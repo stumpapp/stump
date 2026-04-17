@@ -1,40 +1,60 @@
-use async_graphql::{CustomValidator, InputObject, InputValueError, Result};
+use async_graphql::{InputObject, OneofObject};
+use models::shared::enums::MetadataFetchStatus;
+use serde::Serialize;
 
-// TODO(scheduler): Support more complex job configs:
-// enum ScheduledJobConfigType {
-// 	Interval(IntervalTypeJobConfig),
-// 	Override(OverrideTypeJobConfig),
-// }
-// ^ Maybe? idk for like "skip next interval" or "run immediately"
-// We could get fancy with this and allow for workflow type shit like
-// "scan these libraries then queue media fetching then queue thumbs"
-// Leaving as separate file jussst in case I actually do that
-
-#[derive(Debug, Clone, InputObject)]
-pub struct ScheduledJobConfigInput {
-	pub interval_secs: i32,
-	pub included_library_ids: Vec<String>,
+/// A oneOf input for the schedule config
+#[derive(OneofObject, Serialize)]
+#[serde(tag = "config_type")]
+pub enum ScheduledJobConfigInput {
+	LibraryScan(LibraryScanConfigInput),
+	MetadataRetry(MetadataRetryConfigInput),
 }
 
-/// A custom validator for the ScheduledJobConfigInput enum that ensures that the input is valid:
-/// 1. The interval must be greater than 0
-/// 2. At least one library must be included
-#[derive(Default)]
-pub struct ScheduledJobConfigValidator;
+#[derive(InputObject, Serialize)]
+pub struct LibraryScanConfigInput {
+	/// Library IDs to scan. An empty list means "all libraries"
+	pub library_ids: Vec<String>,
+}
 
-impl CustomValidator<ScheduledJobConfigInput> for ScheduledJobConfigValidator {
-	fn check(
-		&self,
-		input: &ScheduledJobConfigInput,
-	) -> Result<(), InputValueError<ScheduledJobConfigInput>> {
-		if input.interval_secs <= 0 {
-			Err(InputValueError::custom("Interval must be greater than 0"))
-		} else if input.included_library_ids.is_empty() {
-			Err(InputValueError::custom(
-				"At least one library must be included",
-			))
-		} else {
-			Ok(())
-		}
+#[derive(InputObject, Serialize)]
+pub struct MetadataRetryConfigInput {
+	/// Which metadata fetch statuses to retry (e.g. RATE_LIMITED, FAILED)
+	pub statuses: Vec<MetadataFetchStatus>,
+}
+
+#[derive(InputObject)]
+pub struct CreateScheduledJobInput {
+	pub name: String,
+	/// A cron expression (e.g. `0 0 * * *` for daily at midnight)
+	pub schedule: String,
+	/// The type-specific config. The kind is inferred from the variant provided
+	pub config: ScheduledJobConfigInput,
+	/// Whether the job is enabled. Defaults to `true`
+	pub enabled: Option<bool>,
+}
+
+#[derive(InputObject)]
+pub struct UpdateScheduledJobInput {
+	pub name: Option<String>,
+	/// A cron expression
+	pub schedule: Option<String>,
+	/// Replace the config entirely. The kind is inferred from the variant
+	pub config: Option<ScheduledJobConfigInput>,
+	pub enabled: Option<bool>,
+}
+
+/// Validate a scheduled job input, returning an error string if invalid
+pub fn validate_create_input(input: &CreateScheduledJobInput) -> Result<(), String> {
+	if input.name.trim().is_empty() {
+		return Err("name must not be empty".to_string());
 	}
+
+	validate_cron_expression(&input.schedule)
+}
+
+pub fn validate_cron_expression(expr: &str) -> Result<(), String> {
+	use std::str::FromStr;
+	cron::Schedule::from_str(expr)
+		.map(|_| ())
+		.map_err(|e| format!("Invalid cron expression: {e}"))
 }

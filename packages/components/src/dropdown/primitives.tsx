@@ -74,13 +74,15 @@ const DropdownItem = React.forwardRef<
 	ElementRef<typeof DropdownMenuPrimitive.Item>,
 	ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
 		inset?: boolean
+		isActive?: boolean
 	}
->(({ className, inset, ...props }, ref) => (
+>(({ className, inset, isActive, ...props }, ref) => (
 	<DropdownMenuPrimitive.Item
 		ref={ref}
 		className={cn(
 			'rounded-sm px-2 py-1.5 text-sm font-medium relative flex cursor-default items-center outline-none select-none focus:bg-background-surface/80 data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50',
 			inset && 'pl-8',
+			isActive && 'bg-background-surface/80',
 			className,
 		)}
 		{...props}

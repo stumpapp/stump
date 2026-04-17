@@ -81,6 +81,14 @@ export type AggregatedReaction = {
   reactedByMe: Scalars['Boolean']['output'];
 };
 
+export type AnalyzeMediaOutput = {
+  __typename?: 'AnalyzeMediaOutput';
+  /** The number of media item updates performed */
+  mediaUpdated: Scalars['Int']['output'];
+  /** The number of pages in total that were analyzed to some extent */
+  pagesAnalyzed: Scalars['Int']['output'];
+};
+
 export type Apikey = {
   __typename?: 'Apikey';
   createdAt: Scalars['DateTime']['output'];
@@ -143,6 +151,37 @@ export type AttachmentMeta = {
   mediaId?: Maybe<Scalars['String']['output']>;
   /** The size of the attachment in bytes */
   size: Scalars['Int']['output'];
+};
+
+export type Author = {
+  __typename?: 'Author';
+  books: Array<Media>;
+  name: Scalars['String']['output'];
+  /**
+   * The role of this author relative to the context they are queried in (e.g., a series).
+   * This field will be None when queried outside of a context in which an author has a role,
+   * like at a library-level query
+   */
+  role?: Maybe<AuthorRole>;
+  series: Array<AuthorSeries>;
+  /** Books where this author shares credit with other writers (co-authored works) */
+  sharedWorks: Array<SharedWork>;
+  /** Books where this author is the sole credited writer (no co-authors) */
+  standalones: Array<Media>;
+};
+
+/** The role of an author in relation to a work or series */
+export enum AuthorRole {
+  CoAuthor = 'CO_AUTHOR',
+  Primary = 'PRIMARY'
+}
+
+export type AuthorSeries = {
+  __typename?: 'AuthorSeries';
+  /** Authors who contributed to this series */
+  authors: Array<Author>;
+  books: Array<Media>;
+  title: Scalars['String']['output'];
 };
 
 export type BookClub = {
@@ -414,10 +453,21 @@ export type ComputedFilterReadingStatus =
   |  { is?: never; isAnyOf?: never; isNoneOf: Array<ReadingStatus>; isNot?: never; }
   |  { is?: never; isAnyOf?: never; isNoneOf?: never; isNot: ReadingStatus; };
 
+/** A factor that contributed to a match's confidence score */
+export type ConfidenceFactor = {
+  __typename?: 'ConfidenceFactor';
+  /** Name of the scoring factor (e.g., "title_exact_match") */
+  factor: Scalars['String']['output'];
+  /** Whether this factor matched */
+  matched: Scalars['Boolean']['output'];
+  /** How much weight this factor carried */
+  weight: Scalars['Float']['output'];
+};
+
 /** An event that is emitted by the core and consumed by a client */
 export type CoreEvent = CreatedManySeries | CreatedMedia | CreatedOrUpdatedManyMedia | DiscoveredMissingLibrary | JobOutput | JobStarted | JobUpdate;
 
-export type CoreJobOutput = ExternalJobOutput | LibraryScanOutput | PlaceholderGenerationOutput | SeriesScanOutput | ThumbnailGenerationOutput;
+export type CoreJobOutput = AnalyzeMediaOutput | LibraryScanOutput | MetadataFetchJobOutput | PlaceholderGenerationOutput | SeriesScanOutput | ThumbnailGenerationOutput;
 
 export type CreateAnnotationInput = {
   annotationText?: InputMaybe<Scalars['String']['input']>;
@@ -446,6 +496,23 @@ export type CreateCustomEmojiInput = {
   name: Scalars['String']['input'];
 };
 
+/** Input object for creating a metadata provider configuration */
+export type CreateMetadataProviderConfigInput = {
+  /** The API token for authenticating with the provider */
+  apiToken: Scalars['String']['input'];
+  /**
+   * Optional expiration date for the API key. This is exclusively a QOL thing,
+   * since the creds don't live within the management domain of Stump
+   */
+  apiTokenExpiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Auto-apply configuration */
+  autoApplyConfig?: InputMaybe<Scalars['JSON']['input']>;
+  /** Whether the provider is enabled */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The provider type */
+  providerType: MetadataProvider;
+};
+
 export type CreateOrUpdateLibraryInput = {
   config?: InputMaybe<LibraryConfigInput>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -454,6 +521,16 @@ export type CreateOrUpdateLibraryInput = {
   path: Scalars['String']['input'];
   scanAfterPersist?: Scalars['Boolean']['input'];
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type CreateScheduledJobInput = {
+  /** The type-specific config. The kind is inferred from the variant provided */
+  config: ScheduledJobConfigInput;
+  /** Whether the job is enabled. Defaults to `true` */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  /** A cron expression (e.g. `0 0 * * *` for daily at midnight) */
+  schedule: Scalars['String']['input'];
 };
 
 export type CreateUserInput = {
@@ -728,9 +805,54 @@ export type ExactDimensionResizeInput = {
   width: Scalars['Int']['input'];
 };
 
-export type ExternalJobOutput = {
-  __typename?: 'ExternalJobOutput';
-  val: Scalars['JSON']['output'];
+/** Metadata about a media item from an external metadata provider */
+export type ExternalMediaMetadata = {
+  __typename?: 'ExternalMediaMetadata';
+  artists?: Maybe<Array<Scalars['String']['output']>>;
+  colorists?: Maybe<Array<Scalars['String']['output']>>;
+  coverArtists?: Maybe<Array<Scalars['String']['output']>>;
+  coverUrl?: Maybe<Scalars['String']['output']>;
+  day?: Maybe<Scalars['Int']['output']>;
+  externalId: Scalars['String']['output'];
+  genres?: Maybe<Array<Scalars['String']['output']>>;
+  isbn?: Maybe<Scalars['String']['output']>;
+  isbn13?: Maybe<Scalars['String']['output']>;
+  letterers?: Maybe<Array<Scalars['String']['output']>>;
+  month?: Maybe<Scalars['Int']['output']>;
+  number?: Maybe<Scalars['Float']['output']>;
+  pageCount?: Maybe<Scalars['Int']['output']>;
+  provider: Scalars['String']['output'];
+  providerUrl?: Maybe<Scalars['String']['output']>;
+  seriesExternalId?: Maybe<Scalars['String']['output']>;
+  seriesName?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  title?: Maybe<Scalars['String']['output']>;
+  writers?: Maybe<Array<Scalars['String']['output']>>;
+  year?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ExternalMetadata = ExternalMediaMetadata | ExternalSeriesMetadata;
+
+/** Metadata about a series from an external metadata provider */
+export type ExternalSeriesMetadata = {
+  __typename?: 'ExternalSeriesMetadata';
+  ageRating?: Maybe<Scalars['String']['output']>;
+  alternativeTitles: Array<Scalars['String']['output']>;
+  artists?: Maybe<Array<Scalars['String']['output']>>;
+  authors?: Maybe<Array<Scalars['String']['output']>>;
+  coverUrl?: Maybe<Scalars['String']['output']>;
+  endYear?: Maybe<Scalars['Int']['output']>;
+  externalId: Scalars['String']['output'];
+  genres?: Maybe<Array<Scalars['String']['output']>>;
+  provider: Scalars['String']['output'];
+  publisher?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<PublicationStatus>;
+  summary?: Maybe<Scalars['String']['output']>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  title: Scalars['String']['output'];
+  volumeCount?: Maybe<Scalars['Int']['output']>;
+  year?: Maybe<Scalars['Int']['output']>;
 };
 
 export type FieldFilterFileStatus =
@@ -996,6 +1118,7 @@ export type JobUpdate = {
 
 export type Library = {
   __typename?: 'Library';
+  authors: Array<Author>;
   config: LibraryConfig;
   configId: Scalars['Int']['output'];
   createdAt: Scalars['DateTime']['output'];
@@ -1073,6 +1196,7 @@ export type LibraryConfig = {
   ignoreRules?: Maybe<Array<Scalars['String']['output']>>;
   libraryId?: Maybe<Scalars['String']['output']>;
   libraryPattern: LibraryPattern;
+  libraryType: LibraryType;
   processMetadata: Scalars['Boolean']['output'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['output'];
   skipBookOverview: Scalars['Boolean']['output'];
@@ -1092,6 +1216,7 @@ export type LibraryConfigInput = {
   hideSeriesView: Scalars['Boolean']['input'];
   ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
   libraryPattern: LibraryPattern;
+  libraryType: LibraryType;
   processMetadata: Scalars['Boolean']['input'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['input'];
   skipBookOverview: Scalars['Boolean']['input'];
@@ -1133,6 +1258,11 @@ export enum LibraryPattern {
   CollectionBased = 'COLLECTION_BASED',
   SeriesBased = 'SERIES_BASED'
 }
+
+export type LibraryScanConfigInput = {
+  /** Library IDs to scan. An empty list means "all libraries" */
+  libraryIds: Array<Scalars['String']['input']>;
+};
 
 /** The data that is collected and updated during the execution of a library scan job */
 export type LibraryScanOutput = {
@@ -1178,6 +1308,18 @@ export type LibraryStats = {
   totalBytes: Scalars['Int']['output'];
   totalReadingTimeSeconds: Scalars['Int']['output'];
 };
+
+/** The type of content a library contains */
+export enum LibraryType {
+  Book = 'BOOK',
+  Comic = 'COMIC',
+  LightNovel = 'LIGHT_NOVEL',
+  Manga = 'MANGA',
+  Manhwa = 'MANHWA',
+  Mixed = 'MIXED',
+  Webtoon = 'WEBTOON',
+  WebNovel = 'WEB_NOVEL'
+}
 
 export enum LibraryViewMode {
   Books = 'BOOKS',
@@ -1234,6 +1376,20 @@ export enum LogModelOrdering {
   Message = 'MESSAGE',
   Timestamp = 'TIMESTAMP'
 }
+
+/** A potential match from an external provider */
+export type MatchCandidate = {
+  __typename?: 'MatchCandidate';
+  /** Confidence score (0.0 - 1.0) */
+  confidence: Scalars['Float']['output'];
+  /** Factors that contributed to the confidence score */
+  confidenceFactors: Array<ConfidenceFactor>;
+  /** External ID on the provider's system */
+  externalId: Scalars['String']['output'];
+  metadata: ExternalMetadata;
+  /** The provider this match came from */
+  provider: Scalars['String']['output'];
+};
 
 export type Media = {
   __typename?: 'Media';
@@ -1394,7 +1550,12 @@ export type MediaMetadata = {
   language?: Maybe<Scalars['String']['output']>;
   letterers: Array<Scalars['String']['output']>;
   links: Array<Scalars['String']['output']>;
+  lockedFields: Array<MetadataField>;
   mediaId?: Maybe<Scalars['String']['output']>;
+  /** The external ID on the metadata provider's system */
+  metadataExternalId?: Maybe<Scalars['String']['output']>;
+  /** The external metadata provider that supplied this metadata (e.g., "HARDCOVER") */
+  metadataSource?: Maybe<Scalars['String']['output']>;
   month?: Maybe<Scalars['Int']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
   number?: Maybe<Scalars['Decimal']['output']>;
@@ -1497,7 +1658,10 @@ export enum MediaMetadataModelOrdering {
   Language = 'LANGUAGE',
   Letterers = 'LETTERERS',
   Links = 'LINKS',
+  LockedFields = 'LOCKED_FIELDS',
   MediaId = 'MEDIA_ID',
+  MetadataExternalId = 'METADATA_EXTERNAL_ID',
+  MetadataSource = 'METADATA_SOURCE',
   Month = 'MONTH',
   Notes = 'NOTES',
   Number = 'NUMBER',
@@ -1570,6 +1734,148 @@ export type MediaProgressInput =
   { epub: EpubProgressInput; paged?: never; }
   |  { epub?: never; paged: PagedProgressInput; };
 
+/** How to merge external metadata values onto existing entity metadata */
+export enum MergeStrategy {
+  /** FillGaps and merge/dedupe for array fields */
+  FillAndMergeLists = 'FILL_AND_MERGE_LISTS',
+  /** Only populate fields that are currently nullish */
+  FillGaps = 'FILL_GAPS',
+  /** Overwrite existing values with (truthy) external data */
+  PreferExternal = 'PREFER_EXTERNAL',
+  /** PreferExternal for scalars, merge/dedupe for array fields */
+  PreferExternalAndMergeLists = 'PREFER_EXTERNAL_AND_MERGE_LISTS'
+}
+
+export type MetadataFetchJobOutput = {
+  __typename?: 'MetadataFetchJobOutput';
+  /** Number of entities that were auto-applied */
+  autoApplied: Scalars['Int']['output'];
+  /** Number of entities that failed during fetch */
+  failed: Scalars['Int']['output'];
+  /** Number of entities where matches were found */
+  matchesFound: Scalars['Int']['output'];
+  /** Number of entities where no matches were found */
+  noMatches: Scalars['Int']['output'];
+  /** Number of entities that were rate-limited */
+  rateLimited: Scalars['Int']['output'];
+  /** Number of entities that were skipped (already have matches) */
+  skipped: Scalars['Int']['output'];
+  /** Total number of entities processed */
+  totalProcessed: Scalars['Int']['output'];
+};
+
+export type MetadataFetchRecord = {
+  __typename?: 'MetadataFetchRecord';
+  acceptedMatchCandidate?: Maybe<MatchCandidate>;
+  addedAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  matchCandidates: Array<MatchCandidate>;
+  /** The media item associated with this fetch record, if any */
+  media?: Maybe<Media>;
+  mediaId?: Maybe<Scalars['String']['output']>;
+  /** The series associated with this fetch record, if any */
+  series?: Maybe<Series>;
+  seriesId?: Maybe<Scalars['String']['output']>;
+  status: MetadataFetchStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/**
+ * An identifer for specifying the target of a metadata fetch record query. I added
+ * mostly for type safety and not annoyingly wrangling both media_id and series_id
+ */
+export type MetadataFetchRecordId =
+  { media: Scalars['String']['input']; series?: never; }
+  |  { media?: never; series: Scalars['String']['input']; };
+
+export enum MetadataFetchStatus {
+  AwaitingReview = 'AWAITING_REVIEW',
+  Failed = 'FAILED',
+  Fetched = 'FETCHED',
+  InProgress = 'IN_PROGRESS',
+  Matched = 'MATCHED',
+  NotStarted = 'NOT_STARTED',
+  NoMatch = 'NO_MATCH',
+  RateLimited = 'RATE_LIMITED'
+}
+
+/**
+ * Represents a specific metadata field that can be locked or configured
+ * for per-field merge strategies
+ */
+export enum MetadataField {
+  AgeRating = 'AGE_RATING',
+  Artists = 'ARTISTS',
+  BookType = 'BOOK_TYPE',
+  Characters = 'CHARACTERS',
+  Colorists = 'COLORISTS',
+  ComicId = 'COMIC_ID',
+  ComicImage = 'COMIC_IMAGE',
+  Cover = 'COVER',
+  CoverArtists = 'COVER_ARTISTS',
+  DescriptionFormatted = 'DESCRIPTION_FORMATTED',
+  Editors = 'EDITORS',
+  Format = 'FORMAT',
+  Genres = 'GENRES',
+  IdentifierAmazon = 'IDENTIFIER_AMAZON',
+  IdentifierCalibre = 'IDENTIFIER_CALIBRE',
+  IdentifierGoogle = 'IDENTIFIER_GOOGLE',
+  IdentifierMobiAsin = 'IDENTIFIER_MOBI_ASIN',
+  IdentifierUuid = 'IDENTIFIER_UUID',
+  Imprint = 'IMPRINT',
+  Inkers = 'INKERS',
+  Isbn = 'ISBN',
+  Language = 'LANGUAGE',
+  Letterers = 'LETTERERS',
+  Links = 'LINKS',
+  MetaType = 'META_TYPE',
+  Notes = 'NOTES',
+  Number = 'NUMBER',
+  PageCount = 'PAGE_COUNT',
+  Pencillers = 'PENCILLERS',
+  PublicationRun = 'PUBLICATION_RUN',
+  Publisher = 'PUBLISHER',
+  ReleaseDate = 'RELEASE_DATE',
+  Series = 'SERIES',
+  SeriesGroup = 'SERIES_GROUP',
+  Status = 'STATUS',
+  StoryArc = 'STORY_ARC',
+  StoryArcNumber = 'STORY_ARC_NUMBER',
+  Summary = 'SUMMARY',
+  Tags = 'TAGS',
+  Teams = 'TEAMS',
+  Title = 'TITLE',
+  TitleSort = 'TITLE_SORT',
+  VolumeCount = 'VOLUME_COUNT',
+  Writers = 'WRITERS',
+  Year = 'YEAR'
+}
+
+/** A user-provided override value for a specific metadata field */
+export type MetadataFieldOverride = {
+  /** Which metadata field this override applies to */
+  field: MetadataField;
+  /** The value to set, using Json because I am lazy */
+  value: Scalars['JSON']['input'];
+};
+
+/** The supported external metadata providers */
+export enum MetadataProvider {
+  /** Hardcover (https://hardcover.app) */
+  Hardcover = 'HARDCOVER'
+}
+
+export type MetadataProviderConfigModel = {
+  __typename?: 'MetadataProviderConfigModel';
+  apiTokenExpiresAt?: Maybe<Scalars['DateTime']['output']>;
+  autoApplyConfig?: Maybe<Scalars['JSON']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  enabled: Scalars['Boolean']['output'];
+  id: Scalars['Int']['output'];
+  providerType: MetadataProvider;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 /**
  * An enum representing the different types of metadata resets that can occur,
  * which manifest differently depending on the context
@@ -1597,6 +1903,11 @@ export enum MetadataResetImpact {
   Series = 'SERIES'
 }
 
+export type MetadataRetryConfigInput = {
+  /** Which metadata fetch statuses to retry (e.g. RATE_LIMITED, FAILED) */
+  statuses: Array<MetadataFetchStatus>;
+};
+
 export type MissingEntity = {
   __typename?: 'MissingEntity';
   id: Scalars['String']['output'];
@@ -1612,6 +1923,12 @@ export enum MissingEntityType {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Accept the top-ranked candidate for all pending metadata matches */
+  acceptAllPendingMatches: Scalars['Int']['output'];
+  /** Accept a match candidate and apply it to media metadata */
+  acceptMediaMatch: MetadataFetchRecord;
+  /** Accept a match candidate and apply it to the series metadata */
+  acceptSeriesMatch: MetadataFetchRecord;
   /** Add a book to the club's queue */
   addBookToClub: BookClub;
   analyzeLibrary: Scalars['Boolean']['output'];
@@ -1653,6 +1970,7 @@ export type Mutation = {
    * the library will be scanned immediately after creation.
    */
   createLibrary: Library;
+  createMetadataProvider: MetadataProviderConfigModel;
   createNotifier: Notifier;
   /**
    * Creates a new reading list.
@@ -1662,7 +1980,7 @@ export type Mutation = {
    * A result containing the newly created reading list, or an error if creation failed.
    */
   createReadingList: ReadingList;
-  createScheduledJobConfig: ScheduledJobConfig;
+  createScheduledJob: ScheduledJob;
   createSmartList: SmartList;
   createSmartListView: SmartListView;
   /**
@@ -1708,6 +2026,7 @@ export type Mutation = {
   deleteMediaReadHistory: Media;
   /** Delete (soft delete) your own message */
   deleteMessage: BookClubDiscussionMessage;
+  deleteMetadataProvider: MetadataProviderConfigModel;
   deleteNotifier: Notifier;
   /**
    * Deletes a reading list by ID.
@@ -1717,7 +2036,7 @@ export type Mutation = {
    * A result containing the deleted reading list, or an error if deletion failed.
    */
   deleteReadingList: ReadingList;
-  deleteScheduledJobConfig: Scalars['Boolean']['output'];
+  deleteScheduledJob: Scalars['Boolean']['output'];
   deleteSmartList: SmartList;
   deleteSmartListView: SmartListView;
   /**
@@ -1737,6 +2056,12 @@ export type Mutation = {
   editMessage: BookClubDiscussionMessage;
   favoriteMedia: Media;
   favoriteSeries: Series;
+  /** Start a job which will search external metadata providers */
+  fetchLibraryMetadata: Scalars['Boolean']['output'];
+  /** Search external metadata providers for a media item and return match candidates */
+  fetchMediaMetadata: Array<MatchCandidate>;
+  /** Search external metadata providers for a series and return match candidates */
+  fetchSeriesMetadata: Array<MatchCandidate>;
   generateLibraryThumbnails: Scalars['Boolean']['output'];
   /** Deletes the membership of the caller to the target book club */
   leaveBookClub: BookClubMember;
@@ -1747,6 +2072,12 @@ export type Mutation = {
   /** Pin or unpin a message (Moderator+) */
   pinMessage: Scalars['Boolean']['output'];
   processLibraryThumbnails: Scalars['Boolean']['output'];
+  /** Reject all pending metadata matches, setting their status to NoMatch */
+  rejectAllPendingMatches: Scalars['Int']['output'];
+  /** Reject the current match candidates for a media item */
+  rejectMediaMatch: MetadataFetchRecord;
+  /** Reject the current match candidates for a series */
+  rejectSeriesMatch: MetadataFetchRecord;
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
   /** Remove your own suggestion (only before it's resolved) */
@@ -1770,11 +2101,19 @@ export type Mutation = {
   sendAttachmentEmail: SendAttachmentEmailOutput;
   /** Send a message in a discussion */
   sendMessage: BookClubDiscussionMessage;
+  /** Bulk-set locked metadata fields for all media metadata in a library */
+  setLibraryMediaLockedFields: Scalars['Int']['output'];
+  /** Bulk-set locked metadata fields for all series metadata in a library */
+  setLibrarySeriesLockedFields: Scalars['Int']['output'];
+  /** Set the locked metadata fields for a media item */
+  setMediaLockedFields: Media;
   /**
    * Set the tags for a media item. Creates any tags that don't exist yet, links new ones,
    * and unlinks removed ones. Returns the updated media item.
    */
   setMediaTags: Media;
+  /** Set the locked metadata fields for a series */
+  setSeriesLockedFields: Series;
   /** Suggest a book for the book club */
   suggestBook: BookClubBookSuggestion;
   /** Send a test email to verify the SMTP configuration is working */
@@ -1832,6 +2171,7 @@ export type Mutation = {
    * will be generated based on the library's thumbnail configuration.
    */
   updateMediaThumbnail: Media;
+  updateMetadataProvider: MetadataProviderConfigModel;
   updateNavigationArrangement: Arrangement;
   updateNavigationArrangementLock: Arrangement;
   updateNotifier: Notifier;
@@ -1844,7 +2184,7 @@ export type Mutation = {
    * A result containing the updated reading list, or an error if update failed.
    */
   updateReadingList: ReadingList;
-  updateScheduledJobConfig: ScheduledJobConfig;
+  updateScheduledJob: ScheduledJob;
   updateSeriesMetadata: Series;
   /**
    * Update the thumbnail for a series. This will replace the existing thumbnail with the the one
@@ -1889,6 +2229,30 @@ export type Mutation = {
    * This is used to inform the UI of the last library which was visited by the user
    */
   visitLibrary: Library;
+};
+
+
+export type MutationAcceptAllPendingMatchesArgs = {
+  excludeFields?: InputMaybe<Array<MetadataField>>;
+  strategy?: InputMaybe<MergeStrategy>;
+};
+
+
+export type MutationAcceptMediaMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  excludeFields?: InputMaybe<Array<MetadataField>>;
+  mediaId: Scalars['ID']['input'];
+  overrides?: InputMaybe<Array<MetadataFieldOverride>>;
+  strategy?: InputMaybe<MergeStrategy>;
+};
+
+
+export type MutationAcceptSeriesMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  excludeFields?: InputMaybe<Array<MetadataField>>;
+  overrides?: InputMaybe<Array<MetadataFieldOverride>>;
+  seriesId: Scalars['ID']['input'];
+  strategy?: InputMaybe<MergeStrategy>;
 };
 
 
@@ -2000,6 +2364,11 @@ export type MutationCreateLibraryArgs = {
 };
 
 
+export type MutationCreateMetadataProviderArgs = {
+  input: CreateMetadataProviderConfigInput;
+};
+
+
 export type MutationCreateNotifierArgs = {
   input: NotifierInput;
 };
@@ -2010,8 +2379,8 @@ export type MutationCreateReadingListArgs = {
 };
 
 
-export type MutationCreateScheduledJobConfigArgs = {
-  input: ScheduledJobConfigInput;
+export type MutationCreateScheduledJobArgs = {
+  input: CreateScheduledJobInput;
 };
 
 
@@ -2126,6 +2495,11 @@ export type MutationDeleteMessageArgs = {
 };
 
 
+export type MutationDeleteMetadataProviderArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationDeleteNotifierArgs = {
   id: Scalars['Int']['input'];
 };
@@ -2136,7 +2510,7 @@ export type MutationDeleteReadingListArgs = {
 };
 
 
-export type MutationDeleteScheduledJobConfigArgs = {
+export type MutationDeleteScheduledJobArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -2191,6 +2565,22 @@ export type MutationFavoriteSeriesArgs = {
 };
 
 
+export type MutationFetchLibraryMetadataArgs = {
+  forceRefetch?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationFetchMediaMetadataArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationFetchSeriesMetadataArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationGenerateLibraryThumbnailsArgs = {
   forceRegenerate?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
@@ -2230,6 +2620,18 @@ export type MutationPinMessageArgs = {
 export type MutationProcessLibraryThumbnailsArgs = {
   forceRegenerate?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationRejectMediaMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  mediaId: Scalars['ID']['input'];
+};
+
+
+export type MutationRejectSeriesMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  seriesId: Scalars['ID']['input'];
 };
 
 
@@ -2296,9 +2698,33 @@ export type MutationSendMessageArgs = {
 };
 
 
+export type MutationSetLibraryMediaLockedFieldsArgs = {
+  libraryId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField>;
+};
+
+
+export type MutationSetLibrarySeriesLockedFieldsArgs = {
+  libraryId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField>;
+};
+
+
+export type MutationSetMediaLockedFieldsArgs = {
+  lockedFields: Array<MetadataField>;
+  mediaId: Scalars['ID']['input'];
+};
+
+
 export type MutationSetMediaTagsArgs = {
   id: Scalars['ID']['input'];
   tags: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationSetSeriesLockedFieldsArgs = {
+  lockedFields: Array<MetadataField>;
+  seriesId: Scalars['ID']['input'];
 };
 
 
@@ -2409,6 +2835,12 @@ export type MutationUpdateMediaThumbnailArgs = {
 };
 
 
+export type MutationUpdateMetadataProviderArgs = {
+  id: Scalars['Int']['input'];
+  input: PatchMetadataProviderConfigInput;
+};
+
+
 export type MutationUpdateNavigationArrangementArgs = {
   input: NavigationArrangementInput;
 };
@@ -2435,9 +2867,9 @@ export type MutationUpdateReadingListArgs = {
 };
 
 
-export type MutationUpdateScheduledJobConfigArgs = {
+export type MutationUpdateScheduledJobArgs = {
   id: Scalars['Int']['input'];
-  input: ScheduledJobConfigInput;
+  input: UpdateScheduledJobInput;
 };
 
 
@@ -2679,6 +3111,12 @@ export type PagedProgressInput = {
   page: Scalars['Int']['input'];
 };
 
+export type PaginatedAuthorResponse = {
+  __typename?: 'PaginatedAuthorResponse';
+  nodes: Array<Author>;
+  pageInfo: PaginationInfo;
+};
+
 export type PaginatedDirectoryListingResponse = {
   __typename?: 'PaginatedDirectoryListingResponse';
   nodes: Array<DirectoryListing>;
@@ -2770,6 +3208,21 @@ export type PatchEmailDeviceInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields. */
+export type PatchMetadataProviderConfigInput = {
+  /** The API token for authenticating with the provider */
+  apiToken?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * Optional expiration date for the API key. This is exclusively a QOL thing,
+   * since the creds don't live within the management domain of Stump
+   */
+  apiTokenExpiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Auto-apply configuration */
+  autoApplyConfig?: InputMaybe<Scalars['JSON']['input']>;
+  /** Whether the provider is enabled */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type PlaceholderGenerationOutput = {
   __typename?: 'PlaceholderGenerationOutput';
   /** The number of placeholder metadata entries that were generated */
@@ -2780,6 +3233,14 @@ export type PlaceholderGenerationOutput = {
   visitedEntities: Scalars['Int']['output'];
 };
 
+export enum PublicationStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Hiatus = 'HIATUS',
+  Ongoing = 'ONGOING',
+  Upcoming = 'UPCOMING'
+}
+
 export type Query = {
   __typename?: 'Query';
   activeReadingSessionCount: Scalars['Int']['output'];
@@ -2787,6 +3248,12 @@ export type Query = {
   annotationsByMediaId: Array<MediaAnnotation>;
   apiKeyById: Apikey;
   apiKeys: Array<Apikey>;
+  /** Get a single author by name (case-insensitive exact match) */
+  authorByName?: Maybe<Author>;
+  /** Get a single author series by name (case-insensitive exact match) */
+  authorSeriesByName?: Maybe<AuthorSeries>;
+  /** Get a paginated list of authors with optional search filter */
+  authors: PaginatedAuthorResponse;
   /** Get a club book by ID */
   bookClubBook: BookClubBook;
   bookClubById: BookClub;
@@ -2848,11 +3315,16 @@ export type Query = {
   mediaCount: Scalars['Int']['output'];
   mediaDiskUsage: Scalars['Int']['output'];
   mediaMetadataOverview: MediaMetadataOverview;
+  metadataFetchRecord?: Maybe<MetadataFetchRecord>;
+  metadataProviderConfigById?: Maybe<MetadataProviderConfigModel>;
+  metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   /** Get all pending invitations for the current user */
   myBookClubInvitations: Array<BookClubInvitation>;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
   onDeck: PaginatedMediaResponse;
+  /** Return all metadata fetch records that are awaiting user review. */
+  pendingMetadataMatches: Array<MetadataFetchRecord>;
   previousBookClubDiscussions: Array<BookClubDiscussion>;
   /**
    * Retrieves a reading list by ID for the current user.
@@ -2871,7 +3343,7 @@ export type Query = {
   readingLists: PaginatedReadingListResponse;
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
-  scheduledJobConfigs: Array<ScheduledJobConfig>;
+  scheduledJobs: Array<ScheduledJob>;
   series: PaginatedSeriesResponse;
   /** Returns the available alphabet for all series in the server */
   seriesAlphabet: Scalars['JSONObject']['output'];
@@ -2900,6 +3372,25 @@ export type QueryAnnotationsByMediaIdArgs = {
 
 export type QueryApiKeyByIdArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type QueryAuthorByNameArgs = {
+  libraryId?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+
+export type QueryAuthorSeriesByNameArgs = {
+  libraryId?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+
+export type QueryAuthorsArgs = {
+  libraryId?: InputMaybe<Scalars['String']['input']>;
+  pagination?: Pagination;
+  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3056,6 +3547,16 @@ export type QueryMediaByPathArgs = {
 
 export type QueryMediaMetadataOverviewArgs = {
   seriesId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryMetadataFetchRecordArgs = {
+  id: MetadataFetchRecordId;
+};
+
+
+export type QueryMetadataProviderConfigByIdArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -3317,17 +3818,30 @@ export type ScaledDimensionResizeInput = {
   size: Scalars['Int']['input'];
 };
 
-export type ScheduledJobConfig = {
-  __typename?: 'ScheduledJobConfig';
+export type ScheduledJob = {
+  __typename?: 'ScheduledJob';
+  config?: Maybe<Scalars['JSON']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  enabled: Scalars['Boolean']['output'];
   id: Scalars['Int']['output'];
-  intervalSecs: Scalars['Int']['output'];
-  scanConfigs: Array<Library>;
+  kind: ScheduledJobKind;
+  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  schedule: Scalars['String']['output'];
 };
 
-export type ScheduledJobConfigInput = {
-  includedLibraryIds: Array<Scalars['String']['input']>;
-  intervalSecs: Scalars['Int']['input'];
-};
+/** A oneOf input for the schedule config */
+export type ScheduledJobConfigInput =
+  { libraryScan: LibraryScanConfigInput; metadataRetry?: never; }
+  |  { libraryScan?: never; metadataRetry: MetadataRetryConfigInput; };
+
+/** The kind of a scheduled job, aligned with the config variants */
+export enum ScheduledJobKind {
+  /** Scan one or more libraries on a cron schedule */
+  LibraryScan = 'LIBRARY_SCAN',
+  /** Retry fetching metadata for records that were rate-limited or failed */
+  MetadataRetry = 'METADATA_RETRY'
+}
 
 export type SendAttachmentEmailOutput = {
   __typename?: 'SendAttachmentEmailOutput';
@@ -3438,8 +3952,13 @@ export type SeriesMetadata = {
   /** Name of imprint while under publisher */
   imprint?: Maybe<Scalars['String']['output']>;
   links: Array<Scalars['String']['output']>;
+  lockedFields: Array<MetadataField>;
   /** Type of series (e.g. "comicSeries") */
   metaType?: Maybe<Scalars['String']['output']>;
+  /** The external ID on the metadata provider's system */
+  metadataExternalId?: Maybe<Scalars['String']['output']>;
+  /** The external metadata provider that supplied this metadata (e.g., "HARDCOVER") */
+  metadataSource?: Maybe<Scalars['String']['output']>;
   /** Start and end of the series in "Month Year - Month Year" format. If series status is Continuing, the end value is "Present" */
   publicationRun?: Maybe<Scalars['String']['output']>;
   /** Publisher name */
@@ -3514,6 +4033,9 @@ export enum SeriesMetadataModelOrdering {
   Genres = 'GENRES',
   Imprint = 'IMPRINT',
   Links = 'LINKS',
+  LockedFields = 'LOCKED_FIELDS',
+  MetadataExternalId = 'METADATA_EXTERNAL_ID',
+  MetadataSource = 'METADATA_SOURCE',
   MetaType = 'META_TYPE',
   PublicationRun = 'PUBLICATION_RUN',
   Publisher = 'PUBLISHER',
@@ -3586,6 +4108,20 @@ export type ServerConfigModel = {
   id: Scalars['Int']['output'];
   initialWalSetupComplete: Scalars['Boolean']['output'];
   publicUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/**
+ * A work that has multiple authors (co-authored). This wrapper allows querying
+ * the authors/co-authors of the work in context.
+ */
+export type SharedWork = {
+  __typename?: 'SharedWork';
+  /** All authors who contributed to this work, with their roles */
+  authors: Array<Author>;
+  /** Authors who contributed to this work, excluding the viewing author */
+  coAuthors: Array<Author>;
+  /** The media/book itself */
+  media: Media;
 };
 
 export type SmartList = {
@@ -3949,6 +4485,15 @@ export type UpdateCustomEmojiInput = {
   name: Scalars['String']['input'];
 };
 
+export type UpdateScheduledJobInput = {
+  /** Replace the config entirely. The kind is inferred from the variant */
+  config?: InputMaybe<ScheduledJobConfigInput>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** A cron expression */
+  schedule?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateThumbnailInput = {
   /** A flag indicating whether the page is zero based (i.e. 0 is the first page) */
   isZeroBased?: InputMaybe<Scalars['Boolean']['input']>;
@@ -4110,6 +4655,14 @@ export enum UserPermission {
   ManageServer = 'MANAGE_SERVER',
   /** Grant access to manage users (create,edit,delete) */
   ManageUsers = 'MANAGE_USERS',
+  /** Grant access to manage metadata fetch statuses (accept matches, etc) */
+  MetadataFetchRecordManage = 'METADATA_FETCH_RECORD_MANAGE',
+  /** Grant access to read metadata fetch statuses */
+  MetadataFetchRecordRead = 'METADATA_FETCH_RECORD_READ',
+  /** Grant access to manage metadata provider configurations (create, update, delete) */
+  MetadataProviderManage = 'METADATA_PROVIDER_MANAGE',
+  /** Grant access to read metadata provider configurations */
+  MetadataProviderRead = 'METADATA_PROVIDER_READ',
   /** Grant access to read jobs */
   ReadJobs = 'READ_JOBS',
   /** Grant access to read notifiers */
@@ -4909,7 +5462,7 @@ export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
+export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null, lockedFields: Array<MetadataField> } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
 
 export type UpdateMediaMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4921,6 +5474,14 @@ export type UpdateMediaMetadataMutation = { __typename?: 'Mutation', updateMedia
       { __typename?: 'MediaMetadata' }
       & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
     ) | null } };
+
+export type MediaEditorSetLockedFieldsMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type MediaEditorSetLockedFieldsMutation = { __typename?: 'Mutation', setMediaLockedFields: { __typename?: 'Media', id: string } };
 
 export type BookOverviewSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5007,6 +5568,95 @@ export type LibrarySeriesAlphabetQueryVariables = Exact<{
 
 
 export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
+
+export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null, lockedFields: Array<MetadataField> } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null, lockedFields: Array<MetadataField> } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
+
+export type PendingMetadataMatchesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PendingMetadataMatchesQuery = { __typename?: 'Query', pendingMetadataMatches: Array<(
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  )> };
+
+export type AcceptAllPendingMatchesMutationVariables = Exact<{
+  strategy?: InputMaybe<MergeStrategy>;
+  excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+}>;
+
+
+export type AcceptAllPendingMatchesMutation = { __typename?: 'Mutation', acceptAllPendingMatches: number };
+
+export type RejectAllPendingMatchesMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RejectAllPendingMatchesMutation = { __typename?: 'Mutation', rejectAllPendingMatches: number };
+
+export type AcceptMediaMatchMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+  strategy?: InputMaybe<MergeStrategy>;
+  excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+  overrides?: InputMaybe<Array<MetadataFieldOverride> | MetadataFieldOverride>;
+}>;
+
+
+export type AcceptMediaMatchMutation = { __typename?: 'Mutation', acceptMediaMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
+export type AcceptSeriesMatchMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+  strategy?: InputMaybe<MergeStrategy>;
+  excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+  overrides?: InputMaybe<Array<MetadataFieldOverride> | MetadataFieldOverride>;
+}>;
+
+
+export type AcceptSeriesMatchMutation = { __typename?: 'Mutation', acceptSeriesMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
+export type RejectMediaMatchMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+}>;
+
+
+export type RejectMediaMatchMutation = { __typename?: 'Mutation', rejectMediaMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
+export type RejectSeriesMatchMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+}>;
+
+
+export type RejectSeriesMatchMutation = { __typename?: 'Mutation', rejectSeriesMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
+export type SetMediaLockedFieldsMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type SetMediaLockedFieldsMutation = { __typename?: 'Mutation', setMediaLockedFields: { __typename?: 'Media', id: string } };
+
+export type SetSeriesLockedFieldsMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type SetSeriesLockedFieldsMutation = { __typename?: 'Mutation', setSeriesLockedFields: { __typename?: 'Series', id: string } };
 
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5099,7 +5749,7 @@ export type SeriesBooksAlphabetQueryVariables = Exact<{
 
 export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
 
-export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
+export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, lockedFields: Array<MetadataField>, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
 
 export type UpdateSeriesMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5112,10 +5762,18 @@ export type UpdateSeriesMetadataMutation = { __typename?: 'Mutation', updateSeri
       & { ' $fragmentRefs'?: { 'SeriesMetadataEditorFragment': SeriesMetadataEditorFragment } }
     ) | null } };
 
+export type SeriesEditorSetLockedFieldsMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type SeriesEditorSetLockedFieldsMutation = { __typename?: 'Mutation', setSeriesLockedFields: { __typename?: 'Series', id: string } };
+
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
+export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
 
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -5495,6 +6153,18 @@ export type AnalyzeLibraryMediaMutationVariables = Exact<{
 
 export type AnalyzeLibraryMediaMutation = { __typename?: 'Mutation', analyzeLibrary: boolean };
 
+export type InitFetchJobCheckProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type InitFetchJobCheckProvidersQuery = { __typename?: 'Query', metadataProviderConfigs: Array<{ __typename?: 'MetadataProviderConfigModel', id: number }> };
+
+export type InitFetchJobMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type InitFetchJobMutation = { __typename?: 'Mutation', fetchLibraryMetadata: boolean };
+
 export type ScanHistorySectionClearHistoryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -5515,7 +6185,7 @@ export type ScanRecordInspectorJobsQueryVariables = Exact<{
 }>;
 
 
-export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
+export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
 
 export type DeleteLibraryThumbnailsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5825,6 +6495,27 @@ export type ServerStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ServerStatsQuery = { __typename?: 'Query', numberOfLibraries: number, numberOfSeries: number, mediaCount: number, mediaDiskUsage: number };
 
+export type CreateScheduledJobMutationVariables = Exact<{
+  input: CreateScheduledJobInput;
+}>;
+
+
+export type CreateScheduledJobMutation = { __typename?: 'Mutation', createScheduledJob: (
+    { __typename?: 'ScheduledJob' }
+    & { ' $fragmentRefs'?: { 'ScheduledJobRowFragment': ScheduledJobRowFragment } }
+  ) };
+
+export type UpdateScheduledJobMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: UpdateScheduledJobInput;
+}>;
+
+
+export type UpdateScheduledJobMutation = { __typename?: 'Mutation', updateScheduledJob: (
+    { __typename?: 'ScheduledJob' }
+    & { ' $fragmentRefs'?: { 'ScheduledJobRowFragment': ScheduledJobRowFragment } }
+  ) };
+
 export type DeleteJobHistoryConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5851,9 +6542,11 @@ export type JobActionMenuDeleteLogsMutationVariables = Exact<{
 
 export type JobActionMenuDeleteLogsMutation = { __typename?: 'Mutation', deleteJobLogs: { __typename?: 'DeleteJobAssociatedLogs', affectedRows: number } };
 
-type JobDataInspector_ExternalJobOutput_Fragment = { __typename: 'ExternalJobOutput', val: any } & { ' $fragmentName'?: 'JobDataInspector_ExternalJobOutput_Fragment' };
+type JobDataInspector_AnalyzeMediaOutput_Fragment = { __typename: 'AnalyzeMediaOutput' } & { ' $fragmentName'?: 'JobDataInspector_AnalyzeMediaOutput_Fragment' };
 
 type JobDataInspector_LibraryScanOutput_Fragment = { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } & { ' $fragmentName'?: 'JobDataInspector_LibraryScanOutput_Fragment' };
+
+type JobDataInspector_MetadataFetchJobOutput_Fragment = { __typename: 'MetadataFetchJobOutput' } & { ' $fragmentName'?: 'JobDataInspector_MetadataFetchJobOutput_Fragment' };
 
 type JobDataInspector_PlaceholderGenerationOutput_Fragment = { __typename: 'PlaceholderGenerationOutput' } & { ' $fragmentName'?: 'JobDataInspector_PlaceholderGenerationOutput_Fragment' };
 
@@ -5861,34 +6554,22 @@ type JobDataInspector_SeriesScanOutput_Fragment = { __typename: 'SeriesScanOutpu
 
 type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'ThumbnailGenerationOutput', visitedFiles: number, skippedFiles: number, generatedThumbnails: number, removedThumbnails: number } & { ' $fragmentName'?: 'JobDataInspector_ThumbnailGenerationOutput_Fragment' };
 
-export type JobDataInspectorFragment = JobDataInspector_ExternalJobOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
+export type JobDataInspectorFragment = JobDataInspector_AnalyzeMediaOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_MetadataFetchJobOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
 
-export type JobSchedulerConfigQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type JobSchedulerConfigQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobConfigs: Array<{ __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> }> };
-
-export type JobSchedulerUpdateMutationVariables = Exact<{
-  id: Scalars['Int']['input'];
-  input: ScheduledJobConfigInput;
-}>;
+export type ScheduledJobsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type JobSchedulerUpdateMutation = { __typename?: 'Mutation', updateScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+export type ScheduledJobsQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobs: Array<(
+    { __typename?: 'ScheduledJob', id: number, name: string }
+    & { ' $fragmentRefs'?: { 'ScheduledJobRowFragment': ScheduledJobRowFragment } }
+  )> };
 
-export type JobSchedulerDeleteMutationVariables = Exact<{
+export type DeleteScheduledJobMutationVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
 
 
-export type JobSchedulerDeleteMutation = { __typename?: 'Mutation', deleteScheduledJobConfig: boolean };
-
-export type JobSchedulerCreateMutationVariables = Exact<{
-  input: ScheduledJobConfigInput;
-}>;
-
-
-export type JobSchedulerCreateMutation = { __typename?: 'Mutation', createScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+export type DeleteScheduledJobMutation = { __typename?: 'Mutation', deleteScheduledJob: boolean };
 
 export type JobTableQueryVariables = Exact<{
   pagination: Pagination;
@@ -5896,11 +6577,14 @@ export type JobTableQueryVariables = Exact<{
 
 
 export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'PaginatedJobResponse', nodes: Array<{ __typename?: 'Job', id: string, name: string, description?: string | null, status: JobStatus, createdAt: any, completedAt?: any | null, msElapsed: number, logCount: number, outputData?: (
-        { __typename?: 'ExternalJobOutput' }
-        & { ' $fragmentRefs'?: { 'JobDataInspector_ExternalJobOutput_Fragment': JobDataInspector_ExternalJobOutput_Fragment } }
+        { __typename?: 'AnalyzeMediaOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_AnalyzeMediaOutput_Fragment': JobDataInspector_AnalyzeMediaOutput_Fragment } }
       ) | (
         { __typename?: 'LibraryScanOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_LibraryScanOutput_Fragment': JobDataInspector_LibraryScanOutput_Fragment } }
+      ) | (
+        { __typename?: 'MetadataFetchJobOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_MetadataFetchJobOutput_Fragment': JobDataInspector_MetadataFetchJobOutput_Fragment } }
       ) | (
         { __typename?: 'PlaceholderGenerationOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_PlaceholderGenerationOutput_Fragment': JobDataInspector_PlaceholderGenerationOutput_Fragment } }
@@ -5911,6 +6595,8 @@ export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'Pagina
         { __typename?: 'ThumbnailGenerationOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_ThumbnailGenerationOutput_Fragment': JobDataInspector_ThumbnailGenerationOutput_Fragment } }
       ) | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type ScheduledJobRowFragment = { __typename?: 'ScheduledJob', id: number, name: string, kind: ScheduledJobKind, schedule: string, config?: any | null, enabled: boolean, createdAt: any, lastRunAt?: any | null } & { ' $fragmentName'?: 'ScheduledJobRowFragment' };
 
 export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -5930,6 +6616,41 @@ export type PersistedLogsQueryVariables = Exact<{
 
 
 export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type CreateProviderDialogCreateProviderMutationVariables = Exact<{
+  input: CreateMetadataProviderConfigInput;
+}>;
+
+
+export type CreateProviderDialogCreateProviderMutation = { __typename?: 'Mutation', createMetadataProvider: { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean } };
+
+export type EditProviderDialogMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: PatchMetadataProviderConfigInput;
+}>;
+
+
+export type EditProviderDialogMutation = { __typename?: 'Mutation', updateMetadataProvider: (
+    { __typename?: 'MetadataProviderConfigModel', id: number }
+    & { ' $fragmentRefs'?: { 'ExistingProviderCardFragment': ExistingProviderCardFragment } }
+  ) };
+
+export type DeleteProviderDialogMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteProviderDialogMutation = { __typename?: 'Mutation', deleteMetadataProvider: { __typename?: 'MetadataProviderConfigModel', id: number } };
+
+export type ExistingProviderCardFragment = { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean, apiTokenExpiresAt?: any | null, autoApplyConfig?: any | null, createdAt: any, updatedAt?: any | null } & { ' $fragmentName'?: 'ExistingProviderCardFragment' };
+
+export type ProvidersSectionGetProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ProvidersSectionGetProvidersQuery = { __typename?: 'Query', metadataProviderConfigs: Array<(
+    { __typename?: 'MetadataProviderConfigModel', id: number }
+    & { ' $fragmentRefs'?: { 'ExistingProviderCardFragment': ExistingProviderCardFragment } }
+  )> };
 
 export type CreateTagModalMutationVariables = Exact<{
   tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -6659,6 +7380,7 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }
     `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
 export const BookClubBookItemFragmentDoc = new TypedDocumentString(`
@@ -6683,6 +7405,100 @@ export const BookClubBookItemFragmentDoc = new TypedDocumentString(`
   addedAt
 }
     `, {"fragmentName":"BookClubBookItem"}) as unknown as TypedDocumentString<BookClubBookItemFragment, unknown>;
+export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+      lockedFields
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+      lockedFields
+    }
+  }
+}
+    `, {"fragmentName":"PendingMatchRecord"}) as unknown as TypedDocumentString<PendingMatchRecordFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
@@ -6710,6 +7526,7 @@ export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }
     `, {"fragmentName":"SeriesMetadataEditor"}) as unknown as TypedDocumentString<SeriesMetadataEditorFragment, unknown>;
 export const BookFileInformationFragmentDoc = new TypedDocumentString(`
@@ -6912,11 +7729,31 @@ export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
     generatedThumbnails
     removedThumbnails
   }
-  ... on ExternalJobOutput {
-    val
-  }
 }
     `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
+export const ScheduledJobRowFragmentDoc = new TypedDocumentString(`
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}
+    `, {"fragmentName":"ScheduledJobRow"}) as unknown as TypedDocumentString<ScheduledJobRowFragment, unknown>;
+export const ExistingProviderCardFragmentDoc = new TypedDocumentString(`
+    fragment ExistingProviderCard on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+  createdAt
+  updatedAt
+}
+    `, {"fragmentName":"ExistingProviderCard"}) as unknown as TypedDocumentString<ExistingProviderCardFragment, unknown>;
 export const SmartListCardFragmentDoc = new TypedDocumentString(`
     fragment SmartListCard on SmartList {
   id
@@ -9108,7 +9945,15 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }`) as unknown as TypedDocumentString<UpdateMediaMetadataMutation, UpdateMediaMetadataMutationVariables>;
+export const MediaEditorSetLockedFieldsDocument = new TypedDocumentString(`
+    mutation MediaEditorSetLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {
+  setMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<MediaEditorSetLockedFieldsMutation, MediaEditorSetLockedFieldsMutationVariables>;
 export const BookOverviewSceneDocument = new TypedDocumentString(`
     query BookOverviewScene($id: ID!) {
   mediaById(id: $id) {
@@ -9211,6 +10056,7 @@ fragment MediaMetadataEditor on MediaMetadata {
   volume
   writers
   year
+  lockedFields
 }
 fragment BookFileInformation on Media {
   id
@@ -9324,6 +10170,532 @@ export const LibrarySeriesAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesAlphabetQuery, LibrarySeriesAlphabetQueryVariables>;
+export const PendingMetadataMatchesDocument = new TypedDocumentString(`
+    query PendingMetadataMatches {
+  pendingMetadataMatches {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+      lockedFields
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+      lockedFields
+    }
+  }
+}`) as unknown as TypedDocumentString<PendingMetadataMatchesQuery, PendingMetadataMatchesQueryVariables>;
+export const AcceptAllPendingMatchesDocument = new TypedDocumentString(`
+    mutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {
+  acceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)
+}
+    `) as unknown as TypedDocumentString<AcceptAllPendingMatchesMutation, AcceptAllPendingMatchesMutationVariables>;
+export const RejectAllPendingMatchesDocument = new TypedDocumentString(`
+    mutation RejectAllPendingMatches {
+  rejectAllPendingMatches
+}
+    `) as unknown as TypedDocumentString<RejectAllPendingMatchesMutation, RejectAllPendingMatchesMutationVariables>;
+export const AcceptMediaMatchDocument = new TypedDocumentString(`
+    mutation AcceptMediaMatch($mediaId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverride!]) {
+  acceptMediaMatch(
+    mediaId: $mediaId
+    candidateIndex: $candidateIndex
+    strategy: $strategy
+    excludeFields: $excludeFields
+    overrides: $overrides
+  ) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+      lockedFields
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+      lockedFields
+    }
+  }
+}`) as unknown as TypedDocumentString<AcceptMediaMatchMutation, AcceptMediaMatchMutationVariables>;
+export const AcceptSeriesMatchDocument = new TypedDocumentString(`
+    mutation AcceptSeriesMatch($seriesId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverride!]) {
+  acceptSeriesMatch(
+    seriesId: $seriesId
+    candidateIndex: $candidateIndex
+    strategy: $strategy
+    excludeFields: $excludeFields
+    overrides: $overrides
+  ) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+      lockedFields
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+      lockedFields
+    }
+  }
+}`) as unknown as TypedDocumentString<AcceptSeriesMatchMutation, AcceptSeriesMatchMutationVariables>;
+export const RejectMediaMatchDocument = new TypedDocumentString(`
+    mutation RejectMediaMatch($mediaId: ID!, $candidateIndex: Int!) {
+  rejectMediaMatch(mediaId: $mediaId, candidateIndex: $candidateIndex) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+      lockedFields
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+      lockedFields
+    }
+  }
+}`) as unknown as TypedDocumentString<RejectMediaMatchMutation, RejectMediaMatchMutationVariables>;
+export const RejectSeriesMatchDocument = new TypedDocumentString(`
+    mutation RejectSeriesMatch($seriesId: ID!, $candidateIndex: Int!) {
+  rejectSeriesMatch(seriesId: $seriesId, candidateIndex: $candidateIndex) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+      lockedFields
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+      lockedFields
+    }
+  }
+}`) as unknown as TypedDocumentString<RejectSeriesMatchMutation, RejectSeriesMatchMutationVariables>;
+export const SetMediaLockedFieldsDocument = new TypedDocumentString(`
+    mutation SetMediaLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {
+  setMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SetMediaLockedFieldsMutation, SetMediaLockedFieldsMutationVariables>;
+export const SetSeriesLockedFieldsDocument = new TypedDocumentString(`
+    mutation SetSeriesLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {
+  setSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SetSeriesLockedFieldsMutation, SetSeriesLockedFieldsMutationVariables>;
 export const SideBarQueryDocument = new TypedDocumentString(`
     query SideBarQuery {
   me {
@@ -9563,7 +10935,15 @@ export const UpdateSeriesMetadataDocument = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }`) as unknown as TypedDocumentString<UpdateSeriesMetadataMutation, UpdateSeriesMetadataMutationVariables>;
+export const SeriesEditorSetLockedFieldsDocument = new TypedDocumentString(`
+    mutation SeriesEditorSetLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {
+  setSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesEditorSetLockedFieldsMutation, SeriesEditorSetLockedFieldsMutationVariables>;
 export const UseCoreEventDocument = new TypedDocumentString(`
     subscription UseCoreEvent {
   readEvents {
@@ -10570,6 +11950,18 @@ export const AnalyzeLibraryMediaDocument = new TypedDocumentString(`
   analyzeLibrary(id: $id)
 }
     `) as unknown as TypedDocumentString<AnalyzeLibraryMediaMutation, AnalyzeLibraryMediaMutationVariables>;
+export const InitFetchJobCheckProvidersDocument = new TypedDocumentString(`
+    query InitFetchJobCheckProviders {
+  metadataProviderConfigs {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<InitFetchJobCheckProvidersQuery, InitFetchJobCheckProvidersQueryVariables>;
+export const InitFetchJobDocument = new TypedDocumentString(`
+    mutation InitFetchJob($id: ID!) {
+  fetchLibraryMetadata(id: $id)
+}
+    `) as unknown as TypedDocumentString<InitFetchJobMutation, InitFetchJobMutationVariables>;
 export const ScanHistorySectionClearHistoryDocument = new TypedDocumentString(`
     mutation ScanHistorySectionClearHistory($id: ID!) {
   clearScanHistory(id: $id)
@@ -10838,6 +12230,7 @@ export const SeriesSettingsSceneDocument = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }
 fragment SeriesThumbnailSelector on Series {
   id
@@ -11158,6 +12551,38 @@ export const ServerStatsDocument = new TypedDocumentString(`
   mediaDiskUsage
 }
     `) as unknown as TypedDocumentString<ServerStatsQuery, ServerStatsQueryVariables>;
+export const CreateScheduledJobDocument = new TypedDocumentString(`
+    mutation CreateScheduledJob($input: CreateScheduledJobInput!) {
+  createScheduledJob(input: $input) {
+    ...ScheduledJobRow
+  }
+}
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}`) as unknown as TypedDocumentString<CreateScheduledJobMutation, CreateScheduledJobMutationVariables>;
+export const UpdateScheduledJobDocument = new TypedDocumentString(`
+    mutation UpdateScheduledJob($id: Int!, $input: UpdateScheduledJobInput!) {
+  updateScheduledJob(id: $id, input: $input) {
+    ...ScheduledJobRow
+  }
+}
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}`) as unknown as TypedDocumentString<UpdateScheduledJobMutation, UpdateScheduledJobMutationVariables>;
 export const DeleteJobHistoryConfirmationDocument = new TypedDocumentString(`
     mutation DeleteJobHistoryConfirmation {
   deleteJobHistory {
@@ -11182,8 +12607,8 @@ export const JobActionMenuDeleteLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<JobActionMenuDeleteLogsMutation, JobActionMenuDeleteLogsMutationVariables>;
-export const JobSchedulerConfigDocument = new TypedDocumentString(`
-    query JobSchedulerConfig {
+export const ScheduledJobsDocument = new TypedDocumentString(`
+    query ScheduledJobs {
   libraries(pagination: {none: {unpaginated: true}}) {
     nodes {
       id
@@ -11191,45 +12616,27 @@ export const JobSchedulerConfigDocument = new TypedDocumentString(`
       emoji
     }
   }
-  scheduledJobConfigs {
+  scheduledJobs {
     id
-    intervalSecs
-    scanConfigs {
-      id
-      name
-    }
+    name
+    ...ScheduledJobRow
   }
 }
-    `) as unknown as TypedDocumentString<JobSchedulerConfigQuery, JobSchedulerConfigQueryVariables>;
-export const JobSchedulerUpdateDocument = new TypedDocumentString(`
-    mutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {
-  updateScheduledJobConfig(id: $id, input: $input) {
-    id
-    intervalSecs
-    scanConfigs {
-      id
-      name
-    }
-  }
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}`) as unknown as TypedDocumentString<ScheduledJobsQuery, ScheduledJobsQueryVariables>;
+export const DeleteScheduledJobDocument = new TypedDocumentString(`
+    mutation DeleteScheduledJob($id: Int!) {
+  deleteScheduledJob(id: $id)
 }
-    `) as unknown as TypedDocumentString<JobSchedulerUpdateMutation, JobSchedulerUpdateMutationVariables>;
-export const JobSchedulerDeleteDocument = new TypedDocumentString(`
-    mutation JobSchedulerDelete($id: Int!) {
-  deleteScheduledJobConfig(id: $id)
-}
-    `) as unknown as TypedDocumentString<JobSchedulerDeleteMutation, JobSchedulerDeleteMutationVariables>;
-export const JobSchedulerCreateDocument = new TypedDocumentString(`
-    mutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {
-  createScheduledJobConfig(input: $input) {
-    id
-    intervalSecs
-    scanConfigs {
-      id
-      name
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<JobSchedulerCreateMutation, JobSchedulerCreateMutationVariables>;
+    `) as unknown as TypedDocumentString<DeleteScheduledJobMutation, DeleteScheduledJobMutationVariables>;
 export const JobTableDocument = new TypedDocumentString(`
     query JobTable($pagination: Pagination!) {
   jobs(pagination: $pagination) {
@@ -11284,9 +12691,6 @@ export const JobTableDocument = new TypedDocumentString(`
     generatedThumbnails
     removedThumbnails
   }
-  ... on ExternalJobOutput {
-    val
-  }
 }`) as unknown as TypedDocumentString<JobTableQuery, JobTableQueryVariables>;
 export const LiveLogsFeedDocument = new TypedDocumentString(`
     subscription LiveLogsFeed {
@@ -11325,6 +12729,54 @@ export const PersistedLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
+export const CreateProviderDialogCreateProviderDocument = new TypedDocumentString(`
+    mutation CreateProviderDialogCreateProvider($input: CreateMetadataProviderConfigInput!) {
+  createMetadataProvider(input: $input) {
+    id
+    providerType
+    enabled
+  }
+}
+    `) as unknown as TypedDocumentString<CreateProviderDialogCreateProviderMutation, CreateProviderDialogCreateProviderMutationVariables>;
+export const EditProviderDialogDocument = new TypedDocumentString(`
+    mutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {
+  updateMetadataProvider(id: $id, input: $input) {
+    id
+    ...ExistingProviderCard
+  }
+}
+    fragment ExistingProviderCard on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+  createdAt
+  updatedAt
+}`) as unknown as TypedDocumentString<EditProviderDialogMutation, EditProviderDialogMutationVariables>;
+export const DeleteProviderDialogDocument = new TypedDocumentString(`
+    mutation DeleteProviderDialog($id: Int!) {
+  deleteMetadataProvider(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteProviderDialogMutation, DeleteProviderDialogMutationVariables>;
+export const ProvidersSectionGetProvidersDocument = new TypedDocumentString(`
+    query ProvidersSectionGetProviders {
+  metadataProviderConfigs {
+    id
+    ...ExistingProviderCard
+  }
+}
+    fragment ExistingProviderCard on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+  createdAt
+  updatedAt
+}`) as unknown as TypedDocumentString<ProvidersSectionGetProvidersQuery, ProvidersSectionGetProvidersQueryVariables>;
 export const CreateTagModalDocument = new TypedDocumentString(`
     mutation CreateTagModal($tags: [String!]!) {
   createTags(tags: $tags) {

@@ -346,6 +346,8 @@ pub enum Relation {
 	Series,
 	#[sea_orm(has_many = "super::media_analysis::Entity")]
 	Analysis,
+	#[sea_orm(has_one = "super::metadata_fetch_record::Entity")]
+	MetadataFetchRecord,
 }
 
 impl Related<super::book_club_book_suggestion::Entity> for Entity {
@@ -423,6 +425,12 @@ impl Related<super::series::Entity> for Entity {
 impl Related<super::media_analysis::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Analysis.def()
+	}
+}
+
+impl Related<super::metadata_fetch_record::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::MetadataFetchRecord.def()
 	}
 }
 

@@ -1,4 +1,5 @@
 mod api_key;
+mod author;
 mod book_club;
 mod book_club_book;
 mod book_club_discussion;
@@ -15,6 +16,7 @@ mod library;
 mod log;
 pub(crate) mod media;
 mod media_metadata_overview;
+mod metadata_provider;
 mod notifier;
 pub(crate) mod reading_list;
 mod series;
@@ -26,6 +28,7 @@ mod tag;
 pub(crate) mod user;
 
 use api_key::APIKeyQuery;
+use author::AuthorQuery;
 use book_club::BookClubQuery;
 use book_club_book::BookClubBookQuery;
 use book_club_discussion::BookClubDiscussionQuery;
@@ -41,6 +44,7 @@ use library::LibraryQuery;
 use log::LogQuery;
 use media::MediaQuery;
 use media_metadata_overview::MediaMetadataOverviewQuery;
+use metadata_provider::MetadataProviderQuery;
 use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
 use series::SeriesQuery;
@@ -67,6 +71,7 @@ struct BookClubQueries(
 
 #[derive(async_graphql::MergedObject, Default)]
 struct ContentQueries(
+	AuthorQuery,
 	MediaQuery,
 	LibraryQuery,
 	SeriesQuery,
@@ -84,6 +89,7 @@ struct SystemQueries(
 	JobQuery,
 	LogQuery,
 	ConfigQuery,
+	MetadataProviderQuery,
 	ServerConfigQuery,
 	FilesystemQuery,
 );

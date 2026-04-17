@@ -206,5 +206,4 @@ Stump is broken up into a number of different packages and applications. Some of
 ## Attribution
 
 - Some of the icons used in the web and mobile applications are from the [Spacedrive](https://github.com/spacedriveapp/spacedrive/tree/main/packages/assets/icons) repository, and are licensed under the [AGPL-3.0](<https://www.tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)>) license.
-- The `job` crate could not be possible without the work of other open source projects which had a significant influence on the design and implementation. See the [corresponding section](core/README.md#license-) in the `core` crate for more information.
 - The native Readium expo modules were adapted from [Storyteller](https://gitlab.com/storyteller-platform/storyteller)

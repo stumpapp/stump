@@ -1,12 +1,13 @@
 use async_graphql::{Context, Json, Object, Result, SimpleObject, ID};
 use chrono::Utc;
 use itertools::chain;
+use metadata_integrations::MetadataField;
 use models::{
 	entity::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
 		library_config, library_exclusion, library_scan_record, library_tag, media,
-		media_metadata, series, series_metadata, tag, user,
+		media_metadata, metadata_provider_config, series, series_metadata, tag, user,
 	},
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
@@ -18,13 +19,14 @@ use sea_orm::{
 use stump_core::filesystem::{
 	image::{
 		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
-		ImageProcessorOptionsExt, PlaceholderGenerationJob,
-		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
-		ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+		ImageProcessorOptionsExt, PlaceholderGenerationJobConfig,
+		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
 	},
-	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
-	scanner::{LibraryScanJob, ScanOptions},
+	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
+	metadata::{MetadataFetchJobParams, MetadataFetchScope},
+	scanner::ScanOptions,
 };
+use stump_core::job::stump_job::StumpJob;
 use tokio::fs;
 
 use crate::{
@@ -65,13 +67,11 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		core.enqueue_job(
-			AnalyzeMediaJob::new(AnalysisJobConfig {
-				force_reanalysis,
-				scope: MediaAnalysisJobScope::Library(model.id),
-			})
-			.wrapped(),
-		)?;
+		core.enqueue(StumpJob::analyze_media(AnalysisJobConfig {
+			force_reanalysis,
+			scope: MediaAnalysisJobScope::Library(model.id),
+		}))
+		.await?;
 
 		Ok(true)
 	}
@@ -265,11 +265,12 @@ impl LibraryMutation {
 		txn.commit().await?;
 
 		if scan_after_creation {
-			core.enqueue_job(LibraryScanJob::new(
+			core.enqueue(StumpJob::library_scan(
 				created_library.id.clone(),
 				created_library.path.clone(),
 				None,
-			))?;
+			))
+			.await?;
 		}
 
 		if add_watcher {
@@ -462,11 +463,12 @@ impl LibraryMutation {
 		txn.commit().await?;
 
 		if scan_after_update {
-			core.enqueue_job(LibraryScanJob::new(
+			core.enqueue(StumpJob::library_scan(
 				updated_library.id.clone(),
 				updated_library.path.clone(),
 				None,
-			))?;
+			))
+			.await?;
 		}
 
 		if add_watcher {
@@ -723,12 +725,16 @@ impl LibraryMutation {
 			.ok_or("Library not found")?;
 		let config = config.ok_or("Library config not found")?;
 
-		let job_config = ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::books_in_library(library.id, force_regenerate),
-		);
-
-		if let Err(error) = core.enqueue_job(job_config) {
+		if let Err(error) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::books_in_library(
+					library.id,
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?error, "Failed to enqueue thumbnail generation job");
 			return Err(error.into());
 		}
@@ -752,13 +758,17 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let jobs_config = PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig {
-			scope: PlaceholderGenerationJobScope::BooksInLibrary(library.id.clone()),
-			force_regenerate,
-		})
-		.wrapped();
-
-		if let Err(error) = core.enqueue_job(jobs_config) {
+		if let Err(error) = core
+			.enqueue(StumpJob::placeholder_generation(
+				PlaceholderGenerationJobConfig {
+					scope: PlaceholderGenerationJobScope::BooksInLibrary(
+						library.id.clone(),
+					),
+					force_regenerate,
+				},
+			))
+			.await
+		{
 			tracing::error!(?error, "Failed to enqueue placeholder generation job");
 			return Err(error.into());
 		}
@@ -817,6 +827,163 @@ impl LibraryMutation {
 		Ok(true)
 	}
 
+	/// Start a job which will search external metadata providers
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
+	#[tracing::instrument(skip(self, ctx))]
+	async fn fetch_library_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_refetch: bool,
+	) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (library, config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let library_type = config.ok_or("Library config not found")?.library_type;
+
+		let has_relevant_provider = metadata_provider_config::Entity::find()
+			.filter(metadata_provider_config::Column::Enabled.eq(true))
+			.all(core.conn.as_ref())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			.any(|config| library_type.has_provider_overlap(&config.provider_type));
+
+		if !has_relevant_provider {
+			tracing::debug!(
+				?library_type,
+				"No compatible metadata providers for this library type"
+			);
+			return Ok(false);
+		}
+
+		core.enqueue(StumpJob::metadata_fetch(MetadataFetchJobParams {
+			force_refetch,
+			scope: MetadataFetchScope::MediaInLibrary(library.id),
+		}))
+		.await?;
+		tracing::debug!("Enqueued library metadata fetch job");
+
+		Ok(true)
+	}
+
+	/// Bulk-set locked metadata fields for all series metadata in a library
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_library_series_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		library_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(library_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+		let library_id_str = library.id.clone();
+
+		let series_ids: Vec<String> = series::Entity::find()
+			.filter(series::Column::LibraryId.eq(&library_id_str))
+			.select_only()
+			.column(series::Column::Id)
+			.into_tuple()
+			.all(conn)
+			.await?;
+
+		if series_ids.is_empty() {
+			return Ok(0);
+		}
+
+		let result = series_metadata::Entity::update_many()
+			.col_expr(
+				series_metadata::Column::LockedFields,
+				sea_orm::sea_query::Expr::value(locked_json.to_string()),
+			)
+			.filter(series_metadata::Column::SeriesId.is_in(series_ids))
+			.exec(conn)
+			.await?;
+
+		tracing::debug!(
+			library_id = ?library_id_str,
+			?locked_fields,
+			updated = result.rows_affected,
+			"Set locked fields for series metadata in library"
+		);
+
+		Ok(result.rows_affected)
+	}
+
+	/// Bulk-set locked metadata fields for all media metadata in a library
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_library_media_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		library_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(library_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+		let library_id_str = library.id.clone();
+
+		let media_ids: Vec<String> = media::Entity::find()
+			.filter(
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::LibraryId.eq(&library_id_str))
+						.to_owned(),
+				),
+			)
+			.select_only()
+			.column(media::Column::Id)
+			.into_tuple()
+			.all(conn)
+			.await?;
+
+		if media_ids.is_empty() {
+			return Ok(0);
+		}
+
+		let result = media_metadata::Entity::update_many()
+			.col_expr(
+				media_metadata::Column::LockedFields,
+				sea_orm::sea_query::Expr::value(locked_json.to_string()),
+			)
+			.filter(media_metadata::Column::MediaId.is_in(media_ids))
+			.exec(conn)
+			.await?;
+
+		tracing::debug!(
+			library_id = ?library_id_str,
+			?locked_fields,
+			updated = result.rows_affected,
+			"Set locked fields for media metadata in library"
+		);
+
+		Ok(result.rows_affected)
+	}
+
 	/// Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	/// and update the database accordingly.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
@@ -836,11 +1003,12 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		core.enqueue_job(LibraryScanJob::new(
+		core.enqueue(StumpJob::library_scan(
 			library.id,
 			library.path,
 			options.map(|o| o.0),
-		))?;
+		))
+		.await?;
 		tracing::debug!("Enqueued library scan job");
 
 		Ok(true)

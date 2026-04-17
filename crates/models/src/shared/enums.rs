@@ -5,6 +5,13 @@ use strum::{Display, EnumString};
 
 // TODO: Consider not using screaming case?
 
+/// The role of an author in relation to a work or series
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Enum)]
+pub enum AuthorRole {
+	Primary,
+	CoAuthor,
+}
+
 /// The different roles a user may have for a role-based access control system scoped
 /// to a specific entity
 #[derive(
@@ -303,6 +310,39 @@ pub enum LibraryViewMode {
 	Books,
 }
 
+/// The type of content a library contains
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LibraryType {
+	Comic,
+	Manga,
+	Book,
+	LightNovel,
+	Manhwa,
+	#[default]
+	Mixed,
+	WebNovel,
+	Webtoon,
+}
+
 #[derive(
 	Eq,
 	Copy,
@@ -332,6 +372,92 @@ pub enum LogLevel {
 	#[default]
 	Info,
 	Debug,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum MetadataFetchStatus {
+	AwaitingReview,
+	#[default]
+	NotStarted,
+	InProgress,
+	Fetched,
+	Matched,
+	NoMatch,
+	Failed,
+	RateLimited,
+}
+
+/// The supported external metadata providers
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	EnumString,
+	Display,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+pub enum MetadataProvider {
+	/// Hardcover (https://hardcover.app)
+	Hardcover,
+}
+
+impl MetadataProvider {
+	/// Returns the library types that this provider has meaningful coverage for
+	pub fn supported_library_types(&self) -> &'static [LibraryType] {
+		match self {
+			// TODO: Determine the exact coverage of Hardcover
+			Self::Hardcover => &[
+				LibraryType::Book,
+				LibraryType::Manga,
+				LibraryType::LightNovel,
+			],
+		}
+	}
+}
+
+impl LibraryType {
+	pub fn has_provider_overlap(&self, provider: &MetadataProvider) -> bool {
+		match self {
+			Self::Mixed => true,
+			other => provider.supported_library_types().contains(other),
+		}
+	}
 }
 
 /// An enum representing the different types of metadata resets that can occur,
@@ -625,10 +751,50 @@ pub enum UserPermission {
 	ReadJobs,
 	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
 	ManageJobs,
+	/// Grant access to read metadata fetch statuses
+	MetadataFetchRecordRead,
+	/// Grant access to manage metadata fetch statuses (accept matches, etc)
+	MetadataFetchRecordManage,
+	/// Grant access to read metadata provider configurations
+	MetadataProviderRead,
+	/// Grant access to manage metadata provider configurations (create, update, delete)
+	MetadataProviderManage,
 	/// Grant access to read application-level logs, e.g. job logs
 	ReadPersistedLogs,
 	/// Grant access to read system logs
 	ReadSystemLogs,
 	/// Grant access to manage the server. This is effectively a step below server owner
 	ManageServer,
+}
+
+/// The kind of a scheduled job, aligned with the config variants
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	EnumString,
+	Display,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ScheduledJobKind {
+	/// Scan one or more libraries on a cron schedule
+	#[default]
+	LibraryScan,
+	/// Retry fetching metadata for records that were rate-limited or failed
+	MetadataRetry,
 }

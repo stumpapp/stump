@@ -1,3 +1,4 @@
+pub mod author;
 pub mod favorite;
 pub mod library;
 pub mod library_config;

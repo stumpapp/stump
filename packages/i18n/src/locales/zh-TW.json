@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Resize Method",
-					"options": {
+					"configuration": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -335,7 +335,7 @@
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",
-						"options": {
+						"configuration": {
 							"width": "Width",
 							"height": "Height"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "You cannot change this setting"
 				},
-				"options": {
+				"configuration": {
 					"label": "Library pattern",
 					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
@@ -544,7 +544,7 @@
 		"subtitleLink": "相关文档",
 		"sidebar": {
 			"basics": "Basics",
-			"options": {
+			"configuration": {
 				"general": "General",
 				"reading": "Reading",
 				"scanning": "Scanning",
@@ -579,7 +579,7 @@
 					"description": "A scan with additional options for more fine-grained control",
 					"form": {
 						"alert": "These will override corresponding library-wide settings",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
 								"label": "Force rebuild",
 								"description": "Rebuild every book in the library on disk",
@@ -650,7 +650,7 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "Analysis",
 			"description": "Analyze the contents of this library to identify potential issues or improvements",
 			"sections": {
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Visibility",
-				"options": {
+				"configuration": {
 					"public": {
 						"label": "Public",
 						"description": "Accessible to all users on the server"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Group by",
 					"description": "How the books in this smart list should be grouped",
-					"options": {
+					"configuration": {
 						"by_books": {
 							"label": "None"
 						},
@@ -1319,7 +1319,7 @@
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "亮色",
 						"dark": "深色",
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"options": {
+					"configuration": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
+					"configuration": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
-					"options": {
+					"configuration": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"options": {
+					"configuration": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -1794,7 +1794,7 @@
 							},
 							"intervalPreset": {
 								"label": "Preset",
-								"options": {
+								"configuration": {
 									"everySixHours": "Every 6 hours",
 									"everyTwelveHours": "Every 12 hours",
 									"oncePerDay": "Once a day",
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "选择缩略图",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "从书中选择",
 			"uploadImage": "上传图片"
 		},

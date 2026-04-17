@@ -15,18 +15,16 @@ use sea_orm::{
 use stump_core::{
 	filesystem::{
 		image::{generate_book_thumbnail, GenerateThumbnailOptions},
-		media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
+		media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 	},
+	job::stump_job::StumpJob,
 	utils::chain_optional_iter,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::{
-		media::{MediaMetadataInput, MediaProgressInput},
-		thumbnail::PageBasedThumbnailInput,
-	},
+	input::{media::MediaProgressInput, thumbnail::PageBasedThumbnailInput},
 	object::{
 		media::Media,
 		reading_session::{ActiveReadingSession, FinishedReadingSession},
@@ -64,13 +62,11 @@ impl MediaMutation {
 			.await?
 			.ok_or("Media not found")?;
 
-		core.enqueue_job(
-			AnalyzeMediaJob::new(AnalysisJobConfig {
-				force_reanalysis,
-				scope: MediaAnalysisJobScope::Book(model.id),
-			})
-			.wrapped(),
-		)?;
+		core.enqueue(StumpJob::analyze_media(AnalysisJobConfig {
+			force_reanalysis,
+			scope: MediaAnalysisJobScope::Book(model.id),
+		}))
+		.await?;
 
 		Ok(true)
 	}
@@ -238,42 +234,6 @@ impl MediaMutation {
 		tracing::debug!(path = ?path_buf, "Generated book thumbnail");
 
 		Ok(book.into())
-	}
-
-	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
-	async fn update_media_metadata(
-		&self,
-		ctx: &Context<'_>,
-		id: ID,
-		input: MediaMetadataInput,
-	) -> Result<Media> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let model = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::Id.eq(id.to_string()))
-			.into_model::<media::ModelWithMetadata>()
-			.one(conn)
-			.await?
-			.ok_or("Media not found")?;
-
-		let updated_metadata = if let Some(existing) = model.metadata {
-			let mut active_model = input.into_active_model();
-			active_model.id = Set(existing.id);
-			active_model.media_id = Set(Some(model.media.id.clone()));
-			active_model.update(conn).await?
-		} else {
-			let mut active_model = input.into_active_model();
-			active_model.media_id = Set(Some(model.media.id.clone()));
-			active_model.insert(conn).await?
-		};
-
-		let model = media::ModelWithMetadata {
-			media: model.media,
-			metadata: Some(updated_metadata),
-		};
-
-		Ok(model.into())
 	}
 
 	async fn delete_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {

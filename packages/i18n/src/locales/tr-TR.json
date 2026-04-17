@@ -264,7 +264,7 @@
 					"label": "Skip book overview",
 					"description": "Open the reader directly when selecting books in this library"
 				},
-				"options": {
+				"configuration": {
 					"series": {
 						"label": "Seriler",
 						"description": "Seriler sekmesini varsayılan olarak göster"
@@ -1319,7 +1319,7 @@
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "Light",
 						"dark": "Dark",
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"options": {
+					"configuration": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
+					"configuration": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1794,7 +1794,7 @@
 							},
 							"intervalPreset": {
 								"label": "Preset",
-								"options": {
+								"configuration": {
 									"everySixHours": "Every 6 hours",
 									"everyTwelveHours": "Every 12 hours",
 									"oncePerDay": "Once a day",
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
 		},

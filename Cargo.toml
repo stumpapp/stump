@@ -6,9 +6,11 @@ members = [
   "core",
   "crates/*",
   "crates/macros/*",
+  "crates/integrations/*",
 ]
 exclude = [
   "crates/macros/Cargo.toml",
+  "crates/integrations/Cargo.toml",
 ]
 
 [workspace.package]
@@ -17,6 +19,8 @@ rust-version = "1.92.0"
 
 [workspace.dependencies]
 alphanumeric-sort = "1.5.3"
+apalis = { version = "0.7", features = ["limit", "tracing"] }
+apalis-cron = { version = "0.7" }
 async-graphql = { version = "7.2.1", features = ["chrono", "decimal", "dynamic-schema", "dataloader"] }
 async-graphql-axum = "7.2.1"
 async-trait = "0.1.89"
@@ -28,11 +32,11 @@ axum = { version = "0.8.6", features = [
 base64 = "0.22.1"
 data-encoding = "2.9.0"
 bcrypt = "0.17.1"
-rust_decimal = "1.38.0"
 derive_builder = "0.20.2"
 derivative = "2.2.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.48", features = ["derive"] }
+english-to-cron = "0.1.7"
 futures = "0.3.31"
 futures-util = "0.3.31"
 globset = "0.4.16"
@@ -53,6 +57,9 @@ prefixed-api-key = { version = "0.3.0", features = ["sha2"] }
 rand = "0.9.2"
 regex = "1.11.3"
 reqwest = { version = "0.12.23", default-features = false, features = [ "json", "rustls-tls" ] }
+reqwest-middleware = { version = "0.4.0", features = ["json"] }
+reqwest-retry = "0.7.0"
+rust_decimal = { version = "1.38.0", features = ["serde-with-float"] }
 sea-orm = { version = "1.1.16", features = [
   "mock",
   "macros",

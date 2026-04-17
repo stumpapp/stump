@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Metod för storleksändring",
-					"options": {
+					"configuration": {
 						"scaleEvenlyByFactor": "Skala Jämnt",
 						"exact": "Exakt Storlek",
 						"scaleDimension": "Automatisk Skala",
@@ -335,7 +335,7 @@
 					"description": "Ange antingen bredden eller höjden på miniatyren och skala automatiskt den andra för att behålla det ursprungliga bildförhållandet",
 					"dimension": {
 						"label": "Mått",
-						"options": {
+						"configuration": {
 							"width": "Bredd",
 							"height": "Höjd"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Du kan inte ändra denna inställning"
 				},
-				"options": {
+				"configuration": {
 					"label": "Biblioteksmönster",
 					"description": "Den inställning som avgör hur Stump kommer att organisera ditt bibliotek",
 					"collectionPriority": {
@@ -544,7 +544,7 @@
 		"subtitleLink": "relevant dokumentation",
 		"sidebar": {
 			"basics": "Grundläggande",
-			"options": {
+			"configuration": {
 				"general": "Allmänt",
 				"reading": "Läsning",
 				"scanning": "Skanning",
@@ -579,7 +579,7 @@
 					"description": "En skanning med ytterligare alternativ för mer finkornig kontroll",
 					"form": {
 						"alert": "Dessa kommer åsidosätta motsvarande inställningar för hela bibliotek",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
 								"label": "Tvinga ombyggnad",
 								"description": "Bygg om alla böcker i biblioteket på disk",
@@ -650,7 +650,7 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "Analys",
 			"description": "Analysera innehållet i detta bibliotek för att identifiera potentiella problem eller förbättringar",
 			"sections": {
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Synlighet",
-				"options": {
+				"configuration": {
 					"public": {
 						"label": "Offentlig",
 						"description": "Tillgänglig för alla användare på servern"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Gruppera efter",
 					"description": "Hur böckerna i denna smarta lista ska grupperas",
-					"options": {
+					"configuration": {
 						"by_books": {
 							"label": "Ingen"
 						},
@@ -1319,7 +1319,7 @@
 						"Om du är intresserad av att skapa ditt eget tema, kolla in",
 						"dokumentationen"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "Ljust",
 						"dark": "Mörkt",
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"options": {
+					"configuration": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
+					"configuration": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Arrangemanget är låst",
 					"lock": "Lås arrangemang",
 					"unlock": "Lås upp arrangemang",
-					"options": {
+					"configuration": {
 						"HOME": "Hem",
 						"EXPLORE": "Utforska",
 						"LIBRARIES": "Bibliotek",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"options": {
+					"configuration": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -1794,7 +1794,7 @@
 							},
 							"intervalPreset": {
 								"label": "Förval",
-								"options": {
+								"configuration": {
 									"everySixHours": "Var sjätte timme",
 									"everyTwelveHours": "Var tolfte timme",
 									"oncePerDay": "En gång om dagen",
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "Välj från böcker",
 			"uploadImage": "Ladda upp bild"
 		},

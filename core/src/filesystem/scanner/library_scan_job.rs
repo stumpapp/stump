@@ -5,7 +5,10 @@ use std::{
 
 use async_graphql::SimpleObject;
 use models::{
-	entity::{library, library_config, library_scan_record, media, series},
+	entity::{
+		library, library_config, library_scan_record, media, metadata_provider_config,
+		series,
+	},
 	shared::enums::FileStatus,
 };
 use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
@@ -18,18 +21,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	database::SQLITE_BIND_LIMIT,
-	event,
+	event::{self, CreatedOrUpdatedManyMedia},
 	filesystem::{
 		image::{
-			PlaceholderGenerationJob, PlaceholderGenerationJobConfig,
-			PlaceholderGenerationJobScope, ThumbnailGenerationJob,
+			PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 			ThumbnailGenerationJobParams,
 		},
+		metadata::MetadataFetchJobParams,
 		scanner::utils::safely_insert_series,
 	},
 	job::{
-		error::JobError, CoreJobOutput, Executor, JobExecuteLog, JobExt, JobOutputExt,
-		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, stump_job::StumpJob, CoreJobOutput, JobContext, JobExecuteLog,
+		JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
 	},
 	utils::chain_optional_iter,
 	CoreEvent,
@@ -79,17 +82,13 @@ pub struct LibraryScanJob {
 }
 
 impl LibraryScanJob {
-	pub fn new(
-		id: String,
-		path: String,
-		options: Option<ScanOptions>,
-	) -> Box<WrappedJob<LibraryScanJob>> {
-		WrappedJob::new(Self {
+	pub fn new(id: String, path: String, options: Option<ScanOptions>) -> Self {
+		Self {
 			id,
 			path,
 			config: None,
 			options: options.unwrap_or_default(),
-		})
+		}
 	}
 }
 
@@ -133,7 +132,7 @@ impl JobOutputExt for LibraryScanOutput {
 }
 
 #[async_trait::async_trait]
-impl JobExt for LibraryScanJob {
+impl JobLifecycle for LibraryScanJob {
 	const NAME: &'static str = "library_scan";
 
 	type Output = LibraryScanOutput;
@@ -145,7 +144,7 @@ impl JobExt for LibraryScanJob {
 
 	async fn init(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
 		// Note: We ignore the potential self.config here in the event that it was
@@ -153,7 +152,7 @@ impl JobExt for LibraryScanJob {
 		// just one additional query.
 		let config = library_config::Entity::find()
 			.filter(library_config::Column::LibraryId.eq(self.id.clone()))
-			.one(ctx.conn.as_ref())
+			.one(ctx.conn())
 			.await?
 			.ok_or(JobError::InitFailed(
 				"Library is missing configuration".to_string(),
@@ -175,7 +174,7 @@ impl JobExt for LibraryScanJob {
 		} = walk_library(
 			&self.path,
 			WalkerCtx {
-				db: ctx.conn.clone(),
+				db: ctx.apalis_state.conn.clone(),
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
 				options: self.options,
@@ -194,14 +193,13 @@ impl JobExt for LibraryScanJob {
 		output.ignored_directories = ignored_directories;
 
 		if library_is_missing {
-			handle_missing_library(&ctx.conn, self.id.as_str()).await?;
-			ctx.send_batch(vec![
-				JobProgress::msg("Failed to find library on disk").into_worker_send(),
-				CoreEvent::DiscoveredMissingLibrary(event::DiscoveredMissingLibrary {
+			handle_missing_library(ctx.conn(), self.id.as_str()).await?;
+			ctx.report_progress(JobProgress::msg("Failed to find library on disk"));
+			ctx.emit_event(CoreEvent::DiscoveredMissingLibrary(
+				event::DiscoveredMissingLibrary {
 					id: self.id.clone(),
-				})
-				.into_worker_send(),
-			]);
+				},
+			));
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
 			));
@@ -237,21 +235,21 @@ impl JobExt for LibraryScanJob {
 		Ok(WorkingState {
 			output: Some(output),
 			tasks,
-			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
-	async fn cleanup(
+	async fn finalize(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		output: &Self::Output,
-	) -> Result<Option<Vec<Box<dyn Executor>>>, JobError> {
-		ctx.send_core_event(CoreEvent::JobOutput(event::JobOutput {
+	) -> Result<(), JobError> {
+		ctx.emit_event(CoreEvent::JobOutput(event::JobOutput {
 			id: ctx.job_id.clone(),
 			output: CoreJobOutput::LibraryScan(output.clone()),
 		}));
 
+		let did_create_media = output.created_media > 0;
 		let did_create = output.created_series > 0 || output.created_media > 0;
 		let did_update = output.updated_series > 0 || output.updated_media > 0;
 		let image_options = self
@@ -263,21 +261,25 @@ impl JobExt for LibraryScanJob {
 			tracing::error!(error = ?error, "Failed to handle scan completion");
 		}
 
-		let mut jobs: Vec<Box<dyn Executor>> = vec![];
-
 		match image_options {
-			Some(options) if did_create | did_update => {
+			Some(options) if did_create || did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				jobs.push(WrappedJob::new(ThumbnailGenerationJob {
-					options,
-					params: ThumbnailGenerationJobParams::books_in_library(
-						self.id.clone(),
-						false,
-					),
-				}));
+				let params = ThumbnailGenerationJobParams::books_in_library(
+					self.id.clone(),
+					false,
+				);
+				if let Err(e) = ctx
+					.enqueue(StumpJob::thumbnail_generation(options, params))
+					.await
+				{
+					tracing::error!(
+						?e,
+						"Failed to enqueue thumbnail generation follow-up"
+					);
+				}
 			},
 			_ => {
-				tracing::debug!("No cleanup required for library scan job");
+				tracing::debug!("No thumbnail generation job will be enqueued");
 			},
 		}
 
@@ -289,28 +291,62 @@ impl JobExt for LibraryScanJob {
 
 		if process_even_without_config {
 			tracing::trace!("Thumbnail color processing job should be enqueued");
-			jobs.push(
-				PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig::new(
-					PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
-					false,
+			if let Err(e) = ctx
+				.enqueue(StumpJob::placeholder_generation(
+					PlaceholderGenerationJobConfig::new(
+						PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
+						false,
+					),
 				))
-				.wrapped(),
-			);
+				.await
+			{
+				tracing::error!(?e, "Failed to enqueue placeholder generation follow-up");
+			}
 		}
 
-		Ok((!jobs.is_empty()).then_some(jobs))
+		let library_type = self
+			.config
+			.as_ref()
+			.map(|c| c.library_type)
+			.unwrap_or_default();
+
+		let has_relevant_provider = metadata_provider_config::Entity::find()
+			.filter(metadata_provider_config::Column::Enabled.eq(true))
+			.all(ctx.conn())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			.any(|config| library_type.has_provider_overlap(&config.provider_type));
+
+		// Note: I figure we only care about new entities
+		if has_relevant_provider && did_create_media {
+			tracing::trace!(
+				?library_type,
+				"Metadata fetch job should be enqueued after library scan"
+			);
+			if let Err(e) = ctx
+				.enqueue(StumpJob::metadata_fetch(
+					MetadataFetchJobParams::media_in_library(self.id.clone()),
+				))
+				.await
+			{
+				tracing::error!(?e, "Failed to enqueue metadata fetch follow-up");
+			}
+		}
+
+		Ok(())
 	}
 
 	async fn execute_task(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 		let mut subtasks = vec![];
 
-		let max_concurrency = ctx.config.max_scanner_concurrency;
+		let max_concurrency = ctx.config().max_scanner_concurrency;
 
 		match task {
 			LibraryScanTask::Init(input) => {
@@ -346,7 +382,7 @@ impl JobExt for LibraryScanJob {
 								Expr::value(FileStatus::Ready.to_string()),
 							)
 							.filter(series::Column::Id.is_in(chunk.to_vec()))
-							.exec(ctx.conn.as_ref())
+							.exec(ctx.conn())
 							.await
 							.map_or_else(
 								|error| {
@@ -391,7 +427,7 @@ impl JobExt for LibraryScanJob {
 								Expr::value(FileStatus::Missing.to_string()),
 							)
 							.filter(series::Column::Path.is_in(chunk.to_vec()))
-							.exec(ctx.conn.as_ref())
+							.exec(ctx.conn())
 							.await
 							.map_or_else(
 								|error| {
@@ -428,7 +464,7 @@ impl JobExt for LibraryScanJob {
 					let (built_series, failure_logs) = safely_build_series(
 						&self.id,
 						series_to_create,
-						ctx.config.as_ref(),
+						ctx.config(),
 						|position| {
 							ctx.report_progress(JobProgress::subtask_position(
 								position as i32,
@@ -452,12 +488,10 @@ impl JobExt for LibraryScanJob {
 							(idx + 1) as i32,
 							chunk_count as i32,
 						));
-						match safely_insert_series(chunk.to_vec(), ctx.conn.as_ref())
-							.await
-						{
+						match safely_insert_series(chunk.to_vec(), ctx.conn()).await {
 							Ok(created_series) => {
 								output.created_series += created_series.len() as u64;
-								ctx.send_core_event(CoreEvent::CreatedManySeries(
+								ctx.emit_event(CoreEvent::CreatedManySeries(
 									event::CreatedManySeries {
 										count: created_series.len() as u64,
 										library_id: self.id.clone(),
@@ -531,7 +565,7 @@ impl JobExt for LibraryScanJob {
 				let walk_result = walk_series(
 					path_buf.as_path(),
 					WalkerCtx {
-						db: ctx.conn.clone(),
+						db: ctx.apalis_state.conn.clone(),
 						ignore_rules,
 						max_depth,
 						options: self.options,
@@ -580,7 +614,7 @@ impl JobExt for LibraryScanJob {
 						updated_media,
 						logs: new_logs,
 					} = handle_missing_series(
-						&ctx.conn,
+						ctx.conn(),
 						path_buf.to_str().unwrap_or_default(),
 					)
 					.await?;
@@ -599,7 +633,7 @@ impl JobExt for LibraryScanJob {
 				let series = series::Entity::find()
 					.filter(series::Column::Path.eq(series_path_str.clone()))
 					.into_model::<series::SeriesIdentSelect>()
-					.one(ctx.conn.as_ref())
+					.one(ctx.conn())
 					.await?
 					.ok_or(JobError::TaskFailed("Series not found".to_string()))?;
 
@@ -637,17 +671,14 @@ impl JobExt for LibraryScanJob {
 						..
 					} = handle_restored_media(ctx, &series_id, ids).await;
 
-					ctx.send_batch(vec![
-						JobProgress::msg("Restored media entities").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: updated_media,
-								series_id,
-								library_id: self.id.clone(),
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Restored media entities"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id,
+							library_id: self.id.clone(),
+						},
+					));
 
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
@@ -660,17 +691,14 @@ impl JobExt for LibraryScanJob {
 						..
 					} = handle_missing_media(ctx, &series_id, paths).await;
 
-					ctx.send_batch(vec![
-						JobProgress::msg("Handled missing media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: updated_media,
-								series_id,
-								library_id: self.id.clone(),
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Handled missing media"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id,
+							library_id: self.id.clone(),
+						},
+					));
 
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
@@ -698,17 +726,14 @@ impl JobExt for LibraryScanJob {
 					)
 					.await?;
 
-					ctx.send_batch(vec![
-						JobProgress::msg("Created new media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: created_media,
-								series_id,
-								library_id: self.id.clone(),
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Created new media"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						CreatedOrUpdatedManyMedia {
+							count: created_media,
+							series_id,
+							library_id: self.id.clone(),
+						},
+					));
 					output.created_media += created_media;
 					logs.extend(new_logs);
 				},
@@ -736,17 +761,14 @@ impl JobExt for LibraryScanJob {
 					)
 					.await?;
 
-					ctx.send_batch(vec![
-						JobProgress::msg("Visited all media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: updated_media,
-								series_id,
-								library_id: self.id.clone(),
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Visited all media"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id,
+							library_id: self.id.clone(),
+						},
+					));
 					output.updated_media += updated_media;
 					logs.extend(new_logs);
 				},
@@ -814,10 +836,10 @@ pub async fn handle_missing_library(
 
 async fn handle_scan_complete(
 	job: &LibraryScanJob,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	options: &ScanOptions,
 ) -> Result<(), JobError> {
-	let conn = ctx.conn.as_ref();
+	let conn = ctx.conn();
 	let now = chrono::Utc::now();
 
 	let update_result = library::Entity::update_many()

@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { CheckBox, Label, Text } from '@stump/components'
-import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
+import { FragmentType, graphql, MetadataField, useFragment, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
@@ -15,6 +15,7 @@ import {
 	BadgeCell,
 	BadgeListCell,
 	isEmptyField,
+	LockFieldButton,
 	MetadataEditorContext,
 	MetadataEditorHeader,
 	MetadataEditorState,
@@ -23,8 +24,8 @@ import {
 	SeriesMetadataEditorRow,
 	SeriesMetadataKeys,
 	TextCell,
-} from '@/components/metadataEditor'
-import EnumCell from '@/components/metadataEditor/cells/EnumCell'
+} from '@/components/metadata/metadataEditor'
+import EnumCell from '@/components/metadata/metadataEditor/cells/EnumCell'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 
@@ -63,6 +64,7 @@ const fragment = graphql(`
 		volume
 		writers
 		year
+		lockedFields
 	}
 `)
 
@@ -72,6 +74,14 @@ const mutation = graphql(`
 			metadata {
 				...SeriesMetadataEditor
 			}
+		}
+	}
+`)
+
+const setLockedFieldsMutation = graphql(`
+	mutation SeriesEditorSetLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {
+		setSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {
+			id
 		}
 	}
 `)
@@ -90,6 +100,9 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 	const paths = usePaths()
 
 	const [showMissing, setShowMissing] = useState(false)
+	const [lockedFields, setLockedFields] = useState<Set<MetadataField>>(
+		() => new Set(metadata?.lockedFields ?? []),
+	)
 
 	const [state, setState] = useState<MetadataEditorState>(MetadataEditorState.Display)
 
@@ -113,9 +126,12 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 					</div>
 				),
 				cell: (info) => (
-					<Text variant="muted" className="text-sm font-medium">
-						{info.getValue()}
-					</Text>
+					<div className="gap-1.5 flex items-center">
+						<Text variant="muted" className="text-sm font-medium">
+							{info.getValue()}
+						</Text>
+						<LockFieldButton binding={info.row.original.field} />
+					</div>
 				),
 				enableResizing: true,
 			}),
@@ -237,6 +253,27 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 		},
 	})
 
+	const { mutate: setLocked } = useGraphQLMutation(setLockedFieldsMutation, {
+		onError: () => {
+			setLockedFields(new Set(metadata?.lockedFields ?? []))
+			toast.error('Failed to update locked fields')
+		},
+	})
+
+	const onToggleLock = useCallback(
+		(field: MetadataField) => {
+			const next = new Set(lockedFields)
+			if (next.has(field)) {
+				next.delete(field)
+			} else {
+				next.add(field)
+			}
+			setLockedFields(next)
+			setLocked({ seriesId, lockedFields: Array.from(next) })
+		},
+		[seriesId, lockedFields, setLocked],
+	)
+
 	const onSaveMetadata = useCallback(
 		(values: SeriesMetadataEditorValues) => {
 			if (seriesId) {
@@ -262,6 +299,8 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 					setState,
 					onCancel: onCancelEdits,
 					onSave: () => form.handleSubmit(onSaveMetadata),
+					lockedFields,
+					onToggleLock,
 				}}
 			>
 				<form onSubmit={form.handleSubmit(onSaveMetadata)}>

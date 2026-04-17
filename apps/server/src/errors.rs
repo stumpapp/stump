@@ -11,7 +11,6 @@ use stump_core::{
 		image::{ProcessorError, ThumbnailGenerateError},
 		FileError,
 	},
-	job::error::JobManagerError,
 	opds::v2_0::OPDSV2Error,
 	CoreEvent,
 };
@@ -235,12 +234,6 @@ impl From<CoreError> for APIError {
 			},
 			_ => APIError::InternalServerError(err.to_string()),
 		}
-	}
-}
-
-impl From<JobManagerError> for APIError {
-	fn from(error: JobManagerError) -> Self {
-		APIError::InternalServerError(error.to_string())
 	}
 }
 

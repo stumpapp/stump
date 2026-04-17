@@ -17,7 +17,8 @@ import { transformConfigForMutation } from './utils'
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
 const ScannerBehaviorScene = lazy(() => import('./options/scanner'))
-const LibraryAnalysisScene = lazy(() => import('./options/analysis'))
+const LibraryAnalysisScene = lazy(() => import('./integrations/analysis'))
+const LibraryMetadataScene = lazy(() => import('./integrations/metadata'))
 const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 
 const AccessControlScene = lazy(() => import('./danger/accessControl'))
@@ -120,6 +121,7 @@ export default function LibrarySettingsRouter() {
 	)
 
 	const canScan = checkPermission(UserPermission.ScanLibrary)
+	const canAccessMetadata = checkPermission(UserPermission.MetadataFetchRecordRead)
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
@@ -168,6 +170,7 @@ export default function LibrarySettingsRouter() {
 					<Route path="scanning" element={<ScannerBehaviorScene />} />
 					<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
 					<Route path="analysis" element={<LibraryAnalysisScene />} />
+					{canAccessMetadata && <Route path="metadata" element={<LibraryMetadataScene />} />}
 
 					<Route path="" element={<Navigate to="access-control" replace />} />
 					<Route path="access-control" element={<AccessControlScene />} />

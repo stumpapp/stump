@@ -1,10 +1,11 @@
 use crate::{
 	filesystem::media::analysis::analyze::{safely_analyze_book, MediaForProcessing},
 	job::{
-		error::JobError, JobExt, JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx,
-		WorkingState, WrappedJob,
+		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkingState,
 	},
 };
+use async_graphql::SimpleObject;
 use models::entity::{media, media_analysis, media_metadata, series};
 use sea_orm::{prelude::*, QuerySelect};
 use serde::{Deserialize, Serialize};
@@ -34,7 +35,7 @@ pub enum AnalyzeMediaTask {
 	ProcessBook(Id),
 }
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, SimpleObject)]
 pub struct AnalyzeMediaOutput {
 	/// The number of pages in total that were analyzed to some extent
 	pub pages_analyzed: u64,
@@ -60,14 +61,10 @@ impl AnalyzeMediaJob {
 	pub fn new(config: AnalysisJobConfig) -> Self {
 		Self { config }
 	}
-
-	pub fn wrapped(self) -> Box<WrappedJob<Self>> {
-		WrappedJob::new(self)
-	}
 }
 
 #[async_trait::async_trait]
-impl JobExt for AnalyzeMediaJob {
+impl JobLifecycle for AnalyzeMediaJob {
 	const NAME: &'static str = "analyze_media";
 
 	type Output = AnalyzeMediaOutput;
@@ -92,7 +89,7 @@ impl JobExt for AnalyzeMediaJob {
 
 	async fn init(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let output = Self::Output::default();
 
@@ -107,7 +104,7 @@ impl JobExt for AnalyzeMediaJob {
 					.inner_join(series::Entity)
 					.filter(series::Column::LibraryId.eq(id))
 					.into_model::<media::MediaIdentSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
@@ -122,7 +119,7 @@ impl JobExt for AnalyzeMediaJob {
 					.columns(media::MediaIdentSelect::columns())
 					.filter(media::Column::SeriesId.eq(id))
 					.into_model::<media::MediaIdentSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await?;
 
 				books
@@ -139,14 +136,13 @@ impl JobExt for AnalyzeMediaJob {
 		Ok(WorkingState {
 			output: Some(output),
 			tasks: tasks.into(),
-			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
 	async fn execute_task(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut output = Self::Output::default();
@@ -166,7 +162,7 @@ impl JobExt for AnalyzeMediaJob {
 					.find_also_related(media_analysis::Entity)
 					.filter(media::Column::Id.eq(id.clone()))
 					.into_model::<MediaForProcessing, media_analysis::Model>()
-					.one(ctx.conn.as_ref())
+					.one(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?
 					.ok_or_else(|| {

@@ -335,7 +335,7 @@
 					"description": "Ustaw szerokość lub wysokość miniatury, a druga wartość zostanie wyskalowana automatycznie tak, aby zachować oryginalny współczynnik kształtu",
 					"dimension": {
 						"label": "Wymiar",
-						"options": {
+						"configuration": {
 							"width": "Szerokość",
 							"height": "Wysokość"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Nie można zmienić tego ustawienia"
 				},
-				"options": {
+				"configuration": {
 					"label": "Wzorzec biblioteki",
 					"description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
 					"collectionPriority": {
@@ -544,7 +544,7 @@
 		"subtitleLink": "stosowną dokumentację",
 		"sidebar": {
 			"basics": "Podstawowe",
-			"options": {
+			"configuration": {
 				"general": "Ogólne",
 				"reading": "Czytanie",
 				"scanning": "Skanowanie",
@@ -579,7 +579,7 @@
 					"description": "Skanowanie z dodatkowymi opcjami dla bardziej precyzyjnej kontroli",
 					"form": {
 						"alert": "Opcje te zastąpią analogiczne ustawienia globalne biblioteki",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
 								"label": "Wymuś odbudowę",
 								"description": "Odbuduj każdą książkę w bibliotece na dysku",
@@ -650,7 +650,7 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "Analiza",
 			"description": "Analizuj zawartość tej biblioteki w celu zidentyfikowania potencjalnych problemów lub ulepszeń",
 			"sections": {
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Widoczność",
-				"options": {
+				"configuration": {
 					"public": {
 						"label": "Publiczna",
 						"description": "Dostępna dla wszystkich użytkowników na serwerze"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Grupuj według",
 					"description": "Jak książki na tej inteligentnej liście powinny być grupowane",
-					"options": {
+					"configuration": {
 						"by_books": {
 							"label": "Brak"
 						},
@@ -1319,7 +1319,7 @@
 						"Jeśli chcesz stworzyć swój własny motyw, sprawdź",
 						"dokumentację"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "Jasny",
 						"dark": "Ciemny",
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Miniatury zastępcze",
 					"description": "Styl używany dla zastępczych miniatur",
-					"options": {
+					"configuration": {
 						"grayscale": "Odcienie szarości",
 						"averageColor": "Średnie wartości kolorów",
 						"colorful": "Kolorowe",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Główna nawigacja",
 					"description": "Wybierz pomiędzy minimalnym panelem bocznym lub nawigacją u górnym ekranu",
-					"options": {
+					"configuration": {
 						"sidebar": "Pasek boczny",
 						"topbar": "Pasek górny"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Układ jest zablokowany",
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",
-					"options": {
+					"configuration": {
 						"HOME": "Strona główna",
 						"EXPLORE": "Odkrywaj",
 						"LIBRARIES": "Biblioteki",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Rozstaw wyświetlania",
 					"description": "Dostosuj odstępy między elementami w aplikacji",
-					"options": {
+					"configuration": {
 						"default": "Domyślne",
 						"compact": "Kompaktowe"
 					},
@@ -1794,7 +1794,7 @@
 							},
 							"intervalPreset": {
 								"label": "Predefiniowane",
-								"options": {
+								"configuration": {
 									"everySixHours": "Co 6 godzin",
 									"everyTwelveHours": "Co 12 godzin",
 									"oncePerDay": "Raz na dzień",
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edytuj miniaturkę",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "Wybierz z książek",
 			"uploadImage": "Prześlij obraz"
 		},

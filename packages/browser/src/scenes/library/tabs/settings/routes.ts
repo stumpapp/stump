@@ -48,15 +48,28 @@ export const routeGroups: RouteGroup[] = [
 				permissions: [UserPermission.ManageLibrary],
 				to: 'settings/thumbnails',
 			},
+		],
+		label: 'Configuration',
+	},
+	{
+		defaultRoute: 'settings/metadata',
+		items: [
 			{
 				icon: FlaskRound,
 				label: 'Analysis',
-				localeKey: 'options/analysis',
+				localeKey: 'integrations/analysis',
 				permissions: [UserPermission.ManageLibrary],
 				to: 'settings/analysis',
 			},
+			{
+				icon: BookOpenText,
+				label: 'Metadata',
+				localeKey: 'integrations/metadata',
+				permissions: [UserPermission.MetadataFetchRecordManage],
+				to: 'settings/metadata',
+			},
 		],
-		label: 'Options',
+		label: 'Integrations',
 	},
 	{
 		defaultRoute: 'settings/danger',

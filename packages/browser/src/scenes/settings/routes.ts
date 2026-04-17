@@ -8,6 +8,7 @@ import {
 	Brush,
 	KeyRound,
 	Mail,
+	PackageSearch,
 	PcCase,
 	ScrollText,
 	Server,
@@ -147,6 +148,13 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 					},
 				],
 				to: '/settings/email',
+			},
+			{
+				icon: PackageSearch,
+				label: 'Metadata',
+				localeKey: 'server/metadataIntegrations',
+				permissions: [UserPermission.MetadataProviderRead],
+				to: '/settings/metadata-integrations',
 			},
 			{
 				disabled: true,

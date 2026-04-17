@@ -9,5 +9,6 @@ export default {
 	libraries: 'Libraries',
 	tags: 'Tags',
 	scanner: 'Scanner',
+	'background-jobs': 'Background Jobs',
 	thumbnails: 'Thumbnails',
 } satisfies Meta

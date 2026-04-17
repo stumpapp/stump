@@ -1,4 +1,5 @@
 use async_graphql::{ComplexObject, SimpleObject};
+use metadata_integrations::MetadataField;
 use models::entity::media_metadata;
 use stump_core::utils::serde::comma_separated_list_to_vec;
 
@@ -102,6 +103,14 @@ impl MediaMetadata {
 			.teams
 			.clone()
 			.map(comma_separated_list_to_vec)
+			.unwrap_or_default()
+	}
+
+	async fn locked_fields(&self) -> Vec<MetadataField> {
+		self.model
+			.locked_fields
+			.as_ref()
+			.and_then(|v| serde_json::from_value(v.clone()).ok())
 			.unwrap_or_default()
 	}
 }

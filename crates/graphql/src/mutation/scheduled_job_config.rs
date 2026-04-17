@@ -1,138 +1,111 @@
 use crate::{
 	data::CoreContext,
 	guard::PermissionGuard,
-	input::scheduled_job_config::{ScheduledJobConfigInput, ScheduledJobConfigValidator},
-	object::job_schedule_config::ScheduledJobConfig,
+	input::scheduled_job_config::{
+		validate_create_input, validate_cron_expression, CreateScheduledJobInput,
+		ScheduledJobConfigInput, UpdateScheduledJobInput,
+	},
+	object::job_schedule_config::ScheduledJob,
 };
 use async_graphql::{Context, Object, Result};
 use models::{
-	entity::{scheduled_job_config, scheduled_job_library},
-	shared::enums::UserPermission,
+	entity::scheduled_job,
+	shared::enums::{ScheduledJobKind, UserPermission},
 };
-use sea_orm::{prelude::*, ActiveModelTrait, Set, TransactionTrait};
+use sea_orm::{prelude::*, ActiveModelTrait, Set};
 
 #[derive(Default)]
 pub struct ScheduledJobConfigMutation;
 
+fn kind_from_config(config: &ScheduledJobConfigInput) -> ScheduledJobKind {
+	match config {
+		ScheduledJobConfigInput::LibraryScan(_) => ScheduledJobKind::LibraryScan,
+		ScheduledJobConfigInput::MetadataRetry(_) => ScheduledJobKind::MetadataRetry,
+	}
+}
+
 #[Object]
 impl ScheduledJobConfigMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
-	async fn create_scheduled_job_config(
+	async fn create_scheduled_job(
 		&self,
 		ctx: &Context<'_>,
-		#[graphql(validator(custom = "ScheduledJobConfigValidator"))]
-		input: ScheduledJobConfigInput,
-	) -> Result<ScheduledJobConfig> {
+		input: CreateScheduledJobInput,
+	) -> Result<ScheduledJob> {
 		let core = ctx.data::<CoreContext>()?;
 
-		let created_model = scheduled_job_config::ActiveModel {
-			interval_secs: Set(input.interval_secs),
+		validate_create_input(&input).map_err(async_graphql::Error::new)?;
+
+		let kind = kind_from_config(&input.config);
+		let config_json = serde_json::to_value(&input.config)?;
+
+		let model = scheduled_job::ActiveModel {
+			name: Set(input.name),
+			kind: Set(kind),
+			schedule: Set(input.schedule),
+			config: Set(Some(config_json)),
+			enabled: Set(input.enabled.unwrap_or(true)),
 			..Default::default()
 		}
 		.insert(core.conn.as_ref())
 		.await?;
 
-		let joint_active_models = input
-			.included_library_ids
-			.iter()
-			.map(|library_id| scheduled_job_library::ActiveModel {
-				library_id: Set(library_id.clone()),
-				schedule_id: Set(created_model.id),
-				..Default::default()
-			})
-			.collect::<Vec<_>>();
-		dbg!(&joint_active_models);
-
-		let created_joint_records =
-			scheduled_job_library::Entity::insert_many(joint_active_models)
-				.exec_without_returning(core.conn.as_ref())
-				.await?;
-		dbg!(created_joint_records);
-
-		Ok(ScheduledJobConfig::from(created_model))
+		Ok(ScheduledJob::from(model))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
-	async fn update_scheduled_job_config(
+	async fn update_scheduled_job(
 		&self,
 		ctx: &Context<'_>,
 		id: i32,
-		input: ScheduledJobConfigInput,
-	) -> Result<ScheduledJobConfig> {
+		input: UpdateScheduledJobInput,
+	) -> Result<ScheduledJob> {
 		let core = ctx.data::<CoreContext>()?;
 
-		let (model, libraries) = scheduled_job_config::Entity::find()
-			.filter(scheduled_job_config::Column::Id.eq(id))
-			.find_with_linked(scheduled_job_library::ScheduledJobConfigsToLibraries)
-			.all(core.conn.as_ref())
+		let existing = scheduled_job::Entity::find_by_id(id)
+			.one(core.conn.as_ref())
 			.await?
-			.pop()
-			.ok_or("Scheduled job config not found")?;
+			.ok_or("Scheduled job not found")?;
 
-		let mut active_model: scheduled_job_config::ActiveModel = model.into();
-		active_model.interval_secs = Set(input.interval_secs);
+		let mut active: scheduled_job::ActiveModel = existing.into();
 
-		let ids_to_remove = libraries
-			.iter()
-			.filter(|library| !input.included_library_ids.contains(&library.id))
-			.map(|library| library.id.clone())
-			.collect::<Vec<_>>();
-
-		let ids_to_add = input
-			.included_library_ids
-			.iter()
-			.filter(|id| !libraries.iter().any(|lib| lib.id == **id))
-			.cloned()
-			.collect::<Vec<_>>();
-
-		let txn = core.conn.begin().await?;
-
-		let updated_model = active_model.update(&txn).await?;
-
-		// Remove libraries that are no longer included
-		if !ids_to_remove.is_empty() {
-			scheduled_job_library::Entity::delete_many()
-				.filter(scheduled_job_library::Column::LibraryId.is_in(ids_to_remove))
-				.filter(scheduled_job_library::Column::ScheduleId.eq(id))
-				.exec(&txn)
-				.await?;
+		if let Some(name) = input.name {
+			active.name = Set(name);
 		}
 
-		// Add new libraries that are included
-		if !ids_to_add.is_empty() {
-			let new_joints = ids_to_add.into_iter().map(|library_id| {
-				scheduled_job_library::ActiveModel {
-					library_id: Set(library_id),
-					schedule_id: Set(updated_model.id),
-					..Default::default()
-				}
-			});
-			scheduled_job_library::Entity::insert_many(new_joints)
-				.exec(&txn)
-				.await?;
+		if let Some(schedule) = input.schedule {
+			validate_cron_expression(&schedule).map_err(async_graphql::Error::new)?;
+			active.schedule = Set(schedule);
 		}
 
-		txn.commit().await?;
+		if let Some(ref config) = input.config {
+			let kind = kind_from_config(config);
+			let config_json = serde_json::to_value(config)?;
+			active.kind = Set(kind);
+			active.config = Set(Some(config_json));
+		}
 
-		Ok(ScheduledJobConfig::from(updated_model))
+		if let Some(enabled) = input.enabled {
+			active.enabled = Set(enabled);
+		}
+
+		let updated = active.update(core.conn.as_ref()).await?;
+
+		Ok(ScheduledJob::from(updated))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
-	async fn delete_scheduled_job_config(
-		&self,
-		ctx: &Context<'_>,
-		id: i32,
-	) -> Result<bool> {
+	async fn delete_scheduled_job(&self, ctx: &Context<'_>, id: i32) -> Result<bool> {
 		let core = ctx.data::<CoreContext>()?;
 
-		let deleted_count = scheduled_job_config::Entity::delete_many()
-			.filter(scheduled_job_config::Column::Id.eq(id))
+		let deleted_count = scheduled_job::Entity::delete_many()
+			.filter(scheduled_job::Column::Id.eq(id))
 			.exec(core.conn.as_ref())
 			.await?
 			.rows_affected;
 
 		if deleted_count == 0 {
-			tracing::warn!(?id, "No scheduled job config to delete with the given ID");
+			tracing::warn!(?id, "No scheduled job to delete with the given ID");
 		}
 
 		Ok(deleted_count > 0)

@@ -1,5 +1,5 @@
 use crate::object::{
-	book_club_discussion_message::BookClubDiscussionMessage,
+	author::Author, book_club_discussion_message::BookClubDiscussionMessage,
 	directory_listing::DirectoryListing, job::Job, library::Library, log::Log,
 	media::Media, missing_entity::MissingEntity, reading_list::ReadingList,
 	series::Series, user::User,
@@ -290,6 +290,7 @@ pub enum PaginationInfo {
 }
 
 #[derive(Debug, SimpleObject)]
+#[graphql(concrete(name = "PaginatedAuthorResponse", params(Author)))]
 #[graphql(concrete(
 	name = "PaginatedDirectoryListingResponse",
 	params(DirectoryListing)

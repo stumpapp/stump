@@ -5,10 +5,15 @@ edition = "2021"
 
 [dependencies]
 alphanumeric-sort.workspace = true
+apalis.workspace = true
+apalis-cron.workspace = true
 notify = "8.0.0"
 async-channel = "2.1.0"
 async-trait.workspace = true
 chrono.workspace = true
+cron = "0.15.0"
+dashmap = "6.1.0"
+tokio-util = "0.7.10"
 async-graphql.workspace = true
 data-encoding = "2.5.0"
 rust_decimal.workspace = true
@@ -23,6 +28,7 @@ image = { version = "0.25.2" }
 imagesize = "0.14.0"
 infer.workspace = true
 itertools.workspace = true
+metadata_integrations = { path = "../crates/integrations/metadata" }
 migrations = { path = "../crates/migrations" }
 models = { path = "../crates/models" }
 md5.workspace = true

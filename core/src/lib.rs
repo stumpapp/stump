@@ -20,7 +20,7 @@ pub mod utils;
 
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
-use job::{JobController, JobScheduler};
+use job::JobScheduler;
 use models::entity::server_config;
 use sea_orm::{
 	prelude::*, ActiveValue::Set, DatabaseBackend, EntityTrait, PaginatorTrait,
@@ -114,10 +114,6 @@ impl StumpCore {
 	/// providing access to the database and internal channels.
 	pub fn get_context(&self) -> Ctx {
 		self.ctx.clone()
-	}
-
-	pub fn get_job_controller(&self) -> Arc<JobController> {
-		self.ctx.job_controller.clone()
 	}
 
 	/// Returns the shadow text for the core. This is just the fun ascii art that
@@ -244,7 +240,9 @@ impl StumpCore {
 	}
 
 	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
-		JobScheduler::init(self.ctx.arced()).await
+		let ctx = self.ctx.arced();
+		let scheduler = JobScheduler::init(ctx).await?;
+		Ok(Arc::new(scheduler))
 	}
 
 	pub async fn init_library_watcher(&self) -> CoreResult<()> {

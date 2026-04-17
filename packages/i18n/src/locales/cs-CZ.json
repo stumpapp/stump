@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Resize Method",
-					"options": {
+					"configuration": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -335,7 +335,7 @@
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",
-						"options": {
+						"configuration": {
 							"width": "Width",
 							"height": "Height"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Toto nastavení nemůžete změnit"
 				},
-				"options": {
+				"configuration": {
 					"label": "Vzor knihovny",
 					"description": "Nastavení, které určuje, jak bude Stump organizovat vaši knihovnu",
 					"collectionPriority": {
@@ -544,7 +544,7 @@
 		"subtitleLink": "příslušná dokumentace",
 		"sidebar": {
 			"basics": "Základní",
-			"options": {
+			"configuration": {
 				"general": "Obecné",
 				"reading": "Čtení",
 				"scanning": "Skenování",
@@ -579,7 +579,7 @@
 					"description": "Další možnosti nastavení skenování",
 					"form": {
 						"alert": "Toto přepíše odpovídající nastavení pro celou knihovnu",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
 								"label": "Vynutit obnovu",
 								"description": "Znovu sestavit každou knihu v knihovně na disku",
@@ -650,7 +650,7 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "Analýza",
 			"description": "Analyzujte obsah této knihovny, abyste zjistili možné problémy nebo vylepšení",
 			"sections": {
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Viditelnost",
-				"options": {
+				"configuration": {
 					"public": {
 						"label": "Veřejný",
 						"description": "Dostupné pro všechny uživatele na serveru"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Seskupit podle",
 					"description": "Jak by měly být knihy v tomto chytrém seznamu seskupeny",
-					"options": {
+					"configuration": {
 						"by_books": {
 							"label": "Nic"
 						},
@@ -1319,7 +1319,7 @@
 						"Pokud máte zájem o vytvoření vlastního motivu, podívejte se na",
 						"dokumentaci"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "Světlý",
 						"dark": "Tmavý",
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"options": {
+					"configuration": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
+					"configuration": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Uspořádání je uzamčené",
 					"lock": "Uzamknout uspořádání",
 					"unlock": "Odemknout uspořádání",
-					"options": {
+					"configuration": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"options": {
+					"configuration": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -1794,7 +1794,7 @@
 							},
 							"intervalPreset": {
 								"label": "Preset",
-								"options": {
+								"configuration": {
 									"everySixHours": "Every 6 hours",
 									"everyTwelveHours": "Every 12 hours",
 									"oncePerDay": "Once a day",
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Upravit náhled",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "Vybrat z knih",
 			"uploadImage": "Nahrát obrázek"
 		},

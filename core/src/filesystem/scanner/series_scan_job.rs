@@ -14,13 +14,12 @@ use serde::{Deserialize, Serialize};
 use crate::{
 	event,
 	filesystem::image::{
-		PlaceholderGenerationJob, PlaceholderGenerationJobConfig,
-		PlaceholderGenerationJobScope, ThumbnailGenerationJob,
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 		ThumbnailGenerationJobParams,
 	},
 	job::{
-		error::JobError, CoreJobOutput, Executor, JobExt, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, stump_job::StumpJob, CoreJobOutput, JobContext, JobLifecycle,
+		JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
 	},
 	utils::chain_optional_iter,
 	CoreEvent,
@@ -53,17 +52,13 @@ pub struct SeriesScanJob {
 }
 
 impl SeriesScanJob {
-	pub fn new(
-		id: String,
-		path: String,
-		options: Option<ScanOptions>,
-	) -> Box<WrappedJob<SeriesScanJob>> {
-		WrappedJob::new(Self {
+	pub fn new(id: String, path: String, options: Option<ScanOptions>) -> Self {
+		Self {
 			id,
 			path,
 			config: None,
 			options: options.unwrap_or_default(),
-		})
+		}
 	}
 
 	fn library_id(&self) -> Option<String> {
@@ -100,7 +95,7 @@ impl JobOutputExt for SeriesScanOutput {
 }
 
 #[async_trait::async_trait]
-impl JobExt for SeriesScanJob {
+impl JobLifecycle for SeriesScanJob {
 	const NAME: &'static str = "series_scan";
 
 	type Output = SeriesScanOutput;
@@ -112,7 +107,7 @@ impl JobExt for SeriesScanJob {
 
 	async fn init(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let mut output = Self::Output::default();
 		let path_buf = PathBuf::from(self.path.clone());
@@ -131,7 +126,7 @@ impl JobExt for SeriesScanJob {
 				),
 			)
 			.find_also_related(library_config::Entity)
-			.one(ctx.conn.as_ref())
+			.one(ctx.conn())
 			.await?
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
 
@@ -168,7 +163,7 @@ impl JobExt for SeriesScanJob {
 		} = walk_series(
 			PathBuf::from(self.path.clone()).as_path(),
 			WalkerCtx {
-				db: ctx.conn.clone(),
+				db: ctx.apalis_state.conn.clone(),
 				ignore_rules,
 				max_depth,
 				options: self.options,
@@ -177,7 +172,7 @@ impl JobExt for SeriesScanJob {
 		.await?;
 
 		if series_is_missing {
-			let _ = handle_missing_series(&ctx.conn, self.path.as_str()).await;
+			let _ = handle_missing_series(ctx.conn(), self.path.as_str()).await;
 			return Err(JobError::InitFailed(
 				"Series could not be found on disk".to_string(),
 			));
@@ -209,39 +204,42 @@ impl JobExt for SeriesScanJob {
 		Ok(WorkingState {
 			output: Some(output),
 			tasks,
-			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
-	async fn cleanup(
+	async fn finalize(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		output: &Self::Output,
-	) -> Result<Option<Vec<Box<dyn Executor>>>, JobError> {
-		ctx.send_core_event(CoreEvent::JobOutput(event::JobOutput {
+	) -> Result<(), JobError> {
+		ctx.emit_event(CoreEvent::JobOutput(event::JobOutput {
 			id: ctx.job_id.clone(),
 			output: CoreJobOutput::SeriesScan(output.clone()),
 		}));
+
 		let did_create = output.created_media > 0;
 		let did_update = output.updated_media > 0;
+
 		let image_options = self
 			.config
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
-		let mut jobs: Vec<Box<dyn Executor>> = vec![];
-
 		match image_options {
-			Some(options) if did_create | did_update => {
+			Some(options) if did_create || did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				jobs.push(WrappedJob::new(ThumbnailGenerationJob {
-					options,
-					params: ThumbnailGenerationJobParams::books_in_series(
-						self.id.clone(),
-						false,
-					),
-				}));
+				let params =
+					ThumbnailGenerationJobParams::books_in_series(self.id.clone(), false);
+				if let Err(e) = ctx
+					.enqueue(StumpJob::thumbnail_generation(options, params))
+					.await
+				{
+					tracing::error!(
+						?e,
+						"Failed to enqueue thumbnail generation follow-up"
+					);
+				}
 			},
 			_ => {
 				tracing::trace!("No cleanup required for series scan job");
@@ -256,27 +254,31 @@ impl JobExt for SeriesScanJob {
 
 		if process_even_without_config {
 			tracing::trace!("Thumbnail color processing job should be enqueued");
-			jobs.push(
-				PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig::new(
-					PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
-					false,
+			if let Err(e) = ctx
+				.enqueue(StumpJob::placeholder_generation(
+					PlaceholderGenerationJobConfig::new(
+						PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
+						false,
+					),
 				))
-				.wrapped(),
-			);
+				.await
+			{
+				tracing::error!(?e, "Failed to enqueue placeholder generation follow-up");
+			}
 		}
 
-		Ok((!jobs.is_empty()).then_some(jobs))
+		Ok(())
 	}
 
 	async fn execute_task(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
-		let max_concurrency = ctx.config.max_scanner_concurrency;
+		let max_concurrency = ctx.config().max_scanner_concurrency;
 
 		match task {
 			SeriesScanTask::RestoreMedia(ids) => {
@@ -287,17 +289,14 @@ impl JobExt for SeriesScanJob {
 					..
 				} = handle_restored_media(ctx, &self.id, ids).await;
 				if let Some(library_id) = self.library_id() {
-					ctx.send_batch(vec![
-						JobProgress::msg("Restored media entities").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: updated_media,
-								series_id: self.id.clone(),
-								library_id,
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Restored media entities"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id: self.id.clone(),
+							library_id,
+						},
+					));
 				}
 				output.updated_media += updated_media;
 				logs.extend(new_logs);
@@ -310,17 +309,14 @@ impl JobExt for SeriesScanJob {
 					..
 				} = handle_missing_media(ctx, &self.id, paths).await;
 				if let Some(library_id) = self.library_id() {
-					ctx.send_batch(vec![
-						JobProgress::msg("Handled missing media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: updated_media,
-								series_id: self.id.clone(),
-								library_id,
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Handled missing media"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id: self.id.clone(),
+							library_id,
+						},
+					));
 				}
 				output.updated_media += updated_media;
 				logs.extend(new_logs);
@@ -348,17 +344,14 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				if let Some(library_id) = self.library_id() {
-					ctx.send_batch(vec![
-						JobProgress::msg("Created new media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: created_media,
-								series_id: self.id.clone(),
-								library_id,
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Created new media"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: created_media,
+							series_id: self.id.clone(),
+							library_id,
+						},
+					));
 				}
 				output.created_media += created_media;
 				logs.extend(new_logs);
@@ -386,17 +379,14 @@ impl JobExt for SeriesScanJob {
 				)
 				.await?;
 				if let Some(library_id) = self.library_id() {
-					ctx.send_batch(vec![
-						JobProgress::msg("Visited all media").into_worker_send(),
-						CoreEvent::CreatedOrUpdatedManyMedia(
-							event::CreatedOrUpdatedManyMedia {
-								count: updated_media,
-								series_id: self.id.clone(),
-								library_id,
-							},
-						)
-						.into_worker_send(),
-					]);
+					ctx.report_progress(JobProgress::msg("Visited all media"));
+					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
+						event::CreatedOrUpdatedManyMedia {
+							count: updated_media,
+							series_id: self.id.clone(),
+							library_id,
+						},
+					));
 				}
 				output.updated_media += updated_media;
 				logs.extend(new_logs);

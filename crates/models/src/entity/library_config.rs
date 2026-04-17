@@ -3,8 +3,8 @@ use sea_orm::{entity::prelude::*, FromQueryResult};
 
 use crate::shared::{
 	enums::{
-		LibraryPattern, LibraryViewMode, ReadingDirection, ReadingImageScaleFit,
-		ReadingMode,
+		LibraryPattern, LibraryType, LibraryViewMode, ReadingDirection,
+		ReadingImageScaleFit, ReadingMode,
 	},
 	ignore_rules::IgnoreRules,
 	image_processor_options::ImageProcessorOptions,
@@ -33,6 +33,8 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub default_library_view_mode: LibraryViewMode,
 	pub hide_series_view: bool,
+	#[sea_orm(column_type = "Text")]
+	pub library_type: LibraryType,
 	#[sea_orm(default_value = "false")]
 	pub skip_book_overview: bool,
 	#[graphql(skip)]

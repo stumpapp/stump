@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Méthode de redimensionnement",
-					"options": {
+					"configuration": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -335,7 +335,7 @@
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",
-						"options": {
+						"configuration": {
 							"width": "Largeur",
 							"height": "Hauteur"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Vous ne pourrez pas modifier ce paramètre"
 				},
-				"options": {
+				"configuration": {
 					"label": "Modèle de bibliothèque",
 					"description": "Le paramètre qui détermine la façon dont Stump organisera votre bibliothèque",
 					"collectionPriority": {
@@ -544,7 +544,7 @@
 		"subtitleLink": "documentation correspondante",
 		"sidebar": {
 			"basics": "Informations",
-			"options": {
+			"configuration": {
 				"general": "Général",
 				"reading": "Lecture",
 				"scanning": "Scan",
@@ -579,7 +579,7 @@
 					"description": "Un scan avec des options supplémentaires pour un contrôle plus précis",
 					"form": {
 						"alert": "Ces paramètres remplaceront ceux définis au niveau de la bibliothèque",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
 								"label": "Forcer la reconstruction",
 								"description": "Reconstruire chaque livre de la bibliothèque sur le disque",
@@ -650,7 +650,7 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "Analyse",
 			"description": "Analyser le contenu de cette bibliothèque pour identifier d’éventuels problèmes ou améliorations",
 			"sections": {
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Visibilité",
-				"options": {
+				"configuration": {
 					"public": {
 						"label": "Publique",
 						"description": "Accessible par tous les utilisateurs"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Regrouper par",
 					"description": "Comment les livres de cette collection doivent être regroupés",
-					"options": {
+					"configuration": {
 						"by_books": {
 							"label": "Aucun"
 						},
@@ -1319,7 +1319,7 @@
 						"Si vous souhaitez créer votre propre thème personnalisé, consultez la",
 						"documentation"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "Clair",
 						"dark": "Sombre",
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"options": {
+					"configuration": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
+					"configuration": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "L'organisation est verrouillée",
 					"lock": "Verrouiller la disposition",
 					"unlock": "Déverrouiller la disposition",
-					"options": {
+					"configuration": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"options": {
+					"configuration": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -1794,7 +1794,7 @@
 							},
 							"intervalPreset": {
 								"label": "Preset",
-								"options": {
+								"configuration": {
 									"everySixHours": "Every 6 hours",
 									"everyTwelveHours": "Every 12 hours",
 									"oncePerDay": "Once a day",
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Éditer l'image de couverture",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "Sélectionner à partir des livres",
 			"uploadImage": "Importer une image"
 		},

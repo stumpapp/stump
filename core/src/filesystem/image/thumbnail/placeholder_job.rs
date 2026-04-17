@@ -12,8 +12,8 @@ use crate::{
 		safely_generate_placeholder_batch, GenerateImageSource,
 	},
 	job::{
-		error::JobError, JobExt, JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx,
-		WorkingState, WrappedJob,
+		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkingState,
 	},
 };
 
@@ -87,14 +87,10 @@ impl PlaceholderGenerationJob {
 	pub fn new(config: PlaceholderGenerationJobConfig) -> PlaceholderGenerationJob {
 		PlaceholderGenerationJob { config }
 	}
-
-	pub fn wrapped(self) -> Box<WrappedJob<Self>> {
-		WrappedJob::new(self)
-	}
 }
 
 #[async_trait::async_trait]
-impl JobExt for PlaceholderGenerationJob {
+impl JobLifecycle for PlaceholderGenerationJob {
 	const NAME: &'static str = "placeholder_generation";
 
 	type Output = PlaceholderGenerationOutput;
@@ -109,7 +105,7 @@ impl JobExt for PlaceholderGenerationJob {
 
 	async fn init(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let init_config = match &self.config.scope {
 			PlaceholderGenerationJobScope::BooksInLibrary(id) => {
@@ -119,7 +115,7 @@ impl JobExt for PlaceholderGenerationJob {
 					.inner_join(series::Entity)
 					.filter(series::Column::LibraryId.eq(id))
 					.into_model::<media::MediaThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 				let media_ids = books.iter().map(|m| m.id.clone()).collect::<Vec<_>>();
@@ -138,7 +134,7 @@ impl JobExt for PlaceholderGenerationJob {
 						.columns(series::SeriesThumbSelect::columns())
 						.filter(series::Column::Id.is_in(chunk.to_vec()))
 						.into_model::<series::SeriesThumbSelect>()
-						.all(ctx.conn.as_ref())
+						.all(ctx.conn())
 						.await
 						.map_err(|e| JobError::InitFailed(e.to_string()))?;
 					series.extend(batch);
@@ -163,7 +159,7 @@ impl JobExt for PlaceholderGenerationJob {
 					.columns(media::MediaThumbSelect::columns())
 					.filter(media::Column::SeriesId.eq(id))
 					.into_model::<media::MediaIdentSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
@@ -216,14 +212,13 @@ impl JobExt for PlaceholderGenerationJob {
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),
 			tasks: tasks.into(),
-			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
 	async fn execute_task(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		match task {
@@ -239,7 +234,7 @@ impl JobExt for PlaceholderGenerationJob {
 						|query, f| query.filter(f),
 					)
 					.into_model::<media::MediaThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
@@ -269,7 +264,7 @@ impl JobExt for PlaceholderGenerationJob {
 					.columns(series::SeriesThumbSelect::columns())
 					.filter(series::Column::Id.is_in(series_ids))
 					.into_model::<series::SeriesThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
@@ -302,7 +297,7 @@ impl JobExt for PlaceholderGenerationJob {
 					.columns(library::LibraryThumbSelect::columns())
 					.filter(library::Column::Id.is_in(library_ids))
 					.into_model::<library::LibraryThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 

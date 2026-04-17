@@ -42,6 +42,8 @@ serde-untagged = "0.1.2"
 serde_with.workspace = true
 sha2 = "0.10"
 stump_core = { path = "../../core" }
+apalis.workspace = true
+apalis-cron.workspace = true
 tempfile = "3.13.0"
 tower-http = { version = "0.5.2", features = [
   "fs",

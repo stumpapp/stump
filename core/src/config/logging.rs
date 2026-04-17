@@ -33,6 +33,11 @@ pub fn init_tracing(config: &StumpConfig) {
 				.expect("Error invalid tracing directive for stump_server!"),
 		)
 		.add_directive(
+			"metadata_integrations=trace"
+				.parse()
+				.expect("Error invalid tracing directive for metadata_integrations!"),
+		)
+		.add_directive(
 			"graphql=trace"
 				.parse()
 				.expect("Error invalid tracing directive for graphql!"),

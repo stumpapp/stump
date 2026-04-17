@@ -13,10 +13,13 @@ mod job;
 mod library;
 mod log;
 mod media;
+mod media_metadata;
+mod metadata_provider;
 mod notifier;
 mod reading_list;
 mod scheduled_job_config;
 mod series;
+mod series_metadata;
 mod server_config;
 mod smart_list_view;
 mod smart_lists;
@@ -39,10 +42,13 @@ use job::JobMutation;
 use library::LibraryMutation;
 use log::LogMutation;
 use media::MediaMutation;
+use media_metadata::MediaMetadataMutation;
+use metadata_provider::MetadataProviderMutation;
 use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
 use scheduled_job_config::ScheduledJobConfigMutation;
 use series::SeriesMutation;
+use series_metadata::SeriesMetadataMutation;
 use server_config::ServerConfigMutation;
 use smart_list_view::SmartListViewMutation;
 use smart_lists::SmartListMutation;
@@ -63,6 +69,8 @@ struct BookClubMutations(
 #[derive(async_graphql::MergedObject, Default)]
 struct ContentMutations(
 	MediaMutation,
+	MediaMetadataMutation,
+	SeriesMetadataMutation,
 	LibraryMutation,
 	SeriesMutation,
 	EpubMutation,
@@ -81,6 +89,7 @@ struct SystemMutations(
 	NotifierMutation,
 	ServerConfigMutation,
 	ScheduledJobConfigMutation,
+	MetadataProviderMutation,
 );
 
 #[derive(async_graphql::MergedObject, Default)]

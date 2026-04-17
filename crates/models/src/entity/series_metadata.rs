@@ -69,6 +69,16 @@ pub struct Model {
 	pub writers: Option<String>,
 	/// Year the series started (publication start)
 	pub year: Option<i32>,
+	/// The external metadata provider that supplied this metadata (e.g., "HARDCOVER")
+	#[sea_orm(column_type = "Text", nullable)]
+	pub metadata_source: Option<String>,
+	/// The external ID on the metadata provider's system
+	#[sea_orm(column_type = "Text", nullable)]
+	pub metadata_external_id: Option<String>,
+	/// JSON array of MetadataField enum values that are locked from being overwritten by fetch features
+	#[sea_orm(column_type = "Json", nullable)]
+	#[graphql(skip)]
+	pub locked_fields: Option<serde_json::Value>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

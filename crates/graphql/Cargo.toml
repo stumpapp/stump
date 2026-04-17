@@ -15,6 +15,7 @@ axum.workspace = true
 base64.workspace = true
 chrono.workspace = true
 clap.workspace = true
+cron = "0.15.0"
 epub.workspace = true
 heck.workspace = true
 filter-gen = { path = "../macros/filter-gen" }
@@ -22,6 +23,7 @@ futures-util.workspace = true
 infer.workspace = true
 itertools.workspace = true
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
+metadata_integrations = { path = "../integrations/metadata" }
 models = { path = "../models" }
 num-traits.workspace = true
 email = { path = "../email" }

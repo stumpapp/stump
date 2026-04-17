@@ -139,7 +139,7 @@ export default function Table<T, V>({
 	}
 
 	const handlePageChanged = (page: number) => {
-		table.setPageIndex(isZeroBasedPagination ? page - 1 : page)
+		table.setPageIndex(isZeroBasedPagination ? page : page - 1)
 	}
 
 	const tableRows = table.getRowModel().rows

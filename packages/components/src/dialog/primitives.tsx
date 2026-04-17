@@ -38,6 +38,7 @@ export const DIALOG_CONTENT_SIZES = {
 	lg: 'sm:max-w-2xl',
 	xl: 'sm:max-w-3xl',
 	massive: 'sm:max-w-7xl',
+	gargantuan: 'sm:max-w-[90%] sm:min-h-[90%]', // lol
 }
 export type DialogContentProps = ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
 	size?: keyof typeof DIALOG_CONTENT_SIZES

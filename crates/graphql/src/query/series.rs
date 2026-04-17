@@ -14,7 +14,7 @@ use sea_orm::{
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	filter::{series::SeriesFilterInput, IntoFilter},
+	filter::series::SeriesFilterInput,
 	object::series::Series,
 	order::SeriesOrderBy,
 	pagination::{
@@ -41,7 +41,7 @@ impl SeriesQuery {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let conditions = filter.into_filter();
+		let conditions = filter.into_filter_with_user(&user.id);
 		let query = SeriesOrderBy::add_order_by(
 			&order_by,
 			series::ModelWithMetadata::find_for_user(user).filter(conditions),

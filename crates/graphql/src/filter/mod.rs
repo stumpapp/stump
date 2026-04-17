@@ -1,6 +1,6 @@
 use async_graphql::{InputObject, InputType, OneofObject};
 use filter_gen::IntoFilter;
-use models::shared::enums::{FileStatus, ReadingStatus};
+use models::shared::enums::{FileStatus, LibraryType, ReadingStatus};
 use sea_orm::{
 	prelude::DateTimeWithTimeZone, sea_query::ConditionExpression, Condition, Value,
 };
@@ -154,6 +154,7 @@ where
 
 #[derive(OneofObject, Clone, Debug, Serialize, Deserialize)]
 #[graphql(concrete(name = "ComputedFilterReadingStatus", params(ReadingStatus)))]
+#[graphql(concrete(name = "ComputedFilterLibraryType", params(LibraryType)))]
 #[serde(rename_all = "camelCase")]
 pub enum ConceptualFilter<T>
 where

@@ -447,6 +447,12 @@ export type CollectedItemInput = {
   series?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ComputedFilterLibraryType =
+  { is: LibraryType; isAnyOf?: never; isNoneOf?: never; isNot?: never; }
+  |  { is?: never; isAnyOf: Array<LibraryType>; isNoneOf?: never; isNot?: never; }
+  |  { is?: never; isAnyOf?: never; isNoneOf: Array<LibraryType>; isNot?: never; }
+  |  { is?: never; isAnyOf?: never; isNoneOf?: never; isNot: LibraryType; };
+
 export type ComputedFilterReadingStatus =
   { is: ReadingStatus; isAnyOf?: never; isNoneOf?: never; isNot?: never; }
   |  { is?: never; isAnyOf: Array<ReadingStatus>; isNoneOf?: never; isNot?: never; }
@@ -3929,9 +3935,11 @@ export type SeriesFilterInput = {
   _or?: InputMaybe<Array<SeriesFilterInput>>;
   library?: InputMaybe<LibraryFilterInput>;
   libraryId?: InputMaybe<FieldFilterString>;
+  libraryType?: InputMaybe<ComputedFilterLibraryType>;
   metadata?: InputMaybe<SeriesMetadataFilterInput>;
   name?: InputMaybe<FieldFilterString>;
   path?: InputMaybe<FieldFilterString>;
+  readingStatus?: InputMaybe<ComputedFilterReadingStatus>;
 };
 
 export type SeriesMetadata = {

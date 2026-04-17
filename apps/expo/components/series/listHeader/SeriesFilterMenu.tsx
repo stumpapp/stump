@@ -1,28 +1,34 @@
 import { LibraryType, ReadingStatus } from '@stump/graphql'
-import { Stack, useNavigation } from 'expo-router'
+import { Stack } from 'expo-router'
 import clone from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
-import { useLayoutEffect } from 'react'
+import { Book, BookOpen, CheckCircle, ClockFading, Glasses, ListFilter } from 'lucide-react-native'
+import { useState } from 'react'
+import { View } from 'react-native'
 import { Platform } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import {
+	Button,
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+	Icon,
+	Text,
+} from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
 import { useSeriesFilterStore } from '~/stores/filters'
 
 export function useSeriesFilterMenu() {
 	const { t } = useTranslate()
 
-	const navigation = useNavigation()
-	useLayoutEffect(() => {
-		if (Platform.OS === 'android') {
-			// navigation.setOptions({
-			// 	// headerLeft: () => <SeriesSortAndDisplayMenu />,
-			// })
-		}
-	}, [navigation])
-
-	// todo: prolly make a separate hook for the setter callbacks to share between menus
 	const filters = useSeriesFilterStore((store) => store.filters)
 	const setFilters = useSeriesFilterStore((store) => store.setFilters)
 
@@ -68,8 +74,16 @@ export function useSeriesFilterMenu() {
 		setFilters(adjustedFilters)
 	}
 
-	if (Platform.OS === 'ios') {
-		return (
+	return Platform.select({
+		android: (
+			<AndroidMenu
+				contentTypeFilter={contentTypeFilter}
+				readingStatusFilter={readingStatusFilter}
+				onSetContentFilter={onSetContentFilter}
+				onSetReadingStatusFilter={onSetReadingStatusFilter}
+			/>
+		),
+		ios: (
 			<Stack.Toolbar.Menu icon="line.3.horizontal.decrease" key="filter-menu">
 				<Stack.Toolbar.Menu inline>
 					<Stack.Toolbar.MenuAction
@@ -125,10 +139,152 @@ export function useSeriesFilterMenu() {
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 			</Stack.Toolbar.Menu>
-		)
-	}
-
-	return null
+		),
+	})
 }
 
-function AndroidMenu() {}
+type AndroidProps = {
+	contentTypeFilter: LibraryType[]
+	readingStatusFilter?: ReadingStatus
+	onSetContentFilter: (contentType: LibraryType) => void
+	onSetReadingStatusFilter: (status: ReadingStatus) => void
+}
+
+function AndroidMenu({
+	contentTypeFilter,
+	readingStatusFilter,
+	onSetContentFilter,
+	onSetReadingStatusFilter,
+}: AndroidProps) {
+	const { t } = useTranslate()
+
+	const [isOpen, setIsOpen] = useState(false)
+	const insets = useSafeAreaInsets()
+
+	const contentInsets = {
+		top: insets.top,
+		bottom: insets.bottom,
+		left: 4,
+		right: 4,
+	}
+
+	return (
+		<DropdownMenu onOpenChange={setIsOpen}>
+			<DropdownMenuTrigger asChild>
+				<Button className="squircle mr-2" variant="ghost" size="icon">
+					{({ pressed }) => (
+						// TODO(colors): should formalize this pattern into the dropdown trigger by some means instead of copy/pasting
+						<View
+							className={cn(
+								'squircle p-2 items-center justify-center rounded-full border border-transparent bg-transparent transition-colors duration-200',
+								{
+									'bg-black/10 dark:bg-white/5 border-edge': isOpen,
+								},
+							)}
+						>
+							<Icon
+								as={ListFilter}
+								size={20}
+								className="text-foreground"
+								style={{
+									opacity: pressed ? 0.7 : 1,
+								}}
+							/>
+						</View>
+					)}
+				</Button>
+			</DropdownMenuTrigger>
+
+			<DropdownMenuContent
+				insets={contentInsets}
+				sideOffset={2}
+				className="tablet:w-64 w-2/3"
+				align="end"
+			>
+				<DropdownMenuCheckboxItem
+					checked={readingStatusFilter === ReadingStatus.NotStarted}
+					onCheckedChange={() => onSetReadingStatusFilter(ReadingStatus.NotStarted)}
+					className="text-foreground"
+				>
+					<View className="gap-4 flex flex-row items-center">
+						<Icon as={ClockFading} size={20} className="text-foreground-muted" />
+						<Text className="text-lg">{t('filtering.notStarted')}</Text>
+					</View>
+				</DropdownMenuCheckboxItem>
+
+				<DropdownMenuCheckboxItem
+					checked={readingStatusFilter === ReadingStatus.Reading}
+					onCheckedChange={() => onSetReadingStatusFilter(ReadingStatus.Reading)}
+					className="text-foreground"
+				>
+					<View className="gap-4 flex flex-row items-center">
+						<Icon as={Glasses} size={20} className="text-foreground-muted" />
+						<Text className="text-lg">{t('filtering.currentlyReading')}</Text>
+					</View>
+				</DropdownMenuCheckboxItem>
+
+				<DropdownMenuCheckboxItem
+					checked={readingStatusFilter === ReadingStatus.Finished}
+					onCheckedChange={() => onSetReadingStatusFilter(ReadingStatus.Finished)}
+					className="text-foreground"
+				>
+					<View className="gap-4 flex flex-row items-center">
+						<Icon as={CheckCircle} size={20} className="text-foreground-muted" />
+						<Text className="text-lg">{t('filtering.finished')}</Text>
+					</View>
+				</DropdownMenuCheckboxItem>
+
+				<DropdownMenuSeparator />
+
+				<DropdownMenuGroup>
+					<DropdownMenuLabel className="text-foreground-muted">
+						{t('common.content')}
+					</DropdownMenuLabel>
+
+					<DropdownMenuCheckboxItem
+						checked={contentTypeFilter.includes(LibraryType.Book)}
+						onCheckedChange={() => onSetContentFilter(LibraryType.Book)}
+						className="text-foreground"
+					>
+						<View className="gap-4 flex flex-row items-center">
+							<Icon as={BookOpen} size={20} className="text-foreground-muted" />
+							<Text className="text-lg">{t('libraryType.BOOK')}</Text>
+						</View>
+					</DropdownMenuCheckboxItem>
+
+					<DropdownMenuCheckboxItem
+						checked={contentTypeFilter.includes(LibraryType.Comic)}
+						onCheckedChange={() => onSetContentFilter(LibraryType.Comic)}
+						className="text-foreground"
+					>
+						<View className="gap-4 flex flex-row items-center">
+							<Icon
+								// TODO: find an icon
+								as={Book}
+								size={20}
+								className="text-foreground-muted"
+							/>
+							<Text className="text-lg">{t('libraryType.COMIC')}</Text>
+						</View>
+					</DropdownMenuCheckboxItem>
+
+					<DropdownMenuCheckboxItem
+						checked={contentTypeFilter.includes(LibraryType.Manga)}
+						onCheckedChange={() => onSetContentFilter(LibraryType.Manga)}
+						className="text-foreground"
+					>
+						<View className="gap-4 flex flex-row items-center">
+							<Icon
+								// TODO: find an icon
+								as={Book}
+								size={20}
+								className="text-foreground-muted"
+							/>
+							<Text className="text-lg">{t('libraryType.MANGA')}</Text>
+						</View>
+					</DropdownMenuCheckboxItem>
+				</DropdownMenuGroup>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	)
+}

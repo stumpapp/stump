@@ -1,7 +1,8 @@
 import { SeriesScreenStatsQuery } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
-import { Stack } from 'expo-router'
+import { Stack, useNavigation } from 'expo-router'
 import { BookCheck, BookOpen, Clock, Layers } from 'lucide-react-native'
+import { useLayoutEffect } from 'react'
 import { Platform, View } from 'react-native'
 
 import { Divider } from '~/components/Divider'
@@ -54,6 +55,20 @@ export function SeriesListHeader({ stats }: Props) {
 export function useSeriesListHeader() {
 	const sortAndDisplayMenu = useSeriesSortAndDisplayMenu()
 	const filterMenu = useSeriesFilterMenu()
+
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		if (Platform.OS === 'android') {
+			navigation.setOptions({
+				headerRight: () => (
+					<View className="gap-2 flex-row">
+						{filterMenu}
+						{sortAndDisplayMenu}
+					</View>
+				),
+			})
+		}
+	}, [navigation, filterMenu, sortAndDisplayMenu])
 
 	if (Platform.OS === 'ios') {
 		// fixme: it seems like two toolbar menu actions in one toolbar

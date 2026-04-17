@@ -48,3 +48,38 @@ index 0ecc2fc..8b957e1 100644
                  0,
                  max(cutoutInsets.bottom, 0),
              )
+diff --git a/node_modules/react-native-screens/src/components/helpers/prepareHeaderBarButtonItems.ts b/node_modules/react-native-screens/src/components/helpers/prepareHeaderBarButtonItems.ts
+index bf43f2d..be2c24d 100644
+--- a/node_modules/react-native-screens/src/components/helpers/prepareHeaderBarButtonItems.ts
++++ b/node_modules/react-native-screens/src/components/helpers/prepareHeaderBarButtonItems.ts
+@@ -8,10 +8,12 @@ const prepareMenu = (
+   menu: HeaderBarButtonItemWithMenu['menu'],
+   index: number,
+   side: 'left' | 'right',
++  path: string = '',
+ ): HeaderBarButtonItemWithMenu['menu'] => {
+   return {
+     ...menu,
+     items: menu.items.map((menuItem, menuIndex) => {
++      const currentPath = path ? `${path}.${menuIndex}` : `${menuIndex}`;
+       const iconType = menuItem.icon?.type;
+       const sfSymbolName =
+         iconType === 'sfSymbol' ? menuItem.icon?.name : undefined;
+@@ -32,7 +34,7 @@ const prepareMenu = (
+           xcassetName,
+           imageSource,
+           templateSource,
+-          ...prepareMenu(menuItem, menuIndex, side),
++          ...prepareMenu(menuItem, index, side, currentPath),
+         };
+       }
+       return {
+@@ -41,7 +43,7 @@ const prepareMenu = (
+         xcassetName,
+         imageSource,
+         templateSource,
+-        menuId: `${menuIndex}-${index}-${side}`,
++        menuId: `${currentPath}-${index}-${side}`,
+       };
+     }),
+   };

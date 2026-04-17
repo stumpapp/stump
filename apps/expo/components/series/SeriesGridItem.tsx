@@ -22,6 +22,7 @@ const fragment = graphql(`
 			height
 			width
 		}
+		isComplete
 	}
 `)
 
@@ -40,6 +41,7 @@ export default function SeriesGridItem({ series, onPress }: Props) {
 	} = useActiveServer()
 	const data = useFragment(fragment, series)
 
+	// TODO: a different color when series is ongoing and/or num issues on stump finished < total from meta?
 	return (
 		<View className="w-full items-center">
 			<GridImageItem
@@ -52,6 +54,7 @@ export default function SeriesGridItem({ series, onPress }: Props) {
 						? { width: data.thumbnail.width, height: data.thumbnail.height }
 						: null
 				}
+				percentageCompleted={data.isComplete ? 100 : undefined}
 			/>
 		</View>
 	)

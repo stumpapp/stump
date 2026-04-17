@@ -5422,7 +5422,7 @@ export type SeriesActionMenuScanSeriesMutationVariables = Exact<{
 
 export type SeriesActionMenuScanSeriesMutation = { __typename?: 'Mutation', scanSeries: boolean };
 
-export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
+export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, isComplete: boolean, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
 export type SeriesOverviewSheetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7236,6 +7236,7 @@ export const SeriesGridItemFragmentDoc = new TypedDocumentString(`
     height
     width
   }
+  isComplete
 }
     `, {"fragmentName":"SeriesGridItem"}) as unknown as TypedDocumentString<SeriesGridItemFragment, unknown>;
 export const SeriesSearchItemFragmentDoc = new TypedDocumentString(`
@@ -8837,6 +8838,7 @@ export const LibrarySeriesScreenDocument = new TypedDocumentString(`
     height
     width
   }
+  isComplete
 }`) as unknown as TypedDocumentString<LibrarySeriesScreenQuery, LibrarySeriesScreenQueryVariables>;
 export const LibrariesScreenDocument = new TypedDocumentString(`
     query LibrariesScreen($pagination: Pagination) {
@@ -8964,6 +8966,7 @@ export const SeriesScreenDocument = new TypedDocumentString(`
     height
     width
   }
+  isComplete
 }`) as unknown as TypedDocumentString<SeriesScreenQuery, SeriesScreenQueryVariables>;
 export const SeriesScreenStatsDocument = new TypedDocumentString(`
     query SeriesScreenStats {
@@ -9704,6 +9707,7 @@ export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     height
     width
   }
+  isComplete
 }`) as unknown as TypedDocumentString<RecentlyAddedSeriesGridQuery, RecentlyAddedSeriesGridQueryVariables>;
 export const SeriesActionMenuScanSeriesDocument = new TypedDocumentString(`
     mutation SeriesActionMenuScanSeries($id: ID!) {

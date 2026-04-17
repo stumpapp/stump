@@ -13627,13 +13627,13 @@ expo-navigation-bar@~55.0.10:
     debug "^4.3.2"
     react-native-is-edge-to-edge "^1.2.1"
 
-expo-router@~55.0.10:
-  version "55.0.10"
-  resolved "https://registry.yarnpkg.com/expo-router/-/expo-router-55.0.10.tgz#ae4e2e35d2c2520d97b6dde798ae26325fa9077e"
-  integrity sha512-8aWTcWtuYN4vriMSWINMXC1rPVBGkHD4r4wWSAWX8e5RuSnXfy8RUcsC5L5Ewq4i7lo04VM2RJZAH6UYFFRKrQ==
+expo-router@~55.0.12:
+  version "55.0.12"
+  resolved "https://registry.yarnpkg.com/expo-router/-/expo-router-55.0.12.tgz#aef105b7b3520b72a8b63015725054497db0c3d0"
+  integrity sha512-Bm6IhI0Kl5/tDlCHPms8jDqy1O6HLHIOrMsEmmAQ5Lgg5UBtDfRThEyHPVOLNTOs8e7/bG/Ftz6a4UgQVA+NhQ==
   dependencies:
     "@expo/metro-runtime" "^55.0.9"
-    "@expo/schema-utils" "^55.0.2"
+    "@expo/schema-utils" "^55.0.3"
     "@radix-ui/react-slot" "^1.2.0"
     "@radix-ui/react-tabs" "^1.1.12"
     "@react-navigation/bottom-tabs" "^7.15.5"

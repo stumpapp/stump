@@ -2784,6 +2784,7 @@
 			"chapter": "Chapter",
 			"clear": "Clear",
 			"confirm": "Confirm",
+			"content": "Content",
 			"details": "Details",
 			"delete": "Delete",
 			"downloads": "Downloads",
@@ -2791,6 +2792,8 @@
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
+			"grid": "Grid",
+			"list": "List",
 			"name": "Name",
 			"none": "None",
 			"options": "Options",
@@ -3134,6 +3137,16 @@
 				"premadeThemes": "Premade themes"
 			}
 		},
+		"libraryType": {
+			"BOOK": "Books",
+			"COMIC": "Comics",
+			"LIGHT_NOVEL": "Light Novels",
+			"MANGA": "Manga",
+			"MANHWA": "Manhwa",
+			"MIXED": "Mixed",
+			"WEBTOON": "Webtoons",
+			"WEB_NOVEL": "Web Novels"
+		},
 		"savedServerActions": {
 			"clearCache": "Clear Cache",
 			"discardTokens": {
@@ -3143,6 +3156,37 @@
 			"deleteServer": {
 				"title": "Delete Server",
 				"confirmation": "Are you sure you want to delete {{serverName}}?"
+			}
+		},
+		"filtering": {
+			"notStarted": "Not Started",
+			"currentlyReading": "Currently Reading",
+			"finished": "Finished"
+		},
+		"sorting": {
+			"labelEllipsis": "Sort By...",
+			"sortField": {
+				"NAME": "Name",
+				"ADDED_AT": "Date Added",
+				"CREATED_AT": "Date Added",
+				"SERIES": "Series",
+				"YEAR": "Year Published"
+			},
+			"sortDirection": {
+				"ASC": "Ascending",
+				"DESC": "Descending"
+			},
+			"sortDirectionString": {
+				"ASC": "A → Z",
+				"DESC": "Z → A"
+			},
+			"sortDirectionDate": {
+				"ASC": "Oldest First",
+				"DESC": "Newest First"
+			},
+			"sortDirectionNumber": {
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
 			}
 		}
 	}

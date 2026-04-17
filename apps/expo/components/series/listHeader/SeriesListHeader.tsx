@@ -1,8 +1,7 @@
 import { SeriesScreenStatsQuery } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
-import { Stack, useNavigation } from 'expo-router'
+import { Stack } from 'expo-router'
 import { BookCheck, BookOpen, Clock, Layers } from 'lucide-react-native'
-import { useLayoutEffect } from 'react'
 import { Platform, View } from 'react-native'
 
 import { Divider } from '~/components/Divider'
@@ -19,8 +18,6 @@ type Props = {
 export function SeriesListHeader({ stats }: Props) {
 	const menuFragment = useSeriesListHeader()
 	const formattedTime = formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
-
-	console.log('hasFragment', !!menuFragment)
 
 	return (
 		<>
@@ -59,6 +56,8 @@ export function useSeriesListHeader() {
 	const filterMenu = useSeriesFilterMenu()
 
 	if (Platform.OS === 'ios') {
+		// fixme: it seems like two toolbar menu actions in one toolbar
+		// is causing onPress issues???
 		return (
 			<Stack.Toolbar placement="right">
 				{filterMenu}

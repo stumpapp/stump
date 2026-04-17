@@ -1,21 +1,26 @@
 import { useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
-import { useInfiniteSuspenseGraphQL, useRefetch } from '@stump/client'
+import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import { formatHumanDurationSeparate } from '@stump/i18n'
+import { BookCheck, BookOpen, Clock, Layers } from 'lucide-react-native'
 import { useCallback, useRef } from 'react'
+import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
+import { Divider } from '~/components/Divider'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { SeriesGridItem } from '~/components/series'
 import { SeriesFilterHeader } from '~/components/series/filterHeader'
 import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
+import { MiniStatCard } from '~/components/StatCard'
 import { Button, RefreshButton, Text } from '~/components/ui'
-import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { ON_END_REACHED_THRESHOLD, STAT_COLORS } from '~/lib/constants'
 import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
 
 const query = graphql(`
@@ -43,6 +48,19 @@ const query = graphql(`
 	}
 `)
 
+const statsQuery = graphql(`
+	query SeriesScreenStats {
+		librariesStats {
+			seriesCount
+			bookCount
+			totalBytes
+			completedBooks
+			inProgressBooks
+			totalReadingTimeSeconds
+		}
+	}
+`)
+
 export default function Screen() {
 	const {
 		activeServer: { id: serverID },
@@ -59,6 +77,12 @@ export default function Screen() {
 			resetFilters: state.resetFilters,
 		})),
 	)
+
+	const {
+		data: { librariesStats },
+	} = useSuspenseGraphQL(statsQuery, ['seriesStats', serverID])
+
+	const formattedTime = formatHumanDurationSeparate(librariesStats.totalReadingTimeSeconds)
 
 	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
 		query,
@@ -97,7 +121,37 @@ export default function Screen() {
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="always"
-					ListHeaderComponent={<SeriesFilterHeader />}
+					ListHeaderComponent={
+						<View className="gap-4">
+							<View className="px-4 gap-2 flex-row flex-wrap">
+								<MiniStatCard
+									value={librariesStats.inProgressBooks}
+									icon={BookOpen}
+									baseColor={STAT_COLORS.inProgress}
+								/>
+
+								<MiniStatCard
+									value={librariesStats.completedBooks}
+									suffix={`/ ${librariesStats.bookCount}`}
+									icon={BookCheck}
+									baseColor={STAT_COLORS.completed}
+								/>
+								<MiniStatCard
+									value={librariesStats.seriesCount}
+									icon={Layers}
+									baseColor={STAT_COLORS.series}
+								/>
+								<MiniStatCard
+									value={formattedTime ? formattedTime.value : '??'}
+									suffix={formattedTime ? formattedTime.unit : undefined}
+									icon={Clock}
+									baseColor={STAT_COLORS.readingTime}
+								/>
+							</View>
+							<Divider />
+							<SeriesFilterHeader />
+						</View>
+					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					refreshControl={
 						nodes.length > 0 ? (

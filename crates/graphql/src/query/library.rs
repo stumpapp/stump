@@ -18,7 +18,7 @@ use sea_orm::{
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	object::{library::Library, missing_entity::MissingEntity},
+	object::{library::Library, missing_entity::MissingEntity, stats::LibraryStats},
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
@@ -166,6 +166,16 @@ impl LibraryQuery {
 		let alphabet = AvailableAlphabet::from(result);
 
 		Ok(alphabet.get())
+	}
+
+	async fn libraries_stats(&self, ctx: &Context<'_>) -> Result<LibraryStats> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let all_stats =
+			LibraryStats::fetch(conn, None, user.id.to_string(), false).await?;
+
+		Ok(all_stats)
 	}
 
 	async fn number_of_libraries(&self, ctx: &Context<'_>) -> Result<u64> {

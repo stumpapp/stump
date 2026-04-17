@@ -2051,6 +2051,7 @@ type Query {
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
 	librariesAlphabet: JSONObject!
+	librariesStats: LibraryStats!
 	numberOfLibraries: Int!
 	lastVisitedLibrary: Library
 	libraryMissingEntities(libraryId: ID!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMissingEntityResponse!

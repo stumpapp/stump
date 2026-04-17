@@ -18,7 +18,7 @@ inputs:
     description: 'List of tags to assigned to the image'
     default: 'nightly'
   build-channel:
-    description: 'Build channel identifier (e.g., nightly, unstable, experimental)'
+    description: 'Build channel identifier (e.g., stable, nightly, unstable)'
     required: false
     default: ''
   archs:

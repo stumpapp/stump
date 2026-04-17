@@ -20,9 +20,6 @@ while getopts "wrdg:" opt; do
         if [[ ${TAGS[0]} == *nightly* ]]; then
           echo "Performing nightly sed correction"
           nightly_sed_correction
-        elif [[ ${TAGS[0]} == *experimental* ]]; then
-          echo "Performing experimental sed correction"
-          experimental_sed_correction
         else
           echo "No corrections needed for tag ${TAGS[0]}"
         fi
@@ -35,7 +32,7 @@ while getopts "wrdg:" opt; do
       echo "The arch provided is $OPTARG"
       download_pdfium $arch
     ;;
-    ?) 
+    ?)
       echo "Invalid option -$OPTARG" >&2
       exit 1
     ;;

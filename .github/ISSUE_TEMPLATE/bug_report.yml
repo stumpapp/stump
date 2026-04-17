@@ -48,7 +48,7 @@ body:
 
       value: |
         #### Server Details:
-          - Release Channel: [latest / nightly / experimental / unstable / Not Applicable]
+          - Release Channel: [latest / nightly / unstable / Not Applicable]
           - Server OS: [macOS 26 / Debian 13 / Windows 11 / Not Applicable / ...]
           - Using Docker: [Yes / No / Not Applicable]
           - Server Version: [0.1.0 / 857351f / Not Applicable / ...]

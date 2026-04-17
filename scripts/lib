@@ -18,13 +18,6 @@ nightly_sed_correction() {
         sed -i 's|"version": ".*"|"version": "nightly"|g' package.json
 }
 
-# Change all versions in package.json files AND Cargo.toml files to 'experimental'
-experimental_sed_correction() {
-    set -ex; \
-        sed -i 's|version = ".*"|version = "experimental"|g' Cargo.toml; \
-        sed -i 's|"version": ".*"|"version": "experimental"|g' package.json
-}
-
 download_pdfium() {
     local arch=$1
     if [ "$arch" = "amd64" ]; then

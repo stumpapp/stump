@@ -61,10 +61,9 @@ export default function Screen() {
 		} catch {
 			Alert.alert(
 				t(getKey('deleteDownloads.deleteFailed.title')),
-				t(getKey('deleteDownloads.deleteFailed.description')).replace(
-					'{{serverName}}',
-					server?.name ? `'${server.name}'` : t('common.thisServer'),
-				),
+				t(getKey('deleteDownloads.deleteFailed.description'), {
+					serverName: server?.name ? `'${server.name}'` : t('common.thisServer'),
+				}),
 			)
 		}
 	}
@@ -76,10 +75,9 @@ export default function Screen() {
 	const handleDelete = () => {
 		Alert.alert(
 			t(getKey('deleteDownloads.label')),
-			t(getKey('deleteDownloads.confirmation')).replace(
-				'{{serverName}}',
-				server?.name ? `'${server.name}'` : t('common.thisServer'),
-			),
+			t(getKey('deleteDownloads.confirmation'), {
+				serverName: server?.name ? `'${server.name}'` : t('common.thisServer'),
+			}),
 			[
 				{ text: t('common.cancel'), style: 'cancel' },
 				{ text: t('common.delete'), style: 'destructive', onPress: onDeleteDownloads },

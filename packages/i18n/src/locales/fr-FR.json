@@ -1319,7 +1319,7 @@
 						"Si vous souhaitez créer votre propre thème personnalisé, consultez la",
 						"documentation"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "Clair",
 						"dark": "Sombre",

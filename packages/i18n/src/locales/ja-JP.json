@@ -1319,7 +1319,7 @@
 						"独自のカスタムテーマの作成に興味がある場合は、",
 						"ドキュメント"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "ライト",
 						"dark": "ダーク",

@@ -11,7 +11,7 @@ export interface EpubTheme {
 export const darkVariantText: EpubTheme = {
 	a: { color: '#4299E1' },
 	blockquote: { color: 'rgb(168 172 176) !important' },
-	body: { color: '#E8EDF4' },
+	body: { color: '#E8EDF4', background: '#161719' },
 	h1: { color: '#E8EDF4' },
 	h2: { color: '#E8EDF4' },
 	h3: { color: '#E8EDF4' },

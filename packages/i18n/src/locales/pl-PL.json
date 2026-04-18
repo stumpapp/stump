@@ -1319,7 +1319,7 @@
 						"Jeśli chcesz stworzyć swój własny motyw, sprawdź",
 						"dokumentację"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "Jasny",
 						"dark": "Ciemny",

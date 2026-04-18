@@ -1319,7 +1319,7 @@
 						"Pokud máte zájem o vytvoření vlastního motivu, podívejte se na",
 						"dokumentaci"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "Světlý",
 						"dark": "Tmavý",

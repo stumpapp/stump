@@ -1319,7 +1319,7 @@
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "Claro",
 						"dark": "Oscuro",

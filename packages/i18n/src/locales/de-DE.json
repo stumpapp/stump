@@ -1319,7 +1319,7 @@
 						"Wie du ein eigenes Design erstellen kannst, ist nachzulesen in der",
 						"Dokumentation"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "Hell",
 						"dark": "Dunkel",

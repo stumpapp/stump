@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { Suspense, useCallback, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
@@ -9,7 +9,6 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookGridItem } from '~/components/book'
-import { BookFilterHeader } from '~/components/book/filterHeader'
 import { BooksListHeader } from '~/components/book/listHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
@@ -111,12 +110,7 @@ export default function Screen() {
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="automatic"
-					ListHeaderComponent={
-						// <Suspense fallback={null}>
-						// 	<BookFilterHeader />
-						// </Suspense>
-						<BooksListHeader stats={booksStats} />
-					}
+					ListHeaderComponent={<BooksListHeader stats={booksStats} />}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
 					ListEmptyComponent={

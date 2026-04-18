@@ -51,8 +51,9 @@ export function useBooksSortAndDisplayMenu() {
 		if (field === sortConfig.field) {
 			set(adjustedConfig, 'direction', sortConfig.direction === 'ASC' ? 'DESC' : 'ASC')
 		} else {
+			const isDateField = ['DATE_ADDED', 'YEAR', 'CREATED_AT'].includes(field)
 			set(adjustedConfig, 'field', field)
-			set(adjustedConfig, 'direction', 'ASC')
+			set(adjustedConfig, 'direction', isDateField ? 'DESC' : 'ASC') // DESC default for dates feels better
 		}
 
 		const adjustedSort = isMetadata

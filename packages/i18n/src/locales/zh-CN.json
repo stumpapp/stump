@@ -264,14 +264,14 @@
 					"label": "跳过书籍概览",
 					"description": "选择书库时直接打开阅读器"
 				},
-				"options": {
+				"configuration": {
 					"series": {
-						"label": "系列",
-						"description": "默认显示系列选项卡"
+						"label": "Series",
+						"description": "Show the series tab by default"
 					},
 					"books": {
-						"label": "书籍",
-						"description": "默认显示书籍选项卡"
+						"label": "Books",
+						"description": "Show the books tab by default"
 					}
 				}
 			},
@@ -308,11 +308,11 @@
 				},
 				"resizeMethod": {
 					"label": "调整尺寸方法",
-					"options": {
-						"scaleEvenlyByFactor": "按比例缩放",
-						"exact": "精确大小",
-						"scaleDimension": "按维度缩放",
-						"none": "无"
+					"configuration": {
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
 					}
 				},
 				"scaleEvenlyByFactor": {
@@ -335,9 +335,9 @@
 					"description": "设置缩略图的宽度或高度并自动缩放对方，以保持原始宽度比",
 					"dimension": {
 						"label": "尺寸",
-						"options": {
-							"width": "宽度",
-							"height": "高度"
+						"configuration": {
+							"width": "Width",
+							"height": "Height"
 						}
 					},
 					"size": {
@@ -433,16 +433,16 @@
 					],
 					"disabled": "你无法更改此设置"
 				},
-				"options": {
-					"label": "书库模式",
-					"description": "决定 Stump 如何组织你的书库的设置",
+				"configuration": {
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
-						"label": "集合优先",
-						"description": "书库根目录最顶层的每个文件夹视为一个系列"
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
 					},
 					"seriesPriority": {
-						"label": "系列优先",
-						"description": "递归任意层级的每个文件夹视为一个系列"
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
 					}
 				}
 			}
@@ -544,14 +544,18 @@
 		"subtitleLink": "相关文档",
 		"sidebar": {
 			"basics": "基础",
-			"options": {
-				"general": "通用",
-				"reading": "阅读",
-				"scanning": "扫描",
-				"thumbnails": "缩略图",
-				"ignore-rules": "忽略规则",
-				"analysis": "分析",
-				"label": "选项"
+			"configuration": {
+				"general": "General",
+				"reading": "Reading",
+				"scanning": "Scanning",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules",
+				"label": "Configuration"
+			},
+			"integrations": {
+				"label": "Integrations",
+				"analysis": "Analysis",
+				"metadata": "Metadata"
 			},
 			"danger-zone": {
 				"access-control": "访问控制",
@@ -579,26 +583,26 @@
 					"description": "具有额外选项的扫描，以实现更细粒度的控制",
 					"form": {
 						"alert": "这些设置将覆盖库范围内的相应设置",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
-								"label": "强制重建",
-								"description": "重建磁盘上书库中的每本书",
-								"alert": "这将从零开始重建书库中的每本书，包括元数据和哈希值"
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
 							},
 							"custom": {
-								"label": "自定义",
-								"description": "自定义扫描配置",
+								"label": "Custom",
+								"description": "Customize the scan configuration",
 								"validation": {
-									"noSelection": "至少必须启用一个选项"
+									"noSelection": "At least one option must be enabled"
 								}
 							},
 							"rebuildMeta": {
-								"label": "重建元数据",
-								"description": "重建书库中书籍的元数据"
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
 							},
 							"regenHashes": {
-								"label": "重新生成哈希值",
-								"description": "重新创建书库中书籍的哈希值"
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
 							}
 						}
 					}
@@ -650,26 +654,42 @@
 				}
 			}
 		},
-		"options/analysis": {
-			"title": "分析",
-			"description": "分析这个图书馆的内容，以确定潜在的问题或改进",
+		"integrations/analysis": {
+			"title": "Analysis",
+			"description": "Analyze the contents of this library to identify potential issues or improvements",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "分析书籍",
-					"description": "分析该书库中的书籍以在数据库中附加额外元数据，例如图像类书籍的页面尺寸",
-					"disclaimerTitle": "这一进程是资源密集型的",
-					"disclaimer": "可能需要一些时间才能完成。今后它将更容易配置",
-					"analyzeButton": "分析书籍"
+					"heading": "Analyze books",
+					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
+					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
-					"heading": "缺失文件",
-					"description": "数据库中引用但磁盘上找不到的文件",
-					"noMissingFiles": "该书库中没有缺失文件"
+					"heading": "Missing files",
+					"description": "Files that are referenced in the database but cannot be located on disk",
+					"noMissingFiles": "There are no missing files in this library"
 				},
 				"duplicateFiles": {
-					"heading": "重复文件",
-					"description": "磁盘上可能重复的文件",
-					"noDuplicateFiles": "该书库未检测到重复文件"
+					"heading": "Duplicate files",
+					"description": "Files that are potentially duplicated on disk",
+					"noDuplicateFiles": "There are no duplicate files detected for this library"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "Metadata",
+			"description": "Manage and review metadata matches for this library",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "Fetch metadata",
+					"description": "Fetch metadata for the media in this library",
+					"noProviders": {
+						"title": "There are no metadata providers available",
+						"description": "You can configure metadata providers in the metadata integration settings"
+					},
+					"fetchButton": "Start background fetch",
+					"fetchError": "Failed to start metadata fetch"
 				}
 			}
 		},
@@ -816,6 +836,75 @@
 			"description": "在自己的行上添加每个添加"
 		}
 	},
+	"metadataMatching": {
+		"section": {
+			"heading": "Pending matches",
+			"description": "Review metadata matches fetched from external providers"
+		},
+		"confidenceBadge": {
+			"label": "confidence"
+		},
+		"includeField": "Include this field",
+		"excludeField": "Exclude this field",
+		"fieldLocked": "This field is locked",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "No candidates available for this record",
+				"noComparableFields": "No comparable fields found",
+				"headers": {
+					"field": "Field",
+					"current": "Current",
+					"external": "External",
+					"resolved": "Resolved"
+				},
+				"toolbar": {
+					"candidatePosition": "Candidate {{position}} of {{total}}",
+					"provider": "Provider"
+				}
+			},
+			"footer": {
+				"accept": "Accept",
+				"reject": "Reject",
+				"strategies": {
+					"FILL_GAPS": "Fill gaps",
+					"PREFER_EXTERNAL": "Prefer external",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
+					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "Keep current",
+				"takeExternal": "Take external",
+				"mergeLists": "Merge lists",
+				"editManually": "Edit manually",
+				"lockField": "Lock field",
+				"unlockField": "Unlock field",
+				"reset": "Reset",
+				"undoManualEdit": "Undo manual edit"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "Name",
+				"entityType": "Type",
+				"candidateCount": "Candidates",
+				"topConfidence": "Top Confidence",
+				"addedAt": "Fetched"
+			},
+			"acceptAll": {
+				"label": "Accept all",
+				"failed": "Failed to accept all matches",
+				"success": "All pending matches accepted"
+			},
+			"rejectAll": {
+				"label": "Reject all",
+				"failed": "Failed to reject all matches",
+				"success": "All pending matches rejected"
+			},
+			"startReview": "Start review",
+			"nothingToReview": "No pending metadata matches to review"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "继续阅读",
@@ -840,19 +929,19 @@
 			},
 			"visibility": {
 				"label": "可见性",
-				"options": {
+				"configuration": {
 					"public": {
-						"label": "公开",
-						"description": "服务器上的所有用户均可访问"
+						"label": "Public",
+						"description": "Accessible to all users on the server"
 					},
 					"shared": {
-						"label": "共享",
-						"description": "特定用户可以访问此智能列表",
-						"createDisclaimer": "你可以在创建后选择与此列表共享的用户"
+						"label": "Shared",
+						"description": "Specific users can access this smart list",
+						"createDisclaimer": "You can select who this list is shared with after creation"
 					},
 					"private": {
-						"label": "私密",
-						"description": "只有你可以访问此智能列表"
+						"label": "Private",
+						"description": "Only you can access this smart list"
 					}
 				}
 			},
@@ -885,15 +974,15 @@
 				"grouping": {
 					"label": "分组依据",
 					"description": "该智能列表中的书籍应如何分组",
-					"options": {
+					"configuration": {
 						"by_books": {
-							"label": "无"
+							"label": "None"
 						},
 						"by_series": {
-							"label": "系列"
+							"label": "Series"
 						},
 						"by_library": {
-							"label": "书库"
+							"label": "Library"
 						}
 					}
 				},
@@ -1253,6 +1342,7 @@
 				"jobs": "任务",
 				"access": "访问",
 				"email": "电子邮件地址",
+				"metadata": "Metadata",
 				"notifications": "通知",
 				"tags": "标签：",
 				"label": "管理"
@@ -1271,7 +1361,12 @@
 					"labels": {
 						"username": "用户名",
 						"password": "密码",
-						"activeChangesPrompt": "您有未保存的更改"
+						"activeChangesPrompt": "您有未保存的更改",
+						"uselessForm": {
+							"title": "You lack permissions to change these settings",
+							"description": "Contact your administrator if you want to make changes to these settings"
+						},
+						"insufficientPermission": "You do not have permission to change this"
 					},
 					"errors": {
 						"updateFailed": "更新您的个人资料时服务器发生错误。请重试。"
@@ -1319,17 +1414,17 @@
 						"如果你有兴趣创建自己的自定义主题，请查看",
 						"文档"
 					],
-					"options": {
-						"system": "系统",
-						"light": "亮色",
-						"dark": "深色",
-						"bronze": "青铜",
-						"ocean": "海洋",
-						"autumn": "秋色",
-						"cosmic": "宇宙",
-						"pumpkin": "南瓜",
-						"midnight": "午夜",
-						"matrix": "矩阵"
+					"configuration": {
+						"system": "System",
+						"light": "Light",
+						"dark": "Dark",
+						"bronze": "Bronze light",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"midnight": "Midnight",
+						"matrix": "Matrix"
 					}
 				},
 				"gradientToggle": {
@@ -1347,11 +1442,11 @@
 				"thumbnailPlaceholder": {
 					"label": "缩略图占位符",
 					"description": "缩略图占位符使用的样式",
-					"options": {
-						"grayscale": "灰度",
-						"averageColor": "平均颜色",
-						"colorful": "彩色化",
-						"thumbhash": "缩略图哈希"
+					"configuration": {
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
+						"thumbhash": "Thumbhash"
 					}
 				},
 				"layoutAndArrangement": {
@@ -1361,9 +1456,9 @@
 				"primaryNavigation": {
 					"label": "主要导航",
 					"description": "选择最小侧边栏或顶栏导航",
-					"options": {
-						"sidebar": "侧边栏",
-						"topbar": "顶部工具条"
+					"configuration": {
+						"sidebar": "Sidebar",
+						"topbar": "Topbar"
 					},
 					"disclaimer": "* 未选中选项的设置将被禁用或隐藏"
 				},
@@ -1388,12 +1483,12 @@
 					"isLocked": "排列已锁定",
 					"lock": "锁定排列",
 					"unlock": "解锁排列",
-					"options": {
-						"HOME": "首页",
-						"EXPLORE": "发现",
-						"LIBRARIES": "库",
-						"BOOK_CLUBS": "读书俱乐部",
-						"SMART_LISTS": "智能列表"
+					"configuration": {
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1409,9 +1504,9 @@
 				"displaySpacing": {
 					"label": "显示间距",
 					"description": "调整整个应用程序元素之间的总间距",
-					"options": {
-						"default": "默认",
-						"compact": "紧凑"
+					"configuration": {
+						"default": "Default",
+						"compact": "Compact"
 					},
 					"disclaimer": "* 简洁显示模式尚未实现"
 				},
@@ -1782,32 +1877,75 @@
 			"description": "Stump 服务器实例上运行的后台任务",
 			"sections": {
 				"scheduling": {
-					"title": "计划任务",
+					"title": "Scheduled jobs",
 					"description": "一些作业可以配置为自动运行计划",
-					"disclaimer": "工作计划器目前较基础，将来会得到改进。欢迎提供反馈或建议！",
-					"createOrUpdateConfig": {
-						"fields": {
-							"intervalSecs": {
-								"label": "间隔",
-								"description": "任务运行频率(秒)",
-								"placeholder": "例如：\"86400\" 每日一次"
-							},
-							"intervalPreset": {
-								"label": "预设值",
-								"options": {
-									"everySixHours": "每 6 小时",
-									"everyTwelveHours": "每 12 小时",
-									"oncePerDay": "每天一次",
-									"oncePerWeek": "每周一次",
-									"oncePerMonth": "每月一次"
-								}
-							},
-							"includedLibraryIds": {
-								"label": "包含的库",
-								"description": "选择包含哪些库"
-							}
+					"restartRequiredTitle": "Restart required",
+					"restartRequired": "Changes to this configuration will take effect after a server restart",
+					"newScheduledJob": "New scheduled job",
+					"deleteScheduledJob": {
+						"title": "Delete scheduled job",
+						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+						"confirm": "Delete"
+					},
+					"dialog": {
+						"titleCreate": "New scheduled job",
+						"titleEdit": "Edit scheduled job",
+						"cancel": "Cancel",
+						"create": "Create",
+						"saveChanges": "Save changes"
+					},
+					"fields": {
+						"name": {
+							"label": "Name",
+							"placeholder": "e.g. \"Daily library scan\""
 						},
-						"restartRequired": "更改此配置将在服务器重启后生效"
+						"schedule": {
+							"label": "Cron schedule",
+							"description": "A cron expression to define the frequency",
+							"placeholder": "0 0 0 * * *"
+						},
+						"schedulePreset": {
+							"label": "Preset",
+							"custom": "Custom",
+							"everySixHours": "Every 6 hours",
+							"everyTwelveHours": "Every 12 hours",
+							"dailyAtMidnight": "Daily at midnight",
+							"weeklySunday": "Weekly (Sunday)",
+							"monthlyFirst": "Monthly (1st)"
+						},
+						"kind": {
+							"label": "Job type",
+							"libraryScan": "Library Scan",
+							"metadataRetry": "Metadata Retry"
+						},
+						"libraryIds": {
+							"label": "Libraries to scan",
+							"description": "Leave empty to scan all libraries"
+						},
+						"statuses": {
+							"label": "Statuses to retry",
+							"description": "Which metadata fetch statuses should be retried",
+							"rateLimited": "Rate Limited",
+							"failed": "Failed"
+						},
+						"enabled": "Enabled"
+					},
+					"row": {
+						"enabled": "Enabled",
+						"disabled": "Disabled",
+						"allLibraries": "All libraries",
+						"rateLimited": "rate limited",
+						"lastRun": "Last run at {{date}}",
+						"edit": "Edit",
+						"delete": "Delete"
+					},
+					"toasts": {
+						"createSuccess": "Scheduled job created",
+						"createError": "Failed to create scheduled job",
+						"updateSuccess": "Scheduled job updated",
+						"updateError": "Failed to update scheduled job",
+						"deleteSuccess": "Scheduled job deleted",
+						"deleteError": "Failed to delete scheduled job"
 					}
 				},
 				"history": {
@@ -1873,6 +2011,16 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "Account",
+						"featureAccess": "Feature access",
+						"fileManagement": "Files",
+						"emailers": "Emailers",
+						"emailing": "Emailing",
+						"libraryManagement": "Library management",
+						"userManagement": "User management",
+						"serverManagement": "Server management"
+					},
 					"heading": "权限",
 					"subtitle": [
 						"选择您想要授予此用户的权限。欲了解更多关于每个权限的信息，请查看",
@@ -2146,6 +2294,61 @@
 				"description": "更新此用户的详细信息"
 			}
 		},
+		"server/metadataIntegrations": {
+			"helmet": "Metadata integrations",
+			"title": "Metadata integrations",
+			"addProvider": "Add provider",
+			"noProviders": "No providers configured yet. Add one to get started",
+			"providers": {
+				"title": "Providers",
+				"description": "Configure external metadata providers to fetch and enrich your library data"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "API token",
+					"description": "The API token for authenticating with this provider"
+				},
+				"apiTokenExpiresAt": {
+					"label": "API token expiration",
+					"description": "The date when the API token will expire (optional)"
+				},
+				"enableProvider": {
+					"label": "Enable provider",
+					"description": "It will be used for fetching if enabled"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "Enable auto-apply",
+						"description": "Skip manual approval and apply likely matches"
+					},
+					"threshold": {
+						"label": "Confidence threshold",
+						"description": "Minimum confidence score (0-1) to auto-apply a match",
+						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+					},
+					"strategy": {
+						"label": "Merge strategy",
+						"options": {
+							"FILL_GAPS": "Accept missing fields",
+							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
+							"PREFER_EXTERNAL": "Prefer external data"
+						}
+					}
+				}
+			},
+			"providerEnabled": "This provider is enabled",
+			"providerDisabled": "This provider is disabled",
+			"providerTokenExpiresSoon": "This provider's token will expire soon",
+			"autoApplyOn": "Auto-apply on",
+			"autoApplyOff": "Auto-apply off",
+			"editDialog": {
+				"tooltip": "Edit provider"
+			},
+			"deleteDialog": {
+				"title": "Delete provider",
+				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+			}
+		},
 		"server/tags": {
 			"helmet": "标签管理",
 			"title": "标签",
@@ -2304,9 +2507,9 @@
 	},
 	"thumbnailDropdown": {
 		"label": "选择缩略图",
-		"options": {
-			"selectFromBooks": "从书中选择",
-			"uploadImage": "上传图片"
+		"configuration": {
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
 		},
 		"uploadImage": {
 			"emptyState": "图片预览将显示在这里",
@@ -2325,6 +2528,10 @@
 			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
 			"confirm": "Delete {{type}}",
 			"typeToConfirm": "Type {{name}} to confirm:"
+		},
+		"experimentalDisclaimer": {
+			"title": "This feature is experimental",
+			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
 		},
 		"enter": "进入",
 		"save": "保存",
@@ -2350,6 +2557,10 @@
 		"never": "从不",
 		"scan": "扫描",
 		"somethingWentWrong": "出了些问题",
+		"back": "Back",
+		"continue": "Continue",
+		"book": "Book",
+		"series": "Series",
 		"fileUpload": {
 			"someRejected": "有些文件被拒绝。请检查文件类型并重试",
 			"tooManyFiles": "您选择了太多的文件",
@@ -2369,9 +2580,25 @@
 			"label": "KoReader 同步",
 			"description": "允许用户访问 KoReader 同步集成"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Kobo sync",
+			"description": "Allows the user to access the Kobo sync integration"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "智能列表",
 			"description": "允许用户访问智能列表功能，包括查看和创建智能列表"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "Change password",
+			"description": "Allows the user to change their own password"
+		},
+		"CHANGE_USERNAME": {
+			"label": "Change username",
+			"description": "Allows the user to change their own username"
+		},
+		"CHANGE_AVATAR": {
+			"label": "Change avatar",
+			"description": "Allows the user to change their own avatar"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "创建读书俱乐部",
@@ -2700,7 +2927,8 @@
 				"label": "阅读",
 				"preferNativePdf": "优先使用原生 PDF",
 				"preferMinimalReader": "优先使用极简阅读器",
-				"disableDismissGesture": "禁用关闭手势"
+				"disableDismissGesture": "禁用关闭手势",
+				"incognitoReading": "Incognito Reading"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2735,6 +2963,7 @@
 			"debug": {
 				"label": "调试",
 				"clearCache": {
+					"label": "Clear Cache",
 					"memory": {
 						"button": "内存",
 						"success": "内存缓存已清除"
@@ -2758,6 +2987,14 @@
 				"performanceMonitor": "性能监控",
 				"reduceAnimations": "减少动画",
 				"maskUrls": "隐藏 URL",
+				"displayLanguageKeys": {
+					"label": "Display Language Keys",
+					"options": {
+						"none": "None",
+						"abbreviated": "Abbreviated",
+						"full": "Full"
+					}
+				},
 				"debugAnalytics": {
 					"label": "调试分析",
 					"description": "发送额外的调试相关事件以帮助排查问题"
@@ -2776,7 +3013,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "阅读器设置",
+			"title": "Image Reader Settings",
+			"overrideGlobalSettings": "Override global settings",
 			"sections": {
 				"mode": "模式",
 				"imageOptions": "图像选项",
@@ -2823,6 +3061,77 @@
 					"images": "图像画廊",
 					"slider": "滑块"
 				}
+			},
+			"readingTimer": {
+				"label": "Reading Timer",
+				"resetTimer": "Reset Timer"
+			},
+			"allSettings": "All Settings"
+		},
+		"epubSettings": {
+			"title": "Epub Reader Settings",
+			"typeface": "Typeface",
+			"fontSize": "Font Size",
+			"fontWeight": {
+				"label": "Font Weight",
+				"options": {
+					"light": "Light",
+					"normal": "Normal",
+					"medium": "Medium",
+					"bold": "Bold"
+				}
+			},
+			"textNormalization": "Text Normalization",
+			"verticalText": "Vertical Text",
+			"readingDirection": {
+				"label": "Reading Direction",
+				"options": {
+					"rtl": "Right to left",
+					"ltr": "Left to right"
+				}
+			},
+			"columns": {
+				"label": "Columns",
+				"options": {
+					"auto": "Auto",
+					"single": "Single",
+					"double": "Double"
+				}
+			},
+			"pageMargins": "Page Margins",
+			"imageFilter": {
+				"label": "Image Filter",
+				"options": {
+					"none": "None",
+					"darken": "Darken",
+					"invert": "Invert"
+				}
+			},
+			"publisherStyles": "Publisher Styles",
+			"textAlignment": {
+				"label": "Text Alignment",
+				"options": {
+					"start": "Start",
+					"left": "Left",
+					"center": "Center",
+					"right": "Right",
+					"justify": "Justify"
+				}
+			},
+			"typeScale": "Type Scale",
+			"lineHeight": "Line Height",
+			"paragraphIndent": "Paragraph Indent",
+			"paragraphSpacing": "Paragraph Spacing",
+			"wordSpacing": "Word Spacing",
+			"letterSpacing": "Letter Spacing",
+			"hyphens": "Hyphens",
+			"ligatures": "Ligatures",
+			"customizeTheme": {
+				"placeholder": "Theme name",
+				"background": "Background",
+				"text": "Text",
+				"highlight": "Highlight",
+				"premadeThemes": "Premade themes"
 			}
 		},
 		"savedServerActions": {

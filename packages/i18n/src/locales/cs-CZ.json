@@ -264,7 +264,7 @@
 					"label": "Skip book overview",
 					"description": "Open the reader directly when selecting books in this library"
 				},
-				"options": {
+				"configuration": {
 					"series": {
 						"label": "Series",
 						"description": "Show the series tab by default"
@@ -434,15 +434,15 @@
 					"disabled": "Toto nastavení nemůžete změnit"
 				},
 				"configuration": {
-					"label": "Vzor knihovny",
-					"description": "Nastavení, které určuje, jak bude Stump organizovat vaši knihovnu",
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
-						"label": "Priorita sbírky",
-						"description": "Každá složka na nejvyšší úrovni kořene knihovny je jedna série"
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
 					},
 					"seriesPriority": {
-						"label": "Priorita série",
-						"description": "Každá složka na libovolné úrovni rekurzivně je jedna série"
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
 					}
 				}
 			}
@@ -545,13 +545,17 @@
 		"sidebar": {
 			"basics": "Základní",
 			"configuration": {
-				"general": "Obecné",
-				"reading": "Čtení",
-				"scanning": "Skenování",
-				"thumbnails": "Náhledy",
-				"ignore-rules": "Pravidla Ignorování",
-				"analysis": "Analýza",
-				"label": "Volby"
+				"general": "General",
+				"reading": "Reading",
+				"scanning": "Scanning",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules",
+				"label": "Configuration"
+			},
+			"integrations": {
+				"label": "Integrations",
+				"analysis": "Analysis",
+				"metadata": "Metadata"
 			},
 			"danger-zone": {
 				"access-control": "Správa přístupu",
@@ -581,24 +585,24 @@
 						"alert": "Toto přepíše odpovídající nastavení pro celou knihovnu",
 						"configuration": {
 							"forceRebuild": {
-								"label": "Vynutit obnovu",
-								"description": "Znovu sestavit každou knihu v knihovně na disku",
-								"alert": "Toto obnoví každou knihu v knihovně od začátku, včetně metadat a hashů"
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
 							},
 							"custom": {
-								"label": "Vlastní",
-								"description": "Přizpůsobit nastavení skenování",
+								"label": "Custom",
+								"description": "Customize the scan configuration",
 								"validation": {
-									"noSelection": "Alespoň jedna možnost musí být povolena"
+									"noSelection": "At least one option must be enabled"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Obnovit metadata",
-								"description": "Obnovit metadata pro knihy v knihovně"
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
 							},
 							"regenHashes": {
-								"label": "Regenerovat kontrolní součty",
-								"description": "Regenerovat kontrolní součty pro knihy v knihovně"
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
 							}
 						}
 					}
@@ -651,25 +655,41 @@
 			}
 		},
 		"integrations/analysis": {
-			"title": "Analýza",
-			"description": "Analyzujte obsah této knihovny, abyste zjistili možné problémy nebo vylepšení",
+			"title": "Analysis",
+			"description": "Analyze the contents of this library to identify potential issues or improvements",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyzovat knihy",
-					"description": "Analyzujte knihy v této knihovně a připojte další metadata do databáze, například rozměry stránky pro knihy založené na obrázcích",
+					"heading": "Analyze books",
+					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
 					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "Tento proces je náročný na zdroje a může chvíli trvat. V budoucnu bude více konfigurovatelný",
-					"analyzeButton": "Analyzovat knihy"
+					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
+					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
-					"heading": "Chybějící soubory",
-					"description": "Soubory, na které je odkazováno v databázi, ale nelze je nalézt na disku",
-					"noMissingFiles": "V této knihovně nejsou žádné chybějící soubory"
+					"heading": "Missing files",
+					"description": "Files that are referenced in the database but cannot be located on disk",
+					"noMissingFiles": "There are no missing files in this library"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicitní soubory",
-					"description": "Soubory, které mohou být na disku duplicitní",
-					"noDuplicateFiles": "Nebyly zjištěny žádné duplicitní soubory pro tuto knihovnu"
+					"heading": "Duplicate files",
+					"description": "Files that are potentially duplicated on disk",
+					"noDuplicateFiles": "There are no duplicate files detected for this library"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "Metadata",
+			"description": "Manage and review metadata matches for this library",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "Fetch metadata",
+					"description": "Fetch metadata for the media in this library",
+					"noProviders": {
+						"title": "There are no metadata providers available",
+						"description": "You can configure metadata providers in the metadata integration settings"
+					},
+					"fetchButton": "Start background fetch",
+					"fetchError": "Failed to start metadata fetch"
 				}
 			}
 		},
@@ -816,6 +836,75 @@
 			"description": "Add each addition on its own line"
 		}
 	},
+	"metadataMatching": {
+		"section": {
+			"heading": "Pending matches",
+			"description": "Review metadata matches fetched from external providers"
+		},
+		"confidenceBadge": {
+			"label": "confidence"
+		},
+		"includeField": "Include this field",
+		"excludeField": "Exclude this field",
+		"fieldLocked": "This field is locked",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "No candidates available for this record",
+				"noComparableFields": "No comparable fields found",
+				"headers": {
+					"field": "Field",
+					"current": "Current",
+					"external": "External",
+					"resolved": "Resolved"
+				},
+				"toolbar": {
+					"candidatePosition": "Candidate {{position}} of {{total}}",
+					"provider": "Provider"
+				}
+			},
+			"footer": {
+				"accept": "Accept",
+				"reject": "Reject",
+				"strategies": {
+					"FILL_GAPS": "Fill gaps",
+					"PREFER_EXTERNAL": "Prefer external",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
+					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "Keep current",
+				"takeExternal": "Take external",
+				"mergeLists": "Merge lists",
+				"editManually": "Edit manually",
+				"lockField": "Lock field",
+				"unlockField": "Unlock field",
+				"reset": "Reset",
+				"undoManualEdit": "Undo manual edit"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "Name",
+				"entityType": "Type",
+				"candidateCount": "Candidates",
+				"topConfidence": "Top Confidence",
+				"addedAt": "Fetched"
+			},
+			"acceptAll": {
+				"label": "Accept all",
+				"failed": "Failed to accept all matches",
+				"success": "All pending matches accepted"
+			},
+			"rejectAll": {
+				"label": "Reject all",
+				"failed": "Failed to reject all matches",
+				"success": "All pending matches rejected"
+			},
+			"startReview": "Start review",
+			"nothingToReview": "No pending metadata matches to review"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Pokračovat ve čtení",
@@ -842,17 +931,17 @@
 				"label": "Viditelnost",
 				"configuration": {
 					"public": {
-						"label": "Veřejný",
-						"description": "Dostupné pro všechny uživatele na serveru"
+						"label": "Public",
+						"description": "Accessible to all users on the server"
 					},
 					"shared": {
-						"label": "Sdílený",
-						"description": "Konkrétní uživatelé mají přístup k tomuto chytrému seznamu",
-						"createDisclaimer": "Můžete si vybrat, s kým bude tento seznam po vytvoření sdílen"
+						"label": "Shared",
+						"description": "Specific users can access this smart list",
+						"createDisclaimer": "You can select who this list is shared with after creation"
 					},
 					"private": {
-						"label": "Soukromý",
-						"description": "Pouze vy můžete přistupovat k tomuto chytrému seznamu"
+						"label": "Private",
+						"description": "Only you can access this smart list"
 					}
 				}
 			},
@@ -887,13 +976,13 @@
 					"description": "Jak by měly být knihy v tomto chytrém seznamu seskupeny",
 					"configuration": {
 						"by_books": {
-							"label": "Nic"
+							"label": "None"
 						},
 						"by_series": {
-							"label": "Série"
+							"label": "Series"
 						},
 						"by_library": {
-							"label": "Knihovna"
+							"label": "Library"
 						}
 					}
 				},
@@ -1253,6 +1342,7 @@
 				"jobs": "Úlohy",
 				"access": "Přístup",
 				"email": "E-mail",
+				"metadata": "Metadata",
 				"notifications": "Notifikace",
 				"tags": "Tags",
 				"label": "Management"
@@ -1271,7 +1361,12 @@
 					"labels": {
 						"username": "Uživatelské jméno",
 						"password": "Heslo",
-						"activeChangesPrompt": "Máte neuložené změny"
+						"activeChangesPrompt": "Máte neuložené změny",
+						"uselessForm": {
+							"title": "You lack permissions to change these settings",
+							"description": "Contact your administrator if you want to make changes to these settings"
+						},
+						"insufficientPermission": "You do not have permission to change this"
 					},
 					"errors": {
 						"updateFailed": "Při aktualizaci profilu došlo k chybě. Zkuste to prosím znovu."
@@ -1321,11 +1416,11 @@
 					],
 					"configuration": {
 						"system": "System",
-						"light": "Světlý",
-						"dark": "Tmavý",
-						"bronze": "Světle bronzový",
-						"ocean": "Oceán",
-						"autumn": "Podzim",
+						"light": "Light",
+						"dark": "Dark",
+						"bronze": "Bronze light",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
 						"cosmic": "Cosmic",
 						"pumpkin": "Pumpkin",
 						"midnight": "Midnight",
@@ -1782,32 +1877,75 @@
 			"description": "Úlohy na pozadí, které běží na instanci vašeho serveru",
 			"sections": {
 				"scheduling": {
-					"title": "Plánování",
+					"title": "Scheduled jobs",
 					"description": "Některé úlohy mohou být nakonfigurovány pro naplánované spuštění. Změny v této konfiguraci se projeví po restartu serveru",
-					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
-					"createOrUpdateConfig": {
-						"fields": {
-							"intervalSecs": {
-								"label": "Interval",
-								"description": "How often the job should run (in seconds)",
-								"placeholder": "e.g. \"86400\" for once a day"
-							},
-							"intervalPreset": {
-								"label": "Preset",
-								"configuration": {
-									"everySixHours": "Every 6 hours",
-									"everyTwelveHours": "Every 12 hours",
-									"oncePerDay": "Once a day",
-									"oncePerWeek": "Once a week",
-									"oncePerMonth": "Once a month"
-								}
-							},
-							"includedLibraryIds": {
-								"label": "Included libraries",
-								"description": "Choose which libraries are included"
-							}
+					"restartRequiredTitle": "Restart required",
+					"restartRequired": "Changes to this configuration will take effect after a server restart",
+					"newScheduledJob": "New scheduled job",
+					"deleteScheduledJob": {
+						"title": "Delete scheduled job",
+						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+						"confirm": "Delete"
+					},
+					"dialog": {
+						"titleCreate": "New scheduled job",
+						"titleEdit": "Edit scheduled job",
+						"cancel": "Cancel",
+						"create": "Create",
+						"saveChanges": "Save changes"
+					},
+					"fields": {
+						"name": {
+							"label": "Name",
+							"placeholder": "e.g. \"Daily library scan\""
 						},
-						"restartRequired": "Changes to this configuration will take effect after a server restart"
+						"schedule": {
+							"label": "Cron schedule",
+							"description": "A cron expression to define the frequency",
+							"placeholder": "0 0 0 * * *"
+						},
+						"schedulePreset": {
+							"label": "Preset",
+							"custom": "Custom",
+							"everySixHours": "Every 6 hours",
+							"everyTwelveHours": "Every 12 hours",
+							"dailyAtMidnight": "Daily at midnight",
+							"weeklySunday": "Weekly (Sunday)",
+							"monthlyFirst": "Monthly (1st)"
+						},
+						"kind": {
+							"label": "Job type",
+							"libraryScan": "Library Scan",
+							"metadataRetry": "Metadata Retry"
+						},
+						"libraryIds": {
+							"label": "Libraries to scan",
+							"description": "Leave empty to scan all libraries"
+						},
+						"statuses": {
+							"label": "Statuses to retry",
+							"description": "Which metadata fetch statuses should be retried",
+							"rateLimited": "Rate Limited",
+							"failed": "Failed"
+						},
+						"enabled": "Enabled"
+					},
+					"row": {
+						"enabled": "Enabled",
+						"disabled": "Disabled",
+						"allLibraries": "All libraries",
+						"rateLimited": "rate limited",
+						"lastRun": "Last run at {{date}}",
+						"edit": "Edit",
+						"delete": "Delete"
+					},
+					"toasts": {
+						"createSuccess": "Scheduled job created",
+						"createError": "Failed to create scheduled job",
+						"updateSuccess": "Scheduled job updated",
+						"updateError": "Failed to update scheduled job",
+						"deleteSuccess": "Scheduled job deleted",
+						"deleteError": "Failed to delete scheduled job"
 					}
 				},
 				"history": {
@@ -1873,6 +2011,16 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "Account",
+						"featureAccess": "Feature access",
+						"fileManagement": "Files",
+						"emailers": "Emailers",
+						"emailing": "Emailing",
+						"libraryManagement": "Library management",
+						"userManagement": "User management",
+						"serverManagement": "Server management"
+					},
 					"heading": "Oprávnění",
 					"subtitle": [
 						"Vyberte oprávnění, která chcete tomuto uživateli udělit. Další informace o tom, co každé oprávnění dělá, naleznete v",
@@ -2146,6 +2294,61 @@
 				"description": "Upravit podrobnosti o tomto SMTP e-maileru"
 			}
 		},
+		"server/metadataIntegrations": {
+			"helmet": "Metadata integrations",
+			"title": "Metadata integrations",
+			"addProvider": "Add provider",
+			"noProviders": "No providers configured yet. Add one to get started",
+			"providers": {
+				"title": "Providers",
+				"description": "Configure external metadata providers to fetch and enrich your library data"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "API token",
+					"description": "The API token for authenticating with this provider"
+				},
+				"apiTokenExpiresAt": {
+					"label": "API token expiration",
+					"description": "The date when the API token will expire (optional)"
+				},
+				"enableProvider": {
+					"label": "Enable provider",
+					"description": "It will be used for fetching if enabled"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "Enable auto-apply",
+						"description": "Skip manual approval and apply likely matches"
+					},
+					"threshold": {
+						"label": "Confidence threshold",
+						"description": "Minimum confidence score (0-1) to auto-apply a match",
+						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+					},
+					"strategy": {
+						"label": "Merge strategy",
+						"options": {
+							"FILL_GAPS": "Accept missing fields",
+							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
+							"PREFER_EXTERNAL": "Prefer external data"
+						}
+					}
+				}
+			},
+			"providerEnabled": "This provider is enabled",
+			"providerDisabled": "This provider is disabled",
+			"providerTokenExpiresSoon": "This provider's token will expire soon",
+			"autoApplyOn": "Auto-apply on",
+			"autoApplyOff": "Auto-apply off",
+			"editDialog": {
+				"tooltip": "Edit provider"
+			},
+			"deleteDialog": {
+				"title": "Delete provider",
+				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+			}
+		},
 		"server/tags": {
 			"helmet": "Tag management",
 			"title": "Tags",
@@ -2305,8 +2508,8 @@
 	"thumbnailDropdown": {
 		"label": "Upravit náhled",
 		"configuration": {
-			"selectFromBooks": "Vybrat z knih",
-			"uploadImage": "Nahrát obrázek"
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
 		},
 		"uploadImage": {
 			"emptyState": "Zde se zobrazí náhled vašeho obrázku",
@@ -2325,6 +2528,10 @@
 			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
 			"confirm": "Delete {{type}}",
 			"typeToConfirm": "Type {{name}} to confirm:"
+		},
+		"experimentalDisclaimer": {
+			"title": "This feature is experimental",
+			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
 		},
 		"enter": "Enter",
 		"save": "Uložit",
@@ -2350,6 +2557,10 @@
 		"never": "Nikdy",
 		"scan": "Skenovat",
 		"somethingWentWrong": "Something went wrong",
+		"back": "Back",
+		"continue": "Continue",
+		"book": "Book",
+		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
@@ -2369,9 +2580,25 @@
 			"label": "KoReader sync",
 			"description": "Allows the user to access the KoReader sync integration"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Kobo sync",
+			"description": "Allows the user to access the Kobo sync integration"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "Smart Lists",
 			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "Change password",
+			"description": "Allows the user to change their own password"
+		},
+		"CHANGE_USERNAME": {
+			"label": "Change username",
+			"description": "Allows the user to change their own username"
+		},
+		"CHANGE_AVATAR": {
+			"label": "Change avatar",
+			"description": "Allows the user to change their own avatar"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Create book clubs",
@@ -2700,7 +2927,8 @@
 				"label": "Reading",
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture"
+				"disableDismissGesture": "Disable Dismiss Gesture",
+				"incognitoReading": "Incognito Reading"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2735,6 +2963,7 @@
 			"debug": {
 				"label": "Debug",
 				"clearCache": {
+					"label": "Clear Cache",
 					"memory": {
 						"button": "Memory",
 						"success": "Memory cache cleared"
@@ -2758,6 +2987,14 @@
 				"performanceMonitor": "Performance Monitor",
 				"reduceAnimations": "Reduce Animations",
 				"maskUrls": "Mask URLs",
+				"displayLanguageKeys": {
+					"label": "Display Language Keys",
+					"options": {
+						"none": "None",
+						"abbreviated": "Abbreviated",
+						"full": "Full"
+					}
+				},
 				"debugAnalytics": {
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
@@ -2776,7 +3013,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Image Reader Settings",
+			"overrideGlobalSettings": "Override global settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -2823,6 +3061,77 @@
 					"images": "Image Gallery",
 					"slider": "Slider"
 				}
+			},
+			"readingTimer": {
+				"label": "Reading Timer",
+				"resetTimer": "Reset Timer"
+			},
+			"allSettings": "All Settings"
+		},
+		"epubSettings": {
+			"title": "Epub Reader Settings",
+			"typeface": "Typeface",
+			"fontSize": "Font Size",
+			"fontWeight": {
+				"label": "Font Weight",
+				"options": {
+					"light": "Light",
+					"normal": "Normal",
+					"medium": "Medium",
+					"bold": "Bold"
+				}
+			},
+			"textNormalization": "Text Normalization",
+			"verticalText": "Vertical Text",
+			"readingDirection": {
+				"label": "Reading Direction",
+				"options": {
+					"rtl": "Right to left",
+					"ltr": "Left to right"
+				}
+			},
+			"columns": {
+				"label": "Columns",
+				"options": {
+					"auto": "Auto",
+					"single": "Single",
+					"double": "Double"
+				}
+			},
+			"pageMargins": "Page Margins",
+			"imageFilter": {
+				"label": "Image Filter",
+				"options": {
+					"none": "None",
+					"darken": "Darken",
+					"invert": "Invert"
+				}
+			},
+			"publisherStyles": "Publisher Styles",
+			"textAlignment": {
+				"label": "Text Alignment",
+				"options": {
+					"start": "Start",
+					"left": "Left",
+					"center": "Center",
+					"right": "Right",
+					"justify": "Justify"
+				}
+			},
+			"typeScale": "Type Scale",
+			"lineHeight": "Line Height",
+			"paragraphIndent": "Paragraph Indent",
+			"paragraphSpacing": "Paragraph Spacing",
+			"wordSpacing": "Word Spacing",
+			"letterSpacing": "Letter Spacing",
+			"hyphens": "Hyphens",
+			"ligatures": "Ligatures",
+			"customizeTheme": {
+				"placeholder": "Theme name",
+				"background": "Background",
+				"text": "Text",
+				"highlight": "Highlight",
+				"premadeThemes": "Premade themes"
 			}
 		},
 		"savedServerActions": {

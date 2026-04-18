@@ -1,4 +1,4 @@
-import { SeriesMetadataModelOrdering, SeriesModelOrdering, SeriesOrderBy } from '@stump/graphql'
+import { MediaMetadataModelOrdering, MediaModelOrdering, MediaOrderBy } from '@stump/graphql'
 import { Stack } from 'expo-router'
 import clone from 'lodash/cloneDeep'
 import set from 'lodash/set'
@@ -22,24 +22,20 @@ import {
 } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { useSeriesFilterStore } from '~/stores/filters'
+import { useBookFilterStore } from '~/stores/filters'
 
-// this is kinda annoying, but Stack.Toolbar seems to be VERY strict
-// about children, effectively checking whether the direct child is e.g.
-// a Stack.Toolbar.Menu, and if not, it just doesn't render anything. so composability
-// is shit, hopefully this gets better over time. for now, the hook renders the inline
-// jsx which should work, but something like <SeriesSortAndDisplayMenu /> would not be
-// recognized as valid
+// todo: there is enough basically duplicate logic between this and series that if i need
+// _any_ more then i should abstract
 
-export function useSeriesSortAndDisplayMenu() {
+export function useBooksSortAndDisplayMenu() {
 	const { t } = useTranslate()
 
 	// todo: prolly make a separate hook for the setter callbacks to share between menus
-	const sort = useSeriesFilterStore((store) => store.sort)
-	const setSort = useSeriesFilterStore((store) => store.setSort)
+	const sort = useBookFilterStore((store) => store.sort)
+	const setSort = useBookFilterStore((store) => store.setSort)
 
 	const sortConfig = match(sort)
-		.with({ series: P.not(P.nullish) }, ({ series: { field, direction } }) => ({
+		.with({ media: P.not(P.nullish) }, ({ media: { field, direction } }) => ({
 			field,
 			direction,
 		}))
@@ -62,16 +58,16 @@ export function useSeriesSortAndDisplayMenu() {
 		const adjustedSort = isMetadata
 			? ({
 					metadata: {
-						field: adjustedConfig.field as SeriesMetadataModelOrdering,
+						field: adjustedConfig.field as MediaMetadataModelOrdering,
 						direction: adjustedConfig.direction,
 					},
-				} as SeriesOrderBy)
+				} as MediaOrderBy)
 			: ({
-					series: {
-						field: adjustedConfig.field as SeriesModelOrdering,
+					media: {
+						field: adjustedConfig.field as MediaModelOrdering,
 						direction: adjustedConfig.direction,
 					},
-				} as SeriesOrderBy)
+				} as MediaOrderBy)
 
 		setSort(adjustedSort)
 	}

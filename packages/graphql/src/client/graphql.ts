@@ -4861,6 +4861,11 @@ export type BooksScreenQuery = { __typename?: 'Query', media: { __typename?: 'Pa
       & { ' $fragmentRefs'?: { 'BookGridItemFragment': BookGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type BooksScreenStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BooksScreenStatsQuery = { __typename?: 'Query', librariesStats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, totalBytes: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number } };
+
 export type BookSearchScreenQueryVariables = Exact<{
   filter: MediaFilterInput;
   pagination: Pagination;
@@ -8349,6 +8354,18 @@ export const BooksScreenDocument = new TypedDocumentString(`
     completedAt
   }
 }`) as unknown as TypedDocumentString<BooksScreenQuery, BooksScreenQueryVariables>;
+export const BooksScreenStatsDocument = new TypedDocumentString(`
+    query BooksScreenStats {
+  librariesStats {
+    seriesCount
+    bookCount
+    totalBytes
+    completedBooks
+    inProgressBooks
+    totalReadingTimeSeconds
+  }
+}
+    `) as unknown as TypedDocumentString<BooksScreenStatsQuery, BooksScreenStatsQueryVariables>;
 export const BookSearchScreenDocument = new TypedDocumentString(`
     query BookSearchScreen($filter: MediaFilterInput!, $pagination: Pagination!) {
   media(filter: $filter, pagination: $pagination) {

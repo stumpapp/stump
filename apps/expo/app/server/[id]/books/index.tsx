@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { useInfiniteSuspenseGraphQL } from '@stump/client'
+import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { Suspense, useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
@@ -10,6 +10,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { useActiveServer } from '~/components/activeServer'
 import { BookGridItem } from '~/components/book'
 import { BookFilterHeader } from '~/components/book/filterHeader'
+import { BooksListHeader } from '~/components/book/listHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
@@ -42,13 +43,25 @@ const query = graphql(`
 	}
 `)
 
+const statsQuery = graphql(`
+	query BooksScreenStats {
+		librariesStats {
+			seriesCount
+			bookCount
+			totalBytes
+			completedBooks
+			inProgressBooks
+			totalReadingTimeSeconds
+		}
+	}
+`)
+
 export default function Screen() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const initialFilters = useInitialBookFilters()
 
-	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(createBookFilterStore(initialFilters)).current
 
 	const { filters, sort, resetFilters } = useStore(
@@ -60,12 +73,18 @@ export default function Screen() {
 		})),
 	)
 
-	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
+	const {
+		data: { librariesStats: booksStats },
+	} = useSuspenseGraphQL(statsQuery, ['booksStats', serverID])
+
+	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
 		query,
 		['books', serverID, filters, sort],
 		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
 	)
 	const { numColumns, paddingHorizontal } = useGridItemSize()
+
+	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -93,12 +112,13 @@ export default function Screen() {
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="automatic"
 					ListHeaderComponent={
-						<Suspense fallback={null}>
-							<BookFilterHeader />
-						</Suspense>
+						// <Suspense fallback={null}>
+						// 	<BookFilterHeader />
+						// </Suspense>
+						<BooksListHeader stats={booksStats} />
 					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
-					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
 					ListEmptyComponent={
 						<ListEmpty
 							message={isFiltered ? 'No books found matching your filters' : 'No books returned'}

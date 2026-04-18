@@ -1,0 +1,5 @@
+- [ ] generalize mini stat component and fragment for librariesStats selection
+- [ ] can probably generalize a EntityConvenientSortMenu to replace BooksSortAndDisplayMenu/SeriesSortAndDisplayMenu
+- [ ] reconsider stats, showing effectively the same thing for both series and books is fine for now but i think it can be better.
+    - [ ] completedSeries for server/[id]/series/index.tsx?
+    - [ ] does time matter for series search? feels less relevant than for library/books (at-a-glance for lib vs more specific for total time)

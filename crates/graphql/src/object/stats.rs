@@ -16,6 +16,7 @@ pub struct BookAggregateStats {
 	completed_books: i64,
 	in_progress_books: i64,
 	total_reading_time_seconds: i64,
+	// TODO: completed_series?
 }
 
 #[derive(Debug, FromQueryResult, SimpleObject)]

@@ -2,7 +2,7 @@ import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Button, Heading, Text } from '@stump/components'
 import { graphql, MetadataResetImpact, UserPermission } from '@stump/graphql'
 import { Construction } from 'lucide-react'
-import { useCallback, useEffect } from 'react'
+import { Suspense, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
@@ -12,6 +12,7 @@ import { useAppContext } from '@/context'
 import paths from '@/paths'
 
 import { useSeriesContext } from '../../context'
+import SeriesTagEditor from './SeriesTagEditor'
 import SeriesThumbnailSelector from './SeriesThumbnailSelector'
 
 const query = graphql(`
@@ -19,6 +20,10 @@ const query = graphql(`
 		seriesById(id: $id) {
 			id
 			...SeriesThumbnailSelector
+			tags {
+				id
+				name
+			}
 			metadata {
 				...SeriesMetadataEditor
 			}
@@ -82,17 +87,43 @@ export default function SeriesSettingsScene() {
 					</AlertDescription>
 				</Alert>
 
-				<Button
-					title={data ? 'Analysis already in progress' : 'Analyze this series'}
-					size="md"
-					variant="primary"
-					onClick={handleAnalyze}
-					disabled={!!data || isPending}
-				>
-					Analyze series
-				</Button>
+				<div className="gap-y-2 flex flex-col">
+					<div>
+						<Heading size="sm">Analysis</Heading>
+						<Text size="sm" variant="muted">
+							Re-analyze this series to update metadata from its files
+						</Text>
+					</div>
 
-				<SeriesThumbnailSelector fragment={seriesById} />
+					<div>
+						<Button
+							title={data ? 'Analysis already in progress' : 'Analyze this series'}
+							size="md"
+							variant="primary"
+							onClick={handleAnalyze}
+							disabled={!!data || isPending}
+						>
+							Analyze series
+						</Button>
+					</div>
+				</div>
+
+				{checkPermission(UserPermission.EditMetadata) && (
+					<Suspense>
+						<SeriesTagEditor seriesId={seriesById.id} tags={seriesById.tags} />
+					</Suspense>
+				)}
+
+				<div className="gap-y-2 flex flex-col">
+					<div>
+						<Heading size="sm">Thumbnail</Heading>
+						<Text size="sm" variant="muted">
+							Change the cover image for this series
+						</Text>
+					</div>
+
+					<SeriesThumbnailSelector fragment={seriesById} />
+				</div>
 
 				<div className="gap-y-2 flex w-full flex-col">
 					<div className="flex items-end justify-between">

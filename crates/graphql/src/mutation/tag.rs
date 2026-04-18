@@ -1,11 +1,11 @@
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	object::{media::Media, tag::Tag},
+	object::{media::Media, series::Series, tag::Tag},
 };
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::{media, media_tag, tag},
+	entity::{media, media_tag, series, series_tag, tag},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
@@ -96,6 +96,77 @@ impl TagMutation {
 					.into_iter()
 					.map(|tag_id| media_tag::ActiveModel {
 						media_id: Set(media_id.clone()),
+						tag_id: Set(tag_id),
+						..Default::default()
+					})
+					.collect::<Vec<_>>(),
+			)
+			.on_conflict_do_nothing()
+			.exec(&txn)
+			.await?;
+		}
+
+		txn.commit().await?;
+
+		Ok(model.into())
+	}
+
+	/// Set the tags for a series. Creates any tags that don't exist yet, links new ones,
+	/// and unlinks removed ones. Returns the updated series.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_series_tags(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		tags: Vec<String>,
+	) -> Result<Series> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Series not found")?;
+
+		let existing_tags = tag::Entity::find()
+			.filter(
+				tag::Column::Id.in_subquery(
+					Query::select()
+						.column(series_tag::Column::TagId)
+						.from(series_tag::Entity)
+						.and_where(
+							series_tag::Column::SeriesId.eq(model.series.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.all(conn)
+			.await?;
+
+		let txn = conn.begin().await?;
+
+		let (to_connect, to_disconnect) = sync_tags(&txn, &tags, &existing_tags).await?;
+
+		if !to_disconnect.is_empty() {
+			series_tag::Entity::delete_many()
+				.filter(
+					series_tag::Column::TagId
+						.is_in(to_disconnect)
+						.and(series_tag::Column::SeriesId.eq(model.series.id.clone())),
+				)
+				.exec(&txn)
+				.await?;
+		}
+
+		if !to_connect.is_empty() {
+			let series_id = model.series.id.clone();
+			series_tag::Entity::insert_many(
+				to_connect
+					.into_iter()
+					.map(|tag_id| series_tag::ActiveModel {
+						series_id: Set(series_id.clone()),
 						tag_id: Set(tag_id),
 						..Default::default()
 					})

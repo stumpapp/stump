@@ -2114,6 +2114,11 @@ export type Mutation = {
   setMediaTags: Media;
   /** Set the locked metadata fields for a series */
   setSeriesLockedFields: Series;
+  /**
+   * Set the tags for a series. Creates any tags that don't exist yet, links new ones,
+   * and unlinks removed ones. Returns the updated series.
+   */
+  setSeriesTags: Series;
   /** Suggest a book for the book club */
   suggestBook: BookClubBookSuggestion;
   /** Send a test email to verify the SMTP configuration is working */
@@ -2725,6 +2730,12 @@ export type MutationSetMediaTagsArgs = {
 export type MutationSetSeriesLockedFieldsArgs = {
   lockedFields: Array<MetadataField>;
   seriesId: Scalars['ID']['input'];
+};
+
+
+export type MutationSetSeriesTagsArgs = {
+  id: Scalars['ID']['input'];
+  tags: Array<Scalars['String']['input']>;
 };
 
 

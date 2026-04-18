@@ -9142,7 +9142,7 @@ dependencies = [
 
 [[package]]
 name = "tests"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "chrono",
  "models",

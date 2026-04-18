@@ -71,8 +71,6 @@ export function useBooksListHeader() {
 	}, [navigation, filterMenu, sortAndDisplayMenu])
 
 	if (Platform.OS === 'ios') {
-		// fixme: it seems like two toolbar menu actions in one toolbar
-		// is causing onPress issues???
 		return (
 			<Stack.Toolbar placement="right">
 				{filterMenu}

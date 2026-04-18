@@ -1414,7 +1414,7 @@
 						"如果你有兴趣创建自己的自定义主题，请查看",
 						"文档"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "Light",
 						"dark": "Dark",

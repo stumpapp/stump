@@ -50,10 +50,9 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 	const handleMarkAsComplete = useCallback(() => {
 		Alert.alert(
 			t('bookActions.markAsRead.label'),
-			t('bookActions.markAsRead.confirmation').replace(
-				'{{bookTitle}}',
-				downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
-			),
+			t('bookActions.markAsRead.confirmation', {
+				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+			}),
 			[
 				{ text: t('common.cancel'), style: 'cancel' },
 				{
@@ -67,10 +66,9 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 	const handleClearProgress = useCallback(() => {
 		Alert.alert(
 			t('bookActions.clearProgress.label'),
-			t('bookActions.clearProgress.confirmation').replace(
-				'{{bookTitle}}',
-				downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
-			),
+			t('bookActions.clearProgress.confirmation', {
+				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+			}),
 			[
 				{ text: t('common.cancel'), style: 'cancel' },
 				{

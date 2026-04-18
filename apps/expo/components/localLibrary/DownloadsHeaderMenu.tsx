@@ -158,10 +158,9 @@ export default function DownloadsHeaderMenu() {
 												ios: 'exclamationmark.triangle',
 												android: AlertCircle,
 											},
-											label: t(getKey('seeProblems')).replace(
-												'{{problemsCount}}',
-												failedDownloadsCount.toString(),
-											),
+											label: t(getKey('seeProblems'), {
+												problemsCount: failedDownloadsCount.toString(),
+											}),
 											onPress: () => {
 												problemsSheetRef.current?.present()
 											},

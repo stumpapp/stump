@@ -79,7 +79,9 @@ export default function TagSelect({ label, description, selected = [], onChange 
 			options={options}
 			value={[...selected].sort((a, b) => a.label.localeCompare(b.label)).map(({ value }) => value)}
 			onChange={handleChange}
-			onAddOption={(option) => setOptions((curr) => [...curr, option])}
+			onAddOption={(option) =>
+				setOptions((curr) => [...curr, option].sort((a, b) => a.label.localeCompare(b.label)))
+			}
 			isMultiSelect
 			filterable
 		/>

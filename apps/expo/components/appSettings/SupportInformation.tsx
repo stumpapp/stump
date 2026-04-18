@@ -31,13 +31,12 @@ export default function SupportInformation() {
 				{t('settings.supportInfo.buildInformation')}
 			</Text>
 			<Text className="text-foreground-muted">
-				{t('settings.supportInfo.version').replace(
-					'{{version}}',
-					Application.nativeApplicationVersion || '??',
-				)}
+				{t('settings.supportInfo.version', {
+					version: Application.nativeApplicationVersion || '??',
+				})}
 			</Text>
 			<Text className="text-foreground-muted">
-				{t('settings.supportInfo.suuportIdentifier').replace('{{supportID}}', supportID || '??')}
+				{t('settings.supportInfo.suuportIdentifier', { supportID: supportID || '??' })}
 			</Text>
 		</View>
 	)

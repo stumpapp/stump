@@ -27,5 +27,5 @@ export function useTranslate() {
 		}
 	}
 
-	return { t: (key: string) => t(`mobileApp.${key}`) }
+	return { t: (key: string, options?: Record<string, unknown>) => t(`mobileApp.${key}`, options) }
 }

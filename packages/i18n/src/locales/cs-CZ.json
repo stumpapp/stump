@@ -2320,6 +2320,12 @@
 		"clear": "Clear",
 		"confirm": "Potvrdit",
 		"delete": "Delete",
+		"deleteConfirmation": {
+			"title": "Delete {{type}}",
+			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
+			"confirm": "Delete {{type}}",
+			"typeToConfirm": "Type {{name}} to confirm:"
+		},
 		"enter": "Enter",
 		"save": "Uložit",
 		"send": "Odeslat",

@@ -2320,6 +2320,12 @@
 		"clear": "Wyczyść",
 		"confirm": "Potwierdź",
 		"delete": "Usuń",
+		"deleteConfirmation": {
+			"title": "Usuń {{type}}",
+			"description": "Czy na pewno chcesz usunąć {{type}}? Tej czynności nie można cofnąć.",
+			"confirm": "Usuń {{type}}",
+			"typeToConfirm": "Wprowadź {{name}} aby potwierdzić:"
+		},
 		"enter": "Enter",
 		"save": "Zapisz",
 		"send": "Wyślij",

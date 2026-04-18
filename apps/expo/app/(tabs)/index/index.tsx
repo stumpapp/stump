@@ -70,10 +70,9 @@ export default function Screen() {
 		(server: SavedServer) => {
 			Alert.alert(
 				t('savedServerActions.deleteServer.title'),
-				t('savedServerActions.deleteServer.confirmation').replace(
-					'{{serverName}}',
-					`'${server.name}'`,
-				),
+				t('savedServerActions.deleteServer.confirmation', {
+					serverName: `'${server.name}'`,
+				}),
 				[
 					{ text: t('common.cancel'), style: 'cancel' },
 					{

@@ -99,10 +99,9 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const handleDelete = useCallback(() => {
 		Alert.alert(
 			t('bookActions.deleteBook.label'),
-			t('bookActions.deleteBook.confirmation').replace(
-				'{{bookTitle}}',
-				downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
-			),
+			t('bookActions.deleteBook.confirmation', {
+				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+			}),
 			[
 				{ text: t('common.cancel'), style: 'cancel' },
 				{

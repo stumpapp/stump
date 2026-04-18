@@ -264,14 +264,14 @@
 					"label": "Buchübersicht überspringen",
 					"description": "Öffne den Reader direkt bei der Auswahl von Büchern in dieser Bibliotheken"
 				},
-				"options": {
+				"configuration": {
 					"series": {
-						"label": "Serien",
-						"description": "Serienreiter standardmäßig anzeigen"
+						"label": "Series",
+						"description": "Show the series tab by default"
 					},
 					"books": {
-						"label": "Bücher",
-						"description": "Buchreiter standardmäßig anzeigen"
+						"label": "Books",
+						"description": "Show the books tab by default"
 					}
 				}
 			},
@@ -309,10 +309,10 @@
 				"resizeMethod": {
 					"label": "Größenveränderungsmethode",
 					"configuration": {
-						"scaleEvenlyByFactor": "Gleichmäßig skalieren",
-						"exact": "Genaue Größe",
-						"scaleDimension": "Auto-Skalierung",
-						"none": "Keine"
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
 					}
 				},
 				"scaleEvenlyByFactor": {
@@ -336,8 +336,8 @@
 					"dimension": {
 						"label": "Abmessung",
 						"configuration": {
-							"width": "Breite",
-							"height": "Höhe"
+							"width": "Width",
+							"height": "Height"
 						}
 					},
 					"size": {
@@ -434,15 +434,15 @@
 					"disabled": "Diese Einstellung kann nicht geändert werden"
 				},
 				"configuration": {
-					"label": "Bibliotheksmuster",
-					"description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
-						"label": "Sammlungspriorität",
-						"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Serie"
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
 					},
 					"seriesPriority": {
-						"label": "Serienpriorität",
-						"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Serie"
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
 					}
 				}
 			}
@@ -545,13 +545,17 @@
 		"sidebar": {
 			"basics": "Grundlegendes",
 			"configuration": {
-				"general": "Allgemein",
-				"reading": "Lesen",
-				"scanning": "Scannen",
-				"thumbnails": "Vorschaubilder",
-				"ignore-rules": "Dateien ignorieren",
-				"analysis": "Analyse",
-				"label": "Optionen"
+				"general": "General",
+				"reading": "Reading",
+				"scanning": "Scanning",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules",
+				"label": "Configuration"
+			},
+			"integrations": {
+				"label": "Integrations",
+				"analysis": "Analysis",
+				"metadata": "Metadata"
 			},
 			"danger-zone": {
 				"access-control": "Zugriffskontrolle",
@@ -581,24 +585,24 @@
 						"alert": "Diese werden die entsprechenden Bibliotheksweiten Einstellungen überschreiben",
 						"configuration": {
 							"forceRebuild": {
-								"label": "Wiederaufbau erzwingen",
-								"description": "Jedes Buch in der Bibliothek auf der Festplatte wiederaufbauen",
-								"alert": "Dies wird jedes Buch in der Bibliothek von Grund auf wiederaufbauen, einschließlich Metadaten und Hashes"
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
 							},
 							"custom": {
-								"label": "Benutzerdefiniert",
-								"description": "Passe die Scan-Konfiguration an",
+								"label": "Custom",
+								"description": "Customize the scan configuration",
 								"validation": {
-									"noSelection": "Mindestens eine Option muss aktiviert sein"
+									"noSelection": "At least one option must be enabled"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Metadaten wiederaufbauen",
-								"description": "Metadaten für Bücher in der Bibliothek wiederaufbauen"
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
 							},
 							"regenHashes": {
-								"label": "Regeneriere Hashes",
-								"description": "Erstelle die Hashes für die Bücher in der Bibliothek neu"
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
 							}
 						}
 					}
@@ -651,25 +655,41 @@
 			}
 		},
 		"integrations/analysis": {
-			"title": "Analyse",
-			"description": "Analysiere den Inhalt dieser Bibliothek, um mögliche Probleme oder Verbesserungen zu identifizieren",
+			"title": "Analysis",
+			"description": "Analyze the contents of this library to identify potential issues or improvements",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Bücher analysieren",
-					"description": "Analysiere die Bücher in dieser Bibliothek, um zusätzliche Metadaten in der Datenbank zu speichern, wie z.B. die Seitenabmessungen für bildbasierte Bücher",
-					"disclaimerTitle": "Dieser Prozess ist ressourcenintensiv",
-					"disclaimer": "Es kann eine Weile dauern, bis es fertig ist. In Zukunft wird es konfigurierbarer sein",
-					"analyzeButton": "Bücher analysieren"
+					"heading": "Analyze books",
+					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
+					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
-					"heading": "Fehlende Dateien",
-					"description": "Dateien, die in der Datenbank gespeichert sind, aber nicht auf der Festplatte gefunden werden können",
-					"noMissingFiles": "Es gibt keine fehlenden Dateien in dieser Bibliothek"
+					"heading": "Missing files",
+					"description": "Files that are referenced in the database but cannot be located on disk",
+					"noMissingFiles": "There are no missing files in this library"
 				},
 				"duplicateFiles": {
-					"heading": "Duplizierte Dateien",
-					"description": "Dateien, die möglicherweise mehrfach auf der Festplatte vorkommen",
-					"noDuplicateFiles": "Es wurden keine doppelten Dateien für diese Bibliothek erkannt"
+					"heading": "Duplicate files",
+					"description": "Files that are potentially duplicated on disk",
+					"noDuplicateFiles": "There are no duplicate files detected for this library"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "Metadata",
+			"description": "Manage and review metadata matches for this library",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "Fetch metadata",
+					"description": "Fetch metadata for the media in this library",
+					"noProviders": {
+						"title": "There are no metadata providers available",
+						"description": "You can configure metadata providers in the metadata integration settings"
+					},
+					"fetchButton": "Start background fetch",
+					"fetchError": "Failed to start metadata fetch"
 				}
 			}
 		},
@@ -816,6 +836,75 @@
 			"description": "Füge jede Ergänzung in eine eigene Zeile hinzu"
 		}
 	},
+	"metadataMatching": {
+		"section": {
+			"heading": "Pending matches",
+			"description": "Review metadata matches fetched from external providers"
+		},
+		"confidenceBadge": {
+			"label": "confidence"
+		},
+		"includeField": "Include this field",
+		"excludeField": "Exclude this field",
+		"fieldLocked": "This field is locked",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "No candidates available for this record",
+				"noComparableFields": "No comparable fields found",
+				"headers": {
+					"field": "Field",
+					"current": "Current",
+					"external": "External",
+					"resolved": "Resolved"
+				},
+				"toolbar": {
+					"candidatePosition": "Candidate {{position}} of {{total}}",
+					"provider": "Provider"
+				}
+			},
+			"footer": {
+				"accept": "Accept",
+				"reject": "Reject",
+				"strategies": {
+					"FILL_GAPS": "Fill gaps",
+					"PREFER_EXTERNAL": "Prefer external",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
+					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "Keep current",
+				"takeExternal": "Take external",
+				"mergeLists": "Merge lists",
+				"editManually": "Edit manually",
+				"lockField": "Lock field",
+				"unlockField": "Unlock field",
+				"reset": "Reset",
+				"undoManualEdit": "Undo manual edit"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "Name",
+				"entityType": "Type",
+				"candidateCount": "Candidates",
+				"topConfidence": "Top Confidence",
+				"addedAt": "Fetched"
+			},
+			"acceptAll": {
+				"label": "Accept all",
+				"failed": "Failed to accept all matches",
+				"success": "All pending matches accepted"
+			},
+			"rejectAll": {
+				"label": "Reject all",
+				"failed": "Failed to reject all matches",
+				"success": "All pending matches rejected"
+			},
+			"startReview": "Start review",
+			"nothingToReview": "No pending metadata matches to review"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Weiterlesen",
@@ -842,17 +931,17 @@
 				"label": "Sichtbarkeit",
 				"configuration": {
 					"public": {
-						"label": "Öffentlich",
-						"description": "Für alle Benutzer auf dem Server zugänglich"
+						"label": "Public",
+						"description": "Accessible to all users on the server"
 					},
 					"shared": {
-						"label": "Geteilt",
-						"description": "Bestimmte Benutzer können auf diese intelligente Liste zugreifen",
-						"createDisclaimer": "Du kannst auswählen, mit wem die Liste nach Erstellung geteilt wird"
+						"label": "Shared",
+						"description": "Specific users can access this smart list",
+						"createDisclaimer": "You can select who this list is shared with after creation"
 					},
 					"private": {
-						"label": "Privat",
-						"description": "Niemand außer dir kann auf diese intelligente Liste zugreifen"
+						"label": "Private",
+						"description": "Only you can access this smart list"
 					}
 				}
 			},
@@ -887,13 +976,13 @@
 					"description": "Wie die Bücher in dieser intelligenten Liste gruppiert werden sollen",
 					"configuration": {
 						"by_books": {
-							"label": "Keine"
+							"label": "None"
 						},
 						"by_series": {
-							"label": "Serie"
+							"label": "Series"
 						},
 						"by_library": {
-							"label": "Bibliothek"
+							"label": "Library"
 						}
 					}
 				},
@@ -1253,6 +1342,7 @@
 				"jobs": "Jobs",
 				"access": "Zugriff",
 				"email": "E-Mail",
+				"metadata": "Metadata",
 				"notifications": "Benachrichtigungen",
 				"tags": "Tags",
 				"label": "Verwaltung"
@@ -1271,7 +1361,12 @@
 					"labels": {
 						"username": "Benutzername",
 						"password": "Passwort",
-						"activeChangesPrompt": "Du hast ungespeicherte Änderungen"
+						"activeChangesPrompt": "Du hast ungespeicherte Änderungen",
+						"uselessForm": {
+							"title": "You lack permissions to change these settings",
+							"description": "Contact your administrator if you want to make changes to these settings"
+						},
+						"insufficientPermission": "You do not have permission to change this"
 					},
 					"errors": {
 						"updateFailed": "Beim Aktualisieren deines Profils ist ein Fehler aufgetreten. Bitte versuche es noch einmal."
@@ -1321,14 +1416,14 @@
 					],
 					"configuration": {
 						"system": "System",
-						"light": "Hell",
-						"dark": "Dunkel",
-						"bronze": "Hell (Bronze)",
-						"ocean": "Ozean",
-						"autumn": "Herbst",
-						"cosmic": "Kosmisch",
-						"pumpkin": "Kürbis",
-						"midnight": "Mitternacht",
+						"light": "Light",
+						"dark": "Dark",
+						"bronze": "Bronze light",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"midnight": "Midnight",
 						"matrix": "Matrix"
 					}
 				},
@@ -1348,9 +1443,9 @@
 					"label": "Vorschaubild-Platzhalter",
 					"description": "Der Stil, welcher für Vorschaubild-Platzhalter benutzt wird",
 					"configuration": {
-						"grayscale": "Graustufen",
-						"averageColor": "Durchschnittsfarbe",
-						"colorful": "Farbenfroh",
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
 						"thumbhash": "Thumbhash"
 					}
 				},
@@ -1362,8 +1457,8 @@
 					"label": "Primäre Navigation",
 					"description": "Wähle zwischen einer minimalen Seiten- oder einer Topleisten Navigation",
 					"configuration": {
-						"sidebar": "Seitenleiste",
-						"topbar": "Topleiste"
+						"sidebar": "Sidebar",
+						"topbar": "Topbar"
 					},
 					"disclaimer": "* Einstellungen für die nicht ausgewählten Optionen werden deaktiviert und ausgeblendet"
 				},
@@ -1389,11 +1484,11 @@
 					"lock": "Anordnung sperren",
 					"unlock": "Anordnung entsperren",
 					"configuration": {
-						"HOME": "Startseite",
-						"EXPLORE": "Entdecken",
-						"LIBRARIES": "Bibliotheken",
-						"BOOK_CLUBS": "Buchclubs",
-						"SMART_LISTS": "Intelligente Listen"
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1410,8 +1505,8 @@
 					"label": "Anzeigeabstand",
 					"description": "Ändert den allgemeinen Abstand zwischen Elementen in der gesamten App",
 					"configuration": {
-						"default": "Standard",
-						"compact": "Kompakt"
+						"default": "Default",
+						"compact": "Compact"
 					},
 					"disclaimer": "* Kompakter Anzeigemodus ist noch nicht implementiert"
 				},
@@ -1782,32 +1877,75 @@
 			"description": "Hintergrundjobs, die auf deiner Stump Serverinstanz ausgeführt werden",
 			"sections": {
 				"scheduling": {
-					"title": "Geplante Jobs",
+					"title": "Scheduled jobs",
 					"description": "Einige Jobs können so konfiguriert werden, dass sie automatisch nach einem Zeitplan ausgeführt werden",
-					"disclaimer": "Der Jobplaner ist sehr einfach und wird in der Zukunft verbessert. Bitte teile uns dein Feedback oder deine Vorschläge mit!",
-					"createOrUpdateConfig": {
-						"fields": {
-							"intervalSecs": {
-								"label": "Intervall",
-								"description": "Wie oft der Job ausgeführt werden soll (in Sekunden)",
-								"placeholder": "z.B. \"86400\" für einmal am Tag"
-							},
-							"intervalPreset": {
-								"label": "Voreinstellung",
-								"configuration": {
-									"everySixHours": "Alle 6 Stunden",
-									"everyTwelveHours": "Alle 12 Stunden",
-									"oncePerDay": "Einmal am Tag",
-									"oncePerWeek": "Einmal pro Woche",
-									"oncePerMonth": "Einmal pro Monat"
-								}
-							},
-							"includedLibraryIds": {
-								"label": "Beinhaltete Bibliotheken",
-								"description": "Wähle aus, welche Bibliotheken beinhalten werden"
-							}
+					"restartRequiredTitle": "Restart required",
+					"restartRequired": "Changes to this configuration will take effect after a server restart",
+					"newScheduledJob": "New scheduled job",
+					"deleteScheduledJob": {
+						"title": "Delete scheduled job",
+						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+						"confirm": "Delete"
+					},
+					"dialog": {
+						"titleCreate": "New scheduled job",
+						"titleEdit": "Edit scheduled job",
+						"cancel": "Cancel",
+						"create": "Create",
+						"saveChanges": "Save changes"
+					},
+					"fields": {
+						"name": {
+							"label": "Name",
+							"placeholder": "e.g. \"Daily library scan\""
 						},
-						"restartRequired": "Änderungen an dieser Konfiguration werden nach einem Neustart des Servers wirksam"
+						"schedule": {
+							"label": "Cron schedule",
+							"description": "A cron expression to define the frequency",
+							"placeholder": "0 0 0 * * *"
+						},
+						"schedulePreset": {
+							"label": "Preset",
+							"custom": "Custom",
+							"everySixHours": "Every 6 hours",
+							"everyTwelveHours": "Every 12 hours",
+							"dailyAtMidnight": "Daily at midnight",
+							"weeklySunday": "Weekly (Sunday)",
+							"monthlyFirst": "Monthly (1st)"
+						},
+						"kind": {
+							"label": "Job type",
+							"libraryScan": "Library Scan",
+							"metadataRetry": "Metadata Retry"
+						},
+						"libraryIds": {
+							"label": "Libraries to scan",
+							"description": "Leave empty to scan all libraries"
+						},
+						"statuses": {
+							"label": "Statuses to retry",
+							"description": "Which metadata fetch statuses should be retried",
+							"rateLimited": "Rate Limited",
+							"failed": "Failed"
+						},
+						"enabled": "Enabled"
+					},
+					"row": {
+						"enabled": "Enabled",
+						"disabled": "Disabled",
+						"allLibraries": "All libraries",
+						"rateLimited": "rate limited",
+						"lastRun": "Last run at {{date}}",
+						"edit": "Edit",
+						"delete": "Delete"
+					},
+					"toasts": {
+						"createSuccess": "Scheduled job created",
+						"createError": "Failed to create scheduled job",
+						"updateSuccess": "Scheduled job updated",
+						"updateError": "Failed to update scheduled job",
+						"deleteSuccess": "Scheduled job deleted",
+						"deleteError": "Failed to delete scheduled job"
 					}
 				},
 				"history": {
@@ -1873,6 +2011,16 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "Account",
+						"featureAccess": "Feature access",
+						"fileManagement": "Files",
+						"emailers": "Emailers",
+						"emailing": "Emailing",
+						"libraryManagement": "Library management",
+						"userManagement": "User management",
+						"serverManagement": "Server management"
+					},
 					"heading": "Berechtigungen",
 					"subtitle": [
 						"Berechtigungen für diesen Benutzer wählen. Weitere Informationen zu den Berechtigungen sind in der",
@@ -2146,6 +2294,61 @@
 				"description": "Details dieses SMTP-Mailservers aktualisieren"
 			}
 		},
+		"server/metadataIntegrations": {
+			"helmet": "Metadata integrations",
+			"title": "Metadata integrations",
+			"addProvider": "Add provider",
+			"noProviders": "No providers configured yet. Add one to get started",
+			"providers": {
+				"title": "Providers",
+				"description": "Configure external metadata providers to fetch and enrich your library data"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "API token",
+					"description": "The API token for authenticating with this provider"
+				},
+				"apiTokenExpiresAt": {
+					"label": "API token expiration",
+					"description": "The date when the API token will expire (optional)"
+				},
+				"enableProvider": {
+					"label": "Enable provider",
+					"description": "It will be used for fetching if enabled"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "Enable auto-apply",
+						"description": "Skip manual approval and apply likely matches"
+					},
+					"threshold": {
+						"label": "Confidence threshold",
+						"description": "Minimum confidence score (0-1) to auto-apply a match",
+						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+					},
+					"strategy": {
+						"label": "Merge strategy",
+						"options": {
+							"FILL_GAPS": "Accept missing fields",
+							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
+							"PREFER_EXTERNAL": "Prefer external data"
+						}
+					}
+				}
+			},
+			"providerEnabled": "This provider is enabled",
+			"providerDisabled": "This provider is disabled",
+			"providerTokenExpiresSoon": "This provider's token will expire soon",
+			"autoApplyOn": "Auto-apply on",
+			"autoApplyOff": "Auto-apply off",
+			"editDialog": {
+				"tooltip": "Edit provider"
+			},
+			"deleteDialog": {
+				"title": "Delete provider",
+				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+			}
+		},
 		"server/tags": {
 			"helmet": "Tag-Verwaltung",
 			"title": "Tags",
@@ -2305,8 +2508,8 @@
 	"thumbnailDropdown": {
 		"label": "Vorschaubild auswählen",
 		"configuration": {
-			"selectFromBooks": "Aus Büchern auswählen",
-			"uploadImage": "Bild hochladen"
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
 		},
 		"uploadImage": {
 			"emptyState": "Eine Vorschau des Bildes wird hier angezeigt",
@@ -2325,6 +2528,10 @@
 			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
 			"confirm": "Delete {{type}}",
 			"typeToConfirm": "Type {{name}} to confirm:"
+		},
+		"experimentalDisclaimer": {
+			"title": "This feature is experimental",
+			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
 		},
 		"enter": "Enter",
 		"save": "Speichern",
@@ -2350,6 +2557,10 @@
 		"never": "Nie",
 		"scan": "Scannen",
 		"somethingWentWrong": "Etwas ist falsch gelaufen",
+		"back": "Back",
+		"continue": "Continue",
+		"book": "Book",
+		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Einige Dateien wurden abgelehnt. Bitte überprüfe die Dateitypen und versuche es erneut",
 			"tooManyFiles": "Du hast zu viele Dateien ausgewählt",
@@ -2369,9 +2580,25 @@
 			"label": "KoReader Synchronisierung",
 			"description": "Erlaubt dem Benutzer auf die KoReader Synchronisierungsintegration zuzugreifen"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Kobo sync",
+			"description": "Allows the user to access the Kobo sync integration"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "Intelligente Listen",
 			"description": "Erlaubt dem Benutzer den Zugriff auf Funktionen der intelligenten Listen, inklusive Erstellung und Verwaltung von intelligenten Listen"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "Change password",
+			"description": "Allows the user to change their own password"
+		},
+		"CHANGE_USERNAME": {
+			"label": "Change username",
+			"description": "Allows the user to change their own username"
+		},
+		"CHANGE_AVATAR": {
+			"label": "Change avatar",
+			"description": "Allows the user to change their own avatar"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Buchclubs erstellen",
@@ -2700,7 +2927,8 @@
 				"label": "Lesen",
 				"preferNativePdf": "Native PDF bevorzugen",
 				"preferMinimalReader": "Minimalen Leser bevorzugen",
-				"disableDismissGesture": "Deaktiviere Zurück-Geste"
+				"disableDismissGesture": "Deaktiviere Zurück-Geste",
+				"incognitoReading": "Incognito Reading"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2735,6 +2963,7 @@
 			"debug": {
 				"label": "Debug",
 				"clearCache": {
+					"label": "Clear Cache",
 					"memory": {
 						"button": "RAM",
 						"success": "RAM-Cache geleert"
@@ -2758,6 +2987,14 @@
 				"performanceMonitor": "Leistungsüberwachung",
 				"reduceAnimations": "Animationen verringern",
 				"maskUrls": "URLs verstecken",
+				"displayLanguageKeys": {
+					"label": "Display Language Keys",
+					"options": {
+						"none": "None",
+						"abbreviated": "Abbreviated",
+						"full": "Full"
+					}
+				},
 				"debugAnalytics": {
 					"label": "Debug-Analysen",
 					"description": "Sende zusätzliche Debug-bezogene Ereignisse, um bei der Fehlerbehebung zu helfen"
@@ -2776,7 +3013,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Readereinstellungen",
+			"title": "Image Reader Settings",
+			"overrideGlobalSettings": "Override global settings",
 			"sections": {
 				"mode": "Modus",
 				"imageOptions": "Bildoptionen",
@@ -2823,6 +3061,77 @@
 					"images": "Bildergalerie",
 					"slider": "Schieberegler"
 				}
+			},
+			"readingTimer": {
+				"label": "Reading Timer",
+				"resetTimer": "Reset Timer"
+			},
+			"allSettings": "All Settings"
+		},
+		"epubSettings": {
+			"title": "Epub Reader Settings",
+			"typeface": "Typeface",
+			"fontSize": "Font Size",
+			"fontWeight": {
+				"label": "Font Weight",
+				"options": {
+					"light": "Light",
+					"normal": "Normal",
+					"medium": "Medium",
+					"bold": "Bold"
+				}
+			},
+			"textNormalization": "Text Normalization",
+			"verticalText": "Vertical Text",
+			"readingDirection": {
+				"label": "Reading Direction",
+				"options": {
+					"rtl": "Right to left",
+					"ltr": "Left to right"
+				}
+			},
+			"columns": {
+				"label": "Columns",
+				"options": {
+					"auto": "Auto",
+					"single": "Single",
+					"double": "Double"
+				}
+			},
+			"pageMargins": "Page Margins",
+			"imageFilter": {
+				"label": "Image Filter",
+				"options": {
+					"none": "None",
+					"darken": "Darken",
+					"invert": "Invert"
+				}
+			},
+			"publisherStyles": "Publisher Styles",
+			"textAlignment": {
+				"label": "Text Alignment",
+				"options": {
+					"start": "Start",
+					"left": "Left",
+					"center": "Center",
+					"right": "Right",
+					"justify": "Justify"
+				}
+			},
+			"typeScale": "Type Scale",
+			"lineHeight": "Line Height",
+			"paragraphIndent": "Paragraph Indent",
+			"paragraphSpacing": "Paragraph Spacing",
+			"wordSpacing": "Word Spacing",
+			"letterSpacing": "Letter Spacing",
+			"hyphens": "Hyphens",
+			"ligatures": "Ligatures",
+			"customizeTheme": {
+				"placeholder": "Theme name",
+				"background": "Background",
+				"text": "Text",
+				"highlight": "Highlight",
+				"premadeThemes": "Premade themes"
 			}
 		},
 		"savedServerActions": {

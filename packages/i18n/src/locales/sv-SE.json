@@ -1414,7 +1414,7 @@
 						"Om du är intresserad av att skapa ditt eget tema, kolla in",
 						"dokumentationen"
 					],
-					"configuration": {
+					"options": {
 						"system": "System",
 						"light": "Light",
 						"dark": "Dark",

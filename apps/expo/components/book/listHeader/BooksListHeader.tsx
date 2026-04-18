@@ -9,6 +9,7 @@ import { Divider } from '~/components/Divider'
 import { MiniStatCard } from '~/components/StatCard'
 import { STAT_COLORS } from '~/lib/constants'
 
+import { useBooksFilterMenu } from './BooksFilterMenu'
 import { useBooksSortAndDisplayMenu } from './BooksSortAndDisplayMenu'
 
 type Props = {
@@ -53,7 +54,7 @@ export function BooksListHeader({ stats }: Props) {
 
 export function useBooksListHeader() {
 	const sortAndDisplayMenu = useBooksSortAndDisplayMenu()
-	// const filterMenu = useSeriesFilterMenu()
+	const filterMenu = useBooksFilterMenu()
 
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
@@ -61,20 +62,20 @@ export function useBooksListHeader() {
 			navigation.setOptions({
 				headerRight: () => (
 					<View className="gap-2 flex-row">
-						{/*{filterMenu}*/}
+						{filterMenu}
 						{sortAndDisplayMenu}
 					</View>
 				),
 			})
 		}
-	}, [navigation, sortAndDisplayMenu])
+	}, [navigation, filterMenu, sortAndDisplayMenu])
 
 	if (Platform.OS === 'ios') {
 		// fixme: it seems like two toolbar menu actions in one toolbar
 		// is causing onPress issues???
 		return (
 			<Stack.Toolbar placement="right">
-				{/*{filterMenu}*/}
+				{filterMenu}
 				{sortAndDisplayMenu}
 			</Stack.Toolbar>
 		)

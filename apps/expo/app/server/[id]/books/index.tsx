@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
-import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
+import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -76,10 +77,17 @@ export default function Screen() {
 		data: { librariesStats: booksStats },
 	} = useSuspenseGraphQL(statsQuery, ['booksStats', serverID])
 
-	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
+	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteGraphQL(
 		query,
 		['books', serverID, filters, sort],
-		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
+		{
+			filters,
+			orderBy: [sort],
+			pagination: { offset: { page: 1 } },
+		},
+		{
+			placeholderData: keepPreviousData,
+		},
 	)
 	const { numColumns, paddingHorizontal } = useGridItemSize()
 

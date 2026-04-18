@@ -9,6 +9,7 @@ import { GraphQLWebsocketConnectEventHandlers } from '@stump/sdk/socket'
 import {
 	InfiniteData,
 	noop,
+	PlaceholderDataFunction,
 	QueryKey,
 	useInfiniteQuery,
 	UseInfiniteQueryResult,
@@ -357,12 +358,17 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	queryKey: QueryKey,
 	variables?: TVariables extends Record<string, never> ? never : TVariables,
-	// Omit<
-	// 	UseInfiniteQueryOptions<TResult, Error, TResult, TResult, readonly unknown[], Pagination>,
-	// 	'queryKey' | 'queryFn'
-	// >
 	options?: {
 		enabled?: boolean
+		placeholderData?:
+			| InfiniteData<TResult, Pagination>
+			| PlaceholderDataFunction<
+					InfiniteData<TResult, Pagination>,
+					Error,
+					InfiniteData<TResult, Pagination>,
+					readonly unknown[]
+			  >
+			| undefined
 	},
 ): UseInfiniteQueryResult<InfiniteData<TResult>> {
 	const { sdk } = useSDK()

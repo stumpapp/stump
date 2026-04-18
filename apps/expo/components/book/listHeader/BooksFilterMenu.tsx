@@ -24,13 +24,13 @@ import {
 } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { useSeriesFilterStore } from '~/stores/filters'
+import { useBookFilterStore } from '~/stores/filters'
 
-export function useSeriesFilterMenu() {
+export function useBooksFilterMenu() {
 	const { t } = useTranslate()
 
-	const filters = useSeriesFilterStore((store) => store.filters)
-	const setFilters = useSeriesFilterStore((store) => store.setFilters)
+	const filters = useBookFilterStore((store) => store.filters)
+	const setFilters = useBookFilterStore((store) => store.setFilters)
 
 	const readingStatusFilter = get(filters, 'readingStatus.is')
 
@@ -49,7 +49,7 @@ export function useSeriesFilterMenu() {
 		setFilters(adjustedFilters)
 	}
 
-	const contentTypeFilter = get(filters, 'libraryType.isAnyOf', []) as LibraryType[]
+	const contentTypeFilter = get(filters, 'series.libraryType.isAnyOf', [] as LibraryType[])
 
 	// todo: should this be a list? or should it just toggle between as we go?
 	// todo: associated types? expose all? idk
@@ -66,9 +66,9 @@ export function useSeriesFilterMenu() {
 		}
 
 		if (newContentTypes.length) {
-			set(adjustedFilters, 'libraryType.isAnyOf', newContentTypes)
+			set(adjustedFilters, 'series.libraryType.isAnyOf', newContentTypes)
 		} else {
-			unset(adjustedFilters, 'libraryType')
+			unset(adjustedFilters, 'series')
 		}
 
 		setFilters(adjustedFilters)

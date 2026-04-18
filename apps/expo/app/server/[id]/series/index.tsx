@@ -2,6 +2,7 @@ import { useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
@@ -79,11 +80,18 @@ export default function Screen() {
 		fetchNextPage,
 		refetch,
 		isLoading: isInitialLoading,
-	} = useInfiniteGraphQL(query, ['series', serverID, filters, sort], {
-		filters,
-		orderBy: [sort],
-		pagination: { offset: { page: 1 } },
-	})
+	} = useInfiniteGraphQL(
+		query,
+		['series', serverID, filters, sort],
+		{
+			filters,
+			orderBy: [sort],
+			pagination: { offset: { page: 1 } },
+		},
+		{
+			placeholderData: keepPreviousData,
+		},
+	)
 	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const nodes = data?.pages.flatMap((page) => page.series.nodes) || []

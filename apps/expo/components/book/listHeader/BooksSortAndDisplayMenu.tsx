@@ -74,7 +74,7 @@ export function useBooksSortAndDisplayMenu() {
 
 	const getSubtitle = (field: string) => {
 		if (field !== sortConfig.field) return undefined
-		if (['DATE_ADDED', 'YEAR'].includes(field)) {
+		if (['DATE_ADDED', 'YEAR', 'CREATED_AT'].includes(field)) {
 			return t(`sorting.sortDirectionDate.${sortConfig.direction}`)
 		}
 		// for now only strings are left

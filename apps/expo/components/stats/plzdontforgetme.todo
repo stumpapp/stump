@@ -5,4 +5,4 @@
     - [ ] does time matter for series search? feels less relevant than for library/books (at-a-glance for lib vs more specific for total time)
 - [x] use generalized componenets i'll def wind up making (ofc ofc) for series books
     - [x] add a `Series Position` sort option
-- [ ] rm old filter ui components
+- [x] rm old filter ui components

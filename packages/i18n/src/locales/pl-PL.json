@@ -679,7 +679,7 @@
 		},
 		"integrations/metadata": {
 			"title": "Metadane",
-			"description": "Manage and review metadata matches for this library",
+			"description": "Zarządzaj i przeglądaj metadane dopasowane do tej biblioteki",
 			"sections": {
 				"fetchMetadata": {
 					"heading": "Fetch metadata",
@@ -936,12 +936,12 @@
 					},
 					"shared": {
 						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"description": "Określeni użytkownicy mogą uzyskać dostęp do tej inteligentnej listy",
+						"createDisclaimer": "Możesz wybrać, z kim ta lista jest udostępniona po jej utworzeniu"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "Prywatne",
+						"description": "Tylko Ty możesz uzyskać dostęp do tej inteligentnej listy"
 					}
 				}
 			},
@@ -976,13 +976,13 @@
 					"description": "Jak książki na tej inteligentnej liście powinny być grupowane",
 					"configuration": {
 						"by_books": {
-							"label": "None"
+							"label": "Brak"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "Według serii"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "Według biblioteki"
 						}
 					}
 				},
@@ -1342,7 +1342,7 @@
 				"jobs": "Zadania",
 				"access": "Dostęp",
 				"email": "Adres e-mail",
-				"metadata": "Metadata",
+				"metadata": "Metadane",
 				"notifications": "Powiadomienia",
 				"tags": "Etykiety",
 				"label": "Zarządzanie"
@@ -1363,10 +1363,10 @@
 						"password": "Hasło",
 						"activeChangesPrompt": "Masz niezapisane zmiany",
 						"uselessForm": {
-							"title": "You lack permissions to change these settings",
-							"description": "Contact your administrator if you want to make changes to these settings"
+							"title": "Nie masz uprawnień do zmiany tych ustawień",
+							"description": "Skontaktuj się z administratorem, aby wprowadzić zmiany w tych ustawieniach"
 						},
-						"insufficientPermission": "You do not have permission to change this"
+						"insufficientPermission": "Nie masz uprawnień do tej zmiany"
 					},
 					"errors": {
 						"updateFailed": "Podczas aktualizacji profilu wystąpił błąd serwera. Spróbuj ponownie."
@@ -1416,14 +1416,14 @@
 					],
 					"options": {
 						"system": "System",
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
+						"light": "Jasny",
+						"dark": "Ciemny",
+						"bronze": "Jasnobrązowy",
 						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
-						"midnight": "Midnight",
+						"autumn": "Jesień",
+						"cosmic": "Kosmiczny",
+						"pumpkin": "Dynia",
+						"midnight": "Północ",
 						"matrix": "Matrix"
 					}
 				},
@@ -1443,9 +1443,9 @@
 					"label": "Miniatury zastępcze",
 					"description": "Styl używany dla zastępczych miniatur",
 					"configuration": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Odcienie szarości",
+						"averageColor": "Średnie wartości kolorów",
+						"colorful": "Kolorowe",
 						"thumbhash": "Thumbhash"
 					}
 				},
@@ -1457,8 +1457,8 @@
 					"label": "Główna nawigacja",
 					"description": "Wybierz pomiędzy minimalnym panelem bocznym lub nawigacją u górnym ekranu",
 					"configuration": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
+						"sidebar": "Pasek boczny",
+						"topbar": "Pasek górny"
 					},
 					"disclaimer": "* Ustawienia niewybranych opcji będą wyłączone lub ukryte"
 				},
@@ -1484,11 +1484,11 @@
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",
 					"configuration": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "Strona główna",
+						"EXPLORE": "Odkrywaj",
+						"LIBRARIES": "Biblioteki",
+						"BOOK_CLUBS": "Kluby książki",
+						"SMART_LISTS": "Inteligentne listy"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1505,8 +1505,8 @@
 					"label": "Rozstaw wyświetlania",
 					"description": "Dostosuj odstępy między elementami w aplikacji",
 					"configuration": {
-						"default": "Default",
-						"compact": "Compact"
+						"default": "Domyślne",
+						"compact": "Kompaktowe"
 					},
 					"disclaimer": "* Tryb kompaktowy wyświetlania nie jest jeszcze zaimplementowany"
 				},
@@ -1877,31 +1877,31 @@
 			"description": "Zadania w tle, które działają na Twojej instancji serwera Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduled jobs",
+					"title": "Zaplanowane zadania",
 					"description": "Niektóre zadania można skonfigurować tak, aby uruchomiały się według harmonogramu. Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
-					"restartRequiredTitle": "Restart required",
-					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
+					"restartRequiredTitle": "Wymagane ponowne uruchomienie",
+					"restartRequired": "Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
+					"newScheduledJob": "Nowe zaplanowane zadanie",
 					"deleteScheduledJob": {
-						"title": "Delete scheduled job",
-						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-						"confirm": "Delete"
+						"title": "Usuń zaplanowane zadanie",
+						"description": "Czy na pewno chcesz usunąć \"{{name}}\"? Tej czynności nie można cofnąć.",
+						"confirm": "Usuń"
 					},
 					"dialog": {
-						"titleCreate": "New scheduled job",
-						"titleEdit": "Edit scheduled job",
-						"cancel": "Cancel",
-						"create": "Create",
-						"saveChanges": "Save changes"
+						"titleCreate": "Nowe zaplanowane zadanie",
+						"titleEdit": "Edytuj zaplanowane zadanie",
+						"cancel": "Anuluj",
+						"create": "Utwórz",
+						"saveChanges": "Zapisz zmiany"
 					},
 					"fields": {
 						"name": {
-							"label": "Name",
-							"placeholder": "e.g. \"Daily library scan\""
+							"label": "Nazwa",
+							"placeholder": "np. \"Codzienne skanowanie biblioteki\""
 						},
 						"schedule": {
-							"label": "Cron schedule",
-							"description": "A cron expression to define the frequency",
+							"label": "Harmonogram cron",
+							"description": "Wyrażenie cron definiujące częstotliwość",
 							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
@@ -2314,11 +2314,11 @@
 				},
 				"enableProvider": {
 					"label": "Enable provider",
-					"description": "It will be used for fetching if enabled"
+					"description": "Włączony będzie używany do pobierania"
 				},
 				"autoApplyConfig": {
 					"enabled": {
-						"label": "Enable auto-apply",
+						"label": "Włącz automatyczne aplikowanie",
 						"description": "Skip manual approval and apply likely matches"
 					},
 					"threshold": {

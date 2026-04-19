@@ -682,14 +682,14 @@
 			"description": "Zarządzaj i przeglądaj metadane dopasowane do tej biblioteki",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "Pobierz metadane",
+					"description": "Pobierz metadane dla mediów w tej bibliotece",
 					"noProviders": {
-						"title": "There are no metadata providers available",
-						"description": "You can configure metadata providers in the metadata integration settings"
+						"title": "Brak dostępnych dostawców metadanych",
+						"description": "Możesz skonfigurować dostawców metadanych w ustawieniach integracji metadanych"
 					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
+					"fetchButton": "Rozpocznij pobieranie w tle",
+					"fetchError": "Nie można uruchomić pobierania metadanych"
 				}
 			}
 		},
@@ -838,71 +838,71 @@
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "Pending matches",
-			"description": "Review metadata matches fetched from external providers"
+			"heading": "Oczekujące dopasowania",
+			"description": "Przeglądaj dopasowane metadane od zewnętrznych dostawców"
 		},
 		"confidenceBadge": {
-			"label": "confidence"
+			"label": "pewność"
 		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
+		"includeField": "Uwzględnij to pole",
+		"excludeField": "Wyklucz to pole",
+		"fieldLocked": "To pole jest zablokowane",
 		"reviewDialog": {
 			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
+				"noCandidates": "Brak kandydatów dla tego rekordu",
+				"noComparableFields": "Nie znaleziono porównywalnych pól",
 				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
+					"field": "Pole",
+					"current": "Bieżące",
+					"external": "Zewnętrzne",
+					"resolved": "Rozwiązane"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
-					"provider": "Provider"
+					"candidatePosition": "Kandydat {{position}} z {{total}}",
+					"provider": "Dostawca"
 				}
 			},
 			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
+				"accept": "Akceptuj",
+				"reject": "Odrzuć",
 				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
-					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+					"FILL_GAPS": "Wypełnij luki",
+					"PREFER_EXTERNAL": "Preferuj zewnętrzne",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferuj zewnętrzne i scal listy",
+					"FILL_AND_MERGE_LISTS": "Wypełnij i scal listy"
 				}
 			},
 			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
-				"reset": "Reset",
-				"undoManualEdit": "Undo manual edit"
+				"keepCurrent": "Zachowaj bieżące",
+				"takeExternal": "Wybier zewnętrzne",
+				"mergeLists": "Scal listy",
+				"editManually": "Edytuj ręcznie",
+				"lockField": "Zablokuj pole",
+				"unlockField": "Odblokuj pole",
+				"reset": "Resetuj",
+				"undoManualEdit": "Cofnij ręczną zmianę"
 			}
 		},
 		"matchesTable": {
 			"columns": {
-				"entityName": "Name",
-				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
+				"entityName": "Nazwa",
+				"entityType": "Typ",
+				"candidateCount": "Kandydaci",
+				"topConfidence": "Największa pewność",
+				"addedAt": "Pobrano o"
 			},
 			"acceptAll": {
-				"label": "Accept all",
-				"failed": "Failed to accept all matches",
-				"success": "All pending matches accepted"
+				"label": "Zaakceptuj wszystkie",
+				"failed": "Nie udało się zaakceptować wszystkich dopasowań",
+				"success": "Wszystkie oczekujące dopasowania zostały zaakceptowane"
 			},
 			"rejectAll": {
-				"label": "Reject all",
-				"failed": "Failed to reject all matches",
-				"success": "All pending matches rejected"
+				"label": "Odrzuć wszystkie",
+				"failed": "Nie udało się odrzucić wszystkich dopasowań",
+				"success": "Wszystkie oczekujące dopasowania zostały odrzucone"
 			},
-			"startReview": "Start review",
-			"nothingToReview": "No pending metadata matches to review"
+			"startReview": "Rozpocznij przegląd",
+			"nothingToReview": "Brak oczekujących dopasowań metadanych do przejrzenia"
 		}
 	},
 	"seriesOverviewScene": {
@@ -931,11 +931,11 @@
 				"label": "Widoczność",
 				"configuration": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "Publiczna",
+						"description": "Dostępna dla wszystkich użytkowników na serwerze"
 					},
 					"shared": {
-						"label": "Shared",
+						"label": "Współdzielona",
 						"description": "Określeni użytkownicy mogą uzyskać dostęp do tej inteligentnej listy",
 						"createDisclaimer": "Możesz wybrać, z kim ta lista jest udostępniona po jej utworzeniu"
 					},
@@ -3111,27 +3111,27 @@
 			"textAlignment": {
 				"label": "Wyrównanie tekstu",
 				"options": {
-					"start": "Start",
+					"start": "Do początku",
 					"left": "Do lewej",
 					"center": "Do środka",
 					"right": "Do prawej",
 					"justify": "Wyjustuj"
 				}
 			},
-			"typeScale": "Type Scale",
-			"lineHeight": "Line Height",
-			"paragraphIndent": "Paragraph Indent",
-			"paragraphSpacing": "Paragraph Spacing",
-			"wordSpacing": "Word Spacing",
-			"letterSpacing": "Letter Spacing",
-			"hyphens": "Hyphens",
-			"ligatures": "Ligatures",
+			"typeScale": "Skalowanie typu",
+			"lineHeight": "Wysokość linii",
+			"paragraphIndent": "Wcięcie akapitu",
+			"paragraphSpacing": "Odstęp między akapitami",
+			"wordSpacing": "Odstępy między wyrazami",
+			"letterSpacing": "Odległość między literami",
+			"hyphens": "Myślniki",
+			"ligatures": "Ligatury",
 			"customizeTheme": {
-				"placeholder": "Theme name",
-				"background": "Background",
-				"text": "Text",
-				"highlight": "Highlight",
-				"premadeThemes": "Premade themes"
+				"placeholder": "Nazwa motywu",
+				"background": "Tło",
+				"text": "Tekst",
+				"highlight": "Zaznaczenie",
+				"premadeThemes": "Wstępnie przygotowane motywy"
 			}
 		},
 		"savedServerActions": {

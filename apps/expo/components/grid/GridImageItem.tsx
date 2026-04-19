@@ -4,7 +4,6 @@ import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import { LinearGradientProps } from 'react-native-linear-gradient'
 
-import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
@@ -43,8 +42,6 @@ export default function GridImageItem({
 
 	const thumbnailHeight = itemWidth / thumbnailRatio
 
-	const colors = useColors()
-
 	return (
 		<Pressable onPress={onPress}>
 			{({ pressed }) => (
@@ -75,10 +72,9 @@ export default function GridImageItem({
 
 						{percentageCompleted != null && percentageCompleted >= 100 && (
 							<View
-								className="bottom-2 right-2 p-1.5 absolute z-30 flex items-center justify-center rounded-full opacity-90"
+								className="bottom-2 right-2 p-1.5 bg-white/40 absolute z-30 flex items-center justify-center rounded-full opacity-90"
 								style={{
 									borderRadius: 999, // idky i android having problems with rounded-full here
-									backgroundColor: colors.fill.brand.DEFAULT,
 								}}
 							>
 								<Icon as={Check} className="shadow" size={20} color="#f5f3ef" strokeWidth={2.5} />

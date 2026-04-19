@@ -1,6 +1,6 @@
 import { SeriesOrderBy } from '@stump/graphql'
 
-import { useEntitySortMenu } from '~/components/filter/EntitySortMenu'
+import { useSortAndDisplayMenu } from '~/components/filter/SortAndDisplayMenu'
 import { SortFieldDef } from '~/components/filter/types'
 import { useSeriesFilterStore } from '~/stores/filters'
 
@@ -14,7 +14,7 @@ export function useSeriesSortAndDisplayMenu() {
 	const sort = useSeriesFilterStore((store) => store.sort)
 	const setSort = useSeriesFilterStore((store) => store.setSort)
 
-	return useEntitySortMenu<SeriesOrderBy>({
+	return useSortAndDisplayMenu<SeriesOrderBy>({
 		sort,
 		setSort,
 		fields: SORT_FIELDS,

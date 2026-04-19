@@ -1,7 +1,7 @@
 import { LucideIcon } from 'lucide-react-native'
 import { View, ViewProps } from 'react-native'
 
-import { Icon, Text } from './ui'
+import { Icon, Text } from '../ui'
 
 export type StatCardProps = {
 	label: string

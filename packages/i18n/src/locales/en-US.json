@@ -3169,6 +3169,7 @@
 				"NAME": "Name",
 				"ADDED_AT": "Date Added",
 				"CREATED_AT": "Date Added",
+				"NUMBER": "Series Position",
 				"SERIES": "Series",
 				"YEAR": "Year Published"
 			},

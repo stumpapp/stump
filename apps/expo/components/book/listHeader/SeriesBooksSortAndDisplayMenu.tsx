@@ -1,16 +1,17 @@
 import { MediaOrderBy } from '@stump/graphql'
 
 import { useSortAndDisplayMenu } from '~/components/filter/SortAndDisplayMenu'
-import { SortFieldDef } from '~/components/filter/types'
+import { ActionDef, SortFieldDef } from '~/components/filter/types'
 import { useBookFilterStore } from '~/stores/filters'
 
 const SORT_FIELDS: SortFieldDef[] = [
 	{ field: 'NAME', orderKey: 'media' },
 	{ field: 'CREATED_AT', orderKey: 'media' },
+	{ field: 'NUMBER', orderKey: 'metadata' },
 	{ field: 'YEAR', orderKey: 'metadata' },
 ]
 
-export function useBooksSortAndDisplayMenu() {
+export function useSeriesBooksSortAndDisplayMenu(actions?: ActionDef[]) {
 	const sort = useBookFilterStore((store) => store.sort)
 	const setSort = useBookFilterStore((store) => store.setSort)
 
@@ -18,5 +19,6 @@ export function useBooksSortAndDisplayMenu() {
 		sort,
 		setSort,
 		fields: SORT_FIELDS,
+		actions,
 	})
 }

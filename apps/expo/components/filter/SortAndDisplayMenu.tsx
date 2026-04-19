@@ -13,6 +13,7 @@ import {
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuGroup,
+	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
@@ -22,12 +23,13 @@ import {
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import { MenuGroupDef, MenuItemDef, SortFieldDef } from './types'
+import { ActionDef, MenuGroupDef, MenuItemDef, SortFieldDef } from './types'
 
 type Props<O> = {
 	sort: O
 	setSort: (sort: O) => void
 	fields: SortFieldDef[]
+	actions?: ActionDef[]
 }
 
 // silly ts compiler
@@ -59,17 +61,19 @@ function extractSortConfig<O extends Record<string, unknown>>(
 
 const DATE_FIELDS = ['DATE_ADDED', 'YEAR', 'CREATED_AT']
 
-export function useEntitySortMenu<O extends Record<string, unknown>>({
+export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 	sort,
 	setSort,
 	fields,
+	actions,
 }: Props<O>) {
 	const { t } = useTranslate()
 
 	const sortConfig = extractSortConfig(sort, fields)
 
 	const onSortFieldPress = (fieldDef: SortFieldDef) => {
-		const adjustedConfig = clone(sortConfig)
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { orderKey: _, ...adjustedConfig } = clone(sortConfig)
 
 		if (fieldDef.field === sortConfig.field) {
 			set(adjustedConfig, 'direction', sortConfig.direction === 'ASC' ? 'DESC' : 'ASC')
@@ -79,9 +83,7 @@ export function useEntitySortMenu<O extends Record<string, unknown>>({
 			set(adjustedConfig, 'direction', isDateField ? 'DESC' : 'ASC')
 		}
 
-		const adjustedSort = {
-			[fieldDef.orderKey]: adjustedConfig,
-		} as O
+		const adjustedSort = set({}, fieldDef.orderKey, adjustedConfig) as O
 
 		setSort(adjustedSort)
 	}
@@ -96,11 +98,14 @@ export function useEntitySortMenu<O extends Record<string, unknown>>({
 
 	const sortItems: MenuItemDef[] = fields.map((fieldDef) => ({
 		key: fieldDef.field,
-		labelKey: `sorting.sortField.${fieldDef.field}`,
+		label: t(`sorting.sortField.${fieldDef.field}`),
 		isOn: sortConfig.field === fieldDef.field,
 		subtitle: getSubtitle(fieldDef.field),
 		onPress: () => onSortFieldPress(fieldDef),
 	}))
+
+	const normalActions = actions?.filter((a) => !a.destructive) ?? []
+	const destructiveActions = actions?.filter((a) => a.destructive) ?? []
 
 	const groups: MenuGroupDef[] = [
 		{
@@ -110,7 +115,7 @@ export function useEntitySortMenu<O extends Record<string, unknown>>({
 				{
 					key: 'grid',
 					icon: { ios: 'rectangle.grid.2x2', android: Grid2X2 },
-					labelKey: 'common.grid',
+					label: t('common.grid'),
 					isOn: true,
 					disabled: true,
 					onPress: () => {},
@@ -118,21 +123,53 @@ export function useEntitySortMenu<O extends Record<string, unknown>>({
 				{
 					key: 'list',
 					icon: { ios: 'list.bullet', android: List },
-					labelKey: 'common.list',
+					label: t('common.list'),
 					isOn: false,
 					disabled: true,
 					onPress: () => {},
 				},
 			],
 		},
-		{
-			key: 'sort-fields',
-			title: t('sorting.labelEllipsis'),
-			label: t('sorting.labelEllipsis'),
-			inline: true,
-			items: sortItems,
-		},
 	]
+
+	if (normalActions.length > 0) {
+		groups.push({
+			key: 'actions',
+			inline: true,
+			items: normalActions.map((a) => ({
+				key: a.key,
+				icon: a.icon,
+				label: a.label,
+				isOn: false,
+				isAction: true,
+				onPress: a.onPress,
+			})),
+		})
+	}
+
+	groups.push({
+		key: 'sort-fields',
+		title: t('sorting.labelEllipsis'),
+		label: t('sorting.labelEllipsis'),
+		inline: true,
+		items: sortItems,
+	})
+
+	if (destructiveActions.length > 0) {
+		groups.push({
+			key: 'destructive-actions',
+			inline: true,
+			items: destructiveActions.map((a) => ({
+				key: a.key,
+				icon: a.icon,
+				label: a.label,
+				isOn: false,
+				isAction: true,
+				destructive: true,
+				onPress: a.onPress,
+			})),
+		})
+	}
 
 	return Platform.select({
 		android: <AndroidSortMenu groups={groups} />,
@@ -144,12 +181,13 @@ export function useEntitySortMenu<O extends Record<string, unknown>>({
 							<Stack.Toolbar.MenuAction
 								key={item.key}
 								icon={item.icon?.ios}
-								isOn={item.isOn}
+								isOn={item.isAction ? undefined : item.isOn}
 								disabled={item.disabled}
 								subtitle={item.subtitle}
+								destructive={item.destructive}
 								onPress={item.onPress}
 							>
-								{t(item.labelKey)}
+								{item.label}
 							</Stack.Toolbar.MenuAction>
 						))}
 					</Stack.Toolbar.Menu>
@@ -164,8 +202,6 @@ type AndroidSortMenuProps = {
 }
 
 function AndroidSortMenu({ groups }: AndroidSortMenuProps) {
-	const { t } = useTranslate()
-
 	const [isOpen, setIsOpen] = useState(false)
 	const insets = useSafeAreaInsets()
 
@@ -180,6 +216,56 @@ function AndroidSortMenu({ groups }: AndroidSortMenuProps) {
 		if (!item.subtitle) return null
 		return <Text className="text-sm text-foreground-muted">{item.subtitle}</Text>
 	}
+
+	const renderActionItem = (item: MenuItemDef) => (
+		<DropdownMenuItem
+			key={item.key}
+			onPress={item.onPress}
+			className="flex-row items-center"
+			variant={item.destructive ? 'destructive' : 'default'}
+		>
+			<View className="gap-4 flex w-full flex-row items-center">
+				{item.icon?.android && (
+					<Icon
+						as={item.icon.android}
+						size={20}
+						className={cn('text-foreground-muted', {
+							'text-fill-danger': item.destructive,
+						})}
+					/>
+				)}
+				<Text
+					className={cn('text-lg', {
+						'text-fill-danger': item.destructive,
+					})}
+				>
+					{item.label}
+				</Text>
+			</View>
+		</DropdownMenuItem>
+	)
+
+	const renderCheckboxItem = (item: MenuItemDef) => (
+		<DropdownMenuCheckboxItem
+			key={item.key}
+			checked={item.isOn}
+			onCheckedChange={item.onPress}
+			className="text-foreground"
+			disabled={item.disabled}
+		>
+			<View className="gap-4 flex w-full flex-row items-center justify-between">
+				{item.icon?.android ? (
+					<View className="gap-4 flex flex-row items-center">
+						<Icon as={item.icon.android} size={20} className="text-foreground-muted" />
+						<Text className="text-lg">{item.label}</Text>
+					</View>
+				) : (
+					<Text className="text-lg">{item.label}</Text>
+				)}
+				{renderSubtitle(item)}
+			</View>
+		</DropdownMenuCheckboxItem>
+	)
 
 	return (
 		<DropdownMenu onOpenChange={setIsOpen}>
@@ -222,54 +308,14 @@ function AndroidSortMenu({ groups }: AndroidSortMenuProps) {
 								<DropdownMenuLabel className="text-foreground-muted">
 									{group.label}
 								</DropdownMenuLabel>
-								{group.items.map((item) => (
-									<DropdownMenuCheckboxItem
-										key={item.key}
-										checked={item.isOn}
-										onCheckedChange={item.onPress}
-										className="text-foreground"
-										disabled={item.disabled}
-									>
-										<View className="gap-4 flex w-full flex-row items-center justify-between">
-											{item.icon?.android ? (
-												<View className="gap-4 flex flex-row items-center">
-													<Icon
-														as={item.icon.android}
-														size={20}
-														className="text-foreground-muted"
-													/>
-													<Text className="text-lg">{t(item.labelKey)}</Text>
-												</View>
-											) : (
-												<Text className="text-lg">{t(item.labelKey)}</Text>
-											)}
-											{renderSubtitle(item)}
-										</View>
-									</DropdownMenuCheckboxItem>
-								))}
+								{group.items.map((item) =>
+									item.isAction ? renderActionItem(item) : renderCheckboxItem(item),
+								)}
 							</DropdownMenuGroup>
 						) : (
-							group.items.map((item) => (
-								<DropdownMenuCheckboxItem
-									key={item.key}
-									checked={item.isOn}
-									onCheckedChange={item.onPress}
-									className="text-foreground"
-									disabled={item.disabled}
-								>
-									<View className="gap-4 flex w-full flex-row items-center justify-between">
-										{item.icon?.android ? (
-											<View className="gap-4 flex flex-row items-center">
-												<Icon as={item.icon.android} size={20} className="text-foreground-muted" />
-												<Text className="text-lg">{t(item.labelKey)}</Text>
-											</View>
-										) : (
-											<Text className="text-lg">{t(item.labelKey)}</Text>
-										)}
-										{renderSubtitle(item)}
-									</View>
-								</DropdownMenuCheckboxItem>
-							))
+							group.items.map((item) =>
+								item.isAction ? renderActionItem(item) : renderCheckboxItem(item),
+							)
 						)}
 					</View>
 				))}

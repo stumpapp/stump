@@ -5309,6 +5309,13 @@ export type WritersQueryVariables = Exact<{
 
 export type WritersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', writers: Array<string> } };
 
+export type SeriesBooksListHeaderScanSeriesMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesBooksListHeaderScanSeriesMutation = { __typename?: 'Mutation', scanSeries: boolean };
+
 export type BookMenuFragment = { __typename?: 'Media', id: string, resolvedName: string, isFavorite: boolean, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string }, readProgress?: { __typename: 'ActiveReadingSession' } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> } & { ' $fragmentName'?: 'BookMenuFragment' };
 
 export type BookMenuCompleteMutationVariables = Exact<{
@@ -5419,13 +5426,6 @@ export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __t
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, createdAt: any, resolvedName: string, mediaCount: number, readCount: number, media: Array<{ __typename?: 'Media', resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
-
-export type SeriesActionMenuScanSeriesMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesActionMenuScanSeriesMutation = { __typename?: 'Mutation', scanSeries: boolean };
 
 export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, isComplete: boolean, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
@@ -9532,6 +9532,11 @@ export const WritersDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<WritersQuery, WritersQueryVariables>;
+export const SeriesBooksListHeaderScanSeriesDocument = new TypedDocumentString(`
+    mutation SeriesBooksListHeaderScanSeries($id: ID!) {
+  scanSeries(id: $id)
+}
+    `) as unknown as TypedDocumentString<SeriesBooksListHeaderScanSeriesMutation, SeriesBooksListHeaderScanSeriesMutationVariables>;
 export const BookMenuCompleteDocument = new TypedDocumentString(`
     mutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
   markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
@@ -9726,11 +9731,6 @@ export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
   }
   isComplete
 }`) as unknown as TypedDocumentString<RecentlyAddedSeriesGridQuery, RecentlyAddedSeriesGridQueryVariables>;
-export const SeriesActionMenuScanSeriesDocument = new TypedDocumentString(`
-    mutation SeriesActionMenuScanSeries($id: ID!) {
-  scanSeries(id: $id)
-}
-    `) as unknown as TypedDocumentString<SeriesActionMenuScanSeriesMutation, SeriesActionMenuScanSeriesMutationVariables>;
 export const SeriesOverviewSheetDocument = new TypedDocumentString(`
     query SeriesOverviewSheet($id: ID!) {
   seriesById(id: $id) {

@@ -1,28 +1,25 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useNavigationState, useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
-import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
+import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { formatHumanDurationSeparate } from '@stump/i18n'
+import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
-import { BookCheck, BookOpen, Clock } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Platform, View } from 'react-native'
+import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 import { BookGridItem } from '~/components/book'
 import { IBookGridItemFragment } from '~/components/book/BookGridItem'
-import { BookFilterHeader } from '~/components/book/filterHeader'
-import { Divider } from '~/components/Divider'
+import { SeriesBooksListHeader } from '~/components/book/listHeader/SeriesBooksListHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
-import { SeriesOverviewSheet, usePrefetchSeriesOverview, useSeriesMenu } from '~/components/series'
-import { MiniStatCard } from '~/components/StatCard'
+import { SeriesOverviewSheet, usePrefetchSeriesOverview } from '~/components/series'
 import { Button, RefreshButton, Text } from '~/components/ui'
-import { ON_END_REACHED_THRESHOLD, STAT_COLORS } from '~/lib/constants'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDownloadSeries } from '~/lib/hooks/db/downloadSeries'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
@@ -88,24 +85,20 @@ export default function Screen() {
 	useDynamicHeader({
 		title: series.resolvedName,
 		showBackButton,
-		// headerRight: () => (
-		// 	<SeriesActionMenu
-		// 		seriesId={id}
-		// 		onShowOverview={() => sheetRef.current?.present()}
-		// 		onDownloadSeries={() => downloadSeries(id)}
-		// 	/>
-		// ),
 	})
 
 	useEffect(() => {
 		prefetch(id)
 	}, [id, prefetch])
 
-	const menuFragment = useSeriesMenu({
-		seriesId: id,
-		onShowOverview: () => sheetRef.current?.present(),
-		onDownloadSeries: () => downloadSeries(id),
-	})
+	const seriesActions = useMemo(
+		() => ({
+			seriesId: id,
+			onShowOverview: () => sheetRef.current?.present(),
+			onDownloadSeries: () => downloadSeries(id),
+		}),
+		[id, downloadSeries],
+	)
 
 	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(createBookFilterStore()).current
@@ -118,7 +111,7 @@ export default function Screen() {
 		})),
 	)
 
-	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
+	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteGraphQL(
 		booksQuery,
 		['seriesBooks', id, filters, sort],
 		{
@@ -128,6 +121,9 @@ export default function Screen() {
 			},
 			orderBy: [sort],
 			pagination: { offset: { page: 1 } },
+		},
+		{
+			placeholderData: keepPreviousData,
 		},
 	)
 	const { numColumns, paddingHorizontal } = useGridItemSize()
@@ -147,11 +143,8 @@ export default function Screen() {
 
 	const isFiltered = Object.keys(filters).length > 0
 
-	const formattedTime = formatHumanDurationSeparate(series.stats.totalReadingTimeSeconds)
-
 	return (
 		<BookFilterContext.Provider value={store}>
-			{menuFragment}
 			<SafeAreaView
 				style={{ flex: 1 }}
 				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
@@ -168,29 +161,7 @@ export default function Screen() {
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={
-						<View className="gap-4">
-							<View className="px-4 gap-2 flex-row flex-wrap">
-								<MiniStatCard
-									value={series.stats.inProgressBooks}
-									icon={BookOpen}
-									baseColor={STAT_COLORS.inProgress}
-								/>
-								<MiniStatCard
-									value={series.stats.completedBooks}
-									suffix={`/ ${series.stats.bookCount}`}
-									icon={BookCheck}
-									baseColor={STAT_COLORS.completed}
-								/>
-								<MiniStatCard
-									value={formattedTime ? formattedTime.value : '??'}
-									suffix={formattedTime ? formattedTime.unit : undefined}
-									icon={Clock}
-									baseColor={STAT_COLORS.readingTime}
-								/>
-							</View>
-							<Divider />
-							<BookFilterHeader seriesId={id} />
-						</View>
+						<SeriesBooksListHeader stats={series.stats} seriesActions={seriesActions} />
 					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					contentInsetAdjustmentBehavior="always"

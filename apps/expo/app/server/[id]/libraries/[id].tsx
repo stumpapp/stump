@@ -19,7 +19,7 @@ import {
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import SeriesGridItem from '~/components/series/SeriesGridItem'
-import { MiniStatCard } from '~/components/StatCard'
+import { MiniStatCard } from '~/components/stats'
 import { RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD, STAT_COLORS } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'

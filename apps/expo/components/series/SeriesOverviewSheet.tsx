@@ -15,7 +15,7 @@ import { formatBytesSeparate } from '~/lib/format'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import { MetadataBadgeSection } from '../overview'
 import { SheetBackDetection } from '../SheetBackDetection'
-import { StatCard, StatCardProps } from '../StatCard'
+import { StatCard, StatCardProps } from '../stats'
 import { Card, Heading, Text } from '../ui'
 
 const query = graphql(`

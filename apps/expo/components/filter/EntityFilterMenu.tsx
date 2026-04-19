@@ -1,4 +1,8 @@
 import { Stack } from 'expo-router'
+import clone from 'lodash/cloneDeep'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
 import { ListFilter } from 'lucide-react-native'
 import { useState } from 'react'
 import { Platform, View } from 'react-native'
@@ -16,18 +20,65 @@ import {
 	Icon,
 	Text,
 } from '~/components/ui'
-import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import { MenuGroupDef, MenuItemDef } from './types'
+import { FilterGroupDef, MenuGroupDef, MenuItemDef } from './types'
+
+type FilterMenuParams<F> = {
+	filters: F
+	setFilters: (filters: F) => void
+	groups: FilterGroupDef[]
+}
+
+export function useFilterMenu<F extends Record<string, unknown>>({
+	filters,
+	setFilters,
+	groups: groupDefs,
+}: FilterMenuParams<F>) {
+	const groups = groupDefs.map((def) => {
+		const currentValue = get(filters, def.filterPath)
+		const unsetPath = def.unsetPath ?? def.filterPath.split('.')[0]!
+
+		const isSingle = def.mode === 'single'
+		const currentArray = isSingle ? [] : ((currentValue ?? []) as string[])
+
+		return {
+			...def,
+			items: def.items.map((opt) => ({
+				...opt,
+				isOn: isSingle ? currentValue === opt.value : currentArray.includes(opt.value),
+				onPress: () => {
+					const adjusted = clone(filters)
+					if (isSingle) {
+						if (currentValue === opt.value) {
+							unset(adjusted, unsetPath)
+						} else {
+							set(adjusted, def.filterPath, opt.value)
+						}
+					} else {
+						const next = currentArray.includes(opt.value)
+							? currentArray.filter((v) => v !== opt.value)
+							: [...currentArray, opt.value]
+						if (next.length) {
+							set(adjusted, def.filterPath, next)
+						} else {
+							unset(adjusted, unsetPath)
+						}
+					}
+					setFilters(adjusted as F)
+				},
+			})),
+		}
+	})
+
+	return useEntityFilterMenu({ groups })
+}
 
 type Params = {
 	groups: MenuGroupDef[]
 }
 
 export function useEntityFilterMenu({ groups }: Params) {
-	const { t } = useTranslate()
-
 	return Platform.select({
 		android: <AndroidFilterMenu groups={groups} />,
 		ios: (
@@ -43,7 +94,7 @@ export function useEntityFilterMenu({ groups }: Params) {
 								subtitle={item.subtitle}
 								onPress={item.onPress}
 							>
-								{t(item.labelKey)}
+								{item.label}
 							</Stack.Toolbar.MenuAction>
 						))}
 					</Stack.Toolbar.Menu>
@@ -58,8 +109,6 @@ type AndroidFilterMenuProps = {
 }
 
 function AndroidFilterMenu({ groups }: AndroidFilterMenuProps) {
-	const { t } = useTranslate()
-
 	const [isOpen, setIsOpen] = useState(false)
 	const insets = useSafeAreaInsets()
 
@@ -82,7 +131,7 @@ function AndroidFilterMenu({ groups }: AndroidFilterMenuProps) {
 				{item.icon?.android && (
 					<Icon as={item.icon.android} size={20} className="text-foreground-muted" />
 				)}
-				<Text className="text-lg">{t(item.labelKey)}</Text>
+				<Text className="text-lg">{item.label}</Text>
 			</View>
 		</DropdownMenuCheckboxItem>
 	)

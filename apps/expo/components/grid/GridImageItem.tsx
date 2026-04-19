@@ -72,12 +72,19 @@ export default function GridImageItem({
 
 						{percentageCompleted != null && percentageCompleted >= 100 && (
 							<View
-								className="bottom-2 right-2 p-1.5 bg-white/40 absolute z-30 flex items-center justify-center rounded-full opacity-90"
+								className="bottom-2 right-2 bg-white/40 p-1 absolute z-30 flex items-center justify-center rounded-full"
 								style={{
 									borderRadius: 999, // idky i android having problems with rounded-full here
 								}}
 							>
-								<Icon as={Check} className="shadow" size={20} color="#f5f3ef" strokeWidth={2.5} />
+								<Icon
+									as={Check}
+									// This icon looks optically off center so I've adjusted it down a bit
+									className="shadow top-[0.8]"
+									size={20}
+									color="#f5f3ef"
+									strokeWidth={2.5}
+								/>
 							</View>
 						)}
 					</View>
@@ -103,7 +110,7 @@ const COMPLETED_GRADIENT = {
 	...easeGradient({
 		colorStops: {
 			0.7: { color: 'transparent' },
-			1: { color: 'rgba(0, 0, 0, 0.80)' },
+			1: { color: 'rgba(0, 0, 0, 0.70)' },
 		},
 		extraColorStopsPerTransition: 16,
 		easing: Easing.bezier(0.4, 0, 0.6, 1),
@@ -115,7 +122,7 @@ const COMPLETED_GRADIENT = {
 const READING_GRADIENT = easeGradient({
 	colorStops: {
 		0.8: { color: 'transparent' },
-		1: { color: 'rgba(0, 0, 0, 0.80)' },
+		1: { color: 'rgba(0, 0, 0, 0.70)' },
 	},
 	extraColorStopsPerTransition: 16,
 	easing: Easing.bezier(0.42, 0, 0.7, 1),

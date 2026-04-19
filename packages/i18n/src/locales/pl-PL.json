@@ -1905,47 +1905,47 @@
 							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
-							"label": "Preset",
-							"custom": "Custom",
-							"everySixHours": "Every 6 hours",
-							"everyTwelveHours": "Every 12 hours",
-							"dailyAtMidnight": "Daily at midnight",
-							"weeklySunday": "Weekly (Sunday)",
-							"monthlyFirst": "Monthly (1st)"
+							"label": "Predefiniowane",
+							"custom": "Niestandardowe",
+							"everySixHours": "Co 6 godzin",
+							"everyTwelveHours": "Co 12 godzin",
+							"dailyAtMidnight": "Codziennie o północy",
+							"weeklySunday": "Tygodniowo (w niedzielę)",
+							"monthlyFirst": "Miesięcznie (pierwszego)"
 						},
 						"kind": {
-							"label": "Job type",
-							"libraryScan": "Library Scan",
-							"metadataRetry": "Metadata Retry"
+							"label": "Rodzaj zadania",
+							"libraryScan": "Skanowanie biblioteki",
+							"metadataRetry": "Ponowienie metadanych"
 						},
 						"libraryIds": {
-							"label": "Libraries to scan",
-							"description": "Leave empty to scan all libraries"
+							"label": "Biblioteki do zeskanowania",
+							"description": "Pozostaw puste, aby zeskanować wszystkie biblioteki"
 						},
 						"statuses": {
-							"label": "Statuses to retry",
-							"description": "Which metadata fetch statuses should be retried",
-							"rateLimited": "Rate Limited",
-							"failed": "Failed"
+							"label": "Statusy do ponawiania próby",
+							"description": "Które statusy pobierania metadanych powinny być ponowione",
+							"rateLimited": "Ograniczenie czasowe",
+							"failed": "Niepowodzenie"
 						},
-						"enabled": "Enabled"
+						"enabled": "Aktywne"
 					},
 					"row": {
-						"enabled": "Enabled",
-						"disabled": "Disabled",
-						"allLibraries": "All libraries",
-						"rateLimited": "rate limited",
-						"lastRun": "Last run at {{date}}",
-						"edit": "Edit",
-						"delete": "Delete"
+						"enabled": "Aktywne",
+						"disabled": "Nieaktywne",
+						"allLibraries": "Wszystkie biblioteki",
+						"rateLimited": "ograniczony czasowo",
+						"lastRun": "Ostatnio uruchomione o {{date}}",
+						"edit": "Edytuj",
+						"delete": "Usuń"
 					},
 					"toasts": {
-						"createSuccess": "Scheduled job created",
-						"createError": "Failed to create scheduled job",
-						"updateSuccess": "Scheduled job updated",
-						"updateError": "Failed to update scheduled job",
-						"deleteSuccess": "Scheduled job deleted",
-						"deleteError": "Failed to delete scheduled job"
+						"createSuccess": "Zaplanowane zadanie zostało utworzone",
+						"createError": "Nie udało się utworzyć zaplanowanego zadania",
+						"updateSuccess": "Zaplanowane zadanie zostało zaktualizowane",
+						"updateError": "Nie udało się zaktualizować zaplanowanego zadania",
+						"deleteSuccess": "Zaplanowane zadanie zostało usunięte",
+						"deleteError": "Nie udało się usunąć zaplanowanego zadania"
 					}
 				},
 				"history": {
@@ -2012,14 +2012,14 @@
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "Account",
-						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
-						"emailing": "Emailing",
-						"libraryManagement": "Library management",
-						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"accountManagement": "Konto",
+						"featureAccess": "Dostęp do funkcji",
+						"fileManagement": "Pliki",
+						"emailers": "Wysyłka",
+						"emailing": "Wysyłka poczty elektronicznej",
+						"libraryManagement": "Zarządzanie bibliotekami",
+						"userManagement": "Zarządzanie użytkownikami",
+						"serverManagement": "Zarządzanie serwerem"
 					},
 					"heading": "Uprawnienia",
 					"subtitle": [
@@ -2295,58 +2295,58 @@
 			}
 		},
 		"server/metadataIntegrations": {
-			"helmet": "Metadata integrations",
-			"title": "Metadata integrations",
-			"addProvider": "Add provider",
-			"noProviders": "No providers configured yet. Add one to get started",
+			"helmet": "Integracja metadanych",
+			"title": "Integracja metadanych",
+			"addProvider": "Dodaj dostawcę",
+			"noProviders": "Brak skonfigurowanych dostawców. Dodaj jednego, aby rozpocząć",
 			"providers": {
-				"title": "Providers",
-				"description": "Configure external metadata providers to fetch and enrich your library data"
+				"title": "Dostawcy",
+				"description": "Skonfiguruj zewnętrznych dostawców metadanych, aby pobierać i wzbogacać dane bibliotek"
 			},
 			"providerForm": {
 				"apiToken": {
-					"label": "API token",
-					"description": "The API token for authenticating with this provider"
+					"label": "Token API",
+					"description": "Token API do uwierzytelniania z tym dostawcą"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
-					"description": "The date when the API token will expire (optional)"
+					"label": "Ważność tokenu",
+					"description": "Data wygaśnięcia tokenu API (opcjonalnie)"
 				},
 				"enableProvider": {
-					"label": "Enable provider",
+					"label": "Włącz dostawcę",
 					"description": "Włączony będzie używany do pobierania"
 				},
 				"autoApplyConfig": {
 					"enabled": {
-						"label": "Włącz automatyczne aplikowanie",
-						"description": "Skip manual approval and apply likely matches"
+						"label": "Włącz automatyczne zastosowanie",
+						"description": "Pomiń ręczną akceptację i zastosuj prawdopodobne dopasowania"
 					},
 					"threshold": {
-						"label": "Confidence threshold",
-						"description": "Minimum confidence score (0-1) to auto-apply a match",
-						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+						"label": "Próg pewności",
+						"description": "Minimalna punktacja pewności (0-1) do automatycznego zastosowania dopasowania",
+						"disclaimer": "Obliczona punktacja pewności jest najlepszym oszacowaniem, niekoniecznie zawsze dokładnym"
 					},
 					"strategy": {
-						"label": "Merge strategy",
+						"label": "Strategia scalania",
 						"options": {
-							"FILL_GAPS": "Accept missing fields",
-							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
-							"PREFER_EXTERNAL": "Prefer external data"
+							"FILL_GAPS": "Akceptuj brakujące pola",
+							"FILL_AND_MERGE_LISTS": "Akceptuj brakujące pola i scalaj listy",
+							"PREFER_EXTERNAL": "Preferuj dane zewnętrzne"
 						}
 					}
 				}
 			},
-			"providerEnabled": "This provider is enabled",
-			"providerDisabled": "This provider is disabled",
-			"providerTokenExpiresSoon": "This provider's token will expire soon",
-			"autoApplyOn": "Auto-apply on",
-			"autoApplyOff": "Auto-apply off",
+			"providerEnabled": "Ten dostawca jest włączony",
+			"providerDisabled": "Ten dostawca jest wyłączony",
+			"providerTokenExpiresSoon": "Token tego dostawcy wkrótce wygaśnie",
+			"autoApplyOn": "Automatyczne zastosowanie włączone",
+			"autoApplyOff": "Automatyczne zastosowanie wyłączone",
 			"editDialog": {
-				"tooltip": "Edit provider"
+				"tooltip": "Edytuj dostawcę"
 			},
 			"deleteDialog": {
-				"title": "Delete provider",
-				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+				"title": "Usuń dostawcę",
+				"description": "Czy na pewno chcesz usunąć {{providerName}}? Tej czynności nie można cofnąć."
 			}
 		},
 		"server/tags": {
@@ -2508,8 +2508,8 @@
 	"thumbnailDropdown": {
 		"label": "Edytuj miniaturkę",
 		"configuration": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Wybierz z książek",
+			"uploadImage": "Prześlij obraz"
 		},
 		"uploadImage": {
 			"emptyState": "Podgląd obrazu pojawi się tutaj",
@@ -2530,8 +2530,8 @@
 			"typeToConfirm": "Wprowadź {{name}} aby potwierdzić:"
 		},
 		"experimentalDisclaimer": {
-			"title": "This feature is experimental",
-			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
+			"title": "Ta funkcja jest eksperymentalna",
+			"description": "Może brakować funkcjonalności, posiadać błędy lub w ogóle nie działać. Uzywaj według własnego uznania i zgłoś wszelkie błędy, które napotkasz"
 		},
 		"enter": "Enter",
 		"save": "Zapisz",
@@ -2557,10 +2557,10 @@
 		"never": "Nigdy",
 		"scan": "Skanuj",
 		"somethingWentWrong": "Coś poszło nie tak",
-		"back": "Back",
-		"continue": "Continue",
-		"book": "Book",
-		"series": "Series",
+		"back": "Powrót",
+		"continue": "Kontynuuj",
+		"book": "Książka",
+		"series": "Seria",
 		"fileUpload": {
 			"someRejected": "Niektóre pliki zostały odrzucone. Sprawdź typy plików i spróbuj ponownie",
 			"tooManyFiles": "Wybrano zbyt dużą ilość plików",
@@ -2581,24 +2581,24 @@
 			"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją KoReader"
 		},
 		"ACCESS_KOBO_SYNC": {
-			"label": "Kobo sync",
-			"description": "Allows the user to access the Kobo sync integration"
+			"label": "Synchronizacja Kobo",
+			"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją Kobo"
 		},
 		"ACCESS_SMART_LIST": {
 			"label": "Inteligentne listy",
 			"description": "Pozwala użytkownikowi na dostęp do funkcji inteligentnych list, w tym do tworzenia i zarządzania nimi"
 		},
 		"CHANGE_PASSWORD": {
-			"label": "Change password",
-			"description": "Allows the user to change their own password"
+			"label": "Zmiana hasła",
+			"description": "Pozwala użytkownikowi na zmianę własnego hasła"
 		},
 		"CHANGE_USERNAME": {
-			"label": "Change username",
-			"description": "Allows the user to change their own username"
+			"label": "Zmiana nazwy użytkownika",
+			"description": "Pozwala użytkownikowi na zmianę własnej nazwy użytkownika"
 		},
 		"CHANGE_AVATAR": {
-			"label": "Change avatar",
-			"description": "Allows the user to change their own avatar"
+			"label": "Zmiana awatara",
+			"description": "Pozwala użytkownikowi na zmianę własnego awatara"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Tworzenie klubów książki",
@@ -2928,7 +2928,7 @@
 				"preferNativePdf": "Preferuj natywny PDF",
 				"preferMinimalReader": "Preferuj minimalny czytnik",
 				"disableDismissGesture": "Wyłącz gest odrzucania",
-				"incognitoReading": "Incognito Reading"
+				"incognitoReading": "Czytanie w trybie prywatnym"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2963,7 +2963,7 @@
 			"debug": {
 				"label": "Debugowanie",
 				"clearCache": {
-					"label": "Clear Cache",
+					"label": "Wyczyść pamięć podręczną",
 					"memory": {
 						"button": "Pamięć",
 						"success": "Wyczyszczono pamięć"
@@ -2988,11 +2988,11 @@
 				"reduceAnimations": "Ogranicz animacje",
 				"maskUrls": "Ukryj odnośniki",
 				"displayLanguageKeys": {
-					"label": "Display Language Keys",
+					"label": "Wyświetl klucze językowe",
 					"options": {
-						"none": "None",
-						"abbreviated": "Abbreviated",
-						"full": "Full"
+						"none": "Brak",
+						"abbreviated": "Skrócone",
+						"full": "Pełne"
 					}
 				},
 				"debugAnalytics": {
@@ -3013,8 +3013,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Image Reader Settings",
-			"overrideGlobalSettings": "Override global settings",
+			"title": "Ustawienia czytnika obrazkowego",
+			"overrideGlobalSettings": "Nadpisz ustawienia globalne",
 			"sections": {
 				"mode": "Tryb",
 				"imageOptions": "Ustawienia obrazów",
@@ -3063,59 +3063,59 @@
 				}
 			},
 			"readingTimer": {
-				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
+				"label": "Czasomierz",
+				"resetTimer": "Resetuj czasomierz"
 			},
-			"allSettings": "All Settings"
+			"allSettings": "Wszystkie ustawienia"
 		},
 		"epubSettings": {
-			"title": "Epub Reader Settings",
-			"typeface": "Typeface",
-			"fontSize": "Font Size",
+			"title": "Ustawienia czytnika Epub",
+			"typeface": "Krój czcionki",
+			"fontSize": "Rozmiar czcionki",
 			"fontWeight": {
-				"label": "Font Weight",
+				"label": "Grubość czcionki",
 				"options": {
-					"light": "Light",
-					"normal": "Normal",
-					"medium": "Medium",
-					"bold": "Bold"
+					"light": "Lekka",
+					"normal": "Normalna",
+					"medium": "Średnia",
+					"bold": "Gruba"
 				}
 			},
-			"textNormalization": "Text Normalization",
-			"verticalText": "Vertical Text",
+			"textNormalization": "Normalizacja tekstu",
+			"verticalText": "Tekst pionowy",
 			"readingDirection": {
-				"label": "Reading Direction",
+				"label": "Kierunek czytania",
 				"options": {
-					"rtl": "Right to left",
-					"ltr": "Left to right"
+					"rtl": "Od prawej do lewej",
+					"ltr": "Od lewej do prawej"
 				}
 			},
 			"columns": {
-				"label": "Columns",
+				"label": "Kolumny",
 				"options": {
-					"auto": "Auto",
-					"single": "Single",
-					"double": "Double"
+					"auto": "Automatycznie",
+					"single": "Pojedyncze",
+					"double": "Podwójne"
 				}
 			},
-			"pageMargins": "Page Margins",
+			"pageMargins": "Marginesy strony",
 			"imageFilter": {
-				"label": "Image Filter",
+				"label": "Filtr obrazu",
 				"options": {
-					"none": "None",
-					"darken": "Darken",
-					"invert": "Invert"
+					"none": "Żaden",
+					"darken": "Przyciemnij",
+					"invert": "Odwróć"
 				}
 			},
-			"publisherStyles": "Publisher Styles",
+			"publisherStyles": "Style wydawcy",
 			"textAlignment": {
-				"label": "Text Alignment",
+				"label": "Wyrównanie tekstu",
 				"options": {
 					"start": "Start",
-					"left": "Left",
-					"center": "Center",
-					"right": "Right",
-					"justify": "Justify"
+					"left": "Do lewej",
+					"center": "Do środka",
+					"right": "Do prawej",
+					"justify": "Wyjustuj"
 				}
 			},
 			"typeScale": "Type Scale",

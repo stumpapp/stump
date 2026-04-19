@@ -266,12 +266,12 @@
 				},
 				"configuration": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "Serie",
+						"description": "Domyślnie pokaż zakładkę serii"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "Książki",
+						"description": "Domyślnie pokaż zakładkę książek"
 					}
 				}
 			},
@@ -309,10 +309,10 @@
 				"resizeMethod": {
 					"label": "Metoda skalowania",
 					"configuration": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Skalowanie równomierne",
+						"exact": "Dokładny wymiar",
+						"scaleDimension": "Skalowanie automatyczne",
+						"none": "Żadne"
 					}
 				},
 				"scaleEvenlyByFactor": {
@@ -336,8 +336,8 @@
 					"dimension": {
 						"label": "Wymiar",
 						"configuration": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Szerokość",
+							"height": "Wysokość"
 						}
 					},
 					"size": {
@@ -434,15 +434,15 @@
 					"disabled": "Nie można zmienić tego ustawienia"
 				},
 				"configuration": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Wzorzec biblioteki",
+					"description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "Priorytet kolekcji",
+						"description": "Każdy folder na najwyższym poziomie katalogu głównego biblioteki jest pojedynczą serią"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "Priorytet serii",
+						"description": "Każdy folder na dowolnym poziomie jest pojedynczą serią"
 					}
 				}
 			}
@@ -545,17 +545,17 @@
 		"sidebar": {
 			"basics": "Podstawowe",
 			"configuration": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"label": "Configuration"
+				"general": "Ogólne",
+				"reading": "Czytanie",
+				"scanning": "Skanowanie",
+				"thumbnails": "Miniatury",
+				"ignore-rules": "Reguły pomijania",
+				"label": "Konfiguracja"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
+				"label": "Integracje",
+				"analysis": "Analiza",
+				"metadata": "Metadane"
 			},
 			"danger-zone": {
 				"access-control": "Kontrola dostępu",
@@ -585,24 +585,24 @@
 						"alert": "Opcje te zastąpią analogiczne ustawienia globalne biblioteki",
 						"configuration": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Wymuś odbudowę",
+								"description": "Odbuduj każdą książkę w bibliotece na dysku",
+								"alert": "Spowoduje odbudowę każdej książki w bibliotece od zera, w tym jej metadane i skrót pliku"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Niestandardowe",
+								"description": "Dostosuj konfigurację skanowania",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "Przynajmniej jedna z opcji musi być włączona"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Odbuduj metadane",
+								"description": "Odbuduj metadane książek w bibliotece"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Wygeneruj ponownie skróty plików",
+								"description": "Wygeneruj ponownie skróty plików dla książek w bibliotece"
 							}
 						}
 					}
@@ -655,30 +655,30 @@
 			}
 		},
 		"integrations/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "Analiza",
+			"description": "Analizuj zawartość tej biblioteki w celu zidentyfikowania potencjalnych problemów lub ulepszeń",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "Analizuj książki",
+					"description": "Analizuj książki w tej bibliotece, aby dołączyć dodatkowe metadane w bazie danych, takie jak wymiary stron dla książek obrazkowych",
+					"disclaimerTitle": "Proces ten jest zasobochłonny",
+					"disclaimer": "Proces ten może trochę potrwać. W przyszłości będzie bardziej konfigurowalny",
+					"analyzeButton": "Analizuj książki"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "Brakujące pliki",
+					"description": "Pliki których odwołania znajdują się w bazie danych ale nie mogą być zlokalizowane na dysku",
+					"noMissingFiles": "W tej bibliotece nie ma brakujących plików"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "Powielone pliki",
+					"description": "Potencjalnie powielone na dysku pliki",
+					"noDuplicateFiles": "W tej bibliotece nie ma powielonych plików"
 				}
 			}
 		},
 		"integrations/metadata": {
-			"title": "Metadata",
+			"title": "Metadane",
 			"description": "Manage and review metadata matches for this library",
 			"sections": {
 				"fetchMetadata": {

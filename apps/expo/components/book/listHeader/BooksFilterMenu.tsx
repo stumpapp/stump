@@ -1,8 +1,9 @@
 import { LibraryType, ReadingStatus } from '@stump/graphql'
-import { Book, BookOpen, CheckCircle, ClockFading, Glasses } from 'lucide-react-native'
+import { BookOpen, CheckCircle, ClockFading, Glasses } from 'lucide-react-native'
 
 import { useFilterMenu } from '~/components/filter/EntityFilterMenu'
 import { FilterGroupDef } from '~/components/filter/types'
+import { ComicBubble, Manga } from '~/components/icons'
 import { useTranslate } from '~/lib/hooks'
 import { useBookFilterStore } from '~/stores/filters'
 
@@ -60,13 +61,24 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 				},
 				{
 					key: 'comic',
-					icon: { ios: 'burst', android: Book },
+					icon: {
+						// haven't quite cracked this yet. ios really does not want to render svg, fine. png works, but
+						// template rendering isn't seemingly working (e.g., so colors are wrong) and 24x24 looks pretty
+						// shit. i've added 48x48 in the assets for now, but those are too large (and wrong colors, still)
+						// ios: require('~/assets/icons/comic-bubble.png'),
+						ios: 'burst',
+						android: ComicBubble,
+					},
 					value: LibraryType.Comic,
 					label: t('libraryType.COMIC'),
 				},
 				{
 					key: 'manga',
-					icon: { ios: 'bubble', android: Book },
+					icon: {
+						// ios: require('~/assets/icons/manga.png'),
+						ios: 'bubble',
+						android: Manga,
+					},
 					value: LibraryType.Manga,
 					label: t('libraryType.MANGA'),
 				},

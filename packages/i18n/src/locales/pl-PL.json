@@ -266,12 +266,12 @@
 				},
 				"options": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "Serie",
+						"description": "Domyślnie pokaż zakładkę serii"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "Książki",
+						"description": "Domyślnie pokaż zakładkę książek"
 					}
 				}
 			},
@@ -309,10 +309,10 @@
 				"resizeMethod": {
 					"label": "Metoda skalowania",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Skalowanie równomierne",
+						"exact": "Dokładny wymiar",
+						"scaleDimension": "Skalowanie automatyczne",
+						"none": "Brak"
 					}
 				},
 				"scaleEvenlyByFactor": {
@@ -336,8 +336,8 @@
 					"dimension": {
 						"label": "Wymiar",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Szerokość",
+							"height": "Wysokość"
 						}
 					},
 					"size": {
@@ -434,15 +434,15 @@
 					"disabled": "Nie można zmienić tego ustawienia"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Wzorzec biblioteki",
+					"description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "Priorytet kolekcji",
+						"description": "Każdy folder na najwyższym poziomie katalogu głównego biblioteki jest pojedynczą serią"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "Priorytet serii",
+						"description": "Każdy folder na dowolnym poziomie jest pojedynczą serią"
 					}
 				}
 			}
@@ -585,24 +585,24 @@
 						"alert": "Opcje te zastąpią analogiczne ustawienia globalne biblioteki",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Wymuś odbudowę",
+								"description": "Odbuduj każdą książkę w bibliotece na dysku",
+								"alert": "Spowoduje odbudowę każdej książki w bibliotece od zera, w tym jej metadane i skrót pliku"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Niestandardowe",
+								"description": "Dostosuj konfigurację skanowania",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "Przynajmniej jedna z opcji musi być włączona"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Odbuduj metadane",
+								"description": "Odbuduj metadane książek w bibliotece"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Wygeneruj ponownie skróty plików",
+								"description": "Wygeneruj ponownie skróty plików dla książek w bibliotece"
 							}
 						}
 					}
@@ -931,17 +931,17 @@
 				"label": "Widoczność",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "Publiczna",
+						"description": "Dostępna dla wszystkich użytkowników na serwerze"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "Współdzielona",
+						"description": "Określeni użytkownicy mogą uzyskać dostęp do tej inteligentnej listy",
+						"createDisclaimer": "Możesz wybrać, z kim ta lista jest udostępniona po jej utworzeniu"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "Prywatna",
+						"description": "Tylko Ty możesz uzyskać dostęp do tej inteligentnej listy"
 					}
 				}
 			},
@@ -976,13 +976,13 @@
 					"description": "Jak książki na tej inteligentnej liście powinny być grupowane",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "Brak"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "Według serii"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "Według biblioteki"
 						}
 					}
 				},
@@ -1443,9 +1443,9 @@
 					"label": "Miniatury zastępcze",
 					"description": "Styl używany dla zastępczych miniatur",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Odcienie szarości",
+						"averageColor": "Średnie wartości kolorów",
+						"colorful": "Kolorowe",
 						"thumbhash": "Thumbhash"
 					}
 				},
@@ -1457,8 +1457,8 @@
 					"label": "Główna nawigacja",
 					"description": "Wybierz pomiędzy minimalnym panelem bocznym lub nawigacją u górnym ekranu",
 					"options": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
+						"sidebar": "Pasek boczny",
+						"topbar": "Pasek górny"
 					},
 					"disclaimer": "* Ustawienia niewybranych opcji będą wyłączone lub ukryte"
 				},
@@ -1484,11 +1484,11 @@
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",
 					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "Strona główna",
+						"EXPLORE": "Odkrywaj",
+						"LIBRARIES": "Biblioteki",
+						"BOOK_CLUBS": "Kluby książki",
+						"SMART_LISTS": "Inteligentne listy"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1505,8 +1505,8 @@
 					"label": "Rozstaw wyświetlania",
 					"description": "Dostosuj odstępy między elementami w aplikacji",
 					"options": {
-						"default": "Default",
-						"compact": "Compact"
+						"default": "Domyślne",
+						"compact": "Kompaktowe"
 					},
 					"disclaimer": "* Tryb kompaktowy wyświetlania nie jest jeszcze zaimplementowany"
 				},
@@ -2508,8 +2508,8 @@
 	"thumbnailDropdown": {
 		"label": "Edytuj miniaturkę",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Wybierz z książek",
+			"uploadImage": "Prześlij obraz"
 		},
 		"uploadImage": {
 			"emptyState": "Podgląd obrazu pojawi się tutaj",

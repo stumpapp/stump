@@ -264,7 +264,7 @@
 					"label": "Skip book overview",
 					"description": "Open the reader directly when selecting books in this library"
 				},
-				"configuration": {
+				"options": {
 					"series": {
 						"label": "Series",
 						"description": "Show the series tab by default"
@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Yeniden Boyutlandırma Yöntemi",
-					"configuration": {
+					"options": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -335,7 +335,7 @@
 					"description": "Küçük resmin genişliğini veya yüksekliğini ayarlayın; orijinal en-boy oranını korumak için diğer boyut otomatik olarak ölçeklenecektir",
 					"dimension": {
 						"label": "Boyut",
-						"configuration": {
+						"options": {
 							"width": "Width",
 							"height": "Height"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Bu ayarı değiştiremezsin"
 				},
-				"configuration": {
+				"options": {
 					"label": "Library pattern",
 					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
@@ -583,7 +583,7 @@
 					"description": "Daha ayrıntılı kontrol imkanı sunan ek seçeneklere sahip bir tarama",
 					"form": {
 						"alert": "Bunlar, kütüphane genelindeki ilgili ayarların yerine geçecektir",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Force rebuild",
 								"description": "Rebuild every book in the library on disk",
@@ -929,7 +929,7 @@
 			},
 			"visibility": {
 				"label": "Görünürlük",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Public",
 						"description": "Accessible to all users on the server"
@@ -974,7 +974,7 @@
 				"grouping": {
 					"label": "Şuna göre grupla",
 					"description": "Bu akıllı listedeki kitaplar nasıl gruplandırılacağı",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "None"
 						},
@@ -1442,7 +1442,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"configuration": {
+					"options": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1456,7 +1456,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"configuration": {
+					"options": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1483,7 +1483,7 @@
 					"isLocked": "Düzenleme kilitli",
 					"lock": "Düzenlemeyi kilitle",
 					"unlock": "Düzenleme kilidini aç",
-					"configuration": {
+					"options": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1504,7 +1504,7 @@
 				"displaySpacing": {
 					"label": "Görüntü aralığı",
 					"description": "Uygulama genelinde öğeler arasındaki genel aralığı ayarlar",
-					"configuration": {
+					"options": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -2507,7 +2507,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
 		},

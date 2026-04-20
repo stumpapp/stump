@@ -264,7 +264,7 @@
 					"label": "Skip book overview",
 					"description": "Open the reader directly when selecting books in this library"
 				},
-				"configuration": {
+				"options": {
 					"series": {
 						"label": "Series",
 						"description": "Show the series tab by default"
@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Metod för storleksändring",
-					"configuration": {
+					"options": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -335,7 +335,7 @@
 					"description": "Ange antingen bredden eller höjden på miniatyren och skala automatiskt den andra för att behålla det ursprungliga bildförhållandet",
 					"dimension": {
 						"label": "Mått",
-						"configuration": {
+						"options": {
 							"width": "Width",
 							"height": "Height"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Du kan inte ändra denna inställning"
 				},
-				"configuration": {
+				"options": {
 					"label": "Library pattern",
 					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
@@ -583,7 +583,7 @@
 					"description": "En skanning med ytterligare alternativ för mer finkornig kontroll",
 					"form": {
 						"alert": "Dessa kommer åsidosätta motsvarande inställningar för hela bibliotek",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Force rebuild",
 								"description": "Rebuild every book in the library on disk",
@@ -929,7 +929,7 @@
 			},
 			"visibility": {
 				"label": "Synlighet",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Public",
 						"description": "Accessible to all users on the server"
@@ -974,7 +974,7 @@
 				"grouping": {
 					"label": "Gruppera efter",
 					"description": "Hur böckerna i denna smarta lista ska grupperas",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "None"
 						},
@@ -1442,7 +1442,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"configuration": {
+					"options": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1456,7 +1456,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"configuration": {
+					"options": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1483,7 +1483,7 @@
 					"isLocked": "Arrangemanget är låst",
 					"lock": "Lås arrangemang",
 					"unlock": "Lås upp arrangemang",
-					"configuration": {
+					"options": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1504,7 +1504,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"configuration": {
+					"options": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -2507,7 +2507,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
 		},

@@ -54,6 +54,7 @@ export default function BookGridItem({ book, onPress }: Props) {
 	const percentageCompleted = isComplete
 		? 1
 		: parseGraphQLDecimal(data.readProgress?.percentageCompleted)
+	const numberOfReads = data.readHistory?.length
 
 	return (
 		<View className="w-full items-center">
@@ -68,6 +69,7 @@ export default function BookGridItem({ book, onPress }: Props) {
 						: null
 				}
 				percentageCompleted={percentageCompleted != null ? percentageCompleted * 100 : undefined}
+				numberOfReads={numberOfReads}
 			/>
 		</View>
 	)

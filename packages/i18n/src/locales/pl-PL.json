@@ -335,7 +335,7 @@
 					"description": "Ustaw szerokość lub wysokość miniatury, a druga wartość zostanie wyskalowana automatycznie tak, aby zachować oryginalny współczynnik kształtu",
 					"dimension": {
 						"label": "Wymiar",
-						"configuration": {
+						"options": {
 							"width": "Szerokość",
 							"height": "Wysokość"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Nie można zmienić tego ustawienia"
 				},
-				"configuration": {
+				"options": {
 					"label": "Wzorzec biblioteki",
 					"description": "Ustawienie, które określa, jak Stump zorganizuje Twoją bibliotekę",
 					"collectionPriority": {
@@ -579,7 +579,7 @@
 					"description": "Skanowanie z dodatkowymi opcjami dla bardziej precyzyjnej kontroli",
 					"form": {
 						"alert": "Opcje te zastąpią analogiczne ustawienia globalne biblioteki",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Wymuś odbudowę",
 								"description": "Odbuduj każdą książkę w bibliotece na dysku",
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Widoczność",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Publiczna",
 						"description": "Dostępna dla wszystkich użytkowników na serwerze"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Grupuj według",
 					"description": "Jak książki na tej inteligentnej liście powinny być grupowane",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "Brak"
 						},
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Miniatury zastępcze",
 					"description": "Styl używany dla zastępczych miniatur",
-					"configuration": {
+					"options": {
 						"grayscale": "Odcienie szarości",
 						"averageColor": "Średnie wartości kolorów",
 						"colorful": "Kolorowe",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Główna nawigacja",
 					"description": "Wybierz pomiędzy minimalnym panelem bocznym lub nawigacją u górnym ekranu",
-					"configuration": {
+					"options": {
 						"sidebar": "Pasek boczny",
 						"topbar": "Pasek górny"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Układ jest zablokowany",
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",
-					"configuration": {
+					"options": {
 						"HOME": "Strona główna",
 						"EXPLORE": "Odkrywaj",
 						"LIBRARIES": "Biblioteki",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Rozstaw wyświetlania",
 					"description": "Dostosuj odstępy między elementami w aplikacji",
-					"configuration": {
+					"options": {
 						"default": "Domyślne",
 						"compact": "Kompaktowe"
 					},
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edytuj miniaturkę",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Wybierz z książek",
 			"uploadImage": "Prześlij obraz"
 		},

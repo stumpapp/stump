@@ -3,6 +3,7 @@ use models::entity::finished_reading_session;
 use models::entity::reading_session;
 use sea_orm::prelude::*;
 use sea_orm::DatabaseConnection;
+use sea_orm::QueryOrder;
 use std::{collections::HashMap, sync::Arc};
 
 use crate::object::reading_session::ActiveReadingSession;
@@ -104,6 +105,7 @@ impl Loader<FinishedReadingSessionLoaderKey> for ReadingSessionLoader {
 						),
 					),
 			)
+			.order_by_desc(finished_reading_session::Column::CompletedAt)
 			.into_model::<finished_reading_session::Model>()
 			.all(self.conn.as_ref())
 			.await?;

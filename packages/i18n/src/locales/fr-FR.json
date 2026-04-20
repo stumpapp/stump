@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Méthode de redimensionnement",
-					"configuration": {
+					"options": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -335,7 +335,7 @@
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",
-						"configuration": {
+						"options": {
 							"width": "Largeur",
 							"height": "Hauteur"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Vous ne pourrez pas modifier ce paramètre"
 				},
-				"configuration": {
+				"options": {
 					"label": "Modèle de bibliothèque",
 					"description": "Le paramètre qui détermine la façon dont Stump organisera votre bibliothèque",
 					"collectionPriority": {
@@ -579,7 +579,7 @@
 					"description": "Un scan avec des options supplémentaires pour un contrôle plus précis",
 					"form": {
 						"alert": "Ces paramètres remplaceront ceux définis au niveau de la bibliothèque",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Forcer la reconstruction",
 								"description": "Reconstruire chaque livre de la bibliothèque sur le disque",
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Visibilité",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Publique",
 						"description": "Accessible par tous les utilisateurs"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Regrouper par",
 					"description": "Comment les livres de cette collection doivent être regroupés",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "Aucun"
 						},
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"configuration": {
+					"options": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"configuration": {
+					"options": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "L'organisation est verrouillée",
 					"lock": "Verrouiller la disposition",
 					"unlock": "Déverrouiller la disposition",
-					"configuration": {
+					"options": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"configuration": {
+					"options": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Éditer l'image de couverture",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Sélectionner à partir des livres",
 			"uploadImage": "Importer une image"
 		},

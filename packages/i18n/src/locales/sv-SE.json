@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Metod för storleksändring",
-					"configuration": {
+					"options": {
 						"scaleEvenlyByFactor": "Skala Jämnt",
 						"exact": "Exakt Storlek",
 						"scaleDimension": "Automatisk Skala",
@@ -335,7 +335,7 @@
 					"description": "Ange antingen bredden eller höjden på miniatyren och skala automatiskt den andra för att behålla det ursprungliga bildförhållandet",
 					"dimension": {
 						"label": "Mått",
-						"configuration": {
+						"options": {
 							"width": "Bredd",
 							"height": "Höjd"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Du kan inte ändra denna inställning"
 				},
-				"configuration": {
+				"options": {
 					"label": "Biblioteksmönster",
 					"description": "Den inställning som avgör hur Stump kommer att organisera ditt bibliotek",
 					"collectionPriority": {
@@ -579,7 +579,7 @@
 					"description": "En skanning med ytterligare alternativ för mer finkornig kontroll",
 					"form": {
 						"alert": "Dessa kommer åsidosätta motsvarande inställningar för hela bibliotek",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Tvinga ombyggnad",
 								"description": "Bygg om alla böcker i biblioteket på disk",
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Synlighet",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Offentlig",
 						"description": "Tillgänglig för alla användare på servern"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Gruppera efter",
 					"description": "Hur böckerna i denna smarta lista ska grupperas",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "Ingen"
 						},
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"configuration": {
+					"options": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"configuration": {
+					"options": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Arrangemanget är låst",
 					"lock": "Lås arrangemang",
 					"unlock": "Lås upp arrangemang",
-					"configuration": {
+					"options": {
 						"HOME": "Hem",
 						"EXPLORE": "Utforska",
 						"LIBRARIES": "Bibliotek",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"configuration": {
+					"options": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Välj från böcker",
 			"uploadImage": "Ladda upp bild"
 		},

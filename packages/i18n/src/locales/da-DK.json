@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Resize Method",
-					"configuration": {
+					"options": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -335,7 +335,7 @@
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",
-						"configuration": {
+						"options": {
 							"width": "Width",
 							"height": "Height"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "You cannot change this setting"
 				},
-				"configuration": {
+				"options": {
 					"label": "Library pattern",
 					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
@@ -579,7 +579,7 @@
 					"description": "A scan with additional options for more fine-grained control",
 					"form": {
 						"alert": "These will override corresponding library-wide settings",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Force rebuild",
 								"description": "Rebuild every book in the library on disk",
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Visibility",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Public",
 						"description": "Accessible to all users on the server"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Group by",
 					"description": "How the books in this smart list should be grouped",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "None"
 						},
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"configuration": {
+					"options": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"configuration": {
+					"options": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
-					"configuration": {
+					"options": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"configuration": {
+					"options": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
 		},

@@ -264,7 +264,7 @@
 					"label": "Skip book overview",
 					"description": "Open the reader directly when selecting books in this library"
 				},
-				"configuration": {
+				"options": {
 					"series": {
 						"label": "Series",
 						"description": "Mostrar por defecto la pestaña de series"
@@ -579,7 +579,7 @@
 					"description": "Un escaneo con opciones adicionales para un control más preciso",
 					"form": {
 						"alert": "These will override corresponding library-wide settings",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Force rebuild",
 								"description": "Rebuild every book in the library on disk",
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Visibility",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Public",
 						"description": "Accessible to all users on the server"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Group by",
 					"description": "How the books in this smart list should be grouped",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "None"
 						},
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"configuration": {
+					"options": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"configuration": {
+					"options": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
-					"configuration": {
+					"options": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"configuration": {
+					"options": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Select thumbnail",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Seleccionar desde los libros",
 			"uploadImage": "Subir una imagen"
 		},

@@ -12,7 +12,7 @@ This section provides general guidance for configuring popular OIDC providers to
 
 When configuring your OIDC provider, you will need to set the callback (redirect) URL to point to your Stump instance. The format is:
 
-`https://<your-stump-domain>/auth/oidc/callback`
+`https://<your-stump-domain>/api/v2/auth/oidc/callback`
 
 If needed, you may also specify the logout URL as:
 
@@ -117,7 +117,9 @@ services:
 OIDC can be configured using either environment variables or the TOML configuration file. See [server configuration](/guides/configuration/server-options) for more details.
 
 <Callout type="warning">
-	When using the `Stump.toml` configuration file, OIDC settings must be placed under an `[oidc]` table section, **not** as flat keys with an `oidc_` prefix. See the [TOML example](#toml-example) below.
+	When using the `Stump.toml` configuration file, OIDC settings must be placed under an `[oidc]`
+	table section, **not** as flat keys with an `oidc_` prefix. See the [TOML example](#toml-example)
+	below.
 </Callout>
 
 ### Required Settings
@@ -184,7 +186,8 @@ disable_local_auth = false
 ```
 
 <Callout type="error">
-	Do not use flat keys like `oidc_enabled`, `oidc_client_id`, etc. in your TOML file. This format only works for environment variables (`STUMP_OIDC_ENABLED`, etc.)
+	Do not use flat keys like `oidc_enabled`, `oidc_client_id`, etc. in your TOML file. This format
+	only works for environment variables (`STUMP_OIDC_ENABLED`, etc.)
 </Callout>
 
 </Tabs.Tab>

@@ -308,7 +308,7 @@
 				},
 				"resizeMethod": {
 					"label": "Größenveränderungsmethode",
-					"configuration": {
+					"options": {
 						"scaleEvenlyByFactor": "Gleichmäßig skalieren",
 						"exact": "Genaue Größe",
 						"scaleDimension": "Auto-Skalierung",
@@ -335,7 +335,7 @@
 					"description": "Setze entweder die Breite oder Höhe des Vorschaubildes und skaliere automatisch die anderen, um das ursprüngliche Seitenverhältnis beizubehalten",
 					"dimension": {
 						"label": "Abmessung",
-						"configuration": {
+						"options": {
 							"width": "Breite",
 							"height": "Höhe"
 						}
@@ -433,7 +433,7 @@
 					],
 					"disabled": "Diese Einstellung kann nicht geändert werden"
 				},
-				"configuration": {
+				"options": {
 					"label": "Bibliotheksmuster",
 					"description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
 					"collectionPriority": {
@@ -579,7 +579,7 @@
 					"description": "Ein Scan mit zusätzlichen Optionen für eine feinere Steuerung",
 					"form": {
 						"alert": "Diese werden die entsprechenden Bibliotheksweiten Einstellungen überschreiben",
-						"configuration": {
+						"options": {
 							"forceRebuild": {
 								"label": "Wiederaufbau erzwingen",
 								"description": "Jedes Buch in der Bibliothek auf der Festplatte wiederaufbauen",
@@ -840,7 +840,7 @@
 			},
 			"visibility": {
 				"label": "Sichtbarkeit",
-				"configuration": {
+				"options": {
 					"public": {
 						"label": "Öffentlich",
 						"description": "Für alle Benutzer auf dem Server zugänglich"
@@ -885,7 +885,7 @@
 				"grouping": {
 					"label": "Gruppierung",
 					"description": "Wie die Bücher in dieser intelligenten Liste gruppiert werden sollen",
-					"configuration": {
+					"options": {
 						"by_books": {
 							"label": "Keine"
 						},
@@ -1347,7 +1347,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Vorschaubild-Platzhalter",
 					"description": "Der Stil, welcher für Vorschaubild-Platzhalter benutzt wird",
-					"configuration": {
+					"options": {
 						"grayscale": "Graustufen",
 						"averageColor": "Durchschnittsfarbe",
 						"colorful": "Farbenfroh",
@@ -1361,7 +1361,7 @@
 				"primaryNavigation": {
 					"label": "Primäre Navigation",
 					"description": "Wähle zwischen einer minimalen Seiten- oder einer Topleisten Navigation",
-					"configuration": {
+					"options": {
 						"sidebar": "Seitenleiste",
 						"topbar": "Topleiste"
 					},
@@ -1388,7 +1388,7 @@
 					"isLocked": "Anordnung ist gesperrt",
 					"lock": "Anordnung sperren",
 					"unlock": "Anordnung entsperren",
-					"configuration": {
+					"options": {
 						"HOME": "Startseite",
 						"EXPLORE": "Entdecken",
 						"LIBRARIES": "Bibliotheken",
@@ -1409,7 +1409,7 @@
 				"displaySpacing": {
 					"label": "Anzeigeabstand",
 					"description": "Ändert den allgemeinen Abstand zwischen Elementen in der gesamten App",
-					"configuration": {
+					"options": {
 						"default": "Standard",
 						"compact": "Kompakt"
 					},
@@ -2304,7 +2304,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Vorschaubild auswählen",
-		"configuration": {
+		"options": {
 			"selectFromBooks": "Aus Büchern auswählen",
 			"uploadImage": "Bild hochladen"
 		},

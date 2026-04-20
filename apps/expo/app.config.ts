@@ -110,6 +110,21 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			['./plugins/withGradle.ts'],
 			['./plugins/withNetworkSecurityConfig.ts'],
 			[
+				'./plugins/withCustomSFSymbols.ts',
+				{
+					symbols: [
+						{
+							name: 'comic.bubble',
+							svgPath: 'assets/sf-icons/comic-bubble.svg',
+						},
+						{
+							name: 'manga',
+							svgPath: 'assets/sf-icons/manga.svg',
+						},
+					],
+				},
+			],
+			[
 				'./plugins/withPods.ts',
 				{
 					pods: [

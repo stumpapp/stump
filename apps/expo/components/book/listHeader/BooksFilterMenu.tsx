@@ -62,11 +62,7 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 				{
 					key: 'comic',
 					icon: {
-						// haven't quite cracked this yet. ios really does not want to render svg, fine. png works, but
-						// template rendering isn't seemingly working (e.g., so colors are wrong) and 24x24 looks pretty
-						// shit. i've added 48x48 in the assets for now, but those are too large (and wrong colors, still)
-						// ios: require('~/assets/icons/comic-bubble.png'),
-						ios: 'burst',
+						ios: 'comic.bubble',
 						android: ComicBubble,
 					},
 					value: LibraryType.Comic,
@@ -75,8 +71,7 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 				{
 					key: 'manga',
 					icon: {
-						// ios: require('~/assets/icons/manga.png'),
-						ios: 'bubble',
+						ios: 'manga',
 						android: Manga,
 					},
 					value: LibraryType.Manga,

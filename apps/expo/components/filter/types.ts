@@ -1,8 +1,9 @@
-import { StackToolbarMenuActionProps } from 'expo-router'
 import type { LucideIcon } from 'lucide-react-native'
+import type { ImageSourcePropType } from 'react-native'
+import type { SFSymbol } from 'sf-symbols-typescript'
 
 export type PlatformIcon = {
-	ios?: StackToolbarMenuActionProps['icon']
+	ios?: SFSymbol | ImageSourcePropType
 	android?: LucideIcon
 }
 

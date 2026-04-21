@@ -55,13 +55,13 @@ export function useSeriesFilterMenu() {
 					},
 					{
 						key: 'comic',
-						icon: { ios: 'comic.bubble', android: Book },
+						icon: { ios: { xcasset: 'comic.bubble' }, android: Book },
 						value: LibraryType.Comic,
 						label: t('libraryType.COMIC'),
 					},
 					{
 						key: 'manga',
-						icon: { ios: 'manga', android: Book },
+						icon: { ios: { xcasset: 'manga' }, android: Book },
 						value: LibraryType.Manga,
 						label: t('libraryType.MANGA'),
 					},

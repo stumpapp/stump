@@ -48,19 +48,6 @@ index 0ecc2fc..8b957e1 100644
                  0,
                  max(cutoutInsets.bottom, 0),
              )
-diff --git a/node_modules/react-native-screens/ios/RNSBarButtonItem.mm b/node_modules/react-native-screens/ios/RNSBarButtonItem.mm
-index 0eb1f09..fbe8fa3 100644
---- a/node_modules/react-native-screens/ios/RNSBarButtonItem.mm
-+++ b/node_modules/react-native-screens/ios/RNSBarButtonItem.mm
-@@ -136,7 +136,7 @@ + (void)resolveImageFromConfig:(NSDictionary *)dict
- {
-   NSString *sfSymbolName = dict[@"sfSymbolName"];
-   if (sfSymbolName != nil) {
--    completionBlock([UIImage systemImageNamed:sfSymbolName]);
-+    UIImage *image = [UIImage systemImageNamed:sfSymbolName]; if (!image) { image = [UIImage imageNamed:sfSymbolName]; } completionBlock(image);
-     return;
-   }
- 
 diff --git a/node_modules/react-native-screens/src/components/helpers/prepareHeaderBarButtonItems.ts b/node_modules/react-native-screens/src/components/helpers/prepareHeaderBarButtonItems.ts
 index bf43f2d..be2c24d 100644
 --- a/node_modules/react-native-screens/src/components/helpers/prepareHeaderBarButtonItems.ts

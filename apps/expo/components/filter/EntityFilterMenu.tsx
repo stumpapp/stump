@@ -5,8 +5,11 @@ import set from 'lodash/set'
 import unset from 'lodash/unset'
 import { ListFilter } from 'lucide-react-native'
 import { useState } from 'react'
+import type { ImageSourcePropType } from 'react-native'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import type { SFSymbol } from 'sf-symbols-typescript'
+import { match, P } from 'ts-pattern'
 
 import {
 	Button,
@@ -85,18 +88,28 @@ export function useEntityFilterMenu({ groups }: Params) {
 			<Stack.Toolbar.Menu icon="line.3.horizontal.decrease" key="filter-menu">
 				{groups.map((group) => (
 					<Stack.Toolbar.Menu key={group.key} inline={group.inline} title={group.title}>
-						{group.items.map((item) => (
-							<Stack.Toolbar.MenuAction
-								key={item.key}
-								icon={item.icon?.ios}
-								isOn={item.isOn}
-								disabled={item.disabled}
-								subtitle={item.subtitle}
-								onPress={item.onPress}
-							>
-								{item.label}
-							</Stack.Toolbar.MenuAction>
-						))}
+						{group.items.map((item) => {
+							const { icon, xcasset } = match(item.icon?.ios)
+								.with({ xcasset: P.string }, (icon) => ({ xcasset: icon.xcasset, icon: undefined }))
+								.otherwise(() => ({
+									icon: item.icon?.ios as SFSymbol | ImageSourcePropType,
+									xcasset: undefined,
+								}))
+
+							return (
+								<Stack.Toolbar.MenuAction
+									key={item.key}
+									icon={icon}
+									xcassetName={xcasset}
+									isOn={item.isOn}
+									disabled={item.disabled}
+									subtitle={item.subtitle}
+									onPress={item.onPress}
+								>
+									{item.label}
+								</Stack.Toolbar.MenuAction>
+							)
+						})}
 					</Stack.Toolbar.Menu>
 				))}
 			</Stack.Toolbar.Menu>

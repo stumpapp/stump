@@ -3,7 +3,7 @@ import type { ImageSourcePropType } from 'react-native'
 import type { SFSymbol } from 'sf-symbols-typescript'
 
 export type PlatformIcon = {
-	ios?: SFSymbol | ImageSourcePropType
+	ios?: SFSymbol | ImageSourcePropType | { xcasset: string }
 	android?: LucideIcon
 }
 

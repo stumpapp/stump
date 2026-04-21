@@ -62,7 +62,7 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 				{
 					key: 'comic',
 					icon: {
-						ios: 'comic.bubble',
+						ios: { xcasset: 'comic.bubble' },
 						android: ComicBubble,
 					},
 					value: LibraryType.Comic,
@@ -71,7 +71,7 @@ export function useBooksFilterMenu({ libraryType = true }: Params = {}) {
 				{
 					key: 'manga',
 					icon: {
-						ios: 'manga',
+						ios: { xcasset: 'manga' },
 						android: Manga,
 					},
 					value: LibraryType.Manga,

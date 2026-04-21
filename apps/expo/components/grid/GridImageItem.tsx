@@ -81,7 +81,17 @@ export default function GridImageItem({
 									borderRadius: 999, // idky i android having problems with rounded-full here
 								}}
 							>
-								{showNumber && <Text className="font-bold pl-1.5 shadow">{numberOfReads}</Text>}
+								{showNumber && (
+									<Text
+										className="font-bold pl-1.5 shadow"
+										style={{
+											color: '#f5f3ef',
+										}}
+									>
+										{numberOfReads}
+									</Text>
+								)}
+
 								<Icon
 									as={Check}
 									// This icon looks optically off center so I've adjusted it down a bit

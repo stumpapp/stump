@@ -6,10 +6,10 @@ import { useFocusEffect } from 'expo-router'
 import groupBy from 'lodash/groupBy'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Platform, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { match } from 'ts-pattern'
 import { useShallow } from 'zustand/react/shallow'
 
+import { DownloadProblemsSheet } from '~/components/downloadQueue'
 import {
 	CuratedDownloadsHeader,
 	DownloadRowItem,
@@ -152,14 +152,6 @@ export default function Screen() {
 	// TODO: Selection mode to delete multiple at once
 	// TODO: Search downloads
 
-	if (!data || data.length === 0) {
-		return (
-			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-				<NoDownloadsOnDevice source={sourceFilter} />
-			</SafeAreaView>
-		)
-	}
-
 	return (
 		<FlashList
 			data={artificiallyGroupedData}
@@ -170,7 +162,13 @@ export default function Screen() {
 			}}
 			contentInsetAdjustmentBehavior="always"
 			ItemSeparatorComponent={() => <View className="h-6" />}
-			ListHeaderComponent={<ListHeaderComponent />}
+			ListHeaderComponent={
+				<>
+					<ListHeaderComponent isEmptyState={data?.length === 0} />
+					<DownloadProblemsSheet />
+				</>
+			}
+			ListEmptyComponent={<NoDownloadsOnDevice source={sourceFilter} />}
 			stickyHeaderIndices={stickyHeaderIndices}
 			getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
 			maintainVisibleContentPosition={{ disabled: true }}
@@ -178,7 +176,7 @@ export default function Screen() {
 	)
 }
 
-const ListHeaderComponent = () => {
+const ListHeaderComponent = ({ isEmptyState }: { isEmptyState: boolean }) => {
 	const { t } = useTranslate()
 
 	const menuFragment = useLocalLibraryMenu()
@@ -186,11 +184,7 @@ const ListHeaderComponent = () => {
 	const isSelecting = useSelectionStore((state) => state.isSelecting)
 	const showCuratedDownloads = usePreferencesStore((state) => state.showCuratedDownloads)
 
-	const shouldShowCurated = showCuratedDownloads && !isSelecting
-
-	if (!shouldShowCurated && Platform.OS === 'android') {
-		return null
-	}
+	const shouldShowCurated = showCuratedDownloads && !isSelecting && !isEmptyState
 
 	return (
 		<>

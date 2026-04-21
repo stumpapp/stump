@@ -166,6 +166,8 @@ function DropdownMenuItem({
 	)
 }
 
+// TODO: it would be nice to get this to behave like iOS where the left space for the check is not reserved
+// if none in the group are checked
 function DropdownMenuCheckboxItem({
 	className,
 	children,
@@ -184,7 +186,7 @@ function DropdownMenuCheckboxItem({
 				)}
 				{...props}
 			>
-				<View className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
+				<View className="left-2 h-4 w-4 absolute flex items-center justify-center">
 					<DropdownMenuPrimitive.ItemIndicator>
 						<Icon
 							as={Check}

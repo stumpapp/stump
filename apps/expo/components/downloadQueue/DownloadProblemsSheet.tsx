@@ -1,6 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { RefreshCw, Trash2 } from 'lucide-react-native'
-import { forwardRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -14,14 +14,14 @@ import { Icon } from '../ui/icon'
 import { Text } from '../ui/text'
 import FailedDownloadItem from './FailedDownloadItem'
 
+export const DOWNLOAD_PROBLEMS_SHEET_NAME = 'downloadsProblemsSheet'
+
 type Props = {
 	onDismiss?: () => void
 }
 
-export const DownloadProblemsSheet = forwardRef<TrueSheet, Props>(function DownloadProblemsSheet(
-	{ onDismiss },
-	ref,
-) {
+export function DownloadProblemsSheet({ onDismiss }: Props) {
+	const ref = useRef<TrueSheet>(null)
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 	const [isOpen, setIsOpen] = useState(false)
@@ -104,11 +104,10 @@ export const DownloadProblemsSheet = forwardRef<TrueSheet, Props>(function Downl
 				</View>
 			</TrueSheet>
 
-			{/*@ts-expect-error: should be fine*/}
-			{ref && <SheetBackDetection ref={ref} isOpen={isOpen} />}
+			<SheetBackDetection ref={ref} isOpen={isOpen} />
 		</>
 	)
-})
+}
 
 const LOCALE_BASE = 'localLibrary.downloadProblemsSheet'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

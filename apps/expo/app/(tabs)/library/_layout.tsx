@@ -4,7 +4,6 @@ import { useRef } from 'react'
 import { Platform } from 'react-native'
 import { useStore } from 'zustand'
 
-import { DownloadsHeaderSortMenu } from '~/components/localLibrary'
 import { SelectionLeftScreenHeader } from '~/components/selection'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
@@ -43,8 +42,7 @@ export default function Screen() {
 						headerLargeTitleStyle: {
 							fontSize: 30,
 						},
-						headerLeft: () =>
-							isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />,
+						headerLeft: () => (isSelecting ? <SelectionLeftScreenHeader /> : null),
 					}}
 				/>
 			</QueryClientProvider>

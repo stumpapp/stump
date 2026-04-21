@@ -1,26 +1,20 @@
-import { useNavigation } from 'expo-router'
-import { useLayoutEffect } from 'react'
-import { Platform } from 'react-native'
-
 import { useSelectionStore } from '~/stores/selection'
 
+import { useEntityListHeader } from '../filter/EntityListHeader'
 import { SelectionRightScreenHeader } from '../selection'
-import DownloadsHeaderMenu from './DownloadsHeaderMenu'
+import { useLocalLibraryFilterMenu } from './LocalLibraryFilterMenu'
+import { useLocalLibrarySortAndDisplayMenu } from './LocalLibrarySortAndDisplayMenu'
 
 export function useLocalLibraryMenu() {
 	const isSelecting = useSelectionStore((state) => state.isSelecting)
 
-	const navigation = useNavigation()
-	useLayoutEffect(() => {
-		if (Platform.OS !== 'android') return
-		navigation.setOptions({
-			headerRight: () => (isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />),
-		})
-	}, [navigation, isSelecting])
+	const filterMenu = useLocalLibraryFilterMenu()
+	const sortMenu = useLocalLibrarySortAndDisplayMenu()
 
-	if (Platform.OS === 'android') return null
+	const toolbar = useEntityListHeader({
+		filterMenu: isSelecting ? null : filterMenu,
+		sortMenu: isSelecting ? null : sortMenu,
+	})
 
-	if (isSelecting) return <SelectionRightScreenHeader />
-
-	return <DownloadsHeaderMenu />
+	return isSelecting ? <SelectionRightScreenHeader /> : toolbar
 }

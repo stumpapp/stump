@@ -553,9 +553,9 @@
 				"label": "Optionen"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
+				"label": "Integrationen",
+				"analysis": "Analyse",
+				"metadata": "Metadaten"
 			},
 			"danger-zone": {
 				"access-control": "Zugriffskontrolle",
@@ -678,14 +678,14 @@
 			}
 		},
 		"integrations/metadata": {
-			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
+			"title": "Metadaten",
+			"description": "Verwalte und überprüfe Metadaten-Treffer für diese Bibliothek",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "Metadaten abrufen",
+					"description": "Rufe Metadaten für die Medien in dieser Bibliothek ab",
 					"noProviders": {
-						"title": "There are no metadata providers available",
+						"title": "Es sind keine Metadatenanbieter verfügbar",
 						"description": "You can configure metadata providers in the metadata integration settings"
 					},
 					"fetchButton": "Start background fetch",
@@ -842,11 +842,11 @@
 			"description": "Review metadata matches fetched from external providers"
 		},
 		"confidenceBadge": {
-			"label": "confidence"
+			"label": "Vertrauen"
 		},
 		"includeField": "Include this field",
 		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
+		"fieldLocked": "Dieses Feld ist gesperrt",
 		"reviewDialog": {
 			"previewEditor": {
 				"noCandidates": "No candidates available for this record",
@@ -858,15 +858,15 @@
 					"resolved": "Resolved"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
-					"provider": "Provider"
+					"candidatePosition": "Kandidat {{position}} von {{total}}",
+					"provider": "Anbieter"
 				}
 			},
 			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
+				"accept": "Akzeptieren",
+				"reject": "Ablehnen",
 				"strategies": {
-					"FILL_GAPS": "Fill gaps",
+					"FILL_GAPS": "Lücken füllen",
 					"PREFER_EXTERNAL": "Prefer external",
 					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
 					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
@@ -876,28 +876,28 @@
 				"keepCurrent": "Keep current",
 				"takeExternal": "Take external",
 				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
-				"reset": "Reset",
-				"undoManualEdit": "Undo manual edit"
+				"editManually": "Manuell bearbeiten",
+				"lockField": "Feld sperren",
+				"unlockField": "Feld entsperren",
+				"reset": "Zurücksetzen",
+				"undoManualEdit": "Manuelle Bearbeitung rückgängig machen"
 			}
 		},
 		"matchesTable": {
 			"columns": {
 				"entityName": "Name",
-				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
+				"entityType": "Typ",
+				"candidateCount": "Kandidaten",
+				"topConfidence": "Top Vertrauen",
+				"addedAt": "Abgerufen"
 			},
 			"acceptAll": {
-				"label": "Accept all",
+				"label": "Alle akzeptieren",
 				"failed": "Failed to accept all matches",
 				"success": "All pending matches accepted"
 			},
 			"rejectAll": {
-				"label": "Reject all",
+				"label": "Alle ablehnen",
 				"failed": "Failed to reject all matches",
 				"success": "All pending matches rejected"
 			},
@@ -1342,7 +1342,7 @@
 				"jobs": "Jobs",
 				"access": "Zugriff",
 				"email": "E-Mail",
-				"metadata": "Metadata",
+				"metadata": "Metadaten",
 				"notifications": "Benachrichtigungen",
 				"tags": "Tags",
 				"label": "Verwaltung"
@@ -1885,37 +1885,37 @@
 					"deleteScheduledJob": {
 						"title": "Delete scheduled job",
 						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-						"confirm": "Delete"
+						"confirm": "Löschen"
 					},
 					"dialog": {
 						"titleCreate": "New scheduled job",
 						"titleEdit": "Edit scheduled job",
-						"cancel": "Cancel",
-						"create": "Create",
-						"saveChanges": "Save changes"
+						"cancel": "Abbrechen",
+						"create": "Erstellen",
+						"saveChanges": "Änderungen speichern"
 					},
 					"fields": {
 						"name": {
 							"label": "Name",
-							"placeholder": "e.g. \"Daily library scan\""
+							"placeholder": "z.B. \"Täglicher Bibliotheksscan\""
 						},
 						"schedule": {
-							"label": "Cron schedule",
-							"description": "A cron expression to define the frequency",
+							"label": "Cron-Zeitplan",
+							"description": "Ein Cron-Ausdruck zur Definition der Frequenz",
 							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
-							"label": "Preset",
-							"custom": "Custom",
-							"everySixHours": "Every 6 hours",
-							"everyTwelveHours": "Every 12 hours",
-							"dailyAtMidnight": "Daily at midnight",
-							"weeklySunday": "Weekly (Sunday)",
-							"monthlyFirst": "Monthly (1st)"
+							"label": "Voreinstellung",
+							"custom": "Benutzerdefiniert",
+							"everySixHours": "Alle 6 Stunden",
+							"everyTwelveHours": "Alle 12 Stunden",
+							"dailyAtMidnight": "Täglich um Mitternacht",
+							"weeklySunday": "Wöchentlich (Sonntag)",
+							"monthlyFirst": "Monatlich (1.)"
 						},
 						"kind": {
-							"label": "Job type",
-							"libraryScan": "Library Scan",
+							"label": "Jobtyp",
+							"libraryScan": "Bibliotheksscan",
 							"metadataRetry": "Metadata Retry"
 						},
 						"libraryIds": {
@@ -1925,18 +1925,18 @@
 						"statuses": {
 							"label": "Statuses to retry",
 							"description": "Which metadata fetch statuses should be retried",
-							"rateLimited": "Rate Limited",
+							"rateLimited": "Anfragerate begrenzt",
 							"failed": "Failed"
 						},
-						"enabled": "Enabled"
+						"enabled": "Aktiviert"
 					},
 					"row": {
-						"enabled": "Enabled",
-						"disabled": "Disabled",
-						"allLibraries": "All libraries",
-						"rateLimited": "rate limited",
-						"lastRun": "Last run at {{date}}",
-						"edit": "Edit",
+						"enabled": "Aktiviert",
+						"disabled": "Deaktiviert",
+						"allLibraries": "Alle Bibliotheken",
+						"rateLimited": "Anfragerate begrenzt",
+						"lastRun": "Zuletzt ausgeführt am {{date}}",
+						"edit": "Bearbeiten",
 						"delete": "Delete"
 					},
 					"toasts": {
@@ -2014,9 +2014,9 @@
 					"groups": {
 						"accountManagement": "Account",
 						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
-						"emailing": "Emailing",
+						"fileManagement": "Dateien",
+						"emailers": "Mailserver",
+						"emailing": "E-Mailing",
 						"libraryManagement": "Library management",
 						"userManagement": "User management",
 						"serverManagement": "Server management"
@@ -2305,11 +2305,11 @@
 			},
 			"providerForm": {
 				"apiToken": {
-					"label": "API token",
-					"description": "The API token for authenticating with this provider"
+					"label": "API-Token",
+					"description": "Der API-Token für die Authentifizierung mit diesem Anbieter"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
+					"label": "API-Token-Verfall",
 					"description": "The date when the API token will expire (optional)"
 				},
 				"enableProvider": {
@@ -3102,20 +3102,20 @@
 			"imageFilter": {
 				"label": "Image Filter",
 				"options": {
-					"none": "None",
-					"darken": "Darken",
+					"none": "Keine",
+					"darken": "Verdunkeln",
 					"invert": "Invert"
 				}
 			},
 			"publisherStyles": "Publisher Styles",
 			"textAlignment": {
-				"label": "Text Alignment",
+				"label": "Textausrichtung",
 				"options": {
 					"start": "Start",
-					"left": "Left",
-					"center": "Center",
-					"right": "Right",
-					"justify": "Justify"
+					"left": "Links",
+					"center": "Mittig",
+					"right": "Rechts",
+					"justify": "Blocksatz"
 				}
 			},
 			"typeScale": "Type Scale",
@@ -3131,7 +3131,7 @@
 				"background": "Background",
 				"text": "Text",
 				"highlight": "Highlight",
-				"premadeThemes": "Premade themes"
+				"premadeThemes": "Vorgefertigte Designs"
 			}
 		},
 		"savedServerActions": {

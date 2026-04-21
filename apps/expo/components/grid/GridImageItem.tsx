@@ -19,6 +19,7 @@ type Props = {
 	placeholderData?: ThumbnailPlaceholderData | null
 	originalDimensions?: { width: number; height: number } | null
 	percentageCompleted?: number | null // 1-100
+	numberOfReads?: number
 }
 
 export default function GridImageItem({
@@ -26,6 +27,7 @@ export default function GridImageItem({
 	title,
 	onPress,
 	percentageCompleted,
+	numberOfReads,
 	...thumbnailProps
 }: Props) {
 	const { sdk } = useSDK()
@@ -41,6 +43,8 @@ export default function GridImageItem({
 				: COMPLETED_GRADIENT
 
 	const thumbnailHeight = itemWidth / thumbnailRatio
+
+	const showNumber = !!numberOfReads && numberOfReads >= 2
 
 	return (
 		<Pressable onPress={onPress}>
@@ -72,15 +76,16 @@ export default function GridImageItem({
 
 						{percentageCompleted != null && percentageCompleted >= 100 && (
 							<View
-								className="bottom-2 right-2 bg-white/40 p-1 absolute z-30 flex items-center justify-center rounded-full"
+								className="bottom-2 right-2 bg-white/40 p-1 gap-1 squircle absolute z-30 flex flex-row items-center justify-center rounded-full"
 								style={{
 									borderRadius: 999, // idky i android having problems with rounded-full here
 								}}
 							>
+								{showNumber && <Text className="font-bold pl-1.5 shadow">{numberOfReads}</Text>}
 								<Icon
 									as={Check}
 									// This icon looks optically off center so I've adjusted it down a bit
-									className="shadow top-[0.8]"
+									className="shadow top-[0.7]"
 									size={20}
 									color="#f5f3ef"
 									strokeWidth={2.5}
@@ -116,7 +121,7 @@ const COMPLETED_GRADIENT = {
 		easing: Easing.bezier(0.4, 0, 0.6, 1),
 	}),
 	useAngle: true,
-	angle: 145,
+	angle: 150,
 } satisfies LinearGradientProps
 
 const READING_GRADIENT = easeGradient({

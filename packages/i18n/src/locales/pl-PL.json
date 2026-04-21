@@ -312,7 +312,7 @@
 						"scaleEvenlyByFactor": "Skalowanie równomierne",
 						"exact": "Dokładny wymiar",
 						"scaleDimension": "Skalowanie automatyczne",
-						"none": "Żadne"
+						"none": "Brak"
 					}
 				},
 				"scaleEvenlyByFactor": {
@@ -550,8 +550,12 @@
 				"scanning": "Skanowanie",
 				"thumbnails": "Miniatury",
 				"ignore-rules": "Reguły pomijania",
+				"label": "Konfiguracja"
+			},
+			"integrations": {
+				"label": "Integracje",
 				"analysis": "Analiza",
-				"label": "Ustawienia"
+				"metadata": "Metadane"
 			},
 			"danger-zone": {
 				"access-control": "Kontrola dostępu",
@@ -598,7 +602,7 @@
 							},
 							"regenHashes": {
 								"label": "Wygeneruj ponownie skróty plików",
-								"description": "Wygeneruj ponownie skrót pliku dla książek w bibliotece"
+								"description": "Wygeneruj ponownie skróty plików dla książek w bibliotece"
 							}
 						}
 					}
@@ -658,7 +662,7 @@
 					"heading": "Analizuj książki",
 					"description": "Analizuj książki w tej bibliotece, aby dołączyć dodatkowe metadane w bazie danych, takie jak wymiary stron dla książek obrazkowych",
 					"disclaimerTitle": "Proces ten jest zasobochłonny",
-					"disclaimer": "Ten proces jest zasobochłonny i może trochę potrwać. W przyszłości będzie bardziej konfigurowalny",
+					"disclaimer": "Proces ten może trochę potrwać. W przyszłości będzie bardziej konfigurowalny",
 					"analyzeButton": "Analizuj książki"
 				},
 				"missingFiles": {
@@ -670,6 +674,22 @@
 					"heading": "Powielone pliki",
 					"description": "Potencjalnie powielone na dysku pliki",
 					"noDuplicateFiles": "W tej bibliotece nie ma powielonych plików"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "Metadane",
+			"description": "Zarządzaj i przeglądaj metadane dopasowane do tej biblioteki",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "Pobierz metadane",
+					"description": "Pobierz metadane dla mediów w tej bibliotece",
+					"noProviders": {
+						"title": "Brak dostępnych dostawców metadanych",
+						"description": "Możesz skonfigurować dostawców metadanych w ustawieniach integracji metadanych"
+					},
+					"fetchButton": "Rozpocznij pobieranie w tle",
+					"fetchError": "Nie można uruchomić pobierania metadanych"
 				}
 			}
 		},
@@ -816,6 +836,75 @@
 			"description": "Dodaj każdy dodatkowy element w osobnej linii"
 		}
 	},
+	"metadataMatching": {
+		"section": {
+			"heading": "Oczekujące dopasowania",
+			"description": "Przeglądaj dopasowane metadane od zewnętrznych dostawców"
+		},
+		"confidenceBadge": {
+			"label": "pewność"
+		},
+		"includeField": "Uwzględnij to pole",
+		"excludeField": "Wyklucz to pole",
+		"fieldLocked": "To pole jest zablokowane",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "Brak kandydatów dla tego rekordu",
+				"noComparableFields": "Nie znaleziono porównywalnych pól",
+				"headers": {
+					"field": "Pole",
+					"current": "Bieżące",
+					"external": "Zewnętrzne",
+					"resolved": "Rozwiązane"
+				},
+				"toolbar": {
+					"candidatePosition": "Kandydat {{position}} z {{total}}",
+					"provider": "Dostawca"
+				}
+			},
+			"footer": {
+				"accept": "Akceptuj",
+				"reject": "Odrzuć",
+				"strategies": {
+					"FILL_GAPS": "Wypełnij luki",
+					"PREFER_EXTERNAL": "Preferuj zewnętrzne",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferuj zewnętrzne i scal listy",
+					"FILL_AND_MERGE_LISTS": "Wypełnij i scal listy"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "Zachowaj bieżące",
+				"takeExternal": "Wybier zewnętrzne",
+				"mergeLists": "Scal listy",
+				"editManually": "Edytuj ręcznie",
+				"lockField": "Zablokuj pole",
+				"unlockField": "Odblokuj pole",
+				"reset": "Resetuj",
+				"undoManualEdit": "Cofnij ręczną zmianę"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "Nazwa",
+				"entityType": "Typ",
+				"candidateCount": "Kandydaci",
+				"topConfidence": "Największa pewność",
+				"addedAt": "Pobrano o"
+			},
+			"acceptAll": {
+				"label": "Zaakceptuj wszystkie",
+				"failed": "Nie udało się zaakceptować wszystkich dopasowań",
+				"success": "Wszystkie oczekujące dopasowania zostały zaakceptowane"
+			},
+			"rejectAll": {
+				"label": "Odrzuć wszystkie",
+				"failed": "Nie udało się odrzucić wszystkich dopasowań",
+				"success": "Wszystkie oczekujące dopasowania zostały odrzucone"
+			},
+			"startReview": "Rozpocznij przegląd",
+			"nothingToReview": "Brak oczekujących dopasowań metadanych do przejrzenia"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Kontynuuj czytanie",
@@ -846,12 +935,12 @@
 						"description": "Dostępna dla wszystkich użytkowników na serwerze"
 					},
 					"shared": {
-						"label": "Współdzielone",
+						"label": "Współdzielona",
 						"description": "Określeni użytkownicy mogą uzyskać dostęp do tej inteligentnej listy",
 						"createDisclaimer": "Możesz wybrać, z kim ta lista jest udostępniona po jej utworzeniu"
 					},
 					"private": {
-						"label": "Prywatne",
+						"label": "Prywatna",
 						"description": "Tylko Ty możesz uzyskać dostęp do tej inteligentnej listy"
 					}
 				}
@@ -890,10 +979,10 @@
 							"label": "Brak"
 						},
 						"by_series": {
-							"label": "Seria"
+							"label": "Według serii"
 						},
 						"by_library": {
-							"label": "Biblioteka"
+							"label": "Według biblioteki"
 						}
 					}
 				},
@@ -1253,6 +1342,7 @@
 				"jobs": "Zadania",
 				"access": "Dostęp",
 				"email": "Adres e-mail",
+				"metadata": "Metadane",
 				"notifications": "Powiadomienia",
 				"tags": "Etykiety",
 				"label": "Zarządzanie"
@@ -1271,7 +1361,12 @@
 					"labels": {
 						"username": "Nazwa użytkownika",
 						"password": "Hasło",
-						"activeChangesPrompt": "Masz niezapisane zmiany"
+						"activeChangesPrompt": "Masz niezapisane zmiany",
+						"uselessForm": {
+							"title": "Nie masz uprawnień do zmiany tych ustawień",
+							"description": "Skontaktuj się z administratorem, aby wprowadzić zmiany w tych ustawieniach"
+						},
+						"insufficientPermission": "Nie masz uprawnień do tej zmiany"
 					},
 					"errors": {
 						"updateFailed": "Podczas aktualizacji profilu wystąpił błąd serwera. Spróbuj ponownie."
@@ -1782,32 +1877,75 @@
 			"description": "Zadania w tle, które działają na Twojej instancji serwera Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Harmonogram",
+					"title": "Zaplanowane zadania",
 					"description": "Niektóre zadania można skonfigurować tak, aby uruchomiały się według harmonogramu. Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
-					"disclaimer": "Harmonogram zadań jest bardzo podstawowy i zostanie ulepszony w przyszłości. Przekaż nam swoją opinię lub sugestię!",
-					"createOrUpdateConfig": {
-						"fields": {
-							"intervalSecs": {
-								"label": "Ineterwał",
-								"description": "Jak często zadanie powinno być uruchamiane (w sekundach)",
-								"placeholder": "np. \"86400\" to raz dziennie"
-							},
-							"intervalPreset": {
-								"label": "Predefiniowane",
-								"configuration": {
-									"everySixHours": "Co 6 godzin",
-									"everyTwelveHours": "Co 12 godzin",
-									"oncePerDay": "Raz na dzień",
-									"oncePerWeek": "Raz w tygodniu",
-									"oncePerMonth": "Raz w miesiącu"
-								}
-							},
-							"includedLibraryIds": {
-								"label": "Uwzględnione biblioteki",
-								"description": "Wybierz, które biblioteki są zawarte"
-							}
+					"restartRequiredTitle": "Wymagane ponowne uruchomienie",
+					"restartRequired": "Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
+					"newScheduledJob": "Nowe zaplanowane zadanie",
+					"deleteScheduledJob": {
+						"title": "Usuń zaplanowane zadanie",
+						"description": "Czy na pewno chcesz usunąć \"{{name}}\"? Tej czynności nie można cofnąć.",
+						"confirm": "Usuń"
+					},
+					"dialog": {
+						"titleCreate": "Nowe zaplanowane zadanie",
+						"titleEdit": "Edytuj zaplanowane zadanie",
+						"cancel": "Anuluj",
+						"create": "Utwórz",
+						"saveChanges": "Zapisz zmiany"
+					},
+					"fields": {
+						"name": {
+							"label": "Nazwa",
+							"placeholder": "np. \"Codzienne skanowanie biblioteki\""
 						},
-						"restartRequired": "Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera"
+						"schedule": {
+							"label": "Harmonogram cron",
+							"description": "Wyrażenie cron definiujące częstotliwość",
+							"placeholder": "0 0 0 * * *"
+						},
+						"schedulePreset": {
+							"label": "Predefiniowane",
+							"custom": "Niestandardowe",
+							"everySixHours": "Co 6 godzin",
+							"everyTwelveHours": "Co 12 godzin",
+							"dailyAtMidnight": "Codziennie o północy",
+							"weeklySunday": "Tygodniowo (w niedzielę)",
+							"monthlyFirst": "Miesięcznie (pierwszego)"
+						},
+						"kind": {
+							"label": "Rodzaj zadania",
+							"libraryScan": "Skanowanie biblioteki",
+							"metadataRetry": "Ponowienie metadanych"
+						},
+						"libraryIds": {
+							"label": "Biblioteki do zeskanowania",
+							"description": "Pozostaw puste, aby zeskanować wszystkie biblioteki"
+						},
+						"statuses": {
+							"label": "Statusy do ponawiania próby",
+							"description": "Które statusy pobierania metadanych powinny być ponowione",
+							"rateLimited": "Ograniczenie czasowe",
+							"failed": "Niepowodzenie"
+						},
+						"enabled": "Aktywne"
+					},
+					"row": {
+						"enabled": "Aktywne",
+						"disabled": "Nieaktywne",
+						"allLibraries": "Wszystkie biblioteki",
+						"rateLimited": "ograniczony czasowo",
+						"lastRun": "Ostatnio uruchomione o {{date}}",
+						"edit": "Edytuj",
+						"delete": "Usuń"
+					},
+					"toasts": {
+						"createSuccess": "Zaplanowane zadanie zostało utworzone",
+						"createError": "Nie udało się utworzyć zaplanowanego zadania",
+						"updateSuccess": "Zaplanowane zadanie zostało zaktualizowane",
+						"updateError": "Nie udało się zaktualizować zaplanowanego zadania",
+						"deleteSuccess": "Zaplanowane zadanie zostało usunięte",
+						"deleteError": "Nie udało się usunąć zaplanowanego zadania"
 					}
 				},
 				"history": {
@@ -1873,6 +2011,16 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "Konto",
+						"featureAccess": "Dostęp do funkcji",
+						"fileManagement": "Pliki",
+						"emailers": "Wysyłka",
+						"emailing": "Wysyłka poczty elektronicznej",
+						"libraryManagement": "Zarządzanie bibliotekami",
+						"userManagement": "Zarządzanie użytkownikami",
+						"serverManagement": "Zarządzanie serwerem"
+					},
 					"heading": "Uprawnienia",
 					"subtitle": [
 						"Wybierz uprawnienia, które chcesz przyznać temu użytkownikowi. Aby uzyskać więcej informacji na temat tego, co robią poszczególne uprawnienia, zobacz",
@@ -2146,6 +2294,61 @@
 				"description": "Aktualizuj detale tej wysyłki SMTP"
 			}
 		},
+		"server/metadataIntegrations": {
+			"helmet": "Integracja metadanych",
+			"title": "Integracja metadanych",
+			"addProvider": "Dodaj dostawcę",
+			"noProviders": "Brak skonfigurowanych dostawców. Dodaj jednego, aby rozpocząć",
+			"providers": {
+				"title": "Dostawcy",
+				"description": "Skonfiguruj zewnętrznych dostawców metadanych, aby pobierać i wzbogacać dane bibliotek"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "Token API",
+					"description": "Token API do uwierzytelniania z tym dostawcą"
+				},
+				"apiTokenExpiresAt": {
+					"label": "Ważność tokenu",
+					"description": "Data wygaśnięcia tokenu API (opcjonalnie)"
+				},
+				"enableProvider": {
+					"label": "Włącz dostawcę",
+					"description": "Włączony będzie używany do pobierania"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "Włącz automatyczne zastosowanie",
+						"description": "Pomiń ręczną akceptację i zastosuj prawdopodobne dopasowania"
+					},
+					"threshold": {
+						"label": "Próg pewności",
+						"description": "Minimalna punktacja pewności (0-1) do automatycznego zastosowania dopasowania",
+						"disclaimer": "Obliczona punktacja pewności jest najlepszym oszacowaniem, niekoniecznie zawsze dokładnym"
+					},
+					"strategy": {
+						"label": "Strategia scalania",
+						"options": {
+							"FILL_GAPS": "Akceptuj brakujące pola",
+							"FILL_AND_MERGE_LISTS": "Akceptuj brakujące pola i scalaj listy",
+							"PREFER_EXTERNAL": "Preferuj dane zewnętrzne"
+						}
+					}
+				}
+			},
+			"providerEnabled": "Ten dostawca jest włączony",
+			"providerDisabled": "Ten dostawca jest wyłączony",
+			"providerTokenExpiresSoon": "Token tego dostawcy wkrótce wygaśnie",
+			"autoApplyOn": "Automatyczne zastosowanie włączone",
+			"autoApplyOff": "Automatyczne zastosowanie wyłączone",
+			"editDialog": {
+				"tooltip": "Edytuj dostawcę"
+			},
+			"deleteDialog": {
+				"title": "Usuń dostawcę",
+				"description": "Czy na pewno chcesz usunąć {{providerName}}? Tej czynności nie można cofnąć."
+			}
+		},
 		"server/tags": {
 			"helmet": "Zarządzanie etykietami",
 			"title": "Etykiety",
@@ -2326,6 +2529,10 @@
 			"confirm": "Usuń {{type}}",
 			"typeToConfirm": "Wprowadź {{name}} aby potwierdzić:"
 		},
+		"experimentalDisclaimer": {
+			"title": "Ta funkcja jest eksperymentalna",
+			"description": "Może brakować funkcjonalności, posiadać błędy lub w ogóle nie działać. Uzywaj według własnego uznania i zgłoś wszelkie błędy, które napotkasz"
+		},
 		"enter": "Enter",
 		"save": "Zapisz",
 		"send": "Wyślij",
@@ -2350,6 +2557,10 @@
 		"never": "Nigdy",
 		"scan": "Skanuj",
 		"somethingWentWrong": "Coś poszło nie tak",
+		"back": "Powrót",
+		"continue": "Kontynuuj",
+		"book": "Książka",
+		"series": "Seria",
 		"fileUpload": {
 			"someRejected": "Niektóre pliki zostały odrzucone. Sprawdź typy plików i spróbuj ponownie",
 			"tooManyFiles": "Wybrano zbyt dużą ilość plików",
@@ -2369,9 +2580,25 @@
 			"label": "Synchronizacja KoReader",
 			"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją KoReader"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Synchronizacja Kobo",
+			"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją Kobo"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "Inteligentne listy",
 			"description": "Pozwala użytkownikowi na dostęp do funkcji inteligentnych list, w tym do tworzenia i zarządzania nimi"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "Zmiana hasła",
+			"description": "Pozwala użytkownikowi na zmianę własnego hasła"
+		},
+		"CHANGE_USERNAME": {
+			"label": "Zmiana nazwy użytkownika",
+			"description": "Pozwala użytkownikowi na zmianę własnej nazwy użytkownika"
+		},
+		"CHANGE_AVATAR": {
+			"label": "Zmiana awatara",
+			"description": "Pozwala użytkownikowi na zmianę własnego awatara"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Tworzenie klubów książki",
@@ -2700,7 +2927,8 @@
 				"label": "Czytane",
 				"preferNativePdf": "Preferuj natywny PDF",
 				"preferMinimalReader": "Preferuj minimalny czytnik",
-				"disableDismissGesture": "Wyłącz gest odrzucania"
+				"disableDismissGesture": "Wyłącz gest odrzucania",
+				"incognitoReading": "Czytanie w trybie prywatnym"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2735,6 +2963,7 @@
 			"debug": {
 				"label": "Debugowanie",
 				"clearCache": {
+					"label": "Wyczyść pamięć podręczną",
 					"memory": {
 						"button": "Pamięć",
 						"success": "Wyczyszczono pamięć"
@@ -2758,6 +2987,14 @@
 				"performanceMonitor": "Monitor wydajności",
 				"reduceAnimations": "Ogranicz animacje",
 				"maskUrls": "Ukryj odnośniki",
+				"displayLanguageKeys": {
+					"label": "Wyświetl klucze językowe",
+					"options": {
+						"none": "Brak",
+						"abbreviated": "Skrócone",
+						"full": "Pełne"
+					}
+				},
 				"debugAnalytics": {
 					"label": "Analityka debugowania",
 					"description": "Wyślij dodatkowe zdarzenia związane z debugowaniem, aby pomóc w rozwiązywaniu problemów"
@@ -2776,7 +3013,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Ustawienia czytnika",
+			"title": "Ustawienia czytnika obrazkowego",
+			"overrideGlobalSettings": "Nadpisz ustawienia globalne",
 			"sections": {
 				"mode": "Tryb",
 				"imageOptions": "Ustawienia obrazów",
@@ -2823,6 +3061,77 @@
 					"images": "Galeria obrazów",
 					"slider": "Suwak"
 				}
+			},
+			"readingTimer": {
+				"label": "Czasomierz",
+				"resetTimer": "Resetuj czasomierz"
+			},
+			"allSettings": "Wszystkie ustawienia"
+		},
+		"epubSettings": {
+			"title": "Ustawienia czytnika Epub",
+			"typeface": "Krój czcionki",
+			"fontSize": "Rozmiar czcionki",
+			"fontWeight": {
+				"label": "Grubość czcionki",
+				"options": {
+					"light": "Lekka",
+					"normal": "Normalna",
+					"medium": "Średnia",
+					"bold": "Gruba"
+				}
+			},
+			"textNormalization": "Normalizacja tekstu",
+			"verticalText": "Tekst pionowy",
+			"readingDirection": {
+				"label": "Kierunek czytania",
+				"options": {
+					"rtl": "Od prawej do lewej",
+					"ltr": "Od lewej do prawej"
+				}
+			},
+			"columns": {
+				"label": "Kolumny",
+				"options": {
+					"auto": "Automatycznie",
+					"single": "Pojedyncze",
+					"double": "Podwójne"
+				}
+			},
+			"pageMargins": "Marginesy strony",
+			"imageFilter": {
+				"label": "Filtr obrazu",
+				"options": {
+					"none": "Żaden",
+					"darken": "Przyciemnij",
+					"invert": "Odwróć"
+				}
+			},
+			"publisherStyles": "Style wydawcy",
+			"textAlignment": {
+				"label": "Wyrównanie tekstu",
+				"options": {
+					"start": "Do początku",
+					"left": "Do lewej",
+					"center": "Do środka",
+					"right": "Do prawej",
+					"justify": "Wyjustuj"
+				}
+			},
+			"typeScale": "Skalowanie typu",
+			"lineHeight": "Wysokość linii",
+			"paragraphIndent": "Wcięcie akapitu",
+			"paragraphSpacing": "Odstęp między akapitami",
+			"wordSpacing": "Odstępy między wyrazami",
+			"letterSpacing": "Odległość między literami",
+			"hyphens": "Myślniki",
+			"ligatures": "Ligatury",
+			"customizeTheme": {
+				"placeholder": "Nazwa motywu",
+				"background": "Tło",
+				"text": "Tekst",
+				"highlight": "Zaznaczenie",
+				"premadeThemes": "Wstępnie przygotowane motywy"
 			}
 		},
 		"savedServerActions": {

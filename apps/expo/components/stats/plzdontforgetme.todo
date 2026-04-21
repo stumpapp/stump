@@ -8,3 +8,4 @@
 - [x] rm old filter ui components
 - [x] make local library consistent with these patterns introduced
 - [ ] libraries/[id]/index.tsx (library series)
+- [ ] formalize patch into pr for expo

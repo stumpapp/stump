@@ -6,4 +6,5 @@
 - [x] use generalized componenets i'll def wind up making (ofc ofc) for series books
     - [x] add a `Series Position` sort option
 - [x] rm old filter ui components
-- [ ] make local library consistent with these patterns introduced
+- [x] make local library consistent with these patterns introduced
+- [ ] libraries/[id]/index.tsx (library series)

@@ -328,6 +328,13 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				percentageCompleted = computeNaiveProgress(location)
 			}
 
+			// epubjs's percentageFromCfi uses start.cfi; on the final page this still
+			// returns <1.0 (e.g. ~0.98) even when the reader has seen everything. Clamp
+			// to 1.0 when epubjs signals atEnd so completion is persisted correctly.
+			if (location.atEnd) {
+				percentageCompleted = 1.0
+			}
+
 			if (percentageCompleted == null) {
 				console.warn('Failed to compute any percentage-based progress')
 				return

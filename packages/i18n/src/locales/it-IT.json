@@ -550,8 +550,12 @@
 				"scanning": "Scanning",
 				"thumbnails": "Thumbnails",
 				"ignore-rules": "Ignore Rules",
+				"label": "Configuration"
+			},
+			"integrations": {
+				"label": "Integrations",
 				"analysis": "Analysis",
-				"label": "Options"
+				"metadata": "Metadata"
 			},
 			"danger-zone": {
 				"access-control": "Access Control",
@@ -658,7 +662,7 @@
 					"heading": "Analyze books",
 					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
 					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
 					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
@@ -670,6 +674,22 @@
 					"heading": "Duplicate files",
 					"description": "Files that are potentially duplicated on disk",
 					"noDuplicateFiles": "There are no duplicate files detected for this library"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "Metadata",
+			"description": "Manage and review metadata matches for this library",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "Fetch metadata",
+					"description": "Fetch metadata for the media in this library",
+					"noProviders": {
+						"title": "There are no metadata providers available",
+						"description": "You can configure metadata providers in the metadata integration settings"
+					},
+					"fetchButton": "Start background fetch",
+					"fetchError": "Failed to start metadata fetch"
 				}
 			}
 		},
@@ -814,6 +834,75 @@
 		},
 		"addFields": {
 			"description": "Add each addition on its own line"
+		}
+	},
+	"metadataMatching": {
+		"section": {
+			"heading": "Pending matches",
+			"description": "Review metadata matches fetched from external providers"
+		},
+		"confidenceBadge": {
+			"label": "confidence"
+		},
+		"includeField": "Include this field",
+		"excludeField": "Exclude this field",
+		"fieldLocked": "This field is locked",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "No candidates available for this record",
+				"noComparableFields": "No comparable fields found",
+				"headers": {
+					"field": "Field",
+					"current": "Current",
+					"external": "External",
+					"resolved": "Resolved"
+				},
+				"toolbar": {
+					"candidatePosition": "Candidate {{position}} of {{total}}",
+					"provider": "Provider"
+				}
+			},
+			"footer": {
+				"accept": "Accept",
+				"reject": "Reject",
+				"strategies": {
+					"FILL_GAPS": "Fill gaps",
+					"PREFER_EXTERNAL": "Prefer external",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
+					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "Keep current",
+				"takeExternal": "Take external",
+				"mergeLists": "Merge lists",
+				"editManually": "Edit manually",
+				"lockField": "Lock field",
+				"unlockField": "Unlock field",
+				"reset": "Reset",
+				"undoManualEdit": "Undo manual edit"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "Name",
+				"entityType": "Type",
+				"candidateCount": "Candidates",
+				"topConfidence": "Top Confidence",
+				"addedAt": "Fetched"
+			},
+			"acceptAll": {
+				"label": "Accept all",
+				"failed": "Failed to accept all matches",
+				"success": "All pending matches accepted"
+			},
+			"rejectAll": {
+				"label": "Reject all",
+				"failed": "Failed to reject all matches",
+				"success": "All pending matches rejected"
+			},
+			"startReview": "Start review",
+			"nothingToReview": "No pending metadata matches to review"
 		}
 	},
 	"seriesOverviewScene": {
@@ -1253,6 +1342,7 @@
 				"jobs": "Jobs",
 				"access": "Access",
 				"email": "Email",
+				"metadata": "Metadata",
 				"notifications": "Notifications",
 				"tags": "Tags",
 				"label": "Management"
@@ -1271,7 +1361,12 @@
 					"labels": {
 						"username": "Nome utente",
 						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"activeChangesPrompt": "You have unsaved changes",
+						"uselessForm": {
+							"title": "You lack permissions to change these settings",
+							"description": "Contact your administrator if you want to make changes to these settings"
+						},
+						"insufficientPermission": "You do not have permission to change this"
 					},
 					"errors": {
 						"updateFailed": "A server error occurred while updating your profile. Please try again."
@@ -1782,32 +1877,75 @@
 			"description": "Background jobs that run on your Stump server instance",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
+					"title": "Scheduled jobs",
 					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
-					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
-					"createOrUpdateConfig": {
-						"fields": {
-							"intervalSecs": {
-								"label": "Interval",
-								"description": "How often the job should run (in seconds)",
-								"placeholder": "e.g. \"86400\" for once a day"
-							},
-							"intervalPreset": {
-								"label": "Preset",
-								"configuration": {
-									"everySixHours": "Every 6 hours",
-									"everyTwelveHours": "Every 12 hours",
-									"oncePerDay": "Once a day",
-									"oncePerWeek": "Once a week",
-									"oncePerMonth": "Once a month"
-								}
-							},
-							"includedLibraryIds": {
-								"label": "Included libraries",
-								"description": "Choose which libraries are included"
-							}
+					"restartRequiredTitle": "Restart required",
+					"restartRequired": "Changes to this configuration will take effect after a server restart",
+					"newScheduledJob": "New scheduled job",
+					"deleteScheduledJob": {
+						"title": "Delete scheduled job",
+						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+						"confirm": "Delete"
+					},
+					"dialog": {
+						"titleCreate": "New scheduled job",
+						"titleEdit": "Edit scheduled job",
+						"cancel": "Cancel",
+						"create": "Create",
+						"saveChanges": "Save changes"
+					},
+					"fields": {
+						"name": {
+							"label": "Name",
+							"placeholder": "e.g. \"Daily library scan\""
 						},
-						"restartRequired": "Changes to this configuration will take effect after a server restart"
+						"schedule": {
+							"label": "Cron schedule",
+							"description": "A cron expression to define the frequency",
+							"placeholder": "0 0 0 * * *"
+						},
+						"schedulePreset": {
+							"label": "Preset",
+							"custom": "Custom",
+							"everySixHours": "Every 6 hours",
+							"everyTwelveHours": "Every 12 hours",
+							"dailyAtMidnight": "Daily at midnight",
+							"weeklySunday": "Weekly (Sunday)",
+							"monthlyFirst": "Monthly (1st)"
+						},
+						"kind": {
+							"label": "Job type",
+							"libraryScan": "Library Scan",
+							"metadataRetry": "Metadata Retry"
+						},
+						"libraryIds": {
+							"label": "Libraries to scan",
+							"description": "Leave empty to scan all libraries"
+						},
+						"statuses": {
+							"label": "Statuses to retry",
+							"description": "Which metadata fetch statuses should be retried",
+							"rateLimited": "Rate Limited",
+							"failed": "Failed"
+						},
+						"enabled": "Enabled"
+					},
+					"row": {
+						"enabled": "Enabled",
+						"disabled": "Disabled",
+						"allLibraries": "All libraries",
+						"rateLimited": "rate limited",
+						"lastRun": "Last run at {{date}}",
+						"edit": "Edit",
+						"delete": "Delete"
+					},
+					"toasts": {
+						"createSuccess": "Scheduled job created",
+						"createError": "Failed to create scheduled job",
+						"updateSuccess": "Scheduled job updated",
+						"updateError": "Failed to update scheduled job",
+						"deleteSuccess": "Scheduled job deleted",
+						"deleteError": "Failed to delete scheduled job"
 					}
 				},
 				"history": {
@@ -1873,6 +2011,16 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "Account",
+						"featureAccess": "Feature access",
+						"fileManagement": "Files",
+						"emailers": "Emailers",
+						"emailing": "Emailing",
+						"libraryManagement": "Library management",
+						"userManagement": "User management",
+						"serverManagement": "Server management"
+					},
 					"heading": "Permissions",
 					"subtitle": [
 						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
@@ -2146,6 +2294,61 @@
 				"description": "Update the details of this SMTP emailer"
 			}
 		},
+		"server/metadataIntegrations": {
+			"helmet": "Metadata integrations",
+			"title": "Metadata integrations",
+			"addProvider": "Add provider",
+			"noProviders": "No providers configured yet. Add one to get started",
+			"providers": {
+				"title": "Providers",
+				"description": "Configure external metadata providers to fetch and enrich your library data"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "API token",
+					"description": "The API token for authenticating with this provider"
+				},
+				"apiTokenExpiresAt": {
+					"label": "API token expiration",
+					"description": "The date when the API token will expire (optional)"
+				},
+				"enableProvider": {
+					"label": "Enable provider",
+					"description": "It will be used for fetching if enabled"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "Enable auto-apply",
+						"description": "Skip manual approval and apply likely matches"
+					},
+					"threshold": {
+						"label": "Confidence threshold",
+						"description": "Minimum confidence score (0-1) to auto-apply a match",
+						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+					},
+					"strategy": {
+						"label": "Merge strategy",
+						"options": {
+							"FILL_GAPS": "Accept missing fields",
+							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
+							"PREFER_EXTERNAL": "Prefer external data"
+						}
+					}
+				}
+			},
+			"providerEnabled": "This provider is enabled",
+			"providerDisabled": "This provider is disabled",
+			"providerTokenExpiresSoon": "This provider's token will expire soon",
+			"autoApplyOn": "Auto-apply on",
+			"autoApplyOff": "Auto-apply off",
+			"editDialog": {
+				"tooltip": "Edit provider"
+			},
+			"deleteDialog": {
+				"title": "Delete provider",
+				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+			}
+		},
 		"server/tags": {
 			"helmet": "Tag management",
 			"title": "Tags",
@@ -2305,8 +2508,8 @@
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
 		"options": {
-			"selectFromBooks": "Seleziona dai libri",
-			"uploadImage": "Carica immagine"
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
 		},
 		"uploadImage": {
 			"emptyState": "Un'anteprima della tua immagine apparirà qui",
@@ -2325,6 +2528,10 @@
 			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
 			"confirm": "Delete {{type}}",
 			"typeToConfirm": "Type {{name}} to confirm:"
+		},
+		"experimentalDisclaimer": {
+			"title": "This feature is experimental",
+			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
 		},
 		"enter": "Enter",
 		"save": "Salva",
@@ -2350,6 +2557,10 @@
 		"never": "Never",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
+		"back": "Back",
+		"continue": "Continue",
+		"book": "Book",
+		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
@@ -2369,9 +2580,25 @@
 			"label": "KoReader sync",
 			"description": "Allows the user to access the KoReader sync integration"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Kobo sync",
+			"description": "Allows the user to access the Kobo sync integration"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "Smart Lists",
 			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "Change password",
+			"description": "Allows the user to change their own password"
+		},
+		"CHANGE_USERNAME": {
+			"label": "Change username",
+			"description": "Allows the user to change their own username"
+		},
+		"CHANGE_AVATAR": {
+			"label": "Change avatar",
+			"description": "Allows the user to change their own avatar"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Create book clubs",
@@ -2700,7 +2927,8 @@
 				"label": "Reading",
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture"
+				"disableDismissGesture": "Disable Dismiss Gesture",
+				"incognitoReading": "Incognito Reading"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2735,6 +2963,7 @@
 			"debug": {
 				"label": "Debug",
 				"clearCache": {
+					"label": "Clear Cache",
 					"memory": {
 						"button": "Memory",
 						"success": "Memory cache cleared"
@@ -2758,6 +2987,14 @@
 				"performanceMonitor": "Performance Monitor",
 				"reduceAnimations": "Reduce Animations",
 				"maskUrls": "Mask URLs",
+				"displayLanguageKeys": {
+					"label": "Display Language Keys",
+					"options": {
+						"none": "None",
+						"abbreviated": "Abbreviated",
+						"full": "Full"
+					}
+				},
 				"debugAnalytics": {
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
@@ -2776,7 +3013,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Image Reader Settings",
+			"overrideGlobalSettings": "Override global settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -2823,6 +3061,77 @@
 					"images": "Image Gallery",
 					"slider": "Slider"
 				}
+			},
+			"readingTimer": {
+				"label": "Reading Timer",
+				"resetTimer": "Reset Timer"
+			},
+			"allSettings": "All Settings"
+		},
+		"epubSettings": {
+			"title": "Epub Reader Settings",
+			"typeface": "Typeface",
+			"fontSize": "Font Size",
+			"fontWeight": {
+				"label": "Font Weight",
+				"options": {
+					"light": "Light",
+					"normal": "Normal",
+					"medium": "Medium",
+					"bold": "Bold"
+				}
+			},
+			"textNormalization": "Text Normalization",
+			"verticalText": "Vertical Text",
+			"readingDirection": {
+				"label": "Reading Direction",
+				"options": {
+					"rtl": "Right to left",
+					"ltr": "Left to right"
+				}
+			},
+			"columns": {
+				"label": "Columns",
+				"options": {
+					"auto": "Auto",
+					"single": "Single",
+					"double": "Double"
+				}
+			},
+			"pageMargins": "Page Margins",
+			"imageFilter": {
+				"label": "Image Filter",
+				"options": {
+					"none": "None",
+					"darken": "Darken",
+					"invert": "Invert"
+				}
+			},
+			"publisherStyles": "Publisher Styles",
+			"textAlignment": {
+				"label": "Text Alignment",
+				"options": {
+					"start": "Start",
+					"left": "Left",
+					"center": "Center",
+					"right": "Right",
+					"justify": "Justify"
+				}
+			},
+			"typeScale": "Type Scale",
+			"lineHeight": "Line Height",
+			"paragraphIndent": "Paragraph Indent",
+			"paragraphSpacing": "Paragraph Spacing",
+			"wordSpacing": "Word Spacing",
+			"letterSpacing": "Letter Spacing",
+			"hyphens": "Hyphens",
+			"ligatures": "Ligatures",
+			"customizeTheme": {
+				"placeholder": "Theme name",
+				"background": "Background",
+				"text": "Text",
+				"highlight": "Highlight",
+				"premadeThemes": "Premade themes"
 			}
 		},
 		"savedServerActions": {

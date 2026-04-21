@@ -309,10 +309,10 @@
 				"resizeMethod": {
 					"label": "调整尺寸方法",
 					"options": {
-						"scaleEvenlyByFactor": "按比例缩放",
-						"exact": "精确大小",
-						"scaleDimension": "按维度缩放",
-						"none": "无"
+						"scaleEvenlyByFactor": "等比缩放",
+						"exact": "精确尺寸",
+						"scaleDimension": "自动缩放",
+						"none": "不缩放"
 					}
 				},
 				"scaleEvenlyByFactor": {
@@ -434,15 +434,15 @@
 					"disabled": "你无法更改此设置"
 				},
 				"options": {
-					"label": "书库模式",
-					"description": "决定 Stump 如何组织你的书库的设置",
+					"label": "书库组织模式",
+					"description": "决定 Stump 如何组织你的书库",
 					"collectionPriority": {
-						"label": "集合优先",
-						"description": "书库根目录最顶层的每个文件夹视为一个系列"
+						"label": "按集合优先",
+						"description": "书库根目录下每个顶层文件夹都视为一个系列"
 					},
 					"seriesPriority": {
-						"label": "系列优先",
-						"description": "递归任意层级的每个文件夹视为一个系列"
+						"label": "按系列优先",
+						"description": "递归地将任意层级的每个文件夹都视为一个系列"
 					}
 				}
 			}
@@ -544,14 +544,18 @@
 		"subtitleLink": "相关文档",
 		"sidebar": {
 			"basics": "基础",
-			"options": {
-				"general": "通用",
+			"configuration": {
+				"general": "常规",
 				"reading": "阅读",
 				"scanning": "扫描",
 				"thumbnails": "缩略图",
 				"ignore-rules": "忽略规则",
+				"label": "配置"
+			},
+			"integrations": {
+				"label": "集成",
 				"analysis": "分析",
-				"label": "选项"
+				"metadata": "元数据"
 			},
 			"danger-zone": {
 				"access-control": "访问控制",
@@ -582,23 +586,23 @@
 						"options": {
 							"forceRebuild": {
 								"label": "强制重建",
-								"description": "重建磁盘上书库中的每本书",
-								"alert": "这将从零开始重建书库中的每本书，包括元数据和哈希值"
+								"description": "重建书库中磁盘上的所有书籍",
+								"alert": "这会从头重建书库中的每一本书，包括元数据和哈希"
 							},
 							"custom": {
 								"label": "自定义",
 								"description": "自定义扫描配置",
 								"validation": {
-									"noSelection": "至少必须启用一个选项"
+									"noSelection": "至少启用一个选项"
 								}
 							},
 							"rebuildMeta": {
 								"label": "重建元数据",
-								"description": "重建书库中书籍的元数据"
+								"description": "重建书库内书籍的元数据"
 							},
 							"regenHashes": {
-								"label": "重新生成哈希值",
-								"description": "重新创建书库中书籍的哈希值"
+								"label": "重新生成哈希",
+								"description": "重新生成书库内书籍的哈希"
 							}
 						}
 					}
@@ -650,26 +654,42 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "分析",
-			"description": "分析这个图书馆的内容，以确定潜在的问题或改进",
+			"description": "分析此书库的内容，以识别潜在问题或可改进项",
 			"sections": {
 				"analyzeBooks": {
 					"heading": "分析书籍",
-					"description": "分析该书库中的书籍以在数据库中附加额外元数据，例如图像类书籍的页面尺寸",
-					"disclaimerTitle": "这一进程是资源密集型的",
-					"disclaimer": "可能需要一些时间才能完成。今后它将更容易配置",
+					"description": "分析此书库中的书籍，并在数据库中补充额外元数据，例如图像类书籍的页面尺寸",
+					"disclaimerTitle": "该过程会占用较多资源",
+					"disclaimer": "完成可能需要较长时间。未来会提供更多可配置项",
 					"analyzeButton": "分析书籍"
 				},
 				"missingFiles": {
 					"heading": "缺失文件",
-					"description": "数据库中引用但磁盘上找不到的文件",
-					"noMissingFiles": "该书库中没有缺失文件"
+					"description": "数据库中有记录但在磁盘上找不到的文件",
+					"noMissingFiles": "该书库没有缺失文件"
 				},
 				"duplicateFiles": {
 					"heading": "重复文件",
 					"description": "磁盘上可能重复的文件",
 					"noDuplicateFiles": "该书库未检测到重复文件"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "元数据",
+			"description": "管理并审核此书库的元数据匹配结果",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "获取元数据",
+					"description": "为此书库中的媒体获取元数据",
+					"noProviders": {
+						"title": "当前没有可用的元数据提供方",
+						"description": "你可以在元数据集成设置中配置元数据提供方"
+					},
+					"fetchButton": "开始后台获取",
+					"fetchError": "启动元数据获取失败"
 				}
 			}
 		},
@@ -703,7 +723,7 @@
 					"emptyText": "没有可以清理的内容",
 					"missingEntitiesTable": {
 						"columns": {
-							"id": "充值账号ID",
+							"id": "资源 ID",
 							"path": "路径",
 							"type": "类型"
 						},
@@ -730,7 +750,7 @@
 		"heading": "哎呀，出错了",
 		"message": "发生错误：",
 		"buttons": {
-			"report": "反馈Bug",
+			"report": "反馈问题",
 			"copy": "复制错误详情",
 			"goHome": "返回首页"
 		}
@@ -816,6 +836,75 @@
 			"description": "在自己的行上添加每个添加"
 		}
 	},
+	"metadataMatching": {
+		"section": {
+			"heading": "待处理匹配",
+			"description": "审核从外部提供方获取的元数据匹配结果"
+		},
+		"confidenceBadge": {
+			"label": "置信度"
+		},
+		"includeField": "包含此字段",
+		"excludeField": "排除此字段",
+		"fieldLocked": "此字段已锁定",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "此记录没有可用候选项",
+				"noComparableFields": "未找到可对比字段",
+				"headers": {
+					"field": "字段",
+					"current": "当前值",
+					"external": "外部值",
+					"resolved": "最终值"
+				},
+				"toolbar": {
+					"candidatePosition": "候选项 {{position}} / {{total}}",
+					"provider": "提供方"
+				}
+			},
+			"footer": {
+				"accept": "接受",
+				"reject": "拒绝",
+				"strategies": {
+					"FILL_GAPS": "仅补全缺失字段",
+					"PREFER_EXTERNAL": "优先使用外部数据",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "优先外部数据并合并列表",
+					"FILL_AND_MERGE_LISTS": "补全缺失字段并合并列表"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "保留当前值",
+				"takeExternal": "采用外部值",
+				"mergeLists": "合并列表",
+				"editManually": "手动编辑",
+				"lockField": "锁定字段",
+				"unlockField": "解锁字段",
+				"reset": "重置",
+				"undoManualEdit": "撤销手动编辑"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "名称",
+				"entityType": "类型",
+				"candidateCount": "候选数",
+				"topConfidence": "最高置信度",
+				"addedAt": "获取时间"
+			},
+			"acceptAll": {
+				"label": "全部接受",
+				"failed": "接受全部匹配失败",
+				"success": "已接受所有待处理匹配"
+			},
+			"rejectAll": {
+				"label": "全部拒绝",
+				"failed": "拒绝全部匹配失败",
+				"success": "已拒绝所有待处理匹配"
+			},
+			"startReview": "开始审核",
+			"nothingToReview": "没有待审核的元数据匹配"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "继续阅读",
@@ -847,12 +936,12 @@
 					},
 					"shared": {
 						"label": "共享",
-						"description": "特定用户可以访问此智能列表",
-						"createDisclaimer": "你可以在创建后选择与此列表共享的用户"
+						"description": "仅指定用户可访问此智能列表",
+						"createDisclaimer": "创建后你可以选择与哪些用户共享该列表"
 					},
 					"private": {
 						"label": "私密",
-						"description": "只有你可以访问此智能列表"
+						"description": "仅你自己可访问此智能列表"
 					}
 				}
 			},
@@ -887,13 +976,13 @@
 					"description": "该智能列表中的书籍应如何分组",
 					"options": {
 						"by_books": {
-							"label": "无"
+							"label": "不分组"
 						},
 						"by_series": {
-							"label": "系列"
+							"label": "按系列"
 						},
 						"by_library": {
-							"label": "书库"
+							"label": "按书库"
 						}
 					}
 				},
@@ -1253,6 +1342,7 @@
 				"jobs": "任务",
 				"access": "访问",
 				"email": "电子邮件地址",
+				"metadata": "元数据",
 				"notifications": "通知",
 				"tags": "标签：",
 				"label": "管理"
@@ -1271,7 +1361,12 @@
 					"labels": {
 						"username": "用户名",
 						"password": "密码",
-						"activeChangesPrompt": "您有未保存的更改"
+						"activeChangesPrompt": "您有未保存的更改",
+						"uselessForm": {
+							"title": "你没有权限修改这些设置",
+							"description": "如果你需要修改这些设置，请联系管理员"
+						},
+						"insufficientPermission": "你没有权限修改此项"
 					},
 					"errors": {
 						"updateFailed": "更新您的个人资料时服务器发生错误。请重试。"
@@ -1320,12 +1415,12 @@
 						"文档"
 					],
 					"options": {
-						"system": "系统",
-						"light": "亮色",
+						"system": "跟随系统",
+						"light": "浅色",
 						"dark": "深色",
-						"bronze": "青铜",
+						"bronze": "青铜浅色",
 						"ocean": "海洋",
-						"autumn": "秋色",
+						"autumn": "秋日",
 						"cosmic": "宇宙",
 						"pumpkin": "南瓜",
 						"midnight": "午夜",
@@ -1350,7 +1445,7 @@
 					"options": {
 						"grayscale": "灰度",
 						"averageColor": "平均颜色",
-						"colorful": "彩色化",
+						"colorful": "彩色",
 						"thumbhash": "缩略图哈希"
 					}
 				},
@@ -1363,7 +1458,7 @@
 					"description": "选择最小侧边栏或顶栏导航",
 					"options": {
 						"sidebar": "侧边栏",
-						"topbar": "顶部工具条"
+						"topbar": "顶栏"
 					},
 					"disclaimer": "* 未选中选项的设置将被禁用或隐藏"
 				},
@@ -1390,8 +1485,8 @@
 					"unlock": "解锁排列",
 					"options": {
 						"HOME": "首页",
-						"EXPLORE": "发现",
-						"LIBRARIES": "库",
+						"EXPLORE": "探索",
+						"LIBRARIES": "书库",
 						"BOOK_CLUBS": "读书俱乐部",
 						"SMART_LISTS": "智能列表"
 					},
@@ -1784,30 +1879,73 @@
 				"scheduling": {
 					"title": "计划任务",
 					"description": "一些作业可以配置为自动运行计划",
-					"disclaimer": "工作计划器目前较基础，将来会得到改进。欢迎提供反馈或建议！",
-					"createOrUpdateConfig": {
-						"fields": {
-							"intervalSecs": {
-								"label": "间隔",
-								"description": "任务运行频率(秒)",
-								"placeholder": "例如：\"86400\" 每日一次"
-							},
-							"intervalPreset": {
-								"label": "预设值",
-								"options": {
-									"everySixHours": "每 6 小时",
-									"everyTwelveHours": "每 12 小时",
-									"oncePerDay": "每天一次",
-									"oncePerWeek": "每周一次",
-									"oncePerMonth": "每月一次"
-								}
-							},
-							"includedLibraryIds": {
-								"label": "包含的库",
-								"description": "选择包含哪些库"
-							}
+					"restartRequiredTitle": "需要重启",
+					"restartRequired": "此配置变更将在服务器重启后生效",
+					"newScheduledJob": "新建计划任务",
+					"deleteScheduledJob": {
+						"title": "删除计划任务",
+						"description": "确定要删除“{{name}}”吗？此操作不可撤销。",
+						"confirm": "删除"
+					},
+					"dialog": {
+						"titleCreate": "新建计划任务",
+						"titleEdit": "编辑计划任务",
+						"cancel": "取消",
+						"create": "创建",
+						"saveChanges": "保存更改"
+					},
+					"fields": {
+						"name": {
+							"label": "名称",
+							"placeholder": "例如：“每日书库扫描”"
 						},
-						"restartRequired": "更改此配置将在服务器重启后生效"
+						"schedule": {
+							"label": "Cron 表达式",
+							"description": "使用 Cron 表达式定义执行频率",
+							"placeholder": "0 0 0 * * *"
+						},
+						"schedulePreset": {
+							"label": "预设",
+							"custom": "自定义",
+							"everySixHours": "每 6 小时",
+							"everyTwelveHours": "每 12 小时",
+							"dailyAtMidnight": "每天午夜",
+							"weeklySunday": "每周（日）",
+							"monthlyFirst": "每月（1 日）"
+						},
+						"kind": {
+							"label": "任务类型",
+							"libraryScan": "书库扫描",
+							"metadataRetry": "元数据重试"
+						},
+						"libraryIds": {
+							"label": "要扫描的书库",
+							"description": "留空则扫描所有书库"
+						},
+						"statuses": {
+							"label": "要重试的状态",
+							"description": "需要重试的元数据获取状态",
+							"rateLimited": "达到速率限制",
+							"failed": "失败"
+						},
+						"enabled": "已启用"
+					},
+					"row": {
+						"enabled": "已启用",
+						"disabled": "已禁用",
+						"allLibraries": "所有书库",
+						"rateLimited": "达到速率限制",
+						"lastRun": "上次运行于 {{date}}",
+						"edit": "编辑",
+						"delete": "删除"
+					},
+					"toasts": {
+						"createSuccess": "计划任务已创建",
+						"createError": "创建计划任务失败",
+						"updateSuccess": "计划任务已更新",
+						"updateError": "更新计划任务失败",
+						"deleteSuccess": "计划任务已删除",
+						"deleteError": "删除计划任务失败"
 					}
 				},
 				"history": {
@@ -1873,6 +2011,16 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "账户",
+						"featureAccess": "功能访问",
+						"fileManagement": "文件",
+						"emailers": "邮件发送器",
+						"emailing": "邮件发送",
+						"libraryManagement": "书库管理",
+						"userManagement": "用户管理",
+						"serverManagement": "服务器管理"
+					},
 					"heading": "权限",
 					"subtitle": [
 						"选择您想要授予此用户的权限。欲了解更多关于每个权限的信息，请查看",
@@ -2146,6 +2294,61 @@
 				"description": "更新此用户的详细信息"
 			}
 		},
+		"server/metadataIntegrations": {
+			"helmet": "元数据集成",
+			"title": "元数据集成",
+			"addProvider": "添加提供方",
+			"noProviders": "尚未配置提供方。添加一个以开始使用",
+			"providers": {
+				"title": "提供方",
+				"description": "配置外部元数据提供方，以获取并补充你的书库数据"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "API 令牌",
+					"description": "用于向该提供方进行身份验证的 API 令牌"
+				},
+				"apiTokenExpiresAt": {
+					"label": "API 令牌过期时间",
+					"description": "API 令牌的过期日期（可选）"
+				},
+				"enableProvider": {
+					"label": "启用提供方",
+					"description": "启用后将用于获取元数据"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "启用自动应用",
+						"description": "跳过手动审核并自动应用高可能性匹配"
+					},
+					"threshold": {
+						"label": "置信度阈值",
+						"description": "自动应用匹配所需的最低置信度（0-1）",
+						"disclaimer": "计算得到的置信度是尽力估算，不一定始终准确"
+					},
+					"strategy": {
+						"label": "合并策略",
+						"options": {
+							"FILL_GAPS": "接受缺失字段",
+							"FILL_AND_MERGE_LISTS": "接受缺失字段并合并列表",
+							"PREFER_EXTERNAL": "优先外部数据"
+						}
+					}
+				}
+			},
+			"providerEnabled": "该提供方已启用",
+			"providerDisabled": "该提供方已禁用",
+			"providerTokenExpiresSoon": "该提供方的令牌即将过期",
+			"autoApplyOn": "自动应用：开启",
+			"autoApplyOff": "自动应用：关闭",
+			"editDialog": {
+				"tooltip": "编辑提供方"
+			},
+			"deleteDialog": {
+				"title": "删除提供方",
+				"description": "确定要删除 {{providerName}} 吗？此操作不可撤销。"
+			}
+		},
 		"server/tags": {
 			"helmet": "标签管理",
 			"title": "标签",
@@ -2305,7 +2508,7 @@
 	"thumbnailDropdown": {
 		"label": "选择缩略图",
 		"options": {
-			"selectFromBooks": "从书中选择",
+			"selectFromBooks": "从书籍中选择",
 			"uploadImage": "上传图片"
 		},
 		"uploadImage": {
@@ -2321,10 +2524,14 @@
 		"confirm": "确认",
 		"delete": "删除",
 		"deleteConfirmation": {
-			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
-			"confirm": "Delete {{type}}",
-			"typeToConfirm": "Type {{name}} to confirm:"
+			"title": "删除{{type}}",
+			"description": "确定要删除此{{type}}吗？此操作不可撤销。",
+			"confirm": "删除{{type}}",
+			"typeToConfirm": "输入 {{name}} 以确认："
+		},
+		"experimentalDisclaimer": {
+			"title": "该功能为实验性功能",
+			"description": "该功能可能存在缺失、Bug 或无法正常工作。请谨慎使用，并反馈你遇到的问题"
 		},
 		"enter": "进入",
 		"save": "保存",
@@ -2350,6 +2557,10 @@
 		"never": "从不",
 		"scan": "扫描",
 		"somethingWentWrong": "出了些问题",
+		"back": "返回",
+		"continue": "继续",
+		"book": "书籍",
+		"series": "系列",
 		"fileUpload": {
 			"someRejected": "有些文件被拒绝。请检查文件类型并重试",
 			"tooManyFiles": "您选择了太多的文件",
@@ -2369,9 +2580,25 @@
 			"label": "KoReader 同步",
 			"description": "允许用户访问 KoReader 同步集成"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Kobo 同步",
+			"description": "允许用户访问 Kobo 同步集成"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "智能列表",
 			"description": "允许用户访问智能列表功能，包括查看和创建智能列表"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "修改密码",
+			"description": "允许用户修改自己的密码"
+		},
+		"CHANGE_USERNAME": {
+			"label": "修改用户名",
+			"description": "允许用户修改自己的用户名"
+		},
+		"CHANGE_AVATAR": {
+			"label": "修改头像",
+			"description": "允许用户修改自己的头像"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "创建读书俱乐部",
@@ -2700,10 +2927,11 @@
 				"label": "阅读",
 				"preferNativePdf": "优先使用原生 PDF",
 				"preferMinimalReader": "优先使用极简阅读器",
-				"disableDismissGesture": "禁用关闭手势"
+				"disableDismissGesture": "禁用关闭手势",
+				"incognitoReading": "隐身阅读"
 			},
 			"stump": {
-				"label": "Stump",
+				"label": "Stump 功能",
 				"description": "Stump 功能是可选的，如果您不需要可以关闭",
 				"bookClubsEnabled": "读书俱乐部功能"
 			},
@@ -2735,6 +2963,7 @@
 			"debug": {
 				"label": "调试",
 				"clearCache": {
+					"label": "清除缓存",
 					"memory": {
 						"button": "内存",
 						"success": "内存缓存已清除"
@@ -2758,6 +2987,14 @@
 				"performanceMonitor": "性能监控",
 				"reduceAnimations": "减少动画",
 				"maskUrls": "隐藏 URL",
+				"displayLanguageKeys": {
+					"label": "显示语言键",
+					"options": {
+						"none": "不显示",
+						"abbreviated": "缩写",
+						"full": "完整"
+					}
+				},
 				"debugAnalytics": {
 					"label": "调试分析",
 					"description": "发送额外的调试相关事件以帮助排查问题"
@@ -2776,7 +3013,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "阅读器设置",
+			"title": "图像阅读器设置",
+			"overrideGlobalSettings": "覆盖全局设置",
 			"sections": {
 				"mode": "模式",
 				"imageOptions": "图像选项",
@@ -2823,6 +3061,77 @@
 					"images": "图像画廊",
 					"slider": "滑块"
 				}
+			},
+			"readingTimer": {
+				"label": "阅读计时器",
+				"resetTimer": "重置计时器"
+			},
+			"allSettings": "全部设置"
+		},
+		"epubSettings": {
+			"title": "Epub 阅读器设置",
+			"typeface": "字体",
+			"fontSize": "字号",
+			"fontWeight": {
+				"label": "字重",
+				"options": {
+					"light": "细体",
+					"normal": "常规",
+					"medium": "中等",
+					"bold": "粗体"
+				}
+			},
+			"textNormalization": "文本规范化",
+			"verticalText": "竖排文本",
+			"readingDirection": {
+				"label": "阅读方向",
+				"options": {
+					"rtl": "从右到左",
+					"ltr": "从左到右"
+				}
+			},
+			"columns": {
+				"label": "分栏",
+				"options": {
+					"auto": "自动",
+					"single": "单栏",
+					"double": "双栏"
+				}
+			},
+			"pageMargins": "页边距",
+			"imageFilter": {
+				"label": "图像滤镜",
+				"options": {
+					"none": "无",
+					"darken": "变暗",
+					"invert": "反相"
+				}
+			},
+			"publisherStyles": "出版方样式",
+			"textAlignment": {
+				"label": "文本对齐",
+				"options": {
+					"start": "起始",
+					"left": "左对齐",
+					"center": "居中",
+					"right": "右对齐",
+					"justify": "两端对齐"
+				}
+			},
+			"typeScale": "字号比例",
+			"lineHeight": "行高",
+			"paragraphIndent": "段首缩进",
+			"paragraphSpacing": "段落间距",
+			"wordSpacing": "词间距",
+			"letterSpacing": "字间距",
+			"hyphens": "断词连字符",
+			"ligatures": "连字",
+			"customizeTheme": {
+				"placeholder": "主题名称",
+				"background": "背景",
+				"text": "文本",
+				"highlight": "高亮",
+				"premadeThemes": "预设主题"
 			}
 		},
 		"savedServerActions": {

@@ -24,9 +24,7 @@ export default function DownloadQueueItem({ item, onCancel }: Props) {
 				</>
 			)
 		} else if (item.status === 'downloading') {
-			return (
-				<Text className="text-xs text-foreground-muted">{t('downloadQueue.downloadStarting')}</Text>
-			)
+			return <Text className="text-xs text-foreground-muted">{t(getKey('downloadStarting'))}</Text>
 		} else {
 			return (
 				<Text className="text-xs text-foreground-muted">
@@ -54,3 +52,6 @@ export default function DownloadQueueItem({ item, onCancel }: Props) {
 		</Card.Row>
 	)
 }
+
+const LOCALE_BASE = 'localLibrary.downloadQueue'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

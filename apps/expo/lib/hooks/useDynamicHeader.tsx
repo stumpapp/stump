@@ -52,7 +52,7 @@ export function useDynamicHeader({
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			...(headerLeft || showBackButton ? { headerLeft: resolvedHeaderLeft } : {}),
-			headerRight,
+			...(headerRight ? { headerRight } : {}),
 			headerShown: true,
 			headerTransparent: Platform.OS === 'ios',
 			headerTitle: title,

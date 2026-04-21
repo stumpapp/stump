@@ -5052,6 +5052,7 @@ export type LibrarySeriesScreenSeriesNameQuery = { __typename?: 'Query', library
 
 export type LibrarySeriesScreenQueryVariables = Exact<{
   filter: SeriesFilterInput;
+  orderBy?: InputMaybe<Array<SeriesOrderBy> | SeriesOrderBy>;
   pagination?: InputMaybe<Pagination>;
 }>;
 
@@ -5253,62 +5254,6 @@ export type BooksAfterCursorQuery = { __typename?: 'Query', mediaById?: { __type
 
 export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: { __typename?: 'Series', resolvedName: string, mediaCount: number } } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
 
-export type CharactersQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type CharactersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', characters: Array<string> } };
-
-export type ColoristsQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type ColoristsQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', colorists: Array<string> } };
-
-export type CoverArtistsQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type CoverArtistsQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', coverArtists: Array<string> } };
-
-export type GenresQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type GenresQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', genres: Array<string> } };
-
-export type InkersQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type InkersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', inkers: Array<string> } };
-
-export type LetterersQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type LetterersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', letterers: Array<string> } };
-
-export type SeriesMetadataQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type SeriesMetadataQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', series: Array<string> } };
-
-export type WritersQueryVariables = Exact<{
-  seriesId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type WritersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', writers: Array<string> } };
-
 export type SeriesBooksListHeaderScanSeriesMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -5397,13 +5342,6 @@ export type UseEmojisQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type UseEmojisQuery = { __typename?: 'Query', customEmojis: Array<{ __typename?: 'CustomEmoji', id: number, name: string, isAnimated: boolean, url: string }> };
 
-export type LibraryActionMenuScanLibraryMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type LibraryActionMenuScanLibraryMutation = { __typename?: 'Mutation', scanLibrary: boolean };
-
 export type LibraryGridItemFragment = { __typename?: 'Library', id: string, name: string, series: Array<{ __typename?: 'Series', thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }> } & { ' $fragmentName'?: 'LibraryGridItemFragment' };
 
 export type LibraryOverviewSheetQueryVariables = Exact<{
@@ -5414,6 +5352,13 @@ export type LibraryOverviewSheetQueryVariables = Exact<{
 export type LibraryOverviewSheetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', name: string, description?: string | null, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, totalBytes: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', name: string }> } | null };
 
 export type LibrarySearchItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'LibrarySearchItemFragment' };
+
+export type LibrarySeriesListHeaderScanLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibrarySeriesListHeaderScanLibraryMutation = { __typename?: 'Mutation', scanLibrary: boolean };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -8823,8 +8768,8 @@ export const LibrarySeriesScreenSeriesNameDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<LibrarySeriesScreenSeriesNameQuery, LibrarySeriesScreenSeriesNameQueryVariables>;
 export const LibrarySeriesScreenDocument = new TypedDocumentString(`
-    query LibrarySeriesScreen($filter: SeriesFilterInput!, $pagination: Pagination) {
-  series(filter: $filter, pagination: $pagination) {
+    query LibrarySeriesScreen($filter: SeriesFilterInput!, $orderBy: [SeriesOrderBy!], $pagination: Pagination) {
+  series(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
       ...SeriesGridItem
@@ -9476,62 +9421,6 @@ export const BooksAfterCursorDocument = new TypedDocumentString(`
     width
   }
 }`) as unknown as TypedDocumentString<BooksAfterCursorQuery, BooksAfterCursorQueryVariables>;
-export const CharactersDocument = new TypedDocumentString(`
-    query Characters($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    characters
-  }
-}
-    `) as unknown as TypedDocumentString<CharactersQuery, CharactersQueryVariables>;
-export const ColoristsDocument = new TypedDocumentString(`
-    query Colorists($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    colorists
-  }
-}
-    `) as unknown as TypedDocumentString<ColoristsQuery, ColoristsQueryVariables>;
-export const CoverArtistsDocument = new TypedDocumentString(`
-    query CoverArtists($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    coverArtists
-  }
-}
-    `) as unknown as TypedDocumentString<CoverArtistsQuery, CoverArtistsQueryVariables>;
-export const GenresDocument = new TypedDocumentString(`
-    query Genres($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    genres
-  }
-}
-    `) as unknown as TypedDocumentString<GenresQuery, GenresQueryVariables>;
-export const InkersDocument = new TypedDocumentString(`
-    query Inkers($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    inkers
-  }
-}
-    `) as unknown as TypedDocumentString<InkersQuery, InkersQueryVariables>;
-export const LetterersDocument = new TypedDocumentString(`
-    query Letterers($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    letterers
-  }
-}
-    `) as unknown as TypedDocumentString<LetterersQuery, LetterersQueryVariables>;
-export const SeriesMetadataDocument = new TypedDocumentString(`
-    query SeriesMetadata($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    series
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesMetadataQuery, SeriesMetadataQueryVariables>;
-export const WritersDocument = new TypedDocumentString(`
-    query Writers($seriesId: ID) {
-  mediaMetadataOverview(seriesId: $seriesId) {
-    writers
-  }
-}
-    `) as unknown as TypedDocumentString<WritersQuery, WritersQueryVariables>;
 export const SeriesBooksListHeaderScanSeriesDocument = new TypedDocumentString(`
     mutation SeriesBooksListHeaderScanSeries($id: ID!) {
   scanSeries(id: $id)
@@ -9667,11 +9556,6 @@ export const UseEmojisDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UseEmojisQuery, UseEmojisQueryVariables>;
-export const LibraryActionMenuScanLibraryDocument = new TypedDocumentString(`
-    mutation LibraryActionMenuScanLibrary($id: ID!) {
-  scanLibrary(id: $id)
-}
-    `) as unknown as TypedDocumentString<LibraryActionMenuScanLibraryMutation, LibraryActionMenuScanLibraryMutationVariables>;
 export const LibraryOverviewSheetDocument = new TypedDocumentString(`
     query LibraryOverviewSheet($id: ID!) {
   libraryById(id: $id) {
@@ -9691,6 +9575,11 @@ export const LibraryOverviewSheetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibraryOverviewSheetQuery, LibraryOverviewSheetQueryVariables>;
+export const LibrarySeriesListHeaderScanLibraryDocument = new TypedDocumentString(`
+    mutation LibrarySeriesListHeaderScanLibrary($id: ID!) {
+  scanLibrary(id: $id)
+}
+    `) as unknown as TypedDocumentString<LibrarySeriesListHeaderScanLibraryMutation, LibrarySeriesListHeaderScanLibraryMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

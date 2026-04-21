@@ -1,28 +1,25 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList } from '@shopify/flash-list'
-import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
+import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { formatHumanDurationSeparate } from '@stump/i18n'
+import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
-import { BookCheck, BookOpen, Clock, Layers } from 'lucide-react-native'
-import { useCallback, useEffect, useRef } from 'react'
-import { Platform, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useStore } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 
-import { Divider } from '~/components/Divider'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
-import {
-	LibraryOverviewSheet,
-	useLibraryMenu,
-	usePrefetchLibraryOverview,
-} from '~/components/library'
+import { LibraryOverviewSheet, usePrefetchLibraryOverview } from '~/components/library'
+import { LibrarySeriesListHeader } from '~/components/library/listHeader'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import SeriesGridItem from '~/components/series/SeriesGridItem'
-import { MiniStatCard } from '~/components/stats'
-import { RefreshButton, Text } from '~/components/ui'
-import { ON_END_REACHED_THRESHOLD, STAT_COLORS } from '~/lib/constants'
+import { Button, FullScreenLoader, RefreshButton, Text } from '~/components/ui'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
 
 const query = graphql(`
 	query LibrarySeriesScreenSeriesName($id: ID!) {
@@ -40,8 +37,12 @@ const query = graphql(`
 `)
 
 const seriesQuery = graphql(`
-	query LibrarySeriesScreen($filter: SeriesFilterInput!, $pagination: Pagination) {
-		series(filter: $filter, pagination: $pagination) {
+	query LibrarySeriesScreen(
+		$filter: SeriesFilterInput!
+		$orderBy: [SeriesOrderBy!]
+		$pagination: Pagination
+	) {
+		series(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
 			nodes {
 				id
 				...SeriesGridItem
@@ -75,22 +76,47 @@ export default function Screen() {
 		title: library.name,
 	})
 
-	const menuFragment = useLibraryMenu({
-		libraryId: id,
-		onShowOverview: () => sheetRef.current?.present(),
-	})
+	const actions = useMemo(
+		() => ({
+			libraryId: id,
+			onShowOverview: () => sheetRef.current?.present(),
+		}),
+		[id],
+	)
 
 	useEffect(() => {
 		prefetch(id)
 	}, [id, prefetch])
 
-	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
+	// eslint-disable-next-line react-hooks/refs
+	const store = useRef(createSeriesFilterStore()).current
+	const { filters, sort, resetFilters } = useStore(
+		store,
+		useShallow((state) => ({
+			filters: state.filters,
+			sort: state.sort,
+			resetFilters: state.resetFilters,
+		})),
+	)
+
+	const {
+		data,
+		hasNextPage,
+		fetchNextPage,
+		refetch,
+		isLoading: isInitialLoading,
+	} = useInfiniteGraphQL(
 		seriesQuery,
-		['librarySeries', id],
+		['librarySeries', id, filters, sort],
 		{
 			filter: {
+				...filters,
 				libraryId: { eq: id },
 			},
+			orderBy: [sort],
+		},
+		{
+			placeholderData: keepPreviousData,
 		},
 	)
 	const { numColumns, paddingHorizontal } = useGridItemSize()
@@ -105,11 +131,10 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
-	const formattedTime = formatHumanDurationSeparate(library.stats.totalReadingTimeSeconds)
+	const isFiltered = Object.keys(filters).length > 0
 
 	return (
-		<>
-			{menuFragment}
+		<SeriesFilterContext.Provider value={store}>
 			<SafeAreaView
 				style={{ flex: 1 }}
 				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
@@ -125,34 +150,7 @@ export default function Screen() {
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={
-						<View className="gap-4">
-							<View className="px-4 gap-2 flex-row flex-wrap">
-								<MiniStatCard
-									value={library.stats.inProgressBooks}
-									icon={BookOpen}
-									baseColor={STAT_COLORS.inProgress}
-								/>
-
-								<MiniStatCard
-									value={library.stats.completedBooks}
-									suffix={`/ ${library.stats.bookCount}`}
-									icon={BookCheck}
-									baseColor={STAT_COLORS.completed}
-								/>
-								<MiniStatCard
-									value={library.stats.seriesCount}
-									icon={Layers}
-									baseColor={STAT_COLORS.series}
-								/>
-								<MiniStatCard
-									value={formattedTime ? formattedTime.value : '??'}
-									suffix={formattedTime ? formattedTime.unit : undefined}
-									icon={Clock}
-									baseColor={STAT_COLORS.readingTime}
-								/>
-							</View>
-							<Divider />
-						</View>
+						<LibrarySeriesListHeader stats={library.stats} additionalActions={actions} />
 					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					contentInsetAdjustmentBehavior="automatic"
@@ -162,28 +160,47 @@ export default function Screen() {
 						) : undefined
 					}
 					ListEmptyComponent={
-						<ListEmpty
-							title="This library is empty"
-							message="Once you've added series to this library, they'll show up here"
-							actions={
-								<>
-									<RefreshButton
-										className="flex-row items-center"
-										roundness="full"
-										size="lg"
-										onPress={() => handleRefetch()}
-										isRefreshing={isRefetching}
-									>
-										<Text>Refresh</Text>
-									</RefreshButton>
-								</>
-							}
-						/>
+						isInitialLoading ? (
+							<FullScreenLoader />
+						) : (
+							<ListEmpty
+								title={isFiltered ? 'Nothing was returned' : 'This library is empty'}
+								message={
+									isFiltered
+										? 'Try adjusting your filters to see more results'
+										: 'When your library has books you will see them here'
+								}
+								actions={
+									<>
+										{isFiltered && (
+											<Button
+												roundness="full"
+												variant="secondary"
+												size="lg"
+												onPress={() => resetFilters()}
+											>
+												<Text>Clear Filters</Text>
+											</Button>
+										)}
+
+										<RefreshButton
+											className="flex-row items-center"
+											roundness="full"
+											size="lg"
+											onPress={() => handleRefetch()}
+											isRefreshing={isRefetching}
+										>
+											<Text>Refresh</Text>
+										</RefreshButton>
+									</>
+								}
+							/>
+						)
 					}
 				/>
 
 				<LibraryOverviewSheet ref={sheetRef} libraryId={id} />
 			</SafeAreaView>
-		</>
+		</SeriesFilterContext.Provider>
 	)
 }

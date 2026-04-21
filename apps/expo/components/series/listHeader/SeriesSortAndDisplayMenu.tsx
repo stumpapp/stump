@@ -1,7 +1,7 @@
 import { SeriesOrderBy } from '@stump/graphql'
 
 import { useSortAndDisplayMenu } from '~/components/filter/SortAndDisplayMenu'
-import { SortFieldDef } from '~/components/filter/types'
+import { ActionDef, SortFieldDef } from '~/components/filter/types'
 import { useSeriesFilterStore } from '~/stores/filters'
 
 const SORT_FIELDS: SortFieldDef[] = [
@@ -10,7 +10,7 @@ const SORT_FIELDS: SortFieldDef[] = [
 	{ field: 'YEAR', orderKey: 'metadata' },
 ]
 
-export function useSeriesSortAndDisplayMenu() {
+export function useSeriesSortAndDisplayMenu(actions?: ActionDef[]) {
 	const sort = useSeriesFilterStore((store) => store.sort)
 	const setSort = useSeriesFilterStore((store) => store.setSort)
 
@@ -18,5 +18,6 @@ export function useSeriesSortAndDisplayMenu() {
 		sort,
 		setSort,
 		fields: SORT_FIELDS,
+		actions,
 	})
 }

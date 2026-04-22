@@ -1437,7 +1437,8 @@
 				},
 				"thumbnailRatioSelect": {
 					"label": "Vorschaubildverhältnis",
-					"description": "Das Seitenverhältnis für Vorschaubilder"
+					"description": "Das Seitenverhältnis für Vorschaubilder",
+					"defaultSuffix": "Default"
 				},
 				"thumbnailPlaceholder": {
 					"label": "Vorschaubild-Platzhalter",
@@ -1513,7 +1514,10 @@
 				"maxWidthPreference": {
 					"label": "Angepasste Breite",
 					"description": "Stump wendet eine Maximalbreite auf das Ansichtsfenster an. Diese Einstellung erlaubt dir das Limit zu verändern oder ganz zu entfernen",
-					"tooltip": "Diese Einstellung ist derzeit nicht unterstützt, wenn die primäre Navigation auf Seitenleiste eingestellt ist"
+					"tooltip": "Diese Einstellung ist derzeit nicht unterstützt, wenn die primäre Navigation auf Seitenleiste eingestellt ist",
+					"options": {
+						"noLimit": "No limit"
+					}
 				},
 				"additionalPreferences": {
 					"label": "Zusätzliche Präferenzen",

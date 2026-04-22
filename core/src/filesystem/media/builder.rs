@@ -31,6 +31,10 @@ pub struct MediaBuilder {
 pub struct BuiltMedia {
 	pub media: media::ActiveModel,
 	pub metadata: Option<media_metadata::ActiveModel>,
+	/// Tag names extracted from the file's metadata (e.g. ComicInfo.xml `<Tags>`).
+	/// Applied additively to `media_tags` during create/update so user-assigned tags
+	/// are never removed by a rescan.
+	pub tags: Vec<String>,
 }
 
 impl BuiltMedia {
@@ -72,6 +76,7 @@ impl MediaBuilder {
 				media_id: Set(Some(media.media.id.clone())),
 				..meta
 			}),
+			tags: generated.tags,
 		})
 	}
 
@@ -104,25 +109,29 @@ impl MediaBuilder {
 
 		let id = Uuid::new_v4().to_string();
 		let pages = processed_entry.pages;
-		let mut resolved_metadata = None;
+		let (resolved_metadata, resolved_tags) = processed_entry
+			.metadata
+			.map(|mut metadata| {
+				let conflicting_page_counts =
+					metadata.page_count.is_some_and(|count| count != pages);
+				if conflicting_page_counts {
+					tracing::warn!(
+						?pages,
+						?metadata.page_count,
+						"Page count in metadata does not match actual page count!"
+					);
+					metadata.page_count = Some(pages);
+				}
 
-		if let Some(mut metadata) = processed_entry.metadata {
-			let conflicting_page_counts =
-				metadata.page_count.is_some_and(|count| count != pages);
-			if conflicting_page_counts {
-				tracing::warn!(
-					?pages,
-					?metadata.page_count,
-					"Page count in metadata does not match actual page count!"
-				);
-				metadata.page_count = Some(pages);
-			}
+				let tags = metadata.tags.take().unwrap_or_default();
 
-			resolved_metadata = Some(media_metadata::ActiveModel {
-				media_id: Set(Some(id.clone())),
-				..metadata.into_active_model()
-			});
-		}
+				let active = media_metadata::ActiveModel {
+					media_id: Set(Some(id.clone())),
+					..metadata.into_active_model()
+				};
+				(Some(active), tags)
+			})
+			.unwrap_or_default();
 
 		let media = media::ActiveModel {
 			id: Set(id),
@@ -141,6 +150,7 @@ impl MediaBuilder {
 		Ok(BuiltMedia {
 			media,
 			metadata: resolved_metadata,
+			tags: resolved_tags,
 		})
 	}
 

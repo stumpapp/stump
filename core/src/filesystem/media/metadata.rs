@@ -20,8 +20,6 @@ const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
 
-// TODO: Intake tags
-
 /// Struct representing the metadata for a processed file.
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, Default, Merge)]
@@ -92,6 +90,14 @@ pub struct ProcessedMediaMetadata {
 		default = "Option::default"
 	)]
 	pub genres: Option<Vec<String>>,
+	/// The tag(s) the media belongs to. Unlike genres, these are stored as first-class
+	/// `Tag` entities and linked to the media via the `media_tags` junction table.
+	#[serde(
+		alias = "Tags",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
+	pub tags: Option<Vec<String>>,
 	/// The language of the media
 	#[serde(alias = "Language")]
 	pub language: Option<String>,
@@ -284,6 +290,19 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 				"genre" | "genres" | "subject" | "subjects" => {
 					metadata.genres = Some(value)
 				},
+				"tag" | "tags" => {
+					metadata.tags = Some(
+						value
+							.into_iter()
+							.flat_map(|v| {
+								v.split(',')
+									.map(|s| s.trim().to_owned())
+									.collect::<Vec<_>>()
+							})
+							.filter(|s| !s.is_empty())
+							.collect(),
+					)
+				},
 				"year" => {
 					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok());
 				},
@@ -448,6 +467,10 @@ mod tests {
 			"Summary".to_string(),
 			vec![String::from("A book, you know?")],
 		);
+		map.insert(
+			"tags".to_string(),
+			vec![String::from("epic"), String::from("high-fantasy")],
+		);
 
 		let metadata = ProcessedMediaMetadata::from(map);
 
@@ -460,7 +483,35 @@ mod tests {
 		assert_eq!(metadata.month, Some(8));
 		assert_eq!(metadata.day, Some(31));
 		assert_eq!(metadata.genres, Some(vec!["Fantasy".to_string()]));
+		assert_eq!(
+			metadata.tags,
+			Some(vec!["epic".to_string(), "high-fantasy".to_string()])
+		);
 		assert_eq!(metadata.summary, Some("A book, you know?".to_string()));
+	}
+
+	#[test]
+	fn test_from_hashmap_splits_comma_separated_tags() {
+		let mut map = HashMap::new();
+		map.insert(
+			"tags".to_string(),
+			vec![
+				String::from("epic, high-fantasy"),
+				String::from("  standalone "),
+				String::from(""),
+			],
+		);
+
+		let metadata = ProcessedMediaMetadata::from(map);
+
+		assert_eq!(
+			metadata.tags,
+			Some(vec![
+				"epic".to_string(),
+				"high-fantasy".to_string(),
+				"standalone".to_string(),
+			])
+		);
 	}
 
 	#[test]

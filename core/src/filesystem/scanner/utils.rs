@@ -1,5 +1,5 @@
 use std::{
-	collections::{HashMap, VecDeque},
+	collections::{HashMap, HashSet, VecDeque},
 	path::{Path, PathBuf},
 	sync::{
 		atomic::{AtomicUsize, Ordering},
@@ -11,13 +11,14 @@ use std::{
 use chrono::{DateTime, Utc};
 use futures::{stream::FuturesUnordered, StreamExt};
 use models::{
-	entity::{library_config, media, media_metadata, series},
+	entity::{library_config, media, media_metadata, media_tag, series, tag},
 	shared::enums::FileStatus,
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	Condition, DatabaseConnection, IntoActiveModel, Iterable, Set, TransactionTrait,
+	Condition, DatabaseConnection, DatabaseTransaction, IntoActiveModel, Iterable, Set,
+	TransactionTrait,
 };
 use tokio::{sync::oneshot, task::spawn_blocking};
 use walkdir::DirEntry;
@@ -73,7 +74,11 @@ pub(crate) fn file_updated_since_scan(
 
 pub(crate) async fn create_media(
 	db: &DatabaseConnection,
-	BuiltMedia { media, metadata }: BuiltMedia,
+	BuiltMedia {
+		media,
+		metadata,
+		tags,
+	}: BuiltMedia,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
@@ -83,6 +88,8 @@ pub(crate) async fn create_media(
 		meta.insert(&txn).await?;
 	}
 
+	ensure_tags_linked(&txn, &created_media.id, &tags).await?;
+
 	txn.commit().await?;
 
 	Ok(created_media)
@@ -90,7 +97,11 @@ pub(crate) async fn create_media(
 
 pub(crate) async fn update_media(
 	db: &DatabaseConnection,
-	BuiltMedia { media, metadata }: BuiltMedia,
+	BuiltMedia {
+		media,
+		metadata,
+		tags,
+	}: BuiltMedia,
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
@@ -106,9 +117,89 @@ pub(crate) async fn update_media(
 			.await?;
 	}
 
+	ensure_tags_linked(&txn, &updated_media.id, &tags).await?;
+
 	txn.commit().await?;
 
 	Ok(updated_media)
+}
+
+/// Ensure each tag name in `tag_names` exists in the `tags` table and is linked to
+/// `media_id` via `media_tags`. Creates tags that don't yet exist and adds missing
+/// links; never removes existing links.
+///
+/// This is used during scans to intake tags from file metadata (e.g. ComicInfo.xml
+/// `<Tags>`) without clobbering tags the user has manually assigned through the UI.
+pub(crate) async fn ensure_tags_linked(
+	txn: &DatabaseTransaction,
+	media_id: &str,
+	tag_names: &[String],
+) -> CoreResult<()> {
+	let desired: HashSet<String> = tag_names
+		.iter()
+		.filter(|n| !n.is_empty())
+		.cloned()
+		.collect();
+	if desired.is_empty() {
+		return Ok(());
+	}
+
+	let already_linked: Vec<tag::Model> =
+		tag::Entity::find_for_media_id(media_id).all(txn).await?;
+	let already_linked_names: HashSet<&str> =
+		already_linked.iter().map(|t| t.name.as_str()).collect();
+
+	let to_link: Vec<String> = desired
+		.into_iter()
+		.filter(|n| !already_linked_names.contains(n.as_str()))
+		.collect();
+	if to_link.is_empty() {
+		return Ok(());
+	}
+
+	let existing_unlinked: Vec<tag::Model> = tag::Entity::find()
+		.filter(tag::Column::Name.is_in(to_link.clone()))
+		.all(txn)
+		.await?;
+	let existing_unlinked_names: HashSet<&str> =
+		existing_unlinked.iter().map(|t| t.name.as_str()).collect();
+
+	let to_create: Vec<tag::ActiveModel> = to_link
+		.iter()
+		.filter(|n| !existing_unlinked_names.contains(n.as_str()))
+		.map(|name| tag::ActiveModel {
+			name: Set(name.clone()),
+			..Default::default()
+		})
+		.collect();
+
+	let created = if to_create.is_empty() {
+		Vec::new()
+	} else {
+		tag::Entity::insert_many(to_create)
+			.exec_with_returning_many(txn)
+			.await?
+	};
+
+	let new_link_ids: Vec<i32> = existing_unlinked
+		.iter()
+		.map(|t| t.id)
+		.chain(created.iter().map(|t| t.id))
+		.collect();
+
+	if !new_link_ids.is_empty() {
+		media_tag::Entity::insert_many(new_link_ids.into_iter().map(|tag_id| {
+			media_tag::ActiveModel {
+				media_id: Set(media_id.to_string()),
+				tag_id: Set(tag_id),
+				..Default::default()
+			}
+		}))
+		.exec(txn)
+		.await?;
+	}
+
+	Ok(())
 }
 
 pub(crate) async fn handle_book_visit_operation(
@@ -117,12 +208,17 @@ pub(crate) async fn handle_book_visit_operation(
 ) -> CoreResult<()> {
 	match result {
 		BookVisitResult::Custom(custom) => {
-			if let Some(meta) = custom.meta {
+			if let Some(mut meta) = custom.meta {
+				let tags = meta.tags.take().unwrap_or_default();
+
+				let txn = db.begin().await?;
 				let active_model = media_metadata::ActiveModel {
 					media_id: Set(Some(custom.id.clone())),
 					..meta.into_active_model()
 				};
-				let updated_meta = active_model.update(db).await?;
+				let updated_meta = active_model.update(&txn).await?;
+				ensure_tags_linked(&txn, &custom.id, &tags).await?;
+				txn.commit().await?;
 
 				tracing::trace!(?updated_meta, "Metadata upserted");
 			}

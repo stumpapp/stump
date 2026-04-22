@@ -136,4 +136,33 @@ mod tests {
 		assert_eq!(metadata.number, None);
 		assert_eq!(metadata.volume, None);
 	}
+
+	#[test]
+	fn test_should_parse_comic_info_tags() {
+		let contents = r#"<?xml version="1.0"?>
+<ComicInfo>
+  <Title>Test Comic</Title>
+  <Tags>superhero, origin story, dark</Tags>
+</ComicInfo>"#;
+		let metadata = metadata_from_buf(contents).expect("should parse");
+		assert_eq!(
+			metadata.tags,
+			Some(vec![
+				"superhero".to_string(),
+				"origin story".to_string(),
+				"dark".to_string(),
+			])
+		);
+	}
+
+	#[test]
+	fn test_should_parse_comic_info_with_empty_tags_element() {
+		let contents = r#"<?xml version="1.0"?>
+<ComicInfo>
+  <Title>Test Comic</Title>
+  <Tags></Tags>
+</ComicInfo>"#;
+		let metadata = metadata_from_buf(contents).expect("should parse");
+		assert_eq!(metadata.tags, None);
+	}
 }

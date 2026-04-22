@@ -161,6 +161,7 @@ mod tests {
 				..Default::default()
 			},
 			metadata: None,
+			tags: Vec::new(),
 		};
 
 		let result = BookVisitResult::Built(Box::new(book.clone()));

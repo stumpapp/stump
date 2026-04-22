@@ -688,8 +688,8 @@
 						"title": "Es sind keine Metadatenanbieter verfügbar",
 						"description": "You can configure metadata providers in the metadata integration settings"
 					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
+					"fetchButton": "Hintergrundabruf starten",
+					"fetchError": "Fehler beim Starten des Metadatenabrufs"
 				}
 			}
 		},
@@ -852,9 +852,9 @@
 				"noCandidates": "No candidates available for this record",
 				"noComparableFields": "No comparable fields found",
 				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
+					"field": "Feld",
+					"current": "Aktuell",
+					"external": "Extern",
 					"resolved": "Resolved"
 				},
 				"toolbar": {
@@ -867,7 +867,7 @@
 				"reject": "Ablehnen",
 				"strategies": {
 					"FILL_GAPS": "Lücken füllen",
-					"PREFER_EXTERNAL": "Prefer external",
+					"PREFER_EXTERNAL": "Bevorzuge Extern",
 					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
 					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
 				}
@@ -1919,14 +1919,14 @@
 							"metadataRetry": "Metadata Retry"
 						},
 						"libraryIds": {
-							"label": "Libraries to scan",
-							"description": "Leave empty to scan all libraries"
+							"label": "Zu scannende Bibliotheken",
+							"description": "Leer lassen, um alle Bibliotheken zu durchsuchen"
 						},
 						"statuses": {
 							"label": "Statuses to retry",
 							"description": "Which metadata fetch statuses should be retried",
 							"rateLimited": "Anfragerate begrenzt",
-							"failed": "Failed"
+							"failed": "Fehlgeschlagen"
 						},
 						"enabled": "Aktiviert"
 					},
@@ -1937,7 +1937,7 @@
 						"rateLimited": "Anfragerate begrenzt",
 						"lastRun": "Zuletzt ausgeführt am {{date}}",
 						"edit": "Bearbeiten",
-						"delete": "Delete"
+						"delete": "Löschen"
 					},
 					"toasts": {
 						"createSuccess": "Scheduled job created",
@@ -2012,7 +2012,7 @@
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "Account",
+						"accountManagement": "Benutzerkonto",
 						"featureAccess": "Feature access",
 						"fileManagement": "Dateien",
 						"emailers": "Mailserver",
@@ -2310,7 +2310,7 @@
 				},
 				"apiTokenExpiresAt": {
 					"label": "API-Token-Verfall",
-					"description": "The date when the API token will expire (optional)"
+					"description": "Das Datum, an dem das API-Token ablaufen wird (optional)"
 				},
 				"enableProvider": {
 					"label": "Enable provider",
@@ -2557,10 +2557,10 @@
 		"never": "Nie",
 		"scan": "Scannen",
 		"somethingWentWrong": "Etwas ist falsch gelaufen",
-		"back": "Back",
-		"continue": "Continue",
-		"book": "Book",
-		"series": "Series",
+		"back": "Zurück",
+		"continue": "Fortfahren",
+		"book": "Buch",
+		"series": "Serien",
 		"fileUpload": {
 			"someRejected": "Einige Dateien wurden abgelehnt. Bitte überprüfe die Dateitypen und versuche es erneut",
 			"tooManyFiles": "Du hast zu viele Dateien ausgewählt",
@@ -2988,11 +2988,11 @@
 				"reduceAnimations": "Animationen verringern",
 				"maskUrls": "URLs verstecken",
 				"displayLanguageKeys": {
-					"label": "Display Language Keys",
+					"label": "Sprachschlüssel anzeigen",
 					"options": {
-						"none": "None",
-						"abbreviated": "Abbreviated",
-						"full": "Full"
+						"none": "Keine",
+						"abbreviated": "Abgekürzt",
+						"full": "Voll"
 					}
 				},
 				"debugAnalytics": {
@@ -3075,10 +3075,10 @@
 			"fontWeight": {
 				"label": "Font Weight",
 				"options": {
-					"light": "Light",
+					"light": "Dünn",
 					"normal": "Normal",
-					"medium": "Medium",
-					"bold": "Bold"
+					"medium": "Mittel",
+					"bold": "Fett"
 				}
 			},
 			"textNormalization": "Text Normalization",

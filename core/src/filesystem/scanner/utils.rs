@@ -1022,3 +1022,192 @@ pub(crate) async fn visit_and_update_media(
 
 	Ok(output)
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use ::tests::db::test_database;
+	use ::tests::fake_data;
+	use sea_orm::{ActiveModelTrait, EntityTrait, QueryOrder};
+
+	fn built_media(id: &str, series_id: &str, tags: Vec<String>) -> BuiltMedia {
+		BuiltMedia {
+			media: media::ActiveModel {
+				id: Set(id.to_string()),
+				name: Set(format!("{id}.cbz")),
+				size: Set(100),
+				extension: Set("cbz".to_string()),
+				pages: Set(1),
+				path: Set(format!("/tmp/{id}.cbz")),
+				series_id: Set(Some(series_id.to_string())),
+				..Default::default()
+			},
+			metadata: None,
+			tags,
+		}
+	}
+
+	async fn fetch_tag_names_for(db: &DatabaseConnection, media_id: &str) -> Vec<String> {
+		let mut names: Vec<String> = tag::Entity::find_for_media_id(media_id)
+			.all(db)
+			.await
+			.expect("tag query failed")
+			.into_iter()
+			.map(|t| t.name)
+			.collect();
+		names.sort();
+		names
+	}
+
+	async fn count_media_tag_rows(db: &DatabaseConnection, media_id: &str) -> usize {
+		media_tag::Entity::find()
+			.filter(media_tag::Column::MediaId.eq(media_id))
+			.all(db)
+			.await
+			.expect("media_tag query failed")
+			.len()
+	}
+
+	// Scenario 1: a fresh scan of a CBZ with ComicInfo `<Tags>action, drama</Tags>` lands
+	// both tags on the book as first-class `tag` rows linked via `media_tags`.
+	#[tokio::test]
+	async fn test_scan_intakes_comicinfo_tags() {
+		let db = test_database().await;
+		let series = fake_data::Series::default().insert(&db).await;
+
+		create_media(
+			&db,
+			built_media(
+				"book-1",
+				&series.id,
+				vec!["action".to_string(), "drama".to_string()],
+			),
+		)
+		.await
+		.expect("create_media failed");
+
+		assert_eq!(
+			fetch_tag_names_for(&db, "book-1").await,
+			vec!["action".to_string(), "drama".to_string()],
+		);
+		assert_eq!(count_media_tag_rows(&db, "book-1").await, 2);
+	}
+
+	// Scenario 2: a tag added through the UI must survive a rescan. We simulate the UI
+	// path by inserting a tag + link directly, then running update_media with scan-derived
+	// tags that don't include the user's tag.
+	#[tokio::test]
+	async fn test_rescan_preserves_user_assigned_tags() {
+		let db = test_database().await;
+		let series = fake_data::Series::default().insert(&db).await;
+
+		// Initial scan pulls in "action".
+		create_media(
+			&db,
+			built_media("book-2", &series.id, vec!["action".to_string()]),
+		)
+		.await
+		.expect("create_media failed");
+
+		// User adds "my-favorite" through the UI.
+		let user_tag = tag::ActiveModel {
+			name: Set("my-favorite".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("tag insert failed");
+		media_tag::ActiveModel {
+			media_id: Set("book-2".to_string()),
+			tag_id: Set(user_tag.id),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("media_tag insert failed");
+
+		// Rescan delivers "action" again plus a newly-added "drama" from updated metadata.
+		update_media(
+			&db,
+			built_media(
+				"book-2",
+				&series.id,
+				vec!["action".to_string(), "drama".to_string()],
+			),
+		)
+		.await
+		.expect("update_media failed");
+
+		assert_eq!(
+			fetch_tag_names_for(&db, "book-2").await,
+			vec![
+				"action".to_string(),
+				"drama".to_string(),
+				"my-favorite".to_string(),
+			],
+			"user-assigned tag must survive rescan",
+		);
+		assert_eq!(count_media_tag_rows(&db, "book-2").await, 3);
+	}
+
+	// Scenario 3: rescanning a file whose ComicInfo tags haven't changed is idempotent —
+	// no duplicate `tag` rows, no duplicate `media_tags` rows.
+	#[tokio::test]
+	async fn test_rescan_is_idempotent_for_unchanged_tags() {
+		let db = test_database().await;
+		let series = fake_data::Series::default().insert(&db).await;
+
+		let initial = vec!["action".to_string(), "drama".to_string()];
+		create_media(&db, built_media("book-3", &series.id, initial.clone()))
+			.await
+			.expect("create_media failed");
+
+		update_media(&db, built_media("book-3", &series.id, initial))
+			.await
+			.expect("update_media failed");
+
+		assert_eq!(count_media_tag_rows(&db, "book-3").await, 2);
+
+		let all_tags = tag::Entity::find()
+			.order_by_asc(tag::Column::Name)
+			.all(&db)
+			.await
+			.expect("tag query failed");
+		assert_eq!(
+			all_tags.into_iter().map(|t| t.name).collect::<Vec<_>>(),
+			vec!["action".to_string(), "drama".to_string()],
+			"no duplicate tag rows should be created",
+		);
+	}
+
+	// A tag that already exists (from another book) should be reused rather than duplicated.
+	#[tokio::test]
+	async fn test_existing_tag_is_reused_across_books() {
+		let db = test_database().await;
+		let series = fake_data::Series::default().insert(&db).await;
+
+		create_media(
+			&db,
+			built_media("book-a", &series.id, vec!["shared".to_string()]),
+		)
+		.await
+		.expect("create_media failed");
+
+		create_media(
+			&db,
+			built_media("book-b", &series.id, vec!["shared".to_string()]),
+		)
+		.await
+		.expect("create_media failed");
+
+		let tag_count = tag::Entity::find()
+			.filter(tag::Column::Name.eq("shared"))
+			.all(&db)
+			.await
+			.expect("tag query failed")
+			.len();
+		assert_eq!(tag_count, 1, "shared tag should not be duplicated");
+		assert_eq!(count_media_tag_rows(&db, "book-a").await, 1);
+		assert_eq!(count_media_tag_rows(&db, "book-b").await, 1);
+	}
+}

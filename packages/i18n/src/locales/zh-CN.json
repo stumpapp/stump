@@ -1437,7 +1437,8 @@
 				},
 				"thumbnailRatioSelect": {
 					"label": "缩略图比率",
-					"description": "缩略图中使用的宽高比"
+					"description": "缩略图中使用的宽高比",
+					"defaultSuffix": "Default"
 				},
 				"thumbnailPlaceholder": {
 					"label": "缩略图占位符",
@@ -1513,7 +1514,10 @@
 				"maxWidthPreference": {
 					"label": "调整宽度",
 					"description": "Stump 对视图端口应用最大宽度。此设置允许您调整或删除此限制",
-					"tooltip": "当主导航设置为侧边栏时，当前不支持此设置"
+					"tooltip": "当主导航设置为侧边栏时，当前不支持此设置",
+					"options": {
+						"noLimit": "No limit"
+					}
 				},
 				"additionalPreferences": {
 					"label": "其他偏好",

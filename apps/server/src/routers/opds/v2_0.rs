@@ -309,10 +309,9 @@ async fn catalog(
 		)
 		.build()?;
 
-	// let latest_books_conditions = apply_media_restrictions_for_user(user);
 	let latest_books = OPDSPublicationEntity::find_for_user(&user)
 		.limit(DEFAULT_LIMIT)
-		.order_by_asc(media::Column::CreatedAt)
+		.order_by_desc(media::Column::CreatedAt)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;
@@ -357,7 +356,7 @@ async fn catalog(
 	let continue_reading = OPDSPublicationEntity::find_for_user(&user)
 		.filter(in_progress_filter.clone())
 		.limit(DEFAULT_LIMIT)
-		.order_by_asc(reading_session::Column::UpdatedAt)
+		.order_by_desc(reading_session::Column::UpdatedAt)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;
@@ -744,7 +743,7 @@ async fn browse_library_by_id(
 	let latest_library_books = OPDSPublicationEntity::find_for_user(&user)
 		.filter(series::Column::LibraryId.eq(id.clone()))
 		.limit(DEFAULT_LIMIT)
-		.order_by_asc(media::Column::CreatedAt)
+		.order_by_desc(media::Column::CreatedAt)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;

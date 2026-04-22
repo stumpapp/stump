@@ -2,16 +2,13 @@ import { FragmentType, graphql, InterfaceLayout, useFragment } from '@stump/grap
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { parseGraphQLDecimal } from '~/lib/format'
-import { useTranslate } from '~/lib/hooks'
-
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
 import { ListRowItem } from '../list'
 import { Text } from '../ui'
 
 const fragment = graphql(`
-	fragment BookListItem on Media {
+	fragment SeriesListItem on Series {
 		id
 		resolvedName
 		thumbnail {
@@ -27,52 +24,37 @@ const fragment = graphql(`
 			height
 			width
 		}
-		pages
-		readProgress {
-			page
-			percentageCompleted
-		}
-		readHistory {
-			completedAt
-		}
+		isComplete
+		mediaCount
+		readCount
 	}
 `)
 
-export type IBookListItemFragment = FragmentType<typeof fragment>
+export type ISeriesListItemFragment = FragmentType<typeof fragment>
 
 type Props = {
 	layout: InterfaceLayout
-	book: IBookListItemFragment
+	series: ISeriesListItemFragment
 	onPress?: () => void
 }
 
-export default function BookListItem({ layout, book, onPress }: Props) {
+export default function SeriesListItem({ layout, series, onPress }: Props) {
 	const router = useRouter()
-	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const data = useFragment(fragment, book)
-
-	// While technically completed if read history has length, an active read session
-	// takes precedence
-	const isComplete = !!data.readHistory?.length && !data.readProgress
-	const percentageCompleted = isComplete
-		? 1
-		: parseGraphQLDecimal(data.readProgress?.percentageCompleted)
-	const numberOfReads = data.readHistory?.length
+	const data = useFragment(fragment, series)
 
 	const sharedProps = {
 		uri: data.thumbnail.url,
 		title: data.resolvedName,
-		onPress: onPress ?? (() => router.navigate(`/server/${serverID}/books/${data.id}`)),
+		onPress: onPress ?? (() => router.navigate(`/server/${serverID}/series/${data.id}`)),
 		placeholderData: data.thumbnail.metadata,
 		originalDimensions:
 			data.thumbnail.width && data.thumbnail.height
 				? { width: data.thumbnail.width, height: data.thumbnail.height }
 				: null,
-		percentageCompleted,
-		numberOfReads,
+		percentageCompleted: data.isComplete ? 100 : undefined,
 	}
 
 	if (layout === InterfaceLayout.Grid) {
@@ -84,17 +66,13 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 		)
 	}
 
-	const currentPage = data.readProgress?.page
-
 	// just demonstration, figure out what else
 	const infoItems = (
 		<>
-			{currentPage != null && (
-				<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
-					<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
-					<Text size="xs" className="pb-0.5 text-foreground-muted">{` / ${data.pages}`}</Text>
-				</View>
-			)}
+			<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
+				<Text size="sm">{data.readCount}</Text>
+				<Text size="xs" className="pb-0.5 text-foreground-muted">{` / ${data.mediaCount}`}</Text>
+			</View>
 		</>
 	)
 

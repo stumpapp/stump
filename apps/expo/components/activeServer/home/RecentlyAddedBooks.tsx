@@ -4,8 +4,8 @@ import { graphql } from '@stump/graphql'
 import { memo, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
-import { BookListItem } from '~/components/book'
-import { BookListItemFragmentType } from '~/components/book/BookListItem'
+import { HorizontalBookListItem } from '~/components/book'
+import { HorizontalBookListItemFragmentType } from '~/components/book/HorizontalBookListItem'
 import { Heading, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useListItemSize } from '~/lib/hooks'
@@ -17,7 +17,7 @@ const query = graphql(`
 		recentlyAddedMedia(pagination: $pagination) {
 			nodes {
 				id
-				...BookListItem
+				...HorizontalBookListItem
 			}
 			pageInfo {
 				__typename
@@ -54,7 +54,9 @@ function RecentlyAddedBooks() {
 	}, [hasNextPage, fetchNextPage])
 
 	const renderItem = useCallback(
-		({ item }: { item: BookListItemFragmentType }) => <BookListItem book={item} />,
+		({ item }: { item: HorizontalBookListItemFragmentType }) => (
+			<HorizontalBookListItem book={item} />
+		),
 		[],
 	)
 

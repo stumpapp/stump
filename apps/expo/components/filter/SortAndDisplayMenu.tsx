@@ -1,11 +1,14 @@
+import { InterfaceLayout } from '@stump/graphql'
 import { Stack } from 'expo-router'
 import clone from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import { Ellipsis, Grid2X2, List } from 'lucide-react-native'
 import { useState } from 'react'
-import { Platform, View } from 'react-native'
+import { ImageSourcePropType, Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import type { SFSymbol } from 'sf-symbols-typescript'
+import { match, P } from 'ts-pattern'
 
 import {
 	Button,
@@ -28,6 +31,8 @@ import { ActionDef, MenuGroupDef, MenuItemDef, SortFieldDef } from './types'
 type Props<O> = {
 	sort: O
 	setSort: (sort: O) => void
+	layout: InterfaceLayout
+	setLayout: (layout: InterfaceLayout) => void
 	fields: SortFieldDef[]
 	actions?: ActionDef[]
 }
@@ -64,6 +69,8 @@ const DATE_FIELDS = ['DATE_ADDED', 'YEAR', 'CREATED_AT']
 export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 	sort,
 	setSort,
+	layout,
+	setLayout,
 	fields,
 	actions,
 }: Props<O>) {
@@ -116,17 +123,15 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 					key: 'grid',
 					icon: { ios: 'rectangle.grid.2x2', android: Grid2X2 },
 					label: t('common.grid'),
-					isOn: true,
-					disabled: true,
-					onPress: () => {},
+					isOn: layout === InterfaceLayout.Grid,
+					onPress: () => setLayout(InterfaceLayout.Grid),
 				},
 				{
 					key: 'list',
 					icon: { ios: 'list.bullet', android: List },
 					label: t('common.list'),
-					isOn: false,
-					disabled: true,
-					onPress: () => {},
+					isOn: layout === InterfaceLayout.Table,
+					onPress: () => setLayout(InterfaceLayout.Table),
 				},
 			],
 		},
@@ -177,19 +182,29 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 			<Stack.Toolbar.Menu icon="ellipsis">
 				{groups.map((group) => (
 					<Stack.Toolbar.Menu key={group.key} inline={group.inline} title={group.title}>
-						{group.items.map((item) => (
-							<Stack.Toolbar.MenuAction
-								key={item.key}
-								icon={item.icon?.ios}
-								isOn={item.isAction ? undefined : item.isOn}
-								disabled={item.disabled}
-								subtitle={item.subtitle}
-								destructive={item.destructive}
-								onPress={item.onPress}
-							>
-								{item.label}
-							</Stack.Toolbar.MenuAction>
-						))}
+						{group.items.map((item) => {
+							const { icon, xcasset } = match(item.icon?.ios)
+								.with({ xcasset: P.string }, (icon) => ({ xcasset: icon.xcasset, icon: undefined }))
+								.otherwise(() => ({
+									icon: item.icon?.ios as SFSymbol | ImageSourcePropType,
+									xcasset: undefined,
+								}))
+
+							return (
+								<Stack.Toolbar.MenuAction
+									key={item.key}
+									icon={icon}
+									xcassetName={xcasset}
+									isOn={item.isAction ? undefined : item.isOn}
+									disabled={item.disabled}
+									subtitle={item.subtitle}
+									destructive={item.destructive}
+									onPress={item.onPress}
+								>
+									{item.label}
+								</Stack.Toolbar.MenuAction>
+							)
+						})}
 					</Stack.Toolbar.Menu>
 				))}
 			</Stack.Toolbar.Menu>

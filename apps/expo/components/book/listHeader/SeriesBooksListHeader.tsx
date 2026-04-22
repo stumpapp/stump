@@ -20,24 +20,25 @@ const scanMutation = graphql(`
 `)
 
 type SeriesActionsProps = {
-	seriesId: string
 	onShowOverview: () => void
 	onDownloadSeries: () => void
 }
 
 type Props = {
+	seriesId: string
+	layoutKey: string
 	stats: NonNullable<SeriesBooksSceneSeriesNameQuery['seriesById']>['stats']
-	seriesActions: SeriesActionsProps
+	additionalActions: SeriesActionsProps
 }
 
-export function SeriesBooksListHeader({ stats, seriesActions }: Props) {
+export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalActions }: Props) {
 	const client = useQueryClient()
 	const { mutate: scanSeries } = useGraphQLMutation(scanMutation, {
 		onSuccess: () => {
 			setTimeout(
 				() =>
 					client.refetchQueries({
-						queryKey: ['seriesById', seriesActions.seriesId],
+						queryKey: ['seriesById', seriesId],
 						exact: false,
 					}),
 				2000,
@@ -53,7 +54,7 @@ export function SeriesBooksListHeader({ stats, seriesActions }: Props) {
 				key: 'overview',
 				label: 'Overview',
 				icon: { ios: 'info.circle', android: Info },
-				onPress: seriesActions.onShowOverview,
+				onPress: additionalActions.onShowOverview,
 			},
 		]
 
@@ -62,7 +63,7 @@ export function SeriesBooksListHeader({ stats, seriesActions }: Props) {
 				key: 'scan',
 				label: 'Scan Series',
 				icon: { ios: 'document.viewfinder', android: ScanLine },
-				onPress: () => scanSeries({ id: seriesActions.seriesId }),
+				onPress: () => scanSeries({ id: seriesId }),
 			})
 		}
 
@@ -77,7 +78,7 @@ export function SeriesBooksListHeader({ stats, seriesActions }: Props) {
 						'Are you sure you want to enqueue the download for this entire series?',
 						[
 							{ text: 'Cancel', style: 'cancel' },
-							{ text: 'Download', onPress: seriesActions.onDownloadSeries },
+							{ text: 'Download', onPress: additionalActions.onDownloadSeries },
 						],
 					)
 				},
@@ -85,9 +86,12 @@ export function SeriesBooksListHeader({ stats, seriesActions }: Props) {
 		}
 
 		return result
-	}, [seriesActions, checkPermission, scanSeries])
+	}, [additionalActions, checkPermission, scanSeries, seriesId])
 
-	const sortMenu = useSeriesBooksSortAndDisplayMenu(actions)
+	const sortMenu = useSeriesBooksSortAndDisplayMenu({
+		layoutKey,
+		actions,
+	})
 	const filterMenu = useBooksFilterMenu({ libraryType: false })
 
 	const menuFragment = useEntityListHeader({

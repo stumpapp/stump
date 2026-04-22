@@ -1,15 +1,15 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, InterfaceLayout } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
-import { BookGridItem } from '~/components/book'
+import { BookListItem } from '~/components/book'
 import { BooksListHeader } from '~/components/book/listHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
@@ -17,6 +17,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { Button, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { BookFilterContext, createBookFilterStore, useInitialBookFilters } from '~/stores/filters'
+import { useBooksLayout } from '~/stores/layout'
 
 const query = graphql(`
 	query BooksScreen(
@@ -27,7 +28,7 @@ const query = graphql(`
 		media(pagination: $pagination, filter: $filters, orderBy: $orderBy) {
 			nodes {
 				id
-				...BookGridItem
+				...BookListItem
 			}
 			pageInfo {
 				__typename
@@ -62,6 +63,7 @@ export default function Screen() {
 	} = useActiveServer()
 	const initialFilters = useInitialBookFilters()
 
+	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(createBookFilterStore(initialFilters)).current
 
 	const { filters, sort, resetFilters } = useStore(
@@ -101,6 +103,8 @@ export default function Screen() {
 
 	const isFiltered = Object.keys(filters).length > 0
 
+	const layout = useBooksLayout('global', (state) => state.layout)
+
 	return (
 		<BookFilterContext.Provider value={store}>
 			<SafeAreaView
@@ -108,13 +112,14 @@ export default function Screen() {
 				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 			>
 				<FlashList
+					key={layout} // force re-render when layout changes
 					data={data?.pages.flatMap((page) => page.media.nodes) || []}
-					renderItem={({ item }) => <BookGridItem book={item} />}
+					renderItem={({ item }) => <BookListItem layout={layout} book={item} />}
 					contentContainerStyle={{
 						paddingVertical: 16,
 						paddingHorizontal: paddingHorizontal,
 					}}
-					numColumns={numColumns}
+					numColumns={layout === InterfaceLayout.Grid ? numColumns : undefined}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="automatic"
@@ -137,6 +142,9 @@ export default function Screen() {
 								</>
 							}
 						/>
+					}
+					ItemSeparatorComponent={
+						layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
 					}
 				/>
 			</SafeAreaView>

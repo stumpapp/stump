@@ -18,23 +18,23 @@ const scanMutation = graphql(`
 `)
 
 type LibraryActions = {
-	libraryId: string
 	onShowOverview: () => void
 }
 
 type Props = {
+	libraryId: string
 	stats: NonNullable<LibrarySeriesScreenSeriesNameQuery['libraryById']>['stats']
 	additionalActions: LibraryActions
 }
 
-export function LibrarySeriesListHeader({ stats, additionalActions }: Props) {
+export function LibrarySeriesListHeader({ libraryId, stats, additionalActions }: Props) {
 	const client = useQueryClient()
 	const { mutate: scanLibrary } = useGraphQLMutation(scanMutation, {
 		onSuccess: () => {
 			setTimeout(
 				() =>
 					client.refetchQueries({
-						queryKey: ['libraryById', additionalActions.libraryId],
+						queryKey: ['libraryById', libraryId],
 						exact: false,
 					}),
 				2000,
@@ -59,14 +59,17 @@ export function LibrarySeriesListHeader({ stats, additionalActions }: Props) {
 				key: 'scan',
 				label: 'Scan Library',
 				icon: { ios: 'document.viewfinder', android: ScanLine },
-				onPress: () => scanLibrary({ id: additionalActions.libraryId }),
+				onPress: () => scanLibrary({ id: libraryId }),
 			})
 		}
 
 		return result
-	}, [additionalActions, checkPermission, scanLibrary])
+	}, [additionalActions, checkPermission, scanLibrary, libraryId])
 
-	const sortMenu = useSeriesSortAndDisplayMenu(actions)
+	const sortMenu = useSeriesSortAndDisplayMenu({
+		layoutKey: `library-${libraryId}-series`,
+		actions,
+	})
 	const filterMenu = useSeriesFilterMenu({ libraryType: false })
 
 	const menuFragment = useEntityListHeader({

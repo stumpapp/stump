@@ -1,9 +1,10 @@
 import { useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, InterfaceLayout } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
+import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -11,12 +12,12 @@ import { useActiveServer } from '~/components/activeServer'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
-import { SeriesGridItem } from '~/components/series'
 import { SeriesListHeader } from '~/components/series/listHeader'
-import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
+import SeriesListItem, { ISeriesListItemFragment } from '~/components/series/SeriesListItem'
 import { Button, FullScreenLoader, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useSeriesFilterStore } from '~/stores/filters'
+import { useSeriesLayout } from '~/stores/layout'
 
 const query = graphql(`
 	query SeriesScreen(
@@ -27,7 +28,7 @@ const query = graphql(`
 		series(pagination: $pagination, filter: $filters, orderBy: $orderBy) {
 			nodes {
 				id
-				...SeriesGridItem
+				...SeriesListItem
 			}
 			pageInfo {
 				__typename
@@ -106,20 +107,23 @@ export default function Screen() {
 
 	const isFiltered = Object.keys(filters).length > 0
 
-	const listRef = useRef<FlashListRef<ISeriesGridItemFragment>>(null)
+	const listRef = useRef<FlashListRef<ISeriesListItemFragment>>(null)
 	useScrollToTop(listRef)
+
+	const layout = useSeriesLayout('global', (state) => state.layout)
 
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<FlashList
+				key={layout} // force re-render when layout changes
 				ref={listRef}
 				data={nodes}
-				renderItem={({ item }) => <SeriesGridItem series={item} />}
+				renderItem={({ item }) => <SeriesListItem layout={layout} series={item} />}
 				contentContainerStyle={{
 					paddingVertical: 16,
 					paddingHorizontal: paddingHorizontal,
 				}}
-				numColumns={numColumns}
+				numColumns={layout === InterfaceLayout.Grid ? numColumns : 1}
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="always"
@@ -162,6 +166,9 @@ export default function Screen() {
 							}
 						/>
 					)
+				}
+				ItemSeparatorComponent={
+					layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
 				}
 			/>
 		</SafeAreaView>

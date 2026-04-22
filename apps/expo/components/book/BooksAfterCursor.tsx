@@ -8,7 +8,7 @@ import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { ListLabel } from '../ui'
-import BookListItem from './BookListItem'
+import HorizontalBookListItem from './HorizontalBookListItem'
 
 const query = graphql(`
 	query BooksAfterCursor($id: ID!, $pagination: Pagination) {
@@ -16,7 +16,7 @@ const query = graphql(`
 			nextInSeries(pagination: $pagination) {
 				nodes {
 					id
-					...BookListItem
+					...HorizontalBookListItem
 				}
 				pageInfo {
 					__typename
@@ -67,7 +67,7 @@ export function BooksAfterCursor({ cursor }: Props) {
 			<ListLabel className="ios:px-8 px-6">Up Next</ListLabel>
 			<FlashList
 				data={nodes}
-				renderItem={({ item }) => <BookListItem book={item} />}
+				renderItem={({ item }) => <HorizontalBookListItem book={item} />}
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				contentContainerStyle={{ paddingHorizontal: 16 }}

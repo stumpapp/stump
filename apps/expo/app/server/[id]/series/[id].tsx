@@ -2,17 +2,16 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useNavigationState, useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, InterfaceLayout } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
-import { BookGridItem } from '~/components/book'
-import { IBookGridItemFragment } from '~/components/book/BookGridItem'
+import { BookListItem, type IBookListItemFragment } from '~/components/book'
 import { SeriesBooksListHeader } from '~/components/book/listHeader/SeriesBooksListHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
@@ -23,6 +22,7 @@ import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDownloadSeries } from '~/lib/hooks/db/downloadSeries'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
+import { useBooksLayout } from '~/stores/layout'
 
 const query = graphql(`
 	query SeriesBooksSceneSeriesName($id: ID!) {
@@ -34,6 +34,7 @@ const query = graphql(`
 				inProgressBooks
 				totalReadingTimeSeconds
 			}
+			libraryId
 		}
 	}
 `)
@@ -47,7 +48,7 @@ const booksQuery = graphql(`
 		media(filter: $filter, pagination: $pagination, orderBy: $orderBy) {
 			nodes {
 				id
-				...BookGridItem
+				...BookListItem
 			}
 			pageInfo {
 				__typename
@@ -91,9 +92,8 @@ export default function Screen() {
 		prefetch(id)
 	}, [id, prefetch])
 
-	const seriesActions = useMemo(
+	const actions = useMemo(
 		() => ({
-			seriesId: id,
 			onShowOverview: () => sheetRef.current?.present(),
 			onDownloadSeries: () => downloadSeries(id),
 		}),
@@ -138,10 +138,13 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
-	const listRef = useRef<FlashListRef<IBookGridItemFragment>>(null)
+	const listRef = useRef<FlashListRef<IBookListItemFragment>>(null)
 	useScrollToTop(listRef)
 
 	const isFiltered = Object.keys(filters).length > 0
+
+	const layoutKey = `library-${series.libraryId}-seriesBooks`
+	const layout = useBooksLayout(layoutKey, (state) => state.layout)
 
 	return (
 		<BookFilterContext.Provider value={store}>
@@ -150,18 +153,24 @@ export default function Screen() {
 				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 			>
 				<FlashList
+					key={layout} // force re-render when layout changes
 					ref={listRef}
 					data={nodes}
-					renderItem={({ item }) => <BookGridItem book={item} />}
+					renderItem={({ item }) => <BookListItem layout={layout} book={item} />}
 					contentContainerStyle={{
 						paddingHorizontal: paddingHorizontal,
 						paddingVertical: 16,
 					}}
-					numColumns={numColumns}
+					numColumns={layout === InterfaceLayout.Grid ? numColumns : 1}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={
-						<SeriesBooksListHeader stats={series.stats} seriesActions={seriesActions} />
+						<SeriesBooksListHeader
+							seriesId={id}
+							layoutKey={layoutKey}
+							stats={series.stats}
+							additionalActions={actions}
+						/>
 					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					contentInsetAdjustmentBehavior="always"
@@ -196,6 +205,9 @@ export default function Screen() {
 								</>
 							}
 						/>
+					}
+					ItemSeparatorComponent={
+						layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
 					}
 				/>
 			</SafeAreaView>

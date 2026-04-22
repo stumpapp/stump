@@ -1,11 +1,11 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, InterfaceLayout } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
@@ -15,11 +15,12 @@ import { LibraryOverviewSheet, usePrefetchLibraryOverview } from '~/components/l
 import { LibrarySeriesListHeader } from '~/components/library/listHeader'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
-import SeriesGridItem from '~/components/series/SeriesGridItem'
+import SeriesListItem from '~/components/series/SeriesListItem'
 import { Button, FullScreenLoader, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
+import { useSeriesLayout } from '~/stores/layout'
 
 const query = graphql(`
 	query LibrarySeriesScreenSeriesName($id: ID!) {
@@ -45,7 +46,7 @@ const seriesQuery = graphql(`
 		series(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
 			nodes {
 				id
-				...SeriesGridItem
+				...SeriesListItem
 			}
 			pageInfo {
 				__typename
@@ -133,6 +134,8 @@ export default function Screen() {
 
 	const isFiltered = Object.keys(filters).length > 0
 
+	const layout = useSeriesLayout(`library-${id}-series`, (state) => state.layout)
+
 	return (
 		<SeriesFilterContext.Provider value={store}>
 			<SafeAreaView
@@ -140,17 +143,22 @@ export default function Screen() {
 				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 			>
 				<FlashList
+					key={layout} // force re-render when layout changes
 					data={nodes}
-					renderItem={({ item }) => <SeriesGridItem series={item} />}
+					renderItem={({ item }) => <SeriesListItem layout={layout} series={item} />}
 					contentContainerStyle={{
 						paddingHorizontal: paddingHorizontal,
 						paddingVertical: 16,
 					}}
-					numColumns={numColumns}
+					numColumns={layout === InterfaceLayout.Grid ? numColumns : 1}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={
-						<LibrarySeriesListHeader stats={library.stats} additionalActions={actions} />
+						<LibrarySeriesListHeader
+							libraryId={id}
+							stats={library.stats}
+							additionalActions={actions}
+						/>
 					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					contentInsetAdjustmentBehavior="automatic"
@@ -196,6 +204,9 @@ export default function Screen() {
 								}
 							/>
 						)
+					}
+					ItemSeparatorComponent={
+						layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
 					}
 				/>
 

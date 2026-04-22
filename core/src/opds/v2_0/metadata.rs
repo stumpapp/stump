@@ -285,7 +285,7 @@ mod tests {
 		let json = serde_json::to_string(&metadata).unwrap();
 		assert_eq!(
 			json,
-			r#"{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"numberOfItems":10,"itemsPerPage":5,"currentPage":1,"publisher":"Test Publisher"}"#
+			r#"{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1.0}},"numberOfItems":10,"itemsPerPage":5,"currentPage":1,"publisher":"Test Publisher"}"#
 		);
 	}
 

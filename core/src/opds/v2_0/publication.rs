@@ -402,7 +402,7 @@ mod tests {
 		let json = serde_json::to_string(&publication).unwrap();
 		assert_eq!(
 			json,
-			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"publisher":"Test Publisher"}}"#
+			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1.0}},"publisher":"Test Publisher"}}"#
 		);
 	}
 

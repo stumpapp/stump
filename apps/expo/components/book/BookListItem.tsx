@@ -2,7 +2,7 @@ import { FragmentType, graphql, InterfaceLayout, useFragment } from '@stump/grap
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { parseGraphQLDecimal } from '~/lib/format'
+import { parseGraphQLPercentageDecimal } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
@@ -59,7 +59,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 	const isComplete = !!data.readHistory?.length && !data.readProgress
 	const percentageCompleted = isComplete
 		? 1
-		: parseGraphQLDecimal(data.readProgress?.percentageCompleted)
+		: parseGraphQLPercentageDecimal(data.readProgress?.percentageCompleted)
 	const numberOfReads = data.readHistory?.length
 
 	const sharedProps = {

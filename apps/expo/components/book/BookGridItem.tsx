@@ -2,7 +2,7 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { parseGraphQLDecimal } from '~/lib/format'
+import { parseGraphQLPercentageDecimal } from '~/lib/format'
 
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
@@ -52,8 +52,8 @@ export default function BookGridItem({ book, onPress }: Props) {
 	// takes precedence
 	const isComplete = !!data.readHistory?.length && !data.readProgress
 	const percentageCompleted = isComplete
-		? 1
-		: parseGraphQLDecimal(data.readProgress?.percentageCompleted)
+		? 100
+		: parseGraphQLPercentageDecimal(data.readProgress?.percentageCompleted)
 	const numberOfReads = data.readHistory?.length
 
 	return (
@@ -68,7 +68,7 @@ export default function BookGridItem({ book, onPress }: Props) {
 						? { width: data.thumbnail.width, height: data.thumbnail.height }
 						: null
 				}
-				percentageCompleted={percentageCompleted != null ? percentageCompleted * 100 : undefined}
+				percentageCompleted={percentageCompleted != null ? percentageCompleted : undefined}
 				numberOfReads={numberOfReads}
 			/>
 		</View>

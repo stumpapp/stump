@@ -33,7 +33,7 @@ const fragment = graphql(`
 export type HorizontalBookListItemFragmentType = FragmentType<typeof fragment>
 
 type Props = {
-	book: BookListItemFragmentType
+	book: HorizontalBookListItemFragmentType
 }
 
 function HorizontalBookListItem({ book }: Props) {

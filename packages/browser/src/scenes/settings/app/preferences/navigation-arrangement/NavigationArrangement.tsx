@@ -198,7 +198,7 @@ export default function NavigationArrangement() {
 
 	const renderLockedButton = () => {
 		const Icon = locked ? Lock : Unlock
-		const help = locked ? 'Unlock arrangement' : 'Lock arrangement'
+		const help = locked ? t(getKey('unlock')) : t(getKey('lock'))
 
 		return (
 			<ToolTip content={help} align="end" size="sm">

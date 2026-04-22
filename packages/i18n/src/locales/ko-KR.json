@@ -1437,7 +1437,8 @@
 				},
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
-					"description": "The aspect ratio to use for thumbnails"
+					"description": "The aspect ratio to use for thumbnails",
+					"defaultSuffix": "Default"
 				},
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
@@ -1513,7 +1514,10 @@
 				"maxWidthPreference": {
 					"label": "Adjusted width",
 					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
-					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar",
+					"options": {
+						"noLimit": "No limit"
+					}
 				},
 				"additionalPreferences": {
 					"label": "Additional preferences",

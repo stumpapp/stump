@@ -1,10 +1,9 @@
 import { useSDK } from '@stump/client'
-import { Easing, Pressable, View } from 'react-native'
-import { easeGradient } from 'react-native-easing-gradient'
-import { LinearGradientProps } from 'react-native-linear-gradient'
+import { Pressable, View } from 'react-native'
 
 import { ThumbnailImage, ThumbnailPlaceholderData } from '../../image'
 import { Heading, Progress, Text } from '../../ui'
+import { COMPLETED_GRADIENT, READING_GRADIENT } from '../shared'
 import { useListRowItemSize } from './useListRowItemSize'
 
 type Props = {
@@ -65,26 +64,7 @@ export function ListRowItem({
 							{title}
 						</Heading>
 
-						{infoItems && (
-							<View className="gap-2 flex-row items-center">
-								{/*{currentPage && (
-						<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
-							<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
-							<Text size="xs" className="pb-0.5 text-foreground-muted">{` / ${totalPages}`}</Text>
-						</View>
-					)}*/}
-
-								{/*{size && (
-						<View className="squircle px-2.5 py-0.5 rounded-full bg-background-surface-secondary">
-							<Text size="sm" className="text-foreground-muted">
-								{size}
-							</Text>
-						</View>
-					)}*/}
-
-								{infoItems}
-							</View>
-						)}
+						{infoItems && <View className="gap-2 flex-row items-center">{infoItems}</View>}
 
 						{percentageCompleted != null && percentageCompleted < 100 && (
 							<View className="gap-3 flex-row items-center">
@@ -105,26 +85,3 @@ export function ListRowItem({
 		</Pressable>
 	)
 }
-
-// TODO: yoinked from GridImageItem, move to shared location
-const COMPLETED_GRADIENT = {
-	...easeGradient({
-		colorStops: {
-			0.7: { color: 'transparent' },
-			1: { color: 'rgba(0, 0, 0, 0.70)' },
-		},
-		extraColorStopsPerTransition: 16,
-		easing: Easing.bezier(0.4, 0, 0.6, 1),
-	}),
-	useAngle: true,
-	angle: 150,
-} satisfies LinearGradientProps
-
-const READING_GRADIENT = easeGradient({
-	colorStops: {
-		0.8: { color: 'transparent' },
-		1: { color: 'rgba(0, 0, 0, 0.70)' },
-	},
-	extraColorStopsPerTransition: 16,
-	easing: Easing.bezier(0.42, 0, 0.7, 1),
-}) satisfies LinearGradientProps

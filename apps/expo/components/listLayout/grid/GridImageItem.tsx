@@ -1,8 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Check } from 'lucide-react-native'
-import { Easing, Pressable, View } from 'react-native'
-import { easeGradient } from 'react-native-easing-gradient'
-import { LinearGradientProps } from 'react-native-linear-gradient'
+import { Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -10,6 +8,7 @@ import { usePreferencesStore } from '~/stores'
 import { ThumbnailImage } from '../../image'
 import { ThumbnailPlaceholderData } from '../../image/ThumbnailPlaceholder'
 import { Icon, Progress, Text } from '../../ui'
+import { COMPLETED_GRADIENT, READING_GRADIENT } from '../shared'
 import { useGridItemSize } from './useGridItemSize'
 
 type Props = {
@@ -120,25 +119,3 @@ export default function GridImageItem({
 		</Pressable>
 	)
 }
-
-const COMPLETED_GRADIENT = {
-	...easeGradient({
-		colorStops: {
-			0.7: { color: 'transparent' },
-			1: { color: 'rgba(0, 0, 0, 0.70)' },
-		},
-		extraColorStopsPerTransition: 16,
-		easing: Easing.bezier(0.4, 0, 0.6, 1),
-	}),
-	useAngle: true,
-	angle: 150,
-} satisfies LinearGradientProps
-
-const READING_GRADIENT = easeGradient({
-	colorStops: {
-		0.8: { color: 'transparent' },
-		1: { color: 'rgba(0, 0, 0, 0.70)' },
-	},
-	extraColorStopsPerTransition: 16,
-	easing: Easing.bezier(0.42, 0, 0.7, 1),
-}) satisfies LinearGradientProps

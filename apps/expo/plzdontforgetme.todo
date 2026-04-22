@@ -18,4 +18,5 @@
     - i have as react node now, i think i _could_ do something more structured like InfoItem type that I construct
       in the component?
 - [x] BookListItem is already taken :sob: figure that out smh
-- [ ] shared gradients between ListRowItem and GridImageItem
+- [x] shared gradients between ListRowItem and GridImageItem
+- [ ] numberOfReads ListRowItem?

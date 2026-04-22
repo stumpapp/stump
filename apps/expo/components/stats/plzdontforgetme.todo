@@ -7,13 +7,15 @@
     - [x] add a `Series Position` sort option
 - [x] rm old filter ui components
 - [x] make local library consistent with these patterns introduced
-- [ ] libraries/[id]/index.tsx (library series)
+- [x] libraries/[id]/index.tsx (library series)
 - [ ] formalize patch into pr for expo
 - [ ] useGridOrListItemSize
     - maybe useGridOrList that returns size and common things like ItemSeparatorComponent etc?
 - [ ] move list/ and grid/ into layout/
 - [ ] fix paddingHorizontal for lists (prolly just need to be 0)
-- [ ] kill smartListLayout, use new pattern
+- [ ] kill smartListLayout, use new patterns
 - [ ] infoItems in ListRowItem
-- [ ] BookListItem is already taken :sob: figure that out smh
+    - i have as react node now, i think i _could_ do something more structured like InfoItem type that I construct
+      in the component?
+- [x] BookListItem is already taken :sob: figure that out smh
 - [ ] shared gradients between ListRowItem and GridImageItem

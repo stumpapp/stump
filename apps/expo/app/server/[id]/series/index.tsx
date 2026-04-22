@@ -1,16 +1,15 @@
 import { useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql, InterfaceLayout } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
-import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
-import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
+import { useListSizing } from '~/components/listLayout'
 import RefreshControl from '~/components/RefreshControl'
 import { SeriesListHeader } from '~/components/series/listHeader'
 import SeriesListItem, { ISeriesListItemFragment } from '~/components/series/SeriesListItem'
@@ -93,7 +92,6 @@ export default function Screen() {
 			placeholderData: keepPreviousData,
 		},
 	)
-	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const nodes = data?.pages.flatMap((page) => page.series.nodes) || []
 
@@ -111,6 +109,7 @@ export default function Screen() {
 	useScrollToTop(listRef)
 
 	const layout = useSeriesLayout('global', (state) => state.layout)
+	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
@@ -121,9 +120,9 @@ export default function Screen() {
 				renderItem={({ item }) => <SeriesListItem layout={layout} series={item} />}
 				contentContainerStyle={{
 					paddingVertical: 16,
-					paddingHorizontal: paddingHorizontal,
+					paddingHorizontal,
 				}}
-				numColumns={layout === InterfaceLayout.Grid ? numColumns : 1}
+				numColumns={numColumns}
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="always"
@@ -167,9 +166,7 @@ export default function Screen() {
 						/>
 					)
 				}
-				ItemSeparatorComponent={
-					layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
-				}
+				ItemSeparatorComponent={ItemSeparatorComponent}
 			/>
 		</SafeAreaView>
 	)

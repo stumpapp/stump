@@ -1,19 +1,19 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql, InterfaceLayout } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Platform, View } from 'react-native'
+import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { LibraryOverviewSheet, usePrefetchLibraryOverview } from '~/components/library'
 import { LibrarySeriesListHeader } from '~/components/library/listHeader'
 import ListEmpty from '~/components/ListEmpty'
+import { useListSizing } from '~/components/listLayout'
 import RefreshControl from '~/components/RefreshControl'
 import SeriesListItem from '~/components/series/SeriesListItem'
 import { Button, FullScreenLoader, RefreshButton, Text } from '~/components/ui'
@@ -120,7 +120,6 @@ export default function Screen() {
 			placeholderData: keepPreviousData,
 		},
 	)
-	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const nodes = data?.pages.flatMap((page) => page.series.nodes) || []
 
@@ -135,6 +134,7 @@ export default function Screen() {
 	const isFiltered = Object.keys(filters).length > 0
 
 	const layout = useSeriesLayout(`library-${id}-series`, (state) => state.layout)
+	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
 	return (
 		<SeriesFilterContext.Provider value={store}>
@@ -150,7 +150,7 @@ export default function Screen() {
 						paddingHorizontal: paddingHorizontal,
 						paddingVertical: 16,
 					}}
-					numColumns={layout === InterfaceLayout.Grid ? numColumns : 1}
+					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={
@@ -205,9 +205,7 @@ export default function Screen() {
 							/>
 						)
 					}
-					ItemSeparatorComponent={
-						layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
-					}
+					ItemSeparatorComponent={ItemSeparatorComponent}
 				/>
 
 				<LibraryOverviewSheet ref={sheetRef} libraryId={id} />

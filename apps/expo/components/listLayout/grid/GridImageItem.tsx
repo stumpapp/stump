@@ -7,9 +7,9 @@ import { LinearGradientProps } from 'react-native-linear-gradient'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
-import { ThumbnailImage } from '../image'
-import { ThumbnailPlaceholderData } from '../image/ThumbnailPlaceholder'
-import { Icon, Progress, Text } from '../ui'
+import { ThumbnailImage } from '../../image'
+import { ThumbnailPlaceholderData } from '../../image/ThumbnailPlaceholder'
+import { Icon, Progress, Text } from '../../ui'
 import { useGridItemSize } from './useGridItemSize'
 
 type Props = {

@@ -1,9 +1,9 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql, InterfaceLayout } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useRef } from 'react'
-import { Platform, View } from 'react-native'
+import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
@@ -11,8 +11,8 @@ import { useShallow } from 'zustand/react/shallow'
 import { useActiveServer } from '~/components/activeServer'
 import { BookListItem } from '~/components/book'
 import { BooksListHeader } from '~/components/book/listHeader'
-import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
+import { useListSizing } from '~/components/listLayout'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
@@ -91,7 +91,6 @@ export default function Screen() {
 			placeholderData: keepPreviousData,
 		},
 	)
-	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
@@ -104,6 +103,7 @@ export default function Screen() {
 	const isFiltered = Object.keys(filters).length > 0
 
 	const layout = useBooksLayout('global', (state) => state.layout)
+	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
 	return (
 		<BookFilterContext.Provider value={store}>
@@ -117,9 +117,9 @@ export default function Screen() {
 					renderItem={({ item }) => <BookListItem layout={layout} book={item} />}
 					contentContainerStyle={{
 						paddingVertical: 16,
-						paddingHorizontal: paddingHorizontal,
+						paddingHorizontal,
 					}}
-					numColumns={layout === InterfaceLayout.Grid ? numColumns : undefined}
+					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="automatic"
@@ -143,9 +143,7 @@ export default function Screen() {
 							}
 						/>
 					}
-					ItemSeparatorComponent={
-						layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
-					}
+					ItemSeparatorComponent={ItemSeparatorComponent}
 				/>
 			</SafeAreaView>
 		</BookFilterContext.Provider>

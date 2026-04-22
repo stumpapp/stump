@@ -9,7 +9,7 @@ import { IS_IOS_24_PLUS, ON_END_REACHED_THRESHOLD, useColors } from '~/lib/const
 
 import { useActiveServer } from '../activeServer'
 import BookGridItem from '../book/BookGridItem'
-import { useGridItemSize } from '../grid/useGridItemSize'
+import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import ListEmpty from '../ListEmpty'
 import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Input, Text } from '../ui'

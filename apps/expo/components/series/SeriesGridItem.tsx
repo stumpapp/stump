@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
 import { useActiveServer } from '../activeServer'
-import GridImageItem from '../grid/GridImageItem'
+import GridImageItem from '../listLayout/grid/GridImageItem'
 
 const fragment = graphql(`
 	fragment SeriesGridItem on Series {

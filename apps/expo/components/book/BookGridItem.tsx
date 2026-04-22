@@ -5,7 +5,7 @@ import { View } from 'react-native'
 import { parseGraphQLPercentageDecimal } from '~/lib/format'
 
 import { useActiveServer } from '../activeServer'
-import GridImageItem from '../grid/GridImageItem'
+import GridImageItem from '../listLayout/grid/GridImageItem'
 
 const fragment = graphql(`
 	fragment BookGridItem on Media {

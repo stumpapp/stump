@@ -8,7 +8,7 @@ import { useCallback, useLayoutEffect, useMemo } from 'react'
 
 import BackLink from '~/components/BackLink'
 import BookGridItem from '~/components/book/BookGridItem'
-import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 
 const query = graphql(`

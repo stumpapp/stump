@@ -6,8 +6,8 @@ import { parseGraphQLPercentageDecimal } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
-import GridImageItem from '../grid/GridImageItem'
-import { ListRowItem } from '../list'
+import GridImageItem from '../listLayout/grid/GridImageItem'
+import { ListRowItem } from '../listLayout/list'
 import { Text } from '../ui'
 
 const fragment = graphql(`

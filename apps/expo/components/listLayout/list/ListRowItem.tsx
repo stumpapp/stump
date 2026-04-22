@@ -3,8 +3,8 @@ import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import { LinearGradientProps } from 'react-native-linear-gradient'
 
-import { ThumbnailImage, ThumbnailPlaceholderData } from '../image'
-import { Heading, Progress, Text } from '../ui'
+import { ThumbnailImage, ThumbnailPlaceholderData } from '../../image'
+import { Heading, Progress, Text } from '../../ui'
 import { useListRowItemSize } from './useListRowItemSize'
 
 type Props = {

@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { IS_IOS_24_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
 
-import { useGridItemSize } from '../grid/useGridItemSize'
+import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { SheetBackDetection } from '../SheetBackDetection'
 import { StatCard, StatCardProps } from '../stats'
 import { Heading, Text } from '../ui'

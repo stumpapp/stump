@@ -2,19 +2,19 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useNavigationState, useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql, InterfaceLayout } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Platform, View } from 'react-native'
+import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 import { BookListItem, type IBookListItemFragment } from '~/components/book'
 import { SeriesBooksListHeader } from '~/components/book/listHeader/SeriesBooksListHeader'
-import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
+import { useListSizing } from '~/components/listLayout'
 import RefreshControl from '~/components/RefreshControl'
 import { SeriesOverviewSheet, usePrefetchSeriesOverview } from '~/components/series'
 import { Button, RefreshButton, Text } from '~/components/ui'
@@ -126,7 +126,6 @@ export default function Screen() {
 			placeholderData: keepPreviousData,
 		},
 	)
-	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const nodes = data?.pages.flatMap((page) => page.media.nodes) || []
 
@@ -145,6 +144,7 @@ export default function Screen() {
 
 	const layoutKey = `library-${series.libraryId}-seriesBooks`
 	const layout = useBooksLayout(layoutKey, (state) => state.layout)
+	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
 	return (
 		<BookFilterContext.Provider value={store}>
@@ -158,10 +158,10 @@ export default function Screen() {
 					data={nodes}
 					renderItem={({ item }) => <BookListItem layout={layout} book={item} />}
 					contentContainerStyle={{
-						paddingHorizontal: paddingHorizontal,
+						paddingHorizontal,
 						paddingVertical: 16,
 					}}
-					numColumns={layout === InterfaceLayout.Grid ? numColumns : 1}
+					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={
@@ -206,9 +206,7 @@ export default function Screen() {
 							}
 						/>
 					}
-					ItemSeparatorComponent={
-						layout === InterfaceLayout.Grid ? undefined : () => <View className="h-6" />
-					}
+					ItemSeparatorComponent={ItemSeparatorComponent}
 				/>
 			</SafeAreaView>
 

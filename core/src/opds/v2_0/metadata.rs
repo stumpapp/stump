@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{NaiveDate, NaiveTime, Utc};
 use derive_builder::Builder;
 use models::entity::media_metadata;
 use serde::{Deserialize, Serialize};
@@ -100,9 +100,11 @@ pub struct OPDSWebPubMetadata {
 	pub language: Option<String>,
 	pub number: Option<rust_decimal::Decimal>,
 	pub age_rating: Option<i32>,
-	pub year: Option<i32>,
-	pub month: Option<i32>,
-	pub day: Option<i32>,
+	/// RFC 3339 formatted publication date. Derived from the year/month/day fields in the
+	/// underlying metadata model.
+	///
+	/// See https://readium.org/webpub-manifest/schema/metadata.schema.json
+	pub published: Option<String>,
 	pub volume: Option<i32>,
 }
 
@@ -132,12 +134,29 @@ impl OPDSWebPubMetadata {
 			language: model.language,
 			number: model.number,
 			age_rating: model.age_rating,
-			year: model.year,
-			month: model.month,
-			day: model.day,
+			published: build_published_date(model.year, model.month, model.day),
 			volume: model.volume,
 		})
 	}
+}
+
+// TODO: i early return if year or month is missing, and default day to 1. this felt
+// reasonable to me but i should check what folks would prefer
+
+/// Constructs a date string from separate year/month/day components
+/// See https://readium.org/webpub-manifest/schema/metadata.schema.json
+fn build_published_date(
+	year: Option<i32>,
+	month: Option<i32>,
+	day: Option<i32>,
+) -> Option<String> {
+	let year = year?;
+	let month = month?;
+	let day = day.unwrap_or(1); // i figure this one doesn't matter much
+
+	NaiveDate::from_ymd_opt(year, month as u32, day as u32)
+		// we don't have time info so just min it out
+		.map(|d| d.and_time(NaiveTime::MIN).and_utc().to_rfc3339())
 }
 
 /// Pagination-specific metadata fields for an OPDS collection

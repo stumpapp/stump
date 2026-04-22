@@ -185,10 +185,10 @@ pub struct OPDSPaginationMetadata {
 pub struct OPDSEntryBelongsToEntity {
 	/// The name of the entity the entry belongs to
 	name: String,
-	/// The position of the entry within the entity, **1-indexed**.
-	///
-	/// For example, if the entry is the first book in a series, this field would be `1`.
-	position: Option<i64>,
+	/// The position of the entry within the entity. The determination of this is as follows:
+	/// - metadata.number takes precendence when present
+	/// - otherwise determined by ranking media in series alphabetically by name
+	position: Option<f64>,
 	/// A list of links to the entity, if available. This **should** include a link to the entity itself
 	/// within the catalog.
 	#[builder(default)]
@@ -268,7 +268,7 @@ mod tests {
 			description: Some(String::from("A cool book")),
 			belongs_to: Some(OPDSEntryBelongsTo::Series(OPDSEntryBelongsToEntity {
 				name: String::from("Test Series"),
-				position: Some(1),
+				position: Some(1f64),
 				links: vec![],
 			})),
 			pagination: Some(OPDSPaginationMetadata {

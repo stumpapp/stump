@@ -386,7 +386,7 @@ mod tests {
 				.belongs_to(OPDSEntryBelongsTo::Series(
 					OPDSEntryBelongsToEntityBuilder::default()
 						.name("Test Series".to_string())
-						.position(Some(1))
+						.position(Some(1.0_f64))
 						.build()
 						.expect("Failed to build belongs_to"),
 				))
@@ -423,12 +423,12 @@ mod tests {
 		let position_results = vec![
 			BTreeMap::from([
 				("id".to_string(), Value::from("1")),
-				("position".to_string(), Value::from(1i64)),
+				("position".to_string(), Value::from(1.0f64)),
 			])
 			.into_mock_row(),
 			BTreeMap::from([
 				("id".to_string(), Value::from("2")),
-				("position".to_string(), Value::from(2i64)),
+				("position".to_string(), Value::from(2.0f64)),
 			])
 			.into_mock_row(),
 		];
@@ -465,7 +465,7 @@ mod tests {
 
 		let position_results = vec![BTreeMap::from([
 			("id".to_string(), Value::from("1")),
-			("position".to_string(), Value::from(1i64)),
+			("position".to_string(), Value::from(1.0f64)),
 		])
 		.into_mock_row()];
 

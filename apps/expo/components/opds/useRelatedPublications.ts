@@ -85,8 +85,14 @@ export function useRelatedPublications({
 	}
 }
 
+// this is at best a heuristic, since position is determined by either metadata.number or ranking media in series
+// alphabetically by name, but it should work in most cases and is better than nothing. the scenarios i can see
+// where it would be wrong are:
+// - incomplete books in series
+// - books with metadata.number that is not a whole number (e.g. 1.5)
+// also by nature of infinite scrolling, the book might not even be in the initial window
 const getInitialIndex = (position: number | null, listLength: number) => {
 	if (!position) return 0
-	const index = position - 1
+	const index = Math.floor(position) - 1
 	return Math.min(Math.max(0, index), listLength - 1)
 }

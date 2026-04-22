@@ -1437,7 +1437,8 @@
 				},
 				"thumbnailRatioSelect": {
 					"label": "Współczynnik miniatur",
-					"description": "Współczynnik proporcji używany dla miniatur"
+					"description": "Współczynnik proporcji używany dla miniatur",
+					"defaultSuffix": "Default"
 				},
 				"thumbnailPlaceholder": {
 					"label": "Miniatury zastępcze",
@@ -1513,7 +1514,10 @@
 				"maxWidthPreference": {
 					"label": "Dostosowana szerokość",
 					"description": "Stump stosuje maksymalną szerokość widoku. To ustawienie pozwala dostosować lub usunąć ten limit",
-					"tooltip": "To ustawienie nie jest obecnie obsługiwane, jeśli główna nawigacja ustawiona jest jako panel boczny"
+					"tooltip": "To ustawienie nie jest obecnie obsługiwane, jeśli główna nawigacja ustawiona jest jako panel boczny",
+					"options": {
+						"noLimit": "No limit"
+					}
 				},
 				"additionalPreferences": {
 					"label": "Dodatkowe ustawienia",

@@ -1438,7 +1438,7 @@
 				"thumbnailRatioSelect": {
 					"label": "Współczynnik miniatur",
 					"description": "Współczynnik proporcji używany dla miniatur",
-					"defaultSuffix": "Default"
+					"defaultSuffix": "Domyślne"
 				},
 				"thumbnailPlaceholder": {
 					"label": "Miniatury zastępcze",
@@ -1516,7 +1516,7 @@
 					"description": "Stump stosuje maksymalną szerokość widoku. To ustawienie pozwala dostosować lub usunąć ten limit",
 					"tooltip": "To ustawienie nie jest obecnie obsługiwane, jeśli główna nawigacja ustawiona jest jako panel boczny",
 					"options": {
-						"noLimit": "No limit"
+						"noLimit": "Bez limitu"
 					}
 				},
 				"additionalPreferences": {

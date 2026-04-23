@@ -13,10 +13,15 @@
     - maybe useGridOrList that returns size and common things like ItemSeparatorComponent etc?
 - [x] move list/ and grid/ into layout/
 - [x] fix paddingHorizontal for lists (prolly just need to be 0)
-- [ ] kill smartListLayout, use new patterns
-- [ ] infoItems in ListRowItem
+- [x] ~kill smartListLayout, use new patterns~
+    - i actually decided not to do this right now, mostly bc:
+        - using the Stack api didn't present any different than what exists
+        - the new patterns are overkill since the only options are search + changing layout + collapse actions
+- [x] ~infoItems in ListRowItem~
     - i have as react node now, i think i _could_ do something more structured like InfoItem type that I construct
       in the component?
+    - punting for now, def want to do this eventually tho. added todo in the component
 - [x] BookListItem is already taken :sob: figure that out smh
 - [x] shared gradients between ListRowItem and GridImageItem
-- [ ] numberOfReads ListRowItem?
+- [x] numberOfReads ListRowItem?
+- [x] either rm BookGridItem and use BookListItem w static layout where needed or keep it and just do the same internally

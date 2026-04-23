@@ -1,16 +1,16 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteGraphQL, usePrefetchGraphQL } from '@stump/client'
-import { BookClubBookInput, graphql, MediaFilterInput } from '@stump/graphql'
+import { BookClubBookInput, graphql, InterfaceLayout, MediaFilterInput } from '@stump/graphql'
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_24_PLUS, ON_END_REACHED_THRESHOLD, useColors } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
-import BookGridItem from '../book/BookGridItem'
-import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
+import BookListItem from '../book/BookListItem'
 import ListEmpty from '../ListEmpty'
+import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Input, Text } from '../ui'
 import { PreviewBookSheet, PreviewBookSheetRef } from './PreviewBookSheet'
@@ -20,7 +20,7 @@ const query = graphql(`
 		media(pagination: $pagination, filter: $filters) {
 			nodes {
 				id
-				...BookGridItem
+				...BookListItem
 			}
 			pageInfo {
 				__typename
@@ -155,7 +155,11 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 				<FlashList
 					data={data?.pages.flatMap((page) => page.media.nodes) || []}
 					renderItem={({ item }) => (
-						<BookGridItem book={item} onPress={() => onSelectBook(item.id)} />
+						<BookListItem
+							layout={InterfaceLayout.Grid}
+							book={item}
+							onPress={() => onSelectBook(item.id)}
+						/>
 					)}
 					contentContainerStyle={{
 						paddingVertical: 16,

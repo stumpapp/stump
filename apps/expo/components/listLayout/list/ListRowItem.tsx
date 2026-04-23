@@ -1,8 +1,10 @@
 import { useSDK } from '@stump/client'
+import { intlFormat } from 'date-fns'
+import { Check } from 'lucide-react-native'
 import { Pressable, View } from 'react-native'
 
 import { ThumbnailImage, ThumbnailPlaceholderData } from '../../image'
-import { Heading, Progress, Text } from '../../ui'
+import { Heading, Icon, Progress, Text } from '../../ui'
 import { COMPLETED_GRADIENT, READING_GRADIENT } from '../shared'
 import { useListRowItemSize } from './useListRowItemSize'
 
@@ -13,7 +15,10 @@ type Props = {
 	placeholderData?: ThumbnailPlaceholderData | null
 	originalDimensions?: { width: number; height: number } | null
 	percentageCompleted?: number | null // 1-100
+	latestCompletionDate?: Date | null
 	numberOfReads?: number
+	// TODO: consider a more structured approach like having an InfoItem type that is used to construct the items into
+	// a consistent format.
 	infoItems?: React.ReactNode
 }
 
@@ -22,6 +27,7 @@ export function ListRowItem({
 	title,
 	onPress,
 	percentageCompleted,
+	latestCompletionDate,
 	numberOfReads,
 	infoItems,
 	...thumbnailProps
@@ -35,6 +41,8 @@ export function ListRowItem({
 			: percentageCompleted < 100
 				? READING_GRADIENT
 				: COMPLETED_GRADIENT
+
+	const showNumber = !!numberOfReads && numberOfReads >= 2
 
 	return (
 		<Pressable onPress={onPress}>
@@ -77,6 +85,40 @@ export function ListRowItem({
 								<Text size="sm" className="shrink-0 text-foreground-muted">
 									{percentageCompleted.toFixed(0)}%
 								</Text>
+							</View>
+						)}
+
+						{percentageCompleted != null && percentageCompleted >= 100 && (
+							// i went back and forth between items-end/center, landed on this. I felt the gap at the bottom otherwise was a bit awk
+							<View className="gap-3 flex-row items-end justify-between">
+								<Text
+									size="sm"
+									// pl-1 adjusted by eye for the infoItems, could be off
+									className="pl-1 shrink-0 text-foreground-muted"
+								>
+									{latestCompletionDate
+										? `Last Completed ${intlFormat(latestCompletionDate, {
+												month: 'short',
+												day: 'numeric',
+												year: 'numeric',
+											})}`
+										: 'Completed'}
+								</Text>
+
+								<View
+									className="p-1 gap-1 squircleflex bg-black/5 dark:bg-white/10 squircle flex-row items-center justify-center rounded-full"
+									style={{
+										borderRadius: 999, // idky i android having problems with rounded-full here
+									}}
+								>
+									{showNumber && (
+										<Text className="font-medium pl-1.5 text-sm text-foreground-muted">
+											{numberOfReads}
+										</Text>
+									)}
+
+									<Icon as={Check} className="text-foreground-muted" size={18} strokeWidth={2.5} />
+								</View>
 							</View>
 						)}
 					</View>

@@ -2,7 +2,7 @@ import { FragmentType, graphql, InterfaceLayout, useFragment } from '@stump/grap
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { parseGraphQLPercentageDecimal } from '~/lib/format'
+import { parseGraphQLDateTime, parseGraphQLPercentageDecimal } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
@@ -61,6 +61,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 		? 100
 		: parseGraphQLPercentageDecimal(data.readProgress?.percentageCompleted)
 	const numberOfReads = data.readHistory?.length
+	const latestCompletionDate = parseGraphQLDateTime(data.readHistory.at(0)?.completedAt)
 
 	const sharedProps = {
 		uri: data.thumbnail.url,
@@ -73,6 +74,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 				: null,
 		percentageCompleted,
 		numberOfReads,
+		latestCompletionDate,
 	}
 
 	if (layout === InterfaceLayout.Grid) {
@@ -93,6 +95,15 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 				<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
 					<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
 					<Text size="xs" className="pb-0.5 text-foreground-muted">{` / ${data.pages}`}</Text>
+				</View>
+			)}
+			{currentPage == null && data.pages > 0 && (
+				<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
+					<Text size="sm">{data.pages}</Text>
+					<Text size="xs" className="pb-0.5 text-foreground-muted">
+						{' '}
+						{t('common.pages').toLocaleLowerCase()}
+					</Text>
 				</View>
 			)}
 		</>

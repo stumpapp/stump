@@ -251,6 +251,22 @@ impl Series {
 		Ok(finished_count >= media_count)
 	}
 
+	// TODO: support this for series
+	// async fn last_completed_at(
+	// 	&self,
+	// 	ctx: &Context<'_>,
+	// ) -> Result<Option<chrono::DateTime<chrono::Utc>>> {
+	// 	let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+	// 	let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+	// 	// i think we need a loader for this, but that does:
+	// 	// get the media_count, finished_count, and the most recent finished_at all in one go
+	// 	// the tricky part here is that it doesn't account for rereads well, so if i complete
+	// 	// a series and then reread a random book in the middle months later, it would
+	// 	// update the last_completed_at to the most recent reread completion
+	// 	// this requires more thought, but leaving here as a reminder
+	// }
+
 	async fn percentage_completed(&self, ctx: &Context<'_>) -> Result<f32> {
 		let (media_count, finished_count) =
 			get_series_progress(ctx, self.model.id.clone()).await?;

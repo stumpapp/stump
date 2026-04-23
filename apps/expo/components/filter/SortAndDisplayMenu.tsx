@@ -5,7 +5,7 @@ import get from 'lodash/get'
 import set from 'lodash/set'
 import { Ellipsis, Grid2X2, List } from 'lucide-react-native'
 import { useState } from 'react'
-import { ImageSourcePropType, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SFSymbol } from 'sf-symbols-typescript'
 import { match, P } from 'ts-pattern'
@@ -183,24 +183,28 @@ export function useSortAndDisplayMenu<O extends Record<string, unknown>>({
 				{groups.map((group) => (
 					<Stack.Toolbar.Menu key={group.key} inline={group.inline} title={group.title}>
 						{group.items.map((item) => {
-							const { icon, xcasset } = match(item.icon?.ios)
-								.with({ xcasset: P.string }, (icon) => ({ xcasset: icon.xcasset, icon: undefined }))
-								.otherwise(() => ({
-									icon: item.icon?.ios as SFSymbol | ImageSourcePropType,
-									xcasset: undefined,
-								}))
+							const iconProps = match(item.icon?.ios)
+								.with({ xcasset: P.string }, (icon) => ({ xcasset: icon.xcasset }))
+								.with(P.string, (icon) => ({ sf: icon }))
+								.with(P.nullish, () => null)
+								.with(P.select(), (src) => ({ src }))
+								.otherwise(
+									() =>
+										({
+											sf: 'circle' satisfies SFSymbol,
+										}) as const,
+								)
 
 							return (
 								<Stack.Toolbar.MenuAction
 									key={item.key}
-									icon={icon}
-									xcassetName={xcasset}
 									isOn={item.isAction ? undefined : item.isOn}
 									disabled={item.disabled}
 									subtitle={item.subtitle}
 									destructive={item.destructive}
 									onPress={item.onPress}
 								>
+									{iconProps && <Stack.Toolbar.Icon {...iconProps} />}
 									{item.label}
 								</Stack.Toolbar.MenuAction>
 							)

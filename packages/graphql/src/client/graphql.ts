@@ -4874,7 +4874,7 @@ export type BookSearchScreenQueryVariables = Exact<{
 
 export type BookSearchScreenQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookGridItemFragment': BookGridItemFragment } }
+      & { ' $fragmentRefs'?: { 'BookListItemFragment': BookListItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type BookClubContextLayoutQueryVariables = Exact<{
@@ -5235,8 +5235,6 @@ export type RecentlyAddedSeriesHorizontalQuery = { __typename?: 'Query', recentl
       & { ' $fragmentRefs'?: { 'RecentlyAddedSeriesItemFragment': RecentlyAddedSeriesItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type BookGridItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookGridItemFragment' };
-
 export type BookListItemFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookListItemFragment' };
 
 export type BookSearchItemFragment = { __typename?: 'Media', id: string, resolvedName: string, size: number, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'BookSearchItemFragment' };
@@ -5296,7 +5294,7 @@ export type AddBookSheetQueryVariables = Exact<{
 
 export type AddBookSheetQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookGridItemFragment': BookGridItemFragment } }
+      & { ' $fragmentRefs'?: { 'BookListItemFragment': BookListItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type BookClubCardFragment = { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, members: Array<{ __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }>, currentBook?: { __typename?: 'BookClubBook', id: string, imageUrl?: string | null, title?: string | null, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } | null } & { ' $fragmentName'?: 'BookClubCardFragment' };
@@ -6867,31 +6865,6 @@ export const ReadingNowFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"ReadingNow"}) as unknown as TypedDocumentString<ReadingNowFragment, unknown>;
-export const BookGridItemFragmentDoc = new TypedDocumentString(`
-    fragment BookGridItem on Media {
-  id
-  resolvedName
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-    height
-    width
-  }
-  readProgress {
-    percentageCompleted
-  }
-  readHistory {
-    completedAt
-  }
-}
-    `, {"fragmentName":"BookGridItem"}) as unknown as TypedDocumentString<BookGridItemFragment, unknown>;
 export const BookListItemFragmentDoc = new TypedDocumentString(`
     fragment BookListItem on Media {
   id
@@ -8371,7 +8344,7 @@ export const BookSearchScreenDocument = new TypedDocumentString(`
   media(filter: $filter, pagination: $pagination) {
     nodes {
       id
-      ...BookGridItem
+      ...BookListItem
     }
     pageInfo {
       __typename
@@ -8383,7 +8356,7 @@ export const BookSearchScreenDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment BookGridItem on Media {
+    fragment BookListItem on Media {
   id
   resolvedName
   thumbnail {
@@ -8399,7 +8372,9 @@ export const BookSearchScreenDocument = new TypedDocumentString(`
     height
     width
   }
+  pages
   readProgress {
+    page
     percentageCompleted
   }
   readHistory {
@@ -9514,7 +9489,7 @@ export const AddBookSheetDocument = new TypedDocumentString(`
   media(pagination: $pagination, filter: $filters) {
     nodes {
       id
-      ...BookGridItem
+      ...BookListItem
     }
     pageInfo {
       __typename
@@ -9528,7 +9503,7 @@ export const AddBookSheetDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment BookGridItem on Media {
+    fragment BookListItem on Media {
   id
   resolvedName
   thumbnail {
@@ -9544,7 +9519,9 @@ export const AddBookSheetDocument = new TypedDocumentString(`
     height
     width
   }
+  pages
   readProgress {
+    page
     percentageCompleted
   }
   readHistory {

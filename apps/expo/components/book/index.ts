@@ -1,4 +1,3 @@
-export { default as BookGridItem } from './BookGridItem'
 export { default as BookListItem, type IBookListItemFragment } from './BookListItem'
 export { default as BookMetaLink } from './BookMetaLink'
 export { BooksAfterCursor } from './BooksAfterCursor'

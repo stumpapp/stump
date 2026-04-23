@@ -1,13 +1,13 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
-import { graphql, MediaFilterInput } from '@stump/graphql'
+import { graphql, InterfaceLayout, MediaFilterInput } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import { useCallback, useLayoutEffect, useMemo } from 'react'
 
 import BackLink from '~/components/BackLink'
-import BookGridItem from '~/components/book/BookGridItem'
+import { BookListItem } from '~/components/book'
 import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 
@@ -16,7 +16,7 @@ const query = graphql(`
 		media(filter: $filter, pagination: $pagination) {
 			nodes {
 				id
-				...BookGridItem
+				...BookListItem
 			}
 			pageInfo {
 				__typename
@@ -88,7 +88,7 @@ export default function Screen() {
 	return (
 		<FlashList
 			data={data?.pages.flatMap((page) => page.media.nodes) || []}
-			renderItem={({ item }) => <BookGridItem book={item} />}
+			renderItem={({ item }) => <BookListItem layout={InterfaceLayout.Grid} book={item} />}
 			contentContainerStyle={{ paddingHorizontal: paddingHorizontal, paddingVertical: 16 }}
 			centerContent
 			numColumns={numColumns}

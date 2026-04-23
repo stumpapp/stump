@@ -1,5 +1,6 @@
+import * as Sentry from '@sentry/react-native'
 import { ALargeSmall, TableOfContents } from 'lucide-react-native'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -90,8 +91,9 @@ function useChapterProgress() {
 	const toc = useEpubLocationStore((store) => store.toc)
 	const page = useEpubLocationStore((state) => state.position)
 	const totalPages = useEpubLocationStore((state) => state.totalPages)
+	const enableDebugAnalytics = usePreferencesStore((state) => state.enableDebugAnalytics)
 
-	const pagesLeftInChapter = useMemo(() => {
+	const pagesLeftInChapterRaw = useMemo(() => {
 		const flatToc = flattenToc(toc)
 		const activeIndex = flatToc.findIndex((item) => item.label === chapterTitle)
 		const nextChapter = flatToc.slice(activeIndex + 1).find((item) => item.position != null)
@@ -104,6 +106,31 @@ function useChapterProgress() {
 		}
 		return null
 	}, [chapterTitle, toc, page, totalPages])
+
+	const pagesLeftInChapter = useMemo(() => {
+		if (pagesLeftInChapterRaw == null) return null
+		if (pagesLeftInChapterRaw < 0) return null
+		return pagesLeftInChapterRaw
+	}, [pagesLeftInChapterRaw])
+
+	useEffect(() => {
+		if (!enableDebugAnalytics) return
+		if (pagesLeftInChapterRaw == null || pagesLeftInChapterRaw > 0) return
+
+		const storeSnapshot = useEpubLocationStore.getState()
+		Sentry.captureMessage('Encountered negative pages left in chapter', {
+			level: 'debug',
+			extra: {
+				locator: storeSnapshot.locator,
+				position: storeSnapshot.position,
+				totalPages: storeSnapshot.totalPages,
+				chapterTitle: storeSnapshot.currentChapter,
+				toc: storeSnapshot.toc,
+				flattenedToc: flattenToc(storeSnapshot.toc),
+				pagesLeftInChapterRaw,
+			},
+		})
+	}, [enableDebugAnalytics, pagesLeftInChapterRaw])
 
 	const progressText = useMemo(() => {
 		if (pagesLeftInChapter == null) return null

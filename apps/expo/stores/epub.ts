@@ -310,6 +310,7 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			bookmarks: [],
 			annotations: [],
 			jumpStack: [],
+			positions: [],
 		})
 	},
 }))

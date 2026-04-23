@@ -58,7 +58,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 	// takes precedence
 	const isComplete = !!data.readHistory?.length && !data.readProgress
 	const percentageCompleted = isComplete
-		? 1
+		? 100
 		: parseGraphQLPercentageDecimal(data.readProgress?.percentageCompleted)
 	const numberOfReads = data.readHistory?.length
 

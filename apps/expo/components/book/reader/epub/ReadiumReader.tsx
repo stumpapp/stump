@@ -331,6 +331,12 @@ export default function ReadiumReader({
 
 			store.onLocationChange(locator)
 
+			// This is a bit of a cautionary change without explicit testing, but if a book doesn't have
+			// any positions I don't think we can reliably make any progression-related calculations. I think,
+			// more than anything, what this would mean is somehow this callback hit before fully loading
+			// the book and getting positions
+			if (!positions.length) return
+
 			const totalProgression = locator.locations?.totalProgression
 			const isLikelyLastLocator = isLastReadiumLocator(locator, positions)
 

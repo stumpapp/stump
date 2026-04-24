@@ -96,7 +96,7 @@ export function CreateProviderDialog() {
 			</Button>
 
 			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<Dialog.Content size="md">
+				<Dialog.Content size="md" className="max-h-full overflow-y-auto">
 					<Dialog.Header>
 						<Dialog.Title>{dialogTitle}</Dialog.Title>
 						<Dialog.Close onClick={handleClose} />

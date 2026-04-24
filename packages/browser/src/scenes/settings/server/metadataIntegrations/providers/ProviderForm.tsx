@@ -6,7 +6,6 @@ import {
 	Input,
 	Label,
 	NativeSelect,
-	PasswordInput,
 	RawSwitch,
 	Text,
 } from '@stump/components'
@@ -45,15 +44,6 @@ export default function ProviderForm() {
 
 	return (
 		<>
-			{/*<PasswordInput
-				label={t(getKey('apiToken.label'))}
-				description={t(getKey('apiToken.description'))}
-				variant="primary"
-				type="password"
-				{...form.register('apiToken')}
-				errorMessage={errors.apiToken?.message}
-				fullWidth
-			/>*/}
 			<ProviderApiKeyInput />
 
 			<div className="gap-2 flex flex-col">

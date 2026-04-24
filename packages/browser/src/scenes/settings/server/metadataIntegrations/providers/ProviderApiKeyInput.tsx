@@ -29,7 +29,7 @@ export function ProviderApiKeyInput() {
 	} = useMutation({
 		mutationKey: ['validateApiKey', provider, debouncedValue],
 		mutationFn: async ({ apiKey, validator }: { apiKey: string; validator: Validator }) => {
-			const isValid = await validator(apiKey)
+			const isValid = await validator(apiKey, t)
 			if (!isValid) {
 				form.setError('apiToken', {
 					type: 'validate',
@@ -55,8 +55,11 @@ export function ProviderApiKeyInput() {
 		() => {
 			if (debouncedValue) {
 				validateKey(debouncedValue)
+			} else {
+				form.clearErrors('apiToken')
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[debouncedValue],
 	)
@@ -91,9 +94,16 @@ export function ProviderApiKeyInput() {
 const LOCALE_KEY = 'settingsScene.server/metadataIntegrations.providerForm'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 
-type Validator = (apiKey: string) => Promise<boolean>
+type Validator = (
+	apiKey: string,
+	t: (key: string, args?: Record<string, unknown>) => string,
+) => Promise<boolean>
 
-const validateHardcoverApiKey: Validator = async (apiKey) => {
+const validateHardcoverApiKey: Validator = async (apiKey, t) => {
+	if (apiKey.startsWith('Bearer ')) {
+		throw new Error(t(getKey('apiToken.noBearerPrefixRequired')))
+	}
+
 	const response = await fetch('https://api.hardcover.app/v1/graphql', {
 		method: 'POST',
 		body: JSON.stringify({
@@ -112,13 +122,17 @@ const validateHardcoverApiKey: Validator = async (apiKey) => {
 		},
 	})
 
-	// TODO(localization): localize this error message
 	if (!response.ok) {
-		throw new Error(`Hardcover API responded with status ${response.status}`)
+		throw new Error(t(getKey('apiToken.hardcoverStatusError'), { status: response.status }))
 	}
 
 	const data = await response.json()
-	return getProperty(data, 'data.me.id') != null
+	const firstError = getProperty(data, 'errors[0].message')
+	if (firstError && typeof firstError === 'string') {
+		throw new Error(t(getKey('apiToken.hardcoverValidationError'), { message: firstError }))
+	}
+	// hardcover `me` is an array for whatever reason
+	return getProperty(data, 'data.me[0].id') != null
 }
 
 const PROVIDER_VALIDATORS: Record<MetadataProvider, Validator | null> = {

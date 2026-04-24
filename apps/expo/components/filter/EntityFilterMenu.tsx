@@ -178,11 +178,10 @@ function AndroidFilterMenu({ groups, isFilterApplied }: AndroidFilterMenuProps) 
 							<Icon
 								as={ListFilter}
 								size={20}
-								className="text-foreground"
 								style={{
 									opacity: pressed ? 0.7 : 1,
 									// @ts-expect-error: color should exist its fine
-									color: isFilterApplied ? colors.fill.brand.DEFAULT : undefined,
+									color: isFilterApplied ? colors.fill.brand.DEFAULT : colors.foreground.DEFAULT,
 								}}
 							/>
 						</View>

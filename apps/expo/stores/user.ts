@@ -42,6 +42,7 @@ type MobilePreferencesStore = {
 	enableDebugAnalytics: boolean
 	preferMinimalReader: boolean
 	displayLanguageKeys: DisplayLanguageKeysType
+	lowercaseTranslation: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -79,6 +80,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			enableDebugAnalytics: false,
 			preferMinimalReader: false,
 			displayLanguageKeys: 'none',
+			lowercaseTranslation: false,
 			patch: (data) => set(data),
 		}),
 		{

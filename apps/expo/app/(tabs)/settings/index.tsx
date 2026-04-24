@@ -17,6 +17,7 @@ import {
 	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
+	LowercaseTranslation,
 	MaskURLs,
 	PerformanceMonitor,
 	PreferMinimalReader,
@@ -40,6 +41,7 @@ export default function Screen() {
 					<AppTheme />
 					<AppPrimaryColor />
 					<AppLanguage />
+					<LowercaseTranslation />
 					<DefaultServer />
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />

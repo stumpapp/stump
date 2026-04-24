@@ -3,6 +3,8 @@ import { intlFormat } from 'date-fns'
 import { Check } from 'lucide-react-native'
 import { Pressable, View } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
+
 import { ThumbnailImage, ThumbnailPlaceholderData } from '../../image'
 import { Heading, Icon, Progress, Text } from '../../ui'
 import { useListRowItemSize } from './useListRowItemSize'
@@ -31,6 +33,7 @@ export function ListRowItem({
 	infoItems,
 	...thumbnailProps
 }: Props) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { width: thumbnailWidth, height } = useListRowItemSize()
 
@@ -86,12 +89,12 @@ export function ListRowItem({
 									className="pl-1 shrink-0 text-foreground-muted"
 								>
 									{latestCompletionDate
-										? `Last Completed ${intlFormat(latestCompletionDate, {
+										? `${t('common.lastCompleted')} ${intlFormat(latestCompletionDate, {
 												month: 'short',
 												day: 'numeric',
 												year: 'numeric',
 											})}`
-										: 'Completed'}
+										: t('common.completed')}
 								</Text>
 
 								<View

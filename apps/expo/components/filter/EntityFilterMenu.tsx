@@ -33,6 +33,15 @@ type FilterMenuParams<F> = {
 	groups: FilterGroupDef[]
 }
 
+// TODO: open questions (that will matter more when you can configure the library type):
+// - do we want explicit options for every supported LibraryType? or can we merge a few? i honestly don't know the conceptual boundaries between formats but we have:
+//    - Manga -> Manga+??? (Light Novel? Manhwa?)
+//    - Books -> Books
+//    - Comics -> Comics+?? (Webtoon?)
+//    - WebNovel + Webtoon???
+//   maybe we support nesting? idk, being a mostly ebook + comics reader, i don't have strong opions are knowledge of prior art for others
+// - how do we want to handle Mixed? right now, if i select a narrower type (e.g., Books) it won't show books
+//   in a mixed library. i think this is fine
 export function useFilterMenu<F extends Record<string, unknown>>({
 	filters,
 	setFilters,

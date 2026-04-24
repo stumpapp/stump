@@ -1,5 +1,7 @@
 import { useSDK } from '@stump/client'
+import { BlurTargetView, BlurView } from 'expo-blur'
 import { Check } from 'lucide-react-native'
+import { useRef } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
@@ -38,34 +40,37 @@ export default function GridImageItem({
 	const showNumber = !!numberOfReads && numberOfReads >= 2
 	const isReading = percentageCompleted != null && percentageCompleted < 100
 
-	let resolvedGradient = undefined
-	if (isReading && hasCompleted) {
-		resolvedGradient = REREADING_GRADIENT
-	} else if (isReading && !hasCompleted) {
-		resolvedGradient = READING_GRADIENT
-	} else if (!isReading && hasCompleted) {
-		resolvedGradient = COMPLETED_GRADIENT
-	}
+	const resolvedGradient = isReading
+		? hasCompleted
+			? REREADING_GRADIENT
+			: READING_GRADIENT
+		: hasCompleted
+			? COMPLETED_GRADIENT
+			: undefined
 
 	const thumbnailHeight = itemWidth / thumbnailRatio
+
+	const blurTargetRef = useRef<View>(null)
 
 	return (
 		<Pressable onPress={onPress}>
 			{({ pressed }) => (
 				<View className={cn('gap-2 pb-4 flex-1', { 'opacity-80': pressed })}>
 					<View style={{ width: itemWidth, height: thumbnailHeight }}>
-						<ThumbnailImage
-							source={{
-								uri: uri,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							size={{ height: thumbnailHeight, width: itemWidth }}
-							{...thumbnailProps}
-							gradient={resolvedGradient}
-						/>
+						<BlurTargetView ref={blurTargetRef}>
+							<ThumbnailImage
+								source={{
+									uri: uri,
+									headers: {
+										...sdk.customHeaders,
+										Authorization: sdk.authorizationHeader || '',
+									},
+								}}
+								size={{ height: thumbnailHeight, width: itemWidth }}
+								{...thumbnailProps}
+								gradient={resolvedGradient}
+							/>
+						</BlurTargetView>
 
 						{isReading && (
 							<View className="bottom-2 left-2 right-2 absolute z-30">
@@ -78,35 +83,37 @@ export default function GridImageItem({
 						)}
 
 						{hasCompleted && (
-							<View
+							<BlurView
+								blurTarget={blurTargetRef}
+								blurMethod="dimezisBlurView"
 								className={cn(
-									'right-2 bg-white/40 squircle absolute z-30 flex flex-row items-center justify-center rounded-full',
-									isReading ? 'bottom-5' : 'bottom-2',
+									'right-2 bottom-2 squircle absolute z-30 rounded-full',
+									isReading && 'bottom-5',
 								)}
-								style={{
-									borderRadius: 999, // idky i android having problems with rounded-full here
-								}}
+								intensity={4}
 							>
-								{showNumber && (
-									<Text
-										className="font-bold ml-2 shadow tablet:text-base"
-										style={{
-											color: '#f5f3ef',
-										}}
-									>
-										{numberOfReads}
-									</Text>
-								)}
+								<View className="bg-white/30 flex flex-row items-center justify-center">
+									{showNumber && (
+										<Text
+											className="font-bold ml-2 shadow tablet:text-base"
+											style={{
+												color: '#f5f3ef',
+											}}
+										>
+											{numberOfReads}
+										</Text>
+									)}
 
-								<Icon
-									as={Check}
-									// This icon looks optically off center so I've adjusted it down a bit
-									className="shadow m-1 top-[0.7]"
-									size={20}
-									color="#f5f3ef"
-									strokeWidth={2.5}
-								/>
-							</View>
+									<Icon
+										as={Check}
+										// This icon looks optically off center so I've adjusted it down a bit
+										className="shadow m-1 top-[0.7]"
+										size={20}
+										color="#f5f3ef"
+										strokeWidth={2.5}
+									/>
+								</View>
+							</BlurView>
 						)}
 					</View>
 

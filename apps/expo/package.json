@@ -59,6 +59,7 @@
 		"expo-application": "~55.0.12",
 		"expo-asset": "~55.0.12",
 		"expo-auth-session": "~55.0.12",
+		"expo-blur": "^55.0.14",
 		"expo-brightness": "~55.0.11",
 		"expo-build-properties": "~55.0.11",
 		"expo-constants": "~55.0.12",

@@ -5,7 +5,6 @@ import { Pressable, View } from 'react-native'
 
 import { ThumbnailImage, ThumbnailPlaceholderData } from '../../image'
 import { Heading, Icon, Progress, Text } from '../../ui'
-import { COMPLETED_GRADIENT, READING_GRADIENT } from '../shared'
 import { useListRowItemSize } from './useListRowItemSize'
 
 type Props = {
@@ -35,13 +34,6 @@ export function ListRowItem({
 	const { sdk } = useSDK()
 	const { width: thumbnailWidth, height } = useListRowItemSize()
 
-	const resolvedGradient =
-		percentageCompleted == null
-			? undefined
-			: percentageCompleted < 100
-				? READING_GRADIENT
-				: COMPLETED_GRADIENT
-
 	const showNumber = !!numberOfReads && numberOfReads >= 2
 
 	return (
@@ -64,13 +56,10 @@ export function ListRowItem({
 						}}
 						size={{ height, width: thumbnailWidth }}
 						{...thumbnailProps}
-						gradient={resolvedGradient}
 					/>
 
 					<View className="gap-2 py-1.5 flex-1 justify-center">
-						<Heading numberOfLines={2} className="shrink">
-							{title}
-						</Heading>
+						<Heading numberOfLines={2}>{title}</Heading>
 
 						{infoItems && <View className="gap-2 flex-row items-center">{infoItems}</View>}
 
@@ -106,18 +95,23 @@ export function ListRowItem({
 								</Text>
 
 								<View
-									className="p-1 gap-1 squircleflex bg-black/5 dark:bg-white/10 squircle flex-row items-center justify-center rounded-full"
+									className="right-0 squircleflex bg-black/5 dark:bg-white/10 squircle absolute flex-row items-center justify-center rounded-full"
 									style={{
 										borderRadius: 999, // idky i android having problems with rounded-full here
 									}}
 								>
 									{showNumber && (
-										<Text className="font-medium pl-1.5 text-sm text-foreground-muted">
+										<Text className="font-medium ml-2 text-sm tablet:text-sm text-foreground-muted">
 											{numberOfReads}
 										</Text>
 									)}
 
-									<Icon as={Check} className="text-foreground-muted" size={18} strokeWidth={2.5} />
+									<Icon
+										as={Check}
+										className="m-1 top-[0.7] text-foreground-muted"
+										size={16}
+										strokeWidth={2.2}
+									/>
 								</View>
 							</View>
 						)}

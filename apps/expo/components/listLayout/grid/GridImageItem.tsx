@@ -75,14 +75,14 @@ export default function GridImageItem({
 
 						{percentageCompleted != null && percentageCompleted >= 100 && (
 							<View
-								className="bottom-2 right-2 bg-white/40 p-1 gap-1 squircle absolute z-30 flex flex-row items-center justify-center rounded-full"
+								className="bottom-2 right-2 bg-white/40 squircle absolute z-30 flex flex-row items-center justify-center rounded-full"
 								style={{
 									borderRadius: 999, // idky i android having problems with rounded-full here
 								}}
 							>
 								{showNumber && (
 									<Text
-										className="font-bold pl-1.5 shadow"
+										className="font-bold ml-2 shadow tablet:text-base"
 										style={{
 											color: '#f5f3ef',
 										}}
@@ -94,7 +94,7 @@ export default function GridImageItem({
 								<Icon
 									as={Check}
 									// This icon looks optically off center so I've adjusted it down a bit
-									className="shadow top-[0.7]"
+									className="shadow m-1 top-[0.7]"
 									size={20}
 									color="#f5f3ef"
 									strokeWidth={2.5}

@@ -36,8 +36,8 @@ export default function GridImageItem({
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const hasCompleted = !!numberOfReads && numberOfReads >= 1
 	const showNumber = !!numberOfReads && numberOfReads >= 2
+	const hasCompleted = percentageCompleted != null && percentageCompleted >= 100
 	const isReading = percentageCompleted != null && percentageCompleted < 100
 
 	const resolvedGradient = isReading

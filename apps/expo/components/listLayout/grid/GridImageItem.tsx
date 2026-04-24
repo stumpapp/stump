@@ -8,7 +8,7 @@ import { usePreferencesStore } from '~/stores'
 import { ThumbnailImage } from '../../image'
 import { ThumbnailPlaceholderData } from '../../image/ThumbnailPlaceholder'
 import { Icon, Progress, Text } from '../../ui'
-import { COMPLETED_GRADIENT, READING_GRADIENT } from '../shared'
+import { COMPLETED_GRADIENT, READING_GRADIENT, REREADING_GRADIENT } from '../shared'
 import { useGridItemSize } from './useGridItemSize'
 
 type Props = {
@@ -34,16 +34,20 @@ export default function GridImageItem({
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const resolvedGradient =
-		percentageCompleted == null
-			? undefined
-			: percentageCompleted < 100
-				? READING_GRADIENT
-				: COMPLETED_GRADIENT
+	const hasCompleted = !!numberOfReads && numberOfReads >= 1
+	const showNumber = !!numberOfReads && numberOfReads >= 2
+	const isReading = percentageCompleted != null && percentageCompleted < 100
+
+	let resolvedGradient = undefined
+	if (isReading && hasCompleted) {
+		resolvedGradient = REREADING_GRADIENT
+	} else if (isReading && !hasCompleted) {
+		resolvedGradient = READING_GRADIENT
+	} else if (!isReading && hasCompleted) {
+		resolvedGradient = COMPLETED_GRADIENT
+	}
 
 	const thumbnailHeight = itemWidth / thumbnailRatio
-
-	const showNumber = !!numberOfReads && numberOfReads >= 2
 
 	return (
 		<Pressable onPress={onPress}>
@@ -63,7 +67,7 @@ export default function GridImageItem({
 							gradient={resolvedGradient}
 						/>
 
-						{percentageCompleted != null && percentageCompleted < 100 && (
+						{isReading && (
 							<View className="bottom-2 left-2 right-2 absolute z-30">
 								<Progress
 									className="h-1 bg-white/40"
@@ -73,9 +77,12 @@ export default function GridImageItem({
 							</View>
 						)}
 
-						{percentageCompleted != null && percentageCompleted >= 100 && (
+						{hasCompleted && (
 							<View
-								className="bottom-2 right-2 bg-white/40 squircle absolute z-30 flex flex-row items-center justify-center rounded-full"
+								className={cn(
+									'right-2 bg-white/40 squircle absolute z-30 flex flex-row items-center justify-center rounded-full',
+									isReading ? 'bottom-5' : 'bottom-2',
+								)}
 								style={{
 									borderRadius: 999, // idky i android having problems with rounded-full here
 								}}

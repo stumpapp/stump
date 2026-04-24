@@ -23,3 +23,16 @@ export const READING_GRADIENT = easeGradient({
 	extraColorStopsPerTransition: 16,
 	easing: Easing.bezier(0.42, 0, 0.7, 1),
 }) satisfies LinearGradientProps
+
+export const REREADING_GRADIENT = {
+	...easeGradient({
+		colorStops: {
+			0.7: { color: 'transparent' },
+			1: { color: 'rgba(0, 0, 0, 0.70)' },
+		},
+		extraColorStopsPerTransition: 16,
+		easing: Easing.bezier(0, 0, 0.6, 1),
+	}),
+	useAngle: true,
+	angle: 165,
+} satisfies LinearGradientProps

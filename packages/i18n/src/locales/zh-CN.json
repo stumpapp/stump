@@ -2787,7 +2787,9 @@
 			"cancel": "取消",
 			"chapter": "章节",
 			"clear": "清除",
+			"completed": "Completed",
 			"confirm": "确认",
+			"content": "Content",
 			"details": "详情",
 			"delete": "删除",
 			"downloads": "下载",
@@ -2795,6 +2797,9 @@
 			"enabled": "已启用",
 			"enable": "启用",
 			"error": "错误",
+			"grid": "Grid",
+			"list": "List",
+			"lastCompleted": "Last Completed",
 			"name": "名称",
 			"none": "无",
 			"options": "选项",
@@ -2940,6 +2945,7 @@
 				"bookClubsEnabled": "读书俱乐部功能"
 			},
 			"autoSyncLocalData": "自动同步本地数据",
+			"lowercaseTranslation": "Lowercase Labels",
 			"management": {
 				"label": "管理",
 				"dataUsage": {
@@ -3138,6 +3144,16 @@
 				"premadeThemes": "预设主题"
 			}
 		},
+		"libraryType": {
+			"BOOK": "Books",
+			"COMIC": "Comics",
+			"LIGHT_NOVEL": "Light Novels",
+			"MANGA": "Manga",
+			"MANHWA": "Manhwa",
+			"MIXED": "Mixed",
+			"WEBTOON": "Webtoons",
+			"WEB_NOVEL": "Web Novels"
+		},
 		"savedServerActions": {
 			"clearCache": "清除缓存",
 			"discardTokens": {
@@ -3147,6 +3163,38 @@
 			"deleteServer": {
 				"title": "删除服务器",
 				"confirmation": "您确定要删除 {{serverName}} 吗？"
+			}
+		},
+		"filtering": {
+			"notStarted": "Not Started",
+			"currentlyReading": "Currently Reading",
+			"finished": "Finished"
+		},
+		"sorting": {
+			"labelEllipsis": "Sort By...",
+			"sortField": {
+				"NAME": "Name",
+				"ADDED_AT": "Date Added",
+				"CREATED_AT": "Date Added",
+				"NUMBER": "Series Position",
+				"SERIES": "Series",
+				"YEAR": "Year Published"
+			},
+			"sortDirection": {
+				"ASC": "Ascending",
+				"DESC": "Descending"
+			},
+			"sortDirectionString": {
+				"ASC": "A → Z",
+				"DESC": "Z → A"
+			},
+			"sortDirectionDate": {
+				"ASC": "Oldest First",
+				"DESC": "Newest First"
+			},
+			"sortDirectionNumber": {
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
 			}
 		}
 	}

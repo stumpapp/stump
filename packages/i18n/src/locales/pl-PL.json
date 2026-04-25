@@ -2787,7 +2787,9 @@
 			"cancel": "Anuluj",
 			"chapter": "Rozdział",
 			"clear": "Wyczyść",
+			"completed": "Completed",
 			"confirm": "Potwierdź",
+			"content": "Content",
 			"details": "Szczegóły",
 			"delete": "Usuń",
 			"downloads": "Pobrane",
@@ -2795,6 +2797,9 @@
 			"enabled": "Aktywne",
 			"enable": "Aktywuj",
 			"error": "Błąd",
+			"grid": "Grid",
+			"list": "List",
+			"lastCompleted": "Last Completed",
 			"name": "Nazwa",
 			"none": "Brak",
 			"options": "Ustawienia",
@@ -2940,6 +2945,7 @@
 				"bookClubsEnabled": "Funkcje klubu książki"
 			},
 			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
+			"lowercaseTranslation": "Lowercase Labels",
 			"management": {
 				"label": "Zarządzanie",
 				"dataUsage": {
@@ -3138,6 +3144,16 @@
 				"premadeThemes": "Wstępnie przygotowane motywy"
 			}
 		},
+		"libraryType": {
+			"BOOK": "Books",
+			"COMIC": "Comics",
+			"LIGHT_NOVEL": "Light Novels",
+			"MANGA": "Manga",
+			"MANHWA": "Manhwa",
+			"MIXED": "Mixed",
+			"WEBTOON": "Webtoons",
+			"WEB_NOVEL": "Web Novels"
+		},
 		"savedServerActions": {
 			"clearCache": "Wyczyść pamięć podręczną",
 			"discardTokens": {
@@ -3147,6 +3163,38 @@
 			"deleteServer": {
 				"title": "Usuń serwer",
 				"confirmation": "Czy na pewno chcesz usunąć {{serverName}}?"
+			}
+		},
+		"filtering": {
+			"notStarted": "Not Started",
+			"currentlyReading": "Currently Reading",
+			"finished": "Finished"
+		},
+		"sorting": {
+			"labelEllipsis": "Sort By...",
+			"sortField": {
+				"NAME": "Name",
+				"ADDED_AT": "Date Added",
+				"CREATED_AT": "Date Added",
+				"NUMBER": "Series Position",
+				"SERIES": "Series",
+				"YEAR": "Year Published"
+			},
+			"sortDirection": {
+				"ASC": "Ascending",
+				"DESC": "Descending"
+			},
+			"sortDirectionString": {
+				"ASC": "A → Z",
+				"DESC": "Z → A"
+			},
+			"sortDirectionDate": {
+				"ASC": "Oldest First",
+				"DESC": "Newest First"
+			},
+			"sortDirectionNumber": {
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
 			}
 		}
 	}

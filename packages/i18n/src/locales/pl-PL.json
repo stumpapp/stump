@@ -3037,7 +3037,7 @@
 				"controls": "Sterowanie"
 			},
 			"readingMode": {
-				"label": "Kierunek",
+				"label": "Tryb czytania",
 				"options": {
 					"PAGED": "Strony",
 					"CONTINUOUS_HORIZONTAL": "Przewijanie (poziome)",

@@ -102,6 +102,8 @@ runs:
         build-args: |
           GIT_REV=${{ env.GIT_REV }}
           BUILD_CHANNEL=${{ inputs.build-channel }}
+        labels: |
+          org.opencontainers.image.revision=${{ env.GIT_REV }}
         containerfiles: |
           ./docker/Dockerfile
 

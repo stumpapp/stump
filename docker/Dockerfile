@@ -96,6 +96,14 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
 
 FROM gcr.io/distroless/cc-debian12:debug
 
+LABEL org.opencontainers.image.title="Stump" \
+      org.opencontainers.image.description="A free and open source comics, manga and digital book server with OPDS support" \
+      org.opencontainers.image.source="https://github.com/stumpapp/stump" \
+      org.opencontainers.image.url="https://stumpapp.dev" \
+      org.opencontainers.image.documentation="https://stumpapp.dev/guides" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.vendor="stumpapp"
+
 RUN [ "/busybox/ln", "-s", "/busybox/sh", "/bin/sh" ]
 RUN ln -s /busybox/env /usr/bin/env
 

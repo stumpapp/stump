@@ -2787,7 +2787,9 @@
 			"cancel": "Abbrechen",
 			"chapter": "Kapitel",
 			"clear": "Löschen",
+			"completed": "Completed",
 			"confirm": "Bestätigen",
+			"content": "Content",
 			"details": "Details",
 			"delete": "Löschen",
 			"downloads": "Downloads",
@@ -2795,6 +2797,9 @@
 			"enabled": "Aktiviert",
 			"enable": "Aktivieren",
 			"error": "Fehler",
+			"grid": "Grid",
+			"list": "List",
+			"lastCompleted": "Last Completed",
 			"name": "Name",
 			"none": "Keine",
 			"options": "Optionen",
@@ -2940,6 +2945,7 @@
 				"bookClubsEnabled": "Buchclubfunktionen"
 			},
 			"autoSyncLocalData": "Lokale Daten automatisch synchronisieren",
+			"lowercaseTranslation": "Lowercase Labels",
 			"management": {
 				"label": "Verwaltung",
 				"dataUsage": {
@@ -3138,6 +3144,16 @@
 				"premadeThemes": "Vorgefertigte Designs"
 			}
 		},
+		"libraryType": {
+			"BOOK": "Books",
+			"COMIC": "Comics",
+			"LIGHT_NOVEL": "Light Novels",
+			"MANGA": "Manga",
+			"MANHWA": "Manhwa",
+			"MIXED": "Mixed",
+			"WEBTOON": "Webtoons",
+			"WEB_NOVEL": "Web Novels"
+		},
 		"savedServerActions": {
 			"clearCache": "Cache leeren",
 			"discardTokens": {
@@ -3147,6 +3163,38 @@
 			"deleteServer": {
 				"title": "Server löschen",
 				"confirmation": "Bist du dir sicher, dass du {{serverName}} löschen möchtest?"
+			}
+		},
+		"filtering": {
+			"notStarted": "Not Started",
+			"currentlyReading": "Currently Reading",
+			"finished": "Finished"
+		},
+		"sorting": {
+			"labelEllipsis": "Sort By...",
+			"sortField": {
+				"NAME": "Name",
+				"ADDED_AT": "Date Added",
+				"CREATED_AT": "Date Added",
+				"NUMBER": "Series Position",
+				"SERIES": "Series",
+				"YEAR": "Year Published"
+			},
+			"sortDirection": {
+				"ASC": "Ascending",
+				"DESC": "Descending"
+			},
+			"sortDirectionString": {
+				"ASC": "A → Z",
+				"DESC": "Z → A"
+			},
+			"sortDirectionDate": {
+				"ASC": "Oldest First",
+				"DESC": "Newest First"
+			},
+			"sortDirectionNumber": {
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
 			}
 		}
 	}

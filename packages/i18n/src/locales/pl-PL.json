@@ -2951,13 +2951,13 @@
 				"bookClubsEnabled": "Funkcje klubu książki"
 			},
 			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
-			"lowercaseTranslation": "Lowercase Labels",
+			"lowercaseTranslation": "Małoliterowe przypisy",
 			"management": {
 				"label": "Zarządzanie",
 				"dataUsage": {
 					"label": "Wykorzystanie danych",
 					"nonStumpData": "Dane inne niż Stump",
-					"serversTotal": "Łącznie serwerów",
+					"serversTotal": "Łącznie z serwerów",
 					"totalFiles": "Łącznie plików",
 					"totalSize": "Łączny rozmiar",
 					"deleteDownloads": {
@@ -3018,7 +3018,7 @@
 			},
 			"contactInfo": {
 				"label": "Kontakt",
-				"email": "Adres e-mail",
+				"email": "Wiadomość e-mail",
 				"discord": "Discord",
 				"github": "GitHub"
 			},

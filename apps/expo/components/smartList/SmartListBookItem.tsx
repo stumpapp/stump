@@ -173,7 +173,7 @@ export default function SmartListBookItem({ book }: Props) {
 							</Text>
 
 							<Progress
-								className="h-1 bg-white/40"
+								className="bg-white/40"
 								indicatorClassName="bg-[#f5f3ef]"
 								value={getProgress()}
 								style={{ height: 6, borderRadius: 3 }}
@@ -205,7 +205,7 @@ export default function SmartListBookItem({ book }: Props) {
 					{data.readProgress && layout === 'list' && (
 						<View className="gap-4 pt-4 flex-row items-center">
 							<Progress
-								className="h-1 shrink bg-background-surface-secondary"
+								className="shrink"
 								value={getProgress()}
 								style={{ height: 6, borderRadius: 3 }}
 							/>

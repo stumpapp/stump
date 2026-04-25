@@ -216,7 +216,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						{readProgress && (
 							<View className="gap-3 flex-row items-center">
 								<Progress
-									className="h-1 shrink bg-background-surface-secondary"
+									className="shrink"
 									value={getProgress()}
 									style={{ height: 6, borderRadius: 3 }}
 								/>

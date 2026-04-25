@@ -1,5 +1,6 @@
 import { MediaMetadata } from '@stump/graphql'
 import { formatDistanceToNow } from 'date-fns'
+import { BlurTargetView } from 'expo-blur'
 import { useRouter } from 'expo-router'
 import { useCallback, useMemo, useRef } from 'react'
 import { Easing, Pressable, View } from 'react-native'
@@ -14,11 +15,10 @@ import { ThumbnailImage } from '~/components/image'
 import { Badge, Heading, Progress, Text } from '~/components/ui'
 import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { COLORS, useColors } from '~/lib/constants'
-import { parseGraphQLDecimal } from '~/lib/format'
+import { parseGraphQLPercentageDecimal } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
-import { BookMetaLink } from '../book'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
 import { getThumbnailPath } from './utils'
@@ -144,7 +144,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 	const colors = useColors()
 
-	const percentageCompleted = parseGraphQLDecimal(book.readProgress?.percentage)
+	const percentageCompleted = parseGraphQLPercentageDecimal(book.readProgress?.percentage)
 	const epubProgression = epubProgress.safeParse(book.readProgress?.epubProgress).data
 	const currentPage = book.readProgress?.page ?? epubProgression?.locations?.position ?? '??'
 
@@ -256,19 +256,23 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
 	})
 
+	const blurTargetRef = useRef<View>(null)
+
 	return (
 		<View className="gap-4 flex flex-row">
 			<Pressable onPress={() => router.push(`/offline/${book.id}`)}>
-				<ThumbnailImage
-					source={{
-						// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
-						// undefined so it's fine
-						uri: thumbnailPath,
-					}}
-					size={{ height: imageHeight, width: IMAGE_WIDTH }}
-					gradient={{ colors: gradientColors, locations: gradientLocations }}
-					placeholderData={thumbnailData}
-				/>
+				<BlurTargetView ref={blurTargetRef}>
+					<ThumbnailImage
+						source={{
+							// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
+							// undefined so it's fine
+							uri: thumbnailPath,
+						}}
+						size={{ height: imageHeight, width: IMAGE_WIDTH }}
+						gradient={{ colors: gradientColors, locations: gradientLocations }}
+						placeholderData={thumbnailData}
+					/>
+				</BlurTargetView>
 
 				{status && (
 					<View className="right-0 p-3 shadow absolute z-20 w-full items-end">
@@ -325,9 +329,15 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 						{percentageCompleted != null && (
 							<Progress
-								className="h-1 bg-white/40"
+								className="h-1"
 								indicatorClassName="bg-[#f5f3ef]"
-								value={percentageCompleted * 100}
+								trackClassName="bg-white/30"
+								value={percentageCompleted}
+								blurProps={{
+									intensity: 4,
+									blurTarget: blurTargetRef,
+									blurMethod: 'dimezisBlurView',
+								}}
 							/>
 						)}
 					</View>

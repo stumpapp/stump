@@ -514,14 +514,17 @@ export default function Footer() {
 			<View className={cn('gap-2 px-3', { 'pb-1': Platform.OS === 'android' })}>
 				{(footerControls === 'images' || readingMode === ReadingMode.ContinuousVertical) && (
 					<Progress
-						className="h-1 bg-white/40"
+						className="h-1"
 						indicatorClassName="bg-[#f5f3ef]"
+						trackClassName="bg-white/30"
 						value={percentage}
 						inverted={
 							readingDirection === ReadingDirection.Rtl &&
 							readingMode !== ReadingMode.ContinuousVertical
 						}
 						max={100}
+						// TODO: Figure out android (blurTarget)
+						blurProps={{ intensity: 4 }}
 					/>
 				)}
 

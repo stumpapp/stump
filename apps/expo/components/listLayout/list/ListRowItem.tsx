@@ -69,7 +69,7 @@ export function ListRowItem({
 						{percentageCompleted != null && percentageCompleted < 100 && (
 							<View className="gap-3 flex-row items-center">
 								<Progress
-									className="h-1 shrink bg-background-surface-secondary"
+									className="shrink"
 									value={percentageCompleted}
 									style={{ height: 6, borderRadius: 3 }}
 								/>

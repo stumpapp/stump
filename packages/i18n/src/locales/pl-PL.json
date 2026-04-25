@@ -2311,12 +2311,12 @@
 				"apiToken": {
 					"label": "Token API",
 					"description": "Token API do uwierzytelniania z tym dostawcą",
-					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
+					"validationError": "Automatyczna walidacja dla tego tokenu zakończyła się niepowodzeniem",
+					"validationRequestError": "Żądanie walidacji zakończyło się niepowodzeniem",
+					"validationRequestErrorUnknown": "Żądanie walidacji napotkało na nieznany błąd",
+					"hardcoverStatusError": "API Hardcover odpowiedziało statusem {{status}}",
+					"hardcoverValidationError": "API Hardcover odpowiedziało błedem: {{message}}",
+					"noBearerPrefixRequired": "Usuń przedrostek 'Bearer ' z tokenu API"
 				},
 				"apiTokenExpiresAt": {
 					"label": "Ważność tokenu",
@@ -2793,9 +2793,9 @@
 			"cancel": "Anuluj",
 			"chapter": "Rozdział",
 			"clear": "Wyczyść",
-			"completed": "Completed",
+			"completed": "Ukończone",
 			"confirm": "Potwierdź",
-			"content": "Content",
+			"content": "Zawartość",
 			"details": "Szczegóły",
 			"delete": "Usuń",
 			"downloads": "Pobrane",
@@ -2803,9 +2803,9 @@
 			"enabled": "Aktywne",
 			"enable": "Aktywuj",
 			"error": "Błąd",
-			"grid": "Grid",
-			"list": "List",
-			"lastCompleted": "Last Completed",
+			"grid": "Siatka",
+			"list": "Lista",
+			"lastCompleted": "Ostatnio ukończone",
 			"name": "Nazwa",
 			"none": "Brak",
 			"options": "Ustawienia",
@@ -3151,14 +3151,14 @@
 			}
 		},
 		"libraryType": {
-			"BOOK": "Books",
-			"COMIC": "Comics",
-			"LIGHT_NOVEL": "Light Novels",
+			"BOOK": "Książki",
+			"COMIC": "Komiksy",
+			"LIGHT_NOVEL": "Light Novel",
 			"MANGA": "Manga",
 			"MANHWA": "Manhwa",
-			"MIXED": "Mixed",
-			"WEBTOON": "Webtoons",
-			"WEB_NOVEL": "Web Novels"
+			"MIXED": "Mieszane",
+			"WEBTOON": "Webtoon",
+			"WEB_NOVEL": "Web Novel"
 		},
 		"savedServerActions": {
 			"clearCache": "Wyczyść pamięć podręczną",
@@ -3172,31 +3172,31 @@
 			}
 		},
 		"filtering": {
-			"notStarted": "Not Started",
-			"currentlyReading": "Currently Reading",
-			"finished": "Finished"
+			"notStarted": "Nierozpoczęte",
+			"currentlyReading": "Aktualnie czytane",
+			"finished": "Ukończone"
 		},
 		"sorting": {
-			"labelEllipsis": "Sort By...",
+			"labelEllipsis": "Sortuj według...",
 			"sortField": {
-				"NAME": "Name",
-				"ADDED_AT": "Date Added",
+				"NAME": "Nazwy",
+				"ADDED_AT": "Daty dodania",
 				"CREATED_AT": "Date Added",
-				"NUMBER": "Series Position",
-				"SERIES": "Series",
-				"YEAR": "Year Published"
+				"NUMBER": "Pozycji serii",
+				"SERIES": "Serii",
+				"YEAR": "Rok wydania"
 			},
 			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
+				"ASC": "Rosnąco",
+				"DESC": "Malejąco"
 			},
 			"sortDirectionString": {
 				"ASC": "A → Z",
 				"DESC": "Z → A"
 			},
 			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
+				"ASC": "Najpierw najstarsze",
+				"DESC": "Najpierw najnowsze"
 			},
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",

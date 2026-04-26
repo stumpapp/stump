@@ -15,11 +15,10 @@ import { Success } from 'react-native-turbo-image'
 
 import { TurboImage } from '~/components/image'
 import { useDisplay, usePrevious } from '~/lib/hooks'
-import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
-import { useImageBasedReader } from './context'
+import { PageIndexes, useImageBasedReader } from './context'
 
 type ImageDimension = {
 	height: number
@@ -134,9 +133,9 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 				keyExtractor={(item) => item.toString()}
 				renderItem={({ item, index }) => (
 					<PageSet
-						index={index}
-						indexes={item as [number, number]}
-						sizes={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
+						flashListIndex={index}
+						pageIndexes={item}
+						dimensions={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
 						maxWidth={width}
 						maxHeight={height}
 						onPastEndReached={onPastEndReached}
@@ -179,9 +178,9 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 }
 
 type PageSetProps = {
-	index: number
-	indexes: [number, number]
-	sizes: ImageDimension[]
+	flashListIndex: number
+	pageIndexes: PageIndexes
+	dimensions: ImageDimension[]
 	maxWidth: number
 	maxHeight: number
 	onPastEndReached?: () => void
@@ -190,9 +189,9 @@ type PageSetProps = {
 
 const PageSet = React.memo(
 	({
-		index,
-		indexes,
-		sizes,
+		flashListIndex,
+		pageIndexes,
+		dimensions,
 		maxWidth,
 		maxHeight,
 		onPastEndReached,
@@ -235,7 +234,7 @@ const PageSet = React.memo(
 				if (isLeft) modifier = readingDirection === ReadingDirection.Rtl ? 1 : -1
 				if (isRight) modifier = readingDirection === ReadingDirection.Rtl ? -1 : 1
 
-				const nextIndex = index + modifier
+				const nextIndex = flashListIndex + modifier
 				if (nextIndex >= 0 && nextIndex < pageSets.length) {
 					flashListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
 				}
@@ -246,7 +245,7 @@ const PageSet = React.memo(
 			},
 			[
 				maxWidth,
-				index,
+				flashListIndex,
 				flashListRef,
 				tapThresholdRatio,
 				readingDirection,
@@ -274,32 +273,31 @@ const PageSet = React.memo(
 			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate, readingMode],
 		)
 
-		const imageRatio = imageSizes?.[index]?.ratio
-
 		const onImageLoaded = useCallback(
-			(event: NativeSyntheticEvent<Success>, idxIdx: number) => {
+			(event: NativeSyntheticEvent<Success>, i: 0 | 1) => {
 				const { height, width } = event.nativeEvent
 				if (!height || !width) return
 				const ratio = width / height
 
-				const pageSize = sizes[idxIdx]
+				const pageSize = dimensions[i]
 				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
 				if (isDifferent) {
 					setImageSizes((prev) => {
-						const actualIdx = indexes[idxIdx]
-						if (actualIdx == null) return prev
-						prev[actualIdx] = { height, width, ratio }
+						const pageIndex = pageIndexes[i]
+						if (pageIndex == null) return prev
+						prev[pageIndex] = { height, width, ratio }
 						return prev
 					})
 				}
 			},
-			[setImageSizes, sizes, indexes],
+			[setImageSizes, dimensions, pageIndexes],
 		)
 
-		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
+		const imageRatios = pageIndexes.map((pageIndex) => imageSizes?.[pageIndex]?.ratio)
+		const roughPageRenderWidth = pageIndexes.length > 1 ? maxWidth / 2 : maxWidth
 
 		const isRtl = readingDirection === ReadingDirection.Rtl
-		const directionRespectingIndexes = isRtl ? [...indexes].reverse() : indexes
+		const directionRespectingPageIndexes = isRtl ? [...pageIndexes].reverse() : pageIndexes
 
 		return (
 			<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
@@ -321,25 +319,25 @@ const PageSet = React.memo(
 					}}
 				>
 					<View
-						className={cn('relative flex-row items-center justify-center', {
-							'gap-0 mx-auto': indexes.length > 1,
-						})}
+						className="relative flex-row items-center justify-center"
 						style={{
 							height:
 								// For the paged reader, this container takes the whole height so we can center vertically,
 								// but for the vertical reader we only want it to take the image height
-								imageRatio && readingMode === ReadingMode.ContinuousVertical
-									? maxWidth / imageRatio
+								readingMode === ReadingMode.ContinuousVertical && imageRatios[0]
+									? maxWidth / imageRatios[0]
 									: maxHeight,
 							width: maxWidth,
 						}}
 					>
-						{directionRespectingIndexes.map((pageIdx, i) => {
+						{directionRespectingPageIndexes.map((pageIndex, i) => {
+							const imageRatio = imageRatios[i]
+
 							return (
 								<TurboImage
-									key={getMappingKey(pageIdx, i)}
+									key={getMappingKey(pageIndex, i)}
 									source={{
-										uri: pageURL(pageIdx + 1),
+										uri: pageURL(pageIndex + 1),
 										headers: {
 											...requestHeaders?.(),
 											[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
@@ -347,12 +345,12 @@ const PageSet = React.memo(
 									}}
 									style={{
 										height: '100%',
-										maxWidth: indexes.length > 1 ? '50%' : '100%',
+										maxWidth: pageIndexes.length > 1 ? '50%' : '100%',
 										aspectRatio: imageRatio,
 									}}
 									resizeMode="contain"
 									resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
-									onSuccess={(event) => onImageLoaded(event, i)}
+									onSuccess={(event) => onImageLoaded(event, i as 0 | 1)}
 								/>
 							)
 						})}

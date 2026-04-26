@@ -47,12 +47,14 @@ export type BookmarkRef = NonNullable<EbookReaderBookRef['ebook']>['bookmarks'][
 		createdAt?: Date
 	}
 
+export type PageIndexes = [number, number] | [number]
+
 export type IImageBasedReaderContext = {
-	flashListRef: React.RefObject<FlashListRef<number[]> | null>
+	flashListRef: React.RefObject<FlashListRef<PageIndexes> | null>
 	book: ImageReaderBookRef
 	imageSizes?: Record<number, ImageBasedBookPageRef>
 	setImageSizes: React.Dispatch<React.SetStateAction<Record<number, ImageBasedBookPageRef>>>
-	pageSets: number[][]
+	pageSets: PageIndexes[]
 	pageURL: (page: number) => string
 	pageThumbnailURL?: (page: number) => string
 	currentPage?: number

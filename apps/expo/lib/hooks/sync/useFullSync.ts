@@ -63,3 +63,23 @@ export function useFullSync() {
 		pullAll,
 	}
 }
+
+// TODO(reading-journal): brainstorm
+// i figure sm like like for conflict resolution:
+//
+// full_journal_sync:
+//    last_sync = get_last_sync_time(server_id)
+//    server_entries = get_entries_since_from_server(last_sync)
+//
+//    for entry in server_entries:
+//       if entry.id not in local_db:
+//          create_entry_locally(entry)
+//       else:
+//          local_entry = get_local_entry(entry.id)
+//          if local_entry.sync_status == 'synced':
+//             update_local_entry(entry)
+//          else:
+//             conflict !! server has changed since last sync, but local entry has also changed since last sync
+//             maybe just ask user to pick
+//
+//   update_last_sync_time(server_id, now)

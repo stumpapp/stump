@@ -36,6 +36,7 @@ pub mod media_tag;
 pub mod metadata_fetch_record;
 pub mod metadata_provider_config;
 pub mod notifier;
+pub mod reading_journal_entry;
 pub mod reading_list;
 pub mod reading_list_item;
 pub mod reading_list_rule;

@@ -53,6 +53,11 @@ pub struct Model {
 	#[graphql(skip)]
 	#[serde(default = "Model::default_home_arrangement")]
 	pub home_arrangement: Option<Arrangement>,
+
+	// TODO(reading-journal): add
+	// enable_reading_journal: bool,
+	// reading_journal_day_reset_hour_offset: i32, // default 0 (midnight)
+	// ^ if more needed then maybe nested config?
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_id: Option<String>,
 }

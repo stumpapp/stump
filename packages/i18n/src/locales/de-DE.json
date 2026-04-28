@@ -839,7 +839,7 @@
 	"metadataMatching": {
 		"section": {
 			"heading": "Ausstehende Treffer",
-			"description": "Review metadata matches fetched from external providers"
+			"description": "Überprüfe Metadaten-Treffer, die von externen Anbietern abgerufen wurden"
 		},
 		"confidenceBadge": {
 			"label": "Vertrauen"
@@ -849,13 +849,13 @@
 		"fieldLocked": "Dieses Feld ist gesperrt",
 		"reviewDialog": {
 			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
+				"noCandidates": "Keine Kandidaten für diesen Eintrag verfügbar",
+				"noComparableFields": "Keine vergleichbaren Felder gefunden",
 				"headers": {
 					"field": "Feld",
 					"current": "Aktuell",
 					"external": "Extern",
-					"resolved": "Resolved"
+					"resolved": "Aufgelöst"
 				},
 				"toolbar": {
 					"candidatePosition": "Kandidat {{position}} von {{total}}",

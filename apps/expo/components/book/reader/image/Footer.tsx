@@ -487,7 +487,7 @@ export default function Footer() {
 
 	return (
 		<Animated.View
-			className="insets-x-safe bottom-safe gap-4 absolute z-20 shrink"
+			className="insets-x-safe bottom-safe gap-4 absolute z-20 w-full shrink"
 			style={[secondaryStyle, translateFooterStyle]}
 		>
 			{footerControls === 'images' && readingMode !== ReadingMode.ContinuousVertical && (

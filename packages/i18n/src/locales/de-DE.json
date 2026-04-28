@@ -686,7 +686,7 @@
 					"description": "Rufe Metadaten für die Medien in dieser Bibliothek ab",
 					"noProviders": {
 						"title": "Es sind keine Metadatenanbieter verfügbar",
-						"description": "You can configure metadata providers in the metadata integration settings"
+						"description": "Du kannst Metadaten-Anbieter in den Metadaten-Integrationseinstellungen konfigurieren"
 					},
 					"fetchButton": "Hintergrundabruf starten",
 					"fetchError": "Fehler beim Starten des Metadatenabrufs"
@@ -838,14 +838,14 @@
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "Pending matches",
+			"heading": "Ausstehende Treffer",
 			"description": "Review metadata matches fetched from external providers"
 		},
 		"confidenceBadge": {
 			"label": "Vertrauen"
 		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
+		"includeField": "Dieses Feld einschließen",
+		"excludeField": "Dieses Feld ausschließen",
 		"fieldLocked": "Dieses Feld ist gesperrt",
 		"reviewDialog": {
 			"previewEditor": {

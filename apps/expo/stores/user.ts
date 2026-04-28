@@ -8,7 +8,6 @@ import {
 	ThumbnailResizeMode,
 } from '~/components/image/ThumbnailPlaceholder'
 
-import { CachePolicy } from './reader'
 import { ZustandMMKVStorage } from './store'
 
 export const useUserStore = createUserStore(ZustandMMKVStorage)
@@ -23,7 +22,6 @@ type MobilePreferencesStore = {
 	setMaskURLs: (mask: boolean) => void
 	storeLastRead: boolean
 	reduceAnimations: boolean
-	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
 	thumbnailResizeMode: ThumbnailResizeMode
@@ -61,7 +59,6 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			setMaskURLs: (mask) => set({ maskURLs: mask }),
 			storeLastRead: false,
 			reduceAnimations: false,
-			cachePolicy: 'memory-disk',
 			allowDownscaling: true,
 			thumbnailRatio: 2 / 3,
 			thumbnailPlaceholder: 'grayscale',

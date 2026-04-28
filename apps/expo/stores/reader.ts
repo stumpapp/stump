@@ -15,16 +15,11 @@ export type DoublePageBehavior = 'auto' | 'always' | 'off'
 
 export type FooterControls = 'images' | 'slider'
 
-export type CachePolicy = 'none' | 'disk' | 'memory' | 'memory-disk'
-export const isCachePolicy = (value: string): value is CachePolicy =>
-	['none', 'disk', 'memory', 'memory-disk'].includes(value)
-
 export type BookPreferences = IBookPreferences & {
 	serverID?: string
 	incognito?: boolean
 	preferSmallImages?: boolean
 	allowDownscaling: boolean
-	cachePolicy: CachePolicy
 	doublePageBehavior: DoublePageBehavior
 	tapSidesToNavigate: boolean
 	footerControls: FooterControls
@@ -97,7 +92,6 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,
 	allowDownscaling: false,
-	cachePolicy: 'memory-disk',
 	footerControls: 'images',
 	allowPublisherStyles: true,
 	pageMargins: 1.0,

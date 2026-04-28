@@ -1,8 +1,7 @@
+import { ImageBasedBookPageRef } from '@stump/sdk'
 import { useEffect, useState } from 'react'
 
 import { useReaderStore } from '~/stores'
-
-import { ImageBasedBookPageRef } from './context'
 
 type Params = {
 	bookID: string

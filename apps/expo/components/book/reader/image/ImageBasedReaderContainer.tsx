@@ -1,6 +1,6 @@
 import { FlashListRef } from '@shopify/flash-list'
 import { ReadingMode } from '@stump/graphql'
-import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
+import { generatePageSets, ImageBasedBookPageRef, PageSetIndexes } from '@stump/sdk'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 
@@ -64,7 +64,7 @@ export default function ImageBasedReaderContainer({
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
 		const modeForceOff = readingMode === ReadingMode.ContinuousVertical
 
-		let sets: number[][] = []
+		let sets: PageSetIndexes[] = []
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
 			sets = Array.from({ length: pages }, (_, i) => [i])
 		} else {
@@ -90,7 +90,7 @@ export default function ImageBasedReaderContainer({
 		[incognito, onPageChanged],
 	)
 
-	const flashListRef = useRef<FlashListRef<number[]>>(null)
+	const flashListRef = useRef<FlashListRef<PageSetIndexes>>(null)
 
 	return (
 		<ImageBasedReaderContext.Provider

@@ -92,7 +92,7 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	imageScaling: {
 		scaleToFit: ReadingImageScaleFit.Auto,
 	},
-	doublePageBehavior: 'off',
+	doublePageBehavior: 'auto',
 	secondPageSeparate: false,
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,

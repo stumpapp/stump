@@ -1,6 +1,7 @@
 import { Zoomable, ZoomableRef } from '@likashefqet/react-native-image-zoom'
 import { FlashList, useMappingHelper } from '@shopify/flash-list'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { ImageBasedBookPageRef, PageSetIndexes } from '@stump/sdk'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NativeScrollEvent, NativeSyntheticEvent, useWindowDimensions, View } from 'react-native'
@@ -18,13 +19,7 @@ import { useDisplay, usePrevious } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
-import { PageIndexes, useImageBasedReader } from './context'
-
-type ImageDimension = {
-	height: number
-	width: number
-	ratio: number
-}
+import { useImageBasedReader } from './context'
 
 // TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
 // scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
@@ -179,8 +174,8 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 
 type PageSetProps = {
 	flashListIndex: number
-	pageIndexes: PageIndexes
-	dimensions: ImageDimension[]
+	pageIndexes: PageSetIndexes
+	dimensions: ImageBasedBookPageRef[]
 	maxWidth: number
 	maxHeight: number
 	onPastEndReached?: () => void

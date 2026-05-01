@@ -2,8 +2,9 @@ use async_graphql::SimpleObject;
 use chrono::Utc;
 use sea_orm::{
 	prelude::{async_trait::async_trait, *},
-	ActiveValue, DeriveEntityModel,
+	ActiveValue, DeriveEntityModel, FromJsonQueryResult,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::shared::readium::ReadiumLocator;
 
@@ -14,6 +15,9 @@ use crate::shared::readium::ReadiumLocator;
 // session model. considering that route, but need to think through holistically more first. in that
 // world, i also imagine something like attaching a reading_session_id fk to annotations/highlights/etc
 // so we can track that together but kept a record-level notes for satisfying the daily note aspect of the req
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct DeviceIds(pub Vec<String>);
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingJournalEntryModel")]
@@ -42,10 +46,10 @@ pub struct Model {
 	pub media_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub device_id: Option<String>,
-	// the fk to the finished_reading_session if finished book this entry, assuming not unified session approach
-	pub finished_session_id: Option<i32>, // TODO: maybe remove
+	/// all devices that contributed to this entry
+	#[graphql(skip)]
+	#[sea_orm(column_type = "Json", nullable)]
+	pub device_ids: Option<DeviceIds>,
 
 	/// the time the entry was created, but should also refer to the session start time
 	pub created_at: DateTimeWithTimeZone,

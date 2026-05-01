@@ -21,19 +21,34 @@
 //      latest_session = reading_session::find(user_id = user.id, media_id = media_id).order_desc(updated_at)
 //
 //      match latest_session:
-//          exists and should_extend_session(session, locical_today):
-//              # update session with pretty much same logic as today, but i guess elapsed_seconds would
-//              # become a delta? since many session comprise a single read in this world... that feels tricky,
-//              # more complex to maintain. if server maintains a delta, client would send.. what? i guess the total total,
-//              # and we diff with last session to get it?
+//          exists and should_extend_session(session, logical_today, grace_period):
+//              # client sends elapsed_seconds_delta (time spent on location before change) -> server accumulates
+//              # device does not matter, all go towards culminating time
+//              session.elapsed_seconds += input.elapsed_seconds_delta.unwrap_or(0).max(0)
+//
+//              session.end_page = input.page
+//              session.end_locator = input.locator
+//              session.end_percentage = input.percentage
+//              session.updated_at = now()
 //
 //              if input.is_completed:
-//                 session.is_completed = true
+//                  session.is_completed = true
+//
+//              # would need to handle device_id here too
 //
 //              update(session)
 //
 //          else:
-//            # create new session with input
+//              # new logical day (or first ever session for this book).
+//              # the delta from the client is the initial elapsed
+//              create session with:
+//                  session_date    = logical_today
+//                  start_page      = input.page
+//                  start_locator   = input.locator
+//                  start_percentage = input.percentage
+//                  elapsed_seconds = input.elapsed_seconds_delta.unwrap_or(0).max(0)
+//                  is_completed    = input.is_completed
+//                  device_ids      = [input.device_id] if input.device_id else []
 //
 //
 // # this is a fucky one for me, i don't know how i want to collect the user timezone since i don't want to force
@@ -49,11 +64,16 @@
 //      if session.is_completed:
 //          return false
 //
-//      # maybe default to 0 if session.ended_at is null?
-//      secs_since_last_update = secs(now() - session.updated_at)
+//      if session.session_date != logical_date:
+//          return false
 //
-//      if  secs_since_last_update <= grace_period_secs:
-//          return true
+//      # updated_at is null only on a brand-new insert that hasn't been touched yet
+//      # treat that as 0 seconds since last update (i.e. always extend)
+//      secs_since_last_update = match session.updated_at:
+//          Some(t) => secs(now() - t)
+//          None    => 0
+//
+//      return secs_since_last_update <= grace_period_secs
 
 // oh also if we unify things, do we even both with an opt-in for journaling? maybe if folks are
 // really against seeing references to it on the ui for whatever reason, but otherwise in this

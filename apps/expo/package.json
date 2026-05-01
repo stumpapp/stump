@@ -56,7 +56,7 @@
 		"date-fns": "^4.1.0",
 		"drizzle-orm": "^0.44.6",
 		"expo": "^55.0.11",
-		"expo-application": "~55.0.12",
+		"expo-application": "~55.0.14",
 		"expo-asset": "~55.0.12",
 		"expo-auth-session": "~55.0.12",
 		"expo-blur": "^55.0.14",

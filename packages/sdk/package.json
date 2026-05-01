@@ -17,7 +17,7 @@
 		"@types/qs": "^6.9.14",
 		"fast-xml-parser": "^5.3.4",
 		"jest": "^30.3.0",
-		"ts-essentials": "^10.0.2",
+		"ts-essentials": "^10.2.0",
 		"typescript": "^5.4.5"
 	},
 	"dependencies": {

@@ -252,11 +252,9 @@ async fn set_series_completed(
 				),
 			),
 		)
+		.into_tuple::<String>()
 		.all(&tx)
-		.await?
-		.into_iter()
-		.map(|m| m.id)
-		.collect::<Vec<String>>();
+		.await?;
 
 	tracing::debug!(
 		count = book_ids_without_completion.len(),

@@ -240,7 +240,8 @@ async fn set_series_completed(
 		.column(media::Column::Id)
 		.filter(
 			media::Column::SeriesId.eq(series.series.id.clone()).and(
-				media::Column::Id.in_subquery(
+				// to get books WITHOUT completion means they do not have a finished_reading_session
+				media::Column::Id.not_in_subquery(
 					Query::select()
 						.column(finished_reading_session::Column::MediaId)
 						.from(finished_reading_session::Entity)
@@ -256,9 +257,10 @@ async fn set_series_completed(
 		.into_iter()
 		.map(|m| m.id)
 		.collect::<Vec<String>>();
+
 	tracing::debug!(
 		count = book_ids_without_completion.len(),
-		"Fetched unread/incomplete books for series"
+		"Fetched unread books within series"
 	);
 
 	let deleted_sessions = reading_session::Entity::delete_many()

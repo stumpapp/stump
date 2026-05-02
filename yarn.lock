@@ -5466,7 +5466,7 @@
     "@radix-ui/react-separator" "1.1.7"
     "@radix-ui/react-toggle-group" "1.1.11"
 
-"@radix-ui/react-tooltip@^1.0.7", "@radix-ui/react-tooltip@^1.1.2":
+"@radix-ui/react-tooltip@^1.0.7", "@radix-ui/react-tooltip@^1.2.8":
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-tooltip/-/react-tooltip-1.2.8.tgz#3f50267e25bccfc9e20bb3036bfd9ab4c2c30c2c"
   integrity sha512-tY7sVt1yL9ozIxvmbtN5qtmH2krXcBCfjEiCgKGLqunJHvgvZG2Pcl2oQ3kbcZARb1BGEHdkLzcYGO8ynVlieg==
@@ -6022,13 +6022,6 @@
     "@rn-primitives/types" "1.2.0"
     "@rn-primitives/utils" "1.2.0"
 
-"@rn-primitives/hooks@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@rn-primitives/hooks/-/hooks-1.1.0.tgz#2ab58a3d444c1d1d0f47a5e92e91e03cebbdfa39"
-  integrity sha512-+WP4i395UDXZueL6PE0PiyLgheD4EbZ0ONgVaHjbrWjGKalfXuCyVNeaN79y3Aw9sY+SYQm7P9RckBAgi0C5xQ==
-  dependencies:
-    "@rn-primitives/types" "1.1.0"
-
 "@rn-primitives/hooks@1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@rn-primitives/hooks/-/hooks-1.3.0.tgz#5e6ad5a96b520582b3a896581651064ea2292de8"
@@ -6077,11 +6070,6 @@
     "@rn-primitives/slot" "1.2.0"
     "@rn-primitives/types" "1.2.0"
 
-"@rn-primitives/slot@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.1.0.tgz#954086820fa71ddcda948e5b2b34c0bfa1cad4d4"
-  integrity sha512-/6LkEPMoGGyJiCAYo3MTCy9letbH6SIm5Dw6wal/ypq3Jvar9llYJstIP2KSZNhx3PmZMN1a581KVgNZ2Jyt5g==
-
 "@rn-primitives/slot@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.2.0.tgz#54f757cb324cbf4670b81456526ae60e723ec6e4"
@@ -6110,20 +6098,15 @@
     "@rn-primitives/slot" "1.4.0"
     "@rn-primitives/types" "1.4.0"
 
-"@rn-primitives/tooltip@~1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@rn-primitives/tooltip/-/tooltip-1.1.0.tgz#76ff5bc13ce6039fd73f3b09de05224eaa1c6e98"
-  integrity sha512-uNMLCqDOueYv2//nh19RiYqYRdytn86K+2rmBStz1u7PFbsqfUJE1Q3FxKm/yvFXK2loHJAoHkzRQCClqA3InA==
+"@rn-primitives/tooltip@~1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rn-primitives/tooltip/-/tooltip-1.4.0.tgz#05eeb3f2902e3caf6393a811003887a08f15243c"
+  integrity sha512-h49JLogVyroRB8ebSAVXuR3Wf6maDw/bFMB/PkvgKupuFxDXhTK1X26dcH9MvmwG6QQ/8kzjamQneqAhu9Cfsg==
   dependencies:
-    "@radix-ui/react-tooltip" "^1.1.2"
-    "@rn-primitives/hooks" "1.1.0"
-    "@rn-primitives/slot" "1.1.0"
-    "@rn-primitives/types" "1.1.0"
-
-"@rn-primitives/types@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@rn-primitives/types/-/types-1.1.0.tgz#2b7b0c2599dfe46329867d570f6ba8d0608f9843"
-  integrity sha512-duS4La965KsVVAeytcSFDJUafw6ZScvejgxlFkwqzW06pDBRMxwfunmZmf3JZ82P/2xaEVPIGseeyblertC/+g==
+    "@radix-ui/react-tooltip" "^1.2.8"
+    "@rn-primitives/hooks" "1.4.0"
+    "@rn-primitives/slot" "1.4.0"
+    "@rn-primitives/types" "1.4.0"
 
 "@rn-primitives/types@1.2.0":
   version "1.2.0"

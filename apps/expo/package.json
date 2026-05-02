@@ -43,7 +43,7 @@
 		"@rn-primitives/slot": "^1.2.0",
 		"@rn-primitives/switch": "^1.1.0",
 		"@rn-primitives/tabs": "^1.4.0",
-		"@rn-primitives/tooltip": "~1.1.0",
+		"@rn-primitives/tooltip": "~1.4.0",
 		"@rn-primitives/types": "^1.1.0",
 		"@sentry/react-native": "~7.11.0",
 		"@shopify/flash-list": "=2.1.0",

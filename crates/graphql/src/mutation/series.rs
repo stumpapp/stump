@@ -13,11 +13,14 @@ use sea_orm::{
 	ActiveValue::Set,
 	QuerySelect, TransactionTrait,
 };
-use stump_core::filesystem::{
-	image::{generate_book_thumbnail, GenerateThumbnailOptions},
-	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
-};
 use stump_core::job::stump_job::StumpJob;
+use stump_core::{
+	database::SQLITE_BIND_LIMIT,
+	filesystem::{
+		image::{generate_book_thumbnail, GenerateThumbnailOptions},
+		media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
+	},
+};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -287,7 +290,7 @@ async fn set_series_completed(
 		.collect::<std::collections::HashMap<_, _>>();
 
 	let now = DateTimeWithTimeZone::from(Utc::now());
-	let finished_sessions = book_ids_without_completion
+	let finished_sessions_chunks = book_ids_without_completion
 		.into_iter()
 		.map(|media_id| {
 			let prior = session_map.get(&media_id);
@@ -302,13 +305,14 @@ async fn set_series_completed(
 			}
 		})
 		.collect::<Vec<finished_reading_session::ActiveModel>>();
-
-	if !finished_sessions.is_empty() {
-		let count = finished_sessions.len();
-		let _ = finished_reading_session::Entity::insert_many(finished_sessions)
-			.exec(&tx)
-			.await?;
-		tracing::debug!(count, "Inserted finished reading sessions for series");
+	if !finished_sessions_chunks.is_empty() {
+		for chunk in finished_sessions_chunks.chunks(SQLITE_BIND_LIMIT) {
+			let count = chunk.len();
+			let _ = finished_reading_session::Entity::insert_many(chunk.to_vec())
+				.exec(&tx)
+				.await?;
+			tracing::debug!(count, "Inserted finished reading sessions for series");
+		}
 	} else {
 		tracing::debug!("No books to mark as finished in series");
 	}

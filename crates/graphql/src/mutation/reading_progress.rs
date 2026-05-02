@@ -79,3 +79,70 @@
 // really against seeing references to it on the ui for whatever reason, but otherwise in this
 // hypothetical world we are solidifying it as a core bit so can't opt out of that. don't have to
 // wrote notes if you don't wanna
+
+// more brainstorming after chats:
+// - multiple sessions a day in order to support "read 10 pages on iPhone" then "read 20 pages on iPad" in some timeline view
+//  - unbounded, no more keyed to e.g. (device_id, logical_day, book_id, user_id)
+//  - prolly index on logical_day though for grouping, precise timestamps for ordering within and mixing with annotations
+// - potentially break out notes as daily_journal_entry keyed to (user_id, media_id, logical_day)
+//  - could also keep notes on a per-session basis but might be too many options to juggle. also, exiting the reader != session end,
+//    so presenting it wouldn't even be clear or intuitive.
+// - grace period to serve two purposes:
+//     1. the session cutoff -> if you exceed that time without an update, you have to start a new session (even if same logical day)
+//     2. logical day extender -> if you read past your reset hour but within that window, you're still on the previous logical day
+// - merging support? outside of wanting to manually override the logical_date of a session or something, not sure how it would be used.
+//   at least not in this world where (see below) i drafted a separate daily_journal_entry for the notes
+//
+// data models
+//
+// reading_session (replace reading_session + finished_reading_session)
+// - id
+// - started_at / updated_at / etc
+//
+// - start_page / end_page
+// - start_locator / end_locator -> (readium for epubs, null for paged)
+// - start_percentage / end_percentage
+// - elapsed_seconds -> (via deltas in inputs)
+// - device_id
+// - is_completed
+// - readthrough_number
+// - logical_day -> (via calculate_logical_date)
+//
+// - media_id / user_id
+// - etc etc
+//
+// daily_journal_entry
+// - id
+// - note
+// - logical_day -> unique per (user_id, media_id, logical_day)
+// - media_id / user_id
+// - created_at / updated_at
+//
+// ^ notes are written after the fact so timestamps irrelevant, maybe present last date with progress but no
+// journal entry? idk
+// ^^ or, maybe just leave it unbounded? can have any number of entries per day? hm.
+//
+// reading_device
+// - id
+// - name
+// - user_id -> unique per (user_id, name)
+// - created_at / updated_at
+//
+// ^ shared devices? maybe rm user_id? user_ids? idk
+//
+// code flow (diff):
+//
+// fn should_extend_session(session, grace_period_secs):
+//      if session.is_completed:
+//          return false
+//
+//      secs_since_last_update = match session.updated_at:
+//          Some(t) => secs(now() - t)
+//          None    => 0
+//
+//      return secs_since_last_update <= grace_period_secs
+//
+//
+// none of this set in stone yet!
+//
+// note for self: would impact kobo sync! see MediaWithMetadataAndReadingSessions

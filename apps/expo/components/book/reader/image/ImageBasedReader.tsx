@@ -1,7 +1,7 @@
 import { Zoomable, ZoomableRef } from '@likashefqet/react-native-image-zoom'
 import { FlashList, useMappingHelper } from '@shopify/flash-list'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
-import { ImageBasedBookPageRef, PageSetIndexes } from '@stump/sdk'
+import { PageSetIndexes } from '@stump/sdk'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NativeScrollEvent, NativeSyntheticEvent, useWindowDimensions, View } from 'react-native'
@@ -40,15 +40,8 @@ type Props = {
  * A reader for books that are image-based, where each page should be displayed as an image
  */
 export default function ImageBasedReader({ initialPage, onPastEndReached }: Props) {
-	const {
-		book,
-		imageSizes = {},
-		onPageChanged,
-		pageSets,
-		currentPage,
-		flashListRef,
-		serverId,
-	} = useImageBasedReader()
+	const { book, onPageChanged, pageSets, currentPage, flashListRef, serverId } =
+		useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito, readingDirection, doublePageBehavior },
 	} = useBookPreferences({ book, serverId })
@@ -130,7 +123,6 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 					<PageSet
 						flashListIndex={index}
 						pageIndexes={item}
-						dimensions={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
 						maxWidth={width}
 						maxHeight={height}
 						onPastEndReached={onPastEndReached}
@@ -175,7 +167,6 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 type PageSetProps = {
 	flashListIndex: number
 	pageIndexes: PageSetIndexes
-	dimensions: ImageBasedBookPageRef[]
 	maxWidth: number
 	maxHeight: number
 	onPastEndReached?: () => void
@@ -185,8 +176,7 @@ type PageSetProps = {
 const PageSet = React.memo(
 	({
 		flashListIndex,
-		pageIndexes,
-		dimensions,
+		pageIndexes: unresolvedPageIndexes,
 		maxWidth,
 		maxHeight,
 		onPastEndReached,
@@ -197,7 +187,7 @@ const PageSet = React.memo(
 			pageURL,
 			flashListRef,
 			pageSets,
-			imageSizes,
+			imageSizes = {},
 			setImageSizes,
 			requestHeaders,
 			serverId,
@@ -215,6 +205,9 @@ const PageSet = React.memo(
 		const tapThresholdRatio = isTablet ? 4 : 5
 
 		const zoomableRef = useRef<ZoomableRef>(null)
+
+		const isRtl = readingDirection === ReadingDirection.Rtl
+		const pageIndexes = isRtl ? [...unresolvedPageIndexes].reverse() : unresolvedPageIndexes
 
 		useEffect(() => {
 			zoomableRef.current?.reset()
@@ -269,30 +262,27 @@ const PageSet = React.memo(
 		)
 
 		const onImageLoaded = useCallback(
-			(event: NativeSyntheticEvent<Success>, i: 0 | 1) => {
+			(event: NativeSyntheticEvent<Success>, pageIndex: number) => {
 				const { height, width } = event.nativeEvent
 				if (!height || !width) return
 				const ratio = width / height
 
-				const pageSize = dimensions[i]
-				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
-				if (isDifferent) {
-					setImageSizes((prev) => {
-						const pageIndex = pageIndexes[i]
-						if (pageIndex == null) return prev
-						prev[pageIndex] = { height, width, ratio }
-						return prev
-					})
-				}
+				setImageSizes((prev) => {
+					const prevSize = prev[pageIndex]
+					const isDifferent =
+						prevSize?.height !== height || prevSize?.width !== width || prevSize?.ratio !== ratio
+
+					if (isDifferent) {
+						return { ...prev, [pageIndex]: { height, width, ratio } }
+					}
+					return prev
+				})
 			},
-			[setImageSizes, dimensions, pageIndexes],
+			[setImageSizes],
 		)
 
 		const imageRatios = pageIndexes.map((pageIndex) => imageSizes?.[pageIndex]?.ratio)
 		const roughPageRenderWidth = pageIndexes.length > 1 ? maxWidth / 2 : maxWidth
-
-		const isRtl = readingDirection === ReadingDirection.Rtl
-		const directionRespectingPageIndexes = isRtl ? [...pageIndexes].reverse() : pageIndexes
 
 		return (
 			<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
@@ -325,7 +315,7 @@ const PageSet = React.memo(
 							width: maxWidth,
 						}}
 					>
-						{directionRespectingPageIndexes.map((pageIndex, i) => {
+						{pageIndexes.map((pageIndex, i) => {
 							const imageRatio = imageRatios[i]
 
 							return (
@@ -345,7 +335,7 @@ const PageSet = React.memo(
 									}}
 									resizeMode="contain"
 									resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
-									onSuccess={(event) => onImageLoaded(event, i as 0 | 1)}
+									onSuccess={(event) => onImageLoaded(event, pageIndex)}
 								/>
 							)
 						})}

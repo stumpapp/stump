@@ -90,8 +90,14 @@
 // - grace period to serve two purposes:
 //     1. the session cutoff -> if you exceed that time without an update, you have to start a new session (even if same logical day)
 //     2. logical day extender -> if you read past your reset hour but within that window, you're still on the previous logical day
-// - merging support? outside of wanting to manually override the logical_date of a session or something, not sure how it would be used.
-//   at least not in this world where (see below) i drafted a separate daily_journal_entry for the notes
+// - grouping/merging as a ui thing only, not at data model level (it'll store timestamps and logical_date for easy grouping but not enforce it?)
+//
+// remaining questions in my mind:
+// - daily_journal_entry as a separate model (one note per logical day) vs notes per session
+//      - separate model enforces one per day, simpler ux for that kinda thing
+//          - also makes "reminders" easier if a user opts into some kind of daily journal thing (e.g. "hey you made X progress yesterday but didn't write a note, wanna jot something down?")
+//            at same time tho i don't see it as a notification necessarily but like an option in ellipsis menu or smth idk
+//      - notes per session more flexible and reflective-focused which i like but ux is not clear to me yet (e.g. exit reader != done reading)
 //
 // data models
 //
@@ -111,7 +117,7 @@
 // - media_id / user_id
 // - etc etc
 //
-// daily_journal_entry
+// daily_journal_entry (TODO: keep this or allow notes per session instead?)
 // - id
 // - note
 // - logical_day -> unique per (user_id, media_id, logical_day)
@@ -128,12 +134,57 @@
 // - user_id -> unique per (user_id, name)
 // - created_at / updated_at
 //
-// ^ shared devices? maybe rm user_id? user_ids? idk
+// ^ realizing i already ahve registered_reading_devices, it isn't used so safe to do away with and rename etc
+// i don't think user_id is as important coming back to this
 //
-// code flow (diff):
+// code flow:
 //
-// fn should_extend_session(session, grace_period_secs):
+// fn update_reading_progress(ctx, book_id, input):
+//      user_prefs = user_preferences::find(user.id = user.id)
+//      grace_period = user_prefs.reading_session_grace_period_secs
+//      logical_today = calculate_logical_date(now(), prefs.reading_session_reset_day_offset)
+//
+//      latest_session = reading_session::find(user_id = user.id, media_id = media_id).order_desc(updated_at)
+//
+//      match latest_session:
+//          exists and should_extend_session(session, grace_period, input.device_id):
+//              session.elapsed_seconds += input.elapsed_seconds_delta.unwrap_or(0).max(0)
+//              session.end_page       = input.page
+//              session.end_locator    = input.locator
+//              session.end_percentage = input.percentage
+//              session.updated_at     = now()
+//              # device_id intentionally not updated — session belongs to the device that created it
+//
+//              if input.is_completed:
+//                  session.is_completed = true
+//
+//              update(session)
+//
+//          else:
+//              # grace period elapsed, different device, or first session for this book
+//              create session with:
+//                  started_at       = now()
+//                  logical_day      = logical_today
+//                  start_page       = input.page
+//                  start_locator    = input.locator
+//                  start_percentage = input.percentage
+//                  elapsed_seconds  = input.elapsed_seconds_delta.unwrap_or(0).max(0)
+//                  is_completed     = input.is_completed
+//                  device_id        = input.device_id
+//                  # this one a little fuzzy, and honestly part of me doesn't think this is any easier
+//                  # than just having a dedicated reading_history table to track this historical info
+//                  # it mostly just makes displaying in a timeline slightly easier since one model to pull from
+//                  # concretely tho in this world it'd just be MAX(reading_session.readthrough_number) + 1 for the user/book combo
+//                  # which isn't terrible so im waffling about potentially nothing its fine its fine
+//                  readthrough_number = derive_readthrough_number(user.id, media_id)
+//
+//
+// fn should_extend_session(session, grace_period_secs, device_id):
 //      if session.is_completed:
+//          return false
+//
+//      # diff device = diff reading session imo but open to discussion
+//      if session.device_id != device_id:
 //          return false
 //
 //      secs_since_last_update = match session.updated_at:
@@ -142,7 +193,33 @@
 //
 //      return secs_since_last_update <= grace_period_secs
 //
+// fn derive_readthrough_number(user_id, media_id):
+//    latest = reading_session::find(user_id = user_id, media_id = media_id).order_desc(readthrough_number).first()
+//    return match latest:
+//      Some(s) => s.readthrough_number + 1
+//      None    => 1
+//
 //
 // none of this set in stone yet!
 //
 // note for self: would impact kobo sync! see MediaWithMetadataAndReadingSessions
+//
+// useBookTimer notes:
+// - currently operates as totalSeconds, need to shift to delta for reporting to server but retain totalSeconds for display
+// - bookTimers is currently Record<bookId, ElapsedSeconds> with no session awareness for determining deltas. not rly sure
+//   best approach for this yet
+// - will likely need a ref for last sync to compute delta tho
+//
+// offline compounding complexity:
+// - i think single session is fine for offline, it cannot follow server rules for non-stump servers anyways
+// - potential for staleness, e.g. read in am offline, read in pm offline, sync next day. what happens?
+//      - (a) include e.g. reading_started_at in the push payload? so server uses that instead of now()
+//      - (b) accept offline reading always just creates a new session on sync
+//
+// other thoughts:
+// - read_progress resolver could potentially return an aggregate struct representing effectively the same as it does today?
+//     - e.g. total_elapsed_seconds, last_page, last_locator, etc merged from all sessions for that user/book combo for the current readthrough
+//     - keeps client change overhead smaller, ideal. can't get around delta stuff tho
+// - read_history resolver could either return all finished sessions (per above) or if decided to keep them as separate historical model or w/e
+// - reading_sessions resolvever would be new and return the granular shit for timeline views and whatnot, either grouping on ui or exposing
+//   some knob for adding a group_by clause in query?

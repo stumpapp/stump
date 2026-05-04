@@ -202,7 +202,13 @@
 //
 // none of this set in stone yet!
 //
-// note for self: would impact kobo sync! see MediaWithMetadataAndReadingSessions
+// note for self: would impact kobo sync! see MediaWithMetadataAndReadingSessions:
+// - apply_reading_session_joins -> in the new world need to either subquery for the latest session
+//   before joining or do a separate query. prolly the latter is cleaner?
+// - finished_reading_session_count -> MAX(readthrough_number) WHERE is_completed = true
+// - finished_reading_session_last_completed_at -> MAX(updated_at) WHERE is_completed = true
+// - reading state logic is still basically the same but would need to update query to pull just latest session
+// - times_started_reading -> MAX(readthrough_number)
 //
 // useBookTimer notes:
 // - currently operates as totalSeconds, need to shift to delta for reporting to server but retain totalSeconds for display

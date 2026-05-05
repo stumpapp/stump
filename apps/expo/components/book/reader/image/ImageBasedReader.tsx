@@ -251,7 +251,9 @@ const PageSet = React.memo(
 					return
 				}
 
-				const didNavigate = onCheckForNavigationTaps(event.x)
+				// event.absoluteX vs event.x bc event.x is the coordinate on the image not the screen. so
+				// if e.g. zoomed in, event.x could be in the middle of the image but the user actually an edge
+				const didNavigate = onCheckForNavigationTaps(event.absoluteX)
 				if (didNavigate) {
 					zoomableRef.current?.reset()
 				} else {

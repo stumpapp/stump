@@ -9,7 +9,7 @@ import BackLink from '~/components/BackLink'
 import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
-import { usePreferencesStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
@@ -26,6 +26,7 @@ export default function ReadiumHeader() {
 
 	const { secondaryStyle, primaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
+	const controlsShown = useReaderStore((state) => state.showControls)
 	const { chapterTitle, progressText } = useChapterProgress()
 
 	return (
@@ -52,6 +53,7 @@ export default function ReadiumHeader() {
 			<Animated.View
 				className="inset-x-safe h-12 gap-2 px-4 absolute z-20 flex-row items-center justify-between"
 				style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
+				pointerEvents={controlsShown ? undefined : 'none'}
 			>
 				<View className="gap-4 flex-row items-center">
 					<BackLink

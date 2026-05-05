@@ -43,6 +43,10 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
+	core.init_jwt_secrets()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
 	core.init_journal_mode()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;

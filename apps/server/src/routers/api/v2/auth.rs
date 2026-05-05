@@ -465,7 +465,7 @@ async fn refresh_token(
 
 	if auth_header.starts_with("Bearer ") {
 		let token = auth_header.trim_start_matches("Bearer ").to_string();
-		let jti = extract_jti_from_refresh_token(&token)?;
+		let jti = extract_jti_from_refresh_token(&token, state.conn.as_ref()).await?;
 		let jwt_pair = exchange_refresh_token(&jti, state).await?;
 		return Ok(Json(jwt_pair));
 	}

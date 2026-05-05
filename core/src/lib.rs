@@ -41,6 +41,8 @@ use crate::database::JournalMode;
 type JournalModeChanged = bool;
 /// A type alias strictly for explicitness in the return type of `init_encryption`.
 type EncryptionKeySet = bool;
+/// A type alias strictly for explicitness in the return type of `init_jwt_secrets`.
+type JwtSecretsInitialized = bool;
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump
 /// applications. It is responsible for managing incoming tasks ([`InternalCoreTask`]),
@@ -172,6 +174,48 @@ impl StumpCore {
 			tracing::trace!(affected_rows, "Updated encryption key");
 			if affected_rows > 1 {
 				tracing::warn!("More than one encryption key was updated? This is definitely not expected");
+			}
+			Ok(affected_rows > 0)
+		}
+	}
+
+	/// Initializes the JWT secrets into the database
+	#[tracing::instrument(skip(self), err)]
+	pub async fn init_jwt_secrets(&self) -> Result<JwtSecretsInitialized, CoreError> {
+		let conn = self.ctx.conn.as_ref();
+
+		let jwt_secrets_set = server_config::Entity::find()
+			.select_only()
+			.select_column(server_config::Column::JwtAccessSecret)
+			.select_column(server_config::Column::JwtRefreshSecret)
+			.into_model::<server_config::JwtSecretsSelect>()
+			.one(conn)
+			.await?
+			.is_some_and(|config| {
+				config.jwt_access_secret.is_some() && config.jwt_refresh_secret.is_some()
+			});
+		tracing::trace!(jwt_secrets_set, "JWT secrets set");
+
+		if jwt_secrets_set {
+			Ok(false)
+		} else {
+			let jwt_access_secret = utils::encryption::create_encryption_key()?;
+			let jwt_refresh_secret = utils::encryption::create_encryption_key()?;
+			let affected_rows = server_config::Entity::update_many()
+				.col_expr(
+					server_config::Column::JwtAccessSecret,
+					Expr::value(Some(jwt_access_secret)),
+				)
+				.col_expr(
+					server_config::Column::JwtRefreshSecret,
+					Expr::value(Some(jwt_refresh_secret)),
+				)
+				.exec(conn)
+				.await?
+				.rows_affected;
+			tracing::trace!(affected_rows, "Updated JWT secrets");
+			if affected_rows > 1 {
+				tracing::warn!("More than one JWT secrets row was updated? This is definitely not expected");
 			}
 			Ok(affected_rows > 0)
 		}

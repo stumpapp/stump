@@ -15,6 +15,8 @@ pub enum CoreError {
 	EntityBuilderError(#[from] UninitializedFieldError),
 	#[error("Encryption key must be set")]
 	EncryptionKeyNotSet,
+	#[error("JWT secrets must be set")]
+	JwtSecretsNotSet,
 	#[error("Failed to encrypt: {0}")]
 	EncryptionFailed(String),
 	#[error("Failed to decrypt: {0}")]

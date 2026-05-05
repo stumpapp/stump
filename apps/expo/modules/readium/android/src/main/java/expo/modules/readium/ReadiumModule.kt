@@ -76,7 +76,7 @@ class ReadiumModule : Module() {
                 view.goBackward()
             }
 
-            AsyncFunction("goToLocation") { view: EPUBView, locatorMap: Map<String, Any> ->
+            AsyncFunction("goToLocation") { view: EPUBView, locatorMap: Map<String, Any?> ->
                 val navigator = view.navigator ?: return@AsyncFunction
                 val jsonLocator = JSONObject(locatorMap)
                 val locator = Locator.fromJSON(jsonLocator) ?: throw Exception("Failed to parse locator from JSON")
@@ -116,7 +116,7 @@ class ReadiumModule : Module() {
                     view.goBackward()
                 }
 
-                AsyncFunction("goToLocation") { view: EPUBView, locatorMap: Map<String, Any> ->
+                AsyncFunction("goToLocation") { view: EPUBView, locatorMap: Map<String, Any?> ->
                     Log.d("ReadiumModule", "goToLocation called with locatorMap: $locatorMap")
                     val navigator = view.navigator ?: return@AsyncFunction
                     Log.d("ReadiumModule", "Navigator found: $navigator")

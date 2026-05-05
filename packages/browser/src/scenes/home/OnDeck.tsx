@@ -27,6 +27,9 @@ const OnDeckBookFragment = graphql(`
 		seriesPosition
 		series {
 			mediaCount
+			metadata {
+				totalIssues
+			}
 		}
 		thumbnail {
 			url
@@ -176,9 +179,15 @@ const OnDeckBookCard = memo(function OnDeckBookCard({ fragment, cardWidth }: OnD
 	const seriesPosition = Number(data.metadata?.number) || data.seriesPosition
 	// If seriesPosition is fractional, we show "Book X in series"
 	// If it's an integer, we show "Book X of Y"
-	// If the integer is more than the total mediaCount, we fallback to "Book X in series"
+	// If the integer is more than the total count, we fallback to "Book X in series"
 	const isFractional = !Number.isInteger(seriesPosition)
-	const showOfY = !!seriesPosition && !isFractional && seriesPosition <= data.series.mediaCount
+	const totalIssues = data.series?.metadata?.totalIssues
+	const showOfY =
+		!!seriesPosition &&
+		!isFractional &&
+		totalIssues != null &&
+		totalIssues > 0 &&
+		seriesPosition <= totalIssues
 
 	return (
 		<Link
@@ -217,7 +226,7 @@ const OnDeckBookCard = memo(function OnDeckBookCard({ fragment, cardWidth }: OnD
 						}}
 					>
 						{showOfY
-							? `Book ${seriesPosition} of ${data.series?.mediaCount}`
+							? `Book ${seriesPosition} of ${totalIssues}`
 							: `Book ${seriesPosition} in series`}
 					</Text>
 				)}

@@ -21,16 +21,16 @@ const decodeHtmlEntities = (str: string): string =>
  * If integer, shows "Book X of Y"
  *
  * @param position The position of the book in the series
- * @param totalBooks The total number of books in the series
+ * @param totalBooks The total number of books in the series, derived from series_metadata.total_issues
  */
 export const formatSeriesPosition = (
 	position: number | null | undefined,
-	totalBooks: number,
+	totalBooks: number | null | undefined,
 	params?: FormatSeriesPositionParams,
 ): string | null => {
 	if (position == null) return null
 	const isFractional = !Number.isInteger(position)
-	const showOfY = !isFractional && position <= totalBooks
+	const showOfY = !isFractional && totalBooks != null && totalBooks > 0 && position <= totalBooks
 
 	const primaryClause = showOfY ? `${position} of ${totalBooks}` : `${position}`
 

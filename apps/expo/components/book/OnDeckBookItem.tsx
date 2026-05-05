@@ -37,6 +37,9 @@ const fragment = graphql(`
 		series {
 			resolvedName
 			mediaCount
+			metadata {
+				totalIssues
+			}
 		}
 	}
 `)
@@ -77,7 +80,7 @@ function OnDeckBookItem({ book }: Props) {
 
 	const seriesPosition = formatSeriesPosition(
 		Number(data.metadata?.number) || data.seriesPosition,
-		data.series.mediaCount,
+		data.series.metadata?.totalIssues ?? null,
 		{
 			seriesName: data.series.resolvedName,
 		},
@@ -105,9 +108,9 @@ function OnDeckBookItem({ book }: Props) {
 						}
 					/>
 
-					<View className="absolute bottom-0 z-20 w-full gap-1 p-2">
+					<View className="bottom-0 gap-1 p-2 absolute z-20 w-full">
 						<Text
-							className="flex-1 flex-wrap text-lg font-semibold leading-5"
+							className="text-lg font-semibold leading-5 flex-1 flex-wrap"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,
@@ -122,7 +125,7 @@ function OnDeckBookItem({ book }: Props) {
 
 						{seriesPosition != null && (
 							<Text
-								className="flex-1 flex-wrap text-sm font-medium tablet:text-base"
+								className="text-sm font-medium tablet:text-base flex-1 flex-wrap"
 								style={{
 									textShadowOffset: { width: 2, height: 1 },
 									textShadowRadius: 2,

@@ -107,6 +107,9 @@ const query = graphql(`
 				id
 				resolvedName
 				mediaCount
+				metadata {
+					totalIssues
+				}
 			}
 			library {
 				id
@@ -213,7 +216,7 @@ export default function Screen() {
 	const seriesName = book.metadata?.series || book.series.resolvedName
 	const seriesPosition = formatSeriesPosition(
 		(Number(book.metadata?.number) || book.seriesPosition) ?? null,
-		book.series.mediaCount,
+		book.series.metadata?.totalIssues ?? null,
 		{
 			seriesName,
 		},

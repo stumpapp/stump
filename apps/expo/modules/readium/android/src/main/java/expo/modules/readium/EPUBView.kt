@@ -4,13 +4,21 @@ package expo.modules.readium
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.Outline
 import android.graphics.PointF
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
+import android.os.Build
 import android.util.Log
 import android.view.View
+import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
-import android.widget.PopupMenu
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.fragment.app.FragmentActivity
@@ -21,29 +29,29 @@ import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import kotlinx.coroutines.*
 import org.readium.r2.navigator.DecorableNavigator
+import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.epub.EpubPreferences
+import org.readium.r2.navigator.input.InputListener
+import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.preferences.ColumnCount
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.preferences.ImageFilter
-import org.readium.r2.navigator.preferences.TextAlign
 import org.readium.r2.navigator.preferences.ReadingProgression
-import org.readium.r2.navigator.epub.EpubNavigatorFragment
-import org.readium.r2.navigator.epub.EpubPreferences
+import org.readium.r2.navigator.preferences.TextAlign
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.extensions.toMap
-import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.AbsoluteUrl
-import org.readium.r2.navigator.input.InputListener
-import org.readium.r2.navigator.input.TapEvent
-import org.readium.r2.shared.publication.Link
 import java.net.URL
 
 data class DecorationItem(
     val id: String,
     @ColorInt val color: Int,
-    val locator: Locator
+    val locator: Locator,
 )
 
 data class Props(
@@ -72,7 +80,7 @@ data class Props(
     var ligatures: Boolean? = null,
     var textNormalization: Boolean? = null,
     var verticalText: Boolean? = null,
-    var decorations: List<DecorationItem>? = null
+    var decorations: List<DecorationItem>? = null,
 )
 
 data class FinalizedProps(
@@ -100,13 +108,16 @@ data class FinalizedProps(
     val ligatures: Boolean?,
     val textNormalization: Boolean?,
     val verticalText: Boolean?,
-    val decorations: List<DecorationItem>
+    val decorations: List<DecorationItem>,
 )
 
 @SuppressLint("ViewConstructor", "ResourceType")
-class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, appContext),
-    EpubNavigatorFragment.Listener, DecorableNavigator.Listener {
-
+class EPUBView(
+    context: Context,
+    appContext: AppContext,
+) : ExpoView(context, appContext),
+    EpubNavigatorFragment.Listener,
+    DecorableNavigator.Listener {
     // Required for proper layout! Forces Expo to
     // use the Android layout system for this view,
     // rather than React Native's. Without this,
@@ -134,24 +145,27 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     var navigator: EpubNavigatorFragment? = null
     private var publication: Publication? = null
     private var changingResource = false
-    
+
     private val highlightDecorationGroup = "highlights"
 
     val pendingProps = Props()
     var props: FinalizedProps? = null
 
-    private val placeholderView = TextView(context).apply {
-        layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = android.view.Gravity.CENTER
-        }
+    private val placeholderView =
+        TextView(context).apply {
+            layoutParams =
+                FrameLayout
+                    .LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                    ).apply {
+                        gravity = android.view.Gravity.CENTER
+                    }
 //        TODO: Spinner
-        text = "Loading EPUB..."
-        textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextColor(Color.BLACK)
-    }
+            text = "Loading EPUB..."
+            textAlignment = View.TEXT_ALIGNMENT_CENTER
+            setTextColor(Color.BLACK)
+        }
 
     private var coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var locatorCollectionJob: Job? = null
@@ -164,36 +178,40 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 
         Log.d("EPUBView", "finalizeProps called with bookId: $bookId, url: $url")
 
-        props = FinalizedProps(
-            bookId = bookId,
-            locator = pendingProps.locator ?: pendingProps.initialLocator ?: oldProps?.locator,
-            url = url,
-            foreground = pendingProps.foreground
-                ?: oldProps?.foreground ?: Color.parseColor("#111111"),
-            background = pendingProps.background
-                ?: oldProps?.background ?: Color.parseColor("#FFFFFF"),
-            fontFamily = pendingProps.fontFamily
-                ?: oldProps?.fontFamily ?: FontFamily("Literata"),
-            lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
-            fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
-            fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
-            readingProgression = pendingProps.readingProgression ?: oldProps?.readingProgression ?: ReadingProgression.LTR,
-            publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
-            imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
-            pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
-            columnCount = pendingProps.columnCount ?: oldProps?.columnCount,
-            textAlign = pendingProps.textAlign ?: oldProps?.textAlign,
-            typeScale = pendingProps.typeScale ?: oldProps?.typeScale,
-            paragraphIndent = pendingProps.paragraphIndent ?: oldProps?.paragraphIndent,
-            paragraphSpacing = pendingProps.paragraphSpacing ?: oldProps?.paragraphSpacing,
-            wordSpacing = pendingProps.wordSpacing ?: oldProps?.wordSpacing,
-            letterSpacing = pendingProps.letterSpacing ?: oldProps?.letterSpacing,
-            hyphens = pendingProps.hyphens ?: oldProps?.hyphens,
-            ligatures = pendingProps.ligatures ?: oldProps?.ligatures,
-            textNormalization = pendingProps.textNormalization ?: oldProps?.textNormalization,
-            verticalText = pendingProps.verticalText ?: oldProps?.verticalText,
-            decorations = pendingProps.decorations ?: oldProps?.decorations ?: emptyList()
-        )
+        props =
+            FinalizedProps(
+                bookId = bookId,
+                locator = pendingProps.locator ?: pendingProps.initialLocator ?: oldProps?.locator,
+                url = url,
+                foreground =
+                    pendingProps.foreground
+                        ?: oldProps?.foreground ?: Color.parseColor("#111111"),
+                background =
+                    pendingProps.background
+                        ?: oldProps?.background ?: Color.parseColor("#FFFFFF"),
+                fontFamily =
+                    pendingProps.fontFamily
+                        ?: oldProps?.fontFamily ?: FontFamily("Literata"),
+                lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
+                fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
+                fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
+                readingProgression = pendingProps.readingProgression ?: oldProps?.readingProgression ?: ReadingProgression.LTR,
+                publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
+                imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
+                pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
+                columnCount = pendingProps.columnCount ?: oldProps?.columnCount,
+                textAlign = pendingProps.textAlign ?: oldProps?.textAlign,
+                typeScale = pendingProps.typeScale ?: oldProps?.typeScale,
+                paragraphIndent = pendingProps.paragraphIndent ?: oldProps?.paragraphIndent,
+                paragraphSpacing = pendingProps.paragraphSpacing ?: oldProps?.paragraphSpacing,
+                wordSpacing = pendingProps.wordSpacing ?: oldProps?.wordSpacing,
+                letterSpacing = pendingProps.letterSpacing ?: oldProps?.letterSpacing,
+                hyphens = pendingProps.hyphens ?: oldProps?.hyphens,
+                ligatures = pendingProps.ligatures ?: oldProps?.ligatures,
+                textNormalization = pendingProps.textNormalization ?: oldProps?.textNormalization,
+                verticalText = pendingProps.verticalText ?: oldProps?.verticalText,
+                decorations = pendingProps.decorations ?: oldProps?.decorations ?: emptyList(),
+            )
 
         if (props!!.bookId != oldProps?.bookId || props!!.url != oldProps?.url) {
             Log.d("EPUBView", "Book ID or URL changed, reloading publication")
@@ -212,14 +230,17 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             applyDecorations()
         }
 
-        val nav = navigator ?: run {
-            Log.w("EPUBView", "Cannot update preferences: navigator is null")
-            return
-        }
-        
+        val nav =
+            navigator ?: run {
+                Log.w("EPUBView", "Cannot update preferences: navigator is null")
+                return
+            }
+
         nav.submitPreferences(
             EpubPreferences(
-                backgroundColor = org.readium.r2.navigator.preferences.Color(props!!.background),
+                backgroundColor =
+                    org.readium.r2.navigator.preferences
+                        .Color(props!!.background),
                 columnCount = props!!.columnCount,
                 fontFamily = props!!.fontFamily,
                 fontSize = props!!.fontSize,
@@ -235,12 +256,14 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 publisherStyles = props!!.publisherStyles,
                 readingProgression = props!!.readingProgression,
                 textAlign = props!!.textAlign,
-                textColor = org.readium.r2.navigator.preferences.Color(props!!.foreground),
+                textColor =
+                    org.readium.r2.navigator.preferences
+                        .Color(props!!.foreground),
                 textNormalization = props!!.textNormalization,
                 typeScale = props!!.typeScale,
                 verticalText = props!!.verticalText,
                 wordSpacing = props!!.wordSpacing,
-            )
+            ),
         )
     }
 
@@ -253,10 +276,11 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
         val activity: FragmentActivity? = appContext.currentActivity as FragmentActivity?
 
         val listener = this
-        val epubFragment = EPUBFragment(
-            publication,
-            listener
-        )
+        val epubFragment =
+            EPUBFragment(
+                publication,
+                listener,
+            )
 
         activity?.supportFragmentManager?.commitNow {
             setReorderingAllowed(true)
@@ -272,23 +296,24 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 
         applyDecorations()
 
-        locatorCollectionJob = coroutineScope.launch {
-            try {
-                navigator?.currentLocator?.collect { locator ->
-                    locator?.let { 
-                        // Only emit if view is still attached to prevent crashes
-                        if (isAttachedToWindow) {
-                            onLocatorChanged(it)
+        locatorCollectionJob =
+            coroutineScope.launch {
+                try {
+                    navigator?.currentLocator?.collect { locator ->
+                        locator?.let {
+                            // Only emit if view is still attached to prevent crashes
+                            if (isAttachedToWindow) {
+                                onLocatorChanged(it)
+                            }
                         }
                     }
+                } catch (e: CancellationException) {
+                    Log.d("EPUBView", "Locator collection canceled")
+                } catch (e: Exception) {
+                    Log.e("EPUBView", "Error collecting locator", e)
                 }
-            } catch (e: CancellationException) {
-                Log.d("EPUBView", "Locator collection canceled")
-            } catch (e: Exception) {
-                Log.e("EPUBView", "Error collecting locator", e)
             }
-        }
-        
+
         // Emit initial locator
         coroutineScope.launch {
             try {
@@ -303,25 +328,26 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 
     fun destroyNavigator() {
         Log.d("EPUBView", "destroyNavigator called")
-        
-        val navigator = this.navigator ?: run {
-            Log.d("EPUBView", "Navigator already destroyed")
-            return
-        }
-        
+
+        val navigator =
+            this.navigator ?: run {
+                Log.d("EPUBView", "Navigator already destroyed")
+                return
+            }
+
         navigator.removeDecorationListener(this)
-        
+
         this.navigator = null
-        
+
         locatorCollectionJob?.cancel()
         locatorCollectionJob = null
-        
+
         try {
             removeView(navigator.view)
         } catch (e: Exception) {
             Log.e("EPUBView", "Error removing navigator view", e)
         }
-        
+
         val activity: FragmentActivity? = appContext.currentActivity as? FragmentActivity
         if (activity == null || activity.isDestroyed || activity.isFinishing) {
             Log.w("EPUBView", "Cannot remove fragment: activity is gone")
@@ -335,7 +361,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 Log.e("EPUBView", "Failed to remove fragment: ${e.message}")
             }
         }
-        
+
         coroutineScope.cancel()
         coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     }
@@ -346,16 +372,17 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             Log.d("EPUBView", "Skipping emitCurrentLocator: view detached")
             return
         }
-        
-        val nav = navigator ?: run {
-            Log.d("EPUBView", "Skipping emitCurrentLocator: navigator is null")
-            return
-        }
-        
+
+        val nav =
+            navigator ?: run {
+                Log.d("EPUBView", "Skipping emitCurrentLocator: navigator is null")
+                return
+            }
+
         val currentLocator = nav.currentLocator?.value ?: return
-        
+
         if (!isAttachedToWindow) return
-        
+
         val found = nav.firstVisibleElementLocator()
         if (found == null) {
             if (isAttachedToWindow) {
@@ -363,14 +390,16 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             }
             return
         }
-        
-        val merged = currentLocator.copy(
-            locations = currentLocator.locations.copy(
-                fragments = found.locations.fragments,
-                otherLocations = found.locations.otherLocations,
-            ),
-        )
-        
+
+        val merged =
+            currentLocator.copy(
+                locations =
+                    currentLocator.locations.copy(
+                        fragments = found.locations.fragments,
+                        otherLocations = found.locations.otherLocations,
+                    ),
+            )
+
         if (isAttachedToWindow) {
             onLocatorChange(merged.toJSON().toMap())
         }
@@ -382,9 +411,11 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
         try {
             Log.d(
                 "EPUBView",
-                "Starting publication load for bookId: ${currentProps.bookId}, url: ${currentProps.url}"
+                "Starting publication load for bookId: ${currentProps.bookId}, url: ${currentProps.url}",
             )
-            val publication = bookService?.openPublication(currentProps.bookId!!, URL(currentProps.url!!)) ?: throw Exception("Failed to open publication")
+            val publication =
+                bookService?.openPublication(currentProps.bookId!!, URL(currentProps.url!!))
+                    ?: throw Exception("Failed to open publication")
             this.publication = publication
             Log.d("EPUBView", "Publication loaded successfully: ${publication?.metadata?.title}")
 
@@ -393,19 +424,22 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             val tableOfContents = convertLinksToToc(publication.tableOfContents)
 
             withContext(Dispatchers.Main) {
-                onBookLoaded(mapOf(
-                    "success" to true,
-                    "bookMetadata" to mapOf(
-                        "title" to publication.metadata.title,
-                        "author" to publication.metadata.authors.joinToString(", ") { it.name },
-                        "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
-                        "identifier" to (publication.metadata.identifier ?: ""),
-                        "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
-                        "totalPages" to publication.positions().size,
-                        "chapterCount" to publication.readingOrder.size
+                onBookLoaded(
+                    mapOf(
+                        "success" to true,
+                        "bookMetadata" to
+                            mapOf(
+                                "title" to publication.metadata.title,
+                                "author" to publication.metadata.authors.joinToString(", ") { it.name },
+                                "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
+                                "identifier" to (publication.metadata.identifier ?: ""),
+                                "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
+                                "totalPages" to publication.positions().size,
+                                "chapterCount" to publication.readingOrder.size,
+                            ),
+                        "tableOfContents" to tableOfContents,
                     ),
-                    "tableOfContents" to tableOfContents
-                ))
+                )
             }
         } catch (e: Exception) {
             Log.e("EPUBView", "Error loading publication", e)
@@ -415,73 +449,86 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                     mapOf(
                         "errorDescription" to (e.message ?: "Unknown error"),
                         "failureReason" to "Failed to load publication",
-                        "recoverySuggestion" to "Check the URL and try again"
-                    )
+                        "recoverySuggestion" to "Check the URL and try again",
+                    ),
                 )
             }
         }
     }
 
-    fun go(locator: Locator, animated: Boolean = true) {
-        val nav = navigator ?: run {
-            Log.w("EPUBView", "Cannot navigate: navigator is null")
-            return
-        }
-        
-        val currentHref = nav.currentLocator?.value?.href?.toString()
+    fun go(
+        locator: Locator,
+        animated: Boolean = true,
+    ) {
+        val nav =
+            navigator ?: run {
+                Log.w("EPUBView", "Cannot navigate: navigator is null")
+                return
+            }
+
+        val currentHref =
+            nav.currentLocator
+                ?.value
+                ?.href
+                ?.toString()
         val newHref = locator.href.toString()
         if (newHref != currentHref) {
             changingResource = true
         }
         nav.go(locator, animated)
     }
-    
+
     @OptIn(InternalReadiumApi::class)
     fun applyDecorations() {
-        val nav = navigator ?: run {
-            Log.w("EPUBView", "Cannot apply decorations: navigator is null")
-            return
-        }
+        val nav =
+            navigator ?: run {
+                Log.w("EPUBView", "Cannot apply decorations: navigator is null")
+                return
+            }
         val currentProps = props ?: return
-        
-        val decorations = currentProps.decorations.map { item ->
-            val style = org.readium.r2.navigator.Decoration.Style.Highlight(
-                tint = item.color,
-                isActive = true
-            )
-            org.readium.r2.navigator.Decoration(
-                id = item.id,
-                locator = item.locator,
-                style = style
-            )
-        }
-        
+
+        val decorations =
+            currentProps.decorations.map { item ->
+                val style =
+                    org.readium.r2.navigator.Decoration.Style.Highlight(
+                        tint = item.color,
+                        isActive = true,
+                    )
+                org.readium.r2.navigator.Decoration(
+                    id = item.id,
+                    locator = item.locator,
+                    style = style,
+                )
+            }
+
         coroutineScope.launch {
             nav.applyDecorations(decorations, highlightDecorationGroup)
         }
     }
-    
+
     @OptIn(InternalReadiumApi::class)
     suspend fun getSelection(): Map<String, Any>? {
         val nav = navigator ?: return null
         val selection = nav.currentSelection() ?: return null
-        
-        val result = mutableMapOf<String, Any>(
-            "locator" to selection.locator.toJSON().toMap()
-        )
-        
-        selection.rect?.let { rect ->
-            result["rect"] = mapOf(
-                "x" to rect.left,
-                "y" to rect.top,
-                "width" to rect.width(),
-                "height" to rect.height()
+
+        val result =
+            mutableMapOf<String, Any>(
+                "locator" to selection.locator.toJSON().toMap(),
             )
+
+        selection.rect?.let { rect ->
+            result["rect"] =
+                mapOf(
+                    "x" to rect.left,
+                    "y" to rect.top,
+                    "width" to rect.width(),
+                    "height" to rect.height(),
+                )
         }
-        
+
         return result
     }
-    
+
     fun clearSelection() {
         navigator?.clearSelection()
     }
@@ -489,7 +536,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
         val rect = event.rect
         val decorationId = event.decoration.id
-        
+
         // Note: If I don't post this, hard crash:
         // Only the original thread that created a view hierarchy can touch its views
         post {
@@ -503,49 +550,203 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             val screenLoc = IntArray(2)
             getLocationOnScreen(screenLoc)
 
-            val anchorView = View(context).apply {
-                val params = FrameLayout.LayoutParams(1, 1)
-                params.leftMargin = screenLoc[0] + (rect?.centerX()?.toInt() ?: (width / 2))
-                params.topMargin = screenLoc[1] + (rect?.bottom?.toInt() ?: (height / 2))
-                layoutParams = params
-            }
-            decorView.addView(anchorView)
-            
-            val popup = PopupMenu(context, anchorView)
-            popup.menu.add(0, 1, 0, "Edit Note")
-            popup.menu.add(0, 2, 1, "Delete")
-            
-            popup.setOnMenuItemClickListener { menuItem ->
-                when (menuItem.itemId) {
-                    1 -> onEditHighlight(mapOf("decorationId" to decorationId))
-                    2 -> onDeleteHighlight(mapOf("decorationId" to decorationId))
+            val anchorView =
+                View(context).apply {
+                    val params = FrameLayout.LayoutParams(1, 1)
+                    params.leftMargin = screenLoc[0] + (rect?.centerX()?.toInt() ?: (width / 2))
+                    params.topMargin = screenLoc[1] + (rect?.bottom?.toInt() ?: (height / 2))
+                    layoutParams = params
                 }
-                true
-            }
-            
+            decorView.addView(anchorView)
+
+            val dp = context.resources.displayMetrics.density
+            val readerBg = props?.background ?: Color.parseColor("#121212")
+            val readerFg = props?.foreground ?: Color.parseColor("#efefef")
+
+            // calc the luminance of the background to determine lightness and therefore contrast
+            // fiddled with this a good bit but sure it could use some more eyes and testing
+            val red = Color.red(readerBg) / 255.0
+            val green = Color.green(readerBg) / 255.0
+            val blue = Color.blue(readerBg) / 255.0
+            val luminance = 0.299 * red + 0.587 * green + 0.114 * blue
+            val isLightBg = luminance > 0.5
+
+            // blend the bg into the highest contrast (i.e., black for light / white for dark)
+            val blendTo = if (isLightBg) Color.BLACK else Color.WHITE
+            val blendAmount = if (isLightBg) 0.08f else 0.18f
+            val surfaceColor =
+                Color.rgb(
+                    (Color.red(readerBg) + (Color.red(blendTo) - Color.red(readerBg)) * blendAmount).toInt(),
+                    (Color.green(readerBg) + (Color.green(blendTo) - Color.green(readerBg)) * blendAmount).toInt(),
+                    (Color.blue(readerBg) + (Color.blue(blendTo) - Color.blue(readerBg)) * blendAmount).toInt(),
+                )
+            val dividerColor = if (isLightBg) Color.argb(30, 0, 0, 0) else Color.argb(25, 255, 255, 255)
+            val rippleStates =
+                ColorStateList.valueOf(
+                    if (isLightBg) Color.argb(40, 0, 0, 0) else Color.argb(50, 255, 255, 255),
+                )
+            val destructiveColor = if (isLightBg) Color.parseColor("#ff3b30") else Color.parseColor("#ff453a")
+
+            val menuLayout =
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    background =
+                        GradientDrawable().apply {
+                            setColor(surfaceColor)
+                            cornerRadius = 12 * dp
+                        }
+                    clipToOutline = true
+                    // this took fckn ages to figure out, but from what i understand
+                    // since i want to the shadow to follow the rounded corners i have to
+                    // override getOutline manually
+                    // https://developer.android.com/reference/android/view/View#setOutlineProvider(android.view.ViewOutlineProvider)
+                    outlineProvider =
+                        object : ViewOutlineProvider() {
+                            override fun getOutline(
+                                view: View,
+                                outline: Outline,
+                            ) {
+                                outline.setRoundRect(0, 0, view.width, view.height, 12 * dp)
+                            }
+                        }
+                    elevation = 8 * dp
+                }
+
+            fun makeItem(
+                label: String,
+                textColor: Int,
+                onClick: () -> Unit,
+            ): TextView =
+                TextView(context).apply {
+                    text = label
+                    setTextColor(textColor)
+                    textSize = 15f // TODO: test on diff screen densities
+                    minHeight = (48 * dp).toInt()
+                    setPadding(
+                        (16 * dp).toInt(),
+                        (10 * dp).toInt(),
+                        (16 * dp).toInt(),
+                        (10 * dp).toInt(),
+                    )
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                    // https://developer.android.com/reference/android/graphics/drawable/RippleDrawable
+                    background = RippleDrawable(rippleStates, null, ColorDrawable(Color.WHITE))
+                    isClickable = true
+                    isFocusable = true
+                    setOnClickListener { onClick() }
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                        )
+                }
+
+            var popupRef: PopupWindow? = null
+
+            menuLayout.addView(
+                makeItem("Edit Note", readerFg) {
+                    onEditHighlight(mapOf("decorationId" to decorationId))
+                    popupRef?.dismiss()
+                },
+            )
+            menuLayout.addView(
+                View(context).apply {
+                    setBackgroundColor(dividerColor)
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            maxOf(1, (0.5f * dp).toInt()),
+                        )
+                },
+            )
+            menuLayout.addView(
+                makeItem("Delete", destructiveColor) {
+                    onDeleteHighlight(mapOf("decorationId" to decorationId))
+                    popupRef?.dismiss()
+                },
+            )
+
+            val shadowPad = (16 * dp).toInt()
+            val shadowWrapper =
+                FrameLayout(context).apply {
+                    setBackgroundColor(Color.TRANSPARENT)
+                    // needed so shadow isn't clipped
+                    clipChildren = false
+                    clipToPadding = false
+                    setPadding(shadowPad, shadowPad, shadowPad, shadowPad)
+                }
+            shadowWrapper.addView(menuLayout)
+            shadowWrapper.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            )
+
+            val popup =
+                PopupWindow(
+                    shadowWrapper,
+                    shadowWrapper.measuredWidth,
+                    shadowWrapper.measuredHeight,
+                    true,
+                ).apply {
+                    isTouchable = true
+                    isOutsideTouchable = true
+                    setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                }
+            popupRef = popup
+
             popup.setOnDismissListener {
                 decorView.removeView(anchorView)
             }
 
-            anchorView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    anchorView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    popup.show()
-                }
-            })
+            anchorView.viewTreeObserver.addOnGlobalLayoutListener(
+                object : ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        anchorView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        popup.showAsDropDown(anchorView, -shadowPad, -shadowPad)
+                        // https://developer.android.com/reference/android/os/Build.VERSION_CODES#R
+                        // ^ if >= android 11 basically
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            // this applies the necessary flags to prevent hte navigation bar from reappearing
+                            // when popup is focused, which in turn prevents some layout shift in the reader
+                            // all of this references within https://developer.android.com/reference/android/view/WindowInsetsController
+                            menuLayout.windowInsetsController?.apply {
+                                hide(
+                                    android.view.WindowInsets.Type
+                                        .navigationBars(),
+                                )
+                                // https://developer.android.com/reference/android/view/WindowInsetsController#BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                                systemBarsBehavior =
+                                    android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                            }
+                        } else {
+                            // https://stackoverflow.com/questions/62577645/android-view-view-systemuivisibility-deprecated-what-is-the-replacement
+                            // and a bunch of flags in https://developer.android.com/reference/android/view/View
+                            @Suppress("DEPRECATION")
+                            menuLayout.rootView.systemUiVisibility = (
+                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            )
+                        }
+                    }
+                },
+            )
         }
-        
+
         return true
     }
 
     override fun onDetachedFromWindow() {
         Log.d("EPUBView", "onDetachedFromWindow called")
-        
+
         locatorCollectionJob?.cancel()
         locatorCollectionJob = null
-        
+
         destroyNavigator()
-        
+
         super.onDetachedFromWindow()
     }
 
@@ -560,7 +761,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 //            onDoubleTouch(locator.toJSON().toMap())
 //        }
 //    }
-    
+
     fun handleTap(point: PointF): Boolean {
         if (point.x < width * 0.2) {
             goBackward()
@@ -599,7 +800,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             Log.d("EPUBView", "Skipping onLocatorChanged: view detached")
             return
         }
-        
+
         val currentHref = locator.href.toString()
         val propsHref = props?.locator?.href?.toString()
         if (currentHref != propsHref || changingResource) {
@@ -625,13 +826,14 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 //        }
     }
 
-    private fun convertLinksToToc(links: List<Link>): List<Map<String, Any>> {
-        return links.mapIndexed { index, link ->
-            val item = mutableMapOf<String, Any>(
-                "label" to (link.title ?: ""),
-                "content" to link.href.toString(),
-                "play_order" to index
-            )
+    private fun convertLinksToToc(links: List<Link>): List<Map<String, Any>> =
+        links.mapIndexed { index, link ->
+            val item =
+                mutableMapOf<String, Any>(
+                    "label" to (link.title ?: ""),
+                    "content" to link.href.toString(),
+                    "play_order" to index,
+                )
             if (link.children.isNotEmpty()) {
                 item["children"] = convertLinksToToc(link.children)
             } else {
@@ -639,14 +841,11 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             }
             item
         }
-    }
 
     /**
      * Input listener to handle tap events for navigation
      */
     private inner class TapInputListener : InputListener {
-        override fun onTap(event: TapEvent): Boolean {
-            return handleTap(event.point)
-        }
+        override fun onTap(event: TapEvent): Boolean = handleTap(event.point)
     }
 }

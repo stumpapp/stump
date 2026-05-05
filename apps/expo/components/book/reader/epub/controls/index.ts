@@ -1,7 +1,6 @@
 export { default as Brightness } from './Brightness'
 export { default as ColumnCount } from './ColumnCount'
 export { default as FontConfig } from './FontConfig'
-export { default as FontSizeSlider } from './FontSizeSlider'
 export { default as ImageFilter } from './ImageFilter'
 export { default as PageMargins } from './PageMargins'
 export { default as PublisherStyles } from './PublisherStyles'

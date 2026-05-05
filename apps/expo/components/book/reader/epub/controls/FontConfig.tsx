@@ -55,10 +55,10 @@ export default function FontConfig() {
 			<Card.Row label={t(getKey('fontSize'))}>
 				<Stepper
 					value={store.fontSize}
-					onChange={(val) => store.setSettings({ fontSize: Math.round(val) })}
+					onChange={(val) => store.setSettings({ fontSize: val })}
 					min={8}
 					max={32}
-					step={1}
+					step={0.5}
 					formatValue={(val) => val.toString()}
 					accessibilityLabel={t(getKey('fontSize'))}
 				/>

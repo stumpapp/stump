@@ -52,7 +52,7 @@ const light = {
 		inverse: '#161719',
 		overlay: {
 			DEFAULT: '#f6f6f7',
-			hover: '#e9eaeb',
+			hover: 'rgb(0 0 0 / 0.05)',
 		},
 		surface: {
 			DEFAULT: '#f7f7f8',
@@ -144,8 +144,8 @@ const dark: Theme = {
 		DEFAULT: '#000000',
 		inverse: '#ffffff',
 		overlay: {
-			DEFAULT: '#111113',
-			hover: '#17171a',
+			DEFAULT: '#2d2d2d',
+			hover: 'rgb(255 255 255 / 0.1)',
 		},
 		surface: {
 			DEFAULT: '#0a0a0a',

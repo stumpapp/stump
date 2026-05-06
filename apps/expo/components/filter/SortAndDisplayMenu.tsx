@@ -253,13 +253,7 @@ function AndroidSortMenu({ groups }: AndroidSortMenuProps) {
 						})}
 					/>
 				)}
-				<Text
-					className={cn('text-lg', {
-						'text-fill-danger': item.destructive,
-					})}
-				>
-					{item.label}
-				</Text>
+				<Text className={cn('text-lg')}>{item.label}</Text>
 			</View>
 		</DropdownMenuItem>
 	)

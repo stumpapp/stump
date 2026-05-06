@@ -6,7 +6,7 @@ import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
-import { COLORS, IS_IOS_24_PLUS } from '~/lib/constants'
+import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
 import { useReaderAnimations } from '../shared/readerAnimations'
@@ -35,7 +35,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 						android: X,
 						ios: 'xmark',
 						color:
-							Platform.OS === 'android' || !IS_IOS_24_PLUS
+							Platform.OS === 'android' || !IS_IOS_26_PLUS
 								? COLORS.dark.foreground.DEFAULT
 								: 'primary',
 					}}

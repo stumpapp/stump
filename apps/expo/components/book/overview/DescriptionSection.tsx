@@ -6,7 +6,7 @@ import { stripHtml } from 'string-strip-html'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Markdown, Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 
 import { DottedLine } from './DottedLine'
@@ -61,7 +61,7 @@ export default function DescriptionSection({ description }: Props) {
 				detents={Platform.OS === 'android' ? [0.5, 1] : ['auto']}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}

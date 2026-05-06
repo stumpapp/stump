@@ -4,7 +4,7 @@ import { useState } from 'react'
 import * as NativeDropdownMenu from 'zeego/dropdown-menu'
 
 import { HeaderButton } from '~/components/ui/header-button/header-button'
-import { COLORS, IS_IOS_24_PLUS } from '~/lib/constants'
+import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { BookPreferences, useBookPreferences } from '~/stores/reader'
 
@@ -42,7 +42,7 @@ export function PagedActionMenu({
 					icon={{
 						ios: 'ellipsis',
 						android: Ellipsis,
-						color: !IS_IOS_24_PLUS ? COLORS.dark.foreground.DEFAULT : 'primary',
+						color: !IS_IOS_26_PLUS ? COLORS.dark.foreground.DEFAULT : 'primary',
 					}}
 					ios={{
 						variant: 'glass',

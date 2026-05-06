@@ -2,7 +2,7 @@ import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
 import BackLink from '~/components/BackLink'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
@@ -20,7 +20,7 @@ export default function Screen() {
 						fontSize: 30,
 					},
 					headerLargeTitle: Platform.OS === 'ios',
-					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
 					headerLeft: Platform.OS === 'android' ? undefined : () => <BackLink />,
 				}}

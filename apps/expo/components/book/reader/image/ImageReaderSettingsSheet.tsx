@@ -11,7 +11,7 @@ import Animated, {
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Heading, Switch, Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore, useReaderStore } from '~/stores'
@@ -64,7 +64,7 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 				detents={[0.5, 1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				insetAdjustment="automatic"
 				{...props}

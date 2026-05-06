@@ -19,13 +19,7 @@ import { useColorScheme } from './useColorScheme'
 ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 
-export const ENABLE_LARGE_HEADER = Platform.select({
-	// iOS 26+ has a bug that causes freezes when using large headers
-	ios: typeof Platform.Version === 'number' ? Platform.Version < 26 : Number(Platform.Version) < 26,
-	default: true,
-})
-
-export const IS_IOS_24_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 24
+export const IS_IOS_26_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26
 
 export const ON_END_REACHED_THRESHOLD = Platform.OS === 'ios' ? 0.75 : 0.6
 

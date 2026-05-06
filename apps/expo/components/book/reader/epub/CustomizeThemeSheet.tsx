@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { CustomizeTheme } from './controls/customTheme'
@@ -35,7 +35,7 @@ export default function CustomizeThemeSheet() {
 				detents={[1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				style={{
 					paddingBottom: insets.bottom,

@@ -4,7 +4,7 @@ import { Pressable, TextStyle, View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Text } from '~/components/ui'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { useReaderStore } from '~/stores'
 import {
@@ -81,11 +81,11 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 			style={{
 				height: HEIGHT,
 				backgroundColor: displayTheme.colors?.background,
-				paddingTop: IS_IOS_24_PLUS ? 16 : 0,
+				paddingTop: IS_IOS_26_PLUS ? 16 : 0,
 			}}
 		>
 			{onCancel && onSaved && (
-				<View className="h-12 flex-row items-center justify-between px-4">
+				<View className="h-12 px-4 flex-row items-center justify-between">
 					<Pressable onPress={handleCancel}>
 						{({ pressed }) => (
 							<Text
@@ -150,7 +150,7 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 
 const getNumberOfLines = (fontSize: number, lineHeight: number, hasHeader: boolean) => {
 	const sizePlusPadding =
-		(IS_IOS_24_PLUS ? HEIGHT + 16 : HEIGHT) -
+		(IS_IOS_26_PLUS ? HEIGHT + 16 : HEIGHT) -
 		48 - // 48 for header
 		32 - // Secondary padding
 		(hasHeader ? 48 / 2 : 0) -

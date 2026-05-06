@@ -9,7 +9,7 @@ import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IS_IOS_24_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
 
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
@@ -75,7 +75,7 @@ export const LibraryOverviewSheet = forwardRef<TrueSheet, Props>(({ libraryId },
 				detents={[0.5, 1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}

@@ -5,7 +5,7 @@ import { View } from 'react-native'
 import { ScrollView } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 
@@ -37,7 +37,7 @@ export default function AddServerDialog() {
 			<Pressable
 				onPress={() => ref.current?.present()}
 				style={
-					IS_IOS_24_PLUS
+					IS_IOS_26_PLUS
 						? {
 								width: 35,
 								height: 35,

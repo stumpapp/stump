@@ -1,7 +1,7 @@
 use models::entity::{
 	finished_reading_session, kobo_sync_session, library, library_exclusion, media,
-	media_metadata, media_tag, reading_session, registered_reading_device, series,
-	series_metadata, tag, user, user_preferences,
+	media_metadata, media_tag, reading_session, refresh_token, registered_reading_device,
+	series, series_metadata, server_config, tag, user, user_preferences,
 };
 use sea_orm::{ConnectionTrait, Database, DbBackend, DbConn, DbErr, Schema};
 pub async fn test_database() -> DbConn {
@@ -34,6 +34,8 @@ pub async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
 		schema.create_table_from_entity(registered_reading_device::Entity),
 		schema.create_table_from_entity(tag::Entity),
 		schema.create_table_from_entity(media_tag::Entity),
+		schema.create_table_from_entity(server_config::Entity),
+		schema.create_table_from_entity(refresh_token::Entity),
 	];
 
 	for stmt in tables {

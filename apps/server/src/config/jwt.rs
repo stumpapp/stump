@@ -241,3 +241,112 @@ pub(crate) async fn exchange_refresh_token(
 
 	Ok(jwt_pair)
 }
+
+#[cfg(test)]
+mod tests {
+	use ::tests::{db::test_database, fake_data};
+	use models::entity::server_config;
+	use sea_orm::{ActiveValue::Set, DbConn};
+	use stump_core::config::StumpConfig;
+
+	use super::*;
+
+	// note that the once locks are static and won't reset between tests, so ordering matters here
+
+	async fn setup_db(
+		access_secret: Option<&str>,
+		refresh_secret: Option<&str>,
+	) -> DbConn {
+		let db = test_database().await;
+
+		server_config::ActiveModel {
+			initial_wal_setup_complete: Set(false),
+			jwt_access_secret: Set(access_secret.map(str::to_string)),
+			jwt_refresh_secret: Set(refresh_secret.map(str::to_string)),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("Failed to insert server_config row");
+
+		db
+	}
+
+	fn test_config() -> StumpConfig {
+		StumpConfig::debug()
+	}
+
+	#[tokio::test]
+	async fn test_missing_secret_returns_error() {
+		let db = setup_db(None, None).await;
+		let result = extract_user_from_jwt("not.a.real.token", &db).await;
+		assert!(result.is_err());
+	}
+
+	#[tokio::test]
+	async fn test_access_token_round_trip() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+		let config = test_config();
+		let user = fake_data::User::new("test-user-access").insert(&db).await;
+
+		let pair = create_jwt_auth(&user.id, &db, &config)
+			.await
+			.expect("Failed to create JWT pair");
+
+		let user_id = extract_user_from_jwt(&pair.access_token, &db)
+			.await
+			.expect("Failed to extract user from access token");
+
+		assert_eq!(user_id, user.id);
+	}
+
+	#[tokio::test]
+	async fn test_refresh_token_jti_extraction() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+		let config = test_config();
+		let user = fake_data::User::new("test-user-refresh").insert(&db).await;
+
+		let pair = create_jwt_auth(&user.id, &db, &config)
+			.await
+			.expect("Failed to create JWT pair");
+
+		let refresh_token_str = pair.refresh_token.expect("Expected a refresh token");
+		let jti = extract_jti_from_refresh_token(&refresh_token_str, &db)
+			.await
+			.expect("Failed to extract jti from refresh token");
+
+		assert!(!jti.is_empty());
+	}
+
+	#[tokio::test]
+	async fn test_secrets_cached_after_first_retrieval() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+		let config = test_config();
+		let user = fake_data::User::new("test-user-cached").insert(&db).await;
+
+		create_jwt_auth(&user.id, &db, &config)
+			.await
+			.expect("Failed to create JWT pair");
+
+		assert!(
+			ACCESS_TOKEN_SECRET.get().is_some(),
+			"ACCESS_TOKEN_SECRET should be cached after first use"
+		);
+		assert!(
+			REFRESH_TOKEN_SECRET.get().is_some(),
+			"REFRESH_TOKEN_SECRET should be cached after first use"
+		);
+	}
+
+	#[tokio::test]
+	async fn test_extract_user_from_invalid_token() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+
+		let result = extract_user_from_jwt("this.is.garbage", &db).await;
+
+		assert!(
+			matches!(result, Err(APIError::Unauthorized)),
+			"Expected Unauthorized for a malformed token, got: {result:?}"
+		);
+	}
+}

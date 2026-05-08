@@ -98,11 +98,15 @@ function useChapterProgress() {
 	const pagesLeftInChapterRaw = useMemo(() => {
 		const flatToc = flattenToc(toc)
 		const activeIndex = flatToc.findIndex((item) => item.label === chapterTitle)
+
+		if (activeIndex === -1 || totalPages <= 0) return null
+
 		const nextChapter = flatToc.slice(activeIndex + 1).find((item) => item.position != null)
 
 		if (activeIndex + 1 === flatToc.length) {
 			return totalPages - page
 		}
+
 		if (nextChapter?.position != null) {
 			return nextChapter.position - 1 - page
 		}

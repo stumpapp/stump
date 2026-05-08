@@ -145,6 +145,7 @@ class EPUBView(
     var navigator: EpubNavigatorFragment? = null
     private var publication: Publication? = null
     private var changingResource = false
+    private var totalPositions: Int = 0
 
     private val highlightDecorationGroup = "highlights"
 
@@ -195,7 +196,9 @@ class EPUBView(
                 lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
                 fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
                 fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
-                readingProgression = pendingProps.readingProgression ?: oldProps?.readingProgression ?: ReadingProgression.LTR,
+                readingProgression =
+                    pendingProps.readingProgression ?: oldProps?.readingProgression
+                    ?: ReadingProgression.LTR,
                 publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
                 imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
                 pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
@@ -338,6 +341,7 @@ class EPUBView(
         navigator.removeDecorationListener(this)
 
         this.navigator = null
+        totalPositions = 0
 
         locatorCollectionJob?.cancel()
         locatorCollectionJob = null
@@ -422,21 +426,23 @@ class EPUBView(
             initializeNavigator()
 
             val tableOfContents = convertLinksToToc(publication.tableOfContents)
+            val positionCount = publication.positions().size
+            totalPositions = positionCount
 
             withContext(Dispatchers.Main) {
                 onBookLoaded(
                     mapOf(
                         "success" to true,
                         "bookMetadata" to
-                            mapOf(
-                                "title" to publication.metadata.title,
-                                "author" to publication.metadata.authors.joinToString(", ") { it.name },
-                                "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
-                                "identifier" to (publication.metadata.identifier ?: ""),
-                                "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
-                                "totalPages" to publication.positions().size,
-                                "chapterCount" to publication.readingOrder.size,
-                            ),
+                                mapOf(
+                                    "title" to publication.metadata.title,
+                                    "author" to publication.metadata.authors.joinToString(", ") { it.name },
+                                    "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
+                                    "identifier" to (publication.metadata.identifier ?: ""),
+                                    "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
+                                    "totalPages" to positionCount,
+                                    "chapterCount" to publication.readingOrder.size,
+                                ),
                         "tableOfContents" to tableOfContents,
                     ),
                 )
@@ -723,13 +729,13 @@ class EPUBView(
                             // and a bunch of flags in https://developer.android.com/reference/android/view/View
                             @Suppress("DEPRECATION")
                             menuLayout.rootView.systemUiVisibility = (
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            )
+                                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                            or View.SYSTEM_UI_FLAG_FULLSCREEN
+                                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                                    )
                         }
                     }
                 },
@@ -779,11 +785,7 @@ class EPUBView(
     fun goForward() {
         val nav = navigator ?: return
         coroutineScope.launch {
-            val didMove = nav.goForward(animated = true)
-            if (!didMove) {
-                val currentLocator = nav.currentLocator?.value ?: return@launch
-                onReachedEnd(currentLocator.toJSON().toMap())
-            }
+            nav.goForward(animated = true)
         }
     }
 
@@ -794,6 +796,7 @@ class EPUBView(
         }
     }
 
+    @OptIn(InternalReadiumApi::class)
     private suspend fun onLocatorChanged(locator: Locator) {
         // Check if view is still attached before processing
         if (!isAttachedToWindow) {
@@ -805,9 +808,18 @@ class EPUBView(
         val propsHref = props?.locator?.href?.toString()
         if (currentHref != propsHref || changingResource) {
             changingResource = false
-            emitCurrentLocator()
-        } else {
-            emitCurrentLocator()
+        }
+        emitCurrentLocator()
+
+        // position is 1-indexed and equals totalPositions on the last page
+        //
+        // TODO: next release of readium (3.9.0?) will have the changes from
+        // github.com/readium/swift-toolkit/issues/775 which we could then swap back to
+        // sm like locator.locations.totalProgression >= 1.0 since EPUBViewportAndLocationCalculator
+        // would guarantee 1.0 at the end. honestly though im hopeful this is fine as-is
+        val position = locator.locations.position
+        if (position != null && totalPositions > 0 && position >= totalPositions) {
+            onReachedEnd(locator.toJSON().toMap())
         }
     }
 

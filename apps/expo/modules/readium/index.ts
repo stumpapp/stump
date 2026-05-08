@@ -113,20 +113,3 @@ export function intoPDFReadiumLocator(page: number): PDFLocator {
 		type: 'application/pdf',
 	}
 }
-
-export function isLastReadiumLocator(
-	locator: ReadiumLocator,
-	positions: ReadiumLocator[],
-): boolean {
-	if (positions.length === 0) return false
-	const totalPositions = positions.length
-	const totalProgression = locator.locations?.totalProgression
-	const position = locator.locations?.position
-
-	return (
-		position != null &&
-		totalProgression != null &&
-		position >= totalPositions &&
-		totalProgression >= 0.95
-	)
-}

@@ -81,7 +81,7 @@ const executeSingleServerSync = async (
 									readium: data,
 								},
 								elapsedSeconds: record.elapsedSeconds,
-								isComplete: record.percentage ? parseFloat(record.percentage) >= 0.99 : false,
+								isComplete: record.percentage ? parseFloat(record.percentage) >= 1.0 : false,
 								percentage: record.percentage,
 							},
 						}) satisfies MediaProgressInput,

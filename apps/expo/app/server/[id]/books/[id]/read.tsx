@@ -354,7 +354,7 @@ export default function Screen() {
 						},
 						elapsedSeconds: totalSeconds,
 						percentage,
-						isComplete: percentage >= 0.99,
+						isComplete: false,
 					},
 				},
 			})

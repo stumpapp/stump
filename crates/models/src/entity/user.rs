@@ -234,6 +234,21 @@ mod tests {
 			false
 		);
 	}
+
+	#[test]
+	fn test_has_permission_resolves_transitively() {
+		// ManageServer -> EmailerManage -> EmailerRead -> EmailSend
+		let user = AuthUser {
+			is_server_owner: false,
+			permissions: PermissionSet::new(vec![UserPermission::ManageServer])
+				.resolve_into_vec(),
+			..get_default_user()
+		};
+
+		assert_eq!(user.has_permission(UserPermission::EmailerManage), true);
+		assert_eq!(user.has_permission(UserPermission::EmailerRead), true);
+		assert_eq!(user.has_permission(UserPermission::EmailSend), true);
+	}
 }
 
 #[derive(Debug, FromQueryResult)]

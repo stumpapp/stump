@@ -8,13 +8,13 @@ export default function MobileApp() {
 				<div className="max-w-2xl md:text-center lg:mx-0 lg:max-w-xl lg:pt-8 mx-auto shrink-0">
 					<div className="text-2xl sm:text-4xl">
 						<h2 className="font-bold tracking-tight text-black dark:text-neutral-100">
-							Mobile app in early alpha
+							Mobile app in beta
 						</h2>
 					</div>
 
 					<p className="text-neutral-650 mt-5! max-w-md text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400 mx-auto">
-						An app for both iOS and Android is in the works, with a more tailored mobile-first
-						experience
+						An app for both iOS and Android is in the works, tailored for mobile-first and on-the-go
+						usage
 					</p>
 
 					<div className="mt-5 gap-2 flex items-center justify-center">
@@ -85,8 +85,8 @@ const features = [
 		icon: Router,
 	},
 	{
-		title: 'OPDS v2 compatible',
-		description: 'Browse any OPDS v2 catalog to stream and download your content',
+		title: 'OPDS',
+		description: 'Browse any compatible OPDS catalog to stream and download your content',
 		icon: Server,
 	},
 	{

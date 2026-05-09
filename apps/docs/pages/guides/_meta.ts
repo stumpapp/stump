@@ -12,8 +12,8 @@ export default {
 	opds: 'OPDS',
 	api: 'API',
 	cli: 'CLI',
-	desktop: 'Desktop App',
 	mobile: 'Mobile App',
+	desktop: 'Desktop App',
 	'breaking-changes': {
 		display: 'hidden',
 	},

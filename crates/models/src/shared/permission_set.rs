@@ -131,7 +131,7 @@ impl AssociatedPermission for UserPermission {
 /// A function to determine whether a user has a specific permission. The permission
 /// is checked against their explicitly assigned permissions, as well as any inherited
 /// ones through permission associations.
-fn user_has_permission(user: &AuthUser, permission: UserPermission) -> bool {
+pub fn user_has_permission(user: &AuthUser, permission: UserPermission) -> bool {
 	user.permissions
 		.iter()
 		.any(|p| p == &permission || p.associated().contains(&permission))

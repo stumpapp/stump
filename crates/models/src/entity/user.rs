@@ -9,7 +9,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
-	shared::{enums::UserPermission, permission_set::PermissionSet},
+	shared::{
+		enums::UserPermission,
+		permission_set::{user_has_permission, PermissionSet},
+	},
 };
 
 use super::{age_restriction, user_preferences};
@@ -68,7 +71,7 @@ impl AuthUser {
 	}
 
 	pub fn has_permission(&self, permission: UserPermission) -> bool {
-		self.permissions.contains(&permission)
+		user_has_permission(self, permission)
 	}
 }
 
@@ -206,6 +209,30 @@ impl From<LoginUser> for AuthUser {
 			age_restriction: user.age_restriction,
 			preferences: user.preferences,
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::*;
+	use pretty_assertions::assert_eq;
+
+	#[test]
+	fn test_has_permission_resolves_associated_permissions() {
+		let user = AuthUser {
+			is_server_owner: false,
+			permissions: vec![UserPermission::ManageUsers],
+			..get_default_user()
+		};
+
+		assert_eq!(user.has_permission(UserPermission::ManageUsers), true);
+		assert_eq!(user.has_permission(UserPermission::CreateUser), true);
+		assert_eq!(user.has_permission(UserPermission::DeleteUser), true);
+		assert_eq!(
+			user.has_permission(UserPermission::AccessKoreaderSync),
+			false
+		);
 	}
 }
 

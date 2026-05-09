@@ -315,7 +315,7 @@ impl UserMutation {
 	}
 
 	#[graphql(
-		guard = "SelfGuard::new(&id.to_string()).or(PermissionGuard::one(UserPermission::ManageUsers))"
+		guard = "SelfGuard::new(&id).or(PermissionGuard::one(UserPermission::ManageUsers))"
 	)]
 	async fn update_user(
 		&self,
@@ -391,7 +391,7 @@ impl UserMutation {
 	}
 
 	#[graphql(
-		guard = "SelfGuard::new(&id.to_string()).or(PermissionGuard::one(UserPermission::ManageUserSessions))"
+		guard = "SelfGuard::new(&id).or(PermissionGuard::one(UserPermission::ManageUserSessions))"
 	)]
 	async fn delete_user_sessions(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
 		let core_ctx = ctx.data::<CoreContext>()?;

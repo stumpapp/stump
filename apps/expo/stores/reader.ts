@@ -23,6 +23,7 @@ export type BookPreferences = IBookPreferences & {
 	allowDownscaling: boolean
 	doublePageBehavior: DoublePageBehavior
 	tapSidesToNavigate: boolean
+	volumeButtonsNavigate: boolean
 	footerControls: FooterControls
 	trackElapsedTime: boolean
 	// Everything below here is epub-specific
@@ -92,6 +93,7 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	secondPageSeparate: false,
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,
+	volumeButtonsNavigate: false,
 	allowDownscaling: false,
 	footerControls: 'images',
 	allowPublisherStyles: true,

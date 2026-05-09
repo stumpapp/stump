@@ -15,6 +15,7 @@ import {
 	PDFViewRef,
 	ReadiumLocator,
 } from '~/modules/readium'
+import { useVolumeListener } from '~/modules/volumeListener'
 import { useReaderStore } from '~/stores'
 import { usePdfStore } from '~/stores/pdf'
 import { Timer, useBookPreferences } from '~/stores/reader'
@@ -123,6 +124,12 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 			}) satisfies PDFViewRef,
 		[],
 	)
+
+	useVolumeListener({
+		enabled: bookPreferences.volumeButtonsNavigate,
+		onVolumeUp: () => navigator.goForward(),
+		onVolumeDown: () => navigator.goBackward(),
+	})
 
 	const store = usePdfStore(
 		useShallow((store) => ({

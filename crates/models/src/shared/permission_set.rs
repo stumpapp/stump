@@ -107,7 +107,12 @@ impl AssociatedPermission for UserPermission {
 			UserPermission::WriteBackMetadata => vec![UserPermission::EditMetadata],
 			UserPermission::EditThumbnails => vec![],
 			UserPermission::ViewAllSmartLists => vec![],
-			// TODO(permissions): sort this one out
+			UserPermission::MetadataFetchRecordManage => {
+				vec![UserPermission::MetadataFetchRecordRead]
+			},
+			UserPermission::MetadataProviderManage => {
+				vec![UserPermission::MetadataProviderRead]
+			},
 			UserPermission::ManageServer => vec![
 				UserPermission::AccessGraphQLPlayground,
 				UserPermission::CreateBookClub,
@@ -123,6 +128,27 @@ impl AssociatedPermission for UserPermission {
 				UserPermission::WriteBackMetadata,
 				UserPermission::EditThumbnails,
 				UserPermission::ViewAllSmartLists,
+				UserPermission::AccessAPIKeys,
+				UserPermission::ChangePassword,
+				UserPermission::ChangeUsername,
+				UserPermission::ChangeAvatar,
+				UserPermission::EmailArbitrarySend,
+				UserPermission::FileExplorer,
+				UserPermission::UploadFile,
+				UserPermission::DownloadFile,
+				UserPermission::DeleteLibrary,
+				UserPermission::ManageUserSessions,
+				UserPermission::ManageJobs,
+				UserPermission::MetadataFetchRecordManage,
+				UserPermission::MetadataProviderManage,
+				UserPermission::ReadSystemLogs,
+				// TODO(permissions): the following are per-user feature-access perms,
+				// included so that admins retain parity with the legacy is_server_owner
+				// short-circuit. Likely candidates for removal once admins are issued
+				// a separate "default user perms" bundle alongside ManageServer.
+				UserPermission::AccessKoreaderSync,
+				UserPermission::AccessKoboSync,
+				UserPermission::AccessSmartList,
 			],
 			_ => vec![],
 		}

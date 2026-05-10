@@ -475,17 +475,20 @@ impl MediaQuery {
 					AND m.series_id IS NOT NULL
 				),
 
-				-- Find all media IDs that user has read or is currently reading
-				user_read_or_reading_media AS (
+				-- Find all media IDs that user has read
+				user_read_media AS (
 					SELECT media_id 
 					FROM finished_reading_sessions
 					WHERE user_id = ?
-					
-					UNION
-					
-					SELECT media_id 
-					FROM reading_sessions
-					WHERE user_id = ?
+				),
+
+				-- We do not want books from series with active reading sessions
+				user_active_series AS (
+					SELECT m.series_id 
+					FROM media m
+					JOIN reading_sessions rs ON rs.media_id = m.id
+					WHERE rs.user_id = ?
+					AND m.series_id IS NOT NULL
 				),
 
 				-- For each series, get last read date for sorting priority
@@ -517,8 +520,9 @@ impl MediaQuery {
 						series_last_read srl ON srl.series_id = m.series_id
 					WHERE 
 						m.series_id IN (SELECT series_id FROM user_read_series)
+						AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
 						-- Exclude media that user has read or is currently reading
-						AND m.id NOT IN (SELECT media_id FROM user_read_or_reading_media)
+						AND m.id NOT IN (SELECT media_id FROM user_read_media)
 						AND m.deleted_at IS NULL
 				)
 

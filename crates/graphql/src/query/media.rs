@@ -21,7 +21,7 @@ use sea_orm::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
-	guard::{PermissionGuard, ServerOwnerGuard},
+	guard::PermissionGuard,
 	object::media::Media,
 	order::MediaOrderBy,
 	pagination::{
@@ -97,9 +97,7 @@ impl MediaQuery {
 	}
 
 	// TODO: Add variant to only fetch your own sessions and remove guard
-	#[graphql(
-		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
-	)]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadUsers)")]
 	async fn finished_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -109,9 +107,7 @@ impl MediaQuery {
 	}
 
 	// TODO: Add variant to only fetch your own sessions and remove guard
-	#[graphql(
-		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
-	)]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadUsers)")]
 	async fn active_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

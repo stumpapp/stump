@@ -9,22 +9,6 @@ use crate::{
 	error_message,
 };
 
-// TODO(permissions): remove this?
-/// Guard that checks if the user is the owner of the server.
-pub struct ServerOwnerGuard;
-
-impl Guard for ServerOwnerGuard {
-	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-
-		if user.is_server_owner {
-			Ok(())
-		} else {
-			Err(error_message::FORBIDDEN_ACTION.into())
-		}
-	}
-}
-
 /// Guard that checks if the user is themselves. This is dependent on the user ID
 /// provided and compared with the ID of the current user. So be sure to provide
 /// the correct user ID.

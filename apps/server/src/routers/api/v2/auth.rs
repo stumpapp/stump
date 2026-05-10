@@ -15,7 +15,7 @@ use models::{
 		user::{self, AuthUser, LoginUser},
 		user_login_activity, user_preferences,
 	},
-	shared::enums::UserPermission,
+	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use reqwest::header;
 use sea_orm::{prelude::*, IntoActiveModel, TransactionTrait};
@@ -417,12 +417,19 @@ pub async fn register(
 
 	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
+	let bootstrap_permissions = if is_server_owner {
+		PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
+	} else {
+		None
+	};
+
 	let tx = conn.begin().await?;
 
 	let active_model = user::ActiveModel {
 		username: Set(input.username.clone()),
 		hashed_password: Set(hashed_password),
 		is_server_owner: Set(is_server_owner),
+		permissions: Set(bootstrap_permissions),
 		..Default::default()
 	};
 	let created_user = active_model.insert(&tx).await?;

@@ -4,7 +4,10 @@ use axum::{
 	routing::get,
 	Json, Router,
 };
-use models::entity::{server_config, user, user_preferences};
+use models::{
+	entity::{server_config, user, user_preferences},
+	shared::{enums::UserPermission, permission_set::PermissionSet},
+};
 use sea_orm::{
 	ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait,
 	QueryFilter, Set, TransactionTrait,
@@ -233,6 +236,12 @@ async fn callback(
 
 		let username = ensure_unique_username(ctx.conn.as_ref(), &claims.email).await?;
 
+		let bootstrap_permissions = if is_server_owner {
+			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
+		} else {
+			None
+		};
+
 		let tx = ctx.conn.begin().await?;
 
 		let active_model = user::ActiveModel {
@@ -241,6 +250,7 @@ async fn callback(
 			oidc_issuer_id: Set(Some(claims.subject.clone())),
 			oidc_email: Set(Some(claims.email.clone())),
 			is_server_owner: Set(is_server_owner),
+			permissions: Set(bootstrap_permissions),
 			..Default::default()
 		};
 		let created_user = active_model.insert(&tx).await?;

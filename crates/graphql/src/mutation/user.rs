@@ -368,11 +368,6 @@ impl UserMutation {
 			.await?
 			.ok_or("User not found")?;
 
-		// TODO(permissions): remove this? if we rm is_server_owner then i guess admins can delete each other?
-		if existing_user.is_server_owner {
-			return Err("You cannot delete the server owner".into());
-		}
-
 		let deleted_user = if hard_delete {
 			user::Entity::delete_by_id(id.to_string())
 				.exec_with_returning(conn)
@@ -600,14 +595,10 @@ async fn update_user(
 
 	let txn = conn.begin().await?;
 
-	// TODO(permissions): ensure to revisit this
-	let is_updating_server_owner = by_user.is_server_owner && by_user.id == for_user_id;
-	if !is_updating_server_owner {
-		update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;
+	update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;
 
-		let permissions = PermissionSet::new(input.permissions.clone());
-		update_user.permissions = Set(permissions.resolve_into_string());
-	}
+	let permissions = PermissionSet::new(input.permissions.clone());
+	update_user.permissions = Set(permissions.resolve_into_string());
 
 	let updated_user_entity = update_user.update(&txn).await?;
 
@@ -670,7 +661,6 @@ async fn update_user_age_restriction(
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::tests::common::*;
 	use sea_orm::{DatabaseBackend::Sqlite, MockDatabase};
 
 	#[tokio::test]
@@ -728,58 +718,6 @@ mod tests {
 			delete_stmt.to_string(),
 			r#"DELETE FROM "age_restrictions" WHERE "age_restrictions"."id" = 1337"#
 				.to_string()
-		);
-	}
-
-	#[tokio::test]
-	async fn test_update_user_server_owner() {
-		let conn = MockDatabase::new(Sqlite)
-			.append_query_results::<user::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![
-				user::Model {
-					id: "42".to_string(),
-					username: "test_user".to_string(),
-					hashed_password: "hashed_password".to_string(),
-					is_server_owner: false,
-					is_locked: false,
-					permissions: None,
-					max_sessions_allowed: None,
-					avatar_path: None,
-					created_at: chrono::Utc::now().into(),
-					deleted_at: None,
-					user_preferences_id: None,
-					oidc_issuer_id: None,
-					oidc_email: None,
-				},
-			]])
-			.into_connection();
-		let config = StumpConfig::debug();
-
-		let input = UpdateUserInput {
-			username: "test_user".to_string(),
-			password: None,
-			max_sessions_allowed: Some(5),
-			permissions: vec![],
-			age_restriction: None,
-		};
-
-		let user = AuthUser {
-			permissions: vec![UserPermission::ChangeUsername],
-			..get_default_user()
-		};
-
-		let updated_user = update_user(&user, user.id.clone(), &conn, &config, &input)
-			.await
-			.unwrap();
-
-		assert_eq!(updated_user.model.username, "test_user");
-		let txns = conn.into_transaction_log();
-		assert_eq!(txns.len(), 1);
-		let txn = txns.first().unwrap();
-		assert_eq!(txn.statements().len(), 3);
-		let stmt = &txn.statements()[1];
-		assert_eq!(
-			stmt.to_string(),
-			r#"UPDATE "users" SET "username" = 'test_user', "max_sessions_allowed" = 5 WHERE "users"."id" = '42' RETURNING "id", "username", "hashed_password", "is_server_owner", "avatar_path", "created_at", "deleted_at", "is_locked", "max_sessions_allowed", "permissions", "user_preferences_id", "oidc_issuer_id", "oidc_email""#
 		);
 	}
 }

@@ -1,6 +1,7 @@
 type FormatSeriesPositionParams = {
 	seriesName?: string | null
 	prefix?: string
+	t: (key: string, args?: Record<string, unknown>) => string
 }
 
 // TODO(metadata): Fix this at the core
@@ -26,21 +27,21 @@ const decodeHtmlEntities = (str: string): string =>
 export const formatSeriesPosition = (
 	position: number | null | undefined,
 	totalBooks: number | null | undefined,
-	params?: FormatSeriesPositionParams,
+	{ t, ...params }: FormatSeriesPositionParams,
 ): string | null => {
 	if (position == null) return null
 	const isFractional = !Number.isInteger(position)
 	const showOfY = !isFractional && totalBooks != null && totalBooks > 0 && position <= totalBooks
 
-	const primaryClause = showOfY ? `${position} of ${totalBooks}` : `${position}`
+	const primaryClauseKey = showOfY
+		? 'formatSeriesPosition.positionWithTotal'
+		: 'formatSeriesPosition.position'
 
-	const withPrefix = params?.prefix ? `${params.prefix} ${primaryClause}` : primaryClause
+	const primaryClause = t(primaryClauseKey, {
+		position,
+		total: totalBooks || undefined,
+		seriesName: params.seriesName ? decodeHtmlEntities(params.seriesName) : undefined,
+	})
 
-	if (params?.seriesName) {
-		return `${withPrefix} in ${decodeHtmlEntities(params.seriesName)}`
-	} else if (!showOfY) {
-		return `${withPrefix} in series`
-	}
-
-	return withPrefix
+	return params.prefix ? `${params.prefix} ${primaryClause}` : primaryClause
 }

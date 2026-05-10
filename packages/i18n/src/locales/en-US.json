@@ -2828,6 +2828,10 @@
 			"value": "Value",
 			"version": "Version"
 		},
+		"formatSeriesPosition": {
+			"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+			"position": "{{position}} in {{seriesName}}"
+		},
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",

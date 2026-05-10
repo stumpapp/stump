@@ -1,6 +1,6 @@
 use async_graphql::{Context, Guard, Result};
 use models::{
-	entity::book_club_member,
+	entity::{book_club_member, user::AuthUser},
 	shared::{book_club::BookClubMemberRole, enums::UserPermission},
 };
 
@@ -70,19 +70,17 @@ impl PermissionGuard {
 			permissions: vec![permission],
 		}
 	}
+
+	fn is_authorized(&self, user: &AuthUser) -> bool {
+		!user.is_locked && self.permissions.iter().any(|p| user.has_permission(*p))
+	}
 }
 
 impl Guard for PermissionGuard {
 	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
-		let authorized = self
-			.permissions
-			.iter()
-			.any(|p| user.permissions.contains(p));
-		let permitted = authorized && !user.is_locked;
-
-		if permitted {
+		if self.is_authorized(user) {
 			Ok(())
 		} else {
 			Err(error_message::FORBIDDEN_ACTION.into())
@@ -164,5 +162,50 @@ impl Guard for BookClubRoleGuard {
 		} else {
 			Err(error_message::FORBIDDEN_ACTION.into())
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::tests::common::get_default_user;
+
+	#[test]
+	fn test_permission_guard_consults_associations() {
+		// User holds ManageUsers but not CreateUser explicitly. ManageUsers
+		// associates to CreateUser, so the guard for CreateUser should pass.
+		let user = AuthUser {
+			is_server_owner: false,
+			permissions: vec![UserPermission::ManageUsers],
+			..get_default_user()
+		};
+
+		let guard = PermissionGuard::one(UserPermission::CreateUser);
+		assert!(guard.is_authorized(&user));
+	}
+
+	#[test]
+	fn test_permission_guard_denies_locked_user() {
+		let user = AuthUser {
+			is_server_owner: false,
+			is_locked: true,
+			permissions: vec![UserPermission::CreateUser],
+			..get_default_user()
+		};
+
+		let guard = PermissionGuard::one(UserPermission::CreateUser);
+		assert!(!guard.is_authorized(&user));
+	}
+
+	#[test]
+	fn test_permission_guard_denies_user_without_permission() {
+		let user = AuthUser {
+			is_server_owner: false,
+			permissions: vec![UserPermission::ReadUsers],
+			..get_default_user()
+		};
+
+		let guard = PermissionGuard::one(UserPermission::CreateUser);
+		assert!(!guard.is_authorized(&user));
 	}
 }

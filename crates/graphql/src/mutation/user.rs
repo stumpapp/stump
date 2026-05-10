@@ -762,7 +762,10 @@ mod tests {
 			age_restriction: None,
 		};
 
-		let user = get_default_user();
+		let user = AuthUser {
+			permissions: vec![UserPermission::ChangeUsername],
+			..get_default_user()
+		};
 
 		let updated_user = update_user(&user, user.id.clone(), &conn, &config, &input)
 			.await

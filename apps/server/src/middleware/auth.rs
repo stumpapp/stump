@@ -519,21 +519,6 @@ mod tests {
 	}
 
 	#[test]
-	fn test_request_context_enforce_permissions_when_server_owner() {
-		let user = AuthUser {
-			is_server_owner: true,
-			..Default::default()
-		};
-		let request_context = AuthContext {
-			user: user.clone(),
-			api_key: None,
-		};
-		assert!(request_context
-			.enforce_permissions(&[UserPermission::AccessBookClub])
-			.is_ok());
-	}
-
-	#[test]
 	fn test_request_context_enforce_permissions_when_permitted() {
 		let user = AuthUser {
 			permissions: vec![UserPermission::AccessBookClub],

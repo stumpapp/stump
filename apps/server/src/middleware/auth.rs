@@ -591,29 +591,6 @@ mod tests {
 	}
 
 	#[test]
-	fn test_request_context_enforce_server_owner_when_server_owner() {
-		let user = AuthUser {
-			is_server_owner: true,
-			..Default::default()
-		};
-		let request_context = AuthContext {
-			user: user.clone(),
-			api_key: None,
-		};
-		assert!(request_context.enforce_server_owner().is_ok());
-	}
-
-	#[test]
-	fn test_request_context_enforce_server_owner_when_not_server_owner() {
-		let user = AuthUser::default();
-		let request_context = AuthContext {
-			user: user.clone(),
-			api_key: None,
-		};
-		assert!(request_context.enforce_server_owner().is_err());
-	}
-
-	#[test]
 	fn test_opds_basic_auth_v1_2_into_response() {
 		let response =
 			OPDSBasicAuth::new("1.2".to_string(), "http://localhost".to_string())

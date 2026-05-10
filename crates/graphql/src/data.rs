@@ -99,28 +99,4 @@ impl AuthContext {
 		self.enforce_permissions(permissions)?;
 		Ok(self.user())
 	}
-
-	// TODO(permissions): rm this?
-	/// Enforce that the current user is the server owner, otherwise return an error
-	#[tracing::instrument(skip(self))]
-	pub fn enforce_server_owner(&self) -> Result<()> {
-		let user = self.user();
-
-		if user.is_server_owner {
-			Ok(())
-		} else {
-			tracing::error!(
-				username = &user.username,
-				"User is not server owner, denying access"
-			);
-			Err(error_message::FORBIDDEN_ACTION.into())
-		}
-	}
-
-	/// Get the current user and enforce that they are the server owner, otherwise return an error
-	#[tracing::instrument(skip(self))]
-	pub fn server_owner_user(&self) -> Result<AuthUser> {
-		self.enforce_server_owner()?;
-		Ok(self.user())
-	}
 }

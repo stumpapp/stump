@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_graphql::Result;
 use models::{
 	entity::user::AuthUser,
-	shared::{enums::UserPermission, permission_set::user_has_all_permissions},
+	shared::{enums::UserPermission, permission_set::permissions_satisfy_all},
 };
 use stump_core::Ctx;
 
@@ -82,7 +82,7 @@ impl AuthContext {
 			return Err(error_message::LOCKED_ACCOUNT.into());
 		}
 
-		if user_has_all_permissions(&user, permissions) {
+		if permissions_satisfy_all(&user.permissions, permissions) {
 			Ok(())
 		} else {
 			Err(error_message::FORBIDDEN_ACTION.into())

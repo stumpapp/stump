@@ -11,7 +11,7 @@ use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
 		enums::UserPermission,
-		permission_set::{user_has_permission, PermissionSet},
+		permission_set::{permissions_satisfy, PermissionSet},
 	},
 };
 
@@ -71,7 +71,7 @@ impl AuthUser {
 	}
 
 	pub fn has_permission(&self, permission: UserPermission) -> bool {
-		user_has_permission(self, permission)
+		permissions_satisfy(&self.permissions, permission)
 	}
 }
 
@@ -158,6 +158,10 @@ impl LoginUser {
 			.selector
 			.left_join(age_restriction::Entity)
 			.left_join(user_preferences::Entity)
+	}
+
+	pub fn has_permission(&self, permission: UserPermission) -> bool {
+		permissions_satisfy(&self.permissions, permission)
 	}
 }
 

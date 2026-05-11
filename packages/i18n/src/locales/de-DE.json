@@ -1928,7 +1928,7 @@
 						},
 						"statuses": {
 							"label": "Status zum wiederholen",
-							"description": "Which metadata fetch statuses should be retried",
+							"description": "Welche Metadatenabrufstatusse erneut versucht werden sollen",
 							"rateLimited": "Anfragerate begrenzt",
 							"failed": "Fehlgeschlagen"
 						},
@@ -1944,12 +1944,12 @@
 						"delete": "Löschen"
 					},
 					"toasts": {
-						"createSuccess": "Scheduled job created",
-						"createError": "Failed to create scheduled job",
-						"updateSuccess": "Scheduled job updated",
-						"updateError": "Failed to update scheduled job",
-						"deleteSuccess": "Scheduled job deleted",
-						"deleteError": "Failed to delete scheduled job"
+						"createSuccess": "Geplanter Job erstellt",
+						"createError": "Fehler beim Erstellen des geplanten Job",
+						"updateSuccess": "Geplanter Job aktualisiert",
+						"updateError": "Fehler beim Aktualisieren des geplanten Job",
+						"deleteSuccess": "Geplanter Job gelöscht",
+						"deleteError": "Fehler beim Löschen des geplanten Job"
 					}
 				},
 				"history": {
@@ -2017,11 +2017,11 @@
 				"permissions": {
 					"groups": {
 						"accountManagement": "Benutzerkonto",
-						"featureAccess": "Feature access",
+						"featureAccess": "Funktionszugriff",
 						"fileManagement": "Dateien",
 						"emailers": "Mailserver",
 						"emailing": "E-Mailing",
-						"libraryManagement": "Library management",
+						"libraryManagement": "Bibliotheksverwaltung",
 						"userManagement": "User management",
 						"serverManagement": "Server management"
 					},
@@ -2301,7 +2301,7 @@
 		"server/metadataIntegrations": {
 			"helmet": "Metadata integrations",
 			"title": "Metadata integrations",
-			"addProvider": "Add provider",
+			"addProvider": "Anbieter hinzufügen",
 			"noProviders": "No providers configured yet. Add one to get started",
 			"providers": {
 				"title": "Anbieter",

@@ -55,7 +55,9 @@ export const formatSeriesPosition = (
 	const primaryClause = t(primaryClauseKey, {
 		position,
 		total: totalBooks || undefined,
-		seriesName: params.seriesName ? decodeHtmlEntities(params.seriesName) : undefined,
+		seriesName: params.seriesName
+			? decodeHtmlEntities(params.seriesName)
+			: t('formatSeriesPosition.unknownSeriesName'),
 	})
 
 	// null = no prefix

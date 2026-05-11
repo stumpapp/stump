@@ -64,12 +64,13 @@ describe('bookUtils', () => {
 		it('returns t result directly when prefix is null', () => {
 			const t = vi.fn().mockReturnValue('1 of 3')
 			expect(formatSeriesPosition(1, 3, { prefix: null, t })).toBe('1 of 3')
-			expect(t).toHaveBeenCalledOnce()
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.unknownSeriesName')
 		})
 
 		it('uses default prefix when prefix is not provided', () => {
 			const t = vi
 				.fn()
+				.mockReturnValueOnce('series') // unknownSeriesName call
 				.mockReturnValueOnce('1 of 3') // primaryClause call
 				.mockReturnValueOnce('Book') // common.book call
 			const result = formatSeriesPosition(1, 3, { t })

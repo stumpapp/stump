@@ -69,7 +69,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 	const insets = useSafeAreaInsets()
 
 	return (
-		<Animated.View className={cn('absolute inset-0 z-10 flex-1')} style={containerStyles}>
+		<Animated.View className={cn('inset-0 absolute z-10 flex-1')} style={containerStyles}>
 			<View
 				className="absolute z-30"
 				style={{
@@ -78,7 +78,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 			>
 				<View className="flex-row items-center justify-between">
 					<Button
-						className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+						className="squircle p-1 tablet:p-2 h-[unset] w-[unset] rounded-full border"
 						variant="ghost"
 						size="icon"
 						style={{
@@ -104,10 +104,10 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 
 			<View style={{ flex: 1, backgroundColor: 'hsla(0, 0%, 0%, 0.75)' }} />
 
-			<View className="absolute inset-0 flex-1 items-center justify-center gap-4">
+			<View className="inset-0 gap-4 absolute flex-1 items-center justify-center">
 				<View>
 					<Label className="text-white opacity-80">Next Up:</Label>
-					<Heading size="xl" className="text-center text-white">
+					<Heading size="xl" className="text-white text-center">
 						{book.name}
 					</Heading>
 				</View>
@@ -125,12 +125,12 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 				/>
 
 				<View
-					className="flex flex-row items-center tablet:max-w-sm tablet:self-center"
+					className="tablet:max-w-sm flex flex-row items-center tablet:self-center"
 					style={{
 						width: size + 16,
 					}}
 				>
-					<Button className="flex-1 border border-edge bg-white opacity-80" onPress={onReadNext}>
+					<Button className="bg-white flex-1 border border-edge opacity-80" onPress={onReadNext}>
 						<Text className="text-black">Read Next</Text>
 					</Button>
 				</View>

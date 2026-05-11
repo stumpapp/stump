@@ -100,9 +100,12 @@ export default function Screen() {
 	const seriesName = metadata?.series || downloadedFile.series?.name
 	const seriesPosition = formatSeriesPosition(
 		(Number(metadata?.number) || undefined) ?? null,
-		// We don't have totalBooks offline, pass 0 so it always shows "X in Series"
+		// We don't have totalBooks offline, pass 0 so it always shows "Book X in Series"
 		0,
-		{ seriesName: seriesName ?? null },
+		{
+			seriesName: seriesName ?? null,
+			t,
+		},
 	)
 
 	const getProgressPercentage = () => {

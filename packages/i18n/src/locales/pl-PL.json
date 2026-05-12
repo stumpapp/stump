@@ -2790,6 +2790,7 @@
 			"year": "Rok"
 		},
 		"common": {
+			"book": "Book",
 			"cancel": "Anuluj",
 			"chapter": "Rozdział",
 			"clear": "Wyczyść",
@@ -2813,6 +2814,7 @@
 			"pages": "Strony",
 			"password": "Hasło",
 			"progress": "Postęp",
+			"publication": "Publication",
 			"readTime": "Czas czytania",
 			"readMore": "Dowiedz się więcej",
 			"save": "Zapisz",
@@ -2827,6 +2829,21 @@
 			"username": "Nazwa użytkownika",
 			"value": "Wartość",
 			"version": "Wersja"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
+				"position": "Book {{position}} in {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
+			},
+			"unknownSeriesName": "series"
 		},
 		"emptyState": {
 			"noStumpServers": "Nie dodano żadnych serwerów Stump",

@@ -1,7 +1,7 @@
 /* eslint-disable react-compiler/react-compiler */
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
-import { ReadingDirection } from '@stump/graphql'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
@@ -21,7 +21,7 @@ export default function ReaderFooter() {
 		useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
-		bookPreferences: { readingDirection, trackElapsedTime },
+		bookPreferences: { readingMode, readingDirection, trackElapsedTime },
 	} = useBookPreferences({ book })
 	const {
 		preferences: { thumbnailRatio },
@@ -137,29 +137,31 @@ export default function ReaderFooter() {
 			// @ts-expect-error: It does have className?
 			className="bottom-0 left-0 gap-2 text-white shadow-lg fixed z-100 flex w-full flex-col justify-end overflow-hidden"
 		>
-			<Virtuoso
-				ref={virtuosoRef}
-				style={{
-					height:
-						(100 / thumbnailRatio) * SIZE_MODIFIER + // item height (all items have the same fixed height)
-						12 + // scrollbar vertical height
-						10 + // translateY padding
-						8, // add some vertical padding between the scrollbar and items
-				}}
-				horizontalDirection
-				data={pageSets}
-				components={{
-					Item,
-					Scroller,
-				}}
-				itemContent={renderItem}
-				overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
-				initialTopMostItemIndex={
-					readingDirection === ReadingDirection.Rtl
-						? pageSets.length - currentPageSetIdx
-						: currentPageSetIdx
-				}
-			/>
+			{readingMode === ReadingMode.Paged && (
+				<Virtuoso
+					ref={virtuosoRef}
+					style={{
+						height:
+							(100 / thumbnailRatio) * SIZE_MODIFIER + // item height (all items have the same fixed height)
+							12 + // scrollbar vertical height
+							10 + // translateY padding
+							8, // add some vertical padding between the scrollbar and items
+					}}
+					horizontalDirection
+					data={pageSets}
+					components={{
+						Item,
+						Scroller,
+					}}
+					itemContent={renderItem}
+					overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
+					initialTopMostItemIndex={
+						readingDirection === ReadingDirection.Rtl
+							? pageSets.length - currentPageSetIdx
+							: currentPageSetIdx
+					}
+				/>
+			)}
 
 			<div className="gap-2 px-4 pb-4 flex w-full flex-col">
 				<ProgressBar
@@ -168,7 +170,7 @@ export default function ReaderFooter() {
 					max={book.pages}
 					className="bg-[#0c0c0c]"
 					indicatorClassName="bg-[#898d94]"
-					inverted={readingDirection === ReadingDirection.Rtl}
+					inverted={readingDirection === ReadingDirection.Rtl && readingMode === ReadingMode.Paged}
 				/>
 
 				<div

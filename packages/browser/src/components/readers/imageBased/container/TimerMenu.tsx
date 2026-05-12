@@ -21,7 +21,7 @@ export default function TimerMenu() {
 				</ControlButton>
 			</Dropdown.Trigger>
 
-			<Dropdown.Content align="end">
+			<Dropdown.Content align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
 				<Dropdown.Item onClick={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}>
 					{trackElapsedTime ? 'Stop Timer' : 'Start Timer'}
 				</Dropdown.Item>

@@ -10,7 +10,6 @@ import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuo
 import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-import { useBookReadTime } from '@/stores/reader'
 
 import { useImageBaseReaderContext } from '../context'
 
@@ -18,13 +17,12 @@ const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
 	const { sdk } = useSDK()
-	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets } =
+	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
 		bookPreferences: { readingDirection, trackElapsedTime },
 	} = useBookPreferences({ book })
-	const elapsedSeconds = useBookReadTime(book.id)
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -54,6 +52,7 @@ export default function ReaderFooter() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showToolBar, currentPageSetIdx])
 
+	const elapsedSeconds = timer.getCurrentTime()
 	const formattedReadTime = formatHumanDuration(elapsedSeconds)
 
 	const renderItem = useCallback(

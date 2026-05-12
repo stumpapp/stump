@@ -65,7 +65,6 @@
 		"react-router-dom": "^6.30.0",
 		"react-scrollbar-size": "^5.0.0",
 		"react-swipeable": "^7.0.2",
-		"react-timer-hook": "^4.0.1",
 		"react-use": "^17.6.0",
 		"react-virtualized-auto-sizer": "^1.0.24",
 		"react-virtuoso": "^4.10.3",

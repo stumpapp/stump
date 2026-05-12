@@ -7,7 +7,7 @@ import { useImageBaseReaderContext } from '../context'
 import ControlButton from './ControlButton'
 
 export default function TimerMenu() {
-	const { book, resetTimer } = useImageBaseReaderContext()
+	const { book, timer } = useImageBaseReaderContext()
 	const {
 		bookPreferences: { trackElapsedTime },
 		setBookPreferences,
@@ -26,7 +26,7 @@ export default function TimerMenu() {
 					{trackElapsedTime ? 'Stop Timer' : 'Start Timer'}
 				</Dropdown.Item>
 
-				<Dropdown.Item onClick={resetTimer}>Reset Timer</Dropdown.Item>
+				<Dropdown.Item onClick={timer.reset}>Reset Timer</Dropdown.Item>
 			</Dropdown.Content>
 		</Dropdown>
 	)

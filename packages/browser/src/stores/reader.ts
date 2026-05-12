@@ -1,7 +1,5 @@
 import { createReaderStore } from '@stump/client'
-import { addSeconds } from 'date-fns'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useStopwatch } from 'react-timer-hook'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 export const useReaderStore = createReaderStore(localStorage)
 
@@ -10,22 +8,13 @@ type UseBookTimerParams = {
 	enabled?: boolean
 }
 
-export const useBookReadTime = (
-	id: string,
-	{ initial }: Omit<UseBookTimerParams, 'enabled'> = {},
-) => {
-	const bookTimers = useReaderStore((state) => state.bookTimers)
-	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
-	return bookTimer || initial || 0
-}
-
 const defaultParams: UseBookTimerParams = {
 	initial: 0,
 	enabled: true,
 }
 
 export const useBookTimer = (id: string, params: UseBookTimerParams = defaultParams) => {
-	const [initial] = useState(() => params.initial)
+	const [initial, setInitial] = useState(() => params.initial)
 
 	const bookTimers = useReaderStore((state) => state.bookTimers)
 	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
@@ -36,42 +25,45 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 		[initial, bookTimer],
 	)
 
-	const { pause, totalSeconds, reset, isRunning } = useStopwatch({
-		autoStart: !!id && !!params.enabled,
-		offsetTimestamp: addSeconds(new Date(), resolvedTimer || 0),
-	})
+	const startDateRef = useRef<number | null>(null)
 
-	const pauseTimer = useCallback(() => {
-		if (isRunning) {
-			pause()
-			setBookTimer(id, totalSeconds)
+	const getCurrentTime = useCallback(() => {
+		let elapsed = 0
+		if (startDateRef.current !== null) {
+			elapsed = Math.trunc((Date.now() - startDateRef.current) / 1000)
 		}
-	}, [id, pause, setBookTimer, totalSeconds, isRunning])
+		return resolvedTimer + elapsed
+	}, [resolvedTimer])
 
-	const resumeTimer = useCallback(() => {
-		if (!params.enabled) return
+	const pause = useCallback(() => {
+		if (startDateRef.current === null) return
 
-		if (!isRunning) {
-			const offset = addSeconds(new Date(), totalSeconds)
-			reset(offset)
-		}
-	}, [totalSeconds, reset, isRunning, params.enabled])
+		const elapsedSeconds = getCurrentTime()
+		setBookTimer(id, elapsedSeconds)
 
-	const resetTimer = useCallback(() => {
-		reset(undefined, params.enabled)
+		startDateRef.current = null
+	}, [id, setBookTimer, getCurrentTime])
+
+	const resume = useCallback(() => {
+		if (!params.enabled || startDateRef.current !== null) return
+		startDateRef.current = Date.now()
+	}, [params.enabled])
+
+	const reset = useCallback(() => {
+		setInitial(0)
 		setBookTimer(id, 0)
-	}, [reset, params.enabled, id, setBookTimer])
-
-	useEffect(() => {
-		reset(addSeconds(new Date(), resolvedTimer || 0))
-	}, [resolvedTimer, reset])
+		startDateRef.current = startDateRef.current !== null ? Date.now() : null
+	}, [id, setBookTimer])
 
 	useEffect(() => {
 		if (!params.enabled) {
 			pause()
-			setBookTimer(id, totalSeconds)
+		} else {
+			resume()
 		}
-	}, [params.enabled, isRunning, pause, setBookTimer, id, totalSeconds])
+	}, [params.enabled, pause, resume])
 
-	return { totalSeconds, pause: pauseTimer, resume: resumeTimer, reset: resetTimer, isRunning }
+	return { getCurrentTime, pause, resume, reset }
 }
+
+export type Timer = ReturnType<typeof useBookTimer>

@@ -85,7 +85,7 @@ function OnDeckBookItem({ book }: Props) {
 		{
 			t,
 			seriesName: data.series.resolvedName,
-			prefix: '#',
+			prefix: 'hashtag',
 		},
 	)
 

@@ -2831,8 +2831,18 @@
 			"version": "Version"
 		},
 		"formatSeriesPosition": {
-			"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
-			"position": "{{position}} in {{seriesName}}",
+			"none": {
+				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
+				"position": "Book {{position}} in {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
+			},
 			"unknownSeriesName": "series"
 		},
 		"emptyState": {

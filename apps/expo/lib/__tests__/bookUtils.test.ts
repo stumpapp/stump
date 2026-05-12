@@ -11,10 +11,27 @@ describe('bookUtils', () => {
 			expect(t).not.toHaveBeenCalled()
 		})
 
+		it('properly handles all prefix options', () => {
+			const t = vi.fn()
+			for (const prefix of [null, undefined, 'book', 'hashtag'] as const) {
+				formatSeriesPosition(1, 3, {
+					prefix,
+					t,
+					// set so we don't worry about extra translation call
+					seriesName: 'Murderbot Diaries',
+				})
+				const expectedPrefixKey = prefix === null ? 'none' : prefix === undefined ? 'book' : prefix
+				expect(t).toHaveBeenCalledWith(
+					`formatSeriesPosition.${expectedPrefixKey}.positionWithTotal`,
+					expect.anything(),
+				)
+			}
+		})
+
 		it('calls t with positionWithTotal key when position <= totalBooks', () => {
 			const t = vi.fn()
-			formatSeriesPosition(1, 3, { prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.positionWithTotal', {
+			formatSeriesPosition(1, 3, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.positionWithTotal', {
 				position: 1,
 				total: 3,
 				seriesName: undefined,
@@ -23,8 +40,8 @@ describe('bookUtils', () => {
 
 		it('calls t with position key when totalBooks is null', () => {
 			const t = vi.fn()
-			formatSeriesPosition(1, null, { prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.position', {
+			formatSeriesPosition(1, null, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
 				position: 1,
 				total: undefined,
 				seriesName: undefined,
@@ -33,8 +50,8 @@ describe('bookUtils', () => {
 
 		it('calls t with position key when totalBooks is undefined', () => {
 			const t = vi.fn()
-			formatSeriesPosition(1, undefined, { prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.position', {
+			formatSeriesPosition(1, undefined, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
 				position: 1,
 				total: undefined,
 				seriesName: undefined,
@@ -43,8 +60,8 @@ describe('bookUtils', () => {
 
 		it('calls t with position key when totalBooks is 0', () => {
 			const t = vi.fn()
-			formatSeriesPosition(1, 0, { prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.position', {
+			formatSeriesPosition(1, 0, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
 				position: 1,
 				total: undefined,
 				seriesName: undefined,
@@ -53,40 +70,18 @@ describe('bookUtils', () => {
 
 		it('calls t with position key when position > totalBooks', () => {
 			const t = vi.fn()
-			formatSeriesPosition(4, 3, { prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.position', {
+			formatSeriesPosition(4, 3, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
 				position: 4,
 				total: 3,
 				seriesName: undefined,
 			})
 		})
 
-		it('returns t result directly when prefix is null', () => {
-			const t = vi.fn().mockReturnValue('1 of 3')
-			expect(formatSeriesPosition(1, 3, { prefix: null, t })).toBe('1 of 3')
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.unknownSeriesName')
-		})
-
-		it('uses default prefix when prefix is not provided', () => {
-			const t = vi
-				.fn()
-				.mockReturnValueOnce('series') // unknownSeriesName call
-				.mockReturnValueOnce('1 of 3') // primaryClause call
-				.mockReturnValueOnce('Book') // common.book call
-			const result = formatSeriesPosition(1, 3, { t })
-			expect(t).toHaveBeenCalledWith('common.book')
-			expect(result).toBe('Book 1 of 3')
-		})
-
-		it('prepends a custom prefix to the result of t', () => {
-			const t = vi.fn().mockReturnValue('1 of 3')
-			expect(formatSeriesPosition(1, 3, { prefix: '#', t })).toBe('#1 of 3')
-		})
-
 		it('passes decoded seriesName to t', () => {
 			const t = vi.fn()
 			formatSeriesPosition(1, 3, { seriesName: 'Batman &amp; Robin', prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.positionWithTotal', {
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.none.positionWithTotal', {
 				position: 1,
 				total: 3,
 				seriesName: 'Batman & Robin',
@@ -96,7 +91,7 @@ describe('bookUtils', () => {
 		it('passes decoded seriesName with multiple entities to t', () => {
 			const t = vi.fn()
 			formatSeriesPosition(1, null, { seriesName: 'Q &amp; A&#039;s', prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.position', {
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.none.position', {
 				position: 1,
 				total: undefined,
 				seriesName: "Q & A's",
@@ -106,7 +101,7 @@ describe('bookUtils', () => {
 		it('passes undefined seriesName to t when seriesName is null', () => {
 			const t = vi.fn()
 			formatSeriesPosition(1, 3, { seriesName: null, prefix: null, t })
-			expect(t).toHaveBeenCalledWith('formatSeriesPosition.positionWithTotal', {
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.none.positionWithTotal', {
 				position: 1,
 				total: 3,
 				seriesName: undefined,

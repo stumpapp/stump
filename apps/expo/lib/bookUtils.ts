@@ -1,7 +1,11 @@
+import { match } from 'ts-pattern'
+
+type KnownPrefix = 'book' | 'hashtag'
+
 type FormatSeriesPositionParams = {
 	seriesName?: string | null
-	// null = no prefix, undefined = default prefix
-	prefix?: string | null
+	// null = no prefix, undefined = default prefix (book)
+	prefix?: KnownPrefix | null
 	t: (key: string, args?: Record<string, unknown>) => string
 }
 
@@ -48,20 +52,23 @@ export const formatSeriesPosition = (
 
 	const showOfY = totalBooks != null && totalBooks > 0 && position <= totalBooks
 
-	const primaryClauseKey = showOfY
-		? 'formatSeriesPosition.positionWithTotal'
-		: 'formatSeriesPosition.position'
+	const resolvedPrefix = match(params.prefix)
+		.with(null, () => 'none' as const)
+		.with(undefined, () => 'book' satisfies KnownPrefix)
+		.otherwise((val) => val)
 
-	const primaryClause = t(primaryClauseKey, {
+	// it comes with a little bit of duplication to handle the prefix in this way,
+	// i.e. a bunch of almost identical positionWithTotal/position keys, but since languages
+	// differ in grammar this was just easiest
+	const primaryClauseKey = showOfY
+		? `formatSeriesPosition.${resolvedPrefix}.positionWithTotal`
+		: `formatSeriesPosition.${resolvedPrefix}.position`
+
+	return t(primaryClauseKey, {
 		position,
 		total: totalBooks || undefined,
 		seriesName: params.seriesName
 			? decodeHtmlEntities(params.seriesName)
 			: t('formatSeriesPosition.unknownSeriesName'),
 	})
-
-	// null = no prefix
-	const prefix = params.prefix === null ? undefined : (params.prefix ?? t('common.book') + ' ')
-
-	return prefix ? `${prefix}${primaryClause}` : primaryClause
 }

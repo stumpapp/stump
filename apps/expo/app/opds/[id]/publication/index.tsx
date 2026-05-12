@@ -140,7 +140,7 @@ export default function Screen() {
 	)
 	const seriesPosition = formatSeriesPosition(belongsToSeries?.position ?? null, 0, {
 		seriesName: belongsToSeries?.name ?? null,
-		prefix: t('common.publication') + ' ',
+
 		t,
 	})
 	const seriesText = seriesPosition ?? belongsToSeries?.name

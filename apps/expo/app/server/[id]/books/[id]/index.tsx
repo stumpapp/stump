@@ -221,7 +221,6 @@ export default function Screen() {
 		{
 			t,
 			seriesName,
-			prefix: t('common.book'),
 		},
 	)
 

@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
+import { useAppState } from '~/lib/hooks'
 import { ColumnCount, ImageFilter, TextAlignment } from '~/modules/readium'
 
 import { ZustandMMKVStorage } from './store'
@@ -236,69 +237,72 @@ type UseBookTimerParams = {
 	enabled?: boolean
 }
 
-export const useBookReadTime = (
-	id: string,
-	{ initial }: Omit<UseBookTimerParams, 'enabled'> = {},
-) => {
-	const bookTimers = useReaderStore((state) => state.bookTimers)
-	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
-	return bookTimer || initial || 0
-}
-
 const defaultParams: UseBookTimerParams = {
 	initial: 0,
 	enabled: true,
 }
 
 export const useBookTimer = (id: string, params: UseBookTimerParams = defaultParams) => {
-	const [initial] = useState(() => params.initial)
+	const [initial, setInitial] = useState(params.initial)
+	const startDateRef = useRef<number | null>(null)
 
-	const bookTimers = useReaderStore((state) => state.bookTimers)
-	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
-	const setBookTimer = useReaderStore((state) => state.setBookTimer)
+	const getCurrentTime = useCallback(() => {
+		const bookTimer = useReaderStore.getState().bookTimers[id] || 0
+		const resolvedTimer = !!initial && initial > bookTimer ? initial : bookTimer
 
-	const resolvedTimer = useMemo(
-		() => (!!initial && initial > bookTimer ? initial : bookTimer),
-		[initial, bookTimer],
-	)
+		if (startDateRef.current === null) {
+			return resolvedTimer
+		}
 
-	const resolvedTimerRef = useRef(resolvedTimer)
-	// eslint-disable-next-line react-hooks/purity
-	const startDateRef = useRef(Date.now())
-	const [isRunning, setIsRunning] = useState(true)
-
-	resolvedTimerRef.current = resolvedTimer
-
-	const pauseTimer = useCallback(() => {
-		if (!isRunning) return
 		const elapsed = Math.trunc((Date.now() - startDateRef.current) / 1000)
-		setBookTimer(id, resolvedTimerRef.current + elapsed)
-		setIsRunning(false)
-	}, [id, isRunning, setBookTimer])
+		return resolvedTimer + elapsed
+	}, [id, initial])
 
-	const resumeTimer = useCallback(() => {
-		if (!params.enabled || isRunning) return
-		startDateRef.current = Date.now()
-		setIsRunning(true)
-	}, [params.enabled, isRunning])
+	const pause = useCallback(() => {
+		if (startDateRef.current === null) return
 
-	const resetTimer = useCallback(() => {
+		const elapsedSeconds = getCurrentTime()
+		useReaderStore.getState().setBookTimer(id, elapsedSeconds)
+
+		startDateRef.current = null
+	}, [id, getCurrentTime])
+
+	const resume = useCallback(() => {
+		if (!params.enabled || startDateRef.current !== null) return
 		startDateRef.current = Date.now()
-		setBookTimer(id, 0)
-	}, [id, setBookTimer])
+	}, [params.enabled])
+
+	const reset = useCallback(() => {
+		setInitial(0)
+		useReaderStore.getState().setBookTimer(id, 0)
+		startDateRef.current = startDateRef.current !== null ? Date.now() : null
+	}, [id])
 
 	useEffect(() => {
-		if (!params.enabled) pauseTimer()
-	}, [params.enabled, pauseTimer])
+		if (!params.enabled) {
+			pause()
+		} else {
+			resume()
+		}
+	}, [params.enabled, pause, resume])
 
-	return {
-		totalSeconds: resolvedTimer,
-		pause: pauseTimer,
-		resume: resumeTimer,
-		reset: resetTimer,
-		isRunning: isRunning,
-	}
+	const handleFocusedChanged = useCallback(
+		(focused: boolean) => {
+			if (!focused) {
+				pause()
+			} else {
+				resume()
+			}
+		},
+		[pause, resume],
+	)
+
+	useAppState({ onStateChanged: handleFocusedChanged })
+
+	return { getCurrentTime, pause, resume, reset }
 }
+
+export type Timer = ReturnType<typeof useBookTimer>
 
 export const useHideSystemBars = () => {
 	const { isReading, showControls } = useReaderStore(

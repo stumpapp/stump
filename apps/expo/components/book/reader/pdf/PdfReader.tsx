@@ -17,7 +17,7 @@ import {
 } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 import { usePdfStore } from '~/stores/pdf'
-import { useBookPreferences } from '~/stores/reader'
+import { Timer, useBookPreferences } from '~/stores/reader'
 
 import { ReaderBookRef } from '../image/context'
 import { ControlsBackdrop } from '../shared'
@@ -44,9 +44,9 @@ type Props = {
 	 */
 	offlineUri?: string
 	/**
-	 * A callback to reset the reading timer
+	 * The active book's timer
 	 */
-	resetTimer?: () => void
+	timer?: Timer
 } & OfflineCompatibleReader
 
 // TODO(expo-pdf): Long term, consider just using a library like https://github.com/wonday/react-native-pdf

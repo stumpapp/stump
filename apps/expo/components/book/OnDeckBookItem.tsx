@@ -7,7 +7,7 @@ import { easeGradient } from 'react-native-easing-gradient'
 
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { COLORS } from '~/lib/constants'
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
@@ -58,6 +58,7 @@ function OnDeckBookItem({ book }: Props) {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
+	const { t } = useTranslate()
 	const { height, width } = useListItemSize()
 
 	const router = useRouter()
@@ -82,7 +83,9 @@ function OnDeckBookItem({ book }: Props) {
 		Number(data.metadata?.number) || data.seriesPosition,
 		data.series.metadata?.totalIssues ?? null,
 		{
+			t,
 			seriesName: data.series.resolvedName,
+			prefix: 'hashtag',
 		},
 	)
 

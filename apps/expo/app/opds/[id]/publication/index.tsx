@@ -38,6 +38,7 @@ import {
 	useIsOPDSBookDownloading,
 	useIsOPDSPublicationDownloaded,
 	useOPDSDownload,
+	useTranslate,
 } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -45,6 +46,7 @@ import { usePreferencesStore } from '~/stores'
 import { usePublicationContext } from './context'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID, kind },
@@ -138,6 +140,8 @@ export default function Screen() {
 	)
 	const seriesPosition = formatSeriesPosition(belongsToSeries?.position ?? null, 0, {
 		seriesName: belongsToSeries?.name ?? null,
+
+		t,
 	})
 	const seriesText = seriesPosition ?? belongsToSeries?.name
 	const belongsToCollection = Array.isArray(belongsTo?.collection)

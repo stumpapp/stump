@@ -71,6 +71,7 @@ export default function Screen() {
 
 	const {
 		data: { librariesStats },
+		refetch: refetchStats,
 	} = useSuspenseGraphQL(statsQuery, ['seriesStats', serverID])
 
 	// i swapped to non-suspense because it was flickering the stack items
@@ -78,7 +79,7 @@ export default function Screen() {
 		data,
 		hasNextPage,
 		fetchNextPage,
-		refetch,
+		refetch: refetchSeries,
 		isLoading: isInitialLoading,
 	} = useInfiniteGraphQL(
 		query,
@@ -94,6 +95,8 @@ export default function Screen() {
 	)
 
 	const nodes = data?.pages.flatMap((page) => page.series.nodes) || []
+
+	const refetch = () => Promise.all([refetchSeries(), refetchStats()])
 
 	const [isRefetching, handleRefetch] = useRefetch(refetch)
 

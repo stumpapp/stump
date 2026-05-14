@@ -1,0 +1,16 @@
+{
+	"applinks": {
+		"details": [
+			{
+				"appIDs": [
+					"AABTGX45S3.com.stumpapp.stump"
+				]
+			}
+		]
+	},
+	"webcredentials": {
+		"apps": [
+			"AABTGX45S3.com.stumpapp.stump"
+		]
+	}
+}

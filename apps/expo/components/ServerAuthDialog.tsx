@@ -188,33 +188,37 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						name="password"
 					/>
 
-					<Button
-						onPress={handleSubmit(onSubmit)}
-						className="mt-4 w-full"
-						disabled={isLoggingIn}
-						variant="brand"
-					>
-						<Text>Login</Text>
-					</Button>
+					<View className="gap-4 w-full">
+						<Button
+							onPress={handleSubmit(onSubmit)}
+							className="mt-4 w-full"
+							roundness="full"
+							disabled={isLoggingIn}
+							variant="brand"
+						>
+							<Text>Login</Text>
+						</Button>
 
-					{oidcConfig?.enabled && (
-						<View className="pb-4 w-full">
-							<View className="my-3 flex-row items-center">
-								<View className="flex-1 border-t border-edge" />
-								<Text className="mx-2 text-sm text-foreground-muted">Or</Text>
-								<View className="flex-1 border-t border-edge" />
-							</View>
+						{oidcConfig?.enabled && (
+							<>
+								<View className="flex-row items-center">
+									<View className="flex-1 border-t border-edge" />
+									<Text className="mx-2 text-sm text-foreground-muted">Or</Text>
+									<View className="flex-1 border-t border-edge" />
+								</View>
 
-							<Button
-								onPress={handleOidcLogin}
-								className="mt-4 w-full"
-								disabled={isOidcLoading || isLoggingIn}
-								variant="secondary"
-							>
-								<Text>Login with OIDC</Text>
-							</Button>
-						</View>
-					)}
+								<Button
+									onPress={handleOidcLogin}
+									className="w-full"
+									disabled={isOidcLoading || isLoggingIn}
+									roundness="full"
+									variant="secondary"
+								>
+									<Text>Login with OIDC</Text>
+								</Button>
+							</>
+						)}
+					</View>
 				</View>
 			</ScrollView>
 		</TrueSheet>

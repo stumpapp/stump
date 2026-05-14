@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 # Offline Reading and Progression Sync
 
-The mobile app supports managed downloads with offline reading capabilities for a subset of formats:
+The mobile app supports managed downloads and local imports for offline reading capabilities. The following matrix outlines the supported formats for offline reading:
 
 | Format  | Status | Notes                                  |
 | ------- | ------ | -------------------------------------- |
@@ -10,6 +10,8 @@ The mobile app supports managed downloads with offline reading capabilities for 
 | CBR/RAR | ❌     |                                        |
 | EPUB    | ✅     |                                        |
 | PDF     | ✅     | Native reader is a separate experience |
+
+If you do not see a format listed above, it is not currently supported.
 
 ## Downloads
 
@@ -20,7 +22,7 @@ The mobile app supports managed downloads with offline reading capabilities for 
 
 You can download books for offline reading by navigating to the book details page and tapping either the download button next to the reading button or the download button in the action menu.
 
-Once downloaded, books will appear in the `Downloads` tab at the root of the app.
+Once downloaded, books will appear in the `Library` tab at the root of the app.
 
 ### Sorting
 
@@ -58,6 +60,10 @@ There is a convenience button in the top-left to select or deselect all books.
 	[GitHub](https://github.com/stumpapp/stump/issues).
 </Callout>
 
+## Local Imports
+
+Stump has file associations for the supported formats, so you can use your device's file browser to find a book and open it with Stump. This will import the book into the app and make it available for offline reading.
+
 ## Progression Sync
 
 The mobile app supports progression sync for **Stump servers only**.
@@ -94,7 +100,6 @@ I'd like to add the following features in the future:
 
 - CBR/RAR offline reading
 - File sharing downloaded files
-- Local storage import (e.g., from Files app on iOS)
 
 <Callout emoji="💡" type="info">
 	If you have ideas for other features you'd like to see, feel free to suggest them on

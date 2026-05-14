@@ -1,0 +1,16 @@
+{
+	"pages": [
+		"---Getting Started---",
+		"index",
+		"getting-started/installation",
+
+		"---Guides---",
+		"guides/access-control",
+		"guides/fundamentals",
+
+		"---Developer---",
+		"developer/api",
+		"developer/cli",
+		"developer/contributing"
+	]
+}

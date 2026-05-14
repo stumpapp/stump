@@ -7,8 +7,12 @@
 		"---Guides---",
 		"guides/access-control",
 		"guides/fundamentals",
+		"guides/integrations",
 
 		"guides/breaking-changes",
+
+		"---Apps---",
+		"apps/mobile",
 
 		"---Developer---",
 		"developer/api",

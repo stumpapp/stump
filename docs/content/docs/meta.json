@@ -8,6 +8,8 @@
 		"guides/access-control",
 		"guides/fundamentals",
 
+		"guides/breaking-changes",
+
 		"---Developer---",
 		"developer/api",
 		"developer/cli",

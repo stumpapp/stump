@@ -13,6 +13,8 @@
 
 		"---Apps---",
 		"apps/mobile",
+		"apps/desktop",
+		"apps/web",
 
 		"---Developer---",
 		"developer/api",

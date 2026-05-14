@@ -14,10 +14,19 @@ export const Route = createRootRoute({
 				content: 'width=device-width, initial-scale=1',
 			},
 			{
-				title: 'Fumadocs on TanStack Start',
+				title: 'Stump Docs',
 			},
 		],
-		links: [{ rel: 'stylesheet', href: appCss }],
+		links: [
+			{ rel: 'stylesheet', href: appCss },
+			{ rel: 'icon', href: '/favicon.ico' },
+			{
+				rel: 'icon',
+				type: 'image/png',
+				sizes: '32x32',
+				href: '/favicon.png',
+			},
+		],
 	}),
 	component: RootComponent,
 })

@@ -47,7 +47,7 @@ To reset a user's password, run:
 
 You will be prompted to enter a new password, with a confirmation prompt to ensure you entered it correctly. The password will be hashed and salted and stored in the database to replace the existing one.
 
-<Callout emoji="📢">
+<Callout>
 	The CLI only contains user-management commands at this time. If you have any ideas for new
 	commands or features, please create a [feature
 	request](https://github.com/stumpapp/stump/issues/new/choose) on GitHub
@@ -68,7 +68,7 @@ This will do the following, assuming both accounts exist:
 - Delete the local account
 - Reassign the local account's username to the OIDC account
 
-<Callout emoji="🔒" type="warning">
+<Callout type="warning">
 	Both the local account and the OIDC account must already exist. The OIDC account should not have
 	any existing data, as it will be overwritten. Use this command with caution, as it cannot be
 	undone

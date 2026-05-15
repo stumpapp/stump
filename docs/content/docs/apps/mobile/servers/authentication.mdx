@@ -16,7 +16,7 @@ Please note that if you are configuring an OPDS v1.2 server with login-based aut
 
 ### OIDC Authentication
 
-<Callout emoji="🔐" type="info">
+<Callout title="Permission required" type="info">
 	**OIDC authentication is only available when using Login-based authentication.** If your server
 	has OIDC configured, a "Login with OIDC" button will appear on the login sheet
 </Callout>
@@ -25,15 +25,15 @@ When you choose a login-based authentication type for a Stump server that has OI
 
 ## Basic Authentication
 
-<Callout emoji="ℹ️" type="info">
+<Callout type="info">
 	Stump will not use actual [Basic
 	Auth](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) for native API operations.
 	If you choose basic auth for a Stump server, it would only use Basic Auth for OPDS (if enabled)
 	and fetch a token from the server for native API operations
 </Callout>
 
-<Callout emoji="⚡" type="warning">
-	**Performance Note:** Basic Auth for OPDS requires the server to verify your password on every
+<Callout title="Performance Note" type="warning">
+	Basic Auth for OPDS requires the server to verify your password on every
 	request. This involves computationally expensive password hashing, which impacts image loading. If
 	you are a heavy OPDS user, consider using [Token-based
 	Authentication](#token-based-authentication) with a scoped API key for much faster performance
@@ -52,7 +52,7 @@ The following servers, besides Stump, have viable, long-lived, token-based authe
 
 Note that token viability **does not** equate to support for the app. Only OPDS v2-compatible servers are supported by the app.
 
-<Callout emoji="📣" type="info">
+<Callout type="info">
 	If there is a server that should be listed here, please let me know!
 </Callout>
 

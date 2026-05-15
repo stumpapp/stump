@@ -2,7 +2,7 @@
 title: Emailing
 ---
 
-<Callout emoji="🔐">
+<Callout title="Permission required">
 	Sending emails is gated behind the `email:send` user permission at a minumum. To learn more about
 	permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
 </Callout>
@@ -28,7 +28,7 @@ The following fields are required to configure an emailer:
   - `Display name` - The name that will be displayed to recipients
   - `Email address` - The email address that will be displayed to recipients
 
-<Callout emoji="🔒">
+<Callout>
 	The password field is encrypted at rest and not visible after creation. Stump will decrypt the
 	password when sending emails. This is a security measure to prevent unauthorized access to your
 	email server. You should still take care to secure your Stump instance.
@@ -77,7 +77,7 @@ The email feature is not fully fleshed out yet, and there are plans to expand it
 - Email notifications for various server events
 - Book club email notifications
 
-<Callout emoji="🚀">
+<Callout type="idea">
 	If you have any ideas for expanding the email functionalities, feel free to open an issue on
 	[GitHub](https://github.com/stumpapp/stump/issues)
 </Callout>

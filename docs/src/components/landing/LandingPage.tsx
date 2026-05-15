@@ -14,10 +14,21 @@ export default function LandingPage() {
 	}
 
 	return (
-		<div className="gap-y-12 flex h-full w-full flex-col items-center overflow-x-hidden">
+		<div className="gap-y-12 relative flex h-full w-full flex-col items-center">
+			<div className="inset-0 pointer-events-none absolute -z-10 h-full w-full overflow-x-clip">
+				<div className="top-0 left-0 bg-amber-500/10 max-md:hidden w-5xl h-256 pointer-events-none absolute -z-10 -translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />
+				<div className="top-0 left-0 bg-amber-500/5 max-md:hidden w-5xl h-256 pointer-events-none absolute -z-10 -translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />
+				<div className="top-0 left-0 bg-dot-matrix-xl max-md:hidden w-5xl h-256 pointer-events-none absolute -z-10 -translate-x-1/2 -translate-y-1/2 [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center_top,red,transparent)] [webkit-mask-image:var(--mask)] dark:opacity-80" />
+				<div className="right-0 bg-amber-500/10 max-md:hidden w-5xl h-256 pointer-events-none absolute top-[calc(100vh-56px)] -z-10 translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />
+				<div className="right-0 bg-amber-500/5 max-md:hidden w-5xl h-256 pointer-events-none absolute top-[calc(100vh-56px)] -z-10 translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />
+				<div className="right-0 bg-dot-matrix-xl max-md:hidden w-5xl h-256 pointer-events-none absolute top-[calc(100vh-56px)] -z-10 translate-x-1/2 -translate-y-1/2 [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center_top,red,transparent)] [webkit-mask-image:var(--mask)] dark:opacity-80" />
+			</div>
+
 			<Hero />
-			<MobileApp />
-			<Feedback />
+			<div className="gap-y-12 flex w-full flex-col items-center overflow-x-hidden">
+				<MobileApp />
+				<Feedback />
+			</div>
 		</div>
 	)
 }

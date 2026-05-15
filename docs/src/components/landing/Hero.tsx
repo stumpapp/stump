@@ -93,11 +93,11 @@ export default function Hero() {
 		image.src = resolvedTheme === 'dark' ? '/images/landing-light.png' : '/images/landing-dark.png'
 	}, [resolvedTheme, imageURL])
 
-	const headingText = 'A lightning fast digital book server'
+	const headingText = 'Read anything from anywhere on your own server'
 	const words = headingText.split(' ')
 
 	return (
-		<div className="max-w-7xl px-6 lg:flex lg:px-8 mt-14 mx-auto h-[calc(100vh-56px)]">
+		<div className="max-w-7xl px-6 lg:flex lg:px-8 mt-14 lg:h-[calc(100vh-56px)] mx-auto">
 			<div className="max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-8 mx-auto shrink-0">
 				<div className="gap-5 md:items-start flex flex-col items-center">
 					<div>
@@ -120,7 +120,7 @@ export default function Hero() {
 							initial="hidden"
 							animate="visible"
 							variants={descriptionVariants}
-							className="text-neutral-650 mt-5 max-w-md text-base sm:text-lg md:max-w-3xl md:text-left md:text-xl dark:text-neutral-400 mx-auto text-center"
+							className="text-neutral-600 mt-5 max-w-md text-base sm:text-lg md:max-w-3xl md:text-left md:text-xl dark:text-neutral-400 mx-auto text-center"
 						>
 							Designed to be fast, beautiful, and simple. Curate your digital libraries and stream
 							your media to any device.
@@ -171,14 +171,13 @@ export default function Hero() {
 
 			<div className="mt-16 max-w-2xl sm:mt-20 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-24 mx-auto">
 				<div className="max-w-3xl sm:max-w-5xl lg:max-w-none h-full">
-					<motion.img
-						initial="hidden"
-						animate="visible"
-						variants={imageVariants}
-						src={imageURL}
-						alt="Demo"
-						className="w-240"
-					/>
+					<motion.div initial="hidden" animate="visible" variants={imageVariants}>
+						<img
+							src={imageURL}
+							alt="Demo"
+							className="w-240 md:[filter:drop-shadow(0_0_30px_theme(colors.amber.400/0.15))] [filter:drop-shadow(0_0_30px_theme(colors.amber.400/0.18))] max-w-full"
+						/>
+					</motion.div>
 				</div>
 			</div>
 		</div>

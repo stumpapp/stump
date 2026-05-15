@@ -5,7 +5,7 @@ title: Migrate to 0.1.0
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 
 
-<Callout emoji="💥">
+<Callout title="💥 Breaking Changes">
 	See the [original announcement](https://github.com/stumpapp/stump/discussions/634) for more
 	context
 </Callout>
@@ -37,7 +37,7 @@ To be clear: these pieces of data will be lost during the migration process. Ple
 
 ## Migration Steps
 
-<Callout emoji="⚠️">
+<Callout type="warning">
 	There are **NO** guarantees that this migration will work for everyone. There are so many different configurations and setups that it's hard to account for all of them.
 
     Please report any issues you encounter during the migration process.
@@ -50,10 +50,13 @@ I should also note that if you don't have a complicated setup, and you don't car
 
 <Steps>
 
+<Step>
 ### Backup Your Data
 
 Before proceeding with the migration, ensure you have a complete backup of your Stump database. This is crucial in case anything goes wrong during the migration process.
+</Step>
 
+<Step>
 ### Create a separate Stump instance
 
 I absolutely do not recommend updating your existing Stump instance in place. Please do not do that. This process should be in total isolation from your existing instance to avoid any potential data loss. We will bring over your existing configs and database in the next steps.
@@ -76,16 +79,20 @@ A few suggestions:
 
 - If your existing setup uses `latest` alias for the Docker image, pin it to `0.0.12` instead to avoid accidental upgrades
 - Make sure to fully stop your existing Stump instance before starting the new one (even though they are isolated)
+</Step>
 
+<Step>
 ### Start the new Stump instance
 
 Start the new Stump instance to allow it to create all the fresh configs and database files. Once you see the startup messages in the logs, fully stop the instance.
 
 Be sure your old Stump instance is fully stopped as well. At this point, you can copy over your old instance's `stump.db` file into the new instance's config directory as `stump-legacy.db` (or any other name you prefer, just not `stump.db`). You may also mount is separately if preferred.
+</Step>
 
+<Step>
 ### Download the `backfill.sql` Script
 
-<Callout emoji="">
+<Callout>
 	The `backfill.sql` script will be one of the downloadable assets in the release page for `0.1.0`.
 </Callout>
 
@@ -94,7 +101,9 @@ Download the `backfill.sql` script from the [release page for 0.1.0](https://git
 If you continue with this guide, you will not need to make **any** edits to this script file. The migration tool will handle executing the sql for you.
 
 If you would prefer to attempt to run the migration manually, please carefully review the script instructions. The important part is that you will need to replace the placeholders at the top of the script with your actual database paths.
+</Step>
 
+<Step>
 ### Migrate Your Database
 
 The updated Stump instance includes a CLI tool to help with the migration process. Before continuing, please ensure the following:
@@ -116,6 +125,8 @@ The tool will prompt you for the necessary information to pull data from the old
 - Enter the path to the legacy database file (with the data you want to migrate)
 - Confirm the path to the new database file (this should be pre-filled with the correct path)
 - Monitor the migration progress (should be very quick)
+
+</Step>
 
 </Steps>
 

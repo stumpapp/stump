@@ -5,14 +5,14 @@ export default function MobileApp() {
 	return (
 		<div className="bg-white w-full dark:bg-[#0E0E0E]">
 			<div className="max-w-7xl gap-16 px-6 py-10 lg:gap-20 lg:px-8 lg:py-24 mx-auto flex min-h-screen flex-col items-center">
-				<div className="max-w-2xl md:text-center lg:mx-0 lg:max-w-xl lg:pt-8 mx-auto shrink-0">
+				<div className="max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-8 mx-auto shrink-0 text-center">
 					<div className="text-2xl sm:text-4xl">
 						<h2 className="font-bold tracking-tight text-black dark:text-neutral-100">
 							Mobile app in beta
 						</h2>
 					</div>
 
-					<p className="text-neutral-650 mt-5! max-w-md text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400 mx-auto">
+					<p className="text-neutral-600 mt-5! max-w-md text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400 mx-auto">
 						An app for both iOS and Android is in the works, tailored for mobile-first and on-the-go
 						usage
 					</p>
@@ -45,7 +45,10 @@ export default function MobileApp() {
 				</div>
 
 				<div className="max-w-7xl lg:px-8 mx-auto">
-					<img src="/images/expo-preview.png" className="w-auto object-scale-down" />
+					<img
+						src="/images/expo-preview.png"
+						className="[filter:drop-shadow(0_0_30px_theme(colors.amber.400/0.18))] w-auto object-scale-down"
+					/>
 				</div>
 
 				<div className="max-w-2xl gap-x-6 gap-y-10 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16 mx-auto grid grid-cols-1 text-gray-300">
@@ -55,7 +58,7 @@ export default function MobileApp() {
 								<feature.icon className="left-1 top-1 h-5 w-5 absolute" />
 								{feature.title}
 							</dt>{' '}
-							<dd className="text-neutral-650 dark:text-neutral-400 inline">
+							<dd className="text-neutral-600 dark:text-neutral-400 inline">
 								{feature.description}
 							</dd>
 						</div>

@@ -5,7 +5,7 @@ title: KoReader Sync
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 
 
-<Callout type="warn">
+<Callout title="Permission required">
 	This functionality is gated behind the `ACCESS_KOREADER_SYNC` and `ACCESS_API_KEYS` user
 	permissions. To learn more about permissions, see the
 	[permissions](/docs/guides/access-control/permissions) guide.
@@ -55,7 +55,7 @@ Stump **only supports hash-based book matching** at this time. This means you wi
 
 To enable this feature, be sure the `KoReader-compatible hashes` setting is enabled for a library. For more information, see the [scanner configuration](/docs/guides/fundamentals/scanner) guide.
 
-<Callout emoji="🚧">
+<Callout>
 	To generate hashes on an existing library, you will need to configure a scan to recompute hashes.
 	You can do this in the library settings page for scanning-related options
 </Callout>
@@ -92,7 +92,7 @@ The API key should have at least the `ACCESS_KOREADER_SYNC` permission:
 
 KoReader requires you to login before it can sync progress. This is a bit unintuitive since you are using an API key, but the login step is necessary. You just need to enter any username and password (they are not validated).
 
-<Callout emoji="ℹ️">
+<Callout>
 	Stump does not currently support anything other than the API key authentication method. If you
 	would like to see support for the username/password method, please open a feature request
 </Callout>
@@ -129,7 +129,7 @@ While the KoReader sync integration is functional, there are a few improvements 
 1. **Device management**: The devices are not surfaced on the UI yet. I'd like to add functions to attach friendly names to devices so you can easily identify them (e.g. `Aaron's Kobo Clara`)
 2. **Progress translation**: The progress data which gets stored is primarily for KoReader's use, with the exception of the percentage. I'd like to add a feature to translate the x-pointer into a proper epubcfi so the native Stump reader can pick up where you left off
 
-<Callout emoji="🚀">
+<Callout type="idea">
 	Have you set up KoReader sync with Stump? I'd love to hear about your experience! This is a very
 	new integration, so if you have any feedback or run into any issues, please let me know by opening
 	an [issue](https://github.com/stumpapp/stump/issues)

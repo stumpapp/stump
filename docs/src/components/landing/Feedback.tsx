@@ -9,7 +9,7 @@ export default function Feedback() {
 					<h2 className="font-bold tracking-tight text-black dark:text-neutral-100">Feedback</h2>
 				</div>
 
-				<p className="text-neutral-650 text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400">
+				<p className="text-neutral-600 text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400">
 					Stump is a community-driven project. The best way to improve the software is to hear and
 					act on your feedback
 				</p>
@@ -23,7 +23,7 @@ export default function Feedback() {
 							<method.icon className="left-1 top-1 h-5 w-5 absolute" />
 							{method.title}
 						</dt>{' '}
-						<dd className="text-neutral-650 dark:text-neutral-400 inline">{method.description}</dd>
+						<dd className="text-neutral-600 dark:text-neutral-400 inline">{method.description}</dd>
 					</div>
 				))}
 			</div>

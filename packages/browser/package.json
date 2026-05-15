@@ -69,6 +69,7 @@
 		"react-virtualized-auto-sizer": "^1.0.24",
 		"react-virtuoso": "^4.10.3",
 		"react-window": "^1.8.11",
+		"rehype-raw": "^7.0.0",
 		"remark-directive": "^3.0.0",
 		"remark-directive-rehype": "^0.4.2",
 		"rooks": "^7.14.1",

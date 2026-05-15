@@ -72,6 +72,7 @@
 		"rehype-raw": "^7.0.0",
 		"remark-directive": "^3.0.0",
 		"remark-directive-rehype": "^0.4.2",
+		"remark-gfm": "^4.0.0",
 		"rooks": "^7.14.1",
 		"sonner": "^2.0.7",
 		"thumbhash": "^0.1.1",

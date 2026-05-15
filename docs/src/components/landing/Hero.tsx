@@ -137,7 +137,7 @@ export default function Hero() {
 						>
 							<Link
 								className="bg-neutral-650 dark:hover:bg-neutral-650 hover:border-neutral-450 active:border-neutral-450 dark:active:border-neutral-450 dark:hover:border-neutral-450 dark:active:bg-neutral-650 rounded-md border-neutral-500 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-600 hover:text-white active:bg-neutral-50 active:text-white dark:border-neutral-500 dark:bg-neutral-700 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center border transition-all duration-300 focus:outline-none dark:active:opacity-90"
-								href="/installation"
+								href="/docs"
 							>
 								<span>Documentation</span>
 							</Link>

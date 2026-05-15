@@ -1,5 +1,5 @@
+import Link from 'fumadocs-core/link'
 import { Bug, ExternalLink, Globe, Lock, Router, Server, WifiOff } from 'lucide-react'
-import Link from 'next/link'
 
 export default function MobileApp() {
 	return (

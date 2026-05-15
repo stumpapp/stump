@@ -30,5 +30,16 @@ html > body[data-scroll-locked] {
 
 .bg-dot-matrix-xl {
 	background-size: 24px 24px;
-	background-image: radial-gradient(circle, #8886 1px, transparent 1px);
+	background-image: radial-gradient(circle, #8883 1px, transparent 1px);
+}
+
+/*i couldn't quite get this right, i'll try another time. trying to get a little convex on the matrix*/
+.bg-dot-matrix-xl::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-size: 24px 24px;
+	background-image: radial-gradient(circle, #8889 1.5px, transparent 1.5px);
+	mask-image: radial-gradient(ellipse 40% 30% at center, black, transparent);
+	-webkit-mask-image: radial-gradient(ellipse 40% 35% at center, black, transparent);
 }

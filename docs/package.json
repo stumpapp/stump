@@ -1,5 +1,5 @@
 {
-	"name": "docs",
+	"name": "@stump/docs",
 	"private": true,
 	"type": "module",
 	"sideEffects": false,

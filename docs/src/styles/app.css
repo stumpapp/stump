@@ -11,7 +11,24 @@ html > body[data-scroll-locked] {
 	--removed-body-scroll-bar-size: 0px !important;
 }
 
-/*article > .prose h2 {
-	margin-top: 2.5em;
-	margin-bottom: 1em;
-}*/
+:root {
+	--color-fd-primary: #c48259;
+	--spacing-fd-container: 1000px;
+}
+
+.dark {
+	--color-fd-primary: #c48259;
+}
+
+.bg-grid-lines-xl {
+	background-position: -30px -30px;
+	background-size: 60px 60px;
+	background-image:
+		linear-gradient(to right, #8884 1px, transparent 1px),
+		linear-gradient(to bottom, #8884 1px, transparent 1px);
+}
+
+.bg-dot-matrix-xl {
+	background-size: 24px 24px;
+	background-image: radial-gradient(circle, #8886 1px, transparent 1px);
+}

@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { RootProvider } from 'fumadocs-ui/provider/tanstack'
 
+import Footer from '@/components/landing/Footer'
 import appCss from '@/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -15,6 +16,74 @@ export const Route = createRootRoute({
 			},
 			{
 				title: 'Stump Docs',
+			},
+			{
+				name: 'robots',
+				content: 'index,follow',
+			},
+			{
+				name: 'description',
+				content:
+					'"Free, open source, self-hosting for your comic books, manga and digital book collections',
+			},
+			{
+				property: 'og:title',
+				content: 'Stump',
+			},
+			{
+				property: 'og:description',
+				content:
+					'Free, open source, self-hosting for your comic books, manga and digital book collections.',
+			},
+			{
+				property: 'og:url',
+				content: 'https://stumpapp.dev',
+			},
+			{
+				property: 'og:type',
+				content: 'website',
+			},
+			{
+				property: 'og:image',
+				content: 'https://stumpapp.dev/og.png',
+			},
+			{
+				property: 'og:image:alt',
+				content: 'Stump OG Image',
+			},
+			{
+				property: 'og:image:type',
+				content: 'image/png',
+			},
+			{
+				property: 'og:image:width',
+				content: '1332',
+			},
+			{
+				property: 'og:locale',
+				content: 'en_US',
+			},
+			{
+				property: 'og:image:height',
+				content: '699',
+			},
+			{
+				property: 'og:description',
+				content:
+					'Free, open source, self-hosting for your comic books, manga and digital book collections.',
+			},
+			{
+				property: 'og:image',
+				content: 'https://stumpapp.dev/og.png',
+			},
+			{ property: 'og:image:alt', content: 'Stump OG Image' },
+			{
+				property: 'og:site_name',
+				content: 'Stump',
+			},
+			{
+				rel: 'canonical',
+				href: 'https://stumpapp.dev',
 			},
 		],
 		links: [
@@ -43,6 +112,7 @@ function RootComponent() {
 				</RootProvider>
 				<Scripts />
 			</body>
+			<Footer />
 		</html>
 	)
 }

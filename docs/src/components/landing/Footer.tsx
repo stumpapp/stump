@@ -1,12 +1,12 @@
 import { SiDiscord, SiGithub, SiOpencollective } from '@icons-pack/react-simple-icons'
 import clsx from 'clsx'
-import Link from 'next/link'
+import Link from 'fumadocs-core/link'
 
 const navigation = {
 	nav: [
 		{ disabled: false, href: '/', name: 'Home' },
-		{ disabled: false, href: '/installation', name: 'Installation' },
-		{ disabled: false, href: '/guides', name: 'Guides' },
+		{ disabled: false, href: '/docs/getting-started/installation', name: 'Installation' },
+		{ disabled: false, href: '/docs', name: 'Guides' },
 	],
 	social: [
 		{

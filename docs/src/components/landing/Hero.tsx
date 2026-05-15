@@ -97,7 +97,7 @@ export default function Hero() {
 	const words = headingText.split(' ')
 
 	return (
-		<div className="max-w-7xl px-6 lg:flex lg:px-8 mx-auto h-screen">
+		<div className="max-w-7xl px-6 lg:flex lg:px-8 mt-14 mx-auto h-[calc(100vh-56px)]">
 			<div className="max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-8 mx-auto shrink-0">
 				<div className="gap-5 md:items-start flex flex-col items-center">
 					<div>

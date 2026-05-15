@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import browserCollections from 'collections/browser'
+import Link from 'fumadocs-core/link'
 import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import {
@@ -8,10 +9,7 @@ import {
 	DocsDescription,
 	DocsPage,
 	DocsTitle,
-	EditButton,
 	EditOnGitHub,
-	MarkdownCopyButton,
-	ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page'
 import { Suspense } from 'react'
 
@@ -42,51 +40,61 @@ const serverLoader = createServerFn({
 			path: page.path,
 			markdownUrl: slugsToMarkdownPath(page.slugs).url,
 			pageTree: await source.serializePageTree(source.getPageTree()),
+			lastModified: page.data.lastModified,
 		}
 	})
 
 const clientLoader = browserCollections.docs.createClientLoader({
 	component(
 		{ toc, frontmatter, default: MDX },
-		// you can define props for the component
 		{
-			markdownUrl,
+			// markdownUrl,
 			path,
+			lastModified,
 		}: {
 			markdownUrl: string
 			path: string
+			lastModified?: Date | null
 		},
 	) {
 		return (
-			<DocsPage
-				toc={toc}
-				tableOfContent={{
-					style: 'clerk',
-				}}
-			>
-				{/*{page.data.lastModified && (
-					<p className="text-sm text-fd-muted-foreground -mb-4">
-						Last updated on{' '}
-						{Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(
-							new Date(page.data.lastModified),
-						)}
-					</p>
-				)}*/}
-				<div className="mb-4 flex items-center justify-between">
-					<div className="flex-1">
-						<DocsTitle>{frontmatter.title}</DocsTitle>
-						<DocsDescription>{frontmatter.description}</DocsDescription>
-					</div>
-					<div className="gap-2 flex items-center">
-						<EditOnGitHub
-							githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
-						/>
-					</div>
+			<>
+				<div className="inset-0 pointer-events-none absolute -z-10 h-full w-full overflow-x-clip">
+					<div className="top-0 xl:right-1/2 right-0 bg-amber-500/10 max-md:hidden w-5xl h-256 pointer-events-none absolute -z-10 translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />
+					<div className="top-0 xl:right-1/2 right-0 bg-amber-500/5 max-md:hidden w-5xl h-256 pointer-events-none fixed -z-10 translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />
+					<div className="top-0 xl:right-1/2 right-0 bg-dot-matrix-xl max-md:hidden w-5xl h-256 pointer-events-none absolute -z-10 translate-x-1/2 -translate-y-1/2 [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center_top,red,transparent)] [webkit-mask-image:var(--mask)] dark:opacity-80" />
 				</div>
-				<DocsBody>
-					<MDX components={useMDXComponents()} />
-				</DocsBody>
-			</DocsPage>
+
+				<DocsPage
+					toc={toc}
+					tableOfContent={{
+						style: 'clerk',
+					}}
+				>
+					{lastModified && (
+						<p className="text-sm text-fd-muted-foreground -mb-4">
+							Last updated on{' '}
+							{Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(lastModified))}
+						</p>
+					)}
+					<div className="mb-4 flex items-center justify-between">
+						<div className="flex-1">
+							<DocsTitle>{frontmatter.title}</DocsTitle>
+							<DocsDescription>{frontmatter.description}</DocsDescription>
+						</div>
+						<div className="gap-2 flex items-center">
+							<Link
+								href={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
+							>
+								<EditOnGitHub />
+							</Link>
+						</div>
+					</div>
+					<DocsBody>
+						<MDX components={useMDXComponents()} />
+					</DocsBody>
+				</DocsPage>
+			</>
 		)
 	},
 })

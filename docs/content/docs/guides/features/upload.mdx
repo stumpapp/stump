@@ -4,6 +4,7 @@ description: Opt-in feature that allows your users to upload content to your ser
 ---
 
 import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
 <Callout type="warn">
 	This functionality allows files to be uploaded to your server, so it should be used with caution.
@@ -108,25 +109,29 @@ Clicking "Upload" starts your upload. Watch the corner of the screen for a toast
 
 </Steps>
 
-## Troubleshooting
+## Common errors
 
 This section provides explanations for possible errors you may encounter when uploading files.
 
-### 400 Bad request
+<Accordions type="multiple">
+  <Accordion title="400 Bad request" id="400-bad-request">
+      A bad request error will be returned if the request includes disallowed files or attempts to access a path outside the library for which the upload is intended.
+  </Accordion>
 
-A bad request error will be returned if the request includes disallowed files or attempts to access a path outside the library for which the upload is intended.
 
-### 401 Unauthorized
+  <Accordion title="401 Unauthorized" id="401-unauthorized">
+      This error indicates that the user attempting to upload files does not have the required `file:upload` or `manage:library` permissions.
+  </Accordion>
 
-This error indicates that the user attempting to upload files does not have the required `file:upload` or `manage:library` permissions.
+  <Accordion title="404 Not found" id="404-not-found">
+      This error may indicate that uploading has not been enabled for your server. Double check that you have `enable_upload = true` in your `Stump.toml` or `STUMP_ENABLE_UPLOAD = true` set in your environment.
+  </Accordion>
 
-### 404 Not found
+  <Accordion title="413 Payload too large" id="413-payload-too-large">
+      The uploaded files exceeded your configured maximum upload size. Consider increasing the value of `max_file_upload_size` in `Stump.toml` or changing the value of the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable.
+  </Accordion>
+</Accordions>
 
-This error may indicate that uploading has not been enabled for your server. Double check that you have `enable_upload = true` in your `Stump.toml` or `STUMP_ENABLE_UPLOAD = true` set in your environment.
-
-### 413 Payload too large
-
-The uploaded files exceeded your configured maximum upload size. Consider increasing the value of `max_file_upload_size` in `Stump.toml` or changing the value of the `STUMP_MAX_FILE_UPLOAD_SIZE` environment variable.
 
 ## Security considerations
 

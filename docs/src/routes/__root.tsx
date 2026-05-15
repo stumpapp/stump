@@ -1,7 +1,6 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { RootProvider } from 'fumadocs-ui/provider/tanstack'
 
-import Footer from '@/components/landing/Footer'
 import appCss from '@/styles/app.css?url'
 
 export const Route = createRootRoute({
@@ -112,7 +111,6 @@ function RootComponent() {
 				</RootProvider>
 				<Scripts />
 			</body>
-			<Footer />
 		</html>
 	)
 }

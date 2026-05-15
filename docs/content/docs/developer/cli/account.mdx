@@ -1,32 +1,27 @@
 ---
-title: CLI
-description: The Stump server ships with a built-in command-line interface tool that allows you to manage your server from the command line
+title: Account
+description: Commands for managing user accounts
 ---
 
+## Listing Accounts
 
-<Callout type="info">
-	Every example in this guide assumes you are running the CLI tool from the same directory as the
-	executable. You will need to adjust the path to the executable accordingly if you are running it
-	from a different location
-</Callout>
-
-## Basic Usage
-
-The CLI tool is exposed via a few subcommands using the same executable as the server, itself. To see the available subcommands, run:
+You can print a basic list of all user accounts by running:
 
 ```bash copy
-./stump --help
+./stump account list
 ```
 
-This will print the various subcommands and options available to you. To see more information about a specific subcommand, run:
+Add the `--locked` flag to filter the list by locked status:
 
 ```bash copy
-./stump <subcommand> --help
+./stump account list --locked true
 ```
 
-## Account Management
+## Account locking
 
-### Locking a user account
+A locked user will be unable to log in to their account until it is unlocked. This will also affect any active sessions, JWTs, or API keys.
+
+### Lock
 
 To lock a user account, run:
 
@@ -34,7 +29,7 @@ To lock a user account, run:
 ./stump account lock --username <username>
 ```
 
-### Unlocking a user account
+### Unlocking
 
 To unlock a user account, run:
 
@@ -42,7 +37,7 @@ To unlock a user account, run:
 ./stump account unlock --username <username>
 ```
 
-### Resetting a user's password
+## Password Reset
 
 To reset a user's password, run:
 
@@ -58,7 +53,7 @@ You will be prompted to enter a new password, with a confirmation prompt to ensu
 	request](https://github.com/stumpapp/stump/issues/new/choose) on GitHub
 </Callout>
 
-### OIDC User Migration
+## Local to OIDC Account Migration
 
 To migrate an existing local user account to an OIDC account, run:
 

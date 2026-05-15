@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 
+import LandingPage from '@/components/landing'
 import { baseOptions } from '@/lib/layout.shared'
 
 export const Route = createFileRoute('/')({
@@ -10,18 +11,7 @@ export const Route = createFileRoute('/')({
 function Home() {
 	return (
 		<HomeLayout {...baseOptions()}>
-			<div className="px-4 py-8 flex flex-1 flex-col justify-center text-center">
-				<h1 className="font-medium text-xl mb-4">Fumadocs on Tanstack Start.</h1>
-				<Link
-					to="/docs/$"
-					params={{
-						_splat: '',
-					}}
-					className="px-3 py-2 rounded-lg bg-fd-primary text-fd-primary-foreground font-medium text-sm mx-auto"
-				>
-					Open Docs
-				</Link>
-			</div>
+			<LandingPage />
 		</HomeLayout>
 	)
 }

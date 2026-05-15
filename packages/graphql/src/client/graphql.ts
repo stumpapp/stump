@@ -4330,8 +4330,8 @@ export type StumpConfig = {
    * When disabled, clients loading/preloading pages won't trigger progress updates.
    */
   enableOpdsProgression: Scalars['Boolean']['output'];
-  /** Indicates if the Swagger UI should be disabled. */
-  enableSwagger: Scalars['Boolean']['output'];
+  /** Indicates if the GraphQL playground should be enabled. */
+  enablePlayground: Scalars['Boolean']['output'];
   /** Whether or not the server will allow users with the appropriate permissions to upload books and series. */
   enableUpload: Scalars['Boolean']['output'];
   /** The interval at which automatic deleted session cleanup is performed. */

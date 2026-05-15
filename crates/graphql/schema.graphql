@@ -87,7 +87,11 @@ type Arrangement {
 	sections: [ArrangementSection!]!
 }
 
-union ArrangementConfig = SystemArrangementConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+union ArrangementConfig =
+	| SystemArrangementConfig
+	| InProgressBooks
+	| RecentlyAdded
+	| CustomArrangementConfig
 
 input ArrangementConfigInput @oneOf {
 	system: SystemArrangementConfigInput
@@ -424,9 +428,22 @@ type ConfidenceFactor {
 }
 
 "An event that is emitted by the core and consumed by a client"
-union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary | CreatedMedia | CreatedManySeries | CreatedOrUpdatedManyMedia
+union CoreEvent =
+	| JobStarted
+	| JobUpdate
+	| JobOutput
+	| DiscoveredMissingLibrary
+	| CreatedMedia
+	| CreatedManySeries
+	| CreatedOrUpdatedManyMedia
 
-union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | MetadataFetchJobOutput | AnalyzeMediaOutput
+union CoreJobOutput =
+	| LibraryScanOutput
+	| SeriesScanOutput
+	| ThumbnailGenerationOutput
+	| PlaceholderGenerationOutput
+	| MetadataFetchJobOutput
+	| AnalyzeMediaOutput
 
 input CreateAnnotationInput {
 	mediaId: String!
@@ -966,7 +983,11 @@ type ImageRef {
 }
 
 "The resize options to use when generating an image"
-union ImageResizeMethod = ExactDimensionResize | ScaleEvenlyByFactor | ScaledDimensionResize | FitWithinResize
+union ImageResizeMethod =
+	| ExactDimensionResize
+	| ScaleEvenlyByFactor
+	| ScaledDimensionResize
+	| FitWithinResize
 
 "The resize options to use when generating an image"
 input ImageResizeMethodInput @oneOf {
@@ -1376,7 +1397,9 @@ type Media {
 	readHistory: [FinishedReadingSession!]!
 	seriesPosition: Int
 	"The next media in the series, ordered by name"
-	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	nextInSeries(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedMediaResponse!
 	"""
 	The path to the media file **relative** to the library path. This is only useful for
 	displaying a truncated path when in the context of a library, e.g. limited space
@@ -1831,7 +1854,7 @@ type Mutation {
 	deleteMessage(messageId: ID!): BookClubDiscussionMessage!
 	"""
 	Toggle a reaction on a message
-	
+
 	Returns true if the reaction was added, false if removed
 	"""
 	toggleReaction(messageId: ID!, emoji: String, customEmojiId: Int): Boolean!
@@ -1864,7 +1887,11 @@ type Mutation {
 	"Toggle like on a suggestion"
 	toggleSuggestionLike(suggestionId: ID!): Boolean!
 	"Update the status of a suggestion (Admin+)"
-	updateSuggestionStatus(suggestionId: ID!, status: BookClubSuggestionStatus!, notes: String): BookClubBookSuggestion!
+	updateSuggestionStatus(
+		suggestionId: ID!
+		status: BookClubSuggestionStatus!
+		notes: String
+	): BookClubBookSuggestion!
 	analyzeMedia(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMedia(id: ID!): Media!
@@ -1887,7 +1914,13 @@ type Mutation {
 	"Search external metadata providers for a media item and return match candidates"
 	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
 	"Accept a match candidate and apply it to media metadata"
-	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
+	acceptMediaMatch(
+		mediaId: ID!
+		candidateIndex: Int!
+		strategy: MergeStrategy
+		excludeFields: [MetadataField!]
+		overrides: [MetadataFieldOverride!]
+	): MetadataFetchRecord!
 	"Reject the current match candidates for a media item"
 	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchRecord!
 	"Set the locked metadata fields for a media item"
@@ -1897,7 +1930,13 @@ type Mutation {
 	"Search external metadata providers for a series and return match candidates"
 	fetchSeriesMetadata(id: ID!): [MatchCandidate!]!
 	"Accept a match candidate and apply it to the series metadata"
-	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
+	acceptSeriesMatch(
+		seriesId: ID!
+		candidateIndex: Int!
+		strategy: MergeStrategy
+		excludeFields: [MetadataField!]
+		overrides: [MetadataFieldOverride!]
+	): MetadataFetchRecord!
 	"Reject the current match candidates for a series"
 	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchRecord!
 	"Set the locked metadata fields for a series"
@@ -1905,11 +1944,11 @@ type Mutation {
 	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	"""
 	Delete media and series from a library that match one of the following conditions:
-	
+
 	- A series that is missing from disk (status is not `Ready`)
 	- A media that is missing from disk (status is not `Ready`)
 	- A series that is not associated with any media (i.e., no media in the series)
-	
+
 	This operation will also remove any associated thumbnails of the deleted media and series.
 	"""
 	cleanLibrary(id: ID!): CleanLibraryResponse!
@@ -1938,7 +1977,7 @@ type Mutation {
 	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
 	full replacement of the excluded users list, so any users not included in the provided list will be
 	removed from the exclusion list if they were previously excluded.
-	
+
 	The server owner cannot be excluded from a library, nor can the user performing the action exclude
 	themselves.
 	"""
@@ -1998,9 +2037,9 @@ type Mutation {
 	deleteAnnotation(id: String!): MediaAnnotation!
 	"""
 	Returns a list containing the newly created tags, or an error if creation failed.
-	
+
 	If any of the tags already exist an error is returned.
-	
+
 	* `tags` - A non-empty list of tags to create.
 	"""
 	createTags(tags: [String!]!): [Tag!]!
@@ -2021,7 +2060,7 @@ type Mutation {
 	setSeriesTags(id: ID!, tags: [String!]!): Series!
 	"""
 	Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
-	
+
 	* `tags` - A non-empty list of tags to delete.
 	"""
 	deleteTags(tags: [String!]!): [Tag!]!
@@ -2079,7 +2118,9 @@ type Mutation {
 	deleteJob(id: ID!, force: Boolean! = false): Boolean!
 	deleteJobHistory: DeleteJobHistory!
 	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
-	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
+	deleteLogs(
+		filter: LogFilterInput! = { level: null, jobId: null, _and: null, _not: null, _or: null }
+	): LogDeleteOutput!
 	deleteLogFile: Boolean!
 	createNotifier(input: NotifierInput!): Notifier!
 	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
@@ -2089,7 +2130,10 @@ type Mutation {
 	updateScheduledJob(id: Int!, input: UpdateScheduledJobInput!): ScheduledJob!
 	deleteScheduledJob(id: Int!): Boolean!
 	createMetadataProvider(input: CreateMetadataProviderConfigInput!): MetadataProviderConfigModel!
-	updateMetadataProvider(id: Int!, input: PatchMetadataProviderConfigInput!): MetadataProviderConfigModel!
+	updateMetadataProvider(
+		id: Int!
+		input: PatchMetadataProviderConfigInput!
+	): MetadataProviderConfigModel!
 	deleteMetadataProvider(id: Int!): MetadataProviderConfigModel!
 	"Accept the top-ranked candidate for all pending metadata matches"
 	acceptAllPendingMatches(strategy: MergeStrategy, excludeFields: [MetadataField!]): Int!
@@ -2103,25 +2147,25 @@ type Mutation {
 	deleteSmartListView(id: ID!, name: String!): SmartListView!
 	"""
 	Creates a new reading list.
-	
+
 	# Returns
-	
+
 	A result containing the newly created reading list, or an error if creation failed.
 	"""
 	createReadingList(input: ReadingListInput!): ReadingList!
 	"""
 	Updates an existing reading list.
-	
+
 	# Returns
-	
+
 	A result containing the updated reading list, or an error if update failed.
 	"""
 	updateReadingList(input: ReadingListInput!): ReadingList!
 	"""
 	Deletes a reading list by ID.
-	
+
 	# Returns
-	
+
 	A result containing the deleted reading list, or an error if deletion failed.
 	"""
 	deleteReadingList(id: String!): ReadingList!
@@ -2398,7 +2442,11 @@ type Query {
 	"Get a single message by ID"
 	bookClubDiscussionMessage(id: ID!): BookClubDiscussionMessage!
 	"Get messages in a discussion"
-	bookClubDiscussionMessages(discussionId: ID!, parentId: ID, pagination: CursorPagination! = {after: null, limit: 20}): CursorPaginatedBookClubDiscussionMessageResponse!
+	bookClubDiscussionMessages(
+		discussionId: ID!
+		parentId: ID
+		pagination: CursorPagination! = { after: null, limit: 20 }
+	): CursorPaginatedBookClubDiscussionMessageResponse!
 	previousBookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!
 	"Get all pending invitations for the current user"
 	myBookClubInvitations: [BookClubInvitation!]!
@@ -2407,19 +2455,22 @@ type Query {
 	"Get a single suggestion by ID"
 	bookClubSuggestion(suggestionId: ID!): BookClubBookSuggestion!
 	"Get a single author by name (case-insensitive exact match)"
-	authorByName(		name: String!,
+	authorByName(
+		name: String!
 		"Optional library ID to scope the author search"
 		libraryId: String
 	): Author
 	"Get a paginated list of authors with optional search filter"
 	authors(
 		"Case-insensitive substring search filter"
-		search: String,
+		search: String
 		"Optional library ID to scope the author search"
-		libraryId: String,		pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}
+		libraryId: String
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
 	): PaginatedAuthorResponse!
 	"Get a single author series by name (case-insensitive exact match)"
-	authorSeriesByName(		name: String!,
+	authorSeriesByName(
+		name: String!
 		"Optional library ID to scope the series search"
 		libraryId: String
 	): AuthorSeries
@@ -2427,29 +2478,80 @@ type Query {
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!
 	mediaDiskUsage: Int!
-	media(filter: MediaFilterInput! = {id: null, name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(
+		filter: MediaFilterInput! = {
+			id: null
+			name: null
+			size: null
+			extension: null
+			createdAt: null
+			updatedAt: null
+			seriesId: null
+			status: null
+			path: null
+			pages: null
+			readingStatus: null
+			metadata: null
+			series: null
+			_and: null
+			_not: null
+			_or: null
+		}
+		orderBy: [MediaOrderBy!]! = [{ media: { field: NAME, direction: ASC } }]
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	"Returns the available alphabet for all media in the server"
 	mediaAlphabet: JSONObject!
-	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
-	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
-	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	keepReading(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedMediaResponse!
+	onDeck(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedMediaResponse!
+	recentlyAddedMedia(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
-	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
+	libraries(
+		orderBy: [LibraryModelOrderBy!]! = [{ field: NAME, direction: ASC }]
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+		search: String
+	): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
 	librariesAlphabet: JSONObject!
 	librariesStats: LibraryStats!
 	numberOfLibraries: Int!
 	lastVisitedLibrary: Library
-	libraryMissingEntities(libraryId: ID!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMissingEntityResponse!
-	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, readingStatus: null, libraryType: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	libraryMissingEntities(
+		libraryId: ID!
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedMissingEntityResponse!
+	series(
+		filter: SeriesFilterInput! = {
+			name: null
+			path: null
+			libraryId: null
+			readingStatus: null
+			libraryType: null
+			metadata: null
+			library: null
+			_and: null
+			_not: null
+			_or: null
+		}
+		orderBy: [SeriesOrderBy!]! = [{ series: { field: NAME, direction: ASC } }]
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	"Returns the available alphabet for all series in the server"
 	seriesAlphabet: JSONObject!
 	numberOfSeries: Int!
-	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	recentlyAddedSeries(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedSeriesResponse!
 	"Get a single epub by its media ID"
 	epubById(id: ID!): Epub!
 	"Get all bookmarks for a single epub by its media ID"
@@ -2462,7 +2564,9 @@ type Query {
 	me: User!
 	userCount: Int!
 	topReaders(take: Int): [User!]!
-	users(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedUserResponse!
+	users(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedUserResponse!
 	userById(id: ID!): User!
 	loginActivity: [UserLoginActivity!]!
 	loginActivityById(id: ID!): [UserLoginActivity!]!
@@ -2474,10 +2578,16 @@ type Query {
 	getNotifierById(id: Int!): Notifier!
 	apiKeys: [Apikey!]!
 	apiKeyById(id: Int!): Apikey!
-	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
+	jobs(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedJobResponse!
 	jobById(id: ID!): Job
 	scheduledJobs: [ScheduledJob!]!
-	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	logs(
+		filter: LogFilterInput! = { level: null, jobId: null, _and: null, _not: null, _or: null }
+		orderBy: [LogModelOrderBy!]! = []
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedLogResponse!
 	"""
 	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
@@ -2491,23 +2601,28 @@ type Query {
 	"Return all metadata fetch records that are awaiting user review."
 	pendingMetadataMatches: [MetadataFetchRecord!]!
 	serverConfig: ServerConfigModel!
-	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
+	listDirectory(
+		pagination: Pagination!
+		input: DirectoryListingInput
+	): PaginatedDirectoryListingResponse!
+	smartLists(input: SmartListsInput! = { all: null, mine: true, search: null }): [SmartList!]!
 	smartListById(id: ID!): SmartList
 	smartListMeta(id: ID!): SmartListMeta
 	smartListItems(id: ID!, limit: Int = null): SmartListItems!
 	smartListViews: [SmartListView!]!
 	"""
 	Retrieves a paginated list of reading lists for the current user.
-	
+
 	# Returns
-	
+
 	A paginated list of reading lists.
 	"""
-	readingLists(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedReadingListResponse!
+	readingLists(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedReadingListResponse!
 	"""
 	Retrieves a reading list by ID for the current user.
-	
+
 	# Returns
 	A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
 	"""
@@ -3142,8 +3257,8 @@ type StumpConfig {
 	allowedOrigins: [String!]!
 	"Path to the PDFium binary for PDF support."
 	pdfiumPath: String
-	"Indicates if the Swagger UI should be disabled."
-	enableSwagger: Boolean!
+	"Indicates if the GraphQL playground should be enabled."
+	enablePlayground: Boolean!
 	"Indicates if the KoReader sync feature should be enabled."
 	enableKoreaderSync: Boolean!
 	"Indicates if the Kobo sync feature should be enabled."
@@ -3394,7 +3509,9 @@ type User {
 	oidcEmail: String
 	avatarUrl: String
 	ageRestriction: AgeRestriction
-	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	continueReading(
+		pagination: Pagination! = { offset: { page: 1, pageSize: 20, zeroBased: false } }
+	): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
 	preferences: UserPreferences!
 	lastLogin: DateTime
@@ -3476,7 +3593,7 @@ enum UserPermission {
 	DELETE_LIBRARY
 	"""
 	Grant access to read users.
-	
+
 	Note that this is explicitly for querying users via user-specific endpoints.
 	This would not affect relational queries, such as members in a common book club.
 	"""

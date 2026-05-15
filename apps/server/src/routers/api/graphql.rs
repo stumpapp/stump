@@ -23,7 +23,7 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 	let schema = build_schema(app_state.clone()).await;
 
 	let mut method_router = post(graphql_handler);
-	if app_state.config.enable_swagger || cfg!(debug_assertions) {
+	if app_state.config.enable_playground || cfg!(debug_assertions) {
 		method_router = method_router.get(playground);
 	}
 

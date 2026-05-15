@@ -7,7 +7,7 @@ type Props = {
 }
 export default function HelpDocsCTA({ className, filePath }: Props) {
 	const href = filePath
-		? `https://github.com/stumpapp/stump/tree/main/apps/docs/${filePath}`
+		? `https://github.com/stumpapp/stump/tree/nightly/docs/${filePath}`
 		: undefined
 
 	return (

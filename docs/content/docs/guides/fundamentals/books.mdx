@@ -5,7 +5,7 @@ title: Books
 The backbone of Stump! There are a couple key concepts to go over regarding how Stump represents books:
 
 - Books (also internally referred to as `media`) primarily refer to files on disk
-- Books are grouped into [`series`](/guides/basics/series), which are then grouped into [`libraries`](/guides/basics/libraries)
+- Books are grouped into [`series`](/docs/guides/fundamentals/series), which are then grouped into [`libraries`](/docs/guides/fundamentals/libraries)
 - [Metadata](#metadata) is an associated set of information _about_ a book, such as its title, author, etc.
 
 ## Supported formats
@@ -17,7 +17,7 @@ The following table outlines the supported formats for books in Stump:
 | ZIP Archive | `.cbz` `.zip` | ✅    | ✅        | ✅   |                                                                                                                                                                                                                                                                                                            |
 | RAR Archive | `.cbr` `.rar` | ✅    | ✅        | ✅   |                                                                                                                                                                                                                                                                                                            |
 | EPUB        | `.epub`       | ✅    | ❌        | ✅   | Epub files aren't generally supported by OPDS-PSE (streaming) unless they are image-only. They are otherwise OPDS-compatible                                                                                                                                                                               |
-| PDF         | `.pdf`        | ✅    | ✅        | ✅   | [PDFium](https://pdfium.googlesource.com/pdfium/) is used for PDF-to-image rendering. Outside of Docker, you will have to provide Stump the location of your PDFium binary in order for PDF rendering to work. See [configuration](/guides/configuration/server-options#pdfium_path) for more information. |
+| PDF         | `.pdf`        | ✅    | ✅        | ✅   | [PDFium](https://pdfium.googlesource.com/pdfium/) is used for PDF-to-image rendering. Outside of Docker, you will have to provide Stump the location of your PDFium binary in order for PDF rendering to work. See [configuration](/docs/guides/configuration/server-config#pdfium_path) for more information. |
 
 - **Basic**: Basic support encapsulates the minimally viable functionality for a given format. In general, this will include things like:
   - File discovery
@@ -25,7 +25,7 @@ The following table outlines the supported formats for books in Stump:
   - File serving
 - **Streaming**: Streaming support refers to the ability to stream a book's pages _individually_ to a client. This is generally important, as it reduces overall network loads by only sending the pages that are being requested by the client. If a format does not support streaming, the entire book will be sent to the client at once when it is requested.
   - Epub files are sort of an exception to this, as they are essentially an archive of HTML/CSS files. The HTML files for each chapter can currently be streamed individually, however the UI does not utilize this yet.
-- **OPDS**: OPDS support refers to the ability to serve a book according to OPDS. For more information, see the [OPDS](/guides/opds) guide.
+- **OPDS**: OPDS support refers to the ability to serve a book according to OPDS. For more information, see the [OPDS](/docs/guides/features/opds) guide.
 
 ### Image formats
 
@@ -63,7 +63,7 @@ PDF files do not generally have very good metadata support. In general, I have s
 
 ### Additional sources
 
-Stump will also attempt to extract series metadata from a `series.json` file at the root of a series directory. This is not specific to any format or books in general, though, so refer to the [series](/guides/series) guide for more information.
+Stump will also attempt to extract series metadata from a `series.json` file at the root of a series directory. This is not specific to any format or books in general, though, so refer to the [series](/docs/guides/fundamentals/series) guide for more information.
 
 ### Special metadata fields
 
@@ -71,7 +71,7 @@ There are a few special metadata fields that Stump will use for additional funct
 
 #### Age rating
 
-The age rating field can be used in-conjunction with [access controls](/guides/access-control) to restrict access to books based on their age rating. There are a **LOT** of different age rating systems, and Stump does not currently support all of them, so be sure to review the [age restriction](/guides/access-control#age-restrictions) section for more information.
+The age rating field can be used in-conjunction with other access controls to restrict access to books based on their age rating. There are a **LOT** of different age rating systems, and Stump does not currently support all of them, so be sure to review the [age restriction](/docs/guides/access-control/age-restrictions) section for more information.
 
 ## Sorting
 

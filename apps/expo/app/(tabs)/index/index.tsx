@@ -130,7 +130,7 @@ export default function Screen() {
 								size="lg"
 								roundness="full"
 								className="relative"
-								onPress={() => Linking.openURL('https://www.stumpapp.dev/guides/mobile/app')}
+								onPress={() => Linking.openURL('https://www.stumpapp.dev/docs/apps/mobile')}
 							>
 								<Text>{t('emptyState.seeDocumentation')}</Text>
 

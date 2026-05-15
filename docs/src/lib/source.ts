@@ -32,3 +32,9 @@ export function slugsToMarkdownPath(slugs: string[]) {
 		url: `${docsRoute}/${segments.join('/')}`,
 	}
 }
+
+export async function getRawMarkdown(page: (typeof source)['$inferPage']) {
+	const processed = await page.data.getText('processed')
+
+	return `# ${page.data.title} (${page.url}) ${processed}`
+}

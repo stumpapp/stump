@@ -116,7 +116,7 @@ services:
 
 ## Stump Configuration
 
-OIDC can be configured using either environment variables or the TOML configuration file. See [server configuration](/guides/configuration/server-options) for more details.
+OIDC can be configured using either environment variables or the TOML configuration file. See [server configuration](/docs/guides/configuration/server-config) for more details.
 
 <Callout type="warning">
 	When using the `Stump.toml` configuration file, OIDC settings must be placed under an `[oidc]`
@@ -203,7 +203,7 @@ OIDC users may optionally set a local password in Stump. This can be useful for 
 
 <Callout type="info">
 	For information about user permissions and managing who can set passwords, see the [User
-	Permissions](/guides/access-control/permissions) guide
+	Permissions](/docs/guides/access-control/permissions) guide
 </Callout>
 
 ### Disabling Local Authentication
@@ -224,5 +224,5 @@ You can disable local username/password authentication globally by setting `STUM
 Stump does not support automatic linking of existing local accounts to OIDC accounts. If you have existing users with read history, preferences, or other data that you want to migrate to OIDC accounts, you can use the Stump CLI migration tool.
 
 <Callout type="info">
-	For instructions on migrating existing accounts to OIDC, see the [CLI](/guides/cli) guide
+	For instructions on migrating existing accounts to OIDC, see the [CLI](/docs/developer/cli) guide
 </Callout>

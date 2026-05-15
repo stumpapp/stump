@@ -22,7 +22,7 @@ export default function SteppedFormSceneHeader() {
 				</Heading>
 				<Text size="sm" variant="muted" className="mt-1.5">
 					{t(`${localeBase}.subtitle`)}{' '}
-					<Link href="https://www.stumpapp.dev/guides/basics/libraries">
+					<Link href="https://www.stumpapp.dev/docs/guides/fundamentals/libraries">
 						{t(`${localeBase}.subtitleLink`)}
 					</Link>
 				</Text>

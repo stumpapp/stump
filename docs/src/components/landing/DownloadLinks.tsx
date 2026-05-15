@@ -110,7 +110,7 @@ const links: Link[] = [
 		title: 'Docker',
 	},
 	{
-		href: '/guides/mobile/app#getting-the-app',
+		href: 'https://play.google.com/store/apps/details?id=com.stumpapp.stump',
 		icon: SiAndroid,
 		title: 'Android',
 	},

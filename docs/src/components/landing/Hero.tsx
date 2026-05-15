@@ -1,7 +1,7 @@
 import { SiGithub } from '@icons-pack/react-simple-icons'
 import { motion } from 'framer-motion'
 import Link from 'fumadocs-core/link'
-import { useTheme } from 'nextra-theme-docs'
+import { useTheme } from 'fumadocs-ui/provider/base'
 import { useEffect, useMemo } from 'react'
 
 import DownloadLinks from './DownloadLinks'

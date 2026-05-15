@@ -7,15 +7,17 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"start": "vite preview",
+		"start": "node .output/server/index.mjs",
 		"preview": "vite preview",
 		"types:check": "fumadocs-mdx && tsc --noEmit",
 		"postinstall": "fumadocs-mdx"
 	},
 	"dependencies": {
+		"@icons-pack/react-simple-icons": "=9.1.0",
 		"@tanstack/react-router": "1.169.2",
 		"@tanstack/react-router-devtools": "1.166.13",
 		"@tanstack/react-start": "1.167.65",
+		"framer-motion": "^10.16.4",
 		"fumadocs-core": "16.8.11",
 		"fumadocs-mdx": "15.0.4",
 		"fumadocs-ui": "16.8.11",

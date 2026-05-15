@@ -8,7 +8,7 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
 <Callout type="warn">
 	This functionality is gated behind the `ACCESS_KOREADER_SYNC` and `ACCESS_API_KEYS` user
 	permissions. To learn more about permissions, see the
-	[permissions](/guides/access-control/permissions) guide.
+	[permissions](/docs/guides/access-control/permissions) guide.
 </Callout>
 
 KoReader is an open-source e-reader application that supports a variety of devices. Stump has a built-in implementation of the [sync API](https://github.com/koreader/koreader-sync-server) that enables KoReader to sync read progress with Stump.
@@ -40,7 +40,7 @@ To set up KoReader sync with Stump, you need to:
 
 The KoReader router is disabled by default. To enable it, you need to set the `ENABLE_KOREADER_SYNC` environment variable to `true`, or directly set `enable_koreader_sync=true` in the `Stump.toml` configuration file.
 
-See the [configuration guide](/guides/configuration/server-options) for more information.
+See the [configuration guide](/docs/guides/configuration/server-config) for more information.
 </Step>
 
 <Step>
@@ -53,7 +53,7 @@ KoReader supports two methods for matching books:
 
 Stump **only supports hash-based book matching** at this time. This means you will need to ensure Stump generates KoReader-specific hashes for library content for the integration to work.
 
-To enable this feature, be sure the `KoReader-compatible hashes` setting is enabled for a library. For more information, see the [scanner configuration](/guides/basics/scanner) guide.
+To enable this feature, be sure the `KoReader-compatible hashes` setting is enabled for a library. For more information, see the [scanner configuration](/docs/guides/fundamentals/scanner) guide.
 
 <Callout emoji="🚧">
 	To generate hashes on an existing library, you will need to configure a scan to recompute hashes.

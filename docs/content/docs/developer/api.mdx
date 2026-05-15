@@ -9,7 +9,7 @@ Stump exposes a GraphQL API that allows you to interact with your Stump server p
 
 ### Sessions
 
-Stump uses server-side sessions to authenticate users. These sessions are stored in the database, and are automatically cleaned up within 60 seconds of expiring. You can change the expiry cleanup check interval by setting the `SESSION_EXPIRY_CLEANUP_INTERVAL` environment variable. See the [configuration guide](/guides/configuration) for more information.
+Stump uses server-side sessions to authenticate users. These sessions are stored in the database, and are automatically cleaned up within 60 seconds of expiring. You can change the expiry cleanup check interval by setting the `SESSION_EXPIRY_CLEANUP_INTERVAL` environment variable. See the [configuration guide](/docs/guides/configuration/server-config) for more information.
 
 ### Basic Authentication
 
@@ -32,7 +32,7 @@ The generation of JWTs is fairly standard. Each type of token (access and refres
 
 <Callout type="warning">
 	This functionality is gated behind the `ACCESS_API_KEYS` user permission. To learn more about
-	permissions, see the [permissions](/guides/access-control/permissions) guide.
+	permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
 </Callout>
 
 You can generated user-scoped API keys to authenticate requests to the REST API. These keys are stored in the database and can be revoked at any time. API keys are not subject to the same expiry as sessions, and are intended for long-term use.
@@ -41,10 +41,10 @@ You can generated user-scoped API keys to authenticate requests to the REST API.
 
 There are instances where you can embed an API key in the URL directly. This will only be available for features/integrations where passing the key in the header is otherwise impossible. At the time of writing, there are two such routes:
 
-- `/koreader/{api_key}/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
-- `/opds/{api_key}/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
+- `/koreader/{api_key}/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/docs/guides/integrations/koreader) for more information
+- `/opds/{api_key}/v1.2/*` - An optional clone of the [OPDS](/docs/guides/features/opds) integration API for clients which don't support auth headers
 
-For more information on API keys, see the [API keys](/guides/features/api-keys) guide.
+For more information on API keys, see the [API keys](/docs/guides/features/api-keys) guide.
 
 ## GraphQL Playground
 
@@ -54,4 +54,4 @@ If you're new to GraphQL, I would recommend giving the [GraphQL documentation](h
 
 ### Disabling GraphQL Playground
 
-If you don't want to expose the GraphQL Playground, you can disable it by setting the `ENABLE_GRAPHQL_PLAYGROUND` environment variable to `false`. See the [configuration guide](/guides/configuration) for more information.
+If you don't want to expose the GraphQL Playground, you can disable it by setting the `ENABLE_GRAPHQL_PLAYGROUND` environment variable to `false`. See the [configuration guide](/docs/guides/configuration/server-config) for more information.

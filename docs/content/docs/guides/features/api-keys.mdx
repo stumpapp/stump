@@ -4,7 +4,7 @@ title: API Keys
 
 <Callout emoji="🔐">
 	This functionality is gated behind the `ACCESS_API_KEYS` user permission. To learn more about
-	permissions, see the [permissions](/guides/access-control/permissions) guide.
+	permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
 </Callout>
 
 API keys are user-scoped, long-lived tokens that can be used to authenticate requests to the REST API. While originally developed to support third-party integrations, they are a useful tool for any user that wants to interact with Stump programmatically or develop their own integrations.
@@ -55,8 +55,8 @@ This will automatically include the key in the request headers for you.
 
 There are instances where you can embed an API key in the URL directly. This is primiarily only done for instances where passing the key in the header is otherwise impossible. At the time of writing, there are two such routes:
 
-- `/koreader/{api_key}/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
-- `/opds/{api_key}/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
+- `/koreader/{api_key}/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/docs/guides/integrations/koreader) for more information
+- `/opds/{api_key}/v1.2/*` - An optional clone of the [OPDS](/docs/guides/features/opds) integration API for clients which don't support auth headers
 
 ## Permissions
 

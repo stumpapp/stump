@@ -15,7 +15,7 @@ An 'unclaimed' Stump server, or a server that has no user with the `server owner
 
 <Callout emoji="🔐">
 	These functionalities are gated behind the `user:manage` user permission. To learn more about
-	permissions, see the [permissions](/guides/access-control/permissions) guide.
+	permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
 </Callout>
 
 ### Create a user
@@ -38,7 +38,7 @@ This will route you to a subpage which displays a form to create a new user
 
 - **Username**: The username of the user. This is used to log in to the server
 - **Password**: The password of the user. This is used to log in to the server. You can click the `Generate` button to generate a random password, or manually enter one
-- **Age restriction**: The _optional_ age restriction of the user. This is used to determine which books the user can access. You may enter a number corresponding to the **maximum** age rating the user can access. For example, if you enter `13` then the user will be able to access books with an age rating of `13` or lower. See the [age restrictions](/guides/access-control#age-restrictions) section of the Access Control guide for more information
+- **Age restriction**: The _optional_ age restriction of the user. This is used to determine which books the user can access. You may enter a number corresponding to the **maximum** age rating the user can access. For example, if you enter `13` then the user will be able to access books with an age rating of `13` or lower. See the [age restrictions](/docs/guides/access-control/age-restrictions) section of the Access Control guide for more information
   - **Note**: If you check the `Enforce restrictions for missing metadata` checkbox, then the user will only be able to access books that:
     1. _Explicitly_ have an age rating set
     2. The age rating is less than or equal to the user's age restriction
@@ -69,7 +69,7 @@ Stump currently does not enforce any password complexity requirements. This can 
 If a user has been locked out of their account, it is up to the server owner to unlock the account to restore access. This can be done using either of the following methods:
 
 1. Navigate to `/settings/users` in your browser. Locate the `Users` table and click the action menu button (three dots) for the user you wish to unlock. Click the `Unlock` button in the action menu. This will open a modal asking you to confirm the unlock. Click the `Unlock` button in the modal to confirm the unlock.
-2. Use the embedded CLI in the Stump server to unlock the user account. See the [CLI](/guides/cli) guide for more information. In general, the command will look like this:
+2. Use the embedded CLI in the Stump server to unlock the user account. See the [CLI](/docs/developer/cli) guide for more information. In general, the command will look like this:
 
    ```bash copy
    ./stump account unlock --username <username>
@@ -85,7 +85,7 @@ In the event the server owner account becomes locked, you will only be able to u
 
 ### Password reset
 
-If a user has forgotten their password, you will have to use the embedded CLI in the Stump server to reset the user's password. See the [CLI](/guides/cli) guide for more information. In general, the command will look like this:
+If a user has forgotten their password, you will have to use the embedded CLI in the Stump server to reset the user's password. See the [CLI](/docs/developer/cli) guide for more information. In general, the command will look like this:
 
 ```bash copy
 ./stump account reset-password --username <username>

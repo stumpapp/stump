@@ -828,7 +828,7 @@
 			"booktype": "Buchtyp",
 			"status": "Status",
 			"totalIssues": "Gesamtanzahl der Ausgaben",
-			"publicationRun": "Publikationslauf",
+			"publicationRun": "Veröffentlichungslauf",
 			"comicImage": "Comicbild",
 			"descriptionFormatted": "Beschreibung (formatiert)"
 		},
@@ -2790,7 +2790,7 @@
 			"year": "Jahr"
 		},
 		"common": {
-			"book": "Book",
+			"book": "Buch",
 			"cancel": "Abbrechen",
 			"chapter": "Kapitel",
 			"clear": "Löschen",
@@ -2814,8 +2814,8 @@
 			"pages": "Seiten",
 			"password": "Passwort",
 			"progress": "Fortschritt",
-			"publication": "Publication",
-			"readTime": "Reading time",
+			"publication": "Veröffentlichung",
+			"readTime": "Lesezeit",
 			"readMore": "Mehr lesen",
 			"save": "Speichern",
 			"select": "Auswählen",
@@ -2832,18 +2832,18 @@
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"positionWithTotal": "{{position}} von {{total}} in {{seriesName}}",
 				"position": "{{position}} in {{seriesName}}"
 			},
 			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
+				"positionWithTotal": "Buch {{position}} von {{total}} in {{seriesName}}",
+				"position": "Buch {{position}} in {{seriesName}}"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"positionWithTotal": "#{{position}} von {{total}} in {{seriesName}}",
 				"position": "#{{position}} in {{seriesName}}"
 			},
-			"unknownSeriesName": "series"
+			"unknownSeriesName": "Serie"
 		},
 		"emptyState": {
 			"noStumpServers": "Keine Stump Server hinzugefügt",

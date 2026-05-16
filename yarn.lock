@@ -9347,10 +9347,10 @@
   dependencies:
     tslib "^2.6.3"
 
-"@xmldom/xmldom@>=0.8.13", "@xmldom/xmldom@^0.7.5", "@xmldom/xmldom@^0.8.8":
-  version "0.9.10"
-  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.9.10.tgz#a0ad5a26fe8aa996310870726e1704977f769dee"
-  integrity sha512-A9gOqLdi6cV4ibazAjcQufGj0B1y/vDqYrcuP6d/6x8P27gRS8643Dj9o1dEKtB6O7fwxb2FgBmJS2mX7gpvdw==
+"@xmldom/xmldom@>=0.8.13 <0.9.0", "@xmldom/xmldom@^0.7.5", "@xmldom/xmldom@^0.8.8":
+  version "0.8.13"
+  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.13.tgz#00d1dd940b218dff2e49309d410d8bb212159225"
+  integrity sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==
 
 "@xobotyi/scrollbar-width@^1.9.5":
   version "1.9.5"

@@ -2790,7 +2790,7 @@
 			"year": "Rok"
 		},
 		"common": {
-			"book": "Book",
+			"book": "Książka",
 			"cancel": "Anuluj",
 			"chapter": "Rozdział",
 			"clear": "Wyczyść",
@@ -2814,8 +2814,8 @@
 			"pages": "Strony",
 			"password": "Hasło",
 			"progress": "Postęp",
-			"publication": "Publication",
-			"readTime": "Reading time",
+			"publication": "Publikacja",
+			"readTime": "Czas czytania",
 			"readMore": "Dowiedz się więcej",
 			"save": "Zapisz",
 			"select": "Zaznacz",
@@ -2832,18 +2832,18 @@
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
-				"position": "{{position}} in {{seriesName}}"
+				"positionWithTotal": "{{position}} z {{total}} w {{seriesName}}",
+				"position": "{{position}} w {{seriesName}}"
 			},
 			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
+				"positionWithTotal": "{{position}} książka z {{total}} w {{seriesName}}",
+				"position": "{{position}} książka w {{seriesName}}"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
-				"position": "#{{position}} in {{seriesName}}"
+				"positionWithTotal": "#{{position}} z {{total}} w {{seriesName}}",
+				"position": "#{{position}} w {{seriesName}}"
 			},
-			"unknownSeriesName": "series"
+			"unknownSeriesName": "seria"
 		},
 		"emptyState": {
 			"noStumpServers": "Nie dodano żadnych serwerów Stump",

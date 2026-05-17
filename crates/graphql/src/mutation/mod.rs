@@ -47,6 +47,7 @@ use media_metadata::MediaMetadataMutation;
 use metadata_provider::MetadataProviderMutation;
 use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
+use reading_progress::ReadProgressMutation;
 use scheduled_job_config::ScheduledJobConfigMutation;
 use series::SeriesMutation;
 use series_metadata::SeriesMetadataMutation;
@@ -108,4 +109,5 @@ pub struct Mutation(
 	UserAndNotifsMutations,
 	SystemMutations,
 	ListMutations,
+	ReadProgressMutation,
 );

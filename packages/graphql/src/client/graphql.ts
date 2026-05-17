@@ -778,6 +778,7 @@ export type Epub = {
 };
 
 export type EpubProgressInput = {
+  deviceId?: InputMaybe<Scalars['String']['input']>;
   elapsedSecondsDelta?: InputMaybe<Scalars['Int']['input']>;
   isComplete?: InputMaybe<Scalars['Boolean']['input']>;
   locator: EpubProgressLocatorInput;
@@ -3124,6 +3125,7 @@ export type PageDimension = {
 };
 
 export type PagedProgressInput = {
+  deviceId?: InputMaybe<Scalars['String']['input']>;
   elapsedSecondsDelta?: InputMaybe<Scalars['Int']['input']>;
   page: Scalars['Int']['input'];
 };

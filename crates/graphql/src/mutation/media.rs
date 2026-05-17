@@ -18,13 +18,13 @@ use stump_core::{
 		media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 	},
 	job::stump_job::StumpJob,
-	utils::chain_optional_iter,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::{media::MediaProgressInput, thumbnail::PageBasedThumbnailInput},
+	input::thumbnail::PageBasedThumbnailInput,
+	mutation::reading_progress::{upsert_reading_session, NormalizedProgression},
 	object::{
 		media::Media,
 		reading_session::{ActiveReadingSession, FinishedReadingSession},
@@ -297,146 +297,6 @@ impl MediaMutation {
 		Ok(Media::from(model))
 	}
 
-	async fn update_media_progress(
-		&self,
-		ctx: &Context<'_>,
-		id: ID,
-		input: MediaProgressInput,
-	) -> Result<ReadingProgressOutput> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let core = ctx.data::<CoreContext>()?;
-		let conn = core.conn.as_ref();
-
-		let mut active_session = reading_session::ActiveModel {
-			user_id: Set(user.id.clone()),
-			media_id: Set(id.to_string()),
-			updated_at: Set(Some(Utc::now().into())),
-			started_at: Set(Utc::now().into()),
-			..Default::default()
-		};
-
-		let is_complete: bool;
-		let has_elapsed_seconds: bool;
-
-		let existing_elapsed =
-			reading_session::Entity::find_for_user_and_media_id(user, id.as_ref())
-				.select_only()
-				.column(reading_session::Column::ElapsedSeconds)
-				.into_tuple::<Option<i64>>()
-				.one(conn)
-				.await?
-				.flatten()
-				.unwrap_or(0);
-
-		match input.clone() {
-			MediaProgressInput::Epub(input) => {
-				let (epubcfi, locator) = input.locator.as_tuple();
-				active_session.epubcfi = Set(epubcfi);
-				active_session.locator = Set(locator);
-				active_session.percentage_completed = Set(input.percentage);
-				let accumulated = input
-					.elapsed_seconds_delta
-					.map(|d| existing_elapsed + d.max(0));
-				active_session.elapsed_seconds = Set(accumulated);
-				has_elapsed_seconds = accumulated.is_some();
-				is_complete = input.is_complete.unwrap_or(
-					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
-				);
-			},
-			MediaProgressInput::Paged(input) => {
-				active_session.page = Set(Some(input.page));
-				let accumulated = input
-					.elapsed_seconds_delta
-					.map(|d| existing_elapsed + d.max(0));
-				active_session.elapsed_seconds = Set(accumulated);
-				has_elapsed_seconds = accumulated.is_some();
-
-				let book_pages = get_book_pages(id.to_string(), conn).await?;
-				is_complete = input.page >= book_pages;
-				active_session.percentage_completed =
-					Set(Some(compute_page_based_percentage(input.page, book_pages)));
-			},
-		}
-
-		let on_conflict_update_cols = chain_optional_iter(
-			[
-				reading_session::Column::UpdatedAt,
-				reading_session::Column::PercentageCompleted,
-			],
-			[
-				// Note: This does mean you effectively cannot unset the field. I think that is acceptable,
-				// since you can just send Some(0) to "unset" the elapsed seconds
-				has_elapsed_seconds.then_some(reading_session::Column::ElapsedSeconds),
-				(matches!(input, MediaProgressInput::Epub(_)))
-					.then(|| reading_session::Column::Epubcfi),
-				(matches!(input, MediaProgressInput::Epub(_)))
-					.then(|| reading_session::Column::Locator),
-				(matches!(input, MediaProgressInput::Paged(_)))
-					.then(|| reading_session::Column::Page),
-			],
-		);
-
-		let active_session = reading_session::Entity::insert(active_session.clone())
-			.on_conflict(
-				OnConflict::columns(vec![
-					reading_session::Column::MediaId,
-					reading_session::Column::UserId,
-				])
-				.update_columns(on_conflict_update_cols)
-				.to_owned(),
-			)
-			.exec_with_returning(conn)
-			.await?;
-
-		if !is_complete {
-			Ok(ReadingProgressOutput::Active(Box::new(
-				active_session.into(),
-			)))
-		} else {
-			let txn = conn.begin().await?;
-
-			let recent_completion =
-				finished_reading_session::Entity::recent_completed_record(
-					&txn,
-					&user.id,
-					id.as_ref(),
-					core.config.book_completion_dedup_timeout_secs,
-				)
-				.await?;
-
-			// TODO: See if this creates too much churn in practice
-			if let Some(existing_session) = recent_completion {
-				// Already completed recently - delete active session but return existing finished session
-				let _ = active_session.delete(&txn).await?;
-				txn.commit().await?;
-				return Ok(ReadingProgressOutput::Finished(Box::new(
-					existing_session.into(),
-				)));
-			}
-
-			let finished_reading_session = finished_reading_session::ActiveModel {
-				user_id: Set(user.id.clone()),
-				media_id: Set(id.to_string()),
-				started_at: Set(active_session.started_at),
-				completed_at: Set(chrono::Utc::now().into()),
-				elapsed_seconds: Set(active_session.elapsed_seconds),
-				..Default::default()
-			};
-
-			let finished_reading_session = insert_finished_reading_session(
-				Some(active_session),
-				finished_reading_session,
-				&txn,
-			)
-			.await?;
-			txn.commit().await?;
-
-			Ok(ReadingProgressOutput::Finished(Box::new(
-				finished_reading_session.into(),
-			)))
-		}
-	}
-
 	async fn mark_media_as_complete(
 		&self,
 		ctx: &Context<'_>,
@@ -444,27 +304,28 @@ impl MediaMutation {
 		is_complete: bool,
 		page: Option<i32>,
 	) -> Result<Option<finished_reading_session::Model>> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		todo!("move to read_progress mutation")
+		// let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		// let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let model = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::Id.eq(id.to_string()))
-			.into_model::<media::ModelWithMetadata>()
-			.one(conn)
-			.await?
-			.ok_or("Media not found")?;
+		// let model = media::ModelWithMetadata::find_for_user(user)
+		// 	.filter(media::Column::Id.eq(id.to_string()))
+		// 	.into_model::<media::ModelWithMetadata>()
+		// 	.one(conn)
+		// 	.await?
+		// 	.ok_or("Media not found")?;
 
-		if is_complete {
-			let txn = conn.begin().await?;
-			let finished_reading_session =
-				set_completed_media(user, &txn, &model).await?;
-			txn.commit().await?;
-			Ok(Some(finished_reading_session))
-		} else {
-			let _active_session =
-				update_active_reading_session(user, conn, &model, page).await?;
-			Ok(None)
-		}
+		// if is_complete {
+		// 	let txn = conn.begin().await?;
+		// 	let finished_reading_session =
+		// 		set_completed_media(user, &txn, &model).await?;
+		// 	txn.commit().await?;
+		// 	Ok(Some(finished_reading_session))
+		// } else {
+		// 	let _active_session =
+		// 		update_active_reading_session(user, conn, &model, page).await?;
+		// 	Ok(None)
+		// }
 	}
 }
 
@@ -550,7 +411,7 @@ async fn set_completed_media(
 	Ok(finished_reading_session)
 }
 
-fn compute_page_based_percentage(current_page: i32, pages: i32) -> Decimal {
+pub fn compute_page_based_percentage(current_page: i32, pages: i32) -> Decimal {
 	if pages <= 0 {
 		Decimal::new(0, 0)
 	} else {
@@ -561,7 +422,7 @@ fn compute_page_based_percentage(current_page: i32, pages: i32) -> Decimal {
 	}
 }
 
-async fn get_book_pages(book_id: String, conn: &DatabaseConnection) -> Result<i32> {
+pub async fn get_book_pages(book_id: String, conn: &DatabaseConnection) -> Result<i32> {
 	let pages: i32 = media::Entity::find_by_id(book_id)
 		.select_only()
 		.columns(vec![media::Column::Pages])

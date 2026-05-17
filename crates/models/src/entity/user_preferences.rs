@@ -116,8 +116,8 @@ impl ActiveModelBehavior for ActiveModel {
 			self.enable_job_overlay = ActiveValue::Set(true);
 			self.enable_alphabet_select = ActiveValue::Set(false);
 			self.enable_reading_journal = ActiveValue::Set(true);
-			self.day_reset_hour_offset = ActiveValue::Set(0);
-			self.reading_session_grace_period_secs = ActiveValue::Set(600);
+			self.day_reset_hour_offset = ActiveValue::Set(0); // midnight
+			self.reading_session_grace_period_secs = ActiveValue::Set(600); // 10 minutes
 		}
 
 		Ok(self)

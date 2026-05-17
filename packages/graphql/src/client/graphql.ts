@@ -778,7 +778,7 @@ export type Epub = {
 };
 
 export type EpubProgressInput = {
-  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
+  elapsedSecondsDelta?: InputMaybe<Scalars['Int']['input']>;
   isComplete?: InputMaybe<Scalars['Boolean']['input']>;
   locator: EpubProgressLocatorInput;
   percentage?: InputMaybe<Scalars['Decimal']['input']>;
@@ -3124,7 +3124,7 @@ export type PageDimension = {
 };
 
 export type PagedProgressInput = {
-  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
+  elapsedSecondsDelta?: InputMaybe<Scalars['Int']['input']>;
   page: Scalars['Int']['input'];
 };
 

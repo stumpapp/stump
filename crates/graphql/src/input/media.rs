@@ -25,13 +25,13 @@ pub struct EpubProgressInput {
 	pub locator: EpubProgressLocatorInput,
 	pub percentage: Option<Decimal>,
 	pub is_complete: Option<bool>,
-	pub elapsed_seconds: Option<i64>,
+	pub elapsed_seconds_delta: Option<i64>,
 }
 
 #[derive(Debug, Clone, InputObject)]
 pub struct PagedProgressInput {
 	pub page: i32,
-	pub elapsed_seconds: Option<i64>,
+	pub elapsed_seconds_delta: Option<i64>,
 }
 
 #[derive(Debug, Clone, OneofObject)]

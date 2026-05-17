@@ -62,6 +62,14 @@ export const readProgress = sqliteTable('read_progress', {
 	page: integer('page'),
 	epubProgress: text('epub_progress', { mode: 'json' }),
 	elapsedSeconds: integer('elapsed_seconds'),
+	/// the elapsed total at the time of the last successful push to the server.
+	/// the delta sent on next sync = elapsedSeconds - lastSyncedElapsedSeconds
+	///
+	/// example:
+	///   open book offline -> lastSyncedElapsedSeconds = 1500, elapsedSeconds = 1500
+	///   read for 5 minutes -> elapsedSeconds = 1800. lastSyncedElapsedSeconds still = 1500
+	///   eventual sync to online -> delta = 300 sent to server, lastSyncedElapsedSeconds updated to 1800
+	lastSyncedElapsedSeconds: integer('last_synced_elapsed_seconds'),
 	// A number between 0 and 1 representing progress through the book
 	percentage: text('percentage'),
 	lastModified: integer('last_modified', { mode: 'timestamp' })

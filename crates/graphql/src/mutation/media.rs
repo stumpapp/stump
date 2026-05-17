@@ -318,22 +318,38 @@ impl MediaMutation {
 		let is_complete: bool;
 		let has_elapsed_seconds: bool;
 
+		let existing_elapsed =
+			reading_session::Entity::find_for_user_and_media_id(user, id.as_ref())
+				.select_only()
+				.column(reading_session::Column::ElapsedSeconds)
+				.into_tuple::<Option<i64>>()
+				.one(conn)
+				.await?
+				.flatten()
+				.unwrap_or(0);
+
 		match input.clone() {
 			MediaProgressInput::Epub(input) => {
 				let (epubcfi, locator) = input.locator.as_tuple();
 				active_session.epubcfi = Set(epubcfi);
 				active_session.locator = Set(locator);
 				active_session.percentage_completed = Set(input.percentage);
-				active_session.elapsed_seconds = Set(input.elapsed_seconds);
-				has_elapsed_seconds = input.elapsed_seconds.is_some();
+				let accumulated = input
+					.elapsed_seconds_delta
+					.map(|d| existing_elapsed + d.max(0));
+				active_session.elapsed_seconds = Set(accumulated);
+				has_elapsed_seconds = accumulated.is_some();
 				is_complete = input.is_complete.unwrap_or(
 					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
 				);
 			},
 			MediaProgressInput::Paged(input) => {
 				active_session.page = Set(Some(input.page));
-				active_session.elapsed_seconds = Set(input.elapsed_seconds);
-				has_elapsed_seconds = input.elapsed_seconds.is_some();
+				let accumulated = input
+					.elapsed_seconds_delta
+					.map(|d| existing_elapsed + d.max(0));
+				active_session.elapsed_seconds = Set(accumulated);
+				has_elapsed_seconds = accumulated.is_some();
 
 				let book_pages = get_book_pages(id.to_string(), conn).await?;
 				is_complete = input.page >= book_pages;

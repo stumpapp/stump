@@ -1,2 +1,21 @@
 - [ ] rm finished_reading_sessions
+    - [ ] might do this early to catch lingering swaps needed
 - [ ] replace reading_sessions with reading_sessions_v2
+- [ ] refactor kobo sync
+    - [ ] rewrite apply_reading_session_joins, pull latested v2 sess
+    - [ ] finished_reading_session_count, count (distinct readthorugh_number) where did_complete
+    - [ ] finished_reading_session_last_completed_at -> max updated_at where did_complete
+    - [ ] find other things i am sure i need to fix just took a glance
+- [ ] refactor opds
+    - [ ] bunch 'o reading_session references to eval in entry.rs, publication.rs, entity.rs
+- [ ] cli account.rs, refacotr to transfer v2 sessions now
+- [ ] write migrations once i am CERTAIN these changes are solid, fuck if i am doing it before then
+    - [ ] will need to figure out backfill
+- [ ] drizzle migrations, too
+- [ ] refactor series completion toggle
+- [ ] refactor SeriesFinishedCountLoader
+- [ ] figure out refactor for registered_reading_device
+    - [ ] rename reading_device, registered is redundant
+    - [ ] consider optional `email` for send-to
+- [ ] refactor SeriesStats
+- [ ] find other things i am sure i need to fix just took a glance

@@ -1,20 +1,17 @@
-// TODO: move existing reading progress mutations here (mark_media_as_complete)
-
 use async_graphql::{Context, Object, Result, ID};
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use models::{
-	entity::{reading_session_v2, user::AuthUser},
+	entity::{media, reading_session_v2, user::AuthUser},
 	shared::readium::ReadiumLocator,
 };
 use sea_orm::{
 	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait,
-	EntityTrait, QueryFilter, QueryOrder,
+	EntityTrait, QueryFilter, QueryOrder, QuerySelect,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	input::media::MediaProgressInput,
-	mutation::media::{compute_page_based_percentage, get_book_pages},
 	object::reading_session_v2::ReadingSession,
 };
 
@@ -76,9 +73,59 @@ impl ReadProgressMutation {
 		.map(ReadingSession::from)
 		.map_err(Into::into)
 	}
+
+	async fn mark_media_as_complete(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		is_complete: bool,
+		page: Option<i32>,
+	) -> Result<Option<ReadingSession>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let (extension, total_pages): (String, i32) =
+			media::Entity::find_by_id(id.to_string())
+				.select_only()
+				.column(media::Column::Extension)
+				.column(media::Column::Pages)
+				.into_tuple()
+				.one(conn)
+				.await?
+				.ok_or("Media not found")?;
+
+		let mut progression = NormalizedProgression::default();
+
+		if is_complete {
+			progression.page = Some(total_pages);
+			progression.percentage = Some(Decimal::new(1, 0));
+		} else {
+			progression.page = match extension.as_str() {
+				"epub" => None,
+				_ => Some(page.unwrap_or(1)),
+			};
+		}
+
+		let session = upsert_reading_session(
+			conn,
+			user,
+			id.as_ref(),
+			progression,
+			core.config.book_completion_dedup_timeout_secs,
+		)
+		.await?;
+
+		if is_complete {
+			Ok(Some(ReadingSession::from(session)))
+		} else {
+			Ok(None)
+		}
+	}
 }
 
 /// normalized porgression info derived from a [`MediaProgressInput`]
+#[derive(Debug, Default)]
 pub struct NormalizedProgression {
 	pub page: Option<i32>,
 	pub locator: Option<ReadiumLocator>,
@@ -87,6 +134,28 @@ pub struct NormalizedProgression {
 	pub elapsed_seconds_delta: Option<i64>,
 	pub did_complete: bool,
 	pub device_id: Option<String>,
+}
+
+fn compute_page_based_percentage(current_page: i32, pages: i32) -> Decimal {
+	if pages <= 0 {
+		Decimal::new(0, 0)
+	} else {
+		let percentage =
+			Decimal::new(current_page as i64, 0) / Decimal::new(pages as i64, 0);
+		// cannot be negative and cannot be more than 100%
+		percentage.clamp(Decimal::new(0, 0), Decimal::new(100, 0))
+	}
+}
+
+async fn get_book_pages(book_id: String, conn: &impl ConnectionTrait) -> Result<i32> {
+	let pages: i32 = media::Entity::find_by_id(book_id)
+		.select_only()
+		.column(media::Column::Pages)
+		.into_tuple()
+		.one(conn)
+		.await?
+		.ok_or("Media not found")?;
+	Ok(pages)
 }
 
 pub fn calculate_logical_date(now: DateTime<Utc>, offset_hours: i32) -> NaiveDate {
@@ -117,6 +186,17 @@ pub fn should_extend_session(
 	secs_since_update <= grace_period_secs
 }
 
+/// returns true if `session` was completed within `timeout_secs` of now
+fn is_recent_completion(session: &reading_session_v2::Model, timeout_secs: i64) -> bool {
+	if !session.did_complete {
+		return false;
+	}
+	session
+		.updated_at
+		.map(|t| (Utc::now() - t.with_timezone(&Utc)).num_seconds() <= timeout_secs)
+		.unwrap_or(false)
+}
+
 // TODO: tests would be sick but am not motivated enough for it rn
 
 /// creates a [`reading_session_v2`] record or extends the most recent one if it falls within
@@ -142,6 +222,12 @@ pub async fn upsert_reading_session(
 			.await?;
 
 	match latest {
+		Some(ref session)
+			if input.did_complete
+				&& is_recent_completion(session, completion_dedup_timeout_secs) =>
+		{
+			return Ok(latest.unwrap());
+		},
 		Some(session)
 			if session.session_date == logical_today
 				&& should_extend_session(&session, grace_period) =>
@@ -176,7 +262,6 @@ pub async fn upsert_reading_session(
 			active.update(db).await
 		},
 		_ => {
-			// TODO: port the v1 completion_dedup_timeout_secs stuff later, ran out of time for now
 			let readthrough_number =
 				derive_readthrough_number(db, &user.id, media_id).await?;
 
@@ -189,7 +274,7 @@ pub async fn upsert_reading_session(
 				end_locator: Set(input.locator),
 				start_percentage: Set(input.percentage),
 				end_percentage: Set(input.percentage),
-				// fixme: not right? think through
+				// set bc there's no existing session to extend
 				elapsed_seconds: Set(Some(
 					input.elapsed_seconds_delta.unwrap_or(0).max(0),
 				)),

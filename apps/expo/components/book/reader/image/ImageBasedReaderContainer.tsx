@@ -100,12 +100,14 @@ export default function ImageBasedReaderContainer({
 			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
 			if (idx < pageSets.length - 1) {
 				flashListRef.current?.scrollToIndex({ index: idx + 1, animated: true })
+				setCurrentPage(currentPage + 1)
 			}
 		},
 		onVolumeDown: () => {
 			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
 			if (idx > 0) {
 				flashListRef.current?.scrollToIndex({ index: idx - 1, animated: true })
+				setCurrentPage(currentPage - 1)
 			}
 		},
 	})

@@ -18,8 +18,17 @@ public class VolumeListenerModule: Module {
     /// 1. prevent the system volume HUD from appearing on every button press
     /// 2. be able to reset the volume back to our captured level after every button
     private var volumeView: MPVolumeView?
-    /// the volume level at listening start time, which will be used to reset after each button press
-    private var capturedVolume: Float = 0.5
+    /// the volume level at listening start time, which will be used to at listening end
+    private var originalVolume: Float = 0.5
+    /// the "safe" volume level to reset to after each press. this is pretty finicky and annoying
+    /// to get right, iOS won't register changes at the min/max so need to coerce into some kind
+    /// of middle ground while still respecting the user's original level as much as possible.
+    /// it won't be a perfect experience, honestly
+    private var safeVolume: Float = 0.5
+    /// a terrible fix for an irritating problem: when we programmatically reset the volume after a press
+    /// it will re-trigger the observer, causing a feedback loop. when true, the observer will ignore events
+    /// because of that. shitty. annoying. WHATEVER
+    private var isResetting = false
 
     public func definition() -> ModuleDefinition {
         Name("VolumeListener")
@@ -56,9 +65,18 @@ public class VolumeListenerModule: Module {
             print("[VolumeListener] Failed to configure AVAudioSession: \(error)")
         }
 
-        capturedVolume = AVAudioSession.sharedInstance().outputVolume
+        originalVolume = AVAudioSession.sharedInstance().outputVolume
+
+        // it took me 16 clicks to get from muted (0) to max volume (1) on my phone. i am going
+        // to assume that is standard and use it as the base for calculating a "safe" volume to
+        // reset to after each press
+        let step: Float = 1.0 / 16.0
+        safeVolume = min(max(originalVolume, step), 1.0 - step)
 
         setupVolumeView()
+        // called to ensure we don't start at e.g. 0 or 1, which would break the experience immediately
+        // also tho if you frequent max volume, that's wild and i'm worried about you
+        resetVolume()
 
         volumeObservation = AVAudioSession.sharedInstance().observe(
             \.outputVolume,
@@ -69,19 +87,38 @@ public class VolumeListenerModule: Module {
                 let newValue = change.newValue
             else { return }
 
+            guard !self.isResetting else {
+                print(
+                    "volume event ignored (isResetting), old=\(oldValue) new=\(newValue) safe=\(self.safeVolume)"
+                )
+                return
+            }
+
             if newValue > oldValue {
                 self.sendEvent("onVolumeUp")
             } else if newValue < oldValue {
                 self.sendEvent("onVolumeDown")
+            } else {
+                // old == new, shouldn't even happen?
+                return
             }
 
+            self.isResetting = true
             self.resetVolume()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                print("clearing volume isResetting flag to allow future events...")
+                self?.isResetting = false
+            }
         }
     }
 
     private func stopListening() {
         volumeObservation?.invalidate()
         volumeObservation = nil
+        isResetting = false
+        if let slider = volumeView?.subviews.first(where: { $0 is UISlider }) as? UISlider {
+            slider.value = originalVolume
+        }
         teardownVolumeView()
     }
 
@@ -114,9 +151,11 @@ public class VolumeListenerModule: Module {
         guard let slider = volumeView?.subviews.first(where: { $0 is UISlider }) as? UISlider else {
             return
         }
-        let target = capturedVolume
         DispatchQueue.main.async {
-            slider.value = target
+            print(
+                "setting slider to \(self.safeVolume) (was \(slider.value))"
+            )
+            slider.value = self.safeVolume
         }
     }
 }

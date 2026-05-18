@@ -10,7 +10,8 @@ import MediaPlayer
 // 2. to prevent the system volume hud from appearing on every button press, we render a tiny,
 //    fully transparent MPVolumeView offscreen. this also allows us to actually reset the volume,
 //    since AVAudioSession.outputVolume is read-only
-// 3. related to 1, the volume can drift a bit if pressed repeatedly and quickly
+// 3. related to 1, the volume can drift a bit if pressed repeatedly and quickly. also, we clamp
+//    the reset target (safeVolume) to [1/16, 15/16] to avoid issues where the obesrver doesn't fire
 
 public class VolumeListenerModule: Module {
     private var volumeObservation: NSKeyValueObservation?

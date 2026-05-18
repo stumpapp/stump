@@ -9,6 +9,7 @@ use crate::{
 		media::MediaLoader,
 		media_analysis::MediaAnalysisLoader,
 		reading_session::ReadingSessionLoader,
+		reading_session_v2::ReadingSessionV2Loader,
 		series::SeriesLoader,
 		series_count::SeriesCountLoader,
 		series_finished_count::SeriesFinishedCountLoader,
@@ -62,6 +63,10 @@ pub fn add_data_loaders<
 		))
 		.data(DataLoader::new(
 			ReadingSessionLoader::new(conn.clone()),
+			tokio::spawn,
+		))
+		.data(DataLoader::new(
+			ReadingSessionV2Loader::new(conn.clone()),
 			tokio::spawn,
 		))
 		.data(DataLoader::new(

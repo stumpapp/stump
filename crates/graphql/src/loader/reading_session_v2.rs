@@ -60,28 +60,41 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionV2Loader {
 			if result.contains_key(key) {
 				continue;
 			}
+
 			// sessions are already ordered newest so the first match should be the one
 			let latest = sessions
 				.iter()
 				.find(|s| s.user_id == key.user_id && s.media_id == key.media_id);
-			if let Some(s) = latest {
-				let total_elapsed = elapsed_by_readthrough
-					.get(&(s.user_id.clone(), s.media_id.clone(), s.readthrough_number))
-					.copied()
-					.unwrap_or(0);
 
-				result.insert(
-					key.clone(),
-					ResumeReadingCursor {
-						readthrough_number: s.readthrough_number,
-						end_page: s.end_page,
-						end_locator: s.end_locator.clone(),
-						end_percentage: s.end_percentage,
-						epubcfi: s.epubcfi.clone(),
-						total_elapsed_seconds: total_elapsed,
-						updated_at: s.updated_at,
-					},
-				);
+			match latest {
+				Some(s) if !s.did_complete => {
+					let total_elapsed = elapsed_by_readthrough
+						.get(&(
+							s.user_id.clone(),
+							s.media_id.clone(),
+							s.readthrough_number,
+						))
+						.copied()
+						.unwrap_or(0);
+
+					result.insert(
+						key.clone(),
+						ResumeReadingCursor {
+							readthrough_number: s.readthrough_number,
+							end_page: s.end_page,
+							end_locator: s.end_locator.clone(),
+							end_percentage: s.end_percentage,
+							epubcfi: s.epubcfi.clone(),
+							total_elapsed_seconds: total_elapsed,
+							updated_at: s.updated_at,
+						},
+					);
+				},
+				_ => {
+					// if the latest session is a completion, we want to return None for the cursor
+					// so that the client doesn't try to resume a completed readthrough
+					continue;
+				},
 			}
 		}
 

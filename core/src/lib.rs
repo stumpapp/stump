@@ -71,6 +71,11 @@ pub struct StumpCore {
 }
 
 impl StumpCore {
+	/// Creates a [StumpCore] from an existing [Ctx]
+	pub fn from_ctx(ctx: Ctx) -> StumpCore {
+		StumpCore { ctx }
+	}
+
 	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`std::sync::Arc`].
 	pub async fn new(config: StumpConfig) -> StumpCore {
 		let core_ctx = Ctx::new(config).await;

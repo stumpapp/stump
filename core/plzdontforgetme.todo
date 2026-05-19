@@ -1,11 +1,11 @@
 - [ ] rm finished_reading_sessions
     - [ ] might do this early to catch lingering swaps needed
 - [ ] replace reading_sessions with reading_sessions_v2
-- [ ] refactor kobo sync
-    - [ ] rewrite apply_reading_session_joins, pull latested v2 sess
-    - [ ] finished_reading_session_count, count (distinct readthorugh_number) where did_complete
-    - [ ] finished_reading_session_last_completed_at -> max updated_at where did_complete
-    - [ ] find other things i am sure i need to fix just took a glance
+- [x] refactor kobo sync
+    - [x] rewrite apply_reading_session_joins, pull latested v2 sess
+    - [x] finished_reading_session_count, count (distinct readthorugh_number) where did_complete
+    - [x] finished_reading_session_last_completed_at -> max updated_at where did_complete
+    - [x] find other things i am sure i need to fix just took a glance
 - [x] refactor opds
     - [x] bunch 'o reading_session references to eval in entry.rs, publication.rs, entity.rs
 - [ ] cli account.rs, refacotr to transfer v2 sessions now

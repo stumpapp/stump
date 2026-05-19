@@ -1,12 +1,12 @@
 use models::{
-	entity::{
-		finished_reading_session, media, media_metadata, reading_session, user::AuthUser,
-	},
+	entity::{media, media_metadata, reading_session_v2, user::AuthUser},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional},
 };
 use rust_decimal::prelude::ToPrimitive;
 use sea_orm::{
-	prelude::*, sea_query::IntoCondition, FromQueryResult, JoinType, QuerySelect, Select,
+	prelude::*,
+	sea_query::{Condition, Expr, Query, SimpleExpr, SubQueryStatement},
+	FromQueryResult, JoinType, QuerySelect, Select,
 };
 
 use crate::kobo::sync_types::*;
@@ -14,9 +14,10 @@ use chrono::Utc;
 
 #[derive(Debug, Clone, FromQueryResult)]
 pub struct ReadingSession {
-	pub started_at: DateTimeWithTimeZone,
+	pub created_at: DateTimeWithTimeZone,
 	pub updated_at: Option<DateTimeWithTimeZone>,
-	pub percentage_completed: Option<Decimal>,
+	pub end_percentage: Option<Decimal>,
+	pub did_complete: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -38,56 +39,137 @@ fn apply_reading_session_joins(
 	// we're using a custom `ReadingSession` struct to insulate us from changes to
 	// `reading_session`: if the entity requires columns that aren't selected here, then
 	// `parse_query_to_model_optional` will silently return None.
+	let user_id = user.id.clone();
+
+	// IN (select max(created_at) where user_id=user.id AND media_id=media.id
+	let latest_subq = Query::select()
+		.expr(
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::CreatedAt,
+			))
+			.max(),
+		)
+		.from(reading_session_v2::Entity)
+		.and_where(reading_session_v2::Column::UserId.eq(user_id.clone()))
+		// where media_id = media.id
+		.and_where(
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::MediaId,
+			))
+			.equals((media::Entity, media::Column::Id)),
+		)
+		.to_owned();
+
+	let completed_count_subq = Query::select()
+		.expr(
+			Expr::col((reading_session_v2::Entity, reading_session_v2::Column::Id))
+				.count(),
+		)
+		.from(reading_session_v2::Entity)
+		.and_where(reading_session_v2::Column::UserId.eq(user_id.clone()))
+		.and_where(
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::MediaId,
+			))
+			.equals((media::Entity, media::Column::Id)),
+		)
+		.and_where(reading_session_v2::Column::DidComplete.eq(true))
+		.to_owned();
+
+	let last_completed_subq = Query::select()
+		.expr(
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::UpdatedAt,
+			))
+			.max(),
+		)
+		.from(reading_session_v2::Entity)
+		.and_where(reading_session_v2::Column::UserId.eq(user_id.clone()))
+		.and_where(
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::MediaId,
+			))
+			.equals((media::Entity, media::Column::Id)),
+		)
+		.and_where(reading_session_v2::Column::DidComplete.eq(true))
+		.to_owned();
+
 	query
-		.column_as(reading_session::Column::Id, "reading_sessionsid")
 		.column_as(
-			reading_session::Column::StartedAt,
-			"reading_sessionsstarted_at",
+			Expr::col((reading_session_v2::Entity, reading_session_v2::Column::Id)),
+			"reading_sessions_v2id",
 		)
 		.column_as(
-			reading_session::Column::UpdatedAt,
-			"reading_sessionsupdated_at",
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::CreatedAt,
+			)),
+			"reading_sessions_v2created_at",
 		)
 		.column_as(
-			reading_session::Column::PercentageCompleted,
-			"reading_sessionspercentage_completed",
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::UpdatedAt,
+			)),
+			"reading_sessions_v2updated_at",
+		)
+		.column_as(
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::EndPercentage,
+			)),
+			"reading_sessions_v2end_percentage",
+		)
+		.column_as(
+			Expr::col((
+				reading_session_v2::Entity,
+				reading_session_v2::Column::DidComplete,
+			)),
+			"reading_sessions_v2did_complete",
 		)
 		// LEFT JOIN reading_sessions on media.id = reading_sessions.media_id
-		//  AND reading_sessions.user_id = $user_id
-		.join(
+		//  AND reading_sessions.user_id = $user_id AND reading_sessions.created_at IN (latest_subq)
+		.join_rev(
 			JoinType::LeftJoin,
-			media::Relation::ReadingSession.def().on_condition({
-				let user_id = user.id.clone();
-				move |_left, right| {
-					Expr::col((right, reading_session::Column::UserId))
-						.eq(user_id.clone())
-						.into_condition()
-				}
-			}),
+			reading_session_v2::Entity::belongs_to(media::Entity)
+				.from(reading_session_v2::Column::MediaId)
+				.to(media::Column::Id)
+				.on_condition({
+					let user_id = user_id.clone();
+					let latest_subq = latest_subq.clone();
+					move |_left, _right| {
+						Condition::all()
+							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
+							.add(
+								Expr::col((
+									reading_session_v2::Entity,
+									reading_session_v2::Column::CreatedAt,
+								))
+								.in_subquery(latest_subq.clone()),
+							)
+					}
+				})
+				.into(),
 		)
 		.column_as(
-			finished_reading_session::Column::Id.count(),
+			SimpleExpr::SubQuery(
+				None,
+				Box::new(SubQueryStatement::SelectStatement(completed_count_subq)),
+			),
 			"finished_reading_session_count",
 		)
 		.column_as(
-			finished_reading_session::Column::CompletedAt.max(),
+			SimpleExpr::SubQuery(
+				None,
+				Box::new(SubQueryStatement::SelectStatement(last_completed_subq)),
+			),
 			"finished_reading_session_last_completed_at",
 		)
-		// LEFT JOIN finished_reading_sessions on media.id = finished_reading_sessions.media_id
-		//  AND finished_reading_sessions.user_id = $user_id
-		.join(
-			JoinType::LeftJoin,
-			media::Relation::FinishedReadingSession.def().on_condition({
-				let user_id = user.id.clone();
-				move |_left, right| {
-					Expr::col((right, finished_reading_session::Column::UserId))
-						.eq(user_id.clone())
-						.into_condition()
-				}
-			}),
-		)
-		// we need this to avoid having one result row per finished reading session.
-		// i'm skeptical that this will work with non-sqlite backends!
 		.group_by(media::Column::Id)
 }
 
@@ -119,7 +201,7 @@ impl FromQueryResult for MediaWithMetadataAndReadingSessions {
 		>(res)?;
 		let reading_session = parse_query_to_model_optional::<
 			ReadingSession,
-			reading_session::Entity,
+			reading_session_v2::Entity,
 		>(res)?;
 		Ok(Self {
 			media,
@@ -276,9 +358,9 @@ impl ReadingState {
 	}
 
 	pub fn from_active_reading_session(media_id: String, rs: &ReadingSession) -> Self {
-		let updated_or_started_at = rs.updated_at.unwrap_or(rs.started_at).to_utc();
+		let updated_or_started_at = rs.updated_at.unwrap_or(rs.created_at).to_utc();
 		let percent_complete = rs
-			.percentage_completed
+			.end_percentage
 			.and_then(|pc| pc.to_f32().map(|pc| pc * 100.0));
 
 		ReadingState {
@@ -312,16 +394,24 @@ impl BookEntitlementContainer {
 			m.reading_session.as_ref(),
 			m.finished_reading_session_last_completed_at,
 		) {
+			// latest session is completed
+			(Some(rs), _) if rs.did_complete => ReadingState::finished(
+				media_id.to_string(),
+				m.finished_reading_session_last_completed_at
+					.unwrap_or_else(|| chrono::Utc::now().into()),
+			),
+			// latest session is in-progress
 			(Some(active_reading_session), _) => {
 				ReadingState::from_active_reading_session(
 					media_id.to_string(),
 					active_reading_session,
 				)
 			},
+			// no active session but has a past completion
 			(_, Some(last_completed_at)) => {
 				ReadingState::finished(media_id.to_string(), last_completed_at)
 			},
-			(_, _) => ReadingState::unread(media_id.to_string()),
+			_ => ReadingState::unread(media_id.to_string()),
 		};
 
 		BookEntitlementContainer {
@@ -435,10 +525,11 @@ mod tests {
 
 		// this book has a single active reading session
 
-		fake_data::ReadingSession {
+		fake_data::ReadingSessionV2 {
 			media_id: media.id.clone(),
 			user_id: user.id.clone(),
-			percentage_completed: 0.5,
+			end_percentage: 0.5,
+			..Default::default()
 		}
 		.insert(&db)
 		.await;
@@ -482,12 +573,9 @@ mod tests {
 
 		// this book has a single finished reading session
 
-		fake_data::FinishedReadingSession {
-			media_id: media.id.clone(),
-			user_id: user.id.clone(),
-		}
-		.insert(&db)
-		.await;
+		fake_data::ReadingSessionV2::completed(media.id.clone(), user.id.clone())
+			.insert(&db)
+			.await;
 
 		let m = load_media(&db, &user, media.id).await;
 

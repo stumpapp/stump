@@ -6,8 +6,8 @@
     - [ ] finished_reading_session_count, count (distinct readthorugh_number) where did_complete
     - [ ] finished_reading_session_last_completed_at -> max updated_at where did_complete
     - [ ] find other things i am sure i need to fix just took a glance
-- [ ] refactor opds
-    - [ ] bunch 'o reading_session references to eval in entry.rs, publication.rs, entity.rs
+- [x] refactor opds
+    - [x] bunch 'o reading_session references to eval in entry.rs, publication.rs, entity.rs
 - [ ] cli account.rs, refacotr to transfer v2 sessions now
 - [ ] write migrations once i am CERTAIN these changes are solid, fuck if i am doing it before then
     - [ ] will need to figure out backfill
@@ -20,3 +20,5 @@
 - [ ] refactor SeriesStats
 - [ ] find other things i am sure i need to fix just took a glance
 - [ ] it would be REALLY convenient to try and think about some kind of e2e testing... because this kind of sweeping change is particularly hard to test and i've mostly been porting without testing
+    - [ ] verify changes to opds aren't broken
+- [ ] search and address TODO(v2-sessions) comments

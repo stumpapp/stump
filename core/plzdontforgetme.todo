@@ -19,3 +19,4 @@
     - [ ] consider optional `email` for send-to
 - [ ] refactor SeriesStats
 - [ ] find other things i am sure i need to fix just took a glance
+- [ ] it would be REALLY convenient to try and think about some kind of e2e testing... because this kind of sweeping change is particularly hard to test and i've mostly been porting without testing

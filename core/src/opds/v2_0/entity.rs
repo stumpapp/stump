@@ -2,14 +2,18 @@ use models::{
 	entity::{
 		library_exclusion,
 		media::{self, get_age_restriction_filter},
-		media_analysis, media_metadata, reading_session, registered_reading_device,
+		media_analysis, media_metadata, reading_session_v2, registered_reading_device,
 		series, series_metadata,
 		user::AuthUser,
 	},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::analysis::MediaAnalysisData,
 };
-use sea_orm::{entity::prelude::*, Condition, FromQueryResult, JoinType, QuerySelect};
+use sea_orm::{
+	entity::prelude::*,
+	sea_query::{Expr, Query},
+	Condition, FromQueryResult, JoinType, QuerySelect,
+};
 
 #[derive(Clone, Debug)]
 pub struct OPDSSeries {
@@ -24,7 +28,7 @@ pub struct OPDSPublicationEntity {
 	pub media: media::Model,
 	pub metadata: Option<media_metadata::Model>,
 	pub series: OPDSSeries,
-	pub reading_session: Option<reading_session::Model>,
+	pub reading_session: Option<reading_session_v2::Model>,
 }
 
 impl OPDSPublicationEntity {
@@ -58,7 +62,7 @@ impl OPDSPublicationEntity {
 			.add_columns(media_metadata::Entity)
 			.add_columns(series::Entity)
 			.add_columns(series_metadata::Entity)
-			.add_columns(reading_session::Entity)
+			.add_columns(reading_session_v2::Entity)
 			.selector
 			.filter(series::Column::LibraryId.not_in_subquery(
 				library_exclusion::Entity::library_hidden_to_user_query(user),
@@ -75,12 +79,48 @@ impl OPDSPublicationEntity {
 			)
 			.join_rev(
 				JoinType::LeftJoin,
-				reading_session::Entity::belongs_to(media::Entity)
-					.from(reading_session::Column::MediaId)
+				reading_session_v2::Entity::belongs_to(media::Entity)
+					.from(reading_session_v2::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
+						// select max(created_at) from reading_session_v2 where user_id = ? and media_id = media.id
+						let latest_created_at = Query::select()
+							// select max(created_at)
+							.expr(
+								Expr::col((
+									reading_session_v2::Entity,
+									reading_session_v2::Column::CreatedAt,
+								))
+								.max(),
+							)
+							.from(reading_session_v2::Entity)
+							// user_id = for_user_id
+							.and_where(
+								reading_session_v2::Column::UserId
+									.eq(for_user_id.clone()),
+							)
+							// media_id = media.id
+							.and_where(
+								Expr::col((
+									reading_session_v2::Entity,
+									reading_session_v2::Column::MediaId,
+								))
+								.equals((media::Entity, media::Column::Id)),
+							)
+							.to_owned();
+
 						Condition::all()
-							.add(reading_session::Column::UserId.eq(for_user_id.clone()))
+							.add(
+								reading_session_v2::Column::UserId
+									.eq(for_user_id.clone()),
+							)
+							.add(
+								Expr::col((
+									reading_session_v2::Entity,
+									reading_session_v2::Column::CreatedAt,
+								))
+								.in_subquery(latest_created_at),
+							)
 					})
 					.into(),
 			)
@@ -104,8 +144,8 @@ impl FromQueryResult for OPDSPublicationEntity {
 		let series_name = res.try_get("series", "name")?;
 		let series_id = res.try_get("series", "id")?;
 		let reading_session = parse_query_to_model_optional::<
-			reading_session::Model,
-			reading_session::Entity,
+			reading_session_v2::Model,
+			reading_session_v2::Entity,
 		>(res)?;
 
 		Ok(OPDSPublicationEntity {
@@ -130,16 +170,16 @@ pub struct OPDSProgressionBookRef {
 }
 
 pub struct OPDSProgressionEntity {
-	pub session: reading_session::Model,
+	pub session: reading_session_v2::Model,
+	// TODO(v2-session): sessiosn now store 2 devices, so not sure how to approach this
 	pub device: Option<registered_reading_device::Model>,
 	pub book: OPDSProgressionBookRef,
 }
 
 impl OPDSProgressionEntity {
-	pub fn find() -> Select<reading_session::Entity> {
-		Prefixer::new(reading_session::Entity::find().select_only())
-			.add_columns(reading_session::Entity)
-			.add_columns(registered_reading_device::Entity)
+	pub fn find() -> Select<reading_session_v2::Entity> {
+		Prefixer::new(reading_session_v2::Entity::find().select_only())
+			.add_columns(reading_session_v2::Entity)
 			.add_named_columns(
 				&[
 					media::Column::Id,
@@ -150,7 +190,6 @@ impl OPDSProgressionEntity {
 			)
 			.add_named_columns(&[media_analysis::Column::Data], "bookref")
 			.selector
-			.left_join(registered_reading_device::Entity)
 			.inner_join(media::Entity)
 			.join_rev(
 				JoinType::LeftJoin,
@@ -167,17 +206,15 @@ impl FromQueryResult for OPDSProgressionEntity {
 		res: &sea_orm::QueryResult,
 		_pre: &str,
 	) -> Result<Self, sea_orm::DbErr> {
-		let session =
-			parse_query_to_model::<reading_session::Model, reading_session::Entity>(res)?;
-		let device = parse_query_to_model_optional::<
-			registered_reading_device::Model,
-			registered_reading_device::Entity,
+		let session = parse_query_to_model::<
+			reading_session_v2::Model,
+			reading_session_v2::Entity,
 		>(res)?;
 		let book = OPDSProgressionBookRef::from_query_result(res, "bookref")?;
 
 		Ok(OPDSProgressionEntity {
 			session,
-			device,
+			device: None,
 			book,
 		})
 	}

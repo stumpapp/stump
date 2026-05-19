@@ -3088,6 +3088,7 @@
 			},
 			"allowDownscaling": "Skalowanie zmniejszające",
 			"tapSidesToNavigate": "Dotknij boki, aby nawigować",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "Stopka",
 				"options": {
@@ -3141,6 +3142,7 @@
 				}
 			},
 			"publisherStyles": "Style wydawcy",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "Wyrównanie tekstu",
 				"options": {

@@ -9,8 +9,9 @@
 - [x] refactor opds
     - [x] bunch 'o reading_session references to eval in entry.rs, publication.rs, entity.rs
 - [ ] cli account.rs, refacotr to transfer v2 sessions now
-- [ ] write migrations once i am CERTAIN these changes are solid, fuck if i am doing it before then
+- [x] write migrations once i am CERTAIN these changes are solid, fuck if i am doing it before then
     - [ ] will need to figure out backfill
+    - [ ] remove postfixes
 - [ ] drizzle migrations, too
 - [ ] refactor series completion toggle
 - [ ] refactor SeriesFinishedCountLoader

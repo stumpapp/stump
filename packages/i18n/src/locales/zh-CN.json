@@ -3088,6 +3088,7 @@
 			},
 			"allowDownscaling": "缩小",
 			"tapSidesToNavigate": "点击两侧导航",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "页脚",
 				"options": {
@@ -3141,6 +3142,7 @@
 				}
 			},
 			"publisherStyles": "出版方样式",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "文本对齐",
 				"options": {

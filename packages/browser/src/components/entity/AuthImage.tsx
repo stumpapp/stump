@@ -4,6 +4,7 @@ import { forwardRef, useCallback, useEffect, useState } from 'react'
 type Props = {
 	token?: string
 } & React.ImgHTMLAttributes<HTMLImageElement>
+
 export const AuthImage = forwardRef<HTMLImageElement, Props>(({ token, src, ...props }, ref) => {
 	const { sdk } = useSDK()
 
@@ -12,7 +13,9 @@ export const AuthImage = forwardRef<HTMLImageElement, Props>(({ token, src, ...p
 	const doFetch = useCallback(
 		async (url: string) => {
 			const response = await sdk.axios.get(url, { responseType: 'arraybuffer' })
-			const blob = new Blob([response.data], { type: response.headers['content-type'] })
+			const blob = new Blob([response.data], {
+				type: contentHeader(response.headers['content-type']),
+			})
 			return blob
 		},
 		[sdk.axios],
@@ -52,3 +55,8 @@ export const AuthImage = forwardRef<HTMLImageElement, Props>(({ token, src, ...p
 	return <img {...props} ref={ref} src={imageURL ?? undefined} />
 })
 AuthImage.displayName = 'AuthImage'
+
+const contentHeader = (raw: unknown) => {
+	if (typeof raw === 'string') return raw
+	return 'application/octet-stream'
+}

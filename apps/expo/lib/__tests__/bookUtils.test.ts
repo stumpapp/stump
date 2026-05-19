@@ -1,49 +1,111 @@
+import { describe, expect, it, vi } from 'vitest'
+
 import { formatSeriesPosition } from '../bookUtils'
 
 describe('bookUtils', () => {
 	describe('formatSeriesPosition', () => {
 		it('returns null if position is null or undefined', () => {
-			expect(formatSeriesPosition(null, 5)).toBeNull()
-			expect(formatSeriesPosition(undefined, 5)).toBeNull()
+			const t = vi.fn()
+			expect(formatSeriesPosition(null, 5, { t })).toBeNull()
+			expect(formatSeriesPosition(undefined, 5, { t })).toBeNull()
+			expect(t).not.toHaveBeenCalled()
 		})
 
-		it('formats fractional positions correctly (ignores totalBooks)', () => {
-			expect(formatSeriesPosition(1.5, 5)).toBe('1.5 in series')
-			expect(formatSeriesPosition(1.5, null)).toBe('1.5 in series')
+		it('properly handles all prefix options', () => {
+			const t = vi.fn()
+			for (const prefix of [null, undefined, 'book', 'hashtag'] as const) {
+				formatSeriesPosition(1, 3, {
+					prefix,
+					t,
+					// set so we don't worry about extra translation call
+					seriesName: 'Murderbot Diaries',
+				})
+				const expectedPrefixKey = prefix === null ? 'none' : prefix === undefined ? 'book' : prefix
+				expect(t).toHaveBeenCalledWith(
+					`formatSeriesPosition.${expectedPrefixKey}.positionWithTotal`,
+					expect.anything(),
+				)
+			}
 		})
 
-		it('formats integer positions without totalBooks', () => {
-			expect(formatSeriesPosition(1, null)).toBe('1 in series')
-			expect(formatSeriesPosition(1, undefined)).toBe('1 in series')
-			expect(formatSeriesPosition(1, 0)).toBe('1 in series')
+		it('calls t with positionWithTotal key when position <= totalBooks', () => {
+			const t = vi.fn()
+			formatSeriesPosition(1, 3, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.positionWithTotal', {
+				position: 1,
+				total: 3,
+				seriesName: undefined,
+			})
 		})
 
-		it('formats integer positions with totalBooks correctly', () => {
-			expect(formatSeriesPosition(1, 3)).toBe('1 of 3')
-			expect(formatSeriesPosition(3, 3)).toBe('3 of 3')
+		it('calls t with position key when totalBooks is null', () => {
+			const t = vi.fn()
+			formatSeriesPosition(1, null, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
+				position: 1,
+				total: undefined,
+				seriesName: undefined,
+			})
 		})
 
-		it('ignores totalBooks if position > totalBooks', () => {
-			expect(formatSeriesPosition(4, 3)).toBe('4 in series')
+		it('calls t with position key when totalBooks is undefined', () => {
+			const t = vi.fn()
+			formatSeriesPosition(1, undefined, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
+				position: 1,
+				total: undefined,
+				seriesName: undefined,
+			})
 		})
 
-		it('applies prefix correctly', () => {
-			expect(formatSeriesPosition(1, 3, { prefix: 'Book' })).toBe('Book 1 of 3')
-			expect(formatSeriesPosition(1.5, 3, { prefix: 'Book' })).toBe('Book 1.5 in series')
-			expect(formatSeriesPosition(1, null, { prefix: 'Issue' })).toBe('Issue 1 in series')
+		it('calls t with position key when totalBooks is 0', () => {
+			const t = vi.fn()
+			formatSeriesPosition(1, 0, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
+				position: 1,
+				total: undefined,
+				seriesName: undefined,
+			})
 		})
 
-		it('applies seriesName correctly', () => {
-			expect(formatSeriesPosition(1, 3, { seriesName: 'Spiderman' })).toBe('1 of 3 in Spiderman')
-			expect(formatSeriesPosition(1.5, 3, { seriesName: 'Spiderman' })).toBe('1.5 in Spiderman')
-			expect(formatSeriesPosition(4, 3, { seriesName: 'Spiderman' })).toBe('4 in Spiderman')
+		it('calls t with position key when position > totalBooks', () => {
+			const t = vi.fn()
+			formatSeriesPosition(4, 3, { t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.book.position', {
+				position: 4,
+				total: 3,
+				seriesName: undefined,
+			})
 		})
 
-		it('decodes HTML entities in seriesName', () => {
-			expect(formatSeriesPosition(1, 3, { seriesName: 'Batman &amp; Robin' })).toBe(
-				'1 of 3 in Batman & Robin',
-			)
-			expect(formatSeriesPosition(1, null, { seriesName: 'Q &amp; A&#039;s' })).toBe("1 in Q & A's")
+		it('passes decoded seriesName to t', () => {
+			const t = vi.fn()
+			formatSeriesPosition(1, 3, { seriesName: 'Batman &amp; Robin', prefix: null, t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.none.positionWithTotal', {
+				position: 1,
+				total: 3,
+				seriesName: 'Batman & Robin',
+			})
+		})
+
+		it('passes decoded seriesName with multiple entities to t', () => {
+			const t = vi.fn()
+			formatSeriesPosition(1, null, { seriesName: 'Q &amp; A&#039;s', prefix: null, t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.none.position', {
+				position: 1,
+				total: undefined,
+				seriesName: "Q & A's",
+			})
+		})
+
+		it('passes undefined seriesName to t when seriesName is null', () => {
+			const t = vi.fn()
+			formatSeriesPosition(1, 3, { seriesName: null, prefix: null, t })
+			expect(t).toHaveBeenCalledWith('formatSeriesPosition.none.positionWithTotal', {
+				position: 1,
+				total: 3,
+				seriesName: undefined,
+			})
 		})
 	})
 })

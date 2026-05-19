@@ -88,7 +88,7 @@ const pathsInternal = {
 	},
 	createEmailer: () => pathsInternal.settings('email/new'),
 	docs: (topic?: DocTopic, section?: string) =>
-		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
+		`https://www.stumpapp.dev/docs/guides/${topic || ''}${section ? `#${section}` : ''}`,
 	editEmailer: (id: number) => pathsInternal.settings('email') + `/${id}/edit`,
 	home: () => '/',
 	libraries: () => '/libraries',

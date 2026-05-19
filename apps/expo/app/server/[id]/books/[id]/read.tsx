@@ -26,7 +26,6 @@ import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
 import { db, downloadedFiles } from '~/db'
 import { booksDirectory } from '~/lib/filesystem'
 import {
-	useAppState,
 	useSyncOnlineToOfflineAnnotations,
 	useSyncOnlineToOfflineBookmarks,
 	useSyncOnlineToOfflineProgress,
@@ -276,6 +275,7 @@ export default function Screen() {
 	const queryClient = useQueryClient()
 
 	const preferNativePdfReader = usePreferencesStore((store) => Boolean(store.preferNativePdf))
+	const showControls = useReaderStore((state) => state.showControls)
 
 	if (!book) {
 		throw new Error('Book not found')
@@ -304,9 +304,9 @@ export default function Screen() {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
-	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
+	const timer = useBookTimer(book?.id || '', {
 		initial: book?.readProgress?.elapsedSeconds,
-		enabled: trackElapsedTime,
+		enabled: trackElapsedTime && !showControls,
 	})
 
 	const { syncProgress } = useSyncOnlineToOfflineProgress({ bookId: book.id, serverId })
@@ -323,6 +323,7 @@ export default function Screen() {
 
 	const onPageChanged = useCallback(
 		(page: number) => {
+			const totalSeconds = timer.getCurrentTime()
 			updateProgress({
 				id: book.id,
 				input: {
@@ -333,11 +334,12 @@ export default function Screen() {
 				},
 			})
 		},
-		[book.id, totalSeconds, updateProgress],
+		[book.id, timer, updateProgress],
 	)
 
 	const onLocationChanged = useCallback(
 		(locator: ReadiumLocator, percentage: number) => {
+			const totalSeconds = timer.getCurrentTime()
 			updateProgress({
 				id: book.id,
 				input: {
@@ -359,11 +361,12 @@ export default function Screen() {
 				},
 			})
 		},
-		[book.id, totalSeconds, updateProgress],
+		[book.id, timer, updateProgress],
 	)
 
 	const onReachedEnd = useCallback(
 		(locator: ReadiumLocator) => {
+			const totalSeconds = timer.getCurrentTime()
 			updateProgress({
 				id: book.id,
 				input: {
@@ -384,7 +387,7 @@ export default function Screen() {
 				},
 			})
 		},
-		[book.id, totalSeconds, updateProgress],
+		[book.id, timer, updateProgress],
 	)
 
 	const { syncCreate: syncBookmarkCreate, syncDelete: syncBookmarkDelete } =
@@ -544,29 +547,6 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
-	const onFocusedChanged = useCallback(
-		(focused: boolean) => {
-			if (!focused) {
-				pause()
-			} else if (focused) {
-				resume()
-			}
-		},
-		[pause, resume],
-	)
-
-	const appState = useAppState({
-		onStateChanged: onFocusedChanged,
-	})
-	const showControls = useReaderStore((state) => state.showControls)
-	useEffect(() => {
-		if ((showControls && isRunning) || appState !== 'active') {
-			pause()
-		} else if (!showControls && !isRunning && appState === 'active') {
-			resume()
-		}
-	}, [showControls, pause, resume, isRunning, appState])
-
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
 	 * is updated with the latest read progress
@@ -630,7 +610,7 @@ export default function Screen() {
 				onPageChanged={onPageChanged}
 				serverId={serverId}
 				// incognito
-				resetTimer={reset}
+				timer={timer}
 			/>
 		)
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
@@ -640,7 +620,7 @@ export default function Screen() {
 				book={book}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
 				onPageChanged={onPageChanged}
-				resetTimer={reset}
+				timer={timer}
 				nextInSeries={nextInSeries}
 				serverId={serverId}
 				requestHeaders={requestHeaders}

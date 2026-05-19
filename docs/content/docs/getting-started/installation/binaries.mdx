@@ -1,0 +1,126 @@
+---
+title: Binaries
+description: Installing Stump using the distributable executables from the GitHub releases page
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Stump is available as a standalone executable for macOS, Linux, and Windows
+
+<Callout type="info">
+  Make sure to select the correct platform in the instructions below
+</Callout>
+
+## Download the latest release
+
+Visit the [GitHub releases page](https://github.com/stumpapp/stump/releases) and download the latest release for your platform.
+
+<Tabs items={['🍎 macOS', '🐧 Linux', '🪟 Windows']}>
+  <Tab value="🍎 macOS">
+    Download the `.zip` file named according to your processor architecture:
+    
+    - `stump-<version>-macos-intel.zip` (for Intel processors)
+    - `stump-<version>-macos-arm.zip` (for Apple Silicon processors, e.g., the M-series chips)
+
+    If you are not sure which you have, you can check by clicking the Apple logo in the top left of your screen, selecting "About This Mac", and looking at the "Chip" or "Processor" field
+  </Tab>
+  <Tab value="🐧 Linux">
+    Download the `.tar.gz` file named according to your processor architecture:
+    
+    - `stump-<version>-linux-x64.tar.gz`
+    - `stump-<version>-linux-arm64.tar.gz`
+  </Tab>
+  <Tab value="🪟 Windows">
+    Download the `.zip` file named according to your processor architecture:
+    
+    - `stump-<version>-windows-x64.zip`
+    - `stump-<version>-windows-arm64.zip`
+  </Tab>
+</Tabs>
+
+## Unzip the file
+
+Unzip the downloaded file using your preferred method. The expected contents are:
+
+- `stump_server` (the binary executable file)
+- `client` (a folder containing all of the webapp files)
+
+These can live wherever you'd like, so long as they are adjacent to each other.
+
+<Tabs items={['🍎 macOS/Linux', '🪟 Windows']}>
+  <Tab value="🍎 macOS/Linux">
+    For example, if you wanted them in your home directory, you could run:
+    
+    ```bash copy
+    # macOS
+    unzip ~/Downloads/stump-<version>-macos-arm.zip -d ~
+
+    # Linux
+    tar -xzf ~/Downloads/stump-<version>-linux-x64.tar.gz -C ~
+    ```
+  </Tab>
+  <Tab value="🪟 Windows">
+    You can use the built in file explorer to unzip the file. Just right click the downloaded `.zip` file and select "Extract All...". Then choose the destination folder where you'd like the files to be extracted to.
+  </Tab>
+</Tabs>
+
+## Make the binary executable
+
+<Callout type="info">
+  This step is only necessary for macOS and Linux users. Windows users can skip this step
+</Callout>
+
+Open a terminal and navigate to the folder containing the `stump` binary. Run the following command to make the binary executable:
+
+```bash copy
+# Navigate to the folder containing the stump binary, e.g., ~/Stump
+sudo chmod +x stump_server
+```
+
+## Run the binary
+
+<Tabs items={['🍎 macOS/Linux', '🪟 Windows']}>
+  <Tab value="🍎 macOS/Linux">
+    You can now run the `stump` binary from the terminal:
+    
+    ```bash copy
+    # Navigate to the folder containing the stump binary, e.g., ~/Stump, or be sure to include the full path to the binary
+    ./stump_server
+    ```
+  </Tab>
+  <Tab value="🪟 Windows">
+    You can run the `stump_server.exe` file by double clicking it in the file explorer, or by running it from the command prompt:
+    
+    ```cmd copy
+    # Navigate to the folder containing the stump binary, e.g., C:\Stump, or be sure to include the full path to the binary
+    stump_server.exe
+    ```
+  </Tab>
+</Tabs>
+
+## Additional guides
+
+### Setup a Windows service
+
+<Callout type="info">
+  This section is only relevant for Windows users
+</Callout>
+
+You can optionally setup a Windows service to run Stump in the background. Here's an example of a Windows service file (provided by [@KrautByte](https://github.com/KrautByte)):
+
+```ini copy
+[Unit]
+Description=Stump Book Server
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=stump
+WorkingDirectory=/opt/stump
+ExecStart=cargo run -p stump_server --release
+
+[Install]
+WantedBy=multi-user.target
+```

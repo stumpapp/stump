@@ -77,9 +77,15 @@ export default function Screen() {
 
 	const {
 		data: { librariesStats: booksStats },
+		refetch: refetchStats,
 	} = useSuspenseGraphQL(statsQuery, ['booksStats', serverID])
 
-	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteGraphQL(
+	const {
+		data,
+		hasNextPage,
+		fetchNextPage,
+		refetch: refetchBooks,
+	} = useInfiniteGraphQL(
 		query,
 		['books', serverID, filters, sort],
 		{
@@ -91,6 +97,8 @@ export default function Screen() {
 			placeholderData: keepPreviousData,
 		},
 	)
+
+	const refetch = () => Promise.all([refetchBooks(), refetchStats()])
 
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 

@@ -12,7 +12,6 @@ import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { useResolveURL } from '~/components/opds/utils'
 import { OPDSLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { db, downloadedFiles, readProgress, syncStatus } from '~/db'
-import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
@@ -93,13 +92,16 @@ export default function Screen() {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
 
-	const { pause, resume, isRunning, totalSeconds, reset } = useBookTimer(contextValue.entryId, {
-		enabled: trackElapsedTime,
+	const showControls = useReaderStore((state) => state.showControls)
+	const timer = useBookTimer(contextValue.entryId, {
+		enabled: trackElapsedTime && !showControls,
 	})
 
 	const onPageChanged = useCallback(
 		async (pageNumber: number) => {
 			if (isLoadingRecord || !record) return
+			const totalSeconds = timer.getCurrentTime()
+
 			return db
 				.insert(readProgress)
 				.values({
@@ -119,32 +121,8 @@ export default function Screen() {
 					},
 				})
 		},
-		[isLoadingRecord, record, totalSeconds],
+		[isLoadingRecord, record, timer],
 	)
-
-	const onFocusedChanged = useCallback(
-		(focused: boolean) => {
-			if (!focused) {
-				pause()
-			} else if (focused) {
-				resume()
-			}
-		},
-		[pause, resume],
-	)
-
-	const appState = useAppState({
-		onStateChanged: onFocusedChanged,
-	})
-
-	const showControls = useReaderStore((state) => state.showControls)
-	useEffect(() => {
-		if ((showControls && isRunning) || appState !== 'active') {
-			pause()
-		} else if (!showControls && !isRunning && appState === 'active') {
-			resume()
-		}
-	}, [showControls, pause, resume, isRunning, appState])
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
@@ -184,7 +162,7 @@ export default function Screen() {
 			book={book}
 			pageURL={getStreamURLForPage}
 			requestHeaders={requestHeaders}
-			resetTimer={reset}
+			timer={timer}
 			onPageChanged={onPageChanged}
 			isOPDS
 		/>

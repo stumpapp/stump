@@ -121,11 +121,9 @@ pub async fn auth_middleware(
 	}
 
 	let is_opds = request_uri.starts_with("/opds");
-	let is_swagger = request_uri.starts_with("/swagger-ui");
-
 	let is_playground_request =
 		request_uri.starts_with("/api/graphql") && *req.method() == Method::GET;
-	let is_playground_allowed = ctx.config.enable_swagger || cfg!(debug_assertions);
+	let is_playground_allowed = ctx.config.enable_playground || cfg!(debug_assertions);
 	let is_playground = is_playground_request && is_playground_allowed;
 
 	let Some(auth_header) = auth_header else {
@@ -143,9 +141,6 @@ pub async fn auth_middleware(
 			return Err(
 				OPDSBasicAuth::new(opds_version, host_details.url()).into_response()
 			);
-		} else if is_swagger {
-			// Sign in via React app and then redirect to server-side swagger-ui
-			return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
 		} else if is_playground {
 			// Sign in via React app and then redirect to server-side playground
 			return Err(Redirect::to("/auth?redirect=%2Fapi%2Fgraphql").into_response());

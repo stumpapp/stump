@@ -12,7 +12,6 @@ import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { hashFromURL, useResolveURL } from '~/components/opds/utils'
-import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
@@ -74,33 +73,9 @@ export default function Screen() {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
-	const { pause, resume, isRunning, reset } = useBookTimer(id, {
-		enabled: trackElapsedTime,
-	})
-
-	const onFocusedChanged = useCallback(
-		(focused: boolean) => {
-			if (!focused) {
-				pause()
-			} else if (focused) {
-				resume()
-			}
-		},
-		[pause, resume],
-	)
-
-	const appState = useAppState({
-		onStateChanged: onFocusedChanged,
-	})
-
 	const showControls = useReaderStore((state) => state.showControls)
-	useEffect(() => {
-		if ((showControls && isRunning) || appState !== 'active') {
-			pause()
-		} else if (!showControls && !isRunning && appState === 'active') {
-			resume()
-		}
-	}, [showControls, pause, resume, isRunning, appState])
+
+	const timer = useBookTimer(id, { enabled: trackElapsedTime && !showControls })
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
@@ -230,7 +205,7 @@ export default function Screen() {
 			book={book}
 			pageURL={(page: number) => getPageURL(readingOrder![page - 1]?.href || '')}
 			requestHeaders={requestHeaders}
-			resetTimer={reset}
+			timer={timer}
 			onPageChanged={progressionURL ? onPageChanged : undefined}
 			isOPDS
 		/>

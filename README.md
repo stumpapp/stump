@@ -193,11 +193,9 @@ Various TypeScript packages, at `/packages` in the root of the project:
 There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there. If Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
 
 - [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
-- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
+- [Codex](https://github.com/ajslater/codex)
 - [Kavita](https://github.com/Kareadita/Kavita)
 - [Komga](https://github.com/gotson/komga)
-- [Librum](https://github.com/Librum-Reader/Librum)
-- [oqurum](https://github.com/oqurum) (✨*Rust*✨)
 
 ## License 📝
 

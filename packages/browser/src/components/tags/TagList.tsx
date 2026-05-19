@@ -6,10 +6,10 @@ import TagComponent from './Tag'
 
 type Props = {
 	tags: Tag[] | null
-	baseUrl?: string
+	buildHref?: (tag: Tag) => string
 }
 
-export default function TagList({ tags, baseUrl }: Props) {
+export default function TagList({ tags, buildHref }: Props) {
 	if (!tags?.length) {
 		return null
 	}
@@ -19,11 +19,7 @@ export default function TagList({ tags, baseUrl }: Props) {
 			{tags
 				.filter((tag) => !!tag.name)
 				.map((tag) => (
-					<TagComponent
-						key={tag.id}
-						tag={tag}
-						{...(baseUrl ? { href: `${baseUrl}?tags[]=${tag.name}` } : {})}
-					/>
+					<TagComponent key={tag.id} tag={tag} {...(buildHref ? { href: buildHref(tag) } : {})} />
 				))}
 		</BadgeList>
 	)

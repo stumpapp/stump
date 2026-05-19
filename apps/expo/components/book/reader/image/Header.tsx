@@ -17,7 +17,7 @@ type Props = {
 }
 
 export default function Header({ onShowGlobalSettings }: Props) {
-	const { book, resetTimer, serverId } = useImageBasedReader()
+	const { book, timer, serverId } = useImageBasedReader()
 
 	const insets = useSafeAreaInsets()
 	const { secondaryStyle } = useReaderAnimations()
@@ -56,7 +56,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				<PagedActionMenu
 					book={book}
 					serverId={serverId}
-					onResetTimer={resetTimer}
+					onResetTimer={timer?.reset}
 					onShowSettings={onShowGlobalSettings}
 				/>
 			</View>

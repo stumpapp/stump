@@ -23,6 +23,7 @@ dts/
 esm/
 lib/
 !apps/expo/**/lib/
+!docs/**/lib/
 mjs/
 tmp/
 umd/

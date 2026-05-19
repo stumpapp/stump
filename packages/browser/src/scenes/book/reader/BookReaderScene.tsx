@@ -135,21 +135,6 @@ function BookReaderScene({ book }: Props) {
 		}
 	}, [sdk, client])
 
-	/**
-	 * An effect to update the read progress whenever the page changes in the URL
-	 */
-	useEffect(() => {
-		if (isIncognito) return
-
-		const parsedPage = parseInt(page || '', 10)
-		if (!parsedPage || isNaN(parsedPage) || !book) return
-
-		const maxPage = book.pages
-		if (parsedPage <= 0 || parsedPage > maxPage) return
-
-		updateProgress(parsedPage, book.readProgress?.elapsedSeconds || 0)
-	}, [page, updateProgress, book, isIncognito])
-
 	const initialPage = useMemo(() => (page ? parseInt(page, 10) : undefined), [page])
 
 	useEffect(() => {

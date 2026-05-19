@@ -14,7 +14,7 @@ import { useColors } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
-import { useBookPreferences, useBookReadTime } from '~/stores/reader'
+import { useBookPreferences } from '~/stores/reader'
 
 import { useReaderAnimations } from '../shared/readerAnimations'
 import { useImageBasedReader } from './context'
@@ -35,8 +35,8 @@ export default function Footer() {
 		isOPDS,
 		requestHeaders,
 		serverId,
+		timer,
 	} = useImageBasedReader()
-	const elapsedSeconds = useBookReadTime(book.id)
 	const {
 		preferences: {
 			footerControls = 'slider',
@@ -134,6 +134,7 @@ export default function Footer() {
 		}
 	}, [footerControls, currentPage, visible, visibilityChanged, pageSets, doublePageBehaviorChanged])
 
+	const elapsedSeconds = timer?.getCurrentTime() || 0
 	const formattedReadTime = formatHumanDuration(elapsedSeconds, { significantUnits: 2 })
 
 	const pageSource = useCallback(

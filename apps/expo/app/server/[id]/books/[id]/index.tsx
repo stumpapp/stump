@@ -32,7 +32,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import { useDownload } from '~/lib/hooks'
+import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
@@ -143,6 +143,7 @@ type ActiveReadingSession = NonNullable<
 
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -218,6 +219,7 @@ export default function Screen() {
 		(Number(book.metadata?.number) || book.seriesPosition) ?? null,
 		book.series.metadata?.totalIssues ?? null,
 		{
+			t,
 			seriesName,
 		},
 	)
@@ -276,7 +278,7 @@ export default function Screen() {
 
 		if (elapsedSeconds) {
 			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
-			return <Card.Stat label="Read time" value={readTime} />
+			return <Card.Stat label="Reading time" value={readTime} />
 		} else {
 			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
 		}
@@ -448,7 +450,7 @@ export default function Screen() {
 									<Card.StatGroup>
 										<Card.Stat label="Pages" value={pages} />
 										<Card.Stat label="Finished" value={lastCompletionDistance} />
-										<Card.Stat label="Read time" value={lastCompletionReadTime} />
+										<Card.Stat label="Reading time" value={lastCompletionReadTime} />
 									</Card.StatGroup>
 								)}
 							</Card>

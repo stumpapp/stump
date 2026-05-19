@@ -107,7 +107,10 @@ export default function LibraryHeader() {
 							<Text size="xs" variant="muted">
 								Tags
 							</Text>
-							<TagList tags={tags} baseUrl={paths.bookSearch()} />
+							<TagList
+								tags={tags}
+								buildHref={(tag) => paths.bookSearchWithFilter({ tags: { anyOf: [tag.name] } })}
+							/>
 						</div>
 					)}
 				</div>

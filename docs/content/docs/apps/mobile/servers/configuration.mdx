@@ -1,0 +1,97 @@
+---
+title: Configuration
+description: Adding, editing, and deleting servers in the mobile app
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+## Adding a Server
+
+The process for adding a Stump server and an OPDS server is the same. The only difference is that an OPDS server requires a URL pointing to the root catalog for the feed
+
+<Callout type="info">
+	If you configure a Stump server as a dual-mode server, you may use the root URL for the Stump
+	server instead of the catalog URL
+</Callout>
+
+<Steps>
+
+<Step>
+#### Go to the Servers screen
+
+This is the very first screen you will see when you open the app
+</Step>
+
+<Step>
+#### Click the `+` button
+
+The button is located in the top right corner of the screen
+</Step>
+
+<Step>
+#### Select either `Stump` or `OPDS`
+
+The very first field labeled `Kind` will allow you to select the type of server you are configuring. You may choose either `Stump` or `OPDS`. If choosing `OPDS`, you will need to specify the OPDS version, as well.
+
+If you wish to configure a Stump server _with_ OPDS support, select `Stump` and then enable the `Enable OPDS` switch towards the bottom of the form
+
+<Callout type="info">
+	If a Stump server has OPDS enabled, it will enable v2.0 support automatically. OPDS v1.2 is not
+	supported for dual-mode servers
+</Callout>
+</Step>
+
+<Step>
+#### If OPDS, select the OPDS version
+
+Stump supports both OPDS v1.2 and OPDS v2.0, but it will not auto-detect the version of your OPDS feed. Once you select `OPDS` as the kind of server you are configuring, There will be an additional field that appears below where you can make your selection. Be sure to select the correct version your server supports.
+</Step>
+
+<Step>
+#### Fill in the required connection details
+
+The form will have the following required fields related to the actual connection:
+
+- **Name**: A friendly name for the server
+- **URL**: The URL of the server. If `OPDS`, this will be labeled `Catalog URL`
+- **Auth**: The type of authentication to use
+
+If you choose `Login` for auth, there will be no additional fields to fill in. If you choose `Basic`, you will need to provide a username and password. If you choose `Token`, you will need to provide a token
+</Step>
+
+<Step>
+#### Fill in the optional fields
+
+You may configure the following optional fields:
+
+- **Custom Headers**: Any custom headers you wish to send with each request
+
+You may enable/disable the following optional fields:
+
+- **Enable OPDS**: If you are configuring a Stump server, you may enable OPDS support here
+- **Set as default server**: If enabled, the app will take you into this server when you open the app instead of the root screen
+</Step>
+
+<Step>
+#### Click `Add server`
+
+</Step>
+
+</Steps>
+
+## Editing a Server
+
+Force press on a server in the list to bring up a context menu. Select `Edit` to edit the server.
+
+The process for editing a server is the same as adding a server, so follow the same steps as above. The notable difference is that you may not name it the same as an existing server
+
+## Deleting a Server
+
+Force press on a server in the list to bring up a context menu. Select `Remove` to delete the server.
+
+You will be presented with a confirmation dialog before the server is deleted. If the server is a dual-mode server, an additional warning will be presented.
+
+<Callout type="info">
+	Any disk space used by the server will be freed up when the server is deleted. This includes any
+	books downloaded from the server or cached data
+</Callout>

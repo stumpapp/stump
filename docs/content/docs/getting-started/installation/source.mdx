@@ -1,0 +1,28 @@
+---
+title: Source
+description: Installing Stump from the source code by building it locally on your machine
+---
+
+## Download the source code
+
+You can download the source code for Stump from the [GitHub repository](https://github.com/stumpapp/stump). You can either clone the repository using Git or download it as a ZIP file and extract it.
+
+### Dedicated release channels
+
+If you want the latest release, the `main` branch is the best option. Commits are usually only made to `main` through the release pipeline. You may also want to check out the `nightly` branch, where you can get access to some of the more cutting edge features that are still in development.
+
+Any other branch is likely to be unstable and not recommended for installation.
+
+## Install dependencies
+
+The [contributing guide](/docs/developer/contributing) provides detailed instructions on installing the necessary dependencies for building Stump from source. Please follow those instructions to set up your development environment.
+
+## Build Stump locally
+
+Afterwards, you can run the following command to build Stump locally:
+
+```bash copy
+yarn web build && cargo build --package stump_server --release
+```
+
+This will bundle the web application and build the Stump server. The server binary is located at `target/release/stump_server`, and the web bundle at `apps/web/dist`. You can place those two items anywhere you'd like, just be sure they are either next to each other or you have set the appropriate [environment variable](/docs/guides/configuration/server-config#stump_client_dir).

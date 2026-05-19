@@ -3088,6 +3088,7 @@
 			},
 			"allowDownscaling": "Herabskalieren",
 			"tapSidesToNavigate": "Seiten zum Navigieren antippen",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
@@ -3141,6 +3142,7 @@
 				}
 			},
 			"publisherStyles": "Verlagsstil",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "Textausrichtung",
 				"options": {

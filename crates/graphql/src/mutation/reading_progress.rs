@@ -74,6 +74,16 @@ impl ReadProgressMutation {
 		.map_err(Into::into)
 	}
 
+	// TODO(v2-sessions): i didn't quite do this correctly the first pass, it's a bit trickier
+	// when considering read history. i think it should:
+	// - if actively reading (any readthrough) and is_complete, complete _that_ readthrough (should work as-is)
+	// - if actively reading and !is_complete, trash current readthrough?
+	// ugh idk, maybe separate mutations more semantically named would make sense? like:
+	// - clear_active_progress (trashes current readthrough, if any)
+	// - finish_active_progress (marks current readthrough as complete, if any)
+	// - clear_reading_history (trashes all readthroughs for the media)
+	// i kinda like that, would need to do the same for series as well. it makes it less ambiguous for me
+	// in my head at least
 	async fn mark_media_as_complete(
 		&self,
 		ctx: &Context<'_>,

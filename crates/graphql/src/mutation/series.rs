@@ -179,6 +179,7 @@ impl SeriesMutation {
 		Ok(series.into())
 	}
 
+	// TODO(v2-sessions): refactor and potentially relocate to read_progress.rs
 	/// Toggle the completion status of a series. If the series is marked as completed, all books
 	/// in the series will also be marked as completed, and vice versa for marking as not completed.
 	/// This is considered a dangerous operation since it can modify all your read progression related
@@ -228,6 +229,7 @@ impl SeriesMutation {
 	}
 }
 
+// TODO(v2-sessions): refactor and potentially relocate to read_progress.rs
 async fn set_series_completed(
 	core: &CoreContext,
 	user: &AuthUser,
@@ -322,6 +324,7 @@ async fn set_series_completed(
 	Ok(())
 }
 
+// TODO(v2-sessions): refactor and potentially relocate to read_progress.rs
 async fn unset_series_completed(
 	core: &CoreContext,
 	user: &AuthUser,

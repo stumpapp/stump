@@ -20,6 +20,7 @@ pub struct Media {
 	pub created_at: Option<DateTimeWithTimeZone>,
 	pub modified_at: Option<DateTimeWithTimeZone>,
 	pub deleted_at: Option<DateTimeWithTimeZone>,
+	pub pages: Option<i32>,
 }
 
 impl Media {
@@ -41,7 +42,7 @@ impl Media {
 			name: ActiveValue::Set(name.clone()),
 			size: ActiveValue::Set(1234),
 			extension: sea_orm::Set(extension.clone()),
-			pages: ActiveValue::Set(940),
+			pages: ActiveValue::Set(self.pages.unwrap_or(940)),
 			modified_at: self
 				.modified_at
 				.map_or(ActiveValue::default(), |t| ActiveValue::Set(Some(t))),
@@ -98,8 +99,8 @@ impl User {
 
 #[derive(Default)]
 pub struct Series {
-	name: Option<String>,
-	path: Option<String>,
+	pub name: Option<String>,
+	pub path: Option<String>,
 }
 
 impl Series {

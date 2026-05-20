@@ -1,17 +1,21 @@
 use std::sync::Arc;
 
 use axum_test::TestServer;
+use sea_orm::DatabaseConnection;
 use serde_json::{json, Value};
 use stump_core::{Ctx, StumpCore};
 use stump_server::config::session::get_session_layer;
 use stump_server::routers;
 use tests::db::test_database;
+use tokio::sync::RwLock;
 
 /// a running test instance of the stump server that will contain:
 /// - in-memory database
 /// - initialized server (e.g. config, jwt secrets, etc)
 pub struct TestApp {
 	pub server: TestServer,
+	pub ctx: Arc<Ctx>,
+	pub access_token: RwLock<Option<String>>,
 }
 
 impl TestApp {
@@ -35,11 +39,56 @@ impl TestApp {
 		let router = routers::mount(app_state.clone())
 			.await
 			.with_state(app_state.clone())
-			.layer(get_session_layer(app_state));
+			.layer(get_session_layer(app_state.clone()));
 
-		let server = TestServer::new(router).expect("failed to create test server");
+		let mut server = TestServer::new(router).expect("failed to create test server");
+		server.add_header("user-agent", "stump-server-tests"); // all requests fails without this
 
-		Self { server }
+		Self {
+			server,
+			ctx: app_state,
+			access_token: RwLock::new(None),
+		}
+	}
+
+	/// creates a new instance of [TestApp] and also creates the initial admin user, setting the access token for the app
+	/// to be used in consecutive requests
+	pub async fn new_with_default_user() -> Self {
+		let app = Self::new().await;
+		let token = app.create_initial_account().await;
+		*app.access_token.write().await = Some(token);
+		app
+	}
+
+	pub fn conn(&self) -> &DatabaseConnection {
+		self.ctx.conn.as_ref()
+	}
+
+	pub async fn execute_gql(&self, query: &str, variables: Option<Value>) -> Value {
+		let mut body = json!({ "query": query });
+		if let Some(vars) = variables {
+			body["variables"] = vars;
+		}
+
+		let response = self
+			.server
+			.post("/api/graphql")
+			.add_header(
+				"Authorization",
+				format!(
+					"Bearer {}",
+					self.access_token
+						.read()
+						.await
+						.clone()
+						.unwrap_or_else(|| String::from("no-token-set"))
+				),
+			)
+			.json(&body)
+			.await;
+		response.assert_status_ok();
+
+		response.json()
 	}
 
 	/// create the initial admin account and return an access token
@@ -58,7 +107,7 @@ impl TestApp {
 		login_response.assert_status_ok();
 		let login_response: Value = login_response.json();
 
-		login_response["token"]["accessToken"]
+		login_response["accessToken"]
 			.as_str()
 			.expect("access token missing from login response")
 			.to_string()

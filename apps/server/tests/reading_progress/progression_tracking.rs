@@ -1,0 +1,417 @@
+use crate::common::TestApp;
+
+use models::entity::{media, reading_session_v2};
+use sea_orm::{prelude::*, QueryOrder};
+use tests::fake_data;
+
+async fn setup() -> (TestApp, media::Model) {
+	let app = TestApp::new_with_default_user().await;
+	let db = app.conn();
+
+	let series = fake_data::Series {
+		name: Some("Black Science".to_string()),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	let book = fake_data::Media {
+		series_id: series.id.clone(),
+		id: Some("issue-1".to_string()),
+		name: Some("Black Science #1".to_string()),
+		created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+		pages: Some(100),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	(app, book)
+}
+
+/// if a session does not exist for a user+book pair, a new session should be created
+#[tokio::test]
+async fn test_start_reading_session() {
+	let (app, book) = setup().await;
+
+	let conn = app.conn();
+
+	// no sessions for this book should exist
+	let sessions_count = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.count(conn)
+		.await
+		.expect("could not query reading sessions");
+	assert_eq!(sessions_count, 0);
+
+	let result = app
+		.execute_gql(
+			r#"
+        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+            updateMediaProgress(id: $id, input: $input) {
+                __typename
+            }
+        }
+        "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 10,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	// a session for this book should now exist
+	let sessions_count = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.count(conn)
+		.await
+		.expect("could not query reading sessions");
+	assert_eq!(sessions_count, 1);
+
+	let session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert_eq!(session.end_page, Some(10));
+}
+
+/// if a session already exists and the grace period has not elapsed, the existing
+/// session should be extended instead of creating a new session
+#[tokio::test]
+async fn test_extend_existing_reading_session() {
+	let (app, book) = setup().await;
+
+	let conn = app.conn();
+
+	// start the session
+	let result = app
+		.execute_gql(
+			r#"
+        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+            updateMediaProgress(id: $id, input: $input) {
+                __typename
+            }
+        }
+        "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 10,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	// flip to next page
+	let result = app
+		.execute_gql(
+			r#"
+        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+            updateMediaProgress(id: $id, input: $input) {
+                __typename
+            }
+        }
+        "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 11,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	let session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert_eq!(session.end_page, Some(11));
+	// the elapsed seconds should have been added together, not overwritten
+	assert_eq!(session.elapsed_seconds, Some(600));
+}
+
+/// if the grace period has elapsed, a new session should be created instead of extending
+/// the existing session
+#[tokio::test]
+async fn test_new_session_on_elapsed_grace_period() {
+	let (app, book) = setup().await;
+
+	let conn = app.conn();
+
+	// start the session
+	let result = app
+		.execute_gql(
+			r#"
+           mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+               updateMediaProgress(id: $id, input: $input) {
+                   __typename
+               }
+           }
+           "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 10,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	// fudge the created_at to be outside the grace period, since manipulating time in rust is way
+	// more annoying than js :(
+	let session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	let fudge_time = session.created_at - chrono::Duration::minutes(20);
+	// cannot use active_model here since it auto-updates the timestamps
+	reading_session_v2::Entity::update_many()
+		.filter(reading_session_v2::Column::Id.eq(session.id))
+		.col_expr(
+			reading_session_v2::Column::UpdatedAt,
+			Expr::value(fudge_time),
+		)
+		.exec(conn)
+		.await
+		.expect("could not update session timestamp");
+
+	// flip to next page, which should create a new session since the grace period has elapsed
+	let result = app
+		.execute_gql(
+			r#"
+           mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+               updateMediaProgress(id: $id, input: $input) {
+                   __typename
+               }
+           }
+           "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 11,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	let sessions = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.order_by_asc(reading_session_v2::Column::CreatedAt)
+		.all(conn)
+		.await
+		.expect("could not query reading sessions");
+	assert_eq!(sessions.len(), 2);
+
+	let latest_session = sessions.last().expect("no session found");
+	assert_eq!(latest_session.end_page, Some(11));
+	// it doesn't accumulate elapsed seconds since it's a new session
+	assert_eq!(latest_session.elapsed_seconds, Some(300));
+}
+
+/// if the user finishes the book, the session should be marked as such
+#[tokio::test]
+async fn test_detect_finishing_session() {
+	let (app, book) = setup().await;
+
+	let conn = app.conn();
+
+	// start the session
+	let result = app
+		.execute_gql(
+			r#"
+              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+                  updateMediaProgress(id: $id, input: $input) {
+                      __typename
+                  }
+              }
+              "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 10,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	// flip to last page
+	let result = app
+		.execute_gql(
+			r#"
+              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+                  updateMediaProgress(id: $id, input: $input) {
+                      __typename
+                  }
+              }
+              "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 100,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	let session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert_eq!(session.end_page, Some(100));
+	assert!(session.did_complete);
+}
+
+/// if the latest session is finished, then a new readthrough session should be created with
+/// an incremented readthrough number
+#[tokio::test]
+async fn test_new_readthrough_after_finished_session() {
+	let (app, book) = setup().await;
+
+	let conn = app.conn();
+
+	// start the session
+	let result = app
+		.execute_gql(
+			r#"
+                 mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+                     updateMediaProgress(id: $id, input: $input) {
+                         __typename
+                     }
+                 }
+                 "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 10,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	// flip to last page
+	let result = app
+		.execute_gql(
+			r#"
+                 mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+                     updateMediaProgress(id: $id, input: $input) {
+                         __typename
+                     }
+                 }
+                 "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 100,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	let session = reading_session_v2::Entity::find()
+		.filter(
+			reading_session_v2::Column::MediaId
+				.eq(book.id.clone())
+				.and(reading_session_v2::Column::DidComplete.eq(true)),
+		)
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert_eq!(session.readthrough_number, 1); // start at 1
+
+	// we have to fudge the updated_at to be outside the guard period where it attempts to block creating a new session
+	// after completion as a form of deduplication etc
+	let fudge_time = session.updated_at.expect("session missing updated_at")
+		- chrono::Duration::minutes(20);
+	reading_session_v2::Entity::update_many()
+		.filter(reading_session_v2::Column::Id.eq(session.id))
+		.col_expr(
+			reading_session_v2::Column::UpdatedAt,
+			Expr::value(fudge_time),
+		)
+		.exec(conn)
+		.await
+		.expect("could not update session timestamp");
+
+	// start a new session, which should create a new readthrough since the previous session is finished
+	let result = app
+		.execute_gql(
+			r#"
+                 mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+                     updateMediaProgress(id: $id, input: $input) {
+                         __typename
+                     }
+                 }
+                 "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"paged": {
+						"page": 10,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	let new_session = reading_session_v2::Entity::find()
+		.filter(
+			reading_session_v2::Column::MediaId
+				.eq(book.id.clone())
+				.and(reading_session_v2::Column::DidComplete.eq(false)),
+		)
+		.order_by_desc(reading_session_v2::Column::CreatedAt)
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert_eq!(new_session.readthrough_number, 2); // should have incremented
+}

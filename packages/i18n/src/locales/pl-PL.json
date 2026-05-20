@@ -3088,7 +3088,7 @@
 			},
 			"allowDownscaling": "Skalowanie zmniejszające",
 			"tapSidesToNavigate": "Dotknij boki, aby nawigować",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"volumeButtonsNavigate": "Nawigacja przyciskami głośności",
 			"footerControls": {
 				"label": "Stopka",
 				"options": {
@@ -3142,7 +3142,7 @@
 				}
 			},
 			"publisherStyles": "Style wydawcy",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"volumeButtonsNavigate": "Nawigacja przyciskami głośności",
 			"textAlignment": {
 				"label": "Wyrównanie tekstu",
 				"options": {

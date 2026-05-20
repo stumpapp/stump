@@ -415,3 +415,110 @@ async fn test_new_readthrough_after_finished_session() {
 		.expect("no session found");
 	assert_eq!(new_session.readthrough_number, 2); // should have incremented
 }
+
+/// if the user finishes an ebook, the session should be marked as such
+#[tokio::test]
+async fn test_detect_finishing_session_for_ebook() {
+	let app = TestApp::new_with_default_user().await;
+	let db = app.conn();
+
+	let series = fake_data::Series {
+		name: Some("The Wayfarers".to_string()),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	let book = fake_data::Media {
+		series_id: series.id.clone(),
+		id: Some("book-1".to_string()),
+		name: Some("A Long Way to a Small Angry Planet".to_string()),
+		created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+		pages: Some(432),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	let conn = app.conn();
+
+	// start the session
+	let result = app
+		.execute_gql(
+			r#"
+              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+                  updateMediaProgress(id: $id, input: $input) {
+                      __typename
+                  }
+              }
+              "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"epub": {
+						"locator": {
+							"readium": {
+								"chapterTitle": "Chapter 1",
+								"href": "chapter1.xhtml",
+								"type": "application/xhtml+xml",
+							}
+						},
+						"percentage": 0.2,
+						"isComplete": false,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	// session not complete
+	let session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert!(!session.did_complete);
+
+	// flip to 100%
+	let result = app
+		.execute_gql(
+			r#"
+              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+                  updateMediaProgress(id: $id, input: $input) {
+                      __typename
+                  }
+              }
+              "#,
+			Some(serde_json::json!({
+				"id": book.id,
+				"input": {
+					"epub": {
+						"locator": {
+							"readium": {
+								"chapterTitle": "Chapter 23",
+								"href": "chapter23.xhtml",
+								"type": "application/xhtml+xml",
+							}
+						},
+						"percentage": 1.0,
+						"isComplete": true,
+						"elapsedSecondsDelta": 300,
+					}
+				}
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+
+	// now session should be marked as complete
+	let session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert!(session.did_complete);
+}

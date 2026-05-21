@@ -117,7 +117,7 @@ impl ActiveModelBehavior for ActiveModel {
 			self.enable_alphabet_select = ActiveValue::Set(false);
 			self.enable_reading_journal = ActiveValue::Set(true);
 			self.day_reset_hour_offset = ActiveValue::Set(0); // midnight
-			self.reading_session_grace_period_secs = ActiveValue::Set(600); // 10 minutes
+			self.reading_session_grace_period_secs = ActiveValue::Set(1800); // 30 minutes
 		}
 
 		Ok(self)

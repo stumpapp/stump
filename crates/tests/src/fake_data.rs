@@ -2,7 +2,7 @@ use chrono::Utc;
 use models::entity::{
 	finished_reading_session, media, reading_session, reading_session_v2, series, user,
 };
-use models::shared::enums::FileStatus;
+use models::shared::enums::{FileStatus, ReadingStatus};
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
 use sea_orm::{prelude::DateTimeWithTimeZone, ActiveModelTrait, ActiveValue, DbConn};
@@ -177,7 +177,7 @@ pub struct ReadingSessionV2 {
 	pub media_id: String,
 	pub user_id: String,
 	pub end_percentage: f32,
-	pub did_complete: bool,
+	pub status: ReadingStatus,
 }
 
 impl ReadingSessionV2 {
@@ -187,7 +187,7 @@ impl ReadingSessionV2 {
 			media_id: media_id.to_string(),
 			user_id: user_id.to_string(),
 			end_percentage: 1.0,
-			did_complete: true,
+			status: ReadingStatus::Finished,
 		}
 	}
 
@@ -199,7 +199,7 @@ impl ReadingSessionV2 {
 			end_percentage: sea_orm::Set(rust_decimal::Decimal::from_f32(
 				self.end_percentage,
 			)),
-			did_complete: sea_orm::Set(self.did_complete),
+			status: sea_orm::Set(self.status),
 			readthrough_number: sea_orm::Set(1),
 			..Default::default()
 		};

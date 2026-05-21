@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
 use itertools::Itertools;
-use models::entity::reading_session_v2;
+use models::{entity::reading_session_v2, shared::enums::ReadingStatus};
 use sea_orm::{prelude::*, DatabaseConnection, QueryOrder};
 use std::{cmp::Reverse, collections::HashMap, sync::Arc};
 
@@ -67,7 +67,7 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionV2Loader {
 				.find(|s| s.user_id == key.user_id && s.media_id == key.media_id);
 
 			match latest {
-				Some(s) if !s.did_complete => {
+				Some(s) if !s.is_finalized() => {
 					let total_elapsed = elapsed_by_readthrough
 						.get(&(
 							s.user_id.clone(),
@@ -91,7 +91,7 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionV2Loader {
 					);
 				},
 				_ => {
-					// if the latest session is a completion, we want to return None for the cursor
+					// if the latest session is a completion/dnf, we want to return None for the cursor
 					// so that the client doesn't try to resume a completed readthrough
 					continue;
 				},
@@ -151,7 +151,7 @@ impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionV2Loader {
 				.iter()
 				.filter(|((uid, mid, _), _)| uid == &key.user_id && mid == &key.media_id)
 				.filter_map(|(_, group)| {
-					let completing = group.iter().find(|s| s.did_complete)?;
+					let completing = group.iter().find(|s| s.is_finalized())?;
 					let first = group.first()?;
 					let total_elapsed =
 						group.iter().map(|s| s.elapsed_seconds.unwrap_or(0)).sum();
@@ -162,6 +162,7 @@ impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionV2Loader {
 							.updated_at
 							.unwrap_or(completing.created_at),
 						total_elapsed_seconds: total_elapsed,
+						dnf: completing.status == ReadingStatus::Abandoned,
 					})
 				})
 				.sorted_unstable_by_key(|r| Reverse(r.readthrough_number))

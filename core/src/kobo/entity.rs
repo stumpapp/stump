@@ -1,6 +1,7 @@
 use models::{
 	entity::{media, media_metadata, reading_session_v2, user::AuthUser},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional},
+	shared::enums::ReadingStatus,
 };
 use rust_decimal::prelude::ToPrimitive;
 use sea_orm::{
@@ -17,7 +18,7 @@ pub struct ReadingSession {
 	pub created_at: DateTimeWithTimeZone,
 	pub updated_at: Option<DateTimeWithTimeZone>,
 	pub end_percentage: Option<Decimal>,
-	pub did_complete: bool,
+	pub status: ReadingStatus,
 }
 
 #[derive(Debug, Clone)]
@@ -76,7 +77,7 @@ fn apply_reading_session_joins(
 			))
 			.equals((media::Entity, media::Column::Id)),
 		)
-		.and_where(reading_session_v2::Column::DidComplete.eq(true))
+		.and_where(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
 		.to_owned();
 
 	let last_completed_subq = Query::select()
@@ -96,7 +97,7 @@ fn apply_reading_session_joins(
 			))
 			.equals((media::Entity, media::Column::Id)),
 		)
-		.and_where(reading_session_v2::Column::DidComplete.eq(true))
+		.and_where(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
 		.to_owned();
 
 	query
@@ -128,9 +129,9 @@ fn apply_reading_session_joins(
 		.column_as(
 			Expr::col((
 				reading_session_v2::Entity,
-				reading_session_v2::Column::DidComplete,
+				reading_session_v2::Column::Status,
 			)),
-			"reading_sessions_v2did_complete",
+			"reading_sessions_v2status",
 		)
 		// LEFT JOIN reading_sessions on media.id = reading_sessions.media_id
 		//  AND reading_sessions.user_id = $user_id AND reading_sessions.created_at IN (latest_subq)
@@ -394,12 +395,20 @@ impl BookEntitlementContainer {
 			m.reading_session.as_ref(),
 			m.finished_reading_session_last_completed_at,
 		) {
-			// latest session is completed
-			(Some(rs), _) if rs.did_complete => ReadingState::finished(
-				media_id.to_string(),
-				m.finished_reading_session_last_completed_at
-					.unwrap_or_else(|| chrono::Utc::now().into()),
-			),
+			// TODO(kobo): should we be grouping dnf with finished?
+			// latest session is completed / dnf
+			(Some(rs), _)
+				if matches!(
+					rs.status,
+					ReadingStatus::Finished | ReadingStatus::Abandoned
+				) =>
+			{
+				ReadingState::finished(
+					media_id.to_string(),
+					m.finished_reading_session_last_completed_at
+						.unwrap_or_else(|| chrono::Utc::now().into()),
+				)
+			},
 			// latest session is in-progress
 			(Some(active_reading_session), _) => {
 				ReadingState::from_active_reading_session(

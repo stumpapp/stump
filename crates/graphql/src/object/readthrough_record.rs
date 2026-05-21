@@ -11,4 +11,5 @@ pub struct ReadthroughRecord {
 	pub started_at: DateTimeWithTimeZone,
 	pub completed_at: DateTimeWithTimeZone,
 	pub total_elapsed_seconds: i64,
+	pub dnf: bool,
 }

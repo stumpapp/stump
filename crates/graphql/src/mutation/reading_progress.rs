@@ -2,11 +2,12 @@ use async_graphql::{Context, Object, Result, ID};
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use models::{
 	entity::{media, reading_session_v2, user::AuthUser},
-	shared::readium::ReadiumLocator,
+	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
 use sea_orm::{
 	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait,
-	EntityTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
+	EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
+	TransactionTrait,
 };
 
 use crate::{
@@ -91,46 +92,47 @@ impl ReadProgressMutation {
 		is_complete: bool,
 		page: Option<i32>,
 	) -> Result<Option<ReadingSession>> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let core = ctx.data::<CoreContext>()?;
-		let conn = core.conn.as_ref();
+		// let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		// let core = ctx.data::<CoreContext>()?;
+		// let conn = core.conn.as_ref();
 
-		let (extension, total_pages): (String, i32) =
-			media::Entity::find_by_id(id.to_string())
-				.select_only()
-				.column(media::Column::Extension)
-				.column(media::Column::Pages)
-				.into_tuple()
-				.one(conn)
-				.await?
-				.ok_or("Media not found")?;
+		// let (extension, total_pages): (String, i32) =
+		// 	media::Entity::find_by_id(id.to_string())
+		// 		.select_only()
+		// 		.column(media::Column::Extension)
+		// 		.column(media::Column::Pages)
+		// 		.into_tuple()
+		// 		.one(conn)
+		// 		.await?
+		// 		.ok_or("Media not found")?;
 
-		let mut progression = NormalizedProgression::default();
+		// let mut progression = NormalizedProgression::default();
 
-		if is_complete {
-			progression.page = Some(total_pages);
-			progression.percentage = Some(Decimal::new(1, 0));
-		} else {
-			progression.page = match extension.as_str() {
-				"epub" => None,
-				_ => Some(page.unwrap_or(1)),
-			};
-		}
+		// if is_complete {
+		// 	progression.page = Some(total_pages);
+		// 	progression.percentage = Some(Decimal::new(1, 0));
+		// } else {
+		// 	progression.page = match extension.as_str() {
+		// 		"epub" => None,
+		// 		_ => Some(page.unwrap_or(1)),
+		// 	};
+		// }
 
-		let session = upsert_reading_session(
-			conn,
-			user,
-			id.as_ref(),
-			progression,
-			core.config.book_completion_dedup_timeout_secs,
-		)
-		.await?;
+		// let session = upsert_reading_session(
+		// 	conn,
+		// 	user,
+		// 	id.as_ref(),
+		// 	progression,
+		// 	core.config.book_completion_dedup_timeout_secs,
+		// )
+		// .await?;
 
-		if is_complete {
-			Ok(Some(ReadingSession::from(session)))
-		} else {
-			Ok(None)
-		}
+		// if is_complete {
+		// 	Ok(Some(ReadingSession::from(session)))
+		// } else {
+		// 	Ok(None)
+		// }
+		Ok(None) // placeholder until i decide how to approach this, see above
 	}
 
 	/// trashes current readthrough, if there is one
@@ -156,7 +158,7 @@ impl ReadProgressMutation {
 			return Ok(false);
 		};
 
-		if session.did_complete {
+		if session.is_finalized() {
 			// already marked = no work to do
 			return Ok(true);
 		}
@@ -172,7 +174,7 @@ impl ReadProgressMutation {
 				reading_session_v2::Column::ReadthroughNumber
 					.eq(session.readthrough_number),
 			)
-			.filter(reading_session_v2::Column::DidComplete.eq(false))
+			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
 			.exec(&tx)
 			.await?
 			.rows_affected;
@@ -188,9 +190,16 @@ impl ReadProgressMutation {
 		Ok(affected_rows > 0)
 	}
 
-	/// marks current readthrough as complete, if there is one
+	/// marks current readthrough as complete:
+	/// - if no current readthrough, creates one
+	/// - if `dnf` is true, it will mark the readthrough as such
 	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
-	async fn finish_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+	async fn finish_media_progress(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default)] dnf: Option<bool>,
+	) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
@@ -205,22 +214,47 @@ impl ReadProgressMutation {
 			.order_by_desc(reading_session_v2::Column::CreatedAt)
 			.one(&tx)
 			.await?;
-		let Some(session) = current_session else {
-			// no active session = no work to do
-			return Ok(false);
+
+		let session = match current_session {
+			Some(ref s) if s.is_finalized() => {
+				// already marked = no work to do
+				return Ok(true);
+			},
+			Some(s) => s,
+			None => {
+				let readthrough_number =
+					derive_readthrough_number(&tx, &user.id, id.as_ref()).await?;
+
+				let day_reset_offset = user
+					.preferences
+					.as_ref()
+					.map(|p| p.day_reset_hour_offset)
+					.unwrap_or(0);
+				let logical_today = calculate_logical_date(Utc::now(), day_reset_offset);
+
+				reading_session_v2::ActiveModel {
+					user_id: Set(user.id.clone()),
+					media_id: Set(id.to_string()),
+					readthrough_number: Set(readthrough_number),
+					session_date: Set(logical_today),
+					..Default::default()
+				}
+				.insert(&tx)
+				.await?
+			},
 		};
 
-		if session.did_complete {
-			// already marked = no work to do
-			return Ok(true);
+		let mut active: reading_session_v2::ActiveModel = session.into();
+		let did_dnf = dnf.unwrap_or(false);
+		if did_dnf {
+			active.status = Set(ReadingStatus::Abandoned);
+		} else {
+			let book_pages = get_book_pages(id.to_string(), &tx).await?;
+			active.end_page = Set(Some(book_pages));
+			active.end_percentage = Set(Some(Decimal::new(1, 0)));
+			active.status = Set(ReadingStatus::Finished);
 		}
 
-		let book_pages = get_book_pages(id.to_string(), &tx).await?;
-
-		let mut active: reading_session_v2::ActiveModel = session.into();
-		active.end_page = Set(Some(book_pages));
-		active.end_percentage = Set(Some(Decimal::new(1, 0)));
-		active.did_complete = Set(true);
 		active.update(&tx).await?;
 
 		tx.commit().await?;
@@ -245,7 +279,11 @@ impl ReadProgressMutation {
 					.eq(user.id.clone())
 					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
 			)
-			.filter(reading_session_v2::Column::DidComplete.eq(false))
+			.filter(
+				reading_session_v2::Column::Status
+					.ne(ReadingStatus::Finished)
+					.and(reading_session_v2::Column::Status.ne(ReadingStatus::Abandoned)),
+			)
 			.order_by_desc(reading_session_v2::Column::CreatedAt)
 			.one(conn)
 			.await?
@@ -257,7 +295,6 @@ impl ReadProgressMutation {
 					.eq(user.id.clone())
 					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
 			)
-			.filter(reading_session_v2::Column::DidComplete.eq(true))
 			.apply_if(current_readthrough, |q, readthrough| {
 				q.filter(reading_session_v2::Column::ReadthroughNumber.ne(readthrough))
 			})
@@ -321,7 +358,7 @@ pub fn should_extend_session(
 	session: &reading_session_v2::Model,
 	grace_period_secs: i64,
 ) -> bool {
-	if session.did_complete {
+	if session.is_finalized() {
 		return false;
 	}
 
@@ -338,7 +375,7 @@ pub fn should_extend_session(
 
 /// returns true if `session` was completed within `timeout_secs` of now
 fn is_recent_completion(session: &reading_session_v2::Model, timeout_secs: i64) -> bool {
-	if !session.did_complete {
+	if !session.is_finalized() {
 		return false;
 	}
 	session
@@ -392,7 +429,7 @@ pub async fn upsert_reading_session(
 			active.end_percentage = Set(input.percentage);
 			active.elapsed_seconds = Set(Some(new_elapsed));
 			if input.did_complete {
-				active.did_complete = Set(true);
+				active.status = Set(ReadingStatus::Finished);
 			}
 			if let Some(incoming) = input.device_id {
 				let current = match &active.device_ids {
@@ -429,7 +466,11 @@ pub async fn upsert_reading_session(
 					input.elapsed_seconds_delta.unwrap_or(0).max(0),
 				)),
 				readthrough_number: Set(readthrough_number),
-				did_complete: Set(input.did_complete),
+				status: Set(if input.did_complete {
+					ReadingStatus::Finished
+				} else {
+					ReadingStatus::Reading
+				}),
 				device_ids: Set(input
 					.device_id
 					.map(|id| reading_session_v2::DeviceIds(vec![id]))),
@@ -459,8 +500,8 @@ pub async fn derive_readthrough_number(
 	Ok(match latest {
 		// no existing session = first read
 		None => 1,
-		// existing session that was completed = increment readthrough number, new readthrough
-		Some(session) if session.did_complete => session.readthrough_number + 1,
+		// existing session that was completed/dnf = increment readthrough number, new readthrough
+		Some(session) if session.is_finalized() => session.readthrough_number + 1,
 		Some(session) => session.readthrough_number,
 	})
 }
@@ -523,7 +564,11 @@ mod tests {
 			koreader_progress: None,
 			elapsed_seconds: None,
 			readthrough_number: 1,
-			did_complete,
+			status: if did_complete {
+				ReadingStatus::Finished
+			} else {
+				ReadingStatus::Reading
+			},
 			notes: None,
 			device_ids: None,
 			media_id: "m1".to_string(),

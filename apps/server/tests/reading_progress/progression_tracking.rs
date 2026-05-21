@@ -1,12 +1,11 @@
-use crate::common::TestApp;
+use crate::common::{book::update_progress, TestApp};
 
-use async_graphql::InputType;
 use graphql::input::media::{
 	EpubProgressInput, EpubProgressLocatorInput, MediaProgressInput, PagedProgressInput,
 };
 use models::{
 	entity::{media, reading_session_v2},
-	shared::readium::ReadiumLocator,
+	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
 use sea_orm::{prelude::*, QueryOrder};
 use tests::fake_data;
@@ -34,29 +33,6 @@ async fn setup() -> (TestApp, media::Model) {
 	.await;
 
 	(app, book)
-}
-
-async fn update_progress(app: &TestApp, book_id: &str, input: MediaProgressInput) {
-	let json_input = input
-		.to_value()
-		.into_json()
-		.expect("failed to convert to json");
-	let result = app
-		.execute_gql(
-			r#"
-        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-            updateMediaProgress(id: $id, input: $input) {
-                __typename
-            }
-        }
-        "#,
-			Some(serde_json::json!({
-				"id": book_id,
-				"input": json_input,
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
 }
 
 /// if a session does not exist for a user+book pair, a new session should be created
@@ -249,7 +225,7 @@ async fn test_detect_finishing_session() {
 		.expect("could not query reading sessions")
 		.expect("no session found");
 	assert_eq!(session.end_page, Some(100));
-	assert!(session.did_complete);
+	assert!(session.is_finalized());
 }
 
 /// if the latest session is finished, then a new readthrough session should be created with
@@ -288,7 +264,7 @@ async fn test_new_readthrough_after_finished_session() {
 		.filter(
 			reading_session_v2::Column::MediaId
 				.eq(book.id.clone())
-				.and(reading_session_v2::Column::DidComplete.eq(true)),
+				.and(reading_session_v2::Column::Status.eq(ReadingStatus::Finished)),
 		)
 		.one(conn)
 		.await
@@ -299,7 +275,7 @@ async fn test_new_readthrough_after_finished_session() {
 	// we have to fudge the updated_at to be outside the guard period where it attempts to block creating a new session
 	// after completion as a form of deduplication etc
 	let fudge_time = session.updated_at.expect("session missing updated_at")
-		- chrono::Duration::minutes(20);
+		- chrono::Duration::minutes(40);
 	reading_session_v2::Entity::update_many()
 		.filter(reading_session_v2::Column::Id.eq(session.id))
 		.col_expr(
@@ -326,7 +302,7 @@ async fn test_new_readthrough_after_finished_session() {
 		.filter(
 			reading_session_v2::Column::MediaId
 				.eq(book.id.clone())
-				.and(reading_session_v2::Column::DidComplete.eq(false)),
+				.and(reading_session_v2::Column::Status.eq(ReadingStatus::Reading)),
 		)
 		.order_by_desc(reading_session_v2::Column::CreatedAt)
 		.one(conn)
@@ -391,7 +367,7 @@ async fn test_detect_finishing_session_for_ebook() {
 		.await
 		.expect("could not query reading sessions")
 		.expect("no session found");
-	assert!(!session.did_complete);
+	assert!(!session.is_finalized());
 
 	// flip to last chapter
 	update_progress(
@@ -414,5 +390,5 @@ async fn test_detect_finishing_session_for_ebook() {
 		.await
 		.expect("could not query reading sessions")
 		.expect("no session found");
-	assert!(session.did_complete);
+	assert!(session.is_finalized());
 }

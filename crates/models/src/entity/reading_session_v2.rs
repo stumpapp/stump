@@ -6,7 +6,7 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::shared::readium::ReadiumLocator;
+use crate::shared::{enums::ReadingStatus, readium::ReadiumLocator};
 
 use super::user::AuthUser;
 
@@ -49,10 +49,15 @@ pub struct Model {
 	#[sea_orm(default_value = "1")]
 	pub readthrough_number: i32,
 
-	/// whether the book was completed during this session
-	pub did_complete: bool,
+	/// the status of this session. this might feel confusing when considering that sessions will
+	/// remain in place even after completion/dnf, but the idea is that the status represents the
+	/// state of the session when it was last updated
+	#[sea_orm(column_type = "Text")]
+	pub status: ReadingStatus,
 
-	// TODO: could make this a relation, instead, for multi-note support?
+	// TODO(v2-sessions): either keep this here or make notes a separate table?
+	// need to figure out ui flow for adding notes, a bit convoluted if e.g. you hvae
+	// multiple sessions in a day and go to add a note
 	#[sea_orm(column_type = "Text", nullable)]
 	pub notes: Option<String>,
 
@@ -68,6 +73,21 @@ pub struct Model {
 
 	pub created_at: DateTimeWithTimeZone,
 	pub updated_at: Option<DateTimeWithTimeZone>,
+}
+
+impl Model {
+	/// whether this session is "finalized"
+	pub fn is_finalized(&self) -> bool {
+		matches!(
+			self.status,
+			ReadingStatus::Finished | ReadingStatus::Abandoned
+		)
+	}
+
+	/// whether this session represents a completed readthrough (i.e. status = Finished)
+	pub fn is_complete(&self) -> bool {
+		self.status == ReadingStatus::Finished
+	}
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -131,6 +151,7 @@ impl ActiveModelBehavior for ActiveModel {
 	{
 		if insert {
 			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+			self.status = ActiveValue::Set(ReadingStatus::Reading);
 		} else {
 			self.updated_at =
 				ActiveValue::Set(Some(DateTimeWithTimeZone::from(Utc::now())));

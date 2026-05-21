@@ -1,6 +1,13 @@
 use crate::common::TestApp;
 
-use models::entity::{media, reading_session_v2};
+use async_graphql::InputType;
+use graphql::input::media::{
+	EpubProgressInput, EpubProgressLocatorInput, MediaProgressInput, PagedProgressInput,
+};
+use models::{
+	entity::{media, reading_session_v2},
+	shared::readium::ReadiumLocator,
+};
 use sea_orm::{prelude::*, QueryOrder};
 use tests::fake_data;
 
@@ -29,6 +36,29 @@ async fn setup() -> (TestApp, media::Model) {
 	(app, book)
 }
 
+async fn update_progress(app: &TestApp, book_id: &str, input: MediaProgressInput) {
+	let json_input = input
+		.to_value()
+		.into_json()
+		.expect("failed to convert to json");
+	let result = app
+		.execute_gql(
+			r#"
+        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
+            updateMediaProgress(id: $id, input: $input) {
+                __typename
+            }
+        }
+        "#,
+			Some(serde_json::json!({
+				"id": book_id,
+				"input": json_input,
+			})),
+		)
+		.await;
+	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+}
+
 /// if a session does not exist for a user+book pair, a new session should be created
 #[tokio::test]
 async fn test_start_reading_session() {
@@ -44,27 +74,16 @@ async fn test_start_reading_session() {
 		.expect("could not query reading sessions");
 	assert_eq!(sessions_count, 0);
 
-	let result = app
-		.execute_gql(
-			r#"
-        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-            updateMediaProgress(id: $id, input: $input) {
-                __typename
-            }
-        }
-        "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 10,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	// a session for this book should now exist
 	let sessions_count = reading_session_v2::Entity::find()
@@ -92,50 +111,28 @@ async fn test_extend_existing_reading_session() {
 	let conn = app.conn();
 
 	// start the session
-	let result = app
-		.execute_gql(
-			r#"
-        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-            updateMediaProgress(id: $id, input: $input) {
-                __typename
-            }
-        }
-        "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 10,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	// flip to next page
-	let result = app
-		.execute_gql(
-			r#"
-        mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-            updateMediaProgress(id: $id, input: $input) {
-                __typename
-            }
-        }
-        "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 11,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 11,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	let session = reading_session_v2::Entity::find()
 		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
@@ -157,27 +154,16 @@ async fn test_new_session_on_elapsed_grace_period() {
 	let conn = app.conn();
 
 	// start the session
-	let result = app
-		.execute_gql(
-			r#"
-           mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-               updateMediaProgress(id: $id, input: $input) {
-                   __typename
-               }
-           }
-           "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 10,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	// fudge the created_at to be outside the grace period, since manipulating time in rust is way
 	// more annoying than js :(
@@ -200,27 +186,16 @@ async fn test_new_session_on_elapsed_grace_period() {
 		.expect("could not update session timestamp");
 
 	// flip to next page, which should create a new session since the grace period has elapsed
-	let result = app
-		.execute_gql(
-			r#"
-           mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-               updateMediaProgress(id: $id, input: $input) {
-                   __typename
-               }
-           }
-           "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 11,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 11,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	let sessions = reading_session_v2::Entity::find()
 		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
@@ -244,50 +219,28 @@ async fn test_detect_finishing_session() {
 	let conn = app.conn();
 
 	// start the session
-	let result = app
-		.execute_gql(
-			r#"
-              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-                  updateMediaProgress(id: $id, input: $input) {
-                      __typename
-                  }
-              }
-              "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 10,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	// flip to last page
-	let result = app
-		.execute_gql(
-			r#"
-              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-                  updateMediaProgress(id: $id, input: $input) {
-                      __typename
-                  }
-              }
-              "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 100,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 100,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	let session = reading_session_v2::Entity::find()
 		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
@@ -308,50 +261,28 @@ async fn test_new_readthrough_after_finished_session() {
 	let conn = app.conn();
 
 	// start the session
-	let result = app
-		.execute_gql(
-			r#"
-                 mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-                     updateMediaProgress(id: $id, input: $input) {
-                         __typename
-                     }
-                 }
-                 "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 10,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	// flip to last page
-	let result = app
-		.execute_gql(
-			r#"
-                 mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-                     updateMediaProgress(id: $id, input: $input) {
-                         __typename
-                     }
-                 }
-                 "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 100,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 100,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	let session = reading_session_v2::Entity::find()
 		.filter(
@@ -380,27 +311,16 @@ async fn test_new_readthrough_after_finished_session() {
 		.expect("could not update session timestamp");
 
 	// start a new session, which should create a new readthrough since the previous session is finished
-	let result = app
-		.execute_gql(
-			r#"
-                 mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-                     updateMediaProgress(id: $id, input: $input) {
-                         __typename
-                     }
-                 }
-                 "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"paged": {
-						"page": 10,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
 
 	let new_session = reading_session_v2::Entity::find()
 		.filter(
@@ -442,36 +362,27 @@ async fn test_detect_finishing_session_for_ebook() {
 
 	let conn = app.conn();
 
-	// start the session
-	let result = app
-		.execute_gql(
-			r#"
-              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-                  updateMediaProgress(id: $id, input: $input) {
-                      __typename
-                  }
-              }
-              "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"epub": {
-						"locator": {
-							"readium": {
-								"chapterTitle": "Chapter 1",
-								"href": "chapter1.xhtml",
-								"type": "application/xhtml+xml",
-							}
-						},
-						"percentage": 0.2,
-						"isComplete": false,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	fn locator(chapter: usize) -> EpubProgressLocatorInput {
+		EpubProgressLocatorInput::Readium(Box::new(ReadiumLocator {
+			chapter_title: format!("Chapter {chapter}"),
+			href: format!("chapter{chapter}.xhtml"),
+			r#type: "application/xhtml+xml".to_string(),
+			..Default::default()
+		}))
+	}
+
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Epub(Box::new(EpubProgressInput {
+			locator: locator(1),
+			percentage: Some(Decimal::new(2, 1)),
+			is_complete: Some(false),
+			elapsed_seconds_delta: Some(300),
+			device_id: None,
+		})),
+	)
+	.await;
 
 	// session not complete
 	let session = reading_session_v2::Entity::find()
@@ -482,36 +393,19 @@ async fn test_detect_finishing_session_for_ebook() {
 		.expect("no session found");
 	assert!(!session.did_complete);
 
-	// flip to 100%
-	let result = app
-		.execute_gql(
-			r#"
-              mutation UpdateMediaProgress($id: String!, $input: MediaProgressInput!) {
-                  updateMediaProgress(id: $id, input: $input) {
-                      __typename
-                  }
-              }
-              "#,
-			Some(serde_json::json!({
-				"id": book.id,
-				"input": {
-					"epub": {
-						"locator": {
-							"readium": {
-								"chapterTitle": "Chapter 23",
-								"href": "chapter23.xhtml",
-								"type": "application/xhtml+xml",
-							}
-						},
-						"percentage": 1.0,
-						"isComplete": true,
-						"elapsedSecondsDelta": 300,
-					}
-				}
-			})),
-		)
-		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	// flip to last chapter
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Epub(Box::new(EpubProgressInput {
+			locator: locator(23),
+			percentage: Some(Decimal::new(100, 0)),
+			is_complete: Some(true),
+			elapsed_seconds_delta: Some(300),
+			device_id: None,
+		})),
+	)
+	.await;
 
 	// now session should be marked as complete
 	let session = reading_session_v2::Entity::find()

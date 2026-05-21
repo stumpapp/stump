@@ -29,7 +29,7 @@ pub struct EpubProgressInput {
 	pub device_id: Option<String>,
 }
 
-#[derive(Debug, Clone, InputObject)]
+#[derive(Default, Debug, Clone, InputObject)]
 pub struct PagedProgressInput {
 	pub page: i32,
 	pub elapsed_seconds_delta: Option<i64>,

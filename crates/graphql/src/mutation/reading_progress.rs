@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use async_graphql::{Context, Object, Result, ID};
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use models::{
@@ -190,6 +192,9 @@ impl ReadProgressMutation {
 		Ok(affected_rows > 0)
 	}
 
+	// TODO(v2-sessions): we need to create a new session if elapsed, otherwise we fuck with the
+	// sacred timeline
+
 	/// marks current readthrough as complete:
 	/// - if no current readthrough, creates one
 	/// - if `dnf` is true, it will mark the readthrough as such
@@ -215,22 +220,34 @@ impl ReadProgressMutation {
 			.one(&tx)
 			.await?;
 
+		let (grace_period, day_reset_offset) = user
+			.preferences
+			.as_ref()
+			.map(|p| (p.reading_session_grace_period_secs, p.day_reset_hour_offset))
+			.unwrap_or((1800, 0));
+		let logical_today = calculate_logical_date(Utc::now(), day_reset_offset);
+
 		let session = match current_session {
 			Some(ref s) if s.is_finalized() => {
 				// already marked = no work to do
 				return Ok(true);
 			},
-			Some(s) => s,
+			Some(s) if should_extend_session(&s, grace_period) => s,
+			// previous session elapsed so we create a new one to preserve the sacred timeline
+			Some(s) => {
+				reading_session_v2::ActiveModel {
+					user_id: Set(user.id.clone()),
+					media_id: Set(id.to_string()),
+					readthrough_number: Set(s.readthrough_number),
+					session_date: Set(logical_today),
+					..Default::default()
+				}
+				.insert(&tx)
+				.await?
+			},
 			None => {
 				let readthrough_number =
 					derive_readthrough_number(&tx, &user.id, id.as_ref()).await?;
-
-				let day_reset_offset = user
-					.preferences
-					.as_ref()
-					.map(|p| p.day_reset_hour_offset)
-					.unwrap_or(0);
-				let logical_today = calculate_logical_date(Utc::now(), day_reset_offset);
 
 				reading_session_v2::ActiveModel {
 					user_id: Set(user.id.clone()),
@@ -308,6 +325,183 @@ impl ReadProgressMutation {
 		);
 
 		Ok(affected_rows.try_into()?)
+	}
+
+	// TODO(v2-sessions): this name kinda worked for finish_media_progress (kinda) but
+	// is even more awk for series... maybe rename
+
+	/// marks all books in the series as finished
+	async fn finish_series_progress(&self, ctx: &Context<'_>, id: ID) -> Result<i64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let tx = core.conn.begin().await?;
+
+		let books = media::Entity::find_for_series_id(user, id.to_string())
+			.select_only()
+			.columns([media::Column::Id, media::Column::Pages])
+			.into_tuple::<(String, i32)>()
+			.all(&tx)
+			.await?;
+
+		if books.is_empty() {
+			tracing::debug!("No books found in series, nothing to mark as finished");
+			return Ok(0);
+		}
+
+		let book_ids_subquery = media::Entity::find_for_series_id(user, id.to_string())
+			.select_only()
+			.column(media::Column::Id)
+			.into_query();
+
+		let existing_sessions = reading_session_v2::Entity::find()
+			.filter(reading_session_v2::Column::UserId.eq(user.id.clone()))
+			.filter(reading_session_v2::Column::MediaId.in_subquery(book_ids_subquery))
+			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.all(&tx)
+			.await?;
+
+		let mut latest_by_book = HashMap::new();
+		for session in existing_sessions {
+			// first session encountered for each book _should_ be the latest due
+			// to ordering
+			latest_by_book
+				.entry(session.media_id.clone())
+				.or_insert(session);
+		}
+
+		let (grace_period, day_reset_offset) = user
+			.preferences
+			.as_ref()
+			.map(|p| (p.reading_session_grace_period_secs, p.day_reset_hour_offset))
+			.unwrap_or((1800, 0));
+		let logical_today = calculate_logical_date(Utc::now(), day_reset_offset);
+
+		let mut changed = 0;
+
+		for (book_id, pages) in books.iter() {
+			let session_to_finalize = match latest_by_book.remove(book_id) {
+				Some(session) if session.is_finalized() => {
+					// already marked = no work
+					continue;
+				},
+				Some(session) if should_extend_session(&session, grace_period) => session,
+				// previous session elapsed so we create a new one to preserve the sacred timeline
+				Some(session) => {
+					reading_session_v2::ActiveModel {
+						user_id: Set(user.id.clone()),
+						media_id: Set(book_id.clone()),
+						readthrough_number: Set(session.readthrough_number),
+						session_date: Set(logical_today),
+						..Default::default()
+					}
+					.insert(&tx)
+					.await?
+				},
+				// no session at all = no reading activity
+				None => {
+					reading_session_v2::ActiveModel {
+						user_id: Set(user.id.clone()),
+						media_id: Set(book_id.clone()),
+						readthrough_number: Set(1),
+						session_date: Set(logical_today),
+						..Default::default()
+					}
+					.insert(&tx)
+					.await?
+				},
+			};
+
+			let mut active = session_to_finalize.into_active_model();
+			active.end_page = Set(Some(*pages));
+			active.end_percentage = Set(Some(Decimal::new(1, 0)));
+			active.status = Set(ReadingStatus::Finished);
+			active.update(&tx).await?;
+			changed += 1;
+		}
+
+		tx.commit().await?;
+
+		Ok(changed)
+	}
+
+	// TODO: consider flag for clear_active_progress?
+	/// trashes all completed readthroughs for all books in this series, preserving any active
+	/// readthroughs
+	async fn clear_series_reading_history(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<i64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let tx = core.conn.begin().await?;
+
+		let books = media::Entity::find_for_series_id(user, id.to_string())
+			.select_only()
+			.columns([media::Column::Id])
+			.into_tuple::<String>()
+			.all(&tx)
+			.await?;
+
+		if books.is_empty() {
+			tracing::debug!("No books found in series, nothing to mark as finished");
+			return Ok(0);
+		}
+
+		let book_ids_subquery = media::Entity::find_for_series_id(user, id.to_string())
+			.select_only()
+			.column(media::Column::Id)
+			.into_query();
+
+		let existing_sessions = reading_session_v2::Entity::find()
+			.filter(reading_session_v2::Column::UserId.eq(user.id.clone()))
+			.filter(reading_session_v2::Column::MediaId.in_subquery(book_ids_subquery))
+			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.all(&tx)
+			.await?;
+
+		let mut latest_by_book = HashMap::new();
+		for session in existing_sessions {
+			// first session encountered for each book _should_ be the latest due
+			// to ordering
+			latest_by_book
+				.entry(session.media_id.clone())
+				.or_insert(session);
+		}
+
+		let mut deleted = 0;
+
+		for book_id in books.iter() {
+			match latest_by_book.remove(book_id) {
+				Some(session) if session.is_finalized() => {
+					// delete sessions for this book/user with readthrough <= session.readthrough_number (i.e., read history)
+					let affected_rows = reading_session_v2::Entity::delete_many()
+						.filter(
+							reading_session_v2::Column::UserId.eq(user.id.clone()).and(
+								reading_session_v2::Column::MediaId.eq(book_id.clone()),
+							),
+						)
+						.filter(
+							reading_session_v2::Column::ReadthroughNumber
+								.lte(session.readthrough_number),
+						)
+						.exec(&tx)
+						.await?
+						.rows_affected;
+					deleted += affected_rows;
+				},
+				_ => {
+					// no session or non-finalized session = no completed session to delete
+					continue;
+				},
+			}
+		}
+
+		tx.commit().await?;
+
+		Ok(deleted.try_into()?)
 	}
 }
 
@@ -399,7 +593,7 @@ pub async fn upsert_reading_session(
 		.preferences
 		.as_ref()
 		.map(|p| (p.reading_session_grace_period_secs, p.day_reset_hour_offset))
-		.unwrap_or((600, 0));
+		.unwrap_or((1800, 0));
 
 	let logical_today = calculate_logical_date(Utc::now(), day_reset_offset);
 

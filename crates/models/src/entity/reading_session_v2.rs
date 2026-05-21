@@ -149,13 +149,12 @@ impl ActiveModelBehavior for ActiveModel {
 	where
 		C: ConnectionTrait,
 	{
+		let now = Utc::now();
 		if insert {
-			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(now));
 			self.status = ActiveValue::Set(ReadingStatus::Reading);
-		} else {
-			self.updated_at =
-				ActiveValue::Set(Some(DateTimeWithTimeZone::from(Utc::now())));
 		}
+		self.updated_at = ActiveValue::Set(Some(DateTimeWithTimeZone::from(now)));
 
 		Ok(self)
 	}

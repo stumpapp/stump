@@ -45,10 +45,10 @@ impl MigrationTrait for Migration {
 							.default(1),
 					)
 					.col(
-						ColumnDef::new(ReadingSessionsV2::DidComplete)
-							.boolean()
+						ColumnDef::new(ReadingSessionsV2::Status)
+							.text()
 							.not_null()
-							.default(false),
+							.default("READING"),
 					)
 					.col(ColumnDef::new(ReadingSessionsV2::DeviceIds).json())
 					.col(ColumnDef::new(ReadingSessionsV2::MediaId).text().not_null())
@@ -219,7 +219,7 @@ enum ReadingSessionsV2 {
 	KoreaderProgress,
 	ElapsedSeconds,
 	ReadthroughNumber,
-	DidComplete,
+	Status,
 	DeviceIds,
 	MediaId,
 	UserId,

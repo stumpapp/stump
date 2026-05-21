@@ -123,7 +123,9 @@ async fn finish_book_progress(app: &TestApp, book_id: &str, dnf: bool) {
 	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
 }
 
-// TODO(v2-sessions): add these once i refactor them in server
+// TODO(v2-sessions): add these once i refactor them in server:
+// - clear_series_reading_history
+// - finish_series_progress
 
 // #[tokio::test]
 // async fn test_mark_unread_series_as_complete() {}
@@ -273,6 +275,64 @@ async fn test_mark_incomplete_book_as_abandonded() {
 
 	assert_eq!(session.end_percentage, Some(Decimal::new(5, 1)));
 	assert_eq!(session.status, ReadingStatus::Abandoned);
+}
+
+#[tokio::test]
+async fn test_mark_incomplete_book_as_finished_and_preserve_sacred_timeline() {
+	let app = setup().await;
+	let conn = app.conn();
+
+	// start the session
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 50,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+		.one(app.conn())
+		.await
+		.expect("db error")
+		.expect("session should exist");
+	// we fudge the time here so that it elapsed and making as finished will create a new session
+	// instead of updating the old one
+	fudge_session_time(&session, conn).await;
+
+	finish_book_progress(&app, "black_science_1", false).await;
+
+	// there should now be 2 sessions
+	let sessions_count = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
+		.count(conn)
+		.await
+		.expect("db error");
+	assert_eq!(sessions_count, 2);
+
+	// the old session should still be in reading status, and the new one should be finished
+	let old_session_exists = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+		.one(conn)
+		.await
+		.expect("db error")
+		.is_some();
+	assert!(old_session_exists);
+
+	let new_session_exists = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		.one(conn)
+		.await
+		.expect("db error")
+		.is_some();
+	assert!(new_session_exists);
 }
 
 #[tokio::test]

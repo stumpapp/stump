@@ -173,7 +173,7 @@ async fn test_new_session_on_elapsed_grace_period() {
 		.await
 		.expect("could not query reading sessions")
 		.expect("no session found");
-	let fudge_time = session.created_at - chrono::Duration::minutes(20);
+	let fudge_time = session.created_at - chrono::Duration::minutes(40);
 	// cannot use active_model here since it auto-updates the timestamps
 	reading_session_v2::Entity::update_many()
 		.filter(reading_session_v2::Column::Id.eq(session.id))

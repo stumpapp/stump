@@ -6,7 +6,7 @@ use models::{
 };
 use sea_orm::{
 	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait,
-	EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+	EntityTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
 };
 
 use crate::{
@@ -131,6 +131,146 @@ impl ReadProgressMutation {
 		} else {
 			Ok(None)
 		}
+	}
+
+	/// trashes current readthrough, if there is one
+	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
+	async fn clear_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let tx = core.conn.begin().await?;
+
+		let current_session = reading_session_v2::Entity::find()
+			.filter(
+				reading_session_v2::Column::UserId
+					.eq(user.id.clone())
+					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+			)
+			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.one(&tx)
+			.await?;
+
+		let Some(session) = current_session else {
+			// no active session = no work to do
+			return Ok(false);
+		};
+
+		if session.did_complete {
+			// already marked = no work to do
+			return Ok(true);
+		}
+
+		// we just delete non-completed ones with the same readthrough number
+		let affected_rows = reading_session_v2::Entity::delete_many()
+			.filter(
+				reading_session_v2::Column::UserId
+					.eq(user.id.clone())
+					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+			)
+			.filter(
+				reading_session_v2::Column::ReadthroughNumber
+					.eq(session.readthrough_number),
+			)
+			.filter(reading_session_v2::Column::DidComplete.eq(false))
+			.exec(&tx)
+			.await?
+			.rows_affected;
+
+		tracing::debug!(
+			?affected_rows,
+			readthrough_number = session.readthrough_number,
+			"Removed reading sessions for the book's current readthrough"
+		);
+
+		tx.commit().await?;
+
+		Ok(affected_rows > 0)
+	}
+
+	/// marks current readthrough as complete, if there is one
+	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
+	async fn finish_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let tx = core.conn.begin().await?;
+
+		let current_session = reading_session_v2::Entity::find()
+			.filter(
+				reading_session_v2::Column::UserId
+					.eq(user.id.clone())
+					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+			)
+			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.one(&tx)
+			.await?;
+		let Some(session) = current_session else {
+			// no active session = no work to do
+			return Ok(false);
+		};
+
+		if session.did_complete {
+			// already marked = no work to do
+			return Ok(true);
+		}
+
+		let book_pages = get_book_pages(id.to_string(), &tx).await?;
+
+		let mut active: reading_session_v2::ActiveModel = session.into();
+		active.end_page = Set(Some(book_pages));
+		active.end_percentage = Set(Some(Decimal::new(1, 0)));
+		active.did_complete = Set(true);
+		active.update(&tx).await?;
+
+		tx.commit().await?;
+
+		Ok(true)
+	}
+
+	/// trashes all completed readthroughs for the media
+	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
+	async fn clear_media_reading_history(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<i64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let current_readthrough = reading_session_v2::Entity::find()
+			.filter(
+				reading_session_v2::Column::UserId
+					.eq(user.id.clone())
+					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+			)
+			.filter(reading_session_v2::Column::DidComplete.eq(false))
+			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.one(conn)
+			.await?
+			.map(|s| s.readthrough_number);
+
+		let affected_rows = reading_session_v2::Entity::delete_many()
+			.filter(
+				reading_session_v2::Column::UserId
+					.eq(user.id.clone())
+					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+			)
+			.filter(reading_session_v2::Column::DidComplete.eq(true))
+			.apply_if(current_readthrough, |q, readthrough| {
+				q.filter(reading_session_v2::Column::ReadthroughNumber.ne(readthrough))
+			})
+			.exec(conn)
+			.await?
+			.rows_affected;
+
+		tracing::debug!(
+			?affected_rows,
+			"Removed completed reading sessions for book"
+		);
+
+		Ok(affected_rows.try_into()?)
 	}
 }
 

@@ -2,8 +2,8 @@ use models::{
 	entity::{
 		library_exclusion,
 		media::{self, get_age_restriction_filter},
-		media_analysis, media_metadata, reading_session_v2, registered_reading_device,
-		series, series_metadata,
+		media_analysis, media_metadata, reading_device, reading_session_v2, series,
+		series_metadata,
 		user::AuthUser,
 	},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
@@ -172,7 +172,7 @@ pub struct OPDSProgressionBookRef {
 pub struct OPDSProgressionEntity {
 	pub session: reading_session_v2::Model,
 	// TODO(v2-session): sessiosn now store 2 devices, so not sure how to approach this
-	pub device: Option<registered_reading_device::Model>,
+	pub device: Option<reading_device::Model>,
 	pub book: OPDSProgressionBookRef,
 }
 

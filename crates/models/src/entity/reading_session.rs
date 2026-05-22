@@ -10,7 +10,7 @@ use crate::{
 	shared::readium::ReadiumLocator,
 };
 
-use super::{registered_reading_device, user::AuthUser};
+use super::{reading_device, user::AuthUser};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingSessionModel")]
@@ -41,16 +41,16 @@ pub struct Model {
 
 pub struct ModelWithDevice {
 	pub model: Model,
-	pub device: Option<registered_reading_device::Model>,
+	pub device: Option<reading_device::Model>,
 }
 
 impl ModelWithDevice {
 	pub fn find() -> Select<Entity> {
 		Prefixer::new(Entity::find().select_only())
 			.add_columns(Entity)
-			.add_columns(registered_reading_device::Entity)
+			.add_columns(reading_device::Entity)
 			.selector
-			.left_join(registered_reading_device::Entity)
+			.left_join(reading_device::Entity)
 	}
 }
 
@@ -61,8 +61,8 @@ impl FromQueryResult for ModelWithDevice {
 	) -> Result<Self, sea_orm::DbErr> {
 		let model = parse_query_to_model::<Model, Entity>(res)?;
 		let device = parse_query_to_model_optional::<
-			registered_reading_device::Model,
-			registered_reading_device::Entity,
+			reading_device::Model,
+			reading_device::Entity,
 		>(res)?;
 		Ok(Self { model, device })
 	}
@@ -79,9 +79,9 @@ pub enum Relation {
 	)]
 	Media,
 	#[sea_orm(
-		belongs_to = "super::registered_reading_device::Entity",
+		belongs_to = "super::reading_device::Entity",
 		from = "Column::DeviceId",
-		to = "super::registered_reading_device::Column::Id",
+		to = "super::reading_device::Column::Id",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]
@@ -102,7 +102,7 @@ impl Related<super::media::Entity> for Entity {
 	}
 }
 
-impl Related<super::registered_reading_device::Entity> for Entity {
+impl Related<super::reading_device::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::RegisteredReadingDevice.def()
 	}

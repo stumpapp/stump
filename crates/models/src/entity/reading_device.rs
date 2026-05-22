@@ -1,7 +1,7 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "registered_reading_devices")]
+#[sea_orm(table_name = "reading_devices")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
 	pub id: String,
@@ -9,6 +9,8 @@ pub struct Model {
 	pub name: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub kind: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub email: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

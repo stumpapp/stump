@@ -7,9 +7,7 @@ use axum::{
 };
 use graphql::data::AuthContext;
 use models::{
-	entity::{
-		finished_reading_session, media, reading_session, registered_reading_device,
-	},
+	entity::{finished_reading_session, media, reading_device, reading_session},
 	shared::enums::UserPermission,
 };
 use sea_orm::{prelude::*, sea_query::OnConflict, Iterable, Set, TransactionTrait};
@@ -248,18 +246,16 @@ async fn put_progress(
 
 	let on_conflict = OnConflict::new()
 		.update_columns(
-			registered_reading_device::Column::iter()
-				.filter(|col| matches!(col, registered_reading_device::Column::Name)),
+			reading_device::Column::iter()
+				.filter(|col| matches!(col, reading_device::Column::Name)),
 		)
 		.to_owned();
 
-	let _device_record = registered_reading_device::Entity::insert(
-		registered_reading_device::ActiveModel {
-			id: Set(device_id.clone()),
-			name: Set(device.clone()),
-			..Default::default()
-		},
-	)
+	let _device_record = reading_device::Entity::insert(reading_device::ActiveModel {
+		id: Set(device_id.clone()),
+		name: Set(device.clone()),
+		..Default::default()
+	})
 	.on_conflict(on_conflict)
 	.exec(&tx)
 	.await?;

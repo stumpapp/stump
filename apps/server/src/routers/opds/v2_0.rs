@@ -10,7 +10,7 @@ use axum::{
 };
 use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::entity::{
-	library, media, media_metadata, reading_session, registered_reading_device, series,
+	library, media, media_metadata, reading_device, reading_session, series,
 	series_metadata, user::AuthUser,
 };
 use sea_orm::{prelude::*, Condition, Order, QueryOrder, QueryTrait};
@@ -1342,18 +1342,18 @@ async fn update_book_progression(
 	}
 
 	let device_id = if let Some(input_device) = input.device() {
-		let existing_device =
-			registered_reading_device::Entity::find_by_id(&input_device.id)
-				.one(conn)
-				.await?;
+		let existing_device = reading_device::Entity::find_by_id(&input_device.id)
+			.one(conn)
+			.await?;
 
 		if existing_device.is_none() {
-			let new_device = registered_reading_device::ActiveModel {
+			let new_device = reading_device::ActiveModel {
 				id: Set(input_device.id.clone()),
 				name: Set(input_device.name.clone()),
 				kind: Set(None),
+				email: Set(None),
 			};
-			registered_reading_device::Entity::insert(new_device)
+			reading_device::Entity::insert(new_device)
 				.exec(conn)
 				.await?;
 		}

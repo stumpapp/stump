@@ -90,6 +90,8 @@ impl Model {
 	}
 }
 
+// note: because DeviceIds is a JSON col we can't derive the relation, to do that we'd
+// need a junction table instead, but i don't wanna deal with that rn so it's fine
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
 	#[sea_orm(

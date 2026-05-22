@@ -26,3 +26,17 @@ yarn web build && cargo build --package stump_server --release
 ```
 
 This will bundle the web application and build the Stump server. The server binary is located at `target/release/stump_server`, and the web bundle at `apps/web/dist`. You can place those two items anywhere you'd like, just be sure they are either next to each other or you have set the appropriate [environment variable](/docs/guides/configuration/server-config#stump_client_dir).
+
+## Community packages
+
+<Callout type="warn">
+  The packages listed here are maintained by community members, not the Stump developer. Use them at your own discretion and please report any packaging issues to the respective maintainers
+</Callout>
+
+### Arch Linux (AUR)
+
+An [AUR package](https://aur.archlinux.org/packages/stump) is available for Arch-based Linux distributions. It compiles Stump from source and installs a systemd service for you. You can install it using your preferred AUR helper:
+
+```bash copy
+yay -S stump
+```

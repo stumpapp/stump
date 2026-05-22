@@ -152,7 +152,10 @@ impl ActiveModelBehavior for ActiveModel {
 		let now = Utc::now();
 		if insert {
 			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(now));
-			self.status = ActiveValue::Set(ReadingStatus::Reading);
+			self.status = match self.status {
+				ActiveValue::Set(s) => ActiveValue::Set(s),
+				_ => ActiveValue::Set(ReadingStatus::Reading),
+			};
 		}
 		self.updated_at = ActiveValue::Set(Some(DateTimeWithTimeZone::from(now)));
 

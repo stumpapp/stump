@@ -8,7 +8,7 @@
     - [x] find other things i am sure i need to fix just took a glance
 - [x] refactor opds
     - [x] bunch 'o reading_session references to eval in entry.rs, publication.rs, entity.rs
-- [ ] cli account.rs, refacotr to transfer v2 sessions now
+- [x] cli account.rs, refacotr to transfer v2 sessions now
 - [x] write migrations once i am CERTAIN these changes are solid, fuck if i am doing it before then
     - [ ] will need to figure out backfill
     - [ ] remove postfixes

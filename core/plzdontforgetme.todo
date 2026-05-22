@@ -13,7 +13,7 @@
     - [ ] will need to figure out backfill
     - [ ] remove postfixes
 - [ ] drizzle migrations, too
-- [ ] refactor series completion toggle
+- [x] refactor series completion toggle
 - [ ] refactor SeriesFinishedCountLoader
 - [ ] figure out refactor for registered_reading_device
     - [ ] rename reading_device, registered is redundant

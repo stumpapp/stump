@@ -179,7 +179,8 @@ impl SeriesMutation {
 		Ok(series.into())
 	}
 
-	// TODO(v2-sessions): refactor and potentially relocate to read_progress.rs
+	// TODO(v2-sessions): remove this and replace client usages with new mutations in read_progress.rs
+
 	/// Toggle the completion status of a series. If the series is marked as completed, all books
 	/// in the series will also be marked as completed, and vice versa for marking as not completed.
 	/// This is considered a dangerous operation since it can modify all your read progression related
@@ -190,23 +191,24 @@ impl SeriesMutation {
 		id: ID,
 		is_completed: bool,
 	) -> Result<Series> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let core = ctx.data::<CoreContext>()?;
+		// let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		// let core = ctx.data::<CoreContext>()?;
 
-		let series = series::ModelWithMetadata::find_for_user(user)
-			.filter(series::Column::Id.eq(id.to_string()))
-			.into_model::<series::ModelWithMetadata>()
-			.one(core.conn.as_ref())
-			.await?
-			.ok_or("Series not found")?;
+		// let series = series::ModelWithMetadata::find_for_user(user)
+		// 	.filter(series::Column::Id.eq(id.to_string()))
+		// 	.into_model::<series::ModelWithMetadata>()
+		// 	.one(core.conn.as_ref())
+		// 	.await?
+		// 	.ok_or("Series not found")?;
 
-		if is_completed {
-			set_series_completed(core, user, &series).await?;
-		} else {
-			unset_series_completed(core, user, &series).await?;
-		}
+		// if is_completed {
+		// 	set_series_completed(core, user, &series).await?;
+		// } else {
+		// 	unset_series_completed(core, user, &series).await?;
+		// }
 
-		Ok(series.into())
+		// Ok(series.into())
+		todo!("remove")
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]

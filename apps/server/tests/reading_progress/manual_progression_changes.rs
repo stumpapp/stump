@@ -13,6 +13,7 @@ async fn setup() -> TestApp {
 	let db = app.conn();
 
 	let black_science = fake_data::Series {
+		id: Some("black_science".to_string()),
 		name: Some("Black Science".to_string()),
 		..Default::default()
 	}
@@ -42,7 +43,7 @@ async fn prepare_secondary_readthrough(app: &TestApp, book_id: &str) {
 
 	// start the session
 	update_progress(
-		&app,
+		app,
 		book_id,
 		MediaProgressInput::Paged(PagedProgressInput {
 			page: 10,
@@ -54,7 +55,7 @@ async fn prepare_secondary_readthrough(app: &TestApp, book_id: &str) {
 
 	// flip to last page
 	update_progress(
-		&app,
+		app,
 		book_id,
 		MediaProgressInput::Paged(PagedProgressInput {
 			page: 100,
@@ -123,18 +124,179 @@ async fn finish_book_progress(app: &TestApp, book_id: &str, dnf: bool) {
 	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
 }
 
-// TODO(v2-sessions): add these once i refactor them in server:
-// - clear_series_reading_history
-// - finish_series_progress
+async fn clear_series_reading_history(app: &TestApp, series_id: &str) -> i64 {
+	let result = app
+		.execute_gql(
+			r#"
+        mutation ClearSeriesReadingHistory($id: String!) {
+            clearSeriesReadingHistory(id: $id)
+        }
+        "#,
+			Some(serde_json::json!({
+				"id": series_id,
+			})),
+		)
+		.await;
 
-// #[tokio::test]
-// async fn test_mark_unread_series_as_complete() {}
+	let deleted = result
+		.get("data")
+		.and_then(|data| data.get("clearSeriesReadingHistory"))
+		.and_then(|value| value.as_i64())
+		.expect("expected a number");
 
-// #[tokio::test]
-// async fn test_mark_incomplete_series_as_complete() {}
+	deleted
+}
 
-// #[tokio::test]
-// async fn test_mark_complete_series_as_incomplete() {}
+async fn finish_series_progress(app: &TestApp, series_id: &str) -> i64 {
+	let result = app
+		.execute_gql(
+			r#"
+        mutation FinishSeriesProgress($id: String!) {
+            finishSeriesProgress(id: $id)
+        }
+        "#,
+			Some(serde_json::json!({
+				"id": series_id,
+			})),
+		)
+		.await;
+
+	let changed = result
+		.get("data")
+		.and_then(|data| data.get("finishSeriesProgress"))
+		.and_then(|value| value.as_i64())
+		.expect("expected finishSeriesProgress to return a number");
+
+	changed
+}
+
+/// a bit of an all-in-one test:
+/// - book 1 already complete, should be left alone
+/// - book 2 active but within grace period, should be finalized in place
+/// - book 3 active but elapsed, should be finalized with a new session to preserve timeline
+/// - book 4 already complete, should be left alone
+/// - book 5 no sessions, should be marked as complete with a new session
+#[tokio::test]
+async fn test_finish_series_progress() {
+	let app = setup().await;
+	let conn = app.conn();
+
+	// book 1 already finished
+	prepare_secondary_readthrough(&app, "black_science_1").await;
+
+	// book 2 active but within grace
+	update_progress(
+		&app,
+		"black_science_2",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 50,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	// book 3 active but elapsed, so new session
+	update_progress(
+		&app,
+		"black_science_3",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 40,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let elapsed_session = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq("black_science_3"))
+		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+		.one(conn)
+		.await
+		.expect("db error")
+		.expect("session should exist");
+	fudge_session_time(&elapsed_session, conn).await;
+
+	let changed = finish_series_progress(&app, "black_science").await;
+	assert_eq!(changed, 4);
+
+	let ids = (1..=5)
+		.map(|pos| format!("black_science_{}", pos))
+		.collect::<Vec<_>>();
+	let finished_sessions = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.is_in(ids.clone()))
+		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		.all(conn)
+		.await
+		.expect("db error");
+	assert_eq!(finished_sessions.len(), 5); // 1 for each book
+
+	let total_sessions = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.is_in(ids))
+		.all(conn)
+		.await
+		.expect("db error");
+	assert_eq!(total_sessions.len(), 6); // 1 for each + the extra for book 3
+}
+
+/// another kinda all-in-one test:
+/// - books 1 and 4 have only finalized sessions, should be fully cleared
+/// - book 2 has finalized + active session, active one being left alone
+/// - book 3 has only an active session, so left alone
+/// - book 5 has no sessions, should remain unaffected
+#[tokio::test]
+async fn test_clear_series_reading_history() {
+	let app = setup().await;
+	let conn = app.conn();
+
+	// full readthroughs for books 1 and 4
+	prepare_secondary_readthrough(&app, "black_science_1").await;
+	prepare_secondary_readthrough(&app, "black_science_4").await;
+
+	// full readthrough + active for book 2
+	prepare_secondary_readthrough(&app, "black_science_2").await;
+	update_progress(
+		&app,
+		"black_science_2",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 20,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	// active for book 3
+	update_progress(
+		&app,
+		"black_science_3",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 30,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let deleted = clear_series_reading_history(&app, "black_science").await;
+	assert_eq!(deleted, 3);
+
+	// should be a total of 2 sessions (book 2 active and book 3 active)
+	let ids = (1..=5)
+		.map(|pos| format!("black_science_{}", pos))
+		.collect::<Vec<_>>();
+	let total_sessions = reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.is_in(ids))
+		.all(conn)
+		.await
+		.expect("db error");
+	assert_eq!(total_sessions.len(), 2);
+
+	// each session should be active
+	assert!(total_sessions
+		.iter()
+		.all(|session| session.status == ReadingStatus::Reading));
+}
 
 #[tokio::test]
 async fn test_clear_media_progress() {

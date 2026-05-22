@@ -99,12 +99,18 @@ impl User {
 
 #[derive(Default)]
 pub struct Series {
+	pub id: Option<String>,
 	pub name: Option<String>,
 	pub path: Option<String>,
 }
 
 impl Series {
 	pub async fn insert(&self, db: &DbConn) -> series::Model {
+		let id = self
+			.id
+			.clone()
+			.unwrap_or_else(|| Uuid::new_v4().to_string());
+
 		let name = self.name.clone().unwrap_or_else(|| {
 			rand::distr::Alphabetic.sample_string(&mut rand::rng(), 16)
 		});
@@ -112,6 +118,7 @@ impl Series {
 		let path = self.path.clone().unwrap_or_else(|| format!("/tmp/{name}"));
 
 		let model = series::ActiveModel {
+			id: sea_orm::Set(id.clone()),
 			name: sea_orm::Set(name),
 			path: sea_orm::Set(path),
 			..Default::default()

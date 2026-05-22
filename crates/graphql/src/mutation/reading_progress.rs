@@ -492,8 +492,25 @@ impl ReadProgressMutation {
 						.rows_affected;
 					deleted += affected_rows;
 				},
+				Some(session) => {
+					// keep the current active readthrough, but clear all earlier readthrough history
+					let affected_rows = reading_session_v2::Entity::delete_many()
+						.filter(
+							reading_session_v2::Column::UserId.eq(user.id.clone()).and(
+								reading_session_v2::Column::MediaId.eq(book_id.clone()),
+							),
+						)
+						.filter(
+							reading_session_v2::Column::ReadthroughNumber
+								.lt(session.readthrough_number),
+						)
+						.exec(&tx)
+						.await?
+						.rows_affected;
+					deleted += affected_rows;
+				},
 				_ => {
-					// no session or non-finalized session = no completed session to delete
+					// no sessions for this book
 					continue;
 				},
 			}

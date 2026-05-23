@@ -171,7 +171,6 @@ impl Series {
 	}
 }
 
-// TODO(v2-sessions): rename
 #[derive(Default)]
 pub struct ReadingSession {
 	pub media_id: String,

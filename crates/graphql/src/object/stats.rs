@@ -58,7 +58,7 @@ impl LibraryStats {
 						MAX(CASE WHEN frs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
 						MAX(CASE WHEN frs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
 						IFNULL(SUM(frs.elapsed_seconds), 0) AS readthrough_elapsed_seconds
-					FROM reading_sessions_v2 frs
+					FROM reading_sessions frs
 					WHERE frs.media_id IN (SELECT id FROM library_media)
 						AND ($2 IS TRUE OR frs.user_id = $3)
 					GROUP BY frs.media_id, frs.readthrough_number
@@ -125,7 +125,7 @@ impl SeriesStats {
 						MAX(CASE WHEN frs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
 						MAX(CASE WHEN frs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
 						IFNULL(SUM(frs.elapsed_seconds), 0) AS readthrough_elapsed_seconds
-					FROM reading_sessions_v2 frs
+					FROM reading_sessions frs
 					WHERE frs.media_id IN (SELECT id FROM media WHERE series_id = $1)
 						AND ($2 IS TRUE OR frs.user_id = $3)
 					GROUP BY frs.media_id, frs.readthrough_number

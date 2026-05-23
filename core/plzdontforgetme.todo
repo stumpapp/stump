@@ -1,6 +1,6 @@
 - [ ] rm finished_reading_sessions
     - [ ] might do this early to catch lingering swaps needed
-- [ ] replace reading_sessions with reading_sessions_v2
+- [x] replace reading_sessions with reading_sessions_v2
 - [x] refactor kobo sync
     - [x] rewrite apply_reading_session_joins, pull latested v2 sess
     - [x] finished_reading_session_count, count (distinct readthorugh_number) where did_complete

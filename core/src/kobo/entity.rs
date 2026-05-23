@@ -85,26 +85,26 @@ fn apply_reading_session_joins(
 	query
 		.column_as(
 			Expr::col((reading_session::Entity, reading_session::Column::Id)),
-			"reading_sessions_v2id",
+			"reading_sessionsid",
 		)
 		.column_as(
 			Expr::col((reading_session::Entity, reading_session::Column::CreatedAt)),
-			"reading_sessions_v2created_at",
+			"reading_sessionscreated_at",
 		)
 		.column_as(
 			Expr::col((reading_session::Entity, reading_session::Column::UpdatedAt)),
-			"reading_sessions_v2updated_at",
+			"reading_sessionsupdated_at",
 		)
 		.column_as(
 			Expr::col((
 				reading_session::Entity,
 				reading_session::Column::EndPercentage,
 			)),
-			"reading_sessions_v2end_percentage",
+			"reading_sessionsend_percentage",
 		)
 		.column_as(
 			Expr::col((reading_session::Entity, reading_session::Column::Status)),
-			"reading_sessions_v2status",
+			"reading_sessionsstatus",
 		)
 		// LEFT JOIN reading_sessions on media.id = reading_sessions.media_id
 		//  AND reading_sessions.user_id = $user_id AND reading_sessions.created_at IN (latest_subq)

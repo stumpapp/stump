@@ -470,7 +470,7 @@ impl MediaQuery {
 				user_read_series AS (
 					SELECT DISTINCT m.series_id
 					FROM media m
-					JOIN reading_sessions_v2 rs ON rs.media_id = m.id
+					JOIN reading_sessions rs ON rs.media_id = m.id
 					WHERE rs.user_id = ?
 					AND rs.status = 'FINISHED'
 					AND m.series_id IS NOT NULL
@@ -479,7 +479,7 @@ impl MediaQuery {
 				-- Find all media IDs that user has read
 				user_read_media AS (
 					SELECT DISTINCT media_id
-					FROM reading_sessions_v2
+					FROM reading_sessions
 					WHERE user_id = ?
 					AND status = 'FINISHED'
 				),
@@ -488,13 +488,13 @@ impl MediaQuery {
 				user_active_series AS (
 					SELECT DISTINCT m.series_id
 					FROM media m
-					JOIN reading_sessions_v2 rs ON rs.media_id = m.id
+					JOIN reading_sessions rs ON rs.media_id = m.id
 					WHERE rs.user_id = ?
 					AND m.series_id IS NOT NULL
 					AND rs.status = 'READING'
 					AND NOT EXISTS (
 						SELECT 1
-						FROM reading_sessions_v2 rs2
+						FROM reading_sessions rs2
 						WHERE rs2.user_id = rs.user_id
 						AND rs2.media_id = rs.media_id
 						AND (
@@ -517,7 +517,7 @@ impl MediaQuery {
 					SELECT
 						m.series_id,
 						MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
-					FROM reading_sessions_v2 rs
+					FROM reading_sessions rs
 					JOIN media m ON m.id = rs.media_id
 					WHERE rs.user_id = ?
 					AND rs.status = 'FINISHED'
@@ -612,7 +612,7 @@ impl MediaQuery {
 					user_read_series AS (
 						SELECT DISTINCT m.series_id
 						FROM media m
-						JOIN reading_sessions_v2 rs ON rs.media_id = m.id
+						JOIN reading_sessions rs ON rs.media_id = m.id
 						WHERE rs.user_id = ?
 						AND rs.status = 'FINISHED'
 						AND m.series_id IS NOT NULL
@@ -622,7 +622,7 @@ impl MediaQuery {
 					user_read_or_reading_media AS (
 						-- Media that user has finished
 						SELECT DISTINCT media_id
-						FROM reading_sessions_v2
+						FROM reading_sessions
 						WHERE user_id = ?
 						AND status = 'FINISHED'
 
@@ -630,12 +630,12 @@ impl MediaQuery {
 
 						-- Media that user is currently reading
 						SELECT DISTINCT rs.media_id
-						FROM reading_sessions_v2 rs
+						FROM reading_sessions rs
 						WHERE rs.user_id = ?
 						AND rs.status = 'READING'
 						AND NOT EXISTS (
 							SELECT 1
-							FROM reading_sessions_v2 rs2
+							FROM reading_sessions rs2
 							WHERE rs2.user_id = rs.user_id
 							AND rs2.media_id = rs.media_id
 							AND (

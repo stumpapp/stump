@@ -127,7 +127,7 @@ impl Library {
 			id: sea_orm::Set(id.clone()),
 			name: sea_orm::Set(name),
 			path: sea_orm::Set(path),
-			config_id: sea_orm::Set(config.id.clone()),
+			config_id: sea_orm::Set(config.id),
 			..Default::default()
 		};
 

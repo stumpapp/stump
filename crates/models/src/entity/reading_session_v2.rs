@@ -1,9 +1,11 @@
 use async_graphql::SimpleObject;
 use chrono::Utc;
 use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, Condition,
-	DeriveEntityModel, FromJsonQueryResult, FromQueryResult, JoinType, QueryOrder,
-	QuerySelect,
+	entity::prelude::*,
+	prelude::async_trait::async_trait,
+	sea_query::{Alias, Query, SelectStatement},
+	ActiveValue, Condition, DeriveEntityModel, FromJsonQueryResult, FromQueryResult,
+	JoinType, QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -176,6 +178,62 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl Entity {
+	/// subquery used to detect if there is a newer session row for the same
+	/// `(user_id, media_id)` as the outer `reading_sessions_v2` row
+	pub fn newer_session_exists_subquery() -> SelectStatement {
+		let inner_alias = Alias::new("rs2");
+
+		// select 1 from reading_sessions_v2 as rs2
+		Query::select()
+			.expr(Expr::val(1))
+			.from_as(Entity, inner_alias.clone())
+			// where the book/media is matching
+			.and_where(
+				Expr::col((inner_alias.clone(), Column::UserId))
+					.eq(Expr::col((Entity, Column::UserId))),
+			)
+			.and_where(
+				Expr::col((inner_alias.clone(), Column::MediaId))
+					.eq(Expr::col((Entity, Column::MediaId))),
+			)
+			// some of these may feel odd, but there are some edge cases that are more plausible.
+			// in particular, i know there are multiple places in the codebase where i set
+			// updated_at/created_at to the same timestamp (e.g., for newly created ones)
+			.cond_where(
+				// and one of the following is true:
+				Condition::any()
+					// the updated_at is newer than outer row's (i.e., more recent session update)
+					.add(
+						Expr::col((inner_alias.clone(), Column::UpdatedAt))
+							.gt(Expr::col((Entity, Column::UpdatedAt))),
+					)
+					// or, if updated_at is the same, the created_at is newer (i.e., a new session created after the outer row)
+					// ^ realistically this feels like it should never happen
+					.add(
+						Expr::col((inner_alias.clone(), Column::UpdatedAt))
+							.eq(Expr::col((Entity, Column::UpdatedAt)))
+							.and(
+								Expr::col((inner_alias.clone(), Column::CreatedAt))
+									.gt(Expr::col((Entity, Column::CreatedAt))),
+							),
+					)
+					// if timestamps are all equal fallback to ids, relying on insert order
+					.add(
+						Expr::col((inner_alias.clone(), Column::UpdatedAt))
+							.eq(Expr::col((Entity, Column::UpdatedAt)))
+							.and(
+								Expr::col((inner_alias.clone(), Column::CreatedAt))
+									.eq(Expr::col((Entity, Column::CreatedAt)))
+									.and(
+										Expr::col((inner_alias, Column::Id))
+											.gt(Expr::col((Entity, Column::Id))),
+									),
+							),
+					),
+			)
+			.to_owned()
+	}
+
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		Entity::find().filter(Column::UserId.eq(&user.id))
 	}

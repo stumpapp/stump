@@ -1,4 +1,5 @@
 use async_graphql::InputType;
+use chrono::{DateTime, Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
 use models::{entity::reading_session_v2, shared::enums::ReadingStatus};
 use sea_orm::prelude::*;
@@ -34,13 +35,30 @@ pub async fn fudge_session_time(
 	session: &reading_session_v2::Model,
 	conn: &sea_orm::DatabaseConnection,
 ) {
-	let fudge_time = session.updated_at.expect("session missing updated_at")
-		- chrono::Duration::minutes(40);
+	let fudge_time =
+		session.updated_at.expect("session missing updated_at") - Duration::minutes(40);
 	reading_session_v2::Entity::update_many()
 		.filter(reading_session_v2::Column::Id.eq(session.id))
 		.col_expr(
 			reading_session_v2::Column::UpdatedAt,
 			Expr::value(fudge_time),
+		)
+		.exec(conn)
+		.await
+		.expect("could not update session timestamp");
+}
+
+/// fudge the session updated_at to a specific timestamp
+pub async fn fudge_session_time_with_timestamp(
+	session: &reading_session_v2::Model,
+	conn: &sea_orm::DatabaseConnection,
+	updated_at: DateTime<Utc>,
+) {
+	reading_session_v2::Entity::update_many()
+		.filter(reading_session_v2::Column::Id.eq(session.id))
+		.col_expr(
+			reading_session_v2::Column::UpdatedAt,
+			Expr::value(updated_at),
 		)
 		.exec(conn)
 		.await

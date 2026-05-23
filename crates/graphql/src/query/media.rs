@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{
-		finished_reading_session, media, media_metadata, reading_session, user::AuthUser,
+		finished_reading_session, media, media_metadata, reading_session,
+		reading_session_v2, user::AuthUser,
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
@@ -318,21 +319,29 @@ impl MediaQuery {
 
 		let user_id = user.id.clone();
 
+		let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+
 		let query = media::Entity::apply_for_user(user, media::Entity::find())
-			.select_also(reading_session::Entity)
+			.select_also(reading_session_v2::Entity)
 			.filter(media::Column::DeletedAt.is_null())
 			.join_rev(
 				JoinType::InnerJoin,
-				reading_session::Entity::belongs_to(media::Entity)
-					.from(reading_session::Column::MediaId)
+				reading_session_v2::Entity::belongs_to(media::Entity)
+					.from(reading_session_v2::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
 						Condition::all()
-							.add(reading_session::Column::UserId.eq(user_id.clone()))
+							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
+							.add(
+								reading_session_v2::Column::Status
+									.eq(models::shared::enums::ReadingStatus::Reading),
+							)
+							// for each session row, ensure there does not exist a newer session for the same user+media
+							.add(Expr::expr(Expr::exists(newer_exists.clone())).not())
 					})
 					.into(),
 			)
-			.order_by_desc(reading_session::Column::UpdatedAt);
+			.order_by_desc(reading_session_v2::Column::UpdatedAt);
 
 		match pagination.resolve() {
 			Pagination::Cursor(_) => {

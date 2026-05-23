@@ -12,6 +12,7 @@
 - [x] write migrations once i am CERTAIN these changes are solid, fuck if i am doing it before then
     - [ ] will need to figure out backfill
     - [ ] remove postfixes
+    - [ ] do NOT forget about data loss potential in rollback if i don't add refill logic
 - [ ] drizzle migrations, too
 - [x] refactor series completion toggle
 - [x] refactor SeriesFinishedCountLoader

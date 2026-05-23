@@ -1,5 +1,8 @@
+use sea_orm::Statement;
 use sea_orm_migration::prelude::*;
 
+/// IMPORTANT: I have not added a refill(?) for the backfill (lol) when rolling back, so the rollback
+/// has data loss
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -10,6 +13,21 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		let conn = manager.get_connection();
+		let backend = conn.get_database_backend();
+
+		conn.execute(Statement::from_string(
+			backend,
+			"ALTER TABLE reading_sessions RENAME TO reading_sessions_legacy".to_string(),
+		))
+		.await?;
+		conn.execute(Statement::from_string(
+			backend,
+			"ALTER TABLE finished_reading_sessions RENAME TO finished_reading_sessions_legacy"
+				.to_string(),
+		))
+		.await?;
+
 		manager
 			.create_table(
 				Table::create()
@@ -61,8 +79,7 @@ impl MigrationTrait for Migration {
 					.col(ColumnDef::new(ReadingSessionsV2::UpdatedAt).date_time())
 					.foreign_key(
 						ForeignKey::create()
-							// TODO(v2-sessions): rm v2 postfix
-							.name("fk-reading_sessions_v2-media")
+							.name("fk-reading_sessions-media")
 							.from(ReadingSessionsV2::Table, ReadingSessionsV2::MediaId)
 							.to(Media::Table, Media::Id)
 							.on_delete(ForeignKeyAction::Cascade)
@@ -70,8 +87,7 @@ impl MigrationTrait for Migration {
 					)
 					.foreign_key(
 						ForeignKey::create()
-							// TODO(v2-sessions): rm v2 postfix
-							.name("fk-reading_sessions_v2-user")
+							.name("fk-reading_sessions-user")
 							.from(ReadingSessionsV2::Table, ReadingSessionsV2::UserId)
 							.to(Users::Table, Users::Id)
 							.on_delete(ForeignKeyAction::Cascade)
@@ -84,8 +100,7 @@ impl MigrationTrait for Migration {
 		manager
 			.create_index(
 				Index::create()
-					// TODO(v2-sessions): rm v2 postfix
-					.name("idx-reading_sessions_v2_user_date")
+					.name("idx-reading_sessions-session_date")
 					.table(ReadingSessionsV2::Table)
 					.col(ReadingSessionsV2::UserId)
 					.col(ReadingSessionsV2::SessionDate)
@@ -93,11 +108,134 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
+		conn.execute(Statement::from_string(
+			backend,
+			r#"
+				INSERT INTO reading_sessions (
+					session_date,
+					notes,
+					epubcfi,
+					start_locator,
+					end_locator,
+					start_page,
+					end_page,
+					start_percentage,
+					end_percentage,
+					koreader_progress,
+					elapsed_seconds,
+					readthrough_number,
+					status,
+					device_ids,
+					media_id,
+					user_id,
+					created_at,
+					updated_at
+				)
+				SELECT
+					DATE(frs.started_at) AS session_date,
+					NULL AS notes,
+					NULL AS epubcfi,
+					NULL AS start_locator,
+					NULL AS end_locator,
+					NULL AS start_page,
+					NULL AS end_page,
+					NULL AS start_percentage,
+					NULL AS end_percentage,
+					NULL AS koreader_progress,
+					frs.elapsed_seconds,
+					ROW_NUMBER() OVER (
+						PARTITION BY frs.user_id, frs.media_id
+						ORDER BY frs.completed_at ASC, frs.started_at ASC, frs.id ASC
+					) AS readthrough_number,
+					'FINISHED' AS status,
+					NULL AS device_ids,
+					frs.media_id,
+					frs.user_id,
+					frs.started_at AS created_at,
+					frs.completed_at AS updated_at
+				FROM finished_reading_sessions_legacy frs;
+			"#
+			.to_string(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			backend,
+			r#"
+				INSERT INTO reading_sessions (
+					session_date,
+					notes,
+					epubcfi,
+					start_locator,
+					end_locator,
+					start_page,
+					end_page,
+					start_percentage,
+					end_percentage,
+					koreader_progress,
+					elapsed_seconds,
+					readthrough_number,
+					status,
+					device_ids,
+					media_id,
+					user_id,
+					created_at,
+					updated_at
+				)
+				SELECT
+					DATE(rs.started_at) AS session_date,
+					NULL AS notes,
+					rs.epubcfi,
+					NULL AS start_locator,
+					rs.locator AS end_locator,
+					NULL AS start_page,
+					rs.page AS end_page,
+					NULL AS start_percentage,
+					rs.percentage_completed AS end_percentage,
+					rs.koreader_progress,
+					rs.elapsed_seconds,
+					(COALESCE(f.finished_count, 0) + ROW_NUMBER() OVER (
+						PARTITION BY rs.user_id, rs.media_id
+						ORDER BY rs.started_at ASC, rs.id ASC
+					)) AS readthrough_number,
+					'READING' AS status,
+					NULL AS device_ids,
+					rs.media_id,
+					rs.user_id,
+					rs.started_at AS created_at,
+					COALESCE(rs.updated_at, rs.started_at) AS updated_at
+				FROM reading_sessions_legacy rs
+				LEFT JOIN (
+					SELECT
+						user_id,
+						media_id,
+						COUNT(*) AS finished_count
+					FROM finished_reading_sessions_legacy
+					GROUP BY user_id, media_id
+				) f
+					ON f.user_id = rs.user_id
+					AND f.media_id = rs.media_id;
+			"#
+			.to_string(),
+		))
+		.await?;
+
+		manager
+			.drop_table(Table::drop().table(ReadingSessionsLegacy::Table).to_owned())
+			.await?;
+
+		manager
+			.drop_table(
+				Table::drop()
+					.table(FinishedReadingSessionsLegacy::Table)
+					.to_owned(),
+			)
+			.await?;
+
 		manager
 			.create_index(
 				Index::create()
-					// TODO(v2-sessions): rm v2 postfix
-					.name("idx-reading_sessions_v2_media")
+					.name("idx-reading_sessions-media")
 					.table(ReadingSessionsV2::Table)
 					.col(ReadingSessionsV2::MediaId)
 					.to_owned(),
@@ -122,16 +260,6 @@ impl MigrationTrait for Migration {
 					.to_owned(),
 			)
 			.await?;
-
-		// TODO(v2-sessions): backfill logic for finished_reading_sessions + reading_sessions
-		// since we have some conflicting index/fk names, with reading_sessions, might
-		// be easier to:
-		// (before create new table)
-		// - get all finished_reading_sessions
-		// - get all reading_sessions
-		// - drop both tables
-		// - create new table
-		// - insert all sessions back in with appropriate mapping to new fields
 
 		manager
 			.alter_table(
@@ -165,10 +293,155 @@ impl MigrationTrait for Migration {
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-		// TODO(v2-sessions): drop postfix, add recreate old tables logic
-
 		manager
 			.drop_table(Table::drop().table(ReadingSessionsV2::Table).to_owned())
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(ReadingSessionsV1::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(ReadingSessionsV1::Id)
+							.integer()
+							.not_null()
+							.auto_increment()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(ReadingSessionsV1::Page).integer())
+					.col(ColumnDef::new(ReadingSessionsV1::PercentageCompleted).float())
+					.col(ColumnDef::new(ReadingSessionsV1::Locator).json())
+					.col(ColumnDef::new(ReadingSessionsV1::Epubcfi).text())
+					.col(ColumnDef::new(ReadingSessionsV1::KoreaderProgress).text())
+					.col(
+						ColumnDef::new(ReadingSessionsV1::StartedAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(ColumnDef::new(ReadingSessionsV1::UpdatedAt).date_time())
+					.col(ColumnDef::new(ReadingSessionsV1::MediaId).text().not_null())
+					.col(ColumnDef::new(ReadingSessionsV1::UserId).text().not_null())
+					.col(ColumnDef::new(ReadingSessionsV1::DeviceId).text())
+					.col(ColumnDef::new(ReadingSessionsV1::ElapsedSeconds).big_integer())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-reading_sessions-media")
+							.from(ReadingSessionsV1::Table, ReadingSessionsV1::MediaId)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-reading_sessions-device")
+							.from(ReadingSessionsV1::Table, ReadingSessionsV1::DeviceId)
+							.to(
+								RegisteredReadingDevices::Table,
+								RegisteredReadingDevices::Id,
+							)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-reading_sessions-user")
+							.from(ReadingSessionsV1::Table, ReadingSessionsV1::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_index(
+				Index::create()
+					.unique()
+					.name("reading_session_media_id_user_id_idx")
+					.table(ReadingSessionsV1::Table)
+					.col(ReadingSessionsV1::MediaId)
+					.col(ReadingSessionsV1::UserId)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(FinishedReadingSessionsV1::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(FinishedReadingSessionsV1::Id)
+							.integer()
+							.not_null()
+							.auto_increment()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(FinishedReadingSessionsV1::StartedAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(FinishedReadingSessionsV1::CompletedAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(FinishedReadingSessionsV1::MediaId)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(FinishedReadingSessionsV1::UserId)
+							.text()
+							.not_null(),
+					)
+					.col(ColumnDef::new(FinishedReadingSessionsV1::DeviceId).text())
+					.col(
+						ColumnDef::new(FinishedReadingSessionsV1::ElapsedSeconds)
+							.big_integer(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-finished_reading_sessions-media")
+							.from(
+								FinishedReadingSessionsV1::Table,
+								FinishedReadingSessionsV1::MediaId,
+							)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-finished_reading_sessions-device")
+							.from(
+								FinishedReadingSessionsV1::Table,
+								FinishedReadingSessionsV1::DeviceId,
+							)
+							.to(
+								RegisteredReadingDevices::Table,
+								RegisteredReadingDevices::Id,
+							)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-finished_reading_sessions-user")
+							.from(
+								FinishedReadingSessionsV1::Table,
+								FinishedReadingSessionsV1::UserId,
+							)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
 			.await?;
 
 		manager
@@ -202,9 +475,52 @@ impl MigrationTrait for Migration {
 	}
 }
 
-// TODO(v2-sessions): rm v2 postfix for ident, leave for enum since i need to add old tables as enums too
+#[derive(DeriveIden)]
+enum ReadingSessionsV1 {
+	#[sea_orm(iden = "reading_sessions")]
+	Table,
+	Id,
+	Page,
+	PercentageCompleted,
+	Locator,
+	Epubcfi,
+	KoreaderProgress,
+	StartedAt,
+	UpdatedAt,
+	MediaId,
+	UserId,
+	DeviceId,
+	ElapsedSeconds,
+}
+
+#[derive(DeriveIden)]
+enum FinishedReadingSessionsV1 {
+	#[sea_orm(iden = "finished_reading_sessions")]
+	Table,
+	Id,
+	StartedAt,
+	CompletedAt,
+	MediaId,
+	UserId,
+	DeviceId,
+	ElapsedSeconds,
+}
+
+#[derive(DeriveIden)]
+enum ReadingSessionsLegacy {
+	#[sea_orm(iden = "reading_sessions_legacy")]
+	Table,
+}
+
+#[derive(DeriveIden)]
+enum FinishedReadingSessionsLegacy {
+	#[sea_orm(iden = "finished_reading_sessions_legacy")]
+	Table,
+}
+
 #[derive(DeriveIden)]
 enum ReadingSessionsV2 {
+	#[sea_orm(iden = "reading_sessions")]
 	Table,
 	Id,
 	SessionDate,
@@ -233,6 +549,12 @@ enum UserPreferences {
 	EnableReadingJournal,
 	DayResetHourOffset,
 	ReadingSessionGracePeriodSecs,
+}
+
+#[derive(DeriveIden)]
+enum RegisteredReadingDevices {
+	Table,
+	Id,
 }
 
 #[derive(DeriveIden)]

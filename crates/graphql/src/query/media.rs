@@ -51,29 +51,15 @@ pub fn add_sessions_join_for_filter(
 
 	if should_join_sessions {
 		let user_id = user.id.clone();
-		let user_id_cpy = user_id.clone();
 		query
 			.join_rev(
 				JoinType::LeftJoin,
-				reading_session::Entity::belongs_to(media::Entity)
-					.from(reading_session::Column::MediaId)
+				reading_session_v2::Entity::belongs_to(media::Entity)
+					.from(reading_session_v2::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
 						Condition::all()
-							.add(reading_session::Column::UserId.eq(user_id.clone()))
-					})
-					.into(),
-			)
-			.join_rev(
-				JoinType::LeftJoin,
-				finished_reading_session::Entity::belongs_to(media::Entity)
-					.from(finished_reading_session::Column::MediaId)
-					.to(media::Column::Id)
-					.on_condition(move |_left, _right| {
-						Condition::all().add(
-							finished_reading_session::Column::UserId
-								.eq(user_id_cpy.clone()),
-						)
+							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
 					})
 					.into(),
 			)

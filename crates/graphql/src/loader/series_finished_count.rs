@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
 use models::{
-	entity::{media, reading_session_v2},
+	entity::{media, reading_session},
 	shared::enums::ReadingStatus,
 };
 use sea_orm::{
@@ -45,15 +45,15 @@ impl Loader<FinishedCountLoaderKey> for SeriesFinishedCountLoader {
 		let series_ids: Vec<String> =
 			keys.iter().map(|key| key.series_id.clone()).collect();
 
-		let finished_count = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		let finished_count = reading_session::Entity::find()
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 			.inner_join(media::Entity)
 			.filter(media::Column::SeriesId.is_in(series_ids))
 			.select_only()
-			.column(reading_session_v2::Column::UserId)
+			.column(reading_session::Column::UserId)
 			.column(media::Column::SeriesId)
 			.column_as(media::Column::Id.count(), "count")
-			.group_by(reading_session_v2::Column::UserId)
+			.group_by(reading_session::Column::UserId)
 			.group_by(media::Column::SeriesId)
 			.into_model::<UserIdSeriesIdCount>()
 			.all(self.conn.as_ref())

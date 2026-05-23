@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::{media, media_metadata, reading_session_v2, user::AuthUser},
+	entity::{media, media_metadata, reading_session, user::AuthUser},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::{ReadingStatus, UserPermission},
@@ -51,12 +51,12 @@ pub fn add_sessions_join_for_filter(
 		query
 			.join_rev(
 				JoinType::LeftJoin,
-				reading_session_v2::Entity::belongs_to(media::Entity)
-					.from(reading_session_v2::Column::MediaId)
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
 						Condition::all()
-							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
+							.add(reading_session::Column::UserId.eq(user_id.clone()))
 					})
 					.into(),
 			)
@@ -87,8 +87,8 @@ impl MediaQuery {
 	async fn finished_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		let count = reading_session::Entity::find()
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 			.count(conn)
 			.await?;
 
@@ -102,9 +102,9 @@ impl MediaQuery {
 	async fn active_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
-		let count = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
+		let count = reading_session::Entity::find()
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 			.filter(Expr::expr(Expr::exists(newer_exists)).not())
 			.count(conn)
 			.await?;
@@ -310,21 +310,21 @@ impl MediaQuery {
 
 		let user_id = user.id.clone();
 
-		let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 		let query = media::Entity::apply_for_user(user, media::Entity::find())
-			.select_also(reading_session_v2::Entity)
+			.select_also(reading_session::Entity)
 			.filter(media::Column::DeletedAt.is_null())
 			.join_rev(
 				JoinType::InnerJoin,
-				reading_session_v2::Entity::belongs_to(media::Entity)
-					.from(reading_session_v2::Column::MediaId)
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
 						Condition::all()
-							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
+							.add(reading_session::Column::UserId.eq(user_id.clone()))
 							.add(
-								reading_session_v2::Column::Status
+								reading_session::Column::Status
 									.eq(ReadingStatus::Reading),
 							)
 							// for each session row, ensure there does not exist a newer session for the same user+media
@@ -332,7 +332,7 @@ impl MediaQuery {
 					})
 					.into(),
 			)
-			.order_by_desc(reading_session_v2::Column::UpdatedAt);
+			.order_by_desc(reading_session::Column::UpdatedAt);
 
 		match pagination.resolve() {
 			Pagination::Cursor(_) => {

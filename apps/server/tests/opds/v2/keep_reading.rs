@@ -8,7 +8,7 @@ use crate::common::{
 
 use chrono::{Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
-use models::{entity::reading_session_v2, shared::enums::ReadingStatus};
+use models::{entity::reading_session, shared::enums::ReadingStatus};
 use sea_orm::{prelude::*, QueryOrder};
 use serde_json::Value;
 use tests::fake_data;
@@ -89,16 +89,13 @@ async fn fetch_keep_reading_ids(app: &TestApp) -> Vec<String> {
 		.collect()
 }
 
-async fn active_session_for_book(
-	app: &TestApp,
-	book_id: &str,
-) -> reading_session_v2::Model {
+async fn active_session_for_book(app: &TestApp, book_id: &str) -> reading_session::Model {
 	let conn = app.conn();
 
-	reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book_id))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
-		.order_by_desc(reading_session_v2::Column::UpdatedAt)
+	reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book_id))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
+		.order_by_desc(reading_session::Column::UpdatedAt)
 		.one(conn)
 		.await
 		.expect("db error")
@@ -158,9 +155,9 @@ async fn test_keep_reading_orders_multiple_active_sessions() {
 		]
 	);
 
-	let active_count = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(&book_ids[0]))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+	let active_count = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(&book_ids[0]))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.count(conn)
 		.await
 		.expect("db error");
@@ -208,9 +205,9 @@ async fn test_keep_reading_filters_finished_and_prior_readthroughs() {
 	assert!(!ids.contains(&book_ids[0]));
 	assert!(!ids.contains(&book_ids[4]));
 
-	let active_sessions_for_book_4 = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(&book_ids[3]))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+	let active_sessions_for_book_4 = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(&book_ids[3]))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.count(app.conn())
 		.await
 		.expect("db error");

@@ -1,5 +1,5 @@
 use models::{
-	entity::{media, media_metadata, reading_session_v2, user::AuthUser},
+	entity::{media, media_metadata, reading_session, user::AuthUser},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional},
 	shared::enums::ReadingStatus,
 };
@@ -45,111 +45,84 @@ fn apply_reading_session_joins(
 	// IN (select max(created_at) where user_id=user.id AND media_id=media.id
 	let latest_subq = Query::select()
 		.expr(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::CreatedAt,
-			))
-			.max(),
+			Expr::col((reading_session::Entity, reading_session::Column::CreatedAt))
+				.max(),
 		)
-		.from(reading_session_v2::Entity)
-		.and_where(reading_session_v2::Column::UserId.eq(user_id.clone()))
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id.clone()))
 		// where media_id = media.id
 		.and_where(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::MediaId,
-			))
-			.equals((media::Entity, media::Column::Id)),
+			Expr::col((reading_session::Entity, reading_session::Column::MediaId))
+				.equals((media::Entity, media::Column::Id)),
 		)
 		.to_owned();
 
 	let completed_count_subq = Query::select()
-		.expr(
-			Expr::col((reading_session_v2::Entity, reading_session_v2::Column::Id))
-				.count(),
-		)
-		.from(reading_session_v2::Entity)
-		.and_where(reading_session_v2::Column::UserId.eq(user_id.clone()))
+		.expr(Expr::col((reading_session::Entity, reading_session::Column::Id)).count())
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id.clone()))
 		.and_where(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::MediaId,
-			))
-			.equals((media::Entity, media::Column::Id)),
+			Expr::col((reading_session::Entity, reading_session::Column::MediaId))
+				.equals((media::Entity, media::Column::Id)),
 		)
-		.and_where(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		.and_where(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.to_owned();
 
 	let last_completed_subq = Query::select()
 		.expr(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::UpdatedAt,
-			))
-			.max(),
+			Expr::col((reading_session::Entity, reading_session::Column::UpdatedAt))
+				.max(),
 		)
-		.from(reading_session_v2::Entity)
-		.and_where(reading_session_v2::Column::UserId.eq(user_id.clone()))
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id.clone()))
 		.and_where(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::MediaId,
-			))
-			.equals((media::Entity, media::Column::Id)),
+			Expr::col((reading_session::Entity, reading_session::Column::MediaId))
+				.equals((media::Entity, media::Column::Id)),
 		)
-		.and_where(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		.and_where(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.to_owned();
 
 	query
 		.column_as(
-			Expr::col((reading_session_v2::Entity, reading_session_v2::Column::Id)),
+			Expr::col((reading_session::Entity, reading_session::Column::Id)),
 			"reading_sessions_v2id",
 		)
 		.column_as(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::CreatedAt,
-			)),
+			Expr::col((reading_session::Entity, reading_session::Column::CreatedAt)),
 			"reading_sessions_v2created_at",
 		)
 		.column_as(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::UpdatedAt,
-			)),
+			Expr::col((reading_session::Entity, reading_session::Column::UpdatedAt)),
 			"reading_sessions_v2updated_at",
 		)
 		.column_as(
 			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::EndPercentage,
+				reading_session::Entity,
+				reading_session::Column::EndPercentage,
 			)),
 			"reading_sessions_v2end_percentage",
 		)
 		.column_as(
-			Expr::col((
-				reading_session_v2::Entity,
-				reading_session_v2::Column::Status,
-			)),
+			Expr::col((reading_session::Entity, reading_session::Column::Status)),
 			"reading_sessions_v2status",
 		)
 		// LEFT JOIN reading_sessions on media.id = reading_sessions.media_id
 		//  AND reading_sessions.user_id = $user_id AND reading_sessions.created_at IN (latest_subq)
 		.join_rev(
 			JoinType::LeftJoin,
-			reading_session_v2::Entity::belongs_to(media::Entity)
-				.from(reading_session_v2::Column::MediaId)
+			reading_session::Entity::belongs_to(media::Entity)
+				.from(reading_session::Column::MediaId)
 				.to(media::Column::Id)
 				.on_condition({
 					let user_id = user_id.clone();
 					let latest_subq = latest_subq.clone();
 					move |_left, _right| {
 						Condition::all()
-							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
+							.add(reading_session::Column::UserId.eq(user_id.clone()))
 							.add(
 								Expr::col((
-									reading_session_v2::Entity,
-									reading_session_v2::Column::CreatedAt,
+									reading_session::Entity,
+									reading_session::Column::CreatedAt,
 								))
 								.in_subquery(latest_subq.clone()),
 							)
@@ -202,7 +175,7 @@ impl FromQueryResult for MediaWithMetadataAndReadingSessions {
 		>(res)?;
 		let reading_session = parse_query_to_model_optional::<
 			ReadingSession,
-			reading_session_v2::Entity,
+			reading_session::Entity,
 		>(res)?;
 		Ok(Self {
 			media,

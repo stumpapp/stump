@@ -10,7 +10,7 @@ use crate::common::{
 use chrono::{Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
 use models::{
-	entity::{reading_session_v2, user},
+	entity::{reading_session, user},
 	shared::enums::ReadingStatus,
 };
 use sea_orm::prelude::*;
@@ -143,9 +143,9 @@ async fn test_keep_reading_orders_multiple_active_sessions() {
 		]
 	);
 
-	let active_count = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(&book_ids[0]))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+	let active_count = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(&book_ids[0]))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.count(conn)
 		.await
 		.expect("db error");
@@ -193,9 +193,9 @@ async fn test_keep_reading_filters_finished_and_prior_readthroughs() {
 	assert!(!ids.contains(&book_ids[0]));
 	assert!(!ids.contains(&book_ids[4]));
 
-	let active_sessions_for_book_4 = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(&book_ids[3]))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+	let active_sessions_for_book_4 = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(&book_ids[3]))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.count(app.conn())
 		.await
 		.expect("db error");

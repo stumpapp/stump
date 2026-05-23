@@ -5,7 +5,7 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, reading_session_v2, series, series_tag, tag},
+	entity::{library, media, reading_session, series, series_tag, tag},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::ReadingStatus,
@@ -167,7 +167,7 @@ impl Series {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let user_id = user.id.clone();
-		let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 		let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 
 		let name_cmp = if let Some(id) = cursor {
@@ -187,12 +187,12 @@ impl Series {
 		let query = media::ModelWithMetadata::find_for_user(user)
 			.join_rev(
 				JoinType::LeftJoin,
-				reading_session_v2::Entity::belongs_to(media::Entity)
-					.from(reading_session_v2::Column::MediaId)
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
 						Condition::all()
-							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
+							.add(reading_session::Column::UserId.eq(user_id.clone()))
 					})
 					.into(),
 			)
@@ -201,12 +201,12 @@ impl Series {
 			.filter(
 				Condition::any()
 					// not started
-					.add(reading_session_v2::Column::Id.is_null())
+					.add(reading_session::Column::Id.is_null())
 					// in progress (latest is reading + no newer sessions)
 					.add(
 						Condition::all()
 							.add(
-								reading_session_v2::Column::Status
+								reading_session::Column::Status
 									.eq(ReadingStatus::Reading),
 							)
 							.add(latest_only.clone()),

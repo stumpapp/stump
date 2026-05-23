@@ -6,7 +6,7 @@ use models::{
 	domain::reading_progress::{
 		calculate_logical_date, compute_page_based_percentage, should_extend_session,
 	},
-	entity::{media, reading_session_v2},
+	entity::{media, reading_session},
 	services::reading_progress::{
 		derive_readthrough_number, get_book_pages, upsert_reading_session,
 		NormalizedProgression,
@@ -91,13 +91,13 @@ impl ReadProgressMutation {
 
 		let tx = core.conn.begin().await?;
 
-		let current_session = reading_session_v2::Entity::find()
+		let current_session = reading_session::Entity::find()
 			.filter(
-				reading_session_v2::Column::UserId
+				reading_session::Column::UserId
 					.eq(user.id.clone())
-					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+					.and(reading_session::Column::MediaId.eq(id.to_string())),
 			)
-			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.order_by_desc(reading_session::Column::CreatedAt)
 			.one(&tx)
 			.await?;
 
@@ -112,17 +112,16 @@ impl ReadProgressMutation {
 		}
 
 		// we just delete non-completed ones with the same readthrough number
-		let affected_rows = reading_session_v2::Entity::delete_many()
+		let affected_rows = reading_session::Entity::delete_many()
 			.filter(
-				reading_session_v2::Column::UserId
+				reading_session::Column::UserId
 					.eq(user.id.clone())
-					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+					.and(reading_session::Column::MediaId.eq(id.to_string())),
 			)
 			.filter(
-				reading_session_v2::Column::ReadthroughNumber
-					.eq(session.readthrough_number),
+				reading_session::Column::ReadthroughNumber.eq(session.readthrough_number),
 			)
-			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 			.exec(&tx)
 			.await?
 			.rows_affected;
@@ -153,13 +152,13 @@ impl ReadProgressMutation {
 
 		let tx = core.conn.begin().await?;
 
-		let current_session = reading_session_v2::Entity::find()
+		let current_session = reading_session::Entity::find()
 			.filter(
-				reading_session_v2::Column::UserId
+				reading_session::Column::UserId
 					.eq(user.id.clone())
-					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+					.and(reading_session::Column::MediaId.eq(id.to_string())),
 			)
-			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.order_by_desc(reading_session::Column::CreatedAt)
 			.one(&tx)
 			.await?;
 
@@ -178,7 +177,7 @@ impl ReadProgressMutation {
 			Some(s) if should_extend_session(&s, grace_period) => s,
 			// previous session elapsed so we create a new one to preserve the sacred timeline
 			Some(s) => {
-				reading_session_v2::ActiveModel {
+				reading_session::ActiveModel {
 					user_id: Set(user.id.clone()),
 					media_id: Set(id.to_string()),
 					readthrough_number: Set(s.readthrough_number),
@@ -192,7 +191,7 @@ impl ReadProgressMutation {
 				let readthrough_number =
 					derive_readthrough_number(&tx, &user.id, id.as_ref()).await?;
 
-				reading_session_v2::ActiveModel {
+				reading_session::ActiveModel {
 					user_id: Set(user.id.clone()),
 					media_id: Set(id.to_string()),
 					readthrough_number: Set(readthrough_number),
@@ -204,7 +203,7 @@ impl ReadProgressMutation {
 			},
 		};
 
-		let mut active: reading_session_v2::ActiveModel = session.into();
+		let mut active: reading_session::ActiveModel = session.into();
 		let did_dnf = dnf.unwrap_or(false);
 		if did_dnf {
 			active.status = Set(ReadingStatus::Abandoned);
@@ -234,30 +233,30 @@ impl ReadProgressMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
-		let current_readthrough = reading_session_v2::Entity::find()
+		let current_readthrough = reading_session::Entity::find()
 			.filter(
-				reading_session_v2::Column::UserId
+				reading_session::Column::UserId
 					.eq(user.id.clone())
-					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+					.and(reading_session::Column::MediaId.eq(id.to_string())),
 			)
 			.filter(
-				reading_session_v2::Column::Status
+				reading_session::Column::Status
 					.ne(ReadingStatus::Finished)
-					.and(reading_session_v2::Column::Status.ne(ReadingStatus::Abandoned)),
+					.and(reading_session::Column::Status.ne(ReadingStatus::Abandoned)),
 			)
-			.order_by_desc(reading_session_v2::Column::CreatedAt)
+			.order_by_desc(reading_session::Column::CreatedAt)
 			.one(conn)
 			.await?
 			.map(|s| s.readthrough_number);
 
-		let affected_rows = reading_session_v2::Entity::delete_many()
+		let affected_rows = reading_session::Entity::delete_many()
 			.filter(
-				reading_session_v2::Column::UserId
+				reading_session::Column::UserId
 					.eq(user.id.clone())
-					.and(reading_session_v2::Column::MediaId.eq(id.to_string())),
+					.and(reading_session::Column::MediaId.eq(id.to_string())),
 			)
 			.apply_if(current_readthrough, |q, readthrough| {
-				q.filter(reading_session_v2::Column::ReadthroughNumber.ne(readthrough))
+				q.filter(reading_session::Column::ReadthroughNumber.ne(readthrough))
 			})
 			.exec(conn)
 			.await?
@@ -298,10 +297,10 @@ impl ReadProgressMutation {
 			.column(media::Column::Id)
 			.into_query();
 
-		let existing_sessions = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::UserId.eq(user.id.clone()))
-			.filter(reading_session_v2::Column::MediaId.in_subquery(book_ids_subquery))
-			.order_by_desc(reading_session_v2::Column::CreatedAt)
+		let existing_sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.eq(user.id.clone()))
+			.filter(reading_session::Column::MediaId.in_subquery(book_ids_subquery))
+			.order_by_desc(reading_session::Column::CreatedAt)
 			.all(&tx)
 			.await?;
 
@@ -332,7 +331,7 @@ impl ReadProgressMutation {
 				Some(session) if should_extend_session(&session, grace_period) => session,
 				// previous session elapsed so we create a new one to preserve the sacred timeline
 				Some(session) => {
-					reading_session_v2::ActiveModel {
+					reading_session::ActiveModel {
 						user_id: Set(user.id.clone()),
 						media_id: Set(book_id.clone()),
 						readthrough_number: Set(session.readthrough_number),
@@ -344,7 +343,7 @@ impl ReadProgressMutation {
 				},
 				// no session at all = no reading activity
 				None => {
-					reading_session_v2::ActiveModel {
+					reading_session::ActiveModel {
 						user_id: Set(user.id.clone()),
 						media_id: Set(book_id.clone()),
 						readthrough_number: Set(1),
@@ -399,10 +398,10 @@ impl ReadProgressMutation {
 			.column(media::Column::Id)
 			.into_query();
 
-		let existing_sessions = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::UserId.eq(user.id.clone()))
-			.filter(reading_session_v2::Column::MediaId.in_subquery(book_ids_subquery))
-			.order_by_desc(reading_session_v2::Column::CreatedAt)
+		let existing_sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.eq(user.id.clone()))
+			.filter(reading_session::Column::MediaId.in_subquery(book_ids_subquery))
+			.order_by_desc(reading_session::Column::CreatedAt)
 			.all(&tx)
 			.await?;
 
@@ -421,14 +420,14 @@ impl ReadProgressMutation {
 			match latest_by_book.remove(book_id) {
 				Some(session) if session.is_finalized() => {
 					// delete sessions for this book/user with readthrough <= session.readthrough_number (i.e., read history)
-					let affected_rows = reading_session_v2::Entity::delete_many()
+					let affected_rows = reading_session::Entity::delete_many()
 						.filter(
-							reading_session_v2::Column::UserId.eq(user.id.clone()).and(
-								reading_session_v2::Column::MediaId.eq(book_id.clone()),
+							reading_session::Column::UserId.eq(user.id.clone()).and(
+								reading_session::Column::MediaId.eq(book_id.clone()),
 							),
 						)
 						.filter(
-							reading_session_v2::Column::ReadthroughNumber
+							reading_session::Column::ReadthroughNumber
 								.lte(session.readthrough_number),
 						)
 						.exec(&tx)
@@ -438,14 +437,14 @@ impl ReadProgressMutation {
 				},
 				Some(session) => {
 					// keep the current active readthrough, but clear all earlier readthrough history
-					let affected_rows = reading_session_v2::Entity::delete_many()
+					let affected_rows = reading_session::Entity::delete_many()
 						.filter(
-							reading_session_v2::Column::UserId.eq(user.id.clone()).and(
-								reading_session_v2::Column::MediaId.eq(book_id.clone()),
+							reading_session::Column::UserId.eq(user.id.clone()).and(
+								reading_session::Column::MediaId.eq(book_id.clone()),
 							),
 						)
 						.filter(
-							reading_session_v2::Column::ReadthroughNumber
+							reading_session::Column::ReadthroughNumber
 								.lt(session.readthrough_number),
 						)
 						.exec(&tx)

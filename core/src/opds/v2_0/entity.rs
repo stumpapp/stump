@@ -2,7 +2,7 @@ use models::{
 	entity::{
 		library_exclusion,
 		media::{self, get_age_restriction_filter},
-		media_analysis, media_metadata, reading_device, reading_session_v2, series,
+		media_analysis, media_metadata, reading_device, reading_session, series,
 		series_metadata,
 		user::AuthUser,
 	},
@@ -27,7 +27,7 @@ pub struct OPDSPublicationEntity {
 	pub media: media::Model,
 	pub metadata: Option<media_metadata::Model>,
 	pub series: OPDSSeries,
-	pub reading_session: Option<reading_session_v2::Model>,
+	pub reading_session: Option<reading_session::Model>,
 }
 
 impl OPDSPublicationEntity {
@@ -61,7 +61,7 @@ impl OPDSPublicationEntity {
 			.add_columns(media_metadata::Entity)
 			.add_columns(series::Entity)
 			.add_columns(series_metadata::Entity)
-			.add_columns(reading_session_v2::Entity)
+			.add_columns(reading_session::Entity)
 			.selector
 			.filter(series::Column::LibraryId.not_in_subquery(
 				library_exclusion::Entity::library_hidden_to_user_query(user),
@@ -78,18 +78,15 @@ impl OPDSPublicationEntity {
 			)
 			.join_rev(
 				JoinType::LeftJoin,
-				reading_session_v2::Entity::belongs_to(media::Entity)
-					.from(reading_session_v2::Column::MediaId)
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
 						let newer_exists =
-							reading_session_v2::Entity::newer_session_exists_subquery();
+							reading_session::Entity::newer_session_exists_subquery();
 
 						Condition::all()
-							.add(
-								reading_session_v2::Column::UserId
-									.eq(for_user_id.clone()),
-							)
+							.add(reading_session::Column::UserId.eq(for_user_id.clone()))
 							// keep only the latest row for this user+media pair
 							.add(Expr::expr(Expr::exists(newer_exists)).not())
 					})
@@ -115,8 +112,8 @@ impl FromQueryResult for OPDSPublicationEntity {
 		let series_name = res.try_get("series", "name")?;
 		let series_id = res.try_get("series", "id")?;
 		let reading_session = parse_query_to_model_optional::<
-			reading_session_v2::Model,
-			reading_session_v2::Entity,
+			reading_session::Model,
+			reading_session::Entity,
 		>(res)?;
 
 		Ok(OPDSPublicationEntity {
@@ -141,16 +138,16 @@ pub struct OPDSProgressionBookRef {
 }
 
 pub struct OPDSProgressionEntity {
-	pub session: reading_session_v2::Model,
+	pub session: reading_session::Model,
 	// TODO(v2-session): sessions now store multiple devices, so not sure how to approach this
 	pub device: Option<reading_device::Model>,
 	pub book: OPDSProgressionBookRef,
 }
 
 impl OPDSProgressionEntity {
-	pub fn find() -> Select<reading_session_v2::Entity> {
-		Prefixer::new(reading_session_v2::Entity::find().select_only())
-			.add_columns(reading_session_v2::Entity)
+	pub fn find() -> Select<reading_session::Entity> {
+		Prefixer::new(reading_session::Entity::find().select_only())
+			.add_columns(reading_session::Entity)
 			.add_named_columns(
 				&[
 					media::Column::Id,
@@ -177,10 +174,8 @@ impl FromQueryResult for OPDSProgressionEntity {
 		res: &sea_orm::QueryResult,
 		_pre: &str,
 	) -> Result<Self, sea_orm::DbErr> {
-		let session = parse_query_to_model::<
-			reading_session_v2::Model,
-			reading_session_v2::Entity,
-		>(res)?;
+		let session =
+			parse_query_to_model::<reading_session::Model, reading_session::Entity>(res)?;
 		let book = OPDSProgressionBookRef::from_query_result(res, "bookref")?;
 
 		Ok(OPDSProgressionEntity {

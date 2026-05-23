@@ -1,5 +1,5 @@
 use chrono::Utc;
-use models::entity::{library, library_config, media, reading_session_v2, series, user};
+use models::entity::{library, library_config, media, reading_session, series, user};
 use models::shared::enums::{FileStatus, ReadingStatus};
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
@@ -191,8 +191,8 @@ impl ReadingSessionV2 {
 		}
 	}
 
-	pub async fn insert(&self, db: &DbConn) -> reading_session_v2::Model {
-		let model = reading_session_v2::ActiveModel {
+	pub async fn insert(&self, db: &DbConn) -> reading_session::Model {
+		let model = reading_session::ActiveModel {
 			session_date: sea_orm::Set(Utc::now().date_naive()),
 			media_id: sea_orm::Set(self.media_id.clone()),
 			user_id: sea_orm::Set(self.user_id.clone()),

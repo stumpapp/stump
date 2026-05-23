@@ -1,7 +1,7 @@
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use sea_orm::sqlx::types::Decimal;
 
-use crate::entity::reading_session_v2;
+use crate::entity::reading_session;
 
 pub fn calculate_logical_date(now: DateTime<Utc>, offset_hours: i32) -> NaiveDate {
 	(now - Duration::hours(offset_hours as i64)).date_naive()
@@ -13,7 +13,7 @@ pub fn calculate_logical_date(now: DateTime<Utc>, offset_hours: i32) -> NaiveDat
 /// - the book was not completed during it (`did_complete` is false)
 /// - the time since the last update is within the user's configured grace period
 pub fn should_extend_session(
-	session: &reading_session_v2::Model,
+	session: &reading_session::Model,
 	grace_period_secs: i64,
 ) -> bool {
 	if session.is_finalized() {
@@ -32,10 +32,7 @@ pub fn should_extend_session(
 }
 
 /// returns true if `session` was completed within `timeout_secs` of now
-pub fn is_recent_completion(
-	session: &reading_session_v2::Model,
-	timeout_secs: i64,
-) -> bool {
+pub fn is_recent_completion(session: &reading_session::Model, timeout_secs: i64) -> bool {
 	if !session.is_finalized() {
 		return false;
 	}
@@ -97,13 +94,13 @@ mod tests {
 	fn make_session(
 		did_complete: bool,
 		updated_at_secs_ago: Option<i64>,
-	) -> reading_session_v2::Model {
+	) -> reading_session::Model {
 		let updated_at = updated_at_secs_ago.map(|secs| {
 			let t = Utc::now() - Duration::seconds(secs);
 			t.fixed_offset()
 		});
 
-		reading_session_v2::Model {
+		reading_session::Model {
 			id: 1,
 			session_date: NaiveDate::from_ymd_opt(2026, 5, 17).unwrap(),
 			epubcfi: None,

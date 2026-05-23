@@ -8,7 +8,7 @@ use crate::{
 	domain::reading_progress::{
 		calculate_logical_date, is_recent_completion, should_extend_session,
 	},
-	entity::{media, reading_session_v2, user::AuthUser},
+	entity::{media, reading_session, user::AuthUser},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
 
@@ -34,7 +34,7 @@ pub async fn upsert_reading_session(
 	media_id: &str,
 	input: NormalizedProgression,
 	completion_dedup_timeout_secs: i64,
-) -> Result<reading_session_v2::Model, sea_orm::DbErr> {
+) -> Result<reading_session::Model, sea_orm::DbErr> {
 	let (grace_period, day_reset_offset) = user
 		.preferences
 		.as_ref()
@@ -43,10 +43,9 @@ pub async fn upsert_reading_session(
 
 	let logical_today = calculate_logical_date(Utc::now(), day_reset_offset);
 
-	let latest =
-		reading_session_v2::Entity::find_latest_for_user_and_media(user, media_id)
-			.one(db)
-			.await?;
+	let latest = reading_session::Entity::find_latest_for_user_and_media(user, media_id)
+		.one(db)
+		.await?;
 
 	match latest {
 		Some(ref session)
@@ -62,7 +61,7 @@ pub async fn upsert_reading_session(
 			let new_elapsed = session.elapsed_seconds.unwrap_or(0)
 				+ input.elapsed_seconds_delta.unwrap_or(0).max(0);
 
-			let mut active: reading_session_v2::ActiveModel = session.into();
+			let mut active: reading_session::ActiveModel = session.into();
 			active.epubcfi = Set(input.epubcfi);
 			active.end_page = Set(input.page);
 			active.end_locator = Set(input.locator);
@@ -79,11 +78,11 @@ pub async fn upsert_reading_session(
 					sea_orm::ActiveValue::NotSet => None,
 				};
 				let mut ids = current
-					.map(|reading_session_v2::DeviceIds(v)| v.clone())
+					.map(|reading_session::DeviceIds(v)| v.clone())
 					.unwrap_or_default();
 				if !ids.contains(&incoming) {
 					ids.push(incoming);
-					active.device_ids = Set(Some(reading_session_v2::DeviceIds(ids)));
+					active.device_ids = Set(Some(reading_session::DeviceIds(ids)));
 				}
 			}
 			active.update(db).await
@@ -92,7 +91,7 @@ pub async fn upsert_reading_session(
 			let readthrough_number =
 				derive_readthrough_number(db, &user.id, media_id).await?;
 
-			reading_session_v2::ActiveModel {
+			reading_session::ActiveModel {
 				session_date: Set(logical_today),
 				epubcfi: Set(input.epubcfi),
 				start_page: Set(input.page),
@@ -113,7 +112,7 @@ pub async fn upsert_reading_session(
 				}),
 				device_ids: Set(input
 					.device_id
-					.map(|id| reading_session_v2::DeviceIds(vec![id]))),
+					.map(|id| reading_session::DeviceIds(vec![id]))),
 				media_id: Set(media_id.to_string()),
 				user_id: Set(user.id.clone()),
 				..Default::default()
@@ -130,10 +129,10 @@ pub async fn derive_readthrough_number(
 	user_id: &str,
 	media_id: &str,
 ) -> Result<i32, sea_orm::DbErr> {
-	let latest = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::UserId.eq(user_id))
-		.filter(reading_session_v2::Column::MediaId.eq(media_id))
-		.order_by_desc(reading_session_v2::Column::CreatedAt)
+	let latest = reading_session::Entity::find()
+		.filter(reading_session::Column::UserId.eq(user_id))
+		.filter(reading_session::Column::MediaId.eq(media_id))
+		.order_by_desc(reading_session::Column::CreatedAt)
 		.one(db)
 		.await?;
 

@@ -15,7 +15,7 @@ use models::{
 };
 use models::{
 	entity::{
-		library, media, media_metadata, reading_device, reading_session_v2, series,
+		library, media, media_metadata, reading_device, reading_session, series,
 		series_metadata, user::AuthUser,
 	},
 	shared::enums::ReadingStatus,
@@ -357,12 +357,12 @@ async fn catalog(
 		.build()?;
 
 	let in_progress_filter = Condition::all()
-		.add(reading_session_v2::Column::UserId.eq(user.id.clone()))
-		.add(reading_session_v2::Column::Status.eq(ReadingStatus::Reading));
+		.add(reading_session::Column::UserId.eq(user.id.clone()))
+		.add(reading_session::Column::Status.eq(ReadingStatus::Reading));
 	let continue_reading = OPDSPublicationEntity::find_for_user(&user)
 		.filter(in_progress_filter.clone())
 		.limit(DEFAULT_LIMIT)
-		.order_by_desc(reading_session_v2::Column::UpdatedAt)
+		.order_by_desc(reading_session::Column::UpdatedAt)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;
@@ -862,7 +862,7 @@ where
 		.apply_if(
 			(order_by_entity == *"reading_sessions").then_some(()),
 			|query, _| {
-				query.filter(reading_session_v2::Column::UserId.eq(for_user_id.clone()))
+				query.filter(reading_session::Column::UserId.eq(for_user_id.clone()))
 			},
 		)
 		.limit(take)
@@ -877,7 +877,7 @@ where
 		.apply_if(
 			(order_by_entity == *"reading_sessions").then_some(()),
 			|query, _| {
-				query.filter(reading_session_v2::Column::UserId.eq(for_user_id.clone()))
+				query.filter(reading_session::Column::UserId.eq(for_user_id.clone()))
 			},
 		)
 		.count(ctx.conn.as_ref())
@@ -1192,7 +1192,7 @@ async fn keep_reading(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
-	let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1200,11 +1200,11 @@ async fn keep_reading(
 		&user,
 		Some(
 			Condition::all()
-				.add(reading_session_v2::Column::UserId.eq(user.id.clone()))
-				.add(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+				.add(reading_session::Column::UserId.eq(user.id.clone()))
+				.add(reading_session::Column::Status.eq(ReadingStatus::Reading))
 				.add(Expr::expr(Expr::exists(newer_exists)).not()),
 		),
-		(reading_session_v2::Column::UpdatedAt, Order::Desc),
+		(reading_session::Column::UpdatedAt, Order::Desc),
 		pagination.0,
 		"Currently Reading",
 		None,
@@ -1284,14 +1284,14 @@ async fn get_book_progression(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let user = req.user();
-	let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	let active_reading_session = OPDSProgressionEntity::find()
 		.filter(
 			Condition::all()
-				.add(reading_session_v2::Column::UserId.eq(user.id.clone()))
-				.add(reading_session_v2::Column::MediaId.eq(id.clone()))
-				.add(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+				.add(reading_session::Column::UserId.eq(user.id.clone()))
+				.add(reading_session::Column::MediaId.eq(id.clone()))
+				.add(reading_session::Column::Status.eq(ReadingStatus::Reading))
 				.add(Expr::expr(Expr::exists(newer_exists)).not()),
 		)
 		.into_model::<OPDSProgressionEntity>()
@@ -1325,7 +1325,7 @@ async fn update_book_progression(
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
 	let existing_session =
-		reading_session_v2::Entity::find_latest_for_user_and_media(&user, &id)
+		reading_session::Entity::find_latest_for_user_and_media(&user, &id)
 			.one(conn)
 			.await?;
 

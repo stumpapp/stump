@@ -3,7 +3,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use chrono::{DateTime, FixedOffset, Utc};
 use models::{
 	entity::{
-		age_restriction, reading_session_v2, session, user, user_login_activity,
+		age_restriction, reading_session, session, user, user_login_activity,
 		user_preferences,
 	},
 	shared::{
@@ -160,9 +160,9 @@ impl User {
 	async fn finished_reading_sessions_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
-			.filter(reading_session_v2::Column::UserId.eq(&self.model.id))
+		let count = reading_session::Entity::find()
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+			.filter(reading_session::Column::UserId.eq(&self.model.id))
 			.count(conn)
 			.await?;
 

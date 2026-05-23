@@ -22,7 +22,7 @@ pub struct DeviceIds(pub Vec<String>);
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "ReadingSessionModel")]
-#[sea_orm(table_name = "reading_sessions_v2")]
+#[sea_orm(table_name = "reading_sessions")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,
@@ -121,7 +121,7 @@ impl ModelWithDevice {
 					// https://sqlite.org/json1.html#the_json_extract_function
 					.on_condition(|_left, _right| {
 						Condition::all().add(Expr::cust(
-							"json_extract(reading_sessions_v2.device_ids, '$[0]') = reading_device.id",
+							"json_extract(reading_sessions.device_ids, '$[0]') = reading_device.id",
 						))
 					})
 					.into(),
@@ -179,11 +179,11 @@ impl Related<super::user::Entity> for Entity {
 
 impl Entity {
 	/// subquery used to detect if there is a newer session row for the same
-	/// `(user_id, media_id)` as the outer `reading_sessions_v2` row
+	/// `(user_id, media_id)` as the outer `reading_sessions` row
 	pub fn newer_session_exists_subquery() -> SelectStatement {
 		let inner_alias = Alias::new("rs2");
 
-		// select 1 from reading_sessions_v2 as rs2
+		// select 1 from reading_sessions as rs2
 		Query::select()
 			.expr(Expr::val(1))
 			.from_as(Entity, inner_alias.clone())

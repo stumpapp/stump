@@ -6,7 +6,7 @@ use crate::common::{
 
 use chrono::{Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
-use models::entity::reading_session_v2;
+use models::entity::reading_session;
 use sea_orm::prelude::*;
 use tests::fake_data;
 
@@ -114,12 +114,9 @@ async fn set_finished_timestamp(
 ) {
 	let session = latest_finished_session_for_book(app, book_id).await;
 
-	reading_session_v2::Entity::update_many()
-		.filter(reading_session_v2::Column::Id.eq(session.id))
-		.col_expr(
-			reading_session_v2::Column::UpdatedAt,
-			Expr::value(updated_at),
-		)
+	reading_session::Entity::update_many()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.col_expr(reading_session::Column::UpdatedAt, Expr::value(updated_at))
 		.exec(app.conn())
 		.await
 		.expect("could not update session timestamp");

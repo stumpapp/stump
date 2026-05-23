@@ -12,9 +12,7 @@ use chrono::Utc;
 use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::{
 	domain::reading_progress::compute_page_based_percentage,
-	entity::{
-		library, media, media_metadata, reading_session_v2, series, series_metadata,
-	},
+	entity::{library, media, media_metadata, reading_session, series, series_metadata},
 	services::reading_progress::{upsert_reading_session, NormalizedProgression},
 	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
 };
@@ -280,8 +278,8 @@ async fn keep_reading(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
 	let books = OPDSPublicationEntity::find_for_user(&req.user())
-		.filter(reading_session_v2::Column::UserId.eq(req.id()))
-		.order_by_desc(reading_session_v2::Column::UpdatedAt)
+		.filter(reading_session::Column::UserId.eq(req.id()))
+		.order_by_desc(reading_session::Column::UpdatedAt)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;

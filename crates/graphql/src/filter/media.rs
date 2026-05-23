@@ -1,6 +1,6 @@
 use async_graphql::InputObject;
 use models::{
-	entity::{media, reading_session_v2},
+	entity::{media, reading_session},
 	shared::enums::{FileStatus, ReadingStatus},
 };
 use sea_orm::{
@@ -21,23 +21,23 @@ fn apply_reading_status_filter(
 	value: ReadingStatus,
 	not: bool,
 ) -> impl Into<ConditionExpression> {
-	let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 	let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 
 	let base_filter = match value {
-		ReadingStatus::Reading => reading_session_v2::Column::Id
+		ReadingStatus::Reading => reading_session::Column::Id
 			.is_not_null()
-			.and(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+			.and(reading_session::Column::Status.eq(ReadingStatus::Reading))
 			.and(latest_only.clone()),
-		ReadingStatus::Finished => reading_session_v2::Column::Id
+		ReadingStatus::Finished => reading_session::Column::Id
 			.is_not_null()
-			.and(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+			.and(reading_session::Column::Status.eq(ReadingStatus::Finished))
 			.and(latest_only.clone()),
-		ReadingStatus::Abandoned => reading_session_v2::Column::Id
+		ReadingStatus::Abandoned => reading_session::Column::Id
 			.is_not_null()
-			.and(reading_session_v2::Column::Status.eq(ReadingStatus::Abandoned))
+			.and(reading_session::Column::Status.eq(ReadingStatus::Abandoned))
 			.and(latest_only),
-		ReadingStatus::NotStarted => reading_session_v2::Column::Id.is_null(),
+		ReadingStatus::NotStarted => reading_session::Column::Id.is_null(),
 	};
 
 	if not {

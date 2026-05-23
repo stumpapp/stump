@@ -236,7 +236,7 @@ pub enum Relation {
 	MediaAnnotation,
 	#[sea_orm(has_many = "super::reading_list::Entity")]
 	ReadingList,
-	#[sea_orm(has_many = "super::reading_session_v2::Entity")]
+	#[sea_orm(has_many = "super::reading_session::Entity")]
 	ReadingSession,
 	#[sea_orm(has_many = "super::review::Entity")]
 	Review,
@@ -318,7 +318,7 @@ impl Related<super::reading_list::Entity> for Entity {
 	}
 }
 
-impl Related<super::reading_session_v2::Entity> for Entity {
+impl Related<super::reading_session::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::ReadingSession.def()
 	}

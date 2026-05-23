@@ -1,6 +1,6 @@
 use async_graphql::InputObject;
 use models::{
-	entity::{library, library_config, media, reading_session_v2, series},
+	entity::{library, library_config, media, reading_session, series},
 	shared::enums::{LibraryType, ReadingStatus},
 };
 use sea_orm::{
@@ -51,15 +51,15 @@ pub struct SeriesFilterInput {
 /// Returns a subquery for series ids where at least one book in the series has an active reading session for the user,
 /// i.e. the user has _some_ reading activity
 fn reading_series_subquery(user_id: &str) -> SelectStatement {
-	let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	// select distinct media_id from reading_session where user_id = ? and status = 'READING'
 	let active_media_ids = Query::select()
 		.distinct()
-		.column(reading_session_v2::Column::MediaId)
-		.from(reading_session_v2::Entity)
-		.and_where(reading_session_v2::Column::UserId.eq(user_id))
-		.and_where(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+		.column(reading_session::Column::MediaId)
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id))
+		.and_where(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.and_where(Expr::expr(Expr::exists(newer_exists)).not())
 		.to_owned();
 
@@ -76,15 +76,15 @@ fn reading_series_subquery(user_id: &str) -> SelectStatement {
 /// Returns a subquery for series ids where all books in the series have at least one
 /// finished reading session for the user
 fn finished_series_subquery(user_id: &str) -> SelectStatement {
-	let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	// select distinct media_id from reading_session_v2 where user_id = ? and status = 'FINISHED'
 	let finished_media_ids = Query::select()
 		.distinct()
-		.column(reading_session_v2::Column::MediaId)
-		.from(reading_session_v2::Entity)
-		.and_where(reading_session_v2::Column::UserId.eq(user_id))
-		.and_where(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		.column(reading_session::Column::MediaId)
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id))
+		.and_where(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.and_where(Expr::expr(Expr::exists(newer_exists)).not())
 		.to_owned();
 

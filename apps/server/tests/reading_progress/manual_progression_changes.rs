@@ -5,7 +5,7 @@ use crate::common::{
 };
 
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
-use models::{entity::reading_session_v2, shared::enums::ReadingStatus};
+use models::{entity::reading_session, shared::enums::ReadingStatus};
 use sea_orm::{prelude::*, QueryOrder};
 use tests::fake_data;
 
@@ -159,9 +159,9 @@ async fn test_finish_series_progress() {
 	)
 	.await;
 
-	let elapsed_session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_3"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+	let elapsed_session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_3"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.one(conn)
 		.await
 		.expect("db error")
@@ -174,16 +174,16 @@ async fn test_finish_series_progress() {
 	let ids = (1..=5)
 		.map(|pos| format!("black_science_{}", pos))
 		.collect::<Vec<_>>();
-	let finished_sessions = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.is_in(ids.clone()))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+	let finished_sessions = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.is_in(ids.clone()))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.all(conn)
 		.await
 		.expect("db error");
 	assert_eq!(finished_sessions.len(), 5); // 1 for each book
 
-	let total_sessions = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.is_in(ids))
+	let total_sessions = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.is_in(ids))
 		.all(conn)
 		.await
 		.expect("db error");
@@ -236,8 +236,8 @@ async fn test_clear_series_reading_history() {
 	let ids = (1..=5)
 		.map(|pos| format!("black_science_{}", pos))
 		.collect::<Vec<_>>();
-	let total_sessions = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.is_in(ids))
+	let total_sessions = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.is_in(ids))
 		.all(conn)
 		.await
 		.expect("db error");
@@ -273,18 +273,18 @@ async fn test_clear_media_progress() {
 	clear_book_progress(&app, "black_science_1").await;
 
 	// now the in-progress session should be gone but the completed one should still be there
-	let in_progress_session_exists = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.ne(ReadingStatus::Finished))
+	let in_progress_session_exists = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.ne(ReadingStatus::Finished))
 		.one(app.conn())
 		.await
 		.expect("db error")
 		.is_some();
 	assert!(!in_progress_session_exists);
 
-	let completed_session_exists = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+	let completed_session_exists = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.one(app.conn())
 		.await
 		.expect("db error")
@@ -298,9 +298,9 @@ async fn test_mark_unread_book_as_finished() {
 
 	finish_book_progress(&app, "black_science_1", false).await;
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.one(app.conn())
 		.await
 		.expect("db error")
@@ -317,9 +317,9 @@ async fn test_mark_unread_book_as_abandonded() {
 
 	finish_book_progress(&app, "black_science_1", true).await;
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Abandoned))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Abandoned))
 		.one(app.conn())
 		.await
 		.expect("db error")
@@ -348,9 +348,9 @@ async fn test_mark_incomplete_book_as_finished() {
 
 	finish_book_progress(&app, "black_science_1", false).await;
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.one(app.conn())
 		.await
 		.expect("db error")
@@ -378,9 +378,9 @@ async fn test_mark_incomplete_book_as_abandonded() {
 
 	finish_book_progress(&app, "black_science_1", true).await;
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Abandoned))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Abandoned))
 		.one(app.conn())
 		.await
 		.expect("db error")
@@ -407,9 +407,9 @@ async fn test_mark_incomplete_book_as_finished_and_preserve_sacred_timeline() {
 	)
 	.await;
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.one(app.conn())
 		.await
 		.expect("db error")
@@ -421,26 +421,26 @@ async fn test_mark_incomplete_book_as_finished_and_preserve_sacred_timeline() {
 	finish_book_progress(&app, "black_science_1", false).await;
 
 	// there should now be 2 sessions
-	let sessions_count = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
+	let sessions_count = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
 		.count(conn)
 		.await
 		.expect("db error");
 	assert_eq!(sessions_count, 2);
 
 	// the old session should still be in reading status, and the new one should be finished
-	let old_session_exists = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+	let old_session_exists = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 		.one(conn)
 		.await
 		.expect("db error")
 		.is_some();
 	assert!(old_session_exists);
 
-	let new_session_exists = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+	let new_session_exists = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.one(conn)
 		.await
 		.expect("db error")
@@ -459,8 +459,8 @@ async fn test_clear_media_reading_history() {
 	clear_reading_history(&app, "black_science_1").await;
 
 	// all sessions for readthrough should be gone
-	let session_exists = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
+	let session_exists = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
 		.one(conn)
 		.await
 		.expect("db error")
@@ -489,9 +489,9 @@ async fn test_clear_media_reading_history_retains_current() {
 	.await;
 
 	// max readthrough should be 2 now
-	let max_readthrough = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.order_by_desc(reading_session_v2::Column::ReadthroughNumber)
+	let max_readthrough = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.order_by_desc(reading_session::Column::ReadthroughNumber)
 		.one(conn)
 		.await
 		.expect("db error")
@@ -500,8 +500,8 @@ async fn test_clear_media_reading_history_retains_current() {
 	assert_eq!(max_readthrough, 2);
 
 	// should be 2 sessions: initial that turned to completion, and the new in-progress one
-	let session_count = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
+	let session_count = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
 		.count(conn)
 		.await
 		.expect("db error");
@@ -510,18 +510,18 @@ async fn test_clear_media_reading_history_retains_current() {
 	// when we clear now, it should only clear the completed session and not the in-progress one
 	clear_reading_history(&app, "black_science_1").await;
 
-	let finished_sessions_exist = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+	let finished_sessions_exist = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 		.one(conn)
 		.await
 		.expect("db error")
 		.is_some();
 	assert!(!finished_sessions_exist);
 
-	let in_progress_sessions_exist = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq("black_science_1"))
-		.filter(reading_session_v2::Column::Status.ne(ReadingStatus::Finished))
+	let in_progress_sessions_exist = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.ne(ReadingStatus::Finished))
 		.one(conn)
 		.await
 		.expect("db error")

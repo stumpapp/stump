@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
 use itertools::Itertools;
-use models::{entity::reading_session_v2, shared::enums::ReadingStatus};
+use models::{entity::reading_session, shared::enums::ReadingStatus};
 use sea_orm::{prelude::*, DatabaseConnection, QueryOrder};
 use std::{cmp::Reverse, collections::HashMap, sync::Arc};
 
@@ -39,10 +39,10 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionV2Loader {
 		let media_ids: Vec<String> = keys.iter().map(|k| k.media_id.clone()).collect();
 		let user_ids: Vec<String> = keys.iter().map(|k| k.user_id.clone()).collect();
 
-		let sessions = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::UserId.is_in(user_ids))
-			.filter(reading_session_v2::Column::MediaId.is_in(media_ids))
-			.order_by_desc(reading_session_v2::Column::CreatedAt)
+		let sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.is_in(user_ids))
+			.filter(reading_session::Column::MediaId.is_in(media_ids))
+			.order_by_desc(reading_session::Column::CreatedAt)
 			.all(self.conn.as_ref())
 			.await?;
 
@@ -124,15 +124,15 @@ impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionV2Loader {
 		let user_ids: Vec<String> = keys.iter().map(|k| k.user_id.clone()).collect();
 
 		// ordered asc so sessions.first() is the earliest in each readthrough
-		let sessions = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::UserId.is_in(user_ids))
-			.filter(reading_session_v2::Column::MediaId.is_in(media_ids))
-			.order_by_asc(reading_session_v2::Column::CreatedAt)
+		let sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.is_in(user_ids))
+			.filter(reading_session::Column::MediaId.is_in(media_ids))
+			.order_by_asc(reading_session::Column::CreatedAt)
 			.all(self.conn.as_ref())
 			.await?;
 
 		// group sessions by (user_id, media_id, readthrough_number)
-		let mut groups: HashMap<(String, String, i32), Vec<reading_session_v2::Model>> =
+		let mut groups: HashMap<(String, String, i32), Vec<reading_session::Model>> =
 			HashMap::new();
 		for s in sessions {
 			groups

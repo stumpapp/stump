@@ -1,11 +1,11 @@
 use async_graphql::{ComplexObject, SimpleObject};
-use models::entity::{reading_session_v2, reading_session_v2::DeviceIds};
+use models::entity::{reading_session, reading_session::DeviceIds};
 
 #[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex, name = "ReadingSession")]
 pub struct ReadingSession {
 	#[graphql(flatten)]
-	pub model: reading_session_v2::Model,
+	pub model: reading_session::Model,
 }
 
 #[ComplexObject]
@@ -21,8 +21,8 @@ impl ReadingSession {
 	// TODO: async fn devices(&self, ctx: &Context<'_>) -> Result<Vec<RegisteredReadingDevice>>
 }
 
-impl From<reading_session_v2::Model> for ReadingSession {
-	fn from(model: reading_session_v2::Model) -> Self {
+impl From<reading_session::Model> for ReadingSession {
+	fn from(model: reading_session::Model) -> Self {
 		Self { model }
 	}
 }

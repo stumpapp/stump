@@ -8,7 +8,7 @@ use axum::{
 use chrono::Utc;
 use graphql::data::AuthContext;
 use models::{
-	entity::{media, reading_device, reading_session_v2},
+	entity::{media, reading_device, reading_session},
 	services::reading_progress::{upsert_reading_session, NormalizedProgression},
 	shared::enums::{ReadingStatus, UserPermission},
 };
@@ -124,15 +124,15 @@ async fn get_progress(
 	let user = req.user();
 	let document_cpy = document.clone();
 
-	let latest_query = reading_session_v2::Entity::find()
+	let latest_query = reading_session::Entity::find()
 		.inner_join(media::Entity)
-		.filter(reading_session_v2::Column::UserId.eq(user.id.clone()))
+		.filter(reading_session::Column::UserId.eq(user.id.clone()))
 		.filter(media::Column::KoreaderHash.eq(document_cpy.clone()))
-		.order_by_desc(reading_session_v2::Column::UpdatedAt);
+		.order_by_desc(reading_session::Column::UpdatedAt);
 
 	let latest_session = latest_query
 		.clone()
-		.into_model::<reading_session_v2::ModelWithDevice>()
+		.into_model::<reading_session::ModelWithDevice>()
 		.one(conn)
 		.await?;
 
@@ -146,9 +146,9 @@ async fn get_progress(
 		// there still might be a previous one
 		Some(_) => {
 			let latest_finished = latest_query
-				.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
-				.order_by_desc(reading_session_v2::Column::CreatedAt)
-				.into_model::<reading_session_v2::ModelWithDevice>()
+				.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+				.order_by_desc(reading_session::Column::CreatedAt)
+				.into_model::<reading_session::ModelWithDevice>()
 				.one(conn)
 				.await?;
 			latest_finished
@@ -314,7 +314,7 @@ async fn put_progress(
 	.await?;
 
 	if session.koreader_progress.as_deref() != Some(progress.as_str()) {
-		let mut active: reading_session_v2::ActiveModel = session.into();
+		let mut active: reading_session::ActiveModel = session.into();
 		active.koreader_progress = Set(Some(progress.clone()));
 		active.update(&tx).await?;
 	}

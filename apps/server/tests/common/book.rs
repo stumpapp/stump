@@ -1,7 +1,7 @@
 use async_graphql::InputType;
 use chrono::{DateTime, Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
-use models::{entity::reading_session_v2, shared::enums::ReadingStatus};
+use models::{entity::reading_session, shared::enums::ReadingStatus};
 use sea_orm::{prelude::*, QueryOrder};
 
 use crate::common::TestApp;
@@ -32,17 +32,14 @@ pub async fn update_progress(app: &TestApp, book_id: &str, input: MediaProgressI
 /// fudge the session updated_at to be outside the guard period where the server
 /// attempts to block creating a new session after completion as a form of deduplication etc
 pub async fn fudge_session_time(
-	session: &reading_session_v2::Model,
+	session: &reading_session::Model,
 	conn: &sea_orm::DatabaseConnection,
 ) {
 	let fudge_time =
 		session.updated_at.expect("session missing updated_at") - Duration::minutes(40);
-	reading_session_v2::Entity::update_many()
-		.filter(reading_session_v2::Column::Id.eq(session.id))
-		.col_expr(
-			reading_session_v2::Column::UpdatedAt,
-			Expr::value(fudge_time),
-		)
+	reading_session::Entity::update_many()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.col_expr(reading_session::Column::UpdatedAt, Expr::value(fudge_time))
 		.exec(conn)
 		.await
 		.expect("could not update session timestamp");
@@ -50,16 +47,13 @@ pub async fn fudge_session_time(
 
 /// fudge the session updated_at to a specific timestamp
 pub async fn fudge_session_time_with_timestamp(
-	session: &reading_session_v2::Model,
+	session: &reading_session::Model,
 	conn: &sea_orm::DatabaseConnection,
 	updated_at: DateTime<Utc>,
 ) {
-	reading_session_v2::Entity::update_many()
-		.filter(reading_session_v2::Column::Id.eq(session.id))
-		.col_expr(
-			reading_session_v2::Column::UpdatedAt,
-			Expr::value(updated_at),
-		)
+	reading_session::Entity::update_many()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.col_expr(reading_session::Column::UpdatedAt, Expr::value(updated_at))
 		.exec(conn)
 		.await
 		.expect("could not update session timestamp");
@@ -95,9 +89,9 @@ pub async fn create_nth_readthrough(app: &TestApp, book_id: &str, n: i32) {
 		)
 		.await;
 
-		let session = reading_session_v2::Entity::find()
-			.filter(reading_session_v2::Column::MediaId.eq(book_id))
-			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		let session = reading_session::Entity::find()
+			.filter(reading_session::Column::MediaId.eq(book_id))
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 			.one(conn)
 			.await
 			.expect("db error")
@@ -110,13 +104,13 @@ pub async fn create_nth_readthrough(app: &TestApp, book_id: &str, n: i32) {
 pub async fn active_session_for_book(
 	app: &TestApp,
 	book_id: &str,
-) -> reading_session_v2::Model {
+) -> reading_session::Model {
 	let conn = app.conn();
 
-	reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book_id))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
-		.order_by_desc(reading_session_v2::Column::UpdatedAt)
+	reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book_id))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
+		.order_by_desc(reading_session::Column::UpdatedAt)
 		.one(conn)
 		.await
 		.expect("db error")
@@ -126,11 +120,11 @@ pub async fn active_session_for_book(
 pub async fn latest_finished_session_for_book(
 	app: &TestApp,
 	book_id: &str,
-) -> reading_session_v2::Model {
-	reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book_id))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
-		.order_by_desc(reading_session_v2::Column::UpdatedAt)
+) -> reading_session::Model {
+	reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book_id))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+		.order_by_desc(reading_session::Column::UpdatedAt)
 		.one(app.conn())
 		.await
 		.expect("db error")

@@ -6,7 +6,7 @@ use graphql::input::media::{
 	EpubProgressInput, EpubProgressLocatorInput, MediaProgressInput, PagedProgressInput,
 };
 use models::{
-	entity::{media, reading_session_v2},
+	entity::{media, reading_session},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
 use sea_orm::{prelude::*, QueryOrder};
@@ -42,8 +42,8 @@ async fn test_start_reading_session() {
 	let conn = app.conn();
 
 	// no sessions for this book should exist
-	let sessions_count = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let sessions_count = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.count(conn)
 		.await
 		.expect("could not query reading sessions");
@@ -61,15 +61,15 @@ async fn test_start_reading_session() {
 	.await;
 
 	// a session for this book should now exist
-	let sessions_count = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let sessions_count = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.count(conn)
 		.await
 		.expect("could not query reading sessions");
 	assert_eq!(sessions_count, 1);
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.one(conn)
 		.await
 		.expect("could not query reading sessions")
@@ -109,8 +109,8 @@ async fn test_extend_existing_reading_session() {
 	)
 	.await;
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.one(conn)
 		.await
 		.expect("could not query reading sessions")
@@ -142,20 +142,17 @@ async fn test_new_session_on_elapsed_grace_period() {
 
 	// fudge the created_at to be outside the grace period, since manipulating time in rust is way
 	// more annoying than js :(
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.one(conn)
 		.await
 		.expect("could not query reading sessions")
 		.expect("no session found");
 	let fudge_time = session.created_at - chrono::Duration::minutes(40);
 	// cannot use active_model here since it auto-updates the timestamps
-	reading_session_v2::Entity::update_many()
-		.filter(reading_session_v2::Column::Id.eq(session.id))
-		.col_expr(
-			reading_session_v2::Column::UpdatedAt,
-			Expr::value(fudge_time),
-		)
+	reading_session::Entity::update_many()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.col_expr(reading_session::Column::UpdatedAt, Expr::value(fudge_time))
 		.exec(conn)
 		.await
 		.expect("could not update session timestamp");
@@ -172,9 +169,9 @@ async fn test_new_session_on_elapsed_grace_period() {
 	)
 	.await;
 
-	let sessions = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
-		.order_by_asc(reading_session_v2::Column::CreatedAt)
+	let sessions = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
+		.order_by_asc(reading_session::Column::CreatedAt)
 		.all(conn)
 		.await
 		.expect("could not query reading sessions");
@@ -217,8 +214,8 @@ async fn test_detect_finishing_session() {
 	)
 	.await;
 
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.one(conn)
 		.await
 		.expect("could not query reading sessions")
@@ -259,11 +256,11 @@ async fn test_new_readthrough_after_finished_session() {
 	)
 	.await;
 
-	let session = reading_session_v2::Entity::find()
+	let session = reading_session::Entity::find()
 		.filter(
-			reading_session_v2::Column::MediaId
+			reading_session::Column::MediaId
 				.eq(book.id.clone())
-				.and(reading_session_v2::Column::Status.eq(ReadingStatus::Finished)),
+				.and(reading_session::Column::Status.eq(ReadingStatus::Finished)),
 		)
 		.one(conn)
 		.await
@@ -275,12 +272,9 @@ async fn test_new_readthrough_after_finished_session() {
 	// after completion as a form of deduplication etc
 	let fudge_time = session.updated_at.expect("session missing updated_at")
 		- chrono::Duration::minutes(40);
-	reading_session_v2::Entity::update_many()
-		.filter(reading_session_v2::Column::Id.eq(session.id))
-		.col_expr(
-			reading_session_v2::Column::UpdatedAt,
-			Expr::value(fudge_time),
-		)
+	reading_session::Entity::update_many()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.col_expr(reading_session::Column::UpdatedAt, Expr::value(fudge_time))
 		.exec(conn)
 		.await
 		.expect("could not update session timestamp");
@@ -297,13 +291,13 @@ async fn test_new_readthrough_after_finished_session() {
 	)
 	.await;
 
-	let new_session = reading_session_v2::Entity::find()
+	let new_session = reading_session::Entity::find()
 		.filter(
-			reading_session_v2::Column::MediaId
+			reading_session::Column::MediaId
 				.eq(book.id.clone())
-				.and(reading_session_v2::Column::Status.eq(ReadingStatus::Reading)),
+				.and(reading_session::Column::Status.eq(ReadingStatus::Reading)),
 		)
-		.order_by_desc(reading_session_v2::Column::CreatedAt)
+		.order_by_desc(reading_session::Column::CreatedAt)
 		.one(conn)
 		.await
 		.expect("could not query reading sessions")
@@ -360,8 +354,8 @@ async fn test_detect_finishing_session_for_ebook() {
 	.await;
 
 	// session not complete
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.one(conn)
 		.await
 		.expect("could not query reading sessions")
@@ -383,8 +377,8 @@ async fn test_detect_finishing_session_for_ebook() {
 	.await;
 
 	// now session should be marked as complete
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book.id.clone()))
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
 		.one(conn)
 		.await
 		.expect("could not query reading sessions")

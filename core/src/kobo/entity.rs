@@ -507,7 +507,7 @@ mod tests {
 
 		// this book has a single active reading session
 
-		fake_data::ReadingSessionV2 {
+		fake_data::ReadingSession {
 			media_id: media.id.clone(),
 			user_id: user.id.clone(),
 			end_percentage: 0.5,
@@ -555,7 +555,7 @@ mod tests {
 
 		// this book has a single finished reading session
 
-		fake_data::ReadingSessionV2::completed(media.id.clone(), user.id.clone())
+		fake_data::ReadingSession::completed(media.id.clone(), user.id.clone())
 			.insert(&db)
 			.await;
 

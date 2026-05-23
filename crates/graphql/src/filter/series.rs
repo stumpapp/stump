@@ -78,7 +78,7 @@ fn reading_series_subquery(user_id: &str) -> SelectStatement {
 fn finished_series_subquery(user_id: &str) -> SelectStatement {
 	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
-	// select distinct media_id from reading_session_v2 where user_id = ? and status = 'FINISHED'
+	// select distinct media_id from reading_session where user_id = ? and status = 'FINISHED'
 	let finished_media_ids = Query::select()
 		.distinct()
 		.column(reading_session::Column::MediaId)

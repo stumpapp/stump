@@ -173,14 +173,14 @@ impl Series {
 
 // TODO(v2-sessions): rename
 #[derive(Default)]
-pub struct ReadingSessionV2 {
+pub struct ReadingSession {
 	pub media_id: String,
 	pub user_id: String,
 	pub end_percentage: f32,
 	pub status: ReadingStatus,
 }
 
-impl ReadingSessionV2 {
+impl ReadingSession {
 	/// shorthand for a completed readthrough (end_percentage = 1.0, did_complete = true)
 	pub fn completed(media_id: impl ToString, user_id: impl ToString) -> Self {
 		Self {

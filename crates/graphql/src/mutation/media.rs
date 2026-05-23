@@ -1,10 +1,7 @@
-use async_graphql::{Context, Object, Result, Union, ID};
+use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	entity::{
-		favorite_media, finished_reading_session, library, library_config, media,
-		reading_session, series,
-	},
+	entity::{favorite_media, library, library_config, media, series},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
@@ -24,17 +21,8 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::thumbnail::PageBasedThumbnailInput,
-	object::{
-		media::Media,
-		reading_session::{ActiveReadingSession, FinishedReadingSession},
-	},
+	object::media::Media,
 };
-
-#[derive(Debug, Union)]
-pub enum ReadingProgressOutput {
-	Active(Box<ActiveReadingSession>),
-	Finished(Box<FinishedReadingSession>),
-}
 
 #[derive(Default)]
 pub struct MediaMutation;
@@ -235,32 +223,12 @@ impl MediaMutation {
 		Ok(book.into())
 	}
 
+	// TODO(v2-sessions): remove, replaced by clear_media_progress
 	async fn delete_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let model = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::Id.eq(id.to_string()))
-			.into_model::<media::ModelWithMetadata>()
-			.one(conn)
-			.await?
-			.ok_or("Media not found")?;
-
-		let affected_sessions = reading_session::Entity::delete_many()
-			.filter(
-				reading_session::Column::MediaId
-					.eq(model.media.id.clone())
-					.and(reading_session::Column::UserId.eq(user.id.clone())),
-			)
-			.exec(conn)
-			.await?
-			.rows_affected;
-		tracing::debug!(affected_sessions, "Deleted user reading sessions for media");
-
-		// Note: We return the full node for cache invalidation purposes
-		Ok(Media::from(model))
+		todo!("remove")
 	}
 
+	// TODO(v2-sessions): remove
 	/// Deletes all of a user's reading history for a specific media item. This cannot be undone, so
 	/// use with caution.
 	async fn delete_media_read_history(
@@ -268,31 +236,6 @@ impl MediaMutation {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<Media> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let model = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::Id.eq(id.to_string()))
-			.into_model::<media::ModelWithMetadata>()
-			.one(conn)
-			.await?
-			.ok_or("Media not found")?;
-
-		let affected_sessions = finished_reading_session::Entity::delete_many()
-			.filter(
-				finished_reading_session::Column::MediaId
-					.eq(model.media.id.clone())
-					.and(finished_reading_session::Column::UserId.eq(user.id.clone())),
-			)
-			.exec(conn)
-			.await?
-			.rows_affected;
-		tracing::debug!(
-			affected_sessions,
-			"Deleted user finished reading sessions for media"
-		);
-
-		// Note: We return the full node for cache invalidation purposes
-		Ok(Media::from(model))
+		todo!("remove")
 	}
 }

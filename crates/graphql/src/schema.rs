@@ -8,7 +8,6 @@ use crate::{
 		log::JobAssociatedLogLoader,
 		media::MediaLoader,
 		media_analysis::MediaAnalysisLoader,
-		reading_session::ReadingSessionLoader,
 		reading_session_v2::ReadingSessionV2Loader,
 		series::SeriesLoader,
 		series_count::SeriesCountLoader,
@@ -59,10 +58,6 @@ pub fn add_data_loaders<
 		))
 		.data(DataLoader::new(
 			JobAssociatedLogLoader::new(conn.clone()),
-			tokio::spawn,
-		))
-		.data(DataLoader::new(
-			ReadingSessionLoader::new(conn.clone()),
 			tokio::spawn,
 		))
 		.data(DataLoader::new(

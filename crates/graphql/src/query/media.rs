@@ -2,13 +2,10 @@ use std::collections::HashMap;
 
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::{
-		finished_reading_session, media, media_metadata, reading_session,
-		reading_session_v2, user::AuthUser,
-	},
+	entity::{media, media_metadata, reading_session_v2, user::AuthUser},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
-		enums::UserPermission,
+		enums::{ReadingStatus, UserPermission},
 		ordering::OrderBy,
 	},
 };
@@ -90,7 +87,10 @@ impl MediaQuery {
 	async fn finished_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = finished_reading_session::Entity::find().count(conn).await?;
+		let count = reading_session_v2::Entity::find()
+			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+			.count(conn)
+			.await?;
 
 		Ok(count as i64)
 	}
@@ -102,7 +102,12 @@ impl MediaQuery {
 	async fn active_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = reading_session::Entity::find().count(conn).await?;
+		let newer_exists = reading_session_v2::Entity::newer_session_exists_subquery();
+		let count = reading_session_v2::Entity::find()
+			.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+			.filter(Expr::expr(Expr::exists(newer_exists)).not())
+			.count(conn)
+			.await?;
 
 		Ok(count as i64)
 	}
@@ -116,9 +121,9 @@ impl MediaQuery {
 			.query_one(Statement::from_sql_and_values(
 				DatabaseBackend::Sqlite,
 				r"
-				SELECT 
+				SELECT
 					COALESCE(SUM(size), 0) as total_size
-				FROM 
+				FROM
 					media
 				WHERE deleted_at IS NULL
 				",
@@ -320,7 +325,7 @@ impl MediaQuery {
 							.add(reading_session_v2::Column::UserId.eq(user_id.clone()))
 							.add(
 								reading_session_v2::Column::Status
-									.eq(models::shared::enums::ReadingStatus::Reading),
+									.eq(ReadingStatus::Reading),
 							)
 							// for each session row, ensure there does not exist a newer session for the same user+media
 							.add(Expr::expr(Expr::exists(newer_exists.clone())).not())
@@ -460,10 +465,10 @@ impl MediaQuery {
 			OnDeckMediaId::find_by_statement(Statement::from_sql_and_values(
 				DatabaseBackend::Sqlite,
 				r#"
-				WITH 
+				WITH
 				-- Find all series where the user has read at least one book
 				user_read_series AS (
-					SELECT DISTINCT m.series_id 
+					SELECT DISTINCT m.series_id
 					FROM media m
 					JOIN reading_sessions_v2 rs ON rs.media_id = m.id
 					WHERE rs.user_id = ?
@@ -473,7 +478,7 @@ impl MediaQuery {
 
 				-- Find all media IDs that user has read
 				user_read_media AS (
-					SELECT DISTINCT media_id 
+					SELECT DISTINCT media_id
 					FROM reading_sessions_v2
 					WHERE user_id = ?
 					AND status = 'FINISHED'
@@ -481,7 +486,7 @@ impl MediaQuery {
 
 				-- We do not want books from series with active reading sessions
 				user_active_series AS (
-					SELECT DISTINCT m.series_id 
+					SELECT DISTINCT m.series_id
 					FROM media m
 					JOIN reading_sessions_v2 rs ON rs.media_id = m.id
 					WHERE rs.user_id = ?
@@ -509,7 +514,7 @@ impl MediaQuery {
 
 				-- For each series, get last read date for sorting priority
 				series_last_read AS (
-					SELECT 
+					SELECT
 						m.series_id,
 						MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
 					FROM reading_sessions_v2 rs
@@ -522,20 +527,20 @@ impl MediaQuery {
 
 				-- Find the first unread book for each series
 				next_in_series AS (
-					SELECT 
-						m.id, 
+					SELECT
+						m.id,
 						m.name,
 						m.series_id,
 						ROW_NUMBER() OVER(
-							PARTITION BY m.series_id 
+							PARTITION BY m.series_id
 							ORDER BY m.name
 						) as book_rank,
 						COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
-					FROM 
+					FROM
 						media m
 					LEFT JOIN
 						series_last_read srl ON srl.series_id = m.series_id
-					WHERE 
+					WHERE
 						m.series_id IN (SELECT series_id FROM user_read_series)
 						AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
 						-- Exclude media that user has read or is currently reading
@@ -544,11 +549,11 @@ impl MediaQuery {
 				)
 
 				-- Get only the first book for each series
-				SELECT 
+				SELECT
 					id
-				FROM 
+				FROM
 					next_in_series
-				WHERE 
+				WHERE
 					book_rank = 1
 				ORDER BY
 					-- Most recently read series first
@@ -602,10 +607,10 @@ impl MediaQuery {
 				DatabaseBackend::Sqlite,
 				r#"
 					-- Count total number of on deck items (for pagination)
-					WITH 
+					WITH
 					-- Find all series where the user has read at least one book
 					user_read_series AS (
-						SELECT DISTINCT m.series_id 
+						SELECT DISTINCT m.series_id
 						FROM media m
 						JOIN reading_sessions_v2 rs ON rs.media_id = m.id
 						WHERE rs.user_id = ?
@@ -616,13 +621,13 @@ impl MediaQuery {
 					-- Find all media IDs that user has read or is currently reading
 					user_read_or_reading_media AS (
 						-- Media that user has finished
-						SELECT DISTINCT media_id 
+						SELECT DISTINCT media_id
 						FROM reading_sessions_v2
 						WHERE user_id = ?
 						AND status = 'FINISHED'
-						
+
 						UNION
-						
+
 						-- Media that user is currently reading
 						SELECT DISTINCT rs.media_id
 						FROM reading_sessions_v2 rs
@@ -650,15 +655,15 @@ impl MediaQuery {
 
 					-- Find the first unread book for each series
 					next_in_series AS (
-						SELECT 
-							m.id, 
+						SELECT
+							m.id,
 							ROW_NUMBER() OVER(
-								PARTITION BY m.series_id 
+								PARTITION BY m.series_id
 								ORDER BY m.name
 							) as book_rank
-						FROM 
+						FROM
 							media m
-						WHERE 
+						WHERE
 							m.series_id IN (SELECT series_id FROM user_read_series)
 							-- Exclude media that user has read or is currently reading
 							AND m.id NOT IN (SELECT media_id FROM user_read_or_reading_media)
@@ -667,11 +672,11 @@ impl MediaQuery {
 					)
 
 					-- Count only the first book for each series
-					SELECT 
+					SELECT
 						COUNT(*) as count
-					FROM 
+					FROM
 						next_in_series
-					WHERE 
+					WHERE
 						book_rank = 1
 					"#,
 				[

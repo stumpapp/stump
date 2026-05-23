@@ -27,3 +27,5 @@
 - [ ] search and address TODO(v2-sessions) comments
 - [ ] search reading_session::
 - [x] koreader
+- [ ] tests
+    - [ ] series.up_next

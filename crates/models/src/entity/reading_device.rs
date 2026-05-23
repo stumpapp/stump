@@ -14,23 +14,6 @@ pub struct Model {
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-	#[sea_orm(has_many = "super::finished_reading_session::Entity")]
-	FinishedReadingSession,
-	#[sea_orm(has_many = "super::reading_session::Entity")]
-	ReadingSession,
-}
-
-impl Related<super::finished_reading_session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::FinishedReadingSession.def()
-	}
-}
-
-impl Related<super::reading_session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::ReadingSession.def()
-	}
-}
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}

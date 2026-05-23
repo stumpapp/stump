@@ -1,8 +1,5 @@
 use chrono::Utc;
-use models::entity::{
-	finished_reading_session, library, library_config, media, reading_session,
-	reading_session_v2, series, user,
-};
+use models::entity::{library, library_config, media, reading_session_v2, series, user};
 use models::shared::enums::{FileStatus, ReadingStatus};
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
@@ -171,56 +168,6 @@ impl Series {
 		};
 
 		model.insert(db).await.expect("could not insert series")
-	}
-}
-
-// TODO(v2-sessions): delete
-#[derive(Default)]
-pub struct ReadingSession {
-	pub media_id: String,
-	pub user_id: String,
-	pub percentage_completed: f32,
-}
-
-impl ReadingSession {
-	pub async fn insert(&self, db: &DbConn) -> reading_session::Model {
-		let model = reading_session::ActiveModel {
-			media_id: sea_orm::Set(self.media_id.clone()),
-			user_id: sea_orm::Set(self.user_id.clone()),
-			percentage_completed: sea_orm::Set(rust_decimal::Decimal::from_f32(
-				self.percentage_completed,
-			)),
-			..Default::default()
-		};
-
-		model
-			.insert(db)
-			.await
-			.expect("could not insert reading session")
-	}
-}
-
-// TODO(v2-sessions): delete
-#[derive(Default)]
-pub struct FinishedReadingSession {
-	pub media_id: String,
-	pub user_id: String,
-}
-
-impl FinishedReadingSession {
-	pub async fn insert(&self, db: &DbConn) -> finished_reading_session::Model {
-		let model = finished_reading_session::ActiveModel {
-			media_id: sea_orm::Set(self.media_id.clone()),
-			user_id: sea_orm::Set(self.user_id.clone()),
-			started_at: sea_orm::Set(Utc::now().into()),
-			completed_at: sea_orm::Set(Utc::now().into()),
-			..Default::default()
-		};
-
-		model
-			.insert(db)
-			.await
-			.expect("could not insert finished reading session")
 	}
 }
 

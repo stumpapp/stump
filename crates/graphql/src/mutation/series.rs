@@ -1,26 +1,19 @@
 use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	entity::{
-		favorite_series, finished_reading_session, library, library_config, media,
-		reading_session, series, user::AuthUser,
-	},
+	entity::{favorite_series, library, library_config, media, series, user::AuthUser},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
-	QuerySelect, TransactionTrait,
+};
+use stump_core::filesystem::{
+	image::{generate_book_thumbnail, GenerateThumbnailOptions},
+	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 };
 use stump_core::job::stump_job::StumpJob;
-use stump_core::{
-	database::SQLITE_BIND_LIMIT,
-	filesystem::{
-		image::{generate_book_thumbnail, GenerateThumbnailOptions},
-		media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
-	},
-};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -237,93 +230,7 @@ async fn set_series_completed(
 	user: &AuthUser,
 	series: &series::ModelWithMetadata,
 ) -> Result<()> {
-	let tx = core.conn.begin().await?;
-
-	let book_ids_without_completion = media::Entity::find_for_user(user)
-		.select_only()
-		.column(media::Column::Id)
-		.filter(
-			media::Column::SeriesId.eq(series.series.id.clone()).and(
-				// to get books WITHOUT completion means they do not have a finished_reading_session
-				media::Column::Id.not_in_subquery(
-					Query::select()
-						.column(finished_reading_session::Column::MediaId)
-						.from(finished_reading_session::Entity)
-						.and_where(
-							finished_reading_session::Column::UserId.eq(user.id.clone()),
-						)
-						.to_owned(),
-				),
-			),
-		)
-		.into_tuple::<String>()
-		.all(&tx)
-		.await?;
-
-	tracing::debug!(
-		count = book_ids_without_completion.len(),
-		"Fetched unread books within series"
-	);
-
-	let deleted_sessions = reading_session::Entity::delete_many()
-		.filter(
-			reading_session::Column::UserId.eq(user.id.clone()).and(
-				reading_session::Column::MediaId.in_subquery(
-					Query::select()
-						.column(media::Column::Id)
-						.from(media::Entity)
-						.and_where(media::Column::SeriesId.eq(series.series.id.clone()))
-						.to_owned(),
-				),
-			),
-		)
-		// with returning so we can reuse the deleted session info when creating the
-		// completion records (e.g., elapsed time etc)
-		.exec_with_returning(&tx)
-		.await?;
-	tracing::debug!(
-		count = deleted_sessions.len(),
-		"Deleted active reading sessions for series"
-	);
-
-	// this just makes it more efficient to pull the previous one before creating
-	// the completion record
-	let session_map = deleted_sessions
-		.into_iter()
-		.map(|s| (s.media_id.clone(), s))
-		.collect::<std::collections::HashMap<_, _>>();
-
-	let now = DateTimeWithTimeZone::from(Utc::now());
-	let finished_sessions_chunks = book_ids_without_completion
-		.into_iter()
-		.map(|media_id| {
-			let prior = session_map.get(&media_id);
-			finished_reading_session::ActiveModel {
-				user_id: Set(user.id.clone()),
-				media_id: Set(media_id),
-				started_at: Set(prior.map(|s| s.started_at).unwrap_or(now)),
-				completed_at: Set(now),
-				elapsed_seconds: Set(prior.and_then(|s| s.elapsed_seconds)),
-				device_id: Set(prior.and_then(|s| s.device_id.clone())),
-				..Default::default()
-			}
-		})
-		.collect::<Vec<finished_reading_session::ActiveModel>>();
-	if !finished_sessions_chunks.is_empty() {
-		for chunk in finished_sessions_chunks.chunks(SQLITE_BIND_LIMIT) {
-			let count = chunk.len();
-			let _ = finished_reading_session::Entity::insert_many(chunk.to_vec())
-				.exec(&tx)
-				.await?;
-			tracing::debug!(count, "Inserted finished reading sessions for series");
-		}
-	} else {
-		tracing::debug!("No books to mark as finished in series");
-	}
-
-	tx.commit().await?;
-
-	Ok(())
+	todo!("remove")
 }
 
 // TODO(v2-sessions): refactor and potentially relocate to read_progress.rs
@@ -332,34 +239,5 @@ async fn unset_series_completed(
 	user: &AuthUser,
 	series: &series::ModelWithMetadata,
 ) -> Result<()> {
-	let tx = core.conn.begin().await?;
-
-	let affected_rows = finished_reading_session::Entity::delete_many()
-		.filter(
-			finished_reading_session::Column::UserId
-				.eq(user.id.clone())
-				.and(
-					finished_reading_session::Column::MediaId.in_subquery(
-						Query::select()
-							.column(media::Column::Id)
-							.from(media::Entity)
-							.and_where(
-								media::Column::SeriesId.eq(series.series.id.clone()),
-							)
-							.to_owned(),
-					),
-				),
-		)
-		.exec(&tx)
-		.await?
-		.rows_affected;
-
-	tracing::debug!(
-		?affected_rows,
-		"Removed finished reading sessions for series"
-	);
-
-	tx.commit().await?;
-
-	Ok(())
+	todo!("remove")
 }

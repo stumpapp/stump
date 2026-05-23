@@ -322,8 +322,6 @@ pub enum Relation {
 	BookClubMemberFavoriteBook,
 	#[sea_orm(has_many = "super::bookmark::Entity")]
 	Bookmark,
-	#[sea_orm(has_many = "super::finished_reading_session::Entity")]
-	FinishedReadingSession,
 	#[sea_orm(has_many = "super::media_annotation::Entity")]
 	MediaAnnotation,
 	#[sea_orm(has_one = "super::media_metadata::Entity")]
@@ -332,7 +330,7 @@ pub enum Relation {
 	Tags,
 	#[sea_orm(has_many = "super::reading_list_item::Entity")]
 	ReadingListItem,
-	#[sea_orm(has_many = "super::reading_session::Entity")]
+	#[sea_orm(has_many = "super::reading_session_v2::Entity")]
 	ReadingSession,
 	#[sea_orm(has_many = "super::review::Entity")]
 	Review,
@@ -374,12 +372,6 @@ impl Related<super::bookmark::Entity> for Entity {
 	}
 }
 
-impl Related<super::finished_reading_session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::FinishedReadingSession.def()
-	}
-}
-
 impl Related<super::media_annotation::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::MediaAnnotation.def()
@@ -404,7 +396,7 @@ impl Related<super::reading_list_item::Entity> for Entity {
 	}
 }
 
-impl Related<super::reading_session::Entity> for Entity {
+impl Related<super::reading_session_v2::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::ReadingSession.def()
 	}

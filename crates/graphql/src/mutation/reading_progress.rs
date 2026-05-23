@@ -83,66 +83,6 @@ impl ReadProgressMutation {
 		.map_err(Into::into)
 	}
 
-	// TODO(v2-sessions): i didn't quite do this correctly the first pass, it's a bit trickier
-	// when considering read history. i think it should:
-	// - if actively reading (any readthrough) and is_complete, complete _that_ readthrough (should work as-is)
-	// - if actively reading and !is_complete, trash current readthrough?
-	// ugh idk, maybe separate mutations more semantically named would make sense? like:
-	// - clear_active_progress (trashes current readthrough, if any)
-	// - finish_active_progress (marks current readthrough as complete, if any)
-	// - clear_reading_history (trashes all readthroughs for the media)
-	// i kinda like that, would need to do the same for series as well. it makes it less ambiguous for me
-	// in my head at least
-	async fn mark_media_as_complete(
-		&self,
-		ctx: &Context<'_>,
-		id: ID,
-		is_complete: bool,
-		page: Option<i32>,
-	) -> Result<Option<ReadingSession>> {
-		// let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		// let core = ctx.data::<CoreContext>()?;
-		// let conn = core.conn.as_ref();
-
-		// let (extension, total_pages): (String, i32) =
-		// 	media::Entity::find_by_id(id.to_string())
-		// 		.select_only()
-		// 		.column(media::Column::Extension)
-		// 		.column(media::Column::Pages)
-		// 		.into_tuple()
-		// 		.one(conn)
-		// 		.await?
-		// 		.ok_or("Media not found")?;
-
-		// let mut progression = NormalizedProgression::default();
-
-		// if is_complete {
-		// 	progression.page = Some(total_pages);
-		// 	progression.percentage = Some(Decimal::new(1, 0));
-		// } else {
-		// 	progression.page = match extension.as_str() {
-		// 		"epub" => None,
-		// 		_ => Some(page.unwrap_or(1)),
-		// 	};
-		// }
-
-		// let session = upsert_reading_session(
-		// 	conn,
-		// 	user,
-		// 	id.as_ref(),
-		// 	progression,
-		// 	core.config.book_completion_dedup_timeout_secs,
-		// )
-		// .await?;
-
-		// if is_complete {
-		// 	Ok(Some(ReadingSession::from(session)))
-		// } else {
-		// 	Ok(None)
-		// }
-		Ok(None) // placeholder until i decide how to approach this, see above
-	}
-
 	/// trashes current readthrough, if there is one
 	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
 	async fn clear_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
@@ -197,9 +137,6 @@ impl ReadProgressMutation {
 
 		Ok(affected_rows > 0)
 	}
-
-	// TODO(v2-sessions): we need to create a new session if elapsed, otherwise we fuck with the
-	// sacred timeline
 
 	/// marks current readthrough as complete:
 	/// - if no current readthrough, creates one
@@ -285,6 +222,7 @@ impl ReadProgressMutation {
 		Ok(true)
 	}
 
+	// TODO(v2-sessions): rename delete_media_reading_history
 	/// trashes all completed readthroughs for the media
 	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
 	async fn clear_media_reading_history(

@@ -1,4 +1,5 @@
 mod common;
+mod opds;
 mod reading_progress;
 
 use common::TestApp;

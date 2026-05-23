@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum_test::TestServer;
+use axum_test::{TestResponse, TestServer};
 use sea_orm::DatabaseConnection;
 use serde_json::{json, Value};
 use stump_core::{Ctx, StumpCore};
@@ -64,6 +64,17 @@ impl TestApp {
 		self.ctx.conn.as_ref()
 	}
 
+	async fn auth_header(&self) -> String {
+		format!(
+			"Bearer {}",
+			self.access_token
+				.read()
+				.await
+				.clone()
+				.unwrap_or_else(|| String::from("no-token-set"))
+		)
+	}
+
 	pub async fn execute_gql(&self, query: &str, variables: Option<Value>) -> Value {
 		let mut body = json!({ "query": query });
 		if let Some(vars) = variables {
@@ -73,17 +84,7 @@ impl TestApp {
 		let response = self
 			.server
 			.post("/api/graphql")
-			.add_header(
-				"Authorization",
-				format!(
-					"Bearer {}",
-					self.access_token
-						.read()
-						.await
-						.clone()
-						.unwrap_or_else(|| String::from("no-token-set"))
-				),
-			)
+			.add_header("Authorization", self.auth_header().await)
 			.json(&body)
 			.await;
 		response.assert_status_ok();
@@ -111,5 +112,28 @@ impl TestApp {
 			.as_str()
 			.expect("access token missing from login response")
 			.to_string()
+	}
+
+	/// issue a GET request to the specified path with auth headers, returning the response directly
+	pub async fn get(&self, path: &str) -> TestResponse {
+		let response = self
+			.server
+			.get(path)
+			.add_header("Authorization", self.auth_header().await)
+			.await;
+
+		response
+	}
+
+	/// issue a PUT request to the specified path with auth headers and a JSON body, returning the response directly
+	pub async fn put(&self, path: &str, body: &Value) -> TestResponse {
+		let response = self
+			.server
+			.put(path)
+			.add_header("Authorization", self.auth_header().await)
+			.json(body)
+			.await;
+
+		response
 	}
 }

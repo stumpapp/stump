@@ -17,7 +17,7 @@ mod media_metadata;
 mod metadata_provider;
 mod notifier;
 mod reading_list;
-mod reading_progress;
+pub mod reading_progress;
 mod scheduled_job_config;
 mod series;
 mod series_metadata;

@@ -99,6 +99,7 @@ impl Model {
 // so for now just extract the first id in the ids list. i also don't know if some of the integrations
 // which this is meant to support (e.g. koreader) care about multiple devices. maybe i just add e.g.
 // find_with_kind("koreader") or something
+#[derive(Debug, Clone)]
 pub struct ModelWithDevice {
 	pub model: Model,
 	pub device: Option<reading_device::Model>,

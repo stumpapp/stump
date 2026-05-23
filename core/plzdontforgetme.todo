@@ -26,3 +26,4 @@
     - [ ] verify changes to opds aren't broken
 - [ ] search and address TODO(v2-sessions) comments
 - [ ] search reading_session::
+- [x] koreader

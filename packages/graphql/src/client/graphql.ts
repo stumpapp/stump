@@ -1533,6 +1533,7 @@ export type MediaFilterInput = {
   seriesId?: InputMaybe<FieldFilterString>;
   size?: InputMaybe<NumericFilterI64>;
   status?: InputMaybe<FieldFilterFileStatus>;
+  tags?: InputMaybe<FieldFilterString>;
   updatedAt?: InputMaybe<NumericFilterDateTime>;
 };
 

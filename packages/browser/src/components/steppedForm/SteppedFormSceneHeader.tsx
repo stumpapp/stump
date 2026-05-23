@@ -5,12 +5,15 @@ import { useSteppedFormContext } from './context'
 import SteppedFormIndicators from './SteppedFormIndicators'
 import SteppedFormStepDetails from './SteppedFormStepDetails'
 
-// TODO: support docs link
+type Props = {
+	subtitleLink?: string
+}
+
 /**
  * A header for scenes which primarily consist of a stepped form. This component
  * requires the SteppedFormProvider to be present in the component tree.
  */
-export default function SteppedFormSceneHeader() {
+export default function SteppedFormSceneHeader({ subtitleLink }: Props) {
 	const { localeBase } = useSteppedFormContext()
 	const { t } = useLocaleContext()
 
@@ -21,10 +24,13 @@ export default function SteppedFormSceneHeader() {
 					{t(`${localeBase}.heading`)}
 				</Heading>
 				<Text size="sm" variant="muted" className="mt-1.5">
-					{t(`${localeBase}.subtitle`)}{' '}
-					<Link href="https://www.stumpapp.dev/docs/guides/fundamentals/libraries">
-						{t(`${localeBase}.subtitleLink`)}
-					</Link>
+					{t(`${localeBase}.subtitle`)}
+					{subtitleLink && (
+						<>
+							{' '}
+							<Link href={subtitleLink}>{t(`${localeBase}.subtitleLink`)}</Link>
+						</>
+					)}
 				</Text>
 			</div>
 

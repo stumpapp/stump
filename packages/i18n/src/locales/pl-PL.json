@@ -935,12 +935,12 @@
 						"description": "Dostępna dla wszystkich użytkowników na serwerze"
 					},
 					"shared": {
-						"label": "Współdzielone",
+						"label": "Współdzielona",
 						"description": "Określeni użytkownicy mogą uzyskać dostęp do tej inteligentnej listy",
 						"createDisclaimer": "Możesz wybrać, z kim ta lista jest udostępniona po jej utworzeniu"
 					},
 					"private": {
-						"label": "Prywatne",
+						"label": "Prywatna",
 						"description": "Tylko Ty możesz uzyskać dostęp do tej inteligentnej listy"
 					}
 				}
@@ -2790,6 +2790,7 @@
 			"year": "Rok"
 		},
 		"common": {
+			"book": "Książka",
 			"cancel": "Anuluj",
 			"chapter": "Rozdział",
 			"clear": "Wyczyść",
@@ -2813,6 +2814,7 @@
 			"pages": "Strony",
 			"password": "Hasło",
 			"progress": "Postęp",
+			"publication": "Publikacja",
 			"readTime": "Czas czytania",
 			"readMore": "Dowiedz się więcej",
 			"save": "Zapisz",
@@ -2827,6 +2829,21 @@
 			"username": "Nazwa użytkownika",
 			"value": "Wartość",
 			"version": "Wersja"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} z {{total}} w {{seriesName}}",
+				"position": "{{position}} w {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "{{position}} książka z {{total}} w {{seriesName}}",
+				"position": "{{position}} książka w {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} z {{total}} w {{seriesName}}",
+				"position": "#{{position}} w {{seriesName}}"
+			},
+			"unknownSeriesName": "seria"
 		},
 		"emptyState": {
 			"noStumpServers": "Nie dodano żadnych serwerów Stump",
@@ -3071,6 +3088,7 @@
 			},
 			"allowDownscaling": "Skalowanie zmniejszające",
 			"tapSidesToNavigate": "Dotknij boki, aby nawigować",
+			"volumeButtonsNavigate": "Nawigacja przyciskami głośności",
 			"footerControls": {
 				"label": "Stopka",
 				"options": {
@@ -3124,6 +3142,7 @@
 				}
 			},
 			"publisherStyles": "Style wydawcy",
+			"volumeButtonsNavigate": "Nawigacja przyciskami głośności",
 			"textAlignment": {
 				"label": "Wyrównanie tekstu",
 				"options": {

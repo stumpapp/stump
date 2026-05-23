@@ -2790,6 +2790,7 @@
 			"year": "Year"
 		},
 		"common": {
+			"book": "Book",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",
@@ -2813,6 +2814,7 @@
 			"pages": "Pages",
 			"password": "Password",
 			"progress": "Progress",
+			"publication": "Publication",
 			"readTime": "Reading time",
 			"readMore": "Read more",
 			"save": "Save",
@@ -2827,6 +2829,21 @@
 			"username": "Username",
 			"value": "Value",
 			"version": "Version"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
+				"position": "Book {{position}} in {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
+			},
+			"unknownSeriesName": "series"
 		},
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
@@ -3071,6 +3088,7 @@
 			},
 			"allowDownscaling": "Downscaling",
 			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
@@ -3124,6 +3142,7 @@
 				}
 			},
 			"publisherStyles": "Publisher Styles",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "Text Alignment",
 				"options": {

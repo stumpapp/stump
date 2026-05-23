@@ -14,7 +14,7 @@ export default function LandingPage() {
 	}
 
 	return (
-		<div className="gap-y-12 relative flex h-full w-full flex-col items-center">
+		<div className="gap-y-12 relative flex h-full w-full max-w-full flex-col items-center overflow-x-clip">
 			<div className="inset-0 pointer-events-none absolute -z-10 h-full w-full overflow-x-clip">
 				<div className="top-0 left-0 bg-amber-500/10 max-md:hidden w-5xl h-256 pointer-events-none absolute -z-10 -translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />
 				<div className="top-0 left-0 bg-amber-500/5 max-md:hidden w-5xl h-256 pointer-events-none absolute -z-10 -translate-x-1/2 -translate-y-1/2 rounded-full [mask-image:var(--mask)] [--mask:radial-gradient(circle_at_center,red,transparent_69%)] [webkit-mask-image:var(--mask)]" />

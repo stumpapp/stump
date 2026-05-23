@@ -2790,6 +2790,7 @@
 			"year": "年份"
 		},
 		"common": {
+			"book": "Book",
 			"cancel": "取消",
 			"chapter": "章节",
 			"clear": "清除",
@@ -2813,7 +2814,8 @@
 			"pages": "页",
 			"password": "密码",
 			"progress": "进度",
-			"readTime": "阅读时间",
+			"publication": "Publication",
+			"readTime": "Reading time",
 			"readMore": "阅读更多",
 			"save": "保存",
 			"select": "选择",
@@ -2827,6 +2829,21 @@
 			"username": "用户名",
 			"value": "值",
 			"version": "版本"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
+				"position": "Book {{position}} in {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
+			},
+			"unknownSeriesName": "series"
 		},
 		"emptyState": {
 			"noStumpServers": "未添加 Stump 服务器",
@@ -3071,6 +3088,7 @@
 			},
 			"allowDownscaling": "缩小",
 			"tapSidesToNavigate": "点击两侧导航",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "页脚",
 				"options": {
@@ -3124,6 +3142,7 @@
 				}
 			},
 			"publisherStyles": "出版方样式",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "文本对齐",
 				"options": {

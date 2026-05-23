@@ -21,6 +21,7 @@ import {
 	ReadiumView,
 	ReadiumViewRef,
 } from '~/modules/readium'
+import { useVolumeListener } from '~/modules/volumeListener'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import {
 	convertNativeToc,
@@ -175,6 +176,15 @@ export default function ReadiumReader({
 			}) satisfies ReadiumViewRef,
 		[],
 	)
+
+	const volumeButtonsNavigate = useReaderStore(
+		(state) => state.globalSettings.volumeButtonsNavigate,
+	)
+	useVolumeListener({
+		enabled: volumeButtonsNavigate,
+		onVolumeUp: () => navigator.goForward(),
+		onVolumeDown: () => navigator.goBackward(),
+	})
 
 	const store = useEpubLocationStore(
 		useShallow((store) => ({

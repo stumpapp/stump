@@ -136,7 +136,7 @@ export default function Hero() {
 							variants={buttonVariants}
 						>
 							<Link
-								className="bg-neutral-650 dark:hover:bg-neutral-650 hover:border-neutral-450 active:border-neutral-450 dark:active:border-neutral-450 dark:hover:border-neutral-450 dark:active:bg-neutral-650 rounded-md border-neutral-500 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-600 hover:text-white active:bg-neutral-50 active:text-white dark:border-neutral-500 dark:bg-neutral-700 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center border transition-all duration-300 focus:outline-none dark:active:opacity-90"
+								className="bg-neutral-650 dark:hover:bg-neutral-650 hover:border-neutral-450 active:border-neutral-450 dark:active:border-neutral-450 dark:hover:border-neutral-450 dark:active:bg-neutral-650 border-neutral-500 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-600 hover:text-white active:bg-neutral-50 active:text-white dark:border-neutral-500 dark:bg-neutral-700 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center rounded-full border transition-all duration-300 focus:outline-none dark:active:opacity-90"
 								href="/docs"
 							>
 								<span>Documentation</span>
@@ -151,7 +151,7 @@ export default function Hero() {
 							variants={buttonVariants}
 						>
 							<Link
-								className="dark:active:border-neutral-650 dark:active:bg-neutral-650 space-x-2 rounded-md px-3 py-1.5 text-sm font-medium text-neutral-700 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center border border-transparent bg-transparent transition-all duration-300 focus:outline-none dark:active:opacity-90"
+								className="dark:active:border-neutral-650 dark:active:bg-neutral-650 space-x-2 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center rounded-full border border-transparent bg-transparent transition-all duration-300 focus:outline-none dark:active:opacity-90"
 								href="https://www.github.com/stumpapp/stump"
 								target="_blank"
 							>

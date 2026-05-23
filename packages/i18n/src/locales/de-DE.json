@@ -828,7 +828,7 @@
 			"booktype": "Buchtyp",
 			"status": "Status",
 			"totalIssues": "Gesamtanzahl der Ausgaben",
-			"publicationRun": "Publikationslauf",
+			"publicationRun": "Veröffentlichungslauf",
 			"comicImage": "Comicbild",
 			"descriptionFormatted": "Beschreibung (formatiert)"
 		},
@@ -1928,7 +1928,7 @@
 						},
 						"statuses": {
 							"label": "Status zum wiederholen",
-							"description": "Which metadata fetch statuses should be retried",
+							"description": "Welche Metadatenabrufstatusse erneut versucht werden sollen",
 							"rateLimited": "Anfragerate begrenzt",
 							"failed": "Fehlgeschlagen"
 						},
@@ -1944,12 +1944,12 @@
 						"delete": "Löschen"
 					},
 					"toasts": {
-						"createSuccess": "Scheduled job created",
-						"createError": "Failed to create scheduled job",
-						"updateSuccess": "Scheduled job updated",
-						"updateError": "Failed to update scheduled job",
-						"deleteSuccess": "Scheduled job deleted",
-						"deleteError": "Failed to delete scheduled job"
+						"createSuccess": "Geplanter Job erstellt",
+						"createError": "Fehler beim Erstellen des geplanten Job",
+						"updateSuccess": "Geplanter Job aktualisiert",
+						"updateError": "Fehler beim Aktualisieren des geplanten Job",
+						"deleteSuccess": "Geplanter Job gelöscht",
+						"deleteError": "Fehler beim Löschen des geplanten Job"
 					}
 				},
 				"history": {
@@ -2017,13 +2017,13 @@
 				"permissions": {
 					"groups": {
 						"accountManagement": "Benutzerkonto",
-						"featureAccess": "Feature access",
+						"featureAccess": "Funktionszugriff",
 						"fileManagement": "Dateien",
 						"emailers": "Mailserver",
 						"emailing": "E-Mailing",
-						"libraryManagement": "Library management",
-						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"libraryManagement": "Bibliotheksverwaltung",
+						"userManagement": "Benutzerverwaltung",
+						"serverManagement": "Serververwaltung"
 					},
 					"heading": "Berechtigungen",
 					"subtitle": [
@@ -2299,24 +2299,24 @@
 			}
 		},
 		"server/metadataIntegrations": {
-			"helmet": "Metadata integrations",
-			"title": "Metadata integrations",
-			"addProvider": "Add provider",
-			"noProviders": "No providers configured yet. Add one to get started",
+			"helmet": "Metadatenintegrationen",
+			"title": "Metadatenintegrationen",
+			"addProvider": "Anbieter hinzufügen",
+			"noProviders": "Noch keine Anbieter konfiguriert. Füge einen hinzu, um loszulegen",
 			"providers": {
 				"title": "Anbieter",
-				"description": "Configure external metadata providers to fetch and enrich your library data"
+				"description": "Konfiguriere externen Metadatenanbieter, um Bibliotheksdaten abzurufen und deine zu bereichern"
 			},
 			"providerForm": {
 				"apiToken": {
 					"label": "API-Token",
 					"description": "Der API-Token für die Authentifizierung mit diesem Anbieter",
-					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
+					"validationError": "Die automatische Validierung für diesen Token fehlgeschlagen",
+					"validationRequestError": "Die Validierungsanfrage ist fehlgeschlagen",
+					"validationRequestErrorUnknown": "Ein unbekannter Fehler ist bei der Validierung aufgetreten",
+					"hardcoverStatusError": "Hardcover-API antwortete mit Status {{status}}",
+					"hardcoverValidationError": "Hardcover-API antwortete mit einem Fehler: {{message}}",
+					"noBearerPrefixRequired": "Entferne den Präfix 'Bearer' von dem API-Token"
 				},
 				"apiTokenExpiresAt": {
 					"label": "API-Token-Verfall",
@@ -2324,23 +2324,23 @@
 				},
 				"enableProvider": {
 					"label": "Anbieter aktivieren",
-					"description": "It will be used for fetching if enabled"
+					"description": "Es wird zum Abrufen verwendet, falls aktiviert"
 				},
 				"autoApplyConfig": {
 					"enabled": {
-						"label": "Enable auto-apply",
-						"description": "Skip manual approval and apply likely matches"
+						"label": "Auto-Anwenden aktivieren",
+						"description": "Überspringe manuelle Überprüfung und wende wahrscheinliche Treffer an"
 					},
 					"threshold": {
-						"label": "Confidence threshold",
-						"description": "Minimum confidence score (0-1) to auto-apply a match",
-						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+						"label": "Vertrauensschwelle",
+						"description": "Minimaler Vertrauenswert (0-1) um Treffer automatisch anzuwenden",
+						"disclaimer": "Der berechnete Vertrauenswert ist eine Schätzung nach bestem Bemühen. Er mag möglicherweise nicht immer genau sein"
 					},
 					"strategy": {
-						"label": "Merge strategy",
+						"label": "Vereinigungsstrategie",
 						"options": {
-							"FILL_GAPS": "Accept missing fields",
-							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
+							"FILL_GAPS": "Akzeptiere fehlende Felder",
+							"FILL_AND_MERGE_LISTS": "Akzeptiere fehlende Felder und vereinige Listen",
 							"PREFER_EXTERNAL": "Bevorzuge externe Daten"
 						}
 					}
@@ -2349,14 +2349,14 @@
 			"providerEnabled": "Dieser Anbieter ist aktiviert",
 			"providerDisabled": "Dieser Anbieter ist deaktiviert",
 			"providerTokenExpiresSoon": "Der Token dieses Anbieters läuft bald ab",
-			"autoApplyOn": "Auto-apply on",
-			"autoApplyOff": "Auto-apply off",
+			"autoApplyOn": "Auto-Anwenden an",
+			"autoApplyOff": "Auto-Anwenden aus",
 			"editDialog": {
 				"tooltip": "Anbieter bearbeiten"
 			},
 			"deleteDialog": {
 				"title": "Anbieter löschen",
-				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+				"description": "Bist du sicher, dass du {{providerName}} löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
 			}
 		},
 		"server/tags": {
@@ -2540,8 +2540,8 @@
 			"typeToConfirm": "Type {{name}} to confirm:"
 		},
 		"experimentalDisclaimer": {
-			"title": "This feature is experimental",
-			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
+			"title": "Diese Funktion ist experimentell",
+			"description": "Es hat möglicherweise fehlende Funktionen, hat Fehler, oder funktioniert gar nicht. Benutze nach deinem eigenen Ermessen und melde alle Probleme, die dir begegnen"
 		},
 		"enter": "Enter",
 		"save": "Speichern",
@@ -2592,7 +2592,7 @@
 		},
 		"ACCESS_KOBO_SYNC": {
 			"label": "Kobo sync",
-			"description": "Allows the user to access the Kobo sync integration"
+			"description": "Erlaubt dem Benutzer auf die Kobo Synchronisierungsintegration zuzugreifen"
 		},
 		"ACCESS_SMART_LIST": {
 			"label": "Intelligente Listen",
@@ -2790,6 +2790,7 @@
 			"year": "Jahr"
 		},
 		"common": {
+			"book": "Buch",
 			"cancel": "Abbrechen",
 			"chapter": "Kapitel",
 			"clear": "Löschen",
@@ -2813,6 +2814,7 @@
 			"pages": "Seiten",
 			"password": "Passwort",
 			"progress": "Fortschritt",
+			"publication": "Veröffentlichung",
 			"readTime": "Lesezeit",
 			"readMore": "Mehr lesen",
 			"save": "Speichern",
@@ -2827,6 +2829,21 @@
 			"username": "Benutzername",
 			"value": "Wert",
 			"version": "Version"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} von {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "Buch {{position}} von {{total}} in {{seriesName}}",
+				"position": "Buch {{position}} in {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} von {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
+			},
+			"unknownSeriesName": "Serie"
 		},
 		"emptyState": {
 			"noStumpServers": "Keine Stump Server hinzugefügt",
@@ -3071,6 +3088,7 @@
 			},
 			"allowDownscaling": "Herabskalieren",
 			"tapSidesToNavigate": "Seiten zum Navigieren antippen",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
@@ -3124,6 +3142,7 @@
 				}
 			},
 			"publisherStyles": "Verlagsstil",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "Textausrichtung",
 				"options": {

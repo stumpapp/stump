@@ -121,7 +121,7 @@ export default function CreateLibraryScene() {
 					stepsBeforeReview: 3,
 				}}
 			>
-				<SteppedFormSceneHeader />
+				<SteppedFormSceneHeader subtitleLink="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns" />
 
 				<SceneContainer>
 					<div className="gap-12 flex flex-col">

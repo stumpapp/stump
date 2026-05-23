@@ -28,9 +28,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          AUDIT_OUTPUT=$(yarn audit --groups dependencies 2>&1 || true)
+          AUDIT_OUTPUT=$(yarn audit --groups dependencies 2>&1)
+          AUDIT_EXIT_CODE=$?
 
-          if echo "$AUDIT_OUTPUT" | grep -q "vulnerabilities found"; then
+          # yarn audit exits 0 when no vulnerabilities are found
+          if [ "$AUDIT_EXIT_CODE" -ne 0 ]; then
             printf '```\n%s\n```\n' "$AUDIT_OUTPUT" > issue-body.txt
             gh issue create \
               --title "[CVE] Vulnerable dependencies detected — $(date -u +%Y-%m-%d)" \

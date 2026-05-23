@@ -5,6 +5,7 @@ import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
+import { useVolumeListener } from '~/modules/volumeListener'
 import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext, NextInSeriesBookRef } from './context'
@@ -33,6 +34,7 @@ export default function ImageBasedReaderContainer({
 			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
 			secondPageSeparate,
+			volumeButtonsNavigate,
 		},
 	} = useBookPreferences({ book: ctx.book, serverId: ctx.serverId })
 
@@ -91,6 +93,24 @@ export default function ImageBasedReaderContainer({
 	)
 
 	const flashListRef = useRef<FlashListRef<PageSetIndexes>>(null)
+
+	useVolumeListener({
+		enabled: volumeButtonsNavigate,
+		onVolumeUp: () => {
+			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+			if (idx < pageSets.length - 1) {
+				flashListRef.current?.scrollToIndex({ index: idx + 1, animated: true })
+				setCurrentPage(currentPage + 1)
+			}
+		},
+		onVolumeDown: () => {
+			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+			if (idx > 0) {
+				flashListRef.current?.scrollToIndex({ index: idx - 1, animated: true })
+				setCurrentPage(currentPage - 1)
+			}
+		},
+	})
 
 	return (
 		<ImageBasedReaderContext.Provider

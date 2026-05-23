@@ -1,11 +1,11 @@
 use async_graphql::InputObject;
 use models::{
-	entity::{media, reading_session},
+	entity::{media, media_tag, reading_session, tag},
 	shared::enums::{FileStatus, ReadingStatus},
 };
 use sea_orm::{
 	prelude::{DateTimeWithTimeZone, *},
-	sea_query::{ConditionExpression, Expr},
+	sea_query::{ConditionExpression, Expr, Query, SelectStatement},
 	Condition,
 };
 use serde::{Deserialize, Serialize};
@@ -47,7 +47,22 @@ fn apply_reading_status_filter(
 	}
 }
 
-// TODO: Support filter by tags (requires join logic)
+fn media_tag_name_subquery(filter: StringLikeFilter<String>) -> SelectStatement {
+	let name_condition = apply_string_filter(tag::Column::Name, filter);
+	let tag_id_subquery = Query::select()
+		.column(tag::Column::Id)
+		.from(tag::Entity)
+		.cond_where(name_condition)
+		.to_owned();
+
+	// SELECT DISTINCT media_id FROM media_tags WHERE tag_id IN
+	Query::select()
+		.distinct()
+		.column(media_tag::Column::MediaId)
+		.from(media_tag::Entity)
+		.and_where(Expr::col(media_tag::Column::TagId).in_subquery(tag_id_subquery))
+		.to_owned()
+}
 
 #[skip_serializing_none]
 #[derive(InputObject, Clone, Serialize, Deserialize, Debug, Default)]
@@ -82,6 +97,8 @@ pub struct MediaFilterInput {
 	#[graphql(default)]
 	pub series: Option<SeriesFilterInput>,
 
+	#[graphql(default)]
+	pub tags: Option<StringLikeFilter<String>>,
 	#[graphql(name = "_and", default)]
 	pub _and: Option<Vec<MediaFilterInput>>,
 	#[graphql(name = "_not", default)]
@@ -170,6 +187,10 @@ impl IntoFilter for MediaFilterInput {
 						})
 						.not(),
 				}
+			}))
+			.add_option(self.tags.map(|f| {
+				let subquery = media_tag_name_subquery(f);
+				Condition::all().add(media::Column::Id.in_subquery(subquery))
 			}))
 			.add_option(self.metadata.map(|f| f.into_filter()))
 			.add_option(self.series.map(|f| f.into_filter()))

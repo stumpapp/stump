@@ -242,6 +242,22 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
+		// this is a pretty loaded index, but i need to do more testing for if it
+		// helps with the inefficient subquery for keep_reading
+		manager
+			.create_index(
+				Index::create()
+					.name("idx-reading_sessions-user-media-recent")
+					.table(ReadingSessionsV2::Table)
+					.col(ReadingSessionsV2::UserId)
+					.col(ReadingSessionsV2::MediaId)
+					.col(ReadingSessionsV2::UpdatedAt)
+					.col(ReadingSessionsV2::CreatedAt)
+					.col(ReadingSessionsV2::Id)
+					.to_owned(),
+			)
+			.await?;
+
 		// the new preferences related to:
 		// - enabling journaling features
 		// - TODO(v2-sessions): maybe a separate one for goals/reminders/etc??
@@ -293,6 +309,15 @@ impl MigrationTrait for Migration {
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		manager
+			.drop_index(
+				Index::drop()
+					.name("idx-reading_sessions-user-media-recent")
+					.table(ReadingSessionsV2::Table)
+					.to_owned(),
+			)
+			.await?;
+
 		manager
 			.drop_table(Table::drop().table(ReadingSessionsV2::Table).to_owned())
 			.await?;

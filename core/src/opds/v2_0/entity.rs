@@ -142,7 +142,7 @@ pub struct OPDSProgressionBookRef {
 
 pub struct OPDSProgressionEntity {
 	pub session: reading_session_v2::Model,
-	// TODO(v2-session): sessiosn now store 2 devices, so not sure how to approach this
+	// TODO(v2-session): sessions now store multiple devices, so not sure how to approach this
 	pub device: Option<reading_device::Model>,
 	pub book: OPDSProgressionBookRef,
 }

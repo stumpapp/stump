@@ -48,11 +48,22 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionLoader {
 
 		let mut elapsed_by_readthrough: HashMap<(String, String, i32), i64> =
 			HashMap::new();
+		let mut started_at_by_readthrough = HashMap::new();
 
 		for s in &sessions {
-			*elapsed_by_readthrough
-				.entry((s.user_id.clone(), s.media_id.clone(), s.readthrough_number))
-				.or_insert(0) += s.elapsed_seconds.unwrap_or(0);
+			let key = (s.user_id.clone(), s.media_id.clone(), s.readthrough_number);
+
+			*elapsed_by_readthrough.entry(key.clone()).or_insert(0) +=
+				s.elapsed_seconds.unwrap_or(0);
+
+			started_at_by_readthrough
+				.entry(key)
+				.and_modify(|started_at| {
+					if s.created_at < *started_at {
+						*started_at = s.created_at;
+					}
+				})
+				.or_insert(s.created_at);
 		}
 
 		let mut result = HashMap::new();
@@ -68,24 +79,26 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionLoader {
 
 			match latest {
 				Some(s) if !s.is_finalized() => {
+					let readthrough_key =
+						(s.user_id.clone(), s.media_id.clone(), s.readthrough_number);
+
 					let total_elapsed = elapsed_by_readthrough
-						.get(&(
-							s.user_id.clone(),
-							s.media_id.clone(),
-							s.readthrough_number,
-						))
+						.get(&readthrough_key)
 						.copied()
 						.unwrap_or(0);
+					let started_at =
+						started_at_by_readthrough.get(&readthrough_key).copied();
 
 					result.insert(
 						key.clone(),
 						ResumeReadingCursor {
 							readthrough_number: s.readthrough_number,
-							end_page: s.end_page,
-							end_locator: s.end_locator.clone(),
-							end_percentage: s.end_percentage,
+							page: s.end_page,
+							locator: s.end_locator.clone(),
+							percentage_completed: s.end_percentage,
 							epubcfi: s.epubcfi.clone(),
-							total_elapsed_seconds: total_elapsed,
+							elapsed_seconds: total_elapsed,
+							started_at,
 							updated_at: s.updated_at,
 						},
 					);
@@ -161,7 +174,7 @@ impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionLoader {
 						completed_at: completing
 							.updated_at
 							.unwrap_or(completing.created_at),
-						total_elapsed_seconds: total_elapsed,
+						elapsed_seconds: total_elapsed,
 						dnf: completing.status == ReadingStatus::Abandoned,
 					})
 				})

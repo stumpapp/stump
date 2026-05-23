@@ -10,6 +10,6 @@ pub struct ReadthroughRecord {
 	pub readthrough_number: i32,
 	pub started_at: DateTimeWithTimeZone,
 	pub completed_at: DateTimeWithTimeZone,
-	pub total_elapsed_seconds: i64,
+	pub elapsed_seconds: i64,
 	pub dnf: bool,
 }

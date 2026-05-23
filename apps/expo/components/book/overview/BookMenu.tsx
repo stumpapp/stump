@@ -37,26 +37,20 @@ const fragment = graphql(`
 `)
 
 const completedMutation = graphql(`
-	mutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
-		markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
-			completedAt
-		}
+	mutation BookMenuComplete($id: ID!) {
+		finishMediaProgress(id: $id)
 	}
 `)
 
 const deleteMutation = graphql(`
 	mutation BookMenuDeleteSession($id: ID!) {
-		deleteMediaProgress(id: $id) {
-			__typename
-		}
+		clearMediaProgress(id: $id)
 	}
 `)
 
 const deleteHistoryMutation = graphql(`
 	mutation BookMenuDeleteHistory($id: ID!) {
-		deleteMediaReadHistory(id: $id) {
-			__typename
-		}
+		deleteMediaReadingHistory(id: $id)
 	}
 `)
 
@@ -146,7 +140,7 @@ export default function BookMenu({ data }: Props) {
 	const confirmMarkAsRead = useCallback(() => {
 		Alert.alert('Mark as Read', `Are you sure you want to mark '${book.resolvedName}' as read?`, [
 			{ text: 'Cancel', style: 'cancel' },
-			{ text: 'Mark as Read', onPress: () => completeBook({ id: book.id, isComplete: true }) },
+			{ text: 'Mark as Read', onPress: () => completeBook({ id: book.id }) },
 		])
 	}, [completeBook, book.id, book.resolvedName])
 

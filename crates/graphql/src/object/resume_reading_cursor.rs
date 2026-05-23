@@ -7,11 +7,14 @@ use sea_orm::prelude::*;
 #[derive(Debug, Clone, SimpleObject)]
 pub struct ResumeReadingCursor {
 	pub readthrough_number: i32,
-	pub end_page: Option<i32>,
-	pub end_locator: Option<ReadiumLocator>,
-	pub end_percentage: Option<Decimal>,
+	pub page: Option<i32>,
+	pub locator: Option<ReadiumLocator>,
+	pub percentage_completed: Option<Decimal>,
 	pub epubcfi: Option<String>,
 	/// total reading time across all sessions in the current readthrough
-	pub total_elapsed_seconds: i64,
+	pub elapsed_seconds: i64,
+	/// when the very first session in the current readthrough started
+	pub started_at: Option<DateTimeWithTimeZone>,
+	// the last time the latest session in the current readthrough was updated
 	pub updated_at: Option<DateTimeWithTimeZone>,
 }

@@ -154,12 +154,6 @@ const mutation = graphql(`
 	mutation UpdateEpubProgress($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
 			__typename
-			... on ActiveReadingSession {
-				percentageCompleted
-				epubcfi
-				page
-				elapsedSeconds
-			}
 		}
 	}
 `)
@@ -210,20 +204,9 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 
 	const client = useQueryClient()
 	const { mutate } = useGraphQLMutation(mutation, {
-		onSuccess: ({ updateMediaProgress: data }) => {
-			client.setQueryData(['epubJsReader', id], (prevData: EpubJsReaderQuery) => {
-				if (!prevData) return prevData
-
-				return {
-					...prevData,
-					epubById: {
-						...prevData.epubById,
-						media: {
-							...prevData.epubById.media,
-							readProgress: data.__typename === 'ActiveReadingSession' ? data : null,
-						},
-					},
-				}
+		onSuccess: () => {
+			client.invalidateQueries({
+				queryKey: ['epubJsReader', id],
 			})
 		},
 	})

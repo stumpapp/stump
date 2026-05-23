@@ -26,12 +26,12 @@ async fn setup() -> TestApp {
 	app
 }
 
-async fn clear_reading_history(app: &TestApp, book_id: &str) {
+async fn delete_reading_history(app: &TestApp, book_id: &str) {
 	let result = app
 		.execute_gql(
 			r#"
-        mutation ClearMediaReadingHistory($id: String!) {
-            clearMediaReadingHistory(id: $id)
+        mutation DeleteMediaReadingHistory($id: String!) {
+            deleteMediaReadingHistory(id: $id)
         }
         "#,
 			Some(serde_json::json!({
@@ -456,7 +456,7 @@ async fn test_clear_media_reading_history() {
 
 	create_nth_readthrough(&app, "black_science_1", 1).await;
 
-	clear_reading_history(&app, "black_science_1").await;
+	delete_reading_history(&app, "black_science_1").await;
 
 	// all sessions for readthrough should be gone
 	let session_exists = reading_session::Entity::find()
@@ -508,7 +508,7 @@ async fn test_clear_media_reading_history_retains_current() {
 	assert_eq!(session_count, 2);
 
 	// when we clear now, it should only clear the completed session and not the in-progress one
-	clear_reading_history(&app, "black_science_1").await;
+	delete_reading_history(&app, "black_science_1").await;
 
 	let finished_sessions_exist = reading_session::Entity::find()
 		.filter(reading_session::Column::MediaId.eq("black_science_1"))

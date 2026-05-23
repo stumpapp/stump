@@ -221,10 +221,9 @@ impl ReadProgressMutation {
 		Ok(true)
 	}
 
-	// TODO(v2-sessions): rename delete_media_reading_history
 	/// trashes all completed readthroughs for the media
 	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
-	async fn clear_media_reading_history(
+	async fn delete_media_reading_history(
 		&self,
 		ctx: &Context<'_>,
 		id: ID,

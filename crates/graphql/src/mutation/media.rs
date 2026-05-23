@@ -222,20 +222,4 @@ impl MediaMutation {
 
 		Ok(book.into())
 	}
-
-	// TODO(v2-sessions): remove, replaced by clear_media_progress
-	async fn delete_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
-		todo!("remove")
-	}
-
-	// TODO(v2-sessions): remove
-	/// Deletes all of a user's reading history for a specific media item. This cannot be undone, so
-	/// use with caution.
-	async fn delete_media_read_history(
-		&self,
-		ctx: &Context<'_>,
-		id: ID,
-	) -> Result<Media> {
-		todo!("remove")
-	}
 }

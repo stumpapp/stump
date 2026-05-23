@@ -1,5 +1,4 @@
-- [ ] rm finished_reading_sessions
-    - [ ] might do this early to catch lingering swaps needed
+- [x] rm finished_reading_sessions
 - [x] replace reading_sessions with reading_sessions_v2
 - [x] refactor kobo sync
     - [x] rewrite apply_reading_session_joins, pull latested v2 sess
@@ -10,8 +9,8 @@
     - [x] bunch 'o reading_session references to eval in entry.rs, publication.rs, entity.rs
 - [x] cli account.rs, refacotr to transfer v2 sessions now
 - [x] write migrations once i am CERTAIN these changes are solid, fuck if i am doing it before then
-    - [ ] will need to figure out backfill
-    - [ ] remove postfixes
+    - [x] will need to figure out backfill
+    - [x] remove postfixes
     - [ ] do NOT forget about data loss potential in rollback if i don't add refill logic
 - [ ] drizzle migrations, too
 - [x] refactor series completion toggle
@@ -21,11 +20,10 @@
     - [x] consider optional `email` for send-to
     - [ ] migration (rename, add email)
 - [x] refactor SeriesStats
-- [ ] find other things i am sure i need to fix just took a glance
 - [ ] it would be REALLY convenient to try and think about some kind of e2e testing... because this kind of sweeping change is particularly hard to test and i've mostly been porting without testing
     - [ ] verify changes to opds aren't broken
 - [ ] search and address TODO(v2-sessions) comments
-- [ ] search reading_session::
+- [x] search reading_session::
 - [x] koreader
 - [ ] tests
     - [ ] series.up_next

@@ -1,5 +1,6 @@
 use crate::common::{
 	book::{create_nth_readthrough, fudge_session_time, update_progress},
+	series::setup_single_series_with_n_books,
 	TestApp,
 };
 
@@ -10,28 +11,17 @@ use tests::fake_data;
 
 async fn setup() -> TestApp {
 	let app = TestApp::new_with_default_user().await;
-	let db = app.conn();
 
-	let black_science = fake_data::Series {
-		id: Some("black_science".to_string()),
-		name: Some("Black Science".to_string()),
-		..Default::default()
-	}
-	.insert(db)
-	.await;
-
-	for i in 1..=5 {
-		fake_data::Media {
-			series_id: black_science.id.clone(),
-			id: Some(format!("black_science_{}", i)),
-			name: Some(format!("Black Science #{}", i)),
-			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
-			pages: Some(100),
+	let _ = setup_single_series_with_n_books(
+		&app,
+		fake_data::Series {
+			id: Some("black_science".to_string()),
+			name: Some("Black Science".to_string()),
 			..Default::default()
-		}
-		.insert(db)
-		.await;
-	}
+		},
+		5,
+	)
+	.await;
 
 	app
 }

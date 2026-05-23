@@ -465,35 +465,57 @@ impl MediaQuery {
 				user_read_series AS (
 					SELECT DISTINCT m.series_id 
 					FROM media m
-					JOIN finished_reading_sessions frs ON frs.media_id = m.id
-					WHERE frs.user_id = ?
+					JOIN reading_sessions_v2 rs ON rs.media_id = m.id
+					WHERE rs.user_id = ?
+					AND rs.status = 'FINISHED'
 					AND m.series_id IS NOT NULL
 				),
 
 				-- Find all media IDs that user has read
 				user_read_media AS (
-					SELECT media_id 
-					FROM finished_reading_sessions
+					SELECT DISTINCT media_id 
+					FROM reading_sessions_v2
 					WHERE user_id = ?
+					AND status = 'FINISHED'
 				),
 
 				-- We do not want books from series with active reading sessions
 				user_active_series AS (
-					SELECT m.series_id 
+					SELECT DISTINCT m.series_id 
 					FROM media m
-					JOIN reading_sessions rs ON rs.media_id = m.id
+					JOIN reading_sessions_v2 rs ON rs.media_id = m.id
 					WHERE rs.user_id = ?
 					AND m.series_id IS NOT NULL
+					AND rs.status = 'READING'
+					AND NOT EXISTS (
+						SELECT 1
+						FROM reading_sessions_v2 rs2
+						WHERE rs2.user_id = rs.user_id
+						AND rs2.media_id = rs.media_id
+						AND (
+							rs2.updated_at > rs.updated_at
+							OR (
+								rs2.updated_at = rs.updated_at
+								AND rs2.created_at > rs.created_at
+							)
+							OR (
+								rs2.updated_at = rs.updated_at
+								AND rs2.created_at = rs.created_at
+								AND rs2.id > rs.id
+							)
+						)
+					)
 				),
 
 				-- For each series, get last read date for sorting priority
 				series_last_read AS (
 					SELECT 
 						m.series_id,
-						MAX(frs.completed_at) as last_read_date
-					FROM finished_reading_sessions frs
-					JOIN media m ON m.id = frs.media_id
-					WHERE frs.user_id = ?
+						MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
+					FROM reading_sessions_v2 rs
+					JOIN media m ON m.id = rs.media_id
+					WHERE rs.user_id = ?
+					AND rs.status = 'FINISHED'
 					AND m.series_id IN (SELECT series_id FROM user_read_series)
 					GROUP BY m.series_id
 				),
@@ -585,24 +607,45 @@ impl MediaQuery {
 					user_read_series AS (
 						SELECT DISTINCT m.series_id 
 						FROM media m
-						JOIN finished_reading_sessions frs ON frs.media_id = m.id
-						WHERE frs.user_id = ?
+						JOIN reading_sessions_v2 rs ON rs.media_id = m.id
+						WHERE rs.user_id = ?
+						AND rs.status = 'FINISHED'
 						AND m.series_id IS NOT NULL
 					),
 
 					-- Find all media IDs that user has read or is currently reading
 					user_read_or_reading_media AS (
 						-- Media that user has finished
-						SELECT media_id 
-						FROM finished_reading_sessions
+						SELECT DISTINCT media_id 
+						FROM reading_sessions_v2
 						WHERE user_id = ?
+						AND status = 'FINISHED'
 						
 						UNION
 						
 						-- Media that user is currently reading
-						SELECT media_id 
-						FROM reading_sessions
-						WHERE user_id = ?
+						SELECT DISTINCT rs.media_id
+						FROM reading_sessions_v2 rs
+						WHERE rs.user_id = ?
+						AND rs.status = 'READING'
+						AND NOT EXISTS (
+							SELECT 1
+							FROM reading_sessions_v2 rs2
+							WHERE rs2.user_id = rs.user_id
+							AND rs2.media_id = rs.media_id
+							AND (
+								rs2.updated_at > rs.updated_at
+								OR (
+									rs2.updated_at = rs.updated_at
+									AND rs2.created_at > rs.created_at
+								)
+								OR (
+									rs2.updated_at = rs.updated_at
+									AND rs2.created_at = rs.created_at
+									AND rs2.id > rs.id
+								)
+							)
+						)
 					),
 
 					-- Find the first unread book for each series

@@ -2,7 +2,7 @@ use async_graphql::InputType;
 use chrono::{DateTime, Duration, Utc};
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
 use models::{entity::reading_session_v2, shared::enums::ReadingStatus};
-use sea_orm::prelude::*;
+use sea_orm::{prelude::*, QueryOrder};
 
 use crate::common::TestApp;
 
@@ -105,4 +105,34 @@ pub async fn create_nth_readthrough(app: &TestApp, book_id: &str, n: i32) {
 
 		fudge_session_time(&session, conn).await;
 	}
+}
+
+pub async fn active_session_for_book(
+	app: &TestApp,
+	book_id: &str,
+) -> reading_session_v2::Model {
+	let conn = app.conn();
+
+	reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book_id))
+		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
+		.order_by_desc(reading_session_v2::Column::UpdatedAt)
+		.one(conn)
+		.await
+		.expect("db error")
+		.expect("active session should exist")
+}
+
+pub async fn latest_finished_session_for_book(
+	app: &TestApp,
+	book_id: &str,
+) -> reading_session_v2::Model {
+	reading_session_v2::Entity::find()
+		.filter(reading_session_v2::Column::MediaId.eq(book_id))
+		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
+		.order_by_desc(reading_session_v2::Column::UpdatedAt)
+		.one(app.conn())
+		.await
+		.expect("db error")
+		.expect("finished session should exist")
 }

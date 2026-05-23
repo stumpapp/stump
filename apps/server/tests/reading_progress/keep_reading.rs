@@ -1,8 +1,9 @@
 use crate::common::{
 	book::{
-		create_nth_readthrough, fudge_session_time, fudge_session_time_with_timestamp,
-		update_progress,
+		active_session_for_book, create_nth_readthrough, fudge_session_time,
+		fudge_session_time_with_timestamp, update_progress,
 	},
+	series::setup_single_series_with_n_books,
 	TestApp,
 };
 
@@ -12,7 +13,7 @@ use models::{
 	entity::{reading_session_v2, user},
 	shared::enums::ReadingStatus,
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::prelude::*;
 use tests::fake_data;
 
 async fn setup() -> (TestApp, Vec<String>) {
@@ -27,48 +28,21 @@ async fn setup() -> (TestApp, Vec<String>) {
 	.insert(db)
 	.await;
 
-	let series = fake_data::Series {
-		id: Some("black_science".to_string()),
-		name: Some("Black Science".to_string()),
-		library_id: Some(image.id.clone()),
-		..Default::default()
-	}
-	.insert(db)
+	let (_, books) = setup_single_series_with_n_books(
+		&app,
+		fake_data::Series {
+			id: Some("black_science".to_string()),
+			name: Some("Black Science".to_string()),
+			library_id: Some(image.id.clone()),
+			..Default::default()
+		},
+		5,
+	)
 	.await;
 
-	let mut book_ids = Vec::new();
-	for i in 1..=5 {
-		let id = format!("black_science_{}", i);
-		book_ids.push(id.clone());
-		fake_data::Media {
-			series_id: series.id.clone(),
-			id: Some(id),
-			name: Some(format!("Black Science #{}", i)),
-			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
-			pages: Some(100),
-			..Default::default()
-		}
-		.insert(db)
-		.await;
-	}
+	let book_ids = books.into_iter().map(|book| book.id).collect();
 
 	(app, book_ids)
-}
-
-async fn active_session_for_book(
-	app: &TestApp,
-	book_id: &str,
-) -> reading_session_v2::Model {
-	let conn = app.conn();
-
-	reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book_id))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Reading))
-		.order_by_desc(reading_session_v2::Column::UpdatedAt)
-		.one(conn)
-		.await
-		.expect("db error")
-		.expect("active session should exist")
 }
 
 async fn fetch_keep_reading_ids(app: &TestApp) -> Vec<String> {

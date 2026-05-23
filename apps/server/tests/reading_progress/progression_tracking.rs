@@ -1,4 +1,6 @@
-use crate::common::{book::update_progress, TestApp};
+use crate::common::{
+	book::update_progress, series::setup_single_series_with_n_books, TestApp,
+};
 
 use graphql::input::media::{
 	EpubProgressInput, EpubProgressLocatorInput, MediaProgressInput, PagedProgressInput,
@@ -12,25 +14,22 @@ use tests::fake_data;
 
 async fn setup() -> (TestApp, media::Model) {
 	let app = TestApp::new_with_default_user().await;
-	let db = app.conn();
 
-	let series = fake_data::Series {
-		name: Some("Black Science".to_string()),
-		..Default::default()
-	}
-	.insert(db)
+	let (_, books) = setup_single_series_with_n_books(
+		&app,
+		fake_data::Series {
+			id: Some("black_science".to_string()),
+			name: Some("Black Science".to_string()),
+			..Default::default()
+		},
+		1,
+	)
 	.await;
 
-	let book = fake_data::Media {
-		series_id: series.id.clone(),
-		id: Some("issue-1".to_string()),
-		name: Some("Black Science #1".to_string()),
-		created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
-		pages: Some(100),
-		..Default::default()
-	}
-	.insert(db)
-	.await;
+	let book = books
+		.into_iter()
+		.next()
+		.expect("should have created a book");
 
 	(app, book)
 }

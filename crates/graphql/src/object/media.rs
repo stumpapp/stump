@@ -18,8 +18,8 @@ use crate::{
 		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
 		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
-		reading_session_v2::{
-			ReadingSessionV2Loader, ReadthroughRecordLoaderKey,
+		reading_session::{
+			ReadingSessionLoader, ReadthroughRecordLoaderKey,
 			ResumeReadingCursorLoaderKey,
 		},
 		series::SeriesLoader,
@@ -230,7 +230,7 @@ impl Media {
 		ctx: &Context<'_>,
 	) -> Result<Option<ResumeReadingCursor>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<ReadingSessionV2Loader>>()?;
+		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
 		let progress = loader
 			.load_one(ResumeReadingCursorLoaderKey {
@@ -245,7 +245,7 @@ impl Media {
 	// TODO(graphql): Create object to query for device used (e.g., KoReader device ID)
 	async fn read_history(&self, ctx: &Context<'_>) -> Result<Vec<ReadthroughRecord>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<ReadingSessionV2Loader>>()?;
+		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
 		let history = loader
 			.load_one(ReadthroughRecordLoaderKey {

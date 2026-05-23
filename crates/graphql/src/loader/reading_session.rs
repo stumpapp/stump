@@ -8,11 +8,11 @@ use crate::object::{
 	readthrough_record::ReadthroughRecord, resume_reading_cursor::ResumeReadingCursor,
 };
 
-pub struct ReadingSessionV2Loader {
+pub struct ReadingSessionLoader {
 	pub conn: Arc<DatabaseConnection>,
 }
 
-impl ReadingSessionV2Loader {
+impl ReadingSessionLoader {
 	pub fn new(conn: Arc<DatabaseConnection>) -> Self {
 		Self { conn }
 	}
@@ -24,7 +24,7 @@ pub struct ResumeReadingCursorLoaderKey {
 	pub media_id: String,
 }
 
-impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionV2Loader {
+impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionLoader {
 	type Value = ResumeReadingCursor;
 	type Error = Arc<sea_orm::error::DbErr>;
 
@@ -108,7 +108,7 @@ pub struct ReadthroughRecordLoaderKey {
 	pub media_id: String,
 }
 
-impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionV2Loader {
+impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionLoader {
 	type Value = Vec<ReadthroughRecord>;
 	type Error = Arc<sea_orm::error::DbErr>;
 

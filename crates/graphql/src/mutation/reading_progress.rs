@@ -21,7 +21,7 @@ use sea_orm::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	input::media::MediaProgressInput,
-	object::reading_session_v2::ReadingSession,
+	object::reading_session::ReadingSession,
 };
 
 #[derive(Default)]

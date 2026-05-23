@@ -257,6 +257,9 @@ impl JobStatus {
 	}
 }
 
+// TODO: rename these terrible things:
+// - FirstFolderOnly?
+// - FolderPerSeries?
 /// The different patterns a library may be organized by
 #[derive(
 	Eq,

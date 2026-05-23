@@ -1,5 +1,5 @@
 use crate::common::{
-	book::{fudge_session_time, update_progress},
+	book::{create_nth_readthrough, fudge_session_time, update_progress},
 	TestApp,
 };
 
@@ -34,45 +34,6 @@ async fn setup() -> TestApp {
 	}
 
 	app
-}
-
-/// this will create a completed readthrough and then fudge the timestamp to be old enough that
-/// a follow-up session can be created
-async fn prepare_secondary_readthrough(app: &TestApp, book_id: &str) {
-	let conn = app.conn();
-
-	// start the session
-	update_progress(
-		app,
-		book_id,
-		MediaProgressInput::Paged(PagedProgressInput {
-			page: 10,
-			elapsed_seconds_delta: Some(300),
-			..Default::default()
-		}),
-	)
-	.await;
-
-	// flip to last page
-	update_progress(
-		app,
-		book_id,
-		MediaProgressInput::Paged(PagedProgressInput {
-			page: 100,
-			elapsed_seconds_delta: Some(300),
-			..Default::default()
-		}),
-	)
-	.await;
-
-	let session = reading_session_v2::Entity::find()
-		.filter(reading_session_v2::Column::MediaId.eq(book_id))
-		.filter(reading_session_v2::Column::Status.eq(ReadingStatus::Finished))
-		.one(conn)
-		.await
-		.expect("db error")
-		.expect("session should exist");
-	fudge_session_time(&session, conn).await;
 }
 
 async fn clear_reading_history(app: &TestApp, book_id: &str) {
@@ -182,7 +143,7 @@ async fn test_finish_series_progress() {
 	let conn = app.conn();
 
 	// book 1 already finished
-	prepare_secondary_readthrough(&app, "black_science_1").await;
+	create_nth_readthrough(&app, "black_science_1", 1).await;
 
 	// book 2 active but within grace
 	update_progress(
@@ -250,11 +211,11 @@ async fn test_clear_series_reading_history() {
 	let conn = app.conn();
 
 	// full readthroughs for books 1 and 4
-	prepare_secondary_readthrough(&app, "black_science_1").await;
-	prepare_secondary_readthrough(&app, "black_science_4").await;
+	create_nth_readthrough(&app, "black_science_1", 1).await;
+	create_nth_readthrough(&app, "black_science_4", 1).await;
 
 	// full readthrough + active for book 2
-	prepare_secondary_readthrough(&app, "black_science_2").await;
+	create_nth_readthrough(&app, "black_science_2", 1).await;
 	update_progress(
 		&app,
 		"black_science_2",
@@ -302,7 +263,7 @@ async fn test_clear_series_reading_history() {
 async fn test_clear_media_progress() {
 	let app = setup().await;
 
-	prepare_secondary_readthrough(&app, "black_science_1").await;
+	create_nth_readthrough(&app, "black_science_1", 1).await;
 
 	update_progress(
 		&app,
@@ -503,7 +464,7 @@ async fn test_clear_media_reading_history() {
 
 	let conn = app.conn();
 
-	prepare_secondary_readthrough(&app, "black_science_1").await;
+	create_nth_readthrough(&app, "black_science_1", 1).await;
 
 	clear_reading_history(&app, "black_science_1").await;
 
@@ -523,7 +484,7 @@ async fn test_clear_media_reading_history_retains_current() {
 
 	let conn = app.conn();
 
-	prepare_secondary_readthrough(&app, "black_science_1").await;
+	create_nth_readthrough(&app, "black_science_1", 1).await;
 
 	// start a new session, which should create a new readthrough since the previous session is finished
 	update_progress(

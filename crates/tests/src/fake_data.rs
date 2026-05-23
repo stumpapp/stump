@@ -1,6 +1,7 @@
 use chrono::Utc;
 use models::entity::{
-	finished_reading_session, media, reading_session, reading_session_v2, series, user,
+	finished_reading_session, library, library_config, media, reading_session,
+	reading_session_v2, series, user,
 };
 use models::shared::enums::{FileStatus, ReadingStatus};
 use rand::distr::SampleString;
@@ -98,10 +99,51 @@ impl User {
 }
 
 #[derive(Default)]
+pub struct Library {
+	pub id: Option<String>,
+	pub name: Option<String>,
+	pub path: Option<String>,
+}
+
+impl Library {
+	pub async fn insert(&self, db: &DbConn) -> library::Model {
+		let id = self
+			.id
+			.clone()
+			.unwrap_or_else(|| Uuid::new_v4().to_string());
+
+		let name = self.name.clone().unwrap_or_else(|| {
+			rand::distr::Alphabetic.sample_string(&mut rand::rng(), 16)
+		});
+
+		let path = self.path.clone().unwrap_or_else(|| format!("/tmp/{name}"));
+
+		let config = library_config::ActiveModel {
+			library_id: sea_orm::Set(Some(id.clone())),
+			..Default::default()
+		}
+		.insert(db)
+		.await
+		.expect("could not insert library config");
+
+		let model = library::ActiveModel {
+			id: sea_orm::Set(id.clone()),
+			name: sea_orm::Set(name),
+			path: sea_orm::Set(path),
+			config_id: sea_orm::Set(config.id.clone()),
+			..Default::default()
+		};
+
+		model.insert(db).await.expect("could not insert library")
+	}
+}
+
+#[derive(Default)]
 pub struct Series {
 	pub id: Option<String>,
 	pub name: Option<String>,
 	pub path: Option<String>,
+	pub library_id: Option<String>,
 }
 
 impl Series {
@@ -121,6 +163,10 @@ impl Series {
 			id: sea_orm::Set(id.clone()),
 			name: sea_orm::Set(name),
 			path: sea_orm::Set(path),
+			library_id: match &self.library_id {
+				Some(lib_id) => sea_orm::Set(Some(lib_id.clone())),
+				None => sea_orm::NotSet,
+			},
 			..Default::default()
 		};
 

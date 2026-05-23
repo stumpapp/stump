@@ -1,4 +1,5 @@
 use chrono::{DateTime, Duration, NaiveDate, Utc};
+use sea_orm::sqlx::types::Decimal;
 
 use crate::entity::reading_session_v2;
 
@@ -42,6 +43,17 @@ pub fn is_recent_completion(
 		.updated_at
 		.map(|t| (Utc::now() - t.with_timezone(&Utc)).num_seconds() <= timeout_secs)
 		.unwrap_or(false)
+}
+
+pub fn compute_page_based_percentage(current_page: i32, pages: i32) -> Decimal {
+	if pages <= 0 {
+		Decimal::new(0, 0)
+	} else {
+		let percentage =
+			Decimal::new(current_page as i64, 0) / Decimal::new(pages as i64, 0);
+		// cannot be negative and cannot be more than 100%
+		percentage.clamp(Decimal::new(0, 0), Decimal::new(100, 0))
+	}
 }
 
 #[cfg(test)]

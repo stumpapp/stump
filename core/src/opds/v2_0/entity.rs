@@ -10,9 +10,8 @@ use models::{
 	shared::analysis::MediaAnalysisData,
 };
 use sea_orm::{
-	entity::prelude::*,
-	sea_query::{Expr, Query},
-	Condition, FromQueryResult, JoinType, QuerySelect,
+	entity::prelude::*, sea_query::Expr, Condition, FromQueryResult, JoinType,
+	QuerySelect,
 };
 
 #[derive(Clone, Debug)]
@@ -83,44 +82,16 @@ impl OPDSPublicationEntity {
 					.from(reading_session_v2::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
-						// select max(created_at) from reading_session_v2 where user_id = ? and media_id = media.id
-						let latest_created_at = Query::select()
-							// select max(created_at)
-							.expr(
-								Expr::col((
-									reading_session_v2::Entity,
-									reading_session_v2::Column::CreatedAt,
-								))
-								.max(),
-							)
-							.from(reading_session_v2::Entity)
-							// user_id = for_user_id
-							.and_where(
-								reading_session_v2::Column::UserId
-									.eq(for_user_id.clone()),
-							)
-							// media_id = media.id
-							.and_where(
-								Expr::col((
-									reading_session_v2::Entity,
-									reading_session_v2::Column::MediaId,
-								))
-								.equals((media::Entity, media::Column::Id)),
-							)
-							.to_owned();
+						let newer_exists =
+							reading_session_v2::Entity::newer_session_exists_subquery();
 
 						Condition::all()
 							.add(
 								reading_session_v2::Column::UserId
 									.eq(for_user_id.clone()),
 							)
-							.add(
-								Expr::col((
-									reading_session_v2::Entity,
-									reading_session_v2::Column::CreatedAt,
-								))
-								.in_subquery(latest_created_at),
-							)
+							// keep only the latest row for this user+media pair
+							.add(Expr::expr(Expr::exists(newer_exists)).not())
 					})
 					.into(),
 			)

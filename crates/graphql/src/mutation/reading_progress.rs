@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	domain::reading_progress::{calculate_logical_date, should_extend_session},
+	domain::reading_progress::{
+		calculate_logical_date, compute_page_based_percentage, should_extend_session,
+	},
 	entity::{media, reading_session_v2},
 	services::reading_progress::{
 		derive_readthrough_number, get_book_pages, upsert_reading_session,
@@ -523,16 +525,5 @@ impl ReadProgressMutation {
 		tx.commit().await?;
 
 		Ok(deleted.try_into()?)
-	}
-}
-
-fn compute_page_based_percentage(current_page: i32, pages: i32) -> Decimal {
-	if pages <= 0 {
-		Decimal::new(0, 0)
-	} else {
-		let percentage =
-			Decimal::new(current_page as i64, 0) / Decimal::new(pages as i64, 0);
-		// cannot be negative and cannot be more than 100%
-		percentage.clamp(Decimal::new(0, 0), Decimal::new(100, 0))
 	}
 }

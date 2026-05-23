@@ -1,12 +1,17 @@
 use async_graphql::SimpleObject;
 use chrono::Utc;
 use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue,
-	DeriveEntityModel, FromJsonQueryResult, QueryOrder, QuerySelect,
+	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, Condition,
+	DeriveEntityModel, FromJsonQueryResult, FromQueryResult, JoinType, QueryOrder,
+	QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::shared::{enums::ReadingStatus, readium::ReadiumLocator};
+use crate::{
+	entity::reading_device,
+	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
+	shared::{enums::ReadingStatus, readium::ReadiumLocator},
+};
 
 use super::user::AuthUser;
 
@@ -87,6 +92,51 @@ impl Model {
 	/// whether this session represents a completed readthrough (i.e. status = Finished)
 	pub fn is_complete(&self) -> bool {
 		self.status == ReadingStatus::Finished
+	}
+}
+
+// TODO(v2-sessions): this is terrible lol it will be a little bit of a headache to make this plural,
+// so for now just extract the first id in the ids list. i also don't know if some of the integrations
+// which this is meant to support (e.g. koreader) care about multiple devices. maybe i just add e.g.
+// find_with_kind("koreader") or something
+pub struct ModelWithDevice {
+	pub model: Model,
+	pub device: Option<reading_device::Model>,
+}
+
+impl ModelWithDevice {
+	pub fn find() -> Select<Entity> {
+		Prefixer::new(Entity::find().select_only())
+			.add_columns(Entity)
+			.add_columns(reading_device::Entity)
+			.selector
+			.join_rev(
+				JoinType::LeftJoin,
+				Entity::belongs_to(reading_device::Entity)
+					.from(Column::DeviceIds)
+					.to(reading_device::Column::Id)
+					// https://sqlite.org/json1.html#the_json_extract_function
+					.on_condition(|_left, _right| {
+						Condition::all().add(Expr::cust(
+							"json_extract(reading_sessions_v2.device_ids, '$[0]') = reading_device.id",
+						))
+					})
+					.into(),
+			)
+	}
+}
+
+impl FromQueryResult for ModelWithDevice {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let model = parse_query_to_model::<Model, Entity>(res)?;
+		let device = parse_query_to_model_optional::<
+			reading_device::Model,
+			reading_device::Entity,
+		>(res)?;
+		Ok(Self { model, device })
 	}
 }
 

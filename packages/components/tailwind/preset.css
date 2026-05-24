@@ -11,6 +11,16 @@
 	'font-inter font-opendyslexic font-atkinsonhyperlegiblenext font-charis font-literata font-bitter font-librebaskerville font-nunito font-hinamincho'
 );
 
+/* 
+
+TODO(ui): i am strongly considering killing my custom token system and just adopting a standard, like
+shadcn. i had the tokens _before_ shad really took off, and adapted the shad components to my tokens
+when pulling them in, but now that i am looking at refreshing/updating them it's just such a headache
+when i could just, instead, pull them as-is is i use their tokens. im sure there will be some custom ones,
+but if i can adhere to the core ones my life maintaining stump will be made easier which, as the surface of
+maintainence grows, is something i would like lol
+*/
+
 @theme {
 	/* MARK: brand colors */
 	--color-brand-50: #f4e8e0;

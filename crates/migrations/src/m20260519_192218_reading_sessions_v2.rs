@@ -299,7 +299,7 @@ impl MigrationTrait for Migration {
 						ColumnDef::new(UserPreferences::ReadingSessionGracePeriodSecs)
 							.big_integer()
 							.not_null()
-							.default(600),
+							.default(1800), // 30 minutes
 					)
 					.to_owned(),
 			)

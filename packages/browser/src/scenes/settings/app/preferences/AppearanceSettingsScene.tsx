@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet'
 
 import { Container, ContentContainer } from '@/components/container'
 
+import DayResetHourOffsetPreference from './DayResetHourOffsetPreference'
 import DebugSettings from './DebugSettings'
 import DisplaySpacingPreference from './DisplaySpacingPreference'
 import EnableAlphabetFiltering from './EnableAlphabetFiltering'
@@ -17,6 +18,7 @@ import MaxWidthPreference from './MaxWidthPreference'
 import { NavigationArrangement } from './navigation-arrangement'
 import PrimaryNavigationPreference from './PrimaryNavigationPreference'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
+import ReadingSessionGracePeriodPreference from './ReadingSessionGracePeriodPreference'
 import { DoubleSidebarToggle, ReplacePrimarySidebarToggle } from './settings-sidebar'
 import ShowThumbnailsInHeader from './ShowThumbnailsInHeader'
 import ThemeSelect from './ThemeSelect'
@@ -93,6 +95,8 @@ export default function AppearanceSettingsScene() {
 					<QueryIndicatorToggle />
 					<LiveRefetchToggle />
 					<EnableJobOverlayToggle />
+					<DayResetHourOffsetPreference />
+					<ReadingSessionGracePeriodPreference />
 				</div>
 			</ContentContainer>
 		</Container>

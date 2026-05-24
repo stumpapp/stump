@@ -39,7 +39,7 @@ export function ButtonOrLink({
 				isLink
 					? cn(
 							buttonVariants({ className, newYork, rounded, size, variant }),
-							'focus:ring-edge-brand dark:focus:ring-edge-brand',
+							'focus:ring-ring',
 							{
 								'cursor-not-allowed bg-background opacity-50': props.disabled,
 							},

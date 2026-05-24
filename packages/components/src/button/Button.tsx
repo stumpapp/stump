@@ -6,60 +6,57 @@ import { cn } from '../utils'
 import { ButtonContext } from './context'
 
 export const BUTTON_BASE_CLASSES = [
-	'transition-colors hover:bg-background-surface',
-	'inline-flex items-center justify-center',
-	'text-sm font-medium',
-	'focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-background',
-	'data-[state=open]:bg-background',
-	'disabled:opacity-50 disabled:pointer-events-none',
+	"group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 ]
 
-// TODO: hone these variants
 export const BUTTON_VARIANTS = {
-	danger:
-		'bg-fill-danger text-white hover:bg-fill-danger-hover dark:hover:bg-fill-danger-hover focus:ring-red-400 dark:focus:ring-red-400',
-	default:
-		'bg-background-surface hover:bg-background-surface-hover text-foreground focus:ring-edge-brand',
-	ghost:
-		'bg-transparent hover:bg-background-surface-hover text-foreground-subtle data-[state=open]:bg-transparent',
-	'ghost-on-black':
-		'bg-transparent hover:bg-background-surface-hover text-foreground-on-black data-[state=open]:bg-transparent',
-	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
-	outline: 'bg-transparent border border-edge-subtle hover:bg-background-surface text-foreground',
-	primary:
-		'bg-fill-brand hover:bg-fill-brand-hover text-white focus:ring-edge-brand data-[state=open]:bg-fill-brand-hover',
+	// TODO(shad): remove danger
+	danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-ring',
+	// TODO(shad): remove primary, default is primary
+	primary: 'bg-primary text-primary-foreground hover:bg-primary/80',
+	// TODO(shad): remove subtle, use secondary/ghost depending on context
+	subtle: 'bg-muted hover:bg-muted/80 text-muted-foreground',
+	// TODO(shad): remove subtle-dark, use subtle + theme tokens
+	'subtle-dark': 'bg-background text-muted-foreground hover:bg-accent data-[state=open]:bg-accent',
+	// TODO(shad): remove warning
+	warning: 'bg-fill-warning text-foreground hover:bg-fill-warning-hover focus:ring-ring',
+	default: 'bg-primary text-primary-foreground hover:bg-primary/80',
+	outline:
+		'border-border bg-input/30 hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground',
 	secondary:
-		'bg-background-inverse text-foreground-on-inverse hover:bg-background-inverse/90 data-[state=open]:bg-background-inverse/90',
-	subtle: 'bg-background-surface hover:bg-background-surface-hover text-foreground-subtle',
-	'subtle-dark':
-		'bg-background text-foreground-subtle hover:bg-background-surface data-[state=open]:bg-background-surface',
-	warning:
-		'bg-fill-warning text-foreground hover:bg-fill-warning/80 focus:ring-fill-warning-secondary',
+		'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
+	ghost:
+		'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
+	destructive:
+		'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
+	link: 'text-primary underline-offset-4 hover:underline',
 }
 
 export const BUTTON_ROUNDED_VARIANTS = {
-	default: 'rounded-md',
+	default: 'rounded-4xl',
 	full: 'rounded-full',
-	lg: 'rounded-lg',
+	lg: 'rounded-2xl',
 	none: 'rounded-none',
 }
 
 export const BUTTON_SIZE_VARIANTS = {
-	default: 'h-8 py-2 px-3',
-	lg: 'h-10 px-4',
-	md: 'h-9 px-3',
-	sm: 'h-8 px-2',
-	xs: 'h-6 px-1',
-	icon: 'h-6 w-6',
+	default: 'h-9 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5',
+	lg: 'h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
+	// TODO(shad): remove md, keep temporarily
+	md: 'h-9 gap-1 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5',
+	sm: 'h-8 gap-1 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
+	xs: "h-6 gap-1 px-2.5 text-xs has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3",
+	icon: 'size-9',
 }
 
+// TODO(shad): remove newYork lol
 export const BUTTON_NY_SIZE_VARIANTS = {
-	default: 'h-7 py-2 px-3',
-	lg: 'h-9 px-4',
-	md: 'h-8 px-3',
-	sm: 'h-7 px-2',
-	xs: 'h-5 px-1',
-	icon: 'h-6 w-6',
+	default: 'h-8 gap-1 px-3',
+	lg: 'h-9 gap-1.5 px-4',
+	md: 'h-8 gap-1 px-3',
+	sm: 'h-7 gap-1 px-2.5',
+	xs: 'h-6 gap-1 px-2 text-xs',
+	icon: 'size-8',
 }
 
 const buttonVariants = cva(BUTTON_BASE_CLASSES, {
@@ -137,7 +134,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						{
 							'active:scale-95': pressEffect,
 							'cursor-not-allowed': props.disabled,
-							'focus:ring-edge-brand dark:focus:ring-edge-brand': primaryFocus,
+							'focus:ring-ring': primaryFocus,
 						},
 						className,
 					)}

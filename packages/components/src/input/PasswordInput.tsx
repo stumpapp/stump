@@ -21,9 +21,9 @@ export const PasswordInput = forwardRef<HTMLInputElement, Props>((props, ref) =>
 					className="inset-y-0 right-0 pr-3 absolute flex items-center"
 				>
 					{showPassword ? (
-						<Eye className="h-4 w-4 text-foreground-muted" />
+						<Eye className="h-4 w-4 text-muted-foreground" />
 					) : (
-						<EyeOff className="h-4 w-4 text-foreground-muted" />
+						<EyeOff className="h-4 w-4 text-muted-foreground" />
 					)}
 				</button>
 			}

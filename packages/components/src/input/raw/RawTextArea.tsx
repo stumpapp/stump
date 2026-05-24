@@ -2,20 +2,29 @@ import { cva, VariantProps } from 'class-variance-authority'
 import React from 'react'
 
 import { cn } from '../../utils'
-import { RAW_INPUT_BASE_CLASSES, RAW_INPUT_VARIANTS } from './RawInput'
+import { RAW_INPUT_VARIANTS } from './RawInput'
+
+export const RAW_TEXT_AREA_BASE_CLASSES = [
+	'flex field-sizing-content min-h-16 w-full resize-none rounded-xl border border-input bg-input/30 px-3 py-3 text-base transition-colors outline-none md:text-sm',
+	'placeholder:text-muted-foreground',
+	'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+	'disabled:cursor-not-allowed disabled:opacity-50',
+	'aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
+]
 
 export const RAW_TEXT_AREA_SIZE_VARIANTS = {
-	default: 'h-20 py-2 px-3',
+	default: '',
 }
 export const RAW_TEXT_AREA_VARIANTS = {
+	// TODO(shad): remove
 	...RAW_INPUT_VARIANTS,
 	size: RAW_TEXT_AREA_SIZE_VARIANTS,
 }
-export const textAreaVariants = cva(RAW_INPUT_BASE_CLASSES, {
+export const textAreaVariants = cva(RAW_TEXT_AREA_BASE_CLASSES, {
 	defaultVariants: {
-		rounded: 'md',
 		size: 'default',
-		variant: 'default',
+		// TODO(shad): remove and drive via aria-invalid and tokens
+		variant: undefined,
 	},
 	variants: RAW_TEXT_AREA_VARIANTS,
 })
@@ -28,6 +37,7 @@ const RawTextArea = React.forwardRef<RawTextAreaRef, RawTextAreaProps>(
 	({ className, variant, size, isInvalid, ...props }, ref) => {
 		return (
 			<textarea
+				data-slot="textarea"
 				className={cn(textAreaVariants({ className, isInvalid, size, variant }))}
 				ref={ref}
 				{...props}

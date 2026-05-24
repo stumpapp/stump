@@ -4,34 +4,43 @@ import React from 'react'
 import { cn } from '../../utils'
 
 export const RAW_INPUT_BASE_CLASSES = [
-	'flex w-full items-center justify-between transition-all duration-150 ',
-	'enabled:hover:bg-background-surface bg-transparent focus:bg-transparent',
-	'border-edge-subtle border outline-none',
-	'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background',
-	'text-foreground-subtle placeholder:text-foreground-muted text-sm light:placeholder:opacity-70',
+	'flex w-full min-w-0 items-center justify-between border border-input bg-input/30 px-3 py-1 text-base text-foreground transition-colors outline-none md:text-sm',
+	'file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
+	'placeholder:text-muted-foreground',
+	'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+	'aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
 	'disabled:cursor-not-allowed disabled:opacity-50',
 ]
 export const RAW_INPUT_SIZE_VARIANTS = {
-	default: 'h-10 py-2 px-3',
-	sm: 'h-8 p-2',
+	default: 'h-9',
+	sm: 'h-8 px-2.5',
 }
 export const RAW_INPUT_VARIANT = {
+	// TODO(shad): remove
 	activeGhost: 'enabled:border-opacity-100 dark:enabled:border-opacity-100',
-	default: 'focus:ring-background-400 dark:focus:ring-background-400',
+	default: 'bg-transparent',
+	// TODO(shad): remove
 	ghost:
 		'border-opacity-0 enabled:hover:border-opacity-70 focus:border-opacity-100 dark:enabled:hover:border-opacity-70 dark:focus:border-opacity-100 dark:border-opacity-0 dark:focus:bg-transparent',
-	primary: 'focus:ring-edge-brand dark:focus:ring-edge-brand',
+	// TODO(shad): remove
+	primary: 'focus-visible:border-ring focus-visible:ring-ring/50',
+	// TODO(shad): remove underline variant after consumer migration
 	underline:
-		'border-x-0 border-t-0 border-b-[1.5px] border-gray-300 border-opacity-70 dark:border-gray-700 dark:border-opacity-70 focus:ring-0 focus:ring-offset-0 outline-none focus:border-b-brand',
+		// TODO(shad): remove
+		'border-x-0 border-t-0 border-b-[1.5px] border-border/70 focus:ring-0 focus:ring-offset-0 outline-none focus:border-b-ring',
 }
 export const RAW_INPUT_VARIANTS = {
 	contrast: {
-		true: 'enabled:hover:bg-background-surface bg-background/40 focus:bg-background/80',
+		// TODO(shad): remove
+		true: 'enabled:hover:bg-muted bg-input/30 focus:bg-input/50',
 	},
 	isInvalid: {
-		true: 'focus:ring-red-400 dark:focus:ring-red-400 border border-red-300 border-opacity-70 dark:border-red-400 dark:border-opacity-70',
+		// TODO(shad): remove
+		true: 'border-destructive ring-[3px] ring-destructive/20 dark:ring-destructive/40',
 	},
+	// TODO(shad): remove, will drive via tokens
 	rounded: {
+		default: 'rounded-4xl',
 		md: 'rounded-md',
 		none: 'rounded-none',
 		sm: 'rounded-sm',
@@ -47,14 +56,15 @@ export const inputVariants = cva(RAW_INPUT_BASE_CLASSES, {
 			variant: 'underline',
 		},
 		{
+			// TODO(shad): remove underline invalid compound when underline variant is deleted
 			className:
-				'border-b-red-400 dark:border-b-red-400 bg-red-50/50 hover:bg-red-100/50 focus:bg-red-100/50',
+				'border-b-destructive bg-destructive/10 hover:bg-destructive/20 focus:bg-destructive/20',
 			isInvalid: true,
 			variant: 'underline',
 		},
 	],
 	defaultVariants: {
-		rounded: 'md',
+		rounded: 'default',
 		size: 'default',
 		variant: 'default',
 	},

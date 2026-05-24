@@ -24,8 +24,10 @@ export type InputProps = {
 	errorMessage?: string
 	/** The optional class name for the container. */
 	containerClassName?: string
+	/** TODO(shad): remove leftDecoration, migrate to InputGroup */
 	/** An optional right icon to display inset the input */
 	leftDecoration?: React.ReactNode
+	/** TODO(shad): remove rightDecoration, migrate to InputGroup */
 	/** An optional right icon to display inset the input */
 	rightDecoration?: React.ReactNode
 } & RawInputProps
@@ -48,6 +50,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref,
 	) => {
+		// TODO(shad): remove
 		const renderLeftDecoration = () => {
 			if (leftDecoration) {
 				return (
@@ -58,6 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 			return null
 		}
 
+		// TODO(shad): remove
 		const renderRightDecoration = () => {
 			if (rightDecoration) {
 				return (
@@ -127,7 +131,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						)}
 					>
 						{label}
-						{props.required && <span className="text-red-400"> *</span>}
+						{props.required && <span className="text-destructive"> *</span>}
 					</Label>
 				)}
 

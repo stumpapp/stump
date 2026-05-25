@@ -116,7 +116,7 @@ export default function UserSmartListsScene() {
 	// TODO: can't decide if I like the border-b
 	return (
 		<>
-			<header className="h-32 gap-y-2 px-4 flex w-full flex-col justify-center border-b border-edge">
+			<header className="h-32 gap-y-2 px-4 flex w-full flex-col justify-center border-b border-border">
 				<div>
 					<Heading size="lg" bold>
 						Smart lists
@@ -135,7 +135,7 @@ export default function UserSmartListsScene() {
 						<Input
 							placeholder={t(withLocaleKey('searchPlaceholder'))}
 							variant="primary"
-							leftDecoration={<Search className="h-4 w-4 text-foreground-muted" />}
+							leftDecoration={<Search className="h-4 w-4 text-muted-foreground" />}
 							rightDecoration={isRefetching ? <ProgressSpinner size="sm" /> : null}
 							className="h-9"
 							fullWidth

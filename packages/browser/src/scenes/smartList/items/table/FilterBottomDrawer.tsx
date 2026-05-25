@@ -28,7 +28,7 @@ export default function FilterBottomDrawer() {
 			<ToolTip content="Adjust filter">
 				<Drawer.Trigger asChild>
 					<IconButton variant="ghost">
-						<Filter className="h-4 w-4 text-foreground-muted" />
+						<Filter className="h-4 w-4 text-muted-foreground" />
 					</IconButton>
 				</Drawer.Trigger>
 			</ToolTip>

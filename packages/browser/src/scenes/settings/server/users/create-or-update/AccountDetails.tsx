@@ -38,7 +38,7 @@ export default function AccountDetails() {
 						variant="ghost"
 						size="xs"
 						onClick={() => setPasswordVisible(!passwordVisible)}
-						className="text-foreground-muted"
+						className="text-muted-foreground"
 						data-testid="togglePasswordVisibility"
 					>
 						{passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

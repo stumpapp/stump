@@ -88,9 +88,9 @@ export function EditProviderDialog({ provider }: Props) {
 				<Button
 					onClick={() => setIsEditDialogOpen(true)}
 					size="icon"
-					className="h-7 w-7 p-0 rounded-full border border-edge bg-background-surface"
+					className="h-7 w-7 p-0 rounded-full border border-border bg-muted"
 				>
-					<Cog className="text-primary h-4 w-4" strokeWidth={1} />
+					<Cog className="h-4 w-4 text-primary" strokeWidth={1} />
 				</Button>
 			</ToolTip>
 

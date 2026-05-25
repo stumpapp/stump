@@ -9,8 +9,8 @@ export const BADGE_VARIANTS = {
 	error: 'bg-destructive/15 text-destructive focus-visible:ring-field-error-ring',
 	primary: 'bg-primary/15 text-primary',
 	secondary: 'bg-secondary text-secondary-foreground',
-	success: 'bg-fill-success-secondary text-fill-success',
-	warning: 'bg-fill-warning-secondary text-fill-warning',
+	success: 'bg-success/15 text-success',
+	warning: 'bg-warning/15 text-warning',
 }
 
 const badgeVariants = cva(

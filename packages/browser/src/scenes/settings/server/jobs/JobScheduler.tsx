@@ -111,7 +111,7 @@ export default function JobScheduler() {
 			)}
 
 			<div>
-				<Button variant="secondary" size="sm" onClick={openCreate}>
+				<Button variant="secondary" onClick={openCreate}>
 					<Plus className="mr-1.5 h-4 w-4" />
 					{t(getKey('newScheduledJob'))}
 				</Button>

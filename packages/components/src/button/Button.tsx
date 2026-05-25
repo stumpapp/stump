@@ -19,7 +19,7 @@ export const BUTTON_VARIANTS = {
 	// TODO(shad): remove subtle-dark, use subtle + theme tokens
 	'subtle-dark': 'bg-background text-muted-foreground hover:bg-accent data-[state=open]:bg-accent',
 	// TODO(shad): remove warning
-	warning: 'bg-amber-500 text-foreground hover:bg-amber-400 focus:ring-ring',
+	warning: 'bg-warning text-warning-foreground hover:bg-warning/85 focus:ring-ring',
 	default: 'bg-primary text-primary-foreground hover:bg-primary/80',
 	outline:
 		'border-border bg-input/30 hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground',

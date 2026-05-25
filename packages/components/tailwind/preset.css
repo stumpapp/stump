@@ -30,6 +30,10 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-success: var(--success, var(--color-fill-success));
+	--color-success-foreground: var(--success-foreground, var(--foreground));
+	--color-warning: var(--warning, var(--color-fill-warning));
+	--color-warning-foreground: var(--warning-foreground, var(--foreground));
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-switch: var(--switch);
@@ -108,6 +112,15 @@
 	--font-librebaskerville: 'Libre Baskerville', ui-serif, Georgia, serif;
 	--font-nunito: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 	--font-hinamincho: 'Hina Mincho', ui-serif, Georgia, serif;
+	--font-heading: var(--font-sans);
+	--font-sans: 'Inter Variable', sans-serif;
+
+	/* MARK: thumbnail colors */
+	--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+	--color-thumbnail-placeholder: #1f2123;
+	--color-thumbnail-stack-series: #3d3a3a;
+	--color-thumbnail-stack-library-start: #2e2b2b;
+	--color-thumbnail-stack-library-end: #3d3a3a;
 
 	/* MARK: custom sizes */
 	--text-xxs: 0.65rem;
@@ -167,7 +180,6 @@
 @custom-variant autofill (&:autofill, &:-webkit-autofill);
 
 @layer base {
-	/* Radius presets applied as classes on html. */
 	html.radius-none {
 		--radius: 0rem;
 	}

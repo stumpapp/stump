@@ -60,10 +60,10 @@ function AppearanceOption({ label, isSelected, onSelect, isSidebar }: Appearance
 		<div className="md:w-1/3 lg:w-1/4 w-1/2 text-center">
 			<div
 				className={cx(
-					'h-32 rounded-md relative flex w-full overflow-hidden border border-edge bg-background-surface opacity-80 transition-all duration-200 hover:border-edge-subtle hover:opacity-100',
+					'h-32 relative flex w-full overflow-hidden rounded-md border border-border bg-muted opacity-80 transition-all duration-200 hover:border-border hover:opacity-100',
 					isSidebar ? 'flex-row' : 'gap-y-2 flex-col',
 					{
-						'border-edge-subtle': isSelected,
+						'border-border': isSelected,
 					},
 				)}
 				onClick={onSelect}
@@ -75,13 +75,13 @@ function AppearanceOption({ label, isSelected, onSelect, isSidebar }: Appearance
 						'bg-background/80': isLightVariant,
 					})}
 				>
-					<div className="rounded-md h-1/5 w-2/3 shrink-0 bg-background-surface-secondary" />
-					<div className="rounded-md h-1/5 w-full shrink-0 bg-background-surface-secondary" />
-					<div className="rounded-md h-1/5 w-full shrink-0 bg-background-surface-secondary" />
+					<div className="h-1/5 w-2/3 shrink-0 rounded-md bg-secondary" />
+					<div className="h-1/5 w-full shrink-0 rounded-md bg-secondary" />
+					<div className="h-1/5 w-full shrink-0 rounded-md bg-secondary" />
 				</div>
 
 				{isSelected && (
-					<div className="bottom-2 right-2 h-6 w-6 absolute flex items-center justify-center rounded-full bg-fill-brand">
+					<div className="bottom-2 right-2 h-6 w-6 absolute flex items-center justify-center rounded-full bg-primary">
 						<Check className="h-5 w-5 text-white" />
 					</div>
 				)}

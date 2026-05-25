@@ -246,23 +246,23 @@ export default function ServerEmojisSection() {
 			</div>
 
 			{canManageEmojis && (
-				<div className="rounded-lg p-3 border border-edge">
+				<div className="p-3 rounded-lg border border-border">
 					<div
 						{...getRootProps()}
 						className={cn(
-							'gap-2 rounded-md p-4 flex cursor-pointer items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background',
-							{ 'ring-edge-brand': isDropzoneFocused },
+							'gap-2 p-4 flex cursor-pointer items-center justify-center rounded-md border border-dashed border-border ring-2 ring-transparent ring-offset-2 ring-offset-background',
+							{ 'ring-ring': isDropzoneFocused },
 						)}
 					>
 						<input {...getInputProps()} />
-						<ImagePlus className="h-4 w-4 text-foreground-muted" />
+						<ImagePlus className="h-4 w-4 text-muted-foreground" />
 						<Text size="sm" variant="muted">
 							{t(getKey('dropzone'))}
 						</Text>
 					</div>
 
 					<div className="mt-3 gap-3 flex flex-row items-end">
-						<div className="h-10 w-10 rounded-md flex items-center justify-center overflow-hidden border border-edge bg-background-surface">
+						<div className="h-10 w-10 flex items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
 							{previewUrl && (
 								<img
 									src={previewUrl}
@@ -301,7 +301,7 @@ export default function ServerEmojisSection() {
 				</div>
 			)}
 
-			<div className="rounded-lg border border-edge">
+			<div className="rounded-lg border border-border">
 				{emojis.length === 0 && (
 					<div className="p-4">
 						<Text size="sm" variant="muted">
@@ -312,7 +312,7 @@ export default function ServerEmojisSection() {
 
 				{emojis.length > 0 && (
 					<ScrollArea className={cn({ 'h-96': emojis.length > 8 })}>
-						<div className="divide-y divide-edge">
+						<div className="divide-y divide-border">
 							{emojis.map((emoji) => (
 								<div key={emoji.id} className="gap-3 p-3 flex items-center">
 									<img src={emoji.url} alt={emoji.name} className="h-8 w-8 rounded object-cover" />
@@ -338,7 +338,7 @@ export default function ServerEmojisSection() {
 										</div>
 									) : (
 										<>
-											<div className="rounded-lg p-0.5 bg-background-surface">
+											<div className="p-0.5 rounded-lg bg-muted">
 												<Text size="sm" className="font-mono">
 													:{emoji.name}:
 												</Text>

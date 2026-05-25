@@ -100,12 +100,12 @@ export default function NavigationArrangementItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				'rounded-md flex cursor-grab flex-col bg-background-surface-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-edge-brand',
+				'flex cursor-grab flex-col rounded-md bg-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-ring',
 				{
 					'cursor-not-allowed': disabled,
 				},
 				{
-					'bg-background-surface-secondary/40': !section.visible,
+					'bg-secondary/40': !section.visible,
 				},
 				{
 					'cursor-grabbing': isDragging,

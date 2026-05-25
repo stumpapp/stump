@@ -51,6 +51,7 @@ export default function RegenerateThumbnails() {
 								},
 								{
 									label: 'Force recreate all',
+									isDestructive: true,
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => regenerate(true),
 								},

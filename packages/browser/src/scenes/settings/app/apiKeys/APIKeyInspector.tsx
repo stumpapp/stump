@@ -42,15 +42,15 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		if (isAllPermissions) {
 			return (
 				<div
-					className="mx-4 my-2 space-y-1.5 rounded-lg flex flex-col bg-fill-warning-secondary p-[3px]"
+					className="mx-4 my-2 space-y-1.5 flex flex-col rounded-lg bg-warning/15 p-[3px]"
 					data-testid="unrestricted-meta"
 				>
-					<div className="px-2.5 py-0.5 flex items-center text-fill-warning">
+					<div className="px-2.5 py-0.5 flex items-center text-warning">
 						<Sparkles className="mr-2 h-4 w-4" />
 						<span className="font-medium">{t(getKey('unrestrictedKey.heading'))}</span>
 					</div>
-					<div className="rounded-lg p-2.5 bg-fill-warning-secondary">
-						<Text size="sm" className="text-fill-warning">
+					<div className="p-2.5 rounded-lg bg-warning/15">
+						<Text size="sm" className="text-warning">
 							{t(getKey('unrestrictedKey.description'))}
 						</Text>
 					</div>
@@ -65,14 +65,14 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 
 		return (
 			<div
-				className="mx-4 my-2 space-y-1.5 rounded-lg flex flex-col bg-background-surface p-[3px]"
+				className="mx-4 my-2 space-y-1.5 flex flex-col rounded-lg bg-muted p-[3px]"
 				data-testid="permissions-meta"
 			>
-				<div className="px-2.5 py-0.5 flex items-center text-foreground-subtle/80">
+				<div className="px-2.5 py-0.5 flex items-center text-foreground/80">
 					<KeyRound className="mr-2 h-4 w-4" />
 					<span className="font-medium">{t(getSharedKey('fields.permissions'))}</span>
 				</div>
-				<div className="rounded-lg p-2.5 bg-background-surface-secondary">
+				<div className="p-2.5 rounded-lg bg-secondary">
 					<div className="gap-2 flex flex-wrap">
 						{permissions.map((perm) => (
 							<Badge
@@ -100,25 +100,25 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		>
 			<div className="flex flex-col">
 				<div className="px-4 py-2" data-testid="name-meta">
-					<Label className="text-foreground-muted">{t(getSharedKey('fields.name'))}</Label>
+					<Label className="text-muted-foreground">{t(getSharedKey('fields.name'))}</Label>
 					<Text size="sm">{displayedData?.name}</Text>
 				</div>
 
 				{renderPermissions()}
 
 				<div className="px-4 py-2" data-testid="expire-meta">
-					<Label className="text-foreground-muted">{t(getSharedKey('fields.expiration'))}</Label>
+					<Label className="text-muted-foreground">{t(getSharedKey('fields.expiration'))}</Label>
 					<Text size="sm">{expirationFormatted ?? t('common.never')}</Text>
 				</div>
 
-				<div className="my-2 px-4 py-2 bg-background-surface" data-testid="last_used-meta">
-					<Label className="text-foreground-muted">{t(getSharedKey('fields.last_used'))}</Label>
+				<div className="my-2 px-4 py-2 bg-muted" data-testid="last_used-meta">
+					<Label className="text-muted-foreground">{t(getSharedKey('fields.last_used'))}</Label>
 					<Text size="sm">{lastUsedAtFormatted ?? t('common.never')}</Text>
 				</div>
 
 				{createdAtFormatted && (
 					<div className="px-4 py-2" data-testid="created-meta">
-						<Label className="text-foreground-muted">{t(getSharedKey('fields.created'))}</Label>
+						<Label className="text-muted-foreground">{t(getSharedKey('fields.created'))}</Label>
 						<Text size="sm">{createdAtFormatted}</Text>
 					</div>
 				)}

@@ -52,6 +52,7 @@ export default function ProcessLibraryThumbnails() {
 								},
 								{
 									label: 'Reprocess all',
+									isDestructive: true,
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => process(true),
 								},

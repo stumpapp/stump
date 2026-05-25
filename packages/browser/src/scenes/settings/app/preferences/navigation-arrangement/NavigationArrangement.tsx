@@ -208,7 +208,7 @@ export default function NavigationArrangement() {
 					onClick={() => updateLockStatus({ locked: !locked })}
 					variant="ghost"
 				>
-					<Icon className="h-4 w-4 text-foreground-muted" />
+					<Icon className="h-4 w-4 text-muted-foreground" />
 				</Button>
 			</ToolTip>
 		)
@@ -252,7 +252,7 @@ export default function NavigationArrangement() {
 			</div>
 
 			<Card
-				className={cn('space-y-4 p-4 md:max-w-xl relative flex flex-col bg-background-surface', {
+				className={cn('space-y-4 p-4 md:max-w-xl relative flex flex-col bg-muted', {
 					'cursor-not-allowed opacity-60 select-none': locked,
 				})}
 				title={locked ? t(getKey('isLocked')) : undefined}

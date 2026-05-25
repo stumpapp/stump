@@ -59,7 +59,7 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 					</tr>
 				</thead>
 
-				<tbody className="divide relative divide-y divide-edge">
+				<tbody className="divide relative divide-y divide-border">
 					{rows.map((row) => (
 						<Fragment key={row.id}>
 							<tr key={row.id} className="h-10">
@@ -168,7 +168,7 @@ const columns = [
 					onClick={row.getToggleExpandedHandler()}
 				>
 					<Text size="sm">{isAlreadyExpanded ? 'Hide' : 'Show'}</Text>
-					<span className="text-foreground-muted">
+					<span className="text-muted-foreground">
 						<ChevronDown
 							className={cn('h-4 w-4', {
 								'rotate-180': isAlreadyExpanded,

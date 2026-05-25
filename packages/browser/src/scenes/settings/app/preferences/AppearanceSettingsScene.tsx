@@ -43,7 +43,7 @@ export default function AppearanceSettingsScene() {
 						<h3 className="text-base font-medium text-foreground">
 							{t(getKey('themeAndAppearance.label'))}
 						</h3>
-						<p className="text-sm text-foreground-muted">
+						<p className="text-sm text-muted-foreground">
 							{t(getKey('themeAndAppearance.description'))}
 						</p>
 					</div>
@@ -60,7 +60,7 @@ export default function AppearanceSettingsScene() {
 					<h3 className="text-base font-medium text-foreground">
 						{t(getKey('layoutAndArrangement.label'))}
 					</h3>
-					<p className="text-sm text-foreground-muted">
+					<p className="text-sm text-muted-foreground">
 						{t(getKey('layoutAndArrangement.description'))}
 					</p>
 				</div>
@@ -84,7 +84,7 @@ export default function AppearanceSettingsScene() {
 						<h3 className="text-base font-medium text-foreground">
 							{t(getKey('additionalPreferences.label'))}
 						</h3>
-						<p className="text-sm text-foreground-muted">
+						<p className="text-sm text-muted-foreground">
 							{t(getKey('additionalPreferences.description'))}
 						</p>
 					</div>

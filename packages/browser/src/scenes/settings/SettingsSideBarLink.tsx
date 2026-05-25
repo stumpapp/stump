@@ -25,10 +25,12 @@ export default function SettingsSideBarLink({
 		<Link to={to} className={cn({ 'pointer-events-none': isDisabled })}>
 			<li
 				className={cn(
-					'rounded-md px-2 py-1.5 flex items-center',
-					isDisabled ? 'text-foreground-muted opacity-50' : 'hover:bg-background-surface-hover',
+					'px-2 py-1.5 flex items-center rounded-md',
+					isDisabled
+						? 'text-foreground/50 opacity-50'
+						: 'text-foreground hover:bg-accent hover:text-accent-foreground',
 					{
-						'bg-background-surface': isActive && !isDisabled,
+						'bg-accent text-accent-foreground': isActive && !isDisabled,
 					},
 				)}
 				{...(prefetch ? { onMouseEnter: prefetch } : {})}

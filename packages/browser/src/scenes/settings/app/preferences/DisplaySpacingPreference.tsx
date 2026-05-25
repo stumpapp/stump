@@ -70,16 +70,16 @@ function AppearanceOption({
 		<div className="md:w-1/3 lg:w-1/4 w-1/2 text-center">
 			<div
 				className={cn(
-					'h-32 rounded-md p-2 relative flex w-full flex-col border border-edge bg-background-surface opacity-80 transition-all duration-200',
+					'h-32 p-2 relative flex w-full flex-col rounded-md border border-border bg-muted opacity-80 transition-all duration-200',
 					isDefaultDisplay ? 'gap-y-4' : 'gap-y-2',
 					{
-						'border-edge-subtle': isSelected,
+						'border-border': isSelected,
 					},
 					{
 						'cursor-not-allowed opacity-50': isDisabled,
 					},
 					{
-						'hover:border-edge-subtle hover:opacity-100': !isDisabled,
+						'hover:border-border hover:opacity-100': !isDisabled,
 					},
 					{
 						'bg-background/80': isLightVariant,
@@ -88,32 +88,21 @@ function AppearanceOption({
 				onClick={isDisabled ? undefined : onSelect}
 			>
 				<div
-					className={cx(
-						'rounded-md w-full bg-background-surface-secondary',
-						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
-					)}
+					className={cx('w-full rounded-md bg-secondary', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
 				<div
-					className={cx(
-						'rounded-md w-2/3 bg-background-surface-secondary',
-						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
-					)}
+					className={cx('w-2/3 rounded-md bg-secondary', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
 				<div
-					className={cx(
-						'rounded-md w-5/6 bg-background-surface-secondary',
-						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
-					)}
+					className={cx('w-5/6 rounded-md bg-secondary', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
-				{!isDefaultDisplay && (
-					<div className="rounded-md h-1/5 w-full bg-background-surface-secondary" />
-				)}
+				{!isDefaultDisplay && <div className="h-1/5 w-full rounded-md bg-secondary" />}
 
 				{isSelected && (
-					<div className="bottom-2 right-2 h-6 w-6 absolute flex items-center justify-center rounded-full bg-fill-brand">
+					<div className="bottom-2 right-2 h-6 w-6 absolute flex items-center justify-center rounded-full bg-primary">
 						<Check className="h-5 w-5 text-white" />
 					</div>
 				)}

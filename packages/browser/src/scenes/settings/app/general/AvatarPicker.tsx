@@ -164,7 +164,7 @@ export default function AvatarPicker() {
 									</>
 								)}
 								{!filePreview && (
-									<div className="flex h-[100px] w-[100px] rounded-full border border-edge" />
+									<div className="flex h-[100px] w-[100px] rounded-full border border-border" />
 								)}
 							</div>
 						</div>
@@ -172,8 +172,8 @@ export default function AvatarPicker() {
 						<div
 							{...getRootProps()}
 							className={cn(
-								'gap-2 rounded-md p-4 flex h-full cursor-pointer items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background',
-								{ 'ring-edge-brand': isDropzoneFocused },
+								'gap-2 p-4 flex h-full cursor-pointer items-center justify-center rounded-md border border-dashed border-border ring-2 ring-transparent ring-offset-2 ring-offset-background',
+								{ 'ring-ring': isDropzoneFocused },
 							)}
 						>
 							<input {...getInputProps()} />
@@ -205,7 +205,11 @@ export default function AvatarPicker() {
 							align="start"
 							contentWrapperClassName="w-18"
 							trigger={
-								<Button variant="subtle-dark" size="xs" className="px-2 py-1.5 border border-edge">
+								<Button
+									variant="subtle-dark"
+									size="xs"
+									className="px-2 py-1.5 border border-border"
+								>
 									<Edit className="mr-2 h-3 w-3" />
 									{t('common.edit')}
 								</Button>

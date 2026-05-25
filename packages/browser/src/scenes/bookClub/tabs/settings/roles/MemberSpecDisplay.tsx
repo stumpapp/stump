@@ -27,8 +27,8 @@ export default function MemberSpecDisplay() {
 				</Text>
 			</div>
 
-			<Card className="rounded-lg w-full">
-				<table className="min-w-full divide-y divide-edge">
+			<Card className="w-full rounded-lg">
+				<table className="min-w-full divide-y divide-border">
 					<thead className="">
 						<tr>
 							<th
@@ -39,13 +39,13 @@ export default function MemberSpecDisplay() {
 							</th>
 							<th
 								scope="col"
-								className="px-3 py-3.5 text-sm font-semibold border-l border-l-edge text-left text-foreground"
+								className="px-3 py-3.5 text-sm font-semibold border-l border-l-border text-left text-foreground"
 							>
 								<Text>Show as</Text>
 							</th>
 						</tr>
 					</thead>
-					<tbody className="divide-y divide-edge">
+					<tbody className="divide-y divide-border">
 						{Object.entries(updatedSpec)
 							.sort(([keyA], [keyB]) => {
 								const order = ['MEMBER', 'MODERATOR', 'ADMIN', 'CREATOR']
@@ -57,7 +57,7 @@ export default function MemberSpecDisplay() {
 										<td className="py-4 pl-4 pr-3 text-sm font-medium sm:pl-6 text-gray-900">
 											<Text size="sm">{upperFirst(key.toLowerCase())}</Text>
 										</td>
-										<td className="px-3 py-4 border-l border-l-edge">
+										<td className="px-3 py-4 border-l border-l-border">
 											<Input
 												value={String(value)}
 												onChange={(e) => {

@@ -55,7 +55,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					rightDecoration={
 						checkPermission(UserPermission.FileExplorer) && (
 							<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
-								<Folder className="h-4 w-4 text-foreground-muted" />
+								<Folder className="h-4 w-4 text-muted-foreground" />
 							</Button>
 						)
 					}

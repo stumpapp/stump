@@ -254,7 +254,7 @@ export function PendingMatchesTable() {
 
 	if (rows.length === 0) {
 		return (
-			<div className="rounded-lg p-8 flex flex-col items-center justify-center border border-dashed border-edge">
+			<div className="p-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-border">
 				<Text size="sm" variant="muted">
 					{t(getKey('nothingToReview'))}
 				</Text>

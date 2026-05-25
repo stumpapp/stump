@@ -17,7 +17,7 @@ export default function UploadMenu({ onSelect }: Props) {
 					<IconButton
 						variant="ghost"
 						size="xs"
-						className="hover:bg-background-surface-hover"
+						className="hover:bg-accent"
 						pressEffect={false}
 						disabled={false}
 					>

@@ -52,7 +52,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 						<IconButton
 							variant="ghost"
 							size="xs"
-							className="hover:bg-background-surface-hover"
+							className="hover:bg-accent"
 							pressEffect={false}
 							onClick={() => setIsOpen(true)}
 						>
@@ -61,7 +61,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 
 						{activeFilters > 0 && (
 							<span className="right-0 top-0 -mr-1.5 -mt-1.5 h-4 w-4 absolute flex">
-								<span className="h-4 w-4 relative inline-flex items-center justify-center rounded-full bg-fill-brand">
+								<span className="h-4 w-4 relative inline-flex items-center justify-center rounded-full bg-primary">
 									<span className="font-semibold text-white text-xxs">{activeFilters}</span>
 								</span>
 							</span>

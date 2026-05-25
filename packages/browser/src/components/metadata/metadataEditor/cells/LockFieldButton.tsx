@@ -27,8 +27,8 @@ export default function LockFieldButton({ binding }: Props) {
 			className={cn(
 				'shrink-0 transition-opacity',
 				isLocked
-					? 'text-foreground-muted opacity-100'
-					: 'text-foreground-muted/50 opacity-0 group-hover/row:opacity-100',
+					? 'text-muted-foreground opacity-100'
+					: 'text-muted-foreground/50 opacity-0 group-hover/row:opacity-100',
 			)}
 			title={isLocked ? 'Unlock field' : 'Lock field'}
 		>

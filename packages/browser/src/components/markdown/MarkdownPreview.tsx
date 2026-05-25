@@ -17,7 +17,7 @@ export default function MarkdownPreview({ children, className }: Props) {
 		<ReactMarkdown
 			remarkPlugins={[remarkDirective, remarkDirectiveRehype, remarkGfm]}
 			rehypePlugins={[rehypeRaw]}
-			className={cn('text-foreground-subtle', className)}
+			className={cn('text-foreground', className)}
 			components={{
 				h1: ({ ref: _, ...props }) => (
 					<>
@@ -79,7 +79,7 @@ const Spoiler = ({ children }: PropsWithChildren) => {
 
 const Table = forwardRef<HTMLTableElement, PropsWithChildren>((props, ref) => {
 	return (
-		<div className="my-1 rounded-xl overflow-hidden border border-edge">
+		<div className="my-1 rounded-xl overflow-hidden border border-border">
 			<table ref={ref} {...props} className="w-full divide-y divide-edge" />
 		</div>
 	)
@@ -111,7 +111,7 @@ const Th = forwardRef<HTMLTableCellElement, PropsWithChildren>((props, ref) => {
 		<th
 			ref={ref}
 			{...props}
-			className="h-8 pl-1.5 pr-1.5 text-sm first:pl-4 last:pr-4 relative bg-background-surface/50 text-left"
+			className="h-8 pl-1.5 pr-1.5 text-sm first:pl-4 last:pr-4 relative bg-muted/50 text-left"
 		/>
 	)
 })

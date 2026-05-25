@@ -137,7 +137,7 @@ export default function ThumbnailConfigForm() {
 				{!enabled && (
 					<div key="no-thumbnail-config">
 						<Card className="gap-y-4 p-6 flex flex-col items-center border-dashed">
-							<span className="p-1 rounded-full border border-fill-brand-secondary bg-fill-brand">
+							<span className="p-1 rounded-full border border-primary/30 bg-primary">
 								<Check className="text-foreground" />
 							</span>
 							<Text size="sm" variant="muted">

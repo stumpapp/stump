@@ -12,6 +12,7 @@ import EnableJobOverlayToggle from './EnableJobOverlayToggle'
 import FontSelect from './FontSelect'
 import GradientToggle from './GradientToggle'
 import HideScrollbarToggle from './HideScrollbarToggle'
+import InterfaceRoundnessPreference from './InterfaceRoundnessPreference'
 import LiveRefetchToggle from './LiveRefetchToggle'
 import MaxWidthPreference from './MaxWidthPreference'
 import { NavigationArrangement } from './navigation-arrangement'
@@ -50,6 +51,7 @@ export default function AppearanceSettingsScene() {
 					<ThemeSelect />
 					<GradientToggle />
 					<FontSelect />
+					<InterfaceRoundnessPreference />
 					<ThumbnailRatioSelect />
 					<ThumbnailPlaceholder />
 				</div>

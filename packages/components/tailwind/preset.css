@@ -51,13 +51,13 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
-	--radius-sm: calc(var(--radius) * 0.6);
-	--radius-md: calc(var(--radius) * 0.8);
+	--radius-sm: max(0px, calc(var(--radius) - 4px));
+	--radius-md: max(0px, calc(var(--radius) - 2px));
 	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) * 1.4);
-	--radius-2xl: calc(var(--radius) * 1.8);
-	--radius-3xl: calc(var(--radius) * 2.2);
-	--radius-4xl: calc(var(--radius) * 2.6);
+	--radius-xl: calc(var(--radius) + 4px);
+	--radius-2xl: calc(var(--radius) + 8px);
+	--radius-3xl: calc(var(--radius) + 12px);
+	--radius-4xl: calc(var(--radius) + 16px);
 }
 
 @theme {
@@ -167,6 +167,23 @@
 @custom-variant autofill (&:autofill, &:-webkit-autofill);
 
 @layer base {
+	/* Radius presets applied as classes on html. */
+	html.radius-none {
+		--radius: 0rem;
+	}
+
+	html.radius-normal {
+		--radius: 0.625rem;
+	}
+
+	html.radius-rounded {
+		--radius: 0.875rem;
+	}
+
+	html.radius-pill {
+		--radius: 1.125rem;
+	}
+
 	/* TODO: preserve v3 default border color behavior but maybe kill? */
 	*,
 	::after,

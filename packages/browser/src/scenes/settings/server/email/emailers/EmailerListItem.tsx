@@ -89,7 +89,7 @@ export default function EmailerListItem({ fragment }: Props) {
 				<div className="space-x-2 flex items-center">
 					{emailer.isPrimary && (
 						<ToolTip content="Primary emailer" align="end" size="xs">
-							<Sparkles className="text-primary h-4 w-4" strokeWidth={1} />
+							<Sparkles className="h-4 w-4 text-primary" strokeWidth={1} />
 						</ToolTip>
 					)}
 					{canEditEmailer && (

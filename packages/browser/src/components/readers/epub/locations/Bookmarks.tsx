@@ -33,7 +33,7 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 	}
 
 	return (
-		<div className="px-2 divide-border scrollbar-hide flex max-h-full flex-col divide-y overflow-y-auto">
+		<div className="px-2 scrollbar-hide flex max-h-full flex-col divide-y divide-border overflow-y-auto">
 			{bookmarksArray.map(({ previewContent, epubcfi }) => (
 				<button
 					key={epubcfi}

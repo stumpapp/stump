@@ -6,7 +6,7 @@ import { cn } from '../utils'
 
 // TODO: common combination shortcuts, e.g. description, subtitle, etc.
 export const TEXT_VARIANTS = {
-	danger: 'text-red-600 dark:text-red-400',
+	danger: 'text-destructive',
 	default: 'text-foreground',
 	label:
 		'font-medium leading-none text-foreground-subtle peer-disabled:cursor-not-allowed peer-disabled:opacity-70',

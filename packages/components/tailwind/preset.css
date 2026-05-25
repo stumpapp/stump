@@ -35,6 +35,8 @@
 	--color-switch: var(--switch);
 	--color-switch-thumb: var(--switch-thumb);
 	--color-switch-thumb-checked: var(--switch-thumb-checked);
+	--color-field-error-border: var(--field-error-border);
+	--color-field-error-ring: var(--field-error-ring);
 	--color-ring: var(--ring);
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);

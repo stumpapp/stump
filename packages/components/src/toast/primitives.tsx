@@ -15,7 +15,7 @@ const ToastViewport = React.forwardRef<
 	<ToastPrimitives.Viewport
 		ref={ref}
 		className={cn(
-			'top-0 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px] fixed z-100 flex max-h-screen w-full flex-col-reverse',
+			'top-0 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-105 fixed z-100 flex max-h-screen w-full flex-col-reverse',
 			className,
 		)}
 		{...props}
@@ -24,15 +24,16 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
-	'data-[swipe=move]:transition-none grow group relative pointer-events-auto flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=move]:translate-x-(--radix-toast-swipe-move-x) data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-(--radix-toast-swipe-end-x) data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full mt-4 data-[state=closed]:slide-out-to-right-full dark:border-gray-700 last:mt-0 sm:last:mt-4',
+	'data-[swipe=move]:transition-none grow group relative pointer-events-auto flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=move]:translate-x-(--radix-toast-swipe-move-x) data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-(--radix-toast-swipe-end-x) data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full mt-4 last:mt-0 data-[state=closed]:slide-out-to-right-full sm:last:mt-4',
 	{
 		defaultVariants: {
 			variant: 'default',
 		},
 		variants: {
 			variant: {
-				default: 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700',
-				destructive: 'group destructive bg-red-600 text-white border-red-600 dark:border-red-600',
+				default: 'border-border bg-background text-foreground',
+				destructive:
+					'group destructive border-destructive bg-destructive text-destructive-foreground',
 			},
 		},
 	},
@@ -59,7 +60,7 @@ const ToastAction = React.forwardRef<
 	<ToastPrimitives.Action
 		ref={ref}
 		className={cn(
-			'h-8 rounded-md px-3 text-sm font-medium group-[.danger]:border-red-100 group-[.danger]:hover:bg-red-100 group-[.danger]:hover:text-red-600 group-[.danger]:focus:ring-red-400 group-[.danger]:focus:ring-offset-red-600 inline-flex shrink-0 items-center justify-center border border-gray-200 bg-transparent transition-colors hover:bg-gray-100 group-[.danger]:hover:border-gray-50 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900 dark:data-[state=open]:bg-gray-800',
+			'h-8 px-3 text-sm font-medium inline-flex shrink-0 items-center justify-center rounded-md border border-border bg-transparent transition-colors group-[.destructive]:border-destructive-foreground/30 hover:bg-muted group-[.destructive]:hover:bg-destructive-foreground/15 group-[.destructive]:hover:text-destructive-foreground focus:ring-2 focus:ring-ring/60 focus:ring-offset-2 focus:ring-offset-background focus:outline-none group-[.destructive]:focus:ring-destructive-foreground/60 group-[.destructive]:focus:ring-offset-destructive disabled:pointer-events-none disabled:opacity-50 data-[state=open]:bg-muted',
 			className,
 		)}
 		{...props}
@@ -74,7 +75,7 @@ const ToastClose = React.forwardRef<
 	<ToastPrimitives.Close
 		ref={ref}
 		className={cn(
-			'right-2 top-2 rounded-md p-1 group-[.danger]:text-red-300 group-[.danger]:hover:text-red-50 group-[.danger]:focus:ring-red-400 group-[.danger]:focus:ring-offset-red-600 absolute text-gray-500 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-900 focus:opacity-100 focus:ring-2 focus:outline-none dark:hover:text-gray-50',
+			'right-2 top-2 p-1 absolute rounded-md text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-[.destructive]:text-destructive-foreground/70 hover:text-foreground group-[.destructive]:hover:text-destructive-foreground focus:opacity-100 focus:ring-2 focus:ring-ring/60 focus:ring-offset-2 focus:ring-offset-background focus:outline-none group-[.destructive]:focus:ring-destructive-foreground/60 group-[.destructive]:focus:ring-offset-destructive',
 			className,
 		)}
 		toast-close=""

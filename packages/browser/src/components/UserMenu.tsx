@@ -1,4 +1,4 @@
-import { Avatar, Card, cn, Popover, Text } from '@stump/components'
+import { Avatar, cn, Popover, Text } from '@stump/components'
 import { Bell, Server, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -31,9 +31,9 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 			{({ width }) => (
 				<Popover onOpenChange={setIsOpen} open={isOpen} modal>
 					<Popover.Trigger asChild>
-						<Card
+						<div
 							className={cn(
-								'border-opacity-80 px-1 hover:border-opacity-100 flex h-[2.35rem] w-full cursor-pointer items-center border-transparent transition-all duration-150',
+								'border-opacity-80 px-1 hover:border-opacity-100 flex h-[2.35rem] w-full cursor-pointer items-center rounded-4xl border border-transparent bg-sidebar transition-all duration-150',
 								{ 'border-opacity-100 border-edge-subtle': isOpen },
 								{ 'border-edge-subtle': isSidebar },
 								{ 'justify-center rounded-full hover:border-edge-subtle': !isSidebar },
@@ -51,13 +51,17 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 									{user.username}
 								</Text>
 							)}
-						</Card>
+						</div>
 					</Popover.Trigger>
 
 					<Popover.Content
 						className="p-0 shadow-sm flex flex-col divide-y divide-edge overflow-hidden"
 						align={isSidebar ? 'start' : 'end'}
-						style={{ width: isSidebar ? width : 'auto' }}
+						style={{
+							width: isSidebar ? width : 'auto',
+							// TODO(shad): i hate this override but too lazy to sort out popover right now
+							boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08)',
+						}}
 					>
 						<div className="flex w-full flex-col">
 							<Link

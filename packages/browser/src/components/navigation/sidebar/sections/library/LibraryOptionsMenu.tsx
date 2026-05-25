@@ -129,6 +129,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 															e.stopPropagation()
 															setIsDeleting(true)
 														},
+														isDestructive: true,
 													},
 												]
 											: []),

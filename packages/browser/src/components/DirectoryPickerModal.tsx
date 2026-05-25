@@ -115,7 +115,7 @@ export default function DirectoryPickerModal({
 						/>
 					</div>
 
-					<div className="h-80 divide-edge/75 flex flex-col divide-y overflow-hidden">
+					<div className="h-80 divide-border/75 flex flex-col divide-y overflow-hidden">
 						<AutoSizer>
 							{({ height, width }) => (
 								<Virtuoso

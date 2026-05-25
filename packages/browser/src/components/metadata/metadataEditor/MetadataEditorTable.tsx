@@ -105,7 +105,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 			}}
 		>
 			<table
-				className="divide-edge w-fit divide-y"
+				className="w-fit divide-y divide-border"
 				style={{
 					width: table.getCenterTotalSize(),
 				}}
@@ -151,7 +151,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 					</tr>
 				</thead>
 
-				<tbody className="divide-edge divide-y">
+				<tbody className="divide-y divide-border">
 					{rows.map((row) => (
 						<tr key={row.id} className="group/row flex w-fit">
 							{row.getVisibleCells().map((cell) => (

@@ -37,11 +37,7 @@ export default function ThemeControls() {
 				</ControlButton>
 			</Popover.Trigger>
 
-			<Popover.Content
-				size="sm"
-				align="end"
-				className="gap-4 z-101 flex flex-col bg-muted"
-			>
+			<Popover.Content size="sm" align="end" className="gap-4 z-101 flex flex-col bg-muted">
 				<FontSizeControl />
 				<LineHeightControl />
 				<ReadingDirection />

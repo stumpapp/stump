@@ -86,7 +86,7 @@ export function MatchPreviewEditor() {
 						<div />
 					</div>
 
-					<div className="divide-edge divide-y">
+					<div className="divide-y divide-border">
 						{fieldComparisons.map((comparison) => (
 							<MatchFieldRow key={comparison.field} comparison={comparison} />
 						))}

@@ -143,7 +143,7 @@ export default function SearchCommand() {
 				<Search className="h-4 w-4" />
 			</ControlButton>
 			<Command.Dialog open={open} onOpenChange={setOpen}>
-				<div className="px-4 border-b-edge flex items-center border-b">
+				<div className="px-4 border-b-border flex items-center border-b">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					<input
 						placeholder="Enter a basic query to search for"

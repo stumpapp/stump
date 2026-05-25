@@ -79,8 +79,8 @@ const Spoiler = ({ children }: PropsWithChildren) => {
 
 const Table = forwardRef<HTMLTableElement, PropsWithChildren>((props, ref) => {
 	return (
-		<div className="my-1 rounded-xl overflow-hidden border border-border">
-			<table ref={ref} {...props} className="w-full divide-y divide-edge" />
+		<div className="my-1 overflow-hidden rounded-xl border border-border">
+			<table ref={ref} {...props} className="w-full divide-y divide-border" />
 		</div>
 	)
 })
@@ -92,12 +92,12 @@ const Thead = forwardRef<HTMLTableSectionElement, PropsWithChildren>((props, ref
 Thead.displayName = 'MarkdownTableHeader'
 
 const Tbody = forwardRef<HTMLTableSectionElement, PropsWithChildren>((props, ref) => {
-	return <tbody ref={ref} {...props} className="divide-y divide-edge" />
+	return <tbody ref={ref} {...props} className="divide-y divide-border" />
 })
 Tbody.displayName = 'MarkdownTableBody'
 
 const Tr = forwardRef<HTMLTableRowElement, PropsWithChildren>((props, ref) => {
-	return <tr ref={ref} {...props} className="w-fit divide-x divide-edge" />
+	return <tr ref={ref} {...props} className="w-fit divide-x divide-border" />
 })
 Tr.displayName = 'MarkdownTableRow'
 

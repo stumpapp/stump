@@ -143,7 +143,7 @@ export default function IgnoreRulesConfig() {
 				<Card className="p-6 flex items-center justify-center border-dashed border-border">
 					<div className="space-y-3 flex flex-col">
 						<div className="relative flex justify-center">
-							<span className="rounded-xl p-2 flex items-center justify-center bg-muted">
+							<span className="p-2 flex items-center justify-center rounded-xl bg-muted">
 								<SquareAsterisk className="h-6 w-6 text-muted-foreground" />
 								<Slash className="h-6 w-6 absolute scale-x-[-1] transform text-foreground opacity-80" />
 							</span>

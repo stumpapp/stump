@@ -32,7 +32,7 @@ export default function ServerStatusOverlay() {
 			{show && (
 				<motion.div
 					// @ts-expect-error: It is there I promise
-					className="bottom-4 right-4 w-64 rounded-md p-3 shadow fixed flex flex-col items-center justify-center bg-background-surface"
+					className="bottom-4 right-4 w-64 p-3 shadow fixed flex flex-col items-center justify-center rounded-md bg-muted"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}

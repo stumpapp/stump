@@ -15,7 +15,7 @@ export default function RoleMappingForm() {
 
 	return (
 		<div className="gap-y-6 flex flex-col">
-			<Card className="gap-6 p-4 md:max-w-3xl md:grid-cols-2 grid grid-cols-1 bg-background-surface/50">
+			<Card className="gap-6 p-4 md:max-w-3xl md:grid-cols-2 grid grid-cols-1 bg-muted/50">
 				<Input
 					variant="primary"
 					fullWidth

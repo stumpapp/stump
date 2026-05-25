@@ -115,7 +115,7 @@ export default function DirectoryPickerModal({
 						/>
 					</div>
 
-					<div className="h-80 flex flex-col divide-y divide-edge/75 overflow-hidden">
+					<div className="h-80 divide-edge/75 flex flex-col divide-y overflow-hidden">
 						<AutoSizer>
 							{({ height, width }) => (
 								<Virtuoso
@@ -126,9 +126,9 @@ export default function DirectoryPickerModal({
 									itemContent={(index, directory) => (
 										<button
 											className={cx(
-												'my-0.5 rounded-lg px-2 py-1.5 w-full justify-start text-left hover:bg-background-surface',
+												'my-0.5 px-2 py-1.5 w-full justify-start rounded-lg text-left hover:bg-muted',
 												{
-													'bg-background-surface/40': index % 2 === 0,
+													'bg-muted/40': index % 2 === 0,
 												},
 											)}
 											onClick={() => setPath(directory.path)}

@@ -62,13 +62,13 @@ export default function EpubReaderFooter() {
 						{sectionWidthKeys.map((index) => (
 							<div
 								key={`section-${index}`}
-								className="relative h-[5px] cursor-pointer bg-foreground-muted/50"
+								className="h-1.25 relative cursor-pointer bg-muted-foreground/50"
 								style={{ width: `${sectionWidths[index] ? sectionWidths[index] : 0}%` }}
 								onClick={() => jumpToSection(index)}
 							>
 								{index === currentSectionIndex && (
 									<div
-										className="top-0 absolute h-full w-[2px] bg-foreground-muted"
+										className="top-0 w-0.5 absolute h-full bg-muted-foreground"
 										style={{ left: `${chapterProgress}%` }}
 									/>
 								)}

@@ -9,10 +9,10 @@ export const TEXT_VARIANTS = {
 	danger: 'text-destructive',
 	default: 'text-foreground',
 	label:
-		'font-medium leading-none text-foreground-subtle peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-	muted: 'text-foreground-muted',
+		'font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+	muted: 'text-muted-foreground',
 	primary: 'text-brand',
-	secondary: 'text-foreground-subtle',
+	secondary: 'text-foreground',
 }
 
 const textVariants = cva('', {

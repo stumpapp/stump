@@ -198,7 +198,7 @@ export default function UploadModal() {
 		if (isUploading) {
 			return (
 				<>
-					<span className="rounded-lg p-4 flex items-center justify-center border border-border bg-muted/80">
+					<span className="p-4 flex items-center justify-center rounded-lg border border-border bg-muted/80">
 						<ProgressSpinner className="h-7 w-7" />
 					</span>
 
@@ -225,7 +225,7 @@ export default function UploadModal() {
 			const Icon = displayedType === 'books' ? Book : FolderArchive
 			return (
 				<>
-					<span className="rounded-lg p-4 flex items-center justify-center border border-border bg-muted/80">
+					<span className="p-4 flex items-center justify-center rounded-lg border border-border bg-muted/80">
 						<Icon className="h-8 w-8 text-muted-foreground" />
 					</span>
 
@@ -263,7 +263,7 @@ export default function UploadModal() {
 					<div
 						{...getRootProps()}
 						className={cn(
-							'space-y-4 rounded-lg p-4 flex shrink-0 grow cursor-pointer flex-col items-center justify-center border border-dashed border-border ring-2 ring-transparent ring-offset-2 ring-offset-background-overlay outline-none!',
+							'space-y-4 p-4 ring-offset-background-overlay flex shrink-0 grow cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border ring-2 ring-transparent ring-offset-2 outline-none!',
 							{ 'ring-ring': isFocused },
 						)}
 					>
@@ -290,10 +290,7 @@ export default function UploadModal() {
 					)}
 
 					<Accordion type="single" collapsible>
-						<Accordion.Item
-							value="files"
-							className="rounded-lg px-4 py-2 border-none bg-muted/80"
-						>
+						<Accordion.Item value="files" className="px-4 py-2 rounded-lg border-none bg-muted/80">
 							<Accordion.Trigger
 								noUnderline
 								asLabel
@@ -311,7 +308,7 @@ export default function UploadModal() {
 									{files.map((file, idx) => (
 										<div
 											key={file.name}
-											className="group gap-x-2 rounded-lg p-2 flex items-center border border-border"
+											className="group gap-x-2 p-2 flex items-center rounded-lg border border-border"
 										>
 											<Text size="sm" className="line-clamp-1">
 												{file.name}

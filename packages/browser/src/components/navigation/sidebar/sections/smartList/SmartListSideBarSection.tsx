@@ -77,7 +77,9 @@ export default function SmartListSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="ml-2 space-y-1 pl-1 border-l border-l-edge">{renderLists()}</div>
+					<div className="ml-2 space-y-1 pl-1 border-l border-l-sidebar-border">
+						{renderLists()}
+					</div>
 					{links.includes(FilterableArrangementEntityLink.Create) && (
 						<SideBarButtonLink
 							to={paths.smartListCreate()}

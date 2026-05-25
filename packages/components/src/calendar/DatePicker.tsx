@@ -52,7 +52,7 @@ export function DatePicker({
 						type="button"
 						className={cn(
 							'font-normal w-full justify-start text-left',
-							!selected && 'text-foreground-muted',
+							!selected && 'text-muted-foreground',
 						)}
 					>
 						<CalendarIcon className="mr-2 h-4 w-4" />

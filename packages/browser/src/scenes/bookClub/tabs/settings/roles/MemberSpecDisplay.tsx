@@ -54,7 +54,7 @@ export default function MemberSpecDisplay() {
 							.map(([key, value]) => {
 								return (
 									<tr key={key}>
-										<td className="py-4 pl-4 pr-3 text-sm font-medium sm:pl-6 text-gray-900">
+										<td className="py-4 pl-4 pr-3 text-sm font-medium sm:pl-6 text-foreground">
 											<Text size="sm">{upperFirst(key.toLowerCase())}</Text>
 										</td>
 										<td className="px-3 py-4 border-l border-l-border">

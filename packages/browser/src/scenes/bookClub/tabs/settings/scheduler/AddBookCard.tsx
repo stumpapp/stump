@@ -182,12 +182,10 @@ export default function AddBookCard({ index }: Props) {
 const LeftAlignedDivider = ({ text }: { text: string }) => (
 	<div className="relative">
 		<div className="inset-0 absolute flex items-center" aria-hidden="true">
-			<div className="w-full border-t border-gray-75 dark:border-gray-800" />
+			<div className="w-full border-t border-border" />
 		</div>
 		<div className="relative flex justify-start">
-			<span className="bg-white pr-2 text-sm text-gray-400 dark:bg-gray-975 dark:text-gray-600">
-				{text}
-			</span>
+			<span className="pr-2 text-sm text-muted-foreground">{text}</span>
 		</div>
 	</div>
 )

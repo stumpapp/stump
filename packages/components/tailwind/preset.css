@@ -36,6 +36,8 @@
 	--color-success-foreground: var(--success-foreground, var(--foreground));
 	--color-warning: var(--warning);
 	--color-warning-foreground: var(--warning-foreground, var(--foreground));
+	--color-debug: var(--debug);
+	--color-debug-foreground: var(--debug-foreground, var(--foreground));
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-switch: var(--switch);

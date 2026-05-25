@@ -23,14 +23,14 @@ function DebugSettings() {
 			</div>
 
 			<div className="gap-2 flex flex-col">
-				<Label className="p-3 flex items-center justify-between rounded-lg border border-dashed border-primary/40 bg-primary/15">
+				<Label className="p-3 flex items-center justify-between rounded-lg border border-dashed border-debug/40 bg-debug/15">
 					<div className="gap-1 flex flex-col">
 						<span>Query Tools</span>
 						<p className="text-sm text-muted-foreground">Enable debugging tools for queries</p>
 					</div>
 					<RawSwitch
 						id="showQueryTools"
-						className="data-[state=checked]:bg-primary/15/60 data-[state=unchecked]:bg-primary/15"
+						className="data-[state=checked]:bg-debug/70 data-[state=unchecked]:bg-debug/30"
 						checked={store.showQueryTools}
 						onCheckedChange={(checked) => store.patch({ showQueryTools: checked })}
 					/>

@@ -41,6 +41,8 @@
 
 		--info: #0ea5e9;
 		--info-foreground: var(--foreground);
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--success: #43a047;
 		--success-foreground: var(--foreground);
 		--warning: #f59e0b;
@@ -97,6 +99,8 @@
 		--sidebar-ring: oklch(0.708 0 0);
 		--radius: 0.625rem;
 
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--info: #0284c7;
 		--info-foreground: var(--foreground);
 		--success: #43a047;
@@ -155,6 +159,8 @@
 		--sidebar-ring: #cf9977;
 		--radius: 0.625rem;
 
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--info: #0284c7;
 		--info-foreground: var(--foreground);
 		--success: #43a047;
@@ -213,6 +219,8 @@
 		--sidebar-ring: #0a9396;
 		--radius: 0.625rem;
 
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--info: #38bdf8;
 		--info-foreground: var(--foreground);
 		--success: #43aa8b;
@@ -275,6 +283,8 @@
 		--sidebar-gradient-to: #130a30;
 		--radius: 0.625rem;
 
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--info: #60a5fa;
 		--info-foreground: var(--foreground);
 		--success: #2ecc71;
@@ -295,69 +305,6 @@
 
 	/* MARK: autumn theme */
 	.autumn {
-		/* TODO(shad): port to shad */
-		/* --color-background: #2c1a12;
-		--color-background-inverse: #fffbf3;
-		--color-background-overlay: #3b2d23;
-		--color-background-overlay-hover: #4d3f33;
-		--color-background-surface: #422f25;
-		--color-background-surface-hover: #5a3f33;
-		--color-background-surface-secondary: #4b382d;
-
-		--color-edge: #4b382d;
-		--color-edge-brand: #d0802d;
-		--color-edge-danger: #c53030;
-		--color-edge-info: #3b82f6;
-		--color-edge-strong: #fffbf3;
-		--color-edge-subtle: #4d3f33;
-		--color-edge-success: #5b8b41;
-		--color-edge-warning: #f59e0b;
-
-		--color-fill-brand: #d08732;
-		--color-fill-brand-hover: #d0802d;
-		--color-fill-brand-secondary: #d0873226;
-		--color-fill-danger: #e25837;
-		--color-fill-danger-hover: #e35f40;
-		--color-fill-danger-secondary: #e2583726;
-		--color-fill-disabled: #726a63;
-		--color-fill-info: #3b82f6;
-		--color-fill-info-hover: #5a9cf6;
-		--color-fill-info-secondary: #3b82f626;
-		--color-fill-success: #7bc96f;
-		--color-fill-success-hover: #8cd37f;
-		--color-fill-success-secondary: #7bc96f26;
-		--color-fill-warning: #ffb703;
-		--color-fill-warning-hover: #ffb70326;
-		--color-fill-warning-secondary: #ffb70326;
-
-		--success: var(--color-fill-success);
-		--success-foreground: var(--foreground);
-		--warning: var(--color-fill-warning);
-		--warning-foreground: var(--foreground);
-		--color-fill-on-black: #242628;
-		--color-fill-on-black-muted: #242628;
-
-		--color-foreground: #f7f0e4;
-		--color-foreground-brand: #d0802d;
-		--color-foreground-disabled: #a29a8d;
-		--color-foreground-muted: #a29a8d;
-		--color-foreground-subtle: #e5dcc5;
-		--color-foreground-on-inverse: #2c1a12;
-		--color-foreground-on-black: #f7f0e4;
-		--color-foreground-on-black-muted: #a29a8d;
-
-		--color-sidebar: #25160f;
-
-		--color-scrollbar: #4b382d;
-		--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
-		--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
-
-		--color-thumbnail-border: rgba(233, 234, 235, 0.1);
-		--color-thumbnail-placeholder: #422f25;
-		--color-thumbnail-stack-series: #d0802d;
-		--color-thumbnail-stack-library-start: #5a3f33;
-		--color-thumbnail-stack-library-end: #d08732; */
-
 		--background: #2c1a12;
 		--foreground: #f7f0e4;
 		--card: #3b2d23;
@@ -396,6 +343,8 @@
 		--sidebar-ring: #d0802d;
 		--radius: 0.625rem;
 
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--info: #3b82f6;
 		--info-foreground: var(--foreground);
 		--success: #7bc96f;
@@ -454,6 +403,8 @@
 		--sidebar-ring: #ff7a1a;
 		--radius: 0.625rem;
 
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--info: #38bdf8;
 		--info-foreground: var(--foreground);
 		--success: #43a047;
@@ -513,6 +464,8 @@
 		--sidebar-ring: #cf9977;
 		--radius: 0.625rem;
 
+		--debug: #6d11af;
+		--debug-foreground: var(--foreground);
 		--info: #38bdf8;
 		--info-foreground: var(--foreground);
 		--success: #43a047;

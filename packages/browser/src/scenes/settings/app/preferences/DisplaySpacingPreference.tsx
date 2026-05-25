@@ -88,18 +88,18 @@ function AppearanceOption({
 				onClick={isDisabled ? undefined : onSelect}
 			>
 				<div
-					className={cx('w-full rounded-md bg-secondary', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
+					className={cx('w-full rounded-md bg-sidebar/80', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
 				<div
-					className={cx('w-2/3 rounded-md bg-secondary', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
+					className={cx('w-2/3 rounded-md bg-sidebar/80', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
 				<div
-					className={cx('w-5/6 rounded-md bg-secondary', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
+					className={cx('w-5/6 rounded-md bg-sidebar/80', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
-				{!isDefaultDisplay && <div className="h-1/5 w-full rounded-md bg-secondary" />}
+				{!isDefaultDisplay && <div className="h-1/5 w-full rounded-md bg-sidebar/80" />}
 
 				{isSelected && (
 					<div className="bottom-2 right-2 h-6 w-6 absolute flex items-center justify-center rounded-full bg-primary">

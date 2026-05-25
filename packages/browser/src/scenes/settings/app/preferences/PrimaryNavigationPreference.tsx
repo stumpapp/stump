@@ -72,12 +72,12 @@ function AppearanceOption({ label, isSelected, onSelect, isSidebar }: Appearance
 
 				<div
 					className={cn('gap-y-4 p-2 flex h-full w-full flex-col', {
-						'bg-background/80': isLightVariant,
+						'bg-background': isLightVariant,
 					})}
 				>
-					<div className="h-1/5 w-2/3 shrink-0 rounded-md bg-secondary" />
-					<div className="h-1/5 w-full shrink-0 rounded-md bg-secondary" />
-					<div className="h-1/5 w-full shrink-0 rounded-md bg-secondary" />
+					<div className="h-1/5 w-2/3 shrink-0 rounded-md bg-sidebar/80" />
+					<div className="h-1/5 w-full shrink-0 rounded-md bg-sidebar/80" />
+					<div className="h-1/5 w-full shrink-0 rounded-md bg-sidebar/80" />
 				</div>
 
 				{isSelected && (

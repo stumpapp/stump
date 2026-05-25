@@ -129,8 +129,8 @@ function ContinueReading() {
 		return (
 			<div className="space-y-2 flex flex-col">
 				<Heading size="sm">{t('homeScene.continueReading.title')}</Heading>
-				<div className="space-x-3 rounded-lg px-4 py-4 flex items-start justify-start border border-dashed border-border">
-					<span className="rounded-lg p-2 border border-border bg-muted">
+				<div className="space-x-3 px-4 py-4 flex items-start justify-start rounded-lg border border-dashed border-border">
+					<span className="p-2 rounded-lg border border-border bg-muted">
 						<BookMarked className="h-8 w-8 text-muted-foreground" />
 					</span>
 					<div>
@@ -208,7 +208,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group rounded-xl relative block shrink-0 overflow-hidden transition-opacity hover:opacity-90"
+			className="group relative block shrink-0 overflow-hidden rounded-xl transition-opacity hover:opacity-90"
 			style={{ width }}
 		>
 			<ThumbnailImage

@@ -81,7 +81,7 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 					}}
 				>
 					{isMissing ? (
-						<span className="text-amber-500">Series Missing</span>
+						<span className="text-warning">Series Missing</span>
 					) : (
 						pluralizeStat('book', data.mediaCount)
 					)}

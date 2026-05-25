@@ -25,7 +25,7 @@ export default function BookClubSettingsSideBar() {
 	return (
 		<div
 			className={cn(
-				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-edge bg-background text-foreground-subtle',
+				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-border bg-background text-foreground',
 				primaryNavigationMode === 'TOPBAR'
 					? 'top-12 fixed z-50 h-screen border-r'
 					: 'top-0 fixed z-50 h-screen border-r',
@@ -36,7 +36,7 @@ export default function BookClubSettingsSideBar() {
 					<ButtonOrLink
 						href="."
 						variant="ghost"
-						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
+						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 						size="sm"
 					>
 						<ArrowLeft className="h-4 w-4 transform" />
@@ -90,7 +90,7 @@ export default function BookClubSettingsSideBar() {
 							title="Go home"
 							variant="ghost"
 							size="icon"
-							className="p-1.5 border border-transparent text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
+							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 							onClick={() => navigate(paths.home())}
 						>
 							<Home className="h-4 w-4 -scale-x-[1] transform" />

@@ -111,7 +111,7 @@ export default function LoginOrClaimScene() {
 			return (
 				<div className="sm:max-w-md md:max-w-lg text-left">
 					<h1 className="text-4xl font-semibold text-foreground">{t('authScene.claimHeading')}</h1>
-					<p className="mt-1.5 text-base text-foreground-subtle">{t('authScene.claimText')}</p>
+					<p className="mt-1.5 text-base text-foreground">{t('authScene.claimText')}</p>
 				</div>
 			)
 		}
@@ -203,10 +203,10 @@ export default function LoginOrClaimScene() {
 								{!oidcConfig.disableLocalAuth && (
 									<div className="my-4 relative">
 										<div className="inset-0 absolute flex items-center">
-											<div className="w-full border-t border-edge" />
+											<div className="w-full border-t border-border" />
 										</div>
 										<div className="text-xs relative flex justify-center uppercase">
-											<span className="px-2 bg-background text-foreground-muted">Or</span>
+											<span className="px-2 bg-background text-muted-foreground">Or</span>
 										</div>
 									</div>
 								)}
@@ -227,15 +227,15 @@ export default function LoginOrClaimScene() {
 
 						{isDesktop && (
 							<button
-								className="group p-4 hover:border-opacity-70 flex w-full items-center justify-between border-l border-edge transition-colors duration-100 hover:border-edge-strong hover:bg-background-surface/50"
+								className="group p-4 hover:border-opacity-70 flex w-full items-center justify-between border-l border-border transition-colors duration-100 hover:border-border hover:bg-muted/50"
 								type="button"
 								onClick={() => setShowServers(true)}
 							>
-								<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+								<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
 									{t('common.goToServers')}
 								</span>
 
-								<ArrowRight className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+								<ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
 							</button>
 						)}
 					</Form>

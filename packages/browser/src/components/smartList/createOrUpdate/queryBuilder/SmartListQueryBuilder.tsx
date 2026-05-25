@@ -63,12 +63,12 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 				</div>
 
 				<div
-					className={cn('ml-4 space-y-8 px-2 pt-4 relative flex flex-col border-l border-l-edge', {
+					className={cn('ml-4 space-y-8 px-2 pt-4 relative flex flex-col border-l border-l-border', {
 						'pointer-events-none': disabled,
 					})}
 				>
 					{groups.length === 0 && (
-						<div className="ml-4 max-w-sm rounded-lg p-4 flex items-center justify-center border border-dashed border-edge">
+						<div className="ml-4 max-w-sm rounded-lg p-4 flex items-center justify-center border border-dashed border-border">
 							<Text variant="muted">{t(getKey('filters.emptyState'))}</Text>
 						</div>
 					)}

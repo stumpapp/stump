@@ -57,7 +57,7 @@ export default function GenericSettingsHeader({ localeBase, routeGroups }: Props
 
 	return (
 		<header
-			className={cn('space-y-4 p-4 md:pl-52 flex w-full flex-col border-b border-b-edge', {
+			className={cn('space-y-4 p-4 md:pl-52 flex w-full flex-col border-b border-b-border', {
 				// Note: We make the border transparent because the width constraint when using a top bar
 				'mx-auto border-b-transparent': preferTopBar && !!layoutMaxWidthPx,
 			})}

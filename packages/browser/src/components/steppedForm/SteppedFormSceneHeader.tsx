@@ -18,7 +18,7 @@ export default function SteppedFormSceneHeader({ subtitleLink }: Props) {
 	const { t } = useLocaleContext()
 
 	return (
-		<header className="space-y-6 p-4 flex w-full flex-col border-b border-b-edge">
+		<header className="space-y-6 p-4 flex w-full flex-col border-b border-b-border">
 			<div>
 				<Heading size="lg" className="font-bold">
 					{t(`${localeBase}.heading`)}

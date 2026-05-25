@@ -88,7 +88,7 @@ export default function APIKeyTable() {
 								)}
 							</span>
 							{permissions.__typename !== 'InheritPermissionStruct' && (
-								<span className="h-5 w-5 rounded-md flex items-center justify-center bg-primary/15">
+								<span className="h-5 w-5 flex items-center justify-center rounded-md bg-primary/15">
 									{permissions.value.length}
 								</span>
 							)}
@@ -190,7 +190,7 @@ export default function APIKeyTable() {
 			<Card className="p-6 flex items-center justify-center border-dashed border-border">
 				<div className="space-y-3 flex flex-col">
 					<div className="relative flex justify-center">
-						<span className="rounded-lg p-2 flex items-center justify-center bg-muted">
+						<span className="p-2 flex items-center justify-center rounded-lg bg-muted">
 							<KeyRound className="h-6 w-6 text-muted-foreground" />
 							<Slash className="h-6 w-6 absolute scale-x-[-1] transform text-foreground opacity-80" />
 						</span>

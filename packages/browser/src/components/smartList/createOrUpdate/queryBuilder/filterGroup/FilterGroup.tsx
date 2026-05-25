@@ -44,13 +44,13 @@ export default function FilterGroup({ idx, group }: Props) {
 									<FieldSelector idx={filterIndex} />
 									{filter.field && (
 										<>
-											<ArrowRight className="h-4 w-4 text-foreground-muted" />
+											<ArrowRight className="h-4 w-4 text-muted-foreground" />
 											<OperatorSelect idx={filterIndex} />
 										</>
 									)}
 									{filter.operation && (
 										<>
-											<ArrowRight className="h-4 w-4 text-foreground-muted" />
+											<ArrowRight className="h-4 w-4 text-muted-foreground" />
 											<FilterValue idx={filterIndex} />
 										</>
 									)}
@@ -60,7 +60,7 @@ export default function FilterGroup({ idx, group }: Props) {
 									<ToolTip content={t(getKey('actions.deleteFilter'))} align="end">
 										<IconButton
 											size="xs"
-											className="text-foreground-muted transition-all duration-200 hover:text-fill-danger"
+											className="text-muted-foreground transition-all duration-200 hover:text-destructive"
 											onClick={() => remove(filterIndex)}
 											disabled={group.filters.length === 1}
 										>
@@ -73,7 +73,7 @@ export default function FilterGroup({ idx, group }: Props) {
 					})}
 				</div>
 
-				<div className="h-12 space-x-4 px-4 flex items-center bg-background-surface/45">
+				<div className="h-12 space-x-4 px-4 flex items-center bg-muted/45">
 					<GroupJoiner />
 
 					<div className="flex-1" />
@@ -92,7 +92,7 @@ export default function FilterGroup({ idx, group }: Props) {
 						variant="ghost"
 						size="sm"
 						newYork
-						className="shrink-0 hover:bg-fill-danger-secondary"
+						className="shrink-0 hover:bg-destructive/15"
 						onClick={() => removeGroup(idx)}
 					>
 						{t(getKey('actions.deleteGroup'))}

@@ -207,7 +207,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 			}}
 		>
 			<div
-				className="inset-0 rounded-xl absolute overflow-hidden border border-edge/50"
+				className="inset-0 absolute overflow-hidden rounded-xl border border-border/50"
 				style={{
 					backgroundColor,
 					boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',

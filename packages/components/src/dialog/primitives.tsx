@@ -52,7 +52,7 @@ const DialogContent = React.forwardRef<
 		<DialogPrimitive.Content
 			ref={ref}
 			className={cn(
-				'gap-6 p-6 text-sm fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-4xl bg-popover text-popover-foreground ring-1 ring-foreground/5 duration-100 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
+				'gap-6 p-6 text-sm fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-popover text-popover-foreground ring-1 ring-foreground/5 duration-100 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
 				DIALOG_CONTENT_SIZES[size] ?? DIALOG_CONTENT_SIZES.md,
 				className,
 			)}
@@ -112,7 +112,7 @@ const DialogClose = React.forwardRef<
 	<DialogPrimitive.Close
 		ref={ref}
 		className={cn(
-			'right-4 top-4 size-8 absolute inline-flex items-center justify-center rounded-4xl text-muted-foreground transition-colors hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none',
+			'right-4 top-4 size-8 absolute inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none',
 			className,
 		)}
 		{...props}

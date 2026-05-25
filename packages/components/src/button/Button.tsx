@@ -33,9 +33,9 @@ export const BUTTON_VARIANTS = {
 }
 
 export const BUTTON_ROUNDED_VARIANTS = {
-	default: 'rounded-4xl',
+	default: 'rounded-md',
 	full: 'rounded-full',
-	lg: 'rounded-2xl',
+	lg: 'rounded-lg',
 	none: 'rounded-none',
 }
 

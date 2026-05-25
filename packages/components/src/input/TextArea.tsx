@@ -22,7 +22,17 @@ const TextArea = React.forwardRef<RawTextAreaRef, TextAreaProps>(
 
 		return (
 			<div className={cn('gap-1.5 grid items-center', containerClassName)}>
-				{label && <Label htmlFor={props.id}>{label}</Label>}
+				{label && (
+					<Label
+						htmlFor={props.id}
+						className={cn({
+							'cursor-not-allowed opacity-50': props.disabled,
+						})}
+					>
+						{label}
+						{props.required && <span className="text-destructive"> *</span>}
+					</Label>
+				)}
 				<RawTextArea
 					variant={variant}
 					ref={ref}

@@ -4,12 +4,12 @@ import React from 'react'
 import { cn } from '../../utils'
 
 export const RAW_INPUT_BASE_CLASSES = [
-	'flex w-full min-w-0 items-center justify-between border border-input bg-input/30 px-3 py-1 text-base text-foreground transition-colors outline-none md:text-sm',
+	'flex w-full min-w-0 items-center justify-between border border-border bg-input/30 px-3 py-1 text-base text-foreground transition-colors outline-none md:text-sm',
 	'file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
 	'placeholder:text-muted-foreground',
 	'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
-	'aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
-	'disabled:cursor-not-allowed disabled:opacity-50',
+	'aria-invalid:border-field-error-border aria-invalid:ring-[3px] aria-invalid:ring-field-error-ring',
+	'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
 ]
 export const RAW_INPUT_SIZE_VARIANTS = {
 	default: 'h-9',
@@ -36,11 +36,11 @@ export const RAW_INPUT_VARIANTS = {
 	},
 	isInvalid: {
 		// TODO(shad): remove
-		true: 'border-destructive ring-[3px] ring-destructive/20 dark:ring-destructive/40',
+		true: 'border-field-error-border ring-[3px] ring-field-error-ring',
 	},
 	// TODO(shad): remove, will drive via tokens
 	rounded: {
-		default: 'rounded-4xl',
+		default: 'rounded-md',
 		md: 'rounded-md',
 		none: 'rounded-none',
 		sm: 'rounded-sm',

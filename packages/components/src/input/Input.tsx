@@ -50,6 +50,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref,
 	) => {
+		const resolvedInvalid = props.isInvalid ?? !!errorMessage
+
 		// TODO(shad): remove
 		const renderLeftDecoration = () => {
 			if (leftDecoration) {
@@ -142,7 +144,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 					<RawInput
 						{...props}
 						ref={ref}
-						isInvalid={!!errorMessage || props.isInvalid}
+						isInvalid={resolvedInvalid}
+						aria-invalid={resolvedInvalid}
 						className={cn(
 							{
 								'pl-10': !!leftDecoration,

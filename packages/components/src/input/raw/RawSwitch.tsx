@@ -9,7 +9,7 @@ export const SWITCH_BASE_CLASSES = [
 	'peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none',
 	'after:absolute after:-inset-x-3 after:-inset-y-2',
 	'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
-	'aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/30',
+	'aria-invalid:border-field-error-border aria-invalid:ring-[3px] aria-invalid:ring-field-error-ring',
 	'data-[state=checked]:bg-primary data-[state=unchecked]:bg-switch',
 	'disabled:cursor-not-allowed disabled:opacity-50',
 ]

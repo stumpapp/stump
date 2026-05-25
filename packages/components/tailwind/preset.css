@@ -30,9 +30,9 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
-	--color-success: var(--success, var(--color-fill-success));
+	--color-success: var(--success);
 	--color-success-foreground: var(--success-foreground, var(--foreground));
-	--color-warning: var(--warning, var(--color-fill-warning));
+	--color-warning: var(--warning);
 	--color-warning-foreground: var(--warning-foreground, var(--foreground));
 	--color-border: var(--border);
 	--color-input: var(--input);

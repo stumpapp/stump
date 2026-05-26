@@ -1,8 +1,11 @@
-import { Label, NativeSelect, Text } from '@stump/components'
+import { cn, NewCard } from '@stump/components'
 import { InterfaceRoundness } from '@stump/graphql'
 
 import { usePreferences } from '@/hooks'
 
+import RadioTileGroup from './RadioTileGroup'
+
+// TODO: honestly it might be good to split interface/cover roundness
 // TODO(i18n): add key/values
 export default function InterfaceRoundnessPreference() {
 	const {
@@ -21,23 +24,54 @@ export default function InterfaceRoundnessPreference() {
 	}
 
 	return (
-		<div className="gap-y-1.5 md:max-w-md flex flex-col">
-			<Label htmlFor="interface-roundness" className="mb-1.5">
-				Interface roundness
-			</Label>
-			<Text size="sm" variant="muted">
-				Controls how rounded core UI surfaces look (buttons, inputs, cards, menus)
-			</Text>
-			<NativeSelect
-				id="interface-roundness"
+		<NewCard.Row
+			label="Interface roundness"
+			description="How rounded the corners are for UI elements"
+		>
+			<RadioTileGroup
 				value={interfaceRoundness || InterfaceRoundness.Normal}
-				onChange={(e) => handleChange(e.target.value as InterfaceRoundness)}
+				onChange={handleChange}
+				columns={4}
 				options={[
-					{ label: 'None', value: InterfaceRoundness.None },
-					{ label: 'Normal', value: InterfaceRoundness.Normal },
-					{ label: 'Rounded', value: InterfaceRoundness.Rounded },
-					{ label: 'Pill', value: InterfaceRoundness.Pill },
+					{
+						label: 'None',
+						value: InterfaceRoundness.None,
+						preview: <RoundnessPreview value={InterfaceRoundness.None} />,
+					},
+					{
+						label: 'Normal',
+						value: InterfaceRoundness.Normal,
+						preview: <RoundnessPreview value={InterfaceRoundness.Normal} />,
+					},
+					{
+						label: 'Rounded',
+						value: InterfaceRoundness.Rounded,
+						preview: <RoundnessPreview value={InterfaceRoundness.Rounded} />,
+					},
+					{
+						label: 'Pill',
+						value: InterfaceRoundness.Pill,
+						preview: <RoundnessPreview value={InterfaceRoundness.Pill} />,
+					},
 				]}
+			/>
+		</NewCard.Row>
+	)
+}
+
+function RoundnessPreview({ value }: { value?: InterfaceRoundness | null }) {
+	const current = value || InterfaceRoundness.Normal
+
+	return (
+		<div className="flex h-full w-full items-center justify-center">
+			<div
+				className={cn(
+					'h-7 shadow-sm w-4/5 border border-foreground/45 bg-foreground/90',
+					{ 'rounded-md': current === InterfaceRoundness.Normal },
+					{ 'rounded-lg': current === InterfaceRoundness.Rounded },
+					{ 'rounded-4xl': current === InterfaceRoundness.Pill },
+					{ 'rounded-none': current === InterfaceRoundness.None },
+				)}
 			/>
 		</div>
 	)

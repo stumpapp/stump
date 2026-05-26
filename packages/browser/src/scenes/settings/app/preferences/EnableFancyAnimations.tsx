@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks/usePreferences'
@@ -17,13 +17,18 @@ export default function EnableFancyAnimations() {
 	}
 
 	return (
-		<WideSwitch
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={enableFancyAnimations}
-			onCheckedChange={handleChange}
-			formId="enableFancyAnimations"
-		/>
+			onClick={handleChange}
+			className="flex-row items-center justify-between"
+		>
+			<RawSwitch
+				id="enableFancyAnimations"
+				checked={enableFancyAnimations}
+				onCheckedChange={handleChange}
+			/>
+		</NewCard.Row>
 	)
 }
 

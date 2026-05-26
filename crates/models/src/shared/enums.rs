@@ -679,7 +679,7 @@ pub enum SupportedFont {
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserPermission {
 	/// Grant access to read/create their own API keys
-	AccessAPIKeys,
+	AccessApiKeys,
 	/// Grant access to the koreader sync feature
 	AccessKoreaderSync,
 	/// Grant access to the kobo sync feature

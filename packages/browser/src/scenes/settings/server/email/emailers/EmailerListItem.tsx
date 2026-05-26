@@ -103,7 +103,7 @@ export default function EmailerListItem({ fragment }: Props) {
 
 			<div>
 				<ToolTip content={`${emailer.smtpHost}:${emailer.smtpPort}`} align="start" size="xs">
-					<Badge size="xs" variant="default" className="cursor-default">
+					<Badge size="xs" className="cursor-default">
 						{displayedHost.name}
 					</Badge>
 				</ToolTip>

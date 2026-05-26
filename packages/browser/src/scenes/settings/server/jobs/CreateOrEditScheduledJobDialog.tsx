@@ -169,7 +169,6 @@ export function CreateOrEditScheduledJobDialog({
 				<Form id={formId} form={form} onSubmit={handleSubmit}>
 					<div className="gap-4 flex flex-col">
 						<Input
-							variant="default"
 							label={t(getKey('fields.name.label'))}
 							placeholder={t(getKey('fields.name.placeholder'))}
 							errorMessage={formErrors.name?.message}
@@ -178,7 +177,6 @@ export function CreateOrEditScheduledJobDialog({
 
 						<div className="gap-2 md:flex-row md:items-end flex flex-col">
 							<Input
-								variant="default"
 								label={t(getKey('fields.schedule.label'))}
 								description={t(getKey('fields.schedule.description'))}
 								descriptionPosition="top"

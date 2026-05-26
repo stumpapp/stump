@@ -215,7 +215,6 @@ export default function UploadModal() {
 								isIndeterminate={uploadProgress === 0}
 								className="h-1.5 rounded-lg"
 								max={100}
-								variant="default"
 							/>
 						</div>
 					</div>

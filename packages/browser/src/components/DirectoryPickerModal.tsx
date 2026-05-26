@@ -105,7 +105,6 @@ export default function DirectoryPickerModal({
 							// isInvalid={!!errorMessage}
 							value={path ?? ''}
 							readOnly
-							variant="default"
 							// TODO: allow input to be editable
 							// onInputStop={(newPath) => {
 							// 	if (newPath) {
@@ -148,12 +147,7 @@ export default function DirectoryPickerModal({
 				</div>
 
 				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
-					<CheckBox
-						variant="default"
-						label="Show Hidden Directories"
-						checked={showHidden}
-						onClick={toggle}
-					/>
+					<CheckBox label="Show Hidden Directories" checked={showHidden} onClick={toggle} />
 
 					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
 						<Button onClick={onClose}>Cancel</Button>

@@ -70,12 +70,12 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			{hasMetadataBadges && (
 				<div className="gap-2 flex flex-wrap items-center">
 					{metadata?.publisher && (
-						<Badge variant="default" size="xs" rounded="full">
+						<Badge size="xs" rounded="full">
 							{metadata.publisher}
 						</Badge>
 					)}
 					{metadata?.language && (
-						<Badge variant="default" size="xs" rounded="full">
+						<Badge size="xs" rounded="full">
 							{metadata.language}
 						</Badge>
 					)}
@@ -181,7 +181,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 								}
 								return (
 									<Link key={link} href={link} underline={false}>
-										<Badge variant="default" size="xs" rounded="full" className="cursor-pointer">
+										<Badge size="xs" rounded="full" className="cursor-pointer">
 											<span>{label}</span>
 											<ExternalLink className="ml-1 h-3 w-3 opacity-90" />
 										</Badge>

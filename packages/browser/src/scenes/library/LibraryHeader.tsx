@@ -66,7 +66,7 @@ export default function LibraryHeader() {
 					{hasPublishers && (
 						<BadgeList>
 							{publishers.map((publisher) => (
-								<Badge key={publisher} variant="default" rounded="full">
+								<Badge key={publisher} rounded="full">
 									{publisher}
 								</Badge>
 							))}

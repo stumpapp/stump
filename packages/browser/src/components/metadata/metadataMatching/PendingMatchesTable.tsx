@@ -329,11 +329,7 @@ const createColumns = (
 			size: 300,
 		}),
 		columnHelper.accessor('entityType', {
-			cell: ({ getValue }) => (
-				<Badge variant="default" size="xs">
-					{getValue()}
-				</Badge>
-			),
+			cell: ({ getValue }) => <Badge size="xs">{getValue()}</Badge>,
 			header: translate(getKey('columns.entityType')),
 			size: 80,
 		}),

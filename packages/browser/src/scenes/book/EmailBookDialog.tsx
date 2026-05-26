@@ -117,7 +117,6 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 							<Badge
 								key={index}
 								size="sm"
-								variant="default"
 								onClick={() => setEmails((curr) => curr.filter((e) => e !== email))}
 							>
 								{email}
@@ -130,7 +129,6 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 							label={t(getFormKey('email.label'))}
 							description={t(getFormKey('email.description'))}
 							fullWidth
-							variant="default"
 							value={currentEmail}
 							onChange={(e) => setCurrentEmail(e.target.value)}
 						/>

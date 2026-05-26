@@ -48,6 +48,21 @@ export default function UploadModal() {
 	const { currentPath, refetch, uploadConfig, libraryID } = useFileExplorerContext()
 
 	const [uploadProgress, setUploadProgress] = useState(0)
+	const [visibleCount, setVisibleCount] = useState(50)
+
+	useEffect(() => {
+		setVisibleCount(50)
+	}, [files.length, uploadType])
+
+	const handleScroll = useCallback(
+		(e: React.UIEvent<HTMLDivElement>) => {
+			const target = e.currentTarget
+			if (target.scrollHeight - target.scrollTop <= target.clientHeight + 150) {
+				setVisibleCount((prev) => Math.min(prev + 50, files.length))
+			}
+		},
+		[files.length],
+	)
 
 	const config = useMemo(
 		() => ({
@@ -261,82 +276,95 @@ export default function UploadModal() {
 					</Dialog.Header>
 
 					<div
-						{...getRootProps()}
-						className={cn(
-							'space-y-4 rounded-lg p-4 flex shrink-0 grow cursor-pointer flex-col items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background-overlay outline-none!',
-							{ 'ring-edge-brand': isFocused },
-						)}
+						className="space-y-4 pr-2 max-h-[55vh] overflow-y-auto"
+						onScroll={handleScroll}
+						style={{
+							scrollbarColor: 'var(--color-scrollbar-thumb) transparent',
+						}}
 					>
-						<input {...getInputProps()} />
-
-						{renderDropContent()}
-					</div>
-
-					{/* Conditionally render the series name input */}
-					{uploadType === 'series' && (
-						<div className="mt-2">
-							<Heading size="xs">Series name</Heading>
-							<Dialog.Description>
-								This will be used as the name of the series directory. Your zip archive will be
-								unpacked here.
-							</Dialog.Description>
-							<Input
-								placeholder="Enter series name"
-								value={seriesDirName}
-								onChange={(e) => setSeriesDirName(e.target.value)}
-								className="mt-2"
-							/>
-						</div>
-					)}
-
-					<Accordion type="single" collapsible>
-						<Accordion.Item
-							value="files"
-							className="rounded-lg px-4 py-2 border-none bg-background-surface/80"
+						<div
+							{...getRootProps()}
+							className={cn(
+								'space-y-4 rounded-lg p-4 flex shrink-0 grow cursor-pointer flex-col items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background-overlay outline-none!',
+								{ 'ring-edge-brand': isFocused },
+							)}
 						>
-							<Accordion.Trigger
-								noUnderline
-								asLabel
-								disabled={!files.length}
-								className={cn('py-2', { 'cursor-not-allowed opacity-50': !files.length })}
+							<input {...getInputProps()} />
+
+							{renderDropContent()}
+						</div>
+
+						{/* Conditionally render the series name input */}
+						{uploadType === 'series' && (
+							<div className="mt-2">
+								<Heading size="xs">Series name</Heading>
+								<Dialog.Description>
+									This will be used as the name of the series directory. Your zip archive will be
+									unpacked here.
+								</Dialog.Description>
+								<Input
+									placeholder="Enter series name"
+									value={seriesDirName}
+									onChange={(e) => setSeriesDirName(e.target.value)}
+									className="mt-2"
+								/>
+							</div>
+						)}
+
+						<Accordion type="single" collapsible>
+							<Accordion.Item
+								value="files"
+								className="rounded-lg px-4 py-2 border-none bg-background-surface/80"
 							>
-								<span>
-									{t(getKey('addedFiles'))}{' '}
-									<span className="text-sm text-foreground-muted">({files.length})</span>
-								</span>
-							</Accordion.Trigger>
+								<Accordion.Trigger
+									noUnderline
+									asLabel
+									disabled={!files.length}
+									className={cn('py-2', { 'cursor-not-allowed opacity-50': !files.length })}
+								>
+									<span>
+										{t(getKey('addedFiles'))}{' '}
+										<span className="text-sm text-foreground-muted">({files.length})</span>
+									</span>
+								</Accordion.Trigger>
 
-							<Accordion.Content>
-								<div className="space-y-1 flex flex-col">
-									{files.map((file, idx) => (
-										<div
-											key={file.name}
-											className="group gap-x-2 rounded-lg p-2 flex items-center border border-edge"
-										>
-											<Text size="sm" className="line-clamp-1">
-												{file.name}
-											</Text>
-											<Text size="sm" variant="muted" className="shrink-0">
-												{formatBytes(file.size)}
-											</Text>
-
-											<div className="flex-1" />
-											<Button
-												variant="ghost"
-												size="xs"
-												className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-												onClick={() => {
-													setFiles((prev) => prev.filter((_, i) => i !== idx))
-												}}
+								<Accordion.Content>
+									<div className="space-y-1 flex flex-col">
+										{files.slice(0, visibleCount).map((file, idx) => (
+											<div
+												key={file.name}
+												className="group gap-x-2 rounded-lg p-2 flex items-center border border-edge"
 											>
-												{t('common.remove')}
-											</Button>
-										</div>
-									))}
-								</div>
-							</Accordion.Content>
-						</Accordion.Item>
-					</Accordion>
+												<Text size="sm" className="line-clamp-1">
+													{file.name}
+												</Text>
+												<Text size="sm" variant="muted" className="shrink-0">
+													{formatBytes(file.size)}
+												</Text>
+
+												<div className="flex-1" />
+												<Button
+													variant="ghost"
+													size="xs"
+													className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+													onClick={() => {
+														setFiles((prev) => prev.filter((_, i) => i !== idx))
+													}}
+												>
+													{t('common.remove')}
+												</Button>
+											</div>
+										))}
+										{files.length > visibleCount && (
+											<div className="p-2 text-xs text-center text-foreground-muted italic">
+												...and {files.length - visibleCount} more files (scroll to load more)
+											</div>
+										)}
+									</div>
+								</Accordion.Content>
+							</Accordion.Item>
+						</Accordion>
+					</div>
 
 					<Dialog.Footer>
 						<Button variant="default" onClick={() => setUploadType(undefined)}>

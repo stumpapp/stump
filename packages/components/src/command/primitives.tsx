@@ -41,7 +41,7 @@ type CommandInputProps = ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 const CommandInput = React.forwardRef<ElementRef<typeof CommandPrimitive.Input>, CommandInputProps>(
 	({ className, iconClassName, wrapperClassName, ...props }, ref) => (
 		<div
-			className={cn('px-4 flex items-center border-b border-b-border', wrapperClassName)}
+			className={cn('px-4 flex items-center rounded-md border border-border', wrapperClassName)}
 			// eslint-disable-next-line react/no-unknown-property
 			cmdk-input-wrapper=""
 		>

@@ -48,6 +48,7 @@ export {
 	CheckBox,
 	type CheckBoxProps,
 	Input,
+	InputGroup,
 	PasswordInput,
 	RawSwitch,
 	RawTextArea,

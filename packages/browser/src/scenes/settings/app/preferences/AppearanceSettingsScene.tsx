@@ -68,41 +68,36 @@ export default function AppearanceSettingsScene() {
 					</NewCard>
 				</div>
 
-				<div>
-					<h3 className="text-base font-medium text-foreground">
-						{t(getKey('layoutAndArrangement.label'))}
-					</h3>
-					<p className="text-sm text-muted-foreground">
-						{t(getKey('layoutAndArrangement.description'))}
-					</p>
+				<div className="gap-y-8 flex flex-col">
+					<div>
+						<h3 className="text-base font-medium text-foreground">
+							{t(getKey('layoutAndArrangement.label'))}
+						</h3>
+						<p className="text-sm text-muted-foreground">
+							{t(getKey('layoutAndArrangement.description'))}
+						</p>
+					</div>
+
+					<NewCard
+						label={t(getKey('navigation.title'))}
+						description={t(getKey('navigation.description'))}
+					>
+						<PrimaryNavigationPreference />
+						<DoubleSidebarToggle />
+						<ReplacePrimarySidebarToggle />
+						<Suspense>
+							<NavigationArrangement />
+						</Suspense>
+					</NewCard>
+
+					<NewCard
+						label="Display and spacing"
+						description="Preferences related to the presentation of content and information"
+					>
+						<DisplaySpacingPreference />
+						<MaxWidthPreference />
+					</NewCard>
 				</div>
-
-				<NewCard
-					label={t(getKey('navigation.title'))}
-					description={t(getKey('navigation.description'))}
-				>
-					<PrimaryNavigationPreference />
-					<DoubleSidebarToggle />
-					<ReplacePrimarySidebarToggle />
-				</NewCard>
-
-				{/* TODO: what group do you belong to fella?
-					i think i'd also like to refactor this to be a row with
-					label/descr left and a trigger to open a sheet or something on right
-					instead of inlining it like this. that will also make it fit better in 
-					sections of one of these groups of cards
-				*/}
-				<Suspense>
-					<NavigationArrangement />
-				</Suspense>
-
-				<NewCard
-					label="Display and spacing"
-					description="Preferences related to the presentation of content and information"
-				>
-					<DisplaySpacingPreference />
-					<MaxWidthPreference />
-				</NewCard>
 
 				<div className="gap-y-8 flex flex-col">
 					<div>

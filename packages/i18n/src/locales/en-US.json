@@ -1489,10 +1489,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
-					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
-					},
+					"description": "Rearrange or tweak the navigation items in your primary navigation",
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",

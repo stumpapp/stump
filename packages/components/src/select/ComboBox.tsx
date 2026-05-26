@@ -269,7 +269,7 @@ export function ComboBox({
 						{filterable && (
 							<>
 								<Command.Input
-									wrapperClassName="m-1 mb-0 h-9 rounded-md border-none bg-input/30 px-3"
+									wrapperClassName="m-1 mb-0 h-9 rounded-md bg-input/30 px-3"
 									iconClassName="mr-0 order-last"
 									className="h-9 py-2"
 									placeholder={filterPlaceholder}

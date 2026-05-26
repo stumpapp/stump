@@ -1,6 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { queryClient, useLoginOrRegister, useOidcConfig, useSDK } from '@stump/client'
-import { Alert, AlertDescription, Button, cx, Form, Heading, Input } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	Button,
+	cx,
+	Form,
+	Heading,
+	Input,
+	PasswordInput,
+} from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { motion, Variants } from 'framer-motion'
@@ -174,7 +183,7 @@ export default function LoginOrClaimScene() {
 									{...form.register('username')}
 								/>
 
-								<Input
+								<PasswordInput
 									id="password"
 									label={t('authScene.form.labels.password')}
 									variant="primary"

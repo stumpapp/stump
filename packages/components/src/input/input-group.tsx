@@ -3,8 +3,8 @@ import * as React from 'react'
 
 import { Button } from '../button'
 import { cn } from '../utils'
-import { Input } from './Input'
-import { TextArea } from './TextArea'
+import { RawInput } from './raw/RawInput'
+import { RawTextArea } from './raw/RawTextArea'
 
 function InputGroupRoot({ className, ...props }: React.ComponentProps<'div'>) {
 	return (
@@ -12,7 +12,7 @@ function InputGroupRoot({ className, ...props }: React.ComponentProps<'div'>) {
 			data-slot="input-group"
 			role="group"
 			className={cn(
-				'group/input-group h-9 min-w-0 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5 relative flex w-full items-center rounded-4xl border border-input bg-input/30 transition-colors outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-data-[align=block-end]:rounded-2xl has-data-[align=block-start]:rounded-2xl has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[textarea]:rounded-xl has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40',
+				'group/input-group h-9 min-w-0 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5 relative flex w-full items-center rounded-md border border-border bg-input/30 text-foreground transition-colors outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-data-[align=block-end]:rounded-md has-data-[align=block-start]:rounded-md has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:border-field-error-border has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-field-error-ring has-[textarea]:rounded-md has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto',
 				className,
 			)}
 			{...props}
@@ -108,9 +108,9 @@ function InputGroupText({ className, ...props }: React.ComponentProps<'span'>) {
 	)
 }
 
-function InputGroupInput({ className, ...props }: Omit<React.ComponentProps<'input'>, 'size'>) {
+function InputGroupInput({ className, ...props }: React.ComponentProps<typeof RawInput>) {
 	return (
-		<Input
+		<RawInput
 			data-slot="input-group-control"
 			className={cn(
 				'flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent',
@@ -121,9 +121,9 @@ function InputGroupInput({ className, ...props }: Omit<React.ComponentProps<'inp
 	)
 }
 
-function InputGroupTextArea({ className, ...props }: React.ComponentProps<'textarea'>) {
+function InputGroupTextArea({ className, ...props }: React.ComponentProps<typeof RawTextArea>) {
 	return (
-		<TextArea
+		<RawTextArea
 			data-slot="input-group-control"
 			className={cn(
 				'py-2 flex-1 resize-none rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent',

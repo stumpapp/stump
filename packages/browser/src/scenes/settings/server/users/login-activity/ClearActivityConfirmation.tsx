@@ -58,7 +58,7 @@ export default function ClearLoginActivityConfirmation() {
 			confirmVariant="danger"
 			trigger={
 				<Button
-					variant="secondary"
+					variant="destructive"
 					onClick={() => setShowConfirmation(true)}
 					disabled={isEmptyState}
 				>

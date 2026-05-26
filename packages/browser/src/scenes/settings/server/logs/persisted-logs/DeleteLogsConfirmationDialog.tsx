@@ -60,7 +60,7 @@ export default function DeleteLogsConfirmationDialog() {
 			confirmVariant="danger"
 			trigger={
 				<Button
-					variant="secondary"
+					variant="destructive"
 					onClick={() => setShowConfirmation(true)}
 					disabled={isEmptyState}
 				>

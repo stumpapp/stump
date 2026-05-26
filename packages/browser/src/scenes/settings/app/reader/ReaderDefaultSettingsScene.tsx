@@ -88,7 +88,7 @@ export default function ReaderDefaultSettingsScene() {
 					</NewCard.Row>
 				</NewCard>
 
-				<div className="gap-y-8 flex flex-col">
+				<div className="gap-y-3 flex flex-col">
 					<div>
 						<h3 className="text-base font-medium text-foreground">
 							{t(getSectionKey('data.sections.clearStore.label'))}

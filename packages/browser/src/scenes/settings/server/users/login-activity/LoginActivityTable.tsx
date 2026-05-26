@@ -97,6 +97,7 @@ export default function LoginActivityTable() {
 					},
 				}}
 				isZeroBasedPagination
+				cellClassName="bg-background"
 			/>
 		</Card>
 	)

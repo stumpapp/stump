@@ -24,12 +24,6 @@ export type InputProps = {
 	errorMessage?: string
 	/** The optional class name for the container. */
 	containerClassName?: string
-	/** TODO(shad): remove leftDecoration, migrate to InputGroup */
-	/** An optional right icon to display inset the input */
-	leftDecoration?: React.ReactNode
-	/** TODO(shad): remove rightDecoration, migrate to InputGroup */
-	/** An optional right icon to display inset the input */
-	rightDecoration?: React.ReactNode
 } & RawInputProps
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -42,8 +36,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 			descriptionProps,
 			fullWidth,
 			containerClassName,
-			leftDecoration,
-			rightDecoration,
 			errorMessage,
 			className,
 			...props
@@ -51,28 +43,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		ref,
 	) => {
 		const resolvedInvalid = props.isInvalid ?? !!errorMessage
-
-		// TODO(shad): remove
-		const renderLeftDecoration = () => {
-			if (leftDecoration) {
-				return (
-					<div className="inset-y-0 left-0 pl-3 absolute flex items-center">{leftDecoration}</div>
-				)
-			}
-
-			return null
-		}
-
-		// TODO(shad): remove
-		const renderRightDecoration = () => {
-			if (rightDecoration) {
-				return (
-					<div className="inset-y-0 right-0 pr-3 absolute flex items-center">{rightDecoration}</div>
-				)
-			}
-
-			return null
-		}
 
 		const renderDescription = () => {
 			if (description) {
@@ -140,21 +110,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 				{topDescription && renderDescription()}
 
 				<div className="relative w-full">
-					{renderLeftDecoration()}
 					<RawInput
 						{...props}
 						ref={ref}
 						isInvalid={resolvedInvalid}
 						aria-invalid={resolvedInvalid}
-						className={cn(
-							{
-								'pl-10': !!leftDecoration,
-							},
-							className,
-						)}
+						className={className}
 						data-testid={props.id}
 					/>
-					{renderRightDecoration()}
 				</div>
 
 				{renderBottom()}

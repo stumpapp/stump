@@ -34,7 +34,7 @@ export const SmallGhost: Story = {
 
 export const MediumGhost: Story = {
 	render: () => (
-		<Button size="md" variant="ghost">
+		<Button variant="ghost">
 			Button
 		</Button>
 	),
@@ -66,7 +66,7 @@ export const SmallPrimary: Story = {
 
 export const MediumPrimary: Story = {
 	render: () => (
-		<Button size="md" variant="primary">
+		<Button variant="primary">
 			Button
 		</Button>
 	),
@@ -88,8 +88,8 @@ export const Outline: Story = {
 	render: () => <Button variant="outline">Button</Button>,
 }
 
-export const Subtle: Story = {
-	render: () => <Button variant="subtle">Button</Button>,
+export const Secondary: Story = {
+	render: () => <Button variant="secondary">Button</Button>,
 }
 
 export const Loading: Story = {

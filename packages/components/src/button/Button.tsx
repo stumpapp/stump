@@ -14,12 +14,6 @@ export const BUTTON_VARIANTS = {
 	danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-ring',
 	// TODO(shad): remove primary, default is primary
 	primary: 'bg-primary text-primary-foreground hover:bg-primary/80',
-	// TODO(shad): remove subtle, use secondary/ghost depending on context
-	subtle: 'bg-muted hover:bg-muted/80 text-muted-foreground',
-	// TODO(shad): remove subtle-dark, use subtle + theme tokens
-	'subtle-dark': 'bg-background text-muted-foreground hover:bg-accent data-[state=open]:bg-accent',
-	// TODO(shad): remove warning
-	warning: 'bg-warning text-warning-foreground hover:bg-warning/85 focus:ring-ring',
 	default: 'bg-primary text-primary-foreground hover:bg-primary/80',
 	outline:
 		'border-border bg-input/30 hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground',
@@ -42,8 +36,6 @@ export const BUTTON_ROUNDED_VARIANTS = {
 export const BUTTON_SIZE_VARIANTS = {
 	default: 'h-9 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5',
 	lg: 'h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
-	// TODO(shad): remove md, keep temporarily
-	md: 'h-9 gap-1 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5',
 	sm: 'h-8 gap-1 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
 	xs: "h-6 gap-1 px-2.5 text-xs has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3",
 	icon: 'size-9',
@@ -53,7 +45,6 @@ export const BUTTON_SIZE_VARIANTS = {
 export const BUTTON_NY_SIZE_VARIANTS = {
 	default: 'h-8 gap-1 px-3',
 	lg: 'h-9 gap-1.5 px-4',
-	md: 'h-8 gap-1 px-3',
 	sm: 'h-7 gap-1 px-2.5',
 	xs: 'h-6 gap-1 px-2 text-xs',
 	icon: 'size-8',
@@ -70,11 +61,6 @@ const buttonVariants = cva(BUTTON_BASE_CLASSES, {
 			className: BUTTON_NY_SIZE_VARIANTS.lg,
 			newYork: true,
 			size: 'lg',
-		},
-		{
-			className: BUTTON_NY_SIZE_VARIANTS.md,
-			newYork: true,
-			size: 'md',
 		},
 		{
 			className: BUTTON_NY_SIZE_VARIANTS.sm,

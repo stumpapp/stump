@@ -36,7 +36,7 @@ export default function RegenerateThumbnails() {
 			<div>
 				<DropdownMenu
 					trigger={
-						<Button size="md" variant="outline">
+						<Button variant="outline">
 							Generate thumbnails
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>

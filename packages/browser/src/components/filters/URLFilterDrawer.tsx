@@ -76,7 +76,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 						size="sm"
 						className="w-full"
 						type="button"
-						variant="danger"
+						variant="destructive"
 						onClick={handleClearFilters}
 					>
 						Clear filters

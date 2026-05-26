@@ -124,7 +124,6 @@ export default function BookManagementScene() {
 							<Button
 								title={data ? 'Analysis already in progress' : 'Analyze this book'}
 								size="md"
-								variant="primary"
 								onClick={handleAnalyze}
 								disabled={!!data || isPending}
 							>

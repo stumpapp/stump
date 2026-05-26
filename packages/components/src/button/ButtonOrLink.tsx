@@ -16,7 +16,6 @@ export function ButtonOrLink({
 	rounded,
 	pressEffect = false,
 	forceAnchor = false,
-	newYork,
 	...props
 }: ButtonOrLinkProps) {
 	const isLink = typeof props.href !== 'undefined'
@@ -38,7 +37,7 @@ export function ButtonOrLink({
 			className={
 				isLink
 					? cn(
-							buttonVariants({ className, newYork, rounded, size, variant }),
+							buttonVariants({ className, rounded, size, variant }),
 							'focus:ring-ring',
 							{
 								'cursor-not-allowed bg-background opacity-50': props.disabled,

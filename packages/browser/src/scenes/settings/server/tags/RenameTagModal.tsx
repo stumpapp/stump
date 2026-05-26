@@ -83,7 +83,6 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 
 					<Button
 						disabled={isPending || !name.trim() || name.trim() === tag?.name}
-						variant="primary"
 						size="sm"
 						onClick={handleRename}
 					>

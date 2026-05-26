@@ -31,7 +31,7 @@ export default function DeleteBookClubSection() {
 					<div>
 						<Button
 							type="button"
-							variant="danger"
+							variant="destructive"
 							onClick={() => setShowConfirmation(true)}
 							className="shrink-0"
 							size="md"

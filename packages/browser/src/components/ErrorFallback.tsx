@@ -36,7 +36,6 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 				</div>
 				<div className="gap-3 pt-3 flex w-full items-center">
 					<ButtonOrLink
-						variant="primary"
 						onClick={resetErrorBoundary}
 						title="Go back to the homepage"
 						forceAnchor

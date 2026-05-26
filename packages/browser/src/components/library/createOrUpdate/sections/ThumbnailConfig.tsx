@@ -309,7 +309,6 @@ export default function ThumbnailConfigForm() {
 							// title={isDifferent ? undefined : t('common.noChanges')}
 							type="submit"
 							// disabled={!isDifferent}
-							variant="primary"
 						>
 							{t('common.saveChanges')}
 						</Button>

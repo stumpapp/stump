@@ -107,7 +107,7 @@ export function EditProviderDialog({ provider }: Props) {
 
 					<Dialog.Footer>
 						<Button
-							variant="danger"
+							variant="destructive"
 							onClick={() => setIsDeleteDialogOpen(true)}
 							disabled={isPending}
 						>
@@ -116,12 +116,11 @@ export function EditProviderDialog({ provider }: Props) {
 
 						<div className="flex-1" />
 
-						<Button variant="default" onClick={handleClose} disabled={isPending}>
+						<Button onClick={handleClose} disabled={isPending}>
 							{t('common.cancel')}
 						</Button>
 
 						<Button
-							variant="primary"
 							type="submit"
 							form="edit-provider-form"
 							disabled={isPending}

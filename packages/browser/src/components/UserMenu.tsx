@@ -33,7 +33,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 				title="Sign out"
 				description="Are you sure you want sign out?"
 				confirmText="Sign out"
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				isOpen={isSignOutConfirmOpen}
 				onClose={() => setIsSignOutConfirmOpen(false)}
 				onConfirm={logout}

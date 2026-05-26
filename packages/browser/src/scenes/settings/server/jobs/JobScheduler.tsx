@@ -130,7 +130,7 @@ export default function JobScheduler() {
 				title={t(getKey('deleteScheduledJob.title'))}
 				description={`${t(getKey('deleteScheduledJob.description')).replace('{{name}}', deleting?.name ?? '')}`}
 				confirmText={t(getKey('deleteScheduledJob.confirm'))}
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				onConfirm={() => deleting && doDelete({ id: deleting.id })}
 				onClose={() => setDeleting(null)}
 			/>

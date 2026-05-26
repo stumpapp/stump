@@ -29,7 +29,7 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 
 	return (
 		<div>
-			<Button variant="danger" disabled={isDisabled} onClick={() => setShowConfirmation(true)}>
+			<Button variant="destructive" disabled={isDisabled} onClick={() => setShowConfirmation(true)}>
 				Delete metadata
 			</Button>
 
@@ -37,7 +37,7 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 				title="Delete metadata"
 				description="Select the impact for the deletion"
 				isOpen={showConfirmation}
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				confirmText="Delete"
 				onConfirm={() => {
 					onConfirmReset(impact)

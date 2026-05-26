@@ -215,7 +215,7 @@ export default function UploadModal() {
 								isIndeterminate={uploadProgress === 0}
 								className="h-1.5 rounded-lg"
 								max={100}
-								variant="primary"
+								variant="default"
 							/>
 						</div>
 					</div>
@@ -336,10 +336,8 @@ export default function UploadModal() {
 					</Accordion>
 
 					<Dialog.Footer>
-						<Button variant="default" onClick={() => setUploadType(undefined)}>
-							{t('common.cancel')}
-						</Button>
-						<Button variant="primary" disabled={!files.length} onClick={onUploadClicked}>
+						<Button onClick={() => setUploadType(undefined)}>{t('common.cancel')}</Button>
+						<Button disabled={!files.length} onClick={onUploadClicked}>
 							{t('common.upload')}
 						</Button>
 					</Dialog.Footer>

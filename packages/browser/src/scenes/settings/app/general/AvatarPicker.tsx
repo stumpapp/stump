@@ -183,7 +183,7 @@ export default function AvatarPicker() {
 
 					<Dialog.Footer>
 						<Button onClick={off}>{t('common.cancel')}</Button>
-						<Button variant="primary" onClick={handleConfirm} disabled={!selectedFile}>
+						<Button onClick={handleConfirm} disabled={!selectedFile}>
 							{t('common.upload')}
 						</Button>
 					</Dialog.Footer>

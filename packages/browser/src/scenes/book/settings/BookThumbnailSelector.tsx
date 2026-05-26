@@ -162,11 +162,8 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 					/>
 
 					<Dialog.Footer>
-						<Button variant="default" onClick={handleCancel}>
-							Cancel
-						</Button>
+						<Button onClick={handleCancel}>Cancel</Button>
 						<Button
-							variant="primary"
 							onClick={handleConfirm}
 							disabled={!page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}

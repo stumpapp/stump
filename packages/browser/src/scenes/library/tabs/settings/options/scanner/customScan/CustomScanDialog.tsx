@@ -36,7 +36,7 @@ export default function CustomScanDialog({ onScan }: Props) {
 
 				<Dialog.Footer>
 					<Button onClick={() => setIsOpen(false)}>{t('common.cancel')}</Button>
-					<Button type="submit" form={FORM_ID} variant="primary">
+					<Button type="submit" form={FORM_ID}>
 						{t('common.scan')}
 					</Button>
 				</Dialog.Footer>

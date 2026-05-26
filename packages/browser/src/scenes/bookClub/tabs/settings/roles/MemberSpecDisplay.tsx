@@ -74,11 +74,7 @@ export default function MemberSpecDisplay() {
 			</Card>
 
 			<div>
-				<Button
-					variant="primary"
-					onClick={() => patchClub({ memberRoleSpec: updatedSpec })}
-					disabled={!isDifferent}
-				>
+				<Button onClick={() => patchClub({ memberRoleSpec: updatedSpec })} disabled={!isDifferent}>
 					Save changes
 				</Button>
 			</div>

@@ -1,5 +1,4 @@
 export { ConfirmationModal, type ConfirmationModalProps } from './ConfirmationModal'
-export { TypeToConfirmModal, type TypeToConfirmModalProps } from './TypeToConfirmModal'
 export {
 	Dialog,
 	DialogContent,
@@ -9,3 +8,4 @@ export {
 	type DialogProps,
 	DialogTitle,
 } from './primitives'
+export { TypeToConfirmModal, type TypeToConfirmModalProps } from './TypeToConfirmModal'

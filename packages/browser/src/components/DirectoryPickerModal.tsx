@@ -100,12 +100,12 @@ export default function DirectoryPickerModal({
 
 						{/* TODO: error message display */}
 						<Input
-							className="line-clamp-1 h-[37px]"
+							className="h-9.25 line-clamp-1"
 							containerClassName="max-w-full"
 							// isInvalid={!!errorMessage}
 							value={path ?? ''}
 							readOnly
-							variant="primary"
+							variant="default"
 							// TODO: allow input to be editable
 							// onInputStop={(newPath) => {
 							// 	if (newPath) {
@@ -149,7 +149,7 @@ export default function DirectoryPickerModal({
 
 				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
 					<CheckBox
-						variant="primary"
+						variant="default"
 						label="Show Hidden Directories"
 						checked={showHidden}
 						onClick={toggle}
@@ -157,9 +157,7 @@ export default function DirectoryPickerModal({
 
 					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
 						<Button onClick={onClose}>Cancel</Button>
-						<Button variant="primary" onClick={handleConfirm}>
-							Confirm
-						</Button>
+						<Button onClick={handleConfirm}>Confirm</Button>
 					</div>
 				</Dialog.Footer>
 			</Dialog.Content>

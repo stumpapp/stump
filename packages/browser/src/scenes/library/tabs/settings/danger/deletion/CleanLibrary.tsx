@@ -102,7 +102,7 @@ export default function CleanLibrary() {
 					title={t(getKey('confirmation.label'))}
 					description={t(getKey('confirmation.text'))}
 					confirmText={t(getKey('confirmation.label'))}
-					confirmVariant="danger"
+					confirmVariant="destructive"
 					isOpen={showConfirmation}
 					onClose={() => setShowConfirmation(false)}
 					onConfirm={handleClean}

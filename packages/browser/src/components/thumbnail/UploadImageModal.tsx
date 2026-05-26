@@ -115,10 +115,8 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				</div>
 
 				<Dialog.Footer>
-					<Button variant="default" onClick={onClose}>
-						Cancel
-					</Button>
-					<Button variant="primary" onClick={handleConfirm} disabled={!selectedFile}>
+					<Button onClick={onClose}>Cancel</Button>
+					<Button onClick={handleConfirm} disabled={!selectedFile}>
 						Confirm selection
 					</Button>
 				</Dialog.Footer>

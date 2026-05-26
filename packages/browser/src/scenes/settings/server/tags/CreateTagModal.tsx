@@ -85,12 +85,7 @@ export default function CreateTagModal() {
 						{t('common.cancel')}
 					</Button>
 
-					<Button
-						disabled={isPending || !name.trim()}
-						variant="primary"
-						size="sm"
-						onClick={handleCreate}
-					>
+					<Button disabled={isPending || !name.trim()} size="sm" onClick={handleCreate}>
 						{t(getKey('modal.submit'))}
 					</Button>
 				</Dialog.Footer>

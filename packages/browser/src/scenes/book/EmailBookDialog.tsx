@@ -130,7 +130,7 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 							label={t(getFormKey('email.label'))}
 							description={t(getFormKey('email.description'))}
 							fullWidth
-							variant="primary"
+							variant="default"
 							value={currentEmail}
 							onChange={(e) => setCurrentEmail(e.target.value)}
 						/>
@@ -185,7 +185,7 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 					<Button onClick={onClose} disabled={isSending}>
 						Cancel
 					</Button>
-					<Button variant="primary" onClick={handleSend} disabled={isSending} isLoading={isSending}>
+					<Button onClick={handleSend} disabled={isSending} isLoading={isSending}>
 						Confirm
 					</Button>
 				</Dialog.Footer>

@@ -154,7 +154,6 @@ export default function CreateAPIKeyModal() {
 
 					<Button
 						disabled={isPending}
-						variant="primary"
 						size="sm"
 						type={apiSecret ? 'button' : 'submit'}
 						form={apiSecret ? undefined : CREATE_OR_UPDATE_API_KEY_FORM_ID}

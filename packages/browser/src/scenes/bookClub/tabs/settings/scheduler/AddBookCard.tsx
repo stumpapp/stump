@@ -70,7 +70,11 @@ export default function AddBookCard({ index }: Props) {
 						{bookName}
 					</Heading>
 					<div>
-						<Button variant="danger" onClick={() => setSelectedBook(null)} className="shrink-0">
+						<Button
+							variant="destructive"
+							onClick={() => setSelectedBook(null)}
+							className="shrink-0"
+						>
 							Remove selection
 						</Button>
 					</div>

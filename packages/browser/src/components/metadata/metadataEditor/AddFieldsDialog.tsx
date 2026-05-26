@@ -66,7 +66,6 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 				<Dialog.Footer>
 					<Button onClick={() => setIsOpen(false)}>{t('common.cancel')}</Button>
 					<Button
-						variant="primary"
 						disabled={parsedValues.length === 0}
 						onClick={() => {
 							onSave(parsedValues)

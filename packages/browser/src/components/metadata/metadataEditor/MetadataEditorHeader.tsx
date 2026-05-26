@@ -13,9 +13,8 @@ export const MetadataEditorHeader = () => {
 				<Button
 					type="button"
 					size="sm"
-					newYork
 					variant="outline"
-					className="rounded-lg"
+					className="h-7 px-2.5 rounded-lg"
 					onClick={onCancel}
 				>
 					Cancel
@@ -23,14 +22,7 @@ export const MetadataEditorHeader = () => {
 			)}
 
 			{isEditing && (
-				<Button
-					type="submit"
-					size="sm"
-					newYork
-					variant="primary"
-					className="rounded-lg"
-					onClick={onSave}
-				>
+				<Button type="submit" size="sm" className="h-7 px-2.5 rounded-lg" onClick={onSave}>
 					Save
 				</Button>
 			)}
@@ -39,9 +31,8 @@ export const MetadataEditorHeader = () => {
 				<Button
 					type="button"
 					size="sm"
-					newYork
 					variant="outline"
-					className="rounded-lg"
+					className="h-7 px-2.5 rounded-lg"
 					onClick={() => setState(MetadataEditorState.Editing)}
 				>
 					Edit

@@ -81,9 +81,8 @@ export default function FilterGroup({ idx, group }: Props) {
 					<Button
 						variant="ghost"
 						size="sm"
-						newYork
 						onClick={() => append({} as FilterSchema)}
-						className="shrink-0"
+						className="h-7 px-2.5 shrink-0"
 					>
 						{t(getKey('actions.addFilter'))}
 					</Button>
@@ -91,8 +90,7 @@ export default function FilterGroup({ idx, group }: Props) {
 					<Button
 						variant="ghost"
 						size="sm"
-						newYork
-						className="shrink-0 hover:bg-destructive/15"
+						className="h-7 px-2.5 shrink-0 hover:bg-destructive/15"
 						onClick={() => removeGroup(idx)}
 					>
 						{t(getKey('actions.deleteGroup'))}

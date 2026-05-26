@@ -10,10 +10,6 @@ export const BUTTON_BASE_CLASSES = [
 ]
 
 export const BUTTON_VARIANTS = {
-	// TODO(shad): remove danger
-	danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-ring',
-	// TODO(shad): remove primary, default is primary
-	primary: 'bg-primary text-primary-foreground hover:bg-primary/80',
 	default: 'bg-primary text-primary-foreground hover:bg-primary/80',
 	outline:
 		'border-border bg-input/30 hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground',
@@ -41,48 +37,13 @@ export const BUTTON_SIZE_VARIANTS = {
 	icon: 'size-9',
 }
 
-// TODO(shad): remove newYork lol
-export const BUTTON_NY_SIZE_VARIANTS = {
-	default: 'h-8 gap-1 px-3',
-	lg: 'h-9 gap-1.5 px-4',
-	sm: 'h-7 gap-1 px-2.5',
-	xs: 'h-6 gap-1 px-2 text-xs',
-	icon: 'size-8',
-}
-
 const buttonVariants = cva(BUTTON_BASE_CLASSES, {
-	compoundVariants: [
-		{
-			className: BUTTON_NY_SIZE_VARIANTS.default,
-			newYork: true,
-			size: 'default',
-		},
-		{
-			className: BUTTON_NY_SIZE_VARIANTS.lg,
-			newYork: true,
-			size: 'lg',
-		},
-		{
-			className: BUTTON_NY_SIZE_VARIANTS.sm,
-			newYork: true,
-			size: 'sm',
-		},
-		{
-			className: BUTTON_NY_SIZE_VARIANTS.xs,
-			newYork: true,
-			size: 'xs',
-		},
-	],
 	defaultVariants: {
 		rounded: 'default',
 		size: 'default',
 		variant: 'default',
 	},
 	variants: {
-		// TODO: remove this new york shit and just create better size variants
-		newYork: {
-			true: '',
-		},
 		rounded: BUTTON_ROUNDED_VARIANTS,
 		size: BUTTON_SIZE_VARIANTS,
 		variant: BUTTON_VARIANTS,
@@ -107,7 +68,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			primaryFocus = true,
 			isLoading,
 			children,
-			newYork,
 			...props
 		},
 		ref,
@@ -116,7 +76,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			<ButtonContext.Provider value={{ variant }}>
 				<button
 					className={cn(
-						buttonVariants({ className, newYork, rounded, size, variant }),
+						buttonVariants({ className, rounded, size, variant }),
 						{
 							'active:scale-95': pressEffect,
 							'cursor-not-allowed': props.disabled,
@@ -128,14 +88,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 					type="button"
 					{...props}
 				>
-					{isLoading ? (
-						<ProgressSpinner
-							variant={variant === 'primary' ? 'primary' : 'default'}
-							size={size === 'icon' ? 'sm' : size}
-						/>
-					) : (
-						children
-					)}
+					{isLoading ? <ProgressSpinner size={size === 'icon' ? 'sm' : size} /> : children}
 				</button>
 			</ButtonContext.Provider>
 		)

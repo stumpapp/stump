@@ -66,12 +66,7 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 						<Button onClick={onClose} disabled={isPending}>
 							Cancel
 						</Button>
-						<Button
-							variant="primary"
-							isLoading={isPending}
-							disabled={isPending}
-							onClick={handleDelete}
-						>
+						<Button isLoading={isPending} disabled={isPending} onClick={handleDelete}>
 							Delete User
 						</Button>
 					</div>

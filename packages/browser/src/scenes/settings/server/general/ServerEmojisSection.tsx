@@ -282,15 +282,10 @@ export default function ServerEmojisSection() {
 						</div>
 
 						<div className="gap-2 flex items-center">
-							<Button
-								variant="default"
-								disabled={!selectedFile || isUploading}
-								onClick={clearSelection}
-							>
+							<Button disabled={!selectedFile || isUploading} onClick={clearSelection}>
 								{t('common.cancel')}
 							</Button>
 							<Button
-								variant="primary"
 								disabled={!selectedFile || !emojiName.trim() || isUploading}
 								onClick={handleUpload}
 							>
@@ -324,15 +319,10 @@ export default function ServerEmojisSection() {
 												onChange={(event) => setRenameValue(event.target.value)}
 												placeholder="emoji_name"
 											/>
-											<Button
-												variant="primary"
-												size="sm"
-												disabled={isRenaming}
-												onClick={confirmRename}
-											>
+											<Button size="sm" disabled={isRenaming} onClick={confirmRename}>
 												{t('common.save')}
 											</Button>
-											<Button variant="default" size="sm" onClick={cancelRename}>
+											<Button size="sm" onClick={cancelRename}>
 												{t('common.cancel')}
 											</Button>
 										</div>
@@ -377,7 +367,7 @@ export default function ServerEmojisSection() {
 				title={t(getKey('deleteModal.title'))}
 				description={t(getKey('deleteModal.description'))}
 				confirmText={t('common.delete')}
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				isOpen={!!deletingEmoji}
 				onClose={() => setDeletingEmoji(null)}
 				onConfirm={confirmDelete}

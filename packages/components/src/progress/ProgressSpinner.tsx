@@ -44,7 +44,7 @@ export const ProgressSpinner = forwardRef<ElementRef<'svg'>, ProgressSpinnerProp
 					spinnerVariants({ className, size, variant }),
 					{
 						'fill-primary-foreground text-primary-foreground/35':
-							buttonContext?.variant === 'primary',
+							buttonContext?.variant === 'default',
 					},
 
 					className,

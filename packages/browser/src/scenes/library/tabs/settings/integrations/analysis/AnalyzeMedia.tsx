@@ -37,9 +37,7 @@ export default function AnalyzeMedia() {
 			</Alert>
 
 			<div>
-				<Button variant="primary" onClick={handleAnalyze}>
-					Analyze books
-				</Button>
+				<Button onClick={handleAnalyze}>Analyze books</Button>
 			</div>
 		</div>
 	)

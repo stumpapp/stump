@@ -274,7 +274,7 @@ export function PendingMatchesTable() {
 					{t(getKey('acceptAll.label'))}
 				</Button>
 				<Button
-					variant="danger"
+					variant="destructive"
 					size="sm"
 					disabled={isRejectingAll}
 					onClick={() => rejectAll(undefined as never)}
@@ -284,7 +284,7 @@ export function PendingMatchesTable() {
 
 				<div className="flex-1" />
 
-				<Button variant="primary" size="sm" onClick={handleReviewAll}>
+				<Button size="sm" onClick={handleReviewAll}>
 					{t(getKey('startReview'))}
 				</Button>
 			</div>

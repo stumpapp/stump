@@ -48,7 +48,7 @@ export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 			title="Delete device"
 			description="Are you sure you want to delete this device?"
 			confirmText="Delete device"
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={!!device}
 			onClose={onClose}
 			onConfirm={handleConfirm}

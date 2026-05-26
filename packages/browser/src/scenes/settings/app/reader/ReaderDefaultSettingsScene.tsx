@@ -99,7 +99,7 @@ export default function ReaderDefaultSettingsScene() {
 					</div>
 
 					<div>
-						<Button variant="danger" size="sm" onClick={clearStore} disabled={!canClearStore}>
+						<Button variant="destructive" size="sm" onClick={clearStore} disabled={!canClearStore}>
 							{t(getSectionKey('data.sections.clearStore.button'))}
 						</Button>
 					</div>

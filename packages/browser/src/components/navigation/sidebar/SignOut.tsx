@@ -17,7 +17,7 @@ export default function SignOut() {
 			title="Sign out"
 			description="Are you sure you want sign out?"
 			confirmText="Sign out"
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={off}
 			onConfirm={handleLogout}

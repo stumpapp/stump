@@ -117,7 +117,6 @@ export default function IgnoreRulesConfig() {
 					title={hasChanges ? undefined : t('common.noChanges')}
 					type="submit"
 					disabled={!hasChanges}
-					variant="primary"
 					className="mt-4"
 				>
 					{t(getKey('save'))}

@@ -368,14 +368,16 @@ impl BookEntitlementContainer {
 			m.reading_session.as_ref(),
 			m.finished_reading_session_last_completed_at,
 		) {
-			// latest session was abandoned
-			(Some(rs), last_completed_at) if rs.status == ReadingStatus::Abandoned => {
-				match last_completed_at {
-					Some(t) => ReadingState::finished(media_id.to_string(), t),
-					// TODO(kobo): determine whether this is ideal outcome. if a book was abandoned, it wasn't
-					// really `unread` but think for now this is acceptable.
-					None => ReadingState::unread(media_id.to_string()),
-				}
+			// latest session was abandoned but there is a prior completion
+			(Some(rs), Some(last_completed_at))
+				if rs.status == ReadingStatus::Abandoned =>
+			{
+				ReadingState::finished(media_id.to_string(), last_completed_at)
+			},
+			// TODO(kobo): determine whether this is ideal outcome. if a book was abandoned, it wasn't
+			// really `unread` but think for now this is acceptable.
+			(Some(rs), None) if rs.status == ReadingStatus::Abandoned => {
+				ReadingState::unread(media_id.to_string())
 			},
 			// latest session is completed
 			(Some(rs), _) if rs.status == ReadingStatus::Finished => {

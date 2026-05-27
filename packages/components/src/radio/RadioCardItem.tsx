@@ -36,10 +36,10 @@ export function RadioCardItem({
 		<Label
 			htmlFor={value}
 			className={cn(
-				'p-4 font-normal relative cursor-pointer rounded-lg border bg-muted transition-colors duration-150 focus:outline-none',
-				disabled ? 'cursor-not-allowed opacity-70' : 'hover:bg-accent/70',
+				'p-4 font-normal relative cursor-pointer rounded-lg border bg-card transition-colors duration-150 focus:outline-none',
+				disabled ? 'cursor-not-allowed opacity-70' : 'hover:bg-accent/50',
 				{
-					'border-primary bg-muted/75 ring-2 ring-ring': isActive,
+					'border-primary ring-2 ring-ring': isActive,
 				},
 				{ 'hover:bg-accent': isActive && !disabled },
 				{

@@ -147,7 +147,12 @@ export default function CreateAPIKeyModal() {
 
 				<Dialog.Footer>
 					{!apiSecret && (
-						<Button disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
+						<Button
+							disabled={isPending}
+							onClick={() => setIsOpen(false)}
+							size="sm"
+							variant="outline"
+						>
 							{t('common.cancel')}
 						</Button>
 					)}

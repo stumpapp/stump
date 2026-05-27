@@ -75,7 +75,6 @@ export default function APIKeyTable() {
 					<div className="flex">
 						<Badge
 							variant="primary"
-							size="sm"
 							className={cn('space-x-1 pl-2 pr-1 flex items-center justify-between', {
 								'pr-2': permissions.__typename === 'InheritPermissionStruct',
 							})}
@@ -88,7 +87,7 @@ export default function APIKeyTable() {
 								)}
 							</span>
 							{permissions.__typename !== 'InheritPermissionStruct' && (
-								<span className="h-5 w-5 flex items-center justify-center rounded-md bg-primary/15">
+								<span className="size-4 flex items-center justify-center rounded-md bg-primary/15">
 									{permissions.value.length}
 								</span>
 							)}

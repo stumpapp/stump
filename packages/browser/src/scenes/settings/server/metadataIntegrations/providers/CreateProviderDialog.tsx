@@ -119,7 +119,7 @@ export function CreateProviderDialog() {
 					</Form>
 
 					<Dialog.Footer>
-						<Button onClick={onSecondaryButtonClick} disabled={isPending}>
+						<Button onClick={onSecondaryButtonClick} disabled={isPending} variant="outline">
 							{step === 1 ? t('common.back') : t('common.cancel')}
 						</Button>
 

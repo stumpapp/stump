@@ -38,7 +38,7 @@ export function DatePicker({
 			<PopoverTrigger asChild>
 				<div
 					className={cn(
-						'w-[280px]',
+						'w-70',
 						{
 							'gap-1.5 flex flex-col': !!label,
 						},
@@ -48,7 +48,6 @@ export function DatePicker({
 					{label && <Label>{label}</Label>}
 					<Button
 						variant="outline"
-						size="md"
 						type="button"
 						className={cn(
 							'font-normal w-full justify-start text-left',

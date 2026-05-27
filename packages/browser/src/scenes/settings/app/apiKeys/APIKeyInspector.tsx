@@ -1,7 +1,7 @@
-import { Badge, Label, Sheet, Text } from '@stump/components'
+import { Alert, AlertDescription, AlertTitle, Badge, NewCard, Sheet, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { intlFormat, isValid, parseISO } from 'date-fns'
-import { KeyRound, Sparkles } from 'lucide-react'
+import { KeyRound, ShieldAlert } from 'lucide-react'
 
 import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
@@ -39,24 +39,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		user.isServerOwner && displayedData?.permissions.__typename === 'InheritPermissionStruct'
 
 	const renderPermissions = () => {
-		if (isAllPermissions) {
-			return (
-				<div
-					className="mx-4 my-2 space-y-1.5 flex flex-col rounded-lg bg-warning/15 p-[3px]"
-					data-testid="unrestricted-meta"
-				>
-					<div className="px-2.5 py-0.5 flex items-center text-warning">
-						<Sparkles className="mr-2 h-4 w-4" />
-						<span className="font-medium">{t(getKey('unrestrictedKey.heading'))}</span>
-					</div>
-					<div className="p-2.5 rounded-lg bg-warning/15">
-						<Text size="sm" className="text-warning">
-							{t(getKey('unrestrictedKey.description'))}
-						</Text>
-					</div>
-				</div>
-			)
-		}
+		if (isAllPermissions) return null
 
 		const permissions =
 			displayedData?.permissions.__typename === 'InheritPermissionStruct'
@@ -64,8 +47,25 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 				: displayedData?.permissions.value || []
 
 		return (
+			<div data-testid="permissions-meta">
+				<Text variant="label" size="sm">
+					Permissions
+				</Text>
+				<div className="gap-2 mt-1.5 flex flex-row flex-wrap">
+					{permissions.map((perm) => (
+						<Badge key={perm} variant="primary" data-testid="permission-badge">
+							{perm}
+						</Badge>
+					))}
+				</div>
+			</div>
+		)
+
+		return <NewCard.Row label={t(getSharedKey('fields.permissions'))}></NewCard.Row>
+
+		return (
 			<div
-				className="mx-4 my-2 space-y-1.5 flex flex-col rounded-lg bg-muted p-[3px]"
+				className="mx-4 my-2 space-y-1.5 p-0.75 flex flex-col rounded-lg bg-muted"
 				data-testid="permissions-meta"
 			>
 				<div className="px-2.5 py-0.5 flex items-center text-foreground/80">
@@ -98,30 +98,36 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 			title="API key"
 			description="A detailed view of this key"
 		>
-			<div className="flex flex-col">
-				<div className="px-4 py-2" data-testid="name-meta">
-					<Label className="text-muted-foreground">{t(getSharedKey('fields.name'))}</Label>
-					<Text size="sm">{displayedData?.name}</Text>
-				</div>
+			<div className="px-4 gap-4 flex flex-col">
+				{isAllPermissions && (
+					<Alert variant="warning" data-testid="unrestricted-meta">
+						<ShieldAlert className="size-4" />
+						<AlertTitle>{t(getKey('unrestrictedKey.heading'))}</AlertTitle>
+						<AlertDescription>{t(getKey('unrestrictedKey.description'))}</AlertDescription>
+					</Alert>
+				)}
+
+				<NewCard>
+					<NewCard.Row label={t(getSharedKey('fields.name'))} data-testid="name-meta">
+						<Text size="sm">{displayedData?.name}</Text>
+					</NewCard.Row>
+
+					<NewCard.Row label={t(getSharedKey('fields.expiration'))} data-testid="expire-meta">
+						<Text size="sm">{expirationFormatted ?? t('common.never')}</Text>
+					</NewCard.Row>
+
+					<NewCard.Row label={t(getSharedKey('fields.last_used'))} data-testid="last_used-meta">
+						<Text size="sm">{lastUsedAtFormatted ?? t('common.never')}</Text>
+					</NewCard.Row>
+
+					{createdAtFormatted && (
+						<NewCard.Row label={t(getSharedKey('fields.created'))} data-testid="created-meta">
+							<Text size="sm">{createdAtFormatted}</Text>
+						</NewCard.Row>
+					)}
+				</NewCard>
 
 				{renderPermissions()}
-
-				<div className="px-4 py-2" data-testid="expire-meta">
-					<Label className="text-muted-foreground">{t(getSharedKey('fields.expiration'))}</Label>
-					<Text size="sm">{expirationFormatted ?? t('common.never')}</Text>
-				</div>
-
-				<div className="my-2 px-4 py-2 bg-muted" data-testid="last_used-meta">
-					<Label className="text-muted-foreground">{t(getSharedKey('fields.last_used'))}</Label>
-					<Text size="sm">{lastUsedAtFormatted ?? t('common.never')}</Text>
-				</div>
-
-				{createdAtFormatted && (
-					<div className="px-4 py-2" data-testid="created-meta">
-						<Label className="text-muted-foreground">{t(getSharedKey('fields.created'))}</Label>
-						<Text size="sm">{createdAtFormatted}</Text>
-					</div>
-				)}
 			</div>
 		</Sheet>
 	)

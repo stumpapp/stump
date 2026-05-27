@@ -200,7 +200,9 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 					<Suspense>{renderContent()}</Suspense>
 
 					<Dialog.Footer>
-						<Button onClick={handleCancel}>Cancel</Button>
+						<Button variant="outline" onClick={handleCancel}>
+							Cancel
+						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!selectedBook || !page}

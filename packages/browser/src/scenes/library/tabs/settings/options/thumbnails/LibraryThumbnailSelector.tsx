@@ -194,9 +194,10 @@ export default function LibraryThumbnailSelector() {
 					</Dialog.Header>
 
 					<Suspense>{renderContent()}</Suspense>
-
 					<Dialog.Footer>
-						<Button onClick={handleCancel}>Cancel</Button>
+						<Button variant="outline" onClick={handleCancel}>
+							Cancel
+						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!selectedSeries || !selectedBook || !page}

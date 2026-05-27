@@ -116,7 +116,7 @@ export function EditProviderDialog({ provider }: Props) {
 
 						<div className="flex-1" />
 
-						<Button onClick={handleClose} disabled={isPending}>
+						<Button variant="outline" onClick={handleClose} disabled={isPending}>
 							{t('common.cancel')}
 						</Button>
 

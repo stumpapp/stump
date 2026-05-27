@@ -64,7 +64,9 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 				</div>
 
 				<Dialog.Footer>
-					<Button onClick={() => setIsOpen(false)}>{t('common.cancel')}</Button>
+					<Button variant="outline" onClick={() => setIsOpen(false)}>
+						{t('common.cancel')}
+					</Button>
 					<Button
 						disabled={parsedValues.length === 0}
 						onClick={() => {

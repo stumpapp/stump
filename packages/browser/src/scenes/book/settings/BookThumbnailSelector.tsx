@@ -162,7 +162,9 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 					/>
 
 					<Dialog.Footer>
-						<Button onClick={handleCancel}>Cancel</Button>
+						<Button variant="outline" onClick={handleCancel}>
+							Cancel
+						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!page}

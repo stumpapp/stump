@@ -335,7 +335,9 @@ export default function UploadModal() {
 					</Accordion>
 
 					<Dialog.Footer>
-						<Button onClick={() => setUploadType(undefined)}>{t('common.cancel')}</Button>
+						<Button variant="outline" onClick={() => setUploadType(undefined)}>
+							{t('common.cancel')}
+						</Button>
 						<Button disabled={!files.length} onClick={onUploadClicked}>
 							{t('common.upload')}
 						</Button>

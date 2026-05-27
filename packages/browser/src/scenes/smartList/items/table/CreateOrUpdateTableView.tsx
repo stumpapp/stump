@@ -115,7 +115,9 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 				</Form>
 
 				<Dialog.Footer>
-					<Button onClick={onClose}>Cancel</Button>
+					<Button variant="outline" onClick={onClose}>
+						Cancel
+					</Button>
 					<Button type="submit" form="create-or-update-view">
 						{isCreating ? t('common.create') : t('common.saveChanges')}
 					</Button>

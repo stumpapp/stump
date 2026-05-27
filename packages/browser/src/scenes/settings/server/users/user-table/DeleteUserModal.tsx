@@ -62,7 +62,7 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 					</div>
 
 					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
-						<Button onClick={onClose} disabled={isPending}>
+						<Button variant="outline" onClick={onClose} disabled={isPending}>
 							Cancel
 						</Button>
 						<Button isLoading={isPending} disabled={isPending} onClick={handleDelete}>

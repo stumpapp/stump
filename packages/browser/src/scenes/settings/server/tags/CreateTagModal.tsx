@@ -81,7 +81,7 @@ export default function CreateTagModal() {
 				</form>
 
 				<Dialog.Footer>
-					<Button disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
+					<Button variant="outline" disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
 						{t('common.cancel')}
 					</Button>
 

@@ -182,7 +182,9 @@ export default function AvatarPicker() {
 					</div>
 
 					<Dialog.Footer>
-						<Button onClick={off}>{t('common.cancel')}</Button>
+						<Button variant="outline" onClick={off}>
+							{t('common.cancel')}
+						</Button>
 						<Button onClick={handleConfirm} disabled={!selectedFile}>
 							{t('common.upload')}
 						</Button>
@@ -205,11 +207,7 @@ export default function AvatarPicker() {
 							align="start"
 							contentWrapperClassName="w-18"
 							trigger={
-								<Button
-									variant="subtle-dark"
-									size="xs"
-									className="px-2 py-1.5 border border-border"
-								>
+								<Button size="xs" className="px-2 py-1.5 border border-border">
 									<Edit className="mr-2 h-3 w-3" />
 									{t('common.edit')}
 								</Button>

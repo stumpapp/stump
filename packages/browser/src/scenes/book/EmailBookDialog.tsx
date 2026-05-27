@@ -180,7 +180,7 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 				</div>
 
 				<Dialog.Footer>
-					<Button onClick={onClose} disabled={isSending}>
+					<Button variant="outline" onClick={onClose} disabled={isSending}>
 						Cancel
 					</Button>
 					<Button onClick={handleSend} disabled={isSending} isLoading={isSending}>

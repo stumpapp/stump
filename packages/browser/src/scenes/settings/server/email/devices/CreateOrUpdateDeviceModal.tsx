@@ -136,7 +136,9 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 				</div>
 
 				<Dialog.Footer>
-					<Button onClick={onClose}>Cancel</Button>
+					<Button variant="outline" onClick={onClose}>
+						Cancel
+					</Button>
 					<Button type="submit" form="create-or-update-device-form">
 						{t(updatingDevice ? getKey('submit.update') : getKey('submit.create'))}
 					</Button>

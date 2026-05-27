@@ -35,7 +35,6 @@ export default function DeleteLibrary() {
 							variant="destructive"
 							onClick={() => setShowConfirmation(true)}
 							className="shrink-0"
-							size="md"
 						>
 							Delete library
 						</Button>

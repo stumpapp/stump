@@ -62,7 +62,6 @@ export default function DeleteLibraryThumbnails() {
 					onClick={() => setShowConfirmation(true)}
 					className="shrink-0"
 					disabled={isPending || !!data}
-					size="md"
 				>
 					Delete thumbnails
 				</Button>

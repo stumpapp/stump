@@ -190,7 +190,6 @@ export default function IgnoreRulesConfig() {
 								placeholder="**/ignore-me/**"
 								description={t(getKey('addRule.description'))}
 								errorMessage={newRuleError}
-								variant="primary"
 							/>
 
 							<Button type="button" disabled={!newRule} onClick={handleAddRule}>
@@ -207,7 +206,6 @@ export default function IgnoreRulesConfig() {
 								onClick={() =>
 									setNewRule(newRule.startsWith('**/') ? newRule.slice(3) : `**/${newRule}`)
 								}
-								variant="primary"
 							/>
 							<CheckBox
 								id="ignoreSubdirs"
@@ -217,7 +215,6 @@ export default function IgnoreRulesConfig() {
 								onClick={() =>
 									setNewRule(newRule.endsWith('/**') ? newRule.slice(0, -3) : `${newRule}/**`)
 								}
-								variant="primary"
 							/>
 						</div>
 					</motion.div>

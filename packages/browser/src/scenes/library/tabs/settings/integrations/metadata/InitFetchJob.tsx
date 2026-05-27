@@ -58,7 +58,7 @@ export default function InitFetchJob() {
 			)}
 
 			<div>
-				<Button size="md" onClick={handleFetch} disabled={metadataProviderConfigs.length === 0}>
+				<Button onClick={handleFetch} disabled={metadataProviderConfigs.length === 0}>
 					{t(getKey('fetchButton'))}
 				</Button>
 			</div>

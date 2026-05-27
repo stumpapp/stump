@@ -112,11 +112,10 @@ export default function CleanLibrary() {
 							<Button
 								type="button"
 								onClick={() => setShowConfirmation(true)}
-								className="flex-shrink-0"
-								size="md"
+								className="shrink-0"
 								disabled={isNoneMissingState || isPending}
 								isLoading={isPending}
-								variant="danger"
+								variant="destructive"
 							>
 								{t(getKey('confirmation.label'))}
 							</Button>

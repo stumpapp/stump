@@ -98,7 +98,6 @@ export default function SeriesSettingsScene() {
 					<div>
 						<Button
 							title={data ? 'Analysis already in progress' : 'Analyze this series'}
-							size="md"
 							onClick={handleAnalyze}
 							disabled={!!data || isPending}
 						>

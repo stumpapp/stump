@@ -118,7 +118,7 @@ mod tests {
 		};
 		let user = AuthUser {
 			id: "shadowfax".to_string(),
-			permissions: vec![UserPermission::AccessAPIKeys],
+			permissions: vec![UserPermission::AccessApiKeys],
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
@@ -138,7 +138,7 @@ mod tests {
 		};
 		let user = AuthUser {
 			id: "oromei".to_string(),
-			permissions: vec![UserPermission::AccessAPIKeys],
+			permissions: vec![UserPermission::AccessApiKeys],
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
@@ -147,7 +147,7 @@ mod tests {
 			.expect("Failed to validate key"));
 		assert_eq!(
 			controller.resolve_permissions(&user),
-			vec![UserPermission::AccessAPIKeys]
+			vec![UserPermission::AccessApiKeys]
 		);
 	}
 
@@ -162,7 +162,7 @@ mod tests {
 		let user = AuthUser {
 			id: "oromei".to_string(),
 			permissions: vec![
-				UserPermission::AccessAPIKeys,
+				UserPermission::AccessApiKeys,
 				UserPermission::AccessBookClub,
 			],
 			..Default::default()

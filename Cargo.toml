@@ -17,6 +17,11 @@ exclude = [
 version = "0.1.3"
 rust-version = "1.92.0"
 
+# I've defined majority of dependencies here in the workspace so that they are
+# significantly easier to manage and update. Every crate in the workspace should be
+# pulling from the root for all of its dependencies unless there is a specific reason not to.
+# Please try to maintain alphabetical order for readability.
+
 [workspace.dependencies]
 alphanumeric-sort = "1.5.3"
 apalis = { version = "0.7", features = ["limit", "tracing"] }

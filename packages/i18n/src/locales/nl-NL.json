@@ -21,8 +21,8 @@
 			"buttons": {
 				"createAccount": "Account aanmaken",
 				"login": "Log in",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"loginWithOidc": "Log in met OIDC",
+				"createAccountWithOidc": "Account aanmaken met OIDC"
 			}
 		},
 		"toasts": {
@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "E-mail dit boek",
-			"description": "Send this book to a device or email address",
+			"description": "Stuur dit boek naar een apparaat of e-mailadres",
 			"form": {
 				"email": {
 					"label": "E-mail",
@@ -105,46 +105,46 @@
 				"admin": {
 					"label": "Beheerder",
 					"placeholder": "Beheerder",
-					"description": "The name of the admin role for your book club"
+					"description": "De naam van de administrator voor je boekenclub"
 				},
 				"creator": {
 					"label": "Creator",
 					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"description": "De naam van de rol voor degene die je boekenclub heeft aangemaakt. Dit ben jij!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "Toon naam",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Een optionele bijnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam"
 				},
 				"hideProgress": {
 					"label": "Verberg voortgang",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"description": "Indien dit is ingeschakeld wordt je leesvoortgang verborgen voor andere leden van de boekenclub"
 				}
 			}
 		},
 		"validation": {
 			"missingName": "Naam is verplicht",
-			"alreadyTaken": "is already taken"
+			"alreadyTaken": "Is al in gebruik"
 		}
 	},
 	"createBookClubScene": {
 		"heading": "Maak een nieuwe boekenclub",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server kan deelnemen",
 		"form": {
 			"stepLabel": "Stap",
 			"steps": [
 				{
 					"label": "Basics",
-					"heading": "Basic Information",
+					"heading": "Basisinformatie",
 					"description": "The details of the club, including its name and description"
 				},
 				{
 					"label": "Rollen",
 					"heading": "Rollen",
-					"description": "Customize the roles in your book club"
+					"description": "De rollen in je boekenclub aanpassen"
 				},
 				{
 					"label": "Lidmaatschap",
@@ -553,8 +553,8 @@
 				"label": "Opties"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
+				"label": "Integraties",
+				"analysis": "Analyse",
 				"metadata": "Metadata"
 			},
 			"danger-zone": {
@@ -679,17 +679,17 @@
 		},
 		"integrations/metadata": {
 			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
+			"description": "Beheer en controleer de metadata overeenkomsten voor deze bibliotheek",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "Metadata ophalen",
+					"description": "Metadata voor de media in deze bibliotheek ophalen",
 					"noProviders": {
-						"title": "There are no metadata providers available",
-						"description": "You can configure metadata providers in the metadata integration settings"
+						"title": "Er zijn geen metadata aanbieders beschikbaar",
+						"description": "U kunt metadata aanbieders configureren in de metadata integratie instellingen"
 					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
+					"fetchButton": "Start ophalen in achtergrond",
+					"fetchError": "Ophalen van metadata mislukt"
 				}
 			}
 		},
@@ -838,68 +838,68 @@
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "Pending matches",
-			"description": "Review metadata matches fetched from external providers"
+			"heading": "Afwachtende overeenkomsten",
+			"description": "Overeenkomsten met metadata van externe aanbieders controleren"
 		},
 		"confidenceBadge": {
-			"label": "confidence"
+			"label": "Vertrouwensniveau"
 		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
+		"includeField": "Voeg dit veld toe",
+		"excludeField": "Dit veld uitsluiten",
+		"fieldLocked": "Dit veld is vergrendeld",
 		"reviewDialog": {
 			"previewEditor": {
 				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
+				"noComparableFields": "Geen vergelijkbare velden gevonden",
 				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
+					"field": "Veld",
+					"current": "Huidige",
+					"external": "Extern",
+					"resolved": "Opgelost"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
-					"provider": "Provider"
+					"candidatePosition": "Kandidaat {{position}} van {{total}}",
+					"provider": "Aanbieder"
 				}
 			},
 			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
+				"accept": "Accepteer",
+				"reject": "Wijs af",
 				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
-					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+					"FILL_GAPS": "Gaten opvullen",
+					"PREFER_EXTERNAL": "Voorkeur voor extern",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Voorkeur voor extern en voeg lijsten samen",
+					"FILL_AND_MERGE_LISTS": "Vul en voeg lijsten samen"
 				}
 			},
 			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
+				"keepCurrent": "Huidige behouden",
+				"takeExternal": "Neem extern op",
+				"mergeLists": "Lijsten samenvoegen",
+				"editManually": "Handmatig bewerken",
+				"lockField": "Vergrendel veld",
+				"unlockField": "Ontgrendel veld",
 				"reset": "Reset",
 				"undoManualEdit": "Undo manual edit"
 			}
 		},
 		"matchesTable": {
 			"columns": {
-				"entityName": "Name",
+				"entityName": "Naam",
 				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
+				"candidateCount": "Kandidaten",
+				"topConfidence": "Hoogste vertrouwen",
+				"addedAt": "Opgehaald"
 			},
 			"acceptAll": {
-				"label": "Accept all",
-				"failed": "Failed to accept all matches",
-				"success": "All pending matches accepted"
+				"label": "Alles accepteren",
+				"failed": "Accepteren van alle overeenkomsten mislukt",
+				"success": "Alle openstaande overeenkomsten geaccepteerd"
 			},
 			"rejectAll": {
-				"label": "Reject all",
-				"failed": "Failed to reject all matches",
-				"success": "All pending matches rejected"
+				"label": "Alles afwijzen",
+				"failed": "Afwijzen van alle overeenkomsten mislukt",
+				"success": "Alle openstaande overeenkomsten afgewezen"
 			},
 			"startReview": "Start review",
 			"nothingToReview": "No pending metadata matches to review"
@@ -1940,7 +1940,7 @@
 						"allLibraries": "All libraries",
 						"rateLimited": "rate limited",
 						"lastRun": "Last run at {{date}}",
-						"edit": "Edit",
+						"edit": "Wijzig",
 						"delete": "Delete"
 					},
 					"toasts": {
@@ -3206,16 +3206,16 @@
 				"YEAR": "Year Published"
 			},
 			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
+				"ASC": "Oplopend",
+				"DESC": "Aflopend"
 			},
 			"sortDirectionString": {
 				"ASC": "A → Z",
 				"DESC": "Z → A"
 			},
 			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
+				"ASC": "Oudste eerst",
+				"DESC": "Nieuwste eerst"
 			},
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",

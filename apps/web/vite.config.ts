@@ -1,7 +1,9 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { constants as zlibConstants } from 'node:zlib'
 import type { PluginOption } from 'vite'
 import { defineConfig } from 'vite'
+import { compression, defineAlgorithm } from 'vite-plugin-compression2'
 import { VitePWA } from 'vite-plugin-pwa'
 import tsconfigPaths from 'vite-plugin-tsconfig-paths'
 
@@ -27,6 +29,19 @@ export default defineConfig({
 			},
 		}),
 		tsconfigPaths(),
+		compression({
+			include: [/\.(js|mjs|json|css|html|svg|xml|wasm)$/i],
+			exclude: [/\.(png|jpe?g|gif|webp|avif|woff2?|mp4|webm)$/i],
+			threshold: 1024,
+			algorithms: [
+				defineAlgorithm('gzip', { level: 9 }),
+				defineAlgorithm('brotliCompress', {
+					params: {
+						[zlibConstants.BROTLI_PARAM_QUALITY]: 11,
+					},
+				}),
+			],
+		}),
 		VitePWA({
 			registerType: 'autoUpdate',
 			devOptions: {

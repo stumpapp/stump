@@ -33,11 +33,11 @@ export const WithDescriptionInvalid: Story = {
 }
 
 export const Primary: Story = {
-	render: () => <Input variant="primary" label="primary" />,
+	render: () => <Input label="primary" />,
 }
 
 export const PrimaryInvalid: Story = {
-	render: () => <Input isInvalid variant="primary" label="primary" />,
+	render: () => <Input isInvalid label="primary" />,
 }
 
 export default StoryMeta

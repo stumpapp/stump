@@ -175,7 +175,6 @@ export default function LoginOrClaimScene() {
 								<Input
 									id="username"
 									label={t('authScene.form.labels.username')}
-									variant="primary"
 									autoComplete="username"
 									autoCapitalize="off"
 									autoFocus

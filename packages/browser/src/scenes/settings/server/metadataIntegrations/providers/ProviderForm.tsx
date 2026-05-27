@@ -101,7 +101,6 @@ export default function ProviderForm() {
 					<Input
 						label={t(getKey('autoApplyConfig.threshold.label'))}
 						description={t(getKey('autoApplyConfig.threshold.description'))}
-						variant="primary"
 						type="number"
 						step="0.01"
 						min="0"

@@ -135,14 +135,12 @@ export default function NavigationArrangementItem({
 			{isConfigurableSection && showConfiguration && (
 				<div className="gap-3 p-4 flex flex-wrap items-center">
 					<CheckBox
-						variant="primary"
 						label={t(getConfigKey('createAction.label'))}
 						checked={section.config.links.includes(FilterableArrangementEntityLink.Create)}
 						onClick={createCheckboxHandler(FilterableArrangementEntityLink.Create)}
 					/>
 
 					<CheckBox
-						variant="primary"
 						label={t(getConfigKey('linkToAll.label'))}
 						checked={section.config.links.includes(FilterableArrangementEntityLink.ShowAll)}
 						onClick={createCheckboxHandler(FilterableArrangementEntityLink.ShowAll)}

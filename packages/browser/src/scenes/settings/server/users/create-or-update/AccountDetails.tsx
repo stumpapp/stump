@@ -15,7 +15,6 @@ export default function AccountDetails() {
 		<div className="gap-4 pb-4 pt-1 md:max-w-md flex flex-col">
 			<Input
 				id="username"
-				variant="primary"
 				fullWidth
 				label="Username"
 				placeholder="Username"
@@ -30,7 +29,6 @@ export default function AccountDetails() {
 				<InputGroup>
 					<InputGroup.Input
 						id="password"
-						variant="primary"
 						placeholder="Password"
 						type={passwordVisible ? 'text' : 'password'}
 						autoComplete="off"

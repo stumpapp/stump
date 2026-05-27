@@ -55,7 +55,6 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
 					<div className="shrink-0">
 						<CheckBox
-							variant="primary"
 							label="Hard Delete User"
 							checked={hardDelete}
 							onClick={() => setHardDelete((prev) => !prev)}

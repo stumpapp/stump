@@ -276,7 +276,6 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 					key={id}
 					className="font-mono"
 					placeholder="**/ignore-me/**"
-					variant="primary"
 					{...form.register(`ignoreRules.${index}.glob`)}
 				/>
 			)

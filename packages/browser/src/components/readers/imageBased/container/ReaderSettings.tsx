@@ -147,7 +147,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						<span>Separate second page</span>
 						<RawSwitch
 							primaryRing
-							variant="primary"
 							checked={activeSettings.secondPageSeparate}
 							onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
 						/>
@@ -157,7 +156,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						<span>Pan and zoom without Ctrl / Cmd</span>
 						<RawSwitch
 							primaryRing
-							variant="primary"
 							checked={activeSettings.panzoomWithoutCtrl}
 							onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
 						/>
@@ -167,7 +165,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						<span>Tap sides to navigate</span>
 						<RawSwitch
 							primaryRing
-							variant="primary"
 							checked={activeSettings.tapSidesToNavigate}
 							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
 						/>
@@ -177,7 +174,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						<span>Reading timer</span>
 						<RawSwitch
 							primaryRing
-							variant="primary"
 							checked={activeSettings.trackElapsedTime}
 							onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
 						/>
@@ -190,7 +186,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 								<span>Experimental animated reader</span>
 								<RawSwitch
 									primaryRing
-									variant="primary"
 									checked={store.settings.animatedReader || false}
 									onCheckedChange={(checked) => onChangeExperimentalReader(checked)}
 								/>

@@ -17,7 +17,6 @@ export default function RoleMappingForm() {
 		<div className="gap-y-6 flex flex-col">
 			<Card className="gap-6 p-4 md:max-w-3xl md:grid-cols-2 grid grid-cols-1 bg-muted/50">
 				<Input
-					variant="primary"
 					fullWidth
 					label={t(getKey('member.label'))}
 					description={t(getKey('member.description'))}
@@ -30,7 +29,6 @@ export default function RoleMappingForm() {
 				/>
 
 				<Input
-					variant="primary"
 					fullWidth
 					label={t(getKey('moderator.label'))}
 					description={t(getKey('moderator.description'))}
@@ -43,7 +41,6 @@ export default function RoleMappingForm() {
 				/>
 
 				<Input
-					variant="primary"
 					fullWidth
 					label={t(getKey('admin.label'))}
 					description={t(getKey('admin.description'))}
@@ -56,7 +53,6 @@ export default function RoleMappingForm() {
 				/>
 
 				<Input
-					variant="primary"
 					fullWidth
 					label={t(getKey('creator.label'))}
 					description={t(getKey('creator.description'))}

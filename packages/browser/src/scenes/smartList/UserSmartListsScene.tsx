@@ -139,7 +139,6 @@ export default function UserSmartListsScene() {
 
 							<InputGroup.Input
 								placeholder={t(withLocaleKey('searchPlaceholder'))}
-								variant="primary"
 								value={value}
 								onChange={(e) => setValue(e.target.value)}
 							/>

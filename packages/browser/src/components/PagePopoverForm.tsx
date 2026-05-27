@@ -73,7 +73,6 @@ export default function PagePopoverForm({
 					<Form id={`pagination-page-entry-form-${pos}`} form={form} onSubmit={handleSubmit}>
 						<Input
 							label="Jump to another page"
-							variant="primary"
 							type="number"
 							autoFocus
 							max={totalPages}

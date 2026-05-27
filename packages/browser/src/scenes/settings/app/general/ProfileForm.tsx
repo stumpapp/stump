@@ -119,7 +119,6 @@ export default function ProfileForm() {
 								? t('settingsScene.app/account.sections.account.labels.insufficientPermission')
 								: undefined
 						}
-						variant="primary"
 						className="w-full"
 						containerClassName="max-w-full md:max-w-sm"
 						label={t('settingsScene.app/account.sections.account.labels.username')}
@@ -134,7 +133,6 @@ export default function ProfileForm() {
 								? t('settingsScene.app/account.sections.account.labels.insufficientPermission')
 								: undefined
 						}
-						variant="primary"
 						className="w-full"
 						containerClassName="max-w-full md:max-w-sm"
 						label={t('settingsScene.app/account.sections.account.labels.password')}

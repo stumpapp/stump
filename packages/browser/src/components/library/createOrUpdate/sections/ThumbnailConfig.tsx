@@ -178,7 +178,6 @@ export default function ThumbnailConfigForm() {
 									<Label>{t(getKey('scaleEvenlyByFactor.factor.label'))}</Label>
 									<Input
 										contrast
-										variant="primary"
 										placeholder="0.65"
 										{...form.register('thumbnailConfig.resizeMethod.factor', {
 											valueAsNumber: true,
@@ -197,7 +196,6 @@ export default function ThumbnailConfigForm() {
 								</Text>
 								<Input
 									contrast
-									variant="primary"
 									label={t(getKey('exact.width.label'))}
 									placeholder="200"
 									{...form.register('thumbnailConfig.resizeMethod.width', {
@@ -208,7 +206,6 @@ export default function ThumbnailConfigForm() {
 								/>
 								<Input
 									contrast
-									variant="primary"
 									label={t(getKey('exact.height.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.height', {
@@ -246,7 +243,6 @@ export default function ThumbnailConfigForm() {
 
 								<Input
 									contrast
-									variant="primary"
 									label={t(getKey('scaleDimension.size.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.size', {
@@ -283,7 +279,6 @@ export default function ThumbnailConfigForm() {
 
 						<Input
 							contrast
-							variant="primary"
 							label={t(getKey('quality.label'))}
 							disabled={!enabled}
 							descriptionProps={{ className: 'text-xs' }}

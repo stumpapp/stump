@@ -35,7 +35,6 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 		<div className="gap-6 flex grow flex-col">
 			<div className="gap-y-6 md:flex-row md:gap-x-6 md:gap-y-6 flex flex-col flex-wrap">
 				<Input
-					variant="primary"
 					label={t(getKey('name.label'))}
 					description={t(getKey('name.description'))}
 					placeholder={t(getKey('name.placeholder'))}
@@ -55,7 +54,6 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					<InputGroup>
 						<InputGroup.Input
 							id="path"
-							variant="primary"
 							placeholder={t(getKey('path.placeholder'))}
 							required={isCreatingLibrary}
 							isInvalid={!!errors.path?.message}
@@ -93,7 +91,6 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 
 			<TextArea
 				className="flex"
-				variant="primary"
 				label={t(getKey('description.label'))}
 				description={t(getKey('description.description'))}
 				placeholder={t(getKey('description.placeholder'))}

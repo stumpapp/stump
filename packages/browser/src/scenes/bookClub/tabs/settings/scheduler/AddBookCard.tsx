@@ -127,13 +127,11 @@ export default function AddBookCard({ index }: Props) {
 				<div className="gap-x-4 gap-y-4 md:flex-row md:gap-y-0 flex w-full flex-col items-start">
 					<Input
 						fullWidth
-						variant="primary"
 						label="Title"
 						disabled={isEntityBook}
 						{...form.register(`books.${index}.book.title`)}
 					/>
 					<Input
-						variant="primary"
 						label="Author"
 						disabled={isEntityBook}
 						{...form.register(`books.${index}.book.author`)}
@@ -141,7 +139,6 @@ export default function AddBookCard({ index }: Props) {
 				</div>
 
 				<Input
-					variant="primary"
 					label="Book URL"
 					disabled={isEntityBook}
 					{...form.register(`books.${index}.book.url`)}

@@ -110,7 +110,6 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 						required
 						autoFocus
 						errorMessage={form.formState.errors.name?.message}
-						variant="primary"
 						{...form.register('name')}
 					/>
 				</Form>

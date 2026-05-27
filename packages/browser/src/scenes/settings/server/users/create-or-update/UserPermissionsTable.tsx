@@ -131,7 +131,6 @@ export default function UserPermissionsTable() {
 										<td className="px-4 py-3 bg-muted/50">
 											<CheckBox
 												id={groupData.id}
-												variant="primary"
 												name={groupData.id}
 												checked={groupData.permissions.every(
 													(p) => selectedPermissions?.includes(p) ?? false,
@@ -160,7 +159,6 @@ export default function UserPermissionsTable() {
 										<td className="px-4 py-3">
 											<CheckBox
 												id={permissionData.permission}
-												variant="primary"
 												name={permissionData.permission}
 												checked={selectedPermissions?.includes(permissionData.permission) ?? false}
 												onClick={() => handlePermissionClick(permissionData.permission)}

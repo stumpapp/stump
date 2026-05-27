@@ -368,14 +368,17 @@ impl BookEntitlementContainer {
 			m.reading_session.as_ref(),
 			m.finished_reading_session_last_completed_at,
 		) {
-			// TODO(kobo): should we be grouping dnf with finished?
-			// latest session is completed / dnf
-			(Some(rs), _)
-				if matches!(
-					rs.status,
-					ReadingStatus::Finished | ReadingStatus::Abandoned
-				) =>
-			{
+			// latest session was abandoned
+			(Some(rs), last_completed_at) if rs.status == ReadingStatus::Abandoned => {
+				match last_completed_at {
+					Some(t) => ReadingState::finished(media_id.to_string(), t),
+					// TODO(kobo): determine whether this is ideal outcome. if a book was abandoned, it wasn't
+					// really `unread` but think for now this is acceptable.
+					None => ReadingState::unread(media_id.to_string()),
+				}
+			},
+			// latest session is completed
+			(Some(rs), _) if rs.status == ReadingStatus::Finished => {
 				ReadingState::finished(
 					media_id.to_string(),
 					m.finished_reading_session_last_completed_at
@@ -529,6 +532,214 @@ mod tests {
 		assert_eq!(Some(50.0), bookmark.progress_percent);
 		assert_eq!(Some(50.0), bookmark.content_source_progress_percent);
 		assert_eq!(None, bookmark.location);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_abandoned_no_prior_completion() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// abandoned without ever having finished it
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 0.4,
+			status: models::shared::enums::ReadingStatus::Abandoned,
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		// TODO(kobo): see above re: whether abandoned + no prior complete = unread is ideal
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::ReadyToRead, reading_state.status_info.status);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_abandoned_after_prior_completion() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// first readthrough was completed, then the re-read was abandoned
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-26T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 0.3,
+			status: models::shared::enums::ReadingStatus::Abandoned,
+			created_at: Some("2026-05-27T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		// non-dnf should always take precendence over dnf if newer
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::Finished, reading_state.status_info.status);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_rereading() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// first readthrough is complete
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-26T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		// second readthrough is in-progress
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 0.35,
+			status: models::shared::enums::ReadingStatus::Reading,
+			created_at: Some("2026-05-27T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		// the re-read in-progress should take precedence
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::Reading, reading_state.status_info.status);
+
+		let bookmark = reading_state.current_bookmark;
+		assert_eq!(Some(35.0), bookmark.progress_percent);
+		assert_eq!(Some(35.0), bookmark.content_source_progress_percent);
+		assert_eq!(None, bookmark.location);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_finished_multiple_readthroughs() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-26T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-27T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		assert_eq!(2, m.finished_reading_session_count);
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::Finished, reading_state.status_info.status);
 	}
 
 	#[tokio::test]

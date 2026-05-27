@@ -177,6 +177,9 @@ pub struct ReadingSession {
 	pub user_id: String,
 	pub end_percentage: f32,
 	pub status: ReadingStatus,
+	/// override the `created_at` timestamp set by `ActiveModelBehavior`, e.g.,
+	/// for tests that need deterministic ordering between sessions
+	pub created_at: Option<DateTimeWithTimeZone>,
 }
 
 impl ReadingSession {
@@ -187,6 +190,7 @@ impl ReadingSession {
 			user_id: user_id.to_string(),
 			end_percentage: 1.0,
 			status: ReadingStatus::Finished,
+			..Default::default()
 		}
 	}
 
@@ -203,9 +207,22 @@ impl ReadingSession {
 			..Default::default()
 		};
 
-		model
+		let insert_result = model
 			.insert(db)
 			.await
-			.expect("could not insert reading session v2")
+			.expect("could not insert reading session v2");
+
+		// `created_at` is overridden by `ActiveModelBehavior` so updating after
+		match self.created_at {
+			Some(t) => {
+				let mut model: reading_session::ActiveModel = insert_result.into();
+				model.created_at = ActiveValue::Set(t);
+				model
+					.update(db)
+					.await
+					.expect("could not update reading session")
+			},
+			None => insert_result,
+		}
 	}
 }

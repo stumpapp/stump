@@ -7,11 +7,11 @@ runs:
     # Linux Section
     - name: Install nasm
       if: runner.os == 'Linux'
-      uses: ilammy/setup-nasm@v1
+      uses: ilammy/setup-nasm@e77cc62a22a374a4d0668286007cc3e3b4c17760 # v1
 
     - name: Install Python 3.9
       if: runner.os == 'Linux'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4
       with:
         python-version: '3.9'
 
@@ -41,11 +41,11 @@ runs:
     # Windows setup
     - name: Install nasm
       if: runner.os == 'Windows'
-      uses: ilammy/setup-nasm@v1
+      uses: ilammy/setup-nasm@e77cc62a22a374a4d0668286007cc3e3b4c17760 # v1
 
     - name: Install Python 3.9
       if: runner.os == 'Windows'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4
       with:
         python-version: '3.9'
 

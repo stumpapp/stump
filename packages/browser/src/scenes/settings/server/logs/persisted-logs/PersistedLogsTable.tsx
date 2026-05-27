@@ -128,6 +128,7 @@ export default function PersistedLogsTable() {
 					)
 				}
 				isZeroBasedPagination
+				cellClassName="bg-background"
 			/>
 		</Card>
 	)

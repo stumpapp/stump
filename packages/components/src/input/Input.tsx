@@ -6,7 +6,6 @@ import { Text } from '../text'
 import { cn } from '../utils'
 import { RawInput, RawInputProps } from './raw'
 
-// TODO: size prop
 export type InputProps = {
 	/** The label for the input. */
 	label?: string
@@ -18,8 +17,10 @@ export type InputProps = {
 	descriptionPosition?: 'top' | 'bottom'
 	/** The optional props for the description. */
 	descriptionProps?: Omit<ComponentPropsWithoutRef<typeof Text>, 'children'>
-	/** The optional variant for the input. */
+	/** Whether the input should take up the full container width. */
 	fullWidth?: boolean
+	/** The optional invalid state. */
+	isInvalid?: boolean
 	/** The optional error message to display. */
 	errorMessage?: string
 	/** The optional class name for the container. */
@@ -35,6 +36,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 			labelProps,
 			descriptionProps,
 			fullWidth,
+			isInvalid,
 			containerClassName,
 			errorMessage,
 			className,
@@ -42,7 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref,
 	) => {
-		const resolvedInvalid = props.isInvalid ?? !!errorMessage
+		const resolvedInvalid = isInvalid ?? !!errorMessage
 
 		const renderDescription = () => {
 			if (description) {
@@ -113,7 +115,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 					<RawInput
 						{...props}
 						ref={ref}
-						isInvalid={resolvedInvalid}
 						aria-invalid={resolvedInvalid}
 						className={className}
 						data-testid={props.id}

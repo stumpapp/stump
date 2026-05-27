@@ -24,7 +24,6 @@ export default function RoleMappingForm() {
 					placeholder={t(getKey('member.placeholder'))}
 					autoComplete="off"
 					errorMessage={errors.memberRoleSpec?.MEMBER?.message}
-					contrast
 					{...form.register('memberRoleSpec.MEMBER')}
 				/>
 
@@ -36,7 +35,6 @@ export default function RoleMappingForm() {
 					placeholder={t(getKey('moderator.placeholder'))}
 					autoComplete="off"
 					errorMessage={errors.memberRoleSpec?.MODERATOR?.message}
-					contrast
 					{...form.register('memberRoleSpec.MODERATOR')}
 				/>
 
@@ -48,7 +46,6 @@ export default function RoleMappingForm() {
 					placeholder={t(getKey('admin.placeholder'))}
 					autoComplete="off"
 					errorMessage={errors.memberRoleSpec?.ADMIN?.message}
-					contrast
 					{...form.register('memberRoleSpec.ADMIN')}
 				/>
 
@@ -60,7 +57,6 @@ export default function RoleMappingForm() {
 					placeholder={t(getKey('creator.placeholder'))}
 					autoComplete="off"
 					errorMessage={errors.memberRoleSpec?.CREATOR?.message}
-					contrast
 					{...form.register('memberRoleSpec.CREATOR')}
 				/>
 			</Card>

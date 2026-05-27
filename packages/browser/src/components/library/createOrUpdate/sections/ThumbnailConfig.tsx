@@ -177,7 +177,6 @@ export default function ThumbnailConfigForm() {
 								<div className="gap-2 flex flex-col">
 									<Label>{t(getKey('scaleEvenlyByFactor.factor.label'))}</Label>
 									<Input
-										contrast
 										placeholder="0.65"
 										{...form.register('thumbnailConfig.resizeMethod.factor', {
 											valueAsNumber: true,
@@ -195,7 +194,6 @@ export default function ThumbnailConfigForm() {
 									{t(getKey('exact.description'))}
 								</Text>
 								<Input
-									contrast
 									label={t(getKey('exact.width.label'))}
 									placeholder="200"
 									{...form.register('thumbnailConfig.resizeMethod.width', {
@@ -205,7 +203,6 @@ export default function ThumbnailConfigForm() {
 									errorMessage={configErrors?.resizeMethod?.width?.message}
 								/>
 								<Input
-									contrast
 									label={t(getKey('exact.height.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.height', {
@@ -242,7 +239,6 @@ export default function ThumbnailConfigForm() {
 								</div>
 
 								<Input
-									contrast
 									label={t(getKey('scaleDimension.size.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.size', {
@@ -278,7 +274,6 @@ export default function ThumbnailConfigForm() {
 						</div>
 
 						<Input
-							contrast
 							label={t(getKey('quality.label'))}
 							disabled={!enabled}
 							descriptionProps={{ className: 'text-xs' }}

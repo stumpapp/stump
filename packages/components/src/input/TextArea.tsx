@@ -10,6 +10,8 @@ export type TextAreaProps = {
 	label?: string
 	/** The optional description for the textarea. */
 	description?: string
+	/** The optional invalid state. */
+	isInvalid?: boolean
 	/** The optional error message to display. */
 	errorMessage?: string
 	/** The optional class name for the container. */
@@ -17,7 +19,7 @@ export type TextAreaProps = {
 } & RawTextAreaProps
 
 const TextArea = React.forwardRef<RawTextAreaRef, TextAreaProps>(
-	({ label, description, containerClassName, errorMessage, variant, isInvalid, ...props }, ref) => {
+	({ label, description, containerClassName, errorMessage, isInvalid, ...props }, ref) => {
 		const resolvedInvalid = isInvalid ?? !!errorMessage
 
 		return (
@@ -33,13 +35,7 @@ const TextArea = React.forwardRef<RawTextAreaRef, TextAreaProps>(
 						{props.required && <span className="text-destructive"> *</span>}
 					</Label>
 				)}
-				<RawTextArea
-					variant={variant}
-					ref={ref}
-					isInvalid={resolvedInvalid}
-					aria-invalid={resolvedInvalid}
-					{...props}
-				/>
+				<RawTextArea ref={ref} aria-invalid={resolvedInvalid} {...props} />
 
 				{errorMessage && (
 					<Text variant="danger" size="xs" className="break-all">

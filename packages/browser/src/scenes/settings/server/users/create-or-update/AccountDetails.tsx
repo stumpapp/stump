@@ -32,7 +32,6 @@ export default function AccountDetails() {
 						placeholder="Password"
 						type={passwordVisible ? 'text' : 'password'}
 						autoComplete="off"
-						isInvalid={!!errors.password?.message}
 						aria-invalid={!!errors.password?.message}
 						{...form.register('password')}
 					/>

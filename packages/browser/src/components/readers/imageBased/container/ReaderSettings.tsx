@@ -146,7 +146,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					<Label className="px-1 flex items-center justify-between">
 						<span>Separate second page</span>
 						<RawSwitch
-							primaryRing
 							checked={activeSettings.secondPageSeparate}
 							onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
 						/>
@@ -155,7 +154,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					<Label className="px-1 flex items-center justify-between">
 						<span>Pan and zoom without Ctrl / Cmd</span>
 						<RawSwitch
-							primaryRing
 							checked={activeSettings.panzoomWithoutCtrl}
 							onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
 						/>
@@ -164,7 +162,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					<Label className="px-1 flex items-center justify-between">
 						<span>Tap sides to navigate</span>
 						<RawSwitch
-							primaryRing
 							checked={activeSettings.tapSidesToNavigate}
 							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
 						/>
@@ -173,7 +170,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					<Label className="px-1 flex items-center justify-between">
 						<span>Reading timer</span>
 						<RawSwitch
-							primaryRing
 							checked={activeSettings.trackElapsedTime}
 							onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
 						/>
@@ -185,7 +181,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 							<Label className="p-3 flex items-center justify-between rounded-lg border border-dashed border-primary/40 bg-primary/15">
 								<span>Experimental animated reader</span>
 								<RawSwitch
-									primaryRing
 									checked={store.settings.animatedReader || false}
 									onCheckedChange={(checked) => onChangeExperimentalReader(checked)}
 								/>

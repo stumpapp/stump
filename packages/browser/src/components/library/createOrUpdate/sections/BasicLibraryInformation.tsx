@@ -56,7 +56,6 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 							id="path"
 							placeholder={t(getKey('path.placeholder'))}
 							required={isCreatingLibrary}
-							isInvalid={!!errors.path?.message}
 							aria-invalid={!!errors.path?.message}
 							{...form.register('path')}
 						/>

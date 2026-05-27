@@ -17,39 +17,25 @@ export const SWITCH_BASE_CLASSES = [
 export const SWITCH_SIZE_VARIANTS = {
 	default: 'h-[18.4px] w-8',
 	sm: 'h-3.5 w-6',
-	// TODO(shad): remove
-	xs: 'h-4 w-7',
-}
-// TODO(shad): remove
-export const SWITCH_VARIANTS = {
-	default: '',
-	primary: '',
 }
 export const switchVariants = cva(SWITCH_BASE_CLASSES, {
 	defaultVariants: {
 		size: 'default',
-		variant: 'default',
 	},
 	variants: {
 		size: SWITCH_SIZE_VARIANTS,
-		variant: SWITCH_VARIANTS,
 	},
 })
 
 export type RawSwitchRef = ElementRef<typeof SwitchPrimitives.Root>
 export type RawSwitchProps = VariantProps<typeof switchVariants> &
-	ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & {
-		// TODO(shad): remove
-		primaryRing?: boolean
-	}
+	ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
 
 export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
-	({ className, variant, size = 'default', primaryRing, ...props }, ref) => {
+	({ className, size = 'default', ...props }, ref) => {
 		return (
 			<SwitchPrimitives.Root
-				className={cn(switchVariants({ className, size, variant }), {
-					'focus-visible:ring-ring/60': primaryRing,
-				})}
+				className={cn(switchVariants({ className, size }))}
 				{...props}
 				ref={ref}
 			>
@@ -63,10 +49,6 @@ export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
 						{
 							'size-3 data-[state=unchecked]:translate-x-0 data-[state=checked]:translate-x-[calc(100%-2px)]':
 								size === 'sm',
-						},
-						{
-							'size-3 data-[state=unchecked]:translate-x-0 data-[state=checked]:translate-x-[calc(100%-2px)]':
-								size === 'xs',
 						},
 					)}
 				/>

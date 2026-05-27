@@ -37,7 +37,7 @@ export function ConfirmationModal({
 	closeIcon = true,
 	triggerVariant,
 	confirmVariant = 'default',
-	cancelVariant,
+	cancelVariant = 'secondary',
 	formId,
 	onConfirm,
 	onClose,

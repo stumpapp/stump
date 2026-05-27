@@ -79,7 +79,10 @@ export function MatchFieldRow({ comparison }: Props) {
 					}
 				>
 					<CheckBox
-						variant={willChange && !disabled ? 'primary' : 'default'}
+						className={cn({
+							'data-[state=unchecked]:border-primary data-[state=unchecked]:bg-primary/10':
+								willChange && !disabled,
+						})}
 						rounded="lg"
 						checked={!excluded}
 						onClick={() => !locked && toggleField(comparison.field)}

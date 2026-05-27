@@ -97,7 +97,6 @@ export const PasswordInput = forwardRef<HTMLInputElement, InputProps>(
 						{...props}
 						ref={ref}
 						type={showPassword ? 'text' : 'password'}
-						isInvalid={resolvedInvalid}
 						aria-invalid={resolvedInvalid}
 						className={className}
 						data-testid={props.id}

@@ -104,7 +104,6 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 			<CheckBox
 				id="inclusive"
 				label={t(getKey('inclusive'))}
-			
 				checked={value?.inclusive}
 				onClick={() =>
 					form.setValue(

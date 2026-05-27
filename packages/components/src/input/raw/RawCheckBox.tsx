@@ -19,21 +19,14 @@ export const RAW_CHECKBOX_ROUND_VARIANTS = {
 	lg: 'rounded-md',
 	none: 'rounded-none',
 }
-// TODO(shad): remove
-export const RAW_CHECKBOX_VARIANTS = {
-	default: '',
-	primary: '',
-}
 export const checkboxVariants = cva(RAW_CHECKBOX_BASE_CLASSES, {
 	defaultVariants: {
 		rounded: 'default',
 		size: 'default',
-		variant: 'default',
 	},
 	variants: {
 		rounded: RAW_CHECKBOX_ROUND_VARIANTS,
 		size: RAW_CHECKBOX_SIZE_VARIANTS,
-		variant: RAW_CHECKBOX_VARIANTS,
 	},
 })
 
@@ -42,10 +35,10 @@ export type RawCheckBoxProps = VariantProps<typeof checkboxVariants> &
 	ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 
 export const RawCheckBox = React.forwardRef<RawCheckBoxRef, RawCheckBoxProps>(
-	({ className, variant, size, rounded, ...props }, ref) => (
+	({ className, size, rounded, ...props }, ref) => (
 		<CheckboxPrimitive.Root
 			ref={ref}
-			className={cn(checkboxVariants({ className, rounded, size, variant }))}
+			className={cn(checkboxVariants({ className, rounded, size }))}
 			{...props}
 			data-testid={props.id}
 		>

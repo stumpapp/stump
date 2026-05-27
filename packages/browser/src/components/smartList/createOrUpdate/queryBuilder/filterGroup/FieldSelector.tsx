@@ -145,7 +145,7 @@ export function FieldSelector({ idx }: Props) {
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="h-[unset] justify-between truncate border-border text-foreground outline-none hover:bg-muted data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background"
+					className="justify-between truncate border-border text-foreground outline-none hover:bg-muted data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background"
 				>
 					{renderSelected()}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

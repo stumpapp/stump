@@ -26,7 +26,7 @@ export default function FilterGroup({ idx, group }: Props) {
 
 	return (
 		<FilterGroupContext.Provider value={{ groupIdx: idx }}>
-			<Card className="ml-4">
+			<Card className="ml-4 bg-background">
 				<div className="flex flex-col">
 					{!group.filters.length && (
 						<div className="p-4">
@@ -59,8 +59,8 @@ export default function FilterGroup({ idx, group }: Props) {
 								<div className="w-12 md:opacity-0 flex h-full shrink-0 items-center justify-end transition-opacity duration-200 group-hover/filter:opacity-100">
 									<ToolTip content={t(getKey('actions.deleteFilter'))} align="end">
 										<IconButton
+											variant="destructive"
 											size="xs"
-											className="text-muted-foreground transition-all duration-200 hover:text-destructive"
 											onClick={() => remove(filterIndex)}
 											disabled={group.filters.length === 1}
 										>

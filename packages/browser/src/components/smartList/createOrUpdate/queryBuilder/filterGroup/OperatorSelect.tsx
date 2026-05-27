@@ -108,7 +108,7 @@ export default function OperatorSelect({ idx }: Props) {
 					role="combobox"
 					aria-expanded={isOpen}
 					className={cn(
-						'h-[unset] justify-between truncate border-border text-foreground outline-none hover:bg-muted data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background',
+						'justify-between truncate border-border text-foreground outline-none hover:bg-muted data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background',
 						{ 'text-muted-foreground': !fieldDef.operation },
 					)}
 				>

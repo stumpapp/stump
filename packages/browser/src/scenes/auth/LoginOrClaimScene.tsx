@@ -185,20 +185,13 @@ export default function LoginOrClaimScene() {
 								<PasswordInput
 									id="password"
 									label={t('authScene.form.labels.password')}
-									variant="primary"
 									type="password"
 									autoComplete="current-password"
 									fullWidth
 									{...form.register('password')}
 								/>
 
-								<Button
-									size="md"
-									type="submit"
-									variant={isClaimed ? 'primary' : 'secondary'}
-									isLoading={isLoggingIn || isRegistering}
-									className="mt-2"
-								>
+								<Button type="submit" isLoading={isLoggingIn || isRegistering} className="mt-2">
 									{isClaimed
 										? t('authScene.form.buttons.login')
 										: t('authScene.form.buttons.createAccount')}
@@ -209,7 +202,7 @@ export default function LoginOrClaimScene() {
 						{oidcConfig.enabled && (
 							<>
 								{!oidcConfig.disableLocalAuth && (
-									<div className="my-4 relative">
+									<div className="my-1.5 relative">
 										<div className="inset-0 absolute flex items-center">
 											<div className="w-full border-t border-border" />
 										</div>
@@ -220,7 +213,6 @@ export default function LoginOrClaimScene() {
 								)}
 
 								<Button
-									size="md"
 									type="button"
 									variant="outline"
 									onClick={handleOidcLogin}

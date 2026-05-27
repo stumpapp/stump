@@ -1011,7 +1011,8 @@
 									"pages": "Pages",
 									"tags": "Tags",
 									"createdAt": "Created at",
-									"updatedAt": "Updated at"
+									"updatedAt": "Updated at",
+									"readingStatus": "Reading status"
 								}
 							},
 							"book_meta": {
@@ -1088,6 +1089,13 @@
 					"listValue": {
 						"placeholder": "Add values",
 						"emptyState": "No values to display"
+					},
+					"enumValue":{
+						"selectPlaceholder": "Select value",
+						"READING": "Reading",
+						"FINISHED": "Finished",
+						"NOT_STARTED": "Not started",
+						"ABANDONED": "Abandoned"
 					}
 				}
 			}

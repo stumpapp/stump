@@ -1,4 +1,4 @@
-import { Input } from '@stump/components'
+import { Input, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import type { ChangeEvent } from 'react'
 import { useCallback } from 'react'
@@ -37,21 +37,19 @@ export default function DayResetHourOffsetPreference() {
 	)
 
 	return (
-		<div className="py-1.5 md:max-w-md">
-			<Input
-				id="dayResetHourOffset"
-				label={t(getKey('label'))}
-				description={t(getKey('description'))}
-				value={dayResetHourOffset ?? 0}
-				onChange={handleChange}
-				type="number"
-				min={MIN_OFFSET}
-				max={MAX_OFFSET}
-				step={1}
-				variant="primary"
-				fullWidth
-			/>
-		</div>
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<div className="lg:w-32 max-w-xs w-full">
+				<Input
+					id="dayResetHourOffset"
+					value={dayResetHourOffset ?? 0}
+					onChange={handleChange}
+					type="number"
+					min={MIN_OFFSET}
+					max={MAX_OFFSET}
+					step={1}
+				/>
+			</div>
+		</NewCard.Row>
 	)
 }
 

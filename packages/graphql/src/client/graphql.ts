@@ -4869,7 +4869,7 @@ export type BooksScreenQueryVariables = Exact<{
 
 
 export type BooksScreenQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
-      { __typename?: 'Media', id: string }
+      { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null } | null } }
       & { ' $fragmentRefs'?: { 'BookListItemFragment': BookListItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
@@ -8318,6 +8318,11 @@ export const BooksScreenDocument = new TypedDocumentString(`
     nodes {
       id
       ...BookListItem
+      thumbnail {
+        metadata {
+          averageColor
+        }
+      }
     }
     pageInfo {
       __typename

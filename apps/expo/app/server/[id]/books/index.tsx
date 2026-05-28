@@ -1,6 +1,6 @@
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { BooksScreenQuery, graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 import { Platform } from 'react-native'
@@ -30,6 +30,11 @@ const query = graphql(`
 			nodes {
 				id
 				...BookListItem
+				thumbnail {
+					metadata {
+						averageColor
+					}
+				}
 			}
 			pageInfo {
 				__typename
@@ -44,6 +49,7 @@ const query = graphql(`
 		}
 	}
 `)
+type Node = BooksScreenQuery['media']['nodes'][number]
 
 const statsQuery = graphql(`
 	query BooksScreenStats {
@@ -114,7 +120,7 @@ export default function Screen() {
 	const layout = useBooksLayout('global', (state) => state.layout)
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
-	const flashListRef = useRef<FlashListRef<any>>(null)
+	const flashListRef = useRef<FlashListRef<Node>>(null)
 	const { animatedProps, viewabilityConfigCallbackPairs } = useBackgroundGradient({
 		layout,
 		flashListRef,

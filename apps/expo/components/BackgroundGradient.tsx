@@ -9,6 +9,7 @@ import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-na
 
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { usePreferencesStore } from '~/stores'
 
 import { useResolvedHeaderHeight } from './header/useAnimatedHeader'
 import { useListSizing } from './listLayout'
@@ -39,6 +40,9 @@ const getThumbnailColor = (item?: MinimalItem): string => {
 const AnimatedMeshGradientView = Animated.createAnimatedComponent(MeshGradientView)
 
 export function BackgroundGradient({ animatedProps }: { animatedProps: MeshGradientViewProps }) {
+	const { tintListBackground } = usePreferencesStore()
+	if (!tintListBackground) return null
+
 	return (
 		<AnimatedMeshGradientView
 			columns={2}
@@ -71,6 +75,8 @@ export function useBackgroundGradient<T extends MinimalItem>({
 	const { estimatedItemHeight, numColumns } = useListSizing({ layout })
 	const { isDarkColorScheme } = useColorScheme()
 
+	const { tintListBackground } = usePreferencesStore()
+
 	useEffect(() => {
 		flashListRef.current?.recomputeViewableItems()
 	}, [flashListRef, isDarkColorScheme])
@@ -95,7 +101,7 @@ export function useBackgroundGradient<T extends MinimalItem>({
 
 	const onViewableItemsChanged = useCallback(
 		({ viewableItems }: { viewableItems: ViewToken<T>[] }) => {
-			if (viewableItems.length === 0) return
+			if (viewableItems.length === 0 || !tintListBackground) return
 
 			const scrollOffset = flashListRef.current?.getAbsoluteLastScrollOffset() ?? 0
 			// we don't want the first visible item because that's often under the header
@@ -108,7 +114,7 @@ export function useBackgroundGradient<T extends MinimalItem>({
 			firstColor.set(withTiming(newFirstColor, { duration: 800 }))
 			lastColor.set(withTiming(newLastColor, { duration: 800 }))
 		},
-		[firstColor, lastColor, isGrid, flashListRef],
+		[firstColor, lastColor, isGrid, flashListRef, tintListBackground],
 	)
 
 	const viewabilityConfig = { itemVisiblePercentThreshold: isGrid ? 70 : 30, minimumViewTime: 800 }

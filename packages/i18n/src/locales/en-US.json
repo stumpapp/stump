@@ -2969,6 +2969,7 @@
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
 			"lowercaseTranslation": "Lowercase Labels",
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",
 				"dataUsage": {

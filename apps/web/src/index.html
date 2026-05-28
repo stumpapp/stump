@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<title>Stump</title>
@@ -10,7 +10,7 @@
 				).state
 				let appTheme = (zustandState.userPreferences?.appTheme || '').toLowerCase()
 				if (appTheme === 'system') {
-					const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+					const prefersDark = globalThis.matchMedia('(prefers-color-scheme: dark)')
 					appTheme = prefersDark.matches ? 'dark' : 'light'
 				}
 				const alreadyHasTheme =
@@ -88,8 +88,17 @@
 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="mobile-web-app-capable" content="yes" />
+		<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+		<link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+		<link
+			rel="preload"
+			href="/assets/fonts/inter/files/inter-latin-standard-normal.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
 	</head>
-	<body>
+	<body class="font-inter">
 		<div id="root">
 			<div class="splash-container">
 				<img src="/assets/stump-splash.gif" alt="loading" class="splash" />

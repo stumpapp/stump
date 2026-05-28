@@ -28,11 +28,14 @@ export default defineConfig({
 		}),
 		tsconfigPaths(),
 		VitePWA({
+			// We manually register in src/index.tsx to add idle scheduling and script preflight checks.
+			injectRegister: null,
 			registerType: 'autoUpdate',
 			devOptions: {
 				enabled: false,
 			},
 			workbox: {
+				inlineWorkboxRuntime: true,
 				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
 			},
 			outDir: '../dist',

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="und">
 	<head>
 		<meta charset="utf-8" />
 		<title>Stump</title>
@@ -8,6 +8,10 @@
 				const zustandState = JSON.parse(
 					localStorage.getItem('stump-user-store') || '{"state": {}}',
 				).state
+				const locale = zustandState.userPreferences?.locale
+				if (typeof locale === 'string' && locale.length > 0) {
+					document.documentElement.lang = locale
+				}
 				let appTheme = (zustandState.userPreferences?.appTheme || '').toLowerCase()
 				if (appTheme === 'system') {
 					const prefersDark = globalThis.matchMedia('(prefers-color-scheme: dark)')

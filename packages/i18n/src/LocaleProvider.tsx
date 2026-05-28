@@ -16,6 +16,7 @@ export default function LocaleProvider({ locale = getDefaultLocale(), children }
 	useEffect(() => {
 		i18n.changeLanguage(locale)
 		initDateFnsLocale(locale)
+		document.documentElement.lang = locale
 	}, [locale])
 
 	return (

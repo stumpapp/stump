@@ -1,4 +1,4 @@
-import { NewCard, Tabs, Text } from '@stump/components'
+import { NewCard, Tabs } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { PanelLeft, PanelTop } from 'lucide-react'
 
@@ -33,17 +33,13 @@ export default function PrimaryNavigationPreference() {
 					<Tabs.Trigger value="sidebar">
 						<div className="gap-2 flex items-center">
 							<PanelLeft className="size-4" />
-							<Text size="xs" className="font-medium">
-								{t(getKey('options.sidebar'))}
-							</Text>
+							<span className="font-medium text-xs">{t(getKey('options.sidebar'))}</span>
 						</div>
 					</Tabs.Trigger>
 					<Tabs.Trigger value="topbar">
 						<div className="gap-2 flex items-center">
 							<PanelTop className="size-4" />
-							<Text size="xs" className="font-medium">
-								{t(getKey('options.topbar'))}
-							</Text>
+							<span className="font-medium text-xs">{t(getKey('options.topbar'))}</span>
 						</div>
 					</Tabs.Trigger>
 				</Tabs.List>

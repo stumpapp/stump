@@ -63,7 +63,7 @@
 
 	/* MARK: light theme */
 	.light {
-		--background: #f7f7f8;
+		--background: #fafafa;
 		--foreground: #26272a;
 		--card: #ffffff;
 		--card-foreground: #26272a;
@@ -251,7 +251,7 @@
 	.cosmic {
 		--background: #1c0f45;
 		--foreground: #f4f2ff;
-		--card: #28175e;
+		--card: #211252;
 		--card-foreground: #f4f2ff;
 		--dialog: #1c0f45;
 		--dialog-foreground: #f4f2ff;
@@ -317,7 +317,7 @@
 	.autumn {
 		--background: #2c1a12;
 		--foreground: #f7f0e4;
-		--card: #3b2d23;
+		--card: #281811;
 		--card-foreground: #f7f0e4;
 		--dialog: #2c1a12;
 		--dialog-foreground: #f7f0e4;

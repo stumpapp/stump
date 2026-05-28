@@ -2,7 +2,7 @@ import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { BooksScreenQuery, graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
@@ -105,8 +105,9 @@ export default function Screen() {
 		},
 	)
 
-	const refetch = () => Promise.all([refetchBooks(), refetchStats()])
+	const nodes = useMemo(() => data?.pages.flatMap((page) => page.media.nodes) || [], [data])
 
+	const refetch = () => Promise.all([refetchBooks(), refetchStats()])
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	const onEndReached = useCallback(() => {
@@ -122,6 +123,7 @@ export default function Screen() {
 
 	const flashListRef = useRef<FlashListRef<Node>>(null)
 	const { animatedProps, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+		data: nodes,
 		layout,
 		flashListRef,
 	})
@@ -140,7 +142,7 @@ export default function Screen() {
 				<FlashList
 					ref={flashListRef}
 					key={layout} // force re-render when layout changes
-					data={data?.pages.flatMap((page) => page.media.nodes) || []}
+					data={nodes}
 					renderItem={({ item }) => <BookListItem layout={layout} book={item} />}
 					contentContainerStyle={{
 						paddingVertical: 16,

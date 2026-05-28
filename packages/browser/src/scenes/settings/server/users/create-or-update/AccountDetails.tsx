@@ -29,6 +29,7 @@ export default function AccountDetails() {
 				<InputGroup>
 					<InputGroup.Input
 						id="password"
+						data-testid="password"
 						placeholder="Password"
 						type={passwordVisible ? 'text' : 'password'}
 						autoComplete="off"

@@ -46,7 +46,7 @@ export default function ReaderHeader() {
 
 				<Text className="text-foreground">{resolvedName}</Text>
 
-				<div className="space-x-2 flex items-center">
+				<div className="space-x-1.5 flex items-center">
 					{isFullscreenAvailable && (
 						<ControlButton onClick={toggleFullscreen}>
 							<FullScreenIcon className="h-4 w-4" />

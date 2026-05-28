@@ -11,5 +11,5 @@
 		"module": "es2022",
 		"moduleResolution": "Node"
 	},
-	"include": ["src", "tailwind.config.ts", "tailwind/**/*", "themes/**/*"]
+	"include": ["src", "tailwind.config.ts", "tailwind/**/*"]
 }

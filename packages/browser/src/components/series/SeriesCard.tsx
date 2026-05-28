@@ -52,7 +52,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 		const isMissing = data.status === 'MISSING'
 		if (isMissing) {
 			return (
-				<Text size="xs" className="text-amber-500 uppercase">
+				<Text size="xs" className="text-warning uppercase">
 					Series Missing
 				</Text>
 			)

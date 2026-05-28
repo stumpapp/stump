@@ -184,7 +184,7 @@ export default function TableColumnsBottomDrawer() {
 			<ToolTip content="Adjust columns">
 				<Drawer.Trigger asChild onClick={() => setIsOpen(true)}>
 					<IconButton variant="ghost">
-						<TableProperties className="h-4 w-4 text-foreground-muted" />
+						<TableProperties className="h-4 w-4 text-muted-foreground" />
 					</IconButton>
 				</Drawer.Trigger>
 			</ToolTip>
@@ -209,7 +209,6 @@ export default function TableColumnsBottomDrawer() {
 											key={value}
 											label={label}
 											onClick={() => handleChangeGroupColumnState(value)}
-											variant="primary"
 										/>
 									))}
 								</div>
@@ -229,7 +228,6 @@ export default function TableColumnsBottomDrawer() {
 										key={value}
 										label={label}
 										onClick={() => handleChangeBookColumnState(value)}
-										variant="primary"
 									/>
 								))}
 							</div>
@@ -250,8 +248,6 @@ export default function TableColumnsBottomDrawer() {
 								id="enable_multi_sort"
 								checked={multiSort}
 								onClick={() => setMultiSort((state) => !state)}
-								primaryRing
-								variant="primary"
 							/>
 						</div>
 					</div>

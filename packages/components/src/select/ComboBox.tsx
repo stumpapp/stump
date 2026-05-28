@@ -35,11 +35,19 @@ type MultiSelectComboBoxProps = {
 }
 
 const SIZE_VARIANTS = {
-	default: 'w-[200px]',
+	default: 'w-50',
 	full: 'w-full',
-	lg: 'w-[300px]',
-	md: 'w-[250px]',
-	sm: 'w-[150px]',
+	lg: 'w-75',
+	md: 'w-62.5',
+	sm: 'w-37.5',
+}
+
+const TRIGGER_SIZE_VARIANTS = {
+	default: 'h-9 px-3 py-2',
+	full: 'h-9 px-3 py-2',
+	lg: 'h-10 px-4 py-2',
+	md: 'h-9 px-3 py-2',
+	sm: 'h-8 px-2.5 py-1.5',
 }
 
 export type ComboBoxProps = {
@@ -162,9 +170,10 @@ export function ComboBox({
 	const renderEmptyState = () => {
 		if (onAddOption && filter) {
 			return (
-				<div className="px-4 overflow-hidden">
+				<div className="px-1 pb-1 overflow-hidden">
 					<Button
-						className="text-brand h-[unset] shrink-0 text-wrap break-all text-ellipsis"
+						variant="ghost"
+						className="px-3 py-2 text-sm font-normal h-auto w-full justify-start rounded-md break-all whitespace-normal text-foreground hover:bg-accent hover:text-accent-foreground"
 						onClick={() => {
 							onAddOption({ label: filter, value: filter })
 							handleChange(filter)
@@ -232,32 +241,37 @@ export function ComboBox({
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							'h-[unset] justify-between truncate border-edge-subtle text-foreground-subtle outline-none hover:bg-background-surface data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-edge-brand data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background',
+							'gap-1.5 justify-between rounded-md border-border bg-input/30 text-foreground outline-none hover:bg-input/50 data-[state=open]:border-ring data-[state=open]:ring-[3px] data-[state=open]:ring-ring/50',
+							{ [TRIGGER_SIZE_VARIANTS[size || 'default']]: !!size },
 							{ [SIZE_VARIANTS[size || 'default']]: !!size },
-							{ 'text-foreground-muted': !hasSelectedSomething },
+							{ 'text-muted-foreground': !hasSelectedSomething },
 							triggerClassName,
 							options.find((option) => option.value === value)?.fontClassName,
 						)}
 					>
-						{renderSelected()}
-						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+						<span className="truncate text-left">{renderSelected()}</span>
+						<ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					</Button>
 				</Popover.Trigger>
 				{/* FIXME: this does NOT scroll right... */}
 				<Popover.Content
+					sideOffset={6}
 					className={cn(
 						{ [SIZE_VARIANTS[size || 'default']]: !!size },
-						'mt-1 max-h-96 p-0 z-1000 overflow-y-auto',
+						'max-h-96 p-0 z-1000 overflow-hidden',
 						wrapperClassName,
 					)}
 					// eslint-disable-next-line react-hooks/refs
 					style={contentStyle}
 					portal={false}
 				>
-					<Command>
+					<Command className="p-0 rounded-none bg-transparent text-popover-foreground">
 						{filterable && (
 							<>
 								<Command.Input
+									wrapperClassName="m-1 mb-0 h-9 rounded-md bg-input/30 px-3"
+									iconClassName="mr-0 order-last"
+									className="h-9 py-2"
 									placeholder={filterPlaceholder}
 									value={filter}
 									onValueChange={setFilter}
@@ -265,36 +279,38 @@ export function ComboBox({
 								<Command.Empty>{renderEmptyState()}</Command.Empty>
 							</>
 						)}
-						<Command.Group>
-							{options.map((option) => {
-								const isSelected = isMultiSelect
-									? value?.includes(option.value)
-									: value === option.value
+						<Command.List className="scroll-py-1 p-1 data-[empty=true]:p-0 max-h-[min(calc(18rem-2.25rem),calc(100dvh-2.25rem))] overflow-y-auto overscroll-contain">
+							<Command.Group className="p-0">
+								{options.map((option) => {
+									const isSelected = isMultiSelect
+										? value?.includes(option.value)
+										: value === option.value
 
-								return (
-									<Command.Item
-										key={option.value}
-										// Note: For some reason, this transforms the `value` to lowercase...
-										onSelect={handleChange}
-										className={cn(
-											'transition-all duration-75',
-											{ 'text-brand': isSelected },
-											option.fontClassName,
-										)}
-										value={option.value}
-										keywords={[option.label]}
-									>
-										<Check
+									return (
+										<Command.Item
+											key={option.value}
+											// Note: For some reason, this transforms the `value` to lowercase...
+											onSelect={handleChange}
 											className={cn(
-												'mr-2 h-4 w-4 shrink-0',
-												isSelected ? 'opacity-100' : 'opacity-0',
+												'gap-2.5 py-2 pr-8 pl-3 relative w-full rounded-md transition-all duration-75',
+												{ 'text-primary': isSelected },
+												option.fontClassName,
 											)}
-										/>
-										{option.label}
-									</Command.Item>
-								)
-							})}
-						</Command.Group>
+											value={option.value}
+											keywords={[option.label]}
+										>
+											<Check
+												className={cn(
+													'mr-2 h-4 w-4 shrink-0',
+													isSelected ? 'opacity-100' : 'opacity-0',
+												)}
+											/>
+											{option.label}
+										</Command.Item>
+									)
+								})}
+							</Command.Group>
+						</Command.List>
 					</Command>
 				</Popover.Content>
 			</Popover>

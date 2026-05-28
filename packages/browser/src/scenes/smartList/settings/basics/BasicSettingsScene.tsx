@@ -62,7 +62,7 @@ export default function BasicSettingsScene() {
 			<BasicDetails />
 
 			<div>
-				<Button type="submit" disabled={!hasChanges} variant="primary">
+				<Button type="submit" disabled={!hasChanges}>
 					Update list
 				</Button>
 			</div>

@@ -1,7 +1,10 @@
 use async_graphql::InputObject;
 use models::shared::{
 	arrangement::ArrangementSection,
-	enums::{InterfaceLayout, SupportedFont, ThumbnailPlaceholderStyle, UserPermission},
+	enums::{
+		InterfaceLayout, InterfaceRoundness, SupportedFont, ThumbnailPlaceholderStyle,
+		UserPermission,
+	},
 };
 
 #[derive(InputObject)]
@@ -34,6 +37,7 @@ pub struct UpdateUserInput {
 pub struct UpdateUserPreferencesInput {
 	pub locale: String,
 	pub preferred_layout_mode: InterfaceLayout,
+	pub interface_roundness: InterfaceRoundness,
 	pub primary_navigation_mode: String,
 	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,

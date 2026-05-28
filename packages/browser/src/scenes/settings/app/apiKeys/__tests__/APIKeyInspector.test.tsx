@@ -73,7 +73,7 @@ describe('APIKeyInspector', () => {
 		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
-		expect(translate).toHaveBeenCalledWith(expect.stringContaining('fields.permissions'))
+		expect(screen.getByText('Permissions')).toBeInTheDocument()
 		expect(screen.getAllByTestId('permission-badge')).toHaveLength(2)
 	})
 
@@ -97,7 +97,7 @@ describe('APIKeyInspector', () => {
 		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
-		expect(translate).toHaveBeenCalledWith(expect.stringContaining('fields.permissions'))
+		expect(screen.getByText('Permissions')).toBeInTheDocument()
 		expect(screen.getAllByTestId('permission-badge')).toHaveLength(2)
 	})
 

@@ -68,7 +68,7 @@ export default function JobOverlay() {
 			{firstRunningJob && (
 				<motion.div
 					// @ts-expect-error: It does have className actually?
-					className="right-4 h-28 w-64 rounded-md p-4 shadow fixed flex flex-col items-start justify-between border border-edge-subtle bg-background-surface"
+					className="right-4 h-28 w-64 p-4 shadow fixed flex flex-col items-start justify-between rounded-md border border-border bg-muted"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}

@@ -1039,6 +1039,14 @@ export enum InterfaceLayout {
   Table = 'TABLE'
 }
 
+/** The roundness of certain UI elements in the client interface, such as cards, buttons, inputs, etc */
+export enum InterfaceRoundness {
+  None = 'NONE',
+  Normal = 'NORMAL',
+  Pill = 'PILL',
+  Rounded = 'ROUNDED'
+}
+
 export type Job = {
   __typename?: 'Job';
   completedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -4598,6 +4606,7 @@ export type UpdateUserPreferencesInput = {
   enableLiveRefetch: Scalars['Boolean']['input'];
   enableReadingJournal: Scalars['Boolean']['input'];
   enableReplacePrimarySidebar: Scalars['Boolean']['input'];
+  interfaceRoundness: InterfaceRoundness;
   layoutMaxWidthPx?: InputMaybe<Scalars['Int']['input']>;
   locale: Scalars['String']['input'];
   preferAccentColor: Scalars['Boolean']['input'];
@@ -4791,6 +4800,7 @@ export type UserPreferences = {
   enableReadingJournal: Scalars['Boolean']['output'];
   enableReplacePrimarySidebar: Scalars['Boolean']['output'];
   homeArrangement: Arrangement;
+  interfaceRoundness: InterfaceRoundness;
   layoutMaxWidthPx?: Maybe<Scalars['Int']['output']>;
   locale: Scalars['String']['output'];
   navigationArrangement: Arrangement;

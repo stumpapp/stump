@@ -1,21 +1,18 @@
-import { Label, NativeSelect, Text } from '@stump/components'
+import { NewCard } from '@stump/components'
 import { ThumbnailPlaceholderStyle } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import React from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
+
+import RadioTileGroup from './RadioTileGroup'
+import ThumbnailPreviewFrame from './ThumbnailPreviewFrame'
 
 export default function ThumbnailPlaceholder() {
 	const { t } = useLocaleContext()
 	const {
-		preferences: { thumbnailPlaceholderStyle },
+		preferences: { thumbnailPlaceholderStyle, thumbnailRatio },
 		update,
 	} = usePreferences()
-
-	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		if (!isPlaceholderStyle(e.target.value)) return
-		return update({ thumbnailPlaceholderStyle: e.target.value })
-	}
 
 	const options = [
 		{ label: t(getKey('options.grayscale')), value: ThumbnailPlaceholderStyle.Grayscale },
@@ -25,18 +22,18 @@ export default function ThumbnailPlaceholder() {
 	] satisfies { label: string; value: ThumbnailPlaceholderStyle }[]
 
 	return (
-		<div className="gap-y-1.5 md:max-w-md flex flex-col">
-			<Label>{t(getKey('label'))}</Label>
-			<NativeSelect value={thumbnailPlaceholderStyle} options={options} onChange={handleChange} />
-			<Text size="xs" variant="muted">
-				{t(getKey('description'))}
-			</Text>
-		</div>
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<RadioTileGroup
+				value={thumbnailPlaceholderStyle}
+				onChange={(value) => update({ thumbnailPlaceholderStyle: value })}
+				options={options.map((option) => ({
+					label: option.label,
+					value: option.value,
+					preview: <ThumbnailPreviewFrame style={option.value} ratio={thumbnailRatio} />,
+				}))}
+			/>
+		</NewCard.Row>
 	)
-}
-
-const isPlaceholderStyle = (value: string): value is ThumbnailPlaceholderStyle => {
-	return Object.values(ThumbnailPlaceholderStyle).includes(value as ThumbnailPlaceholderStyle)
 }
 
 const LOCALE_BASE = 'settingsScene.app/preferences.sections.thumbnailPlaceholder'

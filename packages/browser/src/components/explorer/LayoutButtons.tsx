@@ -12,7 +12,7 @@ export default function LayoutButtons() {
 				<IconButton
 					variant="ghost"
 					size="xs"
-					className="hover:bg-background-surface-hover"
+					className="hover:bg-accent"
 					pressEffect={false}
 					onClick={() => setLayout('grid')}
 					disabled={layout === 'grid'}
@@ -25,7 +25,7 @@ export default function LayoutButtons() {
 				<IconButton
 					variant="ghost"
 					size="xs"
-					className="hover:bg-background-surface-hover"
+					className="hover:bg-accent"
 					pressEffect={false}
 					onClick={() => setLayout('table')}
 					disabled={layout === 'table'}

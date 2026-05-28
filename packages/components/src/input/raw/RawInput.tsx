@@ -4,59 +4,24 @@ import React from 'react'
 import { cn } from '../../utils'
 
 export const RAW_INPUT_BASE_CLASSES = [
-	'flex w-full items-center justify-between transition-all duration-150 ',
-	'enabled:hover:bg-background-surface bg-transparent focus:bg-transparent',
-	'border-edge-subtle border outline-none',
-	'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background',
-	'text-foreground-subtle placeholder:text-foreground-muted text-sm light:placeholder:opacity-70',
-	'disabled:cursor-not-allowed disabled:opacity-50',
+	'flex h-9 w-full min-w-0 items-center justify-between rounded-md border border-border bg-input/30 px-3 py-1 text-base text-foreground transition-colors outline-none md:text-sm',
+	'file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
+	'placeholder:text-muted-foreground',
+	'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+	'aria-invalid:border-field-error-border aria-invalid:ring-[3px] aria-invalid:ring-field-error-ring',
+	'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
 ]
 export const RAW_INPUT_SIZE_VARIANTS = {
-	default: 'h-10 py-2 px-3',
-	sm: 'h-8 p-2',
-}
-export const RAW_INPUT_VARIANT = {
-	activeGhost: 'enabled:border-opacity-100 dark:enabled:border-opacity-100',
-	default: 'focus:ring-background-400 dark:focus:ring-background-400',
-	ghost:
-		'border-opacity-0 enabled:hover:border-opacity-70 focus:border-opacity-100 dark:enabled:hover:border-opacity-70 dark:focus:border-opacity-100 dark:border-opacity-0 dark:focus:bg-transparent',
-	primary: 'focus:ring-edge-brand dark:focus:ring-edge-brand',
-	underline:
-		'border-x-0 border-t-0 border-b-[1.5px] border-gray-300 border-opacity-70 dark:border-gray-700 dark:border-opacity-70 focus:ring-0 focus:ring-offset-0 outline-none focus:border-b-brand',
+	default: '',
+	sm: 'h-8 px-2.5',
 }
 export const RAW_INPUT_VARIANTS = {
-	contrast: {
-		true: 'enabled:hover:bg-background-surface bg-background/40 focus:bg-background/80',
-	},
-	isInvalid: {
-		true: 'focus:ring-red-400 dark:focus:ring-red-400 border border-red-300 border-opacity-70 dark:border-red-400 dark:border-opacity-70',
-	},
-	rounded: {
-		md: 'rounded-md',
-		none: 'rounded-none',
-		sm: 'rounded-sm',
-	},
 	size: RAW_INPUT_SIZE_VARIANTS,
-	variant: RAW_INPUT_VARIANT,
 }
 
 export const inputVariants = cva(RAW_INPUT_BASE_CLASSES, {
-	compoundVariants: [
-		{
-			className: 'rounded-none',
-			variant: 'underline',
-		},
-		{
-			className:
-				'border-b-red-400 dark:border-b-red-400 bg-red-50/50 hover:bg-red-100/50 focus:bg-red-100/50',
-			isInvalid: true,
-			variant: 'underline',
-		},
-	],
 	defaultVariants: {
-		rounded: 'md',
 		size: 'default',
-		variant: 'default',
 	},
 	variants: RAW_INPUT_VARIANTS,
 })
@@ -66,10 +31,10 @@ export type RawInputProps = VariantProps<typeof inputVariants> &
 	}
 
 export const RawInput = React.forwardRef<HTMLInputElement, RawInputProps>(
-	({ className, variant, size, rounded, isInvalid, contrast, ignoreFill, ...props }, ref) => {
+	({ className, size, ignoreFill, ...props }, ref) => {
 		return (
 			<input
-				className={cn(inputVariants({ className, contrast, isInvalid, rounded, size, variant }))}
+				className={cn(inputVariants({ className, size }))}
 				ref={ref}
 				{...props}
 				{...(ignoreFill ? { 'data-1p-ignore': true } : {})}

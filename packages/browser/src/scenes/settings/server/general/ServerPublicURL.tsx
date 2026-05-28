@@ -62,11 +62,7 @@ export default function ServerPublicURL() {
 			/>
 
 			{isDifferent && (
-				<Button
-					variant="primary"
-					className="mt-[26px] shrink"
-					onClick={() => updatePublicUrl({ publicUrl })}
-				>
+				<Button className="mt-6.5 shrink" onClick={() => updatePublicUrl({ publicUrl })}>
 					{t('common.save')}
 				</Button>
 			)}

@@ -545,6 +545,7 @@ async fn update_user_preferences_by_id(
 		reading_session_grace_period_secs: Set(
 			user_preferences.reading_session_grace_period_secs
 		),
+		interface_roundness: Set(user_preferences.interface_roundness),
 		home_arrangement: NotSet,
 		navigation_arrangement: NotSet,
 	};

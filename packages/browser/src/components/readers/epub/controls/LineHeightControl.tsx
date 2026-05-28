@@ -48,7 +48,7 @@ export default function LineHeightControl() {
 					})}
 					variant="ghost"
 					size="xs"
-					className={isHoldingMinus ? 'bg-background-surface-hover select-none' : ''}
+					className={isHoldingMinus ? 'bg-accent select-none' : ''}
 				>
 					<Minus className="h-4 w-4" />
 				</IconButton>
@@ -61,7 +61,7 @@ export default function LineHeightControl() {
 					})}
 					variant="ghost"
 					size="xs"
-					className={isHoldingPlus ? 'bg-background-surface-hover select-none' : ''}
+					className={isHoldingPlus ? 'bg-accent select-none' : ''}
 				>
 					<Plus className="h-4 w-4" />
 				</IconButton>

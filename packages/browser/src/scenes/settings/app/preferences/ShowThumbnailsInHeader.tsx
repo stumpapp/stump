@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -20,16 +20,21 @@ export default function ShowThumbnailsInHeader() {
 	}, [showThumbnailsInHeaders, update])
 
 	return (
-		<WideSwitch
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={showThumbnailsInHeaders}
-			onCheckedChange={handleToggle}
-			formId="showThumbnailsInHeaders"
+			onClick={handleToggle}
+			className="flex-row items-center justify-between"
 			title={
 				showThumbnailsInHeaders ? t(getKey('tooltips.enabled')) : t(getKey('tooltips.disabled'))
 			}
-		/>
+		>
+			<RawSwitch
+				id="showThumbnailsInHeaders"
+				checked={showThumbnailsInHeaders}
+				onCheckedChange={handleToggle}
+			/>
+		</NewCard.Row>
 	)
 }
 

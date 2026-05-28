@@ -117,21 +117,18 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 						<Input
 							label={t(getKey('name.label'))}
 							description={t(getKey('name.description'))}
-							variant="primary"
 							{...form.register('name')}
 							ignoreFill
 						/>
 						<Input
 							label={t(getKey('email.label'))}
 							description={t(getKey('email.description'))}
-							variant="primary"
 							{...form.register('email')}
 							ignoreFill
 						/>
 						<CheckBox
 							label={t(getKey('forbidden.label'))}
 							description={t(getKey('forbidden.description'))}
-							variant="primary"
 							checked={isForbidden}
 							onClick={() => form.setValue('forbidden', !isForbidden)}
 						/>
@@ -139,10 +136,10 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 				</div>
 
 				<Dialog.Footer>
-					<Button variant="default" onClick={onClose}>
+					<Button variant="outline" onClick={onClose}>
 						Cancel
 					</Button>
-					<Button variant="primary" type="submit" form="create-or-update-device-form">
+					<Button type="submit" form="create-or-update-device-form">
 						{t(updatingDevice ? getKey('submit.update') : getKey('submit.create'))}
 					</Button>
 				</Dialog.Footer>

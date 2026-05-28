@@ -73,7 +73,6 @@ export default function UserRestrictionsForm() {
 				<div className="gap-6 md:flex-row md:items-start flex flex-col">
 					<Input
 						id="ageRestriction"
-						variant="primary"
 						type="number"
 						label={t(getAgeRestrictionKey('label'))}
 						description={t(getAgeRestrictionKey('description'))}

@@ -59,7 +59,7 @@ export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }:
 			title={t(getKey('title'))}
 			description={t(getKey('description'))}
 			confirmText={t(getKey('confirm'))}
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={onClose}
 			onConfirm={handleDelete}

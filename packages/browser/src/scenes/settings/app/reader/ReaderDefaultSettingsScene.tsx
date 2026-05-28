@@ -1,9 +1,10 @@
-import { Button, Heading, Text } from '@stump/components'
+import { Button, NewCard, Sheet, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Container, ContentContainer } from '@/components/container'
+import ReaderSettings from '@/components/readers/imageBased/container/ReaderSettings'
 import { useReaderStore } from '@/stores'
 
 import DefaultFontFamily from './DefaultFontFamily'
@@ -12,6 +13,13 @@ import DefaultLineHeight from './DefaultLineHeight'
 import DefaultReadingDirection from './DefaultReadingDirection'
 import PreloadPagesSection from './PreloadPagesSection'
 
+// TODO: this page is a big ol' wip for now, and so didn't bother adding localization changes
+// yet to avoid issues down the road and/or wasting people's time translating.
+// the sheets for format-specific settings needs lots of work, in part that they are
+// not very filled-out yet (esp ebook). my current plan is to just port how
+// expo does it, and ideally while i am at it try to improve the awkward cascading
+// dance of global vs book-level vs format-level vs library-level settings :)
+// TODO(i8n): keys/values
 export default function ReaderDefaultSettingsScene() {
 	const { t } = useLocaleContext()
 
@@ -31,46 +39,68 @@ export default function ReaderDefaultSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<div className="gap-y-1.5 md:max-w-md flex flex-col">
+				<NewCard label="Universal" description="Settings which apply to all types of books">
 					<DefaultReadingDirection />
-				</div>
+				</NewCard>
 
-				<div className="gap-y-8 flex flex-col">
+				<NewCard label="Formats" description="Configure reader default settings independently">
+					<NewCard.Row
+						label={t(getSectionKey('imageBasedBooks.label'))}
+						description={t(getSectionKey('imageBasedBooks.description'))}
+					>
+						<Sheet
+							title={t(getSectionKey('imageBasedBooks.label'))}
+							description={t(getSectionKey('imageBasedBooks.description'))}
+							trigger={
+								<Button size="sm" variant="outline">
+									{t('common.edit')}
+								</Button>
+							}
+							size="lg"
+							contentClassName="overflow-y-scroll"
+						>
+							<div className="gap-4 px-4 pb-4 flex flex-col">
+								<ReaderSettings />
+								<PreloadPagesSection />
+							</div>
+						</Sheet>
+					</NewCard.Row>
+
+					<NewCard.Row
+						label={t(getSectionKey('textBasedBooks.label'))}
+						description={t(getSectionKey('textBasedBooks.description'))}
+					>
+						<Sheet
+							title={t(getSectionKey('textBasedBooks.label'))}
+							description={t(getSectionKey('textBasedBooks.description'))}
+							trigger={
+								<Button size="sm" variant="outline">
+									{t('common.edit')}
+								</Button>
+							}
+							size="default"
+						>
+							<div className="gap-y-1.5 md:max-w-md px-4 pb-4 flex flex-col">
+								<DefaultFontFamily />
+								<DefaultFontSize />
+								<DefaultLineHeight />
+							</div>
+						</Sheet>
+					</NewCard.Row>
+				</NewCard>
+
+				<div className="gap-y-3 flex flex-col">
 					<div>
-						<Heading size="sm">{t(getSectionKey('imageBasedBooks.label'))}</Heading>
-						<Text variant="muted" size="sm">
-							{t(getSectionKey('imageBasedBooks.description'))}
-						</Text>
-					</div>
-
-					<PreloadPagesSection />
-				</div>
-
-				<div className="gap-y-8 flex flex-col">
-					<div>
-						<Heading size="sm">{t(getSectionKey('textBasedBooks.label'))}</Heading>
-						<Text variant="muted" size="sm">
-							{t(getSectionKey('textBasedBooks.description'))}
-						</Text>
-					</div>
-
-					<div className="gap-y-1.5 md:max-w-md flex flex-col">
-						<DefaultFontFamily />
-						<DefaultFontSize />
-						<DefaultLineHeight />
-					</div>
-				</div>
-
-				<div className="gap-y-8 flex flex-col">
-					<div>
-						<Heading size="sm">{t(getSectionKey('data.sections.clearStore.label'))}</Heading>
+						<h3 className="text-base font-medium text-foreground">
+							{t(getSectionKey('data.sections.clearStore.label'))}
+						</h3>
 						<Text variant="muted" size="sm">
 							{t(getSectionKey('data.sections.clearStore.description'))}
 						</Text>
 					</div>
 
 					<div>
-						<Button variant="danger" size="sm" onClick={clearStore} disabled={!canClearStore}>
+						<Button variant="destructive" size="sm" onClick={clearStore} disabled={!canClearStore}>
 							{t(getSectionKey('data.sections.clearStore.button'))}
 						</Button>
 					</div>

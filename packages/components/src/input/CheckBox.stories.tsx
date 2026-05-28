@@ -12,7 +12,7 @@ export const Default: StoryObj<typeof CheckBox> = {
 }
 
 export const Primary: StoryObj<typeof CheckBox> = {
-	render: () => <CheckBox id="my-label" label="My Label" variant="primary" />,
+	render: () => <CheckBox id="my-label" label="My Label" />,
 }
 
 export const Description: StoryObj<typeof CheckBox> = {

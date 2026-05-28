@@ -5,8 +5,7 @@
 		".": "./src/index.ts",
 		"./styles/overrides.css": "./src/styles/overrides.css",
 		"./tailwind": "./tailwind/index.ts",
-		"./tailwind/preset.css": "./tailwind/preset.css",
-		"./themes": "./themes/index.ts"
+		"./tailwind/preset.css": "./tailwind/preset.css"
 	},
 	"scripts": {
 		"check-types": "tsc -b tsconfig.json",

@@ -100,12 +100,12 @@ export default function NavigationArrangementItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				'rounded-md flex cursor-grab flex-col bg-background-surface-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-edge-brand',
+				'flex cursor-grab flex-col rounded-md bg-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-ring',
 				{
 					'cursor-not-allowed': disabled,
 				},
 				{
-					'bg-background-surface-secondary/40': !section.visible,
+					'bg-secondary/40': !section.visible,
 				},
 				{
 					'cursor-grabbing': isDragging,
@@ -135,14 +135,12 @@ export default function NavigationArrangementItem({
 			{isConfigurableSection && showConfiguration && (
 				<div className="gap-3 p-4 flex flex-wrap items-center">
 					<CheckBox
-						variant="primary"
 						label={t(getConfigKey('createAction.label'))}
 						checked={section.config.links.includes(FilterableArrangementEntityLink.Create)}
 						onClick={createCheckboxHandler(FilterableArrangementEntityLink.Create)}
 					/>
 
 					<CheckBox
-						variant="primary"
 						label={t(getConfigKey('linkToAll.label'))}
 						checked={section.config.links.includes(FilterableArrangementEntityLink.ShowAll)}
 						onClick={createCheckboxHandler(FilterableArrangementEntityLink.ShowAll)}

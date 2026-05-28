@@ -69,7 +69,6 @@ export function ProviderApiKeyInput() {
 			<PasswordInput
 				label={t(getKey('apiToken.label'))}
 				description={t(getKey('apiToken.description'))}
-				variant="primary"
 				type="password"
 				{...form.register('apiToken')}
 				errorMessage={errors.apiToken?.message}

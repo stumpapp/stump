@@ -106,7 +106,6 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 							<Button
 								type="button"
 								className="md:w-auto w-full"
-								variant="primary"
 								onClick={() => handleChangeStep(2)}
 							>
 								Next step
@@ -123,11 +122,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<FileConversionOptions />
 						<IgnoreRulesConfig />
 						<div className="mt-6 md:max-w-sm flex w-full">
-							<Button
-								className="md:w-auto w-full"
-								variant="primary"
-								onClick={() => handleChangeStep(3)}
-							>
+							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
 								Next step
 							</Button>
 						</div>
@@ -140,7 +135,6 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button
 								className="md:w-auto w-full"
-								variant="primary"
 								onClick={() => handleChangeStep(4)}
 								type="button"
 							>
@@ -197,7 +191,6 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 							type="submit"
 							form="createLibraryForm"
 							className="md:w-auto w-full"
-							variant="primary"
 							isLoading={isLoading}
 						>
 							Create library

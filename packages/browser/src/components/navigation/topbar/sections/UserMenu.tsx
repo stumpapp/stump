@@ -31,10 +31,7 @@ export default function UserMenu() {
 	}
 
 	const classes = cn(
-		'rounded-full border border-transparent border-opacity-80 bg-sidebar text-foreground-subtle hover:border-edge-subtle hover:border-opacity-100 hover:bg-background-surface/50 data-[state=open]:border-edge-subtle data-[state=open]:border-opacity-100 data-[state=open]:bg-background-surface/50',
-		// {
-		// 	'border-edge-subtle border-opacity-100 bg-background-surface/50': isInSettingsSomewhere,
-		// },
+		'rounded-md border border-transparent bg-sidebar text-sidebar-foreground hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[state=open]:border-sidebar-border data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground',
 		// {
 		// 	'h-[2.35rem] w-[2.35rem] p-0 px-0 py-0': enable_double_sidebar,
 		// },
@@ -54,7 +51,7 @@ export default function UserMenu() {
 			<NavigationMenu.Content className="right-0 left-auto">
 				<ul className="text-sm md:w-48 flex flex-col">
 					<TopBarLinkListItem
-						className="py-3 rounded-none"
+						className="py-3 rounded-md"
 						to={paths.notifications()}
 						isActive={location.pathname.startsWith(paths.notifications())}
 						isDisabled
@@ -63,7 +60,7 @@ export default function UserMenu() {
 						<span className="ml-1 font-medium line-clamp-1">Notifications</span>
 					</TopBarLinkListItem>
 
-					<TopBarButtonItem className="py-3 rounded-none" onClick={logout}>
+					<TopBarButtonItem className="py-3 rounded-md" onClick={logout}>
 						<LogOut className="mr-2 h-4 w-4 shrink-0" />
 						Logout
 					</TopBarButtonItem>

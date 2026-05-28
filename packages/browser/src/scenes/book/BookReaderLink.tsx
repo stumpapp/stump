@@ -41,7 +41,7 @@ export default function BookReaderLink({ book }: Props) {
 	}, [book, isReadAgain, paths])
 
 	return (
-		<ButtonOrLink className="w-full" variant="primary" href={readUrl} title={title} rounded="lg">
+		<ButtonOrLink className="w-full" href={readUrl} title={title} rounded="lg">
 			{title}
 		</ButtonOrLink>
 	)

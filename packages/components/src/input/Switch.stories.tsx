@@ -13,7 +13,7 @@ export const Default: Story = {
 }
 
 export const Primary: Story = {
-	render: () => <Switch label="My Label" variant="primary" />,
+	render: () => <Switch label="My Label" />,
 }
 
 export default StoryMeta

@@ -66,7 +66,7 @@ export default function SeriesNavigation() {
 		<div
 			ref={ref}
 			className={cn(
-				'top-0 h-12 md:relative md:top-[unset] md:z-[unset] sticky z-50 w-full border-b border-edge bg-transparent',
+				'top-0 h-12 md:relative md:top-[unset] md:z-[unset] sticky z-50 w-full border-b border-border bg-transparent',
 				{ 'bg-background': isSticky },
 			)}
 		>
@@ -88,8 +88,8 @@ export default function SeriesNavigation() {
 						className={cn(
 							'px-1 py-3 text-sm font-medium border-b-2 whitespace-nowrap',
 							{
-								'border-edge-brand text-foreground-brand': tab.isActive,
-								'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
+								'border-primary text-primary': tab.isActive,
+								'border-transparent text-muted-foreground hover:border-border': !tab.isActive,
 							},
 							// {
 							// 	'pointer-events-none !text-opacity-40': tab.disabled,

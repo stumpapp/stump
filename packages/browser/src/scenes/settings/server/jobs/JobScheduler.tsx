@@ -111,7 +111,7 @@ export default function JobScheduler() {
 			)}
 
 			<div>
-				<Button variant="secondary" size="sm" onClick={openCreate}>
+				<Button variant="secondary" onClick={openCreate}>
 					<Plus className="mr-1.5 h-4 w-4" />
 					{t(getKey('newScheduledJob'))}
 				</Button>
@@ -130,7 +130,7 @@ export default function JobScheduler() {
 				title={t(getKey('deleteScheduledJob.title'))}
 				description={`${t(getKey('deleteScheduledJob.description')).replace('{{name}}', deleting?.name ?? '')}`}
 				confirmText={t(getKey('deleteScheduledJob.confirm'))}
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				onConfirm={() => deleting && doDelete({ id: deleting.id })}
 				onClose={() => setDeleting(null)}
 			/>

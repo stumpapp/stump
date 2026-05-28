@@ -36,14 +36,14 @@ export function RadioCardItem({
 		<Label
 			htmlFor={value}
 			className={cn(
-				'rounded-lg p-4 font-normal relative cursor-pointer border bg-background-surface transition-colors duration-150 focus:outline-none',
-				disabled ? 'cursor-not-allowed opacity-70' : 'hover:bg-background-surface-hover/70',
+				'p-4 font-normal relative cursor-pointer rounded-lg border bg-card transition-colors duration-150 focus:outline-none',
+				disabled ? 'cursor-not-allowed opacity-70' : 'hover:bg-accent/50',
 				{
-					'border-edge-brand bg-background-surface/75 ring-2 ring-edge-brand': isActive,
+					'border-primary ring-2 ring-ring': isActive,
 				},
-				{ 'hover:bg-background-surface-hover': isActive && !disabled },
+				{ 'hover:bg-accent': isActive && !disabled },
 				{
-					'border-opacity-70 hover:border-opacity-100 border-edge-subtle': !isActive,
+					'border-opacity-70 hover:border-opacity-100 border-border': !isActive,
 				},
 				className,
 			)}
@@ -56,7 +56,7 @@ export function RadioCardItem({
 				)}
 			>
 				<div className={cn('space-x-2 flex shrink-0 items-center', radioContainerClassName)}>
-					<RadioGroup.Item value={value} id={value} className="border-edge-subtle" />
+					<RadioGroup.Item value={value} id={value} className="border-border" />
 					<Text variant="label" className="font-normal">
 						{label}
 					</Text>

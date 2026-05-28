@@ -13,10 +13,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-
 jobs:
   parse-semver:
     if: contains(github.event.pull_request.head.ref, 'release/v')
@@ -79,8 +75,8 @@ jobs:
       - name: Build and push docker image
         uses: ./.github/actions/build-docker
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           tags: ${{ needs.parse-semver.outputs.tags }}
           build-channel: stable
           load: ${{ needs.push-or-load.outputs.load }}

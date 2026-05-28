@@ -12,10 +12,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-
 jobs:
   code-changes-check:
     runs-on: [ubuntu-22.04]
@@ -62,8 +58,8 @@ jobs:
       - name: Setup and build docker image
         uses: ./.github/actions/build-docker
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           tags: 'nightly'
           build-channel: 'nightly'
           load: ${{ env.LOAD }}

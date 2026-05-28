@@ -30,6 +30,7 @@ jobs:
               - './apps/web/**'
               - './apps/desktop/src/**'
               - './packages/**'
+              - './.github/actions/setup-yarn/action.yml'
             expo:
               - './apps/expo/**'
             rust:
@@ -37,6 +38,7 @@ jobs:
               - './apps/desktop/src-tauri/**'
               - './core/**'
               - './crates/**'
+              - './.github/actions/setup-rust/action.yml'
             docker: ./docker/**
 
   check-rust:

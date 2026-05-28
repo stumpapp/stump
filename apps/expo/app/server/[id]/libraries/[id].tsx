@@ -1,7 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, LibrarySeriesScreenQuery } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
+import { BackgroundGradient, useBackgroundGradient } from '~/components/BackgroundGradient'
 import { LibraryOverviewSheet, usePrefetchLibraryOverview } from '~/components/library'
 import { LibrarySeriesListHeader } from '~/components/library/listHeader'
 import ListEmpty from '~/components/ListEmpty'
@@ -47,6 +48,11 @@ const seriesQuery = graphql(`
 			nodes {
 				id
 				...SeriesListItem
+				thumbnail {
+					metadata {
+						averageColor
+					}
+				}
 			}
 			pageInfo {
 				__typename
@@ -59,6 +65,7 @@ const seriesQuery = graphql(`
 		}
 	}
 `)
+type Node = LibrarySeriesScreenQuery['series']['nodes'][number]
 
 export default function Screen() {
 	const { id } = useLocalSearchParams<{ id: string }>()
@@ -136,14 +143,27 @@ export default function Screen() {
 	const layout = useSeriesLayout(`library-${id}-series`, (state) => state.layout)
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
+	const flashListRef = useRef<FlashListRef<Node>>(null)
+	const { animatedProps, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+		data: nodes,
+		layout,
+		flashListRef,
+	})
+	useEffect(() => {
+		flashListRef.current?.recomputeViewableItems()
+	}, [filters, layout, sort])
+
 	return (
 		<SeriesFilterContext.Provider value={store}>
 			<SafeAreaView
 				style={{ flex: 1 }}
 				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 			>
+				<BackgroundGradient animatedProps={animatedProps} />
+
 				<FlashList
 					key={layout} // force re-render when layout changes
+					ref={flashListRef}
 					data={nodes}
 					renderItem={({ item }) => <SeriesListItem layout={layout} series={item} />}
 					contentContainerStyle={{
@@ -153,6 +173,7 @@ export default function Screen() {
 					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
+					viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
 					ListHeaderComponent={
 						<LibrarySeriesListHeader
 							libraryId={id}

@@ -13,7 +13,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { useResolvedHeaderHeight } from './header/useAnimatedHeader'
 import { useListSizing } from './listLayout'
 
-type MinimalMediaItem = {
+type MinimalItem = {
 	thumbnail?: {
 		metadata?: {
 			averageColor?: string | null
@@ -21,7 +21,7 @@ type MinimalMediaItem = {
 	} | null
 }
 
-const getThumbnailColor = (item?: MinimalMediaItem): string => {
+const getThumbnailColor = (item?: MinimalItem): string => {
 	const isDarkColorScheme = Appearance.getColorScheme() === 'dark'
 	const averageColor = item?.thumbnail?.metadata?.averageColor
 
@@ -29,7 +29,7 @@ const getThumbnailColor = (item?: MinimalMediaItem): string => {
 
 	const color = getColor(averageColor)
 	set(color, {
-		'oklch.l': (l) => (isDarkColorScheme ? 0.25 * l : 0.5 * l + 0.5),
+		'oklch.l': (l) => (isDarkColorScheme ? 0.25 * Math.pow(l, 0.4) : 0.5 * l + 0.5),
 		'oklch.c': (c) => 0.95 * c + 0.05 * 0.4,
 	})
 
@@ -61,12 +61,12 @@ type Props<T> = {
 	flashListRef: RefObject<FlashListRef<T> | null>
 }
 
-export function useBackgroundGradient<T extends MinimalMediaItem>({
+export function useBackgroundGradient<T extends MinimalItem>({
 	data,
 	layout,
 	flashListRef,
 }: Props<T>) {
-	const { height } = useDisplay()
+	const { height: displayHeight } = useDisplay()
 	const headerHeight = useResolvedHeaderHeight()
 	const { estimatedItemHeight, numColumns } = useListSizing({ layout })
 	const { isDarkColorScheme } = useColorScheme()
@@ -76,9 +76,15 @@ export function useBackgroundGradient<T extends MinimalMediaItem>({
 	}, [flashListRef, isDarkColorScheme])
 
 	const isGrid = layout === InterfaceLayout.Grid
-	const estimatedVisibleItemCount =
-		// This is missing subtacting height of stats header. ItemSeparatorComponent h-6 = 21px
-		Math.floor((height - headerHeight) / (estimatedItemHeight + (isGrid ? 0 : 21))) * numColumns
+
+	// stats header height is approx 50px (assuming one row of stats)
+	const visibleRowsTotalStartHeight = displayHeight - headerHeight - 50
+	// ItemSeparatorComponent h-6 = 21px
+	const rowHeight = estimatedItemHeight + (isGrid ? 0 : 21)
+	const estimatedVisibleItemCount = Math.min(
+		data.length,
+		Math.floor(visibleRowsTotalStartHeight / rowHeight) * numColumns,
+	)
 
 	const firstColor = useSharedValue(getThumbnailColor(data.at(0)))
 	const lastColor = useSharedValue(getThumbnailColor(data.at(estimatedVisibleItemCount - 1)))

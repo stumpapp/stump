@@ -31,7 +31,6 @@ export default function Screen() {
 						headerLargeTitleStyle: {
 							fontSize: 30,
 						},
-						headerLargeTitle: Platform.OS === 'ios',
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 						animation: animationEnabled ? 'default' : 'none',
 						headerLeft: Platform.OS === 'android' ? undefined : () => <BackLink />,

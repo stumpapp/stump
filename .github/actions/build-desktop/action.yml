@@ -24,7 +24,7 @@ runs:
       uses: ./.github/actions/setup-rust
 
     - name: Copy bundled web app
-      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
       with:
         name: webapp
         path: ./apps/desktop/dist

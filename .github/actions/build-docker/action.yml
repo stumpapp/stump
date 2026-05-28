@@ -69,7 +69,7 @@ runs:
       shell: bash
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4
       if: ${{ steps.check-qemu.outputs.SETUP_QEMU == '1' }}
       with:
         platforms: linux/arm64
@@ -94,7 +94,7 @@ runs:
 
     - name: Run buildah build
       id: build
-      uses: redhat-actions/buildah-build@v2
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
       with:
         image: stump
         tags: ${{ env.FORMATTED_TAGS }}
@@ -115,7 +115,7 @@ runs:
     - name: Push to registry
       id: push
       if: ${{ success() && inputs.push == 'true' }}
-      uses: redhat-actions/push-to-registry@v2
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
       with:
         image: ${{ steps.build.outputs.image }}
         tags: ${{ steps.build.outputs.tags }}
@@ -132,6 +132,6 @@ runs:
       if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}
       env:
         DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
-      uses: 'Ilshidur/action-discord@0.3.2'
+      uses: 'Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554' # 0.4.0
       with:
         args: 'Successfully pushed the following image tags to registry: ${{ steps.build.outputs.tags }}'

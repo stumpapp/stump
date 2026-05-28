@@ -12,18 +12,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-
 jobs:
   code-changes-check:
     runs-on: [ubuntu-22.04]
     outputs:
       changes: ${{steps.filter.outputs.changes}}
     steps:
-      - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
         id: filter
         with:
           base: 'unstable'
@@ -44,13 +40,13 @@ jobs:
     if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup and build docker image
         uses: ./.github/actions/build-docker
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           tags: 'unstable'
           build-channel: 'unstable'
           load: ${{ github.event_name == 'pull_request' }}

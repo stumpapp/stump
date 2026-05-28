@@ -113,3 +113,16 @@ pretty_assertions = "1.4.1"
 
 # Only used to test with sea-orm
 maplit = { version = "1.0.2" }
+
+[profile.dev.package."*"]
+# Compile all dependencies with opt-level=3 to help speed up tests and
+# debug builds
+codegen-units = 1
+debug = "line-tables-only"
+opt-level = 3
+
+[profile.release]
+strip = "debuginfo"
+codegen-units = 1
+panic = "abort"
+

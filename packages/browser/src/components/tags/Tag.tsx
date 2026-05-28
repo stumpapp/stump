@@ -13,12 +13,7 @@ export default function TagComponent({ tag, href }: Props) {
 
 	return (
 		<Container {...containerProps}>
-			<Badge
-				variant="secondary"
-				size="xs"
-				rounded="full"
-				className={href ? 'cursor-pointer' : undefined}
-			>
+			<Badge variant="secondary" rounded="full" className={href ? 'cursor-pointer' : undefined}>
 				{tag.name}
 			</Badge>
 		</Container>

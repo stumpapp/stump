@@ -97,7 +97,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 
 	return (
 		<Card
-			className="overflow-hidden rounded-xl border-border"
+			className="overflow-hidden rounded-xl border-border bg-background"
 			ref={tableContainerRef}
 			style={{
 				direction: table.options.columnResizeDirection,
@@ -123,7 +123,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 										...getCommonPinningStyles(header.column),
 									},
 								}}
-								className="min-h-10 relative"
+								className="min-h-10 relative bg-card/70"
 							>
 								{flexRender(header.column.columnDef.header, header.getContext())}
 

@@ -19,6 +19,7 @@ import PreloadPagesSection from './PreloadPagesSection'
 // not very filled-out yet (esp ebook). my current plan is to just port how
 // expo does it, and ideally while i am at it try to improve the awkward cascading
 // dance of global vs book-level vs format-level vs library-level settings :)
+// TODO(i8n): keys/values
 export default function ReaderDefaultSettingsScene() {
 	const { t } = useLocaleContext()
 
@@ -51,7 +52,7 @@ export default function ReaderDefaultSettingsScene() {
 							title={t(getSectionKey('imageBasedBooks.label'))}
 							description={t(getSectionKey('imageBasedBooks.description'))}
 							trigger={
-								<Button size="sm" variant="secondary">
+								<Button size="sm" variant="outline">
 									{t('common.edit')}
 								</Button>
 							}
@@ -73,7 +74,7 @@ export default function ReaderDefaultSettingsScene() {
 							title={t(getSectionKey('textBasedBooks.label'))}
 							description={t(getSectionKey('textBasedBooks.description'))}
 							trigger={
-								<Button size="sm" variant="secondary">
+								<Button size="sm" variant="outline">
 									{t('common.edit')}
 								</Button>
 							}

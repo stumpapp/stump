@@ -245,7 +245,11 @@ export function NavigationArrangementSheet() {
 		<Sheet
 			title={t(getKey('label'))}
 			description={t(getKey('description'))}
-			trigger={t('common.edit')}
+			trigger={
+				<Button size="sm" variant="outline">
+					{t('common.edit')}
+				</Button>
+			}
 		>
 			<div className="px-4">
 				<div className="flex w-full flex-col overflow-hidden rounded-xl border border-border">

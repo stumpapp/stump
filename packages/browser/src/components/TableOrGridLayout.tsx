@@ -13,7 +13,7 @@ export default function TableOrGridLayout({ layout, setLayout }: Props) {
 			<ToolTip content="Grid" size="sm">
 				<IconButton
 					variant="ghost"
-					size="xs"
+					size="sm"
 					className="hover:bg-accent"
 					pressEffect={false}
 					onClick={() => setLayout(InterfaceLayout.Grid)}
@@ -26,7 +26,7 @@ export default function TableOrGridLayout({ layout, setLayout }: Props) {
 			<ToolTip content="Table" size="sm" align="end">
 				<IconButton
 					variant="ghost"
-					size="xs"
+					size="sm"
 					className="hover:bg-accent"
 					pressEffect={false}
 					onClick={() => setLayout(InterfaceLayout.Table)}

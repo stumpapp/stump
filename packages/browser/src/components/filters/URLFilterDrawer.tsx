@@ -1,10 +1,14 @@
 import { Button, IconButton, Sheet, ToolTip } from '@stump/components'
-import { Bolt } from 'lucide-react'
+import { ListFilter } from 'lucide-react'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { clearFilters, getActiveFilterCount, useFilterContext } from '.'
 import { FilterableEntity, MediaFilterForm, SeriesFilterForm } from './form'
+
+// TODO(ux): I think this can honestly just take inspiration from expo and:
+// 1. render a dropdown with common preset filters (e.g., unread, whatever )
+// 2. an option in the menu for custom filter that just dumps a smart filter form in a modal
 
 type Props = {
 	entity: FilterableEntity
@@ -51,12 +55,12 @@ export default function URLFilterDrawer({ entity }: Props) {
 					<span className="relative inline-flex">
 						<IconButton
 							variant="ghost"
-							size="xs"
+							size="sm"
 							className="hover:bg-accent"
 							pressEffect={false}
 							onClick={() => setIsOpen(true)}
 						>
-							<Bolt className="h-4 w-4" />
+							<ListFilter className="h-4 w-4" />
 						</IconButton>
 
 						{activeFilters > 0 && (

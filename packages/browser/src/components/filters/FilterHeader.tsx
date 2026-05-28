@@ -94,13 +94,14 @@ export default function FilterHeader({
 				isDisabled={isSearchDisabled}
 			/>
 
-			<div className="gap-4 flex items-center">
+			<div className="gap-x-4 flex items-center">
 				{sizeControls}
 
-				<div className="gap-x-2 flex items-center">
+				<div className="gap-x-1 flex items-center">
 					{orderControls}
 					{filterControls}
 				</div>
+
 				{layoutControls}
 			</div>
 		</header>

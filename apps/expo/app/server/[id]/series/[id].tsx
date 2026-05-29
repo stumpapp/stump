@@ -153,7 +153,7 @@ export default function Screen() {
 	const layout = useBooksLayout(layoutKey, (state) => state.layout)
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
-	const { animatedProps, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+	const { colors, viewabilityConfigCallbackPairs } = useBackgroundGradient({
 		data: nodes,
 		layout,
 		flashListRef: listRef,
@@ -164,11 +164,8 @@ export default function Screen() {
 
 	return (
 		<BookFilterContext.Provider value={store}>
-			<SafeAreaView
-				style={{ flex: 1 }}
-				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
-			>
-				<BackgroundGradient animatedProps={animatedProps} />
+			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+				<BackgroundGradient colors={colors} layout={layout} />
 
 				<FlashList
 					key={layout} // force re-render when layout changes

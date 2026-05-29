@@ -47,7 +47,7 @@ export default function Screen() {
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />
 					<ThumbnailResizeMode />
-					{Platform.OS === 'ios' && <TintListBackground />}
+					<TintListBackground />
 				</Card>
 
 				<Card label={t(getSectionLabelKey('reading'))}>

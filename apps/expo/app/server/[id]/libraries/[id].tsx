@@ -5,7 +5,6 @@ import { graphql, LibrarySeriesScreenQuery } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
@@ -144,7 +143,7 @@ export default function Screen() {
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
 	const flashListRef = useRef<FlashListRef<Node>>(null)
-	const { animatedProps, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+	const { colors, viewabilityConfigCallbackPairs } = useBackgroundGradient({
 		data: nodes,
 		layout,
 		flashListRef,
@@ -155,11 +154,8 @@ export default function Screen() {
 
 	return (
 		<SeriesFilterContext.Provider value={store}>
-			<SafeAreaView
-				style={{ flex: 1 }}
-				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
-			>
-				<BackgroundGradient animatedProps={animatedProps} />
+			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+				<BackgroundGradient colors={colors} layout={layout} />
 
 				<FlashList
 					key={layout} // force re-render when layout changes

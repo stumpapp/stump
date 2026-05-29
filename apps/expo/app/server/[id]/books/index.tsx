@@ -3,7 +3,6 @@ import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/clien
 import { BooksScreenQuery, graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
@@ -122,7 +121,7 @@ export default function Screen() {
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
 	const flashListRef = useRef<FlashListRef<Node>>(null)
-	const { animatedProps, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+	const { colors, viewabilityConfigCallbackPairs } = useBackgroundGradient({
 		data: nodes,
 		layout,
 		flashListRef,
@@ -133,11 +132,8 @@ export default function Screen() {
 
 	return (
 		<BookFilterContext.Provider value={store}>
-			<SafeAreaView
-				style={{ flex: 1 }}
-				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
-			>
-				<BackgroundGradient animatedProps={animatedProps} />
+			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+				<BackgroundGradient colors={colors} layout={layout} />
 
 				<FlashList
 					ref={flashListRef}

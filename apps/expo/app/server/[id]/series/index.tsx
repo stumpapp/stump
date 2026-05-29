@@ -121,7 +121,7 @@ export default function Screen() {
 	const layout = useSeriesLayout('global', (state) => state.layout)
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
-	const { animatedProps, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+	const { colors, viewabilityConfigCallbackPairs } = useBackgroundGradient({
 		data: nodes,
 		layout,
 		flashListRef: listRef,
@@ -132,7 +132,7 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-			<BackgroundGradient animatedProps={animatedProps} />
+			<BackgroundGradient colors={colors} layout={layout} />
 
 			<FlashList
 				key={layout} // force re-render when layout changes

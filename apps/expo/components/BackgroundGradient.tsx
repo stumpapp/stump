@@ -1,11 +1,11 @@
 import { FlashListRef, ViewToken } from '@shopify/flash-list'
 import { ViewabilityConfigCallbackPairs } from '@shopify/flash-list/dist/FlashListProps'
+import { AnimatedProp, Canvas, Color, LinearGradient, Rect, vec } from '@shopify/react-native-skia'
 import { InterfaceLayout } from '@stump/graphql'
 import { getColor, serialize, set } from 'colorjs.io/fn'
-import { MeshGradientView, MeshGradientViewProps } from 'expo-mesh-gradient'
 import { RefObject, useCallback, useEffect } from 'react'
 import { Appearance } from 'react-native'
-import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated'
+import { useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated'
 
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
@@ -37,25 +37,27 @@ const getThumbnailColor = (item?: MinimalItem): string => {
 	return serialize(color, { format: 'hex' })
 }
 
-const AnimatedMeshGradientView = Animated.createAnimatedComponent(MeshGradientView)
+type BackgroundGradientProps = {
+	colors: AnimatedProp<Color[]>
+	layout: InterfaceLayout
+}
 
-export function BackgroundGradient({ animatedProps }: { animatedProps: MeshGradientViewProps }) {
+export function BackgroundGradient({ colors, layout }: BackgroundGradientProps) {
+	const { height, width } = useDisplay()
 	const { tintListBackground } = usePreferencesStore()
+
 	if (!tintListBackground) return null
 
+	const isGrid = layout === InterfaceLayout.Grid
+
+	const endPoint = isGrid ? vec(width, height) : vec(0, height)
+
 	return (
-		<AnimatedMeshGradientView
-			columns={2}
-			rows={2}
-			points={[
-				[0, 0],
-				[1, 0],
-				[0, 1],
-				[1, 1],
-			]}
-			animatedProps={animatedProps}
-			style={{ position: 'absolute', inset: 0 }}
-		/>
+		<Canvas style={{ position: 'absolute', inset: 0 }}>
+			<Rect x={0} y={0} width={width} height={height}>
+				<LinearGradient start={vec(0, 0)} end={endPoint} colors={colors} />
+			</Rect>
+		</Canvas>
 	)
 }
 
@@ -95,9 +97,9 @@ export function useBackgroundGradient<T extends MinimalItem>({
 	const firstColor = useSharedValue(getThumbnailColor(data.at(0)))
 	const lastColor = useSharedValue(getThumbnailColor(data.at(estimatedVisibleItemCount - 1)))
 
-	const animatedProps = useAnimatedProps(() => ({
-		colors: [firstColor.value, firstColor.value, lastColor.value, lastColor.value],
-	}))
+	const colors = useDerivedValue(() => {
+		return [firstColor.value, lastColor.value]
+	}, [])
 
 	const onViewableItemsChanged = useCallback(
 		({ viewableItems }: { viewableItems: ViewToken<T>[] }) => {
@@ -124,7 +126,7 @@ export function useBackgroundGradient<T extends MinimalItem>({
 	] satisfies ViewabilityConfigCallbackPairs<T>
 
 	return {
-		animatedProps,
+		colors,
 		viewabilityConfigCallbackPairs,
 	}
 }

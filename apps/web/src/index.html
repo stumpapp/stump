@@ -103,6 +103,21 @@
 		/>
 	</head>
 	<body class="font-inter">
+		<script>
+			try {
+				const zustandState = JSON.parse(
+					localStorage.getItem('stump-user-store') || '{"state": {}}',
+				).state
+				const appFont = zustandState.userPreferences?.appFont
+				if (typeof appFont === 'string' && appFont.length > 0) {
+					const fontSuffix = appFont.toLowerCase().replace(/_/g, '')
+					if (fontSuffix !== 'inter') {
+						document.body.classList.remove('font-inter')
+						document.body.classList.add('font-' + fontSuffix)
+					}
+				}
+			} catch {}
+		</script>
 		<div id="root">
 			<div class="splash-container">
 				<img src="/assets/stump-splash.gif" alt="loading" class="splash" />

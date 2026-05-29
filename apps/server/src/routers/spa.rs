@@ -23,6 +23,7 @@ const SW: &str = "/sw.js";
 const INDEX: &str = "/";
 const INDEX_HTML: &str = "/index.html";
 const ASSETS: &str = "/assets";
+const DIST: &str = "/dist";
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let dist_path = Path::new(&app_state.config.client_dir);

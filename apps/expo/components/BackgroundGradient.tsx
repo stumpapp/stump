@@ -7,6 +7,7 @@ import { RefObject, useCallback, useEffect } from 'react'
 import { Appearance } from 'react-native'
 import { useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated'
 
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
@@ -105,21 +106,40 @@ export function useBackgroundGradient<T extends MinimalItem>({
 		({ viewableItems }: { viewableItems: ViewToken<T>[] }) => {
 			if (viewableItems.length === 0 || !tintListBackground) return
 
-			const scrollOffset = flashListRef.current?.getAbsoluteLastScrollOffset() ?? 0
-			// we don't want the first visible item because that's often under the header
-			// TODO: but just selecting the second item isn't a very accurate way to do it
-			const firstIndex = scrollOffset <= 0 || isGrid ? 0 : 1
+			// distance between top edge of first item and top edge of display
+			// positive if top edge of first item is outside viewport
+			const firstItemToDisplay =
+				(flashListRef.current?.getAbsoluteLastScrollOffset() ?? 0) -
+				(flashListRef.current?.getFirstItemOffset() ?? 0)
 
-			const newFirstColor = getTintColor(viewableItems.at(firstIndex)?.item)
-			const newLastColor = getTintColor(viewableItems.at(-1)?.item)
+			// ios 26 has transparent headers, so the second row is where we want to grab colours from
+			const trulyViewableItems = !IS_IOS_26_PLUS
+				? viewableItems
+				: viewableItems.filter((item, index) => {
+						if (item.index === null) return false
+						// approve items past the first viewableItems row
+						if (index >= numColumns) return true
+
+						const layout = flashListRef.current?.getLayout(item.index)
+						const firstItemToItem = layout?.y ?? 0
+						const displayToItem = firstItemToItem - firstItemToDisplay
+						const itemHeight = layout?.height ?? 0
+						// 70% below the header is probably "truly viewable"
+						return displayToItem > headerHeight - itemHeight * (1 - 0.7)
+					})
+
+			const activeItems = trulyViewableItems.length > 0 ? trulyViewableItems : viewableItems
+
+			const newFirstColor = getTintColor(activeItems.at(0)?.item)
+			const newLastColor = getTintColor(activeItems.at(-1)?.item)
 
 			firstColor.set(withTiming(newFirstColor, { duration: 800 }))
 			lastColor.set(withTiming(newLastColor, { duration: 800 }))
 		},
-		[firstColor, lastColor, isGrid, flashListRef, tintListBackground],
+		[firstColor, lastColor, flashListRef, tintListBackground, headerHeight, numColumns],
 	)
 
-	const viewabilityConfig = { itemVisiblePercentThreshold: isGrid ? 70 : 30, minimumViewTime: 800 }
+	const viewabilityConfig = { itemVisiblePercentThreshold: isGrid ? 50 : 70, minimumViewTime: 800 }
 
 	const viewabilityConfigCallbackPairs = [
 		{ onViewableItemsChanged, viewabilityConfig },

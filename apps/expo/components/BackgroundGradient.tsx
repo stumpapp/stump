@@ -22,7 +22,7 @@ type MinimalItem = {
 	} | null
 }
 
-const getThumbnailColor = (item?: MinimalItem): string => {
+const getTintColor = (item?: MinimalItem): string => {
 	const isDarkColorScheme = Appearance.getColorScheme() === 'dark'
 	const averageColor = item?.thumbnail?.metadata?.averageColor
 
@@ -94,8 +94,8 @@ export function useBackgroundGradient<T extends MinimalItem>({
 		Math.floor(visibleRowsTotalStartHeight / rowHeight) * numColumns,
 	)
 
-	const firstColor = useSharedValue(getThumbnailColor(data.at(0)))
-	const lastColor = useSharedValue(getThumbnailColor(data.at(estimatedVisibleItemCount - 1)))
+	const firstColor = useSharedValue(getTintColor(data.at(0)))
+	const lastColor = useSharedValue(getTintColor(data.at(estimatedVisibleItemCount - 1)))
 
 	const colors = useDerivedValue(() => {
 		return [firstColor.value, lastColor.value]
@@ -110,8 +110,8 @@ export function useBackgroundGradient<T extends MinimalItem>({
 			// TODO: but just selecting the second item isn't a very accurate way to do it
 			const firstIndex = scrollOffset <= 0 || isGrid ? 0 : 1
 
-			const newFirstColor = getThumbnailColor(viewableItems.at(firstIndex)?.item)
-			const newLastColor = getThumbnailColor(viewableItems.at(-1)?.item)
+			const newFirstColor = getTintColor(viewableItems.at(firstIndex)?.item)
+			const newLastColor = getTintColor(viewableItems.at(-1)?.item)
 
 			firstColor.set(withTiming(newFirstColor, { duration: 800 }))
 			lastColor.set(withTiming(newLastColor, { duration: 800 }))

@@ -54,7 +54,7 @@ export default function LibraryNavigationItem({
 			return (
 				<div className="px-2 flex w-full flex-1 items-center justify-start">
 					<div className="gap-y-2 flex flex-col items-start">
-						<CircleSlash2 className="h-7 w-7 text-foreground-muted" />
+						<CircleSlash2 className="h-7 w-7 text-muted-foreground" />
 						<div className="text-left">
 							<Label>No libraries</Label>
 							<Text size="sm" variant="muted">
@@ -97,16 +97,16 @@ export default function LibraryNavigationItem({
 
 	return (
 		<NavigationMenu.Item>
-			<NavigationMenu.Trigger className="bg-sidebar text-foreground-subtle hover:bg-sidebar-surface-hover">
+			<NavigationMenu.Trigger className="bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
 				<Library className="mr-2 h-4 w-4" />
 				Libraries
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
 				<div
 					style={{ width }}
-					className={cn('gap-3 p-2 flex min-h-[150px] min-w-[300px]', {
-						'md:w-[400px] lg:w-[500px]': !width,
-						'md:w-[300px] lg:w-[350px]': !width && !libraries?.length,
+					className={cn('gap-3 p-2 min-h-37.5 min-w-75 flex', {
+						'md:w-100 lg:w-125': !width,
+						'md:w-75 lg:w-87.5': !width && !libraries?.length,
 					})}
 				>
 					<div
@@ -122,7 +122,7 @@ export default function LibraryNavigationItem({
 									<TopBarLinkListItem
 										to={paths.libraryCreate()}
 										isActive={location.pathname.startsWith(paths.libraryCreate())}
-										className="p-1 justify-center self-end border border-dashed border-edge-subtle"
+										className="p-1 justify-center self-end border border-dashed border-sidebar-border"
 									>
 										<span className="text-sm font-medium line-clamp-1">Create library</span>
 									</TopBarLinkListItem>
@@ -132,7 +132,7 @@ export default function LibraryNavigationItem({
 									<TopBarLinkListItem
 										to={paths.libraries()}
 										isActive={location.pathname.startsWith(paths.libraries())}
-										className="p-1 justify-center self-end border border-dashed border-edge-subtle"
+										className="p-1 justify-center self-end border border-dashed border-sidebar-border"
 									>
 										<span className="text-sm font-medium line-clamp-1">See all</span>
 									</TopBarLinkListItem>

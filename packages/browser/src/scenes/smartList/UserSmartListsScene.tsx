@@ -2,7 +2,7 @@ import { useGraphQL, useSDK } from '@stump/client'
 import {
 	ButtonOrLink,
 	Heading,
-	Input,
+	InputGroup,
 	ProgressSpinner,
 	ScrollArea,
 	Text,
@@ -116,7 +116,7 @@ export default function UserSmartListsScene() {
 	// TODO: can't decide if I like the border-b
 	return (
 		<>
-			<header className="h-32 gap-y-2 px-4 flex w-full flex-col justify-center border-b border-edge">
+			<header className="h-32 gap-y-2 px-4 flex w-full flex-col justify-center border-b border-border">
 				<div>
 					<Heading size="lg" bold>
 						Smart lists
@@ -132,22 +132,25 @@ export default function UserSmartListsScene() {
 			<SceneContainer className="relative h-full overflow-hidden">
 				<div className="top-0 min-h-10 py-2 backdrop-blur-sm sticky z-10 bg-background">
 					<div className="gap-x-2 pr-3 md:w-2/3 lg:max-w-xl flex w-full flex-row items-center justify-between">
-						<Input
-							placeholder={t(withLocaleKey('searchPlaceholder'))}
-							variant="primary"
-							leftDecoration={<Search className="h-4 w-4 text-foreground-muted" />}
-							rightDecoration={isRefetching ? <ProgressSpinner size="sm" /> : null}
-							className="h-9"
-							fullWidth
-							value={value}
-							onChange={(e) => setValue(e.target.value)}
-						/>
+						<InputGroup>
+							<InputGroup.Addon align="inline-start">
+								<Search className="h-4 w-4 text-muted-foreground" />
+							</InputGroup.Addon>
 
-						<ButtonOrLink
-							href={paths.smartListCreate()}
-							variant="ghost"
-							className="h-full shrink-0"
-						>
+							<InputGroup.Input
+								placeholder={t(withLocaleKey('searchPlaceholder'))}
+								value={value}
+								onChange={(e) => setValue(e.target.value)}
+							/>
+
+							{isRefetching && (
+								<InputGroup.Addon align="inline-end">
+									<ProgressSpinner size="sm" />
+								</InputGroup.Addon>
+							)}
+						</InputGroup>
+
+						<ButtonOrLink href={paths.smartListCreate()} variant="ghost">
 							{t(withLocaleKey('buttons.createSmartList'))}
 						</ButtonOrLink>
 					</div>

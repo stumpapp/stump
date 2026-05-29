@@ -16,7 +16,7 @@ export default function OrderByDirection({ value, onChange }: Props) {
 			}
 		>
 			<SortAsc
-				className={cx('mr-1.5 h-4 w-4 text-foreground-muted transition-all', {
+				className={cx('mr-1.5 h-4 w-4 text-muted-foreground transition-all', {
 					'rotate-180': value === OrderDirection.Desc,
 				})}
 			/>

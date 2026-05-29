@@ -85,6 +85,7 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 					{
 						disabled: user.loginSessionsCount === 0,
 						label: 'Clear sessions',
+						isDestructive: true,
 						leftIcon: <Database className="mr-2 h-4 w-4" />,
 						onClick: handleClearUserSessions,
 					},
@@ -101,6 +102,7 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 					{
 						disabled: isSelf,
 						label: 'Delete',
+						isDestructive: true,
 						leftIcon: <Trash className="mr-2 h-4 w-4" />,
 						onClick: () => onSelectForDeletion(user),
 					},

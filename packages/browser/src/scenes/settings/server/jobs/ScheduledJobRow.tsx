@@ -61,16 +61,16 @@ export function ScheduledJobRow({ job, libraries, onEdit, onDelete }: Props) {
 
 					{data.enabled && (
 						<ToolTip content={t(getKey('row.enabled'))} align="end" size="xs">
-							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-fill-success/10 bg-fill-success-secondary">
-								<BadgeCheck className="text-primary h-4 w-4" strokeWidth={1} />
+							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-success/10 bg-success/15">
+								<BadgeCheck className="h-4 w-4 text-primary" strokeWidth={1} />
 							</div>
 						</ToolTip>
 					)}
 
 					{!data.enabled && (
 						<ToolTip content={t(getKey('row.disabled'))} align="end" size="xs">
-							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-fill-info/10 bg-fill-info-secondary">
-								<BadgeX className="text-primary h-4 w-4" strokeWidth={1} />
+							<div className="h-7 w-7 border-sky-500/10 bg-sky-500/15 flex items-center justify-center rounded-full border">
+								<BadgeX className="h-4 w-4 text-primary" strokeWidth={1} />
 							</div>
 						</ToolTip>
 					)}
@@ -101,9 +101,9 @@ export function ScheduledJobRow({ job, libraries, onEdit, onDelete }: Props) {
 					<Button
 						onClick={onDelete}
 						size="icon"
-						className="hover h-7 w-7 p-0 rounded-full border border-edge border-fill-danger/10 bg-fill-danger-secondary hover:bg-fill-danger-hover/20"
+						className="hover h-7 w-7 p-0 hover:bg-destructive/20/20 rounded-full border border-border border-destructive/10 bg-destructive/15"
 					>
-						<Trash2 className="text-primary h-4 w-4" strokeWidth={1} />
+						<Trash2 className="h-4 w-4 text-primary" strokeWidth={1} />
 					</Button>
 				</ToolTip>
 
@@ -111,9 +111,9 @@ export function ScheduledJobRow({ job, libraries, onEdit, onDelete }: Props) {
 					<Button
 						onClick={onEdit}
 						size="icon"
-						className="h-7 w-7 p-0 rounded-full border border-edge bg-background-surface"
+						className="h-7 w-7 p-0 rounded-full border border-border bg-muted"
 					>
-						<Cog className="text-primary h-4 w-4" strokeWidth={1} />
+						<Cog className="h-4 w-4 text-primary" strokeWidth={1} />
 					</Button>
 				</ToolTip>
 			</div>

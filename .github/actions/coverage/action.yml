@@ -27,7 +27,7 @@ runs:
       run: cargo llvm-cov --no-cfg-coverage --all-features --workspace --lcov --output-path lcov.info
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6
       with:
         token: ${{ inputs.token }}
         files: lcov.info

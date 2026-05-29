@@ -275,7 +275,7 @@ export default function BookActionMenu({ book }: Props) {
 			<div className="gap-1 flex w-full items-center">
 				{canDownload && (
 					<ButtonOrLink
-						className="w-full"
+						className="w-full shrink"
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
 						title="Download"

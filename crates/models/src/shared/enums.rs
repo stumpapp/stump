@@ -169,6 +169,35 @@ pub enum InterfaceLayout {
 	Table,
 }
 
+/// The roundness of certain UI elements in the client interface, such as cards, buttons, inputs, etc
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	Enum,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum InterfaceRoundness {
+	None,
+	#[default]
+	Normal,
+	Rounded,
+	Pill,
+}
+
 /// The style of placeholder to use for thumbnails while they are loading
 #[derive(
 	Eq,
@@ -679,7 +708,7 @@ pub enum SupportedFont {
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserPermission {
 	/// Grant access to read/create their own API keys
-	AccessAPIKeys,
+	AccessApiKeys,
 	/// Grant access to the koreader sync feature
 	AccessKoreaderSync,
 	/// Grant access to the kobo sync feature

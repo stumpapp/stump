@@ -24,9 +24,10 @@ export default function SettingsNavigationItem() {
 	const isInSettingsSomewhere = location.pathname.startsWith('/settings')
 
 	const classes = cn(
-		'rounded-full border border-transparent border-opacity-80 bg-sidebar text-foreground-subtle hover:border-edge-subtle hover:border-opacity-100 hover:bg-background-surface/50 data-[state=open]:border-edge-subtle data-[state=open]:border-opacity-100 data-[state=open]:bg-background-surface/50',
+		'rounded-md border border-transparent bg-sidebar text-sidebar-foreground hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[state=open]:border-sidebar-border data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground',
 		{
-			'border-edge-subtle border-opacity-100 bg-background-surface/50': isInSettingsSomewhere,
+			'border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground':
+				isInSettingsSomewhere,
 		},
 		{
 			'h-[2.35rem] w-[2.35rem] p-0 px-0 py-0': enableDoubleSidebar,
@@ -92,9 +93,9 @@ export default function SettingsNavigationItem() {
 			<NavigationMenu.Content className="right-0 left-auto">
 				<div
 					className={cn(
-						'gap-x-2 p-4 md:w-[400px] grid justify-between',
+						'gap-x-2 p-4 md:w-100 grid justify-between',
 						{
-							'md:w-[200px] grid-cols-1': groups.length === 1,
+							'md:w-50 grid-cols-1': groups.length === 1,
 						},
 						{ 'grid-cols-2': groups.length === 2 },
 					)}

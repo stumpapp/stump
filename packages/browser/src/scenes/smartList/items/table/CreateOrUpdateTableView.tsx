@@ -110,13 +110,14 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 						required
 						autoFocus
 						errorMessage={form.formState.errors.name?.message}
-						variant="primary"
 						{...form.register('name')}
 					/>
 				</Form>
 
 				<Dialog.Footer>
-					<Button onClick={onClose}>Cancel</Button>
+					<Button variant="outline" onClick={onClose}>
+						Cancel
+					</Button>
 					<Button type="submit" form="create-or-update-view">
 						{isCreating ? t('common.create') : t('common.saveChanges')}
 					</Button>

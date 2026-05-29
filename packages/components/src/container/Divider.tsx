@@ -4,8 +4,8 @@ import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'reac
 import { cn } from '../utils'
 
 export const DIVIDER_VARIANTS = {
-	default: 'bg-gray-200 dark:bg-gray-700',
-	muted: ' bg-gray-75 dark:bg-gray-850',
+	default: 'bg-border',
+	muted: 'bg-muted',
 }
 
 export type DividerProps = {

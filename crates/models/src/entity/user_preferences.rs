@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::shared::{
 	arrangement::Arrangement,
-	enums::{InterfaceLayout, SupportedFont, ThumbnailPlaceholderStyle},
+	enums::{
+		InterfaceLayout, InterfaceRoundness, SupportedFont, ThumbnailPlaceholderStyle,
+	},
 };
 
 #[derive(
@@ -45,6 +47,8 @@ pub struct Model {
 	pub thumbnail_placeholder_style: ThumbnailPlaceholderStyle,
 	pub enable_job_overlay: bool,
 	pub enable_alphabet_select: bool,
+	#[sea_orm(column_type = "Text")]
+	pub interface_roundness: InterfaceRoundness,
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
 	#[serde(default = "Model::default_navigation_arrangement")]
@@ -108,6 +112,7 @@ impl ActiveModelBehavior for ActiveModel {
 				ActiveValue::Set(ThumbnailPlaceholderStyle::default());
 			self.enable_job_overlay = ActiveValue::Set(true);
 			self.enable_alphabet_select = ActiveValue::Set(false);
+			self.interface_roundness = ActiveValue::Set(InterfaceRoundness::default());
 		}
 
 		Ok(self)

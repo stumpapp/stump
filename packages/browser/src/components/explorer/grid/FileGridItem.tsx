@@ -64,12 +64,12 @@ export default function FileGridItem({ file }: Props) {
 				<FileThumbnail
 					path={path}
 					isDirectory={isDirectory}
-					containerClassName="group-hover:bg-background-surface-hover/80 group-focus:bg-background-surface"
+					containerClassName="group-hover:bg-accent/80 group-focus:bg-muted"
 					size="md"
 				/>
 
 				<Text
-					className="rounded-md p-1 line-clamp-2 max-w-full group-hover:bg-background-surface-hover/80 group-focus:bg-background-surface"
+					className="p-1 line-clamp-2 max-w-full rounded-md group-hover:bg-accent/80 group-focus:bg-muted"
 					size="xs"
 				>
 					{name}

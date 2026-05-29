@@ -35,7 +35,6 @@ export default function DefaultLineHeight() {
 				min={1.0}
 				max={3.0}
 				step={0.1}
-				variant="primary"
 			/>
 		</div>
 	)

@@ -85,7 +85,7 @@ export default function FileThumbnail({
 
 	const sizeClasses = cn('h-14', { 'h-20': size === 'md' })
 	const className = cn(
-		'flex w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm',
+		'flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar shadow-sm',
 		sizeClasses,
 		containerClassName,
 	)
@@ -94,7 +94,7 @@ export default function FileThumbnail({
 	if (isDirectory) {
 		return (
 			<div className={className} style={{ aspectRatio: thumbnailRatio }}>
-				<Folder className={cn('text-foreground-muted', iconSizes)} />
+				<Folder className={cn('text-muted-foreground', iconSizes)} />
 			</div>
 		)
 	}
@@ -102,14 +102,14 @@ export default function FileThumbnail({
 	if (showFallback || !book) {
 		return (
 			<div className={className} onClick={attemptReload} style={{ aspectRatio: thumbnailRatio }}>
-				<Book className={cn('text-foreground-muted', iconSizes)} />
+				<Book className={cn('text-muted-foreground', iconSizes)} />
 			</div>
 		)
 	}
 
 	return (
 		<EntityImage
-			className={cn('rounded-sm w-auto object-cover', sizeClasses)}
+			className={cn('w-auto rounded-sm object-cover', sizeClasses)}
 			style={{ aspectRatio: thumbnailRatio }}
 			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}

@@ -52,11 +52,16 @@ export function ReviewDialogFooter() {
 			</div>
 
 			<div className="gap-2 flex items-center">
-				<Button variant="danger" size="sm" onClick={reject} disabled={isPending || !hasCandidate}>
+				<Button
+					variant="destructive"
+					size="sm"
+					onClick={reject}
+					disabled={isPending || !hasCandidate}
+				>
 					<X className="mr-1.5 h-3.5 w-3.5" />
 					{t(getKey('reject'))}
 				</Button>
-				<Button variant="primary" size="sm" onClick={accept} disabled={isPending || !hasCandidate}>
+				<Button size="sm" onClick={accept} disabled={isPending || !hasCandidate}>
 					<Check className="mr-1.5 h-3.5 w-3.5" />
 					{t(getKey('accept'))}
 				</Button>

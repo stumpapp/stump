@@ -53,24 +53,24 @@ export default function ProviderForm() {
 					selected={expirationDate ?? undefined}
 					onChange={(date) => form.setValue('apiTokenExpiresAt', date)}
 				/>
-				<Text className="text-sm text-foreground-muted">
+				<Text className="text-sm text-muted-foreground">
 					{t(getKey('apiTokenExpiresAt.description'))}
 				</Text>
 			</div>
 
-			<div className="rounded-lg divide-y divide-edge border border-edge">
+			<div className="divide-y divide-border rounded-lg border border-border">
 				<div className="gap-2 flex flex-col">
 					<Label className="p-3 flex items-center justify-between">
 						<div className="gap-1 flex flex-col">
 							<span>{t(getKey('enableProvider.label'))}</span>
-							<p className="text-sm text-foreground-muted">
+							<p className="text-sm text-muted-foreground">
 								{t(getKey('enableProvider.description'))}
 							</p>
 						</div>
 
 						<RawSwitch
 							id="enabled"
-							className="data-[state=checked]:bg-fill-brand-secondary/60 data-[state=unchecked]:bg-fill-brand-secondary"
+							className="data-[state=checked]:bg-primary/15/60 data-[state=unchecked]:bg-primary/15"
 							checked={providerEnabled ?? true}
 							onCheckedChange={(checked) => form.setValue('enabled', checked)}
 						/>
@@ -81,14 +81,14 @@ export default function ProviderForm() {
 					<Label className="p-3 flex items-center justify-between">
 						<div className="gap-1 flex flex-col">
 							<span>{t(getKey('autoApplyConfig.enabled.label'))}</span>
-							<p className="text-sm text-foreground-muted">
+							<p className="text-sm text-muted-foreground">
 								{t(getKey('autoApplyConfig.enabled.description'))}
 							</p>
 						</div>
 
 						<RawSwitch
 							id="autoApplyEnabled"
-							className="data-[state=checked]:bg-fill-brand-secondary/60 data-[state=unchecked]:bg-fill-brand-secondary"
+							className="data-[state=checked]:bg-primary/15/60 data-[state=unchecked]:bg-primary/15"
 							checked={autoApplyEnabled ?? true}
 							onCheckedChange={(checked) => form.setValue('autoApplyConfig.enabled', checked)}
 						/>
@@ -101,7 +101,6 @@ export default function ProviderForm() {
 					<Input
 						label={t(getKey('autoApplyConfig.threshold.label'))}
 						description={t(getKey('autoApplyConfig.threshold.description'))}
-						variant="primary"
 						type="number"
 						step="0.01"
 						min="0"

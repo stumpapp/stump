@@ -249,8 +249,8 @@ export default function JobTable() {
 	const EmptyState = useCallback(
 		() =>
 			isRefetching ? null : (
-				<div className="gap-2 flex min-h-[150px] flex-col items-center justify-center">
-					<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
+				<div className="gap-2 min-h-37.5 flex flex-col items-center justify-center">
+					<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted-foreground" />
 					<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 					<Text size="sm" variant="muted">
 						{t(`${LOCALE_BASE}.emptySubtitle`)}
@@ -261,7 +261,7 @@ export default function JobTable() {
 	)
 
 	return (
-		<Card>
+		<Card className="overflow-hidden">
 			<Table
 				sortable
 				columns={columns}

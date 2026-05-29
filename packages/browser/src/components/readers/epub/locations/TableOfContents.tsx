@@ -16,7 +16,7 @@ function TableOfContentsItem({ item, handleSelect }: ItemProps) {
 	return (
 		<>
 			<button
-				className="px-1 py-1.5 justify-start text-left hover:bg-background-surface"
+				className="px-1 py-1.5 justify-start text-left hover:bg-muted"
 				onClick={() => handleSelect(item.content)}
 			>
 				<Text className="line-clamp-1">{item.label}</Text>
@@ -42,7 +42,7 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 
 	return (
 		<div
-			className="px-2 pt-4 scrollbar-hide flex max-h-full flex-col divide-y divide-edge overflow-y-auto"
+			className="px-2 pt-4 scrollbar-hide flex max-h-full flex-col divide-y divide-border overflow-y-auto"
 			aria-label="Table of Contents"
 		>
 			{toc?.map((item) => (

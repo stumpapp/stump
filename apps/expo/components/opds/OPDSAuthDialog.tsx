@@ -31,6 +31,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 	const { sdk } = useSDK()
 
 	const ref = useRef<TrueSheet | null>(null)
+	const hasBeenPresentedRef = useRef(false)
 
 	const [loginError, setLoginError] = useState<string | null>(null)
 	const hasAuthSucceeded = useRef(false)
@@ -45,11 +46,12 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 
 	useEffect(() => {
 		if (isOpen) {
+			hasBeenPresentedRef.current = true
 			hasAuthSucceeded.current = false
 			setLoginError(null)
 			reset()
 			ref.current?.present()
-		} else {
+		} else if (hasBeenPresentedRef.current) {
 			ref.current?.dismiss()
 		}
 	}, [isOpen, reset])
@@ -165,7 +167,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 						</View>
 					)}
 					{loginError && (
-						<View className="squircle mb-2 rounded-xl p-2 bg-fill-danger-secondary">
+						<View className="squircle mb-2 p-2 bg-fill-danger-secondary rounded-xl">
 							<Text className="text-fill-danger">{loginError}</Text>
 						</View>
 					)}

@@ -51,9 +51,9 @@ export default function ScanConfigForm({ onScan }: Props) {
 	return (
 		<Form form={form} onSubmit={handleSubmit} id={FORM_ID}>
 			{showOverrideAlert && (
-				<Alert variant="warning" className="rounded-xl p-3">
+				<Alert variant="warning" className="p-3 rounded-xl">
 					<AlertTriangle />
-					<AlertDescription className="text-sm text-foreground-subtle">
+					<AlertDescription className="text-sm text-foreground">
 						{t(getKey('alert'))}
 					</AlertDescription>
 				</Alert>
@@ -62,14 +62,14 @@ export default function ScanConfigForm({ onScan }: Props) {
 			<RadioGroup
 				value={variant}
 				onValueChange={handleVariantChanged}
-				className="divide gap-0 space-y-0 rounded-xl divide-y divide-edge overflow-hidden border border-edge"
+				className="divide gap-0 space-y-0 divide-y divide-border overflow-hidden rounded-xl border border-border"
 			>
 				<RadioGroup.CardItem
 					label={t(getOptionKey('forceRebuild', 'label'))}
 					value="force-rebuild"
 					description={t(getOptionKey('forceRebuild', 'description'))}
-					className={cn('rounded-b-none border-0 bg-background hover:bg-background-surface/50', {
-						'bg-background-surface/70 hover:bg-background-surface/70': variant === 'force-rebuild',
+					className={cn('rounded-b-none border-0 bg-background hover:bg-muted/50', {
+						'bg-muted/70 hover:bg-muted/70': variant === 'force-rebuild',
 					})}
 				/>
 
@@ -77,15 +77,15 @@ export default function ScanConfigForm({ onScan }: Props) {
 					label={t(getOptionKey('custom', 'label'))}
 					value="custom"
 					description={t(getOptionKey('custom', 'description'))}
-					className={cn('rounded-t-none border-0 bg-background hover:bg-background-surface/50', {
-						'bg-background-surface/70 hover:bg-background-surface/70': variant === 'custom',
+					className={cn('rounded-t-none border-0 bg-background hover:bg-muted/50', {
+						'bg-muted/70 hover:bg-muted/70': variant === 'custom',
 					})}
 				/>
 			</RadioGroup>
 
 			{variant === 'force-rebuild' && (
-				<Alert variant="info" className="rounded-xl p-3">
-					<AlertDescription className="text-sm text-foreground-subtle">
+				<Alert variant="info" className="p-3 rounded-xl">
+					<AlertDescription className="text-sm text-foreground">
 						{t(getOptionKey('forceRebuild', 'alert'))}
 					</AlertDescription>
 				</Alert>

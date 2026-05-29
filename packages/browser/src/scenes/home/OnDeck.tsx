@@ -133,9 +133,9 @@ function OnDeck() {
 			height={listHeight}
 			onFetchMore={handleFetchMore}
 			emptyState={
-				<div className="space-x-3 rounded-lg px-4 py-4 flex items-start justify-start border border-dashed border-edge-subtle">
-					<span className="rounded-lg p-2 border border-edge bg-background-surface">
-						<BookMarked className="h-8 w-8 text-foreground-muted" />
+				<div className="space-x-3 px-4 py-4 flex items-start justify-start rounded-lg border border-dashed border-border">
+					<span className="p-2 rounded-lg border border-border bg-muted">
+						<BookMarked className="h-8 w-8 text-muted-foreground" />
 					</span>
 					<div>
 						<Text>{t('homeScene.onDeck.emptyState.heading')}</Text>
@@ -192,7 +192,7 @@ const OnDeckBookCard = memo(function OnDeckBookCard({ fragment, cardWidth }: OnD
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group rounded-lg relative block shrink-0 overflow-hidden transition-opacity hover:opacity-90"
+			className="group relative block shrink-0 overflow-hidden rounded-lg transition-opacity hover:opacity-90"
 			style={{ width: cardWidth }}
 		>
 			<ThumbnailImage

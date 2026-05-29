@@ -13,11 +13,11 @@ const iconButtonVariants = cva(BUTTON_BASE_CLASSES, {
 	variants: {
 		rounded: BUTTON_ROUNDED_VARIANTS,
 		size: {
-			lg: 'p-3',
-			md: 'p-2',
-			sm: 'p-2',
-			xs: 'p-1.5 md:p-1',
-			xxs: 'p-0.5',
+			lg: 'size-10',
+			md: 'size-9',
+			sm: 'size-8',
+			xs: "size-6 [&_svg:not([class*='size-'])]:size-3",
+			xxs: "size-5 [&_svg:not([class*='size-'])]:size-3",
 		},
 		variant: BUTTON_VARIANTS,
 	},
@@ -41,7 +41,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
 					{
 						'active:scale-95': pressEffect,
 						'cursor-not-allowed': props.disabled,
-						'focus:ring-edge-brand dark:focus:ring-edge-brand': primaryFocus,
+						'focus:ring-ring': primaryFocus,
 					},
 					className,
 				)}

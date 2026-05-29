@@ -1,12 +1,16 @@
-import { Label, NativeSelect, Text } from '@stump/components'
+import { NewCard } from '@stump/components'
+import { ThumbnailPlaceholderStyle } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
 
+import RadioTileGroup from './RadioTileGroup'
+import ThumbnailPreviewFrame from './ThumbnailPreviewFrame'
+
 export default function ThumbnailRatioSelect() {
 	const { t } = useLocaleContext()
 	const {
-		preferences: { thumbnailRatio },
+		preferences: { thumbnailRatio, thumbnailPlaceholderStyle },
 		update,
 	} = usePreferences()
 
@@ -16,24 +20,26 @@ export default function ThumbnailRatioSelect() {
 		{ label: '1 : √2', value: 1 / 1.414 },
 	]
 
-	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const value = e.target.value
-		return update({ thumbnailRatio: Number(value) })
-	}
-
 	// Sidestep any precision issues with the stored thumbnailRatio value
 	const closestOption = options.reduce((prev, curr) =>
 		Math.abs(curr.value - thumbnailRatio) < Math.abs(prev.value - thumbnailRatio) ? curr : prev,
 	)
 
+	const currentStyle = thumbnailPlaceholderStyle || ThumbnailPlaceholderStyle.Grayscale
+
 	return (
-		<div className="gap-y-1.5 md:max-w-md flex flex-col">
-			<Label>{t(getKey('label'))}</Label>
-			<NativeSelect value={closestOption.value} options={options} onChange={handleChange} />
-			<Text size="xs" variant="muted">
-				{t(getKey('description'))}
-			</Text>
-		</div>
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<RadioTileGroup
+				value={closestOption.value}
+				onChange={(value) => update({ thumbnailRatio: Number(value) })}
+				columns={3}
+				options={options.map((option) => ({
+					label: option.label,
+					value: option.value,
+					preview: <ThumbnailPreviewFrame style={currentStyle} ratio={option.value} />,
+				}))}
+			/>
+		</NewCard.Row>
 	)
 }
 

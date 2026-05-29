@@ -88,7 +88,7 @@ export default function IgnoreRulesConfig() {
 					variant="ghost"
 					size="sm"
 				>
-					<Icon className="h-4 w-4 text-foreground-muted" />
+					<Icon className="h-4 w-4 text-muted-foreground" />
 				</IconButton>
 			</ToolTip>
 		)
@@ -117,7 +117,6 @@ export default function IgnoreRulesConfig() {
 					title={hasChanges ? undefined : t('common.noChanges')}
 					type="submit"
 					disabled={!hasChanges}
-					variant="primary"
 					className="mt-4"
 				>
 					{t(getKey('save'))}
@@ -140,11 +139,11 @@ export default function IgnoreRulesConfig() {
 			</div>
 
 			{!ignoreRules.length && (
-				<Card className="p-6 flex items-center justify-center border-dashed border-edge-subtle">
+				<Card className="p-6 flex items-center justify-center border-dashed border-border">
 					<div className="space-y-3 flex flex-col">
 						<div className="relative flex justify-center">
-							<span className="rounded-xl p-2 flex items-center justify-center bg-background-surface">
-								<SquareAsterisk className="h-6 w-6 text-foreground-muted" />
+							<span className="p-2 flex items-center justify-center rounded-xl bg-muted">
+								<SquareAsterisk className="h-6 w-6 text-muted-foreground" />
 								<Slash className="h-6 w-6 absolute scale-x-[-1] transform text-foreground opacity-80" />
 							</span>
 						</div>
@@ -191,7 +190,6 @@ export default function IgnoreRulesConfig() {
 								placeholder="**/ignore-me/**"
 								description={t(getKey('addRule.description'))}
 								errorMessage={newRuleError}
-								variant="primary"
 							/>
 
 							<Button type="button" disabled={!newRule} onClick={handleAddRule}>
@@ -208,7 +206,6 @@ export default function IgnoreRulesConfig() {
 								onClick={() =>
 									setNewRule(newRule.startsWith('**/') ? newRule.slice(3) : `**/${newRule}`)
 								}
-								variant="primary"
 							/>
 							<CheckBox
 								id="ignoreSubdirs"
@@ -218,7 +215,6 @@ export default function IgnoreRulesConfig() {
 								onClick={() =>
 									setNewRule(newRule.endsWith('/**') ? newRule.slice(0, -3) : `${newRule}/**`)
 								}
-								variant="primary"
 							/>
 						</div>
 					</motion.div>
@@ -277,7 +273,6 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 					key={id}
 					className="font-mono"
 					placeholder="**/ignore-me/**"
-					variant="primary"
 					{...form.register(`ignoreRules.${index}.glob`)}
 				/>
 			)
@@ -325,7 +320,7 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 	}
 
 	return (
-		<div className="group space-y-4 px-3 py-1 flex flex-col even:bg-background-surface/50">
+		<div className="group space-y-4 px-3 py-1 flex flex-col even:bg-muted/50">
 			<div
 				className={cn('flex items-center justify-between', {
 					'items-center': isEditing,

@@ -22,7 +22,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Overlay
 		className={cn(
-			'inset-0 bg-black/50 backdrop-blur-sm fixed z-50 duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
+			'inset-0 supports-backdrop-filter:backdrop-blur-xs bg-black/50 fixed isolate z-50 duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
 			className,
 		)}
 		{...props}
@@ -52,8 +52,7 @@ const DialogContent = React.forwardRef<
 		<DialogPrimitive.Content
 			ref={ref}
 			className={cn(
-				'max-w-lg gap-4 p-4 shadow-lg sm:rounded-lg md:w-full fixed top-[50%] left-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] border border-edge bg-background-overlay duration-100 outline-none! data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
-				'bg-background',
+				'gap-6 p-6 text-sm fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-dialog text-dialog-foreground ring-1 ring-foreground/5 duration-100 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
 				DIALOG_CONTENT_SIZES[size] ?? DIALOG_CONTENT_SIZES.md,
 				className,
 			)}
@@ -70,16 +69,13 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-	<div className={cn('space-y-1 sm:text-left flex flex-col text-center', className)} {...props} />
+	<div className={cn('gap-2 flex flex-col', className)} {...props} />
 )
 DialogHeader.displayName = 'DialogHeader'
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn(
-			'space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex flex-col-reverse space-y-reverse',
-			className,
-		)}
+		className={cn('gap-2 sm:flex-row sm:justify-end flex flex-col-reverse', className)}
 		{...props}
 	/>
 )
@@ -91,7 +87,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Title
 		ref={ref}
-		className={cn('text-lg font-semibold text-foreground', className)}
+		className={cn('text-base font-medium leading-none text-foreground', className)}
 		{...props}
 	/>
 ))
@@ -103,7 +99,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Description
 		ref={ref}
-		className={cn('text-sm text-foreground-muted', className)}
+		className={cn('text-sm text-muted-foreground', className)}
 		{...props}
 	/>
 ))
@@ -116,7 +112,7 @@ const DialogClose = React.forwardRef<
 	<DialogPrimitive.Close
 		ref={ref}
 		className={cn(
-			'right-4 top-4 rounded-sm absolute text-foreground-subtle opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background focus:outline-none disabled:pointer-events-none data-[state=open]:bg-background',
+			'right-4 top-4 size-8 absolute inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none',
 			className,
 		)}
 		{...props}

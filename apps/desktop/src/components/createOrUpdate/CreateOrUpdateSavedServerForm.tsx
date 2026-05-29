@@ -114,7 +114,7 @@ export default function CreateOrUpdateSavedServerForm({
 			)}
 
 			{authMode === 'login' && (
-				<div className="rounded-lg p-2 border border-dashed border-edge">
+				<div className="p-2 rounded-lg border border-dashed border-border">
 					<Text variant="muted" size="sm">
 						You will occasionally be prompted to log in when you connect to this server
 					</Text>

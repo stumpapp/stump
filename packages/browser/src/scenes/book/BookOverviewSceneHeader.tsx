@@ -69,18 +69,10 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 
 			{hasMetadataBadges && (
 				<div className="gap-2 flex flex-wrap items-center">
-					{metadata?.publisher && (
-						<Badge variant="default" size="xs" rounded="full">
-							{metadata.publisher}
-						</Badge>
-					)}
-					{metadata?.language && (
-						<Badge variant="default" size="xs" rounded="full">
-							{metadata.language}
-						</Badge>
-					)}
+					{metadata?.publisher && <Badge rounded="full">{metadata.publisher}</Badge>}
+					{metadata?.language && <Badge rounded="full">{metadata.language}</Badge>}
 					{metadata?.ageRating && metadata.ageRating > 0 && (
-						<Badge variant="warning" size="xs" rounded="full">
+						<Badge variant="warning" rounded="full">
 							Age {metadata.ageRating}+
 						</Badge>
 					)}
@@ -120,7 +112,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 								})}
 								underline={false}
 							>
-								<Badge variant="secondary" size="xs" rounded="full" className="cursor-pointer">
+								<Badge variant="secondary" rounded="full" className="cursor-pointer">
 									{genre}
 								</Badge>
 							</Link>
@@ -143,7 +135,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 								})}
 								underline={false}
 							>
-								<Badge variant="secondary" size="xs" rounded="full" className="cursor-pointer">
+								<Badge variant="secondary" rounded="full" className="cursor-pointer">
 									{writer}
 								</Badge>
 							</Link>
@@ -181,7 +173,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 								}
 								return (
 									<Link key={link} href={link} underline={false}>
-										<Badge variant="default" size="xs" rounded="full" className="cursor-pointer">
+										<Badge rounded="full" className="cursor-pointer">
 											<span>{label}</span>
 											<ExternalLink className="ml-1 h-3 w-3 opacity-90" />
 										</Badge>

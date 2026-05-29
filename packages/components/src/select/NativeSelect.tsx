@@ -4,8 +4,8 @@ import { cn } from '../utils'
 import { SelectOption } from './index'
 
 export const SELECT_SIZES = {
-	default: 'h-10 py-2',
-	lg: 'h-12  py-2',
+	default: 'h-9 py-1',
+	lg: 'h-10 py-1',
 	sm: 'h-8',
 	xs: 'h-7',
 }
@@ -26,18 +26,19 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 				ref={ref}
 				className={cn(
 					[
-						'bg-transparent focus:bg-transparent enabled:hover:bg-background-surface',
-						'border border-edge-subtle',
-						'focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background focus:outline-none',
-						'text-sm text-foreground-subtle placeholder:text-foreground-muted',
-						'disabled:cursor-not-allowed disabled:opacity-50',
+						'appearance-none bg-input/30 focus:bg-input/30 enabled:hover:bg-input/50',
+						'border border-border',
+						'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
+						'text-sm text-foreground selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground',
+						'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+						'aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
 					],
-					'rounded-md px-3 pl-3 pr-10 flex w-full items-center justify-between bg-transparent transition-all duration-150',
+					'px-3 pl-3 pr-8 min-w-0 flex w-full items-center justify-between rounded-md transition-colors select-none',
 					{
 						[SELECT_SIZES[size ?? 'default']]: size,
 					},
 					{
-						'text-foreground-muted': !!emptyOption && props.value === emptyOption.value,
+						'text-muted-foreground': !!emptyOption && props.value === emptyOption.value,
 					},
 					className,
 				)}

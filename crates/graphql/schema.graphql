@@ -1003,6 +1003,14 @@ enum InterfaceLayout {
 	TABLE
 }
 
+"The roundness of certain UI elements in the client interface, such as cards, buttons, inputs, etc"
+enum InterfaceRoundness {
+	NONE
+	NORMAL
+	ROUNDED
+	PILL
+}
+
 "A scalar that can represent any JSON value."
 scalar JSON
 
@@ -3341,6 +3349,7 @@ input UpdateUserInput {
 input UpdateUserPreferencesInput {
 	locale: String!
 	preferredLayoutMode: InterfaceLayout!
+	interfaceRoundness: InterfaceRoundness!
 	primaryNavigationMode: String!
 	layoutMaxWidthPx: Int
 	appTheme: String!
@@ -3538,6 +3547,7 @@ type UserPreferences {
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
+	interfaceRoundness: InterfaceRoundness!
 	userId: String
 	homeArrangement: Arrangement!
 	navigationArrangement: Arrangement!

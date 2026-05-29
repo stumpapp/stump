@@ -175,11 +175,11 @@ export default function ScanHistoryTable() {
 
 	if (!scanHistory?.length) {
 		return (
-			<Card className="p-6 flex items-center justify-center border-dashed border-edge-subtle">
+			<Card className="p-6 flex items-center justify-center border-dashed border-border">
 				<div className="space-y-3 flex flex-col">
 					<div className="relative flex justify-center">
-						<span className="rounded-xl p-2 flex items-center justify-center bg-background-surface">
-							<Database className="h-6 w-6 text-foreground-muted" />
+						<span className="p-2 flex items-center justify-center rounded-xl bg-muted">
+							<Database className="h-6 w-6 text-muted-foreground" />
 							<Slash className="h-6 w-6 absolute scale-x-[-1] transform text-foreground opacity-80" />
 						</span>
 					</div>
@@ -204,13 +204,13 @@ export default function ScanHistoryTable() {
 						width: table.getCenterTotalSize(),
 					}}
 				>
-					<thead className="border-b border-edge">
+					<thead className="border-b border-border">
 						<tr className="">
 							{table.getFlatHeaders().map((header) => {
 								return (
 									<th
 										key={header.id}
-										className="top-0! h-10 px-2 shadow-sm sticky z-2 bg-background-surface/50"
+										className="top-0! h-10 px-2 shadow-sm sticky z-2 bg-muted/50"
 										style={getCommonPinningStyles(header.column)}
 									>
 										<div
@@ -228,7 +228,7 @@ export default function ScanHistoryTable() {
 						</tr>
 					</thead>
 
-					<tbody className="divide divide-y divide-edge">
+					<tbody className="divide divide-y divide-border">
 						{rows.map((row) => (
 							<tr key={row.id} className="">
 								{row.getVisibleCells().map((cell) => (

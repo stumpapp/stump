@@ -88,7 +88,7 @@ export default function SmartListCard({ data }: Props) {
 	return (
 		<Link to={paths.smartList(id)} className="block w-full">
 			<Card
-				className="h-32 gap-y-4 rounded-lg p-4 flex w-full flex-col border-none bg-background-surface transition-colors duration-150 hover:bg-background-surface-hover/80"
+				className="h-32 gap-y-4 p-4 flex w-full flex-col rounded-lg border-none bg-muted transition-colors duration-150 hover:bg-accent/80"
 				onMouseEnter={() => prefetch({ id })}
 			>
 				<div className="gap-y-1.5 flex flex-col">

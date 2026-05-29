@@ -260,7 +260,7 @@ pub async fn validate_api_key(
 	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
 	// clean up keys.
 	let can_use_key =
-		user.is_server_owner || user.permissions.contains(&UserPermission::AccessAPIKeys);
+		user.is_server_owner || user.permissions.contains(&UserPermission::AccessApiKeys);
 
 	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
 		tracing::error!(?can_use_key, "API key validation failed!");

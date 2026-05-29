@@ -14,7 +14,7 @@ export default function RemoveMemberConfirmation({ isOpen, onClose }: Props) {
 			title="Remove member"
 			description="Are you sure you want to remove this member?"
 			confirmText="Confirm"
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			size="sm"
 		/>
 	)

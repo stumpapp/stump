@@ -6,8 +6,8 @@ import { useButtonContext } from '../button/context'
 import { cn } from '../utils'
 
 export const SPINNER_VARIANTS = {
-	default: 'fill-gray-700 dark:fill-gray-200',
-	primary: 'fill-brand-600 dark:fill-brand-500',
+	default: 'fill-foreground',
+	primary: 'fill-primary',
 }
 export const SPINNER_SIZE_VARIANTS = {
 	default: 'h-6 w-6',
@@ -17,7 +17,7 @@ export const SPINNER_SIZE_VARIANTS = {
 	xs: 'h-3 w-3',
 }
 
-const spinnerVariants = cva('animate-spin text-gray-200 dark:text-gray-600', {
+const spinnerVariants = cva('animate-spin text-muted', {
 	defaultVariants: {
 		size: 'md',
 		variant: 'default',
@@ -43,8 +43,8 @@ export const ProgressSpinner = forwardRef<ElementRef<'svg'>, ProgressSpinnerProp
 				className={cn(
 					spinnerVariants({ className, size, variant }),
 					{
-						'dark:text-zinc-500 fill-gray-700 dark:fill-gray-100':
-							buttonContext?.variant === 'primary',
+						'fill-primary-foreground text-primary-foreground/35':
+							buttonContext?.variant === 'default',
 					},
 
 					className,

@@ -15,7 +15,7 @@ export default function FileExplorerHeader() {
 	const basename = useMemo(() => currentPath?.split('/').pop() ?? '', [currentPath])
 
 	return (
-		<header className="top-0 h-10 px-4 md:border-y-0 md:border-b sticky z-10 flex w-full justify-between border-y border-edge bg-background">
+		<header className="top-0 h-10 px-4 md:border-y-0 md:border-b sticky z-10 flex w-full justify-between border-y border-border bg-background">
 			<nav className="h-10 gap-4 flex w-full items-center">
 				<FileExplorerNavigation />
 				<Text size="sm" className="line-clamp-1 text-foreground/80">

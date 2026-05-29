@@ -61,7 +61,6 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 
 			<CheckBox
 				id="convertRarToZip"
-				variant="primary"
 				label={t(getKey('rarToZip.label'))}
 				description={t(getKey('rarToZip.description'))}
 				checked={convertRarToZip}
@@ -71,7 +70,6 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 
 			<CheckBox
 				id="hardDeleteConversions"
-				variant="primary"
 				label={t(getKey('deleteRarAfter.label'))}
 				description={t(getKey('deleteRarAfter.description'))}
 				checked={hardDeleteConversions}

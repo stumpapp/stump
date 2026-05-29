@@ -112,7 +112,7 @@ export default function FileTable() {
 								const row = rows[index]
 
 								return (
-									<tr {...props} className={cn({ 'bg-background-surface': !isEven })}>
+									<tr {...props} className={cn({ 'bg-muted': !isEven })}>
 										{row?.getVisibleCells().map((cell) => (
 											<td
 												className="py-1 pl-1.5 pr-1.5 first:pl-4 last:pr-4"

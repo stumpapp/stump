@@ -27,13 +27,14 @@ type AppRouterProps = {
 export function AppRouter({ basePath }: AppRouterProps = {}) {
 	const locale = useUserStore((store) => store.userPreferences?.locale)
 	const baseUrl = useAppStore((state) => state.baseUrl)
+	const resolvedLocale = (locale as AllowedLocale) || 'en-US'
 
 	if (!baseUrl) {
 		throw new Error('Base URL is not set')
 	}
 
 	return (
-		<LocaleProvider locale={(locale as AllowedLocale) || 'en-US'}>
+		<LocaleProvider locale={resolvedLocale}>
 			<RouterProvider basePath={basePath}>
 				<Routes>
 					<Route path="/" element={<AppLayout />}>

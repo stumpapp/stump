@@ -26,7 +26,7 @@ export default function FilterGroup({ idx, group }: Props) {
 
 	return (
 		<FilterGroupContext.Provider value={{ groupIdx: idx }}>
-			<Card className="ml-4">
+			<Card className="ml-4 bg-background">
 				<div className="flex flex-col">
 					{!group.filters.length && (
 						<div className="p-4">
@@ -44,13 +44,13 @@ export default function FilterGroup({ idx, group }: Props) {
 									<FieldSelector idx={filterIndex} />
 									{filter.field && (
 										<>
-											<ArrowRight className="h-4 w-4 text-foreground-muted" />
+											<ArrowRight className="h-4 w-4 text-muted-foreground" />
 											<OperatorSelect idx={filterIndex} />
 										</>
 									)}
 									{filter.operation && (
 										<>
-											<ArrowRight className="h-4 w-4 text-foreground-muted" />
+											<ArrowRight className="h-4 w-4 text-muted-foreground" />
 											<FilterValue idx={filterIndex} />
 										</>
 									)}
@@ -59,8 +59,8 @@ export default function FilterGroup({ idx, group }: Props) {
 								<div className="w-12 md:opacity-0 flex h-full shrink-0 items-center justify-end transition-opacity duration-200 group-hover/filter:opacity-100">
 									<ToolTip content={t(getKey('actions.deleteFilter'))} align="end">
 										<IconButton
+											variant="destructive"
 											size="xs"
-											className="text-foreground-muted transition-all duration-200 hover:text-fill-danger"
 											onClick={() => remove(filterIndex)}
 											disabled={group.filters.length === 1}
 										>
@@ -73,7 +73,7 @@ export default function FilterGroup({ idx, group }: Props) {
 					})}
 				</div>
 
-				<div className="h-12 space-x-4 px-4 flex items-center bg-background-surface/45">
+				<div className="h-12 space-x-4 px-4 flex items-center bg-muted/45">
 					<GroupJoiner />
 
 					<div className="flex-1" />
@@ -81,9 +81,8 @@ export default function FilterGroup({ idx, group }: Props) {
 					<Button
 						variant="ghost"
 						size="sm"
-						newYork
 						onClick={() => append({} as FilterSchema)}
-						className="shrink-0"
+						className="h-7 px-2.5 shrink-0"
 					>
 						{t(getKey('actions.addFilter'))}
 					</Button>
@@ -91,8 +90,7 @@ export default function FilterGroup({ idx, group }: Props) {
 					<Button
 						variant="ghost"
 						size="sm"
-						newYork
-						className="shrink-0 hover:bg-fill-danger-secondary"
+						className="h-7 px-2.5 shrink-0 hover:bg-destructive/15"
 						onClick={() => removeGroup(idx)}
 					>
 						{t(getKey('actions.deleteGroup'))}

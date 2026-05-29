@@ -16,7 +16,7 @@ const SelectPrimitiveTrigger = React.forwardRef<
 	<SelectRadix.Trigger
 		ref={ref}
 		className={cn(
-			'focus:ring-background-400 h-10 rounded-md px-3 py-2 text-sm flex w-full items-center justify-between border border-edge bg-transparent placeholder:text-foreground-muted focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+			'h-10 px-3 py-2 text-sm flex w-full items-center justify-between rounded-md border border-border bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none enabled:hover:bg-input/50 disabled:cursor-not-allowed disabled:opacity-50',
 			className,
 		)}
 		{...props}
@@ -35,7 +35,7 @@ const SelectPrimitiveContent = React.forwardRef<
 		<SelectRadix.Content
 			ref={ref}
 			className={cn(
-				'min-w-32 rounded-md shadow-md relative z-50 animate-in overflow-hidden border border-edge bg-background text-foreground-subtle fade-in-80',
+				'min-w-32 shadow-md relative z-50 animate-in overflow-hidden rounded-lg border border-border bg-background text-foreground fade-in-80',
 				className,
 			)}
 			{...props}
@@ -65,7 +65,7 @@ const SelectPrimitiveItem = React.forwardRef<
 	<SelectRadix.Item
 		ref={ref}
 		className={cn(
-			'rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium relative flex cursor-default items-center outline-none select-none focus:bg-background-surface data-disabled:pointer-events-none data-disabled:opacity-50',
+			'py-1.5 pl-8 pr-2 text-sm font-medium relative flex cursor-default items-center rounded-sm outline-none select-none focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50',
 			className,
 		)}
 		{...props}
@@ -87,7 +87,7 @@ const SelectPrimitiveSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SelectRadix.Separator
 		ref={ref}
-		className={cn('-mx-1 my-1 h-px bg-edge', className)}
+		className={cn('-mx-1 my-1 h-px bg-border', className)}
 		{...props}
 	/>
 ))

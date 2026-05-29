@@ -120,13 +120,13 @@ export default function Home() {
 						</div>
 
 						{!savedServers.length && (
-							<div className="rounded-lg p-4 border border-dashed border-edge-subtle text-foreground-muted select-none">
+							<div className="p-4 border-border-subtle rounded-lg border border-dashed text-muted-foreground select-none">
 								{t(getKey('getStarted'))}
 							</div>
 						)}
 
 						{savedServers.length > 0 && (
-							<Card className="flex flex-col divide-y divide-edge bg-background-surface">
+							<Card className="flex flex-col divide-y divide-border bg-card">
 								{savedServers.map((server) => (
 									<ConfiguredServer
 										key={`configured-server-${server.name}_${server.url}`}

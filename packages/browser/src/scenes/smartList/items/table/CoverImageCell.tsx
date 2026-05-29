@@ -41,11 +41,11 @@ export default function CoverImageCell({ id, title }: Props) {
 		return (
 			<div
 				title={`${title} (Image failed to load)`}
-				className="h-20 rounded-sm shadow-sm flex w-auto items-center justify-center border-[0.5px] border-edge bg-sidebar"
+				className="h-20 shadow-sm flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar"
 				style={{ aspectRatio: thumbnailRatio }}
 				onClick={attemptReload}
 			>
-				<Book className="h-8 w-8 text-foreground-muted" />
+				<Book className="h-8 w-8 text-muted-foreground" />
 			</div>
 		)
 	}
@@ -53,7 +53,7 @@ export default function CoverImageCell({ id, title }: Props) {
 	return (
 		<EntityImage
 			title={title}
-			className="h-20 rounded-sm w-auto object-cover"
+			className="h-20 w-auto rounded-sm object-cover"
 			style={{ aspectRatio: thumbnailRatio }}
 			src={sdk.media.thumbnailURL(id)}
 			onError={() => setShowFallback(true)}

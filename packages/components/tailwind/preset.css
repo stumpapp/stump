@@ -5,11 +5,86 @@
 
 @source '../src/**/*.{ts,tsx,js,jsx}';
 @source '../../browser/src/**/*.{ts,tsx,js,jsx}';
+@source '../../../apps/desktop/src/**/*.{ts,tsx,js,jsx}';
+@source '../../../apps/web/src/**/*.{ts,tsx,js,jsx}';
 
 /* MARK: safelist fonts */
 @source inline(
 	'font-inter font-opendyslexic font-atkinsonhyperlegiblenext font-charis font-literata font-bitter font-librebaskerville font-nunito font-hinamincho'
 );
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-dialog: var(--dialog);
+	--color-dialog-foreground: var(--dialog-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-info: var(--info);
+	--color-info-foreground: var(--info-foreground, var(--foreground));
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground, var(--foreground));
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground, var(--foreground));
+	--color-debug: var(--debug);
+	--color-debug-foreground: var(--debug-foreground, var(--foreground));
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-switch: var(--switch);
+	--color-switch-thumb: var(--switch-thumb);
+	--color-switch-thumb-checked: var(--switch-thumb-checked);
+	--color-field-error-border: var(--field-error-border);
+	--color-field-error-ring: var(--field-error-ring);
+	--color-ring: var(--ring);
+
+	/* MARK: chart stuff */
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-sidebar: var(--sidebar);
+
+	/* MARK: sidebar */
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+
+	/* MARK: gradients */
+	--color-background-gradient-from: var(--background-gradient-from, var(--background));
+	--color-background-gradient-to: var(--background-gradient-to, var(--background));
+	--color-sidebar-gradient-from: var(--sidebar-gradient-from, var(--sidebar));
+	--color-sidebar-gradient-to: var(--sidebar-gradient-to, var(--sidebar));
+
+	/* MARK: border radius */
+	--radius-sm: max(0px, calc(var(--radius) - 4px));
+	--radius-md: max(0px, calc(var(--radius) - 2px));
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--radius-2xl: calc(var(--radius) + 8px);
+	--radius-3xl: calc(var(--radius) + 12px);
+	--radius-4xl: calc(var(--radius) + 16px);
+
+	/* TODO: i should FINALLY implement the display spacing setting!? it
+		was added 2 years ago lmfao
+	 */
+}
 
 @theme {
 	/* MARK: brand colors */
@@ -59,6 +134,15 @@
 	--font-librebaskerville: 'Libre Baskerville', ui-serif, Georgia, serif;
 	--font-nunito: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 	--font-hinamincho: 'Hina Mincho', ui-serif, Georgia, serif;
+	--font-heading: var(--font-sans);
+	--font-sans: 'Inter Variable', sans-serif;
+
+	/* MARK: thumbnail colors */
+	--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+	--color-thumbnail-placeholder: #1f2123;
+	--color-thumbnail-stack-series: #3d3a3a;
+	--color-thumbnail-stack-library-start: #2e2b2b;
+	--color-thumbnail-stack-library-end: #3d3a3a;
 
 	/* MARK: custom sizes */
 	--text-xxs: 0.65rem;
@@ -118,6 +202,22 @@
 @custom-variant autofill (&:autofill, &:-webkit-autofill);
 
 @layer base {
+	html.radius-none {
+		--radius: 0rem;
+	}
+
+	html.radius-normal {
+		--radius: 0.625rem;
+	}
+
+	html.radius-rounded {
+		--radius: 0.875rem;
+	}
+
+	html.radius-pill {
+		--radius: 1.125rem;
+	}
+
 	/* TODO: preserve v3 default border color behavior but maybe kill? */
 	*,
 	::after,

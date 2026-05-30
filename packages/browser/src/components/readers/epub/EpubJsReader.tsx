@@ -261,6 +261,11 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const {
 		bookPreferences: { fontSize, lineHeight, fontFamily, readingMode, readingDirection },
 	} = useBookPreferences({ book: ebook.media })
+	const latestSupportedFontRef = useRef<SupportedFont | undefined>(undefined)
+
+	useEffect(() => {
+		latestSupportedFontRef.current = normalizeSupportedFont(fontFamily)
+	}, [fontFamily])
 
 	const client = useQueryClient()
 	const { mutate } = useGraphQLMutation(mutation, {
@@ -562,7 +567,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				})
 
 				rendition_.hooks.content.register(() => {
-					injectFontStylesheet(rendition_, normalizeSupportedFont(fontFamily))
+					injectFontStylesheet(rendition_, latestSupportedFontRef.current)
 				})
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
@@ -690,7 +695,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (!rendition) return
 		updateEpubPreferences(rendition, fontSize, lineHeight, fontFamily)
-		injectFontStylesheet(rendition, normalizeSupportedFont(fontFamily))
+		injectFontStylesheet(rendition, latestSupportedFontRef.current)
 	}, [rendition, fontSize, fontFamily, lineHeight, updateEpubPreferences])
 
 	/* This effect updates the reading mode. This is separated because it causes flashing */

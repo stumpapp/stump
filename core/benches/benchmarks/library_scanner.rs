@@ -132,11 +132,13 @@ async fn create_test_library(
 	(DatabaseConnection, LibraryWithConfig, Vec<TempDir>),
 	Box<dyn std::error::Error>,
 > {
-	let conn = connect_at(&format!(
-		"sqlite://{}/benchmark.db?mode=rwc",
-		env!("CARGO_MANIFEST_DIR")
-	))
-	.await?;
+	let db_path = PathBuf::from(format!("{}/benchmark.db", env!("CARGO_MANIFEST_DIR")));
+	let _ = std::fs::remove_file(&db_path);
+	let _ = std::fs::remove_file(format!("{}.wal", db_path.to_string_lossy()));
+	let _ = std::fs::remove_file(format!("{}.shm", db_path.to_string_lossy()));
+
+	let conn =
+		connect_at(&format!("sqlite://{}?mode=rwc", db_path.to_string_lossy())).await?;
 
 	let deleted_libraries = library::Entity::delete_many()
 		.exec(&conn)
@@ -179,9 +181,11 @@ async fn create_test_library(
 
 	let data_dir = PathBuf::from(format!("{}/benches/data", env!("CARGO_MANIFEST_DIR")));
 
-	let zip_path = data_dir.join("book.zip");
-	let epub_path = data_dir.join("book.epub");
-	let rar_path = data_dir.join("book.rar");
+	let fixture_paths = [
+		data_dir.join("book.zip"),
+		data_dir.join("book.epub"),
+		data_dir.join("book.rar"),
+	];
 
 	let mut temp_dirs = vec![library_temp_dir];
 	for series_idx in 0..series_count {
@@ -190,11 +194,7 @@ async fn create_test_library(
 			.tempdir_in(&library_temp_dir_path)?;
 
 		for book_idx in 0..books_per_series {
-			let book_path = match book_idx % 3 {
-				0 => zip_path.as_path(),
-				1 => epub_path.as_path(),
-				_ => rar_path.as_path(),
-			};
+			let book_path = &fixture_paths[book_idx % fixture_paths.len()];
 			let book_file_name_with_ext = format!(
 				"{}_{}",
 				book_idx,

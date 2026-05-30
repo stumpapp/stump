@@ -1011,7 +1011,8 @@
 									"pages": "Страницы",
 									"tags": "Метки",
 									"createdAt": "Дата создания",
-									"updatedAt": "Дата изменения"
+									"updatedAt": "Дата изменения",
+									"readingStatus": "Reading status"
 								}
 							},
 							"book_meta": {
@@ -1088,6 +1089,13 @@
 					"listValue": {
 						"placeholder": "Добавить значение",
 						"emptyState": "Нет значений для отображения"
+					},
+					"enumValue": {
+						"selectPlaceholder": "Select value",
+						"READING": "Reading",
+						"FINISHED": "Finished",
+						"NOT_STARTED": "Not started",
+						"ABANDONED": "Abandoned"
 					}
 				}
 			}
@@ -1408,6 +1416,14 @@
 					"label": "Theme and appearance",
 					"description": "The basic look and feel options for Stump"
 				},
+				"interface": {
+					"title": "Interface",
+					"description": "Primary UI surfaces and interaction elements"
+				},
+				"thumbnails": {
+					"title": "Thumbnails",
+					"description": "Display options for thumbnail images"
+				},
 				"themeSelect": {
 					"label": "Тема оформления",
 					"description": [
@@ -1450,6 +1466,10 @@
 						"thumbhash": "Thumbhash"
 					}
 				},
+				"navigation": {
+					"title": "Navigation",
+					"description": "Customize the navigation elements of the app"
+				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
 					"description": "Customize how Stump displays information and organizes content"
@@ -1465,11 +1485,11 @@
 				},
 				"doubleSidebar": {
 					"label": "Settings sidebar",
-					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+					"description": "Enables sidebar navigation for the settings pages"
 				},
 				"replacePrimarySidebar": {
 					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
 					"tooltips": {
 						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
 						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
@@ -1477,10 +1497,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Расположение навигации",
-					"description": {
-						"sidebar": "Размещать и настраивать элементы навигации в боковой панели",
-						"topbar": "Размещать и настраивать навигационные элементы в верхней панели"
-					},
+					"description": "Rearrange or tweak the navigation items in your primary navigation",
 					"isLocked": "Размещение заблокировано",
 					"lock": "Заблокировать размещения",
 					"unlock": "Разблокировать размещения",

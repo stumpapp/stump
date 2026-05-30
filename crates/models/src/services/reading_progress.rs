@@ -24,8 +24,6 @@ pub struct NormalizedProgression {
 	pub device_id: Option<String>,
 }
 
-// TODO: tests would be sick but am not motivated enough for it rn
-
 /// creates a [`reading_session`] record or extends the most recent one if it falls within
 /// the same logical day and the grace period has not elapsed
 pub async fn upsert_reading_session(

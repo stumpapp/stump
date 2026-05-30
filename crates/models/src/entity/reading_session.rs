@@ -62,9 +62,6 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub status: ReadingStatus,
 
-	// TODO(v2-sessions): either keep this here or make notes a separate table?
-	// need to figure out ui flow for adding notes, a bit convoluted if e.g. you hvae
-	// multiple sessions in a day and go to add a note
 	#[sea_orm(column_type = "Text", nullable)]
 	pub notes: Option<String>,
 

@@ -132,15 +132,15 @@ impl MigrationTrait for Migration {
 					updated_at
 				)
 				SELECT
-					DATE(frs.started_at) AS session_date,
+					DATE(frs.completed_at) AS session_date,
 					NULL AS notes,
 					NULL AS epubcfi,
 					NULL AS start_locator,
 					NULL AS end_locator,
 					NULL AS start_page,
 					NULL AS end_page,
-					NULL AS start_percentage,
-					NULL AS end_percentage,
+					0 AS start_percentage,
+					1 AS end_percentage,
 					NULL AS koreader_progress,
 					frs.elapsed_seconds,
 					ROW_NUMBER() OVER (
@@ -183,14 +183,14 @@ impl MigrationTrait for Migration {
 					updated_at
 				)
 				SELECT
-					DATE(rs.started_at) AS session_date,
+					DATE(COALESCE(rs.updated_at, rs.started_at)) AS session_date,
 					NULL AS notes,
 					rs.epubcfi,
 					NULL AS start_locator,
 					rs.locator AS end_locator,
 					NULL AS start_page,
 					rs.page AS end_page,
-					NULL AS start_percentage,
+					0 AS start_percentage,
 					rs.percentage_completed AS end_percentage,
 					rs.koreader_progress,
 					rs.elapsed_seconds,

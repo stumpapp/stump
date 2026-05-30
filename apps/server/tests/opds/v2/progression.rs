@@ -109,6 +109,21 @@ async fn test_progression_put_then_get_round_trip() {
 
 	assert_eq!(
 		progression
+			.get("device")
+			.and_then(|device| device.get("id"))
+			.and_then(Value::as_str),
+		Some("opds-device-1")
+	);
+	assert_eq!(
+		progression
+			.get("device")
+			.and_then(|device| device.get("name"))
+			.and_then(Value::as_str),
+		Some("OPDS Device")
+	);
+
+	assert_eq!(
+		progression
 			.get("locator")
 			.and_then(|locator| locator.get("locations"))
 			.and_then(|locations| locations.get("position"))

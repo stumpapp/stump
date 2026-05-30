@@ -3,7 +3,7 @@ use chrono::Utc;
 use sea_orm::{
 	entity::prelude::*,
 	prelude::async_trait::async_trait,
-	sea_query::{Alias, Query, SelectStatement},
+	sea_query::{Alias, ConditionType, Query, SelectStatement},
 	ActiveValue, Condition, DeriveEntityModel, FromJsonQueryResult, FromQueryResult,
 	JoinType, QueryOrder, QuerySelect,
 };
@@ -97,8 +97,8 @@ impl Model {
 	}
 }
 
-// TODO(v2-sessions): this is terrible lol it will be a little bit of a headache to make this plural,
-// so for now just extract the first id in the ids list. i also don't know if some of the integrations
+// TODO(devices): sessions now store multiple devices, so not sure how to approach this.
+// we don't use it for now, so it's fine, but should be revisited. i also don't know if some of the integrations
 // which this is meant to support (e.g. koreader) care about multiple devices. maybe i just add e.g.
 // find_with_kind("koreader") or something
 #[derive(Debug, Clone)]
@@ -113,15 +113,24 @@ impl ModelWithDevice {
 			.add_columns(Entity)
 			.add_columns(reading_device::Entity)
 			.selector
+			// TODO(devices): this is a bit scuffed. it will generated roughly:
+			/*
+				left join reading_devices on reading_sessions.device_ids = reading_devices.id OR (
+					json_extract(reading_sessions.device_ids, '$[0]') = reading_devices.id
+				)
+			*/
+			// which _works_ but the former condition is redundant and will never actually match anything,
+			// but sea-orm seems to always imbue the join with that default predicate...
 			.join_rev(
 				JoinType::LeftJoin,
 				Entity::belongs_to(reading_device::Entity)
 					.from(Column::DeviceIds)
 					.to(reading_device::Column::Id)
+					.condition_type(ConditionType::Any)
 					// https://sqlite.org/json1.html#the_json_extract_function
 					.on_condition(|_left, _right| {
 						Condition::all().add(Expr::cust(
-							"json_extract(reading_sessions.device_ids, '$[0]') = reading_device.id",
+							"json_extract(reading_sessions.device_ids, '$[0]') = reading_devices.id",
 						))
 					})
 					.into(),

@@ -51,6 +51,12 @@ export default defineConfig({
 			},
 			workbox: {
 				inlineWorkboxRuntime: true,
+				navigateFallbackDenylist: [
+					/^\/api(?:\/|$)/,
+					/^\/opds(?:\/|$)/,
+					/^\/kobo(?:\/|$)/,
+					/^\/koreader(?:\/|$)/,
+				],
 				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
 			},
 			outDir: '../dist',

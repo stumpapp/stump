@@ -1,5 +1,8 @@
 use graphql::input::user::CreateUserInput;
 
+// TODO(tests): ive left my chicken scratch here to remind myself of some ideas. if i am reading
+// this after idk maybe 5 months just do it plz! <3
+
 #[derive(Debug, Clone)]
 pub struct TestAccount {
 	username: &'static str,

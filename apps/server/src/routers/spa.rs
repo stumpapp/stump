@@ -22,6 +22,7 @@ pub const FAVICON: &str = "/favicon.ico";
 const SW: &str = "/sw.js";
 const INDEX: &str = "/";
 const INDEX_HTML: &str = "/index.html";
+const MANIFEST: &str = "/assets/manifest.webmanifest";
 const ASSETS: &str = "/assets";
 const DIST: &str = "/dist";
 
@@ -69,6 +70,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route(INDEX_HTML, get(index_html))
 		.route(FAVICON, get(favicon))
 		.route(SW, get(serve_sw))
+		.route(MANIFEST, get(serve_manifest))
 		.nest_service(ASSETS, static_assets)
 		.nest_service(DIST, dist_files)
 		.fallback_service(spa_fallback)
@@ -106,15 +108,38 @@ async fn serve_sw(
 	serve_with_no_cache(ctx, headers, "sw.js").await
 }
 
+async fn serve_manifest(
+	State(ctx): State<AppState>,
+	headers: HeaderMap,
+) -> APIResult<impl IntoResponse> {
+	serve_with_no_store(ctx, headers, "assets/manifest.webmanifest").await
+}
+
 async fn serve_with_no_cache(
 	ctx: AppState,
 	headers: HeaderMap,
 	path: &str,
 ) -> APIResult<Response> {
 	let mut response = serve_dist_file(ctx, headers, path).await?;
-	response
-		.headers_mut()
-		.insert(header::CACHE_CONTROL, HeaderValue::from_static("no-cache"));
+	response.headers_mut().insert(
+		header::CACHE_CONTROL,
+		HeaderValue::from_static("no-cache, no-store, must-revalidate"),
+	);
+
+	Ok(response)
+}
+
+async fn serve_with_no_store(
+	ctx: AppState,
+	headers: HeaderMap,
+	path: &str,
+) -> APIResult<Response> {
+	// Manifest/bootstrap resources should always bypass caches.
+	let mut response = serve_dist_file(ctx, headers, path).await?;
+	response.headers_mut().insert(
+		header::CACHE_CONTROL,
+		HeaderValue::from_static("no-cache, no-store, must-revalidate"),
+	);
 
 	Ok(response)
 }

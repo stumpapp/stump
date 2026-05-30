@@ -1,4 +1,4 @@
-use crate::common::TestApp;
+use crate::common::{series::setup_single_series_with_n_books, TestApp};
 
 use chrono::Utc;
 use serde_json::{json, Value};
@@ -16,26 +16,22 @@ async fn setup() -> (TestApp, String) {
 	.insert(db)
 	.await;
 
-	let series = fake_data::Series {
-		id: Some("black_science".to_string()),
-		name: Some("Black Science".to_string()),
-		library_id: Some(image.id.clone()),
-		..Default::default()
-	}
-	.insert(db)
+	let (_, books) = setup_single_series_with_n_books(
+		&app,
+		fake_data::Series {
+			id: Some("black_science".to_string()),
+			name: Some("Black Science".to_string()),
+			library_id: Some(image.id.clone()),
+			..Default::default()
+		},
+		1,
+	)
 	.await;
 
-	let book = fake_data::Media {
-		series_id: series.id.clone(),
-		id: Some("black_science_1".to_string()),
-		name: Some("Black Science #1".to_string()),
-		created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
-		pages: Some(100),
-		extension: Some("png".to_string()),
-		..Default::default()
-	}
-	.insert(db)
-	.await;
+	let book = books
+		.into_iter()
+		.next()
+		.expect("expected at least one book");
 
 	(app, book.id)
 }

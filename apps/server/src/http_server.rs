@@ -87,7 +87,11 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		}
 	};
 
-	let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
+	let ip: std::net::IpAddr =
+		config.ip.parse().map_err(|e: std::net::AddrParseError| {
+			ServerError::ServerStartError(e.to_string())
+		})?;
+	let addr = SocketAddr::from((ip, config.port));
 	let listener = tokio::net::TcpListener::bind(&addr)
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;

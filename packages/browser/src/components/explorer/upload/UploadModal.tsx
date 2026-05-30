@@ -12,9 +12,10 @@ import {
 } from '@stump/components'
 import { graphql, UploadBooksInput } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { AxiosProgressEvent } from 'axios'
 import { Book, FolderArchive } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
@@ -37,37 +38,50 @@ const uploadSeriesMutation = graphql(`
 	}
 `)
 
+const ESTIMATED_FILE_ROW_HEIGHT = 44
+
+type UploadFileEntry = {
+	id: string
+	file: File
+}
+
+const getFileFingerprint = (file: File) => `${file.name}:${file.size}:${file.lastModified}`
+
 export default function UploadModal() {
 	const [uploadType, setUploadType] = useState<'books' | 'series'>()
 
 	const [seriesDirName, setSeriesDirName] = useState<string | undefined>(undefined)
-	const [files, setFiles] = useState<File[]>([])
+	const [files, setFiles] = useState<UploadFileEntry[]>([])
+	const nextFileIdRef = useRef(0)
 
 	const { t } = useLocaleContext()
 
 	const { currentPath, refetch, uploadConfig, libraryID } = useFileExplorerContext()
 
 	const [uploadProgress, setUploadProgress] = useState(0)
-	const [visibleCount, setVisibleCount] = useState(50)
+	const [filesViewportElement, setFilesViewportElement] = useState<HTMLDivElement | null>(null)
 
-	useEffect(() => {
-		setVisibleCount(50)
-	}, [files.length, uploadType])
+	const filesVirtualizer = useVirtualizer({
+		count: files.length,
+		enabled: files.length > 0 && !!filesViewportElement,
+		estimateSize: () => ESTIMATED_FILE_ROW_HEIGHT,
+		getItemKey: (index) => files[index]?.id ?? index,
+		getScrollElement: () => filesViewportElement,
+		overscan: 10,
+	})
 
-	const handleScroll = useCallback(
-		(e: React.UIEvent<HTMLDivElement>) => {
-			const target = e.currentTarget
-			if (target.scrollHeight - target.scrollTop <= target.clientHeight + 150) {
-				setVisibleCount((prev) => Math.min(prev + 50, files.length))
-			}
-		},
-		[files.length],
-	)
+	const virtualFileRows = filesVirtualizer.getVirtualItems()
+	const totalFileRowsSize = filesVirtualizer.getTotalSize()
 
 	const config = useMemo(
 		() => ({
 			onUploadProgress: ({ loaded, total }: AxiosProgressEvent) => {
-				const progress = Math.round((loaded * 100) / (total || 0))
+				if (!total || total <= 0) {
+					setUploadProgress(0)
+					return
+				}
+
+				const progress = Math.round((loaded * 100) / total)
 				setUploadProgress(progress)
 			},
 		}),
@@ -97,10 +111,17 @@ export default function UploadModal() {
 			toast.error('Some files were rejected. Please check the file type and size')
 		}
 
-		setFiles((prev) => [
-			...prev,
-			...acceptedFiles.filter((file) => !prev.some((f) => f.name === file.name)),
-		])
+		setFiles((prev) => {
+			const existingFingerprints = new Set(prev.map(({ file }) => getFileFingerprint(file)))
+			const nextEntries = acceptedFiles
+				.filter((file) => !existingFingerprints.has(getFileFingerprint(file)))
+				.map((file) => ({
+					id: `${nextFileIdRef.current++}`,
+					file,
+				}))
+
+			return [...prev, ...nextEntries]
+		})
 	}, [])
 
 	const { getRootProps, getInputProps, isFileDialogActive, isDragActive } = useDropzone({
@@ -145,7 +166,7 @@ export default function UploadModal() {
 	const doUploadSeries = useCallback(async () => {
 		if (!enableSeries) return
 
-		const firstFile = files?.at(0)
+		const firstFile = files.at(0)?.file
 		if (!seriesDirName || !firstFile || !currentPath) return
 
 		try {
@@ -178,7 +199,7 @@ export default function UploadModal() {
 		// Handle books/series upload paths
 		if (uploadType == 'books') {
 			doUploadBooks({
-				uploads: files,
+				uploads: files.map(({ file }) => file),
 				placeAt: currentPath,
 				libraryId: libraryID,
 			})
@@ -274,13 +295,7 @@ export default function UploadModal() {
 						</Dialog.Description>
 					</Dialog.Header>
 
-					<div
-						className="space-y-4 pr-2 max-h-[55vh] overflow-y-auto"
-						onScroll={handleScroll}
-						style={{
-							scrollbarColor: 'var(--color-scrollbar-thumb) transparent',
-						}}
-					>
+					<div className="space-y-4 pr-2">
 						<div
 							{...getRootProps()}
 							className={cn(
@@ -327,37 +342,52 @@ export default function UploadModal() {
 								</Accordion.Trigger>
 
 								<Accordion.Content>
-									<div className="space-y-1 flex flex-col">
-										{files.slice(0, visibleCount).map((file, idx) => (
-											<div
-												key={file.name}
-												className="group gap-x-2 p-2 flex items-center rounded-lg border border-border"
-											>
-												<Text size="sm" className="line-clamp-1">
-													{file.name}
-												</Text>
-												<Text size="sm" variant="muted" className="shrink-0">
-													{formatBytes(file.size)}
-												</Text>
+									<div
+										ref={setFilesViewportElement}
+										className="h-60 pr-1 overflow-y-auto"
+										style={{
+											scrollbarColor: 'var(--color-scrollbar-thumb) transparent',
+										}}
+									>
+										<div className="relative w-full" style={{ height: totalFileRowsSize }}>
+											{virtualFileRows.map((virtualItem) => {
+												const fileEntry = files[virtualItem.index]
+												if (!fileEntry) return null
 
-												<div className="flex-1" />
-												<Button
-													variant="ghost"
-													size="xs"
-													className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-													onClick={() => {
-														setFiles((prev) => prev.filter((_, i) => i !== idx))
-													}}
-												>
-													{t('common.remove')}
-												</Button>
-											</div>
-										))}
-										{files.length > visibleCount && (
-											<div className="p-2 text-xs text-foreground-muted text-center italic">
-												...and {files.length - visibleCount} more files (scroll to load more)
-											</div>
-										)}
+												return (
+													<div
+														key={virtualItem.key}
+														ref={filesVirtualizer.measureElement}
+														data-index={virtualItem.index}
+														className="py-0.5 absolute w-full"
+														style={{
+															transform: `translateY(${virtualItem.start}px)`,
+														}}
+													>
+														<div className="group gap-x-2 p-2 flex items-center rounded-lg border border-border">
+															<Text size="sm" className="line-clamp-1">
+																{fileEntry.file.name}
+															</Text>
+															<Text size="sm" variant="muted" className="shrink-0">
+																{formatBytes(fileEntry.file.size)}
+															</Text>
+
+															<div className="flex-1" />
+															<Button
+																variant="ghost"
+																size="xs"
+																className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+																onClick={() => {
+																	setFiles((prev) => prev.filter(({ id }) => id !== fileEntry.id))
+																}}
+															>
+																{t('common.remove')}
+															</Button>
+														</div>
+													</div>
+												)
+											})}
+										</div>
 									</div>
 								</Accordion.Content>
 							</Accordion.Item>

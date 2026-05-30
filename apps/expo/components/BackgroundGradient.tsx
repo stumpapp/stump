@@ -3,9 +3,16 @@ import { ViewabilityConfigCallbackPairs } from '@shopify/flash-list/dist/FlashLi
 import { AnimatedProp, Canvas, Color, LinearGradient, Rect, vec } from '@shopify/react-native-skia'
 import { InterfaceLayout } from '@stump/graphql'
 import { getColor, serialize, set } from 'colorjs.io/fn'
+import { useNavigation } from 'expo-router'
 import { RefObject, useCallback, useEffect } from 'react'
-import { Appearance } from 'react-native'
-import { useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated'
+import { Appearance, Platform } from 'react-native'
+import Animated, {
+	SharedValue,
+	useAnimatedStyle,
+	useDerivedValue,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated'
 
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
@@ -23,29 +30,28 @@ type MinimalItem = {
 	} | null
 }
 
-const getTintColor = (item?: MinimalItem): string => {
-	const isDarkColorScheme = Appearance.getColorScheme() === 'dark'
-	const averageColor = item?.thumbnail?.metadata?.averageColor
-
-	if (!averageColor) return 'transparent'
-
-	const color = getColor(averageColor)
-	set(color, {
-		'oklch.l': (l) => (isDarkColorScheme ? 0.25 * Math.pow(l, 0.4) : 0.5 * l + 0.5),
-		'oklch.c': (c) => 0.95 * c + 0.05 * 0.4,
-	})
-
-	return serialize(color, { format: 'hex' })
-}
-
 type BackgroundGradientProps = {
 	colors: AnimatedProp<Color[]>
+	androidHeaderColor?: SharedValue<string>
 	layout: InterfaceLayout
 }
 
-export function BackgroundGradient({ colors, layout }: BackgroundGradientProps) {
+export function BackgroundGradient({
+	colors,
+	androidHeaderColor,
+	layout,
+}: BackgroundGradientProps) {
 	const { height, width } = useDisplay()
 	const { tintListBackground } = usePreferencesStore()
+	const naviation = useNavigation()
+
+	useEffect(() => {
+		if (Platform.OS === 'android' && androidHeaderColor) {
+			naviation.setOptions({
+				headerBackground: () => <AnimatedHeaderBackground color={androidHeaderColor} />,
+			})
+		}
+	}, [androidHeaderColor, naviation])
 
 	if (!tintListBackground) return null
 
@@ -95,6 +101,7 @@ export function useBackgroundGradient<T extends MinimalItem>({
 		Math.floor(visibleRowsTotalStartHeight / rowHeight) * numColumns,
 	)
 
+	// const headerColor = useSharedValue(getHeaderTintColor(data.at(0)))
 	const firstColor = useSharedValue(getTintColor(data.at(0)))
 	const lastColor = useSharedValue(getTintColor(data.at(estimatedVisibleItemCount - 1)))
 
@@ -130,13 +137,23 @@ export function useBackgroundGradient<T extends MinimalItem>({
 
 			const activeItems = trulyViewableItems.length > 0 ? trulyViewableItems : viewableItems
 
+			// const newHeaderColor = getHeaderTintColor(activeItems.at(0)?.item)
 			const newFirstColor = getTintColor(activeItems.at(0)?.item)
 			const newLastColor = getTintColor(activeItems.at(-1)?.item)
 
+			// headerColor.set(withTiming(newHeaderColor, { duration: 800 }))
 			firstColor.set(withTiming(newFirstColor, { duration: 800 }))
 			lastColor.set(withTiming(newLastColor, { duration: 800 }))
 		},
-		[firstColor, lastColor, flashListRef, tintListBackground, headerHeight, numColumns],
+		[
+			// headerColor,
+			firstColor,
+			lastColor,
+			flashListRef,
+			tintListBackground,
+			headerHeight,
+			numColumns,
+		],
 	)
 
 	const viewabilityConfig = { itemVisiblePercentThreshold: isGrid ? 50 : 70, minimumViewTime: 800 }
@@ -147,6 +164,42 @@ export function useBackgroundGradient<T extends MinimalItem>({
 
 	return {
 		colors,
+		headerColor: firstColor,
 		viewabilityConfigCallbackPairs,
 	}
+}
+
+function getTintColor(item?: MinimalItem): string {
+	const isDarkColorScheme = Appearance.getColorScheme() === 'dark'
+	const averageColor = item?.thumbnail?.metadata?.averageColor
+
+	if (!averageColor) return 'transparent'
+
+	const color = getColor(averageColor)
+	set(color, {
+		'oklch.l': (l) => (isDarkColorScheme ? 0.25 * Math.pow(l, 0.4) : 0.5 * l + 0.5),
+		'oklch.c': (c) => 0.95 * c + 0.05 * 0.4,
+	})
+
+	return serialize(color, { format: 'hex' })
+}
+
+// const getHeaderTintColor = (item?: MinimalItem): string => {
+// 	const isDarkColorScheme = Appearance.getColorScheme() === 'dark'
+// 	const averageColor = item?.thumbnail?.metadata?.averageColor
+
+// 	if (!averageColor) return 'transparent'
+
+// 	const color = getColor(averageColor)
+// 	set(color, {
+// 		'oklch.l': (l) => (isDarkColorScheme ? 0.25 * Math.pow(l, 0.4) : 0.5 * Math.pow(l, 0.5) + 0.5),
+// 		'oklch.c': (c) => 0.95 * c + 0.05 * 0.4,
+// 	})
+
+// 	return serialize(color, { format: 'hex' })
+// }
+
+function AnimatedHeaderBackground({ color }: { color: SharedValue<string> }) {
+	const animatedStyle = useAnimatedStyle(() => ({ backgroundColor: color.value }))
+	return <Animated.View style={[{ flex: 1 }, animatedStyle]} />
 }

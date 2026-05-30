@@ -143,7 +143,7 @@ export default function Screen() {
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
 	const flashListRef = useRef<FlashListRef<Node>>(null)
-	const { colors, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+	const { colors, headerColor, viewabilityConfigCallbackPairs } = useBackgroundGradient({
 		data: nodes,
 		layout,
 		flashListRef,
@@ -155,7 +155,7 @@ export default function Screen() {
 	return (
 		<SeriesFilterContext.Provider value={store}>
 			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-				<BackgroundGradient colors={colors} layout={layout} />
+				<BackgroundGradient colors={colors} androidHeaderColor={headerColor} layout={layout} />
 
 				<FlashList
 					key={layout} // force re-render when layout changes

@@ -1090,7 +1090,7 @@
 						"placeholder": "Add values",
 						"emptyState": "No values to display"
 					},
-					"enumValue":{
+					"enumValue": {
 						"selectPlaceholder": "Select value",
 						"READING": "Reading",
 						"FINISHED": "Finished",

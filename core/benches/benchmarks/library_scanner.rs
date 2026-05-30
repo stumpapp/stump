@@ -43,26 +43,36 @@ impl Display for BenchmarkSize {
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 4] = [
+	static SIZES: [BenchmarkSize; 5] = [
+		// 100 books
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
 			sample_count: 100,
 		},
+		// 1,000 books
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 10,
 			sample_count: 100,
 		},
+		// 10,000 books
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 100,
 			sample_count: 10,
 		},
+		// 100,000 books
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 1000,
-			sample_count: 10,
+			sample_count: 5,
+		},
+		// 150,000 books
+		BenchmarkSize {
+			series_count: 150,
+			media_per_series: 1000,
+			sample_count: 5,
 		},
 	];
 

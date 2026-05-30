@@ -38,39 +38,41 @@ impl Display for BenchmarkSize {
 	fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
 		write!(
 			f,
-			"{} series with {} media each",
-			self.series_count, self.media_per_series
+			"{} series x {} books per series ({} books)",
+			self.series_count,
+			self.media_per_series,
+			self.series_count * self.media_per_series
 		)
 	}
 }
 
 fn full_scan(c: &mut Criterion) {
 	static SIZES: [BenchmarkSize; 5] = [
-		// 100 books
+		// 10 series x 10 books per series (100 books)
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
 			sample_count: 100,
 		},
-		// 1,000 books
+		// 100 series x 10 books per series (1000 books)
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 10,
 			sample_count: 100,
 		},
-		// 10,000 books
+		// 100 series x 100 books per series (10000 books)
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 100,
 			sample_count: 10,
 		},
-		// 100,000 books
+		// 100 series x 1,000 books per series (100000 books)
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 1000,
 			sample_count: 10,
 		},
-		// 150,000 books
+		// 150 series x 1,000 books per series (150000 books)
 		BenchmarkSize {
 			series_count: 150,
 			media_per_series: 1000,
@@ -94,7 +96,7 @@ fn full_scan(c: &mut Criterion) {
 
 				let conn = test_ctx.job_ctx.conn.clone();
 
-				println!("Starting benchmark for {}", size);
+				println!("Starting benchmark: {}", size);
 				let start = Instant::now();
 				scan_new_library(test_ctx).await;
 				let elapsed = start.elapsed();

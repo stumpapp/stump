@@ -64,22 +64,12 @@ export function useFullSync() {
 	}
 }
 
-// TODO(reading-journal): brainstorm
-// i figure sm like like for conflict resolution:
-//
-// full_journal_sync:
-//    last_sync = get_last_sync_time(server_id)
-//    server_entries = get_entries_since_from_server(last_sync)
-//
-//    for entry in server_entries:
-//       if entry.id not in local_db:
-//          create_entry_locally(entry)
-//       else:
-//          local_entry = get_local_entry(entry.id)
-//          if local_entry.sync_status == 'synced':
-//             update_local_entry(entry)
-//          else:
-//             conflict !! server has changed since last sync, but local entry has also changed since last sync
-//             maybe just ask user to pick
-//
-//   update_last_sync_time(server_id, now)
+// TODO(reading-journal): sync once we have journal features
+// it is a bit tricky, because offline sessions do not map cleanly 1:1 with server sessions.
+// the difference primarily lies in the fact that the server will try to chunk reading into
+// semantic "reading sessions" (e.g., i sat down for 30 minutes and read). the offline reading,
+// however, kinda retains the previous concept where it functions like a cursor but does not
+// track granular sessions. perhaps this should change in the future, however it would require
+// some level of duplication (e.g., defining your window for a session and logic to determine
+// start/end of sessions). im rambling, the point im making here is that once journal features
+// are added (assuming they are avail offline) the sync back to server will need a good think

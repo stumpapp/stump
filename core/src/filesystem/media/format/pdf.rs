@@ -134,7 +134,7 @@ impl FileProcessor for PdfProcessor {
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 
-		Ok(document.pages().len() as i32)
+		Ok(document.pages().len())
 	}
 
 	fn get_page_content_types(

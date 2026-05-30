@@ -269,7 +269,7 @@ impl ReadProgressMutation {
 		Ok(affected_rows.try_into()?)
 	}
 
-	// TODO(v2-sessions): this name kinda worked for finish_media_progress (kinda) but
+	// TODO(pedantic): this name kinda worked for finish_media_progress (kinda) but
 	// is even more awk for series... maybe rename
 
 	/// marks all books in the series as finished

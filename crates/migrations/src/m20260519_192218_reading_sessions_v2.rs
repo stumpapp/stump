@@ -258,11 +258,6 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		// the new preferences related to:
-		// - enabling journaling features
-		// - TODO(v2-sessions): maybe a separate one for goals/reminders/etc??
-		// - offset preferences
-
 		manager
 			.alter_table(
 				Table::alter()

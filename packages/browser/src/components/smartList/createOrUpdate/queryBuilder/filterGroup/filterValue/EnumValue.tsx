@@ -18,8 +18,7 @@ const CONCEPTUAL_FIELD_OPTIONS: Record<string, string[]> = {
 		ReadingStatus.Reading,
 		ReadingStatus.Finished,
 		ReadingStatus.NotStarted,
-		// TODO(v2-sessions): enable
-		// ReadingStatus.Abandoned,
+		ReadingStatus.Abandoned,
 	],
 }
 

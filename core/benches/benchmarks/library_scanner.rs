@@ -19,7 +19,9 @@ use stump_core::{
 	config::StumpConfig,
 	database::connect_at,
 	filesystem::scanner::LibraryScanJob,
-	job::{stump_job::StumpJob, ApalisWorkerState, JobContext, JobLifecycle},
+	job::{
+		stump_job::StumpJob, ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt,
+	},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
 use tokio::{runtime::Builder, sync::broadcast};
@@ -66,13 +68,13 @@ fn full_scan(c: &mut Criterion) {
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 1000,
-			sample_count: 5,
+			sample_count: 10,
 		},
 		// 150,000 books
 		BenchmarkSize {
 			series_count: 150,
 			media_per_series: 1000,
-			sample_count: 5,
+			sample_count: 10,
 		},
 	];
 
@@ -209,8 +211,6 @@ async fn create_test_library(
 		temp_dirs.push(series_temp_dir);
 	}
 
-	tracing::info!("Library created!");
-
 	Ok((conn, (library, library_config), temp_dirs))
 }
 
@@ -332,7 +332,6 @@ async fn scan_new_library(test_ctx: TestCtx) {
 
 	let working_state = job.init(&handle).await.expect("Failed to init job");
 
-	use stump_core::job::JobLifecycle;
 	let stump_core::job::WorkingState {
 		output: initial_output,
 		mut tasks,
@@ -340,7 +339,6 @@ async fn scan_new_library(test_ctx: TestCtx) {
 	} = working_state;
 
 	let mut output = initial_output.unwrap_or_default();
-	use stump_core::job::JobOutputExt;
 
 	while let Some(task) = tasks.pop_front() {
 		match job.execute_task(&handle, task).await {
@@ -357,5 +355,5 @@ async fn scan_new_library(test_ctx: TestCtx) {
 		}
 	}
 
-	println!("Job result: {:?}", output);
+	// println!("Job result: {:?}", output);
 }

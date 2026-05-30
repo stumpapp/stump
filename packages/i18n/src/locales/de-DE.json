@@ -1011,7 +1011,8 @@
 									"pages": "Seiten",
 									"tags": "Tags",
 									"createdAt": "Erstellt am",
-									"updatedAt": "Aktualisiert am"
+									"updatedAt": "Aktualisiert am",
+									"readingStatus": "Reading status"
 								}
 							},
 							"book_meta": {
@@ -1088,6 +1089,13 @@
 					"listValue": {
 						"placeholder": "Werte hinzufügen",
 						"emptyState": "Keine Werte zum Anzeigen vorhanden"
+					},
+					"enumValue": {
+						"selectPlaceholder": "Select value",
+						"READING": "Reading",
+						"FINISHED": "Finished",
+						"NOT_STARTED": "Not started",
+						"ABANDONED": "Abandoned"
 					}
 				}
 			}
@@ -1408,6 +1416,14 @@
 					"label": "Design und Erscheinung",
 					"description": "Die grundlegenden Erscheinungseinstellungen für Stump"
 				},
+				"interface": {
+					"title": "Interface",
+					"description": "Primary UI surfaces and interaction elements"
+				},
+				"thumbnails": {
+					"title": "Thumbnails",
+					"description": "Display options for thumbnail images"
+				},
 				"themeSelect": {
 					"label": "Design",
 					"description": [
@@ -1450,6 +1466,10 @@
 						"thumbhash": "Thumbhash"
 					}
 				},
+				"navigation": {
+					"title": "Navigation",
+					"description": "Customize the navigation elements of the app"
+				},
 				"layoutAndArrangement": {
 					"label": "Layout und Anordnung",
 					"description": "Passe an wie Stump Informationen anzeigt und Inhalte organisiert"
@@ -1465,11 +1485,11 @@
 				},
 				"doubleSidebar": {
 					"label": "Seitenleisteneinstellungen",
-					"description": "Aktiviert die Seitenleisten-Navigation für die Einstellungsseiten. Falls du häufig einen kleineren Bildschirm verwendest, sollten du dies vielleicht deaktivieren."
+					"description": "Enables sidebar navigation for the settings pages"
 				},
 				"replacePrimarySidebar": {
 					"label": "Primäre Seitenleiste ersetzen",
-					"description": "Jede Instanz einer sekundären Seitenleiste ersetzt die primäre Seitenleiste, anstatt neben dieser angezeigt zu werden",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
 					"tooltips": {
 						"doubleSidebar": "Diese Einstellung erfordert die Seitenleisteneinstellungen aktiviert zu sein",
 						"topbar": "Diese Einstellung ist derzeit nicht unterstützt, wenn die primäre Navigation auf Topleiste eingestellt ist"
@@ -1477,10 +1497,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Navigationsanordnung",
-					"description": {
-						"sidebar": "Navigationselemente in der Seitenleiste anordnen und anpassen",
-						"topbar": "Navigationselemente in der oberen Leiste anordnen und anpassen"
-					},
+					"description": "Rearrange or tweak the navigation items in your primary navigation",
 					"isLocked": "Anordnung ist gesperrt",
 					"lock": "Anordnung sperren",
 					"unlock": "Anordnung entsperren",

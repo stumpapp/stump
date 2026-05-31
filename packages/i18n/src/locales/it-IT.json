@@ -1351,70 +1351,70 @@
 				"access": "Accesso",
 				"email": "E-mail",
 				"metadata": "Metadati",
-				"notifications": "Notifications",
-				"tags": "Tags",
-				"label": "Management"
+				"notifications": "Notifiche",
+				"tags": "Tag",
+				"label": "Gestione"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "Impostazioni account",
+			"title": "Impostazioni account",
+			"description": "Impostazioni relative al tuo account",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
+						"invalidUrl": "Inserisci un URL valido",
 						"missingUsername": "Il nome utente è obbligatorio"
 					},
 					"labels": {
 						"username": "Nome utente",
 						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes",
+						"activeChangesPrompt": "Ci sono modifiche non salvate",
 						"uselessForm": {
-							"title": "Non hai i permessi per modificare queste impostazioni",
+							"title": "Non hai l'autorizzazione per modificare queste impostazioni",
 							"description": "Contatta l'amministratore se desideri apportare modifiche a queste impostazioni"
 						},
-						"insufficientPermission": "Non hai il permesso di cambiarlo"
+						"insufficientPermission": "Non sei autorizzato a cambiarlo"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Si è verificato un errore nel server durante l'aggiornamento del tuo profilo. Riprova."
 					},
 					"avatarPicker": {
 						"label": "Avatar",
-						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
-						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
-						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
+						"heading": "Carica avatar",
+						"subtitle": "Puoi caricare qualsiasi immagine da usare come avatar per le funzioni sociali in Stump",
+						"dropzone": "Trascina un'immagine o fai clic per selezionare",
+						"changeImage": "Cambia immagine",
+						"removeImage": "Rimuovi immagine",
+						"removeSelection": "Rimuovi immagine caricata",
+						"uploadFailed": "Impossibile caricare l'avatar",
+						"removeFailed": "Impossibile rimuovere l'avatar"
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Salva modifiche"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Lingua"
 					},
-					"heading": "Language and locale",
+					"heading": "Lingua e localizzazione",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump supporta più lingue e localizzazioni, imposta le tue preferenze qui sotto. Considera l'idea di aiutare a migliorare la qualità delle",
+						"traduzioni di Stump",
+						", se ti è possibile!"
 					]
 				}
 			}
 		},
 		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "Preferenze",
+			"title": "Preferenze",
+			"description": "Personalizza l'aspetto grafico dell'applicazione",
 			"sections": {
 				"themeAndAppearance": {
-					"label": "Theme and appearance",
-					"description": "The basic look and feel options for Stump"
+					"label": "Tema e aspetto",
+					"description": "Le opzioni grafiche di base per Stump"
 				},
 				"interface": {
 					"title": "Interfaccia",
@@ -1425,44 +1425,44 @@
 					"description": "Visualizza le opzioni per le immagini di miniatura"
 				},
 				"themeSelect": {
-					"label": "Theme",
+					"label": "Tema",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"Se ti interessa creare il tuo tema personalizzato, dai un'occhiata alla",
+						"documentazione"
 					],
 					"options": {
-						"system": "System",
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
-						"midnight": "Midnight",
+						"system": "Sistema",
+						"light": "Chiaro",
+						"dark": "Scuro",
+						"bronze": "Bronzo chiaro",
+						"ocean": "Oceano",
+						"autumn": "Autunno",
+						"cosmic": "Cosmico",
+						"pumpkin": "Zucca",
+						"midnight": "Mezzanotte",
 						"matrix": "Matrix"
 					}
 				},
 				"gradientToggle": {
-					"label": "Enable gradients",
-					"description": "Some themes optionally support gradients for a more dynamic look"
+					"label": "Abilita sfumature",
+					"description": "Alcuni temi supportano opzionalmente le sfumature per un aspetto grafico più dinamico"
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "Carattere",
+					"description": "Personalizza il carattere usato nell'applicazione"
 				},
 				"thumbnailRatioSelect": {
-					"label": "Thumbnail Ratio",
-					"description": "The aspect ratio to use for thumbnails",
+					"label": "Proporzioni miniatura",
+					"description": "Il rapporto di aspetto da usare per le miniature",
 					"defaultSuffix": "Predefinito"
 				},
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail placeholder",
-					"description": "The style to use for thumbnail placeholders",
+					"label": "Segnaposto miniature",
+					"description": "Lo stile da usare per i segnaposto delle miniature",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Scala di grigi",
+						"averageColor": "Colore medio",
+						"colorful": "Colorato",
 						"thumbhash": "Thumbhash"
 					}
 				},
@@ -1471,51 +1471,51 @@
 					"description": "Personalizza gli elementi di navigazione dell'app"
 				},
 				"layoutAndArrangement": {
-					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
+					"label": "Layout e disposizione",
+					"description": "Personalizza come Stump mostra le informazioni e organizza i contenuti"
 				},
 				"primaryNavigation": {
-					"label": "Primary navigation",
-					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"label": "Navigazione principale",
+					"description": "Scegli tra una barra laterale minimale o una barra di navigazione superiore",
 					"options": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
+						"sidebar": "Barra laterale",
+						"topbar": "Barra superiore"
 					},
-					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+					"disclaimer": "* Le impostazioni per l'opzione non selezionata saranno disabilitate o nascoste"
 				},
 				"doubleSidebar": {
-					"label": "Settings sidebar",
+					"label": "Impostazioni barra laterale",
 					"description": "Abilita la navigazione tramite barra laterale per le pagine delle impostazioni"
 				},
 				"replacePrimarySidebar": {
-					"label": "Replace primary sidebar",
+					"label": "Sostituisci la barra laterale principale",
 					"description": "Qualsiasi istanza di una barra laterale secondaria sostituirà quella principale invece di sovrapporle",
 					"tooltips": {
-						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
-						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+						"doubleSidebar": "Questa impostazione richiede che la barra laterale delle impostazioni sia abilitata",
+						"topbar": "Questa impostazione non è attualmente supportata quando la navigazione principale è impostata sulla barra superiore"
 					}
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "Disposizione della navigazione",
 					"description": "Riorganizza o modifica gli elementi di navigazione nella navigazione principale",
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "La disposizione è bloccata",
+					"lock": "Blocca disposizione",
+					"unlock": "Sblocca disposizione",
 					"options": {
 						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"EXPLORE": "Esplora",
+						"LIBRARIES": "Librerie",
+						"BOOK_CLUBS": "Club del libro",
+						"SMART_LISTS": "Liste smart"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "Mostra azione di creazione",
+							"help": "Mostra l'azione di creazione nella navigazione"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "Visualizza tutti i link",
+							"help": "Un collegamento a una pagina dedicata alla visualizzazione di tutti gli elementi di questo tipo"
 						}
 					}
 				},

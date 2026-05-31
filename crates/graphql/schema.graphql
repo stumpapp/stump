@@ -3180,6 +3180,8 @@ let core = StumpCore::new(config).await;
 type StumpConfig {
 	"The \"release\" | \"debug\" profile with which the application is running."
 	profile: String!
+	"The IP address on which to listen on (default: \"0.0.0.0\")."
+	ip: String!
 	"The port from which to serve the application (default: 10801)."
 	port: Int!
 	"The verbosity with which system logs are visible (default: 1)."

@@ -16,6 +16,7 @@ export default defineConfig({
 		assetsDir: './assets',
 		manifest: true,
 		outDir: '../dist',
+		emptyOutDir: true,
 		rollupOptions: {
 			output: {
 				manualChunks(id) {

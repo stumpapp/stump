@@ -402,112 +402,112 @@
 				"section": {
 					"heading": "Elaborazione facoltativa",
 					"description": "Funzionalità di elaborazione facoltative per lo scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"disclaimer": "Queste funzionalità comportano letture di file aggiuntive che possono rallentare il processo di scansione"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "Metadati del processo",
+					"description": "Estrai i metadati dai file di libreria e memorizza i risultati nel database"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Guarda",
+					"description": "Guarda la cartella della libreria per le modifiche e aggiorna di conseguenza il database"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "Genera hash dei file",
+					"description": "Genera un hash per ogni file nella libreria per rilevare i duplicati"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "Hash compatibili con KoReader",
+					"description": "Se utilizzi KoReader, genera hash aggiuntivi nel formato atteso"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "Organizzazione",
+					"description": "Identifica quale modello corrisponde più fedelmente all'organizzazione della tua libreria",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"Non sei sicuro di quale scegliere? Clicca",
+						"qui",
+						"per maggiori informazioni.",
+						"Non potrai modificare questa impostazione in seguito"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "Non puoi modificare questa impostazione"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Modello della libreria",
+					"description": "L'impostazione che determina il modo in cui Stump organizzerà la tua libreria",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "Priorità delle collezioni",
+						"description": "Ogni cartella al livello più alto della radice della libreria è una singola serie"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "Priorità delle serie",
+						"description": "Ogni cartella a qualsiasi livello, in modo ricorsivo, è una singola serie"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "Scansiona dopo la creazione",
+				"update": "Scansiona dopo gli aggiornamenti"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "Indicizza i file della libreria per popolare il database"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Crea nuova libreria",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"heading": "Crea libreria",
+		"subtitle": "Le librerie sono usate per raggruppare i tuoi libri insieme. Se vuoi un ripasso su come funzionano, dai un'occhiata alla",
 		"subtitleLink": "documentazione correlata",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
+					"label": "Base",
+					"heading": "Informazioni di base",
+					"description": "I dettagli della libreria, inclusi il nome, il percorso e la descrizione"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
+					"label": "Scansione",
+					"heading": "Scansione",
+					"description": "Impostazioni relative al modo in cui Stump scansiona questa libreria"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"label": "Miniature",
+					"heading": "Miniature",
+					"description": "Le opzioni per stabilire se e come Stump genererà le miniature per questa libreria"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
+					"label": "Riepilogo",
+					"heading": "Riepilogo",
+					"description": "Verifica le impostazioni della tua libreria prima di crearla"
 				}
 			],
 			"review": {
-				"yes": "Yes",
+				"yes": "Sì",
 				"no": "No",
-				"none": "None",
+				"none": "Nessuno",
 				"labels": {
-					"generateThumbnails": "Generate thumbnails",
-					"processThumbnailColors": "Process thumbnail colors",
-					"mode": "Mode",
-					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
-					"path": "Path",
-					"description": "Description",
-					"tags": "Tags",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files",
-					"watch": "Watch directory for changes",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateThumbnails": "Genera miniature",
+					"processThumbnailColors": "Elabora i colori delle miniature",
+					"mode": "Modalità",
+					"format": "Formato",
+					"quality": "Qualità",
+					"name": "Nome",
+					"path": "Percorso",
+					"description": "Descrizione",
+					"tags": "Tag",
+					"pattern": "Modello",
+					"ignoreRules": "Regole di esclusione",
+					"convertRar": "Converti RAR/CBR",
+					"deleteConversions": "Elimina i file convertiti",
+					"watch": "Monitora la cartella per rilevare modifiche",
+					"processMetadata": "Metadati del processo",
+					"generateFileHashes": "Genera hash del file",
+					"generateKoreaderHashes": "Genera hash KoReader",
+					"scaleEvenlyByFactor": "Ridimensiona proporzionalmente",
+					"exact": "Dimensione esatta",
+					"scaleDimension": "Dimensioni esplicite"
 				}
 			},
 			"buttons": {
@@ -518,39 +518,39 @@
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "Carica libri",
+				"series": "Carica serie"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "Aggiungi i libri direttamente nel percorso corrente di Esplora file",
+				"series": "Aggiungi una serie direttamente nel percorso corrente di Esplora file"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"Deve essere un ",
+				"file compresso",
+				"contenente la cartella che dovrebbe essere la serie, con tutti i libri all'interno"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"books": "Trascina e rilascia i libri qui",
+				"series": "Trascina e rilascia un file zip qui",
+				"alt": "Oppure clicca per cercare i libri da caricare sul computer"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "File aggiunti"
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Impostazioni libreria",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Impostazioni",
+		"subtitle": "Gestisci qui la tua libreria. Se vuoi ripassare queste impostazioni, dai un'occhiata alla",
+		"subtitleLink": "documentazione correlata",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Base",
 			"configuration": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"label": "Options"
+				"general": "Generale",
+				"reading": "In lettura",
+				"scanning": "Scansione",
+				"thumbnails": "Miniature",
+				"ignore-rules": "Regole di esclusione",
+				"label": "Configurazione"
 			},
 			"integrations": {
 				"label": "Integrazioni",
@@ -558,40 +558,40 @@
 				"metadata": "Metadati"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "Controllo accesso",
+				"delete": "Eliminazione",
+				"label": "Zona di pericolo"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "Informazioni di base",
+			"description": "I dettagli di questa libreria, inclusi il suo nome, il percorso e la descrizione",
 			"form": {
-				"submit": "Update library"
+				"submit": "Aggiorna libreria"
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "In lettura",
+			"description": "Le impostazioni predefinite del lettore da usare per i libri in questa libreria. Ogni libro può sovrascrivere queste impostazioni"
 		},
 		"options/scanning": {
-			"title": "Scanning",
-			"description": "Settings related to how Stump scans this library",
+			"title": "Scansione",
+			"description": "Impostazioni relative al modo in cui Stump scansiona questa libreria",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Configura scansione",
+					"description": "Una scansione con opzioni aggiuntive per un controllo più granulare",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Queste opzioni sovrascriveranno le corrispondenti impostazioni della libreria",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Forza ricostruzione",
+								"description": "Ricostruisci sul disco ogni libro della libreria",
+								"alert": "Questa operazione ricostruirà da zero ogni libro della libreria, inclusi i metadati e gli hash"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Personalizzata",
+								"description": "Personalizza la configurazione di scansione",
 								"validation": {
 									"noSelection": "At least one option must be enabled"
 								}
@@ -3170,7 +3170,7 @@
 					"justify": "Giustificato"
 				}
 			},
-			"typeScale": "Type Scale",
+			"typeScale": "Dimensione carattere",
 			"lineHeight": "Interlinea",
 			"paragraphIndent": "Indentazione paragrafo",
 			"paragraphSpacing": "Spaziatura paragrafo",
@@ -3194,7 +3194,7 @@
 			"MANHWA": "Manhwa",
 			"MIXED": "Misto",
 			"WEBTOON": "Webtoon",
-			"WEB_NOVEL": "Web Novels"
+			"WEB_NOVEL": "Web novel"
 		},
 		"savedServerActions": {
 			"clearCache": "Clear Cache",
@@ -3208,7 +3208,7 @@
 			}
 		},
 		"filtering": {
-			"notStarted": "Not Started",
+			"notStarted": "Non iniziato",
 			"currentlyReading": "In lettura",
 			"finished": "Completato"
 		},

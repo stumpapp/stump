@@ -1,14 +1,14 @@
-import { PREFETCH_STALE_TIME, useGraphQL, useSDK } from '@stump/client'
-import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
+import { useGraphQL, useSDK } from '@stump/client'
+import { usePreviousIsDifferent } from '@stump/components'
+import { InterfaceLayout, MediaFilterInput } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
 import { BookCard, BookTable } from '@/components/book'
 import { defaultBookColumnSort } from '@/components/book/table'
-import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
+import DynamicCardGrid from '@/components/container/DynamicCardGrid'
+import { GridSizeSlider } from '@/components/container/GridSizeSlider'
 import {
 	FilterContext,
 	FilterHeader,
@@ -17,16 +17,13 @@ import {
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
-import { FilterInput } from '@/components/filters/context'
 import {
-	DEFAULT_MEDIA_ORDER_BY,
 	useMediaURLOrderBy,
 	useSearchMediaFilter,
 	useURLKeywordSearch,
-	useURLPageParams,
 } from '@/components/filters/useFilterScene'
 import GenericEmptyState from '@/components/GenericEmptyState'
-import { LibraryBooksAlphabet, usePrefetchLibraryBooksAlphabet } from '@/components/library'
+import { LibraryBooksAlphabet } from '@/components/library'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
@@ -34,94 +31,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
 
 import { useLibraryContext } from '../../context'
-
-const query = graphql(`
-	query LibraryBooksScene(
-		$filter: MediaFilterInput!
-		$orderBy: [MediaOrderBy!]!
-		$pagination: Pagination!
-	) {
-		media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
-			nodes {
-				id
-				...BookCard
-				...BookMetadata
-			}
-			pageInfo {
-				__typename
-				... on OffsetPaginationInfo {
-					currentPage
-					totalPages
-					pageSize
-					pageOffset
-					zeroBased
-				}
-			}
-		}
-	}
-`)
-
-export type UsePrefetchLibraryBooksParams = {
-	page?: number
-	pageSize?: number
-	filter: FilterInput[]
-	orderBy: MediaOrderBy[]
-}
-
-export const usePrefetchLibraryBooks = () => {
-	const { sdk } = useSDK()
-	const { pageSize } = useURLPageParams()
-	const { search } = useURLKeywordSearch()
-	const searchFilter = useSearchMediaFilter(search)
-
-	const client = useQueryClient()
-	const prefetchAlphabet = usePrefetchLibraryBooksAlphabet()
-
-	const prefetch = useCallback(
-		(
-			id: string,
-			params: UsePrefetchLibraryBooksParams = { filter: [], orderBy: DEFAULT_MEDIA_ORDER_BY },
-		) => {
-			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
-			return Promise.all([
-				client.prefetchQuery({
-					queryKey: getQueryKey(
-						sdk.cacheKeys.libraryBooks,
-						id,
-						pageParams.page,
-						pageParams.pageSize,
-						search,
-						params.filter,
-						params.orderBy,
-					),
-					queryFn: async () => {
-						const response = await sdk.execute(query, {
-							filter: {
-								series: {
-									libraryId: { eq: id },
-								},
-								_and: params.filter,
-								_or: searchFilter,
-							},
-							orderBy: params.orderBy,
-							pagination: {
-								offset: {
-									...pageParams,
-								},
-							},
-						})
-						return response
-					},
-					staleTime: PREFETCH_STALE_TIME,
-				}),
-				prefetchAlphabet(id),
-			])
-		},
-		[client, pageSize, search, searchFilter, sdk, prefetchAlphabet],
-	)
-
-	return prefetch
-}
+import { getQueryKey, query, usePrefetchLibraryBooks } from './queries'
 
 export default function LibraryBooksSceneContainer() {
 	return (
@@ -129,19 +39,6 @@ export default function LibraryBooksSceneContainer() {
 			<LibraryBooksScene />
 		</Suspense>
 	)
-}
-
-// TODO: This is used multiple times, let's generalize it
-function getQueryKey(
-	cacheKey: string,
-	libraryId: string,
-	page: number,
-	pageSize: number,
-	search: string | undefined,
-	filters: MediaFilterInput[] | undefined,
-	orderBy: MediaOrderBy[] | undefined,
-): (string | object | number | MediaFilterInput[] | MediaOrderBy[] | undefined)[] {
-	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 
 function LibraryBooksScene() {

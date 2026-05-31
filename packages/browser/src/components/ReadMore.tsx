@@ -1,9 +1,7 @@
 import { useBoolean } from '@stump/components'
-import { lazy, Suspense } from 'react'
 
 import { DEBUG_ENV } from '../index.ts'
-
-const MarkdownPreview = lazy(() => import('./markdown/MarkdownPreview.tsx'))
+import MarkdownPreview from './markdown/MarkdownPreview.tsx'
 
 type Props = {
 	text?: string | null
@@ -23,11 +21,7 @@ export default function ReadMore({ text }: Props) {
 	}
 
 	if (!canReadMore) {
-		return (
-			<Suspense fallback={<ReadMoreFallback text={resolvedText} />}>
-				<MarkdownPreview>{resolvedText}</MarkdownPreview>
-			</Suspense>
-		)
+		return <MarkdownPreview>{resolvedText}</MarkdownPreview>
 	}
 
 	return (
@@ -39,9 +33,7 @@ export default function ReadMore({ text }: Props) {
 					transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 				}}
 			>
-				<Suspense fallback={<ReadMoreFallback text={resolvedText} />}>
-					<MarkdownPreview>{resolvedText}</MarkdownPreview>
-				</Suspense>
+				<MarkdownPreview>{resolvedText}</MarkdownPreview>
 			</div>
 
 			<div
@@ -61,10 +53,6 @@ export default function ReadMore({ text }: Props) {
 			</div>
 		</div>
 	)
-}
-
-function ReadMoreFallback({ text }: { text: string }) {
-	return <p className="text-sm whitespace-pre-wrap text-muted-foreground">{text}</p>
 }
 
 const DEBUG_FAKE_TEXT =

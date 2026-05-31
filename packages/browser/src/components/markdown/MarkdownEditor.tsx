@@ -1,8 +1,8 @@
 import { Card, cx, Divider, IconButton, Tabs, Text, ToolTip } from '@stump/components'
 import { Asterisk, AtSign } from 'lucide-react'
-import { lazy, Suspense, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
-const MarkdownPreview = lazy(() => import('./MarkdownPreview'))
+import MarkdownPreview from './MarkdownPreview'
 
 type Props = {
 	initialState?: 'writing' | 'preview'
@@ -33,17 +33,7 @@ export default function MarkdownEditor({ initialState = 'writing', initialConten
 
 	const renderTabContent = () => {
 		if (writingState === 'preview') {
-			return (
-				<Suspense
-					fallback={
-						<Text size="sm" variant="muted" className="px-1 py-0.5">
-							{content}
-						</Text>
-					}
-				>
-					<MarkdownPreview className="px-1 py-0.5">{content}</MarkdownPreview>
-				</Suspense>
-			)
+			return <MarkdownPreview className="px-1 py-0.5">{content}</MarkdownPreview>
 		} else {
 			return (
 				<textarea

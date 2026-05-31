@@ -12,7 +12,7 @@
 			"validation": {
 				"missingUsername": "Il nome utente è obbligatorio",
 				"missingPassword": "La password è obbligatoria",
-				"usernameAlreadyExists": "Username già esistente"
+				"usernameAlreadyExists": "Nome utente già esistente"
 			},
 			"labels": {
 				"username": "Nome utente",
@@ -127,12 +127,12 @@
 		},
 		"validation": {
 			"missingName": "Il nome è obbligatorio",
-			"alreadyTaken": "è già stato preso"
+			"alreadyTaken": "è già in uso"
 		}
 	},
 	"createBookClubScene": {
 		"heading": "Crea un nuovo club del libro",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"subtitle": "Puoi creare un club del libro privato per pochi selezionati, oppure renderlo pubblico per permettere a chiunque nel server di unirsi",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
@@ -553,9 +553,9 @@
 				"label": "Options"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
+				"label": "Integrazioni",
+				"analysis": "Analisi",
+				"metadata": "Metadati"
 			},
 			"danger-zone": {
 				"access-control": "Access Control",
@@ -678,14 +678,14 @@
 			}
 		},
 		"integrations/metadata": {
-			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
+			"title": "Metadati",
+			"description": "Gestisci e rivedi le corrispondenze dei metadati per questa libreria",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "Recupera i metadati",
+					"description": "Recupera i metadati per i file multimediali in questa libreria",
 					"noProviders": {
-						"title": "There are no metadata providers available",
+						"title": "Non ci sono provider di metadati disponibili",
 						"description": "You can configure metadata providers in the metadata integration settings"
 					},
 					"fetchButton": "Start background fetch",
@@ -2163,7 +2163,7 @@
 					"ageRestrictionTooLow": "La limitazione dell'età non può essere inferiore a 0",
 					"missingUsername": "Username is required",
 					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
+					"usernameAlreadyExists": "Nome utente già esistente"
 				},
 				"createSubmitButton": "Crea utente",
 				"updateSubmitButton": "Aggiorna utente"
@@ -2246,8 +2246,8 @@
 					"description": "The SMTP-specific settings for this emailer"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "Preimpostazione provider SMTP",
+					"description": "Il provider del server SMTP. Viene utilizzato per precompilare alcune impostazioni comuni, ma non include tutti i provider"
 				},
 				"smtpHost": {
 					"label": "SMTP host",
@@ -2318,21 +2318,21 @@
 		"server/metadataIntegrations": {
 			"helmet": "Metadata integrations",
 			"title": "Metadata integrations",
-			"addProvider": "Add provider",
-			"noProviders": "No providers configured yet. Add one to get started",
+			"addProvider": "Aggiungi provider",
+			"noProviders": "Nessun provider configurato. Aggiungine uno per iniziare",
 			"providers": {
-				"title": "Providers",
-				"description": "Configure external metadata providers to fetch and enrich your library data"
+				"title": "Provider",
+				"description": "Configura i provider di metadati esterni per recuperare e arricchire i dati della tua libreria"
 			},
 			"providerForm": {
 				"apiToken": {
-					"label": "API token",
-					"description": "The API token for authenticating with this provider",
-					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
+					"label": "Token API",
+					"description": "Il token API per l'autenticazione con questo provider",
+					"validationError": "La convalida automatica di questo token è fallita",
+					"validationRequestError": "Richiesta di convalida fallita",
+					"validationRequestErrorUnknown": "Si è verificato un errore sconosciuto durante la convalida",
 					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
+					"hardcoverValidationError": "L'API Hardcover ha risposto con un errore: {{message}}",
 					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {
@@ -2776,8 +2776,8 @@
 			"setAsDefaultServer": "Set as default server",
 			"enableOPDS": "Enable OPDS",
 			"validation": {
-				"nameAlreadyExists": "Name already exists",
-				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+				"nameAlreadyExists": "Nome già esistente",
+				"cannotSetAuthorizationHeader": "Impossibile impostare l'header di autorizzazione"
 			}
 		},
 		"bookActions": {

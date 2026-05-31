@@ -83,7 +83,7 @@
 				"description": "Una breve descrizione facoltativa del club del libro"
 			},
 			"is_private": {
-				"label": "Club Privato",
+				"label": "Club privato",
 				"description": "Se abilitato, solo gli utenti che inviti potranno unirsi al tuo club di libri"
 			},
 			"member_role_spec": {
@@ -868,14 +868,14 @@
 				"strategies": {
 					"FILL_GAPS": "Riempi i vuoti",
 					"PREFER_EXTERNAL": "Preferisci esterni",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferisci esterni e unisci gli elenchi",
-					"FILL_AND_MERGE_LISTS": "Riempi e unisci gli elenchi"
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferisci esterni e unisci le liste",
+					"FILL_AND_MERGE_LISTS": "Riempi e unisci le liste"
 				}
 			},
 			"fieldAction": {
 				"keepCurrent": "Mantieni quello attuale",
 				"takeExternal": "Prendi esterni",
-				"mergeLists": "Unisci elenchi",
+				"mergeLists": "Unisci liste",
 				"editManually": "Modifica manualmente",
 				"lockField": "Blocca campo",
 				"unlockField": "Sblocca campo",
@@ -931,164 +931,164 @@
 				"label": "Visibilità",
 				"options": {
 					"public": {
-						"label": "Pubblico",
+						"label": "Pubblica",
 						"description": "Accessibile a tutti gli utenti sul server"
 					},
 					"shared": {
-						"label": "Condiviso",
+						"label": "Condivisa",
 						"description": "Utenti specifici possono accedere a questa lista smart",
 						"createDisclaimer": "Puoi selezionare con chi condividere questa lista dopo la creazione"
 					},
 					"private": {
-						"label": "Privato",
+						"label": "Privata",
 						"description": "Solo tu puoi accedere a questa lista smart"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "Questa funzionalità non dispone di ottimizzazioni delle prestazioni a livello d'interfaccia utente e potrebbe risultare lenta con filtri che generano un gran numero di risultati. Questo aspetto verrà migliorato in futuro",
 				"rootJoiner": {
 					"and": {
 						"label": "AND",
-						"description": "All filter groups must be true for a book to be matched"
+						"description": "Tutti i gruppi di filtri devono essere soddisfatti affinché un libro venga incluso"
 					},
 					"or": {
 						"label": "OR",
-						"description": "At least one filter group must be true for a book to be matched"
+						"description": "Almeno un gruppo di filtri deve essere soddisfatto affinché un libro venga incluso"
 					}
 				},
 				"groupJoiner": {
 					"and": {
 						"label": "AND",
-						"description": "All must be true"
+						"description": "Tutto deve essere vero"
 					},
 					"or": {
 						"label": "OR",
-						"description": "At least one must be true"
+						"description": "Almeno uno deve essere vero"
 					},
 					"not": {
 						"label": "NOT",
-						"description": "None can be true"
+						"description": "Nessuno può essere vero"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "Raggruppa per",
+					"description": "Come devono essere raggruppati i libri in questa lista smart",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "Nessuno"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "Serie"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "Libreria"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "Aggiungi un gruppo per iniziare",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "Aggiungi filtro",
+						"addGroup": "Aggiungi gruppo",
+						"deleteFilter": "Elimina filtro",
+						"deleteGroup": "Elimina gruppo"
 					},
-					"is": "is",
+					"is": "è",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "Attributo",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "Sorgente",
+							"back": "Indietro",
 							"book": {
-								"label": "Book",
+								"label": "Libro",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags",
-									"createdAt": "Created at",
-									"updatedAt": "Updated at",
+									"name": "Nome file",
+									"size": "Dimensione",
+									"extension": "Estensione",
+									"status": "Stato",
+									"path": "Percorso",
+									"pages": "Pagine",
+									"tags": "Tag",
+									"createdAt": "Creato il",
+									"updatedAt": "Aggiornato il",
 									"readingStatus": "Stato di lettura"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "Metadati del libro",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
+									"title": "Titolo",
+									"summary": "Riepilogo",
+									"notes": "Note",
+									"writers": "Autori",
+									"pencillers": "Matitisti",
+									"inkers": "Inchiostratori",
+									"letterers": "Letteristi",
 									"editors": "Curatori",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams",
-									"genres": "Genre",
-									"coverArtists": "Cover artists",
-									"ageRating": "Age rating",
-									"year": "Year",
-									"month": "Month",
-									"day": "Day"
+									"publisher": "Editore",
+									"colorists": "Colorista",
+									"links": "Collegamenti",
+									"characters": "Personaggi",
+									"teams": "Gruppi",
+									"genres": "Genere",
+									"coverArtists": "Copertinisti",
+									"ageRating": "Classificazione per età",
+									"year": "Anno",
+									"month": "Mese",
+									"day": "Giorno"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "Serie",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "Nome",
+									"path": "Percorso"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "Metadati della serie",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
-									"comicid": "Comic ID",
-									"booktype": "Book type",
-									"status": "Status",
+									"title": "Titolo",
+									"summary": "Riepilogo",
+									"publisher": "Editore",
+									"imprint": "Marchio editoriale",
+									"comicid": "ID fumetto",
+									"booktype": "Tipo di libro",
+									"status": "Stato",
 									"volume": "Volume",
-									"metaType": "Type",
-									"ageRating": "Age rating",
-									"year": "Start year"
+									"metaType": "Tipo",
+									"ageRating": "Classificazione per età",
+									"year": "Anno d'inizio"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "Libreria",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "Nome",
+									"path": "Percorso"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Value",
-						"date": "Date"
+						"placeholder": "Valore",
+						"date": "Data"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "Dalla data",
+							"number": "Da"
 						},
 						"to": {
-							"date": "To date",
-							"number": "To"
+							"date": "Alla data",
+							"number": "A"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "Inclusivo"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "Aggiungi valori",
+						"emptyState": "Nessun valore da visualizzare"
 					},
 					"enumValue": {
 						"selectPlaceholder": "Seleziona valore",
@@ -1102,150 +1102,150 @@
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"heading": "Create lista smart",
+		"subtitle": "Creazione di liste al volo basata su un insieme di filtri",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"label": "Base",
+					"heading": "Informazioni di base",
+					"description": "I dettagli di questa lista smart, inclusi il nome, la descrizione e la visibilità"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
+					"label": "Filtri",
+					"heading": "Filtri",
+					"description": "I filtri da applicare a questa lista smart"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
+					"label": "Riepilogo",
+					"heading": "Riepilogo",
+					"description": "Verifica le impostazioni della tua lista smart prima di crearla"
 				}
 			],
 			"review": {
-				"yes": "Yes",
+				"yes": "Sì",
 				"no": "No",
-				"none": "None",
+				"none": "Nessuno",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"name": "Nome",
+					"description": "Descrizione",
+					"visibility": "Visibilità",
+					"grouping": "Raggruppa per"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "Crea lista"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "La data di scadenza deve essere nel futuro"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "Nome",
+				"placeholder": "Sincronizzazione KoReader"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "Scadenza",
+				"placeholder": "Mai"
 			},
 			"expiresAt": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "Scade il",
+				"placeholder": "Mai"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "Eredita le autorizzazioni",
+					"description": "Le stesse autorizzazioni del tuo account"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "Autorizzazione esplicita",
+					"description": "Scegli l'autorizzazione che dovrebbe avere questa chiave"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "Questa chiave API erediterà tutte le tue autorizzazioni, il che significa che potrà fare tutto ciò che fai tu. Presta attenzione a questa impostazione"
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "Liste smart",
+		"subtitle": "Le tue ricerche e i tuoi filtri preferiti salvati per un accesso rapido",
+		"searchPlaceholder": "Filtra liste smart",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Create lista smart"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "Nessuna lista smart da visualizzare",
+				"noListsMessage": "Crea una lista smart per iniziare",
+				"noMatchesMessage": "Prova a cambiare la tua ricerca"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "libro",
+						"series": "serie",
+						"library": "libreria"
 					},
-					"matches": "Matches"
+					"matches": "Corrispondenze"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Base",
 			"configuration": {
-				"label": "Configuration",
-				"access": "Access",
-				"filters": "Filters"
+				"label": "Configurazione",
+				"access": "Accesso",
+				"filters": "Filtri"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Eliminazione",
+				"label": "Zona di pericolo"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"title": "Informazioni di base",
+			"description": "I dettagli di questa lista smart, inclusi il nome e la descrizione"
 		},
 		"access": {
-			"title": "Access",
-			"description": "Control who can access this smart list",
+			"title": "Accesso",
+			"description": "Controlla chi può accedere a questa lista smart",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "This will make the list visible to everyone",
-						"private": "This will change the list to be private, hiding it from anyone who previously had access",
-						"shared": "You will need to share the list with specific users to give them access",
-						"fallback": "Are you sure you want to change the visibility of this list?"
+						"public": "Questo renderà la lista visibile a tutti",
+						"private": "Questo renderà la lista privata, nascondendola a chiunque vi avesse accesso in precedenza",
+						"shared": "Sarà necessario condividere la lista con utenti specifici per dare loro l'accesso",
+						"fallback": "Sei sicuro di voler cambiare la visibilità di questa lista?"
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Sharing is not ready yet. Please check back later!"
+					"disclaimer": "La condivisione non è ancora pronta. Riprova più tardi!"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"title": "Generatore di filtri",
+			"description": "Gestisci i filtri che costruiscono questa lista smart"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"title": "Azioni di eliminazione",
+			"description": "Elimina permanentemente questa lista smart e tutti i suoi contenuti o determinate risorse",
 			"sections": {
 				"deleteList": {
-					"heading": "Delete list",
+					"heading": "Elimina lista",
 					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"Elimina definitivamente questa lista smart e tutti i suoi contenuti.",
+						"Questa azione non può essere annullata"
 					],
 					"confirmation": {
-						"title": "Delete list",
-						"description": "Are you sure you want to delete this smart list?",
-						"confirm": "Delete list"
+						"title": "Elimina lista",
+						"description": "Sei sicuro di voler eliminare questa lista smart?",
+						"confirm": "Elimina lista"
 					}
 				}
 			}
@@ -1253,73 +1253,73 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "Elementi",
+			"settings": "Impostazioni"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "Questa scena richiede un ID nell'URL",
+			"smartListNotFound": "Lista smart non trovata",
+			"viewCreateError": "Impossibile creare la vista",
+			"viewSaveError": "Impossibile salvare la vista"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Liste"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "Lista smart non trovata",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Vista personalizzata",
+					"defaultView": "Vista predefinita",
+					"noViewsSaved": "Nessuna vista salvata",
+					"selectView": "Seleziona una vista salvata"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Filtri lista smart",
+					"description": "Cambia i filtri per questa sessione di visualizzazione",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Dati del filtro grezzi",
+						"description": "Questo è il modo in cui Stump elaborerà i filtri"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Salva",
+						"cancel": "Annulla"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Filtro rapido"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"deleteSelected": "Delete view",
-					"create": "Create new view",
+					"updateSelected": "Aggiorna vista",
+					"deleteSelected": "Elimina vista",
+					"create": "Crea nuova vista",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Creare vista",
+							"update": "Aggiorna vista"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Crea una nuova vista per questa lista smart",
+							"update": "Aggiorna la vista"
 						},
 						"createForm": {
 							"name": {
 								"label": "Nome",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"placeholder": "La mia vista",
+								"description": "Un nome intuitivo per identificare in modo univoco questa vista"
 							}
 						},
 						"updateForm": {
 							"name": {
 								"label": "Nome",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"placeholder": "La mia vista",
+								"description": "Il nome aggiornato per questa vista, se desiderato"
 							}
 						}
 					},
 					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
+						"title": "Elimina vista",
+						"description": "Sei sicuro di voler eliminare questa vista?"
 					}
 				}
 			}
@@ -1328,28 +1328,28 @@
 	"settingsScene": {
 		"navigation": {
 			"general": "Generale",
-			"logs": "Logs",
+			"logs": "Log",
 			"server": "Server",
-			"jobs": "Lavori e configurazione",
+			"jobs": "Attività e configurazione",
 			"users": "Gestione utenti",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"personal": {
 				"account": "Account",
-				"appearance": "Preferences",
-				"api keys": "API keys",
-				"reader": "Reader",
+				"appearance": "Preferenze",
+				"api keys": "Chiavi API",
+				"reader": "Lettore",
 				"desktop": "Desktop",
-				"label": "Personal"
+				"label": "Personale"
 			},
 			"management": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
+				"general": "Server",
+				"logs": "Log",
+				"users": "Utenti",
+				"jobs": "Attività",
+				"access": "Accesso",
+				"email": "E-mail",
 				"metadata": "Metadati",
 				"notifications": "Notifications",
 				"tags": "Tags",

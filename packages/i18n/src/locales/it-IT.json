@@ -137,97 +137,97 @@
 			"stepLabel": "Step",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "Base",
+					"heading": "Informazioni di base",
+					"description": "I dettagli del club, inclusi il nome e la descrizione"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "Ruoli",
+					"heading": "Ruoli",
+					"description": "Personalizza i ruoli nel club del libro"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "Iscrizione",
+					"heading": "Preferenze di iscrizione",
+					"description": "Opzioni aggiuntive per il club del libro"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "Riepilogo",
+					"heading": "Riepilogo",
+					"description": "Verifica le impostazioni del tuo club prima di crearlo"
 				}
 			],
 			"review": {
-				"yes": "Yes",
+				"yes": "Sì",
 				"no": "No",
-				"none": "None",
+				"none": "Nessuno",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "Nome",
+					"description": "Descrizione"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Crea club del libro"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Informazioni di base",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "Membri",
+				"roles": "Ruoli",
+				"label": "Iscrizione"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "Pianificatore",
+				"options": "Opzioni",
+				"label": "Pianificazione"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Eliminazione",
+				"label": "Zona di pericolo"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "Informazioni di base",
+			"description": "I dettagli di questo club del libro, inclusi il nome e la descrizione",
 			"form": {
-				"submit": "Update club"
+				"submit": "Aggiorna club"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "Membri",
+			"description": "Gestisci i membri di questo club del libro",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "Ruoli",
+			"description": "Personalizza i ruoli in questo club del libro",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "Associazioni ruoli esistenti",
+					"description": "Le associazioni di ruoli attuali per questo club del libro"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the scheduled readings for this book club"
+			"title": "Pianificatore",
+			"description": "Crea e gestisci le letture pianificate per questo club del libro"
 		},
 		"scheduling/options": {
-			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"title": "Opzioni",
+			"description": "Opzioni aggiuntive per la pianificazione di questo club del libro"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "Azioni di eliminazione",
+			"description": "Elimina permanentemente questo club del libro e tutti i suoi contenuti o determinate risorse",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "Elimina club",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"Elimina definitivamente questo club del libro e tutti i suoi contenuti.",
+						"Questa azione non può essere annullata"
 					],
-					"trigger": "Delete club"
+					"trigger": "Elimina club"
 				}
 			}
 		}
@@ -235,103 +235,103 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "Nome",
+				"description": "Un nome riconoscibile per la tua libreria",
+				"placeholder": "La mia libreria"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
+				"label": "Percorso",
+				"description": "Il percorso della libreria così come presente sul tuo server",
 				"placeholder": "/path/to/library"
 			},
 			"description": {
-				"label": "Description",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"label": "Descrizione",
+				"description": "Una breve descrizione della tua libreria",
+				"placeholder": "Una libreria di tutti i miei libri preferiti"
 			},
 			"tags": {
-				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"label": "Tag",
+				"description": "Utilizzati per categorizzare la tua libreria o applicare regole di accesso"
 			},
 			"defaultLibraryView": {
-				"label": "Default library view",
-				"description": "Configure which tab is shown by default when opening this library",
+				"label": "Visualizzazione predefinita della libreria",
+				"description": "Configura quale scheda mostrare come predefinita all'apertura di questa libreria",
 				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
+					"label": "Nascondi la scheda delle serie",
+					"description": "Nascondi la scheda delle serie dalla navigazione della libreria"
 				},
 				"skipBookOverview": {
-					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
+					"label": "Salta la panoramica del libro",
+					"description": "Apri direttamente il lettore quando selezioni i libri in questa libreria"
 				},
 				"options": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "Serie",
+						"description": "Mostra la scheda delle serie come predefinita"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "Libri",
+						"description": "Mostra la scheda dei libri come predefinita"
 					}
 				}
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "Impostazioni di lettura",
+					"description": "Impostazioni di lettura predefinite da usare per i libri"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
-					"description": "How the image-based reader scales images to the page"
+					"label": "Ridimensionamento dell'immagine",
+					"description": "Come il lettore basato su immagini adatta le immagini alla pagina"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "Lettore predefinito",
+					"description": "Il lettore predefinito da usare per i libri basati su immagini"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
-					"description": "Which direction the reader progresses through pages"
+					"label": "Direzione di lettura",
+					"description": "La direzione in cui il lettore avanza tra le pagine"
 				}
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
-						"update": "Generation"
+						"create": "Configurazione miniatura",
+						"update": "Generazione"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books",
-					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+					"description": "Migliora i tempi di caricamento durante la navigazione della libreria generando miniature per i tuoi libri",
+					"disabled": "Non è richiesta alcuna configurazione aggiuntiva quando la generazione delle miniature è disabilitata"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
-					"description": "Generate thumbnail images for this library"
+					"label": "Abilitato",
+					"description": "Genera immagini di miniatura per questa libreria"
 				},
 				"resizeMethod": {
-					"label": "Resize Method",
+					"label": "Metodo di ridimensionamento",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Ridimensiona proporzionalmente",
+						"exact": "Dimensione esatta",
+						"scaleDimension": "Ridimensionamento automatico",
+						"none": "Nessuno"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "Ridimensiona la miniatura in base a un fattore della dimensione originale. Ad esempio, 0.65 genererà una miniatura pari al 65% della dimensione originale",
 					"factor": {
-						"label": "Scale Factor"
+						"label": "Fattore di scala"
 					}
 				},
 				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
+					"description": "Ridimensiona la miniatura a una dimensione esatta in pixel",
 					"width": {
-						"label": "Width"
+						"label": "Larghezza"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Altezza"
 					}
 				},
 				"scaleDimension": {
-					"label": "Auto Scaled",
+					"label": "Ridimensionamento automatico",
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",
@@ -686,10 +686,10 @@
 					"description": "Recupera i metadati per i file multimediali in questa libreria",
 					"noProviders": {
 						"title": "Non ci sono provider di metadati disponibili",
-						"description": "You can configure metadata providers in the metadata integration settings"
+						"description": "È possibile configurare i provider di metadati nelle impostazioni di integrazione dei metadati"
 					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
+					"fetchButton": "Avvia recupero in background",
+					"fetchError": "Impossibile avviare il recupero dei metadati"
 				}
 			}
 		},
@@ -838,71 +838,71 @@
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "Pending matches",
-			"description": "Review metadata matches fetched from external providers"
+			"heading": "Corrispondenze in attesa",
+			"description": "Verifica le corrispondenze dei metadati recuperati dai provider esterni"
 		},
 		"confidenceBadge": {
-			"label": "confidence"
+			"label": "affidabilità"
 		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
+		"includeField": "Includi questo campo",
+		"excludeField": "Escludi questo campo",
+		"fieldLocked": "Questo campo è bloccato",
 		"reviewDialog": {
 			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
+				"noCandidates": "Nessun candidato disponibile per questo record",
+				"noComparableFields": "Nessun campo confrontabile trovato",
 				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
+					"field": "Campo",
+					"current": "Attuale",
+					"external": "Esterno",
+					"resolved": "Risolto"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
+					"candidatePosition": "Candidato {{position}} di {{total}}",
 					"provider": "Provider"
 				}
 			},
 			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
+				"accept": "Accetta",
+				"reject": "Rifiuta",
 				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
-					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+					"FILL_GAPS": "Riempi i vuoti",
+					"PREFER_EXTERNAL": "Preferisci esterni",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferisci esterni e unisci liste",
+					"FILL_AND_MERGE_LISTS": "Riempi e unisci le liste"
 				}
 			},
 			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
-				"reset": "Reset",
-				"undoManualEdit": "Undo manual edit"
+				"keepCurrent": "Mantieni quello attuale",
+				"takeExternal": "Prendi esterni",
+				"mergeLists": "Unisci liste",
+				"editManually": "Modifica manualmente",
+				"lockField": "Blocca campo",
+				"unlockField": "Sblocca campo",
+				"reset": "Reimposta",
+				"undoManualEdit": "Annulla modifica manuale"
 			}
 		},
 		"matchesTable": {
 			"columns": {
-				"entityName": "Name",
-				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
+				"entityName": "Nome",
+				"entityType": "Tipo",
+				"candidateCount": "Candidati",
+				"topConfidence": "Affidabilità massima",
+				"addedAt": "Recuperato"
 			},
 			"acceptAll": {
-				"label": "Accept all",
-				"failed": "Failed to accept all matches",
-				"success": "All pending matches accepted"
+				"label": "Accetta tutti",
+				"failed": "Impossibile accettare tutte le corrispondenze",
+				"success": "Tutte le corrispondenze in attesa sono state accettate"
 			},
 			"rejectAll": {
-				"label": "Reject all",
-				"failed": "Failed to reject all matches",
-				"success": "All pending matches rejected"
+				"label": "Rifiuta tutto",
+				"failed": "Impossibile rifiutare tutte le corrispondenze",
+				"success": "Tutte le corrispondenze in attesa sono state rifiutate"
 			},
-			"startReview": "Start review",
-			"nothingToReview": "No pending metadata matches to review"
+			"startReview": "Avvia verifica",
+			"nothingToReview": "Nessuna corrispondenza di metadati in attesa da verificare"
 		}
 	},
 	"seriesOverviewScene": {
@@ -1012,7 +1012,7 @@
 									"tags": "Tags",
 									"createdAt": "Created at",
 									"updatedAt": "Updated at",
-									"readingStatus": "Reading status"
+									"readingStatus": "Stato di lettura"
 								}
 							},
 							"book_meta": {
@@ -1091,11 +1091,11 @@
 						"emptyState": "No values to display"
 					},
 					"enumValue": {
-						"selectPlaceholder": "Select value",
-						"READING": "Reading",
-						"FINISHED": "Finished",
-						"NOT_STARTED": "Not started",
-						"ABANDONED": "Abandoned"
+						"selectPlaceholder": "Seleziona valore",
+						"READING": "In lettura",
+						"FINISHED": "Completato",
+						"NOT_STARTED": "Non iniziato",
+						"ABANDONED": "Interrotto"
 					}
 				}
 			}
@@ -1350,7 +1350,7 @@
 				"jobs": "Jobs",
 				"access": "Access",
 				"email": "Email",
-				"metadata": "Metadata",
+				"metadata": "Metadati",
 				"notifications": "Notifications",
 				"tags": "Tags",
 				"label": "Management"
@@ -1371,10 +1371,10 @@
 						"password": "Password",
 						"activeChangesPrompt": "You have unsaved changes",
 						"uselessForm": {
-							"title": "You lack permissions to change these settings",
-							"description": "Contact your administrator if you want to make changes to these settings"
+							"title": "Non hai i permessi per modificare queste impostazioni",
+							"description": "Contatta l'amministratore se desideri apportare modifiche a queste impostazioni"
 						},
-						"insufficientPermission": "You do not have permission to change this"
+						"insufficientPermission": "Non hai il permesso di cambiarlo"
 					},
 					"errors": {
 						"updateFailed": "A server error occurred while updating your profile. Please try again."
@@ -1417,12 +1417,12 @@
 					"description": "The basic look and feel options for Stump"
 				},
 				"interface": {
-					"title": "Interface",
-					"description": "Primary UI surfaces and interaction elements"
+					"title": "Interfaccia",
+					"description": "Superfici principali dell'interfaccia utente ed elementi di interazione"
 				},
 				"thumbnails": {
-					"title": "Thumbnails",
-					"description": "Display options for thumbnail images"
+					"title": "Miniature",
+					"description": "Visualizza le opzioni per le immagini di miniatura"
 				},
 				"themeSelect": {
 					"label": "Theme",
@@ -1454,7 +1454,7 @@
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
 					"description": "The aspect ratio to use for thumbnails",
-					"defaultSuffix": "Default"
+					"defaultSuffix": "Predefinito"
 				},
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
@@ -1467,8 +1467,8 @@
 					}
 				},
 				"navigation": {
-					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
+					"title": "Navigazione",
+					"description": "Personalizza gli elementi di navigazione dell'app"
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
@@ -1485,11 +1485,11 @@
 				},
 				"doubleSidebar": {
 					"label": "Settings sidebar",
-					"description": "Enables sidebar navigation for the settings pages"
+					"description": "Abilita la navigazione tramite barra laterale per le pagine delle impostazioni"
 				},
 				"replacePrimarySidebar": {
 					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
+					"description": "Qualsiasi istanza di una barra laterale secondaria sostituirà quella principale invece di sovrapporle",
 					"tooltips": {
 						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
 						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
@@ -1497,7 +1497,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
-					"description": "Rearrange or tweak the navigation items in your primary navigation",
+					"description": "Riorganizza o modifica gli elementi di navigazione nella navigazione principale",
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
@@ -1533,7 +1533,7 @@
 					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
 					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar",
 					"options": {
-						"noLimit": "No limit"
+						"noLimit": "Nessun limite"
 					}
 				},
 				"additionalPreferences": {
@@ -1900,39 +1900,39 @@
 				"scheduling": {
 					"title": "Scheduling",
 					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
-					"restartRequiredTitle": "Restart required",
-					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
+					"restartRequiredTitle": "È necessario riavviare",
+					"restartRequired": "Le modifiche a questa configurazione avranno effetto dopo il riavvio del server",
+					"newScheduledJob": "Nuova attività pianificata",
 					"deleteScheduledJob": {
-						"title": "Delete scheduled job",
-						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-						"confirm": "Delete"
+						"title": "Elimina attività pianificata",
+						"description": "Sei sicuro di voler eliminare \"{{name}}\"? L'azione non può essere annullata.",
+						"confirm": "Elimina"
 					},
 					"dialog": {
-						"titleCreate": "New scheduled job",
-						"titleEdit": "Edit scheduled job",
-						"cancel": "Cancel",
-						"create": "Create",
-						"saveChanges": "Save changes"
+						"titleCreate": "Nuova attività pianificata",
+						"titleEdit": "Modifica attività pianificata",
+						"cancel": "Annulla",
+						"create": "Crea",
+						"saveChanges": "Salve le modifiche"
 					},
 					"fields": {
 						"name": {
-							"label": "Name",
-							"placeholder": "e.g. \"Daily library scan\""
+							"label": "Nome",
+							"placeholder": "es. \"Scansione giornaliera della libreria\""
 						},
 						"schedule": {
-							"label": "Cron schedule",
-							"description": "A cron expression to define the frequency",
+							"label": "Pianificazione cron",
+							"description": "Un'espressione cron per definire la frequenza",
 							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
 							"label": "Preset",
-							"custom": "Custom",
-							"everySixHours": "Every 6 hours",
-							"everyTwelveHours": "Every 12 hours",
-							"dailyAtMidnight": "Daily at midnight",
-							"weeklySunday": "Weekly (Sunday)",
-							"monthlyFirst": "Monthly (1st)"
+							"custom": "Personalizzato",
+							"everySixHours": "Ogni 6 ore",
+							"everyTwelveHours": "Ogni 12 ore",
+							"dailyAtMidnight": "Ogni giorno a mezzanotte",
+							"weeklySunday": "Ogni settimana (domenica)",
+							"monthlyFirst": "Ogni mese (il 1°)"
 						},
 						"kind": {
 							"label": "Job type",
@@ -2364,16 +2364,16 @@
 				}
 			},
 			"providerEnabled": "This provider is enabled",
-			"providerDisabled": "This provider is disabled",
-			"providerTokenExpiresSoon": "This provider's token will expire soon",
-			"autoApplyOn": "Auto-apply on",
-			"autoApplyOff": "Auto-apply off",
+			"providerDisabled": "Questo provider è disabilitato",
+			"providerTokenExpiresSoon": "Il token di questo provider scadrà presto",
+			"autoApplyOn": "Applicazione automatica attiva",
+			"autoApplyOff": "Applicazione automatica disattiva",
 			"editDialog": {
-				"tooltip": "Edit provider"
+				"tooltip": "Modifica provider"
 			},
 			"deleteDialog": {
-				"title": "Delete provider",
-				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+				"title": "Elimina provider",
+				"description": "Sei sicuro di voler eliminare {{providerName}}? L'azione non può essere annullata."
 			}
 		},
 		"server/tags": {
@@ -2557,8 +2557,8 @@
 			"typeToConfirm": "Type {{name}} to confirm:"
 		},
 		"experimentalDisclaimer": {
-			"title": "This feature is experimental",
-			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
+			"title": "Questa funzione è sperimentale",
+			"description": "Potrebbe presentare bug, mancare di alcune funzionalità o non funzionare affatto. Usa a tua discrezione e segnala eventuali problemi riscontrati"
 		},
 		"enter": "Enter",
 		"save": "Salva",
@@ -2584,10 +2584,10 @@
 		"never": "Never",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
-		"back": "Back",
-		"continue": "Continue",
-		"book": "Book",
-		"series": "Series",
+		"back": "Indietro",
+		"continue": "Continua",
+		"book": "Libro",
+		"series": "Serie",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
@@ -2608,24 +2608,24 @@
 			"description": "Allows the user to access the KoReader sync integration"
 		},
 		"ACCESS_KOBO_SYNC": {
-			"label": "Kobo sync",
-			"description": "Allows the user to access the Kobo sync integration"
+			"label": "Sincronizzazione Kobo",
+			"description": "Consente all'utente di accedere all'integrazione della sincronizzazione Kobo"
 		},
 		"ACCESS_SMART_LIST": {
 			"label": "Smart Lists",
 			"description": "Allows the user to access smart list features, including creating and managing smart lists"
 		},
 		"CHANGE_PASSWORD": {
-			"label": "Change password",
-			"description": "Allows the user to change their own password"
+			"label": "Cambia password",
+			"description": "Consente all'utente di modificare la propria password"
 		},
 		"CHANGE_USERNAME": {
-			"label": "Change username",
-			"description": "Allows the user to change their own username"
+			"label": "Cambia nome utente",
+			"description": "Consente all'utente di modificare il proprio nome utente"
 		},
 		"CHANGE_AVATAR": {
-			"label": "Change avatar",
-			"description": "Allows the user to change their own avatar"
+			"label": "Cambia avatar",
+			"description": "Consente all'utente di modificare il proprio avatar"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Create book clubs",
@@ -2807,13 +2807,13 @@
 			"year": "Year"
 		},
 		"common": {
-			"book": "Book",
+			"book": "Libro",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",
-			"completed": "Completed",
+			"completed": "Completato",
 			"confirm": "Confirm",
-			"content": "Content",
+			"content": "Contenuto",
 			"details": "Details",
 			"delete": "Delete",
 			"downloads": "Downloads",
@@ -2821,9 +2821,9 @@
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
-			"grid": "Grid",
-			"list": "List",
-			"lastCompleted": "Last Completed",
+			"grid": "Griglia",
+			"list": "Elenco",
+			"lastCompleted": "Ultimo completamento",
 			"name": "Name",
 			"none": "None",
 			"options": "Options",
@@ -2831,8 +2831,8 @@
 			"pages": "Pages",
 			"password": "Password",
 			"progress": "Progress",
-			"publication": "Publication",
-			"readTime": "Reading time",
+			"publication": "Pubblicazione",
+			"readTime": "Tempo di lettura",
 			"readMore": "Read more",
 			"save": "Save",
 			"select": "Select",
@@ -2849,18 +2849,18 @@
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"positionWithTotal": "{{position}} di {{total}} in {{seriesName}}",
 				"position": "{{position}} in {{seriesName}}"
 			},
 			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
+				"positionWithTotal": "Libro {{position}} di {{total}} in {{seriesName}}",
+				"position": "Libro {{position}} in {{seriesName}}"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"positionWithTotal": "#{{position}} di {{total}} in {{seriesName}}",
 				"position": "#{{position}} in {{seriesName}}"
 			},
-			"unknownSeriesName": "series"
+			"unknownSeriesName": "serie"
 		},
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
@@ -2977,7 +2977,7 @@
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
 				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
+				"incognitoReading": "Lettura in incognito"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2985,7 +2985,7 @@
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
-			"lowercaseTranslation": "Lowercase Labels",
+			"lowercaseTranslation": "Etichette in minuscolo",
 			"management": {
 				"label": "Management",
 				"dataUsage": {
@@ -3013,7 +3013,7 @@
 			"debug": {
 				"label": "Debug",
 				"clearCache": {
-					"label": "Clear Cache",
+					"label": "Svuota la cache",
 					"memory": {
 						"button": "Memory",
 						"success": "Memory cache cleared"
@@ -3038,11 +3038,11 @@
 				"reduceAnimations": "Reduce Animations",
 				"maskUrls": "Mask URLs",
 				"displayLanguageKeys": {
-					"label": "Display Language Keys",
+					"label": "Mostra chiavi della lingua",
 					"options": {
-						"none": "None",
-						"abbreviated": "Abbreviated",
-						"full": "Full"
+						"none": "Nessuno",
+						"abbreviated": "Abbreviato",
+						"full": "Intero"
 					}
 				},
 				"debugAnalytics": {
@@ -3064,7 +3064,7 @@
 		},
 		"readerSettings": {
 			"title": "Reader Settings",
-			"overrideGlobalSettings": "Override global settings",
+			"overrideGlobalSettings": "Sovrascrivi impostazioni globali",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -3105,7 +3105,7 @@
 			},
 			"allowDownscaling": "Downscaling",
 			"tapSidesToNavigate": "Tap Sides to Navigate",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"volumeButtonsNavigate": "Navigazione con i tasti del volume",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
@@ -3114,14 +3114,14 @@
 				}
 			},
 			"readingTimer": {
-				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
+				"label": "Timer di lettura",
+				"resetTimer": "Reimposta timer"
 			},
-			"allSettings": "All Settings"
+			"allSettings": "Tutte le impostazioni"
 		},
 		"epubSettings": {
-			"title": "Epub Reader Settings",
-			"typeface": "Typeface",
+			"title": "Impostazioni del lettore Epub",
+			"typeface": "Carattere",
 			"fontSize": "Font Size",
 			"fontWeight": {
 				"label": "Font Weight",
@@ -3209,18 +3209,18 @@
 		},
 		"filtering": {
 			"notStarted": "Not Started",
-			"currentlyReading": "Currently Reading",
-			"finished": "Finished"
+			"currentlyReading": "In lettura",
+			"finished": "Completato"
 		},
 		"sorting": {
-			"labelEllipsis": "Sort By...",
+			"labelEllipsis": "Ordina per...",
 			"sortField": {
-				"NAME": "Name",
-				"ADDED_AT": "Date Added",
-				"CREATED_AT": "Date Added",
-				"NUMBER": "Series Position",
-				"SERIES": "Series",
-				"YEAR": "Year Published"
+				"NAME": "Nome",
+				"ADDED_AT": "Data di aggiunta",
+				"CREATED_AT": "Data di aggiunta",
+				"NUMBER": "Posizione nella serie",
+				"SERIES": "Serie",
+				"YEAR": "Anno di pubblicazione"
 			},
 			"sortDirection": {
 				"ASC": "Ascending",

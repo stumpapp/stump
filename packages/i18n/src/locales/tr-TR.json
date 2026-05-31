@@ -1011,7 +1011,8 @@
 									"pages": "Sayfalar",
 									"tags": "Etiketler",
 									"createdAt": "Oluşturulma tarihi",
-									"updatedAt": "Güncellenme tarihi"
+									"updatedAt": "Güncellenme tarihi",
+									"readingStatus": "Reading status"
 								}
 							},
 							"book_meta": {
@@ -1088,6 +1089,13 @@
 					"listValue": {
 						"placeholder": "Değerleri ekle",
 						"emptyState": "Gösterilecek değer yok"
+					},
+					"enumValue": {
+						"selectPlaceholder": "Select value",
+						"READING": "Reading",
+						"FINISHED": "Finished",
+						"NOT_STARTED": "Not started",
+						"ABANDONED": "Abandoned"
 					}
 				}
 			}
@@ -1408,6 +1416,14 @@
 					"label": "Theme and appearance",
 					"description": "The basic look and feel options for Stump"
 				},
+				"interface": {
+					"title": "Interface",
+					"description": "Primary UI surfaces and interaction elements"
+				},
+				"thumbnails": {
+					"title": "Thumbnails",
+					"description": "Display options for thumbnail images"
+				},
 				"themeSelect": {
 					"label": "Theme",
 					"description": [
@@ -1450,6 +1466,10 @@
 						"thumbhash": "Thumbhash"
 					}
 				},
+				"navigation": {
+					"title": "Navigation",
+					"description": "Customize the navigation elements of the app"
+				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
 					"description": "Customize how Stump displays information and organizes content"
@@ -1465,11 +1485,11 @@
 				},
 				"doubleSidebar": {
 					"label": "Settings sidebar",
-					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+					"description": "Enables sidebar navigation for the settings pages"
 				},
 				"replacePrimarySidebar": {
 					"label": "Replace primary sidebar",
-					"description": "İkincil kenar çubuğunun herhangi bir örneği, birincil kenar çubuğunun yanında görüntülenmek yerine onun yerini alacaktır",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
 					"tooltips": {
 						"doubleSidebar": "Bu ayarın kullanılabilmesi için ayarlar kenar çubuğunun etkinleştirilmesi gerekir",
 						"topbar": "Ana gezinme yöntemi üst çubuk olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
@@ -1477,10 +1497,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Gezinme düzeni",
-					"description": {
-						"sidebar": "Kenar çubuğundaki gezinme öğelerini düzenleyin ve kişiselleştirin",
-						"topbar": "Üst çubuktaki gezinme öğelerini düzenleyin ve kişiselleştirin"
-					},
+					"description": "Rearrange or tweak the navigation items in your primary navigation",
 					"isLocked": "Düzenleme kilitli",
 					"lock": "Düzenlemeyi kilitle",
 					"unlock": "Düzenleme kilidini aç",

@@ -9,11 +9,21 @@ use axum::{
 	Extension, Json, Router,
 };
 use graphql::{data::AuthContext, pagination::OffsetPagination};
-use models::entity::{
-	library, media, media_metadata, reading_session, registered_reading_device, series,
-	series_metadata, user::AuthUser,
+use models::{
+	domain::reading_progress::compute_page_based_percentage,
+	services::reading_progress::{upsert_reading_session, NormalizedProgression},
 };
-use sea_orm::{prelude::*, Condition, Order, QueryOrder, QueryTrait};
+use models::{
+	entity::{
+		library, media, media_metadata, reading_device, reading_session, series,
+		series_metadata, user::AuthUser,
+	},
+	shared::enums::ReadingStatus,
+};
+use sea_orm::{
+	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, Order, QueryOrder,
+	QueryTrait,
+};
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::{
@@ -348,11 +358,7 @@ async fn catalog(
 
 	let in_progress_filter = Condition::all()
 		.add(reading_session::Column::UserId.eq(user.id.clone()))
-		.add(
-			Condition::any()
-				.add(reading_session::Column::Page.gt(0))
-				.add(reading_session::Column::Epubcfi.is_not_null()),
-		);
+		.add(reading_session::Column::Status.eq(ReadingStatus::Reading));
 	let continue_reading = OPDSPublicationEntity::find_for_user(&user)
 		.filter(in_progress_filter.clone())
 		.limit(DEFAULT_LIMIT)
@@ -1186,6 +1192,7 @@ async fn keep_reading(
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	fetch_books_and_generate_feed(
 		&ctx,
@@ -1194,11 +1201,8 @@ async fn keep_reading(
 		Some(
 			Condition::all()
 				.add(reading_session::Column::UserId.eq(user.id.clone()))
-				.add(
-					Condition::any()
-						.add(reading_session::Column::Page.gt(0))
-						.add(reading_session::Column::Epubcfi.is_not_null()),
-				),
+				.add(reading_session::Column::Status.eq(ReadingStatus::Reading))
+				.add(Expr::expr(Expr::exists(newer_exists)).not()),
 		),
 		(reading_session::Column::UpdatedAt, Order::Desc),
 		pagination.0,
@@ -1280,17 +1284,15 @@ async fn get_book_progression(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let user = req.user();
+	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 	let active_reading_session = OPDSProgressionEntity::find()
 		.filter(
-			reading_session::Column::UserId
-				.eq(user.id.clone())
-				.and(reading_session::Column::MediaId.eq(id.clone())),
-		)
-		.filter(
-			Condition::any()
-				.add(reading_session::Column::Page.gt(0))
-				.add(reading_session::Column::Epubcfi.is_not_null()),
+			Condition::all()
+				.add(reading_session::Column::UserId.eq(user.id.clone()))
+				.add(reading_session::Column::MediaId.eq(id.clone()))
+				.add(reading_session::Column::Status.eq(ReadingStatus::Reading))
+				.add(Expr::expr(Expr::exists(newer_exists)).not()),
 		)
 		.into_model::<OPDSProgressionEntity>()
 		.one(ctx.conn.as_ref())
@@ -1313,9 +1315,6 @@ async fn update_book_progression(
 	Extension(req): Extension<AuthContext>,
 	Json(input): Json<OPDSProgressionInput>,
 ) -> APIResult<axum::http::StatusCode> {
-	use chrono::{DateTime, FixedOffset, Utc};
-	use sea_orm::{sea_query::OnConflict, ActiveValue::Set};
-
 	let user = req.user();
 	let conn = ctx.conn.as_ref();
 
@@ -1326,34 +1325,32 @@ async fn update_book_progression(
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
 	let existing_session =
-		reading_session::Entity::find_for_user_and_media_id(&user, &id)
+		reading_session::Entity::find_latest_for_user_and_media(&user, &id)
 			.one(conn)
 			.await?;
 
-	if let Some(ref session) = existing_session {
-		if let Some(existing_updated_at) = session.updated_at {
-			let existing_timestamp: DateTime<FixedOffset> = existing_updated_at;
-			if input.modified < existing_timestamp {
-				return Err(APIError::Conflict(
-					"Progression timestamp is older than existing session".to_string(),
-				));
-			}
-		}
+	match existing_session {
+		Some(ref session) if session.updated_at.is_some_and(|ts| ts > input.modified) => {
+			return Err(APIError::Conflict(
+				"Progression timestamp is older than existing session".to_string(),
+			));
+		},
+		_ => {},
 	}
 
 	let device_id = if let Some(input_device) = input.device() {
-		let existing_device =
-			registered_reading_device::Entity::find_by_id(&input_device.id)
-				.one(conn)
-				.await?;
+		let existing_device = reading_device::Entity::find_by_id(&input_device.id)
+			.one(conn)
+			.await?;
 
 		if existing_device.is_none() {
-			let new_device = registered_reading_device::ActiveModel {
+			let new_device = reading_device::ActiveModel {
 				id: Set(input_device.id.clone()),
 				name: Set(input_device.name.clone()),
 				kind: Set(None),
+				email: Set(None),
 			};
-			registered_reading_device::Entity::insert(new_device)
+			reading_device::Entity::insert(new_device)
 				.exec(conn)
 				.await?;
 		}
@@ -1364,8 +1361,14 @@ async fn update_book_progression(
 	};
 
 	let page = input.page();
-	let percentage_completed = input.percentage_completed();
-	let locator = input.locator();
+	let percentage = match page {
+		Some(p) => Some(compute_page_based_percentage(p, book.pages)),
+		None => input.percentage_completed(),
+	};
+	let did_complete = match page {
+		Some(p) => p >= book.pages,
+		None => percentage.unwrap_or_default() >= Decimal::new(1, 0),
+	};
 
 	match page {
 		Some(p) if book.pages > -1 => {
@@ -1379,37 +1382,24 @@ async fn update_book_progression(
 		_ => {},
 	}
 
-	let now = Utc::now();
-
-	let active_session = reading_session::ActiveModel {
-		user_id: Set(user.id.clone()),
-		media_id: Set(id),
-		page: Set(page),
-		percentage_completed: Set(percentage_completed),
-		locator: Set(locator),
-		device_id: Set(device_id),
-		updated_at: Set(Some(now.into())),
-		started_at: Set(now.into()),
-		..Default::default()
+	let progression = NormalizedProgression {
+		page,
+		locator: input.locator(),
+		epubcfi: None,
+		percentage,
+		elapsed_seconds_delta: None,
+		did_complete,
+		device_id,
 	};
 
-	reading_session::Entity::insert(active_session)
-		.on_conflict(
-			OnConflict::columns(vec![
-				reading_session::Column::MediaId,
-				reading_session::Column::UserId,
-			])
-			.update_columns(vec![
-				reading_session::Column::Page,
-				reading_session::Column::PercentageCompleted,
-				reading_session::Column::Locator,
-				reading_session::Column::DeviceId,
-				reading_session::Column::UpdatedAt,
-			])
-			.to_owned(),
-		)
-		.exec(conn)
-		.await?;
+	upsert_reading_session(
+		conn,
+		&user,
+		&id,
+		progression,
+		ctx.config.book_completion_dedup_timeout_secs,
+	)
+	.await?;
 
 	Ok(axum::http::StatusCode::NO_CONTENT)
 }

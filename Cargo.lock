@@ -2362,7 +2362,7 @@ dependencies = [
 
 [[package]]
 name = "email"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "async-graphql",
  "lettre",
@@ -3218,7 +3218,7 @@ dependencies = [
 
 [[package]]
 name = "graphql"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "alphanumeric-sort",
  "async-graphql",
@@ -8489,7 +8489,7 @@ dependencies = [
 
 [[package]]
 name = "stump_core"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "alphanumeric-sort",
  "apalis",
@@ -8583,7 +8583,7 @@ dependencies = [
 
 [[package]]
 name = "stump_server"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "alphanumeric-sort",
  "apalis",
@@ -9124,7 +9124,7 @@ dependencies = [
 
 [[package]]
 name = "tests"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "chrono",
  "models",

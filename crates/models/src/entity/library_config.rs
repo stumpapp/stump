@@ -1,5 +1,9 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult};
+use sea_orm::{
+	entity::prelude::{async_trait::async_trait, *},
+	ActiveValue::Set,
+	FromQueryResult,
+};
 
 use crate::shared::{
 	enums::{
@@ -76,5 +80,79 @@ impl Related<super::library::Entity> for Entity {
 	}
 }
 
-// TODO(testing): Impl this so that we can have a reasonable baseline for testing
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if !insert {
+			return Ok(self);
+		}
+
+		if self.convert_rar_to_zip.is_not_set() {
+			self.convert_rar_to_zip = Set(false);
+		}
+
+		if self.hard_delete_conversions.is_not_set() {
+			self.hard_delete_conversions = Set(false);
+		}
+
+		if self.default_reading_dir.is_not_set() {
+			self.default_reading_dir = Set(ReadingDirection::Ltr);
+		}
+
+		if self.default_reading_mode.is_not_set() {
+			self.default_reading_mode = Set(ReadingMode::Paged);
+		}
+
+		if self.default_reading_image_scale_fit.is_not_set() {
+			self.default_reading_image_scale_fit = Set(ReadingImageScaleFit::Auto);
+		}
+
+		if self.generate_file_hashes.is_not_set() {
+			self.generate_file_hashes = Set(false);
+		}
+
+		if self.generate_koreader_hashes.is_not_set() {
+			self.generate_koreader_hashes = Set(false);
+		}
+
+		if self.process_metadata.is_not_set() {
+			self.process_metadata = Set(false);
+		}
+
+		if self.watch.is_not_set() {
+			self.watch = Set(false);
+		}
+
+		if self.library_pattern.is_not_set() {
+			self.library_pattern = Set(LibraryPattern::SeriesBased);
+		}
+
+		if self.default_library_view_mode.is_not_set() {
+			self.default_library_view_mode = Set(LibraryViewMode::Books);
+		}
+
+		if self.hide_series_view.is_not_set() {
+			self.hide_series_view = Set(false);
+		}
+
+		if self.library_type.is_not_set() {
+			self.library_type = Set(LibraryType::Mixed);
+		}
+
+		if self.skip_book_overview.is_not_set() {
+			self.skip_book_overview = Set(false);
+		}
+
+		if self
+			.process_thumbnail_colors_even_without_config
+			.is_not_set()
+		{
+			self.process_thumbnail_colors_even_without_config = Set(false);
+		}
+
+		Ok(self)
+	}
+}

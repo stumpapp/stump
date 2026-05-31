@@ -50,6 +50,7 @@ fn default_type() -> String {
 #[derive(
 	Clone,
 	Debug,
+	Default,
 	SimpleObject,
 	InputObject,
 	Deserialize,

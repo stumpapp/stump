@@ -1,7 +1,7 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { BookReaderSceneQuery, graphql, ReadingMode } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useEffect, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
@@ -96,10 +96,15 @@ function BookReaderScene({ book }: Props) {
 	const page = search.get('page')
 	const isIncognito = search.get('incognito') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
+	const lastSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
+	const pendingSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
 
 	const { mutate } = useGraphQLMutation(mutation, {
 		onError: (err) => {
 			console.error(err)
+		},
+		onSuccess: () => {
+			lastSyncedElapsedRef.current = pendingSyncedElapsedRef.current
 		},
 	})
 	const updateProgress = useCallback(
@@ -107,12 +112,16 @@ function BookReaderScene({ book }: Props) {
 			if (!book) return
 			if (isIncognito) return
 			if (book.readProgress?.page === page) return
+
+			const delta = Math.max(0, elapsedSeconds - lastSyncedElapsedRef.current)
+			pendingSyncedElapsedRef.current = elapsedSeconds
+
 			mutate({
 				id: book.id,
 				input: {
 					paged: {
 						page,
-						elapsedSeconds,
+						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 					},
 				},
 			})

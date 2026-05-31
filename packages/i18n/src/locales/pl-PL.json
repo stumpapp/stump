@@ -1011,7 +1011,8 @@
 									"pages": "Strony",
 									"tags": "Etykiety",
 									"createdAt": "Utworzono",
-									"updatedAt": "Zaktualizowano"
+									"updatedAt": "Zaktualizowano",
+									"readingStatus": "Status czytania"
 								}
 							},
 							"book_meta": {
@@ -1088,6 +1089,13 @@
 					"listValue": {
 						"placeholder": "Dodaj wartości",
 						"emptyState": "Brak wartości do wyświetlenia"
+					},
+					"enumValue": {
+						"selectPlaceholder": "Wybierz wartość",
+						"READING": "Czytane",
+						"FINISHED": "Ukończone",
+						"NOT_STARTED": "Nierozpoczęte",
+						"ABANDONED": "Porzucone"
 					}
 				}
 			}
@@ -1408,6 +1416,14 @@
 					"label": "Motyw i wygląd",
 					"description": "Podstawowe opcje wyglądu Stump"
 				},
+				"interface": {
+					"title": "Interfejs",
+					"description": "Podstawowe powierzchnie interfejsu i elementy interakcji"
+				},
+				"thumbnails": {
+					"title": "Miniatury",
+					"description": "Opcje wyświetlania miniatur obrazów"
+				},
 				"themeSelect": {
 					"label": "Motyw",
 					"description": [
@@ -1450,6 +1466,10 @@
 						"thumbhash": "Thumbhash"
 					}
 				},
+				"navigation": {
+					"title": "Nawigacja",
+					"description": "Dostosuj elementy nawigacyjne aplikacji"
+				},
 				"layoutAndArrangement": {
 					"label": "Układ i aranżacja",
 					"description": "Dostosuj jak Stump wyświetla informacje i organizuje zawartość"
@@ -1465,7 +1485,7 @@
 				},
 				"doubleSidebar": {
 					"label": "Panel boczny ustawień",
-					"description": "Włącza nawigację na panelu bocznym dla stron ustawień. Jeśli często używasz mniejszego ekranu, możesz chcieć to wyłączyć."
+					"description": "Umożliwia nawigację z użyciem paska bocznego dla stron ustawień"
 				},
 				"replacePrimarySidebar": {
 					"label": "Zastąp główny panel boczny",
@@ -1477,10 +1497,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Układ nawigacji",
-					"description": {
-						"sidebar": "Uporządkuj i dostosuj elementy nawigacji na pasku bocznym",
-						"topbar": "Uporządkuj i dostosuj elementy nawigacji na górnym pasku"
-					},
+					"description": "Zmień kolejność lub dostosuj elementy nawigacyjne w głównej nawigacji",
 					"isLocked": "Układ jest zablokowany",
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",

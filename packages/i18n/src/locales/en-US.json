@@ -1090,7 +1090,7 @@
 						"placeholder": "Add values",
 						"emptyState": "No values to display"
 					},
-					"enumValue":{
+					"enumValue": {
 						"selectPlaceholder": "Select value",
 						"READING": "Reading",
 						"FINISHED": "Finished",
@@ -1575,6 +1575,14 @@
 				"enableJobOverlayToggle": {
 					"label": "Job overlay",
 					"description": "Show a floating overlay while a job is running"
+				},
+				"dayResetHourOffset": {
+					"label": "Reading day reset offset",
+					"description": "Shift when a reading day resets, in hours from midnight"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Reading session grace period",
+					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},

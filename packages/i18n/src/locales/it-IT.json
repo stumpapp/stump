@@ -1,7 +1,7 @@
 {
 	"underConstruction": {
-		"heading": "Questo è strano",
-		"message": "Sei incappato su una pagina ancora in fase di sviluppo. Mi piacerebbe mostrarla, ma non è ancora abbastanza pronta.",
+		"heading": "Ops…",
+		"message": "Ti sei imbattuto in una pagina ancora in fase di sviluppo. Mi piacerebbe mostrartela, ma non è ancora del tutto pronta.",
 		"homeLink": "Torna alla home",
 		"githubLink": "Mostra la issue su GitHub"
 	},
@@ -3223,16 +3223,16 @@
 				"YEAR": "Anno di pubblicazione"
 			},
 			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
+				"ASC": "Crescente",
+				"DESC": "Decrescente"
 			},
 			"sortDirectionString": {
 				"ASC": "A → Z",
 				"DESC": "Z → A"
 			},
 			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
+				"ASC": "Dal più vecchio",
+				"DESC": "Dal più recente"
 			},
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",

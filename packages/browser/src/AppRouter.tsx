@@ -13,22 +13,12 @@ const ServerConnectionErrorScene = lazy(
 )
 const LoginOrClaimScene = lazy(() => import('./scenes/auth'))
 
-const BookRouter = lazy(() => import('./scenes/book').then((m) => ({ default: m.BookRouter })))
-const BookClubRouter = lazy(() =>
-	import('./scenes/bookClub').then((m) => ({ default: m.BookClubRouter })),
-)
-const LibraryRouter = lazy(() =>
-	import('./scenes/library').then((m) => ({ default: m.LibraryRouter })),
-)
-const SeriesRouter = lazy(() =>
-	import('./scenes/series').then((m) => ({ default: m.SeriesRouter })),
-)
-const SettingsRouter = lazy(() =>
-	import('./scenes/settings').then((m) => ({ default: m.SettingsRouter })),
-)
-const SmartListRouter = lazy(() =>
-	import('./scenes/smartList').then((m) => ({ default: m.SmartListRouter })),
-)
+import { BookRouter } from './scenes/book'
+import { BookClubRouter } from './scenes/bookClub'
+import { LibraryRouter } from './scenes/library'
+import { SeriesRouter } from './scenes/series'
+import { SettingsRouter } from './scenes/settings'
+import { SmartListRouter } from './scenes/smartList'
 
 type AppRouterProps = {
 	basePath?: string

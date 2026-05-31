@@ -1575,6 +1575,14 @@
 				"enableJobOverlayToggle": {
 					"label": "作业叠加",
 					"description": "当作业运行时显示浮动叠加层"
+				},
+				"dayResetHourOffset": {
+					"label": "Reading day reset offset",
+					"description": "Shift when a reading day resets, in hours from midnight"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Reading session grace period",
+					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},

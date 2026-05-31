@@ -1012,7 +1012,7 @@
 									"tags": "Etykiety",
 									"createdAt": "Utworzono",
 									"updatedAt": "Zaktualizowano",
-									"readingStatus": "Reading status"
+									"readingStatus": "Status czytania"
 								}
 							},
 							"book_meta": {
@@ -1091,11 +1091,11 @@
 						"emptyState": "Brak wartości do wyświetlenia"
 					},
 					"enumValue": {
-						"selectPlaceholder": "Select value",
-						"READING": "Reading",
-						"FINISHED": "Finished",
-						"NOT_STARTED": "Not started",
-						"ABANDONED": "Abandoned"
+						"selectPlaceholder": "Wybierz wartość",
+						"READING": "Czytane",
+						"FINISHED": "Ukończone",
+						"NOT_STARTED": "Nierozpoczęte",
+						"ABANDONED": "Porzucone"
 					}
 				}
 			}
@@ -1417,7 +1417,7 @@
 					"description": "Podstawowe opcje wyglądu Stump"
 				},
 				"interface": {
-					"title": "Interface",
+					"title": "Interfejs",
 					"description": "Primary UI surfaces and interaction elements"
 				},
 				"thumbnails": {

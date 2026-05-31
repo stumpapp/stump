@@ -16,6 +16,32 @@ export default defineConfig({
 		assetsDir: './assets',
 		manifest: true,
 		outDir: '../dist',
+		rollupOptions: {
+			output: {
+				manualChunks(id) {
+					if (id.includes('node_modules')) {
+						if (id.includes('react') || id.includes('scheduler')) {
+							return 'vendor-react'
+						}
+						if (id.includes('@tanstack')) {
+							return 'vendor-tanstack'
+						}
+						if (id.includes('lucide-react')) {
+							return 'vendor-lucide'
+						}
+						if (id.includes('lodash')) {
+							return 'vendor-lodash'
+						}
+						if (id.includes('framer-motion')) {
+							return 'vendor-framer'
+						}
+						if (id.includes('overlayscrollbars')) {
+							return 'vendor-overlayscrollbars'
+						}
+					}
+				},
+			},
+		},
 	},
 	clearScreen: false,
 	define: {

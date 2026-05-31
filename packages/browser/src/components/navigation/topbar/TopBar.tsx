@@ -16,7 +16,7 @@ import { match } from 'ts-pattern'
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 import paths from '@/paths'
-import { usePrefetchHomeScene } from '@/scenes/home'
+import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
 import {
 	BookClubNavigationItem,

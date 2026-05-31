@@ -20,7 +20,7 @@ import { FileRejection, useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
-import { useSeriesContextSafe } from '@/scenes/series'
+import { useSeriesContextSafe } from '@/scenes/series/context'
 import { formatBytes } from '@/utils/format'
 
 import { useFileExplorerContext } from '../context'

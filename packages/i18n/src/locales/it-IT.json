@@ -12,7 +12,7 @@
 			"validation": {
 				"missingUsername": "Il nome utente è obbligatorio",
 				"missingPassword": "La password è obbligatoria",
-				"usernameAlreadyExists": "Nome utente già esistente"
+				"usernameAlreadyExists": "Il nome utente esiste già"
 			},
 			"labels": {
 				"username": "Nome utente",
@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "Invia libro per e-mail",
-			"description": "Invia questo libro a un dispositivo o a un indirizzo mail",
+			"description": "Invia questo libro a un dispositivo o a un indirizzo e-mail",
 			"form": {
 				"email": {
 					"label": "E-mail",
@@ -87,9 +87,9 @@
 				"description": "Se abilitato, solo gli utenti che inviti potranno unirsi al tuo club di libri"
 			},
 			"member_role_spec": {
-				"heading": "Mappatura del ruolo personalizzata",
+				"heading": "Associazione ruoli personalizzata",
 				"subtitle": [
-					"Puoi creare nomi personalizzati per i ruoli nel tuo club di libri, se vuoi. Per ulteriori informazioni, fai riferimento al",
+					"Se lo desideri, puoi creare nomi personalizzati per i ruoli nel tuo club del libro. Per maggiori informazioni, consulta la",
 					"documentazione"
 				],
 				"member": {
@@ -120,7 +120,7 @@
 					"description": "Un nome opzionale per la tua iscrizione nel club del libro. Se impostato, ha la precedenza sul tuo nome utente"
 				},
 				"hideProgress": {
-					"label": "Nascondi Progresso",
+					"label": "Nascondi progresso",
 					"description": "Se abilitato, i tuoi progressi di lettura saranno nascosti agli altri membri del club di libri"
 				}
 			}
@@ -332,76 +332,76 @@
 				},
 				"scaleDimension": {
 					"label": "Ridimensionamento automatico",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"description": "Imposta la larghezza o l'altezza della miniatura e ridimensiona automaticamente l'altra per mantenere le proporzioni originali",
 					"dimension": {
-						"label": "Dimension",
+						"label": "Dimensione",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Larghezza",
+							"height": "Altezza"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "Dimensione"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "Formato immagine",
+					"description": "Il formato delle immagini di miniatura generate"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 1 and 100"
+					"label": "Qualità",
+					"description": "La qualità delle immagini di miniatura generate, tra 1 e 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "Regole di esclusione",
+					"description": "Definisci i pattern glob per escludere determinati file o cartelle durante una scansione"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "Nessuna regola di esclusione configurata",
+				"save": "Salve le modifiche",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "Nuova regola",
+					"description": "Pattern glob per escludere file o cartelle",
+					"addButton": "Aggiungi regola",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "Escludi tutte le cartelle superiori",
+						"label": "Escludi cartelle superiori"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "Escludi tutte le sottocartelle",
+						"label": "Escludi le sottocartelle"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"invalidGlob": "Pattern glob non valido",
+				"duplicateGlob": "Duplicato di una regola esistente",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "Blocca configurazione",
+					"unlock": "Sblocca configurazione"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "Modifica regola",
+				"deleteRule": "Elimina regola",
+				"cancelEdit": "Annulla modifiche",
+				"confirmEdit": "Conferma modifiche"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "Conversione dei file",
+					"description": "Stump è in grado di convertire determinati formati di file in altri più compatibili"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "Converti RAR in ZIP",
+					"description": "Converti i file RAR/CBR in file ZIP/CBZ durante la scansione"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "Elimina RAR dopo la conversione",
+					"description": "Elimina il file RAR/CBR originale dopo la conversione. Questa operazione è irreversibile"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
+					"heading": "Elaborazione facoltativa",
+					"description": "Funzionalità di elaborazione facoltative per lo scanner",
 					"disclaimer": "These features involve additional file reads which may slow down the scan process"
 				},
 				"processMetadata": {
@@ -868,14 +868,14 @@
 				"strategies": {
 					"FILL_GAPS": "Riempi i vuoti",
 					"PREFER_EXTERNAL": "Preferisci esterni",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferisci esterni e unisci liste",
-					"FILL_AND_MERGE_LISTS": "Riempi e unisci le liste"
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferisci esterni e unisci gli elenchi",
+					"FILL_AND_MERGE_LISTS": "Riempi e unisci gli elenchi"
 				}
 			},
 			"fieldAction": {
 				"keepCurrent": "Mantieni quello attuale",
 				"takeExternal": "Prendi esterni",
-				"mergeLists": "Unisci liste",
+				"mergeLists": "Unisci elenchi",
 				"editManually": "Modifica manualmente",
 				"lockField": "Blocca campo",
 				"unlockField": "Sblocca campo",
@@ -1935,38 +1935,38 @@
 							"monthlyFirst": "Ogni mese (il 1°)"
 						},
 						"kind": {
-							"label": "Job type",
-							"libraryScan": "Library Scan",
-							"metadataRetry": "Metadata Retry"
+							"label": "Tipo di attività",
+							"libraryScan": "Scansione della libreria",
+							"metadataRetry": "Riprova caricamento metadati"
 						},
 						"libraryIds": {
-							"label": "Libraries to scan",
-							"description": "Leave empty to scan all libraries"
+							"label": "Librerie da scansionare",
+							"description": "Lascia vuoto per scansionare tutte le librerie"
 						},
 						"statuses": {
-							"label": "Statuses to retry",
-							"description": "Which metadata fetch statuses should be retried",
-							"rateLimited": "Rate Limited",
-							"failed": "Failed"
+							"label": "Stati da riprovare",
+							"description": "Quali stati di recupero dei metadati devono essere riprovati",
+							"rateLimited": "Limite di richiesta superato",
+							"failed": "Fallito"
 						},
-						"enabled": "Enabled"
+						"enabled": "Abilitato"
 					},
 					"row": {
-						"enabled": "Enabled",
-						"disabled": "Disabled",
-						"allLibraries": "All libraries",
-						"rateLimited": "rate limited",
-						"lastRun": "Last run at {{date}}",
-						"edit": "Edit",
-						"delete": "Delete"
+						"enabled": "Abilitato",
+						"disabled": "Disabilitato",
+						"allLibraries": "Tutte le librerie",
+						"rateLimited": "limite di richiesta superato",
+						"lastRun": "Ultima esecuzione il {{date}}",
+						"edit": "Modifica",
+						"delete": "Elimina"
 					},
 					"toasts": {
-						"createSuccess": "Scheduled job created",
-						"createError": "Failed to create scheduled job",
-						"updateSuccess": "Scheduled job updated",
-						"updateError": "Failed to update scheduled job",
-						"deleteSuccess": "Scheduled job deleted",
-						"deleteError": "Failed to delete scheduled job"
+						"createSuccess": "Attività pianificata creata",
+						"createError": "Impossibile creare l'attività pianficata",
+						"updateSuccess": "Attività pianificata aggiornata",
+						"updateError": "Impossibile aggiornare l'attività pianficata",
+						"deleteSuccess": "Attività pianificata eliminata",
+						"deleteError": "Impossibile eliminare l'attività pianficata"
 					}
 				},
 				"history": {
@@ -2033,14 +2033,14 @@
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "Account",
-						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
-						"emailing": "Emailing",
-						"libraryManagement": "Library management",
-						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"accountManagement": "Profilo",
+						"featureAccess": "Accesso alle funzionalità",
+						"fileManagement": "File",
+						"emailers": "Sistemi di invio email",
+						"emailing": "Invio email",
+						"libraryManagement": "Gestione libreria",
+						"userManagement": "Gestione utenti",
+						"serverManagement": "Gestione server"
 					},
 					"heading": "Permissions",
 					"subtitle": [
@@ -2316,8 +2316,8 @@
 			}
 		},
 		"server/metadataIntegrations": {
-			"helmet": "Metadata integrations",
-			"title": "Metadata integrations",
+			"helmet": "Integrazioni metadati",
+			"title": "Integrazioni metadati",
 			"addProvider": "Aggiungi provider",
 			"noProviders": "Nessun provider configurato. Aggiungine uno per iniziare",
 			"providers": {
@@ -2331,39 +2331,39 @@
 					"validationError": "La convalida automatica di questo token è fallita",
 					"validationRequestError": "Richiesta di convalida fallita",
 					"validationRequestErrorUnknown": "Si è verificato un errore sconosciuto durante la convalida",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
+					"hardcoverStatusError": "L'API Hardcover ha risposto con lo stato {{status}}",
 					"hardcoverValidationError": "L'API Hardcover ha risposto con un errore: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
+					"noBearerPrefixRequired": "Rimuovi il prefisso 'Bearer ' dal token API"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
-					"description": "The date when the API token will expire (optional)"
+					"label": "Scadenza token API",
+					"description": "La data di scadenza del token API (opzionale)"
 				},
 				"enableProvider": {
-					"label": "Enable provider",
-					"description": "It will be used for fetching if enabled"
+					"label": "Abilita provider",
+					"description": "Se abilitato, verrà utilizzato per il recupero"
 				},
 				"autoApplyConfig": {
 					"enabled": {
-						"label": "Enable auto-apply",
-						"description": "Skip manual approval and apply likely matches"
+						"label": "Abilita applicazione automatica",
+						"description": "Salta l'approvazione manuale e applica le corrispondenze probabili"
 					},
 					"threshold": {
-						"label": "Confidence threshold",
-						"description": "Minimum confidence score (0-1) to auto-apply a match",
-						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+						"label": "Soglia di affidabilità",
+						"description": "Punteggio minimo di affidabilità (0-1) per applicare automaticamente una corrispondenza",
+						"disclaimer": "Il punteggio di affidabilità calcolato è una stima indicativa e potrebbe non essere sempre accurato"
 					},
 					"strategy": {
-						"label": "Merge strategy",
+						"label": "Strategia di unione",
 						"options": {
-							"FILL_GAPS": "Accept missing fields",
-							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
-							"PREFER_EXTERNAL": "Prefer external data"
+							"FILL_GAPS": "Accetta i campi mancanti",
+							"FILL_AND_MERGE_LISTS": "Accetta i campi mancanti e unisci gli elenchi",
+							"PREFER_EXTERNAL": "Preferisci dati esterni"
 						}
 					}
 				}
 			},
-			"providerEnabled": "This provider is enabled",
+			"providerEnabled": "Questo provider è abilitato",
 			"providerDisabled": "Questo provider è disabilitato",
 			"providerTokenExpiresSoon": "Il token di questo provider scadrà presto",
 			"autoApplyOn": "Applicazione automatica attiva",
@@ -3122,78 +3122,78 @@
 		"epubSettings": {
 			"title": "Impostazioni del lettore Epub",
 			"typeface": "Carattere",
-			"fontSize": "Font Size",
+			"fontSize": "Dimensioni carattere",
 			"fontWeight": {
-				"label": "Font Weight",
+				"label": "Peso carattere",
 				"options": {
-					"light": "Light",
-					"normal": "Normal",
-					"medium": "Medium",
-					"bold": "Bold"
+					"light": "Leggero",
+					"normal": "Normale",
+					"medium": "Medio",
+					"bold": "Grassetto"
 				}
 			},
-			"textNormalization": "Text Normalization",
-			"verticalText": "Vertical Text",
+			"textNormalization": "Normalizzazione del testo",
+			"verticalText": "Testo verticale",
 			"readingDirection": {
-				"label": "Reading Direction",
+				"label": "Direzione di lettura",
 				"options": {
-					"rtl": "Right to left",
-					"ltr": "Left to right"
+					"rtl": "Da destra a sinistra",
+					"ltr": "Da sinistra a destra"
 				}
 			},
 			"columns": {
-				"label": "Columns",
+				"label": "Colonne",
 				"options": {
-					"auto": "Auto",
-					"single": "Single",
-					"double": "Double"
+					"auto": "Automatiche",
+					"single": "Singola",
+					"double": "Doppia"
 				}
 			},
-			"pageMargins": "Page Margins",
+			"pageMargins": "Margini della pagina",
 			"imageFilter": {
-				"label": "Image Filter",
+				"label": "Filtro immagine",
 				"options": {
-					"none": "None",
-					"darken": "Darken",
-					"invert": "Invert"
+					"none": "Nessuno",
+					"darken": "Scuro",
+					"invert": "Inverti"
 				}
 			},
-			"publisherStyles": "Publisher Styles",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"publisherStyles": "Stili editore",
+			"volumeButtonsNavigate": "Navigazione con i tasti del volume",
 			"textAlignment": {
-				"label": "Text Alignment",
+				"label": "Allineamento del testo",
 				"options": {
-					"start": "Start",
-					"left": "Left",
-					"center": "Center",
-					"right": "Right",
-					"justify": "Justify"
+					"start": "Inizio",
+					"left": "Sinistra",
+					"center": "Centro",
+					"right": "Destra",
+					"justify": "Giustificato"
 				}
 			},
 			"typeScale": "Type Scale",
-			"lineHeight": "Line Height",
-			"paragraphIndent": "Paragraph Indent",
-			"paragraphSpacing": "Paragraph Spacing",
-			"wordSpacing": "Word Spacing",
-			"letterSpacing": "Letter Spacing",
-			"hyphens": "Hyphens",
-			"ligatures": "Ligatures",
+			"lineHeight": "Interlinea",
+			"paragraphIndent": "Indentazione paragrafo",
+			"paragraphSpacing": "Spaziatura paragrafo",
+			"wordSpacing": "Spaziatura parole",
+			"letterSpacing": "Spaziatura caratteri",
+			"hyphens": "Sillabazione",
+			"ligatures": "Legature",
 			"customizeTheme": {
-				"placeholder": "Theme name",
-				"background": "Background",
-				"text": "Text",
-				"highlight": "Highlight",
-				"premadeThemes": "Premade themes"
+				"placeholder": "Nome del tema",
+				"background": "Sfondo",
+				"text": "Testo",
+				"highlight": "Evidenziazione",
+				"premadeThemes": "Temi predefiniti"
 			}
 		},
 		"libraryType": {
-			"BOOK": "Books",
-			"COMIC": "Comics",
-			"LIGHT_NOVEL": "Light Novels",
+			"BOOK": "Libri",
+			"COMIC": "Fumetti",
+			"LIGHT_NOVEL": "Light novel",
 			"MANGA": "Manga",
 			"MANHWA": "Manhwa",
-			"MIXED": "Mixed",
-			"WEBTOON": "Webtoons",
+			"MIXED": "Misto",
+			"WEBTOON": "Webtoon",
 			"WEB_NOVEL": "Web Novels"
 		},
 		"savedServerActions": {

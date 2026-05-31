@@ -72,27 +72,117 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
-pub(crate) async fn create_media(
-	db: &DatabaseConnection,
+// // TODO(noodle): needed?
+// pub(crate) async fn create_media(
+// 	db: &DatabaseConnection,
+// 	BuiltMedia {
+// 		media,
+// 		metadata,
+// 		tags,
+// 	}: BuiltMedia,
+// ) -> CoreResult<media::Model> {
+// 	let txn = db.begin().await?;
+// 	let mut tag_id_cache = HashMap::new();
+// 	let created_media =
+// 		create_media_in_txn(&txn, media, metadata, &tags, &mut tag_id_cache).await?;
+
+// 	txn.commit().await?;
+
+// 	Ok(created_media)
+// }
+
+async fn create_media_in_txn(
+	txn: &DatabaseTransaction,
 	BuiltMedia {
 		media,
 		metadata,
 		tags,
 	}: BuiltMedia,
+	tag_id_cache: &mut HashMap<String, i32>,
 ) -> CoreResult<media::Model> {
-	let txn = db.begin().await?;
-
-	let created_media = media.insert(&txn).await?;
+	let created_media = media.insert(txn).await?;
 
 	if let Some(meta) = metadata {
-		meta.insert(&txn).await?;
+		meta.insert(txn).await?;
 	}
 
-	ensure_tags_linked(&txn, &created_media.id, &tags).await?;
-
-	txn.commit().await?;
+	ensure_tags_linked_for_media(txn, &created_media.id, &tags, tag_id_cache).await?;
 
 	Ok(created_media)
+}
+
+async fn ensure_tags_linked_for_media(
+	txn: &DatabaseTransaction,
+	media_id: &str,
+	tag_names: &[String],
+	tag_id_cache: &mut HashMap<String, i32>,
+) -> CoreResult<()> {
+	let desired: HashSet<String> = tag_names
+		.iter()
+		.filter(|name| !name.is_empty())
+		.cloned()
+		.collect();
+
+	if desired.is_empty() {
+		return Ok(());
+	}
+
+	let unknown_names: Vec<String> = desired
+		.iter()
+		.filter(|name| !tag_id_cache.contains_key(*name))
+		.cloned()
+		.collect();
+
+	if !unknown_names.is_empty() {
+		let existing = tag::Entity::find()
+			.filter(tag::Column::Name.is_in(unknown_names.clone()))
+			.all(txn)
+			.await?;
+
+		for existing_tag in existing {
+			tag_id_cache.insert(existing_tag.name, existing_tag.id);
+		}
+
+		let to_create: Vec<tag::ActiveModel> = unknown_names
+			.into_iter()
+			.filter(|name| !tag_id_cache.contains_key(name))
+			.map(|name| tag::ActiveModel {
+				name: Set(name),
+				..Default::default()
+			})
+			.collect();
+
+		if !to_create.is_empty() {
+			tag::Entity::insert_many(to_create).exec(txn).await?;
+
+			let refreshed = tag::Entity::find()
+				.filter(
+					tag::Column::Name.is_in(desired.iter().cloned().collect::<Vec<_>>()),
+				)
+				.all(txn)
+				.await?;
+
+			for resolved_tag in refreshed {
+				tag_id_cache.insert(resolved_tag.name, resolved_tag.id);
+			}
+		}
+	}
+
+	let link_rows: Vec<media_tag::ActiveModel> = desired
+		.into_iter()
+		.filter_map(|name| tag_id_cache.get(&name).copied())
+		.map(|tag_id| media_tag::ActiveModel {
+			media_id: Set(media_id.to_string()),
+			tag_id: Set(tag_id),
+			..Default::default()
+		})
+		.collect();
+
+	if !link_rows.is_empty() {
+		media_tag::Entity::insert_many(link_rows).exec(txn).await?;
+	}
+
+	Ok(())
 }
 
 pub(crate) async fn update_media(
@@ -818,42 +908,57 @@ pub(crate) async fn safely_build_and_insert_media(
 	let task_count = books.len() as i32;
 	let start = Instant::now();
 
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+	// TODO(noodle): arbitrary
+	const MEDIA_INSERT_CHUNK_SIZE: usize = 250;
 
-	while let Some(book) = books.pop_front() {
-		let Some(path) = book.path() else {
-			tracing::warn!(?book, "Book has no path?");
-			continue;
-		};
-		match create_media(worker_ctx.conn(), book).await {
-			Ok(created_media) => {
-				// TODO(metadata-fetching): Track this as needing fetching (assuming enabled)
-				output.created_media += 1;
-				worker_ctx.report_progress(JobProgress::subtask_position(
-					atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-					task_count,
-				));
-				worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
-					id: created_media.id,
-					series_id: series_id.clone(),
-					library_id: library_id.clone(),
-				}));
-			},
-			Err(e) => {
-				worker_ctx.report_progress(JobProgress::subtask_position(
-					atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-					task_count,
-				));
-				tracing::error!(error = ?e, ?path, "Failed to create media");
-				output.logs.push(
-					JobExecuteLog::error(format!(
-						"Failed to create media: {:?}",
-						e.to_string()
-					))
-					.with_ctx(path),
-				);
-			},
+	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+	let mut tag_id_cache = HashMap::new();
+
+	while !books.is_empty() {
+		let txn = worker_ctx.conn().begin().await?;
+
+		for _ in 0..MEDIA_INSERT_CHUNK_SIZE {
+			let Some(book) = books.pop_front() else {
+				break;
+			};
+
+			let Some(path) = book.path() else {
+				tracing::warn!(?book, "Book has no path?");
+				continue;
+			};
+
+			match create_media_in_txn(&txn, book, &mut tag_id_cache).await {
+				Ok(created_media) => {
+					// TODO(metadata-fetching): Track this as needing fetching (assuming enabled)
+					output.created_media += 1;
+					worker_ctx.report_progress(JobProgress::subtask_position(
+						atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+						task_count,
+					));
+					worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
+						id: created_media.id,
+						series_id: series_id.clone(),
+						library_id: library_id.clone(),
+					}));
+				},
+				Err(e) => {
+					worker_ctx.report_progress(JobProgress::subtask_position(
+						atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+						task_count,
+					));
+					tracing::error!(error = ?e, ?path, "Failed to create media");
+					output.logs.push(
+						JobExecuteLog::error(format!(
+							"Failed to create media: {:?}",
+							e.to_string()
+						))
+						.with_ctx(path),
+					);
+				},
+			}
 		}
+
+		txn.commit().await?;
 	}
 
 	let success_count = output.created_media;

@@ -47,16 +47,43 @@ impl Display for BenchmarkSize {
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 5] = [
+	// static SIZES: [BenchmarkSize; 5] = [
+	// 	// 10 series x 10 books per series (100 books)
+	// 	BenchmarkSize {
+	// 		series_count: 10,
+	// 		media_per_series: 10,
+	// 		sample_count: 100,
+	// 	},
+	// 	// 100 series x 10 books per series (1000 books)
+	// 	BenchmarkSize {
+	// 		series_count: 100,
+	// 		media_per_series: 10,
+	// 		sample_count: 100,
+	// 	},
+	// 	// 100 series x 100 books per series (10000 books)
+	// 	BenchmarkSize {
+	// 		series_count: 100,
+	// 		media_per_series: 100,
+	// 		sample_count: 10,
+	// 	},
+	// 	// 100 series x 1,000 books per series (100000 books)
+	// 	BenchmarkSize {
+	// 		series_count: 100,
+	// 		media_per_series: 1000,
+	// 		sample_count: 10,
+	// 	},
+	// 	// 150 series x 1,000 books per series (150000 books)
+	// 	BenchmarkSize {
+	// 		series_count: 150,
+	// 		media_per_series: 1000,
+	// 		sample_count: 10,
+	// 	},
+	// ];
+
+	static SIZES: [BenchmarkSize; 3] = [
 		// 10 series x 10 books per series (100 books)
 		BenchmarkSize {
 			series_count: 10,
-			media_per_series: 10,
-			sample_count: 100,
-		},
-		// 100 series x 10 books per series (1000 books)
-		BenchmarkSize {
-			series_count: 100,
 			media_per_series: 10,
 			sample_count: 100,
 		},
@@ -69,12 +96,6 @@ fn full_scan(c: &mut Criterion) {
 		// 100 series x 1,000 books per series (100000 books)
 		BenchmarkSize {
 			series_count: 100,
-			media_per_series: 1000,
-			sample_count: 10,
-		},
-		// 150 series x 1,000 books per series (150000 books)
-		BenchmarkSize {
-			series_count: 150,
 			media_per_series: 1000,
 			sample_count: 10,
 		},

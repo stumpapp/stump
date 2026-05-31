@@ -1418,11 +1418,11 @@
 				},
 				"interface": {
 					"title": "Interfejs",
-					"description": "Primary UI surfaces and interaction elements"
+					"description": "Podstawowe powierzchnie interfejsu i elementy interakcji"
 				},
 				"thumbnails": {
-					"title": "Thumbnails",
-					"description": "Display options for thumbnail images"
+					"title": "Miniatury",
+					"description": "Opcje wyświetlania miniatur obrazów"
 				},
 				"themeSelect": {
 					"label": "Motyw",
@@ -1467,8 +1467,8 @@
 					}
 				},
 				"navigation": {
-					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
+					"title": "Nawigacja",
+					"description": "Dostosuj elementy nawigacyjne aplikacji"
 				},
 				"layoutAndArrangement": {
 					"label": "Układ i aranżacja",
@@ -1485,11 +1485,11 @@
 				},
 				"doubleSidebar": {
 					"label": "Panel boczny ustawień",
-					"description": "Enables sidebar navigation for the settings pages"
+					"description": "Umożliwia nawigację z użyciem paska bocznego dla stron ustawień"
 				},
 				"replacePrimarySidebar": {
 					"label": "Zastąp główny panel boczny",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
+					"description": "Każde wystąpienie drugorzędnego panelu bocznego zastąpi główny panel boczny, zamiast pokazywać go obok",
 					"tooltips": {
 						"doubleSidebar": "To ustawienie wymaga włączenia panelu bocznego ustawień",
 						"topbar": "To ustawienie nie jest obecnie obsługiwane, gdy główna nawigacja jest ustawiona jako pasek u góry ekranu"
@@ -1497,7 +1497,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Układ nawigacji",
-					"description": "Rearrange or tweak the navigation items in your primary navigation",
+					"description": "Zmień kolejność lub dostosuj elementy nawigacyjne w głównej nawigacji",
 					"isLocked": "Układ jest zablokowany",
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",

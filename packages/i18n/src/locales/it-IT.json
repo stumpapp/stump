@@ -625,55 +625,55 @@
 							"date": "Data",
 							"config": "Configurazione",
 							"jobOutput": "Risultato dell'attività",
-							"logs": "Logs"
+							"logs": "Log"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "I log di questa attività sono stati salvati",
+						"seeLogs": "Visualizza log"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
-							"config": "Config"
+							"timestamp": "Scansionato il",
+							"config": "Configurazione"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "Predefinito",
+						"custom": "Personalizzato"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "Elimina cronologia scansioni"
 				}
 			}
 		},
 		"options/thumbnails": {
-			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library",
+			"title": "Miniature",
+			"description": "Impostazioni e opzioni di gestione per le miniature in questa libreria",
 			"sections": {
 				"management": {
-					"heading": "Management",
-					"description": "Manage the existing thumbnails for this library",
+					"heading": "Gestisci miniature",
+					"description": "Gestisci le miniature esistenti per questa libreria",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"integrations/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "Analisi",
+			"description": "Analizza il contenuto di questa libreria per identificare potenziali problemi o miglioramenti",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "Analizza libri",
+					"description": "Analizza i libri in questa libreria per includere metadati aggiuntivi nel database, come le dimensioni delle pagine per i libri basati su immagini",
+					"disclaimerTitle": "Questo processo richiede molte risorse",
+					"disclaimer": "Il completamento potrebbe richiedere del tempo. In futuro sarà più configurabile",
+					"analyzeButton": "Analizza libri"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "File mancanti",
+					"description": "File presenti nel database ma non trovati sul disco",
+					"noMissingFiles": "Non ci sono file mancanti in questa libreria"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "File duplicati",
+					"description": "File potenzialmente duplicati sul disco",
+					"noDuplicateFiles": "Non sono stati rilevati file duplicati per questa libreria"
 				}
 			}
 		},
@@ -694,60 +694,60 @@
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "Controllo accessi",
+			"description": "Controlla chi può accedere ai contenuti di questa libreria",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsersTitle": "No users to exclude",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "Escludi utenti",
+					"description": "Impedisci ad alcuni utenti di accedere a questa libreria o ai suoi contenuti",
+					"noUsersTitle": "Nessun utente da escludere",
+					"noUsers": "Non ci sono altri utenti registrati da escludere da questa libreria",
+					"updated": "Esclusioni aggiornate",
+					"failure": "Impossibile aggiornare le esclusioni"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "Eliminazione",
+			"description": "Elimina permanentemente questa libreria e tutti i suoi contenuti o determinate risorse",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimerTitle": "No files will be deleted",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "Pulisci libreria",
+					"description": "Rimuovi tutti i media e le serie che non possono essere localizzati sul disco",
+					"disclaimerTitle": "Nessun file verrà eliminato",
+					"disclaimer": "Anche se questa azione non eliminerà alcun file, rimuoverà in modo permanente tutti i record relativi a media e serie che risultano mancanti",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "Pulisci libreria",
+						"text": "Sei sicuro di voler pulire questa libreria?"
 					},
-					"emptyText": "There was nothing to clean",
+					"emptyText": "Non c'era nulla da pulire",
 					"missingEntitiesTable": {
 						"columns": {
 							"id": "ID",
-							"path": "Path",
-							"type": "Type"
+							"path": "Percorso",
+							"type": "Tipo"
 						},
 						"types": {
-							"BOOK": "Book",
-							"SERIES": "Series",
-							"LIBRARY": "Library"
+							"BOOK": "Libro",
+							"SERIES": "Serie",
+							"LIBRARY": "Libreria"
 						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
+						"emptyHeading": "Nessun elemento risulta mancante in questa libreria",
+						"emptySubtitle": "Tutti i file presenti nel database sono stati trovati sul disco"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "Elimina libreria",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"Elimina definitivamente questa libreria e tutti i suoi contenuti.",
+						"Questa azione non può essere annullata"
 					]
 				}
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "Ops, si è verificato un errore",
+		"heading": "lol, oops",
 		"message": "Si è verificato un errore:",
 		"buttons": {
 			"report": "Segnala problema",
@@ -757,83 +757,83 @@
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "La tua prossima lettura",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "Nessun libro pronto da leggere",
+				"message": "I prossimi libri consigliati appariranno qui"
 			}
 		},
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Continua a leggere",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Niente da mostrare",
+				"message": "I libri in corso di lettura che inizierai appariranno qui"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "Serie aggiunte di recente",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Nessuna serie da visualizzare",
+				"message": "Le serie che aggiungi alle tue librerie appariranno qui"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "Libri aggiunti di recente",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "Niente da mostrare",
+				"message": "I libri aggiunti di recente appariranno qui"
 			}
 		}
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
-			"format": "Format",
-			"identifierAmazon": "Amazon ID",
-			"identifierCalibre": "Calibre ID",
-			"identifierGoogle": "Google ID",
+			"ageRating": "Classificazione per età",
+			"characters": "Personaggi",
+			"colorists": "Coloristi",
+			"coverArtists": "Copertinisti",
+			"day": "Giorno",
+			"editors": "Curatori",
+			"format": "Formato",
+			"identifierAmazon": "ID Amazon",
+			"identifierCalibre": "ID Calibre",
+			"identifierGoogle": "ID Google",
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
-			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
-			"summary": "Summary",
-			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
+			"identifierUuid": "UUID del libro",
+			"genres": "Generi",
+			"inkers": "Inchiostratori",
+			"language": "Lingua",
+			"letterers": "Letteristi",
+			"links": "Collegamenti",
+			"month": "Mese",
+			"notes": "Note",
+			"number": "Numero",
+			"pageCount": "Pagine",
+			"pencillers": "Matitisti",
+			"publisher": "Editore",
+			"series": "Serie",
+			"seriesGroup": "Gruppo di serie",
+			"storyArc": "Arco narrativo",
+			"storyArcNumber": "Numero dell'arco narrativo",
+			"summary": "Riepilogo",
+			"teams": "Gruppi",
+			"title": "Titolo",
+			"titleSort": "Titolo per ordinamento",
 			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
-			"metaType": "Type",
-			"imprint": "Imprint",
-			"comicid": "Comic ID",
-			"booktype": "Book type",
-			"status": "Status",
-			"totalIssues": "Total issues",
-			"publicationRun": "Publication run",
-			"comicImage": "Comic image",
-			"descriptionFormatted": "Description (formatted)"
+			"writers": "Autori",
+			"year": "Anno",
+			"metaType": "Tipo",
+			"imprint": "Marchio editoriale",
+			"comicid": "ID fumetto",
+			"booktype": "Tipo di libro",
+			"status": "Stato",
+			"totalIssues": "Problemi totali",
+			"publicationRun": "Periodo di pubblicazione",
+			"comicImage": "Immagine del fumetto",
+			"descriptionFormatted": "Descrizione (formattata)"
 		},
 		"addFields": {
-			"description": "Add each addition on its own line"
+			"description": "Aggiungi ogni aggiunta sulla propria riga"
 		}
 	},
 	"metadataMatching": {
@@ -913,35 +913,35 @@
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "Il nome deve contenere almeno 2 caratteri",
+			"nameTaken": "Impossibile utilizzare questo nome"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"label": "Nome",
+				"placeholder": "La mia lista smart",
+				"description": "Deve essere univoco, ma può essere modificato in seguito"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "Descrizione",
+				"placeholder": "Una lista molto intelligente",
+				"description": "Una descrizione opzionale della lista smart"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "Visibilità",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "Pubblico",
+						"description": "Accessibile a tutti gli utenti sul server"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "Condiviso",
+						"description": "Utenti specifici possono accedere a questa lista smart",
+						"createDisclaimer": "Puoi selezionare con chi condividere questa lista dopo la creazione"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "Privato",
+						"description": "Solo tu puoi accedere a questa lista smart"
 					}
 				}
 			},
@@ -1025,7 +1025,7 @@
 									"pencillers": "Pencillers",
 									"inkers": "Inkers",
 									"letterers": "Letterers",
-									"editors": "Editors",
+									"editors": "Curatori",
 									"publisher": "Publisher",
 									"colorists": "Colorist",
 									"links": "Links",

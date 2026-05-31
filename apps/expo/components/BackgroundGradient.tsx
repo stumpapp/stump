@@ -1,8 +1,8 @@
 import { FlashListRef, ViewToken } from '@shopify/flash-list'
 import { ViewabilityConfigCallbackPairs } from '@shopify/flash-list/dist/FlashListProps'
 import { AnimatedProp, Canvas, Color, LinearGradient, Rect, vec } from '@shopify/react-native-skia'
+import { getThumbnailTintColor } from '@stump/client'
 import { InterfaceLayout } from '@stump/graphql'
-import { getColor, serialize, set } from 'colorjs.io/fn'
 import { useNavigation } from 'expo-router'
 import { RefObject, useCallback, useEffect } from 'react'
 import { Appearance, Platform } from 'react-native'
@@ -175,13 +175,7 @@ function getTintColor(item?: MinimalItem): string {
 
 	if (!averageColor) return 'transparent'
 
-	const color = getColor(averageColor)
-	set(color, {
-		'oklch.l': (l) => (isDarkColorScheme ? 0.25 * Math.pow(l, 0.4) : 0.5 * l + 0.5),
-		'oklch.c': (c) => 0.95 * c + 0.05 * 0.4,
-	})
-
-	return serialize(color, { format: 'hex' })
+	return getThumbnailTintColor(averageColor, { dark: isDarkColorScheme })
 }
 
 // const getHeaderTintColor = (item?: MinimalItem): string => {
@@ -192,7 +186,7 @@ function getTintColor(item?: MinimalItem): string {
 
 // 	const color = getColor(averageColor)
 // 	set(color, {
-// 		'oklch.l': (l) => (isDarkColorScheme ? 0.25 * Math.pow(l, 0.4) : 0.5 * Math.pow(l, 0.5) + 0.5),
+// 		'oklch.l': (l) => (isDarkColorScheme ? 0.35 * Math.pow(l, 0.4) : 0.5 * Math.pow(l, 0.5) + 0.5),
 // 		'oklch.c': (c) => 0.95 * c + 0.05 * 0.4,
 // 	})
 

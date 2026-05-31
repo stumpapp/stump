@@ -1,4 +1,4 @@
-import { getSeriesStackColor } from '@stump/client'
+import { getThumbnailTintColor } from '@stump/client'
 import { cn, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import pluralize from 'pluralize'
@@ -174,7 +174,7 @@ const BookCard = memo(function BookCard({
 	const thumbnailAverageColor = placeholderData?.averageColor
 	const backgroundColor = useMemo(() => {
 		if (thumbnailAverageColor) {
-			return getSeriesStackColor(thumbnailAverageColor, { dark: isDarkVariant })
+			return getThumbnailTintColor(thumbnailAverageColor, { dark: isDarkVariant })
 		}
 		return (
 			getThemeColor('thumbnail.stack.series') ??

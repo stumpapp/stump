@@ -7,7 +7,7 @@ type Config = {
 	dark: boolean
 }
 
-export function getSeriesStackColor(color: string, { dark }: Config): string {
+export function getThumbnailTintColor(color: string, { dark }: Config): string {
 	const plainColor = getColor(color)
 	set(plainColor, {
 		'oklch.l': (l) => (dark ? 0.35 * Math.pow(l, 0.4) : 0.8 * Math.pow(l, 0.6) + 0.2),

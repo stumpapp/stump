@@ -1,4 +1,4 @@
-import { getSeriesStackColor } from '@stump/client'
+import { getThumbnailTintColor } from '@stump/client'
 import { cn } from '@stump/components'
 import { ImageRef } from '@stump/graphql'
 import { useMemo } from 'react'
@@ -67,7 +67,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 
 	const backgroundColor = useMemo(() => {
 		if (mainThumbnailAverageColor) {
-			return getSeriesStackColor(mainThumbnailAverageColor, { dark: isDarkVariant })
+			return getThumbnailTintColor(mainThumbnailAverageColor, { dark: isDarkVariant })
 		}
 		return getThemeColor('thumbnail.stack.series') ?? (isDarkVariant ? '#2a2a2e' : '#e5e5e7')
 	}, [mainThumbnailAverageColor, isDarkVariant, getThemeColor])

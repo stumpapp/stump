@@ -24,6 +24,10 @@ export default function LocaleProvider({ locale = getDefaultLocale(), children }
 				}
 
 				await Promise.all([i18n.changeLanguage(resolvedLocale), initDateFnsLocale(resolvedLocale)])
+				if (!active) {
+					return
+				}
+
 				document.documentElement.lang = resolvedLocale
 			} catch (error) {
 				console.error('Failed to load locale resources', error)

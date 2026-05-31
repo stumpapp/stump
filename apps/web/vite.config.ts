@@ -20,25 +20,32 @@ export default defineConfig({
 		rollupOptions: {
 			output: {
 				manualChunks(id) {
-					if (id.includes('node_modules')) {
-						if (id.includes('react') || id.includes('scheduler')) {
-							return 'vendor-react'
-						}
-						if (id.includes('@tanstack')) {
-							return 'vendor-tanstack'
-						}
-						if (id.includes('lucide-react')) {
-							return 'vendor-lucide'
-						}
-						if (id.includes('lodash')) {
-							return 'vendor-lodash'
-						}
-						if (id.includes('framer-motion')) {
-							return 'vendor-framer'
-						}
-						if (id.includes('overlayscrollbars')) {
-							return 'vendor-overlayscrollbars'
-						}
+					const path = id.replaceAll('\\', '/')
+					if (!path.includes('/node_modules/')) {
+						return
+					}
+
+					if (path.includes('/node_modules/lucide-react/')) {
+						return 'vendor-lucide'
+					}
+					if (path.includes('/node_modules/@tanstack/')) {
+						return 'vendor-tanstack'
+					}
+					if (path.includes('/node_modules/lodash/')) {
+						return 'vendor-lodash'
+					}
+					if (path.includes('/node_modules/framer-motion/')) {
+						return 'vendor-framer'
+					}
+					if (path.includes('/node_modules/overlayscrollbars/')) {
+						return 'vendor-overlayscrollbars'
+					}
+					if (
+						path.includes('/node_modules/react/') ||
+						path.includes('/node_modules/react-dom/') ||
+						path.includes('/node_modules/scheduler/')
+					) {
+						return 'vendor-react'
 					}
 				},
 			},

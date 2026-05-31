@@ -1,5 +1,6 @@
 import type { Locale } from 'date-fns'
 import { formatDuration, setDefaultOptions } from 'date-fns'
+import { enUS } from 'date-fns/locale/en-US'
 
 import type { AllowedLocale } from './config'
 
@@ -13,7 +14,7 @@ const dateFnsLocaleLoaders: Record<AllowedLocale, () => Promise<Locale>> = {
 	'de-DE': () => import('date-fns/locale/de').then((m) => m.de),
 	'el-GR': () => import('date-fns/locale/el').then((m) => m.el),
 	'en-GB': () => import('date-fns/locale/en-GB').then((m) => m.enGB),
-	'en-US': () => import('date-fns/locale/en-US').then((m) => m.enUS),
+	'en-US': () => Promise.resolve(enUS),
 	'es-ES': () => import('date-fns/locale/es').then((m) => m.es),
 	'fa-IR': () => import('date-fns/locale/fa-IR').then((m) => m.faIR),
 	'fi-FI': () => import('date-fns/locale/fi').then((m) => m.fi),

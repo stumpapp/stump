@@ -1575,6 +1575,14 @@
 				"enableJobOverlayToggle": {
 					"label": "Nakładka zadań",
 					"description": "Pokaż pływającą nakładkę, gdy wykonywane jest zadanie"
+				},
+				"dayResetHourOffset": {
+					"label": "Reading day reset offset",
+					"description": "Shift when a reading day resets, in hours from midnight"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Reading session grace period",
+					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},

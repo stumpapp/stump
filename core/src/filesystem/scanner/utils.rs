@@ -71,78 +71,22 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
-async fn ensure_tags_linked_for_media(
-	txn: &DatabaseTransaction,
+/// build the `media_tag` lookup record for given book pulling from cache
+fn build_tag_link_rows(
 	media_id: &str,
 	tag_names: &[String],
-	cache: &mut TagCache,
-) -> CoreResult<()> {
-	let desired: HashSet<String> = tag_names
+	cache: &TagCache,
+) -> Vec<media_tag::ActiveModel> {
+	tag_names
 		.iter()
-		.filter(|name| !name.is_empty())
-		.cloned()
-		.collect();
-
-	if desired.is_empty() {
-		return Ok(());
-	}
-
-	let unknown_names: Vec<String> = desired
-		.iter()
-		.filter(|name| !cache.contains(name))
-		.cloned()
-		.collect();
-
-	if !unknown_names.is_empty() {
-		let existing = tag::Entity::find()
-			.filter(tag::Column::Name.is_in(unknown_names.clone()))
-			.all(txn)
-			.await?;
-
-		for existing_tag in existing {
-			cache.insert(existing_tag.name, existing_tag.id);
-		}
-
-		let to_create: Vec<tag::ActiveModel> = unknown_names
-			.into_iter()
-			.filter(|name| !cache.contains(name))
-			.map(|name| tag::ActiveModel {
-				name: Set(name),
-				..Default::default()
-			})
-			.collect();
-
-		if !to_create.is_empty() {
-			tag::Entity::insert_many(to_create).exec(txn).await?;
-
-			let refreshed = tag::Entity::find()
-				.filter(
-					tag::Column::Name.is_in(desired.iter().cloned().collect::<Vec<_>>()),
-				)
-				.all(txn)
-				.await?;
-
-			for resolved_tag in refreshed {
-				cache.insert(resolved_tag.name, resolved_tag.id);
-			}
-		}
-	}
-
-	let link_rows: Vec<media_tag::ActiveModel> = desired
-		.into_iter()
-		.filter_map(|name| cache.get(&name))
+		.filter(|n| !n.is_empty())
+		.filter_map(|n| cache.get(n))
 		.map(|tag_id| media_tag::ActiveModel {
 			media_id: Set(media_id.to_string()),
 			tag_id: Set(tag_id),
 			..Default::default()
 		})
-		.collect();
-
-	if !link_rows.is_empty() {
-		media_tag::Entity::insert_many(link_rows).exec(txn).await?;
-	}
-
-	Ok(())
+		.collect()
 }
 
 pub(crate) async fn update_media(
@@ -885,10 +829,13 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	let media_cols_count = media::Column::iter().count();
 	let media_metadata_cols_count = media_metadata::Column::iter().count();
+	let media_tag_cols_count = media_tag::Column::iter().count();
+
+	let all_tag_names: HashSet<_> =
+		books.iter().flat_map(|b| b.tags.iter().cloned()).collect();
+	let tag_cache = TagCache::build(worker_ctx.conn(), all_tag_names).await?;
 
 	let mut insert_cursor = 0i32;
-	// TODO: promote to scanner root to reuse each insert batch? or does it make a diff? we'll see
-	let mut tag_cache = TagCache::new();
 
 	while !books.is_empty() {
 		let txn = worker_ctx.conn().begin().await?;
@@ -950,9 +897,18 @@ pub(crate) async fn safely_build_and_insert_media(
 			}
 		}
 
+		let mut tag_links: Vec<media_tag::ActiveModel> = Vec::new();
 		for (media_id, tag_names) in &tags_by_media {
-			ensure_tags_linked_for_media(&txn, media_id, tag_names, &mut tag_cache)
-				.await?;
+			tag_links.extend(build_tag_link_rows(media_id, tag_names, &tag_cache));
+		}
+		if !tag_links.is_empty() {
+			let tag_batch_size = get_insert_batch_size(media_tag_cols_count);
+			for batch in tag_links.chunks(tag_batch_size) {
+				media_tag::Entity::insert_many(batch.to_vec())
+					.exec(&txn)
+					.await
+					.map_err(CoreError::from)?;
+			}
 		}
 
 		txn.commit().await?;

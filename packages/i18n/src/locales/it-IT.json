@@ -2902,149 +2902,149 @@
 				"downloading": "Download in corso",
 				"failed": "Fallito",
 				"nothingDownloading": "Nessun download in corso",
-				"noActiveDownloads": "No active downloads",
-				"noFailedDownloads": "No failed downloads",
-				"downloadStarting": "Starting..."
+				"noActiveDownloads": "Nessun download attivo",
+				"noFailedDownloads": "Nessun download fallito",
+				"downloadStarting": "Avvio..."
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "Delete Books",
-					"confirmation": "Are you sure you want to delete your local library?",
-					"disclaimer": "This action cannot be undone."
+					"label": "Elimina libro",
+					"confirmation": "Sei sicuro di voler eliminare la tua libreria locale?",
+					"disclaimer": "Questa azione non può essere annullata."
 				},
-				"seeProblems": "See Problems ({{problemCount}})",
-				"hideCurated": "Hide Curated",
-				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"seeProblems": "Visualizza problemi ({{problemCount}})",
+				"hideCurated": "Nascondi consigliati",
+				"showCurated": "Mostra consigliati",
+				"attemptSync": "Tenta sincronizzazione"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
-					"NAME": "Name",
-					"ADDED_AT": "Date Added",
-					"SERIES": "Series"
+					"NAME": "Nome",
+					"ADDED_AT": "Data di aggiunta",
+					"SERIES": "Serie"
 				},
 				"sortDirection": {
-					"ASC": "Ascending",
-					"DESC": "Descending"
+					"ASC": "Crescente",
+					"DESC": "Decrescente"
 				},
 				"sortDirectionText": {
 					"ASC": "A → Z",
 					"DESC": "Z → A"
 				},
 				"sortDirectionDate": {
-					"ASC": "Oldest First",
-					"DESC": "Newest First"
+					"ASC": "Dal più vecchio",
+					"DESC": "Dal più recente"
 				},
 				"sourceFilter": {
-					"all": "All Books",
-					"server": "Downloaded",
-					"imported": "Imported"
+					"all": "Tutti i libri",
+					"server": "Scaricato",
+					"imported": "Importato"
 				}
 			},
 			"downloadProblemsSheet": {
-				"title": "Failed Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"retryAll": "Retry All",
-				"dismissAll": "Dismiss All"
+				"title": "Download falliti",
+				"noFailedDownloads": "Nessun download fallito",
+				"retryAll": "Riprova tutto",
+				"dismissAll": "Ignora tutto"
 			}
 		},
 		"settings": {
 			"preferences": {
-				"label": "Preferences",
+				"label": "Preferenze",
 				"appTheme": {
-					"label": "Theme",
+					"label": "Tema",
 					"options": {
-						"light": "Light",
-						"dark": "Dark"
+						"light": "Chiaro",
+						"dark": "Scuro"
 					}
 				},
-				"appPrimaryColor": "Accent",
-				"appLanguage": "Language",
-				"defaultServer": "Default Server",
-				"thumbnailRatio": "Thumbnail Ratio",
+				"appPrimaryColor": "Colore primario",
+				"appLanguage": "Lingua",
+				"defaultServer": "Server predefinito",
+				"thumbnailRatio": "Proporzioni miniatura",
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail Placeholder",
+					"label": "Segnaposto miniature",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Scala di grigi",
+						"averageColor": "Colore medio",
+						"colorful": "Colorato",
 						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailResizeMode": {
-					"label": "Thumbnail Resize",
+					"label": "Proporzioni miniatura",
 					"options": {
-						"cover": "Cover",
-						"stretch": "Stretch",
-						"fit": "Fit"
+						"cover": "Riempi",
+						"stretch": "Distorci",
+						"fit": "Adatta"
 					}
 				}
 			},
 			"reading": {
-				"label": "Reading",
-				"preferNativePdf": "Prefer Native PDF",
-				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture",
+				"label": "In lettura",
+				"preferNativePdf": "Usa lettore PDF nativo",
+				"preferMinimalReader": "Usa lettore minimale",
+				"disableDismissGesture": "Disabilita gesto di chiusura",
 				"incognitoReading": "Lettura in incognito"
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turned off if you do not need them",
-				"bookClubsEnabled": "Book Club Features"
+				"description": "Le funzionalità di Stump sono opzionali e possono essere disattivate se non sono necessarie",
+				"bookClubsEnabled": "Funzionalità club del libro"
 			},
-			"autoSyncLocalData": "Auto-Sync Local Data",
+			"autoSyncLocalData": "Sincronizzazione automatica dati locali",
 			"lowercaseTranslation": "Etichette in minuscolo",
 			"management": {
-				"label": "Management",
+				"label": "Gestione",
 				"dataUsage": {
-					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"label": "Utilizzo dati",
+					"nonStumpData": "Dati non-Stump",
+					"serversTotal": "Totale server",
+					"totalFiles": "File totali",
+					"totalSize": "Dimensione totale",
 					"deleteDownloads": {
-						"label": "Delete Downloads",
-						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
+						"label": "Elimina download",
+						"confirmation": "Sei sicuro di voler eliminare tutti i download da {{serverName}}?",
 						"deleteFailed": {
-							"title": "Deletion Failed",
-							"description": "There was an error deleting all downloads from {{serverName}}"
+							"title": "Eliminazione fallita",
+							"description": "Si è verificato un errore durante l'eliminazione di tutti i download da {{serverName}}"
 						}
 					},
-					"noDownloads": "No downloaded files for this server",
+					"noDownloads": "Nessun file scaricato da questo server",
 					"storedPreferences": {
-						"label": "Stored preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc"
+						"label": "Preferenze salvate",
+						"description": "Dati vari come le preferenze dei libri, i timer di lettura, ecc"
 					},
-					"clearPreferences": "Clear Preferences"
+					"clearPreferences": "Cancella preferenze"
 				}
 			},
 			"debug": {
 				"label": "Debug",
 				"clearCache": {
-					"label": "Svuota la cache",
+					"label": "Svuota cache",
 					"memory": {
-						"button": "Memory",
-						"success": "Memory cache cleared"
+						"button": "Memoria",
+						"success": "Memoria cache cancellata"
 					},
 					"disk": {
-						"button": "Disk",
-						"success": "Disk cache cleared"
+						"button": "Disco",
+						"success": "Cache disco cancellata"
 					}
 				},
 				"deleteDatabase": {
-					"label": "Delete Database",
+					"label": "Elimina database",
 					"success": {
-						"title": "Database deleted",
-						"description": "Please restart the app"
+						"title": "Database eliminato",
+						"description": "Riavvia l'app"
 					},
 					"error": {
-						"title": "Deletion failed",
-						"description": "There was an error deleting the database"
+						"title": "Cancellazione fallita",
+						"description": "Si è verificato un errore durante l'eliminazione del database"
 					}
 				},
-				"performanceMonitor": "Performance Monitor",
-				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
+				"performanceMonitor": "Monitor prestazioni",
+				"reduceAnimations": "Riduci animazioni",
+				"maskUrls": "Maschera URL",
 				"displayLanguageKeys": {
 					"label": "Mostra chiavi della lingua",
 					"options": {
@@ -3054,75 +3054,75 @@
 					}
 				},
 				"debugAnalytics": {
-					"label": "Debug Analytics",
-					"description": "Send additional debug-related events to help troubleshoot issues"
+					"label": "Analisi debug",
+					"description": "Invia eventi aggiuntivi relativi al debug per facilitare la risoluzione dei problemi"
 				}
 			},
 			"contactInfo": {
-				"label": "Contact",
+				"label": "Contatti",
 				"email": "E-mail",
 				"discord": "Discord",
 				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
+				"buildInformation": "Informazioni build",
+				"version": "Versione: {{version}}",
+				"suuportIdentifier": "Identificatore di supporto: {{supportID}}"
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Impostazioni del lettore di immagini",
 			"overrideGlobalSettings": "Sovrascrivi impostazioni globali",
 			"sections": {
-				"mode": "Mode",
-				"imageOptions": "Image Options",
-				"controls": "Controls"
+				"mode": "Modalità",
+				"imageOptions": "Opzioni immagine",
+				"controls": "Controlli"
 			},
 			"readingMode": {
-				"label": "Flow",
+				"label": "Flusso",
 				"options": {
-					"PAGED": "Paged",
-					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
-					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
+					"PAGED": "Pagina singola",
+					"CONTINUOUS_HORIZONTAL": "Scorrimento (Orizzontale)",
+					"CONTINUOUS_VERTICAL": "Scorrimento (Verticale)"
 				}
 			},
 			"readingDirection": {
-				"label": "Direction",
+				"label": "Direzione",
 				"options": {
-					"RTL": "Right to left",
-					"LTR": "Left to right"
+					"RTL": "Da destra a sinistra",
+					"LTR": "Da sinistra a destra"
 				}
 			},
 			"doublePageBehavior": {
-				"label": "Double Paged",
+				"label": "Doppia pagina",
 				"options": {
-					"always": "Always",
-					"auto": "Auto",
-					"off": "Off"
+					"always": "Sempre",
+					"auto": "Automatico",
+					"off": "Disattivo"
 				}
 			},
-			"separateSecondPage": "Separate Second Page",
+			"separateSecondPage": "Separa la seconda pagina",
 			"imageScaling": {
-				"label": "Scaling",
+				"label": "Ridimensionamento proporzionale",
 				"options": {
-					"AUTO": "Auto",
-					"HEIGHT": "Fit Height",
-					"WIDTH": "Fit Width",
-					"NONE": "None"
+					"AUTO": "Automatico",
+					"HEIGHT": "Adatta altezza",
+					"WIDTH": "Adatta larghezza",
+					"NONE": "Nessuno"
 				}
 			},
 			"allowDownscaling": "Downscaling",
-			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"tapSidesToNavigate": "Tocca i lati per navigare",
 			"volumeButtonsNavigate": "Navigazione con i tasti del volume",
 			"footerControls": {
-				"label": "Footer",
+				"label": "Piè di pagina",
 				"options": {
-					"images": "Image Gallery",
-					"slider": "Slider"
+					"images": "Galleria immagini",
+					"slider": "Cursore"
 				}
 			},
 			"readingTimer": {
-				"label": "Timer di lettura",
+				"label": "Tempo di lettura",
 				"resetTimer": "Reimposta timer"
 			},
 			"allSettings": "Tutte le impostazioni"
@@ -3205,14 +3205,14 @@
 			"WEB_NOVEL": "Web novel"
 		},
 		"savedServerActions": {
-			"clearCache": "Clear Cache",
+			"clearCache": "Svuota cache",
 			"discardTokens": {
-				"label": "Discard Tokens",
-				"description": "Affects login tokens only"
+				"label": "Scarta token",
+				"description": "Influisce solo sui token di accesso"
 			},
 			"deleteServer": {
-				"title": "Delete Server",
-				"confirmation": "Are you sure you want to delete {{serverName}}?"
+				"title": "Elimina server",
+				"confirmation": "Sei sicuro di voler eliminare {{serverName}}?"
 			}
 		},
 		"filtering": {

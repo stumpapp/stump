@@ -17,15 +17,15 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	Condition, DatabaseConnection, DatabaseTransaction, IntoActiveModel, Iterable, Set,
-	TransactionTrait,
+	ActiveValue, Condition, DatabaseConnection, DatabaseTransaction, IntoActiveModel,
+	Iterable, Set, TransactionTrait,
 };
 use tokio::{sync::oneshot, task::spawn_blocking};
 use walkdir::DirEntry;
 
 use crate::{
 	config::StumpConfig,
-	database::SQLITE_BIND_LIMIT,
+	database::{get_insert_batch_size, SQLITE_BIND_LIMIT},
 	error::{CoreError, CoreResult},
 	event::CreatedMedia,
 	filesystem::{
@@ -34,16 +34,13 @@ use crate::{
 		series::{BuiltSeries, SeriesBuilder},
 	},
 	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
+	utils::get_cpu_concurrency_limit,
 	CoreEvent,
 };
 
 use super::options::BookVisitResult;
 
-pub fn get_max_scanner_concurrency() -> usize {
-	std::thread::available_parallelism()
-		.map(|n| n.get() * 2)
-		.unwrap_or(2)
-}
+const MAX_INSERT_CHUNK_SIZE: usize = 250;
 
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
@@ -78,45 +75,7 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
-// // TODO(noodle): needed?
-// pub(crate) async fn create_media(
-// 	db: &DatabaseConnection,
-// 	BuiltMedia {
-// 		media,
-// 		metadata,
-// 		tags,
-// 	}: BuiltMedia,
-// ) -> CoreResult<media::Model> {
-// 	let txn = db.begin().await?;
-// 	let mut tag_id_cache = HashMap::new();
-// 	let created_media =
-// 		create_media_in_txn(&txn, media, metadata, &tags, &mut tag_id_cache).await?;
-
-// 	txn.commit().await?;
-
-// 	Ok(created_media)
-// }
-
-async fn create_media_in_txn(
-	txn: &DatabaseTransaction,
-	BuiltMedia {
-		media,
-		metadata,
-		tags,
-	}: BuiltMedia,
-	tag_id_cache: &mut HashMap<String, i32>,
-) -> CoreResult<media::Model> {
-	let created_media = media.insert(txn).await?;
-
-	if let Some(meta) = metadata {
-		meta.insert(txn).await?;
-	}
-
-	ensure_tags_linked_for_media(txn, &created_media.id, &tags, tag_id_cache).await?;
-
-	Ok(created_media)
-}
-
+// TODO(noodle): needed?
 async fn ensure_tags_linked_for_media(
 	txn: &DatabaseTransaction,
 	media_id: &str,
@@ -582,7 +541,7 @@ pub(crate) async fn safely_build_series(
 	let mut logs = vec![];
 	let mut created_series = Vec::with_capacity(paths.len());
 
-	let batch_size = get_max_scanner_concurrency();
+	let batch_size = get_cpu_concurrency_limit();
 	let total_series = paths.len();
 	tracing::debug!(total_series, batch_size, "Processing series");
 
@@ -827,7 +786,7 @@ pub(crate) async fn safely_build_and_insert_media(
 		return Ok(output);
 	};
 
-	let chunk_size = get_max_scanner_concurrency();
+	let chunk_size = get_cpu_concurrency_limit();
 	let book_count = paths.len();
 	tracing::debug!(book_count, chunk_size, "Processing media");
 
@@ -910,8 +869,8 @@ pub(crate) async fn safely_build_and_insert_media(
 	let task_count = books.len() as i32;
 	let start = Instant::now();
 
-	// TODO(noodle): arbitrary
-	const MEDIA_INSERT_CHUNK_SIZE: usize = 250;
+	let media_cols_count = media::Column::iter().count();
+	let media_metadata_cols_count = media_metadata::Column::iter().count();
 
 	let atomic_cursor = Arc::new(AtomicUsize::new(1));
 	let mut tag_id_cache = HashMap::new();
@@ -919,48 +878,83 @@ pub(crate) async fn safely_build_and_insert_media(
 	while !books.is_empty() {
 		let txn = worker_ctx.conn().begin().await?;
 
-		for _ in 0..MEDIA_INSERT_CHUNK_SIZE {
-			let Some(book) = books.pop_front() else {
+		let chunk_count = MAX_INSERT_CHUNK_SIZE.min(books.len());
+
+		let mut media_models = Vec::with_capacity(chunk_count);
+		let mut meta_models: Vec<media_metadata::ActiveModel> = Vec::new();
+		let mut tags_by_media: Vec<(String, Vec<String>)> = Vec::new();
+		let mut inserted_ids: Vec<String> = Vec::with_capacity(chunk_count);
+
+		for _ in 0..chunk_count {
+			let Some(BuiltMedia {
+				media,
+				metadata,
+				tags,
+			}) = books.pop_front()
+			else {
 				break;
 			};
 
-			let Some(path) = book.path() else {
-				tracing::warn!(?book, "Book has no path?");
-				continue;
+			let media_id = match media.id.clone() {
+				ActiveValue::Set(id) | ActiveValue::Unchanged(id) => id,
+				ActiveValue::NotSet => {
+					// this should not really happen but i want the log without killing
+					// the entire batch
+					tracing::warn!(?media, "Media built without an id, skipping");
+					continue;
+				},
 			};
 
-			match create_media_in_txn(&txn, book, &mut tag_id_cache).await {
-				Ok(created_media) => {
-					// TODO(metadata-fetching): Track this as needing fetching (assuming enabled)
-					output.created_media += 1;
-					worker_ctx.report_progress(JobProgress::subtask_position(
-						atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-						task_count,
-					));
-					worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
-						id: created_media.id,
-						series_id: series_id.clone(),
-						library_id: library_id.clone(),
-					}));
-				},
-				Err(e) => {
-					worker_ctx.report_progress(JobProgress::subtask_position(
-						atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-						task_count,
-					));
-					tracing::error!(error = ?e, ?path, "Failed to create media");
-					output.logs.push(
-						JobExecuteLog::error(format!(
-							"Failed to create media: {:?}",
-							e.to_string()
-						))
-						.with_ctx(path),
-					);
-				},
+			inserted_ids.push(media_id.clone());
+			media_models.push(media);
+
+			if let Some(meta) = metadata {
+				meta_models.push(meta);
+			}
+
+			if !tags.is_empty() {
+				tags_by_media.push((media_id, tags));
 			}
 		}
 
+		let media_batch_size = get_insert_batch_size(media_cols_count);
+		for batch in media_models.chunks(media_batch_size) {
+			media::Entity::insert_many(batch.to_vec())
+				.exec(&txn)
+				.await
+				.map_err(CoreError::from)?;
+		}
+
+		if !meta_models.is_empty() {
+			let meta_batch_size = get_insert_batch_size(media_metadata_cols_count);
+			for batch in meta_models.chunks(meta_batch_size) {
+				media_metadata::Entity::insert_many(batch.to_vec())
+					.exec(&txn)
+					.await
+					.map_err(CoreError::from)?;
+			}
+		}
+
+		for (media_id, tag_names) in &tags_by_media {
+			ensure_tags_linked_for_media(&txn, media_id, tag_names, &mut tag_id_cache)
+				.await?;
+		}
+
 		txn.commit().await?;
+
+		// TODO(metadata-fetching): Track inserted_ids as needing fetching (assuming enabled)
+		for media_id in inserted_ids {
+			output.created_media += 1;
+			worker_ctx.report_progress(JobProgress::subtask_position(
+				atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+				task_count,
+			));
+			worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
+				id: media_id,
+				series_id: series_id.clone(),
+				library_id: library_id.clone(),
+			}));
+		}
 	}
 
 	let success_count = output.created_media;
@@ -1017,7 +1011,7 @@ pub(crate) async fn visit_and_update_media(
 		));
 	}
 
-	let chunk_size = get_max_scanner_concurrency();
+	let chunk_size = get_cpu_concurrency_limit();
 	let book_count = media.len();
 	tracing::debug!(book_count, chunk_size, "Processing media visit");
 

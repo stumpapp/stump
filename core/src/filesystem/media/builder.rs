@@ -37,19 +37,6 @@ pub struct BuiltMedia {
 	pub tags: Vec<String>,
 }
 
-impl BuiltMedia {
-	#[tracing::instrument(skip(self))]
-	pub fn path(&self) -> Option<String> {
-		match self.media.path.clone().into_value() {
-			Some(path) => Some(path.to_string()),
-			_ => {
-				tracing::warn!(result = ?self, "Failed to get path from constructed media");
-				None
-			},
-		}
-	}
-}
-
 impl MediaBuilder {
 	pub fn new(
 		path: &Path,

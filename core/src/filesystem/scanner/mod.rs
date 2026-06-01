@@ -9,5 +9,5 @@ pub use library_scan_job::{LibraryScanJob, LibraryScanOutput};
 pub use library_watcher::LibraryWatcher;
 pub use options::{CustomVisit, CustomVisitResult, ScanConfig, ScanOptions};
 pub use series_scan_job::{SeriesScanJob, SeriesScanOutput};
-pub use utils::get_max_scanner_concurrency;
+
 pub use walk::{walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx};

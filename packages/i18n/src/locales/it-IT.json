@@ -1542,39 +1542,39 @@
 				},
 				"showThumbnailsInHeader": {
 					"label": "Mostra le miniature nelle intestazioni",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"description": "Se preferisci vedere le miniature più spesso, questa impostazione le mostrerà in più punti",
 					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
+						"enabled": "Questa impostazione mostrerà le miniature in più punti",
+						"disabled": "Questa impostazione non mostrerà le miniature in più punti"
 					}
 				},
 				"hideScrollbarToggle": {
-					"label": "Hide scrollbar",
-					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"label": "Nascondi barra di scorrimento",
+					"description": "Alcune pagine appaiono semplicemente meglio senza barra di scorrimento, questa impostazione la nasconderà quando possibile",
 					"tooltips": {
-						"enabled": "This setting will hide the scrollbar on some pages",
-						"disabled": "This setting will show the scrollbar on some pages"
+						"enabled": "Questa impostazione nasconderà la barra di scorrimento su alcune pagine",
+						"disabled": "Questa impostazione mostrerà la barra di scorrimento su alcune pagine"
 					}
 				},
 				"enableAlphabetFiltering": {
-					"label": "Alphabet filtering",
-					"description": "Show an alphabet filter when applicable"
+					"label": "Filtro alfabetico",
+					"description": "Mostra un filtro alfabetico quando applicabile"
 				},
 				"enableFancyAnimations": {
-					"label": "Fancy animations",
-					"description": "A broad opt-in for fancier animations throughout the app"
+					"label": "Animazioni avanzate",
+					"description": "Abilita globalmente animazioni più avanzate in tutta l'app"
 				},
 				"queryIndicatorToggle": {
-					"label": "Background fetch indicator",
-					"description": "Show a loading indicator whenever a query is running in the background"
+					"label": "Indicatore attività in background",
+					"description": "Mostra un indicatore di caricamento ogni volta che viene eseguita una query in background"
 				},
 				"liveRefetchToggle": {
-					"label": "Live refetch",
-					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+					"label": "Aggiornamento in tempo reale",
+					"description": "Aggiorna le query istantaneamente per caricare i nuovi dati nella UI non appena arrivano. Questa opzione può consumare molte risorse"
 				},
 				"enableJobOverlayToggle": {
-					"label": "Job overlay",
-					"description": "Show a floating overlay while a job is running"
+					"label": "Overlay delle attività",
+					"description": "Mostra un elemento in sovrimpressione mentre un'attività è in corso"
 				},
 				"dayResetHourOffset": {
 					"label": "Reading day reset offset",
@@ -1587,327 +1587,327 @@
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "Chiavi API",
+			"title": "Chiavi API",
+			"description": "Gestisci le chiavi API di Stump generate",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "Nome",
+					"expiration": "Scadenza",
+					"last_used": "Ultimo utilizzo",
+					"created": "Creata",
+					"permissions": "Autorizzazioni",
+					"inherited": "Ereditata",
+					"explicit": "Esplicita"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "Chiave API",
+					"description": "Una vista dettagliata di questa chiave",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "Chiave senza restrizioni",
+						"description": "Poiché sei il proprietario del server, questa chiave ha accesso senza restrizioni quando è configurata per ereditare i permessi. Presta attenzione."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "Crea chiave API",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "Crea chiave API",
+							"created": "Chiave creata"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "Le chiavi API sono credenziali a lungo termine che possono essere utilizzate per autenticarsi con l'API",
+							"created": "La tua nuova chiave API è stata creata. Salva il codice segreto in un luogo sicuro, poiché non verrà mostrato di nuovo"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "Questa chiave API erediterà tutte le tue autorizzazioni, il che significa che potrà fare tutto ciò che fai tu. Presta attenzione a questa impostazione",
+						"createdKey": "Chiave creata",
+						"savedConfirm": "Ho salvato la mia chiave",
+						"submit": "Crea chiave"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "Le tue chiavi",
+					"description": "Queste sono le chiavi API che hai creato",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "Ispeziona",
+						"delete": "Elimina"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "Non hai creato ancora nessuna chiave",
+						"action": "Crea una chiave API per iniziare"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "Nessuna scadenza impostata"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "Impostazioni del lettore",
+			"title": "Impostazioni del lettore",
+			"description": "Opzioni predefinite per i lettori di Stump. Queste impostazioni sono associate esclusivamente al tuo dispositivo attuale",
 			"sections": {
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "Direzione di lettura",
+							"description": "La direzione in cui il lettore procederà attraverso le pagine"
 						}
 					}
 				},
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "Libri basati su immagini",
+					"description": "Fumetti, manga e altri libri basati su immagini",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "Precaricamento pagine successive",
+							"description": "Il numero di pagine da precaricare dopo la pagina corrente"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Precaricamento pagine precedenti",
+							"description": "Il numero di pagine da precaricare prima della pagina corrente"
 						}
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
+					"label": "Lettore Ebook",
+					"description": "Impostazioni predefinite per i libri di testo",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "Dimensioni carattere",
+							"description": "La dimensione del carattere utilizzato nel lettore"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "Famiglia di caratteri",
+							"description": "Il carattere utilizzato nel lettore"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "Interlinea",
+							"description": "L'interlinea del testo nel lettore"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "Cancella preferenze",
+							"description": "Ripristina le impostazioni dei singoli libri che sostituiscono quelle predefinite",
+							"button": "Cancella preferenze"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Impostazioni desktop",
+			"title": "Impostazioni desktop",
+			"description": "Impostazioni relative all'applicazione desktop di Stump",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "Server configurati",
+					"description": "L'elenco dei server Stump a cui è possibile connettersi",
+					"getStarted": "Aggiungi un server per iniziare",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "Server non raggiungibile"
 					},
 					"activeServer": {
-						"tooltip": "Current server"
+						"tooltip": "Server attuale"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "A server with this name already exists",
-							"nameForbidden": "This name is reserved",
-							"urlExists": "A server with this URL already exists"
+							"nameExists": "Un server con questo nome esiste già",
+							"nameForbidden": "Questo nome è riservato",
+							"urlExists": "Un server con questo URL esiste già"
 						},
 						"fields": {
 							"name": {
-								"label": "Name",
-								"description": "A friendly name to identify this server",
-								"placeholder": "My server"
+								"label": "Nome",
+								"description": "Un nome intuitivo per identificare in modo univoco questo server",
+								"placeholder": "Il mio server"
 							},
 							"uri": {
 								"label": "URI",
-								"description": "The URL of the Stump server",
+								"description": "L'URL del server Stump",
 								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "Add server",
-						"title": "Add a new server",
-						"description": "Add a new Stump server to the desktop application",
-						"confirm": "Add server"
+						"trigger": "Aggiungi server",
+						"title": "Aggiungi un nuovo server",
+						"description": "Aggiungi un nuovo server Stump all'applicazione desktop",
+						"confirm": "Aggiungi server"
 					},
 					"editServer": {
-						"tooltip": "Edit server",
-						"title": "Edit server",
-						"description": "Edit the details of this server",
-						"confirm": "Save changes"
+						"tooltip": "Modifica server",
+						"title": "Modifica server",
+						"description": "Modifica i dettagli di questo server",
+						"confirm": "Salve le modifiche"
 					},
 					"deleteServer": {
-						"tooltip": "Delete server",
+						"tooltip": "Elimina server",
 						"confirmation": {
-							"title": "Delete this server",
-							"description": "This will remove the server from the desktop application",
-							"disclaimerActiveServer": "This server is currently active. You will be logged out",
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete server"
+							"title": "Elimina questo server",
+							"description": "Questa operazione rimuoverà il server dall'applicazione desktop",
+							"disclaimerActiveServer": "Questo server è attualmente attivo. Verrai disconnesso dal tuo account",
+							"disclaimerLastServer": "Questo è l'ultimo server configurato. Verrai disconnesso dal tuo account e dovrai riconfigurare i server durante il processo d'inizializzazione",
+							"confirm": "Elimina server"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "Switch to server",
+						"tooltip": "Passa al server",
 						"confirmation": {
-							"title": "Switch to this server",
-							"description": "This will log you out of your current server",
-							"confirm": "Switch to server",
+							"title": "Passa a questo server",
+							"description": "Verrai disconnesso dal server attuale",
+							"confirm": "Passa al server",
 							"server": "Server",
 							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "Delete all servers",
+						"label": "Elimina tutti i server",
 						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
+							"Elimina tutti i server configurati dall'applicazione desktop",
+							"Questa azione non può essere annullata"
 						],
 						"confirmation": {
-							"trigger": "Delete all servers",
-							"title": "Delete all servers",
-							"description": "This will remove all servers from the desktop application",
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete all servers"
+							"trigger": "Elimina tutti i server",
+							"title": "Elimina tutti i server",
+							"description": "Questa operazione rimuoverà tutti i server dall'applicazione desktop",
+							"disclaimer": "Verrai disconnesso dal tuo account e dovrai riconfigurare i server durante il processo d'inizializzazione",
+							"confirm": "Elimina tutti i server"
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "Elimina token",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"Rimuovi tutti i token di accesso memorizzati in modo sicuro per i tuoi server",
+							"Sarà necessario autenticarsi nuovamente e/o riconfigurare ciascun server"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "Elimina token",
+							"title": "Elimina token",
+							"description": "Sei sicuro di voler eliminare tutti i token memorizzati?",
+							"confirm": "Elimina token"
 						}
 					}
 				},
 				"optionalFeatures": {
-					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
+					"label": "Funzionalità opzionali",
+					"description": "Gestisci le funzionalità opzionali esclusive dell'applicazione desktop",
 					"bundledServer": {
-						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"label": "Server integrato",
+						"description": "Esegui il server integrato in background quando l'applicazione desktop è in funzione (richiede il riavvio)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
-						"description": "Display your Stump activity in Discord using Discord Rich Presence",
-						"reconnect": "Reconnect to Discord"
+						"label": "Stato attività di Discord",
+						"description": "Mostra la tua attività su Stump all'interno di Discord utilizzando la Rich Presence di Discord",
+						"reconnect": "Riconnetti a Discord"
 					}
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"helmet": "Impostazioni del server",
+			"title": "Impostazioni del server",
+			"description": "Impostazioni generali relative alla tua istanza del server Stump",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Il tuo server non è aggiornato. Aggiornalo all'ultima versione!"
 				},
 				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
+					"title": "Informazioni sul server",
+					"description": "Dettagli di base sulla tua istanza del server Stump",
 					"build": {
 						"label": "Build",
-						"description": "Details about the version and build",
+						"description": "Dettagli relativi alla versione e alla build",
 						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"semver": "Versione",
+							"commitHash": "Commit esatto",
+							"date": "Data della build"
 						}
 					},
 					"nonStableChannel": {
-						"title": "You are running a non-stable build of Stump",
+						"title": "Stai eseguendo una build non stabile di Stump",
 						"description": [
-							"It looks like you are running the",
-							"build channel"
+							"Sembra che tu stia eseguendo la versione",
+							"del canale di build"
 						]
 					}
 				},
 				"helpfulLinks": {
-					"title": "Helpful links",
-					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"title": "Link utili",
+					"description": "Collegamenti a risorse che possono essere utili per gestire l'istanza del tuo server Stump",
 					"links": {
-						"documentation": "Documentation",
+						"documentation": "Documentazione",
 						"changelog": "Changelog"
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
+					"label": "URL pubblico",
+					"description": "L'URL da cui il server è accessibile dall'esterno della rete, se applicabile. Questo abiliterà i link di invito e altre funzionalità"
 				},
 				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
-					"dropzone": "Drop an image or click to select",
+					"title": "Emoji personalizzate",
+					"description": "Carica e gestisci le emoji personalizzate per il tuo server",
+					"dropzone": "Trascina un'immagine o fai clic per selezionare",
 					"input": {
-						"label": "Emoji name",
-						"placeholder": "e.g. party_parrot"
+						"label": "Nome emoji",
+						"placeholder": "es. party_parrot"
 					},
 					"deleteModal": {
-						"title": "Delete emoji",
-						"description": "Are you sure you want to delete this emoji?"
+						"title": "Elimina emoji",
+						"description": "Sei sicuro di voler eliminare questa emoji?"
 					},
-					"noCustomEmojis": "No custom emojis have been added yet",
-					"invalidName": "Please enter a valid name for your emoji",
-					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
-					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
-					"deleteError": "Failed to delete emoji"
+					"noCustomEmojis": "Non è ancora stata aggiunta alcuna emoji personalizzata",
+					"invalidName": "Inserisci un nome valido per la tua emoji",
+					"uploadError": "Impossibile caricare l'emoji",
+					"uploadSuccess": "Emoji caricata",
+					"renameSuccess": "Emoji rinominata",
+					"renameError": "Impossibile rinominare l'emoji",
+					"deleteSuccess": "Emoji eliminata",
+					"deleteError": "Impossibile eliminare l'emoji"
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "Logs",
-			"title": "Logs",
-			"description": "The logs generated by your Stump server instance",
+			"helmet": "Log",
+			"title": "Log",
+			"description": "I log generati dalla tua istanza del server Stump",
 			"sections": {
 				"persistedLogs": {
-					"title": "Persisted logs",
-					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
+					"title": "Log persistenti",
+					"description": "Questi log sono stati salvati manualmente nel database e sono solitamente associati a un'attività o a un evento specifico",
 					"table": {
 						"columns": {
-							"level": "Level",
-							"message": "Message",
-							"timestamp": "Timestamp"
+							"level": "Livello",
+							"message": "Messaggio",
+							"timestamp": "Data e ora"
 						},
-						"emptyHeading": "No logs to display",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptyHeading": "Nessun log da visualizzare",
+						"emptySubtitle": "Il tuo server è o estremamente in salute o estremamente in crisi"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Elimina log",
+						"description": "Elimina permanentemente tutti i log persistenti dal database",
+						"disclaimer": "Questa azione non può essere annullata",
+						"confirm": "Elimina log"
 					}
 				},
 				"liveLogs": {
-					"title": "Live logs feed",
-					"description": "Streamed directly from your Stump server instance in real-time"
+					"title": "Flusso dei log in tempo reale",
+					"description": "Trasmessi direttamente dalla tua istanza del server Stump in tempo reale"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
+			"helmet": "Attività",
+			"title": "Attività",
+			"description": "Attività in background che vengono eseguite sull'istanza del tuo server Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
+					"title": "Attività programmate",
+					"description": "Alcune attività possono essere configurate per essere eseguite automaticamente in base a una pianificazione",
 					"restartRequiredTitle": "È necessario riavviare",
 					"restartRequired": "Le modifiche a questa configurazione avranno effetto dopo il riavvio del server",
 					"newScheduledJob": "Nuova attività pianificata",
@@ -1978,70 +1978,70 @@
 					}
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
+					"title": "Cronologia",
+					"description": "Un registro delle attività che sono state eseguite sulla tua istanza del server Stump",
 					"table": {
 						"columns": {
-							"name": "Type",
-							"description": "Description",
-							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"name": "Tipo",
+							"description": "Descrizione",
+							"status": "Stato",
+							"createdAt": "Avviata il",
+							"elapsed": "Durata",
+							"tasks": "Operazioni"
 						},
-						"emptyHeading": "There are no jobs to display",
-						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
+						"emptyHeading": "Non ci sono attività da visualizzare",
+						"emptySubtitle": "Non puoi avere un'attività se non hai un lavoro",
+						"deleteAllMessage": "La cronologia delle attività e le statistiche possono essere eliminate dal database in qualsiasi momento. Questa operazione non può essere annullata"
 					},
 					"deleteJobHistory": {
-						"title": "Delete job history",
-						"description": "Permanently delete all job history from the database",
-						"confirmText": "Are you sure you want to delete all job history?",
-						"confirm": "Delete",
-						"emptyState": "No jobs to clear"
+						"title": "Elimina cronologia attività",
+						"description": "Elimina permanentemente tutte le attività dal database",
+						"confirmText": "Sei sicuro di voler eliminare tutta la cronologia delle attività?",
+						"confirm": "Elimina",
+						"emptyState": "Nessuna attività da cancellare"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Gestione utenti",
+			"title": "Utenti",
+			"description": "Gestisci gli utenti su questo server",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "Crea utente",
+				"title": "Crea utente",
+				"description": "Crea un nuovo utente su questo server"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Aggiorna utente",
+				"title": "Aggiorna utente",
+				"description": "Aggiorna i dettagli di questo utente"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Controllo degli accessi e restrizioni",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"Configura le restrizioni che desideri applicare a questo utente. Per maggiori informazioni sul controllo degli accessi, consulta la",
+						"documentazione"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Limitazioni d'età",
+						"description": "Impedisce all'utente di accedere a contenuti che superano la soglia della fascia d'età impostata",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Forza se non impostato",
+							"description": "Se abilitato, agli utenti sarà vietato l'accesso ai contenuti privi di classificazione dell'età"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Limitazioni per tag",
+						"description": "Impedisce all'utente di accedere a contenuti con i tag selezionati",
+						"placeholder": "Contenuti per adulti, Violenza esplicita"
 					}
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "Profilo",
+						"accountManagement": "Account",
 						"featureAccess": "Accesso alle funzionalità",
 						"fileManagement": "File",
 						"emailers": "Sistemi di invio email",
@@ -2050,76 +2050,76 @@
 						"userManagement": "Gestione utenti",
 						"serverManagement": "Gestione server"
 					},
-					"heading": "Permissions",
+					"heading": "Autorizzazioni",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Seleziona le autorizzazioni che desideri concedere a questo utente. Per maggiori informazioni sulla funzione di ciascun permesso, consulta la",
+						"documentazione"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Club del libro",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Accedere alle funzionalità del club del libro",
+							"description": "Consente all'utente di accedere alle funzionalità del club del libro, inclusa la visualizzazione e l'iscrizione ai club"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Creare club del libro",
+							"description": "Consente all'utente di creare nuovi club del libro"
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Attivazione funzionalità opzionali",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "Chiavi API",
+							"description": "Consente all'utente di gestire le proprie chiavi API"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "Sincronizzazione KoReader",
+							"description": "Consente all'utente di accedere all'integrazione della sincronizzazione KoReader"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "Gestione file",
 						"explorer": {
-							"label": "Esplora file",
-							"description": "Consente all'utente di accedere ai vari esplora file. La restrizione dei contenuti non può essere garantita quando questa funzione viene abilitata"
+							"label": "Esplorare file",
+							"description": "Consente all'utente di accedere ai vari esplora file. Se questa funzionalità viene concessa, non è possibile garantire la restrizione dei contenuti"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Scaricare file",
+							"description": "Consente all'utente di scaricare file dal server"
 						},
 						"upload": {
-							"label": "Upload files",
+							"label": "Caricare file",
 							"description": "Consente all'utente di caricare file sul server"
 						}
 					},
 					"emailer": {
-						"label": "Emailers",
+						"label": "Sistemi di invio email",
 						"read": {
-							"label": "Access emailers",
-							"description": "Allows the user to view the configured emailers"
+							"label": "Accedere ai sistemi di invio email",
+							"description": "Consente all'utente di visualizzare i sistemi di invio email configurati"
 						},
 						"create": {
-							"label": "Create emailers",
-							"description": "Allows the user to create new emailers"
+							"label": "Creare sistemi di invio email",
+							"description": "Consente all'utente di creare nuovi sistemi di invio email"
 						},
 						"manage": {
-							"label": "Manage emailers",
-							"description": "Allows the user to manage existing emailers"
+							"label": "Gestire sistemi di invio email",
+							"description": "Consente all'utente di gestire i sistemi di invio email esistenti"
 						}
 					},
 					"email": {
-						"label": "Emailing",
+						"label": "Invio email",
 						"send": {
-							"label": "Send emails",
-							"description": "Allows the user to send emails from the server to any configured aliases"
+							"label": "Inviare email",
+							"description": "Consente all'utente di inviare email dal server a qualsiasi alias configurato"
 						},
 						"arbitrary_send": {
-							"label": "Send arbitrary emails",
-							"description": "Allows the user to send emails from the server to any email address"
+							"label": "Inviare email arbitrarie",
+							"description": "Consente all'utente di inviare email dal server a qualsiasi indirizzo email"
 						}
 					},
 					"library": {
-						"label": "Gestione Libreria",
+						"label": "Gestione libreria",
 						"create": {
 							"label": "Creare librerie",
 							"description": "Consente all'utente di creare nuove librerie.\nInclude le autorizzazioni per modificare ed eseguire la scansione"
@@ -2142,7 +2142,7 @@
 						}
 					},
 					"server": {
-						"label": "Gestione Server",
+						"label": "Gestione server",
 						"manage": {
 							"label": "Gestire server",
 							"description": "Consente all'utente di gestire il server.\nInclude *molte* altre autorizzazioni"
@@ -2160,9 +2160,9 @@
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
+						"label": "Liste smart",
 						"read": {
-							"label": "Access smart list feature",
+							"label": "Accedere alla funzione lista smart",
 							"description": "Consente all'utente di accedere alle funzionalità delle smart list. Le autorizzazioni granulari non sono ancora implementate, quindi questa include i permessi per leggere, creare e aggiornare le proprie liste"
 						}
 					}
@@ -2604,87 +2604,87 @@
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
+			"label": "Chiavi API",
+			"description": "Consente all'utente di gestire le proprie chiavi API"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+			"label": "Club del libro",
+			"description": "Consente all'utente di accedere alle funzionalità del club del libro, inclusa la visualizzazione e l'iscrizione ai club"
 		},
 		"ACCESS_KOREADER_SYNC": {
-			"label": "KoReader sync",
-			"description": "Allows the user to access the KoReader sync integration"
+			"label": "Sincronizzazione KoReader",
+			"description": "Consente all'utente di accedere all'integrazione della sincronizzazione KoReader"
 		},
 		"ACCESS_KOBO_SYNC": {
 			"label": "Sincronizzazione Kobo",
 			"description": "Consente all'utente di accedere all'integrazione della sincronizzazione Kobo"
 		},
 		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
-			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+			"label": "Liste smart",
+			"description": "Consente all'utente di accedere alle funzionalità della lista smart, inclusa la creazione e la gestione di liste smart"
 		},
 		"CHANGE_PASSWORD": {
-			"label": "Cambia password",
+			"label": "Cambiare password",
 			"description": "Consente all'utente di modificare la propria password"
 		},
 		"CHANGE_USERNAME": {
-			"label": "Cambia nome utente",
+			"label": "Cambiare nome utente",
 			"description": "Consente all'utente di modificare il proprio nome utente"
 		},
 		"CHANGE_AVATAR": {
-			"label": "Cambia avatar",
+			"label": "Cambiare avatar",
 			"description": "Consente all'utente di modificare il proprio avatar"
 		},
 		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
-			"description": "Allows the user to create new book clubs"
+			"label": "Creare club del libro",
+			"description": "Consente all'utente di creare nuovi club del libro"
 		},
 		"CREATE_LIBRARY": {
-			"label": "Create libraries",
-			"description": "Allows the user to create new libraries"
+			"label": "Creare librerie",
+			"description": "Consente all'utente di creare nuove librerie"
 		},
 		"CREATE_NOTIFIER": {
-			"label": "Create notifiers",
-			"description": "Allows the user to create new notification systems"
+			"label": "Creare notificatori",
+			"description": "Consente all'utente di creare nuovi sistemi di notifica"
 		},
 		"DELETE_LIBRARY": {
-			"label": "Delete libraries",
-			"description": "Allows the user to delete existing libraries"
+			"label": "Eliminare librerie",
+			"description": "Consente all'utente di eliminare librerie esistenti"
 		},
 		"DELETE_NOTIFIER": {
-			"label": "Delete notifiers",
-			"description": "Allows the user to delete notification systems"
+			"label": "Eliminare notificatori",
+			"description": "Consente all'utente di eliminare sistemi di notifica"
 		},
 		"DOWNLOAD_FILE": {
-			"label": "Download files",
-			"description": "Allows the user to download files from the server"
+			"label": "Scaricare file",
+			"description": "Consente all'utente di scaricare file dal server"
 		},
 		"EDIT_LIBRARY": {
-			"label": "Edit libraries",
-			"description": "Allows the user to modify existing libraries"
+			"label": "Modificare librerie",
+			"description": "Consente all'utente di modificare librerie esistenti"
 		},
 		"EMAILER_CREATE": {
-			"label": "Create emailer",
-			"description": "Allows the user to create email configuration"
+			"label": "Creare sistema di invio email",
+			"description": "Consente all'utente di creare la configurazione dell'e-mail"
 		},
 		"EMAILER_MANAGE": {
-			"label": "Manage emailer",
-			"description": "Allows the user to manage email configuration and settings"
+			"label": "Gestire sistema di invio e-mail",
+			"description": "Consente all'utente di gestire la configurazione dell'e-mail e le impostazioni"
 		},
 		"EMAILER_READ": {
-			"label": "Read emailer",
-			"description": "Allows the user to view email configuration"
+			"label": "Leggere sistema di invio email",
+			"description": "Consente all'utente di visualizzare la configurazione dell'e-mail"
 		},
 		"EMAIL_ARBITRARY_SEND": {
-			"label": "Send arbitrary emails",
-			"description": "Allows the user to send custom emails to any address"
+			"label": "Inviare email arbitrarie",
+			"description": "Consente all'utente di inviare email personalizzate a qualsiasi indirizzo"
 		},
 		"EMAIL_SEND": {
-			"label": "Send emails",
-			"description": "Allows the user to send emails through the system"
+			"label": "Inviare email",
+			"description": "Consente all'utente di inviare email attraverso il sistema"
 		},
 		"FILE_EXPLORER": {
-			"label": "File explorer",
+			"label": "Esplorare file",
 			"description": "Allows the user to browse and explore the server filesystem"
 		},
 		"MANAGE_LIBRARY": {

@@ -11,7 +11,7 @@ export type StatCardProps = {
 	value: string | number
 	suffix?: string
 	icon: LucideIcon
-	colors: { primary: string; secondary: string }
+	colors: StatColorPalette
 } & ViewProps
 
 type IconProps = { icon: LucideIcon; colors: StatColorPalette }

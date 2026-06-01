@@ -1520,28 +1520,28 @@
 					}
 				},
 				"displaySpacing": {
-					"label": "Display spacing",
-					"description": "Adjusts the overall spacing between elements throughout the app",
+					"label": "Spaziatura schermo",
+					"description": "Regola la spaziatura complessiva tra gli elementi in tutta l'app",
 					"options": {
-						"default": "Default",
-						"compact": "Compact"
+						"default": "Predefinita",
+						"compact": "Compatta"
 					},
-					"disclaimer": "* Compact display mode is not implemented yet"
+					"disclaimer": "* La modalità di visualizzazione compatta non è ancora implementata"
 				},
 				"maxWidthPreference": {
-					"label": "Adjusted width",
-					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
-					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar",
+					"label": "Larghezza regolata",
+					"description": "Stump applica una larghezza massima alla finestra di visualizzazione. Questa impostazione consente di regolare o rimuovere tale limite",
+					"tooltip": "Questa impostazione non è attualmente supportata quando la navigazione principale è impostata sulla barra laterale",
 					"options": {
 						"noLimit": "Nessun limite"
 					}
 				},
 				"additionalPreferences": {
-					"label": "Additional preferences",
-					"description": "Customize the appearance and behavior of Stump with these additional settings"
+					"label": "Preferenze aggiuntive",
+					"description": "Personalizza l'aspetto e il comportamento di Stump con queste impostazioni aggiuntive"
 				},
 				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
+					"label": "Mostra le miniature nelle intestazioni",
 					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
 					"tooltips": {
 						"enabled": "This setting will show thumbnails in more places",

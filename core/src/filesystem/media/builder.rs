@@ -1,7 +1,10 @@
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, FixedOffset, Utc};
-use models::entity::{library_config, media, media_metadata};
+use models::{
+	entity::{library_config, media, media_metadata},
+	shared::enums::FileStatus,
+};
 use sea_orm::Set;
 use uuid::Uuid;
 
@@ -131,6 +134,8 @@ impl MediaBuilder {
 			path: Set(path_str),
 			series_id: Set(Some(self.series_id)),
 			modified_at: Set(last_modified_at),
+			status: Set(FileStatus::Ready),
+			created_at: Set(chrono::Utc::now().into()),
 			..Default::default()
 		};
 

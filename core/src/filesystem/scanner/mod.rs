@@ -2,6 +2,7 @@ mod library_scan_job;
 mod library_watcher;
 mod options;
 mod series_scan_job;
+mod tag_cache;
 mod utils;
 mod walk;
 

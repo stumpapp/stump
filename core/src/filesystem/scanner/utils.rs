@@ -38,7 +38,7 @@ use crate::{
 	CoreEvent,
 };
 
-use super::options::BookVisitResult;
+use super::{options::BookVisitResult, tag_cache::TagCache};
 
 const MAX_INSERT_CHUNK_SIZE: usize = 250;
 
@@ -75,12 +75,11 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
-// TODO(noodle): needed?
 async fn ensure_tags_linked_for_media(
 	txn: &DatabaseTransaction,
 	media_id: &str,
 	tag_names: &[String],
-	tag_id_cache: &mut HashMap<String, i32>,
+	cache: &mut TagCache,
 ) -> CoreResult<()> {
 	let desired: HashSet<String> = tag_names
 		.iter()
@@ -94,7 +93,7 @@ async fn ensure_tags_linked_for_media(
 
 	let unknown_names: Vec<String> = desired
 		.iter()
-		.filter(|name| !tag_id_cache.contains_key(*name))
+		.filter(|name| !cache.contains(name))
 		.cloned()
 		.collect();
 
@@ -105,12 +104,12 @@ async fn ensure_tags_linked_for_media(
 			.await?;
 
 		for existing_tag in existing {
-			tag_id_cache.insert(existing_tag.name, existing_tag.id);
+			cache.insert(existing_tag.name, existing_tag.id);
 		}
 
 		let to_create: Vec<tag::ActiveModel> = unknown_names
 			.into_iter()
-			.filter(|name| !tag_id_cache.contains_key(name))
+			.filter(|name| !cache.contains(name))
 			.map(|name| tag::ActiveModel {
 				name: Set(name),
 				..Default::default()
@@ -128,14 +127,14 @@ async fn ensure_tags_linked_for_media(
 				.await?;
 
 			for resolved_tag in refreshed {
-				tag_id_cache.insert(resolved_tag.name, resolved_tag.id);
+				cache.insert(resolved_tag.name, resolved_tag.id);
 			}
 		}
 	}
 
 	let link_rows: Vec<media_tag::ActiveModel> = desired
 		.into_iter()
-		.filter_map(|name| tag_id_cache.get(&name).copied())
+		.filter_map(|name| cache.get(&name))
 		.map(|tag_id| media_tag::ActiveModel {
 			media_id: Set(media_id.to_string()),
 			tag_id: Set(tag_id),
@@ -873,7 +872,8 @@ pub(crate) async fn safely_build_and_insert_media(
 	let media_metadata_cols_count = media_metadata::Column::iter().count();
 
 	let atomic_cursor = Arc::new(AtomicUsize::new(1));
-	let mut tag_id_cache = HashMap::new();
+	// TODO: promote to scanner root to reuse each insert batch? or does it make a diff? we'll see
+	let mut tag_cache = TagCache::new();
 
 	while !books.is_empty() {
 		let txn = worker_ctx.conn().begin().await?;
@@ -936,7 +936,7 @@ pub(crate) async fn safely_build_and_insert_media(
 		}
 
 		for (media_id, tag_names) in &tags_by_media {
-			ensure_tags_linked_for_media(&txn, media_id, tag_names, &mut tag_id_cache)
+			ensure_tags_linked_for_media(&txn, media_id, tag_names, &mut tag_cache)
 				.await?;
 		}
 

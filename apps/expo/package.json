@@ -36,7 +36,7 @@
 		"@rn-primitives/context-menu": "^1.2.0",
 		"@rn-primitives/dialog": "^1.1.0",
 		"@rn-primitives/dropdown-menu": "^1.2.0",
-		"@rn-primitives/label": "^1.1.0",
+		"@rn-primitives/label": "^1.4.0",
 		"@rn-primitives/portal": "~1.1.0",
 		"@rn-primitives/progress": "~1.4.0",
 		"@rn-primitives/radio-group": "^1.2.0",

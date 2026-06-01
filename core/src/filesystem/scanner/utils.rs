@@ -31,7 +31,6 @@ use crate::{
 		series::{BuiltSeries, SeriesBuilder},
 	},
 	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
-	utils::get_cpu_concurrency_limit,
 	CoreEvent,
 };
 
@@ -537,12 +536,13 @@ type BuiltEntityFutures<T, R = PathBuf> =
 pub(crate) async fn safely_build_series(
 	for_library: &str,
 	paths: Vec<PathBuf>,
+	config: Arc<StumpConfig>,
 	reporter: impl Fn(usize),
 ) -> (Vec<BuiltSeries>, Vec<JobExecuteLog>) {
 	let mut logs = vec![];
 	let mut created_series = Vec::with_capacity(paths.len());
 
-	let concurrency = get_cpu_concurrency_limit();
+	let concurrency = config.cpu_concurrency_limit();
 	let total_series = paths.len();
 	tracing::debug!(total_series, concurrency, "Processing series");
 
@@ -791,7 +791,7 @@ pub(crate) async fn safely_build_and_insert_media(
 		return Ok(output);
 	};
 
-	let concurrency = get_cpu_concurrency_limit();
+	let concurrency = worker_ctx.apalis_state.config.cpu_concurrency_limit();
 	let book_count = paths.len();
 	tracing::debug!(book_count, concurrency, "Processing media");
 
@@ -800,7 +800,7 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	worker_ctx.report_progress(JobProgress::msg("Building media from disk"));
 
-	let config_arc = std::sync::Arc::clone(&worker_ctx.apalis_state.config);
+	let config_arc = Arc::clone(&worker_ctx.apalis_state.config);
 	let mut futures: BuiltEntityFutures<BuiltMedia> = FuturesUnordered::new();
 	let mut cursor = 0i32;
 
@@ -1027,7 +1027,7 @@ pub(crate) async fn visit_and_update_media(
 		));
 	}
 
-	let concurrency = get_cpu_concurrency_limit();
+	let concurrency = worker_ctx.apalis_state.config.cpu_concurrency_limit();
 	let book_count = media.len();
 	tracing::debug!(book_count, concurrency, "Processing media visit");
 

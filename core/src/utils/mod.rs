@@ -1,14 +1,6 @@
 pub mod encryption;
 pub mod serde;
 
-/// returns a sensible default concurrency limit based on the number of logical cpus
-/// available to the process
-pub fn get_cpu_concurrency_limit() -> usize {
-	std::thread::available_parallelism()
-		.map(|n| n.get() * 2)
-		.unwrap_or(2)
-}
-
 pub fn chain_optional_iter<T>(
 	required: impl IntoIterator<Item = T>,
 	optional: impl IntoIterator<Item = Option<T>>,

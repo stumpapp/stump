@@ -1,6 +1,7 @@
 use std::{
 	collections::VecDeque,
 	path::{Path, PathBuf},
+	sync::Arc,
 };
 
 use async_graphql::SimpleObject;
@@ -459,14 +460,18 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.report_progress(JobProgress::msg("Building new series"));
 
 					let task_count = series_to_create.len() as i32;
-					let (built_series, failure_logs) =
-						safely_build_series(&self.id, series_to_create, |position| {
+					let (built_series, failure_logs) = safely_build_series(
+						&self.id,
+						series_to_create,
+						Arc::clone(&ctx.apalis_state.config),
+						|position| {
 							ctx.report_progress(JobProgress::subtask_position(
 								position as i32,
 								task_count,
 							))
-						})
-						.await;
+						},
+					)
+					.await;
 
 					current_subtask_index +=
 						(built_series.len() + failure_logs.len()) as i32;

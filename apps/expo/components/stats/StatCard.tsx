@@ -73,7 +73,7 @@ export function MiniStatCard({
 	const { isDarkColorScheme } = useColorScheme()
 
 	const textColor = isDarkColorScheme ? colors.secondary : colors.primary
-	const backgroundColor = isDarkColorScheme ? colors.primary + '80' : colors.secondary + 'c0'
+	const backgroundColor = isDarkColorScheme ? colors.primary + '80' : colors.secondary + '80'
 
 	return (
 		<View

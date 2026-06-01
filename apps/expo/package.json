@@ -77,7 +77,7 @@
 		"expo-router": "~55.0.14",
 		"expo-secure-store": "~55.0.14",
 		"expo-splash-screen": "~55.0.21",
-		"expo-sqlite": "~55.0.16",
+		"expo-sqlite": "~56.0.4",
 		"expo-status-bar": "~55.0.6",
 		"expo-system-ui": "~55.0.18",
 		"fast-xml-parser": "^5.8.0",

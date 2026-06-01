@@ -5,15 +5,13 @@ use std::{
 };
 
 use globset::GlobSet;
-use itertools::Either;
+use itertools::{Either, Itertools};
 use models::entity::{media, series};
-use rayon::iter::{
-	IntoParallelIterator, IntoParallelRefIterator, ParallelBridge, ParallelIterator,
-};
 use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
+	error::CoreError,
 	filesystem::{
 		scanner::{options::BookVisitOperation, utils::file_updated_since_scan},
 		PathUtils,
@@ -78,11 +76,6 @@ pub async fn walk_library(
 		return Ok(WalkedLibrary::missing());
 	}
 
-	let mut walkdir = WalkDir::new(path);
-	if let Some(num) = max_depth {
-		walkdir = walkdir.max_depth(num);
-	}
-
 	let walk_start = std::time::Instant::now();
 	let is_collection_based = max_depth.is_some_and(|d| d == 1);
 	tracing::debug!(
@@ -93,38 +86,49 @@ pub async fn walk_library(
 		"Walking library",
 	);
 
-	let (valid_entries, ignored_entries) = walkdir
-		// Set min_depth to 0 so we include the library path itself,
-		// which allows us to add it as a series when there are media items in it
-		.min_depth(0)
-		.into_iter()
-		.filter_entry(|e| e.path().is_dir())
-		.filter_map(Result::ok)
-		.par_bridge()
-		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
-			let entry_path = entry.path();
-			let entry_path_str = entry_path.as_os_str().to_string_lossy().to_string();
-			let check_deep = is_collection_based && entry_path_str != path;
-
-			let should_ignore = ignore_rules.is_match(entry.path());
-			// If we're doing a top level scan, we need to check that the path
-			// has media deeply nested. Exception for when the path is the library path,
-			// then we only need to check if it has media in it directly
-			//
-			// If we're doing a bottom up scan, we need to check that the path has
-			// media directly in it.
-			let is_valid = !should_ignore
-				&& (check_deep && entry_path.dir_has_media_deep(&ignore_rules)
-					|| (!check_deep && entry_path.dir_has_media(&ignore_rules)));
-
-			tracing::trace!(?is_valid, ?entry_path_str);
-
-			if is_valid {
-				Either::Left(entry)
-			} else {
-				Either::Right(entry)
+	let path_owned = path.to_string();
+	let (valid_entries, ignored_entries): (Vec<DirEntry>, Vec<DirEntry>) =
+		tokio::task::spawn_blocking(move || {
+			let mut walkdir = WalkDir::new(&path_owned);
+			if let Some(num) = max_depth {
+				walkdir = walkdir.max_depth(num);
 			}
-		});
+
+			walkdir
+				// Set min_depth to 0 so we include the library path itself,
+				// which allows us to add it as a series when there are media items in it
+				.min_depth(0)
+				.into_iter()
+				.filter_entry(|e| e.path().is_dir())
+				.filter_map(Result::ok)
+				.partition_map(|entry| {
+					let entry_path = entry.path();
+					let entry_path_str =
+						entry_path.as_os_str().to_string_lossy().to_string();
+					let check_deep = is_collection_based && entry_path_str != path_owned;
+
+					let should_ignore = ignore_rules.is_match(entry.path());
+					// If we're doing a top level scan, we need to check that the path
+					// has media deeply nested. Exception for when the path is the library path,
+					// then we only need to check if it has media in it directly
+					//
+					// If we're doing a bottom up scan, we need to check that the path has
+					// media directly in it.
+					let is_valid = !should_ignore
+						&& (check_deep && entry_path.dir_has_media_deep(&ignore_rules)
+							|| (!check_deep && entry_path.dir_has_media(&ignore_rules)));
+
+					tracing::trace!(?is_valid, ?entry_path_str);
+
+					if is_valid {
+						Either::Left(entry)
+					} else {
+						Either::Right(entry)
+					}
+				})
+		})
+		.await
+		.map_err(|e| CoreError::InternalError(format!("Failed to walk library! {e}")))?;
 
 	let ignored_directories = ignored_entries.len() as u64;
 	let seen_directories = valid_entries.len() as u64 + ignored_directories;
@@ -191,11 +195,11 @@ pub async fn walk_library(
 					.collect();
 
 				valid_entries
-					.par_iter()
+					.iter()
 					.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
 					.map(|e| e.path().to_owned())
 					.chain(existing_empty_series)
-					.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
+					.partition_map(|path| {
 						let already_exists = existing_series_map
 							.contains_key(path.to_string_lossy().as_ref());
 
@@ -292,27 +296,34 @@ pub async fn walk_series(
 
 	tracing::debug!("Walking series at {}", path.display());
 
-	let mut walker = WalkDir::new(path);
-	if let Some(num) = max_depth {
-		walker = walker.max_depth(num);
-	}
-
+	let path_buf = path.to_path_buf();
 	let walk_start = std::time::Instant::now();
-	let (valid_entries, ignored_entries) = walker
-		.into_iter()
-		.filter_map(Result::ok)
-		.filter_map(|e| e.path().is_file().then_some(e))
-		.par_bridge()
-		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
-			let entry_path = entry.path();
-			let matches_ignore_rule = ignore_rules.is_match(entry.path());
-
-			if matches_ignore_rule || entry_path.is_default_ignored() {
-				Either::Right(entry)
-			} else {
-				Either::Left(entry)
+	let (valid_entries, ignored_entries): (Vec<DirEntry>, Vec<DirEntry>) =
+		tokio::task::spawn_blocking(move || {
+			let mut walker = WalkDir::new(&path_buf);
+			if let Some(num) = max_depth {
+				walker = walker.max_depth(num);
 			}
-		});
+
+			walker
+				.into_iter()
+				.filter_map(Result::ok)
+				.filter_map(|e| e.path().is_file().then_some(e))
+				.partition_map(|entry| {
+					let entry_path = entry.path();
+					let matches_ignore_rule = ignore_rules.is_match(entry.path());
+
+					if matches_ignore_rule || entry_path.is_default_ignored() {
+						Either::Right(entry)
+					} else {
+						Either::Left(entry)
+					}
+				})
+		})
+		.await
+		.map_err(|e| {
+			CoreError::InternalError(format!("Series walk task panicked: {e}"))
+		})?;
 
 	let valid_entries_len = valid_entries.len() as u64;
 	let ignored_files = ignored_entries.len() as u64;
@@ -350,9 +361,8 @@ pub async fn walk_series(
 		.map(|m| (m.path.clone(), m.clone()))
 		.collect::<HashMap<String, _>>();
 
-	let (media_to_create, remaining_entries) = valid_entries
-		.into_par_iter()
-		.partition_map::<Vec<PathBuf>, Vec<DirEntry>, _, _, _>(|entry| {
+	let (media_to_create, remaining_entries): (Vec<PathBuf>, Vec<DirEntry>) =
+		valid_entries.into_iter().partition_map(|entry: DirEntry| {
 			let entry_path = entry.path();
 			let entry_path_str = entry_path.to_string_lossy().to_string();
 
@@ -364,8 +374,8 @@ pub async fn walk_series(
 		});
 
 	let book_visit_operations = remaining_entries
-		.into_par_iter()
-		.filter_map(|entry| {
+		.into_iter()
+		.filter_map(|entry: DirEntry| {
 			let entry_path = entry.path();
 			let entry_path_str = entry_path.to_string_lossy().to_string();
 
@@ -405,13 +415,13 @@ pub async fn walk_series(
 		.collect::<Vec<(PathBuf, BookVisitOperation)>>();
 
 	let missing_media = existing_media_map
-		.par_iter()
+		.iter()
 		.filter(|(path, _)| !PathBuf::from(path).exists())
 		.map(|(path, _)| PathBuf::from(path))
 		.collect::<Vec<PathBuf>>();
 
 	let recovered_media = existing_media_map
-		.into_par_iter()
+		.into_iter()
 		.filter(|(path, media)| {
 			media.status.is_recovered_if_present() && PathBuf::from(path).exists()
 		})

@@ -1,15 +1,12 @@
 use std::{
 	collections::{HashMap, HashSet, VecDeque},
 	path::{Path, PathBuf},
-	sync::{
-		atomic::{AtomicUsize, Ordering},
-		Arc,
-	},
+	sync::Arc,
 	time::Instant,
 };
 
 use chrono::{DateTime, Utc};
-use futures::{stream::FuturesUnordered, StreamExt};
+use futures::{future::BoxFuture, stream::FuturesUnordered, StreamExt};
 use models::{
 	entity::{library_config, media, media_metadata, media_tag, series, tag},
 	shared::enums::FileStatus,
@@ -525,6 +522,11 @@ async fn build_series(for_library: &str, path: &Path) -> CoreResult<BuiltSeries>
 	Ok(build_result)
 }
 
+/// a type alias for the unordered stream of futures returned by concurernt builds of
+/// managed entities
+type BuiltEntityFutures<T, R = PathBuf> =
+	FuturesUnordered<BoxFuture<'static, Result<T, (CoreError, R)>>>;
+
 /// Safely builds a series from a list of paths concurrently, with a maximum concurrency limit
 /// derived from available CPU threads
 ///
@@ -540,58 +542,62 @@ pub(crate) async fn safely_build_series(
 	let mut logs = vec![];
 	let mut created_series = Vec::with_capacity(paths.len());
 
-	let batch_size = get_cpu_concurrency_limit();
+	let concurrency = get_cpu_concurrency_limit();
 	let total_series = paths.len();
-	tracing::debug!(total_series, batch_size, "Processing series");
-
-	// An atomic usize to keep track of the current position in the stream
-	// to report progress to the UI
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+	tracing::debug!(total_series, concurrency, "Processing series");
 
 	let start = Instant::now();
+	let mut futures: BuiltEntityFutures<BuiltSeries> = FuturesUnordered::new();
+	let mut cursor = 0usize;
 
-	for (chunk_index, chunk) in paths.chunks(batch_size).enumerate() {
-		let mut chunk_futures = FuturesUnordered::new();
-
-		tracing::trace!(
-			chunk_index,
-			chunk_size = chunk.len(),
-			"Processing series batch"
-		);
-
-		for (series_index, path) in chunk.iter().enumerate() {
-			let path = path.clone();
-			let for_library = for_library.to_string();
-
-			let future = async move {
-				tracing::trace!(?path, "(Chunk {chunk_index}, Series {series_index}) Starting thumbnail generation");
-				build_series(&for_library, &path)
-					.await
-					.map_err(|e| (e, path.clone()))
-			};
-
-			chunk_futures.push(future);
-		}
-
-		while let Some(result) = chunk_futures.next().await {
-			match result {
-				Ok(series) => {
-					created_series.push(series);
-				},
-				Err((error, path)) => {
-					logs.push(
-						JobExecuteLog::error(format!(
-							"Failed to build series: {:?}",
-							error.to_string()
-						))
-						.with_ctx(format!("Path: {path:?}")),
-					);
-				},
+	for path in paths {
+		if futures.len() >= concurrency {
+			if let Some(result) = futures.next().await {
+				match result {
+					Ok(series) => {
+						created_series.push(series);
+					},
+					Err((error, path)) => {
+						logs.push(
+							JobExecuteLog::error(format!(
+								"Failed to build series: {:?}",
+								error.to_string()
+							))
+							.with_ctx(format!("Path: {path:?}")),
+						);
+					},
+				}
+				reporter(cursor);
+				cursor += 1;
 			}
-
-			// We visit every file, regardless of success or failure
-			reporter(atomic_cursor.fetch_add(1, Ordering::SeqCst));
 		}
+
+		let for_library = for_library.to_string();
+		futures.push(Box::pin(async move {
+			tracing::trace!(?path, "Starting series build");
+			build_series(&for_library, &path)
+				.await
+				.map_err(|e| (e, path.clone()))
+		}));
+	}
+
+	while let Some(result) = futures.next().await {
+		match result {
+			Ok(series) => {
+				created_series.push(series);
+			},
+			Err((error, path)) => {
+				logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to build series: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {path:?}")),
+				);
+			},
+		}
+		reporter(cursor);
+		cursor += 1;
 	}
 
 	let success_count = created_series.len();
@@ -785,67 +791,76 @@ pub(crate) async fn safely_build_and_insert_media(
 		return Ok(output);
 	};
 
-	let chunk_size = get_cpu_concurrency_limit();
+	let concurrency = get_cpu_concurrency_limit();
 	let book_count = paths.len();
-	tracing::debug!(book_count, chunk_size, "Processing media");
-
-	// An atomic usize to keep track of the current position in the stream
-	// to report progress to the UI
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+	tracing::debug!(book_count, concurrency, "Processing media");
 
 	let start = Instant::now();
 	let mut books = VecDeque::with_capacity(book_count);
 
 	worker_ctx.report_progress(JobProgress::msg("Building media from disk"));
 
-	for (chunk_index, chunk) in paths.chunks(chunk_size).enumerate() {
-		let mut chunk_futures = FuturesUnordered::new();
+	let config_arc = std::sync::Arc::clone(&worker_ctx.apalis_state.config);
+	let mut futures: BuiltEntityFutures<BuiltMedia> = FuturesUnordered::new();
+	let mut cursor = 0i32;
 
-		tracing::trace!(
-			chunk_index,
-			chunk_size = chunk.len(),
-			"Processing media batch"
-		);
-
-		for (book_index, path) in chunk.iter().enumerate() {
-			let series_id = series_id.clone();
-			let library_config = library_config.clone();
-			let path = path.clone();
-
-			let future = async move {
-				tracing::trace!(
-					?path,
-					"(Chunk {chunk_index}, Book {book_index}) Starting media build"
-				);
-				build_book(&path, &series_id, None, library_config, worker_ctx.config())
-					.await
-					.map_err(|e| (e, path.clone()))
-			};
-
-			chunk_futures.push(future);
-		}
-
-		while let Some(result) = chunk_futures.next().await {
-			match result {
-				Ok(book) => {
-					books.push_back(book);
-				},
-				Err((error, path)) => {
-					tracing::error!(error = ?error, ?path, "Failed to build book");
-					output.logs.push(
-						JobExecuteLog::error(format!(
-							"Failed to build book: {:?}",
-							error.to_string()
-						))
-						.with_ctx(format!("Path: {path:?}")),
-					);
-				},
+	for path in paths {
+		if futures.len() >= concurrency {
+			if let Some(result) = futures.next().await {
+				match result {
+					Ok(book) => {
+						books.push_back(book);
+					},
+					Err((error, path)) => {
+						tracing::error!(error = ?error, ?path, "Failed to build book");
+						output.logs.push(
+							JobExecuteLog::error(format!(
+								"Failed to build book: {:?}",
+								error.to_string()
+							))
+							.with_ctx(format!("Path: {path:?}")),
+						);
+					},
+				}
+				cursor += 1;
+				worker_ctx.report_progress(JobProgress::subtask_position(
+					cursor,
+					book_count as i32,
+				));
 			}
-			worker_ctx.report_progress(JobProgress::subtask_position(
-				atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-				book_count as i32,
-			));
 		}
+
+		let series_id = series_id.clone();
+		let library_config = library_config.clone();
+		let config = Arc::clone(&config_arc);
+
+		futures.push(Box::pin(async move {
+			tracing::trace!(?path, "Starting media build");
+			build_book(&path, &series_id, None, library_config, &config)
+				.await
+				.map_err(|e| (e, path.clone()))
+		}));
+	}
+
+	while let Some(result) = futures.next().await {
+		match result {
+			Ok(book) => {
+				books.push_back(book);
+			},
+			Err((error, path)) => {
+				tracing::error!(error = ?error, ?path, "Failed to build book");
+				output.logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to build book: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {path:?}")),
+				);
+			},
+		}
+		cursor += 1;
+		worker_ctx
+			.report_progress(JobProgress::subtask_position(cursor, book_count as i32));
 	}
 
 	let success_count = books.len();
@@ -871,7 +886,7 @@ pub(crate) async fn safely_build_and_insert_media(
 	let media_cols_count = media::Column::iter().count();
 	let media_metadata_cols_count = media_metadata::Column::iter().count();
 
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+	let mut insert_cursor = 0i32;
 	// TODO: promote to scanner root to reuse each insert batch? or does it make a diff? we'll see
 	let mut tag_cache = TagCache::new();
 
@@ -945,8 +960,9 @@ pub(crate) async fn safely_build_and_insert_media(
 		// TODO(metadata-fetching): Track inserted_ids as needing fetching (assuming enabled)
 		for media_id in inserted_ids {
 			output.created_media += 1;
+			insert_cursor += 1;
 			worker_ctx.report_progress(JobProgress::subtask_position(
-				atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+				insert_cursor,
 				task_count,
 			));
 			worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
@@ -1011,75 +1027,85 @@ pub(crate) async fn visit_and_update_media(
 		));
 	}
 
-	let chunk_size = get_cpu_concurrency_limit();
+	let concurrency = get_cpu_concurrency_limit();
 	let book_count = media.len();
-	tracing::debug!(book_count, chunk_size, "Processing media visit");
-
-	// An atomic usize to keep track of the current position in the stream
-	// to report progress to the UI
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+	tracing::debug!(book_count, concurrency, "Processing media visit");
 
 	let start = Instant::now();
 	let mut build_results = VecDeque::with_capacity(book_count);
 
 	worker_ctx.report_progress(JobProgress::msg("Visiting media on disk"));
 
-	for (chunk_index, chunk) in media.chunks(chunk_size).enumerate() {
-		let mut chunk_futures = FuturesUnordered::new();
+	let config_arc = Arc::clone(&worker_ctx.apalis_state.config);
+	let mut futures: BuiltEntityFutures<BookVisitResult, String> =
+		FuturesUnordered::new();
+	let mut cursor = 0i32;
 
-		tracing::trace!(
-			chunk_index,
-			chunk_size = chunk.len(),
-			"Processing media visit batch"
-		);
+	for book in media {
+		let path = book.media.path.clone();
+		let Some(operation) = paths_to_operation.get(&path) else {
+			tracing::warn!(?path, "No operation found for media?");
+			continue;
+		};
 
-		for (book_index, book) in chunk.iter().cloned().enumerate() {
-			let path = book.media.path.clone();
-			let Some(operation) = paths_to_operation.get(&path) else {
-				tracing::warn!(?path, "No operation found for media?");
-				continue;
-			};
-			let ctx = BookVisitCtx {
-				operation: *operation,
-				existing_book: Some(book),
-				series_id: series_id.clone(),
-				path: PathBuf::from(path.as_str()),
-			};
-			let library_config = library_config.clone();
-
-			let future = async move {
-				tracing::trace!(
-					?path,
-					"(Chunk {chunk_index}, Book {book_index}) Starting media visit"
-				);
-				handle_book(ctx, library_config, worker_ctx.config())
-					.await
-					.map_err(|e| (e, path.clone()))
-			};
-
-			chunk_futures.push(future);
-		}
-
-		while let Some(future_result) = chunk_futures.next().await {
-			match future_result {
-				Ok(result) => {
-					build_results.push_back(result);
-				},
-				Err((error, path)) => {
-					output.logs.push(
-						JobExecuteLog::error(format!(
-							"Failed to handle book: {:?}",
-							error.to_string()
-						))
-						.with_ctx(format!("Path: {path:?}")),
-					);
-				},
+		if futures.len() >= concurrency {
+			if let Some(future_result) = futures.next().await {
+				match future_result {
+					Ok(result) => {
+						build_results.push_back(result);
+					},
+					Err((error, path)) => {
+						output.logs.push(
+							JobExecuteLog::error(format!(
+								"Failed to handle book: {:?}",
+								error.to_string()
+							))
+							.with_ctx(format!("Path: {path:?}")),
+						);
+					},
+				}
+				cursor += 1;
+				worker_ctx.report_progress(JobProgress::subtask_position(
+					cursor,
+					book_count as i32,
+				));
 			}
-			worker_ctx.report_progress(JobProgress::subtask_position(
-				atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-				book_count as i32,
-			));
 		}
+
+		let ctx = BookVisitCtx {
+			operation: *operation,
+			existing_book: Some(book),
+			series_id: series_id.clone(),
+			path: PathBuf::from(path.as_str()),
+		};
+		let library_config = library_config.clone();
+		let config = Arc::clone(&config_arc);
+		futures.push(Box::pin(async move {
+			tracing::trace!(?path, "Starting media visit");
+			handle_book(ctx, library_config, &config)
+				.await
+				.map_err(|e| (e, path.clone()))
+		}));
+	}
+
+	while let Some(future_result) = futures.next().await {
+		match future_result {
+			Ok(result) => {
+				build_results.push_back(result);
+			},
+			Err((error, path)) => {
+				output.logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to handle book: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {path:?}")),
+				);
+			},
+		}
+		cursor += 1;
+		worker_ctx
+			.report_progress(JobProgress::subtask_position(cursor, book_count as i32));
 	}
 
 	let success_count = build_results.len();
@@ -1090,7 +1116,7 @@ pub(crate) async fn visit_and_update_media(
 	let task_count = build_results.len() as i32;
 	let start = Instant::now();
 
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+	let mut update_cursor = 0i32;
 
 	while let Some(result) = build_results.pop_front() {
 		let error_ctx = result.error_ctx();
@@ -1110,10 +1136,9 @@ pub(crate) async fn visit_and_update_media(
 			},
 		}
 
-		worker_ctx.report_progress(JobProgress::subtask_position(
-			atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-			task_count,
-		));
+		update_cursor += 1;
+		worker_ctx
+			.report_progress(JobProgress::subtask_position(update_cursor, task_count));
 	}
 
 	let success_count = output.updated_media;

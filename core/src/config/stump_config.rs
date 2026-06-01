@@ -38,7 +38,6 @@ pub mod env_keys {
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const MAX_SCANNER_CONCURRENCY_KEY: &str = "STUMP_MAX_SCANNER_CONCURRENCY";
 	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
 	pub const MAX_IMAGE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_IMAGE_UPLOAD_SIZE";
 	pub const ENABLE_UPLOAD_KEY: &str = "STUMP_ENABLE_UPLOAD";
@@ -69,7 +68,6 @@ pub mod defaults {
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 30; // 30 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
 	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 10;
 	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
@@ -223,13 +221,6 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)]
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
 	pub expired_session_cleanup_interval: u64,
-
-	/// The maximum number of concurrent files which may be processed by a scanner. This is used
-	/// to limit/increase the number of files that are processed at once. This may be useful for those
-	/// with high or low performance systems to configure to their needs.
-	#[default_value(DEFAULT_MAX_SCANNER_CONCURRENCY)]
-	#[env_key(MAX_SCANNER_CONCURRENCY_KEY)]
-	pub max_scanner_concurrency: usize,
 
 	/// The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
 	/// to limit/increase the number of images that are processed at once. Image generation can be
@@ -485,7 +476,6 @@ mod tests {
 			access_token_ttl: None,
 			refresh_token_ttl: None,
 			expired_session_cleanup_interval: None,
-			max_scanner_concurrency: None,
 			max_thumbnail_concurrency: None,
 			max_image_upload_size: None,
 			enable_upload: None,
@@ -539,7 +529,6 @@ mod tests {
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
-				max_scanner_concurrency: Some(DEFAULT_MAX_SCANNER_CONCURRENCY),
 				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
 				max_image_upload_size: Some(DEFAULT_MAX_IMAGE_UPLOAD_SIZE),
 				enable_upload: Some(DEFAULT_ENABLE_UPLOAD),
@@ -610,7 +599,6 @@ mod tests {
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 
-						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
 						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
 						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,
 						enable_upload: DEFAULT_ENABLE_UPLOAD,

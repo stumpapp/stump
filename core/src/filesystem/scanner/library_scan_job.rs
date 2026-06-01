@@ -346,8 +346,6 @@ impl JobLifecycle for LibraryScanJob {
 		let mut logs = vec![];
 		let mut subtasks = vec![];
 
-		let max_concurrency = ctx.config().max_scanner_concurrency;
-
 		match task {
 			LibraryScanTask::Init(input) => {
 				tracing::debug!("Executing the init task for library scan");
@@ -461,18 +459,14 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.report_progress(JobProgress::msg("Building new series"));
 
 					let task_count = series_to_create.len() as i32;
-					let (built_series, failure_logs) = safely_build_series(
-						&self.id,
-						series_to_create,
-						ctx.config(),
-						|position| {
+					let (built_series, failure_logs) =
+						safely_build_series(&self.id, series_to_create, |position| {
 							ctx.report_progress(JobProgress::subtask_position(
 								position as i32,
 								task_count,
 							))
-						},
-					)
-					.await;
+						})
+						.await;
 
 					current_subtask_index +=
 						(built_series.len() + failure_logs.len()) as i32;
@@ -719,7 +713,6 @@ impl JobLifecycle for LibraryScanJob {
 									"Library configuration is missing".to_string(),
 								),
 							)?,
-							max_concurrency,
 						},
 						ctx,
 						paths,
@@ -754,7 +747,6 @@ impl JobLifecycle for LibraryScanJob {
 									"Library configuration is missing".to_string(),
 								),
 							)?,
-							max_concurrency,
 						},
 						ctx,
 						params,

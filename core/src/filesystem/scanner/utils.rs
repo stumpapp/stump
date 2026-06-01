@@ -39,6 +39,12 @@ use crate::{
 
 use super::options::BookVisitResult;
 
+pub fn get_max_scanner_concurrency() -> usize {
+	std::thread::available_parallelism()
+		.map(|n| n.get() * 2)
+		.unwrap_or(2)
+}
+
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
 	last_modified_at: String,
@@ -562,23 +568,21 @@ async fn build_series(for_library: &str, path: &Path) -> CoreResult<BuiltSeries>
 }
 
 /// Safely builds a series from a list of paths concurrently, with a maximum concurrency limit
-/// as defined by the core configuration.
+/// derived from available CPU threads
 ///
 /// # Arguments
 /// * `for_library` - The library ID to associate the series with
 /// * `paths` - A list of paths to build series from
-/// * `core_config` - The core configuration
 /// * `reporter` - A function to report progress to the UI
 pub(crate) async fn safely_build_series(
 	for_library: &str,
 	paths: Vec<PathBuf>,
-	core_config: &StumpConfig,
 	reporter: impl Fn(usize),
 ) -> (Vec<BuiltSeries>, Vec<JobExecuteLog>) {
 	let mut logs = vec![];
 	let mut created_series = Vec::with_capacity(paths.len());
 
-	let batch_size = core_config.max_scanner_concurrency;
+	let batch_size = get_max_scanner_concurrency();
 	let total_series = paths.len();
 	tracing::debug!(total_series, batch_size, "Processing series");
 
@@ -672,7 +676,6 @@ pub(crate) async fn safely_insert_series(
 pub(crate) struct MediaBuildOperation {
 	pub series_id: String,
 	pub library_config: library_config::Model,
-	pub max_concurrency: usize,
 }
 
 /// Builds a media from the given path
@@ -804,7 +807,6 @@ pub(crate) async fn safely_build_and_insert_media(
 	MediaBuildOperation {
 		series_id,
 		library_config,
-		max_concurrency,
 	}: MediaBuildOperation,
 	worker_ctx: &JobContext,
 	paths: Vec<PathBuf>,
@@ -825,7 +827,7 @@ pub(crate) async fn safely_build_and_insert_media(
 		return Ok(output);
 	};
 
-	let chunk_size = max_concurrency;
+	let chunk_size = get_max_scanner_concurrency();
 	let book_count = paths.len();
 	tracing::debug!(book_count, chunk_size, "Processing media");
 
@@ -979,7 +981,6 @@ pub(crate) async fn visit_and_update_media(
 	MediaBuildOperation {
 		series_id,
 		library_config,
-		max_concurrency,
 	}: MediaBuildOperation,
 	worker_ctx: &JobContext,
 	params: Vec<(PathBuf, BookVisitOperation)>,
@@ -1016,7 +1017,7 @@ pub(crate) async fn visit_and_update_media(
 		));
 	}
 
-	let chunk_size = max_concurrency;
+	let chunk_size = get_max_scanner_concurrency();
 	let book_count = media.len();
 	tracing::debug!(book_count, chunk_size, "Processing media visit");
 

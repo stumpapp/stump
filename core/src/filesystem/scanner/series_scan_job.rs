@@ -278,8 +278,6 @@ impl JobLifecycle for SeriesScanJob {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
-		let max_concurrency = ctx.config().max_scanner_concurrency;
-
 		match task {
 			SeriesScanTask::RestoreMedia(ids) => {
 				ctx.report_progress(JobProgress::msg("Restoring media entities"));
@@ -337,7 +335,6 @@ impl JobLifecycle for SeriesScanJob {
 								"Library configuration is missing".to_string(),
 							),
 						)?,
-						max_concurrency,
 					},
 					ctx,
 					paths,
@@ -372,7 +369,6 @@ impl JobLifecycle for SeriesScanJob {
 								"Library configuration is missing".to_string(),
 							),
 						)?,
-						max_concurrency,
 					},
 					ctx,
 					params,

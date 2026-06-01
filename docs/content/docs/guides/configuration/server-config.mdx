@@ -334,16 +334,6 @@ The maximum size, in bytes, for images uploaded as thumbnails for users, librari
 
 ## Performance
 
-### STUMP_MAX_SCANNER_CONCURRENCY
-
-The maximum number of files which may be processed concurrently by the scanner. This is useful for limiting the number of files that are processed at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
-
-**Note:** The OS thread scheduler should prevent overload, however, you may want to set this value lower if you're running Stump on a system with limited resources.
-
-| Type    | Default Value | TOML Key                    |
-| ------- | ------------- | --------------------------- |
-| Integer | `200`         | `max_scanner_concurrency`   |
-
 ### STUMP_MAX_THUMBNAIL_CONCURRENCY
 
 The maximum number of images which may be generated concurrently by the thumbnailer. This is useful for limiting the number of thumbnails that are generated at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.

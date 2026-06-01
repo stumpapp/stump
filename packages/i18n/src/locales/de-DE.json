@@ -2994,6 +2994,7 @@
 			},
 			"autoSyncLocalData": "Lokale Daten automatisch synchronisieren",
 			"lowercaseTranslation": "Kleinbuchstaben-Labels",
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Verwaltung",
 				"dataUsage": {

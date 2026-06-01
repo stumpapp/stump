@@ -1577,12 +1577,12 @@
 					"description": "Mostra un elemento in sovrimpressione mentre un'attività è in corso"
 				},
 				"dayResetHourOffset": {
-					"label": "Reading day reset offset",
-					"description": "Shift when a reading day resets, in hours from midnight"
+					"label": "Offset ripristino del giorno di lettura",
+					"description": "Sposta l'orario di azzeramento del giorno di lettura, espresso in ore dalla mezzanotte"
 				},
 				"readingSessionGracePeriod": {
-					"label": "Reading session grace period",
-					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+					"label": "Periodo di tolleranza della sessione di lettura",
+					"description": "Se non viene rilevata alcuna attività entro questo intervallo di tempo, espresso in secondi, l'aggiornamento successivo avvierà una nuova sessione"
 				}
 			}
 		},

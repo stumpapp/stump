@@ -2994,6 +2994,7 @@
 			},
 			"autoSyncLocalData": "自动同步本地数据",
 			"lowercaseTranslation": "Lowercase Labels",
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "管理",
 				"dataUsage": {

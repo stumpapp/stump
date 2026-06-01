@@ -305,9 +305,10 @@ impl StumpConfig {
 	/// returns a sensible default concurrency limit based on the number of logical cpus
 	/// available to the process, scaled by `parallelism_multiplier`.
 	pub fn cpu_concurrency_limit(&self) -> usize {
+		let multiplier = std::cmp::max(self.parallelism_multiplier, 1);
 		std::thread::available_parallelism()
-			.map(|n| n.get() * self.parallelism_multiplier)
-			.unwrap_or(self.parallelism_multiplier)
+			.map(|n| n.get() * multiplier)
+			.unwrap_or(multiplier)
 	}
 
 	/// Ensures that the configuration directory exists and saves the `StumpConfig`'s current values

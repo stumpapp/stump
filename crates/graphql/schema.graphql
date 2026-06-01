@@ -2043,10 +2043,7 @@ type Mutation {
 	"""
 	uploadMediaThumbnailBase64(id: ID!, image: String!): Media!
 	deleteLoginActivity: Int!
-	"""
-	Upload an avatar image for either the authenticated viewer or for any user if
-	called by a server owner
-	"""
+	"Upload an avatar image for either the authenticated viewer or for any user (if authorized by permissions)"
 	uploadUserAvatar(id: ID, upload: Upload!): User!
 	"""
 	Delete the avatar for the authenticated viewer, or for any user if
@@ -3414,6 +3411,8 @@ type UserLoginActivity {
 
 "The permissions a user may be granted"
 enum UserPermission {
+	"Grant access to the GraphQL playground interface"
+	ACCESS_GRAPH_QL_PLAYGROUND
 	"Grant access to read/create their own API keys"
 	ACCESS_API_KEYS
 	"Grant access to the koreader sync feature"
@@ -3481,6 +3480,16 @@ enum UserPermission {
 	This would not affect relational queries, such as members in a common book club.
 	"""
 	READ_USERS
+	"Grant access to create managed user accounts"
+	CREATE_USER
+	"Grant access to update another user account, excluding preferences"
+	UPDATE_USER
+	"Grant access to delete another user"
+	DELETE_USER
+	"Grant access to lock another user, preventing them from logging in until an admin unlocks them"
+	LOCK_USER
+	"Grant access to view and manage active sessions and auth tokens for other users"
+	MANAGE_USER_SESSIONS
 	"Grant access to manage users (create,edit,delete)"
 	MANAGE_USERS
 	"Grant access to read notifiers"
@@ -3507,7 +3516,19 @@ enum UserPermission {
 	READ_PERSISTED_LOGS
 	"Grant access to read system logs"
 	READ_SYSTEM_LOGS
-	"Grant access to manage the server. This is effectively a step below server owner"
+	"Grant access to view all smart lists, even those they don't have explicit access to"
+	VIEW_ALL_SMART_LISTS
+	"""
+	Grant moderator-level powers across all book clubs (edit/delete any message,
+	lock/pin/create/archive discussions, see private clubs they're not a member of)
+	"""
+	MODERATE_BOOK_CLUBS
+	"""
+	Grant admin-level powers across all book clubs (everything ModerateBookClubs
+	grants, plus suggestion administration)
+	"""
+	MANAGE_BOOK_CLUBS
+	"Grant access to manage the server. This is effectively full access and encompasses all other permissions"
 	MANAGE_SERVER
 }
 

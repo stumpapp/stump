@@ -1577,12 +1577,12 @@
 					"description": "Pokaż pływającą nakładkę, gdy wykonywane jest zadanie"
 				},
 				"dayResetHourOffset": {
-					"label": "Reading day reset offset",
-					"description": "Shift when a reading day resets, in hours from midnight"
+					"label": "Przesunięcie resetu dnia czytania",
+					"description": "Przesuń czas, w jakim resetuje się dzień czytania, w godzinach od północy"
 				},
 				"readingSessionGracePeriod": {
-					"label": "Reading session grace period",
-					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+					"label": "Okres karencji sesji czytania",
+					"description": "W przypadku braku aktywności w tym przedziale czasowym, w sekundach, następna aktualizacja rozpocznie nową sesję"
 				}
 			}
 		},

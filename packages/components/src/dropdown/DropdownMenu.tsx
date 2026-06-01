@@ -30,6 +30,7 @@ export type DropdownItem = {
 	hidden?: boolean
 	disabled?: boolean
 	isActive?: boolean
+	isDestructive?: boolean
 }
 export type DropdownItemGroup = {
 	title?: string
@@ -75,7 +76,7 @@ export function DropdownMenu({
 				if (item.subItems) {
 					return (
 						<DropdownSub key={key}>
-							<DropdownSubTrigger disabled={item.disabled}>
+							<DropdownSubTrigger disabled={item.disabled} isDestructive={item.isDestructive}>
 								{item.leftIcon}
 								<span>{item.label}</span>
 								{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
@@ -96,7 +97,12 @@ export function DropdownMenu({
 
 				return (
 					<Container {...containerProps} key={key}>
-						<DropdownItem onClick={item.onClick} disabled={item.disabled} isActive={item.isActive}>
+						<DropdownItem
+							onClick={item.onClick}
+							disabled={item.disabled}
+							isActive={item.isActive}
+							isDestructive={item.isDestructive}
+						>
 							{item.leftIcon}
 							<span>{item.label}</span>
 							{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}

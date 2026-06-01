@@ -23,7 +23,7 @@ export default function HelpfulLinks() {
 					underline={false}
 				>
 					<span>{t('settingsScene.server/general.sections.helpfulLinks.links.documentation')}</span>
-					<ExternalLink className="h-3 w-3 text-foreground-muted" />
+					<ExternalLink className="h-3 w-3 text-muted-foreground" />
 				</Link>
 
 				<Link
@@ -34,7 +34,7 @@ export default function HelpfulLinks() {
 					underline={false}
 				>
 					<span>GitHub</span>
-					<ExternalLink className="h-3 w-3 text-foreground-muted" />
+					<ExternalLink className="h-3 w-3 text-muted-foreground" />
 				</Link>
 
 				<Link
@@ -45,7 +45,7 @@ export default function HelpfulLinks() {
 					underline={false}
 				>
 					<span>{t('settingsScene.server/general.sections.helpfulLinks.links.changelog')}</span>
-					<ExternalLink className="h-3 w-3 text-foreground-muted" />
+					<ExternalLink className="h-3 w-3 text-muted-foreground" />
 				</Link>
 			</div>
 		</div>

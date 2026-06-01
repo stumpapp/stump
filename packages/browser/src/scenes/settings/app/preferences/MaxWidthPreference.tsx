@@ -1,4 +1,4 @@
-import { cx, Label, NativeSelect, Text } from '@stump/components'
+import { cx, NativeSelect, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
@@ -35,33 +35,26 @@ export default function MaxWidthPreference() {
 		return null
 	}
 
+	const isSidebarMode = primaryNavigationMode === 'SIDEBAR'
+
 	return (
-		<div
-			className="gap-y-1.5 md:max-w-md flex flex-col"
-			title={
-				primaryNavigationMode === 'SIDEBAR'
-					? // TODO: support it
-						t(getKey('tooltip'))
-					: undefined
-			}
+		<NewCard.Row
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
+			className={cx({ 'opacity-50': isSidebarMode })}
 		>
-			<Label className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
-				{t(getKey('label'))}
-			</Label>
-			<NativeSelect
-				value={layoutMaxWidthPx || undefined}
-				options={options}
-				onChange={handleChange}
-				disabled={primaryNavigationMode === 'SIDEBAR'}
-			/>
-			<Text
-				size="xs"
-				variant="muted"
-				className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}
+			<div
+				className="max-w-xs lg:w-56 w-full"
+				title={isSidebarMode ? t(getKey('tooltip')) : undefined}
 			>
-				{t(getKey('description'))}
-			</Text>
-		</div>
+				<NativeSelect
+					value={layoutMaxWidthPx || undefined}
+					options={options}
+					onChange={handleChange}
+					disabled={isSidebarMode}
+				/>
+			</div>
+		</NewCard.Row>
 	)
 }
 

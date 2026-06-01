@@ -12,18 +12,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-
 jobs:
   code-changes-check:
     runs-on: [ubuntu-22.04]
     outputs:
       changes: ${{steps.filter.outputs.changes}}
     steps:
-      - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
         id: filter
         with:
           base: 'nightly'
@@ -44,7 +40,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       # The build on PRs is only for linux/amd64 as a sanity check. The build on pushes will
       # actually build all the supported platforms and push them to dockerhub
@@ -62,8 +58,8 @@ jobs:
       - name: Setup and build docker image
         uses: ./.github/actions/build-docker
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           tags: 'nightly'
           build-channel: 'nightly'
           load: ${{ env.LOAD }}

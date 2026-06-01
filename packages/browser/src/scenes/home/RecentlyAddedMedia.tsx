@@ -104,9 +104,9 @@ function RecentlyAddedMedia() {
 	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
 	const emptyState = (
-		<div className="space-x-3 rounded-lg px-4 py-4 flex items-start justify-start border border-dashed border-edge-subtle">
-			<span className="rounded-lg p-2 border border-edge bg-background-surface">
-				<BookX className="h-8 w-8 text-foreground-muted" />
+		<div className="space-x-3 px-4 py-4 flex items-start justify-start rounded-lg border border-dashed border-border">
+			<span className="p-2 rounded-lg border border-border bg-muted">
+				<BookX className="h-8 w-8 text-muted-foreground" />
 			</span>
 			<div>
 				<Text>{t('homeScene.recentlyAddedBooks.emptyState.heading')}</Text>
@@ -171,7 +171,7 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group rounded-lg relative block shrink-0 overflow-hidden transition-opacity hover:opacity-90"
+			className="group relative block shrink-0 overflow-hidden rounded-lg transition-opacity hover:opacity-90"
 			style={{ width: cardWidth }}
 		>
 			<ThumbnailImage

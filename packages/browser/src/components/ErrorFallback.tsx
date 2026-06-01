@@ -30,13 +30,12 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			<div className="max-w-sm sm:max-w-md md:max-w-xl">
 				<div className="text-left">
 					<h1 className="text-4xl font-semibold text-foreground">A critical error occurred</h1>
-					<p className="mt-1.5 text-lg text-foreground-subtle">
+					<p className="mt-1.5 text-lg text-foreground">
 						{error.message || 'The error message was empty.'}
 					</p>
 				</div>
 				<div className="gap-3 pt-3 flex w-full items-center">
 					<ButtonOrLink
-						variant="primary"
 						onClick={resetErrorBoundary}
 						title="Go back to the homepage"
 						forceAnchor

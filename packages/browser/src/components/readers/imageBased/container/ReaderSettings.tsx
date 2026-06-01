@@ -105,7 +105,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 	return (
 		<div className="gap-4 flex flex-col" key={forBook}>
 			<div>
-				<Label className="text-xs font-medium text-foreground-muted uppercase">Mode</Label>
+				<Label className="text-xs font-medium text-muted-foreground uppercase">Mode</Label>
 
 				<ReadingModeSelect
 					value={activeSettings.readingMode || DEFAULT_BOOK_PREFERENCES.readingMode}
@@ -119,7 +119,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			</div>
 
 			<div>
-				<Label className="text-xs font-medium text-foreground-muted uppercase">Image Options</Label>
+				<Label className="text-xs font-medium text-muted-foreground uppercase">Image Options</Label>
 
 				<DoubleSpreadBehavior
 					behavior={
@@ -141,13 +141,11 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			</div>
 
 			<div>
-				<Label className="text-xs font-medium text-foreground-muted uppercase">Preferences</Label>
+				<Label className="text-xs font-medium text-muted-foreground uppercase">Preferences</Label>
 				<div className="gap-3 pt-2 flex flex-col">
 					<Label className="px-1 flex items-center justify-between">
 						<span>Separate second page</span>
 						<RawSwitch
-							primaryRing
-							variant="primary"
 							checked={activeSettings.secondPageSeparate}
 							onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
 						/>
@@ -156,8 +154,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					<Label className="px-1 flex items-center justify-between">
 						<span>Pan and zoom without Ctrl / Cmd</span>
 						<RawSwitch
-							primaryRing
-							variant="primary"
 							checked={activeSettings.panzoomWithoutCtrl}
 							onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
 						/>
@@ -166,8 +162,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					<Label className="px-1 flex items-center justify-between">
 						<span>Tap sides to navigate</span>
 						<RawSwitch
-							primaryRing
-							variant="primary"
 							checked={activeSettings.tapSidesToNavigate}
 							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
 						/>
@@ -176,8 +170,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					<Label className="px-1 flex items-center justify-between">
 						<span>Reading timer</span>
 						<RawSwitch
-							primaryRing
-							variant="primary"
 							checked={activeSettings.trackElapsedTime}
 							onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
 						/>
@@ -186,11 +178,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					{/* TODO: Once UX for settings is settled remove this */}
 					{!forBook && (
 						<div>
-							<Label className="rounded-lg p-3 flex items-center justify-between border border-dashed border-fill-brand/40 bg-fill-brand-secondary">
+							<Label className="p-3 flex items-center justify-between rounded-lg border border-dashed border-primary/40 bg-primary/15">
 								<span>Experimental animated reader</span>
 								<RawSwitch
-									primaryRing
-									variant="primary"
 									checked={store.settings.animatedReader || false}
 									onCheckedChange={(checked) => onChangeExperimentalReader(checked)}
 								/>

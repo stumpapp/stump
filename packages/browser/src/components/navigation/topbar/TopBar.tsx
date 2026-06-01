@@ -152,7 +152,7 @@ export default function TopNavigation() {
 	)
 
 	return (
-		<div className="h-12 w-full border-b border-edge bg-sidebar">
+		<div className="h-12 w-full border-b border-sidebar-border bg-sidebar text-sidebar-foreground">
 			<div
 				className="h-12 mx-auto flex items-center justify-between"
 				style={{

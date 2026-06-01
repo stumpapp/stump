@@ -119,7 +119,6 @@ export default function ProfileForm() {
 								? t('settingsScene.app/account.sections.account.labels.insufficientPermission')
 								: undefined
 						}
-						variant="primary"
 						className="w-full"
 						containerClassName="max-w-full md:max-w-sm"
 						label={t('settingsScene.app/account.sections.account.labels.username')}
@@ -134,7 +133,6 @@ export default function ProfileForm() {
 								? t('settingsScene.app/account.sections.account.labels.insufficientPermission')
 								: undefined
 						}
-						variant="primary"
 						className="w-full"
 						containerClassName="max-w-full md:max-w-sm"
 						label={t('settingsScene.app/account.sections.account.labels.password')}
@@ -146,7 +144,6 @@ export default function ProfileForm() {
 
 					<div className="gap-4 md:flex-row flex w-full flex-col items-center">
 						<Button
-							variant="primary"
 							type="submit"
 							className="md:w-[unset] w-full"
 							disabled={!hasChanges || isUselessForm}

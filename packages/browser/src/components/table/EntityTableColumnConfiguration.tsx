@@ -368,7 +368,7 @@ function DraggableColumn({ column, moveToOtherList, buttonLabel }: DraggableColu
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`rounded-md px-2 py-1 flex shrink-0 items-center justify-between border border-edge bg-background-surface ${
+			className={`px-2 py-1 flex shrink-0 items-center justify-between rounded-md border border-border bg-muted ${
 				isDragging ? 'opacity-40' : ''
 			}`}
 		>
@@ -382,7 +382,7 @@ function DraggableColumn({ column, moveToOtherList, buttonLabel }: DraggableColu
 
 function ColumnOverlay({ column }: { column: ReturnType<typeof resolveConfiguration>[number] }) {
 	return (
-		<div className="min-w-40 rounded-md px-2 py-1 shadow-sm flex items-center justify-between border border-edge bg-background-surface">
+		<div className="min-w-40 px-2 py-1 shadow-sm flex items-center justify-between rounded-md border border-border bg-muted">
 			<Text size="sm">{column.label}</Text>
 		</div>
 	)
@@ -407,7 +407,7 @@ function ColumnBucket({
 	const moveLabel = title === 'Visible' ? 'Move to hidden' : 'Move to visible'
 
 	return (
-		<div ref={setNodeRef} className="rounded-md p-3 border border-edge bg-background">
+		<div ref={setNodeRef} className="p-3 rounded-md border border-border bg-background">
 			<div className="mb-2 flex items-center justify-between">
 				<Text size="sm" variant="secondary">
 					{title}
@@ -428,7 +428,7 @@ function ColumnBucket({
 						/>
 					))}
 					{items.length === 0 && (
-						<div className="min-h-10 rounded px-2 py-3 flex items-center justify-center border border-dashed border-edge">
+						<div className="min-h-10 rounded px-2 py-3 flex items-center justify-center border border-dashed border-border">
 							<Text size="xs" variant="muted">
 								Drop columns here
 							</Text>

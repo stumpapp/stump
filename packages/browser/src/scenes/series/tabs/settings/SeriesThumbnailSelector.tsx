@@ -200,11 +200,10 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 					<Suspense>{renderContent()}</Suspense>
 
 					<Dialog.Footer>
-						<Button variant="default" onClick={handleCancel}>
+						<Button variant="outline" onClick={handleCancel}>
 							Cancel
 						</Button>
 						<Button
-							variant="primary"
 							onClick={handleConfirm}
 							disabled={!selectedBook || !page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}

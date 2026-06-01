@@ -88,7 +88,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				id="name"
 				label={t(`${LOCALE_BASE}.name.label`)}
 				description={t(`${LOCALE_BASE}.name.description`)}
-				variant="primary"
 				{...form.register('name')}
 				errorMessage={errors.name?.message}
 				ignoreFill
@@ -136,7 +135,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 						id="smtpHost"
 						label={t(`${LOCALE_BASE}.smtpHost.label`)}
 						description={t(`${LOCALE_BASE}.smtpHost.description`)}
-						variant="primary"
 						fullWidth
 						{...form.register('smtpHost')}
 						errorMessage={errors.smtpHost?.message}
@@ -146,8 +144,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 						id="smtpPort"
 						label={t(`${LOCALE_BASE}.smtpPort.label`)}
 						description={t(`${LOCALE_BASE}.smtpPort.description`)}
-						variant="primary"
-						className="max-w-[185px]"
+						className="max-w-46.25"
 						{...numericRegister('smtpPort')}
 						errorMessage={errors.smtpPort?.message}
 					/>
@@ -158,7 +155,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 						id="username"
 						label={t(`${LOCALE_BASE}.username.label`)}
 						description={t(`${LOCALE_BASE}.username.description`)}
-						variant="primary"
 						{...form.register('username')}
 						errorMessage={errors.username?.message}
 					/>
@@ -167,7 +163,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 						id="password"
 						label={t(`${LOCALE_BASE}.password.label`)}
 						description={t(`${LOCALE_BASE}.password.description`)}
-						variant="primary"
 						{...form.register('password')}
 						errorMessage={errors.password?.message}
 					/>
@@ -175,7 +170,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 
 				<CheckBox
 					id="tlsEnabled"
-					variant="primary"
 					label={t(`${LOCALE_BASE}.tlsEnabled.label`)}
 					description={t(`${LOCALE_BASE}.tlsEnabled.description`)}
 					{...form.register('tlsEnabled')}
@@ -198,7 +192,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					id="senderDisplayName"
 					label={t(`${LOCALE_BASE}.senderDisplayName.label`)}
 					description={t(`${LOCALE_BASE}.senderDisplayName.description`)}
-					variant="primary"
 					{...form.register('senderDisplayName')}
 					errorMessage={errors.senderDisplayName?.message}
 				/>
@@ -207,7 +200,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					id="senderEmail"
 					label={t(`${LOCALE_BASE}.senderEmail.label`)}
 					description={t(`${LOCALE_BASE}.senderEmail.description`)}
-					variant="primary"
 					{...form.register('senderEmail')}
 					errorMessage={errors.senderEmail?.message}
 				/>
@@ -228,7 +220,6 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					id="maxAttachmentSizeBytes"
 					label={t(`${LOCALE_BASE}.maxAttachmentSize.label`)}
 					description={t(`${LOCALE_BASE}.maxAttachmentSize.description`)}
-					variant="primary"
 					{...numericRegister('maxAttachmentSizeBytes')}
 					errorMessage={errors.maxAttachmentSizeBytes?.message}
 				/>
@@ -237,9 +228,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 			<TestEmailerButton />
 
 			<div>
-				<Button type="submit" variant="primary">
-					{t(`${LOCALE_BASE}.submit.${emailer ? 'update' : 'create'}`)}
-				</Button>
+				<Button type="submit">{t(`${LOCALE_BASE}.submit.${emailer ? 'update' : 'create'}`)}</Button>
 			</div>
 		</Form>
 	)

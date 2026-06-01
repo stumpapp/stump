@@ -46,7 +46,7 @@ export default function DeleteTagConfirmModal({ tag, onClose }: Props) {
 			title={t(getKey('title'))}
 			description={t(getKey('description'))}
 			confirmText={t(getKey('confirm'))}
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={!!tag}
 			onClose={onClose}
 			onConfirm={handleConfirm}

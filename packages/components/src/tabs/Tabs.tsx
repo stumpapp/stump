@@ -7,9 +7,9 @@ import { TabsContext, TabsVariant } from './context'
 
 const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
 	default:
-		'text-foreground-subtle data-[state=active]:bg-background data-[state=active]:text-foreground',
+		'text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground',
 	primary:
-		'text-foreground-subtle data-[state=active]:bg-fill-brand data-[state=active]:text-foreground',
+		'text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground',
 }
 
 export type TabsProps = {
@@ -34,7 +34,7 @@ const TabsList = React.forwardRef<
 			<TabsPrimitive.List
 				ref={ref}
 				className={cn(
-					'rounded-md p-1 inline-flex items-center justify-center border border-edge-subtle/80 bg-transparent',
+					'p-0.75 inline-flex w-fit items-center justify-center rounded-md bg-muted',
 					{ 'gap-1': activeOnHover },
 					className,
 				)}
@@ -53,10 +53,10 @@ const TabsTrigger = React.forwardRef<
 		{({ variant, activeOnHover }) => (
 			<TabsPrimitive.Trigger
 				className={cn(
-					'px-3 py-1.5 text-sm font-medium data-[state=active]:shadow-sm inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] transition-all disabled:pointer-events-none disabled:opacity-50',
+					'px-2 py-1 text-sm font-medium min-w-25 gap-1.5 inline-flex items-center justify-center rounded-sm border border-transparent transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50',
 					TABS_CONTENT_VARIANTS[variant] || TABS_CONTENT_VARIANTS.default,
 					{
-						'hover:data-[state=inactive]:bg-background-surface': activeOnHover && !props.disabled,
+						'hover:data-[state=inactive]:text-foreground': activeOnHover && !props.disabled,
 					},
 					{
 						'pointer-events-none opacity-50': props.disabled,
@@ -76,7 +76,7 @@ const TabsContent = React.forwardRef<
 	ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
 	<TabsPrimitive.Content
-		className={cn('mt-2 rounded-md p-6 border border-edge-subtle', className)}
+		className={cn('mt-2 p-6 rounded-md border border-border', className)}
 		{...props}
 		ref={ref}
 	/>

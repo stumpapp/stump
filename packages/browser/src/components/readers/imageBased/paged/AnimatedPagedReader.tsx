@@ -123,7 +123,7 @@ function AnimatedPagedReader({ initialPage = 1, onPageChanged }: Props) {
 	)
 
 	return (
-		<div className="relative h-full w-full bg-background-surface">
+		<div className="relative h-full w-full bg-muted">
 			{tapSidesToNavigate && (
 				<>
 					<SideBarControl onClick={() => handleSideClick('left')} position="left" />
@@ -227,7 +227,7 @@ function SideBarControl({ onClick, position }: SideBarControlProps) {
 		<div
 			className={cn(
 				'absolute z-50 h-full w-[15%] border border-transparent transition-all duration-300',
-				'active:border-edge-subtle active:bg-background-surface/50',
+				'active:border-border active:bg-muted/50',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}

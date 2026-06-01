@@ -1,10 +1,14 @@
 import { Button, IconButton, Sheet, ToolTip } from '@stump/components'
-import { Bolt } from 'lucide-react'
+import { ListFilter } from 'lucide-react'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { clearFilters, getActiveFilterCount, useFilterContext } from '.'
 import { FilterableEntity, MediaFilterForm, SeriesFilterForm } from './form'
+
+// TODO(ux): I think this can honestly just take inspiration from expo and:
+// 1. render a dropdown with common preset filters (e.g., unread, whatever )
+// 2. an option in the menu for custom filter that just dumps a smart filter form in a modal
 
 type Props = {
 	entity: FilterableEntity
@@ -51,17 +55,17 @@ export default function URLFilterDrawer({ entity }: Props) {
 					<span className="relative inline-flex">
 						<IconButton
 							variant="ghost"
-							size="xs"
-							className="hover:bg-background-surface-hover"
+							size="sm"
+							className="hover:bg-accent"
 							pressEffect={false}
 							onClick={() => setIsOpen(true)}
 						>
-							<Bolt className="h-4 w-4" />
+							<ListFilter className="h-4 w-4" />
 						</IconButton>
 
 						{activeFilters > 0 && (
 							<span className="right-0 top-0 -mr-1.5 -mt-1.5 h-4 w-4 absolute flex">
-								<span className="h-4 w-4 relative inline-flex items-center justify-center rounded-full bg-fill-brand">
+								<span className="h-4 w-4 relative inline-flex items-center justify-center rounded-full bg-primary">
 									<span className="font-semibold text-white text-xxs">{activeFilters}</span>
 								</span>
 							</span>
@@ -76,7 +80,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 						size="sm"
 						className="w-full"
 						type="button"
-						variant="danger"
+						variant="destructive"
 						onClick={handleClearFilters}
 					>
 						Clear filters

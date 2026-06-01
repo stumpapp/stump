@@ -58,11 +58,10 @@ export default function DeleteLibraryThumbnails() {
 
 			<div className="flex">
 				<Button
-					variant="danger"
+					variant="destructive"
 					onClick={() => setShowConfirmation(true)}
 					className="shrink-0"
 					disabled={isPending || !!data}
-					size="md"
 				>
 					Delete thumbnails
 				</Button>
@@ -72,7 +71,7 @@ export default function DeleteLibraryThumbnails() {
 				title="Delete library thumbnails"
 				description="Are you sure you want to delete all thumbnails for this library?"
 				confirmText="Delete thumbnails"
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				isOpen={showConfirmation && !data}
 				onClose={() => setShowConfirmation(false)}
 				onConfirm={handleDeleteThumbnails}

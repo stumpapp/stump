@@ -9,7 +9,7 @@ use stump_core::{
 };
 use tokio::net::TcpListener;
 use tokio::sync::Notify;
-use tower_http::trace::TraceLayer;
+use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
 use crate::{
 	config::{cors, session::get_session_layer},
@@ -72,6 +72,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.with_state(app_state.clone())
 		.layer(get_session_layer(app_state.clone()))
 		.layer(cors_layer)
+		.layer(CompressionLayer::new())
 		.layer(TraceLayer::new_for_http());
 
 	let shutdown_notify = Arc::new(Notify::new());
@@ -86,7 +87,11 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		}
 	};
 
-	let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
+	let ip: std::net::IpAddr =
+		config.ip.parse().map_err(|e: std::net::AddrParseError| {
+			ServerError::ServerStartError(e.to_string())
+		})?;
+	let addr = SocketAddr::from((ip, config.port));
 	let listener = tokio::net::TcpListener::bind(&addr)
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;

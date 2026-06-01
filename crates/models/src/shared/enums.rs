@@ -169,6 +169,35 @@ pub enum InterfaceLayout {
 	Table,
 }
 
+/// The roundness of certain UI elements in the client interface, such as cards, buttons, inputs, etc
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	Enum,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum InterfaceRoundness {
+	None,
+	#[default]
+	Normal,
+	Rounded,
+	Pill,
+}
+
 /// The style of placeholder to use for thumbnails while they are loading
 #[derive(
 	Eq,
@@ -257,6 +286,9 @@ impl JobStatus {
 	}
 }
 
+// TODO: rename these terrible things:
+// - FirstFolderOnly?
+// - FolderPerSeries?
 /// The different patterns a library may be organized by
 #[derive(
 	Eq,
@@ -521,6 +553,8 @@ pub enum ReadingDirection {
 	Rtl,
 }
 
+/// the different reading statuses a book can be categorized as based on a user's
+/// reading sessions
 #[derive(
 	Eq,
 	Copy,
@@ -543,10 +577,15 @@ pub enum ReadingDirection {
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingStatus {
+	/// there is an active reading session for this book. it may or may not have been completed in
+	/// the past, this is strictly about the presence of an active session
 	#[default]
 	Reading,
+	/// there is at least one completed readthrough for this book
 	Finished,
+	/// a user actively started reading a book but decided not to finish it (i.e., dnf-ing a book)
 	Abandoned,
+	/// no sessions have been recorded for this book
 	NotStarted,
 }
 
@@ -679,7 +718,7 @@ pub enum SupportedFont {
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserPermission {
 	/// Grant access to read/create their own API keys
-	AccessAPIKeys,
+	AccessApiKeys,
 	/// Grant access to the koreader sync feature
 	AccessKoreaderSync,
 	/// Grant access to the kobo sync feature

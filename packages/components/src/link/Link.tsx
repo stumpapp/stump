@@ -15,7 +15,7 @@ const linkVariants = cva(
 			variant: {
 				brand: 'text-brand',
 				default: 'text-foreground',
-				muted: 'text-foreground-muted',
+				muted: 'text-muted-foreground',
 			},
 		},
 	},

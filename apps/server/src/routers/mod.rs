@@ -11,7 +11,7 @@ mod spa;
 pub(crate) use api::v2::auth::enforce_max_sessions;
 pub(crate) use spa::relative_favicon_path;
 
-pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
+pub async fn mount(app_state: AppState) -> Router<AppState> {
 	let mut app_router = Router::new();
 
 	if app_state.config.enable_koreader_sync {

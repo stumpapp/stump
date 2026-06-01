@@ -1,3 +1,34 @@
+<a name="0.1.4"></a>
+## 0.1.4 (2026-05-28)
+
+### Added
+
+- ✨ (expo): Support volume-based reader navigation ([#1161](https://github.com/stumpapp/stump/issues/1161)) [[5e5a2e0](https://github.com/stumpapp/stump/commit/5e5a2e0dafe09be901c535984616ac1de1a4d65c)]
+- ✨ Support tag-based filtering on backend ([#1160](https://github.com/stumpapp/stump/issues/1160)) [[6b3fefd](https://github.com/stumpapp/stump/commit/6b3fefda5c1c6c4c19451ca8a37c5ea65ab5ee15)]
+
+### Changed
+
+- ⬆️ Fix vulnerabilities (&#x60;ws&#x60;, &#x60;qs&#x60;, &#x60;uuid&#x60;, &#x60;js-cookie&#x60;) ([#1179](https://github.com/stumpapp/stump/issues/1179)) [[9a93695](https://github.com/stumpapp/stump/commit/9a93695610c3f073d7f7804493086c857f310846)]
+- ♻️ Add infinite scrolling for files in UploadModal ([#1172](https://github.com/stumpapp/stump/issues/1172)) [[f540698](https://github.com/stumpapp/stump/commit/f5406986d9ba413b3bcf62bc6fe45ba78049f0b6)]
+- 🍱 Update docs hero images [[f4c8854](https://github.com/stumpapp/stump/commit/f4c88542904ce1b9519425de559ab2f6c9d5cb6e)]
+
+### Fixed
+
+- 🐛 Fix &#x60;AccessAPIKeys&#x60; permission mismatch ([#1171](https://github.com/stumpapp/stump/issues/1171)) [[666bd01](https://github.com/stumpapp/stump/commit/666bd01dc8ab8aa14a8fa9e2e6002d75a2db4196)]
+- 🐛 (expo): Fix Android themed icon ([#1162](https://github.com/stumpapp/stump/issues/1162)) [[359ebf0](https://github.com/stumpapp/stump/commit/359ebf00e0e40f91dfe6091d54360c7701bc8d86)]
+- 💚 Fix CVE check workflow [[609788d](https://github.com/stumpapp/stump/commit/609788dc74668e39218841b632d14211fd054f88)]
+
+### Miscellaneous
+
+- 🌐 Update translations ([#1164](https://github.com/stumpapp/stump/issues/1164)) [[1aba2c9](https://github.com/stumpapp/stump/commit/1aba2c94b49a91245ab4c8073a9e1d749367a21b)]
+- 📝 Add &#x60;Security.md&#x60; [[3feba0a](https://github.com/stumpapp/stump/commit/3feba0abe6bf53d2c2385d15bbb6c299901c3d7d)]
+- 📝 Update documentation, readmes, and contributing guidelines [[984c953](https://github.com/stumpapp/stump/commit/984c95321a960b612c9b30bd15697e64e1acded0)]
+- 🌐 Update translations ([#1148](https://github.com/stumpapp/stump/issues/1148)) [[4d6cc34](https://github.com/stumpapp/stump/commit/4d6cc347df7a493c1b04bd479486bfaedff58f6b)]
+- 📝 Add docs for AUR package [[44c9791](https://github.com/stumpapp/stump/commit/44c979134e1f178e23fb56a05b812fdb1bc5def6)]
+- 📝 Fix overflow issues on documentation hero [[ffd2ec0](https://github.com/stumpapp/stump/commit/ffd2ec0278f15f45b82e2be23d6d61297708bcff)]
+- 🩹 Fix leftover link in SteppedFormSceneHeader [[7eaa73a](https://github.com/stumpapp/stump/commit/7eaa73a5183083906bb79532b9f4ef61f97fc281)]
+
+
 <a name="0.1.3"></a>
 ## 0.1.3 (2026-05-16)
 

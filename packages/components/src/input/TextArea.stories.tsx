@@ -13,7 +13,7 @@ export const Default: Story = {
 }
 
 export const Primary: Story = {
-	render: () => <TextArea label="Label" variant="primary" placeholder="Hi" />,
+	render: () => <TextArea label="Label" placeholder="Hi" />,
 }
 
 export default StoryMeta

@@ -94,8 +94,8 @@ export default function ReaderFooter() {
 				<div className="flex flex-col justify-end" style={containerSize}>
 					<div
 						className={cn(
-							'rounded-lg shadow-xl flex cursor-pointer overflow-hidden border-2 border-transparent transition duration-300 hover:border-edge-brand',
-							{ 'rounded-[10px] border-edge-brand': isCurrentSet },
+							'shadow-xl flex cursor-pointer overflow-hidden rounded-lg border-2 border-transparent transition duration-300 hover:border-primary',
+							{ 'rounded-[10px] border-primary': isCurrentSet },
 						)}
 						style={{
 							...pageSetSize,

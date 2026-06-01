@@ -20,7 +20,7 @@ export default function GroupJoiner() {
 					<Tabs.Trigger
 						value="and"
 						asChild
-						className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
+						className="w-8 px-1 text-xs min-w-[unset] rounded-lg"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'and')}
 					>
 						<Text className="cursor-pointer truncate">{t(getJoinerKey('and', 'label'))}</Text>
@@ -29,7 +29,7 @@ export default function GroupJoiner() {
 					<Tabs.Trigger
 						value="or"
 						asChild
-						className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
+						className="w-8 px-1 text-xs min-w-[unset] rounded-lg"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'or')}
 					>
 						<Text className={cn('truncate', { 'cursor-pointer': true })}>
@@ -40,7 +40,7 @@ export default function GroupJoiner() {
 					<Tabs.Trigger
 						value="not"
 						asChild
-						className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
+						className="w-8 px-1 text-xs min-w-[unset] rounded-lg"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'not')}
 					>
 						<Text className={cn('truncate', { 'cursor-pointer': true })}>

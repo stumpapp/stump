@@ -9,8 +9,8 @@ export function Preformatted({ title, content }: PreformattedProps) {
 	const memoContent = useMemo(() => JSON.stringify(content, null, 2), [content])
 
 	const formatted = (
-		<div className="rounded-sm p-4 bg-background-surface">
-			<pre className="text-xs text-foreground-subtle">{memoContent}</pre>
+		<div className="p-4 rounded-sm bg-muted">
+			<pre className="text-xs text-foreground">{memoContent}</pre>
 		</div>
 	)
 
@@ -20,7 +20,7 @@ export function Preformatted({ title, content }: PreformattedProps) {
 
 	return (
 		<div className="pb-0 flex flex-col">
-			<div className="h-10 px-4 flex items-center bg-background-surface">
+			<div className="h-10 px-4 flex items-center bg-muted">
 				<Text size="sm" className="font-medium">
 					{title}
 				</Text>

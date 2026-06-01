@@ -1,3 +1,4 @@
+import { NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
@@ -12,6 +13,7 @@ import EnableJobOverlayToggle from './EnableJobOverlayToggle'
 import FontSelect from './FontSelect'
 import GradientToggle from './GradientToggle'
 import HideScrollbarToggle from './HideScrollbarToggle'
+import InterfaceRoundnessPreference from './InterfaceRoundnessPreference'
 import LiveRefetchToggle from './LiveRefetchToggle'
 import MaxWidthPreference from './MaxWidthPreference'
 import { NavigationArrangement } from './navigation-arrangement'
@@ -42,57 +44,96 @@ export default function AppearanceSettingsScene() {
 						<h3 className="text-base font-medium text-foreground">
 							{t(getKey('themeAndAppearance.label'))}
 						</h3>
-						<p className="text-sm text-foreground-muted">
+						<p className="text-sm text-muted-foreground">
 							{t(getKey('themeAndAppearance.description'))}
 						</p>
 					</div>
 
-					<ThemeSelect />
-					<GradientToggle />
-					<FontSelect />
-					<ThumbnailRatioSelect />
-					<ThumbnailPlaceholder />
-				</div>
+					<NewCard
+						label={t(getKey('interface.title'))}
+						description={t(getKey('interface.description'))}
+					>
+						<ThemeSelect />
+						<GradientToggle />
+						<FontSelect />
+						<InterfaceRoundnessPreference />
+					</NewCard>
 
-				<div>
-					<h3 className="text-base font-medium text-foreground">
-						{t(getKey('layoutAndArrangement.label'))}
-					</h3>
-					<p className="text-sm text-foreground-muted">
-						{t(getKey('layoutAndArrangement.description'))}
-					</p>
+					<NewCard
+						label={t(getKey('thumbnails.title'))}
+						description={t(getKey('thumbnails.description'))}
+					>
+						<ThumbnailRatioSelect />
+						<ThumbnailPlaceholder />
+					</NewCard>
 				</div>
-
-				<PrimaryNavigationPreference />
 
 				<div className="gap-y-8 flex flex-col">
-					<DoubleSidebarToggle />
-					<ReplacePrimarySidebarToggle />
+					<div>
+						<h3 className="text-base font-medium text-foreground">
+							{t(getKey('layoutAndArrangement.label'))}
+						</h3>
+						<p className="text-sm text-muted-foreground">
+							{t(getKey('layoutAndArrangement.description'))}
+						</p>
+					</div>
+
+					<NewCard
+						label={t(getKey('navigation.title'))}
+						description={t(getKey('navigation.description'))}
+					>
+						<PrimaryNavigationPreference />
+						<DoubleSidebarToggle />
+						<ReplacePrimarySidebarToggle />
+						<Suspense>
+							<NavigationArrangement />
+						</Suspense>
+					</NewCard>
+
+					<NewCard
+						label="Display and spacing"
+						description="Preferences related to the presentation of content and information"
+					>
+						<DisplaySpacingPreference />
+						<MaxWidthPreference />
+					</NewCard>
 				</div>
-
-				<Suspense>
-					<NavigationArrangement />
-				</Suspense>
-
-				<DisplaySpacingPreference />
-				<MaxWidthPreference />
 
 				<div className="gap-y-8 flex flex-col">
 					<div>
 						<h3 className="text-base font-medium text-foreground">
 							{t(getKey('additionalPreferences.label'))}
 						</h3>
-						<p className="text-sm text-foreground-muted">
+						<p className="text-sm text-muted-foreground">
 							{t(getKey('additionalPreferences.description'))}
 						</p>
 					</div>
-					<ShowThumbnailsInHeader />
-					<HideScrollbarToggle />
-					<EnableAlphabetFiltering />
-					<EnableFancyAnimations />
-					<QueryIndicatorToggle />
-					<LiveRefetchToggle />
-					<EnableJobOverlayToggle />
+
+					{/* TODO: localize after finalizing groups */}
+					<NewCard
+						label="Content browsing"
+						description="Preferences that affect browsing and navigating content lists"
+					>
+						<ShowThumbnailsInHeader />
+						<EnableAlphabetFiltering />
+					</NewCard>
+
+					<NewCard
+						label="Motion and animation"
+						description="Visual presentation and movement preferences"
+					>
+						<EnableFancyAnimations />
+						<HideScrollbarToggle />
+					</NewCard>
+
+					<NewCard
+						label="Activity and status"
+						description="Indicators, overlays, or functionality related to background activity"
+					>
+						<QueryIndicatorToggle />
+						<LiveRefetchToggle />
+						<EnableJobOverlayToggle />
+					</NewCard>
 				</div>
 			</ContentContainer>
 		</Container>

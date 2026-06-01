@@ -20,7 +20,7 @@ export function GridSizeSlider() {
 	// TODO: Tooltip as you drag that shows a label, e.g. below but from locale files
 	return (
 		<div className="gap-2 flex items-center">
-			<LayoutGrid className="h-4 w-4 text-foreground-muted" />
+			<LayoutGrid className="h-4 w-4 text-muted-foreground" />
 			<Slider
 				value={[currentIndex]}
 				onValueChange={handleValueChange}
@@ -29,7 +29,7 @@ export function GridSizeSlider() {
 				step={1}
 				className="w-24"
 			/>
-			<Grid3X3 className="h-4 w-4 text-foreground-muted" />
+			<Grid3X3 className="h-4 w-4 text-muted-foreground" />
 		</div>
 	)
 }

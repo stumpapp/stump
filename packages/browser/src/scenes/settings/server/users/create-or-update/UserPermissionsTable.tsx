@@ -109,7 +109,7 @@ export default function UserPermissionsTable() {
 					{renderDescription()}
 				</Text>
 			</div>
-			<div className="h-96 rounded-lg overflow-auto border border-edge">
+			<div className="h-96 overflow-auto rounded-lg border border-border">
 				<table className="w-full">
 					<tbody>
 						{table.getRowModel().rows.map((row) => {
@@ -123,20 +123,14 @@ export default function UserPermissionsTable() {
 								return (
 									<tr
 										key={row.id}
-										className="top-0 backdrop-blur-sm sticky z-10 border-b border-edge bg-background"
+										className="top-0 backdrop-blur-sm sticky z-10 border-b border-border bg-background"
 									>
-										<td className="px-4 py-3 font-semibold bg-background-surface/50 text-foreground">
+										<td className="px-4 py-3 font-semibold bg-muted/50 text-foreground">
 											{groupName}
 										</td>
-										<td className="px-4 py-3 bg-background-surface/50">
-											{/* <input
-											type="checkbox"
-											className="h-4 w-4 rounded border-edge text-blue-600 focus:ring-blue-500"
-											readOnly
-										/> */}
+										<td className="px-4 py-3 bg-muted/50">
 											<CheckBox
 												id={groupData.id}
-												variant="primary"
 												name={groupData.id}
 												checked={groupData.permissions.every(
 													(p) => selectedPermissions?.includes(p) ?? false,
@@ -154,7 +148,7 @@ export default function UserPermissionsTable() {
 								return (
 									<tr
 										key={row.id}
-										className="hover:bg-muted/50 border-b border-edge transition-colors"
+										className="border-b border-border transition-colors hover:bg-muted/50"
 									>
 										<td className="px-4 py-3 pl-8 text-sm">
 											<Text>{permissionData.label}</Text>
@@ -165,7 +159,6 @@ export default function UserPermissionsTable() {
 										<td className="px-4 py-3">
 											<CheckBox
 												id={permissionData.permission}
-												variant="primary"
 												name={permissionData.permission}
 												checked={selectedPermissions?.includes(permissionData.permission) ?? false}
 												onClick={() => handlePermissionClick(permissionData.permission)}

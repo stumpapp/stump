@@ -55,10 +55,10 @@ export default function ClearLoginActivityConfirmation() {
 			title={t(getKey('title'))}
 			description={t(getKey('description'))}
 			confirmText={t(getKey('confirm'))}
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			trigger={
 				<Button
-					variant="secondary"
+					variant="destructive"
 					onClick={() => setShowConfirmation(true)}
 					disabled={isEmptyState}
 				>

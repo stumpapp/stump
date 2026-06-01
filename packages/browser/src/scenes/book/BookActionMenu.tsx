@@ -28,26 +28,20 @@ import DeleteHistoryConfirmation from './DeleteHistoryConfirmation'
 import EmailBookDialog from './EmailBookDialog'
 
 const completedMutation = graphql(`
-	mutation BookActionMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
-		markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
-			completedAt
-		}
+	mutation BookActionMenuComplete($id: ID!) {
+		finishMediaProgress(id: $id)
 	}
 `)
 
 const deleteMutation = graphql(`
 	mutation BookActionMenuDeleteSession($id: ID!) {
-		deleteMediaProgress(id: $id) {
-			__typename
-		}
+		clearMediaProgress(id: $id)
 	}
 `)
 
 const deleteHistoryMutation = graphql(`
 	mutation BookActionMenuDeleteHistory($id: ID!) {
-		deleteMediaReadHistory(id: $id) {
-			__typename
-		}
+		deleteMediaReadingHistory(id: $id)
 	}
 `)
 
@@ -180,7 +174,7 @@ export default function BookActionMenu({ book }: Props) {
 										label: 'Mark as read',
 										leftIcon: <BookOpenCheck className="mr-2 h-4 w-4" />,
 										onClick: () => {
-											actions.completeBook({ isComplete: true, id: book.id, page: book.pages })
+											actions.completeBook({ id: book.id })
 										},
 									},
 								]
@@ -275,7 +269,7 @@ export default function BookActionMenu({ book }: Props) {
 			<div className="gap-1 flex w-full items-center">
 				{canDownload && (
 					<ButtonOrLink
-						className="w-full"
+						className="w-full shrink"
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
 						title="Download"

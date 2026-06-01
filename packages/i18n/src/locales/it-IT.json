@@ -2994,6 +2994,7 @@
 			},
 			"autoSyncLocalData": "Sincronizzazione automatica dati locali",
 			"lowercaseTranslation": "Etichette in minuscolo",
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Gestione",
 				"dataUsage": {

@@ -46,12 +46,12 @@ export function BackgroundGradient({
 	const naviation = useNavigation()
 
 	useEffect(() => {
-		if (Platform.OS === 'android' && androidHeaderColor) {
+		if (Platform.OS === 'android' && androidHeaderColor && tintListBackground) {
 			naviation.setOptions({
 				headerBackground: () => <AnimatedHeaderBackground color={androidHeaderColor} />,
 			})
 		}
-	}, [androidHeaderColor, naviation])
+	}, [androidHeaderColor, naviation, tintListBackground])
 
 	if (!tintListBackground) return null
 

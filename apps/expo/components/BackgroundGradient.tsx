@@ -101,7 +101,6 @@ export function useBackgroundGradient<T extends MinimalItem>({
 		Math.floor(visibleRowsTotalStartHeight / rowHeight) * numColumns,
 	)
 
-	// const headerColor = useSharedValue(getHeaderTintColor(data.at(0)))
 	const firstColor = useSharedValue(getTintColor(data.at(0)))
 	const lastColor = useSharedValue(getTintColor(data.at(estimatedVisibleItemCount - 1)))
 
@@ -137,23 +136,13 @@ export function useBackgroundGradient<T extends MinimalItem>({
 
 			const activeItems = trulyViewableItems.length > 0 ? trulyViewableItems : viewableItems
 
-			// const newHeaderColor = getHeaderTintColor(activeItems.at(0)?.item)
 			const newFirstColor = getTintColor(activeItems.at(0)?.item)
 			const newLastColor = getTintColor(activeItems.at(-1)?.item)
 
-			// headerColor.set(withTiming(newHeaderColor, { duration: 800 }))
 			firstColor.set(withTiming(newFirstColor, { duration: 800 }))
 			lastColor.set(withTiming(newLastColor, { duration: 800 }))
 		},
-		[
-			// headerColor,
-			firstColor,
-			lastColor,
-			flashListRef,
-			tintListBackground,
-			headerHeight,
-			numColumns,
-		],
+		[firstColor, lastColor, flashListRef, tintListBackground, headerHeight, numColumns],
 	)
 
 	const viewabilityConfig = { itemVisiblePercentThreshold: isGrid ? 50 : 70, minimumViewTime: 800 }
@@ -177,21 +166,6 @@ function getTintColor(item?: MinimalItem): string {
 
 	return getThumbnailTintColor(averageColor, { dark: isDarkColorScheme })
 }
-
-// const getHeaderTintColor = (item?: MinimalItem): string => {
-// 	const isDarkColorScheme = Appearance.getColorScheme() === 'dark'
-// 	const averageColor = item?.thumbnail?.metadata?.averageColor
-
-// 	if (!averageColor) return 'transparent'
-
-// 	const color = getColor(averageColor)
-// 	set(color, {
-// 		'oklch.l': (l) => (isDarkColorScheme ? 0.35 * Math.pow(l, 0.4) : 0.5 * Math.pow(l, 0.5) + 0.5),
-// 		'oklch.c': (c) => 0.95 * c + 0.05 * 0.4,
-// 	})
-
-// 	return serialize(color, { format: 'hex' })
-// }
 
 function AnimatedHeaderBackground({ color }: { color: SharedValue<string> }) {
 	const animatedStyle = useAnimatedStyle(() => ({ backgroundColor: color.value }))

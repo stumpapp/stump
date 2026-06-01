@@ -1,6 +1,9 @@
 use crate::{
 	entity::{book_club, book_club_member},
-	shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec},
+	shared::{
+		book_club::{BookClubMemberRole, BookClubMemberRoleSpec},
+		enums::UserPermission,
+	},
 };
 use async_graphql::SimpleObject;
 use chrono::Utc;
@@ -40,8 +43,8 @@ pub struct Model {
 impl Entity {
 	fn filter_for_user(user: &AuthUser) -> Condition {
 		Condition::all().add_option(
-			// Server owner can see all book clubs
-			if user.is_server_owner {
+			// System-level book club moderators can see all book clubs
+			if user.has_permission(UserPermission::ModerateBookClubs) {
 				None
 			} else {
 				// Any other user can see a book club if they are a member OR if it is not private
@@ -108,17 +111,21 @@ impl Entity {
 		user: &AuthUser,
 		role: BookClubMemberRole,
 	) -> Select<Entity> {
-		let condition = Condition::all().add_option(if user.is_server_owner {
-			None
-		} else {
-			Some(
-				book_club::Column::Id.in_subquery(
-					Self::subquery_for_user(user)
-						.and_where(book_club_member::Column::Role.gte::<i32>(role as i32))
-						.to_owned(),
-				),
-			)
-		});
+		let condition = Condition::all().add_option(
+			if user.has_permission(UserPermission::ModerateBookClubs) {
+				None
+			} else {
+				Some(
+					book_club::Column::Id.in_subquery(
+						Self::subquery_for_user(user)
+							.and_where(
+								book_club_member::Column::Role.gte::<i32>(role as i32),
+							)
+							.to_owned(),
+					),
+				)
+			},
+		);
 
 		Entity::find().filter(condition)
 	}
@@ -193,8 +200,11 @@ mod tests {
 	use pretty_assertions::assert_eq;
 
 	#[test]
-	fn test_all_for_user_server_owner() {
-		let user = get_default_user();
+	fn test_all_for_user_book_club_moderator() {
+		let user = AuthUser {
+			permissions: vec![UserPermission::ModerateBookClubs],
+			..get_default_user()
+		};
 		let select = Entity::find_all_for_user(true, &user);
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
@@ -245,9 +255,11 @@ mod tests {
 	}
 
 	#[test]
-	fn find_for_member_enforce_role_server_owner() {
-		let mut user = get_default_user();
-		user.is_server_owner = true;
+	fn find_for_member_enforce_role_book_club_moderator() {
+		let user = AuthUser {
+			permissions: vec![UserPermission::ModerateBookClubs],
+			..get_default_user()
+		};
 
 		let select =
 			Entity::find_for_member_enforce_role(&user, BookClubMemberRole::Moderator);

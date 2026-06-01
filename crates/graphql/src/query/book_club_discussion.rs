@@ -259,8 +259,7 @@ async fn verify_read_access(
 	user: &AuthUser,
 	conn: &DatabaseConnection,
 ) -> Result<()> {
-	// TODO(permissions): implicit permission
-	if user.has_permission(UserPermission::ManageServer) {
+	if user.has_permission(UserPermission::ModerateBookClubs) {
 		return Ok(());
 	}
 

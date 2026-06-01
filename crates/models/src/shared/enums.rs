@@ -778,6 +778,12 @@ pub enum UserPermission {
 	ReadSystemLogs,
 	/// Grant access to view all smart lists, even those they don't have explicit access to
 	ViewAllSmartLists,
+	/// Grant moderator-level powers across all book clubs (edit/delete any message,
+	/// lock/pin/create/archive discussions, see private clubs they're not a member of)
+	ModerateBookClubs,
+	/// Grant admin-level powers across all book clubs (everything ModerateBookClubs
+	/// grants, plus suggestion administration)
+	ManageBookClubs,
 	/// Grant access to manage the server. This is effectively full access and encompasses all other permissions
 	ManageServer,
 }

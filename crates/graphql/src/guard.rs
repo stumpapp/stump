@@ -127,7 +127,12 @@ impl Guard for BookClubRoleGuard {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		if user.is_server_owner {
+		let system_override = if self.role >= BookClubMemberRole::Admin {
+			UserPermission::ManageBookClubs
+		} else {
+			UserPermission::ModerateBookClubs
+		};
+		if user.has_permission(system_override) {
 			return Ok(());
 		}
 

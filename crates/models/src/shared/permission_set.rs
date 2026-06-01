@@ -111,6 +111,7 @@ impl AssociatedPermission for UserPermission {
 			UserPermission::MetadataProviderManage => {
 				vec![UserPermission::MetadataProviderRead]
 			},
+			UserPermission::ManageBookClubs => vec![UserPermission::ModerateBookClubs],
 			UserPermission::ManageServer => vec![
 				UserPermission::AccessGraphQLPlayground,
 				UserPermission::CreateBookClub,
@@ -140,6 +141,7 @@ impl AssociatedPermission for UserPermission {
 				UserPermission::MetadataFetchRecordManage,
 				UserPermission::MetadataProviderManage,
 				UserPermission::ReadSystemLogs,
+				UserPermission::ManageBookClubs,
 				// TODO(permissions): the following are per-user feature-access perms,
 				// included so that admins retain parity with the legacy is_server_owner
 				// short-circuit. Likely candidates for removal once admins are issued

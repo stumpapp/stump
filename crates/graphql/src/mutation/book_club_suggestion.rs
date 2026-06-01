@@ -86,8 +86,7 @@ impl BookClubSuggestionMutation {
 
 		let can_remove = suggestion.suggested_by_id == member.id
 			|| member.role >= BookClubMemberRole::Admin
-			// TODO(permissions): implicit permission
-			|| user.has_permission(UserPermission::ManageServer);
+			|| user.has_permission(UserPermission::ManageBookClubs);
 
 		if !can_remove {
 			return Err("You can only remove your own suggestions".into());
@@ -168,9 +167,8 @@ impl BookClubSuggestionMutation {
 
 		let member = get_member_for_user(&suggestion.book_club_id, user, conn).await?;
 
-		// TODO(permissions): implicit permission
 		if member.role < BookClubMemberRole::Admin
-			&& !user.has_permission(UserPermission::ManageServer)
+			&& !user.has_permission(UserPermission::ManageBookClubs)
 		{
 			return Err("Only admins and above can update suggestion status".into());
 		}

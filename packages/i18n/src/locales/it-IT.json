@@ -59,11 +59,11 @@
 				"email": {
 					"label": "E-mail",
 					"placeholder": "Indirizzo e-mail",
-					"description": "Un indirizzo email a cui inviare il libro. Fai clic su Aggiungi per confermare ogni input"
+					"description": "Un indirizzo e-mail a cui inviare il libro. Fai clic su Aggiungi per confermare ogni input"
 				},
 				"devices": {
 					"label": "Dispositivi",
-					"placeholder": "Seleziona i dispositivi",
+					"placeholder": "Seleziona dispositivi",
 					"noFilterMatch": "Nessun dispositivo corrisponde al filtro"
 				}
 			}
@@ -2044,8 +2044,8 @@
 						"accountManagement": "Account",
 						"featureAccess": "Accesso alle funzionalità",
 						"fileManagement": "File",
-						"emailers": "Sistemi di invio email",
-						"emailing": "Invio email",
+						"emailers": "Sistemi di invio e-mail",
+						"emailing": "Invio e-mail",
 						"libraryManagement": "Gestione libreria",
 						"userManagement": "Gestione utenti",
 						"serverManagement": "Gestione server"
@@ -2070,11 +2070,11 @@
 						"label": "Attivazione funzionalità opzionali",
 						"api_keys": {
 							"label": "Chiavi API",
-							"description": "Consente all'utente di gestire le proprie chiavi API"
+							"description": "Consenti all'utente di gestire le proprie chiavi API"
 						},
 						"koreader_sync": {
 							"label": "Sincronizzazione KoReader",
-							"description": "Consente all'utente di accedere all'integrazione della sincronizzazione KoReader"
+							"description": "Consenti all'utente di accedere all'integrazione della sincronizzazione KoReader"
 						}
 					},
 					"file": {
@@ -2093,29 +2093,29 @@
 						}
 					},
 					"emailer": {
-						"label": "Sistemi di invio email",
+						"label": "Sistemi di invio e-mail",
 						"read": {
-							"label": "Accedere ai sistemi di invio email",
-							"description": "Consente all'utente di visualizzare i sistemi di invio email configurati"
+							"label": "Accedere ai sistemi di invio e-mail",
+							"description": "Consente all'utente di visualizzare i sistemi di invio e-mail configurati"
 						},
 						"create": {
-							"label": "Creare sistemi di invio email",
-							"description": "Consente all'utente di creare nuovi sistemi di invio email"
+							"label": "Creare sistemi di invio e-mail",
+							"description": "Consente all'utente di creare nuovi sistemi di invio e-mail"
 						},
 						"manage": {
-							"label": "Gestire sistemi di invio email",
-							"description": "Consente all'utente di gestire i sistemi di invio email esistenti"
+							"label": "Gestire sistemi di invio e-mail",
+							"description": "Consente all'utente di gestire i sistemi di invio e-mail esistenti"
 						}
 					},
 					"email": {
-						"label": "Invio email",
+						"label": "Invio e-mail",
 						"send": {
-							"label": "Inviare email",
-							"description": "Consente all'utente di inviare email dal server a qualsiasi alias configurato"
+							"label": "Inviare e-mail",
+							"description": "Consente all'utente di inviare e-mail dal server a qualsiasi alias configurato"
 						},
 						"arbitrary_send": {
-							"label": "Inviare email arbitrarie",
-							"description": "Consente all'utente di inviare email dal server a qualsiasi indirizzo email"
+							"label": "Inviare e-mail arbitrarie",
+							"description": "Consente all'utente di inviare e-mail dal server a qualsiasi indirizzo email"
 						}
 					},
 					"library": {
@@ -2169,158 +2169,158 @@
 				},
 				"validation": {
 					"ageRestrictionTooLow": "La limitazione dell'età non può essere inferiore a 0",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Nome utente già esistente"
+					"missingUsername": "Il nome utente è obbligatorio",
+					"missingPassword": "La password è obbligatoria",
+					"usernameAlreadyExists": "Il nome utente esiste già"
 				},
 				"createSubmitButton": "Crea utente",
 				"updateSubmitButton": "Aggiorna utente"
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
+					"title": "Elimina attività",
+					"description": "Tutti i record delle attività di accesso verranno eliminati in modo permanente dal database",
+					"confirm": "Elimina"
 				}
 			}
 		},
 		"server/email": {
-			"helmet": "Impostazioni email",
-			"title": "Email",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"helmet": "Impostazioni e-mail",
+			"title": "E-mail",
+			"description": "Impostazioni per la configurazione del servizio e-mail SMTP per l'istanza del tuo server Stump",
 			"sections": {
 				"emailers": {
-					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"title": "Sistemi di invio e-mail SMTP",
+					"description": "I client di invio e-mail configurati per l'istanza del tuo server Stump",
+					"singleInstanceDisclaimer": "Sebbene Stump supporti più sistemi di invio e-mail SMTP nel backend, è possibile configurarne solo uno dall'interfaccia utente. Questa funzionalità verrà migliorata in futuro",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
+						"emptyHeading": "Nessun sistema di invio e-mail SMTP configurato",
+						"primaryEmailer": "Sistema di invio e-mail principale",
 						"sendHistory": {
-							"heading": "Send history",
-							"description": "A record of emails sent from this emailer",
+							"heading": "Cronologia invii",
+							"description": "Un registro delle e-mail inviate da questo sistema di invio",
 							"table": {
 								"columns": {
-									"to": "To",
-									"subject": "Subject",
-									"status": "Status",
-									"createdAt": "Sent at"
+									"to": "A",
+									"subject": "Oggetto",
+									"status": "Stato",
+									"createdAt": "Inviato il"
 								}
 							},
-							"emptyHeading": "No history",
-							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+							"emptyHeading": "Nessuna cronologia",
+							"emptySubtitle": "La cronologia di questo sistema di invio è vuota. Potrebbe non essere ancora stato utilizzato o la cronologia è stata svuotata"
 						}
 					}
 				},
 				"devices": {
-					"title": "Email devices",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
-					"addDevice": "Add device alias",
+					"title": "Dispositivi e-mail",
+					"description": "Gli alias di dispositivi che hai configurato per ricevere e-mail dall'istanza del tuo server Stump",
+					"addDevice": "Aggiungi alias dispositivo",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Crea alias dispositivo",
+							"update": "Aggiorna alias dispositivo"
 						},
 						"name": {
 							"label": "Nome",
-							"description": "A friendly name to uniquely identify this device alias"
+							"description": "Un nome intuitivo per identificare in modo univoco questo alias di dispositivo"
 						},
 						"email": {
-							"label": "Email",
-							"description": "The email address this alias will be associated with"
+							"label": "E-mail",
+							"description": "L'indirizzo e-mail a cui verrà associato questo alias"
 						},
 						"forbidden": {
-							"label": "Vietato",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
+							"label": "Invio vietato",
+							"description": "Quando questa opzione è abilitata, nessun utente potrà inviare e-mail all'indirizzo associato a questo alias"
 						},
 						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Crea alias dispositivo",
+							"update": "Aggiorna alias dispositivo"
 						}
 					},
 					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
+						"emptyHeading": "Nessun dispositivo registrato",
+						"emptySubtitle": "Crea un nuovo alias di dispositivo per un uso futuro"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
 					"label": "Nome",
-					"description": "A friendly name to uniquely identify this emailer"
+					"description": "Un nome intuitivo per identificare in modo univoco questo sistema di invio e-mail"
 				},
 				"smtpSettings": {
-					"heading": "SMTP settings",
-					"description": "The SMTP-specific settings for this emailer"
+					"heading": "Impostazioni SMTP",
+					"description": "Le impostazioni specifiche per SMTP di questo sistema di invio"
 				},
 				"smtpProvider": {
 					"label": "Preimpostazione provider SMTP",
 					"description": "Il provider del server SMTP. Viene utilizzato per precompilare alcune impostazioni comuni, ma non include tutti i provider"
 				},
 				"smtpHost": {
-					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
+					"label": "Host SMTP",
+					"description": "Il nome dell'host del server SMTP"
 				},
 				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
+					"label": "Porta SMTP",
+					"description": "La porta del server SMTP"
 				},
 				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
+					"label": "TLS abilitato",
+					"description": "Se abilitata, la connessione al server SMTP sarà crittografata"
 				},
 				"username": {
 					"label": "Nome utente",
-					"description": "Il nome utente per l'autenticazione con il server SMTP. Tipicamente è l'indirizzo email"
+					"description": "Il nome utente per l'autenticazione con il server SMTP. In genere coincide con l'indirizzo e-mail"
 				},
 				"password": {
 					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+					"description": "La password per l'autenticazione con il server SMTP. Se stai usando Gmail, potrebbe essere necessario generare una password specifica per l'app"
 				},
 				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
+					"heading": "Impostazioni del mittente",
+					"description": "Le impostazioni per il mittente dell'e-mail"
 				},
 				"senderDisplayName": {
 					"label": "Nome visualizzato del mittente",
-					"description": "The name that will be displayed to recipients"
+					"description": "Il nome che verrà visualizzato dai destinatari"
 				},
 				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
+					"label": "Indirizzo e-mail del mittente",
+					"description": "L'indirizzo e-mail che verrà visualizzato dai destinatari"
 				},
 				"additionalSettings": {
 					"heading": "Impostazioni aggiuntive",
-					"description": "Additional settings for the emailer"
+					"description": "Impostazioni aggiuntive per il sistema di invio"
 				},
 				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"label": "Dimensione massima allegato",
+					"description": "La dimensione massima, in byte, che un allegato può avere"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "Crea sistema di invio",
+					"update": "Aggiorna sistema di invio"
 				},
 				"testEmailer": {
-					"button": "Send test email",
-					"recipientLabel": "Test recipient",
-					"recipientDescription": "An email address to send the test email to",
-					"success": "Test email sent successfully",
+					"button": "Invia e-mail di prova",
+					"recipientLabel": "Destinatario della prova",
+					"recipientDescription": "Un indirizzo e-mail a cui inviare l'e-mail di prova",
+					"success": "E-mail di prova inviata correttamente",
 					"error": {
-						"title": "Failed to send test email",
-						"description": "Check your SMTP settings and try again"
+						"title": "Impossibile inviare e-mail di prova",
+						"description": "Verifica le impostazioni SMTP e riprova"
 					}
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "Crea sistema di invio",
+				"title": "Crea sistema di invio",
+				"description": "Crea un nuovo sistema di invio e-mail SMTP per l'istanza del tuo server Stump"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "Aggiorna sistema di invio",
+				"title": "Aggiorna sistema di invio",
+				"description": "Aggiorna i dettagli di questo sistema di invio e-mail SMTP"
 			}
 		},
 		"server/metadataIntegrations": {
@@ -2385,57 +2385,57 @@
 			}
 		},
 		"server/tags": {
-			"helmet": "Tag management",
-			"title": "Tags",
-			"description": "Create and manage tags for organizing your content",
+			"helmet": "Gestione dei tag",
+			"title": "Tag",
+			"description": "Crea e gestisci i tag per organizzare i tuoi contenuti",
 			"sections": {
 				"table": {
-					"title": "Tags",
-					"description": "All tags available on this server",
+					"title": "Tag",
+					"description": "Tutti i tag disponibili su questo server",
 					"empty": {
-						"title": "No tags",
-						"action": "Create your first tag to get started"
+						"title": "Nessun tag",
+						"action": "Crea il tuo primo tag per iniziare"
 					},
 					"columns": {
-						"name": "Name"
+						"name": "Nome"
 					},
 					"actionMenu": {
-						"rename": "Rename"
+						"rename": "Rinomina"
 					}
 				},
 				"createTag": {
-					"trigger": "Create tag",
+					"trigger": "Crea tag",
 					"modal": {
-						"heading": "Create new tag",
-						"description": "Tags can be assigned to books, series, and libraries",
+						"heading": "Crea nuovo tag",
+						"description": "I tag possono essere assegnati a libri, serie e librerie",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter tag name"
+							"label": "Nome",
+							"placeholder": "Inserisci nome tag"
 						},
-						"submit": "Create"
+						"submit": "Crea"
 					}
 				},
 				"renameTag": {
 					"modal": {
-						"heading": "Rename tag",
-						"description": "Change the name of this tag across all assigned items",
+						"heading": "Rinomina tag",
+						"description": "Modifica il nome di questo tag su tutti gli elementi assegnati",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter new tag name"
+							"label": "Nome",
+							"placeholder": "Inserisci nuovo nome tag"
 						},
-						"submit": "Rename"
+						"submit": "Rinomina"
 					}
 				},
 				"deleteTag": {
-					"title": "Delete tag",
-					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
-					"confirm": "Delete"
+					"title": "Elimina tag",
+					"description": "Questo tag verrà rimosso da tutti i libri, serie e librerie. Questa operazione non può essere annullata.",
+					"confirm": "Elimina"
 				}
 			}
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Lavoro in corso"
+		"backupHeading": "Attività in corso"
 	},
 	"libraryStats": {
 		"seriesCount": "Serie totali",
@@ -2444,14 +2444,14 @@
 	},
 	"noLibraries": {
 		"heading": "Niente da vedere qui",
-		"messagePrefix": "You can't see what you don't have",
+		"messagePrefix": "Non puoi vedere ciò che non hai",
 		"message": {
 			"create": "Crea una libreria per iniziare",
 			"wait": "Una volta create le librerie, verranno visualizzate qui"
 		},
 		"links": {
 			"create": "Crea libreria",
-			"settings": "Go to settings"
+			"settings": "Vai alle impostazioni"
 		}
 	},
 	"pagination": {
@@ -2477,7 +2477,7 @@
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Casa",
+			"home": "Home",
 			"libraries": "Librerie",
 			"books": "Esplora",
 			"bookClubs": "Club del libro",
@@ -2486,25 +2486,25 @@
 			"createBookClub": "Crea club del libro",
 			"noBookClubs": "Nessun club del libro",
 			"settings": "Impostazioni",
-			"themeToggle": "Cambia Tema",
-			"goForward": "Vai Avanti",
-			"goBack": "Torna Indietro",
-			"smartlists": "Smart list",
-			"noSmartlists": "Nessuna smart list",
-			"createSmartlist": "Crea smart list",
+			"themeToggle": "Cambia tema",
+			"goForward": "Vai avanti",
+			"goBack": "Torna indietro",
+			"smartlists": "Liste smart",
+			"noSmartlists": "Nessuna lista smart",
+			"createSmartlist": "Create lista smart",
 			"seeAll": "Mostra tutti"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Analizza",
-			"fileExplorer": "Files",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Cancella"
+			"scanLibrary": "Scansiona",
+			"fileExplorer": "File",
+			"manageLibrary": "Impostazioni",
+			"deleteLibrary": "Elimina"
 		},
 		"versionInformation": {
 			"heading": "Informazioni sulla versione",
-			"semVer": "Versione Semantica",
-			"commitHash": "Hash del Commit",
-			"buildDate": "Data di compilazione"
+			"semVer": "Versione semantica",
+			"commitHash": "Hash del commit",
+			"buildDate": "Data di build"
 		}
 	},
 	"search": {
@@ -2518,7 +2518,7 @@
 		"web": {
 			"message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo"
 		},
-		"reconnected": "Riconnesso al server! Redirezione in corso...",
+		"reconnected": "Riconnesso al server! Reindirizzamento in corso...",
 		"reconnectionFailed": "Qualcosa è andato storto!"
 	},
 	"serverStatusOverlay": {
@@ -2537,11 +2537,11 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
+		"placeholder": "Seleziona o crea un tag",
 		"placeholderNoTags": "Nessun tag disponibile"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Seleziona minatura",
 		"options": {
 			"selectFromBooks": "Seleziona dai libri",
 			"uploadImage": "Carica immagine"
@@ -2555,51 +2555,51 @@
 	"common": {
 		"add": "Aggiungi",
 		"cancel": "Annulla",
-		"clear": "Clear",
+		"clear": "Cancella",
 		"confirm": "Conferma",
-		"delete": "Delete",
+		"delete": "Elimina",
 		"deleteConfirmation": {
-			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
-			"confirm": "Delete {{type}}",
-			"typeToConfirm": "Type {{name}} to confirm:"
+			"title": "Elimina {{type}}",
+			"description": "Sei sicuro di voler eliminare {{type}}? L'azione non può essere annullata.",
+			"confirm": "Elimina {{type}}",
+			"typeToConfirm": "Digita {{name}} per confermare:"
 		},
 		"experimentalDisclaimer": {
 			"title": "Questa funzione è sperimentale",
 			"description": "Potrebbe presentare bug, mancare di alcune funzionalità o non funzionare affatto. Usa a tua discrezione e segnala eventuali problemi riscontrati"
 		},
-		"enter": "Enter",
+		"enter": "Inserisci",
 		"save": "Salva",
 		"send": "Invia",
 		"saveChanges": "Salve le modifiche",
-		"noChanges": "No changes",
+		"noChanges": "Nessuna modifica",
 		"create": "Crea",
 		"edit": "Modifica",
 		"update": "Aggiorna",
 		"upload": "Upload",
-		"uploading": "Uploading",
-		"uploadingEllipsis": "Uploading...",
+		"uploading": "Caricamento",
+		"uploadingEllipsis": "Caricamento...",
 		"unimplemented": "Questa funzionalità non è stata ancora implementata! Riprova più tardi",
-		"limitedFunctionality": "Questo non è stato ancora implementato completamente e mancano alcune funzionalità. Riprova più tardi",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"remove": "Remove",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready",
-		"notUsedYet": "Not used yet",
-		"never": "Never",
-		"scan": "Scan",
-		"somethingWentWrong": "Something went wrong",
+		"limitedFunctionality": "Questa funzionalità non è ancora completamente implementata e mancano alcune caratteristiche. Riprova più tardi",
+		"logIn": "Accedi",
+		"login": "Accedi",
+		"seeError": "Visualizza errore",
+		"remove": "Rimuovi",
+		"goBack": "Torna indietro",
+		"goToServers": "Vai ai server",
+		"notReady": "Questa funzionalità non è pronta",
+		"notUsedYet": "Non ancora utilizzato",
+		"never": "Mai",
+		"scan": "Scansiona",
+		"somethingWentWrong": "Qualcosa è andato storto",
 		"back": "Indietro",
 		"continue": "Continua",
 		"book": "Libro",
 		"series": "Serie",
 		"fileUpload": {
-			"someRejected": "Some files were rejected. Please check the file types and try again",
-			"tooManyFiles": "You have selected too many files",
-			"noValidFiles": "No valid files were selected"
+			"someRejected": "Alcuni file sono stati rifiutati. Controlla i tipi di file e riprova",
+			"tooManyFiles": "Hai selezionato troppi file",
+			"noValidFiles": "Non è stato selezionato alcun file valido"
 		}
 	},
 	"userPermissions": {
@@ -2664,7 +2664,7 @@
 			"description": "Consente all'utente di modificare librerie esistenti"
 		},
 		"EMAILER_CREATE": {
-			"label": "Creare sistema di invio email",
+			"label": "Creare sistema di invio e-mail",
 			"description": "Consente all'utente di creare la configurazione dell'e-mail"
 		},
 		"EMAILER_MANAGE": {
@@ -2672,188 +2672,188 @@
 			"description": "Consente all'utente di gestire la configurazione dell'e-mail e le impostazioni"
 		},
 		"EMAILER_READ": {
-			"label": "Leggere sistema di invio email",
+			"label": "Visualizzare sistema di invio e-mail",
 			"description": "Consente all'utente di visualizzare la configurazione dell'e-mail"
 		},
 		"EMAIL_ARBITRARY_SEND": {
-			"label": "Inviare email arbitrarie",
-			"description": "Consente all'utente di inviare email personalizzate a qualsiasi indirizzo"
+			"label": "Inviare e-mail arbitrarie",
+			"description": "Consente all'utente di inviare e-mail personalizzate a qualsiasi indirizzo"
 		},
 		"EMAIL_SEND": {
-			"label": "Inviare email",
-			"description": "Consente all'utente di inviare email attraverso il sistema"
+			"label": "Inviare e-mail",
+			"description": "Consente all'utente di inviare e-mail attraverso il sistema"
 		},
 		"FILE_EXPLORER": {
 			"label": "Esplorare file",
-			"description": "Allows the user to browse and explore the server filesystem"
+			"description": "Consente all'utente di sfogliare ed esplorare il file system del server"
 		},
 		"MANAGE_LIBRARY": {
-			"label": "Manage libraries",
-			"description": "Allows the user to manage library settings and configuration"
+			"label": "Gestire librerie",
+			"description": "Consente all'utente di gestire le impostazioni e la configurazione della libreria"
 		},
 		"MANAGE_NOTIFIER": {
-			"label": "Manage notifiers",
-			"description": "Allows the user to manage notification system settings"
+			"label": "Gestire notificatori",
+			"description": "Consente all'utente di gestire le impostazioni del sistema di notifica"
 		},
 		"MANAGE_SERVER": {
-			"label": "Manage server",
-			"description": "Allows the user to manage server configuration and settings"
+			"label": "Gestire server",
+			"description": "Consente all'utente di gestire la configurazione del server e le impostazioni"
 		},
 		"MANAGE_USERS": {
-			"label": "Manage users",
-			"description": "Allows the user to create, edit, and delete user accounts"
+			"label": "Gestire utenti",
+			"description": "Consente all'utente di creare, modificare ed eliminare gli account utente"
 		},
 		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
+			"label": "Visualizzare attività",
+			"description": "Consente all'utente di visualizzare le attività di sistema e il loro stato"
 		},
 		"READ_NOTIFIER": {
-			"label": "Read notifiers",
-			"description": "Allows the user to view notification system configuration"
+			"label": "Visualizzare notificatori",
+			"description": "Consente all'utente di visualizzare la configurazione del sistema di notifica"
 		},
 		"READ_PERSISTED_LOGS": {
-			"label": "Read persisted logs",
-			"description": "Allows the user to view stored system logs"
+			"label": "Visualizzare log persistenti",
+			"description": "Consente all'utente di visualizzare i log di sistema memorizzati"
 		},
 		"READ_SYSTEM_LOGS": {
-			"label": "Read system logs",
-			"description": "Allows the user to view real-time system logs"
+			"label": "Visualizzare log di sistema",
+			"description": "Consente all'utente di visualizzare i log di sistema in tempo reale"
 		},
 		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
+			"label": "Visualizzare utenti",
+			"description": "Consente all'utente di visualizzare le informazioni dell'account utente"
 		},
 		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
-			"description": "Allows the user to trigger library scans to discover new content"
+			"label": "Scansionare librerie",
+			"description": "Consente all'utente di attivare le scansioni della libreria per scoprire nuovi contenuti"
 		},
 		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
+			"label": "Caricare file",
+			"description": "Consente all'utente di caricare file sul server"
 		},
 		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+			"label": "Gestire attività",
+			"description": "Consente all'utente di gestire qualsiasi attività in coda"
 		},
 		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
+			"label": "Modificare metadati",
+			"description": "Consente all'utente di modificare i metadati per libri e serie"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
+			"label": "Scrivere metadati",
+			"description": "Consente all'utente di riscrivere le modifiche dei metadati nei file di origine"
 		},
 		"EDIT_THUMBNAILS": {
-			"label": "Edit thumbnails",
-			"description": "Allows the user to edit thumbnails for books and series"
+			"label": "Modificare miniature",
+			"description": "Consente all'utente di modificare le miniature per libri e serie"
 		}
 	},
 	"mobileApp": {
 		"addOrEditServer": {
 			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
+				"title": "Aggiungi server",
+				"subtitle": "Configura un nuovo server per accedere ai tuoi contenuti"
 			},
 			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
+				"title": "Modifica server",
+				"subtitle": "Modifica server"
 			},
-			"kind": "Kind",
+			"kind": "Genere",
 			"customHeaders": {
-				"label": "Custom Headers",
-				"addHeader": "Add header",
-				"invalidHeader": "Invalid header"
+				"label": "Intestazioni personalizzate",
+				"addHeader": "Aggiungi intestazione",
+				"invalidHeader": "Intestazione non valida"
 			},
 			"auth": {
-				"label": "Auth",
+				"label": "Autenticazione",
 				"default": {
-					"label": "Login",
-					"description": "You will be prompted to login when accessing content as needed"
+					"label": "Accesso",
+					"description": "Ti verrà richiesto di accedere quando necessario per consultare i contenuti"
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw token"
+					"placeholder": "Token grezzo"
 				},
-				"basic": "Basic"
+				"basic": "Base"
 			},
-			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
-			"failedToConnect": "Failed to connect to server",
-			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
-			"enableOPDS": "Enable OPDS",
+			"serverNamePlaceholder": "Il mio server",
+			"catalogUrl": "URL catalogo",
+			"failedToConnect": "Impossibile connettersi al server",
+			"didConnect": "Connesso",
+			"checkConnection": "Verifica connessione",
+			"setAsDefaultServer": "Imposta come server predefinito",
+			"enableOPDS": "Abilita OPDS",
 			"validation": {
 				"nameAlreadyExists": "Nome già esistente",
-				"cannotSetAuthorizationHeader": "Impossibile impostare l'header di autorizzazione"
+				"cannotSetAuthorizationHeader": "Impossibile impostare l'intestazione di autorizzazione"
 			}
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"label": "Segna come letto",
+				"confirmation": "Sei sicuro di voler contrassegnare {{bookTitle}} come letto?"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"label": "Azzera progresso",
+				"confirmation": "Sei sicuro di voler azzerare i tuoi progressi per {{bookTitle}}?"
 			},
 			"deleteBook": {
-				"label": "Delete book",
-				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
+				"label": "Elimina libro",
+				"confirmation": "Sei sicuro di voler eliminare {{bookTitle}}?"
 			},
-			"seeDetails": "See Details"
+			"seeDetails": "Visualizza i dettagli"
 		},
 		"bookMetadata": {
-			"ageRating": "Age Rating",
-			"downloadedAt": "Downloaded",
-			"format": "Format",
-			"genres": "Genres",
-			"language": "Language",
-			"publisher": "Publisher",
-			"size": "Size",
+			"ageRating": "Classificazione per età",
+			"downloadedAt": "Scaricato",
+			"format": "Formato",
+			"genres": "Generi",
+			"language": "Lingua",
+			"publisher": "Editore",
+			"size": "Dimensione",
 			"volume": "Volume",
-			"year": "Year"
+			"year": "Anno"
 		},
 		"common": {
 			"book": "Libro",
-			"cancel": "Cancel",
-			"chapter": "Chapter",
-			"clear": "Clear",
+			"cancel": "Annulla",
+			"chapter": "Capitolo",
+			"clear": "Cancella",
 			"completed": "Completato",
-			"confirm": "Confirm",
+			"confirm": "Conferma",
 			"content": "Contenuto",
-			"details": "Details",
-			"delete": "Delete",
-			"downloads": "Downloads",
-			"edit": "Edit",
-			"enabled": "Enabled",
-			"enable": "Enable",
-			"error": "Error",
+			"details": "Dettagli",
+			"delete": "Elimina",
+			"downloads": "Download",
+			"edit": "Modifica",
+			"enabled": "Abilitato",
+			"enable": "Abilita",
+			"error": "Errore",
 			"grid": "Griglia",
 			"list": "Elenco",
 			"lastCompleted": "Ultimo completamento",
-			"name": "Name",
-			"none": "None",
-			"options": "Options",
-			"page": "Page",
-			"pages": "Pages",
+			"name": "Nome",
+			"none": "Nessuno",
+			"options": "Opzioni",
+			"page": "Pagina",
+			"pages": "Pagine",
 			"password": "Password",
-			"progress": "Progress",
+			"progress": "Progresso",
 			"publication": "Pubblicazione",
 			"readTime": "Tempo di lettura",
-			"readMore": "Read more",
-			"save": "Save",
-			"select": "Select",
-			"settings": "Settings",
-			"servers": "Servers",
-			"thisBook": "this book",
-			"thisServer": "this server",
-			"unknown": "Unknown",
-			"unknownTitle": "Untitled",
+			"readMore": "Scopri di più",
+			"save": "Salva",
+			"select": "Seleziona",
+			"settings": "Impostazioni",
+			"servers": "Server",
+			"thisBook": "questo libro",
+			"thisServer": "questo server",
+			"unknown": "Sconosciuto",
+			"unknownTitle": "Senza titolo",
 			"url": "URL",
-			"username": "Username",
-			"value": "Value",
-			"version": "Version"
+			"username": "Nome utente",
+			"value": "Valore",
+			"version": "Versione"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2871,37 +2871,37 @@
 			"unknownSeriesName": "serie"
 		},
 		"emptyState": {
-			"noStumpServers": "No Stump servers added",
-			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
-			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"noStumpServers": "Nessun server Stump aggiunto",
+			"noOPDSServers": "Nessun server OPDS aggiunto",
+			"noServers": "Nessun server configurato",
+			"cta": "Inizia aggiungendo un server per accedere alle tue collezioni di libri",
+			"seeDocumentation": "Visualizza la documentazione"
 		},
 		"tabs": {
-			"servers": "Servers",
-			"localLibrary": "Library",
-			"settings": "Settings"
+			"servers": "Server",
+			"localLibrary": "Libreria",
+			"settings": "Impostazioni"
 		},
 		"localLibrary": {
-			"title": "Local Library",
+			"title": "Libreria locale",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
-					"description": "Once you have books for offline reading, they will appear here"
+					"title": "Ancora nulla da leggere",
+					"description": "Una volta scaricati i libri per la lettura offline, appariranno qui"
 				},
 				"imported": {
-					"title": "No imported books",
-					"description": "Import books to read them offline"
+					"title": "Nessun libro importato",
+					"description": "Importa libri per leggerli offline"
 				},
 				"server": {
-					"title": "No downloaded books",
-					"description": "Download books from your library to read them offline"
+					"title": "Nessun libro scaricato",
+					"description": "Scarica libri dalla tua libreria per leggerli offline"
 				}
 			},
 			"downloadQueue": {
-				"downloading": "Downloading",
-				"failed": "Failed",
-				"nothingDownloading": "Nothing is being downloaded",
+				"downloading": "Download in corso",
+				"failed": "Fallito",
+				"nothingDownloading": "Nessun download in corso",
 				"noActiveDownloads": "No active downloads",
 				"noFailedDownloads": "No failed downloads",
 				"downloadStarting": "Starting..."
@@ -3060,7 +3060,7 @@
 			},
 			"contactInfo": {
 				"label": "Contact",
-				"email": "Email",
+				"email": "E-mail",
 				"discord": "Discord",
 				"github": "GitHub"
 			},

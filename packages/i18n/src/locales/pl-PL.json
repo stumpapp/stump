@@ -2994,7 +2994,7 @@
 			},
 			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
 			"lowercaseTranslation": "Małoliterowe przypisy",
-			"tintListBackground": "Tint List Backgrounds",
+			"tintListBackground": "Zabarw tła list",
 			"management": {
 				"label": "Zarządzanie",
 				"dataUsage": {

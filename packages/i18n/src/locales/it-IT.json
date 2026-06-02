@@ -1,6 +1,6 @@
 {
 	"underConstruction": {
-		"heading": "Ops…",
+		"heading": "Che imbarazzo…",
 		"message": "Ti sei imbattuto in una pagina ancora in fase di sviluppo. Mi piacerebbe mostrartela, ma non è ancora del tutto pronta.",
 		"homeLink": "Torna alla home",
 		"githubLink": "Mostra la issue su GitHub"
@@ -19,10 +19,10 @@
 				"password": "Password"
 			},
 			"buttons": {
-				"createAccount": "Crea un account",
+				"createAccount": "Crea account",
 				"login": "Accedi",
 				"loginWithOidc": "Accedi con OIDC",
-				"createAccountWithOidc": "Crea un account con OIDC"
+				"createAccountWithOidc": "Crea account con OIDC"
 			}
 		},
 		"toasts": {
@@ -31,8 +31,8 @@
 			"loggedInFirstTime": "Benvenuto!",
 			"registering": "Registrazione in corso...",
 			"registered": "Registrazione completata!",
-			"loginFailed": "Accesso fallito. Riprova",
-			"registrationFailed": "Registrazione fallita. Riprova"
+			"loginFailed": "Accesso non riuscito. Riprova",
+			"registrationFailed": "Registrazione non riuscita. Riprova"
 		}
 	},
 	"adminLibrarySidebar": {
@@ -79,7 +79,7 @@
 			},
 			"description": {
 				"label": "Descrizione",
-				"placeholder": "Un fan club del 'La nostra bandiera significa morte'. Leggiamo le fiction dei pirati divorandole completamente",
+				"placeholder": "Un fan club di 'Our Flag Means Death'. Leggiamo narrativa piratesca a più non posso",
 				"description": "Una breve descrizione facoltativa del club del libro"
 			},
 			"is_private": {
@@ -132,7 +132,7 @@
 	},
 	"createBookClubScene": {
 		"heading": "Crea un nuovo club del libro",
-		"subtitle": "Puoi creare un club del libro privato per pochi selezionati, oppure renderlo pubblico per permettere a chiunque nel server di unirsi",
+		"subtitle": "Puoi creare un club del libro privato per un gruppo ristretto di persone, oppure renderlo pubblico per permettere a chiunque sul server di partecipare",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
@@ -154,7 +154,7 @@
 				{
 					"label": "Riepilogo",
 					"heading": "Riepilogo",
-					"description": "Verifica le impostazioni del tuo club prima di crearlo"
+					"description": "Verifica le impostazioni del club prima di crearlo"
 				}
 			],
 			"review": {
@@ -205,7 +205,7 @@
 			"sections": {
 				"roleMappings": {
 					"heading": "Associazioni ruoli esistenti",
-					"description": "Le associazioni di ruoli attuali per questo club del libro"
+					"description": "Le associazioni dei ruoli attuali per questo club del libro"
 				}
 			}
 		},
@@ -257,11 +257,11 @@
 				"label": "Visualizzazione predefinita della libreria",
 				"description": "Configura quale scheda mostrare come predefinita all'apertura di questa libreria",
 				"hideSeriesView": {
-					"label": "Nascondi la scheda delle serie",
+					"label": "Nascondi scheda delle serie",
 					"description": "Nascondi la scheda delle serie dalla navigazione della libreria"
 				},
 				"skipBookOverview": {
-					"label": "Salta la panoramica del libro",
+					"label": "Salta panoramica del libro",
 					"description": "Apri direttamente il lettore quando selezioni i libri in questa libreria"
 				},
 				"options": {
@@ -281,8 +281,8 @@
 					"description": "Impostazioni di lettura predefinite da usare per i libri"
 				},
 				"imageScaling": {
-					"label": "Ridimensionamento dell'immagine",
-					"description": "Come il lettore basato su immagini adatta le immagini alla pagina"
+					"label": "Ridimensionamento immagini",
+					"description": "Modalità con cui il lettore basato su immagini adatta le immagini alla pagina"
 				},
 				"readingMode": {
 					"label": "Lettore predefinito",
@@ -296,7 +296,7 @@
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Configurazione miniatura",
+						"create": "Configurazione delle miniature",
 						"update": "Generazione"
 					},
 					"description": "Migliora i tempi di caricamento durante la navigazione della libreria generando miniature per i tuoi libri",
@@ -359,14 +359,14 @@
 					"description": "Definisci i pattern glob per escludere determinati file o cartelle durante una scansione"
 				},
 				"noRules": "Nessuna regola di esclusione configurata",
-				"save": "Salve le modifiche",
+				"save": "Salva modifiche",
 				"addRule": {
 					"label": "Nuova regola",
 					"description": "Pattern glob per escludere file o cartelle",
 					"addButton": "Aggiungi regola",
 					"ignoreParents": {
 						"title": "Escludi tutte le cartelle superiori",
-						"label": "Escludi cartelle superiori"
+						"label": "Escludi le cartelle superiori"
 					},
 					"ignoreSubdirs": {
 						"title": "Escludi tutte le sottocartelle",
@@ -480,7 +480,7 @@
 				{
 					"label": "Riepilogo",
 					"heading": "Riepilogo",
-					"description": "Verifica le impostazioni della tua libreria prima di crearla"
+					"description": "Verifica le impostazioni della libreria prima di crearla"
 				}
 			],
 			"review": {
@@ -489,7 +489,7 @@
 				"none": "Nessuno",
 				"labels": {
 					"generateThumbnails": "Genera miniature",
-					"processThumbnailColors": "Elabora i colori delle miniature",
+					"processThumbnailColors": "Elabora colori delle miniature",
 					"mode": "Modalità",
 					"format": "Formato",
 					"quality": "Qualità",
@@ -500,7 +500,7 @@
 					"pattern": "Modello",
 					"ignoreRules": "Regole di esclusione",
 					"convertRar": "Converti RAR/CBR",
-					"deleteConversions": "Elimina i file convertiti",
+					"deleteConversions": "Elimina file convertiti",
 					"watch": "Monitora la cartella per rilevare modifiche",
 					"processMetadata": "Metadati del processo",
 					"generateFileHashes": "Genera hash del file",
@@ -546,7 +546,7 @@
 			"basics": "Base",
 			"configuration": {
 				"general": "Generale",
-				"reading": "In lettura",
+				"reading": "Lettura",
 				"scanning": "Scansione",
 				"thumbnails": "Miniature",
 				"ignore-rules": "Regole di esclusione",
@@ -571,7 +571,7 @@
 			}
 		},
 		"options/reading": {
-			"title": "In lettura",
+			"title": "Lettura",
 			"description": "Le impostazioni predefinite del lettore da usare per i libri in questa libreria. Ogni libro può sovrascrivere queste impostazioni"
 		},
 		"options/scanning": {
@@ -1120,7 +1120,7 @@
 				{
 					"label": "Riepilogo",
 					"heading": "Riepilogo",
-					"description": "Verifica le impostazioni della tua lista smart prima di crearla"
+					"description": "Verifica le impostazioni della lista smart prima di crearla"
 				}
 			],
 			"review": {
@@ -1742,7 +1742,7 @@
 						"tooltip": "Modifica server",
 						"title": "Modifica server",
 						"description": "Modifica i dettagli di questo server",
-						"confirm": "Salve le modifiche"
+						"confirm": "Salva modifiche"
 					},
 					"deleteServer": {
 						"tooltip": "Elimina server",
@@ -1921,7 +1921,7 @@
 						"titleEdit": "Modifica attività pianificata",
 						"cancel": "Annulla",
 						"create": "Crea",
-						"saveChanges": "Salve le modifiche"
+						"saveChanges": "Salva modifiche"
 					},
 					"fields": {
 						"name": {
@@ -2336,8 +2336,8 @@
 				"apiToken": {
 					"label": "Token API",
 					"description": "Il token API per l'autenticazione con questo provider",
-					"validationError": "La convalida automatica di questo token è fallita",
-					"validationRequestError": "Richiesta di convalida fallita",
+					"validationError": "Convalida automatica del token non riuscita",
+					"validationRequestError": "Richiesta di convalida non riuscita",
 					"validationRequestErrorUnknown": "Si è verificato un errore sconosciuto durante la convalida",
 					"hardcoverStatusError": "L'API Hardcover ha risposto con lo stato {{status}}",
 					"hardcoverValidationError": "L'API Hardcover ha risposto con un errore: {{message}}",
@@ -2571,7 +2571,7 @@
 		"enter": "Inserisci",
 		"save": "Salva",
 		"send": "Invia",
-		"saveChanges": "Salve le modifiche",
+		"saveChanges": "Salva modifiche",
 		"noChanges": "Nessuna modifica",
 		"create": "Crea",
 		"edit": "Modifica",
@@ -2900,10 +2900,10 @@
 			},
 			"downloadQueue": {
 				"downloading": "Download in corso",
-				"failed": "Fallito",
+				"failed": "Non riuscito",
 				"nothingDownloading": "Nessun download in corso",
 				"noActiveDownloads": "Nessun download attivo",
-				"noFailedDownloads": "Nessun download fallito",
+				"noFailedDownloads": "Nessun download non riuscito",
 				"downloadStarting": "Avvio..."
 			},
 			"downloadsHeaderMenu": {
@@ -2942,8 +2942,8 @@
 				}
 			},
 			"downloadProblemsSheet": {
-				"title": "Download falliti",
-				"noFailedDownloads": "Nessun download fallito",
+				"title": "Download non riusciti",
+				"noFailedDownloads": "Nessun download non riuscito",
 				"retryAll": "Riprova tutto",
 				"dismissAll": "Ignora tutto"
 			}
@@ -2981,7 +2981,7 @@
 				}
 			},
 			"reading": {
-				"label": "In lettura",
+				"label": "Lettura",
 				"preferNativePdf": "Usa lettore PDF nativo",
 				"preferMinimalReader": "Usa lettore minimale",
 				"disableDismissGesture": "Disabilita gesto di chiusura",
@@ -2994,7 +2994,7 @@
 			},
 			"autoSyncLocalData": "Sincronizzazione automatica dati locali",
 			"lowercaseTranslation": "Etichette in minuscolo",
-			"tintListBackground": "Tint List Backgrounds",
+			"tintListBackground": "Colora sfondi lista",
 			"management": {
 				"label": "Gestione",
 				"dataUsage": {
@@ -3007,7 +3007,7 @@
 						"label": "Elimina download",
 						"confirmation": "Sei sicuro di voler eliminare tutti i download da {{serverName}}?",
 						"deleteFailed": {
-							"title": "Eliminazione fallita",
+							"title": "Eliminazione non riuscita",
 							"description": "Si è verificato un errore durante l'eliminazione di tutti i download da {{serverName}}"
 						}
 					},
@@ -3039,7 +3039,7 @@
 						"description": "Riavvia l'app"
 					},
 					"error": {
-						"title": "Cancellazione fallita",
+						"title": "Cancellazione non riuscita",
 						"description": "Si è verificato un errore durante l'eliminazione del database"
 					}
 				},
@@ -3112,7 +3112,7 @@
 					"NONE": "Nessuno"
 				}
 			},
-			"allowDownscaling": "Downscaling",
+			"allowDownscaling": "Riduzione in scala",
 			"tapSidesToNavigate": "Tocca i lati per navigare",
 			"volumeButtonsNavigate": "Navigazione con i tasti del volume",
 			"footerControls": {

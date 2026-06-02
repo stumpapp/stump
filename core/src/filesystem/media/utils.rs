@@ -56,9 +56,10 @@ pub fn parse_pdf_date(raw_date: &str) -> Option<(i32, Option<i32>, Option<i32>)>
 	// 1. PDF spec: D:YYYYMMDDHHmmSS... parse digit-only prefixes
 	if s.len() >= 4 && s[..4].chars().all(|c| c.is_ascii_digit()) {
 		let has_digit_at_4 = s.chars().nth(4).is_some_and(|c| c.is_ascii_digit());
-		let has_separator_at_4 = s.chars().nth(4).is_some_and(|c| {
-			c == '-' || c == '/' || c == '.' || c == 'T' || c == ' '
-		});
+		let has_separator_at_4 = s
+			.chars()
+			.nth(4)
+			.is_some_and(|c| c == '-' || c == '/' || c == '.' || c == 'T' || c == ' ');
 
 		if !has_separator_at_4 && !has_digit_at_4 {
 			if let Ok(y) = s[..4].parse::<i32>() {

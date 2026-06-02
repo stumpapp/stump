@@ -388,7 +388,8 @@ impl PdfProcessor {
 					let path_owned = path.to_string();
 					let config_owned = config.clone();
 					tokio::spawn(async move {
-						Self::prerender_adjacent_pages(&path_owned, page, &config_owned).await;
+						Self::prerender_adjacent_pages(&path_owned, page, &config_owned)
+							.await;
 					});
 				}
 				return Ok(cached);
@@ -487,7 +488,7 @@ impl PdfProcessor {
 				},
 				Err(e) => {
 					tracing::warn!(cache_file = ?cache_file, error = ?e, "Failed to read cache file");
-				}
+				},
 			}
 		} else {
 			// File doesn't exist or isn't accessible
@@ -634,7 +635,10 @@ impl PdfProcessor {
 			match render_result {
 				Ok(Ok((_, content))) => {
 					// Cache the rendered page
-					if let Err(e) = Self::cache_page(&pdf_path_owned, page, &content, &config_owned).await {
+					if let Err(e) =
+						Self::cache_page(&pdf_path_owned, page, &content, &config_owned)
+							.await
+					{
 						tracing::debug!(
 							pdf_path = %pdf_path_owned,
 							page,
@@ -664,7 +668,7 @@ impl PdfProcessor {
 						error = ?e,
 						"Pre-rendering task panicked"
 					);
-				}
+				},
 			}
 		}
 	}

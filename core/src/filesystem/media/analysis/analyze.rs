@@ -80,11 +80,9 @@ async fn analyze_book_page(
 		content_type,
 		height,
 		width,
-	} = tokio::task::spawn_blocking(move || {
-		analyze_page(&path_owned, page, &config_owned)
-	})
-	.await
-	.map_err(|e| JobError::Unknown(e.to_string()))??;
+	} = tokio::task::spawn_blocking(move || analyze_page(&path_owned, page, &config_owned))
+		.await
+		.map_err(|e| JobError::Unknown(e.to_string()))??;
 
 	let dimensions = PageDimension { height, width };
 

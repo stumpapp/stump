@@ -342,6 +342,9 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"date" => {
+					// Note: we don't know the format of the date. It could be a year, a full date, etc.
+					// We need to _try_ to parse each part of the date, and if it fails, we just ignore it.
+					// This is a bit of a hack, but it's the best we can do without knowing the format.
 					let raw_date = value.into_iter().next().unwrap_or_default();
 					if let Some((y, m, d)) = parse_pdf_date(&raw_date) {
 						metadata.year = Some(y);

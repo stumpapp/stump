@@ -35,6 +35,10 @@ static PDFIUM_LOCK: Mutex<()> = Mutex::new(());
 pub struct PdfProcessor;
 
 impl FileProcessor for PdfProcessor {
+	// It is REALLY annoying to work with PDFs, and there is no good way to consume
+	// each page as a vector of bytes efficiently. Since PDFs don't really have metadata,
+	// I wouldn't expect the file to change much after a scan. So, for now, this will
+	// just make the sample size approximately 1/10th of the file size.
 	fn get_sample_size(path: &str) -> Result<u64, FileError> {
 		let size = std::fs::metadata(path)?.len();
 		if size < 10 {
@@ -86,6 +90,8 @@ impl FileProcessor for PdfProcessor {
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let pages = document.pages().len();
 
+		// Note: The metadata is already parsed by the PDF library, so might as well use it
+		// PDF metadata is generally poop though
 		let metadata = if options.process_metadata {
 			Self::process_metadata_internal(path, &config.pdfium_path)?
 		} else {
@@ -111,6 +117,7 @@ impl FileProcessor for PdfProcessor {
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
+		// This is the sync version - we'll create an async wrapper that handles caching
 		PdfProcessor::render_page_sync(path, page, config)
 	}
 
@@ -294,12 +301,14 @@ impl PdfProcessor {
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let total_pages = document.pages().len() as usize;
 
+		// Validate page number bounds
 		if page < 1 || page as usize > total_pages {
 			return Err(FileError::PdfProcessingError(
 				"Page out of bounds".to_string(),
 			));
 		}
 
+		// Convert back to PdfPageIndex for pdfium API
 		let page_index = (page - 1) as pdfium_render::prelude::PdfPageIndex;
 		let document_page = document.pages().get(page_index)?;
 
@@ -352,6 +361,7 @@ impl PdfProcessor {
 		let bitmap = document_page.render_with_config(&render_config)?;
 		let dyn_image = bitmap.as_image()?;
 
+		// Get the configured output format
 		let output_format = config.get_pdf_render_format();
 		let image_format = into_image_format(output_format);
 		let content_type = ContentType::from(output_format);
@@ -371,7 +381,7 @@ impl PdfProcessor {
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		// Check cache first asynchronously to avoid spawning blocking threads
+		// Check cache first if caching is enabled
 		if config.pdf_cache_pages {
 			if let Ok(Some(cached)) = Self::get_cached_page(path, page, config).await {
 				if config.pdf_prerender_range > 0 {
@@ -388,6 +398,7 @@ impl PdfProcessor {
 		let path_owned = path.to_string();
 		let config_owned = config.clone();
 
+		// Render the page in a blocking task
 		let result = tokio::task::spawn_blocking(move || {
 			Self::render_page_sync(&path_owned, page, &config_owned)
 		})
@@ -396,6 +407,7 @@ impl PdfProcessor {
 			FileError::PdfProcessingError(format!("Render task panicked: {}", e))
 		})??;
 
+		// Cache the result if caching is enabled (but don't fail if caching fails)
 		if config.pdf_cache_pages {
 			let _ = Self::cache_page(path, page, &result.1, config).await;
 		}
@@ -418,6 +430,7 @@ impl PdfProcessor {
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<String, FileError> {
+		// Use file metadata and config to create a unique cache key
 		let metadata = std::fs::metadata(pdf_path)?;
 		let modified_time = metadata
 			.modified()?
@@ -431,6 +444,7 @@ impl PdfProcessor {
 
 		let mut hasher = DefaultHasher::new();
 		pdf_path.hash(&mut hasher);
+		// Create a more robust hash using file path, size, and modified time
 		file_size.hash(&mut hasher);
 		modified_time.hash(&mut hasher);
 		config.pdf_max_dimension.hash(&mut hasher);
@@ -439,6 +453,7 @@ impl PdfProcessor {
 		config.pdf_high_quality.hash(&mut hasher);
 		page.hash(&mut hasher);
 
+		// Use a safer filename format
 		Ok(format!("pdf_{}_{}", hasher.finish(), page))
 	}
 
@@ -460,9 +475,11 @@ impl PdfProcessor {
 			output_format.extension()
 		));
 
+		// Check if file exists and is readable
 		if cache_file.exists() {
 			match tokio::fs::read(&cache_file).await {
 				Ok(bytes) => {
+					// Ensure it's a file and has content
 					if !bytes.is_empty() {
 						return Ok(Some((ContentType::from(output_format), bytes)));
 					}
@@ -472,6 +489,8 @@ impl PdfProcessor {
 					tracing::warn!(cache_file = ?cache_file, error = ?e, "Failed to read cache file");
 				}
 			}
+		} else {
+			// File doesn't exist or isn't accessible
 		}
 
 		Ok(None)
@@ -492,6 +511,7 @@ impl PdfProcessor {
 		let cache_dir = config.get_pdf_cache_dir();
 
 		if !cache_dir.exists() {
+			// Ensure cache directory exists
 			if let Err(e) = tokio::fs::create_dir_all(&cache_dir).await {
 				tracing::warn!(cache_dir = ?cache_dir, error = ?e, "Failed to create cache directory");
 				return Ok(());
@@ -507,6 +527,7 @@ impl PdfProcessor {
 		// Atomic write: write to temp file first, then rename
 		match tokio::fs::write(&temp_file, content).await {
 			Ok(_) => {
+				// Atomically move temp file to final location
 				match tokio::fs::rename(&temp_file, &cache_file).await {
 					Ok(_) => {
 						tracing::debug!(
@@ -521,6 +542,7 @@ impl PdfProcessor {
 							error = ?e,
 							"Failed to move temp cache file"
 						);
+						// Clean up temp file
 						let _ = tokio::fs::remove_file(&temp_file).await;
 					},
 				}
@@ -537,6 +559,7 @@ impl PdfProcessor {
 		Ok(())
 	}
 
+	/// Pre-render adjacent pages in the background for faster loading
 	async fn prerender_adjacent_pages(
 		pdf_path: &str,
 		current_page: i32,
@@ -550,6 +573,7 @@ impl PdfProcessor {
 		let pdf_path_owned = pdf_path.to_string();
 		let config_owned = config.clone();
 
+		// Get total page count
 		let total_pages = match Self::get_page_count(&pdf_path_owned, &config_owned) {
 			Ok(count) => count,
 			Err(e) => {
@@ -592,7 +616,7 @@ impl PdfProcessor {
 		// See:
 		// - PDFium C API threading constraints: https://github.com/ajrcarey/pdfium-render#thread-safety
 		for page in pages_to_render {
-			// Check if already cached (async check)
+			// Check if already cached
 			if let Ok(Some(_)) =
 				Self::get_cached_page(&pdf_path_owned, page, &config_owned).await
 			{
@@ -718,9 +742,12 @@ impl FileConverter for PdfProcessor {
 		let cache_dir = config.get_cache_dir();
 		let unpacked_path = cache_dir.join(&file_stem);
 
+		// create folder for the zip
 		std::fs::create_dir_all(&unpacked_path)?;
 
+		// write each image to the folder
 		for (idx, image_buf) in converted_pages {
+			// write the image to file with proper extension
 			let image_path = unpacked_path.join(format!(
 				"{}_{:03}.{}",
 				file_stem,
@@ -733,10 +760,12 @@ impl FileConverter for PdfProcessor {
 		let zip_path =
 			create_zip_archive(&unpacked_path, &file_name, &extension, parent)?;
 
+		// TODO: won't work in docker
 		if delete_source {
 			let _ = trash::delete(path).or_else(|_| std::fs::remove_file(path));
 		}
 
+		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
 		if unpacked_path.exists() {
 			let _ = std::fs::remove_dir_all(&unpacked_path);
 		}

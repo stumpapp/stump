@@ -179,13 +179,14 @@ pub async fn generate_book_thumbnail(
 	let (thumbnail, thumbnail_path, did_generate) = generate_result;
 	fs::write(&thumbnail_path, &thumbnail).await?;
 
-	let thumbnail_metadata = match generate_image_metadata(&thumbnail_path).await {
-		Ok(metadata) => Some(metadata),
-		Err(e) => {
-			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
-			None
-		},
-	};
+	let thumbnail_metadata =
+		match generate_image_metadata_from_bytes(thumbnail.clone()).await {
+			Ok(metadata) => Some(metadata),
+			Err(e) => {
+				tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
+				None
+			},
+		};
 
 	let update_result = media::Entity::update_many()
 		.filter(media::Column::Id.eq(book.id.clone()))

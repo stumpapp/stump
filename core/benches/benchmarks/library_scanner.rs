@@ -122,9 +122,9 @@ fn full_scan(c: &mut Criterion) {
 				scan_new_library(test_ctx).await;
 				let elapsed = start.elapsed();
 
-				let _ =
-					safe_validate_counts(&conn, size.series_count, size.media_per_series)
-						.await;
+				validate_counts(&conn, size.series_count, size.media_per_series)
+					.await
+					.expect("Failed to validate counts");
 
 				clean_up(&conn, library.0, tempdirs).await;
 
@@ -244,12 +244,8 @@ async fn setup_test(
 	let (conn, library, tempdirs) =
 		create_test_library(series_count, books_per_series).await?;
 
-	let job = LibraryScanJob {
-		id: library.0.id.clone(),
-		path: library.0.path.clone(),
-		config: Some(library.1.clone()),
-		options: Default::default(),
-	};
+	let mut job = LibraryScanJob::new(library.0.id.clone(), library.0.path.clone(), None);
+	job.config = Some(library.1.clone());
 
 	let job_id = Uuid::new_v4().to_string();
 	let _db_job = job::ActiveModel {
@@ -280,24 +276,25 @@ async fn setup_test(
 	})
 }
 
-async fn safe_validate_counts(
+// i return errors so that the benchmark fails hard, so it doesn't fuck with
+// the trend data from previous runs e.g. in the scenario where a bug is introduced
+// and no books are inserted and things "improve" by a significant margin. def did not
+// happen nuh uh
+async fn validate_counts(
 	conn: &DatabaseConnection,
 	series_count: usize,
 	books_per_series: usize,
-) -> bool {
-	let mut passed = true;
-
+) -> Result<(), String> {
 	let actual_series_count = series::Entity::find()
 		.count(conn)
 		.await
 		.expect("Failed to count series");
 
 	if actual_series_count != series_count as u64 {
-		println!(
+		return Err(format!(
 			"Series count mismatch (actual vs expected): {} != {}",
 			actual_series_count, series_count
-		);
-		passed = false;
+		));
 	}
 
 	let actual_media_count = media::Entity::find()
@@ -306,15 +303,14 @@ async fn safe_validate_counts(
 		.expect("Failed to count media");
 
 	if actual_media_count != (series_count * books_per_series) as u64 {
-		println!(
+		return Err(format!(
 			"Media count mismatch (actual vs expected): {} != {}. You probably introduced a bug :)",
 			actual_media_count,
 			series_count * books_per_series
-		);
-		passed = false;
+		)	);
 	}
 
-	passed
+	Ok(())
 }
 
 async fn clean_up(

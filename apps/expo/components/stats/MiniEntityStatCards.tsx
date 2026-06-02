@@ -28,23 +28,23 @@ export function MiniEntityStatCards({ stats }: Props) {
 				<MiniStatCard
 					value={stats.inProgressBooks}
 					icon={BookOpen}
-					baseColor={STAT_COLORS.inProgress}
+					colors={STAT_COLORS.inProgress}
 				/>
 
 				<MiniStatCard
 					value={stats.completedBooks}
 					suffix={`/ ${stats.bookCount}`}
 					icon={BookCheck}
-					baseColor={STAT_COLORS.completed}
+					colors={STAT_COLORS.completed}
 				/>
 				{stats.seriesCount != null && (
-					<MiniStatCard value={stats.seriesCount} icon={Layers} baseColor={STAT_COLORS.series} />
+					<MiniStatCard value={stats.seriesCount} icon={Layers} colors={STAT_COLORS.series} />
 				)}
 				<MiniStatCard
 					value={formattedTime ? formattedTime.value : '??'}
 					suffix={formattedTime ? formattedTime.unit : undefined}
 					icon={Clock}
-					baseColor={STAT_COLORS.readingTime}
+					colors={STAT_COLORS.readingTime}
 				/>
 			</View>
 			<Divider />

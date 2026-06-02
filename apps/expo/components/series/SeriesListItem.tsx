@@ -69,7 +69,7 @@ export default function SeriesListItem({ layout, series, onPress }: Props) {
 	// just demonstration, figure out what else
 	const infoItems = (
 		<>
-			<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
+			<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
 				<Text size="sm">{data.readCount}</Text>
 				<Text size="xs" className="pb-0.5 text-foreground-muted">{` / ${data.mediaCount}`}</Text>
 			</View>

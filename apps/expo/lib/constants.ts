@@ -11,6 +11,7 @@ import {
 import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
 import { Platform } from 'react-native'
+import tailwindColors from 'tailwindcss/colors'
 
 import { usePreferencesStore } from '~/stores'
 
@@ -35,14 +36,32 @@ export const SETTINGS_COLORS = {
 	destructive: '#fd6bd5',
 }
 
-export const STAT_COLORS = {
-	inProgress: '#f59e0b', // amber-500
-	completed: '#34d399', // emerald-400
-	books: '#60a5fa', // blue-400
-	series: '#c084fc', // purple-400
-	readingTime: '#fb7185', // rose-400
-	size: '#94a3b8', // slate-400
+type Hue = Exclude<
+	keyof typeof tailwindColors,
+	'inherit' | 'current' | 'transparent' | 'black' | 'white'
+>
+export type StatColorPalette = { primary: string; secondary: string }
+
+const STAT_HUES = {
+	inProgress: 'amber',
+	completed: 'emerald',
+	books: 'blue',
+	series: 'purple',
+	readingTime: 'rose',
+	size: 'slate',
+} satisfies Record<string, Hue>
+
+function toHex(color: string) {
+	return serialize(to(getColor(color), sRGB), { format: 'hex' })
 }
+
+export const STAT_COLORS = Object.fromEntries(
+	Object.entries(STAT_HUES).map(([stat, hue]) => {
+		const primary = toHex(tailwindColors[hue]['500'])
+		const secondary = toHex(tailwindColors[hue]['100'])
+		return [stat, { primary, secondary }]
+	}),
+) as { [K in keyof typeof STAT_HUES]: StatColorPalette }
 
 // TODO: android-specific tab bar color
 

@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useNavigationState, useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, SeriesBooksScreenQuery } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
@@ -11,7 +11,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
-import { BookListItem, type IBookListItemFragment } from '~/components/book'
+import { BackgroundGradient, useBackgroundGradient } from '~/components/BackgroundGradient'
+import { BookListItem } from '~/components/book'
 import { SeriesBooksListHeader } from '~/components/book/listHeader/SeriesBooksListHeader'
 import ListEmpty from '~/components/ListEmpty'
 import { useListSizing } from '~/components/listLayout'
@@ -49,6 +50,11 @@ const booksQuery = graphql(`
 			nodes {
 				id
 				...BookListItem
+				thumbnail {
+					metadata {
+						averageColor
+					}
+				}
 			}
 			pageInfo {
 				__typename
@@ -63,6 +69,7 @@ const booksQuery = graphql(`
 		}
 	}
 `)
+type Node = SeriesBooksScreenQuery['media']['nodes'][number]
 
 export default function Screen() {
 	const navigationState = useNavigationState((state) => state.routes)
@@ -137,7 +144,7 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
-	const listRef = useRef<FlashListRef<IBookListItemFragment>>(null)
+	const listRef = useRef<FlashListRef<Node>>(null)
 	useScrollToTop(listRef)
 
 	const isFiltered = Object.keys(filters).length > 0
@@ -146,12 +153,20 @@ export default function Screen() {
 	const layout = useBooksLayout(layoutKey, (state) => state.layout)
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
+	const { colors, headerColor, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+		data: nodes,
+		layout,
+		flashListRef: listRef,
+	})
+	useEffect(() => {
+		listRef.current?.recomputeViewableItems()
+	}, [filters, layout, sort])
+
 	return (
 		<BookFilterContext.Provider value={store}>
-			<SafeAreaView
-				style={{ flex: 1 }}
-				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
-			>
+			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+				<BackgroundGradient colors={colors} androidHeaderColor={headerColor} layout={layout} />
+
 				<FlashList
 					key={layout} // force re-render when layout changes
 					ref={listRef}
@@ -164,6 +179,7 @@ export default function Screen() {
 					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
+					viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
 					ListHeaderComponent={
 						<SeriesBooksListHeader
 							seriesId={id}

@@ -1,14 +1,14 @@
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { BooksScreenQuery, graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
-import { useCallback, useRef } from 'react'
-import { Platform } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
+import { BackgroundGradient, useBackgroundGradient } from '~/components/BackgroundGradient'
 import { BookListItem } from '~/components/book'
 import { BooksListHeader } from '~/components/book/listHeader'
 import ListEmpty from '~/components/ListEmpty'
@@ -29,6 +29,11 @@ const query = graphql(`
 			nodes {
 				id
 				...BookListItem
+				thumbnail {
+					metadata {
+						averageColor
+					}
+				}
 			}
 			pageInfo {
 				__typename
@@ -43,6 +48,7 @@ const query = graphql(`
 		}
 	}
 `)
+type Node = BooksScreenQuery['media']['nodes'][number]
 
 const statsQuery = graphql(`
 	query BooksScreenStats {
@@ -98,8 +104,9 @@ export default function Screen() {
 		},
 	)
 
-	const refetch = () => Promise.all([refetchBooks(), refetchStats()])
+	const nodes = useMemo(() => data?.pages.flatMap((page) => page.media.nodes) || [], [data])
 
+	const refetch = () => Promise.all([refetchBooks(), refetchStats()])
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	const onEndReached = useCallback(() => {
@@ -113,15 +120,25 @@ export default function Screen() {
 	const layout = useBooksLayout('global', (state) => state.layout)
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
+	const flashListRef = useRef<FlashListRef<Node>>(null)
+	const { colors, headerColor, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+		data: nodes,
+		layout,
+		flashListRef,
+	})
+	useEffect(() => {
+		flashListRef.current?.recomputeViewableItems()
+	}, [filters, layout, sort])
+
 	return (
 		<BookFilterContext.Provider value={store}>
-			<SafeAreaView
-				style={{ flex: 1 }}
-				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
-			>
+			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+				<BackgroundGradient colors={colors} androidHeaderColor={headerColor} layout={layout} />
+
 				<FlashList
+					ref={flashListRef}
 					key={layout} // force re-render when layout changes
-					data={data?.pages.flatMap((page) => page.media.nodes) || []}
+					data={nodes}
 					renderItem={({ item }) => <BookListItem layout={layout} book={item} />}
 					contentContainerStyle={{
 						paddingVertical: 16,
@@ -130,6 +147,7 @@ export default function Screen() {
 					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
+					viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
 					contentInsetAdjustmentBehavior="automatic"
 					ListHeaderComponent={<BooksListHeader stats={booksStats} />}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}

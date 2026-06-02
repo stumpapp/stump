@@ -1,6 +1,6 @@
+import { getThumbnailTintColor } from '@stump/client'
 import { cn, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { getColor, serialize, set } from 'colorjs.io/fn'
 import pluralize from 'pluralize'
 import { memo, useCallback, useMemo } from 'react'
 
@@ -174,12 +174,7 @@ const BookCard = memo(function BookCard({
 	const thumbnailAverageColor = placeholderData?.averageColor
 	const backgroundColor = useMemo(() => {
 		if (thumbnailAverageColor) {
-			const color = getColor(thumbnailAverageColor)
-			set(color, {
-				'oklch.l': isDarkVariant ? 0.35 : 0.9,
-				'oklch.c': 0.04,
-			})
-			return serialize(color, { format: 'hex' })
+			return getThumbnailTintColor(thumbnailAverageColor, { dark: isDarkVariant })
 		}
 		return (
 			getThemeColor('thumbnail.stack.series') ??

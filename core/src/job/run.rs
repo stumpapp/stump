@@ -107,16 +107,7 @@ pub async fn dispatch_job(
 
 	let result = match job {
 		StumpJob::LibraryScan { id, path, options } => {
-			run_job(
-				&job_ctx,
-				&mut LibraryScanJob {
-					id,
-					path,
-					config: None,
-					options: options.unwrap_or_default(),
-				},
-			)
-			.await
+			run_job(&job_ctx, &mut LibraryScanJob::new(id, path, options)).await
 		},
 		StumpJob::SeriesScan { id, path, options } => {
 			run_job(

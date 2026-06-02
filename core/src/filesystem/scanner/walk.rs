@@ -2,6 +2,7 @@ use std::{
 	collections::HashMap,
 	path::{Path, PathBuf},
 	sync::Arc,
+	time::UNIX_EPOCH,
 };
 
 use globset::GlobSet;
@@ -30,6 +31,9 @@ pub struct WalkerCtx {
 	pub max_depth: Option<usize>,
 	/// The scan options to apply during the walk
 	pub options: ScanOptions,
+	/// Stored directory mtimes, loaded at scan start to be used for
+	/// short-circuiting directories that have not been modified since the last scan
+	pub dir_mtimes: HashMap<String, u64>,
 }
 
 /// The output of walking a library
@@ -266,6 +270,8 @@ pub struct WalkedSeries {
 	pub missing_media: Vec<PathBuf>,
 	/// Whether the series is missing from the filesystem
 	pub series_is_missing: bool,
+	/// The mtimes observed for every directory during the walk
+	pub observed_dir_mtimes: HashMap<String, u64>,
 }
 
 impl WalkedSeries {
@@ -284,6 +290,7 @@ pub async fn walk_series(
 		ignore_rules,
 		max_depth,
 		options,
+		dir_mtimes,
 	}: WalkerCtx,
 ) -> CoreResult<WalkedSeries> {
 	if !path.exists() {
@@ -298,32 +305,80 @@ pub async fn walk_series(
 
 	let path_buf = path.to_path_buf();
 	let walk_start = std::time::Instant::now();
-	let (valid_entries, ignored_entries): (Vec<DirEntry>, Vec<DirEntry>) =
-		tokio::task::spawn_blocking(move || {
-			let mut walker = WalkDir::new(&path_buf);
-			if let Some(num) = max_depth {
-				walker = walker.max_depth(num);
-			}
+	let (valid_entries, ignored_entries, observed_dir_mtimes): (
+		Vec<DirEntry>,
+		Vec<DirEntry>,
+		HashMap<String, u64>,
+	) = tokio::task::spawn_blocking(move || {
+		let mut walkdir = WalkDir::new(&path_buf);
+		if let Some(num) = max_depth {
+			walkdir = walkdir.max_depth(num);
+		}
 
-			walker
-				.into_iter()
-				.filter_map(Result::ok)
-				.filter_map(|e| e.path().is_file().then_some(e))
-				.partition_map(|entry| {
+		let root_str = path_buf.to_string_lossy().into_owned();
+
+		let mut it = walkdir.into_iter();
+
+		let mut valid = Vec::new();
+		let mut ignored = Vec::new();
+		let mut observed = HashMap::new();
+
+		loop {
+			match it.next() {
+				None => break,
+				Some(Err(error)) => {
+					tracing::warn!(
+						error = ?error,
+						path = ?error.path(),
+						"Error encountered during walk, skipping entry"
+					);
+					continue;
+				},
+				Some(Ok(entry)) => {
 					let entry_path = entry.path();
-					let matches_ignore_rule = ignore_rules.is_match(entry.path());
 
-					if matches_ignore_rule || entry_path.is_default_ignored() {
-						Either::Right(entry)
-					} else {
-						Either::Left(entry)
+					if entry_path.is_dir() {
+						let path_str = entry_path.to_string_lossy().into_owned();
+						let current_mtime = entry_path
+							.metadata()
+							.and_then(|m| m.modified())
+							.map(|t| {
+								t.duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
+							})
+							.unwrap_or(0);
+						observed.insert(path_str.clone(), current_mtime);
+
+						// we never skip the series root, itself. the mtime might not accurately
+						// reflect changes deeper in the tree, and so skipping would cause us
+						// to miss any changes at those levels.
+						let is_root = path_str == root_str;
+						if !is_root {
+							if dir_mtimes.get(&path_str) == Some(&current_mtime) {
+								tracing::trace!(
+									mtime = current_mtime,
+									"Skipping unchanged dir: {path_str}"
+								);
+								it.skip_current_dir();
+							}
+						}
+						continue;
 					}
-				})
-		})
-		.await
-		.map_err(|e| {
-			CoreError::InternalError(format!("Series walk task panicked: {e}"))
-		})?;
+
+					if ignore_rules.is_match(entry_path)
+						|| entry_path.is_default_ignored()
+					{
+						ignored.push(entry);
+					} else {
+						valid.push(entry);
+					}
+				},
+			}
+		}
+
+		(valid, ignored, observed)
+	})
+	.await
+	.map_err(|e| CoreError::InternalError(format!("Series walk task panicked: {e}")))?;
 
 	let valid_entries_len = valid_entries.len() as u64;
 	let ignored_files = ignored_entries.len() as u64;
@@ -460,5 +515,6 @@ pub async fn walk_series(
 		media_to_visit: book_visit_operations,
 		missing_media,
 		series_is_missing: false,
+		observed_dir_mtimes,
 	})
 }

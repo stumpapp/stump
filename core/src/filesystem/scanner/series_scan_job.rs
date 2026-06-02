@@ -1,5 +1,5 @@
 use std::{
-	collections::VecDeque,
+	collections::{HashMap, VecDeque},
 	path::{Path, PathBuf},
 };
 
@@ -160,6 +160,7 @@ impl JobLifecycle for SeriesScanJob {
 			seen_files,
 			ignored_files,
 			skipped_files,
+			..
 		} = walk_series(
 			PathBuf::from(self.path.clone()).as_path(),
 			WalkerCtx {
@@ -167,6 +168,7 @@ impl JobLifecycle for SeriesScanJob {
 				ignore_rules,
 				max_depth,
 				options: self.options,
+				dir_mtimes: HashMap::new(),
 			},
 		)
 		.await?;

@@ -1,5 +1,5 @@
 use std::{
-	collections::VecDeque,
+	collections::{HashMap, VecDeque},
 	path::{Path, PathBuf},
 	sync::Arc,
 };
@@ -8,17 +8,18 @@ use async_graphql::SimpleObject;
 use models::{
 	entity::{
 		library, library_config, library_scan_record, media, metadata_provider_config,
-		series,
+		scanned_directory, series,
 	},
 	shared::enums::FileStatus,
 };
-use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
+use sea_orm::{
+	prelude::*,
+	sea_query::{OnConflict, Query},
+	Set, TransactionTrait,
+};
 use serde::{Deserialize, Serialize};
 
-// TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
-// TODO: Refactor rayon usage to use tokio instead. I am trying to learn more about IO-bound operations in an
-// async context, and I believe tokio might be more appropriate for this use case (highly concurrent IO-bound tasks).
-// Also perhaps experiment with https://docs.rs/tokio-uring/latest/tokio_uring/index.html
+// FIXME: progress messages are noisy and unhelpful in places (e.g. 'Starting task')
 
 use crate::{
 	database::SQLITE_BIND_LIMIT,
@@ -80,6 +81,9 @@ pub struct LibraryScanJob {
 	pub config: Option<library_config::Model>,
 	/// The scan options to use, if any
 	pub options: ScanOptions,
+	/// Stored directory mtimes, loaded at scan start to be used for
+	/// short-circuiting directories that have not been modified since the last scan
+	dir_mtimes: Arc<HashMap<String, u64>>,
 }
 
 impl LibraryScanJob {
@@ -89,6 +93,7 @@ impl LibraryScanJob {
 			path,
 			config: None,
 			options: options.unwrap_or_default(),
+			dir_mtimes: Arc::new(HashMap::new()),
 		}
 	}
 }
@@ -163,6 +168,20 @@ impl JobLifecycle for LibraryScanJob {
 
 		self.config = Some(config);
 
+		let stored_dir_mtimes = scanned_directory::Entity::find()
+			.filter(scanned_directory::Column::Path.starts_with(self.path.as_str()))
+			.all(ctx.conn())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			.map(|r| (r.path, r.last_mtime as u64))
+			.collect::<HashMap<String, u64>>();
+		tracing::debug!(
+			count = stored_dir_mtimes.len(),
+			"Loaded stored directory mtimes"
+		);
+		self.dir_mtimes = Arc::new(stored_dir_mtimes);
+
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
 			series_to_create,
@@ -179,6 +198,9 @@ impl JobLifecycle for LibraryScanJob {
 				ignore_rules,
 				max_depth: is_collection_based.then_some(1),
 				options: self.options,
+				// intentially empty here since walk_library only visits top-level dirs to discover series,
+				// so there is nothing to short-circuit
+				dir_mtimes: HashMap::new(),
 			},
 		)
 		.await?;
@@ -332,6 +354,34 @@ impl JobLifecycle for LibraryScanJob {
 				.await
 			{
 				tracing::error!(?e, "Failed to enqueue metadata fetch follow-up");
+			}
+		}
+
+		let library_path = self.path.clone();
+		let stale_paths = scanned_directory::Entity::find()
+			.filter(scanned_directory::Column::Path.starts_with(library_path.as_str()))
+			.all(ctx.conn())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			// Path::exists() is blocking but the list of stale paths shouldn't regularly
+			// be large and so think it's largely fine
+			.filter(|r| !std::path::Path::new(&r.path).exists())
+			.map(|r| r.path)
+			.collect::<Vec<_>>();
+
+		// if there are paths which no longer exist on disk, no need to keep
+		// them around and just bloat
+		if !stale_paths.is_empty() {
+			let count = stale_paths.len();
+			if let Err(err) = scanned_directory::Entity::delete_many()
+				.filter(scanned_directory::Column::Path.is_in(stale_paths))
+				.exec(ctx.conn())
+				.await
+			{
+				tracing::error!(error = ?err, "Failed to clean up stale scanned_directory rows");
+			} else {
+				tracing::debug!(count, "Cleaned up stale scanned_directory rows");
 			}
 		}
 
@@ -568,6 +618,7 @@ impl JobLifecycle for LibraryScanJob {
 						ignore_rules,
 						max_depth,
 						options: self.options,
+						dir_mtimes: (*self.dir_mtimes).clone(),
 					},
 				)
 				.await;
@@ -581,6 +632,7 @@ impl JobLifecycle for LibraryScanJob {
 					seen_files,
 					ignored_files,
 					skipped_files,
+					observed_dir_mtimes,
 				} = match walk_result {
 					Ok(walked_series) => walked_series,
 					Err(core_error) => {
@@ -598,6 +650,32 @@ impl JobLifecycle for LibraryScanJob {
 						});
 					},
 				};
+
+				if !observed_dir_mtimes.is_empty() {
+					let active_models = observed_dir_mtimes
+						.into_iter()
+						.map(|(path, mtime)| scanned_directory::ActiveModel {
+							path: Set(path),
+							last_mtime: Set(mtime as i64),
+						})
+						.collect::<Vec<_>>();
+
+					if let Err(error) =
+						scanned_directory::Entity::insert_many(active_models)
+							.on_conflict(
+								OnConflict::column(scanned_directory::Column::Path)
+									.update_column(scanned_directory::Column::LastMtime)
+									.to_owned(),
+							)
+							.exec(ctx.conn())
+							.await
+					{
+						tracing::warn!(
+							?error,
+							"Failed to upsert scanned directory mtimes"
+						);
+					}
+				}
 				output.total_files += seen_files + ignored_files;
 				output.ignored_files += ignored_files;
 				output.skipped_files += skipped_files;

@@ -1,6 +1,6 @@
+import { getThumbnailTintColor } from '@stump/client'
 import { cn } from '@stump/components'
 import { ImageRef } from '@stump/graphql'
-import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { useMemo } from 'react'
 
 import { useFancyAnimations } from '@/hooks/useFancyAnimations'
@@ -8,9 +8,6 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 
 import { ThumbnailImage } from './ThumbnailImage'
-
-ColorSpace.register(sRGB)
-ColorSpace.register(OKLCH)
 
 type ThumbnailConfig = {
 	/**
@@ -70,12 +67,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 
 	const backgroundColor = useMemo(() => {
 		if (mainThumbnailAverageColor) {
-			const color = getColor(mainThumbnailAverageColor)
-			set(color, {
-				'oklch.l': isDarkVariant ? 0.3 : 0.9,
-				'oklch.c': (c) => (c + 0.05) / 2,
-			})
-			return serialize(color, { format: 'hex' })
+			return getThumbnailTintColor(mainThumbnailAverageColor, { dark: isDarkVariant })
 		}
 		return getThemeColor('thumbnail.stack.series') ?? (isDarkVariant ? '#2a2a2e' : '#e5e5e7')
 	}, [mainThumbnailAverageColor, isDarkVariant, getThemeColor])

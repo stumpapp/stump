@@ -286,6 +286,9 @@ impl JobStatus {
 	}
 }
 
+// TODO: rename these terrible things:
+// - FirstFolderOnly?
+// - FolderPerSeries?
 /// The different patterns a library may be organized by
 #[derive(
 	Eq,
@@ -550,6 +553,8 @@ pub enum ReadingDirection {
 	Rtl,
 }
 
+/// the different reading statuses a book can be categorized as based on a user's
+/// reading sessions
 #[derive(
 	Eq,
 	Copy,
@@ -572,10 +577,15 @@ pub enum ReadingDirection {
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingStatus {
+	/// there is an active reading session for this book. it may or may not have been completed in
+	/// the past, this is strictly about the presence of an active session
 	#[default]
 	Reading,
+	/// there is at least one completed readthrough for this book
 	Finished,
+	/// a user actively started reading a book but decided not to finish it (i.e., dnf-ing a book)
 	Abandoned,
+	/// no sessions have been recorded for this book
 	NotStarted,
 }
 

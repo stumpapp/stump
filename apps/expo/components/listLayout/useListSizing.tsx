@@ -12,6 +12,7 @@ type Params = {
 type Return = {
 	itemWidth: number
 	itemHeight?: number
+	estimatedItemHeight: number
 	paddingHorizontal: number
 	numColumns: number
 } & Pick<FlashListProps<unknown>, 'ItemSeparatorComponent'>
@@ -24,12 +25,14 @@ export function useListSizing({ layout }: Params): Return {
 		[InterfaceLayout.Table]: {
 			itemWidth: listSizing.width,
 			itemHeight: listSizing.height,
+			estimatedItemHeight: listSizing.height,
 			paddingHorizontal: 0,
 			numColumns: 1,
 			ItemSeparatorComponent: () => <View className="h-6" />,
 		},
 		[InterfaceLayout.Grid]: {
 			itemWidth: gridSizing.itemWidth,
+			estimatedItemHeight: gridSizing.estimatedItemHeight,
 			paddingHorizontal: gridSizing.paddingHorizontal,
 			numColumns: gridSizing.numColumns,
 			ItemSeparatorComponent: null,

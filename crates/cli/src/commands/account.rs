@@ -4,9 +4,9 @@ use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
 use models::entity::{
 	api_key, book_club_member, bookmark, favorite_library, favorite_media,
-	favorite_series, finished_reading_session, last_library_visit, library_exclusion,
-	media_annotation, reading_session, refresh_token, review, session, user,
-	user_login_activity, user_preferences,
+	favorite_series, last_library_visit, library_exclusion, media_annotation,
+	reading_session, refresh_token, review, session, user, user_login_activity,
+	user_preferences,
 };
 use sea_orm::{
 	prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait,
@@ -411,23 +411,13 @@ where
 		.exec(&txn)
 		.await?;
 
-	post_message("Transferring reading sessions...");
+	post_message("Transferring reading sessions and history...");
 	reading_session::Entity::update_many()
 		.col_expr(
 			reading_session::Column::UserId,
 			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
 		)
 		.filter(reading_session::Column::UserId.eq(local_user.id.clone()))
-		.exec(&txn)
-		.await?;
-
-	post_message("Transferring finished reading sessions...");
-	finished_reading_session::Entity::update_many()
-		.col_expr(
-			finished_reading_session::Column::UserId,
-			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
-		)
-		.filter(finished_reading_session::Column::UserId.eq(local_user.id.clone()))
 		.exec(&txn)
 		.await?;
 
@@ -605,22 +595,24 @@ mod tests {
 	use models::{
 		entity::{
 			api_key, bookmark, favorite_library, favorite_media, favorite_series,
-			finished_reading_session, last_library_visit, library, library_config,
-			library_exclusion, media, media_annotation, reading_session, refresh_token,
-			review, series, session, user, user_login_activity, user_preferences,
+			last_library_visit, library, library_config, library_exclusion, media,
+			media_annotation, reading_session, refresh_token, review, series, session,
+			user, user_login_activity, user_preferences,
 		},
 		shared::{
 			api_key::APIKeyPermissions,
 			enums::{
 				FileStatus, LibraryPattern, LibraryViewMode, ReadingDirection,
-				ReadingImageScaleFit, ReadingMode,
+				ReadingImageScaleFit, ReadingMode, ReadingStatus,
 			},
 			readium::ReadiumLocator,
 		},
 	};
 	use sea_orm::{
-		prelude::DateTimeWithTimeZone, sqlx::types::chrono::Utc, ActiveModelTrait,
-		ColumnTrait, ConnectionTrait, Database, DbConn, EntityTrait, QueryFilter, Set,
+		prelude::{Date, DateTimeWithTimeZone},
+		sqlx::types::chrono::Utc,
+		ActiveModelTrait, ColumnTrait, ConnectionTrait, Database, DbConn, EntityTrait,
+		QueryFilter, Set,
 	};
 
 	use super::do_migrate_oidc_account;
@@ -771,28 +763,21 @@ mod tests {
 
 		// let's have an active session for books 0 and 2, and a finished reading session for book 1
 		for i in 0..3 {
+			let mut active = reading_session::ActiveModel {
+				user_id: Set(local_user.id.clone()),
+				media_id: Set(media_list[i].id.clone()),
+				end_page: Set(Some(10)),
+				session_date: Set(Date::parse_from_str("2026-05-22", "%Y-%m-%d")
+					.expect("failed to parse date")),
+				..Default::default()
+			};
 			if i == 1 {
-				finished_reading_session::ActiveModel {
-					user_id: Set(local_user.id.clone()),
-					media_id: Set(media_list[1].id.clone()),
-					started_at: Set(DateTimeWithTimeZone::from(Utc::now())),
-					completed_at: Set(DateTimeWithTimeZone::from(Utc::now())),
-					..Default::default()
-				}
-				.insert(db)
-				.await
-				.expect("could not insert finished reading session for media 1");
-			} else {
-				reading_session::ActiveModel {
-					page: Set(Some(10)),
-					user_id: Set(local_user.id.clone()),
-					media_id: Set(media_list[i].id.clone()),
-					..Default::default()
-				}
+				active.status = Set(ReadingStatus::Finished)
+			}
+			active
 				.insert(db)
 				.await
 				.expect(&format!("could not insert reading session for media {}", i));
-			}
 		}
 
 		// let's create a review for media 0 as well
@@ -1019,19 +1004,21 @@ mod tests {
 			panic!("OIDC user should have preferences");
 		}
 
-		let reading_sessions = reading_session::Entity::find()
+		let active_sessions = reading_session::Entity::find()
 			.filter(reading_session::Column::UserId.eq(&oidc_user.id))
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 			.all(&db)
 			.await
 			.expect("Failed to query reading sessions");
 		assert_eq!(
-			reading_sessions.len(),
+			active_sessions.len(),
 			2,
 			"Should have 2 reading sessions transferred"
 		);
 
-		let finished_sessions = finished_reading_session::Entity::find()
-			.filter(finished_reading_session::Column::UserId.eq(&oidc_user.id))
+		let finished_sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.eq(&oidc_user.id))
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 			.all(&db)
 			.await
 			.expect("Failed to query finished reading sessions");

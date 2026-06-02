@@ -26,6 +26,7 @@ import {
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
 	ThumbnailResizeMode,
+	TintListBackground,
 } from '~/components/appSettings/preferences'
 import { BookClubsEnabled, StumpEnabled } from '~/components/appSettings/stump'
 import { Card } from '~/components/ui'
@@ -46,6 +47,7 @@ export default function Screen() {
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />
 					<ThumbnailResizeMode />
+					<TintListBackground />
 				</Card>
 
 				<Card label={t(getSectionLabelKey('reading'))}>

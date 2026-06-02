@@ -8,21 +8,6 @@ enum AccessRole {
 	CO_CREATOR
 }
 
-type ActiveReadingSession {
-	id: Int!
-	page: Int
-	percentageCompleted: Decimal
-	locator: ReadiumLocator
-	epubcfi: String
-	koreaderProgress: String
-	startedAt: DateTime!
-	updatedAt: DateTime
-	mediaId: String!
-	userId: String!
-	deviceId: String
-	elapsedSeconds: Int
-}
-
 input AddBookToClubInput {
 	book: BookClubBookInput!
 }
@@ -727,7 +712,8 @@ input EpubProgressInput {
 	locator: EpubProgressLocatorInput!
 	percentage: Decimal
 	isComplete: Boolean
-	elapsedSeconds: Int
+	elapsedSecondsDelta: Int
+	deviceId: String
 }
 
 input EpubProgressLocatorInput @oneOf {
@@ -861,26 +847,6 @@ input FilterableArrangementEntityLinkInput {
 	filter: JSON
 	orderBy: String
 	links: [FilterableArrangementEntityLink!]! = []
-}
-
-type FinishedReadingSession {
-	id: Int!
-	startedAt: DateTime!
-	completedAt: DateTime!
-	mediaId: String!
-	userId: String!
-	deviceId: String
-	elapsedSeconds: Int
-}
-
-type FinishedReadingSessionModel {
-	id: Int!
-	startedAt: DateTime!
-	completedAt: DateTime!
-	mediaId: String!
-	userId: String!
-	deviceId: String
-	elapsedSeconds: Int
 }
 
 """
@@ -1380,8 +1346,8 @@ type Media {
 	metatadata, if available, and fallback to the name derived from the file name
 	"""
 	resolvedName: String!
-	readProgress: ActiveReadingSession
-	readHistory: [FinishedReadingSession!]!
+	readProgress: ResumeReadingCursor
+	readHistory: [ReadthroughRecord!]!
 	seriesPosition: Int
 	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -1884,14 +1850,6 @@ type Mutation {
 	will be generated based on the library's thumbnail configuration.
 	"""
 	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
-	deleteMediaProgress(id: ID!): Media!
-	"""
-	Deletes all of a user's reading history for a specific media item. This cannot be undone, so
-	use with caution.
-	"""
-	deleteMediaReadHistory(id: ID!): Media!
-	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingProgressOutput!
-	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
 	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
 	"Search external metadata providers for a media item and return match candidates"
 	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
@@ -1985,13 +1943,6 @@ type Mutation {
 	will be generated based on the library's thumbnail configuration.
 	"""
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
-	"""
-	Toggle the completion status of a series. If the series is marked as completed, all books
-	in the series will also be marked as completed, and vice versa for marking as not completed.
-	This is considered a dangerous operation since it can modify all your read progression related
-	to a single series all at once. Please use with caution.
-	"""
-	toggleSeriesCompletion(id: ID!, isCompleted: Boolean!): Series!
 	scanSeries(id: ID!): Boolean!
 	"Create a bookmark for a user"
 	createBookmark(input: BookmarkInput!): Bookmark!
@@ -2140,7 +2091,36 @@ type Mutation {
 	deleteCustomEmoji(id: ID!): Boolean!
 	"Rename a custom emoji"
 	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
+	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingSession!
+	"trashes current readthrough, if there is one"
+	clearMediaProgress(id: ID!): Boolean!
+	"""
+	marks current readthrough as complete:
+	- if no current readthrough, creates one
+	- if `dnf` is true, it will mark the readthrough as such
+	"""
+	finishMediaProgress(id: ID!, dnf: Boolean = null): Boolean!
+	"trashes all completed readthroughs for the media"
+	deleteMediaReadingHistory(id: ID!): Int!
+	"marks all books in the series as finished"
+	finishSeriesProgress(id: ID!): Int!
+	"""
+	trashes all completed readthroughs for all books in this series, preserving any active
+	readthroughs
+	"""
+	clearSeriesReadingHistory(id: ID!): Int!
 }
+
+"""
+ISO 8601 calendar date without timezone.
+Format: %Y-%m-%d
+
+# Examples
+
+* `1994-11-13`
+* `2000-02-24`
+"""
+scalar NaiveDate
 
 input NavigationArrangementInput {
 	sections: [ArrangementSectionInput!]!
@@ -2269,7 +2249,8 @@ type PageDimension {
 
 input PagedProgressInput {
 	page: Int!
-	elapsedSeconds: Int
+	elapsedSecondsDelta: Int
+	deviceId: String
 }
 
 type PaginatedAuthorResponse {
@@ -2563,12 +2544,51 @@ enum ReadingMode {
 	CONTINUOUS_HORIZONTAL
 }
 
-union ReadingProgressOutput = ActiveReadingSession | FinishedReadingSession
+type ReadingSession {
+	id: Int!
+	"the \"logical\" date of this session, based on user prefs and start time"
+	sessionDate: NaiveDate!
+	epubcfi: String @deprecated(reason: "future releases of Stump will remove support for this field")
+	startLocator: ReadiumLocator
+	endLocator: ReadiumLocator
+	startPage: Int
+	endPage: Int
+	startPercentage: Decimal
+	endPercentage: Decimal
+	koreaderProgress: String
+	"accumulated reading time for this session, updated via deltas (not overwritten)"
+	elapsedSeconds: Int
+	"which read-through of this book this session belongs to (1-indexed)"
+	readthroughNumber: Int!
+	"""
+	the status of this session. this might feel confusing when considering that sessions will
+	remain in place even after completion/dnf, but the idea is that the status represents the
+	state of the session when it was last updated
+	"""
+	status: ReadingStatus!
+	notes: String
+	mediaId: String!
+	userId: String!
+	createdAt: DateTime!
+	updatedAt: DateTime
+	deviceIds: [String!]!
+}
 
+"""
+the different reading statuses a book can be categorized as based on a user's
+reading sessions
+"""
 enum ReadingStatus {
+	"""
+	there is an active reading session for this book. it may or may not have been completed in
+	the past, this is strictly about the presence of an active session
+	"""
 	READING
+	"there is at least one completed readthrough for this book"
 	FINISHED
+	"a user actively started reading a book but decided not to finish it (i.e., dnf-ing a book)"
 	ABANDONED
+	"no sessions have been recorded for this book"
 	NOT_STARTED
 }
 
@@ -2620,6 +2640,18 @@ input ReadiumTextInput {
 	highlight: String
 }
 
+"""
+a completed readthrough of a book, aggregated across all sessions that
+share the same `readthrough_number`
+"""
+type ReadthroughRecord {
+	readthroughNumber: Int!
+	startedAt: DateTime!
+	completedAt: DateTime!
+	elapsedSeconds: Int!
+	dnf: Boolean!
+}
+
 type RecentlyAdded {
 	entity: FilterableArrangementEntity!
 	name: String
@@ -2638,6 +2670,23 @@ type RegisteredEmailDevice {
 	email: String!
 	forbidden: Boolean!
 	sendHistory: [EmailerSendRecord!]!
+}
+
+"""
+the current reading position for a book, derived from the latest session
+with the highest `readthrough_number`
+"""
+type ResumeReadingCursor {
+	readthroughNumber: Int!
+	page: Int
+	locator: ReadiumLocator
+	percentageCompleted: Decimal
+	epubcfi: String
+	"total reading time across all sessions in the current readthrough"
+	elapsedSeconds: Int!
+	"when the very first session in the current readthrough started"
+	startedAt: DateTime
+	updatedAt: DateTime
 }
 
 input SaveSmartListInput {
@@ -3131,6 +3180,8 @@ let core = StumpCore::new(config).await;
 type StumpConfig {
 	"The \"release\" | \"debug\" profile with which the application is running."
 	profile: String!
+	"The IP address on which to listen on (default: \"0.0.0.0\")."
+	ip: String!
 	"The port from which to serve the application (default: 10801)."
 	port: Int!
 	"The verbosity with which system logs are visible (default: 1)."
@@ -3369,6 +3420,9 @@ input UpdateUserPreferencesInput {
 	thumbnailRatio: Float!
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableAlphabetSelect: Boolean!
+	enableReadingJournal: Boolean!
+	dayResetHourOffset: Int!
+	readingSessionGracePeriodSecs: Int!
 }
 
 "A multipart file upload"
@@ -3548,11 +3602,21 @@ type UserPreferences {
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
 	interfaceRoundness: InterfaceRoundness!
+	enableReadingJournal: Boolean!
+	"""
+	hour offset from midnight at which a new "logical day" begins for reading sessions
+	0 = midnight, 2 = 2am, etc
+	"""
+	dayResetHourOffset: Int!
+	"seconds of inactivity after which the current reading session is considered ended"
+	readingSessionGracePeriodSecs: Int!
 	userId: String
 	homeArrangement: Arrangement!
 	navigationArrangement: Arrangement!
 }
 
+"Marks an element of a GraphQL schema as no longer supported."
+directive @deprecated(reason: String = "No longer supported") on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | ENUM_VALUE
 "Directs the executor to include this field or fragment only when the `if` argument is true."
 directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
 "Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)"

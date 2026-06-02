@@ -139,14 +139,28 @@ export function useSyncOnlineToOfflineProgress({
 		async (onlineProgress: MediaProgressInput) => {
 			if (!isOfflineSyncable) return
 
+			const accumulatedElapsed =
+				(record?.elapsedSeconds ?? 0) +
+				match(onlineProgress)
+					.with(
+						{ epub: P.not(P.nullish) },
+						({ epub: { elapsedSecondsDelta } }) => elapsedSecondsDelta ?? 0,
+					)
+					.with(
+						{ paged: P.not(P.nullish) },
+						({ paged: { elapsedSecondsDelta } }) => elapsedSecondsDelta ?? 0,
+					)
+					.otherwise(() => 0)
+
 			const values = match(onlineProgress)
 				.with(
 					{ epub: P.not(P.nullish) },
-					({ epub: { percentage, elapsedSeconds, locator } }) =>
+					({ epub: { percentage, locator } }) =>
 						({
 							bookId,
 							serverId,
-							elapsedSeconds,
+							elapsedSeconds: accumulatedElapsed,
+							lastSyncedElapsedSeconds: accumulatedElapsed,
 							percentage,
 							epubProgress: epubProgress.safeParse(locator.readium).data,
 							syncStatus: syncStatus.enum.SYNCED,
@@ -154,11 +168,12 @@ export function useSyncOnlineToOfflineProgress({
 				)
 				.with(
 					{ paged: P.not(P.nullish) },
-					({ paged: { page, elapsedSeconds } }) =>
+					({ paged: { page } }) =>
 						({
 							bookId,
 							serverId,
-							elapsedSeconds,
+							elapsedSeconds: accumulatedElapsed,
+							lastSyncedElapsedSeconds: accumulatedElapsed,
 							page,
 							syncStatus: syncStatus.enum.SYNCED,
 						}) satisfies typeof readProgress.$inferInsert,
@@ -197,7 +212,7 @@ export function useSyncOnlineToOfflineProgress({
 				})
 			}
 		},
-		[bookId, serverId, isOfflineSyncable],
+		[bookId, serverId, isOfflineSyncable, record],
 	)
 
 	return { syncProgress }

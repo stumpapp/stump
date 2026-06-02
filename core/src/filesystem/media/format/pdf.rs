@@ -134,7 +134,7 @@ impl FileProcessor for PdfProcessor {
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 
-		Ok(document.pages().len() as i32)
+		Ok(document.pages().len())
 	}
 
 	fn get_page_content_types(
@@ -230,11 +230,11 @@ impl PdfProcessor {
 			)));
 		}
 
-		// Convert back to u16 for pdfium API
-		let page_index_u16 = page_index_usize as u16;
+		// Convert back to PdfPageIndex for pdfium API
+		let page_index = page_index_usize as pdfium_render::prelude::PdfPageIndex;
 
 		tracing::debug!(path, page, total_pages, "Loading PDF page");
-		let document_page = document.pages().get(page_index_u16)?;
+		let document_page = document.pages().get(page_index)?;
 
 		// Configure rendering with quality settings
 		let use_high_quality = force_high_quality || config.pdf_high_quality;
@@ -260,7 +260,7 @@ impl PdfProcessor {
 		};
 
 		let bitmap = document_page.render_with_config(&render_config)?;
-		let dyn_image = bitmap.as_image();
+		let dyn_image = bitmap.as_image()?;
 
 		// Get the configured output format
 		let output_format = config.get_pdf_render_format();
@@ -712,7 +712,7 @@ impl FileConverter for PdfProcessor {
 			.enumerate()
 			.map(|(idx, page)| {
 				let bitmap = page.render_with_config(&render_config)?;
-				let dyn_image = bitmap.as_image();
+				let dyn_image = bitmap.as_image()?;
 
 				if let Some(image) = dyn_image.as_rgba8() {
 					let mut buffer = Cursor::new(vec![]);

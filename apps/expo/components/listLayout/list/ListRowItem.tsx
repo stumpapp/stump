@@ -70,6 +70,7 @@ export function ListRowItem({
 							<View className="gap-3 flex-row items-center">
 								<Progress
 									className="shrink"
+									trackClassName="bg-black/5 dark:bg-white/10"
 									value={percentageCompleted}
 									style={{ height: 6, borderRadius: 3 }}
 								/>

@@ -57,6 +57,13 @@ pub struct Model {
 	#[graphql(skip)]
 	#[serde(default = "Model::default_home_arrangement")]
 	pub home_arrangement: Option<Arrangement>,
+
+	pub enable_reading_journal: bool,
+	/// hour offset from midnight at which a new "logical day" begins for reading sessions
+	/// 0 = midnight, 2 = 2am, etc
+	pub day_reset_hour_offset: i32,
+	/// seconds of inactivity after which the current reading session is considered ended
+	pub reading_session_grace_period_secs: i64,
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_id: Option<String>,
 }
@@ -112,6 +119,9 @@ impl ActiveModelBehavior for ActiveModel {
 				ActiveValue::Set(ThumbnailPlaceholderStyle::default());
 			self.enable_job_overlay = ActiveValue::Set(true);
 			self.enable_alphabet_select = ActiveValue::Set(false);
+			self.enable_reading_journal = ActiveValue::Set(true);
+			self.day_reset_hour_offset = ActiveValue::Set(0); // midnight
+			self.reading_session_grace_period_secs = ActiveValue::Set(1800); // 30 minutes
 			self.interface_roundness = ActiveValue::Set(InterfaceRoundness::default());
 		}
 

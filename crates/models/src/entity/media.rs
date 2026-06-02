@@ -322,8 +322,6 @@ pub enum Relation {
 	BookClubMemberFavoriteBook,
 	#[sea_orm(has_many = "super::bookmark::Entity")]
 	Bookmark,
-	#[sea_orm(has_many = "super::finished_reading_session::Entity")]
-	FinishedReadingSession,
 	#[sea_orm(has_many = "super::media_annotation::Entity")]
 	MediaAnnotation,
 	#[sea_orm(has_one = "super::media_metadata::Entity")]
@@ -371,12 +369,6 @@ impl Related<super::book_club_member_favorite_book::Entity> for Entity {
 impl Related<super::bookmark::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Bookmark.def()
-	}
-}
-
-impl Related<super::finished_reading_session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::FinishedReadingSession.def()
 	}
 }
 

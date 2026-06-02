@@ -1,6 +1,9 @@
 import { LucideIcon } from 'lucide-react-native'
 import { View, ViewProps } from 'react-native'
 
+import { StatColorPalette } from '~/lib/constants'
+import { useColorScheme } from '~/lib/useColorScheme'
+
 import { Icon, Text } from '../ui'
 
 export type StatCardProps = {
@@ -8,46 +11,52 @@ export type StatCardProps = {
 	value: string | number
 	suffix?: string
 	icon: LucideIcon
-	baseColor: string
+	colors: StatColorPalette
 } & ViewProps
 
-export function StatCard({ label, value, suffix, icon, baseColor, ...props }: StatCardProps) {
-	return (
-		<View className="rounded-3xl squircle gap-2 p-3 bg-white/40 dark:bg-transparent" {...props}>
-			<View
-				className="inset-0 rounded-3xl squircle border-white/20 absolute border-[1.5px] opacity-30"
-				style={{ backgroundColor: baseColor }}
-			/>
+type IconProps = { icon: LucideIcon; colors: StatColorPalette }
 
+export function StatCard({ label, value, suffix, icon, colors, style, ...props }: StatCardProps) {
+	const { isDarkColorScheme } = useColorScheme()
+
+	const textColor = isDarkColorScheme ? colors.secondary : colors.primary
+	const backgroundColor = isDarkColorScheme ? colors.primary + '80' : colors.secondary + 'c0'
+
+	return (
+		<View
+			className="rounded-3xl squircle gap-2 p-3"
+			style={[{ backgroundColor: backgroundColor }, style]}
+			{...props}
+		>
 			<View className="flex-row justify-between">
-				<IconWithBackground icon={icon} baseColor={baseColor} />
+				<IconWithBackground icon={icon} colors={colors} />
 
 				<View className="flex-row items-end">
-					<Text size="2xl" className="font-extrabold" style={{ color: baseColor }}>
+					<Text size="2xl" className="font-extrabold" style={{ color: textColor }}>
 						{value}
 					</Text>
 					{suffix && (
-						<Text size="sm" className="font-bold mb-1 opacity-60" style={{ color: baseColor }}>
+						<Text size="sm" className="font-bold mb-1 opacity-60" style={{ color: textColor }}>
 							{' '}
 							{suffix}
 						</Text>
 					)}
 				</View>
 			</View>
-			<Text className="font-medium px-1" style={{ color: baseColor }}>
+			<Text className="font-medium px-1" style={{ color: textColor }}>
 				{label}
 			</Text>
 		</View>
 	)
 }
 
-function IconWithBackground({ icon, baseColor }: { icon: LucideIcon; baseColor: string }) {
+function IconWithBackground({ icon, colors }: IconProps) {
 	return (
 		<View
 			className="squircle h-8 w-8 rounded-xl flex shrink-0 items-center justify-center"
-			style={{ backgroundColor: baseColor }}
+			style={{ backgroundColor: colors.primary }}
 		>
-			<Icon as={icon} size={18} strokeWidth={1.8} absoluteStrokeWidth color="white" />
+			<Icon as={icon} size={18} strokeWidth={1.8} absoluteStrokeWidth color={colors.secondary} />
 			<View className="inset-0 rounded-xl dark:border-white/10 border-white/30 squircle absolute border-[0.75px]" />
 		</View>
 	)
@@ -57,28 +66,30 @@ export function MiniStatCard({
 	value,
 	suffix,
 	icon,
-	baseColor,
+	colors,
+	style,
 	...props
 }: Omit<StatCardProps, 'label'>) {
+	const { isDarkColorScheme } = useColorScheme()
+
+	const textColor = isDarkColorScheme ? colors.secondary : colors.primary
+	const backgroundColor = isDarkColorScheme ? colors.primary + '80' : colors.secondary + '80'
+
 	return (
 		<View
-			className="gap-2 p-1.5 squircle bg-white/40 rounded-2xl grow dark:bg-transparent"
+			className="gap-2 p-1.5 squircle rounded-2xl grow"
+			style={[{ backgroundColor: backgroundColor }, style]}
 			{...props}
 		>
-			<View
-				className="inset-0 squircle border-white/20 rounded-2xl absolute border-[1.5px] opacity-30"
-				style={{ backgroundColor: baseColor }}
-			/>
-
 			<View className="gap-0.5 flex-row items-center justify-between">
-				<MiniIconWithBackground icon={icon} baseColor={baseColor} />
+				<MiniIconWithBackground icon={icon} colors={colors} />
 
 				<View className="grow flex-row items-end justify-center">
-					<Text size="xl" className="font-extrabold" style={{ color: baseColor }}>
+					<Text size="xl" className="font-extrabold" style={{ color: textColor }}>
 						{value}
 					</Text>
 					{suffix && (
-						<Text size="xs" className="font-bold mb-1 opacity-60" style={{ color: baseColor }}>
+						<Text size="xs" className="font-bold mb-1 opacity-60" style={{ color: textColor }}>
 							{' '}
 							{suffix}
 						</Text>
@@ -89,13 +100,13 @@ export function MiniStatCard({
 	)
 }
 
-function MiniIconWithBackground({ icon, baseColor }: { icon: LucideIcon; baseColor: string }) {
+function MiniIconWithBackground({ icon, colors }: IconProps) {
 	return (
 		<View
 			className="squircle h-6 w-6 rounded-lg flex shrink-0 items-center justify-center"
-			style={{ backgroundColor: baseColor }}
+			style={{ backgroundColor: colors.primary }}
 		>
-			<Icon as={icon} size={14} strokeWidth={1.8} absoluteStrokeWidth color="white" />
+			<Icon as={icon} size={14} strokeWidth={1.8} absoluteStrokeWidth color={colors.secondary} />
 			<View className="inset-0 rounded-lg dark:border-white/10 border-white/30 squircle absolute border-[0.75px]" />
 		</View>
 	)

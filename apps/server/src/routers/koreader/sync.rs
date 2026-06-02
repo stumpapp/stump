@@ -5,14 +5,16 @@ use axum::{
 	routing::{get, put},
 	Extension, Router,
 };
+use chrono::Utc;
 use graphql::data::AuthContext;
 use models::{
-	entity::{
-		finished_reading_session, media, reading_session, registered_reading_device,
-	},
-	shared::enums::UserPermission,
+	entity::{media, reading_device, reading_session},
+	services::reading_progress::{upsert_reading_session, NormalizedProgression},
+	shared::enums::{ReadingStatus, UserPermission},
 };
-use sea_orm::{prelude::*, sea_query::OnConflict, Iterable, Set, TransactionTrait};
+use sea_orm::{
+	prelude::*, sea_query::OnConflict, Iterable, QueryOrder, Set, TransactionTrait,
+};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
@@ -122,28 +124,44 @@ async fn get_progress(
 	let user = req.user();
 	let document_cpy = document.clone();
 
-	let active_session = reading_session::ModelWithDevice::find()
+	let latest_query = reading_session::Entity::find()
 		.inner_join(media::Entity)
 		.filter(reading_session::Column::UserId.eq(user.id.clone()))
 		.filter(media::Column::KoreaderHash.eq(document_cpy.clone()))
+		.order_by_desc(reading_session::Column::UpdatedAt);
+
+	let latest_session = latest_query
+		.clone()
 		.into_model::<reading_session::ModelWithDevice>()
 		.one(conn)
 		.await?;
 
-	let finished_session = finished_reading_session::ModelWithDevice::find()
-		.inner_join(media::Entity)
-		.filter(finished_reading_session::Column::UserId.eq(user.id.clone()))
-		.filter(media::Column::KoreaderHash.eq(document_cpy))
-		.into_model::<finished_reading_session::ModelWithDevice>()
-		.one(conn)
-		.await?;
+	let active_session = latest_session
+		.as_ref()
+		.filter(|s| s.model.status == ReadingStatus::Reading)
+		.cloned();
+
+	let finished_session = match latest_session {
+		Some(session) if session.model.is_finalized() => Some(session),
+		// there still might be a previous one
+		Some(_) => {
+			let latest_finished = latest_query
+				.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+				.order_by_desc(reading_session::Column::CreatedAt)
+				.into_model::<reading_session::ModelWithDevice>()
+				.one(conn)
+				.await?;
+			latest_finished
+		},
+		_ => None,
+	};
 
 	let progress = match (active_session, finished_session) {
 		(Some(active_session), _) => GetProgressResponse {
 			document,
 			percentage: active_session
 				.model
-				.percentage_completed
+				.end_percentage
 				.map(|dec| dec.try_into().unwrap_or(0.0)),
 			timestamp: Some(
 				active_session
@@ -157,12 +175,15 @@ async fn get_progress(
 			progress: active_session
 				.model
 				.koreader_progress
-				.or_else(|| active_session.model.page.map(|p| p.to_string())),
+				.or_else(|| active_session.model.end_page.map(|p| p.to_string())),
 		},
 		(_, Some(finished_session)) => GetProgressResponse {
 			document,
 			percentage: Some(1.0),
-			timestamp: Some(finished_session.model.completed_at.timestamp_millis() as u64),
+			timestamp: finished_session
+				.model
+				.updated_at
+				.map(|t| t.timestamp_millis() as u64),
 			device: finished_session.device.as_ref().map(|d| d.name.clone()),
 			device_id: finished_session.device.as_ref().map(|d| d.id.clone()),
 			..Default::default()
@@ -242,124 +263,67 @@ async fn put_progress(
 		.ok_or_else(|| APIError::NotFound("Book not found".to_string()))?;
 
 	let is_completed = percentage >= 1.0;
-	let document_cpy = document.clone();
 
 	let tx = ctx.conn.as_ref().begin().await?;
 
 	let on_conflict = OnConflict::new()
 		.update_columns(
-			registered_reading_device::Column::iter()
-				.filter(|col| matches!(col, registered_reading_device::Column::Name)),
+			reading_device::Column::iter()
+				.filter(|col| matches!(col, reading_device::Column::Name)),
 		)
 		.to_owned();
 
-	let _device_record = registered_reading_device::Entity::insert(
-		registered_reading_device::ActiveModel {
-			id: Set(device_id.clone()),
-			name: Set(device.clone()),
-			..Default::default()
-		},
-	)
+	let _device_record = reading_device::Entity::insert(reading_device::ActiveModel {
+		id: Set(device_id.clone()),
+		name: Set(device.clone()),
+		..Default::default()
+	})
 	.on_conflict(on_conflict)
 	.exec(&tx)
 	.await?;
 
-	let existing_active_session = reading_session::Entity::find()
-		.inner_join(media::Entity)
-		.filter(reading_session::Column::UserId.eq(user.id.clone()))
-		.filter(media::Column::KoreaderHash.eq(document_cpy.clone()))
-		.one(&tx)
-		.await?;
-
-	let (active_session, finished_session) = if is_completed {
-		let mut started_at = None;
-		if let Some(active_session) = existing_active_session {
-			started_at = Some(active_session.started_at);
-			active_session.delete(&tx).await?;
-		}
-
-		let finished_session = finished_reading_session::ActiveModel {
-			user_id: Set(user.id.clone()),
-			media_id: Set(book.id.clone()),
-			device_id: Set(Some(device_id.clone())),
-			started_at: Set(started_at.unwrap_or_else(|| chrono::Utc::now().into())),
-			..Default::default()
-		};
-		let finished_session = finished_session.insert(&tx).await?;
-
-		(None, Some(finished_session))
-	} else {
-		let mut active_model = reading_session::ActiveModel {
-			user_id: Set(user.id.clone()),
-			media_id: Set(book.id.clone()),
-			device_id: Set(Some(device_id.clone())),
-			percentage_completed: Set(Decimal::try_from(percentage).ok()),
-			koreader_progress: Set(Some(progress.clone())),
-			started_at: Set(existing_active_session
-				.as_ref()
-				.map(|s| s.started_at)
-				.unwrap_or_else(|| chrono::Utc::now().into())),
-			updated_at: Set(Some(chrono::Utc::now().into())),
-			..Default::default()
-		};
-
-		match parse_progress(&progress) {
-			Some(NativeProgress::Page(page)) => {
-				active_model.page = Set(Some(page));
-			},
-			Some(NativeProgress::EpubCfi(cfi)) => {
-				active_model.epubcfi = Set(Some(cfi));
-			},
-			_ => {
-				tracing::debug!(
-					progress,
-					"Failed to parse progress string, assuming x-pointer"
-				);
-			},
-		};
-
-		let active_session = reading_session::Entity::insert(active_model)
-			.on_conflict(
-				OnConflict::new()
-					.update_columns(reading_session::Column::iter().filter(|col| {
-						matches!(
-							col,
-							reading_session::Column::Page
-								| reading_session::Column::Epubcfi
-								| reading_session::Column::DeviceId
-								| reading_session::Column::PercentageCompleted
-								| reading_session::Column::KoreaderProgress
-								| reading_session::Column::UpdatedAt
-						)
-					}))
-					.to_owned(),
-			)
-			.exec_with_returning(&tx)
-			.await?;
-
-		(Some(active_session), None)
+	let mut progression = NormalizedProgression {
+		percentage: Decimal::try_from(percentage).ok(),
+		did_complete: is_completed,
+		device_id: Some(device_id.clone()),
+		..Default::default()
 	};
+
+	match parse_progress(&progress) {
+		Some(NativeProgress::Page(page)) => {
+			progression.page = Some(page);
+		},
+		Some(NativeProgress::EpubCfi(cfi)) => {
+			progression.epubcfi = Some(cfi);
+		},
+		_ => {
+			tracing::debug!(
+				progress,
+				"Failed to parse progress string, assuming x-pointer"
+			);
+		},
+	}
+
+	let session = upsert_reading_session(
+		&tx,
+		&user,
+		book.id.as_ref(),
+		progression,
+		ctx.config.book_completion_dedup_timeout_secs,
+	)
+	.await?;
+
+	if session.koreader_progress.as_deref() != Some(progress.as_str()) {
+		let mut active: reading_session::ActiveModel = session.into();
+		active.koreader_progress = Set(Some(progress.clone()));
+		active.update(&tx).await?;
+	}
 
 	tx.commit().await?;
 
-	let timestamp = match (active_session, finished_session) {
-		(Some(active_session), _) => active_session
-			.updated_at
-			.unwrap_or_else(|| chrono::Utc::now().into())
-			.timestamp_millis() as u64,
-		(_, Some(finished_session)) => {
-			finished_session.completed_at.timestamp_millis() as u64
-		},
-		_ => {
-			tracing::error!("Failed to update progress!");
-			return Err(APIError::InternalServerError(
-				"Failed to update progress".to_string(),
-			));
-		},
-	};
-
 	Ok(Json(PutProgressResponse {
 		document,
-		timestamp,
+		// not exact but i'm sure it's fine
+		timestamp: Utc::now().timestamp_millis() as u64,
 	}))
 }

@@ -57,6 +57,9 @@ pub struct UpdateUserPreferencesInput {
 	pub thumbnail_ratio: f32,
 	pub thumbnail_placeholder_style: ThumbnailPlaceholderStyle,
 	pub enable_alphabet_select: bool,
+	pub enable_reading_journal: bool,
+	pub day_reset_hour_offset: i32,
+	pub reading_session_grace_period_secs: i64,
 }
 
 #[derive(InputObject, Debug)]

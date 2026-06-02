@@ -7,6 +7,8 @@ import { Container, ContentContainer } from '@/components/container'
 import ReaderSettings from '@/components/readers/imageBased/container/ReaderSettings'
 import { useReaderStore } from '@/stores'
 
+import DayResetHourOffsetPreference from '../preferences/DayResetHourOffsetPreference'
+import ReadingSessionGracePeriodPreference from '../preferences/ReadingSessionGracePeriodPreference'
 import DefaultFontFamily from './DefaultFontFamily'
 import DefaultFontSize from './DefaultFontSize'
 import DefaultLineHeight from './DefaultLineHeight'
@@ -41,6 +43,13 @@ export default function ReaderDefaultSettingsScene() {
 			<ContentContainer>
 				<NewCard label="Universal" description="Settings which apply to all types of books">
 					<DefaultReadingDirection />
+
+					{/* TODO: not sure these belong here? idk they are reading preferences. 
+						im being a bit pedantic but this should be renamed `reading` preferences and 
+						not specifically reader, geared towards readers and not generally reading experience
+					*/}
+					<DayResetHourOffsetPreference />
+					<ReadingSessionGracePeriodPreference />
 				</NewCard>
 
 				<NewCard label="Formats" description="Configure reader default settings independently">

@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use chrono::{Datelike, NaiveDate};
 use merge::Merge;
 use sea_orm::{prelude::*, Set};
 use serde::{Deserialize, Serialize};
@@ -11,7 +10,7 @@ use crate::utils::serde::{
 	parse_age_restriction, string_list_deserializer,
 };
 
-const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
+use super::utils::parse_pdf_date;
 
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
@@ -343,70 +342,11 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
 				"date" => {
-					// Note: we don't know the format of the date. It could be a year, a full date, etc.
-					// We need to _try_ to parse each part of the date, and if it fails, we just ignore it.
-					// This is a bit of a hack, but it's the best we can do without knowing the format.
 					let raw_date = value.into_iter().next().unwrap_or_default();
-					// PDF date format: D:YYYYMMDDHHmmSSOHH'mm' — all fields after year are optional.
-					// See PDF spec ISO 32000, section 7.9.4
-					let clean_date = raw_date
-						.strip_prefix("D:")
-						.or_else(|| raw_date.strip_prefix("d:"))
-						.unwrap_or(&raw_date);
-
-					// Helper: safely parse a fixed-width digit slice
-					let parse_digits = |s: &str, start: usize, end: usize| -> Option<i32> {
-						s.get(start..end)
-							.filter(|slice| slice.chars().all(|c| c.is_ascii_digit()))
-							.and_then(|slice| slice.parse::<i32>().ok())
-					};
-
-					let parsed_pdf_date: Option<(i32, i32, i32)> = (|| {
-						let y = parse_digits(clean_date, 0, 4)?;
-
-						// Ensure the 5th char (if present) is NOT a digit — avoids matching "20241"
-						if clean_date.len() > 4 && clean_date.chars().nth(4).map_or(false, |c| c.is_ascii_digit()) {
-							// Has more digits — try to parse month
-							let m = parse_digits(clean_date, 4, 6)?;
-							if !(1..=12).contains(&m) { return None; }
-
-							if clean_date.len() >= 8 && clean_date.chars().nth(7).map_or(true, |c| c.is_ascii_digit()) {
-								// Try to parse day
-								let d = parse_digits(clean_date, 6, 8)?;
-								if !(1..=31).contains(&d) { return None; }
-								Some((y, m, d))
-							} else {
-								Some((y, m, 1))
-							}
-						} else if clean_date.len() > 4 && clean_date.chars().nth(4).map_or(false, |c| c == '-' || c == '/' || c == '.') {
-							// Has a separator — yield to naive date parsers
-							None
-						} else {
-							// Year only
-							Some((y, 1, 1))
-						}
-					})();
-
-					if let Some((y, m, d)) = parsed_pdf_date {
+					if let Some((y, m, d)) = parse_pdf_date(&raw_date) {
 						metadata.year = Some(y);
-						metadata.month = Some(m);
-						metadata.day = Some(d);
-					} else {
-						for format in &NAIVE_DATE_FORMATS {
-							if let Ok(date) = NaiveDate::parse_from_str(&raw_date, format)
-							{
-								metadata.year = Some(date.year());
-								metadata.month = Some(date.month() as i32);
-								metadata.day = Some(date.day() as i32);
-								break;
-							}
-						}
-
-						if metadata.year.is_none() {
-							if let Ok(year) = raw_date.parse() {
-								metadata.year = Some(year);
-							}
-						}
+						metadata.month = m;
+						metadata.day = d;
 					}
 				},
 				// TODO: separate out writer vs author?
@@ -529,11 +469,11 @@ mod tests {
 			("D:20190101", Some(2019), Some(1), Some(1)),
 			("D:20190101123456Z", Some(2019), Some(1), Some(1)),
 			("20190101", Some(2019), Some(1), Some(1)),
-			("D:2019", Some(2019), Some(1), Some(1)),
+			("D:2019", Some(2019), None, None),
 			("2019-08-31", Some(2019), Some(8), Some(31)),
-			("201901", Some(2019), Some(1), Some(1)),
-			("2019010", Some(2019), Some(1), Some(1)),
-			("2019010a", Some(2019), Some(1), Some(1)),
+			("201901", Some(2019), Some(1), None),
+			("2019010", Some(2019), Some(1), None),
+			("2019010a", Some(2019), Some(1), None),
 			("20241", Some(20241), None, None),
 			("invalid", None, None, None),
 		];

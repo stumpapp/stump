@@ -13,6 +13,7 @@ import { useActiveServer } from '~/components/activeServer'
 import { db, epubProgress, readProgress, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
 
+import { useTranslate } from '../useTranslate'
 import { useServerInstances } from './utils'
 
 export function useProgressSync() {
@@ -77,6 +78,7 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
+	const { t } = useTranslate()
 
 	const { syncProgress } = useProgressSync()
 
@@ -92,12 +94,11 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 				try {
 					await syncProgress([serverId])
 				} catch (error) {
-					console.error('Failed to sync progress', error)
 					Sentry.captureException(error, {
 						extra: { serverId },
 					})
-					toast.error('Failed to sync offline progress', {
-						description: error instanceof Error ? error.message : 'Unknown error',
+					toast.error(t('progressSync.syncFailed'), {
+						description: error instanceof Error ? error.message : t('errors.unknown'),
 					})
 				}
 			}
@@ -108,7 +109,7 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 			}
 			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [enabled, serverId]),
+		}, [enabled, serverId, t]),
 	)
 }
 

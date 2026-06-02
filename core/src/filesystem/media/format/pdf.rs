@@ -126,6 +126,9 @@ impl FileProcessor for PdfProcessor {
 		_: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
+		// Note: This method can't access config, so we return WebP as the default
+		// since that's our new default format. The actual format will be determined
+		// at render time based on the configuration.
 		Ok(pages
 			.into_iter()
 			.map(|page| (page, ContentType::WEBP))
@@ -368,32 +371,34 @@ impl PdfProcessor {
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
+		// Check cache first asynchronously to avoid spawning blocking threads
+		if config.pdf_cache_pages {
+			if let Ok(Some(cached)) = Self::get_cached_page(path, page, config).await {
+				if config.pdf_prerender_range > 0 {
+					let path_owned = path.to_string();
+					let config_owned = config.clone();
+					tokio::spawn(async move {
+						Self::prerender_adjacent_pages(&path_owned, page, &config_owned).await;
+					});
+				}
+				return Ok(cached);
+			}
+		}
+
 		let path_owned = path.to_string();
 		let config_owned = config.clone();
 
 		let result = tokio::task::spawn_blocking(move || {
-			let use_caching = config_owned.pdf_cache_pages;
-			if use_caching {
-				if let Ok(Some(cached)) =
-					Self::get_cached_page(&path_owned, page, &config_owned)
-				{
-					return Ok(cached);
-				}
-			}
-
-			let render_result = Self::render_page_sync(&path_owned, page, &config_owned);
-			if use_caching {
-				if let Ok((_, ref data)) = render_result {
-					let _ = Self::cache_page(&path_owned, page, data, &config_owned);
-				}
-			}
-
-			render_result
+			Self::render_page_sync(&path_owned, page, &config_owned)
 		})
 		.await
 		.map_err(|e| {
 			FileError::PdfProcessingError(format!("Render task panicked: {}", e))
 		})??;
+
+		if config.pdf_cache_pages {
+			let _ = Self::cache_page(path, page, &result.1, config).await;
+		}
 
 		// Trigger pre-rendering for adjacent pages in background if enabled
 		if config.pdf_cache_pages && config.pdf_prerender_range > 0 {
@@ -438,7 +443,7 @@ impl PdfProcessor {
 	}
 
 	/// Check if a cached page exists and return its content
-	fn get_cached_page(
+	async fn get_cached_page(
 		pdf_path: &str,
 		page: i32,
 		config: &StumpConfig,
@@ -456,18 +461,24 @@ impl PdfProcessor {
 		));
 
 		if cache_file.exists() {
-			let bytes = std::fs::read(&cache_file)?;
-			if !bytes.is_empty() {
-				return Ok(Some((ContentType::from(output_format), bytes)));
+			match tokio::fs::read(&cache_file).await {
+				Ok(bytes) => {
+					if !bytes.is_empty() {
+						return Ok(Some((ContentType::from(output_format), bytes)));
+					}
+					let _ = tokio::fs::remove_file(&cache_file).await;
+				},
+				Err(e) => {
+					tracing::warn!(cache_file = ?cache_file, error = ?e, "Failed to read cache file");
+				}
 			}
-			let _ = std::fs::remove_file(&cache_file);
 		}
 
 		Ok(None)
 	}
 
 	/// Save a rendered page to the cache
-	fn cache_page(
+	async fn cache_page(
 		pdf_path: &str,
 		page: i32,
 		content: &[u8],
@@ -479,13 +490,50 @@ impl PdfProcessor {
 
 		let cache_key = Self::generate_cache_key(pdf_path, page, config)?;
 		let cache_dir = config.get_pdf_cache_dir();
-		std::fs::create_dir_all(&cache_dir)?;
+
+		if !cache_dir.exists() {
+			if let Err(e) = tokio::fs::create_dir_all(&cache_dir).await {
+				tracing::warn!(cache_dir = ?cache_dir, error = ?e, "Failed to create cache directory");
+				return Ok(());
+			}
+		}
 
 		let output_format = config.get_pdf_render_format();
 		let cache_file =
 			cache_dir.join(format!("{}.{}", cache_key, output_format.extension()));
+		let temp_file =
+			cache_dir.join(format!("{}.{}.tmp", cache_key, output_format.extension()));
 
-		std::fs::write(&cache_file, content)?;
+		// Atomic write: write to temp file first, then rename
+		match tokio::fs::write(&temp_file, content).await {
+			Ok(_) => {
+				match tokio::fs::rename(&temp_file, &cache_file).await {
+					Ok(_) => {
+						tracing::debug!(
+							cache_file = ?cache_file,
+							size = content.len(),
+							"Cached PDF page successfully"
+						);
+					},
+					Err(e) => {
+						tracing::warn!(
+							cache_file = ?cache_file,
+							error = ?e,
+							"Failed to move temp cache file"
+						);
+						let _ = tokio::fs::remove_file(&temp_file).await;
+					},
+				}
+			},
+			Err(e) => {
+				tracing::warn!(
+					cache_file = ?cache_file,
+					error = ?e,
+					"Failed to write to temp cache file"
+				);
+			},
+		}
+
 		Ok(())
 	}
 
@@ -502,99 +550,99 @@ impl PdfProcessor {
 		let pdf_path_owned = pdf_path.to_string();
 		let config_owned = config.clone();
 
-		let _ = tokio::task::spawn_blocking(move || {
-			let total_pages = match Self::get_page_count(&pdf_path_owned, &config_owned) {
-				Ok(count) => count,
-				Err(e) => {
-					tracing::debug!(
-						pdf_path = %pdf_path_owned,
-						error = ?e,
-						"Failed to get page count for pre-rendering, skipping"
-					);
-					return;
-				},
-			};
-
-			let range = config_owned.pdf_prerender_range as i32;
-			// Calculate page range for pre-rendering
-			let start_page = (current_page - range).max(1);
-			let end_page = (current_page + range).min(total_pages);
-
-			tracing::debug!(
-				pdf_path = %pdf_path_owned,
-				current_page,
-				start_page,
-				end_page,
-				total_pages,
-				"Pre-rendering adjacent pages"
-			);
-
-			// Prioritize pages closer to current page for better navigation experience
-			let mut pages_to_render: Vec<i32> = (start_page..=end_page)
-				.filter(|&page| page != current_page)
-				.collect();
-
-			// Sort by distance from current page (closest first)
-			pages_to_render.sort_by_key(|&page| (page - current_page).abs());
-
-			// Spawn a single background task to process pages sequentially.
-			// Since PDFium's C API is not thread-safe, the `thread_safe` feature wraps all interactions
-			// in a global mutex. Attempting to render pages concurrently leads to severe lock contention
-			// and starves the executor thread pool. Processing sequentially maximizes lock utility and throughput.
-			//
-			// See:
-			// - PDFium C API threading constraints: https://github.com/ajrcarey/pdfium-render#thread-safety
-			for page in pages_to_render {
-				// Check if already cached
-				if let Ok(Some(_)) =
-					Self::get_cached_page(&pdf_path_owned, page, &config_owned)
-				{
-					continue; // Already cached
-				}
-
-				// Render the page in a blocking thread
-				let render_result = Self::render_page_with_quality(
-					&pdf_path_owned,
-					page,
-					&config_owned,
-					true,
+		let total_pages = match Self::get_page_count(&pdf_path_owned, &config_owned) {
+			Ok(count) => count,
+			Err(e) => {
+				tracing::debug!(
+					pdf_path = %pdf_path_owned,
+					error = ?e,
+					"Failed to get page count for pre-rendering, skipping"
 				);
+				return;
+			},
+		};
 
-				match render_result {
-					Ok((_, content)) => {
-						// Cache the rendered page
-						if let Err(e) = Self::cache_page(
-							&pdf_path_owned,
-							page,
-							&content,
-							&config_owned,
-						) {
-							tracing::debug!(
-								pdf_path = %pdf_path_owned,
-								page,
-								error = ?e,
-								"Failed to cache pre-rendered page"
-							);
-						} else {
-							tracing::debug!(
-								pdf_path = %pdf_path_owned,
-								page,
-								"Pre-rendered and cached page successfully"
-							);
-						}
-					},
-					Err(e) => {
+		let range = config_owned.pdf_prerender_range as i32;
+		// Calculate page range for pre-rendering
+		let start_page = (current_page - range).max(1);
+		let end_page = (current_page + range).min(total_pages);
+
+		tracing::debug!(
+			pdf_path = %pdf_path_owned,
+			current_page,
+			start_page,
+			end_page,
+			total_pages,
+			"Pre-rendering adjacent pages"
+		);
+
+		// Prioritize pages closer to current page for better navigation experience
+		let mut pages_to_render: Vec<i32> = (start_page..=end_page)
+			.filter(|&page| page != current_page)
+			.collect();
+
+		// Sort by distance from current page (closest first)
+		pages_to_render.sort_by_key(|&page| (page - current_page).abs());
+
+		// Spawn a single background task to process pages sequentially.
+		// Since PDFium's C API is not thread-safe, the `thread_safe` feature wraps all interactions
+		// in a global mutex. Attempting to render pages concurrently leads to severe lock contention
+		// and starves the executor thread pool. Processing sequentially maximizes lock utility and throughput.
+		//
+		// See:
+		// - PDFium C API threading constraints: https://github.com/ajrcarey/pdfium-render#thread-safety
+		for page in pages_to_render {
+			// Check if already cached (async check)
+			if let Ok(Some(_)) =
+				Self::get_cached_page(&pdf_path_owned, page, &config_owned).await
+			{
+				continue; // Already cached
+			}
+
+			// Render the page in a blocking thread
+			let path_clone = pdf_path_owned.clone();
+			let config_clone = config_owned.clone();
+			let render_result = tokio::task::spawn_blocking(move || {
+				Self::render_page_with_quality(&path_clone, page, &config_clone, true)
+			})
+			.await;
+
+			match render_result {
+				Ok(Ok((_, content))) => {
+					// Cache the rendered page
+					if let Err(e) = Self::cache_page(&pdf_path_owned, page, &content, &config_owned).await {
 						tracing::debug!(
 							pdf_path = %pdf_path_owned,
 							page,
 							error = ?e,
-							"Failed to render page during pre-rendering"
+							"Failed to cache pre-rendered page"
 						);
-					},
+					} else {
+						tracing::debug!(
+							pdf_path = %pdf_path_owned,
+							page,
+							"Pre-rendered and cached page successfully"
+						);
+					}
+				},
+				Ok(Err(e)) => {
+					tracing::debug!(
+						pdf_path = %pdf_path_owned,
+						page,
+						error = ?e,
+						"Failed to render page during pre-rendering"
+					);
+				},
+				Err(e) => {
+					tracing::debug!(
+						pdf_path = %pdf_path_owned,
+						page,
+						error = ?e,
+						"Pre-rendering task panicked"
+					);
 				}
 			}
-		})
-		.await;
+		}
 	}
 }
 

@@ -2,10 +2,6 @@ use std::collections::HashMap;
 
 use chrono::{Datelike, NaiveDate};
 use merge::Merge;
-use pdf::{
-	object::InfoDict,
-	primitive::{Dictionary, PdfString},
-};
 use sea_orm::{prelude::*, Set};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -402,55 +398,9 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 	}
 }
 
-impl From<Dictionary> for ProcessedMediaMetadata {
-	fn from(dict: Dictionary) -> Self {
-		// FIXME: this is pretty hacky! I need to match on the type of the value
-		let map = dict
-			.into_iter()
-			.map(|(k, v)| v.to_string().map(|v| (k, v)))
-			.filter_map(Result::ok)
-			.map(|(k, v)| (k.to_lowercase(), vec![v]))
-			.collect::<HashMap<String, Vec<String>>>();
-		Self::from(map)
-	}
-}
-
-fn pdf_string_to_string(pdf_string: PdfString) -> Option<String> {
-	pdf_string.to_string().map_or_else(
-		|error| {
-			tracing::error!(error = ?error, "Failed to convert PdfString to String");
-			None
-		},
-		|str| Some(str.trim().to_owned()),
-	)
-}
-
-impl From<InfoDict> for ProcessedMediaMetadata {
-	fn from(dict: InfoDict) -> Self {
-		ProcessedMediaMetadata {
-			title: dict.title.and_then(pdf_string_to_string),
-			genres: dict.subject.and_then(pdf_string_to_string).map(|v| vec![v]),
-			year: dict.creation_date.as_ref().map(|date| date.year as i32),
-			month: dict.creation_date.as_ref().map(|date| date.month as i32),
-			day: dict.creation_date.as_ref().map(|date| date.day as i32),
-			writers: dict.author.and_then(pdf_string_to_string).map(|v| vec![v]),
-			..Default::default()
-		}
-	}
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
-
-	#[test]
-	fn test_pdf_string_to_string() {
-		let pdf_string = PdfString::from("Hello, world!");
-		assert_eq!(
-			pdf_string_to_string(pdf_string),
-			Some("Hello, world!".to_string())
-		);
-	}
 
 	#[test]
 	fn test_from_hashmap() {

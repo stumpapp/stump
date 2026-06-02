@@ -23,8 +23,6 @@ pub enum FileError {
 	#[error("Could not find an image")]
 	NoImageError,
 	#[error("{0}")]
-	PdfError(#[from] pdf::error::PdfError),
-	#[error("{0}")]
 	PdfRendererError(#[from] pdfium_render::prelude::PdfiumError),
 	#[error("Stump is not properly configured to render PDFs")]
 	PdfConfigurationError,

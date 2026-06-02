@@ -347,19 +347,67 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 					// We need to _try_ to parse each part of the date, and if it fails, we just ignore it.
 					// This is a bit of a hack, but it's the best we can do without knowing the format.
 					let raw_date = value.into_iter().next().unwrap_or_default();
+					// PDF dates are non-standard.
+					// They can be in the format "D:YYYYMMDD" or "D:YYYYMMDDHHMMSSZ" or "D:YYYYMMDDHHMMSS+HH'MM'".
+					// Some of this may be useful down the line for other formats too, i think.
+					let clean_date = raw_date
+						.strip_prefix("D:")
+						.or_else(|| raw_date.strip_prefix("d:"))
+						.unwrap_or(&raw_date);
 
-					for format in &NAIVE_DATE_FORMATS {
-						if let Ok(date) = NaiveDate::parse_from_str(&raw_date, format) {
-							metadata.year = Some(date.year());
-							metadata.month = Some(date.month() as i32);
-							metadata.day = Some(date.day() as i32);
-							break;
+					let parsed_pdf_date = if clean_date.len() >= 8
+						&& clean_date.chars().take(8).all(|c| c.is_ascii_digit())
+					{
+						let y = clean_date[0..4].parse::<i32>().unwrap();
+						let m = clean_date[4..6].parse::<i32>().unwrap();
+						let d = clean_date[6..8].parse::<i32>().unwrap();
+						if m >= 1 && m <= 12 && d >= 1 && d <= 31 {
+							Some((y, m, d))
+						} else {
+							None
 						}
-					}
+					} else if clean_date.len() >= 6
+						&& clean_date.chars().take(6).all(|c| c.is_ascii_digit())
+					{
+						let y = clean_date[0..4].parse::<i32>().unwrap();
+						let m = clean_date[4..6].parse::<i32>().unwrap();
+						if m >= 1 && m <= 12 {
+							Some((y, m, 1))
+						} else {
+							None
+						}
+					} else if clean_date.len() >= 4
+						&& clean_date.chars().take(4).all(|c| c.is_ascii_digit())
+						&& clean_date
+							.chars()
+							.nth(4)
+							.map_or(true, |c| c.is_ascii_digit())
+					{
+						let y = clean_date[0..4].parse::<i32>().unwrap();
+						Some((y, 1, 1))
+					} else {
+						None
+					};
 
-					if metadata.year.is_none() {
-						if let Ok(year) = raw_date.parse() {
-							metadata.year = Some(year);
+					if let Some((y, m, d)) = parsed_pdf_date {
+						metadata.year = Some(y);
+						metadata.month = Some(m);
+						metadata.day = Some(d);
+					} else {
+						for format in &NAIVE_DATE_FORMATS {
+							if let Ok(date) = NaiveDate::parse_from_str(&raw_date, format)
+							{
+								metadata.year = Some(date.year());
+								metadata.month = Some(date.month() as i32);
+								metadata.day = Some(date.day() as i32);
+								break;
+							}
+						}
+
+						if metadata.year.is_none() {
+							if let Ok(year) = raw_date.parse() {
+								metadata.year = Some(year);
+							}
 						}
 					}
 				},
@@ -475,5 +523,26 @@ mod tests {
 		let metadata = ProcessedMediaMetadata::from(map);
 
 		assert_eq!(metadata.age_rating, Some(13));
+	}
+
+	#[test]
+	fn test_from_hashmap_pdf_dates() {
+		let test_cases = vec![
+			("D:20190101", Some(2019), Some(1), Some(1)),
+			("D:20190101123456Z", Some(2019), Some(1), Some(1)),
+			("20190101", Some(2019), Some(1), Some(1)),
+			("D:2019", Some(2019), Some(1), Some(1)),
+			("2019-08-31", Some(2019), Some(8), Some(31)),
+			("invalid", None, None, None),
+		];
+
+		for (raw_date, exp_year, exp_month, exp_day) in test_cases {
+			let mut map = HashMap::new();
+			map.insert("date".to_string(), vec![raw_date.to_string()]);
+			let metadata = ProcessedMediaMetadata::from(map);
+			assert_eq!(metadata.year, exp_year, "Failed for {}", raw_date);
+			assert_eq!(metadata.month, exp_month, "Failed for {}", raw_date);
+			assert_eq!(metadata.day, exp_day, "Failed for {}", raw_date);
+		}
 	}
 }

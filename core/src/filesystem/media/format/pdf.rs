@@ -183,11 +183,10 @@ impl PdfProcessor {
 			let key = match tag.tag_type() {
 				PdfDocumentMetadataTagType::Title => "title".to_string(),
 				PdfDocumentMetadataTagType::Author => "author".to_string(),
-				PdfDocumentMetadataTagType::Subject => "subject".to_string(),
+				PdfDocumentMetadataTagType::Subject => "summary".to_string(),
 				PdfDocumentMetadataTagType::Keywords => "tags".to_string(),
-				PdfDocumentMetadataTagType::Creator => "creator".to_string(),
-				PdfDocumentMetadataTagType::Producer => "producer".to_string(),
 				PdfDocumentMetadataTagType::CreationDate => "date".to_string(),
+				PdfDocumentMetadataTagType::ModificationDate => "date".to_string(),
 				_ => continue,
 			};
 			metadata_map.entry(key).or_default().push(value);

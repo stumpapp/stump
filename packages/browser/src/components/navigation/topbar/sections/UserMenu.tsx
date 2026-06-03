@@ -44,7 +44,6 @@ export default function UserMenu() {
 					src={user.avatarUrl || undefined}
 					fallback={user.username.slice(0, 2).toUpperCase()}
 					fallbackWrapperClassName="text-xs select-none"
-					rounded="lg"
 					className="h-6 w-6"
 				/>
 			</NavigationMenu.Trigger>

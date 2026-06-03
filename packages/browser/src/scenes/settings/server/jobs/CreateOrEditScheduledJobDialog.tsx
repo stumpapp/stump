@@ -255,7 +255,6 @@ export function CreateOrEditScheduledJobDialog({
 							label={t(getKey('fields.enabled'))}
 							checked={enabled}
 							onClick={() => form.setValue('enabled', !enabled)}
-							rounded="lg"
 						/>
 					</div>
 				</Form>

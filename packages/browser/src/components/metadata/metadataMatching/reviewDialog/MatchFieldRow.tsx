@@ -83,7 +83,6 @@ export function MatchFieldRow({ comparison }: Props) {
 							'data-[state=unchecked]:border-primary data-[state=unchecked]:bg-primary/10':
 								willChange && !disabled,
 						})}
-						rounded="lg"
 						checked={!excluded}
 						onClick={() => !locked && toggleField(comparison.field)}
 						disabled={locked}

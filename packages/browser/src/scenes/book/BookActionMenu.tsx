@@ -273,7 +273,6 @@ export default function BookActionMenu({ book }: Props) {
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
 						title="Download"
-						rounded="lg"
 					>
 						<Download className="mr-2 h-4 w-4" />
 						Download
@@ -284,7 +283,7 @@ export default function BookActionMenu({ book }: Props) {
 					align="end"
 					contentWrapperClassName="w-48"
 					trigger={
-						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0" rounded="lg">
+						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0">
 							<EllipsisVertical className="h-4 w-4" />
 						</Button>
 					}

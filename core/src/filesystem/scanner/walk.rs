@@ -352,14 +352,13 @@ pub async fn walk_series(
 						// reflect changes deeper in the tree, and so skipping would cause us
 						// to miss any changes at those levels.
 						let is_root = path_str == root_str;
-						if !is_root {
-							if dir_mtimes.get(&path_str) == Some(&current_mtime) {
-								tracing::trace!(
-									mtime = current_mtime,
-									"Skipping unchanged dir: {path_str}"
-								);
-								it.skip_current_dir();
-							}
+						if !is_root && dir_mtimes.get(&path_str) == Some(&current_mtime) {
+							tracing::trace!(
+								mtime = current_mtime,
+								path = path_str,
+								"Skipping unchanged dir"
+							);
+							it.skip_current_dir();
 						}
 						continue;
 					}

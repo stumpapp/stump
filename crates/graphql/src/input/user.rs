@@ -38,6 +38,7 @@ pub struct UpdateUserPreferencesInput {
 	pub locale: String,
 	pub preferred_layout_mode: InterfaceLayout,
 	pub interface_roundness: InterfaceRoundness,
+	pub thumbnail_roundness: InterfaceRoundness,
 	pub primary_navigation_mode: String,
 	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,

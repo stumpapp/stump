@@ -3401,6 +3401,7 @@ input UpdateUserPreferencesInput {
 	locale: String!
 	preferredLayoutMode: InterfaceLayout!
 	interfaceRoundness: InterfaceRoundness!
+	thumbnailRoundness: InterfaceRoundness!
 	primaryNavigationMode: String!
 	layoutMaxWidthPx: Int
 	appTheme: String!
@@ -3602,6 +3603,7 @@ type UserPreferences {
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
 	interfaceRoundness: InterfaceRoundness!
+	thumbnailRoundness: InterfaceRoundness!
 	enableReadingJournal: Boolean!
 	"""
 	hour offset from midnight at which a new "logical day" begins for reading sessions

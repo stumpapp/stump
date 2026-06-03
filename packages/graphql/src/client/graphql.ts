@@ -4619,6 +4619,7 @@ export type UpdateUserPreferencesInput = {
   showThumbnailsInHeaders: Scalars['Boolean']['input'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['input'];
+  thumbnailRoundness: InterfaceRoundness;
 };
 
 export type UploadBooksInput = {
@@ -4815,6 +4816,7 @@ export type UserPreferences = {
   showThumbnailsInHeaders: Scalars['Boolean']['output'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['output'];
+  thumbnailRoundness: InterfaceRoundness;
   userId?: Maybe<Scalars['String']['output']>;
 };
 

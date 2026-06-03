@@ -49,6 +49,8 @@ pub struct Model {
 	pub enable_alphabet_select: bool,
 	#[sea_orm(column_type = "Text")]
 	pub interface_roundness: InterfaceRoundness,
+	#[sea_orm(column_type = "Text")]
+	pub thumbnail_roundness: InterfaceRoundness,
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
 	#[serde(default = "Model::default_navigation_arrangement")]
@@ -123,6 +125,7 @@ impl ActiveModelBehavior for ActiveModel {
 			self.day_reset_hour_offset = ActiveValue::Set(0); // midnight
 			self.reading_session_grace_period_secs = ActiveValue::Set(1800); // 30 minutes
 			self.interface_roundness = ActiveValue::Set(InterfaceRoundness::default());
+			self.thumbnail_roundness = ActiveValue::Set(InterfaceRoundness::default());
 		}
 
 		Ok(self)

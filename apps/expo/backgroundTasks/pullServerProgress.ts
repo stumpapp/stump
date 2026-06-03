@@ -114,16 +114,18 @@ export const executeSingleServerPullSync = async (
 			continue
 		}
 
-		// No progress = skip (nothing to pull)
+		// no progress = skip (nothing to pull)
 		const progress = media.readProgress
 		if (!progress) continue
 
 		const serverUpdatedAt = progress.updatedAt ? new Date(progress.updatedAt) : new Date(0)
 
-		// local has unsynced writes = skip (push step will handle the conflict)
-		if (localProgress && localProgress.syncStatus !== syncStatus.enum.SYNCED) continue
+		if (localProgress && localProgress.syncStatus !== syncStatus.enum.SYNCED) {
+			// naive-ish last write wins
+			if (localUpdatedAt >= serverUpdatedAt) continue
+		}
 
-		// Local already ahead = skip (need to push)
+		// local already ahead or equal = skip (push handles it)
 		if (localUpdatedAt >= serverUpdatedAt) continue
 
 		try {

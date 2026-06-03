@@ -4409,18 +4409,10 @@ export type StumpConfig = {
    */
   maxImageUploadSize: Scalars['Int']['output'];
   /**
-   * The maximum number of concurrent files which may be processed by a scanner. This is used
-   * to limit/increase the number of files that are processed at once. This may be useful for those
-   * with high or low performance systems to configure to their needs.
+   * A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
+   * limit. Increasing can speed things up but will increase resource usage
    */
-  maxScannerConcurrency: Scalars['Int']['output'];
-  /**
-   * The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
-   * to limit/increase the number of images that are processed at once. Image generation can be
-   * resource intensive, so this may be useful for those with high or low performance systems to
-   * configure to their needs.
-   */
-  maxThumbnailConcurrency: Scalars['Int']['output'];
+  parallelismMultiplier: Scalars['Int']['output'];
   /** Password hash cost */
   passwordHashCost: Scalars['Int']['output'];
   /** Whether to enable disk caching for rendered PDF pages. */

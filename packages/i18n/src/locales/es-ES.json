@@ -453,6 +453,10 @@
 				"update": "Escanear tras actualizaciones"
 			},
 			"description": "Indexar los archivos de la biblioteca para llenar la base de datos"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

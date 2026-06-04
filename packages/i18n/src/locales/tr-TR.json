@@ -453,6 +453,10 @@
 				"update": "Güncellemeden sonra tara"
 			},
 			"description": "Veritabanınızı doldurmak için kütüphane dosyalarını tarayın"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

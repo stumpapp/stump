@@ -453,6 +453,10 @@
 				"update": "アップデート後にスキャン"
 			},
 			"description": "ライブラリファイルをインデックスしてデータベースに入力します"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

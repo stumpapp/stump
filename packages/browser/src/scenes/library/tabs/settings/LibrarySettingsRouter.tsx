@@ -1,5 +1,11 @@
 import { useGraphQLMutation } from '@stump/client'
-import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
+import {
+	CreateOrUpdateLibraryInput,
+	extractErrorMessage,
+	graphql,
+	useFragment,
+	UserPermission,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
@@ -41,6 +47,7 @@ export const LibrarySettingsConfig = graphql(`
 			processMetadata
 			watch
 			libraryPattern
+			libraryType
 			thumbnailConfig {
 				__typename
 				resizeMethod {
@@ -102,6 +109,11 @@ export default function LibrarySettingsRouter() {
 								// sdk.library.keys.getByID,
 							].includes(key),
 					),
+			})
+		},
+		onError: (error) => {
+			toast.error('Failed to update library', {
+				description: extractErrorMessage(error),
 			})
 		},
 	})

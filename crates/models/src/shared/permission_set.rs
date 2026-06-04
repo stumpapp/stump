@@ -22,18 +22,9 @@ impl PermissionSet {
 	/// Returns true iff the target permission would be effectively granted to a user
 	/// holding this set — directly granted, or reachable transitively via associations.
 	pub fn contains(&self, target: UserPermission) -> bool {
-		let mut seen: Vec<UserPermission> = Vec::new();
-		let mut queue: Vec<UserPermission> = self.0.clone();
-		while let Some(permission) = queue.pop() {
-			if permission == target {
-				return true;
-			}
-			if !seen.contains(&permission) {
-				seen.push(permission);
-				queue.extend(permission.associated());
-			}
-		}
-		false
+		PermissionSet::new(self.0.clone())
+			.resolve_into_vec()
+			.contains(&target)
 	}
 
 	/// Returns a new PermissionSet with the target permission added to the explicit

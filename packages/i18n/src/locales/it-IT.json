@@ -453,6 +453,10 @@
 				"update": "Scansiona dopo gli aggiornamenti"
 			},
 			"description": "Indicizza i file della libreria per popolare il database"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

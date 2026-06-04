@@ -453,6 +453,10 @@
 				"update": "Сканировать после обновления"
 			},
 			"description": "Индексация файлов библиотеки для заполнения базы данных"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

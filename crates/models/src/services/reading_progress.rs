@@ -46,9 +46,23 @@ pub async fn upsert_reading_session(
 		.await?;
 
 	match latest {
+		// TODO(reading-sessions): this presents an interesting ux smell imo. once you finish a session,
+		// the next progression tracking event (e.g., jumping back 10 pages before the end) will create
+		// a new session and increment the readthrough number. it will not let you finish that readthrough
+		// until you mark as complete or the deduplication window passes (e.g., 1 day by default). im thinking
+		// one of two things would be better:
+		// 1. increment the readthrough to continue tracking progress (the current fix in this branch)
+		// 2. mutate the finished session as incomplete if within the dedupe window to be active instead
+		// the first was easier which is why i did it, however second might be better. need to properly review
+		// how it would impact the tracking though so will come back when i have more time.
 		Some(ref session)
 			if input.did_complete
-				&& is_recent_completion(session, completion_dedup_timeout_secs) =>
+				&& should_enforce_completion_dedupe(
+					session,
+					completion_dedup_timeout_secs,
+					db,
+				)
+				.await? =>
 		{
 			Ok(latest.unwrap())
 		},
@@ -158,4 +172,27 @@ pub async fn get_book_pages(
 			sea_orm::DbErr::RecordNotFound(format!("Media with id {} not found", book_id))
 		})?;
 	Ok(pages)
+}
+
+// note this makes certain assumptions that feel incorrect but i only use it when
+// gated by input.is_complete so it's fine
+async fn should_enforce_completion_dedupe(
+	session: &reading_session::Model,
+	timeout_secs: i64,
+	conn: &impl ConnectionTrait,
+) -> Result<bool, sea_orm::DbErr> {
+	let latest_completed = reading_session::Entity::find()
+		.filter(
+			reading_session::Column::UserId
+				.eq(&session.user_id)
+				.and(reading_session::Column::MediaId.eq(&session.media_id)),
+		)
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+		.order_by_desc(reading_session::Column::UpdatedAt)
+		.one(conn)
+		.await?;
+
+	Ok(latest_completed
+		.filter(|s| is_recent_completion(s, timeout_secs))
+		.is_some())
 }

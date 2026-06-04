@@ -453,6 +453,10 @@
 				"update": "Scan after updates"
 			},
 			"description": "Index the library files to populate your database"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

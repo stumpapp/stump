@@ -55,6 +55,8 @@ pub async fn upsert_reading_session(
 		// 2. mutate the finished session as incomplete if within the dedupe window to be active instead
 		// the first was easier which is why i did it, however second might be better. need to properly review
 		// how it would impact the tracking though so will come back when i have more time.
+		// other suggestion from another:
+		// replace dedupe timout with grace period (simplifies in that now there is just one number to control session lifetimes)
 		Some(ref session)
 			if input.did_complete
 				&& should_enforce_completion_dedupe(

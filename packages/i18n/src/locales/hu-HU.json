@@ -453,6 +453,10 @@
 				"update": "Szkennelés a frissítések után"
 			},
 			"description": "Indexelje a könyvtárfájlokat az adatbázis feltöltéséhez"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

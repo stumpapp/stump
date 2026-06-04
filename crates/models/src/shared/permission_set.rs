@@ -19,6 +19,33 @@ impl PermissionSet {
 		PermissionSet(permissions)
 	}
 
+	/// Returns true iff the target permission would be effectively granted to a user
+	/// holding this set — directly granted, or reachable transitively via associations.
+	pub fn contains(&self, target: UserPermission) -> bool {
+		let mut seen: Vec<UserPermission> = Vec::new();
+		let mut queue: Vec<UserPermission> = self.0.clone();
+		while let Some(permission) = queue.pop() {
+			if permission == target {
+				return true;
+			}
+			if !seen.contains(&permission) {
+				seen.push(permission);
+				queue.extend(permission.associated());
+			}
+		}
+		false
+	}
+
+	/// Returns a new PermissionSet with the target permission stripped from the
+	/// explicit grants (no-op if absent). Does NOT strip transitive grants — if the
+	/// set holds an upstream permission whose associations include the target, the
+	/// target is still reachable via `contains` after this call. To revoke a
+	/// transitively-granted permission, remove the upstream grant instead.
+	pub fn without(mut self, target: UserPermission) -> PermissionSet {
+		self.0.retain(|p| *p != target);
+		self
+	}
+
 	/// Unwrap the underlying Vec<UserPermission> and include any associated permissions,
 	/// recursively, so that callers see the transitive closure of granted permissions.
 	pub fn resolve_into_vec(self) -> Vec<UserPermission> {
@@ -171,4 +198,32 @@ pub fn permissions_satisfy_all(
 	required
 		.iter()
 		.all(|target| permissions_satisfy(granted, *target))
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_contains_resolves_associated_permissions() {
+		// ManageUsers transitively grants CreateUser via associations.
+		let set = PermissionSet::new(vec![UserPermission::ManageUsers]);
+		assert!(set.contains(UserPermission::ManageUsers));
+		assert!(set.contains(UserPermission::CreateUser));
+		assert!(!set.contains(UserPermission::AccessKoboSync));
+	}
+
+	#[test]
+	fn test_without_strips_explicit_grant_only() {
+		let set = PermissionSet::new(vec![
+			UserPermission::ManageUsers,
+			UserPermission::AccessAPIKeys,
+		]);
+		let pruned = set.without(UserPermission::ManageUsers);
+		assert!(!pruned.contains(UserPermission::ManageUsers));
+		// CreateUser was reachable transitively via ManageUsers; with ManageUsers
+		// stripped, it's no longer reachable.
+		assert!(!pruned.contains(UserPermission::CreateUser));
+		assert!(pruned.contains(UserPermission::AccessAPIKeys));
+	}
 }

@@ -36,6 +36,16 @@ impl PermissionSet {
 		false
 	}
 
+	/// Returns a new PermissionSet with the target permission added to the explicit
+	/// grants (no-op if it's already an explicit grant; a transitively-reachable
+	/// permission is still added as an explicit grant when requested).
+	pub fn with(mut self, target: UserPermission) -> PermissionSet {
+		if !self.0.contains(&target) {
+			self.0.push(target);
+		}
+		self
+	}
+
 	/// Returns a new PermissionSet with the target permission stripped from the
 	/// explicit grants (no-op if absent). Does NOT strip transitive grants — if the
 	/// set holds an upstream permission whose associations include the target, the
@@ -211,6 +221,18 @@ mod tests {
 		assert!(set.contains(UserPermission::ManageUsers));
 		assert!(set.contains(UserPermission::CreateUser));
 		assert!(!set.contains(UserPermission::AccessKoboSync));
+	}
+
+	#[test]
+	fn test_with_adds_and_is_idempotent_on_explicit_grant() {
+		let set = PermissionSet::new(vec![UserPermission::AccessAPIKeys]);
+		let extended = set.with(UserPermission::ManageServer);
+		assert!(extended.contains(UserPermission::ManageServer));
+		assert!(extended.contains(UserPermission::AccessAPIKeys));
+
+		// Idempotent: adding an already-present explicit grant does not duplicate it.
+		let extended_again = extended.with(UserPermission::ManageServer);
+		assert!(extended_again.contains(UserPermission::ManageServer));
 	}
 
 	#[test]

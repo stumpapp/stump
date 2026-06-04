@@ -47,8 +47,8 @@ pub enum Account {
 		#[clap(long)]
 		username: String,
 	},
-	/// Enter a flow to change the server owner to another account
-	ResetOwner,
+	/// Grant the ManageServer (admin) permission to an account
+	GrantAdmin,
 	/// Migrate a local user account to an OIDC account
 	MigrateOidc {
 		/// The username of the local account to migrate
@@ -75,7 +75,7 @@ pub async fn handle_account_command(
 		Account::ResetPassword { username } => {
 			reset_account_password(username, config.password_hash_cost, config).await
 		},
-		Account::ResetOwner => change_server_owner(config).await,
+		Account::GrantAdmin => grant_admin(config).await,
 		Account::MigrateOidc {
 			username,
 			oidc_email,
@@ -209,35 +209,48 @@ async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult
 	Ok(())
 }
 
-// TODO(permissions): rm this?
-async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
+async fn grant_admin(config: &StumpConfig) -> CliResult<()> {
 	let conn = connect(config).await?;
 
-	let all_accounts = models::entity::user::Entity::find()
+	let unlocked_accounts = user::Entity::find()
 		.filter(user::Column::IsLocked.eq(false))
 		.all(&conn)
 		.await?;
 
-	let current_server_owner = all_accounts
-		.iter()
-		.find(|user| user.is_server_owner)
-		.cloned();
-
 	let username = Input::new()
-		.with_prompt("Enter the username of the account to assign as server owner")
+		.with_prompt("Enter the username of the account to grant ManageServer to")
 		.allow_empty(false)
 		.validate_with(|input: &String| -> Result<(), &str> {
-			let existing_user = all_accounts.iter().find(|user| user.username == *input);
-			if existing_user.is_some() {
+			if unlocked_accounts.iter().any(|user| user.username == *input) {
 				Ok(())
 			} else {
-				Err("An account with that username does not exist or their account is locked")
+				Err("No unlocked account exists with that username")
 			}
 		})
 		.interact_text()?;
 
+	let target_user = unlocked_accounts
+		.into_iter()
+		.find(|user| user.username == username)
+		.ok_or(CliError::OperationFailed(
+			"Failed to reconcile users after validation".to_string(),
+		))?;
+
+	let existing_permissions =
+		PermissionSet::from(target_user.permissions.clone().unwrap_or_default());
+	if existing_permissions.contains(UserPermission::ManageServer) {
+		println!(
+			"'{}' already holds ManageServer (directly or transitively). Nothing to do.",
+			target_user.username
+		);
+		return Ok(());
+	}
+
 	let confirmation = Confirm::new()
-		.with_prompt("Are you sure you want to continue?")
+		.with_prompt(format!(
+			"Grant ManageServer (admin) to '{}'?",
+			target_user.username
+		))
 		.interact()?;
 
 	if !confirmation {
@@ -245,35 +258,17 @@ async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
 		return Ok(());
 	}
 
-	let target_user = all_accounts
-		.into_iter()
-		.find(|user| user.username == username)
-		.ok_or(CliError::OperationFailed(
-			"Failed to reconcile users after validation".to_string(),
-		))?;
-
 	let progress = default_progress_spinner();
-	if let Some(user) = current_server_owner {
-		progress.set_message(format!("Removing owner status from {}", user.username));
-		let mut active_model = user.into_active_model();
-		active_model.is_server_owner = Set(false);
-		let updated_user = active_model.update(&conn).await?;
+	progress.set_message(format!("Granting ManageServer to {}", target_user.username));
 
-		session::Entity::delete_many()
-			.filter(session::Column::UserId.eq(updated_user.id))
-			.exec(&conn)
-			.await?;
-	}
-
-	progress.set_message(format!("Setting owner status for {}", target_user.username));
+	let updated_permissions = existing_permissions
+		.with(UserPermission::ManageServer)
+		.resolve_into_string();
 	let mut active_model = target_user.into_active_model();
-	active_model.is_server_owner = Set(true);
-	let _updated_user = active_model.update(&conn).await?;
-	session::Entity::delete_many()
-		.filter(session::Column::UserId.eq(_updated_user.id))
-		.exec(&conn)
-		.await?;
-	progress.finish_with_message("Successfully changed the server owner!");
+	active_model.permissions = Set(updated_permissions);
+	active_model.update(&conn).await?;
+
+	progress.finish_with_message("Granted ManageServer successfully!");
 
 	Ok(())
 }

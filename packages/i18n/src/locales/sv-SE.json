@@ -453,6 +453,10 @@
 				"update": "Skanna efter uppdatering"
 			},
 			"description": "Indexera bibliotekets filer för att fylla i databasen"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {

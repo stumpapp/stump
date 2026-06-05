@@ -5,9 +5,7 @@ use sea_orm::{
 };
 
 use crate::{
-	domain::reading_progress::{
-		calculate_logical_date, is_recent_completion, should_extend_session,
-	},
+	domain::reading_progress::{calculate_logical_date, should_extend_session},
 	entity::{media, reading_session, user::AuthUser},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
@@ -163,27 +161,4 @@ pub async fn get_book_pages(
 			sea_orm::DbErr::RecordNotFound(format!("Media with id {} not found", book_id))
 		})?;
 	Ok(pages)
-}
-
-// note this makes certain assumptions that feel incorrect but i only use it when
-// gated by input.is_complete so it's fine
-async fn should_enforce_completion_dedupe(
-	session: &reading_session::Model,
-	timeout_secs: i64,
-	conn: &impl ConnectionTrait,
-) -> Result<bool, sea_orm::DbErr> {
-	let latest_completed = reading_session::Entity::find()
-		.filter(
-			reading_session::Column::UserId
-				.eq(&session.user_id)
-				.and(reading_session::Column::MediaId.eq(&session.media_id)),
-		)
-		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
-		.order_by_desc(reading_session::Column::UpdatedAt)
-		.one(conn)
-		.await?;
-
-	Ok(latest_completed
-		.filter(|s| is_recent_completion(s, timeout_secs))
-		.is_some())
 }

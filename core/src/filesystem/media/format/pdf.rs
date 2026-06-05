@@ -2,7 +2,7 @@ use std::{
 	collections::HashMap,
 	io::Cursor,
 	path::{Path, PathBuf},
-	sync::{Mutex, OnceLock},
+	sync::{Mutex, MutexGuard, OnceLock},
 };
 
 use models::shared::image_processor_options::SupportedImageFormat;
@@ -76,7 +76,7 @@ impl FileProcessor for PdfProcessor {
 	}
 
 	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
-		let _lock = PDFIUM_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+		let _lock = Self::acquire_pdfium_lock()?;
 		Self::process_metadata_internal(path, &None)
 	}
 
@@ -85,7 +85,7 @@ impl FileProcessor for PdfProcessor {
 		options: FileProcessorOptions,
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		let _lock = PDFIUM_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = Self::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let pages = document.pages().len();
@@ -122,7 +122,7 @@ impl FileProcessor for PdfProcessor {
 	}
 
 	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
-		let _lock = PDFIUM_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 
@@ -147,7 +147,7 @@ impl FileProcessor for PdfProcessor {
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<AnalyzedPage, FileError> {
-		let _lock = PDFIUM_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 
@@ -174,6 +174,12 @@ impl FileProcessor for PdfProcessor {
 }
 
 impl PdfProcessor {
+	fn acquire_pdfium_lock() -> Result<MutexGuard<'static, ()>, FileError> {
+		PDFIUM_LOCK.lock().map_err(|e| {
+			FileError::PdfProcessingError(format!("Failed to acquire PDFium lock: {}", e))
+		})
+	}
+
 	/// Process the metadata of a PDF file using the specified config/env pdfium path.
 	pub fn process_metadata_internal(
 		path: &str,
@@ -296,7 +302,7 @@ impl PdfProcessor {
 		config: &StumpConfig,
 		force_high_quality: bool,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		let _lock = PDFIUM_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let total_pages = document.pages().len() as usize;
@@ -681,7 +687,7 @@ impl FileConverter for PdfProcessor {
 		format: Option<SupportedImageFormat>,
 		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
-		let _lock = PDFIUM_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 

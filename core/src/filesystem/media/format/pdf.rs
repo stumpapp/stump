@@ -711,8 +711,11 @@ impl FileConverter for PdfProcessor {
 
 					// Clamp to max dimension if configured
 					let max_dim = config.pdf_max_dimension as f32;
-					if max_dim > 0.0 && (target_width > max_dim || target_height > max_dim) {
-						let fit_scale = (max_dim / target_width).min(max_dim / target_height);
+					if max_dim > 0.0
+						&& (target_width > max_dim || target_height > max_dim)
+					{
+						let fit_scale =
+							(max_dim / target_width).min(max_dim / target_height);
 						target_width *= fit_scale;
 						target_height *= fit_scale;
 					}
@@ -746,7 +749,7 @@ impl FileConverter for PdfProcessor {
 					Err(e) => {
 						tracing::error!(error = ?e, "Failed to render PDF page {}", idx + 1);
 						None
-					}
+					},
 				}
 			})
 			.collect::<Vec<(usize, Vec<u8>)>>();
@@ -946,7 +949,9 @@ mod tests {
 
 		let mut success = false;
 		for _ in 0..100 {
-			if cache_file.exists() && cache_file.metadata().map(|m| m.len() > 0).unwrap_or(false) {
+			if cache_file.exists()
+				&& cache_file.metadata().map(|m| m.len() > 0).unwrap_or(false)
+			{
 				success = true;
 				break;
 			}

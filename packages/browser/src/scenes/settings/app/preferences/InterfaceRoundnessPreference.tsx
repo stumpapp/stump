@@ -1,11 +1,10 @@
-import { cn, NewCard } from '@stump/components'
+import { NewCard } from '@stump/components'
 import { InterfaceRoundness } from '@stump/graphql'
 
 import { usePreferences } from '@/hooks'
 
 import RadioTileGroup from './RadioTileGroup'
 
-// TODO: honestly it might be good to split interface/cover roundness
 // TODO(i18n): add key/values
 export default function InterfaceRoundnessPreference() {
 	const {
@@ -59,19 +58,21 @@ export default function InterfaceRoundnessPreference() {
 	)
 }
 
+const ROUNDNESS_PREVIEW_RADIUS: Record<InterfaceRoundness, number> = {
+	[InterfaceRoundness.None]: 0,
+	[InterfaceRoundness.Normal]: 10,
+	[InterfaceRoundness.Rounded]: 14,
+	[InterfaceRoundness.Pill]: 18,
+}
+
 function RoundnessPreview({ value }: { value?: InterfaceRoundness | null }) {
 	const current = value || InterfaceRoundness.Normal
 
 	return (
 		<div className="flex h-full w-full items-center justify-center">
 			<div
-				className={cn(
-					'h-7 shadow-sm w-4/5 border border-foreground/45 bg-foreground/90',
-					{ 'rounded-md': current === InterfaceRoundness.Normal },
-					{ 'rounded-lg': current === InterfaceRoundness.Rounded },
-					{ 'rounded-4xl': current === InterfaceRoundness.Pill },
-					{ 'rounded-none': current === InterfaceRoundness.None },
-				)}
+				className="h-7 shadow-sm w-4/5 border border-foreground/45 bg-foreground/90"
+				style={{ borderRadius: ROUNDNESS_PREVIEW_RADIUS[current] }}
 			/>
 		</div>
 	)

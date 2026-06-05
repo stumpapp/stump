@@ -83,7 +83,6 @@
 
 	/* for buttons, inputs, etc */
 	--radius-interactive: var(--radius);
-	--radius-thumbnail: 4%;
 
 	/* TODO: i should FINALLY implement the display spacing setting!? it
 		was added 2 years ago lmfao
@@ -214,6 +213,10 @@
 @custom-variant autofill (&:autofill, &:-webkit-autofill);
 
 @layer base {
+	html {
+		--radius-thumbnail: 0.5rem;
+	}
+
 	html.thumbnail-radius-none {
 		--radius-thumbnail: 0rem;
 	}

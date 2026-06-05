@@ -22,8 +22,7 @@ import QueryIndicatorToggle from './QueryIndicatorToggle'
 import { DoubleSidebarToggle, ReplacePrimarySidebarToggle } from './settings-sidebar'
 import ShowThumbnailsInHeader from './ShowThumbnailsInHeader'
 import ThemeSelect from './ThemeSelect'
-import ThumbnailPlaceholder from './ThumbnailPlaceholder'
-import ThumbnailRatioSelect from './ThumbnailRatioSelect'
+import ThumbnailAppearancePreference from './ThumbnailAppearancePreference'
 
 // TODO: The more I look at this the less I kinda like it
 
@@ -63,8 +62,7 @@ export default function AppearanceSettingsScene() {
 						label={t(getKey('thumbnails.title'))}
 						description={t(getKey('thumbnails.description'))}
 					>
-						<ThumbnailRatioSelect />
-						<ThumbnailPlaceholder />
+						<ThumbnailAppearancePreference />
 					</NewCard>
 				</div>
 

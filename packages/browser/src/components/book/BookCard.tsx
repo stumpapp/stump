@@ -197,7 +197,7 @@ const BookCard = memo(function BookCard({
 		>
 			<div
 				className={cn(
-					'-inset-0.5 absolute -z-10 rounded-lg',
+					'-inset-0.5 absolute -z-10 rounded-thumbnail',
 					'scale-95 opacity-0 duration-100',
 					'group-hover:scale-100 group-hover:opacity-100',
 					'group-focus-visible:scale-100 group-focus-visible:opacity-100',
@@ -213,7 +213,6 @@ const BookCard = memo(function BookCard({
 					placeholderData={placeholderData}
 					lazy
 					borderAndShadowStyle={{
-						borderRadius: 8,
 						shadowColor: 'rgba(0, 0, 0, 0.15)',
 						shadowRadius: 2,
 					}}

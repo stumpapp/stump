@@ -1,6 +1,6 @@
 import { getThumbnailTintColor } from '@stump/client'
 import { cn } from '@stump/components'
-import { ImageRef } from '@stump/graphql'
+import { ImageRef, InterfaceRoundness } from '@stump/graphql'
 import { useMemo } from 'react'
 
 import { useFancyAnimations } from '@/hooks/useFancyAnimations'
@@ -55,7 +55,7 @@ type Props = {
 export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, className }: Props) {
 	const { isDarkVariant, getColor: getThemeColor } = useTheme()
 	const {
-		preferences: { thumbnailRatio },
+		preferences: { thumbnailRatio, thumbnailRoundness },
 	} = usePreferences()
 	const { shouldFancyHover } = useFancyAnimations()
 
@@ -158,7 +158,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 	// We need to only hide the parts of the thumbnails that go under the bottom of the card
 	// but we also account for the bottom left and right rounded corners of the card
 	// If we didn't need to account for the rounded corners, we could just use style={{ clipPath: 'inset(-10% -10% 1px -10%)' }}
-	const outerRadius = 12
+	const outerRadius = THUMBNAIL_ROUNDNESS_TO_PX[thumbnailRoundness ?? InterfaceRoundness.Normal]
 	const borderWidth = 1
 	const buffer = 20
 
@@ -174,14 +174,14 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 	 * Note: Arc notation 0 0 1 means no ellipse rotation, short arc, clockwise
 	 */
 	const clipPath = `
-		M -${buffer} -${buffer} 
-		L ${cardWidth + buffer} -${buffer} 
-		L ${cardWidth + buffer} ${cardHeight - outerRadius} 
-		L ${cardWidth - borderWidth} ${cardHeight - outerRadius} 
-		A ${innerRadius} ${innerRadius} 0 0 1 ${cardWidth - outerRadius} ${cardHeight - borderWidth} 
-		L ${outerRadius} ${cardHeight - borderWidth} 
-		A ${innerRadius} ${innerRadius} 0 0 1 ${borderWidth} ${cardHeight - outerRadius} 
-		L -${buffer} ${cardHeight - outerRadius} 
+		M -${buffer} -${buffer}
+		L ${cardWidth + buffer} -${buffer}
+		L ${cardWidth + buffer} ${cardHeight - outerRadius}
+		L ${cardWidth - borderWidth} ${cardHeight - outerRadius}
+		A ${innerRadius} ${innerRadius} 0 0 1 ${cardWidth - outerRadius} ${cardHeight - borderWidth}
+		L ${outerRadius} ${cardHeight - borderWidth}
+		A ${innerRadius} ${innerRadius} 0 0 1 ${borderWidth} ${cardHeight - outerRadius}
+		L -${buffer} ${cardHeight - outerRadius}
 		Z
 	`
 	const clipPathString = clipPath.replace(/\s+/g, ' ').trim()
@@ -199,8 +199,9 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 			}}
 		>
 			<div
-				className="inset-0 absolute overflow-hidden rounded-xl border border-border/50"
+				className="inset-0 absolute overflow-hidden border border-border/50"
 				style={{
+					borderRadius: outerRadius,
 					backgroundColor,
 					boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
 					contain: 'layout style paint',
@@ -214,4 +215,11 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 			</div>
 		</div>
 	)
+}
+
+const THUMBNAIL_ROUNDNESS_TO_PX: Record<InterfaceRoundness, number> = {
+	[InterfaceRoundness.None]: 0,
+	[InterfaceRoundness.Normal]: 8,
+	[InterfaceRoundness.Rounded]: 12,
+	[InterfaceRoundness.Pill]: 16,
 }

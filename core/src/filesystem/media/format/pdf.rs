@@ -699,47 +699,57 @@ impl FileConverter for PdfProcessor {
 			.pages()
 			.iter()
 			.enumerate()
-			.map(|(idx, page)| {
-				let page_width = page.width().value;
-				let page_height = page.height().value;
+			.filter_map(|(idx, page)| {
+				let render_page = || -> Result<Vec<u8>, FileError> {
+					let page_width = page.width().value;
+					let page_height = page.height().value;
 
-				// Calculate target resolution based on configured DPI (PDF base is 72 DPI)
-				let dpi_scale = config.pdf_render_dpi as f32 / 72.0;
-				let mut target_width = page_width * dpi_scale;
-				let mut target_height = page_height * dpi_scale;
+					// Calculate target resolution based on configured DPI (PDF base is 72 DPI)
+					let dpi_scale = config.pdf_render_dpi as f32 / 72.0;
+					let mut target_width = page_width * dpi_scale;
+					let mut target_height = page_height * dpi_scale;
 
-				// Clamp to max dimension if configured
-				let max_dim = config.pdf_max_dimension as f32;
-				if max_dim > 0.0 && (target_width > max_dim || target_height > max_dim) {
-					let fit_scale = (max_dim / target_width).min(max_dim / target_height);
-					target_width *= fit_scale;
-					target_height *= fit_scale;
+					// Clamp to max dimension if configured
+					let max_dim = config.pdf_max_dimension as f32;
+					if max_dim > 0.0 && (target_width > max_dim || target_height > max_dim) {
+						let fit_scale = (max_dim / target_width).min(max_dim / target_height);
+						target_width *= fit_scale;
+						target_height *= fit_scale;
+					}
+
+					let render_config = PdfRenderConfig::new()
+						.set_target_width(target_width.max(1.0) as i32)
+						.set_maximum_height(target_height.max(1.0) as i32)
+						.use_print_quality(true)
+						.set_image_smoothing(true)
+						.set_text_smoothing(true)
+						.set_path_smoothing(true)
+						.set_clear_color(PdfColor::new(255, 255, 255, 255))
+						.clear_before_rendering(true);
+
+					let bitmap = page.render_with_config(&render_config)?;
+					let dyn_image = bitmap.as_image()?;
+
+					let image = dyn_image.as_rgba8().ok_or_else(|| {
+						FileError::PdfProcessingError(format!(
+							"Failed to render page {} as RGBA8",
+							idx + 1
+						))
+					})?;
+					let mut buffer = Cursor::new(vec![]);
+					image.write_to(&mut buffer, output_format)?;
+					Ok(buffer.into_inner())
+				};
+
+				match render_page() {
+					Ok(buf) => Some((idx, buf)),
+					Err(e) => {
+						tracing::error!(error = ?e, "Failed to render PDF page {}", idx + 1);
+						None
+					}
 				}
-
-				let render_config = PdfRenderConfig::new()
-					.set_target_width(target_width.max(1.0) as i32)
-					.set_maximum_height(target_height.max(1.0) as i32)
-					.use_print_quality(true)
-					.set_image_smoothing(true)
-					.set_text_smoothing(true)
-					.set_path_smoothing(true)
-					.set_clear_color(PdfColor::new(255, 255, 255, 255))
-					.clear_before_rendering(true);
-
-				let bitmap = page.render_with_config(&render_config)?;
-				let dyn_image = bitmap.as_image()?;
-
-				let image = dyn_image.as_rgba8().ok_or_else(|| {
-					FileError::PdfProcessingError(format!(
-						"Failed to render page {} as RGBA8",
-						idx + 1
-					))
-				})?;
-				let mut buffer = Cursor::new(vec![]);
-				image.write_to(&mut buffer, output_format)?;
-				Ok((idx, buffer.into_inner()))
 			})
-			.collect::<Result<Vec<(usize, Vec<u8>)>, FileError>>()?;
+			.collect::<Vec<(usize, Vec<u8>)>>();
 
 		let path_buf = PathBuf::from(path);
 		let parent = path_buf.parent().unwrap_or_else(|| Path::new("/"));
@@ -764,7 +774,10 @@ impl FileConverter for PdfProcessor {
 				idx + 1,
 				output_extension
 			));
-			std::fs::write(image_path, image_buf)?;
+			// NOTE: This isn't bubbling up because we don't want to kill the whole conversion process
+			if let Err(err) = std::fs::write(&image_path, image_buf) {
+				tracing::error!(error = ?err, ?image_path, "Failed to write PDF page image to file");
+			}
 		}
 
 		let zip_path =

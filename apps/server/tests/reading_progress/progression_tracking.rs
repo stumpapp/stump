@@ -305,10 +305,10 @@ async fn test_new_readthrough_after_finished_session() {
 	assert_eq!(new_session.readthrough_number, 2); // should have incremented
 }
 
-/// if a session completes within the dedupe window, after a previous completion, it should be
-/// deduped
+/// if a progression event occurs after completion within grace, the same session should reopen
+/// instead of creating a new readthrough
 #[tokio::test]
-async fn test_completion_dedupe_suppresses_immediate_second_readthrough_finish() {
+async fn test_reopen_recent_finished_session_within_grace() {
 	let (app, book) = setup().await;
 
 	let conn = app.conn();
@@ -337,12 +337,12 @@ async fn test_completion_dedupe_suppresses_immediate_second_readthrough_finish()
 	)
 	.await;
 
-	// start second readthrough right away
+	// regress progress
 	update_progress(
 		&app,
 		&book.id,
 		MediaProgressInput::Paged(PagedProgressInput {
-			page: 1,
+			page: 99,
 			elapsed_seconds_delta: Some(120),
 			..Default::default()
 		}),
@@ -356,10 +356,17 @@ async fn test_completion_dedupe_suppresses_immediate_second_readthrough_finish()
 		.await
 		.expect("could not query reading sessions")
 		.expect("no session found");
-	assert_eq!(latest_before_finish.readthrough_number, 2);
+	assert_eq!(latest_before_finish.readthrough_number, 1);
 	assert_eq!(latest_before_finish.status, ReadingStatus::Reading);
 
-	// complete second readthrough
+	let sessions_after_reopen = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
+		.all(conn)
+		.await
+		.expect("could not query reading sessions");
+	assert_eq!(sessions_after_reopen.len(), 1);
+
+	// finish again
 	update_progress(
 		&app,
 		&book.id,
@@ -377,11 +384,11 @@ async fn test_completion_dedupe_suppresses_immediate_second_readthrough_finish()
 		.all(conn)
 		.await
 		.expect("could not query reading sessions");
-	assert_eq!(all_sessions.len(), 2);
+	assert_eq!(all_sessions.len(), 1);
 
 	let latest_after_finish = all_sessions.last().expect("no session found");
-	assert_eq!(latest_after_finish.readthrough_number, 2);
-	assert_eq!(latest_after_finish.status, ReadingStatus::Reading);
+	assert_eq!(latest_after_finish.readthrough_number, 1);
+	assert_eq!(latest_after_finish.status, ReadingStatus::Finished);
 
 	let finished_count = all_sessions
 		.iter()

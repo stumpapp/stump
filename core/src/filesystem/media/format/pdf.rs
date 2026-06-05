@@ -804,6 +804,10 @@ mod tests {
 
 	#[test]
 	fn test_process() {
+		if PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
 		let path = get_test_pdf_path();
 		let config = StumpConfig::debug();
 
@@ -830,6 +834,10 @@ mod tests {
 
 	#[test]
 	fn test_process_metadata() {
+		if PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
 		let path = get_test_pdf_path();
 		let metadata = PdfProcessor::process_metadata(&path);
 		assert!(metadata.is_ok());
@@ -867,6 +875,10 @@ mod tests {
 
 	#[test]
 	fn test_analyze_page() {
+		if PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
 		let path = get_test_pdf_path();
 		let config = StumpConfig::debug();
 		let page = PdfProcessor::analyze_page(&path, 1, &config);
@@ -878,6 +890,10 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_get_page_async() {
+		if PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
 		let path = get_test_pdf_path();
 		let config = StumpConfig::debug();
 
@@ -904,6 +920,10 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_prerender_adjacent_pages() {
+		if PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
 		let path = get_test_pdf_path();
 		let mut config = StumpConfig::debug();
 		config.pdf_cache_pages = true;
@@ -915,10 +935,7 @@ mod tests {
 		let result = PdfProcessor::get_page_async(&path, 1, &config).await;
 		assert!(result.is_ok());
 
-		// Wait for the background task to complete pre-rendering and caching page 2
-		tokio::time::sleep(std::time::Duration::from_millis(600)).await;
-
-		// Now check if page 2 was successfully cached
+		// Now check if page 2 was successfully cached (poll to prevent timing flakiness under load)
 		let cache_key = PdfProcessor::generate_cache_key(&path, 2, &config).unwrap();
 		let output_format = config.get_pdf_render_format();
 		let cache_file = config.get_pdf_cache_dir().join(format!(
@@ -926,7 +943,32 @@ mod tests {
 			cache_key,
 			output_format.extension()
 		));
-		assert!(cache_file.exists());
-		assert!(cache_file.metadata().unwrap().len() > 0);
+
+		let mut success = false;
+		for _ in 0..100 {
+			if cache_file.exists() && cache_file.metadata().map(|m| m.len() > 0).unwrap_or(false) {
+				success = true;
+				break;
+			}
+			tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+		}
+		assert!(success);
+	}
+
+	#[test]
+	fn test_to_zip() {
+		if PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
+		let path = get_test_pdf_path();
+		let config = StumpConfig::debug();
+		let result = PdfProcessor::to_zip(&path, false, None, &config);
+		assert!(result.is_ok());
+		let zip_path = result.unwrap();
+		assert!(zip_path.exists());
+		if zip_path.exists() {
+			let _ = std::fs::remove_file(zip_path);
+		}
 	}
 }

@@ -455,8 +455,8 @@
 			"description": "Indicizza i file della libreria per popolare il database"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "Impossibile aggiornare la libreria",
+			"failedToScan": "Impossibile scansionare la collezione"
 		}
 	},
 	"createLibraryScene": {
@@ -2860,7 +2860,7 @@
 			"version": "Versione"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Errore sconosciuto"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2957,11 +2957,11 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"skippedOneServer": "Sincronizzazione ignorata per {{skippedCount}} server",
+				"skippedMultipleServers": "Sincronizzazione ignorata per {{skippedCount}} server",
+				"explanation": "Alcuni server utilizzano metodi di autenticazione che non possono essere aggiornati automaticamente"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "Impossibile sincronizzare i progressi offline"
 		},
 		"settings": {
 			"preferences": {

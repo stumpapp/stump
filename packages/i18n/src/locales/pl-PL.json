@@ -2859,6 +2859,9 @@
 			"value": "Wartość",
 			"version": "Wersja"
 		},
+		"errors": {
+			"unknown": "Unknown error"
+		},
 		"formatSeriesPosition": {
 			"none": {
 				"positionWithTotal": "{{position}} z {{total}} w {{seriesName}}",
@@ -2951,6 +2954,14 @@
 				"retryAll": "Ponów wszystkie",
 				"dismissAll": "Odrzucić wszystkie"
 			}
+		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
+				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+			},
+			"syncFailed": "Failed to sync offline progress"
 		},
 		"settings": {
 			"preferences": {

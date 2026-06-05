@@ -455,8 +455,8 @@
 			"description": "Indeksuj pliki biblioteki, aby wypełnić bazę danych"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "Aktualizacja biblioteki nie powiodła się",
+			"failedToScan": "Skanowanie biblioteki nie powiodło się"
 		}
 	},
 	"createLibraryScene": {
@@ -2860,7 +2860,7 @@
 			"version": "Wersja"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Nieznany błąd"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2957,11 +2957,11 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"skippedOneServer": "Synchronizacja pominięta dla serwera {{skippedCount}}",
+				"skippedMultipleServers": "Synchronizacja pominięta dla serwerów {{skippedCount}}",
+				"explanation": "Niektóre serwery używają metod uwierzytelniania, których nie można automatycznie odświeżyć"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "Synchronizacja postępu offline nie powiodła się"
 		},
 		"settings": {
 			"preferences": {

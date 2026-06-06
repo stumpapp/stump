@@ -3255,8 +3255,6 @@ type StumpConfig {
 	pdfPrerenderRange: Int!
 	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
 	pdfHighQuality: Boolean!
-	"The number of seconds after which a book can be re-completed"
-	bookCompletionDedupTimeoutSecs: Int!
 	"Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)"
 	trustProxyHeaders: Boolean!
 }

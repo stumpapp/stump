@@ -138,6 +138,18 @@ mod tests {
 	}
 
 	#[test]
+	fn test_is_within_grace_period_recent_update() {
+		let session = make_session(false, Some(10)); // within grace
+		assert!(is_within_grace_period(&session, 60));
+	}
+
+	#[test]
+	fn test_is_within_grace_period_expired_update() {
+		let session = make_session(false, Some(700)); // past grace
+		assert!(!is_within_grace_period(&session, 60));
+	}
+
+	#[test]
 	fn test_should_extend_not_completed_within_grace() {
 		let session = make_session(false, Some(300)); // 5 min ago
 		assert!(should_extend_session(&session, 600));
@@ -152,6 +164,12 @@ mod tests {
 	#[test]
 	fn test_should_extend_completed_session() {
 		let session = make_session(true, Some(10)); // recently updated but complete
+		assert!(should_extend_session(&session, 600));
+	}
+
+	#[test]
+	fn test_should_not_extend_completed_session_after_grace() {
+		let session = make_session(true, Some(700)); // updated a while ago and complete
 		assert!(!should_extend_session(&session, 600));
 	}
 

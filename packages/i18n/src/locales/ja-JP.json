@@ -455,8 +455,8 @@
 			"description": "ライブラリファイルをインデックスしてデータベースに入力します"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "ライブラリの更新に失敗しました",
+			"failedToScan": "ライブラリのスキャンに失敗しました"
 		}
 	},
 	"createLibraryScene": {
@@ -557,9 +557,9 @@
 				"label": "オプション"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
+				"label": "インテグレーション",
+				"analysis": "分析",
+				"metadata": "メタデータ"
 			},
 			"danger-zone": {
 				"access-control": "アクセス管理",
@@ -682,12 +682,12 @@
 			}
 		},
 		"integrations/metadata": {
-			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
+			"title": "メタデータ",
+			"description": "このライブラリのメタデータマッチを管理・レビューする",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "メタデータを取得",
+					"description": "このライブラリ内のメディアのメタデータを取得します",
 					"noProviders": {
 						"title": "There are no metadata providers available",
 						"description": "You can configure metadata providers in the metadata integration settings"

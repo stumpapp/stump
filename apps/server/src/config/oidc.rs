@@ -40,7 +40,7 @@ pub type StumpOidcClient = Client<
 pub async fn create_oidc_client(
 	config: &OidcConfig,
 	frontend_url: &str,
-) -> Result<(reqwest::Client, StumpOidcClient), APIError> {
+) -> Result<(oauth2_reqwest::ReqwestClient, StumpOidcClient), APIError> {
 	if !config.is_configured() {
 		return Err(APIError::OIDCConfigurationInvalid);
 	}
@@ -50,16 +50,18 @@ pub async fn create_oidc_client(
 		APIError::OIDCConfigurationInvalid
 	})?;
 
-	let http_client = reqwest::ClientBuilder::new()
-		.redirect(reqwest::redirect::Policy::none())
-		.build()
-		.map_err(|error| {
-			tracing::error!(?error, "Failed to create HTTP client for OIDC");
-			APIError::InternalServerError(format!(
-				"Failed to create HTTP client: {}",
-				error
-			))
-		})?;
+	let http_client = oauth2_reqwest::ReqwestClient::from(
+		reqwest::ClientBuilder::new()
+			.redirect(reqwest::redirect::Policy::none())
+			.build()
+			.map_err(|error| {
+				tracing::error!(?error, "Failed to create HTTP client for OIDC");
+				APIError::InternalServerError(format!(
+					"Failed to create HTTP client: {}",
+					error
+				))
+			})?,
+	);
 
 	let provider_metadata =
 		CoreProviderMetadata::discover_async(issuer_url, &http_client)
@@ -122,7 +124,7 @@ pub struct OidcClaims {
 
 /// Exchange authorization code for tokens and extract claims
 pub async fn exchange_code_for_claims(
-	http_client: &reqwest::Client,
+	http_client: &oauth2_reqwest::ReqwestClient,
 	client: &StumpOidcClient,
 	code: String,
 	extra_audiences: Vec<String>,

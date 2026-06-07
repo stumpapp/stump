@@ -15,27 +15,34 @@ export default function LocaleProvider({ locale = getDefaultLocale(), children }
 	const { t } = useTranslation(resolvedLocale, { useSuspense: false })
 
 	useEffect(() => {
-		let active = true
+		const controller = new AbortController()
+		const { signal } = controller
+
 		async function prepare() {
 			try {
-				await loadLocaleResources(resolvedLocale)
-				if (!active) {
+				await loadLocaleResources(resolvedLocale, signal)
+				if (signal.aborted) {
 					return
 				}
 
-				await Promise.all([i18n.changeLanguage(resolvedLocale), initDateFnsLocale(resolvedLocale)])
-				if (!active) {
+				await Promise.all([
+					i18n.changeLanguage(resolvedLocale),
+					initDateFnsLocale(resolvedLocale, signal),
+				])
+				if (signal.aborted) {
 					return
 				}
 
 				document.documentElement.lang = resolvedLocale
 			} catch (error) {
-				console.error('Failed to load locale resources', error)
+				if (!signal.aborted) {
+					console.error('Failed to load locale resources', error)
+				}
 			}
 		}
 		prepare()
 		return () => {
-			active = false
+			controller.abort()
 		}
 	}, [resolvedLocale])
 

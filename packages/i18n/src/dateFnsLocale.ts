@@ -96,16 +96,22 @@ function findClosestLocale(locale: string): AllowedLocale {
 	return 'en-US'
 }
 
-export async function initDateFnsLocale(locale: string): Promise<AllowedLocale> {
+export async function initDateFnsLocale(
+	locale: string,
+	signal?: AbortSignal,
+): Promise<AllowedLocale> {
 	const targetLocale = findClosestLocale(locale)
 
 	let dateFnsLocale = localeCache.get(targetLocale)
 
 	if (!dateFnsLocale) {
 		try {
+			if (signal?.aborted) return targetLocale
 			dateFnsLocale = await dateFnsLocaleLoaders[targetLocale]()
+			if (signal?.aborted) return targetLocale
 			localeCache.set(targetLocale, dateFnsLocale)
 		} catch (error) {
+			if (signal?.aborted) return targetLocale
 			console.warn(
 				`Failed to load date-fns locale for ${targetLocale}, falling back to en-US`,
 				error,
@@ -114,16 +120,20 @@ export async function initDateFnsLocale(locale: string): Promise<AllowedLocale> 
 			if (targetLocale !== 'en-US') {
 				dateFnsLocale = localeCache.get('en-US')
 				if (!dateFnsLocale) {
+					if (signal?.aborted) return targetLocale
 					dateFnsLocale = await dateFnsLocaleLoaders['en-US']()
+					if (signal?.aborted) return targetLocale
 					localeCache.set('en-US', dateFnsLocale)
 				}
 			} else {
-				throw error // Re-throw if en-US itself failed
+				throw error
 			}
 		}
 	}
 
-	setDefaultOptions({ locale: dateFnsLocale })
+	if (!signal?.aborted) {
+		setDefaultOptions({ locale: dateFnsLocale })
+	}
 
 	return targetLocale
 }

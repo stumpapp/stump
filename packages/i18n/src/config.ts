@@ -1,11 +1,11 @@
 import i18n, { Resource } from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
+import { type AllowedLocale, LOCALES } from './locales'
 import enUS from './locales/en-US.json'
-import { LOCALES, type AllowedLocale } from './locales'
 
-export { LOCALES } from './locales'
 export type { AllowedLocale } from './locales'
+export { LOCALES } from './locales'
 
 export const resources: Resource = {
 	'en-US': {
@@ -117,9 +117,7 @@ export const resolveLocale = (inputLocale?: string): AllowedLocale => {
 	}
 
 	const normalized = inputLocale.replace('_', '-')
-	const matchedLocale = LOCALES.find(
-		(locale) => locale.toLowerCase() === normalized.toLowerCase(),
-	)
+	const matchedLocale = LOCALES.find((locale) => locale.toLowerCase() === normalized.toLowerCase())
 	if (matchedLocale) {
 		return matchedLocale
 	}
@@ -132,12 +130,8 @@ export const resolveLocale = (inputLocale?: string): AllowedLocale => {
 	return fallback
 }
 
-export const loadLocaleResources = async (locale: AllowedLocale) => {
-	if (locale === 'en-US') {
-		return
-	}
-
-	if (i18n.hasResourceBundle(locale, locale)) {
+export const loadLocaleResources = async (locale: AllowedLocale, signal?: AbortSignal) => {
+	if (locale === 'en-US' || i18n.hasResourceBundle(locale, locale)) {
 		return
 	}
 
@@ -147,10 +141,15 @@ export const loadLocaleResources = async (locale: AllowedLocale) => {
 			throw new Error(`Locale loader is missing for ${locale}`)
 		}
 
+		if (signal?.aborted) return
 		const { default: translations } = await loadLocale()
+		if (signal?.aborted) return
+
 		i18n.addResourceBundle(locale, locale, translations)
 	} catch (error) {
-		console.error(`Failed to load locale: ${locale}`, error)
+		if (!signal?.aborted) {
+			console.error(`Failed to load locale: ${locale}`, error)
+		}
 	}
 }
 

@@ -453,6 +453,10 @@
 				"update": "アップデート後にスキャン"
 			},
 			"description": "ライブラリファイルをインデックスしてデータベースに入力します"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
@@ -1575,6 +1579,14 @@
 				"enableJobOverlayToggle": {
 					"label": "Job overlay",
 					"description": "Show a floating overlay while a job is running"
+				},
+				"dayResetHourOffset": {
+					"label": "Reading day reset offset",
+					"description": "Shift when a reading day resets, in hours from midnight"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Reading session grace period",
+					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},
@@ -2847,6 +2859,9 @@
 			"value": "Value",
 			"version": "Version"
 		},
+		"errors": {
+			"unknown": "Unknown error"
+		},
 		"formatSeriesPosition": {
 			"none": {
 				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
@@ -2940,6 +2955,14 @@
 				"dismissAll": "Dismiss All"
 			}
 		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
+				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+			},
+			"syncFailed": "Failed to sync offline progress"
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferences",
@@ -2986,6 +3009,7 @@
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
 			"lowercaseTranslation": "Lowercase Labels",
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",
 				"dataUsage": {

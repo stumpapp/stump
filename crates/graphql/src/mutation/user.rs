@@ -540,6 +540,11 @@ async fn update_user_preferences_by_id(
 		thumbnail_ratio: Set(user_preferences.thumbnail_ratio),
 		thumbnail_placeholder_style: Set(user_preferences.thumbnail_placeholder_style),
 		enable_alphabet_select: Set(user_preferences.enable_alphabet_select),
+		enable_reading_journal: Set(user_preferences.enable_reading_journal),
+		day_reset_hour_offset: Set(user_preferences.day_reset_hour_offset),
+		reading_session_grace_period_secs: Set(
+			user_preferences.reading_session_grace_period_secs
+		),
 		interface_roundness: Set(user_preferences.interface_roundness),
 		home_arrangement: NotSet,
 		navigation_arrangement: NotSet,

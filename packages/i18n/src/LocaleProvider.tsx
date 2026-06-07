@@ -33,7 +33,11 @@ export default function LocaleProvider({ locale = getDefaultLocale(), children }
 					return
 				}
 
-				document.documentElement.lang = resolvedLocale
+				// locale provider is used in web and expo, the latter
+				// not having a document
+				if ('document' in globalThis) {
+					document.documentElement.lang = resolvedLocale
+				}
 			} catch (error) {
 				if (!signal.aborted) {
 					console.error('Failed to load locale resources', error)

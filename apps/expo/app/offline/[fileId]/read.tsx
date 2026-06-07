@@ -8,7 +8,6 @@ import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { match, P } from 'ts-pattern'
 import urlJoin from 'url-join'
 
 import { ImageBasedReader, PdfReader, ReadiumReader } from '~/components/book/reader'
@@ -383,40 +382,28 @@ const buildBook = (
 
 	const extension = downloadedFile.filename.split('.').pop() || ''
 
-	const readProgress: ImageReaderBookRef['readProgress'] | undefined = match(unsyncedProgress)
-		.with(
-			{ page: P.number },
-			(progress) =>
-				({
-					__typename: 'ActiveReadingSession' as const,
-					page: progress.page,
-					elapsedSeconds: progress.elapsedSeconds,
-					percentageCompleted: progress.percentage,
-				}) satisfies ImageReaderBookRef['readProgress'],
-		)
-		.with(
-			{
-				epubProgress: P.not(P.nullish),
-			},
-			(progress) => {
-				const parsedData = epubProgress.safeParse(progress.epubProgress)
-				if (!parsedData.success) {
-					return undefined
-				}
-				const epubData = parsedData.data
+	let readProgress: ImageReaderBookRef['readProgress'] | undefined = unsyncedProgress
+		? {
+				__typename: 'ResumeReadingCursor',
+				page: unsyncedProgress.page,
+				elapsedSeconds: unsyncedProgress.elapsedSeconds ?? 0,
+				percentageCompleted: unsyncedProgress.percentage,
+			}
+		: undefined
 
-				return {
-					__typename: 'ActiveReadingSession' as const,
-					locator: {
-						__typename: 'ReadiumLocator',
-						...epubData,
-					},
-					elapsedSeconds: progress.elapsedSeconds,
-					percentageCompleted: progress.percentage,
-				} satisfies ImageReaderBookRef['readProgress']
+	const epubData = unsyncedProgress?.epubProgress
+		? epubProgress.safeParse(unsyncedProgress.epubProgress)
+		: null
+
+	if (epubData?.success && readProgress) {
+		readProgress = {
+			...readProgress,
+			locator: {
+				__typename: 'ReadiumLocator',
+				...epubData.data,
 			},
-		)
-		.otherwise(() => undefined)
+		}
+	}
 
 	const bookmarks = bookmarkRecords.map((b) => ({
 		__typename: 'Bookmark' as const,

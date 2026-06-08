@@ -99,7 +99,7 @@ pub async fn upsert_reading_session(
 				end_page: Set(input.page),
 				start_locator: Set(input.locator.clone()),
 				end_locator: Set(input.locator),
-				start_percentage: Set(input.percentage),
+				start_percentage: Set(input.percentage.or(Some(Decimal::new(0, 2)))),
 				end_percentage: Set(input.percentage),
 				// set bc there's no existing session to extend
 				elapsed_seconds: Set(Some(

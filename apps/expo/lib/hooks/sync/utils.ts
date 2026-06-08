@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { toast } from 'sonner-native'
 
 import { isLocalLibrary } from '~/lib/localLibrary'
 import { useSavedServers } from '~/stores'
@@ -6,9 +7,11 @@ import { useCacheStore } from '~/stores/cache'
 import { SavedServerWithConfig } from '~/stores/savedServer'
 
 import { getInstancesForServers } from '../../sdk/auth'
+import { useTranslate } from '../useTranslate'
 
 export function useServerInstances() {
 	const { savedServers, getServerConfig, saveServerToken, getServerToken } = useSavedServers()
+	const { t } = useTranslate()
 
 	const cachedInstances = useCacheStore((state) => state.sdks)
 	const onCacheInstance = useCacheStore((state) => state.addSDK)
@@ -26,40 +29,44 @@ export function useServerInstances() {
 		[savedServers, getServerConfig],
 	)
 
-	const getInstances = useCallback(
-		async (forServers?: string[]) => {
-			const actualServers = forServers?.filter((id) => !isLocalLibrary(id))
+	const getInstances = async (forServers?: string[]) => {
+		const actualServers = forServers?.filter((id) => !isLocalLibrary(id))
 
-			const servers = await Promise.all(
-				savedServers
-					.filter(
-						(server) =>
-							!isLocalLibrary(server.id) &&
-							(!actualServers?.length ||
-								server.id === actualServers.find((id) => id === server.id)),
-					)
-					.map(async (server) => {
-						const config = await getServerConfig(server.id)
-						return { ...server, config } satisfies SavedServerWithConfig
-					}),
-			)
+		const servers = await Promise.all(
+			savedServers
+				.filter(
+					(server) =>
+						!isLocalLibrary(server.id) &&
+						(!actualServers?.length || server.id === actualServers.find((id) => id === server.id)),
+				)
+				.map(async (server) => {
+					const config = await getServerConfig(server.id)
+					return { ...server, config } satisfies SavedServerWithConfig
+				}),
+		)
 
-			return getInstancesForServers(servers, {
-				getServerToken,
-				saveToken: saveServerToken,
-				getCachedInstance,
-				onCacheInstance,
-			})
-		},
-		[
-			savedServers,
+		const instances = await getInstancesForServers(servers, {
 			getServerToken,
-			saveServerToken,
-			getServerConfig,
-			onCacheInstance,
+			saveToken: saveServerToken,
 			getCachedInstance,
-		],
-	)
+			onCacheInstance,
+		})
+
+		// skipped = stump servers which cannot auto-auth
+		const skipped = servers.filter((s) => s.kind === 'stump' && !instances[s.id])
+		if (skipped.length > 0) {
+			toast.warning(
+				t(`progressSync.${skipped.length === 1 ? 'skippedOneServer' : 'skippedMultipleServers'}`, {
+					skippedCount: skipped.length,
+				}),
+				{
+					description: t('progressSync.explanation'),
+				},
+			)
+		}
+
+		return instances
+	}
 
 	return { getInstances, getFullServer, savedServers }
 }

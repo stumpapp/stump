@@ -453,6 +453,10 @@
 				"update": "Skanuj po aktualizacjach"
 			},
 			"description": "Indeksuj pliki biblioteki, aby wypełnić bazę danych"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
@@ -1575,6 +1579,14 @@
 				"enableJobOverlayToggle": {
 					"label": "Nakładka zadań",
 					"description": "Pokaż pływającą nakładkę, gdy wykonywane jest zadanie"
+				},
+				"dayResetHourOffset": {
+					"label": "Przesunięcie resetu dnia czytania",
+					"description": "Przesuń czas, w jakim resetuje się dzień czytania, w godzinach od północy"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Okres karencji sesji czytania",
+					"description": "W przypadku braku aktywności w tym przedziale czasowym, w sekundach, następna aktualizacja rozpocznie nową sesję"
 				}
 			}
 		},
@@ -2847,6 +2859,9 @@
 			"value": "Wartość",
 			"version": "Wersja"
 		},
+		"errors": {
+			"unknown": "Unknown error"
+		},
 		"formatSeriesPosition": {
 			"none": {
 				"positionWithTotal": "{{position}} z {{total}} w {{seriesName}}",
@@ -2940,6 +2955,14 @@
 				"dismissAll": "Odrzucić wszystkie"
 			}
 		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
+				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+			},
+			"syncFailed": "Failed to sync offline progress"
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferencje",
@@ -2986,6 +3009,7 @@
 			},
 			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
 			"lowercaseTranslation": "Małoliterowe przypisy",
+			"tintListBackground": "Zabarw tła list",
 			"management": {
 				"label": "Zarządzanie",
 				"dataUsage": {

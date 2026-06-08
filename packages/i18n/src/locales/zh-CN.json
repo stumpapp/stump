@@ -453,6 +453,10 @@
 				"update": "更新后扫描"
 			},
 			"description": "索引书库文件以填充你的数据库"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
@@ -1575,6 +1579,14 @@
 				"enableJobOverlayToggle": {
 					"label": "作业叠加",
 					"description": "当作业运行时显示浮动叠加层"
+				},
+				"dayResetHourOffset": {
+					"label": "Reading day reset offset",
+					"description": "Shift when a reading day resets, in hours from midnight"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Reading session grace period",
+					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},
@@ -2847,6 +2859,9 @@
 			"value": "值",
 			"version": "版本"
 		},
+		"errors": {
+			"unknown": "Unknown error"
+		},
 		"formatSeriesPosition": {
 			"none": {
 				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
@@ -2940,6 +2955,14 @@
 				"dismissAll": "全部忽略"
 			}
 		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
+				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+			},
+			"syncFailed": "Failed to sync offline progress"
+		},
 		"settings": {
 			"preferences": {
 				"label": "首选项",
@@ -2986,6 +3009,7 @@
 			},
 			"autoSyncLocalData": "自动同步本地数据",
 			"lowercaseTranslation": "Lowercase Labels",
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "管理",
 				"dataUsage": {

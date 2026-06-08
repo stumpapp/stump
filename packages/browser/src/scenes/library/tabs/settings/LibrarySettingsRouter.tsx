@@ -1,5 +1,12 @@
 import { useGraphQLMutation } from '@stump/client'
-import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
+import {
+	CreateOrUpdateLibraryInput,
+	extractErrorMessage,
+	graphql,
+	useFragment,
+	UserPermission,
+} from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
@@ -41,6 +48,7 @@ export const LibrarySettingsConfig = graphql(`
 			processMetadata
 			watch
 			libraryPattern
+			libraryType
 			thumbnailConfig {
 				__typename
 				resizeMethod {
@@ -83,6 +91,7 @@ const scanMutation = graphql(`
 
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
+	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 	const { library } = useLibraryContext()
 	const { config } = useFragment(LibrarySettingsConfig, library)
@@ -104,13 +113,17 @@ export default function LibrarySettingsRouter() {
 					),
 			})
 		},
+		onError: (error) => {
+			toast.error(t('createOrUpdateLibrary.errors.failedToUpdate'), {
+				description: extractErrorMessage(error),
+			})
+		},
 	})
 
 	const { mutate: scan } = useGraphQLMutation(scanMutation, {
 		onError: (error) => {
-			console.error('Failed to scan library', error)
-			toast.error('Failed to scan library', {
-				description: 'Please check the logs for more details',
+			toast.error(t('createOrUpdateLibrary.errors.failedToScan'), {
+				description: extractErrorMessage(error),
 			})
 		},
 	})

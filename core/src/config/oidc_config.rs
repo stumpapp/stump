@@ -36,6 +36,9 @@ pub struct OidcConfig {
 	/// Additional trusted audiences for ID token verification
 	#[serde(default)]
 	pub extra_audiences: Vec<String>,
+	/// Path to a CA certificate file (PEM-encoded) to trust when connecting to the OIDC issuer
+	#[serde(default)]
+	pub ca_cert_file: Option<String>,
 }
 
 impl Default for OidcConfig {
@@ -49,6 +52,7 @@ impl Default for OidcConfig {
 			allow_registration: true,
 			disable_local_auth: false,
 			extra_audiences: Vec::new(),
+			ca_cert_file: None,
 		}
 	}
 }
@@ -119,6 +123,13 @@ impl OidcConfig {
 			})
 			.unwrap_or_default();
 
+		let ca_cert_file = env::var(OIDC_CA_CERT_FILE_KEY)
+			.ok()
+			.filter(|v| !v.is_empty());
+		if let Some(ref ca_cert_file_specified) = ca_cert_file {
+			tracing::info!("OIDC certificate specified as {}", ca_cert_file_specified);
+		}
+
 		Some(Self {
 			enabled,
 			client_id,
@@ -128,6 +139,7 @@ impl OidcConfig {
 			allow_registration,
 			disable_local_auth,
 			extra_audiences,
+			ca_cert_file,
 		})
 	}
 

@@ -9,12 +9,12 @@ import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { PortalHostContext } from '~/lib/PortalHostContext'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
-import LocationsSheetContent from './LocationsSheetContent'
+import AnnotationsSheetContent from './AnnotationsSheetContent'
 
-const SHEET_PORTAL_HOST = 'locations-settings-sheet'
+const SHEET_PORTAL_HOST = 'annotations-sheet'
 
-export default function EpubLocationsSheet() {
-	const sheetRef = useEpubSheetStore((state) => state.locationsSheetRef)
+export default function AnnotationsSheet() {
+	const sheetRef = useEpubSheetStore((state) => state.annotationsSheetRef)
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -42,7 +42,7 @@ export default function EpubLocationsSheet() {
 				<PortalHostContext.Provider
 					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}
 				>
-					<LocationsSheetContent />
+					<AnnotationsSheetContent />
 					{Platform.OS === 'android' && <PortalHost name={SHEET_PORTAL_HOST} />}
 				</PortalHostContext.Provider>
 			</TrueSheet>

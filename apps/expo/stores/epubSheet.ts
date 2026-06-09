@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { createRef, RefObject } from 'react'
 import { create } from 'zustand'
 
-export type EpubSheetType = 'settings' | 'locations' | 'customizeTheme'
+export type EpubSheetType = 'settings' | 'annotations' | 'tableOfContents' | 'customizeTheme'
 
 export type CustomizeThemeMode = 'edit' | 'create'
 
@@ -13,7 +13,8 @@ export type CustomizeThemeConfig = {
 
 type IEpubSheetStore = {
 	settingsSheetRef: RefObject<TrueSheet | null>
-	locationsSheetRef: RefObject<TrueSheet | null>
+	tableOfContentsSheetRef: RefObject<TrueSheet | null>
+	annotationsSheetRef: RefObject<TrueSheet | null>
 	customizeThemeSheetRef: RefObject<TrueSheet | null>
 	customizeThemeMode: CustomizeThemeMode
 	customizeThemeName?: string
@@ -25,15 +26,18 @@ type IEpubSheetStore = {
 
 export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 	settingsSheetRef: createRef<TrueSheet>(),
-	locationsSheetRef: createRef<TrueSheet>(),
+	tableOfContentsSheetRef: createRef<TrueSheet>(),
+	annotationsSheetRef: createRef<TrueSheet>(),
 	customizeThemeSheetRef: createRef<TrueSheet>(),
 	customizeThemeMode: 'edit',
 	openSheet: (sheet) => {
 		const state = get()
 		if (sheet === 'settings') {
 			state.settingsSheetRef.current?.present()
-		} else if (sheet === 'locations') {
-			state.locationsSheetRef.current?.present()
+		} else if (sheet === 'tableOfContents') {
+			state.tableOfContentsSheetRef.current?.present()
+		} else if (sheet === 'annotations') {
+			state.annotationsSheetRef.current?.present()
 		} else if (sheet === 'customizeTheme') {
 			state.customizeThemeSheetRef.current?.present()
 		}
@@ -42,8 +46,10 @@ export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 		const state = get()
 		if (sheet === 'settings') {
 			state.settingsSheetRef.current?.dismiss()
-		} else if (sheet === 'locations') {
-			state.locationsSheetRef.current?.dismiss()
+		} else if (sheet === 'tableOfContents') {
+			state.tableOfContentsSheetRef.current?.dismiss()
+		} else if (sheet === 'annotations') {
+			state.annotationsSheetRef.current?.dismiss()
 		} else if (sheet === 'customizeTheme') {
 			state.customizeThemeSheetRef.current?.dismiss()
 		}
@@ -51,7 +57,8 @@ export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 	closeAllSheets: () => {
 		const state = get()
 		state.settingsSheetRef.current?.dismiss()
-		state.locationsSheetRef.current?.dismiss()
+		state.tableOfContentsSheetRef.current?.dismiss()
+		state.annotationsSheetRef.current?.dismiss()
 		state.customizeThemeSheetRef.current?.dismiss()
 	},
 	openCustomizeTheme: ({ mode, name }) => {

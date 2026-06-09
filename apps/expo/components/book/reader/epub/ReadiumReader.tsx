@@ -40,12 +40,13 @@ import {
 	UpdateAnnotationSheet,
 	UpdateAnnotationSheetRef,
 } from './annotations'
+import AnnotationsSheet from './AnnotationsSheet'
 import { EpubReaderContext, EpubReaderContextValue } from './context'
 import CustomizeThemeSheet from './CustomizeThemeSheet'
-import EpubLocationsSheet from './EpubLocationsSheet'
 import EpubSettingsSheet from './EpubSettingsSheet'
 import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
 import ReadiumHeader, { HEADER_HEIGHT } from './ReadiumHeader'
+import TableOfContentsSheet from './TableOfContentsSheet'
 
 type BaseProps = OfflineCompatibleReader &
 	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders'>
@@ -555,7 +556,8 @@ export default function ReadiumReader({
 				<ReadiumFooter />
 
 				<EpubSettingsSheet />
-				<EpubLocationsSheet />
+				<TableOfContentsSheet />
+				<AnnotationsSheet />
 				<CustomizeThemeSheet />
 
 				<CreateAnnotationSheet

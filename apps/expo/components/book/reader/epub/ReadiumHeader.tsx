@@ -1,19 +1,17 @@
 import * as Sentry from '@sentry/react-native'
 import { GlassView } from 'expo-glass-effect'
 import { useRouter } from 'expo-router'
-import { ALargeSmall, TableOfContents, X } from 'lucide-react-native'
-import { useEffect, useMemo, useState } from 'react'
+import { X } from 'lucide-react-native'
+import { useEffect, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, { Easing, Keyframe } from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import BackLink from '~/components/BackLink'
 import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
-import { useEpubSheetStore } from '~/stores/epubSheet'
 
 export const HEADER_HEIGHT = 48
 
@@ -79,16 +77,6 @@ export default function ReadiumHeader() {
 						</Pressable>
 					</GlassView>
 
-					{/* <View className="gap-4 flex-row items-center">
-					<BackLink
-						color={colors?.foreground}
-						style={{ opacity: 0.9 }}
-						activeOpacity={0.7}
-						iconClassName="mr-[unset]"
-					/>
-					<OpenSheetButton sheet="locations" />
-				</View> */}
-
 					<View className="flex-1 items-center justify-center">
 						<Animated.View entering={FADE_IN} exiting={FADE_OUT}>
 							<Text
@@ -100,11 +88,6 @@ export default function ReadiumHeader() {
 							</Text>
 						</Animated.View>
 					</View>
-
-					{/* <View className="gap-4 flex-row items-center">
-						<BookmarkButton color={colors?.foreground} />
-						<OpenSheetButton sheet="settings" />
-					</View> */}
 				</Animated.View>
 			)}
 		</>
@@ -170,24 +153,4 @@ function useChapterProgress() {
 	}, [pagesLeftInChapter])
 
 	return { chapterTitle, progressText }
-}
-
-function OpenSheetButton({ sheet }: { sheet: 'locations' | 'settings' }) {
-	const { colors } = useEpubTheme()
-	const openSheet = useEpubSheetStore((state) => state.openSheet)
-
-	const sheetIcon = { locations: TableOfContents, settings: ALargeSmall }
-
-	return (
-		<Pressable onPress={() => openSheet(sheet)}>
-			{({ pressed }) => (
-				<Icon
-					as={sheetIcon[sheet]}
-					className="h-6 w-6"
-					color={colors?.foreground}
-					style={{ opacity: pressed ? 0.7 : 0.9 }}
-				/>
-			)}
-		</Pressable>
-	)
 }

@@ -2,14 +2,10 @@ import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list'
 import { getColor, serialize } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Platform, Pressable, useWindowDimensions, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
-import PagerView from 'react-native-pager-view'
+import { Platform, Pressable, View } from 'react-native'
 import Animated, { Easing, Keyframe } from 'react-native-reanimated'
-import { stripHtml } from 'string-strip-html'
 
-import { ThumbnailImage } from '~/components/image'
-import { Heading, Text } from '~/components/ui'
+import { Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -17,42 +13,16 @@ import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
-import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
 import { useEpubReaderContext } from './context'
 
-// TODO(ux): the more i use this the more i dislike it. a running list of thoughts:
-// - the overview isn't as important, if i click a button signaling toc at the very least it should open toc first
-// - i am starting to really dislike the pager view. it _kinda_ made sense to colocate toc + annotations, however i
-//   am realizing (at least for me) i'd rather them separate
-// maybe we can do sm like ((Aa) (Bookmark) (Ellipsis)) (or move Aa into ellipsis), either move toc into ellipses
-// or keep it separate on left, then shove more functionality into ellipsis (page jump, search eventually, bookmarks/annotations, etc)
-
-export default function LocationsSheetContent() {
-	const { getRequestHeaders } = useEpubReaderContext()
-
-	const [activePage, setActivePage] = useState(0)
+export default function TableOfContentsSheetContent() {
 	const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
 
-	const { height: windowHeight } = useWindowDimensions()
-
-	const pagerHeight =
-		windowHeight -
-		72 - // py-6 + text(ish)
-		60 // tabs
-
-	const pagerViewRef = useRef<PagerView>(null)
 	const flashListRef = useRef<FlashListRef<TableOfContentsItemWithLevel>>(null)
 
 	const book = useEpubLocationStore((store) => store.book)
 	const toc = useEpubLocationStore((store) => store.toc)
-	const embeddedMetadata = useEpubLocationStore((store) => store.embeddedMetadata)
 	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
-
-	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
-
-	const bookTitle = book?.name || embeddedMetadata?.title
-	const bookAuthor = book?.metadata?.writers?.join(', ') || embeddedMetadata?.author
-	const bookPublisher = book?.metadata?.publisher || embeddedMetadata?.publisher
 
 	const flatTocWithLevels = flattenTocWithLevels(toc)
 
@@ -78,15 +48,6 @@ export default function LocationsSheetContent() {
 		scrollToCurrentChapter({ animated: false })
 	}, [scrollToCurrentChapter])
 
-	// flash the scrollbar to give a rough indication of where we are
-	useEffect(() => {
-		if (activePage === 1) {
-			setTimeout(() => {
-				flashListRef.current?.flashScrollIndicators()
-			}, 250)
-		}
-	}, [activePage, scrollToCurrentChapter])
-
 	const showTopIndicator = activeTocItemIndex < visibleRange.min
 	const showBottomIndicator = activeTocItemIndex > visibleRange.max
 
@@ -105,135 +66,35 @@ export default function LocationsSheetContent() {
 	if (!book) return
 
 	return (
-		<View className="gap-1 flex-1">
-			<View className="px-4 py-6 flex-row items-center justify-around">
-				<Pressable onPress={() => pagerViewRef.current?.setPage(0)}>
-					{({ pressed }) => (
-						<Text
-							className={cn('text-lg font-medium text-foreground-subtle', {
-								'text-foreground': activePage === 0,
-							})}
-							style={{ opacity: pressed && activePage !== 0 ? 0.7 : 1 }}
-						>
-							Overview
-						</Text>
-					)}
-				</Pressable>
-
-				<Pressable onPress={() => pagerViewRef.current?.setPage(1)}>
-					{({ pressed }) => (
-						<Text
-							className={cn('text-lg font-medium text-foreground-subtle', {
-								'text-foreground': activePage === 1,
-							})}
-							style={{ opacity: pressed && activePage !== 1 ? 0.7 : 1 }}
-						>
-							Contents
-						</Text>
-					)}
-				</Pressable>
-
-				<Pressable onPress={() => pagerViewRef.current?.setPage(2)}>
-					{({ pressed }) => (
-						<Text
-							className={cn('text-lg font-medium text-foreground-subtle', {
-								'text-foreground': activePage === 2,
-							})}
-							style={{ opacity: pressed && activePage !== 2 ? 0.7 : 1 }}
-						>
-							Annotations
-						</Text>
-					)}
-				</Pressable>
-			</View>
-
-			<PagerView
-				ref={pagerViewRef}
-				style={{ flex: 1, height: pagerHeight }}
-				initialPage={0}
-				onPageSelected={(e) => setActivePage(e.nativeEvent.position)}
-			>
-				<View
-					style={{
-						justifyContent: 'flex-start',
-						alignItems: 'center',
-					}}
-					key="1"
-				>
-					<ScrollView contentContainerStyle={{ paddingBottom: 16, paddingTop: 12 }}>
-						<View className="gap-4 flex items-center">
-							<ThumbnailImage
-								source={{
-									uri: book?.thumbnail.url,
-									headers: {
-										...getRequestHeaders?.(),
-									},
-								}}
-								size={{ height: 235 / thumbnailRatio, width: 235 }}
-								borderAndShadowStyle={{ shadowRadius: 5 }}
-							/>
-
-							<View className="gap-2">
-								<Heading size="lg" className="text-center" numberOfLines={3}>
-									{bookTitle}
-								</Heading>
-
-								<Text className="text-base text-center text-foreground-muted">
-									{bookAuthor}
-									{bookPublisher ? ` • ${bookPublisher}` : null}
-								</Text>
-							</View>
-
-							{!!book.metadata?.summary && (
-								<Text className="px-4 text-sm text-center text-foreground-muted">
-									{stripHtml(book.metadata.summary).result}
-								</Text>
-							)}
-						</View>
-					</ScrollView>
-				</View>
-
-				<View key="2">
-					<FlashList
-						ref={flashListRef}
-						data={flatTocWithLevels}
-						contentContainerStyle={{ paddingBottom: 16 }}
-						onViewableItemsChanged={onViewableItemsChanged}
-						renderItem={({ item, index }) => (
-							<TableOfContentsListItem
-								item={item.item}
-								level={item.level}
-								currentChapterActive={index === activeTocItemIndex}
-								nextChapterActive={index + 1 === activeTocItemIndex}
-							/>
-						)}
+		<View className="flex-1">
+			<FlashList
+				ref={flashListRef}
+				data={flatTocWithLevels}
+				contentContainerStyle={{ paddingTop: 16 }}
+				onViewableItemsChanged={onViewableItemsChanged}
+				renderItem={({ item, index }) => (
+					<TableOfContentsListItem
+						item={item.item}
+						level={item.level}
+						currentChapterActive={index === activeTocItemIndex}
+						nextChapterActive={index + 1 === activeTocItemIndex}
 					/>
+				)}
+			/>
 
-					{showTopIndicator && (
-						<ScrollToChapterIndicator
-							onPress={() => scrollToCurrentChapter({ animated: true })}
-							className="top-4"
-						/>
-					)}
+			{showTopIndicator && (
+				<ScrollToChapterIndicator
+					onPress={() => scrollToCurrentChapter({ animated: true })}
+					className="top-6"
+				/>
+			)}
 
-					{showBottomIndicator && (
-						<ScrollToChapterIndicator
-							onPress={() => scrollToCurrentChapter({ animated: true })}
-							className="bottom-6"
-						/>
-					)}
-				</View>
-
-				<View
-					style={{
-						justifyContent: 'center',
-						alignItems: 'center',
-					}}
-					key="3"
-				>
-					<AnnotationsAndBookmarks />
-				</View>
-			</PagerView>
+			{showBottomIndicator && (
+				<ScrollToChapterIndicator
+					onPress={() => scrollToCurrentChapter({ animated: true })}
+					className="bottom-6"
+				/>
+			)}
 		</View>
 	)
 }
@@ -278,7 +139,7 @@ const TableOfContentsListItem = ({
 			pushJump(previousLocator, direction)
 		}
 
-		closeSheet('locations')
+		closeSheet('tableOfContents')
 	}
 
 	const { isDarkColorScheme } = useColorScheme()
@@ -322,7 +183,7 @@ const TableOfContentsListItem = ({
 							</Text>
 							<Text
 								className={cn(
-									'py-4 text-base shrink-0 text-foreground-muted',
+									'py-4 text-base text-foreground-muted shrink-0',
 									currentChapterActive && 'font-bold',
 								)}
 								style={currentChapterActive && { color: textColor }}

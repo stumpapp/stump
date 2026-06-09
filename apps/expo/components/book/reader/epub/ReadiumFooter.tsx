@@ -1,13 +1,13 @@
 import { GlassView } from 'expo-glass-effect'
 import {
 	Bookmark,
+	BookmarkCheck,
 	Info,
 	List,
 	LucideIcon,
 	Menu,
 	Palette,
 	PencilLine,
-	Search,
 } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
 import { useEffect, useState } from 'react'
@@ -24,10 +24,13 @@ import Animated, {
 
 import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
 import { Icon, Text } from '~/components/ui'
+import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import JumpButton from './JumpButton'
+import { useBookmark } from './useBookmark'
 
 export const FOOTER_HEIGHT = 48
 
@@ -46,14 +49,14 @@ const exitingAnimation = new Keyframe({
 
 type GlassMenuItemProps = {
 	show: boolean
-	delayIn: number
-	delayOut: number
+	delay: number
 	onPress?: () => void
 	icon?: LucideIcon
 	label?: string
+	disabled?: boolean
 }
 
-function MenuItem({ show, delayIn, delayOut, onPress, icon, label }: GlassMenuItemProps) {
+function MenuItem({ show, delay, onPress, icon, label, disabled }: GlassMenuItemProps) {
 	const progress = useSharedValue(0)
 	const [glassActive, setGlassActive] = useState(false)
 
@@ -62,14 +65,14 @@ function MenuItem({ show, delayIn, delayOut, onPress, icon, label }: GlassMenuIt
 	useEffect(() => {
 		let timeout: NodeJS.Timeout
 		if (show) {
-			timeout = setTimeout(() => setGlassActive(true), delayIn)
-			progress.value = withDelay(delayIn, withSpring(1, { damping: 10, stiffness: 150, mass: 0.8 }))
+			timeout = setTimeout(() => setGlassActive(true), delay)
+			progress.value = withDelay(delay, withSpring(1, { damping: 10, stiffness: 150, mass: 0.8 }))
 		} else {
-			timeout = setTimeout(() => setGlassActive(false), delayOut)
-			progress.value = withDelay(delayOut, withTiming(0, { duration: 350 }))
+			timeout = setTimeout(() => setGlassActive(false), delay)
+			progress.value = withDelay(delay, withTiming(0, { duration: 350 }))
 		}
 		return () => clearTimeout(timeout)
-	}, [show, delayIn, delayOut, progress])
+	}, [show, delay, progress])
 
 	const animatedContentStyle = useAnimatedStyle(() => ({
 		opacity: progress.value,
@@ -96,7 +99,11 @@ function MenuItem({ show, delayIn, delayOut, onPress, icon, label }: GlassMenuIt
 				}}
 			>
 				<Animated.View style={animatedContentStyle}>
-					<Pressable onPress={onPress} className={contentClassName}>
+					<Pressable
+						onPress={onPress}
+						className={cn(disabled && 'opacity-40', contentClassName)}
+						disabled={disabled}
+					>
 						{label && <Text className="font-medium">{label}</Text>}
 						{icon && <Icon as={icon} size={21} strokeWidth={2.2} />}
 					</Pressable>
@@ -109,8 +116,12 @@ function MenuItem({ show, delayIn, delayOut, onPress, icon, label }: GlassMenuIt
 export default function ReadiumFooter() {
 	const showControls = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
+	const openSheet = useEpubSheetStore((state) => state.openSheet)
+
 	const [showMenu, setShowMenu] = useState(false)
 	const [showMenuButton, setShowMenuButton] = useState(showControls && !showMenu)
+
+	const { isBookmarked, disabled: bookmarkDisabled, toggleBookmark } = useBookmark()
 
 	useEffect(() => {
 		// Modify
@@ -120,6 +131,7 @@ export default function ReadiumFooter() {
 	return (
 		<>
 			{showMenu && (
+				// TODO: update showControls for time and stuff
 				<Pressable className="inset-0 absolute z-30" onPress={() => setShowMenu(false)} />
 			)}
 
@@ -131,40 +143,54 @@ export default function ReadiumFooter() {
 				>
 					<MenuItem
 						show={showMenu}
-						delayIn={200}
-						delayOut={200}
+						delay={150} // 200 with Search Book
 						label="Table of Contents"
 						icon={List}
+						onPress={() => {
+							openSheet('tableOfContents')
+							setShowMenu(false)
+						}}
 					/>
 
-					<MenuItem
+					{/* <MenuItem
 						show={showMenu}
-						delayIn={150}
-						delayOut={150}
+						delay={150}
 						label="Search Book"
 						icon={Search}
-					/>
+					/> */}
 
 					<MenuItem
 						show={showMenu}
-						delayIn={100}
-						delayOut={100}
-						label="Highlights & Annotations"
+						delay={100}
+						label="Bookmarks & Annotations"
 						icon={PencilLine}
+						onPress={() => {
+							openSheet('annotations')
+							setShowMenu(false)
+						}}
 					/>
 
 					<MenuItem
 						show={showMenu}
-						delayIn={50}
-						delayOut={50}
-						label="Theme & Appearance"
+						delay={50}
+						label="Appearance"
 						icon={Palette}
+						onPress={() => {
+							openSheet('settings')
+							setShowMenu(false)
+						}}
 					/>
 
 					<View className="gap-2 w-full flex-row items-center">
-						<MenuItem label="1h 42m" show={showMenu} delayIn={0} delayOut={0} />
-						<MenuItem show={showMenu} delayIn={0} delayOut={0} icon={Info} />
-						<MenuItem show={showMenu} delayIn={0} delayOut={0} icon={Bookmark} />
+						<MenuItem label="1h 42m" show={showMenu} delay={0} />
+						<MenuItem show={showMenu} delay={0} icon={Info} />
+						<MenuItem
+							show={showMenu}
+							delay={0}
+							icon={isBookmarked ? BookmarkCheck : Bookmark}
+							onPress={toggleBookmark}
+							disabled={bookmarkDisabled}
+						/>
 					</View>
 				</View>
 

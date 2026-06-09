@@ -1,8 +1,10 @@
 import * as Sentry from '@sentry/react-native'
-import { ALargeSmall, TableOfContents } from 'lucide-react-native'
-import { useEffect, useMemo } from 'react'
+import { GlassView } from 'expo-glass-effect'
+import { useRouter } from 'expo-router'
+import { ALargeSmall, TableOfContents, X } from 'lucide-react-native'
+import { useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
-import Animated from 'react-native-reanimated'
+import Animated, { Easing, Keyframe } from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import BackLink from '~/components/BackLink'
@@ -13,9 +15,18 @@ import { usePreferencesStore, useReaderStore } from '~/stores'
 import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
-import BookmarkButton from './BookmarkButton'
-
 export const HEADER_HEIGHT = 48
+
+// For the menu button
+const enteringAnimation = new Keyframe({
+	from: { opacity: 0.02 },
+	to: { opacity: 1, easing: Easing.inOut(Easing.quad) },
+}).duration(350)
+
+const exitingAnimation = new Keyframe({
+	from: { opacity: 1 },
+	to: { opacity: 0.02, easing: Easing.inOut(Easing.quad) },
+}).duration(350)
 
 // TODO: Figure out ideal UI for reader, I have largely been influenced by Yomu but
 // think I want to deviate a bit moving forward
@@ -23,10 +34,11 @@ export const HEADER_HEIGHT = 48
 export default function ReadiumHeader() {
 	const { colors } = useEpubTheme()
 	const insets = useSafeAreaInsets()
+	const router = useRouter()
 
-	const { secondaryStyle, primaryStyle } = useReaderAnimations()
+	const { primaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
-	const controlsShown = useReaderStore((state) => state.showControls)
+	const showControls = useReaderStore((state) => state.showControls)
 	const { chapterTitle, progressText } = useChapterProgress()
 
 	return (
@@ -50,12 +62,24 @@ export default function ReadiumHeader() {
 			)}
 
 			{/* Controls shown */}
-			<Animated.View
-				className="inset-x-safe h-12 gap-2 px-4 absolute z-20 flex-row items-center justify-between"
-				style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
-				pointerEvents={controlsShown ? undefined : 'none'}
-			>
-				<View className="gap-4 flex-row items-center">
+			{showControls && (
+				<Animated.View
+					className="inset-x-safe h-12 gap-2 px-4 absolute z-20 flex-row items-center justify-between"
+					entering={enteringAnimation}
+					exiting={exitingAnimation}
+					style={[{ top: initialWindowMetrics?.insets.top || insets.top }]}
+					pointerEvents={showControls ? undefined : 'none'}
+				>
+					<GlassView
+						className="left-6 absolute items-center justify-center rounded-full"
+						isInteractive
+					>
+						<Pressable disabled={!showControls} onPress={router.back} className="p-3">
+							<Icon as={X} size={30} />
+						</Pressable>
+					</GlassView>
+
+					{/* <View className="gap-4 flex-row items-center">
 					<BackLink
 						color={colors?.foreground}
 						style={{ opacity: 0.9 }}
@@ -63,25 +87,26 @@ export default function ReadiumHeader() {
 						iconClassName="mr-[unset]"
 					/>
 					<OpenSheetButton sheet="locations" />
-				</View>
+				</View> */}
 
-				<View className="flex-1 items-center justify-center">
-					<Animated.View entering={FADE_IN} exiting={FADE_OUT}>
-						<Text
-							numberOfLines={1}
-							style={{ color: colors?.foreground }}
-							className="font-medium opacity-50"
-						>
-							{preferMinimalReader ? chapterTitle : progressText}
-						</Text>
-					</Animated.View>
-				</View>
+					<View className="flex-1 items-center justify-center">
+						<Animated.View entering={FADE_IN} exiting={FADE_OUT}>
+							<Text
+								numberOfLines={1}
+								style={{ color: colors?.foreground }}
+								className="font-medium opacity-50"
+							>
+								{preferMinimalReader ? chapterTitle : progressText}
+							</Text>
+						</Animated.View>
+					</View>
 
-				<View className="gap-4 flex-row items-center">
-					<BookmarkButton color={colors?.foreground} />
-					<OpenSheetButton sheet="settings" />
-				</View>
-			</Animated.View>
+					{/* <View className="gap-4 flex-row items-center">
+						<BookmarkButton color={colors?.foreground} />
+						<OpenSheetButton sheet="settings" />
+					</View> */}
+				</Animated.View>
+			)}
 		</>
 	)
 }

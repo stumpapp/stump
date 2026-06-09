@@ -58,3 +58,4 @@ pub mod tag;
 pub mod user;
 pub mod user_login_activity;
 pub mod user_preferences;
+pub mod user_series_state;

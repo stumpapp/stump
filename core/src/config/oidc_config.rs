@@ -36,6 +36,10 @@ pub struct OidcConfig {
 	/// Additional trusted audiences for ID token verification
 	#[serde(default)]
 	pub extra_audiences: Vec<String>,
+	/// Allow connections to the OIDC issuer using invalid TLS certificates (self-signed, expired, etc.)
+	/// WARNING: This is insecure and should only be used for testing or internal networks
+	#[serde(default)]
+	pub danger_accept_invalid_certs: bool,
 }
 
 impl Default for OidcConfig {
@@ -49,6 +53,7 @@ impl Default for OidcConfig {
 			allow_registration: true,
 			disable_local_auth: false,
 			extra_audiences: Vec::new(),
+			danger_accept_invalid_certs: false,
 		}
 	}
 }
@@ -119,6 +124,11 @@ impl OidcConfig {
 			})
 			.unwrap_or_default();
 
+		let danger_accept_invalid_certs = env::var(OIDC_DANGER_ACCEPT_INVALID_CERTS_KEY)
+			.ok()
+			.and_then(|v| v.parse::<bool>().ok())
+			.unwrap_or(false);
+
 		Some(Self {
 			enabled,
 			client_id,
@@ -128,6 +138,7 @@ impl OidcConfig {
 			allow_registration,
 			disable_local_auth,
 			extra_audiences,
+			danger_accept_invalid_certs,
 		})
 	}
 

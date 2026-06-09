@@ -50,16 +50,23 @@ pub async fn create_oidc_client(
 		APIError::OIDCConfigurationInvalid
 	})?;
 
-	let http_client = reqwest::ClientBuilder::new()
-		.redirect(reqwest::redirect::Policy::none())
-		.build()
-		.map_err(|error| {
-			tracing::error!(?error, "Failed to create HTTP client for OIDC");
-			APIError::InternalServerError(format!(
-				"Failed to create HTTP client: {}",
-				error
-			))
-		})?;
+	let mut client_builder = reqwest::ClientBuilder::new()
+		.redirect(reqwest::redirect::Policy::none());
+
+	if config.danger_accept_invalid_certs {
+		tracing::warn!(
+			"OIDC is configured to accept invalid TLS certificates. This is insecure!"
+		);
+		client_builder = client_builder.danger_accept_invalid_certs(true);
+	}
+
+	let http_client = client_builder.build().map_err(|error| {
+		tracing::error!(?error, "Failed to create HTTP client for OIDC");
+		APIError::InternalServerError(format!(
+			"Failed to create HTTP client: {}",
+			error
+		))
+	})?;
 
 	let provider_metadata =
 		CoreProviderMetadata::discover_async(issuer_url, &http_client)

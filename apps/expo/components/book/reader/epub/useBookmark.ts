@@ -66,12 +66,9 @@ export function useBookmark() {
 		removeBookmark,
 	])
 
-	// mute if no locator or no bookmark callback
-	const isVisible = !!(locator && book && onBookmark)
-
 	return {
 		isBookmarked: isCurrentLocationBookmarked,
-		disabled: isLoading || !isVisible,
+		disabled: isLoading || !locator || !book || !onBookmark,
 		toggleBookmark: handleToggleBookmark,
 	}
 }

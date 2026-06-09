@@ -1,8 +1,8 @@
+import { formatNarrowDuration, useLocaleContext } from '@stump/i18n'
 import { GlassView } from 'expo-glass-effect'
 import {
 	Bookmark,
 	BookmarkCheck,
-	Info,
 	List,
 	LucideIcon,
 	Menu,
@@ -29,6 +29,7 @@ import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
+import { useEpubReaderContext } from './context'
 import JumpButton from './JumpButton'
 import { useBookmark } from './useBookmark'
 
@@ -54,9 +55,10 @@ type GlassMenuItemProps = {
 	icon?: LucideIcon
 	label?: string
 	disabled?: boolean
+	className?: string
 }
 
-function MenuItem({ show, delay, onPress, icon, label, disabled }: GlassMenuItemProps) {
+function MenuItem({ show, delay, onPress, icon, label, disabled, className }: GlassMenuItemProps) {
 	const progress = useSharedValue(0)
 	const [glassActive, setGlassActive] = useState(false)
 
@@ -88,7 +90,7 @@ function MenuItem({ show, delay, onPress, icon, label, disabled }: GlassMenuItem
 		: 'p-3 items-center justify-center w-full'
 
 	return (
-		<Animated.View style={animatedWrapperStyle} className="flex-1">
+		<Animated.View style={animatedWrapperStyle} className={className}>
 			<GlassView
 				className="rounded-full"
 				isInteractive
@@ -128,6 +130,11 @@ export default function ReadiumFooter() {
 		setShowMenuButton(showControls)
 	}, [showControls])
 
+	const { timer } = useEpubReaderContext()
+	const { locale } = useLocaleContext()
+	const elapsedSeconds = timer?.getCurrentTime() || 0
+	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
+
 	return (
 		<>
 			{showMenu && (
@@ -137,8 +144,7 @@ export default function ReadiumFooter() {
 
 			<View className="inset-x-safe bottom-safe h-12 absolute items-center justify-center">
 				<View
-					className="bottom-16 right-4 gap-2 absolute z-40 flex-col items-end"
-					style={{ width: 260 }}
+					className="bottom-16 right-4 gap-2 w-80 absolute z-40 flex-col items-end"
 					pointerEvents={showMenu ? 'auto' : 'none'}
 				>
 					<MenuItem
@@ -182,14 +188,14 @@ export default function ReadiumFooter() {
 					/>
 
 					<View className="gap-2 w-full flex-row items-center">
-						<MenuItem label="1h 42m" show={showMenu} delay={0} />
-						<MenuItem show={showMenu} delay={0} icon={Info} />
+						<MenuItem label={formattedReadTime} show={showMenu} delay={0} className="flex-1" />
 						<MenuItem
 							show={showMenu}
 							delay={0}
 							icon={isBookmarked ? BookmarkCheck : Bookmark}
 							onPress={toggleBookmark}
 							disabled={bookmarkDisabled}
+							className="flex-1"
 						/>
 					</View>
 				</View>

@@ -94,6 +94,7 @@ export default function ReadiumReader({
 	onCreateAnnotation,
 	onUpdateAnnotation,
 	onDeleteAnnotation,
+	timer,
 	...ctx
 }: Props) {
 	const { downloadImmediate } = useDownload({ serverId: ctx.serverId })
@@ -520,6 +521,7 @@ export default function ReadiumReader({
 				onCreateAnnotation,
 				onUpdateAnnotation,
 				onDeleteAnnotation,
+				timer: timer,
 			}}
 		>
 			<View

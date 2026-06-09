@@ -8,7 +8,8 @@ use openidconnect::{
 	},
 	AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims,
 	EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl, Nonce, OAuth2TokenResponse,
-	RedirectUrl, Scope, StandardErrorResponse, TokenResponse,
+	PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope,
+	StandardErrorResponse, TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::config::OidcConfig;
@@ -89,19 +90,24 @@ pub fn get_oidc_authorize_url(
 	client: &StumpOidcClient,
 	scopes: &[String],
 	state: &str,
+	pkce_challenge: Option<PkceCodeChallenge>,
 ) -> String {
 	let scope_vec: Vec<Scope> = scopes.iter().map(|s| Scope::new(s.clone())).collect();
 	let state_owned = state.to_string();
 
-	let (authorize_url, _, _) = client
+	let mut auth_request = client
 		.authorize_url(
 			CoreAuthenticationFlow::AuthorizationCode,
 			move || CsrfToken::new(state_owned),
 			Nonce::new_random,
 		)
-		.add_scopes(scope_vec)
-		.url();
+		.add_scopes(scope_vec);
 
+	if let Some(challenge) = pkce_challenge {
+		auth_request = auth_request.set_pkce_challenge(challenge);
+	}
+
+	let (authorize_url, _, _) = auth_request.url();
 	authorize_url.to_string()
 }
 
@@ -126,9 +132,13 @@ pub async fn exchange_code_for_claims(
 	client: &StumpOidcClient,
 	code: String,
 	extra_audiences: Vec<String>,
+	pkce_verifier: Option<PkceCodeVerifier>,
 ) -> Result<OidcClaims, APIError> {
-	let token_response = client
-		.exchange_code(AuthorizationCode::new(code))?
+	let mut request = client.exchange_code(AuthorizationCode::new(code))?;
+	if let Some(verifier) = pkce_verifier {
+		request = request.set_pkce_verifier(verifier);
+	}
+	let token_response = request
 		.request_async(http_client)
 		.await
 		.map_err(|error| {

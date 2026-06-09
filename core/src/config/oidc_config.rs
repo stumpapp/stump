@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use super::env_keys::*;
 
-const REQUIRED_SCOPES: &str = "openid,email";
+const REQUIRED_SCOPES: &str = "email";
 
 /// Configuration for OpenID Connect (OIDC) authentication
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, SimpleObject)]

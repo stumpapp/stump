@@ -32,8 +32,8 @@ export default function ThumbnailAppearancePreference() {
 	return (
 		<>
 			<NewCard.Row
-				label="Preview"
-				description="This is how thumbnails will look with the current settings"
+				label={t(getSectionKey('thumbnailPreview', 'label'))}
+				description={t(getSectionKey('thumbnailPreview', 'description'))}
 			>
 				<div className="lg:w-auto lg:justify-end flex w-full justify-center">
 					<div className="h-28 max-w-36 w-full">

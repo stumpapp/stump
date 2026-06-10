@@ -92,10 +92,7 @@ export default function Screen() {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
 
-	const showControls = useReaderStore((state) => state.showControls)
-	const timer = useBookTimer(contextValue.entryId, {
-		enabled: trackElapsedTime && !showControls,
-	})
+	const timer = useBookTimer(contextValue.entryId, { enabled: trackElapsedTime })
 
 	const onPageChanged = useCallback(
 		async (pageNumber: number) => {

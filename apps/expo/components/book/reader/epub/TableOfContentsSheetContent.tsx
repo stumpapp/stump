@@ -3,7 +3,7 @@ import { getColor, serialize } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
-import Animated, { Easing, Keyframe } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 
 import { Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
@@ -13,6 +13,7 @@ import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
+import { ENTERING_ANIMATION, EXITING_ANIMATION } from '../shared'
 import { useEpubReaderContext } from './context'
 
 export default function TableOfContentsSheetContent() {
@@ -213,17 +214,6 @@ const Divider = ({ level = 0 }: { level?: number }) => (
 	/>
 )
 
-// GlassView doesn't like zero opacity https://github.com/expo/expo/issues/41024
-const enteringAnimation = new Keyframe({
-	from: { opacity: 0.02 },
-	to: { opacity: 1, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
-const exitingAnimation = new Keyframe({
-	from: { opacity: 1 },
-	to: { opacity: 0.02, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
 const ScrollToChapterIndicator = ({
 	onPress,
 	className,
@@ -237,8 +227,8 @@ const ScrollToChapterIndicator = ({
 
 	return (
 		<Animated.View
-			entering={enteringAnimation}
-			exiting={exitingAnimation}
+			entering={ENTERING_ANIMATION}
+			exiting={EXITING_ANIMATION}
 			className={cn('left-0 right-0 absolute items-center', className)}
 		>
 			<Pressable onPress={onPress}>

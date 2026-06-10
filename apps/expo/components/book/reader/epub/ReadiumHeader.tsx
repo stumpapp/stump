@@ -4,10 +4,15 @@ import { useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
 import { useEffect, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
-import Animated, { Easing, Keyframe } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
+import {
+	ENTERING_ANIMATION,
+	EXITING_ANIMATION,
+	FADE_IN,
+	FADE_OUT,
+} from '~/components/book/reader/shared'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { usePreferencesStore, useReaderStore } from '~/stores'
@@ -15,26 +20,11 @@ import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
 export const HEADER_HEIGHT = 48
 
-// For the menu button
-const enteringAnimation = new Keyframe({
-	from: { opacity: 0.02 },
-	to: { opacity: 1, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
-const exitingAnimation = new Keyframe({
-	from: { opacity: 1 },
-	to: { opacity: 0.02, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
-// TODO: Figure out ideal UI for reader, I have largely been influenced by Yomu but
-// think I want to deviate a bit moving forward
-
 export default function ReadiumHeader() {
 	const { colors } = useEpubTheme()
 	const insets = useSafeAreaInsets()
 	const router = useRouter()
 
-	const { primaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
 	const showControls = useReaderStore((state) => state.showControls)
 	const { chapterTitle, progressText } = useChapterProgress()
@@ -42,10 +32,12 @@ export default function ReadiumHeader() {
 	return (
 		<>
 			{/* Controls hidden */}
-			{!preferMinimalReader && (
+			{!preferMinimalReader && !showControls && (
 				<Animated.View
 					className="inset-x-safe h-12 px-8 absolute z-20 items-center justify-center"
-					style={[{ top: initialWindowMetrics?.insets.top || insets.top }, primaryStyle]}
+					style={{ top: initialWindowMetrics?.insets.top || insets.top }}
+					entering={ENTERING_ANIMATION}
+					exiting={EXITING_ANIMATION}
 				>
 					<Animated.View key={chapterTitle} entering={FADE_IN} exiting={FADE_OUT}>
 						<Text
@@ -63,8 +55,8 @@ export default function ReadiumHeader() {
 			{showControls && (
 				<Animated.View
 					className="inset-x-safe h-12 gap-2 px-4 absolute z-20 flex-row items-center justify-between"
-					entering={enteringAnimation}
-					exiting={exitingAnimation}
+					entering={ENTERING_ANIMATION}
+					exiting={EXITING_ANIMATION}
 					style={[{ top: initialWindowMetrics?.insets.top || insets.top }]}
 					pointerEvents={showControls ? undefined : 'none'}
 				>

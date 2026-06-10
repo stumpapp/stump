@@ -13,8 +13,6 @@ import { cssInterop } from 'nativewind'
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, {
-	Easing,
-	Keyframe,
 	useAnimatedStyle,
 	useSharedValue,
 	withDelay,
@@ -22,9 +20,13 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated'
 
-import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
+import {
+	ENTERING_ANIMATION,
+	EXITING_ANIMATION,
+	FADE_IN,
+	FADE_OUT,
+} from '~/components/book/reader/shared'
 import { Icon, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
@@ -36,17 +38,6 @@ import { useBookmark } from './useBookmark'
 export const FOOTER_HEIGHT = 48
 
 cssInterop(GlassView, { className: { target: 'style' } })
-
-// For the menu button
-const enteringAnimation = new Keyframe({
-	from: { opacity: 0.02 },
-	to: { opacity: 1, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
-const exitingAnimation = new Keyframe({
-	from: { opacity: 1 },
-	to: { opacity: 0.02, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
 
 type GlassMenuItemProps = {
 	show: boolean
@@ -101,11 +92,7 @@ function MenuItem({ show, delay, onPress, icon, label, disabled, className }: Gl
 				}}
 			>
 				<Animated.View style={animatedContentStyle}>
-					<Pressable
-						onPress={onPress}
-						className={cn(disabled && 'opacity-40', contentClassName)}
-						disabled={disabled}
-					>
+					<Pressable onPress={onPress} className={contentClassName} disabled={disabled}>
 						{label && <Text className="font-medium">{label}</Text>}
 						{icon && <Icon as={icon} size={21} strokeWidth={2.2} />}
 					</Pressable>
@@ -121,25 +108,24 @@ export default function ReadiumFooter() {
 	const openSheet = useEpubSheetStore((state) => state.openSheet)
 
 	const [showMenu, setShowMenu] = useState(false)
-	const [showMenuButton, setShowMenuButton] = useState(showControls && !showMenu)
 
 	const { isBookmarked, disabled: bookmarkDisabled, toggleBookmark } = useBookmark()
 
-	useEffect(() => {
-		// Modify
-		setShowMenuButton(showControls)
-	}, [showControls])
-
 	const { timer } = useEpubReaderContext()
 	const { locale } = useLocaleContext()
-	const elapsedSeconds = timer?.getCurrentTime() || 0
+	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
 
 	return (
 		<>
 			{showMenu && (
-				// TODO: update showControls for time and stuff
-				<Pressable className="inset-0 absolute z-30" onPress={() => setShowMenu(false)} />
+				<Pressable
+					className="inset-0 absolute z-30"
+					onPress={() => {
+						setShowMenu(false)
+						timer?.resume()
+					}}
+				/>
 			)}
 
 			<View className="inset-x-safe bottom-safe h-12 absolute items-center justify-center">
@@ -200,18 +186,19 @@ export default function ReadiumFooter() {
 					</View>
 				</View>
 
-				{showMenuButton && (
+				{showControls && (
 					<Animated.View
-						entering={enteringAnimation}
-						exiting={exitingAnimation}
+						entering={ENTERING_ANIMATION}
+						exiting={EXITING_ANIMATION}
 						className="right-6 absolute z-30"
 					>
 						<GlassView className="items-center justify-center rounded-full" isInteractive>
 							<Pressable
-								disabled={!showMenuButton}
+								disabled={!showControls}
 								onPress={() => {
+									timer?.pause()
+									setElapsedSeconds(timer?.getCurrentTime() || 0)
 									setShowMenu(true)
-									setShowMenuButton(false)
 									setShowControls(false)
 								}}
 								className="p-3"
@@ -230,16 +217,20 @@ export default function ReadiumFooter() {
 
 function PageNumber() {
 	const { colors } = useEpubTheme()
+	const showControls = useReaderStore((state) => state.showControls)
 
-	const { secondaryStyle, primaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
 	const { page, pageOfTotal, formattedPageOfTotal } = usePositionFormat()
 
 	return (
 		<>
 			{/* Controls hidden: Page only */}
-			{!preferMinimalReader && (
-				<Animated.View className="absolute w-full items-center justify-center" style={primaryStyle}>
+			{!preferMinimalReader && !showControls && (
+				<Animated.View
+					className="absolute w-full items-center justify-center"
+					entering={ENTERING_ANIMATION}
+					exiting={EXITING_ANIMATION}
+				>
 					<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
 						<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
 							{page}
@@ -249,15 +240,21 @@ function PageNumber() {
 			)}
 
 			{/* Controls shown: Page out of total */}
-			<Animated.View className="absolute w-full items-center justify-center" style={secondaryStyle}>
-				<JumpButton />
+			{showControls && (
+				<Animated.View
+					className="absolute w-full items-center justify-center"
+					entering={ENTERING_ANIMATION}
+					exiting={EXITING_ANIMATION}
+				>
+					<JumpButton />
 
-				<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
-					<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
-						{preferMinimalReader ? formattedPageOfTotal : pageOfTotal}
-					</Text>
+					<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
+						<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
+							{preferMinimalReader ? formattedPageOfTotal : pageOfTotal}
+						</Text>
+					</Animated.View>
 				</Animated.View>
-			</Animated.View>
+			)}
 		</>
 	)
 }

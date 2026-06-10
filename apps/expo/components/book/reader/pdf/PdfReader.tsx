@@ -75,6 +75,14 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
 
+	useEffect(() => {
+		if (controlsVisible) {
+			ctx.timer?.pause()
+		} else {
+			ctx.timer?.resume()
+		}
+	}, [controlsVisible, ctx.timer])
+
 	const { preferences: bookPreferences } = useBookPreferences({ book, serverId: ctx.serverId })
 
 	// TODO(expo-pdf): Additional PDFPreferences to consider exposing:

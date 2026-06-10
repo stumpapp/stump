@@ -73,9 +73,8 @@ export default function Screen() {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
-	const showControls = useReaderStore((state) => state.showControls)
 
-	const timer = useBookTimer(id, { enabled: trackElapsedTime && !showControls })
+	const timer = useBookTimer(id, { enabled: trackElapsedTime })
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)

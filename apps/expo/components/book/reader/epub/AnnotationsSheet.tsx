@@ -10,11 +10,13 @@ import { PortalHostContext } from '~/lib/PortalHostContext'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import AnnotationsSheetContent from './AnnotationsSheetContent'
+import { useEpubReaderContext } from './context'
 
 const SHEET_PORTAL_HOST = 'annotations-sheet'
 
 export default function AnnotationsSheet() {
 	const sheetRef = useEpubSheetStore((state) => state.annotationsSheetRef)
+	const { timer } = useEpubReaderContext()
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -37,7 +39,10 @@ export default function AnnotationsSheet() {
 				}}
 				insetAdjustment="automatic"
 				onDidPresent={() => setIsOpen(true)}
-				onDidDismiss={() => setIsOpen(false)}
+				onDidDismiss={() => {
+					setIsOpen(false)
+					timer?.resume()
+				}}
 			>
 				<PortalHostContext.Provider
 					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}

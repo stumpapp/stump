@@ -9,12 +9,14 @@ import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { PortalHostContext } from '~/lib/PortalHostContext'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
+import { useEpubReaderContext } from './context'
 import TableOfContentsSheetContent from './TableOfContentsSheetContent'
 
 const SHEET_PORTAL_HOST = 'table-of-contents-sheet'
 
 export default function TableOfContentsSheet() {
 	const sheetRef = useEpubSheetStore((state) => state.tableOfContentsSheetRef)
+	const { timer } = useEpubReaderContext()
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -37,7 +39,10 @@ export default function TableOfContentsSheet() {
 				}}
 				insetAdjustment="automatic"
 				onDidPresent={() => setIsOpen(true)}
-				onDidDismiss={() => setIsOpen(false)}
+				onDidDismiss={() => {
+					setIsOpen(false)
+					timer?.resume()
+				}}
 			>
 				<PortalHostContext.Provider
 					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}

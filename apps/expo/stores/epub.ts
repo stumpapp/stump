@@ -1,3 +1,4 @@
+import { getColor, to } from 'colorjs.io/fn'
 import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
@@ -405,7 +406,7 @@ export const resolveThemeName = (
 }
 
 export const useEpubTheme = () => {
-	const { colorScheme } = useColorScheme()
+	const { colorScheme, isDarkColorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore(
 		useShallow((store) => ({
 			themes: store.themes,
@@ -413,10 +414,25 @@ export const useEpubTheme = () => {
 		})),
 	)
 
-	return useMemo(
+	const theme = useMemo(
 		() => resolveTheme(themes, selectedTheme || '', colorScheme),
 		[themes, selectedTheme, colorScheme],
 	)
+
+	let isDarkEpubTheme: boolean = isDarkColorScheme
+	if (theme.colors?.background) {
+		const backgroundColor = getColor(theme.colors?.background)
+		const foregroundColor = getColor(theme.colors?.foreground)
+
+		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
+		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
+
+		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
+		// to look much better for edge cases near the boundry
+		isDarkEpubTheme = foregroundLightness > backgroundLightness
+	}
+
+	return { ...theme, isDarkEpubTheme }
 }
 
 export type SupportedMobileFont =

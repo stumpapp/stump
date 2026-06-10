@@ -21,7 +21,7 @@ import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 export const HEADER_HEIGHT = 48
 
 export default function ReadiumHeader() {
-	const { colors } = useEpubTheme()
+	const { colors, isDarkEpubTheme } = useEpubTheme()
 	const insets = useSafeAreaInsets()
 	const router = useRouter()
 
@@ -63,9 +63,10 @@ export default function ReadiumHeader() {
 					<GlassView
 						className="left-6 absolute items-center justify-center rounded-full"
 						isInteractive
+						colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
 					>
 						<Pressable disabled={!showControls} onPress={router.back} className="p-3">
-							<Icon as={X} size={30} />
+							<Icon as={X} size={30} color={colors?.foreground} className="opacity-80" />
 						</Pressable>
 					</GlassView>
 

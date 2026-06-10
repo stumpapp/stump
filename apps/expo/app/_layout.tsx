@@ -4,7 +4,6 @@ import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation
 import { PortalHost } from '@rn-primitives/portal'
 import * as Sentry from '@sentry/react-native'
 import { initDateFnsLocale, LocaleProvider } from '@stump/i18n'
-import { getColor, to } from 'colorjs.io/fn'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import * as Localization from 'expo-localization'
 import { Stack, useNavigationContainerRef } from 'expo-router'
@@ -86,7 +85,7 @@ export default function RootLayout() {
 	)
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
-	const { colors: epubThemeColors } = useEpubTheme()
+	const { isDarkEpubTheme } = useEpubTheme()
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -138,19 +137,6 @@ export default function RootLayout() {
 			Sentry.captureException(err)
 		})
 	}, [success])
-
-	let isDarkEpubTheme: boolean = isDarkColorScheme
-	if (epubThemeColors?.background && isReadingEbook) {
-		const backgroundColor = getColor(epubThemeColors?.background)
-		const foregroundColor = getColor(epubThemeColors?.foreground)
-
-		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
-		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
-
-		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
-		// to look much better for edge cases near the boundry
-		isDarkEpubTheme = foregroundLightness > backgroundLightness
-	}
 
 	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
 

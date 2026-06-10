@@ -50,6 +50,8 @@ type GlassMenuItemProps = {
 }
 
 function MenuItem({ show, delay, onPress, icon, label, disabled, className }: GlassMenuItemProps) {
+	const { colors, isDarkEpubTheme } = useEpubTheme()
+
 	const progress = useSharedValue(0)
 	const [glassActive, setGlassActive] = useState(false)
 
@@ -90,11 +92,16 @@ function MenuItem({ show, delay, onPress, icon, label, disabled, className }: Gl
 					animate: true,
 					animationDuration: 0.35,
 				}}
+				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
 			>
 				<Animated.View style={animatedContentStyle}>
 					<Pressable onPress={onPress} className={contentClassName} disabled={disabled}>
-						{label && <Text className="font-medium">{label}</Text>}
-						{icon && <Icon as={icon} size={21} strokeWidth={2.2} />}
+						{label && (
+							<Text className="font-medium" style={{ color: colors?.foreground }}>
+								{label}
+							</Text>
+						)}
+						{icon && <Icon as={icon} size={21} strokeWidth={2.2} color={colors?.foreground} />}
 					</Pressable>
 				</Animated.View>
 			</GlassView>
@@ -106,10 +113,10 @@ export default function ReadiumFooter() {
 	const showControls = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 	const openSheet = useEpubSheetStore((state) => state.openSheet)
+	const { colors, isDarkEpubTheme } = useEpubTheme()
+	const { isBookmarked, disabled: bookmarkDisabled, toggleBookmark } = useBookmark()
 
 	const [showMenu, setShowMenu] = useState(false)
-
-	const { isBookmarked, disabled: bookmarkDisabled, toggleBookmark } = useBookmark()
 
 	const { timer } = useEpubReaderContext()
 	const { locale } = useLocaleContext()
@@ -192,7 +199,11 @@ export default function ReadiumFooter() {
 						exiting={EXITING_ANIMATION}
 						className="right-6 absolute z-30"
 					>
-						<GlassView className="items-center justify-center rounded-full" isInteractive>
+						<GlassView
+							className="items-center justify-center rounded-full"
+							isInteractive
+							colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+						>
 							<Pressable
 								disabled={!showControls}
 								onPress={() => {
@@ -203,7 +214,7 @@ export default function ReadiumFooter() {
 								}}
 								className="p-3"
 							>
-								<Icon as={Menu} size={30} />
+								<Icon as={Menu} size={30} color={colors?.foreground} className="opacity-80" />
 							</Pressable>
 						</GlassView>
 					</Animated.View>

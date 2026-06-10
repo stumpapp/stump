@@ -1392,14 +1392,7 @@ async fn update_book_progression(
 		device_id,
 	};
 
-	upsert_reading_session(
-		conn,
-		&user,
-		&id,
-		progression,
-		ctx.config.book_completion_dedup_timeout_secs,
-	)
-	.await?;
+	upsert_reading_session(conn, &user, &id, progression).await?;
 
 	Ok(axum::http::StatusCode::NO_CONTENT)
 }

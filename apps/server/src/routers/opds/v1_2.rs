@@ -874,14 +874,8 @@ async fn get_book_page(
 			..Default::default()
 		};
 
-		let reading_session = upsert_reading_session(
-			ctx.conn.as_ref(),
-			&user,
-			&id,
-			progression,
-			ctx.config.book_completion_dedup_timeout_secs,
-		)
-		.await?;
+		let reading_session =
+			upsert_reading_session(ctx.conn.as_ref(), &user, &id, progression).await?;
 		tracing::trace!(?reading_session, "Upserted active reading session");
 	}
 

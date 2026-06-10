@@ -1,3 +1,4 @@
+import Octicons from '@expo/vector-icons/Octicons'
 import { formatNarrowDuration, useLocaleContext } from '@stump/i18n'
 import { GlassView } from 'expo-glass-effect'
 import {
@@ -13,6 +14,7 @@ import { cssInterop } from 'nativewind'
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, {
+	interpolate,
 	useAnimatedStyle,
 	useSharedValue,
 	withDelay,
@@ -27,6 +29,7 @@ import {
 	FADE_OUT,
 } from '~/components/book/reader/shared'
 import { Icon, Text } from '~/components/ui'
+import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
@@ -123,6 +126,41 @@ export default function ReadiumFooter() {
 	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
 
+	const enableMenuButton = showControls || (isBookmarked && !bookmarkDisabled)
+	const showMenuButton = enableMenuButton && !showMenu
+
+	const progress = useSharedValue(showControls ? 1 : 0)
+
+	useEffect(() => {
+		progress.value = withSpring(showControls ? 1 : 0, {
+			damping: 15,
+			stiffness: 150,
+			mass: 0.8,
+		})
+	}, [showControls, progress])
+
+	// we split menuButtonStyle and menuButtonIconStyle (not using scale on menuButtonStyle)
+	// because otherwise the bookmark will be very blurry during animation
+	const menuButtonStyle = useAnimatedStyle(() => {
+		const size = interpolate(progress.value, [0, 1], [48.6, 54])
+		const offset = (54 - size) / 2
+		return { width: size, height: size, top: offset, left: offset }
+	})
+	const menuButtonIconStyle = useAnimatedStyle(() => {
+		const scale = interpolate(progress.value, [0, 1], [0.9, 1])
+		return { transform: [{ scale }] }
+	})
+
+	const bookmarkContainerStyle = useAnimatedStyle(() => {
+		const size = interpolate(progress.value, [0, 1], [48.6, 54])
+		// bookmark icon: small = 14px, large = 30px
+		const scale = interpolate(progress.value, [0, 1], [1, 14 / 30])
+		const translateX = interpolate(progress.value, [0, 1], [0, 16])
+		const translateY = -translateX
+
+		return { width: size, height: size, transform: [{ translateX }, { translateY }, { scale }] }
+	})
+
 	return (
 		<>
 			{showMenu && (
@@ -132,7 +170,13 @@ export default function ReadiumFooter() {
 						setShowMenu(false)
 						timer?.resume()
 					}}
-				/>
+				>
+					<Animated.View
+						className={cn('flex-1', isDarkEpubTheme ? 'bg-black/50' : 'bg-black/20')}
+						entering={ENTERING_ANIMATION}
+						exiting={EXITING_ANIMATION}
+					/>
+				</Pressable>
 			)}
 
 			<View className="inset-x-safe bottom-safe h-12 absolute items-center justify-center">
@@ -181,7 +225,14 @@ export default function ReadiumFooter() {
 					/>
 
 					<View className="gap-2 w-full flex-row items-center">
-						<MenuItem label={formattedReadTime} show={showMenu} delay={0} className="flex-1" />
+						<MenuItem
+							label={formattedReadTime}
+							show={showMenu}
+							delay={0}
+							// The read time must take around half the width to display on one line for all locales
+							// 9.75rem = ( w-80 - half of gap-2 ) / 2
+							className="w-[9.75rem]"
+						/>
 						<MenuItem
 							show={showMenu}
 							delay={0}
@@ -193,30 +244,50 @@ export default function ReadiumFooter() {
 					</View>
 				</View>
 
-				{showControls && (
+				{showMenuButton && (
 					<Animated.View
 						entering={ENTERING_ANIMATION}
 						exiting={EXITING_ANIMATION}
 						className="right-6 absolute z-30"
+						style={{ width: 54, height: 54 }}
 					>
-						<GlassView
-							className="items-center justify-center rounded-full"
-							isInteractive
-							colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-						>
-							<Pressable
-								disabled={!showControls}
-								onPress={() => {
-									timer?.pause()
-									setElapsedSeconds(timer?.getCurrentTime() || 0)
-									setShowMenu(true)
-									setShowControls(false)
-								}}
-								className="p-3"
+						<Animated.View style={menuButtonStyle} className="inset-0 absolute">
+							<GlassView
+								className="flex-1 items-center justify-center rounded-full"
+								isInteractive
+								colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
 							>
-								<Icon as={Menu} size={30} color={colors?.foreground} className="opacity-80" />
-							</Pressable>
-						</GlassView>
+								<Pressable
+									disabled={!enableMenuButton}
+									onPress={() => {
+										timer?.pause()
+										setElapsedSeconds(timer?.getCurrentTime() || 0)
+										setShowMenu(true)
+										setShowControls(false)
+									}}
+									className="flex-1 items-center justify-center"
+								>
+									<Animated.View style={menuButtonIconStyle}>
+										<Icon as={Menu} size={30} color={colors?.foreground} className="opacity-80" />
+									</Animated.View>
+								</Pressable>
+
+								{isBookmarked && !bookmarkDisabled && (
+									<Animated.View
+										style={bookmarkContainerStyle}
+										className="top-0 right-0 border-white/10 bg-red-600 absolute items-center justify-center rounded-full border"
+										pointerEvents="none"
+									>
+										<Octicons
+											name="bookmark-filled"
+											size={30}
+											color="#facc15" // yellow-400
+											className="scale-x-90"
+										/>
+									</Animated.View>
+								)}
+							</GlassView>
+						</Animated.View>
 					</Animated.View>
 				)}
 

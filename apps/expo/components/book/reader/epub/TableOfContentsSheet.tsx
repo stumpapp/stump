@@ -28,7 +28,6 @@ export default function TableOfContentsSheet() {
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				dimmed={false}
 				scrollable
 				grabber
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}

@@ -12,7 +12,8 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
+	Condition, DatabaseBackend, FromQueryResult, JoinType, QueryOrder, QuerySelect,
+	QueryTrait, Statement,
 };
 
 use crate::{
@@ -459,114 +460,178 @@ impl MediaQuery {
 		let limit = offset_info.limit();
 		let offset = offset_info.offset();
 
+		let ctes = r#"
+			WITH
+			-- series with at least one finished session
+			user_read_series AS (
+				SELECT DISTINCT m.series_id
+				FROM media m
+				JOIN reading_sessions rs ON rs.media_id = m.id
+				WHERE rs.user_id = ?
+				AND rs.status = 'FINISHED'
+				AND m.series_id IS NOT NULL
+			),
+
+			-- series the user has dropped
+			user_dropped_series AS (
+				SELECT series_id
+				FROM user_series_state
+				WHERE user_id = ?
+				AND dropped_at IS NOT NULL
+			),
+
+			-- series with an in-progress session
+			user_active_series AS (
+				SELECT DISTINCT m.series_id
+				FROM media m
+				JOIN reading_sessions rs ON rs.media_id = m.id
+				WHERE rs.user_id = ?
+				AND m.series_id IS NOT NULL
+				AND rs.status = 'READING'
+				AND NOT EXISTS (
+					SELECT 1
+					FROM reading_sessions rs2
+					WHERE rs2.user_id = rs.user_id
+					AND rs2.media_id = rs.media_id
+					AND (
+						rs2.updated_at > rs.updated_at
+						OR (
+							rs2.updated_at = rs.updated_at
+							AND rs2.created_at > rs.created_at
+						)
+						OR (
+							rs2.updated_at = rs.updated_at
+							AND rs2.created_at = rs.created_at
+							AND rs2.id > rs.id
+						)
+					)
+				)
+			),
+
+			-- max readthrough number per series or the stopped_readthrough flag if set
+			series_current_readthrough AS (
+				SELECT
+					m.series_id,
+					MAX(rs.readthrough_number) AS current_readthrough,
+					uss.stopped_readthrough
+				FROM reading_sessions rs
+				JOIN media m ON m.id = rs.media_id
+				LEFT JOIN user_series_state uss
+					ON uss.series_id = m.series_id
+					AND uss.user_id = rs.user_id
+				WHERE rs.user_id = ?
+				AND m.series_id IS NOT NULL
+				GROUP BY m.series_id, uss.stopped_readthrough
+			),
+
+			-- books that count as "already read":
+			--  stopped re-read -> treat as read
+			--  first readthrough -> any finished session counts
+			--  active re-read -> only sessions from the current readthrough
+			user_read_media AS (
+				SELECT DISTINCT rs.media_id
+				FROM reading_sessions rs
+				JOIN media m ON m.id = rs.media_id
+				LEFT JOIN series_current_readthrough scr ON scr.series_id = m.series_id
+				WHERE rs.user_id = ?
+				AND rs.status = 'FINISHED'
+				AND (
+					scr.stopped_readthrough IS NOT NULL
+					OR scr.current_readthrough = 1
+					OR rs.readthrough_number = scr.current_readthrough
+				)
+			),
+
+			book_ranks AS (
+				SELECT
+					m.id,
+					m.series_id,
+					COALESCE(
+						mm.number,
+						ROW_NUMBER() OVER (PARTITION BY m.series_id ORDER BY m.name)
+					) AS rank
+				FROM media m
+				LEFT JOIN media_metadata mm ON mm.media_id = m.id
+				WHERE m.deleted_at IS NULL
+				AND m.series_id IS NOT NULL
+			),
+
+			series_max_read_rank AS (
+				SELECT br.series_id, MAX(br.rank) AS max_rank
+				FROM user_read_media ucm
+				JOIN book_ranks br ON br.id = ucm.media_id
+				GROUP BY br.series_id
+			),
+
+			series_last_read AS (
+				SELECT
+					m.series_id,
+					MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
+				FROM reading_sessions rs
+				JOIN media m ON m.id = rs.media_id
+				WHERE rs.user_id = ?
+				AND rs.status = 'FINISHED'
+				AND m.series_id IN (SELECT series_id FROM user_read_series)
+				GROUP BY m.series_id
+			),
+
+			next_in_series AS (
+				SELECT
+					m.id,
+					ROW_NUMBER() OVER(
+						PARTITION BY m.series_id
+						ORDER BY br.rank
+					) as book_rank,
+					COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
+				FROM
+					media m
+				LEFT JOIN
+					series_last_read srl ON srl.series_id = m.series_id
+				JOIN
+					book_ranks br ON br.id = m.id
+				LEFT JOIN
+					series_max_read_rank smrr ON smrr.series_id = m.series_id
+				WHERE
+					m.series_id IN (SELECT series_id FROM user_read_series)
+					AND m.series_id NOT IN (SELECT series_id FROM user_dropped_series)
+					AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
+					AND m.id NOT IN (SELECT media_id FROM user_read_media)
+					AND (smrr.max_rank IS NULL OR br.rank > smrr.max_rank)
+					AND m.deleted_at IS NULL
+			)
+		"#;
+
 		#[derive(Debug, FromQueryResult)]
 		struct OnDeckMediaId {
 			id: String,
 		}
 
-		let on_deck_media_ids = OnDeckMediaId::find_by_statement(db_statement(
-			conn,
-			r#"
-				WITH
-				-- Find all series where the user has read at least one book
-				user_read_series AS (
-					SELECT DISTINCT m.series_id
-					FROM media m
-					JOIN reading_sessions rs ON rs.media_id = m.id
-					WHERE rs.user_id = $1
-					AND rs.status = 'FINISHED'
-					AND m.series_id IS NOT NULL
+		let on_deck_media_ids =
+			OnDeckMediaId::find_by_statement(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				format!(
+					r#"
+					{ctes}
+					SELECT id
+					FROM next_in_series
+					WHERE book_rank = 1
+					ORDER BY series_last_read_date DESC
+					LIMIT ? OFFSET ?
+					"#
 				),
-
-				-- Find all media IDs that user has read
-				user_read_media AS (
-					SELECT DISTINCT media_id
-					FROM reading_sessions
-					WHERE user_id = $1
-					AND status = 'FINISHED'
-				),
-
-				-- We do not want books from series with active reading sessions
-				user_active_series AS (
-					SELECT DISTINCT m.series_id
-					FROM media m
-					JOIN reading_sessions rs ON rs.media_id = m.id
-					WHERE rs.user_id = $1
-					AND m.series_id IS NOT NULL
-					AND rs.status = 'READING'
-					AND NOT EXISTS (
-						SELECT 1
-						FROM reading_sessions rs2
-						WHERE rs2.user_id = rs.user_id
-						AND rs2.media_id = rs.media_id
-						AND (
-							rs2.updated_at > rs.updated_at
-							OR (
-								rs2.updated_at = rs.updated_at
-								AND rs2.created_at > rs.created_at
-							)
-							OR (
-								rs2.updated_at = rs.updated_at
-								AND rs2.created_at = rs.created_at
-								AND rs2.id > rs.id
-							)
-						)
-					)
-				),
-
-				-- For each series, get last read date for sorting priority
-				series_last_read AS (
-					SELECT
-						m.series_id,
-						MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
-					FROM reading_sessions rs
-					JOIN media m ON m.id = rs.media_id
-					WHERE rs.user_id = $1
-					AND rs.status = 'FINISHED'
-					AND m.series_id IN (SELECT series_id FROM user_read_series)
-					GROUP BY m.series_id
-				),
-
-				-- Find the first unread book for each series
-				next_in_series AS (
-					SELECT
-						m.id,
-						m.name,
-						m.series_id,
-						ROW_NUMBER() OVER(
-							PARTITION BY m.series_id
-							ORDER BY m.name
-						) as book_rank,
-						COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
-					FROM
-						media m
-					LEFT JOIN
-						series_last_read srl ON srl.series_id = m.series_id
-					WHERE
-						m.series_id IN (SELECT series_id FROM user_read_series)
-						AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
-						-- Exclude media that user has read or is currently reading
-						AND m.id NOT IN (SELECT media_id FROM user_read_media)
-						AND m.deleted_at IS NULL
-				)
-
-				-- Get only the first book for each series
-				SELECT
-					id
-				FROM
-					next_in_series
-				WHERE
-					book_rank = 1
-				ORDER BY
-					-- Most recently read series first
-					series_last_read_date DESC
-				LIMIT $2
-				OFFSET $3
-				"#,
-			[user_id.clone().into(), limit.into(), offset.into()],
-		))
-		.all(conn)
-		.await?;
+				[
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					limit.into(),
+					offset.into(),
+				],
+			))
+			.all(conn)
+			.await?;
 
 		let media_ids: Vec<String> =
 			on_deck_media_ids.into_iter().map(|row| row.id).collect();
@@ -598,83 +663,25 @@ impl MediaQuery {
 			.collect();
 
 		let total_count = conn
-			.query_one(db_statement(
-				conn,
-				r#"
-					-- Count total number of on deck items (for pagination)
-					WITH
-					-- Find all series where the user has read at least one book
-					user_read_series AS (
-						SELECT DISTINCT m.series_id
-						FROM media m
-						JOIN reading_sessions rs ON rs.media_id = m.id
-						WHERE rs.user_id = $1
-						AND rs.status = 'FINISHED'
-						AND m.series_id IS NOT NULL
-					),
-
-					-- Find all media IDs that user has read or is currently reading
-					user_read_or_reading_media AS (
-						-- Media that user has finished
-						SELECT DISTINCT media_id
-						FROM reading_sessions
-						WHERE user_id = $1
-						AND status = 'FINISHED'
-
-						UNION
-
-						-- Media that user is currently reading
-						SELECT DISTINCT rs.media_id
-						FROM reading_sessions rs
-						WHERE rs.user_id = $1
-						AND rs.status = 'READING'
-						AND NOT EXISTS (
-							SELECT 1
-							FROM reading_sessions rs2
-							WHERE rs2.user_id = rs.user_id
-							AND rs2.media_id = rs.media_id
-							AND (
-								rs2.updated_at > rs.updated_at
-								OR (
-									rs2.updated_at = rs.updated_at
-									AND rs2.created_at > rs.created_at
-								)
-								OR (
-									rs2.updated_at = rs.updated_at
-									AND rs2.created_at = rs.created_at
-									AND rs2.id > rs.id
-								)
-							)
-						)
-					),
-
-					-- Find the first unread book for each series
-					next_in_series AS (
-						SELECT
-							m.id,
-							ROW_NUMBER() OVER(
-								PARTITION BY m.series_id
-								ORDER BY m.name
-							) as book_rank
-						FROM
-							media m
-						WHERE
-							m.series_id IN (SELECT series_id FROM user_read_series)
-							-- Exclude media that user has read or is currently reading
-							AND m.id NOT IN (SELECT media_id FROM user_read_or_reading_media)
-							-- Ensure the media is not deleted
-							AND m.deleted_at IS NULL
-					)
-
-					-- Count only the first book for each series
-					SELECT
-						COUNT(*) as count
-					FROM
-						next_in_series
-					WHERE
-						book_rank = 1
-					"#,
-				[user_id.into()],
+			.query_one(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				format!(
+					r#"
+					{ctes}
+					SELECT COUNT(*) as count
+					FROM next_in_series
+					WHERE book_rank = 1
+					"#
+				),
+				[
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.into(),
+				],
 			))
 			.await?
 			.ok_or_else(|| async_graphql::Error::new("Failed to get count"))?

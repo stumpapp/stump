@@ -12,6 +12,7 @@ import {
 	EXITING_ANIMATION,
 	FADE_IN,
 	FADE_OUT,
+	useReaderAnimations,
 } from '~/components/book/reader/shared'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
@@ -21,10 +22,44 @@ import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 export const HEADER_HEIGHT = 48
 
 export default function ReadiumHeader() {
-	const { colors, isDarkEpubTheme } = useEpubTheme()
-	const insets = useSafeAreaInsets()
 	const router = useRouter()
+	const insets = useSafeAreaInsets()
 
+	const { colors, isDarkEpubTheme } = useEpubTheme()
+	const showControls = useReaderStore((state) => state.showControls)
+
+	return (
+		<View
+			className="inset-x-safe h-12 px-8 absolute z-20 items-center justify-center"
+			style={{ top: initialWindowMetrics?.insets.top || insets.top }}
+		>
+			{showControls && (
+				<Animated.View
+					entering={ENTERING_ANIMATION}
+					exiting={EXITING_ANIMATION}
+					className="left-6 absolute z-30"
+					style={{ width: 54, height: 54 }}
+				>
+					<GlassView
+						className="flex-1 items-center justify-center rounded-full"
+						isInteractive
+						colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+					>
+						<Pressable disabled={!showControls} onPress={router.back} className="p-3">
+							<Icon as={X} size={30} color={colors?.foreground} className="opacity-80" />
+						</Pressable>
+					</GlassView>
+				</Animated.View>
+			)}
+
+			<Title />
+		</View>
+	)
+}
+
+function Title() {
+	const { colors } = useEpubTheme()
+	const { primaryStyle, secondaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
 	const showControls = useReaderStore((state) => state.showControls)
 	const { chapterTitle, progressText } = useChapterProgress()
@@ -32,13 +67,8 @@ export default function ReadiumHeader() {
 	return (
 		<>
 			{/* Controls hidden */}
-			{!preferMinimalReader && !showControls && (
-				<Animated.View
-					className="inset-x-safe h-12 px-8 absolute z-20 items-center justify-center"
-					style={{ top: initialWindowMetrics?.insets.top || insets.top }}
-					entering={ENTERING_ANIMATION}
-					exiting={EXITING_ANIMATION}
-				>
+			{!preferMinimalReader && (
+				<Animated.View style={primaryStyle} className="absolute w-full items-center justify-center">
 					<Animated.View key={chapterTitle} entering={FADE_IN} exiting={FADE_OUT}>
 						<Text
 							numberOfLines={1}
@@ -52,37 +82,25 @@ export default function ReadiumHeader() {
 			)}
 
 			{/* Controls shown */}
-			{showControls && (
+			<Animated.View
+				className="absolute w-full items-center justify-center"
+				style={secondaryStyle}
+				pointerEvents={showControls ? undefined : 'none'}
+			>
 				<Animated.View
-					className="inset-x-safe h-12 gap-2 px-4 absolute z-20 flex-row items-center justify-between"
-					entering={ENTERING_ANIMATION}
-					exiting={EXITING_ANIMATION}
-					style={[{ top: initialWindowMetrics?.insets.top || insets.top }]}
-					pointerEvents={showControls ? undefined : 'none'}
+					key={preferMinimalReader ? chapterTitle : progressText}
+					entering={FADE_IN}
+					exiting={FADE_OUT}
 				>
-					<GlassView
-						className="left-6 absolute items-center justify-center rounded-full"
-						isInteractive
-						colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+					<Text
+						numberOfLines={1}
+						style={{ color: colors?.foreground }}
+						className="font-medium opacity-50"
 					>
-						<Pressable disabled={!showControls} onPress={router.back} className="p-3">
-							<Icon as={X} size={30} color={colors?.foreground} className="opacity-80" />
-						</Pressable>
-					</GlassView>
-
-					<View className="flex-1 items-center justify-center">
-						<Animated.View entering={FADE_IN} exiting={FADE_OUT}>
-							<Text
-								numberOfLines={1}
-								style={{ color: colors?.foreground }}
-								className="font-medium opacity-50"
-							>
-								{preferMinimalReader ? chapterTitle : progressText}
-							</Text>
-						</Animated.View>
-					</View>
+						{preferMinimalReader ? chapterTitle : progressText}
+					</Text>
 				</Animated.View>
-			)}
+			</Animated.View>
 		</>
 	)
 }

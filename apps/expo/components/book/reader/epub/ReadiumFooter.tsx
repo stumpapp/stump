@@ -27,6 +27,7 @@ import {
 	EXITING_ANIMATION,
 	FADE_IN,
 	FADE_OUT,
+	useReaderAnimations,
 } from '~/components/book/reader/shared'
 import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
@@ -110,8 +111,8 @@ export default function ReadiumFooter() {
 	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
 
-	const enableMenuButton = showControls || (isBookmarked && !bookmarkDisabled)
-	const showMenuButton = enableMenuButton && !showMenu
+	const showBookmark = isBookmarked && !bookmarkDisabled
+	const showMenuButton = (showControls || showBookmark) && !showMenu
 
 	const progress = useSharedValue(showControls ? 1 : 0)
 
@@ -128,10 +129,12 @@ export default function ReadiumFooter() {
 	const menuButtonStyle = useAnimatedStyle(() => {
 		const size = interpolate(progress.value, [0, 1], [48.6, 54])
 		const offset = (54 - size) / 2
+		if (!showBookmark) return {}
 		return { width: size, height: size, top: offset, left: offset }
 	})
 	const menuButtonIconStyle = useAnimatedStyle(() => {
 		const scale = interpolate(progress.value, [0, 1], [0.9, 1])
+		if (!showBookmark) return {}
 		return { transform: [{ scale }] }
 	})
 
@@ -235,14 +238,13 @@ export default function ReadiumFooter() {
 						className="right-6 absolute z-30"
 						style={{ width: 54, height: 54 }}
 					>
-						<Animated.View style={menuButtonStyle} className="inset-0 absolute">
+						<Animated.View style={menuButtonStyle} className="inset-0 absolute flex-1">
 							<GlassView
 								className="flex-1 items-center justify-center rounded-full"
 								isInteractive
 								colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
 							>
 								<Pressable
-									disabled={!enableMenuButton}
 									onPress={() => {
 										timer?.pause()
 										setElapsedSeconds(timer?.getCurrentTime() || 0)
@@ -283,20 +285,15 @@ export default function ReadiumFooter() {
 
 function PageNumber() {
 	const { colors } = useEpubTheme()
-	const showControls = useReaderStore((state) => state.showControls)
-
+	const { secondaryStyle, primaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
 	const { page, pageOfTotal, formattedPageOfTotal } = usePositionFormat()
 
 	return (
 		<>
 			{/* Controls hidden: Page only */}
-			{!preferMinimalReader && !showControls && (
-				<Animated.View
-					className="absolute w-full items-center justify-center"
-					entering={ENTERING_ANIMATION}
-					exiting={EXITING_ANIMATION}
-				>
+			{!preferMinimalReader && (
+				<Animated.View className="absolute w-full items-center justify-center" style={primaryStyle}>
 					<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
 						<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
 							{page}
@@ -306,21 +303,15 @@ function PageNumber() {
 			)}
 
 			{/* Controls shown: Page out of total */}
-			{showControls && (
-				<Animated.View
-					className="absolute w-full items-center justify-center"
-					entering={ENTERING_ANIMATION}
-					exiting={EXITING_ANIMATION}
-				>
-					<JumpButton />
+			<Animated.View className="absolute w-full items-center justify-center" style={secondaryStyle}>
+				<JumpButton />
 
-					<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
-						<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
-							{preferMinimalReader ? formattedPageOfTotal : pageOfTotal}
-						</Text>
-					</Animated.View>
+				<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
+					<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
+						{preferMinimalReader ? formattedPageOfTotal : pageOfTotal}
+					</Text>
 				</Animated.View>
-			)}
+			</Animated.View>
 		</>
 	)
 }

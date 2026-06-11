@@ -455,8 +455,8 @@
 			"description": "Indiziere die Bibliotheksdateien, um die Datenbank auszufüllen"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "Fehler bei der Aktualisierung der Bibliothek",
+			"failedToScan": "Fehler bei dem Scan der Bibliothek"
 		}
 	},
 	"createLibraryScene": {
@@ -2860,7 +2860,7 @@
 			"version": "Version"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Unbekannter Fehler"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2957,8 +2957,8 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"skippedOneServer": "Synchronisation für {{skippedCount}} Server übersprungen",
+				"skippedMultipleServers": "Synchronisation für {{skippedCount}} Server übersprungen",
 				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
 			},
 			"syncFailed": "Failed to sync offline progress"
@@ -3009,7 +3009,7 @@
 			},
 			"autoSyncLocalData": "Lokale Daten automatisch synchronisieren",
 			"lowercaseTranslation": "Kleinbuchstaben-Labels",
-			"tintListBackground": "Tint List Backgrounds",
+			"tintListBackground": "Färbe Listenhintergrund",
 			"management": {
 				"label": "Verwaltung",
 				"dataUsage": {

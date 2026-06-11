@@ -8,8 +8,8 @@ use openidconnect::{
 	},
 	AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims,
 	EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl, Nonce, OAuth2TokenResponse,
-	PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope,
-	StandardErrorResponse, TokenResponse,
+	PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, StandardErrorResponse,
+	TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::config::OidcConfig;
@@ -138,13 +138,10 @@ pub async fn exchange_code_for_claims(
 	if let Some(verifier) = pkce_verifier {
 		request = request.set_pkce_verifier(verifier);
 	}
-	let token_response = request
-		.request_async(http_client)
-		.await
-		.map_err(|error| {
-			tracing::error!(?error, "Token exchange failed");
-			APIError::OIDCTokenExchangeFailed(error.to_string())
-		})?;
+	let token_response = request.request_async(http_client).await.map_err(|error| {
+		tracing::error!(?error, "Token exchange failed");
+		APIError::OIDCTokenExchangeFailed(error.to_string())
+	})?;
 
 	let id_token = token_response
 		.id_token()

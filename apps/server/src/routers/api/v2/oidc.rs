@@ -81,7 +81,7 @@ pub struct AuthorizeQuery {
 
 /// The OIDC state parameter passed through the authorization flow.
 /// Contains both the original query params and the PKCE code verifier.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 struct OidcState {
 	#[serde(flatten)]
 	query: AuthorizeQuery,
@@ -119,6 +119,7 @@ async fn authorize(
 
 	let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
+	let generate_token = query.generate_token;
 	let state = OidcState {
 		query,
 		pkce_verifier: pkce_verifier.secret().to_string(),
@@ -129,6 +130,7 @@ async fn authorize(
 		APIError::InternalServerError("Failed to encode state".to_string())
 	})?;
 
+	let pkce_challenge_code = pkce_challenge.as_str().to_owned();
 	let redirect_to = get_oidc_authorize_url(
 		&client,
 		&oidc_config.get_scopes(),
@@ -137,7 +139,8 @@ async fn authorize(
 	);
 
 	tracing::debug!(
-		pkce = true,
+		%generate_token,
+		pkce_challenge_code,
 		?redirect_to,
 		"Redirecting to OIDC provider",
 	);
@@ -169,10 +172,7 @@ impl axum::response::IntoResponse for OidcCallbackResponse {
 fn parse_state(state: Option<&str>) -> OidcState {
 	state
 		.and_then(|s| serde_json::from_str::<OidcState>(s).ok())
-		.unwrap_or_else(|| OidcState {
-			query: AuthorizeQuery::default(),
-			pkce_verifier: String::new(),
-		})
+		.unwrap_or_default()
 }
 
 /// The handler for the OIDC callback (code exchange + user creation/login)

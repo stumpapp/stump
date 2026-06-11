@@ -28,7 +28,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub series_id: String,
 
-	/// the readthrough number at which this series was dropped
+	/// the readthrough number at which this series was dropped, so that we can
+	/// revert back to "first book beyond highest position ever read" logic for
+	/// the recommendations query instead of "next book in current re-read"
 	pub stopped_readthrough: Option<i32>,
 
 	/// when set, the books in the series will be excluded from on-deck recommentations

@@ -56,28 +56,19 @@ function MenuItem({ show, delay, onPress, icon, label, disabled, className }: Gl
 	const { colors, isDarkEpubTheme } = useEpubTheme()
 
 	const progress = useSharedValue(0)
-	const [glassActive, setGlassActive] = useState(false)
 
-	// glassEffectStyle animation is the proper way to animate the GlassViews
-	// but doesn't seem to work well with isInteractive on the menu button
 	useEffect(() => {
-		let timeout: NodeJS.Timeout
 		if (show) {
-			timeout = setTimeout(() => setGlassActive(true), delay)
 			progress.value = withDelay(delay, withSpring(1, { damping: 10, stiffness: 150, mass: 0.8 }))
 		} else {
-			timeout = setTimeout(() => setGlassActive(false), delay)
 			progress.value = withDelay(delay, withTiming(0, { duration: 350 }))
 		}
-		return () => clearTimeout(timeout)
 	}, [show, delay, progress])
 
-	const animatedContentStyle = useAnimatedStyle(() => ({
-		opacity: progress.value,
-	}))
-
-	const animatedWrapperStyle = useAnimatedStyle(() => ({
-		transform: [{ translateY: 20 * (1 - progress.value) }],
+	// GlassViews don't like zero opacity, so instead we make them disappear with scale
+	const animatedStyle = useAnimatedStyle(() => ({
+		transform: [{ translateY: 20 * (1 - progress.value) }, { scale: progress.value === 0 ? 0 : 1 }],
+		opacity: interpolate(progress.value, [0, 1], [0.02, 1]),
 	}))
 
 	const isWide = !!label && !!icon
@@ -86,27 +77,20 @@ function MenuItem({ show, delay, onPress, icon, label, disabled, className }: Gl
 		: 'p-3 items-center justify-center w-full'
 
 	return (
-		<Animated.View style={animatedWrapperStyle} className={className}>
+		<Animated.View style={animatedStyle} className={className}>
 			<GlassView
 				className="rounded-full"
 				isInteractive
-				glassEffectStyle={{
-					style: glassActive ? 'regular' : 'none',
-					animate: true,
-					animationDuration: 0.35,
-				}}
 				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
 			>
-				<Animated.View style={animatedContentStyle}>
-					<Pressable onPress={onPress} className={contentClassName} disabled={disabled}>
-						{label && (
-							<Text className="font-medium" style={{ color: colors?.foreground }}>
-								{label}
-							</Text>
-						)}
-						{icon && <Icon as={icon} size={21} strokeWidth={2.2} color={colors?.foreground} />}
-					</Pressable>
-				</Animated.View>
+				<Pressable onPress={onPress} className={contentClassName} disabled={disabled}>
+					{label && (
+						<Text className="font-medium" style={{ color: colors?.foreground }}>
+							{label}
+						</Text>
+					)}
+					{icon && <Icon as={icon} size={21} strokeWidth={2.2} color={colors?.foreground} />}
+				</Pressable>
 			</GlassView>
 		</Animated.View>
 	)

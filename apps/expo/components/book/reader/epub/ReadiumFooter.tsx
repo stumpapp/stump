@@ -1,15 +1,7 @@
 import Octicons from '@expo/vector-icons/Octicons'
 import { formatNarrowDuration, useLocaleContext } from '@stump/i18n'
 import { GlassView } from 'expo-glass-effect'
-import {
-	Bookmark,
-	BookmarkCheck,
-	List,
-	LucideIcon,
-	Menu,
-	Palette,
-	PencilLine,
-} from 'lucide-react-native'
+import { List, Menu, Palette, PencilLine } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -17,9 +9,7 @@ import Animated, {
 	interpolate,
 	useAnimatedStyle,
 	useSharedValue,
-	withDelay,
 	withSpring,
-	withTiming,
 } from 'react-native-reanimated'
 
 import {
@@ -37,72 +27,19 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { useEpubReaderContext } from './context'
 import JumpButton from './JumpButton'
+import { BookmarkMenuItem, MenuItem } from './MenuItem'
 import { useBookmark } from './useBookmark'
 
 export const FOOTER_HEIGHT = 48
 
 cssInterop(GlassView, { className: { target: 'style' } })
 
-type GlassMenuItemProps = {
-	show: boolean
-	delay: number
-	onPress?: () => void
-	icon?: LucideIcon
-	label?: string
-	disabled?: boolean
-	className?: string
-}
-
-function MenuItem({ show, delay, onPress, icon, label, disabled, className }: GlassMenuItemProps) {
-	const { colors, isDarkEpubTheme } = useEpubTheme()
-
-	const progress = useSharedValue(0)
-
-	useEffect(() => {
-		if (show) {
-			progress.value = withDelay(delay, withSpring(1, { damping: 10, stiffness: 150, mass: 0.8 }))
-		} else {
-			progress.value = withDelay(delay, withTiming(0, { duration: 350 }))
-		}
-	}, [show, delay, progress])
-
-	// GlassViews don't like zero opacity, so instead we make them disappear with scale
-	const animatedStyle = useAnimatedStyle(() => ({
-		transform: [{ translateY: 20 * (1 - progress.value) }, { scale: progress.value === 0 ? 0 : 1 }],
-		opacity: interpolate(progress.value, [0, 1], [0.02, 1]),
-	}))
-
-	const isWide = !!label && !!icon
-	const contentClassName = isWide
-		? 'p-4 flex-row items-center justify-between w-full'
-		: 'p-3 items-center justify-center w-full'
-
-	return (
-		<Animated.View style={animatedStyle} className={className}>
-			<GlassView
-				className="rounded-full"
-				isInteractive
-				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-			>
-				<Pressable onPress={onPress} className={contentClassName} disabled={disabled}>
-					{label && (
-						<Text className="font-medium" style={{ color: colors?.foreground }}>
-							{label}
-						</Text>
-					)}
-					{icon && <Icon as={icon} size={21} strokeWidth={2.2} color={colors?.foreground} />}
-				</Pressable>
-			</GlassView>
-		</Animated.View>
-	)
-}
-
 export default function ReadiumFooter() {
 	const showControls = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 	const openSheet = useEpubSheetStore((state) => state.openSheet)
 	const { colors, isDarkEpubTheme } = useEpubTheme()
-	const { isBookmarked, disabled: bookmarkDisabled, toggleBookmark } = useBookmark()
+	const { isBookmarked, disabled: bookmarkDisabled } = useBookmark()
 
 	const [showMenu, setShowMenu] = useState(false)
 
@@ -219,14 +156,7 @@ export default function ReadiumFooter() {
 							// The read time must take around half the width to display on one line for all locales
 							className="flex-[2]"
 						/>
-						<MenuItem
-							show={showMenu}
-							delay={0}
-							icon={isBookmarked ? BookmarkCheck : Bookmark}
-							onPress={toggleBookmark}
-							disabled={bookmarkDisabled}
-							className="flex-1"
-						/>
+						<BookmarkMenuItem show={showMenu} delay={0} className="flex-1" />
 					</View>
 				</View>
 

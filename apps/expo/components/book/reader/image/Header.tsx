@@ -56,7 +56,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				<PagedActionMenu
 					book={book}
 					serverId={serverId}
-					onResetTimer={timer?.reset}
+					onResetTimer={timer.reset}
 					onShowSettings={onShowGlobalSettings}
 				/>
 			</View>

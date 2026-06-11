@@ -54,7 +54,7 @@ export type IImageBasedReaderContext = {
 	pageThumbnailURL?: (page: number) => string
 	currentPage?: number
 	onPageChanged?: (page: number) => void
-	timer?: Timer
+	timer: Timer
 	isOPDS?: boolean
 } & OfflineCompatibleReader
 

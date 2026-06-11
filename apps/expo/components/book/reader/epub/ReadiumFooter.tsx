@@ -155,7 +155,7 @@ export default function ReadiumFooter() {
 					className="inset-0 absolute z-30"
 					onPress={() => {
 						setShowMenu(false)
-						timer?.resume()
+						timer.resume()
 					}}
 				>
 					<Animated.View
@@ -217,8 +217,7 @@ export default function ReadiumFooter() {
 							show={showMenu}
 							delay={0}
 							// The read time must take around half the width to display on one line for all locales
-							// 9.75rem = ( w-80 - half of gap-2 ) / 2
-							className="w-[9.75rem]"
+							className="flex-[2]"
 						/>
 						<MenuItem
 							show={showMenu}
@@ -246,8 +245,8 @@ export default function ReadiumFooter() {
 							>
 								<Pressable
 									onPress={() => {
-										timer?.pause()
-										setElapsedSeconds(timer?.getCurrentTime() || 0)
+										timer.pause()
+										setElapsedSeconds(timer.getCurrentTime() || 0)
 										setShowMenu(true)
 										setShowControls(false)
 									}}

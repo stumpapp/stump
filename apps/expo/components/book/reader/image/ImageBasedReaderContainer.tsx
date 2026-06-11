@@ -41,9 +41,9 @@ export default function ImageBasedReaderContainer({
 
 	useEffect(() => {
 		if (showControls) {
-			ctx.timer?.pause()
+			ctx.timer.pause()
 		} else {
-			ctx.timer?.resume()
+			ctx.timer.resume()
 		}
 	}, [showControls, ctx.timer])
 

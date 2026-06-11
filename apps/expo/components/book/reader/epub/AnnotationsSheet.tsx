@@ -40,7 +40,7 @@ export default function AnnotationsSheet() {
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => {
 					setIsOpen(false)
-					timer?.resume()
+					timer.resume()
 				}}
 			>
 				<PortalHostContext.Provider

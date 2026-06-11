@@ -5,7 +5,7 @@ import { Timer } from '~/stores/reader'
 
 export type EpubReaderContextValue = {
 	readerRef: ReadiumViewRef | null
-	timer?: Timer
+	timer: Timer
 	getRequestHeaders?: () => Record<string, string>
 	onBookmark?: (locator: ReadiumLocator, previewContent?: string) => Promise<{ id: string } | void>
 	onDeleteBookmark?: (bookmarkId: string) => Promise<void>

@@ -43,7 +43,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 				onDidDismiss={() => {
 					setIsOpen(false)
 					if (context) {
-						context.timer?.resume()
+						context.timer.resume()
 					}
 				}}
 			>

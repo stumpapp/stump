@@ -1,4 +1,4 @@
-import Octicons from '@expo/vector-icons/Octicons'
+import Octicons from '@react-native-vector-icons/octicons'
 import { formatNarrowDuration, useLocaleContext } from '@stump/i18n'
 import { GlassView } from 'expo-glass-effect'
 import { List, Menu, Palette, PencilLine } from 'lucide-react-native'
@@ -205,7 +205,7 @@ export default function ReadiumFooter() {
 											name="bookmark-filled"
 											size={ICON_SIZE}
 											color="#facc15" // yellow-400
-											className="scale-x-90"
+											style={{ transform: [{ scaleX: 0.9 }] }}
 										/>
 									</Animated.View>
 								)}

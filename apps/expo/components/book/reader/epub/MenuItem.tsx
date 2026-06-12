@@ -1,4 +1,4 @@
-import Octicons from '@expo/vector-icons/Octicons'
+import Octicons from '@react-native-vector-icons/octicons'
 import { getColor, mix, serialize, to } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
 import { LucideIcon } from 'lucide-react-native'
@@ -9,6 +9,7 @@ import Animated, {
 	createAnimatedComponent,
 	interpolate,
 	interpolateColor,
+	useAnimatedProps,
 	useAnimatedStyle,
 	useSharedValue,
 	withDelay,
@@ -26,6 +27,7 @@ import { useBookmark } from './useBookmark'
 cssInterop(GlassView, { className: { target: 'style' } })
 
 const AnimatedOcticons = createAnimatedComponent(Octicons)
+const AnimatedGlassView = createAnimatedComponent(GlassView)
 
 type GlassMenuItemProps = {
 	show: boolean
@@ -97,11 +99,19 @@ export function BookmarkMenuItem({
 		colorProgress.value = withTiming(isBookmarked ? 1 : 0, { duration: 300 })
 	}, [isBookmarked, colorProgress])
 
-	const iconBackgroundStyle = useAnimatedStyle(() => ({
-		backgroundColor: interpolateColor(colorProgress.value, [0, 1], ['transparent', '#dc2626']),
+	// For the background colour:
+	// - For ios 26+: animate prop 'tintColor' on AnimatedGlassView
+	// - Otherwise: animate 'backgroundColor' on Animated.View
+	const ios26BackgroundColor = useAnimatedProps(() => ({
+		tintColor: interpolateColor(colorProgress.value, [0, 1], ['transparent', '#dc2626']),
 	}))
+	const iconBackgroundColor = useAnimatedStyle(() => {
+		if (IS_IOS_26_PLUS) return {}
+		return {
+			backgroundColor: interpolateColor(colorProgress.value, [0, 1], ['transparent', '#dc2626']),
+		}
+	})
 
-	// FIXME: when the app is launched fresh, the AnimatedOcticons are not filled with colour for bookmarked pages
 	// there are two styles because we do: not bookmarked => non-filled icon, bookmarked => filled icon
 	const iconNonFilledStyle = useAnimatedStyle(() => ({
 		color: interpolateColor(colorProgress.value, [0, 1], [colors?.foreground || '#000', '#facc15']),
@@ -112,32 +122,31 @@ export function BookmarkMenuItem({
 
 	return (
 		<Animated.View style={animatedStyle} className={className}>
-			<GlassView
+			<AnimatedGlassView
 				className={cn('rounded-full', !IS_IOS_26_PLUS && 'squircle')}
 				isInteractive
 				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
 				style={{ backgroundColor }}
+				animatedProps={ios26BackgroundColor}
 			>
 				<Pressable onPress={toggleBookmark} disabled={disabled}>
 					<Animated.View
-						style={iconBackgroundStyle}
+						style={iconBackgroundColor}
 						className={cn(SMALL_BUTTON_CLASS_NAME, 'squircle overflow-hidden rounded-full')}
 					>
 						<AnimatedOcticons
 							name="bookmark"
 							size={21}
-							style={iconNonFilledStyle}
-							className="scale-x-90"
+							style={[iconNonFilledStyle, { transform: [{ scaleX: 0.9 }] }]}
 						/>
 						<AnimatedOcticons
 							name="bookmark-filled"
 							size={21}
-							style={iconFilledStyle}
-							className="absolute scale-x-90"
+							style={[iconFilledStyle, { position: 'absolute', transform: [{ scaleX: 0.9 }] }]}
 						/>
 					</Animated.View>
 				</Pressable>
-			</GlassView>
+			</AnimatedGlassView>
 		</Animated.View>
 	)
 }

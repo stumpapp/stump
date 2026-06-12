@@ -30,6 +30,7 @@
 		"@react-native-async-storage/async-storage": "2.2.0",
 		"@react-native-community/slider": "5.1.2",
 		"@react-native-menu/menu": "^2.0.0",
+		"@react-native-vector-icons/octicons": "^21.1.2",
 		"@rn-primitives/accordion": "^1.2.0",
 		"@rn-primitives/avatar": "~1.4.0",
 		"@rn-primitives/checkbox": "^1.2.0",

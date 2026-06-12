@@ -134,6 +134,46 @@ async fn test_reread_shows_next_in_reread() {
 	assert_eq!(ids[0], "black_science_2");
 }
 
+/// read books 1-3, reread books 1-3, then add and read book 4, then add book 5
+#[tokio::test]
+async fn test_reading_unread_from_next_in_reread() {
+	let (app, series_id) = setup(3).await;
+
+	for i in 1..=3 {
+		create_nth_readthrough(&app, &format!("black_science_{i}"), 1).await;
+	}
+
+	for i in 1..=3 {
+		create_nth_readthrough(&app, &format!("black_science_{i}"), 1).await;
+	}
+
+	fake_data::Media {
+		id: Some("black_science_4".to_string()),
+		name: Some("Black Science #4".to_string()),
+		series_id: series_id.clone(),
+		pages: Some(100),
+		..Default::default()
+	}
+	.insert(app.conn())
+	.await;
+
+	create_nth_readthrough(&app, "black_science_4", 1).await;
+
+	fake_data::Media {
+		id: Some("black_science_5".to_string()),
+		name: Some("Black Science #5".to_string()),
+		series_id: series_id.clone(),
+		pages: Some(100),
+		..Default::default()
+	}
+	.insert(app.conn())
+	.await;
+
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids.len(), 1);
+	assert_eq!(ids[0], "black_science_5");
+}
+
 /// stopping the re-read should still surface new books added since, e.g.
 /// finish books 1-3, re-read book 1, stop the re-read, eventually add new book
 #[tokio::test]

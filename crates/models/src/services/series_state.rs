@@ -6,6 +6,18 @@ use sea_orm::{
 
 use crate::entity::{reading_session, user_series_state};
 
+pub async fn get(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	series_id: &str,
+) -> Result<Option<user_series_state::Model>, DbErr> {
+	user_series_state::Entity::find()
+		.filter(user_series_state::Column::UserId.eq(user_id))
+		.filter(user_series_state::Column::SeriesId.eq(series_id))
+		.one(db)
+		.await
+}
+
 /// return the existing series state for a given user+series pair, or create one if
 /// none exist
 async fn get_or_create(
@@ -13,12 +25,7 @@ async fn get_or_create(
 	user_id: &str,
 	series_id: &str,
 ) -> Result<user_series_state::Model, DbErr> {
-	if let Some(existing) = user_series_state::Entity::find()
-		.filter(user_series_state::Column::UserId.eq(user_id))
-		.filter(user_series_state::Column::SeriesId.eq(series_id))
-		.one(db)
-		.await?
-	{
+	if let Some(existing) = get(db, user_id, series_id).await? {
 		return Ok(existing);
 	}
 

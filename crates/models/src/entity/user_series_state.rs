@@ -2,18 +2,6 @@ use async_graphql::SimpleObject;
 use chrono::Utc;
 use sea_orm::{prelude::*, ActiveValue, DeriveEntityModel};
 
-// TODO: i think i am thinking of this correctly, but i think maybe i need
-// to think more about it to ensure my thoughts are properly thunked. im tired lol
-// example:
-// - i have a series of 4 books (1 unreleased, not on server)
-// - i read 3 books and then drop the series
-// - this will cause on deck to be empty
-// - the 5th comes in
-// - 5th shows up in on deck
-// if i track the readthrough at which it was dropped, then i can continue
-// to show the next book in the series instead of skipping to the 5th. is that
-// needed???? i'll keep it for now
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "UserSeriesState")]
 #[sea_orm(table_name = "user_series_state")]

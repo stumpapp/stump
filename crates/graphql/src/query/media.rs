@@ -525,9 +525,11 @@ impl MediaQuery {
 			),
 
 			-- books that count as "already read":
-			--  stopped re-read -> treat as read
-			--  first readthrough -> any finished session counts
-			--  active re-read -> only sessions from the current readthrough
+			--  stopped re-read -> all-time finished sessions
+			--  readthrough 1   -> all-time finished sessions
+			--  active re-read  -> sessions from the current readthrough OR:
+			--                     lower-readthrough session whose created_at is after
+			--                     the re-read was started (i.e. new books read mid-reread)
 			user_read_media AS (
 				SELECT DISTINCT rs.media_id
 				FROM reading_sessions rs
@@ -539,6 +541,21 @@ impl MediaQuery {
 					scr.stopped_readthrough IS NOT NULL
 					OR scr.current_readthrough = 1
 					OR rs.readthrough_number = scr.current_readthrough
+					-- book was read at a lower readthrough but after the re-read had already started
+					-- e.g., read books 1-3, reread books 1-3, then add and read book 4, then add book 5
+					-- expectation is that 5 shows up in on-deck, but 1-4 do not
+					OR (
+						rs.readthrough_number < scr.current_readthrough
+						AND EXISTS (
+							SELECT 1
+							FROM reading_sessions rs_reread
+							JOIN media m_reread ON m_reread.id = rs_reread.media_id
+							WHERE rs_reread.user_id = rs.user_id
+							AND m_reread.series_id = m.series_id
+							AND rs_reread.readthrough_number = scr.current_readthrough
+							AND rs_reread.created_at <= rs.created_at
+						)
+					)
 				)
 			),
 

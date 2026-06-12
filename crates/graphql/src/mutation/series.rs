@@ -196,7 +196,7 @@ impl SeriesMutation {
 
 	// TODO(series-state): dedicated/complex object if needed
 
-	/// exclude the series from on deck recommendations, except for books added to the series after
+	/// Exclude the series from on deck recommendations, except for books added to the series after
 	/// dropping
 	async fn drop_series(
 		&self,
@@ -211,7 +211,7 @@ impl SeriesMutation {
 			.map_err(Into::into)
 	}
 
-	/// un-drop a series, which will cause it to be included in on deck recommendations per normal logic
+	/// Un-drop a series, which will cause it to be included in on deck recommendations per normal logic
 	async fn undrop_series(
 		&self,
 		ctx: &Context<'_>,
@@ -225,7 +225,7 @@ impl SeriesMutation {
 			.map_err(Into::into)
 	}
 
-	/// set the intent to stop the current readthrough, effectively a pause. on deck will stop
+	/// Set the intent to stop the current readthrough, effectively a pause. on deck will stop
 	/// showing books in the current readthrough and instead only show unread books
 	async fn stop_series_reread(
 		&self,
@@ -240,7 +240,7 @@ impl SeriesMutation {
 			.map_err(Into::into)
 	}
 
-	/// restore the intent to read through the series, effectively a resume of the highest
+	/// Restore the intent to read through the series, effectively a resume of the highest
 	/// readthrough
 	async fn resume_series_reread(
 		&self,

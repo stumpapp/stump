@@ -2032,19 +2032,19 @@ type Mutation {
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
 	scanSeries(id: ID!): Boolean!
 	"""
-	exclude the series from on deck recommendations, except for books added to the series after
+	Exclude the series from on deck recommendations, except for books added to the series after
 	dropping
 	"""
 	dropSeries(id: ID!): UserSeriesState!
-	"un-drop a series, which will cause it to be included in on deck recommendations per normal logic"
+	"Un-drop a series, which will cause it to be included in on deck recommendations per normal logic"
 	undropSeries(id: ID!): UserSeriesState!
 	"""
-	set the intent to stop the current readthrough, effectively a pause. on deck will stop
+	Set the intent to stop the current readthrough, effectively a pause. on deck will stop
 	showing books in the current readthrough and instead only show unread books
 	"""
 	stopSeriesReread(id: ID!): UserSeriesState!
 	"""
-	restore the intent to read through the series, effectively a resume of the highest
+	Restore the intent to read through the series, effectively a resume of the highest
 	readthrough
 	"""
 	resumeSeriesReread(id: ID!): UserSeriesState!
@@ -3085,9 +3085,10 @@ type Series {
 	qualified URL to the image.
 	"""
 	thumbnail: ImageRef!
+	"Get the stats for this series, scoped to current user by default"
 	stats(allUsers: Boolean): SeriesStats!
-	"Get the readthrough state for this series for the current user, if it exists"
-	userReadthroughState: UserSeriesState
+	"Get the on-deck/re-read state for this series for the current user, if it exists"
+	userSeriesState: UserSeriesState
 }
 
 input SeriesFilterInput {

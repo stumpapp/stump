@@ -194,8 +194,6 @@ impl SeriesMutation {
 		Ok(true)
 	}
 
-	// TODO(series-state): dedicated/complex object if needed
-
 	/// Exclude the series from on deck recommendations, except for books added to the series after
 	/// dropping
 	async fn drop_series(

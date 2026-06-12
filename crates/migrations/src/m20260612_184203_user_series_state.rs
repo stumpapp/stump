@@ -52,13 +52,55 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		// TODO: run explain query plan on the on deck query and fiddle with indexes per results
-		// i fkcn hate reading query plans tho 😭
+		// one state per user+series pair
+		manager
+			.create_index(
+				Index::create()
+					.unique()
+					.name("idx-user_series_state-user-series")
+					.table(UserSeriesState::Table)
+					.col(UserSeriesState::UserId)
+					.col(UserSeriesState::SeriesId)
+					.to_owned(),
+			)
+			.await?;
+
+		// covers a common path in the on deck query to filter sessions by status for user
+		// the existing index on user_id+media_id was doing work per query plan but showed status
+		// then filtered in memory, so this should help in multiple ctes
+		manager
+			.create_index(
+				Index::create()
+					.name("idx-reading_sessions-user-status")
+					.table(ReadingSessions::Table)
+					.col(ReadingSessions::UserId)
+					.col(ReadingSessions::Status)
+					.to_owned(),
+			)
+			.await?;
 
 		Ok(())
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		manager
+			.drop_index(
+				Index::drop()
+					.name("idx-reading_sessions-user-status")
+					.table(ReadingSessions::Table)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.drop_index(
+				Index::drop()
+					.name("idx-user_series_state-user-series")
+					.table(UserSeriesState::Table)
+					.to_owned(),
+			)
+			.await?;
+
 		manager
 			.drop_table(Table::drop().table(UserSeriesState::Table).to_owned())
 			.await?;
@@ -77,6 +119,14 @@ enum UserSeriesState {
 	DroppedAt,
 	CreatedAt,
 	UpdatedAt,
+}
+
+#[derive(DeriveIden)]
+enum ReadingSessions {
+	#[sea_orm(iden = "reading_sessions")]
+	Table,
+	UserId,
+	Status,
 }
 
 #[derive(DeriveIden)]

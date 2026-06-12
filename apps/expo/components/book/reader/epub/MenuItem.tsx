@@ -1,4 +1,5 @@
 import Octicons from '@expo/vector-icons/Octicons'
+import { getColor, mix, serialize, to } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
 import { LucideIcon } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
@@ -16,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { Icon, Text } from '~/components/ui'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useEpubTheme } from '~/stores/epub'
 
@@ -49,6 +51,7 @@ export function MenuItem({
 }: GlassMenuItemProps) {
 	const { colors, isDarkEpubTheme } = useEpubTheme()
 	const { animatedStyle } = useMenuAnimation({ show, delay })
+	const backgroundColor = useMenuColor()
 
 	const isWide = !!label && !!icon
 	const contentClassName = isWide ? WIDE_BUTTON_CLASS_NAME : SMALL_BUTTON_CLASS_NAME
@@ -56,11 +59,16 @@ export function MenuItem({
 	return (
 		<Animated.View style={animatedStyle} className={className}>
 			<GlassView
-				className="rounded-full"
+				className={cn('rounded-full', !IS_IOS_26_PLUS && 'squircle')}
 				isInteractive
 				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+				style={{ backgroundColor }}
 			>
-				<Pressable onPress={onPress} className={contentClassName} disabled={disabled}>
+				<Pressable
+					onPress={onPress}
+					className={cn(contentClassName, !IS_IOS_26_PLUS && isWide && 'active:opacity-60')}
+					disabled={disabled}
+				>
 					{label && (
 						<Text className="font-medium" style={{ color: colors?.foreground }}>
 							{label}
@@ -81,6 +89,7 @@ export function BookmarkMenuItem({
 	const { colors, isDarkEpubTheme } = useEpubTheme()
 	const { toggleBookmark, disabled, isBookmarked } = useBookmark()
 	const { animatedStyle } = useMenuAnimation({ show, delay })
+	const backgroundColor = useMenuColor()
 
 	const colorProgress = useSharedValue(isBookmarked ? 1 : 0)
 
@@ -92,6 +101,7 @@ export function BookmarkMenuItem({
 		backgroundColor: interpolateColor(colorProgress.value, [0, 1], ['transparent', '#dc2626']),
 	}))
 
+	// FIXME: when the app is launched fresh, the AnimatedOcticons are not filled with colour for bookmarked pages
 	// there are two styles because we do: not bookmarked => non-filled icon, bookmarked => filled icon
 	const iconNonFilledStyle = useAnimatedStyle(() => ({
 		color: interpolateColor(colorProgress.value, [0, 1], [colors?.foreground || '#000', '#facc15']),
@@ -103,9 +113,10 @@ export function BookmarkMenuItem({
 	return (
 		<Animated.View style={animatedStyle} className={className}>
 			<GlassView
-				className="rounded-full"
+				className={cn('rounded-full', !IS_IOS_26_PLUS && 'squircle')}
 				isInteractive
 				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+				style={{ backgroundColor }}
 			>
 				<Pressable onPress={toggleBookmark} disabled={disabled}>
 					<Animated.View
@@ -133,20 +144,43 @@ export function BookmarkMenuItem({
 
 function useMenuAnimation({ show, delay }: { show: boolean; delay: number }) {
 	const progress = useSharedValue(0)
+	const opacity = useSharedValue(0)
 
 	useEffect(() => {
 		if (show) {
 			progress.value = withDelay(delay, withSpring(1, { damping: 10, stiffness: 150, mass: 0.8 }))
+			opacity.value = withDelay(delay, withTiming(1, { duration: 350 }))
 		} else {
 			progress.value = withDelay(delay, withTiming(0, { duration: 350 }))
+			opacity.value = withDelay(delay, withTiming(0, { duration: 350 }))
 		}
-	}, [show, delay, progress])
+	}, [show, delay, progress, opacity])
 
 	// GlassViews don't like zero opacity, so instead we make them disappear with scale
 	const animatedStyle = useAnimatedStyle(() => ({
 		transform: [{ translateY: 20 * (1 - progress.value) }, { scale: progress.value === 0 ? 0 : 1 }],
-		opacity: interpolate(progress.value, [0, 1], [0.02, 1]),
+		opacity: interpolate(opacity.value, [0, 1], [0.02, 1]),
 	}))
 
 	return { animatedStyle }
+}
+
+export function useMenuColor() {
+	const { colors, isDarkEpubTheme } = useEpubTheme()
+
+	const backgroundColor = serialize(
+		to(
+			mix(
+				getColor(colors?.foreground || 'black'),
+				getColor(colors?.background || 'white'),
+				isDarkEpubTheme ? 0.75 : 0.9,
+				{ space: 'oklch' },
+			),
+			'sRGB',
+		),
+		{ format: 'hex' },
+	)
+
+	if (IS_IOS_26_PLUS) return undefined
+	return backgroundColor
 }

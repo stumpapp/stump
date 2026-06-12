@@ -1,11 +1,10 @@
 import * as Sentry from '@sentry/react-native'
 import { GlassView } from 'expo-glass-effect'
 import { useRouter } from 'expo-router'
-import { X } from 'lucide-react-native'
+import { ArrowLeft, X } from 'lucide-react-native'
 import { useEffect, useMemo } from 'react'
-import { Pressable, View } from 'react-native'
+import { Platform, Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
-import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
 	ENTERING_ANIMATION,
@@ -16,37 +15,50 @@ import {
 } from '~/components/book/reader/shared'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
-export const HEADER_HEIGHT = 48
+import { useMenuColor } from './MenuItem'
+import { BUTTON_SIZE, ICON_SIZE } from './ReadiumFooter'
 
 export default function ReadiumHeader() {
 	const router = useRouter()
-	const insets = useSafeAreaInsets()
 
 	const { colors, isDarkEpubTheme } = useEpubTheme()
+	const backgroundColor = useMenuColor()
 	const showControls = useReaderStore((state) => state.showControls)
 
 	return (
-		<View
-			className="inset-x-safe h-12 px-8 absolute z-20 items-center justify-center"
-			style={{ top: initialWindowMetrics?.insets.top || insets.top }}
-		>
+		<View className="inset-x-safe h-12 px-8 mb-2 z-20 items-center justify-center">
 			{showControls && (
 				<Animated.View
 					entering={ENTERING_ANIMATION}
 					exiting={EXITING_ANIMATION}
 					className="left-6 absolute z-30"
-					style={{ width: 54, height: 54 }}
+					style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
 				>
 					<GlassView
-						className="flex-1 items-center justify-center rounded-full"
+						className="flex-1 rounded-full"
 						isInteractive
 						colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+						style={{ backgroundColor }}
 					>
-						<Pressable disabled={!showControls} onPress={router.back} className="p-3">
-							<Icon as={X} size={30} color={colors?.foreground} className="opacity-80" />
+						<Pressable
+							disabled={!showControls}
+							onPress={router.back}
+							className={cn(
+								'h-full w-full items-center justify-center',
+								!IS_IOS_26_PLUS && 'active:opacity-60',
+							)}
+						>
+							<Icon
+								as={Platform.OS === 'ios' ? X : ArrowLeft}
+								size={ICON_SIZE}
+								color={colors?.foreground}
+								className="opacity-80"
+							/>
 						</Pressable>
 					</GlassView>
 				</Animated.View>

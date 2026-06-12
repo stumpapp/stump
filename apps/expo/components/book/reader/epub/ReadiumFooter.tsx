@@ -20,6 +20,7 @@ import {
 	useReaderAnimations,
 } from '~/components/book/reader/shared'
 import { Icon, Text } from '~/components/ui'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
@@ -27,10 +28,12 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { useEpubReaderContext } from './context'
 import JumpButton from './JumpButton'
-import { BookmarkMenuItem, MenuItem } from './MenuItem'
+import { BookmarkMenuItem, MenuItem, useMenuColor } from './MenuItem'
 import { useBookmark } from './useBookmark'
 
-export const FOOTER_HEIGHT = 48
+export const BUTTON_SIZE = 54
+export const SHRINK_SCALE = 0.9
+export const ICON_SIZE = BUTTON_SIZE * (30 / 54)
 
 cssInterop(GlassView, { className: { target: 'style' } })
 
@@ -39,6 +42,7 @@ export default function ReadiumFooter() {
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 	const openSheet = useEpubSheetStore((state) => state.openSheet)
 	const { colors, isDarkEpubTheme } = useEpubTheme()
+	const backgroundColor = useMenuColor()
 	const { isBookmarked, disabled: bookmarkDisabled } = useBookmark()
 
 	const [showMenu, setShowMenu] = useState(false)
@@ -64,21 +68,21 @@ export default function ReadiumFooter() {
 	// we split menuButtonStyle and menuButtonIconStyle (not using scale on menuButtonStyle)
 	// because otherwise the bookmark will be very blurry during animation
 	const menuButtonStyle = useAnimatedStyle(() => {
-		const size = interpolate(progress.value, [0, 1], [48.6, 54])
-		const offset = (54 - size) / 2
+		const size = interpolate(progress.value, [0, 1], [BUTTON_SIZE * SHRINK_SCALE, BUTTON_SIZE])
+		const offset = (BUTTON_SIZE - size) / 2
 		if (!showBookmark) return {}
 		return { width: size, height: size, top: offset, left: offset }
 	})
 	const menuButtonIconStyle = useAnimatedStyle(() => {
-		const scale = interpolate(progress.value, [0, 1], [0.9, 1])
+		const scale = interpolate(progress.value, [0, 1], [SHRINK_SCALE, 1])
 		if (!showBookmark) return {}
 		return { transform: [{ scale }] }
 	})
 
 	const bookmarkContainerStyle = useAnimatedStyle(() => {
-		const size = interpolate(progress.value, [0, 1], [48.6, 54])
+		const size = interpolate(progress.value, [0, 1], [BUTTON_SIZE * SHRINK_SCALE, BUTTON_SIZE])
 		// bookmark icon: small = 14px, large = 30px
-		const scale = interpolate(progress.value, [0, 1], [1, 14 / 30])
+		const scale = interpolate(progress.value, [0, 1], [1, 0.5])
 		const translateX = interpolate(progress.value, [0, 1], [0, 16])
 		const translateY = -translateX
 
@@ -103,7 +107,7 @@ export default function ReadiumFooter() {
 				</Pressable>
 			)}
 
-			<View className="inset-x-safe bottom-safe h-12 absolute items-center justify-center">
+			<View className="inset-x-safe mt-2 h-12 items-center justify-center">
 				<View
 					className="bottom-16 right-4 gap-2 w-80 absolute z-40 flex-col items-end"
 					pointerEvents={showMenu ? 'auto' : 'none'}
@@ -149,13 +153,8 @@ export default function ReadiumFooter() {
 					/>
 
 					<View className="gap-2 w-full flex-row items-center">
-						<MenuItem
-							label={formattedReadTime}
-							show={showMenu}
-							delay={0}
-							// The read time must take around half the width to display on one line for all locales
-							className="flex-[2]"
-						/>
+						{/* The read time must take around half the width to display on one line for all locales */}
+						<MenuItem label={formattedReadTime} show={showMenu} delay={0} className="flex-[2]" />
 						<BookmarkMenuItem show={showMenu} delay={0} className="flex-1" />
 					</View>
 				</View>
@@ -165,13 +164,14 @@ export default function ReadiumFooter() {
 						entering={ENTERING_ANIMATION}
 						exiting={EXITING_ANIMATION}
 						className="right-6 absolute z-30"
-						style={{ width: 54, height: 54 }}
+						style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
 					>
-						<Animated.View style={menuButtonStyle} className="inset-0 absolute flex-1">
+						<Animated.View style={menuButtonStyle} className="inset-0 absolute">
 							<GlassView
-								className="flex-1 items-center justify-center rounded-full"
+								className="flex-1 rounded-full"
 								isInteractive
 								colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+								style={{ backgroundColor }}
 							>
 								<Pressable
 									onPress={() => {
@@ -180,10 +180,18 @@ export default function ReadiumFooter() {
 										setShowMenu(true)
 										setShowControls(false)
 									}}
-									className="flex-1 items-center justify-center"
+									className={cn(
+										'h-full w-full items-center justify-center',
+										!IS_IOS_26_PLUS && 'active:opacity-60',
+									)}
 								>
 									<Animated.View style={menuButtonIconStyle}>
-										<Icon as={Menu} size={30} color={colors?.foreground} className="opacity-80" />
+										<Icon
+											as={Menu}
+											size={ICON_SIZE}
+											color={colors?.foreground}
+											className="opacity-80"
+										/>
 									</Animated.View>
 								</Pressable>
 
@@ -195,7 +203,7 @@ export default function ReadiumFooter() {
 									>
 										<Octicons
 											name="bookmark-filled"
-											size={30}
+											size={ICON_SIZE}
 											color="#facc15" // yellow-400
 											className="scale-x-90"
 										/>

@@ -44,8 +44,8 @@ import AnnotationsSheet from './AnnotationsSheet'
 import { EpubReaderContext, EpubReaderContextValue } from './context'
 import CustomizeThemeSheet from './CustomizeThemeSheet'
 import EpubSettingsSheet from './EpubSettingsSheet'
-import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
-import ReadiumHeader, { HEADER_HEIGHT } from './ReadiumHeader'
+import ReadiumFooter from './ReadiumFooter'
+import ReadiumHeader from './ReadiumHeader'
 import TableOfContentsSheet from './TableOfContentsSheet'
 
 type BaseProps = OfflineCompatibleReader &
@@ -528,6 +528,8 @@ export default function ReadiumReader({
 				style={{
 					flex: 1,
 					backgroundColor: colors?.background,
+					paddingTop: initialWindowMetrics?.insets.top || insets.top || 14,
+					paddingBottom: initialWindowMetrics?.insets.bottom || insets.bottom || 14,
 				}}
 			>
 				<ReadiumHeader />
@@ -547,11 +549,7 @@ export default function ReadiumReader({
 					onAnnotationTap={handleAnnotationTap}
 					onEditHighlight={handleEditHighlight}
 					onDeleteHighlight={handleNativeDeleteAnnotation}
-					style={{
-						flex: 1,
-						marginTop: (initialWindowMetrics?.insets.top || insets.top) + HEADER_HEIGHT,
-						marginBottom: insets.bottom + FOOTER_HEIGHT,
-					}}
+					style={{ flex: 1 }}
 					{...config}
 				/>
 

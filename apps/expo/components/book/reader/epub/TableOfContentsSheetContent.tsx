@@ -1,12 +1,14 @@
 import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list'
 import { getColor, serialize } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
+import { Search } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 
-import { Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
+import { ThumbnailImage } from '~/components/image'
+import { Heading, Icon, Text } from '~/components/ui'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -16,14 +18,21 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 import { ENTERING_ANIMATION, EXITING_ANIMATION } from '../shared'
 import { useEpubReaderContext } from './context'
 
-export default function TableOfContentsSheetContent() {
+export default function TableOfContentsSheetContent({ isOpen }: { isOpen: boolean }) {
+	const { getRequestHeaders, readerRef } = useEpubReaderContext()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+
 	const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
 
 	const flashListRef = useRef<FlashListRef<TableOfContentsItemWithLevel>>(null)
 
 	const book = useEpubLocationStore((store) => store.book)
 	const toc = useEpubLocationStore((store) => store.toc)
+	const bookTitle = useEpubLocationStore((store) => book?.name || store.embeddedMetadata?.title)
 	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
+	const currentPage = useEpubLocationStore((store) => store.position)
+	const totalPages = useEpubLocationStore((store) => store.totalPages)
+	const positions = useEpubLocationStore((store) => store.positions)
 
 	const flatTocWithLevels = flattenTocWithLevels(toc)
 
@@ -37,8 +46,8 @@ export default function TableOfContentsSheetContent() {
 				index: activeTocItemIndex,
 				animated: animated,
 				viewPosition: 0.5,
-				// each row is 49px, and we scroll back up a bit to make it look more balanced
-				viewOffset: 49 / 2,
+				// scroll back up a bit to make it look more balanced (by half of: row width + rough header height)
+				viewOffset: (49 + 82) / 2,
 			}),
 		[activeTocItemIndex],
 	)
@@ -49,8 +58,14 @@ export default function TableOfContentsSheetContent() {
 		scrollToCurrentChapter({ animated: false })
 	}, [scrollToCurrentChapter])
 
-	const showTopIndicator = activeTocItemIndex < visibleRange.min
-	const showBottomIndicator = activeTocItemIndex > visibleRange.max
+	// flash the scrollbar to give a rough indication of where we are
+	useEffect(() => {
+		if (!isOpen) return
+		flashListRef.current?.flashScrollIndicators()
+	}, [isOpen])
+
+	const showTopIndicator = activeTocItemIndex !== -1 && activeTocItemIndex < visibleRange.min
+	const showBottomIndicator = activeTocItemIndex !== -1 && activeTocItemIndex > visibleRange.max
 
 	const onViewableItemsChanged = useCallback(
 		({ viewableItems }: { viewableItems: ViewToken<TableOfContentsItemWithLevel>[] }) => {
@@ -64,38 +79,86 @@ export default function TableOfContentsSheetContent() {
 		[],
 	)
 
+	const handlePress = async () => {
+		// TODO: go to page sheet + input
+		const pageLocator = positions[2]
+
+		if (pageLocator) {
+			await readerRef?.goToLocation(pageLocator)
+		}
+	}
+
 	if (!book) return
 
 	return (
 		<View className="flex-1">
-			<FlashList
-				ref={flashListRef}
-				data={flatTocWithLevels}
-				contentContainerStyle={{ paddingTop: 16 }}
-				onViewableItemsChanged={onViewableItemsChanged}
-				renderItem={({ item, index }) => (
-					<TableOfContentsListItem
-						item={item.item}
-						level={item.level}
-						currentChapterActive={index === activeTocItemIndex}
-						nextChapterActive={index + 1 === activeTocItemIndex}
+			<View className="px-4 gap-4 pb-4 pt-6 flex-row">
+				<ThumbnailImage
+					source={{
+						uri: book.thumbnail.url,
+						headers: {
+							...getRequestHeaders?.(),
+						},
+					}}
+					placeholderData={book.thumbnail.metadata}
+					size={{ height: 82, width: 82 * thumbnailRatio }}
+				/>
+
+				<View className="pb-0.5 shrink justify-between">
+					<Heading className="shrink" numberOfLines={2}>
+						{bookTitle}
+					</Heading>
+
+					<View className="flex-row items-center justify-between">
+						<Text className="text-[#898d94]">
+							Page {currentPage} of {totalPages}
+						</Text>
+
+						<GlassView isInteractive className="right-0 absolute rounded-full">
+							<Pressable
+								className="h-10 px-4 gap-2 flex-row items-center justify-center"
+								onPress={handlePress}
+							>
+								<Icon as={Search} size={12} color="#898d94" />
+								<Text className="text-[#898d94]">{'Go to page...'}</Text>
+							</Pressable>
+						</GlassView>
+					</View>
+				</View>
+			</View>
+
+			<View className="bg-black/10 dark:bg-white/10 mx-[6px] h-px" />
+
+			<View className="flex-1">
+				<FlashList
+					ref={flashListRef}
+					data={flatTocWithLevels}
+					contentContainerClassName={cn(activeTocItemIndex === 0 && 'pt-2')}
+					onViewableItemsChanged={onViewableItemsChanged}
+					renderItem={({ item, index }) => (
+						<TableOfContentsListItem
+							item={item.item}
+							level={item.level}
+							currentChapterActive={index === activeTocItemIndex}
+							nextChapterActive={index + 1 === activeTocItemIndex}
+						/>
+					)}
+				/>
+
+				{showTopIndicator && (
+					<ScrollToChapterIndicator
+						onPress={() => scrollToCurrentChapter({ animated: true })}
+						className="top-2"
 					/>
 				)}
-			/>
 
-			{showTopIndicator && (
-				<ScrollToChapterIndicator
-					onPress={() => scrollToCurrentChapter({ animated: true })}
-					className="top-6"
-				/>
-			)}
-
-			{showBottomIndicator && (
-				<ScrollToChapterIndicator
-					onPress={() => scrollToCurrentChapter({ animated: true })}
-					className="bottom-6"
-				/>
-			)}
+				{showBottomIndicator && (
+					<ScrollToChapterIndicator
+						onPress={() => scrollToCurrentChapter({ animated: true })}
+						className="bottom-safe-offset-2"
+					/>
+				)}
+			</View>
 		</View>
 	)
 }
@@ -236,8 +299,7 @@ const ScrollToChapterIndicator = ({
 					glassEffectStyle="regular"
 					style={{ borderRadius: 999 }}
 					isInteractive
-					// this is for android only, but ios ignores it so it's fine
-					className="bg-background-surface"
+					className={cn(!IS_IOS_26_PLUS && 'bg-background-surface')}
 				>
 					<View className="px-4 py-2">
 						<Text className="text-base font-semibold" style={{ color: textColor }}>

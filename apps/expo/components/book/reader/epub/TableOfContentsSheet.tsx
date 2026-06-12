@@ -46,7 +46,7 @@ export default function TableOfContentsSheet() {
 				<PortalHostContext.Provider
 					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}
 				>
-					<TableOfContentsSheetContent />
+					<TableOfContentsSheetContent isOpen={isOpen} />
 					{Platform.OS === 'android' && <PortalHost name={SHEET_PORTAL_HOST} />}
 				</PortalHostContext.Provider>
 			</TrueSheet>

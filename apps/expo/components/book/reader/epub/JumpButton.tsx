@@ -6,6 +6,8 @@ import Animated from 'react-native-reanimated'
 
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { cn } from '~/lib/utils'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
 import { ENTERING_ANIMATION, EXITING_ANIMATION } from '../shared'
@@ -51,12 +53,10 @@ export default function JumpButton() {
 			<Animated.View entering={ENTERING_ANIMATION} exiting={EXITING_ANIMATION}>
 				<Pressable onPress={handlePress}>
 					<GlassView
-						glassEffectStyle="regular"
 						style={{ borderRadius: 999 }}
 						isInteractive
-						// this is for android only, but ios ignores it so it's fine
 						// TODO: use theme color
-						className="bg-background-surface"
+						className={cn(!IS_IOS_26_PLUS && 'bg-background-surface')}
 					>
 						<View className="gap-2 px-4 py-2 flex-row items-center">
 							{Platform.select({

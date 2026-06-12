@@ -1581,12 +1581,12 @@
 					"description": "Zeige ein schwebendes Overlay, während ein Job läuft"
 				},
 				"dayResetHourOffset": {
-					"label": "Reading day reset offset",
-					"description": "Shift when a reading day resets, in hours from midnight"
+					"label": "Lesetagrücksetzversatz",
+					"description": "Verschiebe, wenn ein Lesetag sich zurücksetzt, in Stunden ab Mitternacht"
 				},
 				"readingSessionGracePeriod": {
-					"label": "Reading session grace period",
-					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+					"label": "Lesesitzungsschonfrist",
+					"description": "Falls keine Aktivität in diesem Zeitrahmen, in Sekunden, erkannt wird, wird bei der nächsten Aktualisierung eine neue Sitzung gestartet"
 				}
 			}
 		},
@@ -2959,9 +2959,9 @@
 			"skippedSync": {
 				"skippedOneServer": "Synchronisation für {{skippedCount}} Server übersprungen",
 				"skippedMultipleServers": "Synchronisation für {{skippedCount}} Server übersprungen",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"explanation": "Manche Server verwenden Authentifizierungsmethoden, die nicht automatisch aktualisiert werden können"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "Fehler beim Synchronisieren des Offline-Fortschritts"
 		},
 		"settings": {
 			"preferences": {

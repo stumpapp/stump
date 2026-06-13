@@ -17,7 +17,7 @@ use sea_orm::{
 	ActiveValue, Condition, DatabaseConnection, DatabaseTransaction, IntoActiveModel,
 	Iterable, Set, TransactionTrait,
 };
-use tokio::{sync::oneshot, task::spawn_blocking};
+use tokio::task::spawn_blocking;
 use walkdir::DirEntry;
 
 use crate::{
@@ -435,34 +435,13 @@ pub(crate) async fn handle_restored_media(
 /// * `for_library` - The library ID to associate the series with
 /// * `path` - The path to the series on disk
 async fn build_series(for_library: &str, path: &Path) -> CoreResult<BuiltSeries> {
-	let (tx, rx) = oneshot::channel();
+	let path = path.to_path_buf();
+	let for_library = for_library.to_string();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
-	let handle = spawn_blocking({
-		let path = path.to_path_buf();
-		let for_library = for_library.to_string();
-
-		move || {
-			let send_result = tx.send(SeriesBuilder::new(&path, &for_library).build());
-			tracing::trace!(
-				is_err = send_result.is_err(),
-				"Sending build result to channel"
-			);
-		}
-	});
-
-	let build_result = if let Ok(recv) = rx.await {
-		recv?
-	} else {
-		handle
-			.await
-			.map_err(|e| CoreError::Unknown(e.to_string()))?;
-		return Err(CoreError::Unknown(
-			"Failed to receive build result".to_string(),
-		));
-	};
-
-	Ok(build_result)
+	spawn_blocking(move || SeriesBuilder::new(&path, &for_library).build())
+		.await
+		.map_err(|e| CoreError::Unknown(e.to_string()))?
 }
 
 /// a type alias for the unordered stream of futures returned by concurernt builds of
@@ -601,41 +580,24 @@ async fn build_book(
 	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<BuiltMedia> {
-	let (tx, rx) = oneshot::channel();
+	let path = path.to_path_buf();
+	let series_id = series_id.to_string();
+	let library_config = library_config.clone();
+	let config = config.clone();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
-	let handle = spawn_blocking({
-		let path = path.to_path_buf();
-		let series_id = series_id.to_string();
-		let library_config = library_config.clone();
-		let config = config.clone();
-
+	spawn_blocking({
 		move || {
 			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
-			let send_result = tx.send(if let Some(existing_book) = existing_book {
+			if let Some(existing_book) = existing_book {
 				builder.rebuild(&existing_book)
 			} else {
 				builder.build()
-			});
-			tracing::trace!(
-				is_err = send_result.is_err(),
-				"Sending build result to channel"
-			);
+			}
 		}
-	});
-
-	let build_result = if let Ok(recv) = rx.await {
-		recv?
-	} else {
-		handle
-			.await
-			.map_err(|e| CoreError::Unknown(e.to_string()))?;
-		return Err(CoreError::Unknown(
-			"Failed to receive build result".to_string(),
-		));
-	};
-
-	Ok(build_result)
+	})
+	.await
+	.map_err(|e| CoreError::Unknown(e.to_string()))?
 }
 
 struct BookVisitCtx {
@@ -655,18 +617,16 @@ async fn handle_book(
 	library_config: library_config::Model,
 	config: &StumpConfig,
 ) -> CoreResult<BookVisitResult> {
-	let (tx, rx) = oneshot::channel();
+	let path = path.to_path_buf();
+	let series_id = series_id.to_string();
+	let library_config = library_config.clone();
+	let config = config.clone();
 
 	// Spawn a blocking task to handle the IO-intensive operations:
-	let handle = spawn_blocking({
-		let path = path.to_path_buf();
-		let series_id = series_id.to_string();
-		let library_config = library_config.clone();
-		let config = config.clone();
-
+	spawn_blocking({
 		move || {
 			let builder = MediaBuilder::new(&path, &series_id, library_config, &config);
-			let send_result = tx.send(match (operation, existing_book) {
+			match (operation, existing_book) {
 				(BookVisitOperation::Rebuild, Some(book)) => builder
 					.rebuild(&book)
 					.map(|b| BookVisitResult::Built(Box::new(b))),
@@ -682,26 +642,11 @@ async fn handle_book(
 				// always just do a full build. However, we really shouldn't be in this state
 				// since media creation is handled in a separate flow than visit
 				(_, None) => builder.build().map(|b| BookVisitResult::Built(Box::new(b))),
-			});
-			tracing::trace!(
-				is_err = send_result.is_err(),
-				"Sending build result to channel"
-			);
+			}
 		}
-	});
-
-	let build_result = if let Ok(recv) = rx.await {
-		recv?
-	} else {
-		handle
-			.await
-			.map_err(|e| CoreError::Unknown(e.to_string()))?;
-		return Err(CoreError::Unknown(
-			"Failed to receive build result".to_string(),
-		));
-	};
-
-	Ok(build_result)
+	})
+	.await
+	.map_err(|e| CoreError::Unknown(e.to_string()))?
 }
 
 /// Safely builds media from a list of paths concurrently, with a maximum concurrency limit

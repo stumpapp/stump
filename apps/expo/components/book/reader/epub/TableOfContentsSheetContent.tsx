@@ -3,26 +3,39 @@ import { getColor, serialize } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
 import { Search } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Platform, Pressable, TextInput, View } from 'react-native'
+import { useKeyboardHandler } from 'react-native-keyboard-controller'
 import Animated from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 
 import { ThumbnailImage } from '~/components/image'
 import { Heading, Icon, Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
+import { ReadiumLocator } from '~/modules/readium'
 import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { ENTERING_ANIMATION, EXITING_ANIMATION } from '../shared'
 import { useEpubReaderContext } from './context'
+import { GoToPage } from './TableOfContentsSheet'
 
-export default function TableOfContentsSheetContent({ isOpen }: { isOpen: boolean }) {
-	const { getRequestHeaders, readerRef } = useEpubReaderContext()
+type Props = {
+	goToPage: GoToPage
+	isOpen: boolean
+}
+
+export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props) {
+	const colors = useColors()
+	const accentColor = usePreferencesStore((state) => state.accentColor)
+
+	const { getRequestHeaders } = useEpubReaderContext()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
+	const [textInputWidth, setTextInputWidth] = useState<number>()
 
 	const flashListRef = useRef<FlashListRef<TableOfContentsItemWithLevel>>(null)
 
@@ -32,7 +45,6 @@ export default function TableOfContentsSheetContent({ isOpen }: { isOpen: boolea
 	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
 	const currentPage = useEpubLocationStore((store) => store.position)
 	const totalPages = useEpubLocationStore((store) => store.totalPages)
-	const positions = useEpubLocationStore((store) => store.positions)
 
 	const flatTocWithLevels = flattenTocWithLevels(toc)
 
@@ -64,8 +76,36 @@ export default function TableOfContentsSheetContent({ isOpen }: { isOpen: boolea
 		flashListRef.current?.flashScrollIndicators()
 	}, [isOpen])
 
-	const showTopIndicator = activeTocItemIndex !== -1 && activeTocItemIndex < visibleRange.min
-	const showBottomIndicator = activeTocItemIndex !== -1 && activeTocItemIndex > visibleRange.max
+	const scrollToCurrentChapterOnKeyboardShow = () => {
+		const layout = flashListRef.current?.getLayout(activeTocItemIndex)
+		if (!layout) return
+		// scroll up by 7px to add some padding
+		const offset = layout.y - 7
+		flashListRef.current?.scrollToOffset({
+			offset,
+			animated: true,
+		})
+	}
+
+	useKeyboardHandler(
+		{
+			onStart: (e) => {
+				'worklet'
+				if (e.progress === 1) {
+					scheduleOnRN(scrollToCurrentChapterOnKeyboardShow)
+				}
+				if (e.progress === 0) {
+					scheduleOnRN(goToPage.reset)
+				}
+			},
+		},
+		[],
+	)
+
+	const showTopIndicator =
+		isOpen && activeTocItemIndex !== -1 && activeTocItemIndex < visibleRange.min
+	const showBottomIndicator =
+		isOpen && activeTocItemIndex !== -1 && activeTocItemIndex > visibleRange.max
 
 	const onViewableItemsChanged = useCallback(
 		({ viewableItems }: { viewableItems: ViewToken<TableOfContentsItemWithLevel>[] }) => {
@@ -79,87 +119,99 @@ export default function TableOfContentsSheetContent({ isOpen }: { isOpen: boolea
 		[],
 	)
 
-	const handlePress = async () => {
-		// TODO: go to page sheet + input
-		const pageLocator = positions[2]
-
-		if (pageLocator) {
-			await readerRef?.goToLocation(pageLocator)
-		}
-	}
-
 	if (!book) return
 
 	return (
-		<View className="flex-1">
-			<View className="px-4 gap-4 pb-4 pt-6 flex-row">
-				<ThumbnailImage
-					source={{
-						uri: book.thumbnail.url,
-						headers: {
-							...getRequestHeaders?.(),
-						},
-					}}
-					placeholderData={book.thumbnail.metadata}
-					size={{ height: 82, width: 82 * thumbnailRatio }}
-				/>
+		<>
+			<View className="flex-1">
+				<View className="px-4 gap-4 pb-4 pt-6 flex-row">
+					<ThumbnailImage
+						source={{
+							uri: book.thumbnail.url,
+							headers: {
+								...getRequestHeaders?.(),
+							},
+						}}
+						placeholderData={book.thumbnail.metadata}
+						size={{ height: 82, width: 82 * thumbnailRatio }}
+					/>
 
-				<View className="pb-0.5 shrink justify-between">
-					<Heading className="shrink" numberOfLines={2}>
-						{bookTitle}
-					</Heading>
+					<View className="pb-0.5 shrink justify-between">
+						<Heading className="shrink" numberOfLines={2}>
+							{bookTitle}
+						</Heading>
 
-					<View className="flex-row items-center justify-between">
-						<Text className="text-[#898d94]">
-							Page {currentPage} of {totalPages}
-						</Text>
+						<View className="flex-row items-center justify-between">
+							<Text className="text-[#898d94]">
+								Page {currentPage} of {totalPages}
+							</Text>
 
-						<GlassView isInteractive className="right-0 absolute rounded-full">
-							<Pressable
-								className="h-10 px-4 gap-2 flex-row items-center justify-center"
-								onPress={handlePress}
+							<GlassView
+								isInteractive
+								className={cn(
+									'right-0 h-10 px-4 gap-2 absolute flex-row items-center justify-center rounded-full',
+									!IS_IOS_26_PLUS && 'squircle bg-background-surface',
+								)}
 							>
-								<Icon as={Search} size={12} color="#898d94" />
-								<Text className="text-[#898d94]">{'Go to page...'}</Text>
-							</Pressable>
-						</GlassView>
+								<Icon as={Search} size={12} strokeWidth={2.5} color="#898d94" />
+								<TextInput
+									hitSlop={50}
+									placeholderTextColor="#898d94"
+									keyboardType="number-pad"
+									selectionColor={accentColor || colors.fill.brand.DEFAULT}
+									placeholder={'Go to page...'}
+									onLayout={(e) => setTextInputWidth(e.nativeEvent.layout.width)}
+									onChangeText={(text) => goToPage.setString(text)}
+									value={goToPage.string}
+									style={{
+										width: textInputWidth,
+										color:
+											goToPage.isValid || goToPage.isEmpty
+												? colors.foreground.DEFAULT
+												: colors.fill.danger.DEFAULT,
+									}}
+								/>
+							</GlassView>
+						</View>
 					</View>
 				</View>
-			</View>
 
-			<View className="bg-black/10 dark:bg-white/10 mx-[6px] h-px" />
+				<View className="bg-black/10 dark:bg-white/10 mx-[6px] h-px" />
 
-			<View className="flex-1">
-				<FlashList
-					ref={flashListRef}
-					data={flatTocWithLevels}
-					contentContainerClassName={cn(activeTocItemIndex === 0 && 'pt-2')}
-					onViewableItemsChanged={onViewableItemsChanged}
-					renderItem={({ item, index }) => (
-						<TableOfContentsListItem
-							item={item.item}
-							level={item.level}
-							currentChapterActive={index === activeTocItemIndex}
-							nextChapterActive={index + 1 === activeTocItemIndex}
+				<View className="flex-1">
+					<FlashList
+						ref={flashListRef}
+						data={flatTocWithLevels}
+						contentContainerClassName={cn(activeTocItemIndex === 0 && 'pt-2')}
+						onViewableItemsChanged={onViewableItemsChanged}
+						// compensate for the toolbar: h-14 = 49px, plus the gap between the keyboard and toolbar, plus extra padding above the toolbar
+						contentContainerStyle={{ paddingBottom: 49 + 7 + 7 }}
+						renderItem={({ item, index }) => (
+							<TableOfContentsListItem
+								item={item.item}
+								level={item.level}
+								currentChapterActive={index === activeTocItemIndex}
+								nextChapterActive={index + 1 === activeTocItemIndex}
+							/>
+						)}
+					/>
+
+					{showTopIndicator && (
+						<ScrollToChapterIndicator
+							onPress={() => scrollToCurrentChapter({ animated: true })}
+							className="top-2"
 						/>
 					)}
-				/>
 
-				{showTopIndicator && (
-					<ScrollToChapterIndicator
-						onPress={() => scrollToCurrentChapter({ animated: true })}
-						className="top-2"
-					/>
-				)}
-
-				{showBottomIndicator && (
-					<ScrollToChapterIndicator
-						onPress={() => scrollToCurrentChapter({ animated: true })}
-						className="bottom-safe-offset-2"
-					/>
-				)}
+					{showBottomIndicator && (
+						<ScrollToChapterIndicator
+							onPress={() => scrollToCurrentChapter({ animated: true })}
+							className="bottom-safe-offset-2"
+						/>
+					)}
+				</View>
 			</View>
-		</View>
+		</>
 	)
 }
 
@@ -176,33 +228,24 @@ const TableOfContentsListItem = ({
 }) => {
 	const { readerRef } = useEpubReaderContext()
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
-	const locator = useEpubLocationStore((state) => state.locator)
-	const position = useEpubLocationStore((state) => state.position)
 	const pushJump = useEpubLocationStore((state) => state.pushJump)
 
 	const handlePress = async () => {
-		const previousLocator = locator
-
-		// If jumping to higher position, return direction should be 'back'
-		// If jumping to lower position, return direction should be 'forward'
-		const targetPosition = item.position
-		const direction: 'back' | 'forward' =
-			targetPosition != null && position != null && targetPosition > position ? 'back' : 'forward'
-
 		// E.g.: "text/part0010.html#9H5K0-..." -> ["text/part0010.html", "9H5K0-..."]
 		const [hrefWithoutFragment, fragment] = item.content.split('#')
 
-		await readerRef?.goToLocation({
+		const newLocator: ReadiumLocator = {
 			href: hrefWithoutFragment || item.content,
 			type: 'application/xhtml+xml',
 			chapterTitle: item.label,
-			locations: fragment ? { fragments: [fragment] } : {},
-		})
-
-		if (previousLocator) {
-			pushJump(previousLocator, direction)
+			locations: {
+				...(fragment && { fragments: [fragment] }),
+				...(item.position != null && { position: item.position }),
+			},
 		}
 
+		pushJump(newLocator)
+		await readerRef?.goToLocation(newLocator)
 		closeSheet('tableOfContents')
 	}
 

@@ -98,7 +98,7 @@
 		"react-native-gesture-handler": "~2.30.0",
 		"react-native-ios-context-menu": "^3.2.1",
 		"react-native-ios-utilities": "^5.2.0",
-		"react-native-keyboard-controller": "1.20.7",
+		"react-native-keyboard-controller": "^1.21.11",
 		"react-native-linear-gradient": "^2.8.3",
 		"react-native-mmkv": "^3.3.3",
 		"react-native-nitro-modules": "^0.31.10",

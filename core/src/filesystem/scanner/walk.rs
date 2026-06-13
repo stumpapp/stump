@@ -270,7 +270,8 @@ pub struct WalkedSeries {
 	pub missing_media: Vec<PathBuf>,
 	/// Whether the series is missing from the filesystem
 	pub series_is_missing: bool,
-	/// The mtimes observed for every directory during the walk
+	/// The *changed* mtimes observed for every directory during the walk. If a value was observed but
+	/// unchanged, it will not be included in this map
 	pub observed_dir_mtimes: HashMap<String, u64>,
 }
 
@@ -346,13 +347,26 @@ pub async fn walk_series(
 								t.duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
 							})
 							.unwrap_or(0);
-						observed.insert(path_str.clone(), current_mtime);
+						let did_change = dir_mtimes
+							.get(&path_str)
+							.map_or(true, |&prev_mtime| prev_mtime != current_mtime);
+
+						// no point observing mtimes if unchanged, as the write path will be useless since the
+						// value is already same as before
+						if did_change {
+							tracing::trace!(
+								mtime = current_mtime,
+								path = path_str,
+								"Observed changed dir"
+							);
+							observed.insert(path_str.clone(), current_mtime);
+						}
 
 						// we never skip the series root, itself. the mtime might not accurately
 						// reflect changes deeper in the tree, and so skipping would cause us
-						// to miss any changes at those levels.
+						// to miss any changes at those levels
 						let is_root = path_str == root_str;
-						if !is_root && dir_mtimes.get(&path_str) == Some(&current_mtime) {
+						if !is_root && !did_change {
 							tracing::trace!(
 								mtime = current_mtime,
 								path = path_str,

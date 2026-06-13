@@ -1,7 +1,7 @@
 use std::{
 	collections::{HashMap, VecDeque},
 	path::{Path, PathBuf},
-	sync::Arc,
+	sync::{Arc, Mutex},
 };
 
 use async_graphql::SimpleObject;
@@ -15,7 +15,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	Set, TransactionTrait,
+	QuerySelect, Set, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 
@@ -84,6 +84,8 @@ pub struct LibraryScanJob {
 	/// Stored directory mtimes, loaded at scan start to be used for
 	/// short-circuiting directories that have not been modified since the last scan
 	dir_mtimes: Arc<HashMap<String, u64>>,
+
+	series_id_by_path: Arc<Mutex<HashMap<String, String>>>,
 }
 
 impl LibraryScanJob {
@@ -94,6 +96,7 @@ impl LibraryScanJob {
 			config: None,
 			options: options.unwrap_or_default(),
 			dir_mtimes: Arc::new(HashMap::new()),
+			series_id_by_path: Arc::new(Mutex::new(HashMap::new())),
 		}
 	}
 }
@@ -181,6 +184,22 @@ impl JobLifecycle for LibraryScanJob {
 			"Loaded stored directory mtimes"
 		);
 		self.dir_mtimes = Arc::new(stored_dir_mtimes);
+
+		let loaded_series_ids = series::Entity::find()
+			.select_only()
+			.columns(series::SeriesIdentSelect::columns())
+			.filter(series::Column::LibraryId.eq(self.id.clone()))
+			.into_model::<series::SeriesIdentSelect>()
+			.all(ctx.conn())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			.map(|s| (s.path, s.id))
+			.collect::<HashMap<String, String>>();
+		tracing::debug!(count = loaded_series_ids.len(), "Loaded series ID map");
+		if let Ok(mut map) = self.series_id_by_path.lock() {
+			*map = loaded_series_ids;
+		}
 
 		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
@@ -540,6 +559,11 @@ impl JobLifecycle for LibraryScanJob {
 						match safely_insert_series(chunk.to_vec(), ctx.conn()).await {
 							Ok(created_series) => {
 								output.created_series += created_series.len() as u64;
+								if let Ok(mut map) = self.series_id_by_path.lock() {
+									for s in &created_series {
+										map.insert(s.path.clone(), s.id.clone());
+									}
+								}
 								ctx.emit_event(CoreEvent::CreatedManySeries(
 									event::CreatedManySeries {
 										count: created_series.len() as u64,
@@ -707,12 +731,16 @@ impl JobLifecycle for LibraryScanJob {
 
 				let series_path_str = path_buf.to_str().unwrap_or_default().to_string();
 
-				let series = series::Entity::find()
-					.filter(series::Column::Path.eq(series_path_str.clone()))
-					.into_model::<series::SeriesIdentSelect>()
-					.one(ctx.conn())
-					.await?
-					.ok_or(JobError::TaskFailed("Series not found".to_string()))?;
+				let series_id = self
+					.series_id_by_path
+					.lock()
+					.ok()
+					.and_then(|map| map.get(&series_path_str).cloned())
+					.ok_or_else(|| {
+						JobError::TaskFailed(format!(
+							"Series not found in pre-loaded state: {series_path_str}"
+						))
+					})?;
 
 				subtasks = chain_optional_iter(
 					[],
@@ -729,7 +757,7 @@ impl JobLifecycle for LibraryScanJob {
 				)
 				.into_iter()
 				.map(|task| LibraryScanTask::SeriesTask {
-					id: series.id.clone(),
+					id: series_id.clone(),
 					path: series_path_str.clone(),
 					task,
 				})

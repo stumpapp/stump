@@ -349,7 +349,7 @@ pub async fn walk_series(
 							.unwrap_or(0);
 						let did_change = dir_mtimes
 							.get(&path_str)
-							.map_or(true, |&prev_mtime| prev_mtime != current_mtime);
+							.is_none_or(|&prev_mtime| prev_mtime != current_mtime);
 
 						// no point observing mtimes if unchanged, as the write path will be useless since the
 						// value is already same as before

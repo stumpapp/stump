@@ -34,6 +34,8 @@ pub struct WalkerCtx {
 	/// Stored directory mtimes, loaded at scan start to be used for
 	/// short-circuiting directories that have not been modified since the last scan
 	pub dir_mtimes: HashMap<String, u64>,
+	/// The series ID for this walk, if scoped to a specific series
+	pub series_id: Option<String>,
 }
 
 /// The output of walking a library
@@ -292,9 +294,10 @@ pub async fn walk_series(
 		max_depth,
 		options,
 		dir_mtimes,
+		series_id,
 	}: WalkerCtx,
 ) -> CoreResult<WalkedSeries> {
-	if !path.exists() {
+	if !tokio::fs::metadata(path).await.is_ok() {
 		tracing::error!(
 			"Failed to walk: {} is missing or inaccessible",
 			path.display()
@@ -405,17 +408,23 @@ pub async fn walk_series(
 
 	tracing::trace!("Fetching existing media...");
 	let fetch_start = std::time::Instant::now();
-	let existing_media = media::Entity::find()
-		.columns(vec![
-			media::Column::Id,
-			media::Column::Path,
-			media::Column::ModifiedAt,
-			media::Column::Status,
-		])
-		.inner_join(series::Entity)
-		.filter(series::Column::Path.starts_with(path.to_string_lossy().to_string()))
-		.all(db.as_ref())
-		.await?;
+	let existing_media = match series_id.as_deref() {
+		Some(id) => {
+			media::Entity::find()
+				.columns(vec![
+					media::Column::Id,
+					media::Column::Path,
+					media::Column::ModifiedAt,
+					media::Column::Status,
+				])
+				.filter(media::Column::SeriesId.eq(id))
+				.all(db.as_ref())
+				.await?
+		},
+		// walk_library calls walk_series with no series_id (it discovers series,
+		// not scoping to one). A brand-new series also has no existing media yet
+		None => Vec::new(),
+	};
 	tracing::trace!(
 		"Fetched {} existing media in {}ms",
 		existing_media.len(),

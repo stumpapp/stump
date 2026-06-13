@@ -84,7 +84,10 @@ pub struct LibraryScanJob {
 	/// Stored directory mtimes, loaded at scan start to be used for
 	/// short-circuiting directories that have not been modified since the last scan
 	dir_mtimes: Arc<HashMap<String, u64>>,
-
+	/// A map of paths to mtimes that were observed to be changed during the scan, batch
+	/// updated at the end during finalization in order to avoid excessive database writes during the scan
+	pending_dir_mtimes: Arc<Mutex<Vec<(String, u64)>>>,
+	/// A map of series paths to their ids, loaded during init and used to avoid db trips
 	series_id_by_path: Arc<Mutex<HashMap<String, String>>>,
 }
 
@@ -96,6 +99,7 @@ impl LibraryScanJob {
 			config: None,
 			options: options.unwrap_or_default(),
 			dir_mtimes: Arc::new(HashMap::new()),
+			pending_dir_mtimes: Arc::new(Mutex::new(vec![])),
 			series_id_by_path: Arc::new(Mutex::new(HashMap::new())),
 		}
 	}
@@ -196,7 +200,7 @@ impl JobLifecycle for LibraryScanJob {
 			.into_iter()
 			.map(|s| (s.path, s.id))
 			.collect::<HashMap<String, String>>();
-		tracing::debug!(count = loaded_series_ids.len(), "Loaded series ID map");
+		tracing::debug!(count = loaded_series_ids.len(), "preloaded series ids");
 		if let Ok(mut map) = self.series_id_by_path.lock() {
 			*map = loaded_series_ids;
 		}
@@ -220,6 +224,7 @@ impl JobLifecycle for LibraryScanJob {
 				// intentially empty here since walk_library only visits top-level dirs to discover series,
 				// so there is nothing to short-circuit
 				dir_mtimes: HashMap::new(),
+				series_id: None,
 			},
 		)
 		.await?;
@@ -377,6 +382,34 @@ impl JobLifecycle for LibraryScanJob {
 		}
 
 		let library_path = self.path.clone();
+
+		let pending_models = self
+			.pending_dir_mtimes
+			.lock()
+			.map(|mut v| {
+				v.drain(..) // i.e. yoink em all and clear the pending list in one go
+					.map(|(path, mtime)| scanned_directory::ActiveModel {
+						path: Set(path),
+						last_mtime: Set(mtime as i64),
+					})
+					.collect::<Vec<_>>()
+			})
+			.unwrap_or_default();
+
+		for chunk in pending_models.chunks(SQLITE_BIND_LIMIT / 2) {
+			if let Err(err) = scanned_directory::Entity::insert_many(chunk.to_vec())
+				.on_conflict(
+					OnConflict::column(scanned_directory::Column::Path)
+						.update_column(scanned_directory::Column::LastMtime)
+						.to_owned(),
+				)
+				.exec(ctx.conn())
+				.await
+			{
+				tracing::error!(error = ?err, "Failed to flush pending scanned_directory mtimes");
+			}
+		}
+
 		let stale_paths = scanned_directory::Entity::find()
 			.filter(scanned_directory::Column::Path.starts_with(library_path.as_str()))
 			.all(ctx.conn())
@@ -635,6 +668,10 @@ impl JobLifecycle for LibraryScanJob {
 						},
 					};
 
+				let series_id = self.series_id_by_path.lock().ok().and_then(|map| {
+					map.get(&path_buf.to_string_lossy().to_string()).cloned()
+				});
+
 				let walk_result = walk_series(
 					path_buf.as_path(),
 					WalkerCtx {
@@ -643,6 +680,7 @@ impl JobLifecycle for LibraryScanJob {
 						max_depth,
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
+						series_id: series_id.clone(),
 					},
 				)
 				.await;
@@ -675,31 +713,15 @@ impl JobLifecycle for LibraryScanJob {
 					},
 				};
 
-				if !observed_dir_mtimes.is_empty() {
-					let active_models = observed_dir_mtimes
-						.into_iter()
-						.map(|(path, mtime)| scanned_directory::ActiveModel {
-							path: Set(path),
-							last_mtime: Set(mtime as i64),
-						})
-						.collect::<Vec<_>>();
-
-					if let Err(error) =
-						scanned_directory::Entity::insert_many(active_models)
-							.on_conflict(
-								OnConflict::column(scanned_directory::Column::Path)
-									.update_column(scanned_directory::Column::LastMtime)
-									.to_owned(),
-							)
-							.exec(ctx.conn())
-							.await
-					{
-						tracing::warn!(
-							?error,
-							"Failed to upsert scanned directory mtimes"
-						);
+				let stored = self.dir_mtimes.as_ref();
+				if let Ok(mut pending) = self.pending_dir_mtimes.lock() {
+					for (path, mtime) in observed_dir_mtimes {
+						if stored.get(&path).copied() != Some(mtime) {
+							pending.push((path, mtime));
+						}
 					}
 				}
+
 				output.total_files += seen_files + ignored_files;
 				output.ignored_files += ignored_files;
 				output.skipped_files += skipped_files;
@@ -731,16 +753,15 @@ impl JobLifecycle for LibraryScanJob {
 
 				let series_path_str = path_buf.to_str().unwrap_or_default().to_string();
 
-				let series_id = self
-					.series_id_by_path
-					.lock()
-					.ok()
-					.and_then(|map| map.get(&series_path_str).cloned())
-					.ok_or_else(|| {
-						JobError::TaskFailed(format!(
-							"Series not found in pre-loaded state: {series_path_str}"
-						))
-					})?;
+				let Some(series_id) = series_id else {
+					tracing::error!(
+						path = ?series_path_str,
+						"series not found in preloaded state"
+					);
+					return Err(JobError::TaskFailed(
+                        "An unexpected error occurred while attempting to scan the series. Check logs for details.".to_string(),
+                    ));
+				};
 
 				subtasks = chain_optional_iter(
 					[],

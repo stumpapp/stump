@@ -169,6 +169,7 @@ impl JobLifecycle for SeriesScanJob {
 				max_depth,
 				options: self.options,
 				dir_mtimes: HashMap::new(),
+				series_id: Some(self.id.clone()),
 			},
 		)
 		.await?;

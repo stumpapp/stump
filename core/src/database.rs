@@ -30,7 +30,7 @@ pub async fn connect(config: &StumpConfig) -> Result<DatabaseConnection, CoreErr
 			.map_err(|e| {
 				CoreError::InternalError(format!("Invalid SQLite connection string: {e}"))
 			})?
-			.collation("NATURAL", |a, b| natord::compare(a, b))
+			.collation("NATURAL", natord::compare)
 			// TODO(sqlite): do proper eval for NORMAL synchronous mode
 			// .synchronous(SqliteSynchronous::Normal)
 			.busy_timeout(Duration::from_secs(30));

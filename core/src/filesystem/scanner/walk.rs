@@ -297,7 +297,7 @@ pub async fn walk_series(
 		series_id,
 	}: WalkerCtx,
 ) -> CoreResult<WalkedSeries> {
-	if !tokio::fs::metadata(path).await.is_ok() {
+	if tokio::fs::metadata(path).await.is_err() {
 		tracing::error!(
 			"Failed to walk: {} is missing or inaccessible",
 			path.display()

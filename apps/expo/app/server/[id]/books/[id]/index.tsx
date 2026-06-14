@@ -6,14 +6,15 @@ import {
 	MediaMetadataFilterInput,
 	UserPermission,
 } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
-import { formatDistanceToNow } from 'date-fns'
+import { formatHumanDuration, formatNarrowDuration } from '@stump/i18n'
+import { formatDistanceToNowStrict } from 'date-fns'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
+import { toOrdinal } from 'to-words'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import BackLink from '~/components/BackLink'
@@ -32,7 +33,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import { useDownload, useTranslate } from '~/lib/hooks'
+import { useDisplay, useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
@@ -143,7 +144,8 @@ type ActiveReadingSession = NonNullable<
 
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
-	const { t } = useTranslate()
+	const { t, locale } = useTranslate()
+	const { isTablet } = useDisplay()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -277,10 +279,12 @@ export default function Screen() {
 		}
 
 		if (elapsedSeconds) {
-			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
+			const readTime = isTablet
+				? formatHumanDuration(elapsedSeconds)
+				: formatNarrowDuration(elapsedSeconds, { locale })
 			return <Card.Stat label="Reading time" value={readTime} />
 		} else {
-			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
+			return <Card.Stat label="Started" value={formatDistanceToNowStrict(new Date(startedAt))} />
 		}
 	}
 
@@ -299,15 +303,19 @@ export default function Screen() {
 
 	const currentPage = progression?.page ?? progression?.locator?.locations?.position ?? '??'
 
+	const readthroughNumber = book.readHistory.length
+	const readthroughNumberOrdinal = toOrdinal(readthroughNumber)
+
 	const lastCompletionDistance =
 		lastCompletion?.completedAt != null
-			? formatDistanceToNow(new Date(lastCompletion.completedAt), { addSuffix: true })
+			? formatDistanceToNowStrict(new Date(lastCompletion.completedAt), { addSuffix: true })
 			: 'Unknown'
 
-	const lastCompletionReadTime =
-		lastCompletion?.elapsedSeconds != null
-			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
-			: 'Unknown'
+	const lastCompletionReadTime = lastCompletion?.elapsedSeconds
+		? isTablet
+			? formatHumanDuration(lastCompletion.elapsedSeconds)
+			: formatNarrowDuration(lastCompletion.elapsedSeconds, { locale })
+		: 'Unknown'
 
 	// Reminder: Whenever this page introduces a new clickable filter field, make sure to
 	// add a corresponding bit in the filter header and prolly metadata overview object
@@ -410,7 +418,7 @@ export default function Screen() {
 							</Heading>
 
 							{seriesPosition != null && (
-								<Text className="text-base text-center text-foreground-muted">
+								<Text className="text-base text-foreground-muted text-center">
 									{seriesPosition}
 								</Text>
 							)}
@@ -448,7 +456,9 @@ export default function Screen() {
 									</>
 								) : (
 									<Card.StatGroup>
-										<Card.Stat label="Pages" value={pages} />
+										{readthroughNumber > 1 && (
+											<Card.Stat label="Readthrough" value={readthroughNumberOrdinal} />
+										)}
 										<Card.Stat label="Finished" value={lastCompletionDistance} />
 										<Card.Stat label="Reading time" value={lastCompletionReadTime} />
 									</Card.StatGroup>

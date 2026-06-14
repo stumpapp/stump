@@ -122,6 +122,7 @@
 		"tailwindcss": "3.3.5",
 		"tailwindcss-animate": "^1.0.7",
 		"thumbhash": "^0.1.1",
+		"to-words": "^5.6.1",
 		"ts-pattern": "^5.6.2",
 		"url-join": "^5.0.0",
 		"zeego": "^3.0.6",

@@ -193,17 +193,13 @@ export function formatHumanDurationSeparate(seconds: number) {
  */
 export function formatNarrowDuration(
 	seconds: number,
-	options?: {
+	options: {
 		significantUnits?: 1 | 2 | 3
-		locale?: AllowedLocale
+		locale: AllowedLocale
 	},
 ): string {
 	const locale = options?.locale ?? 'en-US'
 	const units = LOCALE_NARROW_UNITS[locale]
-
-	if (seconds <= 0) {
-		return `0${units?.s}`
-	}
 
 	const h = Math.trunc(seconds / 3600)
 	const m = Math.trunc((seconds % 3600) / 60)
@@ -215,9 +211,15 @@ export function formatNarrowDuration(
 		{ value: s, units: units.s },
 	]
 
+	const firstNonZeroIndex = duration.findIndex((item) => item.value !== 0)
+
+	if (seconds <= 0 || firstNonZeroIndex === -1) {
+		return `0${units?.s}`
+	}
+
 	const trimmedDuration = duration
+		.slice(firstNonZeroIndex, firstNonZeroIndex + (options?.significantUnits ?? 2))
 		.filter((item) => item.value !== 0)
-		.slice(0, options?.significantUnits ?? 2)
 
 	const narrowFormat = trimmedDuration.map((item) => `${item.value}${item.units}`).join(' ')
 

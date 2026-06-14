@@ -1,5 +1,5 @@
 import Octicons from '@react-native-vector-icons/octicons'
-import { formatNarrowDuration, useLocaleContext } from '@stump/i18n'
+import { formatNarrowDuration } from '@stump/i18n'
 import { GlassView } from 'expo-glass-effect'
 import { List, Menu, Palette, PencilLine } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
@@ -21,6 +21,7 @@ import {
 } from '~/components/book/reader/shared'
 import { Icon, Text } from '~/components/ui'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
@@ -48,7 +49,7 @@ export default function ReadiumFooter() {
 	const [showMenu, setShowMenu] = useState(false)
 
 	const { timer } = useEpubReaderContext()
-	const { locale } = useLocaleContext()
+	const { locale } = useTranslate()
 	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
 

@@ -16,6 +16,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Toaster } from 'sonner-native'
+import { setLocaleDetector } from 'to-words'
 import { useShallow } from 'zustand/react/shallow'
 
 import darkSplash from '~/assets/splash/dark.json'
@@ -94,6 +95,7 @@ export default function RootLayout() {
 		const preferredLocale = usePreferencesStore.getState().locale
 		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
 		initDateFnsLocale(preferredLocale ?? deviceLocale)
+		setLocaleDetector(() => preferredLocale ?? deviceLocale)
 		setAndroidNavigationBar(colorScheme)
 		setIsColorSchemeLoaded(true)
 		hasMounted.current = true

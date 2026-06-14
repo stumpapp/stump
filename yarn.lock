@@ -23227,6 +23227,11 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
+to-words@^5.6.1:
+  version "5.6.1"
+  resolved "https://registry.yarnpkg.com/to-words/-/to-words-5.6.1.tgz#f3db6315ad72e843165df56edd730e75247ca23c"
+  integrity sha512-I2tQDzfUjFUbBiRFkoN4qYvm88us5h/hXayyfsszlWK21NY5fGRU0BOURrejmh55isf6lEt1rCstW9ezkdXFyw==
+
 tocbot@^4.20.1:
   version "4.36.4"
   resolved "https://registry.yarnpkg.com/tocbot/-/tocbot-4.36.4.tgz#5f82976a2455e5abff44bdff84c89443dc23180f"

@@ -226,8 +226,8 @@ pub async fn walk_library(
 		}
 	};
 
-	let to_create = series_to_create.len();
-	tracing::trace!(?series_to_create, "Found {to_create} series to create");
+	let count = series_to_create.len();
+	tracing::trace!(count, "Found series to create");
 
 	let missing_series_len = missing_series.len();
 	tracing::trace!(
@@ -506,10 +506,10 @@ pub async fn walk_series(
 		.collect::<Vec<String>>();
 
 	let to_create = media_to_create.len();
-	tracing::trace!(?media_to_create, "Found {to_create} media to create");
+	tracing::trace!(to_create, "Found media to create");
 
 	let to_visit = book_visit_operations.len();
-	tracing::trace!("Found {to_visit} media to visit");
+	tracing::trace!(to_visit, "Found media to visit");
 
 	let skipped_files = seen_files - (to_create + to_visit) as u64;
 	tracing::trace!(

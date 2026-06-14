@@ -20,14 +20,19 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
-import { useMenuColor } from './MenuItem'
-import { BUTTON_SIZE, ICON_SIZE } from './ReadiumFooter'
+import { useButtonColors } from './MenuItem'
+import { BUTTON_SIZE, ICON_SCALE } from './ReadiumFooter'
+
+// size normalisation factor to make the icons feel the same size:
+// - X: smaller than expected -> 1.2x seems good
+// - ArrowLeft: Menu is wider than ArrowLeft, so it's closer to the circle's edge, so ArrowLeft looks smaller -> 1.2x seems good (coincidence)
+const ICON_SIZE = BUTTON_SIZE * (Platform.OS === 'ios' ? 1.2 : 1.2) * ICON_SCALE
 
 export default function ReadiumHeader() {
 	const router = useRouter()
 
-	const { colors, isDarkEpubTheme } = useEpubTheme()
-	const backgroundColor = useMenuColor()
+	const { isDarkEpubTheme } = useEpubTheme()
+	const buttonColors = useButtonColors()
 	const showControls = useReaderStore((state) => state.showControls)
 
 	return (
@@ -43,7 +48,7 @@ export default function ReadiumHeader() {
 						className="flex-1 rounded-full"
 						isInteractive
 						colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-						style={{ backgroundColor }}
+						style={{ backgroundColor: buttonColors.controls.background }}
 					>
 						<Pressable
 							disabled={!showControls}
@@ -56,8 +61,9 @@ export default function ReadiumHeader() {
 							<Icon
 								as={Platform.OS === 'ios' ? X : ArrowLeft}
 								size={ICON_SIZE}
-								color={colors?.foreground}
-								className="opacity-80"
+								absoluteStrokeWidth
+								strokeWidth={2.5}
+								color={buttonColors.controls.foreground}
 							/>
 						</Pressable>
 					</GlassView>

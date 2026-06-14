@@ -1,5 +1,5 @@
 import Octicons from '@react-native-vector-icons/octicons'
-import { getColor, mix, serialize, to } from 'colorjs.io/fn'
+import { getColor, mix } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
 import { LucideIcon } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
@@ -18,7 +18,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { Icon, Text } from '~/components/ui'
-import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS, toHex } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useEpubTheme } from '~/stores/epub'
 
@@ -51,9 +51,9 @@ export function MenuItem({
 	disabled,
 	className,
 }: GlassMenuItemProps) {
-	const { colors, isDarkEpubTheme } = useEpubTheme()
+	const { isDarkEpubTheme } = useEpubTheme()
 	const { animatedStyle } = useMenuAnimation({ show, delay })
-	const backgroundColor = useMenuColor()
+	const buttonColors = useButtonColors()
 
 	const isWide = !!label && !!icon
 	const contentClassName = isWide ? WIDE_BUTTON_CLASS_NAME : SMALL_BUTTON_CLASS_NAME
@@ -64,7 +64,7 @@ export function MenuItem({
 				className={cn('rounded-full', !IS_IOS_26_PLUS && 'squircle')}
 				isInteractive
 				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-				style={{ backgroundColor }}
+				style={{ backgroundColor: buttonColors.menuItem.background }}
 			>
 				<Pressable
 					onPress={onPress}
@@ -72,11 +72,13 @@ export function MenuItem({
 					disabled={disabled}
 				>
 					{label && (
-						<Text className="font-medium" style={{ color: colors?.foreground }}>
+						<Text className="font-medium" style={{ color: buttonColors.menuItem.foreground }}>
 							{label}
 						</Text>
 					)}
-					{icon && <Icon as={icon} size={21} strokeWidth={2.2} color={colors?.foreground} />}
+					{icon && (
+						<Icon as={icon} size={21} strokeWidth={2.2} color={buttonColors.menuItem.foreground} />
+					)}
 				</Pressable>
 			</GlassView>
 		</Animated.View>
@@ -88,10 +90,10 @@ export function BookmarkMenuItem({
 	delay,
 	className,
 }: Pick<GlassMenuItemProps, 'show' | 'delay' | 'className'>) {
-	const { colors, isDarkEpubTheme } = useEpubTheme()
+	const { isDarkEpubTheme } = useEpubTheme()
 	const { toggleBookmark, disabled, isBookmarked } = useBookmark()
 	const { animatedStyle } = useMenuAnimation({ show, delay })
-	const backgroundColor = useMenuColor()
+	const buttonColors = useButtonColors()
 
 	const colorProgress = useSharedValue(isBookmarked ? 1 : 0)
 
@@ -114,7 +116,11 @@ export function BookmarkMenuItem({
 
 	// there are two styles because we do: not bookmarked => non-filled icon, bookmarked => filled icon
 	const iconNonFilledStyle = useAnimatedStyle(() => ({
-		color: interpolateColor(colorProgress.value, [0, 1], [colors?.foreground || '#000', '#facc15']),
+		color: interpolateColor(
+			colorProgress.value,
+			[0, 1],
+			[buttonColors.menuItem.foreground || '#000', '#facc15'],
+		),
 	}))
 	const iconFilledStyle = useAnimatedStyle(() => ({
 		color: interpolateColor(colorProgress.value, [0, 1], ['transparent', '#facc15']),
@@ -126,7 +132,7 @@ export function BookmarkMenuItem({
 				className={cn('rounded-full', !IS_IOS_26_PLUS && 'squircle')}
 				isInteractive
 				colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-				style={{ backgroundColor }}
+				style={{ backgroundColor: buttonColors.menuItem.background }}
 				animatedProps={ios26BackgroundColor}
 			>
 				<Pressable onPress={toggleBookmark} disabled={disabled}>
@@ -174,22 +180,21 @@ function useMenuAnimation({ show, delay }: { show: boolean; delay: number }) {
 	return { animatedStyle }
 }
 
-export function useMenuColor() {
+export function useButtonColors() {
 	const { colors, isDarkEpubTheme } = useEpubTheme()
 
-	const backgroundColor = serialize(
-		to(
-			mix(
-				getColor(colors?.foreground || 'black'),
-				getColor(colors?.background || 'white'),
-				isDarkEpubTheme ? 0.75 : 0.9,
-				{ space: 'oklch' },
-			),
-			'sRGB',
-		),
-		{ format: 'hex' },
-	)
+	const fgColor = getColor(colors?.foreground || 'black')
+	const bgColor = getColor(colors?.background || 'white')
 
-	if (IS_IOS_26_PLUS) return undefined
-	return backgroundColor
+	const background = !IS_IOS_26_PLUS
+		? toHex(mix(fgColor, bgColor, isDarkEpubTheme ? 0.75 : 0.9, { space: 'oklch' }))
+		: undefined
+
+	// header/footer text is colors?.foreground with opacity-50. This is the exact equivalent solid colour
+	const iconColor = toHex(mix(fgColor, bgColor, 0.5, { space: 'oklch' }))
+
+	return {
+		controls: { background, foreground: iconColor },
+		menuItem: { background, foreground: colors?.foreground },
+	}
 }

@@ -136,7 +136,7 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 						size={{ height: 82, width: 82 * thumbnailRatio }}
 					/>
 
-					<View className="pb-0.5 shrink justify-between">
+					<View className="pb-0.5 flex-1 justify-between">
 						<Heading className="shrink" numberOfLines={2}>
 							{bookTitle}
 						</Heading>

@@ -4,7 +4,7 @@ import { GlassView } from 'expo-glass-effect'
 import { List, Menu, Palette, PencilLine } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
 import { useEffect, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Platform, Pressable, View } from 'react-native'
 import Animated, {
 	interpolate,
 	useAnimatedStyle,
@@ -29,12 +29,13 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { useEpubReaderContext } from './context'
 import JumpButton from './JumpButton'
-import { BookmarkMenuItem, MenuItem, useMenuColor } from './MenuItem'
+import { BookmarkMenuItem, MenuItem, useButtonColors } from './MenuItem'
 import { useBookmark } from './useBookmark'
 
-export const BUTTON_SIZE = 54
-export const SHRINK_SCALE = 0.9
-export const ICON_SIZE = BUTTON_SIZE * (30 / 54)
+export const BUTTON_SIZE = Platform.OS === 'ios' ? 50 : 42
+export const ICON_SCALE = 0.6
+const SHRINK_SCALE = 0.9
+const ICON_SIZE = BUTTON_SIZE * ICON_SCALE
 
 cssInterop(GlassView, { className: { target: 'style' } })
 
@@ -42,8 +43,8 @@ export default function ReadiumFooter() {
 	const showControls = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 	const openSheet = useEpubSheetStore((state) => state.openSheet)
-	const { colors, isDarkEpubTheme } = useEpubTheme()
-	const backgroundColor = useMenuColor()
+	const { isDarkEpubTheme } = useEpubTheme()
+	const buttonColors = useButtonColors()
 	const { isBookmarked, disabled: bookmarkDisabled } = useBookmark()
 
 	const [showMenu, setShowMenu] = useState(false)
@@ -172,7 +173,7 @@ export default function ReadiumFooter() {
 								className="flex-1 rounded-full"
 								isInteractive
 								colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-								style={{ backgroundColor }}
+								style={{ backgroundColor: buttonColors.controls.background }}
 							>
 								<Pressable
 									onPress={() => {
@@ -190,8 +191,9 @@ export default function ReadiumFooter() {
 										<Icon
 											as={Menu}
 											size={ICON_SIZE}
-											color={colors?.foreground}
-											className="opacity-80"
+											absoluteStrokeWidth
+											strokeWidth={2.5}
+											color={buttonColors.controls.foreground}
 										/>
 									</Animated.View>
 								</Pressable>

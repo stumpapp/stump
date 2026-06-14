@@ -9,6 +9,7 @@ import { parseGraphQLDecimal } from '~/lib/format'
 import { useDisplay, useTranslate } from '~/lib/hooks'
 
 export type CurrentProgressCardProps = {
+	hidden: boolean
 	showChapterTitle: boolean
 	chapterTitle: string | undefined | null
 	page: number | undefined | null
@@ -18,6 +19,7 @@ export type CurrentProgressCardProps = {
 }
 
 export function CurrentProgressCard({
+	hidden,
 	showChapterTitle,
 	chapterTitle,
 	page,
@@ -27,6 +29,8 @@ export function CurrentProgressCard({
 }: CurrentProgressCardProps) {
 	const { isTablet } = useDisplay()
 	const { locale } = useTranslate()
+
+	if (hidden) return
 
 	const readingTime = readingTimeSeconds
 		? isTablet
@@ -55,18 +59,22 @@ export function CurrentProgressCard({
 }
 
 type LastFinishedCardProps = {
+	hidden: boolean
 	readthroughNumber?: number
 	lastCompletedAt: string | undefined | null | unknown
 	readingTimeSeconds: number | undefined | null
 }
 
 export function LastFinishedCard({
+	hidden,
 	readthroughNumber,
 	lastCompletedAt,
 	readingTimeSeconds,
 }: LastFinishedCardProps) {
 	const { isTablet } = useDisplay()
 	const { locale } = useTranslate()
+
+	if (hidden) return
 
 	const readingTime = readingTimeSeconds
 		? isTablet

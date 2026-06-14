@@ -374,26 +374,22 @@ export default function Screen() {
 							)}
 						</View>
 
-						<View>
-							{progression && (
-								<CurrentProgressCard
-									showChapterTitle={isEpub}
-									chapterTitle={chapterTitle}
-									page={currentPage}
-									totalPages={totalPages}
-									percentage={percentage}
-									readingTimeSeconds={progression?.elapsedSeconds}
-								/>
-							)}
+						<CurrentProgressCard
+							hidden={!progression}
+							showChapterTitle={isEpub}
+							chapterTitle={chapterTitle}
+							page={currentPage}
+							totalPages={totalPages}
+							percentage={percentage}
+							readingTimeSeconds={progression?.elapsedSeconds}
+						/>
 
-							{!progression && lastCompletion && (
-								<LastFinishedCard
-									readthroughNumber={readthroughNumber}
-									lastCompletedAt={lastCompletion?.completedAt}
-									readingTimeSeconds={lastCompletion?.elapsedSeconds}
-								/>
-							)}
-						</View>
+						<LastFinishedCard
+							hidden={!!progression || !lastCompletion}
+							readthroughNumber={readthroughNumber}
+							lastCompletedAt={lastCompletion?.completedAt}
+							readingTimeSeconds={lastCompletion?.elapsedSeconds}
+						/>
 					</View>
 				</View>
 

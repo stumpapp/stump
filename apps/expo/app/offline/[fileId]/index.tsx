@@ -205,18 +205,15 @@ export default function Screen() {
 							</Button>
 						</View>
 
-						<View>
-							{readProgressData && (
-								<CurrentProgressCard
-									showChapterTitle={!!epubProgressData}
-									chapterTitle={epubProgressData?.chapterTitle}
-									page={currentPage}
-									totalPages={pages}
-									percentage={progressPercentage}
-									readingTimeSeconds={readProgressData?.elapsedSeconds}
-								/>
-							)}
-						</View>
+						<CurrentProgressCard
+							hidden={!readProgressData}
+							showChapterTitle={!!epubProgressData}
+							chapterTitle={epubProgressData?.chapterTitle}
+							page={currentPage}
+							totalPages={pages}
+							percentage={progressPercentage}
+							readingTimeSeconds={readProgressData?.elapsedSeconds}
+						/>
 					</View>
 				</View>
 

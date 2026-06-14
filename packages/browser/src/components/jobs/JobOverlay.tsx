@@ -4,6 +4,10 @@ import { JobUpdate } from '@stump/graphql'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
+// TODO: the messages are chaotic and need cleaning up. I think:
+// - more persistent title message e.g., "Creating books" generic message without including path in title
+// - a subtitle message for extra shit like the path or whatever
+
 export default function JobOverlay() {
 	const storeJobs = useJobStore((state) => state.jobs)
 
@@ -68,7 +72,7 @@ export default function JobOverlay() {
 			{firstRunningJob && (
 				<motion.div
 					// @ts-expect-error: It does have className actually?
-					className="right-4 h-28 w-64 p-4 shadow fixed flex flex-col items-start justify-between rounded-md border border-border bg-muted"
+					className="right-4 w-72 h-28 p-4 shadow fixed z-50 flex flex-col items-start justify-between rounded-xl border border-border bg-muted"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
@@ -76,9 +80,11 @@ export default function JobOverlay() {
 						bottom: 16 + additionalOffset,
 					}}
 				>
-					<Text size="sm" className="line-clamp-2">
-						{firstRunningJob.message ?? 'Job in Progress'}
-					</Text>
+					<div className="w-full">
+						<Text size="sm" className="line-clamp-2">
+							{firstRunningJob.message ?? 'Job in Progress'}
+						</Text>
+					</div>
 
 					<div className="gap-y-2 flex w-full flex-col">
 						<div className="flex w-full items-center justify-between">

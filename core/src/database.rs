@@ -30,7 +30,11 @@ pub async fn connect(config: &StumpConfig) -> Result<DatabaseConnection, CoreErr
 			.map_err(|e| {
 				CoreError::InternalError(format!("Invalid SQLite connection string: {e}"))
 			})?
-			.collation("NATURAL", natord::compare)
+			// TODO(482): support this:
+			// - add indexes (e.g., create index media_name on media (name collate NATURALSORT))
+			// - maybe some sql magic (e.g., update sqlite_master set sql = replace(sql, 'collate NOCASE', 'collate NATURALSORT') WHERE type = 'table' AND name IN (...))
+			// - will need to verify ^ doesn't break comparisons where case matters, though
+			.collation("NATURALSORT", natord::compare)
 			// TODO(sqlite): do proper eval for NORMAL synchronous mode
 			// .synchronous(SqliteSynchronous::Normal)
 			.busy_timeout(Duration::from_secs(30));

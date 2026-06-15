@@ -1,10 +1,9 @@
 use chrono::Utc;
 use sea_orm::{
 	prelude::*, ActiveValue::Set, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
-	QueryOrder, QuerySelect,
 };
 
-use crate::entity::{reading_session, user_series_state};
+use crate::entity::user_series_state;
 
 pub async fn get(
 	db: &impl ConnectionTrait,
@@ -71,27 +70,9 @@ pub async fn stop_series_reread(
 	user_id: &str,
 	series_id: &str,
 ) -> Result<user_series_state::Model, DbErr> {
-	let max_readthrough: Option<i32> = reading_session::Entity::find()
-		.filter(reading_session::Column::UserId.eq(user_id))
-		.filter(
-			reading_session::Column::MediaId.in_subquery(
-				sea_orm::sea_query::Query::select()
-					.column(crate::entity::media::Column::Id)
-					.from(crate::entity::media::Entity)
-					.and_where(crate::entity::media::Column::SeriesId.eq(series_id))
-					.to_owned(),
-			),
-		)
-		.order_by_desc(reading_session::Column::ReadthroughNumber)
-		.select_only()
-		.column(reading_session::Column::ReadthroughNumber)
-		.into_tuple()
-		.one(db)
-		.await?;
-
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.stopped_readthrough = Set(max_readthrough);
+	active.stopped_readthrough_at = Set(Some(DateTimeWithTimeZone::from(Utc::now())));
 	active.update(db).await
 }
 
@@ -104,7 +85,7 @@ pub async fn resume_series_reread(
 ) -> Result<user_series_state::Model, DbErr> {
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.stopped_readthrough = Set(None);
+	active.stopped_readthrough_at = Set(None);
 	active.update(db).await
 }
 

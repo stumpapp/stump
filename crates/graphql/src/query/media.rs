@@ -508,57 +508,7 @@ impl MediaQuery {
 				)
 			),
 
-			-- max readthrough number per series or the stopped_readthrough flag if set
-			series_current_readthrough AS (
-				SELECT
-					m.series_id,
-					MAX(rs.readthrough_number) AS current_readthrough,
-					uss.stopped_readthrough
-				FROM reading_sessions rs
-				JOIN media m ON m.id = rs.media_id
-				LEFT JOIN user_series_state uss
-					ON uss.series_id = m.series_id
-					AND uss.user_id = rs.user_id
-				WHERE rs.user_id = ?
-				AND m.series_id IS NOT NULL
-				GROUP BY m.series_id, uss.stopped_readthrough
-			),
-
-			-- books that count as "already read":
-			--  stopped re-read -> all-time finished sessions
-			--  readthrough 1   -> all-time finished sessions
-			--  active re-read  -> sessions from the current readthrough OR:
-			--                     lower-readthrough session whose created_at is after
-			--                     the re-read was started (i.e. new books read mid-reread)
-			user_read_media AS (
-				SELECT DISTINCT rs.media_id
-				FROM reading_sessions rs
-				JOIN media m ON m.id = rs.media_id
-				LEFT JOIN series_current_readthrough scr ON scr.series_id = m.series_id
-				WHERE rs.user_id = ?
-				AND rs.status = 'FINISHED'
-				AND (
-					scr.stopped_readthrough IS NOT NULL
-					OR scr.current_readthrough = 1
-					OR rs.readthrough_number = scr.current_readthrough
-					-- book was read at a lower readthrough but after the re-read had already started
-					-- e.g., read books 1-3, reread books 1-3, then add and read book 4, then add book 5
-					-- expectation is that 5 shows up in on-deck, but 1-4 do not
-					OR (
-						rs.readthrough_number < scr.current_readthrough
-						AND EXISTS (
-							SELECT 1
-							FROM reading_sessions rs_reread
-							JOIN media m_reread ON m_reread.id = rs_reread.media_id
-							WHERE rs_reread.user_id = rs.user_id
-							AND m_reread.series_id = m.series_id
-							AND rs_reread.readthrough_number = scr.current_readthrough
-							AND rs_reread.created_at <= rs.created_at
-						)
-					)
-				)
-			),
-
+			-- rank every book in a series
 			book_ranks AS (
 				SELECT
 					m.id,
@@ -573,13 +523,7 @@ impl MediaQuery {
 				AND m.series_id IS NOT NULL
 			),
 
-			series_max_read_rank AS (
-				SELECT br.series_id, MAX(br.rank) AS max_rank
-				FROM user_read_media ucm
-				JOIN book_ranks br ON br.id = ucm.media_id
-				GROUP BY br.series_id
-			),
-
+			-- the most recently finished session time per series
 			series_last_read AS (
 				SELECT
 					m.series_id,
@@ -592,6 +536,46 @@ impl MediaQuery {
 				GROUP BY m.series_id
 			),
 
+			-- per series: highest rank book ever finished, and rank of the most recently finished book
+			series_ranks AS (
+				SELECT
+					m.series_id,
+					MAX(br.rank) AS max_rank,
+					MAX(
+						CASE
+						WHEN COALESCE(rs.updated_at, rs.created_at) = slr.last_read_date
+						THEN br.rank
+						ELSE 0
+						END
+					) AS latest_rank
+				FROM reading_sessions rs
+				JOIN media m ON m.id = rs.media_id
+				JOIN book_ranks br ON br.id = m.id
+				JOIN series_last_read slr ON slr.series_id = m.series_id
+				WHERE rs.user_id = ?
+				AND rs.status = 'FINISHED'
+				GROUP BY m.series_id
+			),
+
+			-- to determine the target rank:
+			-- - highest position book if a re-read was stopped after the last read date
+			-- - otherwise the latest-read rank
+			series_target_rank AS (
+				SELECT
+					sr.series_id,
+					CASE
+						WHEN uss.stopped_readthrough_at IS NOT NULL
+							AND slr.last_read_date <= uss.stopped_readthrough_at
+						THEN sr.max_rank
+						ELSE sr.latest_rank
+					END AS target_rank
+				FROM series_ranks sr
+				JOIN series_last_read slr ON slr.series_id = sr.series_id
+				LEFT JOIN user_series_state uss
+					ON uss.series_id = sr.series_id
+					AND uss.user_id = ?
+			),
+
 			next_in_series AS (
 				SELECT
 					m.id,
@@ -599,21 +583,20 @@ impl MediaQuery {
 						PARTITION BY m.series_id
 						ORDER BY br.rank
 					) as book_rank,
-					COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
+					COALESCE(slr.last_read_date, '1970-01-01') as series_last_read_date
 				FROM
 					media m
 				LEFT JOIN
-					series_last_read srl ON srl.series_id = m.series_id
+					series_last_read slr ON slr.series_id = m.series_id
 				JOIN
 					book_ranks br ON br.id = m.id
 				LEFT JOIN
-					series_max_read_rank smrr ON smrr.series_id = m.series_id
+					series_target_rank str ON str.series_id = m.series_id
 				WHERE
 					m.series_id IN (SELECT series_id FROM user_read_series)
 					AND m.series_id NOT IN (SELECT series_id FROM user_dropped_series)
 					AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
-					AND m.id NOT IN (SELECT media_id FROM user_read_media)
-					AND (smrr.max_rank IS NULL OR br.rank > smrr.max_rank)
+					AND (str.target_rank IS NULL OR br.rank > str.target_rank)
 					AND m.deleted_at IS NULL
 			)
 		"#;

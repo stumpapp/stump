@@ -1455,6 +1455,10 @@
 					"label": "Carattere",
 					"description": "Personalizza il carattere usato nell'applicazione"
 				},
+				"thumbnailPreview": {
+					"label": "Preview",
+					"description": "This is how thumbnails will look with the current settings"
+				},
 				"thumbnailRatioSelect": {
 					"label": "Proporzioni miniatura",
 					"description": "Il rapporto di aspetto da usare per le miniature",
@@ -1468,6 +1472,16 @@
 						"averageColor": "Colore medio",
 						"colorful": "Colorato",
 						"thumbhash": "Thumbhash"
+					}
+				},
+				"thumbnailRoundness": {
+					"label": "Thumbnail roundness",
+					"description": "How rounded the corners of thumbnail images should be",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"large": "Large"
 					}
 				},
 				"navigation": {
@@ -1649,7 +1663,7 @@
 		"app/reader": {
 			"helmet": "Impostazioni del lettore",
 			"title": "Impostazioni del lettore",
-			"description": "Opzioni predefinite per i lettori di Stump. Queste impostazioni sono associate esclusivamente al tuo dispositivo attuale",
+			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
 					"sections": {

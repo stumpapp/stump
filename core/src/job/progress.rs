@@ -13,6 +13,10 @@ pub struct JobUpdate {
 	pub payload: JobProgress,
 }
 
+// TODO(cleanup): The ui no longer shows the job's internal task position,
+// since that felt like an internal detail to me (and the dynamic resizing is
+// awkward visually). so im thinking just rm the subtask ones
+
 /// A struct that represents a progress event that is emitted by a job. This behaves like a patch,
 /// where the client will ignore any fields that are not present. This is done so all internal ops
 /// can be done without needing to know the full state of the job.

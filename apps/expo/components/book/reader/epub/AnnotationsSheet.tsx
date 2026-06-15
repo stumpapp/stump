@@ -9,12 +9,14 @@ import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { PortalHostContext } from '~/lib/PortalHostContext'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
-import LocationsSheetContent from './LocationsSheetContent'
+import AnnotationsSheetContent from './AnnotationsSheetContent'
+import { useEpubReaderContext } from './context'
 
-const SHEET_PORTAL_HOST = 'locations-settings-sheet'
+const SHEET_PORTAL_HOST = 'annotations-sheet'
 
-export default function EpubLocationsSheet() {
-	const sheetRef = useEpubSheetStore((state) => state.locationsSheetRef)
+export default function AnnotationsSheet() {
+	const sheetRef = useEpubSheetStore((state) => state.annotationsSheetRef)
+	const { timer } = useEpubReaderContext()
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -26,7 +28,6 @@ export default function EpubLocationsSheet() {
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				dimmed={false}
 				scrollable
 				grabber
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
@@ -37,12 +38,15 @@ export default function EpubLocationsSheet() {
 				}}
 				insetAdjustment="automatic"
 				onDidPresent={() => setIsOpen(true)}
-				onDidDismiss={() => setIsOpen(false)}
+				onDidDismiss={() => {
+					setIsOpen(false)
+					timer.resume()
+				}}
 			>
 				<PortalHostContext.Provider
 					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}
 				>
-					<LocationsSheetContent />
+					<AnnotationsSheetContent />
 					{Platform.OS === 'android' && <PortalHost name={SHEET_PORTAL_HOST} />}
 				</PortalHostContext.Provider>
 			</TrueSheet>

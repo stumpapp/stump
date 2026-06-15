@@ -47,7 +47,7 @@ type Props = {
 	/**
 	 * The active book's timer
 	 */
-	timer?: Timer
+	timer: Timer
 } & OfflineCompatibleReader
 
 // TODO(expo-pdf): Long term, consider just using a library like https://github.com/wonday/react-native-pdf
@@ -74,6 +74,14 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
+
+	useEffect(() => {
+		if (controlsVisible) {
+			ctx.timer.pause()
+		} else {
+			ctx.timer.resume()
+		}
+	}, [controlsVisible, ctx.timer])
 
 	const { preferences: bookPreferences } = useBookPreferences({ book, serverId: ctx.serverId })
 

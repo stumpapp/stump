@@ -30,7 +30,7 @@ export default function SettingsNavigationItem() {
 				isInSettingsSomewhere,
 		},
 		{
-			'h-[2.35rem] w-[2.35rem] p-0 px-0 py-0': enableDoubleSidebar,
+			'p-0 px-0 py-0 h-[2.35rem] w-[2.35rem]': enableDoubleSidebar,
 		},
 	)
 

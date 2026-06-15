@@ -17,7 +17,7 @@ import { useEpubReaderContext } from './context'
 
 type Tab = 'ALL' | 'NOTES' | 'HIGHLIGHTS' | 'BOOKMARKS'
 
-export default function AnnotationsAndBookmarks() {
+export default function AnnotationsSheetContent() {
 	const { readerRef, onDeleteBookmark, onDeleteAnnotation } = useEpubReaderContext()
 
 	const book = useEpubLocationStore((store) => store.book)
@@ -53,7 +53,7 @@ export default function AnnotationsAndBookmarks() {
 
 			await readerRef.goToLocation(locator)
 
-			closeSheet('locations')
+			closeSheet('annotations')
 		},
 		[readerRef, closeSheet],
 	)
@@ -124,7 +124,7 @@ export default function AnnotationsAndBookmarks() {
 	)
 
 	return (
-		<View className="w-full flex-1">
+		<View className="pt-6 w-full flex-1">
 			<ListHeader tab={tab} setTab={setTab} />
 
 			<FlashList
@@ -162,6 +162,7 @@ function ListHeader({ tab, setTab }: HeaderProps) {
 								onSelectionChange={(selection) => {
 									setTab((selection as Tab) || 'ALL')
 								}}
+								selection={tab}
 							>
 								<SwiftText modifiers={[tag('ALL')]}>All</SwiftText>
 								<SwiftText modifiers={[tag('NOTES')]}>Notes</SwiftText>

@@ -1,58 +1,50 @@
 import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list'
 import { getColor, serialize } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
+import { Search } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Platform, Pressable, useWindowDimensions, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
-import PagerView from 'react-native-pager-view'
-import Animated, { Easing, Keyframe } from 'react-native-reanimated'
-import { stripHtml } from 'string-strip-html'
+import { Platform, Pressable, TextInput, View } from 'react-native'
+import { useKeyboardHandler } from 'react-native-keyboard-controller'
+import Animated from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 
 import { ThumbnailImage } from '~/components/image'
-import { Heading, Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
+import { Heading, Icon, Text } from '~/components/ui'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
+import { ReadiumLocator } from '~/modules/readium'
 import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
-import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
+import { ENTERING_ANIMATION, EXITING_ANIMATION } from '../shared'
 import { useEpubReaderContext } from './context'
+import { GoToPage } from './TableOfContentsSheet'
 
-// TODO(ux): the more i use this the more i dislike it. a running list of thoughts:
-// - the overview isn't as important, if i click a button signaling toc at the very least it should open toc first
-// - i am starting to really dislike the pager view. it _kinda_ made sense to colocate toc + annotations, however i
-//   am realizing (at least for me) i'd rather them separate
-// maybe we can do sm like ((Aa) (Bookmark) (Ellipsis)) (or move Aa into ellipsis), either move toc into ellipses
-// or keep it separate on left, then shove more functionality into ellipsis (page jump, search eventually, bookmarks/annotations, etc)
+type Props = {
+	goToPage: GoToPage
+	isOpen: boolean
+}
 
-export default function LocationsSheetContent() {
+export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props) {
+	const colors = useColors()
+	const accentColor = usePreferencesStore((state) => state.accentColor)
+
 	const { getRequestHeaders } = useEpubReaderContext()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const [activePage, setActivePage] = useState(0)
 	const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
+	const [textInputWidth, setTextInputWidth] = useState<number>()
 
-	const { height: windowHeight } = useWindowDimensions()
-
-	const pagerHeight =
-		windowHeight -
-		72 - // py-6 + text(ish)
-		60 // tabs
-
-	const pagerViewRef = useRef<PagerView>(null)
 	const flashListRef = useRef<FlashListRef<TableOfContentsItemWithLevel>>(null)
 
 	const book = useEpubLocationStore((store) => store.book)
 	const toc = useEpubLocationStore((store) => store.toc)
-	const embeddedMetadata = useEpubLocationStore((store) => store.embeddedMetadata)
+	const bookTitle = useEpubLocationStore((store) => book?.name || store.embeddedMetadata?.title)
 	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
-
-	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
-
-	const bookTitle = book?.name || embeddedMetadata?.title
-	const bookAuthor = book?.metadata?.writers?.join(', ') || embeddedMetadata?.author
-	const bookPublisher = book?.metadata?.publisher || embeddedMetadata?.publisher
+	const currentPage = useEpubLocationStore((store) => store.position)
+	const totalPages = useEpubLocationStore((store) => store.totalPages)
 
 	const flatTocWithLevels = flattenTocWithLevels(toc)
 
@@ -66,8 +58,8 @@ export default function LocationsSheetContent() {
 				index: activeTocItemIndex,
 				animated: animated,
 				viewPosition: 0.5,
-				// each row is 49px, and we scroll back up a bit to make it look more balanced
-				viewOffset: 49 / 2,
+				// scroll back up a bit to make it look more balanced (by half of: row width + rough header height)
+				viewOffset: (49 + 82) / 2,
 			}),
 		[activeTocItemIndex],
 	)
@@ -80,15 +72,40 @@ export default function LocationsSheetContent() {
 
 	// flash the scrollbar to give a rough indication of where we are
 	useEffect(() => {
-		if (activePage === 1) {
-			setTimeout(() => {
-				flashListRef.current?.flashScrollIndicators()
-			}, 250)
-		}
-	}, [activePage, scrollToCurrentChapter])
+		if (!isOpen) return
+		flashListRef.current?.flashScrollIndicators()
+	}, [isOpen])
 
-	const showTopIndicator = activeTocItemIndex < visibleRange.min
-	const showBottomIndicator = activeTocItemIndex > visibleRange.max
+	const scrollToCurrentChapterOnKeyboardShow = () => {
+		const layout = flashListRef.current?.getLayout(activeTocItemIndex)
+		if (!layout) return
+		// scroll up by 7px to add some padding
+		const offset = layout.y - 7
+		flashListRef.current?.scrollToOffset({
+			offset,
+			animated: true,
+		})
+	}
+
+	useKeyboardHandler(
+		{
+			onStart: (e) => {
+				'worklet'
+				if (e.progress === 1) {
+					scheduleOnRN(scrollToCurrentChapterOnKeyboardShow)
+				}
+				if (e.progress === 0) {
+					scheduleOnRN(goToPage.reset)
+				}
+			},
+		},
+		[],
+	)
+
+	const showTopIndicator =
+		isOpen && activeTocItemIndex !== -1 && activeTocItemIndex < visibleRange.min
+	const showBottomIndicator =
+		isOpen && activeTocItemIndex !== -1 && activeTocItemIndex > visibleRange.max
 
 	const onViewableItemsChanged = useCallback(
 		({ viewableItems }: { viewableItems: ViewToken<TableOfContentsItemWithLevel>[] }) => {
@@ -105,100 +122,70 @@ export default function LocationsSheetContent() {
 	if (!book) return
 
 	return (
-		<View className="gap-1 flex-1">
-			<View className="px-4 py-6 flex-row items-center justify-around">
-				<Pressable onPress={() => pagerViewRef.current?.setPage(0)}>
-					{({ pressed }) => (
-						<Text
-							className={cn('text-lg font-medium text-foreground-subtle', {
-								'text-foreground': activePage === 0,
-							})}
-							style={{ opacity: pressed && activePage !== 0 ? 0.7 : 1 }}
-						>
-							Overview
-						</Text>
-					)}
-				</Pressable>
+		<>
+			<View className="flex-1">
+				<View className="px-4 gap-4 pb-4 pt-6 flex-row">
+					<ThumbnailImage
+						source={{
+							uri: book.thumbnail.url,
+							headers: {
+								...getRequestHeaders?.(),
+							},
+						}}
+						placeholderData={book.thumbnail.metadata}
+						size={{ height: 82, width: 82 * thumbnailRatio }}
+					/>
 
-				<Pressable onPress={() => pagerViewRef.current?.setPage(1)}>
-					{({ pressed }) => (
-						<Text
-							className={cn('text-lg font-medium text-foreground-subtle', {
-								'text-foreground': activePage === 1,
-							})}
-							style={{ opacity: pressed && activePage !== 1 ? 0.7 : 1 }}
-						>
-							Contents
-						</Text>
-					)}
-				</Pressable>
+					<View className="pb-0.5 flex-1 justify-between">
+						<Heading className="shrink" numberOfLines={2}>
+							{bookTitle}
+						</Heading>
 
-				<Pressable onPress={() => pagerViewRef.current?.setPage(2)}>
-					{({ pressed }) => (
-						<Text
-							className={cn('text-lg font-medium text-foreground-subtle', {
-								'text-foreground': activePage === 2,
-							})}
-							style={{ opacity: pressed && activePage !== 2 ? 0.7 : 1 }}
-						>
-							Annotations
-						</Text>
-					)}
-				</Pressable>
-			</View>
+						<View className="flex-row items-center justify-between">
+							<Text className="text-[#898d94]">
+								Page {currentPage} of {totalPages}
+							</Text>
 
-			<PagerView
-				ref={pagerViewRef}
-				style={{ flex: 1, height: pagerHeight }}
-				initialPage={0}
-				onPageSelected={(e) => setActivePage(e.nativeEvent.position)}
-			>
-				<View
-					style={{
-						justifyContent: 'flex-start',
-						alignItems: 'center',
-					}}
-					key="1"
-				>
-					<ScrollView contentContainerStyle={{ paddingBottom: 16, paddingTop: 12 }}>
-						<View className="gap-4 flex items-center">
-							<ThumbnailImage
-								source={{
-									uri: book?.thumbnail.url,
-									headers: {
-										...getRequestHeaders?.(),
-									},
-								}}
-								size={{ height: 235 / thumbnailRatio, width: 235 }}
-								borderAndShadowStyle={{ shadowRadius: 5 }}
-							/>
-
-							<View className="gap-2">
-								<Heading size="lg" className="text-center" numberOfLines={3}>
-									{bookTitle}
-								</Heading>
-
-								<Text className="text-base text-center text-foreground-muted">
-									{bookAuthor}
-									{bookPublisher ? ` • ${bookPublisher}` : null}
-								</Text>
-							</View>
-
-							{!!book.metadata?.summary && (
-								<Text className="px-4 text-sm text-center text-foreground-muted">
-									{stripHtml(book.metadata.summary).result}
-								</Text>
-							)}
+							<GlassView
+								isInteractive
+								className={cn(
+									'right-0 h-10 px-4 gap-2 absolute flex-row items-center justify-center rounded-full',
+									!IS_IOS_26_PLUS && 'squircle bg-background-surface',
+								)}
+							>
+								<Icon as={Search} size={12} strokeWidth={2.5} color="#898d94" />
+								<TextInput
+									hitSlop={50}
+									placeholderTextColor="#898d94"
+									keyboardType="number-pad"
+									selectionColor={accentColor || colors.fill.brand.DEFAULT}
+									placeholder={'Go to page...'}
+									onLayout={(e) => setTextInputWidth(e.nativeEvent.layout.width)}
+									onChangeText={(text) => goToPage.setString(text)}
+									value={goToPage.string}
+									style={{
+										width: textInputWidth,
+										color:
+											goToPage.isValid || goToPage.isEmpty
+												? colors.foreground.DEFAULT
+												: colors.fill.danger.DEFAULT,
+									}}
+								/>
+							</GlassView>
 						</View>
-					</ScrollView>
+					</View>
 				</View>
 
-				<View key="2">
+				<View className="bg-black/10 dark:bg-white/10 mx-[6px] h-px" />
+
+				<View className="flex-1">
 					<FlashList
 						ref={flashListRef}
 						data={flatTocWithLevels}
-						contentContainerStyle={{ paddingBottom: 16 }}
+						contentContainerClassName={cn(activeTocItemIndex === 0 && 'pt-2')}
 						onViewableItemsChanged={onViewableItemsChanged}
+						// compensate for the toolbar: h-14 = 49px, plus the gap between the keyboard and toolbar, plus extra padding above the toolbar
+						contentContainerStyle={{ paddingBottom: 49 + 7 + 7 }}
 						renderItem={({ item, index }) => (
 							<TableOfContentsListItem
 								item={item.item}
@@ -212,29 +199,19 @@ export default function LocationsSheetContent() {
 					{showTopIndicator && (
 						<ScrollToChapterIndicator
 							onPress={() => scrollToCurrentChapter({ animated: true })}
-							className="top-4"
+							className="top-2"
 						/>
 					)}
 
 					{showBottomIndicator && (
 						<ScrollToChapterIndicator
 							onPress={() => scrollToCurrentChapter({ animated: true })}
-							className="bottom-6"
+							className="bottom-safe-offset-2"
 						/>
 					)}
 				</View>
-
-				<View
-					style={{
-						justifyContent: 'center',
-						alignItems: 'center',
-					}}
-					key="3"
-				>
-					<AnnotationsAndBookmarks />
-				</View>
-			</PagerView>
-		</View>
+			</View>
+		</>
 	)
 }
 
@@ -251,34 +228,25 @@ const TableOfContentsListItem = ({
 }) => {
 	const { readerRef } = useEpubReaderContext()
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
-	const locator = useEpubLocationStore((state) => state.locator)
-	const position = useEpubLocationStore((state) => state.position)
 	const pushJump = useEpubLocationStore((state) => state.pushJump)
 
 	const handlePress = async () => {
-		const previousLocator = locator
-
-		// If jumping to higher position, return direction should be 'back'
-		// If jumping to lower position, return direction should be 'forward'
-		const targetPosition = item.position
-		const direction: 'back' | 'forward' =
-			targetPosition != null && position != null && targetPosition > position ? 'back' : 'forward'
-
 		// E.g.: "text/part0010.html#9H5K0-..." -> ["text/part0010.html", "9H5K0-..."]
 		const [hrefWithoutFragment, fragment] = item.content.split('#')
 
-		await readerRef?.goToLocation({
+		const newLocator: ReadiumLocator = {
 			href: hrefWithoutFragment || item.content,
 			type: 'application/xhtml+xml',
 			chapterTitle: item.label,
-			locations: fragment ? { fragments: [fragment] } : {},
-		})
-
-		if (previousLocator) {
-			pushJump(previousLocator, direction)
+			locations: {
+				...(fragment && { fragments: [fragment] }),
+				...(item.position != null && { position: item.position }),
+			},
 		}
 
-		closeSheet('locations')
+		pushJump(newLocator)
+		await readerRef?.goToLocation(newLocator)
+		closeSheet('tableOfContents')
 	}
 
 	const { isDarkColorScheme } = useColorScheme()
@@ -322,7 +290,7 @@ const TableOfContentsListItem = ({
 							</Text>
 							<Text
 								className={cn(
-									'py-4 text-base shrink-0 text-foreground-muted',
+									'py-4 text-base text-foreground-muted shrink-0',
 									currentChapterActive && 'font-bold',
 								)}
 								style={currentChapterActive && { color: textColor }}
@@ -352,17 +320,6 @@ const Divider = ({ level = 0 }: { level?: number }) => (
 	/>
 )
 
-// GlassView doesn't like zero opacity https://github.com/expo/expo/issues/41024
-const enteringAnimation = new Keyframe({
-	from: { opacity: 0.02 },
-	to: { opacity: 1, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
-const exitingAnimation = new Keyframe({
-	from: { opacity: 1 },
-	to: { opacity: 0.02, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
 const ScrollToChapterIndicator = ({
 	onPress,
 	className,
@@ -376,8 +333,8 @@ const ScrollToChapterIndicator = ({
 
 	return (
 		<Animated.View
-			entering={enteringAnimation}
-			exiting={exitingAnimation}
+			entering={ENTERING_ANIMATION}
+			exiting={EXITING_ANIMATION}
 			className={cn('left-0 right-0 absolute items-center', className)}
 		>
 			<Pressable onPress={onPress}>
@@ -385,8 +342,7 @@ const ScrollToChapterIndicator = ({
 					glassEffectStyle="regular"
 					style={{ borderRadius: 999 }}
 					isInteractive
-					// this is for android only, but ios ignores it so it's fine
-					className="bg-background-surface"
+					className={cn(!IS_IOS_26_PLUS && 'bg-background-surface')}
 				>
 					<View className="px-4 py-2">
 						<Text className="text-base font-semibold" style={{ color: textColor }}>

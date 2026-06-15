@@ -275,7 +275,6 @@ export default function Screen() {
 	const queryClient = useQueryClient()
 
 	const preferNativePdfReader = usePreferencesStore((store) => Boolean(store.preferNativePdf))
-	const showControls = useReaderStore((state) => state.showControls)
 
 	if (!book) {
 		throw new Error('Book not found')
@@ -306,7 +305,7 @@ export default function Screen() {
 	} = useBookPreferences({ book })
 	const timer = useBookTimer(book?.id || '', {
 		initial: book?.readProgress?.elapsedSeconds,
-		enabled: trackElapsedTime && !showControls,
+		enabled: trackElapsedTime,
 	})
 
 	// tracks the elapsed total at the time of the last successful sync so we can
@@ -599,6 +598,7 @@ export default function Screen() {
 		return (
 			<ReadiumReader
 				book={book}
+				timer={timer}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
 				onReachedEnd={onReachedEnd}

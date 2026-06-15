@@ -1,7 +1,7 @@
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import LocationsSheetContent from '~/components/book/reader/epub/LocationsSheetContent'
+import LocationsSheetContent from '~/components/book/reader/epub/TableOfContentsSheetContent'
 
 export default function Screen() {
 	return (

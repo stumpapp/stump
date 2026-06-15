@@ -6263,6 +6263,13 @@ export type RegenerateThumbnailsMutationVariables = Exact<{
 
 export type RegenerateThumbnailsMutation = { __typename?: 'Mutation', generateLibraryThumbnails: boolean };
 
+export type SeriesActionCompleteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionCompleteMutation = { __typename?: 'Mutation', finishSeriesProgress: number };
+
 export type SeriesLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -12101,6 +12108,11 @@ export const RegenerateThumbnailsDocument = new TypedDocumentString(`
   generateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)
 }
     `) as unknown as TypedDocumentString<RegenerateThumbnailsMutation, RegenerateThumbnailsMutationVariables>;
+export const SeriesActionCompleteDocument = new TypedDocumentString(`
+    mutation SeriesActionComplete($id: ID!) {
+  finishSeriesProgress(id: $id)
+}
+    `) as unknown as TypedDocumentString<SeriesActionCompleteMutation, SeriesActionCompleteMutationVariables>;
 export const SeriesLayoutDocument = new TypedDocumentString(`
     query SeriesLayout($id: ID!) {
   seriesById(id: $id) {

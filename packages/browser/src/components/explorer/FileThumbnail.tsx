@@ -85,7 +85,7 @@ export default function FileThumbnail({
 
 	const sizeClasses = cn('h-14', { 'h-20': size === 'md' })
 	const className = cn(
-		'flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar shadow-sm',
+		'shadow-sm flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar',
 		sizeClasses,
 		containerClassName,
 	)

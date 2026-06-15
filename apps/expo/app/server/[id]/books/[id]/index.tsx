@@ -1,13 +1,5 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import {
-	BookByIdQuery,
-	graphql,
-	MediaFilterInput,
-	MediaMetadataFilterInput,
-	UserPermission,
-} from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
-import { formatDistanceToNow } from 'date-fns'
+import { graphql, MediaFilterInput, MediaMetadataFilterInput, UserPermission } from '@stump/graphql'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { Platform, View } from 'react-native'
@@ -20,18 +12,21 @@ import BackLink from '~/components/BackLink'
 import { BookMetaLink, BooksAfterCursor } from '~/components/book'
 import {
 	BookActionMenu,
+	CurrentProgressCard,
 	DescriptionSection,
 	DownloadButton,
+	getPercentage,
 	IdentifiersSheet,
+	LastFinishedCard,
+	useBookMenu,
 	useOverviewAnimations,
 } from '~/components/book/overview'
-import { useBookMenu } from '~/components/book/overview/BookMenu'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
-import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
+import { formatBytes } from '~/lib/format'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -137,10 +132,6 @@ const query = graphql(`
 	}
 `)
 
-type ActiveReadingSession = NonNullable<
-	NonNullable<Pick<NonNullable<BookByIdQuery['mediaById']>, 'readProgress'>>['readProgress']
->
-
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
 	const { t } = useTranslate()
@@ -211,7 +202,6 @@ export default function Screen() {
 	const description = book.metadata?.summary || ''
 	const genres = book.metadata?.genres || []
 	const links = book.metadata?.links || []
-	const pages = book.metadata?.pageCount || book.pages
 	const characters = book.metadata?.characters || []
 
 	const seriesName = book.metadata?.series || book.series.resolvedName
@@ -252,62 +242,11 @@ export default function Screen() {
 		}
 	}
 
-	const renderPercentage = ({ page, percentageCompleted, locator }: ActiveReadingSession) => {
-		if (!page && !percentageCompleted && !locator) {
-			return null
-		}
-
-		if (locator?.locations?.totalProgression != null && !percentageCompleted) {
-			const percentage = Math.round(locator.locations.totalProgression * 100)
-			return <Card.Stat label="Completed" value={`${percentage}%`} />
-		}
-
-		const fraction = percentageCompleted
-			? parseGraphQLDecimal(percentageCompleted)
-			: (page || 0) / pages
-
-		const percentage = fraction != null ? Math.max(0, Math.min(100, Math.round(fraction * 100))) : 0
-
-		return <Card.Stat label="Completed" value={percentage} suffix={'%'} />
-	}
-
-	const renderReadTime = ({ elapsedSeconds, startedAt }: ActiveReadingSession) => {
-		if (!elapsedSeconds || !startedAt) {
-			return null
-		}
-
-		if (elapsedSeconds) {
-			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
-			return <Card.Stat label="Reading time" value={readTime} />
-		} else {
-			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
-		}
-	}
-
-	const renderEpubLocator = ({ epubcfi, locator }: ActiveReadingSession) => {
-		if (!locator && !epubcfi) {
-			return null
-		}
-
-		if (locator) {
-			const chapterTitle = locator.chapterTitle || locator.href || 'Unknown'
-			return <Card.Stat label="Chapter" value={chapterTitle} />
-		} else {
-			return <Card.Stat label="Locator" value={`${epubcfi?.slice(0, 4)}...${epubcfi?.slice(-4)}`} />
-		}
-	}
-
-	const currentPage = progression?.page ?? progression?.locator?.locations?.position ?? '??'
-
-	const lastCompletionDistance =
-		lastCompletion?.completedAt != null
-			? formatDistanceToNow(new Date(lastCompletion.completedAt), { addSuffix: true })
-			: 'Unknown'
-
-	const lastCompletionReadTime =
-		lastCompletion?.elapsedSeconds != null
-			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
-			: 'Unknown'
+	const chapterTitle = progression?.locator?.chapterTitle || progression?.locator?.href
+	const currentPage = progression?.page ?? progression?.locator?.locations?.position
+	const totalPages = book.metadata?.pageCount || book.pages
+	const percentage = getPercentage({ readProgress: progression, totalPages })
+	const readthroughNumber = book.readHistory.length
 
 	// Reminder: Whenever this page introduces a new clickable filter field, make sure to
 	// add a corresponding bit in the filter header and prolly metadata overview object
@@ -410,7 +349,7 @@ export default function Screen() {
 							</Heading>
 
 							{seriesPosition != null && (
-								<Text className="text-base text-center text-foreground-muted">
+								<Text className="text-base text-foreground-muted text-center">
 									{seriesPosition}
 								</Text>
 							)}
@@ -435,26 +374,22 @@ export default function Screen() {
 							)}
 						</View>
 
-						{(progression || lastCompletion) && (
-							<Card>
-								{progression ? (
-									<>
-										{isEpub && <Card.StatGroup>{renderEpubLocator(progression)}</Card.StatGroup>}
-										<Card.StatGroup>
-											<Card.Stat label="Page" value={currentPage} suffix={` / ${pages}`} />
-											{renderPercentage(progression)}
-											{renderReadTime(progression)}
-										</Card.StatGroup>
-									</>
-								) : (
-									<Card.StatGroup>
-										<Card.Stat label="Pages" value={pages} />
-										<Card.Stat label="Finished" value={lastCompletionDistance} />
-										<Card.Stat label="Reading time" value={lastCompletionReadTime} />
-									</Card.StatGroup>
-								)}
-							</Card>
-						)}
+						<CurrentProgressCard
+							hidden={!progression}
+							showChapterTitle={isEpub}
+							chapterTitle={chapterTitle}
+							page={currentPage}
+							totalPages={totalPages}
+							percentage={percentage}
+							readingTimeSeconds={progression?.elapsedSeconds}
+						/>
+
+						<LastFinishedCard
+							hidden={!!progression || !lastCompletion}
+							readthroughNumber={readthroughNumber}
+							lastCompletedAt={lastCompletion?.completedAt}
+							readingTimeSeconds={lastCompletion?.elapsedSeconds}
+						/>
 					</View>
 				</View>
 
@@ -468,7 +403,7 @@ export default function Screen() {
 							{book.metadata?.year != null && book.metadata.year > 0 && (
 								<Card.Stat label="Year" value={book.metadata.year} />
 							)}
-							<Card.Stat label="Pages" value={pages} />
+							<Card.Stat label="Pages" value={totalPages} />
 						</Card.StatGroup>
 					</Card>
 

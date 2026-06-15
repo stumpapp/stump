@@ -1,12 +1,12 @@
 import { FlashListRef } from '@shopify/flash-list'
 import { ReadingMode } from '@stump/graphql'
 import { generatePageSets, ImageBasedBookPageRef, PageSetIndexes } from '@stump/sdk'
-import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
+import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
 import { useVolumeListener } from '~/modules/volumeListener'
-import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
+import { DEFAULT_BOOK_PREFERENCES, useBookPreferences, useReaderStore } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext, NextInSeriesBookRef } from './context'
 import ControlsOverlay from './ControlsOverlay'
@@ -37,6 +37,15 @@ export default function ImageBasedReaderContainer({
 			volumeButtonsNavigate,
 		},
 	} = useBookPreferences({ book: ctx.book, serverId: ctx.serverId })
+	const showControls = useReaderStore((state) => state.showControls)
+
+	useEffect(() => {
+		if (showControls) {
+			ctx.timer.pause()
+		} else {
+			ctx.timer.resume()
+		}
+	}, [showControls, ctx.timer])
 
 	const [imageSizes, setImageSizes] = useState<Record<number, ImageBasedBookPageRef>>(
 		() =>

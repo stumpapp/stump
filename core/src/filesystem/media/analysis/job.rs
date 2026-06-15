@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::{
 	filesystem::media::analysis::analyze::{safely_analyze_book, MediaForProcessing},
 	job::{
@@ -171,11 +173,14 @@ impl JobLifecycle for AnalyzeMediaJob {
 						))
 					})?;
 
-				let filename = std::path::Path::new(&book.path)
+				let filename = Path::new(&book.path)
 					.file_name()
 					.and_then(|n| n.to_str())
 					.unwrap_or(&book.path);
-				ctx.report_progress(JobProgress::msg(&format!("Analyzing {}", filename)));
+				ctx.report_progress(JobProgress::msg_with_subtitle(
+					"Analyzing",
+					filename,
+				));
 
 				let JobTaskOutput {
 					output: sub_output,

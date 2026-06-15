@@ -1090,7 +1090,7 @@ export type JobUpdate = {
   /** The current task being worked on */
   completedTasks?: Maybe<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
-  /** The message to display */
+  /** The primary message to display, e.g. "Scanning series" */
   message?: Maybe<Scalars['String']['output']>;
   /**
    * The number of tasks for the job. This number can change as
@@ -1099,6 +1099,8 @@ export type JobUpdate = {
   remainingTasks?: Maybe<Scalars['Int']['output']>;
   /** The status of the job */
   status?: Maybe<JobStatus>;
+  /** An optional secondary message providing additional detail, e.g. a path or item name */
+  subtitle?: Maybe<Scalars['String']['output']>;
   /** The number of subtasks that exist in the current task */
   totalSubtasks?: Maybe<Scalars['Int']['output']>;
 };
@@ -4407,18 +4409,10 @@ export type StumpConfig = {
    */
   maxImageUploadSize: Scalars['Int']['output'];
   /**
-   * The maximum number of concurrent files which may be processed by a scanner. This is used
-   * to limit/increase the number of files that are processed at once. This may be useful for those
-   * with high or low performance systems to configure to their needs.
+   * A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
+   * limit. Increasing can speed things up but will increase resource usage
    */
-  maxScannerConcurrency: Scalars['Int']['output'];
-  /**
-   * The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
-   * to limit/increase the number of images that are processed at once. Image generation can be
-   * resource intensive, so this may be useful for those with high or low performance systems to
-   * configure to their needs.
-   */
-  maxThumbnailConcurrency: Scalars['Int']['output'];
+  parallelismMultiplier: Scalars['Int']['output'];
   /** Password hash cost */
   passwordHashCost: Scalars['Int']['output'];
   /** Whether to enable disk caching for rendered PDF pages. */
@@ -5818,7 +5812,7 @@ export type SeriesEditorSetLockedFieldsMutation = { __typename?: 'Mutation', set
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
+export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null, subtitle?: string | null } };
 
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -11044,6 +11038,7 @@ export const UseCoreEventDocument = new TypedDocumentString(`
       remainingTasks
       completedSubtasks
       totalSubtasks
+      subtitle
     }
     ... on JobOutput {
       id

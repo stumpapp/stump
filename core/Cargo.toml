@@ -32,6 +32,7 @@ metadata_integrations = { path = "../crates/integrations/metadata" }
 migrations = { path = "../crates/migrations" }
 models = { path = "../crates/models" }
 md5.workspace = true
+natord.workspace = true
 rand.workspace = true
 sea-orm.workspace = true
 serde.workspace = true

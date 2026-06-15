@@ -294,11 +294,8 @@ impl JobLifecycle for ThumbnailGenerationJob {
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = media.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating book thumbnails",
-					1,
-					task_count,
-				));
+				ctx.report_progress(JobProgress::msg("Generating book thumbnails"));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 				let JobTaskOutput {
 					output: sub_output,
 					logs: sub_logs,
@@ -334,11 +331,8 @@ impl JobLifecycle for ThumbnailGenerationJob {
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = series.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating series thumbnails",
-					1,
-					task_count,
-				));
+				ctx.report_progress(JobProgress::msg("Generating series thumbnails"));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				let JobTaskOutput {
 					output: sub_output,
@@ -378,11 +372,8 @@ impl JobLifecycle for ThumbnailGenerationJob {
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = libraries.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating library thumbnails",
-					1,
-					task_count,
-				));
+				ctx.report_progress(JobProgress::msg("Generating library thumbnails"));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				let JobTaskOutput {
 					output: sub_output,

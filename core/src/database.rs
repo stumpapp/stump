@@ -1,7 +1,8 @@
-use std::env;
+use std::{env, time::Duration};
 
 use migrations::{Migrator, MigratorTrait};
-use sea_orm::{self, DatabaseConnection, FromQueryResult};
+use sea_orm::sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sea_orm::{self, DatabaseConnection, FromQueryResult, SqlxSqliteConnector};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -24,7 +25,35 @@ pub async fn connect(config: &StumpConfig) -> Result<DatabaseConnection, CoreErr
 		format!("sqlite://{}/stump.db?mode=rwc", config_dir.display())
 	};
 
-	let connection = sea_orm::Database::connect(&sqlite_url).await?;
+	let connection = if sqlite_url.starts_with("sqlite://") {
+		let options = SqliteConnectOptions::from_str(&sqlite_url)
+			.map_err(|e| {
+				CoreError::InternalError(format!("Invalid SQLite connection string: {e}"))
+			})?
+			// TODO(482): support this:
+			// - add indexes (e.g., create index media_name on media (name collate NATURALSORT))
+			// - maybe some sql magic (e.g., update sqlite_master set sql = replace(sql, 'collate NOCASE', 'collate NATURALSORT') WHERE type = 'table' AND name IN (...))
+			// - will need to verify ^ doesn't break comparisons where case matters, though
+			.collation("NATURALSORT", natord::compare)
+			// TODO(sqlite): do proper eval for NORMAL synchronous mode
+			// .synchronous(SqliteSynchronous::Normal)
+			.busy_timeout(Duration::from_secs(30));
+		let pool = SqlitePoolOptions::new()
+			.acquire_timeout(Duration::from_secs(30))
+			.connect_with(options)
+			.await
+			.map_err(|e| {
+				CoreError::InternalError(format!("Failed to connect to SQLite: {e}"))
+			})?;
+		SqlxSqliteConnector::from_sqlx_sqlite_pool(pool)
+	} else {
+		// TODO(postgres): tune for postgres
+		let connect_options = sea_orm::ConnectOptions::new(sqlite_url)
+			.acquire_timeout(Duration::from_secs(30))
+			.sqlx_logging(true)
+			.to_owned();
+		sea_orm::Database::connect(connect_options).await?
+	};
 
 	let force_reset = match env::var(FORCE_RESET_KEY) {
 		Ok(value) => value == "true",

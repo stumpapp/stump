@@ -179,13 +179,14 @@ pub async fn generate_book_thumbnail(
 	let (thumbnail, thumbnail_path, did_generate) = generate_result;
 	fs::write(&thumbnail_path, &thumbnail).await?;
 
-	let thumbnail_metadata = match generate_image_metadata(&thumbnail_path).await {
-		Ok(metadata) => Some(metadata),
-		Err(e) => {
-			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
-			None
-		},
-	};
+	let thumbnail_metadata =
+		match generate_image_metadata_from_bytes(thumbnail.clone()).await {
+			Ok(metadata) => Some(metadata),
+			Err(e) => {
+				tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
+				None
+			},
+		};
 
 	let update_result = media::Entity::update_many()
 		.filter(media::Column::Id.eq(book.id.clone()))
@@ -435,7 +436,7 @@ pub async fn safely_generate_batch(
 	let mut output = ThumbnailGenerationOutput::default();
 	let mut logs = vec![];
 
-	let max_concurrency = options.core_config.max_thumbnail_concurrency;
+	let max_concurrency = options.core_config.cpu_concurrency_limit();
 	let batch_size = max_concurrency;
 	let total_sources = sources.len();
 	tracing::debug!(
@@ -744,7 +745,7 @@ pub async fn safely_generate_placeholder_batch(
 	let mut output = PlaceholderGenerationOutput::default();
 	let mut logs = vec![];
 
-	let max_concurrency = ctx.config().max_thumbnail_concurrency;
+	let max_concurrency = ctx.config().cpu_concurrency_limit();
 	let batch_size = max_concurrency;
 	let total_sources = sources.len();
 	tracing::debug!(

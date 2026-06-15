@@ -25,7 +25,9 @@ mod m20260505_231341_jwt_secrets;
 mod m20260519_192218_reading_sessions_v2;
 mod m20260523_220757_rename_registered_reading_devices;
 mod m20260525_165704_roundness_preference;
+mod m20260601_000000_add_scanned_directory;
 mod m20260603_164540_thumbnail_roundness_preference;
+mod m20260613_000000_add_series_path_index;
 
 pub struct Migrator;
 
@@ -58,6 +60,8 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260523_220757_rename_registered_reading_devices::Migration),
 			Box::new(m20260525_165704_roundness_preference::Migration),
 			Box::new(m20260603_164540_thumbnail_roundness_preference::Migration),
+			Box::new(m20260601_000000_add_scanned_directory::Migration),
+			Box::new(m20260613_000000_add_series_path_index::Migration),
 		]
 	}
 }

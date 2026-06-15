@@ -432,10 +432,10 @@ impl JobLifecycle for MetadataFetchJob {
 					});
 				}
 				output.total_processed = 1;
-				ctx.report_progress(JobProgress::msg(&format!(
-					"Fetching metadata for series: {}",
-					series_name
-				)));
+				ctx.report_progress(JobProgress::msg_with_subtitle(
+					"Fetching series metadata",
+					&series_name,
+				));
 
 				if !self.params.force_refetch {
 					let existing = metadata_fetch_record::Entity::find()
@@ -610,10 +610,10 @@ impl JobLifecycle for MetadataFetchJob {
 					});
 				}
 				output.total_processed = 1;
-				ctx.report_progress(JobProgress::msg(&format!(
-					"Fetching metadata for media: {}",
-					media_name
-				)));
+				ctx.report_progress(JobProgress::msg_with_subtitle(
+					"Fetching media metadata",
+					&media_name,
+				));
 
 				if !self.params.force_refetch {
 					let existing = metadata_fetch_record::Entity::find()

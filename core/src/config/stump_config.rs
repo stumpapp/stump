@@ -38,8 +38,6 @@ pub mod env_keys {
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const MAX_SCANNER_CONCURRENCY_KEY: &str = "STUMP_MAX_SCANNER_CONCURRENCY";
-	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
 	pub const MAX_IMAGE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_IMAGE_UPLOAD_SIZE";
 	pub const ENABLE_UPLOAD_KEY: &str = "STUMP_ENABLE_UPLOAD";
 	pub const MAX_FILE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_FILE_UPLOAD_SIZE";
@@ -58,6 +56,7 @@ pub mod env_keys {
 	pub const OIDC_DISABLE_LOCAL_AUTH_KEY: &str = "STUMP_OIDC_DISABLE_LOCAL_AUTH";
 	pub const OIDC_EXTRA_AUDIENCES_KEY: &str = "STUMP_OIDC_EXTRA_AUDIENCES";
 	pub const TRUST_PROXY_HEADERS_KEY: &str = "STUMP_TRUST_PROXY_HEADERS";
+	pub const PARALLELISM_MULTIPLIER_KEY: &str = "STUMP_PARALLELISM_MULTIPLIER";
 }
 use env_keys::*;
 
@@ -67,8 +66,6 @@ pub mod defaults {
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 30; // 30 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
-	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 10;
 	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
 	pub const DEFAULT_MAX_FILE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
@@ -79,6 +76,7 @@ pub mod defaults {
 	pub const DEFAULT_PDF_PRERENDER_RANGE: u32 = 5; // Pre-render 5 pages before/after current
 	pub const DEFAULT_PDF_HIGH_QUALITY: bool = true; // Enable high-quality rendering by default
 	pub const DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS: i64 = 60 * 60 * 24; // 1 day
+	pub const DEFAULT_PARALLELISM_MULTIPLIER: usize = 2;
 }
 use defaults::*;
 
@@ -222,20 +220,11 @@ pub struct StumpConfig {
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
 	pub expired_session_cleanup_interval: u64,
 
-	/// The maximum number of concurrent files which may be processed by a scanner. This is used
-	/// to limit/increase the number of files that are processed at once. This may be useful for those
-	/// with high or low performance systems to configure to their needs.
-	#[default_value(DEFAULT_MAX_SCANNER_CONCURRENCY)]
-	#[env_key(MAX_SCANNER_CONCURRENCY_KEY)]
-	pub max_scanner_concurrency: usize,
-
-	/// The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
-	/// to limit/increase the number of images that are processed at once. Image generation can be
-	/// resource intensive, so this may be useful for those with high or low performance systems to
-	/// configure to their needs.
-	#[default_value(DEFAULT_MAX_THUMBNAIL_CONCURRENCY)]
-	#[env_key(MAX_THUMBNAIL_CONCURRENCY_KEY)]
-	pub max_thumbnail_concurrency: usize,
+	/// A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
+	/// limit. Increasing can speed things up but will increase resource usage
+	#[default_value(DEFAULT_PARALLELISM_MULTIPLIER)]
+	#[env_key(PARALLELISM_MULTIPLIER_KEY)]
+	pub parallelism_multiplier: usize,
 
 	/// The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
 	/// libraries, series, or media.
@@ -296,6 +285,15 @@ pub struct StumpConfig {
 }
 
 impl StumpConfig {
+	/// returns a sensible default concurrency limit based on the number of logical cpus
+	/// available to the process, scaled by `parallelism_multiplier`.
+	pub fn cpu_concurrency_limit(&self) -> usize {
+		let multiplier = std::cmp::max(self.parallelism_multiplier, 1);
+		std::thread::available_parallelism()
+			.map(|n| n.get() * multiplier)
+			.unwrap_or(multiplier)
+	}
+
 	/// Ensures that the configuration directory exists and saves the `StumpConfig`'s current values
 	/// to Stump.toml in the configuration directory.
 	///
@@ -464,7 +462,7 @@ mod tests {
 			colorful_logs: None,
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
-
+			parallelism_multiplier: Some(DEFAULT_PARALLELISM_MULTIPLIER),
 			enable_opds_progression: Some(false),
 			ip: None,
 			config_dir: None,
@@ -478,8 +476,6 @@ mod tests {
 			access_token_ttl: None,
 			refresh_token_ttl: None,
 			expired_session_cleanup_interval: None,
-			max_scanner_concurrency: None,
-			max_thumbnail_concurrency: None,
 			max_image_upload_size: None,
 			enable_upload: None,
 			max_file_upload_size: None,
@@ -517,7 +513,7 @@ mod tests {
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
-
+				parallelism_multiplier: Some(DEFAULT_PARALLELISM_MULTIPLIER),
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				enable_playground: Some(false),
@@ -531,8 +527,6 @@ mod tests {
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
-				max_scanner_concurrency: Some(DEFAULT_MAX_SCANNER_CONCURRENCY),
-				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
 				max_image_upload_size: Some(DEFAULT_MAX_IMAGE_UPLOAD_SIZE),
 				enable_upload: Some(DEFAULT_ENABLE_UPLOAD),
 				max_file_upload_size: Some(DEFAULT_MAX_FILE_UPLOAD_SIZE),
@@ -598,9 +592,8 @@ mod tests {
 						refresh_token_ttl: DEFAULT_REFRESH_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+						parallelism_multiplier: DEFAULT_PARALLELISM_MULTIPLIER,
 
-						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
-						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
 						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,
 						enable_upload: DEFAULT_ENABLE_UPLOAD,
 						max_file_upload_size: DEFAULT_MAX_FILE_UPLOAD_SIZE,

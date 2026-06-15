@@ -334,25 +334,15 @@ The maximum size, in bytes, for images uploaded as thumbnails for users, librari
 
 ## Performance
 
-### STUMP_MAX_SCANNER_CONCURRENCY
+### STUMP_PARALLELISM_MULTIPLIER
 
-The maximum number of files which may be processed concurrently by the scanner. This is useful for limiting the number of files that are processed at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
+A multiplier applied to the number of logical CPUs available to the process to derive concurrency limits for processing-heavy tasks (e.g., the scanner and thumbnail generator). 
 
-**Note:** The OS thread scheduler should prevent overload, however, you may want to set this value lower if you're running Stump on a system with limited resources.
+For example, a value of `2` on a 6-CPU machine yields a concurrency of `12`. Increasing this value may improve speeds at the cost of increased CPU usage, while decreasing it may reduce CPU usage at the cost of slower processing times. It depends on your host machine and workload.
 
-| Type    | Default Value | TOML Key                    |
-| ------- | ------------- | --------------------------- |
-| Integer | `200`         | `max_scanner_concurrency`   |
-
-### STUMP_MAX_THUMBNAIL_CONCURRENCY
-
-The maximum number of images which may be generated concurrently by the thumbnailer. This is useful for limiting the number of thumbnails that are generated at once, which can help prevent the server from becoming overwhelmed on systems with limited resources.
-
-**Note:** Thumbnail generation is a CPU-intensive process, so you may want to set this value lower if you're running Stump on a system with limited resources.
-
-| Type    | Default Value | TOML Key                      |
-| ------- | ------------- | ----------------------------- |
-| Integer | `50`          | `max_thumbnail_concurrency`   |
+| Type    | Default Value | TOML Key                  |
+| ------- | ------------- | ------------------------- |
+| Integer | `2`           | `parallelism_multiplier`  |
 
 ### STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
 

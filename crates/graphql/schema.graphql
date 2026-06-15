@@ -1020,8 +1020,10 @@ type JobUpdate {
 	id: String!
 	"The status of the job"
 	status: JobStatus
-	"The message to display"
+	"The primary message to display, e.g. \"Scanning series\""
 	message: String
+	"An optional secondary message providing additional detail, e.g. a path or item name"
+	subtitle: String
 	"The current task being worked on"
 	completedTasks: Int
 	"""
@@ -3222,18 +3224,10 @@ type StumpConfig {
 	"The interval at which automatic deleted session cleanup is performed."
 	expiredSessionCleanupInterval: Int!
 	"""
-	The maximum number of concurrent files which may be processed by a scanner. This is used
-	to limit/increase the number of files that are processed at once. This may be useful for those
-	with high or low performance systems to configure to their needs.
+	A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
+	limit. Increasing can speed things up but will increase resource usage
 	"""
-	maxScannerConcurrency: Int!
-	"""
-	The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
-	to limit/increase the number of images that are processed at once. Image generation can be
-	resource intensive, so this may be useful for those with high or low performance systems to
-	configure to their needs.
-	"""
-	maxThumbnailConcurrency: Int!
+	parallelismMultiplier: Int!
 	"""
 	The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
 	libraries, series, or media.

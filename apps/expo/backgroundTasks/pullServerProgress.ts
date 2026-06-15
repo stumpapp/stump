@@ -4,6 +4,7 @@ import { Api } from '@stump/sdk'
 import { eq, inArray } from 'drizzle-orm'
 
 import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
+import { parseGraphQLDateTime } from '~/lib/format'
 
 const query = graphql(`
 	query PullServerReadProgression($filter: MediaFilterInput!) {
@@ -57,7 +58,6 @@ export const executeSingleServerPullSync = async (
 		.select({ id: downloadedFiles.id })
 		.from(downloadedFiles)
 		.where(eq(downloadedFiles.serverId, serverId))
-		.all()
 
 	if (downloadedBooks.length === 0) {
 		return { failedBookIds: [] }
@@ -84,7 +84,6 @@ export const executeSingleServerPullSync = async (
 				serverMedia.map((m) => m.id),
 			),
 		)
-		.all()
 
 	const localProgressMap = new Map(localRecords.map((r) => [r.bookId, r]))
 	const failedBookIds: string[] = []
@@ -98,11 +97,11 @@ export const executeSingleServerPullSync = async (
 			const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0
 			return dateB - dateA // Descending order
 		})
-		const serverCompletedAt = sortedReadHistory.at(0)?.completedAt
+		const serverCompletedAt = parseGraphQLDateTime(sortedReadHistory.at(0)?.completedAt)
 
 		if (serverCompletedAt && serverCompletedAt > localUpdatedAt) {
 			try {
-				await db.delete(readProgress).where(eq(readProgress.bookId, media.id)).run()
+				await db.delete(readProgress).where(eq(readProgress.bookId, media.id))
 			} catch (error) {
 				// Note: A failure to delete local progress is not a failure to pull progress,
 				// so we log it but don't add to failedBookIds
@@ -115,13 +114,18 @@ export const executeSingleServerPullSync = async (
 			continue
 		}
 
-		// No progress = skip (nothing to pull)
+		// no progress = skip (nothing to pull)
 		const progress = media.readProgress
 		if (!progress) continue
 
 		const serverUpdatedAt = progress.updatedAt ? new Date(progress.updatedAt) : new Date(0)
 
-		// Local already ahead = skip (need to push)
+		if (localProgress && localProgress.syncStatus !== syncStatus.enum.SYNCED) {
+			// naive-ish last write wins
+			if (localUpdatedAt >= serverUpdatedAt) continue
+		}
+
+		// local already ahead or equal = skip (push handles it)
 		if (localUpdatedAt >= serverUpdatedAt) continue
 
 		try {
@@ -135,6 +139,7 @@ export const executeSingleServerPullSync = async (
 				serverId,
 				page: progress.page,
 				elapsedSeconds: progress.elapsedSeconds,
+				lastSyncedElapsedSeconds: progress.elapsedSeconds,
 				percentage,
 				epubProgress: isEpub
 					? epubProgress.safeParse({
@@ -147,14 +152,10 @@ export const executeSingleServerPullSync = async (
 				lastModified: serverUpdatedAt,
 			}
 
-			await db
-				.insert(readProgress)
-				.values(values)
-				.onConflictDoUpdate({
-					target: readProgress.bookId,
-					set: values,
-				})
-				.run()
+			await db.insert(readProgress).values(values).onConflictDoUpdate({
+				target: readProgress.bookId,
+				set: values,
+			})
 		} catch (error) {
 			// Fail to pull means we can't reliably push later, so mark as failed
 			console.error('Failed to pull server progress for book', {

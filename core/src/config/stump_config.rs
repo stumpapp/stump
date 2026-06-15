@@ -55,8 +55,6 @@ pub mod env_keys {
 	pub const OIDC_ALLOW_REGISTRATION_KEY: &str = "STUMP_OIDC_ALLOW_REGISTRATION";
 	pub const OIDC_DISABLE_LOCAL_AUTH_KEY: &str = "STUMP_OIDC_DISABLE_LOCAL_AUTH";
 	pub const OIDC_EXTRA_AUDIENCES_KEY: &str = "STUMP_OIDC_EXTRA_AUDIENCES";
-	pub const BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY: &str =
-		"STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS";
 	pub const TRUST_PROXY_HEADERS_KEY: &str = "STUMP_TRUST_PROXY_HEADERS";
 	pub const PARALLELISM_MULTIPLIER_KEY: &str = "STUMP_PARALLELISM_MULTIPLIER";
 }
@@ -280,11 +278,6 @@ pub struct StumpConfig {
 	#[default_value(None)]
 	pub oidc: Option<OidcConfig>,
 
-	/// The number of seconds after which a book can be re-completed
-	#[default_value(DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS)]
-	#[env_key(BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY)]
-	pub book_completion_dedup_timeout_secs: i64,
-
 	/// Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)
 	#[default_value(false)]
 	#[env_key(TRUST_PROXY_HEADERS_KEY)]
@@ -493,7 +486,6 @@ mod tests {
 			pdf_prerender_range: None,
 			pdf_high_quality: None,
 			oidc: None,
-			book_completion_dedup_timeout_secs: None,
 			trust_proxy_headers: None,
 		};
 		partial_config.apply_to_config(&mut config);
@@ -545,9 +537,6 @@ mod tests {
 				pdf_prerender_range: Some(DEFAULT_PDF_PRERENDER_RANGE),
 				pdf_high_quality: Some(DEFAULT_PDF_HIGH_QUALITY),
 				oidc: None,
-				book_completion_dedup_timeout_secs: Some(
-					DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
-				),
 				trust_proxy_headers: Some(false),
 			}
 		);
@@ -615,8 +604,6 @@ mod tests {
 						pdf_prerender_range: DEFAULT_PDF_PRERENDER_RANGE,
 						pdf_high_quality: DEFAULT_PDF_HIGH_QUALITY,
 						oidc: None,
-						book_completion_dedup_timeout_secs:
-							DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS,
 						trust_proxy_headers: false,
 					}
 				);

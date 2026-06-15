@@ -304,14 +304,8 @@ async fn put_progress(
 		},
 	}
 
-	let session = upsert_reading_session(
-		&tx,
-		&user,
-		book.id.as_ref(),
-		progression,
-		ctx.config.book_completion_dedup_timeout_secs,
-	)
-	.await?;
+	let session =
+		upsert_reading_session(&tx, &user, book.id.as_ref(), progression).await?;
 
 	if session.koreader_progress.as_deref() != Some(progress.as_str()) {
 		let mut active: reading_session::ActiveModel = session.into();

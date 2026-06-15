@@ -453,6 +453,10 @@
 				"update": "Escanear tras actualizaciones"
 			},
 			"description": "Indexar los archivos de la biblioteca para llenar la base de datos"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
@@ -553,9 +557,9 @@
 				"label": "Opciones"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
+				"label": "Integraciones",
+				"analysis": "Análisis",
+				"metadata": "Metadatos"
 			},
 			"danger-zone": {
 				"access-control": "Control de acceso",
@@ -678,18 +682,18 @@
 			}
 		},
 		"integrations/metadata": {
-			"title": "Metadata",
+			"title": "Metadatos",
 			"description": "Manage and review metadata matches for this library",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "Obtener metadatos",
+					"description": "Obtener metadatos para el medio en esta biblioteca",
 					"noProviders": {
-						"title": "There are no metadata providers available",
+						"title": "No hay proveedores de metadatos disponibles",
 						"description": "You can configure metadata providers in the metadata integration settings"
 					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
+					"fetchButton": "Comenzar búsqueda de fondo",
+					"fetchError": "Error al iniciar búsqueda de metadatos"
 				}
 			}
 		},
@@ -838,70 +842,70 @@
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "Pending matches",
-			"description": "Review metadata matches fetched from external providers"
+			"heading": "Partidas pendientes",
+			"description": "Revisar metadatos obtenidos de proveedores externos"
 		},
 		"confidenceBadge": {
-			"label": "confidence"
+			"label": "confianza"
 		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
+		"includeField": "Incluye este campo",
+		"excludeField": "Excluye este campo",
+		"fieldLocked": "Este campo está bloqueado",
 		"reviewDialog": {
 			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
+				"noCandidates": "No hay candidatos disponibles para este registro",
+				"noComparableFields": "No se encontraron campos comparables",
 				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
+					"field": "Campo",
+					"current": "Actual",
+					"external": "Externo",
+					"resolved": "Resuelto"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
-					"provider": "Provider"
+					"candidatePosition": "Candidato {{position}} de {{total}}",
+					"provider": "Proveedor"
 				}
 			},
 			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
+				"accept": "Aceptar",
+				"reject": "Cancelar",
 				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
+					"FILL_GAPS": "Rellenar huecos",
+					"PREFER_EXTERNAL": "Preferir externo",
 					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
-					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+					"FILL_AND_MERGE_LISTS": "Llenar y combinar listas"
 				}
 			},
 			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
-				"reset": "Reset",
-				"undoManualEdit": "Undo manual edit"
+				"keepCurrent": "Mantener actual",
+				"takeExternal": "Tomar externo",
+				"mergeLists": "Fusionar listas",
+				"editManually": "Editar manualmente",
+				"lockField": "Bloquear campo",
+				"unlockField": "Desbloquear campo",
+				"reset": "Reiniciar",
+				"undoManualEdit": "Deshacer edición manual"
 			}
 		},
 		"matchesTable": {
 			"columns": {
-				"entityName": "Name",
-				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
+				"entityName": "Nombre",
+				"entityType": "Tipo",
+				"candidateCount": "Candidatos",
+				"topConfidence": "Mayor confianza",
+				"addedAt": "Obtenido"
 			},
 			"acceptAll": {
-				"label": "Accept all",
-				"failed": "Failed to accept all matches",
+				"label": "Aceptar todo",
+				"failed": "Error al aceptar todas las coincidencias",
 				"success": "All pending matches accepted"
 			},
 			"rejectAll": {
-				"label": "Reject all",
-				"failed": "Failed to reject all matches",
-				"success": "All pending matches rejected"
+				"label": "Rechazar todo",
+				"failed": "Error al rechazar todas las coincidencias",
+				"success": "Todas las coincidencias pendientes rechazadas"
 			},
-			"startReview": "Start review",
+			"startReview": "Iniciar la revisión",
 			"nothingToReview": "No pending metadata matches to review"
 		}
 	},
@@ -1012,7 +1016,7 @@
 									"tags": "Tags",
 									"createdAt": "Created at",
 									"updatedAt": "Updated at",
-									"readingStatus": "Reading status"
+									"readingStatus": "Estado de lectura"
 								}
 							},
 							"book_meta": {
@@ -1091,11 +1095,11 @@
 						"emptyState": "No values to display"
 					},
 					"enumValue": {
-						"selectPlaceholder": "Select value",
-						"READING": "Reading",
-						"FINISHED": "Finished",
-						"NOT_STARTED": "Not started",
-						"ABANDONED": "Abandoned"
+						"selectPlaceholder": "Seleccionar valor",
+						"READING": "Leyendo",
+						"FINISHED": "Inactivas",
+						"NOT_STARTED": "Sin iniciar",
+						"ABANDONED": "Abandonado"
 					}
 				}
 			}
@@ -1350,7 +1354,7 @@
 				"jobs": "Tareas",
 				"access": "Acceso",
 				"email": "Correo electrónico",
-				"metadata": "Metadata",
+				"metadata": "Metadatos",
 				"notifications": "Notificaciones",
 				"tags": "Tags",
 				"label": "Servidor"
@@ -1417,11 +1421,11 @@
 					"description": "The basic look and feel options for Stump"
 				},
 				"interface": {
-					"title": "Interface",
+					"title": "Interfaz",
 					"description": "Primary UI surfaces and interaction elements"
 				},
 				"thumbnails": {
-					"title": "Thumbnails",
+					"title": "Miniaturas",
 					"description": "Display options for thumbnail images"
 				},
 				"themeSelect": {
@@ -1454,7 +1458,7 @@
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
 					"description": "The aspect ratio to use for thumbnails",
-					"defaultSuffix": "Default"
+					"defaultSuffix": "Por defecto"
 				},
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
@@ -1467,7 +1471,7 @@
 					}
 				},
 				"navigation": {
-					"title": "Navigation",
+					"title": "Navegación",
 					"description": "Customize the navigation elements of the app"
 				},
 				"layoutAndArrangement": {
@@ -1533,7 +1537,7 @@
 					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
 					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar",
 					"options": {
-						"noLimit": "No limit"
+						"noLimit": "Ilimitado"
 					}
 				},
 				"additionalPreferences": {
@@ -1575,6 +1579,14 @@
 				"enableJobOverlayToggle": {
 					"label": "Job overlay",
 					"description": "Show a floating overlay while a job is running"
+				},
+				"dayResetHourOffset": {
+					"label": "Reading day reset offset",
+					"description": "Shift when a reading day resets, in hours from midnight"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Reading session grace period",
+					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},
@@ -1900,25 +1912,25 @@
 				"scheduling": {
 					"title": "Programación",
 					"description": "Algunas tareas pueden ser programadas. Los cambios a esta configuración surtirán efecto después de reiniciar el servidor",
-					"restartRequiredTitle": "Restart required",
-					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
+					"restartRequiredTitle": "Reinicio requerido",
+					"restartRequired": "Los cambios a esta configuración tendrán efecto después de reiniciar el servidor",
+					"newScheduledJob": "Nueva tarea programada",
 					"deleteScheduledJob": {
-						"title": "Delete scheduled job",
+						"title": "Eliminar tarea programada",
 						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-						"confirm": "Delete"
+						"confirm": "Eliminar"
 					},
 					"dialog": {
-						"titleCreate": "New scheduled job",
-						"titleEdit": "Edit scheduled job",
-						"cancel": "Cancel",
-						"create": "Create",
-						"saveChanges": "Save changes"
+						"titleCreate": "Nueva tarea programada",
+						"titleEdit": "Editar tarea programada",
+						"cancel": "Cancelar",
+						"create": "Crear",
+						"saveChanges": "Guardar cambios"
 					},
 					"fields": {
 						"name": {
-							"label": "Name",
-							"placeholder": "e.g. \"Daily library scan\""
+							"label": "Nombre",
+							"placeholder": "ej. \"Escaneo diario de biblioteca\""
 						},
 						"schedule": {
 							"label": "Cron schedule",
@@ -1926,47 +1938,47 @@
 							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
-							"label": "Preset",
-							"custom": "Custom",
-							"everySixHours": "Every 6 hours",
-							"everyTwelveHours": "Every 12 hours",
-							"dailyAtMidnight": "Daily at midnight",
-							"weeklySunday": "Weekly (Sunday)",
-							"monthlyFirst": "Monthly (1st)"
+							"label": "Predefinido",
+							"custom": "Personalizado",
+							"everySixHours": "Cada 6 horas",
+							"everyTwelveHours": "Cada 12 horas",
+							"dailyAtMidnight": "Diariamente a medianoche",
+							"weeklySunday": "Semanal (Domingo)",
+							"monthlyFirst": "Mensual (1r)"
 						},
 						"kind": {
-							"label": "Job type",
-							"libraryScan": "Library Scan",
-							"metadataRetry": "Metadata Retry"
+							"label": "Tipo de tarea",
+							"libraryScan": "Escaneo de biblioteca",
+							"metadataRetry": "Reintentar metadatos"
 						},
 						"libraryIds": {
-							"label": "Libraries to scan",
-							"description": "Leave empty to scan all libraries"
+							"label": "Bibliotecas a escanear",
+							"description": "Dejar en blanco para escanear todas las librerías"
 						},
 						"statuses": {
-							"label": "Statuses to retry",
-							"description": "Which metadata fetch statuses should be retried",
-							"rateLimited": "Rate Limited",
-							"failed": "Failed"
+							"label": "Estados a reintentar",
+							"description": "Qué estados de búsqueda de metadatos deben ser reintentados",
+							"rateLimited": "Límite excedido",
+							"failed": "Fallido"
 						},
-						"enabled": "Enabled"
+						"enabled": "Activado"
 					},
 					"row": {
-						"enabled": "Enabled",
-						"disabled": "Disabled",
-						"allLibraries": "All libraries",
-						"rateLimited": "rate limited",
-						"lastRun": "Last run at {{date}}",
-						"edit": "Edit",
-						"delete": "Delete"
+						"enabled": "Activado",
+						"disabled": "Desactivado",
+						"allLibraries": "Todas las bibliotecas",
+						"rateLimited": "límite excedido",
+						"lastRun": "Última ejecución en {{date}}",
+						"edit": "Editar",
+						"delete": "Eliminar"
 					},
 					"toasts": {
-						"createSuccess": "Scheduled job created",
+						"createSuccess": "Tarea programada creada",
 						"createError": "Failed to create scheduled job",
-						"updateSuccess": "Scheduled job updated",
-						"updateError": "Failed to update scheduled job",
-						"deleteSuccess": "Scheduled job deleted",
-						"deleteError": "Failed to delete scheduled job"
+						"updateSuccess": "Tarea programada actualizada",
+						"updateError": "Error al actualizar el trabajo programado",
+						"deleteSuccess": "Tarea programada eliminada",
+						"deleteError": "Error al eliminar la tarea programada"
 					}
 				},
 				"history": {
@@ -2033,14 +2045,14 @@
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "Account",
-						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
-						"emailing": "Emailing",
-						"libraryManagement": "Library management",
-						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"accountManagement": "Cuenta",
+						"featureAccess": "Acceso a características",
+						"fileManagement": "Archivos",
+						"emailers": "Correos",
+						"emailing": "Mensajes por correo electrónico",
+						"libraryManagement": "Gestión de la biblioteca",
+						"userManagement": "Gestión de usuarios",
+						"serverManagement": "Gestión del servidor"
 					},
 					"heading": "Permisos",
 					"subtitle": [
@@ -2316,20 +2328,20 @@
 			}
 		},
 		"server/metadataIntegrations": {
-			"helmet": "Metadata integrations",
-			"title": "Metadata integrations",
-			"addProvider": "Add provider",
+			"helmet": "Integraciones de metadatos",
+			"title": "Integraciones de metadatos",
+			"addProvider": "Agregar proveedor",
 			"noProviders": "No providers configured yet. Add one to get started",
 			"providers": {
-				"title": "Providers",
+				"title": "Proveedores",
 				"description": "Configure external metadata providers to fetch and enrich your library data"
 			},
 			"providerForm": {
 				"apiToken": {
-					"label": "API token",
+					"label": "Token de API",
 					"description": "The API token for authenticating with this provider",
 					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
+					"validationRequestError": "La solicitud de validación falló",
 					"validationRequestErrorUnknown": "An unknown error occurred during validation",
 					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
 					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
@@ -2340,7 +2352,7 @@
 					"description": "The date when the API token will expire (optional)"
 				},
 				"enableProvider": {
-					"label": "Enable provider",
+					"label": "Activar proveedor",
 					"description": "It will be used for fetching if enabled"
 				},
 				"autoApplyConfig": {
@@ -2354,25 +2366,25 @@
 						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
 					},
 					"strategy": {
-						"label": "Merge strategy",
+						"label": "Combinar estrategia",
 						"options": {
-							"FILL_GAPS": "Accept missing fields",
+							"FILL_GAPS": "Aceptar campos faltantes",
 							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
-							"PREFER_EXTERNAL": "Prefer external data"
+							"PREFER_EXTERNAL": "Datos externos preferidos"
 						}
 					}
 				}
 			},
-			"providerEnabled": "This provider is enabled",
-			"providerDisabled": "This provider is disabled",
+			"providerEnabled": "Este proveedor está habilitado",
+			"providerDisabled": "Este proveedor está desactivado",
 			"providerTokenExpiresSoon": "This provider's token will expire soon",
-			"autoApplyOn": "Auto-apply on",
-			"autoApplyOff": "Auto-apply off",
+			"autoApplyOn": "Autoaplicar activado",
+			"autoApplyOff": "Autoaplicar desactivado",
 			"editDialog": {
-				"tooltip": "Edit provider"
+				"tooltip": "Editar proveedor"
 			},
 			"deleteDialog": {
-				"title": "Delete provider",
+				"title": "Eliminar Proveedor",
 				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
 			}
 		},
@@ -2557,7 +2569,7 @@
 			"typeToConfirm": "Type {{name}} to confirm:"
 		},
 		"experimentalDisclaimer": {
-			"title": "This feature is experimental",
+			"title": "Esta característica es experimental",
 			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
 		},
 		"enter": "Enter",
@@ -2584,9 +2596,9 @@
 		"never": "Nunca",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
-		"back": "Back",
-		"continue": "Continue",
-		"book": "Book",
+		"back": "Atrás",
+		"continue": "Continuar",
+		"book": "Libro",
 		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
@@ -2616,16 +2628,16 @@
 			"description": "Allows the user to access smart list features, including creating and managing smart lists"
 		},
 		"CHANGE_PASSWORD": {
-			"label": "Change password",
-			"description": "Allows the user to change their own password"
+			"label": "Cambiar contraseña",
+			"description": "Permite al usuario cambiar su propia contraseña"
 		},
 		"CHANGE_USERNAME": {
-			"label": "Change username",
-			"description": "Allows the user to change their own username"
+			"label": "Cambiar de nombre de usuario",
+			"description": "Permite al usuario cambiar su propio nombre de usuario"
 		},
 		"CHANGE_AVATAR": {
-			"label": "Change avatar",
-			"description": "Allows the user to change their own avatar"
+			"label": "Cambiar avatar",
+			"description": "Permite al usuario cambiar su propio avatar"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Create book clubs",
@@ -2807,13 +2819,13 @@
 			"year": "Year"
 		},
 		"common": {
-			"book": "Book",
+			"book": "Libro",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",
-			"completed": "Completed",
+			"completed": "Completado",
 			"confirm": "Confirm",
-			"content": "Content",
+			"content": "Contenido",
 			"details": "Details",
 			"delete": "Delete",
 			"downloads": "Downloads",
@@ -2821,9 +2833,9 @@
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
-			"grid": "Grid",
-			"list": "List",
-			"lastCompleted": "Last Completed",
+			"grid": "Cuadrícula",
+			"list": "Lista",
+			"lastCompleted": "Último completado",
 			"name": "Name",
 			"none": "None",
 			"options": "Options",
@@ -2831,8 +2843,8 @@
 			"pages": "Pages",
 			"password": "Password",
 			"progress": "Progress",
-			"publication": "Publication",
-			"readTime": "Reading time",
+			"publication": "Publicación",
+			"readTime": "Tiempo de lectura",
 			"readMore": "Read more",
 			"save": "Save",
 			"select": "Select",
@@ -2847,20 +2859,23 @@
 			"value": "Value",
 			"version": "Version"
 		},
+		"errors": {
+			"unknown": "Unknown error"
+		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
-				"position": "{{position}} in {{seriesName}}"
+				"positionWithTotal": "{{position}} de {{total}} en {{seriesName}}",
+				"position": "{{position}} en {{seriesName}}"
 			},
 			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
+				"positionWithTotal": "Libro {{position}} de {{total}} en {{seriesName}}",
+				"position": "Libro {{position}} en {{seriesName}}"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
-				"position": "#{{position}} in {{seriesName}}"
+				"positionWithTotal": "#{{position}} de {{total}} en {{seriesName}}",
+				"position": "#{{position}} en {{seriesName}}"
 			},
-			"unknownSeriesName": "series"
+			"unknownSeriesName": "serie"
 		},
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
@@ -2940,6 +2955,14 @@
 				"dismissAll": "Dismiss All"
 			}
 		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
+				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+			},
+			"syncFailed": "Failed to sync offline progress"
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferences",
@@ -2977,7 +3000,7 @@
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
 				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
+				"incognitoReading": "Lectura de Incognito"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2985,7 +3008,8 @@
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
-			"lowercaseTranslation": "Lowercase Labels",
+			"lowercaseTranslation": "Etiquetas minúsculas",
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",
 				"dataUsage": {
@@ -3013,7 +3037,7 @@
 			"debug": {
 				"label": "Debug",
 				"clearCache": {
-					"label": "Clear Cache",
+					"label": "Limpiar caché",
 					"memory": {
 						"button": "Memory",
 						"success": "Memory cache cleared"
@@ -3038,11 +3062,11 @@
 				"reduceAnimations": "Reduce Animations",
 				"maskUrls": "Mask URLs",
 				"displayLanguageKeys": {
-					"label": "Display Language Keys",
+					"label": "Mostrar claves de idioma",
 					"options": {
-						"none": "None",
-						"abbreviated": "Abbreviated",
-						"full": "Full"
+						"none": "Ninguno",
+						"abbreviated": "Abreviado",
+						"full": "Completo"
 					}
 				},
 				"debugAnalytics": {
@@ -3114,10 +3138,10 @@
 				}
 			},
 			"readingTimer": {
-				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
+				"label": "Temporizador de lectura",
+				"resetTimer": "Resetear Reloj"
 			},
-			"allSettings": "All Settings"
+			"allSettings": "Todos los ajustes"
 		},
 		"epubSettings": {
 			"title": "Epub Reader Settings",

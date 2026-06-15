@@ -3,7 +3,7 @@ import { MediaProgressInput } from '@stump/graphql'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect } from 'expo-router'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner-native'
 import { match, P } from 'ts-pattern'
 
@@ -13,6 +13,7 @@ import { useActiveServer } from '~/components/activeServer'
 import { db, epubProgress, readProgress, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
 
+import { useTranslate } from '../useTranslate'
 import { useServerInstances } from './utils'
 
 export function useProgressSync() {
@@ -77,6 +78,7 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
+	const { t } = useTranslate()
 
 	const { syncProgress } = useProgressSync()
 
@@ -92,12 +94,11 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 				try {
 					await syncProgress([serverId])
 				} catch (error) {
-					console.error('Failed to sync progress', error)
 					Sentry.captureException(error, {
 						extra: { serverId },
 					})
-					toast.error('Failed to sync offline progress', {
-						description: error instanceof Error ? error.message : 'Unknown error',
+					toast.error(t('progressSync.syncFailed'), {
+						description: error instanceof Error ? error.message : t('errors.unknown'),
 					})
 				}
 			}
@@ -108,7 +109,7 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 			}
 			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [enabled, serverId]),
+		}, [enabled, serverId, t]),
 	)
 }
 
@@ -135,22 +136,33 @@ export function useSyncOnlineToOfflineProgress({
 	// up to date
 	const isOfflineSyncable = Boolean(record)
 
+	const accumulatedElapsedRef = useRef<number>(record?.elapsedSeconds ?? 0)
+	useEffect(() => {
+		const dbValue = record?.elapsedSeconds ?? 0
+		// the logic here is that we want to make sure if we've made forward progress offline
+		// we don't want to overwrite that with an older value from the server
+		if (dbValue > accumulatedElapsedRef.current) {
+			accumulatedElapsedRef.current = dbValue
+		}
+	}, [record?.elapsedSeconds])
+
 	const syncProgress = useCallback(
 		async (onlineProgress: MediaProgressInput) => {
 			if (!isOfflineSyncable) return
 
-			const accumulatedElapsed =
-				(record?.elapsedSeconds ?? 0) +
-				match(onlineProgress)
-					.with(
-						{ epub: P.not(P.nullish) },
-						({ epub: { elapsedSecondsDelta } }) => elapsedSecondsDelta ?? 0,
-					)
-					.with(
-						{ paged: P.not(P.nullish) },
-						({ paged: { elapsedSecondsDelta } }) => elapsedSecondsDelta ?? 0,
-					)
-					.otherwise(() => 0)
+			const delta = match(onlineProgress)
+				.with(
+					{ epub: P.not(P.nullish) },
+					({ epub: { elapsedSecondsDelta } }) => elapsedSecondsDelta ?? 0,
+				)
+				.with(
+					{ paged: P.not(P.nullish) },
+					({ paged: { elapsedSecondsDelta } }) => elapsedSecondsDelta ?? 0,
+				)
+				.otherwise(() => 0)
+
+			const accumulatedElapsed = accumulatedElapsedRef.current + delta
+			accumulatedElapsedRef.current = accumulatedElapsed
 
 			const values = match(onlineProgress)
 				.with(
@@ -200,7 +212,6 @@ export function useSyncOnlineToOfflineProgress({
 						target: readProgress.bookId,
 						set: { ...values, lastModified: new Date() },
 					})
-					.run()
 			} catch (error) {
 				console.error('Failed to sync online progress to offline DB', {
 					onlineProgress,
@@ -212,7 +223,7 @@ export function useSyncOnlineToOfflineProgress({
 				})
 			}
 		},
-		[bookId, serverId, isOfflineSyncable, record],
+		[bookId, serverId, isOfflineSyncable],
 	)
 
 	return { syncProgress }

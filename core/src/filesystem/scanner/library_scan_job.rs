@@ -19,8 +19,6 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
-// FIXME: progress messages are noisy and unhelpful in places (e.g. 'Starting task')
-
 use crate::{
 	database::SQLITE_BIND_LIMIT,
 	event::{self, CreatedOrUpdatedManyMedia},

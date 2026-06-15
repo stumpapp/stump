@@ -95,6 +95,7 @@ pub async fn create_nth_readthrough(app: &TestApp, book_id: &str, n: i32) {
 		let session = reading_session::Entity::find()
 			.filter(reading_session::Column::MediaId.eq(book_id))
 			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+			.order_by_desc(reading_session::Column::UpdatedAt)
 			.one(conn)
 			.await
 			.expect("db error")

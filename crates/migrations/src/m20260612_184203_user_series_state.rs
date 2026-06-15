@@ -22,7 +22,9 @@ impl MigrationTrait for Migration {
 					.col(ColumnDef::new(UserSeriesState::SeriesId).text().not_null())
 					// non-null -> do not show unread books in current readthrough on deck, show only
 					// completely unread books beyond the highest read position ever reached
-					.col(ColumnDef::new(UserSeriesState::StoppedReadthrough).integer())
+					.col(
+						ColumnDef::new(UserSeriesState::StoppedReadthroughAt).date_time(),
+					)
 					// non-null -> do not show the series on deck at all, unless books are added
 					// after drop
 					.col(ColumnDef::new(UserSeriesState::DroppedAt).date_time())
@@ -115,7 +117,7 @@ enum UserSeriesState {
 	Id,
 	UserId,
 	SeriesId,
-	StoppedReadthrough,
+	StoppedReadthroughAt,
 	DroppedAt,
 	CreatedAt,
 	UpdatedAt,

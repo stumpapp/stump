@@ -1,6 +1,6 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Badge, Button, cn, DropdownMenu, Heading, Link, Statistic, Text } from '@stump/components'
-import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
+import { Badge, Button, cn, Heading, Link, Statistic, Text } from '@stump/components'
+import { DropdownItemGroup, DropdownMenu } from '@stump/components/dropdown/DropdownMenu'
 import { graphql } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
@@ -139,12 +139,12 @@ export default function SeriesHeader() {
 						{hasMetadataBadges && (
 							<div className="gap-2 flex flex-wrap items-center">
 								{metadata?.publisher && (
-									<Badge size="xs" rounded="full">
+									<Badge variant="default" size="xs" rounded="full">
 										{metadata.publisher}
 									</Badge>
 								)}
 								{metadata?.year && (
-									<Badge size="xs" rounded="full">
+									<Badge variant="default" size="xs" rounded="full">
 										{metadata.year}
 									</Badge>
 								)}
@@ -217,7 +217,12 @@ export default function SeriesHeader() {
 										}
 										return (
 											<Link key={link} href={link} underline={false}>
-												<Badge size="xs" rounded="full" className="cursor-pointer">
+												<Badge
+													variant="default"
+													size="xs"
+													rounded="full"
+													className="cursor-pointer"
+												>
 													<span>{label}</span>
 													<ExternalLink className="ml-1 h-3 w-3 opacity-90" />
 												</Badge>

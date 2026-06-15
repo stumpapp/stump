@@ -116,7 +116,7 @@ export default function SeriesHeader() {
 								align="end"
 								contentWrapperClassName="w-48"
 								trigger={
-									<Button variant="outline" size="icon" className="h-8 w-8 shrink-0" rounded="lg">
+									<Button variant="outline" size="icon" className="h-8 w-8 shrink-0">
 										<EllipsisVertical className="h-4 w-4" />
 									</Button>
 								}

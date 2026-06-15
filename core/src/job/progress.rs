@@ -22,8 +22,10 @@ pub struct JobUpdate {
 pub struct JobProgress {
 	/// The status of the job
 	pub status: Option<JobStatus>,
-	/// The message to display
+	/// The primary message to display, e.g. "Scanning series"
 	pub message: Option<String>,
+	/// An optional secondary message providing additional detail, e.g. a path or item name
+	pub subtitle: Option<String>,
 
 	/// The current task being worked on
 	pub completed_tasks: Option<i32>,
@@ -42,6 +44,15 @@ impl JobProgress {
 	pub fn msg(msg: &str) -> Self {
 		Self {
 			message: Some(msg.to_string()),
+			..Default::default()
+		}
+	}
+
+	/// Constructs a new [`JobProgress`] with the given primary message and subtitle
+	pub fn msg_with_subtitle(msg: &str, subtitle: &str) -> Self {
+		Self {
+			message: Some(msg.to_string()),
+			subtitle: Some(subtitle.to_string()),
 			..Default::default()
 		}
 	}

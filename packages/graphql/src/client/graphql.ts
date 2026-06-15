@@ -1090,7 +1090,7 @@ export type JobUpdate = {
   /** The current task being worked on */
   completedTasks?: Maybe<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
-  /** The message to display */
+  /** The primary message to display, e.g. "Scanning series" */
   message?: Maybe<Scalars['String']['output']>;
   /**
    * The number of tasks for the job. This number can change as
@@ -1099,6 +1099,8 @@ export type JobUpdate = {
   remainingTasks?: Maybe<Scalars['Int']['output']>;
   /** The status of the job */
   status?: Maybe<JobStatus>;
+  /** An optional secondary message providing additional detail, e.g. a path or item name */
+  subtitle?: Maybe<Scalars['String']['output']>;
   /** The number of subtasks that exist in the current task */
   totalSubtasks?: Maybe<Scalars['Int']['output']>;
 };
@@ -5810,7 +5812,7 @@ export type SeriesEditorSetLockedFieldsMutation = { __typename?: 'Mutation', set
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
+export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null, subtitle?: string | null } };
 
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -11035,6 +11037,7 @@ export const UseCoreEventDocument = new TypedDocumentString(`
       remainingTasks
       completedSubtasks
       totalSubtasks
+      subtitle
     }
     ... on JobOutput {
       id

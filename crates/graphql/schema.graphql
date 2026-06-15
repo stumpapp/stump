@@ -1020,8 +1020,10 @@ type JobUpdate {
 	id: String!
 	"The status of the job"
 	status: JobStatus
-	"The message to display"
+	"The primary message to display, e.g. \"Scanning series\""
 	message: String
+	"An optional secondary message providing additional detail, e.g. a path or item name"
+	subtitle: String
 	"The current task being worked on"
 	completedTasks: Int
 	"""

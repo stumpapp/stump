@@ -49,8 +49,6 @@ where
 	} = working_state;
 
 	let mut output = initial_output.unwrap_or_default();
-	let total_tasks = tasks.len();
-
 	let mut completed = 0u64;
 	while let Some(task) = tasks.pop_front() {
 		if ctx.is_canceled() {
@@ -58,9 +56,9 @@ where
 			return Ok(());
 		}
 
-		ctx.report_progress(JobProgress::subtask_position(
+		ctx.report_progress(JobProgress::task_position(
 			completed as i32,
-			total_tasks as i32,
+			(tasks.len() + 1) as i32,
 		));
 
 		match job.execute_task(ctx, task).await {

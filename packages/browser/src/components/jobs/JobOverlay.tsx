@@ -4,10 +4,6 @@ import { JobUpdate } from '@stump/graphql'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
-// TODO: the messages are chaotic and need cleaning up. I think:
-// - more persistent title message e.g., "Creating books" generic message without including path in title
-// - a subtitle message for extra shit like the path or whatever
-
 export default function JobOverlay() {
 	const storeJobs = useJobStore((state) => state.jobs)
 
@@ -37,17 +33,16 @@ export default function JobOverlay() {
 	)
 
 	/**
-	 * The percentage value for the progress bar, calculated from the subtask counts.
-	 * Note that we don't care about the task counts here, as the subtask counts are more
-	 * indicative of actual work being done.
+	 * The percentage value for the progress bar, calculated from task counts.
+	 * Goes indeterminate until the first task_position update arrives
 	 */
 	const progressValue = useMemo(() => {
-		if (subTaskCounts != null) {
-			const { completed, total } = subTaskCounts
+		if (taskCounts != null && taskCounts.total > 0) {
+			const { completed, total } = taskCounts
 			return (completed / total) * 100
 		}
 		return null
-	}, [subTaskCounts])
+	}, [taskCounts])
 	/**
 	 * The string representation of the task counts, which is used to display the total, overarching
 	 * tasks that are being done in the job.
@@ -81,9 +76,14 @@ export default function JobOverlay() {
 					}}
 				>
 					<div className="w-full">
-						<Text size="sm" className="line-clamp-2">
-							{firstRunningJob.message ?? 'Job in Progress'}
+						<Text size="sm" className="font-medium line-clamp-2">
+							{firstRunningJob.message ?? 'Job in progress'}
 						</Text>
+						{firstRunningJob.subtitle && (
+							<Text size="xs" className="line-clamp-1 text-muted-foreground">
+								{firstRunningJob.subtitle}
+							</Text>
+						)}
 					</div>
 
 					<div className="gap-y-2 flex w-full flex-col">
@@ -106,11 +106,11 @@ export default function JobOverlay() {
 }
 
 const calcTaskCounts = ({ completedTasks, remainingTasks }: JobUpdate) => {
-	if (remainingTasks == null || !completedTasks) return null
+	if (remainingTasks == null || completedTasks == null) return null
 
-	const total = (completedTasks ?? 0) + (remainingTasks ?? 0)
+	const total = completedTasks + remainingTasks
 	return {
-		completed: completedTasks ?? 0,
+		completed: completedTasks,
 		total,
 	}
 }

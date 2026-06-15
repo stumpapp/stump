@@ -452,7 +452,7 @@ impl JobLifecycle for LibraryScanJob {
 		match task {
 			LibraryScanTask::Init(input) => {
 				tracing::debug!("Executing the init task for library scan");
-				ctx.report_progress(JobProgress::msg("Handling library scan init"));
+				ctx.report_progress(JobProgress::msg("Initializing"));
 				let InitTaskInput {
 					series_to_create,
 					missing_series,
@@ -623,15 +623,17 @@ impl JobLifecycle for LibraryScanJob {
 				} else {
 					tracing::trace!("No series to create");
 				}
-
-				ctx.report_progress(JobProgress::msg("Init task complete!"));
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
 				tracing::debug!("Executing the walk series task for library scan");
-				ctx.report_progress(JobProgress::msg(&format!(
-					"Scanning series at {}",
-					path_buf.display()
-				)));
+				let filename = path_buf
+					.file_name()
+					.map(|n| n.to_string_lossy())
+					.unwrap_or_else(|| path_buf.to_string_lossy());
+				ctx.report_progress(JobProgress::msg_with_subtitle(
+					"Scanning series",
+					filename.as_ref(),
+				));
 
 				// If the library is collection-priority, any child directories are 'ignored' and their
 				// files are part of / folded into the top-most folder (series).
@@ -786,18 +788,24 @@ impl JobLifecycle for LibraryScanJob {
 			},
 			LibraryScanTask::SeriesTask {
 				id: series_id,
-				path: _series_path,
+				path: series_path,
 				task: series_task,
 			} => match series_task {
 				SeriesScanTask::RestoreMedia(ids) => {
-					ctx.report_progress(JobProgress::msg("Restoring media entities"));
+					let series_name = Path::new(&series_path)
+						.file_name()
+						.map(|n| n.to_string_lossy().into_owned())
+						.unwrap_or_else(|| series_path.clone());
+					ctx.report_progress(JobProgress::msg_with_subtitle(
+						"Restoring media",
+						&series_name,
+					));
 					let MediaOperationOutput {
 						updated_media,
 						logs: new_logs,
 						..
 					} = handle_restored_media(ctx, &series_id, ids).await;
 
-					ctx.report_progress(JobProgress::msg("Restored media entities"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: updated_media,
@@ -810,14 +818,20 @@ impl JobLifecycle for LibraryScanJob {
 					logs.extend(new_logs);
 				},
 				SeriesScanTask::MarkMissingMedia(paths) => {
-					ctx.report_progress(JobProgress::msg("Handling missing media"));
+					let series_name = Path::new(&series_path)
+						.file_name()
+						.map(|n| n.to_string_lossy().into_owned())
+						.unwrap_or_else(|| series_path.clone());
+					ctx.report_progress(JobProgress::msg_with_subtitle(
+						"Handling missing media",
+						&series_name,
+					));
 					let MediaOperationOutput {
 						updated_media,
 						logs: new_logs,
 						..
 					} = handle_missing_media(ctx, &series_id, paths).await;
 
-					ctx.report_progress(JobProgress::msg("Handled missing media"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: updated_media,
@@ -830,8 +844,13 @@ impl JobLifecycle for LibraryScanJob {
 					logs.extend(new_logs);
 				},
 				SeriesScanTask::CreateMedia(paths) => {
-					ctx.report_progress(JobProgress::msg(
-						format!("Creating {} media entities", paths.len()).as_str(),
+					let series_name = Path::new(&series_path)
+						.file_name()
+						.map(|n| n.to_string_lossy().into_owned())
+						.unwrap_or_else(|| series_path.clone());
+					ctx.report_progress(JobProgress::msg_with_subtitle(
+						"Creating media",
+						&series_name,
 					));
 					let MediaOperationOutput {
 						created_media,
@@ -851,7 +870,6 @@ impl JobLifecycle for LibraryScanJob {
 					)
 					.await?;
 
-					ctx.report_progress(JobProgress::msg("Created new media"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: created_media,
@@ -863,9 +881,13 @@ impl JobLifecycle for LibraryScanJob {
 					logs.extend(new_logs);
 				},
 				SeriesScanTask::VisitMedia(params) => {
-					ctx.report_progress(JobProgress::msg(
-						format!("Visiting {} media entities on disk", params.len())
-							.as_str(),
+					let series_name = Path::new(&series_path)
+						.file_name()
+						.map(|n| n.to_string_lossy().into_owned())
+						.unwrap_or_else(|| series_path.clone());
+					ctx.report_progress(JobProgress::msg_with_subtitle(
+						"Visiting media",
+						&series_name,
 					));
 					let MediaOperationOutput {
 						updated_media,
@@ -885,7 +907,6 @@ impl JobLifecycle for LibraryScanJob {
 					)
 					.await?;
 
-					ctx.report_progress(JobProgress::msg("Visited all media"));
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {
 							count: updated_media,

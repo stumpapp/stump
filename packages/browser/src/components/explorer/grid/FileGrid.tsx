@@ -25,7 +25,7 @@ export default function FileGrid() {
 						style={{ height, width }}
 						totalCount={files.length}
 						className="scrollbar-hide"
-						listClassName={cn('flex flex-1 flex-wrap gap-2 px-4')}
+						listClassName={cn('gap-2 px-4 flex flex-1 flex-wrap')}
 						itemClassName="py-1.5"
 						itemContent={renderItem}
 						overscan={{ main: 15, reverse: 10 }}

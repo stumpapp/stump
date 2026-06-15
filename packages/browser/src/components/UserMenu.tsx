@@ -128,7 +128,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 
 const itemClasses = (isSidebar: boolean, isDestructive?: boolean) =>
 	cn(
-		'h-9 w-full gap-1.5 rounded-md bg-transparent px-3 text-sm transition-colors duration-150 outline-none',
+		'h-9 gap-1.5 px-3 text-sm w-full rounded-md bg-transparent transition-colors duration-150 outline-none',
 		{
 			'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[highlighted]:bg-sidebar-accent/60 data-[highlighted]:text-sidebar-accent-foreground':
 				isSidebar && !isDestructive,

@@ -7,7 +7,13 @@ export function useTranslate() {
 	const displayLanguageKeys = usePreferencesStore((store) => store.displayLanguageKeys)
 	const lowerCase = usePreferencesStore((store) => store.lowercaseTranslation)
 
-	let translate: (key: string) => string
+	let translate = (key: string, options?: Record<string, unknown>) => {
+		const translation = t(`mobileApp.${key}`, options)
+		if (lowerCase) {
+			return translation.toLocaleLowerCase(locale)
+		}
+		return translation
+	}
 
 	if (displayLanguageKeys === 'full') {
 		translate = (key: string) => key
@@ -26,14 +32,6 @@ export function useTranslate() {
 
 			return abbreviatedKey.join('.')
 		}
-	}
-
-	translate = (key: string, options?: Record<string, unknown>) => {
-		const translation = t(`mobileApp.${key}`, options)
-		if (lowerCase) {
-			return translation.toLocaleLowerCase(locale)
-		}
-		return translation
 	}
 
 	return { t: translate, locale }

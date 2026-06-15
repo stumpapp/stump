@@ -83,7 +83,6 @@ export default function ReadiumFooter() {
 
 	const bookmarkContainerStyle = useAnimatedStyle(() => {
 		const size = interpolate(progress.value, [0, 1], [BUTTON_SIZE * SHRINK_SCALE, BUTTON_SIZE])
-		// bookmark icon: small = 14px, large = 30px
 		const scale = interpolate(progress.value, [0, 1], [1, 0.5])
 		const translateX = interpolate(progress.value, [0, 1], [0, 16])
 		const translateY = -translateX

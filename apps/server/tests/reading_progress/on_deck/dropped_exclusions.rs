@@ -230,6 +230,77 @@ async fn test_resume_reread_after_stop() {
 	assert_eq!(ids, vec!["black_science_2"]); // back to book 2 from the re-read
 }
 
+/// First "readthrough": read 1-5
+/// Second "readthrough": reread 2-5 (skip 1)
+/// Third "readthrough": reread 1 (second readthrough of 1) -> should show 2,
+///     then read 2 (third readthrough of 2) -> should show 3
+#[tokio::test]
+async fn test_reading_skipped_books_in_reread() {
+	let (app, _) = setup(5).await;
+
+	for i in 1..=5 {
+		create_nth_readthrough(&app, &format!("black_science_{i}"), 1).await;
+	}
+
+	for i in 2..=5 {
+		create_nth_readthrough(&app, &format!("black_science_{i}"), 1).await;
+	}
+
+	create_nth_readthrough(&app, "black_science_1", 1).await;
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids, vec!["black_science_2".to_string()]);
+
+	create_nth_readthrough(&app, "black_science_2", 1).await;
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids, vec!["black_science_3".to_string()]);
+}
+
+/// First "readthrough": read 1-4
+/// Second "readthrough": reread 1 and 3 -> should show 4
+/// Third "readthrough": reread 1 (third readthrough of 1) and 4 (second readthrough of 4) -> should show 5
+#[tokio::test]
+async fn test_skipping_on_rereads() {
+	let (app, _) = setup(5).await;
+
+	for i in 1..=4 {
+		create_nth_readthrough(&app, &format!("black_science_{i}"), 1).await;
+	}
+
+	create_nth_readthrough(&app, "black_science_1", 1).await;
+	create_nth_readthrough(&app, "black_science_3", 1).await;
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids, vec!["black_science_4".to_string()]);
+
+	create_nth_readthrough(&app, "black_science_1", 1).await;
+	create_nth_readthrough(&app, "black_science_4", 1).await;
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids, vec!["black_science_5".to_string()]);
+}
+
+/// First "readthrough": read 1 and 3
+/// Second "readthrough": read 1-4 (rereading 1 and 3 in the process) -> should show 5
+/// Third "readthrough": reread 1 (third readthrough of 1) and 4 (second readthrough of 4) -> should show 5
+///     skip 5 to read 6 -> should show 7
+#[tokio::test]
+async fn test_skipping_on_first_readthrough() {
+	let (app, _) = setup(7).await;
+
+	create_nth_readthrough(&app, "black_science_1", 1).await;
+	create_nth_readthrough(&app, "black_science_3", 1).await;
+
+	for i in 1..=4 {
+		create_nth_readthrough(&app, &format!("black_science_{i}"), 1).await;
+	}
+
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids, vec!["black_science_5".to_string()]);
+
+	create_nth_readthrough(&app, "black_science_6", 1).await;
+
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids, vec!["black_science_7".to_string()]);
+}
+
 /// dropping a series should not appear on deck
 #[tokio::test]
 async fn test_dropped_series_excluded() {
@@ -245,7 +316,7 @@ async fn test_dropped_series_excluded() {
 	assert!(ids.is_empty(), "dropped series still on deck: {ids:?}");
 }
 
-/// un-dropping a series should restore it to on dekc
+/// un-dropping a series should restore it to on deck
 #[tokio::test]
 async fn test_undrop_series_reappears() {
 	let (app, series_id) = setup(3).await;

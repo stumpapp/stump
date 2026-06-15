@@ -1455,6 +1455,10 @@
 					"label": "Yazı Tipi",
 					"description": "Customize the font used in the application"
 				},
+				"thumbnailPreview": {
+					"label": "Preview",
+					"description": "This is how thumbnails will look with the current settings"
+				},
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
 					"description": "The aspect ratio to use for thumbnails",
@@ -1468,6 +1472,16 @@
 						"averageColor": "Average color",
 						"colorful": "Colorful",
 						"thumbhash": "Thumbhash"
+					}
+				},
+				"thumbnailRoundness": {
+					"label": "Thumbnail roundness",
+					"description": "How rounded the corners of thumbnail images should be",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"large": "Large"
 					}
 				},
 				"navigation": {
@@ -1649,7 +1663,7 @@
 		"app/reader": {
 			"helmet": "Reader settings",
 			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
 					"sections": {

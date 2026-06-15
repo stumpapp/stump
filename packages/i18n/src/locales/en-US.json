@@ -1476,7 +1476,13 @@
 				},
 				"thumbnailRoundness": {
 					"label": "Thumbnail roundness",
-					"description": "How rounded the corners of thumbnail images should be"
+					"description": "How rounded the corners of thumbnail images should be",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"large": "Large"
+					}
 				},
 				"navigation": {
 					"title": "Navigation",

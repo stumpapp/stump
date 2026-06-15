@@ -11,7 +11,7 @@ import { useUserStore } from '@/stores'
 import SettingsHeader from './SettingsHeader'
 import SettingsSideBar from './SettingsSideBar'
 
-// TODO(ui): i think these settings pages are in a desperate need for a little bit of ui love
+// TODO(cleanup): i think these settings pages are in a desperate need for a little bit of ui love
 // the disconnected and floating inputs and knobs are not a great look, especially after being
 // so accustomed to how we've been building out the mobile app. i think a few things would
 // go a long way (esp for pages like /settings/preferences):

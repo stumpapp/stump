@@ -25,6 +25,44 @@ export default function ThumbnailAppearancePreference() {
 		{ label: '1 : √2', value: 1 / 1.414 },
 	]
 
+	const styleOptions = [
+		{
+			label: t(getSectionKey('thumbnailPlaceholder', 'options.grayscale')),
+			value: ThumbnailPlaceholderStyle.Grayscale,
+		},
+		{
+			label: t(getSectionKey('thumbnailPlaceholder', 'options.averageColor')),
+			value: ThumbnailPlaceholderStyle.AverageColor,
+		},
+		{
+			label: t(getSectionKey('thumbnailPlaceholder', 'options.colorful')),
+			value: ThumbnailPlaceholderStyle.Colorful,
+		},
+		{
+			label: t(getSectionKey('thumbnailPlaceholder', 'options.thumbhash')),
+			value: ThumbnailPlaceholderStyle.Thumbhash,
+		},
+	]
+
+	const roundnessOptions = [
+		{
+			label: t(getSectionKey('thumbnailRoundness', 'options.none')),
+			value: InterfaceRoundness.None,
+		},
+		{
+			label: t(getSectionKey('thumbnailRoundness', 'options.normal')),
+			value: InterfaceRoundness.Normal,
+		},
+		{
+			label: t(getSectionKey('thumbnailRoundness', 'options.rounded')),
+			value: InterfaceRoundness.Rounded,
+		},
+		{
+			label: t(getSectionKey('thumbnailRoundness', 'options.large')),
+			value: InterfaceRoundness.Pill,
+		},
+	]
+
 	const closestOption = ratioOptions.reduce((prev, curr) =>
 		Math.abs(curr.value - thumbnailRatio) < Math.abs(prev.value - thumbnailRatio) ? curr : prev,
 	)
@@ -85,20 +123,6 @@ export default function ThumbnailAppearancePreference() {
 		</>
 	)
 }
-
-const styleOptions = [
-	{ label: 'Grayscale', value: ThumbnailPlaceholderStyle.Grayscale },
-	{ label: 'Average color', value: ThumbnailPlaceholderStyle.AverageColor },
-	{ label: 'Colorful', value: ThumbnailPlaceholderStyle.Colorful },
-	{ label: 'Thumbhash', value: ThumbnailPlaceholderStyle.Thumbhash },
-]
-
-const roundnessOptions = [
-	{ label: 'None', value: InterfaceRoundness.None },
-	{ label: 'Normal', value: InterfaceRoundness.Normal },
-	{ label: 'Rounded', value: InterfaceRoundness.Rounded },
-	{ label: 'Large', value: InterfaceRoundness.Pill },
-]
 
 const LOCALE_BASE = 'settingsScene.app/preferences.sections'
 const getSectionKey = (section: string, key: string) => `${LOCALE_BASE}.${section}.${key}`

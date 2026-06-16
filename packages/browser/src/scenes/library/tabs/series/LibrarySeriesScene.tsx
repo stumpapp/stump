@@ -31,8 +31,7 @@ import {
 } from '@/components/filters/useFilterScene'
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { LibrarySeriesAlphabet, usePrefetchLibrarySeriesAlphabet } from '@/components/library'
-import { SeriesTable } from '@/components/series'
-import StackedSeriesCard from '@/components/series/StackedSeriesCard'
+import { LibrarySeriesCard, SeriesTable } from '@/components/series'
 import { defaultSeriesColumnSort } from '@/components/series/table'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
@@ -344,7 +343,7 @@ export default function LibrarySeriesScene() {
 							<DynamicCardGrid
 								count={nodes.length}
 								renderItem={(index) => (
-									<StackedSeriesCard key={nodes[index]!.id} data={nodes[index]!} />
+									<LibrarySeriesCard key={nodes[index]!.id} data={nodes[index]!} />
 								)}
 							/>
 						)}

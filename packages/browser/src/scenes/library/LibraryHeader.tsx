@@ -1,17 +1,8 @@
 import { usePrefetchFiles } from '@stump/client'
-import { cn, Heading, Link, Tabs, useSticky } from '@stump/components'
+import { cn, Heading, Link, MiniStatCard, Tabs, useSticky } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
-import {
-	BookCheck,
-	BookOpen,
-	Clock,
-	HardDrive,
-	Info,
-	Layers,
-	LucideIcon,
-	Settings,
-} from 'lucide-react'
+import { BookCheck, BookOpen, Clock, HardDrive, Info, Layers, Settings } from 'lucide-react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
@@ -107,24 +98,24 @@ export default function LibraryHeader() {
 					</Heading>
 					{stats && (
 						<div className="sm:flex gap-2 hidden items-center">
-							<MiniStatBadge icon={BookOpen} value={stats.inProgressBooks} />
-							<MiniStatBadge
+							<MiniStatCard icon={BookOpen} value={stats.inProgressBooks} />
+							<MiniStatCard
 								icon={BookCheck}
 								value={stats.completedBooks}
 								suffix={`/ ${stats.bookCount}`}
 							/>
 							{stats.seriesCount != null && !hideSeriesView && (
-								<MiniStatBadge icon={Layers} value={stats.seriesCount} />
+								<MiniStatCard icon={Layers} value={stats.seriesCount} />
 							)}
 							{formattedTime && (
-								<MiniStatBadge
+								<MiniStatCard
 									icon={Clock}
 									value={formattedTime.value}
 									suffix={formattedTime.unit}
 								/>
 							)}
 							{formattedSize && (
-								<MiniStatBadge
+								<MiniStatCard
 									icon={HardDrive}
 									value={formattedSize.value}
 									suffix={formattedSize.unit}
@@ -161,28 +152,6 @@ export default function LibraryHeader() {
 					<Settings className="h-4 w-4" />
 				</Link>
 			</div>
-		</div>
-	)
-}
-
-type MiniStatBadgeProps = {
-	icon?: LucideIcon
-	value: string | number
-	suffix?: string
-}
-
-// TODO: yoinked from expo but ignored colors for now, put somewhere else!
-
-function MiniStatBadge({ icon: Icon, value, suffix }: MiniStatBadgeProps) {
-	return (
-		<div className="gap-1.5 px-1.5 py-1 flex items-center rounded-lg bg-muted">
-			{Icon && (
-				<div className="h-5 w-5 flex shrink-0 items-center justify-center rounded-md bg-muted-foreground/15">
-					<Icon className="h-3 w-3 text-muted-foreground" />
-				</div>
-			)}
-			<span className="text-xs font-semibold text-foreground tabular-nums">{value}</span>
-			{suffix && <span className="text-xs font-medium text-foreground opacity-50">{suffix}</span>}
 		</div>
 	)
 }

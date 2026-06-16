@@ -24,7 +24,7 @@ export function StatCard({ label, value, suffix, icon, colors, style, ...props }
 
 	return (
 		<View
-			className="rounded-3xl squircle gap-2 p-3"
+			className="squircle gap-2 p-3 rounded-3xl"
 			style={[{ backgroundColor: backgroundColor }, style]}
 			{...props}
 		>
@@ -53,11 +53,11 @@ export function StatCard({ label, value, suffix, icon, colors, style, ...props }
 function IconWithBackground({ icon, colors }: IconProps) {
 	return (
 		<View
-			className="squircle h-8 w-8 rounded-xl flex shrink-0 items-center justify-center"
+			className="squircle h-8 w-8 flex shrink-0 items-center justify-center rounded-xl"
 			style={{ backgroundColor: colors.primary }}
 		>
 			<Icon as={icon} size={18} strokeWidth={1.8} absoluteStrokeWidth color={colors.secondary} />
-			<View className="inset-0 rounded-xl dark:border-white/10 border-white/30 squircle absolute border-[0.75px]" />
+			<View className="inset-0 dark:border-white/10 border-white/30 squircle absolute rounded-xl border-[0.75px]" />
 		</View>
 	)
 }
@@ -77,7 +77,7 @@ export function MiniStatCard({
 
 	return (
 		<View
-			className="gap-2 p-1.5 squircle rounded-2xl grow"
+			className="gap-2 p-1.5 squircle grow rounded-2xl"
 			style={[{ backgroundColor: backgroundColor }, style]}
 			{...props}
 		>
@@ -103,11 +103,11 @@ export function MiniStatCard({
 function MiniIconWithBackground({ icon, colors }: IconProps) {
 	return (
 		<View
-			className="squircle h-6 w-6 rounded-lg flex shrink-0 items-center justify-center"
+			className="squircle h-6 w-6 flex shrink-0 items-center justify-center rounded-lg"
 			style={{ backgroundColor: colors.primary }}
 		>
 			<Icon as={icon} size={14} strokeWidth={1.8} absoluteStrokeWidth color={colors.secondary} />
-			<View className="inset-0 rounded-lg dark:border-white/10 border-white/30 squircle absolute border-[0.75px]" />
+			<View className="inset-0 dark:border-white/10 border-white/30 squircle absolute rounded-lg border-[0.75px]" />
 		</View>
 	)
 }

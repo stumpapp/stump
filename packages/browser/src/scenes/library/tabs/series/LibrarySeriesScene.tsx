@@ -1,19 +1,17 @@
-import { PREFETCH_STALE_TIME, useGraphQL, useSDK } from '@stump/client'
-import { usePrevious } from '@stump/components'
+import { useGraphQL, useSDK } from '@stump/client'
 import {
-	graphql,
 	InterfaceLayout,
 	OrderDirection,
 	SeriesFilterInput,
 	SeriesModelOrdering,
 	SeriesOrderBy,
 } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
 
-import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
+import DynamicCardGrid from '@/components/container/DynamicCardGrid'
+import { GridSizeSlider } from '@/components/container/GridSizeSlider'
 import {
 	FilterContext,
 	FilterHeader,
@@ -23,14 +21,9 @@ import {
 	useFilterScene,
 } from '@/components/filters'
 import { Ordering } from '@/components/filters/context'
-import {
-	DEFAULT_SERIES_ORDER_BY,
-	useSearchSeriesFilter,
-	useURLKeywordSearch,
-	useURLPageParams,
-} from '@/components/filters/useFilterScene'
+import { useSearchSeriesFilter, useURLKeywordSearch } from '@/components/filters/useFilterScene'
 import GenericEmptyState from '@/components/GenericEmptyState'
-import { LibrarySeriesAlphabet, usePrefetchLibrarySeriesAlphabet } from '@/components/library'
+import { LibrarySeriesAlphabet } from '@/components/library'
 import { SeriesTable } from '@/components/series'
 import StackedSeriesCard from '@/components/series/StackedSeriesCard'
 import { defaultSeriesColumnSort } from '@/components/series/table'
@@ -41,119 +34,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useSeriesLayout } from '@/stores/layout'
 
 import { useLibraryContext } from '../../context'
-
-const query = graphql(`
-	query LibrarySeries(
-		$filter: SeriesFilterInput!
-		$orderBy: [SeriesOrderBy!]!
-		$pagination: Pagination!
-	) {
-		series(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
-			nodes {
-				id
-				resolvedName
-				mediaCount
-				percentageCompleted
-				status
-				# We fetch 2 and skip 1 because the first thumbnail _might_ be the same as the series thumbnail.
-				# See https://github.com/stumpapp/stump/issues/899
-				media(take: 2, skip: 1) {
-					id
-					thumbnail {
-						url
-						metadata {
-							averageColor
-							colors {
-								color
-								percentage
-							}
-							thumbhash
-						}
-					}
-				}
-				thumbnail {
-					url
-					metadata {
-						averageColor
-						colors {
-							color
-							percentage
-						}
-						thumbhash
-					}
-				}
-			}
-			pageInfo {
-				__typename
-				... on OffsetPaginationInfo {
-					totalPages
-					currentPage
-					pageSize
-					pageOffset
-					zeroBased
-				}
-			}
-		}
-	}
-`)
-
-export type UsePrefetchLibrarySeriesParams = {
-	page?: number
-	pageSize?: number
-	filter?: SeriesFilterInput[]
-	orderBy: SeriesOrderBy[]
-}
-
-export const usePrefetchLibrarySeries = () => {
-	const { sdk } = useSDK()
-	const { pageSize } = useURLPageParams()
-	const { search } = useURLKeywordSearch()
-	const searchFilter = useSearchSeriesFilter(search)
-
-	const client = useQueryClient()
-	const prefetchAlphabet = usePrefetchLibrarySeriesAlphabet()
-
-	return useCallback(
-		(
-			libraryId: string,
-			params: UsePrefetchLibrarySeriesParams = { filter: [], orderBy: DEFAULT_SERIES_ORDER_BY },
-		) => {
-			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
-			return Promise.all([
-				client.prefetchQuery({
-					queryKey: getQueryKey(
-						sdk.cacheKeys.librarySeries,
-						libraryId,
-						pageParams.page,
-						pageParams.pageSize,
-						search,
-						params.filter,
-						params.orderBy,
-					),
-					queryFn: async () => {
-						const response = await sdk.execute(query, {
-							filter: {
-								libraryId: { eq: libraryId },
-								_and: params.filter,
-								_or: searchFilter,
-							},
-							orderBy: params.orderBy,
-							pagination: {
-								offset: {
-									...pageParams,
-								},
-							},
-						})
-						return response
-					},
-					staleTime: PREFETCH_STALE_TIME,
-				}),
-				prefetchAlphabet(libraryId),
-			])
-		},
-		[pageSize, search, searchFilter, sdk, client, prefetchAlphabet],
-	)
-}
+import { getQueryKey, query, usePrefetchLibrarySeries } from './queries'
 
 function useSeriesURLOrderBy(ordering: Ordering): SeriesOrderBy[] {
 	return useMemo(() => {
@@ -171,18 +52,6 @@ function useSeriesURLOrderBy(ordering: Ordering): SeriesOrderBy[] {
 			},
 		] as SeriesOrderBy[]
 	}, [ordering])
-}
-
-function getQueryKey(
-	cacheKey: string,
-	libraryId: string,
-	page: number,
-	pageSize: number,
-	search: string | undefined,
-	filters: SeriesFilterInput[] | undefined,
-	orderBy: SeriesOrderBy[] | undefined,
-): (string | object | number | SeriesFilterInput[] | SeriesOrderBy[] | undefined)[] {
-	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 
 export default function LibrarySeriesScene() {

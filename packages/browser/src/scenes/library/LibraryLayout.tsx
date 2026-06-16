@@ -12,7 +12,8 @@ import { usePreferences } from '@/hooks'
 import { LibraryContext } from './context'
 import LibraryHeader from './LibraryHeader'
 import LibraryNavigation from './LibraryNavigation'
-import { LibrarySettingsHeader, LibrarySettingsSidebar } from './tabs/settings'
+import LibrarySettingsHeader from './tabs/settings/LibrarySettingsHeader'
+import LibrarySettingsSidebar from './tabs/settings/LibrarySettingsSidebar'
 
 const query = graphql(`
 	query LibraryLayout($id: ID!) {

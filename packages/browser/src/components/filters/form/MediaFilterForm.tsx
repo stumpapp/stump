@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
-import { useSeriesContextSafe } from '@/scenes/series'
+import { useSeriesContextSafe } from '@/scenes/series/context'
 
 import { useFilterContext } from '..'
 import AgeRatingFilter from './AgeRatingFilter'

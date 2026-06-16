@@ -159,18 +159,72 @@ const mutation = graphql(`
 	}
 `)
 
-const injectFontStylesheet = (rendition: Rendition) => {
-	const doc = Object.values(rendition.getContents())[0]?.document
-	if (!doc) return
+const FONT_STYLESHEET_MAP: Record<string, string> = {
+	'Atkinson Hyperlegible Next':
+		'/assets/fonts/atkinson-hyperlegible-next/atkinson-hyperlegible-next.css',
+	Bitter: '/assets/fonts/bitter/bitter.css',
+	Charis: '/assets/fonts/charis/charis.css',
+	'Hina Mincho': '/assets/fonts/hina-mincho/hina-mincho.css',
+	Inter: '/assets/fonts/inter/inter.css',
+	'Libre Baskerville': '/assets/fonts/libre-baskerville/libre-baskerville.css',
+	Literata: '/assets/fonts/literata/literata.css',
+	Nunito: '/assets/fonts/nunito/nunito.css',
+	OpenDyslexic: '/assets/fonts/opendyslexic/opendyslexic.css',
+}
 
-	const head = doc.head
-	if (!head) return
+const FALLBACK_FONT_PATH = '/assets/fonts/inter/inter.css'
 
-	const link = doc.createElement('link')
-	link.rel = 'stylesheet'
-	link.id = 'stump-fonts-stylesheet'
-	link.href = '/assets/fonts/fonts.css'
-	head.appendChild(link)
+const normalizeSupportedFont = (fontFamily?: string): SupportedFont | undefined => {
+	if (!fontFamily) {
+		return undefined
+	}
+
+	return Object.values(SupportedFont).includes(fontFamily as SupportedFont)
+		? (fontFamily as SupportedFont)
+		: undefined
+}
+
+const fontStylesheetPathFromFamily = (fontFamily?: SupportedFont) => {
+	const family = toFamilyName(fontFamily || SupportedFont.Inter)
+	return FONT_STYLESHEET_MAP[family] ?? FALLBACK_FONT_PATH
+}
+
+const matchesStylesheetPath = (href: string, stylesheetPath: string): boolean => {
+	try {
+		const normalizedPathname = new URL(href).pathname
+		return normalizedPathname.endsWith(stylesheetPath)
+	} catch {
+		return href.endsWith(stylesheetPath)
+	}
+}
+
+const injectFontStylesheet = (rendition: Rendition, fontFamily?: SupportedFont) => {
+	const contentDocs: Document[] = rendition
+		.getContents()
+		.map((content: Contents) => content.document as Document | undefined)
+		.filter((doc: Document | undefined): doc is Document => Boolean(doc))
+	const stylesheetPath = fontStylesheetPathFromFamily(fontFamily)
+
+	contentDocs.forEach((doc: Document) => {
+		const head = doc.head as HTMLHeadElement | null
+		if (!head) {
+			return
+		}
+
+		const existing = head.querySelector('#stump-fonts-stylesheet') as HTMLLinkElement | null
+		if (existing) {
+			if (matchesStylesheetPath(existing.href, stylesheetPath)) {
+				return
+			}
+			existing.remove()
+		}
+
+		const link = doc.createElement('link')
+		link.rel = 'stylesheet'
+		link.id = 'stump-fonts-stylesheet'
+		link.href = stylesheetPath
+		head.appendChild(link)
+	})
 }
 
 /**
@@ -209,6 +263,11 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 			trackElapsedTime,
 		},
 	} = useBookPreferences({ book: ebook.media })
+	const latestSupportedFontRef = useRef<SupportedFont | undefined>(undefined)
+
+	useEffect(() => {
+		latestSupportedFontRef.current = normalizeSupportedFont(fontFamily)
+	}, [fontFamily])
 
 	const timer = useBookTimer(ebook.media?.id || '', {
 		initial: ebook.media?.readProgress?.elapsedSeconds,
@@ -438,11 +497,12 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	/**	A function for applying updates to the the epub reader preferences to the epubjs rendition instance */
 	const updateEpubPreferences = useCallback(
 		(rendition: Rendition, fontSize?: number, lineHeight?: number, fontFamily?: string) => {
+			const supportedFont = normalizeSupportedFont(fontFamily)
 			const newStylesheetRules = {
 				'a, blockquote, body, h1, h2, h3, h4, h5, p, span, ul': {
 					'font-size': `${fontSize}px !important`,
 					'line-height': `${lineHeight} !important`,
-					'font-family': `${toFamilyName(fontFamily as SupportedFont)} !important`,
+					'font-family': `${toFamilyName(supportedFont ?? SupportedFont.Inter)} !important`,
 				},
 				img: { 'max-width': '100% !important' },
 			}
@@ -512,7 +572,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				})
 
 				rendition_.hooks.content.register(() => {
-					injectFontStylesheet(rendition_)
+					injectFontStylesheet(rendition_, latestSupportedFontRef.current)
 				})
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
@@ -591,10 +651,34 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 * events like window resizing, when the fullscreen state changes.
 	 */
 	useEffect(() => {
+		if (!rendition) {
+			return
+		}
+
+		let disposed = false
 		const resizeObserver = new ResizeObserver((entries) => {
+			if (disposed) {
+				return
+			}
+
 			for (const entry of entries) {
 				const { width, height } = entry.contentRect
-				rendition?.resize(width, height)
+				if (width <= 0 || height <= 0) {
+					continue
+				}
+
+				const renditionWithManager = rendition as Rendition & {
+					manager?: { stage?: unknown }
+				}
+				if (!renditionWithManager.manager?.stage) {
+					continue
+				}
+
+				try {
+					rendition.resize(width, height)
+				} catch (error) {
+					console.warn('Skipping rendition resize after teardown', error)
+				}
 			}
 		})
 
@@ -603,6 +687,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		}
 
 		return () => {
+			disposed = true
 			resizeObserver.disconnect()
 		}
 	}, [rendition])
@@ -615,6 +700,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (!rendition) return
 		updateEpubPreferences(rendition, fontSize, lineHeight, fontFamily)
+		injectFontStylesheet(rendition, latestSupportedFontRef.current)
 	}, [rendition, fontSize, fontFamily, lineHeight, updateEpubPreferences])
 
 	/* This effect updates the reading mode. This is separated because it causes flashing */

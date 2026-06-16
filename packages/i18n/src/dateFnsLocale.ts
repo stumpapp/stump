@@ -1,5 +1,6 @@
 import type { Locale } from 'date-fns'
 import { formatDuration, setDefaultOptions } from 'date-fns'
+import { enUS } from 'date-fns/locale/en-US'
 
 import type { AllowedLocale } from './config'
 
@@ -13,7 +14,7 @@ const dateFnsLocaleLoaders: Record<AllowedLocale, () => Promise<Locale>> = {
 	'de-DE': () => import('date-fns/locale/de').then((m) => m.de),
 	'el-GR': () => import('date-fns/locale/el').then((m) => m.el),
 	'en-GB': () => import('date-fns/locale/en-GB').then((m) => m.enGB),
-	'en-US': () => import('date-fns/locale/en-US').then((m) => m.enUS),
+	'en-US': () => Promise.resolve(enUS),
 	'es-ES': () => import('date-fns/locale/es').then((m) => m.es),
 	'fa-IR': () => import('date-fns/locale/fa-IR').then((m) => m.faIR),
 	'fi-FI': () => import('date-fns/locale/fi').then((m) => m.fi),
@@ -95,16 +96,22 @@ function findClosestLocale(locale: string): AllowedLocale {
 	return 'en-US'
 }
 
-export async function initDateFnsLocale(locale: string): Promise<AllowedLocale> {
+export async function initDateFnsLocale(
+	locale: string,
+	signal?: AbortSignal,
+): Promise<AllowedLocale> {
 	const targetLocale = findClosestLocale(locale)
 
 	let dateFnsLocale = localeCache.get(targetLocale)
 
 	if (!dateFnsLocale) {
 		try {
+			if (signal?.aborted) return targetLocale
 			dateFnsLocale = await dateFnsLocaleLoaders[targetLocale]()
+			if (signal?.aborted) return targetLocale
 			localeCache.set(targetLocale, dateFnsLocale)
 		} catch (error) {
+			if (signal?.aborted) return targetLocale
 			console.warn(
 				`Failed to load date-fns locale for ${targetLocale}, falling back to en-US`,
 				error,
@@ -113,16 +120,20 @@ export async function initDateFnsLocale(locale: string): Promise<AllowedLocale> 
 			if (targetLocale !== 'en-US') {
 				dateFnsLocale = localeCache.get('en-US')
 				if (!dateFnsLocale) {
+					if (signal?.aborted) return targetLocale
 					dateFnsLocale = await dateFnsLocaleLoaders['en-US']()
+					if (signal?.aborted) return targetLocale
 					localeCache.set('en-US', dateFnsLocale)
 				}
 			} else {
-				throw error // Re-throw if en-US itself failed
+				throw error
 			}
 		}
 	}
 
-	setDefaultOptions({ locale: dateFnsLocale })
+	if (!signal?.aborted) {
+		setDefaultOptions({ locale: dateFnsLocale })
+	}
 
 	return targetLocale
 }

@@ -7,7 +7,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
-import { SideBarLinkButton } from '@/scenes/settings'
+import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
 import { useLibraryContext } from '../../context'
 import { routeGroups } from './routes'

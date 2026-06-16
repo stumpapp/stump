@@ -3,8 +3,8 @@ import { Text } from '@stump/components'
 import { FileStatus } from '@stump/graphql'
 import { useCallback } from 'react'
 
-import { usePrefetchSeries } from '@/scenes/series'
-import { usePrefetchSeriesBooks } from '@/scenes/series/tabs/books/SeriesBooksScene'
+import { usePrefetchSeries } from '@/scenes/series/SeriesLayout'
+import { usePrefetchSeriesBooks } from '@/scenes/series/tabs/books/queries'
 
 import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'

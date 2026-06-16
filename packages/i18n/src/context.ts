@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import { AllowedLocale } from './config'
+import { AllowedLocale, resolveLocale } from './config'
 
 export type LocaleContextProps = {
 	locale: AllowedLocale
@@ -8,7 +8,11 @@ export type LocaleContextProps = {
 }
 
 export const getDefaultLocale = (defaultValue: AllowedLocale = 'en-US') => {
-	return 'navigator' in globalThis ? (navigator?.language as AllowedLocale) : defaultValue
+	if (!('navigator' in globalThis)) {
+		return defaultValue
+	}
+
+	return resolveLocale(navigator?.language)
 }
 
 export const LocaleContext = createContext<LocaleContextProps>({

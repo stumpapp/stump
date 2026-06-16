@@ -5,20 +5,20 @@ import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout.tsx'
 import { RouterProvider } from './context/RouterContext.tsx'
-import { BookRouter } from './scenes/book'
-import { BookClubRouter } from './scenes/bookClub'
-import { LibraryRouter } from './scenes/library'
-import { SeriesRouter } from './scenes/series'
-import { SettingsRouter } from './scenes/settings'
-import { SmartListRouter } from './scenes/smartList'
 import { useAppStore, useUserStore } from './stores'
-
 const HomeScene = lazy(() => import('./scenes/home'))
 const FourOhFour = lazy(() => import('./scenes/error/FourOhFour.tsx'))
 const ServerConnectionErrorScene = lazy(
 	() => import('./scenes/error/ServerConnectionErrorScene.tsx'),
 )
 const LoginOrClaimScene = lazy(() => import('./scenes/auth'))
+
+import { BookRouter } from './scenes/book'
+import { BookClubRouter } from './scenes/bookClub'
+import { LibraryRouter } from './scenes/library'
+import { SeriesRouter } from './scenes/series'
+import { SettingsRouter } from './scenes/settings'
+import { SmartListRouter } from './scenes/smartList'
 
 type AppRouterProps = {
 	basePath?: string

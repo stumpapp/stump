@@ -9,7 +9,7 @@ import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 
 import { useSeriesContext } from './context'
-import { usePrefetchSeriesBooks } from './tabs/books/SeriesBooksScene'
+import { usePrefetchSeriesBooks } from './tabs/books/queries'
 
 export default function SeriesNavigation() {
 	const isMobile = useMediaMatch('(max-width: 768px)')

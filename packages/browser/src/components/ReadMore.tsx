@@ -1,7 +1,7 @@
 import { useBoolean } from '@stump/components'
 
 import { DEBUG_ENV } from '../index.ts'
-import Markdown from './markdown/MarkdownPreview.tsx'
+import MarkdownPreview from './markdown/MarkdownPreview.tsx'
 
 type Props = {
 	text?: string | null
@@ -21,7 +21,7 @@ export default function ReadMore({ text }: Props) {
 	}
 
 	if (!canReadMore) {
-		return <Markdown>{resolvedText}</Markdown>
+		return <MarkdownPreview>{resolvedText}</MarkdownPreview>
 	}
 
 	return (
@@ -33,7 +33,7 @@ export default function ReadMore({ text }: Props) {
 					transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 				}}
 			>
-				<Markdown>{resolvedText}</Markdown>
+				<MarkdownPreview>{resolvedText}</MarkdownPreview>
 			</div>
 
 			<div

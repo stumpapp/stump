@@ -1,7 +1,7 @@
 import { Dropdown, IconButton, ToolTip } from '@stump/components'
 import { BookPlus, FolderPlus, Upload } from 'lucide-react'
 
-import { useSeriesContextSafe } from '@/scenes/series'
+import { useSeriesContextSafe } from '@/scenes/series/context'
 
 type Props = {
 	onSelect: (type: 'books' | 'series') => void

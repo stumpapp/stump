@@ -3159,7 +3159,17 @@
 		},
 		"epubSettings": {
 			"title": "Epub Reader Settings",
-			"typeface": "Typeface",
+			"typeface": {
+				"label": "Typeface",
+				"options": {
+				 "system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "Font Size",
 			"fontWeight": {
 				"label": "Font Weight",

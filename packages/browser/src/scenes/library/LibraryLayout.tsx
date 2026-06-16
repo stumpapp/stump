@@ -28,12 +28,6 @@ const query = graphql(`
 				totalBytes
 				totalReadingTimeSeconds
 			}
-			genres
-			publishers
-			tags {
-				id
-				name
-			}
 			thumbnail {
 				url
 				metadata {

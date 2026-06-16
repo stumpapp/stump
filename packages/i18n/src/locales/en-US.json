@@ -542,6 +542,13 @@
 			"addedFiles": "Added files"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Settings",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
@@ -913,6 +920,19 @@
 		"buttons": {
 			"continueReading": "Continue Reading",
 			"downloadSeries": "Download Series"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {

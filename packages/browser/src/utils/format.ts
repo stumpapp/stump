@@ -33,6 +33,7 @@ export function formatBytes(bytes?: number | bigint, decimals = 2, zeroUnit = 'G
 	}
 }
 
+// TODO(cleanup): conform to how we do in expo
 /**
  * Returns an object containing the converted bytes and the unit of measurement.
  */

@@ -1,3 +1,4 @@
+import { formatBytes } from '@stump/client'
 import { Badge, Heading, Link, Statistic, Text } from '@stump/components'
 import { BookCardFragment, BookOverviewSceneQuery, Tag } from '@stump/graphql'
 import { ExternalLink } from 'lucide-react'
@@ -7,7 +8,6 @@ import BadgeList from '@/components/BadgeList'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 import paths from '@/paths'
-import { formatBytes } from '@/utils/format'
 
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 

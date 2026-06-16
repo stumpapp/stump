@@ -1,4 +1,5 @@
 import { Host, Image } from '@expo/ui/swift-ui'
+import { formatBytes } from '@stump/client'
 import { useRouter } from 'expo-router'
 import { CheckCircle2, Trash } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -8,7 +9,6 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
-import { formatBytes } from '~/lib/format'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useSelectionStore } from '~/stores/selection'
 
@@ -195,7 +195,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 						<View className="gap-2 flex-row items-center">
 							{currentPage && (
-								<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
+								<View className="squircle px-2.5 py-0.5 bg-background-surface-secondary flex-row items-end rounded-full">
 									<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
 									<Text
 										size="xs"
@@ -205,7 +205,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							)}
 
 							{size && (
-								<View className="squircle px-2.5 py-0.5 rounded-full bg-background-surface-secondary">
+								<View className="squircle px-2.5 py-0.5 bg-background-surface-secondary rounded-full">
 									<Text size="sm" className="text-foreground-muted">
 										{size}
 									</Text>
@@ -221,7 +221,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 									style={{ height: 6, borderRadius: 3 }}
 								/>
 
-								<Text size="sm" className="shrink-0 text-foreground-muted">
+								<Text size="sm" className="text-foreground-muted shrink-0">
 									{(getProgress() || 0).toFixed(0)}%
 								</Text>
 							</View>
@@ -229,7 +229,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					</View>
 
 					<Animated.View
-						className="squircle inset-0 -m-1 rounded-lg absolute z-10 border-2"
+						className="squircle inset-0 -m-1 absolute z-10 rounded-lg border-2"
 						style={overlayStyle}
 					>
 						<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>

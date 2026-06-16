@@ -1,5 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { formatBytesSeparate } from '@stump/client'
 import { graphql, LibraryOverviewSheetQuery } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
@@ -10,7 +11,6 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_26_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
-import { formatBytesSeparate } from '~/lib/format'
 
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { SheetBackDetection } from '../SheetBackDetection'

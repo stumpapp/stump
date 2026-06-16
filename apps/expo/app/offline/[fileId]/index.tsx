@@ -1,3 +1,4 @@
+import { formatBytes } from '@stump/client'
 import { MediaMetadata } from '@stump/graphql'
 import { intlFormat } from 'date-fns'
 import { eq } from 'drizzle-orm'
@@ -33,7 +34,6 @@ import {
 	seriesRefs,
 } from '~/db'
 import { formatSeriesPosition } from '~/lib/bookUtils'
-import { formatBytes } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'

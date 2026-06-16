@@ -1,4 +1,5 @@
 import { getThumbnailTintColor } from '@stump/client'
+import { formatBytes } from '@stump/client'
 import { cn, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import pluralize from 'pluralize'
@@ -9,7 +10,6 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
-import { formatBytes } from '@/utils/format'
 
 import { ThumbnailImage } from '../thumbnail/ThumbnailImage'
 import { usePrefetchBook } from './useBookOverview'

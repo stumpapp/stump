@@ -1,3 +1,4 @@
+import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { MediaMetadata } from '@stump/graphql'
 import { formatDistanceToNow } from 'date-fns'
 import { BlurTargetView } from 'expo-blur'
@@ -15,7 +16,6 @@ import { ThumbnailImage } from '~/components/image'
 import { Badge, Heading, Progress, Text } from '~/components/ui'
 import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { COLORS, useColors } from '~/lib/constants'
-import { parseGraphQLPercentageDecimal } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 

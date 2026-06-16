@@ -1,4 +1,4 @@
-import { usePrefetchFiles } from '@stump/client'
+import { formatBytesSeparate, usePrefetchFiles } from '@stump/client'
 import { UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
@@ -6,7 +6,6 @@ import { useLocation } from 'react-router'
 
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
-import { formatBytesSeparate } from '@/utils/format'
 
 import { useLibraryContext } from './context'
 import { usePrefetchLibraryBooks } from './tabs/books/LibraryBooksScene'

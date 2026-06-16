@@ -1,3 +1,4 @@
+import { formatBytes } from '@stump/client'
 import { cn, Text } from '@stump/components'
 import {
 	createColumnHelper,
@@ -11,7 +12,6 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { getTableModels, SortIcon } from '@/components/table'
 import { usePreferences } from '@/hooks'
-import { formatBytes } from '@/utils/format'
 
 import { EmailerSendRecord } from './EmailerSendHistoryTable'
 

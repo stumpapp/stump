@@ -1,4 +1,5 @@
 import { useGraphQLMutation, usePrefetchFiles } from '@stump/client'
+import { formatBytesSeparate } from '@stump/client'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { extractErrorMessage, graphql, UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
@@ -10,7 +11,6 @@ import { toast } from 'sonner'
 
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
-import { formatBytesSeparate } from '@/utils/format'
 
 import CompleteSeriesConfirmation from './CompleteSeriesConfirmation'
 import { useSeriesContext } from './context'

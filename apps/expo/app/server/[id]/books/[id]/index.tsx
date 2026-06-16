@@ -484,7 +484,7 @@ export default function Screen() {
 					)}
 
 					{showDetails && (
-						<Card label="Details">
+						<Card label={t('common.details')}>
 							{book.extension && (
 								<Card.Row label={t('bookMetadata.format')} value={book.extension.toUpperCase()} />
 							)}

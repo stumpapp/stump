@@ -11,6 +11,7 @@ import { scheduleOnRN } from 'react-native-worklets'
 import { ThumbnailImage } from '~/components/image'
 import { Heading, Icon, Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { ReadiumLocator } from '~/modules/readium'
@@ -30,7 +31,7 @@ type Props = {
 export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props) {
 	const colors = useColors()
 	const accentColor = usePreferencesStore((state) => state.accentColor)
-
+	const { t } = useTranslate()
 	const { getRequestHeaders } = useEpubReaderContext()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
@@ -143,7 +144,7 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 
 						<View className="flex-row items-center justify-between">
 							<Text className="text-[#898d94]">
-								Page {currentPage} of {totalPages}
+								{t('common.pageXOfY', { current: currentPage, total: totalPages })}
 							</Text>
 
 							<GlassView
@@ -159,7 +160,7 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 									placeholderTextColor="#898d94"
 									keyboardType="number-pad"
 									selectionColor={accentColor || colors.fill.brand.DEFAULT}
-									placeholder={'Go to page...'}
+									placeholder={t('tableOfContents.goToPagePlaceholder')}
 									onLayout={(e) => setTextInputWidth(e.nativeEvent.layout.width)}
 									onChangeText={(text) => goToPage.setString(text)}
 									value={goToPage.string}
@@ -227,6 +228,7 @@ const TableOfContentsListItem = ({
 	nextChapterActive: boolean
 }) => {
 	const { readerRef } = useEpubReaderContext()
+	const { t } = useTranslate()
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 	const pushJump = useEpubLocationStore((state) => state.pushJump)
 
@@ -295,7 +297,7 @@ const TableOfContentsListItem = ({
 								)}
 								style={currentChapterActive && { color: textColor }}
 							>
-								{item.position || 'Not Available'}
+								{item.position || t('common.notAvailable')}
 							</Text>
 						</View>
 					</>
@@ -327,6 +329,7 @@ const ScrollToChapterIndicator = ({
 	onPress: () => void
 	className?: string
 }) => {
+	const { t } = useTranslate()
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const colors = useColors()
 	const textColor = accentColor || colors.fill.brand.DEFAULT
@@ -346,7 +349,7 @@ const ScrollToChapterIndicator = ({
 				>
 					<View className="px-4 py-2">
 						<Text className="text-base font-semibold" style={{ color: textColor }}>
-							Show Current Chapter
+							{t('tableOfContents.showCurrentChapter')}
 						</Text>
 					</View>
 				</GlassView>

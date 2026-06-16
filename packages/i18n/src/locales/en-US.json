@@ -2808,17 +2808,27 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
+				"label": "Mark as Read",
 				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
+				"label": "Clear Progress",
 				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
 			},
+			"deleteReadHistory": {
+				"label": "Delete Read History",
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+			},
 			"deleteBook": {
-				"label": "Delete book",
+				"label": "Delete Book",
 				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
 			},
+			"deleteDownload": {
+				"label": "Delete Download",
+				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+			},
+			"goToLibrary": "Go to Library",
+			"goToSeries": "Go to Series",
 			"seeDetails": "See Details"
 		},
 		"bookMetadata": {
@@ -2852,18 +2862,22 @@
 			"content": "Content",
 			"details": "Details",
 			"delete": "Delete",
+			"dismiss": "Dismiss",
 			"download": "Download",
 			"downloads": "Downloads",
+			"done": "Done",
 			"edit": "Edit",
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
 			"favorite": "Favorite",
+			"finished": "Finished",
 			"grid": "Grid",
 			"list": "List",
 			"lastCompleted": "Last Completed",
 			"name": "Name",
 			"none": "None",
+			"notAvailable": "Not Available",
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",
@@ -2874,6 +2888,7 @@
 			"read": "Read",
 			"readAgain": "Read again",
 			"readTime": "Reading time",
+			"readthrough": "Readthrough",
 			"readMore": "Read more",
 			"save": "Save",
 			"select": "Select",
@@ -2890,6 +2905,11 @@
 		},
 		"errors": {
 			"unknown": "Unknown error"
+		},
+		"epubMenu": {
+			"tableOfContents": "Table of Contents",
+			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"appearance": "Appearance"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -3206,6 +3226,23 @@
 				"resetTimer": "Reset Timer"
 			},
 			"allSettings": "All Settings"
+		},
+		"tableOfContents": {
+			"goToPageX": "Go to page {{pageNumber}}",
+			"goToPagePlaceholder": "Go to page...",
+			"errors": {
+				"pageDoesNotExist": "Page {{page}} does not exist",
+				"invalidPage": "'{{page}}' is not a page number"
+			},
+			"showCurrentChapter": "Show Current Chapter"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "All",
+				"bookmarks": "Bookmarks",
+				"highlights": "Highlights",
+				"notes": "Notes"
+			}
 		},
 		"epubSettings": {
 			"title": "Epub Reader Settings",

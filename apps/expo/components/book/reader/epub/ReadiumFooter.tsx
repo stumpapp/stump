@@ -50,7 +50,7 @@ export default function ReadiumFooter() {
 	const [showMenu, setShowMenu] = useState(false)
 
 	const { timer } = useEpubReaderContext()
-	const { locale } = useTranslate()
+	const { t, locale } = useTranslate()
 	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
 
@@ -116,7 +116,7 @@ export default function ReadiumFooter() {
 					<MenuItem
 						show={showMenu}
 						delay={150} // 200 with Search Book
-						label="Table of Contents"
+						label={t('epubMenu.tableOfContents')}
 						icon={List}
 						onPress={() => {
 							openSheet('tableOfContents')
@@ -134,7 +134,7 @@ export default function ReadiumFooter() {
 					<MenuItem
 						show={showMenu}
 						delay={100}
-						label="Bookmarks & Annotations"
+						label={t('epubMenu.annotations')}
 						icon={PencilLine}
 						onPress={() => {
 							openSheet('annotations')
@@ -145,7 +145,7 @@ export default function ReadiumFooter() {
 					<MenuItem
 						show={showMenu}
 						delay={50}
-						label="Appearance"
+						label={t('epubMenu.appearance')}
 						icon={Palette}
 						onPress={() => {
 							openSheet('settings')

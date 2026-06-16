@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { Text } from '~/components/ui'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { useReaderStore } from '~/stores'
 import {
@@ -24,6 +25,7 @@ type Props = {
 }
 
 export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onSaved }: Props) => {
+	const { t } = useTranslate()
 	const { colorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore(
 		useShallow((store) => ({
@@ -92,7 +94,7 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 								className="text-lg"
 								style={{ color: displayTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
 							>
-								Cancel
+								{t('common.cancel')}
 							</Text>
 						)}
 					</Pressable>
@@ -103,7 +105,7 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 								className="text-lg font-medium"
 								style={{ color: displayTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
 							>
-								Done
+								{t('common.done')}
 							</Text>
 						)}
 					</Pressable>

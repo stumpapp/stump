@@ -2824,13 +2824,22 @@
 		"bookMetadata": {
 			"ageRating": "Age Rating",
 			"downloadedAt": "Downloaded",
+			"characters": "Characters",
 			"format": "Format",
 			"genres": "Genres",
 			"language": "Language",
 			"publisher": "Publisher",
 			"size": "Size",
 			"volume": "Volume",
-			"year": "Year"
+			"writers": "Writers",
+			"colorists": "Colorists",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"coverArtists": "Cover Artists",
+			"links": "Links",
+			"year": "Year",
+			"identifier": "Identifier",
+			"identifiers": "Identifiers"
 		},
 		"common": {
 			"book": "Book",
@@ -2839,14 +2848,17 @@
 			"clear": "Clear",
 			"completed": "Completed",
 			"confirm": "Confirm",
+			"continue": "Continue",
 			"content": "Content",
 			"details": "Details",
 			"delete": "Delete",
+			"download": "Download",
 			"downloads": "Downloads",
 			"edit": "Edit",
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
+			"favorite": "Favorite",
 			"grid": "Grid",
 			"list": "List",
 			"lastCompleted": "Last Completed",
@@ -2855,9 +2867,12 @@
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",
+			"pageXOfY": "Page {{current}} of {{total}}",
 			"password": "Password",
 			"progress": "Progress",
 			"publication": "Publication",
+			"read": "Read",
+			"readAgain": "Read again",
 			"readTime": "Reading time",
 			"readMore": "Read more",
 			"save": "Save",
@@ -2901,7 +2916,11 @@
 		"tabs": {
 			"servers": "Servers",
 			"localLibrary": "Library",
-			"settings": "Settings"
+			"settings": "Settings",
+			"home": "Home",
+			"browse": "Browse",
+			"clubs": "Clubs",
+			"search": "Search"
 		},
 		"localLibrary": {
 			"title": "Local Library",
@@ -2976,6 +2995,11 @@
 				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
 			},
 			"syncFailed": "Failed to sync offline progress"
+		},
+		"search": {
+			"label": "Search this server",
+			"description": "Find specific content on this server",
+			"placeholder": "Search"
 		},
 		"settings": {
 			"preferences": {
@@ -3098,6 +3122,32 @@
 				"buildInformation": "Build Information",
 				"version": "Version: {{version}}",
 				"suuportIdentifier": "Support Identifier: {{supportID}}"
+			}
+		},
+		"stumpServer": {
+			"browse": {
+				"books": "Books",
+				"favorites": "Favorites",
+				"files": "Files",
+				"libraries": "Libraries",
+				"series": "Series",
+				"smartLists": "Smart Lists"
+			},
+			"continueReading": {
+				"label": "Continue Reading",
+				"emptyText": "No books in progress"
+			},
+			"onDeck": {
+				"label": "Your Next Read",
+				"emptyText": "No books on deck"
+			},
+			"recentlyAddedSeries": {
+				"label": "Recently Added Series",
+				"emptyText": "No recently added series"
+			},
+			"recentlyAddedBooks": {
+				"label": "Recently Added Books",
+				"emptyText": "No recently added books"
 			}
 		},
 		"readerSettings": {

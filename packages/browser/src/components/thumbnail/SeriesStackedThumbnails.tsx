@@ -61,7 +61,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 
 	const baseThumbnailWidth = cardWidth * 0.7
 	const baseThumbnailHeight = baseThumbnailWidth / thumbnailRatio
-	const cardHeight = baseThumbnailHeight + 100
+	const cardHeight = baseThumbnailHeight + 82.5
 
 	const mainThumbnailAverageColor = thumbnailData[0]?.metadata?.averageColor
 
@@ -158,11 +158,8 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 	// We need to only hide the parts of the thumbnails that go under the bottom of the card
 	// but we also account for the bottom left and right rounded corners of the card
 	// If we didn't need to account for the rounded corners, we could just use style={{ clipPath: 'inset(-10% -10% 1px -10%)' }}
-	const outerRadius = THUMBNAIL_ROUNDNESS_TO_PX[thumbnailRoundness ?? InterfaceRoundness.Normal]
-	const borderWidth = 1
+	const radius = THUMBNAIL_ROUNDNESS_TO_PX[thumbnailRoundness ?? InterfaceRoundness.Normal]
 	const buffer = 20
-
-	const innerRadius = outerRadius - borderWidth
 
 	/**
 	 * clipPath Logic - We want the thumbnails to spill over the left and right sides of the card,
@@ -176,12 +173,12 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 	const clipPath = `
 		M -${buffer} -${buffer}
 		L ${cardWidth + buffer} -${buffer}
-		L ${cardWidth + buffer} ${cardHeight - outerRadius}
-		L ${cardWidth - borderWidth} ${cardHeight - outerRadius}
-		A ${innerRadius} ${innerRadius} 0 0 1 ${cardWidth - outerRadius} ${cardHeight - borderWidth}
-		L ${outerRadius} ${cardHeight - borderWidth}
-		A ${innerRadius} ${innerRadius} 0 0 1 ${borderWidth} ${cardHeight - outerRadius}
-		L -${buffer} ${cardHeight - outerRadius}
+		L ${cardWidth + buffer} ${cardHeight - radius}
+		L ${cardWidth} ${cardHeight - radius}
+		A ${radius} ${radius} 0 0 1 ${cardWidth - radius} ${cardHeight}
+		L ${radius} ${cardHeight}
+		A ${radius} ${radius} 0 0 1 0 ${cardHeight - radius}
+		L -${buffer} ${cardHeight - radius}
 		Z
 	`
 	const clipPathString = clipPath.replace(/\s+/g, ' ').trim()
@@ -196,21 +193,33 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 			style={{
 				width: cardWidth,
 				height: cardHeight,
+				borderRadius: radius,
+				backgroundColor,
 			}}
 		>
+			{/* The border is split into two, because here in the top part, the cards must go above the border for the fancy hover */}
 			<div
-				className="inset-0 absolute overflow-hidden border border-border/50"
+				className="inset-0 border-white/10 pointer-events-none absolute z-10 border"
 				style={{
-					borderRadius: outerRadius,
-					backgroundColor,
-					boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-					contain: 'layout style paint',
+					borderRadius: radius,
+					clipPath: `inset(0 0 ${Math.max(radius, 2)}px 0)`,
 				}}
-			>
-				<div className="inset-0 pointer-events-none absolute z-10" style={gradientStyle} />
-			</div>
+			/>
+			{/* here in the bottom part, the cards must sit below the border */}
+			<div
+				className="inset-0 border-white/10 pointer-events-none absolute z-50 border"
+				style={{
+					borderRadius: radius,
+					clipPath: `inset(calc(100% - ${Math.max(radius, 2)}px) 0 0 0)`,
+				}}
+			/>
 
-			<div className="inset-0 absolute z-20" style={{ clipPath: `path('${clipPathString}')` }}>
+			<div
+				className="inset-0 pointer-events-none absolute"
+				style={{ ...gradientStyle, borderRadius: radius }}
+			/>
+
+			<div className="inset-0 absolute z-10" style={{ clipPath: `path('${clipPathString}')` }}>
 				{renderThumbnails()}
 			</div>
 		</div>

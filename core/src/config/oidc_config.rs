@@ -22,6 +22,7 @@ pub struct OidcConfig {
 	pub issuer_url: String,
 	/// The client secret
 	#[serde(default)]
+	#[graphql(skip)]
 	pub client_secret: String,
 	/// Additional scopes to request (comma-separated)
 	/// Default: "openid,email,profile"
@@ -38,6 +39,7 @@ pub struct OidcConfig {
 	pub extra_audiences: Vec<String>,
 	/// Path to a CA certificate file (PEM-encoded) to trust when connecting to the OIDC issuer
 	#[serde(default)]
+	#[graphql(skip)]
 	pub ca_cert_file: Option<String>,
 }
 

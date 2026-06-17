@@ -117,7 +117,7 @@ async fn authorize(
 
 	let frontend_url = get_frontend_url(&ctx.conn, service).await?;
 
-	let client = oidc_state.create_client(&frontend_url);
+	let client = oidc_state.create_client(&frontend_url)?;
 
 	let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -209,7 +209,7 @@ async fn callback(
 
 	let (http_client, client) = (
 		oidc_state.http_client.clone(),
-		oidc_state.create_client(&base_url),
+		oidc_state.create_client(&base_url)?,
 	);
 
 	let extra_audiences = oidc_config.get_extra_audiences();

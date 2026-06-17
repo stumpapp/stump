@@ -60,16 +60,10 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
-	// Initialize the OIDC client once at startup. If OIDC is configured but
-	// the provider is unreachable, crash hard — no degraded mode.
 	let oidc_state: Option<Arc<OidcClientState>> = {
-		if let Some(oidc_config) = config
-			.oidc
-			.as_ref()
-			.filter(|c| c.is_configured() && c.enabled)
-		{
+		if let Some(oidc_config) = config.oidc.as_ref().filter(|c| c.is_configured()) {
 			let state = OidcClientState::new(oidc_config).await.map_err(|e| {
-				tracing::error!(?e, ?oidc_config, "OIDC client initialization failed");
+				tracing::error!(?e, "OIDC client initialization failed");
 				ServerError::ServerStartError(format!("OIDC client init failed: {e:?}"))
 			})?;
 			tracing::info!("OIDC client initialized successfully");

@@ -62,7 +62,7 @@ impl OidcClientState {
 			reqwest::ClientBuilder::new().redirect(reqwest::redirect::Policy::none());
 
 		if let Some(ca_cert_path) = &config.ca_cert_file {
-			let cert_bytes = std::fs::read(ca_cert_path).map_err(|error| {
+			let cert_bytes = tokio::fs::read(ca_cert_path).await.map_err(|error| {
 				tracing::error!(?error, path = %ca_cert_path, "Failed to read CA certificate file for OIDC");
 				APIError::InternalServerError(format!(
 					"Failed to read CA certificate file '{}': {}",
@@ -107,34 +107,23 @@ impl OidcClientState {
 
 	/// Create a per-request [StumpOidcClient] from the cached state.
 	/// This is cheap — no I/O, just constructs the client with the correct redirect URL.
-	pub fn create_client(&self, frontend_url: &str) -> StumpOidcClient {
+	pub fn create_client(&self, frontend_url: &str) -> Result<StumpOidcClient, APIError> {
 		let redirect_uri = format!("{}/api/v2/auth/oidc/callback", frontend_url);
-		let redirect_url = RedirectUrl::new(redirect_uri)
-			.expect("Invalid redirect URI constructed from frontend URL");
+		let redirect_url = RedirectUrl::new(redirect_uri).map_err(|e| {
+			tracing::error!(?e, "Invalid redirect URI constructed from frontend URL");
+			APIError::InternalServerError(format!(
+				"Invalid redirect URI constructed from frontend URL: {}",
+				frontend_url
+			))
+		})?;
 
-		CoreClient::from_provider_metadata(
+		Ok(CoreClient::from_provider_metadata(
 			self.provider_metadata.clone(),
 			ClientId::new(self.client_id.clone()),
 			Some(ClientSecret::new(self.client_secret.clone())),
 		)
-		.set_redirect_uri(redirect_url)
+		.set_redirect_uri(redirect_url))
 	}
-}
-
-/// Create OIDC client from configuration (convenience wrapper for one-shot use).
-/// Prefer [OidcClientState] when handling multiple requests.
-#[allow(dead_code)]
-pub async fn create_oidc_client(
-	config: &OidcConfig,
-	frontend_url: &str,
-) -> Result<(oauth2_reqwest::ReqwestClient, StumpOidcClient), APIError> {
-	if !config.is_configured() {
-		return Err(APIError::OIDCConfigurationInvalid);
-	}
-
-	let state = OidcClientState::new(config).await?;
-	let client = state.create_client(frontend_url);
-	Ok((state.http_client, client))
 }
 
 /// Get the OIDC authorization URL to redirect the user to

@@ -3409,7 +3409,6 @@ input UpdateUserPreferencesInput {
 	enableJobOverlay: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
-	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableAlphabetSelect: Boolean!
@@ -3589,7 +3588,6 @@ type UserPreferences {
 	enableHideScrollbar: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
-	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableJobOverlay: Boolean!

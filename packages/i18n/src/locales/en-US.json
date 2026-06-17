@@ -1579,14 +1579,6 @@
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
 				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
-				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
 					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",

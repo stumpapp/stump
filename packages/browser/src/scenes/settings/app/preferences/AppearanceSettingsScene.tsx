@@ -20,7 +20,6 @@ import { NavigationArrangement } from './navigation-arrangement'
 import PrimaryNavigationPreference from './PrimaryNavigationPreference'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
 import { DoubleSidebarToggle, ReplacePrimarySidebarToggle } from './settings-sidebar'
-import ShowThumbnailsInHeader from './ShowThumbnailsInHeader'
 import ThemeSelect from './ThemeSelect'
 import ThumbnailAppearancePreference from './ThumbnailAppearancePreference'
 
@@ -112,7 +111,6 @@ export default function AppearanceSettingsScene() {
 						label="Content browsing"
 						description="Preferences that affect browsing and navigating content lists"
 					>
-						<ShowThumbnailsInHeader />
 						<EnableAlphabetFiltering />
 					</NewCard>
 

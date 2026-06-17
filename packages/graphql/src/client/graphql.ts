@@ -4608,7 +4608,6 @@ export type UpdateUserPreferencesInput = {
   primaryNavigationMode: Scalars['String']['input'];
   readingSessionGracePeriodSecs: Scalars['Int']['input'];
   showQueryIndicator: Scalars['Boolean']['input'];
-  showThumbnailsInHeaders: Scalars['Boolean']['input'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['input'];
   thumbnailRoundness: InterfaceRoundness;
@@ -4805,7 +4804,6 @@ export type UserPreferences = {
   /** seconds of inactivity after which the current reading session is considered ended */
   readingSessionGracePeriodSecs: Scalars['Int']['output'];
   showQueryIndicator: Scalars['Boolean']['output'];
-  showThumbnailsInHeaders: Scalars['Boolean']['output'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['output'];
   thumbnailRoundness: InterfaceRoundness;

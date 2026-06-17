@@ -41,7 +41,6 @@ pub struct Model {
 	pub enable_hide_scrollbar: bool,
 	pub enable_fancy_animations: bool,
 	pub prefer_accent_color: bool,
-	pub show_thumbnails_in_headers: bool,
 	pub thumbnail_ratio: f32,
 	#[sea_orm(column_type = "Text")]
 	pub thumbnail_placeholder_style: ThumbnailPlaceholderStyle,
@@ -115,7 +114,6 @@ impl ActiveModelBehavior for ActiveModel {
 			self.enable_hide_scrollbar = ActiveValue::Set(false);
 			self.enable_fancy_animations = ActiveValue::Set(false);
 			self.prefer_accent_color = ActiveValue::Set(false);
-			self.show_thumbnails_in_headers = ActiveValue::Set(false);
 			self.thumbnail_ratio = ActiveValue::Set(1.0 / 1.5);
 			self.thumbnail_placeholder_style =
 				ActiveValue::Set(ThumbnailPlaceholderStyle::default());

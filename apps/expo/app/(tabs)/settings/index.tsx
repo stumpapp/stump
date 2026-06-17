@@ -17,13 +17,12 @@ import {
 	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
-	LowercaseTranslation,
 	MaskURLs,
 	PerformanceMonitor,
 	PreferMinimalReader,
 	PreferNativePdf,
 	ReduceAnimations,
-	SentenceCase,
+	TextCasePreference,
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
 	ThumbnailResizeMode,
@@ -43,8 +42,7 @@ export default function Screen() {
 					<AppTheme />
 					<AppPrimaryColor />
 					<AppLanguage />
-					<SentenceCase />
-					<LowercaseTranslation />
+					<TextCasePreference />
 					<DefaultServer />
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />

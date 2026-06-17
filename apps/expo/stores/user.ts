@@ -17,6 +17,8 @@ export type ListLayout = 'grid' | 'list'
 
 export type DisplayLanguageKeysType = 'none' | 'abbreviated' | 'full'
 
+export type TextCase = 'lowerCase' | 'sentenceCase' | 'titleCase'
+
 type MobilePreferencesStore = {
 	showTabLabels: boolean
 	maskURLs: boolean
@@ -42,8 +44,7 @@ type MobilePreferencesStore = {
 	preferMinimalReader: boolean
 	displayLanguageKeys: DisplayLanguageKeysType
 	tintListBackground: boolean
-	lowercaseTranslation: boolean
-	sentenceCase: boolean
+	textCase: TextCase
 	/**
 	 * Patch the store with new values.
 	 */
@@ -80,9 +81,8 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			enableDebugAnalytics: false,
 			preferMinimalReader: false,
 			displayLanguageKeys: 'none',
-			lowercaseTranslation: false,
+			textCase: Platform.OS === 'android' ? 'sentenceCase' : 'titleCase',
 			tintListBackground: false,
-			sentenceCase: Platform.OS === 'android',
 			patch: (data) => set(data),
 		}),
 		{

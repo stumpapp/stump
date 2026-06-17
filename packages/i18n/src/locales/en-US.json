@@ -1456,7 +1456,7 @@
 					"description": "Customize the font used in the application"
 				},
 				"thumbnailPreview": {
-					"label":"Preview",
+					"label": "Preview",
 					"description": "This is how thumbnails will look with the current settings"
 				},
 				"thumbnailRatioSelect": {
@@ -3066,8 +3066,14 @@
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
-			"lowercaseTranslation": "Lowercase Labels",
-			"sentenceCase": "Prefer Sentence Case",
+			"textCase": {
+				"label": "Text Case",
+				"options": {
+					"lowerCase": "Lowercase",
+					"sentenceCase": "Sentence Case",
+					"titleCase": "Title Case"
+				}
+			},
 			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",
@@ -3250,7 +3256,7 @@
 			"typeface": {
 				"label": "Typeface",
 				"options": {
-				 "system": "System",
+					"system": "System",
 					"opendyslexic": "OpenDyslexic",
 					"literata": "Literata",
 					"atkinsonHyperlegible": "Atkinson Hyperlegible",

@@ -5,15 +5,14 @@ import { usePreferencesStore } from '~/stores'
 export function useTranslate() {
 	const { t, locale } = useLocaleContext()
 	const displayLanguageKeys = usePreferencesStore((store) => store.displayLanguageKeys)
-	const lowerCase = usePreferencesStore((store) => store.lowercaseTranslation)
-	const sentenceCase = usePreferencesStore((store) => store.sentenceCase)
+	const textCase = usePreferencesStore((store) => store.textCase)
 
 	let translate = (key: string, options?: Record<string, unknown>) => {
 		const translation = t(`mobileApp.${key}`, {
-			...(locale.startsWith('en-') && sentenceCase ? { ns: 'sentenceCase' } : {}),
+			...(locale.startsWith('en-') && textCase === 'sentenceCase' ? { ns: 'sentenceCase' } : {}),
 			...options,
 		})
-		if (lowerCase) {
+		if (textCase === 'lowerCase') {
 			return translation.toLocaleLowerCase(locale)
 		}
 		return translation

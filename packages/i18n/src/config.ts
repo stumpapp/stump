@@ -213,21 +213,22 @@ function sentenceCase(obj: RecursiveResource): ResourceKey {
 	const preservedWords = new Set(['Stump', 'OPDS', 'URL', 'URLs', 'PDF'])
 
 	if (typeof obj === 'string') {
-		return obj
-			.split(' ')
-			.map((word, index) => {
-				if (word.startsWith('{{') && word.endsWith('}}')) {
-					return word
-				}
-				if (preservedWords.has(word)) {
-					return word
-				}
-				if (index === 0) {
-					return word
-				}
-				return word.toLowerCase()
-			})
-			.join(' ')
+		let isFirstMatch = true
+		return obj.replace(/\{\{.*?\}\}|\S+/g, (match) => {
+			let result
+			if (match.startsWith('{{')) {
+				result = match
+			} else if (preservedWords.has(match)) {
+				result = match
+			} else if (isFirstMatch === true) {
+				result = match
+			} else {
+				result = match.toLowerCase()
+			}
+
+			isFirstMatch = false
+			return result
+		})
 	}
 
 	if (Array.isArray(obj)) {

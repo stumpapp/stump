@@ -124,9 +124,9 @@ export default function Screen() {
 
 	const renderRead = () => {
 		if (progressPercentage && progressPercentage > 0) {
-			return <Text>Continue</Text>
+			return <Text>{t('common.continue')}</Text>
 		} else {
-			return <Text>Read</Text>
+			return <Text>{t('common.read')}</Text>
 		}
 	}
 

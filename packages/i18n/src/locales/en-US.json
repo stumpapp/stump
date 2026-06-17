@@ -2890,6 +2890,7 @@
 			"readTime": "Reading Time",
 			"readthrough": "Readthrough",
 			"readMore": "Read More",
+			"refresh": "Refresh",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
@@ -2931,7 +2932,11 @@
 			"noOPDSServers": "No OPDS servers added",
 			"noServers": "No servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"seeDocumentation": "See Documentation",
+			"noSmartLists": {
+				"label": "No lists returned",
+				"description": "Once created they will appear here"
+			}
 		},
 		"tabs": {
 			"servers": "Servers",

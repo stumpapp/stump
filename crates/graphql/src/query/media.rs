@@ -560,12 +560,22 @@ impl MediaQuery {
 			-- to determine the target rank:
 			-- - highest position book if a re-read was stopped after the last read date
 			-- - otherwise the latest-read rank
+
+			-- to determine the target rank:
+			--  - paused re-read: stopped_readthrough_at != null and no book has been
+			--                    finished since the stop (last_read_date <= stopped) ->
+			--                    uses max_rank so on-deck shows only new stuff
+			--  - auto-resume:    a book is finished after the stop (last_read_date > stopped)
+			--                    -> uses latest_rank so on deck shows next book
+			--  - resumed:        stopped_readthrough_at = null -> uses latest_rank so on deck
+			--                    shows next book
+			--  - normal read:    same as resumed, basically
 			series_target_rank AS (
 				SELECT
 					sr.series_id,
 					CASE
 						WHEN uss.stopped_readthrough_at IS NOT NULL
-							AND slr.last_read_date <= uss.stopped_readthrough_at
+						    AND slr.last_read_date <= uss.stopped_readthrough_at
 						THEN sr.max_rank
 						ELSE sr.latest_rank
 					END AS target_rank

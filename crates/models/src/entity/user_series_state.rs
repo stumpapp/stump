@@ -2,8 +2,6 @@ use async_graphql::SimpleObject;
 use chrono::Utc;
 use sea_orm::{prelude::*, ActiveValue, DeriveEntityModel};
 
-// TODO(series-state): dedicated/complex object if needed
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "UserSeriesState")]
 #[sea_orm(table_name = "user_series_state")]

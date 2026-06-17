@@ -3087,6 +3087,19 @@ type Series {
 	thumbnail: ImageRef!
 	"Get the stats for this series, scoped to current user by default"
 	stats(allUsers: Boolean): SeriesStats!
+	"""
+	The reading status of this series for the current user:
+	- `READING` if any book has an active (latest) session
+	- `FINISHED` if all books have a finished session and **none** are active,
+	including re-reads
+	- `NOT_STARTED` if no sessions exist at all
+	"""
+	readingStatus: ReadingStatus!
+	"""
+	The highest readthrough number seen across all sessions for this user+series, or
+	null if not started yet
+	"""
+	currentReadthrough: Int
 	"Get the on-deck/re-read state for this series for the current user, if it exists"
 	userSeriesState: UserSeriesState
 }

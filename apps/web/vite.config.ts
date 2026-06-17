@@ -1,6 +1,7 @@
+import { constants as zlibConstants } from 'node:zlib'
+
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { constants as zlibConstants } from 'node:zlib'
 import type { PluginOption } from 'vite'
 import { defineConfig } from 'vite'
 import { compression, defineAlgorithm } from 'vite-plugin-compression2'
@@ -57,7 +58,7 @@ export default defineConfig({
 					/^\/kobo(?:\/|$)/,
 					/^\/koreader(?:\/|$)/,
 				],
-				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+				maximumFileSizeToCacheInBytes: 6 * 1024 * 1024, // 6MB
 			},
 			outDir: '../dist',
 			base: '/',

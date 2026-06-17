@@ -929,7 +929,8 @@
 		},
 		"actions": {
 			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread"
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
 		},
 		"errors": {
 			"failedToUpdateCompletion": "Failed to update book completion status"
@@ -2595,6 +2596,7 @@
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2613,11 +2615,22 @@
 		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",

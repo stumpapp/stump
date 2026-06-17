@@ -30,11 +30,10 @@ type Props = {
 	actions?: DropdownMenuProps['groups']
 	stats?: Stat[]
 	settingsLink?: string
-	// TODO: sheet? drawer? link?
-	// infoLink?: string
+	onInfoClick?: () => void
 }
 
-export function EntityHeader({ name, tabs, actions, stats, settingsLink }: Props) {
+export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoClick }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const location = useLocation()
 	const {
@@ -96,9 +95,14 @@ export function EntityHeader({ name, tabs, actions, stats, settingsLink }: Props
 
 				<div className="flex-1" />
 
-				<div className="gap-1 px-1 py-1 group flex items-center rounded-lg bg-primary/15">
-					<Info className="h-4 w-4 text-primary" />
-				</div>
+				{onInfoClick && (
+					<button
+						className="gap-1 px-1 py-1 group flex items-center rounded-lg bg-primary/15"
+						onClick={onInfoClick}
+					>
+						<Info className="h-4 w-4 text-primary" />
+					</button>
+				)}
 
 				<Tabs value={activeTab} size="sm">
 					<Tabs.List>

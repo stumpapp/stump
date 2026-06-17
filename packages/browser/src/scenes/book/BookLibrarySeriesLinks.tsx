@@ -35,18 +35,18 @@ export default function BookLibrarySeriesLinks({ seriesId }: Props) {
 		<div className="gap-1.5 flex items-center">
 			{library && (
 				<Link to={paths.librarySeries(library.id)} underline={false}>
-					<Badge size="xs" rounded="full" className="cursor-pointer">
+					<Badge size="sm" rounded="full" className="cursor-pointer">
 						{library.name}
 					</Badge>
 				</Link>
 			)}
 			{series && (
 				<>
-					<Text size="xs" variant="muted">
+					<Text size="sm" variant="muted">
 						/
 					</Text>
 					<Link to={paths.seriesOverview(series.id)} underline={false}>
-						<Badge variant="primary" size="xs" rounded="full" className="cursor-pointer">
+						<Badge variant="primary" size="sm" rounded="full" className="cursor-pointer">
 							{series.resolvedName}
 						</Badge>
 					</Link>

@@ -4,16 +4,18 @@ import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { extractErrorMessage, graphql, UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { BookCheck, BookOpen, BookOpenCheck, Clock, HardDrive } from 'lucide-react'
+import { ArrowUpRight, BookCheck, BookOpen, BookOpenCheck, Clock, HardDrive } from 'lucide-react'
 import { useState } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
+import { usePaths } from '@/paths'
 
 import CompleteSeriesConfirmation from './CompleteSeriesConfirmation'
 import { useSeriesContext } from './context'
+import { SeriesOverviewSheet } from './SeriesOverviewSheet'
 import { usePrefetchSeriesBooks } from './tabs/books/SeriesBooksScene'
 
 const completeSeriesMutation = graphql(`
@@ -25,17 +27,26 @@ const completeSeriesMutation = graphql(`
 export default function SeriesHeader() {
 	const { checkPermission } = useAppContext()
 	const {
-		series: { id, resolvedName, path, stats },
+		series: {
+			id,
+			resolvedName,
+			path,
+			stats,
+			library: { id: libraryId },
+		},
 	} = useSeriesContext()
 	const { t } = useLocaleContext()
-	const location = useLocation()
 
+	const location = useLocation()
+	const navigate = useNavigate()
+	const paths = usePaths()
 	const formattedTime = stats.totalReadingTimeSeconds
 		? formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
 		: null
 	const formattedSize = stats.totalBytes ? formatBytesSeparate(stats.totalBytes) : null
 
 	const [showCompleteSeriesConfirmation, setShowCompleteSeriesConfirmation] = useState(false)
+	const [isOverviewSheetOpen, setIsOverviewSheetOpen] = useState(false)
 
 	const client = useQueryClient()
 
@@ -61,6 +72,17 @@ export default function SeriesHeader() {
 					leftIcon: <BookOpenCheck className="mr-2 h-4 w-4" />,
 					onClick: () => {
 						setShowCompleteSeriesConfirmation(true)
+					},
+				},
+			],
+		},
+		{
+			items: [
+				{
+					label: t('seriesHeader.actions.goToLibrary'),
+					leftIcon: <ArrowUpRight className="mr-2 h-4 w-4" />,
+					onClick: () => {
+						navigate(paths.librarySeries(libraryId))
 					},
 				},
 			],
@@ -148,6 +170,12 @@ export default function SeriesHeader() {
 				actions={actions}
 				stats={resolvedStats}
 				settingsLink="settings"
+				onInfoClick={() => setIsOverviewSheetOpen(true)}
+			/>
+
+			<SeriesOverviewSheet
+				isOpen={isOverviewSheetOpen}
+				onClose={() => setIsOverviewSheetOpen(false)}
 			/>
 		</>
 	)

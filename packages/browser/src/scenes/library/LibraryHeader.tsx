@@ -2,12 +2,14 @@ import { formatBytesSeparate, usePrefetchFiles } from '@stump/client'
 import { UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
+import { useState } from 'react'
 import { useLocation } from 'react-router'
 
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
 
 import { useLibraryContext } from './context'
+import { LibraryOverviewSheet } from './LibraryOverviewSheet'
 import { usePrefetchLibraryBooks } from './tabs/books/LibraryBooksScene'
 import { usePrefetchLibrarySeries } from './tabs/series/LibrarySeriesScene'
 
@@ -18,6 +20,8 @@ export default function LibraryHeader() {
 		library: { id, name, path, stats, config },
 	} = useLibraryContext()
 	const { checkPermission } = useAppContext()
+
+	const [isOverviewSheetOpen, setIsOverviewSheetOpen] = useState(false)
 
 	const prefetchSeries = usePrefetchLibrarySeries()
 	const prefetchBooks = usePrefetchLibraryBooks()
@@ -109,5 +113,20 @@ export default function LibraryHeader() {
 			]
 		: undefined
 
-	return <EntityHeader name={name} tabs={tabs} stats={resolvedStats} settingsLink="settings" />
+	return (
+		<>
+			<EntityHeader
+				name={name}
+				tabs={tabs}
+				stats={resolvedStats}
+				settingsLink="settings"
+				onInfoClick={() => setIsOverviewSheetOpen(true)}
+			/>
+
+			<LibraryOverviewSheet
+				isOpen={isOverviewSheetOpen}
+				onClose={() => setIsOverviewSheetOpen(false)}
+			/>
+		</>
+	)
 }

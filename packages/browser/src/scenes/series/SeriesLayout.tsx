@@ -29,6 +29,10 @@ const query = graphql(`
 				totalBytes
 				totalReadingTimeSeconds
 			}
+			tags {
+				id
+				name
+			}
 			thumbnail {
 				url
 				metadata {
@@ -40,6 +44,8 @@ const query = graphql(`
 					}
 				}
 			}
+			createdAt
+			updatedAt
 		}
 	}
 `)

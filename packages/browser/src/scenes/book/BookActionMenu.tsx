@@ -1,4 +1,5 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
+import { EBOOK_EXTENSION, PDF_EXTENSION } from '@stump/client'
 import { Button, ButtonOrLink, DropdownMenu } from '@stump/components'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { BookCardFragment, graphql, UserPermission } from '@stump/graphql'
@@ -22,7 +23,6 @@ import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
-import { EBOOK_EXTENSION, PDF_EXTENSION } from '@/utils/patterns'
 
 import DeleteHistoryConfirmation from './DeleteHistoryConfirmation'
 import EmailBookDialog from './EmailBookDialog'

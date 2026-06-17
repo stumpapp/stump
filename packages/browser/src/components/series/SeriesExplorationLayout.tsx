@@ -21,7 +21,6 @@ export default function SeriesExplorationLayout() {
 					variant="ghost"
 					size="xs"
 					className="hover:bg-accent"
-					pressEffect={false}
 					onClick={() => setLayout(InterfaceLayout.Grid)}
 					disabled={layout === InterfaceLayout.Grid}
 				>
@@ -34,7 +33,6 @@ export default function SeriesExplorationLayout() {
 					variant="ghost"
 					size="xs"
 					className="hover:bg-accent"
-					pressEffect={false}
 					onClick={() => setLayout(InterfaceLayout.Table)}
 					disabled={layout === InterfaceLayout.Table}
 				>

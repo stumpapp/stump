@@ -2929,7 +2929,7 @@
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers Configured",
+			"noServers": "No Servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
 			"seeDocumentation": "See Documentation"
 		},

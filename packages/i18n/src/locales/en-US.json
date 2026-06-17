@@ -2790,7 +2790,7 @@
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw token"
+					"placeholder": "Raw Token"
 				},
 				"basic": "Basic"
 			},
@@ -2798,8 +2798,8 @@
 			"catalogUrl": "Catalog URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
+			"checkConnection": "Check Connection",
+			"setAsDefaultServer": "Set as Default Server",
 			"enableOPDS": "Enable OPDS",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
@@ -2886,10 +2886,10 @@
 			"progress": "Progress",
 			"publication": "Publication",
 			"read": "Read",
-			"readAgain": "Read again",
-			"readTime": "Reading time",
+			"readAgain": "Read Again",
+			"readTime": "Reading Time",
 			"readthrough": "Readthrough",
-			"readMore": "Read more",
+			"readMore": "Read More",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
@@ -2929,7 +2929,7 @@
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
+			"noServers": "No servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
 			"seeDocumentation": "See Documentation"
 		},
@@ -2946,15 +2946,15 @@
 			"title": "Local Library",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
+					"title": "Nothing to Read Yet",
 					"description": "Once you have books for offline reading, they will appear here"
 				},
 				"imported": {
-					"title": "No imported books",
+					"title": "No Imported Books",
 					"description": "Import books to read them offline"
 				},
 				"server": {
-					"title": "No downloaded books",
+					"title": "No Downloaded Books",
 					"description": "Download books from your library to read them offline"
 				}
 			},
@@ -3017,7 +3017,7 @@
 			"syncFailed": "Failed to sync offline progress"
 		},
 		"search": {
-			"label": "Search this server",
+			"label": "Search This Server",
 			"description": "Find specific content on this server",
 			"placeholder": "Search"
 		},
@@ -3039,7 +3039,7 @@
 					"label": "Thumbnail Placeholder",
 					"options": {
 						"grayscale": "Grayscale",
-						"averageColor": "Average color",
+						"averageColor": "Average Color",
 						"colorful": "Colorful",
 						"thumbhash": "Thumbhash"
 					}
@@ -3079,10 +3079,10 @@
 				"label": "Management",
 				"dataUsage": {
 					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"nonStumpData": "Non-Stump Data",
+					"serversTotal": "Servers Total",
+					"totalFiles": "Total Files",
+					"totalSize": "Total Size",
 					"deleteDownloads": {
 						"label": "Delete Downloads",
 						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
@@ -3093,7 +3093,7 @@
 					},
 					"noDownloads": "No downloaded files for this server",
 					"storedPreferences": {
-						"label": "Stored preferences",
+						"label": "Stored Preferences",
 						"description": "Miscellaneous data like book preferences, reading timers, etc"
 					},
 					"clearPreferences": "Clear Preferences"
@@ -3105,21 +3105,21 @@
 					"label": "Clear Cache",
 					"memory": {
 						"button": "Memory",
-						"success": "Memory cache cleared"
+						"success": "Memory Cache Cleared"
 					},
 					"disk": {
 						"button": "Disk",
-						"success": "Disk cache cleared"
+						"success": "Disk Cache Cleared"
 					}
 				},
 				"deleteDatabase": {
 					"label": "Delete Database",
 					"success": {
-						"title": "Database deleted",
+						"title": "Database Deleted",
 						"description": "Please restart the app"
 					},
 					"error": {
-						"title": "Deletion failed",
+						"title": "Deletion Failed",
 						"description": "There was an error deleting the database"
 					}
 				},
@@ -3179,7 +3179,7 @@
 		},
 		"readerSettings": {
 			"title": "Image Reader Settings",
-			"overrideGlobalSettings": "Override global settings",
+			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",

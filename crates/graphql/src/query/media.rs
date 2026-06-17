@@ -679,7 +679,6 @@ impl MediaQuery {
 					user_id.clone().into(),
 					user_id.clone().into(),
 					user_id.clone().into(),
-					user_id.clone().into(),
 					user_id.into(),
 				],
 			))

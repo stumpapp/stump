@@ -3885,11 +3885,11 @@ input ValidateMetadataProviderConfigInput {
 type UserSeriesState {
 	seriesId: String!
 	"""
-	the readthrough number at which this series was dropped, so that we can
+	the timestamp at which this series re-read was paused, so that we can
 	revert back to "first book beyond highest position ever read" logic for
 	the recommendations query instead of "next book in current re-read"
 	"""
-	stoppedReadthrough: Int
+	stoppedReadthroughAt: DateTime
 	"""
 	when set, the books in the series will be excluded from on-deck recommentations
 	if the timestamp is after the ingestion time into stump

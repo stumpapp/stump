@@ -91,7 +91,7 @@ async fn undrop_series(app: &TestApp, series_id: &str) {
 async fn stop_reread(app: &TestApp, series_id: &str) {
 	execute_series_mutation(
 		app,
-		r#"mutation Stop($id: ID!) { stopSeriesReread(id: $id) { droppedAt } }"#,
+		r#"mutation Stop($id: ID!) { stopSeriesReread(id: $id) { stoppedReadthroughAt } }"#,
 		series_id,
 	)
 	.await;
@@ -100,7 +100,7 @@ async fn stop_reread(app: &TestApp, series_id: &str) {
 async fn resume_reread(app: &TestApp, series_id: &str) {
 	execute_series_mutation(
 		app,
-		r#"mutation Resume($id: ID!) { resumeSeriesReread(id: $id) { droppedAt } }"#,
+		r#"mutation Resume($id: ID!) { resumeSeriesReread(id: $id) { stoppedReadthroughAt } }"#,
 		series_id,
 	)
 	.await;

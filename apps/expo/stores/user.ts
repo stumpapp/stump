@@ -1,5 +1,6 @@
 import { createUserStore } from '@stump/client'
 import type { AllowedLocale } from '@stump/i18n'
+import { Platform } from 'react-native'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -42,6 +43,7 @@ type MobilePreferencesStore = {
 	displayLanguageKeys: DisplayLanguageKeysType
 	tintListBackground: boolean
 	lowercaseTranslation: boolean
+	sentenceCase: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -80,6 +82,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			displayLanguageKeys: 'none',
 			lowercaseTranslation: false,
 			tintListBackground: false,
+			sentenceCase: Platform.OS === 'android',
 			patch: (data) => set(data),
 		}),
 		{

@@ -23,6 +23,7 @@ import {
 	PreferMinimalReader,
 	PreferNativePdf,
 	ReduceAnimations,
+	SentenceCase,
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
 	ThumbnailResizeMode,
@@ -42,6 +43,7 @@ export default function Screen() {
 					<AppTheme />
 					<AppPrimaryColor />
 					<AppLanguage />
+					<SentenceCase />
 					<LowercaseTranslation />
 					<DefaultServer />
 					<ThumbnailRatio />

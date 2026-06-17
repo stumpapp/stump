@@ -3067,6 +3067,7 @@
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
 			"lowercaseTranslation": "Lowercase Labels",
+			"sentenceCase": "Prefer Sentence Case",
 			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",

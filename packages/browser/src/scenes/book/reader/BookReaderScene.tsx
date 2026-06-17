@@ -1,4 +1,11 @@
-import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import {
+	ARCHIVE_EXTENSION,
+	EBOOK_EXTENSION,
+	PDF_EXTENSION,
+	useGraphQLMutation,
+	useSDK,
+	useSuspenseGraphQL,
+} from '@stump/client'
 import { BookReaderSceneQuery, graphql, ReadingMode } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
@@ -7,7 +14,6 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ImageBasedReader } from '@/components/readers/imageBased'
 import paths from '@/paths'
 
-import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../../utils/patterns'
 import { useBookPreferences } from './useBookPreferences'
 
 export const BOOK_READER_SCENE_QUERY = graphql(`

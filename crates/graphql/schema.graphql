@@ -3885,7 +3885,7 @@ input ValidateMetadataProviderConfigInput {
 type UserSeriesState {
 	seriesId: String!
 	"""
-	the timestamp at which this series re-read was paused, so that we can
+	the date at which the last readthrough was dropped, so that we can
 	revert back to "first book beyond highest position ever read" logic for
 	the recommendations query instead of "next book in current re-read"
 	"""

@@ -1,9 +1,13 @@
 use chrono::Utc;
 use sea_orm::{
-	prelude::*, ActiveValue::Set, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
+	prelude::*, sea_query::Func, ActiveValue::Set, ColumnTrait, EntityTrait,
+	IntoActiveModel, JoinType, QueryFilter, QuerySelect,
 };
 
-use crate::entity::user_series_state;
+use crate::{
+	entity::{media, reading_session, user_series_state},
+	shared::enums::ReadingStatus,
+};
 
 pub async fn get(
 	db: &impl ConnectionTrait,
@@ -61,18 +65,44 @@ pub async fn undrop_series(
 	active.update(db).await
 }
 
-// TODO: this is semantically really confusing but the best i could land on for now
-
 /// set the intent to stop a re-read, which will cause on deck to stop showing books in the current
-/// readthrough and instead only show unread books
+/// readthrough and instead only show unread books beyond the highest position ever reached.
+///
+/// the stop timestamp is set to the actual last-read date so any book finished after this
+/// point will advance last_read_date past the stop timestamp and autoresumt
 pub async fn stop_series_reread(
 	db: &impl ConnectionTrait,
 	user_id: &str,
 	series_id: &str,
 ) -> Result<user_series_state::Model, DbErr> {
+	let stop_at: Option<DateTimeWithTimeZone> = reading_session::Entity::find()
+		.select_only()
+		.expr(Func::max(
+			Expr::col((reading_session::Entity, reading_session::Column::UpdatedAt))
+				.if_null(Expr::col((
+					reading_session::Entity,
+					reading_session::Column::CreatedAt,
+				))),
+		))
+		.join(
+			JoinType::InnerJoin,
+			reading_session::Entity::belongs_to(media::Entity)
+				.from(reading_session::Column::MediaId)
+				.to(media::Column::Id)
+				.into(),
+		)
+		.filter(reading_session::Column::UserId.eq(user_id))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+		.filter(media::Column::SeriesId.eq(series_id))
+		.into_tuple()
+		.one(db)
+		.await?;
+
+	let stop_at = stop_at.unwrap_or_else(|| DateTimeWithTimeZone::from(Utc::now()));
+
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.stopped_readthrough_at = Set(Some(DateTimeWithTimeZone::from(Utc::now())));
+	active.stopped_readthrough_at = Set(Some(stop_at));
 	active.update(db).await
 }
 

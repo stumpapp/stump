@@ -331,3 +331,25 @@ async fn test_undrop_series_reappears() {
 	let ids = fetch_on_deck_ids(&app).await;
 	assert_eq!(ids.len(), 1);
 }
+
+/// stop reread, but then finish a book from the series -> show next book (kind of an autoresume)
+#[tokio::test]
+async fn test_stop_then_finish_another_book() {
+	let (app, series_id) = setup(5).await;
+
+	for i in 1..=5 {
+		create_nth_readthrough(&app, &format!("black_science_{i}"), 1).await;
+	}
+
+	create_nth_readthrough(&app, "black_science_1", 1).await;
+
+	// time not fudged
+	stop_reread(&app, &series_id).await;
+
+	assert!(fetch_on_deck_ids(&app).await.is_empty());
+
+	create_nth_readthrough(&app, "black_science_3", 1).await;
+
+	let ids = fetch_on_deck_ids(&app).await;
+	assert_eq!(ids, vec!["black_science_4"]);
+}

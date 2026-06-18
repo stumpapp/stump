@@ -11,6 +11,7 @@ import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
 import { Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useSearchStore } from '~/stores/search'
 
 import { prefetchBookSearch } from '../../books/search[q]'
@@ -20,6 +21,7 @@ export default function Screen() {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
+	const { t } = useTranslate()
 	const trackSearch = useSearchStore((store) => store.trackSearch)
 
 	const client = useQueryClient()
@@ -61,7 +63,7 @@ export default function Screen() {
 			headerTransparent: Platform.OS === 'ios',
 			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 			headerSearchBarOptions: {
-				placeholder: 'Search',
+				placeholder: t('search.placeholder'),
 				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
 					setQuery(e.nativeEvent.text),
 				shouldShowHintSearchIcon: true,
@@ -75,7 +77,7 @@ export default function Screen() {
 				textColor: colors.foreground.DEFAULT,
 			},
 		})
-	}, [navigation, setQuery, onSearch, colors])
+	}, [navigation, setQuery, onSearch, colors, t])
 
 	if (!isInputFocused) {
 		return (
@@ -83,10 +85,10 @@ export default function Screen() {
 				<Owl owl="search" />
 				<View className="gap-2 px-4 tablet:max-w-lg">
 					<Text size="xl" className="font-semibold leading-tight text-center">
-						Search the server
+						{t('search.label')}
 					</Text>
-					<Text size="lg" className="text-center text-foreground-muted">
-						Enter a search query to find content on this server
+					<Text size="lg" className="text-foreground-muted text-center">
+						{t('search.description')}
 					</Text>
 				</View>
 			</View>

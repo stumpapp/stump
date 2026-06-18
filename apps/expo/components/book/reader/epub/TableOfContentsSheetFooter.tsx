@@ -8,6 +8,7 @@ import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated
 
 import { Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
@@ -18,6 +19,7 @@ import { GoToPage } from './TableOfContentsSheet'
 export default function TableOfContentsSheetFooter({ goToPage }: { goToPage: GoToPage }) {
 	const colors = useColors()
 
+	const { t } = useTranslate()
 	const { readerRef } = useEpubReaderContext()
 
 	const positions = useEpubLocationStore((store) => store.positions)
@@ -74,13 +76,15 @@ export default function TableOfContentsSheetFooter({ goToPage }: { goToPage: GoT
 						{goToPage.isValid || goToPage.isEmpty
 							? undefined
 							: goToPage.number != undefined
-								? `Page ${goToPage.number} does not exist`
-								: `'${goToPage.string}' is not a page number`}
+								? t('tableOfContents.errors.pageDoesNotExist', { page: goToPage.number })
+								: t('tableOfContents.errors.invalidPage', { page: goToPage.string })}
 					</Text>
 
 					<Pressable onPress={handleGoToPage} hitSlop={10}>
 						<Text className="font-medium" style={{ fontSize: 16 }}>
-							{goToPage.isValid ? `Go to page ${goToPage.number}` : 'Dismiss'}
+							{goToPage.isValid
+								? t('tableOfContents.goToPageX', { page: goToPage.number })
+								: t('common.dismiss')}
 						</Text>
 					</Pressable>
 				</View>

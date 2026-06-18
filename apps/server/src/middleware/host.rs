@@ -67,10 +67,12 @@ where
 			"http".to_string()
 		});
 
-		Ok(HostExtractor(HostDetails {
-			host: host.0,
-			scheme,
-		}))
+		let via_proxy = trust_proxy_headers
+			&& (parts.headers.contains_key(X_FORWARDED_PROTO_HEADER_KEY)
+				|| parts.headers.contains_key(FORWARDED));
+		let host = resolve_host(host.0, &scheme, app_state.config.port, via_proxy);
+
+		Ok(HostExtractor(HostDetails { host, scheme }))
 	}
 }
 
@@ -117,6 +119,29 @@ fn parse_forwarded(headers: &HeaderMap) -> Option<&str> {
 			.eq_ignore_ascii_case("proto")
 			.then(|| value.trim().trim_matches('"'))
 	})
+}
+
+/// resolves the ideal host to use for URL generation based on the incoming request and server config,
+/// appending a port manually when:
+/// - the incoming `Host` header doesn't include a port (e.g., from Kobo devices,
+///   see https://github.com/stumpapp/stump/issues/1228)
+/// - the connection is direct (not via a trusted reverse proxy, which should handle port mapping on its own)
+/// - the configured port is not the default for the scheme (80 for http, 443 for https)
+fn resolve_host(host: String, scheme: &str, port: u16, via_proxy: bool) -> String {
+	// if already contains a port or is pulled from proxy header, return as-is
+	if host.contains(':') || via_proxy {
+		return host;
+	}
+
+	// is a bit naive but feels safe
+	let is_default =
+		(scheme == "http" && port == 80) || (scheme == "https" && port == 443);
+
+	if is_default {
+		host
+	} else {
+		format!("{}:{}", host, port)
+	}
 }
 
 /// Extracts the client IP from headers in the following priority order:
@@ -275,5 +300,49 @@ mod tests {
 		let ip = extract_client_ip(&headers, &extensions, false);
 
 		assert_eq!(ip, Some("192.0.2.1".parse().unwrap())); // connect info used, not headers
+	}
+
+	#[test]
+	fn test_append_port_direct_non_standard() {
+		let result = resolve_host("192.168.0.62".to_string(), "http", 10801, false);
+		assert_eq!(result, "192.168.0.62:10801");
+	}
+
+	#[test]
+	fn test_append_port_direct_https_non_standard() {
+		let result = resolve_host("192.168.0.62".to_string(), "https", 10801, false);
+		assert_eq!(result, "192.168.0.62:10801");
+	}
+
+	#[test]
+	fn test_no_append_port_http_default() {
+		let result = resolve_host("192.168.0.62".to_string(), "http", 80, false);
+		assert_eq!(result, "192.168.0.62");
+	}
+
+	#[test]
+	fn test_no_append_port_https_default() {
+		let result = resolve_host("myserver.com".to_string(), "https", 443, false);
+		assert_eq!(result, "myserver.com");
+	}
+
+	#[test]
+	fn test_no_append_port_already_has_port() {
+		let result = resolve_host("192.168.0.62:10801".to_string(), "http", 10801, false);
+		assert_eq!(result, "192.168.0.62:10801");
+	}
+
+	#[test]
+	fn test_no_append_port_via_proxy() {
+		// e.g., reverse proxy myserver.com:443 -> internal:10801
+		// assuming host header is myserver.com
+		let result = resolve_host("myserver.com".to_string(), "https", 10801, true);
+		assert_eq!(result, "myserver.com");
+	}
+
+	#[test]
+	fn test_no_append_port_via_proxy_non_standard_public_port() {
+		let result = resolve_host("myserver.com:8443".to_string(), "https", 10801, true);
+		assert_eq!(result, "myserver.com:8443");
 	}
 }

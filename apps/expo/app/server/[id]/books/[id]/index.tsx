@@ -234,11 +234,11 @@ export default function Screen() {
 		const { page, percentageCompleted, epubcfi } = book.readProgress || {}
 
 		if (page || percentageCompleted || !!epubcfi) {
-			return <Text>Continue</Text>
+			return <Text>{t('common.continue')}</Text>
 		} else if (book.readHistory?.length) {
-			return <Text>Read again</Text>
+			return <Text>{t('common.readAgain')}</Text>
 		} else {
-			return <Text>Read</Text>
+			return <Text>{t('common.read')}</Text>
 		}
 	}
 
@@ -398,17 +398,19 @@ export default function Screen() {
 
 					<Card className={cn(!description && 'px-2')}>
 						<Card.StatGroup>
-							{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
-							{!!seriesVolume && <Card.Stat label="Volume" value={seriesVolume} />}
-							{book.metadata?.year != null && book.metadata.year > 0 && (
-								<Card.Stat label="Year" value={book.metadata.year} />
+							{!!publisher && <Card.Stat label={t('bookMetadata.publisher')} value={publisher} />}
+							{!!seriesVolume && (
+								<Card.Stat label={t('bookMetadata.volume')} value={seriesVolume} />
 							)}
-							<Card.Stat label="Pages" value={totalPages} />
+							{book.metadata?.year != null && book.metadata.year > 0 && (
+								<Card.Stat label={t('bookMetadata.year')} value={book.metadata.year} />
+							)}
+							<Card.Stat label={t('common.pages')} value={totalPages} />
 						</Card.StatGroup>
 					</Card>
 
 					<MetadataBadgeSection
-						label="Genres"
+						label={t('bookMetadata.genres')}
 						items={genres.map((genre) => ({
 							label: genre,
 							onPress: () => onClickFilterField('genres', genre),
@@ -418,7 +420,7 @@ export default function Screen() {
 					{!noAcknowledgements && (
 						<View className="gap-6">
 							<MetadataBadgeSection
-								label="Writers"
+								label={t('bookMetadata.writers')}
 								items={writers.map((writer) => ({
 									label: writer,
 									onPress: () => onClickFilterField('writers', writer),
@@ -426,7 +428,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Colorists"
+								label={t('bookMetadata.colorists')}
 								items={colorists.map((colorist) => ({
 									label: colorist,
 									onPress: () => onClickFilterField('colorists', colorist),
@@ -434,7 +436,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Inkers"
+								label={t('bookMetadata.inkers')}
 								items={inkers.map((inker) => ({
 									label: inker,
 									onPress: () => onClickFilterField('inkers', inker),
@@ -442,7 +444,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Letterers"
+								label={t('bookMetadata.letterers')}
 								items={letterers.map((letterer) => ({
 									label: letterer,
 									onPress: () => onClickFilterField('letterers', letterer),
@@ -450,7 +452,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Cover Artists"
+								label={t('bookMetadata.coverArtists')}
 								items={coverArtists.map((coverArtist) => ({
 									label: coverArtist,
 									onPress: () => onClickFilterField('coverArtists', coverArtist),
@@ -460,7 +462,7 @@ export default function Screen() {
 					)}
 
 					<MetadataBadgeSection
-						label="Characters"
+						label={t('bookMetadata.characters')}
 						items={characters.map((character) => ({
 							label: character,
 							onPress: () => onClickFilterField('characters', character),
@@ -471,7 +473,7 @@ export default function Screen() {
 
 					{links.length > 0 && (
 						<View className="gap-2 flex w-full">
-							<ListLabel className="ios:px-4 px-2">Links</ListLabel>
+							<ListLabel className="ios:px-4 px-2">{t('bookMetadata.links')}</ListLabel>
 
 							<View className="ios:px-4 gap-2 px-2 flex flex-row flex-wrap">
 								{links.map((link) => (
@@ -482,14 +484,19 @@ export default function Screen() {
 					)}
 
 					{showDetails && (
-						<Card label="Details">
-							{book.extension && <Card.Row label="Format" value={book.extension.toUpperCase()} />}
-							{!!formattedSize && <Card.Row label="Size" value={formattedSize} />}
+						<Card label={t('common.details')}>
+							{book.extension && (
+								<Card.Row label={t('bookMetadata.format')} value={book.extension.toUpperCase()} />
+							)}
+							{!!formattedSize && <Card.Row label={t('bookMetadata.size')} value={formattedSize} />}
 							{book.metadata?.language && (
-								<Card.Row label="Language" value={book.metadata.language} />
+								<Card.Row label={t('bookMetadata.language')} value={book.metadata.language} />
 							)}
 							{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
-								<Card.Row label="Age Rating" value={`${book.metadata.ageRating}+`} />
+								<Card.Row
+									label={t('bookMetadata.ageRating')}
+									value={`${book.metadata.ageRating}+`}
+								/>
 							)}
 						</Card>
 					)}

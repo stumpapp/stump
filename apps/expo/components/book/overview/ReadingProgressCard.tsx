@@ -28,7 +28,7 @@ export function CurrentProgressCard({
 	readingTimeSeconds,
 }: CurrentProgressCardProps) {
 	const { isTablet } = useDisplay()
-	const { locale } = useTranslate()
+	const { t, locale } = useTranslate()
 
 	if (hidden) return
 
@@ -36,23 +36,23 @@ export function CurrentProgressCard({
 		? isTablet
 			? formatHumanDuration(readingTimeSeconds)
 			: formatNarrowDuration(readingTimeSeconds, { locale })
-		: 'Unknown'
+		: t('common.unknown')
 
 	return (
 		<Card>
 			{showChapterTitle && chapterTitle && (
 				<Card.StatGroup>
-					<Card.Stat label="Chapter" value={chapterTitle} />
+					<Card.Stat label={t('common.chapter')} value={chapterTitle} />
 				</Card.StatGroup>
 			)}
 			<Card.StatGroup>
 				<Card.Stat
-					label="Page"
+					label={t('common.page')}
 					value={page ?? '??'}
 					suffix={totalPages ? ` / ${totalPages}` : undefined}
 				/>
-				<Card.Stat label="Completed" value={percentage} suffix={'%'} />
-				<Card.Stat label="Reading time" value={readingTime} />
+				<Card.Stat label={t('common.completed')} value={percentage} suffix={'%'} />
+				<Card.Stat label={t('common.readTime')} value={readingTime} />
 			</Card.StatGroup>
 		</Card>
 	)
@@ -72,7 +72,7 @@ export function LastFinishedCard({
 	readingTimeSeconds,
 }: LastFinishedCardProps) {
 	const { isTablet } = useDisplay()
-	const { locale } = useTranslate()
+	const { t, locale } = useTranslate()
 
 	if (hidden) return
 
@@ -80,21 +80,21 @@ export function LastFinishedCard({
 		? isTablet
 			? formatHumanDuration(readingTimeSeconds)
 			: formatNarrowDuration(readingTimeSeconds, { locale })
-		: 'Unknown'
+		: t('common.unknown')
 
 	const lastCompletedDistance =
 		typeof lastCompletedAt === 'string'
 			? formatDistanceToNowStrict(new Date(lastCompletedAt), { addSuffix: true })
-			: 'Unknown'
+			: t('common.unknown')
 
 	return (
 		<Card>
 			<Card.StatGroup>
 				{readthroughNumber && readthroughNumber > 1 && (
-					<Card.Stat label="Readthrough" value={toOrdinal(readthroughNumber)} />
+					<Card.Stat label={t('common.readthrough')} value={toOrdinal(readthroughNumber)} />
 				)}
-				<Card.Stat label="Finished" value={lastCompletedDistance} />
-				<Card.Stat label="Reading time" value={readingTime} />
+				<Card.Stat label={t('common.finished')} value={lastCompletedDistance} />
+				<Card.Stat label={t('common.readTime')} value={readingTime} />
 			</Card.StatGroup>
 		</Card>
 	)

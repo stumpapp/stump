@@ -4,9 +4,11 @@ import { Platform, View } from 'react-native'
 import BackLink from '~/components/BackLink'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	return (
@@ -21,7 +23,7 @@ export default function Screen() {
 					name="index"
 					options={{
 						headerShown: true,
-						headerTitle: 'Files',
+						headerTitle: t('stumpServer.browse.files'),
 						headerLeft:
 							Platform.OS === 'android'
 								? undefined

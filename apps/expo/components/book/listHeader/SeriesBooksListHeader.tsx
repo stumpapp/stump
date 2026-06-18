@@ -1,7 +1,12 @@
 import { useGraphQLMutation } from '@stump/client'
-import { graphql, SeriesBooksSceneSeriesNameQuery, UserPermission } from '@stump/graphql'
+import {
+	graphql,
+	ReadingStatus,
+	SeriesBooksSceneSeriesNameQuery,
+	UserPermission,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { DownloadCloud, Info, ScanLine } from 'lucide-react-native'
+import { BookX, DownloadCloud, Info, PauseCircle, PlayCircle, ScanLine } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Alert } from 'react-native'
 
@@ -12,10 +17,43 @@ import { useStumpServer } from '~/providers/StumpServerProvider'
 
 import { useBooksFilterMenu } from './BooksFilterMenu'
 import { useSeriesBooksSortAndDisplayMenu } from './SeriesBooksSortAndDisplayMenu'
+import { useTranslate } from '~/lib/hooks'
 
 const scanMutation = graphql(`
 	mutation SeriesBooksListHeaderScanSeries($id: ID!) {
 		scanSeries(id: $id)
+	}
+`)
+
+const dropMutation = graphql(`
+	mutation SeriesBooksListHeaderDropSeries($id: ID!) {
+		dropSeries(id: $id) {
+			droppedAt
+		}
+	}
+`)
+
+const undropMutation = graphql(`
+	mutation SeriesBooksListHeaderUndropSeries($id: ID!) {
+		undropSeries(id: $id) {
+			droppedAt
+		}
+	}
+`)
+
+const stopRereadMutation = graphql(`
+	mutation SeriesBooksListHeaderStopReread($id: ID!) {
+		stopSeriesReread(id: $id) {
+			stoppedReadthroughAt
+		}
+	}
+`)
+
+const resumeRereadMutation = graphql(`
+	mutation SeriesBooksListHeaderResumeReread($id: ID!) {
+		resumeSeriesReread(id: $id) {
+			stoppedReadthroughAt
+		}
 	}
 `)
 
@@ -24,31 +62,63 @@ type SeriesActionsProps = {
 	onDownloadSeries: () => void
 }
 
+type SeriesState = NonNullable<
+	NonNullable<SeriesBooksSceneSeriesNameQuery['seriesById']>['userSeriesState']
+>
+
 type Props = {
 	seriesId: string
 	layoutKey: string
 	stats: NonNullable<SeriesBooksSceneSeriesNameQuery['seriesById']>['stats']
+	seriesState: SeriesState | null
+	readingStatus: ReadingStatus
+	currentReadthrough?: number | null
 	additionalActions: SeriesActionsProps
 }
 
-export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalActions }: Props) {
+export function SeriesBooksListHeader({
+	seriesId,
+	layoutKey,
+	stats,
+	seriesState,
+	readingStatus,
+	currentReadthrough,
+	additionalActions,
+}: Props) {
 	const client = useQueryClient()
+
+	const onSuccess = () =>
+		client.invalidateQueries({ queryKey: ['seriesById', seriesId], exact: false })
+
 	const { mutate: scanSeries } = useGraphQLMutation(scanMutation, {
-		onSuccess: () => {
-			setTimeout(
-				() =>
-					client.refetchQueries({
-						queryKey: ['seriesById', seriesId],
-						exact: false,
-					}),
-				2000,
-			)
-		},
+		onSuccess: () => setTimeout(onSuccess, 2000), // a bit of a naive approach but prolly fine
+	})
+	const { mutate: dropSeries } = useGraphQLMutation(dropMutation, { onSuccess })
+	const { mutate: undropSeries } = useGraphQLMutation(undropMutation, {
+		onSuccess,
+	})
+	const { mutate: stopReread } = useGraphQLMutation(stopRereadMutation, {
+		onSuccess,
+	})
+	const { mutate: resumeReread } = useGraphQLMutation(resumeRereadMutation, {
+		onSuccess,
 	})
 
 	const { checkPermission } = useStumpServer()
+	const { t } = useTranslate()
+
+	// TODO(localization): add keys after the existing effort to avoid conflicts
+	// TODO(on-deck): ughhh it was such a good idea at the time to push all destructive actions
+	// to the end in useSortAndDisplayMenu but now things aren't grouped how i want them.
+	// its fine for now, but annoying >:(
+	// TODO(on-deck): pick icons, did not have much time to be thoughtful abt it
 
 	const actions = useMemo(() => {
+		const isDropped = !!seriesState?.droppedAt
+		const isRereadStopped = !!seriesState?.stoppedReadthroughAt
+		const hasProgress = (stats?.completedBooks ?? 0) > 0
+		const isActiveReread = readingStatus === ReadingStatus.Reading && (currentReadthrough ?? 0) > 1
+
 		const result: ActionDef[] = [
 			{
 				key: 'overview',
@@ -57,6 +127,63 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 				onPress: additionalActions.onShowOverview,
 			},
 		]
+
+		// can only un-drop if you have dropped
+		if (isDropped) {
+			result.push({
+				key: 'undrop',
+				label: 'Un-drop Series',
+				icon: { ios: 'arrow.uturn.up.circle', android: PlayCircle },
+				onPress: () => undropSeries({ id: seriesId }),
+			})
+		} else {
+			// can only stop a re-read if you are actively re-reading
+			if (isActiveReread && !isRereadStopped) {
+				result.push({
+					key: 'stop-reread',
+					label: 'Stop Re-read',
+					icon: { ios: 'pause.circle', android: PauseCircle },
+					onPress: () =>
+						Alert.alert(
+							'Stop Re-read',
+							'Only newly-added books will be shown in on-deck suggestions. You can resume the re-read at any time',
+							[
+								{ text: t('common.cancel'), style: 'cancel' },
+								{ text: 'Stop Re-read', onPress: () => stopReread({ id: seriesId }) },
+							],
+						),
+				})
+			}
+
+			// can only resume a re-read if you have stopped it
+			if (isRereadStopped) {
+				result.push({
+					key: 'resume-reread',
+					label: 'Resume Re-read',
+					icon: { ios: 'play.circle', android: PlayCircle },
+					onPress: () => resumeReread({ id: seriesId }),
+				})
+			}
+
+			// can drop if you have any progress
+			if (hasProgress) {
+				result.push({
+					key: 'drop',
+					label: 'Drop Series',
+					icon: { ios: 'xmark.circle', android: BookX },
+					destructive: true,
+					onPress: () =>
+						Alert.alert(
+							'Drop Series',
+							'This series will no longer appear in on-deck suggestions. You can un-drop it at any time',
+							[
+								{ text: t('common.cancel'), style: 'cancel' },
+								{ text: 'Drop', style: 'destructive', onPress: () => dropSeries({ id: seriesId }) },
+							],
+						),
+				})
+			}
+		}
 
 		if (checkPermission(UserPermission.ScanLibrary)) {
 			result.push({
@@ -77,8 +204,8 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 						'Download Series',
 						'Are you sure you want to enqueue the download for this entire series?',
 						[
-							{ text: 'Cancel', style: 'cancel' },
-							{ text: 'Download', onPress: additionalActions.onDownloadSeries },
+							{ text: t('common.cancel'), style: 'cancel' },
+							{ text: t('common.download'), onPress: additionalActions.onDownloadSeries },
 						],
 					)
 				},
@@ -86,7 +213,20 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 		}
 
 		return result
-	}, [additionalActions, checkPermission, scanSeries, seriesId])
+	}, [
+		additionalActions,
+		checkPermission,
+		currentReadthrough,
+		dropSeries,
+		readingStatus,
+		resumeReread,
+		scanSeries,
+		seriesId,
+		stopReread,
+		undropSeries,
+		seriesState,
+		stats,
+	]) // jfc
 
 	const sortMenu = useSeriesBooksSortAndDisplayMenu({
 		layoutKey,

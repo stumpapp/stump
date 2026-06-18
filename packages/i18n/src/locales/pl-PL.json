@@ -2885,12 +2885,12 @@
 			"password": "Hasło",
 			"progress": "Postęp",
 			"publication": "Publikacja",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
+			"read": "Czytaj",
+			"readAgain": "Czytaj ponownie",
+			"readTime": "Czas czytania",
 			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
+			"readMore": "Dowiedz się więcej",
+			"refresh": "Odśwież",
 			"save": "Zapisz",
 			"select": "Zaznacz",
 			"settings": "Ustawienia",
@@ -2908,8 +2908,8 @@
 			"unknown": "Nieznany błąd"
 		},
 		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"tableOfContents": "Spis treści",
+			"bookmarksAndAnnotations": "Zakładki i adnotacje",
 			"appearance": "Wygląd"
 		},
 		"formatSeriesPosition": {
@@ -3184,7 +3184,7 @@
 		},
 		"readerSettings": {
 			"title": "Ustawienia czytnika",
-			"overrideGlobalSettings": "Override Global Settings",
+			"overrideGlobalSettings": "Nadpisz ustawienia globalne",
 			"sections": {
 				"mode": "Tryb",
 				"imageOptions": "Ustawienia obrazów",
@@ -3240,19 +3240,19 @@
 			"allSettings": "Wszystkie ustawienia"
 		},
 		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
+			"goToPageX": "Przejdź do strony {{pageNumber}}",
+			"goToPagePlaceholder": "Przejdź do strony...",
 			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
+				"pageDoesNotExist": "Strona {{page}} nie istnieje",
+				"invalidPage": "'{{page}}' nie jest numerem strony"
 			},
-			"showCurrentChapter": "Show Current Chapter"
+			"showCurrentChapter": "Pokaż bieżący rozdział"
 		},
 		"annotationsSheet": {
 			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
-				"highlights": "Highlights",
+				"all": "Wszystkie",
+				"bookmarks": "Zakładki",
+				"highlights": "Wyróżnione",
 				"notes": "Notatki"
 			}
 		},

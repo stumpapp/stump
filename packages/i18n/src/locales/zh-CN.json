@@ -2790,7 +2790,7 @@
 				},
 				"token": {
 					"label": "令牌",
-					"placeholder": "原始令牌"
+					"placeholder": "Raw Token"
 				},
 				"basic": "基本"
 			},
@@ -2798,8 +2798,8 @@
 			"catalogUrl": "目录 URL",
 			"failedToConnect": "连接到服务器失败",
 			"didConnect": "已连接",
-			"checkConnection": "检查连接",
-			"setAsDefaultServer": "设为默认服务器",
+			"checkConnection": "Check Connection",
+			"setAsDefaultServer": "Set as Default Server",
 			"enableOPDS": "启用 OPDS",
 			"validation": {
 				"nameAlreadyExists": "名称已存在",
@@ -2808,29 +2808,48 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "标记为已读",
+				"label": "Mark as Read",
 				"confirmation": "您确定要将 {{bookTitle}} 标记为已读吗？"
 			},
 			"clearProgress": {
-				"label": "清除进度",
+				"label": "Clear Progress",
 				"confirmation": "您确定要清除 {{bookTitle}} 的进度吗？"
 			},
+			"deleteReadHistory": {
+				"label": "Delete Read History",
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+			},
 			"deleteBook": {
-				"label": "删除书籍",
+				"label": "Delete Book",
 				"confirmation": "您确定要删除 {{bookTitle}} 吗？"
 			},
+			"deleteDownload": {
+				"label": "Delete Download",
+				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+			},
+			"goToLibrary": "Go to Library",
+			"goToSeries": "Go to Series",
 			"seeDetails": "查看详情"
 		},
 		"bookMetadata": {
 			"ageRating": "年龄分级",
 			"downloadedAt": "下载时间",
+			"characters": "Characters",
 			"format": "格式",
 			"genres": "类型",
 			"language": "语言",
 			"publisher": "出版社",
 			"size": "大小",
 			"volume": "卷",
-			"year": "年份"
+			"writers": "Writers",
+			"colorists": "Colorists",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"coverArtists": "Cover Artists",
+			"links": "Links",
+			"year": "年份",
+			"identifier": "Identifier",
+			"identifiers": "Identifiers"
 		},
 		"common": {
 			"book": "书籍",
@@ -2839,27 +2858,39 @@
 			"clear": "清除",
 			"completed": "已完成",
 			"confirm": "确认",
+			"continue": "Continue",
 			"content": "内容",
 			"details": "详情",
 			"delete": "删除",
+			"dismiss": "Dismiss",
+			"download": "Download",
 			"downloads": "下载",
+			"done": "Done",
 			"edit": "编辑",
 			"enabled": "已启用",
 			"enable": "启用",
 			"error": "错误",
+			"favorite": "Favorite",
+			"finished": "Finished",
 			"grid": "网格",
 			"list": "列表",
 			"lastCompleted": "最近完成",
 			"name": "名称",
 			"none": "无",
+			"notAvailable": "Not Available",
 			"options": "选项",
 			"page": "页面",
 			"pages": "页",
+			"pageXOfY": "Page {{current}} of {{total}}",
 			"password": "密码",
 			"progress": "进度",
 			"publication": "出版信息",
-			"readTime": "阅读时长",
-			"readMore": "阅读更多",
+			"read": "Read",
+			"readAgain": "Read Again",
+			"readTime": "Reading Time",
+			"readthrough": "Readthrough",
+			"readMore": "Read More",
+			"refresh": "Refresh",
 			"save": "保存",
 			"select": "选择",
 			"settings": "设置",
@@ -2875,6 +2906,11 @@
 		},
 		"errors": {
 			"unknown": "未知错误"
+		},
+		"epubMenu": {
+			"tableOfContents": "Table of Contents",
+			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"appearance": "Appearance"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2894,28 +2930,36 @@
 		"emptyState": {
 			"noStumpServers": "未添加 Stump 服务器",
 			"noOPDSServers": "未添加 OPDS 服务器",
-			"noServers": "未配置服务器",
+			"noServers": "No Servers Configured",
 			"cta": "通过添加服务器来开始访问您的书籍收藏",
-			"seeDocumentation": "查看文档"
+			"seeDocumentation": "查看文档",
+			"noSmartLists": {
+				"label": "No lists returned",
+				"description": "Once created they will appear here"
+			}
 		},
 		"tabs": {
 			"servers": "服务器",
 			"localLibrary": "本地书库",
-			"settings": "设置"
+			"settings": "设置",
+			"home": "Home",
+			"browse": "Browse",
+			"clubs": "Clubs",
+			"search": "Search"
 		},
 		"localLibrary": {
 			"title": "本地书库",
 			"emptyState": {
 				"all": {
-					"title": "暂无可阅读的内容",
+					"title": "Nothing to Read Yet",
 					"description": "一旦您下载了离线阅读的书籍，它们将显示在这里"
 				},
 				"imported": {
-					"title": "未导入书籍",
+					"title": "No Imported Books",
 					"description": "导入书籍以离线阅读"
 				},
 				"server": {
-					"title": "未下载书籍",
+					"title": "No Downloaded Books",
 					"description": "从书库下载书籍以离线阅读"
 				}
 			},
@@ -2977,6 +3021,11 @@
 			},
 			"syncFailed": "离线进度同步失败"
 		},
+		"search": {
+			"label": "Search This Server",
+			"description": "Find specific content on this server",
+			"placeholder": "Search"
+		},
 		"settings": {
 			"preferences": {
 				"label": "首选项",
@@ -2995,7 +3044,7 @@
 					"label": "缩略图占位符",
 					"options": {
 						"grayscale": "灰度",
-						"averageColor": "平均颜色",
+						"averageColor": "Average Color",
 						"colorful": "彩色",
 						"thumbhash": "缩略图哈希"
 					}
@@ -3022,16 +3071,23 @@
 				"bookClubsEnabled": "读书俱乐部功能"
 			},
 			"autoSyncLocalData": "自动同步本地数据",
-			"lowercaseTranslation": "标签小写显示",
+			"textCase": {
+				"label": "Text Case",
+				"options": {
+					"lowerCase": "Lowercase",
+					"sentenceCase": "Sentence Case",
+					"titleCase": "Title Case"
+				}
+			},
 			"tintListBackground": "列表背景着色",
 			"management": {
 				"label": "管理",
 				"dataUsage": {
 					"label": "数据使用",
-					"nonStumpData": "非 Stump 数据",
-					"serversTotal": "服务器总计",
-					"totalFiles": "文件总数",
-					"totalSize": "总大小",
+					"nonStumpData": "Non-Stump Data",
+					"serversTotal": "Servers Total",
+					"totalFiles": "Total Files",
+					"totalSize": "Total Size",
 					"deleteDownloads": {
 						"label": "删除下载",
 						"confirmation": "您确定要删除来自 {{serverName}} 的所有下载吗？",
@@ -3042,7 +3098,7 @@
 					},
 					"noDownloads": "此服务器无下载文件",
 					"storedPreferences": {
-						"label": "存储的首选项",
+						"label": "Stored Preferences",
 						"description": "书籍首选项、阅读计时器等杂项数据"
 					},
 					"clearPreferences": "清除首选项"
@@ -3054,21 +3110,21 @@
 					"label": "清除缓存",
 					"memory": {
 						"button": "内存",
-						"success": "内存缓存已清除"
+						"success": "Memory Cache Cleared"
 					},
 					"disk": {
 						"button": "磁盘",
-						"success": "磁盘缓存已清除"
+						"success": "Disk Cache Cleared"
 					}
 				},
 				"deleteDatabase": {
 					"label": "删除数据库",
 					"success": {
-						"title": "数据库已删除",
+						"title": "Database Deleted",
 						"description": "请重启应用"
 					},
 					"error": {
-						"title": "删除失败",
+						"title": "Deletion Failed",
 						"description": "删除数据库时出错"
 					}
 				},
@@ -3100,9 +3156,35 @@
 				"suuportIdentifier": "支持标识符：{{supportID}}"
 			}
 		},
+		"stumpServer": {
+			"browse": {
+				"books": "Books",
+				"favorites": "Favorites",
+				"files": "Files",
+				"libraries": "Libraries",
+				"series": "Series",
+				"smartLists": "Smart Lists"
+			},
+			"continueReading": {
+				"label": "Continue Reading",
+				"emptyText": "No books in progress"
+			},
+			"onDeck": {
+				"label": "Your Next Read",
+				"emptyText": "No books on deck"
+			},
+			"recentlyAddedSeries": {
+				"label": "Recently Added Series",
+				"emptyText": "No recently added series"
+			},
+			"recentlyAddedBooks": {
+				"label": "Recently Added Books",
+				"emptyText": "No recently added books"
+			}
+		},
 		"readerSettings": {
 			"title": "阅读器设置",
-			"overrideGlobalSettings": "覆盖全局设置",
+			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "模式",
 				"imageOptions": "图像选项",
@@ -3157,9 +3239,36 @@
 			},
 			"allSettings": "全部设置"
 		},
+		"tableOfContents": {
+			"goToPageX": "Go to page {{pageNumber}}",
+			"goToPagePlaceholder": "Go to page...",
+			"errors": {
+				"pageDoesNotExist": "Page {{page}} does not exist",
+				"invalidPage": "'{{page}}' is not a page number"
+			},
+			"showCurrentChapter": "Show Current Chapter"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "All",
+				"bookmarks": "Bookmarks",
+				"highlights": "Highlights",
+				"notes": "Notes"
+			}
+		},
 		"epubSettings": {
 			"title": "EPUB 阅读器设置",
-			"typeface": "字体",
+			"typeface": {
+				"label": "Typeface",
+				"options": {
+					"system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "字号",
 			"fontWeight": {
 				"label": "字重",

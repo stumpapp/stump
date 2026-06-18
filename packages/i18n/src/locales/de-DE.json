@@ -523,16 +523,16 @@
 		"uploadModal": {
 			"title": {
 				"books": "Bücher hochladen",
-				"series": "Reihe hochladen"
+				"series": "Serie hochladen"
 			},
 			"description": {
 				"books": "Füge Bücher direkt zum aktuellen Pfad im Dateimanager hinzu",
-				"series": "Füge eine Reihe direkt zum aktuellen Pfad im Dateimanager hinzu"
+				"series": "Füge eine Serie direkt zum aktuellen Pfad im Dateimanager hinzu"
 			},
 			"seriesDisclaimer": [
 				"Es muss eine ",
 				"gezippte Datei",
-				"sein welche den Ordner enthält, der die Reihe sein soll, die alle Bücher beinhaltet"
+				"sein welche den Ordner enthält, der die Serie sein soll, die alle Bücher beinhaltet"
 			],
 			"dropzone": {
 				"books": "Ziehe und lege Bücher hier ab",
@@ -775,9 +775,9 @@
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Kürzlich hinzugefügte Reihe",
+			"title": "Kürzlich hinzugefügte Serien",
 			"emptyState": {
-				"heading": "Keine Serie zur Ansicht vorhanden",
+				"heading": "Keine Serien zur Ansicht vorhanden",
 				"message": "Alle Serien, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
 			}
 		},
@@ -1663,7 +1663,7 @@
 		"app/reader": {
 			"helmet": "Readereinstellungen",
 			"title": "Readereinstellungen",
-			"description": "Default preferences for reading. Some of these are local-only to your current device",
+			"description": "Standardeinstellungen zum Lesen. Einige davon sind nur lokal auf deinem aktuellen Gerät",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -2798,8 +2798,8 @@
 			"catalogUrl": "Katalog URL",
 			"failedToConnect": "Die Verbindung zum Server ist fehlgeschlagen",
 			"didConnect": "Verbunden",
-			"checkConnection": "Check Connection",
-			"setAsDefaultServer": "Set as Default Server",
+			"checkConnection": "Verbindung prüfen",
+			"setAsDefaultServer": "Als Standardserver festlegen",
 			"enableOPDS": "OPDS aktivieren",
 			"validation": {
 				"nameAlreadyExists": "Name ist bereits vorhanden",
@@ -2808,44 +2808,44 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as Read",
+				"label": "Als gelesen markieren",
 				"confirmation": "Bist du dir sicher, dass du {{bookTitle}} als gelesen markieren möchtest?"
 			},
 			"clearProgress": {
-				"label": "Clear Progress",
+				"label": "Fortschritt löschen",
 				"confirmation": "Bist du dir sicher, dass du den Fortschritt für {{bookTitle}} löschen möchtest?"
 			},
 			"deleteReadHistory": {
-				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+				"label": "Leseverlauf löschen",
+				"confirmation": "Bist du dir sicher, dass du den Leseverlauf für {{bookTitle}} löschen möchtest?"
 			},
 			"deleteBook": {
-				"label": "Delete Book",
+				"label": "Buch löschen",
 				"confirmation": "Bist du dir sicher, dass du {{bookTitle}} löschen möchtest?"
 			},
 			"deleteDownload": {
-				"label": "Delete Download",
-				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+				"label": "Download löschen",
+				"confirmation": "Bist du dir sicher, dass du den Download für {{bookTitle}} löschen möchtest?"
 			},
-			"goToLibrary": "Go to Library",
-			"goToSeries": "Go to Series",
+			"goToLibrary": "Geh zur Bibliothek",
+			"goToSeries": "Gehe zur Serie",
 			"seeDetails": "Details anzeigen"
 		},
 		"bookMetadata": {
 			"ageRating": "Altersfreigabe",
 			"downloadedAt": "Heruntergeladen",
-			"characters": "Characters",
+			"characters": "Charaktere",
 			"format": "Format",
 			"genres": "Genres",
 			"language": "Sprache",
 			"publisher": "Verlag",
 			"size": "Größe",
 			"volume": "Band",
-			"writers": "Writers",
-			"colorists": "Colorists",
-			"inkers": "Inkers",
-			"letterers": "Letterers",
-			"coverArtists": "Cover Artists",
+			"writers": "Schriftsteller",
+			"colorists": "Koloristen",
+			"inkers": "Zeichner",
+			"letterers": "Schriftsteller",
+			"coverArtists": "Cover-Künstler",
 			"links": "Links",
 			"year": "Jahr",
 			"identifier": "Identifier",
@@ -2858,39 +2858,39 @@
 			"clear": "Löschen",
 			"completed": "Beendet",
 			"confirm": "Bestätigen",
-			"continue": "Continue",
+			"continue": "Fortfahren",
 			"content": "Inhalt",
 			"details": "Details",
 			"delete": "Löschen",
-			"dismiss": "Dismiss",
+			"dismiss": "Verwerfen",
 			"download": "Download",
 			"downloads": "Downloads",
-			"done": "Done",
+			"done": "Fertig",
 			"edit": "Bearbeiten",
 			"enabled": "Aktiviert",
 			"enable": "Aktivieren",
 			"error": "Fehler",
 			"favorite": "Favorite",
-			"finished": "Finished",
+			"finished": "Beendet",
 			"grid": "Raster",
 			"list": "Liste",
 			"lastCompleted": "Zuletzt beendet",
 			"name": "Name",
 			"none": "Keine",
-			"notAvailable": "Not Available",
+			"notAvailable": "Nicht verfügbar",
 			"options": "Optionen",
 			"page": "Seite",
 			"pages": "Seiten",
-			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageXOfY": "Seite {{current}} von {{total}}",
 			"password": "Passwort",
 			"progress": "Fortschritt",
 			"publication": "Veröffentlichung",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
-			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
+			"read": "Lesen",
+			"readAgain": "Erneut lesen",
+			"readTime": "Lesezeit",
+			"readthrough": "Durchlesen",
+			"readMore": "Mehr lesen",
+			"refresh": "Aktualisieren",
 			"save": "Speichern",
 			"select": "Auswählen",
 			"settings": "Einstellungen",
@@ -2908,9 +2908,9 @@
 			"unknown": "Unbekannter Fehler"
 		},
 		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
+			"tableOfContents": "Inhaltsverzeichnis",
+			"bookmarksAndAnnotations": "Lesezeichen & Anmerkungen",
+			"appearance": "Erscheinung"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2930,7 +2930,7 @@
 		"emptyState": {
 			"noStumpServers": "Keine Stump Server hinzugefügt",
 			"noOPDSServers": "Keine OPDS Server hinzugefügt",
-			"noServers": "No Servers Configured",
+			"noServers": "Keine Server konfiguriert",
 			"cta": "Lege los mit einem Server hinzuzufügen, um auf deine Buchsammlungen zuzugreifen",
 			"seeDocumentation": "Siehe Dokumentation",
 			"noSmartLists": {
@@ -2942,24 +2942,24 @@
 			"servers": "Server",
 			"localLibrary": "Bibliothek",
 			"settings": "Einstellungen",
-			"home": "Home",
-			"browse": "Browse",
-			"clubs": "Clubs",
-			"search": "Search"
+			"home": "Startseite",
+			"browse": "Durchsuchen",
+			"clubs": "Klubs",
+			"search": "Suche"
 		},
 		"localLibrary": {
 			"title": "Lokale Bibliothek",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to Read Yet",
+					"title": "Noch nichts zu lesen",
 					"description": "Sobald du Bücher zum Offline-Lesen hast, werden sie hier erscheinen"
 				},
 				"imported": {
-					"title": "No Imported Books",
+					"title": "Keine importierten Bücher",
 					"description": "Bücher zum Offline-Lesen importieren"
 				},
 				"server": {
-					"title": "No Downloaded Books",
+					"title": "Keine heruntergeladenen Bücher",
 					"description": "Lade Bücher aus deiner Bibliothek herunter, um diese offline zu lesen"
 				}
 			},
@@ -3022,9 +3022,9 @@
 			"syncFailed": "Fehler beim Synchronisieren des Offline-Fortschritts"
 		},
 		"search": {
-			"label": "Search This Server",
-			"description": "Find specific content on this server",
-			"placeholder": "Search"
+			"label": "Diesen Server durchsuchen",
+			"description": "Finde spezifische Inhalte auf diesem Server",
+			"placeholder": "Suche"
 		},
 		"settings": {
 			"preferences": {
@@ -3044,7 +3044,7 @@
 					"label": "Vorschaubild-Platzhalter",
 					"options": {
 						"grayscale": "Graustufen",
-						"averageColor": "Average Color",
+						"averageColor": "Durchschnittsfarbe",
 						"colorful": "Farbenfroh",
 						"thumbhash": "Thumbhash"
 					}
@@ -3084,10 +3084,10 @@
 				"label": "Verwaltung",
 				"dataUsage": {
 					"label": "Datennutzung",
-					"nonStumpData": "Non-Stump Data",
-					"serversTotal": "Servers Total",
-					"totalFiles": "Total Files",
-					"totalSize": "Total Size",
+					"nonStumpData": "Nicht-Stump Daten",
+					"serversTotal": "Server insgesamt",
+					"totalFiles": "Dateien gesamt",
+					"totalSize": "Gesamtgröße",
 					"deleteDownloads": {
 						"label": "Downloads löschen",
 						"confirmation": "Bist du dir sicher, dass du alle Downloads von {{serverName}} löschen möchtest?",
@@ -3098,7 +3098,7 @@
 					},
 					"noDownloads": "Keine heruntergeladenen Dateien für diesen Server",
 					"storedPreferences": {
-						"label": "Stored Preferences",
+						"label": "Gespeicherte Präferenzen",
 						"description": "Sonstige Daten wie Buchpräferenzen, Lesezeiten, etc"
 					},
 					"clearPreferences": "Präferenzen löschen"
@@ -3110,21 +3110,21 @@
 					"label": "Cache Löschen",
 					"memory": {
 						"button": "RAM",
-						"success": "Memory Cache Cleared"
+						"success": "RAM-Cache geleert"
 					},
 					"disk": {
 						"button": "Speicher",
-						"success": "Disk Cache Cleared"
+						"success": "Speicher-Cache geleert"
 					}
 				},
 				"deleteDatabase": {
 					"label": "Datenbank löschen",
 					"success": {
-						"title": "Database Deleted",
+						"title": "Datenbank gelöscht",
 						"description": "Bitte starte die App neu"
 					},
 					"error": {
-						"title": "Deletion Failed",
+						"title": "Löschen fehlgeschlagen",
 						"description": "Es ist ein Fehler beim Löschen der Datenbank aufgetreten"
 					}
 				},
@@ -3158,24 +3158,24 @@
 		},
 		"stumpServer": {
 			"browse": {
-				"books": "Books",
+				"books": "Bücher",
 				"favorites": "Favorites",
-				"files": "Files",
-				"libraries": "Libraries",
-				"series": "Series",
-				"smartLists": "Smart Lists"
+				"files": "Dateien",
+				"libraries": "Bibliotheken",
+				"series": "Serien",
+				"smartLists": "Intelligente Listen"
 			},
 			"continueReading": {
-				"label": "Continue Reading",
-				"emptyText": "No books in progress"
+				"label": "Weiterlesen",
+				"emptyText": "Keine angefangenen Bücher"
 			},
 			"onDeck": {
-				"label": "Your Next Read",
-				"emptyText": "No books on deck"
+				"label": "Deine nächste Lesung",
+				"emptyText": "Keine Bücher im Deck"
 			},
 			"recentlyAddedSeries": {
-				"label": "Recently Added Series",
-				"emptyText": "No recently added series"
+				"label": "Kürzlich hinzugefügte Serien",
+				"emptyText": "Keine kürzlich hinzugefügte Serien"
 			},
 			"recentlyAddedBooks": {
 				"label": "Recently Added Books",

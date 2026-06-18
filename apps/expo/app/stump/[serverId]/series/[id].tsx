@@ -36,6 +36,12 @@ const query = graphql(`
 				totalReadingTimeSeconds
 			}
 			libraryId
+			readingStatus
+			currentReadthrough
+			userSeriesState {
+				stoppedReadthroughAt
+				droppedAt
+			}
 		}
 	}
 `)
@@ -158,6 +164,7 @@ export default function Screen() {
 		layout,
 		flashListRef: listRef,
 	})
+
 	useEffect(() => {
 		listRef.current?.recomputeViewableItems()
 	}, [filters, layout, sort])
@@ -185,6 +192,9 @@ export default function Screen() {
 							seriesId={id}
 							layoutKey={layoutKey}
 							stats={series.stats}
+							seriesState={series.userSeriesState ?? null}
+							readingStatus={series.readingStatus}
+							currentReadthrough={series.currentReadthrough}
 							additionalActions={actions}
 						/>
 					}

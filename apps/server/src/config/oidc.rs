@@ -65,8 +65,8 @@ impl OidcClientState {
 			let cert_bytes = tokio::fs::read(ca_cert_path).await.map_err(|error| {
 				tracing::error!(?error, path = %ca_cert_path, "Failed to read CA certificate file for OIDC");
 				APIError::InternalServerError(format!(
-					"Failed to read CA certificate file '{}': {}",
-					ca_cert_path, error
+					"Failed to read CA certificate file: {}",
+					error
 				))
 			})?;
 			let cert = reqwest::Certificate::from_pem(&cert_bytes).map_err(|error| {

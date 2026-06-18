@@ -1456,8 +1456,8 @@
 					"description": "Passe die Schriftart an, die in der Anwendung genutzt wird"
 				},
 				"thumbnailPreview": {
-					"label": "Preview",
-					"description": "This is how thumbnails will look with the current settings"
+					"label": "Vorschau",
+					"description": "So werden die Thumbnails mit den aktuellen Einstellungen aussehen"
 				},
 				"thumbnailRatioSelect": {
 					"label": "Vorschaubildverhältnis",
@@ -1475,13 +1475,13 @@
 					}
 				},
 				"thumbnailRoundness": {
-					"label": "Thumbnail roundness",
-					"description": "How rounded the corners of thumbnail images should be",
+					"label": "Rundheit der Vorschaubilder",
+					"description": "Wie abgerundet die Ecken der Vorschaubilder sein sollen",
 					"options": {
-						"none": "None",
+						"none": "Keine",
 						"normal": "Normal",
-						"rounded": "Rounded",
-						"large": "Large"
+						"rounded": "Abgerundet",
+						"large": "Groß"
 					}
 				},
 				"navigation": {

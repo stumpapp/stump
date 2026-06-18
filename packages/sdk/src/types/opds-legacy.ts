@@ -46,6 +46,10 @@ const linkRel = z
 export const isPseStreamLink = (link: OPDSLegacyLink) =>
 	link.rel === 'http://vaemendis.net/opds-pse/stream'
 
+// fast-xml-parser coerces all-digit text to numbers, so this will allow either
+// and coerce into string for us
+const coercedString = z.union([z.string(), z.number()]).transform(String)
+
 const intoValidNumber = (value: string | number) => {
 	if (typeof value === 'number') return value
 	const parsed = parseInt(value, 10)
@@ -68,7 +72,7 @@ const resolveCountFromLink = (
 const linkSchema = z
 	.object({
 		href: z.string(),
-		title: z.string().nullish(),
+		title: coercedString.nullish(),
 		type: linkType.nullish(),
 		rel: linkRel.nullish(),
 		'pse:count': z.union([z.string(), z.number()]).nullish(),
@@ -87,7 +91,7 @@ const linkSchema = z
 export type OPDSLegacyLink = z.infer<typeof linkSchema>
 
 const entryAuthor = z.object({
-	name: z.string(),
+	name: coercedString,
 	uri: z.string().nullish(),
 })
 export type OPDSLegacyEntryAuthor = z.infer<typeof entryAuthor>
@@ -102,12 +106,12 @@ const contentSchema = z
 	])
 	.transform((val) => (typeof val === 'string' ? val : val['#text']))
 
-const idSchema = z.union([z.string(), z.number()]).transform((val) => val.toString())
+const idSchema = coercedString
 
 const entry = z
 	.object({
 		id: idSchema,
-		title: z.string(),
+		title: coercedString,
 		updated: z.string().nullish(),
 		content: contentSchema.nullish(),
 		link: z.union([linkSchema, z.array(linkSchema)]).default([]),
@@ -121,15 +125,15 @@ const entry = z
 export type OPDSLegacyEntry = z.infer<typeof entry>
 
 const feedAuthor = z.object({
-	name: z.string(),
+	name: coercedString,
 	uri: z.string().nullish(),
 })
 export type OPDSLegacyFeedAuthor = z.infer<typeof feedAuthor>
 
 export const legacyFeed = z
 	.object({
-		id: z.string(),
-		title: z.string(),
+		id: coercedString,
+		title: coercedString,
 		author: feedAuthor.nullish(),
 		link: z.union([linkSchema, z.array(linkSchema)]).default([]),
 		entry: z.union([entry, z.array(entry)]).default([]),

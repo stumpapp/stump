@@ -13270,6 +13270,14 @@ expo-symbols@^55.0.8:
     "@expo-google-fonts/material-symbols" "^0.4.1"
     sf-symbols-typescript "^2.0.0"
 
+expo-symbols@^56.0.6:
+  version "56.0.6"
+  resolved "https://registry.yarnpkg.com/expo-symbols/-/expo-symbols-56.0.6.tgz#02e5f6154e0a7445981ea3634d8069cfe3148fb1"
+  integrity sha512-BrA81DjcNafdj7gXVhdrExb9LtUiSVyOf/NavyMmDAHgHMY1GqeR5cnn1PSAZeYKnSgQhee/H89XUpAxtog5hg==
+  dependencies:
+    "@expo-google-fonts/material-symbols" "^0.4.1"
+    sf-symbols-typescript "^2.0.0"
+
 expo-system-ui@~55.0.18:
   version "55.0.18"
   resolved "https://registry.yarnpkg.com/expo-system-ui/-/expo-system-ui-55.0.18.tgz#dabd6c872e4c71d12e6ba512733be8f5387a2028"

@@ -41,14 +41,14 @@ pub type StumpOidcClient = Client<
 /// Holds the HTTP client and discovered provider metadata, avoiding
 /// repeated metadata discovery on every OIDC login request.
 #[derive(Clone)]
-pub struct OidcClientState {
+pub struct OidcProvider {
 	pub http_client: oauth2_reqwest::ReqwestClient,
 	provider_metadata: CoreProviderMetadata,
 	client_id: String,
 	client_secret: String,
 }
 
-impl OidcClientState {
+impl OidcProvider {
 	/// Build the HTTP client and discover provider metadata.
 	/// This performs the expensive I/O (metadata discovery) so it should
 	/// be called once at startup and reused.

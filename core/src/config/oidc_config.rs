@@ -8,7 +8,7 @@ use super::env_keys::*;
 const REQUIRED_SCOPES: &str = "email";
 
 /// Configuration for OpenID Connect (OIDC) authentication
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, SimpleObject)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, SimpleObject)]
 #[graphql(name = "OidcConfig")]
 pub struct OidcConfig {
 	/// Whether to enable OIDC authentication
@@ -65,6 +65,22 @@ fn default_oidc_scopes() -> String {
 
 fn default_true() -> bool {
 	true
+}
+
+impl std::fmt::Debug for OidcConfig {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.debug_struct("OidcConfig")
+			.field("enabled", &self.enabled)
+			.field("client_id", &self.client_id)
+			.field("issuer_url", &self.issuer_url)
+			.field("client_secret", &"[REDACTED]")
+			.field("scopes", &self.scopes)
+			.field("allow_registration", &self.allow_registration)
+			.field("disable_local_auth", &self.disable_local_auth)
+			.field("extra_audiences", &self.extra_audiences)
+			.field("ca_cert_file", &self.ca_cert_file)
+			.finish()
+	}
 }
 
 impl OidcConfig {

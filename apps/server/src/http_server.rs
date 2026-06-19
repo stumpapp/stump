@@ -12,7 +12,7 @@ use tokio::sync::Notify;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
 use crate::{
-	config::{cors, oidc::OidcClientState, session::get_session_layer},
+	config::{cors, oidc::OidcProvider, session::get_session_layer},
 	errors::{EntryError, ServerError, ServerResult},
 	routers,
 	utils::shutdown_signal_with_cleanup,
@@ -60,9 +60,9 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
-	let oidc_state: Option<Arc<OidcClientState>> = {
+	let oidc_provider: Option<Arc<OidcProvider>> = {
 		if let Some(oidc_config) = config.oidc.as_ref().filter(|c| c.is_configured()) {
-			let state = OidcClientState::new(oidc_config).await.map_err(|e| {
+			let state = OidcProvider::new(oidc_config).await.map_err(|e| {
 				tracing::error!(?e, "OIDC client initialization failed");
 				ServerError::ServerStartError(format!("OIDC client init failed: {e:?}"))
 			})?;
@@ -87,7 +87,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.layer(cors_layer)
 		.layer(CompressionLayer::new())
 		.layer(TraceLayer::new_for_http())
-		.layer(Extension(oidc_state));
+		.layer(Extension(oidc_provider));
 
 	let shutdown_notify = Arc::new(Notify::new());
 

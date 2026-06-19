@@ -42,7 +42,7 @@ async fn main() -> Result<(), EntryError> {
 		init_tracing(&resolved_config);
 
 		if let Some(ref oidc) = resolved_config.oidc {
-			tracing::info!(?oidc, "OIDC configuration");
+			tracing::info!(enabled = oidc.enabled, "OIDC configuration loaded");
 		}
 
 		if resolved_config.verbosity >= 3 {

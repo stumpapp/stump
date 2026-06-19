@@ -37,54 +37,93 @@ pub type StumpOidcClient = Client<
 	EndpointMaybeSet,
 >;
 
-/// Create OIDC client from configuration
-pub async fn create_oidc_client(
-	config: &OidcConfig,
-	frontend_url: &str,
-) -> Result<(oauth2_reqwest::ReqwestClient, StumpOidcClient), APIError> {
-	if !config.is_configured() {
-		return Err(APIError::OIDCConfigurationInvalid);
-	}
+/// Cached OIDC client state, initialized once at server startup.
+/// Holds the HTTP client and discovered provider metadata, avoiding
+/// repeated metadata discovery on every OIDC login request.
+#[derive(Clone)]
+pub struct OidcProvider {
+	pub http_client: oauth2_reqwest::ReqwestClient,
+	provider_metadata: CoreProviderMetadata,
+	client_id: String,
+	client_secret: String,
+}
 
-	let issuer_url = IssuerUrl::new(config.issuer_url.clone()).map_err(|error| {
-		tracing::error!(?error, "Invalid issuer URL for OIDC");
-		APIError::OIDCConfigurationInvalid
-	})?;
+impl OidcProvider {
+	/// Build the HTTP client and discover provider metadata.
+	/// This performs the expensive I/O (metadata discovery) so it should
+	/// be called once at startup and reused.
+	pub async fn new(config: &OidcConfig) -> Result<Self, APIError> {
+		let issuer_url = IssuerUrl::new(config.issuer_url.clone()).map_err(|error| {
+			tracing::error!(?error, "Invalid issuer URL for OIDC");
+			APIError::OIDCConfigurationInvalid
+		})?;
 
-	let http_client = oauth2_reqwest::ReqwestClient::from(
-		reqwest::ClientBuilder::new()
-			.redirect(reqwest::redirect::Policy::none())
-			.build()
-			.map_err(|error| {
+		let mut client_builder =
+			reqwest::ClientBuilder::new().redirect(reqwest::redirect::Policy::none());
+
+		if let Some(ca_cert_path) = &config.ca_cert_file {
+			let cert_bytes = tokio::fs::read(ca_cert_path).await.map_err(|error| {
+				tracing::error!(?error, path = %ca_cert_path, "Failed to read CA certificate file for OIDC");
+				APIError::InternalServerError(format!(
+					"Failed to read CA certificate file: {}",
+					error
+				))
+			})?;
+			let cert = reqwest::Certificate::from_pem(&cert_bytes).map_err(|error| {
+				tracing::error!(?error, path = %ca_cert_path, "Failed to parse CA certificate file for OIDC");
+				APIError::InternalServerError(format!(
+					"Failed to parse CA certificate '{}': {}",
+					ca_cert_path, error
+				))
+			})?;
+			client_builder = client_builder.add_root_certificate(cert);
+		}
+
+		let http_client = oauth2_reqwest::ReqwestClient::from(
+			client_builder.build().map_err(|error| {
 				tracing::error!(?error, "Failed to create HTTP client for OIDC");
 				APIError::InternalServerError(format!(
 					"Failed to create HTTP client: {}",
 					error
 				))
 			})?,
-	);
+		);
 
-	let provider_metadata =
-		CoreProviderMetadata::discover_async(issuer_url, &http_client)
-			.await
-			.map_err(|e| {
-				tracing::error!(?e, "OIDC discovery failed");
-				APIError::InternalServerError(format!("OIDC discovery failed: {}", e))
-			})?;
+		let provider_metadata =
+			CoreProviderMetadata::discover_async(issuer_url, &http_client)
+				.await
+				.map_err(|e| {
+					tracing::error!(?e, "OIDC discovery failed");
+					APIError::InternalServerError(format!("OIDC discovery failed: {}", e))
+				})?;
 
-	let redirect_uri = format!("{}/api/v2/auth/oidc/callback", frontend_url);
-	let redirect_url = RedirectUrl::new(redirect_uri).map_err(|e| {
-		APIError::InternalServerError(format!("Invalid redirect URI: {}", e))
-	})?;
+		Ok(Self {
+			http_client,
+			provider_metadata,
+			client_id: config.client_id.clone(),
+			client_secret: config.client_secret.clone(),
+		})
+	}
 
-	let client = CoreClient::from_provider_metadata(
-		provider_metadata,
-		ClientId::new(config.client_id.clone()),
-		Some(ClientSecret::new(config.client_secret.clone())),
-	)
-	.set_redirect_uri(redirect_url);
+	/// Create a per-request [StumpOidcClient] from the cached state.
+	/// This is cheap — no I/O, just constructs the client with the correct redirect URL.
+	pub fn create_client(&self, frontend_url: &str) -> Result<StumpOidcClient, APIError> {
+		let redirect_uri = format!("{}/api/v2/auth/oidc/callback", frontend_url);
+		let redirect_url = RedirectUrl::new(redirect_uri).map_err(|e| {
+			tracing::error!(?e, "Invalid redirect URI constructed from frontend URL");
+			APIError::InternalServerError(format!(
+				"Invalid redirect URI constructed from frontend URL: {}",
+				frontend_url
+			))
+		})?;
 
-	Ok((http_client, client))
+		Ok(CoreClient::from_provider_metadata(
+			self.provider_metadata.clone(),
+			ClientId::new(self.client_id.clone()),
+			Some(ClientSecret::new(self.client_secret.clone())),
+		)
+		.set_redirect_uri(redirect_url))
+	}
 }
 
 /// Get the OIDC authorization URL to redirect the user to

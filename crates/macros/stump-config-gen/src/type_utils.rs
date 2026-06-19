@@ -1,33 +1,53 @@
 use proc_macro2::TokenStream;
 use syn::{Field, Type, TypePath};
 
-pub fn parse_field_type(field: &Field) -> (TokenStream, bool, bool) {
+pub struct FieldType {
+	pub inner_type_tokens: TokenStream,
+	pub is_optional: bool,
+	pub is_vec: bool,
+}
+
+pub fn parse_field_type(field: &Field) -> FieldType {
 	match &field.ty {
 		Type::Path(type_path) => {
 			let type_name = type_path.path.segments.last().unwrap().ident.to_string();
 			let is_optional = type_name == "Option";
 
 			// If it's an Option get the inner type name
-			let (type_tokens, is_vec) = if is_optional {
+			let inner_type = if is_optional {
 				parse_option_inner_type(type_path)
 			}
 			// If it's a Vec<T> we want both Vec and T.
 			else if type_name == "Vec" {
-				let vector_type = get_vector_type(type_path);
-				(vector_type, true)
+				InnerType {
+					inner_type_tokens: get_vector_type(type_path),
+					is_vec: true,
+				}
 			} else {
 				let non_vector_type = type_name.parse::<TokenStream>().unwrap();
-				(non_vector_type, false)
+				InnerType {
+					inner_type_tokens: non_vector_type,
+					is_vec: false,
+				}
 			};
 
-			(type_tokens, is_optional, is_vec)
+			FieldType {
+				inner_type_tokens: inner_type.inner_type_tokens,
+				is_optional,
+				is_vec: inner_type.is_vec,
+			}
 		},
 		_ => panic!("Unsupported type"),
 	}
 }
 
-pub fn parse_option_inner_type(type_path: &TypePath) -> (TokenStream, bool) {
-	// Unravel the Option<T>
+pub struct InnerType {
+	inner_type_tokens: TokenStream,
+	is_vec: bool,
+}
+
+pub fn parse_option_inner_type(type_path: &TypePath) -> InnerType {
+	// Unravel the Option<T> or Vec<T>
 	match &type_path.path.segments.last().unwrap().arguments {
 		// Match on angle bracketed arguments only
 		syn::PathArguments::AngleBracketed(args) => {
@@ -46,13 +66,18 @@ pub fn parse_option_inner_type(type_path: &TypePath) -> (TokenStream, bool) {
 
 				// If T is a Vec then we need to do more processing
 				if inner_path_name == "Vec" {
-					let vector_type = get_vector_type(inner_type_path);
-					(vector_type, true)
+					InnerType {
+						inner_type_tokens: get_vector_type(inner_type_path),
+						is_vec: true,
+					}
 				}
 				// Otherwise we can just parse and return it
 				else {
 					let non_vector_type = inner_path_name.parse::<TokenStream>().unwrap();
-					(non_vector_type, false)
+					InnerType {
+						inner_type_tokens: non_vector_type,
+						is_vec: false,
+					}
 				}
 			}
 			// This shouldn't happen, but would occur if there were empty angle brackets

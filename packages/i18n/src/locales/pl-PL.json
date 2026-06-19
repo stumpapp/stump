@@ -455,8 +455,8 @@
 			"description": "Indeksuj pliki biblioteki, aby wypełnić bazę danych"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "Aktualizacja biblioteki nie powiodła się",
+			"failedToScan": "Skanowanie biblioteki nie powiodło się"
 		}
 	},
 	"createLibraryScene": {
@@ -1455,6 +1455,10 @@
 					"label": "Czcionka",
 					"description": "Dostosuj czcionkę używaną w aplikacji"
 				},
+				"thumbnailPreview": {
+					"label": "Podgląd",
+					"description": "Tak będą wyglądały miniatury z bieżącymi ustawieniami"
+				},
 				"thumbnailRatioSelect": {
 					"label": "Współczynnik miniatur",
 					"description": "Współczynnik proporcji używany dla miniatur",
@@ -1468,6 +1472,16 @@
 						"averageColor": "Średnie wartości kolorów",
 						"colorful": "Kolorowe",
 						"thumbhash": "Thumbhash"
+					}
+				},
+				"thumbnailRoundness": {
+					"label": "Zaokrąglenie miniatury",
+					"description": "Jak bardzo zaokrąglone powinny być narożniki miniatur",
+					"options": {
+						"none": "Brak",
+						"normal": "Normalne",
+						"rounded": "Zaokrąglone",
+						"large": "Duże"
 					}
 				},
 				"navigation": {
@@ -1649,7 +1663,7 @@
 		"app/reader": {
 			"helmet": "Ustawienia czytnika",
 			"title": "Ustawienia czytnika",
-			"description": "Domyślne opcje dla czytników Stump. Są one powiązane jedynie z bieżącym urządzeniem",
+			"description": "Domyślne opcje do czytania. Niektóre z nich przechowywane są tylko lokalnie na bieżącym urządzeniu",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -2776,7 +2790,7 @@
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Token"
+					"placeholder": "Nieprzetworzony token"
 				},
 				"basic": "Podstawowe"
 			},
@@ -2801,22 +2815,41 @@
 				"label": "Wyczyść postęp",
 				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?"
 			},
+			"deleteReadHistory": {
+				"label": "Usuń historię czytania",
+				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?"
+			},
 			"deleteBook": {
 				"label": "Usuń książkę",
 				"confirmation": "Czy na pewno chcesz usunąć {{bookTitle}}?"
 			},
+			"deleteDownload": {
+				"label": "Usuń pobrane",
+				"confirmation": "Czy na pewno chcesz usunąć pobrany plik dla {{bookTitle}}?"
+			},
+			"goToLibrary": "Przejdź do biblioteki",
+			"goToSeries": "Przejdź do serii",
 			"seeDetails": "Zobacz szczegóły"
 		},
 		"bookMetadata": {
 			"ageRating": "Klasyfikacja wiekowa",
 			"downloadedAt": "Pobrane",
+			"characters": "Postacie",
 			"format": "Format",
 			"genres": "Gatunki",
 			"language": "Język",
 			"publisher": "Wydawca",
 			"size": "Rozmiar",
 			"volume": "Tom",
-			"year": "Rok"
+			"writers": "Pisarze",
+			"colorists": "Koloryści",
+			"inkers": "Kreślarze",
+			"letterers": "Kaligrafiści",
+			"coverArtists": "Twórcy okładki",
+			"links": "Odnośniki",
+			"year": "Rok",
+			"identifier": "Identyfikator",
+			"identifiers": "Identyfikatory"
 		},
 		"common": {
 			"book": "Książka",
@@ -2825,27 +2858,39 @@
 			"clear": "Wyczyść",
 			"completed": "Ukończone",
 			"confirm": "Potwierdź",
+			"continue": "Kontynuuj",
 			"content": "Zawartość",
 			"details": "Szczegóły",
 			"delete": "Usuń",
+			"dismiss": "Odrzuć",
+			"download": "Pobierz",
 			"downloads": "Pobrane",
+			"done": "Zakończone",
 			"edit": "Edytuj",
 			"enabled": "Aktywne",
 			"enable": "Aktywuj",
 			"error": "Błąd",
+			"favorite": "Ulubione",
+			"finished": "Ukończone",
 			"grid": "Siatka",
 			"list": "Lista",
 			"lastCompleted": "Ostatnio ukończone",
 			"name": "Nazwa",
 			"none": "Brak",
+			"notAvailable": "Niedostępne",
 			"options": "Ustawienia",
 			"page": "Strona",
 			"pages": "Strony",
+			"pageXOfY": "Strona {{current}} z {{total}}",
 			"password": "Hasło",
 			"progress": "Postęp",
 			"publication": "Publikacja",
+			"read": "Czytaj",
+			"readAgain": "Czytaj ponownie",
 			"readTime": "Czas czytania",
+			"readthrough": "Readthrough",
 			"readMore": "Dowiedz się więcej",
+			"refresh": "Odśwież",
 			"save": "Zapisz",
 			"select": "Zaznacz",
 			"settings": "Ustawienia",
@@ -2860,7 +2905,12 @@
 			"version": "Wersja"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Nieznany błąd"
+		},
+		"epubMenu": {
+			"tableOfContents": "Spis treści",
+			"bookmarksAndAnnotations": "Zakładki i adnotacje",
+			"appearance": "Wygląd"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2880,14 +2930,22 @@
 		"emptyState": {
 			"noStumpServers": "Nie dodano żadnych serwerów Stump",
 			"noOPDSServers": "Nie dodano żadnych serwerów OPDS",
-			"noServers": "Nie skonfigurowano żadnych serwerów",
+			"noServers": "Brak skonfigurowanych serwerów",
 			"cta": "Zacznij od dodania serwera, aby uzyskać do swojej kolekcji książek",
-			"seeDocumentation": "Zobacz dokumentację"
+			"seeDocumentation": "Zobacz dokumentację",
+			"noSmartLists": {
+				"label": "Nie zwrócono żadnych list",
+				"description": "Po utworzeniu pojawią się tutaj"
+			}
 		},
 		"tabs": {
 			"servers": "Serwery",
 			"localLibrary": "Biblioteka",
-			"settings": "Ustawienia"
+			"settings": "Ustawienia",
+			"home": "Strona główna",
+			"browse": "Przeglądaj",
+			"clubs": "Kluby",
+			"search": "Szukaj"
 		},
 		"localLibrary": {
 			"title": "Biblioteka lokalna",
@@ -2957,11 +3015,16 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"skippedOneServer": "Synchronizacja pominięta dla serwera {{skippedCount}}",
+				"skippedMultipleServers": "Synchronizacja pominięta dla serwerów {{skippedCount}}",
+				"explanation": "Niektóre serwery używają metod uwierzytelniania, których nie można automatycznie odświeżyć"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "Synchronizacja postępu offline nie powiodła się"
+		},
+		"search": {
+			"label": "Przeszukaj ten serwer",
+			"description": "Szukaj konkretnej zawartości na tym serwerze",
+			"placeholder": "Szukaj"
 		},
 		"settings": {
 			"preferences": {
@@ -3008,7 +3071,14 @@
 				"bookClubsEnabled": "Funkcje klubu książki"
 			},
 			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
-			"lowercaseTranslation": "Małoliterowe przypisy",
+			"textCase": {
+				"label": "Kapitalizacja tekstu",
+				"options": {
+					"lowerCase": "Lowercase",
+					"sentenceCase": "Sentence Case",
+					"titleCase": "Title Case"
+				}
+			},
 			"tintListBackground": "Zabarw tła list",
 			"management": {
 				"label": "Zarządzanie",
@@ -3040,11 +3110,11 @@
 					"label": "Wyczyść pamięć podręczną",
 					"memory": {
 						"button": "Pamięć",
-						"success": "Wyczyszczono pamięć"
+						"success": "Wyczyszczono pamięć podręczną w pamięci"
 					},
 					"disk": {
 						"button": "Dysk",
-						"success": "Wyczyszczono pamięć podręczną"
+						"success": "Wyczyszczono pamięć podręczną na dysku"
 					}
 				},
 				"deleteDatabase": {
@@ -3084,6 +3154,32 @@
 				"buildInformation": "Informacje o kompilacji",
 				"version": "Wersja: {{version}}",
 				"suuportIdentifier": "Identyfikator wsparcia: {{supportID}}"
+			}
+		},
+		"stumpServer": {
+			"browse": {
+				"books": "Książki",
+				"favorites": "Ulubione",
+				"files": "Pliki",
+				"libraries": "Biblioteki",
+				"series": "Serie",
+				"smartLists": "Inteligentne listy"
+			},
+			"continueReading": {
+				"label": "Wznów czytanie",
+				"emptyText": "Brak książek w toku"
+			},
+			"onDeck": {
+				"label": "Twoja następna pozycja do przeczytania",
+				"emptyText": "Brak książek na pokładzie"
+			},
+			"recentlyAddedSeries": {
+				"label": "Ostatnio dodane serie",
+				"emptyText": "Brak ostatnio dodanych serii"
+			},
+			"recentlyAddedBooks": {
+				"label": "Ostatnio dodane książki",
+				"emptyText": "Brak ostatnio dodanych książek"
 			}
 		},
 		"readerSettings": {
@@ -3143,9 +3239,36 @@
 			},
 			"allSettings": "Wszystkie ustawienia"
 		},
+		"tableOfContents": {
+			"goToPageX": "Przejdź do strony {{pageNumber}}",
+			"goToPagePlaceholder": "Przejdź do strony...",
+			"errors": {
+				"pageDoesNotExist": "Strona {{page}} nie istnieje",
+				"invalidPage": "'{{page}}' nie jest numerem strony"
+			},
+			"showCurrentChapter": "Pokaż bieżący rozdział"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "Wszystkie",
+				"bookmarks": "Zakładki",
+				"highlights": "Wyróżnione",
+				"notes": "Notatki"
+			}
+		},
 		"epubSettings": {
 			"title": "Ustawienia czytnika Epub",
-			"typeface": "Krój czcionki",
+			"typeface": {
+				"label": "Krój czcionki",
+				"options": {
+					"system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "Rozmiar czcionki",
 			"fontWeight": {
 				"label": "Grubość czcionki",

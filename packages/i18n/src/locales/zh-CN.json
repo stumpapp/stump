@@ -417,7 +417,7 @@
 					"description": "为书库中的每个文件生成哈希值以检测重复"
 				},
 				"koreaderHashes": {
-					"label": "KoReader兼容的哈希",
+					"label": "KoReader 兼容的哈希",
 					"description": "如果使用 KoReader，生成它所期望格式的额外哈希值"
 				}
 			},
@@ -455,8 +455,8 @@
 			"description": "索引书库文件以填充你的数据库"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "更新书库失败",
+			"failedToScan": "扫描书库失败"
 		}
 	},
 	"createLibraryScene": {
@@ -1016,7 +1016,7 @@
 									"tags": "标签",
 									"createdAt": "创建时间",
 									"updatedAt": "更新时间",
-									"readingStatus": "Reading status"
+									"readingStatus": "阅读状态"
 								}
 							},
 							"book_meta": {
@@ -1095,11 +1095,11 @@
 						"emptyState": "没有可显示的值"
 					},
 					"enumValue": {
-						"selectPlaceholder": "Select value",
-						"READING": "Reading",
-						"FINISHED": "Finished",
-						"NOT_STARTED": "Not started",
-						"ABANDONED": "Abandoned"
+						"selectPlaceholder": "选择值",
+						"READING": "阅读中",
+						"FINISHED": "已完成",
+						"NOT_STARTED": "未开始",
+						"ABANDONED": "已放弃"
 					}
 				}
 			}
@@ -1386,7 +1386,7 @@
 					"avatarPicker": {
 						"label": "头像",
 						"heading": "上传头像",
-						"subtitle": "您可以上传任何图片作为您在Stump 中的社交功能的头像",
+						"subtitle": "您可以上传任何图片作为您在 Stump 中的社交功能头像",
 						"dropzone": "拖放图片到此处或点击以选择",
 						"changeImage": "更改图像",
 						"removeImage": "删除图片",
@@ -1405,7 +1405,7 @@
 					"heading": "语言及地区",
 					"subtitle": [
 						"Stump 支持多种语言和本地化，在下方设置您的偏好。请考虑帮助提升质量",
-						"Stump的翻译",
+						"Stump 的翻译",
 						"如果你可以！"
 					]
 				}
@@ -1421,12 +1421,12 @@
 					"description": "Stump 的基本外观和风格选项"
 				},
 				"interface": {
-					"title": "Interface",
-					"description": "Primary UI surfaces and interaction elements"
+					"title": "界面",
+					"description": "主要界面区域和交互元素"
 				},
 				"thumbnails": {
-					"title": "Thumbnails",
-					"description": "Display options for thumbnail images"
+					"title": "缩略图",
+					"description": "缩略图图片的显示选项"
 				},
 				"themeSelect": {
 					"label": "主题",
@@ -1455,10 +1455,14 @@
 					"label": "字体",
 					"description": "自定义应用使用的字体"
 				},
+				"thumbnailPreview": {
+					"label": "Preview",
+					"description": "This is how thumbnails will look with the current settings"
+				},
 				"thumbnailRatioSelect": {
 					"label": "缩略图比率",
 					"description": "缩略图中使用的宽高比",
-					"defaultSuffix": "Default"
+					"defaultSuffix": "默认"
 				},
 				"thumbnailPlaceholder": {
 					"label": "缩略图占位符",
@@ -1470,13 +1474,23 @@
 						"thumbhash": "缩略图哈希"
 					}
 				},
+				"thumbnailRoundness": {
+					"label": "Thumbnail roundness",
+					"description": "How rounded the corners of thumbnail images should be",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"large": "Large"
+					}
+				},
 				"navigation": {
-					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
+					"title": "导航",
+					"description": "自定义应用的导航元素"
 				},
 				"layoutAndArrangement": {
-					"label": "布局和安排",
-					"description": "自定义Stump 如何显示信息和组织内容"
+					"label": "布局与排列",
+					"description": "自定义 Stump 如何显示信息和组织内容"
 				},
 				"primaryNavigation": {
 					"label": "主要导航",
@@ -1489,11 +1503,11 @@
 				},
 				"doubleSidebar": {
 					"label": "设置边栏",
-					"description": "Enables sidebar navigation for the settings pages"
+					"description": "为设置页面启用侧边栏导航"
 				},
 				"replacePrimarySidebar": {
 					"label": "替换主侧边栏",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
+					"description": "出现二级侧边栏时，用它替换主侧边栏，而不是叠加显示",
 					"tooltips": {
 						"doubleSidebar": "此设置需要启用侧边栏",
 						"topbar": "当主导航设置为顶部栏时，当前不支持此设置"
@@ -1501,7 +1515,7 @@
 				},
 				"navigationArrangement": {
 					"label": "导航排列",
-					"description": "Rearrange or tweak the navigation items in your primary navigation",
+					"description": "重新排列或调整主导航中的导航项",
 					"isLocked": "排列已锁定",
 					"lock": "锁定排列",
 					"unlock": "解锁排列",
@@ -1537,12 +1551,12 @@
 					"description": "Stump 对视图端口应用最大宽度。此设置允许您调整或删除此限制",
 					"tooltip": "当主导航设置为侧边栏时，当前不支持此设置",
 					"options": {
-						"noLimit": "No limit"
+						"noLimit": "无限制"
 					}
 				},
 				"additionalPreferences": {
 					"label": "其他偏好",
-					"description": "通过这些附加设置自定义Stump的外观和行为"
+					"description": "通过这些附加设置自定义 Stump 的外观和行为"
 				},
 				"showThumbnailsInHeader": {
 					"label": "在标题中显示缩略图",
@@ -1581,12 +1595,12 @@
 					"description": "当作业运行时显示浮动叠加层"
 				},
 				"dayResetHourOffset": {
-					"label": "Reading day reset offset",
-					"description": "Shift when a reading day resets, in hours from midnight"
+					"label": "阅读日重置偏移量",
+					"description": "设置阅读日从午夜起延后多少小时重置"
 				},
 				"readingSessionGracePeriod": {
-					"label": "Reading session grace period",
-					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+					"label": "阅读会话宽限期",
+					"description": "如果在此时间范围内（秒）未检测到活动，下次更新将开始新的会话"
 				}
 			}
 		},
@@ -1649,7 +1663,7 @@
 		"app/reader": {
 			"helmet": "阅读设置",
 			"title": "阅读设置",
-			"description": "Stump 阅读器的默认选项。这些选项仅绑定到当前设备",
+			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -1785,7 +1799,7 @@
 					"resetTokens": {
 						"label": "删除令牌",
 						"description": [
-							"移除所有安全存储的服务器令牌，包括API密钥",
+							"移除所有安全存储的服务器令牌，包括 API 密钥",
 							"你将需要重新在每个服务器上进行身份验证"
 						],
 						"confirmation": {
@@ -1832,7 +1846,7 @@
 						}
 					},
 					"nonStableChannel": {
-						"title": "您正在运行一个不稳定的Stump 构建",
+						"title": "您正在运行一个不稳定的 Stump 构建",
 						"description": [
 							"看起来您正在运行",
 							"构建频道"
@@ -1841,7 +1855,7 @@
 				},
 				"helpfulLinks": {
 					"title": "帮助链接",
-					"description": "可能有助于管理Stump 服务器实例的资源链接",
+					"description": "可能有助于管理 Stump 服务器实例的资源链接",
 					"links": {
 						"documentation": "文档",
 						"changelog": "更改日志"
@@ -1852,25 +1866,25 @@
 					"description": "如果适用，你的服务器从外部网络可访问的 URL。这将启用邀请链接和其他功能"
 				},
 				"customEmojis": {
-					"title": "自定义表情",
-					"description": "为您的服务器上传和管理自定义图像 emoji",
+					"title": "自定义 Emoji",
+					"description": "为您的服务器上传和管理自定义 Emoji 图片",
 					"dropzone": "拖放图片到此处或点击以选择",
 					"input": {
-						"label": "表情符号名称",
+						"label": "Emoji 名称",
 						"placeholder": "例如：party_parrot"
 					},
 					"deleteModal": {
-						"title": "删除表情",
-						"description": "确实要删除此录音？"
+						"title": "删除 Emoji",
+						"description": "确定要删除此 Emoji 吗？"
 					},
-					"noCustomEmojis": "尚未添加自定义表情",
-					"invalidName": "请输入有效的表情名称",
-					"uploadError": "头像上传失败",
-					"uploadSuccess": "表情已上传",
-					"renameSuccess": "Emoji重命名了",
-					"renameError": "重命名表情失败",
-					"deleteSuccess": "表情已删除",
-					"deleteError": "删除表情失败"
+					"noCustomEmojis": "尚未添加自定义 Emoji",
+					"invalidName": "请输入有效的 Emoji 名称",
+					"uploadError": "Emoji 上传失败",
+					"uploadSuccess": "Emoji 已上传",
+					"renameSuccess": "Emoji 已重命名",
+					"renameError": "重命名 Emoji 失败",
+					"deleteSuccess": "Emoji 已删除",
+					"deleteError": "删除 Emoji 失败"
 				}
 			}
 		},
@@ -2167,7 +2181,7 @@
 						"label": "智能列表",
 						"read": {
 							"label": "访问智能列表功能",
-							"description": "允许用户访问智能列表功能。 Granular 权限尚未实现，\n包括读、创建和更新他们自己的列表的权限"
+							"description": "允许用户访问智能列表功能。细粒度权限尚未实现，\n包括读取、创建和更新自己列表的权限"
 						}
 					}
 				},
@@ -2198,7 +2212,7 @@
 					"description": "你配置的用于从你的 Stump 服务器实例发送邮件的客户端",
 					"singleInstanceDisclaimer": "虽然 Stump 在后端支持多个 SMTP 配置，但 UI 上只能配置一个。将来会改进",
 					"list": {
-						"emptyHeading": "未配置SMTP电子邮件服务器",
+						"emptyHeading": "未配置 SMTP 邮件服务器",
 						"primaryEmailer": "首选电子邮箱",
 						"sendHistory": {
 							"heading": "发送历史",
@@ -2340,12 +2354,12 @@
 				"apiToken": {
 					"label": "API 令牌",
 					"description": "用于向该提供方进行身份验证的 API 令牌",
-					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
+					"validationError": "此令牌自动验证失败",
+					"validationRequestError": "验证请求失败",
+					"validationRequestErrorUnknown": "验证期间发生未知错误",
+					"hardcoverStatusError": "Hardcover API 返回状态 {{status}}",
+					"hardcoverValidationError": "Hardcover API 返回错误：{{message}}",
+					"noBearerPrefixRequired": "请移除 API 令牌开头的 'Bearer ' 前缀"
 				},
 				"apiTokenExpiresAt": {
 					"label": "API 令牌过期时间",
@@ -2563,14 +2577,14 @@
 		"confirm": "确认",
 		"delete": "删除",
 		"deleteConfirmation": {
-			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
-			"confirm": "Delete {{type}}",
+			"title": "删除 {{type}}",
+			"description": "确定要删除此 {{type}} 吗？此操作不可撤销。",
+			"confirm": "删除 {{type}}",
 			"typeToConfirm": "Type {{name}} to confirm:"
 		},
 		"experimentalDisclaimer": {
 			"title": "该功能为实验性功能",
-			"description": "该功能可能存在缺失、Bug 或无法正常工作。请谨慎使用，并反馈你遇到的问题"
+			"description": "该功能可能缺少部分内容、存在错误或无法正常工作。请谨慎使用，并反馈你遇到的问题"
 		},
 		"enter": "进入",
 		"save": "保存",
@@ -2776,7 +2790,7 @@
 				},
 				"token": {
 					"label": "令牌",
-					"placeholder": "原始令牌"
+					"placeholder": "Raw Token"
 				},
 				"basic": "基本"
 			},
@@ -2784,8 +2798,8 @@
 			"catalogUrl": "目录 URL",
 			"failedToConnect": "连接到服务器失败",
 			"didConnect": "已连接",
-			"checkConnection": "检查连接",
-			"setAsDefaultServer": "设为默认服务器",
+			"checkConnection": "Check Connection",
+			"setAsDefaultServer": "Set as Default Server",
 			"enableOPDS": "启用 OPDS",
 			"validation": {
 				"nameAlreadyExists": "名称已存在",
@@ -2794,58 +2808,89 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "标记为已读",
+				"label": "Mark as Read",
 				"confirmation": "您确定要将 {{bookTitle}} 标记为已读吗？"
 			},
 			"clearProgress": {
-				"label": "清除进度",
+				"label": "Clear Progress",
 				"confirmation": "您确定要清除 {{bookTitle}} 的进度吗？"
 			},
+			"deleteReadHistory": {
+				"label": "Delete Read History",
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+			},
 			"deleteBook": {
-				"label": "删除书籍",
+				"label": "Delete Book",
 				"confirmation": "您确定要删除 {{bookTitle}} 吗？"
 			},
+			"deleteDownload": {
+				"label": "Delete Download",
+				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+			},
+			"goToLibrary": "Go to Library",
+			"goToSeries": "Go to Series",
 			"seeDetails": "查看详情"
 		},
 		"bookMetadata": {
 			"ageRating": "年龄分级",
 			"downloadedAt": "下载时间",
+			"characters": "Characters",
 			"format": "格式",
 			"genres": "类型",
 			"language": "语言",
 			"publisher": "出版社",
 			"size": "大小",
 			"volume": "卷",
-			"year": "年份"
+			"writers": "Writers",
+			"colorists": "Colorists",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"coverArtists": "Cover Artists",
+			"links": "Links",
+			"year": "年份",
+			"identifier": "Identifier",
+			"identifiers": "Identifiers"
 		},
 		"common": {
-			"book": "Book",
+			"book": "书籍",
 			"cancel": "取消",
 			"chapter": "章节",
 			"clear": "清除",
-			"completed": "Completed",
+			"completed": "已完成",
 			"confirm": "确认",
-			"content": "Content",
+			"continue": "Continue",
+			"content": "内容",
 			"details": "详情",
 			"delete": "删除",
+			"dismiss": "Dismiss",
+			"download": "Download",
 			"downloads": "下载",
+			"done": "Done",
 			"edit": "编辑",
 			"enabled": "已启用",
 			"enable": "启用",
 			"error": "错误",
-			"grid": "Grid",
-			"list": "List",
-			"lastCompleted": "Last Completed",
+			"favorite": "Favorite",
+			"finished": "Finished",
+			"grid": "网格",
+			"list": "列表",
+			"lastCompleted": "最近完成",
 			"name": "名称",
 			"none": "无",
+			"notAvailable": "Not Available",
 			"options": "选项",
 			"page": "页面",
 			"pages": "页",
+			"pageXOfY": "Page {{current}} of {{total}}",
 			"password": "密码",
 			"progress": "进度",
-			"publication": "Publication",
-			"readTime": "Reading time",
-			"readMore": "阅读更多",
+			"publication": "出版信息",
+			"read": "Read",
+			"readAgain": "Read Again",
+			"readTime": "Reading Time",
+			"readthrough": "Readthrough",
+			"readMore": "Read More",
+			"refresh": "Refresh",
 			"save": "保存",
 			"select": "选择",
 			"settings": "设置",
@@ -2860,48 +2905,61 @@
 			"version": "版本"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "未知错误"
+		},
+		"epubMenu": {
+			"tableOfContents": "Table of Contents",
+			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"appearance": "Appearance"
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
-				"position": "{{position}} in {{seriesName}}"
+				"positionWithTotal": "{{seriesName}}：第 {{position}} / {{total}}",
+				"position": "{{seriesName}}：第 {{position}}"
 			},
 			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
+				"positionWithTotal": "{{seriesName}}：第 {{position}} 本，共 {{total}} 本",
+				"position": "{{seriesName}}：第 {{position}} 本"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
-				"position": "#{{position}} in {{seriesName}}"
+				"positionWithTotal": "{{seriesName}}：#{{position}} / {{total}}",
+				"position": "{{seriesName}}：#{{position}}"
 			},
-			"unknownSeriesName": "series"
+			"unknownSeriesName": "系列"
 		},
 		"emptyState": {
 			"noStumpServers": "未添加 Stump 服务器",
 			"noOPDSServers": "未添加 OPDS 服务器",
-			"noServers": "未配置服务器",
+			"noServers": "No Servers Configured",
 			"cta": "通过添加服务器来开始访问您的书籍收藏",
-			"seeDocumentation": "查看文档"
+			"seeDocumentation": "查看文档",
+			"noSmartLists": {
+				"label": "No lists returned",
+				"description": "Once created they will appear here"
+			}
 		},
 		"tabs": {
 			"servers": "服务器",
 			"localLibrary": "本地书库",
-			"settings": "设置"
+			"settings": "设置",
+			"home": "Home",
+			"browse": "Browse",
+			"clubs": "Clubs",
+			"search": "Search"
 		},
 		"localLibrary": {
 			"title": "本地书库",
 			"emptyState": {
 				"all": {
-					"title": "暂无可阅读的内容",
+					"title": "Nothing to Read Yet",
 					"description": "一旦您下载了离线阅读的书籍，它们将显示在这里"
 				},
 				"imported": {
-					"title": "未导入书籍",
+					"title": "No Imported Books",
 					"description": "导入书籍以离线阅读"
 				},
 				"server": {
-					"title": "未下载书籍",
+					"title": "No Downloaded Books",
 					"description": "从书库下载书籍以离线阅读"
 				}
 			},
@@ -2957,11 +3015,16 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"skippedOneServer": "已跳过 {{skippedCount}} 个服务器的同步",
+				"skippedMultipleServers": "已跳过 {{skippedCount}} 个服务器的同步",
+				"explanation": "部分服务器使用的认证方式无法自动刷新"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "离线进度同步失败"
+		},
+		"search": {
+			"label": "Search This Server",
+			"description": "Find specific content on this server",
+			"placeholder": "Search"
 		},
 		"settings": {
 			"preferences": {
@@ -2981,7 +3044,7 @@
 					"label": "缩略图占位符",
 					"options": {
 						"grayscale": "灰度",
-						"averageColor": "平均颜色",
+						"averageColor": "Average Color",
 						"colorful": "彩色",
 						"thumbhash": "缩略图哈希"
 					}
@@ -3008,16 +3071,23 @@
 				"bookClubsEnabled": "读书俱乐部功能"
 			},
 			"autoSyncLocalData": "自动同步本地数据",
-			"lowercaseTranslation": "Lowercase Labels",
-			"tintListBackground": "Tint List Backgrounds",
+			"textCase": {
+				"label": "Text Case",
+				"options": {
+					"lowerCase": "Lowercase",
+					"sentenceCase": "Sentence Case",
+					"titleCase": "Title Case"
+				}
+			},
+			"tintListBackground": "列表背景着色",
 			"management": {
 				"label": "管理",
 				"dataUsage": {
 					"label": "数据使用",
-					"nonStumpData": "非 Stump 数据",
-					"serversTotal": "服务器总计",
-					"totalFiles": "文件总数",
-					"totalSize": "总大小",
+					"nonStumpData": "Non-Stump Data",
+					"serversTotal": "Servers Total",
+					"totalFiles": "Total Files",
+					"totalSize": "Total Size",
 					"deleteDownloads": {
 						"label": "删除下载",
 						"confirmation": "您确定要删除来自 {{serverName}} 的所有下载吗？",
@@ -3028,7 +3098,7 @@
 					},
 					"noDownloads": "此服务器无下载文件",
 					"storedPreferences": {
-						"label": "存储的首选项",
+						"label": "Stored Preferences",
 						"description": "书籍首选项、阅读计时器等杂项数据"
 					},
 					"clearPreferences": "清除首选项"
@@ -3040,21 +3110,21 @@
 					"label": "清除缓存",
 					"memory": {
 						"button": "内存",
-						"success": "内存缓存已清除"
+						"success": "Memory Cache Cleared"
 					},
 					"disk": {
 						"button": "磁盘",
-						"success": "磁盘缓存已清除"
+						"success": "Disk Cache Cleared"
 					}
 				},
 				"deleteDatabase": {
 					"label": "删除数据库",
 					"success": {
-						"title": "数据库已删除",
+						"title": "Database Deleted",
 						"description": "请重启应用"
 					},
 					"error": {
-						"title": "删除失败",
+						"title": "Deletion Failed",
 						"description": "删除数据库时出错"
 					}
 				},
@@ -3086,9 +3156,35 @@
 				"suuportIdentifier": "支持标识符：{{supportID}}"
 			}
 		},
+		"stumpServer": {
+			"browse": {
+				"books": "Books",
+				"favorites": "Favorites",
+				"files": "Files",
+				"libraries": "Libraries",
+				"series": "Series",
+				"smartLists": "Smart Lists"
+			},
+			"continueReading": {
+				"label": "Continue Reading",
+				"emptyText": "No books in progress"
+			},
+			"onDeck": {
+				"label": "Your Next Read",
+				"emptyText": "No books on deck"
+			},
+			"recentlyAddedSeries": {
+				"label": "Recently Added Series",
+				"emptyText": "No recently added series"
+			},
+			"recentlyAddedBooks": {
+				"label": "Recently Added Books",
+				"emptyText": "No recently added books"
+			}
+		},
 		"readerSettings": {
 			"title": "阅读器设置",
-			"overrideGlobalSettings": "覆盖全局设置",
+			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "模式",
 				"imageOptions": "图像选项",
@@ -3129,7 +3225,7 @@
 			},
 			"allowDownscaling": "缩小",
 			"tapSidesToNavigate": "点击两侧导航",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"volumeButtonsNavigate": "音量键翻页",
 			"footerControls": {
 				"label": "页脚",
 				"options": {
@@ -3143,9 +3239,36 @@
 			},
 			"allSettings": "全部设置"
 		},
+		"tableOfContents": {
+			"goToPageX": "Go to page {{pageNumber}}",
+			"goToPagePlaceholder": "Go to page...",
+			"errors": {
+				"pageDoesNotExist": "Page {{page}} does not exist",
+				"invalidPage": "'{{page}}' is not a page number"
+			},
+			"showCurrentChapter": "Show Current Chapter"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "All",
+				"bookmarks": "Bookmarks",
+				"highlights": "Highlights",
+				"notes": "Notes"
+			}
+		},
 		"epubSettings": {
-			"title": "Epub 阅读器设置",
-			"typeface": "字体",
+			"title": "EPUB 阅读器设置",
+			"typeface": {
+				"label": "Typeface",
+				"options": {
+					"system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "字号",
 			"fontWeight": {
 				"label": "字重",
@@ -3183,7 +3306,7 @@
 				}
 			},
 			"publisherStyles": "出版方样式",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"volumeButtonsNavigate": "音量键翻页",
 			"textAlignment": {
 				"label": "文本对齐",
 				"options": {
@@ -3211,14 +3334,14 @@
 			}
 		},
 		"libraryType": {
-			"BOOK": "Books",
-			"COMIC": "Comics",
-			"LIGHT_NOVEL": "Light Novels",
-			"MANGA": "Manga",
-			"MANHWA": "Manhwa",
-			"MIXED": "Mixed",
-			"WEBTOON": "Webtoons",
-			"WEB_NOVEL": "Web Novels"
+			"BOOK": "书籍",
+			"COMIC": "漫画",
+			"LIGHT_NOVEL": "轻小说",
+			"MANGA": "日漫",
+			"MANHWA": "韩漫",
+			"MIXED": "混合",
+			"WEBTOON": "条漫",
+			"WEB_NOVEL": "网络小说"
 		},
 		"savedServerActions": {
 			"clearCache": "清除缓存",
@@ -3232,31 +3355,31 @@
 			}
 		},
 		"filtering": {
-			"notStarted": "Not Started",
-			"currentlyReading": "Currently Reading",
-			"finished": "Finished"
+			"notStarted": "未开始",
+			"currentlyReading": "阅读中",
+			"finished": "已完成"
 		},
 		"sorting": {
-			"labelEllipsis": "Sort By...",
+			"labelEllipsis": "排序方式...",
 			"sortField": {
-				"NAME": "Name",
-				"ADDED_AT": "Date Added",
-				"CREATED_AT": "Date Added",
-				"NUMBER": "Series Position",
-				"SERIES": "Series",
-				"YEAR": "Year Published"
+				"NAME": "名称",
+				"ADDED_AT": "添加日期",
+				"CREATED_AT": "添加日期",
+				"NUMBER": "系列位置",
+				"SERIES": "系列",
+				"YEAR": "出版年份"
 			},
 			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
+				"ASC": "升序",
+				"DESC": "降序"
 			},
 			"sortDirectionString": {
-				"ASC": "A → Z",
-				"DESC": "Z → A"
+				"ASC": "A -> Z",
+				"DESC": "Z -> A"
 			},
 			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
+				"ASC": "最早优先",
+				"DESC": "最新优先"
 			},
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",

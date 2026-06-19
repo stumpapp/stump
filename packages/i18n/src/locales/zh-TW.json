@@ -542,6 +542,13 @@
 			"addedFiles": "Added files"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "设置",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "继续阅读",
 			"downloadSeries": "下载系列"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "添加",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "取消",
 		"clear": "Clear",
 		"confirm": "确认",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "没有更改",
 		"create": "创建",
 		"edit": "编辑",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "更新",
 		"upload": "上传",
 		"uploading": "上传中...",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "此功能尚未实现！稍后再试",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "这尚未完全实现，并且缺少一些功能。请稍后再试",
 		"logIn": "登录",
 		"login": "登录",

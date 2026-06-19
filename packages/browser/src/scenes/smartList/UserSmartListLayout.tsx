@@ -16,7 +16,6 @@ import { createRouteGroups } from './settings/routes'
 import SmartListSettingsSideBar from './settings/SmartListSettingsSideBar'
 import { createSmartListViewStore, SmartListViewStoreContext } from './store'
 import UserSmartListHeader from './UserSmartListHeader'
-import UserSmartListNavigation from './UserSmartListNavigation'
 
 const LOCALE_BASE_KEY = 'userSmartListScene.layout'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
@@ -90,10 +89,7 @@ export default function UserSmartListLayout() {
 				routeGroups={createRouteGroups(viewerRole)}
 			/>
 		) : (
-			<>
-				<UserSmartListHeader />
-				<UserSmartListNavigation />
-			</>
+			<UserSmartListHeader />
 		)
 
 	if (isLoadingList || isLoadingMeta) {

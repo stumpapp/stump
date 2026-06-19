@@ -2816,40 +2816,40 @@
 				"confirmation": "Sei sicuro di voler azzerare i tuoi progressi per {{bookTitle}}?"
 			},
 			"deleteReadHistory": {
-				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+				"label": "Elimina cronologia di lettura",
+				"confirmation": "Sei sicuro di voler eliminare la tua cronologia di lettura per {{bookTitle}}?"
 			},
 			"deleteBook": {
-				"label": "Delete Book",
+				"label": "Elimina libro",
 				"confirmation": "Sei sicuro di voler eliminare {{bookTitle}}?"
 			},
 			"deleteDownload": {
-				"label": "Delete Download",
-				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+				"label": "Elimina download",
+				"confirmation": "Sei sicuro di voler eliminare il file scaricato per {{bookTitle}}?"
 			},
-			"goToLibrary": "Go to Library",
-			"goToSeries": "Go to Series",
+			"goToLibrary": "Vai alla libreria",
+			"goToSeries": "Vai alle serie",
 			"seeDetails": "Visualizza i dettagli"
 		},
 		"bookMetadata": {
 			"ageRating": "Classificazione per età",
 			"downloadedAt": "Scaricato",
-			"characters": "Characters",
+			"characters": "Personaggi",
 			"format": "Formato",
 			"genres": "Generi",
 			"language": "Lingua",
 			"publisher": "Editore",
 			"size": "Dimensione",
 			"volume": "Volume",
-			"writers": "Writers",
-			"colorists": "Colorists",
-			"inkers": "Inkers",
-			"letterers": "Letterers",
-			"coverArtists": "Cover Artists",
-			"links": "Links",
+			"writers": "Autori",
+			"colorists": "Coloristi",
+			"inkers": "Inchiostratori",
+			"letterers": "Letteristi",
+			"coverArtists": "Copertinisti",
+			"links": "Collegamenti",
 			"year": "Anno",
-			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"identifier": "Identificatore",
+			"identifiers": "Identificatori"
 		},
 		"common": {
 			"book": "Libro",
@@ -2858,39 +2858,39 @@
 			"clear": "Cancella",
 			"completed": "Completato",
 			"confirm": "Conferma",
-			"continue": "Continue",
+			"continue": "Continua",
 			"content": "Contenuto",
 			"details": "Dettagli",
 			"delete": "Elimina",
-			"dismiss": "Dismiss",
-			"download": "Download",
+			"dismiss": "Ignora",
+			"download": "Scarica",
 			"downloads": "Download",
-			"done": "Done",
+			"done": "Fatto",
 			"edit": "Modifica",
 			"enabled": "Abilitato",
 			"enable": "Abilita",
 			"error": "Errore",
-			"favorite": "Favorite",
-			"finished": "Finished",
+			"favorite": "Preferiti",
+			"finished": "Completato",
 			"grid": "Griglia",
 			"list": "Elenco",
 			"lastCompleted": "Ultimo completamento",
 			"name": "Nome",
 			"none": "Nessuno",
-			"notAvailable": "Not Available",
+			"notAvailable": "Non disponibile",
 			"options": "Opzioni",
 			"page": "Pagina",
 			"pages": "Pagine",
-			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageXOfY": "Pagina {{current}} di {{total}}",
 			"password": "Password",
 			"progress": "Progresso",
 			"publication": "Pubblicazione",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
+			"read": "Leggi",
+			"readAgain": "Leggi di nuovo",
+			"readTime": "Tempo di lettura",
 			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
+			"readMore": "Scopri di più",
+			"refresh": "Aggiorna",
 			"save": "Salva",
 			"select": "Seleziona",
 			"settings": "Impostazioni",
@@ -2909,8 +2909,8 @@
 		},
 		"epubMenu": {
 			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
+			"bookmarksAndAnnotations": "Segnalibri e annotazioni",
+			"appearance": "Aspetto"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2930,7 +2930,7 @@
 		"emptyState": {
 			"noStumpServers": "Nessun server Stump aggiunto",
 			"noOPDSServers": "Nessun server OPDS aggiunto",
-			"noServers": "No Servers Configured",
+			"noServers": "Nessun server configurato",
 			"cta": "Inizia aggiungendo un server per accedere alle tue collezioni di libri",
 			"seeDocumentation": "Visualizza la documentazione",
 			"noSmartLists": {
@@ -2973,7 +2973,7 @@
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "Elimina libro",
+					"label": "Elimina libri",
 					"confirmation": "Sei sicuro di voler eliminare la tua libreria locale?",
 					"disclaimer": "Questa azione non può essere annullata."
 				},

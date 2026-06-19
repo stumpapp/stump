@@ -542,6 +542,13 @@
 			"addedFiles": "Dodaj pliki"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Ustawienia",
 		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Kontynuuj czytanie",
 			"downloadSeries": "Pobierz serię"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Dodatkowe ustawienia",
 					"description": "Dostosuj wygląd i zachowanie Stump za pomocą tych dodatkowych ustawień"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Pokazuj miniatury w nagłówkach",
-					"description": "Jeśli chcesz widzieć częściej miniatury, to ustawienie pokaże je w większej ilości miejsc",
-					"tooltips": {
-						"enabled": "To ustawienie pokaże miniatury w większej ilości miejsc",
-						"disabled": "To ustawienie nie pokaże miniatur w większej ilości miejsc"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Ukrywaj pasek przewijania",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Dodaj",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Anuluj",
 		"clear": "Wyczyść",
 		"confirm": "Potwierdź",
+		"created": "Created",
 		"delete": "Usuń",
 		"deleteConfirmation": {
 			"title": "Usuń {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "Brak zmian",
 		"create": "Utwórz",
 		"edit": "Edytuj",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Aktualizuj",
 		"upload": "Prześlij",
 		"uploading": "Przesyłanie",
 		"uploadingEllipsis": "Przesyłanie...",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
 		"login": "Nazwa użytkownika",

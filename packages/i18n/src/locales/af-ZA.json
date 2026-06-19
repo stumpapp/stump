@@ -542,6 +542,13 @@
 			"addedFiles": "Added files"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Continue Reading",
 			"downloadSeries": "Download Series"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Add",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",

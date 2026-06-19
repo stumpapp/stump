@@ -21,10 +21,10 @@ pub fn gen_partial_stump_config(
 
 	let empty_fn_impl = gen_empty_impl(&empty_setters);
 	let apply_fn_impl = gen_apply_impl(struct_ident, config_vars);
-	let partial_struct_name = format_ident!("Partial{}", struct_ident);
+	let partial_struct_name = format_ident!("Partial{struct_ident}");
 
 	quote! {
-		#[derive(serde::Deserialize, Debug, Clone, PartialEq)]
+		#[derive(serde::Deserialize, Debug, Default, Clone, PartialEq)]
 		struct #partial_struct_name {
 			#(#struct_defs),*
 		}
@@ -69,7 +69,7 @@ fn config_var_to_setter(var: &StumpConfigVariable) -> TokenStream {
 			var.error("The config macro doesn't support Option<Vec<T>> config variables.")
 		},
 		(true, false) => {
-			let orig_var_name = format_ident!("orig_{}", var_name);
+			let orig_var_name = format_ident!("orig_{var_name}");
 
 			quote! {
 			let #orig_var_name = config.#var_name.clone();

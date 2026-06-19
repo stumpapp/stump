@@ -471,22 +471,7 @@ mod tests {
 			enable_playground: Some(false),
 			enable_koreader_sync: Some(false),
 			enable_kobo_sync: Some(false),
-			password_hash_cost: None,
-			session_ttl: None,
-			access_token_ttl: None,
-			refresh_token_ttl: None,
-			expired_session_cleanup_interval: None,
-			max_image_upload_size: None,
-			enable_upload: None,
-			max_file_upload_size: None,
-			pdf_render_dpi: None,
-			pdf_max_dimension: None,
-			pdf_render_format: None,
-			pdf_cache_pages: None,
-			pdf_prerender_range: None,
-			pdf_high_quality: None,
-			oidc: None,
-			trust_proxy_headers: None,
+			..Default::default()
 		};
 		partial_config.apply_to_config(&mut config);
 

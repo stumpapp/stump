@@ -74,8 +74,7 @@ export default function LibraryPatternRadioGroup() {
 						>
 							{t(getKey('section.docs.1'))}
 						</Link>{' '}
-						{t(getKey('section.docs.2'))}
-						{<b>{t(getKey('section.docs.3'))}</b>}
+						{t(getKey('section.docs.2'))} {<b>{t(getKey('section.docs.3'))}</b>}
 					</Text>
 				)}
 			</div>

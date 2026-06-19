@@ -542,6 +542,13 @@
 			"addedFiles": "已添加文件"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "设置",
 		"subtitle": "在此管理您的资料库。如果您想要在这些设置上刷新，请查看",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "继续阅读",
 			"downloadSeries": "下载系列"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "其他偏好",
 					"description": "通过这些附加设置自定义 Stump 的外观和行为"
-				},
-				"showThumbnailsInHeader": {
-					"label": "在标题中显示缩略图",
-					"description": "如果您希望更经常地看到缩略图，此设置将在更多地方显示缩略图",
-					"tooltips": {
-						"enabled": "此设置将在更多地方显示缩略图",
-						"disabled": "此设置将不会在更多地方显示缩略图"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "启用隐藏滚动条",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "添加",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "取消",
 		"clear": "清除",
 		"confirm": "确认",
+		"created": "Created",
 		"delete": "删除",
 		"deleteConfirmation": {
 			"title": "删除 {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "没有更改",
 		"create": "创建",
 		"edit": "编辑",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "更新",
 		"upload": "上传",
 		"uploading": "上传中",
 		"uploadingEllipsis": "正在上传......",
 		"unimplemented": "此功能尚未实现！稍后再试",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "这尚未完全实现，并且缺少一些功能。请稍后再试",
 		"logIn": "登录",
 		"login": "登录",

@@ -161,7 +161,7 @@ export default function Screen() {
 				paddingVertical: 16,
 			}}
 			contentInsetAdjustmentBehavior="always"
-			ItemSeparatorComponent={() => <View className="h-6" />}
+			ItemSeparatorComponent={() => <View className="h-4" />}
 			ListHeaderComponent={
 				<>
 					<ListHeaderComponent isEmptyState={data?.length === 0} />

@@ -81,6 +81,7 @@
 		"expo-splash-screen": "~55.0.21",
 		"expo-sqlite": "~55.0.16",
 		"expo-status-bar": "~55.0.6",
+		"expo-symbols": "^56.0.6",
 		"expo-system-ui": "~55.0.18",
 		"fast-xml-parser": "^5.8.0",
 		"image-size": "^2.0.0",

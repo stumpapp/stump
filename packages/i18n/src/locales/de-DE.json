@@ -2848,8 +2848,8 @@
 			"coverArtists": "Cover-Künstler",
 			"links": "Links",
 			"year": "Jahr",
-			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"identifier": "Identifikator",
+			"identifiers": "Identifikatoren"
 		},
 		"common": {
 			"book": "Buch",
@@ -2870,7 +2870,7 @@
 			"enabled": "Aktiviert",
 			"enable": "Aktivieren",
 			"error": "Fehler",
-			"favorite": "Favorite",
+			"favorite": "Favorit",
 			"finished": "Beendet",
 			"grid": "Raster",
 			"list": "Liste",
@@ -2934,8 +2934,8 @@
 			"cta": "Lege los mit einem Server hinzuzufügen, um auf deine Buchsammlungen zuzugreifen",
 			"seeDocumentation": "Siehe Dokumentation",
 			"noSmartLists": {
-				"label": "No lists returned",
-				"description": "Once created they will appear here"
+				"label": "Keine Listen zurückgegeben",
+				"description": "Sobald sie erstellt sind, werden sie hier erscheinen"
 			}
 		},
 		"tabs": {
@@ -3072,11 +3072,11 @@
 			},
 			"autoSyncLocalData": "Lokale Daten automatisch synchronisieren",
 			"textCase": {
-				"label": "Text Case",
+				"label": "Groß-/Kleinschreibung",
 				"options": {
-					"lowerCase": "Lowercase",
-					"sentenceCase": "Sentence Case",
-					"titleCase": "Title Case"
+					"lowerCase": "Kleinschreibung",
+					"sentenceCase": "Satzschreibung",
+					"titleCase": "Titelschreibung"
 				}
 			},
 			"tintListBackground": "Färbe Listenhintergrund",
@@ -3159,7 +3159,7 @@
 		"stumpServer": {
 			"browse": {
 				"books": "Bücher",
-				"favorites": "Favorites",
+				"favorites": "Favoriten",
 				"files": "Dateien",
 				"libraries": "Bibliotheken",
 				"series": "Serien",
@@ -3178,13 +3178,13 @@
 				"emptyText": "Keine kürzlich hinzugefügte Serien"
 			},
 			"recentlyAddedBooks": {
-				"label": "Recently Added Books",
-				"emptyText": "No recently added books"
+				"label": "Kürzlich hinzugefügte Bücher",
+				"emptyText": "Keine kürzlich hinzugefügte Bücher"
 			}
 		},
 		"readerSettings": {
 			"title": "Bild-Readereinstellungen",
-			"overrideGlobalSettings": "Override Global Settings",
+			"overrideGlobalSettings": "Globale Einstellungen überschreiben",
 			"sections": {
 				"mode": "Modus",
 				"imageOptions": "Bildoptionen",
@@ -3240,26 +3240,26 @@
 			"allSettings": "Alle Einstellungen"
 		},
 		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
+			"goToPageX": "Gehe zu Seite {{pageNumber}}",
+			"goToPagePlaceholder": "Gehe zu Seite...",
 			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
+				"pageDoesNotExist": "Seite {{page}} existiert nicht",
+				"invalidPage": "'{{page}}' ist keine Seitennummer"
 			},
-			"showCurrentChapter": "Show Current Chapter"
+			"showCurrentChapter": "Aktuelles Kapitel anzeigen"
 		},
 		"annotationsSheet": {
 			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
+				"all": "Alle",
+				"bookmarks": "Lesezeichen",
 				"highlights": "Highlights",
-				"notes": "Notes"
+				"notes": "Notizen"
 			}
 		},
 		"epubSettings": {
 			"title": "Epub-Readereinstellungen",
 			"typeface": {
-				"label": "Typeface",
+				"label": "Schriftart",
 				"options": {
 					"system": "System",
 					"opendyslexic": "OpenDyslexic",

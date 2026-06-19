@@ -542,6 +542,13 @@
 			"addedFiles": "File aggiunti"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Impostazioni",
 		"subtitle": "Gestisci qui la tua libreria. Se vuoi ripassare queste impostazioni, dai un'occhiata alla",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Continua a leggere",
 			"downloadSeries": "Scarica serie"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Preferenze aggiuntive",
 					"description": "Personalizza l'aspetto e il comportamento di Stump con queste impostazioni aggiuntive"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Mostra le miniature nelle intestazioni",
-					"description": "Se preferisci vedere le miniature più spesso, questa impostazione le mostrerà in più punti",
-					"tooltips": {
-						"enabled": "Questa impostazione mostrerà le miniature in più punti",
-						"disabled": "Questa impostazione non mostrerà le miniature in più punti"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Nascondi barra di scorrimento",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Aggiungi",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Annulla",
 		"clear": "Cancella",
 		"confirm": "Conferma",
+		"created": "Created",
 		"delete": "Elimina",
 		"deleteConfirmation": {
 			"title": "Elimina {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "Nessuna modifica",
 		"create": "Crea",
 		"edit": "Modifica",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Aggiorna",
 		"upload": "Carica",
 		"uploading": "Caricamento",
 		"uploadingEllipsis": "Caricamento...",
 		"unimplemented": "Questa funzionalità non è stata ancora implementata! Riprova più tardi",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "Questa funzionalità non è ancora completamente implementata e mancano alcune caratteristiche. Riprova più tardi",
 		"logIn": "Accedi",
 		"login": "Accedi",

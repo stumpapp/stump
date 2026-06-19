@@ -7,7 +7,7 @@ use crate::config_vars::StumpConfigVariable;
 pub fn gen_partial_stump_config(
 	struct_ident: &Ident,
 	config_vars: &[StumpConfigVariable],
-) -> proc_macro2::TokenStream {
+) -> TokenStream {
 	let mut struct_defs = Vec::new();
 	let mut empty_setters = Vec::new();
 

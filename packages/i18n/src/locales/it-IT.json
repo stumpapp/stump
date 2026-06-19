@@ -1663,7 +1663,7 @@
 		"app/reader": {
 			"helmet": "Impostazioni del lettore",
 			"title": "Impostazioni del lettore",
-			"description": "Default preferences for reading. Some of these are local-only to your current device",
+			"description": "Preferenze di lettura predefinite. Alcune di queste si applicano solo al dispositivo corrente",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -2790,7 +2790,7 @@
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw Token"
+					"placeholder": "Token grezzo"
 				},
 				"basic": "Base"
 			},
@@ -2798,8 +2798,8 @@
 			"catalogUrl": "URL catalogo",
 			"failedToConnect": "Impossibile connettersi al server",
 			"didConnect": "Connesso",
-			"checkConnection": "Check Connection",
-			"setAsDefaultServer": "Set as Default Server",
+			"checkConnection": "Verifica connessione",
+			"setAsDefaultServer": "Imposta come server predefinito",
 			"enableOPDS": "Abilita OPDS",
 			"validation": {
 				"nameAlreadyExists": "Nome già esistente",
@@ -2808,11 +2808,11 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as Read",
+				"label": "Segna come letto",
 				"confirmation": "Sei sicuro di voler contrassegnare {{bookTitle}} come letto?"
 			},
 			"clearProgress": {
-				"label": "Clear Progress",
+				"label": "Azzera progresso",
 				"confirmation": "Sei sicuro di voler azzerare i tuoi progressi per {{bookTitle}}?"
 			},
 			"deleteReadHistory": {

@@ -542,6 +542,13 @@
 			"addedFiles": "Přidané soubory"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Správa knihovny",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Pokračovat ve čtení",
 			"downloadSeries": "Stáhnout série"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Přidat",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Zrušit",
 		"clear": "Clear",
 		"confirm": "Potvrdit",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "Žádné změny",
 		"create": "Vytvořit",
 		"edit": "Upravit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Aktualizovat",
 		"upload": "Nahrát",
 		"uploading": "Nahrávání",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "Tato funkce ještě není implementována! Zkuste to později",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "Toto ještě není plně implementováno a chybí některé funkce. Zkuste to později",
 		"logIn": "Přihlásit se",
 		"login": "Přihlášení",

@@ -542,6 +542,13 @@
 			"addedFiles": "Tillagda filer"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Inställningar",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Fortsätt Läsa",
 			"downloadSeries": "Ladda Ner Serie"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Lätt till",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Avbryt",
 		"clear": "Clear",
 		"confirm": "Bekräfta",
+		"created": "Created",
 		"delete": "Radera",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "Inga förändringar",
 		"create": "Skapa",
 		"edit": "Ändra",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Uppdatera",
 		"upload": "Ladda Upp",
 		"uploading": "Laddar upp",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "Denna funktion finns inte ännu! Kom tillbaka senare",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "Detta är ännu inte fullt komplett och saknar vissa funktioner. Kom tillbaka senare",
 		"logIn": "Logga in",
 		"login": "Inlogg",

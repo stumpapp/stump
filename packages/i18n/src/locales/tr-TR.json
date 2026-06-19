@@ -542,6 +542,13 @@
 			"addedFiles": "Eklenen dosyalar"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Kütüphanenizi buradan yönetin. Bu ayarlarla ilgili bilgilerinizi tazelemek isterseniz,",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Okumaya Devam Et",
 			"downloadSeries": "Serileri İndir"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1557,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Diğer tercihler",
 					"description": "Bu ek ayarlarla Stump'ın görünümünü ve davranışını özelleştirin"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Başlıklarda küçük resimleri göster",
-					"description": "Küçük resimleri daha sık görmek isterseniz, bu ayar ile daha fazla yerde gösterilecektir",
-					"tooltips": {
-						"enabled": "Bu ayar, küçük resimleri daha fazla yerde gösterecektir",
-						"disabled": "Bu ayar, daha fazla yerde küçük resimleri göstermeyecektir"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Kaydırma çubuğunu gizle",
@@ -2572,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Add",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2593,11 +2608,22 @@
 		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",

@@ -1,5 +1,5 @@
 import { formatBytesSeparate, parseGraphQLDateTime, useGraphQL } from '@stump/client'
-import { Badge, Link, NewCard, STAT_COLORS, Text } from '@stump/components'
+import { Badge, Link, NewCard, STAT_COLORS } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { intlFormat } from 'date-fns'

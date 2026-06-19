@@ -1,10 +1,11 @@
 import { formatBytesSeparate, parseGraphQLDateTime, useGraphQL } from '@stump/client'
-import { NewCard, STAT_COLORS } from '@stump/components'
+import { Badge, Link, NewCard, STAT_COLORS, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
-import { BookCheck, BookOpen, Clock, HardDrive } from 'lucide-react'
+import { BookCheck, BookOpen, Clock, ExternalLink, HardDrive } from 'lucide-react'
 
+import BadgeList from '@/components/BadgeList'
 import { SimpleBookCard, useSimpleBookCardSize } from '@/components/book'
 import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
 import { EntityOverviewSheet } from '@/components/sharedLayout'
@@ -15,6 +16,12 @@ const query = graphql(`
 	query SeriesOverviewSheetExtas($id: ID!) {
 		seriesById(id: $id) {
 			id
+			metadata {
+				publisher
+				year
+				summary
+				links
+			}
 			upNext(take: 10) {
 				id
 				...SimpleBookCard
@@ -45,6 +52,13 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 		: null
 	const lastUpdatedAt = parseGraphQLDateTime(updatedAt)
 	const createdAtDate = parseGraphQLDateTime(createdAt)
+
+	const metadata = data?.seriesById?.metadata
+	const publisher = metadata?.publisher
+	const year = metadata?.year
+	const links = metadata?.links ?? []
+
+	const showStatCard = publisher || year
 
 	const resolvedStats = stats
 		? [
@@ -97,6 +111,46 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 			stats={resolvedStats}
 			tags={tags.map((tag) => tag.name)}
 		>
+			{links.length > 0 && (
+				<div className="gap-1 flex flex-col">
+					<NewCard.ListLabel>{t('metadataEditor.labels.links')}</NewCard.ListLabel>
+					<BadgeList>
+						{links.map((link) => {
+							let label = link.replace(/^(https?:\/\/)?(www\.)?/, '')
+							try {
+								label = new URL(link).hostname
+							} catch {
+								// weird but w/e
+							}
+							return (
+								<Link key={link} href={link} underline={false}>
+									<Badge variant="default" rounded="full" className="cursor-pointer">
+										<span>{label}</span>
+										<ExternalLink className="ml-1 h-3 w-3 opacity-90" />
+									</Badge>
+								</Link>
+							)
+						})}
+					</BadgeList>
+				</div>
+			)}
+
+			{showStatCard && (
+				<NewCard>
+					<NewCard.StatGroup>
+						{!!metadata.publisher && (
+							<NewCard.Stat
+								label={t('metadataEditor.labels.publisher')}
+								value={metadata.publisher}
+							/>
+						)}
+						{metadata.year != null && metadata.year > 0 && (
+							<NewCard.Stat label={t('metadataEditor.labels.year')} value={metadata.year} />
+						)}
+					</NewCard.StatGroup>
+				</NewCard>
+			)}
+
 			{upNext?.length && (
 				<MultiRowHorizontalCardList
 					title={t('common.upNext')}
@@ -110,6 +164,9 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 
 			<NewCard label={t('common.info')}>
 				<NewCard.Row
+					// TODO: create a new updated_at timestamp that is more user-friendly,
+					// this one is literally whether the entity was updated which does not
+					// account for e.g. books added "to the series"
 					label={t('common.lastUpdated')}
 					value={
 						lastUpdatedAt

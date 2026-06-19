@@ -1,6 +1,9 @@
 import { SheetPrimitive as Sheet, StatCard, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 import { useTheme } from '@/hooks'
+
+import ReadMore from '../ReadMore'
 
 type Stat = React.ComponentProps<typeof StatCard>
 
@@ -23,6 +26,7 @@ export function EntityOverviewSheet({
 	stats,
 	children,
 }: Props) {
+	const { t } = useLocaleContext()
 	const { isDarkVariant } = useTheme()
 
 	return (
@@ -32,15 +36,21 @@ export function EntityOverviewSheet({
 					<Sheet.Title className="text-2xl">{name}</Sheet.Title>
 					{(description || !!tags?.length) && (
 						<Sheet.Description className="text-base">
-							{description}
+							<ReadMore text={description} muted />
 
+							{/*TODO: dont render tags here, but dont have time to fix now just clamped*/}
 							{!!tags?.length && (
 								<div className="mt-2 gap-3 flex flex-row flex-wrap">
-									{tags?.map((tag) => (
+									{tags.slice(0, 10).map((tag) => (
 										<Text key={tag} size="sm" className="text-muted-foreground">
 											#{tag}
 										</Text>
 									))}
+									{tags.length > 10 && (
+										<Text size="sm" className="text-muted-foreground">
+											{t('common.andXMoreTrailing', { count: tags.length - 10 })}
+										</Text>
+									)}
 								</div>
 							)}
 						</Sheet.Description>

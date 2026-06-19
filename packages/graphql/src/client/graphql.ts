@@ -6289,7 +6289,7 @@ export type SeriesOverviewSheetExtasQueryVariables = Exact<{
 }>;
 
 
-export type SeriesOverviewSheetExtasQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, upNext: Array<(
+export type SeriesOverviewSheetExtasQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, metadata?: { __typename?: 'SeriesMetadata', publisher?: string | null, year?: number | null, summary?: string | null, links: Array<string> } | null, upNext: Array<(
       { __typename?: 'Media', id: string }
       & { ' $fragmentRefs'?: { 'SimpleBookCardFragment': SimpleBookCardFragment } }
     )> } | null };
@@ -12189,6 +12189,12 @@ export const SeriesOverviewSheetExtasDocument = new TypedDocumentString(`
     query SeriesOverviewSheetExtas($id: ID!) {
   seriesById(id: $id) {
     id
+    metadata {
+      publisher
+      year
+      summary
+      links
+    }
     upNext(take: 10) {
       id
       ...SimpleBookCard

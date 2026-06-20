@@ -412,6 +412,14 @@ export default function Screen() {
 					},
 				},
 			})
+			// TODO: in order for subsequent reads to track time we need to remove the local timer, however
+			// i don't think we can just remove it here since the reader is still mounted. there will need to
+			// be a more thoughtful approach, and i don't have the time to consider it now. my immediate ideas:
+			// - when entering book overview, delete local timers if book is completed (don't _love_ effect-based approach but what ya gonna do)
+			// - add an explicit reset timer action, defers to user which isn't a solve imo but something that should
+			//   exist regardless imo
+			// - add a didReachEnd ref that resets on non-end progression but set true here, then in cleanup of effect
+			//   delete if true <-- prolly the best? still kinda effect-based but at least directly tied to reader
 		},
 		[book.id, timer, updateProgress],
 	)

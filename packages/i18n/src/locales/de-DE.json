@@ -544,9 +544,9 @@
 	},
 	"libraryHeader": {
 		"tabs": {
-			"books": "Books",
-			"series": "Series",
-			"files": "Files"
+			"books": "Bücher",
+			"series": "Serien",
+			"files": "Dateien"
 		}
 	},
 	"librarySettingsScene": {
@@ -924,13 +924,13 @@
 	},
 	"seriesHeader": {
 		"tabs": {
-			"books": "Books",
-			"files": "Files"
+			"books": "Bücher",
+			"files": "Dateien"
 		},
 		"actions": {
-			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
+			"markAsRead": "Serie als gelesen markieren",
+			"markAsUnread": "Serie als ungelesen markieren",
+			"goToLibrary": "Geh zur Bibliothek"
 		},
 		"errors": {
 			"failedToUpdateCompletion": "Failed to update book completion status"

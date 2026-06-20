@@ -933,7 +933,7 @@
 			"goToLibrary": "Geh zur Bibliothek"
 		},
 		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
+			"failedToUpdateCompletion": "Fehler beim Aktualisieren des Buchvervollständigungsstatus"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -2585,11 +2585,11 @@
 	},
 	"common": {
 		"add": "Hinzufügen",
-		"andXMoreTrailing": "...and {{count}} more",
+		"andXMoreTrailing": "... und {{count}} mehr",
 		"cancel": "Abbrechen",
 		"clear": "Löschen",
 		"confirm": "Bestätigen",
-		"created": "Created",
+		"created": "Erstellt",
 		"delete": "Löschen",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2610,20 +2610,20 @@
 		"edit": "Bearbeiten",
 		"info": "Info",
 		"infoSheetStats": {
-			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
+			"series": "Serien",
+			"inProgress": "In Fortschritt",
+			"completedBooks": "Beendet",
+			"readingTime": "Lesezeit",
+			"size": "Größe"
 		},
 		"update": "Aktualisieren",
 		"upload": "Hochladen",
 		"uploading": "Wird hochgeladen",
 		"uploadingEllipsis": "Wird hochgeladen...",
 		"unimplemented": "Diese Funktionalität ist noch nicht implementiert! Schaue später wieder vorbei",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
+		"upNext": "Als nächstes",
+		"unknown": "Unbekannt",
+		"lastUpdated": "Zuletzt aktualisiert",
 		"limitedFunctionality": "Das ist noch nicht vollständig implementiert und es fehlen noch ein paar Funktionen! Schaue später wieder vorbei",
 		"logIn": "Anmelden",
 		"login": "Login",

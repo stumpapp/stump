@@ -317,3 +317,7 @@ export const useHideSystemBars = () => {
 	// when reading, hideNavigationBar keep the android and iPad nav bar hidden
 	return { hideStatusBar: isReading && !showControls, hideNavigationBar: isReading }
 }
+
+export function deleteBookTimer(id: string) {
+	useReaderStore.getState().setBookTimer(id, 0)
+}

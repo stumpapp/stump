@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native'
+import { extractErrorMessage } from '@stump/graphql'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -17,8 +18,10 @@ import {
 } from '~/lib/downloadQueue'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
 import { LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
+import { deleteBookTimer } from '~/stores/reader'
 import { useSavedServerStore } from '~/stores/savedServer'
 
+import { useTranslate } from '../useTranslate'
 import { type EnqueueBookParams, useDownloadQueue } from './downloadQueue'
 
 const downloadKeys = {
@@ -66,6 +69,7 @@ export type UseDownloadParams = {
 }
 
 export function useDownload({ serverId }: UseDownloadParams = {}) {
+	const { t } = useTranslate()
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
@@ -135,6 +139,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 			if (!effectiveServerId) return
 			queryClient.invalidateQueries({ queryKey: downloadKeys.server(effectiveServerId) })
 			queryClient.invalidateQueries({ queryKey: downloadKeys.book(bookId, effectiveServerId) })
+			// if we finished the book, remove the timer so next read
+			// is fresh. see https://github.com/stumpapp/stump/issues/1254
+			deleteBookTimer(bookId)
 		},
 	})
 
@@ -230,11 +237,11 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 			}
 
 			try {
-				const existingProgress = await db
+				const [existingProgress] = await db
 					.select()
 					.from(readProgress)
 					.where(eq(readProgress.bookId, bookId))
-					.get()
+					.limit(1)
 
 				if (existingProgress) {
 					await db
@@ -245,6 +252,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 							lastModified: new Date(),
 						})
 						.where(eq(readProgress.bookId, bookId))
+					// if we finished the book, remove the timer so next read
+					// is fresh. see https://github.com/stumpapp/stump/issues/1254
+					deleteBookTimer(bookId)
 				} else {
 					await db.insert(readProgress).values({
 						bookId,
@@ -252,17 +262,24 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 						percentage: '1.0',
 						page: totalPages ?? undefined,
 						lastModified: new Date(),
+						// did not set elapsedSeconds here since realistically it
+						// shouldn't matter in this if branch. if you dont have a
+						// session you wont have a timer
 					})
 				}
 
 				queryClient.invalidateQueries({ queryKey: downloadKeys.server(effectiveServerId) })
 			} catch (error) {
 				Sentry.captureException(error)
-				toast.error('Failed to mark as complete')
+				toast.error(
+					t('bookActions.markAsRead.failure', {
+						description: extractErrorMessage(error, t('common.unknownError')),
+					}),
+				)
 				throw error
 			}
 		},
-		[serverID, queryClient],
+		[serverID, queryClient, t],
 	)
 
 	const clearProgress = useCallback(
@@ -274,14 +291,21 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 			try {
 				await db.delete(readProgress).where(eq(readProgress.bookId, bookId))
+				// if we finished the book, remove the timer so next read
+				// is fresh. see https://github.com/stumpapp/stump/issues/1254
+				deleteBookTimer(bookId)
 				queryClient.invalidateQueries({ queryKey: downloadKeys.server(effectiveServerId) })
 			} catch (error) {
 				Sentry.captureException(error)
-				toast.error('Failed to clear progress')
+				toast.error(
+					t('bookActions.clearProgress.failure', {
+						description: extractErrorMessage(error, t('common.unknownError')),
+					}),
+				)
 				throw error
 			}
 		},
-		[serverID, queryClient],
+		[serverID, queryClient, t],
 	)
 
 	const downloadImmediate = useCallback(

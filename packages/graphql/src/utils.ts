@@ -1,5 +1,5 @@
 // TODO: This is wrong lol figure this out
-export const extractErrorMessage = (error: unknown): string => {
+export const extractErrorMessage = (error: unknown, fallbackMessage?: string): string => {
 	if (error instanceof Error) {
 		return error.message
 	} else if (typeof error === 'string') {
@@ -7,5 +7,5 @@ export const extractErrorMessage = (error: unknown): string => {
 	} else if (typeof error === 'object' && error !== null && 'message' in error) {
 		return (error as { message: string }).message
 	}
-	return 'An unknown error occurred'
+	return fallbackMessage || 'An unknown error occurred'
 }

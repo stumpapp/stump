@@ -45,7 +45,7 @@
 		"lodash.sortby": "^4.7.0",
 		"lodash.uniqby": "^4.7.0",
 		"lodash.upperfirst": "^4.3.1",
-		"lucide-react": "=0.428.0",
+		"lucide-react": "=1.20.0",
 		"nprogress": "^0.2.0",
 		"overlayscrollbars": "^2.10.0",
 		"overlayscrollbars-react": "^0.5.6",

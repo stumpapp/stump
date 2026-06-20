@@ -46,7 +46,7 @@
 		"cmdk": "=1.1.1",
 		"date-fns": "^4.1.0",
 		"emoji-mart": "^5.5.2",
-		"lucide-react": "=0.428.0",
+		"lucide-react": "=1.20.0",
 		"postcss": "^8.5.14",
 		"react": "^19.0.0",
 		"react-day-picker": "^8.10.0",

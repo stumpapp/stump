@@ -13025,6 +13025,11 @@ expo-application@~55.0.15:
   resolved "https://registry.yarnpkg.com/expo-application/-/expo-application-55.0.15.tgz#5ae5484baa94c69a6eda92757c8e76be035a628d"
   integrity sha512-eWf5OGrat1r/TYr0daL684C6pJYiN2k30NmcISsD9fbtZLfA6Sbo/JebfYzP3OjO/T/i8j/9Pf3ePqUYPLfZnw==
 
+expo-application@~56.0.3:
+  version "56.0.3"
+  resolved "https://registry.yarnpkg.com/expo-application/-/expo-application-56.0.3.tgz#ec3f39fb0016fd5b7d93f6b2bfbe0581e7628292"
+  integrity sha512-DdGGPlMuM6cSTeKhbvh6OeLr2O/+EI5BHKYrD+Do8sJPYgLwzGrgESELfyjJCpEhFzT+TgKIdmLmWXhNUQnHiw==
+
 expo-asset@~55.0.17:
   version "55.0.17"
   resolved "https://registry.yarnpkg.com/expo-asset/-/expo-asset-55.0.17.tgz#750a27685ea118417473f4f293c5a35116b572d4"

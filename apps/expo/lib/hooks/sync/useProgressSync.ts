@@ -84,32 +84,36 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 
 	const didSync = useRef(false)
 
+	const syncIfNeeded = useCallback(async () => {
+		if (!enabled || didSync.current || isLocalLibrary(serverId)) return
+
+		didSync.current = true
+
+		try {
+			await syncProgress([serverId])
+		} catch (error) {
+			Sentry.captureException(error, {
+				extra: { serverId },
+			})
+			toast.error(t('progressSync.syncFailed'), {
+				description: error instanceof Error ? error.message : t('errors.unknown'),
+			})
+		}
+	}, [enabled, syncProgress, serverId, t])
+
 	useFocusEffect(
-		useCallback(() => {
-			const syncIfNeeded = async () => {
-				if (!enabled || didSync.current || isLocalLibrary(serverId)) return
+		useCallback(
+			() => {
+				syncIfNeeded()
 
-				didSync.current = true
-
-				try {
-					await syncProgress([serverId])
-				} catch (error) {
-					Sentry.captureException(error, {
-						extra: { serverId },
-					})
-					toast.error(t('progressSync.syncFailed'), {
-						description: error instanceof Error ? error.message : t('errors.unknown'),
-					})
+				return () => {
+					didSync.current = false
 				}
-			}
-			syncIfNeeded()
-
-			return () => {
-				didSync.current = false
-			}
+			},
 			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [enabled, serverId, t]),
+			[],
+		),
 	)
 }
 

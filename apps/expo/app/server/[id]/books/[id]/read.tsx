@@ -13,7 +13,6 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
-import { initial } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useActiveServer } from '~/components/activeServer'

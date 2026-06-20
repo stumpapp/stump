@@ -420,6 +420,9 @@ export default function Screen() {
 			//   exist regardless imo
 			// - add a didReachEnd ref that resets on non-end progression but set true here, then in cleanup of effect
 			//   delete if true <-- prolly the best? still kinda effect-based but at least directly tied to reader
+			// - just reset the timer before navigating to read.tsx from overview if rereading a completed book (ty arklaum for idea)
+			// - just use non-persisted timers for online reading, and only persist for offline. although even then it might
+			//   not be needed since secs is tracked in sqlite too
 		},
 		[book.id, timer, updateProgress],
 	)

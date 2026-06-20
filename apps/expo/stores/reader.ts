@@ -71,6 +71,7 @@ export type ReaderStore = {
 
 	bookTimers: Record<string, ElapsedSeconds>
 	setBookTimer: (id: string, timer: ElapsedSeconds) => void
+	removeBookTimer: (id: string) => void
 
 	bookOverrides: Record<string, boolean>
 	setBookOverride: (id: string, override: boolean) => void
@@ -163,6 +164,11 @@ export const useReaderStore = create<ReaderStore>()(
 				bookTimers: {},
 				setBookTimer: (id, elapsedSeconds) =>
 					set({ bookTimers: { ...get().bookTimers, [id]: elapsedSeconds } }),
+				removeBookTimer: (id) => {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const { [id]: _, ...rest } = get().bookTimers
+					set({ bookTimers: rest })
+				},
 
 				bookOverrides: {},
 				setBookOverride: (id, override) =>
@@ -319,5 +325,5 @@ export const useHideSystemBars = () => {
 }
 
 export function deleteBookTimer(id: string) {
-	useReaderStore.getState().setBookTimer(id, 0)
+	useReaderStore.getState().removeBookTimer(id)
 }

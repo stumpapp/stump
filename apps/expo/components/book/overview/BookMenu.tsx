@@ -106,17 +106,19 @@ export default function BookMenu({ data }: Props) {
 	})
 
 	const onSuccess = async () => {
-		await Promise.all([
-			client.refetchQueries({ queryKey: ['bookById', book.id] }),
-			client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),
-			client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
-			client.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
-			client.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
-		])
 		// see https://github.com/stumpapp/stump/issues/1254
 		// for now every action here using onSuccess will clear the timer
 		// however this NEEDS to be removed if that changes
 		deleteBookTimer(book.id)
+
+		await Promise.all([
+			client.refetchQueries({ queryKey: ['bookById', book.id], exact: false }),
+			client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),
+			client.invalidateQueries({ queryKey: ['readBook'], exact: false }),
+			client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
+			client.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
+			client.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+		])
 	}
 
 	const onError = (title: string, error: unknown) => {

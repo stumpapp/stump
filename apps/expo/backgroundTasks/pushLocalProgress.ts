@@ -13,6 +13,7 @@ const mutation = graphql(`
 	}
 `)
 
+// TODO(sync): mv to shared types file(?) and reuse across other TODO(sync) tasks
 type SyncResult = {
 	failureCount: number
 	syncedCount: number
@@ -39,7 +40,6 @@ const executeSingleServerSync = async (
 				not(inArray(readProgress.syncStatus, [syncStatus.Enum.SYNCED, syncStatus.Enum.SYNCING])),
 			),
 		)
-		.all()
 
 	const progressRecords = ignoreBookIds?.length
 		? allProgressRecords.filter((r) => !ignoreBookIds.includes(r.bookId))
@@ -64,7 +64,6 @@ const executeSingleServerSync = async (
 				),
 			),
 		)
-		.run()
 
 	let failureCount = 0
 
@@ -110,14 +109,12 @@ const executeSingleServerSync = async (
 					lastSyncedElapsedSeconds: record.elapsedSeconds,
 				})
 				.where(eq(readProgress.id, record.id))
-				.run()
 		} catch {
 			failureCount++
 			await db
 				.update(readProgress)
 				.set({ syncStatus: syncStatus.Enum.ERROR })
 				.where(eq(readProgress.id, record.id))
-				.run()
 		}
 	}
 

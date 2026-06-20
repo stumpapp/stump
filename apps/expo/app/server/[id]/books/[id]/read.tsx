@@ -13,6 +13,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
+import { initial } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useActiveServer } from '~/components/activeServer'
@@ -259,6 +260,8 @@ type Params = {
 	id: string
 }
 
+// TODO(reading): support incognito, not using it here lol
+
 export default function Screen() {
 	useKeepAwake()
 
@@ -311,6 +314,11 @@ export default function Screen() {
 	// tracks the elapsed total at the time of the last successful sync so we can
 	// send a delta
 	const lastSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
+	// tracks the last synced locator so that on exit we can send a final update so timer progression
+	// is not lost if the page did not change
+	const lastSyncedLocator = useRef(
+		book.readProgress?.locator ? intoReadiumLocator(book.readProgress.locator) : undefined,
+	)
 
 	const { syncProgress } = useSyncOnlineToOfflineProgress({ bookId: book.id, serverId })
 
@@ -322,6 +330,16 @@ export default function Screen() {
 		},
 		onSuccess: (_, { input: onlineProgress }) => {
 			lastSyncedElapsedRef.current = timer.getCurrentTime()
+			if (onlineProgress.epub?.locator?.readium) {
+				lastSyncedLocator.current = intoReadiumLocator({
+					...onlineProgress.epub.locator.readium,
+					chapterTitle: onlineProgress.epub.locator.readium.chapterTitle || '',
+					type: onlineProgress.epub.locator.readium.type || 'application/xhtml+xml',
+				})
+			}
+			// invalidate but do not refetch
+			queryClient.invalidateQueries({ queryKey: ['bookById', bookID], exact: false })
+			queryClient.invalidateQueries({ queryKey: ['readBook', bookID], exact: false })
 			// TODO: Consider a preference to disable online-to-offline sync?
 			syncProgress(onlineProgress)
 		},
@@ -556,25 +574,44 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
+	const onExitReader = useCallback(async () => {
+		// update progress first so refetch picks up changes
+		if (lastSyncedLocator.current) {
+			onLocationChanged(
+				lastSyncedLocator.current,
+				lastSyncedLocator.current.locations?.totalProgression ?? 0,
+			)
+		}
+
+		await Promise.all([
+			queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['readBook', bookID], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
+		])
+	}, [bookID, onLocationChanged, queryClient])
+
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
 	 * is updated with the latest read progress
 	 */
-	useEffect(() => {
-		NavigationBar.setVisibilityAsync('hidden')
-		return () => {
-			NavigationBar.setVisibilityAsync('visible')
-			Promise.all([
-				queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['readBook', bookID], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
-			])
-		}
-	}, [queryClient, bookID])
+	useEffect(
+		() => {
+			NavigationBar.setVisibilityAsync('hidden')
+			return () => {
+				NavigationBar.setVisibilityAsync('visible')
+				onExitReader()
+			}
+		},
+		// this should be fine, but in practice we will see. i'd prefer to avoid needless pushes
+		// if we can, and spamming the navigation bar visibility
+		// eslint-disable-next-line react-compiler/react-compiler
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[bookID],
+	)
 
 	const requestHeaders = useCallback(
 		() => ({

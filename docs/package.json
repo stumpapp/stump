@@ -20,7 +20,7 @@
 		"framer-motion": "^10.16.4",
 		"fumadocs-core": "16.8.11",
 		"fumadocs-mdx": "15.0.4",
-		"fumadocs-ui": "16.8.11",
+		"fumadocs-ui": "16.10.3",
 		"lucide-react": "^1.14.0",
 		"react": "^19.2.6",
 		"react-dom": "^19.2.6",

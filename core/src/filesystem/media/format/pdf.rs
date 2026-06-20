@@ -1,7 +1,9 @@
 use std::{
 	collections::HashMap,
 	io::Cursor,
+	ops::Deref,
 	path::{Path, PathBuf},
+	sync::{Mutex, MutexGuard},
 };
 
 use models::shared::image_processor_options::SupportedImageFormat;
@@ -28,6 +30,21 @@ use crate::{
 
 /// A file processor for PDF files.
 pub struct PdfProcessor;
+
+/// Held while PDFium is in use; derefs to `Pdfium` for ergonomic access.
+pub struct PdfiumRef<'a>(MutexGuard<'a, Option<Pdfium>>);
+
+impl<'a> Deref for PdfiumRef<'a> {
+	type Target = Pdfium;
+	fn deref(&self) -> &Self::Target {
+		self.0.as_ref().expect("PDFium not initialized")
+	}
+}
+
+/// Single shared Pdfium instance, initialized on first use.
+/// The global lock prevents PdfiumLibraryBindingsAlreadyInitialized
+/// race conditions when multiple PDFs are processed concurrently.
+static PDFIUM: Mutex<Option<Pdfium>> = Mutex::new(None);
 
 impl FileProcessor for PdfProcessor {
 	// It is REALLY annoying to work with PDFs, and there is no good way to consume
@@ -172,23 +189,29 @@ impl FileProcessor for PdfProcessor {
 }
 
 impl PdfProcessor {
-	/// Initializes a PDFium renderer. If a path to the PDFium library is not provided
-	pub fn renderer(pdfium_path: &Option<String>) -> Result<Pdfium, FileError> {
-		if let Some(path) = pdfium_path {
-			let bindings = Pdfium::bind_to_library(path)
-			.or_else(|e| {
-				tracing::error!(provided_path = ?path, ?e, "Failed to bind to PDFium library at provided path");
-				Pdfium::bind_to_system_library()
-			})?;
-			Ok(Pdfium::new(bindings))
-		} else {
-			tracing::warn!(
-				"No PDFium path provided, will attempt to bind to system library"
-			);
-			Pdfium::bind_to_system_library()
-				.map(Pdfium::new)
-				.map_err(|_| FileError::PdfConfigurationError)
+	/// Returns a shared PdfiumRef, initializing the library on first call.
+	pub fn renderer(pdfium_path: &Option<String>) -> Result<PdfiumRef, FileError> {
+		let mut guard = PDFIUM.lock().map_err(|e| {
+			tracing::error!(?e, "Failed to lock PDFium mutex");
+			FileError::PdfConfigurationError
+		})?;
+
+		if guard.is_none() {
+			if let Some(path) = pdfium_path {
+				let bindings = Pdfium::bind_to_library(path).map_err(|e| {
+					tracing::error!(provided_path = ?path, ?e, "Failed to bind to PDFium library at provided path");
+					FileError::PdfConfigurationError
+				})?;
+				*guard = Some(Pdfium::new(bindings));
+			} else {
+				tracing::warn!("No PDFium path provided, falling back to system library");
+				let bindings = Pdfium::bind_to_system_library()
+					.map_err(|_| FileError::PdfConfigurationError)?;
+				*guard = Some(Pdfium::new(bindings));
+			}
 		}
+
+		Ok(PdfiumRef(guard))
 	}
 
 	/// Synchronous page rendering without caching (used internally)

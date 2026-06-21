@@ -544,8 +544,8 @@
 	},
 	"libraryHeader": {
 		"tabs": {
-			"books": "Books",
-			"series": "Series",
+			"books": "Libri",
+			"series": "Serie",
 			"files": "Files"
 		}
 	},
@@ -924,16 +924,16 @@
 	},
 	"seriesHeader": {
 		"tabs": {
-			"books": "Books",
+			"books": "Libri",
 			"files": "Files"
 		},
 		"actions": {
-			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
+			"markAsRead": "Segna serie come lette",
+			"markAsUnread": "Segna serie come non lette",
+			"goToLibrary": "Vai alla libreria"
 		},
 		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
+			"failedToUpdateCompletion": "Impossibile aggiornare lo stato di completamento del libro"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1705,7 +1705,7 @@
 					"description": "Impostazioni predefinite per i libri di testo",
 					"sections": {
 						"fontSize": {
-							"label": "Dimensioni carattere",
+							"label": "Dimensione carattere",
 							"description": "La dimensione del carattere utilizzato nel lettore"
 						},
 						"fontFamily": {
@@ -2182,7 +2182,7 @@
 					"user": {
 						"label": "Gestione utenti",
 						"read": {
-							"label": "Leggere utenti",
+							"label": "Visualizzare utenti",
 							"description": "Consente all'utente d'interrogare altri utenti sul server. Richiesto per altre funzionalità, ad esempio escludere gli utenti dall'accesso a una libreria"
 						},
 						"manage": {

@@ -2842,12 +2842,12 @@
 			"clearProgress": {
 				"label": "Azzera progresso",
 				"confirmation": "Sei sicuro di voler azzerare i tuoi progressi per {{bookTitle}}?",
-				"failure": "Failed to delete current progress"
+				"failure": "Impossibile eliminare il progresso attuale"
 			},
 			"deleteReadHistory": {
 				"label": "Elimina cronologia di lettura",
 				"confirmation": "Sei sicuro di voler eliminare la tua cronologia di lettura per {{bookTitle}}?",
-				"failure": "Failed to delete read history"
+				"failure": "Impossibile eliminare la cronologia di lettura"
 			},
 			"deleteBook": {
 				"label": "Elimina libro",
@@ -2938,7 +2938,7 @@
 			"unknown": "Errore sconosciuto"
 		},
 		"epubMenu": {
-			"tableOfContents": "Table of Contents",
+			"tableOfContents": "Sommario",
 			"bookmarksAndAnnotations": "Segnalibri e annotazioni",
 			"appearance": "Aspetto"
 		},
@@ -2965,7 +2965,7 @@
 			"seeDocumentation": "Visualizza la documentazione",
 			"noSmartLists": {
 				"label": "No lists returned",
-				"description": "Once created they will appear here"
+				"description": "Una volta create, appariranno qui"
 			}
 		},
 		"tabs": {
@@ -2973,23 +2973,23 @@
 			"localLibrary": "Libreria",
 			"settings": "Impostazioni",
 			"home": "Home",
-			"browse": "Browse",
-			"clubs": "Clubs",
-			"search": "Search"
+			"browse": "Esplora",
+			"clubs": "Club",
+			"search": "Cerca"
 		},
 		"localLibrary": {
 			"title": "Libreria locale",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to Read Yet",
+					"title": "Ancora nulla da leggere",
 					"description": "Una volta scaricati i libri per la lettura offline, appariranno qui"
 				},
 				"imported": {
-					"title": "No Imported Books",
+					"title": "Nessun libro importato",
 					"description": "Importa libri per leggerli offline"
 				},
 				"server": {
-					"title": "No Downloaded Books",
+					"title": "Nessun libro scaricato",
 					"description": "Scarica libri dalla tua libreria per leggerli offline"
 				}
 			},
@@ -3052,8 +3052,8 @@
 			"syncFailed": "Impossibile sincronizzare i progressi offline"
 		},
 		"search": {
-			"label": "Search This Server",
-			"description": "Find specific content on this server",
+			"label": "Cerca in questo server",
+			"description": "Trova contenuti specifici su questo server",
 			"placeholder": "Cerca"
 		},
 		"settings": {
@@ -3102,7 +3102,7 @@
 			},
 			"autoSyncLocalData": "Sincronizzazione automatica dati locali",
 			"textCase": {
-				"label": "Text Case",
+				"label": "﻿Maiuscola/minuscola",
 				"options": {
 					"lowerCase": "Minuscolo",
 					"sentenceCase": "Maiuscolo a inizio frase",
@@ -3115,9 +3115,9 @@
 				"dataUsage": {
 					"label": "Utilizzo dati",
 					"nonStumpData": "Dati non-Stump",
-					"serversTotal": "Servers Total",
-					"totalFiles": "Total Files",
-					"totalSize": "Total Size",
+					"serversTotal": "Totale server",
+					"totalFiles": "File totali",
+					"totalSize": "Dimensione totale",
 					"deleteDownloads": {
 						"label": "Elimina download",
 						"confirmation": "Sei sicuro di voler eliminare tutti i download da {{serverName}}?",
@@ -3128,7 +3128,7 @@
 					},
 					"noDownloads": "Nessun file scaricato da questo server",
 					"storedPreferences": {
-						"label": "Stored Preferences",
+						"label": "Preferenze salvate",
 						"description": "Dati vari come le preferenze dei libri, i timer di lettura, ecc"
 					},
 					"clearPreferences": "Cancella preferenze"

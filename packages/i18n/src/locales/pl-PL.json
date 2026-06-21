@@ -2644,7 +2644,8 @@
 			"someRejected": "Niektóre pliki zostały odrzucone. Sprawdź typy plików i spróbuj ponownie",
 			"tooManyFiles": "Wybrano zbyt dużą ilość plików",
 			"noValidFiles": "Nie wybrano żadnych poprawnych plików"
-		}
+		},
+		"unknownError": "An unknown error occurred"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2835,15 +2836,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Oznacz jako przeczytane",
-				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?"
+				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?",
+				"failure": "Failed to mark book as read"
 			},
 			"clearProgress": {
 				"label": "Wyczyść postęp",
-				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?"
+				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?",
+				"failure": "Failed to delete current progress"
 			},
 			"deleteReadHistory": {
 				"label": "Usuń historię czytania",
-				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?"
+				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?",
+				"failure": "Failed to delete read history"
 			},
 			"deleteBook": {
 				"label": "Usuń książkę",

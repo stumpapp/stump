@@ -546,7 +546,7 @@
 		"tabs": {
 			"books": "Libri",
 			"series": "Serie",
-			"files": "Files"
+			"files": "File"
 		}
 	},
 	"librarySettingsScene": {
@@ -925,7 +925,7 @@
 	"seriesHeader": {
 		"tabs": {
 			"books": "Libri",
-			"files": "Files"
+			"files": "File"
 		},
 		"actions": {
 			"markAsRead": "Segna serie come lette",
@@ -1477,8 +1477,8 @@
 					"description": "Personalizza il carattere usato nell'applicazione"
 				},
 				"thumbnailPreview": {
-					"label": "Preview",
-					"description": "This is how thumbnails will look with the current settings"
+					"label": "Anteprima",
+					"description": "Così è come appariranno le miniature con con le impostazioni attuali"
 				},
 				"thumbnailRatioSelect": {
 					"label": "Proporzioni miniatura",
@@ -1496,13 +1496,13 @@
 					}
 				},
 				"thumbnailRoundness": {
-					"label": "Thumbnail roundness",
-					"description": "How rounded the corners of thumbnail images should be",
+					"label": "Arrotondamento miniature",
+					"description": "Quanto devono essere arrotondati gli angoli delle immagini di miniatura",
 					"options": {
-						"none": "None",
-						"normal": "Normal",
-						"rounded": "Rounded",
-						"large": "Large"
+						"none": "Nessuno",
+						"normal": "Normale",
+						"rounded": "Arrotondato",
+						"large": "Grande"
 					}
 				},
 				"navigation": {
@@ -2585,11 +2585,11 @@
 	},
 	"common": {
 		"add": "Aggiungi",
-		"andXMoreTrailing": "...and {{count}} more",
+		"andXMoreTrailing": "... e altri {{count}}",
 		"cancel": "Annulla",
 		"clear": "Cancella",
 		"confirm": "Conferma",
-		"created": "Created",
+		"created": "Creato",
 		"delete": "Elimina",
 		"deleteConfirmation": {
 			"title": "Elimina {{type}}",
@@ -2608,22 +2608,22 @@
 		"noChanges": "Nessuna modifica",
 		"create": "Crea",
 		"edit": "Modifica",
-		"info": "Info",
+		"info": "Informazioni",
 		"infoSheetStats": {
-			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
+			"series": "Serie",
+			"inProgress": "In corso",
+			"completedBooks": "Completati",
+			"readingTime": "Tempo di lettura",
+			"size": "Dimensione"
 		},
 		"update": "Aggiorna",
 		"upload": "Carica",
 		"uploading": "Caricamento",
 		"uploadingEllipsis": "Caricamento...",
 		"unimplemented": "Questa funzionalità non è stata ancora implementata! Riprova più tardi",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
+		"upNext": "A seguire",
+		"unknown": "Sconosciuto",
+		"lastUpdated": "Ultimo aggiornamento",
 		"limitedFunctionality": "Questa funzionalità non è ancora completamente implementata e mancano alcune caratteristiche. Riprova più tardi",
 		"logIn": "Accedi",
 		"login": "Accedi",
@@ -2645,7 +2645,7 @@
 			"tooManyFiles": "Hai selezionato troppi file",
 			"noValidFiles": "Non è stato selezionato alcun file valido"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "Si è verificato un errore sconosciuto"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2837,7 +2837,7 @@
 			"markAsRead": {
 				"label": "Segna come letto",
 				"confirmation": "Sei sicuro di voler contrassegnare {{bookTitle}} come letto?",
-				"failure": "Failed to mark book as read"
+				"failure": "Impossibile contrassegnare il libro come letto"
 			},
 			"clearProgress": {
 				"label": "Azzera progresso",
@@ -3054,7 +3054,7 @@
 		"search": {
 			"label": "Search This Server",
 			"description": "Find specific content on this server",
-			"placeholder": "Search"
+			"placeholder": "Cerca"
 		},
 		"settings": {
 			"preferences": {
@@ -3074,7 +3074,7 @@
 					"label": "Segnaposto miniature",
 					"options": {
 						"grayscale": "Scala di grigi",
-						"averageColor": "Average Color",
+						"averageColor": "Colore medio",
 						"colorful": "Colorato",
 						"thumbhash": "Thumbhash"
 					}
@@ -3104,9 +3104,9 @@
 			"textCase": {
 				"label": "Text Case",
 				"options": {
-					"lowerCase": "Lowercase",
-					"sentenceCase": "Sentence Case",
-					"titleCase": "Title Case"
+					"lowerCase": "Minuscolo",
+					"sentenceCase": "Maiuscolo a inizio frase",
+					"titleCase": "Iniziali in maiuscolo"
 				}
 			},
 			"tintListBackground": "Colora sfondi lista",
@@ -3114,7 +3114,7 @@
 				"label": "Gestione",
 				"dataUsage": {
 					"label": "Utilizzo dati",
-					"nonStumpData": "Non-Stump Data",
+					"nonStumpData": "Dati non-Stump",
 					"serversTotal": "Servers Total",
 					"totalFiles": "Total Files",
 					"totalSize": "Total Size",

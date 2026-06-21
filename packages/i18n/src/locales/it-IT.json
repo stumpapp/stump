@@ -2918,7 +2918,7 @@
 			"read": "Leggi",
 			"readAgain": "Leggi di nuovo",
 			"readTime": "Tempo di lettura",
-			"readthrough": "Readthrough",
+			"readthrough": "Lettura completa",
 			"readMore": "Scopri di più",
 			"refresh": "Aggiorna",
 			"save": "Salva",
@@ -2964,7 +2964,7 @@
 			"cta": "Inizia aggiungendo un server per accedere alle tue collezioni di libri",
 			"seeDocumentation": "Visualizza la documentazione",
 			"noSmartLists": {
-				"label": "No lists returned",
+				"label": "Nessuna lista smart trovata",
 				"description": "Una volta create, appariranno qui"
 			}
 		},
@@ -3140,21 +3140,21 @@
 					"label": "Svuota cache",
 					"memory": {
 						"button": "Memoria",
-						"success": "Memory Cache Cleared"
+						"success": "Memoria cache cancellata"
 					},
 					"disk": {
 						"button": "Disco",
-						"success": "Disk Cache Cleared"
+						"success": "Cache disco cancellata"
 					}
 				},
 				"deleteDatabase": {
 					"label": "Elimina database",
 					"success": {
-						"title": "Database Deleted",
+						"title": "Database eliminato",
 						"description": "Riavvia l'app"
 					},
 					"error": {
-						"title": "Deletion Failed",
+						"title": "Eliminazione non riuscita",
 						"description": "Si è verificato un errore durante l'eliminazione del database"
 					}
 				},
@@ -3188,33 +3188,33 @@
 		},
 		"stumpServer": {
 			"browse": {
-				"books": "Books",
-				"favorites": "Favorites",
-				"files": "Files",
-				"libraries": "Libraries",
-				"series": "Series",
-				"smartLists": "Smart Lists"
+				"books": "Libri",
+				"favorites": "Preferiti",
+				"files": "File",
+				"libraries": "Librerie",
+				"series": "Serie",
+				"smartLists": "Liste smart"
 			},
 			"continueReading": {
-				"label": "Continue Reading",
-				"emptyText": "No books in progress"
+				"label": "Continua a leggere",
+				"emptyText": "Nessun libro in lettura"
 			},
 			"onDeck": {
-				"label": "Your Next Read",
-				"emptyText": "No books on deck"
+				"label": "La tua prossima lettura",
+				"emptyText": "Nessun libro pronto da leggere"
 			},
 			"recentlyAddedSeries": {
-				"label": "Recently Added Series",
-				"emptyText": "No recently added series"
+				"label": "Serie aggiunte di recente",
+				"emptyText": "Nessuna serie aggiunta di recente"
 			},
 			"recentlyAddedBooks": {
-				"label": "Recently Added Books",
-				"emptyText": "No recently added books"
+				"label": "Libri aggiunti di recente",
+				"emptyText": "Nessun libro aggiunto di recente"
 			}
 		},
 		"readerSettings": {
 			"title": "Impostazioni del lettore di immagini",
-			"overrideGlobalSettings": "Override Global Settings",
+			"overrideGlobalSettings": "Sovrascrivi impostazioni globali",
 			"sections": {
 				"mode": "Modalità",
 				"imageOptions": "Opzioni immagine",
@@ -3270,28 +3270,28 @@
 			"allSettings": "Tutte le impostazioni"
 		},
 		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
+			"goToPageX": "Vai alla pagina {{pageNumber}}",
+			"goToPagePlaceholder": "Vai alla pagina...",
 			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
+				"pageDoesNotExist": "La pagina {{page}} non esiste",
+				"invalidPage": "'{{page}}' non è un numero di pagina"
 			},
-			"showCurrentChapter": "Show Current Chapter"
+			"showCurrentChapter": "Mostra capitolo attuale"
 		},
 		"annotationsSheet": {
 			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
-				"highlights": "Highlights",
-				"notes": "Notes"
+				"all": "Tutto",
+				"bookmarks": "Segnalibri",
+				"highlights": "Evidenziazioni",
+				"notes": "Note"
 			}
 		},
 		"epubSettings": {
 			"title": "Impostazioni del lettore Epub",
 			"typeface": {
-				"label": "Typeface",
+				"label": "Carattere",
 				"options": {
-					"system": "System",
+					"system": "Sistema",
 					"opendyslexic": "OpenDyslexic",
 					"literata": "Literata",
 					"atkinsonHyperlegible": "Atkinson Hyperlegible",

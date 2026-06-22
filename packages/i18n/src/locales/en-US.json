@@ -1476,6 +1476,16 @@
 					"label": "Font",
 					"description": "Customize the font used in the application"
 				},
+				"interfaceRoundness": {
+					"label": "Interface roundness",
+					"description": "How rounded the corners are for UI elements",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"pill": "Pill"
+					}
+				},
 				"thumbnailPreview": {
 					"label": "Preview",
 					"description": "This is how thumbnails will look with the current settings"
@@ -1575,9 +1585,25 @@
 						"noLimit": "No limit"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Display and spacing",
+					"description": "Preferences related to the presentation of content and information"
+				},
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
+				},
+				"contentBrowsing": {
+					"label": "Content browsing",
+					"description": "Preferences that affect browsing and navigating content lists"
+				},
+				"motionAndAnimation": {
+					"label": "Motion and animation",
+					"description": "Visual presentation and movement preferences"
+				},
+				"activityAndStatus": {
+					"label": "Activity and status",
+					"description": "Indicators, overlays, or functionality related to background activity"
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",

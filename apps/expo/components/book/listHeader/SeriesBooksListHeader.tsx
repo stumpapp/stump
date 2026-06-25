@@ -1,11 +1,7 @@
 import { useGraphQLMutation } from '@stump/client'
-import {
-	graphql,
-	ReadingStatus,
-	SeriesBooksSceneSeriesNameQuery,
-	UserPermission,
-} from '@stump/graphql'
+import { graphql, SeriesBooksSceneSeriesNameQuery, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
+import { isAfter } from 'date-fns'
 import { BookX, DownloadCloud, Info, PauseCircle, PlayCircle, ScanLine } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Alert } from 'react-native'
@@ -13,11 +9,11 @@ import { Alert } from 'react-native'
 import { useEntityListHeader } from '~/components/filter/EntityListHeader'
 import { ActionDef } from '~/components/filter/types'
 import { MiniEntityStatCards } from '~/components/stats'
+import { useTranslate } from '~/lib/hooks'
 import { useStumpServer } from '~/providers/StumpServerProvider'
 
 import { useBooksFilterMenu } from './BooksFilterMenu'
 import { useSeriesBooksSortAndDisplayMenu } from './SeriesBooksSortAndDisplayMenu'
-import { useTranslate } from '~/lib/hooks'
 
 const scanMutation = graphql(`
 	mutation SeriesBooksListHeaderScanSeries($id: ID!) {
@@ -71,7 +67,7 @@ type Props = {
 	layoutKey: string
 	stats: NonNullable<SeriesBooksSceneSeriesNameQuery['seriesById']>['stats']
 	seriesState: SeriesState | null
-	readingStatus: ReadingStatus
+	lastReadAt: string | null | undefined
 	currentReadthrough?: number | null
 	additionalActions: SeriesActionsProps
 }
@@ -81,7 +77,7 @@ export function SeriesBooksListHeader({
 	layoutKey,
 	stats,
 	seriesState,
-	readingStatus,
+	lastReadAt,
 	currentReadthrough,
 	additionalActions,
 }: Props) {
@@ -115,9 +111,11 @@ export function SeriesBooksListHeader({
 
 	const actions = useMemo(() => {
 		const isDropped = !!seriesState?.droppedAt
-		const isRereadStopped = !!seriesState?.stoppedReadthroughAt
 		const hasProgress = (stats?.completedBooks ?? 0) > 0
-		const isActiveReread = readingStatus === ReadingStatus.Reading && (currentReadthrough ?? 0) > 1
+		const isRereading = (currentReadthrough ?? 0) > 1
+
+		const stopped_at = seriesState?.stoppedReadthroughAt
+		const isReadthroughStopped = lastReadAt && stopped_at ? isAfter(lastReadAt, stopped_at) : false
 
 		const result: ActionDef[] = [
 			{
@@ -137,8 +135,8 @@ export function SeriesBooksListHeader({
 				onPress: () => undropSeries({ id: seriesId }),
 			})
 		} else {
-			// can only stop a re-read if you are actively re-reading
-			if (isActiveReread && !isRereadStopped) {
+			// can only stop a re-read if you are re-reading
+			if (isRereading && !isReadthroughStopped) {
 				result.push({
 					key: 'stop-reread',
 					label: 'Stop Re-read',
@@ -146,7 +144,7 @@ export function SeriesBooksListHeader({
 					onPress: () =>
 						Alert.alert(
 							'Stop Re-read',
-							'Only newly-added books will be shown in on-deck suggestions. You can resume the re-read at any time',
+							'Only the latest unread books will be shown in on-deck suggestions. You can resume the re-read at any time',
 							[
 								{ text: t('common.cancel'), style: 'cancel' },
 								{ text: 'Stop Re-read', onPress: () => stopReread({ id: seriesId }) },
@@ -156,7 +154,7 @@ export function SeriesBooksListHeader({
 			}
 
 			// can only resume a re-read if you have stopped it
-			if (isRereadStopped) {
+			if (isReadthroughStopped) {
 				result.push({
 					key: 'resume-reread',
 					label: 'Resume Re-read',
@@ -217,8 +215,8 @@ export function SeriesBooksListHeader({
 		additionalActions,
 		checkPermission,
 		currentReadthrough,
+		lastReadAt,
 		dropSeries,
-		readingStatus,
 		resumeReread,
 		scanSeries,
 		seriesId,
@@ -226,6 +224,7 @@ export function SeriesBooksListHeader({
 		undropSeries,
 		seriesState,
 		stats,
+		t,
 	]) // jfc
 
 	const sortMenu = useSeriesBooksSortAndDisplayMenu({

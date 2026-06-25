@@ -5369,7 +5369,7 @@ export type SeriesBooksSceneSeriesNameQueryVariables = Exact<{
 }>;
 
 
-export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string, libraryId?: string | null, readingStatus: ReadingStatus, currentReadthrough?: number | null, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number }, userSeriesState?: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null, droppedAt?: any | null } | null } | null };
+export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string, libraryId?: string | null, readingStatus: ReadingStatus, currentReadthrough?: number | null, lastReadAt?: any | null, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number }, userSeriesState?: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null, droppedAt?: any | null } | null } | null };
 
 export type SeriesBooksScreenQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -9363,6 +9363,7 @@ export const SeriesBooksSceneSeriesNameDocument = new TypedDocumentString(`
     libraryId
     readingStatus
     currentReadthrough
+    lastReadAt
     userSeriesState {
       stoppedReadthroughAt
       droppedAt

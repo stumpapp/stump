@@ -38,6 +38,7 @@ const query = graphql(`
 			libraryId
 			readingStatus
 			currentReadthrough
+			lastReadAt
 			userSeriesState {
 				stoppedReadthroughAt
 				droppedAt
@@ -193,7 +194,7 @@ export default function Screen() {
 							layoutKey={layoutKey}
 							stats={series.stats}
 							seriesState={series.userSeriesState ?? null}
-							readingStatus={series.readingStatus}
+							lastReadAt={series.lastReadAt}
 							currentReadthrough={series.currentReadthrough}
 							additionalActions={actions}
 						/>

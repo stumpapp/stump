@@ -445,6 +445,34 @@ impl Series {
 		Ok(max)
 	}
 
+	/// The most recent datetime that any book in the series was read
+	async fn last_read_at(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<DateTimeWithTimeZone>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let last_read_at: Option<DateTimeWithTimeZone> = reading_session::Entity::find()
+			.select_only()
+			.column(reading_session::Column::UpdatedAt)
+			.join(
+				JoinType::InnerJoin,
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
+					.to(media::Column::Id)
+					.into(),
+			)
+			.filter(reading_session::Column::UserId.eq(&user.id))
+			.filter(media::Column::SeriesId.eq(&self.model.id))
+			.order_by_desc(reading_session::Column::UpdatedAt)
+			.into_tuple()
+			.one(conn)
+			.await?;
+
+		Ok(last_read_at)
+	}
+
 	/// Get the on-deck/re-read state for this series for the current user, if it exists
 	async fn user_series_state(
 		&self,

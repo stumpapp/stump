@@ -3100,6 +3100,8 @@ type Series {
 	null if not started yet
 	"""
 	currentReadthrough: Int
+	"The most recent datetime that any book in the series was read"
+	lastReadAt: DateTime
 	"Get the on-deck/re-read state for this series for the current user, if it exists"
 	userSeriesState: UserSeriesState
 }

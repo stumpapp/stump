@@ -2645,7 +2645,7 @@
 			"tooManyFiles": "Du hast zu viele Dateien ausgewählt",
 			"noValidFiles": "Es wurden keine gültigen Dateien ausgewählt"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "Ein unbekannter Fehler ist aufgetreten"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2837,17 +2837,17 @@
 			"markAsRead": {
 				"label": "Als gelesen markieren",
 				"confirmation": "Bist du dir sicher, dass du {{bookTitle}} als gelesen markieren möchtest?",
-				"failure": "Failed to mark book as read"
+				"failure": "Fehler beim Markieren des Buches als gelesen"
 			},
 			"clearProgress": {
 				"label": "Fortschritt löschen",
 				"confirmation": "Bist du dir sicher, dass du den Fortschritt für {{bookTitle}} löschen möchtest?",
-				"failure": "Failed to delete current progress"
+				"failure": "Fehler beim Löschen des aktuellen Fortschritts"
 			},
 			"deleteReadHistory": {
 				"label": "Leseverlauf löschen",
 				"confirmation": "Bist du dir sicher, dass du den Leseverlauf für {{bookTitle}} löschen möchtest?",
-				"failure": "Failed to delete read history"
+				"failure": "Fehler beim Löschen des Leseverlaufs"
 			},
 			"deleteBook": {
 				"label": "Buch löschen",

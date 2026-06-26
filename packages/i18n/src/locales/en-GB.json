@@ -1507,7 +1507,7 @@
 				},
 				"navigation": {
 					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
+					"description": "Customise the navigation elements of the app"
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
@@ -2375,7 +2375,7 @@
 					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
+					"label": "API token expiry",
 					"description": "The date when the API token will expire (optional)"
 				},
 				"enableProvider": {
@@ -2822,7 +2822,7 @@
 				"basic": "Basic"
 			},
 			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
+			"catalogUrl": "Catalogue URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
 			"checkConnection": "Check Connection",
@@ -2872,7 +2872,7 @@
 			"size": "Size",
 			"volume": "Volume",
 			"writers": "Writers",
-			"colorists": "Colorists",
+			"colorists": "Colourists",
 			"inkers": "Inkers",
 			"letterers": "Letterers",
 			"coverArtists": "Cover Artists",
@@ -2900,7 +2900,7 @@
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
-			"favorite": "Favorite",
+			"favorite": "Favourite",
 			"finished": "Finished",
 			"grid": "Grid",
 			"list": "List",
@@ -3073,9 +3073,9 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail Placeholder",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average Color",
-						"colorful": "Colorful",
+						"grayscale": "Greyscale",
+						"averageColor": "Average Colour",
+						"colorful": "Colourful",
 						"thumbhash": "Thumbhash"
 					}
 				},
@@ -3189,7 +3189,7 @@
 		"stumpServer": {
 			"browse": {
 				"books": "Books",
-				"favorites": "Favorites",
+				"favorites": "Favourites",
 				"files": "Files",
 				"libraries": "Libraries",
 				"series": "Series",
@@ -3342,7 +3342,7 @@
 				"options": {
 					"start": "Start",
 					"left": "Left",
-					"center": "Center",
+					"center": "Centre",
 					"right": "Right",
 					"justify": "Justify"
 				}

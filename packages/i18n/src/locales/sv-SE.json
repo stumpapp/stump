@@ -19,7 +19,7 @@
 				"password": "Lösenord"
 			},
 			"buttons": {
-				"createAccount": "Skapa Konto",
+				"createAccount": "Skapa konto",
 				"login": "Logga In",
 				"loginWithOidc": "Logga in med OIDC",
 				"createAccountWithOidc": "Skapa konto med OIDC"

@@ -2,7 +2,7 @@
 	"underConstruction": {
 		"heading": "Det här är pinsamt",
 		"message": "Du har snubblat på en sida som är under utveckling. Jag skulle vilja visa den för dig, men den är inte riktigt klar än.",
-		"homeLink": "Gå Hem",
+		"homeLink": "Gå hem",
 		"githubLink": "Se problemet på GitHub"
 	},
 	"authScene": {
@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "Mejla bok",
-			"description": "Send this book to a device or email address",
+			"description": "Skicka den här boken till en enhet eller e-postadress",
 			"form": {
 				"email": {
 					"label": "E-post",
@@ -121,7 +121,7 @@
 				},
 				"hideProgress": {
 					"label": "Dölj Framsteg",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"description": "Om detta är aktiverat döljs dina läsframsteg för andra medlemmar i bokklubben"
 				}
 			}
 		},
@@ -211,7 +211,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Schemaläggare",
-			"description": "Create and manage the scheduled readings for this book club"
+			"description": "Skapa och hantera schemalagd läsning för den här bokklubben"
 		},
 		"scheduling/options": {
 			"title": "Inställningar",
@@ -262,7 +262,7 @@
 				},
 				"skipBookOverview": {
 					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
+					"description": "Öppna läsaren direkt när böcker väljs i det här biblioteket"
 				},
 				"options": {
 					"series": {
@@ -350,7 +350,7 @@
 				},
 				"quality": {
 					"label": "Kvalitet",
-					"description": "Kvaliteten på den genererade miniatyrbilden, mellan 0 och 1.0"
+					"description": "Kvaliteten på de genererade miniatyrbilderna, mellan 1 och 100"
 				}
 			},
 			"ignoreRules": {
@@ -460,8 +460,8 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"heading": "Skapa bibliotek",
+		"subtitle": "Bibliotek används för att gruppera dina böcker. Om du vill fräscha upp minnet om hur de fungerar kan du läsa",
 		"subtitleLink": "relevant dokumentation",
 		"form": {
 			"stepLabel": "Steg",
@@ -511,11 +511,11 @@
 					"generateKoreaderHashes": "Generera KoReader-hashar",
 					"scaleEvenlyByFactor": "Skala Jämnt",
 					"exact": "Exakt Storlek",
-					"scaleDimension": "Uttryckligen Förstorad"
+					"scaleDimension": "Angiven storlek"
 				}
 			},
 			"buttons": {
-				"confirm": "Skapa Bibliotek"
+				"confirm": "Skapa bibliotek"
 			}
 		}
 	},
@@ -763,7 +763,7 @@
 		"buttons": {
 			"report": "Rapportera Bugg",
 			"copy": "Kopiera Felinformation",
-			"goHome": "Gå till startsidan"
+			"goHome": "Gå hem"
 		}
 	},
 	"homeScene": {
@@ -1409,11 +1409,11 @@
 						"heading": "Upload avatar",
 						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
 						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
+						"changeImage": "Byt bild",
+						"removeImage": "Ta bort bild",
 						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
+						"uploadFailed": "Det gick inte att ladda upp profilbilden",
+						"removeFailed": "Det gick inte att ta bort profilbilden"
 					},
 					"buttons": {
 						"confirm": "Spara Ändringar"

@@ -460,6 +460,7 @@ impl JobLifecycle for MetadataFetchJob {
 
 				let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 				let mut was_rate_limited = false;
+				let mut had_partial_results = false;
 
 				for config in &provider_configs {
 					match provider_cache.get_or_create(config).await {
@@ -471,8 +472,11 @@ impl JobLifecycle for MetadataFetchJob {
 							};
 
 							match provider.search_series(&query).await {
-								Ok(candidates) => {
-									all_candidates.extend(candidates);
+								Ok(outcome) => {
+									if outcome.failed() > 0 {
+										had_partial_results = true;
+									}
+									all_candidates.extend(outcome.candidates);
 								},
 								Err(e) if e.is_rate_limited() => {
 									was_rate_limited = true;
@@ -530,6 +534,7 @@ impl JobLifecycle for MetadataFetchJob {
 					series_id: Set(Some(series_id.clone())),
 					status: Set(status),
 					match_candidates: Set(Some(candidates_json)),
+					had_partial_results: Set(had_partial_results),
 					..Default::default()
 				};
 
@@ -539,6 +544,7 @@ impl JobLifecycle for MetadataFetchJob {
 							.update_columns([
 								metadata_fetch_record::Column::Status,
 								metadata_fetch_record::Column::MatchCandidates,
+								metadata_fetch_record::Column::HadPartialResults,
 								metadata_fetch_record::Column::UpdatedAt,
 							])
 							.to_owned(),
@@ -638,6 +644,7 @@ impl JobLifecycle for MetadataFetchJob {
 
 				let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 				let mut was_rate_limited = false;
+				let mut had_partial_results = false;
 
 				for config in &provider_configs {
 					match provider_cache.get_or_create(config).await {
@@ -649,8 +656,11 @@ impl JobLifecycle for MetadataFetchJob {
 							};
 
 							match provider.search_media(&query).await {
-								Ok(candidates) => {
-									all_candidates.extend(candidates);
+								Ok(outcome) => {
+									if outcome.failed() > 0 {
+										had_partial_results = true;
+									}
+									all_candidates.extend(outcome.candidates);
 								},
 								Err(e) if e.is_rate_limited() => {
 									was_rate_limited = true;
@@ -700,6 +710,7 @@ impl JobLifecycle for MetadataFetchJob {
 					media_id: Set(Some(media_id.clone())),
 					status: Set(status),
 					match_candidates: Set(Some(candidates_json)),
+					had_partial_results: Set(had_partial_results),
 					..Default::default()
 				};
 
@@ -709,6 +720,7 @@ impl JobLifecycle for MetadataFetchJob {
 							.update_columns([
 								metadata_fetch_record::Column::Status,
 								metadata_fetch_record::Column::MatchCandidates,
+								metadata_fetch_record::Column::HadPartialResults,
 								metadata_fetch_record::Column::UpdatedAt,
 							])
 							.to_owned(),

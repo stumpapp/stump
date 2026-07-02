@@ -3,7 +3,7 @@ use models::{
 	entity::{
 		library_config, media, metadata_fetch_record, metadata_provider_config, series,
 	},
-	shared::enums::{LibraryType, MetadataFetchStatus},
+	shared::enums::{LibraryType, MetadataFetchStatus, MetadataProvider},
 };
 use sea_orm::{prelude::*, sea_query::OnConflict, QuerySelect, Set};
 
@@ -86,6 +86,7 @@ pub async fn fetch_series_metadata(
 
 	let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 	let mut was_rate_limited = false;
+	let mut had_partial_results = false;
 
 	for config in &provider_configs {
 		match provider_cache.get_or_create(config).await {
@@ -97,8 +98,11 @@ pub async fn fetch_series_metadata(
 				};
 
 				match provider.search_series(&query).await {
-					Ok(candidates) => {
-						all_candidates.extend(candidates);
+					Ok(outcome) => {
+						if outcome.failed() > 0 {
+							had_partial_results = true;
+						}
+						all_candidates.extend(outcome.candidates);
 					},
 					Err(e) if e.is_rate_limited() => {
 						was_rate_limited = true;
@@ -141,6 +145,7 @@ pub async fn fetch_series_metadata(
 		series_id: Set(Some(series_id.to_string())),
 		status: Set(status),
 		match_candidates: Set(Some(candidates_json)),
+		had_partial_results: Set(had_partial_results),
 		..Default::default()
 	};
 
@@ -150,6 +155,7 @@ pub async fn fetch_series_metadata(
 				.update_columns([
 					metadata_fetch_record::Column::Status,
 					metadata_fetch_record::Column::MatchCandidates,
+					metadata_fetch_record::Column::HadPartialResults,
 					metadata_fetch_record::Column::UpdatedAt,
 				])
 				.to_owned(),
@@ -193,6 +199,8 @@ pub async fn fetch_media_metadata(
 	media_id: &str,
 	search: SearchQuery,
 	provider_cache: &ProviderClientCache,
+	provider_filter: Option<MetadataProvider>,
+	skip_auto_apply: bool,
 ) -> Result<Vec<MatchCandidate>, CoreError> {
 	let library_type = library_type_for_media(conn, media_id).await?;
 
@@ -204,6 +212,14 @@ pub async fn fetch_media_metadata(
 	let provider_configs =
 		filter_providers_for_library_type(provider_configs, &library_type);
 
+	let provider_configs = match provider_filter {
+		Some(provider) => provider_configs
+			.into_iter()
+			.filter(|c| c.provider_type == provider)
+			.collect(),
+		None => provider_configs,
+	};
+
 	if provider_configs.is_empty() {
 		return Err(CoreError::InternalError(
 			"No enabled metadata providers configured for this library type".to_string(),
@@ -212,12 +228,16 @@ pub async fn fetch_media_metadata(
 
 	let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 	let mut was_rate_limited = false;
+	let mut had_partial_results = false;
 
 	for config in &provider_configs {
 		match provider_cache.get_or_create(config).await {
 			Ok(provider) => match provider.search_media(&search).await {
-				Ok(candidates) => {
-					all_candidates.extend(candidates);
+				Ok(outcome) => {
+					if outcome.failed() > 0 {
+						had_partial_results = true;
+					}
+					all_candidates.extend(outcome.candidates);
 				},
 				Err(e) if e.is_rate_limited() => {
 					was_rate_limited = true;
@@ -259,6 +279,7 @@ pub async fn fetch_media_metadata(
 		media_id: Set(Some(media_id.to_string())),
 		status: Set(status),
 		match_candidates: Set(Some(candidates_json)),
+		had_partial_results: Set(had_partial_results),
 		..Default::default()
 	};
 
@@ -268,6 +289,7 @@ pub async fn fetch_media_metadata(
 				.update_columns([
 					metadata_fetch_record::Column::Status,
 					metadata_fetch_record::Column::MatchCandidates,
+					metadata_fetch_record::Column::HadPartialResults,
 					metadata_fetch_record::Column::UpdatedAt,
 				])
 				.to_owned(),
@@ -275,30 +297,32 @@ pub async fn fetch_media_metadata(
 		.exec(conn)
 		.await?;
 
-	if let Some((candidate, config)) =
-		apply::find_auto_apply_candidate(&all_candidates, &provider_configs)
-	{
-		tracing::info!(
-			media_id,
-			provider = candidate.provider,
-			confidence = candidate.confidence,
-			"Auto-applying media metadata match"
-		);
-		if let Err(e) = apply::apply_media_match(
-			conn,
-			media_id,
-			&candidate,
-			config.strategy,
-			config.exclude_fields,
-			vec![],
-		)
-		.await
+	if !skip_auto_apply {
+		if let Some((candidate, config)) =
+			apply::find_auto_apply_candidate(&all_candidates, &provider_configs)
 		{
-			tracing::error!(
+			tracing::info!(
 				media_id,
-				error = ?e,
-				"Failed to auto-apply media metadata"
+				provider = candidate.provider,
+				confidence = candidate.confidence,
+				"Auto-applying media metadata match"
 			);
+			if let Err(e) = apply::apply_media_match(
+				conn,
+				media_id,
+				&candidate,
+				config.strategy,
+				config.exclude_fields,
+				vec![],
+			)
+			.await
+			{
+				tracing::error!(
+					media_id,
+					error = ?e,
+					"Failed to auto-apply media metadata"
+				);
+			}
 		}
 	}
 

@@ -1,7 +1,7 @@
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::media::MediaMetadataInput,
+	input::media::{MediaMetadataInput, MediaMetadataSearchInput},
 	object::{media::Media, metadata_fetch_record::MetadataFetchRecord},
 };
 use async_graphql::{Context, Object, Result, ID};
@@ -56,13 +56,18 @@ impl MediaMetadataMutation {
 		Ok(model.into())
 	}
 
-	/// Search external metadata providers for a media item and return match candidates
+	/// Search external metadata providers for a media item and return the resulting fetch
+	/// record with its match candidates. When `search` is provided, the caller's fields
+	/// take precedence over the media's stored metadata, the search can be restricted to a
+	/// single provider, and auto-apply is skipped so the caller can review candidates before
+	/// anything is written.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn fetch_media_metadata(
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
-	) -> Result<Vec<MatchCandidate>> {
+		search: Option<MediaMetadataSearchInput>,
+	) -> Result<MetadataFetchRecord> {
 		let AuthContext { .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
@@ -77,38 +82,60 @@ impl MediaMetadataMutation {
 		let encryption_key = core_ctx.get_encryption_key().await?;
 		let provider_cache = ProviderClientCache::new(encryption_key);
 
-		let title = model
-			.metadata
+		let title = search
 			.as_ref()
-			.and_then(|m| m.title.clone())
+			.and_then(|s| s.title.clone())
+			.or_else(|| model.metadata.as_ref().and_then(|m| m.title.clone()))
 			.unwrap_or_else(|| model.media.name.clone());
 
-		let author = match model.metadata.as_ref().and_then(|m| m.writers.clone()) {
-			Some(authors_str) => {
-				authors_str.split(',').map(|s| s.trim().to_string()).next()
-			},
-			None => None,
-		};
+		let author = search.as_ref().and_then(|s| s.author.clone()).or_else(|| {
+			model
+				.metadata
+				.as_ref()
+				.and_then(|m| m.writers.clone())
+				.and_then(|authors_str| {
+					authors_str.split(',').map(|s| s.trim().to_string()).next()
+				})
+		});
 
-		let isbn = model
-			.metadata
+		let isbn = search.as_ref().and_then(|s| s.isbn.clone()).or_else(|| {
+			model
+				.metadata
+				.as_ref()
+				.and_then(|m| m.identifier_isbn.clone())
+		});
+
+		let year = search.as_ref().and_then(|s| s.year);
+		let limit = search
 			.as_ref()
-			.and_then(|m| m.identifier_isbn.clone());
+			.and_then(|s| s.limit)
+			.map(|l| l.max(0) as u32);
+		let provider_filter = search.as_ref().and_then(|s| s.provider);
+		let skip_auto_apply = search.is_some();
 
-		let candidates = stump_core::filesystem::metadata::fetch_media_metadata(
+		stump_core::filesystem::metadata::fetch_media_metadata(
 			conn,
 			&model.media.id,
 			SearchQuery {
 				title,
 				author,
 				isbn,
-				..Default::default()
+				year,
+				limit: limit.or(Some(10)),
 			},
 			&provider_cache,
+			provider_filter,
+			skip_auto_apply,
 		)
 		.await?;
 
-		Ok(candidates)
+		let updated = metadata_fetch_record::Entity::find()
+			.filter(metadata_fetch_record::Column::MediaId.eq(model.media.id))
+			.one(conn)
+			.await?
+			.ok_or("Failed to load fetch record after search")?;
+
+		Ok(MetadataFetchRecord::from(updated))
 	}
 
 	/// Accept a match candidate and apply it to media metadata

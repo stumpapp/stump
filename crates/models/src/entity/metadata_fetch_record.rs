@@ -25,6 +25,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
 	pub accepted_match_candidate: Option<JsonValue>, // auto or manual
+	/// True if a provider search found more raw hits than could be turned into
+	/// candidates (e.g. a per-hit detail fetch failed after the initial search)
+	pub had_partial_results: bool,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub added_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -78,6 +81,9 @@ impl ActiveModelBehavior for ActiveModel {
 			self.added_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
 			if self.status.is_not_set() {
 				self.status = ActiveValue::Set(MetadataFetchStatus::NotStarted);
+			}
+			if self.had_partial_results.is_not_set() {
+				self.had_partial_results = ActiveValue::Set(false);
 			}
 		} else {
 			self.updated_at =

@@ -2,13 +2,15 @@ import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { Construction } from 'lucide-react'
-import { Suspense, useCallback, useEffect, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
+import { MatchReviewDialog } from '@/components/metadata/metadataMatching'
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 
+import BookMetadataSearch from './BookMetadataSearch'
 import BookTagEditor from './BookTagEditor'
 import BookThumbnailSelector from './BookThumbnailSelector'
 
@@ -55,6 +57,8 @@ export default function BookManagementScene() {
 	})
 
 	const { data, mutate: analyze, isPending } = useGraphQLMutation(analyzeMutation)
+
+	const [isSearchingMetadata, setIsSearchingMetadata] = useState(false)
 
 	const breadcrumbs = useMemo(() => {
 		if (!book) return []
@@ -130,6 +134,31 @@ export default function BookManagementScene() {
 								Analyze Media
 							</Button>
 						</div>
+					</div>
+				)}
+
+				{checkPermission(UserPermission.MetadataFetchRecordManage) && (
+					<div className="gap-y-2 flex flex-col">
+						<div>
+							<Heading size="sm">Search metadata</Heading>
+							<Text size="sm" variant="muted">
+								Search an external provider for this book and choose a match to apply
+							</Text>
+						</div>
+
+						<div>
+							<Button size="default" onClick={() => setIsSearchingMetadata(true)}>
+								Search Metadata
+							</Button>
+						</div>
+
+						<BookMetadataSearch
+							mediaId={book.id}
+							initialTitle={book.resolvedName}
+							isOpen={isSearchingMetadata}
+							onClose={() => setIsSearchingMetadata(false)}
+						/>
+						<MatchReviewDialog />
 					</div>
 				)}
 

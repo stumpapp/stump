@@ -75,7 +75,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				} else {
 					search.delete('page')
 				}
-				setSearch(search)
+				setSearch(search, { replace: true })
 			}
 			setBookPreferences({ readingMode: value })
 		},

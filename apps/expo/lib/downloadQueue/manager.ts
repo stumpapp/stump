@@ -113,13 +113,13 @@ class DownloadQueueManager {
 	 * @returns The queue ID of the enqueued download, or -1 if already downloaded
 	 */
 	async enqueue(params: EnqueueDownloadParams): Promise<number> {
-		const existingRecord = await db
+		const [existingRecord] = await db
 			.select()
 			.from(downloadQueue)
 			.where(
 				and(eq(downloadQueue.bookId, params.bookId), eq(downloadQueue.serverId, params.serverId)),
 			)
-			.get()
+			.limit(1)
 
 		if (existingRecord) {
 			if (existingRecord.status === downloadQueueStatus.enum.failed) {
@@ -185,7 +185,7 @@ class DownloadQueueManager {
 			this.emit({ type: 'cancelled', queueId, bookId: active.bookId })
 		}
 
-		const item = await db.select().from(downloadQueue).where(eq(downloadQueue.id, queueId)).get()
+		const [item] = await db.select().from(downloadQueue).where(eq(downloadQueue.id, queueId))
 
 		if (item) {
 			await db.delete(downloadQueue).where(eq(downloadQueue.id, queueId))
@@ -282,7 +282,7 @@ class DownloadQueueManager {
 			throw new Error(`Download failed with status ${result.status}`)
 		}
 
-		const size = Number(result.headers['Content-Length'] ?? 0)
+		const size = await determineFileSize(result.headers, result.uri)
 		const metadata = params.metadata ? downloadQueueMetadata.safeParse(params.metadata).data : null
 
 		await DownloadRepository.addFile(
@@ -291,7 +291,7 @@ class DownloadQueueManager {
 				filename: params.filename,
 				uri: result.uri,
 				serverId: params.serverId,
-				size: !isNaN(size) && size > 0 ? size : undefined,
+				size,
 				bookName: metadata?.bookName,
 				metadata: metadata?.bookMetadata,
 				seriesId: metadata?.seriesId,
@@ -345,13 +345,12 @@ class DownloadQueueManager {
 
 		try {
 			while (this.activeDownloads.size < MAX_CONCURRENT_DOWNLOADS) {
-				const nextItem = await db
+				const [nextItem] = await db
 					.select()
 					.from(downloadQueue)
 					.where(eq(downloadQueue.status, downloadQueueStatus.enum.pending))
 					.orderBy(downloadQueue.createdAt)
 					.limit(1)
-					.get()
 
 				if (!nextItem) break
 
@@ -486,7 +485,11 @@ class DownloadQueueManager {
 	}
 
 	private async markFailed(queueId: number, reason: string): Promise<void> {
-		const item = await db.select().from(downloadQueue).where(eq(downloadQueue.id, queueId)).get()
+		const [item] = await db
+			.select()
+			.from(downloadQueue)
+			.where(eq(downloadQueue.id, queueId))
+			.limit(1)
 
 		await db
 			.update(downloadQueue)
@@ -509,8 +512,7 @@ class DownloadQueueManager {
 		result: FileSystem.FileSystemDownloadResult,
 	): Promise<void> {
 		try {
-			// android seems to have all lowercase headers
-			const size = Number(result.headers['Content-Length'] ?? result.headers['content-length'] ?? 0)
+			const size = await determineFileSize(result.headers, result.uri)
 			const metadata = item.metadata ? downloadQueueMetadata.safeParse(item.metadata).data : null
 
 			await DownloadRepository.addFile(
@@ -519,7 +521,7 @@ class DownloadQueueManager {
 					filename: item.filename,
 					uri: result.uri,
 					serverId: item.serverId,
-					size: !isNaN(size) && size > 0 ? size : undefined,
+					size,
 					bookName: metadata?.bookName,
 					metadata: metadata?.bookMetadata,
 					seriesId: metadata?.seriesId,
@@ -553,3 +555,35 @@ class DownloadQueueManager {
 export const getDownloadQueueManager = DownloadQueueManager.getInstance.bind(DownloadQueueManager)
 
 export { DownloadQueueManager }
+
+function extractSizeFromHeaders(headers: Record<string, string>): number | undefined {
+	const raw = headers['Content-Length'] ?? headers['content-length']
+	if (!raw) return undefined
+	const size = Number(raw)
+	return isNaN(size) ? undefined : size
+}
+
+async function determineFileSize(
+	headers: Record<string, string>,
+	lookupUri?: string,
+): Promise<number | undefined> {
+	const sizeFromHeaders = extractSizeFromHeaders(headers)
+	if (sizeFromHeaders != undefined) {
+		return sizeFromHeaders
+	}
+
+	console.warn('could not determine file size from headers, looking up manually', {
+		headers: headers,
+		lookupUri,
+	})
+
+	if (lookupUri) {
+		const info = await FileSystem.getInfoAsync(lookupUri)
+		// an annoying type union, size only present if exists: true lol
+		if (info.exists && info.size) {
+			return info.size
+		}
+	}
+
+	return undefined
+}

@@ -1,6 +1,7 @@
 import {
 	clone as cloneColor,
 	ColorSpace,
+	ColorTypes,
 	getColor,
 	OKLCH,
 	serialize,
@@ -51,7 +52,7 @@ const STAT_HUES = {
 	size: 'slate',
 } satisfies Record<string, Hue>
 
-function toHex(color: string) {
+export function toHex(color: ColorTypes) {
 	return serialize(to(getColor(color), sRGB), { format: 'hex' })
 }
 

@@ -1,5 +1,8 @@
-import { Host, Image } from '@expo/ui/swift-ui'
+import { formatBytes } from '@stump/client'
+import { clone, getColor, mix } from 'colorjs.io/fn'
 import { useRouter } from 'expo-router'
+import { SymbolView } from 'expo-symbols'
+import medium from 'expo-symbols/androidWeights/medium'
 import { CheckCircle2, Trash } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Alert, Platform, View } from 'react-native'
@@ -7,15 +10,15 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useShallow } from 'zustand/react/shallow'
 
 import { epubProgress, imageMeta, syncStatus } from '~/db'
-import { useColors } from '~/lib/constants'
-import { formatBytes } from '~/lib/format'
+import { COLORS, toHex } from '~/lib/constants'
 import { useDownload, useTranslate } from '~/lib/hooks'
+import { useColorScheme } from '~/lib/useColorScheme'
+import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
 import { ThumbnailImage } from '../image'
 import { Heading, Progress, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
-import { Icon } from '../ui/icon'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
 import { useDownloadRowItemSize } from './useDownloadRowItemSize'
@@ -48,9 +51,8 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const totalPages = downloadedFile.pages
 	const size = downloadedFile.size ? formatBytes(downloadedFile.size) : null
 
-	const colors = useColors()
-
 	const { width, height } = useDownloadRowItemSize()
+	const { backgroundColor, iconColor } = useSelectionColors()
 
 	const selectionStore = useSelectionStore(
 		useShallow((state) => ({
@@ -66,22 +68,53 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		[selectionStore],
 	)
 
-	const iconOpacity = useSharedValue(1)
-	const overlayOpacity = useSharedValue(0)
+	const scale = useSharedValue(1)
+	const opacity = useSharedValue(1)
+	const bgOpacity = useSharedValue(0)
+	const bgScale = useSharedValue(0)
 
 	useEffect(() => {
-		iconOpacity.value = withTiming(selectionStore.isSelected ? 0.6 : 1, { duration: 200 })
-		overlayOpacity.value = withTiming(selectionStore.isSelected ? 1 : 0, { duration: 150 })
-	}, [selectionStore.isSelected, iconOpacity, overlayOpacity])
+		// three different modes (selected, not selected, and not in selection mode)
+		if (selectionStore.isSelectionMode) {
+			if (selectionStore.isSelected) {
+				scale.value = withTiming(0.95, { duration: 250 })
+				opacity.value = withTiming(1, { duration: 250 })
+				bgOpacity.value = withTiming(1, { duration: 250 })
+				bgScale.value = withTiming(1, { duration: 250 })
+			} else {
+				scale.value = withTiming(0.9, { duration: 250 })
+				opacity.value = withTiming(0.5, { duration: 250 })
+				bgOpacity.value = withTiming(0, { duration: 250 })
+				bgScale.value = withTiming(0.85, { duration: 250 })
+			}
+		} else {
+			scale.value = withTiming(1, { duration: 250 })
+			opacity.value = withTiming(1, { duration: 250 })
+			bgOpacity.value = withTiming(0, { duration: 250 })
+			bgScale.value = withTiming(1, { duration: 250 })
+		}
+	}, [selectionStore, scale, opacity, bgOpacity, bgScale])
 
-	const syncIconStyle = useAnimatedStyle(() => ({
-		opacity: iconOpacity.value,
-	}))
-	const overlayStyle = useAnimatedStyle(() => ({
-		backgroundColor: colors.foreground.brand + '33',
-		borderColor: colors.foreground.brand,
-		opacity: overlayOpacity.value,
-	}))
+	const itemStyle = useAnimatedStyle(() => {
+		return {
+			transform: [{ scale: scale.value }],
+			opacity: opacity.value,
+		}
+	})
+
+	const backgroundStyle = useAnimatedStyle(() => {
+		return {
+			opacity: bgOpacity.value,
+			transform: [{ scale: bgScale.value }],
+		}
+	})
+
+	const overlayStyle = useAnimatedStyle(() => {
+		return {
+			opacity: bgOpacity.value,
+			transform: [{ scale: bgScale.value }],
+		}
+	})
 
 	const onPress = useCallback(
 		() =>
@@ -168,7 +201,12 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					},
 				]}
 			>
-				<View className="mx-4 gap-4 relative flex-row" style={{ height }}>
+				<Animated.View
+					className="squircle left-3 right-3 -top-1 -bottom-1 absolute rounded-3xl"
+					style={[backgroundStyle, { backgroundColor: backgroundColor }]}
+				/>
+
+				<Animated.View className="mx-4 gap-4 relative flex-row" style={[{ height }, itemStyle]}>
 					{/* TODO: Use file icons when no thumbnail is available? */}
 					<ThumbnailImage
 						source={{
@@ -187,7 +225,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							</Heading>
 
 							{status && (
-								<Animated.View className="mt-1 shrink-0" style={syncIconStyle}>
+								<Animated.View className="mt-1 shrink-0">
 									<SyncIcon status={status} />
 								</Animated.View>
 							)}
@@ -195,7 +233,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 						<View className="gap-2 flex-row items-center">
 							{currentPage && (
-								<View className="squircle px-2.5 py-0.5 flex-row items-end rounded-full bg-background-surface-secondary">
+								<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
 									<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
 									<Text
 										size="xs"
@@ -205,7 +243,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							)}
 
 							{size && (
-								<View className="squircle px-2.5 py-0.5 rounded-full bg-background-surface-secondary">
+								<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 rounded-full">
 									<Text size="sm" className="text-foreground-muted">
 										{size}
 									</Text>
@@ -217,34 +255,77 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							<View className="gap-3 flex-row items-center">
 								<Progress
 									className="shrink"
+									trackClassName="bg-black/5 dark:bg-white/10"
 									value={getProgress()}
 									style={{ height: 6, borderRadius: 3 }}
 								/>
 
-								<Text size="sm" className="shrink-0 text-foreground-muted">
+								<Text size="sm" className="text-foreground-muted shrink-0">
 									{(getProgress() || 0).toFixed(0)}%
 								</Text>
 							</View>
 						)}
 					</View>
+				</Animated.View>
 
-					<Animated.View
-						className="squircle inset-0 -m-1 rounded-lg absolute z-10 border-2"
-						style={overlayStyle}
-					>
-						<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>
-					</Animated.View>
-				</View>
+				<Animated.View
+					// absolute and symmetrical so it translates from the same origin as the background style, plus move the icon up and left
+					className="left-2 right-2 -top-2.5 -bottom-2.5 absolute"
+					style={overlayStyle}
+				>
+					<CheckIcon color={iconColor} />
+				</Animated.View>
 			</ContextMenu>
 		</>
 	)
 }
 
-const CheckIcon = Platform.select({
-	ios: (
-		<Host matchContents>
-			<Image systemName="checkmark.circle.fill" size={32} />
-		</Host>
-	),
-	android: <Icon as={CheckCircle2} size={32} className="shadow text-fill-brand" />,
-})
+function useSelectionColors() {
+	const { isDarkColorScheme } = useColorScheme()
+	const accentColor =
+		usePreferencesStore((state) => state.accentColor) ?? COLORS.light.fill.brand.DEFAULT
+
+	const color = getColor(accentColor)
+
+	const c1 = clone(color)
+	c1.alpha = 0.2
+	const backgroundColor = toHex(c1)
+
+	const iconColor = toHex(
+		mix(color, isDarkColorScheme ? 'black' : 'white', isDarkColorScheme ? 0.3 : 0.25, {
+			space: 'oklch',
+		}),
+	)
+
+	return { backgroundColor, iconColor }
+}
+
+function CheckIcon({ color }: { color: string }) {
+	return Platform.select({
+		ios: (
+			<SymbolView
+				name="checkmark.circle.fill"
+				weight="medium"
+				size={30}
+				type="palette"
+				colors={['white', color]}
+			/>
+		),
+		android: (
+			<View
+				className="squircle h-7 w-7 items-center justify-center rounded-full"
+				style={{ backgroundColor: color }}
+			>
+				<SymbolView
+					name={{ android: 'check' }}
+					// @ts-expect-error ios should not be required
+					weight={{ android: medium }}
+					size={18}
+					tintColor={'white'}
+					// this makes it line up with ios, because the ios icon has some kind of padding, because of course it does
+					style={{ inset: 3 }}
+				/>
+			</View>
+		),
+	})
+}

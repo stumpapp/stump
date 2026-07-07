@@ -15,7 +15,6 @@ You can automatically sync books to your Kobo device with Stump.
 
 You can configure your Kobo to retrieve books from Stump, rather than from the Kobo store.
 
-
 ## Setup
 
 To set up Kobo sync with Stump, you need to:
@@ -70,6 +69,21 @@ api_endpoint=http://192.168.4.100:10801/kobo/98765432109876543210876543210987
 </Step>
 
 </Steps>
+
+## Force sync
+
+If your Kobo becomes out of sync with Stump, you can reset the server-side sync state so the next sync starts from scratch:
+
+```http
+DELETE /api/v2/kobo/sync-sessions
+Authorization: Bearer <your-token>
+```
+
+This deletes all stored sync sessions for your account, which should force a full re-sync the next time your Kobo connects.
+
+<Callout>
+	After calling this endpoint you may also need to trigger a fresh sync from the Kobo itself. If the device still skips the library sync step, you may need to restore `.kobo/Kobo/Kobo eReader.conf` back to defaults, trigger a sync, then edit it again to point to Stump and trigger another sync.
+</Callout>
 
 ## Future improvements
 

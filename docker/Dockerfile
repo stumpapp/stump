@@ -97,6 +97,8 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
 
 FROM gcr.io/distroless/cc-debian12:debug
 
+ARG PORT=10801
+
 LABEL org.opencontainers.image.title="Stump" \
       org.opencontainers.image.description="A free and open source comics, manga and digital book server with OPDS support" \
       org.opencontainers.image.source="https://github.com/stumpapp/stump" \
@@ -121,11 +123,13 @@ COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
 ENV STUMP_CONFIG_DIR=/config \
     STUMP_CLIENT_DIR=/app/client \
     STUMP_PROFILE=release \
-    STUMP_PORT=10801 \
+    STUMP_PORT=${PORT} \
     STUMP_IN_DOCKER=true \
     PDFIUM_PATH=/opt/pdfium/lib/libpdfium.so \
     API_VERSION=v1
 
 WORKDIR /app
+
+EXPOSE ${PORT}
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -1,4 +1,3 @@
-export { default as BookmarkButton } from './BookmarkButton'
 export type { EpubReaderContextValue } from './context'
 export { EpubReaderContext, useEpubReaderContext } from './context'
 export { default as JumpButton } from './JumpButton'

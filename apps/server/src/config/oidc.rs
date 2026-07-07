@@ -8,7 +8,8 @@ use openidconnect::{
 	},
 	AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims,
 	EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl, Nonce, OAuth2TokenResponse,
-	RedirectUrl, Scope, StandardErrorResponse, TokenResponse,
+	PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, StandardErrorResponse,
+	TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::config::OidcConfig;
@@ -36,52 +37,93 @@ pub type StumpOidcClient = Client<
 	EndpointMaybeSet,
 >;
 
-/// Create OIDC client from configuration
-pub async fn create_oidc_client(
-	config: &OidcConfig,
-	frontend_url: &str,
-) -> Result<(reqwest::Client, StumpOidcClient), APIError> {
-	if !config.is_configured() {
-		return Err(APIError::OIDCConfigurationInvalid);
+/// Cached OIDC client state, initialized once at server startup.
+/// Holds the HTTP client and discovered provider metadata, avoiding
+/// repeated metadata discovery on every OIDC login request.
+#[derive(Clone)]
+pub struct OidcProvider {
+	pub http_client: oauth2_reqwest::ReqwestClient,
+	provider_metadata: CoreProviderMetadata,
+	client_id: String,
+	client_secret: String,
+}
+
+impl OidcProvider {
+	/// Build the HTTP client and discover provider metadata.
+	/// This performs the expensive I/O (metadata discovery) so it should
+	/// be called once at startup and reused.
+	pub async fn new(config: &OidcConfig) -> Result<Self, APIError> {
+		let issuer_url = IssuerUrl::new(config.issuer_url.clone()).map_err(|error| {
+			tracing::error!(?error, "Invalid issuer URL for OIDC");
+			APIError::OIDCConfigurationInvalid
+		})?;
+
+		let mut client_builder =
+			reqwest::ClientBuilder::new().redirect(reqwest::redirect::Policy::none());
+
+		if let Some(ca_cert_path) = &config.ca_cert_file {
+			let cert_bytes = tokio::fs::read(ca_cert_path).await.map_err(|error| {
+				tracing::error!(?error, path = %ca_cert_path, "Failed to read CA certificate file for OIDC");
+				APIError::InternalServerError(format!(
+					"Failed to read CA certificate file: {}",
+					error
+				))
+			})?;
+			let cert = reqwest::Certificate::from_pem(&cert_bytes).map_err(|error| {
+				tracing::error!(?error, path = %ca_cert_path, "Failed to parse CA certificate file for OIDC");
+				APIError::InternalServerError(format!(
+					"Failed to parse CA certificate '{}': {}",
+					ca_cert_path, error
+				))
+			})?;
+			client_builder = client_builder.add_root_certificate(cert);
+		}
+
+		let http_client = oauth2_reqwest::ReqwestClient::from(
+			client_builder.build().map_err(|error| {
+				tracing::error!(?error, "Failed to create HTTP client for OIDC");
+				APIError::InternalServerError(format!(
+					"Failed to create HTTP client: {}",
+					error
+				))
+			})?,
+		);
+
+		let provider_metadata =
+			CoreProviderMetadata::discover_async(issuer_url, &http_client)
+				.await
+				.map_err(|e| {
+					tracing::error!(?e, "OIDC discovery failed");
+					APIError::InternalServerError(format!("OIDC discovery failed: {}", e))
+				})?;
+
+		Ok(Self {
+			http_client,
+			provider_metadata,
+			client_id: config.client_id.clone(),
+			client_secret: config.client_secret.clone(),
+		})
 	}
 
-	let issuer_url = IssuerUrl::new(config.issuer_url.clone()).map_err(|error| {
-		tracing::error!(?error, "Invalid issuer URL for OIDC");
-		APIError::OIDCConfigurationInvalid
-	})?;
-
-	let http_client = reqwest::ClientBuilder::new()
-		.redirect(reqwest::redirect::Policy::none())
-		.build()
-		.map_err(|error| {
-			tracing::error!(?error, "Failed to create HTTP client for OIDC");
+	/// Create a per-request [StumpOidcClient] from the cached state.
+	/// This is cheap — no I/O, just constructs the client with the correct redirect URL.
+	pub fn create_client(&self, frontend_url: &str) -> Result<StumpOidcClient, APIError> {
+		let redirect_uri = format!("{}/api/v2/auth/oidc/callback", frontend_url);
+		let redirect_url = RedirectUrl::new(redirect_uri).map_err(|e| {
+			tracing::error!(?e, "Invalid redirect URI constructed from frontend URL");
 			APIError::InternalServerError(format!(
-				"Failed to create HTTP client: {}",
-				error
+				"Invalid redirect URI constructed from frontend URL: {}",
+				frontend_url
 			))
 		})?;
 
-	let provider_metadata =
-		CoreProviderMetadata::discover_async(issuer_url, &http_client)
-			.await
-			.map_err(|e| {
-				tracing::error!(?e, "OIDC discovery failed");
-				APIError::InternalServerError(format!("OIDC discovery failed: {}", e))
-			})?;
-
-	let redirect_uri = format!("{}/api/v2/auth/oidc/callback", frontend_url);
-	let redirect_url = RedirectUrl::new(redirect_uri).map_err(|e| {
-		APIError::InternalServerError(format!("Invalid redirect URI: {}", e))
-	})?;
-
-	let client = CoreClient::from_provider_metadata(
-		provider_metadata,
-		ClientId::new(config.client_id.clone()),
-		Some(ClientSecret::new(config.client_secret.clone())),
-	)
-	.set_redirect_uri(redirect_url);
-
-	Ok((http_client, client))
+		Ok(CoreClient::from_provider_metadata(
+			self.provider_metadata.clone(),
+			ClientId::new(self.client_id.clone()),
+			Some(ClientSecret::new(self.client_secret.clone())),
+		)
+		.set_redirect_uri(redirect_url))
+	}
 }
 
 /// Get the OIDC authorization URL to redirect the user to
@@ -89,19 +131,24 @@ pub fn get_oidc_authorize_url(
 	client: &StumpOidcClient,
 	scopes: &[String],
 	state: &str,
+	pkce_challenge: Option<PkceCodeChallenge>,
 ) -> String {
 	let scope_vec: Vec<Scope> = scopes.iter().map(|s| Scope::new(s.clone())).collect();
 	let state_owned = state.to_string();
 
-	let (authorize_url, _, _) = client
+	let mut auth_request = client
 		.authorize_url(
 			CoreAuthenticationFlow::AuthorizationCode,
 			move || CsrfToken::new(state_owned),
 			Nonce::new_random,
 		)
-		.add_scopes(scope_vec)
-		.url();
+		.add_scopes(scope_vec);
 
+	if let Some(challenge) = pkce_challenge {
+		auth_request = auth_request.set_pkce_challenge(challenge);
+	}
+
+	let (authorize_url, _, _) = auth_request.url();
 	authorize_url.to_string()
 }
 
@@ -122,19 +169,20 @@ pub struct OidcClaims {
 
 /// Exchange authorization code for tokens and extract claims
 pub async fn exchange_code_for_claims(
-	http_client: &reqwest::Client,
+	http_client: &oauth2_reqwest::ReqwestClient,
 	client: &StumpOidcClient,
 	code: String,
 	extra_audiences: Vec<String>,
+	pkce_verifier: Option<PkceCodeVerifier>,
 ) -> Result<OidcClaims, APIError> {
-	let token_response = client
-		.exchange_code(AuthorizationCode::new(code))?
-		.request_async(http_client)
-		.await
-		.map_err(|error| {
-			tracing::error!(?error, "Token exchange failed");
-			APIError::OIDCTokenExchangeFailed(error.to_string())
-		})?;
+	let mut request = client.exchange_code(AuthorizationCode::new(code))?;
+	if let Some(verifier) = pkce_verifier {
+		request = request.set_pkce_verifier(verifier);
+	}
+	let token_response = request.request_async(http_client).await.map_err(|error| {
+		tracing::error!(?error, "Token exchange failed");
+		APIError::OIDCTokenExchangeFailed(error.to_string())
+	})?;
 
 	let id_token = token_response
 		.id_token()

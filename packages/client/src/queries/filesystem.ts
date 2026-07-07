@@ -4,7 +4,7 @@ import {
 	extractErrorMessage,
 	graphql,
 } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -152,6 +152,9 @@ export function useDirectoryListing({
 				},
 			},
 		},
+		{
+			placeholderData: keepPreviousData,
+		},
 	)
 
 	/**
@@ -222,23 +225,16 @@ export function useDirectoryListing({
 				return
 			}
 
-			let newIndex = currentIndex + direction
-			let newHistory: string[]
-			// A -1 indicates that we don't have previous history when we called setPath, so we
-			// need to add the current path to the history ahead of where we are going next.
 			setHistory((curr) => {
 				if (direction === -1) {
-					newHistory = [...curr.slice(0, currentIndex + 1), directory]
-				} else {
-					// When we manually set the path, history needs to be reset, keeping
-					// the current path as the first entry and the new path as the second.
-					newHistory = [curr[0] || '', directory].filter(Boolean)
+					// navigating backwards via filesystem parent (no history entry) -> insert the
+					// parent before the current position to retain history
+					return [...curr.slice(0, currentIndex), directory, ...curr.slice(currentIndex)]
 				}
-				newIndex = newHistory.length - 1
-				return newHistory
+				return [...curr.slice(0, currentIndex + 1), directory]
 			})
 			setCurrentPath(directory)
-			setCurrentIndex(newIndex)
+			setCurrentIndex(direction === -1 ? currentIndex : currentIndex + 1)
 		},
 		[currentIndex],
 	)
@@ -259,24 +255,21 @@ export function useDirectoryListing({
 			return
 		}
 
-		const parent = directoryListing?.parent || ''
-		// If there is no parent, we are at the root directory, so we don't want to go back.
-		if (!parent) {
-			return
-		}
+		if (!hasBackHistory) return
 
-		// if parent comes BEFORE enforcedRoot, then we are trying to go back to a parent
+		// use the history stack instead of the filesystem parent so that non-linear
+		// navigation (e.g. jumping directly into a deep path) is handled correctly
+		const prevPath = history[currentIndex - 1]
+		if (prevPath === undefined) return
+
+		// if prevPath comes BEFORE enforcedRoot, then we are trying to go back to a
 		// directory that is not allowed. In this case, we don't want to go back.
-		if (enforcedRoot !== parent && enforcedRoot?.startsWith(parent)) {
-			return
-		}
+		if (enforcedRoot !== prevPath && enforcedRoot?.startsWith(prevPath)) return
 
-		if (directoryListing?.parent) {
-			onGoBack?.(directoryListing.parent)
-			setCurrentPath(directoryListing.parent)
-			setCurrentIndex((prev) => prev - 1)
-		}
-	}, [enforcedRoot, directoryListing, currentPath, onGoBack])
+		onGoBack?.(prevPath)
+		setCurrentPath(prevPath)
+		setCurrentIndex((prev) => prev - 1)
+	}, [history, currentIndex, hasBackHistory, enforcedRoot, directoryListing, currentPath, onGoBack])
 
 	const goBack = useCallback(() => {
 		if (!canGoBack) return

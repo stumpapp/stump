@@ -208,7 +208,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group relative block shrink-0 overflow-hidden rounded-xl transition-opacity hover:opacity-90"
+			className="group relative block shrink-0 rounded-thumbnail transition-opacity hover:opacity-90"
 			style={{ width }}
 		>
 			<ThumbnailImage
@@ -218,7 +218,6 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 				placeholderData={placeholderData}
 				gradient={gradient}
 				borderAndShadowStyle={{
-					borderRadius: 12,
 					shadowColor: 'rgba(0, 0, 0, 0.2)',
 					shadowRadius: 2,
 				}}

@@ -4,7 +4,7 @@ import { Timer } from '~/stores/reader'
 
 export type IPdfReaderContext = {
 	serverId: string
-	timer?: Timer
+	timer: Timer
 }
 
 export const PdfReaderContext = createContext<IPdfReaderContext | null>(null)

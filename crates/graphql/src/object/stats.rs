@@ -51,22 +51,65 @@ impl LibraryStats {
 						(SELECT COUNT(*) FROM series WHERE ($1 IS NULL OR series.library_id = $1)) AS series_count
 					FROM library_media
 				),
-				readthrough_stats AS (
+				filtered_sessions AS (
+					SELECT *
+					FROM reading_sessions
+					WHERE media_id IN (SELECT id FROM library_media)
+						AND ($2 IS TRUE OR user_id = $3)
+				),
+				latest_readthrough_sessions AS (
 					SELECT
 						frs.media_id,
+						frs.user_id,
 						frs.readthrough_number,
-						MAX(CASE WHEN frs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
-						MAX(CASE WHEN frs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
+						frs.status
+					FROM filtered_sessions frs
+					WHERE NOT EXISTS (
+							SELECT 1
+							FROM filtered_sessions rs2
+							WHERE rs2.user_id = frs.user_id
+								AND rs2.media_id = frs.media_id
+								AND rs2.readthrough_number = frs.readthrough_number
+								AND (
+									IFNULL(rs2.updated_at, rs2.created_at) > IFNULL(frs.updated_at, frs.created_at)
+									OR (
+										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										AND rs2.created_at > frs.created_at
+									)
+									OR (
+										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										AND rs2.created_at = frs.created_at
+										AND rs2.id > frs.id
+									)
+								)
+						)
+				),
+				readthrough_elapsed AS (
+					SELECT
+						frs.media_id,
+						frs.user_id,
+						frs.readthrough_number,
 						IFNULL(SUM(frs.elapsed_seconds), 0) AS readthrough_elapsed_seconds
-					FROM reading_sessions frs
-					WHERE frs.media_id IN (SELECT id FROM library_media)
-						AND ($2 IS TRUE OR frs.user_id = $3)
-					GROUP BY frs.media_id, frs.readthrough_number
+					FROM filtered_sessions frs
+					GROUP BY frs.media_id, frs.user_id, frs.readthrough_number
+				),
+				readthrough_stats AS (
+					SELECT
+						lrs.media_id,
+						MAX(CASE WHEN lrs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
+						MAX(CASE WHEN lrs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
+						IFNULL(SUM(rte.readthrough_elapsed_seconds), 0) AS readthrough_elapsed_seconds
+					FROM latest_readthrough_sessions lrs
+					INNER JOIN readthrough_elapsed rte
+						ON rte.media_id = lrs.media_id
+						AND rte.user_id = lrs.user_id
+						AND rte.readthrough_number = lrs.readthrough_number
+					GROUP BY lrs.media_id
 				),
 				session_stats AS (
 					SELECT
-						COUNT(DISTINCT CASE WHEN has_finished = 1 THEN media_id END) AS completed_books,
-						COUNT(DISTINCT CASE WHEN has_reading = 1 THEN media_id END) AS in_progress_books,
+						COUNT(CASE WHEN has_finished = 1 THEN media_id END) AS completed_books,
+						COUNT(CASE WHEN has_reading = 1 THEN media_id END) AS in_progress_books,
 						IFNULL(SUM(readthrough_elapsed_seconds), 0) AS total_reading_time_seconds
 					FROM readthrough_stats
 				)
@@ -118,22 +161,65 @@ impl SeriesStats {
 					FROM media
 					WHERE media.series_id = $1
 				),
-				readthrough_stats AS (
+				filtered_sessions AS (
+					SELECT *
+					FROM reading_sessions
+					WHERE media_id IN (SELECT id FROM media WHERE series_id = $1)
+						AND ($2 IS TRUE OR user_id = $3)
+				),
+				latest_readthrough_sessions AS (
 					SELECT
 						frs.media_id,
+						frs.user_id,
 						frs.readthrough_number,
-						MAX(CASE WHEN frs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
-						MAX(CASE WHEN frs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
+						frs.status
+					FROM filtered_sessions frs
+					WHERE NOT EXISTS (
+							SELECT 1
+							FROM filtered_sessions rs2
+							WHERE rs2.user_id = frs.user_id
+								AND rs2.media_id = frs.media_id
+								AND rs2.readthrough_number = frs.readthrough_number
+								AND (
+									IFNULL(rs2.updated_at, rs2.created_at) > IFNULL(frs.updated_at, frs.created_at)
+									OR (
+										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										AND rs2.created_at > frs.created_at
+									)
+									OR (
+										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										AND rs2.created_at = frs.created_at
+										AND rs2.id > frs.id
+									)
+								)
+						)
+				),
+				readthrough_elapsed AS (
+					SELECT
+						frs.media_id,
+						frs.user_id,
+						frs.readthrough_number,
 						IFNULL(SUM(frs.elapsed_seconds), 0) AS readthrough_elapsed_seconds
-					FROM reading_sessions frs
-					WHERE frs.media_id IN (SELECT id FROM media WHERE series_id = $1)
-						AND ($2 IS TRUE OR frs.user_id = $3)
-					GROUP BY frs.media_id, frs.readthrough_number
+					FROM filtered_sessions frs
+					GROUP BY frs.media_id, frs.user_id, frs.readthrough_number
+				),
+				readthrough_stats AS (
+					SELECT
+						lrs.media_id,
+						MAX(CASE WHEN lrs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
+						MAX(CASE WHEN lrs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
+						IFNULL(SUM(rte.readthrough_elapsed_seconds), 0) AS readthrough_elapsed_seconds
+					FROM latest_readthrough_sessions lrs
+					INNER JOIN readthrough_elapsed rte
+						ON rte.media_id = lrs.media_id
+						AND rte.user_id = lrs.user_id
+						AND rte.readthrough_number = lrs.readthrough_number
+					GROUP BY lrs.media_id
 				),
 				session_stats AS (
 					SELECT
-						COUNT(DISTINCT CASE WHEN has_finished = 1 THEN media_id END) AS completed_books,
-						COUNT(DISTINCT CASE WHEN has_reading = 1 THEN media_id END) AS in_progress_books,
+						COUNT(CASE WHEN has_finished = 1 THEN media_id END) AS completed_books,
+						COUNT(CASE WHEN has_reading = 1 THEN media_id END) AS in_progress_books,
 						IFNULL(SUM(readthrough_elapsed_seconds), 0) AS total_reading_time_seconds
 					FROM readthrough_stats
 				)

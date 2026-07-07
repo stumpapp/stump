@@ -1,5 +1,4 @@
 import { UseDirectoryListingFile, useSDK } from '@stump/client'
-import { Text, ToolTip } from '@stump/components'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { usePrefetchBook } from '@/components/book'
@@ -22,13 +21,8 @@ export default function FileGridItem({ file }: Props) {
 
 	const tooltipName = useMemo(() => (book ? book.resolvedName : name), [book, name])
 
-	/**
-	 * An effect that attempts to fetch the book associated with the file, if any exists.
-	 * This uses the same fetcher as the thumbnail, so it should be properly cached
-	 */
 	useEffect(() => {
 		async function tryGetMedia() {
-			// Note: This should be cached, so it should be fast
 			const maybeBook = await getBook(path, sdk)
 			if (maybeBook) {
 				setBook(maybeBook)
@@ -51,30 +45,19 @@ export default function FileGridItem({ file }: Props) {
 	)
 
 	return (
-		<ToolTip content={tooltipName} align="start">
-			<button
-				className="group w-32 gap-y-1.5 flex h-full flex-col items-center justify-center focus:outline-none"
-				onDoubleClick={() => onSelect(file)}
-				{...(book
-					? {
-							onMouseEnter: prefetch,
-						}
-					: {})}
-			>
-				<FileThumbnail
-					path={path}
-					isDirectory={isDirectory}
-					containerClassName="group-hover:bg-accent/80 group-focus:bg-muted"
-					size="md"
-				/>
+		<button
+			title={tooltipName}
+			className="group w-30 gap-2 p-1 flex cursor-default flex-col items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+			onDoubleClick={() => onSelect(file)}
+			{...(book ? { onMouseEnter: prefetch } : {})}
+		>
+			<div className="p-2 flex w-full items-center justify-center rounded-lg transition-colors group-hover:bg-muted">
+				<FileThumbnail path={path} isDirectory={isDirectory} thumbSize={72} />
+			</div>
 
-				<Text
-					className="p-1 line-clamp-2 max-w-full rounded-md group-hover:bg-accent/80 group-focus:bg-muted"
-					size="xs"
-				>
-					{name}
-				</Text>
-			</button>
-		</ToolTip>
+			<span className="px-2 py-0.5 text-sm line-clamp-2 max-w-full rounded-md text-center text-foreground/80 transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
+				{name}
+			</span>
+		</button>
 	)
 }

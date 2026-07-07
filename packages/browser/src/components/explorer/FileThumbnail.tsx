@@ -1,49 +1,55 @@
-import { queryClient, useSDK } from '@stump/client'
+import {
+	ARCHIVE_EXTENSION,
+	EBOOK_EXTENSION,
+	PDF_EXTENSION,
+	queryClient,
+	useSDK,
+} from '@stump/client'
 import { cn } from '@stump/components'
 import { graphql, MediaAtPathQuery } from '@stump/graphql'
 import { Api } from '@stump/sdk'
-import { Book, Folder } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTheme } from '@/hooks/useTheme'
 
 import { EntityImage } from '../entity'
 
 type Props = {
 	path: string
 	isDirectory: boolean
-	size?: 'sm' | 'md'
+	thumbSize?: number
 	containerClassName?: string
 }
 
-export default function FileThumbnail({
-	path,
-	isDirectory,
-	size = 'sm',
-	containerClassName,
-}: Props) {
+function getIconSrc(path: string, isDirectory: boolean, isDark: boolean): string {
+	if (isDirectory) {
+		return isDark ? '/assets/icons/Folder.png' : '/assets/icons/Folder_Light.png'
+	}
+
+	const ext = path.split('.').pop()?.toLowerCase() ?? ''
+
+	if (ARCHIVE_EXTENSION.test(ext) || EBOOK_EXTENSION.test(ext)) {
+		return isDark ? '/assets/icons/Archive.png' : '/assets/icons/Archive_Light.png'
+	} else if (PDF_EXTENSION.test(ext)) {
+		return isDark ? '/assets/icons/Document_pdf.png' : '/assets/icons/Document_pdf_Light.png'
+	} else {
+		return isDark ? '/assets/icons/Document.png' : '/assets/icons/Document_Light.png'
+	}
+}
+
+export default function FileThumbnail({ path, isDirectory, thumbSize, containerClassName }: Props) {
 	const { sdk } = useSDK()
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
-	/**
-	 * A boolean state to keep track of whether or not we should show the fallback icon. This
-	 * will be set to true if the image fails to load
-	 */
+	const { isDarkVariant } = useTheme()
+
 	const [showFallback, setShowFallback] = useState(false)
-	/**
-	 * The book associated with the file, if any exists
-	 */
 	const [book, setBook] = useState<MediaAtPath>(null)
-	/**
-	 * A naive ref to keep track of whether or not we have fetched the book
-	 */
+
 	const didFetchRef = useRef(false)
 
-	/**
-	 * An effect that attempts to fetch the book associated with the file, if any exists.
-	 * This will only run once, and only if the file is not a directory
-	 */
 	useEffect(() => {
 		if (!book && !didFetchRef.current && !isDirectory) {
 			didFetchRef.current = true
@@ -51,65 +57,52 @@ export default function FileThumbnail({
 		}
 	}, [book, path, isDirectory, sdk])
 
-	/**
-	 * A function that attempts to load the image associated with the book,
-	 * returning a promise that resolves with the image if it loads successfully
-	 */
-	const loadImage = useCallback(() => {
-		if (book) {
-			const image = new Image()
-			return new Promise((resolve, reject) => {
-				image.src = book.thumbnail.url
-				image.onload = () => resolve(image)
-				image.onerror = (e) => {
-					console.error('Image failed to load:', e)
-					reject(new Error('Could not load image'))
-				}
-			})
-		} else {
-			return Promise.reject('No book found')
+	const iconSrc = getIconSrc(path, isDirectory, isDarkVariant)
+
+	if (thumbSize != undefined) {
+		if (isDirectory || showFallback || !book) {
+			return (
+				<div
+					className={cn('relative flex shrink-0 items-center justify-center', containerClassName)}
+					style={{ width: thumbSize, height: thumbSize, minWidth: thumbSize, minHeight: thumbSize }}
+					onClick={showFallback ? () => setShowFallback(false) : undefined}
+				>
+					<img
+						src={iconSrc}
+						style={{ width: thumbSize, height: thumbSize }}
+						className="object-contain"
+						alt=""
+					/>
+				</div>
+			)
 		}
-	}, [book])
-
-	/**
-	 * A function that attempts to reload the image
-	 */
-	const attemptReload = async () => {
-		try {
-			await loadImage()
-			setShowFallback(false)
-		} catch {
-			setShowFallback(true)
-		}
-	}
-
-	const sizeClasses = cn('h-14', { 'h-20': size === 'md' })
-	const className = cn(
-		'flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar shadow-sm',
-		sizeClasses,
-		containerClassName,
-	)
-	const iconSizes = cn('h-7 w-7', { 'h-8 w-8': size === 'md' })
-
-	if (isDirectory) {
 		return (
-			<div className={className} style={{ aspectRatio: thumbnailRatio }}>
-				<Folder className={cn('text-muted-foreground', iconSizes)} />
+			<div
+				className={cn('relative flex shrink-0 items-center justify-center', containerClassName)}
+				style={{ width: thumbSize, height: thumbSize, minWidth: thumbSize, minHeight: thumbSize }}
+			>
+				<EntityImage
+					className="max-h-full max-w-full rounded-sm object-contain"
+					src={sdk.media.thumbnailURL(book.id)}
+					onError={() => setShowFallback(true)}
+				/>
 			</div>
 		)
 	}
 
-	if (showFallback || !book) {
+	if (isDirectory || showFallback || !book) {
 		return (
-			<div className={className} onClick={attemptReload} style={{ aspectRatio: thumbnailRatio }}>
-				<Book className={cn('text-muted-foreground', iconSizes)} />
+			<div
+				className={cn('flex items-center justify-center', containerClassName)}
+				style={{ aspectRatio: thumbnailRatio }}
+			>
+				<img src={iconSrc} className="h-full w-full object-contain" alt="" />
 			</div>
 		)
 	}
-
 	return (
 		<EntityImage
-			className={cn('w-auto rounded-sm object-cover', sizeClasses)}
+			className={cn('h-full w-auto rounded-sm object-cover', containerClassName)}
 			style={{ aspectRatio: thumbnailRatio }}
 			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}

@@ -1,17 +1,10 @@
-import { Bookmark, BookmarkCheck } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
-import { Pressable } from 'react-native'
 
-import { Icon } from '~/components/ui/icon'
 import { useEpubLocationStore } from '~/stores/epub'
 
 import { useEpubReaderContext } from './context'
 
-type Props = {
-	color?: string
-}
-
-export default function BookmarkButton({ color }: Props) {
+export function useBookmark() {
 	const [isLoading, setIsLoading] = useState(false)
 
 	const { onBookmark, onDeleteBookmark } = useEpubReaderContext()
@@ -73,21 +66,9 @@ export default function BookmarkButton({ color }: Props) {
 		removeBookmark,
 	])
 
-	// Don't render if no locator or no bookmark callback
-	if (!locator || !book || !onBookmark) return null
-
-	return (
-		<Pressable onPress={handleToggleBookmark} disabled={isLoading}>
-			{({ pressed }) => (
-				<Icon
-					as={isCurrentLocationBookmarked ? BookmarkCheck : Bookmark}
-					className="h-6 w-6"
-					style={{
-						opacity: isLoading ? 0.4 : pressed ? 0.7 : 0.9,
-					}}
-					color={color}
-				/>
-			)}
-		</Pressable>
-	)
+	return {
+		isBookmarked: isCurrentLocationBookmarked,
+		disabled: isLoading || !locator || !book || !onBookmark,
+		toggleBookmark: handleToggleBookmark,
+	}
 }

@@ -7,7 +7,7 @@ import { View } from 'react-native'
 import { HorizontalBookListItem } from '~/components/book'
 import { HorizontalBookListItemFragmentType } from '~/components/book/HorizontalBookListItem'
 import { Heading, Text } from '~/components/ui'
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
@@ -38,7 +38,7 @@ function ContinueReading() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-
+	const { t } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['continueReading', serverID],
@@ -80,7 +80,7 @@ function ContinueReading() {
 			{(leftOffBooks.length > 0 || activeBooks.length === 0) && (
 				<View className="flex">
 					<Heading size="xl" className="px-4">
-						Continue Reading
+						{t('stumpServer.continueReading.label')}
 					</Heading>
 
 					<FlashList
@@ -94,7 +94,9 @@ function ContinueReading() {
 						showsHorizontalScrollIndicator={false}
 						ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 						ListEmptyComponent={
-							<Text className="px-4 text-foreground-muted">No books in progress</Text>
+							<Text className="px-4 text-foreground-muted">
+								{t('stumpServer.continueReading.emptyText')}
+							</Text>
 						}
 					/>
 				</View>

@@ -38,6 +38,7 @@ const subscription = graphql(`
 				remainingTasks
 				completedSubtasks
 				totalSubtasks
+				subtitle
 			}
 			... on JobOutput {
 				id

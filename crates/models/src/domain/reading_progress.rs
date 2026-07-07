@@ -1,25 +1,17 @@
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use sea_orm::sqlx::types::Decimal;
 
-use crate::entity::reading_session;
+use crate::{entity::reading_session, shared::enums::ReadingStatus};
 
 pub fn calculate_logical_date(now: DateTime<Utc>, offset_hours: i32) -> NaiveDate {
 	(now - Duration::hours(offset_hours as i64)).date_naive()
 }
 
-/// returns true if the given session should be extended rather than a new one created.
-///
-/// a session is extendable when:
-/// - the book was not completed during it (`did_complete` is false)
-/// - the time since the last update is within the user's configured grace period
-pub fn should_extend_session(
+/// returns true if `session` was updated within the last `grace_period_secs` seconds
+fn is_within_grace_period(
 	session: &reading_session::Model,
 	grace_period_secs: i64,
 ) -> bool {
-	if session.is_finalized() {
-		return false;
-	}
-
 	let secs_since_update = session
 		.updated_at
 		.map(|t| {
@@ -29,6 +21,24 @@ pub fn should_extend_session(
 		.unwrap_or(0);
 
 	secs_since_update <= grace_period_secs
+}
+
+/// returns true if the given session should be extended rather than a new one created
+///
+/// a session is extendable when:
+/// - the session is still within the grace period
+/// - the status is not Abandoned
+///
+/// if a completed session is within the grace period, that is accepted as an extension
+pub fn should_extend_session(
+	session: &reading_session::Model,
+	grace_period_secs: i64,
+) -> bool {
+	if session.status == ReadingStatus::Abandoned {
+		false
+	} else {
+		is_within_grace_period(session, grace_period_secs)
+	}
 }
 
 /// returns true if `session` was completed within `timeout_secs` of now
@@ -128,6 +138,18 @@ mod tests {
 	}
 
 	#[test]
+	fn test_is_within_grace_period_recent_update() {
+		let session = make_session(false, Some(10)); // within grace
+		assert!(is_within_grace_period(&session, 60));
+	}
+
+	#[test]
+	fn test_is_within_grace_period_expired_update() {
+		let session = make_session(false, Some(700)); // past grace
+		assert!(!is_within_grace_period(&session, 60));
+	}
+
+	#[test]
 	fn test_should_extend_not_completed_within_grace() {
 		let session = make_session(false, Some(300)); // 5 min ago
 		assert!(should_extend_session(&session, 600));
@@ -142,6 +164,12 @@ mod tests {
 	#[test]
 	fn test_should_extend_completed_session() {
 		let session = make_session(true, Some(10)); // recently updated but complete
+		assert!(should_extend_session(&session, 600));
+	}
+
+	#[test]
+	fn test_should_not_extend_completed_session_after_grace() {
+		let session = make_session(true, Some(700)); // updated a while ago and complete
 		assert!(!should_extend_session(&session, 600));
 	}
 

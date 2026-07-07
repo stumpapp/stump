@@ -1,13 +1,11 @@
 use chrono::Utc;
 use sea_orm::{
 	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait,
-	EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+	EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
 };
 
 use crate::{
-	domain::reading_progress::{
-		calculate_logical_date, is_recent_completion, should_extend_session,
-	},
+	domain::reading_progress::{calculate_logical_date, should_extend_session},
 	entity::{media, reading_session, user::AuthUser},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
@@ -24,6 +22,42 @@ pub struct NormalizedProgression {
 	pub device_id: Option<String>,
 }
 
+impl NormalizedProgression {
+	fn apply(&self, session: reading_session::Model) -> reading_session::ActiveModel {
+		let new_elapsed = session.elapsed_seconds.unwrap_or(0)
+			+ self.elapsed_seconds_delta.unwrap_or(0).max(0);
+
+		let mut active = session.into_active_model();
+
+		active.epubcfi = Set(self.epubcfi.clone());
+		active.end_page = Set(self.page);
+		active.end_locator = Set(self.locator.clone());
+		active.end_percentage = Set(self.percentage);
+		if self.did_complete {
+			active.status = Set(ReadingStatus::Finished);
+		} else {
+			active.status = Set(ReadingStatus::Reading);
+		}
+		active.elapsed_seconds = Set(Some(new_elapsed));
+		if let Some(incoming) = &self.device_id {
+			let current = match &active.device_ids {
+				sea_orm::ActiveValue::Set(v) | sea_orm::ActiveValue::Unchanged(v) => {
+					v.as_ref()
+				},
+				sea_orm::ActiveValue::NotSet => None,
+			};
+			let mut ids = current
+				.map(|reading_session::DeviceIds(v)| v.clone())
+				.unwrap_or_default();
+			if !ids.contains(incoming) {
+				ids.push(incoming.clone());
+				active.device_ids = Set(Some(reading_session::DeviceIds(ids)));
+			}
+		}
+		active
+	}
+}
+
 /// creates a [`reading_session`] record or extends the most recent one if it falls within
 /// the same logical day and the grace period has not elapsed
 pub async fn upsert_reading_session(
@@ -31,7 +65,6 @@ pub async fn upsert_reading_session(
 	user: &AuthUser,
 	media_id: &str,
 	input: NormalizedProgression,
-	completion_dedup_timeout_secs: i64,
 ) -> Result<reading_session::Model, sea_orm::DbErr> {
 	let (grace_period, day_reset_offset) = user
 		.preferences
@@ -46,43 +79,13 @@ pub async fn upsert_reading_session(
 		.await?;
 
 	match latest {
-		Some(ref session)
-			if input.did_complete
-				&& is_recent_completion(session, completion_dedup_timeout_secs) =>
-		{
-			Ok(latest.unwrap())
-		},
+		// so long as the status is no dnf, progression within grace period will extend the existing session.
+		// this might re-open the session if it was previously marked as finished
 		Some(session)
 			if session.session_date == logical_today
 				&& should_extend_session(&session, grace_period) =>
 		{
-			let new_elapsed = session.elapsed_seconds.unwrap_or(0)
-				+ input.elapsed_seconds_delta.unwrap_or(0).max(0);
-
-			let mut active: reading_session::ActiveModel = session.into();
-			active.epubcfi = Set(input.epubcfi);
-			active.end_page = Set(input.page);
-			active.end_locator = Set(input.locator);
-			active.end_percentage = Set(input.percentage);
-			active.elapsed_seconds = Set(Some(new_elapsed));
-			if input.did_complete {
-				active.status = Set(ReadingStatus::Finished);
-			}
-			if let Some(incoming) = input.device_id {
-				let current = match &active.device_ids {
-					sea_orm::ActiveValue::Set(v) | sea_orm::ActiveValue::Unchanged(v) => {
-						v.as_ref()
-					},
-					sea_orm::ActiveValue::NotSet => None,
-				};
-				let mut ids = current
-					.map(|reading_session::DeviceIds(v)| v.clone())
-					.unwrap_or_default();
-				if !ids.contains(&incoming) {
-					ids.push(incoming);
-					active.device_ids = Set(Some(reading_session::DeviceIds(ids)));
-				}
-			}
+			let active = input.apply(session);
 			active.update(db).await
 		},
 		_ => {
@@ -96,7 +99,7 @@ pub async fn upsert_reading_session(
 				end_page: Set(input.page),
 				start_locator: Set(input.locator.clone()),
 				end_locator: Set(input.locator),
-				start_percentage: Set(input.percentage),
+				start_percentage: Set(input.percentage.or(Some(Decimal::new(0, 2)))),
 				end_percentage: Set(input.percentage),
 				// set bc there's no existing session to extend
 				elapsed_seconds: Set(Some(

@@ -171,7 +171,7 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group relative block shrink-0 overflow-hidden rounded-lg transition-opacity hover:opacity-90"
+			className="group relative block shrink-0 rounded-thumbnail transition-opacity hover:opacity-90"
 			style={{ width: cardWidth }}
 		>
 			<ThumbnailImage
@@ -181,7 +181,6 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 				placeholderData={placeholderData}
 				gradient={gradient}
 				borderAndShadowStyle={{
-					borderRadius: 8,
 					shadowColor: 'rgba(0, 0, 0, 0.2)',
 					shadowRadius: 2,
 				}}

@@ -8,6 +8,7 @@ import { Platform, View } from 'react-native'
 
 import { Icon, Tabs, Text } from '~/components/ui'
 import { ContextMenu } from '~/components/ui/context-menu/context-menu'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { Decoration, ReadiumLocator } from '~/modules/readium'
 import { BookmarkRef, useEpubLocationStore } from '~/stores/epub'
@@ -17,7 +18,7 @@ import { useEpubReaderContext } from './context'
 
 type Tab = 'ALL' | 'NOTES' | 'HIGHLIGHTS' | 'BOOKMARKS'
 
-export default function AnnotationsAndBookmarks() {
+export default function AnnotationsSheetContent() {
 	const { readerRef, onDeleteBookmark, onDeleteAnnotation } = useEpubReaderContext()
 
 	const book = useEpubLocationStore((store) => store.book)
@@ -53,7 +54,7 @@ export default function AnnotationsAndBookmarks() {
 
 			await readerRef.goToLocation(locator)
 
-			closeSheet('locations')
+			closeSheet('annotations')
 		},
 		[readerRef, closeSheet],
 	)
@@ -124,7 +125,7 @@ export default function AnnotationsAndBookmarks() {
 	)
 
 	return (
-		<View className="w-full flex-1">
+		<View className="pt-6 w-full flex-1">
 			<ListHeader tab={tab} setTab={setTab} />
 
 			<FlashList
@@ -151,6 +152,8 @@ type HeaderProps = {
 }
 
 function ListHeader({ tab, setTab }: HeaderProps) {
+	const { t } = useTranslate()
+
 	return (
 		<View className="px-4 pb-2 w-full">
 			{Platform.select({
@@ -162,11 +165,16 @@ function ListHeader({ tab, setTab }: HeaderProps) {
 								onSelectionChange={(selection) => {
 									setTab((selection as Tab) || 'ALL')
 								}}
+								selection={tab}
 							>
-								<SwiftText modifiers={[tag('ALL')]}>All</SwiftText>
-								<SwiftText modifiers={[tag('NOTES')]}>Notes</SwiftText>
-								<SwiftText modifiers={[tag('HIGHLIGHTS')]}>Highlights</SwiftText>
-								<SwiftText modifiers={[tag('BOOKMARKS')]}>Bookmarks</SwiftText>
+								<SwiftText modifiers={[tag('ALL')]}>{t('annotationsSheet.tabs.all')}</SwiftText>
+								<SwiftText modifiers={[tag('NOTES')]}>{t('annotationsSheet.tabs.notes')}</SwiftText>
+								<SwiftText modifiers={[tag('HIGHLIGHTS')]}>
+									{t('annotationsSheet.tabs.highlights')}
+								</SwiftText>
+								<SwiftText modifiers={[tag('BOOKMARKS')]}>
+									{t('annotationsSheet.tabs.bookmarks')}
+								</SwiftText>
 							</Picker>
 						</Host>
 					</View>
@@ -175,19 +183,19 @@ function ListHeader({ tab, setTab }: HeaderProps) {
 					<Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
 						<Tabs.List className="flex-row">
 							<Tabs.Trigger value="ALL">
-								<Text>All</Text>
+								<Text>{t('annotationsSheet.tabs.all')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="NOTES">
-								<Text>Notes</Text>
+								<Text>{t('annotationsSheet.tabs.notes')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="HIGHLIGHTS">
-								<Text>Highlights</Text>
+								<Text>{t('annotationsSheet.tabs.highlights')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="BOOKMARKS">
-								<Text>Bookmarks</Text>
+								<Text>{t('annotationsSheet.tabs.bookmarks')}</Text>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>
@@ -219,6 +227,7 @@ function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
 				minute: '2-digit',
 			})
 		: null
+	const { t } = useTranslate()
 
 	return (
 		<View className="w-full">
@@ -228,7 +237,7 @@ function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
 					{
 						items: [
 							{
-								label: 'Delete',
+								label: t('common.delete'),
 								icon: { ios: 'trash', android: Trash },
 								role: 'destructive',
 								onPress: onDelete,
@@ -280,6 +289,7 @@ function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
 				minute: '2-digit',
 			})
 		: null
+	const { t } = useTranslate()
 
 	return (
 		<View className="w-full">
@@ -289,7 +299,7 @@ function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
 					{
 						items: [
 							{
-								label: 'Delete',
+								label: t('common.delete'),
 								icon: { ios: 'trash', android: Trash },
 								role: 'destructive',
 								onPress: onDelete,

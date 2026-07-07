@@ -1,5 +1,5 @@
+import { formatBytes } from '@stump/client'
 import { MediaMetadata } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -11,7 +11,12 @@ import TImage from 'react-native-turbo-image'
 import { useShallow } from 'zustand/react/shallow'
 
 import BackLink from '~/components/BackLink'
-import { DescriptionSection, useOverviewAnimations } from '~/components/book/overview'
+import {
+	CurrentProgressCard,
+	DescriptionSection,
+	getPercentage,
+	useOverviewAnimations,
+} from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { intoDownloadedFile } from '~/components/localLibrary'
 import { useOfflineBookMenu } from '~/components/localLibrary/OfflineBookMenu'
@@ -29,7 +34,6 @@ import {
 	seriesRefs,
 } from '~/db'
 import { formatSeriesPosition } from '~/lib/bookUtils'
-import { formatBytes } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -88,7 +92,6 @@ export default function Screen() {
 	const metadata = downloadedFile.bookMetadata as Partial<MediaMetadata> | undefined
 
 	const formattedSize = downloadedFile.size ? formatBytes(downloadedFile.size) : null
-	const pages = downloadedFile.pages && downloadedFile.pages > 0 ? downloadedFile.pages : null
 	const extension = downloadedFile.filename.split('.').pop()?.toUpperCase() || null
 
 	const publisher = metadata?.publisher
@@ -108,30 +111,9 @@ export default function Screen() {
 		},
 	)
 
-	const getProgressPercentage = () => {
-		if (!readProgressData) return null
-
-		const currentPage = readProgressData.page || 0
-		const totalPages = pages || -1
-		if (totalPages > 0 && currentPage > 0) {
-			return Math.min((currentPage / totalPages) * 100, 100)
-		}
-
-		if (readProgressData.percentage) {
-			const parsed = parseFloat(readProgressData.percentage)
-			if (!isNaN(parsed)) {
-				return Math.min(parsed * 100, 100)
-			}
-		}
-
-		return null
-	}
-
-	const currentPage = readProgressData?.page ?? epubProgressData?.locations?.position ?? '??'
-	const progressPercentage = getProgressPercentage()
-	const readTime = readProgressData?.elapsedSeconds
-		? formatHumanDuration(readProgressData.elapsedSeconds, { significantUnits: 1 })
-		: null
+	const currentPage = readProgressData?.page ?? epubProgressData?.locations?.position
+	const pages = downloadedFile.pages && downloadedFile.pages > 0 ? downloadedFile.pages : null
+	const progressPercentage = getPercentage({ readProgress: readProgressData, totalPages: pages })
 
 	const showDetails =
 		!!formattedSize ||
@@ -142,9 +124,9 @@ export default function Screen() {
 
 	const renderRead = () => {
 		if (progressPercentage && progressPercentage > 0) {
-			return <Text>Continue</Text>
+			return <Text>{t('common.continue')}</Text>
 		} else {
-			return <Text>Read</Text>
+			return <Text>{t('common.read')}</Text>
 		}
 	}
 
@@ -195,18 +177,18 @@ export default function Screen() {
 							</Heading>
 
 							{seriesPosition != null ? (
-								<Text className="text-base text-center text-foreground-muted">
+								<Text className="text-base text-foreground-muted text-center">
 									{seriesPosition}
 								</Text>
 							) : (
 								downloadedFile.series && (
-									<Text className="text-base text-center text-foreground-muted">
+									<Text className="text-base text-foreground-muted text-center">
 										{downloadedFile.series.name}
 									</Text>
 								)
 							)}
 							{downloadedFile.library && (
-								<Text className="text-sm text-center text-foreground-muted" numberOfLines={1}>
+								<Text className="text-sm text-foreground-muted text-center" numberOfLines={1}>
 									{downloadedFile.library.name}
 								</Text>
 							)}
@@ -223,27 +205,15 @@ export default function Screen() {
 							</Button>
 						</View>
 
-						{(readProgressData || progressPercentage != null) && (
-							<Card>
-								{epubProgressData?.chapterTitle && (
-									<Card.StatGroup>
-										<Card.Stat label={t('common.chapter')} value={epubProgressData.chapterTitle} />
-									</Card.StatGroup>
-								)}
-								<Card.StatGroup>
-									{pages && <Card.Stat label="Page" value={currentPage} suffix={` / ${pages}`} />}
-
-									{progressPercentage != null && (
-										<Card.Stat
-											label={t('common.progress')}
-											value={progressPercentage.toFixed(0)}
-											suffix={'%'}
-										/>
-									)}
-									{readTime && <Card.Stat label={t('common.readTime')} value={readTime} />}
-								</Card.StatGroup>
-							</Card>
-						)}
+						<CurrentProgressCard
+							hidden={!readProgressData}
+							showChapterTitle={!!epubProgressData}
+							chapterTitle={epubProgressData?.chapterTitle}
+							page={currentPage}
+							totalPages={pages}
+							percentage={progressPercentage}
+							readingTimeSeconds={readProgressData?.elapsedSeconds}
+						/>
 					</View>
 				</View>
 

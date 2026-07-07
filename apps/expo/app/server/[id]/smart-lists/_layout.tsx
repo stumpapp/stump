@@ -3,9 +3,11 @@ import { Platform } from 'react-native'
 
 import BackLink from '~/components/BackLink'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	return (
@@ -14,7 +16,7 @@ export default function Screen() {
 				name="index"
 				options={{
 					headerShown: true,
-					title: 'Smart Lists',
+					title: t('stumpServer.browse.smartLists'),
 					headerTransparent: Platform.OS === 'ios',
 					headerLargeTitleStyle: {
 						fontSize: 30,

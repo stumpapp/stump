@@ -239,11 +239,10 @@ impl JobLifecycle for PlaceholderGenerationJob {
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = media.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Extracting thumbnail placeholder colors",
-					1,
-					task_count,
+				ctx.report_progress(JobProgress::msg(
+					"Generating thumbnail placeholder colors",
 				));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				Ok(safely_generate_placeholder_batch(
 					media.into_iter().map(GenerateImageSource::Book).collect(),
@@ -269,11 +268,10 @@ impl JobLifecycle for PlaceholderGenerationJob {
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = series.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating series placeholder metadata",
-					1,
-					task_count,
+				ctx.report_progress(JobProgress::msg(
+					"Generating series placeholder colors",
 				));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				Ok(safely_generate_placeholder_batch(
 					series
@@ -302,11 +300,10 @@ impl JobLifecycle for PlaceholderGenerationJob {
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = libraries.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating library placeholder metadata",
-					1,
-					task_count,
+				ctx.report_progress(JobProgress::msg(
+					"Generating library placeholder colors",
 				));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				Ok(safely_generate_placeholder_batch(
 					libraries

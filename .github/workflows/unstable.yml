@@ -7,6 +7,12 @@ on:
   push:
     branches:
       - unstable
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build against'
+        required: true
+        default: 'unstable'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,6 +27,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
         id: filter
+        if: github.event_name != 'workflow_dispatch'
         with:
           base: 'unstable'
           filters: |
@@ -33,14 +40,16 @@ jobs:
               - './.github/workflows/unstable.yml'
               - './.github/actions/**'
 
-  nightly-docker-build:
+  unstable-docker-build:
     needs: code-changes-check
     name: Build docker image
     runs-on: [self-hosted]
-    if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
+    if: ${{ needs.code-changes-check.outputs.changes != '[]' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Setup and build docker image
         uses: ./.github/actions/build-docker
@@ -50,6 +59,6 @@ jobs:
           tags: 'unstable'
           build-channel: 'unstable'
           load: ${{ github.event_name == 'pull_request' }}
-          push: ${{ github.event_name == 'push' }}
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           archs: 'amd64'
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

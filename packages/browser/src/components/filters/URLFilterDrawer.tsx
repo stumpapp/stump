@@ -57,7 +57,6 @@ export default function URLFilterDrawer({ entity }: Props) {
 							variant="ghost"
 							size="sm"
 							className="hover:bg-accent"
-							pressEffect={false}
 							onClick={() => setIsOpen(true)}
 						>
 							<ListFilter className="h-4 w-4" />

@@ -173,11 +173,10 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book, serverId: downloadedFile.serverId })
-	const showControls = useReaderStore((state) => state.showControls)
 
 	const timer = useBookTimer(book?.id || '', {
 		initial: book?.readProgress?.elapsedSeconds,
-		enabled: trackElapsedTime && !showControls,
+		enabled: trackElapsedTime,
 	})
 
 	const { mutate: updatePagedProgress } = useMutation({
@@ -324,6 +323,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 		return (
 			<ReadiumReader
 				book={book}
+				timer={timer}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
 				onReachedEnd={onReachedEnd}

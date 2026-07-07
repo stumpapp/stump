@@ -81,6 +81,9 @@
 	--radius-3xl: calc(var(--radius) + 12px);
 	--radius-4xl: calc(var(--radius) + 16px);
 
+	/* for buttons, inputs, etc */
+	--radius-interactive: var(--radius);
+
 	/* TODO: i should FINALLY implement the display spacing setting!? it
 		was added 2 years ago lmfao
 	 */
@@ -199,9 +202,37 @@
 	}
 }
 
+@utility rounded-interactive {
+	border-radius: var(--radius-interactive);
+}
+
+@utility rounded-thumbnail {
+	border-radius: var(--radius-thumbnail);
+}
+
 @custom-variant autofill (&:autofill, &:-webkit-autofill);
 
 @layer base {
+	html {
+		--radius-thumbnail: 0.5rem;
+	}
+
+	html.thumbnail-radius-none {
+		--radius-thumbnail: 0rem;
+	}
+
+	html.thumbnail-radius-normal {
+		--radius-thumbnail: 0.5rem;
+	}
+
+	html.thumbnail-radius-rounded {
+		--radius-thumbnail: 0.75rem;
+	}
+
+	html.thumbnail-radius-pill {
+		--radius-thumbnail: 1rem;
+	}
+
 	html.radius-none {
 		--radius: 0rem;
 	}
@@ -216,6 +247,7 @@
 
 	html.radius-pill {
 		--radius: 1.125rem;
+		--radius-interactive: 9999px;
 	}
 
 	/* TODO: preserve v3 default border color behavior but maybe kill? */

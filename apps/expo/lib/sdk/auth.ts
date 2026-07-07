@@ -217,12 +217,7 @@ export const getInstancesForServers = async (
 ): Promise<Record<string, Api>> => {
 	const [compatibleServers, incompatibleServers] = partition(
 		servers,
-		(server) =>
-			server.kind === 'stump' &&
-			match(server.config?.auth)
-				.with({ basic: P.shape({ username: P.string, password: P.string }) }, () => true)
-				.with({ bearer: P.string }, () => true)
-				.otherwise(() => false),
+		(server) => server.kind === 'stump',
 	)
 
 	if (compatibleServers.length === 0) {

@@ -43,6 +43,7 @@ pub mod reading_session;
 pub mod refresh_token;
 pub mod registered_email_device;
 pub mod review;
+pub mod scanned_directory;
 pub mod scheduled_job;
 pub mod series;
 pub mod series_metadata;

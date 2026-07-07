@@ -80,7 +80,7 @@
 		"@storybook/testing-library": "^0.2.2",
 		"@storybook/theming": "^7.6.17",
 		"@tailwindcss/postcss": "^4.2.2",
-		"@tailwindcss/typography": "^0.5.12",
+		"@tailwindcss/typography": "^0.5.20",
 		"tailwindcss": "^4.2.2",
 		"@types/react": "^19.0.0",
 		"@types/react-dom": "^19.0.0",

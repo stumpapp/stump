@@ -1,13 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import {
-	BookByIdQuery,
-	graphql,
-	MediaFilterInput,
-	MediaMetadataFilterInput,
-	UserPermission,
-} from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
-import { formatDistanceToNow } from 'date-fns'
+import { formatBytes } from '@stump/client'
+import { graphql, MediaFilterInput, MediaMetadataFilterInput, UserPermission } from '@stump/graphql'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { Platform, View } from 'react-native'
@@ -20,18 +13,20 @@ import BackLink from '~/components/BackLink'
 import { BookMetaLink, BooksAfterCursor } from '~/components/book'
 import {
 	BookActionMenu,
+	CurrentProgressCard,
 	DescriptionSection,
 	DownloadButton,
+	getPercentage,
 	IdentifiersSheet,
+	LastFinishedCard,
+	useBookMenu,
 	useOverviewAnimations,
 } from '~/components/book/overview'
-import { useBookMenu } from '~/components/book/overview/BookMenu'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
-import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -137,10 +132,6 @@ const query = graphql(`
 	}
 `)
 
-type ActiveReadingSession = NonNullable<
-	NonNullable<Pick<NonNullable<BookByIdQuery['mediaById']>, 'readProgress'>>['readProgress']
->
-
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
 	const { t } = useTranslate()
@@ -211,7 +202,6 @@ export default function Screen() {
 	const description = book.metadata?.summary || ''
 	const genres = book.metadata?.genres || []
 	const links = book.metadata?.links || []
-	const pages = book.metadata?.pageCount || book.pages
 	const characters = book.metadata?.characters || []
 
 	const seriesName = book.metadata?.series || book.series.resolvedName
@@ -244,70 +234,19 @@ export default function Screen() {
 		const { page, percentageCompleted, epubcfi } = book.readProgress || {}
 
 		if (page || percentageCompleted || !!epubcfi) {
-			return <Text>Continue</Text>
+			return <Text>{t('common.continue')}</Text>
 		} else if (book.readHistory?.length) {
-			return <Text>Read again</Text>
+			return <Text>{t('common.readAgain')}</Text>
 		} else {
-			return <Text>Read</Text>
+			return <Text>{t('common.read')}</Text>
 		}
 	}
 
-	const renderPercentage = ({ page, percentageCompleted, locator }: ActiveReadingSession) => {
-		if (!page && !percentageCompleted && !locator) {
-			return null
-		}
-
-		if (locator?.locations?.totalProgression != null && !percentageCompleted) {
-			const percentage = Math.round(locator.locations.totalProgression * 100)
-			return <Card.Stat label="Completed" value={`${percentage}%`} />
-		}
-
-		const fraction = percentageCompleted
-			? parseGraphQLDecimal(percentageCompleted)
-			: (page || 0) / pages
-
-		const percentage = fraction != null ? Math.max(0, Math.min(100, Math.round(fraction * 100))) : 0
-
-		return <Card.Stat label="Completed" value={percentage} suffix={'%'} />
-	}
-
-	const renderReadTime = ({ elapsedSeconds, startedAt }: ActiveReadingSession) => {
-		if (!elapsedSeconds || !startedAt) {
-			return null
-		}
-
-		if (elapsedSeconds) {
-			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
-			return <Card.Stat label="Reading time" value={readTime} />
-		} else {
-			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
-		}
-	}
-
-	const renderEpubLocator = ({ epubcfi, locator }: ActiveReadingSession) => {
-		if (!locator && !epubcfi) {
-			return null
-		}
-
-		if (locator) {
-			const chapterTitle = locator.chapterTitle || locator.href || 'Unknown'
-			return <Card.Stat label="Chapter" value={chapterTitle} />
-		} else {
-			return <Card.Stat label="Locator" value={`${epubcfi?.slice(0, 4)}...${epubcfi?.slice(-4)}`} />
-		}
-	}
-
-	const currentPage = progression?.page ?? progression?.locator?.locations?.position ?? '??'
-
-	const lastCompletionDistance =
-		lastCompletion?.completedAt != null
-			? formatDistanceToNow(new Date(lastCompletion.completedAt), { addSuffix: true })
-			: 'Unknown'
-
-	const lastCompletionReadTime =
-		lastCompletion?.elapsedSeconds != null
-			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
-			: 'Unknown'
+	const chapterTitle = progression?.locator?.chapterTitle || progression?.locator?.href
+	const currentPage = progression?.page ?? progression?.locator?.locations?.position
+	const totalPages = book.metadata?.pageCount || book.pages
+	const percentage = getPercentage({ readProgress: progression, totalPages })
+	const readthroughNumber = book.readHistory.length
 
 	// Reminder: Whenever this page introduces a new clickable filter field, make sure to
 	// add a corresponding bit in the filter header and prolly metadata overview object
@@ -410,7 +349,7 @@ export default function Screen() {
 							</Heading>
 
 							{seriesPosition != null && (
-								<Text className="text-base text-center text-foreground-muted">
+								<Text className="text-base text-foreground-muted text-center">
 									{seriesPosition}
 								</Text>
 							)}
@@ -435,26 +374,22 @@ export default function Screen() {
 							)}
 						</View>
 
-						{(progression || lastCompletion) && (
-							<Card>
-								{progression ? (
-									<>
-										{isEpub && <Card.StatGroup>{renderEpubLocator(progression)}</Card.StatGroup>}
-										<Card.StatGroup>
-											<Card.Stat label="Page" value={currentPage} suffix={` / ${pages}`} />
-											{renderPercentage(progression)}
-											{renderReadTime(progression)}
-										</Card.StatGroup>
-									</>
-								) : (
-									<Card.StatGroup>
-										<Card.Stat label="Pages" value={pages} />
-										<Card.Stat label="Finished" value={lastCompletionDistance} />
-										<Card.Stat label="Reading time" value={lastCompletionReadTime} />
-									</Card.StatGroup>
-								)}
-							</Card>
-						)}
+						<CurrentProgressCard
+							hidden={!progression}
+							showChapterTitle={isEpub}
+							chapterTitle={chapterTitle}
+							page={currentPage}
+							totalPages={totalPages}
+							percentage={percentage}
+							readingTimeSeconds={progression?.elapsedSeconds}
+						/>
+
+						<LastFinishedCard
+							hidden={!!progression || !lastCompletion}
+							readthroughNumber={readthroughNumber}
+							lastCompletedAt={lastCompletion?.completedAt}
+							readingTimeSeconds={lastCompletion?.elapsedSeconds}
+						/>
 					</View>
 				</View>
 
@@ -463,17 +398,19 @@ export default function Screen() {
 
 					<Card className={cn(!description && 'px-2')}>
 						<Card.StatGroup>
-							{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
-							{!!seriesVolume && <Card.Stat label="Volume" value={seriesVolume} />}
-							{book.metadata?.year != null && book.metadata.year > 0 && (
-								<Card.Stat label="Year" value={book.metadata.year} />
+							{!!publisher && <Card.Stat label={t('bookMetadata.publisher')} value={publisher} />}
+							{!!seriesVolume && (
+								<Card.Stat label={t('bookMetadata.volume')} value={seriesVolume} />
 							)}
-							<Card.Stat label="Pages" value={pages} />
+							{book.metadata?.year != null && book.metadata.year > 0 && (
+								<Card.Stat label={t('bookMetadata.year')} value={book.metadata.year} />
+							)}
+							<Card.Stat label={t('common.pages')} value={totalPages} />
 						</Card.StatGroup>
 					</Card>
 
 					<MetadataBadgeSection
-						label="Genres"
+						label={t('bookMetadata.genres')}
 						items={genres.map((genre) => ({
 							label: genre,
 							onPress: () => onClickFilterField('genres', genre),
@@ -483,7 +420,7 @@ export default function Screen() {
 					{!noAcknowledgements && (
 						<View className="gap-6">
 							<MetadataBadgeSection
-								label="Writers"
+								label={t('bookMetadata.writers')}
 								items={writers.map((writer) => ({
 									label: writer,
 									onPress: () => onClickFilterField('writers', writer),
@@ -491,7 +428,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Colorists"
+								label={t('bookMetadata.colorists')}
 								items={colorists.map((colorist) => ({
 									label: colorist,
 									onPress: () => onClickFilterField('colorists', colorist),
@@ -499,7 +436,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Inkers"
+								label={t('bookMetadata.inkers')}
 								items={inkers.map((inker) => ({
 									label: inker,
 									onPress: () => onClickFilterField('inkers', inker),
@@ -507,7 +444,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Letterers"
+								label={t('bookMetadata.letterers')}
 								items={letterers.map((letterer) => ({
 									label: letterer,
 									onPress: () => onClickFilterField('letterers', letterer),
@@ -515,7 +452,7 @@ export default function Screen() {
 							/>
 
 							<MetadataBadgeSection
-								label="Cover Artists"
+								label={t('bookMetadata.coverArtists')}
 								items={coverArtists.map((coverArtist) => ({
 									label: coverArtist,
 									onPress: () => onClickFilterField('coverArtists', coverArtist),
@@ -525,7 +462,7 @@ export default function Screen() {
 					)}
 
 					<MetadataBadgeSection
-						label="Characters"
+						label={t('bookMetadata.characters')}
 						items={characters.map((character) => ({
 							label: character,
 							onPress: () => onClickFilterField('characters', character),
@@ -536,7 +473,7 @@ export default function Screen() {
 
 					{links.length > 0 && (
 						<View className="gap-2 flex w-full">
-							<ListLabel className="ios:px-4 px-2">Links</ListLabel>
+							<ListLabel className="ios:px-4 px-2">{t('bookMetadata.links')}</ListLabel>
 
 							<View className="ios:px-4 gap-2 px-2 flex flex-row flex-wrap">
 								{links.map((link) => (
@@ -547,14 +484,19 @@ export default function Screen() {
 					)}
 
 					{showDetails && (
-						<Card label="Details">
-							{book.extension && <Card.Row label="Format" value={book.extension.toUpperCase()} />}
-							{!!formattedSize && <Card.Row label="Size" value={formattedSize} />}
+						<Card label={t('common.details')}>
+							{book.extension && (
+								<Card.Row label={t('bookMetadata.format')} value={book.extension.toUpperCase()} />
+							)}
+							{!!formattedSize && <Card.Row label={t('bookMetadata.size')} value={formattedSize} />}
 							{book.metadata?.language && (
-								<Card.Row label="Language" value={book.metadata.language} />
+								<Card.Row label={t('bookMetadata.language')} value={book.metadata.language} />
 							)}
 							{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
-								<Card.Row label="Age Rating" value={`${book.metadata.ageRating}+`} />
+								<Card.Row
+									label={t('bookMetadata.ageRating')}
+									value={`${book.metadata.ageRating}+`}
+								/>
 							)}
 						</Card>
 					)}

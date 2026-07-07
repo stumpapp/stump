@@ -305,6 +305,98 @@ async fn test_new_readthrough_after_finished_session() {
 	assert_eq!(new_session.readthrough_number, 2); // should have incremented
 }
 
+/// if a progression event occurs after completion within grace, the same session should reopen
+/// instead of creating a new readthrough
+#[tokio::test]
+async fn test_reopen_recent_finished_session_within_grace() {
+	let (app, book) = setup().await;
+
+	let conn = app.conn();
+
+	// first readthrough start
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	// first readthrough finish
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 100,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	// regress progress
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 99,
+			elapsed_seconds_delta: Some(120),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let latest_before_finish = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
+		.order_by_desc(reading_session::Column::CreatedAt)
+		.one(conn)
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+	assert_eq!(latest_before_finish.readthrough_number, 1);
+	assert_eq!(latest_before_finish.status, ReadingStatus::Reading);
+
+	let sessions_after_reopen = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
+		.all(conn)
+		.await
+		.expect("could not query reading sessions");
+	assert_eq!(sessions_after_reopen.len(), 1);
+
+	// finish again
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 100,
+			elapsed_seconds_delta: Some(180),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let all_sessions = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
+		.order_by_asc(reading_session::Column::CreatedAt)
+		.all(conn)
+		.await
+		.expect("could not query reading sessions");
+	assert_eq!(all_sessions.len(), 1);
+
+	let latest_after_finish = all_sessions.last().expect("no session found");
+	assert_eq!(latest_after_finish.readthrough_number, 1);
+	assert_eq!(latest_after_finish.status, ReadingStatus::Finished);
+
+	let finished_count = all_sessions
+		.iter()
+		.filter(|s| s.status == ReadingStatus::Finished)
+		.count();
+	assert_eq!(finished_count, 1);
+}
+
 /// if the user finishes an ebook, the session should be marked as such
 #[tokio::test]
 async fn test_detect_finishing_session_for_ebook() {

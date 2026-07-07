@@ -1,4 +1,3 @@
-import { cn } from '@stump/components'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { VirtuosoGrid } from 'react-virtuoso'
 
@@ -25,8 +24,7 @@ export default function FileGrid() {
 						style={{ height, width }}
 						totalCount={files.length}
 						className="scrollbar-hide"
-						listClassName={cn('flex flex-1 flex-wrap gap-2 px-4')}
-						itemClassName="py-1.5"
+						listClassName="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2 p-4 items-start"
 						itemContent={renderItem}
 						overscan={{ main: 15, reverse: 10 }}
 						endReached={loadMore}

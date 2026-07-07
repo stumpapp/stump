@@ -124,7 +124,7 @@ async fn get_progress(
 	let user = req.user();
 	let document_cpy = document.clone();
 
-	let latest_query = reading_session::Entity::find()
+	let latest_query = reading_session::ModelWithDevice::find()
 		.inner_join(media::Entity)
 		.filter(reading_session::Column::UserId.eq(user.id.clone()))
 		.filter(media::Column::KoreaderHash.eq(document_cpy.clone()))
@@ -304,14 +304,8 @@ async fn put_progress(
 		},
 	}
 
-	let session = upsert_reading_session(
-		&tx,
-		&user,
-		book.id.as_ref(),
-		progression,
-		ctx.config.book_completion_dedup_timeout_secs,
-	)
-	.await?;
+	let session =
+		upsert_reading_session(&tx, &user, book.id.as_ref(), progression).await?;
 
 	if session.koreader_progress.as_deref() != Some(progress.as_str()) {
 		let mut active: reading_session::ActiveModel = session.into();

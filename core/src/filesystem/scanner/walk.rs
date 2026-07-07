@@ -2,18 +2,17 @@ use std::{
 	collections::HashMap,
 	path::{Path, PathBuf},
 	sync::Arc,
+	time::UNIX_EPOCH,
 };
 
 use globset::GlobSet;
-use itertools::Either;
+use itertools::{Either, Itertools};
 use models::entity::{media, series};
-use rayon::iter::{
-	IntoParallelIterator, IntoParallelRefIterator, ParallelBridge, ParallelIterator,
-};
 use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
+	error::CoreError,
 	filesystem::{
 		scanner::{options::BookVisitOperation, utils::file_updated_since_scan},
 		PathUtils,
@@ -32,6 +31,11 @@ pub struct WalkerCtx {
 	pub max_depth: Option<usize>,
 	/// The scan options to apply during the walk
 	pub options: ScanOptions,
+	/// Stored directory mtimes, loaded at scan start to be used for
+	/// short-circuiting directories that have not been modified since the last scan
+	pub dir_mtimes: HashMap<String, u64>,
+	/// The series ID for this walk, if scoped to a specific series
+	pub series_id: Option<String>,
 }
 
 /// The output of walking a library
@@ -78,11 +82,6 @@ pub async fn walk_library(
 		return Ok(WalkedLibrary::missing());
 	}
 
-	let mut walkdir = WalkDir::new(path);
-	if let Some(num) = max_depth {
-		walkdir = walkdir.max_depth(num);
-	}
-
 	let walk_start = std::time::Instant::now();
 	let is_collection_based = max_depth.is_some_and(|d| d == 1);
 	tracing::debug!(
@@ -93,38 +92,49 @@ pub async fn walk_library(
 		"Walking library",
 	);
 
-	let (valid_entries, ignored_entries) = walkdir
-		// Set min_depth to 0 so we include the library path itself,
-		// which allows us to add it as a series when there are media items in it
-		.min_depth(0)
-		.into_iter()
-		.filter_entry(|e| e.path().is_dir())
-		.filter_map(Result::ok)
-		.par_bridge()
-		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
-			let entry_path = entry.path();
-			let entry_path_str = entry_path.as_os_str().to_string_lossy().to_string();
-			let check_deep = is_collection_based && entry_path_str != path;
-
-			let should_ignore = ignore_rules.is_match(entry.path());
-			// If we're doing a top level scan, we need to check that the path
-			// has media deeply nested. Exception for when the path is the library path,
-			// then we only need to check if it has media in it directly
-			//
-			// If we're doing a bottom up scan, we need to check that the path has
-			// media directly in it.
-			let is_valid = !should_ignore
-				&& (check_deep && entry_path.dir_has_media_deep(&ignore_rules)
-					|| (!check_deep && entry_path.dir_has_media(&ignore_rules)));
-
-			tracing::trace!(?is_valid, ?entry_path_str);
-
-			if is_valid {
-				Either::Left(entry)
-			} else {
-				Either::Right(entry)
+	let path_owned = path.to_string();
+	let (valid_entries, ignored_entries): (Vec<DirEntry>, Vec<DirEntry>) =
+		tokio::task::spawn_blocking(move || {
+			let mut walkdir = WalkDir::new(&path_owned);
+			if let Some(num) = max_depth {
+				walkdir = walkdir.max_depth(num);
 			}
-		});
+
+			walkdir
+				// Set min_depth to 0 so we include the library path itself,
+				// which allows us to add it as a series when there are media items in it
+				.min_depth(0)
+				.into_iter()
+				.filter_entry(|e| e.path().is_dir())
+				.filter_map(Result::ok)
+				.partition_map(|entry| {
+					let entry_path = entry.path();
+					let entry_path_str =
+						entry_path.as_os_str().to_string_lossy().to_string();
+					let check_deep = is_collection_based && entry_path_str != path_owned;
+
+					let should_ignore = ignore_rules.is_match(entry.path());
+					// If we're doing a top level scan, we need to check that the path
+					// has media deeply nested. Exception for when the path is the library path,
+					// then we only need to check if it has media in it directly
+					//
+					// If we're doing a bottom up scan, we need to check that the path has
+					// media directly in it.
+					let is_valid = !should_ignore
+						&& (check_deep && entry_path.dir_has_media_deep(&ignore_rules)
+							|| (!check_deep && entry_path.dir_has_media(&ignore_rules)));
+
+					tracing::trace!(?is_valid, ?entry_path_str);
+
+					if is_valid {
+						Either::Left(entry)
+					} else {
+						Either::Right(entry)
+					}
+				})
+		})
+		.await
+		.map_err(|e| CoreError::InternalError(format!("Failed to walk library! {e}")))?;
 
 	let ignored_directories = ignored_entries.len() as u64;
 	let seen_directories = valid_entries.len() as u64 + ignored_directories;
@@ -191,11 +201,11 @@ pub async fn walk_library(
 					.collect();
 
 				valid_entries
-					.par_iter()
+					.iter()
 					.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
 					.map(|e| e.path().to_owned())
 					.chain(existing_empty_series)
-					.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
+					.partition_map(|path| {
 						let already_exists = existing_series_map
 							.contains_key(path.to_string_lossy().as_ref());
 
@@ -216,8 +226,8 @@ pub async fn walk_library(
 		}
 	};
 
-	let to_create = series_to_create.len();
-	tracing::trace!(?series_to_create, "Found {to_create} series to create");
+	let count = series_to_create.len();
+	tracing::trace!(count, "Found series to create");
 
 	let missing_series_len = missing_series.len();
 	tracing::trace!(
@@ -262,6 +272,9 @@ pub struct WalkedSeries {
 	pub missing_media: Vec<PathBuf>,
 	/// Whether the series is missing from the filesystem
 	pub series_is_missing: bool,
+	/// The *changed* mtimes observed for every directory during the walk. If a value was observed but
+	/// unchanged, it will not be included in this map
+	pub observed_dir_mtimes: HashMap<String, u64>,
 }
 
 impl WalkedSeries {
@@ -280,9 +293,11 @@ pub async fn walk_series(
 		ignore_rules,
 		max_depth,
 		options,
+		dir_mtimes,
+		series_id,
 	}: WalkerCtx,
 ) -> CoreResult<WalkedSeries> {
-	if !path.exists() {
+	if tokio::fs::metadata(path).await.is_err() {
 		tracing::error!(
 			"Failed to walk: {} is missing or inaccessible",
 			path.display()
@@ -292,27 +307,94 @@ pub async fn walk_series(
 
 	tracing::debug!("Walking series at {}", path.display());
 
-	let mut walker = WalkDir::new(path);
-	if let Some(num) = max_depth {
-		walker = walker.max_depth(num);
-	}
-
+	let path_buf = path.to_path_buf();
 	let walk_start = std::time::Instant::now();
-	let (valid_entries, ignored_entries) = walker
-		.into_iter()
-		.filter_map(Result::ok)
-		.filter_map(|e| e.path().is_file().then_some(e))
-		.par_bridge()
-		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
-			let entry_path = entry.path();
-			let matches_ignore_rule = ignore_rules.is_match(entry.path());
+	let (valid_entries, ignored_entries, observed_dir_mtimes): (
+		Vec<DirEntry>,
+		Vec<DirEntry>,
+		HashMap<String, u64>,
+	) = tokio::task::spawn_blocking(move || {
+		let mut walkdir = WalkDir::new(&path_buf);
+		if let Some(num) = max_depth {
+			walkdir = walkdir.max_depth(num);
+		}
 
-			if matches_ignore_rule || entry_path.is_default_ignored() {
-				Either::Right(entry)
-			} else {
-				Either::Left(entry)
+		let root_str = path_buf.to_string_lossy().into_owned();
+
+		let mut it = walkdir.into_iter();
+
+		let mut valid = Vec::new();
+		let mut ignored = Vec::new();
+		let mut observed = HashMap::new();
+
+		loop {
+			match it.next() {
+				None => break,
+				Some(Err(error)) => {
+					tracing::warn!(
+						error = ?error,
+						path = ?error.path(),
+						"Error encountered during walk, skipping entry"
+					);
+					continue;
+				},
+				Some(Ok(entry)) => {
+					let entry_path = entry.path();
+
+					if entry_path.is_dir() {
+						let path_str = entry_path.to_string_lossy().into_owned();
+						let current_mtime = entry_path
+							.metadata()
+							.and_then(|m| m.modified())
+							.map(|t| {
+								t.duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
+							})
+							.unwrap_or(0);
+						let did_change = dir_mtimes
+							.get(&path_str)
+							.is_none_or(|&prev_mtime| prev_mtime != current_mtime);
+
+						// no point observing mtimes if unchanged, as the write path will be useless since the
+						// value is already same as before
+						if did_change {
+							tracing::trace!(
+								mtime = current_mtime,
+								path = path_str,
+								"Observed changed dir"
+							);
+							observed.insert(path_str.clone(), current_mtime);
+						}
+
+						// we never skip the series root, itself. the mtime might not accurately
+						// reflect changes deeper in the tree, and so skipping would cause us
+						// to miss any changes at those levels
+						let is_root = path_str == root_str;
+						if !is_root && !did_change {
+							tracing::trace!(
+								mtime = current_mtime,
+								path = path_str,
+								"Skipping unchanged dir"
+							);
+							it.skip_current_dir();
+						}
+						continue;
+					}
+
+					if ignore_rules.is_match(entry_path)
+						|| entry_path.is_default_ignored()
+					{
+						ignored.push(entry);
+					} else {
+						valid.push(entry);
+					}
+				},
 			}
-		});
+		}
+
+		(valid, ignored, observed)
+	})
+	.await
+	.map_err(|e| CoreError::InternalError(format!("Series walk task panicked: {e}")))?;
 
 	let valid_entries_len = valid_entries.len() as u64;
 	let ignored_files = ignored_entries.len() as u64;
@@ -326,17 +408,23 @@ pub async fn walk_series(
 
 	tracing::trace!("Fetching existing media...");
 	let fetch_start = std::time::Instant::now();
-	let existing_media = media::Entity::find()
-		.columns(vec![
-			media::Column::Id,
-			media::Column::Path,
-			media::Column::ModifiedAt,
-			media::Column::Status,
-		])
-		.inner_join(series::Entity)
-		.filter(series::Column::Path.starts_with(path.to_string_lossy().to_string()))
-		.all(db.as_ref())
-		.await?;
+	let existing_media = match series_id.as_deref() {
+		Some(id) => {
+			media::Entity::find()
+				.columns(vec![
+					media::Column::Id,
+					media::Column::Path,
+					media::Column::ModifiedAt,
+					media::Column::Status,
+				])
+				.filter(media::Column::SeriesId.eq(id))
+				.all(db.as_ref())
+				.await?
+		},
+		// walk_library calls walk_series with no series_id (it discovers series,
+		// not scoping to one). A brand-new series also has no existing media yet
+		None => Vec::new(),
+	};
 	tracing::trace!(
 		"Fetched {} existing media in {}ms",
 		existing_media.len(),
@@ -350,9 +438,8 @@ pub async fn walk_series(
 		.map(|m| (m.path.clone(), m.clone()))
 		.collect::<HashMap<String, _>>();
 
-	let (media_to_create, remaining_entries) = valid_entries
-		.into_par_iter()
-		.partition_map::<Vec<PathBuf>, Vec<DirEntry>, _, _, _>(|entry| {
+	let (media_to_create, remaining_entries): (Vec<PathBuf>, Vec<DirEntry>) =
+		valid_entries.into_iter().partition_map(|entry: DirEntry| {
 			let entry_path = entry.path();
 			let entry_path_str = entry_path.to_string_lossy().to_string();
 
@@ -364,8 +451,8 @@ pub async fn walk_series(
 		});
 
 	let book_visit_operations = remaining_entries
-		.into_par_iter()
-		.filter_map(|entry| {
+		.into_iter()
+		.filter_map(|entry: DirEntry| {
 			let entry_path = entry.path();
 			let entry_path_str = entry_path.to_string_lossy().to_string();
 
@@ -405,13 +492,13 @@ pub async fn walk_series(
 		.collect::<Vec<(PathBuf, BookVisitOperation)>>();
 
 	let missing_media = existing_media_map
-		.par_iter()
+		.iter()
 		.filter(|(path, _)| !PathBuf::from(path).exists())
 		.map(|(path, _)| PathBuf::from(path))
 		.collect::<Vec<PathBuf>>();
 
 	let recovered_media = existing_media_map
-		.into_par_iter()
+		.into_iter()
 		.filter(|(path, media)| {
 			media.status.is_recovered_if_present() && PathBuf::from(path).exists()
 		})
@@ -419,10 +506,10 @@ pub async fn walk_series(
 		.collect::<Vec<String>>();
 
 	let to_create = media_to_create.len();
-	tracing::trace!(?media_to_create, "Found {to_create} media to create");
+	tracing::trace!(to_create, "Found media to create");
 
 	let to_visit = book_visit_operations.len();
-	tracing::trace!("Found {to_visit} media to visit");
+	tracing::trace!(to_visit, "Found media to visit");
 
 	let skipped_files = seen_files - (to_create + to_visit) as u64;
 	tracing::trace!(
@@ -450,5 +537,6 @@ pub async fn walk_series(
 		media_to_visit: book_visit_operations,
 		missing_media,
 		series_is_missing: false,
+		observed_dir_mtimes,
 	})
 }

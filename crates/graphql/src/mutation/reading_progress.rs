@@ -71,16 +71,10 @@ impl ReadProgressMutation {
 			},
 		};
 
-		upsert_reading_session(
-			conn,
-			user,
-			id.as_ref(),
-			progression,
-			core.config.book_completion_dedup_timeout_secs,
-		)
-		.await
-		.map(ReadingSession::from)
-		.map_err(Into::into)
+		upsert_reading_session(conn, user, id.as_ref(), progression)
+			.await
+			.map(ReadingSession::from)
+			.map_err(Into::into)
 	}
 
 	/// trashes current readthrough, if there is one

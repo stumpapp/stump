@@ -3,6 +3,7 @@ import * as Localization from 'expo-localization'
 import { Languages } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Platform } from 'react-native'
+import { setLocaleDetector } from 'to-words'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
@@ -41,6 +42,7 @@ export default function AppLanguage() {
 		if (isLocale(value)) {
 			patch({ locale: value })
 			initDateFnsLocale(value)
+			setLocaleDetector(() => value)
 		}
 	}
 

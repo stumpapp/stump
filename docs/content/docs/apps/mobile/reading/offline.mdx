@@ -86,7 +86,9 @@ You may also trigger a manual sync by selecting the `Attempt Sync` option from t
 
 As mentioned above, progression sync is only supported for Stump servers. Additionally, there are some limitations primarily based on the authentication configuration:
 
-`Basic` and `Token` authentication are fully supported for progression sync. The `Login` authentication method is not supported, since it would be too annoying to implement a background operation that attempts to open a login sheet every time a sync is attempted.
+`Basic` and `Token` authentication are fully supported for auto-sync of progression. The `Login` authentication method is partially supported: if there are non-expired auth tokens available in the cache then sync will work as expected, and in the absence of valid and non-expired auth tokens, sync will be skipped for that server.
+
+The solution would be to prompt for login credentials when attempting to sync with a server of this auth configuration, however that is not currently implemented.
 
 ### Visual Indicators
 

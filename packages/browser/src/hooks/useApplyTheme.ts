@@ -17,11 +17,16 @@ type Params = {
 	 */
 	interfaceRoundness?: InterfaceRoundness
 	/**
+	 * The roundness to apply to thumbnail images
+	 */
+	thumbnailRoundness?: InterfaceRoundness
+	/**
 	 * The font to apply to the app
 	 */
 	appFont?: SupportedFont
 }
 
+// TODO(refactor): atp just pull in preferences inside the hook
 /**
  * A hook that applies the provided theme values to the app whenever they change
  *
@@ -32,6 +37,7 @@ export function useApplyTheme({
 	appTheme,
 	appFont = SupportedFont.Inter,
 	interfaceRoundness = InterfaceRoundness.Normal,
+	thumbnailRoundness = InterfaceRoundness.Normal,
 }: Params) {
 	const prefersDark = useMediaMatch('(prefers-color-scheme: dark)')
 
@@ -90,6 +96,20 @@ export function useApplyTheme({
 	}, [interfaceRoundness])
 
 	/**
+	 * The effect responsible for applying thumbnail roundness
+	 */
+	useEffect(() => {
+		const html = document.querySelector('html')
+		if (!html) return
+
+		html.classList.remove(...THUMBNAIL_ROUNDNESS_CLASSES)
+		html.classList.add(
+			THUMBNAIL_ROUNDNESS_TO_CLASS[thumbnailRoundness] ??
+				THUMBNAIL_ROUNDNESS_TO_CLASS[InterfaceRoundness.Normal],
+		)
+	}, [thumbnailRoundness])
+
+	/**
 	 * The effect responsible for applying the font to the app. If the `appFont` is not provided,
 	 * the app will default to the Inter font
 	 */
@@ -116,6 +136,20 @@ const ROUNDNESS_TO_CLASS: Record<InterfaceRoundness, string> = {
 }
 
 const ROUNDNESS_CLASSES = ['radius-none', 'radius-normal', 'radius-rounded', 'radius-pill']
+
+const THUMBNAIL_ROUNDNESS_TO_CLASS: Record<InterfaceRoundness, string> = {
+	[InterfaceRoundness.None]: 'thumbnail-radius-none',
+	[InterfaceRoundness.Normal]: 'thumbnail-radius-normal',
+	[InterfaceRoundness.Rounded]: 'thumbnail-radius-rounded',
+	[InterfaceRoundness.Pill]: 'thumbnail-radius-pill',
+}
+
+const THUMBNAIL_ROUNDNESS_CLASSES = [
+	'thumbnail-radius-none',
+	'thumbnail-radius-normal',
+	'thumbnail-radius-rounded',
+	'thumbnail-radius-pill',
+]
 
 const THEME_CLASSES = [
 	'light',

@@ -30,7 +30,7 @@ export function PdfReaderHeader() {
 			<View className="flex-row items-center justify-between">
 				<HeaderButton onPress={() => router.back()} ios={{ variant: 'glass' }} />
 
-				{book && <PagedActionMenu book={book} serverId={serverId} onResetTimer={timer?.reset} />}
+				{book && <PagedActionMenu book={book} serverId={serverId} onResetTimer={timer.reset} />}
 			</View>
 
 			<Heading

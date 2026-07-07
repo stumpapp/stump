@@ -1,4 +1,5 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
+import { EBOOK_EXTENSION, PDF_EXTENSION } from '@stump/client'
 import { Button, ButtonOrLink, DropdownMenu } from '@stump/components'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { BookCardFragment, graphql, UserPermission } from '@stump/graphql'
@@ -22,7 +23,6 @@ import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
-import { EBOOK_EXTENSION, PDF_EXTENSION } from '@/utils/patterns'
 
 import DeleteHistoryConfirmation from './DeleteHistoryConfirmation'
 import EmailBookDialog from './EmailBookDialog'
@@ -273,7 +273,6 @@ export default function BookActionMenu({ book }: Props) {
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
 						title="Download"
-						rounded="lg"
 					>
 						<Download className="mr-2 h-4 w-4" />
 						Download
@@ -284,7 +283,7 @@ export default function BookActionMenu({ book }: Props) {
 					align="end"
 					contentWrapperClassName="w-48"
 					trigger={
-						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0" rounded="lg">
+						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0">
 							<EllipsisVertical className="h-4 w-4" />
 						</Button>
 					}

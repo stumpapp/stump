@@ -55,6 +55,7 @@ const RouterContainer = (props: StumpClientProps) => {
 		appFont: userPreferences?.appFont,
 		appTheme: userPreferences?.appTheme,
 		interfaceRoundness: userPreferences?.interfaceRoundness,
+		thumbnailRoundness: userPreferences?.thumbnailRoundness,
 	})
 
 	const { setUseDiscordPresence, setDiscordPresence } = props.tauriRPC ?? {}

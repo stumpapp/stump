@@ -57,10 +57,9 @@ export default function LibrarySettingsHeader() {
 	return (
 		<header
 			className={cn(
-				'gap-4 p-4 lg:flex-row lg:gap-0 flex w-full flex-col items-start justify-between border-b border-b-border',
+				'gap-4 p-4 lg:flex-row lg:gap-0 flex w-full flex-col items-start justify-between',
 				{
-					// Note: We make the border transparent because the width constraint when using a top bar
-					'mx-auto border-b-transparent': preferTopBar && !!layoutMaxWidthPx,
+					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					'pl-52': displayingSideBar,
 				},
 			)}

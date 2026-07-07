@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef, ElementRef } from 'react'
 import React from 'react'
 
 import { cn } from '../utils'
-import { TabsContext, TabsVariant } from './context'
+import { TabsContext, TabsSize, TabsVariant } from './context'
 
 const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
 	default:
@@ -14,11 +14,12 @@ const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
 
 export type TabsProps = {
 	variant?: TabsVariant
+	size?: TabsSize
 	activeOnHover?: boolean
 } & ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
 const Tabs = React.forwardRef<ElementRef<typeof TabsPrimitive.Root>, TabsProps>(
-	({ variant = 'default', activeOnHover, ...props }, ref) => (
-		<TabsContext.Provider value={{ activeOnHover, variant }}>
+	({ variant = 'default', size = 'default', activeOnHover, ...props }, ref) => (
+		<TabsContext.Provider value={{ activeOnHover, size, variant }}>
 			<TabsPrimitive.Root ref={ref} {...props} />
 		</TabsContext.Provider>
 	),
@@ -30,11 +31,12 @@ const TabsList = React.forwardRef<
 	ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
 	<TabsContext.Consumer>
-		{({ activeOnHover }) => (
+		{({ activeOnHover, size }) => (
 			<TabsPrimitive.List
 				ref={ref}
 				className={cn(
-					'p-0.75 inline-flex w-fit items-center justify-center rounded-md bg-muted',
+					'inline-flex w-fit items-center justify-center rounded-md bg-muted',
+					size === 'sm' ? 'p-0.5' : 'p-0.75',
 					{ 'gap-1': activeOnHover },
 					className,
 				)}
@@ -50,10 +52,11 @@ const TabsTrigger = React.forwardRef<
 	ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, ...props }, ref) => (
 	<TabsContext.Consumer>
-		{({ variant, activeOnHover }) => (
+		{({ variant, size, activeOnHover }) => (
 			<TabsPrimitive.Trigger
 				className={cn(
-					'px-2 py-1 text-sm font-medium min-w-25 gap-1.5 inline-flex items-center justify-center rounded-sm border border-transparent transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50',
+					'font-medium inline-flex items-center justify-center rounded-sm border border-transparent transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50',
+					size === 'sm' ? 'px-2 py-0.5 text-xs gap-1' : 'px-2 py-1 text-sm min-w-25 gap-1.5',
 					TABS_CONTENT_VARIANTS[variant] || TABS_CONTENT_VARIANTS.default,
 					{
 						'hover:data-[state=inactive]:text-foreground': activeOnHover && !props.disabled,

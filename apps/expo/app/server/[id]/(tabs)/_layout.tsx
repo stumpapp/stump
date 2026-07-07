@@ -7,11 +7,14 @@ import { useEffect } from 'react'
 import { useStumpServer } from '~/components/activeServer'
 import { ServerErrorBoundary } from '~/components/error'
 import { useColors } from '~/lib/constants'
-import { useAutoSyncActiveServer } from '~/lib/hooks'
+import { useAutoSyncActiveServer, useTranslate } from '~/lib/hooks'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse } = useClientContext()
+	const { t } = useTranslate()
+	const { checkPermission } = useStumpServer()
 
 	const colors = useColors()
 	const setUser = useUserStore((state) => state.setUser)
@@ -21,10 +24,6 @@ export default function TabLayout() {
 	useAutoSyncActiveServer({
 		enabled: !!sdk.token && autoSyncEnabled,
 	})
-
-	const { onUnauthenticatedResponse } = useClientContext()
-
-	const { checkPermission } = useStumpServer()
 
 	const { user, error } = useAuthQuery({
 		enabled: !!sdk.token,
@@ -66,21 +65,21 @@ export default function TabLayout() {
 			labelVisibilityMode="labeled"
 		>
 			<NativeTabs.Trigger name="index">
-				<NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Label>{t('tabs.home')}</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
 			</NativeTabs.Trigger>
 			<NativeTabs.Trigger name="browse">
-				<NativeTabs.Trigger.Label>Browse</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Label>{t('tabs.browse')}</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon sf="books.vertical.fill" md="explore" />
 			</NativeTabs.Trigger>
 			{showClubs && (
 				<NativeTabs.Trigger name="clubs">
-					<NativeTabs.Trigger.Label>Clubs</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Label>{t('tabs.clubs')}</NativeTabs.Trigger.Label>
 					<NativeTabs.Trigger.Icon sf="square.grid.2x2.fill" md="groups" />
 				</NativeTabs.Trigger>
 			)}
 			<NativeTabs.Trigger name="search" role="search">
-				<NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Label>{t('tabs.search')}</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
 			</NativeTabs.Trigger>
 		</NativeTabs>

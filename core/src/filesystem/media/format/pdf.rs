@@ -2,7 +2,7 @@ use std::{
 	collections::HashMap,
 	io::Cursor,
 	path::{Path, PathBuf},
-	sync::{Mutex, MutexGuard, OnceLock},
+	sync::OnceLock,
 };
 
 use models::shared::image_processor_options::SupportedImageFormat;
@@ -29,16 +29,11 @@ use crate::{
 };
 
 static PDFIUM: OnceLock<Result<Pdfium, FileError>> = OnceLock::new();
-static PDFIUM_LOCK: Mutex<()> = Mutex::new(());
 
-/// A file processor for PDF files.
 pub struct PdfProcessor;
 
 impl FileProcessor for PdfProcessor {
-	// It is REALLY annoying to work with PDFs, and there is no good way to consume
-	// each page as a vector of bytes efficiently. Since PDFs don't really have metadata,
-	// I wouldn't expect the file to change much after a scan. So, for now, this will
-	// just make the sample size approximately 1/10th of the file size.
+	// sample size is ~1/10th of the file size
 	fn get_sample_size(path: &str) -> Result<u64, FileError> {
 		let size = std::fs::metadata(path)?.len();
 		if size < 10 {
@@ -76,7 +71,6 @@ impl FileProcessor for PdfProcessor {
 	}
 
 	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
-		let _lock = Self::acquire_pdfium_lock()?;
 		Self::process_metadata_internal(path, &None)
 	}
 
@@ -85,13 +79,10 @@ impl FileProcessor for PdfProcessor {
 		options: FileProcessorOptions,
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = Self::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let pages = document.pages().len();
 
-		// Note: The metadata is already parsed by the PDF library, so might as well use it
-		// PDF metadata is generally poop though
 		let metadata = if options.process_metadata {
 			Self::process_metadata_internal(path, &config.pdfium_path)?
 		} else {
@@ -117,12 +108,10 @@ impl FileProcessor for PdfProcessor {
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		// This is the sync version - we'll create an async wrapper that handles caching
 		PdfProcessor::render_page_sync(path, page, config)
 	}
 
 	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
-		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 
@@ -147,7 +136,6 @@ impl FileProcessor for PdfProcessor {
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<AnalyzedPage, FileError> {
-		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 
@@ -174,12 +162,6 @@ impl FileProcessor for PdfProcessor {
 }
 
 impl PdfProcessor {
-	fn acquire_pdfium_lock() -> Result<MutexGuard<'static, ()>, FileError> {
-		PDFIUM_LOCK.lock().map_err(|e| {
-			FileError::PdfProcessingError(format!("Failed to acquire PDFium lock: {}", e))
-		})
-	}
-
 	/// Process the metadata of a PDF file using the specified config/env pdfium path.
 	pub fn process_metadata_internal(
 		path: &str,
@@ -217,46 +199,15 @@ impl PdfProcessor {
 		Ok(metadata)
 	}
 
-	/// Gets the global thread-safe PDFium instance, initializing it if necessary.
+	/// Returns the global pdfium singleton, initializing it on first call
 	///
-	/// NOTE: This configuration uses a "first-call wins" behavior. The `pdfium_path` parameter
-	/// is only read during the first invocation when initializing the singleton. Subsequent calls
-	/// with a different `pdfium_path` will NOT reinitialize or change the library binding.
-	/// If initialization fails once, the error result is cached permanently.
-	/// Process restart is required to re-attempt binding.
+	/// Note that a failed init is cached permanently and requires a restart the process to retry
+	/// initialization
 	///
-	/// See:
-	/// - pdfium-render thread-safety guide: https://github.com/ajrcarey/pdfium-render#thread-safety
+	/// See: https://github.com/ajrcarey/pdfium-render#thread-safety
 	pub fn renderer(pdfium_path: &Option<String>) -> Result<&'static Pdfium, FileError> {
 		let result = PDFIUM.get_or_init(|| {
-			let mut path = pdfium_path.clone().or_else(|| std::env::var("PDFIUM_PATH").ok());
-
-			// Dev/Test helper: if no path was provided or found in environment,
-			// check if there is a local `pdfium-bin` directory in the current working directory,
-			// or relative to the cargo manifest directory during testing/development.
-			if path.is_none() {
-				#[cfg(target_os = "windows")]
-				let lib_name = "pdfium.dll";
-				#[cfg(target_os = "macos")]
-				let lib_name = "libpdfium.dylib";
-				#[cfg(not(any(target_os = "windows", target_os = "macos")))]
-				let lib_name = "libpdfium.so";
-
-				let local_paths = [
-					PathBuf::from(format!("pdfium-bin/lib/{}", lib_name)),
-					PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-						.parent()
-						.map(|p| p.join(format!("pdfium-bin/lib/{}", lib_name)))
-						.unwrap_or_default(),
-				];
-				for p in local_paths {
-					if p.exists() {
-						tracing::info!(path = ?p, "Found local PDFium library");
-						path = Some(p.to_string_lossy().to_string());
-						break;
-					}
-				}
-			}
+			let  path = pdfium_path.clone().or_else(|| std::env::var("PDFIUM_PATH").ok());
 
 			if let Some(path) = path {
 				tracing::info!(path, "Initializing PDFium from provided path");
@@ -302,31 +253,26 @@ impl PdfProcessor {
 		config: &StumpConfig,
 		force_high_quality: bool,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let total_pages = document.pages().len() as usize;
 
-		// Validate page number bounds
 		if page < 1 || page as usize > total_pages {
 			return Err(FileError::PdfProcessingError(
 				"Page out of bounds".to_string(),
 			));
 		}
 
-		// Convert back to PdfPageIndex for pdfium API
 		let page_index = (page - 1) as pdfium_render::prelude::PdfPageIndex;
 		let document_page = document.pages().get(page_index)?;
 
 		let page_width = document_page.width().value;
 		let page_height = document_page.height().value;
 
-		// Calculate target resolution based on configured DPI (PDF base is 72 DPI)
+		// scale from PDF's 72 DPI base to configured DPI, then clamp to max dimension
 		let dpi_scale = config.pdf_render_dpi as f32 / 72.0;
 		let mut target_width = page_width * dpi_scale;
 		let mut target_height = page_height * dpi_scale;
-
-		// Clamp to max dimension if configured
 		let max_dim = config.pdf_max_dimension as f32;
 		if max_dim > 0.0 && (target_width > max_dim || target_height > max_dim) {
 			let fit_scale = (max_dim / target_width).min(max_dim / target_height);
@@ -337,7 +283,6 @@ impl PdfProcessor {
 		let target_width = target_width.max(1.0) as i32;
 		let target_height = target_height.max(1.0) as i32;
 
-		// Configure rendering with quality settings
 		let use_high_quality = force_high_quality || config.pdf_high_quality;
 		let render_config = if use_high_quality {
 			PdfRenderConfig::new()
@@ -367,7 +312,6 @@ impl PdfProcessor {
 		let bitmap = document_page.render_with_config(&render_config)?;
 		let dyn_image = bitmap.as_image()?;
 
-		// Get the configured output format
 		let output_format = config.get_pdf_render_format();
 		let image_format = into_image_format(output_format);
 		let content_type = ContentType::from(output_format);
@@ -414,12 +358,11 @@ impl PdfProcessor {
 			FileError::PdfProcessingError(format!("Render task panicked: {}", e))
 		})??;
 
-		// Cache the result if caching is enabled (but don't fail if caching fails)
 		if config.pdf_cache_pages {
+			// non-fatal, does not rly matter if caching fails
 			let _ = Self::cache_page(path, page, &result.1, config).await;
 		}
 
-		// Trigger pre-rendering for adjacent pages in background if enabled
 		if config.pdf_cache_pages && config.pdf_prerender_range > 0 {
 			let path_owned = path.to_string();
 			let config_owned = config.clone();
@@ -431,13 +374,11 @@ impl PdfProcessor {
 		Ok(result)
 	}
 
-	/// Generate a cache key for a PDF page based on file path, page number, and render settings
 	fn generate_cache_key(
 		pdf_path: &str,
 		page: i32,
 		config: &StumpConfig,
 	) -> Result<String, FileError> {
-		// Use file metadata and config to create a unique cache key
 		let metadata = std::fs::metadata(pdf_path)?;
 		let modified_time = metadata
 			.modified()?
@@ -451,7 +392,6 @@ impl PdfProcessor {
 
 		let mut hasher = DefaultHasher::new();
 		pdf_path.hash(&mut hasher);
-		// Create a more robust hash using file path, size, and modified time
 		file_size.hash(&mut hasher);
 		modified_time.hash(&mut hasher);
 		config.pdf_max_dimension.hash(&mut hasher);
@@ -460,7 +400,6 @@ impl PdfProcessor {
 		config.pdf_high_quality.hash(&mut hasher);
 		page.hash(&mut hasher);
 
-		// Use a safer filename format
 		Ok(format!("pdf_{}_{}", hasher.finish(), page))
 	}
 
@@ -482,11 +421,9 @@ impl PdfProcessor {
 			output_format.extension()
 		));
 
-		// Check if file exists and is readable
 		if cache_file.exists() {
 			match tokio::fs::read(&cache_file).await {
 				Ok(bytes) => {
-					// Ensure it's a file and has content
 					if !bytes.is_empty() {
 						return Ok(Some((ContentType::from(output_format), bytes)));
 					}
@@ -496,8 +433,6 @@ impl PdfProcessor {
 					tracing::warn!(cache_file = ?cache_file, error = ?e, "Failed to read cache file");
 				},
 			}
-		} else {
-			// File doesn't exist or isn't accessible
 		}
 
 		Ok(None)
@@ -518,7 +453,6 @@ impl PdfProcessor {
 		let cache_dir = config.get_pdf_cache_dir();
 
 		if !cache_dir.exists() {
-			// Ensure cache directory exists
 			if let Err(e) = tokio::fs::create_dir_all(&cache_dir).await {
 				tracing::warn!(cache_dir = ?cache_dir, error = ?e, "Failed to create cache directory");
 				return Ok(());
@@ -531,48 +465,33 @@ impl PdfProcessor {
 		let temp_file =
 			cache_dir.join(format!("{}.{}.tmp", cache_key, output_format.extension()));
 
-		// Atomic write: write to temp file first, then rename
 		match tokio::fs::write(&temp_file, content).await {
-			Ok(_) => {
-				// Atomically move temp file to final location
-				match tokio::fs::rename(&temp_file, &cache_file).await {
-					Ok(_) => {
-						tracing::debug!(
-							cache_file = ?cache_file,
-							size = content.len(),
-							"Cached PDF page successfully"
-						);
-					},
-					Err(e) => {
-						tracing::warn!(
-							cache_file = ?cache_file,
-							error = ?e,
-							"Failed to move temp cache file"
-						);
-						// Clean up temp file
-						let _ = tokio::fs::remove_file(&temp_file).await;
-					},
-				}
+			Ok(_) => match tokio::fs::rename(&temp_file, &cache_file).await {
+				Ok(_) => {
+					tracing::debug!(
+						?cache_file,
+						size = content.len(),
+						"Cached PDF page successfully"
+					);
+				},
+				Err(error) => {
+					tracing::warn!(?cache_file, ?error, "Failed to move temp cache file");
+					let _ = tokio::fs::remove_file(&temp_file).await;
+				},
 			},
-			Err(e) => {
-				tracing::warn!(
-					cache_file = ?cache_file,
-					error = ?e,
-					"Failed to write to temp cache file"
-				);
+			Err(error) => {
+				tracing::warn!(?cache_file, ?error, "Failed to write to temp cache file");
 			},
 		}
 
 		Ok(())
 	}
 
-	/// Pre-render adjacent pages in the background for faster loading
 	async fn prerender_adjacent_pages(
 		pdf_path: &str,
 		current_page: i32,
 		config: &StumpConfig,
 	) {
-		// Skip pre-rendering if disabled
 		if !config.pdf_cache_pages || config.pdf_prerender_range == 0 {
 			return;
 		}
@@ -580,7 +499,6 @@ impl PdfProcessor {
 		let pdf_path_owned = pdf_path.to_string();
 		let config_owned = config.clone();
 
-		// Get total page count
 		let total_pages = match Self::get_page_count(&pdf_path_owned, &config_owned) {
 			Ok(count) => count,
 			Err(e) => {
@@ -594,7 +512,6 @@ impl PdfProcessor {
 		};
 
 		let range = config_owned.pdf_prerender_range as i32;
-		// Calculate page range for pre-rendering
 		let start_page = (current_page - range).max(1);
 		let end_page = (current_page + range).min(total_pages);
 
@@ -607,30 +524,22 @@ impl PdfProcessor {
 			"Pre-rendering adjacent pages"
 		);
 
-		// Prioritize pages closer to current page for better navigation experience
+		// sort closest-first so the most useful pages render first
 		let mut pages_to_render: Vec<i32> = (start_page..=end_page)
 			.filter(|&page| page != current_page)
 			.collect();
-
-		// Sort by distance from current page (closest first)
 		pages_to_render.sort_by_key(|&page| (page - current_page).abs());
 
-		// Spawn a single background task to process pages sequentially.
-		// Since PDFium's C API is not thread-safe, the `thread_safe` feature wraps all interactions
-		// in a global mutex. Attempting to render pages concurrently leads to severe lock contention
-		// and starves the executor thread pool. Processing sequentially maximizes lock utility and throughput.
-		//
-		// See:
-		// - PDFium C API threading constraints: https://github.com/ajrcarey/pdfium-render#thread-safety
+		// there is some ambiguity around thread safety you can read about here: https://github.com/stumpapp/stump/pull/1209#discussion_r3359574540
+		// until proven otherwise, i am inclined to lean into pdfium-render's internal mechanisms
+		// for thread safety and avoid reinventing it here. as such, pages are processed sequentially.
 		for page in pages_to_render {
-			// Check if already cached
 			if let Ok(Some(_)) =
 				Self::get_cached_page(&pdf_path_owned, page, &config_owned).await
 			{
-				continue; // Already cached
+				continue; // already cached = no work
 			}
 
-			// Render the page in a blocking thread
 			let path_clone = pdf_path_owned.clone();
 			let config_clone = config_owned.clone();
 			let render_result = tokio::task::spawn_blocking(move || {
@@ -640,7 +549,6 @@ impl PdfProcessor {
 
 			match render_result {
 				Ok(Ok((_, content))) => {
-					// Cache the rendered page
 					if let Err(e) =
 						Self::cache_page(&pdf_path_owned, page, &content, &config_owned)
 							.await
@@ -687,7 +595,6 @@ impl FileConverter for PdfProcessor {
 		format: Option<SupportedImageFormat>,
 		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
-		let _lock = Self::acquire_pdfium_lock()?;
 		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 		let document = pdfium.load_pdf_from_file(path, None)?;
 
@@ -704,12 +611,11 @@ impl FileConverter for PdfProcessor {
 					let page_width = page.width().value;
 					let page_height = page.height().value;
 
-					// Calculate target resolution based on configured DPI (PDF base is 72 DPI)
+					// scale from PDF's 72 DPI base to configured DPI, then clamp to max dimension
 					let dpi_scale = config.pdf_render_dpi as f32 / 72.0;
 					let mut target_width = page_width * dpi_scale;
 					let mut target_height = page_height * dpi_scale;
 
-					// Clamp to max dimension if configured
 					let max_dim = config.pdf_max_dimension as f32;
 					if max_dim > 0.0
 						&& (target_width > max_dim || target_height > max_dim)
@@ -765,20 +671,17 @@ impl FileConverter for PdfProcessor {
 		let cache_dir = config.get_cache_dir();
 		let unpacked_path = cache_dir.join(&file_stem);
 
-		// create folder for the zip
 		std::fs::create_dir_all(&unpacked_path)?;
 
-		// write each image to the folder
 		for (idx, image_buf) in converted_pages {
-			// write the image to file with proper extension
 			let image_path = unpacked_path.join(format!(
 				"{}_{:03}.{}",
 				file_stem,
 				idx + 1,
 				output_extension
 			));
-			// NOTE: This isn't bubbling up because we don't want to kill the whole conversion process
 			if let Err(err) = std::fs::write(&image_path, image_buf) {
+				// non-fatal, don't think we should fail the entire conversion if one page fails to write
 				tracing::error!(error = ?err, ?image_path, "Failed to write PDF page image to file");
 			}
 		}
@@ -786,12 +689,12 @@ impl FileConverter for PdfProcessor {
 		let zip_path =
 			create_zip_archive(&unpacked_path, &file_name, &extension, parent)?;
 
-		// TODO: won't work in docker
 		if delete_source {
+			// note that the trash::delete won't work in docker, but or_else should hit in that case
 			let _ = trash::delete(path).or_else(|_| std::fs::remove_file(path));
 		}
 
-		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
+		// TODO: guard against accidentally deleting important paths
 		if unpacked_path.exists() {
 			let _ = std::fs::remove_dir_all(&unpacked_path);
 		}

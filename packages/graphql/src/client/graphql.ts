@@ -1776,16 +1776,17 @@ export type MetadataFetchRecord = {
   __typename?: 'MetadataFetchRecord';
   acceptedMatchCandidate?: Maybe<MatchCandidate>;
   addedAt: Scalars['DateTime']['output'];
-  /**
-   * True if a provider search found more raw hits than could be turned into
-   * candidates (e.g. a per-hit detail fetch failed after the initial search)
-   */
-  hadPartialResults: Scalars['Boolean']['output'];
   id: Scalars['Int']['output'];
   matchCandidates: Array<MatchCandidate>;
   /** The media item associated with this fetch record, if any */
   media?: Maybe<Media>;
   mediaId?: Maybe<Scalars['String']['output']>;
+  /**
+   * The total number of raw hits reported by provider searches, across all
+   * providers searched. Compare against `match_candidates.len()` to detect when
+   * hits were dropped (e.g. a per-hit detail fetch failed after the initial search).
+   */
+  rawHits: Scalars['Int']['output'];
   /** The series associated with this fetch record, if any */
   series?: Maybe<Series>;
   seriesId?: Maybe<Scalars['String']['output']>;
@@ -5659,7 +5660,7 @@ export type RejectAllPendingMatchesMutationVariables = Exact<{ [key: string]: ne
 
 export type RejectAllPendingMatchesMutation = { __typename?: 'Mutation', rejectAllPendingMatches: number };
 
-export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, hadPartialResults: boolean, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, series?: string | null, number?: any | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null, lockedFields: Array<MetadataField> } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null, lockedFields: Array<MetadataField> } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
+export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, rawHits: number, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, series?: string | null, number?: any | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null, lockedFields: Array<MetadataField> } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null, lockedFields: Array<MetadataField> } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
 
 export type AcceptMediaMatchMutationVariables = Exact<{
   mediaId: Scalars['ID']['input'];
@@ -7565,7 +7566,7 @@ export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
   status
   mediaId
   seriesId
-  hadPartialResults
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10334,7 +10335,7 @@ export const PendingMetadataMatchesDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
-  hadPartialResults
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10451,7 +10452,7 @@ export const AcceptMediaMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
-  hadPartialResults
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10558,7 +10559,7 @@ export const AcceptSeriesMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
-  hadPartialResults
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10659,7 +10660,7 @@ export const RejectMediaMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
-  hadPartialResults
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10760,7 +10761,7 @@ export const RejectSeriesMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
-  hadPartialResults
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -11362,7 +11363,7 @@ export const SearchMediaMetadataDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
-  hadPartialResults
+  rawHits
   matchCandidates {
     provider
     externalId

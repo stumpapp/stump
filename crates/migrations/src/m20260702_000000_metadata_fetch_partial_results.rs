@@ -11,10 +11,10 @@ impl MigrationTrait for Migration {
 				Table::alter()
 					.table(MetadataFetchRecords::Table)
 					.add_column(
-						ColumnDef::new(MetadataFetchRecords::HadPartialResults)
-							.boolean()
+						ColumnDef::new(MetadataFetchRecords::RawHits)
+							.integer()
 							.not_null()
-							.default(false),
+							.default(0),
 					)
 					.to_owned(),
 			)
@@ -28,7 +28,7 @@ impl MigrationTrait for Migration {
 			.alter_table(
 				Table::alter()
 					.table(MetadataFetchRecords::Table)
-					.drop_column(MetadataFetchRecords::HadPartialResults)
+					.drop_column(MetadataFetchRecords::RawHits)
 					.to_owned(),
 			)
 			.await?;
@@ -40,5 +40,5 @@ impl MigrationTrait for Migration {
 #[derive(DeriveIden)]
 enum MetadataFetchRecords {
 	Table,
-	HadPartialResults,
+	RawHits,
 }

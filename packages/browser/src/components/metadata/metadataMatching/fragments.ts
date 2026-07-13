@@ -8,7 +8,7 @@ export const pendingMatchRecordFragment = graphql(`
 		status
 		mediaId
 		seriesId
-		hadPartialResults
+		rawHits
 		matchCandidates {
 			provider
 			externalId

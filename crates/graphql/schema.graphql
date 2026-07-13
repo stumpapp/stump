@@ -1665,10 +1665,11 @@ type MetadataFetchRecord {
 	mediaId: String
 	seriesId: String
 	"""
-	True if a provider search found more raw hits than could be turned into
-	candidates (e.g. a per-hit detail fetch failed after the initial search)
+	The total number of raw hits reported by provider searches, across all
+	providers searched. Compare against `match_candidates.len()` to detect when
+	hits were dropped (e.g. a per-hit detail fetch failed after the initial search).
 	"""
-	hadPartialResults: Boolean!
+	rawHits: Int!
 	addedAt: DateTime!
 	updatedAt: DateTime
 	matchCandidates: [MatchCandidate!]!

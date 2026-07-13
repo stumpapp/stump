@@ -51,14 +51,51 @@ async fn library_type_for_media(
 	library_type_for_series(conn, &series.id).await
 }
 
-fn filter_providers_for_library_type(
+/// Filters provider configs down to those that support the given library type, and,
+/// if `provider_filter` is given, further down to just that one provider.
+fn filter_providers(
 	provider_configs: Vec<metadata_provider_config::Model>,
 	library_type: &LibraryType,
+	provider_filter: Option<MetadataProvider>,
 ) -> Vec<metadata_provider_config::Model> {
 	provider_configs
 		.into_iter()
 		.filter(|c| library_type.has_provider_overlap(&c.provider_type))
+		.filter(|c| match provider_filter {
+			Some(provider) => c.provider_type == provider,
+			None => true,
+		})
 		.collect()
+}
+
+/// The error to return when [filter_providers] leaves nothing to search, worded
+/// according to whether a specific provider was requested or not.
+fn no_provider_configs_error(
+	library_type: &LibraryType,
+	provider_filter: Option<MetadataProvider>,
+) -> CoreError {
+	match provider_filter {
+		Some(provider) => {
+			tracing::warn!(
+				?library_type,
+				?provider,
+				"No enabled metadata providers match the requested provider filter"
+			);
+			CoreError::InternalError(
+				"No enabled metadata providers for configured filters".to_string(),
+			)
+		},
+		None => {
+			tracing::warn!(
+				?library_type,
+				"No enabled metadata providers configured for this library type"
+			);
+			CoreError::InternalError(
+				"No enabled metadata providers configured for this library type"
+					.to_string(),
+			)
+		},
+	}
 }
 
 /// Fetch metadata candidates for a series from all enabled providers
@@ -75,18 +112,15 @@ pub async fn fetch_series_metadata(
 		.all(conn)
 		.await?;
 
-	let provider_configs =
-		filter_providers_for_library_type(provider_configs, &library_type);
+	let provider_configs = filter_providers(provider_configs, &library_type, None);
 
 	if provider_configs.is_empty() {
-		return Err(CoreError::InternalError(
-			"No enabled metadata providers configured for this library type".to_string(),
-		));
+		return Err(no_provider_configs_error(&library_type, None));
 	}
 
 	let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 	let mut was_rate_limited = false;
-	let mut had_partial_results = false;
+	let mut raw_hits: i32 = 0;
 
 	for config in &provider_configs {
 		match provider_cache.get_or_create(config).await {
@@ -99,9 +133,7 @@ pub async fn fetch_series_metadata(
 
 				match provider.search_series(&query).await {
 					Ok(outcome) => {
-						if outcome.failed() > 0 {
-							had_partial_results = true;
-						}
+						raw_hits += outcome.requested as i32;
 						all_candidates.extend(outcome.candidates);
 					},
 					Err(e) if e.is_rate_limited() => {
@@ -145,7 +177,7 @@ pub async fn fetch_series_metadata(
 		series_id: Set(Some(series_id.to_string())),
 		status: Set(status),
 		match_candidates: Set(Some(candidates_json)),
-		had_partial_results: Set(had_partial_results),
+		raw_hits: Set(raw_hits),
 		..Default::default()
 	};
 
@@ -155,7 +187,7 @@ pub async fn fetch_series_metadata(
 				.update_columns([
 					metadata_fetch_record::Column::Status,
 					metadata_fetch_record::Column::MatchCandidates,
-					metadata_fetch_record::Column::HadPartialResults,
+					metadata_fetch_record::Column::RawHits,
 					metadata_fetch_record::Column::UpdatedAt,
 				])
 				.to_owned(),
@@ -210,33 +242,21 @@ pub async fn fetch_media_metadata(
 		.await?;
 
 	let provider_configs =
-		filter_providers_for_library_type(provider_configs, &library_type);
-
-	let provider_configs = match provider_filter {
-		Some(provider) => provider_configs
-			.into_iter()
-			.filter(|c| c.provider_type == provider)
-			.collect(),
-		None => provider_configs,
-	};
+		filter_providers(provider_configs, &library_type, provider_filter);
 
 	if provider_configs.is_empty() {
-		return Err(CoreError::InternalError(
-			"No enabled metadata providers configured for this library type".to_string(),
-		));
+		return Err(no_provider_configs_error(&library_type, provider_filter));
 	}
 
 	let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 	let mut was_rate_limited = false;
-	let mut had_partial_results = false;
+	let mut raw_hits: i32 = 0;
 
 	for config in &provider_configs {
 		match provider_cache.get_or_create(config).await {
 			Ok(provider) => match provider.search_media(&search).await {
 				Ok(outcome) => {
-					if outcome.failed() > 0 {
-						had_partial_results = true;
-					}
+					raw_hits += outcome.requested as i32;
 					all_candidates.extend(outcome.candidates);
 				},
 				Err(e) if e.is_rate_limited() => {
@@ -279,7 +299,7 @@ pub async fn fetch_media_metadata(
 		media_id: Set(Some(media_id.to_string())),
 		status: Set(status),
 		match_candidates: Set(Some(candidates_json)),
-		had_partial_results: Set(had_partial_results),
+		raw_hits: Set(raw_hits),
 		..Default::default()
 	};
 
@@ -289,7 +309,7 @@ pub async fn fetch_media_metadata(
 				.update_columns([
 					metadata_fetch_record::Column::Status,
 					metadata_fetch_record::Column::MatchCandidates,
-					metadata_fetch_record::Column::HadPartialResults,
+					metadata_fetch_record::Column::RawHits,
 					metadata_fetch_record::Column::UpdatedAt,
 				])
 				.to_owned(),

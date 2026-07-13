@@ -46,6 +46,7 @@
 		"metadataSearch": {
 			"heading": "Search metadata",
 			"description": "Search an external provider for this book and choose a match to apply",
+			"openButton": "Search Metadata",
 			"searchButton": "Search",
 			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
 			"noResults": "No matches were found for this search",

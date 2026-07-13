@@ -99,7 +99,7 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 				toast.info(t(getKey('noResults')))
 				return
 			}
-			if (record.hadPartialResults) {
+			if (record.rawHits > record.matchCandidates.length) {
 				toast.warning(t(getKey('partialResults')))
 			}
 			openReview([record], 0, MergeStrategy.PreferExternal)
@@ -113,13 +113,15 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 	})
 
 	const handleSubmit = () => {
+		const parsedYear = parseInt(year, 10)
+
 		mutate({
 			id: mediaId,
 			search: {
 				title: title.trim() || undefined,
 				author: author.trim() || undefined,
 				isbn: isbn.trim() || undefined,
-				year: year.trim() ? Number(year) : undefined,
+				year: Number.isNaN(parsedYear) ? undefined : parsedYear,
 				provider: provider || undefined,
 			},
 		})

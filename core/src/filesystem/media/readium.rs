@@ -162,7 +162,7 @@ impl ReadiumManifestGenerator {
 		let mut epub = EpubDoc::new(&self.epub_path)
 			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
 
-		let num_pages = epub.get_num_pages();
+		let num_pages = epub.get_num_chapters();
 
 		struct PositionData {
 			href: String,
@@ -173,7 +173,7 @@ impl ReadiumManifestGenerator {
 
 		let items: Vec<PositionData> = (0..num_pages)
 			.filter_map(|i| {
-				epub.set_current_page(i);
+				epub.set_current_chapter(i);
 
 				let spine_item = epub.spine.get(i)?;
 				let resource = epub.resources.get(&spine_item.idref).or_else(|| {
@@ -186,17 +186,17 @@ impl ReadiumManifestGenerator {
 					None
 				})?;
 
-		 		let href = resource.path.to_string_lossy().to_string();
+				let href = resource.path.to_string_lossy().to_string();
 
 				let media_type = epub
 					.get_current_mime()
 					.unwrap_or_else(|| "application/xhtml+xml".to_string());
 
-				let title = epub.toc
+				let title = epub
+					.toc
 					.iter()
 					.find(|nav| nav.content.to_string_lossy().contains(&spine_item.idref))
 					.map(|nav| nav.label.clone());
-
 
 				let size = match epub.get_current() {
 					Some((content, _)) => content.len(),
@@ -281,7 +281,7 @@ impl ReadiumManifestGenerator {
 			published: get_first("date"),
 			modified: None,
 			description: get_first("description"),
-			number_of_pages: Some(epub.get_num_pages() as u32),
+			number_of_pages: Some(epub.get_num_chapters() as u32),
 			reading_progression: Some(
 				get_first("direction").unwrap_or_else(|| "ltr".to_string()),
 			),
@@ -362,14 +362,31 @@ impl ReadiumManifestGenerator {
 	}
 
 	fn resource_url(&self, path: &str) -> String {
-		let normalized_path = path.trim_start_matches('/');
-		format!("{}/resource/{}", self.base_url, normalized_path)
+		let normalized = path.trim_start_matches('/');
+		let (path_part, fragment) = match normalized.split_once('#') {
+			Some((path, frag)) => (path, Some(frag)),
+			None => (normalized, None),
+		};
+
+		let encoded = path_part
+			.split('/')
+			.map(|segment| urlencoding::encode(segment).into_owned())
+			.collect::<Vec<_>>()
+			.join("/");
+
+		let mut url = format!("{}/resource/{}", self.base_url, encoded);
+		if let Some(frag) = fragment {
+			url.push('#');
+			url.push_str(frag);
+		}
+		url
 	}
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::filesystem::media::tests::get_test_epub_path;
 
 	#[test]
 	fn test_rwpm_link_builder() {
@@ -410,5 +427,71 @@ mod tests {
 		assert!(json.contains("Test Book"));
 		assert!(json.contains("@context"));
 		assert!(json.contains("readingOrder"));
+	}
+
+	#[test]
+	fn test_resource_url_percent_encodes_segments() {
+		let generator = ReadiumManifestGenerator::new(
+			"/tmp/book.epub",
+			"https://example.com/api/v2/epub/abc",
+		);
+
+		assert_eq!(
+			generator.resource_url("OEBPS/My Chapter.xhtml"),
+			"https://example.com/api/v2/epub/abc/resource/OEBPS/My%20Chapter.xhtml"
+		);
+		assert_eq!(
+			generator.resource_url("/OEBPS/ch1.xhtml#frag"),
+			"https://example.com/api/v2/epub/abc/resource/OEBPS/ch1.xhtml#frag"
+		);
+	}
+
+	#[test]
+	fn test_generate_manifest_from_fixture() {
+		let path = get_test_epub_path();
+		let base = "https://example.com/api/v2/epub/book-1";
+		let generator = ReadiumManifestGenerator::new(&path, base);
+		let manifest = generator.generate_manifest().expect("manifest");
+
+		assert_eq!(manifest.context, RWPM_CONTEXT);
+		assert!(!manifest.reading_order.is_empty());
+		assert!(
+			manifest.links.iter().any(|link| {
+				link.rel
+					.as_ref()
+					.is_some_and(|rels| rels.iter().any(|r| r == "self"))
+					&& link.href.ends_with("/manifest.json")
+			}),
+			"expected self link to manifest.json"
+		);
+
+		let first = &manifest.reading_order[0];
+		assert!(
+			first.href.contains("/resource/"),
+			"readingOrder href should point at resource route: {}",
+			first.href
+		);
+		assert!(first.href.starts_with(base));
+
+		assert!(
+			manifest
+				.resources
+				.iter()
+				.any(|r| r.href.contains("/resource/")),
+			"expected non-spine resources with resource hrefs"
+		);
+	}
+
+	#[test]
+	fn test_generate_positions_from_fixture() {
+		let path = get_test_epub_path();
+		let base = "https://example.com/api/v2/epub/book-1";
+		let generator = ReadiumManifestGenerator::new(&path, base);
+		let positions = generator.generate_positions().expect("positions");
+
+		assert!(positions.total >= 1);
+		assert_eq!(positions.total as usize, positions.positions.len());
+		assert!(positions.positions[0].href.contains("/resource/"));
+		assert_eq!(positions.positions[0].locations.position, 1);
 	}
 }

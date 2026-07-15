@@ -203,6 +203,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 						elapsedSeconds: 0,
 						lastModified: new Date(),
 						syncStatus: syncStatus.enum.UNSYNCED,
+						pendingReset: true,
 					},
 				})
 		},

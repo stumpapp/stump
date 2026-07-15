@@ -1,6 +1,7 @@
 import {
 	ARCHIVE_EXTENSION,
 	EBOOK_EXTENSION,
+	parseGraphQLDateTime,
 	PDF_EXTENSION,
 	useGraphQLMutation,
 	useSDK,
@@ -172,7 +173,7 @@ export const query = graphql(`
 const mutation = graphql(`
 	mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
-			__typename
+			updatedAt
 		}
 	}
 `)
@@ -333,7 +334,7 @@ export default function Screen() {
 		onError: (error) => {
 			console.error('Failed to update read progress:', error)
 		},
-		onSuccess: (_, { input: onlineProgress }) => {
+		onSuccess: (data, { input: onlineProgress }) => {
 			if (onlineProgress.epub?.locator?.readium) {
 				lastSyncedReadiumLocator.current = intoReadiumLocator({
 					...onlineProgress.epub.locator.readium,
@@ -348,8 +349,10 @@ export default function Screen() {
 			// invalidate but do not refetch
 			queryClient.invalidateQueries({ queryKey: ['bookById', bookID], exact: false })
 			queryClient.invalidateQueries({ queryKey: ['readBook', bookID], exact: false })
+
 			// TODO: Consider a preference to disable online-to-offline sync?
-			syncProgress(onlineProgress)
+			const serverUpdatedAt = parseGraphQLDateTime(data.updateMediaProgress.updatedAt)
+			syncProgress(onlineProgress, serverUpdatedAt)
 		},
 	})
 

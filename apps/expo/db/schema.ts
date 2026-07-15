@@ -46,7 +46,7 @@ export const libraryRefs = sqliteTable('library_refs', {
 	name: text('name').notNull(),
 })
 
-export const syncStatus = z.enum(['UNSYNCED', 'SYNCING', 'SYNCED', 'ERROR'])
+export const syncStatus = z.enum(['UNSYNCED', 'SYNCING', 'SYNCED', 'ERROR', 'CONFLICT'])
 
 /**
  * Unsynced read progress table
@@ -76,6 +76,11 @@ export const readProgress = sqliteTable('read_progress', {
 		.notNull()
 		.$defaultFn(() => new Date()),
 	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
+	/// the server's updatedAt at the time of the last successful pull
+	lastPulledSessionUpdatedAt: integer('last_pulled_session_updated_at', { mode: 'timestamp' }),
+	// set when the reading timer is reset while offline to inform remote server that the
+	// elapsedSeconds should be reset to 0 for all sessions in current readthrough
+	pendingReset: integer('pending_reset', { mode: 'boolean' }).notNull().default(false),
 })
 
 export type DownloadedFile = typeof downloadedFiles.$inferSelect

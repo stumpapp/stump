@@ -121,8 +121,16 @@ export const executeSingleServerPullSync = async (
 		const serverUpdatedAt = progress.updatedAt ? new Date(progress.updatedAt) : new Date(0)
 
 		if (localProgress && localProgress.syncStatus !== syncStatus.enum.SYNCED) {
-			// naive-ish last write wins
-			if (localUpdatedAt >= serverUpdatedAt) continue
+			const lastPulledAt = localProgress.lastPulledSessionUpdatedAt
+
+			// local behind remote = conflict (cannot push until resolved)
+			if (lastPulledAt && serverUpdatedAt > lastPulledAt) {
+				await db
+					.update(readProgress)
+					.set({ syncStatus: syncStatus.enum.CONFLICT })
+					.where(eq(readProgress.bookId, media.id))
+				continue
+			}
 		}
 
 		// local already ahead or equal = skip (push handles it)
@@ -150,6 +158,8 @@ export const executeSingleServerPullSync = async (
 					: null,
 				syncStatus: syncStatus.enum.SYNCED,
 				lastModified: serverUpdatedAt,
+				lastPulledSessionUpdatedAt: serverUpdatedAt,
+				pendingReset: false,
 			}
 
 			await db.insert(readProgress).values(values).onConflictDoUpdate({

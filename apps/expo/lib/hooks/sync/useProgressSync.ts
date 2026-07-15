@@ -153,7 +153,7 @@ export function useSyncOnlineToOfflineProgress({
 	}, [record?.elapsedSeconds])
 
 	const syncProgress = useCallback(
-		async (onlineProgress: MediaProgressInput) => {
+		async (onlineProgress: MediaProgressInput, serverUpdatedAt?: Date | null) => {
 			if (!isOfflineSyncable) return
 
 			const delta = match(onlineProgress)
@@ -213,10 +213,14 @@ export function useSyncOnlineToOfflineProgress({
 			try {
 				await db
 					.insert(readProgress)
-					.values(values)
+					.values({ ...values, lastPulledSessionUpdatedAt: serverUpdatedAt })
 					.onConflictDoUpdate({
 						target: readProgress.bookId,
-						set: { ...values, lastModified: new Date() },
+						set: {
+							...values,
+							lastModified: new Date(),
+							lastPulledSessionUpdatedAt: serverUpdatedAt,
+						},
 					})
 			} catch (error) {
 				console.error('Failed to sync online progress to offline DB', {

@@ -4898,7 +4898,7 @@ export type UpdateReadProgressionMutationVariables = Exact<{
 }>;
 
 
-export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
+export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', updatedAt?: any | null } };
 
 export type ResetElapsedSecondsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5284,7 +5284,14 @@ export type PushLocalReadProgressionMutationVariables = Exact<{
 }>;
 
 
-export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
+export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', updatedAt?: any | null } };
+
+export type PushResetElapsedSecondsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PushResetElapsedSecondsMutation = { __typename?: 'Mutation', resetElapsedSeconds: boolean };
 
 export type ContinueReadingQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -8349,7 +8356,7 @@ export const BookReadScreenDocument = new TypedDocumentString(`
 export const UpdateReadProgressionDocument = new TypedDocumentString(`
     mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
   updateMediaProgress(id: $id, input: $input) {
-    __typename
+    updatedAt
   }
 }
     `) as unknown as TypedDocumentString<UpdateReadProgressionMutation, UpdateReadProgressionMutationVariables>;
@@ -9385,10 +9392,15 @@ export const PushDeleteBookmarkDocument = new TypedDocumentString(`
 export const PushLocalReadProgressionDocument = new TypedDocumentString(`
     mutation PushLocalReadProgression($id: ID!, $input: MediaProgressInput!) {
   updateMediaProgress(id: $id, input: $input) {
-    __typename
+    updatedAt
   }
 }
     `) as unknown as TypedDocumentString<PushLocalReadProgressionMutation, PushLocalReadProgressionMutationVariables>;
+export const PushResetElapsedSecondsDocument = new TypedDocumentString(`
+    mutation PushResetElapsedSeconds($id: ID!) {
+  resetElapsedSeconds(id: $id)
+}
+    `) as unknown as TypedDocumentString<PushResetElapsedSecondsMutation, PushResetElapsedSecondsMutationVariables>;
 export const ContinueReadingDocument = new TypedDocumentString(`
     query ContinueReading($pagination: Pagination) {
   keepReading(pagination: $pagination) {

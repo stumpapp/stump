@@ -1,3 +1,4 @@
+import { parseGraphQLDateTime } from '@stump/client'
 import { graphql, MediaProgressInput } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { and, eq, inArray, not } from 'drizzle-orm'
@@ -8,8 +9,14 @@ import { db, epubProgress, readProgress, syncStatus } from '~/db'
 const mutation = graphql(`
 	mutation PushLocalReadProgression($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
-			__typename
+			updatedAt
 		}
+	}
+`)
+
+const resetElapsedSecondsMutation = graphql(`
+	mutation PushResetElapsedSeconds($id: ID!) {
+		resetElapsedSeconds(id: $id)
 	}
 `)
 
@@ -37,7 +44,13 @@ const executeSingleServerSync = async (
 		.where(
 			and(
 				eq(readProgress.serverId, serverId),
-				not(inArray(readProgress.syncStatus, [syncStatus.Enum.SYNCED, syncStatus.Enum.SYNCING])),
+				not(
+					inArray(readProgress.syncStatus, [
+						syncStatus.Enum.SYNCED,
+						syncStatus.Enum.SYNCING,
+						syncStatus.Enum.CONFLICT,
+					]),
+				),
 			),
 		)
 
@@ -69,8 +82,17 @@ const executeSingleServerSync = async (
 
 	// Note: I didn't do a transaction here because each iteration involves an external API call
 	for (const record of progressRecords) {
+		// FIXME: this is easiest for now, but sequentially resetting and then pushing progress is more error-prone,
+		// and it might just be better to have the mutation intake the reset flag to handle it in a single txn. i will
+		// prolly come back to this before letting it merge to do just that
 		try {
-			const elapsedDelta = (record.elapsedSeconds ?? 0) - (record.lastSyncedElapsedSeconds ?? 0)
+			if (record.pendingReset) {
+				await api.execute(resetElapsedSecondsMutation, { id: record.bookId })
+			}
+
+			const elapsedDelta = record.pendingReset
+				? (record.elapsedSeconds ?? 0)
+				: (record.elapsedSeconds ?? 0) - (record.lastSyncedElapsedSeconds ?? 0)
 
 			const payload: MediaProgressInput = match(epubProgress.safeParse(record.epubProgress).data)
 				.when(
@@ -97,16 +119,20 @@ const executeSingleServerSync = async (
 						}) satisfies MediaProgressInput,
 				)
 
-			await api.execute(mutation, {
+			const result = await api.execute(mutation, {
 				id: record.bookId,
 				input: payload,
 			})
+
+			const serverUpdatedAt = parseGraphQLDateTime(result.updateMediaProgress.updatedAt)
 
 			await db
 				.update(readProgress)
 				.set({
 					syncStatus: syncStatus.Enum.SYNCED,
 					lastSyncedElapsedSeconds: record.elapsedSeconds,
+					pendingReset: false,
+					lastPulledSessionUpdatedAt: serverUpdatedAt,
 				})
 				.where(eq(readProgress.id, record.id))
 		} catch {

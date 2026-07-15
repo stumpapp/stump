@@ -17,7 +17,9 @@ export function SyncIcon({ status, size = 16 }: SyncIconProps) {
 	)
 }
 
+// FIXME: can't use these icons or apple will be angry >:(
 const ICONS: Record<SyncIconProps['status'], React.ComponentProps<typeof Image>['systemName']> = {
+	CONFLICT: 'exclamationmark.icloud.fill',
 	ERROR: 'xmark.icloud.fill',
 	SYNCED: 'checkmark.icloud.fill',
 	SYNCING: 'arrow.triangle.2.circlepath',

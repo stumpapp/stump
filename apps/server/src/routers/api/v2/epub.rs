@@ -161,7 +161,13 @@ async fn get_epub_positions(
 	let generator = ReadiumManifestGenerator::new(&ebook.path, base_url);
 	let positions = generator.generate_positions()?;
 
-	Ok(Json(positions))
+	Ok((
+		[(
+			header::CONTENT_TYPE,
+			"application/vnd.readium.position-list+json",
+		)],
+		Json(positions),
+	))
 }
 
 /// Get a resource from an epub file by package-relative path.

@@ -70,7 +70,7 @@ export default function EpubNavigationControls({ children }: Props) {
 	})
 
 	return (
-		<div className="gap-1 relative flex h-full w-full flex-1 items-center" aria-hidden="true">
+		<div className="min-h-0 relative flex h-full w-full flex-1 items-stretch" aria-hidden="true">
 			<div
 				className={cx('left-2 w-12 md:flex fixed z-100 hidden h-1/2 items-center', {
 					hidden: isVerticalScrolling,

@@ -19,7 +19,21 @@ export class EpubAPI extends APIBase {
 	 * A helper to get the service URL for the epub API scoped to a specific epub ID
 	 */
 	epubServiceURL(id: string): string {
-		return epubURL(`/${id}`)
+		return this.withServiceURL(epubURL(`/${id}`))
+	}
+
+	/**
+	 * Absolute URL for the Readium Web Publication Manifest for an epub
+	 */
+	manifestURL(id: string): string {
+		return this.withServiceURL(epubURL(`/${id}/manifest.json`))
+	}
+
+	/**
+	 * Absolute URL for the Readium positions list for an epub
+	 */
+	positionsURL(id: string): string {
+		return this.withServiceURL(epubURL(`/${id}/positions.json`))
 	}
 
 	/**
@@ -45,7 +59,6 @@ export class EpubAPI extends APIBase {
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof EpubAPI>> {
 		return {
-			epubServiceURL: 'epub.serviceURL',
 			fetchResource: 'epub.fetchResource',
 		}
 	}

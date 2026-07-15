@@ -26,7 +26,7 @@ export default function SearchCommand() {
 	 * from a single spine item.
 	 */
 	const doSearch = useCallback(async () => {
-		if (!query) return
+		if (!query || !searchEntireBook) return
 
 		setIsSearching(true)
 		const results = await searchEntireBook(query)
@@ -39,7 +39,7 @@ export default function SearchCommand() {
 	 */
 	const handleGoToCfi = useCallback(
 		(cfi: string) => {
-			onGoToCfi(cfi)
+			onGoToCfi?.(cfi)
 			setOpen(false)
 		},
 		[onGoToCfi],

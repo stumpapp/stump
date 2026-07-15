@@ -121,6 +121,22 @@ async fn test_epub_manifest_ok() {
 		href.contains(&format!("/api/v2/epub/{book_id}/resource/")),
 		"href={href}"
 	);
+
+	let links = manifest
+		.get("links")
+		.and_then(Value::as_array)
+		.expect("links");
+	assert!(
+		links.iter().any(|link| {
+			link.get("type").and_then(Value::as_str)
+				== Some("application/vnd.readium.position-list+json")
+				&& link
+					.get("href")
+					.and_then(Value::as_str)
+					.is_some_and(|h| h.ends_with("/positions.json"))
+		}),
+		"expected positions list link in manifest: {links:?}"
+	);
 }
 
 /// positions list should be consistent
@@ -132,6 +148,16 @@ async fn test_epub_positions_ok() {
 		.get(format!("/api/v2/epub/{book_id}/positions.json").as_str())
 		.await;
 	response.assert_status_ok();
+
+	let content_type = response
+		.headers()
+		.get("content-type")
+		.and_then(|v| v.to_str().ok())
+		.unwrap_or_default();
+	assert!(
+		content_type.contains("application/vnd.readium.position-list+json"),
+		"unexpected content-type: {content_type}"
+	);
 
 	let positions: Value = response.json();
 	let total = positions

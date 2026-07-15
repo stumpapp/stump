@@ -5922,12 +5922,27 @@ export type CreateBookmarkMutationVariables = Exact<{
 
 export type CreateBookmarkMutation = { __typename?: 'Mutation', createBookmark: { __typename: 'Bookmark' } };
 
-export type DeleteBookmarkByEpubcfiMutationVariables = Exact<{
-  epubcfi: Scalars['String']['input'];
+export type DeleteBookmarkMutationVariables = Exact<{
+  id: Scalars['String']['input'];
 }>;
 
 
-export type DeleteBookmarkByEpubcfiMutation = { __typename?: 'Mutation', deleteBookmarkByEpubcfi: { __typename: 'Bookmark' } };
+export type DeleteBookmarkMutation = { __typename?: 'Mutation', deleteBookmark: { __typename: 'Bookmark' } };
+
+export type ReadiumWebReaderQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ReadiumWebReaderQuery = { __typename?: 'Query', epubById: { __typename?: 'Epub', mediaId: string, toc: Array<string>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string, previewContent?: string | null, createdAt: any, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } | null }>, media: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds: number, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } } };
+
+export type UpdateReadiumEpubProgressMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: MediaProgressInput;
+}>;
+
+
+export type UpdateReadiumEpubProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
 
 export type SeriesBooksAlphabetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11270,13 +11285,100 @@ export const CreateBookmarkDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CreateBookmarkMutation, CreateBookmarkMutationVariables>;
-export const DeleteBookmarkByEpubcfiDocument = new TypedDocumentString(`
-    mutation DeleteBookmarkByEpubcfi($epubcfi: String!) {
-  deleteBookmarkByEpubcfi(epubcfi: $epubcfi) {
+export const DeleteBookmarkDocument = new TypedDocumentString(`
+    mutation DeleteBookmark($id: String!) {
+  deleteBookmark(id: $id) {
     __typename
   }
 }
-    `) as unknown as TypedDocumentString<DeleteBookmarkByEpubcfiMutation, DeleteBookmarkByEpubcfiMutationVariables>;
+    `) as unknown as TypedDocumentString<DeleteBookmarkMutation, DeleteBookmarkMutationVariables>;
+export const ReadiumWebReaderDocument = new TypedDocumentString(`
+    query ReadiumWebReader($id: ID!) {
+  epubById(id: $id) {
+    mediaId
+    toc
+    bookmarks {
+      id
+      userId
+      epubcfi
+      mediaId
+      previewContent
+      createdAt
+      locator {
+        chapterTitle
+        href
+        title
+        type
+        locations {
+          fragments
+          progression
+          position
+          totalProgression
+          cssSelector
+          partialCfi
+        }
+        text {
+          after
+          before
+          highlight
+        }
+      }
+    }
+    media {
+      id
+      resolvedName
+      pages
+      extension
+      readProgress {
+        percentageCompleted
+        epubcfi
+        page
+        elapsedSeconds
+        locator {
+          chapterTitle
+          href
+          title
+          type
+          locations {
+            fragments
+            progression
+            position
+            totalProgression
+            cssSelector
+            partialCfi
+          }
+          text {
+            after
+            before
+            highlight
+          }
+        }
+      }
+      libraryConfig {
+        defaultReadingImageScaleFit
+        defaultReadingMode
+        defaultReadingDir
+      }
+      nextInSeries(pagination: {cursor: {limit: 1}}) {
+        nodes {
+          id
+          name: resolvedName
+          thumbnail {
+            url
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ReadiumWebReaderQuery, ReadiumWebReaderQueryVariables>;
+export const UpdateReadiumEpubProgressDocument = new TypedDocumentString(`
+    mutation UpdateReadiumEpubProgress($id: ID!, $input: MediaProgressInput!) {
+  updateMediaProgress(id: $id, input: $input) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateReadiumEpubProgressMutation, UpdateReadiumEpubProgressMutationVariables>;
 export const SeriesBooksAlphabetDocument = new TypedDocumentString(`
     query SeriesBooksAlphabet($id: ID!) {
   seriesById(id: $id) {

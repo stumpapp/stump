@@ -5,24 +5,48 @@ import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 
 import { noop } from '../../../utils/misc'
 
+export type ReaderLocator = {
+	href: string
+	type: string
+	title?: string
+	chapterTitle?: string
+	locations?: {
+		fragments?: string[] | null
+		progression?: number | null
+		position?: number | null
+		totalProgression?: number | null
+	} | null
+	text?: {
+		after?: string | null
+		before?: string | null
+		highlight?: string | null
+	} | null
+}
+
 export type EpubReaderChapterMeta = {
 	/** The chapter's title. */
 	name?: string
-	/** The chapter's position in the book. */
+	/** The chapter's position in the book / TOC index. */
 	position?: number
-	/** The chapter's index in the spine */
+	/** The chapter's index in the spine / reading order */
 	sectionSpineIndex?: number
-	/** The chapter's total number of pages. */
+	/** Absolute or relative progression for footer UI (0–1). */
+	totalProgression?: number
+	/** 1-based Readium position index when available. */
+	locatorPosition?: number
+	/** Total positions in the publication. */
+	totalPositions?: number
+	/**
+	 * Current locator for progress and bookmarks.
+	 * Preferred over epubcfi for the Readium reader.
+	 */
+	currentLocator?: ReaderLocator | null
+	/**
+	 * Legacy epub.js page display.
+	 */
 	totalPages?: number
-	/**
-	 * The chapter's current page. If the viewport is large enough, two pages will
-	 * be displayed, so this will be an array of two numbers.
-	 */
 	currentPage?: [number | undefined, number | undefined]
-	/**
-	 * The visible cfi strings for the first and last visible pages.
-	 */
-	cfiRange: [string | undefined, string | undefined]
+	cfiRange?: [string | undefined, string | undefined]
 }
 
 export interface EpubContent {
@@ -35,6 +59,7 @@ export interface EpubContent {
 export type EpubReaderBookMeta = {
 	chapter: EpubReaderChapterMeta
 	toc: EpubContent[]
+	/** Legacy epub.js section lengths — unused by Readium. */
 	sectionLengths: { [key: number]: number }
 	bookmarks: Record<string, Bookmark>
 }
@@ -56,9 +81,16 @@ export type EpubReaderControls = {
 	onPaginateForward: () => void
 	onPaginateBackward: () => void
 	jumpToSection: (section: number) => void
-	getCfiPreviewText: (cfi: string) => Promise<string | null>
-	searchEntireBook: (query: string) => Promise<SpineSearchResult[]>
-	onGoToCfi: (cfi: string) => void
+	/** Navigate using a Readium locator (preferred). */
+	onGoToLocator: (locator: ReaderLocator) => void
+	/** Preview text for a locator-based bookmark. */
+	getLocatorPreviewText: (locator: ReaderLocator) => Promise<string | null>
+	/**
+	 * Legacy epub.js CFI navigation — optional; SearchCommand/Bookmarks fall back when present.
+	 */
+	onGoToCfi?: (cfi: string) => void
+	getCfiPreviewText?: (cfi: string) => Promise<string | null>
+	searchEntireBook?: (query: string) => Promise<SpineSearchResult[]>
 }
 
 export type SpineSearchResult = {
@@ -79,15 +111,14 @@ export type EpubReaderContextProps = {
 export const EpubReaderContext = createContext<EpubReaderContextProps>({
 	controls: {
 		fullscreen: false,
-		getCfiPreviewText: async () => null,
-		onGoToCfi: noop,
+		getLocatorPreviewText: async () => null,
+		onGoToLocator: noop,
 		onLinkClick: noop,
 		onMouseEnterControls: noop,
 		onMouseLeaveControls: noop,
 		onPaginateBackward: noop,
 		onPaginateForward: noop,
 		jumpToSection: noop,
-		searchEntireBook: async () => [],
 		setFullscreen: noop,
 		setVisible: noop,
 		visible: false,

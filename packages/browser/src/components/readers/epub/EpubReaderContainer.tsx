@@ -14,6 +14,8 @@ type Props = {
 		| 'onPaginateBackward'
 		| 'onPaginateForward'
 		| 'jumpToSection'
+		| 'onGoToLocator'
+		| 'getLocatorPreviewText'
 		| 'getCfiPreviewText'
 		| 'searchEntireBook'
 		| 'onGoToCfi'
@@ -31,8 +33,6 @@ export default function EpubReaderContainer({ children, readerMeta, controls }: 
 	const onMouseEnterControls = () => setMouseIsInZone(true)
 	const onMouseLeaveControls = () => setMouseIsInZone(false)
 
-	// TODO: Just make these preferences, e.g. `showHeader` and `showFooter`. When set to false, then we can do something like this effect
-	// and the header/footer can manage their own visibility state
 	/**
 	 * This effect is responsible for hiding the controls when the user is not interacting with the reader.
 	 * It is 'debounced' to prevent the controls closing when the user exits but re-enters before
@@ -69,9 +69,13 @@ export default function EpubReaderContainer({ children, readerMeta, controls }: 
 				readerMeta,
 			}}
 		>
-			<EpubReaderHeader />
-			<EpubNavigationControls>{children}</EpubNavigationControls>
-			<EpubReaderFooter />
+			<div className="min-h-0 flex h-full w-full flex-col overflow-hidden">
+				<EpubReaderHeader />
+				<div className="min-h-0 relative w-full flex-1">
+					<EpubNavigationControls>{children}</EpubNavigationControls>
+				</div>
+				<EpubReaderFooter />
+			</div>
 		</EpubReaderContext.Provider>
 	)
 }

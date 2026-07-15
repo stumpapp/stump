@@ -289,11 +289,19 @@ impl ReadiumManifestGenerator {
 	}
 
 	fn generate_links(&self) -> Vec<RWPMLink> {
-		vec![RWPMLink::new(
-			format!("{}/manifest.json", self.base_url),
-			Some("application/webpub+json".to_string()),
-		)
-		.with_rel("self")]
+		vec![
+			RWPMLink::new(
+				format!("{}/manifest.json", self.base_url),
+				Some("application/webpub+json".to_string()),
+			)
+			.with_rel("self"),
+			// Required by @readium/shared Publication.positionsFromManifest() —
+			// media type is how the client discovers the list (not rel alone).
+			RWPMLink::new(
+				format!("{}/positions.json", self.base_url),
+				Some("application/vnd.readium.position-list+json".to_string()),
+			),
+		]
 	}
 
 	fn generate_reading_order(
@@ -463,6 +471,14 @@ mod tests {
 					&& link.href.ends_with("/manifest.json")
 			}),
 			"expected self link to manifest.json"
+		);
+		assert!(
+			manifest.links.iter().any(|link| {
+				link.media_type.as_deref()
+					== Some("application/vnd.readium.position-list+json")
+					&& link.href.ends_with("/positions.json")
+			}),
+			"expected positions list link for Readium Web"
 		);
 
 		let first = &manifest.reading_order[0];

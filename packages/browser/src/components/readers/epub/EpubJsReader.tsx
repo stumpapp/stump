@@ -879,7 +879,13 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 			}}
 			controls={{
 				getCfiPreviewText,
+				getLocatorPreviewText: async () => null,
 				onGoToCfi,
+				onGoToLocator: (locator) => {
+					if (locator.href) {
+						void onLinkClick(locator.href)
+					}
+				},
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,

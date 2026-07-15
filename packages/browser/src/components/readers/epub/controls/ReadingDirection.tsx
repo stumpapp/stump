@@ -29,8 +29,8 @@ export default function ReadingDirection() {
 				id="reading-direction"
 				size="sm"
 				options={[
-					{ label: 'Left to right', value: 'ltr' },
-					{ label: 'Right to left', value: 'rtl' },
+					{ label: 'Left to right', value: 'LTR' },
+					{ label: 'Right to left', value: 'RTL' },
 				]}
 				value={readingDirection}
 				onChange={handleChange}

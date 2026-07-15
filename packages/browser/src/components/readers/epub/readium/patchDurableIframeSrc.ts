@@ -1,3 +1,28 @@
+/**
+ * Pinned to `@readium/navigator@2.6.1` / `@readium/navigator-html-injectables@2.5.0`.
+ *
+ * This module monkeypatches and reaches into **private/unexported** Readium internals that
+ * are not part of its public API contract. Re-verify every one of these against the release
+ * notes before bumping either package:
+ *
+ * - `FrameManager.prototype.load` — patched in place (`patchDurableIframeSrc`) to navigate via
+ *   `iframe.src` instead of `contentWindow.location.replace(blob)`, so a browser-driven reload
+ *   (e.g. on resize) lands back on the publication resource instead of `about:blank`.
+ * - `FrameManager#iframe` / `#source` / `#loader` / `#comms` / `#currModules` — private instance
+ *   fields read/written directly (no public getters exist).
+ * - `EpubNavigator#_cframes` — private field (underscore-prefixed, unexported type) read to
+ *   enumerate live frames.
+ * - `EpubNavigator#pool` — the `FramePoolManager`'s internal `pool` Map is read directly; there
+ *   is no public iteration API for pooled frames.
+ * - `EpubNavigator#determineModules` — private method invoked via a duck-typed check.
+ * - `EpubNavigator#resizeHandler` — public but undocumented; wrapped (not replaced) to add
+ *   blank-frame recovery after every resize.
+ * - `EpubNavigator#attachListener` — private method invoked via a duck-typed check after
+ *   recovering frames, to re-bind Readium's own event listeners to the rebuilt frame.
+ *
+ * If any of these renames/removes on upgrade, this file will need a matching rewrite — it is
+ * not just a config tweak.
+ */
 import { type EpubNavigator, FrameManager } from '@readium/navigator'
 import { Loader, type ModuleName } from '@readium/navigator-html-injectables'
 

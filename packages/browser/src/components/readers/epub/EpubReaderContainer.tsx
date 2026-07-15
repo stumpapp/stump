@@ -19,6 +19,8 @@ type Props = {
 		| 'getCfiPreviewText'
 		| 'searchEntireBook'
 		| 'onGoToCfi'
+		| 'canGoForward'
+		| 'canGoBackward'
 	>
 }
 

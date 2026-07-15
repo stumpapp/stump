@@ -1,13 +1,14 @@
 import { Link, Locator } from '@readium/shared'
 import { queryClient, useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { cx } from '@stump/components'
 import {
 	Bookmark,
 	EpubProgressInput,
 	graphql,
 	ReadingDirection,
+	ReadingMode,
 	type ReadiumLocator,
 } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebounce } from 'rooks'
 import { toast } from 'sonner'
@@ -21,7 +22,7 @@ import { EpubContent, type ReaderLocator } from '../context'
 import EpubReaderContainer from '../EpubReaderContainer'
 import { hrefsMatch, resolveInitialLocator, toolkitLocatorToInput } from './locator'
 import { type OpenedPublication, openStumpPublication } from './openPublication'
-import { bookPreferencesToEpubPreferences } from './preferences'
+import { bookPreferencesToEpubPreferences, resolveEffectiveColumnCount } from './preferences'
 import { useReadiumNavigator } from './useReadiumNavigator'
 
 type Props = {
@@ -133,6 +134,8 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	const { sdk } = useSDK()
 	const { isDarkVariant } = useTheme()
 	const containerRef = useRef<HTMLDivElement>(null)
+	const viewportRef = useRef<HTMLDivElement>(null)
+	const [stageWidth, setStageWidth] = useState<number | undefined>(undefined)
 
 	const {
 		data: { epubById: ebook },
@@ -148,8 +151,35 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 			readingMode,
 			readingDirection,
 			trackElapsedTime,
+			columnCount,
+			pageMargins,
 		},
 	} = useBookPreferences({ book: ebook.media })
+
+	// Measures the viewport parent — i.e. the parent of the element Readium itself treats
+	// as its viewport (`containerRef`'s parent, see `useReadiumNavigator`). Keeping the
+	// measurement one level up means it is unaffected by the centering max-width we apply to
+	// that inner element below, so there is no feedback loop between measured width and layout.
+	useEffect(() => {
+		const el = viewportRef.current
+		if (!el) return undefined
+
+		setStageWidth(el.clientWidth || undefined)
+
+		const observer = new ResizeObserver((entries) => {
+			const entry = entries[0]
+			if (entry) {
+				setStageWidth(entry.contentRect.width)
+			}
+		})
+		observer.observe(el)
+		return () => observer.disconnect()
+	}, [])
+
+	const isContinuous = readingMode === ReadingMode.ContinuousVertical
+	const effectiveColumnCount = isContinuous
+		? null
+		: resolveEffectiveColumnCount(columnCount, stageWidth)
 
 	const timer = useBookTimer(ebook.media?.id || '', {
 		initial: ebook.media?.readProgress?.elapsedSeconds,
@@ -160,7 +190,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	const lastSyncedLocatorRef = useRef<ReadiumLocator | null>(
 		ebook.media?.readProgress?.locator ?? null,
 	)
-	const latestLocatorRef = useRef<Locator | null>(null)
 	const hasReachedEndRef = useRef(false)
 
 	const [openState, setOpenState] = useState<LoadState>({ status: 'loading' })
@@ -171,13 +200,12 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 			: null,
 	)
 
-	const client = useQueryClient()
+	// Intentionally does not invalidate `['readiumWebReader', id]` on every success — progress
+	// mutations fire on (debounced) every position change, and refetching the reader's own
+	// suspense query that often would cause avoidable re-renders / flicker while reading.
 	const { mutate } = useGraphQLMutation(mutation, {
 		onSuccess: () => {
 			lastSyncedElapsedRef.current = timer.getCurrentTime()
-			client.invalidateQueries({
-				queryKey: ['readiumWebReader', id],
-			})
 		},
 	})
 
@@ -189,8 +217,20 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				fontFamily,
 				readingMode,
 				isDarkVariant,
+				columnCount,
+				pageMargins,
+				stageWidth,
 			}),
-		[fontSize, lineHeight, fontFamily, readingMode, isDarkVariant],
+		[
+			fontSize,
+			lineHeight,
+			fontFamily,
+			readingMode,
+			isDarkVariant,
+			columnCount,
+			pageMargins,
+			stageWidth,
+		],
 	)
 
 	// Open the publication once per book id
@@ -294,7 +334,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 
 	const handlePositionChanged = useCallback(
 		(locator: Locator) => {
-			latestLocatorRef.current = locator
 			setCurrentLocator(locator)
 
 			const total = locator.locations.totalProgression
@@ -317,12 +356,13 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		[debouncedPersist, persistLocator],
 	)
 
-	// Flush latest progress on unmount so elapsed time is not lost
+	// Flush any pending debounced progress write on unmount so recent reading is not lost.
+	// `useDebounce` (rooks) returns a lodash `DebouncedFunc`, which synchronously invokes the
+	// pending call (if any) rather than waiting out the remaining debounce window.
 	useEffect(() => {
 		return () => {
-			const locator = latestLocatorRef.current
-			if (locator && !isIncognito) {
-				persistLocator(locator)
+			if (!isIncognito) {
+				debouncedPersist.flush()
 			}
 			void Promise.all([
 				queryClient.invalidateQueries({ queryKey: ['bookOverview', id], exact: false }),
@@ -389,6 +429,8 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 								progression: input.locations.progression,
 								position: input.locations.position,
 								totalProgression: input.locations.totalProgression,
+								cssSelector: input.locations.cssSelector,
+								partialCfi: input.locations.partialCfi,
 							}
 						: null,
 					text: input.text
@@ -437,8 +479,8 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 									progression: locator.locations.progression,
 									position: locator.locations.position,
 									totalProgression: locator.locations.totalProgression,
-									cssSelector: null,
-									partialCfi: null,
+									cssSelector: locator.locations.cssSelector ?? null,
+									partialCfi: locator.locations.partialCfi ?? null,
 								}
 							: null,
 						text: locator.text ?? null,
@@ -497,12 +539,14 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		return locator.text?.highlight ?? locator.chapterTitle ?? locator.title ?? null
 	}, [])
 
-	/** Keyboard navigation — RTL aware */
+	/** Keyboard navigation — RTL aware, ignores keystrokes aimed at inputs/dialogs */
 	useEffect(() => {
 		if (!api) return
 		const isLtr = readingDirection !== ReadingDirection.Rtl
 
 		const handleKeyDown = (event: KeyboardEvent) => {
+			if (isEditableTarget(event.target)) return
+
 			const nextKey = isLtr ? 'ArrowRight' : 'ArrowLeft'
 			const prevKey = isLtr ? 'ArrowLeft' : 'ArrowRight'
 			if (event.key === nextKey) {
@@ -551,16 +595,35 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				onPaginateBackward,
 				onPaginateForward,
 				jumpToSection,
+				canGoForward: api?.canGoForward,
+				canGoBackward: api?.canGoBackward,
 			}}
 		>
 			{/*
-			  Readium observes this viewport (container.parentElement) and sets the
-			  inner host's width. Keep the viewport CSS-sized and stable — AutoSizer
-			  0×0 flashes + React size state fight that ResizeObserver path.
-			  md:px-12 matches the fixed side chevron gutters (w-12).
+			  This outer div is the "viewport parent" — measured independently via
+			  ResizeObserver above to decide the effective column count, and unaffected by
+			  the centering max-width applied to the inner div below. md:px-12 matches the
+			  chevron gutters (w-12) rendered by EpubNavigationControls, one level up.
 			*/}
-			<div className="min-h-0 md:px-12 relative h-full w-full flex-1 self-stretch overflow-hidden">
-				<div ref={containerRef} className="relative h-full w-full overflow-hidden" />
+			<div
+				ref={viewportRef}
+				className="min-h-0 md:px-12 relative h-full w-full flex-1 self-stretch overflow-hidden"
+			>
+				{/*
+				  Readium observes *this* element (container.parentElement) and sets the
+				  inner host's width. Keep it CSS-sized and stable — AutoSizer 0×0 flashes +
+				  React size state fight that ResizeObserver path. Centered with a max-width
+				  once paginated, so a single/double column spread doesn't stretch edge to
+				  edge on wide screens.
+				*/}
+				<div
+					className={cx('relative mx-auto h-full w-full overflow-hidden', {
+						'max-w-3xl': effectiveColumnCount === 1,
+						'max-w-5xl': effectiveColumnCount === 2,
+					})}
+				>
+					<div ref={containerRef} className="relative h-full w-full overflow-hidden" />
+				</div>
 
 				{isLoading && (
 					<div className="inset-0 absolute z-10 flex items-center justify-center bg-background/80">
@@ -576,6 +639,15 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 			</div>
 		</EpubReaderContainer>
 	)
+}
+
+/** Whether a keydown target is an editable surface that should swallow reader shortcuts. */
+function isEditableTarget(target: EventTarget | null): boolean {
+	if (!(target instanceof HTMLElement)) return false
+	const tag = target.tagName
+	if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true
+	if (target.isContentEditable) return true
+	return !!target.closest('[role="dialog"]')
 }
 
 function packageKey(href: string): string {

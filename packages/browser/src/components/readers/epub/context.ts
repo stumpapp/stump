@@ -15,6 +15,10 @@ export type ReaderLocator = {
 		progression?: number | null
 		position?: number | null
 		totalProgression?: number | null
+		/** CSS selector fallback, preserved so re-navigation does not lose precision. */
+		cssSelector?: string | null
+		/** Partial CFI fallback, preserved so re-navigation does not lose precision. */
+		partialCfi?: string | null
 	} | null
 	text?: {
 		after?: string | null
@@ -81,6 +85,10 @@ export type EpubReaderControls = {
 	onPaginateForward: () => void
 	onPaginateBackward: () => void
 	jumpToSection: (section: number) => void
+	/** Whether forward pagination is currently possible (e.g. not at the end of the book). */
+	canGoForward?: boolean
+	/** Whether backward pagination is currently possible (e.g. not at the start of the book). */
+	canGoBackward?: boolean
 	/** Navigate using a Readium locator (preferred). */
 	onGoToLocator: (locator: ReaderLocator) => void
 	/** Preview text for a locator-based bookmark. */

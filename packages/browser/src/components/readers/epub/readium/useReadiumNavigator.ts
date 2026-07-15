@@ -112,15 +112,14 @@ export function useReadiumNavigator({
 						syncNavButtons(navigatorRef.current)
 						onPositionChangedRef.current(locator)
 					},
-					tap: () => {
-						onToggleControlsRef.current?.()
-						return true
-					},
-					click: () => {
-						onToggleControlsRef.current?.()
-						return true
-					},
+					// Return false so Readium's own injectables keep handling edge-tap pagination
+					// inside the iframe; Stump's own tap zones (EpubNavigationControls) live
+					// outside the iframe and handle chrome-toggle taps independently.
+					tap: () => false,
+					click: () => false,
 					zoom: () => {},
+					// Not wired up yet — reserved for a future non-edge pointer gesture
+					// (e.g. long-press) that should toggle chrome from inside the iframe.
 					miscPointer: () => {},
 					scroll: () => {},
 					customEvent: () => {},

@@ -1,14 +1,29 @@
-import { Dialog, Heading, Popover } from '@stump/components'
+import { Dialog, Heading } from '@stump/components'
+import { ReadingMode } from '@stump/graphql'
 import { Paintbrush } from 'lucide-react'
 
+import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+
+import { useEpubReaderContext } from '../context'
+import ColumnCount from './ColumnCount'
 import ControlButton from './ControlButton'
 import FontFamily from './FontFamily'
 import FontSizeControl from './FontSizeControl'
 import LineHeightControl from './LineHeightControl'
+import PageMargins from './PageMargins'
 import ReadingDirection from './ReadingDirection'
-import ReadingMode from './ReadingMode'
+import ReadingModeControl from './ReadingMode'
 
 export default function ThemeControls() {
+	const {
+		readerMeta: { bookEntity: book },
+	} = useEpubReaderContext()
+	const {
+		bookPreferences: { readingMode },
+	} = useBookPreferences({ book })
+
+	const isContinuous = readingMode === ReadingMode.ContinuousVertical
+
 	return (
 		<Dialog>
 			<Dialog.Trigger asChild>
@@ -24,25 +39,10 @@ export default function ThemeControls() {
 				<FontSizeControl />
 				<LineHeightControl />
 				<ReadingDirection />
-				<ReadingMode />
+				<ReadingModeControl />
+				{!isContinuous && <ColumnCount />}
+				<PageMargins />
 			</Dialog.Content>
 		</Dialog>
-	)
-
-	return (
-		<Popover>
-			<Popover.Trigger asChild>
-				<ControlButton title="Theme and options">
-					<Paintbrush className="h-4 w-4" />
-				</ControlButton>
-			</Popover.Trigger>
-
-			<Popover.Content size="sm" align="end" className="gap-4 z-101 flex flex-col bg-muted">
-				<FontSizeControl />
-				<LineHeightControl />
-				<ReadingDirection />
-				<ReadingMode />
-			</Popover.Content>
-		</Popover>
 	)
 }

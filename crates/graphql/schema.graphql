@@ -2682,6 +2682,8 @@ with the highest `readthrough_number`
 """
 type ResumeReadingCursor {
 	readthroughNumber: Int!
+	"the id of the session this cursor is derived from"
+	sessionId: Int!
 	page: Int
 	locator: ReadiumLocator
 	percentageCompleted: Decimal

@@ -2,6 +2,7 @@ import { Dialog, Tabs, Text } from '@stump/components'
 import { List } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
+import AnnotationsList from '../annotations/AnnotationsList'
 import ControlButton from '../controls/ControlButton'
 import Bookmarks from './Bookmarks'
 import TableOfContents from './TableOfContents'
@@ -14,7 +15,9 @@ export default function LocationManager() {
 
 	const handleClose = () => setIsOpen(false)
 	const handleOpenChange = (nowOpen: boolean) => {
-		if (!nowOpen) {
+		if (nowOpen) {
+			setIsOpen(true)
+		} else {
 			handleClose()
 		}
 	}
@@ -29,7 +32,7 @@ export default function LocationManager() {
 		if (activeTab === 'contents') {
 			return <TableOfContents onLocationChanged={handleLocationChanged} />
 		} else if (activeTab === 'annotations') {
-			return null
+			return <AnnotationsList onLocationChanged={handleLocationChanged} />
 		} else if (activeTab === 'bookmarks') {
 			return <Bookmarks onLocationChanged={handleLocationChanged} />
 		}
@@ -41,7 +44,7 @@ export default function LocationManager() {
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<Dialog.Trigger asChild>
 				<ControlButton title="Location manager">
-					<List className="h-4 w-4" onClick={() => setIsOpen(true)} />
+					<List className="h-4 w-4" />
 				</ControlButton>
 			</Dialog.Trigger>
 			<Dialog.Content size="md">
@@ -60,7 +63,6 @@ export default function LocationManager() {
 								value="annotations"
 								asChild
 								onClick={() => handleTabChange('annotations')}
-								disabled
 							>
 								<Text className="cursor-pointer truncate">Annotations</Text>
 							</Tabs.Trigger>

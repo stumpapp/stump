@@ -5,6 +5,7 @@ import { createContext, useContext } from 'react'
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 
 import { noop } from '../../../utils/misc'
+import type { EpubAnnotation } from './annotations/types'
 
 export type { EpubSearchResponse, EpubSearchResult } from '@stump/sdk'
 
@@ -69,6 +70,7 @@ export type EpubReaderBookMeta = {
 	/** Legacy epub.js section lengths — unused by Readium. */
 	sectionLengths: { [key: number]: number }
 	bookmarks: Record<string, Bookmark>
+	annotations: EpubAnnotation[]
 }
 
 export type EpubReaderMeta = {

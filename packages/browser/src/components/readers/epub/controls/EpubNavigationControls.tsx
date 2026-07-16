@@ -95,7 +95,7 @@ export default function EpubNavigationControls({ children }: Props) {
 			{/* Desktop hover chevrons */}
 			<div
 				className={cx('inset-y-0 left-0 w-12 absolute z-20 hidden items-center', {
-					'md:flex': !isVerticalScrolling,
+					'md:flex': true,
 				})}
 			>
 				<ControlButton
@@ -109,7 +109,7 @@ export default function EpubNavigationControls({ children }: Props) {
 			</div>
 			<div
 				className={cx('inset-y-0 right-0 w-12 absolute z-20 hidden items-center justify-end', {
-					'md:flex': !isVerticalScrolling,
+					'md:flex': true,
 				})}
 			>
 				<ControlButton
@@ -123,39 +123,37 @@ export default function EpubNavigationControls({ children }: Props) {
 			</div>
 
 			{/*
-			  Mobile tap zones. The wrapper is pointer-events-none so any unclaimed space
-			  falls through to the content below; only the zone buttons themselves are
-			  pointer-events-auto. This intentionally avoids one large opaque div that would
-			  swallow every tap over the reading pane (links, text selection, etc.).
-			*/}
-			{!isVerticalScrolling && (
-				<div className="inset-0 md:hidden pointer-events-none absolute z-10 flex">
-					{tapSidesToNavigate && (
-						<button
-							type="button"
-							aria-label="Previous page"
-							disabled={!canNavigateLeft}
-							onClick={onBackwardNavigation}
-							className="pointer-events-auto h-full w-[15%] disabled:pointer-events-none"
-						/>
-					)}
+		  Mobile tap zones. The wrapper is pointer-events-none so any unclaimed space
+		  falls through to the content below; only the zone buttons themselves are
+		  pointer-events-auto. This intentionally avoids one large opaque div that would
+		  swallow every tap over the reading pane (links, text selection, etc.).
+		*/}
+			<div className="inset-0 md:hidden pointer-events-none absolute z-10 flex">
+				{tapSidesToNavigate && (
 					<button
 						type="button"
-						aria-label="Toggle reader controls"
-						onClick={toggleControls}
-						className="pointer-events-auto h-full flex-1"
+						aria-label="Previous page"
+						disabled={!canNavigateLeft}
+						onClick={onBackwardNavigation}
+						className="pointer-events-auto h-full w-[15%] disabled:pointer-events-none"
 					/>
-					{tapSidesToNavigate && (
-						<button
-							type="button"
-							aria-label="Next page"
-							disabled={!canNavigateRight}
-							onClick={onForwardNavigation}
-							className="pointer-events-auto h-full w-[15%] disabled:pointer-events-none"
-						/>
-					)}
-				</div>
-			)}
+				)}
+				<button
+					type="button"
+					aria-label="Toggle reader controls"
+					onClick={toggleControls}
+					className="pointer-events-auto h-full flex-1"
+				/>
+				{tapSidesToNavigate && (
+					<button
+						type="button"
+						aria-label="Next page"
+						disabled={!canNavigateRight}
+						onClick={onForwardNavigation}
+						className="pointer-events-auto h-full w-[15%] disabled:pointer-events-none"
+					/>
+				)}
+			</div>
 
 			{children}
 		</div>

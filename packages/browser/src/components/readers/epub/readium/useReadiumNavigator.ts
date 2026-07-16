@@ -1,12 +1,16 @@
 import {
+	type Decoration,
+	type DecorationObserver,
 	EpubNavigator,
 	type EpubNavigatorListeners,
 	EpubPreferences,
 	type IEpubPreferences,
 } from '@readium/navigator'
+import type { BasicTextSelection } from '@readium/navigator-html-injectables'
 import { Link, Locator, Publication } from '@readium/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { clearFramesSelection } from '../annotations/clearSelection'
 import {
 	attachFrameReloadGuard,
 	patchDurableIframeSrc,
@@ -27,6 +31,9 @@ type UseReadiumNavigatorArgs = {
 	preferences: IEpubPreferences
 	onPositionChanged: (locator: Locator) => void
 	onToggleControls?: () => void
+	onTextSelected?: (selection: BasicTextSelection) => void
+	onTextCleared?: () => void
+	onDecorationActivated?: DecorationObserver['onDecorationActivated']
 }
 
 export type ReadiumNavigatorApi = {
@@ -38,9 +45,18 @@ export type ReadiumNavigatorApi = {
 	canGoBackward: boolean
 	currentLocator: Locator | null
 	submitPreferences: (prefs: IEpubPreferences) => Promise<void>
+	/** Replace all decorations in a named group (e.g. annotations). */
+	applyDecorations: (decorations: Decoration[], group: string) => void
+	/**
+	 * Clear the active text selection inside Readium frames.
+	 * Uses `_cframes` (documented private API) because the public navigator
+	 * surface does not yet expose selection clearing.
+	 */
+	clearSelection: () => void
 }
 
 const MIN_VIEWPORT_PX = 1
+const ANNOTATIONS_GROUP = 'annotations'
 
 /**
  * Mount and lifecycle-manage an EpubNavigator inside a container element.
@@ -58,6 +74,9 @@ export function useReadiumNavigator({
 	preferences,
 	onPositionChanged,
 	onToggleControls,
+	onTextSelected,
+	onTextCleared,
+	onDecorationActivated,
 }: UseReadiumNavigatorArgs): {
 	loadState: LoadState
 	api: ReadiumNavigatorApi | null
@@ -68,10 +87,18 @@ export function useReadiumNavigator({
 	const navigatorRef = useRef<EpubNavigator | null>(null)
 	const onPositionChangedRef = useRef(onPositionChanged)
 	const onToggleControlsRef = useRef(onToggleControls)
+	const onTextSelectedRef = useRef(onTextSelected)
+	const onTextClearedRef = useRef(onTextCleared)
+	const onDecorationActivatedRef = useRef(onDecorationActivated)
 	const preferencesRef = useRef(preferences)
+	const decorationObserverRef = useRef<DecorationObserver | null>(null)
+	const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 	onPositionChangedRef.current = onPositionChanged
 	onToggleControlsRef.current = onToggleControls
+	onTextSelectedRef.current = onTextSelected
+	onTextClearedRef.current = onTextCleared
+	onDecorationActivatedRef.current = onDecorationActivated
 	preferencesRef.current = preferences
 
 	const syncNavButtons = useCallback((nav: EpubNavigator | null) => {
@@ -81,6 +108,47 @@ export function useReadiumNavigator({
 			canGoForward: nav.canGoForward,
 		})
 	}, [])
+
+	const clearSelection = useCallback(() => {
+		const nav = navigatorRef.current
+		if (!nav) return
+		// Private `_cframes` access is intentional and contract-tested — see
+		// annotations/__tests__/clearSelection.test.ts. Prefer a public API if
+		// Readium adds one.
+		clearFramesSelection(nav._cframes)
+	}, [])
+
+	const applyDecorations = useCallback((decorations: Decoration[], group: string) => {
+		navigatorRef.current?.applyDecorations(decorations, group)
+	}, [])
+
+	const handleSelectionChange = useCallback((e: Event) => {
+		if (clearTimerRef.current) {
+			clearTimeout(clearTimerRef.current)
+		}
+		clearTimerRef.current = setTimeout(() => {
+			const doc = e.target as Document
+			const sel = doc.getSelection()
+			if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+				onTextClearedRef.current?.()
+			}
+		}, 100)
+	}, [])
+
+	const attachSelectionClearListeners = useCallback(() => {
+		const nav = navigatorRef.current
+		if (!nav) return
+		for (const frame of nav._cframes) {
+			try {
+				const doc = frame?.iframe?.contentWindow?.document
+				if (!doc) continue
+				doc.removeEventListener('selectionchange', handleSelectionChange)
+				doc.addEventListener('selectionchange', handleSelectionChange)
+			} catch {
+				// Cross-origin or destroyed frame, ignore.
+			}
+		}
+	}, [handleSelectionChange])
 
 	useEffect(() => {
 		if (!publication || !positions.length || !containerRef.current) {
@@ -111,20 +179,22 @@ export function useReadiumNavigator({
 						setCurrentLocator(locator)
 						syncNavButtons(navigatorRef.current)
 						onPositionChangedRef.current(locator)
+						attachSelectionClearListeners()
 					},
-					// Return false so Readium's own injectables keep handling edge-tap pagination
-					// inside the iframe; Stump's own tap zones (EpubNavigationControls) live
-					// outside the iframe and handle chrome-toggle taps independently.
-					tap: () => false,
-					click: () => false,
+					// Return true to suppress Readium's built-in quarter-based tap
+					// navigation (left quarter = back, right quarter = forward).
+					// Stump's own controls handle all navigation; link clicks inside
+					// the iframe are handled before this listener fires.
+					tap: () => true,
+					click: () => true,
 					zoom: () => {},
-					// Not wired up yet — reserved for a future non-edge pointer gesture
-					// (e.g. long-press) that should toggle chrome from inside the iframe.
 					miscPointer: () => {},
 					scroll: () => {},
 					customEvent: () => {},
 					handleLocator: () => false,
-					textSelected: () => {},
+					textSelected: (selection) => {
+						onTextSelectedRef.current?.(selection)
+					},
 					contentProtection: () => {},
 					contextMenu: () => {},
 					peripheral: () => {},
@@ -171,12 +241,21 @@ export function useReadiumNavigator({
 					return
 				}
 
+				const observer: DecorationObserver = {
+					onDecorationActivated: (event) => {
+						return onDecorationActivatedRef.current?.(event) ?? false
+					},
+				}
+				decorationObserverRef.current = observer
+				navigator.registerDecorationObserver(ANNOTATIONS_GROUP, observer)
+
 				detachReloadGuard = attachFrameReloadGuard(navigator, container)
 
 				navigatorRef.current = navigator
 				setCurrentLocator(navigator.currentLocator)
 				syncNavButtons(navigator)
 				setLoadState({ status: 'ready' })
+				attachSelectionClearListeners()
 			} catch (error) {
 				console.error('[useReadiumNavigator] open failed', error)
 				if (!cancelled) {
@@ -192,11 +271,24 @@ export function useReadiumNavigator({
 
 		return () => {
 			cancelled = true
+			if (clearTimerRef.current) {
+				clearTimeout(clearTimerRef.current)
+				clearTimerRef.current = null
+			}
 			detachReloadGuard?.()
 			detachReloadGuard = null
+			const current = navigator
+			const observer = decorationObserverRef.current
+			if (current && observer) {
+				try {
+					current.unregisterDecorationObserver(observer)
+				} catch {
+					// Navigator may already be tearing down.
+				}
+			}
+			decorationObserverRef.current = null
 			navigatorRef.current = null
 			setCurrentLocator(null)
-			const current = navigator
 			if (current) {
 				void current.destroy().catch((err) => {
 					console.error('[useReadiumNavigator] destroy failed', err)
@@ -235,6 +327,8 @@ export function useReadiumNavigator({
 					submitPreferences: async (prefs: IEpubPreferences) => {
 						await navigatorRef.current?.submitPreferences(new EpubPreferences(prefs))
 					},
+					applyDecorations,
+					clearSelection,
 				}
 			: null
 

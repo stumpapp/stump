@@ -1,12 +1,12 @@
+import type { DecorationActivationEvent } from '@readium/navigator'
+import type { BasicTextSelection } from '@readium/navigator-html-injectables'
 import { Link, Locator } from '@readium/shared'
 import { queryClient, useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { cx } from '@stump/components'
 import {
 	Bookmark,
 	EpubProgressInput,
 	graphql,
 	ReadingDirection,
-	ReadingMode,
 	type ReadiumLocator,
 } from '@stump/graphql'
 import type { EpubSearchResponse } from '@stump/sdk'
@@ -19,11 +19,21 @@ import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useBookTimer } from '@/stores/reader'
 
+import AnnotationDialog from '../annotations/AnnotationDialog'
+import { annotationsToDecorations } from '../annotations/decorations'
+import { enrichSelectionLocator, extractSelectionContext } from '../annotations/locator'
+import SelectionToolbar from '../annotations/SelectionToolbar'
+import type { AnnotationSelection, EpubAnnotation } from '../annotations/types'
+import { ANNOTATION_DECORATION_GROUP } from '../annotations/types'
+import {
+	graphqlAnnotationToEpubAnnotation,
+	useEpubAnnotations,
+} from '../annotations/useEpubAnnotations'
 import { EpubContent, type ReaderLocator } from '../context'
 import EpubReaderContainer from '../EpubReaderContainer'
 import { hrefsMatch, resolveInitialLocator, toolkitLocatorToInput } from './locator'
 import { type OpenedPublication, openStumpPublication } from './openPublication'
-import { bookPreferencesToEpubPreferences, resolveEffectiveColumnCount } from './preferences'
+import { bookPreferencesToEpubPreferences } from './preferences'
 import { useReadiumNavigator } from './useReadiumNavigator'
 
 type Props = {
@@ -43,6 +53,33 @@ const query = graphql(`
 				mediaId
 				previewContent
 				createdAt
+				locator {
+					chapterTitle
+					href
+					title
+					type
+					locations {
+						fragments
+						progression
+						position
+						totalProgression
+						cssSelector
+						partialCfi
+					}
+					text {
+						after
+						before
+						highlight
+					}
+				}
+			}
+			annotations {
+				id
+				mediaId
+				userId
+				annotationText
+				createdAt
+				updatedAt
 				locator {
 					chapterTitle
 					href
@@ -176,11 +213,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		observer.observe(el)
 		return () => observer.disconnect()
 	}, [])
-
-	const isContinuous = readingMode === ReadingMode.ContinuousVertical
-	const effectiveColumnCount = isContinuous
-		? null
-		: resolveEffectiveColumnCount(columnCount, stageWidth)
 
 	const timer = useBookTimer(ebook.media?.id || '', {
 		initial: ebook.media?.readProgress?.elapsedSeconds,
@@ -376,6 +408,87 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	const opened = openState.status === 'ready' ? openState.opened : null
 	const initialLocator = openState.status === 'ready' ? openState.initialLocator : undefined
 
+	const toc = useMemo(() => {
+		const fromManifest = opened?.publication.manifest.toc?.items
+		if (fromManifest?.length) {
+			return linksToToc(fromManifest)
+		}
+		return parseToc(ebook.toc)
+	}, [opened, ebook.toc])
+
+	const initialAnnotations = useMemo<EpubAnnotation[]>(
+		() => (ebook.annotations ?? []).map(graphqlAnnotationToEpubAnnotation),
+		[ebook.annotations],
+	)
+
+	const {
+		annotations,
+		createAnnotation,
+		updateAnnotation,
+		deleteAnnotation,
+		isPending: isAnnotationMutationPending,
+	} = useEpubAnnotations({ mediaId: id, isIncognito, initialAnnotations })
+
+	const [selection, setSelection] = useState<AnnotationSelection | null>(null)
+	const [dialogState, setDialogState] = useState<
+		{ mode: 'create' } | { mode: 'edit'; annotationId: string } | null
+	>(null)
+
+	const onTextSelected = useCallback(
+		(sel: BasicTextSelection) => {
+			if (!sel.text || !containerRef.current) return
+
+			// Capture surrounding text context immediately, before anything else
+			// can modify the DOM selection. Readium's web navigator only populates
+			// text.highlight — without before/after, matchQuote() always anchors
+			// to the first occurrence of repeated text in the chapter.
+			const context = extractSelectionContext(containerRef.current, sel.targetFrameSrc)
+
+			const readingOrderHrefs =
+				opened?.publication.manifest.readingOrder?.items.map((link) => link.href) ?? []
+			const chapterTitleFromToc = findChapterTitle(sel.locator?.href ?? '', toc)
+			const locator = enrichSelectionLocator({
+				selectionLocator: sel.locator ?? null,
+				selectedText: sel.text,
+				positions: opened?.positions ?? EMPTY_POSITIONS,
+				readingOrderHrefs,
+				chapterTitleFromToc,
+			})
+			if (!locator) return
+
+			if (context) {
+				locator.text = {
+					...locator.text,
+					before: context.before ?? locator.text?.before,
+					after: context.after ?? locator.text?.after,
+				}
+			}
+
+			const containerRect = containerRef.current.getBoundingClientRect()
+			setSelection({
+				rect: {
+					x: containerRect.left + sel.x,
+					y: containerRect.top + sel.y,
+					width: sel.width,
+					height: sel.height,
+				},
+				locator,
+				text: sel.text,
+			})
+		},
+		[opened, toc],
+	)
+
+	const onDecorationActivated = useCallback((event: DecorationActivationEvent): boolean => {
+		if (event.group !== ANNOTATION_DECORATION_GROUP) return false
+		setDialogState({ mode: 'edit', annotationId: event.decoration.id })
+		return true
+	}, [])
+
+	const dismissToolbar = useCallback(() => {
+		setSelection(null)
+	}, [])
+
 	const { loadState, api } = useReadiumNavigator({
 		containerRef,
 		publication: opened?.publication ?? null,
@@ -384,7 +497,75 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		allowedDomains: opened?.allowedDomains ?? EMPTY_DOMAINS,
 		preferences,
 		onPositionChanged: handlePositionChanged,
+		onTextSelected,
+		onTextCleared: dismissToolbar,
+		onDecorationActivated,
 	})
+
+	useEffect(() => {
+		api?.applyDecorations(annotationsToDecorations(annotations), ANNOTATION_DECORATION_GROUP)
+	}, [api, annotations])
+
+	// A navigator position change means the reader moved away from wherever the
+	// selection toolbar was anchored, so drop it rather than show a stale rect.
+	useEffect(() => {
+		setSelection(null)
+	}, [currentLocator])
+
+	const clearSelectionState = useCallback(() => {
+		setSelection(null)
+		api?.clearSelection()
+	}, [api])
+
+	const handleHighlightSelection = useCallback(() => {
+		if (!selection) return
+		void createAnnotation(selection.locator)
+		clearSelectionState()
+	}, [selection, createAnnotation, clearSelectionState])
+
+	const handleAddNoteFromSelection = useCallback(() => {
+		if (!selection) return
+		setDialogState({ mode: 'create' })
+	}, [selection])
+
+	const activeAnnotation = useMemo(
+		() =>
+			dialogState?.mode === 'edit'
+				? (annotations.find((annotation) => annotation.id === dialogState.annotationId) ?? null)
+				: null,
+		[dialogState, annotations],
+	)
+
+	const handleCloseDialog = useCallback(() => {
+		setDialogState(null)
+	}, [])
+
+	const handleSaveAnnotation = useCallback(
+		(noteText: string) => {
+			if (dialogState?.mode === 'create' && selection) {
+				void createAnnotation(selection.locator, noteText || undefined)
+				clearSelectionState()
+			} else if (dialogState?.mode === 'edit' && activeAnnotation) {
+				void updateAnnotation(activeAnnotation.id, noteText || null)
+			}
+			setDialogState(null)
+		},
+		[
+			dialogState,
+			selection,
+			activeAnnotation,
+			createAnnotation,
+			updateAnnotation,
+			clearSelectionState,
+		],
+	)
+
+	const handleDeleteAnnotation = useCallback(() => {
+		if (activeAnnotation) {
+			void deleteAnnotation(activeAnnotation.id)
+		}
+		setDialogState(null)
+	}, [activeAnnotation, deleteAnnotation])
 
 	const existingBookmarks = useMemo(() => {
 		const map: Record<string, Bookmark> = {}
@@ -396,14 +577,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		}
 		return map
 	}, [ebook.bookmarks])
-
-	const toc = useMemo(() => {
-		const fromManifest = opened?.publication.manifest.toc?.items
-		if (fromManifest?.length) {
-			return linksToToc(fromManifest)
-		}
-		return parseToc(ebook.toc)
-	}, [opened, ebook.toc])
 
 	const chapterMeta = useMemo(() => {
 		const chapterTitle = findChapterTitle(currentLocator?.href ?? '', toc) ?? currentLocator?.title
@@ -596,6 +769,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				bookEntity: ebook.media,
 				bookMeta: {
 					bookmarks: existingBookmarks,
+					annotations,
 					chapter: chapterMeta,
 					toc,
 					sectionLengths: {},
@@ -625,19 +799,19 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				className="min-h-0 md:px-12 relative h-full w-full flex-1 self-stretch overflow-hidden"
 			>
 				{/*
-				  Readium observes *this* element (container.parentElement) and sets the
-				  inner host's width. Keep it CSS-sized and stable — AutoSizer 0×0 flashes +
-				  React size state fight that ResizeObserver path. Centered with a max-width
-				  once paginated, so a single/double column spread doesn't stretch edge to
-				  edge on wide screens.
-				*/}
+			  Readium observes *this* element (container.parentElement) and sets the
+			  inner host's width. Keep it CSS-sized and stable — AutoSizer 0×0 flashes +
+			  React size state fight that ResizeObserver path. Readium handles column
+			  width and pagination internally via ReadiumCSS.paginate(), so no
+			  max-width constraint is needed here. The epub background color is set on
+			  this parent so it fills full width even in paged mode, where Readium
+			  narrows the container to the column reading width.
+			*/}
 				<div
-					className={cx('relative mx-auto h-full w-full overflow-hidden', {
-						'max-w-3xl': effectiveColumnCount === 1,
-						'max-w-5xl': effectiveColumnCount === 2,
-					})}
+					className="relative mx-auto h-full w-full overflow-hidden"
+					style={{ backgroundColor: isDarkVariant ? '#161719' : '#ffffff' }}
 				>
-					<div ref={containerRef} className="relative h-full w-full overflow-hidden" />
+					<div ref={containerRef} className="relative mx-auto h-full w-full overflow-hidden" />
 				</div>
 
 				{isLoading && (
@@ -652,6 +826,27 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 					</div>
 				)}
 			</div>
+
+			{selection && !isIncognito && (
+				<SelectionToolbar
+					rect={selection.rect}
+					onHighlight={handleHighlightSelection}
+					onAddNote={handleAddNoteFromSelection}
+				/>
+			)}
+
+			<AnnotationDialog
+				open={dialogState !== null}
+				mode={dialogState?.mode ?? 'create'}
+				quotedText={
+					dialogState?.mode === 'edit' ? activeAnnotation?.locator.text?.highlight : selection?.text
+				}
+				initialNote={dialogState?.mode === 'edit' ? activeAnnotation?.annotationText : undefined}
+				isPending={isAnnotationMutationPending}
+				onOpenChange={(open) => !open && handleCloseDialog()}
+				onSave={handleSaveAnnotation}
+				onDelete={dialogState?.mode === 'edit' ? handleDeleteAnnotation : undefined}
+			/>
 		</EpubReaderContainer>
 	)
 }

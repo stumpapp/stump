@@ -5915,6 +5915,27 @@ export type UpdateEpubProgressMutationVariables = Exact<{
 
 export type UpdateEpubProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
 
+export type CreateEpubAnnotationMutationVariables = Exact<{
+  input: CreateAnnotationInput;
+}>;
+
+
+export type CreateEpubAnnotationMutation = { __typename?: 'Mutation', createAnnotation: { __typename?: 'MediaAnnotation', id: string, mediaId: string, userId: string, annotationText?: string | null, createdAt: any, updatedAt: any, locator: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } } };
+
+export type UpdateEpubAnnotationMutationVariables = Exact<{
+  input: UpdateAnnotationInput;
+}>;
+
+
+export type UpdateEpubAnnotationMutation = { __typename?: 'Mutation', updateAnnotation: { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, updatedAt: any } };
+
+export type DeleteEpubAnnotationMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type DeleteEpubAnnotationMutation = { __typename?: 'Mutation', deleteAnnotation: { __typename?: 'MediaAnnotation', id: string } };
+
 export type CreateBookmarkMutationVariables = Exact<{
   input: BookmarkInput;
 }>;
@@ -5934,7 +5955,7 @@ export type ReadiumWebReaderQueryVariables = Exact<{
 }>;
 
 
-export type ReadiumWebReaderQuery = { __typename?: 'Query', epubById: { __typename?: 'Epub', mediaId: string, toc: Array<string>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string, previewContent?: string | null, createdAt: any, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } | null }>, media: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds: number, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } } };
+export type ReadiumWebReaderQuery = { __typename?: 'Query', epubById: { __typename?: 'Epub', mediaId: string, toc: Array<string>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string, previewContent?: string | null, createdAt: any, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } | null }>, annotations: Array<{ __typename?: 'MediaAnnotationModel', id: string, mediaId: string, userId: string, annotationText?: string | null, createdAt: any, updatedAt: any, locator: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } }>, media: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds: number, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null, text?: { __typename?: 'ReadiumText', after?: string | null, before?: string | null, highlight?: string | null } | null } | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } } };
 
 export type UpdateReadiumEpubProgressMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11278,6 +11299,53 @@ export const UpdateEpubProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateEpubProgressMutation, UpdateEpubProgressMutationVariables>;
+export const CreateEpubAnnotationDocument = new TypedDocumentString(`
+    mutation CreateEpubAnnotation($input: CreateAnnotationInput!) {
+  createAnnotation(input: $input) {
+    id
+    mediaId
+    userId
+    annotationText
+    createdAt
+    updatedAt
+    locator {
+      chapterTitle
+      href
+      title
+      type
+      locations {
+        fragments
+        progression
+        position
+        totalProgression
+        cssSelector
+        partialCfi
+      }
+      text {
+        after
+        before
+        highlight
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CreateEpubAnnotationMutation, CreateEpubAnnotationMutationVariables>;
+export const UpdateEpubAnnotationDocument = new TypedDocumentString(`
+    mutation UpdateEpubAnnotation($input: UpdateAnnotationInput!) {
+  updateAnnotation(input: $input) {
+    id
+    annotationText
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateEpubAnnotationMutation, UpdateEpubAnnotationMutationVariables>;
+export const DeleteEpubAnnotationDocument = new TypedDocumentString(`
+    mutation DeleteEpubAnnotation($id: String!) {
+  deleteAnnotation(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteEpubAnnotationMutation, DeleteEpubAnnotationMutationVariables>;
 export const CreateBookmarkDocument = new TypedDocumentString(`
     mutation CreateBookmark($input: BookmarkInput!) {
   createBookmark(input: $input) {
@@ -11304,6 +11372,33 @@ export const ReadiumWebReaderDocument = new TypedDocumentString(`
       mediaId
       previewContent
       createdAt
+      locator {
+        chapterTitle
+        href
+        title
+        type
+        locations {
+          fragments
+          progression
+          position
+          totalProgression
+          cssSelector
+          partialCfi
+        }
+        text {
+          after
+          before
+          highlight
+        }
+      }
+    }
+    annotations {
+      id
+      mediaId
+      userId
+      annotationText
+      createdAt
+      updatedAt
       locator {
         chapterTitle
         href

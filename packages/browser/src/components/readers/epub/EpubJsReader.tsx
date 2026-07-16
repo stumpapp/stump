@@ -874,6 +874,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 					},
 					toc: toc,
 					sectionLengths: sectionsLengths?.lengths ?? {},
+					annotations: [],
 				},
 				progress: ebook.media.readProgress?.percentageCompleted || null,
 			}}

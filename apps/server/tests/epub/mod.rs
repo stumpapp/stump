@@ -1,1 +1,2 @@
+mod search;
 mod streaming;

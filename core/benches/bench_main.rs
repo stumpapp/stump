@@ -4,4 +4,5 @@ mod benchmarks;
 
 criterion_main! {
 	benchmarks::library_scanner::benches,
+	benchmarks::epub_search::benches,
 }

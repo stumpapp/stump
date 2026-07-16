@@ -1,42 +1,209 @@
 import { cn, Command, Text } from '@stump/components'
-import { Search } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import type { EpubSearchResult } from '@stump/sdk'
+import { Loader2, Search } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Spinner from '@/components/Spinner'
 
 import { SpineSearchResult, useEpubReaderContext } from '../context'
+import { searchResultToReaderLocator } from '../readium/locator'
 import ControlButton from './ControlButton'
+
+type ResultGroup = {
+	heading: string
+	items: EpubSearchResult[]
+}
+
+/**
+ * Groups server search results by chapter title (falling back to the locator title, then
+ * spine position), preserving the order in which each group first appears.
+ */
+export function groupByChapter(results: EpubSearchResult[]): ResultGroup[] {
+	const order: string[] = []
+	const groups = new Map<string, EpubSearchResult[]>()
+
+	for (const result of results) {
+		const heading =
+			result.locator.chapterTitle?.trim() ||
+			result.locator.title?.trim() ||
+			`Section ${result.spineIndex + 1}`
+
+		const existing = groups.get(heading)
+		if (existing) {
+			existing.push(result)
+		} else {
+			groups.set(heading, [result])
+			order.push(heading)
+		}
+	}
+
+	return order.map((heading) => ({ heading, items: groups.get(heading) ?? [] }))
+}
+
+/**
+ * Highlights occurrences of `query` within `excerpt` using case-insensitive substring
+ * matching — deliberately not a `RegExp`, since the query is arbitrary user input that may
+ * contain characters with special meaning to `RegExp` (e.g. `(`, `*`, `\`).
+ */
+export function highlightExcerpt(excerpt: string, query: string): React.ReactNode[] {
+	if (!query) return [excerpt]
+
+	const needle = query.toLowerCase()
+	const haystack = excerpt.toLowerCase()
+	const parts: React.ReactNode[] = []
+
+	let cursor = 0
+	let matchIndex = haystack.indexOf(needle, cursor)
+	let key = 0
+
+	while (matchIndex !== -1) {
+		if (matchIndex > cursor) {
+			parts.push(excerpt.slice(cursor, matchIndex))
+		}
+		parts.push(
+			<span key={key++} className="bg-yellow-400 text-gray-900">
+				{excerpt.slice(matchIndex, matchIndex + needle.length)}
+			</span>,
+		)
+		cursor = matchIndex + needle.length
+		matchIndex = haystack.indexOf(needle, cursor)
+	}
+
+	if (cursor < excerpt.length) {
+		parts.push(excerpt.slice(cursor))
+	}
+
+	return parts
+}
 
 export default function SearchCommand() {
 	const {
 		readerMeta,
-		controls: { searchEntireBook, onGoToCfi },
+		controls: { searchBook, searchEntireBook, onGoToLocator, onGoToCfi },
 	} = useEpubReaderContext()
 	const { toc } = readerMeta.bookMeta || {}
 
-	const [isSearching, setIsSearching] = useState(false)
-	const [results, setResults] = useState<SpineSearchResult[]>()
+	// The server path is strictly preferred; the legacy epub.js path is only used as a
+	// fallback until Milestone 5 removes it.
+	const usingServerSearch = !!searchBook
 
 	const [query, setQuery] = useState('')
 	const [open, setOpen] = useState(false)
 
-	/**
-	 * A callback to search the entire book for the given query. This will
-	 * return an array of arrays, where each array is a group of results
-	 * from a single spine item.
-	 */
-	const doSearch = useCallback(async () => {
-		if (!query || !searchEntireBook) return
+	const [isSearching, setIsSearching] = useState(false)
+	const [isLoadingMore, setIsLoadingMore] = useState(false)
+	const [error, setError] = useState<string | null>(null)
+	const [hasSearched, setHasSearched] = useState(false)
 
-		setIsSearching(true)
-		const results = await searchEntireBook(query)
-		setResults(results)
-		setIsSearching(false)
-	}, [searchEntireBook, query])
+	const [serverResults, setServerResults] = useState<EpubSearchResult[]>([])
+	const [nextCursor, setNextCursor] = useState<string | undefined>(undefined)
 
-	/**
-	 * A callback to go to a specific CFI in the book.
-	 */
+	const [legacyResults, setLegacyResults] = useState<SpineSearchResult[]>()
+
+	// Guards against a slow, superseded request overwriting the results of a newer one.
+	const requestIdRef = useRef(0)
+	const abortControllerRef = useRef<AbortController | null>(null)
+
+	const abortInFlightRequest = useCallback(() => {
+		abortControllerRef.current?.abort()
+		abortControllerRef.current = null
+	}, [])
+
+	const resetResults = useCallback(() => {
+		setServerResults([])
+		setLegacyResults(undefined)
+		setNextCursor(undefined)
+		setHasSearched(false)
+		setError(null)
+	}, [])
+
+	const runServerSearch = useCallback(
+		async (searchQuery: string, opts?: { cursor?: string }) => {
+			if (!searchBook) return
+
+			abortInFlightRequest()
+			const controller = new AbortController()
+			abortControllerRef.current = controller
+			const requestId = ++requestIdRef.current
+
+			const isLoadMore = !!opts?.cursor
+			if (isLoadMore) {
+				setIsLoadingMore(true)
+			} else {
+				setIsSearching(true)
+				setError(null)
+			}
+
+			try {
+				const response = await searchBook(searchQuery, {
+					cursor: opts?.cursor,
+					signal: controller.signal,
+				})
+				// A newer request has since started — ignore this now-stale response.
+				if (requestId !== requestIdRef.current) return
+
+				setServerResults((prev) => (isLoadMore ? [...prev, ...response.results] : response.results))
+				setNextCursor(response.nextCursor ?? undefined)
+				setHasSearched(true)
+			} catch (err) {
+				if (controller.signal.aborted || requestId !== requestIdRef.current) return
+				console.error('[SearchCommand] search failed', err)
+				setError('Search failed. Please try again.')
+			} finally {
+				if (requestId === requestIdRef.current) {
+					setIsSearching(false)
+					setIsLoadingMore(false)
+				}
+			}
+		},
+		[searchBook, abortInFlightRequest],
+	)
+
+	const runLegacySearch = useCallback(
+		async (searchQuery: string) => {
+			if (!searchEntireBook) return
+
+			setIsSearching(true)
+			setError(null)
+			try {
+				const results = await searchEntireBook(searchQuery)
+				setLegacyResults(results)
+				setHasSearched(true)
+			} catch (err) {
+				console.error('[SearchCommand] legacy search failed', err)
+				setError('Search failed. Please try again.')
+			} finally {
+				setIsSearching(false)
+			}
+		},
+		[searchEntireBook],
+	)
+
+	const doSearch = useCallback(() => {
+		const trimmed = query.trim()
+		if (!trimmed) return
+
+		if (usingServerSearch) {
+			void runServerSearch(trimmed)
+		} else {
+			void runLegacySearch(trimmed)
+		}
+	}, [query, usingServerSearch, runServerSearch, runLegacySearch])
+
+	const loadMore = useCallback(() => {
+		const trimmed = query.trim()
+		if (!trimmed || !nextCursor || isLoadingMore) return
+		void runServerSearch(trimmed, { cursor: nextCursor })
+	}, [query, nextCursor, isLoadingMore, runServerSearch])
+
+	const handleGoToResult = useCallback(
+		(result: EpubSearchResult) => {
+			onGoToLocator(searchResultToReaderLocator(result))
+			setOpen(false)
+		},
+		[onGoToLocator],
+	)
+
 	const handleGoToCfi = useCallback(
 		(cfi: string) => {
 			onGoToCfi?.(cfi)
@@ -44,6 +211,26 @@ export default function SearchCommand() {
 		},
 		[onGoToCfi],
 	)
+
+	// Abort any in-flight request and drop stale results once the query is cleared.
+	useEffect(() => {
+		if (!query.trim()) {
+			abortInFlightRequest()
+			resetResults()
+		}
+	}, [query, abortInFlightRequest, resetResults])
+
+	// Abort on close so a response for a closed dialog never lands.
+	useEffect(() => {
+		if (!open) {
+			abortInFlightRequest()
+		}
+	}, [open, abortInFlightRequest])
+
+	// Abort on unmount.
+	useEffect(() => {
+		return () => abortInFlightRequest()
+	}, [abortInFlightRequest])
 
 	/**
 	 * An effect to handle keyboard shortcuts for opening and closing the search dialog.
@@ -59,6 +246,8 @@ export default function SearchCommand() {
 			} else if (e.key === 'Escape') {
 				setOpen(false)
 			} else if (e.key === 'Enter' && open) {
+				// The search input handles Enter itself; skip to avoid double submits.
+				if ((e.target as HTMLElement | null)?.tagName === 'INPUT') return
 				doSearch()
 			}
 		}
@@ -66,12 +255,6 @@ export default function SearchCommand() {
 		document.addEventListener('keydown', onKeyDown)
 		return () => document.removeEventListener('keydown', onKeyDown)
 	}, [open, doSearch])
-
-	useEffect(() => {
-		if (!query.length) {
-			setResults(undefined)
-		}
-	}, [query])
 
 	const getSpineTitle = useCallback(
 		(idx: number) => {
@@ -86,41 +269,76 @@ export default function SearchCommand() {
 		[toc],
 	)
 
-	const renderResults = () => {
-		if (!results) {
-			return null
-		} else if (!results.length) {
-			return <Command.Empty>No results found.</Command.Empty>
-		} else {
-			return results.map(({ spineIndex, results }, idx) => (
-				<Command.Group key={`group-${idx}`} heading={getSpineTitle(spineIndex)}>
-					{results.map((result) => (
-						<Command.Item
-							key={result.cfi}
-							onDoubleClick={() => handleGoToCfi(result.cfi)}
-							className="space-y-1 flex flex-col"
-						>
-							<p className="w-full">
-								{result.excerpt.split(new RegExp(`(${query})`, 'gi')).map((part, idx) => {
-									if (part.toLowerCase() === query.toLowerCase()) {
-										return (
-											<span key={idx} className="bg-yellow-400 text-gray-900">
-												{part}
-											</span>
-										)
-									} else {
-										return part
-									}
-								})}
-							</p>
-							<Text size="xs" variant="muted" className="w-full" title={result.cfi}>
-								{result.cfi.slice(0, 12)}...{result.cfi.slice(-12)}
-							</Text>
-						</Command.Item>
-					))}
-				</Command.Group>
-			))
-		}
+	const serverGroups = useMemo(() => groupByChapter(serverResults), [serverResults])
+
+	const renderServerResults = () => {
+		if (error) return <Command.Empty>{error}</Command.Empty>
+		if (!serverResults.length) return <Command.Empty>No results found.</Command.Empty>
+
+		return (
+			<>
+				{serverGroups.map((group) => (
+					<Command.Group key={group.heading} heading={group.heading}>
+						{group.items.map((result, idx) => (
+							<Command.Item
+								key={`${result.locator.href}:${result.locator.locations.position}:${idx}`}
+								value={`${result.locator.href}:${result.locator.locations.position}:${idx}`}
+								onSelect={() => handleGoToResult(result)}
+								className="space-y-1 flex flex-col"
+							>
+								<p className="w-full">
+									{result.locator.text.before}
+									<span className="bg-yellow-400 text-gray-900">
+										{result.locator.text.highlight}
+									</span>
+									{result.locator.text.after}
+								</p>
+							</Command.Item>
+						))}
+					</Command.Group>
+				))}
+				{nextCursor && (
+					<Command.Item
+						value="__load-more__"
+						disabled={isLoadingMore}
+						onSelect={loadMore}
+						className="justify-center text-center text-muted-foreground"
+					>
+						{isLoadingMore ? (
+							<span className="gap-x-2 flex items-center">
+								<Loader2 className="h-3 w-3 animate-spin" />
+								Loading more…
+							</span>
+						) : (
+							'Load more results'
+						)}
+					</Command.Item>
+				)}
+			</>
+		)
+	}
+
+	const renderLegacyResults = () => {
+		if (error) return <Command.Empty>{error}</Command.Empty>
+		if (!legacyResults?.length) return <Command.Empty>No results found.</Command.Empty>
+
+		return legacyResults.map(({ spineIndex, results }, idx) => (
+			<Command.Group key={`group-${idx}`} heading={getSpineTitle(spineIndex)}>
+				{results.map((result) => (
+					<Command.Item
+						key={result.cfi}
+						value={result.cfi}
+						onSelect={() => handleGoToCfi(result.cfi)}
+						className="space-y-1 flex flex-col"
+					>
+						<p className="w-full">{highlightExcerpt(result.excerpt, query)}</p>
+						<Text size="xs" variant="muted" className="w-full" title={result.cfi}>
+							{result.cfi.slice(0, 12)}...{result.cfi.slice(-12)}
+						</Text>
+					</Command.Item>
+				))}
+			</Command.Group>
+		))
 	}
 
 	const renderContent = () => {
@@ -130,11 +348,15 @@ export default function SearchCommand() {
 					<Spinner />
 				</div>
 			)
-		} else if (results) {
-			return renderResults()
-		} else {
+		} else if (!hasSearched) {
 			return null
 		}
+
+		return usingServerSearch ? renderServerResults() : renderLegacyResults()
+	}
+
+	if (!searchBook && !searchEntireBook) {
+		return null
 	}
 
 	return (
@@ -146,12 +368,19 @@ export default function SearchCommand() {
 				<div className="px-4 flex items-center border-b border-b-border">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					<input
-						placeholder="Enter a basic query to search for"
+						placeholder="Enter a query and press enter to search"
 						className={cn(
 							'h-11 py-3 text-sm flex w-full rounded-md bg-transparent text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
 						)}
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								e.preventDefault()
+								e.stopPropagation()
+								doSearch()
+							}
+						}}
 					/>
 				</div>
 

@@ -18,6 +18,7 @@ type Props = {
 		| 'getLocatorPreviewText'
 		| 'getCfiPreviewText'
 		| 'searchEntireBook'
+		| 'searchBook'
 		| 'onGoToCfi'
 		| 'canGoForward'
 		| 'canGoBackward'

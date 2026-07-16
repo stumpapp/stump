@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use axum::{
-	extract::{Path, State},
+	extract::{Path, Query, State},
 	http::header,
 	middleware,
 	response::IntoResponse,
@@ -11,7 +11,12 @@ use axum::{
 use graphql::data::AuthContext;
 use models::entity::{media, server_config, user::AuthUser};
 use sea_orm::prelude::*;
-use stump_core::filesystem::media::{EpubProcessor, ReadiumManifestGenerator};
+use serde::Deserialize;
+use stump_core::filesystem::media::{
+	search_epub, EpubProcessor, EpubSearchError, EpubSearchOptions,
+	ReadiumManifestGenerator, EPUB_SEARCH_DEFAULT_LIMIT,
+};
+use tokio_util::sync::CancellationToken;
 
 use crate::{
 	config::state::AppState,
@@ -40,6 +45,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				// Static + splat routes before `/{root}/{resource}` so they are not swallowed.
 				.route("/manifest.json", get(get_epub_manifest))
 				.route("/positions.json", get(get_epub_positions))
+				.route("/search", get(get_epub_search))
 				.route("/resource/{*path}", get(get_epub_resource))
 				.route("/{root}/{resource}", get(get_epub_meta)),
 		)
@@ -168,6 +174,80 @@ async fn get_epub_positions(
 		)],
 		Json(positions),
 	))
+}
+
+#[derive(Debug, Deserialize)]
+struct EpubSearchQueryParams {
+	q: String,
+	#[serde(default = "default_search_limit")]
+	limit: usize,
+	cursor: Option<String>,
+}
+
+fn default_search_limit() -> usize {
+	EPUB_SEARCH_DEFAULT_LIMIT
+}
+
+/// Bounded whole-book search over EPUB spine XHTML.
+///
+/// Returns plain-text excerpts and Readium locators. Does not require
+/// `DownloadFile` — the scan never ships the archive to the client.
+async fn get_epub_search(
+	Path(id): Path<String>,
+	Query(params): Query<EpubSearchQueryParams>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<AuthContext>,
+	HostExtractor(host_details): HostExtractor,
+) -> APIResult<impl IntoResponse> {
+	let AuthContext { user, .. } = req;
+	let ebook = find_ebook_for_user(ctx.conn.as_ref(), &user, &id).await?;
+	let base_url = epub_service_base_url(ctx.conn.as_ref(), &host_details, &id).await?;
+
+	let cursor = match params.cursor.as_deref() {
+		Some(raw) if !raw.is_empty() => {
+			Some(EpubSearchOptions::decode_cursor(raw).map_err(search_error_to_api)?)
+		},
+		_ => None,
+	};
+
+	let options = EpubSearchOptions::new(params.q)
+		.with_limit(params.limit)
+		.with_cursor(cursor);
+	options.validate().map_err(search_error_to_api)?;
+
+	let cancel = CancellationToken::new();
+	let cancel_for_task = cancel.clone();
+	let path = ebook.path.clone();
+
+	// Dropping the request future cancels the token so the blocking scan can stop.
+	struct CancelOnDrop(CancellationToken);
+	impl Drop for CancelOnDrop {
+		fn drop(&mut self) {
+			self.0.cancel();
+		}
+	}
+	let _guard = CancelOnDrop(cancel);
+
+	let response = tokio::task::spawn_blocking(move || {
+		search_epub(&path, &base_url, options, &cancel_for_task)
+	})
+	.await
+	.map_err(|e| APIError::InternalServerError(e.to_string()))?
+	.map_err(search_error_to_api)?;
+
+	Ok(Json(response))
+}
+
+fn search_error_to_api(error: EpubSearchError) -> APIError {
+	match error {
+		EpubSearchError::InvalidQueryLength { .. }
+		| EpubSearchError::InvalidCursor
+		| EpubSearchError::InvalidLimit { .. } => APIError::BadRequest(error.to_string()),
+		EpubSearchError::Cancelled => {
+			APIError::BadRequest("Search cancelled".to_string())
+		},
+		EpubSearchError::File(err) => APIError::from(err),
+	}
 }
 
 /// Get a resource from an epub file by package-relative path.

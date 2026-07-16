@@ -159,87 +159,18 @@ impl ReadiumManifestGenerator {
 
 	/// Generate a positions list for the EPUB
 	pub fn generate_positions(&self) -> Result<RWPMPositions, FileError> {
-		let mut epub = EpubDoc::new(&self.epub_path)
-			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
-
-		let num_pages = epub.get_num_chapters();
-
-		struct PositionData {
-			href: String,
-			media_type: String,
-			title: Option<String>,
-			size: usize,
-		}
-
-		let items: Vec<PositionData> = (0..num_pages)
-			.filter_map(|i| {
-				epub.set_current_chapter(i);
-
-				let spine_item = epub.spine.get(i)?;
-				let resource = epub.resources.get(&spine_item.idref).or_else(|| {
-					tracing::warn!(
-						page = i,
-						spine_idref = %spine_item.idref,
-						epub_path = %self.epub_path,
-						"Spine item not found in resources! Skipping for positions. This may affect accuracy of positions"
-					);
-					None
-				})?;
-
-				let href = resource.path.to_string_lossy().to_string();
-
-				let media_type = epub
-					.get_current_mime()
-					.unwrap_or_else(|| "application/xhtml+xml".to_string());
-
-				let title = epub
-					.toc
-					.iter()
-					.find(|nav| nav.content.to_string_lossy().contains(&spine_item.idref))
-					.map(|nav| nav.label.clone());
-
-				let size = match epub.get_current() {
-					Some((content, _)) => content.len(),
-					None => {
-						tracing::warn!(
-							page = i,
-							epub_path = %self.epub_path,
-							"Failed to read content for page, defaulting to reasonable size but this may affect accuracy of positions"
-						);
-						1000
-					},
-				};
-
-				Some(PositionData {
-					href,
-					media_type,
-					title,
-					size,
-				})
-			})
-			.collect();
-
-		let total_size: usize = items.iter().map(|p| p.size).sum();
-		let total_size = total_size.max(1); // Avoid division by zero
-
-		let mut cumulative_size: usize = 0;
+		let items = self.enumerate_spine_for_positions()?;
 		let positions: Vec<RWPMPosition> = items
 			.into_iter()
-			.enumerate()
-			.map(|(i, item)| {
-				let total_progression = cumulative_size as f64 / total_size as f64;
-				cumulative_size += item.size;
-
-				RWPMPosition {
-					href: self.resource_url(&item.href),
-					media_type: item.media_type,
-					title: item.title,
-					locations: RWPMPositionLocations {
-						position: (i + 1) as u32,
-						progression: 0.0,
-						total_progression,
-					},
-				}
+			.map(|item| RWPMPosition {
+				href: self.resource_url(&item.package_path),
+				media_type: item.media_type,
+				title: item.title,
+				locations: RWPMPositionLocations {
+					position: item.position,
+					progression: 0.0,
+					total_progression: item.total_progression,
+				},
 			})
 			.collect();
 
@@ -369,26 +300,147 @@ impl ReadiumManifestGenerator {
 			.collect()
 	}
 
-	fn resource_url(&self, path: &str) -> String {
-		let normalized = path.trim_start_matches('/');
-		let (path_part, fragment) = match normalized.split_once('#') {
-			Some((path, frag)) => (path, Some(frag)),
-			None => (normalized, None),
-		};
-
-		let encoded = path_part
-			.split('/')
-			.map(|segment| urlencoding::encode(segment).into_owned())
-			.collect::<Vec<_>>()
-			.join("/");
-
-		let mut url = format!("{}/resource/{}", self.base_url, encoded);
-		if let Some(frag) = fragment {
-			url.push('#');
-			url.push_str(frag);
-		}
-		url
+	/// Build an absolute RWPM resource URL for a package-relative path.
+	pub fn resource_url(&self, path: &str) -> String {
+		rwpm_resource_url(&self.base_url, path)
 	}
+
+	/// Enumerate linear spine items with package paths, MIME types, and size weights
+	/// used by both `positions.json` and whole-book search locators.
+	pub fn enumerate_spine_for_positions(
+		&self,
+	) -> Result<Vec<SpinePositionMeta>, FileError> {
+		let mut epub = EpubDoc::new(&self.epub_path)
+			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
+		enumerate_spine_for_positions_at(&mut epub)
+	}
+}
+
+/// Absolute `/resource/{path}` href for a package-relative EPUB path.
+pub fn rwpm_resource_url(base_url: &str, path: &str) -> String {
+	let normalized = path.trim_start_matches('/');
+	let (path_part, fragment) = match normalized.split_once('#') {
+		Some((path, frag)) => (path, Some(frag)),
+		None => (normalized, None),
+	};
+
+	let encoded = path_part
+		.split('/')
+		.map(|segment| urlencoding::encode(segment).into_owned())
+		.collect::<Vec<_>>()
+		.join("/");
+
+	let mut url = format!("{}/resource/{}", base_url.trim_end_matches('/'), encoded);
+	if let Some(frag) = fragment {
+		url.push('#');
+		url.push_str(frag);
+	}
+	url
+}
+
+/// Spine item metadata used to align search locators with `positions.json`.
+#[derive(Debug, Clone)]
+pub struct SpinePositionMeta {
+	pub spine_index: usize,
+	pub package_path: String,
+	pub media_type: String,
+	pub title: Option<String>,
+	pub size: usize,
+	pub position: u32,
+	pub total_progression: f64,
+}
+
+/// Enumerate spine metadata from an already-open `EpubDoc`.
+pub fn enumerate_spine_for_positions_at(
+	epub: &mut EpubDoc<BufReader<File>>,
+) -> Result<Vec<SpinePositionMeta>, FileError> {
+	enumerate_spine_position_meta(epub)
+}
+
+fn enumerate_spine_position_meta(
+	epub: &mut EpubDoc<BufReader<File>>,
+) -> Result<Vec<SpinePositionMeta>, FileError> {
+	let num_pages = epub.get_num_chapters();
+
+	struct RawItem {
+		spine_index: usize,
+		package_path: String,
+		media_type: String,
+		title: Option<String>,
+		size: usize,
+	}
+
+	let items: Vec<RawItem> = (0..num_pages)
+		.filter_map(|i| {
+			epub.set_current_chapter(i);
+
+			let spine_item = epub.spine.get(i)?;
+			let resource = epub.resources.get(&spine_item.idref).or_else(|| {
+				tracing::warn!(
+					page = i,
+					spine_idref = %spine_item.idref,
+					"Spine item not found in resources! Skipping for positions."
+				);
+				None
+			})?;
+
+			let package_path = resource.path.to_string_lossy().to_string();
+			let media_type = epub
+				.get_current_mime()
+				.unwrap_or_else(|| "application/xhtml+xml".to_string());
+
+			let title = epub
+				.toc
+				.iter()
+				.find(|nav| {
+					nav.content
+						.to_string_lossy()
+						.contains(package_path.as_str())
+						|| nav.content.to_string_lossy().contains(&spine_item.idref)
+				})
+				.map(|nav| nav.label.clone());
+
+			let size = match epub.get_current() {
+				Some((content, _)) => content.len(),
+				None => {
+					tracing::warn!(
+						page = i,
+						"Failed to read content for page, defaulting size"
+					);
+					1000
+				},
+			};
+
+			Some(RawItem {
+				spine_index: i,
+				package_path,
+				media_type,
+				title,
+				size,
+			})
+		})
+		.collect();
+
+	let total_size: usize = items.iter().map(|p| p.size).sum::<usize>().max(1);
+	let mut cumulative_size: usize = 0;
+
+	Ok(items
+		.into_iter()
+		.enumerate()
+		.map(|(ordinal, item)| {
+			let total_progression = cumulative_size as f64 / total_size as f64;
+			cumulative_size += item.size;
+			SpinePositionMeta {
+				spine_index: item.spine_index,
+				package_path: item.package_path,
+				media_type: item.media_type,
+				title: item.title,
+				size: item.size,
+				position: (ordinal + 1) as u32,
+				total_progression,
+			}
+		})
+		.collect())
 }
 
 #[cfg(test)]

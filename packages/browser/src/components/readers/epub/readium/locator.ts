@@ -1,5 +1,8 @@
 import { Locator, LocatorLocations, LocatorText } from '@readium/shared'
 import type { ReadiumLocator, ReadiumLocatorInput } from '@stump/graphql'
+import type { EpubSearchResult } from '@stump/sdk'
+
+import type { ReaderLocator } from '../context'
 
 const RESOURCE_MARKER = '/resource/'
 
@@ -99,6 +102,32 @@ export function graphQLLocatorToToolkit(locator: ReadiumLocator): Locator {
 				})
 			: undefined,
 	})
+}
+
+/**
+ * Convert a server EPUB search result's locator into a `ReaderLocator`, ready to pass
+ * to `onGoToLocator`. The result's `text` fields are server-computed excerpts around the
+ * match and are safe to render literally (no query re-matching needed).
+ */
+export function searchResultToReaderLocator(result: EpubSearchResult): ReaderLocator {
+	const { locator } = result
+	return {
+		href: locator.href,
+		type: locator.type || 'application/xhtml+xml',
+		title: locator.title ?? undefined,
+		chapterTitle: locator.chapterTitle ?? undefined,
+		locations: {
+			fragments: locator.locations.fragments ?? undefined,
+			progression: locator.locations.progression,
+			position: locator.locations.position,
+			totalProgression: locator.locations.totalProgression,
+		},
+		text: {
+			after: locator.text.after,
+			before: locator.text.before,
+			highlight: locator.text.highlight,
+		},
+	}
 }
 
 function buildOtherLocations(

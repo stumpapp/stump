@@ -5,6 +5,7 @@ export {
 	nearestPositionByTotalProgression,
 	packagePathFromHref,
 	resolveInitialLocator,
+	searchResultToReaderLocator,
 	toolkitLocatorToInput,
 } from './locator'
 export { default as ReadiumWebReader } from './ReadiumWebReader'

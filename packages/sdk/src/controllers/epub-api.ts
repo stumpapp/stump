@@ -1,4 +1,5 @@
 import { APIBase } from '../base'
+import type { EpubSearchParams, EpubSearchResponse } from '../types/epub'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -37,6 +38,13 @@ export class EpubAPI extends APIBase {
 	}
 
 	/**
+	 * Absolute URL for whole-book EPUB search
+	 */
+	searchURL(id: string): string {
+		return this.withServiceURL(epubURL(`/${id}/search`))
+	}
+
+	/**
 	 * Fetch a resource from an epub by its ID and resource ID
 	 */
 	async fetchResource({
@@ -55,11 +63,28 @@ export class EpubAPI extends APIBase {
 	}
 
 	/**
+	 * Bounded whole-book search over spine XHTML. Returns Readium locators — never
+	 * downloads the EPUB archive.
+	 */
+	async search({ id, q, limit, cursor, signal }: EpubSearchParams): Promise<EpubSearchResponse> {
+		const { data } = await this.api.axios.get<EpubSearchResponse>(
+			epubURL(`/${id}/search`, {
+				q,
+				...(limit != null ? { limit } : {}),
+				...(cursor ? { cursor } : {}),
+			}),
+			{ signal },
+		)
+		return data
+	}
+
+	/**
 	 * The query keys for the epub API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof EpubAPI>> {
 		return {
 			fetchResource: 'epub.fetchResource',
+			search: 'epub.search',
 		}
 	}
 }

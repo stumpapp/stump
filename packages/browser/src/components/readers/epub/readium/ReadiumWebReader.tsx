@@ -9,6 +9,7 @@ import {
 	ReadingMode,
 	type ReadiumLocator,
 } from '@stump/graphql'
+import type { EpubSearchResponse } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebounce } from 'rooks'
 import { toast } from 'sonner'
@@ -539,6 +540,19 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		return locator.text?.highlight ?? locator.chapterTitle ?? locator.title ?? null
 	}, [])
 
+	/**
+	 * Server-backed whole-book search — never downloads the EPUB archive, just queries
+	 * the manifest-scoped search endpoint for Readium locators.
+	 */
+	const searchBook = useCallback(
+		(
+			query: string,
+			opts?: { cursor?: string; signal?: AbortSignal },
+		): Promise<EpubSearchResponse> =>
+			sdk.epub.search({ id, q: query, cursor: opts?.cursor, signal: opts?.signal }),
+		[sdk, id],
+	)
+
 	/** Keyboard navigation — RTL aware, ignores keystrokes aimed at inputs/dialogs */
 	useEffect(() => {
 		if (!api) return
@@ -595,6 +609,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				onPaginateBackward,
 				onPaginateForward,
 				jumpToSection,
+				searchBook,
 				canGoForward: api?.canGoForward,
 				canGoBackward: api?.canGoBackward,
 			}}

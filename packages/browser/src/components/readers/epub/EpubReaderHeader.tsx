@@ -19,7 +19,7 @@ import { LocationManager } from './locations'
 export default function EpubReaderHeader() {
 	const {
 		readerMeta: { bookEntity },
-		controls: { searchEntireBook },
+		controls: { searchBook, searchEntireBook },
 	} = useEpubReaderContext()
 	const {
 		bookPreferences: { fontFamily },
@@ -51,8 +51,7 @@ export default function EpubReaderHeader() {
 			<Spacer />
 
 			<div className="gap-x-2 flex items-center">
-				{/* Whole-book search loads every spine item, deferred for now. */}
-				{searchEntireBook ? <SearchCommand /> : null}
+				{searchBook || searchEntireBook ? <SearchCommand /> : null}
 				<ThemeControls />
 				<FullScreenToggle />
 				<BookmarkToggle />

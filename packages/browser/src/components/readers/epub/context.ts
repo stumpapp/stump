@@ -1,9 +1,12 @@
 import { Bookmark } from '@stump/graphql'
+import type { EpubSearchResponse } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 
 import { noop } from '../../../utils/misc'
+
+export type { EpubSearchResponse, EpubSearchResult } from '@stump/sdk'
 
 export type ReaderLocator = {
 	href: string
@@ -98,7 +101,20 @@ export type EpubReaderControls = {
 	 */
 	onGoToCfi?: (cfi: string) => void
 	getCfiPreviewText?: (cfi: string) => Promise<string | null>
+	/**
+	 * Legacy client-side whole-book search over epub.js spine items — removed once
+	 * Milestone 5 drops epub.js.
+	 */
 	searchEntireBook?: (query: string) => Promise<SpineSearchResult[]>
+	/**
+	 * Server-backed EPUB search (`GET /api/v2/epub/{id}/search`). Preferred over
+	 * `searchEntireBook` — results are Readium locators, directly navigable via
+	 * `onGoToLocator`.
+	 */
+	searchBook?: (
+		query: string,
+		opts?: { cursor?: string; signal?: AbortSignal },
+	) => Promise<EpubSearchResponse>
 }
 
 export type SpineSearchResult = {

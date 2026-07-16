@@ -16,7 +16,7 @@ fn test_epub_path() -> String {
 		.to_string()
 }
 
-async fn setup_epub_book() -> (TestApp, String) {
+pub(crate) async fn setup_epub_book() -> (TestApp, String) {
 	let app = TestApp::new_with_default_user().await;
 	let db = app.conn();
 

@@ -18,6 +18,7 @@ export type ClassQueryKeys<T> = Omit<
 	| 'bookPageURL'
 	| 'manifestURL'
 	| 'positionsURL'
+	| 'searchURL'
 	| 'epubServiceURL'
 	| 'axios'
 	| 'withServiceURL'

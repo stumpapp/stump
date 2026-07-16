@@ -514,11 +514,11 @@ mod tests {
 		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
 		let temp_rar_file_path = tempdir
 			.path()
-			.join("book.rar")
+			.join("test_process.rar")
 			.to_string_lossy()
 			.to_string();
 		fs::write(&temp_rar_file_path, get_test_rar_file_data())
-			.expect("Failed to write temporary book.rar");
+			.expect("Failed to write temporary test_process.rar");
 		let config = StumpConfig::debug();
 
 		// We can test deletion since it's a temporary file
@@ -547,11 +547,11 @@ mod tests {
 
 		let temp_cbr_path = tempdir
 			.path()
-			.join("book.cbr")
+			.join("test_rar_to_zip.cbr")
 			.to_string_lossy()
 			.to_string();
 		fs::write(&temp_cbr_path, get_test_rar_file_data())
-			.expect("failed to write temporary book.cbr");
+			.expect("failed to write temporary test_rar_to_zip.cbr");
 
 		let cbz_result = RarProcessor::to_zip(&temp_cbr_path, true, None, &config);
 		assert!(

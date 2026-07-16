@@ -6,16 +6,9 @@ Stump has a few different built-in readers that you can use to read your books. 
 
 ## Ebook Reader
 
-A reader for reading ebooks, such as `.epub` files.
+A reader for reading ebooks, such as `.epub` files. On the web, Stump uses [Readium](https://readium.org/web/) to stream EPUB package resources (XHTML, CSS, images, fonts) on demand instead of downloading the entire archive up front.
 
-<Callout>
-	At the time of writing, ebooks are eagerly loaded for the reader, meaning your server will send
-	the entire book to your client. This is far from ideal, and a [streamable ebook
-	reader](https://github.com/stumpapp/stump/issues/62) is planned for a future release so ebook
-	reading sessions can be more network friendly.
-</Callout>
-
-> Wow, such empty. Much sad.
+The reader supports themes, reading direction, search, bookmarks, and annotations. New reading progress is stored as Readium locators (shared with the mobile app). Older sessions that only have a legacy EPUB CFI can still resume when the server can resolve that location.
 
 ## Image-based Reader
 

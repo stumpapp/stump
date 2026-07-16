@@ -44,6 +44,13 @@ impl ReadProgressMutation {
 		let progression = match input {
 			MediaProgressInput::Epub(input) => {
 				let (epubcfi, locator) = input.locator.as_tuple();
+				let location_source = if epubcfi.is_some() {
+					models::services::reading_progress::ProgressLocationSource::EpubCfi
+				} else if locator.is_some() {
+					models::services::reading_progress::ProgressLocationSource::Readium
+				} else {
+					models::services::reading_progress::ProgressLocationSource::None
+				};
 				let is_complete = input.is_complete.unwrap_or(
 					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
 				);
@@ -56,6 +63,7 @@ impl ReadProgressMutation {
 					did_complete: is_complete,
 					device_id: input.device_id,
 					reset_elapsed_seconds,
+					location_source,
 				}
 			},
 			MediaProgressInput::Paged(input) => {
@@ -71,6 +79,8 @@ impl ReadProgressMutation {
 					did_complete: is_complete,
 					device_id: input.device_id,
 					reset_elapsed_seconds,
+					location_source:
+						models::services::reading_progress::ProgressLocationSource::Page,
 				}
 			},
 		};
@@ -150,6 +160,13 @@ impl ReadProgressMutation {
 		let progression = match input {
 			MediaProgressInput::Epub(input) => {
 				let (epubcfi, locator) = input.locator.as_tuple();
+				let location_source = if epubcfi.is_some() {
+					models::services::reading_progress::ProgressLocationSource::EpubCfi
+				} else if locator.is_some() {
+					models::services::reading_progress::ProgressLocationSource::Readium
+				} else {
+					models::services::reading_progress::ProgressLocationSource::None
+				};
 				let is_complete = input.is_complete.unwrap_or(
 					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
 				);
@@ -162,6 +179,7 @@ impl ReadProgressMutation {
 					did_complete: is_complete,
 					device_id: input.device_id,
 					reset_elapsed_seconds,
+					location_source,
 				}
 			},
 			MediaProgressInput::Paged(input) => {
@@ -177,6 +195,8 @@ impl ReadProgressMutation {
 					did_complete: is_complete,
 					device_id: input.device_id,
 					reset_elapsed_seconds,
+					location_source:
+						models::services::reading_progress::ProgressLocationSource::Page,
 				}
 			},
 		};

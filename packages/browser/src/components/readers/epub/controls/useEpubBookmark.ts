@@ -21,52 +21,37 @@ const _deleteMutation = graphql(`
 	}
 `)
 
-/**
- * Create and delete bookmarks for the EPUB reader using Readium locators.
- * Legacy CFI-only bookmarks remain listed but are not deleted via this hook,
- * they will be removed soon.
- */
+/** Create and delete bookmarks for the Readium EPUB reader using locators. */
 export function useEpubBookmark() {
 	const {
 		readerMeta: {
 			bookEntity: { id: bookId },
 			bookMeta,
 		},
-		controls: { getLocatorPreviewText, getCfiPreviewText },
+		controls: { getLocatorPreviewText },
 	} = useEpubReaderContext()
 
 	const chapterMeta = bookMeta?.chapter
 	const currentLocator = chapterMeta?.currentLocator
-	const cfiRange = useMemo(
-		() => (chapterMeta?.cfiRange?.filter(Boolean) ?? []) as string[],
-		[chapterMeta],
-	)
-
 	const existingBookmarks = useMemo(() => bookMeta?.bookmarks ?? {}, [bookMeta?.bookmarks])
 
 	const currentBookmark = useMemo(() => {
-		if (currentLocator?.href) {
-			const match = Object.values(existingBookmarks).find(
-				(bookmark) =>
-					bookmark.locator &&
-					locatorsRoughlyMatch(
-						{
-							href: bookmark.locator.href,
-							locations: bookmark.locator.locations,
-						},
-						currentLocator,
-					),
-			)
-			if (match) return match
-		}
-
-		// Legacy epub.js: match by CFI key
-		return existingBookmarks[cfiRange[0] ?? ''] ?? existingBookmarks[cfiRange[1] ?? '']
-	}, [existingBookmarks, currentLocator, cfiRange])
+		if (!currentLocator?.href) return undefined
+		return Object.values(existingBookmarks).find(
+			(bookmark) =>
+				bookmark.locator &&
+				locatorsRoughlyMatch(
+					{
+						href: bookmark.locator.href,
+						locations: bookmark.locator.locations,
+					},
+					currentLocator,
+				),
+		)
+	}, [existingBookmarks, currentLocator])
 
 	const onSuccess = useCallback(() => {
 		queryClient.invalidateQueries({ queryKey: ['readiumWebReader', bookId], exact: false })
-		queryClient.invalidateQueries({ queryKey: ['epubJsReader', bookId], exact: false })
 	}, [bookId])
 
 	const { mutate: createMutation, isPending: isCreating } = useGraphQLMutation(_createMutation, {
@@ -74,41 +59,31 @@ export function useEpubBookmark() {
 	})
 
 	const createPayload = useCallback(async (): Promise<BookmarkInput | null> => {
-		if (currentLocator?.href) {
-			const preview = await getLocatorPreviewText(currentLocator)
-			return {
-				locator: {
-					readium: {
-						chapterTitle: currentLocator.chapterTitle ?? currentLocator.title ?? '',
-						href: currentLocator.href,
-						title: currentLocator.title,
-						type: currentLocator.type || 'application/xhtml+xml',
-						locations: currentLocator.locations
-							? {
-									fragments: currentLocator.locations.fragments ?? undefined,
-									progression: currentLocator.locations.progression ?? undefined,
-									position: currentLocator.locations.position ?? undefined,
-									totalProgression: currentLocator.locations.totalProgression ?? undefined,
-								}
-							: undefined,
-						text: currentLocator.text ?? undefined,
-					},
-				},
-				mediaId: bookId,
-				previewContent: preview ?? undefined,
-			}
-		}
+		if (!currentLocator?.href) return null
 
-		// Legacy epub.js path
-		const epubcfi = cfiRange[0] ?? cfiRange[1] ?? ''
-		if (!epubcfi || !getCfiPreviewText) return null
-		const preview = await getCfiPreviewText(epubcfi)
+		const preview = await getLocatorPreviewText(currentLocator)
 		return {
-			locator: { epubcfi },
+			locator: {
+				readium: {
+					chapterTitle: currentLocator.chapterTitle ?? currentLocator.title ?? '',
+					href: currentLocator.href,
+					title: currentLocator.title,
+					type: currentLocator.type || 'application/xhtml+xml',
+					locations: currentLocator.locations
+						? {
+								fragments: currentLocator.locations.fragments ?? undefined,
+								progression: currentLocator.locations.progression ?? undefined,
+								position: currentLocator.locations.position ?? undefined,
+								totalProgression: currentLocator.locations.totalProgression ?? undefined,
+							}
+						: undefined,
+					text: currentLocator.text ?? undefined,
+				},
+			},
 			mediaId: bookId,
 			previewContent: preview ?? undefined,
 		}
-	}, [currentLocator, getLocatorPreviewText, getCfiPreviewText, cfiRange, bookId])
+	}, [currentLocator, getLocatorPreviewText, bookId])
 
 	const createBookmark = useCallback(
 		async (payload?: BookmarkInput) => {
@@ -131,8 +106,8 @@ export function useEpubBookmark() {
 	}, [deleteMutation, currentBookmark])
 
 	const currentIsBookmarked = !!currentBookmark
-	const canBookmarkCurrent = !!(currentLocator?.href || cfiRange.length > 0) && !currentIsBookmarked
-	const isUnknownLocation = !currentLocator?.href && cfiRange.length === 0
+	const canBookmarkCurrent = !!currentLocator?.href && !currentIsBookmarked
+	const isUnknownLocation = !currentLocator?.href
 
 	return {
 		canBookmarkCurrent,

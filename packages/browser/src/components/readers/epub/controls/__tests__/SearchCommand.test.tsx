@@ -105,7 +105,7 @@ describe('SearchCommand', () => {
 		resultId = 0
 	})
 
-	it('renders nothing when neither searchBook nor searchEntireBook is available', () => {
+	it('renders nothing when searchBook is unavailable', () => {
 		mockControls()
 		expect(render(<SearchCommand />).container).toBeEmptyDOMElement()
 	})

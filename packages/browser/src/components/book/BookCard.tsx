@@ -10,6 +10,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
+import { isEbookExtension, isEbookReadProgress, readProgressPercent } from '@/utils/ebookProgress'
 
 import { ThumbnailImage } from '../thumbnail/ThumbnailImage'
 import { usePrefetchBook } from './useBookOverview'
@@ -40,6 +41,9 @@ export const BookCardFragment = graphql(`
 			epubcfi
 			page
 			updatedAt
+			locator {
+				href
+			}
 		}
 		readHistory {
 			__typename
@@ -85,12 +89,9 @@ const BookCard = memo(function BookCard({
 		if (!data.readProgress && !data.readHistory) {
 			return null
 		} else if (data.readProgress) {
-			const { epubcfi, percentageCompleted, page } = data.readProgress
-			if (epubcfi && percentageCompleted) {
-				return Math.round(percentageCompleted * 100)
-			} else if (page) {
-				const percent = Math.round((page / data.pages) * 100)
-				return Math.min(Math.max(percent, 0), 100)
+			const percent = readProgressPercent(data.readProgress, data.pages, data.extension)
+			if (percent != null) {
+				return percent
 			}
 		} else if (data.readHistory?.length) {
 			return 100
@@ -118,14 +119,16 @@ const BookCard = memo(function BookCard({
 
 		return readingLink || shouldSkipOverview
 			? paths.bookReader(data.id, {
-					epubcfi: data.readProgress?.epubcfi,
-					page: data.readProgress?.page ?? undefined,
+					isEpub: isEbookExtension(data.extension),
+					page: isEbookExtension(data.extension)
+						? undefined
+						: (data.readProgress?.page ?? undefined),
 				})
 			: paths.bookOverview(data.id)
-	}, [readingLink, data.id, onSelect, data.readProgress, data.libraryConfig, paths])
+	}, [readingLink, data.id, data.extension, onSelect, data.readProgress, data.libraryConfig, paths])
 
 	const isMissing = data.status === 'MISSING'
-	const isEbookProgress = !!data.readProgress?.epubcfi
+	const isEbookProgress = isEbookReadProgress(data.readProgress, data.extension)
 	const pagesLeft = data.pages - (data.readProgress?.page || 0)
 	const progressPercent = progress ?? 0
 

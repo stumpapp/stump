@@ -156,7 +156,6 @@ function BookReaderScene({ book }: Props) {
 		if (book.extension.match(EBOOK_EXTENSION)) {
 			navigate(
 				paths.bookReader(book.id, {
-					epubcfi: book.readProgress?.epubcfi || null,
 					isEpub: true,
 				}),
 			)

@@ -19,7 +19,7 @@ import { LocationManager } from './locations'
 export default function EpubReaderHeader() {
 	const {
 		readerMeta: { bookEntity },
-		controls: { searchBook, searchEntireBook },
+		controls: { searchBook },
 	} = useEpubReaderContext()
 	const {
 		bookPreferences: { fontFamily },
@@ -51,7 +51,7 @@ export default function EpubReaderHeader() {
 			<Spacer />
 
 			<div className="gap-x-2 flex items-center">
-				{searchBook || searchEntireBook ? <SearchCommand /> : null}
+				{searchBook ? <SearchCommand /> : null}
 				<ThemeControls />
 				<FullScreenToggle />
 				<BookmarkToggle />

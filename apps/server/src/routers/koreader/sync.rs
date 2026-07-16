@@ -9,7 +9,9 @@ use chrono::Utc;
 use graphql::data::AuthContext;
 use models::{
 	entity::{media, reading_device, reading_session},
-	services::reading_progress::{upsert_reading_session, NormalizedProgression},
+	services::reading_progress::{
+		upsert_reading_session, NormalizedProgression, ProgressLocationSource,
+	},
 	shared::enums::{ReadingStatus, UserPermission},
 };
 use sea_orm::{
@@ -292,9 +294,11 @@ async fn put_progress(
 	match parse_progress(&progress) {
 		Some(NativeProgress::Page(page)) => {
 			progression.page = Some(page);
+			progression.location_source = ProgressLocationSource::Page;
 		},
 		Some(NativeProgress::EpubCfi(cfi)) => {
 			progression.epubcfi = Some(cfi);
+			progression.location_source = ProgressLocationSource::EpubCfi;
 		},
 		_ => {
 			tracing::debug!(

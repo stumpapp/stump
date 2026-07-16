@@ -1,5 +1,10 @@
 import { APIBase } from '../base'
-import type { EpubSearchParams, EpubSearchResponse } from '../types/epub'
+import type {
+	EpubResolveCfiParams,
+	EpubResolvedCfiLocator,
+	EpubSearchParams,
+	EpubSearchResponse,
+} from '../types/epub'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
@@ -45,6 +50,17 @@ export class EpubAPI extends APIBase {
 	}
 
 	/**
+	 * Best-effort legacy epubcfi → Readium locator (read-only).
+	 */
+	async resolveCfi({ id, cfi, signal }: EpubResolveCfiParams): Promise<EpubResolvedCfiLocator> {
+		const { data } = await this.api.axios.get<EpubResolvedCfiLocator>(
+			epubURL(`/${id}/resolve-cfi`, { cfi }),
+			{ signal },
+		)
+		return data
+	}
+
+	/**
 	 * Fetch a resource from an epub by its ID and resource ID
 	 */
 	async fetchResource({
@@ -85,6 +101,7 @@ export class EpubAPI extends APIBase {
 		return {
 			fetchResource: 'epub.fetchResource',
 			search: 'epub.search',
+			resolveCfi: 'epub.resolveCfi',
 		}
 	}
 }

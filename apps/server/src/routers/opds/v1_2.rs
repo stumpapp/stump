@@ -871,6 +871,8 @@ async fn get_book_page(
 			page: Some(correct_page),
 			percentage: Some(percentage),
 			did_complete: book.pages == correct_page,
+			location_source:
+				models::services::reading_progress::ProgressLocationSource::Page,
 			..Default::default()
 		};
 

@@ -44,3 +44,20 @@ export type EpubSearchParams = {
 	cursor?: string
 	signal?: AbortSignal
 }
+
+export type EpubResolvedCfiLocator = {
+	href: string
+	type: string
+	chapterTitle: string
+	locations: {
+		partialCfi: string
+		position?: number | null
+		totalProgression?: number | null
+	}
+}
+
+export type EpubResolveCfiParams = {
+	id: string
+	cfi: string
+	signal?: AbortSignal
+}

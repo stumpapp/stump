@@ -5634,7 +5634,7 @@ export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
-export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord', completedAt: any }>, libraryConfig: { __typename?: 'LibraryConfig', skipBookOverview: boolean } } & { ' $fragmentName'?: 'BookCardFragment' };
+export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', href: string } | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord', completedAt: any }>, libraryConfig: { __typename?: 'LibraryConfig', skipBookOverview: boolean } } & { ' $fragmentName'?: 'BookCardFragment' };
 
 export type BookSearchOverlayQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5899,21 +5899,6 @@ export type SmartListNavigationItemQueryVariables = Exact<{ [key: string]: never
 
 
 export type SmartListNavigationItemQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
-
-export type EpubJsReaderQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type EpubJsReaderQuery = { __typename?: 'Query', epubById: { __typename?: 'Epub', mediaId: string, rootBase: string, rootFile: string, extraCss: Array<string>, toc: Array<string>, resources: any, metadata: any, spine: Array<{ __typename?: 'SpineItem', id?: string | null, idref: string, properties?: string | null, linear: boolean }>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string, createdAt: any }>, media: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds: number } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } } };
-
-export type UpdateEpubProgressMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  input: MediaProgressInput;
-}>;
-
-
-export type UpdateEpubProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
 
 export type CreateEpubAnnotationMutationVariables = Exact<{
   input: CreateAnnotationInput;
@@ -6238,7 +6223,7 @@ export type CreateSmartListSceneMutationVariables = Exact<{
 
 export type CreateSmartListSceneMutation = { __typename?: 'Mutation', createSmartList: { __typename?: 'SmartList', id: string, name: string } };
 
-export type ContinueReadingBookFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null } & { ' $fragmentName'?: 'ContinueReadingBookFragment' };
+export type ContinueReadingBookFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', href: string } | null } | null } & { ' $fragmentName'?: 'ContinueReadingBookFragment' };
 
 export type ContinueReadingMediaQueryVariables = Exact<{
   pagination: Pagination;
@@ -7636,6 +7621,9 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename
@@ -7901,6 +7889,7 @@ export const ContinueReadingBookFragmentDoc = new TypedDocumentString(`
   id
   resolvedName
   pages
+  extension
   thumbnail {
     url
     metadata {
@@ -7917,6 +7906,9 @@ export const ContinueReadingBookFragmentDoc = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
 }
     `, {"fragmentName":"ContinueReadingBook"}) as unknown as TypedDocumentString<ContinueReadingBookFragment, unknown>;
@@ -10301,6 +10293,9 @@ export const BookSearchOverlayDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename
@@ -10420,6 +10415,9 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename
@@ -11240,65 +11238,6 @@ export const SmartListNavigationItemDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SmartListNavigationItemQuery, SmartListNavigationItemQueryVariables>;
-export const EpubJsReaderDocument = new TypedDocumentString(`
-    query EpubJsReader($id: ID!) {
-  epubById(id: $id) {
-    mediaId
-    rootBase
-    rootFile
-    extraCss
-    toc
-    resources
-    metadata
-    spine {
-      id
-      idref
-      properties
-      linear
-    }
-    bookmarks {
-      id
-      userId
-      epubcfi
-      mediaId
-      createdAt
-    }
-    media {
-      id
-      resolvedName
-      pages
-      extension
-      readProgress {
-        percentageCompleted
-        epubcfi
-        page
-        elapsedSeconds
-      }
-      libraryConfig {
-        defaultReadingImageScaleFit
-        defaultReadingMode
-        defaultReadingDir
-      }
-      nextInSeries(pagination: {cursor: {limit: 1}}) {
-        nodes {
-          id
-          name: resolvedName
-          thumbnail {
-            url
-          }
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<EpubJsReaderQuery, EpubJsReaderQueryVariables>;
-export const UpdateEpubProgressDocument = new TypedDocumentString(`
-    mutation UpdateEpubProgress($id: ID!, $input: MediaProgressInput!) {
-  updateMediaProgress(id: $id, input: $input) {
-    __typename
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateEpubProgressMutation, UpdateEpubProgressMutationVariables>;
 export const CreateEpubAnnotationDocument = new TypedDocumentString(`
     mutation CreateEpubAnnotation($input: CreateAnnotationInput!) {
   createAnnotation(input: $input) {
@@ -11654,6 +11593,9 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename
@@ -12088,6 +12030,9 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename
@@ -12181,6 +12126,7 @@ export const ContinueReadingMediaDocument = new TypedDocumentString(`
   id
   resolvedName
   pages
+  extension
   thumbnail {
     url
     metadata {
@@ -12197,6 +12143,9 @@ export const ContinueReadingMediaDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
 }`) as unknown as TypedDocumentString<ContinueReadingMediaQuery, ContinueReadingMediaQueryVariables>;
 export const HomeSceneQueryDocument = new TypedDocumentString(`
@@ -12459,6 +12408,9 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename
@@ -12867,6 +12819,9 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename
@@ -13825,6 +13780,9 @@ export const SmartListItemsDocument = new TypedDocumentString(`
     epubcfi
     page
     updatedAt
+    locator {
+      href
+    }
   }
   readHistory {
     __typename

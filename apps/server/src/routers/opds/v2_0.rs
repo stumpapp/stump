@@ -1380,15 +1380,25 @@ async fn update_book_progression(
 		_ => {},
 	}
 
+	let locator = input.locator();
+	let location_source = if locator.is_some() {
+		models::services::reading_progress::ProgressLocationSource::Readium
+	} else if page.is_some() {
+		models::services::reading_progress::ProgressLocationSource::Page
+	} else {
+		models::services::reading_progress::ProgressLocationSource::None
+	};
+
 	let progression = NormalizedProgression {
 		page,
-		locator: input.locator(),
+		locator,
 		epubcfi: None,
 		percentage,
 		elapsed_seconds_delta: None,
 		did_complete,
 		device_id,
 		reset_elapsed_seconds: false,
+		location_source,
 	};
 
 	let txn = conn.begin().await?;

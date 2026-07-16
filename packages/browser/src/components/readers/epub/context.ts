@@ -19,9 +19,7 @@ export type ReaderLocator = {
 		progression?: number | null
 		position?: number | null
 		totalProgression?: number | null
-		/** CSS selector fallback, preserved so re-navigation does not lose precision. */
 		cssSelector?: string | null
-		/** Partial CFI fallback, preserved so re-navigation does not lose precision. */
 		partialCfi?: string | null
 	} | null
 	text?: {
@@ -32,29 +30,13 @@ export type ReaderLocator = {
 }
 
 export type EpubReaderChapterMeta = {
-	/** The chapter's title. */
 	name?: string
-	/** The chapter's position in the book / TOC index. */
 	position?: number
-	/** The chapter's index in the spine / reading order */
 	sectionSpineIndex?: number
-	/** Absolute or relative progression for footer UI (0–1). */
 	totalProgression?: number
-	/** 1-based Readium position index when available. */
 	locatorPosition?: number
-	/** Total positions in the publication. */
 	totalPositions?: number
-	/**
-	 * Current locator for progress and bookmarks.
-	 * Preferred over epubcfi for the Readium reader.
-	 */
 	currentLocator?: ReaderLocator | null
-	/**
-	 * Legacy epub.js page display.
-	 */
-	totalPages?: number
-	currentPage?: [number | undefined, number | undefined]
-	cfiRange?: [string | undefined, string | undefined]
 }
 
 export interface EpubContent {
@@ -67,8 +49,6 @@ export interface EpubContent {
 export type EpubReaderBookMeta = {
 	chapter: EpubReaderChapterMeta
 	toc: EpubContent[]
-	/** Legacy epub.js section lengths — unused by Readium. */
-	sectionLengths: { [key: number]: number }
 	bookmarks: Record<string, Bookmark>
 	annotations: EpubAnnotation[]
 }
@@ -90,43 +70,16 @@ export type EpubReaderControls = {
 	onPaginateForward: () => void
 	onPaginateBackward: () => void
 	jumpToSection: (section: number) => void
-	/** Whether forward pagination is currently possible (e.g. not at the end of the book). */
 	canGoForward?: boolean
-	/** Whether backward pagination is currently possible (e.g. not at the start of the book). */
 	canGoBackward?: boolean
-	/** Navigate using a Readium locator (preferred). */
 	onGoToLocator: (locator: ReaderLocator) => void
-	/** Preview text for a locator-based bookmark. */
 	getLocatorPreviewText: (locator: ReaderLocator) => Promise<string | null>
-	/**
-	 * Legacy epub.js CFI navigation — optional; SearchCommand/Bookmarks fall back when present.
-	 */
-	onGoToCfi?: (cfi: string) => void
-	getCfiPreviewText?: (cfi: string) => Promise<string | null>
-	/**
-	 * Legacy client-side whole-book search over epub.js spine items — removed once
-	 * Milestone 5 drops epub.js.
-	 */
-	searchEntireBook?: (query: string) => Promise<SpineSearchResult[]>
-	/**
-	 * Server-backed EPUB search (`GET /api/v2/epub/{id}/search`). Preferred over
-	 * `searchEntireBook` — results are Readium locators, directly navigable via
-	 * `onGoToLocator`.
-	 */
+	/** Resolve a stored full epubcfi via the server and navigate (legacy bookmarks/progress). */
+	onGoToLegacyCfi?: (cfi: string) => void | Promise<void>
 	searchBook?: (
 		query: string,
 		opts?: { cursor?: string; signal?: AbortSignal },
 	) => Promise<EpubSearchResponse>
-}
-
-export type SpineSearchResult = {
-	results: SearchResult[]
-	spineIndex: number
-}
-
-export type SearchResult = {
-	cfi: string
-	excerpt: string
 }
 
 export type EpubReaderContextProps = {

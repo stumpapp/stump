@@ -34,6 +34,7 @@ import EpubReaderContainer from '../EpubReaderContainer'
 import { hrefsMatch, resolveInitialLocator, toolkitLocatorToInput } from './locator'
 import { type OpenedPublication, openStumpPublication } from './openPublication'
 import { bookPreferencesToEpubPreferences } from './preferences'
+import { resolveLegacyCfi } from './resolveLegacyCfi'
 import { useReadiumNavigator } from './useReadiumNavigator'
 
 type Props = {
@@ -276,15 +277,44 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				const opened = await openStumpPublication(sdk, id, abort.signal)
 				if (abort.signal.aborted) return
 
-				const initialLocator = isIncognito
+				const percentageCompleted = ebook.media?.readProgress?.percentageCompleted
+					? Number(ebook.media.readProgress.percentageCompleted)
+					: null
+
+				let initialLocator = isIncognito
 					? undefined
 					: resolveInitialLocator({
 							positions: opened.positions,
 							storedLocator: ebook.media?.readProgress?.locator,
-							percentageCompleted: ebook.media?.readProgress?.percentageCompleted
-								? Number(ebook.media.readProgress.percentageCompleted)
-								: null,
+							percentageCompleted,
 						})
+
+				if (!initialLocator && !isIncognito && ebook.media?.readProgress?.epubcfi) {
+					const resolved = await resolveLegacyCfi(
+						sdk,
+						id,
+						ebook.media.readProgress.epubcfi,
+						abort.signal,
+					)
+					if (resolved) {
+						initialLocator = resolveInitialLocator({
+							positions: opened.positions,
+							storedLocator: {
+								chapterTitle: resolved.chapterTitle ?? '',
+								href: resolved.href,
+								type: resolved.type || 'application/xhtml+xml',
+								locations: resolved.locations
+									? {
+											partialCfi: resolved.locations.partialCfi ?? null,
+											position: resolved.locations.position ?? null,
+											totalProgression: resolved.locations.totalProgression ?? null,
+										}
+									: null,
+							},
+							percentageCompleted,
+						})
+					}
+				}
 
 				setOpenState({ status: 'ready', opened, initialLocator })
 			} catch (error) {
@@ -709,6 +739,18 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		[api, opened],
 	)
 
+	const onGoToLegacyCfi = useCallback(
+		async (cfi: string) => {
+			const resolved = await resolveLegacyCfi(sdk, id, cfi)
+			if (resolved) {
+				onGoToLocator(resolved)
+			} else {
+				toast.error('Could not resolve this legacy bookmark location')
+			}
+		},
+		[sdk, id, onGoToLocator],
+	)
+
 	const getLocatorPreviewText = useCallback(async (locator: ReaderLocator) => {
 		return locator.text?.highlight ?? locator.chapterTitle ?? locator.title ?? null
 	}, [])
@@ -772,13 +814,13 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 					annotations,
 					chapter: chapterMeta,
 					toc,
-					sectionLengths: {},
 				},
 				progress: localProgress,
 			}}
 			controls={{
 				getLocatorPreviewText,
 				onGoToLocator,
+				onGoToLegacyCfi,
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,

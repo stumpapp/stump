@@ -13,8 +13,8 @@ use models::entity::{media, server_config, user::AuthUser};
 use sea_orm::prelude::*;
 use serde::Deserialize;
 use stump_core::filesystem::media::{
-	search_epub, EpubProcessor, EpubSearchError, EpubSearchOptions,
-	ReadiumManifestGenerator, EPUB_SEARCH_DEFAULT_LIMIT,
+	resolve_epub_cfi, search_epub, EpubCfiResolveError, EpubProcessor, EpubSearchError,
+	EpubSearchOptions, ReadiumManifestGenerator, EPUB_SEARCH_DEFAULT_LIMIT,
 };
 use tokio_util::sync::CancellationToken;
 
@@ -45,6 +45,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				// Static + splat routes before `/{root}/{resource}` so they are not swallowed.
 				.route("/manifest.json", get(get_epub_manifest))
 				.route("/positions.json", get(get_epub_positions))
+				.route("/resolve-cfi", get(get_epub_resolve_cfi))
 				.route("/search", get(get_epub_search))
 				.route("/resource/{*path}", get(get_epub_resource))
 				.route("/{root}/{resource}", get(get_epub_meta)),
@@ -174,6 +175,39 @@ async fn get_epub_positions(
 		)],
 		Json(positions),
 	))
+}
+
+#[derive(Debug, Deserialize)]
+struct EpubResolveCfiQueryParams {
+	cfi: String,
+}
+
+/// Best-effort legacy `epubcfi` → Readium locator resolution (read-only).
+async fn get_epub_resolve_cfi(
+	Path(id): Path<String>,
+	Query(params): Query<EpubResolveCfiQueryParams>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<AuthContext>,
+	HostExtractor(host_details): HostExtractor,
+) -> APIResult<impl IntoResponse> {
+	let AuthContext { user, .. } = req;
+	let ebook = find_ebook_for_user(ctx.conn.as_ref(), &user, &id).await?;
+	let base_url = epub_service_base_url(ctx.conn.as_ref(), &host_details, &id).await?;
+
+	let resolved = resolve_epub_cfi(&ebook.path, &base_url, &params.cfi)
+		.map_err(cfi_resolve_error_to_api)?;
+
+	Ok(Json(resolved))
+}
+
+fn cfi_resolve_error_to_api(error: EpubCfiResolveError) -> APIError {
+	match error {
+		EpubCfiResolveError::InvalidFormat
+		| EpubCfiResolveError::TooLong
+		| EpubCfiResolveError::MissingContentComponent
+		| EpubCfiResolveError::SpineNotFound => APIError::BadRequest(error.to_string()),
+		EpubCfiResolveError::OpenFailed(msg) => APIError::InternalServerError(msg),
+	}
 }
 
 #[derive(Debug, Deserialize)]

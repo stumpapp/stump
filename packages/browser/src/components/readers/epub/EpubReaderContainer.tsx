@@ -15,11 +15,9 @@ type Props = {
 		| 'onPaginateForward'
 		| 'jumpToSection'
 		| 'onGoToLocator'
+		| 'onGoToLegacyCfi'
 		| 'getLocatorPreviewText'
-		| 'getCfiPreviewText'
-		| 'searchEntireBook'
 		| 'searchBook'
-		| 'onGoToCfi'
 		| 'canGoForward'
 		| 'canGoBackward'
 	>
@@ -36,11 +34,6 @@ export default function EpubReaderContainer({ children, readerMeta, controls }: 
 	const onMouseEnterControls = () => setMouseIsInZone(true)
 	const onMouseLeaveControls = () => setMouseIsInZone(false)
 
-	/**
-	 * This effect is responsible for hiding the controls when the user is not interacting with the reader.
-	 * It is 'debounced' to prevent the controls closing when the user exits but re-enters before
-	 * the timeout has expired.
-	 */
 	useEffect(() => {
 		if (!mouseIsInZone) {
 			const timeout = setTimeout(() => {

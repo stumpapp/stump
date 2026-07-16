@@ -1,11 +1,11 @@
-import { cn, Command, Text } from '@stump/components'
+import { cn, Command } from '@stump/components'
 import type { EpubSearchResult } from '@stump/sdk'
 import { Loader2, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Spinner from '@/components/Spinner'
 
-import { SpineSearchResult, useEpubReaderContext } from '../context'
+import { useEpubReaderContext } from '../context'
 import { searchResultToReaderLocator } from '../readium/locator'
 import ControlButton from './ControlButton'
 
@@ -40,52 +40,10 @@ export function groupByChapter(results: EpubSearchResult[]): ResultGroup[] {
 	return order.map((heading) => ({ heading, items: groups.get(heading) ?? [] }))
 }
 
-/**
- * Highlights occurrences of `query` within `excerpt` using case-insensitive substring
- * matching — deliberately not a `RegExp`, since the query is arbitrary user input that may
- * contain characters with special meaning to `RegExp` (e.g. `(`, `*`, `\`).
- */
-export function highlightExcerpt(excerpt: string, query: string): React.ReactNode[] {
-	if (!query) return [excerpt]
-
-	const needle = query.toLowerCase()
-	const haystack = excerpt.toLowerCase()
-	const parts: React.ReactNode[] = []
-
-	let cursor = 0
-	let matchIndex = haystack.indexOf(needle, cursor)
-	let key = 0
-
-	while (matchIndex !== -1) {
-		if (matchIndex > cursor) {
-			parts.push(excerpt.slice(cursor, matchIndex))
-		}
-		parts.push(
-			<span key={key++} className="bg-yellow-400 text-gray-900">
-				{excerpt.slice(matchIndex, matchIndex + needle.length)}
-			</span>,
-		)
-		cursor = matchIndex + needle.length
-		matchIndex = haystack.indexOf(needle, cursor)
-	}
-
-	if (cursor < excerpt.length) {
-		parts.push(excerpt.slice(cursor))
-	}
-
-	return parts
-}
-
 export default function SearchCommand() {
 	const {
-		readerMeta,
-		controls: { searchBook, searchEntireBook, onGoToLocator, onGoToCfi },
+		controls: { searchBook, onGoToLocator },
 	} = useEpubReaderContext()
-	const { toc } = readerMeta.bookMeta || {}
-
-	// The server path is strictly preferred; the legacy epub.js path is only used as a
-	// fallback until Milestone 5 removes it.
-	const usingServerSearch = !!searchBook
 
 	const [query, setQuery] = useState('')
 	const [open, setOpen] = useState(false)
@@ -98,8 +56,6 @@ export default function SearchCommand() {
 	const [serverResults, setServerResults] = useState<EpubSearchResult[]>([])
 	const [nextCursor, setNextCursor] = useState<string | undefined>(undefined)
 
-	const [legacyResults, setLegacyResults] = useState<SpineSearchResult[]>()
-
 	// Guards against a slow, superseded request overwriting the results of a newer one.
 	const requestIdRef = useRef(0)
 	const abortControllerRef = useRef<AbortController | null>(null)
@@ -111,7 +67,6 @@ export default function SearchCommand() {
 
 	const resetResults = useCallback(() => {
 		setServerResults([])
-		setLegacyResults(undefined)
 		setNextCursor(undefined)
 		setHasSearched(false)
 		setError(null)
@@ -159,36 +114,11 @@ export default function SearchCommand() {
 		[searchBook, abortInFlightRequest],
 	)
 
-	const runLegacySearch = useCallback(
-		async (searchQuery: string) => {
-			if (!searchEntireBook) return
-
-			setIsSearching(true)
-			setError(null)
-			try {
-				const results = await searchEntireBook(searchQuery)
-				setLegacyResults(results)
-				setHasSearched(true)
-			} catch (err) {
-				console.error('[SearchCommand] legacy search failed', err)
-				setError('Search failed. Please try again.')
-			} finally {
-				setIsSearching(false)
-			}
-		},
-		[searchEntireBook],
-	)
-
 	const doSearch = useCallback(() => {
 		const trimmed = query.trim()
 		if (!trimmed) return
-
-		if (usingServerSearch) {
-			void runServerSearch(trimmed)
-		} else {
-			void runLegacySearch(trimmed)
-		}
-	}, [query, usingServerSearch, runServerSearch, runLegacySearch])
+		void runServerSearch(trimmed)
+	}, [query, runServerSearch])
 
 	const loadMore = useCallback(() => {
 		const trimmed = query.trim()
@@ -202,14 +132,6 @@ export default function SearchCommand() {
 			setOpen(false)
 		},
 		[onGoToLocator],
-	)
-
-	const handleGoToCfi = useCallback(
-		(cfi: string) => {
-			onGoToCfi?.(cfi)
-			setOpen(false)
-		},
-		[onGoToCfi],
 	)
 
 	// Abort any in-flight request and drop stale results once the query is cleared.
@@ -256,22 +178,17 @@ export default function SearchCommand() {
 		return () => document.removeEventListener('keydown', onKeyDown)
 	}, [open, doSearch])
 
-	const getSpineTitle = useCallback(
-		(idx: number) => {
-			const adjustedIdx = idx - 1
-			let item = toc?.at(adjustedIdx)
-			if (item?.play_order !== adjustedIdx) {
-				item = toc?.find((i) => i.play_order === adjustedIdx)
-			}
-
-			return item?.label || `Spine item ${idx}`
-		},
-		[toc],
-	)
-
 	const serverGroups = useMemo(() => groupByChapter(serverResults), [serverResults])
 
-	const renderServerResults = () => {
+	const renderContent = () => {
+		if (isSearching) {
+			return (
+				<div className="h-32 flex w-full items-center justify-center">
+					<Spinner />
+				</div>
+			)
+		}
+		if (!hasSearched) return null
 		if (error) return <Command.Empty>{error}</Command.Empty>
 		if (!serverResults.length) return <Command.Empty>No results found.</Command.Empty>
 
@@ -318,44 +235,7 @@ export default function SearchCommand() {
 		)
 	}
 
-	const renderLegacyResults = () => {
-		if (error) return <Command.Empty>{error}</Command.Empty>
-		if (!legacyResults?.length) return <Command.Empty>No results found.</Command.Empty>
-
-		return legacyResults.map(({ spineIndex, results }, idx) => (
-			<Command.Group key={`group-${idx}`} heading={getSpineTitle(spineIndex)}>
-				{results.map((result) => (
-					<Command.Item
-						key={result.cfi}
-						value={result.cfi}
-						onSelect={() => handleGoToCfi(result.cfi)}
-						className="space-y-1 flex flex-col"
-					>
-						<p className="w-full">{highlightExcerpt(result.excerpt, query)}</p>
-						<Text size="xs" variant="muted" className="w-full" title={result.cfi}>
-							{result.cfi.slice(0, 12)}...{result.cfi.slice(-12)}
-						</Text>
-					</Command.Item>
-				))}
-			</Command.Group>
-		))
-	}
-
-	const renderContent = () => {
-		if (isSearching) {
-			return (
-				<div className="h-32 flex w-full items-center justify-center">
-					<Spinner />
-				</div>
-			)
-		} else if (!hasSearched) {
-			return null
-		}
-
-		return usingServerSearch ? renderServerResults() : renderLegacyResults()
-	}
-
-	if (!searchBook && !searchEntireBook) {
+	if (!searchBook) {
 		return null
 	}
 

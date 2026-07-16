@@ -479,3 +479,102 @@ async fn test_detect_finishing_session_for_ebook() {
 		.expect("no session found");
 	assert!(session.is_finalized());
 }
+
+/// Dual-read location-source wiring through the progress API:
+/// CFI → Readium keeps the legacy CFI; Readium → CFI clears the stale locator.
+#[tokio::test]
+async fn test_dual_read_location_source_ordering() {
+	let app = TestApp::new_with_default_user().await;
+	let db = app.conn();
+
+	let series = fake_data::Series {
+		name: Some("Dual Read".to_string()),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	let book = fake_data::Media {
+		series_id: series.id.clone(),
+		id: Some("dual-read-epub".to_string()),
+		name: Some("Dual Read Book".to_string()),
+		extension: Some("epub".to_string()),
+		pages: Some(100),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
+
+	let legacy_cfi = "epubcfi(/6/4!/4[chapter1]/2/4[chap01ref]!/3:0)".to_string();
+
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Epub(Box::new(EpubProgressInput {
+			locator: EpubProgressLocatorInput::Epubcfi(legacy_cfi.clone()),
+			percentage: Some(Decimal::new(10, 2)),
+			is_complete: Some(false),
+			elapsed_seconds_delta: Some(60),
+			device_id: None,
+		})),
+	)
+	.await;
+
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Epub(Box::new(EpubProgressInput {
+			locator: EpubProgressLocatorInput::Readium(Box::new(ReadiumLocator {
+				chapter_title: "Chapter 2".to_string(),
+				href: "chapter2.xhtml".to_string(),
+				r#type: "application/xhtml+xml".to_string(),
+				..Default::default()
+			})),
+			percentage: Some(Decimal::new(25, 2)),
+			is_complete: Some(false),
+			elapsed_seconds_delta: Some(60),
+			device_id: None,
+		})),
+	)
+	.await;
+
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
+		.one(app.conn())
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+
+	assert_eq!(session.epubcfi.as_deref(), Some(legacy_cfi.as_str()));
+	assert_eq!(
+		session.end_locator.as_ref().map(|l| l.href.as_str()),
+		Some("chapter2.xhtml")
+	);
+
+	let newer_cfi = "epubcfi(/6/6!/4[koreader]/1:0)".to_string();
+	update_progress(
+		&app,
+		&book.id,
+		MediaProgressInput::Epub(Box::new(EpubProgressInput {
+			locator: EpubProgressLocatorInput::Epubcfi(newer_cfi.clone()),
+			percentage: Some(Decimal::new(30, 2)),
+			is_complete: Some(false),
+			elapsed_seconds_delta: Some(60),
+			device_id: None,
+		})),
+	)
+	.await;
+
+	let session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq(book.id.clone()))
+		.one(app.conn())
+		.await
+		.expect("could not query reading sessions")
+		.expect("no session found");
+
+	assert_eq!(session.epubcfi.as_deref(), Some(newer_cfi.as_str()));
+	assert!(
+		session.end_locator.is_none(),
+		"CFI write after Readium must clear stale end_locator"
+	);
+}

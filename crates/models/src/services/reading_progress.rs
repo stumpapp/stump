@@ -10,6 +10,17 @@ use crate::{
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
 
+/// Which coordinate system an incoming progression update is authoritative for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ProgressLocationSource {
+	/// Percentage / elapsed / completion only — do not change stored locations.
+	#[default]
+	None,
+	Readium,
+	EpubCfi,
+	Page,
+}
+
 /// normalized porgression info derived from a [`MediaProgressInput`]
 #[derive(Debug, Default)]
 pub struct NormalizedProgression {
@@ -21,6 +32,7 @@ pub struct NormalizedProgression {
 	pub did_complete: bool,
 	pub device_id: Option<String>,
 	pub reset_elapsed_seconds: bool,
+	pub location_source: ProgressLocationSource,
 }
 
 impl NormalizedProgression {
@@ -28,12 +40,42 @@ impl NormalizedProgression {
 		let new_elapsed = session.elapsed_seconds.unwrap_or(0)
 			+ self.elapsed_seconds_delta.unwrap_or(0).max(0);
 
+		let preserved_epubcfi = session.epubcfi.clone();
+		let preserved_end_page = session.end_page;
+		let preserved_end_locator = session.end_locator.clone();
+		let preserved_end_percentage = session.end_percentage;
+
 		let mut active = session.into_active_model();
 
-		active.epubcfi = Set(self.epubcfi.clone());
-		active.end_page = Set(self.page);
-		active.end_locator = Set(self.locator.clone());
-		active.end_percentage = Set(self.percentage);
+		match self.location_source {
+			ProgressLocationSource::Readium => {
+				active.epubcfi = Set(preserved_epubcfi);
+				if let Some(locator) = &self.locator {
+					active.end_locator = Set(Some(locator.clone()));
+				}
+			},
+			ProgressLocationSource::EpubCfi => {
+				if let Some(cfi) = &self.epubcfi {
+					active.epubcfi = Set(Some(cfi.clone()));
+				}
+				// A fresh CFI update supersedes a stale Readium locator so resume
+				// does not prefer an older web/mobile position.
+				active.end_locator = Set(None);
+			},
+			ProgressLocationSource::Page | ProgressLocationSource::None => {
+				active.epubcfi = Set(self.epubcfi.clone().or(preserved_epubcfi));
+				active.end_locator = Set(self.locator.clone().or(preserved_end_locator));
+			},
+		}
+
+		active.end_page = match self.page {
+			Some(page) => Set(Some(page)),
+			None => Set(preserved_end_page),
+		};
+		active.end_percentage = match self.percentage {
+			Some(percentage) => Set(Some(percentage)),
+			None => Set(preserved_end_percentage),
+		};
 		if self.did_complete {
 			active.status = Set(ReadingStatus::Finished);
 		} else {
@@ -99,13 +141,21 @@ pub async fn upsert_reading_session(
 			let readthrough_number =
 				derive_readthrough_number(txn, &user.id, media_id).await?;
 
+			let (epubcfi, end_locator) = match input.location_source {
+				ProgressLocationSource::Readium => (input.epubcfi, input.locator),
+				ProgressLocationSource::EpubCfi => (input.epubcfi, None),
+				ProgressLocationSource::Page | ProgressLocationSource::None => {
+					(input.epubcfi, input.locator)
+				},
+			};
+
 			reading_session::ActiveModel {
 				session_date: Set(logical_today),
-				epubcfi: Set(input.epubcfi),
+				epubcfi: Set(epubcfi),
 				start_page: Set(input.page),
 				end_page: Set(input.page),
-				start_locator: Set(input.locator.clone()),
-				end_locator: Set(input.locator),
+				start_locator: Set(end_locator.clone()),
+				end_locator: Set(end_locator),
 				start_percentage: Set(input.percentage.or(Some(Decimal::new(0, 2)))),
 				end_percentage: Set(input.percentage),
 				// set bc there's no existing session to extend
@@ -210,4 +260,77 @@ pub async fn reset_cumulative_elapsed_seconds(
 	);
 
 	Ok(affected_rows > 0)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::shared::{enums::ReadingStatus, readium::ReadiumLocator};
+	use chrono::NaiveDate;
+
+	fn sample_session() -> reading_session::Model {
+		reading_session::Model {
+			id: 1,
+			session_date: NaiveDate::from_ymd_opt(2026, 1, 1).unwrap(),
+			epubcfi: Some("epubcfi(/6/4!/4[old]/1:0)".to_string()),
+			start_locator: None,
+			end_locator: Some(ReadiumLocator {
+				chapter_title: "Old".to_string(),
+				href: "old.xhtml".to_string(),
+				r#type: "application/xhtml+xml".to_string(),
+				..Default::default()
+			}),
+			start_page: None,
+			end_page: None,
+			start_percentage: None,
+			end_percentage: Some(Decimal::new(10, 2)),
+			koreader_progress: None,
+			elapsed_seconds: Some(0),
+			readthrough_number: 1,
+			status: ReadingStatus::Reading,
+			notes: None,
+			device_ids: None,
+			media_id: "m1".to_string(),
+			user_id: "u1".to_string(),
+			created_at: chrono::Utc::now().fixed_offset(),
+			updated_at: None,
+		}
+	}
+
+	#[test]
+	fn readium_update_preserves_epubcfi() {
+		let applied = NormalizedProgression {
+			locator: Some(ReadiumLocator {
+				chapter_title: "New".to_string(),
+				href: "new.xhtml".to_string(),
+				r#type: "application/xhtml+xml".to_string(),
+				..Default::default()
+			}),
+			location_source: ProgressLocationSource::Readium,
+			..Default::default()
+		}
+		.apply(sample_session());
+
+		assert_eq!(
+			applied.epubcfi,
+			Set(Some("epubcfi(/6/4!/4[old]/1:0)".to_string()))
+		);
+		assert!(matches!(applied.end_locator, Set(Some(_))));
+	}
+
+	#[test]
+	fn cfi_update_clears_stale_locator() {
+		let applied = NormalizedProgression {
+			epubcfi: Some("epubcfi(/6/6!/4[new]/1:0)".to_string()),
+			location_source: ProgressLocationSource::EpubCfi,
+			..Default::default()
+		}
+		.apply(sample_session());
+
+		assert_eq!(
+			applied.epubcfi,
+			Set(Some("epubcfi(/6/6!/4[new]/1:0)".to_string()))
+		);
+		assert_eq!(applied.end_locator, Set(None));
+	}
 }

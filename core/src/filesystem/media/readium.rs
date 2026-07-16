@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
-use epub::doc::EpubDoc;
+use epub::doc::{EpubDoc, NavPoint};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
@@ -20,6 +20,8 @@ pub struct RWPMLink {
 	pub rel: Option<Vec<String>>,
 	#[serde(skip_serializing_if = "HashMap::is_empty", default)]
 	pub properties: HashMap<String, serde_json::Value>,
+	#[serde(skip_serializing_if = "Vec::is_empty", default)]
+	pub children: Vec<RWPMLink>,
 	pub duration: Option<f64>, //  for audio/video
 	pub width: Option<u32>,    // for images
 	pub height: Option<u32>,   // for images
@@ -41,6 +43,11 @@ impl RWPMLink {
 
 	pub fn with_rel(mut self, rel: impl Into<String>) -> Self {
 		self.rel = Some(vec![rel.into()]);
+		self
+	}
+
+	pub fn with_children(mut self, children: Vec<RWPMLink>) -> Self {
+		self.children = children;
 		self
 	}
 }
@@ -289,15 +296,23 @@ impl ReadiumManifestGenerator {
 	fn generate_toc(&self, epub: &EpubDoc<BufReader<File>>) -> Vec<RWPMLink> {
 		epub.toc
 			.iter()
-			.map(|nav| {
-				let href = nav.content.to_string_lossy().to_string();
-				RWPMLink::new(
-					self.resource_url(&href),
-					Some("application/xhtml+xml".to_string()),
-				)
-				.with_title(&nav.label)
-			})
+			.map(|nav| self.nav_point_to_link(nav))
 			.collect()
+	}
+
+	fn nav_point_to_link(&self, nav: &NavPoint) -> RWPMLink {
+		let href = nav.content.to_string_lossy().to_string();
+		RWPMLink::new(
+			self.resource_url(&href),
+			Some("application/xhtml+xml".to_string()),
+		)
+		.with_title(&nav.label)
+		.with_children(
+			nav.children
+				.iter()
+				.map(|child| self.nav_point_to_link(child))
+				.collect(),
+		)
 	}
 
 	/// Build an absolute RWPM resource URL for a package-relative path.
@@ -458,6 +473,21 @@ mod tests {
 		assert_eq!(link.media_type, Some("text/html".to_string()));
 		assert_eq!(link.title, Some("Test".to_string()));
 		assert_eq!(link.rel, Some(vec!["self".to_string()]));
+		assert!(link.children.is_empty());
+	}
+
+	#[test]
+	fn test_rwpm_link_children_builder() {
+		let child =
+			RWPMLink::new("/child.xhtml", Some("application/xhtml+xml".to_string()))
+				.with_title("Child");
+		let parent =
+			RWPMLink::new("/parent.xhtml", Some("application/xhtml+xml".to_string()))
+				.with_title("Parent")
+				.with_children(vec![child]);
+
+		assert_eq!(parent.children.len(), 1);
+		assert_eq!(parent.children[0].title, Some("Child".to_string()));
 	}
 
 	#[test]
@@ -487,6 +517,41 @@ mod tests {
 		assert!(json.contains("Test Book"));
 		assert!(json.contains("@context"));
 		assert!(json.contains("readingOrder"));
+	}
+
+	#[test]
+	fn test_manifest_serialization_nested_toc() {
+		let child = RWPMLink::new(
+			"/OEBPS/ch1.xhtml",
+			Some("application/xhtml+xml".to_string()),
+		)
+		.with_title("Chapter 1");
+		let parent = RWPMLink::new(
+			"/OEBPS/volume1.xhtml",
+			Some("application/xhtml+xml".to_string()),
+		)
+		.with_title("Volume 1")
+		.with_children(vec![child]);
+
+		let manifest = RWPManifest {
+			context: RWPM_CONTEXT.to_string(),
+			metadata: RWPMMetadata {
+				title: "Test Book".to_string(),
+				..Default::default()
+			},
+			links: vec![],
+			reading_order: vec![],
+			resources: vec![],
+			toc: vec![parent],
+		};
+
+		let json = serde_json::to_string(&manifest).unwrap();
+		assert!(json.contains("Volume 1"));
+		assert!(json.contains("Chapter 1"));
+		assert!(
+			json.contains("\"children\":["),
+			"toc children should be serialized"
+		);
 	}
 
 	#[test]

@@ -1,4 +1,5 @@
 mod common;
+mod koreader;
 mod opds;
 mod reading_progress;
 

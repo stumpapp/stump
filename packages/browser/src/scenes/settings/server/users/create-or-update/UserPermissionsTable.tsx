@@ -250,6 +250,15 @@ const groups = [
 		permissions: [UserPermission.ReadUsers, UserPermission.ManageUsers],
 	},
 	{
+		groupKey: 'metadataManagement',
+		permissions: [
+			UserPermission.MetadataProviderRead,
+			UserPermission.MetadataProviderManage,
+			UserPermission.MetadataFetchRecordRead,
+			UserPermission.MetadataFetchRecordManage,
+		],
+	},
+	{
 		groupKey: 'serverManagement',
 		permissions: [
 			UserPermission.ReadJobs,

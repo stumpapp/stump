@@ -2644,7 +2644,8 @@
 			"someRejected": "有些文件被拒绝。请检查文件类型并重试",
 			"tooManyFiles": "您选择了太多的文件",
 			"noValidFiles": "没有选择有效的文件"
-		}
+		},
+		"unknownError": "An unknown error occurred"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2835,15 +2836,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Mark as Read",
-				"confirmation": "您确定要将 {{bookTitle}} 标记为已读吗？"
+				"confirmation": "您确定要将 {{bookTitle}} 标记为已读吗？",
+				"failure": "Failed to mark book as read"
 			},
 			"clearProgress": {
 				"label": "Clear Progress",
-				"confirmation": "您确定要清除 {{bookTitle}} 的进度吗？"
+				"confirmation": "您确定要清除 {{bookTitle}} 的进度吗？",
+				"failure": "Failed to delete current progress"
 			},
 			"deleteReadHistory": {
 				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"failure": "Failed to delete read history"
 			},
 			"deleteBook": {
 				"label": "Delete Book",

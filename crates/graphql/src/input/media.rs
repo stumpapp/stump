@@ -1,7 +1,7 @@
 use async_graphql::{InputObject, OneofObject};
 use models::{
 	entity::{bookmark, media_annotation, media_metadata, user::AuthUser},
-	shared::readium::ReadiumLocator,
+	shared::{enums::MetadataProvider, readium::ReadiumLocator},
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
 
@@ -180,4 +180,19 @@ impl CreateAnnotationInput {
 pub struct UpdateAnnotationInput {
 	pub id: String,
 	pub annotation_text: Option<String>,
+}
+
+/// A manual override for searching metadata providers for a single media item. When
+/// provided, the caller's fields take precedence over whatever is already stored on the
+/// media, and the search is restricted to a single provider if one is given.
+#[derive(Debug, Clone, Default, InputObject)]
+pub struct MediaMetadataSearchInput {
+	pub title: Option<String>,
+	pub author: Option<String>,
+	pub isbn: Option<String>,
+	pub year: Option<i32>,
+	/// Restrict the search to this provider only. If omitted, all enabled providers
+	/// configured for the media's library type are searched.
+	pub provider: Option<MetadataProvider>,
+	pub limit: Option<i32>,
 }

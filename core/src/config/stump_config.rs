@@ -185,6 +185,7 @@ pub struct StumpConfig {
 	/// Indicates if the KoReader sync feature should be enabled.
 	#[default_value(false)]
 	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
+	#[debug_value(true)]
 	pub enable_koreader_sync: bool,
 
 	/// Indicates if the Kobo sync feature should be enabled.

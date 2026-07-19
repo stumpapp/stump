@@ -544,9 +544,9 @@
 	},
 	"libraryHeader": {
 		"tabs": {
-			"books": "Books",
-			"series": "Series",
-			"files": "Files"
+			"books": "Książki",
+			"series": "Serie",
+			"files": "Pliki"
 		}
 	},
 	"librarySettingsScene": {
@@ -924,16 +924,16 @@
 	},
 	"seriesHeader": {
 		"tabs": {
-			"books": "Books",
-			"files": "Files"
+			"books": "Książki",
+			"files": "Pliki"
 		},
 		"actions": {
-			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
+			"markAsRead": "Oznacz serię jako przeczytaną",
+			"markAsUnread": "Oznacz serię jako nieprzeczytaną",
+			"goToLibrary": "Przejdź do biblioteki"
 		},
 		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
+			"failedToUpdateCompletion": "Nie udało się zaktualizować stanu ukończenia książki"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -2585,11 +2585,11 @@
 	},
 	"common": {
 		"add": "Dodaj",
-		"andXMoreTrailing": "...and {{count}} more",
+		"andXMoreTrailing": "...i jeszcze {{count}}",
 		"cancel": "Anuluj",
 		"clear": "Wyczyść",
 		"confirm": "Potwierdź",
-		"created": "Created",
+		"created": "Utworzono",
 		"delete": "Usuń",
 		"deleteConfirmation": {
 			"title": "Usuń {{type}}",
@@ -2608,22 +2608,22 @@
 		"noChanges": "Brak zmian",
 		"create": "Utwórz",
 		"edit": "Edytuj",
-		"info": "Info",
+		"info": "Informacje",
 		"infoSheetStats": {
-			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
+			"series": "Serie",
+			"inProgress": "W trakcie",
+			"completedBooks": "Ukończone",
+			"readingTime": "Czas czytania",
+			"size": "Rozmiar"
 		},
 		"update": "Aktualizuj",
 		"upload": "Prześlij",
 		"uploading": "Przesyłanie",
 		"uploadingEllipsis": "Przesyłanie...",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
+		"upNext": "Następne w kolejce",
+		"unknown": "Nieznane",
+		"lastUpdated": "Ostatnio aktualizowane",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
 		"login": "Nazwa użytkownika",
@@ -2644,7 +2644,8 @@
 			"someRejected": "Niektóre pliki zostały odrzucone. Sprawdź typy plików i spróbuj ponownie",
 			"tooManyFiles": "Wybrano zbyt dużą ilość plików",
 			"noValidFiles": "Nie wybrano żadnych poprawnych plików"
-		}
+		},
+		"unknownError": "Wystąpił nieznany błąd"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2835,15 +2836,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Oznacz jako przeczytane",
-				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?"
+				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?",
+				"failure": "Nie udało się oznaczyć książki jako przeczytanej"
 			},
 			"clearProgress": {
 				"label": "Wyczyść postęp",
-				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?"
+				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?",
+				"failure": "Nie udało się usunąć bieżącego postępu"
 			},
 			"deleteReadHistory": {
 				"label": "Usuń historię czytania",
-				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?"
+				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?",
+				"failure": "Nie udało się usunąć historii odczytu"
 			},
 			"deleteBook": {
 				"label": "Usuń książkę",

@@ -173,6 +173,7 @@ impl Entity {
 	}
 
 	pub fn apply_for_user(user: &AuthUser, select: Select<Entity>) -> Select<Entity> {
+		let select = select.left_join(media_metadata::Entity);
 		let select = apply_series_metadata_join(select);
 		let select = apply_library_hidden_filter(select, user);
 		apply_age_restriction_filter(select, user.age_restriction.clone())
@@ -556,5 +557,24 @@ mod tests {
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
             r#"WHERE "media"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
             );
+	}
+
+	#[test]
+	fn test_apply_for_user_age_restrict() {
+		let mut user = get_default_user();
+		user.age_restriction = Some(age_restriction::Model {
+			id: 1,
+			age: 18,
+			restrict_on_unset: true,
+			user_id: user.id.clone(),
+		});
+		let select = Entity::apply_for_user(&user, Entity::find());
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"# +
+            r#" AND (("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR ("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18))"#
+        );
 	}
 }

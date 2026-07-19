@@ -74,11 +74,15 @@ async fn analyze_book_page(
 		});
 	}
 
+	let config_owned = ctx.config().clone();
+	let path_owned = path.clone();
 	let AnalyzedPage {
 		content_type,
 		height,
 		width,
-	} = analyze_page(&path, page, ctx.config())?;
+	} = tokio::task::spawn_blocking(move || analyze_page(&path_owned, page, &config_owned))
+		.await
+		.map_err(|e| JobError::Unknown(e.to_string()))??;
 
 	let dimensions = PageDimension { height, width };
 

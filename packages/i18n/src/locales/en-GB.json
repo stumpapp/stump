@@ -1507,7 +1507,7 @@
 				},
 				"navigation": {
 					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
+					"description": "Customise the navigation elements of the app"
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
@@ -2375,7 +2375,7 @@
 					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
+					"label": "API token expiry",
 					"description": "The date when the API token will expire (optional)"
 				},
 				"enableProvider": {
@@ -2644,7 +2644,8 @@
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
-		}
+		},
+		"unknownError": "An unknown error occurred"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2821,7 +2822,7 @@
 				"basic": "Basic"
 			},
 			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
+			"catalogUrl": "Catalogue URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
 			"checkConnection": "Check Connection",
@@ -2835,15 +2836,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Mark as Read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
+				"failure": "Failed to mark book as read"
 			},
 			"clearProgress": {
 				"label": "Clear Progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
+				"failure": "Failed to delete current progress"
 			},
 			"deleteReadHistory": {
 				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"failure": "Failed to delete read history"
 			},
 			"deleteBook": {
 				"label": "Delete Book",
@@ -2868,7 +2872,7 @@
 			"size": "Size",
 			"volume": "Volume",
 			"writers": "Writers",
-			"colorists": "Colorists",
+			"colorists": "Colourists",
 			"inkers": "Inkers",
 			"letterers": "Letterers",
 			"coverArtists": "Cover Artists",
@@ -2896,7 +2900,7 @@
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
-			"favorite": "Favorite",
+			"favorite": "Favourite",
 			"finished": "Finished",
 			"grid": "Grid",
 			"list": "List",
@@ -3069,9 +3073,9 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail Placeholder",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average Color",
-						"colorful": "Colorful",
+						"grayscale": "Greyscale",
+						"averageColor": "Average Colour",
+						"colorful": "Colourful",
 						"thumbhash": "Thumbhash"
 					}
 				},
@@ -3185,7 +3189,7 @@
 		"stumpServer": {
 			"browse": {
 				"books": "Books",
-				"favorites": "Favorites",
+				"favorites": "Favourites",
 				"files": "Files",
 				"libraries": "Libraries",
 				"series": "Series",
@@ -3338,7 +3342,7 @@
 				"options": {
 					"start": "Start",
 					"left": "Left",
-					"center": "Center",
+					"center": "Centre",
 					"right": "Right",
 					"justify": "Justify"
 				}

@@ -1588,6 +1588,13 @@ input MediaMetadataSearchInput {
 	author: String
 	isbn: String
 	year: Int
+	"The issue number (for comics/manga)"
+	number: Float
+	"""
+	The volume ID to search within, which will swap to a more precise lookup if provided alongside
+	`number`
+	"""
+	comicVineVolumeId: String
 	"""
 	Restrict the search to this provider only. If omitted, all enabled providers
 	configured for the media's library type are searched.

@@ -88,7 +88,9 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 	const [author, setAuthor] = useState('')
 	const [isbn, setIsbn] = useState('')
 	const [year, setYear] = useState('')
-	const [provider, setProvider] = useState<MetadataProvider | ''>('')
+	const [number, setNumber] = useState('')
+	const [comicVineVolumeId, setComicVineVolumeId] = useState('')
+	const [provider, setProvider] = useState<MetadataProvider>()
 
 	const { mutate, isPending } = useGraphQLMutation(searchMutation, {
 		onSuccess: (data) => {
@@ -114,6 +116,7 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 
 	const handleSubmit = () => {
 		const parsedYear = parseInt(year, 10)
+		const parsedNumber = parseFloat(number)
 
 		mutate({
 			id: mediaId,
@@ -122,6 +125,8 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 				author: author.trim() || undefined,
 				isbn: isbn.trim() || undefined,
 				year: Number.isNaN(parsedYear) ? undefined : parsedYear,
+				number: Number.isNaN(parsedNumber) ? undefined : parsedNumber,
+				comicVineVolumeId: comicVineVolumeId.trim() || undefined,
 				provider: provider || undefined,
 			},
 		})
@@ -162,6 +167,22 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 					onChange={(e) => setYear(e.target.value)}
 					fullWidth
 				/>
+				<Input
+					label={t(getFormKey('number.label'))}
+					type="number"
+					value={number}
+					onChange={(e) => setNumber(e.target.value)}
+					placeholder="e.g., 1, 2.5"
+					step="0.01"
+					fullWidth
+				/>
+				<Input
+					label={t(getFormKey('comicVineVolumeId.label'))}
+					value={comicVineVolumeId}
+					onChange={(e) => setComicVineVolumeId(e.target.value)}
+					placeholder={t(getFormKey('comicVineVolumeId.placeholder'))}
+					fullWidth
+				/>
 
 				<div className="gap-2 flex flex-col">
 					<Label>{t(getFormKey('provider.label'))}</Label>
@@ -171,7 +192,7 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 							value: p.providerType,
 						}))}
 						emptyOption={{ label: t(getFormKey('provider.allOption')), value: '' }}
-						value={provider}
+						value={provider ?? ''}
 						onChange={(e) => setProvider(e.target.value as MetadataProvider)}
 						disabled={enabledProviders.length === 0}
 					/>

@@ -1699,8 +1699,15 @@ export type MediaMetadataOverview = {
  */
 export type MediaMetadataSearchInput = {
   author?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The volume ID to search within, which will swap to a more precise lookup if provided alongside
+   * `number`
+   */
+  comicVineVolumeId?: InputMaybe<Scalars['String']['input']>;
   isbn?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  /** The issue number (for comics/manga) */
+  number?: InputMaybe<Scalars['Float']['input']>;
   /**
    * Restrict the search to this provider only. If omitted, all enabled providers
    * configured for the media's library type are searched.

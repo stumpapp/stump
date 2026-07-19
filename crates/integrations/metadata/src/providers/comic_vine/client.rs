@@ -18,8 +18,8 @@ use crate::{
 
 use super::{
 	types::{
-		ComicVinePrefix, ComicVineResponse, IssueDetail, IssueResult, VolumeDetail,
-		VolumeResult,
+		ComicVineIssuesFilter, ComicVinePrefix, ComicVineResponse, IssueDetail,
+		IssueResult, VolumeDetail, VolumeResult,
 	},
 	utils::filter_credits_by_role,
 };
@@ -131,13 +131,32 @@ impl ComicVineClient {
 		limit: u32,
 	) -> Result<Vec<IssueResult>, MetadataProviderError> {
 		let limit_str = limit.to_string();
-		let params = [
+		let params = vec![
 			("query", query),
 			("resources", "issue"),
 			("field_list", "id,name,description,issue_number,volume,cover_date,image,person_credits,character_credits"),
 			("limit", limit_str.as_str()),
 		];
+
 		self.get::<Vec<IssueResult>>("/search/", &params).await
+	}
+
+	/// queries the `/issues/` endpoint with filters, which is more precise than search when you know
+	/// specific criteria like volume ID or issue number
+	#[tracing::instrument(skip(self))]
+	async fn filter_issues(
+		&self,
+		filter: &str,
+		limit: u32,
+	) -> Result<Vec<IssueResult>, MetadataProviderError> {
+		let limit_str = limit.to_string();
+		let params = vec![
+			("field_list", "id,name,description,issue_number,volume,cover_date,image,person_credits,character_credits"),
+			("limit", limit_str.as_str()),
+			("filter", filter),
+		];
+
+		self.get::<Vec<IssueResult>>("/issues/", &params).await
 	}
 
 	async fn fetch_volume(
@@ -308,9 +327,20 @@ impl MetadataProvider for ComicVineClient {
 		}
 
 		tracing::trace!("Searching for issues on ComicVine");
-		let results = self
-			.search_issues(&query.title, query.limit.unwrap_or(10))
-			.await?;
+
+		let filter = ComicVineIssuesFilter::from(query);
+		let filter_str = filter.to_filter_string();
+
+		let results = if let Some(ref filter) = filter_str {
+			tracing::debug!(?filter, "Using ComicVine /issues/ endpoint with filter");
+			self.filter_issues(filter, query.limit.unwrap_or(10))
+				.await?
+		} else {
+			tracing::debug!("Using ComicVine /search/ endpoint");
+			self.search_issues(&query.title, query.limit.unwrap_or(10))
+				.await?
+		};
+
 		let requested = results.len();
 
 		let mut candidates = Vec::with_capacity(results.len());

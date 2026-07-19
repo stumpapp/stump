@@ -65,6 +65,13 @@
 				"year": {
 					"label": "Year"
 				},
+				"number": {
+					"label": "Issue number"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine volume ID",
+					"placeholder": "e.g., 129260"
+				},
 				"provider": {
 					"label": "Provider",
 					"allOption": "All enabled providers"

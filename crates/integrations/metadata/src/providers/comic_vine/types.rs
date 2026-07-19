@@ -1,5 +1,43 @@
 use crate::serde_utils::string_or_number;
+use crate::types::SearchQuery;
 use serde::Deserialize;
+
+/// Filter builder for ComicVine issues search
+#[derive(Debug, Default)]
+pub struct ComicVineIssuesFilter {
+	volume_id: Option<String>,
+	issue_number: Option<f32>,
+}
+
+impl ComicVineIssuesFilter {
+	/// convert the filter to a ComicVine API filter string -> "field1:value1,field2:value2"
+	pub fn to_filter_string(&self) -> Option<String> {
+		let mut filters = Vec::new();
+
+		if let Some(volume_id) = &self.volume_id {
+			filters.push(format!("volume:{}", volume_id));
+		}
+
+		if let Some(issue_number) = self.issue_number {
+			filters.push(format!("issue_number:{}", issue_number));
+		}
+
+		if filters.is_empty() {
+			None
+		} else {
+			Some(filters.join(","))
+		}
+	}
+}
+
+impl From<&SearchQuery> for ComicVineIssuesFilter {
+	fn from(query: &SearchQuery) -> Self {
+		Self {
+			volume_id: query.provider_hints.get("comic_vine_volume_id").cloned(),
+			issue_number: query.number,
+		}
+	}
+}
 
 pub enum ComicVinePrefix {
 	Volume = 4050,

@@ -42,6 +42,36 @@
 			"subtitleEditing": "您书库编辑的预览将在下方显示"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Search metadata",
+			"description": "Search an external provider for this book and choose a match to apply",
+			"openButton": "Search Metadata",
+			"searchButton": "Search",
+			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
+			"noResults": "No matches were found for this search",
+			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
+			"searchFailed": "Failed to search metadata providers",
+			"form": {
+				"title": {
+					"label": "Title"
+				},
+				"author": {
+					"label": "Author"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Year"
+				},
+				"provider": {
+					"label": "Provider",
+					"allOption": "All enabled providers"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "文件信息",
@@ -2108,7 +2138,8 @@
 						"emailing": "Emailing",
 						"libraryManagement": "Library management",
 						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"serverManagement": "Server management",
+						"metadataManagement": "Metadata management"
 					},
 					"heading": "权限",
 					"subtitle": [
@@ -2820,6 +2851,22 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edit thumbnails",
 			"description": "Allows the user to edit thumbnails for books and series"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Read metadata providers",
+			"description": "Allows the user to view configured external metadata providers"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Manage metadata providers",
+			"description": "Allows the user to configure external metadata providers"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Read metadata matches",
+			"description": "Allows the user to view metadata fetch results awaiting review"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Manage metadata matches",
+			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
 		}
 	},
 	"mobileApp": {

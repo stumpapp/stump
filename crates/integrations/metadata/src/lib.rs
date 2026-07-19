@@ -16,7 +16,8 @@ pub use rate_limit::RateLimiter;
 pub use scoring::MatchScorer;
 pub use types::{
 	ConfidenceFactor, ExternalMediaMetadata, ExternalMetadata, ExternalSeriesMetadata,
-	MatchCandidate, MediaType, MetadataField, PublicationStatus, SearchQuery,
+	MatchCandidate, MediaType, MetadataField, PublicationStatus, SearchOutcome,
+	SearchQuery,
 };
 
 use providers::HardcoverClient;

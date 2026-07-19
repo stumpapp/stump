@@ -2032,6 +2032,9 @@
 						"updateError": "Error al actualizar el trabajo programado",
 						"deleteSuccess": "Tarea programada eliminada",
 						"deleteError": "Error al eliminar la tarea programada"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {

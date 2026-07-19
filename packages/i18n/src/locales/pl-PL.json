@@ -2032,6 +2032,9 @@
 						"updateError": "Nie udało się zaktualizować zaplanowanego zadania",
 						"deleteSuccess": "Zaplanowane zadanie zostało usunięte",
 						"deleteError": "Nie udało się usunąć zaplanowanego zadania"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {

@@ -5980,6 +5980,13 @@ export type BookMetadataSearchProvidersQueryVariables = Exact<{ [key: string]: n
 
 export type BookMetadataSearchProvidersQuery = { __typename?: 'Query', metadataProviderConfigs: Array<{ __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean }> };
 
+export type BookMetadataSearchContextQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookMetadataSearchContextQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, series: { __typename?: 'Series', id: string, metadata?: { __typename?: 'SeriesMetadata', comicid?: number | null } | null } } | null };
+
 export type SearchMediaMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   search?: InputMaybe<MediaMetadataSearchInput>;
@@ -11389,6 +11396,19 @@ export const BookMetadataSearchProvidersDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookMetadataSearchProvidersQuery, BookMetadataSearchProvidersQueryVariables>;
+export const BookMetadataSearchContextDocument = new TypedDocumentString(`
+    query BookMetadataSearchContext($id: ID!) {
+  mediaById(id: $id) {
+    id
+    series {
+      id
+      metadata {
+        comicid
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookMetadataSearchContextQuery, BookMetadataSearchContextQueryVariables>;
 export const SearchMediaMetadataDocument = new TypedDocumentString(`
     mutation SearchMediaMetadata($id: ID!, $search: MediaMetadataSearchInput) {
   fetchMediaMetadata(id: $id, search: $search) {

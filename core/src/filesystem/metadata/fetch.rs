@@ -269,7 +269,7 @@ pub async fn fetch_media_metadata(
 					.to_owned(),
 			),
 		)
-		.into_tuple::<Option<String>>()
+		.into_tuple::<Option<i32>>()
 		.one(conn)
 		.await?
 		.flatten();

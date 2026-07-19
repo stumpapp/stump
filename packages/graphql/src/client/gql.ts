@@ -175,6 +175,7 @@ type Documents = {
     "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n": typeof types.BookManagementSceneDocument,
     "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": typeof types.BookManagementSceneAnalyzeDocument,
     "\n\tquery BookMetadataSearchProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": typeof types.BookMetadataSearchProvidersDocument,
+    "\n\tquery BookMetadataSearchContext($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tmetadata {\n\t\t\t\t\tcomicid\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookMetadataSearchContextDocument,
     "\n\tmutation SearchMediaMetadata($id: ID!, $search: MediaMetadataSearchInput) {\n\t\tfetchMediaMetadata(id: $id, search: $search) {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": typeof types.SearchMediaMetadataDocument,
     "\n\tmutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetMediaTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookTagEditorSetTagsDocument,
     "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": typeof types.BookThumbnailSelectorFragmentDoc,
@@ -479,6 +480,7 @@ const documents: Documents = {
     "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n": types.BookManagementSceneDocument,
     "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": types.BookManagementSceneAnalyzeDocument,
     "\n\tquery BookMetadataSearchProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": types.BookMetadataSearchProvidersDocument,
+    "\n\tquery BookMetadataSearchContext($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tmetadata {\n\t\t\t\t\tcomicid\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookMetadataSearchContextDocument,
     "\n\tmutation SearchMediaMetadata($id: ID!, $search: MediaMetadataSearchInput) {\n\t\tfetchMediaMetadata(id: $id, search: $search) {\n\t\t\t...PendingMatchRecord\n\t\t}\n\t}\n": types.SearchMediaMetadataDocument,
     "\n\tmutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {\n\t\tsetMediaTags(id: $id, tags: $tags) {\n\t\t\tid\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.BookTagEditorSetTagsDocument,
     "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": types.BookThumbnailSelectorFragmentDoc,
@@ -1263,6 +1265,10 @@ export function graphql(source: "\n\tmutation BookManagementSceneAnalyze($id: ID
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery BookMetadataSearchProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n"): typeof import('./graphql').BookMetadataSearchProvidersDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery BookMetadataSearchContext($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tmetadata {\n\t\t\t\t\tcomicid\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookMetadataSearchContextDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -1678,6 +1678,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "croner"
+version = "3.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4aa42bcd3d846ebf66e15bd528d1087f75d1c6c1c66ebff626178a106353c576"
+dependencies = [
+ "chrono",
+ "derive_builder",
+ "strum 0.27.2",
+]
+
+[[package]]
 name = "crossbeam-channel"
 version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3274,7 +3285,7 @@ dependencies = [
  "bcrypt",
  "chrono",
  "clap 4.5.48",
- "cron",
+ "croner",
  "email",
  "epub",
  "filter-gen",
@@ -8614,7 +8625,7 @@ dependencies = [
  "base64 0.22.1",
  "chrono",
  "criterion",
- "cron",
+ "croner",
  "dashmap 6.1.0",
  "data-encoding",
  "derivative",

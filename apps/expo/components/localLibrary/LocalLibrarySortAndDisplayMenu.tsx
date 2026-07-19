@@ -238,6 +238,13 @@ function AndroidSortAndActionsMenu({
 		return t(getSortKey(`${localeKey}.${direction}`))
 	}
 
+	const renderSortText = (label: string, subtitle: string | null) => (
+		<View className={cn('flex-1', !subtitle && 'justify-center')}>
+			<Text className="text-lg">{label}</Text>
+			{subtitle && <Text className="text-sm text-foreground-muted">{subtitle}</Text>}
+		</View>
+	)
+
 	return (
 		<DropdownMenu onOpenChange={setIsOpen}>
 			<DropdownMenuTrigger asChild>
@@ -273,14 +280,14 @@ function AndroidSortAndActionsMenu({
 					onCheckedChange={() => onSortSelection('NAME')}
 					className="text-foreground"
 				>
-					<View className="gap-4 flex w-full flex-row items-center justify-between">
-						<View className="gap-4 flex flex-row items-center">
-							<Icon as={ALargeSmall} size={20} className="ml-auto text-foreground-muted" />
-							<Text className="text-lg">{t(getSortKey('sortBy.NAME'))}</Text>
+					<View className="flex w-full">
+						<View className="gap-4 flex flex-1 flex-row items-center">
+							<Icon as={ALargeSmall} size={20} className="text-foreground-muted ml-auto" />
+							{renderSortText(
+								t(getSortKey('sortBy.NAME')),
+								renderAndroidSortLabel('NAME', sortConfig.direction),
+							)}
 						</View>
-						<Text className="text-sm text-foreground-muted">
-							{renderAndroidSortLabel('NAME', sortConfig.direction)}
-						</Text>
 					</View>
 				</DropdownMenuCheckboxItem>
 
@@ -289,14 +296,14 @@ function AndroidSortAndActionsMenu({
 					onCheckedChange={() => onSortSelection('ADDED_AT')}
 					className="text-foreground"
 				>
-					<View className="gap-4 flex w-full flex-row items-center justify-between">
-						<View className="gap-4 flex flex-row items-center">
-							<Icon as={Clock} size={20} className="ml-auto text-foreground-muted" />
-							<Text className="text-lg">{t(getSortKey('sortBy.ADDED_AT'))}</Text>
+					<View className="flex w-full">
+						<View className="gap-4 flex flex-1 flex-row items-center">
+							<Icon as={Clock} size={20} className="text-foreground-muted ml-auto" />
+							{renderSortText(
+								t(getSortKey('sortBy.ADDED_AT')),
+								renderAndroidSortLabel('ADDED_AT', sortConfig.direction),
+							)}
 						</View>
-						<Text className="text-sm text-foreground-muted">
-							{renderAndroidSortLabel('ADDED_AT', sortConfig.direction)}
-						</Text>
 					</View>
 				</DropdownMenuCheckboxItem>
 
@@ -305,14 +312,14 @@ function AndroidSortAndActionsMenu({
 					onCheckedChange={() => onSortSelection('SERIES')}
 					className="text-foreground"
 				>
-					<View className="gap-4 flex w-full flex-row items-center justify-between">
-						<View className="gap-4 flex flex-row items-center">
-							<Icon as={LibraryBig} size={20} className="ml-auto text-foreground-muted" />
-							<Text className="text-lg">{t(getSortKey('sortBy.SERIES'))}</Text>
+					<View className="flex w-full">
+						<View className="gap-4 flex flex-1 flex-row items-center">
+							<Icon as={LibraryBig} size={20} className="text-foreground-muted ml-auto" />
+							{renderSortText(
+								t(getSortKey('sortBy.SERIES')),
+								renderAndroidSortLabel('SERIES', sortConfig.direction),
+							)}
 						</View>
-						<Text className="text-sm text-foreground-muted">
-							{renderAndroidSortLabel('SERIES', sortConfig.direction)}
-						</Text>
 					</View>
 				</DropdownMenuCheckboxItem>
 
@@ -325,7 +332,7 @@ function AndroidSortAndActionsMenu({
 				>
 					<View className="gap-4 flex w-full flex-row items-center justify-between">
 						<View className="gap-4 flex flex-row items-center">
-							<Icon as={CheckCircle} size={20} className="ml-auto text-foreground-muted" />
+							<Icon as={CheckCircle} size={20} className="text-foreground-muted ml-auto" />
 							<Text className="text-lg">{t('common.select')}</Text>
 						</View>
 					</View>
@@ -334,7 +341,7 @@ function AndroidSortAndActionsMenu({
 				<DropdownMenuItem onPress={onSync} className="text-foreground">
 					<View className="gap-4 flex w-full flex-row items-center justify-between">
 						<View className="gap-4 flex flex-row items-center">
-							<Icon as={RefreshCw} size={20} className="ml-auto text-foreground-muted" />
+							<Icon as={RefreshCw} size={20} className="text-foreground-muted ml-auto" />
 							<Text className="text-lg">{t(getActionsKey('attemptSync'))}</Text>
 						</View>
 					</View>
@@ -343,7 +350,7 @@ function AndroidSortAndActionsMenu({
 				<DropdownMenuItem onPress={onToggleCurated} className="text-foreground">
 					<View className="gap-4 flex w-full flex-row items-center justify-between">
 						<View className="gap-4 flex flex-row items-center">
-							<Icon as={Sparkles} size={20} className="ml-auto text-foreground-muted" />
+							<Icon as={Sparkles} size={20} className="text-foreground-muted ml-auto" />
 							<Text className="text-lg">
 								{t(getActionsKey(isCuratedDownloadsEnabled ? 'hideCurated' : 'showCurated'))}
 							</Text>
@@ -360,7 +367,7 @@ function AndroidSortAndActionsMenu({
 										problemsCount: failedDownloadsCount.toString(),
 									})}
 								</Text>
-								<Icon as={AlertCircle} size={20} className="ml-auto text-foreground-muted" />
+								<Icon as={AlertCircle} size={20} className="text-foreground-muted ml-auto" />
 							</View>
 						</View>
 					</DropdownMenuItem>
@@ -375,7 +382,7 @@ function AndroidSortAndActionsMenu({
 				>
 					<View className="gap-4 flex w-full flex-row items-center justify-between">
 						<View className="gap-4 flex flex-row items-center">
-							<Icon as={Trash} size={20} className="ml-auto text-fill-danger" />
+							<Icon as={Trash} size={20} className="text-fill-danger ml-auto" />
 							<Text className="text-lg text-fill-danger">
 								{t(getActionsKey('deleteAllDownloads.label'))}
 							</Text>

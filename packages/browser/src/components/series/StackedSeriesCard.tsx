@@ -1,94 +1,282 @@
+import { getThumbnailTintColor } from '@stump/client'
 import { cn, Text } from '@stump/components'
-import { LibrarySeriesQuery } from '@stump/graphql'
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { ImageRef, InterfaceRoundness } from '@stump/graphql'
+import { useCallback, useMemo } from 'react'
 
 import { Link } from '@/context'
 import { useFancyAnimations } from '@/hooks/useFancyAnimations'
+import { usePreferences } from '@/hooks/usePreferences'
+import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchSeries } from '@/scenes/series'
 import { usePrefetchSeriesBooks } from '@/scenes/series/tabs/books/SeriesBooksScene'
 
-import pluralizeStat from '../../utils/pluralize'
-import { SeriesStackedThumbnails } from '../thumbnail'
+import { ThumbnailImage } from '../thumbnail/ThumbnailImage'
 
-export type StackedSeriesCardData = LibrarySeriesQuery['series']['nodes'][number]
-
-type Props = {
-	data: StackedSeriesCardData
+type ThumbnailConfig = {
+	/**
+	 * The fractional horizontal position of the center of the thumbnail within the series card
+	 */
+	x: number
+	/**
+	 * The fraction of the thumbnail that is hidden
+	 */
+	y: number
+	/**
+	 * This is the fraction of the series card's width to move to the left or right by
+	 */
+	hoverX: number
+	/**
+	 * The fraction of the thumbnail that is hidden on hover
+	 */
+	hoverY: number
+	hoverRotate: number
+	scale: number
+	zIndex: number
 }
 
-const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
-	const paths = usePaths()
-	const containerRef = useRef<HTMLAnchorElement>(null)
-	const [width, setWidth] = useState<number | null>(null)
+const THREE_BOOK_LAYOUT: ThumbnailConfig[] = [
+	{ x: 0.5, y: 0.081, hoverX: 0, hoverY: 0.0, hoverRotate: 0, scale: 1.081, zIndex: 40 },
+	{ x: 0.373, y: 0.086, hoverX: -0.035, hoverY: 0.0, hoverRotate: -5, scale: 0.973, zIndex: 30 },
+	{ x: 0.648, y: 0.081, hoverX: 0.035, hoverY: 0.0, hoverRotate: 5, scale: 0.908, zIndex: 20 },
+]
 
+const TWO_BOOK_LAYOUT: ThumbnailConfig[] = [
+	{ x: 0.436, y: 0.081, hoverX: -0.045, hoverY: 0.0, hoverRotate: -5, scale: 1.081, zIndex: 30 },
+	{ x: 0.606, y: 0.097, hoverX: 0.045, hoverY: 0.0, hoverRotate: 5, scale: 0.973, zIndex: 20 },
+]
+
+const ONE_BOOK_LAYOUT: ThumbnailConfig[] = [
+	{ x: 0.5, y: 0.081, hoverX: 0.0, hoverY: 0.0, hoverRotate: 0, scale: 1.081, zIndex: 20 },
+]
+
+const TEXT_HEIGHT = 80
+
+type Props = {
+	id: string
+	name: string
+	subtitle: string
+	isMissing: boolean
+	width: number
+	thumbnailData: ImageRef[]
+	className?: string
+}
+
+export function StackedSeriesCard({
+	id,
+	name,
+	subtitle,
+	isMissing,
+	width: cardWidth,
+	thumbnailData,
+	className,
+}: Props) {
+	const { isDarkVariant, getColor: getThemeColor } = useTheme()
+	const {
+		preferences: { thumbnailRatio, thumbnailRoundness },
+	} = usePreferences()
 	const { shouldFancyHover } = useFancyAnimations()
-
-	// The cards in the traversal bits of the web app are resizable (to an extent), and so providing
-	// a width to the stacked thumb component is a bit annoying. This should DEFINITELY be rethought, though,
-	// because a resize observer for every card is probably not great for performance. Part of the problem
-	// is that I mostly just copy/pasted the stacked series layouts but should maybe try positioning them with
-	// css and percentages instead
-	useEffect(() => {
-		if (!containerRef.current) return
-
-		const observer = new ResizeObserver((entries) => {
-			const entry = entries[0]
-			if (entry) {
-				setWidth(entry.contentRect.width)
-			}
-		})
-
-		observer.observe(containerRef.current)
-		setWidth(containerRef.current.offsetWidth)
-
-		return () => observer.disconnect()
-	}, [])
+	const paths = usePaths()
 
 	const prefetchSeries = usePrefetchSeries()
 	const prefetchSeriesBooks = usePrefetchSeriesBooks()
 
 	const prefetch = useCallback(
-		() => Promise.all([prefetchSeries(data.id), prefetchSeriesBooks(data.id)]),
-		[prefetchSeries, prefetchSeriesBooks, data.id],
+		() => Promise.all([prefetchSeries(id), prefetchSeriesBooks(id)]),
+		[prefetchSeries, prefetchSeriesBooks, id],
 	)
 
-	const thumbnailData = [data.thumbnail, ...data.media.map((m) => m.thumbnail)]
-	const isMissing = data.status === 'MISSING'
+	const baseThumbnailWidth = cardWidth * 0.7
+	const baseThumbnailHeight = baseThumbnailWidth / thumbnailRatio
+	const cardHeight = baseThumbnailHeight + TEXT_HEIGHT
+
+	const mainThumbnailAverageColor = thumbnailData[0]?.metadata?.averageColor
+
+	const backgroundColor = useMemo(() => {
+		if (mainThumbnailAverageColor) {
+			return getThumbnailTintColor(mainThumbnailAverageColor, { dark: isDarkVariant })
+		}
+		return getThemeColor('thumbnail.stack.series') ?? (isDarkVariant ? '#2a2a2e' : '#e5e5e7')
+	}, [mainThumbnailAverageColor, isDarkVariant, getThemeColor])
+
+	const gradientStyle = useMemo(
+		() => ({
+			background: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 25%, transparent 50%)`,
+		}),
+		[],
+	)
+
+	const layoutConfig = useMemo(() => {
+		if (thumbnailData.length >= 3) return THREE_BOOK_LAYOUT
+		if (thumbnailData.length === 2) return TWO_BOOK_LAYOUT
+		if (thumbnailData.length === 1) return ONE_BOOK_LAYOUT
+		return []
+	}, [thumbnailData.length])
+
+	const renderThumbnails = () => {
+		return layoutConfig.map((config, index) => {
+			const currentThumbnailData = thumbnailData[index]
+			if (!currentThumbnailData) return null
+
+			const currentThumbnailSize = {
+				width: baseThumbnailWidth * config.scale,
+				height: baseThumbnailHeight * config.scale,
+			}
+
+			const leftOffset = cardWidth * config.x - currentThumbnailSize.width / 2
+			const translateY = baseThumbnailHeight * config.y
+
+			const hoverTranslateY = baseThumbnailHeight * config.hoverY
+			const hoverTranslateX = cardWidth * config.hoverX
+			const hoverRotate = config.hoverRotate
+
+			const placeholderData = currentThumbnailData.metadata
+				? {
+						averageColor: currentThumbnailData.metadata.averageColor,
+						colors: currentThumbnailData.metadata.colors,
+						thumbhash: currentThumbnailData.metadata.thumbhash,
+					}
+				: undefined
+
+			// Note: I add lazy for back thumbs to try and improve performance
+			const isBackThumbnail = index > 0
+
+			return (
+				<div
+					key={index}
+					className={cn(
+						'bottom-0 absolute will-change-transform',
+						'translate-x-(--x) translate-y-(--y) rotate-(--r)',
+						shouldFancyHover && [
+							'transform-gpu duration-300',
+							'group-hover:translate-x-(--x-hover) group-hover:translate-y-(--y-hover) group-hover:rotate-(--r-hover)',
+						],
+					)}
+					style={
+						{
+							zIndex: config.zIndex,
+							left: leftOffset,
+							'--x': '0px',
+							'--y': `${translateY}px`,
+							'--r': '0deg',
+							...(shouldFancyHover && {
+								'--x-hover': `${hoverTranslateX}px`,
+								'--y-hover': `${hoverTranslateY}px`,
+								'--r-hover': `${hoverRotate}deg`,
+							}),
+						} as React.CSSProperties
+					}
+				>
+					<ThumbnailImage
+						src={currentThumbnailData.url}
+						size={currentThumbnailSize}
+						placeholderData={placeholderData}
+						lazy={isBackThumbnail}
+						borderAndShadowStyle={{
+							shadowColor: 'rgba(0, 0, 0, 0.4)',
+							shadowRadius: 3,
+						}}
+					/>
+				</div>
+			)
+		})
+	}
+
+	// We need to only hide the parts of the thumbnails that go under the bottom of the card
+	// but we also account for the bottom left and right rounded corners of the card
+	// If we didn't need to account for the rounded corners, we could just use style={{ clipPath: 'inset(-10% -10% 1px -10%)' }}
+	const radius = THUMBNAIL_ROUNDNESS_TO_PX[thumbnailRoundness ?? InterfaceRoundness.Normal]
+	const buffer = 20
+
+	/**
+	 * clipPath Logic - We want the thumbnails to spill over the left and right sides of the card,
+	 * but go under the bottom edge of the card, so we create this shape:
+	 * https://yqnn.github.io/svg-path-editor/#P=M_-6_-6_L_48_-6_L_48_64_L_42_64_A_6_6_0_0_1_36_70_L_6_70_A_6_6_0_0_1_0_64_L_-6_64_Z
+	 *
+	 * The 0 0 point is at the top left corner of the card. We start at -20 -20 and create the path clockwise.
+	 *
+	 * Note: Arc notation 0 0 1 means no ellipse rotation, short arc, clockwise
+	 */
+	const clipPath = `
+		M -${buffer} -${buffer}
+		L ${cardWidth + buffer} -${buffer}
+		L ${cardWidth + buffer} ${cardHeight - radius}
+		L ${cardWidth} ${cardHeight - radius}
+		A ${radius} ${radius} 0 0 1 ${cardWidth - radius} ${cardHeight}
+		L ${radius} ${cardHeight}
+		A ${radius} ${radius} 0 0 1 0 ${cardHeight - radius}
+		L -${buffer} ${cardHeight - radius}
+		Z
+	`
+	const clipPathString = clipPath.replace(/\s+/g, ' ').trim()
+
+	if (thumbnailData.length === 0) {
+		return null
+	}
 
 	return (
 		<Link
-			ref={containerRef}
-			to={paths.seriesOverview(data.id)}
+			to={paths.seriesOverview(id)}
 			className={cn('group relative block w-full', !shouldFancyHover && 'hover:opacity-80')}
 			onMouseEnter={prefetch}
 		>
-			{width != null && <SeriesStackedThumbnails width={width} thumbnailData={thumbnailData} />}
+			<div
+				className={cn('relative', className)}
+				style={{
+					width: cardWidth,
+					height: cardHeight,
+					borderRadius: radius,
+					backgroundColor,
+				}}
+			>
+				{/* The border is split into two, because here in the top part, the cards must go above the border for the fancy hover */}
+				<div
+					className="inset-0 border-white/10 pointer-events-none absolute z-10 border"
+					style={{
+						borderRadius: radius,
+						clipPath: `inset(0 0 ${Math.max(radius, 2)}px 0)`,
+					}}
+				/>
+				{/* here in the bottom part, the cards must sit under the border */}
+				<div
+					className="inset-0 border-white/10 pointer-events-none absolute z-50 border"
+					style={{
+						borderRadius: radius,
+						clipPath: `inset(calc(100% - ${Math.max(radius, 2)}px) 0 0 0)`,
+					}}
+				/>
 
-			<div className="left-0 top-0 px-2.5 py-3 absolute z-20 w-full">
-				<Text
-					className="text-base font-bold leading-tight text-white md:text-lg line-clamp-2 text-wrap!"
-					style={{
-						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
-					}}
-				>
-					{data.resolvedName}
-				</Text>
-				<Text
-					className="mt-0.5 text-xs font-medium leading-tight md:text-sm line-clamp-1 text-gray-200"
-					style={{
-						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
-					}}
-				>
-					{isMissing ? (
-						<span className="text-warning">Series Missing</span>
-					) : (
-						pluralizeStat('book', data.mediaCount)
-					)}
-				</Text>
+				<div
+					className="inset-0 pointer-events-none absolute"
+					style={{ ...gradientStyle, borderRadius: radius }}
+				/>
+
+				<div className="px-2.5 py-2 top-0 left-0 absolute z-10">
+					<Text
+						className="text-base font-bold leading-tight text-white md:text-lg line-clamp-2 text-wrap!"
+						style={{ textShadow: '2px 1px 2px rgba(0, 0, 0, 0.2)' }}
+					>
+						{name}
+					</Text>
+					<Text
+						className="mt-0.5 text-xs font-medium leading-tight md:text-sm text-white/75 line-clamp-1"
+						style={{ textShadow: '2px 1px 2px rgba(0, 0, 0, 0.2)' }}
+					>
+						{!isMissing ? subtitle : <span className="text-warning">Series Missing</span>}
+					</Text>
+				</div>
+
+				<div className="inset-0 absolute z-10" style={{ clipPath: `path('${clipPathString}')` }}>
+					{renderThumbnails()}
+				</div>
 			</div>
 		</Link>
 	)
-})
+}
 
-export default StackedSeriesCard
+const THUMBNAIL_ROUNDNESS_TO_PX: Record<InterfaceRoundness, number> = {
+	[InterfaceRoundness.None]: 0,
+	[InterfaceRoundness.Normal]: 8,
+	[InterfaceRoundness.Rounded]: 12,
+	[InterfaceRoundness.Pill]: 16,
+}

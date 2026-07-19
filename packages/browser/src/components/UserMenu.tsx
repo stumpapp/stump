@@ -66,7 +66,6 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 									src={avatarUrl}
 									fallback={fallback}
 									fallbackWrapperClassName="text-xs select-none"
-									rounded="lg"
 									className="h-6 w-6"
 								/>
 								{isSidebar && (

@@ -1,3 +1,4 @@
+import { formatBytes } from '@stump/client'
 import { Badge, Link, Text } from '@stump/components'
 import { FragmentType, Media, MediaModelOrdering } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
@@ -5,7 +6,6 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat } from 'date-fns'
 
 import paths from '@/paths'
-import { formatBytes } from '@/utils/format'
 
 import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'

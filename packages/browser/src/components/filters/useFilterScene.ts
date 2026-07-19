@@ -1,5 +1,6 @@
 import {
 	MediaFilterInput,
+	MediaMetadataModelOrdering,
 	MediaModelOrdering,
 	MediaOrderBy,
 	OrderDirection,
@@ -263,11 +264,27 @@ export function useFilterScene(): Return {
 	}
 }
 
+const MEDIA_METADATA_ORDER_FIELDS: string[] = [
+	MediaMetadataModelOrdering.Number,
+	MediaMetadataModelOrdering.Volume,
+]
+
 export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
 	return useMemo(() => {
 		// check for undefined values
 		if (!ordering || !ordering.orderBy || !ordering.direction) {
 			return DEFAULT_MEDIA_ORDER_BY
+		}
+
+		if (MEDIA_METADATA_ORDER_FIELDS.includes(ordering.orderBy)) {
+			return [
+				{
+					metadata: {
+						field: ordering.orderBy as MediaMetadataModelOrdering,
+						direction: ordering.direction as OrderDirection,
+					},
+				},
+			] as MediaOrderBy[]
 		}
 
 		return [

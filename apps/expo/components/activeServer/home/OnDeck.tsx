@@ -7,7 +7,7 @@ import { View } from 'react-native'
 import { OnDeckBookItem } from '~/components/book'
 import { OnDeckBookItemFragmentType } from '~/components/book/OnDeckBookItem'
 import { Heading, Text } from '~/components/ui'
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 
@@ -36,6 +36,7 @@ function OnDeck() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { t } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['onDeck', serverID],
@@ -61,7 +62,7 @@ function OnDeck() {
 	return (
 		<View className="flex">
 			<Heading size="xl" className="px-4">
-				Your Next Read
+				{t('stumpServer.onDeck.label')}
 			</Heading>
 
 			<FlashList
@@ -75,7 +76,9 @@ function OnDeck() {
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}
 				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
-				ListEmptyComponent={<Text className="text-foreground-muted">No books on deck</Text>}
+				ListEmptyComponent={
+					<Text className="text-foreground-muted">{t('stumpServer.onDeck.emptyText')}</Text>
+				}
 			/>
 		</View>
 	)

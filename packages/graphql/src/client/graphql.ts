@@ -1692,6 +1692,24 @@ export type MediaMetadataOverview = {
   writers: Array<Scalars['String']['output']>;
 };
 
+/**
+ * A manual override for searching metadata providers for a single media item. When
+ * provided, the caller's fields take precedence over whatever is already stored on the
+ * media, and the search is restricted to a single provider if one is given.
+ */
+export type MediaMetadataSearchInput = {
+  author?: InputMaybe<Scalars['String']['input']>;
+  isbn?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  /**
+   * Restrict the search to this provider only. If omitted, all enabled providers
+   * configured for the media's library type are searched.
+   */
+  provider?: InputMaybe<MetadataProvider>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  year?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export enum MediaModelOrdering {
   CreatedAt = 'CREATED_AT',
   DeletedAt = 'DELETED_AT',
@@ -1763,6 +1781,12 @@ export type MetadataFetchRecord = {
   /** The media item associated with this fetch record, if any */
   media?: Maybe<Media>;
   mediaId?: Maybe<Scalars['String']['output']>;
+  /**
+   * The total number of raw hits reported by provider searches, across all
+   * providers searched. Compare against `match_candidates.len()` to detect when
+   * hits were dropped (e.g. a per-hit detail fetch failed after the initial search).
+   */
+  rawHits: Scalars['Int']['output'];
   /** The series associated with this fetch record, if any */
   series?: Maybe<Series>;
   seriesId?: Maybe<Scalars['String']['output']>;
@@ -2051,8 +2075,14 @@ export type Mutation = {
   favoriteSeries: Series;
   /** Start a job which will search external metadata providers */
   fetchLibraryMetadata: Scalars['Boolean']['output'];
-  /** Search external metadata providers for a media item and return match candidates */
-  fetchMediaMetadata: Array<MatchCandidate>;
+  /**
+   * Search external metadata providers for a media item and return the resulting fetch
+   * record with its match candidates. When `search` is provided, the caller's fields
+   * take precedence over the media's stored metadata, the search can be restricted to a
+   * single provider, and auto-apply is skipped so the caller can review candidates before
+   * anything is written.
+   */
+  fetchMediaMetadata: MetadataFetchRecord;
   /** Search external metadata providers for a series and return match candidates */
   fetchSeriesMetadata: Array<MatchCandidate>;
   /**
@@ -2576,6 +2606,7 @@ export type MutationFetchLibraryMetadataArgs = {
 
 export type MutationFetchMediaMetadataArgs = {
   id: Scalars['ID']['input'];
+  search?: InputMaybe<MediaMetadataSearchInput>;
 };
 
 
@@ -4608,9 +4639,9 @@ export type UpdateUserPreferencesInput = {
   primaryNavigationMode: Scalars['String']['input'];
   readingSessionGracePeriodSecs: Scalars['Int']['input'];
   showQueryIndicator: Scalars['Boolean']['input'];
-  showThumbnailsInHeaders: Scalars['Boolean']['input'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['input'];
+  thumbnailRoundness: InterfaceRoundness;
 };
 
 export type UploadBooksInput = {
@@ -4804,9 +4835,9 @@ export type UserPreferences = {
   /** seconds of inactivity after which the current reading session is considered ended */
   readingSessionGracePeriodSecs: Scalars['Int']['output'];
   showQueryIndicator: Scalars['Boolean']['output'];
-  showThumbnailsInHeaders: Scalars['Boolean']['output'];
   thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['output'];
+  thumbnailRoundness: InterfaceRoundness;
   userId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -5499,6 +5530,8 @@ export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type SimpleBookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SimpleBookCardFragment' };
+
 export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null, lockedFields: Array<MetadataField> } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
 
 export type UpdateMediaMetadataMutationVariables = Exact<{
@@ -5606,8 +5639,6 @@ export type LibrarySeriesAlphabetQueryVariables = Exact<{
 
 export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
 
-export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null, lockedFields: Array<MetadataField> } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null, lockedFields: Array<MetadataField> } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
-
 export type PendingMetadataMatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5628,6 +5659,8 @@ export type RejectAllPendingMatchesMutationVariables = Exact<{ [key: string]: ne
 
 
 export type RejectAllPendingMatchesMutation = { __typename?: 'Mutation', rejectAllPendingMatches: number };
+
+export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, rawHits: number, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, series?: string | null, number?: any | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null, lockedFields: Array<MetadataField> } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null, lockedFields: Array<MetadataField> } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
 
 export type AcceptMediaMatchMutationVariables = Exact<{
   mediaId: Scalars['ID']['input'];
@@ -5912,6 +5945,22 @@ export type BookManagementSceneAnalyzeMutationVariables = Exact<{
 
 export type BookManagementSceneAnalyzeMutation = { __typename?: 'Mutation', analyzeMedia: boolean };
 
+export type BookMetadataSearchProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BookMetadataSearchProvidersQuery = { __typename?: 'Query', metadataProviderConfigs: Array<{ __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean }> };
+
+export type SearchMediaMetadataMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  search?: InputMaybe<MediaMetadataSearchInput>;
+}>;
+
+
+export type SearchMediaMetadataMutation = { __typename?: 'Mutation', fetchMediaMetadata: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
 export type BookTagEditorSetTagsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -6083,7 +6132,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, genres: Array<string>, publishers: Array<string>, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -6273,7 +6322,7 @@ export type SeriesLayoutQueryVariables = Exact<{
 }>;
 
 
-export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, library: { __typename?: 'Library', id: string, name: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, metadata?: { __typename?: 'SeriesMetadata', status?: string | null, publisher?: string | null, year?: number | null, genres: Array<string>, booktype?: string | null, volume?: number | null, totalIssues?: number | null, writers: Array<string>, summary?: string | null, descriptionFormatted?: string | null, links: Array<string> } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
 
 export type SeriesLibrayLinkQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6281,6 +6330,16 @@ export type SeriesLibrayLinkQueryVariables = Exact<{
 
 
 export type SeriesLibrayLinkQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', id: string, name: string } | null };
+
+export type SeriesOverviewSheetExtasQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesOverviewSheetExtasQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, metadata?: { __typename?: 'SeriesMetadata', publisher?: string | null, year?: number | null, summary?: string | null, links: Array<string> } | null, upNext: Array<(
+      { __typename?: 'Media', id: string }
+      & { ' $fragmentRefs'?: { 'SimpleBookCardFragment': SimpleBookCardFragment } }
+    )> } | null };
 
 export type SeriesBooksSceneQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -7421,6 +7480,24 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
+export const SimpleBookCardFragmentDoc = new TypedDocumentString(`
+    fragment SimpleBookCard on Media {
+  id
+  resolvedName
+  createdAt
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+}
+    `, {"fragmentName":"SimpleBookCard"}) as unknown as TypedDocumentString<SimpleBookCardFragment, unknown>;
 export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment MediaMetadataEditor on MediaMetadata {
   ageRating
@@ -7489,6 +7566,7 @@ export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
   status
   mediaId
   seriesId
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -7545,6 +7623,8 @@ export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
     metadata {
       title
       summary
+      series
+      number
       genres
       writers
       colorists
@@ -10255,6 +10335,7 @@ export const PendingMetadataMatchesDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10311,6 +10392,8 @@ export const PendingMetadataMatchesDocument = new TypedDocumentString(`
     metadata {
       title
       summary
+      series
+      number
       genres
       writers
       colorists
@@ -10369,6 +10452,7 @@ export const AcceptMediaMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10425,6 +10509,8 @@ export const AcceptMediaMatchDocument = new TypedDocumentString(`
     metadata {
       title
       summary
+      series
+      number
       genres
       writers
       colorists
@@ -10473,6 +10559,7 @@ export const AcceptSeriesMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10529,6 +10616,8 @@ export const AcceptSeriesMatchDocument = new TypedDocumentString(`
     metadata {
       title
       summary
+      series
+      number
       genres
       writers
       colorists
@@ -10571,6 +10660,7 @@ export const RejectMediaMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10627,6 +10717,8 @@ export const RejectMediaMatchDocument = new TypedDocumentString(`
     metadata {
       title
       summary
+      series
+      number
       genres
       writers
       colorists
@@ -10669,6 +10761,7 @@ export const RejectSeriesMatchDocument = new TypedDocumentString(`
   status
   mediaId
   seriesId
+  rawHits
   matchCandidates {
     provider
     externalId
@@ -10725,6 +10818,8 @@ export const RejectSeriesMatchDocument = new TypedDocumentString(`
     metadata {
       title
       summary
+      series
+      number
       genres
       writers
       colorists
@@ -11248,6 +11343,116 @@ export const BookManagementSceneAnalyzeDocument = new TypedDocumentString(`
   analyzeMedia(id: $id)
 }
     `) as unknown as TypedDocumentString<BookManagementSceneAnalyzeMutation, BookManagementSceneAnalyzeMutationVariables>;
+export const BookMetadataSearchProvidersDocument = new TypedDocumentString(`
+    query BookMetadataSearchProviders {
+  metadataProviderConfigs {
+    id
+    providerType
+    enabled
+  }
+}
+    `) as unknown as TypedDocumentString<BookMetadataSearchProvidersQuery, BookMetadataSearchProvidersQueryVariables>;
+export const SearchMediaMetadataDocument = new TypedDocumentString(`
+    mutation SearchMediaMetadata($id: ID!, $search: MediaMetadataSearchInput) {
+  fetchMediaMetadata(id: $id, search: $search) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  rawHits
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      series
+      number
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+      lockedFields
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+      lockedFields
+    }
+  }
+}`) as unknown as TypedDocumentString<SearchMediaMetadataMutation, SearchMediaMetadataMutationVariables>;
 export const BookTagEditorSetTagsDocument = new TypedDocumentString(`
     mutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {
   setMediaTags(id: $id, tags: $tags) {
@@ -11709,8 +11914,6 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
       totalBytes
       totalReadingTimeSeconds
     }
-    genres
-    publishers
     tags {
       id
       name
@@ -12122,10 +12325,6 @@ export const SeriesLayoutDocument = new TypedDocumentString(`
     }
     resolvedName
     resolvedDescription
-    tags {
-      id
-      name
-    }
     stats {
       bookCount
       completedBooks
@@ -12133,18 +12332,9 @@ export const SeriesLayoutDocument = new TypedDocumentString(`
       totalBytes
       totalReadingTimeSeconds
     }
-    metadata {
-      status
-      publisher
-      year
-      genres
-      booktype
-      volume
-      totalIssues
-      writers
-      summary
-      descriptionFormatted
-      links
+    tags {
+      id
+      name
     }
     thumbnail {
       url
@@ -12157,6 +12347,8 @@ export const SeriesLayoutDocument = new TypedDocumentString(`
         }
       }
     }
+    createdAt
+    updatedAt
   }
 }
     `) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
@@ -12168,6 +12360,38 @@ export const SeriesLibrayLinkDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesLibrayLinkQuery, SeriesLibrayLinkQueryVariables>;
+export const SeriesOverviewSheetExtasDocument = new TypedDocumentString(`
+    query SeriesOverviewSheetExtas($id: ID!) {
+  seriesById(id: $id) {
+    id
+    metadata {
+      publisher
+      year
+      summary
+      links
+    }
+    upNext(take: 10) {
+      id
+      ...SimpleBookCard
+    }
+  }
+}
+    fragment SimpleBookCard on Media {
+  id
+  resolvedName
+  createdAt
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+}`) as unknown as TypedDocumentString<SeriesOverviewSheetExtasQuery, SeriesOverviewSheetExtasQueryVariables>;
 export const SeriesBooksSceneDocument = new TypedDocumentString(`
     query SeriesBooksScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
   media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {

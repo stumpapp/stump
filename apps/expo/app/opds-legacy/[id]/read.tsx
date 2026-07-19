@@ -15,8 +15,9 @@ import { db, downloadedFiles, readProgress, syncStatus } from '~/db'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
-type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount'> & {
+type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount' | 'serverLastRead'> & {
 	pageCount: string // conform to Route params, reqs being a string
+	serverLastRead?: string
 }
 
 export default function Screen() {
@@ -28,6 +29,7 @@ export default function Screen() {
 		() => ({
 			...params,
 			pageCount: getValidNumber(params.pageCount),
+			serverLastRead: getPositiveNumber(params.serverLastRead),
 		}),
 		[params],
 	)
@@ -92,6 +94,8 @@ export default function Screen() {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
 
+	const initialPage = contextValue.serverLastRead ?? 1
+
 	const timer = useBookTimer(contextValue.entryId, { enabled: trackElapsedTime })
 
 	const onPageChanged = useCallback(
@@ -155,7 +159,7 @@ export default function Screen() {
 	return (
 		<ImageBasedReader
 			serverId={serverId}
-			initialPage={1}
+			initialPage={initialPage}
 			book={book}
 			pageURL={getStreamURLForPage}
 			requestHeaders={requestHeaders}
@@ -169,4 +173,10 @@ export default function Screen() {
 const getValidNumber = (value: string) => {
 	const parsed = parseInt(value, 10)
 	return isNaN(parsed) ? -1 : parsed
+}
+
+const getPositiveNumber = (value: string | undefined): number | undefined => {
+	if (value == null) return undefined
+	const parsed = parseInt(value, 10)
+	return isNaN(parsed) || parsed <= 0 ? undefined : parsed
 }

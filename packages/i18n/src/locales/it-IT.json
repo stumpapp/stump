@@ -455,8 +455,8 @@
 			"description": "Indicizza i file della libreria per popolare il database"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "Impossibile aggiornare la libreria",
+			"failedToScan": "Impossibile scansionare la collezione"
 		}
 	},
 	"createLibraryScene": {
@@ -540,6 +540,13 @@
 				"alt": "Oppure clicca per cercare i libri da caricare sul computer"
 			},
 			"addedFiles": "File aggiunti"
+		}
+	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Libri",
+			"series": "Serie",
+			"files": "File"
 		}
 	},
 	"librarySettingsScene": {
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Continua a leggere",
 			"downloadSeries": "Scarica serie"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Libri",
+			"files": "File"
+		},
+		"actions": {
+			"markAsRead": "Segna serie come lette",
+			"markAsUnread": "Segna serie come non lette",
+			"goToLibrary": "Vai alla libreria"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Impossibile aggiornare lo stato di completamento del libro"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1455,6 +1476,10 @@
 					"label": "Carattere",
 					"description": "Personalizza il carattere usato nell'applicazione"
 				},
+				"thumbnailPreview": {
+					"label": "Anteprima",
+					"description": "Così è come appariranno le miniature con con le impostazioni attuali"
+				},
 				"thumbnailRatioSelect": {
 					"label": "Proporzioni miniatura",
 					"description": "Il rapporto di aspetto da usare per le miniature",
@@ -1468,6 +1493,16 @@
 						"averageColor": "Colore medio",
 						"colorful": "Colorato",
 						"thumbhash": "Thumbhash"
+					}
+				},
+				"thumbnailRoundness": {
+					"label": "Arrotondamento miniature",
+					"description": "Quanto devono essere arrotondati gli angoli delle immagini di miniatura",
+					"options": {
+						"none": "Nessuno",
+						"normal": "Normale",
+						"rounded": "Arrotondato",
+						"large": "Grande"
 					}
 				},
 				"navigation": {
@@ -1543,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Preferenze aggiuntive",
 					"description": "Personalizza l'aspetto e il comportamento di Stump con queste impostazioni aggiuntive"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Mostra le miniature nelle intestazioni",
-					"description": "Se preferisci vedere le miniature più spesso, questa impostazione le mostrerà in più punti",
-					"tooltips": {
-						"enabled": "Questa impostazione mostrerà le miniature in più punti",
-						"disabled": "Questa impostazione non mostrerà le miniature in più punti"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Nascondi barra di scorrimento",
@@ -1649,7 +1676,7 @@
 		"app/reader": {
 			"helmet": "Impostazioni del lettore",
 			"title": "Impostazioni del lettore",
-			"description": "Opzioni predefinite per i lettori di Stump. Queste impostazioni sono associate esclusivamente al tuo dispositivo attuale",
+			"description": "Preferenze di lettura predefinite. Alcune di queste si applicano solo al dispositivo corrente",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -1678,7 +1705,7 @@
 					"description": "Impostazioni predefinite per i libri di testo",
 					"sections": {
 						"fontSize": {
-							"label": "Dimensioni carattere",
+							"label": "Dimensione carattere",
 							"description": "La dimensione del carattere utilizzato nel lettore"
 						},
 						"fontFamily": {
@@ -2155,7 +2182,7 @@
 					"user": {
 						"label": "Gestione utenti",
 						"read": {
-							"label": "Leggere utenti",
+							"label": "Visualizzare utenti",
 							"description": "Consente all'utente d'interrogare altri utenti sul server. Richiesto per altre funzionalità, ad esempio escludere gli utenti dall'accesso a una libreria"
 						},
 						"manage": {
@@ -2558,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Aggiungi",
+		"andXMoreTrailing": "... e altri {{count}}",
 		"cancel": "Annulla",
 		"clear": "Cancella",
 		"confirm": "Conferma",
+		"created": "Creato",
 		"delete": "Elimina",
 		"deleteConfirmation": {
 			"title": "Elimina {{type}}",
@@ -2579,11 +2608,22 @@
 		"noChanges": "Nessuna modifica",
 		"create": "Crea",
 		"edit": "Modifica",
+		"info": "Informazioni",
+		"infoSheetStats": {
+			"series": "Serie",
+			"inProgress": "In corso",
+			"completedBooks": "Completati",
+			"readingTime": "Tempo di lettura",
+			"size": "Dimensione"
+		},
 		"update": "Aggiorna",
 		"upload": "Carica",
 		"uploading": "Caricamento",
 		"uploadingEllipsis": "Caricamento...",
 		"unimplemented": "Questa funzionalità non è stata ancora implementata! Riprova più tardi",
+		"upNext": "A seguire",
+		"unknown": "Sconosciuto",
+		"lastUpdated": "Ultimo aggiornamento",
 		"limitedFunctionality": "Questa funzionalità non è ancora completamente implementata e mancano alcune caratteristiche. Riprova più tardi",
 		"logIn": "Accedi",
 		"login": "Accedi",
@@ -2604,7 +2644,8 @@
 			"someRejected": "Alcuni file sono stati rifiutati. Controlla i tipi di file e riprova",
 			"tooManyFiles": "Hai selezionato troppi file",
 			"noValidFiles": "Non è stato selezionato alcun file valido"
-		}
+		},
+		"unknownError": "Si è verificato un errore sconosciuto"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2795,28 +2836,50 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Segna come letto",
-				"confirmation": "Sei sicuro di voler contrassegnare {{bookTitle}} come letto?"
+				"confirmation": "Sei sicuro di voler contrassegnare {{bookTitle}} come letto?",
+				"failure": "Impossibile contrassegnare il libro come letto"
 			},
 			"clearProgress": {
 				"label": "Azzera progresso",
-				"confirmation": "Sei sicuro di voler azzerare i tuoi progressi per {{bookTitle}}?"
+				"confirmation": "Sei sicuro di voler azzerare i tuoi progressi per {{bookTitle}}?",
+				"failure": "Impossibile eliminare il progresso attuale"
+			},
+			"deleteReadHistory": {
+				"label": "Elimina cronologia di lettura",
+				"confirmation": "Sei sicuro di voler eliminare la tua cronologia di lettura per {{bookTitle}}?",
+				"failure": "Impossibile eliminare la cronologia di lettura"
 			},
 			"deleteBook": {
 				"label": "Elimina libro",
 				"confirmation": "Sei sicuro di voler eliminare {{bookTitle}}?"
 			},
+			"deleteDownload": {
+				"label": "Elimina download",
+				"confirmation": "Sei sicuro di voler eliminare il file scaricato per {{bookTitle}}?"
+			},
+			"goToLibrary": "Vai alla libreria",
+			"goToSeries": "Vai alle serie",
 			"seeDetails": "Visualizza i dettagli"
 		},
 		"bookMetadata": {
 			"ageRating": "Classificazione per età",
 			"downloadedAt": "Scaricato",
+			"characters": "Personaggi",
 			"format": "Formato",
 			"genres": "Generi",
 			"language": "Lingua",
 			"publisher": "Editore",
 			"size": "Dimensione",
 			"volume": "Volume",
-			"year": "Anno"
+			"writers": "Autori",
+			"colorists": "Coloristi",
+			"inkers": "Inchiostratori",
+			"letterers": "Letteristi",
+			"coverArtists": "Copertinisti",
+			"links": "Collegamenti",
+			"year": "Anno",
+			"identifier": "Identificatore",
+			"identifiers": "Identificatori"
 		},
 		"common": {
 			"book": "Libro",
@@ -2825,27 +2888,39 @@
 			"clear": "Cancella",
 			"completed": "Completato",
 			"confirm": "Conferma",
+			"continue": "Continua",
 			"content": "Contenuto",
 			"details": "Dettagli",
 			"delete": "Elimina",
+			"dismiss": "Ignora",
+			"download": "Scarica",
 			"downloads": "Download",
+			"done": "Fatto",
 			"edit": "Modifica",
 			"enabled": "Abilitato",
 			"enable": "Abilita",
 			"error": "Errore",
+			"favorite": "Preferiti",
+			"finished": "Completato",
 			"grid": "Griglia",
 			"list": "Elenco",
 			"lastCompleted": "Ultimo completamento",
 			"name": "Nome",
 			"none": "Nessuno",
+			"notAvailable": "Non disponibile",
 			"options": "Opzioni",
 			"page": "Pagina",
 			"pages": "Pagine",
+			"pageXOfY": "Pagina {{current}} di {{total}}",
 			"password": "Password",
 			"progress": "Progresso",
 			"publication": "Pubblicazione",
+			"read": "Leggi",
+			"readAgain": "Leggi di nuovo",
 			"readTime": "Tempo di lettura",
+			"readthrough": "Lettura completa",
 			"readMore": "Scopri di più",
+			"refresh": "Aggiorna",
 			"save": "Salva",
 			"select": "Seleziona",
 			"settings": "Impostazioni",
@@ -2860,7 +2935,12 @@
 			"version": "Versione"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Errore sconosciuto"
+		},
+		"epubMenu": {
+			"tableOfContents": "Sommario",
+			"bookmarksAndAnnotations": "Segnalibri e annotazioni",
+			"appearance": "Aspetto"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2882,12 +2962,20 @@
 			"noOPDSServers": "Nessun server OPDS aggiunto",
 			"noServers": "Nessun server configurato",
 			"cta": "Inizia aggiungendo un server per accedere alle tue collezioni di libri",
-			"seeDocumentation": "Visualizza la documentazione"
+			"seeDocumentation": "Visualizza la documentazione",
+			"noSmartLists": {
+				"label": "Nessuna lista smart trovata",
+				"description": "Una volta create, appariranno qui"
+			}
 		},
 		"tabs": {
 			"servers": "Server",
 			"localLibrary": "Libreria",
-			"settings": "Impostazioni"
+			"settings": "Impostazioni",
+			"home": "Home",
+			"browse": "Esplora",
+			"clubs": "Club",
+			"search": "Cerca"
 		},
 		"localLibrary": {
 			"title": "Libreria locale",
@@ -2915,7 +3003,7 @@
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "Elimina libro",
+					"label": "Elimina libri",
 					"confirmation": "Sei sicuro di voler eliminare la tua libreria locale?",
 					"disclaimer": "Questa azione non può essere annullata."
 				},
@@ -2957,11 +3045,16 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"skippedOneServer": "Sincronizzazione ignorata per {{skippedCount}} server",
+				"skippedMultipleServers": "Sincronizzazione ignorata per {{skippedCount}} server",
+				"explanation": "Alcuni server utilizzano metodi di autenticazione che non possono essere aggiornati automaticamente"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "Impossibile sincronizzare i progressi offline"
+		},
+		"search": {
+			"label": "Cerca in questo server",
+			"description": "Trova contenuti specifici su questo server",
+			"placeholder": "Cerca"
 		},
 		"settings": {
 			"preferences": {
@@ -3008,7 +3101,14 @@
 				"bookClubsEnabled": "Funzionalità club del libro"
 			},
 			"autoSyncLocalData": "Sincronizzazione automatica dati locali",
-			"lowercaseTranslation": "Etichette in minuscolo",
+			"textCase": {
+				"label": "﻿Maiuscola/minuscola",
+				"options": {
+					"lowerCase": "Minuscolo",
+					"sentenceCase": "Maiuscolo a inizio frase",
+					"titleCase": "Iniziali in maiuscolo"
+				}
+			},
 			"tintListBackground": "Colora sfondi lista",
 			"management": {
 				"label": "Gestione",
@@ -3054,7 +3154,7 @@
 						"description": "Riavvia l'app"
 					},
 					"error": {
-						"title": "Cancellazione non riuscita",
+						"title": "Eliminazione non riuscita",
 						"description": "Si è verificato un errore durante l'eliminazione del database"
 					}
 				},
@@ -3084,6 +3184,32 @@
 				"buildInformation": "Informazioni build",
 				"version": "Versione: {{version}}",
 				"suuportIdentifier": "Identificatore di supporto: {{supportID}}"
+			}
+		},
+		"stumpServer": {
+			"browse": {
+				"books": "Libri",
+				"favorites": "Preferiti",
+				"files": "File",
+				"libraries": "Librerie",
+				"series": "Serie",
+				"smartLists": "Liste smart"
+			},
+			"continueReading": {
+				"label": "Continua a leggere",
+				"emptyText": "Nessun libro in lettura"
+			},
+			"onDeck": {
+				"label": "La tua prossima lettura",
+				"emptyText": "Nessun libro pronto da leggere"
+			},
+			"recentlyAddedSeries": {
+				"label": "Serie aggiunte di recente",
+				"emptyText": "Nessuna serie aggiunta di recente"
+			},
+			"recentlyAddedBooks": {
+				"label": "Libri aggiunti di recente",
+				"emptyText": "Nessun libro aggiunto di recente"
 			}
 		},
 		"readerSettings": {
@@ -3143,9 +3269,36 @@
 			},
 			"allSettings": "Tutte le impostazioni"
 		},
+		"tableOfContents": {
+			"goToPageX": "Vai alla pagina {{pageNumber}}",
+			"goToPagePlaceholder": "Vai alla pagina...",
+			"errors": {
+				"pageDoesNotExist": "La pagina {{page}} non esiste",
+				"invalidPage": "'{{page}}' non è un numero di pagina"
+			},
+			"showCurrentChapter": "Mostra capitolo attuale"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "Tutto",
+				"bookmarks": "Segnalibri",
+				"highlights": "Evidenziazioni",
+				"notes": "Note"
+			}
+		},
 		"epubSettings": {
 			"title": "Impostazioni del lettore Epub",
-			"typeface": "Carattere",
+			"typeface": {
+				"label": "Carattere",
+				"options": {
+					"system": "Sistema",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "Dimensioni carattere",
 			"fontWeight": {
 				"label": "Peso carattere",

@@ -2,7 +2,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use chrono::Utc;
-use cron::Schedule;
+use croner::Cron;
 use models::entity::{library, metadata_fetch_record, scheduled_job};
 use models::shared::enums::{MetadataFetchStatus, ScheduledJobKind};
 use sea_orm::{prelude::*, EntityTrait, QueryFilter};
@@ -28,8 +28,8 @@ impl JobScheduler {
 		};
 
 		for job in jobs {
-			match Schedule::from_str(&job.schedule) {
-				Ok(schedule) => {
+			match Cron::from_str(&job.schedule) {
+				Ok(cron) => {
 					tracing::info!(
 						id = job.id,
 						name = %job.name,
@@ -38,7 +38,7 @@ impl JobScheduler {
 						"Starting scheduled job"
 					);
 					let ctx = Arc::clone(&ctx);
-					let handle = tokio::spawn(cron_loop(job, schedule, ctx));
+					let handle = tokio::spawn(cron_loop(job, cron, ctx));
 					scheduler.handles.push(handle);
 				},
 				Err(error) => {
@@ -74,13 +74,13 @@ impl Drop for JobScheduler {
 
 /// The main loop for a single scheduled job based on its cron expression
 #[tracing::instrument(fields(job_id = %job.id, job_name = %job.name), skip(ctx))]
-async fn cron_loop(job: scheduled_job::Model, schedule: Schedule, ctx: Arc<Ctx>) {
+async fn cron_loop(job: scheduled_job::Model, cron: Cron, ctx: Arc<Ctx>) {
 	loop {
 		let now = Utc::now();
-		let next = match schedule.upcoming(Utc).next() {
-			Some(t) => t,
-			None => {
-				tracing::warn!("No upcoming fire time for cron schedule, stopping");
+		let next = match cron.find_next_occurrence(&now, false) {
+			Ok(t) => t,
+			Err(e) => {
+				tracing::warn!(?e, "No upcoming fire time for cron schedule, stopping");
 				return;
 			},
 		};

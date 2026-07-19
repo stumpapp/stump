@@ -241,7 +241,7 @@ export function ComboBox({
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							'gap-1.5 justify-between rounded-md border-border bg-input/30 text-foreground outline-none hover:bg-input/50 data-[state=open]:border-ring data-[state=open]:ring-[3px] data-[state=open]:ring-ring/50',
+							'gap-1.5 justify-between rounded-interactive border-border bg-input/30 text-foreground outline-none hover:bg-input/50 data-[state=open]:border-ring data-[state=open]:ring-[3px] data-[state=open]:ring-ring/50',
 							{ [TRIGGER_SIZE_VARIANTS[size || 'default']]: !!size },
 							{ [SIZE_VARIANTS[size || 'default']]: !!size },
 							{ 'text-muted-foreground': !hasSelectedSomething },
@@ -269,7 +269,7 @@ export function ComboBox({
 						{filterable && (
 							<>
 								<Command.Input
-									wrapperClassName="m-1 mb-0 h-9 rounded-md bg-input/30 px-3"
+									wrapperClassName="m-1 mb-0 h-9 rounded-interactive bg-input/30 px-3"
 									iconClassName="mr-0 order-last"
 									className="h-9 py-2"
 									placeholder={filterPlaceholder}
@@ -292,7 +292,7 @@ export function ComboBox({
 											// Note: For some reason, this transforms the `value` to lowercase...
 											onSelect={handleChange}
 											className={cn(
-												'gap-2.5 py-2 pr-8 pl-3 relative w-full rounded-md transition-all duration-75',
+												'gap-2.5 py-2 pr-8 pl-3 relative w-full rounded-sm transition-all duration-75',
 												{ 'text-primary': isSelected },
 												option.fontClassName,
 											)}

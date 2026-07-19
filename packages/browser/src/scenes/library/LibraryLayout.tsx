@@ -11,7 +11,6 @@ import { usePreferences } from '@/hooks'
 
 import { LibraryContext } from './context'
 import LibraryHeader from './LibraryHeader'
-import LibraryNavigation from './LibraryNavigation'
 import { LibrarySettingsHeader, LibrarySettingsSidebar } from './tabs/settings'
 
 const query = graphql(`
@@ -29,8 +28,6 @@ const query = graphql(`
 				totalBytes
 				totalReadingTimeSeconds
 			}
-			genres
-			publishers
 			tags {
 				id
 				name
@@ -123,8 +120,6 @@ export default function LibraryLayout() {
 				}}
 			>
 				{renderHeader()}
-
-				{!isSettings && <LibraryNavigation />}
 
 				{displaySideBar && <LibrarySettingsSidebar />}
 

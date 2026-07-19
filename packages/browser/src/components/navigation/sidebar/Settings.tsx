@@ -21,7 +21,6 @@ export default function SettingsButton() {
 						? 'border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
 						: 'hover:border-sidebar-border hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
 				)}
-				pressEffect={false}
 				onClick={() => navigate(paths.settings())}
 			>
 				<Settings className="h-4 w-4 -scale-x-[1] transform" />

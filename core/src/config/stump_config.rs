@@ -61,6 +61,7 @@ pub mod env_keys {
 	pub const OIDC_ALLOW_REGISTRATION_KEY: &str = "STUMP_OIDC_ALLOW_REGISTRATION";
 	pub const OIDC_DISABLE_LOCAL_AUTH_KEY: &str = "STUMP_OIDC_DISABLE_LOCAL_AUTH";
 	pub const OIDC_EXTRA_AUDIENCES_KEY: &str = "STUMP_OIDC_EXTRA_AUDIENCES";
+	pub const OIDC_CA_CERT_FILE_KEY: &str = "STUMP_OIDC_CA_CERT_FILE";
 	pub const TRUST_PROXY_HEADERS_KEY: &str = "STUMP_TRUST_PROXY_HEADERS";
 	pub const PARALLELISM_MULTIPLIER_KEY: &str = "STUMP_PARALLELISM_MULTIPLIER";
 }
@@ -190,6 +191,7 @@ pub struct StumpConfig {
 	/// Indicates if the KoReader sync feature should be enabled.
 	#[default_value(false)]
 	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
+	#[debug_value(true)]
 	pub enable_koreader_sync: bool,
 
 	/// Indicates if the Kobo sync feature should be enabled.
@@ -477,22 +479,7 @@ mod tests {
 			enable_playground: Some(false),
 			enable_koreader_sync: Some(false),
 			enable_kobo_sync: Some(false),
-			password_hash_cost: None,
-			session_ttl: None,
-			access_token_ttl: None,
-			refresh_token_ttl: None,
-			expired_session_cleanup_interval: None,
-			max_image_upload_size: None,
-			enable_upload: None,
-			max_file_upload_size: None,
-			pdf_render_dpi: None,
-			pdf_max_dimension: None,
-			pdf_render_format: None,
-			pdf_cache_pages: None,
-			pdf_prerender_range: None,
-			pdf_high_quality: None,
-			oidc: None,
-			trust_proxy_headers: None,
+			..Default::default()
 		};
 		partial_config.apply_to_config(&mut config);
 

@@ -16,7 +16,7 @@ const SelectPrimitiveTrigger = React.forwardRef<
 	<SelectRadix.Trigger
 		ref={ref}
 		className={cn(
-			'h-10 px-3 py-2 text-sm flex w-full items-center justify-between rounded-md border border-border bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none enabled:hover:bg-input/50 disabled:cursor-not-allowed disabled:opacity-50',
+			'h-10 px-3 py-2 text-sm flex w-full items-center justify-between rounded-interactive border border-border bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none enabled:hover:bg-input/50 disabled:cursor-not-allowed disabled:opacity-50',
 			className,
 		)}
 		{...props}

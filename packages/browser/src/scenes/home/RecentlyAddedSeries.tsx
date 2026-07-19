@@ -1,6 +1,6 @@
 import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
-import { cn, Text } from '@stump/components'
-import { graphql, RecentlyAddedSeriesQuery } from '@stump/graphql'
+import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
@@ -9,9 +9,7 @@ import { Suspense, useCallback, useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
-import { SeriesStackedThumbnails } from '@/components/thumbnail'
-import { Link } from '@/context'
-import { useFancyAnimations } from '@/hooks/useFancyAnimations'
+import { StackedSeriesCard } from '@/components/series'
 import { usePreferences } from '@/hooks/usePreferences'
 
 const query = graphql(`
@@ -84,49 +82,6 @@ export const usePrefetchRecentlyAddedSeries = () => {
 	}, [sdk, client])
 }
 
-type RecentlyAddedSeriesCardProps = {
-	series: RecentlyAddedSeriesQuery['recentlyAddedSeries']['nodes'][number]
-	cardWidth: number
-}
-
-function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardProps) {
-	const { shouldFancyHover } = useFancyAnimations()
-
-	const thumbnailData = [series.thumbnail, ...series.media.map((m) => m.thumbnail)]
-
-	return (
-		<Link
-			to={`/series/${series.id}`}
-			className={cn(
-				'group relative block shrink-0 transition-opacity',
-				!shouldFancyHover && 'hover:opacity-80',
-			)}
-			style={{ width: cardWidth }}
-		>
-			<SeriesStackedThumbnails width={cardWidth} thumbnailData={thumbnailData} />
-
-			<div className="left-0 top-0 px-2.5 py-3 absolute z-20 w-full">
-				<Text
-					className="text-xl font-bold leading-tight text-white line-clamp-2 text-wrap!"
-					style={{
-						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
-					}}
-				>
-					{series.resolvedName}
-				</Text>
-				<Text
-					className="mt-0.5 text-sm font-medium leading-tight line-clamp-1 text-gray-200"
-					style={{
-						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
-					}}
-				>
-					{formatDistanceToNow(new Date(series.createdAt), { addSuffix: true })}
-				</Text>
-			</div>
-		</Link>
-	)
-}
-
 function RecentlyAddedSeries() {
 	const { t } = useLocaleContext()
 	const {
@@ -177,7 +132,16 @@ function RecentlyAddedSeries() {
 			title={t('homeScene.recentlyAddedSeries.title')}
 			items={nodes}
 			keyExtractor={(series) => series.id}
-			renderItem={(series) => <RecentlyAddedSeriesCard series={series} cardWidth={cardWidth} />}
+			renderItem={(series) => (
+				<StackedSeriesCard
+					id={series.id}
+					name={series.resolvedName}
+					subtitle={formatDistanceToNow(new Date(series.createdAt), { addSuffix: true })}
+					isMissing={series.status === 'MISSING'}
+					width={cardWidth}
+					thumbnailData={[series.thumbnail, ...series.media.map((m) => m.thumbnail)]}
+				/>
+			)}
 			cardHeight={cardHeight}
 			onFetchMore={handleFetchMore}
 			emptyState={emptyState}

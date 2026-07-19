@@ -12,7 +12,7 @@ pub fn gen_stump_config_impls(
 	let new_impl = gen_new_impl(config_vars);
 	let debug_impl = gen_debug_impl(config_vars);
 
-	let partial_struct_name = format_ident!("Partial{}", struct_ident);
+	let partial_struct_name = format_ident!("Partial{struct_ident}");
 	let with_file_impl = gen_with_file_impl(&partial_struct_name, input_attrs);
 	let with_env_impl = gen_with_env_impl(&partial_struct_name, config_vars);
 
@@ -29,8 +29,8 @@ pub fn gen_stump_config_impls(
 }
 
 fn gen_new_impl(config_vars: &[StumpConfigVariable]) -> TokenStream {
-	let mut setters: Vec<TokenStream> = Vec::new();
-	let mut args: Vec<TokenStream> = Vec::new();
+	let mut setters = Vec::new();
+	let mut args = Vec::new();
 
 	for var in config_vars {
 		let name = &var.variable_name;
@@ -63,7 +63,7 @@ fn gen_new_impl(config_vars: &[StumpConfigVariable]) -> TokenStream {
 }
 
 fn gen_debug_impl(config_vars: &[StumpConfigVariable]) -> TokenStream {
-	let mut setters: Vec<TokenStream> = Vec::new();
+	let mut setters = Vec::new();
 
 	for var in config_vars {
 		let name = &var.variable_name;
@@ -106,7 +106,7 @@ fn gen_with_file_impl(
 			let toml_content_str = std::fs::read_to_string(config_toml)?;
 			let toml_configs = toml::from_str::<#partial_struct_name>(&toml_content_str)
 				.map_err(|e| {
-					eprintln!("Failed to parse Stump config file: {}", e);
+					eprintln!("Failed to parse Stump config file: {e}");
 					crate::CoreError::InitializationError(e.to_string())
 				})?;
 

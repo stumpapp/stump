@@ -1,8 +1,8 @@
+import { parseGraphQLDateTime, parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, InterfaceLayout, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { parseGraphQLDateTime, parseGraphQLPercentageDecimal } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'

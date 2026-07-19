@@ -17,7 +17,7 @@ export default function SeriesExplorerScene() {
 	const { uploadConfig } = useUploadConfig({ enabled: checkPermission(UserPermission.UploadFile) })
 
 	return (
-		<div className="flex flex-1">
+		<div className="flex min-h-[50vh] flex-1 flex-col">
 			<FileExplorer libraryID={libraryId} rootPath={path} uploadConfig={uploadConfig} />
 		</div>
 	)

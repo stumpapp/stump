@@ -29,3 +29,55 @@ pub struct ConfidenceFactor {
 	/// Whether this factor matched
 	pub matched: bool,
 }
+
+/// The result of a provider search: the candidates that were successfully
+/// resolved, plus how many raw hits the search itself reported. Providers
+/// like Hardcover require a separate per-hit detail fetch after the initial
+/// search, and any of those can fail (e.g. rate limiting) without failing
+/// the whole search -- `requested` lets callers detect when hits were
+/// silently dropped instead of just seeing a shorter-than-expected list.
+#[derive(Debug, Clone, Default)]
+pub struct SearchOutcome {
+	pub candidates: Vec<MatchCandidate>,
+	pub requested: usize,
+}
+
+impl SearchOutcome {
+	pub fn failed(&self) -> usize {
+		self.requested.saturating_sub(self.candidates.len())
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::types::ExternalMediaMetadata;
+
+	fn candidate() -> MatchCandidate {
+		MatchCandidate {
+			provider: "hardcover".to_string(),
+			external_id: "1".to_string(),
+			metadata: ExternalMetadata::Media(ExternalMediaMetadata::default()),
+			confidence: 0.0,
+			confidence_factors: vec![],
+		}
+	}
+
+	#[test]
+	fn failed_counts_missing_candidates() {
+		let outcome = SearchOutcome {
+			candidates: vec![candidate()],
+			requested: 3,
+		};
+		assert_eq!(outcome.failed(), 2);
+	}
+
+	#[test]
+	fn failed_saturates_at_zero() {
+		let outcome = SearchOutcome {
+			candidates: vec![candidate()],
+			requested: 0,
+		};
+		assert_eq!(outcome.failed(), 0);
+	}
+}

@@ -542,6 +542,13 @@
 			"addedFiles": "Added files"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Settings",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
@@ -913,6 +920,20 @@
 		"buttons": {
 			"continueReading": "Continue Reading",
 			"downloadSeries": "Download Series"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1455,6 +1476,10 @@
 					"label": "Font",
 					"description": "Customise the font used in the application"
 				},
+				"thumbnailPreview": {
+					"label": "Preview",
+					"description": "This is how thumbnails will look with the current settings"
+				},
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
 					"description": "The aspect ratio to use for thumbnails",
@@ -1470,9 +1495,19 @@
 						"thumbhash": "Thumbhash"
 					}
 				},
+				"thumbnailRoundness": {
+					"label": "Thumbnail roundness",
+					"description": "How rounded the corners of thumbnail images should be",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"large": "Large"
+					}
+				},
 				"navigation": {
 					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
+					"description": "Customise the navigation elements of the app"
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
@@ -1543,14 +1578,6 @@
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customise the appearance and behaviour of Stump with these additional settings"
-				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -1649,7 +1676,7 @@
 		"app/reader": {
 			"helmet": "Reader settings",
 			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -2348,7 +2375,7 @@
 					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
+					"label": "API token expiry",
 					"description": "The date when the API token will expire (optional)"
 				},
 				"enableProvider": {
@@ -2558,9 +2585,11 @@
 	},
 	"common": {
 		"add": "Add",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2579,11 +2608,22 @@
 		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",
@@ -2604,7 +2644,8 @@
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
-		}
+		},
+		"unknownError": "An unknown error occurred"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2776,16 +2817,16 @@
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw token"
+					"placeholder": "Raw Token"
 				},
 				"basic": "Basic"
 			},
 			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
+			"catalogUrl": "Catalogue URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
+			"checkConnection": "Check Connection",
+			"setAsDefaultServer": "Set as Default Server",
 			"enableOPDS": "Enable OPDS",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
@@ -2794,29 +2835,51 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"label": "Mark as Read",
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
+				"failure": "Failed to mark book as read"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"label": "Clear Progress",
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
+				"failure": "Failed to delete current progress"
+			},
+			"deleteReadHistory": {
+				"label": "Delete Read History",
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"failure": "Failed to delete read history"
 			},
 			"deleteBook": {
-				"label": "Delete book",
+				"label": "Delete Book",
 				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
 			},
+			"deleteDownload": {
+				"label": "Delete Download",
+				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+			},
+			"goToLibrary": "Go to Library",
+			"goToSeries": "Go to Series",
 			"seeDetails": "See Details"
 		},
 		"bookMetadata": {
 			"ageRating": "Age Rating",
 			"downloadedAt": "Downloaded",
+			"characters": "Characters",
 			"format": "Format",
 			"genres": "Genres",
 			"language": "Language",
 			"publisher": "Publisher",
 			"size": "Size",
 			"volume": "Volume",
-			"year": "Year"
+			"writers": "Writers",
+			"colorists": "Colourists",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"coverArtists": "Cover Artists",
+			"links": "Links",
+			"year": "Year",
+			"identifier": "Identifier",
+			"identifiers": "Identifiers"
 		},
 		"common": {
 			"book": "Book",
@@ -2825,27 +2888,39 @@
 			"clear": "Clear",
 			"completed": "Completed",
 			"confirm": "Confirm",
+			"continue": "Continue",
 			"content": "Content",
 			"details": "Details",
 			"delete": "Delete",
+			"dismiss": "Dismiss",
+			"download": "Download",
 			"downloads": "Downloads",
+			"done": "Done",
 			"edit": "Edit",
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
+			"favorite": "Favourite",
+			"finished": "Finished",
 			"grid": "Grid",
 			"list": "List",
 			"lastCompleted": "Last Completed",
 			"name": "Name",
 			"none": "None",
+			"notAvailable": "Not Available",
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",
+			"pageXOfY": "Page {{current}} of {{total}}",
 			"password": "Password",
 			"progress": "Progress",
 			"publication": "Publication",
-			"readTime": "Reading time",
-			"readMore": "Read more",
+			"read": "Read",
+			"readAgain": "Read Again",
+			"readTime": "Reading Time",
+			"readthrough": "Readthrough",
+			"readMore": "Read More",
+			"refresh": "Refresh",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
@@ -2861,6 +2936,11 @@
 		},
 		"errors": {
 			"unknown": "Unknown error"
+		},
+		"epubMenu": {
+			"tableOfContents": "Table of Contents",
+			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"appearance": "Appearance"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -2880,28 +2960,36 @@
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
+			"noServers": "No Servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"seeDocumentation": "See Documentation",
+			"noSmartLists": {
+				"label": "No lists returned",
+				"description": "Once created they will appear here"
+			}
 		},
 		"tabs": {
 			"servers": "Servers",
 			"localLibrary": "Library",
-			"settings": "Settings"
+			"settings": "Settings",
+			"home": "Home",
+			"browse": "Browse",
+			"clubs": "Clubs",
+			"search": "Search"
 		},
 		"localLibrary": {
 			"title": "Local Library",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
+					"title": "Nothing to Read Yet",
 					"description": "Once you have books for offline reading, they will appear here"
 				},
 				"imported": {
-					"title": "No imported books",
+					"title": "No Imported Books",
 					"description": "Import books to read them offline"
 				},
 				"server": {
-					"title": "No downloaded books",
+					"title": "No Downloaded Books",
 					"description": "Download books from your library to read them offline"
 				}
 			},
@@ -2963,6 +3051,11 @@
 			},
 			"syncFailed": "Failed to sync offline progress"
 		},
+		"search": {
+			"label": "Search This Server",
+			"description": "Find specific content on this server",
+			"placeholder": "Search"
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferences",
@@ -2980,9 +3073,9 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail Placeholder",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Greyscale",
+						"averageColor": "Average Colour",
+						"colorful": "Colourful",
 						"thumbhash": "Thumbhash"
 					}
 				},
@@ -3008,16 +3101,23 @@
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
-			"lowercaseTranslation": "Lowercase Labels",
+			"textCase": {
+				"label": "Text Case",
+				"options": {
+					"lowerCase": "Lowercase",
+					"sentenceCase": "Sentence Case",
+					"titleCase": "Title Case"
+				}
+			},
 			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",
 				"dataUsage": {
 					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"nonStumpData": "Non-Stump Data",
+					"serversTotal": "Servers Total",
+					"totalFiles": "Total Files",
+					"totalSize": "Total Size",
 					"deleteDownloads": {
 						"label": "Delete Downloads",
 						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
@@ -3028,7 +3128,7 @@
 					},
 					"noDownloads": "No downloaded files for this server",
 					"storedPreferences": {
-						"label": "Stored preferences",
+						"label": "Stored Preferences",
 						"description": "Miscellaneous data like book preferences, reading timers, etc"
 					},
 					"clearPreferences": "Clear Preferences"
@@ -3040,21 +3140,21 @@
 					"label": "Clear Cache",
 					"memory": {
 						"button": "Memory",
-						"success": "Memory cache cleared"
+						"success": "Memory Cache Cleared"
 					},
 					"disk": {
 						"button": "Disk",
-						"success": "Disk cache cleared"
+						"success": "Disk Cache Cleared"
 					}
 				},
 				"deleteDatabase": {
 					"label": "Delete Database",
 					"success": {
-						"title": "Database deleted",
+						"title": "Database Deleted",
 						"description": "Please restart the app"
 					},
 					"error": {
-						"title": "Deletion failed",
+						"title": "Deletion Failed",
 						"description": "There was an error deleting the database"
 					}
 				},
@@ -3086,9 +3186,35 @@
 				"suuportIdentifier": "Support Identifier: {{supportID}}"
 			}
 		},
+		"stumpServer": {
+			"browse": {
+				"books": "Books",
+				"favorites": "Favourites",
+				"files": "Files",
+				"libraries": "Libraries",
+				"series": "Series",
+				"smartLists": "Smart Lists"
+			},
+			"continueReading": {
+				"label": "Continue Reading",
+				"emptyText": "No books in progress"
+			},
+			"onDeck": {
+				"label": "Your Next Read",
+				"emptyText": "No books on deck"
+			},
+			"recentlyAddedSeries": {
+				"label": "Recently Added Series",
+				"emptyText": "No recently added series"
+			},
+			"recentlyAddedBooks": {
+				"label": "Recently Added Books",
+				"emptyText": "No recently added books"
+			}
+		},
 		"readerSettings": {
 			"title": "Reader Settings",
-			"overrideGlobalSettings": "Override global settings",
+			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -3143,9 +3269,36 @@
 			},
 			"allSettings": "All Settings"
 		},
+		"tableOfContents": {
+			"goToPageX": "Go to page {{pageNumber}}",
+			"goToPagePlaceholder": "Go to page...",
+			"errors": {
+				"pageDoesNotExist": "Page {{page}} does not exist",
+				"invalidPage": "'{{page}}' is not a page number"
+			},
+			"showCurrentChapter": "Show Current Chapter"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "All",
+				"bookmarks": "Bookmarks",
+				"highlights": "Highlights",
+				"notes": "Notes"
+			}
+		},
 		"epubSettings": {
 			"title": "Epub Reader Settings",
-			"typeface": "Typeface",
+			"typeface": {
+				"label": "Typeface",
+				"options": {
+					"system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "Font Size",
 			"fontWeight": {
 				"label": "Font Weight",
@@ -3189,7 +3342,7 @@
 				"options": {
 					"start": "Start",
 					"left": "Left",
-					"center": "Center",
+					"center": "Centre",
 					"right": "Right",
 					"justify": "Justify"
 				}

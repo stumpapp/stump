@@ -22,7 +22,7 @@ export default function ThumbnailPreviewFrame({
 		<div className="flex h-full w-full items-center justify-center">
 			<div
 				className={cn(
-					'rounded-md border border-border',
+					'rounded-thumbnail border border-border',
 					hasCustomRatio ? 'h-full max-h-full' : 'aspect-2/3 h-full',
 					{
 						'from-zinc-500 to-zinc-700 bg-linear-to-br':

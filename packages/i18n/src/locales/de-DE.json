@@ -2032,6 +2032,9 @@
 						"updateError": "Fehler beim Aktualisieren des geplanten Job",
 						"deleteSuccess": "Geplanter Job gelöscht",
 						"deleteError": "Fehler beim Löschen des geplanten Job"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {

@@ -19,7 +19,7 @@ export default function SettingsDialog() {
 				</ControlButton>
 			</Dialog.Trigger>
 
-			<Dialog.Content size="md" className="gap-4 z-101 flex flex-col bg-background-surface">
+			<Dialog.Content size="md" className="gap-4 z-101 flex flex-col">
 				<Tabs
 					value={modality}
 					defaultValue="book"

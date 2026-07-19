@@ -254,7 +254,7 @@ export function PendingMatchesTable() {
 
 	if (rows.length === 0) {
 		return (
-			<div className="rounded-lg p-8 flex flex-col items-center justify-center border border-dashed border-edge">
+			<div className="p-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-border">
 				<Text size="sm" variant="muted">
 					{t(getKey('nothingToReview'))}
 				</Text>
@@ -274,7 +274,7 @@ export function PendingMatchesTable() {
 					{t(getKey('acceptAll.label'))}
 				</Button>
 				<Button
-					variant="danger"
+					variant="destructive"
 					size="sm"
 					disabled={isRejectingAll}
 					onClick={() => rejectAll(undefined as never)}
@@ -284,7 +284,7 @@ export function PendingMatchesTable() {
 
 				<div className="flex-1" />
 
-				<Button variant="primary" size="sm" onClick={handleReviewAll}>
+				<Button size="sm" onClick={handleReviewAll}>
 					{t(getKey('startReview'))}
 				</Button>
 			</div>
@@ -329,11 +329,7 @@ const createColumns = (
 			size: 300,
 		}),
 		columnHelper.accessor('entityType', {
-			cell: ({ getValue }) => (
-				<Badge variant="default" size="xs">
-					{getValue()}
-				</Badge>
-			),
+			cell: ({ getValue }) => <Badge size="xs">{getValue()}</Badge>,
 			header: translate(getKey('columns.entityType')),
 			size: 80,
 		}),

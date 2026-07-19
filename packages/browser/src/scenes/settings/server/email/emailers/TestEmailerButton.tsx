@@ -75,7 +75,6 @@ export default function TestEmailerButton() {
 				id="testRecipient"
 				label={t(getKey('recipientLabel'))}
 				description={t(getKey('recipientDescription'))}
-				variant="primary"
 				value={recipient}
 				onChange={(e) => setRecipient(e.target.value)}
 				placeholder="you@example.com"

@@ -1,0 +1,28 @@
+---
+title: Progression Tracking
+---
+
+<Callout>
+    Outside of basic position tracking or "you have or have not read this book" kind of functionality, Stump does not have any additional features built on top of read progress yet. This will be more utilitzed in the future, for features like [reading journals](https://github.com/stumpapp/stump/issues/866) and reading goals
+</Callout>
+
+
+Stump keeps track of your reading progress as you read. This includes:
+
+- Which books you have read
+- Which books you are currently reading
+- Your current position in a book
+
+This is done on a **per-user** basis, meaning that each user has their own set of progress for the books they read on the server.
+
+
+
+## Supported Clients
+
+Stump natively supports tracking read progress for books when using any of the built-in [readers](/docs/apps/web/readers). Besides the built-in readers, Stump will update read progress when using OPDS-PSE.
+
+Most other reading clients will have their own mechanisms for tracking read progress, which is likely not compatible to sync with Stump without an additional layer of integration. If you are interested in integrating a custom reading client with Stump, please create a GitHub issue to discuss the details.
+
+## KoReader Sync
+
+Stump has a special integration with [KoReader](https://koreader.rocks) to sync read progress. For more information on how to set up KoReader sync, see the [dedicated guide](/docs/guides/integrations/koreader).

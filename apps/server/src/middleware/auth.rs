@@ -121,11 +121,9 @@ pub async fn auth_middleware(
 	}
 
 	let is_opds = request_uri.starts_with("/opds");
-	let is_swagger = request_uri.starts_with("/swagger-ui");
-
 	let is_playground_request =
 		request_uri.starts_with("/api/graphql") && *req.method() == Method::GET;
-	let is_playground_allowed = ctx.config.enable_swagger || cfg!(debug_assertions);
+	let is_playground_allowed = ctx.config.enable_playground || cfg!(debug_assertions);
 	let is_playground = is_playground_request && is_playground_allowed;
 
 	let Some(auth_header) = auth_header else {
@@ -143,9 +141,6 @@ pub async fn auth_middleware(
 			return Err(
 				OPDSBasicAuth::new(opds_version, host_details.url()).into_response()
 			);
-		} else if is_swagger {
-			// Sign in via React app and then redirect to server-side swagger-ui
-			return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
 		} else if is_playground {
 			// Sign in via React app and then redirect to server-side playground
 			return Err(Redirect::to("/auth?redirect=%2Fapi%2Fgraphql").into_response());
@@ -265,7 +260,7 @@ pub async fn validate_api_key(
 	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
 	// clean up keys.
 	let can_use_key =
-		user.is_server_owner || user.permissions.contains(&UserPermission::AccessAPIKeys);
+		user.is_server_owner || user.permissions.contains(&UserPermission::AccessApiKeys);
 
 	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
 		tracing::error!(?can_use_key, "API key validation failed!");
@@ -315,7 +310,7 @@ async fn handle_bearer_auth(
 		_ => (),
 	};
 
-	let user_id = extract_user_from_jwt(&token)?;
+	let user_id = extract_user_from_jwt(&token, conn).await?;
 
 	let fetched_user = user::LoginUser::find()
 		.filter(user::Column::Id.eq(user_id.clone()))

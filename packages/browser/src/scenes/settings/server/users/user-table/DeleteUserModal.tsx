@@ -55,7 +55,6 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
 					<div className="shrink-0">
 						<CheckBox
-							variant="primary"
 							label="Hard Delete User"
 							checked={hardDelete}
 							onClick={() => setHardDelete((prev) => !prev)}
@@ -63,15 +62,10 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 					</div>
 
 					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
-						<Button onClick={onClose} disabled={isPending}>
+						<Button variant="outline" onClick={onClose} disabled={isPending}>
 							Cancel
 						</Button>
-						<Button
-							variant="primary"
-							isLoading={isPending}
-							disabled={isPending}
-							onClick={handleDelete}
-						>
+						<Button isLoading={isPending} disabled={isPending} onClick={handleDelete}>
 							Delete User
 						</Button>
 					</div>

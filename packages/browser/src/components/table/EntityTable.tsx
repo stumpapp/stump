@@ -100,7 +100,7 @@ export default function EntityTable<Entity>({
 				}}
 			>
 				<thead>
-					<tr className="divide-x divide-edge">
+					<tr className="divide-x divide-border">
 						{table.getFlatHeaders().map((header) => {
 							const isSortable = header.column.getCanSort()
 							return (
@@ -132,7 +132,7 @@ export default function EntityTable<Entity>({
 
 				<tbody>
 					{rows.map((row) => (
-						<tr key={row.id} className="divide-y divide-edge odd:bg-background-surface">
+						<tr key={row.id} className="divide-y divide-border odd:bg-muted">
 							{row.getVisibleCells().map((cell) => (
 								<td
 									className={cn(
@@ -142,7 +142,7 @@ export default function EntityTable<Entity>({
 											'py-2': !columns?.some((col) => col.id === 'cover'),
 											'first:pl-4': !['cover', 'position'].includes(cell.column.id),
 										},
-										'border-r border-r-edge last:border-r-0',
+										'border-r border-r-border last:border-r-0',
 									)}
 									key={cell.id}
 									style={{

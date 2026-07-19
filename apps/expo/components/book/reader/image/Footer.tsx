@@ -14,7 +14,7 @@ import { useColors } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
-import { useBookPreferences, useBookReadTime } from '~/stores/reader'
+import { useBookPreferences } from '~/stores/reader'
 
 import { useReaderAnimations } from '../shared/readerAnimations'
 import { useImageBasedReader } from './context'
@@ -35,8 +35,8 @@ export default function Footer() {
 		isOPDS,
 		requestHeaders,
 		serverId,
+		timer,
 	} = useImageBasedReader()
-	const elapsedSeconds = useBookReadTime(book.id)
 	const {
 		preferences: {
 			footerControls = 'slider',
@@ -134,6 +134,7 @@ export default function Footer() {
 		}
 	}, [footerControls, currentPage, visible, visibilityChanged, pageSets, doublePageBehaviorChanged])
 
+	const elapsedSeconds = timer.getCurrentTime() || 0
 	const formattedReadTime = formatHumanDuration(elapsedSeconds, { significantUnits: 2 })
 
 	const pageSource = useCallback(
@@ -487,7 +488,7 @@ export default function Footer() {
 
 	return (
 		<Animated.View
-			className="insets-x-safe bottom-safe gap-4 absolute z-20 shrink"
+			className="insets-x-safe bottom-safe gap-4 absolute z-20 w-full shrink"
 			style={[secondaryStyle, translateFooterStyle]}
 		>
 			{footerControls === 'images' && readingMode !== ReadingMode.ContinuousVertical && (
@@ -514,14 +515,17 @@ export default function Footer() {
 			<View className={cn('gap-2 px-3', { 'pb-1': Platform.OS === 'android' })}>
 				{(footerControls === 'images' || readingMode === ReadingMode.ContinuousVertical) && (
 					<Progress
-						className="h-1 bg-white/40"
+						className="h-1"
 						indicatorClassName="bg-[#f5f3ef]"
+						trackClassName="bg-white/30"
 						value={percentage}
 						inverted={
 							readingDirection === ReadingDirection.Rtl &&
 							readingMode !== ReadingMode.ContinuousVertical
 						}
 						max={100}
+						// TODO: Figure out android (blurTarget)
+						blurProps={{ intensity: 4 }}
 					/>
 				)}
 

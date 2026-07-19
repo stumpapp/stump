@@ -14,8 +14,13 @@ exclude = [
 ]
 
 [workspace.package]
-version = "0.1.2"
+version = "0.1.4"
 rust-version = "1.92.0"
+
+# I've defined majority of dependencies here in the workspace so that they are
+# significantly easier to manage and update. Every crate in the workspace should be
+# pulling from the root for all of its dependencies unless there is a specific reason not to.
+# Please try to maintain alphabetical order for readability.
 
 [workspace.dependencies]
 alphanumeric-sort = "1.5.3"
@@ -36,6 +41,7 @@ derive_builder = "0.20.2"
 derivative = "2.2.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.48", features = ["derive"] }
+croner = "3.0.1"
 english-to-cron = "0.1.7"
 futures = "0.3.31"
 futures-util = "0.3.31"
@@ -43,7 +49,7 @@ globset = "0.4.16"
 infer = "0.19.0"
 itertools = "0.14.0"
 heck = "0.5.0"
-http-cache-reqwest = { version = "0.16.0", features = ["manager-moka"] }
+http-cache-reqwest = { version = "1.0.0-alpha.6", features = ["manager-moka"] }
 keyring = { version = "3.6.3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 lettre = { version = "0.11.18", default-features = false, features = [
   "builder",
@@ -53,13 +59,14 @@ lettre = { version = "0.11.18", default-features = false, features = [
   "tokio1-rustls-tls",
 ] }
 md5 = "0.8.0"
+natord = "1.0.9"
 num-traits = "0.2.19"
 prefixed-api-key = { version = "0.3.0", features = ["sha2"] }
 rand = "0.9.2"
 regex = "1.11.3"
-reqwest = { version = "0.12.23", default-features = false, features = [ "json", "rustls-tls" ] }
-reqwest-middleware = { version = "0.4.0", features = ["json"] }
-reqwest-retry = "0.7.0"
+reqwest = { version = "0.13.4", default-features = false, features = [ "json", "rustls" ] }
+reqwest-middleware = { version = "0.5.2", features = ["json"] }
+reqwest-retry = "0.9.1"
 rust_decimal = { version = "1.38.0", features = ["serde-with-float"] }
 sea-orm = { version = "1.1.16", features = [
   "mock",
@@ -109,3 +116,15 @@ pretty_assertions = "1.4.1"
 
 # Only used to test with sea-orm
 maplit = { version = "1.0.2" }
+
+[profile.dev.package."*"]
+# Compile all dependencies with opt-level=3 to help speed up tests and
+# debug builds
+codegen-units = 1
+debug = "line-tables-only"
+opt-level = 3
+
+[profile.release]
+strip = "debuginfo"
+codegen-units = 1
+panic = "abort"

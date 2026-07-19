@@ -6,7 +6,7 @@ import { Controller, useForm, useFormState } from 'react-hook-form'
 import { ScrollView, View } from 'react-native'
 import { z } from 'zod'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 
 import { SheetBackDetection } from '../SheetBackDetection'
 import { Input, SheetHeader } from '../ui'
@@ -83,7 +83,7 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 					detents={['auto', 1]}
 					grabber
 					scrollable
-					backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 					grabberOptions={{ color: colors.sheet.grabber }}
 					onDidPresent={() => setIsOpen(true)}
 					onDidDismiss={handleDismiss}

@@ -4,7 +4,6 @@ import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation
 import { PortalHost } from '@rn-primitives/portal'
 import * as Sentry from '@sentry/react-native'
 import { initDateFnsLocale, LocaleProvider } from '@stump/i18n'
-import { getColor, to } from 'colorjs.io/fn'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import * as Localization from 'expo-localization'
 import { Stack, useNavigationContainerRef } from 'expo-router'
@@ -17,6 +16,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Toaster } from 'sonner-native'
+import { setLocaleDetector } from 'to-words'
 import { useShallow } from 'zustand/react/shallow'
 
 import darkSplash from '~/assets/splash/dark.json'
@@ -86,7 +86,7 @@ export default function RootLayout() {
 	)
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
-	const { colors: epubThemeColors } = useEpubTheme()
+	const { isDarkEpubTheme } = useEpubTheme()
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -95,6 +95,7 @@ export default function RootLayout() {
 		const preferredLocale = usePreferencesStore.getState().locale
 		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
 		initDateFnsLocale(preferredLocale ?? deviceLocale)
+		setLocaleDetector(() => preferredLocale ?? deviceLocale)
 		setAndroidNavigationBar(colorScheme)
 		setIsColorSchemeLoaded(true)
 		hasMounted.current = true
@@ -138,19 +139,6 @@ export default function RootLayout() {
 			Sentry.captureException(err)
 		})
 	}, [success])
-
-	let isDarkEpubTheme: boolean = isDarkColorScheme
-	if (epubThemeColors?.background && isReadingEbook) {
-		const backgroundColor = getColor(epubThemeColors?.background)
-		const foregroundColor = getColor(epubThemeColors?.foreground)
-
-		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
-		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
-
-		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
-		// to look much better for edge cases near the boundry
-		isDarkEpubTheme = foregroundLightness > backgroundLightness
-	}
 
 	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
 

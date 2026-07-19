@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -20,13 +20,18 @@ export default function DoubleSidebarToggle() {
 	}, [enableDoubleSidebar, update])
 
 	return (
-		<WideSwitch
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={enableDoubleSidebar}
-			onCheckedChange={handleToggle}
-			formId="enableDoubleSidebar"
-		/>
+			onClick={handleToggle}
+			className="flex-row items-center justify-between"
+		>
+			<RawSwitch
+				id="enableDoubleSidebar"
+				checked={enableDoubleSidebar}
+				onCheckedChange={handleToggle}
+			/>
+		</NewCard.Row>
 	)
 }
 

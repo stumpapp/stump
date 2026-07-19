@@ -145,6 +145,7 @@ export class DownloadRepository {
 					page: relations.existingProgression.page ?? undefined,
 					percentage: relations.existingProgression.percentageCompleted ?? undefined,
 					elapsedSeconds: relations.existingProgression.elapsedSeconds ?? undefined,
+					lastSyncedElapsedSeconds: relations.existingProgression.elapsedSeconds ?? undefined,
 					epubProgress: relations.existingProgression.locator
 						? epubProgress.safeParse(relations.existingProgression.locator).data
 						: undefined,

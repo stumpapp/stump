@@ -13,11 +13,23 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
 	pub encryption_key: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub jwt_access_secret: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub jwt_refresh_secret: Option<String>,
 }
 
 #[derive(FromQueryResult)]
 pub struct EncryptionKeySelect {
 	pub encryption_key: Option<String>,
+}
+
+#[derive(FromQueryResult)]
+pub struct JwtSecretsSelect {
+	pub jwt_access_secret: Option<String>,
+	pub jwt_refresh_secret: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

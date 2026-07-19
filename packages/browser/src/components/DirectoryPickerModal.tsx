@@ -100,12 +100,11 @@ export default function DirectoryPickerModal({
 
 						{/* TODO: error message display */}
 						<Input
-							className="line-clamp-1 h-[37px]"
+							className="h-9.25 line-clamp-1"
 							containerClassName="max-w-full"
 							// isInvalid={!!errorMessage}
 							value={path ?? ''}
 							readOnly
-							variant="primary"
 							// TODO: allow input to be editable
 							// onInputStop={(newPath) => {
 							// 	if (newPath) {
@@ -115,7 +114,7 @@ export default function DirectoryPickerModal({
 						/>
 					</div>
 
-					<div className="h-80 flex flex-col divide-y divide-edge/75 overflow-hidden">
+					<div className="h-80 flex flex-col divide-y divide-border/75 overflow-hidden">
 						<AutoSizer>
 							{({ height, width }) => (
 								<Virtuoso
@@ -126,9 +125,9 @@ export default function DirectoryPickerModal({
 									itemContent={(index, directory) => (
 										<button
 											className={cx(
-												'my-0.5 rounded-lg px-2 py-1.5 w-full justify-start text-left hover:bg-background-surface',
+												'my-0.5 px-2 py-1.5 w-full justify-start rounded-lg text-left hover:bg-muted',
 												{
-													'bg-background-surface/40': index % 2 === 0,
+													'bg-muted/40': index % 2 === 0,
 												},
 											)}
 											onClick={() => setPath(directory.path)}
@@ -148,18 +147,11 @@ export default function DirectoryPickerModal({
 				</div>
 
 				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
-					<CheckBox
-						variant="primary"
-						label="Show Hidden Directories"
-						checked={showHidden}
-						onClick={toggle}
-					/>
+					<CheckBox label="Show Hidden Directories" checked={showHidden} onClick={toggle} />
 
 					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
 						<Button onClick={onClose}>Cancel</Button>
-						<Button variant="primary" onClick={handleConfirm}>
-							Confirm
-						</Button>
+						<Button onClick={handleConfirm}>Confirm</Button>
 					</div>
 				</Dialog.Footer>
 			</Dialog.Content>

@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 
 use super::env_keys::*;
 
-const REQUIRED_SCOPES: &str = "openid,email";
+const REQUIRED_SCOPES: &str = "email";
 
 /// Configuration for OpenID Connect (OIDC) authentication
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, SimpleObject)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, SimpleObject)]
 #[graphql(name = "OidcConfig")]
 pub struct OidcConfig {
 	/// Whether to enable OIDC authentication
@@ -22,6 +22,7 @@ pub struct OidcConfig {
 	pub issuer_url: String,
 	/// The client secret
 	#[serde(default)]
+	#[graphql(skip)]
 	pub client_secret: String,
 	/// Additional scopes to request (comma-separated)
 	/// Default: "openid,email,profile"
@@ -36,6 +37,10 @@ pub struct OidcConfig {
 	/// Additional trusted audiences for ID token verification
 	#[serde(default)]
 	pub extra_audiences: Vec<String>,
+	/// Path to a CA certificate file (PEM-encoded) to trust when connecting to the OIDC issuer
+	#[serde(default)]
+	#[graphql(skip)]
+	pub ca_cert_file: Option<String>,
 }
 
 impl Default for OidcConfig {
@@ -49,6 +54,7 @@ impl Default for OidcConfig {
 			allow_registration: true,
 			disable_local_auth: false,
 			extra_audiences: Vec::new(),
+			ca_cert_file: None,
 		}
 	}
 }
@@ -59,6 +65,22 @@ fn default_oidc_scopes() -> String {
 
 fn default_true() -> bool {
 	true
+}
+
+impl std::fmt::Debug for OidcConfig {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.debug_struct("OidcConfig")
+			.field("enabled", &self.enabled)
+			.field("client_id", &self.client_id)
+			.field("issuer_url", &self.issuer_url)
+			.field("client_secret", &"[REDACTED]")
+			.field("scopes", &self.scopes)
+			.field("allow_registration", &self.allow_registration)
+			.field("disable_local_auth", &self.disable_local_auth)
+			.field("extra_audiences", &self.extra_audiences)
+			.field("ca_cert_file", &self.ca_cert_file)
+			.finish()
+	}
 }
 
 impl OidcConfig {
@@ -119,6 +141,13 @@ impl OidcConfig {
 			})
 			.unwrap_or_default();
 
+		let ca_cert_file = env::var(OIDC_CA_CERT_FILE_KEY)
+			.ok()
+			.filter(|v| !v.is_empty());
+		if let Some(ref ca_cert_file_specified) = ca_cert_file {
+			tracing::info!("OIDC certificate specified as {}", ca_cert_file_specified);
+		}
+
 		Some(Self {
 			enabled,
 			client_id,
@@ -128,6 +157,7 @@ impl OidcConfig {
 			allow_registration,
 			disable_local_auth,
 			extra_audiences,
+			ca_cert_file,
 		})
 	}
 

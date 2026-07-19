@@ -24,17 +24,17 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group rounded-md px-2 text-sm inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start transition-all duration-150 hover:bg-sidebar-surface-hover',
+				'group h-9 px-3 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
 				{
-					'justify-center border border-dashed border-edge-subtle text-foreground/90 hover:bg-sidebar-surface hover:text-foreground':
+					'justify-center border border-dashed border-sidebar-border text-sidebar-foreground/90 hover:border-sidebar-border hover:bg-sidebar-accent/35 hover:text-sidebar-accent-foreground':
 						variant === 'action',
 				},
-				{ 'text-foreground': variant !== 'action' },
 				{
-					'bg-sidebar-surface hover:bg-sidebar-surface-hover': isActive,
+					'font-medium bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent':
+						isActive,
 				},
 				{
-					'bg-sidebar-surface-hover': isActive && variant === 'action',
+					'bg-sidebar-accent': isActive && variant === 'action',
 				},
 				className,
 			)}

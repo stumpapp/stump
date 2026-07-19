@@ -5,16 +5,15 @@ import * as React from 'react'
 import { cn } from '../utils'
 
 const alertVariants = cva(
-	'relative w-full rounded-lg border border-edge px-4 py-3 text-sm grid has-[>svg]:grid-cols-[--spacing(4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
+	'relative w-full rounded-lg border border-border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[--spacing(4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
 	{
 		variants: {
 			variant: {
-				default: 'bg-background-surface text-foreground',
-				info: 'bg-fill-info-secondary text-foreground-subtle border-fill-info/10',
-				success: 'bg-fill-success-secondary text-foreground-subtle border-fill-success/10',
-				warning: 'bg-fill-warning-secondary text-foreground-subtle border-fill-warning/10',
-				destructive:
-					'bg-fill-danger-secondary text-foreground-subtle [&>svg]:text-current border-fill-danger/10',
+				default: 'bg-muted text-foreground',
+				info: 'bg-info/15 text-foreground border-info/10',
+				success: 'bg-success/15 text-foreground border-success/10',
+				warning: 'bg-warning/15 text-foreground border-warning/10',
+				destructive: 'bg-destructive/15 text-foreground [&>svg]:text-current border-destructive/10',
 			},
 		},
 		defaultVariants: {
@@ -99,7 +98,7 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
 		<div
 			data-slot="alert-description"
 			className={cn(
-				'gap-1 text-sm [&_p]:leading-relaxed col-start-2 grid justify-items-start text-foreground-muted',
+				'gap-1 text-sm [&_p]:leading-relaxed col-start-2 grid justify-items-start text-muted-foreground',
 				className,
 			)}
 			{...props}

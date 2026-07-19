@@ -1,0 +1,41 @@
+name: CVE Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  yarn-audit:
+    runs-on: ubuntu-latest
+    # write for creating issue
+    permissions:
+      issues: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run yarn audit and create issue if needed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AUDIT_OUTPUT=$(yarn audit --groups dependencies 2>&1)
+          AUDIT_EXIT_CODE=$?
+
+          # yarn audit exits 0 when no vulnerabilities are found
+          if [ "$AUDIT_EXIT_CODE" -ne 0 ]; then
+            printf '```\n%s\n```\n' "$AUDIT_OUTPUT" > issue-body.txt
+            gh issue create \
+              --title "[CVE] Vulnerable dependencies detected — $(date -u +%Y-%m-%d)" \
+              --body-file issue-body.txt \
+              --label "security"
+          fi

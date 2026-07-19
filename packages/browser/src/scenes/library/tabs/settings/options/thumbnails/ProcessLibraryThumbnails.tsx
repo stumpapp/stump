@@ -37,7 +37,7 @@ export default function ProcessLibraryThumbnails() {
 			<div>
 				<DropdownMenu
 					trigger={
-						<Button size="md" variant="outline">
+						<Button variant="outline">
 							Extract colors
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>
@@ -52,6 +52,7 @@ export default function ProcessLibraryThumbnails() {
 								},
 								{
 									label: 'Reprocess all',
+									isDestructive: true,
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => process(true),
 								},

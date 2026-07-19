@@ -1,11 +1,12 @@
 import { FlashListRef } from '@shopify/flash-list'
 import { ReadingMode } from '@stump/graphql'
-import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
-import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
+import { generatePageSets, ImageBasedBookPageRef, PageSetIndexes } from '@stump/sdk'
+import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
-import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
+import { useVolumeListener } from '~/modules/volumeListener'
+import { DEFAULT_BOOK_PREFERENCES, useBookPreferences, useReaderStore } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext, NextInSeriesBookRef } from './context'
 import ControlsOverlay from './ControlsOverlay'
@@ -33,8 +34,18 @@ export default function ImageBasedReaderContainer({
 			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
 			secondPageSeparate,
+			volumeButtonsNavigate,
 		},
 	} = useBookPreferences({ book: ctx.book, serverId: ctx.serverId })
+	const showControls = useReaderStore((state) => state.showControls)
+
+	useEffect(() => {
+		if (showControls) {
+			ctx.timer.pause()
+		} else {
+			ctx.timer.resume()
+		}
+	}, [showControls, ctx.timer])
 
 	const [imageSizes, setImageSizes] = useState<Record<number, ImageBasedBookPageRef>>(
 		() =>
@@ -64,7 +75,7 @@ export default function ImageBasedReaderContainer({
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
 		const modeForceOff = readingMode === ReadingMode.ContinuousVertical
 
-		let sets: number[][] = []
+		let sets: PageSetIndexes[] = []
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
 			sets = Array.from({ length: pages }, (_, i) => [i])
 		} else {
@@ -90,7 +101,25 @@ export default function ImageBasedReaderContainer({
 		[incognito, onPageChanged],
 	)
 
-	const flashListRef = useRef<FlashListRef<number[]>>(null)
+	const flashListRef = useRef<FlashListRef<PageSetIndexes>>(null)
+
+	useVolumeListener({
+		enabled: volumeButtonsNavigate,
+		onVolumeUp: () => {
+			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+			if (idx < pageSets.length - 1) {
+				flashListRef.current?.scrollToIndex({ index: idx + 1, animated: true })
+				setCurrentPage(currentPage + 1)
+			}
+		},
+		onVolumeDown: () => {
+			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+			if (idx > 0) {
+				flashListRef.current?.scrollToIndex({ index: idx - 1, animated: true })
+				setCurrentPage(currentPage - 1)
+			}
+		},
+	})
 
 	return (
 		<ImageBasedReaderContext.Provider

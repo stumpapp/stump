@@ -3,37 +3,37 @@
 	"files": [],
 	"references": [
 		{
-			"path": "apps/desktop"
+			"path": "apps/desktop",
 		},
 		{
-			"path": "apps/expo"
+			"path": "apps/expo",
 		},
 		{
-			"path": "apps/web"
+			"path": "apps/web",
 		},
 		{
-			"path": "apps/docs"
+			"path": "docs",
 		},
 		{
-			"path": "packages/sdk"
+			"path": "packages/sdk",
 		},
 		{
-			"path": "packages/client"
+			"path": "packages/client",
 		},
 		{
-			"path": "packages/components"
+			"path": "packages/components",
 		},
 		{
-			"path": "packages/browser"
+			"path": "packages/browser",
 		},
 		{
-			"path": "packages/i18n"
-		}
+			"path": "packages/i18n",
+		},
 	],
 	"compilerOptions": {
 		"module": "NodeNext",
 		"composite": true,
 		"declaration": true,
-		"emitDeclarationOnly": true
-	}
+		"emitDeclarationOnly": true,
+	},
 }

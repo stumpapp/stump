@@ -308,6 +308,7 @@ mod tests {
 				series_id: None,
 				size: None,
 				status: None,
+				tags: None,
 				updated_at: None,
 			})],
 		}];
@@ -337,6 +338,7 @@ mod tests {
 					series_id: None,
 					size: None,
 					status: None,
+					tags: None,
 					updated_at: None,
 				})],
 			},
@@ -381,6 +383,7 @@ mod tests {
 					series_id: None,
 					size: None,
 					status: None,
+					tags: None,
 					updated_at: None,
 				})],
 			},

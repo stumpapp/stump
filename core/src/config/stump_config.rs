@@ -16,10 +16,12 @@ use super::oidc_config::OidcConfig;
 use crate::{CoreError, CoreResult};
 use stump_config_gen::StumpConfigGenerator;
 
+// TODO(env): prefix with STUMP_ for consistency
 pub mod env_keys {
 	pub const CONFIG_DIR_KEY: &str = "STUMP_CONFIG_DIR";
 	pub const IN_DOCKER_KEY: &str = "STUMP_IN_DOCKER";
 	pub const PROFILE_KEY: &str = "STUMP_PROFILE";
+	pub const IP_KEY: &str = "STUMP_IP";
 	pub const PORT_KEY: &str = "STUMP_PORT";
 	pub const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
 	pub const PRETTY_LOGS_KEY: &str = "STUMP_PRETTY_LOGS";
@@ -29,15 +31,13 @@ pub mod env_keys {
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
 	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
-	pub const ENABLE_SWAGGER_KEY: &str = "ENABLE_SWAGGER_UI";
+	pub const ENABLE_PLAYGROUND_KEY: &str = "STUMP_ENABLE_PLAYGROUND";
 	pub const ENABLE_KOREADER_SYNC_KEY: &str = "ENABLE_KOREADER_SYNC";
 	pub const ENABLE_KOBO_SYNC_KEY: &str = "ENABLE_KOBO_SYNC";
 	pub const ENABLE_OPDS_PROGRESSION_KEY: &str = "ENABLE_OPDS_PROGRESSION";
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const MAX_SCANNER_CONCURRENCY_KEY: &str = "STUMP_MAX_SCANNER_CONCURRENCY";
-	pub const MAX_THUMBNAIL_CONCURRENCY_KEY: &str = "STUMP_MAX_THUMBNAIL_CONCURRENCY";
 	pub const MAX_IMAGE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_IMAGE_UPLOAD_SIZE";
 	pub const ENABLE_UPLOAD_KEY: &str = "STUMP_ENABLE_UPLOAD";
 	pub const MAX_FILE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_FILE_UPLOAD_SIZE";
@@ -55,9 +55,9 @@ pub mod env_keys {
 	pub const OIDC_ALLOW_REGISTRATION_KEY: &str = "STUMP_OIDC_ALLOW_REGISTRATION";
 	pub const OIDC_DISABLE_LOCAL_AUTH_KEY: &str = "STUMP_OIDC_DISABLE_LOCAL_AUTH";
 	pub const OIDC_EXTRA_AUDIENCES_KEY: &str = "STUMP_OIDC_EXTRA_AUDIENCES";
-	pub const BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY: &str =
-		"STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS";
+	pub const OIDC_CA_CERT_FILE_KEY: &str = "STUMP_OIDC_CA_CERT_FILE";
 	pub const TRUST_PROXY_HEADERS_KEY: &str = "STUMP_TRUST_PROXY_HEADERS";
+	pub const PARALLELISM_MULTIPLIER_KEY: &str = "STUMP_PARALLELISM_MULTIPLIER";
 }
 use env_keys::*;
 
@@ -67,8 +67,6 @@ pub mod defaults {
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
 	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 30; // 30 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
-	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 10;
 	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
 	pub const DEFAULT_MAX_FILE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
@@ -79,6 +77,7 @@ pub mod defaults {
 	pub const DEFAULT_PDF_PRERENDER_RANGE: u32 = 5; // Pre-render 5 pages before/after current
 	pub const DEFAULT_PDF_HIGH_QUALITY: bool = true; // Enable high-quality rendering by default
 	pub const DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS: i64 = 60 * 60 * 24; // 1 day
+	pub const DEFAULT_PARALLELISM_MULTIPLIER: usize = 2;
 }
 use defaults::*;
 
@@ -120,6 +119,11 @@ pub struct StumpConfig {
 	#[env_key(PROFILE_KEY)]
 	#[validator(do_validate_profile)]
 	pub profile: String,
+
+	/// The IP address on which to listen on (default: "0.0.0.0").
+	#[default_value("0.0.0.0".to_string())]
+	#[env_key(IP_KEY)]
+	pub ip: String,
 
 	/// The port from which to serve the application (default: 10801).
 	#[default_value(10801)]
@@ -173,14 +177,15 @@ pub struct StumpConfig {
 	#[env_key(PDFIUM_KEY)]
 	pub pdfium_path: Option<String>,
 
-	/// Indicates if the Swagger UI should be disabled.
+	/// Indicates if the GraphQL playground should be enabled.
 	#[default_value(false)]
-	#[env_key(ENABLE_SWAGGER_KEY)]
-	pub enable_swagger: bool,
+	#[env_key(ENABLE_PLAYGROUND_KEY)]
+	pub enable_playground: bool,
 
 	/// Indicates if the KoReader sync feature should be enabled.
 	#[default_value(false)]
 	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
+	#[debug_value(true)]
 	pub enable_koreader_sync: bool,
 
 	/// Indicates if the Kobo sync feature should be enabled.
@@ -217,20 +222,11 @@ pub struct StumpConfig {
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
 	pub expired_session_cleanup_interval: u64,
 
-	/// The maximum number of concurrent files which may be processed by a scanner. This is used
-	/// to limit/increase the number of files that are processed at once. This may be useful for those
-	/// with high or low performance systems to configure to their needs.
-	#[default_value(DEFAULT_MAX_SCANNER_CONCURRENCY)]
-	#[env_key(MAX_SCANNER_CONCURRENCY_KEY)]
-	pub max_scanner_concurrency: usize,
-
-	/// The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
-	/// to limit/increase the number of images that are processed at once. Image generation can be
-	/// resource intensive, so this may be useful for those with high or low performance systems to
-	/// configure to their needs.
-	#[default_value(DEFAULT_MAX_THUMBNAIL_CONCURRENCY)]
-	#[env_key(MAX_THUMBNAIL_CONCURRENCY_KEY)]
-	pub max_thumbnail_concurrency: usize,
+	/// A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
+	/// limit. Increasing can speed things up but will increase resource usage
+	#[default_value(DEFAULT_PARALLELISM_MULTIPLIER)]
+	#[env_key(PARALLELISM_MULTIPLIER_KEY)]
+	pub parallelism_multiplier: usize,
 
 	/// The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
 	/// libraries, series, or media.
@@ -284,11 +280,6 @@ pub struct StumpConfig {
 	#[default_value(None)]
 	pub oidc: Option<OidcConfig>,
 
-	/// The number of seconds after which a book can be re-completed
-	#[default_value(DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS)]
-	#[env_key(BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY)]
-	pub book_completion_dedup_timeout_secs: i64,
-
 	/// Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)
 	#[default_value(false)]
 	#[env_key(TRUST_PROXY_HEADERS_KEY)]
@@ -296,6 +287,15 @@ pub struct StumpConfig {
 }
 
 impl StumpConfig {
+	/// returns a sensible default concurrency limit based on the number of logical cpus
+	/// available to the process, scaled by `parallelism_multiplier`.
+	pub fn cpu_concurrency_limit(&self) -> usize {
+		let multiplier = std::cmp::max(self.parallelism_multiplier, 1);
+		std::thread::available_parallelism()
+			.map(|n| n.get() * multiplier)
+			.unwrap_or(multiplier)
+	}
+
 	/// Ensures that the configuration directory exists and saves the `StumpConfig`'s current values
 	/// to Stump.toml in the configuration directory.
 	///
@@ -464,33 +464,16 @@ mod tests {
 			colorful_logs: None,
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
-
+			parallelism_multiplier: Some(DEFAULT_PARALLELISM_MULTIPLIER),
 			enable_opds_progression: Some(false),
+			ip: None,
 			config_dir: None,
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
-			enable_swagger: Some(false),
+			enable_playground: Some(false),
 			enable_koreader_sync: Some(false),
 			enable_kobo_sync: Some(false),
-			password_hash_cost: None,
-			session_ttl: None,
-			access_token_ttl: None,
-			refresh_token_ttl: None,
-			expired_session_cleanup_interval: None,
-			max_scanner_concurrency: None,
-			max_thumbnail_concurrency: None,
-			max_image_upload_size: None,
-			enable_upload: None,
-			max_file_upload_size: None,
-			pdf_render_dpi: None,
-			pdf_max_dimension: None,
-			pdf_render_format: None,
-			pdf_cache_pages: None,
-			pdf_prerender_range: None,
-			pdf_high_quality: None,
-			oidc: None,
-			book_completion_dedup_timeout_secs: None,
-			trust_proxy_headers: None,
+			..Default::default()
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -508,6 +491,7 @@ mod tests {
 			new_toml_vals,
 			PartialStumpConfig {
 				profile: Some("release".to_string()),
+				ip: Some("0.0.0.0".to_string()),
 				port: Some(1337),
 				verbosity: Some(3),
 				pretty_logs: Some(true),
@@ -516,10 +500,10 @@ mod tests {
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
-
+				parallelism_multiplier: Some(DEFAULT_PARALLELISM_MULTIPLIER),
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
-				enable_swagger: Some(false),
+				enable_playground: Some(false),
 				enable_koreader_sync: Some(false),
 				enable_kobo_sync: Some(false),
 				enable_opds_progression: Some(false),
@@ -530,8 +514,6 @@ mod tests {
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
-				max_scanner_concurrency: Some(DEFAULT_MAX_SCANNER_CONCURRENCY),
-				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
 				max_image_upload_size: Some(DEFAULT_MAX_IMAGE_UPLOAD_SIZE),
 				enable_upload: Some(DEFAULT_ENABLE_UPLOAD),
 				max_file_upload_size: Some(DEFAULT_MAX_FILE_UPLOAD_SIZE),
@@ -542,9 +524,6 @@ mod tests {
 				pdf_prerender_range: Some(DEFAULT_PDF_PRERENDER_RANGE),
 				pdf_high_quality: Some(DEFAULT_PDF_HIGH_QUALITY),
 				oidc: None,
-				book_completion_dedup_timeout_secs: Some(
-					DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
-				),
 				trust_proxy_headers: Some(false),
 			}
 		);
@@ -561,7 +540,7 @@ mod tests {
 			[
 				(PORT_KEY, Some("1337")),
 				(VERBOSITY_KEY, Some("2")),
-				(ENABLE_SWAGGER_KEY, Some("true")),
+				(ENABLE_PLAYGROUND_KEY, Some("true")),
 				(HASH_COST_KEY, Some("1")),
 			],
 			|| {
@@ -579,6 +558,7 @@ mod tests {
 					generated,
 					StumpConfig {
 						profile: "release".to_string(),
+						ip: "0.0.0.0".to_string(),
 						port: 1337,
 						verbosity: 2,
 						pretty_logs: true,
@@ -589,7 +569,7 @@ mod tests {
 						config_dir,
 						allowed_origins: vec![],
 						pdfium_path: None,
-						enable_swagger: true,
+						enable_playground: true,
 						enable_koreader_sync: false,
 						enable_kobo_sync: false,
 						enable_opds_progression: false,
@@ -599,9 +579,8 @@ mod tests {
 						refresh_token_ttl: DEFAULT_REFRESH_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+						parallelism_multiplier: DEFAULT_PARALLELISM_MULTIPLIER,
 
-						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
-						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
 						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,
 						enable_upload: DEFAULT_ENABLE_UPLOAD,
 						max_file_upload_size: DEFAULT_MAX_FILE_UPLOAD_SIZE,
@@ -612,8 +591,6 @@ mod tests {
 						pdf_prerender_range: DEFAULT_PDF_PRERENDER_RANGE,
 						pdf_high_quality: DEFAULT_PDF_HIGH_QUALITY,
 						oidc: None,
-						book_completion_dedup_timeout_secs:
-							DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS,
 						trust_proxy_headers: false,
 					}
 				);

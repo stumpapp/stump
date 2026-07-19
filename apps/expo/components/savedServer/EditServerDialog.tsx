@@ -21,6 +21,7 @@ export default function EditServerDialog({ editingServer, onClose, onSubmit }: P
 	const colors = useColors()
 
 	const ref = useRef<TrueSheet>(null)
+	const hasBeenPresentedRef = useRef(false)
 	const [isOpen, setIsOpen] = useState(false)
 
 	const handleSubmit = useCallback(
@@ -32,8 +33,9 @@ export default function EditServerDialog({ editingServer, onClose, onSubmit }: P
 
 	useEffect(() => {
 		if (editingServer) {
+			hasBeenPresentedRef.current = true
 			ref.current?.present()
-		} else {
+		} else if (hasBeenPresentedRef.current) {
 			ref.current?.dismiss()
 		}
 	}, [editingServer])

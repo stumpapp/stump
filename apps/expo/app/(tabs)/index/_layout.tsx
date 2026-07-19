@@ -2,7 +2,7 @@ import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
 import { AddServerDialog } from '~/components/savedServer'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -18,7 +18,7 @@ export default function Screen() {
 				headerShown: true,
 				headerTransparent: Platform.OS === 'ios',
 				headerLargeTitle: true,
-				headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+				headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 				animation: animationEnabled ? 'default' : 'none',
 				headerRight: () => <AddServerDialog />,
 			}}

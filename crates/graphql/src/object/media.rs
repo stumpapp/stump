@@ -19,8 +19,8 @@ use crate::{
 		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
-			ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
-			ReadingSessionLoader,
+			ReadingSessionLoader, ReadthroughRecordLoaderKey,
+			ResumeReadingCursorLoaderKey,
 		},
 		series::SeriesLoader,
 	},
@@ -29,12 +29,9 @@ use crate::{
 };
 
 use super::{
-	library::Library,
-	library_config::LibraryConfig,
-	media_metadata::MediaMetadata,
-	reading_session::{ActiveReadingSession, FinishedReadingSession},
-	series::Series,
-	tag::Tag,
+	library::Library, library_config::LibraryConfig, media_metadata::MediaMetadata,
+	readthrough_record::ReadthroughRecord, resume_reading_cursor::ResumeReadingCursor,
+	series::Series, tag::Tag,
 };
 
 #[derive(Debug, Clone, SimpleObject)]
@@ -228,16 +225,15 @@ impl Media {
 			.to_string()
 	}
 
-	// TODO(graphql): Create object to query for device used (e.g., KoReader device ID)
 	async fn read_progress(
 		&self,
 		ctx: &Context<'_>,
-	) -> Result<Option<ActiveReadingSession>> {
+	) -> Result<Option<ResumeReadingCursor>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
 		let progress = loader
-			.load_one(ActiveReadingSessionLoaderKey {
+			.load_one(ResumeReadingCursorLoaderKey {
 				user_id: user.id.clone(),
 				media_id: self.model.id.clone(),
 			})
@@ -247,15 +243,12 @@ impl Media {
 	}
 
 	// TODO(graphql): Create object to query for device used (e.g., KoReader device ID)
-	async fn read_history(
-		&self,
-		ctx: &Context<'_>,
-	) -> Result<Vec<FinishedReadingSession>> {
+	async fn read_history(&self, ctx: &Context<'_>) -> Result<Vec<ReadthroughRecord>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
 		let history = loader
-			.load_one(FinishedReadingSessionLoaderKey {
+			.load_one(ReadthroughRecordLoaderKey {
 				user_id: user.id.clone(),
 				media_id: self.model.id.clone(),
 			})
@@ -286,10 +279,10 @@ impl Media {
 			r#"
             SELECT position
             FROM (
-                SELECT 
+                SELECT
                     id,
                     ROW_NUMBER() OVER (
-                        PARTITION BY series_id 
+                        PARTITION BY series_id
                         ORDER BY name
                     ) as position
                 FROM media

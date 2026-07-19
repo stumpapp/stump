@@ -10,7 +10,8 @@ import { useActiveServer } from '~/components/activeServer'
 import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
 import { Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useSearchStore } from '~/stores/search'
 
 import { prefetchBookSearch } from '../../books/search[q]'
@@ -20,6 +21,7 @@ export default function Screen() {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
+	const { t } = useTranslate()
 	const trackSearch = useSearchStore((store) => store.trackSearch)
 
 	const client = useQueryClient()
@@ -59,9 +61,9 @@ export default function Screen() {
 		navigation.setOptions({
 			headerShown: true,
 			headerTransparent: Platform.OS === 'ios',
-			headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 			headerSearchBarOptions: {
-				placeholder: 'Search',
+				placeholder: t('search.placeholder'),
 				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
 					setQuery(e.nativeEvent.text),
 				shouldShowHintSearchIcon: true,
@@ -75,18 +77,18 @@ export default function Screen() {
 				textColor: colors.foreground.DEFAULT,
 			},
 		})
-	}, [navigation, setQuery, onSearch, colors])
+	}, [navigation, setQuery, onSearch, colors, t])
 
 	if (!isInputFocused) {
 		return (
-			<View className="flex-1 items-center justify-center gap-4 bg-background p-4 tablet:p-7">
+			<View className="gap-4 p-4 tablet:p-7 flex-1 items-center justify-center bg-background">
 				<Owl owl="search" />
 				<View className="gap-2 px-4 tablet:max-w-lg">
-					<Text size="xl" className="text-center font-semibold leading-tight">
-						Search the server
+					<Text size="xl" className="font-semibold leading-tight text-center">
+						{t('search.label')}
 					</Text>
-					<Text size="lg" className="text-center text-foreground-muted">
-						Enter a search query to find content on this server
+					<Text size="lg" className="text-foreground-muted text-center">
+						{t('search.description')}
 					</Text>
 				</View>
 			</View>

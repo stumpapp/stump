@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import Spinner from '@/components/Spinner'
 import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useBookTimer } from '@/stores/reader'
 
 import { EpubContent } from './context'
 import EpubReaderContainer from './EpubReaderContainer'
@@ -154,12 +155,6 @@ const mutation = graphql(`
 	mutation UpdateEpubProgress($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
 			__typename
-			... on ActiveReadingSession {
-				percentageCompleted
-				epubcfi
-				page
-				elapsedSeconds
-			}
 		}
 	}
 `)
@@ -205,25 +200,29 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const [isInitialLoading, setIsInitialLoading] = useState(true)
 
 	const {
-		bookPreferences: { fontSize, lineHeight, fontFamily, readingMode, readingDirection },
+		bookPreferences: {
+			fontSize,
+			lineHeight,
+			fontFamily,
+			readingMode,
+			readingDirection,
+			trackElapsedTime,
+		},
 	} = useBookPreferences({ book: ebook.media })
+
+	const timer = useBookTimer(ebook.media?.id || '', {
+		initial: ebook.media?.readProgress?.elapsedSeconds,
+		enabled: trackElapsedTime,
+	})
+
+	const lastSyncedElapsedRef = useRef(ebook.media?.readProgress?.elapsedSeconds ?? 0)
 
 	const client = useQueryClient()
 	const { mutate } = useGraphQLMutation(mutation, {
-		onSuccess: ({ updateMediaProgress: data }) => {
-			client.setQueryData(['epubJsReader', id], (prevData: EpubJsReaderQuery) => {
-				if (!prevData) return prevData
-
-				return {
-					...prevData,
-					epubById: {
-						...prevData.epubById,
-						media: {
-							...prevData.epubById.media,
-							readProgress: data.__typename === 'ActiveReadingSession' ? data : null,
-						},
-					},
-				}
+		onSuccess: () => {
+			lastSyncedElapsedRef.current = timer.getCurrentTime()
+			client.invalidateQueries({
+				queryKey: ['epubJsReader', id],
 			})
 		},
 	})
@@ -232,14 +231,20 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		(input: EpubProgressInput) => {
 			if (isIncognito) return
 
+			const totalSeconds = timer.getCurrentTime()
+			const delta = Math.max(0, totalSeconds - lastSyncedElapsedRef.current)
+
 			mutate({
 				id: ebook.media?.id || '',
 				input: {
-					epub: input,
+					epub: {
+						...input,
+						elapsedSecondsDelta: delta > 0 ? delta : undefined,
+					},
 				},
 			})
 		},
-		[mutate, ebook, isIncognito],
+		[mutate, ebook, isIncognito, timer],
 	)
 
 	const existingBookmarks = useMemo(

@@ -5,7 +5,7 @@ import { BookClubBookInput, graphql, InterfaceLayout, MediaFilterInput } from '@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IS_IOS_24_PLUS, ON_END_REACHED_THRESHOLD, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, ON_END_REACHED_THRESHOLD, useColors } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
 import BookListItem from '../book/BookListItem'
@@ -141,7 +141,7 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 				dimmed={false}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}

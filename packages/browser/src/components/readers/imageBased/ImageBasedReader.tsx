@@ -33,7 +33,6 @@ type Props = {
 	onProgress?: (page: number, elapsedSeconds: number) => void
 }
 
-// TODO: support read time
 export default function ImageBasedReader({ media, isIncognito, initialPage, onProgress }: Props) {
 	const { sdk } = useSDK()
 	const paths = usePaths()
@@ -60,18 +59,10 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 		setSettings,
 	} = useBookPreferences({ book: media })
 
-	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(media?.id || '', {
+	const timer = useBookTimer(media?.id || '', {
 		initial: media?.readProgress?.elapsedSeconds,
-		enabled: trackElapsedTime,
+		enabled: trackElapsedTime && !showToolBar,
 	})
-
-	useEffect(() => {
-		if (showToolBar && isRunning) {
-			pause()
-		} else if (!showToolBar && !isRunning) {
-			resume()
-		}
-	}, [showToolBar, isRunning, pause, resume])
 
 	const windowSize = useWindowSize()
 
@@ -112,18 +103,6 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 	])
 
 	/**
-	 * A callback to update the read progress, if the reader is not in incognito mode.
-	 */
-	const handleUpdateProgress = useCallback(
-		(page: number) => {
-			if (!isIncognito) {
-				onProgress?.(page, totalSeconds)
-			}
-		},
-		[onProgress, isIncognito, totalSeconds],
-	)
-
-	/**
 	 * A callback to handle when the page changes. This will update the URL to reflect the new page
 	 * if the reader mode is not continuous.
 	 */
@@ -135,8 +114,13 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 				setCurrentPage(newPage)
 				navigate(paths.bookReader(media.id, { isIncognito, page: newPage }))
 			}
+
+			if (!isIncognito) {
+				const elapsedSeconds = timer.getCurrentTime()
+				onProgress?.(newPage, elapsedSeconds)
+			}
 		},
-		[media.id, isIncognito, navigate, readingMode, paths],
+		[media.id, isIncognito, navigate, readingMode, paths, timer, onProgress],
 	)
 
 	/**
@@ -202,7 +186,6 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 					media={media}
 					initialPage={currentPage}
 					getPageUrl={getPageUrl}
-					onProgressUpdate={handleUpdateProgress}
 					onPageChanged={handleChangePage}
 					orientation={
 						(readingMode.split('_')[1]?.toLowerCase() as 'vertical' | 'horizontal') || 'vertical'
@@ -227,7 +210,7 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 				getPageUrl,
 				setPageSize,
 				pageSets,
-				resetTimer: reset,
+				timer,
 				toggleToolbar: () => setSettings({ showToolBar: !showToolBar }),
 			}}
 		>

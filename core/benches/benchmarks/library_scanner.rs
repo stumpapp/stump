@@ -19,7 +19,9 @@ use stump_core::{
 	config::StumpConfig,
 	database::connect_at,
 	filesystem::scanner::LibraryScanJob,
-	job::{stump_job::StumpJob, ApalisWorkerState, JobContext, JobLifecycle},
+	job::{
+		stump_job::StumpJob, ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt,
+	},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
 use tokio::{runtime::Builder, sync::broadcast};
@@ -36,35 +38,68 @@ impl Display for BenchmarkSize {
 	fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
 		write!(
 			f,
-			"{} series with {} media each",
-			self.series_count, self.media_per_series
+			"{} series x {} books per series ({} books)",
+			self.series_count,
+			self.media_per_series,
+			self.series_count * self.media_per_series
 		)
 	}
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 4] = [
+	static SIZES: [BenchmarkSize; 5] = [
+		// 10 series x 10 books per series (100 books)
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
 			sample_count: 100,
 		},
+		// 100 series x 10 books per series (1000 books)
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 10,
 			sample_count: 100,
 		},
+		// 100 series x 100 books per series (10000 books)
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 100,
 			sample_count: 10,
 		},
+		// 100 series x 1,000 books per series (100000 books)
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 1000,
 			sample_count: 10,
 		},
+		// 150 series x 1,000 books per series (150000 books)
+		BenchmarkSize {
+			series_count: 150,
+			media_per_series: 1000,
+			sample_count: 10,
+		},
 	];
+
+	// static SIZES: [BenchmarkSize; 3] = [
+	// 	// 10 series x 10 books per series (100 books)
+	// 	BenchmarkSize {
+	// 		series_count: 10,
+	// 		media_per_series: 10,
+	// 		sample_count: 100,
+	// 	},
+	// 	// 100 series x 100 books per series (10000 books)
+	// 	BenchmarkSize {
+	// 		series_count: 100,
+	// 		media_per_series: 100,
+	// 		sample_count: 10,
+	// 	},
+	// 	// 100 series x 1,000 books per series (100000 books)
+	// 	BenchmarkSize {
+	// 		series_count: 100,
+	// 		media_per_series: 1000,
+	// 		sample_count: 10,
+	// 	},
+	// ];
 
 	let mut group = c.benchmark_group("full_scan");
 	for size in SIZES.iter() {
@@ -82,14 +117,14 @@ fn full_scan(c: &mut Criterion) {
 
 				let conn = test_ctx.job_ctx.conn.clone();
 
-				println!("Starting benchmark for {}", size);
+				println!("Starting benchmark: {}", size);
 				let start = Instant::now();
 				scan_new_library(test_ctx).await;
 				let elapsed = start.elapsed();
 
-				let _ =
-					safe_validate_counts(&conn, size.series_count, size.media_per_series)
-						.await;
+				validate_counts(&conn, size.series_count, size.media_per_series)
+					.await
+					.expect("Failed to validate counts");
 
 				clean_up(&conn, library.0, tempdirs).await;
 
@@ -122,11 +157,13 @@ async fn create_test_library(
 	(DatabaseConnection, LibraryWithConfig, Vec<TempDir>),
 	Box<dyn std::error::Error>,
 > {
-	let conn = connect_at(&format!(
-		"sqlite://{}/benchmark.db?mode=rwc",
-		env!("CARGO_MANIFEST_DIR")
-	))
-	.await?;
+	let db_path = PathBuf::from(format!("{}/benchmark.db", env!("CARGO_MANIFEST_DIR")));
+	let _ = std::fs::remove_file(&db_path);
+	let _ = std::fs::remove_file(format!("{}.wal", db_path.to_string_lossy()));
+	let _ = std::fs::remove_file(format!("{}.shm", db_path.to_string_lossy()));
+
+	let conn =
+		connect_at(&format!("sqlite://{}?mode=rwc", db_path.to_string_lossy())).await?;
 
 	let deleted_libraries = library::Entity::delete_many()
 		.exec(&conn)
@@ -169,9 +206,11 @@ async fn create_test_library(
 
 	let data_dir = PathBuf::from(format!("{}/benches/data", env!("CARGO_MANIFEST_DIR")));
 
-	let zip_path = data_dir.join("book.zip");
-	let epub_path = data_dir.join("book.epub");
-	let rar_path = data_dir.join("book.rar");
+	let fixture_paths = [
+		data_dir.join("book.zip"),
+		data_dir.join("book.epub"),
+		data_dir.join("book.rar"),
+	];
 
 	let mut temp_dirs = vec![library_temp_dir];
 	for series_idx in 0..series_count {
@@ -180,11 +219,7 @@ async fn create_test_library(
 			.tempdir_in(&library_temp_dir_path)?;
 
 		for book_idx in 0..books_per_series {
-			let book_path = match book_idx % 3 {
-				0 => zip_path.as_path(),
-				1 => epub_path.as_path(),
-				_ => rar_path.as_path(),
-			};
+			let book_path = &fixture_paths[book_idx % fixture_paths.len()];
 			let book_file_name_with_ext = format!(
 				"{}_{}",
 				book_idx,
@@ -199,8 +234,6 @@ async fn create_test_library(
 		temp_dirs.push(series_temp_dir);
 	}
 
-	tracing::info!("Library created!");
-
 	Ok((conn, (library, library_config), temp_dirs))
 }
 
@@ -211,12 +244,8 @@ async fn setup_test(
 	let (conn, library, tempdirs) =
 		create_test_library(series_count, books_per_series).await?;
 
-	let job = LibraryScanJob {
-		id: library.0.id.clone(),
-		path: library.0.path.clone(),
-		config: Some(library.1.clone()),
-		options: Default::default(),
-	};
+	let mut job = LibraryScanJob::new(library.0.id.clone(), library.0.path.clone(), None);
+	job.config = Some(library.1.clone());
 
 	let job_id = Uuid::new_v4().to_string();
 	let _db_job = job::ActiveModel {
@@ -247,24 +276,25 @@ async fn setup_test(
 	})
 }
 
-async fn safe_validate_counts(
+// i return errors so that the benchmark fails hard, so it doesn't fuck with
+// the trend data from previous runs e.g. in the scenario where a bug is introduced
+// and no books are inserted and things "improve" by a significant margin. def did not
+// happen nuh uh
+async fn validate_counts(
 	conn: &DatabaseConnection,
 	series_count: usize,
 	books_per_series: usize,
-) -> bool {
-	let mut passed = true;
-
+) -> Result<(), String> {
 	let actual_series_count = series::Entity::find()
 		.count(conn)
 		.await
 		.expect("Failed to count series");
 
 	if actual_series_count != series_count as u64 {
-		println!(
+		return Err(format!(
 			"Series count mismatch (actual vs expected): {} != {}",
 			actual_series_count, series_count
-		);
-		passed = false;
+		));
 	}
 
 	let actual_media_count = media::Entity::find()
@@ -273,15 +303,14 @@ async fn safe_validate_counts(
 		.expect("Failed to count media");
 
 	if actual_media_count != (series_count * books_per_series) as u64 {
-		println!(
+		return Err(format!(
 			"Media count mismatch (actual vs expected): {} != {}. You probably introduced a bug :)",
 			actual_media_count,
 			series_count * books_per_series
-		);
-		passed = false;
+		)	);
 	}
 
-	passed
+	Ok(())
 }
 
 async fn clean_up(
@@ -322,7 +351,6 @@ async fn scan_new_library(test_ctx: TestCtx) {
 
 	let working_state = job.init(&handle).await.expect("Failed to init job");
 
-	use stump_core::job::JobLifecycle;
 	let stump_core::job::WorkingState {
 		output: initial_output,
 		mut tasks,
@@ -330,7 +358,6 @@ async fn scan_new_library(test_ctx: TestCtx) {
 	} = working_state;
 
 	let mut output = initial_output.unwrap_or_default();
-	use stump_core::job::JobOutputExt;
 
 	while let Some(task) = tasks.pop_front() {
 		match job.execute_task(&handle, task).await {
@@ -347,5 +374,5 @@ async fn scan_new_library(test_ctx: TestCtx) {
 		}
 	}
 
-	println!("Job result: {:?}", output);
+	// println!("Job result: {:?}", output);
 }

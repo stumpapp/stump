@@ -140,7 +140,7 @@ async fn initialization(
 ) -> APIResult<impl IntoResponse> {
 	let base_url = host.url();
 	let template = format!(
-		"{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/image.jpg",
+		"{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{IsGreyscale}}/image.jpg",
 		base_url, api_key
 	);
 	let quality_template = format!(
@@ -148,8 +148,19 @@ async fn initialization(
 		base_url, api_key
 	);
 
-	Ok(Json(
-		json![{ "image_url_quality_template": quality_template, "image_url_template": template,	}],
+	let mut headers = HeaderMap::new();
+	// Note: i couldn't find reference to _why_ this is needed, but Komga includes the header. it should be
+	// harmless, as e30= is just a base64 of "{}"
+	headers.insert("x-kobo-apitoken", HeaderValue::from_static("e30="));
+
+	Ok((
+		headers,
+		Json(json![{
+			"Resources": {
+				"image_url_quality_template": quality_template,
+				"image_url_template": template,
+			}
+		}]),
 	))
 }
 

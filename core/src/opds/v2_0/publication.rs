@@ -265,24 +265,35 @@ impl OPDSPublication {
 		Ok(publication)
 	}
 
+	// TODO: we should pull from media analysis first
 	async fn images_for_book(
 		book: &OPDSPublicationEntity,
 		finalizer: &OPDSLinkFinalizer,
 	) -> CoreResult<Vec<OPDSImageLink>> {
-		Ok(vec![OPDSImageLinkBuilder::default()
-			.base_link(
-				OPDSBaseLinkBuilder::default()
-					.href(finalizer.format_link(format!(
-						"/opds/v2.0/books/{}/thumbnail",
-						book.media.id
-					)))
-					._type(OPDSLinkType::from(
-						get_content_type_for_page(&book.media.path, 1).await?,
-					))
-					.build()?
-					.with_auth(finalizer.format_link(AUTH_ROUTE)),
-			)
-			.build()?])
+		let first_page_content_type =
+			get_content_type_for_page(&book.media.path, 1).await;
+
+		match first_page_content_type {
+			Err(error) => {
+				tracing::error!(
+					?error,
+					"Failed to get content type for book page, skipping image links"
+				);
+				Ok(vec![])
+			},
+			Ok(content_type) => Ok(vec![OPDSImageLinkBuilder::default()
+				.base_link(
+					OPDSBaseLinkBuilder::default()
+						.href(finalizer.format_link(format!(
+							"/opds/v2.0/books/{}/thumbnail",
+							book.media.id
+						)))
+						._type(OPDSLinkType::from(content_type))
+						.build()?
+						.with_auth(finalizer.format_link(AUTH_ROUTE)),
+				)
+				.build()?]),
+		}
 	}
 
 	fn links_for_book(

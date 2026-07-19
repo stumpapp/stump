@@ -34,7 +34,7 @@ export function useGridItemSize(params: Params = {}) {
 		() => (availableSpace - padding - horizontalGap * (numColumns - 1)) / numColumns,
 		[availableSpace, padding, horizontalGap, numColumns],
 	)
-	const sizeEstimate = itemWidth * 1.5 + 16 + 20 + 4 * 2
+	const estimatedItemHeight = itemWidth * 1.5 + 16 + 20 + 4 * 2
 
 	// Here gap refers to the space on each side of a thumbnail, e.g. 4 items means 8 gaps (2 on each side)
 	// and paddingH refers to the horizontal padding we will use in the flashlist for grids, so that the real horizontal padding equals 16px.
@@ -50,6 +50,6 @@ export function useGridItemSize(params: Params = {}) {
 		itemWidth,
 		paddingHorizontal,
 		numColumns,
-		sizeEstimate,
+		estimatedItemHeight,
 	}
 }

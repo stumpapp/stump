@@ -161,6 +161,7 @@ function AndroidFilterMenu({ groups, isFilterApplied }: AndroidFilterMenuProps) 
 			onCheckedChange={item.onPress}
 			className="text-foreground"
 			disabled={item.disabled}
+			variant={item.destructive ? 'destructive' : 'default'}
 		>
 			<View className="gap-4 flex flex-row items-center">
 				{item.icon?.android && (
@@ -198,12 +199,7 @@ function AndroidFilterMenu({ groups, isFilterApplied }: AndroidFilterMenuProps) 
 				</Button>
 			</DropdownMenuTrigger>
 
-			<DropdownMenuContent
-				insets={contentInsets}
-				sideOffset={2}
-				className="tablet:w-64 w-2/3"
-				align="end"
-			>
+			<DropdownMenuContent insets={contentInsets} sideOffset={2} className="w-64" align="end">
 				{groups.map((group, groupIndex) => (
 					<View key={group.key}>
 						{groupIndex > 0 && <DropdownMenuSeparator />}

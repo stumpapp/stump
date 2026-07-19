@@ -1,20 +1,23 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
 import { PortalHost } from '@rn-primitives/portal'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { Platform, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { PortalHostContext } from '~/lib/PortalHostContext'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
+import { EpubReaderContext } from './context'
 import ThemeSheetContent from './ThemeSheetContent'
 
 const SHEET_PORTAL_HOST = 'epub-settings-sheet'
 
 export default function EpubSettingsSheet(props: TrueSheetProps) {
 	const sheetRef = useEpubSheetStore((state) => state.settingsSheetRef)
+
+	const context = useContext(EpubReaderContext)
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -29,7 +32,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 				dimmed={false}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				style={{
 					paddingBottom: insets.bottom,
@@ -37,7 +40,12 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 				insetAdjustment="automatic"
 				{...props}
 				onDidPresent={() => setIsOpen(true)}
-				onDidDismiss={() => setIsOpen(false)}
+				onDidDismiss={() => {
+					setIsOpen(false)
+					if (context) {
+						context.timer.resume()
+					}
+				}}
 			>
 				<PortalHostContext.Provider
 					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}

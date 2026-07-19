@@ -1,0 +1,26 @@
+{
+	"pages": [
+		"---Getting Started---",
+		"index",
+		"getting-started/installation",
+
+		"---Guides---",
+		"guides/access-control",
+		"guides/fundamentals",
+		"guides/features",
+		"guides/integrations",
+		"guides/configuration",
+
+		"guides/breaking-changes",
+
+		"---Apps---",
+		"apps/mobile",
+		"apps/desktop",
+		"apps/web",
+
+		"---Developer---",
+		"developer/api",
+		"developer/cli",
+		"developer/contributing"
+	]
+}

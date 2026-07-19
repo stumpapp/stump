@@ -1,10 +1,9 @@
-use std::sync::LazyLock;
+use std::sync::OnceLock;
 
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use models::entity::refresh_token;
-use rand::distr::{Alphanumeric, SampleString};
-use sea_orm::{prelude::*, ActiveValue, IntoActiveModel};
+use models::entity::{refresh_token, server_config};
+use sea_orm::{prelude::*, ActiveValue, IntoActiveModel, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::config::StumpConfig;
 
@@ -13,16 +12,55 @@ use crate::{
 	errors::{APIError, APIResult},
 };
 
-/// The secret used to sign the JWT tokens, recycles every time the server is restarted*
-///
-/// Note: _Technically_ it will only be initialized after the first attempt to use it, not
-/// necessarily when the server starts. I don't see an issue with this, but it's worth noting.
-static ACCESS_TOKEN_SECRET: LazyLock<String> =
-	LazyLock::new(|| Alphanumeric.sample_string(&mut rand::rng(), 60));
+/// The secret used to sign the JWT tokens. If unset, will query the database
+/// for the value and cache it for consecutive calls
+static ACCESS_TOKEN_SECRET: OnceLock<String> = OnceLock::new();
 
-/// The secret used to sign the refresh tokens, recycles every time the server is restarted*
-static REFRESH_TOKEN_SECRET: LazyLock<String> =
-	LazyLock::new(|| Alphanumeric.sample_string(&mut rand::rng(), 60));
+/// The secret used to sign the JWT refresh tokens. If unset, will query the database
+/// for the value and cache it for consecutive calls
+static REFRESH_TOKEN_SECRET: OnceLock<String> = OnceLock::new();
+
+async fn get_access_token_secret(conn: &DatabaseConnection) -> APIResult<String> {
+	if let Some(secret) = ACCESS_TOKEN_SECRET.get() {
+		return Ok(secret.clone());
+	}
+
+	let Some(Some(secret)) = server_config::Entity::find()
+		.select_only()
+		.column(server_config::Column::JwtAccessSecret)
+		.into_tuple::<Option<String>>()
+		.one(conn)
+		.await?
+	else {
+		return Err(APIError::InternalServerError(
+			"JWT access secret not set".to_string(),
+		));
+	};
+
+	let _ = ACCESS_TOKEN_SECRET.set(secret.clone());
+	Ok(secret)
+}
+
+async fn get_refresh_token_secret(conn: &DatabaseConnection) -> APIResult<String> {
+	if let Some(secret) = REFRESH_TOKEN_SECRET.get() {
+		return Ok(secret.clone());
+	}
+
+	let Some(Some(refresh_secret)) = server_config::Entity::find()
+		.select_only()
+		.column(server_config::Column::JwtRefreshSecret)
+		.into_tuple::<Option<String>>()
+		.one(conn)
+		.await?
+	else {
+		return Err(APIError::InternalServerError(
+			"JWT refresh secret not set".to_string(),
+		));
+	};
+
+	let _ = REFRESH_TOKEN_SECRET.set(refresh_secret.clone());
+	Ok(refresh_secret)
+}
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -62,7 +100,7 @@ pub(crate) async fn create_jwt_auth(
 	let CreatedToken {
 		token: access_token,
 		expires_at,
-	} = generate_access_token(user_id, config)?;
+	} = generate_access_token(user_id, config, conn).await?;
 
 	let (
 		jti,
@@ -70,7 +108,7 @@ pub(crate) async fn create_jwt_auth(
 			token: refresh_token,
 			expires_at: refresh_expiry,
 		},
-	) = generate_refresh_token(user_id, config)?;
+	) = generate_refresh_token(user_id, config, conn).await?;
 
 	let active_model = refresh_token::ActiveModel {
 		id: ActiveValue::Set(jti),
@@ -87,10 +125,13 @@ pub(crate) async fn create_jwt_auth(
 	})
 }
 
-pub(crate) fn extract_jti_from_refresh_token(token: &str) -> APIResult<String> {
+pub(crate) async fn extract_jti_from_refresh_token(
+	token: &str,
+	conn: &DatabaseConnection,
+) -> APIResult<String> {
 	let token_data = decode::<RefreshTokenClaims>(
 		token,
-		&DecodingKey::from_secret(REFRESH_TOKEN_SECRET.as_bytes()),
+		&DecodingKey::from_secret(get_refresh_token_secret(conn).await?.as_bytes()),
 		&Validation::default(),
 	)
 	.map_err(|e| {
@@ -101,7 +142,11 @@ pub(crate) fn extract_jti_from_refresh_token(token: &str) -> APIResult<String> {
 	Ok(token_data.claims.jti)
 }
 
-fn generate_access_token(user_id: &str, config: &StumpConfig) -> APIResult<CreatedToken> {
+async fn generate_access_token(
+	user_id: &str,
+	config: &StumpConfig,
+	conn: &DatabaseConnection,
+) -> APIResult<CreatedToken> {
 	let now = Utc::now();
 	let iat = now.timestamp() as usize;
 	let exp = (now + Duration::seconds(config.access_token_ttl)).timestamp() as usize;
@@ -115,19 +160,20 @@ fn generate_access_token(user_id: &str, config: &StumpConfig) -> APIResult<Creat
 	let token = encode(
 		&Header::default(),
 		&claims,
-		&EncodingKey::from_secret(ACCESS_TOKEN_SECRET.as_bytes()),
+		&EncodingKey::from_secret(get_access_token_secret(conn).await?.as_bytes()),
 	)
-	.map_err(|e| {
-		tracing::error!("Failed to encode JWT: {:?}", e);
+	.map_err(|error| {
+		tracing::error!(?error, "Failed to encode JWT!");
 		APIError::InternalServerError("Failed to encode JWT".to_string())
 	})?;
 
 	Ok(CreatedToken { token, expires_at })
 }
 
-fn generate_refresh_token(
+async fn generate_refresh_token(
 	user_id: &str,
 	config: &StumpConfig,
+	conn: &DatabaseConnection,
 ) -> APIResult<(String, CreatedToken)> {
 	let now = Utc::now();
 	let iat = now.timestamp() as usize;
@@ -144,10 +190,10 @@ fn generate_refresh_token(
 	let token = encode(
 		&Header::default(),
 		&claims,
-		&EncodingKey::from_secret(REFRESH_TOKEN_SECRET.as_bytes()),
+		&EncodingKey::from_secret(get_refresh_token_secret(conn).await?.as_bytes()),
 	)
-	.map_err(|e| {
-		tracing::error!("Failed to encode refresh token JWT: {:?}", e);
+	.map_err(|error| {
+		tracing::error!(?error, "Failed to encode refresh token JWT!");
 		APIError::InternalServerError("Failed to encode refresh token JWT".to_string())
 	})?;
 
@@ -155,14 +201,17 @@ fn generate_refresh_token(
 }
 
 /// A function that will take a JWT token and return the user ID
-pub(crate) fn extract_user_from_jwt(token: &str) -> APIResult<String> {
+pub(crate) async fn extract_user_from_jwt(
+	token: &str,
+	conn: &DatabaseConnection,
+) -> APIResult<String> {
 	let token_data = decode::<AccessTokenClaims>(
 		token,
-		&DecodingKey::from_secret(ACCESS_TOKEN_SECRET.as_bytes()),
+		&DecodingKey::from_secret(get_access_token_secret(conn).await?.as_bytes()),
 		&Validation::default(),
 	)
-	.map_err(|e| {
-		tracing::error!("Failed to decode JWT: {:?}", e);
+	.map_err(|error| {
+		tracing::error!(?error, "Failed to decode JWT");
 		APIError::Unauthorized
 	})?;
 
@@ -191,4 +240,113 @@ pub(crate) async fn exchange_refresh_token(
 	tracing::debug!(?user_id, "Exchanged refresh token for new JWT");
 
 	Ok(jwt_pair)
+}
+
+#[cfg(test)]
+mod tests {
+	use ::tests::{db::test_database, fake_data};
+	use models::entity::server_config;
+	use sea_orm::{ActiveValue::Set, DbConn};
+	use stump_core::config::StumpConfig;
+
+	use super::*;
+
+	// note that the once locks are static and won't reset between tests, so ordering matters here
+
+	async fn setup_db(
+		access_secret: Option<&str>,
+		refresh_secret: Option<&str>,
+	) -> DbConn {
+		let db = test_database().await;
+
+		server_config::ActiveModel {
+			initial_wal_setup_complete: Set(false),
+			jwt_access_secret: Set(access_secret.map(str::to_string)),
+			jwt_refresh_secret: Set(refresh_secret.map(str::to_string)),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("Failed to insert server_config row");
+
+		db
+	}
+
+	fn test_config() -> StumpConfig {
+		StumpConfig::debug()
+	}
+
+	#[tokio::test]
+	async fn test_missing_secret_returns_error() {
+		let db = setup_db(None, None).await;
+		let result = extract_user_from_jwt("not.a.real.token", &db).await;
+		assert!(result.is_err());
+	}
+
+	#[tokio::test]
+	async fn test_access_token_round_trip() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+		let config = test_config();
+		let user = fake_data::User::new("test-user-access").insert(&db).await;
+
+		let pair = create_jwt_auth(&user.id, &db, &config)
+			.await
+			.expect("Failed to create JWT pair");
+
+		let user_id = extract_user_from_jwt(&pair.access_token, &db)
+			.await
+			.expect("Failed to extract user from access token");
+
+		assert_eq!(user_id, user.id);
+	}
+
+	#[tokio::test]
+	async fn test_refresh_token_jti_extraction() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+		let config = test_config();
+		let user = fake_data::User::new("test-user-refresh").insert(&db).await;
+
+		let pair = create_jwt_auth(&user.id, &db, &config)
+			.await
+			.expect("Failed to create JWT pair");
+
+		let refresh_token_str = pair.refresh_token.expect("Expected a refresh token");
+		let jti = extract_jti_from_refresh_token(&refresh_token_str, &db)
+			.await
+			.expect("Failed to extract jti from refresh token");
+
+		assert!(!jti.is_empty());
+	}
+
+	#[tokio::test]
+	async fn test_secrets_cached_after_first_retrieval() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+		let config = test_config();
+		let user = fake_data::User::new("test-user-cached").insert(&db).await;
+
+		create_jwt_auth(&user.id, &db, &config)
+			.await
+			.expect("Failed to create JWT pair");
+
+		assert!(
+			ACCESS_TOKEN_SECRET.get().is_some(),
+			"ACCESS_TOKEN_SECRET should be cached after first use"
+		);
+		assert!(
+			REFRESH_TOKEN_SECRET.get().is_some(),
+			"REFRESH_TOKEN_SECRET should be cached after first use"
+		);
+	}
+
+	#[tokio::test]
+	async fn test_extract_user_from_invalid_token() {
+		let db = setup_db(Some("access-secret-abc"), Some("refresh-secret-abc")).await;
+
+		let result = extract_user_from_jwt("this.is.garbage", &db).await;
+
+		assert!(
+			matches!(result, Err(APIError::Unauthorized)),
+			"Expected Unauthorized for a malformed token, got: {result:?}"
+		);
+	}
 }

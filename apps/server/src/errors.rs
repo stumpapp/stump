@@ -135,6 +135,8 @@ pub enum APIError {
 	DbError(#[from] sea_orm::error::DbErr),
 	#[error("OIDC is not enabled")]
 	OIDCNotEnabled,
+	#[error("OIDC provider is not initialized")]
+	OIDCNotInitialized,
 	#[error("The provided OIDC configuration is invalid or missing required fields")]
 	OIDCConfigurationInvalid,
 	#[error("{0}")]

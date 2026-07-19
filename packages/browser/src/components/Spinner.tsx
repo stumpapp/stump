@@ -1,6 +1,6 @@
 export default function Spinner() {
 	return (
-		<svg className="h-6 w-6 animate-spin stroke-background-inverse" viewBox="0 0 256 256">
+		<svg className="h-6 w-6 animate-spin stroke-background" viewBox="0 0 256 256">
 			<line
 				x1="128"
 				y1="32"

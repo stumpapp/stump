@@ -16,7 +16,6 @@ export default function MembershipOptions() {
 	return (
 		<div className="gap-4 pt-2 md:max-w-lg flex flex-col">
 			<Input
-				variant="primary"
 				fullWidth
 				label={t(getKey('displayName.label'))}
 				description={t(getKey('displayName.description'))}
@@ -29,7 +28,6 @@ export default function MembershipOptions() {
 
 			<CheckBox
 				id="creatorHideProgress"
-				variant="primary"
 				label={t(getKey('hideProgress.label'))}
 				description={t(getKey('hideProgress.description'))}
 				checked={creatorHideProgress}

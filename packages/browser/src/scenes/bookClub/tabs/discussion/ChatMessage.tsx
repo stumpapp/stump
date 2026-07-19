@@ -50,7 +50,7 @@
 // 	// 				<IconButton variant="ghost" size="sm" className="flex items-center gap-2">
 // 	// 					<ThumbsUp
 // 	// 						className={cx('h-4 w-4', {
-// 	// 							'text-foreground-brand': isLikedByViewer,
+// 	// 							'text-primary': isLikedByViewer,
 // 	// 						})}
 // 	// 					/>
 // 	// 				</IconButton>

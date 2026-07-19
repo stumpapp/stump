@@ -74,11 +74,7 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 
 	const renderNextButton = (nextStep: number) => (
 		<div className="mt-6 md:max-w-sm flex w-full">
-			<Button
-				className="md:w-auto w-full"
-				variant="primary"
-				onClick={() => handleChangeStep(nextStep)}
-			>
+			<Button className="md:w-auto w-full" onClick={() => handleChangeStep(nextStep)}>
 				Next step
 			</Button>
 		</div>
@@ -125,7 +121,7 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 						'invisible hidden': currentStep < 4,
 					})}
 				>
-					<Button type="submit" className="md:w-auto w-full" variant="primary">
+					<Button type="submit" className="md:w-auto w-full">
 						Create club
 					</Button>
 				</div>

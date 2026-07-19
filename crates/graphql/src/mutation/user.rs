@@ -536,10 +536,16 @@ async fn update_user_preferences_by_id(
 		enable_job_overlay: Set(user_preferences.enable_job_overlay),
 		enable_fancy_animations: Set(user_preferences.enable_fancy_animations),
 		prefer_accent_color: Set(user_preferences.prefer_accent_color),
-		show_thumbnails_in_headers: Set(user_preferences.show_thumbnails_in_headers),
 		thumbnail_ratio: Set(user_preferences.thumbnail_ratio),
 		thumbnail_placeholder_style: Set(user_preferences.thumbnail_placeholder_style),
 		enable_alphabet_select: Set(user_preferences.enable_alphabet_select),
+		enable_reading_journal: Set(user_preferences.enable_reading_journal),
+		day_reset_hour_offset: Set(user_preferences.day_reset_hour_offset),
+		reading_session_grace_period_secs: Set(
+			user_preferences.reading_session_grace_period_secs
+		),
+		interface_roundness: Set(user_preferences.interface_roundness),
+		thumbnail_roundness: Set(user_preferences.thumbnail_roundness),
 		home_arrangement: NotSet,
 		navigation_arrangement: NotSet,
 	};

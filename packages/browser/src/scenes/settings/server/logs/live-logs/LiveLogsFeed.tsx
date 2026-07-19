@@ -33,10 +33,10 @@ export default function LiveLogsFeed() {
 	}, [data])
 
 	return (
-		<div className="h-72 rounded-md p-4 bg-background-surface">
+		<div className="h-72 rounded-xl border border-border bg-card text-card-foreground">
 			<div
 				ref={logContainerRef}
-				className="gap-y-1.5 font-mono text-sm flex max-h-full flex-col overflow-y-auto text-foreground-subtle"
+				className="gap-y-1.5 font-mono text-sm p-4 flex max-h-full flex-col overflow-y-auto text-muted-foreground"
 			>
 				{data?.map(({ tailLogFile: log }, index) => (
 					<span key={`live-log-${index}`}>

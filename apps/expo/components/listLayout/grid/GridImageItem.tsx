@@ -77,9 +77,15 @@ export default function GridImageItem({
 						{isReading && (
 							<View className="bottom-2 left-2 right-2 absolute z-30">
 								<Progress
-									className="h-1 bg-white/40"
+									className="h-1"
 									indicatorClassName="bg-[#f5f3ef]"
+									trackClassName=" bg-white/30"
 									value={percentageCompleted}
+									blurProps={{
+										intensity: 4,
+										blurTarget: blurTargetRef,
+										blurMethod: 'dimezisBlurView',
+									}}
 								/>
 							</View>
 						)}

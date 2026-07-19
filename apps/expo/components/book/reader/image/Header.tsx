@@ -6,7 +6,7 @@ import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
-import { COLORS } from '~/lib/constants'
+import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
 import { useReaderAnimations } from '../shared/readerAnimations'
@@ -17,7 +17,7 @@ type Props = {
 }
 
 export default function Header({ onShowGlobalSettings }: Props) {
-	const { book, resetTimer, serverId } = useImageBasedReader()
+	const { book, timer, serverId } = useImageBasedReader()
 
 	const insets = useSafeAreaInsets()
 	const { secondaryStyle } = useReaderAnimations()
@@ -34,7 +34,10 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					icon={{
 						android: X,
 						ios: 'xmark',
-						color: Platform.OS === 'android' ? COLORS.dark.foreground.DEFAULT : 'primary',
+						color:
+							Platform.OS === 'android' || !IS_IOS_26_PLUS
+								? COLORS.dark.foreground.DEFAULT
+								: 'primary',
 					}}
 					onPress={() => router.back()}
 					ios={{ variant: 'glass' }}
@@ -53,7 +56,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				<PagedActionMenu
 					book={book}
 					serverId={serverId}
-					onResetTimer={resetTimer}
+					onResetTimer={timer.reset}
 					onShowSettings={onShowGlobalSettings}
 				/>
 			</View>

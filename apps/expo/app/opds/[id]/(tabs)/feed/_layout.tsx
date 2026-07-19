@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
-import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
 export default function Layout() {
@@ -20,7 +20,7 @@ export default function Layout() {
 					headerShown: true,
 					title: 'Feeds',
 					headerTransparent: Platform.OS === 'ios',
-					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					headerLargeTitle: Platform.OS === 'ios',
 					headerLargeTitleStyle: {
 						fontSize: 30,
@@ -34,7 +34,7 @@ export default function Layout() {
 					title: '',
 					headerShown: true,
 					headerTransparent: Platform.OS === 'ios',
-					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 				}}
 			/>
 		</Stack>

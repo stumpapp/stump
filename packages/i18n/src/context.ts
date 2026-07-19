@@ -8,7 +8,10 @@ export type LocaleContextProps = {
 }
 
 export const getDefaultLocale = (defaultValue: AllowedLocale = 'en-US') => {
-	return 'navigator' in globalThis ? (navigator?.language as AllowedLocale) : defaultValue
+	return (
+		('navigator' in globalThis ? (navigator?.language as AllowedLocale) : defaultValue) ||
+		defaultValue
+	)
 }
 
 export const LocaleContext = createContext<LocaleContextProps>({

@@ -4,9 +4,9 @@ use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
 use models::entity::{
 	api_key, book_club_member, bookmark, favorite_library, favorite_media,
-	favorite_series, finished_reading_session, last_library_visit, library_exclusion,
-	media_annotation, reading_session, refresh_token, review, session, user,
-	user_login_activity, user_preferences,
+	favorite_series, last_library_visit, library_exclusion, media_annotation,
+	reading_session, refresh_token, review, session, user, user_login_activity,
+	user_preferences,
 };
 use sea_orm::{
 	prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait,
@@ -361,8 +361,6 @@ async fn migrate_oidc_account(
 
 	let progress = default_progress_spinner();
 
-	conn.execute_unprepared("PRAGMA foreign_keys = OFF").await?;
-
 	let result = do_migrate_oidc_account(
 		local_user,
 		oidc_user,
@@ -371,8 +369,6 @@ async fn migrate_oidc_account(
 		is_server_owner,
 	)
 	.await;
-
-	conn.execute_unprepared("PRAGMA foreign_keys = ON").await?;
 
 	match result {
 		Ok(_) => {
@@ -411,23 +407,13 @@ where
 		.exec(&txn)
 		.await?;
 
-	post_message("Transferring reading sessions...");
+	post_message("Transferring reading sessions and history...");
 	reading_session::Entity::update_many()
 		.col_expr(
 			reading_session::Column::UserId,
 			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
 		)
 		.filter(reading_session::Column::UserId.eq(local_user.id.clone()))
-		.exec(&txn)
-		.await?;
-
-	post_message("Transferring finished reading sessions...");
-	finished_reading_session::Entity::update_many()
-		.col_expr(
-			finished_reading_session::Column::UserId,
-			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
-		)
-		.filter(finished_reading_session::Column::UserId.eq(local_user.id.clone()))
 		.exec(&txn)
 		.await?;
 
@@ -554,11 +540,20 @@ where
 		.await?;
 
 	post_message("Transferring user preferences and permissions...");
+	let previous_oidc_prefs_id = oidc_user.user_preferences_id;
 
-	if let Some(oidc_prefs_id) = oidc_user.user_preferences_id {
-		user_preferences::Entity::delete_by_id(oidc_prefs_id)
-			.exec(&txn)
-			.await?;
+	match previous_oidc_prefs_id {
+		Some(oidc_prefs_id) if Some(oidc_prefs_id) != local_user.user_preferences_id => {
+			user_preferences::Entity::update_many()
+				.col_expr(
+					user_preferences::Column::UserId,
+					sea_orm::sea_query::Expr::value(Option::<String>::None),
+				)
+				.filter(user_preferences::Column::Id.eq(oidc_prefs_id))
+				.exec(&txn)
+				.await?;
+		},
+		_ => {},
 	}
 
 	// if we do not swap the user_preferences_id the account "breaks" because no preferences exist.
@@ -593,6 +588,16 @@ where
 	oidc_active.is_server_owner = Set(is_server_owner);
 	oidc_active.update(&txn).await?;
 
+	match previous_oidc_prefs_id {
+		Some(oidc_prefs_id) if Some(oidc_prefs_id) != local_user.user_preferences_id => {
+			post_message("Cleaning up old OIDC user preferences...");
+			user_preferences::Entity::delete_by_id(oidc_prefs_id)
+				.exec(&txn)
+				.await?;
+		},
+		_ => {},
+	}
+
 	post_message("Committing changes...");
 	txn.commit().await?;
 
@@ -605,22 +610,23 @@ mod tests {
 	use models::{
 		entity::{
 			api_key, bookmark, favorite_library, favorite_media, favorite_series,
-			finished_reading_session, last_library_visit, library, library_config,
-			library_exclusion, media, media_annotation, reading_session, refresh_token,
-			review, series, session, user, user_login_activity, user_preferences,
+			last_library_visit, library, library_config, library_exclusion, media,
+			media_annotation, reading_session, refresh_token, review, series, session,
+			user, user_login_activity, user_preferences,
 		},
 		shared::{
 			api_key::APIKeyPermissions,
 			enums::{
 				FileStatus, LibraryPattern, LibraryViewMode, ReadingDirection,
-				ReadingImageScaleFit, ReadingMode,
+				ReadingImageScaleFit, ReadingMode, ReadingStatus,
 			},
 			readium::ReadiumLocator,
 		},
 	};
 	use sea_orm::{
-		prelude::DateTimeWithTimeZone, sqlx::types::chrono::Utc, ActiveModelTrait,
-		ColumnTrait, ConnectionTrait, Database, DbConn, EntityTrait, QueryFilter, Set,
+		prelude::{Date, DateTimeWithTimeZone},
+		sqlx::types::chrono::Utc,
+		ActiveModelTrait, ColumnTrait, Database, DbConn, EntityTrait, QueryFilter, Set,
 	};
 
 	use super::do_migrate_oidc_account;
@@ -654,7 +660,7 @@ mod tests {
 			db: &DbConn,
 			user: Option<user::ActiveModel>,
 		) -> user::Model {
-			let model = user.unwrap_or_else(|| Self::active_model());
+			let model = user.unwrap_or_else(Self::active_model);
 
 			let user = model.insert(db).await.expect("could not insert user");
 			let user_preferences = user_preferences::ActiveModel {
@@ -770,29 +776,22 @@ mod tests {
 			.expect("could not fetch media");
 
 		// let's have an active session for books 0 and 2, and a finished reading session for book 1
-		for i in 0..3 {
+		for (i, media) in media_list.iter().enumerate().take(3) {
+			let mut active = reading_session::ActiveModel {
+				user_id: Set(local_user.id.clone()),
+				media_id: Set(media.id.clone()),
+				end_page: Set(Some(10)),
+				session_date: Set(Date::parse_from_str("2026-05-22", "%Y-%m-%d")
+					.expect("failed to parse date")),
+				..Default::default()
+			};
 			if i == 1 {
-				finished_reading_session::ActiveModel {
-					user_id: Set(local_user.id.clone()),
-					media_id: Set(media_list[1].id.clone()),
-					started_at: Set(DateTimeWithTimeZone::from(Utc::now())),
-					completed_at: Set(DateTimeWithTimeZone::from(Utc::now())),
-					..Default::default()
-				}
-				.insert(db)
-				.await
-				.expect("could not insert finished reading session for media 1");
-			} else {
-				reading_session::ActiveModel {
-					page: Set(Some(10)),
-					user_id: Set(local_user.id.clone()),
-					media_id: Set(media_list[i].id.clone()),
-					..Default::default()
-				}
-				.insert(db)
-				.await
-				.expect(&format!("could not insert reading session for media {}", i));
+				active.status = Set(ReadingStatus::Finished)
 			}
+			active
+				.insert(db)
+				.await
+				.expect("could not insert reading session for media");
 		}
 
 		// let's create a review for media 0 as well
@@ -960,10 +959,6 @@ mod tests {
 
 		setup_oidc_migration_test(&local_user, &db).await;
 
-		db.execute_unprepared("PRAGMA foreign_keys = OFF")
-			.await
-			.expect("Failed to disable foreign keys");
-
 		let result = do_migrate_oidc_account(
 			local_user.clone(),
 			oidc_user.clone(),
@@ -972,10 +967,6 @@ mod tests {
 			true,
 		)
 		.await;
-
-		db.execute_unprepared("PRAGMA foreign_keys = ON")
-			.await
-			.expect("Failed to re-enable foreign keys");
 
 		assert!(result.is_ok(), "Migration failed: {:?}", result.err());
 
@@ -1019,19 +1010,21 @@ mod tests {
 			panic!("OIDC user should have preferences");
 		}
 
-		let reading_sessions = reading_session::Entity::find()
+		let active_sessions = reading_session::Entity::find()
 			.filter(reading_session::Column::UserId.eq(&oidc_user.id))
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
 			.all(&db)
 			.await
 			.expect("Failed to query reading sessions");
 		assert_eq!(
-			reading_sessions.len(),
+			active_sessions.len(),
 			2,
 			"Should have 2 reading sessions transferred"
 		);
 
-		let finished_sessions = finished_reading_session::Entity::find()
-			.filter(finished_reading_session::Column::UserId.eq(&oidc_user.id))
+		let finished_sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.eq(&oidc_user.id))
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
 			.all(&db)
 			.await
 			.expect("Failed to query finished reading sessions");

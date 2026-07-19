@@ -8,7 +8,7 @@ import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
 import { Text } from '~/components/ui'
 import { useOPDSFeedContext } from '~/context/opds'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useSearchStore } from '~/stores/search'
 
 export default function Screen() {
@@ -51,7 +51,7 @@ export default function Screen() {
 		navigation.setOptions({
 			headerShown: true,
 			headerTransparent: Platform.OS === 'ios',
-			headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 			headerSearchBarOptions: {
 				placeholder: 'Search',
 				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
@@ -71,11 +71,11 @@ export default function Screen() {
 
 	if (!isInputFocused) {
 		return (
-			<View className="flex-1 items-center justify-center gap-4 bg-background p-4 tablet:p-7">
+			<View className="gap-4 p-4 tablet:p-7 flex-1 items-center justify-center bg-background">
 				<Owl owl="search" />
 
 				<View className="gap-2 px-4 tablet:max-w-lg">
-					<Text size="xl" className="text-center font-semibold leading-tight">
+					<Text size="xl" className="font-semibold leading-tight text-center">
 						Search the feed
 					</Text>
 

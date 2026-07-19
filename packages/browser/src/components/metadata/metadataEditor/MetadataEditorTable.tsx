@@ -97,7 +97,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 
 	return (
 		<Card
-			className="rounded-xl overflow-hidden border-edge"
+			className="overflow-hidden rounded-xl border-border bg-background"
 			ref={tableContainerRef}
 			style={{
 				direction: table.options.columnResizeDirection,
@@ -105,7 +105,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 			}}
 		>
 			<table
-				className="w-fit divide-y divide-edge"
+				className="w-fit divide-y divide-border"
 				style={{
 					width: table.getCenterTotalSize(),
 				}}
@@ -123,7 +123,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 										...getCommonPinningStyles(header.column),
 									},
 								}}
-								className="min-h-10 relative"
+								className="min-h-10 relative bg-card/70"
 							>
 								{flexRender(header.column.columnDef.header, header.getContext())}
 
@@ -151,12 +151,12 @@ export default function MetadataEditorTable<Item extends RowData>({
 					</tr>
 				</thead>
 
-				<tbody className="divide-y divide-edge">
+				<tbody className="divide-y divide-border">
 					{rows.map((row) => (
 						<tr key={row.id} className="group/row flex w-fit">
 							{row.getVisibleCells().map((cell) => (
 								<td
-									className="py-2 pl-1.5 pr-1.5 first:pl-4 last:pl-0 last:pr-0 first:border-r first:border-edge"
+									className="py-2 pl-1.5 pr-1.5 first:pl-4 last:pl-0 last:pr-0 first:border-r first:border-border"
 									key={cell.id}
 									style={{
 										width: cell.column.getSize(),

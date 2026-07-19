@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::shared::{
 	arrangement::Arrangement,
-	enums::{InterfaceLayout, SupportedFont, ThumbnailPlaceholderStyle},
+	enums::{
+		InterfaceLayout, InterfaceRoundness, SupportedFont, ThumbnailPlaceholderStyle,
+	},
 };
 
 #[derive(
@@ -39,12 +41,15 @@ pub struct Model {
 	pub enable_hide_scrollbar: bool,
 	pub enable_fancy_animations: bool,
 	pub prefer_accent_color: bool,
-	pub show_thumbnails_in_headers: bool,
 	pub thumbnail_ratio: f32,
 	#[sea_orm(column_type = "Text")]
 	pub thumbnail_placeholder_style: ThumbnailPlaceholderStyle,
 	pub enable_job_overlay: bool,
 	pub enable_alphabet_select: bool,
+	#[sea_orm(column_type = "Text")]
+	pub interface_roundness: InterfaceRoundness,
+	#[sea_orm(column_type = "Text")]
+	pub thumbnail_roundness: InterfaceRoundness,
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
 	#[serde(default = "Model::default_navigation_arrangement")]
@@ -53,6 +58,13 @@ pub struct Model {
 	#[graphql(skip)]
 	#[serde(default = "Model::default_home_arrangement")]
 	pub home_arrangement: Option<Arrangement>,
+
+	pub enable_reading_journal: bool,
+	/// hour offset from midnight at which a new "logical day" begins for reading sessions
+	/// 0 = midnight, 2 = 2am, etc
+	pub day_reset_hour_offset: i32,
+	/// seconds of inactivity after which the current reading session is considered ended
+	pub reading_session_grace_period_secs: i64,
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_id: Option<String>,
 }
@@ -102,12 +114,16 @@ impl ActiveModelBehavior for ActiveModel {
 			self.enable_hide_scrollbar = ActiveValue::Set(false);
 			self.enable_fancy_animations = ActiveValue::Set(false);
 			self.prefer_accent_color = ActiveValue::Set(false);
-			self.show_thumbnails_in_headers = ActiveValue::Set(false);
 			self.thumbnail_ratio = ActiveValue::Set(1.0 / 1.5);
 			self.thumbnail_placeholder_style =
 				ActiveValue::Set(ThumbnailPlaceholderStyle::default());
 			self.enable_job_overlay = ActiveValue::Set(true);
 			self.enable_alphabet_select = ActiveValue::Set(false);
+			self.enable_reading_journal = ActiveValue::Set(true);
+			self.day_reset_hour_offset = ActiveValue::Set(0); // midnight
+			self.reading_session_grace_period_secs = ActiveValue::Set(1800); // 30 minutes
+			self.interface_roundness = ActiveValue::Set(InterfaceRoundness::default());
+			self.thumbnail_roundness = ActiveValue::Set(InterfaceRoundness::default());
 		}
 
 		Ok(self)

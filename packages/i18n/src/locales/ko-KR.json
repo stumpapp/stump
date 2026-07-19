@@ -453,6 +453,10 @@
 				"update": "Scan after updates"
 			},
 			"description": "Index the library files to populate your database"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
@@ -536,6 +540,13 @@
 				"alt": "Or click to browse your computer for books to upload"
 			},
 			"addedFiles": "Added files"
+		}
+	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
 		}
 	},
 	"librarySettingsScene": {
@@ -911,6 +922,20 @@
 			"downloadSeries": "Download Series"
 		}
 	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
+		}
+	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
 			"nameTooShort": "Name must be at least 2 characters",
@@ -1011,7 +1036,8 @@
 									"pages": "Pages",
 									"tags": "Tags",
 									"createdAt": "Created at",
-									"updatedAt": "Updated at"
+									"updatedAt": "Updated at",
+									"readingStatus": "Reading status"
 								}
 							},
 							"book_meta": {
@@ -1088,6 +1114,13 @@
 					"listValue": {
 						"placeholder": "Add values",
 						"emptyState": "No values to display"
+					},
+					"enumValue": {
+						"selectPlaceholder": "Select value",
+						"READING": "Reading",
+						"FINISHED": "Finished",
+						"NOT_STARTED": "Not started",
+						"ABANDONED": "Abandoned"
 					}
 				}
 			}
@@ -1400,164 +1433,213 @@
 			}
 		},
 		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "환경설정",
+			"title": "환경설정",
+			"description": "애플리케이션의 모양과 사용감을 사용자화합니다",
 			"sections": {
 				"themeAndAppearance": {
-					"label": "Theme and appearance",
-					"description": "The basic look and feel options for Stump"
+					"label": "테마와 모양",
+					"description": "Stump의 기본적인 모양과 느낌 옵션"
+				},
+				"interface": {
+					"title": "인터페이스",
+					"description": "주요 UI 화면과 상호작용 요소"
+				},
+				"thumbnails": {
+					"title": "썸네일",
+					"description": "썸네일 이미지 표시 옵션"
 				},
 				"themeSelect": {
 					"label": "테마",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"직접 커스텀 테마를 만들고 싶다면",
+						"문서"
 					],
 					"options": {
-						"system": "System",
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
+						"system": "시스템",
+						"light": "라이트",
+						"dark": "다크",
+						"bronze": "브론즈 라이트",
+						"ocean": "오션",
+						"autumn": "어텀",
+						"cosmic": "코스믹",
+						"pumpkin": "펌킨",
 						"midnight": "Midnight",
 						"matrix": "Matrix"
 					}
 				},
 				"gradientToggle": {
-					"label": "Enable gradients",
-					"description": "Some themes optionally support gradients for a more dynamic look"
+					"label": "그라데이션 사용",
+					"description": "일부 테마는 더 동적인 느낌을 위해 그라데이션을 지원합니다"
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "글꼴",
+					"description": "애플리케이션에서 사용할 글꼴을 설정합니다"
+				},
+				"interfaceRoundness": {
+					"label": "인터페이스 둥글기",
+					"description": "UI 요소의 모서리를 얼마나 둥글게 표시할지 설정합니다",
+					"options": {
+						"none": "없음",
+						"normal": "보통",
+						"rounded": "둥글게",
+						"pill": "알약형"
+					}
+				},
+				"thumbnailPreview": {
+					"label": "미리보기",
+					"description": "현재 설정에서 썸네일이 이렇게 표시됩니다"
 				},
 				"thumbnailRatioSelect": {
-					"label": "Thumbnail Ratio",
-					"description": "The aspect ratio to use for thumbnails",
-					"defaultSuffix": "Default"
+					"label": "썸네일 비율",
+					"description": "썸네일에 사용할 가로세로 비율",
+					"defaultSuffix": "기본값"
 				},
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail placeholder",
-					"description": "The style to use for thumbnail placeholders",
+					"label": "썸네일 플레이스홀더",
+					"description": "썸네일 플레이스홀더에 사용할 스타일",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "회색조",
+						"averageColor": "평균 색상",
+						"colorful": "컬러풀",
 						"thumbhash": "Thumbhash"
 					}
 				},
+				"thumbnailRoundness": {
+					"label": "썸네일 둥글기",
+					"description": "썸네일 이미지의 모서리를 얼마나 둥글게 표시할지 설정합니다",
+					"options": {
+						"none": "없음",
+						"normal": "보통",
+						"rounded": "둥글게",
+						"large": "크게"
+					}
+				},
+				"navigation": {
+					"title": "내비게이션",
+					"description": "앱의 내비게이션 요소를 사용자화합니다"
+				},
 				"layoutAndArrangement": {
-					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
+					"label": "레이아웃과 배치",
+					"description": "Stump가 정보를 표시하고 콘텐츠를 구성하는 방식을 사용자화합니다"
 				},
 				"primaryNavigation": {
-					"label": "Primary navigation",
-					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"label": "기본 내비게이션",
+					"description": "간단한 사이드바와 상단바 내비게이션 중 선택합니다",
 					"options": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
+						"sidebar": "사이드바",
+						"topbar": "상단바"
 					},
-					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+					"disclaimer": "* 선택하지 않은 옵션의 설정은 비활성화되거나 숨겨집니다"
 				},
 				"doubleSidebar": {
-					"label": "Settings sidebar",
-					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+					"label": "설정 사이드바",
+					"description": "설정 페이지에서 사이드바 내비게이션을 사용합니다"
 				},
 				"replacePrimarySidebar": {
-					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"label": "기본 사이드바 대체",
+					"description": "보조 사이드바가 기본 사이드바 위에 쌓이지 않고 기본 사이드바를 대체합니다",
 					"tooltips": {
-						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
-						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+						"doubleSidebar": "이 설정을 사용하려면 설정 사이드바가 활성화되어야 합니다",
+						"topbar": "기본 내비게이션이 상단바일 때는 현재 이 설정을 지원하지 않습니다"
 					}
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
-					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
-					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"label": "내비게이션 배치",
+					"description": "기본 내비게이션 항목을 재배치하거나 조정합니다",
+					"isLocked": "배치가 잠겨 있습니다",
+					"lock": "배치 잠금",
+					"unlock": "배치 잠금 해제",
 					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "홈",
+						"EXPLORE": "탐색",
+						"LIBRARIES": "라이브러리",
+						"BOOK_CLUBS": "북클럽",
+						"SMART_LISTS": "스마트 목록"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "생성 액션 표시",
+							"help": "내비게이션에 생성 액션을 표시합니다"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "전체 보기 링크",
+							"help": "이 유형의 모든 항목을 보는 전용 페이지 링크"
 						}
 					}
 				},
 				"displaySpacing": {
-					"label": "Display spacing",
-					"description": "Adjusts the overall spacing between elements throughout the app",
+					"label": "표시 간격",
+					"description": "앱 전체 요소 사이의 전반적인 간격을 조정합니다",
 					"options": {
-						"default": "Default",
-						"compact": "Compact"
+						"default": "기본값",
+						"compact": "압축"
 					},
-					"disclaimer": "* Compact display mode is not implemented yet"
+					"disclaimer": "* 압축 표시 모드는 아직 구현되지 않았습니다"
 				},
 				"maxWidthPreference": {
-					"label": "Adjusted width",
-					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
-					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar",
+					"label": "화면 너비",
+					"description": "Stump는 화면 영역에 최대 너비를 적용합니다. 이 설정으로 제한을 조정하거나 제거할 수 있습니다",
+					"tooltip": "기본 내비게이션이 사이드바일 때는 현재 이 설정을 지원하지 않습니다",
 					"options": {
-						"noLimit": "No limit"
+						"noLimit": "제한 없음"
 					}
+				},
+				"displayAndSpacing": {
+					"label": "표시와 간격",
+					"description": "콘텐츠와 정보 표시 방식 관련 설정"
 				},
 				"additionalPreferences": {
-					"label": "Additional preferences",
-					"description": "Customize the appearance and behavior of Stump with these additional settings"
+					"label": "추가 환경설정",
+					"description": "추가 설정으로 Stump의 모양과 동작을 사용자화합니다"
 				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
+				"contentBrowsing": {
+					"label": "콘텐츠 탐색",
+					"description": "콘텐츠 목록을 탐색하고 이동하는 방식에 영향을 주는 설정"
+				},
+				"motionAndAnimation": {
+					"label": "모션과 애니메이션",
+					"description": "시각적 움직임과 애니메이션 관련 설정"
+				},
+				"activityAndStatus": {
+					"label": "활동 및 상태",
+					"description": "백그라운드 활동과 관련된 표시, 오버레이, 기능 설정"
 				},
 				"hideScrollbarToggle": {
-					"label": "Hide scrollbar",
-					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"label": "스크롤바 숨기기",
+					"description": "일부 페이지는 스크롤바가 없을 때 더 보기 좋습니다. 가능한 경우 스크롤바를 숨깁니다",
 					"tooltips": {
-						"enabled": "This setting will hide the scrollbar on some pages",
-						"disabled": "This setting will show the scrollbar on some pages"
+						"enabled": "일부 페이지에서 스크롤바를 숨깁니다",
+						"disabled": "일부 페이지에서 스크롤바를 표시합니다"
 					}
 				},
 				"enableAlphabetFiltering": {
-					"label": "Alphabet filtering",
-					"description": "Show an alphabet filter when applicable"
+					"label": "알파벳 필터",
+					"description": "사용 가능한 곳에 알파벳 필터를 표시합니다"
 				},
 				"enableFancyAnimations": {
-					"label": "Fancy animations",
-					"description": "A broad opt-in for fancier animations throughout the app"
+					"label": "화려한 애니메이션",
+					"description": "앱 전반에서 더 화려한 애니메이션을 사용합니다"
 				},
 				"queryIndicatorToggle": {
-					"label": "Background fetch indicator",
-					"description": "Show a loading indicator whenever a query is running in the background"
+					"label": "백그라운드 가져오기 표시기",
+					"description": "백그라운드에서 쿼리가 실행 중일 때마다 로딩 표시기를 표시합니다"
 				},
 				"liveRefetchToggle": {
-					"label": "Live refetch",
-					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+					"label": "실시간 다시 가져오기",
+					"description": "새 데이터가 들어오는 즉시 쿼리를 다시 가져와 UI를 갱신합니다. 리소스를 많이 사용할 수 있습니다"
 				},
 				"enableJobOverlayToggle": {
-					"label": "Job overlay",
-					"description": "Show a floating overlay while a job is running"
+					"label": "작업 오버레이",
+					"description": "작업이 실행 중일 때 떠 있는 오버레이를 표시합니다"
+				},
+				"dayResetHourOffset": {
+					"label": "독서일 초기화 오프셋",
+					"description": "독서일이 초기화되는 시간을 자정 기준 시간 단위로 조정합니다"
+				},
+				"readingSessionGracePeriod": {
+					"label": "독서 세션 유예 시간",
+					"description": "이 시간(초) 동안 활동이 없으면 다음 업데이트가 새 세션을 시작합니다"
 				}
 			}
 		},
@@ -1620,7 +1702,7 @@
 		"app/reader": {
 			"helmet": "Reader settings",
 			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -2310,7 +2392,13 @@
 			"providerForm": {
 				"apiToken": {
 					"label": "API token",
-					"description": "The API token for authenticating with this provider"
+					"description": "The API token for authenticating with this provider",
+					"validationError": "The auto-validation failed for this token",
+					"validationRequestError": "The validation request failed",
+					"validationRequestErrorUnknown": "An unknown error occurred during validation",
+					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
+					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
+					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {
 					"label": "API token expiration",
@@ -2523,9 +2611,11 @@
 	},
 	"common": {
 		"add": "Add",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2544,11 +2634,22 @@
 		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",
@@ -2569,7 +2670,8 @@
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
-		}
+		},
+		"unknownError": "알 수 없는 오류가 발생했습니다"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2741,7 +2843,7 @@
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw token"
+					"placeholder": "Raw Token"
 				},
 				"basic": "Basic"
 			},
@@ -2749,8 +2851,8 @@
 			"catalogUrl": "Catalog URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
+			"checkConnection": "Check Connection",
+			"setAsDefaultServer": "Set as Default Server",
 			"enableOPDS": "Enable OPDS",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
@@ -2759,56 +2861,92 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"label": "Mark as Read",
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
+				"failure": "책을 읽음으로 표시하지 못했습니다"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"label": "Clear Progress",
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
+				"failure": "현재 진행률을 삭제하지 못했습니다"
+			},
+			"deleteReadHistory": {
+				"label": "Delete Read History",
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"failure": "읽기 기록을 삭제하지 못했습니다"
 			},
 			"deleteBook": {
-				"label": "Delete book",
+				"label": "Delete Book",
 				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
 			},
+			"deleteDownload": {
+				"label": "Delete Download",
+				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+			},
+			"goToLibrary": "Go to Library",
+			"goToSeries": "Go to Series",
 			"seeDetails": "See Details"
 		},
 		"bookMetadata": {
 			"ageRating": "Age Rating",
 			"downloadedAt": "Downloaded",
+			"characters": "Characters",
 			"format": "Format",
 			"genres": "Genres",
 			"language": "Language",
 			"publisher": "Publisher",
 			"size": "Size",
 			"volume": "Volume",
-			"year": "Year"
+			"writers": "Writers",
+			"colorists": "Colorists",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"coverArtists": "Cover Artists",
+			"links": "Links",
+			"year": "Year",
+			"identifier": "Identifier",
+			"identifiers": "Identifiers"
 		},
 		"common": {
+			"book": "Book",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",
 			"completed": "Completed",
 			"confirm": "Confirm",
+			"continue": "Continue",
 			"content": "Content",
 			"details": "Details",
 			"delete": "Delete",
+			"dismiss": "Dismiss",
+			"download": "Download",
 			"downloads": "Downloads",
+			"done": "Done",
 			"edit": "Edit",
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
+			"favorite": "Favorite",
+			"finished": "Finished",
 			"grid": "Grid",
 			"list": "List",
 			"lastCompleted": "Last Completed",
 			"name": "Name",
 			"none": "None",
+			"notAvailable": "Not Available",
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",
+			"pageXOfY": "Page {{current}} of {{total}}",
 			"password": "Password",
 			"progress": "Progress",
-			"readTime": "Read time",
-			"readMore": "Read more",
+			"publication": "Publication",
+			"read": "Read",
+			"readAgain": "Read Again",
+			"readTime": "Reading Time",
+			"readthrough": "Readthrough",
+			"readMore": "Read More",
+			"refresh": "Refresh",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
@@ -2822,31 +2960,62 @@
 			"value": "Value",
 			"version": "Version"
 		},
+		"errors": {
+			"unknown": "Unknown error"
+		},
+		"epubMenu": {
+			"tableOfContents": "Table of Contents",
+			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"appearance": "Appearance"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
+				"position": "Book {{position}} in {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
+			},
+			"unknownSeriesName": "series"
+		},
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
+			"noServers": "No Servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"seeDocumentation": "See Documentation",
+			"noSmartLists": {
+				"label": "No lists returned",
+				"description": "Once created they will appear here"
+			}
 		},
 		"tabs": {
 			"servers": "Servers",
 			"localLibrary": "Library",
-			"settings": "Settings"
+			"settings": "Settings",
+			"home": "Home",
+			"browse": "Browse",
+			"clubs": "Clubs",
+			"search": "Search"
 		},
 		"localLibrary": {
 			"title": "Local Library",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
+					"title": "Nothing to Read Yet",
 					"description": "Once you have books for offline reading, they will appear here"
 				},
 				"imported": {
-					"title": "No imported books",
+					"title": "No Imported Books",
 					"description": "Import books to read them offline"
 				},
 				"server": {
-					"title": "No downloaded books",
+					"title": "No Downloaded Books",
 					"description": "Download books from your library to read them offline"
 				}
 			},
@@ -2900,6 +3069,19 @@
 				"dismissAll": "Dismiss All"
 			}
 		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
+				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+			},
+			"syncFailed": "Failed to sync offline progress"
+		},
+		"search": {
+			"label": "Search This Server",
+			"description": "Find specific content on this server",
+			"placeholder": "Search"
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferences",
@@ -2918,7 +3100,7 @@
 					"label": "Thumbnail Placeholder",
 					"options": {
 						"grayscale": "Grayscale",
-						"averageColor": "Average color",
+						"averageColor": "Average Color",
 						"colorful": "Colorful",
 						"thumbhash": "Thumbhash"
 					}
@@ -2945,15 +3127,23 @@
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
-			"lowercaseTranslation": "Lowercase Labels",
+			"textCase": {
+				"label": "Text Case",
+				"options": {
+					"lowerCase": "Lowercase",
+					"sentenceCase": "Sentence Case",
+					"titleCase": "Title Case"
+				}
+			},
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",
 				"dataUsage": {
 					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"nonStumpData": "Non-Stump Data",
+					"serversTotal": "Servers Total",
+					"totalFiles": "Total Files",
+					"totalSize": "Total Size",
 					"deleteDownloads": {
 						"label": "Delete Downloads",
 						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
@@ -2964,7 +3154,7 @@
 					},
 					"noDownloads": "No downloaded files for this server",
 					"storedPreferences": {
-						"label": "Stored preferences",
+						"label": "Stored Preferences",
 						"description": "Miscellaneous data like book preferences, reading timers, etc"
 					},
 					"clearPreferences": "Clear Preferences"
@@ -2976,21 +3166,21 @@
 					"label": "Clear Cache",
 					"memory": {
 						"button": "Memory",
-						"success": "Memory cache cleared"
+						"success": "Memory Cache Cleared"
 					},
 					"disk": {
 						"button": "Disk",
-						"success": "Disk cache cleared"
+						"success": "Disk Cache Cleared"
 					}
 				},
 				"deleteDatabase": {
 					"label": "Delete Database",
 					"success": {
-						"title": "Database deleted",
+						"title": "Database Deleted",
 						"description": "Please restart the app"
 					},
 					"error": {
-						"title": "Deletion failed",
+						"title": "Deletion Failed",
 						"description": "There was an error deleting the database"
 					}
 				},
@@ -3022,9 +3212,35 @@
 				"suuportIdentifier": "Support Identifier: {{supportID}}"
 			}
 		},
+		"stumpServer": {
+			"browse": {
+				"books": "Books",
+				"favorites": "Favorites",
+				"files": "Files",
+				"libraries": "Libraries",
+				"series": "Series",
+				"smartLists": "Smart Lists"
+			},
+			"continueReading": {
+				"label": "Continue Reading",
+				"emptyText": "No books in progress"
+			},
+			"onDeck": {
+				"label": "Your Next Read",
+				"emptyText": "No books on deck"
+			},
+			"recentlyAddedSeries": {
+				"label": "Recently Added Series",
+				"emptyText": "No recently added series"
+			},
+			"recentlyAddedBooks": {
+				"label": "Recently Added Books",
+				"emptyText": "No recently added books"
+			}
+		},
 		"readerSettings": {
 			"title": "Reader Settings",
-			"overrideGlobalSettings": "Override global settings",
+			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -3065,6 +3281,7 @@
 			},
 			"allowDownscaling": "Downscaling",
 			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
@@ -3078,9 +3295,36 @@
 			},
 			"allSettings": "All Settings"
 		},
+		"tableOfContents": {
+			"goToPageX": "Go to page {{pageNumber}}",
+			"goToPagePlaceholder": "Go to page...",
+			"errors": {
+				"pageDoesNotExist": "Page {{page}} does not exist",
+				"invalidPage": "'{{page}}' is not a page number"
+			},
+			"showCurrentChapter": "Show Current Chapter"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "All",
+				"bookmarks": "Bookmarks",
+				"highlights": "Highlights",
+				"notes": "Notes"
+			}
+		},
 		"epubSettings": {
 			"title": "Epub Reader Settings",
-			"typeface": "Typeface",
+			"typeface": {
+				"label": "Typeface",
+				"options": {
+					"system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "Font Size",
 			"fontWeight": {
 				"label": "Font Weight",
@@ -3118,6 +3362,7 @@
 				}
 			},
 			"publisherStyles": "Publisher Styles",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "Text Alignment",
 				"options": {

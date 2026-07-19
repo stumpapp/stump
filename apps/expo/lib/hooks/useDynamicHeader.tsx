@@ -5,7 +5,7 @@ import { NativeSyntheticEvent, Platform, TextInputChangeEvent, View } from 'reac
 
 import { Icon } from '~/components/ui'
 
-import { IS_IOS_24_PLUS } from '../constants'
+import { IS_IOS_26_PLUS } from '../constants'
 
 type Params = {
 	title: string
@@ -60,7 +60,7 @@ export function useDynamicHeader({
 				fontSize: 24,
 				lineHeight: 32,
 			},
-			headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 			...rest,
 		})
 	}, [navigation, title, headerLeft, headerRight, rest, resolvedHeaderLeft, showBackButton])

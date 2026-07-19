@@ -13,6 +13,7 @@ const mutation = graphql(`
 	}
 `)
 
+// TODO(sync): mv to shared types file(?) and reuse across other TODO(sync) tasks
 type SyncResult = {
 	failureCount: number
 	syncedCount: number
@@ -39,7 +40,6 @@ const executeSingleServerSync = async (
 				not(inArray(readProgress.syncStatus, [syncStatus.Enum.SYNCED, syncStatus.Enum.SYNCING])),
 			),
 		)
-		.all()
 
 	const progressRecords = ignoreBookIds?.length
 		? allProgressRecords.filter((r) => !ignoreBookIds.includes(r.bookId))
@@ -64,13 +64,14 @@ const executeSingleServerSync = async (
 				),
 			),
 		)
-		.run()
 
 	let failureCount = 0
 
 	// Note: I didn't do a transaction here because each iteration involves an external API call
 	for (const record of progressRecords) {
 		try {
+			const elapsedDelta = (record.elapsedSeconds ?? 0) - (record.lastSyncedElapsedSeconds ?? 0)
+
 			const payload: MediaProgressInput = match(epubProgress.safeParse(record.epubProgress).data)
 				.when(
 					(data) => data != undefined,
@@ -80,8 +81,8 @@ const executeSingleServerSync = async (
 								locator: {
 									readium: data,
 								},
-								elapsedSeconds: record.elapsedSeconds,
-								isComplete: record.percentage ? parseFloat(record.percentage) >= 0.99 : false,
+								elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
+								isComplete: record.percentage ? parseFloat(record.percentage) >= 1.0 : false,
 								percentage: record.percentage,
 							},
 						}) satisfies MediaProgressInput,
@@ -91,7 +92,7 @@ const executeSingleServerSync = async (
 						({
 							paged: {
 								page: record.page ?? 1,
-								elapsedSeconds: record.elapsedSeconds,
+								elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
 							},
 						}) satisfies MediaProgressInput,
 				)
@@ -103,16 +104,17 @@ const executeSingleServerSync = async (
 
 			await db
 				.update(readProgress)
-				.set({ syncStatus: syncStatus.Enum.SYNCED })
+				.set({
+					syncStatus: syncStatus.Enum.SYNCED,
+					lastSyncedElapsedSeconds: record.elapsedSeconds,
+				})
 				.where(eq(readProgress.id, record.id))
-				.run()
 		} catch {
 			failureCount++
 			await db
 				.update(readProgress)
 				.set({ syncStatus: syncStatus.Enum.ERROR })
 				.where(eq(readProgress.id, record.id))
-				.run()
 		}
 	}
 

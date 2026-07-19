@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 
@@ -77,8 +77,10 @@ describe('AccountDetails', () => {
 		await user.type(getByTestId('username'), 'bob') // Duplicate username
 		await user.click(screen.getByRole('button', { name: /submit/i })) // No password
 
-		expect(onSubmit).not.toHaveBeenCalled()
-		expect(screen.getByText(/usernameAlreadyExists/i)).toBeInTheDocument()
-		expect(screen.getByText(/missingPassword/i)).toBeInTheDocument()
+		await waitFor(() => {
+			expect(onSubmit).not.toHaveBeenCalled()
+			expect(screen.getByText(/usernameAlreadyExists/i)).toBeInTheDocument()
+			expect(screen.getByText(/missingPassword/i)).toBeInTheDocument()
+		})
 	})
 })

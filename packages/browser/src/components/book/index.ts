@@ -1,4 +1,5 @@
 export { default as BookURLFilterContainer } from '../filters/URLFilterContainer'
 export { default as BookCard } from './BookCard'
+export { SimpleBookCard, useSimpleBookCardSize } from './SimpleBookCard'
 export { BookTable } from './table'
 export { useBookOverview, usePrefetchBook } from './useBookOverview'

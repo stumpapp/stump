@@ -11,15 +11,12 @@ use axum::{
 use chrono::Utc;
 use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::{
-	entity::{
-		finished_reading_session, library, media, media_metadata, reading_session,
-		series, series_metadata,
-	},
+	domain::reading_progress::compute_page_based_percentage,
+	entity::{library, media, media_metadata, reading_session, series, series_metadata},
+	services::reading_progress::{upsert_reading_session, NormalizedProgression},
 	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
 };
-use sea_orm::{
-	prelude::*, sea_query::OnConflict, QueryOrder, QuerySelect, QueryTrait, Set,
-};
+use sea_orm::{prelude::*, QueryOrder, QuerySelect, QueryTrait};
 use serde::{Deserialize, Serialize};
 use stump_core::{
 	config::StumpConfig,
@@ -868,59 +865,18 @@ async fn get_book_page(
 		.await?
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
-	// Only track reading progression if enabled in config
 	if ctx.config.enable_opds_progression {
-		if book.pages == correct_page {
-			let deleted_sessions = reading_session::Entity::delete_many()
-				.filter(
-					reading_session::Column::UserId
-						.eq(user.id.clone())
-						.and(reading_session::Column::MediaId.eq(id.clone())),
-				)
-				.exec_with_returning(ctx.conn.as_ref())
-				.await?;
-			let deleted_session = deleted_sessions.into_iter().next();
-			tracing::trace!(?deleted_session, "Deleted active reading session");
+		let percentage = compute_page_based_percentage(correct_page, book.pages);
+		let progression = NormalizedProgression {
+			page: Some(correct_page),
+			percentage: Some(percentage),
+			did_complete: book.pages == correct_page,
+			..Default::default()
+		};
 
-			let started_at = deleted_session.as_ref().map(|s| s.started_at);
-			let device_id = deleted_session.as_ref().and_then(|s| s.device_id.clone());
-			let elapsed_seconds =
-				deleted_session.as_ref().and_then(|s| s.elapsed_seconds);
-
-			let active_model = finished_reading_session::ActiveModel {
-				user_id: Set(user.id.clone()),
-				media_id: Set(id.clone()),
-				device_id: Set(device_id),
-				started_at: Set(started_at.unwrap_or_else(|| Utc::now().into())),
-				elapsed_seconds: Set(elapsed_seconds),
-				completed_at: Set(Utc::now().into()),
-				..Default::default()
-			};
-			let finished_session = finished_reading_session::Entity::insert(active_model)
-				.exec(ctx.conn.as_ref())
-				.await?;
-			tracing::trace!(?finished_session, "Created finished reading session");
-		} else {
-			let on_conflict = OnConflict::new()
-				.update_columns(vec![
-					reading_session::Column::Page,
-					reading_session::Column::UpdatedAt,
-				])
-				.to_owned();
-			let active_model = reading_session::ActiveModel {
-				user_id: Set(user.id.clone()),
-				media_id: Set(id.clone()),
-				device_id: Set(None),
-				page: Set(Some(correct_page)),
-				started_at: Set(Utc::now().into()),
-				..Default::default()
-			};
-			let reading_session = reading_session::Entity::insert(active_model)
-				.on_conflict(on_conflict)
-				.exec(ctx.conn.as_ref())
-				.await?;
-			tracing::trace!(?reading_session, "Upserted active reading session");
-		}
+		let reading_session =
+			upsert_reading_session(ctx.conn.as_ref(), &user, &id, progression).await?;
+		tracing::trace!(?reading_session, "Upserted active reading session");
 	}
 
 	let (content_type, image_buffer) =

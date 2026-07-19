@@ -112,26 +112,26 @@ export default function CreateAPIKeyModal() {
 				</Dialog.Header>
 
 				{apiSecret && (
-					<div className="divide rounded-lg p-0.5 divide-y divide-edge border border-edge bg-background-surface">
+					<div className="divide p-0.5 divide-y divide-border rounded-lg border border-border bg-muted">
 						<div className="mb-1 h-8 pl-3 pr-2 flex items-center justify-between">
 							<div className="space-x-2 flex items-center">
-								<KeyRound className="h-4 w-4 text-foreground-muted" />
-								<Text size="sm" className="text-foreground-subtle">
+								<KeyRound className="h-4 w-4 text-muted-foreground" />
+								<Text size="sm" className="text-foreground">
 									{t(getKey('createdKey'))}
 								</Text>
 							</div>
 
 							<div className="gap-1 flex items-center">
 								<Button size="icon" onClick={() => setHideSecret((prev) => !prev)}>
-									<VisibilityIcon className="h-4 w-4 text-foreground-muted" />
+									<VisibilityIcon className="h-4 w-4 text-muted-foreground" />
 								</Button>
 								<Button size="icon" onClick={() => copy()}>
-									<CopyIcon className="h-4 w-4 text-foreground-muted" />
+									<CopyIcon className="h-4 w-4 text-muted-foreground" />
 								</Button>
 							</div>
 						</div>
 
-						<div className="rounded-lg p-3 text-sm bg-background-surface-secondary text-foreground-subtle">
+						<div className="p-3 text-sm rounded-lg bg-secondary text-foreground">
 							<span>
 								<code>{hideSecret ? maskedSecret : apiSecret}</code>
 							</span>
@@ -147,14 +147,18 @@ export default function CreateAPIKeyModal() {
 
 				<Dialog.Footer>
 					{!apiSecret && (
-						<Button disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
+						<Button
+							disabled={isPending}
+							onClick={() => setIsOpen(false)}
+							size="sm"
+							variant="outline"
+						>
 							{t('common.cancel')}
 						</Button>
 					)}
 
 					<Button
 						disabled={isPending}
-						variant="primary"
 						size="sm"
 						type={apiSecret ? 'button' : 'submit'}
 						form={apiSecret ? undefined : CREATE_OR_UPDATE_API_KEY_FORM_ID}

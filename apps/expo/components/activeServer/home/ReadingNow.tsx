@@ -1,4 +1,5 @@
 import { useSDK } from '@stump/client'
+import { parseGraphQLPercentageDecimal } from '@stump/client'
 import {
 	FragmentType,
 	graphql,
@@ -7,6 +8,7 @@ import {
 	useFragment,
 } from '@stump/graphql'
 import { formatDistanceToNow } from 'date-fns'
+import { BlurTargetView } from 'expo-blur'
 import { useRouter } from 'expo-router'
 import { useRef } from 'react'
 import { Easing, Pressable, View } from 'react-native'
@@ -20,8 +22,7 @@ import { stripHtml } from 'string-strip-html'
 import { ThumbnailImage } from '~/components/image'
 import { Badge, Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
-import { parseGraphQLDecimal } from '~/lib/format'
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
@@ -193,12 +194,13 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
+	const { t } = useTranslate()
 	const { width, isTablet } = useDisplay()
 
 	const router = useRouter()
 	const colors = useColors()
 
-	const percentageCompleted = parseGraphQLDecimal(data.readProgress?.percentageCompleted)
+	const percentageCompleted = parseGraphQLPercentageDecimal(data.readProgress?.percentageCompleted)
 	const currentPage =
 		data.readProgress?.page ?? data.readProgress?.locator?.locations?.position ?? '??'
 
@@ -336,22 +338,26 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 	const { url: uri, metadata: placeholderData } = data.thumbnail
 
+	const blurTargetRef = useRef<View>(null)
+
 	return (
 		<View className="gap-4 flex flex-row">
 			<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
-				<ThumbnailImage
-					source={{
-						uri,
-						headers: {
-							...sdk.customHeaders,
-							Authorization: sdk.authorizationHeader || '',
-						},
-					}}
-					size={{ height: imageHeight, width: IMAGE_WIDTH }}
-					gradient={{ colors: gradientColors, locations: gradientLocations }}
-					placeholderData={placeholderData}
-					originalDimensions={originalDimensions}
-				/>
+				<BlurTargetView ref={blurTargetRef}>
+					<ThumbnailImage
+						source={{
+							uri,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						size={{ height: imageHeight, width: IMAGE_WIDTH }}
+						gradient={{ colors: gradientColors, locations: gradientLocations }}
+						placeholderData={placeholderData}
+						originalDimensions={originalDimensions}
+					/>
+				</BlurTargetView>
 
 				<View className="bottom-0 gap-2 p-3 absolute z-20 w-full">
 					{!isTablet && (
@@ -378,7 +384,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 									opacity: 0.9,
 								}}
 							>
-								Page {currentPage} of {data.pages}
+								{t('common.pageXOfY', { current: currentPage, total: data.pages })}
 							</Text>
 
 							<Text
@@ -396,9 +402,15 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 						{percentageCompleted != null && (
 							<Progress
-								className="h-1 bg-white/40"
+								className="h-1"
 								indicatorClassName="bg-[#f5f3ef]"
-								value={percentageCompleted * 100}
+								trackClassName="bg-white/30"
+								value={percentageCompleted}
+								blurProps={{
+									intensity: 4,
+									blurTarget: blurTargetRef,
+									blurMethod: 'dimezisBlurView',
+								}}
 							/>
 						)}
 					</View>

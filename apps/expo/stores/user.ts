@@ -1,5 +1,6 @@
 import { createUserStore } from '@stump/client'
 import type { AllowedLocale } from '@stump/i18n'
+import { Platform } from 'react-native'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -8,7 +9,6 @@ import {
 	ThumbnailResizeMode,
 } from '~/components/image/ThumbnailPlaceholder'
 
-import { CachePolicy } from './reader'
 import { ZustandMMKVStorage } from './store'
 
 export const useUserStore = createUserStore(ZustandMMKVStorage)
@@ -17,13 +17,14 @@ export type ListLayout = 'grid' | 'list'
 
 export type DisplayLanguageKeysType = 'none' | 'abbreviated' | 'full'
 
+export type TextCase = 'lowerCase' | 'sentenceCase' | 'titleCase'
+
 type MobilePreferencesStore = {
 	showTabLabels: boolean
 	maskURLs: boolean
 	setMaskURLs: (mask: boolean) => void
 	storeLastRead: boolean
 	reduceAnimations: boolean
-	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
 	thumbnailResizeMode: ThumbnailResizeMode
@@ -42,7 +43,8 @@ type MobilePreferencesStore = {
 	enableDebugAnalytics: boolean
 	preferMinimalReader: boolean
 	displayLanguageKeys: DisplayLanguageKeysType
-	lowercaseTranslation: boolean
+	tintListBackground: boolean
+	textCase: TextCase
 	/**
 	 * Patch the store with new values.
 	 */
@@ -61,7 +63,6 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			setMaskURLs: (mask) => set({ maskURLs: mask }),
 			storeLastRead: false,
 			reduceAnimations: false,
-			cachePolicy: 'memory-disk',
 			allowDownscaling: true,
 			thumbnailRatio: 2 / 3,
 			thumbnailPlaceholder: 'grayscale',
@@ -80,7 +81,8 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			enableDebugAnalytics: false,
 			preferMinimalReader: false,
 			displayLanguageKeys: 'none',
-			lowercaseTranslation: false,
+			textCase: Platform.OS === 'android' ? 'sentenceCase' : 'titleCase',
+			tintListBackground: false,
 			patch: (data) => set(data),
 		}),
 		{

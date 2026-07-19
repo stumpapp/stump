@@ -3,10 +3,12 @@ import { Platform, View } from 'react-native'
 
 import BackLink from '~/components/BackLink'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
-import { ENABLE_LARGE_HEADER, IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	return (
@@ -21,7 +23,7 @@ export default function Screen() {
 					name="index"
 					options={{
 						headerShown: true,
-						headerTitle: 'Files',
+						headerTitle: t('stumpServer.browse.files'),
 						headerLeft:
 							Platform.OS === 'android'
 								? undefined
@@ -41,8 +43,7 @@ export default function Screen() {
 						headerLargeTitleStyle: {
 							fontSize: 24,
 						},
-						headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
-						headerLargeTitle: ENABLE_LARGE_HEADER,
+						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					}}
 				/>
 
@@ -52,7 +53,7 @@ export default function Screen() {
 						headerShown: true,
 						headerTitle: '',
 						headerTransparent: Platform.OS === 'ios',
-						headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					}}
 					dangerouslySingular
 				/>

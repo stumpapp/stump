@@ -13,7 +13,7 @@ import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 
 import ListEmpty from '../ListEmpty'
 import { SheetBackDetection } from '../SheetBackDetection'
@@ -102,7 +102,7 @@ export const SuggestionsPickerSheet = forwardRef<SuggestionsPickerSheetRef, Prop
 					detents={[1]}
 					grabber
 					scrollable
-					backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 					grabberOptions={{ color: colors.sheet.grabber }}
 					style={{ paddingBottom: insets.bottom }}
 					insetAdjustment="automatic"

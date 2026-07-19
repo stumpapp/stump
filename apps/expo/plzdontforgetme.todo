@@ -2,3 +2,6 @@
     - [ ] completedSeries for server/[id]/series/index.tsx?
     - [ ] does time matter for series search? feels less relevant than for library/books (at-a-glance for lib vs more specific for total time)
 - [ ] formalize patch into pr for expo
+- [ ] figure out why flash-list > 2.1.0 breaks on android with so many issues
+    - it looks to be https://github.com/Shopify/flash-list/issues/2250, but i don't have time to validate anymore today
+    so am deferring until another time

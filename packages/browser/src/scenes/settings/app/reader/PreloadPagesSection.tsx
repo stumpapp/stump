@@ -43,7 +43,6 @@ export default function PreloadPagesSection() {
 					onChange={createChangeHandler((n) => setSettings({ preload: { ahead: n, behind } }))}
 					type="number"
 					min={0}
-					variant="primary"
 				/>
 			</div>
 
@@ -55,7 +54,6 @@ export default function PreloadPagesSection() {
 					onChange={createChangeHandler((n) => setSettings({ preload: { ahead, behind: n } }))}
 					type="number"
 					min={0}
-					variant="primary"
 				/>
 			</div>
 		</>

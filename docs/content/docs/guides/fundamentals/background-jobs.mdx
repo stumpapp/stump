@@ -1,0 +1,43 @@
+---
+title: Background Jobs
+---
+
+
+<Callout type="info">
+	Jobs and job management can be accessed on the `/settings/jobs` page
+</Callout>
+
+Stump runs certain operations as background jobs so the server remains responsive. Background jobs are usually long-running operations that may involve heavier CPU or IO work, such as scanning a library.
+
+## Scheduling
+
+You can define recurring jobs that run automatically on a cron-based schedule:
+
+1. **Library scan**: Scans one or more libraries for new, updated, or missing media. You can target specific libraries or leave the selection empty to scan all libraries.
+
+2. **Metadata retry**: Retries previously failed or rate-limited metadata fetch attempts. You choose which statuses to retry (`Rate limited`, `Failed`, or both).
+
+### Cron
+
+Schedules are defined using [cron expressions](https://en.wikipedia.org/wiki/Cron). Stump supports 6-field cron expressions:
+
+```bash
+┌─────────── second
+│ ┌───────── minute
+│ │ ┌─────── hour
+│ │ │ ┌───── day of month
+│ │ │ │ ┌─── month
+│ │ │ │ │ ┌─ day of week
+│ │ │ │ │ │
+* * * * * *
+```
+
+And provides a few default presets:
+
+| Preset             | Cron expression  |
+| ------------------ | ---------------- |
+| Every 6 hours      | `0 0 */6 * * *`  |
+| Every 12 hours     | `0 0 */12 * * *` |
+| Daily at midnight  | `0 0 0 * * *`    |
+| Weekly on Sunday   | `0 0 0 * * 0`    |
+| Monthly on the 1st | `0 0 0 1 * *`    |

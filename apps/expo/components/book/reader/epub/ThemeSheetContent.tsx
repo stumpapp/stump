@@ -11,6 +11,7 @@ import {
 	ReadingProgression,
 	ThemeSelect,
 	TypographySettings,
+	VolumeNavigation,
 } from './controls'
 
 export default function ThemeSheetContent() {
@@ -30,6 +31,7 @@ export default function ThemeSheetContent() {
 				<ReadingProgression />
 				<ColumnCount />
 				<PageMargins />
+				<VolumeNavigation />
 			</Card>
 
 			<Card>

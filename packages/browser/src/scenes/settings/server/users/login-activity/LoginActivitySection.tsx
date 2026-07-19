@@ -4,8 +4,7 @@ import { Suspense } from 'react'
 import ClearLoginActivityConfirmation from './ClearActivityConfirmation'
 import LoginActivityTable from './LoginActivityTable'
 
-// TODO: locale
-// TODO: move clear to top section
+// TODO(i8n): add key/values
 export default function LoginActivitySection() {
 	return (
 		<div className="gap-y-4 flex flex-col">
@@ -17,8 +16,6 @@ export default function LoginActivitySection() {
 					</Text>
 				</div>
 
-				{/* 
-				<ClearActivitySection /> */}
 				<ClearLoginActivityConfirmation />
 			</div>
 

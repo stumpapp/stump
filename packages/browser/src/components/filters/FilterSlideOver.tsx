@@ -71,7 +71,7 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 			size={isMobile ? 'xl' : 'default'}
 			footer={
 				<div className="gap-4 py-2 flex items-center">
-					<Button type="button" variant="danger" onClick={handleClearFilters}>
+					<Button type="button" variant="destructive" onClick={handleClearFilters}>
 						Clear filters
 					</Button>
 

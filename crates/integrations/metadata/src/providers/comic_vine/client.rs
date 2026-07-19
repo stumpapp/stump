@@ -1,4 +1,5 @@
 use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions, MokaManager};
+use reqwest::Url;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 
 use crate::{
@@ -80,17 +81,18 @@ impl ComicVineClient {
 	) -> Result<T, MetadataProviderError> {
 		self.rate_limiter.until_ready().await;
 
-		let url = format!("{}{}", Self::API_URL, path);
-		let mut request = self
-			.client
-			.get(&url)
-			.query(&[("api_key", self.api_key.as_str()), ("format", "json")]);
+		let mut url = Url::parse(&format!("{}{}", Self::API_URL, path))
+			.map_err(|e| MetadataProviderError::Other(format!("Invalid URL: {}", e)))?;
+
+		url.query_pairs_mut()
+			.append_pair("api_key", &self.api_key)
+			.append_pair("format", "json");
 
 		for (k, v) in params {
-			request = request.query(&[(k, v)]);
+			url.query_pairs_mut().append_pair(k, v);
 		}
 
-		let response = request.send().await?.error_for_status()?;
+		let response = self.client.get(url).send().await?.error_for_status()?;
 		let data: ComicVineResponse<T> = response.json().await?;
 
 		if data.status_code != 1 {
@@ -420,12 +422,14 @@ impl MetadataProvider for ComicVineClient {
 	async fn verify_credentials(
 		&self,
 	) -> Result<ProviderCredentialVerification, MetadataProviderError> {
-		let request = self
-			.client
-			.get("https://comicvine.gamespot.com/api/characters/")
-			.query(&[("api_key", self.api_key.as_str()), ("format", "json")]);
+		let mut url = Url::parse("https://comicvine.gamespot.com/api/characters/")
+			.map_err(|e| MetadataProviderError::Other(format!("Invalid URL: {}", e)))?;
 
-		let response = request.send().await?.error_for_status()?;
+		url.query_pairs_mut()
+			.append_pair("api_key", &self.api_key)
+			.append_pair("format", "json");
+
+		let response = self.client.get(url).send().await?.error_for_status()?;
 		let response_status = response.status().as_u16();
 		// don't care about actual data, so used serde_json::Value as catch-all
 		let data: ComicVineResponse<serde_json::Value> = response.json().await?;
@@ -469,14 +473,14 @@ mod tests {
 		};
 
 		let results = client.search_series(&query).await;
-		println!("search_series results: {:#?}", results);
-		assert!(results.is_ok());
+		assert!(results.is_ok(), "should have been ok: {:?}", results);
 
 		let candidates = results.unwrap();
-		assert!(!candidates.is_empty());
-		for candidate in &candidates {
-			println!("{:?}", candidate);
-		}
+		assert!(
+			!candidates.is_empty(),
+			"should have gotten at least one: {:?}",
+			candidates
+		);
 	}
 
 	#[ignore = "Requires COMIC_VINE_API_KEY env var"]

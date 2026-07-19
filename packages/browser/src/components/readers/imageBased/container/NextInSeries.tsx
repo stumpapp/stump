@@ -52,7 +52,7 @@ export default function NextInSeries() {
 					</div>
 
 					<EntityImage
-						className="rounded-xl shadow object-contain"
+						className="shadow rounded-xl object-contain"
 						src={nextInSeries.thumbnailUrl}
 					/>
 

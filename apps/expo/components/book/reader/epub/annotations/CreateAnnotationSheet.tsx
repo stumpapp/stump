@@ -4,7 +4,7 @@ import { TextInput, View } from 'react-native'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { ReadiumLocator } from '~/modules/readium'
 
 import AnnotationSheetHeader from './AnnotationSheetHeader'
@@ -62,7 +62,7 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 					ref={sheetRef}
 					detents={['auto', 1]}
 					grabber
-					backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
 					grabberOptions={{
 						color: colors.sheet.grabber,
 					}}

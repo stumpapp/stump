@@ -39,15 +39,36 @@ export const useJobStore = createWithEqualityFn<JobStore>(
 						// a patch request. The fields are: message, status, completedTasks, remainingTasks.
 						// Subtasks are sent with both always included, so if they are null that means
 						// they are completed and can be overwritten.
-						const { status, completedTasks, remainingTasks, message, ...rest } = job
+						const {
+							status,
+							completedTasks,
+							remainingTasks,
+							message,
+							subtitle,
+							completedSubtasks,
+							totalSubtasks,
+							...rest
+						} = job
+
+						// when the overall task position advances, the subtask state and subtitle from
+						// the previous task get reset
+						const taskTransition = completedTasks != null
+						const subtaskState = taskTransition
+							? { completedSubtasks: null, totalSubtasks: null }
+							: {
+									completedSubtasks: completedSubtasks ?? existingJob.completedSubtasks,
+									totalSubtasks: totalSubtasks ?? existingJob.totalSubtasks,
+								}
 
 						draft.jobs[job.id] = {
 							...existingJob,
 							...rest,
+							...subtaskState,
 							completedTasks: completedTasks ?? existingJob.completedTasks,
-							message: message || existingJob.message,
+							message: message ?? existingJob.message,
 							remainingTasks: remainingTasks ?? existingJob.remainingTasks,
 							status: status || existingJob.status,
+							subtitle: taskTransition ? null : (subtitle ?? existingJob.subtitle),
 						}
 					} else {
 						draft.jobs[job.id] = {

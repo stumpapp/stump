@@ -40,18 +40,29 @@ export const KIND_OPTIONS = [
 	{ localeKey: 'metadataRetry', value: 'METADATA_RETRY' },
 ] as const
 
-export const scheduledJobFormSchema = z.object({
-	name: z.string().min(1),
-	schedule: z.string().min(1),
-	kind: z.enum(['LIBRARY_SCAN', 'METADATA_RETRY']),
-	libraryIds: z.array(z.string()).default([]),
-	statuses: z
-		.array(z.nativeEnum(MetadataFetchStatus))
+export const getCronSchema = (t: (key: string, params?: Record<string, unknown>) => string) =>
+	z
+		.string()
 		.min(1)
-		.default([MetadataFetchStatus.RateLimited]),
-	enabled: z.boolean().default(true),
-})
-export type ScheduledJobFormValues = z.infer<typeof scheduledJobFormSchema>
+		.refine((val) => /^\S+(\s+\S+){4,6}$/.test(val.trim()), {
+			message: t('settingsScene.server/jobs.sections.scheduling.errors.invalidCron'),
+		})
+
+export const getScheduledJobSchema = (
+	t: (key: string, params?: Record<string, unknown>) => string,
+) =>
+	z.object({
+		name: z.string().min(1),
+		schedule: getCronSchema(t),
+		kind: z.enum(['LIBRARY_SCAN', 'METADATA_RETRY']),
+		libraryIds: z.array(z.string()).default([]),
+		statuses: z
+			.array(z.nativeEnum(MetadataFetchStatus))
+			.min(1)
+			.default([MetadataFetchStatus.RateLimited]),
+		enabled: z.boolean().default(true),
+	})
+export type ScheduledJobFormValues = z.infer<ReturnType<typeof getScheduledJobSchema>>
 
 export function buildScheduledJobInput(values: ScheduledJobFormValues) {
 	const config =

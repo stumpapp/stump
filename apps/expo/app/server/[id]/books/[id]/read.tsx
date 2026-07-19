@@ -13,7 +13,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useActiveServer } from '~/components/activeServer'
 import {
@@ -26,7 +26,6 @@ import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
 import { db, downloadedFiles } from '~/db'
 import { booksDirectory } from '~/lib/filesystem'
 import {
-	useAppState,
 	useSyncOnlineToOfflineAnnotations,
 	useSyncOnlineToOfflineBookmarks,
 	useSyncOnlineToOfflineProgress,
@@ -260,6 +259,8 @@ type Params = {
 	id: string
 }
 
+// TODO(reading): support incognito, not using it here lol
+
 export default function Screen() {
 	useKeepAwake()
 
@@ -304,10 +305,19 @@ export default function Screen() {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
-	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
+	const timer = useBookTimer(book?.id || '', {
 		initial: book?.readProgress?.elapsedSeconds,
 		enabled: trackElapsedTime,
 	})
+
+	// tracks the elapsed total at the time of the last successful sync so we can
+	// send a delta
+	const lastSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
+	// tracks the last synced locator so that on exit we can send a final update so timer progression
+	// is not lost if the page did not change
+	const lastSyncedLocator = useRef(
+		book.readProgress?.locator ? intoReadiumLocator(book.readProgress.locator) : undefined,
+	)
 
 	const { syncProgress } = useSyncOnlineToOfflineProgress({ bookId: book.id, serverId })
 
@@ -317,27 +327,44 @@ export default function Screen() {
 		onError: (error) => {
 			console.error('Failed to update read progress:', error)
 		},
-		// TODO: Consider a preference to disable online-to-offline sync?
-		onSuccess: (_, { input: onlineProgress }) => syncProgress(onlineProgress),
+		onSuccess: (_, { input: onlineProgress }) => {
+			lastSyncedElapsedRef.current = timer.getCurrentTime()
+			if (onlineProgress.epub?.locator?.readium) {
+				lastSyncedLocator.current = intoReadiumLocator({
+					...onlineProgress.epub.locator.readium,
+					chapterTitle: onlineProgress.epub.locator.readium.chapterTitle || '',
+					type: onlineProgress.epub.locator.readium.type || 'application/xhtml+xml',
+				})
+			}
+			// invalidate but do not refetch
+			queryClient.invalidateQueries({ queryKey: ['bookById', bookID], exact: false })
+			queryClient.invalidateQueries({ queryKey: ['readBook', bookID], exact: false })
+			// TODO: Consider a preference to disable online-to-offline sync?
+			syncProgress(onlineProgress)
+		},
 	})
 
 	const onPageChanged = useCallback(
 		(page: number) => {
+			const totalSeconds = timer.getCurrentTime()
+			const delta = Math.max(0, totalSeconds - lastSyncedElapsedRef.current)
 			updateProgress({
 				id: book.id,
 				input: {
 					paged: {
 						page,
-						elapsedSeconds: totalSeconds,
+						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 					},
 				},
 			})
 		},
-		[book.id, totalSeconds, updateProgress],
+		[book.id, timer, updateProgress],
 	)
 
 	const onLocationChanged = useCallback(
 		(locator: ReadiumLocator, percentage: number) => {
+			const totalSeconds = timer.getCurrentTime()
+			const delta = Math.max(0, totalSeconds - lastSyncedElapsedRef.current)
 			updateProgress({
 				id: book.id,
 				input: {
@@ -352,18 +379,20 @@ export default function Screen() {
 								type: locator.type || 'application/xhtml+xml',
 							},
 						},
-						elapsedSeconds: totalSeconds,
+						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 						percentage,
-						isComplete: percentage >= 0.99,
+						isComplete: false,
 					},
 				},
 			})
 		},
-		[book.id, totalSeconds, updateProgress],
+		[book.id, timer, updateProgress],
 	)
 
 	const onReachedEnd = useCallback(
 		(locator: ReadiumLocator) => {
+			const totalSeconds = timer.getCurrentTime()
+			const delta = Math.max(0, totalSeconds - lastSyncedElapsedRef.current)
 			updateProgress({
 				id: book.id,
 				input: {
@@ -378,13 +407,24 @@ export default function Screen() {
 								type: locator.type || 'application/xhtml+xml',
 							},
 						},
-						elapsedSeconds: totalSeconds,
+						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 						isComplete: true,
 					},
 				},
 			})
+			// TODO: in order for subsequent reads to track time we need to remove the local timer, however
+			// i don't think we can just remove it here since the reader is still mounted. there will need to
+			// be a more thoughtful approach, and i don't have the time to consider it now. my immediate ideas:
+			// - when entering book overview, delete local timers if book is completed (don't _love_ effect-based approach but what ya gonna do)
+			// - add an explicit reset timer action, defers to user which isn't a solve imo but something that should
+			//   exist regardless imo
+			// - add a didReachEnd ref that resets on non-end progression but set true here, then in cleanup of effect
+			//   delete if true <-- prolly the best? still kinda effect-based but at least directly tied to reader
+			// - just reset the timer before navigating to read.tsx from overview if rereading a completed book (ty arklaum for idea)
+			// - just use non-persisted timers for online reading, and only persist for offline. although even then it might
+			//   not be needed since secs is tracked in sqlite too
 		},
-		[book.id, totalSeconds, updateProgress],
+		[book.id, timer, updateProgress],
 	)
 
 	const { syncCreate: syncBookmarkCreate, syncDelete: syncBookmarkDelete } =
@@ -544,48 +584,44 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
-	const onFocusedChanged = useCallback(
-		(focused: boolean) => {
-			if (!focused) {
-				pause()
-			} else if (focused) {
-				resume()
-			}
-		},
-		[pause, resume],
-	)
-
-	const appState = useAppState({
-		onStateChanged: onFocusedChanged,
-	})
-	const showControls = useReaderStore((state) => state.showControls)
-	useEffect(() => {
-		if ((showControls && isRunning) || appState !== 'active') {
-			pause()
-		} else if (!showControls && !isRunning && appState === 'active') {
-			resume()
+	const onExitReader = useCallback(async () => {
+		// update progress first so refetch picks up changes
+		if (lastSyncedLocator.current) {
+			onLocationChanged(
+				lastSyncedLocator.current,
+				lastSyncedLocator.current.locations?.totalProgression ?? 0,
+			)
 		}
-	}, [showControls, pause, resume, isRunning, appState])
+
+		await Promise.all([
+			queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['readBook', bookID], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
+		])
+	}, [bookID, onLocationChanged, queryClient])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
 	 * is updated with the latest read progress
 	 */
-	useEffect(() => {
-		NavigationBar.setVisibilityAsync('hidden')
-		return () => {
-			NavigationBar.setVisibilityAsync('visible')
-			Promise.all([
-				queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['readBook', bookID], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
-				queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
-			])
-		}
-	}, [queryClient, bookID])
+	useEffect(
+		() => {
+			NavigationBar.setVisibilityAsync('hidden')
+			return () => {
+				NavigationBar.setVisibilityAsync('visible')
+				onExitReader()
+			}
+		},
+		// this should be fine, but in practice we will see. i'd prefer to avoid needless pushes
+		// if we can, and spamming the navigation bar visibility
+		// eslint-disable-next-line react-compiler/react-compiler
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[bookID],
+	)
 
 	const requestHeaders = useCallback(
 		() => ({
@@ -609,6 +645,7 @@ export default function Screen() {
 		return (
 			<ReadiumReader
 				book={book}
+				timer={timer}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
 				onReachedEnd={onReachedEnd}
@@ -630,7 +667,7 @@ export default function Screen() {
 				onPageChanged={onPageChanged}
 				serverId={serverId}
 				// incognito
-				resetTimer={reset}
+				timer={timer}
 			/>
 		)
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
@@ -640,7 +677,7 @@ export default function Screen() {
 				book={book}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
 				onPageChanged={onPageChanged}
-				resetTimer={reset}
+				timer={timer}
 				nextInSeries={nextInSeries}
 				serverId={serverId}
 				requestHeaders={requestHeaders}

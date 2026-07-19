@@ -24,7 +24,7 @@ export default function InlineBadgeListInput({ values, onChange, className, bind
 			<div key={`${value}-${index}`} className="group relative">
 				<Badge>{value}</Badge>
 				<Button
-					variant="danger"
+					variant="destructive"
 					size="icon"
 					className="-right-2 -top-2 h-4 w-4 absolute z-10 opacity-0 transition-opacity group-hover:opacity-100"
 					aria-label="Remove item"

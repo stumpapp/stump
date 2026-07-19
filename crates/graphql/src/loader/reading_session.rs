@@ -1,19 +1,17 @@
 use async_graphql::dataloader::Loader;
-use models::entity::finished_reading_session;
-use models::entity::reading_session;
-use sea_orm::prelude::*;
-use sea_orm::DatabaseConnection;
-use sea_orm::QueryOrder;
-use std::{collections::HashMap, sync::Arc};
+use itertools::Itertools;
+use models::{entity::reading_session, shared::enums::ReadingStatus};
+use sea_orm::{prelude::*, DatabaseConnection, QueryOrder};
+use std::{cmp::Reverse, collections::HashMap, sync::Arc};
 
-use crate::object::reading_session::ActiveReadingSession;
-use crate::object::reading_session::FinishedReadingSession;
+use crate::object::{
+	readthrough_record::ReadthroughRecord, resume_reading_cursor::ResumeReadingCursor,
+};
 
 pub struct ReadingSessionLoader {
-	conn: Arc<DatabaseConnection>,
+	pub conn: Arc<DatabaseConnection>,
 }
 
-/// A loader for optimizing the loading of both active and finished reading sessions
 impl ReadingSessionLoader {
 	pub fn new(conn: Arc<DatabaseConnection>) -> Self {
 		Self { conn }
@@ -21,49 +19,95 @@ impl ReadingSessionLoader {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct ActiveReadingSessionLoaderKey {
+pub struct ResumeReadingCursorLoaderKey {
 	pub user_id: String,
 	pub media_id: String,
 }
 
-impl Loader<ActiveReadingSessionLoaderKey> for ReadingSessionLoader {
-	type Value = ActiveReadingSession;
+impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionLoader {
+	type Value = ResumeReadingCursor;
 	type Error = Arc<sea_orm::error::DbErr>;
 
 	async fn load(
 		&self,
-		keys: &[ActiveReadingSessionLoaderKey],
-	) -> Result<HashMap<ActiveReadingSessionLoaderKey, Self::Value>, Self::Error> {
-		let progresses = reading_session::Entity::find()
-			.filter(
-				reading_session::Column::MediaId
-					.is_in(
-						keys.iter()
-							.map(|key| key.media_id.clone())
-							.collect::<Vec<_>>(),
-					)
-					.and(
-						reading_session::Column::UserId.is_in(
-							keys.iter()
-								.map(|key| key.user_id.clone())
-								.collect::<Vec<_>>(),
-						),
-					),
-			)
-			.into_model::<reading_session::Model>()
+		keys: &[ResumeReadingCursorLoaderKey],
+	) -> Result<HashMap<ResumeReadingCursorLoaderKey, Self::Value>, Self::Error> {
+		if keys.is_empty() {
+			return Ok(HashMap::new());
+		}
+
+		let media_ids: Vec<String> = keys.iter().map(|k| k.media_id.clone()).collect();
+		let user_ids: Vec<String> = keys.iter().map(|k| k.user_id.clone()).collect();
+
+		let sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.is_in(user_ids))
+			.filter(reading_session::Column::MediaId.is_in(media_ids))
+			.order_by_desc(reading_session::Column::CreatedAt)
 			.all(self.conn.as_ref())
 			.await?;
 
+		let mut elapsed_by_readthrough: HashMap<(String, String, i32), i64> =
+			HashMap::new();
+		let mut started_at_by_readthrough = HashMap::new();
+
+		for s in &sessions {
+			let key = (s.user_id.clone(), s.media_id.clone(), s.readthrough_number);
+
+			*elapsed_by_readthrough.entry(key.clone()).or_insert(0) +=
+				s.elapsed_seconds.unwrap_or(0);
+
+			started_at_by_readthrough
+				.entry(key)
+				.and_modify(|started_at| {
+					if s.created_at < *started_at {
+						*started_at = s.created_at;
+					}
+				})
+				.or_insert(s.created_at);
+		}
+
 		let mut result = HashMap::new();
-
 		for key in keys {
-			let progress = progresses
-				.iter()
-				.find(|p| p.user_id == key.user_id && p.media_id == key.media_id)
-				.cloned();
+			if result.contains_key(key) {
+				continue;
+			}
 
-			if let Some(progress) = progress {
-				result.insert(key.clone(), ActiveReadingSession::from(progress));
+			// sessions are already ordered newest so the first match should be the one
+			let latest = sessions
+				.iter()
+				.find(|s| s.user_id == key.user_id && s.media_id == key.media_id);
+
+			match latest {
+				Some(s) if !s.is_finalized() => {
+					let readthrough_key =
+						(s.user_id.clone(), s.media_id.clone(), s.readthrough_number);
+
+					let total_elapsed = elapsed_by_readthrough
+						.get(&readthrough_key)
+						.copied()
+						.unwrap_or(0);
+					let started_at =
+						started_at_by_readthrough.get(&readthrough_key).copied();
+
+					result.insert(
+						key.clone(),
+						ResumeReadingCursor {
+							readthrough_number: s.readthrough_number,
+							page: s.end_page,
+							locator: s.end_locator.clone(),
+							percentage_completed: s.end_percentage,
+							epubcfi: s.epubcfi.clone(),
+							elapsed_seconds: total_elapsed,
+							started_at,
+							updated_at: s.updated_at,
+						},
+					);
+				},
+				_ => {
+					// if the latest session is a completion/dnf, we want to return None for the cursor
+					// so that the client doesn't try to resume a completed readthrough
+					continue;
+				},
 			}
 		}
 
@@ -71,62 +115,74 @@ impl Loader<ActiveReadingSessionLoaderKey> for ReadingSessionLoader {
 	}
 }
 
-// Note: The type is the same as ActiveReadingSessionLoaderKey, but the different struct def
-// allows us to share a single ReadingSessionLoader between the models
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct FinishedReadingSessionLoaderKey {
+pub struct ReadthroughRecordLoaderKey {
 	pub user_id: String,
 	pub media_id: String,
 }
 
-impl Loader<FinishedReadingSessionLoaderKey> for ReadingSessionLoader {
-	// Note: It might seem counterintuitive to have the Value type be a Vec, but since a user
-	// may have many reading sessions a `load_one` call really should return a Vec
-	type Value = Vec<FinishedReadingSession>;
+impl Loader<ReadthroughRecordLoaderKey> for ReadingSessionLoader {
+	type Value = Vec<ReadthroughRecord>;
 	type Error = Arc<sea_orm::error::DbErr>;
 
 	async fn load(
 		&self,
-		keys: &[FinishedReadingSessionLoaderKey],
-	) -> Result<HashMap<FinishedReadingSessionLoaderKey, Self::Value>, Self::Error> {
-		let progresses = finished_reading_session::Entity::find()
-			.filter(
-				finished_reading_session::Column::MediaId
-					.is_in(
-						keys.iter()
-							.map(|key| key.media_id.clone())
-							.collect::<Vec<_>>(),
-					)
-					.and(
-						finished_reading_session::Column::UserId.is_in(
-							keys.iter()
-								.map(|key| key.user_id.clone())
-								.collect::<Vec<_>>(),
-						),
-					),
-			)
-			.order_by_desc(finished_reading_session::Column::CompletedAt)
-			.into_model::<finished_reading_session::Model>()
+		keys: &[ReadthroughRecordLoaderKey],
+	) -> Result<HashMap<ReadthroughRecordLoaderKey, Self::Value>, Self::Error> {
+		if keys.is_empty() {
+			return Ok(HashMap::new());
+		}
+
+		let media_ids: Vec<String> = keys.iter().map(|k| k.media_id.clone()).collect();
+		let user_ids: Vec<String> = keys.iter().map(|k| k.user_id.clone()).collect();
+
+		// ordered asc so sessions.first() is the earliest in each readthrough
+		let sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.is_in(user_ids))
+			.filter(reading_session::Column::MediaId.is_in(media_ids))
+			.order_by_asc(reading_session::Column::CreatedAt)
 			.all(self.conn.as_ref())
 			.await?;
 
+		// group sessions by (user_id, media_id, readthrough_number)
+		let mut groups: HashMap<(String, String, i32), Vec<reading_session::Model>> =
+			HashMap::new();
+		for s in sessions {
+			groups
+				.entry((s.user_id.clone(), s.media_id.clone(), s.readthrough_number))
+				.or_default()
+				.push(s);
+		}
+
 		let mut result = HashMap::new();
-
 		for key in keys {
-			let progress = progresses
-				.iter()
-				.filter(|p| p.user_id == key.user_id && p.media_id == key.media_id)
-				.cloned()
-				.collect::<Vec<_>>();
+			if result.contains_key(key) {
+				continue;
+			}
 
-			if !progress.is_empty() {
-				result.insert(
-					key.clone(),
-					progress
-						.into_iter()
-						.map(FinishedReadingSession::from)
-						.collect(),
-				);
+			let records: Vec<ReadthroughRecord> = groups
+				.iter()
+				.filter(|((uid, mid, _), _)| uid == &key.user_id && mid == &key.media_id)
+				.filter_map(|(_, group)| {
+					let completing = group.iter().find(|s| s.is_finalized())?;
+					let first = group.first()?;
+					let total_elapsed =
+						group.iter().map(|s| s.elapsed_seconds.unwrap_or(0)).sum();
+					Some(ReadthroughRecord {
+						readthrough_number: completing.readthrough_number,
+						started_at: first.created_at,
+						completed_at: completing
+							.updated_at
+							.unwrap_or(completing.created_at),
+						elapsed_seconds: total_elapsed,
+						dnf: completing.status == ReadingStatus::Abandoned,
+					})
+				})
+				.sorted_unstable_by_key(|r| Reverse(r.readthrough_number))
+				.collect();
+
+			if !records.is_empty() {
+				result.insert(key.clone(), records);
 			}
 		}
 

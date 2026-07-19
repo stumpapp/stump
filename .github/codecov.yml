@@ -8,4 +8,5 @@ coverage:
         target: 0%
 ignore:
   - 'crates/cli'
+  - 'crates/migrations'
   - 'apps/desktop'

@@ -1,6 +1,7 @@
 import {
 	clone as cloneColor,
 	ColorSpace,
+	ColorTypes,
 	getColor,
 	OKLCH,
 	serialize,
@@ -11,6 +12,7 @@ import {
 import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
 import { Platform } from 'react-native'
+import tailwindColors from 'tailwindcss/colors'
 
 import { usePreferencesStore } from '~/stores'
 
@@ -19,13 +21,7 @@ import { useColorScheme } from './useColorScheme'
 ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 
-export const ENABLE_LARGE_HEADER = Platform.select({
-	// iOS 26+ has a bug that causes freezes when using large headers
-	ios: typeof Platform.Version === 'number' ? Platform.Version < 26 : Number(Platform.Version) < 26,
-	default: true,
-})
-
-export const IS_IOS_24_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 24
+export const IS_IOS_26_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26
 
 export const ON_END_REACHED_THRESHOLD = Platform.OS === 'ios' ? 0.75 : 0.6
 
@@ -41,14 +37,32 @@ export const SETTINGS_COLORS = {
 	destructive: '#fd6bd5',
 }
 
-export const STAT_COLORS = {
-	inProgress: '#f59e0b', // amber-500
-	completed: '#34d399', // emerald-400
-	books: '#60a5fa', // blue-400
-	series: '#c084fc', // purple-400
-	readingTime: '#fb7185', // rose-400
-	size: '#94a3b8', // slate-400
+type Hue = Exclude<
+	keyof typeof tailwindColors,
+	'inherit' | 'current' | 'transparent' | 'black' | 'white'
+>
+export type StatColorPalette = { primary: string; secondary: string }
+
+const STAT_HUES = {
+	inProgress: 'amber',
+	completed: 'emerald',
+	books: 'blue',
+	series: 'purple',
+	readingTime: 'rose',
+	size: 'slate',
+} satisfies Record<string, Hue>
+
+export function toHex(color: ColorTypes) {
+	return serialize(to(getColor(color), sRGB), { format: 'hex' })
 }
+
+export const STAT_COLORS = Object.fromEntries(
+	Object.entries(STAT_HUES).map(([stat, hue]) => {
+		const primary = toHex(tailwindColors[hue]['500'])
+		const secondary = toHex(tailwindColors[hue]['100'])
+		return [stat, { primary, secondary }]
+	}),
+) as { [K in keyof typeof STAT_HUES]: StatColorPalette }
 
 // TODO: android-specific tab bar color
 
@@ -58,7 +72,7 @@ const light = {
 		inverse: '#161719',
 		overlay: {
 			DEFAULT: '#f6f6f7',
-			hover: '#e9eaeb',
+			hover: 'rgb(0 0 0 / 0.05)',
 		},
 		surface: {
 			DEFAULT: '#f7f7f8',
@@ -150,8 +164,8 @@ const dark: Theme = {
 		DEFAULT: '#000000',
 		inverse: '#ffffff',
 		overlay: {
-			DEFAULT: '#111113',
-			hover: '#17171a',
+			DEFAULT: '#2d2d2d',
+			hover: 'rgb(255 255 255 / 0.1)',
 		},
 		surface: {
 			DEFAULT: '#0a0a0a',

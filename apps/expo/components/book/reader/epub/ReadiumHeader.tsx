@@ -1,41 +1,92 @@
 import * as Sentry from '@sentry/react-native'
-import { ALargeSmall, TableOfContents } from 'lucide-react-native'
+import { GlassView } from 'expo-glass-effect'
+import { useRouter } from 'expo-router'
+import { ArrowLeft, X } from 'lucide-react-native'
 import { useEffect, useMemo } from 'react'
-import { Pressable, View } from 'react-native'
+import { Platform, Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
-import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import BackLink from '~/components/BackLink'
-import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
+import {
+	ENTERING_ANIMATION,
+	EXITING_ANIMATION,
+	FADE_IN,
+	FADE_OUT,
+	useReaderAnimations,
+} from '~/components/book/reader/shared'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
-import { usePreferencesStore } from '~/stores'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { cn } from '~/lib/utils'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
-import { useEpubSheetStore } from '~/stores/epubSheet'
 
-import BookmarkButton from './BookmarkButton'
+import { useButtonColors } from './MenuItem'
+import { BUTTON_SIZE, ICON_SCALE } from './ReadiumFooter'
 
-export const HEADER_HEIGHT = 48
-
-// TODO: Figure out ideal UI for reader, I have largely been influenced by Yomu but
-// think I want to deviate a bit moving forward
+// size normalisation factor to make the icons feel the same size:
+// - X: smaller than expected -> 1.2x seems good
+// - ArrowLeft: Menu is wider than ArrowLeft, so it's closer to the circle's edge, so ArrowLeft looks smaller -> 1.2x seems good (coincidence)
+const ICON_SIZE = BUTTON_SIZE * (Platform.OS === 'ios' ? 1.2 : 1.2) * ICON_SCALE
 
 export default function ReadiumHeader() {
-	const { colors } = useEpubTheme()
-	const insets = useSafeAreaInsets()
+	const router = useRouter()
 
-	const { secondaryStyle, primaryStyle } = useReaderAnimations()
+	const { isDarkEpubTheme } = useEpubTheme()
+	const buttonColors = useButtonColors()
+	const showControls = useReaderStore((state) => state.showControls)
+
+	return (
+		<View className="inset-x-safe h-12 px-8 mb-2 z-20 items-center justify-center">
+			{showControls && (
+				<Animated.View
+					entering={ENTERING_ANIMATION}
+					exiting={EXITING_ANIMATION}
+					className="left-6 absolute z-30"
+					style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
+				>
+					<GlassView
+						className="flex-1 rounded-full"
+						isInteractive
+						colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+						style={{ backgroundColor: buttonColors.controls.background }}
+					>
+						<Pressable
+							disabled={!showControls}
+							onPress={router.back}
+							className={cn(
+								'h-full w-full items-center justify-center',
+								!IS_IOS_26_PLUS && 'active:opacity-60',
+							)}
+						>
+							<Icon
+								as={Platform.OS === 'ios' ? X : ArrowLeft}
+								size={ICON_SIZE}
+								absoluteStrokeWidth
+								strokeWidth={2.5}
+								color={buttonColors.controls.foreground}
+							/>
+						</Pressable>
+					</GlassView>
+				</Animated.View>
+			)}
+
+			<Title />
+		</View>
+	)
+}
+
+function Title() {
+	const { colors } = useEpubTheme()
+	const { primaryStyle, secondaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
+	const showControls = useReaderStore((state) => state.showControls)
 	const { chapterTitle, progressText } = useChapterProgress()
 
 	return (
 		<>
 			{/* Controls hidden */}
 			{!preferMinimalReader && (
-				<Animated.View
-					className="inset-x-safe h-12 px-8 absolute z-20 items-center justify-center"
-					style={[{ top: initialWindowMetrics?.insets.top || insets.top }, primaryStyle]}
-				>
+				<Animated.View style={primaryStyle} className="absolute w-full items-center justify-center">
 					<Animated.View key={chapterTitle} entering={FADE_IN} exiting={FADE_OUT}>
 						<Text
 							numberOfLines={1}
@@ -50,35 +101,23 @@ export default function ReadiumHeader() {
 
 			{/* Controls shown */}
 			<Animated.View
-				className="inset-x-safe h-12 gap-2 px-4 absolute z-20 flex-row items-center justify-between"
-				style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
+				className="absolute w-full items-center justify-center"
+				style={secondaryStyle}
+				pointerEvents={showControls ? undefined : 'none'}
 			>
-				<View className="gap-4 flex-row items-center">
-					<BackLink
-						color={colors?.foreground}
-						style={{ opacity: 0.9 }}
-						activeOpacity={0.7}
-						iconClassName="mr-[unset]"
-					/>
-					<OpenSheetButton sheet="locations" />
-				</View>
-
-				<View className="flex-1 items-center justify-center">
-					<Animated.View entering={FADE_IN} exiting={FADE_OUT}>
-						<Text
-							numberOfLines={1}
-							style={{ color: colors?.foreground }}
-							className="font-medium opacity-50"
-						>
-							{preferMinimalReader ? chapterTitle : progressText}
-						</Text>
-					</Animated.View>
-				</View>
-
-				<View className="gap-4 flex-row items-center">
-					<BookmarkButton color={colors?.foreground} />
-					<OpenSheetButton sheet="settings" />
-				</View>
+				<Animated.View
+					key={preferMinimalReader ? chapterTitle : progressText}
+					entering={FADE_IN}
+					exiting={FADE_OUT}
+				>
+					<Text
+						numberOfLines={1}
+						style={{ color: colors?.foreground }}
+						className="font-medium opacity-50"
+					>
+						{preferMinimalReader ? chapterTitle : progressText}
+					</Text>
+				</Animated.View>
 			</Animated.View>
 		</>
 	)
@@ -96,11 +135,15 @@ function useChapterProgress() {
 	const pagesLeftInChapterRaw = useMemo(() => {
 		const flatToc = flattenToc(toc)
 		const activeIndex = flatToc.findIndex((item) => item.label === chapterTitle)
+
+		if (activeIndex === -1 || totalPages <= 0) return null
+
 		const nextChapter = flatToc.slice(activeIndex + 1).find((item) => item.position != null)
 
 		if (activeIndex + 1 === flatToc.length) {
 			return totalPages - page
 		}
+
 		if (nextChapter?.position != null) {
 			return nextChapter.position - 1 - page
 		}
@@ -115,7 +158,7 @@ function useChapterProgress() {
 
 	useEffect(() => {
 		if (!enableDebugAnalytics) return
-		if (pagesLeftInChapterRaw == null || pagesLeftInChapterRaw > 0) return
+		if (pagesLeftInChapterRaw == null || pagesLeftInChapterRaw >= 0) return
 
 		const storeSnapshot = useEpubLocationStore.getState()
 		Sentry.captureMessage('Encountered negative pages left in chapter', {
@@ -139,24 +182,4 @@ function useChapterProgress() {
 	}, [pagesLeftInChapter])
 
 	return { chapterTitle, progressText }
-}
-
-function OpenSheetButton({ sheet }: { sheet: 'locations' | 'settings' }) {
-	const { colors } = useEpubTheme()
-	const openSheet = useEpubSheetStore((state) => state.openSheet)
-
-	const sheetIcon = { locations: TableOfContents, settings: ALargeSmall }
-
-	return (
-		<Pressable onPress={() => openSheet(sheet)}>
-			{({ pressed }) => (
-				<Icon
-					as={sheetIcon[sheet]}
-					className="h-6 w-6"
-					color={colors?.foreground}
-					style={{ opacity: pressed ? 0.7 : 0.9 }}
-				/>
-			)}
-		</Pressable>
-	)
 }

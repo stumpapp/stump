@@ -16,6 +16,11 @@ export default function LocaleProvider({ locale = getDefaultLocale(), children }
 	useEffect(() => {
 		i18n.changeLanguage(locale)
 		initDateFnsLocale(locale)
+		// locale provider is used in web and expo, the latter
+		// not having a document
+		if ('document' in globalThis) {
+			document.documentElement.lang = locale
+		}
 	}, [locale])
 
 	return (

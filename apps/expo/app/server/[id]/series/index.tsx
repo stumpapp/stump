@@ -1,18 +1,19 @@
 import { useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, SeriesScreenQuery } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
+import { BackgroundGradient, useBackgroundGradient } from '~/components/BackgroundGradient'
 import ListEmpty from '~/components/ListEmpty'
 import { useListSizing } from '~/components/listLayout'
 import RefreshControl from '~/components/RefreshControl'
 import { SeriesListHeader } from '~/components/series/listHeader'
-import SeriesListItem, { ISeriesListItemFragment } from '~/components/series/SeriesListItem'
+import SeriesListItem from '~/components/series/SeriesListItem'
 import { Button, FullScreenLoader, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useSeriesFilterStore } from '~/stores/filters'
@@ -28,6 +29,11 @@ const query = graphql(`
 			nodes {
 				id
 				...SeriesListItem
+				thumbnail {
+					metadata {
+						averageColor
+					}
+				}
 			}
 			pageInfo {
 				__typename
@@ -42,6 +48,7 @@ const query = graphql(`
 		}
 	}
 `)
+type Node = SeriesScreenQuery['series']['nodes'][number]
 
 const statsQuery = graphql(`
 	query SeriesScreenStats {
@@ -71,6 +78,7 @@ export default function Screen() {
 
 	const {
 		data: { librariesStats },
+		refetch: refetchStats,
 	} = useSuspenseGraphQL(statsQuery, ['seriesStats', serverID])
 
 	// i swapped to non-suspense because it was flickering the stack items
@@ -78,7 +86,7 @@ export default function Screen() {
 		data,
 		hasNextPage,
 		fetchNextPage,
-		refetch,
+		refetch: refetchSeries,
 		isLoading: isInitialLoading,
 	} = useInfiniteGraphQL(
 		query,
@@ -95,6 +103,8 @@ export default function Screen() {
 
 	const nodes = data?.pages.flatMap((page) => page.series.nodes) || []
 
+	const refetch = () => Promise.all([refetchSeries(), refetchStats()])
+
 	const [isRefetching, handleRefetch] = useRefetch(refetch)
 
 	const onEndReached = useCallback(() => {
@@ -105,14 +115,25 @@ export default function Screen() {
 
 	const isFiltered = Object.keys(filters).length > 0
 
-	const listRef = useRef<FlashListRef<ISeriesListItemFragment>>(null)
+	const listRef = useRef<FlashListRef<Node>>(null)
 	useScrollToTop(listRef)
 
 	const layout = useSeriesLayout('global', (state) => state.layout)
 	const { numColumns, paddingHorizontal, ItemSeparatorComponent } = useListSizing({ layout })
 
+	const { colors, headerColor, viewabilityConfigCallbackPairs } = useBackgroundGradient({
+		data: nodes,
+		layout,
+		flashListRef: listRef,
+	})
+	useEffect(() => {
+		listRef.current?.recomputeViewableItems()
+	}, [filters, layout, sort])
+
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+			<BackgroundGradient colors={colors} androidHeaderColor={headerColor} layout={layout} />
+
 			<FlashList
 				key={layout} // force re-render when layout changes
 				ref={listRef}
@@ -125,6 +146,7 @@ export default function Screen() {
 				numColumns={numColumns}
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
+				viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
 				contentInsetAdjustmentBehavior="always"
 				ListHeaderComponent={<SeriesListHeader stats={librariesStats} />}
 				ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}

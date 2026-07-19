@@ -16,11 +16,9 @@ runs:
   using: composite
   steps:
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
       with:
         toolchain: 1.92.0
-        profile: minimal
-        override: true
         components: rustfmt, clippy
 
     - name: Configure environment
@@ -31,6 +29,6 @@ runs:
     # See https://github.com/Swatinem/rust-cache/issues/194
     - name: Cache Rust Dependencies
       if: ${{ inputs.cache-dependencies == 'true' }}
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@42dc69e1aa15d09112580998cf2ef0119e2e91ae # v2
       with:
         shared-key: stump-rust-cache

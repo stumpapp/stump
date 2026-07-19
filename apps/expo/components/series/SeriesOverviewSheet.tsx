@@ -1,5 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { formatBytesSeparate } from '@stump/client'
 import { graphql, SeriesOverviewSheetQuery } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
@@ -9,8 +10,7 @@ import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IS_IOS_24_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
-import { formatBytesSeparate } from '~/lib/format'
+import { IS_IOS_26_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
 
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { MetadataBadgeSection } from '../overview'
@@ -101,7 +101,7 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 				detents={[0.5, 1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
@@ -140,34 +140,34 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 			label: 'In Progress',
 			value: stats.inProgressBooks,
 			icon: BookOpen,
-			baseColor: STAT_COLORS.inProgress,
+			colors: STAT_COLORS.inProgress,
 		},
 		{
 			label: 'Completed',
 			value: stats.completedBooks,
 			suffix: `/ ${stats.bookCount}`,
 			icon: BookCheck,
-			baseColor: STAT_COLORS.completed,
+			colors: STAT_COLORS.completed,
 		},
 		{
 			label: 'Books',
 			value: stats.bookCount,
 			icon: Library,
-			baseColor: STAT_COLORS.books,
+			colors: STAT_COLORS.books,
 		},
 		{
 			label: 'Reading Time',
 			value: formattedTime ? formattedTime.value : '??',
 			suffix: formattedTime ? formattedTime.unit : undefined,
 			icon: Clock,
-			baseColor: STAT_COLORS.readingTime,
+			colors: STAT_COLORS.readingTime,
 		},
 		{
 			label: 'Size',
 			value: formattedSize ? formattedSize.value : 'Unknown',
 			suffix: formattedSize ? formattedSize.unit : '',
 			icon: HardDrive,
-			baseColor: STAT_COLORS.size,
+			colors: STAT_COLORS.size,
 		},
 	] satisfies StatCardProps[]
 

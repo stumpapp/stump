@@ -12,12 +12,12 @@ import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { useResolveURL } from '~/components/opds/utils'
 import { OPDSLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { db, downloadedFiles, readProgress, syncStatus } from '~/db'
-import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
-type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount'> & {
+type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount' | 'serverLastRead'> & {
 	pageCount: string // conform to Route params, reqs being a string
+	serverLastRead?: string
 }
 
 export default function Screen() {
@@ -29,6 +29,7 @@ export default function Screen() {
 		() => ({
 			...params,
 			pageCount: getValidNumber(params.pageCount),
+			serverLastRead: getPositiveNumber(params.serverLastRead),
 		}),
 		[params],
 	)
@@ -93,13 +94,15 @@ export default function Screen() {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
 
-	const { pause, resume, isRunning, totalSeconds, reset } = useBookTimer(contextValue.entryId, {
-		enabled: trackElapsedTime,
-	})
+	const initialPage = contextValue.serverLastRead ?? 1
+
+	const timer = useBookTimer(contextValue.entryId, { enabled: trackElapsedTime })
 
 	const onPageChanged = useCallback(
 		async (pageNumber: number) => {
 			if (isLoadingRecord || !record) return
+			const totalSeconds = timer.getCurrentTime()
+
 			return db
 				.insert(readProgress)
 				.values({
@@ -119,32 +122,8 @@ export default function Screen() {
 					},
 				})
 		},
-		[isLoadingRecord, record, totalSeconds],
+		[isLoadingRecord, record, timer],
 	)
-
-	const onFocusedChanged = useCallback(
-		(focused: boolean) => {
-			if (!focused) {
-				pause()
-			} else if (focused) {
-				resume()
-			}
-		},
-		[pause, resume],
-	)
-
-	const appState = useAppState({
-		onStateChanged: onFocusedChanged,
-	})
-
-	const showControls = useReaderStore((state) => state.showControls)
-	useEffect(() => {
-		if ((showControls && isRunning) || appState !== 'active') {
-			pause()
-		} else if (!showControls && !isRunning && appState === 'active') {
-			resume()
-		}
-	}, [showControls, pause, resume, isRunning, appState])
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
@@ -180,11 +159,11 @@ export default function Screen() {
 	return (
 		<ImageBasedReader
 			serverId={serverId}
-			initialPage={1}
+			initialPage={initialPage}
 			book={book}
 			pageURL={getStreamURLForPage}
 			requestHeaders={requestHeaders}
-			resetTimer={reset}
+			timer={timer}
 			onPageChanged={onPageChanged}
 			isOPDS
 		/>
@@ -194,4 +173,10 @@ export default function Screen() {
 const getValidNumber = (value: string) => {
 	const parsed = parseInt(value, 10)
 	return isNaN(parsed) ? -1 : parsed
+}
+
+const getPositiveNumber = (value: string | undefined): number | undefined => {
+	if (value == null) return undefined
+	const parsed = parseInt(value, 10)
+	return isNaN(parsed) || parsed <= 0 ? undefined : parsed
 }

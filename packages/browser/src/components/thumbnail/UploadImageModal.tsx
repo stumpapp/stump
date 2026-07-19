@@ -107,7 +107,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 
 					<div
 						{...getRootProps()}
-						className="p-4 flex shrink-0 grow flex-col items-center justify-center border border-dashed border-edge"
+						className="p-4 flex shrink-0 grow flex-col items-center justify-center border border-dashed border-border"
 					>
 						<input {...getInputProps()} />
 						<Text variant="muted">{t(withLocaleKey('prompt'))}</Text>
@@ -115,10 +115,10 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				</div>
 
 				<Dialog.Footer>
-					<Button variant="default" onClick={onClose}>
+					<Button variant="outline" onClick={onClose}>
 						Cancel
 					</Button>
-					<Button variant="primary" onClick={handleConfirm} disabled={!selectedFile}>
+					<Button onClick={handleConfirm} disabled={!selectedFile}>
 						Confirm selection
 					</Button>
 				</Dialog.Footer>

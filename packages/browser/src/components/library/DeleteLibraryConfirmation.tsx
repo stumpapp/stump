@@ -85,7 +85,7 @@ export default function DeleteLibraryConfirmation({
 			title={t(getKey('title'), entityI18nValues)}
 			description={t(getKey('description'), entityI18nValues)}
 			confirmText={t(getKey('confirm'), entityI18nValues)}
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={onClose}
 			onConfirm={handleDelete}

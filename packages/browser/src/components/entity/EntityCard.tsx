@@ -162,7 +162,7 @@ export default function EntityCard({
 		} else {
 			return (
 				<div className="flex h-full w-full items-center justify-center bg-sidebar">
-					<Book className="h-16 w-16 absolute text-foreground-muted" />
+					<Book className="h-16 w-16 absolute text-muted-foreground" />
 				</div>
 			)
 		}
@@ -172,8 +172,8 @@ export default function EntityCard({
 		<Container
 			{...containerProps}
 			className={cn(
-				'space-y-1 rounded-lg relative flex flex-1 flex-col overflow-hidden border-[1.5px] border-edge bg-background/80 transition-colors duration-100',
-				{ 'cursor-pointer hover:border-edge-brand dark:hover:border-edge-brand': hasClickAction },
+				'space-y-1 relative flex flex-1 flex-col overflow-hidden rounded-lg border-[1.5px] border-border bg-background/80 transition-colors duration-100',
+				{ 'cursor-pointer hover:border-primary dark:hover:border-primary': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{
 					'w-40 sm:w-[10.666rem] md:w-48': !isFullWidth,

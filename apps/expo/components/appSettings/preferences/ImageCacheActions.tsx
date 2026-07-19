@@ -8,7 +8,7 @@ import { useTranslate } from '~/lib/hooks'
 
 import AppSettingsRow from '../AppSettingsRow'
 
-export default function CachePolicySelect() {
+export default function ImageCacheActions() {
 	const { t } = useTranslate()
 
 	const onClearCache = async (message: string) => {

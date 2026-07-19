@@ -1,6 +1,9 @@
 import { FlashListRef } from '@shopify/flash-list'
 import { BookReadScreenQuery, ReadiumLocation, ReadiumLocator } from '@stump/graphql'
+import { ImageBasedBookPageRef, PageSetIndexes } from '@stump/sdk'
 import { createContext, useContext } from 'react'
+
+import { Timer } from '~/stores/reader'
 
 import { OfflineCompatibleReader } from '../types'
 
@@ -29,12 +32,6 @@ export type EbookReaderBookRef = {
 		readProgress?: QueryData['readProgress']
 	}
 
-export type ImageBasedBookPageRef = {
-	height: number
-	width: number
-	ratio: number
-}
-
 export type NextInSeriesBookRef = {
 	id: string
 	name: string
@@ -48,16 +45,16 @@ export type BookmarkRef = NonNullable<EbookReaderBookRef['ebook']>['bookmarks'][
 	}
 
 export type IImageBasedReaderContext = {
-	flashListRef: React.RefObject<FlashListRef<number[]> | null>
+	flashListRef: React.RefObject<FlashListRef<PageSetIndexes> | null>
 	book: ImageReaderBookRef
 	imageSizes?: Record<number, ImageBasedBookPageRef>
 	setImageSizes: React.Dispatch<React.SetStateAction<Record<number, ImageBasedBookPageRef>>>
-	pageSets: number[][]
+	pageSets: PageSetIndexes[]
 	pageURL: (page: number) => string
 	pageThumbnailURL?: (page: number) => string
 	currentPage?: number
 	onPageChanged?: (page: number) => void
-	resetTimer?: () => void
+	timer: Timer
 	isOPDS?: boolean
 } & OfflineCompatibleReader
 

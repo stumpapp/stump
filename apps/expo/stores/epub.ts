@@ -1,3 +1,4 @@
+import { getColor, to } from 'colorjs.io/fn'
 import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
@@ -141,7 +142,7 @@ export type IEpubLocationStore = {
 	// So, before a jump is pushed the pusher will compute that so when it renders it doesn't flash
 	// the incorrect direction
 	jumpStack: JumpEntry[]
-	pushJump: (locator: ReadiumLocator, direction: 'back' | 'forward') => void
+	pushJump: (newLocator: ReadiumLocator) => void
 	popJump: () => JumpEntry | undefined
 	clearJumpStack: () => void
 
@@ -175,12 +176,32 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	positions: [],
 
 	jumpStack: [],
-	pushJump: (locator, direction) => {
+	pushJump: (newLocator) => {
+		const { locator } = get()
+
+		// If jumping to higher position, return direction should be 'back'
+		// If jumping to lower position, return direction should be 'forward'
+		const currentPosition = locator?.locations?.position
+		const currentChapterProgression = locator?.locations?.progression
+		const targetPosition = newLocator.locations?.position
+		const targetChapterProgression = newLocator.locations?.progression
+
+		let direction: 'back' | 'forward'
+		if (currentPosition === targetPosition) {
+			if (!currentChapterProgression || !targetChapterProgression) return
+			direction = targetChapterProgression > currentChapterProgression ? 'back' : 'forward'
+		} else {
+			if (!currentPosition || !targetPosition) return
+			direction = targetPosition > currentPosition ? 'back' : 'forward'
+		}
+
 		const { jumpStack } = get()
 
 		if (jumpStackTimerId) {
 			clearTimeout(jumpStackTimerId)
 		}
+
+		if (!locator) return
 
 		const entry: JumpEntry = { locator, direction }
 		const newStack = [entry, ...jumpStack].slice(0, JUMP_STACK_MAX_SIZE)
@@ -405,7 +426,7 @@ export const resolveThemeName = (
 }
 
 export const useEpubTheme = () => {
-	const { colorScheme } = useColorScheme()
+	const { colorScheme, isDarkColorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore(
 		useShallow((store) => ({
 			themes: store.themes,
@@ -413,10 +434,25 @@ export const useEpubTheme = () => {
 		})),
 	)
 
-	return useMemo(
+	const theme = useMemo(
 		() => resolveTheme(themes, selectedTheme || '', colorScheme),
 		[themes, selectedTheme, colorScheme],
 	)
+
+	let isDarkEpubTheme: boolean = isDarkColorScheme
+	if (theme.colors?.background) {
+		const backgroundColor = getColor(theme.colors?.background)
+		const foregroundColor = getColor(theme.colors?.foreground)
+
+		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
+		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
+
+		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
+		// to look much better for edge cases near the boundry
+		isDarkEpubTheme = foregroundLightness > backgroundLightness
+	}
+
+	return { ...theme, isDarkEpubTheme }
 }
 
 export type SupportedMobileFont =

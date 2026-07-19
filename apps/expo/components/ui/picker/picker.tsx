@@ -37,7 +37,7 @@ export function Picker<T extends string = string>({
 				>
 					<Text
 						className={cn(
-							'text-lg font-normal text-foreground-muted',
+							'text-lg tablet:text-xl font-normal text-foreground-muted',
 							!selectedOption && 'text-foreground-subtle',
 						)}
 					>
@@ -53,7 +53,7 @@ export function Picker<T extends string = string>({
 				<DropdownMenuRadioGroup value={value} onValueChange={(v) => onValueChange(v as T)}>
 					{options.map((option) => (
 						<DropdownMenuRadioItem key={option.value} value={option.value}>
-							<Text>{option.label}</Text>
+							<Text className="text-lg">{option.label}</Text>
 						</DropdownMenuRadioItem>
 					))}
 				</DropdownMenuRadioGroup>

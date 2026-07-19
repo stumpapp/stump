@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useSDKSafe } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
-import setProperty from 'lodash/set'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -17,12 +16,12 @@ import {
 	getPositions,
 	HighlightRequestEvent,
 	intoBookmarkRef,
-	isLastReadiumLocator,
 	NoteRequestEvent,
 	ReadiumLocator,
 	ReadiumView,
 	ReadiumViewRef,
 } from '~/modules/readium'
+import { useVolumeListener } from '~/modules/volumeListener'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import {
 	convertNativeToc,
@@ -41,12 +40,13 @@ import {
 	UpdateAnnotationSheet,
 	UpdateAnnotationSheetRef,
 } from './annotations'
+import AnnotationsSheet from './AnnotationsSheet'
 import { EpubReaderContext, EpubReaderContextValue } from './context'
 import CustomizeThemeSheet from './CustomizeThemeSheet'
-import EpubLocationsSheet from './EpubLocationsSheet'
 import EpubSettingsSheet from './EpubSettingsSheet'
-import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
-import ReadiumHeader, { HEADER_HEIGHT } from './ReadiumHeader'
+import ReadiumFooter from './ReadiumFooter'
+import ReadiumHeader from './ReadiumHeader'
+import TableOfContentsSheet from './TableOfContentsSheet'
 
 type BaseProps = OfflineCompatibleReader &
 	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders'>
@@ -94,6 +94,7 @@ export default function ReadiumReader({
 	onCreateAnnotation,
 	onUpdateAnnotation,
 	onDeleteAnnotation,
+	timer,
 	...ctx
 }: Props) {
 	const { downloadImmediate } = useDownload({ serverId: ctx.serverId })
@@ -177,6 +178,15 @@ export default function ReadiumReader({
 			}) satisfies ReadiumViewRef,
 		[],
 	)
+
+	const volumeButtonsNavigate = useReaderStore(
+		(state) => state.globalSettings.volumeButtonsNavigate,
+	)
+	useVolumeListener({
+		enabled: volumeButtonsNavigate,
+		onVolumeUp: () => navigator.goForward(),
+		onVolumeDown: () => navigator.goBackward(),
+	})
 
 	const store = useEpubLocationStore(
 		useShallow((store) => ({
@@ -275,7 +285,8 @@ export default function ReadiumReader({
 
 	const handleBookLoaded = useCallback(
 		async (event: BookLoadedEventPayload) => {
-			store.onBookLoad(event.bookMetadata, await getPositions(book.id))
+			const fetchedPositions = await getPositions(book.id)
+			store.onBookLoad(event.bookMetadata, fetchedPositions)
 
 			hasReachedEndRef.current = false
 
@@ -331,22 +342,28 @@ export default function ReadiumReader({
 
 			store.onLocationChange(locator)
 
-			// This is a bit of a cautionary change without explicit testing, but if a book doesn't have
-			// any positions I don't think we can reliably make any progression-related calculations. I think,
-			// more than anything, what this would mean is somehow this callback hit before fully loading
-			// the book and getting positions
-			if (!positions.length) return
+			// already reaching end = also do not report
+			if (hasReachedEndRef.current || incognito) return
 
 			const totalProgression = locator.locations?.totalProgression
-			const isLikelyLastLocator = isLastReadiumLocator(locator, positions)
+			if (totalProgression != null) {
+				onLocationChanged(locator, totalProgression)
+			}
+		},
+		[onLocationChanged, incognito, store, controlsVisible, setControlsVisible],
+	)
 
-			if (!hasReachedEndRef.current && !incognito && isLikelyLastLocator) {
+	const handleReachedEnd = useCallback(
+		(event: { nativeEvent: ReadiumLocator }) => {
+			const { nativeEvent: locator } = event
+
+			if (!hasReachedEndRef.current && !incognito) {
 				hasReachedEndRef.current = true
 				if (enableDebugAnalytics) {
-					Sentry.captureMessage('handleLocationChanged -> isLastReadiumLocator', {
+					Sentry.captureMessage('handleReachedEnd -> not already reached end', {
 						level: 'debug',
 						extra: {
-							totalProgression,
+							totalProgression: locator.locations?.totalProgression,
 							position: locator.locations?.position,
 							positionsCount: positions?.length,
 							positions: JSON.stringify(positions),
@@ -355,42 +372,7 @@ export default function ReadiumReader({
 						},
 					})
 				}
-				setProperty(locator, 'locations.totalProgression', 1.0)
 				onReachedEnd?.(locator)
-			} else if (!incognito && totalProgression != null) {
-				onLocationChanged(locator, totalProgression)
-			}
-		},
-		[
-			onLocationChanged,
-			onReachedEnd,
-			incognito,
-			store,
-			positions,
-			controlsVisible,
-			setControlsVisible,
-			enableDebugAnalytics,
-		],
-	)
-
-	const handleReachedEnd = useCallback(
-		(event: { nativeEvent: ReadiumLocator }) => {
-			if (!hasReachedEndRef.current && !incognito) {
-				hasReachedEndRef.current = true
-				if (enableDebugAnalytics) {
-					Sentry.captureMessage('handleReachedEnd -> not already reached end', {
-						level: 'debug',
-						extra: {
-							totalProgression: event.nativeEvent.locations?.totalProgression,
-							position: event.nativeEvent.locations?.position,
-							positionsCount: positions?.length,
-							positions: JSON.stringify(positions),
-							href: event.nativeEvent.href,
-							locator: event.nativeEvent,
-						},
-					})
-				}
-				onReachedEnd?.(event.nativeEvent)
 			}
 		},
 		[onReachedEnd, incognito, enableDebugAnalytics, positions],
@@ -539,12 +521,15 @@ export default function ReadiumReader({
 				onCreateAnnotation,
 				onUpdateAnnotation,
 				onDeleteAnnotation,
+				timer: timer,
 			}}
 		>
 			<View
 				style={{
 					flex: 1,
 					backgroundColor: colors?.background,
+					paddingTop: initialWindowMetrics?.insets.top || insets.top || 14,
+					paddingBottom: initialWindowMetrics?.insets.bottom || insets.bottom || 14,
 				}}
 			>
 				<ReadiumHeader />
@@ -564,18 +549,15 @@ export default function ReadiumReader({
 					onAnnotationTap={handleAnnotationTap}
 					onEditHighlight={handleEditHighlight}
 					onDeleteHighlight={handleNativeDeleteAnnotation}
-					style={{
-						flex: 1,
-						marginTop: (initialWindowMetrics?.insets.top || insets.top) + HEADER_HEIGHT,
-						marginBottom: insets.bottom + FOOTER_HEIGHT,
-					}}
+					style={{ flex: 1 }}
 					{...config}
 				/>
 
 				<ReadiumFooter />
 
 				<EpubSettingsSheet />
-				<EpubLocationsSheet />
+				<TableOfContentsSheet />
+				<AnnotationsSheet />
 				<CustomizeThemeSheet />
 
 				<CreateAnnotationSheet

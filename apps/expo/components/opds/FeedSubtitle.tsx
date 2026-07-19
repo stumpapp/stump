@@ -3,7 +3,7 @@ import { Fragment, useRef, useState } from 'react'
 import { Platform, Pressable, ScrollView } from 'react-native'
 
 import { Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 
 import { SheetBackDetection } from '../SheetBackDetection'
 
@@ -32,7 +32,7 @@ export default function FeedSubtitle({ value }: Props) {
 				detents={Platform.OS === 'android' ? [0.4, 1] : ['auto']}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}

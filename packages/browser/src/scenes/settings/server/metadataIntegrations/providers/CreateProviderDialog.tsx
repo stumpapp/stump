@@ -126,13 +126,12 @@ export function CreateProviderDialog() {
 					</Form>
 
 					<Dialog.Footer>
-						<Button variant="default" onClick={onSecondaryButtonClick} disabled={isPending}>
+						<Button onClick={onSecondaryButtonClick} disabled={isPending} variant="outline">
 							{step === 1 ? t('common.back') : t('common.cancel')}
 						</Button>
 
 						{step === 0 && !!selectedProvider && (
 							<Button
-								variant="primary"
 								type="button"
 								disabled={isPending}
 								isLoading={isPending}
@@ -144,7 +143,6 @@ export function CreateProviderDialog() {
 
 						{step === 1 && (
 							<Button
-								variant="primary"
 								type="submit"
 								form="create-provider-form"
 								disabled={isPending}

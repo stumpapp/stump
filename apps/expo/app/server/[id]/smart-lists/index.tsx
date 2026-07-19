@@ -11,6 +11,7 @@ import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { SmartListGridItem } from '~/components/smartList'
 import { RefreshButton, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query SmartListsTabList {
@@ -22,6 +23,7 @@ const query = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -86,8 +88,8 @@ export default function Screen() {
 				}
 				ListEmptyComponent={
 					<ListEmpty
-						title="No smart lists yet"
-						message="You can create smart lists in the web app to have them show up here"
+						title={t('emptyState.noSmartLists.label')}
+						message={t('emptyState.noSmartLists.description')}
 						actions={
 							<>
 								<RefreshButton
@@ -97,7 +99,7 @@ export default function Screen() {
 									onPress={() => handleRefetch()}
 									isRefreshing={isRefetching}
 								>
-									<Text>Refresh</Text>
+									<Text>{t('common.refresh')}</Text>
 								</RefreshButton>
 							</>
 						}

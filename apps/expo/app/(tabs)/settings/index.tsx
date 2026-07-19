@@ -17,15 +17,16 @@ import {
 	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
-	LowercaseTranslation,
 	MaskURLs,
 	PerformanceMonitor,
 	PreferMinimalReader,
 	PreferNativePdf,
 	ReduceAnimations,
+	TextCasePreference,
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
 	ThumbnailResizeMode,
+	TintListBackground,
 } from '~/components/appSettings/preferences'
 import { BookClubsEnabled, StumpEnabled } from '~/components/appSettings/stump'
 import { Card } from '~/components/ui'
@@ -41,11 +42,12 @@ export default function Screen() {
 					<AppTheme />
 					<AppPrimaryColor />
 					<AppLanguage />
-					<LowercaseTranslation />
+					<TextCasePreference />
 					<DefaultServer />
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />
 					<ThumbnailResizeMode />
+					<TintListBackground />
 				</Card>
 
 				<Card label={t(getSectionLabelKey('reading'))}>

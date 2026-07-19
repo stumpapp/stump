@@ -13,7 +13,7 @@ use crate::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
 		SearchQuery,
 	},
-	ExternalMetadata, MetadataProvider, RateLimiter,
+	ExternalMetadata, MetadataProvider, RateLimiter, SearchOutcome,
 };
 
 use super::{
@@ -224,7 +224,7 @@ impl MetadataProvider for ComicVineClient {
 	async fn search_series(
 		&self,
 		query: &SearchQuery,
-	) -> Result<Vec<MatchCandidate>, MetadataProviderError> {
+	) -> Result<SearchOutcome, MetadataProviderError> {
 		// happy path
 		if let Some(volume_id) = query.provider_hints.get("comic_vine_volume_id") {
 			tracing::debug!(
@@ -233,13 +233,19 @@ impl MetadataProvider for ComicVineClient {
 			);
 			match self.fetch_series_metadata(volume_id).await {
 				Ok(metadata) => {
-					return Ok(vec![MatchCandidate {
-						external_id: volume_id.clone(),
-						metadata: ExternalMetadata::Series(metadata),
-						provider: self.id().to_string(),
-						confidence: 1.0,
-						confidence_factors: Vec::new(),
-					}]);
+					return Ok(SearchOutcome {
+						candidates: self.score_search(
+							query,
+							vec![MatchCandidate {
+								external_id: volume_id.clone(),
+								metadata: ExternalMetadata::Series(metadata),
+								provider: self.id().to_string(),
+								confidence: 1.0,
+								confidence_factors: Vec::new(),
+							}],
+						),
+						requested: 1,
+					});
 				},
 				Err(e) => {
 					// TODO: i think this would warrant a persisted log, since unless the request was just
@@ -283,23 +289,29 @@ impl MetadataProvider for ComicVineClient {
 			}
 		}
 
-		Ok(self.score_search(query, candidates))
+		Ok(SearchOutcome {
+			candidates: self.score_search(query, candidates),
+			requested: 1,
+		})
 	}
 
 	#[tracing::instrument(skip(self))]
 	async fn search_media(
 		&self,
 		query: &SearchQuery,
-	) -> Result<Vec<MatchCandidate>, MetadataProviderError> {
-		// happy path
+	) -> Result<SearchOutcome, MetadataProviderError> {
 		if let Some(candidate) = self.try_hint_issue_lookup(query).await {
-			return Ok(vec![candidate]);
+			return Ok(SearchOutcome {
+				candidates: self.score_search(query, vec![candidate]),
+				requested: 1,
+			});
 		}
 
 		tracing::trace!("Searching for issues on ComicVine");
 		let results = self
 			.search_issues(&query.title, query.limit.unwrap_or(10))
 			.await?;
+		let requested = results.len();
 
 		let mut candidates = Vec::with_capacity(results.len());
 		for result in results {
@@ -326,7 +338,10 @@ impl MetadataProvider for ComicVineClient {
 			}
 		}
 
-		Ok(self.score_search(query, candidates))
+		Ok(SearchOutcome {
+			candidates: self.score_search(query, candidates),
+			requested,
+		})
 	}
 
 	async fn fetch_series_metadata(
@@ -475,11 +490,11 @@ mod tests {
 		let results = client.search_series(&query).await;
 		assert!(results.is_ok(), "should have been ok: {:?}", results);
 
-		let candidates = results.unwrap();
+		let outcome = results.unwrap();
 		assert!(
-			!candidates.is_empty(),
+			!outcome.candidates.is_empty(),
 			"should have gotten at least one: {:?}",
-			candidates
+			outcome
 		);
 	}
 

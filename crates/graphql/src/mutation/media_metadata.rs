@@ -122,6 +122,7 @@ impl MediaMetadataMutation {
 				isbn,
 				year,
 				limit: limit.or(Some(10)),
+				..Default::default()
 			},
 			&provider_cache,
 			provider_filter,

@@ -133,14 +133,16 @@ fn resolve_host(host: String, scheme: &str, port: u16, via_proxy: bool) -> Strin
 		return host;
 	}
 
+	let is_ip_address = host.parse::<std::net::IpAddr>().is_ok();
+
 	// is a bit naive but feels safe
 	let is_default =
 		(scheme == "http" && port == 80) || (scheme == "https" && port == 443);
 
-	if is_default {
-		host
-	} else {
+	if !is_default && is_ip_address {
 		format!("{}:{}", host, port)
+	} else {
+		host
 	}
 }
 
@@ -344,5 +346,30 @@ mod tests {
 	fn test_no_append_port_via_proxy_non_standard_public_port() {
 		let result = resolve_host("myserver.com:8443".to_string(), "https", 10801, true);
 		assert_eq!(result, "myserver.com:8443");
+	}
+
+	#[test]
+	fn test_no_append_port_domain_non_standard() {
+		let result = resolve_host("stump.example.com".to_string(), "https", 10801, false);
+		assert_eq!(result, "stump.example.com");
+	}
+
+	#[test]
+	fn test_no_append_port_domain_with_subdomain() {
+		let result =
+			resolve_host("my.stump.example.com".to_string(), "https", 10801, false);
+		assert_eq!(result, "my.stump.example.com");
+	}
+
+	#[test]
+	fn test_append_port_ipv4_non_standard() {
+		let result = resolve_host("192.168.1.100".to_string(), "https", 10801, false);
+		assert_eq!(result, "192.168.1.100:10801");
+	}
+
+	#[test]
+	fn test_no_append_port_ipv4_default() {
+		let result = resolve_host("192.168.1.100".to_string(), "https", 443, false);
+		assert_eq!(result, "192.168.1.100");
 	}
 }

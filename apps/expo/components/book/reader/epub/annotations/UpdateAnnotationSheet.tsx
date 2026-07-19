@@ -86,7 +86,7 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 					ref={sheetRef}
 					detents={['auto']}
 					grabber
-					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
+					backgroundColor={colors.sheet.background}
 					grabberOptions={{
 						color: colors.sheet.grabber,
 					}}

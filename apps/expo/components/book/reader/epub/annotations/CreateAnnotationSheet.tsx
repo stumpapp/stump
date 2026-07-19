@@ -30,6 +30,9 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 		const [isOpen, setIsOpen] = useState(false)
 		const [naturalDetent, setNaturalDetent] = useState<number>(0)
 
+		// TODO: use computed scoped mini-themes to prevent light colours with dark epub theme (and vice versa):
+		//   - Use dark mode colours (i.e. black background, white text, etc.) with dark epub theme?
+		//   - Or derive from epub theme colours and replace accent colour with something else?
 		const colors = useColors()
 
 		useImperativeHandle(ref, () => ({
@@ -65,7 +68,7 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 					ref={sheetRef}
 					detents={['auto']}
 					grabber
-					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
+					backgroundColor={colors.sheet.background}
 					grabberOptions={{
 						color: colors.sheet.grabber,
 					}}

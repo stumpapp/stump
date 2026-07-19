@@ -2032,6 +2032,9 @@
 						"updateError": "更新计划任务失败",
 						"deleteSuccess": "计划任务已删除",
 						"deleteError": "删除计划任务失败"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {

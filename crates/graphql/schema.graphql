@@ -1578,6 +1578,24 @@ type MediaMetadataOverview {
 	series: [String!]!
 }
 
+"""
+A manual override for searching metadata providers for a single media item. When
+provided, the caller's fields take precedence over whatever is already stored on the
+media, and the search is restricted to a single provider if one is given.
+"""
+input MediaMetadataSearchInput {
+	title: String
+	author: String
+	isbn: String
+	year: Int
+	"""
+	Restrict the search to this provider only. If omitted, all enabled providers
+	configured for the media's library type are searched.
+	"""
+	provider: MetadataProvider
+	limit: Int
+}
+
 enum MediaModelOrdering {
 	ID
 	NAME
@@ -1646,6 +1664,12 @@ type MetadataFetchRecord {
 	status: MetadataFetchStatus!
 	mediaId: String
 	seriesId: String
+	"""
+	The total number of raw hits reported by provider searches, across all
+	providers searched. Compare against `match_candidates.len()` to detect when
+	hits were dropped (e.g. a per-hit detail fetch failed after the initial search).
+	"""
+	rawHits: Int!
 	addedAt: DateTime!
 	updatedAt: DateTime
 	matchCandidates: [MatchCandidate!]!
@@ -1855,8 +1879,14 @@ type Mutation {
 	"""
 	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
 	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
-	"Search external metadata providers for a media item and return match candidates"
-	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
+	"""
+	Search external metadata providers for a media item and return the resulting fetch
+	record with its match candidates. When `search` is provided, the caller's fields
+	take precedence over the media's stored metadata, the search can be restricted to a
+	single provider, and auto-apply is skipped so the caller can review candidates before
+	anything is written.
+	"""
+	fetchMediaMetadata(id: ID!, search: MediaMetadataSearchInput): MetadataFetchRecord!
 	"Accept a match candidate and apply it to media metadata"
 	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
 	"Reject the current match candidates for a media item"

@@ -9,7 +9,7 @@ use crate::{
 	serde_utils::string_or_number,
 	types::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
-		SearchQuery,
+		SearchOutcome, SearchQuery,
 	},
 	ExternalMetadata, MetadataProvider, RateLimiter,
 };
@@ -202,7 +202,7 @@ impl MetadataProvider for HardcoverClient {
 	async fn search_series(
 		&self,
 		query: &SearchQuery,
-	) -> Result<Vec<MatchCandidate>, MetadataProviderError> {
+	) -> Result<SearchOutcome, MetadataProviderError> {
 		tracing::trace!("Searching for series on Hardcover");
 		let response = self
 			.search(
@@ -213,6 +213,7 @@ impl MetadataProvider for HardcoverClient {
 			.await?;
 
 		let hits = response.parse_series_hits()?;
+		let requested = hits.len();
 
 		// TODO: Parallelize these fetches
 		let mut candidates = Vec::with_capacity(hits.len());
@@ -241,7 +242,18 @@ impl MetadataProvider for HardcoverClient {
 			}
 		}
 
-		Ok(self.score_search(query, candidates))
+		if candidates.len() < requested {
+			tracing::warn!(
+				requested,
+				fetched = candidates.len(),
+				"Some series search results could not be fetched"
+			);
+		}
+
+		Ok(SearchOutcome {
+			candidates: self.score_search(query, candidates),
+			requested,
+		})
 	}
 
 	/// Search for books on Hardcover and fetch full metadata for each result
@@ -250,7 +262,7 @@ impl MetadataProvider for HardcoverClient {
 	async fn search_media(
 		&self,
 		query: &SearchQuery,
-	) -> Result<Vec<MatchCandidate>, MetadataProviderError> {
+	) -> Result<SearchOutcome, MetadataProviderError> {
 		let response = self
 			.search(
 				&query.title,
@@ -260,6 +272,7 @@ impl MetadataProvider for HardcoverClient {
 			.await?;
 
 		let hits = response.parse_book_hits()?;
+		let requested = hits.len();
 
 		// TODO: Parallelize these fetches
 		let mut candidates = Vec::with_capacity(hits.len());
@@ -288,7 +301,18 @@ impl MetadataProvider for HardcoverClient {
 			}
 		}
 
-		Ok(self.score_search(query, candidates))
+		if candidates.len() < requested {
+			tracing::warn!(
+				requested,
+				fetched = candidates.len(),
+				"Some book search results could not be fetched"
+			);
+		}
+
+		Ok(SearchOutcome {
+			candidates: self.score_search(query, candidates),
+			requested,
+		})
 	}
 
 	async fn fetch_series_metadata(
@@ -630,7 +654,7 @@ mod tests {
 		println!("search_series results: {:#?}", results);
 		assert!(results.is_ok());
 
-		let candidates = results.unwrap();
+		let candidates = results.unwrap().candidates;
 		assert!(!candidates.is_empty());
 		println!("Found {} series candidates", candidates.len());
 		for candidate in &candidates {
@@ -652,7 +676,7 @@ mod tests {
 		println!("search_media results: {:#?}", results);
 		assert!(results.is_ok());
 
-		let candidates = results.unwrap();
+		let candidates = results.unwrap().candidates;
 		assert!(!candidates.is_empty());
 		println!("Found {} book candidates", candidates.len());
 		for candidate in &candidates {
@@ -671,7 +695,7 @@ mod tests {
 			..Default::default()
 		};
 
-		let search_results = client.search_series(&query).await.unwrap();
+		let search_results = client.search_series(&query).await.unwrap().candidates;
 		assert!(!search_results.is_empty());
 
 		let series_id = &search_results[0].external_id;
@@ -696,7 +720,7 @@ mod tests {
 			..Default::default()
 		};
 
-		let search_results = client.search_media(&query).await.unwrap();
+		let search_results = client.search_media(&query).await.unwrap().candidates;
 		assert!(!search_results.is_empty());
 
 		let book_id = &search_results[0].external_id;

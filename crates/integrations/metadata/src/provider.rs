@@ -5,7 +5,7 @@ use crate::{
 	error::MetadataProviderError,
 	types::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
-		SearchQuery,
+		SearchOutcome, SearchQuery,
 	},
 	MatchScorer,
 };
@@ -33,13 +33,13 @@ pub trait MetadataProvider: Send + Sync {
 	async fn search_series(
 		&self,
 		query: &SearchQuery,
-	) -> Result<Vec<MatchCandidate>, MetadataProviderError>;
+	) -> Result<SearchOutcome, MetadataProviderError>;
 
 	/// Search for individual books/issues/volumes/etc
 	async fn search_media(
 		&self,
 		query: &SearchQuery,
-	) -> Result<Vec<MatchCandidate>, MetadataProviderError>;
+	) -> Result<SearchOutcome, MetadataProviderError>;
 
 	/// Score and sort search results based on their relevance to the query
 	fn score_search(

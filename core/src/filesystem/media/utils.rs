@@ -35,6 +35,91 @@ where
 	alphanumeric_sort::sort_str_slice(file_names);
 }
 
+/// Parse a PDF format or general format date string into year, optional month, and optional day.
+///
+/// Note: Time and timezone components in the PDF date format (`D:YYYYMMDDHHmmSSOHH'mm'`)
+/// are intentionally ignored for the purpose of media metadata year/month/day extraction.
+pub fn parse_pdf_date(raw_date: &str) -> Option<(i32, Option<i32>, Option<i32>)> {
+	use chrono::Datelike;
+
+	let s = raw_date.trim();
+	if s.is_empty() {
+		return None;
+	}
+
+	// Normalize D: prefix (case-insensitive)
+	let s = s
+		.strip_prefix("D:")
+		.or_else(|| s.strip_prefix("d:"))
+		.unwrap_or(s);
+
+	// 1. PDF spec: D:YYYYMMDDHHmmSS... parse digit-only prefixes
+	if s.len() >= 4 && s[..4].chars().all(|c| c.is_ascii_digit()) {
+		let has_digit_at_4 = s.chars().nth(4).is_some_and(|c| c.is_ascii_digit());
+		let has_separator_at_4 = s
+			.chars()
+			.nth(4)
+			.is_some_and(|c| c == '-' || c == '/' || c == '.' || c == 'T' || c == ' ');
+
+		if !has_separator_at_4 && !has_digit_at_4 {
+			if let Ok(y) = s[..4].parse::<i32>() {
+				return Some((y, None, None));
+			}
+		} else if !has_separator_at_4 && has_digit_at_4 {
+			if s.len() >= 8 && s[4..8].chars().all(|c| c.is_ascii_digit()) {
+				if let Ok(d) = chrono::NaiveDate::parse_from_str(&s[..8], "%Y%m%d") {
+					return Some((
+						d.year(),
+						Some(d.month() as i32),
+						Some(d.day() as i32),
+					));
+				}
+			}
+			if s.len() >= 6 && s[4..6].chars().all(|c| c.is_ascii_digit()) {
+				if let Ok(d) =
+					chrono::NaiveDate::parse_from_str(&format!("{}01", &s[..6]), "%Y%m%d")
+				{
+					return Some((d.year(), Some(d.month() as i32), None));
+				}
+			}
+		}
+	}
+
+	// 2. ISO 8601 / RFC 3339, handles YYYY-MM-DD, MM-DD-YYYY, etc.
+	let prefix10 = s.get(..10).unwrap_or(s);
+	let normalized10 = prefix10.replace(['/', '.'], "-");
+	if let Ok(d) = chrono::NaiveDate::parse_from_str(&normalized10, "%Y-%m-%d") {
+		return Some((d.year(), Some(d.month() as i32), Some(d.day() as i32)));
+	}
+	if let Ok(d) = chrono::NaiveDate::parse_from_str(&normalized10, "%m-%d-%Y") {
+		return Some((d.year(), Some(d.month() as i32), Some(d.day() as i32)));
+	}
+
+	// Try parsing YYYY-MM or MM-YYYY formats by normalizing separators
+	if s.len() >= 7 {
+		let prefix7 = &s[..7];
+		let normalized7 = prefix7.replace(['/', '.'], "-");
+		// Try YYYY-MM (e.g. 2019-08)
+		if let Ok(d) =
+			chrono::NaiveDate::parse_from_str(&format!("{normalized7}-01"), "%Y-%m-%d")
+		{
+			return Some((d.year(), Some(d.month() as i32), None));
+		}
+		// Try MM-YYYY (e.g. 08-2019)
+		if let Ok(d) =
+			chrono::NaiveDate::parse_from_str(&format!("01-{normalized7}"), "%d-%m-%Y")
+		{
+			return Some((d.year(), Some(d.month() as i32), None));
+		}
+	}
+
+	s.split(|c: char| !c.is_ascii_digit())
+		.find(|tok| tok.len() == 4)
+		.and_then(|tok| tok.parse::<i32>().ok())
+		.map(|y| (y, None, None))
+		.or_else(|| s.parse::<i32>().ok().map(|y| (y, None, None)))
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -164,5 +249,56 @@ mod tests {
 </ComicInfo>"#;
 		let metadata = metadata_from_buf(contents).expect("should parse");
 		assert_eq!(metadata.tags, None);
+	}
+
+	#[test]
+	fn test_parse_pdf_date() {
+		let cases = vec![
+			// PDF specific formats
+			("D:20190101", Some((2019, Some(1), Some(1)))),
+			("D:20190101123456Z", Some((2019, Some(1), Some(1)))),
+			("d:20190101123456+01'00'", Some((2019, Some(1), Some(1)))),
+			("20190101", Some((2019, Some(1), Some(1)))),
+			("D:2019", Some((2019, None, None))),
+			("201901", Some((2019, Some(1), None))),
+			("2019010", Some((2019, Some(1), None))),
+			("2019010a", Some((2019, Some(1), None))),
+			// Standard ISO-like with separators
+			("2019-08-31", Some((2019, Some(8), Some(31)))),
+			("2019/08/31", Some((2019, Some(8), Some(31)))),
+			("2019.08.31", Some((2019, Some(8), Some(31)))),
+			("08-31-2019", Some((2019, Some(8), Some(31)))),
+			("08/31/2019", Some((2019, Some(8), Some(31)))),
+			("08.31.2019", Some((2019, Some(8), Some(31)))),
+			// Trailing date-time details
+			("2019-08-31T12:00:00Z", Some((2019, Some(8), Some(31)))),
+			("2019-08-31 12:00:00", Some((2019, Some(8), Some(31)))),
+			// Year-month only
+			("2019-08", Some((2019, Some(8), None))),
+			("08-2019", Some((2019, Some(8), None))),
+			("2019/08", Some((2019, Some(8), None))),
+			("08/2019", Some((2019, Some(8), None))),
+			("2019.08", Some((2019, Some(8), None))),
+			("08.2019", Some((2019, Some(8), None))),
+			// Standalone years / non-isolated / parsing fallbacks
+			("20241", Some((20241, None, None))),
+			("Published in 2019", Some((2019, None, None))),
+			("2019 year", Some((2019, None, None))),
+			("2024", Some((2024, None, None))),
+			("1995", Some((1995, None, None))),
+			// Invalid formats
+			("", None),
+			("   ", None),
+			("invalid-date", None),
+		];
+
+		for (raw, expected) in cases {
+			assert_eq!(
+				parse_pdf_date(raw),
+				expected,
+				"Failed parsing pdf date for: {:?}",
+				raw
+			);
+		}
 	}
 }

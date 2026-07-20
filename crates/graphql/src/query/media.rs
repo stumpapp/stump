@@ -399,7 +399,7 @@ impl MediaQuery {
 				let count = query.clone().count(conn).await?;
 
 				let models = query
-					.find_also_related(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.offset(info.offset())
 					.limit(info.limit())
 					.all(conn)
@@ -418,7 +418,7 @@ impl MediaQuery {
 			},
 			Pagination::None(_) => {
 				let models = query
-					.find_also_related(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.all(conn)
 					.await?
 					.into_iter()

@@ -22,16 +22,6 @@ describe('clampPage', () => {
 })
 
 describe('GoToPage', () => {
-	// The component emits console.debug for manual verification during development;
-	// silence it so the test output stays clean.
-	const originalDebug = console.debug
-	beforeAll(() => {
-		console.debug = jest.fn()
-	})
-	afterAll(() => {
-		console.debug = originalDebug
-	})
-
 	const openPopover = () => {
 		fireEvent.click(screen.getByRole('button', { name: 'Go to page' }))
 	}

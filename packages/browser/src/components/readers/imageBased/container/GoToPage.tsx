@@ -4,7 +4,7 @@ import { ChangeEvent, KeyboardEvent, useState } from 'react'
 
 export type GoToPageProps = {
 	/**
-	 * The page the reader is currently on (1-indexed).
+	 * The page the reader is currently on meaning between 1 to indexed.
 	 */
 	currentPage: number
 	/**
@@ -17,14 +17,21 @@ export type GoToPageProps = {
 	 */
 	onSubmit: (page: number) => void
 	/**
-	 * Localized label for the input. Passed in so this component stays locale-agnostic
-	 * and trivially testable. Defaults are placeholders until i18n is wired (Increment 3).
+	 * Label for the input. Passed in so this component stays presentation-agnostic and
+	 * trivially testable. Defaults to English to match the rest of the (currently
+	 * unlocalized) image reader; can be swapped for a t(...) string once the reader is
+	 * localized as a whole.
 	 */
 	label?: string
 	/**
-	 * Localized text for the submit button.
+	 * Text for the submit button. See `label` re: localization.
 	 */
 	submitLabel?: string
+	/**
+	 * Optional text to show on the trigger. Lets the parent preserve its existing page
+	 * display (e.g. a "4-5 of 42" page-set range) instead of the default single page.
+	 */
+	triggerLabel?: string
 }
 
 /**
@@ -40,7 +47,7 @@ export const clampPage = (value: number, totalPages: number): number =>
  * manual-recovery affordance: if reading position is ever lost, the user can type the
  * page they remember and return to it immediately.
  *
- * NOTE: This component is intentionally "dumb" — it owns no reader state and performs
+ * NOTE: This component is intentionally "dumb" so that it owns no reader state and performs
  * no navigation itself. The parent supplies `currentPage`/`totalPages` and binds
  * `onSubmit` to the reader's existing page-change handler.
  */
@@ -50,6 +57,7 @@ export default function GoToPage({
 	onSubmit,
 	label = 'Go to page',
 	submitLabel = 'Go',
+	triggerLabel,
 }: GoToPageProps) {
 	const [open, setOpen] = useState(false)
 	const [value, setValue] = useState(() => String(currentPage))
@@ -60,23 +68,17 @@ export default function GoToPage({
 		if (next) {
 			setValue(String(currentPage))
 		}
-		// eslint-disable-next-line no-console
-		console.debug(`[GoToPage] popover ${next ? 'opened' : 'closed'} (current=${currentPage})`)
 		setOpen(next)
 	}
 
 	const handleSubmit = () => {
 		const parsed = parseInt(value, 10)
+		// Ignore anything that isn't a number (empty input, stray characters, etc.).
 		if (Number.isNaN(parsed)) {
-			// eslint-disable-next-line no-console
-			console.debug(`[GoToPage] ignoring non-numeric input: "${value}"`)
 			return
 		}
 
-		const target = clampPage(parsed, totalPages)
-		// eslint-disable-next-line no-console
-		console.debug(`[GoToPage] jump requested=${parsed} clamped=${target} of ${totalPages}`)
-		onSubmit(target)
+		onSubmit(clampPage(parsed, totalPages))
 		setOpen(false)
 	}
 
@@ -99,7 +101,7 @@ export default function GoToPage({
 					className="text-sm text-gray-450 underline-offset-2 hover:underline"
 					aria-label={label}
 				>
-					{currentPage} of {totalPages}
+					{triggerLabel ?? `${currentPage} of ${totalPages}`}
 				</button>
 			</Popover.Trigger>
 

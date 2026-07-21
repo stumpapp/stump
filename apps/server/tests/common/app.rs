@@ -125,6 +125,14 @@ impl TestApp {
 		response
 	}
 
+	/// issue a DELETE request to the specified path with auth headers, returning the response directly
+	pub async fn delete(&self, path: &str) -> TestResponse {
+		self.server
+			.delete(path)
+			.add_header("Authorization", self.auth_header().await)
+			.await
+	}
+
 	/// issue a PUT request to the specified path with auth headers and a JSON body, returning the response directly
 	pub async fn put(&self, path: &str, body: &Value) -> TestResponse {
 		let response = self

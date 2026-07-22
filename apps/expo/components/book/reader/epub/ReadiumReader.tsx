@@ -191,7 +191,7 @@ export default function ReadiumReader({
 		(state) => state.globalSettings.volumeButtonsNavigate,
 	)
 	useVolumeListener({
-		// this is implicit, which isn't great, but felt it was rationale to only allow volume nav when
+		// this is implicit, which isn't great, but felt it was rational to only allow volume nav when
 		// tts is not active
 		enabled: volumeButtonsNavigate && ttsState === 'stopped',
 		onVolumeUp: () => navigator.goForward(),

@@ -1023,7 +1023,7 @@ extension EPUBView: UIContextMenuInteractionDelegate {
 
 extension EPUBView: PublicationSpeechSynthesizerDelegate {
     public func publicationSpeechSynthesizer(
-        _ synthesizer: PublicationSpeechSynthesizer,
+        _: PublicationSpeechSynthesizer,
         stateDidChange state: PublicationSpeechSynthesizer.State
     ) {
         switch state {
@@ -1055,9 +1055,9 @@ extension EPUBView: PublicationSpeechSynthesizerDelegate {
     }
 
     public func publicationSpeechSynthesizer(
-        _ synthesizer: PublicationSpeechSynthesizer,
-        utterance: PublicationSpeechSynthesizer.Utterance,
-        didFailWithError error: PublicationSpeechSynthesizer.Error
+        _: PublicationSpeechSynthesizer,
+        utterance _: PublicationSpeechSynthesizer.Utterance,
+        didFailWithError _: PublicationSpeechSynthesizer.Error
     ) {
         navigator?.apply(decorations: [], in: ttsDecorationGroup)
         onTTSStateChange(["state": "stopped"])

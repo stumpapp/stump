@@ -18,7 +18,6 @@ enum ReadiumModuleError: LocalizedError {
     }
 }
 
-
 public class ReadiumModule: Module {
     public func definition() -> ModuleDefinition {
         Name("Readium")

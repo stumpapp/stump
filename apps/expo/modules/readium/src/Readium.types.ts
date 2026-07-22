@@ -98,6 +98,27 @@ export type ReadiumModuleEvents = {
 		failureReason: string
 		recoverySuggestion: string
 	}) => void
+	onTTSStateChange: (params: TTSStateChangeEvent) => void
+}
+
+export type TTSPlaybackState = 'stopped' | 'playing' | 'paused'
+
+/**
+ * an event which will get emited each change of the TTS state. it pops off very frequently:
+ * - per word
+ * - per sentence completed
+ */
+export type TTSStateChangeEvent = {
+	state: TTSPlaybackState
+	// lol i absolutely love this naming, kept it from toolkit
+	/**
+	 * the locator of the current utterance, i.e. the current word being read
+	 */
+	utteranceLocator?: ReadiumLocator
+	/**
+	 * the locator of the current range being read, i.e. the sentence
+	 */
+	rangeLocator?: ReadiumLocator
 }
 
 export type ChangeEventPayload = {
@@ -124,6 +145,7 @@ export type BookMetadata = {
 export type BookLoadedEventPayload = {
 	success: boolean
 	error?: string
+	supportsTTS?: boolean
 	bookMetadata?: BookMetadata
 	tableOfContents?: NativeTableOfContentsItem[]
 }
@@ -194,6 +216,7 @@ export type ReadiumViewProps = {
 	onError?: (event: {
 		nativeEvent: { errorDescription: string; failureReason: string; recoverySuggestion: string }
 	}) => void
+	onTTSStateChange?: (event: { nativeEvent: TTSStateChangeEvent }) => void
 	style?: StyleProp<ViewStyle>
 } & EPUBReaderConfig
 
@@ -256,4 +279,7 @@ export type ReadiumViewRef = {
 	destroy: () => Promise<void>
 	getSelection: () => Promise<SelectionEvent | null>
 	clearSelection: () => Promise<void>
+	startTTS: (locator?: ReadiumLocator) => Promise<void>
+	stopTTS: () => Promise<void>
+	pauseOrResumeTTS: () => Promise<void>
 }

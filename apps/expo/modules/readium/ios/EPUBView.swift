@@ -81,6 +81,7 @@ public class EPUBView: ExpoView {
     let onDeleteHighlight = EventDispatcher()
     let onError = EventDispatcher()
     let onReachedEnd = EventDispatcher()
+    let onTTSStateChange = EventDispatcher()
 
     private var tappedHighlightId: String?
     private var tappedHighlightRect: CGRect?
@@ -95,7 +96,9 @@ public class EPUBView: ExpoView {
     private var totalPositions: Int = 0
 
     private let highlightDecorationGroup = "highlights"
+    private let ttsDecorationGroup = "tts"
     private var decorationObserverRegistered = false
+    private var synthesizer: PublicationSpeechSynthesizer?
 
     // Misc tasks for cleanup
     private var loadPublicationTask: Task<Void, Never>?
@@ -481,6 +484,10 @@ public class EPUBView: ExpoView {
             isInitialized = true
 
             applyDecorations()
+            setupTTS(publication: publication)
+            // synthesizer is nil iff the publication cannot be spoken (e.g. apparently fixed-layout EPUBs)
+            // see: https://github.com/readium/swift-toolkit/blob/3.11.0/Sources/Navigator/TTS/PublicationSpeechSynthesizer.swift#L28-L30
+            let supportsTTS = synthesizer != nil
 
             // Cancel any existing positions task and start new one
             positionsTask?.cancel()
@@ -495,12 +502,12 @@ public class EPUBView: ExpoView {
                 let tocLinks = (try? tocResult.get()) ?? []
                 let tableOfContents = self.convertLinksToToc(tocLinks)
 
-                // Check if we're cancelled before updating UI
                 try? Task.checkCancellation()
 
                 await MainActor.run { [weak self] in
                     self?.onBookLoaded([
                         "success": true,
+                        "supportsTTS": supportsTTS,
                         "bookMetadata": [
                             "title": publication.metadata.title ?? "",
                             "author": publication.metadata.authors.map { $0.name }.joined(
@@ -532,6 +539,8 @@ public class EPUBView: ExpoView {
     public func destroyNavigator() {
         print("EPUBView: destroyNavigator called")
 
+        synthesizer?.stop()
+        synthesizer = nil
         cancelAllTasks()
 
         navigator?.view.removeFromSuperview()
@@ -542,6 +551,22 @@ public class EPUBView: ExpoView {
         if let bookId = props?.bookId {
             Task { await BookService.instance.closePublication(for: bookId) }
         }
+    }
+
+    private func setupTTS(publication: Publication) {
+        synthesizer = PublicationSpeechSynthesizer(publication: publication, delegate: self)
+    }
+
+    func startTTS(from locator: Locator? = nil) {
+        synthesizer?.start(from: locator ?? navigator?.currentLocation)
+    }
+
+    func stopTTS() {
+        synthesizer?.stop()
+    }
+
+    func pauseOrResumeTTS() {
+        synthesizer?.pauseOrResume()
     }
 
     private func convertLinksToToc(_ links: [Link]) -> [[String: Any]] {
@@ -955,6 +980,8 @@ extension EPUBView {
     }
 }
 
+// MARK: - highlight context menu
+
 @available(iOS 16.0, *)
 extension EPUBView: UIEditMenuInteractionDelegate {
     public func editMenuInteraction(
@@ -989,5 +1016,50 @@ extension EPUBView: UIContextMenuInteractionDelegate {
         _: UIContextMenuInteraction, configurationForMenuAtLocation _: CGPoint
     ) -> UIContextMenuConfiguration? {
         return nil
+    }
+}
+
+// MARK: - lifecycle for TTS state
+
+extension EPUBView: PublicationSpeechSynthesizerDelegate {
+    public func publicationSpeechSynthesizer(
+        _ synthesizer: PublicationSpeechSynthesizer,
+        stateDidChange state: PublicationSpeechSynthesizer.State
+    ) {
+        switch state {
+        case .stopped:
+            navigator?.apply(decorations: [], in: ttsDecorationGroup)
+            onTTSStateChange(["state": "stopped"])
+
+        case let .paused(utterance):
+            onTTSStateChange([
+                "state": "paused",
+                "utteranceLocator": utterance.locator.jsonObject.asAny,
+            ])
+
+        case let .playing(utterance, range: range):
+            let highlightLocator = range ?? utterance.locator
+            let decoration = Decoration(
+                id: "tts-current",
+                locator: highlightLocator,
+                // TODO(colors): derive from theme instead of hardcoding
+                style: .highlight(tint: UIColor.systemBlue.withAlphaComponent(0.35))
+            )
+            navigator?.apply(decorations: [decoration], in: ttsDecorationGroup)
+            onTTSStateChange([
+                "state": "playing",
+                "utteranceLocator": utterance.locator.jsonObject.asAny,
+                "rangeLocator": highlightLocator.jsonObject.asAny,
+            ])
+        }
+    }
+
+    public func publicationSpeechSynthesizer(
+        _ synthesizer: PublicationSpeechSynthesizer,
+        utterance: PublicationSpeechSynthesizer.Utterance,
+        didFailWithError error: PublicationSpeechSynthesizer.Error
+    ) {
+        navigator?.apply(decorations: [], in: ttsDecorationGroup)
+        onTTSStateChange(["state": "stopped"])
     }
 }

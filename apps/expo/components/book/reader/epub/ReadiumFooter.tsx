@@ -1,7 +1,7 @@
 import Octicons from '@react-native-vector-icons/octicons'
 import { formatNarrowDuration } from '@stump/i18n'
 import { GlassView } from 'expo-glass-effect'
-import { List, Menu, Palette, PencilLine } from 'lucide-react-native'
+import { List, Menu, Palette, Pause, PencilLine, Play, Volume2, VolumeX } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
 import { useEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
@@ -49,7 +49,7 @@ export default function ReadiumFooter() {
 
 	const [showMenu, setShowMenu] = useState(false)
 
-	const { timer } = useEpubReaderContext()
+	const { timer, ttsState, supportsTTS, readerRef } = useEpubReaderContext()
 	const { t, locale } = useTranslate()
 	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
@@ -153,6 +153,24 @@ export default function ReadiumFooter() {
 						}}
 					/>
 
+					{supportsTTS && (
+						<MenuItem
+							show={showMenu}
+							delay={25}
+							label={ttsState !== 'stopped' ? t('epubMenu.stopReading') : t('epubMenu.readAloud')}
+							icon={ttsState !== 'stopped' ? VolumeX : Volume2}
+							onPress={() => {
+								// TODO: should this affect the timer??
+								if (ttsState !== 'stopped') {
+									readerRef?.stopTTS()
+								} else {
+									readerRef?.startTTS()
+								}
+								setShowMenu(false)
+							}}
+						/>
+					)}
+
 					<View className="gap-2 w-full flex-row items-center">
 						{/* The read time must take around half the width to display on one line for all locales */}
 						<MenuItem label={formattedReadTime} show={showMenu} delay={0} className="flex-[2]" />
@@ -213,6 +231,38 @@ export default function ReadiumFooter() {
 								)}
 							</GlassView>
 						</Animated.View>
+					</Animated.View>
+				)}
+
+				{ttsState !== 'stopped' && (
+					<Animated.View
+						entering={ENTERING_ANIMATION}
+						exiting={EXITING_ANIMATION}
+						className="left-6 absolute z-30"
+						style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
+					>
+						<GlassView
+							className="flex-1 rounded-full"
+							isInteractive
+							colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+							style={{ backgroundColor: buttonColors.controls.background }}
+						>
+							<Pressable
+								onPress={() => readerRef?.pauseOrResumeTTS()}
+								className={cn(
+									'h-full w-full items-center justify-center',
+									!IS_IOS_26_PLUS && 'active:opacity-60',
+								)}
+							>
+								<Icon
+									as={ttsState === 'playing' ? Pause : Play}
+									size={ICON_SIZE}
+									absoluteStrokeWidth
+									strokeWidth={2.5}
+									color={buttonColors.controls.foreground}
+								/>
+							</Pressable>
+						</GlassView>
 					</Animated.View>
 				)}
 

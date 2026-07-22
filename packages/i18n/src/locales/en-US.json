@@ -3016,7 +3016,9 @@
 		"epubMenu": {
 			"tableOfContents": "Table of Contents",
 			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
+			"appearance": "Appearance",
+			"readAloud": "Read Aloud",
+			"stopReading": "Stop Reading"
 		},
 		"formatSeriesPosition": {
 			"none": {

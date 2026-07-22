@@ -20,6 +20,8 @@ import {
 	ReadiumLocator,
 	ReadiumView,
 	ReadiumViewRef,
+	TTSPlaybackState,
+	TTSStateChangeEvent,
 } from '~/modules/readium'
 import { useVolumeListener } from '~/modules/volumeListener'
 import { usePreferencesStore, useReaderStore } from '~/stores'
@@ -49,7 +51,7 @@ import ReadiumHeader from './ReadiumHeader'
 import TableOfContentsSheet from './TableOfContentsSheet'
 
 type BaseProps = OfflineCompatibleReader &
-	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders'>
+	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders' | 'ttsState' | 'supportsTTS'>
 
 type Props = {
 	/**
@@ -106,6 +108,9 @@ export default function ReadiumReader({
 	const enableDebugAnalytics = usePreferencesStore((state) => state.enableDebugAnalytics)
 
 	const hasReachedEndRef = useRef(false)
+
+	const [ttsState, setTtsState] = useState<TTSPlaybackState>('stopped')
+	const [supportsTTS, setSupportsTTS] = useState(false)
 
 	const {
 		fontWeight: rawFontWeight,
@@ -175,6 +180,9 @@ export default function ReadiumReader({
 				clearSelection: async () => {
 					readerRef.current?.clearSelection()
 				},
+				startTTS: async (locator?) => readerRef.current?.startTTS(locator),
+				stopTTS: async () => readerRef.current?.stopTTS(),
+				pauseOrResumeTTS: async () => readerRef.current?.pauseOrResumeTTS(),
 			}) satisfies ReadiumViewRef,
 		[],
 	)
@@ -183,7 +191,9 @@ export default function ReadiumReader({
 		(state) => state.globalSettings.volumeButtonsNavigate,
 	)
 	useVolumeListener({
-		enabled: volumeButtonsNavigate,
+		// this is implicit, which isn't great, but felt it was rationale to only allow volume nav when
+		// tts is not active
+		enabled: volumeButtonsNavigate && ttsState === 'stopped',
 		onVolumeUp: () => navigator.goForward(),
 		onVolumeDown: () => navigator.goBackward(),
 	})
@@ -303,9 +313,21 @@ export default function ReadiumReader({
 			}
 
 			store.setBook(book)
+			setSupportsTTS(event.supportsTTS ?? false)
 		},
 		[store, book],
 	)
+
+	function handleTTSStateChange({ nativeEvent }: { nativeEvent: TTSStateChangeEvent }) {
+		setTtsState(nativeEvent.state)
+		const loc = nativeEvent.rangeLocator ?? nativeEvent.utteranceLocator
+		if (nativeEvent.state !== 'stopped' && loc) {
+			// TODO: this effectively fires goToLocation on every word, which is both a bit much and
+			// in some cases not ideal ux (e.g., i want to move around while listening). im thinking
+			// maybe a flag to follow tts, which auto-sets false when manually moving around?
+			readerRef.current?.goToLocation(loc)
+		}
+	}
 
 	const controlsVisibleTimestamp = useRef(0)
 	useEffect(() => {
@@ -515,6 +537,8 @@ export default function ReadiumReader({
 		<EpubReaderContext.Provider
 			value={{
 				readerRef: navigator,
+				ttsState,
+				supportsTTS,
 				getRequestHeaders: ctx.requestHeaders,
 				onBookmark,
 				onDeleteBookmark,
@@ -549,6 +573,7 @@ export default function ReadiumReader({
 					onAnnotationTap={handleAnnotationTap}
 					onEditHighlight={handleEditHighlight}
 					onDeleteHighlight={handleNativeDeleteAnnotation}
+					onTTSStateChange={handleTTSStateChange}
 					style={{ flex: 1 }}
 					{...config}
 				/>

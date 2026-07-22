@@ -33,10 +33,11 @@ public class ReadiumModule: Module {
         }
 
         AsyncFunction("getResource") { (bookId: String, linkJson: [String: Any]) -> String in
-            guard let jsonValue = JSONValue(linkJson) else {
+            guard let jsonValue = JSONValue(linkJson),
+                  let link = try? Link(json: jsonValue)
+            else {
                 throw ReadiumModuleError.invalidLink
             }
-            let link = try Link(json: jsonValue)
             let resource = try await BookService.instance.getResource(for: bookId, link: link)
             if link.mediaType?.type.starts(with: "image/") == true {
                 let data = try await resource.read().get()
@@ -75,7 +76,7 @@ public class ReadiumModule: Module {
         }
 
         View(EPUBView.self) {
-            Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError", "onReachedEnd")
+            Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError", "onReachedEnd", "onTTSStateChange")
 
             AsyncFunction("goToLocation") { (view: EPUBView, locatorJson: [String: Any]) in
                 guard let jsonValue = JSONValue(locatorJson),
@@ -104,6 +105,19 @@ public class ReadiumModule: Module {
 
             AsyncFunction("clearSelection") { (view: EPUBView) in
                 view.clearSelection()
+            }
+
+            AsyncFunction("startTTS") { (view: EPUBView, locatorJson: [String: Any]?) in
+                let locator = locatorJson.flatMap { JSONValue($0).flatMap { try? Locator(json: $0) } }
+                view.startTTS(from: locator)
+            }
+
+            AsyncFunction("stopTTS") { (view: EPUBView) in
+                view.stopTTS()
+            }
+
+            AsyncFunction("pauseOrResumeTTS") { (view: EPUBView) in
+                view.pauseOrResumeTTS()
             }
 
             Prop("bookId") { (view: EPUBView, prop: String) in

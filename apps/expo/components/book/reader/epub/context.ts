@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import { ReadiumLocator, ReadiumViewRef } from '~/modules/readium'
+import { ReadiumLocator, ReadiumViewRef, TTSPlaybackState } from '~/modules/readium'
 import { Timer } from '~/stores/reader'
 
 export type EpubReaderContextValue = {
@@ -12,6 +12,10 @@ export type EpubReaderContextValue = {
 	onCreateAnnotation?: (locator: ReadiumLocator, annotationText?: string) => Promise<{ id: string }>
 	onUpdateAnnotation?: (annotationId: string, annotationText: string | null) => Promise<void>
 	onDeleteAnnotation?: (annotationId: string) => Promise<void>
+	// TODO: it was quickest for me to add here, however will churn thru lots of updates so perhaps dedicated store
+	// is better
+	ttsState: TTSPlaybackState
+	supportsTTS: boolean
 }
 
 export const EpubReaderContext = createContext<EpubReaderContextValue | null>(null)

@@ -49,6 +49,7 @@ dependencies {
   implementation "org.readium.kotlin-toolkit:readium-navigator:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-opds:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-lcp:$readium_version"
+  implementation "org.readium.kotlin-toolkit:readium-navigator-media-tts:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-adapter-pdfium-document:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-adapter-pdfium-navigator:$readium_version"
   implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'

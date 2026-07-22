@@ -1,6 +1,4 @@
 import ExpoModulesCore
-import ReadiumAdapterGCDWebServer
-import ReadiumInternal
 import ReadiumNavigator
 import ReadiumShared
 import UIKit
@@ -234,9 +232,6 @@ public class PDFView: ExpoView {
                         spread: props.spread,
                         visibleScrollbar: false
                     )
-                ),
-                httpServer: GCDHTTPServer(
-                    assetRetriever: AssetRetriever(httpClient: DefaultHTTPClient())
                 )
             )
 
@@ -307,8 +302,8 @@ public class PDFView: ExpoView {
         onLocatorChange(makeJSON([
             "href": currentLocator.href.string,
             "title": encodeIfNotNil(currentLocator.title),
-            "locations": encodeIfNotEmpty(currentLocator.locations.json),
-            "text": encodeIfNotEmpty(currentLocator.text.json),
+            "locations": encodeIfNotEmpty(currentLocator.locations.jsonObject),
+            "text": encodeIfNotEmpty(currentLocator.text.jsonObject),
             "type": encodeIfNotEmpty(currentLocator.mediaType.string),
         ]))
 

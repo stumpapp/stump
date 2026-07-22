@@ -1,6 +1,4 @@
 import ExpoModulesCore
-import ReadiumAdapterGCDWebServer
-import ReadiumInternal
 import ReadiumNavigator
 import ReadiumShared
 import WebKit
@@ -184,7 +182,7 @@ public class EPUBView: ExpoView {
 
         // Don't proceed if we don't have required props
         guard let bookId = pendingProps.bookId,
-            let url = pendingProps.url
+              let url = pendingProps.url
         else {
             return
         }
@@ -334,13 +332,13 @@ public class EPUBView: ExpoView {
                         file: resources.appendingPath(
                             "Literata-VariableFont_opsz,wght.ttf", isDirectory: false
                         ),
-                        style: .normal, weight: .variable(200...900)
+                        style: .normal, weight: .variable(200 ... 900)
                     ),
                     CSSFontFace(
                         file: resources.appendingPath(
                             "Literata-Italic-VariableFont_opsz,wght.ttf", isDirectory: false
                         ),
-                        style: .italic, weight: .variable(200...900)
+                        style: .italic, weight: .variable(200 ... 900)
                     ),
                 ]
             ).eraseToAnyHTMLFontFamilyDeclaration(),
@@ -406,13 +404,13 @@ public class EPUBView: ExpoView {
                         file: resources.appendingPath(
                             "Bitter-VariableFont_wght.ttf", isDirectory: false
                         ),
-                        style: .normal, weight: .variable(100...900)
+                        style: .normal, weight: .variable(100 ... 900)
                     ),
                     CSSFontFace(
                         file: resources.appendingPath(
                             "Bitter-Italic-VariableFont_wght.ttf", isDirectory: false
                         ),
-                        style: .italic, weight: .variable(100...900)
+                        style: .italic, weight: .variable(100 ... 900)
                     ),
                 ]
             ).eraseToAnyHTMLFontFamilyDeclaration(),
@@ -474,9 +472,6 @@ public class EPUBView: ExpoView {
                     readiumCSSRSProperties: CSSRSProperties(
                         maxLineLength: CSSRemLength(200)
                     )
-                ),
-                httpServer: GCDHTTPServer(
-                    assetRetriever: BookService.instance.assetRetriever
                 )
             )
 
@@ -544,7 +539,6 @@ public class EPUBView: ExpoView {
         isInitialized = false
         totalPositions = 0
 
-        // Remove publication from cache
         if let bookId = props?.bookId {
             Task { await BookService.instance.closePublication(for: bookId) }
         }
@@ -568,7 +562,7 @@ public class EPUBView: ExpoView {
 
     func emitCurrentLocator() {
         guard let navigator = navigator,
-            let currentLocator = navigator.currentLocation
+              let currentLocator = navigator.currentLocation
         else {
             return
         }
@@ -578,8 +572,8 @@ public class EPUBView: ExpoView {
                 "chapterTitle": currentLocator.title ?? "",
                 "href": currentLocator.href.string,
                 "title": encodeIfNotNil(currentLocator.title),
-                "locations": encodeIfNotEmpty(currentLocator.locations.json),
-                "text": encodeIfNotEmpty(currentLocator.text.json),
+                "locations": encodeIfNotEmpty(currentLocator.locations.jsonObject),
+                "text": encodeIfNotEmpty(currentLocator.text.jsonObject),
                 "type": encodeIfNotEmpty(currentLocator.mediaType.string),
             ]))
     }
@@ -621,7 +615,7 @@ public class EPUBView: ExpoView {
                         "language": publication.metadata.languages.first ?? "en",
                         "totalPages": totalPages,
                         "chapterCount": publication.readingOrder.count,
-                    ]
+                    ],
                 ])
             }
         }
@@ -683,13 +677,13 @@ public class EPUBView: ExpoView {
 
     func getSelection() -> [String: Any]? {
         guard let navigator = navigator,
-            let selection = navigator.currentSelection
+              let selection = navigator.currentSelection
         else {
             return nil
         }
 
         var result: [String: Any] = [
-            "locator": selection.locator.json
+            "locator": selection.locator.jsonObject.asAny,
         ]
 
         if let frame = selection.frame {
@@ -840,15 +834,14 @@ extension EPUBView: EPUBNavigatorDelegate {
         // github.com/readium/swift-toolkit/issues/775 which we could then swap back to
         // sm like locator.locations.totalProgression >= 1.0 since EPUBViewportAndLocationCalculator
         // would guarantee 1.0 at the end. honestly though im hopeful this is fine as-is
-        if let position = locator.locations.position, totalPositions > 0, position >= totalPositions
-        {
+        if let position = locator.locations.position, totalPositions > 0, position >= totalPositions {
             onReachedEnd(
                 makeJSON([
                     "chapterTitle": locator.title ?? "",
                     "href": locator.href.string,
                     "title": encodeIfNotNil(locator.title),
-                    "locations": encodeIfNotEmpty(locator.locations.json),
-                    "text": encodeIfNotEmpty(locator.text.json),
+                    "locations": encodeIfNotEmpty(locator.locations.jsonObject),
+                    "text": encodeIfNotEmpty(locator.text.jsonObject),
                     "type": encodeIfNotEmpty(locator.mediaType.string),
                 ]))
         }
@@ -865,7 +858,7 @@ extension EPUBView: EPUBNavigatorDelegate {
     public func navigator(_: any SelectableNavigator, shouldShowMenuForSelection _: Selection)
         -> Bool
     {
-        return true  // use native
+        return true // use native
     }
 
     public func navigator(_: VisualNavigator, didTapAt point: CGPoint) {
@@ -891,7 +884,7 @@ extension EPUBView {
 
         let selectedText = selection.locator.text.highlight ?? ""
         onHighlightRequest([
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
             "text": selectedText,
         ])
 
@@ -906,7 +899,7 @@ extension EPUBView {
 
         let selectedText = selection.locator.text.highlight ?? ""
         onNoteRequest([
-            "locator": selection.locator.json,
+            "locator": selection.locator.jsonObject.asAny,
             "text": selectedText,
         ])
 
@@ -949,7 +942,7 @@ extension EPUBView {
         let referenceVC = UIReferenceLibraryViewController(term: text)
 
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-            let rootVC = windowScene.windows.first?.rootViewController
+           let rootVC = windowScene.windows.first?.rootViewController
         {
             var topVC = rootVC
             while let presented = topVC.presentedViewController {

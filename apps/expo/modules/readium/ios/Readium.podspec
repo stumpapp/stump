@@ -13,15 +13,10 @@ Pod::Spec.new do |s|
   s.static_framework = true
   
   s.dependency 'ExpoModulesCore'
-  
-  s.dependency 'ExpoModulesCore'
   s.dependency 'ReadiumShared'
   s.dependency 'ReadiumStreamer'
   s.dependency 'ReadiumNavigator'
   s.dependency 'ReadiumOPDS'
-  s.dependency 'ReadiumInternal'
-  s.dependency 'ReadiumAdapterGCDWebServer'
-  s.dependency 'OrderedCollections'
 
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {

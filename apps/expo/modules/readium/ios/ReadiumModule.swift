@@ -3,6 +3,22 @@ import Foundation
 import ReadiumNavigator
 import ReadiumShared
 
+/// errors that can be thrown by the ReadiumModule
+enum ReadiumModuleError: LocalizedError {
+    case invalidLocator
+    case invalidLink
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidLocator:
+            return "Failed to parse the locator JSON"
+        case .invalidLink:
+            return "Invalid link provided"
+        }
+    }
+}
+
+
 public class ReadiumModule: Module {
     public func definition() -> ModuleDefinition {
         Name("Readium")
@@ -17,7 +33,10 @@ public class ReadiumModule: Module {
         }
 
         AsyncFunction("getResource") { (bookId: String, linkJson: [String: Any]) -> String in
-            let link = try Link(json: linkJson)
+            guard let jsonValue = JSONValue(linkJson) else {
+                throw ReadiumModuleError.invalidLink
+            }
+            let link = try Link(json: jsonValue)
             let resource = try await BookService.instance.getResource(for: bookId, link: link)
             if link.mediaType?.type.starts(with: "image/") == true {
                 let data = try await resource.read().get()
@@ -28,13 +47,15 @@ public class ReadiumModule: Module {
 
         AsyncFunction("getPositions") { (bookId: String) -> [[String: Any]] in
             let positions = try await BookService.instance.getPositions(for: bookId)
-            return positions.map { $0.json }
+            return positions.map { $0.jsonObject.asAny }
         }
 
         AsyncFunction("locateLink") { (bookId: String, linkJson: [String: Any]) -> [String: Any]? in
-            let link = try Link(json: linkJson)
+            guard let jsonValue = JSONValue(linkJson),
+                  let link = try? Link(json: jsonValue)
+            else { return nil }
             let locator = await BookService.instance.locateLink(for: bookId, link: link)
-            return locator?.json
+            return locator?.jsonObject.asAny
         }
 
         // TODO: This was my original impl but don't think I need
@@ -57,8 +78,10 @@ public class ReadiumModule: Module {
             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError", "onReachedEnd")
 
             AsyncFunction("goToLocation") { (view: EPUBView, locatorJson: [String: Any]) in
-                guard let locator = try? Locator(json: locatorJson) else {
-                    throw NSError(domain: "ReadiumError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid locator format"])
+                guard let jsonValue = JSONValue(locatorJson),
+                      let locator = try? Locator(json: jsonValue)
+                else {
+                    throw ReadiumModuleError.invalidLocator
                 }
                 view.goToLocation(locator: locator)
             }
@@ -88,16 +111,16 @@ public class ReadiumModule: Module {
             }
 
             Prop("locator") { (view: EPUBView, prop: [String: Any]) in
-                guard let locator = try? Locator(json: prop) else {
-                    return
-                }
+                guard let jsonValue = JSONValue(prop),
+                      let locator = try? Locator(json: jsonValue)
+                else { return }
                 view.pendingProps.locator = locator
             }
 
             Prop("initialLocator") { (view: EPUBView, prop: [String: Any]) in
-                guard let locator = try? Locator(json: prop) else {
-                    return
-                }
+                guard let jsonValue = JSONValue(prop),
+                      let locator = try? Locator(json: jsonValue)
+                else { return }
                 view.pendingProps.initialLocator = locator
             }
 
@@ -110,7 +133,8 @@ public class ReadiumModule: Module {
                     guard let id = decorationDict["id"] as? String,
                           let colorHex = decorationDict["color"] as? String,
                           let locatorDict = decorationDict["locator"] as? [String: Any],
-                          let locator = try? Locator(json: locatorDict),
+                          let locatorJson = JSONValue(locatorDict),
+                          let locator = try? Locator(json: locatorJson),
                           let color = Color(hex: colorHex)?.uiColor
                     else {
                         return nil
@@ -241,8 +265,10 @@ public class ReadiumModule: Module {
             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onMiddleTouch", "onError")
 
             AsyncFunction("goToLocation") { (view: PDFView, locatorJson: [String: Any]) in
-                guard let locator = try? Locator(json: locatorJson) else {
-                    throw NSError(domain: "ReadiumError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid locator format"])
+                guard let jsonValue = JSONValue(locatorJson),
+                      let locator = try? Locator(json: jsonValue)
+                else {
+                    throw ReadiumModuleError.invalidLocator
                 }
                 view.goToLocation(locator: locator)
             }
@@ -268,16 +294,16 @@ public class ReadiumModule: Module {
             }
 
             Prop("locator") { (view: PDFView, prop: [String: Any]) in
-                guard let locator = try? Locator(json: prop) else {
-                    return
-                }
+                guard let jsonValue = JSONValue(prop),
+                      let locator = try? Locator(json: jsonValue)
+                else { return }
                 view.pendingProps.locator = locator
             }
 
             Prop("initialLocator") { (view: PDFView, prop: [String: Any]) in
-                guard let locator = try? Locator(json: prop) else {
-                    return
-                }
+                guard let jsonValue = JSONValue(prop),
+                      let locator = try? Locator(json: jsonValue)
+                else { return }
                 view.pendingProps.initialLocator = locator
             }
 

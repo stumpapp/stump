@@ -152,13 +152,6 @@ export default function AppPrimaryColor() {
 										{t(getKey(`options.hues.${hue}`))}
 									</Text>
 
-									{/* <LinearGradient
-										style={{ height: 21, borderCurve: 'continuous', borderRadius: 7 }}
-										colors={[palette[100], palette[300], palette[500], palette[700], palette[900]]}
-										useAngle
-										angle={90}
-									/> */}
-
 									<View className="h-6 squircle flex-row rounded-lg">
 										{PREVIEW_SHADES.map((shade) => (
 											<View

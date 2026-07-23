@@ -1,3 +1,4 @@
+import { parseGraphQLDecimal } from '@stump/client'
 import { BookByIdQuery } from '@stump/graphql'
 import { formatHumanDuration, formatNarrowDuration } from '@stump/i18n'
 import { formatDistanceToNowStrict } from 'date-fns'
@@ -5,7 +6,6 @@ import { toOrdinal } from 'to-words'
 
 import { DownloadedFile } from '~/components/localLibrary/types'
 import { Card } from '~/components/ui'
-import { parseGraphQLDecimal } from '~/lib/format'
 import { useDisplay, useTranslate } from '~/lib/hooks'
 
 export type CurrentProgressCardProps = {

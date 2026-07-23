@@ -83,7 +83,7 @@ export default function TableOfContentsSheetFooter({ goToPage }: { goToPage: GoT
 					<Pressable onPress={handleGoToPage} hitSlop={10}>
 						<Text className="font-medium" style={{ fontSize: 16 }}>
 							{goToPage.isValid
-								? t('tableOfContents.goToPageX', { page: goToPage.number })
+								? t('tableOfContents.goToPageX', { pageNumber: goToPage.number })
 								: t('common.dismiss')}
 						</Text>
 					</Pressable>

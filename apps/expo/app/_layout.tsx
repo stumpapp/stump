@@ -9,6 +9,7 @@ import { Stack, useNavigationContainerRef } from 'expo-router'
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from 'expo-router/react-navigation'
 import * as SplashScreen from 'expo-splash-screen'
 import LottieView from 'lottie-react-native'
+import { vars } from 'nativewind'
 import * as React from 'react'
 import { AppState, Platform, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
@@ -27,7 +28,7 @@ import { db } from '~/db'
 import migrations from '~/drizzle/migrations'
 import { reactNavigationIntegration } from '~/index'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
-import { NAV_THEME, useColors } from '~/lib/constants'
+import { NAV_THEME, Shade, toRgbChannels, useColors, usePalette } from '~/lib/constants'
 import { getDownloadQueueManager } from '~/lib/downloadQueue'
 import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
@@ -74,6 +75,17 @@ export default function RootLayout() {
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
+
+	const palette = usePalette()
+
+	const accentVars = React.useMemo(() => {
+		const shades: Shade[] = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+		return vars(
+			Object.fromEntries(
+				shades.map((shade) => [`--accent-${shade}`, toRgbChannels(palette[shade])]),
+			),
+		)
+	}, [palette])
 
 	useFileImportListener()
 
@@ -174,85 +186,87 @@ export default function RootLayout() {
 		<LocaleProvider locale={locale}>
 			<GestureHandlerRootView style={{ flex: 1 }}>
 				<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-					{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
-					<KeyboardProvider>
-						<SystemBars
-							style={isDarkBackground ? 'light' : 'dark'}
-							hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
-						/>
+					<View className="flex-1" style={accentVars}>
+						{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
+						<KeyboardProvider>
+							<SystemBars
+								style={isDarkBackground ? 'light' : 'dark'}
+								hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+							/>
 
-						<Stack
-							screenOptions={{
-								animation: animationEnabled ? 'default' : 'none',
-								contentStyle: {
-									backgroundColor: colors.background.DEFAULT,
+							<Stack
+								screenOptions={{
+									animation: animationEnabled ? 'default' : 'none',
+									contentStyle: {
+										backgroundColor: colors.background.DEFAULT,
+									},
+								}}
+							>
+								<Stack.Screen
+									name="(tabs)"
+									options={{
+										headerShown: false,
+										title: '',
+										animation: animationEnabled ? 'default' : 'none',
+									}}
+								/>
+
+								<Stack.Screen
+									name="server/[id]"
+									options={{
+										headerShown: false,
+										title: '',
+										animation: animationEnabled ? 'default' : 'none',
+										autoHideHomeIndicator: hideNavigationBar,
+										contentStyle: {
+											backgroundColor: colors.background.DEFAULT,
+										},
+									}}
+								/>
+								<Stack.Screen
+									name="opds/[id]"
+									options={{
+										headerShown: false,
+										animation: animationEnabled ? 'default' : 'none',
+									}}
+								/>
+								<Stack.Screen
+									name="opds-legacy/[id]"
+									options={{
+										headerShown: false,
+										animation: animationEnabled ? 'default' : 'none',
+									}}
+								/>
+
+								<Stack.Screen
+									name="offline"
+									options={{
+										headerShown: false,
+										title: '',
+										animation: animationEnabled ? 'default' : 'none',
+										autoHideHomeIndicator: hideNavigationBar,
+										contentStyle: {
+											backgroundColor: colors.background.DEFAULT,
+										},
+									}}
+								/>
+							</Stack>
+							<FloatingQueueButton />
+							<PortalHost />
+						</KeyboardProvider>
+
+						<Toaster
+							position="bottom-center"
+							styles={{
+								title: {
+									fontSize: 18,
+								},
+								description: {
+									fontSize: 16,
 								},
 							}}
-						>
-							<Stack.Screen
-								name="(tabs)"
-								options={{
-									headerShown: false,
-									title: '',
-									animation: animationEnabled ? 'default' : 'none',
-								}}
-							/>
-
-							<Stack.Screen
-								name="server/[id]"
-								options={{
-									headerShown: false,
-									title: '',
-									animation: animationEnabled ? 'default' : 'none',
-									autoHideHomeIndicator: hideNavigationBar,
-									contentStyle: {
-										backgroundColor: colors.background.DEFAULT,
-									},
-								}}
-							/>
-							<Stack.Screen
-								name="opds/[id]"
-								options={{
-									headerShown: false,
-									animation: animationEnabled ? 'default' : 'none',
-								}}
-							/>
-							<Stack.Screen
-								name="opds-legacy/[id]"
-								options={{
-									headerShown: false,
-									animation: animationEnabled ? 'default' : 'none',
-								}}
-							/>
-
-							<Stack.Screen
-								name="offline"
-								options={{
-									headerShown: false,
-									title: '',
-									animation: animationEnabled ? 'default' : 'none',
-									autoHideHomeIndicator: hideNavigationBar,
-									contentStyle: {
-										backgroundColor: colors.background.DEFAULT,
-									},
-								}}
-							/>
-						</Stack>
-						<FloatingQueueButton />
-						<PortalHost />
-					</KeyboardProvider>
-
-					<Toaster
-						position="bottom-center"
-						styles={{
-							title: {
-								fontSize: 18,
-							},
-							description: {
-								fontSize: 16,
-							},
-						}}
-					/>
+						/>
+					</View>
 				</ThemeProvider>
 			</GestureHandlerRootView>
 		</LocaleProvider>

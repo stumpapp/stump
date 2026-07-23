@@ -43,7 +43,7 @@ function CardBackground({ className, ...props }: ComponentPropsWithoutRef<'div'>
 	return (
 		<div
 			className={cn(
-				'divide-y divide-border/70 overflow-hidden rounded-xl border border-border bg-card text-card-foreground',
+				'overflow-hidden rounded-xl border border-border bg-card text-card-foreground',
 				className,
 			)}
 			{...props}
@@ -62,7 +62,7 @@ function BaseRowComponent({
 	...props
 }: NewCardRowProps) {
 	return (
-		<div className="w-full">
+		<div className={cn('w-full first:border-t-0', renderDivider && 'border-t border-border/70')}>
 			<div
 				onClick={disabled ? undefined : onClick}
 				className={cn(
@@ -71,7 +71,6 @@ function BaseRowComponent({
 					onClick && !disabled && 'cursor-pointer',
 					className,
 				)}
-				data-render-divider={renderDivider}
 				{...props}
 			>
 				{label && (
@@ -100,6 +99,48 @@ function Row({ value, children, ...props }: NewCardRowProps) {
 			{value != null && <Text className="text-sm text-right text-muted-foreground">{value}</Text>}
 			{children}
 		</BaseRowComponent>
+	)
+}
+
+type StatGroupProps = ComponentPropsWithoutRef<'div'>
+
+type StatProps = {
+	label: string
+	value: string | number | undefined | null
+	suffix?: string | number | undefined | null
+}
+
+/**
+ * The StatGroup component. This acts as the container for Card.Stat items.
+ */
+function StatGroup({ children, className }: StatGroupProps) {
+	return (
+		<div
+			className={cn(
+				'gap-x-1 gap-y-4 p-3 flex flex-row flex-wrap items-start justify-evenly',
+				className,
+			)}
+		>
+			{children}
+		</div>
+	)
+}
+
+function Stat({ label, value, suffix }: StatProps) {
+	return (
+		<div className="flex flex-col items-center justify-center">
+			<Text className="mb-1 font-medium text-center text-muted-foreground">{label}</Text>
+			<div className="flex flex-row items-end">
+				<Text size="xl" className="font-semibold text-center">
+					{value}
+				</Text>
+				{suffix != null && (
+					<Text size="xs" className="py-1 text-center text-muted-foreground">
+						{suffix}
+					</Text>
+				)}
+			</div>
+		</div>
 	)
 }
 
@@ -147,12 +188,16 @@ NewCardRoot.displayName = 'NewCard'
 
 type NewCardComponent = typeof NewCardRoot & {
 	Row: typeof Row
+	StatGroup: typeof StatGroup
+	Stat: typeof Stat
 	ListLabel: typeof ListLabel
 	Background: typeof CardBackground
 }
 
 export const NewCard = Object.assign(NewCardRoot, {
 	Row,
+	StatGroup,
+	Stat,
 	ListLabel,
 	Background: CardBackground,
 }) as NewCardComponent

@@ -12,7 +12,7 @@ type Props = {
 
 export default function AnnotationSheetHeader({ title, onClose, onPrimaryAction }: Props) {
 	return (
-		<View className="flex-row justify-between px-2 pt-4">
+		<View className="px-4 pt-4 flex-row items-center justify-between">
 			<HeaderButton
 				onPress={onClose}
 				icon={{ ios: 'xmark', android: X }}

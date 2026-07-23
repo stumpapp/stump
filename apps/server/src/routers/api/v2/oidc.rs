@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use axum::{
 	extract::{Query, State},
 	response::Redirect,
 	routing::get,
-	Json, Router,
+	Extension, Json, Router,
 };
 use models::entity::{server_config, user, user_preferences};
 use sea_orm::{
@@ -17,7 +19,7 @@ use openidconnect::PkceCodeChallenge;
 use crate::{
 	config::{
 		jwt::{create_jwt_auth, JwtTokenPair},
-		oidc::{create_oidc_client, exchange_code_for_claims, get_oidc_authorize_url},
+		oidc::{exchange_code_for_claims, get_oidc_authorize_url, OidcProvider},
 		session::SESSION_USER_KEY,
 		state::AppState,
 	},
@@ -93,6 +95,7 @@ struct OidcState {
 /// and then redirect the user again to the provider
 async fn authorize(
 	State(ctx): State<AppState>,
+	Extension(oidc_provider): Extension<Option<Arc<OidcProvider>>>,
 	HostExtractor(service): HostExtractor,
 	Query(query): Query<AuthorizeQuery>,
 ) -> Result<Redirect, APIError> {
@@ -108,14 +111,11 @@ async fn authorize(
 		return Err(APIError::OIDCNotEnabled);
 	}
 
+	let oidc_provider = oidc_provider.ok_or(APIError::OIDCNotInitialized)?;
+
 	let frontend_url = get_frontend_url(&ctx.conn, service).await?;
 
-	let (_http_client, client) = create_oidc_client(oidc_config, &frontend_url)
-		.await
-		.map_err(|e| {
-			tracing::error!("Failed to create OIDC client: {:?}", e);
-			APIError::InternalServerError("Failed to initialize OIDC".to_string())
-		})?;
+	let client = oidc_provider.create_client(&frontend_url)?;
 
 	let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -179,6 +179,7 @@ fn parse_state(state: Option<&str>) -> OidcState {
 /// Provider redirects here with code, we exchange for tokens and create session or return JWT
 async fn callback(
 	State(ctx): State<AppState>,
+	Extension(oidc_provider): Extension<Option<Arc<OidcProvider>>>,
 	HostExtractor(service): HostExtractor,
 	session: Session,
 	Query(query): Query<CallbackQuery>,
@@ -198,14 +199,14 @@ async fn callback(
 		return Err(APIError::OIDCNotEnabled);
 	}
 
+	let oidc_provider = oidc_provider.ok_or(APIError::OIDCNotInitialized)?;
+
 	let base_url = get_frontend_url(&ctx.conn, service).await?;
 
-	let (http_client, client) = create_oidc_client(oidc_config, &base_url)
-		.await
-		.map_err(|e| {
-			tracing::error!("Failed to create OIDC client: {:?}", e);
-			APIError::InternalServerError("Failed to initialize OIDC".to_string())
-		})?;
+	let (http_client, client) = (
+		oidc_provider.http_client.clone(),
+		oidc_provider.create_client(&base_url)?,
+	);
 
 	let extra_audiences = oidc_config.get_extra_audiences();
 	let pkce_verifier = (!oidc_state.pkce_verifier.is_empty())

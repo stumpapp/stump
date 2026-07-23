@@ -47,6 +47,11 @@ struct BasicConfig {
 }
 
 #[test]
+fn test_empty_config() {
+	let _ = EmptyConfig::new();
+}
+
+#[test]
 fn test_create_new() {
 	let config = BasicConfig::new();
 

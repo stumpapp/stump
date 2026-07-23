@@ -50,10 +50,10 @@ export type OPDSLegacyStreamingContextValue = {
 	entryContent: string
 	streamingURL: string
 	pageCount: number
-	// TODO: I _could_ use this for resuming, but is that the best way?
-	// It doesn't necessarily sync back as you progress, depends on server,
-	// sooooo
-	// currentPage?: number
+	/**
+	 * the last-read page reported by the server via pse:lastRead (1-indexed)
+	 */
+	serverLastRead?: number
 }
 
 export const OPDSLegacyStreamingContext = createContext<OPDSLegacyStreamingContextValue | null>(
@@ -85,11 +85,14 @@ export const getLegacyStreamingContextValue = (
 	const pageCount = pageCountLink['pse:count']
 	if (pageCount == null) return null
 
+	const serverLastRead = pageCountLink['pse:lastRead'] ?? undefined
+
 	return {
 		entryId: entry.id,
 		entryTitle: entry.title,
 		entryContent: entry.content || '',
 		streamingURL,
 		pageCount,
+		serverLastRead,
 	}
 }

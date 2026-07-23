@@ -318,6 +318,19 @@ fn apply_media_fields(
 		active.summary = Set(v);
 	}
 
+	if let Some(v) =
+		merger.merge_scalar(MetadataField::Series, &model.series, &ext.series_name)
+	{
+		active.series = Set(v);
+	}
+
+	let ext_number = ext.number.and_then(Decimal::from_f32);
+	if let Some(v) =
+		merger.merge_scalar(MetadataField::Number, &model.number, &ext_number)
+	{
+		active.number = Set(v);
+	}
+
 	if let Some(v) = merger.merge_scalar(MetadataField::Year, &model.year, &ext.year) {
 		active.year = Set(v);
 	}
@@ -394,6 +407,12 @@ fn apply_media_fields(
 	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Summary) {
 		active.summary = Set(v);
 	}
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Series) {
+		active.series = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<Decimal>(MetadataField::Number) {
+		active.number = Set(v);
+	}
 	if let Some(v) = merger.apply_scalar_override::<i32>(MetadataField::Year) {
 		active.year = Set(v);
 	}
@@ -465,6 +484,8 @@ fn build_media_metadata_insert(
 		media_id: Set(Some(media_id.to_string())),
 		title: Set(ext.title.clone()),
 		summary: Set(ext.summary.clone()),
+		series: Set(ext.series_name.clone()),
+		number: Set(ext.number.and_then(Decimal::from_f32)),
 		year: Set(ext.year),
 		day: Set(ext.day),
 		month: Set(ext.month),
@@ -479,5 +500,62 @@ fn build_media_metadata_insert(
 		metadata_source: Set(Some(provider.to_string())),
 		metadata_external_id: Set(Some(external_id.to_string())),
 		..Default::default()
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	fn external_media(
+		series_name: Option<&str>,
+		number: Option<f32>,
+	) -> ExternalMediaMetadata {
+		ExternalMediaMetadata {
+			series_name: series_name.map(String::from),
+			number,
+			..Default::default()
+		}
+	}
+
+	#[test]
+	fn media_match_applies_series_and_number() {
+		let merger = FieldMerger::new(MergeStrategy::PreferExternal, vec![], vec![]);
+		let model = media_metadata::Model::default();
+		let mut active = model.clone().into_active_model();
+		let ext = external_media(Some("The Beginning After the End"), Some(3.0));
+
+		apply_media_fields(&merger, &model, &mut active, &ext);
+
+		assert_eq!(
+			active.series,
+			Set(Some("The Beginning After the End".to_string()))
+		);
+		assert_eq!(active.number, Set(Decimal::from_f32(3.0)));
+	}
+
+	#[test]
+	fn fill_gaps_preserves_existing_series() {
+		let merger = FieldMerger::new(MergeStrategy::FillGaps, vec![], vec![]);
+		let model = media_metadata::Model {
+			series: Some("Existing".to_string()),
+			..Default::default()
+		};
+		let mut active = model.clone().into_active_model();
+		let ext = external_media(Some("New"), None);
+
+		apply_media_fields(&merger, &model, &mut active, &ext);
+
+		assert!(active.series.is_unchanged());
+	}
+
+	#[test]
+	fn media_metadata_insert_includes_series_and_number() {
+		let ext = external_media(Some("Wayfarers"), Some(1.0));
+
+		let active = build_media_metadata_insert("media-id", &ext, "hardcover", "42");
+
+		assert_eq!(active.series, Set(Some("Wayfarers".to_string())));
+		assert_eq!(active.number, Set(Decimal::from_f32(1.0)));
 	}
 }

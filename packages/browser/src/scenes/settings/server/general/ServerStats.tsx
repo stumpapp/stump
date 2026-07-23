@@ -1,9 +1,8 @@
 import { useSuspenseGraphQL } from '@stump/client'
+import { formatBytesSeparate } from '@stump/client'
 import { Statistic } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useMemo } from 'react'
-
-import { formatBytesSeparate } from '@/utils/format'
 
 const query = graphql(`
 	query ServerStats {

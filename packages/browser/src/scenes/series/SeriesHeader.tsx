@@ -1,23 +1,22 @@
-import { useGraphQLMutation } from '@stump/client'
-import { Badge, Button, cn, Heading, Link, Statistic, Text } from '@stump/components'
-import { DropdownItemGroup, DropdownMenu } from '@stump/components/dropdown/DropdownMenu'
-import { graphql } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { useGraphQLMutation, usePrefetchFiles } from '@stump/client'
+import { formatBytesSeparate } from '@stump/client'
+import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
+import { extractErrorMessage, graphql, UserPermission } from '@stump/graphql'
+import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { BookOpenCheck, EllipsisVertical, ExternalLink } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowUpRight, BookCheck, BookOpen, BookOpenCheck, Clock, HardDrive } from 'lucide-react'
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import BadgeList from '@/components/BadgeList'
-import ReadMore from '@/components/ReadMore'
-import TagList from '@/components/tags/TagList'
-import { ProminentThumbnailImage } from '@/components/thumbnail'
-import { usePreferences } from '@/hooks'
-import paths from '@/paths'
-import { formatBytes } from '@/utils/format'
+import { EntityHeader } from '@/components/sharedLayout'
+import { useAppContext } from '@/context'
+import { usePaths } from '@/paths'
 
 import CompleteSeriesConfirmation from './CompleteSeriesConfirmation'
 import { useSeriesContext } from './context'
+import { SeriesOverviewSheet } from './SeriesOverviewSheet'
+import { usePrefetchSeriesBooks } from './tabs/books/SeriesBooksScene'
 
 const completeSeriesMutation = graphql(`
 	mutation SeriesActionComplete($id: ID!) {
@@ -25,27 +24,29 @@ const completeSeriesMutation = graphql(`
 	}
 `)
 
-// TODO(localization): Use localized strings for labels etc
 export default function SeriesHeader() {
+	const { checkPermission } = useAppContext()
 	const {
-		preferences: { primaryNavigationMode, layoutMaxWidthPx, showThumbnailsInHeaders },
-	} = usePreferences()
-	const {
-		series: { id, resolvedName, resolvedDescription, tags, thumbnail, stats, metadata },
+		series: {
+			id,
+			resolvedName,
+			path,
+			stats,
+			library: { id: libraryId },
+		},
 	} = useSeriesContext()
+	const { t } = useLocaleContext()
 
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
-
+	const location = useLocation()
+	const navigate = useNavigate()
+	const paths = usePaths()
 	const formattedTime = stats.totalReadingTimeSeconds
-		? formatHumanDuration(stats.totalReadingTimeSeconds, { significantUnits: 2 })
+		? formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
 		: null
-	const formattedSize = stats.totalBytes ? formatBytes(stats.totalBytes) : null
+	const formattedSize = stats.totalBytes ? formatBytesSeparate(stats.totalBytes) : null
 
-	const hasMetadataBadges = metadata?.status || metadata?.publisher || metadata?.year
-	const hasGenres = metadata?.genres && metadata.genres.length > 0
-	const hasTags = tags && tags.length > 0
-	const hasLinks = metadata?.links && metadata.links.length > 0
 	const [showCompleteSeriesConfirmation, setShowCompleteSeriesConfirmation] = useState(false)
+	const [isOverviewSheetOpen, setIsOverviewSheetOpen] = useState(false)
 
 	const client = useQueryClient()
 
@@ -57,33 +58,100 @@ export default function SeriesHeader() {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to update book completion status')
+			toast.error(t('seriesHeader.errors.failedToUpdateCompletion'), {
+				description: extractErrorMessage(error),
+			})
 		},
 	})
 
-	const actions = useMemo(
-		() => ({
-			completeSeries,
-		}),
-		[completeSeries],
-	)
-
-	const groups = useMemo<DropdownItemGroup[]>(
-		() => [
-			{
-				items: [
-					{
-						label: 'Mark series as read',
-						leftIcon: <BookOpenCheck className="mr-2 h-4 w-4" />,
-						onClick: () => {
-							setShowCompleteSeriesConfirmation(true)
-						},
+	const actions = [
+		{
+			items: [
+				{
+					label: t('seriesHeader.actions.markAsRead'),
+					leftIcon: <BookOpenCheck className="mr-2 h-4 w-4" />,
+					onClick: () => {
+						setShowCompleteSeriesConfirmation(true)
 					},
-				],
-			},
-		],
-		[],
-	)
+				},
+			],
+		},
+		{
+			items: [
+				{
+					label: t('seriesHeader.actions.goToLibrary'),
+					leftIcon: <ArrowUpRight className="mr-2 h-4 w-4" />,
+					onClick: () => {
+						navigate(paths.librarySeries(libraryId))
+					},
+				},
+			],
+		},
+	] satisfies DropdownItemGroup[]
+
+	const prefetchSeriesBooks = usePrefetchSeriesBooks()
+	const prefetchFiles = usePrefetchFiles()
+
+	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
+
+	const tabs = [
+		{
+			isActive: !!location.pathname.match(/\/series\/[^/]+\/books(\/.*)?$/),
+			label: t('seriesHeader.tabs.books'),
+			onHover: () => prefetchSeriesBooks(id),
+			to: 'books',
+		},
+		...(canAccessFiles
+			? [
+					{
+						isActive: !!location.pathname.match(/\/series\/[^/]+\/files(\/.*)?$/),
+						label: t('seriesHeader.tabs.files'),
+						onHover: () =>
+							prefetchFiles({
+								path,
+								fetchConfig: checkPermission(UserPermission.UploadFile),
+							}),
+						to: 'files',
+					},
+				]
+			: []),
+	]
+
+	const resolvedStats = stats
+		? [
+				{
+					key: 'inProgressBooks',
+					icon: BookOpen,
+					value: stats.inProgressBooks,
+				},
+				{
+					key: 'completedBooks',
+					icon: BookCheck,
+					value: stats.completedBooks,
+					suffix: `/ ${stats.bookCount}`,
+				},
+				...(formattedTime
+					? [
+							{
+								key: 'totalReadingTimeSeconds',
+								icon: Clock,
+								value: formattedTime.value,
+								suffix: formattedTime.unit,
+							},
+						]
+					: []),
+				...(formattedSize
+					? [
+							{
+								key: 'totalBytes',
+								icon: HardDrive,
+								value: formattedSize.value,
+								suffix: formattedSize.unit,
+							},
+						]
+					: []),
+			]
+		: undefined
 
 	return (
 		<>
@@ -91,150 +159,24 @@ export default function SeriesHeader() {
 				isOpen={showCompleteSeriesConfirmation}
 				onCancel={() => setShowCompleteSeriesConfirmation(false)}
 				onConfirm={() => {
-					actions.completeSeries({ id: id })
+					completeSeries({ id: id })
 					setShowCompleteSeriesConfirmation(false)
 				}}
 			/>
-			<header
-				className={cn('gap-4 p-4 flex w-full flex-col', {
-					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
-				})}
-				style={{
-					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-				}}
-			>
-				<div className="gap-4 md:flex-row md:items-start flex w-full flex-col items-center">
-					{showThumbnailsInHeaders && (
-						<ProminentThumbnailImage src={thumbnail.url} placeholderData={thumbnail.metadata} />
-					)}
 
-					<div className="gap-4 flex w-full flex-col">
-						<div className="gap-4 flex">
-							<Heading size="lg">{resolvedName}</Heading>
+			<EntityHeader
+				name={resolvedName}
+				tabs={tabs}
+				actions={actions}
+				stats={resolvedStats}
+				settingsLink="settings"
+				onInfoClick={() => setIsOverviewSheetOpen(true)}
+			/>
 
-							<DropdownMenu
-								align="end"
-								contentWrapperClassName="w-48"
-								trigger={
-									<Button variant="outline" size="icon" className="h-8 w-8 shrink-0">
-										<EllipsisVertical className="h-4 w-4" />
-									</Button>
-								}
-								groups={groups}
-							/>
-						</div>
-
-						<div className="gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6 grid grid-cols-2">
-							<Statistic.Item label="Books" value={stats.bookCount} />
-							<Statistic.Item
-								label="Completed"
-								value={stats.completedBooks}
-								suffix={` / ${stats.bookCount}`}
-							/>
-							<Statistic.Item label="In progress" value={stats.inProgressBooks} />
-							{formattedTime && <Statistic.Item label="Reading time" value={formattedTime} />}
-							{formattedSize && <Statistic.Item label="Total size" value={formattedSize} />}
-						</div>
-
-						{hasMetadataBadges && (
-							<div className="gap-2 flex flex-wrap items-center">
-								{metadata?.publisher && (
-									<Badge variant="default" size="xs" rounded="full">
-										{metadata.publisher}
-									</Badge>
-								)}
-								{metadata?.year && (
-									<Badge variant="default" size="xs" rounded="full">
-										{metadata.year}
-									</Badge>
-								)}
-								{metadata?.status && (
-									<Badge variant="primary" size="xs" rounded="full">
-										{metadata.status}
-									</Badge>
-								)}
-							</div>
-						)}
-
-						{!!resolvedDescription && (
-							<div className="max-w-3xl">
-								<ReadMore text={resolvedDescription} />
-							</div>
-						)}
-
-						{hasGenres && (
-							<div className="gap-1 flex flex-col">
-								<Text size="xs" variant="muted">
-									Genres
-								</Text>
-								<BadgeList>
-									{metadata.genres.map((genre) => (
-										<Link
-											key={genre}
-											to={paths.bookSearchWithFilter({
-												metadata: { genres: { likeAnyOf: [genre] } },
-											})}
-											underline={false}
-										>
-											<Badge
-												variant="secondary"
-												size="xs"
-												rounded="full"
-												className="cursor-pointer"
-											>
-												{genre}
-											</Badge>
-										</Link>
-									))}
-								</BadgeList>
-							</div>
-						)}
-
-						{hasTags && (
-							<div className="gap-1 flex flex-col">
-								<Text size="xs" variant="muted">
-									Tags
-								</Text>
-								<TagList
-									tags={tags}
-									buildHref={(tag) => paths.bookSearchWithFilter({ tags: { anyOf: [tag.name] } })}
-								/>
-							</div>
-						)}
-
-						{hasLinks && (
-							<div className="gap-1 flex flex-col">
-								<Text size="xs" variant="muted">
-									Links
-								</Text>
-								<BadgeList>
-									{metadata.links.map((link) => {
-										let label = link.replace(/^(https?:\/\/)?(www\.)?/, '')
-										try {
-											label = new URL(link).hostname
-										} catch {
-											// weird but w/e
-										}
-										return (
-											<Link key={link} href={link} underline={false}>
-												<Badge
-													variant="default"
-													size="xs"
-													rounded="full"
-													className="cursor-pointer"
-												>
-													<span>{label}</span>
-													<ExternalLink className="ml-1 h-3 w-3 opacity-90" />
-												</Badge>
-											</Link>
-										)
-									})}
-								</BadgeList>
-							</div>
-						)}
-					</div>
-				</div>
-			</header>
+			<SeriesOverviewSheet
+				isOpen={isOverviewSheetOpen}
+				onClose={() => setIsOverviewSheetOpen(false)}
+			/>
 		</>
 	)
 }

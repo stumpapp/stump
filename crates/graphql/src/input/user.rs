@@ -54,7 +54,6 @@ pub struct UpdateUserPreferencesInput {
 	pub enable_job_overlay: bool,
 	pub enable_fancy_animations: bool,
 	pub prefer_accent_color: bool,
-	pub show_thumbnails_in_headers: bool,
 	pub thumbnail_ratio: f32,
 	pub thumbnail_placeholder_style: ThumbnailPlaceholderStyle,
 	pub enable_alphabet_select: bool,

@@ -72,7 +72,7 @@ const sheetVariants = cva(
 				size: 'content',
 			},
 			{
-				class: 'md:w-1/3 w-3/4',
+				class: 'md:w-1/3 sm:w-5/6 w-11/12',
 				position: ['right', 'left'],
 				size: 'default',
 			},

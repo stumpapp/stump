@@ -20,7 +20,6 @@ import { NavigationArrangement } from './navigation-arrangement'
 import PrimaryNavigationPreference from './PrimaryNavigationPreference'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
 import { DoubleSidebarToggle, ReplacePrimarySidebarToggle } from './settings-sidebar'
-import ShowThumbnailsInHeader from './ShowThumbnailsInHeader'
 import ThemeSelect from './ThemeSelect'
 import ThumbnailAppearancePreference from './ThumbnailAppearancePreference'
 
@@ -89,8 +88,8 @@ export default function AppearanceSettingsScene() {
 					</NewCard>
 
 					<NewCard
-						label="Display and spacing"
-						description="Preferences related to the presentation of content and information"
+						label={t(getKey('displayAndSpacing.label'))}
+						description={t(getKey('displayAndSpacing.description'))}
 					>
 						<DisplaySpacingPreference />
 						<MaxWidthPreference />
@@ -107,26 +106,24 @@ export default function AppearanceSettingsScene() {
 						</p>
 					</div>
 
-					{/* TODO: localize after finalizing groups */}
 					<NewCard
-						label="Content browsing"
-						description="Preferences that affect browsing and navigating content lists"
+						label={t(getKey('contentBrowsing.label'))}
+						description={t(getKey('contentBrowsing.description'))}
 					>
-						<ShowThumbnailsInHeader />
 						<EnableAlphabetFiltering />
 					</NewCard>
 
 					<NewCard
-						label="Motion and animation"
-						description="Visual presentation and movement preferences"
+						label={t(getKey('motionAndAnimation.label'))}
+						description={t(getKey('motionAndAnimation.description'))}
 					>
 						<EnableFancyAnimations />
 						<HideScrollbarToggle />
 					</NewCard>
 
 					<NewCard
-						label="Activity and status"
-						description="Indicators, overlays, or functionality related to background activity"
+						label={t(getKey('activityAndStatus.label'))}
+						description={t(getKey('activityAndStatus.description'))}
 					>
 						<QueryIndicatorToggle />
 						<LiveRefetchToggle />

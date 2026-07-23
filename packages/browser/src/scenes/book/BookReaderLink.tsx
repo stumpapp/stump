@@ -1,9 +1,9 @@
+import { EBOOK_EXTENSION } from '@stump/client'
 import { ButtonOrLink } from '@stump/components'
 import { BookCardFragment } from '@stump/graphql'
 import { useMemo } from 'react'
 
 import { usePaths } from '@/paths'
-import { EBOOK_EXTENSION } from '@/utils/patterns'
 
 type Props = {
 	book: BookCardFragment

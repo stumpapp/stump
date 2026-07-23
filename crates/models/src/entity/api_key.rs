@@ -1,5 +1,8 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect};
+use sea_orm::{
+	entity::prelude::{async_trait::async_trait, *},
+	ActiveValue, FromQueryResult, JoinType, QuerySelect,
+};
 
 use crate::{
 	prefixer::{parse_query_to_model, Prefixer},
@@ -27,10 +30,7 @@ pub struct Model {
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
 	pub permissions: APIKeyPermissions,
-	#[sea_orm(
-		column_type = "custom(\"DATETIME\")",
-		default_value = "CURRENT_TIMESTAMP"
-	)]
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub last_used_at: Option<DateTimeWithTimeZone>,
@@ -111,4 +111,15 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert {
+			self.created_at = ActiveValue::Set(chrono::Utc::now().into());
+		}
+		Ok(self)
+	}
+}

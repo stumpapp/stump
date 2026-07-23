@@ -1,7 +1,7 @@
 use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use apalis::prelude::*;
-use axum::{extract::connect_info::Connected, serve::IncomingStream, Router};
+use axum::{extract::connect_info::Connected, serve::IncomingStream, Extension, Router};
 use stump_core::{
 	config::{bootstrap_config_dir, logging::init_tracing},
 	job::dispatch_job,
@@ -12,7 +12,7 @@ use tokio::sync::Notify;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
 use crate::{
-	config::{cors, session::get_session_layer},
+	config::{cors, oidc::OidcProvider, session::get_session_layer},
 	errors::{EntryError, ServerError, ServerResult},
 	routers,
 	utils::shutdown_signal_with_cleanup,
@@ -60,6 +60,19 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
+	let oidc_provider: Option<Arc<OidcProvider>> = {
+		if let Some(oidc_config) = config.oidc.as_ref().filter(|c| c.is_configured()) {
+			let state = OidcProvider::new(oidc_config).await.map_err(|e| {
+				tracing::error!(?e, "OIDC client initialization failed");
+				ServerError::ServerStartError(format!("OIDC client init failed: {e:?}"))
+			})?;
+			tracing::info!("OIDC client initialized successfully");
+			Some(Arc::new(state))
+		} else {
+			None
+		}
+	};
+
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
 	let cors_layer = cors::get_cors_layer(config.clone());
@@ -73,7 +86,8 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.layer(get_session_layer(app_state.clone()))
 		.layer(cors_layer)
 		.layer(CompressionLayer::new())
-		.layer(TraceLayer::new_for_http());
+		.layer(TraceLayer::new_for_http())
+		.layer(Extension(oidc_provider));
 
 	let shutdown_notify = Arc::new(Notify::new());
 

@@ -13,6 +13,7 @@ const mutation = graphql(`
 	}
 `)
 
+// TODO(sync): mv to shared types file(?) and reuse across other TODO(sync) tasks
 type SyncResult = {
 	failureCount: number
 	syncedCount: number

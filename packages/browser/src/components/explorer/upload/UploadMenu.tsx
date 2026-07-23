@@ -14,13 +14,7 @@ export default function UploadMenu({ onSelect }: Props) {
 		<Dropdown modal={false}>
 			<ToolTip content="Upload" side="left" size="sm">
 				<Dropdown.Trigger asChild>
-					<IconButton
-						variant="ghost"
-						size="xs"
-						className="hover:bg-accent"
-						pressEffect={false}
-						disabled={false}
-					>
+					<IconButton variant="ghost" size="xs" className="hover:bg-accent" disabled={false}>
 						<Upload className="h-4 w-4" />
 					</IconButton>
 				</Dropdown.Trigger>

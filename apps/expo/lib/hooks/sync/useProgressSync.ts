@@ -14,6 +14,7 @@ import { db, epubProgress, readProgress, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
 
 import { useTranslate } from '../useTranslate'
+import { PushSyncParams, SyncParams } from './types'
 import { useServerInstances } from './utils'
 
 export function useProgressSync() {
@@ -29,34 +30,35 @@ export function useProgressSync() {
 		[getFullServer],
 	)
 
-	type PushProgressParams = {
-		forServers?: string[]
-		ignoreBookIds?: string[]
-	}
-
 	const pushProgress = useCallback(
-		async ({ forServers, ignoreBookIds }: PushProgressParams = {}) => {
-			const instances = await getInstances(forServers)
-			return executePushProgressSync(instances, ignoreBookIds)
+		async ({ forServers, ignoreBookIds, instances }: PushSyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+			return executePushProgressSync(resolvedInstances, ignoreBookIds)
 		},
 		[getInstances],
 	)
 
 	const pullProgress = useCallback(
-		async (forServers?: string[]) => {
-			const instances = await getInstances(forServers)
-			return executePullProgressSync(instances)
+		async ({ forServers, instances }: SyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+			return executePullProgressSync(resolvedInstances)
 		},
 		[getInstances],
 	)
 
 	const syncProgress = useCallback(
-		async (forServers?: string[]) => {
-			const pullResults = await pullProgress(forServers)
+		async ({ forServers, instances }: SyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+
+			const pullResults = await pullProgress({ forServers, instances: resolvedInstances })
 
 			const ignoreBookIds = Object.values(pullResults).flatMap((r) => r.failedBookIds)
 
-			const pushResults = await pushProgress({ forServers, ignoreBookIds })
+			const pushResults = await pushProgress({
+				forServers,
+				ignoreBookIds,
+				instances: resolvedInstances,
+			})
 
 			if (ignoreBookIds.length > 0) {
 				throw new Error(`Failed to pull progress for ${ignoreBookIds.length} book(s)`)
@@ -64,7 +66,7 @@ export function useProgressSync() {
 
 			return { pullResults, pushResults }
 		},
-		[pullProgress, pushProgress],
+		[getInstances, pullProgress, pushProgress],
 	)
 
 	return { syncProgress, syncServerProgress, pushProgress, pullProgress }
@@ -90,7 +92,7 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 		didSync.current = true
 
 		try {
-			await syncProgress([serverId])
+			await syncProgress({ forServers: [serverId] })
 		} catch (error) {
 			Sentry.captureException(error, {
 				extra: { serverId },

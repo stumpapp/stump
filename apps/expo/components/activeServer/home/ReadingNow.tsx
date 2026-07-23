@@ -1,4 +1,5 @@
 import { useSDK } from '@stump/client'
+import { parseGraphQLPercentageDecimal } from '@stump/client'
 import {
 	FragmentType,
 	graphql,
@@ -21,7 +22,6 @@ import { stripHtml } from 'string-strip-html'
 import { ThumbnailImage } from '~/components/image'
 import { Badge, Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
-import { parseGraphQLPercentageDecimal } from '~/lib/format'
 import { useDisplay, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'

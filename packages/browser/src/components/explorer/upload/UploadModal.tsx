@@ -1,4 +1,5 @@
 import { useGraphQLUploadMutation } from '@stump/client'
+import { formatBytes } from '@stump/client'
 import {
 	Accordion,
 	Button,
@@ -21,7 +22,6 @@ import { toast } from 'sonner'
 
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 import { useSeriesContextSafe } from '@/scenes/series'
-import { formatBytes } from '@/utils/format'
 
 import { useFileExplorerContext } from '../context'
 import UploadMenu from './UploadMenu'

@@ -12,9 +12,8 @@ import Animated, {
 
 import { Button, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
-import { useColors } from '~/lib/constants'
+import { usePalette } from '~/lib/constants'
 import { useDownloadQueue, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
-import { usePreferencesStore } from '~/stores'
 
 type DownloadState = 'downloading' | 'completed'
 
@@ -31,8 +30,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	const isDownloading = useIsBookDownloading(bookId)
 	const isDownloaded = useIsBookDownloaded(bookId, serverId)
 
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-	const colors = useColors()
+	const accentColor = usePalette('muted')
 
 	const { activeItems, cancel } = useDownloadQueue({ serverId })
 
@@ -166,22 +164,17 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 				variant="secondary"
 				roundness="full"
 				onPress={onPress}
-				className="native:px-0 w-36 flex-row gap-2 overflow-hidden"
+				className="native:px-0 w-36 gap-2 flex-row overflow-hidden"
 			>
 				{(isActive || isCompleted) && (
 					<Animated.View
 						style={[progressBarStyle, { backgroundColor: accentColor }]}
-						className="absolute inset-0 opacity-25"
+						className="inset-0 absolute opacity-25"
 					/>
 				)}
 
-				<Animated.View style={contentStyle} className="flex-row items-center gap-2">
-					<Icon
-						as={iconComponent}
-						color={accentColor || colors.fill.brand.DEFAULT}
-						size={20}
-						className="-ml-1"
-					/>
+				<Animated.View style={contentStyle} className="gap-2 flex-row items-center">
+					<Icon as={iconComponent} color={accentColor} size={20} className="-ml-1" />
 					<Text className="font-medium">{label}</Text>
 				</Animated.View>
 			</Button>

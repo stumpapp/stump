@@ -1,13 +1,10 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { getColor, serialize } from 'colorjs.io/fn'
 import { Check, ChevronsUpDown, X } from 'lucide-react-native'
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
-import { useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
+import { useColors, usePalette } from '~/lib/constants'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 import { SheetBackDetection } from '../SheetBackDetection'
 import { HeaderButton } from './header-button/header-button'
@@ -58,9 +55,9 @@ export function PickerSheet<T extends string = string>({
 
 			<TrueSheet
 				ref={sheetRef}
-				detents={['auto', 1]}
+				detents={[1]}
 				grabber
-				backgroundColor={colors.background.DEFAULT}
+				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
@@ -104,16 +101,10 @@ function PickerSheetOption<T extends string>({
 }: PickerSheetOptionProps<T>) {
 	const isSelected = option.value === selection
 
-	const { isDarkColorScheme } = useColorScheme()
-	const colors = useColors()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-
-	const color = getColor(accentColor || colors.fill.brand.DEFAULT)
-	color.alpha = isDarkColorScheme ? 0.1 : 0.15
-	const backgroundColor = serialize(color, { format: 'hex' })
-
-	color.alpha = isDarkColorScheme ? 0.8 : 0.9
-	const textColor = serialize(color, { format: 'hex' })
+	const palette = usePalette({
+		text: { light: 400, dark: 400 },
+		background: { light: 400, dark: 600, opacity: 0.15 },
+	})
 
 	return (
 		<Pressable onPress={() => onSelect(option.value)}>
@@ -123,7 +114,7 @@ function PickerSheetOption<T extends string>({
 						className={cn('squircle inset-0 absolute rounded-[1.25rem]')}
 						style={[
 							{ opacity: pressed ? 0.7 : 1, marginLeft: 6, marginRight: 6 },
-							isSelected && { backgroundColor: backgroundColor },
+							isSelected && { backgroundColor: palette.background },
 						]}
 					/>
 					<View
@@ -133,7 +124,7 @@ function PickerSheetOption<T extends string>({
 						{isSelected ? <Icon as={Check} /> : <Icon as={Check} className="invisible" />}
 						<Text
 							className={cn('py-4 text-base flex-1', isSelected && 'font-bold')}
-							style={isSelected && { color: textColor }}
+							style={isSelected && { color: palette.text }}
 						>
 							{option.label}
 						</Text>

@@ -10,9 +10,9 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated'
 
+import { usePalette } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 const RGB_COLORS = {
 	monochrome: {
@@ -66,13 +66,13 @@ type Props = {
 const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 	({ className, variant = 'brand', size = 'default', ...props }, ref) => {
 		const { colorScheme } = useColorScheme()
-		const accentColor = usePreferencesStore((state) => state.accentColor)
+		const tintColor = usePalette('accent')
 		const xValue = SIZES[size]?.translateX || SIZES.default.translateX
 		const translateX = useDerivedValue(() => (props.checked ? xValue : 0))
 		const defaultColors = RGB_COLORS[variant][colorScheme]
 		const colors = {
 			...defaultColors,
-			primary: accentColor || defaultColors.primary,
+			primary: tintColor || defaultColors.primary,
 		}
 		const animatedRootStyle = useAnimatedStyle(() => {
 			return {

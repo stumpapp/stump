@@ -234,35 +234,70 @@ export default function ReadiumFooter() {
 					</Animated.View>
 				)}
 
-				{ttsState !== 'stopped' && (
+				{true && (
+					// {ttsState !== 'stopped' && (
 					<Animated.View
 						entering={ENTERING_ANIMATION}
 						exiting={EXITING_ANIMATION}
-						className="left-6 absolute z-30"
-						style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
+						className="left-6 gap-4 absolute z-30 flex-row items-center"
 					>
-						<GlassView
-							className="flex-1 rounded-full"
-							isInteractive
-							colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-							style={{ backgroundColor: buttonColors.controls.background }}
-						>
-							<Pressable
-								onPress={() => readerRef?.pauseOrResumeTTS()}
-								className={cn(
-									'h-full w-full items-center justify-center',
-									!IS_IOS_26_PLUS && 'active:opacity-60',
-								)}
+						<View style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}>
+							<GlassView
+								className="flex-1 rounded-full"
+								isInteractive
+								colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+								style={{ backgroundColor: buttonColors.controls.background }}
 							>
-								<Icon
-									as={ttsState === 'playing' ? Pause : Play}
-									size={ICON_SIZE}
-									absoluteStrokeWidth
-									strokeWidth={2.5}
-									color={buttonColors.controls.foreground}
-								/>
-							</Pressable>
-						</GlassView>
+								<Pressable
+									onPress={() => readerRef?.pauseOrResumeTTS()}
+									className={cn(
+										'h-full w-full items-center justify-center',
+										!IS_IOS_26_PLUS && 'active:opacity-60',
+									)}
+								>
+									<Icon
+										as={ttsState === 'playing' ? Pause : Play}
+										size={ICON_SIZE}
+										absoluteStrokeWidth
+										strokeWidth={2.5}
+										color={buttonColors.controls.foreground}
+									/>
+								</Pressable>
+							</GlassView>
+						</View>
+
+						{showMenuButton && (
+							<Animated.View
+								entering={ENTERING_ANIMATION}
+								exiting={EXITING_ANIMATION}
+								style={{ width: BUTTON_SIZE, height: BUTTON_SIZE / 2 }}
+							>
+								<GlassView
+									className="flex-1 rounded-full"
+									isInteractive
+									colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
+									style={{ backgroundColor: buttonColors.controls.background }}
+								>
+                  <Pressable
+										// onPress={() => ttsStore.cycleTTSSpeed()}
+										className={cn(
+											'h-full w-full items-center justify-center',
+											!IS_IOS_26_PLUS && 'active:opacity-60',
+										)}
+									>
+										<Text
+											style={{
+												color: buttonColors.controls.foreground,
+												fontSize: 12,
+												fontWeight: '600',
+											}}
+										>
+											1x
+										</Text>
+									</Pressable>
+								</GlassView>
+							</Animated.View>
+						)}
 					</Animated.View>
 				)}
 

@@ -9,8 +9,9 @@ import java.util.zip.ZipFile
 /**
  * A simple ZIP archive wrapper for extracting image files
  */
-class ZipArchive(private val path: String) {
-
+class ZipArchive(
+    private val path: String,
+) {
     companion object {
         private const val TAG = "ZipArchive"
 
@@ -20,18 +21,19 @@ class ZipArchive(private val path: String) {
         private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
     }
 
-    private val zipFile: ZipFile = try {
-        ZipFile(File(path))
-    } catch (e: Exception) {
-        throw StreamerError.ArchiveOpenFailed(path, e)
-    }
+    private val zipFile: ZipFile =
+        try {
+            ZipFile(File(path))
+        } catch (e: Exception) {
+            throw StreamerError.ArchiveOpenFailed(path, e)
+        }
 
     /**
      * Data class representing a ZIP entry with its metadata
      */
     data class Entry(
         val name: String,
-        val zipEntry: ZipEntry
+        val zipEntry: ZipEntry,
     )
 
     /**
@@ -59,9 +61,11 @@ class ZipArchive(private val path: String) {
             imageEntries.add(Entry(filename, zipEntry))
         }
 
-        imageEntries.sortWith(compareBy(naturalOrder()) {
-            File(it.name).name
-        })
+        imageEntries.sortWith(
+            compareBy(naturalOrder()) {
+                File(it.name).name
+            },
+        )
 
         Log.d(TAG, "Found ${imageEntries.size} image files in archive")
         return imageEntries
@@ -70,15 +74,14 @@ class ZipArchive(private val path: String) {
     /**
      * Extract an entry's data
      */
-    fun extractEntry(entry: Entry): ByteArray {
-        return try {
+    fun extractEntry(entry: Entry): ByteArray =
+        try {
             zipFile.getInputStream(entry.zipEntry).use { input ->
                 input.readBytes()
             }
         } catch (e: Exception) {
             throw StreamerError.PageExtractionFailed(0, e)
         }
-    }
 
     /**
      * Check if a file is hidden (starts with . or is in __MACOSX)
@@ -118,10 +121,11 @@ private fun naturalOrder(): Comparator<String> {
             val num1 = token1.toIntOrNull()
             val num2 = token2.toIntOrNull()
 
-            val comparison = when {
-                num1 != null && num2 != null -> num1.compareTo(num2)
-                else -> token1.compareTo(token2, ignoreCase = true)
-            }
+            val comparison =
+                when {
+                    num1 != null && num2 != null -> num1.compareTo(num2)
+                    else -> token1.compareTo(token2, ignoreCase = true)
+                }
 
             if (comparison != 0) return@Comparator comparison
         }

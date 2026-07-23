@@ -1050,6 +1050,8 @@ extension EPUBView: PublicationSpeechSynthesizerDelegate {
             onTTSStateChange(["state": "stopped"])
 
         case let .paused(utterance):
+            // i had to manually store the latest utterance for android because pause seems to clear the range
+            // internally, but ios seems to retain it
             onTTSStateChange([
                 "state": "paused",
                 "utteranceLocator": utterance.locator.jsonObject.asAny,

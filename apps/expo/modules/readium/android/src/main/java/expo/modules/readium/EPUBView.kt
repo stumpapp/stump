@@ -28,6 +28,11 @@ import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import kotlinx.coroutines.*
+import org.readium.navigator.media.tts.AndroidTtsNavigator
+import org.readium.navigator.media.tts.AndroidTtsNavigatorFactory
+import org.readium.navigator.media.tts.TtsNavigator
+import org.readium.navigator.media.tts.TtsNavigatorFactory
+import org.readium.navigator.media.tts.android.AndroidTtsPreferences
 import org.readium.r2.navigator.DecorableNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.EpubPreferences
@@ -46,10 +51,6 @@ import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.AbsoluteUrl
-import org.readium.navigator.media.tts.AndroidTtsNavigator
-import org.readium.navigator.media.tts.AndroidTtsNavigatorFactory
-import org.readium.navigator.media.tts.TtsNavigator
-import org.readium.navigator.media.tts.TtsNavigatorFactory
 import java.net.URL
 
 data class DecorationItem(
@@ -160,6 +161,8 @@ class EPUBView(
     private var ttsNavigatorFactory: AndroidTtsNavigatorFactory? = null
     private var ttsNavigator: AndroidTtsNavigator? = null
     private var ttsObserverJob: Job? = null
+    private var ttsSpeed: Double = 1.0
+    private var lastTtsTokenLocator: Locator? = null // utterance
 
     val pendingProps = Props()
     var props: FinalizedProps? = null
@@ -210,7 +213,7 @@ class EPUBView(
                 fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
                 readingProgression =
                     pendingProps.readingProgression ?: oldProps?.readingProgression
-                    ?: ReadingProgression.LTR,
+                        ?: ReadingProgression.LTR,
                 publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
                 imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
                 pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
@@ -450,15 +453,15 @@ class EPUBView(
                         "success" to true,
                         "supportsTTS" to (ttsNavigatorFactory != null),
                         "bookMetadata" to
-                                mapOf(
-                                    "title" to publication.metadata.title,
-                                    "author" to publication.metadata.authors.joinToString(", ") { it.name },
-                                    "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
-                                    "identifier" to (publication.metadata.identifier ?: ""),
-                                    "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
-                                    "totalPages" to positionCount,
-                                    "chapterCount" to publication.readingOrder.size,
-                                ),
+                            mapOf(
+                                "title" to publication.metadata.title,
+                                "author" to publication.metadata.authors.joinToString(", ") { it.name },
+                                "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
+                                "identifier" to (publication.metadata.identifier ?: ""),
+                                "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
+                                "totalPages" to positionCount,
+                                "chapterCount" to publication.readingOrder.size,
+                            ),
                         "tableOfContents" to tableOfContents,
                     ),
                 )
@@ -555,7 +558,6 @@ class EPUBView(
         navigator?.clearSelection()
     }
 
-
     fun setupTTS(publication: Publication) {
         ttsNavigatorFactory = TtsNavigatorFactory(context.applicationContext as android.app.Application, publication)
     }
@@ -564,17 +566,21 @@ class EPUBView(
         val factory = ttsNavigatorFactory ?: return
         coroutineScope.launch {
             val startLocator = locator ?: navigator?.currentLocator?.value
-            val result = factory.createNavigator(
-                listener = object : TtsNavigator.Listener {
-                    override fun onStopRequested() = stopTTS()
-                },
-                initialLocator = startLocator,
-            )
-            val nav = result.getOrNull() ?: run {
-                onTTSStateChange(mapOf("state" to "stopped"))
-                return@launch
-            }
+            val result =
+                factory.createNavigator(
+                    listener =
+                        object : TtsNavigator.Listener {
+                            override fun onStopRequested() = stopTTS()
+                        },
+                    initialLocator = startLocator,
+                )
+            val nav =
+                result.getOrNull() ?: run {
+                    onTTSStateChange(mapOf("state" to "stopped"))
+                    return@launch
+                }
             ttsNavigator = nav
+            nav.submitPreferences(AndroidTtsPreferences(speed = ttsSpeed))
             nav.play()
             observeTTS(nav)
         }
@@ -583,35 +589,67 @@ class EPUBView(
     @OptIn(org.readium.r2.shared.InternalReadiumApi::class)
     private fun observeTTS(nav: AndroidTtsNavigator) {
         ttsObserverJob?.cancel()
-        ttsObserverJob = coroutineScope.launch {
-            nav.location.collect { location ->
-                val decorLocator = location.tokenLocator ?: location.utteranceLocator
-                navigator?.applyDecorations(
-                    listOf(
-                        org.readium.r2.navigator.Decoration(
-                            id = "tts-current",
-                            locator = decorLocator,
-                            style = org.readium.r2.navigator.Decoration.Style.Highlight(
-                                tint = android.graphics.Color.argb(89, 0, 0, 255),
+        ttsObserverJob =
+            coroutineScope.launch {
+                nav.location.collect { location ->
+                    val tokenLocator = location.tokenLocator
+                    if (tokenLocator != null) lastTtsTokenLocator = tokenLocator
+                    val decorLocator = tokenLocator ?: location.utteranceLocator
+                    navigator?.applyDecorations(
+                        listOf(
+                            org.readium.r2.navigator.Decoration(
+                                id = "tts-current",
+                                locator = decorLocator,
+                                style =
+                                    org.readium.r2.navigator.Decoration.Style.Highlight(
+                                        tint = android.graphics.Color.argb(89, 0, 0, 255),
+                                    ),
                             ),
                         ),
-                    ),
-                    ttsDecorationGroup,
-                )
-                onTTSStateChange(
-                    mapOf(
-                        "state" to "playing",
-                        "utteranceLocator" to location.utteranceLocator.toJSON().toMap(),
-                        "rangeLocator" to (location.tokenLocator ?: location.utteranceLocator).toJSON().toMap(),
-                    ),
-                )
+                        ttsDecorationGroup,
+                    )
+                    if (nav.playback.value.playWhenReady) {
+                        onTTSStateChange(
+                            mapOf(
+                                "state" to "playing",
+                                "utteranceLocator" to location.utteranceLocator.toJSON().toMap(),
+                                "rangeLocator" to (location.tokenLocator ?: location.utteranceLocator).toJSON().toMap(),
+                            ),
+                        )
+                    }
+                }
             }
-        }
         coroutineScope.launch {
             nav.playback.collect { playback ->
                 when {
-                    playback.state is TtsNavigator.State.Ended -> stopTTS()
-                    !playback.playWhenReady -> onTTSStateChange(mapOf("state" to "paused"))
+                    playback.state is TtsNavigator.State.Ended -> {
+                        stopTTS()
+                    }
+
+                    !playback.playWhenReady -> {
+                        // android seems to clear the range when paused which causes the decoration to snap to the
+                        // full sentence when paused. so we re-apply the last token spoken to keep it at the
+                        // utterance level. it will snap back to sentence when resumed, but i like how this
+                        // looks more so here we are
+                        lastTtsTokenLocator?.let { tokenLoc ->
+                            coroutineScope.launch {
+                                navigator?.applyDecorations(
+                                    listOf(
+                                        org.readium.r2.navigator.Decoration(
+                                            id = "tts-current",
+                                            locator = tokenLoc,
+                                            style =
+                                                org.readium.r2.navigator.Decoration.Style.Highlight(
+                                                    tint = android.graphics.Color.argb(89, 0, 0, 255),
+                                                ),
+                                        ),
+                                    ),
+                                    ttsDecorationGroup,
+                                )
+                            }
+                        }
+                        onTTSStateChange(mapOf("state" to "paused"))
+                    }
                 }
             }
         }
@@ -622,6 +660,7 @@ class EPUBView(
         ttsObserverJob = null
         ttsNavigator?.close()
         ttsNavigator = null
+        lastTtsTokenLocator = null
         coroutineScope.launch {
             navigator?.applyDecorations(emptyList(), ttsDecorationGroup)
         }
@@ -633,7 +672,12 @@ class EPUBView(
         if (nav.playback.value.playWhenReady) nav.pause() else nav.play()
     }
 
-        override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
+    fun setTTSSpeed(speed: Double) {
+        ttsSpeed = speed
+        ttsNavigator?.submitPreferences(AndroidTtsPreferences(speed = speed))
+    }
+
+    override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
         val rect = event.rect
         val decorationId = event.decoration.id
 
@@ -823,13 +867,13 @@ class EPUBView(
                             // and a bunch of flags in https://developer.android.com/reference/android/view/View
                             @Suppress("DEPRECATION")
                             menuLayout.rootView.systemUiVisibility = (
-                                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                            or View.SYSTEM_UI_FLAG_FULLSCREEN
-                                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                                    )
+                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            )
                         }
                     }
                 },

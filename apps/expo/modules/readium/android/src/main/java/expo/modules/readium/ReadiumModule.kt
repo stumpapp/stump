@@ -155,6 +155,10 @@ class ReadiumModule : Module() {
                     view.pauseOrResumeTTS()
                 }
 
+                AsyncFunction("setTTSSpeed") { view: EPUBView, speed: Double ->
+                    view.setTTSSpeed(speed)
+                }
+
                 Prop("locator") { view: EPUBView, prop: Map<String, Any?>? ->
                     if (prop == null) {
                         Log.d("ReadiumModule", "Received null locator prop")

@@ -18,15 +18,21 @@ sealed class ThumbnailError : Exception() {
         override val message: String get() = "No valid image files found in archive"
     }
 
-    data class ExtractionFailed(override val cause: Throwable) : ThumbnailError() {
+    data class ExtractionFailed(
+        override val cause: Throwable,
+    ) : ThumbnailError() {
         override val message: String get() = "Failed to extract image from archive: ${cause.message}"
     }
 
-    data class DecodingFailed(override val cause: Throwable) : ThumbnailError() {
+    data class DecodingFailed(
+        override val cause: Throwable,
+    ) : ThumbnailError() {
         override val message: String get() = "Failed to decode image to bitmap: ${cause.message}"
     }
 
-    data class SavingFailed(override val cause: Throwable) : ThumbnailError() {
+    data class SavingFailed(
+        override val cause: Throwable,
+    ) : ThumbnailError() {
         override val message: String get() = "Failed to save thumbnail: ${cause.message}"
     }
 }
@@ -34,10 +40,12 @@ sealed class ThumbnailError : Exception() {
 /**
  * Generates thumbnails from comic book archives and ebooks
  */
-class ThumbnailGenerator private constructor(private val context: Context) {
-
+class ThumbnailGenerator private constructor(
+    private val context: Context,
+) {
     companion object {
         private const val TAG = "ThumbnailGenerator"
+
         // Note: This differs from iOS implementation since Swift automagically handles scaling for us
         private const val MAX_THUMBNAIL_SIZE_DP = 300
         private const val JPEG_QUALITY = 80
@@ -46,25 +54,23 @@ class ThumbnailGenerator private constructor(private val context: Context) {
         @Volatile
         private var INSTANCE: ThumbnailGenerator? = null
 
-        fun getInstance(context: Context): ThumbnailGenerator {
-            return INSTANCE ?: synchronized(this) {
+        fun getInstance(context: Context): ThumbnailGenerator =
+            INSTANCE ?: synchronized(this) {
                 INSTANCE ?: ThumbnailGenerator(context.applicationContext).also {
                     INSTANCE = it
                 }
             }
-        }
 
-        private fun stripFilePrefix(path: String): String {
-            return if (path.startsWith("file://")) {
+        private fun stripFilePrefix(path: String): String =
+            if (path.startsWith("file://")) {
                 path.substring(7)
             } else {
                 path
             }
-        }
     }
 
     private val bookService by lazy { BookService(context) }
-    
+
     /**
      * Convert dp to pixels based on the device's density
      */
@@ -75,7 +81,7 @@ class ThumbnailGenerator private constructor(private val context: Context) {
 
     /**
      * Generate a thumbnail for a book
-     * 
+     *
      * @param bookId Unique identifier for the book
      * @param archivePath Path to the archive file
      * @param outputDir Directory to save the thumbnail
@@ -85,7 +91,7 @@ class ThumbnailGenerator private constructor(private val context: Context) {
     fun generateThumbnail(
         bookId: String,
         archivePath: String,
-        outputDir: String
+        outputDir: String,
     ): String {
         val cleanArchivePath = stripFilePrefix(archivePath)
         val cleanOutputDir = stripFilePrefix(outputDir)
@@ -100,14 +106,15 @@ class ThumbnailGenerator private constructor(private val context: Context) {
         val fileExtension = File(cleanArchivePath).extension.lowercase()
         val isReadiumRequired = fileExtension == "epub" || fileExtension == "pdf"
 
-        val bitmap = if (isReadiumRequired) {
-            extractReadiumCover(cleanArchivePath)
-        } else {
-            extractZipCover(cleanArchivePath)
-        }
+        val bitmap =
+            if (isReadiumRequired) {
+                extractReadiumCover(cleanArchivePath)
+            } else {
+                extractZipCover(cleanArchivePath)
+            }
 
         val scaledBitmap = scaleBitmap(bitmap)
-        
+
         if (bitmap != scaledBitmap) {
             bitmap.recycle()
         }
@@ -132,12 +139,13 @@ class ThumbnailGenerator private constructor(private val context: Context) {
      * Extract cover from a zip archive (CBZ, ZIP)
      */
     private fun extractZipCover(archivePath: String): Bitmap {
-        val archive = try {
-            ZipArchive(archivePath)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to open archive", e)
-            throw ThumbnailError.ExtractionFailed(e)
-        }
+        val archive =
+            try {
+                ZipArchive(archivePath)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to open archive", e)
+                throw ThumbnailError.ExtractionFailed(e)
+            }
 
         val imageFiles = archive.getImageFiles()
         if (imageFiles.isEmpty()) {
@@ -148,15 +156,16 @@ class ThumbnailGenerator private constructor(private val context: Context) {
         val firstImage = imageFiles[0]
         Log.d(TAG, "Using first image: ${firstImage.name}")
 
-        val imageData = try {
-            archive.extractEntry(firstImage)
-        } catch (e: Exception) {
-            archive.close()
-            Log.e(TAG, "Failed to extract image", e)
-            throw ThumbnailError.ExtractionFailed(e)
-        } finally {
-            archive.close()
-        }
+        val imageData =
+            try {
+                archive.extractEntry(firstImage)
+            } catch (e: Exception) {
+                archive.close()
+                Log.e(TAG, "Failed to extract image", e)
+                throw ThumbnailError.ExtractionFailed(e)
+            } finally {
+                archive.close()
+            }
 
         return try {
             BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
@@ -170,28 +179,30 @@ class ThumbnailGenerator private constructor(private val context: Context) {
     /**
      * Extract cover from an EPUB/PDF, falling back to ZIP extraction if needed
      */
-    private fun extractReadiumCover(archivePath: String): Bitmap {
-        return runBlocking {
+    private fun extractReadiumCover(archivePath: String): Bitmap =
+        runBlocking {
             val fileUrl = URL("file://$archivePath")
-            
+
             val coverBitmap = bookService.getCoverImage(fileUrl)
-            
+
             if (coverBitmap != null) {
                 Log.d(TAG, "Successfully extracted cover: ${coverBitmap.width}x${coverBitmap.height}")
                 coverBitmap
             } else {
                 if (archivePath.lowercase().endsWith(".pdf")) {
                     throw ThumbnailError.ExtractionFailed(
-                        IllegalStateException("PDF cover extraction failed")
+                        IllegalStateException("PDF cover extraction failed"),
                     )
                 }
                 Log.w(TAG, "Failed to extract cover, falling back to ZIP extraction")
                 extractZipCover(archivePath)
             }
         }
-    }
 
-    fun getThumbnailPath(bookId: String, outputDir: String): String {
+    fun getThumbnailPath(
+        bookId: String,
+        outputDir: String,
+    ): String {
         val cleanOutputDir = stripFilePrefix(outputDir)
         return File(cleanOutputDir, "$bookId.jpg").absolutePath
     }
@@ -207,30 +218,32 @@ class ThumbnailGenerator private constructor(private val context: Context) {
             return original
         }
 
-        val scale = minOf(
-            maxThumbnailSizePixels.toFloat() / width.toFloat(),
-            maxThumbnailSizePixels.toFloat() / height.toFloat()
-        )
+        val scale =
+            minOf(
+                maxThumbnailSizePixels.toFloat() / width.toFloat(),
+                maxThumbnailSizePixels.toFloat() / height.toFloat(),
+            )
 
         val newWidth = (width * scale).toInt()
         val newHeight = (height * scale).toInt()
 
-        Log.d(TAG, "Scaling bitmap from ${width}x${height} to ${newWidth}x${newHeight}")
+        Log.d(TAG, "Scaling bitmap from ${width}x$height to ${newWidth}x$newHeight")
 
         val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(scaledBitmap)
-        
-        val paint = android.graphics.Paint().apply {
-            isAntiAlias = true
-            isFilterBitmap = true
-            isDither = true
-        }
-        
+
+        val paint =
+            android.graphics.Paint().apply {
+                isAntiAlias = true
+                isFilterBitmap = true
+                isDither = true
+            }
+
         val srcRect = android.graphics.Rect(0, 0, width, height)
         val dstRect = android.graphics.Rect(0, 0, newWidth, newHeight)
-        
+
         canvas.drawBitmap(original, srcRect, dstRect, paint)
-        
+
         return scaledBitmap
     }
 }

@@ -8,7 +8,6 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
 class VolumeListenerModule : Module() {
-
     /**
      * Whether the JS side has called startListening(), volatile since it's accessed from both the main thread and the JS thread
      */
@@ -22,26 +21,27 @@ class VolumeListenerModule : Module() {
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    override fun definition() = ModuleDefinition {
-        Name("VolumeListener")
+    override fun definition() =
+        ModuleDefinition {
+            Name("VolumeListener")
 
-        Events("onVolumeUp", "onVolumeDown")
+            Events("onVolumeUp", "onVolumeDown")
 
-        Function("startListening") {
-            isListening = true
-            mainHandler.post { setupKeyInterceptor() }
+            Function("startListening") {
+                isListening = true
+                mainHandler.post { setupKeyInterceptor() }
+            }
+
+            Function("stopListening") {
+                isListening = false
+                mainHandler.post { removeKeyInterceptor() }
+            }
+
+            OnDestroy {
+                isListening = false
+                mainHandler.post { removeKeyInterceptor() }
+            }
         }
-
-        Function("stopListening") {
-            isListening = false
-            mainHandler.post { removeKeyInterceptor() }
-        }
-
-        OnDestroy {
-            isListening = false
-            mainHandler.post { removeKeyInterceptor() }
-        }
-    }
 
     private fun setupKeyInterceptor() {
         val window = appContext.currentActivity?.window ?: return
@@ -49,9 +49,10 @@ class VolumeListenerModule : Module() {
         if (originalCallback != null) return
 
         originalCallback = window.callback
-        window.callback = VolumeKeyCallback(originalCallback) { isUp ->
-            sendEvent(if (isUp) "onVolumeUp" else "onVolumeDown")
-        }
+        window.callback =
+            VolumeKeyCallback(originalCallback) { isUp ->
+                sendEvent(if (isUp) "onVolumeUp" else "onVolumeDown")
+            }
     }
 
     private fun removeKeyInterceptor() {
@@ -73,7 +74,6 @@ class VolumeListenerModule : Module() {
         private val delegate: Window.Callback?,
         private val onVolumeKey: (isUp: Boolean) -> Unit,
     ) : Window.Callback by delegate!! {
-
         override fun dispatchKeyEvent(event: KeyEvent): Boolean {
             if (isListening && event.action == KeyEvent.ACTION_DOWN) {
                 when (event.keyCode) {

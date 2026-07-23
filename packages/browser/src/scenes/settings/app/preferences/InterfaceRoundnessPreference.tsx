@@ -1,12 +1,13 @@
 import { NewCard } from '@stump/components'
 import { InterfaceRoundness } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
 
 import RadioTileGroup from './RadioTileGroup'
 
-// TODO(i18n): add key/values
 export default function InterfaceRoundnessPreference() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { interfaceRoundness },
 		update,
@@ -23,32 +24,29 @@ export default function InterfaceRoundnessPreference() {
 	}
 
 	return (
-		<NewCard.Row
-			label="Interface roundness"
-			description="How rounded the corners are for UI elements"
-		>
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
 			<RadioTileGroup
 				value={interfaceRoundness || InterfaceRoundness.Normal}
 				onChange={handleChange}
 				columns={4}
 				options={[
 					{
-						label: 'None',
+						label: t(getKey('options.none')),
 						value: InterfaceRoundness.None,
 						preview: <RoundnessPreview value={InterfaceRoundness.None} />,
 					},
 					{
-						label: 'Normal',
+						label: t(getKey('options.normal')),
 						value: InterfaceRoundness.Normal,
 						preview: <RoundnessPreview value={InterfaceRoundness.Normal} />,
 					},
 					{
-						label: 'Rounded',
+						label: t(getKey('options.rounded')),
 						value: InterfaceRoundness.Rounded,
 						preview: <RoundnessPreview value={InterfaceRoundness.Rounded} />,
 					},
 					{
-						label: 'Pill',
+						label: t(getKey('options.pill')),
 						value: InterfaceRoundness.Pill,
 						preview: <RoundnessPreview value={InterfaceRoundness.Pill} />,
 					},
@@ -57,6 +55,9 @@ export default function InterfaceRoundnessPreference() {
 		</NewCard.Row>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.interfaceRoundness'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 
 const ROUNDNESS_PREVIEW_RADIUS: Record<InterfaceRoundness, number> = {
 	[InterfaceRoundness.None]: 0,

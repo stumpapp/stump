@@ -124,7 +124,7 @@ async fn get_progress(
 	let user = req.user();
 	let document_cpy = document.clone();
 
-	let latest_query = reading_session::Entity::find()
+	let latest_query = reading_session::ModelWithDevice::find()
 		.inner_join(media::Entity)
 		.filter(reading_session::Column::UserId.eq(user.id.clone()))
 		.filter(media::Column::KoreaderHash.eq(document_cpy.clone()))

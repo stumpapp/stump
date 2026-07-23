@@ -23,8 +23,6 @@ pub enum FileError {
 	#[error("Could not find an image")]
 	NoImageError,
 	#[error("{0}")]
-	PdfError(#[from] pdf::error::PdfError),
-	#[error("{0}")]
 	PdfRendererError(#[from] pdfium_render::prelude::PdfiumError),
 	#[error("Stump is not properly configured to render PDFs")]
 	PdfConfigurationError,
@@ -42,6 +40,8 @@ pub enum FileError {
 	RarReadError,
 	#[error("Error reading RAR byte content")]
 	RarByteReadError(#[from] std::str::Utf8Error),
+	#[error("RAR archive is empty")]
+	RarEmpty,
 	#[error("Unsupported file type: {0}")]
 	UnsupportedFileType(String),
 	#[error("{0}")]
@@ -52,6 +52,8 @@ pub enum FileError {
 	DirectoryReadError,
 	#[error("Incorrect image processor for requested format")]
 	IncorrectProcessorError,
+	#[error("File not found on disk")]
+	NotFound,
 	#[error("An unknown error occurred: {0}")]
 	UnknownError(String),
 }

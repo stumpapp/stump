@@ -1,12 +1,15 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { Alert, TextInput, View } from 'react-native'
+import { Alert, ScrollView, View } from 'react-native'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Button, Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { cn } from '~/lib/utils'
 import { Decoration } from '~/modules/readium'
 
+import AnnotatedText from './AnnotatedText'
+import AnnotationInput from './AnnotationInput'
 import AnnotationSheetHeader from './AnnotationSheetHeader'
 
 export type UpdateAnnotationSheetRef = {
@@ -26,6 +29,7 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 		const [annotation, setAnnotation] = useState('')
 		const [isDirty, setIsDirty] = useState(false)
 		const [isOpen, setIsOpen] = useState(false)
+		const [naturalDetent, setNaturalDetent] = useState<number>(0)
 
 		const colors = useColors()
 
@@ -71,22 +75,25 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 			}
 			setDecoration(null)
 			setIsDirty(false)
+			setNaturalDetent(0)
 		}, [isDirty, decoration, annotation, onAnnotationChange])
 
 		const highlightedText = decoration?.locator?.text?.highlight
 
-		// TODO: Make look better for iOS sheet, either adjust colors or remove glass
 		return (
 			<>
 				<TrueSheet
 					ref={sheetRef}
-					detents={['auto', 1]}
+					detents={['auto']}
 					grabber
-					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
+					backgroundColor={colors.sheet.background}
 					grabberOptions={{
 						color: colors.sheet.grabber,
 					}}
-					onDidPresent={() => setIsOpen(true)}
+					onDidPresent={(e) => {
+						setIsOpen(true)
+						setNaturalDetent(e.nativeEvent.detent)
+					}}
 					onDidDismiss={handleDismiss}
 					header={
 						<AnnotationSheetHeader
@@ -95,38 +102,33 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 							onPrimaryAction={handleSaveAnnotation}
 						/>
 					}
+					scrollable={naturalDetent >= 1}
+					headerStyle={
+						IS_IOS_26_PLUS ? { position: 'absolute', left: 0, right: 0, zIndex: 1 } : undefined
+					}
+					scrollableOptions={{ topScrollEdgeEffect: 'soft' }}
 				>
-					<View className="gap-4 p-4">
-						{highlightedText && (
-							<View className="rounded-lg p-3 bg-background-surface">
-								<Text className="text-foreground-muted italic" numberOfLines={3}>
-									&ldquo;{highlightedText}&rdquo;
-								</Text>
-							</View>
-						)}
+					<ScrollView
+						className={cn('p-4', IS_IOS_26_PLUS && 'pt-20')}
+						scrollEnabled={naturalDetent >= 1}
+					>
+						<View className="gap-4">
+							{highlightedText && <AnnotatedText text={highlightedText} />}
 
-						<View className="gap-2">
-							<Text className="text-foreground-muted">Note</Text>
-							<TextInput
+							<AnnotationInput
 								value={annotation}
 								onChangeText={(text) => {
 									setAnnotation(text)
 									setIsDirty(true)
 								}}
-								placeholder="Enter your notes..."
-								placeholderTextColor={colors.foreground.muted}
-								multiline
-								numberOfLines={3}
-								className="rounded-lg p-3 min-h-[80px] border border-edge bg-background-surface text-foreground"
-								textAlignVertical="top"
 							/>
-						</View>
 
-						{/* TODO: Probably look better as joined button with primary action, however too lazy for that now */}
-						<Button variant="destructive" onPress={handleDelete} roundness="full">
-							<Text className="text-white">Delete</Text>
-						</Button>
-					</View>
+							{/* TODO: Probably look better as joined button with primary action, however too lazy for that now */}
+							<Button variant="destructive" onPress={handleDelete} roundness="full">
+								<Text>Delete</Text>
+							</Button>
+						</View>
+					</ScrollView>
 				</TrueSheet>
 
 				<SheetBackDetection ref={sheetRef} isOpen={isOpen} />

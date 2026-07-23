@@ -2644,7 +2644,8 @@
 			"someRejected": "Einige Dateien wurden abgelehnt. Bitte überprüfe die Dateitypen und versuche es erneut",
 			"tooManyFiles": "Du hast zu viele Dateien ausgewählt",
 			"noValidFiles": "Es wurden keine gültigen Dateien ausgewählt"
-		}
+		},
+		"unknownError": "Ein unbekannter Fehler ist aufgetreten"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2835,15 +2836,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Als gelesen markieren",
-				"confirmation": "Bist du dir sicher, dass du {{bookTitle}} als gelesen markieren möchtest?"
+				"confirmation": "Bist du dir sicher, dass du {{bookTitle}} als gelesen markieren möchtest?",
+				"failure": "Fehler beim Markieren des Buches als gelesen"
 			},
 			"clearProgress": {
 				"label": "Fortschritt löschen",
-				"confirmation": "Bist du dir sicher, dass du den Fortschritt für {{bookTitle}} löschen möchtest?"
+				"confirmation": "Bist du dir sicher, dass du den Fortschritt für {{bookTitle}} löschen möchtest?",
+				"failure": "Fehler beim Löschen des aktuellen Fortschritts"
 			},
 			"deleteReadHistory": {
 				"label": "Leseverlauf löschen",
-				"confirmation": "Bist du dir sicher, dass du den Leseverlauf für {{bookTitle}} löschen möchtest?"
+				"confirmation": "Bist du dir sicher, dass du den Leseverlauf für {{bookTitle}} löschen möchtest?",
+				"failure": "Fehler beim Löschen des Leseverlaufs"
 			},
 			"deleteBook": {
 				"label": "Buch löschen",

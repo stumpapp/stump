@@ -5,7 +5,7 @@ import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
-import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useColors } from '~/lib/constants'
 import { PortalHostContext } from '~/lib/PortalHostContext'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
@@ -30,7 +30,7 @@ export default function AnnotationsSheet() {
 				detents={[1]}
 				scrollable
 				grabber
-				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				style={{
 					paddingBottom: insets.bottom,

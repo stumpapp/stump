@@ -1,17 +1,18 @@
 import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list'
-import { getColor, serialize } from 'colorjs.io/fn'
 import { GlassView } from 'expo-glass-effect'
 import { Search } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Platform, Pressable, TextInput, View } from 'react-native'
-import { useKeyboardHandler } from 'react-native-keyboard-controller'
+import { useKeyboardHandler, useKeyboardState } from 'react-native-keyboard-controller'
 import Animated from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
 
 import { ThumbnailImage } from '~/components/image'
+import { DraftNumber } from '~/components/keyboard'
 import { Heading, Icon, Text } from '~/components/ui'
-import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
-import { DraftNumber, useTranslate } from '~/lib/hooks'
+import { IS_IOS_26_PLUS, useColors, usePalette } from '~/lib/constants'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { ReadiumLocator } from '~/modules/readium'
@@ -29,11 +30,17 @@ type Props = {
 
 export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props) {
 	const colors = useColors()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const { t } = useTranslate()
 	const { getRequestHeaders } = useEpubReaderContext()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const { height } = useDisplay()
+	const insets = useSafeAreaInsets()
+	const keyboardVisible = useKeyboardState((state) => state.isVisible)
 
+	const selectionColor = usePalette('accent')
+
+	// FIXME: items behind the keyboard are viewableItems from the flashlist, but they shouldn't be counted
+	// and probably change to just use up and down arrows if keyboard is shown
 	const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
 	const [textInputWidth, setTextInputWidth] = useState<number>()
 
@@ -103,9 +110,9 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 	)
 
 	const showTopIndicator =
-		isOpen && activeTocItemIndex !== -1 && activeTocItemIndex < visibleRange.min
+		isOpen && !keyboardVisible && activeTocItemIndex !== -1 && activeTocItemIndex < visibleRange.min
 	const showBottomIndicator =
-		isOpen && activeTocItemIndex !== -1 && activeTocItemIndex > visibleRange.max
+		isOpen && !keyboardVisible && activeTocItemIndex !== -1 && activeTocItemIndex > visibleRange.max
 
 	const onViewableItemsChanged = useCallback(
 		({ viewableItems }: { viewableItems: ViewToken<TableOfContentsItemWithLevel>[] }) => {
@@ -119,11 +126,17 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 		[],
 	)
 
+	// truesheet's height on ios when scrollable=true is a device height, which is too big, but
+	// iPad has floating sheets so this calculation doesn't work, and android was already fine
+	// i *think* this is the issue https://github.com/lodev09/react-native-true-sheet/issues/708
+	const style =
+		Platform.OS === 'ios' && !Platform.isPad ? { height: height - insets.top } : { flex: 1 }
+
 	if (!book) return
 
 	return (
 		<>
-			<View className="flex-1">
+			<View style={style}>
 				<View className="px-4 gap-4 pb-4 pt-6 flex-row">
 					<ThumbnailImage
 						source={{
@@ -158,7 +171,7 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 									hitSlop={50}
 									placeholderTextColor="#898d94"
 									keyboardType="number-pad"
-									selectionColor={accentColor || colors.fill.brand.DEFAULT}
+									selectionColor={selectionColor}
 									placeholder={t('tableOfContents.goToPagePlaceholder')}
 									onLayout={(e) => setTextInputWidth(e.nativeEvent.layout.width)}
 									onChangeText={(text) => goToPage.setString(text)}
@@ -207,7 +220,7 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 					{showBottomIndicator && (
 						<ScrollToChapterIndicator
 							onPress={() => scrollToCurrentChapter({ animated: true })}
-							className="bottom-safe-offset-2"
+							className="bottom-safe-or-6"
 						/>
 					)}
 				</View>
@@ -252,16 +265,16 @@ const TableOfContentsListItem = ({
 	}
 
 	const { isDarkColorScheme } = useColorScheme()
-	const colors = useColors()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-
-	const color = getColor(accentColor || colors.fill.brand.DEFAULT)
-	color.alpha = isDarkColorScheme ? 0.1 : 0.15
-	const backgroundColor = serialize(color, { format: 'hex' })
-
 	const isChild = level > 0
-	color.alpha = isDarkColorScheme ? (isChild ? 0.5 : 0.8) : isChild ? 0.7 : 0.9
-	const textColor = serialize(color, { format: 'hex' })
+
+	const palette = usePalette({
+		text: {
+			light: 400,
+			dark: 400,
+			opacity: isDarkColorScheme ? (isChild ? 0.6 : 1) : isChild ? 0.8 : 1,
+		},
+		background: { light: 400, dark: 600, opacity: 0.15 },
+	})
 
 	return (
 		<View>
@@ -272,7 +285,7 @@ const TableOfContentsListItem = ({
 							className={cn('squircle inset-0 absolute rounded-[1.25rem]')}
 							style={[
 								{ opacity: pressed ? 0.7 : 1, marginLeft: 6 + level * 16, marginRight: 6 },
-								currentChapterActive && { backgroundColor: backgroundColor },
+								currentChapterActive && { backgroundColor: palette.background },
 							]}
 						/>
 
@@ -286,7 +299,7 @@ const TableOfContentsListItem = ({
 									currentChapterActive && 'font-bold',
 									isChild && 'text-foreground-muted',
 								)}
-								style={currentChapterActive && { color: textColor }}
+								style={currentChapterActive && { color: palette.text }}
 							>
 								{item.label}
 							</Text>
@@ -295,7 +308,7 @@ const TableOfContentsListItem = ({
 									'py-4 text-base text-foreground-muted shrink-0',
 									currentChapterActive && 'font-bold',
 								)}
-								style={currentChapterActive && { color: textColor }}
+								style={currentChapterActive && { color: palette.text }}
 							>
 								{item.position || t('common.notAvailable')}
 							</Text>
@@ -330,9 +343,8 @@ const ScrollToChapterIndicator = ({
 	className?: string
 }) => {
 	const { t } = useTranslate()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-	const colors = useColors()
-	const textColor = accentColor || colors.fill.brand.DEFAULT
+
+	const textColor = usePalette('accent')
 
 	return (
 		<Animated.View

@@ -118,7 +118,7 @@ impl ModelWithDevice {
 			*/
 			// which _works_ but the former condition is redundant and will never actually match anything,
 			// but sea-orm seems to always imbue the join with that default predicate...
-			.join_rev(
+			.join(
 				JoinType::LeftJoin,
 				Entity::belongs_to(reading_device::Entity)
 					.from(Column::DeviceIds)

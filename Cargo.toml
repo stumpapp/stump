@@ -14,7 +14,7 @@ exclude = [
 ]
 
 [workspace.package]
-version = "0.1.4"
+version = "0.1.5"
 rust-version = "1.92.0"
 
 # I've defined majority of dependencies here in the workspace so that they are
@@ -41,6 +41,7 @@ derive_builder = "0.20.2"
 derivative = "2.2.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.48", features = ["derive"] }
+croner = "3.0.1"
 english-to-cron = "0.1.7"
 futures = "0.3.31"
 futures-util = "0.3.31"

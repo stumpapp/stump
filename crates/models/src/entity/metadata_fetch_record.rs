@@ -25,6 +25,10 @@ pub struct Model {
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
 	pub accepted_match_candidate: Option<JsonValue>, // auto or manual
+	/// The total number of raw hits reported by provider searches, across all
+	/// providers searched. Compare against `match_candidates.len()` to detect when
+	/// hits were dropped (e.g. a per-hit detail fetch failed after the initial search).
+	pub raw_hits: i32,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub added_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -78,6 +82,9 @@ impl ActiveModelBehavior for ActiveModel {
 			self.added_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
 			if self.status.is_not_set() {
 				self.status = ActiveValue::Set(MetadataFetchStatus::NotStarted);
+			}
+			if self.raw_hits.is_not_set() {
+				self.raw_hits = ActiveValue::Set(0);
 			}
 		} else {
 			self.updated_at =

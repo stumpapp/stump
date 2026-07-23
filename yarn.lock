@@ -6664,16 +6664,16 @@
   resolved "https://registry.yarnpkg.com/@shopify/flash-list/-/flash-list-2.1.0.tgz#b1eefcf9fbd01ca04a5f24a6003cda3b46a59f64"
   integrity sha512-/EIQlptG456yM5o9qNmNsmaZEFEOGvG3WGyb6GUAxSLlcKUGlPUkPI2NLW5wQSDEY4xSRa5zocUI+9xwmsM4Kg==
 
-"@shopify/react-native-skia@2.6.2":
-  version "2.6.2"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-2.6.2.tgz#30181907b373dd292cc23e1f9870151f07fb698f"
-  integrity sha512-NzZ3+MRedZAUhguWw9DTCpWFd09Bq+tdGWhimGfJLGckuyoWGyimTiNTmaO2DeeivHTnGdv+eXbw7j/AV3LkRQ==
+"@shopify/react-native-skia@^2.6.4":
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-2.10.0.tgz#2feab42b215ecf8bd8b811afe8a85be3b58c29aa"
+  integrity sha512-kw6XK5FaoUQ7FcAM7jcOlQI5xXI9H6SGSKoPAsiAqPSnzvd4+/mMjeT05/hoOTf/aRjvz3Li0eTQHB+JC9mJGg==
   dependencies:
     canvaskit-wasm "0.41.0"
-    react-native-skia-android "147.1.0"
-    react-native-skia-apple-ios "147.1.0"
-    react-native-skia-apple-macos "147.1.0"
-    react-native-skia-apple-tvos "147.1.0"
+    react-native-skia-android "150.0.0"
+    react-native-skia-apple-ios "150.0.0"
+    react-native-skia-apple-macos "150.0.0"
+    react-native-skia-apple-tvos "150.0.0"
     react-reconciler "0.31.0"
 
 "@sigstore/bundle@^4.0.0":
@@ -13514,7 +13514,7 @@ expo-status-bar@~56.0.4:
   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-56.0.4.tgz#01a0b6f9946ae51fe9d85c961ae9b485383cfcab"
   integrity sha512-IGs/fDfkHXofy2ZQrGiXayhFK04HB85FZXorhcEhDZEcqASKgSqpak+HwUtAaR0MeTJwWyHNF7I6VmVbbp8EcA==
 
-expo-symbols@^56.0.6:
+expo-symbols@^56.0.5, expo-symbols@^56.0.6:
   version "56.0.6"
   resolved "https://registry.yarnpkg.com/expo-symbols/-/expo-symbols-56.0.6.tgz#02e5f6154e0a7445981ea3634d8069cfe3148fb1"
   integrity sha512-BrA81DjcNafdj7gXVhdrExb9LtUiSVyOf/NavyMmDAHgHMY1GqeR5cnn1PSAZeYKnSgQhee/H89XUpAxtog5hg==
@@ -13522,18 +13522,10 @@ expo-symbols@^56.0.6:
     "@expo-google-fonts/material-symbols" "^0.4.1"
     sf-symbols-typescript "^2.0.0"
 
-expo-symbols@^55.0.9:
-  version "55.0.9"
-  resolved "https://registry.yarnpkg.com/expo-symbols/-/expo-symbols-55.0.9.tgz#2595e39f5e92a5e428361bd030fd0fcd04818b69"
-  integrity sha512-F85C/8ExQjd2gYjasLVKMT8wPj+1+19TVTqg4jAeVjVZklqiQtLO72io9Ji1xAjYNgmDeUI0diVHlFMMTC4Ekg==
-  dependencies:
-    "@expo-google-fonts/material-symbols" "^0.4.1"
-    sf-symbols-typescript "^2.0.0"
-
-expo-system-ui@~55.0.18:
-  version "55.0.18"
-  resolved "https://registry.yarnpkg.com/expo-system-ui/-/expo-system-ui-55.0.18.tgz#dabd6c872e4c71d12e6ba512733be8f5387a2028"
-  integrity sha512-Fbc0HJgqMpABeA/gI7NJFnSXwUeLrEMjjXq8Nl+4gTXyacIK2iOOrzCkvq41rKBBde0CR6kVnB1DXj0j9ZYnjg==
+expo-system-ui@~56.0.5:
+  version "56.0.5"
+  resolved "https://registry.yarnpkg.com/expo-system-ui/-/expo-system-ui-56.0.5.tgz#c23c3dc772c41df356dfa620071e5b4f479c7de2"
+  integrity sha512-n1MmnUArV4cc3gVed9fGtluPme00PE9axKVx+NHbKxHFMam5l4GcOI7PxbYKFNx8o7WA1LRD7eLW33agmZrxGg==
   dependencies:
     "@react-native/normalize-colors" "0.85.3"
     debug "^4.3.2"
@@ -21004,25 +20996,25 @@ react-native-screens@^4.25.2, react-native-screens@~4.25.2:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
-react-native-skia-android@147.1.0:
-  version "147.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-skia-android/-/react-native-skia-android-147.1.0.tgz#aea026cca4fe1b481064edb95787fe6d683d9abe"
-  integrity sha512-pWA0M0G74AhjEop0HLCkjWJMup2HJxOmuUjfPt6kSDhYeWKVx8AEzWh0Fh19ah78zE/s4hD0Of0Tyem5shhiTg==
+react-native-skia-android@150.0.0:
+  version "150.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-skia-android/-/react-native-skia-android-150.0.0.tgz#72b98b9f4a68f7a8744656a7e078b6b72d6d374e"
+  integrity sha512-Eiv52NT6Y1eB8ZGmM8Uz01SQ+U8OAaDy2WSpPQQCpvfCWid1ufpsh1YhWVGrW55IJdJWm6/8DJTDEyQsJLH5ew==
 
-react-native-skia-apple-ios@147.1.0:
-  version "147.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-skia-apple-ios/-/react-native-skia-apple-ios-147.1.0.tgz#c9e850e3bf657796ed81f85562ea594bb78e7d39"
-  integrity sha512-cr4rWe4Bf0H0TTutUp5cgHt5/Felttl1bh4BAAAsgAeL2F10FAK9urX8spjUshzMwjqXD7rNOWuFzU6ZcNlGKw==
+react-native-skia-apple-ios@150.0.0:
+  version "150.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-skia-apple-ios/-/react-native-skia-apple-ios-150.0.0.tgz#0cb380d65adf6a0e77430169be81a47725937e43"
+  integrity sha512-RrJHQEcsPUN8i/KqBwqEIQ6MmbMvL3nWtlJPQ+K5n6Nw4SF0W9VhL2yf2/jguX0WWydMyR5R4pSrJprfWFBMAg==
 
-react-native-skia-apple-macos@147.1.0:
-  version "147.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-skia-apple-macos/-/react-native-skia-apple-macos-147.1.0.tgz#aea3e4b8de088aa94d7fe4739d2c56d8fefd4eee"
-  integrity sha512-Qbv0Y7LgawtRKuGk8gnGeh8nDWwNiu03LcX0mVaQzBBbxFDYvqejanA+AkO3p8gsQb+fsXRc9DAk+U8cBnzZvA==
+react-native-skia-apple-macos@150.0.0:
+  version "150.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-skia-apple-macos/-/react-native-skia-apple-macos-150.0.0.tgz#67129daa0009ea3cb0ae847ace5467829003e06b"
+  integrity sha512-CBqQvaWRl5U+jBjUPbTGrf3g6M0GM7S0g6Ia6QK91K2G5xkMwrzs9l03zheYSdLzTtRCnW+Tkyws7K4whDJc3g==
 
-react-native-skia-apple-tvos@147.1.0:
-  version "147.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-skia-apple-tvos/-/react-native-skia-apple-tvos-147.1.0.tgz#99710d8f3740c6d03cc8ac1564c368a13bdd2210"
-  integrity sha512-b+4vILXHPu++t8H41PHLBVsTab2LPqwXNdzgdScyl4+Cu8Ta34aUQW3T469cB0ogAMPdu//KV00w4YVpDZoRUQ==
+react-native-skia-apple-tvos@150.0.0:
+  version "150.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-skia-apple-tvos/-/react-native-skia-apple-tvos-150.0.0.tgz#f591fd1c6c67584a396bb2c5e9136d77880c5ea5"
+  integrity sha512-W1oDsSGK+nRvPu2/b1tUWvOorbYTjhJ3SLWDPAIWH43mSgfdn3zws3AZttfJO81Qmqpf3blJrFCoCzASRdi7qg==
 
 react-native-super-grid@^6.0.1:
   version "6.0.2"

@@ -5,9 +5,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createTestDb, dbProxy, type TestDb } from '~/__tests__/utils/db'
 import { downloadedFiles, readProgress, syncStatus } from '~/db/schema'
 
-vi.mock('@stump/graphql', () => ({
-	graphql: vi.fn((q) => q),
-}))
+vi.mock('@stump/graphql', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@stump/graphql')>()
+	return {
+		...actual,
+		graphql: vi.fn((q) => q),
+	}
+})
 
 vi.mock('~/db', async () => {
 	const { createDbMock } = await import('~/__tests__/utils/db')
@@ -19,6 +23,7 @@ const loadPushProgressFn = () =>
 
 const SERVER_ID = 'server-1'
 const BOOK_ID = 'book-1'
+const MOCK_UPDATED_AT = '2026-06-03T12:00:00.000Z'
 
 async function seedBook(db: TestDb, bookId = BOOK_ID) {
 	await db.insert(downloadedFiles).values({
@@ -37,6 +42,7 @@ async function seedProgress(
 		syncStatus?: string
 		elapsedSeconds?: number
 		lastSyncedElapsedSeconds?: number
+		pendingReset?: boolean
 	} = {},
 ) {
 	await db.insert(readProgress).values({
@@ -48,6 +54,7 @@ async function seedProgress(
 		percentage: '0.25',
 		syncStatus: overrides.syncStatus ?? syncStatus.enum.UNSYNCED,
 		lastModified: new Date(),
+		pendingReset: overrides.pendingReset ?? false,
 	})
 }
 
@@ -55,7 +62,13 @@ function makeMockApi(opts: { shouldFail?: boolean } = {}) {
 	return {
 		execute: opts.shouldFail
 			? vi.fn().mockRejectedValue(new Error('network error'))
-			: vi.fn().mockResolvedValue({ updateMediaProgress: { __typename: 'MediaProgress' } }),
+			: vi.fn().mockImplementation((query: string) => {
+					// reset mutation returns a bool
+					if (typeof query === 'string' && query.includes('resetElapsedSeconds')) {
+						return Promise.resolve(true)
+					}
+					return Promise.resolve({ updateMediaProgress: { updatedAt: MOCK_UPDATED_AT } })
+				}),
 	} as unknown as Api
 }
 
@@ -101,19 +114,22 @@ describe('what gets pushed', () => {
 		expect(api.execute).toHaveBeenCalledOnce()
 	})
 
-	it.each([syncStatus.enum.SYNCING, syncStatus.enum.SYNCED])('skips %s records', async (status) => {
-		const db = dbProxy.current
-		const executePushProgressSync = await loadPushProgressFn()
+	it.each([syncStatus.enum.SYNCING, syncStatus.enum.SYNCED, syncStatus.enum.CONFLICT])(
+		'skips %s records',
+		async (status) => {
+			const db = dbProxy.current
+			const executePushProgressSync = await loadPushProgressFn()
 
-		await seedBook(db)
-		await seedProgress(db, { syncStatus: status })
+			await seedBook(db)
+			await seedProgress(db, { syncStatus: status })
 
-		const api = makeMockApi()
-		const results = await executePushProgressSync({ [SERVER_ID]: api })
+			const api = makeMockApi()
+			const results = await executePushProgressSync({ [SERVER_ID]: api })
 
-		expect(results[SERVER_ID]!.syncedCount).toBe(0)
-		expect(api.execute).not.toHaveBeenCalled()
-	})
+			expect(results[SERVER_ID]!.syncedCount).toBe(0)
+			expect(api.execute).not.toHaveBeenCalled()
+		},
+	)
 
 	it('respects ignoreBookIds and skips pushing those', async () => {
 		const db = dbProxy.current
@@ -167,7 +183,7 @@ describe('errors', () => {
 			execute: vi.fn().mockImplementation(() => {
 				callCount++
 				if (callCount === 1) return Promise.reject(new Error('network error'))
-				return Promise.resolve({ updateMediaProgress: { __typename: 'MediaProgress' } })
+				return Promise.resolve({ updateMediaProgress: { updatedAt: MOCK_UPDATED_AT } })
 			}),
 		} as unknown as Api
 
@@ -239,5 +255,99 @@ describe('elapsedSeconds delta', () => {
 			input: { paged: { elapsedSecondsDelta?: number } }
 		}
 		expect(payload.input.paged.elapsedSecondsDelta).toBeUndefined()
+	})
+})
+
+describe('pendingReset', () => {
+	it('calls the reset mutation when pendingReset is true', async () => {
+		const db = dbProxy.current
+		const executePushProgressSync = await loadPushProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			elapsedSeconds: 120,
+			lastSyncedElapsedSeconds: 900,
+			pendingReset: true,
+		})
+
+		const api = makeMockApi()
+		await executePushProgressSync({ [SERVER_ID]: api })
+
+		expect(api.execute).toHaveBeenCalledTimes(2)
+		const firstCall = (api.execute as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string
+		expect(firstCall).toContain('resetElapsedSeconds')
+	})
+
+	it('sends elapsedSeconds directly as the delta after a reset', async () => {
+		const db = dbProxy.current
+		const executePushProgressSync = await loadPushProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			elapsedSeconds: 120,
+			lastSyncedElapsedSeconds: 900,
+			pendingReset: true,
+		})
+
+		const api = makeMockApi()
+		await executePushProgressSync({ [SERVER_ID]: api })
+
+		const progressCall = (api.execute as ReturnType<typeof vi.fn>).mock.calls[1]![1] as {
+			input: { paged: { elapsedSecondsDelta?: number } }
+		}
+		expect(progressCall.input.paged.elapsedSecondsDelta).toBe(120)
+
+		// cleared + pushed -> should be synced without pendingReset
+		const after = await db
+			.select()
+			.from(readProgress)
+			.where(eq(readProgress.bookId, BOOK_ID))
+			.then((r) => r[0])
+		expect(after!.pendingReset).toBe(false)
+		expect(after!.syncStatus).toBe(syncStatus.enum.SYNCED)
+	})
+
+	it('marks ERROR and does not clear pendingReset when the push fails', async () => {
+		const db = dbProxy.current
+		const executePushProgressSync = await loadPushProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			elapsedSeconds: 120,
+			lastSyncedElapsedSeconds: 900,
+			pendingReset: true,
+		})
+
+		const api = makeMockApi({ shouldFail: true })
+		await executePushProgressSync({ [SERVER_ID]: api })
+
+		const after = await db
+			.select()
+			.from(readProgress)
+			.where(eq(readProgress.bookId, BOOK_ID))
+			.then((r) => r[0])
+		expect(after!.pendingReset).toBe(true)
+		expect(after!.syncStatus).toBe(syncStatus.enum.ERROR)
+	})
+
+	it('does not call the reset mutation if pendingReset is false', async () => {
+		const db = dbProxy.current
+		const executePushProgressSync = await loadPushProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			pendingReset: false,
+		})
+
+		const api = makeMockApi()
+		await executePushProgressSync({ [SERVER_ID]: api })
+
+		expect(api.execute).toHaveBeenCalledOnce()
+		const calledQuery = (api.execute as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string
+		expect(calledQuery).not.toContain('resetElapsedSeconds')
 	})
 })

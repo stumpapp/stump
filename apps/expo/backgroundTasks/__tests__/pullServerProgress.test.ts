@@ -32,6 +32,7 @@ const loadPullProgressFn = () =>
 const SERVER_ID = 'server-1'
 const BOOK_ID = 'book-1'
 const OLDER_DATE = '2026-06-01T00:00:00.000Z'
+const MID_DATE = '2026-06-02T00:00:00.000Z'
 const NEWER_DATE = '2026-06-03T00:00:00.000Z'
 
 async function seedBook(db: TestDb, bookId = BOOK_ID) {
@@ -52,6 +53,7 @@ async function seedProgress(
 		elapsedSeconds?: number
 		lastSyncedElapsedSeconds?: number
 		lastModified?: Date
+		lastPulledSessionUpdatedAt?: Date | null
 	} = {},
 ) {
 	await db.insert(readProgress).values({
@@ -63,6 +65,9 @@ async function seedProgress(
 		percentage: '0.25',
 		syncStatus: overrides.syncStatus ?? syncStatus.enum.SYNCED,
 		lastModified: overrides.lastModified ?? new Date(OLDER_DATE),
+		...(overrides.lastPulledSessionUpdatedAt !== undefined
+			? { lastPulledSessionUpdatedAt: overrides.lastPulledSessionUpdatedAt }
+			: {}),
 	})
 }
 
@@ -312,5 +317,102 @@ describe('lastSyncedElapsedSeconds tracking', () => {
 
 		expect(after).toBeTruthy()
 		expect(after!.lastSyncedElapsedSeconds).toBe(after!.elapsedSeconds)
+	})
+})
+
+describe('conflicts', () => {
+	it('marks record as CONFLICT when server is newer than lastPulledSessionUpdatedAt', async () => {
+		const db = dbProxy.current
+		const executeSingleServerPullSync = await loadPullProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			lastModified: new Date(NEWER_DATE),
+			lastPulledSessionUpdatedAt: new Date(OLDER_DATE),
+		})
+
+		const api = makeMockApi([
+			makeServerMedia({
+				readProgress: {
+					page: 20,
+					percentageCompleted: '0.75',
+					epubcfi: null,
+					updatedAt: MID_DATE,
+					elapsedSeconds: 1200,
+					locator: null,
+				},
+			}),
+		])
+		await executeSingleServerPullSync(SERVER_ID, api as never)
+
+		const after = await db
+			.select()
+			.from(readProgress)
+			.where(eq(readProgress.bookId, BOOK_ID))
+			.then((r) => r[0])
+
+		expect(after!.syncStatus).toBe(syncStatus.enum.CONFLICT)
+		// local data should not be overwritten
+		expect(after!.page).toBe(5)
+		expect(after!.elapsedSeconds).toBe(300)
+	})
+
+	it('does not mark CONFLICT when server is not newer than lastPulledSessionUpdatedAt', async () => {
+		const db = dbProxy.current
+		const executeSingleServerPullSync = await loadPullProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			lastModified: new Date(NEWER_DATE),
+			lastPulledSessionUpdatedAt: new Date(MID_DATE),
+		})
+
+		// server updatedAt = anchor -> no conflict
+		const api = makeMockApi([
+			makeServerMedia({
+				readProgress: {
+					page: 20,
+					percentageCompleted: '0.75',
+					epubcfi: null,
+					updatedAt: MID_DATE,
+					elapsedSeconds: 1200,
+					locator: null,
+				},
+			}),
+		])
+		await executeSingleServerPullSync(SERVER_ID, api as never)
+
+		const after = await db
+			.select()
+			.from(readProgress)
+			.where(eq(readProgress.bookId, BOOK_ID))
+			.then((r) => r[0])
+
+		expect(after!.syncStatus).not.toBe(syncStatus.enum.CONFLICT)
+	})
+
+	it('does not mark CONFLICT when lastPulledSessionUpdatedAt is not set', async () => {
+		const db = dbProxy.current
+		const executeSingleServerPullSync = await loadPullProgressFn()
+
+		await seedBook(db)
+		await seedProgress(db, {
+			syncStatus: syncStatus.enum.UNSYNCED,
+			lastModified: new Date(NEWER_DATE),
+			lastPulledSessionUpdatedAt: null,
+		})
+
+		const api = makeMockApi([makeServerMedia()])
+		await executeSingleServerPullSync(SERVER_ID, api as never)
+
+		const after = await db
+			.select()
+			.from(readProgress)
+			.where(eq(readProgress.bookId, BOOK_ID))
+			.then((r) => r[0])
+
+		expect(after!.syncStatus).not.toBe(syncStatus.enum.CONFLICT)
 	})
 })

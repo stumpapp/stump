@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import expo.modules.kotlin.types.ValueOrUndefined
 import org.json.JSONObject
 import org.readium.r2.navigator.preferences.ColumnCount
 import org.readium.r2.navigator.preferences.FontFamily
@@ -99,6 +100,7 @@ class ReadiumModule : Module() {
                     "onDoubleTouch",
                     "onError",
                     "onReachedEnd",
+                    "onTTSStateChange",
                 )
 
                 Prop("bookId") { view: EPUBView, prop: String ->
@@ -138,6 +140,19 @@ class ReadiumModule : Module() {
 
                 AsyncFunction("clearSelection") { view: EPUBView ->
                     view.clearSelection()
+                }
+
+                AsyncFunction("startTTS") { view: EPUBView, locatorMap: Map<String, Any?>? ->
+                    val locator = locatorMap?.let { Locator.fromJSON(JSONObject(it)) }
+                    view.startTTS(locator)
+                }
+
+                AsyncFunction("stopTTS") { view: EPUBView ->
+                    view.stopTTS()
+                }
+
+                AsyncFunction("pauseOrResumeTTS") { view: EPUBView ->
+                    view.pauseOrResumeTTS()
                 }
 
                 Prop("locator") { view: EPUBView, prop: Map<String, Any?>? ->

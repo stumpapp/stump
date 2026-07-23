@@ -46,6 +46,10 @@ import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.AbsoluteUrl
+import org.readium.navigator.media.tts.AndroidTtsNavigator
+import org.readium.navigator.media.tts.AndroidTtsNavigatorFactory
+import org.readium.navigator.media.tts.TtsNavigator
+import org.readium.navigator.media.tts.TtsNavigatorFactory
 import java.net.URL
 
 data class DecorationItem(
@@ -141,6 +145,7 @@ class EPUBView(
     val onDoubleTouch by EventDispatcher()
     val onError by EventDispatcher()
     val onReachedEnd by EventDispatcher()
+    val onTTSStateChange by EventDispatcher()
 
     var navigator: EpubNavigatorFragment? = null
     private var publication: Publication? = null
@@ -148,6 +153,13 @@ class EPUBView(
     private var totalPositions: Int = 0
 
     private val highlightDecorationGroup = "highlights"
+    private val ttsDecorationGroup = "tts"
+
+    // returns null when publication.content() is null
+    // see: https://github.com/readium/kotlin-toolkit/blob/3.1.1/readium/navigators/media/tts/src/main/java/org/readium/navigator/media/tts/TtsNavigatorFactory.kt#L113-L114
+    private var ttsNavigatorFactory: AndroidTtsNavigatorFactory? = null
+    private var ttsNavigator: AndroidTtsNavigator? = null
+    private var ttsObserverJob: Job? = null
 
     val pendingProps = Props()
     var props: FinalizedProps? = null
@@ -332,6 +344,8 @@ class EPUBView(
     fun destroyNavigator() {
         Log.d("EPUBView", "destroyNavigator called")
 
+        stopTTS()
+
         val navigator =
             this.navigator ?: run {
                 Log.d("EPUBView", "Navigator already destroyed")
@@ -424,6 +438,7 @@ class EPUBView(
             Log.d("EPUBView", "Publication loaded successfully: ${publication?.metadata?.title}")
 
             initializeNavigator()
+            setupTTS(publication)
 
             val tableOfContents = convertLinksToToc(publication.tableOfContents)
             val positionCount = publication.positions().size
@@ -433,6 +448,7 @@ class EPUBView(
                 onBookLoaded(
                     mapOf(
                         "success" to true,
+                        "supportsTTS" to (ttsNavigatorFactory != null),
                         "bookMetadata" to
                                 mapOf(
                                     "title" to publication.metadata.title,
@@ -539,7 +555,85 @@ class EPUBView(
         navigator?.clearSelection()
     }
 
-    override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
+
+    fun setupTTS(publication: Publication) {
+        ttsNavigatorFactory = TtsNavigatorFactory(context.applicationContext as android.app.Application, publication)
+    }
+
+    fun startTTS(locator: Locator? = null) {
+        val factory = ttsNavigatorFactory ?: return
+        coroutineScope.launch {
+            val startLocator = locator ?: navigator?.currentLocator?.value
+            val result = factory.createNavigator(
+                listener = object : TtsNavigator.Listener {
+                    override fun onStopRequested() = stopTTS()
+                },
+                initialLocator = startLocator,
+            )
+            val nav = result.getOrNull() ?: run {
+                onTTSStateChange(mapOf("state" to "stopped"))
+                return@launch
+            }
+            ttsNavigator = nav
+            nav.play()
+            observeTTS(nav)
+        }
+    }
+
+    @OptIn(org.readium.r2.shared.InternalReadiumApi::class)
+    private fun observeTTS(nav: AndroidTtsNavigator) {
+        ttsObserverJob?.cancel()
+        ttsObserverJob = coroutineScope.launch {
+            nav.location.collect { location ->
+                val decorLocator = location.tokenLocator ?: location.utteranceLocator
+                navigator?.applyDecorations(
+                    listOf(
+                        org.readium.r2.navigator.Decoration(
+                            id = "tts-current",
+                            locator = decorLocator,
+                            style = org.readium.r2.navigator.Decoration.Style.Highlight(
+                                tint = android.graphics.Color.argb(89, 0, 0, 255),
+                            ),
+                        ),
+                    ),
+                    ttsDecorationGroup,
+                )
+                onTTSStateChange(
+                    mapOf(
+                        "state" to "playing",
+                        "utteranceLocator" to location.utteranceLocator.toJSON().toMap(),
+                        "rangeLocator" to (location.tokenLocator ?: location.utteranceLocator).toJSON().toMap(),
+                    ),
+                )
+            }
+        }
+        coroutineScope.launch {
+            nav.playback.collect { playback ->
+                when {
+                    playback.state is TtsNavigator.State.Ended -> stopTTS()
+                    !playback.playWhenReady -> onTTSStateChange(mapOf("state" to "paused"))
+                }
+            }
+        }
+    }
+
+    fun stopTTS() {
+        ttsObserverJob?.cancel()
+        ttsObserverJob = null
+        ttsNavigator?.close()
+        ttsNavigator = null
+        coroutineScope.launch {
+            navigator?.applyDecorations(emptyList(), ttsDecorationGroup)
+        }
+        onTTSStateChange(mapOf("state" to "stopped"))
+    }
+
+    fun pauseOrResumeTTS() {
+        val nav = ttsNavigator ?: return
+        if (nav.playback.value.playWhenReady) nav.pause() else nav.play()
+    }
+
+        override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
         val rect = event.rect
         val decorationId = event.decoration.id
 
@@ -748,6 +842,7 @@ class EPUBView(
     override fun onDetachedFromWindow() {
         Log.d("EPUBView", "onDetachedFromWindow called")
 
+        stopTTS()
         locatorCollectionJob?.cancel()
         locatorCollectionJob = null
 

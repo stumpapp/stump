@@ -80,10 +80,8 @@ type Props = {
 	offlineUri?: string
 } & BaseProps
 
-// FIXME: There is a pretty gnarly bug for single-page EPUBs where Readium doesn't do a great job of
-// reporting the location back. It manifests as the chapterTitle always being missing (and a "fix" I added
-// makes it show the _first_ chapter title all the time). Need to investigate further, the only idea I've had
-// is to try and detect single-page EPUBs and handle them differently (e.g., percentage or position-based tracking?)
+// TODO: add something like "read aloud from here" to the context menu for selection, otherwise it will
+// always start at very start of current visible page
 
 export default function ReadiumReader({
 	book,

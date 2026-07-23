@@ -99,6 +99,8 @@ public class EPUBView: ExpoView {
     private let ttsDecorationGroup = "tts"
     private var decorationObserverRegistered = false
     private var synthesizer: PublicationSpeechSynthesizer?
+    private var ttsSpeedMultiplier: Float = 1.0
+    private var currentTTSUtteranceLocator: Locator?
 
     // Misc tasks for cleanup
     private var loadPublicationTask: Task<Void, Never>?
@@ -554,7 +556,12 @@ public class EPUBView: ExpoView {
     }
 
     private func setupTTS(publication: Publication) {
-        synthesizer = PublicationSpeechSynthesizer(publication: publication, delegate: self)
+        let engine = AVTTSEngine(delegate: self)
+        synthesizer = PublicationSpeechSynthesizer(
+            publication: publication,
+            engineFactory: { engine },
+            delegate: self
+        )
     }
 
     func startTTS(from locator: Locator? = nil) {
@@ -567,6 +574,16 @@ public class EPUBView: ExpoView {
 
     func pauseOrResumeTTS() {
         synthesizer?.pauseOrResume()
+    }
+
+    func setTTSSpeed(_ speed: Float) {
+        ttsSpeedMultiplier = speed
+        // note: this isn't ideal because it restarts the sentence, but the alternative is
+        // the speed change doesn't take effect until the next sentence, which is worse imo
+        if let loc = currentTTSUtteranceLocator {
+            synthesizer?.stop()
+            synthesizer?.start(from: loc)
+        }
     }
 
     private func convertLinksToToc(_ links: [Link]) -> [[String: Any]] {
@@ -1028,6 +1045,7 @@ extension EPUBView: PublicationSpeechSynthesizerDelegate {
     ) {
         switch state {
         case .stopped:
+            currentTTSUtteranceLocator = nil
             navigator?.apply(decorations: [], in: ttsDecorationGroup)
             onTTSStateChange(["state": "stopped"])
 
@@ -1037,7 +1055,8 @@ extension EPUBView: PublicationSpeechSynthesizerDelegate {
                 "utteranceLocator": utterance.locator.jsonObject.asAny,
             ])
 
-        case let .playing(utterance, range: range):
+        case let .playing(utterance, range):
+            currentTTSUtteranceLocator = utterance.locator
             let highlightLocator = range ?? utterance.locator
             let decoration = Decoration(
                 id: "tts-current",
@@ -1061,5 +1080,18 @@ extension EPUBView: PublicationSpeechSynthesizerDelegate {
     ) {
         navigator?.apply(decorations: [], in: ttsDecorationGroup)
         onTTSStateChange(["state": "stopped"])
+    }
+}
+
+// MARK: - speech speed delegate
+
+extension EPUBView: AVTTSEngineDelegate {
+    public func avTTSEngine(_: AVTTSEngine, didCreateUtterance utterance: AVSpeechUtterance) {
+        let minRate = Float(AVSpeechUtteranceMinimumSpeechRate)
+        let maxRate = Float(AVSpeechUtteranceMaximumSpeechRate)
+        let defaultRate = Float(AVSpeechUtteranceDefaultSpeechRate)
+        // ios doesn't seem to map speeds 1:1 like android, so i had to do math (ugh, right?)
+        // to try and scale things to be more similar
+        utterance.rate = min(max(defaultRate + (ttsSpeedMultiplier - 1.0) * 0.2, minRate), maxRate)
     }
 }

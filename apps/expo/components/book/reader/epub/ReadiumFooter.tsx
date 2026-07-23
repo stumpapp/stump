@@ -11,6 +11,7 @@ import Animated, {
 	useSharedValue,
 	withSpring,
 } from 'react-native-reanimated'
+import { useShallow } from 'zustand/react/shallow'
 
 import {
 	ENTERING_ANIMATION,
@@ -26,6 +27,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
+import { useTTSStore } from '~/stores/tts'
 
 import { useEpubReaderContext } from './context'
 import JumpButton from './JumpButton'
@@ -49,7 +51,15 @@ export default function ReadiumFooter() {
 
 	const [showMenu, setShowMenu] = useState(false)
 
-	const { timer, ttsState, supportsTTS, readerRef } = useEpubReaderContext()
+	const { timer, readerRef } = useEpubReaderContext()
+	const { ttsState, supportsTTS, speechSpeed, cycleTTSSpeed } = useTTSStore(
+		useShallow((s) => ({
+			ttsState: s.ttsState,
+			supportsTTS: s.supportsTTS,
+			speechSpeed: s.speechSpeed,
+			cycleTTSSpeed: s.cycleTTSSpeed,
+		})),
+	)
 	const { t, locale } = useTranslate()
 	const [elapsedSeconds, setElapsedSeconds] = useState(0)
 	const formattedReadTime = formatNarrowDuration(elapsedSeconds, { locale })
@@ -234,8 +244,7 @@ export default function ReadiumFooter() {
 					</Animated.View>
 				)}
 
-				{true && (
-					// {ttsState !== 'stopped' && (
+				{ttsState !== 'stopped' && (
 					<Animated.View
 						entering={ENTERING_ANIMATION}
 						exiting={EXITING_ANIMATION}
@@ -278,8 +287,11 @@ export default function ReadiumFooter() {
 									colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
 									style={{ backgroundColor: buttonColors.controls.background }}
 								>
-                  <Pressable
-										// onPress={() => ttsStore.cycleTTSSpeed()}
+									<Pressable
+										onPress={() => {
+											const next = cycleTTSSpeed()
+											readerRef?.setTTSSpeed(next)
+										}}
 										className={cn(
 											'h-full w-full items-center justify-center',
 											!IS_IOS_26_PLUS && 'active:opacity-60',
@@ -292,7 +304,7 @@ export default function ReadiumFooter() {
 												fontWeight: '600',
 											}}
 										>
-											1x
+											{speechSpeed}x
 										</Text>
 									</Pressable>
 								</GlassView>

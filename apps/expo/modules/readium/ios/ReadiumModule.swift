@@ -75,7 +75,12 @@ public class ReadiumModule: Module {
         }
 
         View(EPUBView.self) {
-            Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError", "onReachedEnd", "onTTSStateChange")
+            Events(
+                "onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange",
+                "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest",
+                "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError",
+                "onReachedEnd", "onTTSStateChange"
+            )
 
             AsyncFunction("goToLocation") { (view: EPUBView, locatorJson: [String: Any]) in
                 guard let jsonValue = JSONValue(locatorJson),
@@ -107,7 +112,9 @@ public class ReadiumModule: Module {
             }
 
             AsyncFunction("startTTS") { (view: EPUBView, locatorJson: [String: Any]?) in
-                let locator = locatorJson.flatMap { JSONValue($0).flatMap { try? Locator(json: $0) } }
+                let locator = locatorJson.flatMap {
+                    JSONValue($0).flatMap { try? Locator(json: $0) }
+                }
                 view.startTTS(from: locator)
             }
 
@@ -117,6 +124,10 @@ public class ReadiumModule: Module {
 
             AsyncFunction("pauseOrResumeTTS") { (view: EPUBView) in
                 view.pauseOrResumeTTS()
+            }
+
+            AsyncFunction("setTTSSpeed") { (view: EPUBView, speed: Float) in
+                view.setTTSSpeed(speed)
             }
 
             Prop("bookId") { (view: EPUBView, prop: String) in
@@ -142,7 +153,8 @@ public class ReadiumModule: Module {
             }
 
             Prop("decorations") { (view: EPUBView, prop: [[String: Any]]) in
-                let decorations = prop.compactMap { (decorationDict: [String: Any]) -> DecorationItem? in
+                let decorations = prop.compactMap {
+                    (decorationDict: [String: Any]) -> DecorationItem? in
                     guard let id = decorationDict["id"] as? String,
                           let colorHex = decorationDict["color"] as? String,
                           let locatorDict = decorationDict["locator"] as? [String: Any],
@@ -179,7 +191,10 @@ public class ReadiumModule: Module {
             }
 
             Prop("readingDirection") { (view: EPUBView, prop: String) in
-                view.pendingProps.readingProgression = prop == "rtl" ? ReadiumNavigator.ReadingProgression.rtl : ReadiumNavigator.ReadingProgression.ltr
+                view.pendingProps.readingProgression =
+                    prop == "rtl"
+                        ? ReadiumNavigator.ReadingProgression.rtl
+                        : ReadiumNavigator.ReadingProgression.ltr
             }
 
             Prop("publisherStyles") { (view: EPUBView, prop: Bool) in

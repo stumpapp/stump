@@ -20,7 +20,6 @@ import {
 	ReadiumLocator,
 	ReadiumView,
 	ReadiumViewRef,
-	TTSPlaybackState,
 	TTSStateChangeEvent,
 } from '~/modules/readium'
 import { useVolumeListener } from '~/modules/volumeListener'
@@ -33,6 +32,7 @@ import {
 	useEpubTheme,
 } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
+import { useTTSStore } from '~/stores/tts'
 
 import { EbookReaderBookRef } from '../image/context'
 import { OfflineCompatibleReader } from '../types'
@@ -51,7 +51,7 @@ import ReadiumHeader from './ReadiumHeader'
 import TableOfContentsSheet from './TableOfContentsSheet'
 
 type BaseProps = OfflineCompatibleReader &
-	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders' | 'ttsState' | 'supportsTTS'>
+	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders'>
 
 type Props = {
 	/**
@@ -107,8 +107,14 @@ export default function ReadiumReader({
 
 	const hasReachedEndRef = useRef(false)
 
-	const [ttsState, setTtsState] = useState<TTSPlaybackState>('stopped')
-	const [supportsTTS, setSupportsTTS] = useState(false)
+	const { ttsState, trackTTSStateChange, setSupportsTTS, resetTTSState } = useTTSStore(
+		useShallow((s) => ({
+			ttsState: s.ttsState,
+			trackTTSStateChange: s.trackTTSStateChange,
+			setSupportsTTS: s.setSupportsTTS,
+			resetTTSState: s.resetTTSState,
+		})),
+	)
 
 	const {
 		fontWeight: rawFontWeight,
@@ -181,6 +187,7 @@ export default function ReadiumReader({
 				startTTS: async (locator?) => readerRef.current?.startTTS(locator),
 				stopTTS: async () => readerRef.current?.stopTTS(),
 				pauseOrResumeTTS: async () => readerRef.current?.pauseOrResumeTTS(),
+				setTTSSpeed: async (speed: number) => readerRef.current?.setTTSSpeed(speed),
 			}) satisfies ReadiumViewRef,
 		[],
 	)
@@ -291,6 +298,12 @@ export default function ReadiumReader({
 		[],
 	)
 
+	useEffect(() => {
+		return () => {
+			resetTTSState()
+		}
+	}, [resetTTSState])
+
 	const handleBookLoaded = useCallback(
 		async (event: BookLoadedEventPayload) => {
 			const fetchedPositions = await getPositions(book.id)
@@ -313,16 +326,12 @@ export default function ReadiumReader({
 			store.setBook(book)
 			setSupportsTTS(event.supportsTTS ?? false)
 		},
-		[store, book],
+		[store, book, setSupportsTTS],
 	)
 
 	function handleTTSStateChange({ nativeEvent }: { nativeEvent: TTSStateChangeEvent }) {
-		setTtsState(nativeEvent.state)
-		const loc = nativeEvent.rangeLocator ?? nativeEvent.utteranceLocator
-		if (nativeEvent.state !== 'stopped' && loc) {
-			// TODO: this effectively fires goToLocation on every word, which is both a bit much and
-			// in some cases not ideal ux (e.g., i want to move around while listening). im thinking
-			// maybe a flag to follow tts, which auto-sets false when manually moving around?
+		const loc = trackTTSStateChange(nativeEvent)
+		if (loc) {
 			readerRef.current?.goToLocation(loc)
 		}
 	}
@@ -535,8 +544,6 @@ export default function ReadiumReader({
 		<EpubReaderContext.Provider
 			value={{
 				readerRef: navigator,
-				ttsState,
-				supportsTTS,
 				getRequestHeaders: ctx.requestHeaders,
 				onBookmark,
 				onDeleteBookmark,

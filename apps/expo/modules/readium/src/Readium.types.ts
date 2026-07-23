@@ -282,4 +282,5 @@ export type ReadiumViewRef = {
 	startTTS: (locator?: ReadiumLocator) => Promise<void>
 	stopTTS: () => Promise<void>
 	pauseOrResumeTTS: () => Promise<void>
+	setTTSSpeed: (speed: number) => Promise<void>
 }

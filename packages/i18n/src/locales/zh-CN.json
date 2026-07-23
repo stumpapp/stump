@@ -3142,7 +3142,36 @@
 						"dark": "深色"
 					}
 				},
-				"appPrimaryColor": "强调色",
+				"appPrimaryColor": {
+					"label": "Accent",
+					"options": {
+						"chromaScale": "Chroma Scale",
+						"hues": {
+							"red": "Red",
+							"orange": "Orange",
+							"amber": "Amber",
+							"yellow": "Yellow",
+							"lime": "Lime",
+							"green": "Green",
+							"emerald": "Emerald",
+							"teal": "Teal",
+							"cyan": "Cyan",
+							"sky": "Sky",
+							"blue": "Blue",
+							"indigo": "Indigo",
+							"violet": "Violet",
+							"purple": "Purple",
+							"fuchsia": "Fuchsia",
+							"pink": "Pink",
+							"rose": "Rose",
+							"slate": "Slate",
+							"gray": "Gray",
+							"zinc": "Zinc",
+							"neutral": "Neutral",
+							"stone": "Stone"
+						}
+					}
+				},
 				"appLanguage": "语言",
 				"defaultServer": "默认服务器",
 				"thumbnailRatio": "缩略图比例",

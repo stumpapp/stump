@@ -39,18 +39,22 @@ export function useProgressSync() {
 	)
 
 	const pullProgress = useCallback(
-		async ({ forServers, instances }: SyncParams = {}) => {
-			const resolvedInstances = instances ?? (await getInstances(forServers))
+		async ({ forServers, instances, ...params }: SyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers, params.suppressAlerts))
 			return executePullProgressSync(resolvedInstances)
 		},
 		[getInstances],
 	)
 
 	const syncProgress = useCallback(
-		async ({ forServers, instances }: SyncParams = {}) => {
+		async ({ forServers, instances, ...params }: SyncParams = {}) => {
 			const resolvedInstances = instances ?? (await getInstances(forServers))
 
-			const pullResults = await pullProgress({ forServers, instances: resolvedInstances })
+			const pullResults = await pullProgress({
+				forServers,
+				instances: resolvedInstances,
+				...params,
+			})
 
 			const ignoreBookIds = Object.values(pullResults).flatMap((r) => r.failedBookIds)
 

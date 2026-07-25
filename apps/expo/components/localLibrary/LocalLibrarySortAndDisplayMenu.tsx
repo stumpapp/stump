@@ -43,6 +43,7 @@ import { useSelectionStore } from '~/stores/selection'
 
 import { DOWNLOAD_PROBLEMS_SHEET_NAME } from '../downloadQueue'
 import { DownloadSortOption, useDownloadsState } from './store'
+import { SYNC_CONFLICTS_SHEET_NAME } from './SyncConflictsSheet'
 
 export function useLocalLibrarySortAndDisplayMenu() {
 	const { t } = useTranslate()
@@ -159,12 +160,11 @@ export function useLocalLibrarySortAndDisplayMenu() {
 						{t(getActionsKey('attemptSync'))}
 					</Stack.Toolbar.MenuAction>
 
-					{syncConflictsCount > 0 && (
+					{/*{syncConflictsCount > 0 && (*/}
+					{syncConflictsCount > -1 && (
 						<Stack.Toolbar.MenuAction
 							icon="exclamationmark.circle"
-							onPress={async () => {
-								// TODO: launch sync conflicts sheet
-							}}
+							onPress={() => TrueSheet.present(SYNC_CONFLICTS_SHEET_NAME)}
 						>
 							{t(getActionsKey('syncConflicts'))}
 						</Stack.Toolbar.MenuAction>

@@ -29,7 +29,7 @@ export function useServerInstances() {
 		[savedServers, getServerConfig],
 	)
 
-	const getInstances = async (forServers?: string[]) => {
+	const getInstances = async (forServers?: string[], suppressAlerts?: boolean) => {
 		const actualServers = forServers?.filter((id) => !isLocalLibrary(id))
 
 		const servers = await Promise.all(
@@ -54,7 +54,7 @@ export function useServerInstances() {
 
 		// skipped = stump servers which cannot auto-auth
 		const skipped = servers.filter((s) => s.kind === 'stump' && !instances[s.id])
-		if (skipped.length > 0) {
+		if (skipped.length > 0 && !suppressAlerts) {
 			toast.warning(
 				t(
 					`progressSync.skippedSync.${skipped.length === 1 ? 'skippedOneServer' : 'skippedMultipleServers'}`,

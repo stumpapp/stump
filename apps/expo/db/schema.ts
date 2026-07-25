@@ -90,15 +90,6 @@ export const imageMeta = z.object({
 	thumbhash: z.string().nullish(),
 })
 
-// TODO: trying to determine if this is ideal, debating either:
-// 1. store all info in local sqlite as to not ping n remotes for conflict data
-//    when showing conflict sheet
-// 2. just ping remotes for conflict data when showing conflict sheet
-// going route 1 would be "easier" but not when considering staleness of stored
-// data, so route 2 for now UGH. leaving just in case i change my mind before
-// fully committing
-// coming back to this, maybe i jsut need to always execute a pull sync before showing conflict sheet?
-// that would remove the staleness problem? and potentially auto-resolve conflicts in some scenarios?
 export const conflictingSource = z.object({
 	updatedAt: z.date(),
 	page: z.number().nullish(),

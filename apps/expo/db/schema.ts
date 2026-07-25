@@ -48,6 +48,65 @@ export const libraryRefs = sqliteTable('library_refs', {
 
 export const syncStatus = z.enum(['UNSYNCED', 'SYNCING', 'SYNCED', 'ERROR', 'CONFLICT'])
 
+export const epubProgress = z.object({
+	chapterTitle: z.string().default(''),
+	href: z.string(),
+	locations: z
+		.object({
+			fragments: z.array(z.string()).nullish(),
+			position: z.number().nullish(),
+			// Note: Stored as strings in the DB, so need to preprocess
+			progression: z.preprocess((val) => {
+				if (typeof val === 'string') return parseFloat(val)
+				return val
+			}, z.number().nullish()),
+			// Note: Stored as strings in the DB, so need to preprocess
+			totalProgression: z.preprocess((val) => {
+				if (typeof val === 'string') return parseFloat(val)
+				return val
+			}, z.number().nullish()),
+			cssSelector: z.string().nullish(),
+			partialCfi: z.string().nullish(),
+		})
+		.nullish(),
+	title: z.string().nullish(),
+	type: z.string().default('application/xhtml+xml'),
+})
+
+export const epubToc = z.array(z.string())
+
+export const imageMeta = z.object({
+	averageColor: z.string().nullish(),
+	colors: z.array(
+		z.object({
+			color: z.string(),
+			// Note: Stored as strings in the DB, so need to preprocess
+			percentage: z.preprocess((val) => {
+				if (typeof val === 'string') return parseFloat(val)
+				return val
+			}, z.number()),
+		}),
+	),
+	thumbhash: z.string().nullish(),
+})
+
+// TODO: trying to determine if this is ideal, debating either:
+// 1. store all info in local sqlite as to not ping n remotes for conflict data
+//    when showing conflict sheet
+// 2. just ping remotes for conflict data when showing conflict sheet
+// going route 1 would be "easier" but not when considering staleness of stored
+// data, so route 2 for now UGH. leaving just in case i change my mind before
+// fully committing
+// coming back to this, maybe i jsut need to always execute a pull sync before showing conflict sheet?
+// that would remove the staleness problem? and potentially auto-resolve conflicts in some scenarios?
+// const conflictingSource = z.object({
+// 	updatedAt: z.date(),
+// 	page: z.number().nullish(),
+// 	percentageCompleted: z.string().nullish(),
+// 	elapsedSeconds: z.number().nullish(),
+// 	locator: epubProgress.nullish(),
+// })
+
 /**
  * Unsynced read progress table
  * Stores reading progress that hasn't been synced to the server yet
@@ -94,48 +153,6 @@ export type NewLibraryRef = typeof libraryRefs.$inferInsert
 
 export type UnsyncedReadProgress = typeof readProgress.$inferSelect
 export type NewUnsyncedReadProgress = typeof readProgress.$inferInsert
-
-export const epubProgress = z.object({
-	chapterTitle: z.string().default(''),
-	href: z.string(),
-	locations: z
-		.object({
-			fragments: z.array(z.string()).nullish(),
-			position: z.number().nullish(),
-			// Note: Stored as strings in the DB, so need to preprocess
-			progression: z.preprocess((val) => {
-				if (typeof val === 'string') return parseFloat(val)
-				return val
-			}, z.number().nullish()),
-			// Note: Stored as strings in the DB, so need to preprocess
-			totalProgression: z.preprocess((val) => {
-				if (typeof val === 'string') return parseFloat(val)
-				return val
-			}, z.number().nullish()),
-			cssSelector: z.string().nullish(),
-			partialCfi: z.string().nullish(),
-		})
-		.nullish(),
-	title: z.string().nullish(),
-	type: z.string().default('application/xhtml+xml'),
-})
-
-export const epubToc = z.array(z.string())
-
-export const imageMeta = z.object({
-	averageColor: z.string().nullish(),
-	colors: z.array(
-		z.object({
-			color: z.string(),
-			// Note: Stored as strings in the DB, so need to preprocess
-			percentage: z.preprocess((val) => {
-				if (typeof val === 'string') return parseFloat(val)
-				return val
-			}, z.number()),
-		}),
-	),
-	thumbhash: z.string().nullish(),
-})
 
 /**
  * Bookmarks table for offline reading

@@ -1,9 +1,12 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { count, eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Stack } from 'expo-router'
 import {
 	ALargeSmall,
 	AlertCircle,
 	CheckCircle,
+	CircleAlert,
 	Clock,
 	Ellipsis,
 	LibraryBig,
@@ -26,6 +29,7 @@ import {
 	Icon,
 	Text,
 } from '~/components/ui'
+import { db, downloadedFiles, readProgress } from '~/db'
 import {
 	useDownload,
 	useDownloadsCount,
@@ -59,6 +63,17 @@ export function useLocalLibrarySortAndDisplayMenu() {
 
 	const downloadsCount = useDownloadsCount()
 	const failedDownloadsCount = useFailedDownloadsCount()
+
+	const {
+		data: [conflictCountData],
+	} = useLiveQuery(
+		db
+			.select({ count: count() })
+			.from(downloadedFiles)
+			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
+			.where(eq(readProgress.syncStatus, 'CONFLICT')),
+	)
+	const syncConflictsCount = conflictCountData?.count ?? 0
 
 	const handleSortSelection = useCallback(
 		(option: DownloadSortOption) => {
@@ -143,6 +158,18 @@ export function useLocalLibrarySortAndDisplayMenu() {
 					>
 						{t(getActionsKey('attemptSync'))}
 					</Stack.Toolbar.MenuAction>
+
+					{syncConflictsCount > 0 && (
+						<Stack.Toolbar.MenuAction
+							icon="exclamationmark.circle"
+							onPress={async () => {
+								// TODO: launch sync conflicts sheet
+							}}
+						>
+							{t(getActionsKey('syncConflicts'))}
+						</Stack.Toolbar.MenuAction>
+					)}
+
 					<Stack.Toolbar.MenuAction
 						icon="sparkles.rectangle.stack"
 						onPress={() => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled)}
@@ -343,6 +370,20 @@ function AndroidSortAndActionsMenu({
 						<View className="gap-4 flex flex-row items-center">
 							<Icon as={RefreshCw} size={20} className="text-foreground-muted ml-auto" />
 							<Text className="text-lg">{t(getActionsKey('attemptSync'))}</Text>
+						</View>
+					</View>
+				</DropdownMenuItem>
+
+				<DropdownMenuItem
+					onPress={() => {
+						// TODO: launch sync conflicts sheet
+					}}
+					className="text-foreground"
+				>
+					<View className="gap-4 flex w-full flex-row items-center justify-between">
+						<View className="gap-4 flex flex-row items-center">
+							<Icon as={CircleAlert} size={20} className="text-foreground-muted ml-auto" />
+							<Text className="text-lg">{t(getActionsKey('syncConflicts'))}</Text>
 						</View>
 					</View>
 				</DropdownMenuItem>

@@ -45,7 +45,8 @@ export type PullSyncResult = {
 }
 
 /**
- * Pull the server progress for downloaded books for a single server
+ * Pull the server progress for downloaded books for a single server, syncing
+ * to local database
  *
  * @param serverId The ID of the server to attempt syncing progression to
  * @param api The *authenticated* instance for interacting with that server

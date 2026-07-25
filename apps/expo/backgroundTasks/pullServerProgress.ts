@@ -1,10 +1,18 @@
 import * as Sentry from '@sentry/react-native'
 import { parseGraphQLDateTime } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, PullServerReadProgressionQuery } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { eq, inArray } from 'drizzle-orm'
 
-import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
+import {
+	conflictingSource,
+	db,
+	downloadedFiles,
+	epubProgress,
+	readProgress,
+	SyncConflictData,
+	syncStatus,
+} from '~/db'
 
 const query = graphql(`
 	query PullServerReadProgression($filter: MediaFilterInput!) {
@@ -40,8 +48,22 @@ const query = graphql(`
 	}
 `)
 
+const intoConflictData = (
+	serverData: PullServerReadProgressionQuery['media']['nodes'][number],
+): SyncConflictData | null => {
+	const snapshot = {
+		updatedAt: parseGraphQLDateTime(serverData.readProgress?.updatedAt),
+		page: serverData.readProgress?.page ?? null,
+		percentageCompleted: serverData.readProgress?.percentageCompleted ?? null,
+		elapsedSeconds: serverData.readProgress?.elapsedSeconds ?? null,
+		locator: serverData.readProgress?.locator ?? null,
+	}
+	return conflictingSource.safeParse(snapshot)?.data ?? null
+}
+
 export type PullSyncResult = {
 	failedBookIds: string[]
+	conflictBookIds: string[]
 }
 
 /**
@@ -61,7 +83,7 @@ export const executeSingleServerPullSync = async (
 		.where(eq(downloadedFiles.serverId, serverId))
 
 	if (downloadedBooks.length === 0) {
-		return { failedBookIds: [] }
+		return { failedBookIds: [], conflictBookIds: [] }
 	}
 
 	const downloadedBookIds = downloadedBooks.map((b) => b.id)
@@ -73,7 +95,11 @@ export const executeSingleServerPullSync = async (
 	})
 
 	if (serverMedia.length === 0) {
-		return { failedBookIds: [] }
+		console.warn(
+			'There exist local books originally from server which are no longer present on remote',
+			{ serverId, downloadedBookIds },
+		)
+		return { failedBookIds: [], conflictBookIds: [] }
 	}
 
 	const localRecords = await db
@@ -88,6 +114,7 @@ export const executeSingleServerPullSync = async (
 
 	const localProgressMap = new Map(localRecords.map((r) => [r.bookId, r]))
 	const failedBookIds: string[] = []
+	const conflictBookIds: string[] = []
 
 	for (const media of serverMedia) {
 		const localProgress = localProgressMap.get(media.id)
@@ -126,9 +153,10 @@ export const executeSingleServerPullSync = async (
 
 			// local behind remote = conflict (cannot push until resolved)
 			if (lastPulledAt && serverUpdatedAt > lastPulledAt) {
+				conflictBookIds.push(media.id)
 				await db
 					.update(readProgress)
-					.set({ syncStatus: syncStatus.enum.CONFLICT })
+					.set({ syncStatus: syncStatus.enum.CONFLICT, conflictData: intoConflictData(media) })
 					.where(eq(readProgress.bookId, media.id))
 				continue
 			}
@@ -158,6 +186,7 @@ export const executeSingleServerPullSync = async (
 						}).data
 					: null,
 				syncStatus: syncStatus.enum.SYNCED,
+				conflictData: null,
 				lastModified: serverUpdatedAt,
 				lastPulledSessionUpdatedAt: serverUpdatedAt,
 				pendingReset: false,
@@ -180,7 +209,7 @@ export const executeSingleServerPullSync = async (
 		}
 	}
 
-	return { failedBookIds }
+	return { failedBookIds, conflictBookIds }
 }
 
 /**

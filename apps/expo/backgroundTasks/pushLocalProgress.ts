@@ -130,6 +130,7 @@ const executeSingleServerSync = async (
 				.update(readProgress)
 				.set({
 					syncStatus: syncStatus.Enum.SYNCED,
+					conflictData: null,
 					lastSyncedElapsedSeconds: record.elapsedSeconds,
 					pendingReset: false,
 					lastPulledSessionUpdatedAt: serverUpdatedAt,

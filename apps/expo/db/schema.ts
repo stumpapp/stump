@@ -99,13 +99,14 @@ export const imageMeta = z.object({
 // fully committing
 // coming back to this, maybe i jsut need to always execute a pull sync before showing conflict sheet?
 // that would remove the staleness problem? and potentially auto-resolve conflicts in some scenarios?
-// const conflictingSource = z.object({
-// 	updatedAt: z.date(),
-// 	page: z.number().nullish(),
-// 	percentageCompleted: z.string().nullish(),
-// 	elapsedSeconds: z.number().nullish(),
-// 	locator: epubProgress.nullish(),
-// })
+export const conflictingSource = z.object({
+	updatedAt: z.date(),
+	page: z.number().nullish(),
+	percentageCompleted: z.string().nullish(),
+	elapsedSeconds: z.number().nullish(),
+	locator: epubProgress.nullish(),
+})
+export type SyncConflictData = z.infer<typeof conflictingSource>
 
 /**
  * Unsynced read progress table
@@ -135,6 +136,8 @@ export const readProgress = sqliteTable('read_progress', {
 		.notNull()
 		.$defaultFn(() => new Date()),
 	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
+	/// if the syncStatus is CONFLICT this should contain the server's version of the progress
+	conflictData: text('conflict_data', { mode: 'json' }),
 	/// the server's updatedAt at the time of the last successful pull
 	lastPulledSessionUpdatedAt: integer('last_pulled_session_updated_at', { mode: 'timestamp' }),
 	// set when the reading timer is reset while offline to inform remote server that the

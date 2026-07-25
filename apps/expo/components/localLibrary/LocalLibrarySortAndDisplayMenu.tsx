@@ -113,6 +113,20 @@ export function useLocalLibrarySortAndDisplayMenu() {
 		)
 	}
 
+	const onAttemptSync = async () => {
+		const {
+			progress: { pullResults },
+		} = await syncAll()
+		refetchDownloads()
+		const conflictsCount = Object.values(pullResults).reduce(
+			(acc, result) => acc + result.conflictBookIds.length,
+			0,
+		)
+		if (conflictsCount > 0) {
+			TrueSheet.present(SYNC_CONFLICTS_SHEET_NAME)
+		}
+	}
+
 	return Platform.select({
 		ios: (
 			<Stack.Toolbar.Menu icon="ellipsis" key="sort-actions-menu">
@@ -152,10 +166,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						icon="arrow.trianglehead.2.clockwise.rotate.90"
-						onPress={async () => {
-							await syncAll()
-							refetchDownloads()
-						}}
+						onPress={onAttemptSync}
 					>
 						{t(getActionsKey('attemptSync'))}
 					</Stack.Toolbar.MenuAction>
@@ -207,10 +218,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 				isCuratedDownloadsEnabled={isCuratedDownloadsEnabled}
 				onSortSelection={handleSortSelection}
 				onSelect={() => setIsSelecting(true)}
-				onSync={async () => {
-					await syncAll()
-					refetchDownloads()
-				}}
+				onSync={onAttemptSync}
 				onToggleCurated={() => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled)}
 				onSeeProblems={() => TrueSheet.present(DOWNLOAD_PROBLEMS_SHEET_NAME)}
 				onDeleteAll={confirmDeleteAllDownloads}

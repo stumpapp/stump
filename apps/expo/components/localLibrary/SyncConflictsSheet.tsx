@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useMutation } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { db, downloadedFiles, epubProgress, readProgress, SyncConflictData, syncStatus } from '~/db'
@@ -31,6 +31,19 @@ export const SyncConflictsSheet = forwardRef<TrueSheet, Props>(function SyncConf
 			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
 			.where(eq(readProgress.syncStatus, 'CONFLICT')),
 	)
+	const oldestModifiedAt = useMemo(
+		() =>
+			conflictingRecords?.reduce(
+				(oldest, record) => {
+					const modifiedAt = record.read_progress?.lastModified
+					if (!modifiedAt) return oldest
+					if (!oldest) return modifiedAt
+					return modifiedAt < oldest ? modifiedAt : oldest
+				},
+				null as Date | null,
+			),
+		[conflictingRecords],
+	)
 
 	const onDismissInternal = () => {
 		setIsOpen(false)
@@ -55,15 +68,20 @@ export const SyncConflictsSheet = forwardRef<TrueSheet, Props>(function SyncConf
 		throwOnError: false,
 	})
 
+	// if the earliest sync was <= 5 min ago, we can avoid the refresh
+	const shouldPull = useMemo(
+		() => !oldestModifiedAt || oldestModifiedAt.getTime() < Date.now() - 5 * 60 * 1000,
+		[oldestModifiedAt],
+	)
 	useEffect(
 		() => {
-			if (isOpen) {
+			if (isOpen && shouldPull) {
 				executePullProgress()
 			}
 		},
 		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isOpen],
+		[isOpen, shouldPull],
 	)
 
 	const locallyPersistProgress = async (

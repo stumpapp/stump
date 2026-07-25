@@ -11,6 +11,7 @@ import { useAppState } from '~/lib/hooks'
 import { ColumnCount, ImageFilter, TextAlignment } from '~/modules/readium'
 
 import { ZustandMMKVStorage } from './store'
+import { useTTSStore } from './tts'
 
 export type DoublePageBehavior = 'auto' | 'always' | 'off'
 
@@ -297,7 +298,12 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 	const handleFocusedChanged = useCallback(
 		(focused: boolean) => {
 			if (!focused) {
-				pause()
+				// backgrounding the app will not pause playback and therefore we want the
+				// timer to keep on truckin
+				const ttsIsPlaying = useTTSStore.getState().ttsState === 'playing'
+				if (!ttsIsPlaying) {
+					pause()
+				}
 			} else {
 				resume()
 			}

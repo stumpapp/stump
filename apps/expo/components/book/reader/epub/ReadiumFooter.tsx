@@ -1,7 +1,7 @@
 import Octicons from '@react-native-vector-icons/octicons'
 import { formatNarrowDuration } from '@stump/i18n'
 import { GlassView } from 'expo-glass-effect'
-import { List, Menu, Palette, Pause, PencilLine, Play, Volume2, VolumeX } from 'lucide-react-native'
+import { List, Menu, Palette, PencilLine, Volume2, VolumeX } from 'lucide-react-native'
 import { cssInterop } from 'nativewind'
 import { useEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
@@ -20,6 +20,7 @@ import {
 	FADE_OUT,
 	useReaderAnimations,
 } from '~/components/book/reader/shared'
+import { AnimatedAudioLines } from '~/components/icons'
 import { Icon, Text } from '~/components/ui'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
@@ -52,12 +53,11 @@ export default function ReadiumFooter() {
 	const [showMenu, setShowMenu] = useState(false)
 
 	const { timer, readerRef } = useEpubReaderContext()
-	const { ttsState, supportsTTS, speechSpeed, cycleTTSSpeed } = useTTSStore(
+	const { ttsState, supportsTTS } = useTTSStore(
 		useShallow((s) => ({
 			ttsState: s.ttsState,
 			supportsTTS: s.supportsTTS,
 			speechSpeed: s.speechSpeed,
-			cycleTTSSpeed: s.cycleTTSSpeed,
 		})),
 	)
 	const { t, locale } = useTranslate()
@@ -100,6 +100,16 @@ export default function ReadiumFooter() {
 		return { width: size, height: size, transform: [{ translateX }, { translateY }, { scale }] }
 	})
 
+	const ttsMainButtonStyle = useAnimatedStyle(() => {
+		const size = interpolate(progress.value, [0, 1], [BUTTON_SIZE * SHRINK_SCALE, BUTTON_SIZE])
+		const offset = (BUTTON_SIZE - size) / 2
+		return { width: size, height: size, top: offset, left: offset }
+	})
+
+	const ttsMainIconStyle = useAnimatedStyle(() => ({
+		transform: [{ scale: interpolate(progress.value, [0, 1], [SHRINK_SCALE, 1]) }],
+	}))
+
 	return (
 		<>
 			{showMenu && (
@@ -134,13 +144,6 @@ export default function ReadiumFooter() {
 						}}
 					/>
 
-					{/* <MenuItem
-						show={showMenu}
-						delay={150}
-						label="Search Book"
-						icon={Search}
-					/> */}
-
 					<MenuItem
 						show={showMenu}
 						delay={100}
@@ -167,6 +170,7 @@ export default function ReadiumFooter() {
 						<MenuItem
 							show={showMenu}
 							delay={25}
+							// TODO(tts): make trigger for sheet instead
 							label={ttsState !== 'stopped' ? t('epubMenu.stopReading') : t('epubMenu.readAloud')}
 							icon={ttsState !== 'stopped' ? VolumeX : Volume2}
 							onPress={() => {
@@ -248,9 +252,10 @@ export default function ReadiumFooter() {
 					<Animated.View
 						entering={ENTERING_ANIMATION}
 						exiting={EXITING_ANIMATION}
-						className="left-6 gap-4 absolute z-30 flex-row items-center"
+						className="left-6 absolute z-30"
+						style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
 					>
-						<View style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}>
+						<Animated.View style={ttsMainButtonStyle} className="inset-0 absolute">
 							<GlassView
 								className="flex-1 rounded-full"
 								isInteractive
@@ -258,58 +263,22 @@ export default function ReadiumFooter() {
 								style={{ backgroundColor: buttonColors.controls.background }}
 							>
 								<Pressable
-									onPress={() => readerRef?.pauseOrResumeTTS()}
+									onPress={() => (showControls ? openSheet('tts') : readerRef?.pauseOrResumeTTS())}
 									className={cn(
 										'h-full w-full items-center justify-center',
 										!IS_IOS_26_PLUS && 'active:opacity-60',
 									)}
 								>
-									<Icon
-										as={ttsState === 'playing' ? Pause : Play}
-										size={ICON_SIZE}
-										absoluteStrokeWidth
-										strokeWidth={2.5}
-										color={buttonColors.controls.foreground}
-									/>
+									<Animated.View style={ttsMainIconStyle}>
+										<AnimatedAudioLines
+											playing={ttsState === 'playing'}
+											color={buttonColors.controls.foreground}
+											size={ICON_SIZE}
+										/>
+									</Animated.View>
 								</Pressable>
 							</GlassView>
-						</View>
-
-						{showMenuButton && (
-							<Animated.View
-								entering={ENTERING_ANIMATION}
-								exiting={EXITING_ANIMATION}
-								style={{ width: BUTTON_SIZE, height: BUTTON_SIZE / 2 }}
-							>
-								<GlassView
-									className="flex-1 rounded-full"
-									isInteractive
-									colorScheme={isDarkEpubTheme ? 'dark' : 'light'}
-									style={{ backgroundColor: buttonColors.controls.background }}
-								>
-									<Pressable
-										onPress={() => {
-											const next = cycleTTSSpeed()
-											readerRef?.setTTSSpeed(next)
-										}}
-										className={cn(
-											'h-full w-full items-center justify-center',
-											!IS_IOS_26_PLUS && 'active:opacity-60',
-										)}
-									>
-										<Text
-											style={{
-												color: buttonColors.controls.foreground,
-												fontSize: 12,
-												fontWeight: '600',
-											}}
-										>
-											{speechSpeed}x
-										</Text>
-									</Pressable>
-								</GlassView>
-							</Animated.View>
-						)}
+						</Animated.View>
 					</Animated.View>
 				)}
 
@@ -324,6 +293,10 @@ function PageNumber() {
 	const { secondaryStyle, primaryStyle } = useReaderAnimations()
 	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
 	const { page, pageOfTotal, formattedPageOfTotal } = usePositionFormat()
+
+	// TODO: show "return to p{n}" or w/e when navigated away while tts is active. thinking through it
+	// and i think it will be a little tough with the speech absolutely smashing through events
+	// but we'll see
 
 	return (
 		<>

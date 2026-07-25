@@ -2,7 +2,12 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { createRef, RefObject } from 'react'
 import { create } from 'zustand'
 
-export type EpubSheetType = 'settings' | 'annotations' | 'tableOfContents' | 'customizeTheme'
+export type EpubSheetType =
+	| 'settings'
+	| 'annotations'
+	| 'tableOfContents'
+	| 'customizeTheme'
+	| 'tts'
 
 export type CustomizeThemeMode = 'edit' | 'create'
 
@@ -16,6 +21,7 @@ type IEpubSheetStore = {
 	tableOfContentsSheetRef: RefObject<TrueSheet | null>
 	annotationsSheetRef: RefObject<TrueSheet | null>
 	customizeThemeSheetRef: RefObject<TrueSheet | null>
+	ttsSheetRef: RefObject<TrueSheet | null>
 	customizeThemeMode: CustomizeThemeMode
 	customizeThemeName?: string
 	openSheet: (sheet: EpubSheetType) => void
@@ -29,6 +35,7 @@ export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 	tableOfContentsSheetRef: createRef<TrueSheet>(),
 	annotationsSheetRef: createRef<TrueSheet>(),
 	customizeThemeSheetRef: createRef<TrueSheet>(),
+	ttsSheetRef: createRef<TrueSheet>(),
 	customizeThemeMode: 'edit',
 	openSheet: (sheet) => {
 		const state = get()
@@ -40,6 +47,8 @@ export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 			state.annotationsSheetRef.current?.present()
 		} else if (sheet === 'customizeTheme') {
 			state.customizeThemeSheetRef.current?.present()
+		} else if (sheet === 'tts') {
+			state.ttsSheetRef.current?.present()
 		}
 	},
 	closeSheet: (sheet) => {
@@ -52,6 +61,8 @@ export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 			state.annotationsSheetRef.current?.dismiss()
 		} else if (sheet === 'customizeTheme') {
 			state.customizeThemeSheetRef.current?.dismiss()
+		} else if (sheet === 'tts') {
+			state.ttsSheetRef.current?.dismiss()
 		}
 	},
 	closeAllSheets: () => {
@@ -60,6 +71,7 @@ export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 		state.tableOfContentsSheetRef.current?.dismiss()
 		state.annotationsSheetRef.current?.dismiss()
 		state.customizeThemeSheetRef.current?.dismiss()
+		state.ttsSheetRef.current?.dismiss()
 	},
 	openCustomizeTheme: ({ mode, name }) => {
 		set({ customizeThemeMode: mode, customizeThemeName: name })

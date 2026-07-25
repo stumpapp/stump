@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/react-native'
 import { useSDKSafe } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { View } from 'react-native'
+import { AppState, View } from 'react-native'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -49,6 +49,7 @@ import EpubSettingsSheet from './EpubSettingsSheet'
 import ReadiumFooter from './ReadiumFooter'
 import ReadiumHeader from './ReadiumHeader'
 import TableOfContentsSheet from './TableOfContentsSheet'
+import TTSSheet from './TTSSheet'
 
 type BaseProps = OfflineCompatibleReader &
 	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders'>
@@ -336,6 +337,19 @@ export default function ReadiumReader({
 		}
 	}
 
+	// if the tts is paused for 5 min, just stop it
+	useEffect(() => {
+		if (ttsState !== 'paused') return
+		const timer = setTimeout(
+			() => {
+				readerRef.current?.stopTTS()
+				resetTTSState()
+			},
+			5 * 60 * 1000, // 5 min
+		)
+		return () => clearTimeout(timer)
+	}, [ttsState, resetTTSState])
+
 	const controlsVisibleTimestamp = useRef(0)
 	useEffect(() => {
 		if (!controlsVisible) return
@@ -570,6 +584,9 @@ export default function ReadiumReader({
 					initialLocator={initialLocator}
 					decorations={annotations}
 					onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
+					// TODO(tts): i think we might need more info baked into the event, like whether it changed
+					// from a user vs programmatic action so that we can auto-disable followSpeech when user
+					// moves against tts
 					onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
 					onMiddleTouch={handleMiddleTouch}
 					onReachedEnd={handleReachedEnd}
@@ -589,6 +606,7 @@ export default function ReadiumReader({
 				<TableOfContentsSheet />
 				<AnnotationsSheet />
 				<CustomizeThemeSheet />
+				<TTSSheet />
 
 				<CreateAnnotationSheet
 					ref={createAnnotationSheetRef}

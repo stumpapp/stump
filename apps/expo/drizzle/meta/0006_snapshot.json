@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "41cdb315-e561-427d-abad-01bb14e3ee8d",
+  "id": "71ff5c4c-8971-449a-a58e-6f4550a7e6a8",
   "prevId": "f4748028-1d2b-4f79-a153-cc18b0df430f",
   "tables": {
     "annotations": {
@@ -509,6 +509,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'UNSYNCED'"
+        },
+        "conflict_data": {
+          "name": "conflict_data",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "last_pulled_session_updated_at": {
           "name": "last_pulled_session_updated_at",

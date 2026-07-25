@@ -6,7 +6,7 @@ import m0002 from './0002_jazzy_charles_xavier.sql'
 import m0003 from './0003_magenta_hardball.sql'
 import m0004 from './0004_happy_odin.sql'
 import m0005 from './0005_low_lady_ursula.sql'
-import m0006 from './0006_conflict_tracking.sql'
+import m0006 from './0006_lonely_vindicator.sql'
 import journal from './meta/_journal.json'
 
 export default {

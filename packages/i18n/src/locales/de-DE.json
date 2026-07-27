@@ -42,6 +42,36 @@
 			"subtitleEditing": "Eine Vorschau deiner Bibliotheksänderungen wird unten angezeigt"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Search metadata",
+			"description": "Search an external provider for this book and choose a match to apply",
+			"openButton": "Search Metadata",
+			"searchButton": "Search",
+			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
+			"noResults": "No matches were found for this search",
+			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
+			"searchFailed": "Failed to search metadata providers",
+			"form": {
+				"title": {
+					"label": "Title"
+				},
+				"author": {
+					"label": "Author"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Year"
+				},
+				"provider": {
+					"label": "Provider",
+					"allOption": "All enabled providers"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "Dateiinformationen",
@@ -1476,6 +1506,16 @@
 					"label": "Schriftart",
 					"description": "Passe die Schriftart an, die in der Anwendung genutzt wird"
 				},
+				"interfaceRoundness": {
+					"label": "Interface roundness",
+					"description": "How rounded the corners are for UI elements",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"pill": "Pill"
+					}
+				},
 				"thumbnailPreview": {
 					"label": "Vorschau",
 					"description": "So werden die Thumbnails mit den aktuellen Einstellungen aussehen"
@@ -1575,9 +1615,25 @@
 						"noLimit": "Unbegrenzt"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Display and spacing",
+					"description": "Preferences related to the presentation of content and information"
+				},
 				"additionalPreferences": {
 					"label": "Zusätzliche Präferenzen",
 					"description": "Passe das Aussehen und Verhalten von Stump mit diesen zusätzlichen Einstellungen an"
+				},
+				"contentBrowsing": {
+					"label": "Content browsing",
+					"description": "Preferences that affect browsing and navigating content lists"
+				},
+				"motionAndAnimation": {
+					"label": "Motion and animation",
+					"description": "Visual presentation and movement preferences"
+				},
+				"activityAndStatus": {
+					"label": "Activity and status",
+					"description": "Indicators, overlays, or functionality related to background activity"
 				},
 				"hideScrollbarToggle": {
 					"label": "Scrollbar ausblenden",
@@ -2006,6 +2062,9 @@
 						"updateError": "Fehler beim Aktualisieren des geplanten Job",
 						"deleteSuccess": "Geplanter Job gelöscht",
 						"deleteError": "Fehler beim Löschen des geplanten Job"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {
@@ -2079,7 +2138,8 @@
 						"emailing": "E-Mailing",
 						"libraryManagement": "Bibliotheksverwaltung",
 						"userManagement": "Benutzerverwaltung",
-						"serverManagement": "Serververwaltung"
+						"serverManagement": "Serververwaltung",
+						"metadataManagement": "Metadata management"
 					},
 					"heading": "Berechtigungen",
 					"subtitle": [
@@ -2791,6 +2851,22 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Vorschaubilder bearbeiten",
 			"description": "Erlaubt dem Benutzer Vorschaubilder für Bücher und Serien zu bearbeiten"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Read metadata providers",
+			"description": "Allows the user to view configured external metadata providers"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Manage metadata providers",
+			"description": "Allows the user to configure external metadata providers"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Read metadata matches",
+			"description": "Allows the user to view metadata fetch results awaiting review"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Manage metadata matches",
+			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
 		}
 	},
 	"mobileApp": {
@@ -3066,7 +3142,36 @@
 						"dark": "Dunkel"
 					}
 				},
-				"appPrimaryColor": "Akzent",
+				"appPrimaryColor": {
+					"label": "Accent",
+					"options": {
+						"chromaScale": "Chroma Scale",
+						"hues": {
+							"red": "Red",
+							"orange": "Orange",
+							"amber": "Amber",
+							"yellow": "Yellow",
+							"lime": "Lime",
+							"green": "Green",
+							"emerald": "Emerald",
+							"teal": "Teal",
+							"cyan": "Cyan",
+							"sky": "Sky",
+							"blue": "Blue",
+							"indigo": "Indigo",
+							"violet": "Violet",
+							"purple": "Purple",
+							"fuchsia": "Fuchsia",
+							"pink": "Pink",
+							"rose": "Rose",
+							"slate": "Slate",
+							"gray": "Gray",
+							"zinc": "Zinc",
+							"neutral": "Neutral",
+							"stone": "Stone"
+						}
+					}
+				},
 				"appLanguage": "Sprache",
 				"defaultServer": "Standardserver",
 				"thumbnailRatio": "Vorschaubildverhältnis",

@@ -13,7 +13,12 @@ import Animated, {
 import { Button, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { usePalette } from '~/lib/constants'
-import { useDownloadQueue, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
+import {
+	useDownloadQueue,
+	useIsBookDownloaded,
+	useIsBookDownloading,
+	useTranslate,
+} from '~/lib/hooks'
 
 type DownloadState = 'downloading' | 'completed'
 
@@ -32,6 +37,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 
 	const accentColor = usePalette('muted')
 
+	const { t } = useTranslate()
 	const { activeItems, cancel } = useDownloadQueue({ serverId })
 
 	const activeDownload = activeItems.find((item) => item.bookId === bookId)
@@ -156,7 +162,11 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	const isActive = displayedState === 'downloading'
 
 	const iconComponent = isCompleted ? Check : isActive ? X : ArrowDown
-	const label = isCompleted ? 'Downloaded' : isActive ? 'Cancel' : 'Download'
+	const label = isCompleted
+		? t('common.downloaded')
+		: isActive
+			? t('common.cancel')
+			: t('common.download')
 
 	return (
 		<Animated.View exiting={isCompleted ? FadeOut.duration(300) : undefined}>

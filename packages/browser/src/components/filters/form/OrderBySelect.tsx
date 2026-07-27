@@ -1,5 +1,10 @@
 import { Label, NativeSelect } from '@stump/components'
-import { LibraryModelOrdering, MediaModelOrdering, SeriesModelOrdering } from '@stump/graphql'
+import {
+	LibraryModelOrdering,
+	MediaMetadataModelOrdering,
+	MediaModelOrdering,
+	SeriesModelOrdering,
+} from '@stump/graphql'
 import { useMemo } from 'react'
 
 import { OrderingField } from '../context'
@@ -23,6 +28,8 @@ const options: Record<FilterableEntity, OrderingField[]> = {
 		MediaModelOrdering.Pages,
 		MediaModelOrdering.SeriesId,
 		MediaModelOrdering.ModifiedAt,
+		MediaMetadataModelOrdering.Number,
+		MediaMetadataModelOrdering.Volume,
 	],
 	series: [
 		SeriesModelOrdering.Name,

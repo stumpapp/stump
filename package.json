@@ -1,6 +1,6 @@
 {
 	"name": "@stump/monorepo",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "SEE README.md",
@@ -18,7 +18,7 @@
 	"scripts": {
 		"prepare": "husky",
 		"postinstall": "patch-package",
-		"setup": "yarn && yarn web build && cargo codegen",
+		"setup": "yarn && yarn web build",
 		"lint": "lerna run lint --stream --parallel && yarn check-types",
 		"check-types": "lerna run check-types  --stream --parallel --ignore @stump/expo",
 		"test": "lerna run test",

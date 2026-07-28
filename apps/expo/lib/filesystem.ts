@@ -1,4 +1,5 @@
 import { Directory, File, Paths } from 'expo-file-system'
+import { widgetsDirectory } from 'expo-widgets'
 import urlJoin from 'url-join'
 
 import { useReaderStore } from '~/stores'
@@ -209,3 +210,10 @@ export function getAppUsage() {
 		total: appUsageTotal + serverUsageTotal,
 	}
 }
+
+export const widgetStorage = new Directory(widgetsDirectory)
+
+export const widgetThumbnailDirectory = new Directory(urlJoin(widgetStorage.uri, 'thumbnails'))
+
+export const widgetThumbnailPath = (bookId: string): string =>
+	urlJoin(widgetThumbnailDirectory.uri, `${bookId}.jpg`)

@@ -1,4 +1,8 @@
+// TODO: move to sm like /widgetSync/continueReadingWidgetSync.{ios.ts,ts}
+
 import type { Api } from '@stump/sdk'
+
+import { ReadingNowWidgetProps } from '~/widgets/types'
 
 export type ServerBookInput = {
 	id: string
@@ -18,6 +22,8 @@ export async function refreshWidgetData(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_api: Api,
 	// _t: (key: string, options?: Record<string, unknown> | undefined) => string,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_params: Pick<ReadingNowWidgetProps, 'thumbnailRatio' | 'accentColor'>,
 ): Promise<void> {}
 
 export function refreshWidgetFromCache(): void {}

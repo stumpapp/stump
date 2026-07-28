@@ -1,3 +1,5 @@
+// TODO: move to sm like /widgetSync/useContinueReadingWidgetSync.{ios.ts,ts}
+
 export type WidgetSyncBook = {
 	id: string
 	resolvedName: string

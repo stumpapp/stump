@@ -15,11 +15,11 @@ import { PlatformColor } from 'react-native'
 import type { ReadingNowWidgetProps } from './types'
 
 // TODO:
-// - sort the image shit out: https://github.com/expo/expo/issues/46272
-// - colors, localization, etc
+// - localization, etc
+// - use owl for empty state!!
 
 const ReadingNowWidget = (
-	{ books }: ReadingNowWidgetProps,
+	{ books, accentColor, thumbnailRatio }: ReadingNowWidgetProps,
 	{ widgetFamily }: WidgetEnvironment,
 ) => {
 	'widget'
@@ -47,6 +47,8 @@ const ReadingNowWidget = (
 	}
 
 	if (widgetFamily === 'systemSmall') {
+		const thumbnailWidth = 75
+		const thumbnailHeight = thumbnailWidth / thumbnailRatio
 		return (
 			<ZStack
 				modifiers={[
@@ -57,13 +59,12 @@ const ReadingNowWidget = (
 				<VStack spacing={0} modifiers={[frame({ maxWidth: Infinity, maxHeight: Infinity })]}>
 					{firstBook.thumbnailPath && (
 						<Image
-							// uiImage={firstBook.thumbnailPath}
+							uiImage={firstBook.thumbnailPath}
 							modifiers={[
 								resizable(),
-								frame({ maxWidth: Infinity, maxHeight: Infinity }),
-								clipShape('rectangle'),
+								frame({ width: thumbnailWidth, height: thumbnailHeight }),
+								clipShape('roundedRectangle', 6),
 							]}
-							systemName="box.truck.fill"
 						/>
 					)}
 
@@ -76,12 +77,29 @@ const ReadingNowWidget = (
 						>
 							{firstBook.name}
 						</Text>
-						<ProgressView
-							value={firstBook.percentage}
-							modifiers={[tint(PlatformColor('systemBlue'))]}
-						/>
+						<ProgressView value={firstBook.percentage} modifiers={[tint(accentColor)]} />
 					</VStack>
 				</VStack>
+			</ZStack>
+		)
+	}
+
+	if (widgetFamily === 'systemMedium' && books.length === 1) {
+		return (
+			<ZStack
+				modifiers={[
+					containerBackground(PlatformColor('systemBackground'), 'widget'),
+					clipShape('containerRelativeShape'),
+				]}
+			>
+				<Text
+					modifiers={[
+						foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+						font({ textStyle: 'callout' }),
+					]}
+				>
+					Medium (single book large format)
+				</Text>
 			</ZStack>
 		)
 	}
@@ -100,7 +118,7 @@ const ReadingNowWidget = (
 						font({ textStyle: 'callout' }),
 					]}
 				>
-					Medium
+					Medium (multiple books)
 				</Text>
 			</ZStack>
 		)

@@ -1,8 +1,13 @@
+// TODO: move to sm like /widgetSync/useContinueReadingWidgetSync.{ios.ts,ts}
+
 import { useSDK } from '@stump/client'
 import { useEffect } from 'react'
 
 import { useActiveServer } from '~/components/activeServer/context'
 import { refreshWidgetData, type ServerBookInput } from '~/lib/widgetSync'
+import { usePreferencesStore } from '~/stores'
+
+import { usePalette } from '../constants'
 
 // intentionally in the shape of server books
 export type WidgetSyncBook = {
@@ -15,6 +20,9 @@ export type WidgetSyncBook = {
 export function useWidgetSync(books: WidgetSyncBook[]) {
 	const { activeServer } = useActiveServer()
 	const { sdk } = useSDK()
+
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const accentColor = usePalette('accent')
 
 	useEffect(() => {
 		if (!books.length) return
@@ -31,6 +39,6 @@ export function useWidgetSync(books: WidgetSyncBook[]) {
 				}) satisfies ServerBookInput,
 		)
 
-		refreshWidgetData(inputs, sdk)
-	}, [books, activeServer.id, sdk])
+		refreshWidgetData(inputs, sdk, { thumbnailRatio, accentColor })
+	}, [books, activeServer.id, sdk, thumbnailRatio, accentColor])
 }

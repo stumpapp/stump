@@ -1,13 +1,21 @@
+// TODO: move to sm like /widgetSync/continueReadingWidgetSync.{ios.ts,ts}
+// ^ also honestly will have a lot of shared logic between two, once android is supported
+
 import * as Sentry from '@sentry/react-native'
 import { parseGraphQLDecimal } from '@stump/client'
 import { Api } from '@stump/sdk'
 import { formatDistanceToNow } from 'date-fns'
 import { Directory, File } from 'expo-file-system'
-import { widgetsDirectory } from 'expo-widgets'
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { MMKV } from 'react-native-mmkv'
 import { z } from 'zod'
 
-import { bookThumbnailPath, toAbsolutePath } from '~/lib/filesystem'
+import {
+	bookThumbnailPath,
+	toAbsolutePath,
+	widgetThumbnailDirectory,
+	widgetThumbnailPath,
+} from '~/lib/filesystem'
 import ReadingNowWidget from '~/widgets/ReadingNowWidget.ios'
 import type { ReadingNowWidgetProps, WidgetBook } from '~/widgets/types'
 
@@ -45,8 +53,20 @@ function getBookThumbnailMeta(bookId: string): z.infer<typeof metaSchema> | null
 	return parsed.data
 }
 
+// this is VERY important, because the widget will crash if the image is too large to render. ask me
+// how i know :(
+async function createThumbnail(sourceUri: string): Promise<File> {
+	const manipulator = ImageManipulator.manipulate(sourceUri).resize({ width: 300 }) // height will scale
+	const renderedImage = await manipulator.renderAsync()
+	const resized = await renderedImage.saveAsync({
+		format: SaveFormat.PNG,
+		compress: 0.85,
+	})
+	return new File(resized.uri)
+}
+
 async function ensureThumbnailCached(book: ServerBookInput, api: Api): Promise<string | null> {
-	const destFile = new File(widgetsDirectory, book.id + '.jpg')
+	const destFile = new File(widgetThumbnailPath(book.id))
 	try {
 		// we might have a thumb if e.g. the book is downloaded, and if so just use that
 		// instead of redownloading it
@@ -54,7 +74,8 @@ async function ensureThumbnailCached(book: ServerBookInput, api: Api): Promise<s
 		const localFile = new File(localPath)
 		if (localFile.exists) {
 			if (!destFile.exists) {
-				localFile.copy(destFile)
+				const resized = await createThumbnail(localFile.uri)
+				await new File(resized.uri).copy(destFile)
 			}
 			// we skip the staleness check because the local thumb isn't mutable atm,
 			// and if i ever add e.g. a regenerate thumb operation it would be
@@ -72,18 +93,20 @@ async function ensureThumbnailCached(book: ServerBookInput, api: Api): Promise<s
 
 		// TODO: resize? -> https://docs.expo.dev/versions/latest/sdk/imagemanipulator/
 
-		const downloaded = await File.downloadFileAsync(book.thumbnailUrl, destFile, {
+		const tmp = await File.downloadFileAsync(book.thumbnailUrl, destFile, {
 			headers: await api.getHeaders(),
 			idempotent: true,
 		})
-		// TODO: worth a log?
-		if (downloaded.size === 0) {
-			downloaded.delete()
+		if (tmp.size === 0) {
+			tmp.delete()
 			return null
 		}
-		storage.set(thumbnailKey(book.id), JSON.stringify({ fetchedAt: Date.now() }))
-		return downloaded.uri
+		const resized = await createThumbnail(tmp.uri)
+		await new File(resized.uri).copy(destFile, { overwrite: true })
+		storage.set('thumb-meta-' + book.id, JSON.stringify({ fetchedAt: Date.now() }))
+		return destFile.uri
 	} catch (err) {
+		console.error('failed to download thumbnail for book', book, err)
 		Sentry.captureException(err, {
 			extra: {
 				bookId: book.id,
@@ -104,9 +127,9 @@ async function reconcileThumbnails(
 	books: ServerBookInput[],
 	api: Api,
 ): Promise<Map<string, string>> {
-	new Directory(widgetsDirectory).create({ intermediates: true, idempotent: true })
+	new Directory(widgetThumbnailDirectory.uri).create({ intermediates: true, idempotent: true })
 
-	const existing = new Directory(widgetsDirectory).list()
+	const existing = new Directory(widgetThumbnailDirectory.uri).list()
 	const targetIds = new Set(books.map((b) => b.id))
 
 	for (const entry of existing) {
@@ -131,28 +154,33 @@ async function reconcileThumbnails(
 	return resultMap
 }
 
-export async function refreshWidgetData(serverBooks: ServerBookInput[], api: Api): Promise<void> {
+export async function refreshWidgetData(
+	serverBooks: ServerBookInput[],
+	api: Api,
+	params: Pick<ReadingNowWidgetProps, 'thumbnailRatio' | 'accentColor'>,
+): Promise<void> {
 	const top6 = serverBooks.slice(0, 6)
 	const thumbnailMap = await reconcileThumbnails(top6, api)
 
-	const books: WidgetBook[] = top6
-		.filter((book) => thumbnailMap.has(book.id))
-		.map((book) => {
-			const percentage = parseGraphQLDecimal(book.percentageCompleted) ?? 0
-			const lastReadAt = book.updatedAt ? new Date(book.updatedAt).getTime() : Date.now()
-			const timeAgoLabel = formatDistanceToNow(lastReadAt, { addSuffix: true })
-			return {
-				id: book.id,
-				serverId: book.serverId,
-				name: book.name,
-				percentage,
-				thumbnailPath: thumbnailMap.get(book.id),
-				lastReadAt,
-				timeAgoLabel,
-			}
-		})
+	const books: WidgetBook[] = top6.map((book) => {
+		const percentage = parseGraphQLDecimal(book.percentageCompleted) ?? 0
+		const lastReadAt = book.updatedAt ? new Date(book.updatedAt).getTime() : Date.now()
+		const timeAgoLabel = formatDistanceToNow(lastReadAt, { addSuffix: true })
+		return {
+			id: book.id,
+			serverId: book.serverId,
+			name: book.name,
+			percentage,
+			thumbnailPath: thumbnailMap.get(book.id),
+			lastReadAt,
+			timeAgoLabel,
+		}
+	})
 
-	const snapshot: ReadingNowWidgetProps = { books }
+	const snapshot: ReadingNowWidgetProps = {
+		books,
+		...params,
+	}
 	storage.set(SNAPSHOT_KEY, JSON.stringify(snapshot))
 
 	try {

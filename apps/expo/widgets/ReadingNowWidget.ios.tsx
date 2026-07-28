@@ -1,10 +1,11 @@
-import { Image, ProgressView, Text, VStack, ZStack } from '@expo/ui/swift-ui'
+import { HStack, Image, ProgressView, Text, VStack, ZStack } from '@expo/ui/swift-ui'
 import {
 	clipShape,
 	containerBackground,
 	font,
 	foregroundStyle,
 	frame,
+	lineLimit,
 	padding,
 	resizable,
 	tint,
@@ -17,6 +18,9 @@ import type { ReadingNowWidgetProps } from './types'
 // TODO:
 // - localization, etc
 // - use owl for empty state!!
+// - link? what happens when clicked? can i deep link:
+//    - small widget = direct to book (entire widget is link)
+//    - other widgets more complex, can i do multiple links? prolly not
 
 const ReadingNowWidget = (
 	{ books, accentColor, thumbnailRatio }: ReadingNowWidgetProps,
@@ -73,6 +77,7 @@ const ReadingNowWidget = (
 							modifiers={[
 								font({ size: 13, weight: 'semibold' }),
 								foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+								lineLimit(1),
 							]}
 						>
 							{firstBook.name}
@@ -105,6 +110,10 @@ const ReadingNowWidget = (
 	}
 
 	if (widgetFamily === 'systemMedium') {
+		const visibleBooks = books.slice(0, 3)
+		const thumbnailWidth = 30
+		const thumbnailHeight = thumbnailWidth / thumbnailRatio
+
 		return (
 			<ZStack
 				modifiers={[
@@ -112,14 +121,46 @@ const ReadingNowWidget = (
 					clipShape('containerRelativeShape'),
 				]}
 			>
-				<Text
-					modifiers={[
-						foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-						font({ textStyle: 'callout' }),
-					]}
+				<VStack
+					spacing={8}
+					modifiers={[frame({ maxWidth: Infinity, maxHeight: Infinity }), padding({ all: 12 })]}
 				>
-					Medium (multiple books)
-				</Text>
+					{visibleBooks.map((book) => (
+						<HStack
+							key={book.id}
+							spacing={12}
+							alignment="center"
+							modifiers={[frame({ maxWidth: Infinity })]}
+						>
+							{book.thumbnailPath && (
+								<Image
+									uiImage={book.thumbnailPath}
+									modifiers={[
+										resizable(),
+										frame({ width: thumbnailWidth, height: thumbnailHeight }),
+										clipShape('roundedRectangle', 6),
+									]}
+								/>
+							)}
+
+							<VStack alignment="leading" spacing={8}>
+								<Text
+									modifiers={[
+										font({ size: 12, weight: 'medium' }),
+										foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+										lineLimit(1),
+									]}
+								>
+									{book.name}
+								</Text>
+								<ProgressView
+									value={book.percentage}
+									modifiers={[tint(PlatformColor('systemBlue'))]}
+								/>
+							</VStack>
+						</HStack>
+					))}
+				</VStack>
 			</ZStack>
 		)
 	}

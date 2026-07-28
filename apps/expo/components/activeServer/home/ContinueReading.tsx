@@ -8,7 +8,10 @@ import { HorizontalBookListItem } from '~/components/book'
 import { HorizontalBookListItemFragmentType } from '~/components/book/HorizontalBookListItem'
 import { Heading, Text } from '~/components/ui'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
-import { useWidgetSync, type WidgetSyncBook } from '~/lib/hooks/useWidgetSync'
+import {
+	useReadingNowWidgetSync,
+	WidgetSyncBook,
+} from '~/lib/hooks/widgetSync/useReadingNowWidgetSync'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
@@ -53,7 +56,7 @@ function ContinueReading() {
 	const activeBooks = useMemo(() => data?.pages.at(0)?.keepReading.nodes.slice(0, 6) || [], [data])
 
 	// the cast should be fine, fragment is just masked
-	useWidgetSync(activeBooks as WidgetSyncBook[])
+	useReadingNowWidgetSync(activeBooks as WidgetSyncBook[])
 
 	const leftOffBooks = useMemo(
 		() => nodes.filter(({ id }) => !activeBooks.some((book) => book.id === id)),

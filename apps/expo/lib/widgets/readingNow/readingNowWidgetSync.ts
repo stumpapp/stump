@@ -1,5 +1,3 @@
-// TODO: move to sm like /widgetSync/continueReadingWidgetSync.{ios.ts,ts}
-
 import type { Api } from '@stump/sdk'
 
 import { ReadingNowWidgetProps } from '~/widgets/types'
@@ -16,7 +14,7 @@ export type ServerBookInput = {
 // TODO(widgets): rm lint supress, we need this to stub for android until expo-widgets
 // supports android widgets
 
-export async function refreshWidgetData(
+export async function refreshReadingNowWidget(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_serverBooks: ServerBookInput[],
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,5 +1,5 @@
-// TODO: move to sm like /widgetSync/continueReadingWidgetSync.{ios.ts,ts}
-// ^ also honestly will have a lot of shared logic between two, once android is supported
+// TODO(widgets): there will be a lot of shared logic between platforms once android is supported,
+// but for now it lives in ios file
 
 import * as Sentry from '@sentry/react-native'
 import { parseGraphQLDecimal } from '@stump/client'
@@ -154,7 +154,7 @@ async function reconcileThumbnails(
 	return resultMap
 }
 
-export async function refreshWidgetData(
+export async function refreshReadingNowWidget(
 	serverBooks: ServerBookInput[],
 	api: Api,
 	params: Pick<ReadingNowWidgetProps, 'thumbnailRatio' | 'accentColor'>,

@@ -94,6 +94,21 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		plugins: [
 			'expo-router',
 			[
+				'expo-widgets',
+				{
+					groupIdentifier: 'group.com.stumpapp.stump',
+					widgets: [
+						{
+							name: 'ReadingNow',
+							displayName: 'Reading Now',
+							description: "See what you're currently reading",
+							contentMarginsDisabled: true,
+							supportedFamilies: ['systemSmall', 'systemMedium', 'systemLarge'],
+						},
+					],
+				},
+			],
+			[
 				'expo-secure-store',
 				{
 					configureAndroidBackup: true,

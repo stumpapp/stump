@@ -1,0 +1,23 @@
+import type { Api } from '@stump/sdk'
+
+export type ServerBookInput = {
+	id: string
+	serverId: string
+	name: string
+	thumbnailUrl: string
+	percentageCompleted: string | null
+	updatedAt: string | null
+}
+
+// TODO(widgets): rm lint supress, we need this to stub for android until expo-widgets
+// supports android widgets
+
+export async function refreshWidgetData(
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_serverBooks: ServerBookInput[],
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_api: Api,
+	// _t: (key: string, options?: Record<string, unknown> | undefined) => string,
+): Promise<void> {}
+
+export function refreshWidgetFromCache(): void {}

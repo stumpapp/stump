@@ -22,6 +22,10 @@ import type { ReadingNowWidgetProps } from './types'
 //    - small widget = direct to book (entire widget is link)
 //    - other widgets more complex, can i do multiple links? prolly not
 
+// deep linking proved to be annoying. i got it working but had to remove ambiguous routes (e.g., multiple [id]s in the path)
+// but it doens't anchor when it pushes the route, so you wind up being in effectively an islanded screen and cannot escape.
+// ignoring for now until i sort more of this out
+
 const ReadingNowWidget = (
 	{ books, accentColor, thumbnailRatio }: ReadingNowWidgetProps,
 	{ widgetFamily }: WidgetEnvironment,
@@ -58,6 +62,9 @@ const ReadingNowWidget = (
 				modifiers={[
 					containerBackground(PlatformColor('systemBackground'), 'widget'),
 					clipShape('containerRelativeShape'),
+					// TODO: this has issues, see above
+					// widgetURL(`stump://server/${firstBook.serverId}/books/${firstBook.id}`),
+					padding({ all: 8 }),
 				]}
 			>
 				<VStack spacing={0} modifiers={[frame({ maxWidth: Infinity, maxHeight: Infinity })]}>
@@ -119,6 +126,7 @@ const ReadingNowWidget = (
 				modifiers={[
 					containerBackground(PlatformColor('systemBackground'), 'widget'),
 					clipShape('containerRelativeShape'),
+					padding({ all: 8 }),
 				]}
 			>
 				<VStack
@@ -153,10 +161,7 @@ const ReadingNowWidget = (
 								>
 									{book.name}
 								</Text>
-								<ProgressView
-									value={book.percentage}
-									modifiers={[tint(PlatformColor('systemBlue'))]}
-								/>
+								<ProgressView value={book.percentage} modifiers={[tint(accentColor)]} />
 							</VStack>
 						</HStack>
 					))}
@@ -165,21 +170,65 @@ const ReadingNowWidget = (
 		)
 	}
 
+	const visibleBooks = books.slice(0, 6)
+	const thumbnailWidth = 50
+	const thumbnailHeight = thumbnailWidth / thumbnailRatio
+
 	return (
 		<ZStack
 			modifiers={[
 				containerBackground(PlatformColor('systemBackground'), 'widget'),
 				clipShape('containerRelativeShape'),
+				padding({ all: 8 }),
 			]}
 		>
-			<Text
-				modifiers={[
-					foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-					font({ textStyle: 'callout' }),
-				]}
+			<VStack
+				spacing={8}
+				modifiers={[frame({ maxWidth: Infinity, maxHeight: Infinity }), padding({ all: 12 })]}
 			>
-				systemLarge assumed
-			</Text>
+				{visibleBooks.map((book) => (
+					<HStack
+						key={book.id}
+						spacing={12}
+						alignment="center"
+						modifiers={[frame({ maxWidth: Infinity })]}
+					>
+						{book.thumbnailPath && (
+							<Image
+								uiImage={book.thumbnailPath}
+								modifiers={[
+									resizable(),
+									frame({ width: thumbnailWidth, height: thumbnailHeight }),
+									clipShape('roundedRectangle', 6),
+								]}
+							/>
+						)}
+
+						<VStack alignment="leading" spacing={12}>
+							<VStack alignment="leading" spacing={4}>
+								<Text
+									modifiers={[
+										font({ size: 12, weight: 'medium' }),
+										foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+										lineLimit(1),
+									]}
+								>
+									{book.name}
+								</Text>
+								<Text
+									modifiers={[
+										font({ size: 11 }),
+										foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+									]}
+								>
+									{book.timeAgoLabel}
+								</Text>
+							</VStack>
+							<ProgressView value={book.percentage} modifiers={[tint(accentColor)]} />
+						</VStack>
+					</HStack>
+				))}
+			</VStack>
 		</ZStack>
 	)
 }

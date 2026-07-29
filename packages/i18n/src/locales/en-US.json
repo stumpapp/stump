@@ -2988,6 +2988,7 @@
 			"page": "Page",
 			"pages": "Pages",
 			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageX": "Page {{current}}",
 			"password": "Password",
 			"progress": "Progress",
 			"publication": "Publication",

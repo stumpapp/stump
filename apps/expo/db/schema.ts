@@ -91,7 +91,7 @@ export const imageMeta = z.object({
 })
 
 export const conflictingSource = z.object({
-	updatedAt: z.date(),
+	updatedAt: z.coerce.date(),
 	page: z.number().nullish(),
 	percentageCompleted: z.string().nullish(),
 	elapsedSeconds: z.number().nullish(),

@@ -139,7 +139,7 @@ const main = defineCommand({
 			const changelogSpinner = p.spinner()
 			changelogSpinner.start('generating changelog')
 			try {
-				await execa('npx', ['gitmoji-changelog', '--output', './.github/CHANGELOG.md'])
+				await execa('yarn', ['gitmoji-changelog', '--output', './.github/CHANGELOG.md'])
 				changelogSpinner.stop('updates written to .github/CHANGELOG.md')
 			} catch (err) {
 				changelogSpinner.stop('changelog generation failed!')

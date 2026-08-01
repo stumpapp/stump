@@ -62,7 +62,7 @@
 		"expo-application": "~56.0.3",
 		"expo-asset": "~56.0.17",
 		"expo-auth-session": "~56.0.14",
-		"expo-blur": "~56.0.3",
+		"expo-blur": "~57.0.2",
 		"expo-brightness": "~56.0.5",
 		"expo-build-properties": "~56.0.19",
 		"expo-constants": "~56.0.18",

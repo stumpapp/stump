@@ -14,13 +14,21 @@ mod sync;
 mod sync_token;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new()
-		.nest("/kobo", router::mount(app_state.clone()))
+	let session_route = Router::new()
 		.route(
 			"/api/v2/kobo/sync-sessions",
 			delete(delete_kobo_sync_sessions),
 		)
-		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
+		.layer(middleware::from_fn_with_state(
+			app_state.clone(),
+			auth_middleware,
+		));
+
+	// the session route is separate from the main /kobo router because auth mechanisms
+	// are different (session cookie / jwt vs api-key in URL)
+	Router::new()
+		.nest("/kobo", router::mount(app_state))
+		.merge(session_route)
 }
 
 /// Delete all Kobo sync sessions for the current user, forcing a full re-sync

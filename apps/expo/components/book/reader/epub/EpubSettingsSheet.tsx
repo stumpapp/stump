@@ -32,7 +32,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 				dimmed={false}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				style={{
 					paddingBottom: insets.bottom,

@@ -1,16 +1,47 @@
 name: Binary release
 
-# Manual release with input version number
 on:
+  # only runs when a release/v* branch is merged into main (resolve-version step)
+  pull_request:
+    branches:
+      - main
+    types: [closed]
   workflow_dispatch:
     inputs:
       version:
-        description: Enter the release version (e.g., 0.1.0)
+        description: 'Release version (e.g. 0.1.0)'
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # This job builds the common webapp HTML/JS/CSS used for all platforms
+  resolve-version:
+    name: Resolve release version
+    runs-on: ubuntu-22.04
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       contains(github.event.pull_request.head.ref, 'release/v'))
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - name: Resolve version
+        id: resolve
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=$(echo "${{ github.event.pull_request.head.ref }}" | sed -e 's/release\/v//')" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Print version
+        run: echo "Building release for v${{ steps.resolve.outputs.version }}"
+
+  # build the common webapp HTML/JS/CSS used for all platforms
   build-webapp:
+    needs: [resolve-version]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -19,9 +50,9 @@ jobs:
       - name: Build web application/upload artifact
         uses: ./.github/actions/build-web
 
-  # This job builds the binaries for each release
+  # build the server binary for each supported platform
   build-binary:
-    needs: build-webapp
+    needs: [resolve-version, build-webapp]
     strategy:
       matrix:
         # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
@@ -63,13 +94,14 @@ jobs:
           upload-name: ${{ matrix.artifact_name }}
           upload-path: staging
 
-  # This job creates the release and organizes associated files
+  # create the release and attach the platform artifacts
   create-release:
-    needs: build-binary
+    needs: [resolve-version, build-binary]
     runs-on: ubuntu-22.04
     permissions: write-all
     env:
       GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.resolve-version.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -103,24 +135,19 @@ jobs:
 
       - name: Zip artifacts
         run: |
-          cd StumpServer-linux
-          zip -r ../linux-build-results.zip *
-          cd ../StumpServer-macos-intel
-          zip -r ../macos-intel-build-results.zip *
-          cd ../StumpServer-macos-arm
-          zip -r ../macos-arm-build-results.zip *
-          cd ../StumpServer-windows
-          zip -r ../windows-build-results.zip *
-          cd ..
+          cd StumpServer-linux && zip -r ../linux-build-results.zip * && cd ..
+          cd StumpServer-macos-intel && zip -r ../macos-intel-build-results.zip * && cd ..
+          cd StumpServer-macos-arm && zip -r ../macos-arm-build-results.zip * && cd ..
+          cd StumpServer-windows && zip -r ../windows-build-results.zip * && cd ..
 
       - name: Create release and upload artifacts
         run: |
-          gh release create v${{ github.event.inputs.version }} \
+          gh release create v$VERSION \
             --draft \
             --target main \
-            --title 'v${{ github.event.inputs.version }}' \
+            --title "v$VERSION" \
             --generate-notes \
-            linux-build-results.zip#StumpServer-${{ github.event.inputs.version }}-linux-x86_64.zip \
-            macos-intel-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-intel.zip \
-            macos-arm-build-results.zip#StumpServer-${{ github.event.inputs.version }}-macos-arm.zip \
-            windows-build-results.zip#StumpServer-${{ github.event.inputs.version }}-windows-x86_64.zip
+            linux-build-results.zip#StumpServer-$VERSION-linux-x86_64.zip \
+            macos-intel-build-results.zip#StumpServer-$VERSION-macos-intel.zip \
+            macos-arm-build-results.zip#StumpServer-$VERSION-macos-arm.zip \
+            windows-build-results.zip#StumpServer-$VERSION-windows-x86_64.zip

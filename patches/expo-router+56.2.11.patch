@@ -1,8 +1,8 @@
 diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
-index 7758365..6ef273f 100644
+index fee7cd8..62b0996 100644
 --- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
 +++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
-@@ -130,6 +130,7 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
+@@ -138,6 +138,7 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
          return undefined;
      }
      const sharedProps = (0, shared_1.convertStackHeaderSharedPropsToRNSharedHeaderItem)(props);
@@ -10,7 +10,7 @@ index 7758365..6ef273f 100644
      const actions = react_1.Children.toArray(props.children).filter((child) => (0, children_1.isChildOfType)(child, exports.StackToolbarMenuAction) || (0, children_1.isChildOfType)(child, exports.StackToolbarMenu));
      const item = {
          type: 'submenu',
-@@ -154,7 +155,10 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
+@@ -162,7 +163,10 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
          item.destructive = props.destructive;
      }
      // TODO: Add elementSize to react-native-screens
@@ -22,12 +22,12 @@ index 7758365..6ef273f 100644
          if (sharedProps.icon.type === 'sfSymbol') {
              item.icon = sharedProps.icon;
          }
-@@ -196,12 +200,13 @@ const StackToolbarMenuAction = (props) => {
-     }
+@@ -206,12 +210,13 @@ const StackToolbarMenuAction = (props) => {
      // TODO(@ubax): Handle image loading using useImage in a follow-up PR.
      const icon = typeof props.icon === 'string' ? props.icon : undefined;
--    return (<native_1.NativeToolbarMenuAction {...props} icon={icon} image={props.image} imageRenderingMode={props.iconRenderingMode}/>);
-+    return (<native_1.NativeToolbarMenuAction {...props} icon={icon} xcassetName={props.xcassetName} image={props.image} imageRenderingMode={props.iconRenderingMode}/>);
+     const source = typeof props.icon !== 'string' ? props.icon : undefined;
+-    return ((0, jsx_runtime_1.jsx)(native_1.NativeToolbarMenuAction, { ...props, icon: icon, source: source, image: props.image, imageRenderingMode: props.iconRenderingMode }));
++    return ((0, jsx_runtime_1.jsx)(native_1.NativeToolbarMenuAction, { ...props, icon: icon, source: source, xcassetName: props.xcassetName, image: props.image, imageRenderingMode: props.iconRenderingMode }));
  };
  exports.StackToolbarMenuAction = StackToolbarMenuAction;
  function convertStackToolbarMenuActionPropsToRNHeaderItem(props) {
@@ -38,7 +38,7 @@ index 7758365..6ef273f 100644
      const item = {
          ...rest,
          description: props.subtitle,
-@@ -213,7 +218,10 @@ function convertStackToolbarMenuActionPropsToRNHeaderItem(props) {
+@@ -223,7 +228,10 @@ function convertStackToolbarMenuActionPropsToRNHeaderItem(props) {
      if (unstable_keepPresented !== undefined) {
          item.keepsMenuPresented = unstable_keepPresented;
      }
@@ -51,10 +51,10 @@ index 7758365..6ef273f 100644
              item.icon = sharedProps.icon;
          }
 diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
-index 5220860..34c6001 100644
+index b9b9a81..e4e1012 100644
 --- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
 +++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
-@@ -217,6 +217,13 @@ export interface StackToolbarMenuActionProps {
+@@ -295,6 +295,13 @@ export interface StackToolbarMenuActionProps {
       */
      subtitle?: string;
      hidden?: boolean;
@@ -66,14 +66,13 @@ index 5220860..34c6001 100644
 +     */
 +    xcassetName?: string;
  }
- export type NativeToolbarMenuActionProps = LinkMenuActionProps;
- //# sourceMappingURL=types.d.ts.map
-\ No newline at end of file
+ export interface NativeToolbarMenuActionProps extends LinkMenuActionProps {
+     /** @platform android */
 diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
-index 2ce865a..b38c37c 100644
+index 186be4b..da75656 100644
 --- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
 +++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
-@@ -45,15 +45,14 @@ function convertStackHeaderSharedPropsToRNSharedHeaderItem(props, isBottomPlacem
+@@ -56,15 +56,14 @@ function convertStackHeaderSharedPropsToRNSharedHeaderItem(props, isBottomPlacem
              return undefined;
          }
          // Bottom placement xcasset uses native xcasset type

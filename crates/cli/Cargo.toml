@@ -1,6 +1,6 @@
 [package]
 name = "cli"
-version = "0.1.3"
+version.workspace = true
 edition = "2021"
 
 [[bin]]

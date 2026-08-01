@@ -1,73 +1,81 @@
 name: Docker Release CI
 
-# This workflow triggers when a PR is merged into `main`, but jobs have conditions to only run when:
-# - A PR is closed, merged into `main`, from a branch that matches the pattern `release/v*.*.*`
-
 on:
+  # only runs when a release/v* branch is merged into main (resolve-version step)
   pull_request:
     branches:
       - main
     types: [opened, closed, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Comma-separated Docker tags (e.g. latest,0.1.4)'
+        required: true
+      build-channel:
+        description: 'Build channel (e.g. stable, nightly)'
+        required: false
+        default: 'stable'
+      archs:
+        description: 'Comma-separated architectures to build (e.g. arm64,amd64)'
+        required: false
+        default: 'arm64,amd64'
+      push:
+        description: 'Push image to Docker Hub'
+        type: boolean
+        required: false
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  parse-semver:
-    if: contains(github.event.pull_request.head.ref, 'release/v')
-    name: Parse semver version
-    runs-on: [ubuntu-22.04]
+  # will build the ctx config based on how this workflow was triggered
+  resolve-config:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.head.ref, 'release/v')
+    name: Resolve build configuration
+    runs-on: ubuntu-22.04
     outputs:
-      version: ${{ steps.tag.outputs.version }}
-      tags: ${{ steps.docker-tags.outputs.tags }}
+      tags: ${{ steps.config.outputs.tags }}
+      push: ${{ steps.config.outputs.push }}
+      archs: ${{ steps.config.outputs.archs }}
+      build-channel: ${{ steps.config.outputs.build-channel }}
     steps:
-      - name: Extract version from branch name
-        id: tag
-        run: echo "version=$(echo ${{ github.event.pull_request.head.ref }} | sed -e 's/release\/v//')" >> $GITHUB_OUTPUT
-
-      - name: Print the tag
-        run: echo "The output version is ${{ steps.tag.outputs.version }}"
-
-      - name: Configure docker tags
-        id: docker-tags
+      - name: Resolve configuration
+        id: config
         run: |
-          echo "tags=latest,${{ steps.tag.outputs.version }}" >> $GITHUB_OUTPUT
-          echo "Docker tags are latest, and ${{ steps.tag.outputs.version }}"
-
-  push-or-load:
-    if: contains(github.event.pull_request.head.ref, 'release/v')
-    name: Configure docker load/push
-    runs-on: [ubuntu-22.04]
-    outputs:
-      load: ${{ steps.configure.outputs.load }}
-      push: ${{ steps.configure.outputs.push }}
-      archs: ${{ steps.configure.outputs.archs }}
-    steps:
-      - name: Configure environment
-        id: configure
-        run: |
-          if [[ ${{ github.event.pull_request.merged }} == true ]]; then
-            echo "push=true" >> $GITHUB_OUTPUT
-            echo "load=false" >> $GITHUB_OUTPUT
-            echo "archs=arm64,amd64" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tags=${{ github.event.inputs.tags }}" >> $GITHUB_OUTPUT
+            echo "push=${{ github.event.inputs.push }}" >> $GITHUB_OUTPUT
+            echo "archs=${{ github.event.inputs.archs }}" >> $GITHUB_OUTPUT
+            echo "build-channel=${{ github.event.inputs.build-channel }}" >> $GITHUB_OUTPUT
           else
-            echo "push=false" >> $GITHUB_OUTPUT
-            echo "load=true" >> $GITHUB_OUTPUT
-            echo "archs=amd64" >> $GITHUB_OUTPUT
+            VERSION=$(echo "${{ github.event.pull_request.head.ref }}" | sed -e 's/release\/v//')
+            if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+              echo "tags=latest,$VERSION" >> $GITHUB_OUTPUT
+              echo "push=true" >> $GITHUB_OUTPUT
+              echo "archs=arm64,amd64" >> $GITHUB_OUTPUT
+            else
+              echo "tags=$VERSION" >> $GITHUB_OUTPUT
+              echo "push=false" >> $GITHUB_OUTPUT
+              echo "archs=amd64" >> $GITHUB_OUTPUT
+            fi
+            echo "build-channel=stable" >> $GITHUB_OUTPUT
           fi
 
-      - name: Print the configuration
+      - name: Print configuration
         run: |
-          echo "Archs: ${{ steps.configure.outputs.archs }}"
-          echo "Load: ${{ steps.configure.outputs.load }}"
-          echo "Push: ${{ steps.configure.outputs.push }}"
+          echo "tags:          ${{ steps.config.outputs.tags }}"
+          echo "push:          ${{ steps.config.outputs.push }}"
+          echo "archs:         ${{ steps.config.outputs.archs }}"
+          echo "channel: ${{ steps.config.outputs.build-channel }}"
 
   build-stable-docker:
-    if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Build docker image
     runs-on: [self-hosted]
-    needs: [parse-semver, push-or-load]
+    needs: [resolve-config]
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -77,9 +85,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          tags: ${{ needs.parse-semver.outputs.tags }}
-          build-channel: stable
-          load: ${{ needs.push-or-load.outputs.load }}
-          push: ${{ needs.push-or-load.outputs.push }}
-          archs: ${{ needs.push-or-load.outputs.archs }}
+          tags: ${{ needs.resolve-config.outputs.tags }}
+          build-channel: ${{ needs.resolve-config.outputs.build-channel }}
+          push: ${{ needs.resolve-config.outputs.push }}
+          archs: ${{ needs.resolve-config.outputs.archs }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

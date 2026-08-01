@@ -2662,7 +2662,7 @@ dependencies = [
 
 [[package]]
 name = "filter-gen"
-version = "0.1.3"
+version = "0.1.5"
 dependencies = [
  "heck 0.5.0",
  "itertools 0.14.0",
@@ -4062,7 +4062,7 @@ dependencies = [
 
 [[package]]
 name = "integrations"
-version = "0.1.3"
+version = "0.1.5"
 dependencies = [
  "async-trait",
  "lettre",
@@ -4835,7 +4835,7 @@ dependencies = [
 
 [[package]]
 name = "metadata_integrations"
-version = "0.1.3"
+version = "0.1.5"
 dependencies = [
  "async-graphql",
  "async-trait",
@@ -8687,7 +8687,7 @@ dependencies = [
 
 [[package]]
 name = "stump_desktop"
-version = "0.1.3"
+version = "0.1.5"
 dependencies = [
  "chrono",
  "discord-rich-presence",

@@ -16,13 +16,13 @@ public struct Props {
     var locator: Locator?
     var initialLocator: Locator?
     var url: String?
-    var foreground: Color?
-    var background: Color?
+    var foreground: ReadiumNavigator.Color?
+    var background: ReadiumNavigator.Color?
     var fontFamily: FontFamily?
     var lineHeight: Double?
     var fontSize: Double?
     var fontWeight: Double?
-    var textAlign: TextAlignment?
+    var textAlign: ReadiumNavigator.TextAlignment?
     var publisherStyles: Bool?
     var imageFilter: ImageFilter?
     var pageMargins: Double?
@@ -44,13 +44,13 @@ public struct FinalizedProps {
     var bookId: String
     var locator: Locator?
     var url: String
-    var foreground: Color
-    var background: Color
+    var foreground: ReadiumNavigator.Color
+    var background: ReadiumNavigator.Color
     var fontFamily: FontFamily
     var lineHeight: Double
     var fontSize: Double
     var fontWeight: Double?
-    var textAlign: TextAlignment
+    var textAlign: ReadiumNavigator.TextAlignment
     var publisherStyles: Bool = true
     var imageFilter: ImageFilter?
     var pageMargins: Double?
@@ -184,7 +184,7 @@ public class EPUBView: ExpoView {
 
         // Don't proceed if we don't have required props
         guard let bookId = pendingProps.bookId,
-            let url = pendingProps.url
+              let url = pendingProps.url
         else {
             return
         }
@@ -193,14 +193,17 @@ public class EPUBView: ExpoView {
             bookId: bookId,
             locator: pendingProps.locator ?? pendingProps.initialLocator ?? oldProps?.locator,
             url: url,
-            foreground: pendingProps.foreground ?? oldProps?.foreground ?? Color(hex: "#111111")!,
-            background: pendingProps.background ?? oldProps?.background ?? Color(hex: "#FFFFFF")!,
+            foreground: pendingProps.foreground ?? oldProps?.foreground ?? ReadiumNavigator.Color(
+                hex: "#111111")!,
+            background: pendingProps.background ?? oldProps?.background ?? ReadiumNavigator.Color(
+                hex: "#FFFFFF")!,
             fontFamily: pendingProps.fontFamily ?? oldProps?.fontFamily
                 ?? FontFamily(rawValue: "systemFont"),
             lineHeight: pendingProps.lineHeight ?? oldProps?.lineHeight ?? 1.4,
             fontSize: pendingProps.fontSize ?? oldProps?.fontSize ?? 1.0,
             fontWeight: pendingProps.fontWeight ?? oldProps?.fontWeight,
-            textAlign: pendingProps.textAlign ?? oldProps?.textAlign ?? TextAlignment.justify,
+            textAlign: pendingProps.textAlign ?? oldProps?.textAlign
+                ?? ReadiumNavigator.TextAlignment.justify,
             publisherStyles: pendingProps.publisherStyles ?? oldProps?.publisherStyles ?? true,
             imageFilter: pendingProps.imageFilter ?? oldProps?.imageFilter,
             pageMargins: pendingProps.pageMargins ?? oldProps?.pageMargins,
@@ -334,13 +337,13 @@ public class EPUBView: ExpoView {
                         file: resources.appendingPath(
                             "Literata-VariableFont_opsz,wght.ttf", isDirectory: false
                         ),
-                        style: .normal, weight: .variable(200...900)
+                        style: .normal, weight: .variable(200 ... 900)
                     ),
                     CSSFontFace(
                         file: resources.appendingPath(
                             "Literata-Italic-VariableFont_opsz,wght.ttf", isDirectory: false
                         ),
-                        style: .italic, weight: .variable(200...900)
+                        style: .italic, weight: .variable(200 ... 900)
                     ),
                 ]
             ).eraseToAnyHTMLFontFamilyDeclaration(),
@@ -406,13 +409,13 @@ public class EPUBView: ExpoView {
                         file: resources.appendingPath(
                             "Bitter-VariableFont_wght.ttf", isDirectory: false
                         ),
-                        style: .normal, weight: .variable(100...900)
+                        style: .normal, weight: .variable(100 ... 900)
                     ),
                     CSSFontFace(
                         file: resources.appendingPath(
                             "Bitter-Italic-VariableFont_wght.ttf", isDirectory: false
                         ),
-                        style: .italic, weight: .variable(100...900)
+                        style: .italic, weight: .variable(100 ... 900)
                     ),
                 ]
             ).eraseToAnyHTMLFontFamilyDeclaration(),
@@ -550,7 +553,7 @@ public class EPUBView: ExpoView {
         }
     }
 
-    private func convertLinksToToc(_ links: [Link]) -> [[String: Any]] {
+    private func convertLinksToToc(_ links: [ReadiumShared.Link]) -> [[String: Any]] {
         return links.enumerated().map { index, link in
             var item: [String: Any] = [
                 "label": link.title ?? "",
@@ -568,7 +571,7 @@ public class EPUBView: ExpoView {
 
     func emitCurrentLocator() {
         guard let navigator = navigator,
-            let currentLocator = navigator.currentLocation
+              let currentLocator = navigator.currentLocation
         else {
             return
         }
@@ -621,7 +624,7 @@ public class EPUBView: ExpoView {
                         "language": publication.metadata.languages.first ?? "en",
                         "totalPages": totalPages,
                         "chapterCount": publication.readingOrder.count,
-                    ]
+                    ],
                 ])
             }
         }
@@ -683,13 +686,13 @@ public class EPUBView: ExpoView {
 
     func getSelection() -> [String: Any]? {
         guard let navigator = navigator,
-            let selection = navigator.currentSelection
+              let selection = navigator.currentSelection
         else {
             return nil
         }
 
         var result: [String: Any] = [
-            "locator": selection.locator.json
+            "locator": selection.locator.json,
         ]
 
         if let frame = selection.frame {
@@ -840,8 +843,7 @@ extension EPUBView: EPUBNavigatorDelegate {
         // github.com/readium/swift-toolkit/issues/775 which we could then swap back to
         // sm like locator.locations.totalProgression >= 1.0 since EPUBViewportAndLocationCalculator
         // would guarantee 1.0 at the end. honestly though im hopeful this is fine as-is
-        if let position = locator.locations.position, totalPositions > 0, position >= totalPositions
-        {
+        if let position = locator.locations.position, totalPositions > 0, position >= totalPositions {
             onReachedEnd(
                 makeJSON([
                     "chapterTitle": locator.title ?? "",
@@ -865,7 +867,7 @@ extension EPUBView: EPUBNavigatorDelegate {
     public func navigator(_: any SelectableNavigator, shouldShowMenuForSelection _: Selection)
         -> Bool
     {
-        return true  // use native
+        return true // use native
     }
 
     public func navigator(_: VisualNavigator, didTapAt point: CGPoint) {
@@ -949,7 +951,7 @@ extension EPUBView {
         let referenceVC = UIReferenceLibraryViewController(term: text)
 
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-            let rootVC = windowScene.windows.first?.rootViewController
+           let rootVC = windowScene.windows.first?.rootViewController
         {
             var topVC = rootVC
             while let presented = topVC.presentedViewController {

@@ -2,21 +2,13 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { useMutation } from '@tanstack/react-query'
 import { intlFormat } from 'date-fns'
-import { and, eq, isNotNull } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import {
-	conflictingSource,
-	db,
-	downloadedFiles,
-	epubProgress,
-	readProgress,
-	SyncConflictData,
-	syncStatus,
-} from '~/db'
+import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
 import { useProgressSync, useTranslate } from '~/lib/hooks'
 
@@ -25,6 +17,20 @@ import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Card, Text } from '../ui'
 
 export const SYNC_CONFLICTS_SHEET_NAME = 'syncConflictsSheet'
+
+// TODO: refactor hard, got helpful feedback/ideas:
+// each book can have its own page in a pager / flashlist (depending on how many we want to optimize for ig)
+// which shows the last common ancestor session which offline branched off from (e.g., session 3 -> local session
+// -> FORK -> remote session 4-5 -> attempt sync)
+// options for accepting version at bottom, think through what "accept both" would actually do. im thinking
+// roughly:
+// - drop conflictData, query from remote directly for info needed
+// - add conflict_resolution_view to gql? returns an obj like:
+//  - ancestor_session: Option<ReadingSEssion> -> last common ancestor session
+//  - remote_sessions: [ReadingSession] -> all remote sessions that branched off from ancestor
+
+// TODO: obv dont do this
+type SyncConflictData = any
 
 type Props = {
 	onDismiss?: () => void
@@ -42,7 +48,7 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 			.select()
 			.from(downloadedFiles)
 			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
-			.where(and(eq(readProgress.syncStatus, 'CONFLICT'), isNotNull(readProgress.conflictData))),
+			.where(eq(readProgress.syncStatus, 'CONFLICT')),
 	)
 
 	const oldestModifiedAt = useMemo(
@@ -122,7 +128,6 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 			percentage: progression.percentageCompleted,
 			epubProgress: epubProgress.safeParse(progression.locator).data,
 			syncStatus: syncStatus.enum.UNSYNCED,
-			conflictData: null,
 			lastModified: now,
 			// TODO: i def need to think about this one!!
 			pendingReset: false,
@@ -226,16 +231,17 @@ function SyncConflictRow({ book }: SyncConflictRowProps) {
 		updatedAt: book.read_progress.lastModified,
 	}
 
-	const conflictData = conflictingSource.safeParse(book.read_progress?.conflictData).data
-	const remoteProgress = conflictData
-		? {
-				page: conflictData.page,
-				elapsedSeconds: conflictData.elapsedSeconds,
-				percentageCompleted: parseGraphQLPercentageDecimal(conflictData.percentageCompleted),
-				chapter: epubProgress.safeParse(conflictData?.locator).data?.chapterTitle,
-				updatedAt: conflictData.updatedAt,
-			}
-		: null
+	// const conflictData = conflictingSource.safeParse(book.read_progress?.conflictData).data
+	// const remoteProgress = conflictData
+	// 	? {
+	// 			page: conflictData.page,
+	// 			elapsedSeconds: conflictData.elapsedSeconds,
+	// 			percentageCompleted: parseGraphQLPercentageDecimal(conflictData.percentageCompleted),
+	// 			chapter: epubProgress.safeParse(conflictData?.locator).data?.chapterTitle,
+	// 			updatedAt: conflictData.updatedAt,
+	// 		}
+	// 	: null
+	const remoteProgress = localProgress
 
 	const renderProgress = ({
 		page,

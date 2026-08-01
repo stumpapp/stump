@@ -173,6 +173,7 @@ export const query = graphql(`
 const mutation = graphql(`
 	mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
+			id
 			updatedAt
 		}
 	}
@@ -351,8 +352,10 @@ export default function Screen() {
 			queryClient.invalidateQueries({ queryKey: ['readBook', bookID], exact: false })
 
 			// TODO: Consider a preference to disable online-to-offline sync?
-			const serverUpdatedAt = parseGraphQLDateTime(data.updateMediaProgress.updatedAt)
-			syncProgress(onlineProgress, serverUpdatedAt)
+			syncProgress(onlineProgress, {
+				updatedAt: parseGraphQLDateTime(data.updateMediaProgress.updatedAt),
+				sessionId: data.updateMediaProgress.id,
+			})
 		},
 	})
 

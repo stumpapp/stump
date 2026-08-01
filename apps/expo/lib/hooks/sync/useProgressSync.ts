@@ -156,8 +156,13 @@ export function useSyncOnlineToOfflineProgress({
 		}
 	}, [record?.elapsedSeconds])
 
+	type RemoteSessionInfo = {
+		updatedAt?: Date | null
+		sessionId: number
+	}
+
 	const syncProgress = useCallback(
-		async (onlineProgress: MediaProgressInput, serverUpdatedAt?: Date | null) => {
+		async (onlineProgress: MediaProgressInput, remoteSession?: RemoteSessionInfo) => {
 			if (!isOfflineSyncable) return
 
 			const delta = match(onlineProgress)
@@ -215,15 +220,23 @@ export function useSyncOnlineToOfflineProgress({
 
 			// Note: I don't throw here because I intend for this to be a background best-effort sync
 			try {
+				const anchorUpdate = remoteSession?.updatedAt
+					? { lastPulledSessionUpdatedAt: remoteSession.updatedAt }
+					: {}
+				const sessionUpdate = remoteSession?.sessionId
+					? { lastSyncedSessionId: remoteSession.sessionId }
+					: {}
+				const syncedAt = remoteSession?.updatedAt ?? new Date()
 				await db
 					.insert(readProgress)
-					.values({ ...values, lastPulledSessionUpdatedAt: serverUpdatedAt })
+					.values({ ...values, ...anchorUpdate, ...sessionUpdate })
 					.onConflictDoUpdate({
 						target: readProgress.bookId,
 						set: {
 							...values,
-							lastModified: new Date(),
-							lastPulledSessionUpdatedAt: serverUpdatedAt,
+							lastModified: syncedAt,
+							...anchorUpdate,
+							...sessionUpdate,
 						},
 					})
 			} catch (error) {

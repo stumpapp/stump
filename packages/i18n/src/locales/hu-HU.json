@@ -42,6 +42,36 @@
 			"subtitleEditing": "A könyvtárad szerkesztéseinek előnézete alább látható"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Search metadata",
+			"description": "Search an external provider for this book and choose a match to apply",
+			"openButton": "Search Metadata",
+			"searchButton": "Search",
+			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
+			"noResults": "No matches were found for this search",
+			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
+			"searchFailed": "Failed to search metadata providers",
+			"form": {
+				"title": {
+					"label": "Title"
+				},
+				"author": {
+					"label": "Author"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Year"
+				},
+				"provider": {
+					"label": "Provider",
+					"allOption": "All enabled providers"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "Fájlinformációk",
@@ -1476,6 +1506,16 @@
 					"label": "Font",
 					"description": "Customize the font used in the application"
 				},
+				"interfaceRoundness": {
+					"label": "Interface roundness",
+					"description": "How rounded the corners are for UI elements",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"pill": "Pill"
+					}
+				},
 				"thumbnailPreview": {
 					"label": "Preview",
 					"description": "This is how thumbnails will look with the current settings"
@@ -1575,9 +1615,25 @@
 						"noLimit": "No limit"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Display and spacing",
+					"description": "Preferences related to the presentation of content and information"
+				},
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
+				},
+				"contentBrowsing": {
+					"label": "Content browsing",
+					"description": "Preferences that affect browsing and navigating content lists"
+				},
+				"motionAndAnimation": {
+					"label": "Motion and animation",
+					"description": "Visual presentation and movement preferences"
+				},
+				"activityAndStatus": {
+					"label": "Activity and status",
+					"description": "Indicators, overlays, or functionality related to background activity"
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -2006,6 +2062,9 @@
 						"updateError": "Failed to update scheduled job",
 						"deleteSuccess": "Scheduled job deleted",
 						"deleteError": "Failed to delete scheduled job"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {
@@ -2079,7 +2138,8 @@
 						"emailing": "Emailing",
 						"libraryManagement": "Library management",
 						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"serverManagement": "Server management",
+						"metadataManagement": "Metadata management"
 					},
 					"heading": "Permissions",
 					"subtitle": [
@@ -2791,6 +2851,22 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edit thumbnails",
 			"description": "Allows the user to edit thumbnails for books and series"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Read metadata providers",
+			"description": "Allows the user to view configured external metadata providers"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Manage metadata providers",
+			"description": "Allows the user to configure external metadata providers"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Read metadata matches",
+			"description": "Allows the user to view metadata fetch results awaiting review"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Manage metadata matches",
+			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
 		}
 	},
 	"mobileApp": {
@@ -3066,7 +3142,36 @@
 						"dark": "Dark"
 					}
 				},
-				"appPrimaryColor": "Accent",
+				"appPrimaryColor": {
+					"label": "Accent",
+					"options": {
+						"chromaScale": "Chroma Scale",
+						"hues": {
+							"red": "Red",
+							"orange": "Orange",
+							"amber": "Amber",
+							"yellow": "Yellow",
+							"lime": "Lime",
+							"green": "Green",
+							"emerald": "Emerald",
+							"teal": "Teal",
+							"cyan": "Cyan",
+							"sky": "Sky",
+							"blue": "Blue",
+							"indigo": "Indigo",
+							"violet": "Violet",
+							"purple": "Purple",
+							"fuchsia": "Fuchsia",
+							"pink": "Pink",
+							"rose": "Rose",
+							"slate": "Slate",
+							"gray": "Gray",
+							"zinc": "Zinc",
+							"neutral": "Neutral",
+							"stone": "Stone"
+						}
+					}
+				},
 				"appLanguage": "Language",
 				"defaultServer": "Default Server",
 				"thumbnailRatio": "Thumbnail Ratio",

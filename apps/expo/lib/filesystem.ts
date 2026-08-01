@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system/legacy'
+import { Directory, File, Paths } from 'expo-file-system'
 import urlJoin from 'url-join'
 
 import { useReaderStore } from '~/stores'
@@ -19,10 +19,8 @@ Filesystem structure:
 				- etc
 */
 
-// TODO(filesystem): Use non-deprecated filesystem
-
-export const baseDirectory = `${FileSystem.documentDirectory}`
-export const cacheDirectory = `${FileSystem.cacheDirectory}`
+export const baseDirectory = Paths.document.uri
+export const cacheDirectory = Paths.cache.uri
 
 /**
  * Converts an absolute path to a relative path by stripping the documentDirectory prefix.
@@ -78,11 +76,8 @@ export const unpackedDirectory = (serverID: string) => serverCachePath(serverID,
 export const unpackedBookDirectory = (serverID: string, bookID: string) =>
 	urlJoin(unpackedDirectory(serverID), bookID)
 
-export async function ensureDirectoryExists(path = baseDirectory) {
-	const info = await FileSystem.getInfoAsync(path)
-	if (!info.exists) {
-		await FileSystem.makeDirectoryAsync(path, { intermediates: true })
-	}
+export function ensureDirectoryExists(path = baseDirectory) {
+	new Directory(path).create({ intermediates: true, idempotent: true })
 }
 
 /**
@@ -97,9 +92,9 @@ export async function verifyFileReadable(
 ): Promise<void> {
 	for (let attempt = 0; attempt < maxAttempts; attempt++) {
 		try {
-			const fileInfo = await FileSystem.getInfoAsync(uri)
+			const file = new File(uri)
 
-			if (fileInfo.exists && fileInfo.size && fileInfo.size > 0) {
+			if (file.exists && file.size > 0) {
 				if (attempt === 0) {
 					await new Promise((resolve) => setTimeout(resolve, delayMs))
 				}
@@ -123,26 +118,24 @@ export async function verifyFileReadable(
 	})
 }
 
-const getFileSize = async (path: string): Promise<number> => {
-	const { exists, isDirectory, ...info } = await FileSystem.getInfoAsync(path)
+const getFileSize = (path: string): number => {
+	const info = Paths.info(path)
+	if (!info.exists) return 0
 
-	const size = 'size' in info ? info.size : 0
-
-	if (!exists) {
-		return 0
-	} else if (!isDirectory) {
-		return size
+	if (!info.isDirectory) {
+		return new File(path).size
 	}
 
-	const subfiles = await FileSystem.readDirectoryAsync(path)
-	const subfileSizes = await Promise.all(
-		subfiles.map(async (name) => {
-			const subpath = urlJoin(path, name)
-			return await getFileSize(subpath)
-		}),
-	)
-
-	return subfileSizes.reduce((acc, size) => acc + size, 0)
+	try {
+		return new Directory(path).list().reduce((acc, item) => {
+			if (item instanceof Directory) {
+				return acc + getFileSize(item.uri)
+			}
+			return acc + (item as File).size
+		}, 0)
+	} catch {
+		return 0
+	}
 }
 
 export function getServerStoredPreferencesUsage(serverID: string) {
@@ -163,19 +156,19 @@ export function getServerStoredPreferencesUsage(serverID: string) {
 	return size
 }
 
-export async function getServerFilesUsage(serverID: string) {
+export function getServerFilesUsage(serverID: string) {
 	return getFileSize(serverDirectory(serverID))
 }
 
-export async function getServerUsage(serverID: string) {
-	const fsUsage = await getFileSize(serverDirectory(serverID))
+export function getServerUsage(serverID: string) {
+	const fsUsage = getFileSize(serverDirectory(serverID))
 	const prefsUsage = getServerStoredPreferencesUsage(serverID)
 	return fsUsage + prefsUsage
 }
 
-export async function getAllServersUsage() {
+export function getAllServersUsage() {
 	const serverIDs = useSavedServerStore.getState().servers.map((server) => server.id)
-	const usage = await Promise.all(serverIDs.map(getServerUsage))
+	const usage = serverIDs.map(getServerUsage)
 	return serverIDs.reduce(
 		(acc, server, i) => {
 			// @ts-expect-error: indexing
@@ -186,14 +179,18 @@ export async function getAllServersUsage() {
 	)
 }
 
-export async function getAppUsage() {
+export function getAppUsage() {
 	const serverIDs = useSavedServerStore.getState().servers.map((server) => server.id)
-	const allRootDirs = (await FileSystem.readDirectoryAsync(baseDirectory))
-		.filter((f) => !serverIDs.includes(f))
-		.map((f) => `${baseDirectory}/${f}`)
+	const baseDir = new Directory(baseDirectory)
+	const allRootDirs = baseDir.exists
+		? baseDir
+				.list()
+				.filter((item) => !serverIDs.includes(item.name))
+				.map((item) => item.uri)
+		: []
 
-	const serverUsage = await Promise.all(serverIDs.map(getServerUsage))
-	const appUsage = await Promise.all(allRootDirs.map(getFileSize))
+	const serverUsage = serverIDs.map(getServerUsage)
+	const appUsage = allRootDirs.map(getFileSize)
 
 	const appUsageTotal = appUsage.reduce((acc, size) => acc + size, 0)
 	const serverUsageTotal = serverUsage.reduce((acc, size) => acc + size, 0)

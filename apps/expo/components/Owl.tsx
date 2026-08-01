@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-import { useHeaderHeight } from '@react-navigation/elements'
 import * as Sentry from '@sentry/react-native'
 import { Asset, useAssets } from 'expo-asset'
+import { useHeaderHeight } from 'expo-router/react-navigation'
 import { useEffect, useMemo } from 'react'
 import { Image, Platform, useWindowDimensions } from 'react-native'
 

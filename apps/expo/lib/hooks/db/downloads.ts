@@ -3,7 +3,7 @@ import { extractErrorMessage } from '@stump/graphql'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import * as FileSystem from 'expo-file-system/legacy'
+import { File } from 'expo-file-system'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner-native'
 import { useShallow } from 'zustand/react/shallow'
@@ -101,9 +101,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 			const fileUri = `${booksDirectory(effectiveServerId)}/${file.filename}`
 			try {
-				const info = await FileSystem.getInfoAsync(fileUri)
-				if (info.exists) {
-					await FileSystem.deleteAsync(fileUri)
+				const fsFile = new File(fileUri)
+				if (fsFile.exists) {
+					fsFile.delete()
 				}
 			} catch (e) {
 				Sentry.withScope((scope) => {
@@ -117,9 +117,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 			const thumbnailPath = bookThumbnailPath(effectiveServerId, bookId)
 			try {
-				const thumbInfo = await FileSystem.getInfoAsync(thumbnailPath)
-				if (thumbInfo.exists) {
-					await FileSystem.deleteAsync(thumbnailPath)
+				const thumb = new File(thumbnailPath)
+				if (thumb.exists) {
+					thumb.delete()
 				}
 			} catch (e) {
 				Sentry.withScope((scope) => {
@@ -157,9 +157,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 				const fileUri = `${booksDirectory(effectiveServerId)}/${file.filename}`
 				try {
-					const info = await FileSystem.getInfoAsync(fileUri)
-					if (info.exists) {
-						await FileSystem.deleteAsync(fileUri)
+					const fsFile = new File(fileUri)
+					if (fsFile.exists) {
+						fsFile.delete()
 					}
 				} catch (e) {
 					Sentry.withScope((scope) => {
@@ -173,9 +173,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 				const thumbnailPath = bookThumbnailPath(effectiveServerId, bookID)
 				try {
-					const thumbInfo = await FileSystem.getInfoAsync(thumbnailPath)
-					if (thumbInfo.exists) {
-						await FileSystem.deleteAsync(thumbnailPath)
+					const thumb = new File(thumbnailPath)
+					if (thumb.exists) {
+						thumb.delete()
 					}
 				} catch (e) {
 					Sentry.withScope((scope) => {

@@ -20,7 +20,10 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
 	guard::{PermissionGuard, ServerOwnerGuard},
-	object::media::Media,
+	object::{
+		media::Media,
+		reading_session::{ReadingSession, ReadingSessionConflictResolutionView},
+	},
 	order::MediaOrderBy,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -803,6 +806,54 @@ impl MediaQuery {
 			.await?;
 
 		Ok(models.into_iter().map(Media::from).collect())
+	}
+
+	async fn reading_session_conflict_view(
+		&self,
+		ctx: &Context<'_>,
+		media_id: ID,
+		branched_session_id: i32,
+	) -> Result<ReadingSessionConflictResolutionView> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let media_id_str = media_id.as_str();
+
+		let ancestor = reading_session::Entity::find_by_id(branched_session_id)
+			.filter(reading_session::Column::UserId.eq(&user.id))
+			.filter(reading_session::Column::MediaId.eq(media_id_str))
+			.one(conn)
+			.await?
+			.ok_or_else(|| "Reading session not found".to_string())?;
+
+		let remote_sessions =
+			reading_session::Entity::find_for_user_and_media(user, media_id_str)
+				.filter(
+					Condition::any()
+						// any new sessions created after the ancestor
+						.add(reading_session::Column::CreatedAt.gt(ancestor.created_at))
+						// the ancestor itself was updated after its creation, should be included but it is a bit awkward
+						.add(
+							Condition::all()
+								.add(reading_session::Column::Id.eq(ancestor.id))
+								.add(
+									reading_session::Column::UpdatedAt
+										.gt(ancestor.created_at),
+								),
+						),
+				)
+				.order_by_asc(reading_session::Column::CreatedAt)
+				.order_by_asc(reading_session::Column::Id)
+				.all(conn)
+				.await?;
+
+		Ok(ReadingSessionConflictResolutionView {
+			ancestor_session: ReadingSession::from(ancestor),
+			remote_sessions: remote_sessions
+				.into_iter()
+				.map(ReadingSession::from)
+				.collect(),
+		})
 	}
 }
 

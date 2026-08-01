@@ -26,3 +26,14 @@ impl From<reading_session::Model> for ReadingSession {
 		Self { model }
 	}
 }
+
+/// a view through which a client can resolve conflicts relative to a local ancestor session
+/// and any number of remote sessions which were created afterwards
+#[derive(Debug, Clone, SimpleObject)]
+pub struct ReadingSessionConflictResolutionView {
+	/// the last session which was known to be in sync with the local client
+	pub ancestor_session: ReadingSession,
+	/// all sessions created/updated on **this server** (remote) after the ancestor session, ordered
+	/// by created_at ascending
+	pub remote_sessions: Vec<ReadingSession>,
+}

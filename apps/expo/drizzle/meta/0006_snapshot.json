@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "71ff5c4c-8971-449a-a58e-6f4550a7e6a8",
+  "id": "f12bcf7c-0325-4d9f-bd92-5fca46dff0ce",
   "prevId": "f4748028-1d2b-4f79-a153-cc18b0df430f",
   "tables": {
     "annotations": {
@@ -510,13 +510,6 @@
           "autoincrement": false,
           "default": "'UNSYNCED'"
         },
-        "conflict_data": {
-          "name": "conflict_data",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "last_pulled_session_updated_at": {
           "name": "last_pulled_session_updated_at",
           "type": "integer",
@@ -531,6 +524,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
+        },
+        "last_synced_session_id": {
+          "name": "last_synced_session_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {

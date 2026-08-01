@@ -11,7 +11,7 @@ notify = "8.0.0"
 async-channel = "2.1.0"
 async-trait.workspace = true
 chrono.workspace = true
-cron = "0.15.0"
+croner.workspace = true
 dashmap = "6.1.0"
 tokio-util = "0.7.10"
 async-graphql.workspace = true
@@ -44,8 +44,7 @@ stump-config-gen = { path = "../crates/macros/stump-config-gen"}
 tokio.workspace = true
 toml.workspace = true
 trash = "3.1.2"
-pdf = "0.9.1"
-pdfium-render = "0.9.1"
+pdfium-render = { version = "0.9.1" }
 prefixed-api-key = { workspace = true}
 rayon = "1.10.0"
 regex.workspace = true

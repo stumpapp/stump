@@ -6,10 +6,9 @@ import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 
 import { Icon, Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
+import { useColors, usePalette } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 // MARK: Types
 
@@ -131,13 +130,13 @@ function StatGroup({ children, className }: StatGroupProps) {
 function Stat({ label, value, suffix }: StatProps) {
 	return (
 		<View className="items-center justify-center">
-			<Text className="mb-1 font-medium text-center text-foreground-muted">{label}</Text>
+			<Text className="mb-1 font-medium text-foreground-muted text-center">{label}</Text>
 			<View className="gap-0 flex-row items-end">
 				<Text size="xl" className="font-semibold text-center">
 					{value}
 				</Text>
 				{suffix != null && (
-					<Text size="xs" className="py-1 text-center text-foreground-muted">
+					<Text size="xs" className="py-1 text-foreground-muted text-center">
 						{suffix}
 					</Text>
 				)}
@@ -150,7 +149,7 @@ function Row({ value, children, ...props }: RowProps) {
 	return (
 		<BaseRowComponent {...props}>
 			{value != undefined && (
-				<Text className="text-lg flex-1 text-right text-foreground-muted">{value}</Text>
+				<Text className="text-lg text-foreground-muted flex-1 text-right">{value}</Text>
 			)}
 			{children}
 		</BaseRowComponent>
@@ -160,7 +159,7 @@ function Row({ value, children, ...props }: RowProps) {
 function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 	const colors = useColors()
 	const { isDarkColorScheme } = useColorScheme()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
+	const accentColor = usePalette('accent')
 
 	const [expanded, setExpanded] = useState(false)
 	const [isExpandable, setIsExpandable] = useState(false)
@@ -224,7 +223,7 @@ function CardBackground({ className, ...props }: ViewProps) {
 		<View
 			className={cn(
 				// We hide the overflow so that the first divider gets hidden
-				'squircle ios:rounded-[2rem] rounded-3xl bg-black/5 dark:bg-white/10 flex overflow-hidden',
+				'squircle ios:rounded-[2rem] bg-black/5 dark:bg-white/10 flex overflow-hidden rounded-3xl',
 				className,
 			)}
 			{...props}
@@ -321,7 +320,7 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 	})
 
 	return (
-		<View className="squircle h-8 w-8 rounded-xl flex shrink-0 items-center justify-center">
+		<View className="squircle h-8 w-8 flex shrink-0 items-center justify-center rounded-xl">
 			<LinearGradient
 				{...gradient}
 				useAngle
@@ -329,7 +328,7 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 				style={{ position: 'absolute', inset: 0 }}
 			/>
 			<Icon as={icon} size={18} strokeWidth={1.8} absoluteStrokeWidth color="white" />
-			<View className="inset-0 rounded-xl dark:border-white/10 border-white/30 squircle absolute border-[0.75px]" />
+			<View className="inset-0 dark:border-white/10 border-white/30 squircle absolute rounded-xl border-[0.75px]" />
 		</View>
 	)
 }
@@ -344,12 +343,12 @@ type ListEmptyMessageProps = {
 export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
 	<View
 		className={cn(
-			'squircle h-24 gap-2 rounded-3xl p-3 w-full items-center justify-center border border-dashed border-edge',
+			'squircle h-24 gap-2 p-3 border-edge w-full items-center justify-center rounded-3xl border border-dashed',
 			Platform.OS === 'android' && 'rounded-2xl',
 		)}
 	>
 		<View className="relative flex items-center justify-center">
-			<View className="squircle rounded-lg p-2 flex items-center justify-center bg-background-surface">
+			<View className="squircle p-2 bg-background-surface flex items-center justify-center rounded-lg">
 				<Icon as={icon || CircleAlert} className="h-6 w-6 text-foreground-muted" />
 				{/* <Icon as={Slash} className="absolute h-6 w-6 transform text-foreground opacity-80" /> */}
 			</View>

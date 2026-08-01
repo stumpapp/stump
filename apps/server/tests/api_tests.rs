@@ -1,4 +1,6 @@
 mod common;
+mod kobo;
+mod koreader;
 mod opds;
 mod reading_progress;
 

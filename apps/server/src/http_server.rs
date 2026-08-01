@@ -9,7 +9,13 @@ use stump_core::{
 };
 use tokio::net::TcpListener;
 use tokio::sync::Notify;
-use tower_http::{compression::CompressionLayer, trace::TraceLayer};
+use tower_http::{
+	compression::{
+		predicate::{DefaultPredicate, NotForContentType, Predicate},
+		CompressionLayer,
+	},
+	trace::TraceLayer,
+};
 
 use crate::{
 	config::{cors, oidc::OidcProvider, session::get_session_layer},
@@ -80,12 +86,29 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	println!("{}", core.get_shadow_text());
 
 	let app_router = routers::mount(app_state.clone()).await;
+
+	// we have to exclude downloadable content types from compression, 1 bc a lot are already compressed
+	// but also because compression seems to strip the content-length header which breaks download progress
+	// tracking on the mobile app
+	let compression_predicate = DefaultPredicate::new()
+		.and(NotForContentType::const_new("application/epub"))
+		.and(NotForContentType::const_new("application/zip"))
+		.and(NotForContentType::const_new("application/pdf"))
+		.and(NotForContentType::const_new("application/octet-stream"))
+		.and(NotForContentType::const_new("application/x-rar"))
+		.and(NotForContentType::const_new("application/vnd.rar"))
+		.and(NotForContentType::const_new(
+			"application/vnd.comicbook+zip",
+		))
+		.and(NotForContentType::const_new("application/x-cbr"))
+		.and(NotForContentType::const_new("application/x-cbz"));
+
 	let app = Router::new()
 		.merge(app_router)
 		.with_state(app_state.clone())
 		.layer(get_session_layer(app_state.clone()))
 		.layer(cors_layer)
-		.layer(CompressionLayer::new())
+		.layer(CompressionLayer::new().compress_when(compression_predicate))
 		.layer(TraceLayer::new_for_http())
 		.layer(Extension(oidc_provider));
 

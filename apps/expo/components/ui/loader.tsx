@@ -6,9 +6,8 @@ import { Host, ProgressView as IosCircularProgress } from '@expo/ui/swift-ui'
 import { progressViewStyle, tint } from '@expo/ui/swift-ui/modifiers'
 import { Platform, View } from 'react-native'
 
-import { useColors } from '~/lib/constants'
+import { useColors, usePalette } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
-import { usePreferencesStore } from '~/stores'
 
 import { Text } from './text'
 
@@ -37,8 +36,8 @@ const AndroidLoader = ({ color }: NativeLoaderProps) => {
 }
 
 const WrappedLoader = ({ color }: Partial<NativeLoaderProps>) => {
-	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const colors = useColors()
+	const accentColor = usePalette('accent')
 
 	return Platform.select({
 		ios: <IosLoader color={color || accentColor || colors.fill.brand.DEFAULT} />,

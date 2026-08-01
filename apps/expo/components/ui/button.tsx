@@ -3,8 +3,8 @@ import * as React from 'react'
 import { ActivityIndicator, Pressable } from 'react-native'
 
 import { TextClassContext } from '~/components/ui/text'
+import { usePalette } from '~/lib/constants'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 // TODO: Use native buttons where applicable, once expo ui stabilizes
 
@@ -68,7 +68,9 @@ type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
 
 const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
 	({ className, variant, size, style, roundness, ...props }, ref) => {
-		const accentColor = usePreferencesStore((state) => state.accentColor)
+		// Note: It may or may not be better to have non-book overview buttons
+		// as the full accent color rather than this slightly muted accent colour
+		const accentColor = usePalette('muted')
 		const isBrand = variant === 'brand' || !variant
 
 		return (

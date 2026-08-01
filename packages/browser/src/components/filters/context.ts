@@ -2,6 +2,7 @@ import {
 	LibraryFilterInput,
 	LibraryModelOrdering,
 	MediaFilterInput,
+	MediaMetadataModelOrdering,
 	MediaModelOrdering,
 	OffsetPagination,
 	OrderDirection,
@@ -12,7 +13,11 @@ import { createContext, useContext } from 'react'
 
 import { noop } from '../../utils/misc'
 
-export type OrderingField = MediaModelOrdering | SeriesModelOrdering | LibraryModelOrdering
+export type OrderingField =
+	| MediaModelOrdering
+	| MediaMetadataModelOrdering
+	| SeriesModelOrdering
+	| LibraryModelOrdering
 export type FilterInput = MediaFilterInput | SeriesFilterInput | LibraryFilterInput
 
 export type Ordering = {

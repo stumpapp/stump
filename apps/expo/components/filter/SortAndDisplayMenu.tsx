@@ -236,6 +236,13 @@ function AndroidSortMenu({ groups }: AndroidSortMenuProps) {
 		return <Text className="text-sm text-foreground-muted">{item.subtitle}</Text>
 	}
 
+	const renderLabelContent = (item: MenuItemDef) => (
+		<View className={cn('flex-1', !item.subtitle && 'justify-center')}>
+			<Text className="text-lg">{item.label}</Text>
+			{renderSubtitle(item)}
+		</View>
+	)
+
 	const renderActionItem = (item: MenuItemDef) => (
 		<DropdownMenuItem
 			key={item.key}
@@ -266,16 +273,15 @@ function AndroidSortMenu({ groups }: AndroidSortMenuProps) {
 			className="text-foreground"
 			disabled={item.disabled}
 		>
-			<View className="gap-4 flex w-full flex-row items-center justify-between">
+			<View className="gap-4 flex w-full flex-row items-center">
 				{item.icon?.android ? (
-					<View className="gap-4 flex flex-row items-center">
+					<View className="gap-4 flex flex-1 flex-row items-center">
 						<Icon as={item.icon.android} size={20} className="text-foreground-muted" />
-						<Text className="text-lg">{item.label}</Text>
+						{renderLabelContent(item)}
 					</View>
 				) : (
-					<Text className="text-lg">{item.label}</Text>
+					renderLabelContent(item)
 				)}
-				{renderSubtitle(item)}
 			</View>
 		</DropdownMenuCheckboxItem>
 	)

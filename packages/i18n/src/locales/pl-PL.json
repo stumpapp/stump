@@ -42,6 +42,36 @@
 			"subtitleEditing": "Podgląd zmian w bibliotece zostanie ukazany poniżej"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Szukaj metadanych",
+			"description": "Wyszukaj książkę u zewnętrznego dostawcy i wybierz dopasowanie do zastosowania",
+			"openButton": "Szukaj metadanych",
+			"searchButton": "Szukaj",
+			"noProviders": "Brak skonfigurowanych i włączonych dostawców metadanych dla tego typu biblioteki. Skonfiguruj go najpierw w ustawieniach.",
+			"noResults": "Nie znaleziono dopasowań dla tego wyszukiwania",
+			"partialResults": "Niektóre wyniki, najprawdopodobniej ze względu na ograniczenie ilości żądań u dostawcy, nie mogły zostać załadowane. Spróbuj wyszukać ponownie, aby zobaczyć, czy nie pojawi się ich więcej.",
+			"searchFailed": "Nie udało się wyszukać wyników u dostawców metadanych",
+			"form": {
+				"title": {
+					"label": "Tytuł"
+				},
+				"author": {
+					"label": "Autor"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Rok"
+				},
+				"provider": {
+					"label": "Dostawca",
+					"allOption": "Wszyscy aktywni dostawcy"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "Informacje o pliku",
@@ -542,6 +572,13 @@
 			"addedFiles": "Dodaj pliki"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Książki",
+			"series": "Serie",
+			"files": "Pliki"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Ustawienia",
 		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
@@ -913,6 +950,20 @@
 		"buttons": {
 			"continueReading": "Kontynuuj czytanie",
 			"downloadSeries": "Pobierz serię"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Książki",
+			"files": "Pliki"
+		},
+		"actions": {
+			"markAsRead": "Oznacz serię jako przeczytaną",
+			"markAsUnread": "Oznacz serię jako nieprzeczytaną",
+			"goToLibrary": "Przejdź do biblioteki"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Nie udało się zaktualizować stanu ukończenia książki"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1455,6 +1506,16 @@
 					"label": "Czcionka",
 					"description": "Dostosuj czcionkę używaną w aplikacji"
 				},
+				"interfaceRoundness": {
+					"label": "Zaokrąglenie interfejsu",
+					"description": "Jak bardzo zaokrąglone będą narożniki elementów interfejsu",
+					"options": {
+						"none": "W ogóle",
+						"normal": "Normalnie",
+						"rounded": "Zaokrąglone",
+						"pill": "Pastylka"
+					}
+				},
 				"thumbnailPreview": {
 					"label": "Podgląd",
 					"description": "Tak będą wyglądały miniatury z bieżącymi ustawieniami"
@@ -1478,8 +1539,8 @@
 					"label": "Zaokrąglenie miniatury",
 					"description": "Jak bardzo zaokrąglone powinny być narożniki miniatur",
 					"options": {
-						"none": "Brak",
-						"normal": "Normalne",
+						"none": "W ogóle",
+						"normal": "Normalnie",
 						"rounded": "Zaokrąglone",
 						"large": "Duże"
 					}
@@ -1554,17 +1615,25 @@
 						"noLimit": "Bez limitu"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Rozstaw i widok",
+					"description": "Ustawienia powiązane z prezentacją treści i informacji"
+				},
 				"additionalPreferences": {
 					"label": "Dodatkowe ustawienia",
 					"description": "Dostosuj wygląd i zachowanie Stump za pomocą tych dodatkowych ustawień"
 				},
-				"showThumbnailsInHeader": {
-					"label": "Pokazuj miniatury w nagłówkach",
-					"description": "Jeśli chcesz widzieć częściej miniatury, to ustawienie pokaże je w większej ilości miejsc",
-					"tooltips": {
-						"enabled": "To ustawienie pokaże miniatury w większej ilości miejsc",
-						"disabled": "To ustawienie nie pokaże miniatur w większej ilości miejsc"
-					}
+				"contentBrowsing": {
+					"label": "Przeglądanie treści",
+					"description": "Ustawienia mające wpływ na przeglądanie i nawigację list treści"
+				},
+				"motionAndAnimation": {
+					"label": "Ruch i animacja",
+					"description": "Ustawienia prezentacji wizualnej i ruchu"
+				},
+				"activityAndStatus": {
+					"label": "Aktywność i status",
+					"description": "Wskaźniki, nakładki lub funkcjonalności związane z aktywnością w tle"
 				},
 				"hideScrollbarToggle": {
 					"label": "Ukrywaj pasek przewijania",
@@ -1993,6 +2062,9 @@
 						"updateError": "Nie udało się zaktualizować zaplanowanego zadania",
 						"deleteSuccess": "Zaplanowane zadanie zostało usunięte",
 						"deleteError": "Nie udało się usunąć zaplanowanego zadania"
+					},
+					"errors": {
+						"invalidCron": "Harmonogram musi być poprawnym wyrażeniem cron"
 					}
 				},
 				"history": {
@@ -2066,7 +2138,8 @@
 						"emailing": "Wysyłka poczty elektronicznej",
 						"libraryManagement": "Zarządzanie bibliotekami",
 						"userManagement": "Zarządzanie użytkownikami",
-						"serverManagement": "Zarządzanie serwerem"
+						"serverManagement": "Zarządzanie serwerem",
+						"metadataManagement": "Zarządzanie metadanymi"
 					},
 					"heading": "Uprawnienia",
 					"subtitle": [
@@ -2572,9 +2645,11 @@
 	},
 	"common": {
 		"add": "Dodaj",
+		"andXMoreTrailing": "...i jeszcze {{count}}",
 		"cancel": "Anuluj",
 		"clear": "Wyczyść",
 		"confirm": "Potwierdź",
+		"created": "Utworzono",
 		"delete": "Usuń",
 		"deleteConfirmation": {
 			"title": "Usuń {{type}}",
@@ -2593,11 +2668,22 @@
 		"noChanges": "Brak zmian",
 		"create": "Utwórz",
 		"edit": "Edytuj",
+		"info": "Informacje",
+		"infoSheetStats": {
+			"series": "Serie",
+			"inProgress": "W trakcie",
+			"completedBooks": "Ukończone",
+			"readingTime": "Czas czytania",
+			"size": "Rozmiar"
+		},
 		"update": "Aktualizuj",
 		"upload": "Prześlij",
 		"uploading": "Przesyłanie",
 		"uploadingEllipsis": "Przesyłanie...",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
+		"upNext": "Następne w kolejce",
+		"unknown": "Nieznane",
+		"lastUpdated": "Ostatnio aktualizowane",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
 		"login": "Nazwa użytkownika",
@@ -2618,7 +2704,8 @@
 			"someRejected": "Niektóre pliki zostały odrzucone. Sprawdź typy plików i spróbuj ponownie",
 			"tooManyFiles": "Wybrano zbyt dużą ilość plików",
 			"noValidFiles": "Nie wybrano żadnych poprawnych plików"
-		}
+		},
+		"unknownError": "Wystąpił nieznany błąd"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2764,6 +2851,22 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edycja miniatur",
 			"description": "Pozwala użytkownikowi na edycję miniatur książek i serii"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Przeglądanie dostawcami metadanych",
+			"description": "Pozwala użytkownikowi na wyświetlanie skonfigurowanych zewnętrznych dostawców metadanych"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Zarządzanie dostawcami metadanych",
+			"description": "Pozwala użytkownikowi na konfigurowanie zewnętrznych dostawców metadanych"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Przeglądanie dopasowań metadanych",
+			"description": "Pozwala użytkownikowi na przeglądanie oczekujących na recenzję wyników dopasowania metadanych"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Zarządzanie dopasowaniami metadanych",
+			"description": "Pozwala użytkownikowi na szukanie za książką u zewnętrznych dostawców i akceptację lub odrzucenie oczekujących dopasowań"
 		}
 	},
 	"mobileApp": {
@@ -2809,15 +2912,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Oznacz jako przeczytane",
-				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?"
+				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?",
+				"failure": "Nie udało się oznaczyć książki jako przeczytanej"
 			},
 			"clearProgress": {
 				"label": "Wyczyść postęp",
-				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?"
+				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?",
+				"failure": "Nie udało się usunąć bieżącego postępu"
 			},
 			"deleteReadHistory": {
 				"label": "Usuń historię czytania",
-				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?"
+				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?",
+				"failure": "Nie udało się usunąć historii odczytu"
 			},
 			"deleteBook": {
 				"label": "Usuń książkę",
@@ -2888,7 +2994,7 @@
 			"read": "Czytaj",
 			"readAgain": "Czytaj ponownie",
 			"readTime": "Czas czytania",
-			"readthrough": "Readthrough",
+			"readthrough": "Przeczytanie",
 			"readMore": "Dowiedz się więcej",
 			"refresh": "Odśwież",
 			"save": "Zapisz",
@@ -3036,7 +3142,36 @@
 						"dark": "Ciemny"
 					}
 				},
-				"appPrimaryColor": "Akcent",
+				"appPrimaryColor": {
+					"label": "Akcent",
+					"options": {
+						"chromaScale": "Skala nasycenia",
+						"hues": {
+							"red": "Czerwony",
+							"orange": "Pomarańczowy",
+							"amber": "Bursztynowy",
+							"yellow": "Żółty",
+							"lime": "Limonkowy",
+							"green": "Zielony",
+							"emerald": "Szmaragdowy",
+							"teal": "Turkusowy",
+							"cyan": "Błękitny",
+							"sky": "Niebo",
+							"blue": "Niebieski",
+							"indigo": "Indygo",
+							"violet": "Fioletowy",
+							"purple": "Purpurowy",
+							"fuchsia": "Fuksja",
+							"pink": "Różowy",
+							"rose": "Różany",
+							"slate": "Łupek",
+							"gray": "Szary",
+							"zinc": "Cynk",
+							"neutral": "Neutralny",
+							"stone": "Kamień"
+						}
+					}
+				},
 				"appLanguage": "Język",
 				"defaultServer": "Domyślny serwer",
 				"thumbnailRatio": "Współczynnik miniatur",
@@ -3074,9 +3209,9 @@
 			"textCase": {
 				"label": "Kapitalizacja tekstu",
 				"options": {
-					"lowerCase": "Lowercase",
-					"sentenceCase": "Sentence Case",
-					"titleCase": "Title Case"
+					"lowerCase": "małe litery",
+					"sentenceCase": "Jak w zdaniu",
+					"titleCase": "Jak w Tytule"
 				}
 			},
 			"tintListBackground": "Zabarw tła list",

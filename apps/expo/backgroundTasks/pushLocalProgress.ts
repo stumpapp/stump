@@ -9,6 +9,7 @@ import { db, epubProgress, readProgress, syncStatus } from '~/db'
 const mutation = graphql(`
 	mutation PushLocalReadProgression($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
+			id
 			updatedAt
 		}
 	}
@@ -125,15 +126,16 @@ const executeSingleServerSync = async (
 			})
 
 			const serverUpdatedAt = parseGraphQLDateTime(result.updateMediaProgress.updatedAt)
+			const serverSessionId = result.updateMediaProgress.id ?? undefined
 
 			await db
 				.update(readProgress)
 				.set({
 					syncStatus: syncStatus.Enum.SYNCED,
-					conflictData: null,
 					lastSyncedElapsedSeconds: record.elapsedSeconds,
 					pendingReset: false,
 					lastPulledSessionUpdatedAt: serverUpdatedAt,
+					...(serverSessionId ? { lastSyncedSessionId: serverSessionId } : {}),
 				})
 				.where(eq(readProgress.id, record.id))
 		} catch {

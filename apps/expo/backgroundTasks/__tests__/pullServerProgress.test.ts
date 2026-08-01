@@ -84,6 +84,7 @@ function makeServerMedia(overrides: Partial<FakeServerMedia> = {}) {
 			overrides.readProgress !== undefined
 				? overrides.readProgress
 				: {
+						sessionId: 1,
 						page: 10,
 						percentageCompleted: '0.5',
 						epubcfi: null,
@@ -128,6 +129,7 @@ describe('conflict resolution', () => {
 			const api = makeMockApi([
 				makeServerMedia({
 					readProgress: {
+						sessionId: 1,
 						page: 10,
 						percentageCompleted: '0.5',
 						epubcfi: null,
@@ -267,6 +269,7 @@ describe('lastSyncedElapsedSeconds tracking', () => {
 		const api = makeMockApi([
 			makeServerMedia({
 				readProgress: {
+					sessionId: 2,
 					page: 20,
 					percentageCompleted: '0.75',
 					epubcfi: null,
@@ -298,6 +301,7 @@ describe('lastSyncedElapsedSeconds tracking', () => {
 		const api = makeMockApi([
 			makeServerMedia({
 				readProgress: {
+					sessionId: 1,
 					page: 1,
 					percentageCompleted: '0.1',
 					epubcfi: null,
@@ -335,6 +339,7 @@ describe('conflicts', () => {
 		const api = makeMockApi([
 			makeServerMedia({
 				readProgress: {
+					sessionId: 2,
 					page: 20,
 					percentageCompleted: '0.75',
 					epubcfi: null,
@@ -373,6 +378,7 @@ describe('conflicts', () => {
 		const api = makeMockApi([
 			makeServerMedia({
 				readProgress: {
+					sessionId: 2,
 					page: 20,
 					percentageCompleted: '0.75',
 					epubcfi: null,

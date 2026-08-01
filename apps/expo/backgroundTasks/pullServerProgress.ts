@@ -1,18 +1,10 @@
 import * as Sentry from '@sentry/react-native'
 import { parseGraphQLDateTime } from '@stump/client'
-import { graphql, PullServerReadProgressionQuery } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { eq, inArray } from 'drizzle-orm'
 
-import {
-	conflictingSource,
-	db,
-	downloadedFiles,
-	epubProgress,
-	readProgress,
-	SyncConflictData,
-	syncStatus,
-} from '~/db'
+import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
 
 const query = graphql(`
 	query PullServerReadProgression($filter: MediaFilterInput!) {
@@ -20,6 +12,7 @@ const query = graphql(`
 			nodes {
 				id
 				readProgress {
+					sessionId
 					page
 					percentageCompleted
 					epubcfi
@@ -47,19 +40,6 @@ const query = graphql(`
 		}
 	}
 `)
-
-const intoConflictData = (
-	serverData: PullServerReadProgressionQuery['media']['nodes'][number],
-): SyncConflictData | null => {
-	const snapshot = {
-		updatedAt: parseGraphQLDateTime(serverData.readProgress?.updatedAt),
-		page: serverData.readProgress?.page ?? null,
-		percentageCompleted: serverData.readProgress?.percentageCompleted ?? null,
-		elapsedSeconds: serverData.readProgress?.elapsedSeconds ?? null,
-		locator: serverData.readProgress?.locator ?? null,
-	}
-	return conflictingSource.safeParse(snapshot)?.data ?? null
-}
 
 export type PullSyncResult = {
 	failedBookIds: string[]
@@ -156,7 +136,7 @@ export const executeSingleServerPullSync = async (
 				conflictBookIds.push(media.id)
 				await db
 					.update(readProgress)
-					.set({ syncStatus: syncStatus.enum.CONFLICT, conflictData: intoConflictData(media) })
+					.set({ syncStatus: syncStatus.enum.CONFLICT })
 					.where(eq(readProgress.bookId, media.id))
 				continue
 			}
@@ -186,9 +166,9 @@ export const executeSingleServerPullSync = async (
 						}).data
 					: null,
 				syncStatus: syncStatus.enum.SYNCED,
-				conflictData: null,
 				lastModified: serverUpdatedAt,
 				lastPulledSessionUpdatedAt: serverUpdatedAt,
+				lastSyncedSessionId: progress.sessionId,
 				pendingReset: false,
 			}
 

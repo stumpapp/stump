@@ -3871,6 +3871,8 @@ export type ResumeReadingCursor = {
   page?: Maybe<Scalars['Int']['output']>;
   percentageCompleted?: Maybe<Scalars['Decimal']['output']>;
   readthroughNumber: Scalars['Int']['output'];
+  /** the id of the session this cursor is derived from */
+  sessionId: Scalars['Int']['output'];
   /** when the very first session in the current readthrough started */
   startedAt?: Maybe<Scalars['DateTime']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -4929,7 +4931,7 @@ export type UpdateReadProgressionMutationVariables = Exact<{
 }>;
 
 
-export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', updatedAt?: any | null } };
+export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', id: number, updatedAt?: any | null } };
 
 export type ResetElapsedSecondsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5272,7 +5274,7 @@ export type PullServerReadProgressionQueryVariables = Exact<{
 }>;
 
 
-export type PullServerReadProgressionQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, readProgress?: { __typename?: 'ResumeReadingCursor', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, updatedAt?: any | null, elapsedSeconds: number, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, readHistory: Array<{ __typename?: 'ReadthroughRecord', completedAt: any }> }> } };
+export type PullServerReadProgressionQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, readProgress?: { __typename?: 'ResumeReadingCursor', sessionId: number, page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, updatedAt?: any | null, elapsedSeconds: number, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, readHistory: Array<{ __typename?: 'ReadthroughRecord', completedAt: any }> }> } };
 
 export type PushCreateAnnotationMutationVariables = Exact<{
   input: CreateAnnotationInput;
@@ -5315,7 +5317,7 @@ export type PushLocalReadProgressionMutationVariables = Exact<{
 }>;
 
 
-export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', updatedAt?: any | null } };
+export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', id: number, updatedAt?: any | null } };
 
 export type PushResetElapsedSecondsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8406,6 +8408,7 @@ export const BookReadScreenDocument = new TypedDocumentString(`
 export const UpdateReadProgressionDocument = new TypedDocumentString(`
     mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
   updateMediaProgress(id: $id, input: $input) {
+    id
     updatedAt
   }
 }
@@ -9377,6 +9380,7 @@ export const PullServerReadProgressionDocument = new TypedDocumentString(`
     nodes {
       id
       readProgress {
+        sessionId
         page
         percentageCompleted
         epubcfi
@@ -9442,6 +9446,7 @@ export const PushDeleteBookmarkDocument = new TypedDocumentString(`
 export const PushLocalReadProgressionDocument = new TypedDocumentString(`
     mutation PushLocalReadProgression($id: ID!, $input: MediaProgressInput!) {
   updateMediaProgress(id: $id, input: $input) {
+    id
     updatedAt
   }
 }

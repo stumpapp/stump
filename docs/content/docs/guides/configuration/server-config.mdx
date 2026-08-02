@@ -71,6 +71,8 @@ Stored as a valid array in the configuration file.
 
 Whether or not to trust proxy headers like `X-Forwarded-For` and `X-Real-IP` for determining the client's IP address. This should only be set to `true` if Stump is running behind a reverse proxy that is properly configured to set these headers, since it increases the risk of IP spoofing.
 
+Without this config enabled, Stump will ignore these headers entirely and rely only on raw connect info. This means that if you're running Stump behind a reverse proxy, some generated URLs may be built incorrectly.
+
 | Type    | Default Value | TOML Key              |
 | ------- | ------------- | --------------------- |
 | Boolean | `false`       | `trust_proxy_headers` |

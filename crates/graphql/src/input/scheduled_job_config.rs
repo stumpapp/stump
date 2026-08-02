@@ -54,7 +54,7 @@ pub fn validate_create_input(input: &CreateScheduledJobInput) -> Result<(), Stri
 
 pub fn validate_cron_expression(expr: &str) -> Result<(), String> {
 	use std::str::FromStr;
-	cron::Schedule::from_str(expr)
+	croner::Cron::from_str(expr)
 		.map(|_| ())
 		.map_err(|e| format!("Invalid cron expression: {e}"))
 }

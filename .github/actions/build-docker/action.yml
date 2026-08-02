@@ -8,9 +8,6 @@ inputs:
   password:
     description: 'Token for docker login'
     required: true
-  load:
-    description: 'Set output-type to docker'
-    default: 'true'
   push:
     description: 'Set output-type to registry'
     default: 'false'

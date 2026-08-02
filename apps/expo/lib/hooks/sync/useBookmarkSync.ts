@@ -12,39 +12,41 @@ import { bookmarks, db, downloadedFiles, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
 import { ReadiumLocator } from '~/modules/readium'
 
+import { PushSyncParams, SyncParams } from './types'
 import { useServerInstances } from './utils'
 
 export function useBookmarkSync() {
 	const { getInstances } = useServerInstances()
 
-	type PushBookmarksParams = {
-		forServers?: string[]
-		ignoreBookIds?: string[]
-	}
-
 	const pushBookmarks = useCallback(
-		async ({ forServers, ignoreBookIds }: PushBookmarksParams = {}) => {
-			const instances = await getInstances(forServers)
-			return executePushBookmarksSync(instances, ignoreBookIds)
+		async ({ forServers, ignoreBookIds, instances }: PushSyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+			return executePushBookmarksSync(resolvedInstances, ignoreBookIds)
 		},
 		[getInstances],
 	)
 
 	const pullBookmarks = useCallback(
-		async (forServers?: string[]) => {
-			const instances = await getInstances(forServers)
-			return executePullBookmarksSync(instances)
+		async ({ forServers, instances }: SyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+			return executePullBookmarksSync(resolvedInstances)
 		},
 		[getInstances],
 	)
 
 	const syncBookmarks = useCallback(
-		async (forServers?: string[]) => {
-			const pullResults = await pullBookmarks(forServers)
+		async ({ forServers, instances }: SyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+
+			const pullResults = await pullBookmarks({ forServers, instances: resolvedInstances })
 
 			const ignoreBookIds = Object.values(pullResults).flatMap((r) => r.failedBookIds)
 
-			const pushResults = await pushBookmarks({ forServers, ignoreBookIds })
+			const pushResults = await pushBookmarks({
+				forServers,
+				ignoreBookIds,
+				instances: resolvedInstances,
+			})
 
 			if (ignoreBookIds.length > 0) {
 				throw new Error(`Failed to pull bookmarks for ${ignoreBookIds.length} book(s)`)
@@ -52,7 +54,7 @@ export function useBookmarkSync() {
 
 			return { pullResults, pushResults }
 		},
-		[pullBookmarks, pushBookmarks],
+		[getInstances, pullBookmarks, pushBookmarks],
 	)
 
 	return { syncBookmarks, pushBookmarks, pullBookmarks }
@@ -79,7 +81,7 @@ export function useAutoSyncBookmarksForActiveServer({ enabled = true }: AutoSync
 				didSync.current = true
 
 				try {
-					await syncBookmarks([serverId])
+					await syncBookmarks({ forServers: [serverId] })
 				} catch (error) {
 					console.error('Failed to sync bookmarks', error)
 					Sentry.captureException(error, {
@@ -124,7 +126,6 @@ export function useSyncOnlineToOfflineBookmarks({ bookId, serverId }: SyncOnline
 					.from(bookmarks)
 					.where(eq(bookmarks.serverBookmarkId, serverBookmarkId))
 					.limit(1)
-					.all()
 
 				if (existing.length > 0) return
 

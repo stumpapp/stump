@@ -4,7 +4,7 @@ If this PR does not close an issue, please remove the above line. If it does, pl
 
 ## Description
 
-A clear and concise description of the PR.
+A clear and concise description of the PR. If you used LLM tools to assist in the creation of this PR, please disclose that here, too.
 
 - Summary of changes
 - Reasoning
@@ -26,6 +26,7 @@ Please read each item and check the boxes:
 - [ ] I searched for existing issues or pull requests that may be related to my contribution
 - [ ] This PR is based into `nightly` and not `main`
 - [ ] I added tests and/or documentation for my changes if applicable
+- [ ] I disclosed any use of LLMs in the creation of this PR (if applicable)
 
 ## Stump Contributor License Agreement
 

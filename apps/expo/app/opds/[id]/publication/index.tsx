@@ -34,6 +34,7 @@ import {
 import MetadataBadgeSection from '~/components/overview/MetadataBadgeSection'
 import { Button, Card, Heading, Icon, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
+import { usePalette } from '~/lib/constants'
 import {
 	useIsOPDSBookDownloading,
 	useIsOPDSPublicationDownloaded,
@@ -191,7 +192,7 @@ export default function Screen() {
 
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
 
-	const accentColor = usePreferencesStore((state) => state.accentColor)
+	const accentColor = usePalette('accent')
 
 	const renderModifiedStat = (progression: OPDSProgression) => {
 		if (!progression.modified) return null
@@ -268,7 +269,7 @@ export default function Screen() {
 							</Heading>
 
 							{seriesText && (
-								<Text className="text-base text-center text-foreground-muted" numberOfLines={1}>
+								<Text className="text-base text-foreground-muted text-center" numberOfLines={1}>
 									{seriesText}
 								</Text>
 							)}
@@ -299,14 +300,7 @@ export default function Screen() {
 								>
 									{isDownloading && (
 										<View className="animate-spin pointer-events-none">
-											<Icon
-												className="h-5 w-5"
-												as={Loader2}
-												style={{
-													// @ts-expect-error: It's fine
-													color: accentColor,
-												}}
-											/>
+											<Icon className="h-5 w-5" as={Loader2} color={accentColor} />
 										</View>
 									)}
 									<Text>Download</Text>
@@ -342,7 +336,7 @@ export default function Screen() {
 						<View className="gap-2">
 							{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
 							{!canDownload && !isDownloaded && (
-								<View className="squircle ios:rounded-3xl rounded-2xl p-3 bg-fill-warning-secondary">
+								<View className="squircle ios:rounded-3xl p-3 bg-fill-warning-secondary rounded-2xl">
 									<Text>
 										{!downloadURL
 											? 'No download link available for this publication'
@@ -352,13 +346,13 @@ export default function Screen() {
 							)}
 
 							{!canStream && (
-								<View className="squircle ios:rounded-3xl rounded-2xl p-3 bg-fill-info-secondary">
+								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
 									<Text>This publication lacks a defined reading order and cannot be streamed</Text>
 								</View>
 							)}
 
 							{!isSupportedStream && (
-								<View className="squircle ios:rounded-3xl rounded-2xl p-3 bg-fill-info-secondary">
+								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
 									<Text>
 										This publication contains unsupported media types and cannot be streamed yet
 									</Text>

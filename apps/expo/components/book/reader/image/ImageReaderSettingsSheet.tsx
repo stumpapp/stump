@@ -1,5 +1,4 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
-import { getColor, serialize } from 'colorjs.io/fn'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
 import Animated, {
@@ -11,10 +10,9 @@ import Animated, {
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Heading, Switch, Text } from '~/components/ui'
-import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors, usePalette } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
-import { useColorScheme } from '~/lib/useColorScheme'
-import { usePreferencesStore, useReaderStore } from '~/stores'
+import { useReaderStore } from '~/stores'
 
 import { ReaderSettings } from '../settings'
 import { FADE_TIMING_CONFIG } from '../shared'
@@ -24,21 +22,17 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 	const context = useContext(ImageBasedReaderContext)
 	const { t } = useTranslate()
 	const colors = useColors()
-	const { isDarkColorScheme } = useColorScheme()
+
+	const accentColor = usePalette({ light: 300, dark: 900, opacity: 0.4 })
 
 	const bookOverrides = useReaderStore((state) => state.bookOverrides)
 	const setBookOverride = useReaderStore((state) => state.setBookOverride)
-	const { accentColor } = usePreferencesStore()
 
 	const ref = useRef<TrueSheet | null>(null)
 
 	const bookId = context?.book?.id
 	const serverId = context?.serverId
 	const overrideGlobalSettings = !!(bookId ? bookOverrides[bookId] : false)
-
-	const color = getColor(accentColor || colors.fill.brand.DEFAULT)
-	color.alpha = isDarkColorScheme ? 0.1 : 0.2
-	const backgroundColor = serialize(color, { format: 'hex' })
 
 	const bgOpacity = useSharedValue(0)
 
@@ -50,7 +44,7 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 		return {
 			// add a slight tint if global settings are not used
 			// this visually helps to confirm the switch did something if no settings change
-			backgroundColor: interpolateColor(bgOpacity.value, [0, 1], ['transparent', backgroundColor]),
+			backgroundColor: interpolateColor(bgOpacity.value, [0, 1], ['transparent', accentColor]),
 		}
 	})
 
@@ -64,7 +58,7 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 				detents={[0.5, 1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				insetAdjustment="automatic"
 				{...props}

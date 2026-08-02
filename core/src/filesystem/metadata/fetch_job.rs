@@ -460,6 +460,7 @@ impl JobLifecycle for MetadataFetchJob {
 
 				let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 				let mut was_rate_limited = false;
+				let mut raw_hits: i32 = 0;
 
 				for config in &provider_configs {
 					match provider_cache.get_or_create(config).await {
@@ -471,8 +472,9 @@ impl JobLifecycle for MetadataFetchJob {
 							};
 
 							match provider.search_series(&query).await {
-								Ok(candidates) => {
-									all_candidates.extend(candidates);
+								Ok(outcome) => {
+									raw_hits += outcome.requested as i32;
+									all_candidates.extend(outcome.candidates);
 								},
 								Err(e) if e.is_rate_limited() => {
 									was_rate_limited = true;
@@ -530,6 +532,7 @@ impl JobLifecycle for MetadataFetchJob {
 					series_id: Set(Some(series_id.clone())),
 					status: Set(status),
 					match_candidates: Set(Some(candidates_json)),
+					raw_hits: Set(raw_hits),
 					..Default::default()
 				};
 
@@ -539,6 +542,7 @@ impl JobLifecycle for MetadataFetchJob {
 							.update_columns([
 								metadata_fetch_record::Column::Status,
 								metadata_fetch_record::Column::MatchCandidates,
+								metadata_fetch_record::Column::RawHits,
 								metadata_fetch_record::Column::UpdatedAt,
 							])
 							.to_owned(),
@@ -638,6 +642,7 @@ impl JobLifecycle for MetadataFetchJob {
 
 				let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 				let mut was_rate_limited = false;
+				let mut raw_hits: i32 = 0;
 
 				for config in &provider_configs {
 					match provider_cache.get_or_create(config).await {
@@ -649,8 +654,9 @@ impl JobLifecycle for MetadataFetchJob {
 							};
 
 							match provider.search_media(&query).await {
-								Ok(candidates) => {
-									all_candidates.extend(candidates);
+								Ok(outcome) => {
+									raw_hits += outcome.requested as i32;
+									all_candidates.extend(outcome.candidates);
 								},
 								Err(e) if e.is_rate_limited() => {
 									was_rate_limited = true;
@@ -700,6 +706,7 @@ impl JobLifecycle for MetadataFetchJob {
 					media_id: Set(Some(media_id.clone())),
 					status: Set(status),
 					match_candidates: Set(Some(candidates_json)),
+					raw_hits: Set(raw_hits),
 					..Default::default()
 				};
 
@@ -709,6 +716,7 @@ impl JobLifecycle for MetadataFetchJob {
 							.update_columns([
 								metadata_fetch_record::Column::Status,
 								metadata_fetch_record::Column::MatchCandidates,
+								metadata_fetch_record::Column::RawHits,
 								metadata_fetch_record::Column::UpdatedAt,
 							])
 							.to_owned(),

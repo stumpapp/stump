@@ -42,6 +42,36 @@
 			"subtitleEditing": "Kütüphanenizde yaptığınız değişikliklerin önizlemesi aşağıda gösterilecektir"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Search metadata",
+			"description": "Search an external provider for this book and choose a match to apply",
+			"openButton": "Search Metadata",
+			"searchButton": "Search",
+			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
+			"noResults": "No matches were found for this search",
+			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
+			"searchFailed": "Failed to search metadata providers",
+			"form": {
+				"title": {
+					"label": "Title"
+				},
+				"author": {
+					"label": "Author"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Year"
+				},
+				"provider": {
+					"label": "Provider",
+					"allOption": "All enabled providers"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "Dosya Bilgisi",
@@ -542,6 +572,13 @@
 			"addedFiles": "Eklenen dosyalar"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"files": "Files"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Kütüphanenizi buradan yönetin. Bu ayarlarla ilgili bilgilerinizi tazelemek isterseniz,",
@@ -913,6 +950,20 @@
 		"buttons": {
 			"continueReading": "Okumaya Devam Et",
 			"downloadSeries": "Serileri İndir"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1455,6 +1506,16 @@
 					"label": "Yazı Tipi",
 					"description": "Customize the font used in the application"
 				},
+				"interfaceRoundness": {
+					"label": "Interface roundness",
+					"description": "How rounded the corners are for UI elements",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"pill": "Pill"
+					}
+				},
 				"thumbnailPreview": {
 					"label": "Preview",
 					"description": "This is how thumbnails will look with the current settings"
@@ -1554,17 +1615,25 @@
 						"noLimit": "No limit"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Display and spacing",
+					"description": "Preferences related to the presentation of content and information"
+				},
 				"additionalPreferences": {
 					"label": "Diğer tercihler",
 					"description": "Bu ek ayarlarla Stump'ın görünümünü ve davranışını özelleştirin"
 				},
-				"showThumbnailsInHeader": {
-					"label": "Başlıklarda küçük resimleri göster",
-					"description": "Küçük resimleri daha sık görmek isterseniz, bu ayar ile daha fazla yerde gösterilecektir",
-					"tooltips": {
-						"enabled": "Bu ayar, küçük resimleri daha fazla yerde gösterecektir",
-						"disabled": "Bu ayar, daha fazla yerde küçük resimleri göstermeyecektir"
-					}
+				"contentBrowsing": {
+					"label": "Content browsing",
+					"description": "Preferences that affect browsing and navigating content lists"
+				},
+				"motionAndAnimation": {
+					"label": "Motion and animation",
+					"description": "Visual presentation and movement preferences"
+				},
+				"activityAndStatus": {
+					"label": "Activity and status",
+					"description": "Indicators, overlays, or functionality related to background activity"
 				},
 				"hideScrollbarToggle": {
 					"label": "Kaydırma çubuğunu gizle",
@@ -1993,6 +2062,9 @@
 						"updateError": "Failed to update scheduled job",
 						"deleteSuccess": "Scheduled job deleted",
 						"deleteError": "Failed to delete scheduled job"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {
@@ -2066,7 +2138,8 @@
 						"emailing": "Emailing",
 						"libraryManagement": "Library management",
 						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"serverManagement": "Server management",
+						"metadataManagement": "Metadata management"
 					},
 					"heading": "İzinler",
 					"subtitle": [
@@ -2572,9 +2645,11 @@
 	},
 	"common": {
 		"add": "Add",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2593,11 +2668,22 @@
 		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",
@@ -2618,7 +2704,8 @@
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
-		}
+		},
+		"unknownError": "An unknown error occurred"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2764,6 +2851,22 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edit thumbnails",
 			"description": "Allows the user to edit thumbnails for books and series"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Read metadata providers",
+			"description": "Allows the user to view configured external metadata providers"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Manage metadata providers",
+			"description": "Allows the user to configure external metadata providers"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Read metadata matches",
+			"description": "Allows the user to view metadata fetch results awaiting review"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Manage metadata matches",
+			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
 		}
 	},
 	"mobileApp": {
@@ -2809,15 +2912,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Mark as Read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
+				"failure": "Failed to mark book as read"
 			},
 			"clearProgress": {
 				"label": "Clear Progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
+				"failure": "Failed to delete current progress"
 			},
 			"deleteReadHistory": {
 				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"failure": "Failed to delete read history"
 			},
 			"deleteBook": {
 				"label": "Delete Book",
@@ -3036,7 +3142,36 @@
 						"dark": "Dark"
 					}
 				},
-				"appPrimaryColor": "Accent",
+				"appPrimaryColor": {
+					"label": "Accent",
+					"options": {
+						"chromaScale": "Chroma Scale",
+						"hues": {
+							"red": "Red",
+							"orange": "Orange",
+							"amber": "Amber",
+							"yellow": "Yellow",
+							"lime": "Lime",
+							"green": "Green",
+							"emerald": "Emerald",
+							"teal": "Teal",
+							"cyan": "Cyan",
+							"sky": "Sky",
+							"blue": "Blue",
+							"indigo": "Indigo",
+							"violet": "Violet",
+							"purple": "Purple",
+							"fuchsia": "Fuchsia",
+							"pink": "Pink",
+							"rose": "Rose",
+							"slate": "Slate",
+							"gray": "Gray",
+							"zinc": "Zinc",
+							"neutral": "Neutral",
+							"stone": "Stone"
+						}
+					}
+				},
 				"appLanguage": "Language",
 				"defaultServer": "Default Server",
 				"thumbnailRatio": "Thumbnail Ratio",

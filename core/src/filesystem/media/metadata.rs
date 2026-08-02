@@ -1,11 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::{Datelike, NaiveDate};
 use merge::Merge;
-use pdf::{
-	object::InfoDict,
-	primitive::{Dictionary, PdfString},
-};
 use sea_orm::{prelude::*, Set};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -15,7 +10,7 @@ use crate::utils::serde::{
 	parse_age_restriction, string_list_deserializer,
 };
 
-const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
+use super::utils::parse_pdf_date;
 
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
@@ -351,20 +346,10 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 					// We need to _try_ to parse each part of the date, and if it fails, we just ignore it.
 					// This is a bit of a hack, but it's the best we can do without knowing the format.
 					let raw_date = value.into_iter().next().unwrap_or_default();
-
-					for format in &NAIVE_DATE_FORMATS {
-						if let Ok(date) = NaiveDate::parse_from_str(&raw_date, format) {
-							metadata.year = Some(date.year());
-							metadata.month = Some(date.month() as i32);
-							metadata.day = Some(date.day() as i32);
-							break;
-						}
-					}
-
-					if metadata.year.is_none() {
-						if let Ok(year) = raw_date.parse() {
-							metadata.year = Some(year);
-						}
+					if let Some((y, m, d)) = parse_pdf_date(&raw_date) {
+						metadata.year = Some(y);
+						metadata.month = m;
+						metadata.day = d;
 					}
 				},
 				// TODO: separate out writer vs author?
@@ -402,55 +387,9 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 	}
 }
 
-impl From<Dictionary> for ProcessedMediaMetadata {
-	fn from(dict: Dictionary) -> Self {
-		// FIXME: this is pretty hacky! I need to match on the type of the value
-		let map = dict
-			.into_iter()
-			.map(|(k, v)| v.to_string().map(|v| (k, v)))
-			.filter_map(Result::ok)
-			.map(|(k, v)| (k.to_lowercase(), vec![v]))
-			.collect::<HashMap<String, Vec<String>>>();
-		Self::from(map)
-	}
-}
-
-fn pdf_string_to_string(pdf_string: PdfString) -> Option<String> {
-	pdf_string.to_string().map_or_else(
-		|error| {
-			tracing::error!(error = ?error, "Failed to convert PdfString to String");
-			None
-		},
-		|str| Some(str.trim().to_owned()),
-	)
-}
-
-impl From<InfoDict> for ProcessedMediaMetadata {
-	fn from(dict: InfoDict) -> Self {
-		ProcessedMediaMetadata {
-			title: dict.title.and_then(pdf_string_to_string),
-			genres: dict.subject.and_then(pdf_string_to_string).map(|v| vec![v]),
-			year: dict.creation_date.as_ref().map(|date| date.year as i32),
-			month: dict.creation_date.as_ref().map(|date| date.month as i32),
-			day: dict.creation_date.as_ref().map(|date| date.day as i32),
-			writers: dict.author.and_then(pdf_string_to_string).map(|v| vec![v]),
-			..Default::default()
-		}
-	}
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
-
-	#[test]
-	fn test_pdf_string_to_string() {
-		let pdf_string = PdfString::from("Hello, world!");
-		assert_eq!(
-			pdf_string_to_string(pdf_string),
-			Some("Hello, world!".to_string())
-		);
-	}
 
 	#[test]
 	fn test_from_hashmap() {
@@ -525,5 +464,30 @@ mod tests {
 		let metadata = ProcessedMediaMetadata::from(map);
 
 		assert_eq!(metadata.age_rating, Some(13));
+	}
+
+	#[test]
+	fn test_from_hashmap_pdf_dates() {
+		let test_cases = vec![
+			("D:20190101", Some(2019), Some(1), Some(1)),
+			("D:20190101123456Z", Some(2019), Some(1), Some(1)),
+			("20190101", Some(2019), Some(1), Some(1)),
+			("D:2019", Some(2019), None, None),
+			("2019-08-31", Some(2019), Some(8), Some(31)),
+			("201901", Some(2019), Some(1), None),
+			("2019010", Some(2019), Some(1), None),
+			("2019010a", Some(2019), Some(1), None),
+			("20241", Some(20241), None, None),
+			("invalid", None, None, None),
+		];
+
+		for (raw_date, exp_year, exp_month, exp_day) in test_cases {
+			let mut map = HashMap::new();
+			map.insert("date".to_string(), vec![raw_date.to_string()]);
+			let metadata = ProcessedMediaMetadata::from(map);
+			assert_eq!(metadata.year, exp_year, "Failed for {}", raw_date);
+			assert_eq!(metadata.month, exp_month, "Failed for {}", raw_date);
+			assert_eq!(metadata.day, exp_day, "Failed for {}", raw_date);
+		}
 	}
 }

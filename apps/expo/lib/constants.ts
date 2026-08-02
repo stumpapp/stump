@@ -3,7 +3,9 @@ import {
 	ColorSpace,
 	ColorTypes,
 	getColor,
+	mix,
 	OKLCH,
+	PlainColorObject,
 	serialize,
 	set as setColor,
 	sRGB,
@@ -37,10 +39,35 @@ export const SETTINGS_COLORS = {
 	destructive: '#fd6bd5',
 }
 
-type Hue = Exclude<
-	keyof typeof tailwindColors,
-	'inherit' | 'current' | 'transparent' | 'black' | 'white'
->
+export const HUES = [
+	'red',
+	'orange',
+	'amber',
+	'yellow',
+	'lime',
+	'green',
+	'emerald',
+	'teal',
+	'cyan',
+	'sky',
+	'blue',
+	'indigo',
+	'violet',
+	'purple',
+	'fuchsia',
+	'pink',
+	'rose',
+	'slate',
+	'gray',
+	'zinc',
+	'neutral',
+	'stone',
+] as const
+
+export type Hue = (typeof HUES)[number]
+
+export type Shade = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950
+
 export type StatColorPalette = { primary: string; secondary: string }
 
 const STAT_HUES = {
@@ -54,6 +81,20 @@ const STAT_HUES = {
 
 export function toHex(color: ColorTypes) {
 	return serialize(to(getColor(color), sRGB), { format: 'hex' })
+}
+
+export const toRgbChannels = (color: ColorTypes) => {
+	const hex = toHex(color)
+	const r = parseInt(hex.slice(1, 3), 16)
+	const g = parseInt(hex.slice(3, 5), 16)
+	const b = parseInt(hex.slice(5, 7), 16)
+	return `${r} ${g} ${b}`
+}
+
+export function reduceChroma(color: ColorTypes, chromaScale: number) {
+	const plainColor = getColor(color)
+	setColor(plainColor, { 'oklch.c': (c) => c * chromaScale })
+	return toHex(plainColor)
 }
 
 export const STAT_COLORS = Object.fromEntries(
@@ -244,7 +285,7 @@ const dark: Theme = {
 		maximumTrack: '#292c30',
 	},
 	sheet: {
-		background: '#000000',
+		background: '#1c1c1e',
 		grabber: '#333',
 	},
 	tabbar: '#0B0B0B',
@@ -257,8 +298,9 @@ export const COLORS = {
 
 export const useColors = () => {
 	const { isDarkColorScheme } = useColorScheme()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const resolvedTheme = clone(isDarkColorScheme ? dark : light)
+
+	const accentColor = usePalette('accent')
 
 	if (accentColor) {
 		const color = getColor(accentColor)
@@ -283,6 +325,87 @@ export const useColors = () => {
 	}
 
 	return resolvedTheme
+}
+
+const PRECOMPUTED_SHADES = [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 1000] as const
+
+type BaseShadeConfig = { light: number; dark: number; opacity?: number; chromaScale?: number }
+type ShadeConfig = number | BaseShadeConfig
+type CommonConfig = 'accent' | 'muted'
+
+export function usePalette(): Record<Shade, string>
+export function usePalette(config: ShadeConfig): string
+export function usePalette<T extends Record<string, ShadeConfig>>(
+	config: T,
+): Record<keyof T, string>
+export function usePalette(config: CommonConfig): string
+
+export function usePalette(config?: ShadeConfig | CommonConfig | Record<string, ShadeConfig>) {
+	const accentHue = usePreferencesStore((state) => state.accentHue)
+	const accentChromaScale = usePreferencesStore((state) => state.accentChromaScale)
+	const palette: Record<number, string> = tailwindColors[accentHue]
+	const { isDarkColorScheme } = useColorScheme()
+
+	const resolveConfig = (s: ShadeConfig) => {
+		let shade: number
+		let opacity: number = 1
+		let chromaScale: number = 1
+
+		if (typeof s === 'number') {
+			shade = s
+		} else {
+			shade = isDarkColorScheme ? s.dark : s.light
+			opacity = s.opacity ?? 1
+			chromaScale = s.chromaScale ?? 1
+		}
+
+		let color: PlainColorObject
+		const twColor = palette[shade]
+		if (twColor) {
+			color = getColor(twColor)
+		} else {
+			const lower = PRECOMPUTED_SHADES.toReversed().find((s) => s <= shade) ?? 0
+			const upper = PRECOMPUTED_SHADES.find((s) => s >= shade) ?? 1000
+			const ratio = (shade - lower) / (upper - lower)
+
+			const upperColor = getColor(palette[upper] ?? 'black')
+			const lowerColor = getColor(palette[lower] ?? 'white')
+
+			color = mix(lowerColor, upperColor, ratio, { space: 'oklch' })
+		}
+
+		setColor(color, { 'oklch.c': (c) => c * chromaScale * accentChromaScale })
+		color.alpha = opacity
+
+		return toHex(color)
+	}
+
+	// No config: return an 11-colour palette
+	if (config === undefined) {
+		return Object.fromEntries(
+			Object.entries(palette).map(([key, value]) => [key, reduceChroma(value, accentChromaScale)]),
+		)
+	}
+	// Common config 'accent': Accent colour
+	else if (config === 'accent') {
+		return resolveConfig({ light: 450, dark: 500 })
+	}
+	// Common config 'muted': Slightly muted accent colour
+	else if (config === 'muted') {
+		return resolveConfig({ light: 450, dark: 500, chromaScale: 0.9 })
+	}
+	// A simple config: e.g. 500 or { light: 500, dark: 600 } -> return the single colour
+	else if (typeof config === 'number' || ('light' in config && 'dark' in config)) {
+		return resolveConfig(config as ShadeConfig)
+	}
+	// A record: e.g. pass in { icon: 600, background: { light: 400, dark: 600 } }
+	// if accentHue = 'orange' and isDarkColorScheme = true,
+	// return an object { icon: '#ea580c', background: '#fb923c' }
+	else {
+		return Object.fromEntries(
+			Object.entries(config).map(([key, value]) => [key, resolveConfig(value)]),
+		)
+	}
 }
 
 export const NAV_THEME = {

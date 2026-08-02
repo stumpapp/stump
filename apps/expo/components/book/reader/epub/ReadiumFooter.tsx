@@ -134,7 +134,7 @@ export default function ReadiumFooter() {
 					<MenuItem
 						show={showMenu}
 						delay={100}
-						label={t('epubMenu.annotations')}
+						label={t('epubMenu.bookmarksAndAnnotations')}
 						icon={PencilLine}
 						onPress={() => {
 							openSheet('annotations')

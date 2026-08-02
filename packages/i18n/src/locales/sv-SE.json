@@ -2,7 +2,7 @@
 	"underConstruction": {
 		"heading": "Det här är pinsamt",
 		"message": "Du har snubblat på en sida som är under utveckling. Jag skulle vilja visa den för dig, men den är inte riktigt klar än.",
-		"homeLink": "Gå Hem",
+		"homeLink": "Gå hem",
 		"githubLink": "Se problemet på GitHub"
 	},
 	"authScene": {
@@ -19,14 +19,14 @@
 				"password": "Lösenord"
 			},
 			"buttons": {
-				"createAccount": "Skapa Konto",
-				"login": "Logga In",
+				"createAccount": "Skapa konto",
+				"login": "Logga in",
 				"loginWithOidc": "Logga in med OIDC",
 				"createAccountWithOidc": "Skapa konto med OIDC"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Loggar In...",
+			"loggingIn": "Loggar in…",
 			"loggedIn": "Välkommen tillbaka!",
 			"loggedInFirstTime": "Välkommen!",
 			"registering": "Registrerar...",
@@ -37,14 +37,44 @@
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Bibliotek Konfigurering",
+			"heading": "Bibliotekskonfiguration",
 			"subtitleCreating": "En förhandsvisning av ditt nya bibliotek visas nedan",
 			"subtitleEditing": "En förhandsvisning av dina biblioteksändringar visas nedan"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Search metadata",
+			"description": "Search an external provider for this book and choose a match to apply",
+			"openButton": "Search Metadata",
+			"searchButton": "Search",
+			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
+			"noResults": "No matches were found for this search",
+			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
+			"searchFailed": "Failed to search metadata providers",
+			"form": {
+				"title": {
+					"label": "Title"
+				},
+				"author": {
+					"label": "Author"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Year"
+				},
+				"provider": {
+					"label": "Provider",
+					"allOption": "All enabled providers"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Fil Information",
+			"heading": "Filinformation",
 			"labels": {
 				"fileSize": "Filstorlek",
 				"fileType": "Filtyp",
@@ -54,11 +84,11 @@
 		},
 		"emailBook": {
 			"heading": "Mejla bok",
-			"description": "Send this book to a device or email address",
+			"description": "Skicka den här boken till en enhet eller e-postadress",
 			"form": {
 				"email": {
 					"label": "E-post",
-					"placeholder": "E-post adress",
+					"placeholder": "E-postadress",
 					"description": "En mejladress att skicka boken till. Tryck på lägg till för att slutföra varje tillägg"
 				},
 				"devices": {
@@ -68,7 +98,7 @@
 				}
 			}
 		},
-		"nextInSeries": "Nästa i Serien"
+		"nextInSeries": "Nästa i serien"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
@@ -87,7 +117,7 @@
 				"description": "Om aktiverat, så kan bara inbjudna användare gå med i din bokklubb"
 			},
 			"member_role_spec": {
-				"heading": "Speciella roller",
+				"heading": "Anpassad rollmappning",
 				"subtitle": [
 					"Om du vill, kan du skapa egna namn för rollerna i din bokklubb. För mer information, se",
 					"dokumentation"
@@ -117,11 +147,11 @@
 				"displayName": {
 					"label": "Visningsnamn",
 					"placeholder": "oromei",
-					"description": "Ett valfritt visningsnamn för ditt medlemskap i bokklubben. Detta kommer visas istället för ditt användarnamnet"
+					"description": "Ett valfritt visningsnamn för ditt medlemskap i bokklubben. Om det anges har det företräde framför ditt användarnamn"
 				},
 				"hideProgress": {
-					"label": "Dölj Framsteg",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"label": "Dölj framsteg",
+					"description": "Om detta är aktiverat döljs dina läsframsteg för andra medlemmar i bokklubben"
 				}
 			}
 		},
@@ -138,7 +168,7 @@
 			"steps": [
 				{
 					"label": "Grundläggande",
-					"heading": "Grundläggande Information",
+					"heading": "Grundläggande information",
 					"description": "Detaljerna av klubben, inklusive namn och beskrivning"
 				},
 				{
@@ -166,7 +196,7 @@
 					"description": "Beskrivning"
 				}
 			},
-			"submit": "Skapa Bokklubb"
+			"submit": "Skapa bokklubb"
 		}
 	},
 	"bookClubSettingsScene": {
@@ -188,7 +218,7 @@
 			}
 		},
 		"basics": {
-			"title": "Grundläggande Information",
+			"title": "Grundläggande information",
 			"description": "Detaljerna för bokklubben, inklusive dess namn och beskrivning",
 			"form": {
 				"submit": "Uppdatera klubb"
@@ -211,7 +241,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Schemaläggare",
-			"description": "Create and manage the scheduled readings for this book club"
+			"description": "Skapa och hantera schemalagd läsning för den här bokklubben"
 		},
 		"scheduling/options": {
 			"title": "Inställningar",
@@ -262,7 +292,7 @@
 				},
 				"skipBookOverview": {
 					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
+					"description": "Öppna läsaren direkt när böcker väljs i det här biblioteket"
 				},
 				"options": {
 					"series": {
@@ -296,7 +326,7 @@
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Konfiguration Miniatyrbilder",
+						"create": "Miniatyrbildskonfiguration",
 						"update": "Generering"
 					},
 					"description": "Förbättra laddningstiderna när du bläddrar i biblioteket genom att generera miniatyrbilder för dina böcker",
@@ -309,9 +339,9 @@
 				"resizeMethod": {
 					"label": "Metod för storleksändring",
 					"options": {
-						"scaleEvenlyByFactor": "Skala Jämnt",
-						"exact": "Exakt Storlek",
-						"scaleDimension": "Automatisk Skala",
+						"scaleEvenlyByFactor": "Jämn skalning",
+						"exact": "Exakt storlek",
+						"scaleDimension": "Automatisk skalning",
 						"none": "Ingen"
 					}
 				},
@@ -331,7 +361,7 @@
 					}
 				},
 				"scaleDimension": {
-					"label": "Automatisk Skala",
+					"label": "Automatisk skalning",
 					"description": "Ange antingen bredden eller höjden på miniatyren och skala automatiskt den andra för att behålla det ursprungliga bildförhållandet",
 					"dimension": {
 						"label": "Mått",
@@ -350,23 +380,23 @@
 				},
 				"quality": {
 					"label": "Kvalitet",
-					"description": "Kvaliteten på den genererade miniatyrbilden, mellan 0 och 1.0"
+					"description": "Kvaliteten på de genererade miniatyrbilderna, mellan 1 och 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignorera regler",
+					"heading": "Ignoreringsregler",
 					"description": "Definiera glob-mönster för att ignorera vissa filer eller mappar under skanning"
 				},
 				"noRules": "Inga ignoreringsregler har konfigurerats",
-				"save": "Spara förändringar",
+				"save": "Spara ändringar",
 				"addRule": {
 					"label": "Ny regel",
 					"description": "Glob-mönster för att ignorera filer eller mappar",
 					"addButton": "Lägg till regel",
 					"ignoreParents": {
 						"title": "Ignorera alla överordnade mappar",
-						"label": "Ignorera föräldrar"
+						"label": "Ignorera överordnade mappar"
 					},
 					"ignoreSubdirs": {
 						"title": "Ignorera alla undermappar",
@@ -387,7 +417,7 @@
 			"convertOptions": {
 				"section": {
 					"heading": "Filkonvertering",
-					"description": "Stump kan konvertera vissa filformat till mer kompatibla filer"
+					"description": "Stump kan konvertera vissa filformat till mer kompatibla format"
 				},
 				"rarToZip": {
 					"label": "Konvertera RAR till ZIP",
@@ -413,7 +443,7 @@
 					"description": "Bevaka biblioteksmappen för förändringar och uppdatera databasen"
 				},
 				"generateFileHashes": {
-					"label": "Generera fil-hashar",
+					"label": "Generera filhashar",
 					"description": "Generera en hash för varje fil i biblioteket för att upptäcka dubbletter"
 				},
 				"koreaderHashes": {
@@ -455,20 +485,20 @@
 			"description": "Indexera bibliotekets filer för att fylla i databasen"
 		},
 		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
+			"failedToUpdate": "Det gick inte att uppdatera biblioteket",
+			"failedToScan": "Det gick inte att skanna biblioteket"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"heading": "Skapa bibliotek",
+		"subtitle": "Bibliotek används för att gruppera dina böcker. Om du vill fräscha upp minnet om hur de fungerar kan du läsa",
 		"subtitleLink": "relevant dokumentation",
 		"form": {
 			"stepLabel": "Steg",
 			"steps": [
 				{
 					"label": "Grundläggande",
-					"heading": "Grundläggande Information",
+					"heading": "Grundläggande information",
 					"description": "Detaljerna för detta bibliotek, inklusive dess namn, sökväg och beskrivning"
 				},
 				{
@@ -502,20 +532,20 @@
 					"description": "Beskrivning",
 					"tags": "Taggar",
 					"pattern": "Mönster",
-					"ignoreRules": "Ignorera regler",
+					"ignoreRules": "Ignoreringsregler",
 					"convertRar": "Konvertera RAR/CBR",
 					"deleteConversions": "Radera konverterade filer",
 					"watch": "Bevaka mappen för förändringar",
 					"processMetadata": "Behandla metadata",
-					"generateFileHashes": "Generera fil-hashar",
+					"generateFileHashes": "Generera filhashar",
 					"generateKoreaderHashes": "Generera KoReader-hashar",
-					"scaleEvenlyByFactor": "Skala Jämnt",
-					"exact": "Exakt Storlek",
-					"scaleDimension": "Uttryckligen Förstorad"
+					"scaleEvenlyByFactor": "Jämn skalning",
+					"exact": "Exakt storlek",
+					"scaleDimension": "Angiven storlek"
 				}
 			},
 			"buttons": {
-				"confirm": "Skapa Bibliotek"
+				"confirm": "Skapa bibliotek"
 			}
 		}
 	},
@@ -542,6 +572,13 @@
 			"addedFiles": "Tillagda filer"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Böcker",
+			"series": "Serier",
+			"files": "Filer"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Inställningar",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
@@ -553,12 +590,12 @@
 				"reading": "Läsning",
 				"scanning": "Skanning",
 				"thumbnails": "Miniatyrbilder",
-				"ignore-rules": "Ignorera Regler",
+				"ignore-rules": "Ignoreringsregler",
 				"label": "Inställningar"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
+				"label": "Integrationer",
+				"analysis": "Analys",
 				"metadata": "Metadata"
 			},
 			"danger-zone": {
@@ -568,7 +605,7 @@
 			}
 		},
 		"basics": {
-			"title": "Grundläggande Information",
+			"title": "Grundläggande information",
 			"description": "Detaljerna för detta bibliotek, inklusive dess namn, sökväg och beskrivning",
 			"form": {
 				"submit": "Uppdatera bibliotek"
@@ -683,16 +720,16 @@
 		},
 		"integrations/metadata": {
 			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
+			"description": "Hantera och granska metadatamatchningar för det här biblioteket",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "Hämta metadata",
+					"description": "Hämta metadata för medierna i det här biblioteket",
 					"noProviders": {
-						"title": "There are no metadata providers available",
+						"title": "Det finns inga metadataleverantörer tillgängliga",
 						"description": "You can configure metadata providers in the metadata integration settings"
 					},
-					"fetchButton": "Start background fetch",
+					"fetchButton": "Starta bakgrundshämtning",
 					"fetchError": "Failed to start metadata fetch"
 				}
 			}
@@ -754,9 +791,9 @@
 		"heading": "lol, oj",
 		"message": "Ett fel inträffade:",
 		"buttons": {
-			"report": "Rapportera Bugg",
-			"copy": "Kopiera Felinformation",
-			"goHome": "Gå till startsidan"
+			"report": "Rapportera fel",
+			"copy": "Kopiera feldetaljer",
+			"goHome": "Gå hem"
 		}
 	},
 	"homeScene": {
@@ -791,7 +828,7 @@
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Åldersgräns",
+			"ageRating": "Åldersmärkning",
 			"characters": "Karaktärer",
 			"colorists": "Färgläggare",
 			"coverArtists": "Omslagsmålare",
@@ -842,44 +879,44 @@
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "Pending matches",
+			"heading": "Väntande matchningar",
 			"description": "Review metadata matches fetched from external providers"
 		},
 		"confidenceBadge": {
 			"label": "confidence"
 		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
+		"includeField": "Inkludera detta fält",
+		"excludeField": "Exkludera detta fält",
+		"fieldLocked": "Det här fältet är låst",
 		"reviewDialog": {
 			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
+				"noCandidates": "Inga kandidater tillgängliga för denna post",
 				"noComparableFields": "No comparable fields found",
 				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
+					"field": "Fält",
+					"current": "Nuvarande",
+					"external": "Extern",
+					"resolved": "Löst"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
+					"candidatePosition": "Kandidat {{position}} av {{total}}",
 					"provider": "Provider"
 				}
 			},
 			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
+				"accept": "Godkänn",
+				"reject": "Avvisa",
 				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
+					"FILL_GAPS": "Fyll i luckor",
+					"PREFER_EXTERNAL": "Föredra extern",
 					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
 					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
 				}
 			},
 			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
+				"keepCurrent": "Behåll nuvarande",
+				"takeExternal": "Använd extern",
+				"mergeLists": "Slå ihop listor",
 				"editManually": "Edit manually",
 				"lockField": "Lock field",
 				"unlockField": "Unlock field",
@@ -911,8 +948,22 @@
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Fortsätt Läsa",
-			"downloadSeries": "Ladda Ner Serie"
+			"continueReading": "Fortsätt läsa",
+			"downloadSeries": "Hämta serie"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Böcker",
+			"files": "Filer"
+		},
+		"actions": {
+			"markAsRead": "Markera serien som läst",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1016,11 +1067,11 @@
 									"tags": "Taggar",
 									"createdAt": "Skapad vid",
 									"updatedAt": "Uppdaterad vid",
-									"readingStatus": "Reading status"
+									"readingStatus": "Lässtatus"
 								}
 							},
 							"book_meta": {
-								"label": "Bok Meta",
+								"label": "Bokmetadata",
 								"attributes": {
 									"title": "Titel",
 									"summary": "Sammanfattning",
@@ -1037,7 +1088,7 @@
 									"teams": "Team",
 									"genres": "Genre",
 									"coverArtists": "Omslagsmålare",
-									"ageRating": "Age rating",
+									"ageRating": "Åldersmärkning",
 									"year": "Year",
 									"month": "Month",
 									"day": "Day"
@@ -1051,7 +1102,7 @@
 								}
 							},
 							"series_meta": {
-								"label": "Seriens Meta",
+								"label": "Seriemetadata",
 								"attributes": {
 									"title": "Titel",
 									"summary": "Sammanfattning",
@@ -1062,7 +1113,7 @@
 									"status": "Status",
 									"volume": "Volym",
 									"metaType": "Typ",
-									"ageRating": "Åldersgräns",
+									"ageRating": "Åldersmärkning",
 									"year": "Start year"
 								}
 							},
@@ -1113,7 +1164,7 @@
 			"steps": [
 				{
 					"label": "Grunderna",
-					"heading": "Grundläggande Information",
+					"heading": "Grundläggande information",
 					"description": "Detaljerna för denna smarta lista, inklusive dess namn, beskrivning och synlighet"
 				},
 				{
@@ -1212,7 +1263,7 @@
 			}
 		},
 		"basics": {
-			"title": "Grundläggande Information",
+			"title": "Grundläggande information",
 			"description": "Detaljerna för denna smarta lista, inklusive dess namn och beskrivning"
 		},
 		"access": {
@@ -1283,7 +1334,7 @@
 					"description": "Ändra filtren för denna visning",
 					"rawData": {
 						"heading": "Rå filterdata",
-						"description": "Detta är hur Stump kommer att behandla filtren"
+						"description": "Så här kommer Stump att behandla filtren"
 					},
 					"buttons": {
 						"save": "Spara",
@@ -1334,7 +1385,7 @@
 			"general": "Allmänt",
 			"logs": "Loggar",
 			"server": "Server",
-			"jobs": "Jobb och Konfigurering",
+			"jobs": "Jobb och konfiguration",
 			"users": "Användarhantering",
 			"desktop": "Stationär Dator"
 		},
@@ -1386,16 +1437,16 @@
 					"avatarPicker": {
 						"label": "Avatar",
 						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
+						"subtitle": "Du kan ladda upp valfri bild och använda den som profilbild för sociala funktioner i Stump",
 						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
+						"changeImage": "Byt bild",
+						"removeImage": "Ta bort bild",
 						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
+						"uploadFailed": "Det gick inte att ladda upp profilbilden",
+						"removeFailed": "Det gick inte att ta bort profilbilden"
 					},
 					"buttons": {
-						"confirm": "Spara Ändringar"
+						"confirm": "Spara ändringar"
 					}
 				},
 				"locale": {
@@ -1418,7 +1469,7 @@
 			"sections": {
 				"themeAndAppearance": {
 					"label": "Theme and appearance",
-					"description": "The basic look and feel options for Stump"
+					"description": "Grundläggande alternativ för Stumps utseende och känsla"
 				},
 				"interface": {
 					"title": "Interface",
@@ -1455,12 +1506,22 @@
 					"label": "Typsnitt",
 					"description": "Anpassa typsnittet som används i programmet"
 				},
+				"interfaceRoundness": {
+					"label": "Interface roundness",
+					"description": "How rounded the corners are for UI elements",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"pill": "Pill"
+					}
+				},
 				"thumbnailPreview": {
 					"label": "Preview",
 					"description": "This is how thumbnails will look with the current settings"
 				},
 				"thumbnailRatioSelect": {
-					"label": "Thumbnail Ratio",
+					"label": "Miniatyrbildsförhållande",
 					"description": "The aspect ratio to use for thumbnails",
 					"defaultSuffix": "Default"
 				},
@@ -1490,7 +1551,7 @@
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
+					"description": "Anpassa hur Stump visar information och organiserar innehåll"
 				},
 				"primaryNavigation": {
 					"label": "Primary navigation",
@@ -1554,17 +1615,25 @@
 						"noLimit": "No limit"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Display and spacing",
+					"description": "Preferences related to the presentation of content and information"
+				},
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
 				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
+				"contentBrowsing": {
+					"label": "Content browsing",
+					"description": "Preferences that affect browsing and navigating content lists"
+				},
+				"motionAndAnimation": {
+					"label": "Motion and animation",
+					"description": "Visual presentation and movement preferences"
+				},
+				"activityAndStatus": {
+					"label": "Activity and status",
+					"description": "Indicators, overlays, or functionality related to background activity"
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -1855,7 +1924,7 @@
 				},
 				"helpfulLinks": {
 					"title": "Helpful links",
-					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"description": "Länkar till resurser som kan vara användbara när du hanterar din Stump-serverinstans",
 					"links": {
 						"documentation": "Documentation",
 						"changelog": "Changelog"
@@ -1866,7 +1935,7 @@
 					"description": "Webbadressen som din server är tillgänglig från utanför nätverket, om det är möjligt. Detta kommer att aktivera inbjudningslänkar och andra funktioner"
 				},
 				"customEmojis": {
-					"title": "Custom emojis",
+					"title": "Anpassade emojier",
 					"description": "Upload and manage custom image emojis for your server",
 					"dropzone": "Drop an image or click to select",
 					"input": {
@@ -1939,7 +2008,7 @@
 						"titleEdit": "Edit scheduled job",
 						"cancel": "Cancel",
 						"create": "Create",
-						"saveChanges": "Save changes"
+						"saveChanges": "Spara ändringar"
 					},
 					"fields": {
 						"name": {
@@ -1993,6 +2062,9 @@
 						"updateError": "Failed to update scheduled job",
 						"deleteSuccess": "Scheduled job deleted",
 						"deleteError": "Failed to delete scheduled job"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {
@@ -2061,12 +2133,13 @@
 					"groups": {
 						"accountManagement": "Account",
 						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
+						"fileManagement": "Filer",
+						"emailers": "E-postavsändare",
 						"emailing": "Emailing",
 						"libraryManagement": "Library management",
 						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"serverManagement": "Server management",
+						"metadataManagement": "Metadata management"
 					},
 					"heading": "Behörigheter",
 					"subtitle": [
@@ -2111,17 +2184,17 @@
 						}
 					},
 					"emailer": {
-						"label": "E-postare",
+						"label": "E-postavsändare",
 						"read": {
 							"label": "Få åtkomst till e-post",
 							"description": "Tillåt användaren att visa de konfigurerade e-postarna"
 						},
 						"create": {
-							"label": "Skapa e-postare",
+							"label": "Skapa e-postavsändare",
 							"description": "Tillåt användaren att skapa nya e-postare"
 						},
 						"manage": {
-							"label": "Hantera e-postare",
+							"label": "Hantera e-postavsändare",
 							"description": "Tillåt användaren att hantera befintliga e-postare"
 						}
 					},
@@ -2178,7 +2251,7 @@
 						}
 					},
 					"smartlist": {
-						"label": "Smarta Listor",
+						"label": "Smarta listor",
 						"read": {
 							"label": "Få tillgång till funktioner för smarta listor",
 							"description": "Allows the user to access smart lists features"
@@ -2205,10 +2278,10 @@
 		"server/email": {
 			"helmet": "E-postinställningar",
 			"title": "E-post",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"description": "Inställningar för att konfigurera en SMTP-avsändare för din Stump-serverinstans",
 			"sections": {
 				"emailers": {
-					"title": "SMTP e-postare",
+					"title": "SMTP-avsändare",
 					"description": "De klienter du har konfigurerat för att skicka e-post från din Stump-serverinstans",
 					"singleInstanceDisclaimer": "Medan Stump stöder flera SMTP-konfigurationer i backend, kan endast en konfigureras grafiskt. Detta kommer att förbättras i framtiden",
 					"list": {
@@ -2316,7 +2389,7 @@
 					"description": "Maximal storlek, i bytes, som en bilaga kan vara"
 				},
 				"submit": {
-					"create": "Skapa e-postare",
+					"create": "Skapa e-postavsändare",
 					"update": "Uppdatera e-postare"
 				},
 				"testEmailer": {
@@ -2331,8 +2404,8 @@
 				}
 			},
 			"createEmailer": {
-				"helmet": "Skapa e-postare",
-				"title": "Skapa e-postare",
+				"helmet": "Skapa e-postavsändare",
+				"title": "Skapa e-postavsändare",
 				"description": "Skapa en ny SMTP-e-postare för din Stump-serverinstans"
 			},
 			"updateEmailer": {
@@ -2456,7 +2529,7 @@
 		"backupHeading": "Jobb Pågår"
 	},
 	"libraryStats": {
-		"seriesCount": "Totalt Antal Serier",
+		"seriesCount": "Totalt antal serier",
 		"bookCount": "Totalt Antal Böcker",
 		"diskUsage": "Diskanvändning"
 	},
@@ -2519,7 +2592,7 @@
 			"deleteLibrary": "Radera"
 		},
 		"versionInformation": {
-			"heading": "Information om Version",
+			"heading": "Versionsinformation",
 			"semVer": "Semantisk Version",
 			"commitHash": "Hash för bygg-commit",
 			"buildDate": "Byggdatum"
@@ -2529,7 +2602,7 @@
 		"placeholder": "Sök"
 	},
 	"serverSOS": {
-		"heading": "Otillgänglig Server",
+		"heading": "Servern är inte tillgänglig",
 		"desktop": {
 			"message": "Ett nätverksfel som uppstod tyder på att din Stump-server för närvarande inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet.\nOm din serverlänk har ändrats, kan du uppdatera den med formuläret nedan"
 		},
@@ -2550,8 +2623,8 @@
 	"slidingList": {
 		"empty": "Inga föremål att visa",
 		"buttons": {
-			"next": "Sök Framåt",
-			"previous": "Sök Bakåt"
+			"next": "Hoppa framåt",
+			"previous": "Hoppa bakåt"
 		}
 	},
 	"tagSelect": {
@@ -2572,13 +2645,15 @@
 	},
 	"common": {
 		"add": "Lätt till",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Avbryt",
 		"clear": "Clear",
 		"confirm": "Bekräfta",
+		"created": "Created",
 		"delete": "Radera",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
+			"description": "Är du säker på att du vill ta bort denna {{type}}? Den här åtgärden kan inte ångras.",
 			"confirm": "Delete {{type}}",
 			"typeToConfirm": "Type {{name}} to confirm:"
 		},
@@ -2589,15 +2664,26 @@
 		"enter": "Ange",
 		"save": "Spara",
 		"send": "Skicka",
-		"saveChanges": "Spara förändringar",
+		"saveChanges": "Spara ändringar",
 		"noChanges": "Inga förändringar",
 		"create": "Skapa",
 		"edit": "Ändra",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Serier",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Uppdatera",
-		"upload": "Ladda Upp",
+		"upload": "Ladda upp",
 		"uploading": "Laddar upp",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "Denna funktion finns inte ännu! Kom tillbaka senare",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "Detta är ännu inte fullt komplett och saknar vissa funktioner. Kom tillbaka senare",
 		"logIn": "Logga in",
 		"login": "Inlogg",
@@ -2613,12 +2699,13 @@
 		"back": "Back",
 		"continue": "Continue",
 		"book": "Book",
-		"series": "Series",
+		"series": "Serier",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
-		}
+		},
+		"unknownError": "An unknown error occurred"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2638,7 +2725,7 @@
 			"description": "Allows the user to access the Kobo sync integration"
 		},
 		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
+			"label": "Smarta listor",
 			"description": "Allows the user to access smart list features, including creating and managing smart lists"
 		},
 		"CHANGE_PASSWORD": {
@@ -2654,7 +2741,7 @@
 			"description": "Allows the user to change their own avatar"
 		},
 		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
+			"label": "Skapa bokklubbar",
 			"description": "Allows the user to create new book clubs"
 		},
 		"CREATE_LIBRARY": {
@@ -2682,7 +2769,7 @@
 			"description": "Allows the user to modify existing libraries"
 		},
 		"EMAILER_CREATE": {
-			"label": "Create emailer",
+			"label": "Skapa e-postavsändare",
 			"description": "Allows the user to create email configuration"
 		},
 		"EMAILER_MANAGE": {
@@ -2764,12 +2851,28 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edit thumbnails",
 			"description": "Allows the user to edit thumbnails for books and series"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Read metadata providers",
+			"description": "Allows the user to view configured external metadata providers"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Manage metadata providers",
+			"description": "Allows the user to configure external metadata providers"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Read metadata matches",
+			"description": "Allows the user to view metadata fetch results awaiting review"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Manage metadata matches",
+			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
 		}
 	},
 	"mobileApp": {
 		"addOrEditServer": {
 			"addServer": {
-				"title": "Add Server",
+				"title": "Lägg till server",
 				"subtitle": "Configure a new server to access your content"
 			},
 			"editServer": {
@@ -2778,7 +2881,7 @@
 			},
 			"kind": "Kind",
 			"customHeaders": {
-				"label": "Custom Headers",
+				"label": "Anpassade huvuden",
 				"addHeader": "Add header",
 				"invalidHeader": "Invalid header"
 			},
@@ -2809,15 +2912,18 @@
 		"bookActions": {
 			"markAsRead": {
 				"label": "Mark as Read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
+				"failure": "Failed to mark book as read"
 			},
 			"clearProgress": {
 				"label": "Clear Progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
+				"failure": "Failed to delete current progress"
 			},
 			"deleteReadHistory": {
 				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?"
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"failure": "Failed to delete read history"
 			},
 			"deleteBook": {
 				"label": "Delete Book",
@@ -2832,7 +2938,7 @@
 			"seeDetails": "See Details"
 		},
 		"bookMetadata": {
-			"ageRating": "Age Rating",
+			"ageRating": "Åldersmärkning",
 			"downloadedAt": "Downloaded",
 			"characters": "Characters",
 			"format": "Format",
@@ -2908,8 +3014,8 @@
 			"unknown": "Unknown error"
 		},
 		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"tableOfContents": "Innehållsförteckning",
+			"bookmarksAndAnnotations": "Bokmärken & anteckningar",
 			"appearance": "Appearance"
 		},
 		"formatSeriesPosition": {
@@ -2925,14 +3031,14 @@
 				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
 				"position": "#{{position}} in {{seriesName}}"
 			},
-			"unknownSeriesName": "series"
+			"unknownSeriesName": "serier"
 		},
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",
 			"noServers": "No Servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation",
+			"seeDocumentation": "Se dokumentationen",
 			"noSmartLists": {
 				"label": "No lists returned",
 				"description": "Once created they will appear here"
@@ -2948,7 +3054,7 @@
 			"search": "Search"
 		},
 		"localLibrary": {
-			"title": "Local Library",
+			"title": "Lokalt bibliotek",
 			"emptyState": {
 				"all": {
 					"title": "Nothing to Read Yet",
@@ -3036,10 +3142,39 @@
 						"dark": "Dark"
 					}
 				},
-				"appPrimaryColor": "Accent",
+				"appPrimaryColor": {
+					"label": "Accent",
+					"options": {
+						"chromaScale": "Chroma Scale",
+						"hues": {
+							"red": "Red",
+							"orange": "Orange",
+							"amber": "Amber",
+							"yellow": "Yellow",
+							"lime": "Lime",
+							"green": "Green",
+							"emerald": "Emerald",
+							"teal": "Teal",
+							"cyan": "Cyan",
+							"sky": "Sky",
+							"blue": "Blue",
+							"indigo": "Indigo",
+							"violet": "Violet",
+							"purple": "Purple",
+							"fuchsia": "Fuchsia",
+							"pink": "Pink",
+							"rose": "Rose",
+							"slate": "Slate",
+							"gray": "Gray",
+							"zinc": "Zinc",
+							"neutral": "Neutral",
+							"stone": "Stone"
+						}
+					}
+				},
 				"appLanguage": "Language",
 				"defaultServer": "Default Server",
-				"thumbnailRatio": "Thumbnail Ratio",
+				"thumbnailRatio": "Miniatyrbildsförhållande",
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail Placeholder",
 					"options": {
@@ -3083,7 +3218,7 @@
 			"management": {
 				"label": "Management",
 				"dataUsage": {
-					"label": "Data Usage",
+					"label": "Dataanvändning",
 					"nonStumpData": "Non-Stump Data",
 					"serversTotal": "Servers Total",
 					"totalFiles": "Total Files",
@@ -3151,22 +3286,22 @@
 				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
+				"buildInformation": "Bygginformation",
 				"version": "Version: {{version}}",
 				"suuportIdentifier": "Support Identifier: {{supportID}}"
 			}
 		},
 		"stumpServer": {
 			"browse": {
-				"books": "Books",
+				"books": "Böcker",
 				"favorites": "Favorites",
-				"files": "Files",
+				"files": "Filer",
 				"libraries": "Libraries",
 				"series": "Series",
-				"smartLists": "Smart Lists"
+				"smartLists": "Smarta listor"
 			},
 			"continueReading": {
-				"label": "Continue Reading",
+				"label": "Fortsätt läsa",
 				"emptyText": "No books in progress"
 			},
 			"onDeck": {
@@ -3183,7 +3318,7 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Inställningar för bildläsaren",
 			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "Mode",
@@ -3334,7 +3469,7 @@
 			}
 		},
 		"libraryType": {
-			"BOOK": "Books",
+			"BOOK": "Böcker",
 			"COMIC": "Comics",
 			"LIGHT_NOVEL": "Light Novels",
 			"MANGA": "Manga",
@@ -3360,13 +3495,13 @@
 			"finished": "Finished"
 		},
 		"sorting": {
-			"labelEllipsis": "Sort By...",
+			"labelEllipsis": "Sortera efter…",
 			"sortField": {
 				"NAME": "Name",
 				"ADDED_AT": "Date Added",
 				"CREATED_AT": "Date Added",
 				"NUMBER": "Series Position",
-				"SERIES": "Series",
+				"SERIES": "Serier",
 				"YEAR": "Year Published"
 			},
 			"sortDirection": {

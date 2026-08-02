@@ -54,7 +54,7 @@ const fetchDeletedBookmarks = async (serverId: string) =>
 const markSyncStatus = async (ids: number | number[], status: SyncStatus) => {
 	const idArray = Array.isArray(ids) ? ids : [ids]
 	if (idArray.length === 0) return
-	await db.update(bookmarks).set({ syncStatus: status }).where(inArray(bookmarks.id, idArray)).run()
+	await db.update(bookmarks).set({ syncStatus: status }).where(inArray(bookmarks.id, idArray))
 }
 
 const handleCreateBookmark = async (api: Api, bookmark: Bookmark) => {
@@ -81,7 +81,6 @@ const handleCreateBookmark = async (api: Api, bookmark: Bookmark) => {
 		.update(bookmarks)
 		.set({ serverBookmarkId: result.createBookmark.id })
 		.where(eq(bookmarks.id, bookmark.id))
-		.run()
 }
 
 const handleDeleteBookmark = async (api: Api, bookmark: Bookmark) => {
@@ -89,8 +88,10 @@ const handleDeleteBookmark = async (api: Api, bookmark: Bookmark) => {
 		id: bookmark.serverBookmarkId!,
 	})
 
-	await db.delete(bookmarks).where(eq(bookmarks.id, bookmark.id)).run()
+	await db.delete(bookmarks).where(eq(bookmarks.id, bookmark.id))
 }
+
+// TODO(sync): return failed syncs to report on them
 
 export const executeSingleServerBookmarkPushSync = async (
 	serverId: string,

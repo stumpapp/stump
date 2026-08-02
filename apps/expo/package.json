@@ -84,7 +84,7 @@
 		"expo-status-bar": "~56.0.4",
 		"expo-symbols": "^56.0.5",
 		"expo-system-ui": "~56.0.5",
-		"fast-xml-parser": "^5.8.0",
+		"fast-xml-parser": "^5.10.1",
 		"image-size": "^2.0.0",
 		"intl-pluralrules": "^2.0.1",
 		"lodash": "^4.18.1",

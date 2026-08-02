@@ -65,6 +65,13 @@
 				"year": {
 					"label": "Year"
 				},
+				"number": {
+					"label": "Issue number"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine volume ID",
+					"placeholder": "e.g., 129260"
+				},
 				"provider": {
 					"label": "Provider",
 					"allOption": "All enabled providers"
@@ -282,6 +289,20 @@
 			"tags": {
 				"label": "标签",
 				"description": "用于分类你的书库或强制执行访问规则"
+			},
+			"libraryType": {
+				"label": "Library content",
+				"description": "The type of content present in this library",
+				"options": {
+					"COMIC": "Comics",
+					"MANGA": "Manga",
+					"BOOK": "Books",
+					"LIGHT_NOVEL": "Light Novels",
+					"MANHWA": "Manhwa",
+					"WEB_NOVEL": "Web Novels",
+					"WEBTOON": "Webtoons",
+					"MIXED": "Mixed"
+				}
 			},
 			"defaultLibraryView": {
 				"label": "默认库视图",
@@ -2418,6 +2439,8 @@
 			"helmet": "元数据集成",
 			"title": "元数据集成",
 			"addProvider": "添加提供方",
+			"createProviderError": "Failed to create provider",
+			"updateProviderError": "Failed to update provider",
 			"noProviders": "尚未配置提供方。添加一个以开始使用",
 			"providers": {
 				"title": "提供方",
@@ -2430,8 +2453,8 @@
 					"validationError": "此令牌自动验证失败",
 					"validationRequestError": "验证请求失败",
 					"validationRequestErrorUnknown": "验证期间发生未知错误",
-					"hardcoverStatusError": "Hardcover API 返回状态 {{status}}",
-					"hardcoverValidationError": "Hardcover API 返回错误：{{message}}",
+					"providerStatusError": "The provider responded with status {{status}}",
+					"providerError": "The provider responded with an error: {{message}}",
 					"noBearerPrefixRequired": "请移除 API 令牌开头的 'Bearer ' 前缀"
 				},
 				"apiTokenExpiresAt": {

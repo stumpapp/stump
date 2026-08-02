@@ -65,6 +65,13 @@
 				"year": {
 					"label": "Rok"
 				},
+				"number": {
+					"label": "Issue number"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine volume ID",
+					"placeholder": "e.g., 129260"
+				},
 				"provider": {
 					"label": "Dostawca",
 					"allOption": "Wszyscy aktywni dostawcy"
@@ -282,6 +289,20 @@
 			"tags": {
 				"label": "Etykiety",
 				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
+			},
+			"libraryType": {
+				"label": "Library content",
+				"description": "The type of content present in this library",
+				"options": {
+					"COMIC": "Comics",
+					"MANGA": "Manga",
+					"BOOK": "Books",
+					"LIGHT_NOVEL": "Light Novels",
+					"MANHWA": "Manhwa",
+					"WEB_NOVEL": "Web Novels",
+					"WEBTOON": "Webtoons",
+					"MIXED": "Mixed"
+				}
 			},
 			"defaultLibraryView": {
 				"label": "Domyślny widok biblioteki",
@@ -2418,6 +2439,8 @@
 			"helmet": "Integracja metadanych",
 			"title": "Integracja metadanych",
 			"addProvider": "Dodaj dostawcę",
+			"createProviderError": "Failed to create provider",
+			"updateProviderError": "Failed to update provider",
 			"noProviders": "Brak skonfigurowanych dostawców. Dodaj jednego, aby rozpocząć",
 			"providers": {
 				"title": "Dostawcy",
@@ -2430,8 +2453,8 @@
 					"validationError": "Automatyczna walidacja dla tego tokenu zakończyła się niepowodzeniem",
 					"validationRequestError": "Żądanie walidacji zakończyło się niepowodzeniem",
 					"validationRequestErrorUnknown": "Żądanie walidacji napotkało na nieznany błąd",
-					"hardcoverStatusError": "API Hardcover odpowiedziało statusem {{status}}",
-					"hardcoverValidationError": "API Hardcover odpowiedziało błedem: {{message}}",
+					"providerStatusError": "The provider responded with status {{status}}",
+					"providerError": "The provider responded with an error: {{message}}",
 					"noBearerPrefixRequired": "Usuń przedrostek 'Bearer ' z tokenu API"
 				},
 				"apiTokenExpiresAt": {

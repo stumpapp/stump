@@ -9,6 +9,7 @@ async-trait = { workspace = true }
 chrono = { workspace = true }
 dateparser = "0.2.1"
 governor = "0.6"
+http-cache-reqwest = { workspace = true }
 reqwest = { workspace = true }
 reqwest-middleware = { workspace = true }
 reqwest-retry = { workspace = true }

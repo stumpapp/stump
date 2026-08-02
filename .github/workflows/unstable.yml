@@ -24,8 +24,8 @@ jobs:
     outputs:
       changes: ${{steps.filter.outputs.changes}}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4
         id: filter
         if: github.event_name != 'workflow_dispatch'
         with:
@@ -47,7 +47,7 @@ jobs:
     if: ${{ needs.code-changes-check.outputs.changes != '[]' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           ref: ${{ github.event.inputs.branch || github.ref }}
 

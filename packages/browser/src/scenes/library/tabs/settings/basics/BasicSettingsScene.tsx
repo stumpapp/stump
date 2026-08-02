@@ -48,28 +48,33 @@ export default function BasicSettingsScene() {
 	})
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
-	const [path, name, description, tags] = useWatch({
+	const [path, name, description, tags, libraryType] = useWatch({
 		control: form.control,
-		name: ['path', 'name', 'description', 'tags'],
+		name: ['path', 'name', 'description', 'tags', 'libraryType'],
 	})
 
 	const hasChanges = useMemo(() => {
 		const currentTagSet = new Set(tags?.map(({ label }) => label) || [])
 		const libraryTagSet = new Set(library?.tags?.map(({ name }) => name) || [])
+		const differentLibraryType = library?.config?.libraryType !== libraryType
 
 		return (
 			library?.path !== normalizePath(path) ||
 			library?.name !== name ||
 			library?.description !== description ||
 			[...currentTagSet].some((tag) => !libraryTagSet.has(tag)) ||
-			[...libraryTagSet].some((tag) => !currentTagSet.has(tag))
+			[...libraryTagSet].some((tag) => !currentTagSet.has(tag)) ||
+			differentLibraryType
 		)
-	}, [library, path, name, description, tags])
+	}, [library, path, name, description, tags, libraryType])
 
 	const handleSubmit = useCallback(
 		(values: CreateOrUpdateLibrarySchema) => {
 			patch({
-				config: { thumbnailConfig: intoThumbnailConfig(values.thumbnailConfig) },
+				config: {
+					thumbnailConfig: intoThumbnailConfig(values.thumbnailConfig),
+					libraryType: values.libraryType,
+				},
 				description: values.description,
 				name: values.name,
 				path: values.path,

@@ -13,6 +13,7 @@ use models::{
 	shared::enums::{MetadataFetchStatus, UserPermission},
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use std::collections::HashMap;
 use stump_core::filesystem::metadata::ProviderClientCache;
 
 #[derive(Default)]
@@ -106,6 +107,16 @@ impl MediaMetadataMutation {
 		});
 
 		let year = search.as_ref().and_then(|s| s.year);
+		let number = search.as_ref().and_then(|s| s.number.map(|n| n as f32));
+
+		let mut provider_hints = HashMap::new();
+		if let Some(ref s) = search {
+			if let Some(ref volume_id) = s.comic_vine_volume_id {
+				provider_hints
+					.insert("comic_vine_volume_id".to_string(), volume_id.clone());
+			}
+		}
+
 		let limit = search
 			.as_ref()
 			.and_then(|s| s.limit)
@@ -121,7 +132,9 @@ impl MediaMetadataMutation {
 				author,
 				isbn,
 				year,
+				number,
 				limit: limit.or(Some(10)),
+				provider_hints,
 			},
 			&provider_cache,
 			provider_filter,

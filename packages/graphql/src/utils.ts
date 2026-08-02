@@ -1,4 +1,3 @@
-// TODO: This is wrong lol figure this out
 export const extractErrorMessage = (error: unknown, fallbackMessage?: string): string => {
 	if (error instanceof Error) {
 		return error.message

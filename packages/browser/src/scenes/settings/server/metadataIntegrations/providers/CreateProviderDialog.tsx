@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation } from '@stump/client'
 import { Button, Dialog, Form } from '@stump/components'
-import { graphql, MergeStrategy, MetadataProvider } from '@stump/graphql'
+import { extractErrorMessage, graphql, MergeStrategy, MetadataProvider } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { PROVIDER_LABELS, PROVIDERS } from './constants'
 import ProviderForm from './ProviderForm'
@@ -57,6 +58,12 @@ export function CreateProviderDialog() {
 					q.queryKey.some((k) => typeof k === 'string' && k.includes('metadataProvider')),
 			})
 			handleClose()
+		},
+		onError: (error) => {
+			const message = extractErrorMessage(error)
+			toast.error(t('settingsScene.server/metadataIntegrations.createProviderError'), {
+				description: message,
+			})
 		},
 	})
 

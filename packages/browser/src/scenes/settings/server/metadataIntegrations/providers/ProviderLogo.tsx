@@ -12,7 +12,7 @@ export function ProviderLogo({ provider, className }: Props) {
 			src={LOGOS[provider]}
 			alt={`${provider[0] + provider.slice(1).toLowerCase()} logo`}
 			className={cn('h-16 w-16 object-scale-down', className, {
-				'rotate-[12deg] transform': provider === MetadataProvider.Hardcover,
+				'rotate-12 transform': provider === MetadataProvider.Hardcover,
 			})}
 		/>
 	)
@@ -20,4 +20,5 @@ export function ProviderLogo({ provider, className }: Props) {
 
 const LOGOS: Record<MetadataProvider, string> = {
 	[MetadataProvider.Hardcover]: '/assets/logos/hardcover.png',
+	[MetadataProvider.ComicVine]: '/assets/logos/comicvine.png',
 }

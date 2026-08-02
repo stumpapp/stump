@@ -191,6 +191,11 @@ pub struct MediaMetadataSearchInput {
 	pub author: Option<String>,
 	pub isbn: Option<String>,
 	pub year: Option<i32>,
+	/// The issue number (for comics/manga)
+	pub number: Option<f64>,
+	/// The volume ID to search within, which will swap to a more precise lookup if provided alongside
+	/// `number`
+	pub comic_vine_volume_id: Option<String>,
 	/// Restrict the search to this provider only. If omitted, all enabled providers
 	/// configured for the media's library type are searched.
 	pub provider: Option<MetadataProvider>,

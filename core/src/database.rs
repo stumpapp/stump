@@ -66,9 +66,9 @@ pub async fn connect(config: &StumpConfig) -> Result<DatabaseConnection, CoreErr
 			.collation("NATURALSORT", natord::compare)
 			// TODO(sqlite): do proper eval for NORMAL synchronous mode
 			// .synchronous(SqliteSynchronous::Normal)
-			.busy_timeout(Duration::from_secs(30));
+			.busy_timeout(Duration::from_secs(config.db_timeout_secs));
 		let pool = SqlitePoolOptions::new()
-			.acquire_timeout(Duration::from_secs(30))
+			.acquire_timeout(Duration::from_secs(config.db_timeout_secs))
 			.connect_with(options)
 			.await
 			.map_err(|e| {
@@ -78,7 +78,7 @@ pub async fn connect(config: &StumpConfig) -> Result<DatabaseConnection, CoreErr
 	} else {
 		// TODO(postgres): tune for postgres
 		let connect_options = sea_orm::ConnectOptions::new(connection_url)
-			.acquire_timeout(Duration::from_secs(30))
+			.acquire_timeout(Duration::from_secs(config.db_timeout_secs))
 			.to_owned();
 		sea_orm::Database::connect(connect_options).await?
 	};

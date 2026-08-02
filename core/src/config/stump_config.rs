@@ -16,6 +16,10 @@ use super::oidc_config::OidcConfig;
 use crate::{CoreError, CoreResult};
 use stump_config_gen::StumpConfigGenerator;
 
+// TODO(env): i think DatabaseConfig enum with e.g. SQLite and Postgres variants would be nice
+// TODO(postgres): the vars are not toml-supported atm, not sure if this really matters. i kept it
+// like that bc idk what to do about the password, and having all of the config except password in toml
+// felt funny? idk ill wait until someone complains maybe >:)
 // TODO(env): prefix with STUMP_ for consistency
 pub mod env_keys {
 	pub const CONFIG_DIR_KEY: &str = "STUMP_CONFIG_DIR";
@@ -28,12 +32,13 @@ pub mod env_keys {
 	pub const LOG_DIR_KEY: &str = "STUMP_LOG_DIR";
 	pub const COLORFUL_LOGS_KEY: &str = "STUMP_COLORFUL_LOGS";
 	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
-	pub const DATABASE_URL_KEY: &str = "DATABASE_URL";
-	pub const DB_PASSWORD_KEY: &str = "DB_PASSWORD";
-	pub const DB_HOST_KEY: &str = "DB_HOST";
-	pub const DB_PORT_KEY: &str = "DB_PORT";
-	pub const DB_NAME_KEY: &str = "DB_NAME";
-	pub const DB_USER_KEY: &str = "DB_USER";
+	pub const DATABASE_URL_KEY: &str = "STUMP_DATABASE_URL";
+	pub const DB_PASSWORD_KEY: &str = "STUMP_DB_PASSWORD";
+	pub const DB_HOST_KEY: &str = "STUMP_DB_HOST";
+	pub const DB_PORT_KEY: &str = "STUMP_DB_PORT";
+	pub const DB_NAME_KEY: &str = "STUMP_DB_NAME";
+	pub const DB_USER_KEY: &str = "STUMP_DB_USER";
+	pub const DB_TIMEOUT_KEY: &str = "STUMP_DB_TIMEOUT_SECS";
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
 	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
@@ -160,6 +165,10 @@ pub struct StumpConfig {
 	#[default_value(None)]
 	#[env_key(DB_PATH_KEY)]
 	pub db_path: Option<String>,
+
+	#[default_value(30)]
+	#[env_key(DB_TIMEOUT_KEY)]
+	pub db_timeout_secs: u64,
 
 	/// The client directory.
 	#[default_value("./client".to_string())]
@@ -505,6 +514,7 @@ mod tests {
 				log_dir: None,
 				colorful_logs: Some(false),
 				db_path: Some("not_a_real_path".to_string()),
+				db_timeout_secs: Some(30),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
 				parallelism_multiplier: Some(DEFAULT_PARALLELISM_MULTIPLIER),
@@ -572,6 +582,7 @@ mod tests {
 						log_dir: None,
 						colorful_logs: false,
 						db_path: None,
+						db_timeout_secs: 30,
 						client_dir: "./client".to_string(),
 						config_dir,
 						allowed_origins: vec![],

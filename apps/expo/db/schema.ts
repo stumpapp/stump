@@ -89,6 +89,7 @@ export const imageMeta = z.object({
 	),
 	thumbhash: z.string().nullish(),
 })
+export type ImageMeta = z.infer<typeof imageMeta>
 
 /**
  * Unsynced read progress table

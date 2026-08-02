@@ -1,4 +1,5 @@
-import { useCallback } from 'react'
+import { Api } from '@stump/sdk'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner-native'
 
 import { isLocalLibrary } from '~/lib/localLibrary'
@@ -74,4 +75,23 @@ export function useServerInstances() {
 	}
 
 	return { getInstances, getFullServer, savedServers }
+}
+
+export function useServerInstance(serverId: string) {
+	const { getInstances } = useServerInstances()
+
+	const [instance, setInstance] = useState<Api | null>(null)
+
+	useEffect(() => {
+		const fetchInstance = async () => {
+			const instances = await getInstances([serverId], true)
+			setInstance(instances[serverId] || null)
+		}
+
+		if (!instance) {
+			fetchInstance()
+		}
+	}, [instance, serverId, getInstances])
+
+	return [instance, setInstance] as const
 }

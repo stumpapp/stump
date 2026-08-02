@@ -117,6 +117,38 @@ export function useGraphQL<TResult, TVariables>(
 	return { error, ...rest } as UseQueryResult<TResult>
 }
 
+// kinda hate this name, but can't think of anything else and think 5 min is enough time to spend on it lol
+/**
+ * same as {@link useGraphQL} but without a parent stump client context, so caller will
+ * need to properly handle errors themselves and provide a valid sdk instance
+ */
+export function useDetachedGraphQL<TResult, TVariables>(
+	sdk: Api,
+	document: TypedDocumentString<TResult, TVariables>,
+	queryKey: QueryKey,
+	variables?: TVariables extends Record<string, never> ? never : TVariables,
+	options?: Omit<UseQueryOptions<TResult, Error, TResult, QueryKey>, 'queryKey' | 'queryFn'>,
+): UseQueryResult<TResult> {
+	const { error, ...rest } = useQuery({
+		queryKey,
+		queryFn: async () => {
+			const response = await sdk.execute(document, variables)
+			return response
+		},
+		...options,
+	})
+
+	useEffect(() => {
+		if (!error) return
+		handleError({
+			sdk,
+			error,
+		})
+	}, [error, sdk])
+
+	return { error, ...rest } as UseQueryResult<TResult>
+}
+
 type UseGraphQLMutationOptions<TResult, TVariables> = Omit<
 	UseMutationOptions<
 		TResult,

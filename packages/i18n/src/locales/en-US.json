@@ -3089,7 +3089,9 @@
 				"seeProblems": "See Problems ({{problemCount}})",
 				"hideCurated": "Hide Curated",
 				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"attemptSync": "Attempt Sync",
+				"syncConflicts": "Sync Conflicts"
+
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
@@ -3129,6 +3131,24 @@
 				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
 			},
 			"syncFailed": "Failed to sync offline progress"
+		},
+		"syncConflicts": {
+			"title": "Sync Conflicts",
+			"remainingCount": "{{remainingCount}} Remaining",
+			"noConflicts": {
+				"title": "No Sync Conflicts",
+				"description": "All your local progress is in sync their servers"
+			},
+			"lastCommonSession": "Last common session",
+			"localSession": "Local Session",
+			"remoteSessionWithId": "Remote Session {{sessionId}}",
+			"noCommonSession": "No common reading history",
+			"noRemoteSessions": "No remote sessions",
+			"acceptSource": {
+				"local": "Accept Local",
+				"remote": "Accept Remote",
+				"both": "Accept Both"
+			}
 		},
 		"search": {
 			"label": "Search This Server",

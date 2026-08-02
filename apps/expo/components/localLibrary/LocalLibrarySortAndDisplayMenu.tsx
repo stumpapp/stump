@@ -43,7 +43,7 @@ import { useSelectionStore } from '~/stores/selection'
 
 import { DOWNLOAD_PROBLEMS_SHEET_NAME } from '../downloadQueue'
 import { DownloadSortOption, useDownloadsState } from './store'
-import { SYNC_CONFLICTS_SHEET_NAME } from './SyncConflictsSheet'
+import { SYNC_CONFLICTS_SHEET_NAME } from './syncConflicts'
 
 export function useLocalLibrarySortAndDisplayMenu() {
 	const { t } = useTranslate()

@@ -18,7 +18,7 @@ import {
 	useLocalLibraryMenu,
 } from '~/components/localLibrary'
 import { useDownloadsState } from '~/components/localLibrary/store'
-import { SyncConflictsSheet } from '~/components/localLibrary/SyncConflictsSheet'
+import { SyncConflictsSheet } from '~/components/localLibrary/syncConflicts'
 import { Text } from '~/components/ui'
 import { db, downloadedFiles, libraryRefs, readProgress, seriesRefs } from '~/db'
 import { useTranslate } from '~/lib/hooks'

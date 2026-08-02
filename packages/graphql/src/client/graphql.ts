@@ -3387,6 +3387,7 @@ export type Query = {
    * A paginated list of reading lists.
    */
   readingLists: PaginatedReadingListResponse;
+  readingSessionConflictView: ReadingSessionConflictResolutionView;
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
   scheduledJobs: Array<ScheduledJob>;
@@ -3626,6 +3627,12 @@ export type QueryReadingListsArgs = {
 };
 
 
+export type QueryReadingSessionConflictViewArgs = {
+  branchedSessionId: Scalars['Int']['input'];
+  mediaId: Scalars['ID']['input'];
+};
+
+
 export type QueryRecentlyAddedMediaArgs = {
   pagination?: Pagination;
 };
@@ -3752,6 +3759,21 @@ export type ReadingSession = {
   status: ReadingStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   userId: Scalars['String']['output'];
+};
+
+/**
+ * a view through which a client can resolve conflicts relative to a local ancestor session
+ * and any number of remote sessions which were created afterwards
+ */
+export type ReadingSessionConflictResolutionView = {
+  __typename?: 'ReadingSessionConflictResolutionView';
+  /** the last session which was known to be in sync with the local client */
+  ancestorSession: ReadingSession;
+  /**
+   * all sessions created/updated on **this server** (remote) after the ancestor session, ordered
+   * by created_at ascending
+   */
+  remoteSessions: Array<ReadingSession>;
 };
 
 /**
@@ -5490,6 +5512,14 @@ export type LibrarySeriesListHeaderScanLibraryMutationVariables = Exact<{
 
 
 export type LibrarySeriesListHeaderScanLibraryMutation = { __typename?: 'Mutation', scanLibrary: boolean };
+
+export type ReadingSessionConflictViewQueryVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  branchedSessionId: Scalars['Int']['input'];
+}>;
+
+
+export type ReadingSessionConflictViewQuery = { __typename?: 'Query', readingSessionConflictView: { __typename?: 'ReadingSessionConflictResolutionView', ancestorSession: { __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }, remoteSessions: Array<{ __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }> } };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -9852,6 +9882,51 @@ export const LibrarySeriesListHeaderScanLibraryDocument = new TypedDocumentStrin
   scanLibrary(id: $id)
 }
     `) as unknown as TypedDocumentString<LibrarySeriesListHeaderScanLibraryMutation, LibrarySeriesListHeaderScanLibraryMutationVariables>;
+export const ReadingSessionConflictViewDocument = new TypedDocumentString(`
+    query ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int!) {
+  readingSessionConflictView(
+    mediaId: $mediaId
+    branchedSessionId: $branchedSessionId
+  ) {
+    ancestorSession {
+      __typename
+      id
+      endPage
+      endPercentage
+      elapsedSeconds
+      createdAt
+      updatedAt
+      readthroughNumber
+      endLocator {
+        href
+        chapterTitle
+        locations {
+          progression
+          totalProgression
+        }
+      }
+    }
+    remoteSessions {
+      __typename
+      id
+      endPage
+      endPercentage
+      elapsedSeconds
+      createdAt
+      updatedAt
+      readthroughNumber
+      endLocator {
+        href
+        chapterTitle
+        locations {
+          progression
+          totalProgression
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ReadingSessionConflictViewQuery, ReadingSessionConflictViewQueryVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

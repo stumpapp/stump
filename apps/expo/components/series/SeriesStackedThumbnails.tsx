@@ -1,11 +1,11 @@
 import { getThumbnailTintColor, useSDK } from '@stump/client'
 import { ImageRef } from '@stump/graphql'
-import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
+import { ColorSpace, OKLCH, sRGB } from 'colorjs.io/fn'
 import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 
-import { useColors } from '~/lib/constants'
+import { usePalette } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
@@ -43,9 +43,9 @@ const ONE_BOOK_LAYOUT: ThumbnailConfig[] = [{ x: 0.5, y: 0.081, scale: 1.081, zI
 export default function SeriesStackedThumbnails({ thumbnailData, width: cardWidth }: Props) {
 	const { sdk } = useSDK()
 	const { isDarkColorScheme } = useColorScheme()
-	const colors = useColors()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+
+	const accentColor = usePalette({ light: 200, dark: 950, chromaScale: 0.8 })
 
 	const baseThumbnailWidth = cardWidth * 0.7
 	const baseThumbnailHeight = baseThumbnailWidth / thumbnailRatio
@@ -118,15 +118,7 @@ export default function SeriesStackedThumbnails({ thumbnailData, width: cardWidt
 	if (mainThumbnailAverageColor) {
 		backgroundColor = getThumbnailTintColor(mainThumbnailAverageColor, { dark: isDarkColorScheme })
 	} else if (accentColor) {
-		// Take the hue of the accentColor and give it the same chroma and lightness as colors.thumbnail.stack.series
-		const color = getColor(accentColor)
-		const modifiedColor = set(color, {
-			'oklch.l': isDarkColorScheme ? 0.38 : 0.8,
-			'oklch.c': 0.04,
-		})
-		backgroundColor = serialize(modifiedColor, { format: 'hex' })
-	} else {
-		backgroundColor = colors.thumbnail.stack.series
+		backgroundColor = accentColor
 	}
 
 	return (

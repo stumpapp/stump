@@ -62,7 +62,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           tags: 'nightly'
           build-channel: 'nightly'
-          load: ${{ env.LOAD }}
           push: ${{ env.PUSH }}
           archs: ${{ env.ARCHS }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

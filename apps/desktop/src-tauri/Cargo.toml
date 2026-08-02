@@ -1,6 +1,6 @@
 [package]
 name = "stump_desktop"
-version = "0.1.3"
+version.workspace = true
 description = ""
 authors = ["Aaron Leopold <aaronleopold1221@gmail.com>"]
 license = "MIT"
@@ -32,4 +32,4 @@ tokio = { workspace = true, features = ["full"] }
 [features]
 # This feature will bundle the Stump server with the desktop app, allowing the user to use the desktop app
 # as their dedicated server instance.
-bundled-server = [ "dep:stump_server" ] 
+bundled-server = [ "dep:stump_server" ]

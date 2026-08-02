@@ -32,7 +32,7 @@ export default function TableOfContentsSheet() {
 				detents={[1]}
 				scrollable
 				grabber
-				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				style={{ flex: 1 }}
 				insetAdjustment="automatic"

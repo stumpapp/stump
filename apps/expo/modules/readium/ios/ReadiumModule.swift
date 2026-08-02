@@ -8,16 +8,20 @@ public class ReadiumModule: Module {
         Name("Readium")
 
         AsyncFunction("extractArchive") { (archiveUrl: URL, extractedUrl: URL) in
-            try await BookService.instance.extractArchive(archiveUrl: archiveUrl, extractedUrl: extractedUrl)
+            try await BookService.instance.extractArchive(
+                archiveUrl: archiveUrl, extractedUrl: extractedUrl
+            )
         }
 
         AsyncFunction("openPublication") { (bookId: String, publicationUri: URL) -> String in
-            let pub = try await BookService.instance.openPublication(for: bookId, at: publicationUri)
+            let pub = try await BookService.instance.openPublication(
+                for: bookId, at: publicationUri
+            )
             return pub.jsonManifest ?? "{}"
         }
 
         AsyncFunction("getResource") { (bookId: String, linkJson: [String: Any]) -> String in
-            let link = try Link(json: linkJson)
+            let link = try ReadiumShared.Link(json: linkJson)
             let resource = try await BookService.instance.getResource(for: bookId, link: link)
             if link.mediaType?.type.starts(with: "image/") == true {
                 let data = try await resource.read().get()
@@ -32,7 +36,7 @@ public class ReadiumModule: Module {
         }
 
         AsyncFunction("locateLink") { (bookId: String, linkJson: [String: Any]) -> [String: Any]? in
-            let link = try Link(json: linkJson)
+            let link = try ReadiumShared.Link(json: linkJson)
             let locator = await BookService.instance.locateLink(for: bookId, link: link)
             return locator?.json
         }
@@ -54,11 +58,19 @@ public class ReadiumModule: Module {
         }
 
         View(EPUBView.self) {
-            Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError", "onReachedEnd")
+            Events(
+                "onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange",
+                "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest",
+                "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError",
+                "onReachedEnd"
+            )
 
             AsyncFunction("goToLocation") { (view: EPUBView, locatorJson: [String: Any]) in
                 guard let locator = try? Locator(json: locatorJson) else {
-                    throw NSError(domain: "ReadiumError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid locator format"])
+                    throw NSError(
+                        domain: "ReadiumError", code: 1,
+                        userInfo: [NSLocalizedDescriptionKey: "Invalid locator format"]
+                    )
                 }
                 view.goToLocation(locator: locator)
             }
@@ -106,12 +118,13 @@ public class ReadiumModule: Module {
             }
 
             Prop("decorations") { (view: EPUBView, prop: [[String: Any]]) in
-                let decorations = prop.compactMap { (decorationDict: [String: Any]) -> DecorationItem? in
+                let decorations = prop.compactMap {
+                    (decorationDict: [String: Any]) -> DecorationItem? in
                     guard let id = decorationDict["id"] as? String,
                           let colorHex = decorationDict["color"] as? String,
                           let locatorDict = decorationDict["locator"] as? [String: Any],
                           let locator = try? Locator(json: locatorDict),
-                          let color = Color(hex: colorHex)?.uiColor
+                          let color = ReadiumNavigator.Color(hex: colorHex)?.uiColor
                     else {
                         return nil
                     }
@@ -122,10 +135,10 @@ public class ReadiumModule: Module {
 
             Prop("colors") { (view: EPUBView, prop: [String: String]) in
                 if let background = prop["background"] {
-                    view.pendingProps.background = Color(hex: background)
+                    view.pendingProps.background = ReadiumNavigator.Color(hex: background)
                 }
                 if let foreground = prop["foreground"] {
-                    view.pendingProps.foreground = Color(hex: foreground)
+                    view.pendingProps.foreground = ReadiumNavigator.Color(hex: foreground)
                 }
             }
 
@@ -142,7 +155,10 @@ public class ReadiumModule: Module {
             }
 
             Prop("readingDirection") { (view: EPUBView, prop: String) in
-                view.pendingProps.readingProgression = prop == "rtl" ? ReadiumNavigator.ReadingProgression.rtl : ReadiumNavigator.ReadingProgression.ltr
+                view.pendingProps.readingProgression =
+                    prop == "rtl"
+                        ? ReadiumNavigator.ReadingProgression.rtl
+                        : ReadiumNavigator.ReadingProgression.ltr
             }
 
             Prop("publisherStyles") { (view: EPUBView, prop: Bool) in
@@ -242,7 +258,10 @@ public class ReadiumModule: Module {
 
             AsyncFunction("goToLocation") { (view: PDFView, locatorJson: [String: Any]) in
                 guard let locator = try? Locator(json: locatorJson) else {
-                    throw NSError(domain: "ReadiumError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid locator format"])
+                    throw NSError(
+                        domain: "ReadiumError", code: 1,
+                        userInfo: [NSLocalizedDescriptionKey: "Invalid locator format"]
+                    )
                 }
                 view.goToLocation(locator: locator)
             }
@@ -286,7 +305,7 @@ public class ReadiumModule: Module {
             }
 
             Prop("backgroundColor") { (view: PDFView, prop: String) in
-                view.pendingProps.background = Color(hex: prop)
+                view.pendingProps.background = ReadiumNavigator.Color(hex: prop)
             }
 
             Prop("pageSpacing") { (view: PDFView, prop: Double) in

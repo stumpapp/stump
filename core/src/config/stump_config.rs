@@ -197,6 +197,7 @@ pub struct StumpConfig {
 	/// Indicates if the Kobo sync feature should be enabled.
 	#[default_value(false)]
 	#[env_key(ENABLE_KOBO_SYNC_KEY)]
+	#[debug_value(true)]
 	pub enable_kobo_sync: bool,
 
 	/// Indicates if OPDS page access should automatically track reading progression.

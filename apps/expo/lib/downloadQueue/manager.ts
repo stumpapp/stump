@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native'
 import { Api } from '@stump/sdk'
 import { and, eq } from 'drizzle-orm'
-import * as FileSystem from 'expo-file-system/legacy'
+import { DownloadTask, File } from 'expo-file-system'
 
 import { db, DownloadRepository } from '~/db'
 import {
@@ -35,7 +35,7 @@ type ActiveDownload = {
 	queueId: number
 	bookId: string
 	serverId: string
-	resumable: FileSystem.DownloadResumable | null // null if pending etc
+	downloadTask: DownloadTask | null // null if pending etc
 	progress: DownloadProgress
 }
 
@@ -174,9 +174,9 @@ class DownloadQueueManager {
 		const active = this.activeDownloads.get(queueId)
 
 		if (active) {
-			if (active.resumable) {
+			if (active.downloadTask) {
 				try {
-					await active.resumable.cancelAsync()
+					active.downloadTask.cancel()
 				} catch {
 					// Ignore cancellation errors, might be irrelevant
 				}
@@ -244,52 +244,37 @@ class DownloadQueueManager {
 			throw new Error('Server not connected. Please reconnect and try again.')
 		}
 
-		await ensureDirectoryExists(booksDirectory(params.serverId))
+		ensureDirectoryExists(booksDirectory(params.serverId))
 
 		const placementUrl = `${booksDirectory(params.serverId)}/${params.filename}`
 
-		// TODO(filesystem): Use non-deprecated filesystem
-		const progressCallback: FileSystem.DownloadProgressCallback = (progress) => {
-			const downloadProgress: DownloadProgress = {
-				totalBytes: progress.totalBytesExpectedToWrite,
-				downloadedBytes: progress.totalBytesWritten,
-				percentage:
-					progress.totalBytesExpectedToWrite > 0
-						? Math.round((progress.totalBytesWritten / progress.totalBytesExpectedToWrite) * 100)
-						: 0,
-			}
-			onProgress?.(downloadProgress)
-		}
-
-		const resumable = FileSystem.createDownloadResumable(
-			params.downloadUrl,
-			placementUrl,
-			{
-				headers: sdk.headers,
+		const destFile = new File(placementUrl)
+		const downloadTask = File.createDownloadTask(params.downloadUrl, destFile, {
+			headers: sdk.headers,
+			onProgress: ({ bytesWritten, totalBytes }) => {
+				const downloadProgress: DownloadProgress = {
+					totalBytes,
+					downloadedBytes: bytesWritten,
+					percentage: totalBytes > 0 ? Math.round((bytesWritten / totalBytes) * 100) : 0,
+				}
+				onProgress?.(downloadProgress)
 			},
-			progressCallback,
-		)
+		})
 
-		const result = await resumable.downloadAsync()
+		const file = await downloadTask.downloadAsync()
 
-		if (!result) {
+		if (!file) {
 			throw new Error('Download was cancelled')
 		}
 
-		// TODO: This is fine for Stump, but will it hold true for all servers? I assume so.
-		// I could always just assert > 2xx?
-		if (result.status !== 200) {
-			throw new Error(`Download failed with status ${result.status}`)
-		}
-
-		const size = await determineFileSize(result.headers, result.uri)
+		const size = file.size > 0 ? file.size : undefined
 		const metadata = params.metadata ? downloadQueueMetadata.safeParse(params.metadata).data : null
 
 		await DownloadRepository.addFile(
 			{
 				id: params.bookId,
 				filename: params.filename,
-				uri: result.uri,
+				uri: file.uri,
 				serverId: params.serverId,
 				size,
 				bookName: metadata?.bookName,
@@ -301,7 +286,7 @@ class DownloadQueueManager {
 			downloadMetaIntoDownloadRelations(metadata),
 		)
 
-		return result.uri
+		return file.uri
 	}
 
 	/**
@@ -383,7 +368,7 @@ class DownloadQueueManager {
 			queueId: item.id,
 			bookId: item.bookId,
 			serverId: item.serverId,
-			resumable: null,
+			downloadTask: null,
 			progress: { totalBytes: 0, downloadedBytes: 0, percentage: 0 },
 		})
 
@@ -403,71 +388,53 @@ class DownloadQueueManager {
 		}
 
 		try {
-			await ensureDirectoryExists(booksDirectory(item.serverId))
+			ensureDirectoryExists(booksDirectory(item.serverId))
 
 			const placementUrl = `${booksDirectory(item.serverId)}/${item.filename}`
 
-			// TODO(filesystem): Use non-deprecated filesystem
-			const progressCallback: FileSystem.DownloadProgressCallback = (progress) => {
-				const downloadProgress: DownloadProgress = {
-					totalBytes: progress.totalBytesExpectedToWrite,
-					downloadedBytes: progress.totalBytesWritten,
-					percentage:
-						progress.totalBytesExpectedToWrite > 0
-							? Math.round((progress.totalBytesWritten / progress.totalBytesExpectedToWrite) * 100)
-							: 0,
-				}
+			const destFile = new File(placementUrl)
+			const downloadTask = File.createDownloadTask(item.downloadUrl, destFile, {
+				headers: { ...sdk.headers },
+				onProgress: ({ bytesWritten, totalBytes }) => {
+					const downloadProgress: DownloadProgress = {
+						totalBytes,
+						downloadedBytes: bytesWritten,
+						percentage: totalBytes > 0 ? Math.round((bytesWritten / totalBytes) * 100) : 0,
+					}
 
-				const active = this.activeDownloads.get(item.id)
-				if (active) {
-					active.progress = downloadProgress
-				}
+					const active = this.activeDownloads.get(item.id)
+					if (active) {
+						active.progress = downloadProgress
+					}
 
-				this.emit({
-					type: 'progress',
-					queueId: item.id,
-					bookId: item.bookId,
-					progress: downloadProgress,
-				})
-			}
-
-			const resumable = FileSystem.createDownloadResumable(
-				item.downloadUrl,
-				placementUrl,
-				{
-					headers: {
-						...sdk.headers,
-					},
+					this.emit({
+						type: 'progress',
+						queueId: item.id,
+						bookId: item.bookId,
+						progress: downloadProgress,
+					})
 				},
-				progressCallback,
-			)
+			})
 
 			const active = this.activeDownloads.get(item.id)
 			if (active) {
-				active.resumable = resumable
+				active.downloadTask = downloadTask
 			} else {
 				// Note: This shouldn't happen, I think maybe if cancel before initialized
 				// it could
 				return
 			}
 
-			const result = await resumable.downloadAsync()
+			const file = await downloadTask.downloadAsync()
 
 			this.activeDownloads.delete(item.id)
 
-			if (!result) {
+			if (!file) {
 				await this.markFailed(item.id, 'Download was cancelled')
 				return
 			}
 
-			// TODO: This is fine for Stump, but will it hold true for all servers? I assume so.
-			// I could always just assert > 2xx?
-			if (result.status !== 200) {
-				await this.markFailed(item.id, `Download failed with status ${result.status}`)
-				return
-			}
-
-			await this.completeDownload(item, result)
+			await this.completeDownload(item, file)
 		} catch (error) {
 			this.activeDownloads.delete(item.id)
 
@@ -507,19 +474,16 @@ class DownloadQueueManager {
 		this.processQueue()
 	}
 
-	private async completeDownload(
-		item: DownloadQueueItem,
-		result: FileSystem.FileSystemDownloadResult,
-	): Promise<void> {
+	private async completeDownload(item: DownloadQueueItem, file: File): Promise<void> {
 		try {
-			const size = await determineFileSize(result.headers, result.uri)
+			const size = file.size > 0 ? file.size : undefined
 			const metadata = item.metadata ? downloadQueueMetadata.safeParse(item.metadata).data : null
 
 			await DownloadRepository.addFile(
 				{
 					id: item.bookId,
 					filename: item.filename,
-					uri: result.uri,
+					uri: file.uri,
 					serverId: item.serverId,
 					size,
 					bookName: metadata?.bookName,

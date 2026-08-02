@@ -42,6 +42,36 @@
 			"subtitleEditing": "Un'anteprima delle modifiche alla libreria verrà mostrata di seguito"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Ricerca metadati",
+			"description": "Cerca un provider esterno per questo libro e scegli una corrispondenza da applicare",
+			"openButton": "Cerca metadati",
+			"searchButton": "Cerca",
+			"noProviders": "Nessun provider di metadati abilitato è configurato per questo tipo di libreria. Configurane prima uno nelle impostazioni del server.",
+			"noResults": "Nessuna corrispondenza trovata per questa ricerca",
+			"partialResults": "Non è stato possibile caricare alcuni risultati dal provider, probabilmente a causa del superamento del limite di richieste. Prova a cercare di nuovo per vedere se ne compaiono altri.",
+			"searchFailed": "Impossibile cercare nei provider di metadati",
+			"form": {
+				"title": {
+					"label": "Titolo"
+				},
+				"author": {
+					"label": "Autore"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Anno"
+				},
+				"provider": {
+					"label": "Provider",
+					"allOption": "Tutti i provider abilitati"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "Informazioni sul file",
@@ -693,7 +723,7 @@
 			"description": "Gestisci e rivedi le corrispondenze dei metadati per questa libreria",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Recupera i metadati",
+					"heading": "Recupera metadati",
 					"description": "Recupera i metadati per i file multimediali in questa libreria",
 					"noProviders": {
 						"title": "Non ci sono provider di metadati disponibili",
@@ -1476,6 +1506,16 @@
 					"label": "Carattere",
 					"description": "Personalizza il carattere usato nell'applicazione"
 				},
+				"interfaceRoundness": {
+					"label": "Rotondità interfaccia",
+					"description": "Quanto sono arrotondati gli angoli degli elementi UI",
+					"options": {
+						"none": "Nessuno",
+						"normal": "Normale",
+						"rounded": "Arrotondato",
+						"pill": "Pillola"
+					}
+				},
 				"thumbnailPreview": {
 					"label": "Anteprima",
 					"description": "Così è come appariranno le miniature con con le impostazioni attuali"
@@ -1575,9 +1615,25 @@
 						"noLimit": "Nessun limite"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Visualizzazione e spaziatura",
+					"description": "Preferenze relative alla presentazione dei contenuti e delle informazioni"
+				},
 				"additionalPreferences": {
 					"label": "Preferenze aggiuntive",
 					"description": "Personalizza l'aspetto e il comportamento di Stump con queste impostazioni aggiuntive"
+				},
+				"contentBrowsing": {
+					"label": "Navigazione contenuti",
+					"description": "Preferenze che influenzano la navigazione degli elenchi di contenuti"
+				},
+				"motionAndAnimation": {
+					"label": "Movimento e animazione",
+					"description": "Presentazione visiva e preferenze di movimento"
+				},
+				"activityAndStatus": {
+					"label": "Attività e stato",
+					"description": "Indicatori, sovrapposizioni o funzionalità relative alle attività in background"
 				},
 				"hideScrollbarToggle": {
 					"label": "Nascondi barra di scorrimento",
@@ -2006,6 +2062,9 @@
 						"updateError": "Impossibile aggiornare l'attività pianficata",
 						"deleteSuccess": "Attività pianificata eliminata",
 						"deleteError": "Impossibile eliminare l'attività pianficata"
+					},
+					"errors": {
+						"invalidCron": "La pianificazione deve essere un'espressione cron valida"
 					}
 				},
 				"history": {
@@ -2079,7 +2138,8 @@
 						"emailing": "Invio e-mail",
 						"libraryManagement": "Gestione libreria",
 						"userManagement": "Gestione utenti",
-						"serverManagement": "Gestione server"
+						"serverManagement": "Gestione server",
+						"metadataManagement": "Gestione metadati"
 					},
 					"heading": "Autorizzazioni",
 					"subtitle": [
@@ -2791,6 +2851,22 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Modificare miniature",
 			"description": "Consente all'utente di modificare le miniature per libri e serie"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Lettura dei provider di metadati",
+			"description": "Consente all'utente di visualizzare i provider di metadati esterni configurati"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Gestione dei provider di metadati",
+			"description": "Consente all'utente di configurare i provider di metadati esterni"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Lettura delle corrispondenze dei metadati",
+			"description": "Consente all'utente di visualizzare i risultati del recupero dei metadati in attesa di revisione"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Gestione delle corrispondenze dei metadati",
+			"description": "Consente all'utente di cercare un libro nei provider esterni e di accettare o rifiutare le corrispondenze candidate"
 		}
 	},
 	"mobileApp": {
@@ -2894,6 +2970,7 @@
 			"delete": "Elimina",
 			"dismiss": "Ignora",
 			"download": "Scarica",
+			"downloaded": "Downloaded",
 			"downloads": "Download",
 			"done": "Fatto",
 			"edit": "Modifica",
@@ -3066,7 +3143,36 @@
 						"dark": "Scuro"
 					}
 				},
-				"appPrimaryColor": "Colore primario",
+				"appPrimaryColor": {
+					"label": "Colore primario",
+					"options": {
+						"chromaScale": "Scala cromatica",
+						"hues": {
+							"red": "Rosso",
+							"orange": "Arancione",
+							"amber": "Ambra",
+							"yellow": "Giallo",
+							"lime": "Lime",
+							"green": "Verde",
+							"emerald": "Smeraldo",
+							"teal": "Ottanio",
+							"cyan": "Ciano",
+							"sky": "Cielo",
+							"blue": "Blu",
+							"indigo": "Indaco",
+							"violet": "Violetto",
+							"purple": "Viola",
+							"fuchsia": "Fucsia",
+							"pink": "Rosa",
+							"rose": "Rosato",
+							"slate": "Ardesia",
+							"gray": "Grigio",
+							"zinc": "Zinco",
+							"neutral": "Neutro",
+							"stone": "Pietra"
+						}
+					}
+				},
 				"appLanguage": "Lingua",
 				"defaultServer": "Server predefinito",
 				"thumbnailRatio": "Proporzioni miniatura",

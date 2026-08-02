@@ -118,6 +118,10 @@ services:
 
 OIDC can be configured using either environment variables or the TOML configuration file. See [server configuration](/docs/guides/configuration/server-config) for more details.
 
+<Callout type="info">
+	**Running behind a reverse proxy?** You might need to set `STUMP_TRUST_PROXY_HEADERS=true` (or `trust_proxy_headers = true` in `Stump.toml`). Without it, Stump ignores forwarded headers and may generate incorrect URLs (like the OIDC redirect callbacks). See [`STUMP_TRUST_PROXY_HEADERS`](/docs/guides/configuration/server-config#stump_trust_proxy_headers) for details.
+</Callout>
+
 <Callout type="warning">
 	When using the `Stump.toml` configuration file, OIDC settings must be placed under an `[oidc]`
 	table section, **not** as flat keys with an `oidc_` prefix. See the [TOML example](#toml-example)

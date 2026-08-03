@@ -3,10 +3,14 @@ use crate::{
 	guard::PermissionGuard,
 	input::metadata_provider::{
 		CreateMetadataProviderConfigInput, PatchMetadataProviderConfigInput,
+		ValidateMetadataProviderConfigInput,
 	},
 };
 use async_graphql::{Context, Object, Result};
-use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField};
+use metadata_integrations::{
+	create_provider, MatchCandidate, MergeStrategy, MetadataField,
+	ProviderCredentialVerification,
+};
 use models::{
 	entity::{metadata_fetch_record, metadata_provider_config},
 	shared::enums::{MetadataFetchStatus, UserPermission},
@@ -76,6 +80,18 @@ impl MetadataProviderMutation {
 			.await?;
 
 		Ok(model)
+	}
+
+	/// Validate the provided API token by making a test request using a client instance
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataProviderManage)")]
+	async fn validate_provider_config(
+		&self,
+		config: ValidateMetadataProviderConfigInput,
+	) -> Result<ProviderCredentialVerification> {
+		let client =
+			create_provider(&config.provider_type.to_string(), config.api_token)?;
+		let verification = client.verify_credentials().await?;
+		Ok(verification)
 	}
 
 	/// Accept the top-ranked candidate for all pending metadata matches

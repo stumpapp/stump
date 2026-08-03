@@ -1,5 +1,4 @@
 import { formatBytes } from '@stump/client'
-import { clone, getColor, mix } from 'colorjs.io/fn'
 import { useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import medium from 'expo-symbols/androidWeights/medium'
@@ -10,10 +9,8 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useShallow } from 'zustand/react/shallow'
 
 import { epubProgress, imageMeta, syncStatus } from '~/db'
-import { COLORS, toHex } from '~/lib/constants'
+import { usePalette } from '~/lib/constants'
 import { useDownload, useTranslate } from '~/lib/hooks'
-import { useColorScheme } from '~/lib/useColorScheme'
-import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
 import { ThumbnailImage } from '../image'
@@ -52,7 +49,10 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const size = downloadedFile.size ? formatBytes(downloadedFile.size) : null
 
 	const { width, height } = useDownloadRowItemSize()
-	const { backgroundColor, iconColor } = useSelectionColors()
+	const { backgroundColor, iconColor } = usePalette({
+		iconColor: { light: 400, dark: 700 },
+		backgroundColor: { light: 150, dark: 950, chromaScale: 0.6 },
+	})
 
 	const selectionStore = useSelectionStore(
 		useShallow((state) => ({
@@ -278,26 +278,6 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 			</ContextMenu>
 		</>
 	)
-}
-
-function useSelectionColors() {
-	const { isDarkColorScheme } = useColorScheme()
-	const accentColor =
-		usePreferencesStore((state) => state.accentColor) ?? COLORS.light.fill.brand.DEFAULT
-
-	const color = getColor(accentColor)
-
-	const c1 = clone(color)
-	c1.alpha = 0.2
-	const backgroundColor = toHex(c1)
-
-	const iconColor = toHex(
-		mix(color, isDarkColorScheme ? 'black' : 'white', isDarkColorScheme ? 0.3 : 0.25, {
-			space: 'oklch',
-		}),
-	)
-
-	return { backgroundColor, iconColor }
 }
 
 function CheckIcon({ color }: { color: string }) {

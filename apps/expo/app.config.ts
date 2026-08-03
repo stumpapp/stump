@@ -103,7 +103,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 							displayName: 'Reading Now',
 							description: "See what you're currently reading",
 							contentMarginsDisabled: true,
-							supportedFamilies: ['systemSmall', 'systemMedium', 'systemLarge'],
+							supportedFamilies: [
+								'accessoryRectangular',
+								'systemSmall',
+								'systemMedium',
+								'systemLarge',
+							],
 						},
 					],
 				},

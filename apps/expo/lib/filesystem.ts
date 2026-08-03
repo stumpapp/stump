@@ -214,6 +214,10 @@ export function getAppUsage() {
 export const widgetStorage = new Directory(widgetsDirectory)
 
 export const widgetThumbnailDirectory = new Directory(urlJoin(widgetStorage.uri, 'thumbnails'))
+export const widgetAssetsDirectory = new Directory(urlJoin(widgetStorage.uri, 'assets'))
 
 export const widgetThumbnailPath = (bookId: string): string =>
 	urlJoin(widgetThumbnailDirectory.uri, `${bookId}.jpg`)
+
+export const widgetAssetPath = (assetName: string): string =>
+	urlJoin(widgetAssetsDirectory.uri, assetName)

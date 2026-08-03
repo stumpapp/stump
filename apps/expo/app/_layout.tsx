@@ -33,6 +33,7 @@ import { getDownloadQueueManager } from '~/lib/downloadQueue'
 import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { refreshWidgetFromCache } from '~/lib/widgets/readingNow/readingNowWidgetSync'
+import { useEnsureWidgetAssetsWritten } from '~/lib/widgets/utils'
 import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useHideSystemBars, useReaderStore } from '~/stores/reader'
@@ -161,6 +162,8 @@ export default function RootLayout() {
 			Sentry.captureException(err)
 		})
 	}, [success])
+
+	useEnsureWidgetAssetsWritten()
 
 	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
 

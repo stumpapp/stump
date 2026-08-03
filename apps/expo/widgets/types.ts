@@ -16,4 +16,5 @@ export type ReadingNowWidgetProps = {
 	books: WidgetBook[]
 	thumbnailRatio: number
 	accentColor: string
+	assetsPath: string
 }

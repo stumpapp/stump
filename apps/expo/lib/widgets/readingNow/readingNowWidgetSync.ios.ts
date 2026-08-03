@@ -6,18 +6,20 @@ import { parseGraphQLDecimal } from '@stump/client'
 import { Api } from '@stump/sdk'
 import { formatDistanceToNow } from 'date-fns'
 import { Directory, File } from 'expo-file-system'
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { MMKV } from 'react-native-mmkv'
 import { z } from 'zod'
 
 import {
 	bookThumbnailPath,
 	toAbsolutePath,
+	widgetAssetsDirectory,
 	widgetThumbnailDirectory,
 	widgetThumbnailPath,
 } from '~/lib/filesystem'
 import ReadingNowWidget from '~/widgets/ReadingNowWidget.ios'
 import type { ReadingNowWidgetProps, WidgetBook } from '~/widgets/types'
+
+import { createThumbnail } from '../utils'
 
 export type ServerBookInput = {
 	id: string
@@ -51,18 +53,6 @@ function getBookThumbnailMeta(bookId: string): z.infer<typeof metaSchema> | null
 		return null
 	}
 	return parsed.data
-}
-
-// this is VERY important, because the widget will crash if the image is too large to render. ask me
-// how i know :(
-async function createThumbnail(sourceUri: string): Promise<File> {
-	const manipulator = ImageManipulator.manipulate(sourceUri).resize({ width: 300 }) // height will scale
-	const renderedImage = await manipulator.renderAsync()
-	const resized = await renderedImage.saveAsync({
-		format: SaveFormat.PNG,
-		compress: 0.85,
-	})
-	return new File(resized.uri)
 }
 
 async function ensureThumbnailCached(book: ServerBookInput, api: Api): Promise<string | null> {
@@ -180,6 +170,7 @@ export async function refreshReadingNowWidget(
 	const snapshot: ReadingNowWidgetProps = {
 		books,
 		...params,
+		assetsPath: widgetAssetsDirectory.uri,
 	}
 	storage.set(SNAPSHOT_KEY, JSON.stringify(snapshot))
 

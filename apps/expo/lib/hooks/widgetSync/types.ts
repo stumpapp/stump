@@ -4,4 +4,6 @@ export type WidgetSyncBook = {
 	resolvedName: string
 	thumbnail: { url: string }
 	readProgress?: { percentageCompleted?: string | null; updatedAt?: string | null } | null
+	isReadingOffline?: boolean
+	serverId: string
 }

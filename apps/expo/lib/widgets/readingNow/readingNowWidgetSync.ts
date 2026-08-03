@@ -9,6 +9,7 @@ export type ServerBookInput = {
 	thumbnailUrl: string
 	percentageCompleted: string | null
 	updatedAt: string | null
+	isReadingOffline: boolean
 }
 
 // TODO(widgets): rm lint supress, we need this to stub for android until expo-widgets
@@ -18,7 +19,7 @@ export async function refreshReadingNowWidget(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_serverBooks: ServerBookInput[],
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	_api: Api,
+	_api: Api | null,
 	// _t: (key: string, options?: Record<string, unknown> | undefined) => string,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_params: Pick<ReadingNowWidgetProps, 'thumbnailRatio' | 'accentColor'>,

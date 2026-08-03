@@ -38,7 +38,7 @@ const ReadingNowWidget = (
 	// Note: i had to put inside the `widget` directive because it would throw error otherwise about
 	// ident not found
 	const bookUrl = (book: WidgetBook) => {
-		// if (book.isReadingOffline)
+		if (book.isReadingOffline) return `stump://offline/${book.id}`
 		return `stump://server/${book.serverId}/books/${book.id}`
 	}
 

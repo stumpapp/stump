@@ -28,6 +28,7 @@ export type ServerBookInput = {
 	thumbnailUrl: string
 	percentageCompleted: string | null
 	updatedAt: string | null
+	isReadingOffline: boolean
 }
 
 const SNAPSHOT_KEY = 'reading-now-snapshot'
@@ -38,9 +39,6 @@ const THUMBNAIL_META_KEY_PREFIX = 'thumb-meta-'
 const storage = new MMKV({ id: 'stump-widget-sync' })
 
 const thumbnailKey = (bookId: string) => THUMBNAIL_META_KEY_PREFIX + bookId
-
-// TODO: can i assume jpg throughout? not sure how much it will matter? at least
-// for now, swift Image(uiImage:) will ignore the ext but android might not
 
 // doesn't really need to be an obj but think it is more future proof
 const metaSchema = z.object({
@@ -55,7 +53,10 @@ function getBookThumbnailMeta(bookId: string): z.infer<typeof metaSchema> | null
 	return parsed.data
 }
 
-async function ensureThumbnailCached(book: ServerBookInput, api: Api): Promise<string | null> {
+async function ensureThumbnailCached(
+	book: ServerBookInput,
+	api: Api | null,
+): Promise<string | null> {
 	const destFile = new File(widgetThumbnailPath(book.id))
 	try {
 		// we might have a thumb if e.g. the book is downloaded, and if so just use that
@@ -81,7 +82,10 @@ async function ensureThumbnailCached(book: ServerBookInput, api: Api): Promise<s
 			}
 		}
 
-		// TODO: resize? -> https://docs.expo.dev/versions/latest/sdk/imagemanipulator/
+		if (!api) {
+			// no api = local reading, so if no thumb we can't do anything
+			return destFile.exists ? destFile.uri : null
+		}
 
 		const tmp = await File.downloadFileAsync(book.thumbnailUrl, destFile, {
 			headers: await api.getHeaders(),
@@ -108,25 +112,56 @@ async function ensureThumbnailCached(book: ServerBookInput, api: Api): Promise<s
 	}
 }
 
+function toPartialWidgetBook(book: ServerBookInput): WidgetBook {
+	const percentage = parseGraphQLDecimal(book.percentageCompleted) ?? 0
+	const lastReadAt = book.updatedAt ? new Date(book.updatedAt).getTime() : 0
+	const timeAgoLabel = book.updatedAt
+		? formatDistanceToNow(lastReadAt, { addSuffix: true })
+		: 'never'
+
+	return {
+		id: book.id,
+		serverId: book.serverId,
+		name: book.name,
+		percentage,
+		lastReadAt,
+		timeAgoLabel,
+		isReadingOffline: book.isReadingOffline,
+		// thumbnailPath is resolved after reconciling with existing thumbs, so we don't set it here
+	}
+}
+
 /**
- * reconciles the books which are currently currently being read with existing
- * thumbnails in the widget directory, removing any that are no longer needed
- * so we don't accumulate stale thumbs over time
+ * reconcile the incoming books with the cached snapshot to ensure that we don't lose any
+ * books that are still relevant (e.g., not part of current sync but still within cutoff)
+ */
+function reconcileSnapshotWithBooks(incoming: WidgetBook[]): WidgetBook[] {
+	const cached = getSnapshotFromCache()?.books ?? []
+	if (!cached.length) return incoming
+
+	const incomingIds = new Set(incoming.map((b) => b.id))
+	const cachedOnly = cached.filter((b) => !incomingIds.has(b.id))
+	return [...incoming, ...cachedOnly]
+}
+
+/**
+ * reconciles the books which are currently being read with existing thumbnails
+ * in the widget directory, removing any that are no longer needed so we don't
+ * accumulate stale thumbs over time. books outside the incoming set but still
+ * within the cutoff are preserved via topIds
  */
 async function reconcileThumbnails(
-	books: ServerBookInput[],
-	api: Api,
+	incomingBooks: ServerBookInput[],
+	topIds: Set<string>,
+	api: Api | null,
 ): Promise<Map<string, string>> {
 	new Directory(widgetThumbnailDirectory.uri).create({ intermediates: true, idempotent: true })
 
 	const existing = new Directory(widgetThumbnailDirectory.uri).list()
-	const targetIds = new Set(books.map((b) => b.id))
-
 	for (const entry of existing) {
 		if (!(entry instanceof File)) continue
 		const bookId = entry.name.replace(/\.jpg$/, '')
-		// remove any thumbs that are no longer in the top 6
-		if (!targetIds.has(bookId)) {
+		if (!topIds.has(bookId)) {
 			entry.delete()
 			storage.delete(thumbnailKey(bookId))
 		}
@@ -134,7 +169,7 @@ async function reconcileThumbnails(
 
 	const resultMap = new Map<string, string>()
 	await Promise.all(
-		books.map(async (book) => {
+		incomingBooks.map(async (book) => {
 			const path = await ensureThumbnailCached(book, api)
 			if (path) {
 				resultMap.set(book.id, path)
@@ -144,28 +179,42 @@ async function reconcileThumbnails(
 	return resultMap
 }
 
+function getSnapshotFromCache(): ReadingNowWidgetProps | null {
+	const raw = storage.getString(SNAPSHOT_KEY)
+	if (!raw) return null
+	try {
+		return JSON.parse(raw)
+	} catch (err) {
+		Sentry.captureException(err, {
+			extra: {
+				raw,
+			},
+		})
+		return null
+	}
+}
+
 export async function refreshReadingNowWidget(
 	serverBooks: ServerBookInput[],
-	api: Api,
+	api: Api | null,
 	params: Pick<ReadingNowWidgetProps, 'thumbnailRatio' | 'accentColor'>,
 ): Promise<void> {
-	const top6 = serverBooks.slice(0, 6)
-	const thumbnailMap = await reconcileThumbnails(top6, api)
+	const incomingById = new Map(serverBooks.map((b) => [b.id, b]))
 
-	const books: WidgetBook[] = top6.map((book) => {
-		const percentage = parseGraphQLDecimal(book.percentageCompleted) ?? 0
-		const lastReadAt = book.updatedAt ? new Date(book.updatedAt).getTime() : Date.now()
-		const timeAgoLabel = formatDistanceToNow(lastReadAt, { addSuffix: true })
-		return {
-			id: book.id,
-			serverId: book.serverId,
-			name: book.name,
-			percentage,
-			thumbnailPath: thumbnailMap.get(book.id),
-			lastReadAt,
-			timeAgoLabel,
-		}
-	})
+	const mostRecent = reconcileSnapshotWithBooks(serverBooks.map(toPartialWidgetBook))
+		.sort((a, b) => b.lastReadAt - a.lastReadAt)
+		.slice(0, 5)
+
+	const incomingBooks = mostRecent
+		.filter((b) => incomingById.has(b.id))
+		.map((b) => incomingById.get(b.id)!) // bang is fineee
+	const topIds = new Set(mostRecent.map((b) => b.id))
+	const thumbnailMap = await reconcileThumbnails(incomingBooks, topIds, api)
+
+	const books: WidgetBook[] = mostRecent.map((book) => ({
+		...book,
+		thumbnailPath: book.thumbnailPath ?? thumbnailMap.get(book.id),
+	}))
 
 	const snapshot: ReadingNowWidgetProps = {
 		books,
@@ -187,16 +236,8 @@ export async function refreshReadingNowWidget(
 }
 
 export function refreshWidgetFromCache(): void {
-	try {
-		const raw = storage.getString(SNAPSHOT_KEY)
-		if (!raw) return
-		const parsed = JSON.parse(raw)
-		ReadingNowWidget.updateSnapshot(parsed)
-	} catch (err) {
-		Sentry.captureException(err, {
-			extra: {
-				raw: storage.getString(SNAPSHOT_KEY),
-			},
-		})
+	const snapshot = getSnapshotFromCache()
+	if (snapshot) {
+		ReadingNowWidget.updateSnapshot(snapshot)
 	}
 }

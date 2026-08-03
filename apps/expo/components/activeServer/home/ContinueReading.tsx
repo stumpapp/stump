@@ -52,11 +52,23 @@ function ContinueReading() {
 	)
 	const nodes = useMemo(() => data?.pages.flatMap((page) => page.keepReading.nodes) || [], [data])
 
-	// Take the first 6 books as "currently reading"
-	const activeBooks = useMemo(() => data?.pages.at(0)?.keepReading.nodes.slice(0, 6) || [], [data])
+	// Take the first 5 books as "currently reading"
+	const activeBooks = useMemo(() => data?.pages.at(0)?.keepReading.nodes.slice(0, 5) || [], [data])
+	const widgetBooks = useMemo(
+		() =>
+			activeBooks.map(
+				(book) =>
+					({
+						...book,
+						serverId: serverID,
+						isReadingOffline: false,
+					}) as WidgetSyncBook,
+			),
+		[activeBooks, serverID],
+	)
 
 	// the cast should be fine, fragment is just masked
-	useReadingNowWidgetSync(activeBooks as WidgetSyncBook[])
+	useReadingNowWidgetSync(widgetBooks as WidgetSyncBook[])
 
 	const leftOffBooks = useMemo(
 		() => nodes.filter(({ id }) => !activeBooks.some((book) => book.id === id)),

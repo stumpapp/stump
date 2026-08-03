@@ -10,6 +10,7 @@ export type WidgetBook = {
 	thumbnailPath?: string
 	lastReadAt: number
 	timeAgoLabel: string
+	isReadingOffline: boolean
 }
 
 export type ReadingNowWidgetProps = {

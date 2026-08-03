@@ -1,7 +1,6 @@
-import { useSDK } from '@stump/client'
+import { useSDKSafe } from '@stump/client'
 import { useEffect } from 'react'
 
-import { useActiveServer } from '~/components/activeServer/context'
 import {
 	refreshReadingNowWidget,
 	type ServerBookInput,
@@ -14,8 +13,7 @@ import { WidgetSyncBook } from './types'
 export type { WidgetSyncBook } from './types'
 
 export function useReadingNowWidgetSync(books: WidgetSyncBook[]) {
-	const { activeServer } = useActiveServer()
-	const { sdk } = useSDK()
+	const sdkContext = useSDKSafe()
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const accentColor = usePalette('accent')
@@ -27,14 +25,15 @@ export function useReadingNowWidgetSync(books: WidgetSyncBook[]) {
 			(book) =>
 				({
 					id: book.id,
-					serverId: activeServer.id,
+					serverId: book.serverId,
 					name: book.resolvedName,
 					thumbnailUrl: book.thumbnail.url,
 					percentageCompleted: book.readProgress?.percentageCompleted ?? null,
 					updatedAt: book.readProgress?.updatedAt ?? null,
+					isReadingOffline: book.isReadingOffline ?? false,
 				}) satisfies ServerBookInput,
 		)
 
-		refreshReadingNowWidget(inputs, sdk, { thumbnailRatio, accentColor })
-	}, [books, activeServer.id, sdk, thumbnailRatio, accentColor])
+		refreshReadingNowWidget(inputs, sdkContext?.sdk || null, { thumbnailRatio, accentColor })
+	}, [books, sdkContext?.sdk, thumbnailRatio, accentColor])
 }

@@ -256,18 +256,18 @@ impl Media {
 		Ok(history)
 	}
 
-	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i32>> {
+	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i64>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		if let Some(position) = self.metadata.as_ref().and_then(|m| m.model.number) {
 			if position.fract().is_zero() {
-				return Ok(Some(position.to_i32().unwrap_or(0)));
+				return Ok(Some(position.to_i64().unwrap_or(0)));
 			}
 		}
 
 		#[derive(Debug, FromQueryResult)]
 		struct PositionResult {
-			position: i32,
+			position: i64,
 		}
 
 		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;

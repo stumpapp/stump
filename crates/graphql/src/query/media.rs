@@ -112,8 +112,8 @@ impl MediaQuery {
 		Ok(count as i64)
 	}
 
-	// Note: This could be slightly inaccurate based on permissions, but it's close enough and I'm too lazy
-	// to write a more complex query right now.
+	// Note: this could be slightly inaccurate based on permissions, but it's close enough and I'm not
+	// motivated enough to write a more complex query right now
 	async fn media_disk_usage(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -121,12 +121,12 @@ impl MediaQuery {
 			.query_one(db_statement(
 				conn,
 				r"
-				SELECT
-					COALESCE(SUM(size), 0) as total_size
-				FROM
-					media
-				WHERE deleted_at IS NULL
-				",
+			SELECT
+				CAST(COALESCE(SUM(size), 0) AS BIGINT) as total_size
+			FROM
+				media
+			WHERE deleted_at IS NULL
+			",
 				[],
 			))
 			.await?;

@@ -44,8 +44,8 @@
 	},
 	"bookManagementScene": {
 		"metadataSearch": {
-			"heading": "Search metadata",
-			"description": "Search an external provider for this book and choose a match to apply",
+			"heading": "Metadaten suchen",
+			"description": "Suche einen externen Anbieter für dieses Buch und wähle einen Treffer zum Anwenden",
 			"openButton": "Search Metadata",
 			"searchButton": "Search",
 			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
@@ -70,7 +70,7 @@
 				},
 				"comicVineVolumeId": {
 					"label": "ComicVine volume ID",
-					"placeholder": "e.g., 129260"
+					"placeholder": "z.B.: 129260"
 				},
 				"provider": {
 					"label": "Provider",

@@ -271,7 +271,6 @@ export default function Screen() {
 	const { sdk } = useSDK()
 	const {
 		data: { mediaById: book },
-		error,
 	} = useSuspenseGraphQL(query, ['readBook', bookId], {
 		id: bookId,
 	})

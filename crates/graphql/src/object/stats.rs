@@ -71,13 +71,13 @@ impl LibraryStats {
 								AND rs2.media_id = frs.media_id
 								AND rs2.readthrough_number = frs.readthrough_number
 								AND (
-									IFNULL(rs2.updated_at, rs2.created_at) > IFNULL(frs.updated_at, frs.created_at)
+									COALESCE(rs2.updated_at, rs2.created_at) > COALESCE(frs.updated_at, frs.created_at)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at > frs.created_at
 									)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at = frs.created_at
 										AND rs2.id > frs.id
 									)
@@ -181,13 +181,13 @@ impl SeriesStats {
 								AND rs2.media_id = frs.media_id
 								AND rs2.readthrough_number = frs.readthrough_number
 								AND (
-									IFNULL(rs2.updated_at, rs2.created_at) > IFNULL(frs.updated_at, frs.created_at)
+									COALESCE(rs2.updated_at, rs2.created_at) > COALESCE(frs.updated_at, frs.created_at)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at > frs.created_at
 									)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at = frs.created_at
 										AND rs2.id > frs.id
 									)

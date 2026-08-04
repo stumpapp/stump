@@ -1,5 +1,6 @@
 import { cx } from '@stump/components'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback } from 'react'
 import { useSwipeable } from 'react-swipeable'
@@ -20,6 +21,7 @@ type Props = {
  * `fixed` to the viewport — so it tracks the actual reading pane instead of the window.
  */
 export default function EpubNavigationControls({ children }: Props) {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()
@@ -102,7 +104,7 @@ export default function EpubNavigationControls({ children }: Props) {
 					className={cx({ hidden: !visible })}
 					onClick={onBackwardNavigation}
 					disabled={!canNavigateLeft}
-					aria-label="Previous page"
+					aria-label={t('epubReader.controls.previousPage')}
 				>
 					<ChevronLeft className="h-5 w-5" />
 				</ControlButton>
@@ -116,7 +118,7 @@ export default function EpubNavigationControls({ children }: Props) {
 					className={cx({ hidden: !visible })}
 					onClick={onForwardNavigation}
 					disabled={!canNavigateRight}
-					aria-label="Next page"
+					aria-label={t('epubReader.controls.nextPage')}
 				>
 					<ChevronRight className="h-5 w-5" />
 				</ControlButton>
@@ -132,7 +134,7 @@ export default function EpubNavigationControls({ children }: Props) {
 				{tapSidesToNavigate && (
 					<button
 						type="button"
-						aria-label="Previous page"
+						aria-label={t('epubReader.controls.previousPage')}
 						disabled={!canNavigateLeft}
 						onClick={onBackwardNavigation}
 						className="pointer-events-auto h-full w-[15%] disabled:pointer-events-none"
@@ -140,14 +142,14 @@ export default function EpubNavigationControls({ children }: Props) {
 				)}
 				<button
 					type="button"
-					aria-label="Toggle reader controls"
+					aria-label={t('epubReader.controls.toggleControls')}
 					onClick={toggleControls}
 					className="pointer-events-auto h-full flex-1"
 				/>
 				{tapSidesToNavigate && (
 					<button
 						type="button"
-						aria-label="Next page"
+						aria-label={t('epubReader.controls.nextPage')}
 						disabled={!canNavigateRight}
 						onClick={onForwardNavigation}
 						className="pointer-events-auto h-full w-[15%] disabled:pointer-events-none"

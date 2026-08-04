@@ -3,6 +3,30 @@ import type { Locator } from '@readium/shared'
 import type { ReaderLocator } from '../context'
 import { hrefsMatch, packagePathFromHref } from '../readium/locator'
 
+type SelectionLocatorLike = {
+	href?: string
+	type?: string
+	title?: string | null
+	chapterTitle?: string | null
+	locations?: {
+		fragments?: string[] | null
+		progression?: number | null
+		position?: number | null
+		totalProgression?: number | null
+	} | null
+	text?: { highlight?: string | null; before?: string | null; after?: string | null } | null
+}
+
+type EnrichSelectionLocatorArgs = {
+	selectionLocator: Locator | ReaderLocator | null | undefined
+	selectedText: string
+	positions: Locator[]
+	readingOrderHrefs: string[]
+	chapterTitleFromToc?: string
+}
+
+export type SelectionContext = { before?: string; after?: string }
+
 /**
  * Canonicalize a locator href against the publication reading-order hrefs so
  * stored annotations always use the same absolute resource URLs as positions.
@@ -21,86 +45,35 @@ export function canonicalizeAnnotationHref(href: string, readingOrderHrefs: stri
  * Enrich a selection locator with TOC chapter title and nearest position metadata
  * before persistence. Prefer selection text / progression when present.
  */
-export function enrichSelectionLocator(args: {
-	selectionLocator: Locator | ReaderLocator | null | undefined
-	selectedText: string
-	positions: Locator[]
-	readingOrderHrefs: string[]
-	chapterTitleFromToc?: string
-}): ReaderLocator | null {
+export function enrichSelectionLocator(args: EnrichSelectionLocatorArgs): ReaderLocator | null {
 	const { selectionLocator, selectedText, positions, readingOrderHrefs, chapterTitleFromToc } = args
-	if (!selectionLocator?.href && !selectedText) return null
+	const locator = selectionLocator as SelectionLocatorLike | null | undefined
+	if (!locator?.href && !selectedText) return null
 
-	const rawHref = selectionLocator?.href ?? positions[0]?.href
+	const rawHref = locator?.href ?? positions[0]?.href
 	if (!rawHref) return null
 
 	const href = canonicalizeAnnotationHref(rawHref, readingOrderHrefs)
 	const match = positions.find((p) => hrefsMatch(p.href, href))
 
 	const progression =
-		safeNumber(
-			selectionLocator && 'locations' in selectionLocator && selectionLocator.locations
-				? 'progression' in selectionLocator.locations
-					? selectionLocator.locations.progression
-					: undefined
-				: undefined,
-		) ??
-		safeNumber(match?.locations.progression) ??
-		0
-
-	const position =
-		safeNumber(
-			selectionLocator && 'locations' in selectionLocator && selectionLocator.locations
-				? 'position' in selectionLocator.locations
-					? (selectionLocator.locations as { position?: number | null }).position
-					: undefined
-				: undefined,
-		) ?? safeNumber(match?.locations.position)
-
+		safeNumber(locator?.locations?.progression) ?? safeNumber(match?.locations.progression) ?? 0
+	const position = safeNumber(locator?.locations?.position) ?? safeNumber(match?.locations.position)
 	const totalProgression =
-		safeNumber(
-			selectionLocator && 'locations' in selectionLocator && selectionLocator.locations
-				? 'totalProgression' in selectionLocator.locations
-					? (selectionLocator.locations as { totalProgression?: number | null }).totalProgression
-					: undefined
-				: undefined,
-		) ?? safeNumber(match?.locations.totalProgression)
-
-	const title =
-		(selectionLocator && 'title' in selectionLocator && selectionLocator.title) ||
-		match?.title ||
-		chapterTitleFromToc ||
-		undefined
-
+		safeNumber(locator?.locations?.totalProgression) ??
+		safeNumber(match?.locations.totalProgression)
+	const title = locator?.title || match?.title || chapterTitleFromToc || undefined
 	const chapterTitle =
-		(selectionLocator && 'chapterTitle' in selectionLocator && selectionLocator.chapterTitle) ||
-		chapterTitleFromToc ||
-		title ||
-		packagePathFromHref(href)
-
-	const highlight =
-		selectedText ||
-		(selectionLocator && 'text' in selectionLocator
-			? selectionLocator.text?.highlight
-			: undefined) ||
-		undefined
+		locator?.chapterTitle || chapterTitleFromToc || title || packagePathFromHref(href)
+	const highlight = selectedText || locator?.text?.highlight || undefined
 
 	return {
 		href,
-		type:
-			(selectionLocator && 'type' in selectionLocator && selectionLocator.type) ||
-			match?.type ||
-			'application/xhtml+xml',
+		type: locator?.type || match?.type || 'application/xhtml+xml',
 		title: title ?? undefined,
 		chapterTitle: chapterTitle ?? undefined,
 		locations: {
-			fragments:
-				selectionLocator &&
-				'locations' in selectionLocator &&
-				selectionLocator.locations &&
-				'fragments' in selectionLocator.locations
-					? ((selectionLocator.locations as { fragments?: string[] | null }).fragments ?? undefined)
-					: undefined,
+			fragments: locator?.locations?.fragments ?? undefined,
 			progression,
 			position: position ?? undefined,
 			totalProgression: totalProgression ?? undefined,
@@ -108,14 +81,8 @@ export function enrichSelectionLocator(args: {
 		text: highlight
 			? {
 					highlight,
-					before:
-						selectionLocator && 'text' in selectionLocator
-							? selectionLocator.text?.before
-							: undefined,
-					after:
-						selectionLocator && 'text' in selectionLocator
-							? selectionLocator.text?.after
-							: undefined,
+					before: locator?.text?.before ?? undefined,
+					after: locator?.text?.after ?? undefined,
 				}
 			: undefined,
 	}
@@ -139,7 +106,7 @@ const TEXT_CONTEXT_LENGTH = 32
 export function extractSelectionContext(
 	container: HTMLDivElement,
 	targetFrameSrc?: string,
-): { before?: string; after?: string } | null {
+): SelectionContext | null {
 	try {
 		const iframes = container.querySelectorAll('iframe')
 		for (const iframe of iframes) {

@@ -23,7 +23,7 @@ import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
-import { isEbookExtension, isEbookReadProgress } from '@/utils/ebookProgress'
+import { isEbookExtension, isEbookReadProgress } from '@/utils/readingProgress'
 
 import DeleteHistoryConfirmation from './DeleteHistoryConfirmation'
 import EmailBookDialog from './EmailBookDialog'

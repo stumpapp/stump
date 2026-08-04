@@ -1,6 +1,5 @@
 pub mod analysis;
 mod builder;
-mod epub_cfi;
 mod epub_search;
 mod format;
 mod metadata;
@@ -10,9 +9,6 @@ mod utils;
 
 pub use crate::filesystem::media::epub::EpubProcessor;
 pub(crate) use builder::{BuiltMedia, MediaBuilder};
-pub use epub_cfi::{
-	resolve_epub_cfi, EpubCfiResolveError, ResolvedEpubCfiLocator, EPUB_CFI_MAX_LEN,
-};
 pub use epub_search::{
 	search_epub, EpubSearchCursor, EpubSearchError, EpubSearchOptions,
 	EpubSearchResponse, EPUB_SEARCH_DEFAULT_LIMIT, EPUB_SEARCH_MAX_LIMIT,

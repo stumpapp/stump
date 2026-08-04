@@ -1,10 +1,12 @@
 import { Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 import { useEpubReaderContext } from './context'
 import { ControlsContainer } from './controls'
 
 /** Footer progress for the Readium EPUB reader. */
 export default function EpubReaderFooter() {
+	const { t } = useLocaleContext()
 	const { bookMeta, progress } = useEpubReaderContext().readerMeta
 
 	if (!bookMeta) return null
@@ -23,7 +25,7 @@ export default function EpubReaderFooter() {
 				<div className="gap-y-1 z-50 flex flex-1 flex-col">
 					<div className="gap-2 flex items-center justify-between">
 						<Text size="xs" variant="muted" className="line-clamp-1">
-							{chapter.name || 'Reading'}
+							{chapter.name || t('epubReader.reading')}
 						</Text>
 						<Text size="xs" variant="muted">
 							{positionLabel}

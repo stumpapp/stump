@@ -1,4 +1,5 @@
 import { Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
@@ -10,9 +11,10 @@ type Props = {
 }
 
 export default function Bookmarks({ onLocationChanged }: Props) {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookMeta },
-		controls: { onGoToLocator, onGoToLegacyCfi },
+		controls: { onGoToLocator },
 	} = useEpubReaderContext()
 
 	const bookmarks = useMemo(() => Object.values(bookMeta?.bookmarks || {}), [bookMeta])
@@ -29,16 +31,13 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 					text: bookmark.locator.text,
 				})
 				onLocationChanged?.()
-			} else if (bookmark.epubcfi && onGoToLegacyCfi) {
-				await onGoToLegacyCfi(bookmark.epubcfi)
-				onLocationChanged?.()
 			}
 		},
-		[onGoToLocator, onGoToLegacyCfi, onLocationChanged],
+		[onGoToLocator, onLocationChanged],
 	)
 
 	if (!bookmarks.length) {
-		return <GenericEmptyState title="No bookmarks" />
+		return <GenericEmptyState title={t('epubReader.noBookmarks')} />
 	}
 
 	return (
@@ -46,12 +45,9 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 			{bookmarks.map((bookmark) => {
 				const key = bookmark.id
 				const hasLocator = !!bookmark.locator?.href
-				const hasLegacyCfi = !!bookmark.epubcfi
-				const isNavigable = hasLocator || (hasLegacyCfi && !!onGoToLegacyCfi)
+				const isNavigable = hasLocator
 				const subtitle =
-					bookmark.locator?.chapterTitle ||
-					bookmark.locator?.href ||
-					(hasLegacyCfi ? 'Legacy bookmark' : 'Bookmark')
+					bookmark.locator?.chapterTitle || bookmark.locator?.href || t('epubReader.bookmark')
 
 				return (
 					<button
@@ -59,23 +55,11 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 						className="gap-1.5 p-2 px-1 py-1.5 flex flex-col justify-start text-left hover:bg-muted disabled:opacity-60"
 						onClick={() => void handleSelectLocator(bookmark)}
 						disabled={!isNavigable}
-						title={
-							hasLegacyCfi && !hasLocator
-								? 'Legacy CFI bookmark — will be resolved when opened'
-								: undefined
-						}
 					>
 						<Text variant="muted" size="xs" className="line-clamp-1">
 							{subtitle}
 						</Text>
 						{bookmark.previewContent && <Text size="sm">{bookmark.previewContent}</Text>}
-						{hasLegacyCfi && !hasLocator && (
-							<Text variant="muted" size="xs">
-								{onGoToLegacyCfi
-									? 'Tap to resolve legacy location'
-									: 'Location unavailable in this reader'}
-							</Text>
-						)}
 					</button>
 				)
 			})}

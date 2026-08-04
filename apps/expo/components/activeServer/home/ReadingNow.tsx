@@ -54,7 +54,6 @@ const fragment = graphql(`
 		}
 		pages
 		readProgress {
-			epubcfi
 			page
 			percentageCompleted
 			updatedAt
@@ -226,7 +225,6 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		} satisfies MediaFilterInput
 		const filterString = JSON.stringify(filter)
 		router.push({
-			// @ts-expect-error: String path
 			pathname: `/server/${serverID}/books?initialFilters=${filterString}`,
 		})
 	}

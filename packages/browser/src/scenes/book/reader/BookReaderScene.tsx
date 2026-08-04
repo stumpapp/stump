@@ -25,7 +25,6 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 			extension
 			readProgress {
 				percentageCompleted
-				epubcfi
 				page
 				elapsedSeconds
 			}

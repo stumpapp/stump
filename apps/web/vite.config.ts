@@ -14,9 +14,6 @@ import tsconfigPaths from 'vite-plugin-tsconfig-paths'
 import { name, version } from './package.json'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const reactRoot = path.resolve(__dirname, '../../node_modules/react')
-const reactDomRoot = path.resolve(__dirname, '../../node_modules/react-dom')
-
 // https://vitejs.dev/config/
 export default defineConfig({
 	build: {
@@ -27,18 +24,6 @@ export default defineConfig({
 	clearScreen: false,
 	define: {
 		pkgJson: { name, version },
-	},
-	// Nested react@19.2.7 copies under @radix-ui/* break hooks (null dispatcher / useState).
-	// Force a single React for app + prebundled deps (Presence, framer-motion, etc.).
-	resolve: {
-		alias: {
-			react: reactRoot,
-			'react-dom': reactDomRoot,
-		},
-		dedupe: ['react', 'react-dom'],
-	},
-	optimizeDeps: {
-		include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
 	},
 	plugins: [
 		tailwindcss(),

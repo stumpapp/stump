@@ -37,7 +37,7 @@ export function buildLocalToRemoteProgressInput(
 	if (epubData) {
 		return {
 			epub: {
-				locator: { readium: epubData },
+				locator: epubData,
 				elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
 				isComplete: local.percentage ? parseFloat(local.percentage) >= 1.0 : false,
 				percentage: local.percentage,

@@ -4,7 +4,7 @@ import { BookCardFragment } from '@stump/graphql'
 import { useMemo } from 'react'
 
 import { usePaths } from '@/paths'
-import { isEbookReadProgress } from '@/utils/ebookProgress'
+import { isEbookReadProgress } from '@/utils/readingProgress'
 
 type Props = {
 	book: BookCardFragment

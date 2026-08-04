@@ -1,5 +1,6 @@
 import { Button, Dialog, Text, TextArea } from '@stump/components'
-import { useCallback, useEffect, useState } from 'react'
+import { useLocaleContext } from '@stump/i18n'
+import { useEffect, useState } from 'react'
 
 type Props = {
 	open: boolean
@@ -26,6 +27,7 @@ export default function AnnotationDialog({
 	onSave,
 	onDelete,
 }: Props) {
+	const { t } = useLocaleContext()
 	const [note, setNote] = useState(initialNote ?? '')
 
 	useEffect(() => {
@@ -34,15 +36,13 @@ export default function AnnotationDialog({
 		}
 	}, [open, initialNote])
 
-	const handleSave = useCallback(() => {
-		onSave(note.trim())
-	}, [note, onSave])
-
 	return (
 		<Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
 			<Dialog.Content size="sm">
 				<Dialog.Header>
-					<Dialog.Title>{mode === 'create' ? 'Add note' : 'Edit annotation'}</Dialog.Title>
+					<Dialog.Title>
+						{t(mode === 'create' ? 'epubReader.annotation.addNote' : 'epubReader.annotation.edit')}
+					</Dialog.Title>
 					<Dialog.Close onClick={() => onOpenChange(false)} />
 				</Dialog.Header>
 
@@ -53,8 +53,8 @@ export default function AnnotationDialog({
 				)}
 
 				<TextArea
-					label="Note"
-					placeholder="Add an optional note…"
+					label={t('epubReader.annotation.note')}
+					placeholder={t('epubReader.annotation.optionalNote')}
 					value={note}
 					onChange={(event) => setNote(event.target.value)}
 					rows={4}
@@ -70,7 +70,7 @@ export default function AnnotationDialog({
 							onClick={onDelete}
 							className="sm:mr-auto"
 						>
-							Delete
+							{t('common.delete')}
 						</Button>
 					)}
 					<Button
@@ -79,10 +79,10 @@ export default function AnnotationDialog({
 						disabled={isPending}
 						onClick={() => onOpenChange(false)}
 					>
-						Cancel
+						{t('common.cancel')}
 					</Button>
-					<Button size="sm" disabled={isPending} onClick={handleSave}>
-						Save
+					<Button size="sm" disabled={isPending} onClick={() => onSave(note.trim())}>
+						{t('common.save')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

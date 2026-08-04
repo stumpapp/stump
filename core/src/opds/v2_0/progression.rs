@@ -31,97 +31,17 @@ impl OPDSProgression {
 		data: OPDSProgressionEntity,
 		link_finalizer: OPDSLinkFinalizer,
 	) -> CoreResult<Self> {
-		let book_id = data.book.id;
-
-		let device = match data.device {
+		let device = match data.device.as_ref() {
 			Some(device) => OPDSProgressionDevice {
-				id: device.id,
-				name: device.name,
+				id: device.id.clone(),
+				name: device.name.clone(),
 			},
 			_ => OPDSProgressionDevice::default(),
 		};
 
-		let extension = data.book.extension.to_lowercase();
-		let percentage_completed = data.session.end_percentage.and_then(|d| d.to_f64());
-
-		let (title, href, _type, locations) = if extension.as_str() == "epub" {
-			if let Some(locator) = data.session.end_locator.as_ref() {
-				let title = if locator.chapter_title.is_empty() {
-					locator.title.clone()
-				} else {
-					Some(locator.chapter_title.clone())
-				}
-				.unwrap_or_else(|| "Ebook Progress".to_string());
-				let locations =
-					locator.locations.as_ref().map(|l| OPDSProgressionLocation {
-						fragments: l.fragments.clone(),
-						position: l.position,
-						progression: l.progression.and_then(|p| p.to_f64()),
-						total_progression: l
-							.total_progression
-							.and_then(|p| p.to_f64())
-							.or(percentage_completed),
-					});
-				(
-					Some(title),
-					Some(locator.href.clone()),
-					Some(OPDSLinkType::Xhtml),
-					locations,
-				)
-			} else if let Some(cfi) = data.session.epubcfi.clone() {
-				// Legacy KoReader / epub.js CFI.
-				let title = "Ebook Progress".to_string();
-				let locations = percentage_completed.map(|_| OPDSProgressionLocation {
-					fragments: Some(vec![cfi]),
-					total_progression: percentage_completed,
-					..Default::default()
-				});
-				(Some(title), None, Some(OPDSLinkType::Xhtml), locations)
-			} else if let Some(total) = percentage_completed {
-				let locations = Some(OPDSProgressionLocation {
-					total_progression: Some(total),
-					..Default::default()
-				});
-				(
-					Some("Ebook Progress".to_string()),
-					None,
-					Some(OPDSLinkType::Xhtml),
-					locations,
-				)
-			} else {
-				(None, None, None, None)
-			}
-		} else {
-			match (data.session.epubcfi, data.session.end_page) {
-				(_, Some(current_page)) => {
-					let title = format!("Page {}", current_page);
-					let href = link_finalizer.format_link(format!(
-						"/opds/v2.0/books/{book_id}/pages/{current_page}",
-					));
-					let locations = OPDSProgressionLocation {
-						position: Some(current_page),
-						total_progression: percentage_completed.or_else(|| {
-							Some(current_page as f64 / data.book.pages as f64)
-						}),
-						..Default::default()
-					};
-					let _type = OPDSLinkType::ImageJpeg;
-					(Some(title), Some(href), Some(_type), Some(locations))
-				},
-				_ => (None, None, None, None),
-			}
-		};
-
 		OPDSProgressionBuilder::default()
 			.device(device)
-			.locator(
-				OPDSProgressionLocatorBuilder::default()
-					.title(title)
-					.href(href)
-					._type(_type)
-					.locations(locations)
-					.build()?,
-			)
+			.locator(OPDSProgressionLocator::new(&data, &link_finalizer)?)
 			.modified(
 				data.session
 					.updated_at
@@ -143,6 +63,84 @@ struct OPDSProgressionLocator {
 	_type: Option<OPDSLinkType>,
 	#[builder(default)]
 	locations: Option<OPDSProgressionLocation>,
+}
+
+impl OPDSProgressionLocator {
+	fn new(
+		data: &OPDSProgressionEntity,
+		link_finalizer: &OPDSLinkFinalizer,
+	) -> CoreResult<Self> {
+		let percentage_completed = data.session.end_percentage.and_then(|d| d.to_f64());
+
+		if data.book.extension.eq_ignore_ascii_case("epub") {
+			return Self::epub(data.session.end_locator.as_ref(), percentage_completed);
+		}
+
+		Self::paged(data, link_finalizer, percentage_completed)
+	}
+
+	fn epub(
+		locator: Option<&ReadiumLocator>,
+		percentage_completed: Option<f64>,
+	) -> CoreResult<Self> {
+		let Some(locator) = locator else {
+			return OPDSProgressionLocatorBuilder::default().build();
+		};
+
+		let title = if locator.chapter_title.is_empty() {
+			locator.title.clone()
+		} else {
+			Some(locator.chapter_title.clone())
+		}
+		.unwrap_or_else(|| "Ebook Progress".to_string());
+		let locations =
+			locator
+				.locations
+				.as_ref()
+				.map(|locations| OPDSProgressionLocation {
+					fragments: locations.fragments.clone(),
+					position: locations.position,
+					progression: locations.progression.and_then(|p| p.to_f64()),
+					total_progression: locations
+						.total_progression
+						.and_then(|p| p.to_f64())
+						.or(percentage_completed),
+				});
+
+		OPDSProgressionLocatorBuilder::default()
+			.title(Some(title))
+			.href(Some(locator.href.clone()))
+			._type(Some(OPDSLinkType::Xhtml))
+			.locations(locations)
+			.build()
+	}
+
+	fn paged(
+		data: &OPDSProgressionEntity,
+		link_finalizer: &OPDSLinkFinalizer,
+		percentage_completed: Option<f64>,
+	) -> CoreResult<Self> {
+		let Some(current_page) = data.session.end_page else {
+			return OPDSProgressionLocatorBuilder::default().build();
+		};
+		let href = link_finalizer.format_link(format!(
+			"/opds/v2.0/books/{}/pages/{current_page}",
+			data.book.id
+		));
+		let locations = OPDSProgressionLocation {
+			position: Some(current_page),
+			total_progression: percentage_completed
+				.or_else(|| Some(current_page as f64 / data.book.pages as f64)),
+			..Default::default()
+		};
+
+		OPDSProgressionLocatorBuilder::default()
+			.title(Some(format!("Page {current_page}")))
+			.href(Some(href))
+			._type(Some(OPDSLinkType::ImageJpeg))
+			.locations(Some(locations))
+			.build()
+	}
 }
 
 #[skip_serializing_none]

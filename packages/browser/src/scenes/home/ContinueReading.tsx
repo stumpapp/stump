@@ -14,7 +14,7 @@ import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceh
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
 import { usePaths } from '@/paths'
-import { isEbookReadProgress, readProgressPercent } from '@/utils/ebookProgress'
+import { isEbookReadProgress, readProgressPercent } from '@/utils/readingProgress'
 
 const IMAGE_WIDTH_MOBILE = 200
 const IMAGE_WIDTH_TABLET = 220
@@ -38,7 +38,6 @@ const ContinueReadingBookFragment = graphql(`
 		}
 		readProgress {
 			percentageCompleted
-			epubcfi
 			page
 			updatedAt
 			locator {

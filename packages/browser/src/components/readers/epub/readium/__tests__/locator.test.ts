@@ -2,6 +2,7 @@ import { Locator, LocatorLocations } from '@readium/shared'
 
 import {
 	hrefsMatch,
+	locatorsRoughlyMatch,
 	nearestPositionByTotalProgression,
 	packagePathFromHref,
 	resolveInitialLocator,
@@ -112,5 +113,31 @@ describe('nearestPositionByTotalProgression', () => {
 			}),
 		]
 		expect(nearestPositionByTotalProgression(positions, 0.65).href).toBe('b')
+	})
+})
+
+describe('locatorsRoughlyMatch', () => {
+	it('matches equal positions in the same resource', () => {
+		expect(
+			locatorsRoughlyMatch(
+				{ href: 'OEBPS/chapter.xhtml', locations: { position: 4 } },
+				{ href: 'OEBPS/chapter.xhtml', locations: { position: 4 } },
+			),
+		).toBe(true)
+	})
+
+	it('matches nearby progression values in the same resource', () => {
+		expect(
+			locatorsRoughlyMatch(
+				{ href: 'OEBPS/chapter.xhtml', locations: { progression: 0.5 } },
+				{ href: 'OEBPS/chapter.xhtml', locations: { progression: 0.51 } },
+			),
+		).toBe(true)
+	})
+
+	it('does not match resource-only locators', () => {
+		expect(
+			locatorsRoughlyMatch({ href: 'OEBPS/chapter.xhtml' }, { href: 'OEBPS/chapter.xhtml' }),
+		).toBe(false)
 	})
 })

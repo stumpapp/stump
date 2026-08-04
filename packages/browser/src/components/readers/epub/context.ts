@@ -74,8 +74,6 @@ export type EpubReaderControls = {
 	canGoBackward?: boolean
 	onGoToLocator: (locator: ReaderLocator) => void
 	getLocatorPreviewText: (locator: ReaderLocator) => Promise<string | null>
-	/** Resolve a stored full epubcfi via the server and navigate (legacy bookmarks/progress). */
-	onGoToLegacyCfi?: (cfi: string) => void | Promise<void>
 	searchBook?: (
 		query: string,
 		opts?: { cursor?: string; signal?: AbortSignal },

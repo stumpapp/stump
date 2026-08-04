@@ -9,9 +9,7 @@ use chrono::Utc;
 use graphql::data::AuthContext;
 use models::{
 	entity::{media, reading_device, reading_session},
-	services::reading_progress::{
-		upsert_reading_session, NormalizedProgression, ProgressLocationSource,
-	},
+	services::reading_progress::{upsert_reading_session, NormalizedProgression},
 	shared::enums::{ReadingStatus, UserPermission},
 };
 use sea_orm::{
@@ -199,25 +197,10 @@ async fn get_progress(
 	Ok(Json(progress))
 }
 
-enum NativeProgress {
-	Page(i32),
-	EpubCfi(String),
-}
-
-/// Attempts to parse the progress string into a native progress type. If the progress string
-/// cannot be parsed, it is assumed to be an x-pointer. Stump does not support x-pointers, so
-/// this function will return `None` in that case.
-fn parse_progress(progress: &str) -> Option<NativeProgress> {
-	// This is a super naive check, but it should be good enough for now. Eventually
-	// I would really like to try and parse the x-pointer and translate it to a valid
-	// epubcfi if possible. The closest I've seen online to an epubcfi parser in rust is
-	// https://github.com/tnahs/readstor/blob/main/src/lib/models/epubcfi.rs. There are others
-	// in JS that can be ported, as well
-	if progress.starts_with("epubcfi(") && progress.ends_with(')') {
-		Some(NativeProgress::EpubCfi(progress.to_string()))
-	} else {
-		progress.parse::<i32>().ok().map(NativeProgress::Page)
-	}
+/// KoReader's non-numeric progress formats (such as x-pointers) are retained
+/// verbatim on the session but cannot be mapped to Stump's page coordinate.
+fn parse_progress(progress: &str) -> Option<i32> {
+	progress.parse().ok() // Try to parse as a page number
 }
 
 #[derive(Deserialize)]
@@ -292,15 +275,8 @@ async fn put_progress(
 	};
 
 	match parse_progress(&progress) {
-		Some(NativeProgress::Page(page)) => {
-			progression.page = Some(page);
-			progression.location_source = ProgressLocationSource::Page;
-		},
-		Some(NativeProgress::EpubCfi(cfi)) => {
-			progression.epubcfi = Some(cfi);
-			progression.location_source = ProgressLocationSource::EpubCfi;
-		},
-		_ => {
+		Some(page) => progression.page = Some(page),
+		None => {
 			tracing::debug!(
 				progress,
 				"Failed to parse progress string, assuming x-pointer"

@@ -8,7 +8,8 @@ import {
 } from '@readium/navigator'
 import type { BasicTextSelection } from '@readium/navigator-html-injectables'
 import { Link, Locator, Publication } from '@readium/shared'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocaleContext } from '@stump/i18n'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { clearFramesSelection } from '../annotations/clearSelection'
 import {
@@ -36,6 +37,11 @@ type UseReadiumNavigatorArgs = {
 	onDecorationActivated?: DecorationObserver['onDecorationActivated']
 }
 
+export type UseReadiumNavigatorResult = {
+	loadState: LoadState
+	api: ReadiumNavigatorApi
+}
+
 export type ReadiumNavigatorApi = {
 	goForward: () => void
 	goBackward: () => void
@@ -57,6 +63,8 @@ export type ReadiumNavigatorApi = {
 
 const MIN_VIEWPORT_PX = 1
 const ANNOTATIONS_GROUP = 'annotations'
+// A safety cap prevents a hidden/unmounted reader from waiting forever for ResizeObserver.
+const VIEWPORT_READY_TIMEOUT_MS = 5_000
 
 /**
  * Mount and lifecycle-manage an EpubNavigator inside a container element.
@@ -77,10 +85,8 @@ export function useReadiumNavigator({
 	onTextSelected,
 	onTextCleared,
 	onDecorationActivated,
-}: UseReadiumNavigatorArgs): {
-	loadState: LoadState
-	api: ReadiumNavigatorApi | null
-} {
+}: UseReadiumNavigatorArgs): UseReadiumNavigatorResult {
+	const { t } = useLocaleContext()
 	const [loadState, setLoadState] = useState<LoadState>({ status: 'idle' })
 	const [navButtons, setNavButtons] = useState({ canGoBackward: false, canGoForward: false })
 	const [currentLocator, setCurrentLocator] = useState<Locator | null>(null)
@@ -261,7 +267,7 @@ export function useReadiumNavigator({
 				if (!cancelled) {
 					setLoadState({
 						status: 'error',
-						message: error instanceof Error ? error.message : 'Failed to open EPUB with Readium.',
+						message: error instanceof Error ? error.message : t('epubReader.errors.openFailed'),
 					})
 				}
 			}
@@ -296,7 +302,7 @@ export function useReadiumNavigator({
 			}
 		}
 		// Intentionally omit preferences — applied via submitPreferences on change.
-	}, [publication, positions, initialLocator, allowedDomains, containerRef, syncNavButtons])
+	}, [publication, positions, initialLocator, allowedDomains, containerRef, syncNavButtons, t])
 
 	useEffect(() => {
 		const nav = navigatorRef.current
@@ -306,31 +312,31 @@ export function useReadiumNavigator({
 		})
 	}, [preferences, loadState.status])
 
-	const api: ReadiumNavigatorApi | null =
-		loadState.status === 'ready' && navigatorRef.current
-			? {
-					goForward: () => {
-						navigatorRef.current?.goForward(false, () => syncNavButtons(navigatorRef.current))
-					},
-					goBackward: () => {
-						navigatorRef.current?.goBackward(false, () => syncNavButtons(navigatorRef.current))
-					},
-					go: (locator: Locator) => {
-						navigatorRef.current?.go(locator, false, () => syncNavButtons(navigatorRef.current))
-					},
-					goLink: (link: Link) => {
-						navigatorRef.current?.goLink(link, false, () => syncNavButtons(navigatorRef.current))
-					},
-					canGoForward: navButtons.canGoForward,
-					canGoBackward: navButtons.canGoBackward,
-					currentLocator,
-					submitPreferences: async (prefs: IEpubPreferences) => {
-						await navigatorRef.current?.submitPreferences(new EpubPreferences(prefs))
-					},
-					applyDecorations,
-					clearSelection,
-				}
-			: null
+	const api = useMemo<ReadiumNavigatorApi>(
+		() => ({
+			goForward: () => {
+				navigatorRef.current?.goForward(false, () => syncNavButtons(navigatorRef.current))
+			},
+			goBackward: () => {
+				navigatorRef.current?.goBackward(false, () => syncNavButtons(navigatorRef.current))
+			},
+			go: (locator: Locator) => {
+				navigatorRef.current?.go(locator, false, () => syncNavButtons(navigatorRef.current))
+			},
+			goLink: (link: Link) => {
+				navigatorRef.current?.goLink(link, false, () => syncNavButtons(navigatorRef.current))
+			},
+			canGoForward: navButtons.canGoForward,
+			canGoBackward: navButtons.canGoBackward,
+			currentLocator,
+			submitPreferences: async (prefs: IEpubPreferences) => {
+				await navigatorRef.current?.submitPreferences(new EpubPreferences(prefs))
+			},
+			applyDecorations,
+			clearSelection,
+		}),
+		[applyDecorations, clearSelection, currentLocator, navButtons, syncNavButtons],
+	)
 
 	return { loadState, api }
 }
@@ -367,7 +373,7 @@ function waitForNonZeroBox(el: HTMLElement | null, isCancelled: () => boolean): 
 			} else {
 				reject(new Error('EPUB viewport never received a non-zero size'))
 			}
-		}, 5000)
+		}, VIEWPORT_READY_TIMEOUT_MS)
 	})
 }
 

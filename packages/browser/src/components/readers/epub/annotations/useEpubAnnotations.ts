@@ -1,6 +1,13 @@
 import { useGraphQLMutation } from '@stump/client'
-import { CreateAnnotationInput, graphql, ReadiumLocatorInput } from '@stump/graphql'
-import { useCallback, useEffect, useState } from 'react'
+import {
+	CreateAnnotationInput,
+	graphql,
+	ReadiumLocatorInput,
+	type ReadiumWebReaderQuery,
+} from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
+import { useCallback, useMemo, useSyncExternalStore } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import type { ReaderLocator } from '../context'
@@ -73,11 +80,34 @@ export function useEpubAnnotations({
 	isIncognito,
 	initialAnnotations,
 }: UseEpubAnnotationsArgs) {
-	const [annotations, setAnnotations] = useState<EpubAnnotation[]>(initialAnnotations)
-
-	useEffect(() => {
-		setAnnotations(initialAnnotations)
-	}, [initialAnnotations])
+	const { t } = useLocaleContext()
+	const queryClient = useQueryClient()
+	const queryKey = ['readiumWebReader', mediaId] as const
+	const cachedAnnotations = useSyncExternalStore(
+		(onStoreChange) => queryClient.getQueryCache().subscribe(onStoreChange),
+		() => queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)?.epubById?.annotations ?? null,
+		() => null,
+	)
+	const annotations = useMemo(
+		() => cachedAnnotations?.map(graphqlAnnotationToEpubAnnotation) ?? initialAnnotations,
+		[cachedAnnotations, initialAnnotations],
+	)
+	const updateCachedAnnotations = useCallback(
+		(transform: (annotations: EpubAnnotation[]) => EpubAnnotation[]) => {
+			queryClient.setQueryData<ReadiumWebReaderQuery>(queryKey, (data) => {
+				if (!data?.epubById) return data
+				const annotations = data.epubById.annotations.map(graphqlAnnotationToEpubAnnotation)
+				return {
+					...data,
+					epubById: {
+						...data.epubById,
+						annotations: transform(annotations) as typeof data.epubById.annotations,
+					},
+				}
+			})
+		},
+		[queryClient, queryKey],
+	)
 
 	const { mutateAsync: createMutation, isPending: isCreating } = useGraphQLMutation(_createMutation)
 	const { mutateAsync: updateMutation, isPending: isUpdating } = useGraphQLMutation(_updateMutation)
@@ -86,7 +116,7 @@ export function useEpubAnnotations({
 	const createAnnotation = useCallback(
 		async (locator: ReaderLocator, annotationText?: string) => {
 			if (isIncognito) {
-				toast.info('Annotations are disabled in incognito mode')
+				toast.info(t('epubReader.annotation.disabledInIncognito'))
 				return undefined
 			}
 
@@ -106,12 +136,13 @@ export function useEpubAnnotations({
 				updatedAt: new Date().toISOString(),
 				locator,
 			}
-			setAnnotations((prev) => [...prev, optimistic])
+			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
+			updateCachedAnnotations((annotations) => [...annotations, optimistic])
 
 			try {
 				const { createAnnotation: created } = await createMutation({ input })
-				setAnnotations((prev) =>
-					prev.map((annotation) =>
+				updateCachedAnnotations((annotations) =>
+					annotations.map((annotation) =>
 						annotation.id === optimisticId
 							? graphqlAnnotationToEpubAnnotation(created)
 							: annotation,
@@ -119,73 +150,57 @@ export function useEpubAnnotations({
 				)
 				return created.id
 			} catch (error) {
-				setAnnotations((prev) => prev.filter((annotation) => annotation.id !== optimisticId))
+				queryClient.setQueryData(queryKey, previous)
 				console.error('[useEpubAnnotations] createAnnotation failed', error)
-				toast.error('Failed to save annotation')
+				toast.error(t('epubReader.annotation.saveFailed'))
 				return undefined
 			}
 		},
-		[mediaId, isIncognito, createMutation],
+		[mediaId, isIncognito, createMutation, queryClient, queryKey, t, updateCachedAnnotations],
 	)
 
 	const updateAnnotation = useCallback(
 		async (id: string, annotationText: string | null) => {
 			if (isIncognito) return
 
-			let previous: EpubAnnotation | undefined
-			setAnnotations((prev) => {
-				previous = prev.find((annotation) => annotation.id === id)
-				return prev.map((annotation) =>
+			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
+			updateCachedAnnotations((annotations) =>
+				annotations.map((annotation) =>
 					annotation.id === id
 						? { ...annotation, annotationText, updatedAt: new Date().toISOString() }
 						: annotation,
-				)
-			})
+				),
+			)
 
 			try {
 				await updateMutation({ input: { id, annotationText } })
 			} catch (error) {
-				if (previous) {
-					const rolledBack = previous
-					setAnnotations((prev) =>
-						prev.map((annotation) => (annotation.id === id ? rolledBack : annotation)),
-					)
-				}
+				queryClient.setQueryData(queryKey, previous)
 				console.error('[useEpubAnnotations] updateAnnotation failed', error)
-				toast.error('Failed to update annotation')
+				toast.error(t('epubReader.annotation.updateFailed'))
 			}
 		},
-		[isIncognito, updateMutation],
+		[isIncognito, queryClient, queryKey, t, updateCachedAnnotations, updateMutation],
 	)
 
 	const deleteAnnotation = useCallback(
 		async (id: string) => {
 			if (isIncognito) return
 
-			let removed: EpubAnnotation | undefined
-			let removedIndex = -1
-			setAnnotations((prev) => {
-				removedIndex = prev.findIndex((annotation) => annotation.id === id)
-				removed = prev[removedIndex]
-				return prev.filter((annotation) => annotation.id !== id)
-			})
+			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
+			updateCachedAnnotations((annotations) =>
+				annotations.filter((annotation) => annotation.id !== id),
+			)
 
 			try {
 				await deleteMutation({ id })
 			} catch (error) {
-				if (removed) {
-					const restored = removed
-					setAnnotations((prev) => {
-						const next = [...prev]
-						next.splice(Math.min(removedIndex, next.length), 0, restored)
-						return next
-					})
-				}
+				queryClient.setQueryData(queryKey, previous)
 				console.error('[useEpubAnnotations] deleteAnnotation failed', error)
-				toast.error('Failed to delete annotation')
+				toast.error(t('epubReader.annotation.deleteFailed'))
 			}
 		},
-		[isIncognito, deleteMutation],
+		[isIncognito, deleteMutation, queryClient, queryKey, t, updateCachedAnnotations],
 	)
 
 	return {

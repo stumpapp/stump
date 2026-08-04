@@ -8,6 +8,25 @@ import { EpubReaderControls, useEpubReaderContext } from '../../context'
 import { searchResultToReaderLocator } from '../../readium/locator'
 import SearchCommand from '../SearchCommand'
 
+jest.mock('@stump/i18n', () => ({
+	...jest.requireActual('@stump/i18n'),
+	useLocaleContext: () => ({
+		t: (key: string, options?: { position?: number }) => {
+			if (key === 'epubReader.search.placeholder') {
+				return 'Enter a query and press enter to search'
+			}
+			if (key === 'epubReader.search.loadMore') {
+				return 'Load more results'
+			}
+			if (key === 'epubReader.search.section') {
+				return `Section ${options?.position}`
+			}
+
+			return key
+		},
+	}),
+}))
+
 jest.mock('../../context', () => ({
 	...jest.requireActual('../../context'),
 	useEpubReaderContext: jest.fn(),

@@ -2,7 +2,6 @@ import { EBOOK_EXTENSION } from '@stump/client'
 
 export type ReadProgressLike =
 	| {
-			epubcfi?: string | null
 			page?: number | null
 			percentageCompleted?: number | string | null
 			locator?: { href?: string | null } | null
@@ -22,7 +21,6 @@ export function isEbookReadProgress(
 	extension?: string | null,
 ): boolean {
 	if (!readProgress) return false
-	if (readProgress.epubcfi) return true
 	if (readProgress.locator?.href) return true
 	if (extension && isEbookExtension(extension)) return true
 	return false
@@ -39,14 +37,10 @@ export function readProgressPercent(
 ): number | null {
 	if (!readProgress) return null
 
-	const { epubcfi, percentageCompleted, page } = readProgress
+	const { percentageCompleted, page } = readProgress
 	const isEbook = isEbookReadProgress(readProgress, extension)
 
 	if (isEbook && percentageCompleted != null) {
-		return Math.round(Number(percentageCompleted) * 100)
-	}
-
-	if (epubcfi && percentageCompleted != null) {
 		return Math.round(Number(percentageCompleted) * 100)
 	}
 

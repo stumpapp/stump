@@ -243,9 +243,9 @@ async fn test_epub_nested_resource_path() {
 	assert!(!response.as_bytes().is_empty());
 }
 
-/// public_url on server config should win over HostExtractor for absolute hrefs
+/// Manifest hrefs must use the request host, even when public_url is configured.
 #[tokio::test]
-async fn test_epub_manifest_uses_public_url() {
+async fn test_epub_manifest_uses_request_host() {
 	let (app, book_id) = setup_epub_book().await;
 	let db = app.conn();
 
@@ -280,7 +280,7 @@ async fn test_epub_manifest_uses_public_url() {
 		.expect("href");
 
 	assert!(
-		href.starts_with("https://books.example/api/v2/epub/"),
-		"href should use public_url, got {href}"
+		href.starts_with("http://localhost:") && href.contains("/api/v2/epub/"),
+		"href should use the request host, got {href}"
 	);
 }

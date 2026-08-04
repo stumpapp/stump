@@ -10,7 +10,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
-import { isEbookExtension, isEbookReadProgress, readProgressPercent } from '@/utils/ebookProgress'
+import { isEbookExtension, isEbookReadProgress, readProgressPercent } from '@/utils/readingProgress'
 
 import { ThumbnailImage } from '../thumbnail/ThumbnailImage'
 import { usePrefetchBook } from './useBookOverview'
@@ -38,7 +38,6 @@ export const BookCardFragment = graphql(`
 		}
 		readProgress {
 			percentageCompleted
-			epubcfi
 			page
 			updatedAt
 			locator {

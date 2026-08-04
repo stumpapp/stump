@@ -15,7 +15,6 @@ type Props = {
 		| 'onPaginateForward'
 		| 'jumpToSection'
 		| 'onGoToLocator'
-		| 'onGoToLegacyCfi'
 		| 'getLocatorPreviewText'
 		| 'searchBook'
 		| 'canGoForward'

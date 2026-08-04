@@ -1,4 +1,5 @@
-import { cx } from '@stump/components'
+import { cn } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Highlighter, NotebookPen } from 'lucide-react'
 
 type Rect = { x: number; y: number; width: number; height: number }
@@ -18,11 +19,12 @@ const TOOLBAR_OFFSET_PX = 8
  * the iframe-relative `BasicTextSelection`).
  */
 export default function SelectionToolbar({ rect, onHighlight, onAddNote, className }: Props) {
+	const { t } = useLocaleContext()
 	return (
 		<div
 			role="toolbar"
-			aria-label="Selection actions"
-			className={cx(
+			aria-label={t('epubReader.annotation.selectionActions')}
+			className={cn(
 				'gap-1 p-1 shadow-lg fixed z-50 flex items-center rounded-md border border-border bg-background',
 				className,
 			)}
@@ -38,7 +40,7 @@ export default function SelectionToolbar({ rect, onHighlight, onAddNote, classNa
 				onClick={onHighlight}
 			>
 				<Highlighter className="h-4 w-4" />
-				Highlight
+				{t('epubReader.annotation.highlight')}
 			</button>
 
 			<button
@@ -47,7 +49,7 @@ export default function SelectionToolbar({ rect, onHighlight, onAddNote, classNa
 				onClick={onAddNote}
 			>
 				<NotebookPen className="h-4 w-4" />
-				Add note
+				{t('epubReader.annotation.addNote')}
 			</button>
 		</div>
 	)

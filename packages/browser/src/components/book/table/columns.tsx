@@ -6,7 +6,7 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat } from 'date-fns'
 
 import paths from '@/paths'
-import { isEbookExtension } from '@/utils/ebookProgress'
+import { isEbookExtension } from '@/utils/readingProgress'
 
 import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'

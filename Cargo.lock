@@ -9151,6 +9151,7 @@ dependencies = [
  "async-channel",
  "async-graphql",
  "async-trait",
+ "axum",
  "base64 0.22.1",
  "chrono",
  "criterion",

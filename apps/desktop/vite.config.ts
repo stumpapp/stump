@@ -24,17 +24,6 @@ export default defineConfig({
 	define: {
 		pkgJson: { name, version },
 	},
-	// Same as apps/web: avoid nested react copies under radix breaking hooks.
-	resolve: {
-		alias: {
-			react: resolve(__dirname, '../../node_modules/react'),
-			'react-dom': resolve(__dirname, '../../node_modules/react-dom'),
-		},
-		dedupe: ['react', 'react-dom'],
-	},
-	optimizeDeps: {
-		include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
-	},
 	plugins: [
 		tailwindcss(),
 		react({

@@ -1,4 +1,5 @@
 import { cn, Command } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import type { EpubSearchResult } from '@stump/sdk'
 import { Loader2, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -18,7 +19,10 @@ type ResultGroup = {
  * Groups server search results by chapter title (falling back to the locator title, then
  * spine position), preserving the order in which each group first appears.
  */
-export function groupByChapter(results: EpubSearchResult[]): ResultGroup[] {
+export function groupByChapter(
+	results: EpubSearchResult[],
+	sectionLabel = (position: number) => `Section ${position}`,
+): ResultGroup[] {
 	const order: string[] = []
 	const groups = new Map<string, EpubSearchResult[]>()
 
@@ -26,7 +30,7 @@ export function groupByChapter(results: EpubSearchResult[]): ResultGroup[] {
 		const heading =
 			result.locator.chapterTitle?.trim() ||
 			result.locator.title?.trim() ||
-			`Section ${result.spineIndex + 1}`
+			sectionLabel(result.spineIndex + 1)
 
 		const existing = groups.get(heading)
 		if (existing) {
@@ -41,6 +45,7 @@ export function groupByChapter(results: EpubSearchResult[]): ResultGroup[] {
 }
 
 export default function SearchCommand() {
+	const { t } = useLocaleContext()
 	const {
 		controls: { searchBook, onGoToLocator },
 	} = useEpubReaderContext()
@@ -103,7 +108,7 @@ export default function SearchCommand() {
 			} catch (err) {
 				if (controller.signal.aborted || requestId !== requestIdRef.current) return
 				console.error('[SearchCommand] search failed', err)
-				setError('Search failed. Please try again.')
+				setError(t('epubReader.search.failed'))
 			} finally {
 				if (requestId === requestIdRef.current) {
 					setIsSearching(false)
@@ -111,7 +116,7 @@ export default function SearchCommand() {
 				}
 			}
 		},
-		[searchBook, abortInFlightRequest],
+		[searchBook, abortInFlightRequest, t],
 	)
 
 	const doSearch = useCallback(() => {
@@ -178,7 +183,10 @@ export default function SearchCommand() {
 		return () => document.removeEventListener('keydown', onKeyDown)
 	}, [open, doSearch])
 
-	const serverGroups = useMemo(() => groupByChapter(serverResults), [serverResults])
+	const serverGroups = useMemo(
+		() => groupByChapter(serverResults, (position) => t('epubReader.search.section', { position })),
+		[serverResults, t],
+	)
 
 	const renderContent = () => {
 		if (isSearching) {
@@ -190,7 +198,8 @@ export default function SearchCommand() {
 		}
 		if (!hasSearched) return null
 		if (error) return <Command.Empty>{error}</Command.Empty>
-		if (!serverResults.length) return <Command.Empty>No results found.</Command.Empty>
+		if (!serverResults.length)
+			return <Command.Empty>{t('epubReader.search.noResults')}</Command.Empty>
 
 		return (
 			<>
@@ -224,10 +233,10 @@ export default function SearchCommand() {
 						{isLoadingMore ? (
 							<span className="gap-x-2 flex items-center">
 								<Loader2 className="h-3 w-3 animate-spin" />
-								Loading more…
+								{t('epubReader.search.loadingMore')}
 							</span>
 						) : (
-							'Load more results'
+							t('epubReader.search.loadMore')
 						)}
 					</Command.Item>
 				)}
@@ -248,7 +257,7 @@ export default function SearchCommand() {
 				<div className="px-4 flex items-center border-b border-b-border">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					<input
-						placeholder="Enter a query and press enter to search"
+						placeholder={t('epubReader.search.placeholder')}
 						className={cn(
 							'h-11 py-3 text-sm flex w-full rounded-md bg-transparent text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
 						)}

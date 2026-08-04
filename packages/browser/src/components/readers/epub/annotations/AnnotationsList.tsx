@@ -1,4 +1,5 @@
 import { Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export default function AnnotationsList({ onLocationChanged }: Props) {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookMeta },
 		controls: { onGoToLocator },
@@ -27,7 +29,7 @@ export default function AnnotationsList({ onLocationChanged }: Props) {
 	)
 
 	if (!annotations.length) {
-		return <GenericEmptyState title="No annotations" />
+		return <GenericEmptyState title={t('epubReader.noAnnotations')} />
 	}
 
 	return (

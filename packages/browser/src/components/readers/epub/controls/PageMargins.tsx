@@ -1,4 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
@@ -7,6 +8,7 @@ import { useEpubReaderContext } from '../context'
 const OPTIONS = [0.5, 1, 1.5, 2]
 
 export default function PageMargins() {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()
@@ -26,7 +28,7 @@ export default function PageMargins() {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="page-margins">Page margins</Label>
+			<Label htmlFor="page-margins">{t('epubReader.controls.pageMargins')}</Label>
 			<NativeSelect
 				id="page-margins"
 				size="sm"

@@ -5,6 +5,7 @@
 //! locators that the web reader can navigate directly.
 
 use std::{
+	collections::HashMap,
 	fs::File,
 	io::{BufReader, Read},
 };
@@ -92,7 +93,7 @@ impl EpubSearchOptions {
 	pub fn validate(&self) -> Result<(), EpubSearchError> {
 		let trimmed = self.query.trim();
 		let len = trimmed.chars().count();
-		if len < EPUB_SEARCH_MIN_QUERY_LEN || len > EPUB_SEARCH_MAX_QUERY_LEN {
+		if !(EPUB_SEARCH_MIN_QUERY_LEN..=EPUB_SEARCH_MAX_QUERY_LEN).contains(&len) {
 			return Err(EpubSearchError::InvalidQueryLength {
 				min: EPUB_SEARCH_MIN_QUERY_LEN,
 				max: EPUB_SEARCH_MAX_QUERY_LEN,
@@ -208,11 +209,25 @@ pub fn search_epub(
 
 	let mut epub =
 		EpubDoc::new(epub_path).map_err(|e| FileError::EpubOpenError(e.to_string()))?;
+	// `enumerate_spine_for_positions_at` intentionally skips unreadable entries. Search
+	// cursors, however, use OPF spine indices, so retain the unfiltered length and map
+	// parseable metadata back to that coordinate system.
+	let raw_spine_len = epub.get_num_chapters();
 	let spine_meta = enumerate_spine_for_positions_at(&mut epub)?;
 
 	let zip_file = File::open(epub_path).map_err(FileError::from)?;
 	let mut archive =
 		ZipArchive::new(BufReader::new(zip_file)).map_err(FileError::from)?;
+	let zip_indices = build_zip_entry_indices(&mut archive)?;
+	let spine_meta_by_index: HashMap<usize, _> = spine_meta
+		.iter()
+		.map(|meta| (meta.spine_index, meta))
+		.collect();
+	let total_spine_size = spine_meta
+		.iter()
+		.map(|meta| meta.size)
+		.sum::<usize>()
+		.max(1);
 
 	let start_spine = options
 		.cursor
@@ -225,7 +240,7 @@ pub fn search_epub(
 		.map(|c| c.text_offset as usize)
 		.unwrap_or(0);
 
-	if start_spine > spine_meta.len() {
+	if options.cursor.is_some() && start_spine >= raw_spine_len {
 		return Err(EpubSearchError::InvalidCursor);
 	}
 
@@ -233,10 +248,9 @@ pub fn search_epub(
 	let mut results = Vec::new();
 	let mut truncated = false;
 	let mut bytes_scanned = 0usize;
-	let mut spine_items_scanned = 0usize;
 	let mut next_cursor: Option<EpubSearchCursor> = None;
 
-	for meta in spine_meta.iter().skip(start_spine) {
+	for (spine_items_scanned, spine_index) in (start_spine..raw_spine_len).enumerate() {
 		if cancel.is_cancelled() {
 			return Err(EpubSearchError::Cancelled);
 		}
@@ -247,12 +261,18 @@ pub fn search_epub(
 			truncated = true;
 			next_cursor = Some(EpubSearchCursor {
 				v: CURSOR_VERSION,
-				spine_index: meta.spine_index as u32,
+				spine_index: spine_index as u32,
 				text_offset: 0,
 				query_fp: query_fp.clone(),
 			});
 			break;
 		}
+		// Unparseable OPF entries remain part of the cursor coordinate space, but
+		// cannot produce text. Move past them without shifting later chapter indices.
+		let Some(meta) = spine_meta_by_index.get(&spine_index) else {
+			start_text_offset = 0;
+			continue;
+		};
 
 		if !is_searchable_mime(&meta.media_type) {
 			start_text_offset = 0;
@@ -260,7 +280,7 @@ pub fn search_epub(
 		}
 
 		let zip_path = package_path_for_zip(&meta.package_path);
-		let entry_index = match find_zip_index(&mut archive, &zip_path) {
+		let entry_index = match find_zip_index(&zip_indices, &zip_path) {
 			Some(idx) => idx,
 			None => {
 				tracing::warn!(path = %zip_path, "spine resource missing from zip; skipping");
@@ -283,7 +303,6 @@ pub fn search_epub(
 			);
 			truncated = true;
 			start_text_offset = 0;
-			spine_items_scanned += 1;
 			continue;
 		}
 
@@ -301,7 +320,6 @@ pub fn search_epub(
 		let bytes =
 			read_zip_entry_bounded(&mut archive, entry_index, uncompressed, cancel)?;
 		bytes_scanned += bytes.len();
-		spine_items_scanned += 1;
 
 		let plain = extract_searchable_text(&bytes);
 		if plain.is_empty() {
@@ -316,9 +334,10 @@ pub fn search_epub(
 		};
 
 		let matches = find_literal_matches_ci(&plain, &needle, resume);
-		let mut emitted_in_spine = 0usize;
 
-		for (match_start, match_end) in matches {
+		for (emitted_in_spine, (match_start, match_end)) in
+			matches.into_iter().enumerate()
+		{
 			if cancel.is_cancelled() {
 				return Err(EpubSearchError::Cancelled);
 			}
@@ -343,12 +362,7 @@ pub fn search_epub(
 			} else {
 				(match_start as f64 / plain.len() as f64).clamp(0.0, 1.0)
 			};
-			let weight = if spine_meta.iter().map(|s| s.size).sum::<usize>().max(1) == 0 {
-				0.0
-			} else {
-				meta.size as f64
-					/ spine_meta.iter().map(|s| s.size).sum::<usize>().max(1) as f64
-			};
+			let weight = meta.size as f64 / total_spine_size as f64;
 			let total_progression =
 				(meta.total_progression + progression * weight).clamp(0.0, 1.0);
 
@@ -373,7 +387,6 @@ pub fn search_epub(
 					},
 				},
 			});
-			emitted_in_spine += 1;
 		}
 
 		if results.len() >= options.limit {
@@ -381,7 +394,7 @@ pub fn search_epub(
 			// If we exhausted matches in this spine, resume at the next spine.
 			if next_cursor.is_none() {
 				let next_index = meta.spine_index.saturating_add(1);
-				if next_index < epub.get_num_chapters() {
+				if next_index < raw_spine_len {
 					next_cursor = Some(EpubSearchCursor {
 						v: CURSOR_VERSION,
 						spine_index: next_index as u32,
@@ -433,56 +446,42 @@ fn package_path_for_zip(path: &str) -> String {
 		.to_string()
 }
 
-fn find_zip_index<R: Read + std::io::Seek>(
+struct ZipEntryIndices {
+	raw: HashMap<String, usize>,
+	decoded: HashMap<String, usize>,
+}
+
+fn build_zip_entry_indices<R: Read + std::io::Seek>(
 	archive: &mut ZipArchive<R>,
-	path: &str,
-) -> Option<usize> {
-	for i in 0..archive.len() {
-		if let Ok(file) = archive.by_index(i) {
-			if file.name() == path {
-				return Some(i);
-			}
+) -> Result<ZipEntryIndices, EpubSearchError> {
+	let mut raw = HashMap::with_capacity(archive.len());
+	let mut decoded = HashMap::with_capacity(archive.len());
+
+	for index in 0..archive.len() {
+		let name = archive
+			.by_index(index)
+			.map_err(FileError::from)?
+			.name()
+			.to_string();
+		// ZIP names are authoritative; first-wins matches `ZipArchive::by_name`'s
+		// practical behavior while avoiding an O(entries × spine) scan.
+		raw.entry(name.clone()).or_insert(index);
+		// OPF paths may be percent-encoded even when the ZIP entry is not (or vice
+		// versa). Index decoded names once, and decode the requested OPF path below.
+		if let Ok(decoded_name) = urlencoding::decode(&name) {
+			decoded.entry(decoded_name.into_owned()).or_insert(index);
 		}
 	}
-	// Try percent-decoded variants of path segments already normalized.
-	let decoded = percent_encoding_lite(path);
-	if decoded != path {
-		for i in 0..archive.len() {
-			if let Ok(file) = archive.by_index(i) {
-				if file.name() == decoded {
-					return Some(i);
-				}
-			}
-		}
-	}
-	None
+
+	Ok(ZipEntryIndices { raw, decoded })
 }
 
-fn percent_encoding_lite(path: &str) -> String {
-	let mut out = String::with_capacity(path.len());
-	let bytes = path.as_bytes();
-	let mut i = 0;
-	while i < bytes.len() {
-		if bytes[i] == b'%' && i + 2 < bytes.len() {
-			if let (Some(a), Some(b)) = (from_hex(bytes[i + 1]), from_hex(bytes[i + 2])) {
-				out.push((a << 4 | b) as char);
-				i += 3;
-				continue;
-			}
-		}
-		out.push(bytes[i] as char);
-		i += 1;
-	}
-	out
-}
-
-fn from_hex(b: u8) -> Option<u8> {
-	match b {
-		b'0'..=b'9' => Some(b - b'0'),
-		b'a'..=b'f' => Some(b - b'a' + 10),
-		b'A'..=b'F' => Some(b - b'A' + 10),
-		_ => None,
-	}
+fn find_zip_index(indices: &ZipEntryIndices, path: &str) -> Option<usize> {
+	indices.raw.get(path).copied().or_else(|| {
+		urlencoding::decode(path)
+			.ok()
+			.and_then(|decoded_path| indices.decoded.get(decoded_path.as_ref()).copied())
+	})
 }
 
 fn read_zip_entry_bounded<R: Read + std::io::Seek>(

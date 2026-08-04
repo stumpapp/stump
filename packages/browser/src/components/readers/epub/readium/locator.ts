@@ -6,6 +6,17 @@ import type { ReaderLocator } from '../context'
 
 const RESOURCE_MARKER = '/resource/'
 
+export type ComparableLocator = {
+	href: string
+	locations?: { position?: number | null; progression?: number | null } | null
+}
+
+export type ResolveInitialLocatorArgs = {
+	positions: Locator[]
+	storedLocator?: ReadiumLocator | null
+	percentageCompleted?: number | null
+}
+
 /**
  * Extract the package-relative path from a resource href (absolute or relative),
  * dropping the fragment. Used to compare mobile/server locators with web positions.
@@ -146,11 +157,7 @@ function buildOtherLocations(
  * Priority: matching stored Readium locator (by package path) → nearest
  * totalProgression from saved percentage → undefined (navigator uses positions[0]).
  */
-export function resolveInitialLocator(args: {
-	positions: Locator[]
-	storedLocator?: ReadiumLocator | null
-	percentageCompleted?: number | null
-}): Locator | undefined {
+export function resolveInitialLocator(args: ResolveInitialLocatorArgs): Locator | undefined {
 	const { positions, storedLocator, percentageCompleted } = args
 	if (!positions.length) return undefined
 
@@ -201,10 +208,7 @@ export function nearestPositionByTotalProgression(positions: Locator[], target: 
 /**
  * Whether two locators refer to approximately the same place for bookmark matching.
  */
-export function locatorsRoughlyMatch(
-	a: { href: string; locations?: { position?: number | null; progression?: number | null } | null },
-	b: { href: string; locations?: { position?: number | null; progression?: number | null } | null },
-): boolean {
+export function locatorsRoughlyMatch(a: ComparableLocator, b: ComparableLocator): boolean {
 	if (!hrefsMatch(a.href, b.href)) return false
 
 	const aPos = a.locations?.position
@@ -216,8 +220,10 @@ export function locatorsRoughlyMatch(
 	const aProg = safeNumber(a.locations?.progression)
 	const bProg = safeNumber(b.locations?.progression)
 	if (aProg != null && bProg != null) {
+		// A small per-resource tolerance handles reflow differences without treating
+		// unrelated positions in the same chapter as the same bookmark.
 		return Math.abs(aProg - bProg) < 0.02
 	}
 
-	return true
+	return false
 }

@@ -7,6 +7,7 @@ edition = "2021"
 alphanumeric-sort.workspace = true
 apalis.workspace = true
 apalis-cron.workspace = true
+axum.workspace = true
 notify = "8.0.0"
 async-channel = "2.1.0"
 async-trait.workspace = true

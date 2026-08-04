@@ -189,7 +189,7 @@ export function useSyncOnlineToOfflineProgress({
 							elapsedSeconds: accumulatedElapsed,
 							lastSyncedElapsedSeconds: accumulatedElapsed,
 							percentage,
-							epubProgress: epubProgress.safeParse(locator.readium).data,
+							epubProgress: epubProgress.safeParse(locator).data,
 							syncStatus: syncStatus.enum.SYNCED,
 						}) satisfies typeof readProgress.$inferInsert,
 				)

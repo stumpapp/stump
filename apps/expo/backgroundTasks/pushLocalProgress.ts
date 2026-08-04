@@ -87,9 +87,7 @@ const executeSingleServerSync = async (
 					(data) =>
 						({
 							epub: {
-								locator: {
-									readium: data,
-								},
+								locator: data,
 								elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
 								isComplete: record.percentage ? parseFloat(record.percentage) >= 1.0 : false,
 								percentage: record.percentage,

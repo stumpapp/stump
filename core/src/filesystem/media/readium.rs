@@ -1,5 +1,10 @@
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
+use axum::{
+	http::header,
+	response::{IntoResponse, Response},
+	Json,
+};
 use epub::doc::{EpubDoc, NavPoint};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -99,6 +104,16 @@ impl Default for RWPManifest {
 	}
 }
 
+impl IntoResponse for RWPManifest {
+	fn into_response(self) -> Response {
+		(
+			[(header::CONTENT_TYPE, "application/webpub+json")],
+			Json(self),
+		)
+			.into_response()
+	}
+}
+
 /// A position locator for Readium navigation
 ///
 /// See: https://readium.org/architecture/models/locators/positions/
@@ -128,6 +143,19 @@ pub struct RWPMPositionLocations {
 pub struct RWPMPositions {
 	pub total: u32,
 	pub positions: Vec<RWPMPosition>,
+}
+
+impl IntoResponse for RWPMPositions {
+	fn into_response(self) -> Response {
+		(
+			[(
+				header::CONTENT_TYPE,
+				"application/vnd.readium.position-list+json",
+			)],
+			Json(self),
+		)
+			.into_response()
+	}
 }
 
 /// A utility struct for generating Readium Web Publication Manifests

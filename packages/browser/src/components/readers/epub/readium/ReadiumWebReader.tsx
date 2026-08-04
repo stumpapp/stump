@@ -9,6 +9,7 @@ import {
 	ReadingDirection,
 	type ReadiumLocator,
 } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import type { EpubSearchResponse } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebounce } from 'rooks'
@@ -34,7 +35,6 @@ import EpubReaderContainer from '../EpubReaderContainer'
 import { hrefsMatch, resolveInitialLocator, toolkitLocatorToInput } from './locator'
 import { type OpenedPublication, openStumpPublication } from './openPublication'
 import { bookPreferencesToEpubPreferences } from './preferences'
-import { resolveLegacyCfi } from './resolveLegacyCfi'
 import { useReadiumNavigator } from './useReadiumNavigator'
 
 type Props = {
@@ -50,7 +50,6 @@ const query = graphql(`
 			bookmarks {
 				id
 				userId
-				epubcfi
 				mediaId
 				previewContent
 				createdAt
@@ -108,7 +107,6 @@ const query = graphql(`
 				extension
 				readProgress {
 					percentageCompleted
-					epubcfi
 					page
 					elapsedSeconds
 					locator {
@@ -170,6 +168,7 @@ const EMPTY_DOMAINS: string[] = []
  * Production Readium Web EPUB reader — streams via Stump RWPM.
  */
 export default function ReadiumWebReader({ id, isIncognito }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { isDarkVariant } = useTheme()
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -289,40 +288,13 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 							percentageCompleted,
 						})
 
-				if (!initialLocator && !isIncognito && ebook.media?.readProgress?.epubcfi) {
-					const resolved = await resolveLegacyCfi(
-						sdk,
-						id,
-						ebook.media.readProgress.epubcfi,
-						abort.signal,
-					)
-					if (resolved) {
-						initialLocator = resolveInitialLocator({
-							positions: opened.positions,
-							storedLocator: {
-								chapterTitle: resolved.chapterTitle ?? '',
-								href: resolved.href,
-								type: resolved.type || 'application/xhtml+xml',
-								locations: resolved.locations
-									? {
-											partialCfi: resolved.locations.partialCfi ?? null,
-											position: resolved.locations.position ?? null,
-											totalProgression: resolved.locations.totalProgression ?? null,
-										}
-									: null,
-							},
-							percentageCompleted,
-						})
-					}
-				}
-
 				setOpenState({ status: 'ready', opened, initialLocator })
 			} catch (error) {
 				if (abort.signal.aborted) return
 				console.error('[ReadiumWebReader] open failed', error)
 				setOpenState({
 					status: 'error',
-					message: error instanceof Error ? error.message : 'Failed to open EPUB with Readium.',
+					message: error instanceof Error ? error.message : t('epubReader.errors.openFailed'),
 				})
 			}
 		})()
@@ -330,7 +302,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		return () => abort.abort()
 		// Only re-open when the book id or auth surface changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [id, sdk, isIncognito])
+	}, [id, sdk, isIncognito, t])
 
 	const updateProgress = useCallback(
 		(input: EpubProgressInput) => {
@@ -381,7 +353,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 			}
 
 			updateProgress({
-				locator: { readium: payload },
+				locator: payload,
 				percentage,
 				isComplete: opts?.isComplete || percentage >= 1,
 			})
@@ -533,7 +505,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	})
 
 	useEffect(() => {
-		api?.applyDecorations(annotationsToDecorations(annotations), ANNOTATION_DECORATION_GROUP)
+		api.applyDecorations(annotationsToDecorations(annotations), ANNOTATION_DECORATION_GROUP)
 	}, [api, annotations])
 
 	// A navigator position change means the reader moved away from wherever the
@@ -544,7 +516,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 
 	const clearSelectionState = useCallback(() => {
 		setSelection(null)
-		api?.clearSelection()
+		api.clearSelection()
 	}, [api])
 
 	const handleHighlightSelection = useCallback(() => {
@@ -602,7 +574,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		for (const bookmark of ebook.bookmarks ?? []) {
 			const key = bookmark.locator?.href
 				? `${packageKey(bookmark.locator.href)}:${bookmark.locator.locations?.position ?? ''}`
-				: (bookmark.epubcfi ?? bookmark.id)
+				: bookmark.id
 			map[key] = bookmark
 		}
 		return map
@@ -659,11 +631,11 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	}, [currentLocator, toc, opened])
 
 	const onPaginateForward = useCallback(() => {
-		api?.goForward()
+		api.goForward()
 	}, [api])
 
 	const onPaginateBackward = useCallback(() => {
-		api?.goBackward()
+		api.goBackward()
 	}, [api])
 
 	const onGoToLocator = useCallback(
@@ -691,14 +663,14 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 					},
 				})
 				if (toolkit) {
-					api?.go(toolkit)
+					api.go(toolkit)
 				}
 			} catch (err) {
 				console.error(err)
-				toast.error('Failed to navigate to location')
+				toast.error(t('epubReader.errors.navigateFailed'))
 			}
 		},
-		[api, opened],
+		[api, opened, t],
 	)
 
 	const onLinkClick = useCallback(
@@ -733,22 +705,10 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		(section: number) => {
 			const item = opened?.publication.manifest.readingOrder?.items?.[section]
 			if (item) {
-				api?.goLink(item)
+				api.goLink(item)
 			}
 		},
 		[api, opened],
-	)
-
-	const onGoToLegacyCfi = useCallback(
-		async (cfi: string) => {
-			const resolved = await resolveLegacyCfi(sdk, id, cfi)
-			if (resolved) {
-				onGoToLocator(resolved)
-			} else {
-				toast.error('Could not resolve this legacy bookmark location')
-			}
-		},
-		[sdk, id, onGoToLocator],
 	)
 
 	const getLocatorPreviewText = useCallback(async (locator: ReaderLocator) => {
@@ -770,7 +730,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 
 	/** Keyboard navigation — RTL aware, ignores keystrokes aimed at inputs/dialogs */
 	useEffect(() => {
-		if (!api) return
 		const isLtr = readingDirection !== ReadingDirection.Rtl
 
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -820,14 +779,13 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 			controls={{
 				getLocatorPreviewText,
 				onGoToLocator,
-				onGoToLegacyCfi,
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,
 				jumpToSection,
 				searchBook,
-				canGoForward: api?.canGoForward,
-				canGoBackward: api?.canGoBackward,
+				canGoForward: api.canGoForward,
+				canGoBackward: api.canGoBackward,
 			}}
 		>
 			{/*

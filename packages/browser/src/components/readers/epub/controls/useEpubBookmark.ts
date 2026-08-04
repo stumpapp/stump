@@ -64,21 +64,19 @@ export function useEpubBookmark() {
 		const preview = await getLocatorPreviewText(currentLocator)
 		return {
 			locator: {
-				readium: {
-					chapterTitle: currentLocator.chapterTitle ?? currentLocator.title ?? '',
-					href: currentLocator.href,
-					title: currentLocator.title,
-					type: currentLocator.type || 'application/xhtml+xml',
-					locations: currentLocator.locations
-						? {
-								fragments: currentLocator.locations.fragments ?? undefined,
-								progression: currentLocator.locations.progression ?? undefined,
-								position: currentLocator.locations.position ?? undefined,
-								totalProgression: currentLocator.locations.totalProgression ?? undefined,
-							}
-						: undefined,
-					text: currentLocator.text ?? undefined,
-				},
+				chapterTitle: currentLocator.chapterTitle ?? currentLocator.title ?? '',
+				href: currentLocator.href,
+				title: currentLocator.title,
+				type: currentLocator.type || 'application/xhtml+xml',
+				locations: currentLocator.locations
+					? {
+							fragments: currentLocator.locations.fragments ?? undefined,
+							progression: currentLocator.locations.progression ?? undefined,
+							position: currentLocator.locations.position ?? undefined,
+							totalProgression: currentLocator.locations.totalProgression ?? undefined,
+						}
+					: undefined,
+				text: currentLocator.text ?? undefined,
 			},
 			mediaId: bookId,
 			previewContent: preview ?? undefined,

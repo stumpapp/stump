@@ -63,10 +63,10 @@ docker run -d \
   postgres:16-alpine
 ```
 
-Then run the server with the `DATABASE_URL` env var pointing at it:
+Then run the server with the `STUMP_DATABASE_URL` env var pointing at it:
 
 ```bash
-DATABASE_URL=postgresql://stump:stump@localhost:5432/stump \
+STUMP_DATABASE_URL=postgresql://stump:stump@localhost:5432/stump \
 cargo run --package stump_server --bin stump_server
 ```
 

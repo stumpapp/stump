@@ -2877,19 +2877,19 @@
 		},
 		"METADATA_PROVIDER_READ": {
 			"label": "Metadatenanbieter lesen",
-			"description": "Allows the user to view configured external metadata providers"
+			"description": "Erlaubt dem Benutzer die konfigurierte Metadatenanbieter anzuzeigen"
 		},
 		"METADATA_PROVIDER_MANAGE": {
-			"label": "Manage metadata providers",
-			"description": "Allows the user to configure external metadata providers"
+			"label": "Metadatenanbieter verwalten",
+			"description": "Erlaubt dem Benutzer externe Metadatenanbieter zu konfigurieren"
 		},
 		"METADATA_FETCH_RECORD_READ": {
-			"label": "Read metadata matches",
-			"description": "Allows the user to view metadata fetch results awaiting review"
+			"label": "Metadatentreffer lesen",
+			"description": "Erlaubt dem Benutzer die Ergebnisse der Metadatenabfrage anzuzeigen, die noch auf Überprüfung warten"
 		},
 		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "Manage metadata matches",
-			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
+			"label": "Metadatentreffer verwalten",
+			"description": "Erlaubt dem Benutzer externe Anbieter für Bucher zu durchsuchen und Trefferkandidaten zu akzeptieren oder abzulehnen"
 		}
 	},
 	"mobileApp": {

@@ -46,35 +46,35 @@
 		"metadataSearch": {
 			"heading": "Metadaten suchen",
 			"description": "Suche einen externen Anbieter für dieses Buch und wähle einen Treffer zum Anwenden",
-			"openButton": "Search Metadata",
-			"searchButton": "Search",
-			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
-			"noResults": "No matches were found for this search",
-			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
-			"searchFailed": "Failed to search metadata providers",
+			"openButton": "Metadaten suchen",
+			"searchButton": "Suche",
+			"noProviders": "Es sind keine Metadatenanbieter für diesen Bibliothekstypen konfiguriert. Konfiguriere zuerst einen in den Servereinstellungen.",
+			"noResults": "Keine Treffer für diese Suche gefunden",
+			"partialResults": "Manche Ergebnisse konnten nicht von dem Anbieter geladen werden, wahrscheinlich aufgrund von Ratenbegrenzung. Versuche nochmal zu suchen und schaue ob mehr angezeigt wird.",
+			"searchFailed": "Fehler beim Suchen der Metadatenanbieter",
 			"form": {
 				"title": {
-					"label": "Title"
+					"label": "Titel"
 				},
 				"author": {
-					"label": "Author"
+					"label": "Autor"
 				},
 				"isbn": {
 					"label": "ISBN"
 				},
 				"year": {
-					"label": "Year"
+					"label": "Jahr"
 				},
 				"number": {
-					"label": "Issue number"
+					"label": "Ausgabennummer"
 				},
 				"comicVineVolumeId": {
-					"label": "ComicVine volume ID",
+					"label": "ComicVine Band ID",
 					"placeholder": "z.B.: 129260"
 				},
 				"provider": {
-					"label": "Provider",
-					"allOption": "All enabled providers"
+					"label": "Anbieter",
+					"allOption": "Alle aktivierten Anbieter"
 				}
 			}
 		}
@@ -291,17 +291,17 @@
 				"description": "Wird verwendet, um deine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
 			},
 			"libraryType": {
-				"label": "Library content",
-				"description": "The type of content present in this library",
+				"label": "Bibliotheksinhalt",
+				"description": "Die Art des Inhalts in dieser Bibliothek",
 				"options": {
 					"COMIC": "Comics",
 					"MANGA": "Manga",
-					"BOOK": "Books",
+					"BOOK": "Bücher",
 					"LIGHT_NOVEL": "Light Novels",
-					"MANHWA": "Manhwa",
-					"WEB_NOVEL": "Web Novels",
+					"MANHWA": "Manwha",
+					"WEB_NOVEL": "Webromane",
 					"WEBTOON": "Webtoons",
-					"MIXED": "Mixed"
+					"MIXED": "Gemischt"
 				}
 			},
 			"defaultLibraryView": {
@@ -1528,13 +1528,13 @@
 					"description": "Passe die Schriftart an, die in der Anwendung genutzt wird"
 				},
 				"interfaceRoundness": {
-					"label": "Interface roundness",
-					"description": "How rounded the corners are for UI elements",
+					"label": "Oberflächenrundheit",
+					"description": "Wie abgerundet die Ecken der Benutzerelemente",
 					"options": {
-						"none": "None",
+						"none": "Keine",
 						"normal": "Normal",
-						"rounded": "Rounded",
-						"pill": "Pill"
+						"rounded": "Abgerundet",
+						"pill": "Pille"
 					}
 				},
 				"thumbnailPreview": {
@@ -1637,24 +1637,24 @@
 					}
 				},
 				"displayAndSpacing": {
-					"label": "Display and spacing",
-					"description": "Preferences related to the presentation of content and information"
+					"label": "Anzeigeabstand",
+					"description": "Einstellungen für die Darstellung von Inhalten und Informationen"
 				},
 				"additionalPreferences": {
 					"label": "Zusätzliche Präferenzen",
 					"description": "Passe das Aussehen und Verhalten von Stump mit diesen zusätzlichen Einstellungen an"
 				},
 				"contentBrowsing": {
-					"label": "Content browsing",
-					"description": "Preferences that affect browsing and navigating content lists"
+					"label": "Inhalt durchsuchen",
+					"description": "Einstellungen, die das Durchsuchen und Navigieren von Inhaltslisten beeinflussen"
 				},
 				"motionAndAnimation": {
-					"label": "Motion and animation",
-					"description": "Visual presentation and movement preferences"
+					"label": "Bewegung und Animation",
+					"description": "Visuelle Darstellung und Bewegungspräferenzen"
 				},
 				"activityAndStatus": {
-					"label": "Activity and status",
-					"description": "Indicators, overlays, or functionality related to background activity"
+					"label": "Aktivität und Status",
+					"description": "Indikatoren, Overlays oder Funktionen im Zusammenhang mit der Hintergrundaktivität"
 				},
 				"hideScrollbarToggle": {
 					"label": "Scrollbar ausblenden",
@@ -2085,7 +2085,7 @@
 						"deleteError": "Fehler beim Löschen des geplanten Job"
 					},
 					"errors": {
-						"invalidCron": "Schedule must be a valid cron expression"
+						"invalidCron": "Zeitplan muss ein gültiger Cron-Ausdruck sein"
 					}
 				},
 				"history": {
@@ -2160,7 +2160,7 @@
 						"libraryManagement": "Bibliotheksverwaltung",
 						"userManagement": "Benutzerverwaltung",
 						"serverManagement": "Serververwaltung",
-						"metadataManagement": "Metadata management"
+						"metadataManagement": "Metadatenmanagement"
 					},
 					"heading": "Berechtigungen",
 					"subtitle": [
@@ -2439,8 +2439,8 @@
 			"helmet": "Metadatenintegrationen",
 			"title": "Metadatenintegrationen",
 			"addProvider": "Anbieter hinzufügen",
-			"createProviderError": "Failed to create provider",
-			"updateProviderError": "Failed to update provider",
+			"createProviderError": "Fehler beim Erstellen des Anbieters",
+			"updateProviderError": "Fehler beim Aktualisieren des Anbieters",
 			"noProviders": "Noch keine Anbieter konfiguriert. Füge einen hinzu, um loszulegen",
 			"providers": {
 				"title": "Anbieter",
@@ -2453,8 +2453,8 @@
 					"validationError": "Die automatische Validierung für diesen Token fehlgeschlagen",
 					"validationRequestError": "Die Validierungsanfrage ist fehlgeschlagen",
 					"validationRequestErrorUnknown": "Ein unbekannter Fehler ist bei der Validierung aufgetreten",
-					"providerStatusError": "The provider responded with status {{status}}",
-					"providerError": "The provider responded with an error: {{message}}",
+					"providerStatusError": "Der Anbieter antwortete mit dem Status {{status}}",
+					"providerError": "Der Anbieter antwortete mit dem Fehler: {{message}}",
 					"noBearerPrefixRequired": "Entferne den Präfix 'Bearer' von dem API-Token"
 				},
 				"apiTokenExpiresAt": {
@@ -2876,7 +2876,7 @@
 			"description": "Erlaubt dem Benutzer Vorschaubilder für Bücher und Serien zu bearbeiten"
 		},
 		"METADATA_PROVIDER_READ": {
-			"label": "Read metadata providers",
+			"label": "Metadatenanbieter lesen",
 			"description": "Allows the user to view configured external metadata providers"
 		},
 		"METADATA_PROVIDER_MANAGE": {
@@ -2993,7 +2993,7 @@
 			"delete": "Löschen",
 			"dismiss": "Verwerfen",
 			"download": "Download",
-			"downloaded": "Downloaded",
+			"downloaded": "Heruntergeladen",
 			"downloads": "Downloads",
 			"done": "Fertig",
 			"edit": "Bearbeiten",
@@ -3167,32 +3167,32 @@
 					}
 				},
 				"appPrimaryColor": {
-					"label": "Accent",
+					"label": "Akzent",
 					"options": {
-						"chromaScale": "Chroma Scale",
+						"chromaScale": "Chroma-Skala",
 						"hues": {
-							"red": "Red",
+							"red": "Rot",
 							"orange": "Orange",
-							"amber": "Amber",
-							"yellow": "Yellow",
-							"lime": "Lime",
-							"green": "Green",
-							"emerald": "Emerald",
-							"teal": "Teal",
+							"amber": "Bernstein",
+							"yellow": "Gelb",
+							"lime": "Limette",
+							"green": "Grün",
+							"emerald": "Smaragd",
+							"teal": "Türkis",
 							"cyan": "Cyan",
-							"sky": "Sky",
-							"blue": "Blue",
+							"sky": "Himmel",
+							"blue": "Blau",
 							"indigo": "Indigo",
-							"violet": "Violet",
-							"purple": "Purple",
-							"fuchsia": "Fuchsia",
+							"violet": "Violett",
+							"purple": "Lila",
+							"fuchsia": "Fuchsie",
 							"pink": "Pink",
-							"rose": "Rose",
-							"slate": "Slate",
-							"gray": "Gray",
-							"zinc": "Zinc",
+							"rose": "Rosa",
+							"slate": "Schiefer",
+							"gray": "Grau",
+							"zinc": "Zink",
 							"neutral": "Neutral",
-							"stone": "Stone"
+							"stone": "Stein"
 						}
 					}
 				},
@@ -3498,7 +3498,7 @@
 			"LIGHT_NOVEL": "Light Novels",
 			"MANGA": "Manga",
 			"MANHWA": "Manwha",
-			"MIXED": "Gemixt",
+			"MIXED": "Gemischt",
 			"WEBTOON": "Webtoons",
 			"WEB_NOVEL": "Webromane"
 		},

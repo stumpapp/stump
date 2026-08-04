@@ -5,7 +5,7 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, reading_session, series, series_tag, tag},
+	entity::{library, media, media_metadata, reading_session, series, series_tag, tag},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::ReadingStatus,
@@ -212,7 +212,8 @@ impl Series {
 							.add(latest_only.clone()),
 					),
 			)
-			.group_by(media::Column::Id);
+			.group_by(media::Column::Id)
+			.group_by(media_metadata::Column::Id); // pgsql requires addtl grouping
 
 		let books = if let Some(name) = name_cmp {
 			let mut cursor = query.cursor_by(media::Column::Name);

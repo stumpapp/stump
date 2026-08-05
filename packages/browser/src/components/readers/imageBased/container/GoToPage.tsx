@@ -43,13 +43,7 @@ export const clampPage = (value: number, totalPages: number): number =>
 	Math.min(Math.max(1, value), Math.max(1, totalPages))
 
 /**
- * A small control that lets the reader jump directly to an arbitrary page. This is a
- * manual-recovery affordance: if reading position is ever lost, the user can type the
- * page they remember and return to it immediately.
- *
- * NOTE: This component is intentionally "dumb" so that it owns no reader state and performs
- * no navigation itself. The parent supplies `currentPage`/`totalPages` and binds
- * `onSubmit` to the reader's existing page-change handler.
+ * A small control that lets the reader jump directly to an arbitrary page
  */
 export default function GoToPage({
 	currentPage,

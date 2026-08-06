@@ -34,7 +34,7 @@ export default function ServerPublicURL() {
 
 	const { mutate: updatePublicUrl } = useGraphQLMutation(mutation, {
 		onSuccess: (data) => {
-			toast.success('Public URL updated successfully')
+			toast.success(t('settingsUi.publicUrlUpdated'))
 			client.setQueryData(['serverConfig', 'publicUrl'], {
 				serverConfig: {
 					publicUrl: data.updatePublicUrl.publicUrl,
@@ -42,7 +42,7 @@ export default function ServerPublicURL() {
 			})
 		},
 		onError: (error) => {
-			toast.error('Failed to update public URL', {
+			toast.error(t('settingsUi.publicUrlUpdateFailed'), {
 				description: error instanceof Error ? error.message : 'An unknown error occurred',
 			})
 		},

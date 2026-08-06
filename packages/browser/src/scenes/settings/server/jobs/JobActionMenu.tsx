@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, DropdownMenu } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Ban, Database, FileClock, ListX, MoreVertical, Trash2 } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
@@ -38,6 +39,7 @@ type Props = {
 }
 
 export default function JobActionMenu({ job, onInspectData }: Props) {
+	const { t } = useLocaleContext()
 	const navigate = useNavigate()
 	const client = useQueryClient()
 
@@ -56,8 +58,8 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 				}),
 			onError: (error: unknown) => {
 				if (isBadStateError(error)) {
-					toast.warning('This job was found in an invalid state', {
-						description: 'Please check server logs and report this issue',
+					toast.warning(t('settingsUi.jobInvalidState'), {
+						description: t('settingsUi.checkServerLogs'),
 					})
 					client.refetchQueries({
 						predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.jobs),
@@ -66,11 +68,11 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 					toast.error(error.message)
 				} else {
 					console.error(error)
-					toast.error('An unknown error occurred')
+					toast.error(t('common.unknownError'))
 				}
 			},
 		}),
-		[sdk, client],
+		[sdk, client, t],
 	)
 
 	const { mutate: cancelJob } = useGraphQLMutation(cancelMutation, options)
@@ -112,7 +114,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			...(isCancelable
 				? [
 						{
-							label: 'Cancel',
+							label: t('settingsUi.cancelJob'),
 							leftIcon: <Ban className="mr-2 h-4 w-4" />,
 							onClick: () => handleAction('cancel'),
 						},
@@ -121,7 +123,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			...(jobData
 				? [
 						{
-							label: 'View data',
+							label: t('settingsUi.viewJobData'),
 							leftIcon: <Database className="mr-2 h-4 w-4" />,
 							onClick: () => onInspectData(jobData),
 						},
@@ -130,12 +132,12 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			...(hasLogs
 				? [
 						{
-							label: 'View logs',
+							label: t('settingsUi.viewLogs'),
 							leftIcon: <FileClock className="mr-2 h-4 w-4" />,
 							onClick: () => navigate(paths.serverLogs(jobId)),
 						},
 						{
-							label: 'Clear logs',
+							label: t('settingsUi.clearLogs'),
 							leftIcon: <ListX className="mr-2 h-4 w-4" />,
 							onClick: () => handleAction('deleteLogs'),
 						},
@@ -145,14 +147,14 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			...(isDeletable
 				? [
 						{
-							label: 'Delete',
+							label: t('common.delete'),
 							leftIcon: <Trash2 className="mr-2 h-4 w-4" />,
 							onClick: () => handleAction('delete'),
 						},
 					]
 				: []),
 		],
-		[isCancelable, isDeletable, hasLogs, jobId, jobData, navigate, onInspectData, handleAction],
+		[isCancelable, isDeletable, hasLogs, jobId, jobData, navigate, onInspectData, handleAction, t],
 	)
 
 	return (

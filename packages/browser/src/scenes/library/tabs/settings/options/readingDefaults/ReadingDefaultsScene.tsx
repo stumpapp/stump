@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Form } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useDebouncedValue } from 'rooks'
@@ -27,6 +28,7 @@ type PatchParams = Partial<
 >
 
 export default function ReadingDefaultsScene() {
+	const { t } = useLocaleContext()
 	const { library, patch } = useLibraryManagement()
 
 	const handleSubmit = useCallback(
@@ -107,7 +109,7 @@ export default function ReadingDefaultsScene() {
 
 			<div className="invisible hidden">
 				<Button id="save-changes" type="submit">
-					Save changes
+					{t('common.saveChanges')}
 				</Button>
 			</div>
 		</Form>

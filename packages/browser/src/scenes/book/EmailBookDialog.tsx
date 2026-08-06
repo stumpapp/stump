@@ -74,7 +74,7 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 			if (errors.length > 0) {
 				onClose()
 				console.warn(errors)
-				toast.error('Some errors occurred while sending email(s). Check the logs for more detail')
+				toast.error(t('bookOverviewScene.emailBook.partialFailure'))
 			}
 		},
 	})
@@ -102,9 +102,9 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 			mutate({ id: mediaId, sendTo })
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to send email')
+			toast.error(t('bookOverviewScene.emailBook.sendFailed'))
 		}
-	}, [mutate, deviceIds, emails, canArbitrarySendEmail, mediaId])
+	}, [mutate, deviceIds, emails, canArbitrarySendEmail, mediaId, t])
 
 	const renderArbitraryEmails = () => {
 		if (!canArbitrarySendEmail) {
@@ -181,10 +181,10 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 
 				<Dialog.Footer>
 					<Button variant="outline" onClick={onClose} disabled={isSending}>
-						Cancel
+						{t('common.cancel')}
 					</Button>
 					<Button onClick={handleSend} disabled={isSending} isLoading={isSending}>
-						Confirm
+						{t('common.confirm')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

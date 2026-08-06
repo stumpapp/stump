@@ -112,38 +112,41 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 const LOCALE_BASE = 'settingsScene.server/email.sections.devices.table'
 
 const columnHelper = createColumnHelper<RegisteredEmailDevice>()
+
+function DeviceColumnHeader({ label }: { label: 'deviceEmail' | 'deviceName' | 'deviceStatus' }) {
+	const { t } = useLocaleContext()
+	return (
+		<Text size="sm" variant="muted">
+			{t(`settingsUi.${label}`)}
+		</Text>
+	)
+}
+
+function DeviceStatus({ forbidden }: { forbidden: boolean }) {
+	const { t } = useLocaleContext()
+	return (
+		<Badge size="sm" variant={forbidden ? 'warning' : 'default'}>
+			{forbidden ? t('settingsUi.forbidden') : t('settingsUi.allowed')}
+		</Badge>
+	)
+}
+
 const baseColumns = [
 	columnHelper.accessor('name', {
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Name
-			</Text>
-		),
+		header: () => <DeviceColumnHeader label="deviceName" />,
 	}),
 	columnHelper.accessor('email', {
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Email
-			</Text>
-		),
+		header: () => <DeviceColumnHeader label="deviceEmail" />,
 	}),
 	columnHelper.display({
 		cell: ({
 			row: {
 				original: { forbidden },
 			},
-		}) => (
-			<Badge size="sm" variant={forbidden ? 'warning' : 'default'}>
-				{forbidden ? 'Forbidden' : 'Allowed'}
-			</Badge>
-		),
-		header: () => (
-			<Text size="sm" variant="muted">
-				Status
-			</Text>
-		),
+		}) => <DeviceStatus forbidden={forbidden} />,
+		header: () => <DeviceColumnHeader label="deviceStatus" />,
 		id: 'status',
 	}),
 ] as ColumnDef<RegisteredEmailDevice>[]

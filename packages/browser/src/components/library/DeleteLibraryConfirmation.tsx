@@ -72,9 +72,9 @@ export default function DeleteLibraryConfirmation({
 
 		console.error(error)
 		if (isAxiosError(error)) {
-			toast.error(error.message || 'An error occurred while deleting the library')
+			toast.error(error.message || t('libraryUi.deleteLibraryError'))
 		} else {
-			toast.error('An error occurred while deleting the library')
+			toast.error(t('libraryUi.deleteLibraryError'))
 		}
 	}, [error])
 

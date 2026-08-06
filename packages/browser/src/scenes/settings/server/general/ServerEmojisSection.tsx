@@ -95,7 +95,7 @@ export default function ServerEmojisSection() {
 		(acceptedFiles: File[], fileRejections: FileRejection[]) => {
 			if (fileRejections.length > 0) {
 				const firstError = fileRejections[0]?.errors[0]
-				toast.error(firstError?.message ?? t('common.fileUpload.someFilesRejected'))
+				toast.error(firstError?.message ?? t('common.fileUpload.someRejected'))
 				return
 			}
 
@@ -192,7 +192,7 @@ export default function ServerEmojisSection() {
 
 		const name = sanitizedName(renameValue)
 		if (!name) {
-			toast.error('Please provide an emoji name')
+			toast.error(t('settingsUi.emojiNameRequired'))
 			return
 		}
 

@@ -78,7 +78,7 @@ export function ExistingProviderCard({ data }: Props) {
 
 			<div className="gap-1 flex items-center justify-between">
 				<Text size="xs" variant="muted">
-					Added {intlFormat(new Date(provider.createdAt))}
+					{t('settingsUi.addedAt', { date: intlFormat(new Date(provider.createdAt)) })}
 				</Text>
 
 				<Badge size="xs">

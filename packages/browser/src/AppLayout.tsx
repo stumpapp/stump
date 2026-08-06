@@ -1,6 +1,7 @@
 import { useAuthQuery, useSDK } from '@stump/client'
 import { cn, cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
@@ -22,6 +23,7 @@ import { useCoreEvent } from './hooks/useCoreEvent'
 import { useAppStore, useUserStore } from './stores'
 
 export function AppLayout() {
+	const { t } = useLocaleContext()
 	const location = useLocation()
 	const navigate = useNavigate()
 
@@ -172,10 +174,10 @@ export function AppLayout() {
 			client.clear()
 			setUser(null)
 			navigate('/auth')
-			toast.success('You have been logged out')
+			toast.success(t('common.loggedOut'))
 		} catch (error) {
 			console.error('Error logging out:', { error })
-			toast.error('There was an error logging you out. Please try again.')
+			toast.error(t('common.logoutFailed'))
 		}
 	}, [sdk, client, setUser, navigate])
 

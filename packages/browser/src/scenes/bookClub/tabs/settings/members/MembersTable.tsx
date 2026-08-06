@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Avatar, Card } from '@stump/components'
 import { BookClubMembersTableQuery, graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { BookClubMemberRoleSpec } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import upperFirst from 'lodash/upperFirst'
@@ -39,6 +40,7 @@ const removeMutation = graphql(`
 `)
 
 export default function MembersTable() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { user } = useAppContext()
 	const {
@@ -65,7 +67,7 @@ export default function MembersTable() {
 		onSuccess: () => refetch(),
 		onError: (error) => {
 			console.error('Error removing member:', error)
-			toast.error('Failed to remove member')
+			toast.error(t('bookClubUi.removeMemberFailed'))
 		},
 	})
 

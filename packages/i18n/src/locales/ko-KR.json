@@ -112,6 +112,8 @@
 		"emailBook": {
 			"heading": "책 이메일로 보내기",
 			"description": "이 책을 기기나 이메일 주소로 보냅니다",
+			"partialFailure": "일부 이메일을 보내지 못했습니다. 자세한 내용은 로그를 확인하세요.",
+			"sendFailed": "이메일을 보내지 못했습니다",
 			"form": {
 				"email": {
 					"label": "이메일",
@@ -806,6 +808,9 @@
 		"adjustFilter": "필터 조정"
 	},
 	"libraryUi": {
+		"deleteLibraryError": "라이브러리를 삭제하는 중 오류가 발생했습니다",
+		"updateLibrary": "라이브러리 업데이트",
+		"deleteLibrary": "라이브러리 삭제",
 		"directoryPicker": {
 			"title": "디렉터리 선택",
 			"description": "라이브러리가 있는 디렉터리를 지정하세요.",
@@ -841,6 +846,29 @@
 		"emptyFolder": "이 폴더는 비어 있습니다"
 	},
 	"settingsUi": {
+		"permissions": "권한",
+		"deviceName": "이름",
+		"deviceEmail": "이메일",
+		"deviceStatus": "상태",
+		"createEmailer": "이메일 전송 서비스 만들기",
+		"emojiNameRequired": "이모지 이름을 입력하세요",
+		"publicUrlUpdated": "공개 URL을 업데이트했습니다",
+		"publicUrlUpdateFailed": "공개 URL을 업데이트하지 못했습니다",
+		"userLockUpdateFailed": "사용자 잠금 상태를 업데이트하는 중 오류가 발생했습니다",
+		"userSessionsDeleteFailed": "사용자 세션을 삭제하는 중 오류가 발생했습니다",
+		"jobInvalidState": "이 작업은 올바르지 않은 상태입니다",
+		"addedAt": "{{date}} 추가",
+		"allowed": "허용",
+		"forbidden": "차단",
+		"inspectUser": "상세 보기",
+		"clearSessions": "세션 지우기",
+		"lockAccount": "계정 잠금",
+		"unlockAccount": "계정 잠금 해제",
+		"cancelJob": "취소",
+		"viewJobData": "데이터 보기",
+		"viewLogs": "로그 보기",
+		"clearLogs": "로그 지우기",
+		"checkServerLogs": "서버 로그를 확인하고 이 문제를 신고해 주세요",
 		"readerUniversal": "공통",
 		"readerUniversalDescription": "모든 책 형식에 적용되는 설정",
 		"readerFormats": "형식별 설정",
@@ -885,6 +913,7 @@
 		"currentlyReading": "현재 읽는 책",
 		"pastBook": "지난 책",
 		"navigationEmpty": "북클럽에 참여하거나 새로 만들어 보세요",
+		"removeMemberFailed": "회원을 내보내지 못했습니다",
 		"deleteTitle": "북클럽 삭제",
 		"deleteDescription": "이 북클럽을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
 		"deleteConfirm": "북클럽 삭제",
@@ -3158,6 +3187,9 @@
 		"never": "없음",
 		"scan": "스캔",
 		"somethingWentWrong": "문제가 발생했습니다",
+		"loggedOut": "로그아웃되었습니다",
+		"logoutFailed": "로그아웃하는 중 오류가 발생했습니다. 다시 시도하세요.",
+		"updateFailed": "업데이트하지 못했습니다",
 		"back": "뒤로",
 		"continue": "계속",
 		"nextStep": "다음 단계",

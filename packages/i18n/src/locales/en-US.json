@@ -112,6 +112,8 @@
 		"emailBook": {
 			"heading": "Email book",
 			"description": "Send this book to a device or email address",
+			"partialFailure": "Some emails could not be sent. Check the logs for details.",
+			"sendFailed": "Failed to send email",
 			"form": {
 				"email": {
 					"label": "Email",
@@ -806,6 +808,9 @@
 		"adjustFilter": "Adjust filter"
 	},
 	"libraryUi": {
+		"deleteLibraryError": "An error occurred while deleting the library",
+		"updateLibrary": "Update library",
+		"deleteLibrary": "Delete library",
 		"directoryPicker": {
 			"title": "Select a directory",
 			"description": "Specify the directory where your library is located.",
@@ -841,6 +846,29 @@
 		"emptyFolder": "This folder is empty"
 	},
 	"settingsUi": {
+		"permissions": "Permissions",
+		"deviceName": "Name",
+		"deviceEmail": "Email",
+		"deviceStatus": "Status",
+		"createEmailer": "Create an emailer",
+		"emojiNameRequired": "Please provide an emoji name",
+		"publicUrlUpdated": "Public URL updated successfully",
+		"publicUrlUpdateFailed": "Failed to update public URL",
+		"userLockUpdateFailed": "An error occurred while updating the user lock",
+		"userSessionsDeleteFailed": "An error occurred while deleting user sessions",
+		"jobInvalidState": "This job is in an invalid state",
+		"addedAt": "Added {{date}}",
+		"allowed": "Allowed",
+		"forbidden": "Forbidden",
+		"inspectUser": "Inspect",
+		"clearSessions": "Clear sessions",
+		"lockAccount": "Lock account",
+		"unlockAccount": "Unlock account",
+		"cancelJob": "Cancel",
+		"viewJobData": "View data",
+		"viewLogs": "View logs",
+		"clearLogs": "Clear logs",
+		"checkServerLogs": "Please check server logs and report this issue",
 		"readerUniversal": "Universal",
 		"readerUniversalDescription": "Settings which apply to all types of books",
 		"readerFormats": "Formats",
@@ -885,6 +913,7 @@
 		"currentlyReading": "Currently reading",
 		"pastBook": "Past book",
 		"navigationEmpty": "Join or create a book club to get started",
+		"removeMemberFailed": "Failed to remove member",
 		"deleteTitle": "Delete book club",
 		"deleteDescription": "Are you sure you want to delete this club? This action cannot be undone.",
 		"deleteConfirm": "Delete club",
@@ -3158,6 +3187,9 @@
 		"never": "Never",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
+		"loggedOut": "You have been logged out",
+		"logoutFailed": "There was an error logging you out. Please try again.",
+		"updateFailed": "Failed to update",
 		"back": "Back",
 		"continue": "Continue",
 		"nextStep": "Next step",

@@ -35,7 +35,7 @@ export default function DiscordPresenceSwitch() {
 				await update(newPreferences)
 			} catch (err) {
 				console.error(err)
-				toast.error('Failed to update!')
+				toast.error(t('common.updateFailed'))
 			}
 		}
 	}

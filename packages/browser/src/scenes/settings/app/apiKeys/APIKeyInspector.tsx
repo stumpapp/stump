@@ -49,7 +49,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		return (
 			<div data-testid="permissions-meta">
 				<Text variant="label" size="sm">
-					Permissions
+					{t('settingsUi.permissions')}
 				</Text>
 				<div className="gap-2 mt-3 flex flex-row flex-wrap">
 					{permissions.map((perm) => (

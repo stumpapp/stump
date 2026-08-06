@@ -1,5 +1,6 @@
 import { formatBytes } from '@stump/client'
 import { cn, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import {
 	createColumnHelper,
 	flexRender,
@@ -19,6 +20,8 @@ type Props = {
 	attachments: EmailerSendRecord['attachmentMeta']
 }
 export default function EmailerSendRecordAttachmentTable({ attachments }: Props) {
+	const { t } = useLocaleContext()
+	const columns = getColumns(t)
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()
@@ -107,7 +110,7 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 }
 
 const columnHelper = createColumnHelper<EmailerSendRecord['attachmentMeta'][number]>()
-const columns = [
+const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 	columnHelper.display({
 		id: 'media',
 		cell: ({ row }) => {
@@ -116,7 +119,7 @@ const columns = [
 			} = row
 
 			if (!media) {
-				return <Text size="sm">Not Found</Text>
+				return <Text size="sm">{t('settingsUi.notFound')}</Text>
 			}
 
 			return (
@@ -127,7 +130,7 @@ const columns = [
 		},
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				Media
+				{t('settingsUi.media')}
 			</Text>
 		),
 	}),
@@ -135,7 +138,7 @@ const columns = [
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				Filename
+				{t('settingsUi.filename')}
 			</Text>
 		),
 	}),
@@ -143,7 +146,7 @@ const columns = [
 		cell: ({ getValue }) => <Text size="sm">{formatBytes(getValue())}</Text>,
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				Size
+				{t('settingsUi.size')}
 			</Text>
 		),
 	}),

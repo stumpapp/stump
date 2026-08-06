@@ -1,5 +1,6 @@
 import { cn, IconButton, Text, ToolTip } from '@stump/components'
 import { EmailerSendHistoryQuery } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import {
 	createColumnHelper,
 	ExpandedState,
@@ -24,6 +25,8 @@ type Props = {
 }
 
 export default function EmailerSendHistoryTable({ records }: Props) {
+	const { t } = useLocaleContext()
+	const columns = getColumns(t)
 	const [expanded, setExpanded] = useState<ExpandedState>({})
 
 	const table = useReactTable({
@@ -87,7 +90,7 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 }
 
 const columnHelper = createColumnHelper<EmailerSendRecord>()
-const columns = [
+const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 	columnHelper.accessor('sentAt', {
 		cell: ({ getValue }) => (
 			<Text size="sm">
@@ -102,7 +105,7 @@ const columns = [
 		),
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				Sent at
+				{t('settingsUi.sentAt')}
 			</Text>
 		),
 		id: 'sentAt',
@@ -111,7 +114,7 @@ const columns = [
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				Recipient
+				{t('settingsUi.recipient')}
 			</Text>
 		),
 		id: 'recipientEmail',
@@ -140,12 +143,12 @@ const columns = [
 					</div>
 				)
 			} else {
-				return <Text size="sm">Unknown</Text>
+				return <Text size="sm">{t('settingsUi.unknown')}</Text>
 			}
 		},
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				Sender
+				{t('settingsUi.sender')}
 			</Text>
 		),
 		id: 'sender',
@@ -158,7 +161,7 @@ const columns = [
 			} = row
 
 			if (!attachmentMeta) {
-				return <Text size="sm">None</Text>
+				return <Text size="sm">{t('settingsUi.none')}</Text>
 			}
 
 			const isAlreadyExpanded = row.getIsExpanded()
@@ -167,7 +170,7 @@ const columns = [
 					className="space-x-2 flex cursor-pointer items-center"
 					onClick={row.getToggleExpandedHandler()}
 				>
-					<Text size="sm">{isAlreadyExpanded ? 'Hide' : 'Show'}</Text>
+					<Text size="sm">{isAlreadyExpanded ? t('settingsUi.hide') : t('settingsUi.show')}</Text>
 					<span className="text-muted-foreground">
 						<ChevronDown
 							className={cn('h-4 w-4', {
@@ -180,7 +183,7 @@ const columns = [
 		},
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				Attachments
+				{t('settingsUi.attachments')}
 			</Text>
 		),
 		id: 'attachments-sub-table',

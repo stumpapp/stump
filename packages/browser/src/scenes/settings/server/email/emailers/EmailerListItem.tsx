@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sparkles } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
@@ -42,6 +43,7 @@ type Props = {
 }
 
 export default function EmailerListItem({ fragment }: Props) {
+	const { t } = useLocaleContext()
 	const navigate = useNavigate()
 	const emailer = useFragment(EmailerListItemFragment, fragment)
 
@@ -66,7 +68,7 @@ export default function EmailerListItem({ fragment }: Props) {
 		if (!emailer.lastUsedAt) {
 			return (
 				<Text size="sm" variant="muted">
-					Not used yet
+					{t('common.notUsedYet')}
 				</Text>
 			)
 		} else {
@@ -88,7 +90,7 @@ export default function EmailerListItem({ fragment }: Props) {
 				</Text>
 				<div className="space-x-2 flex items-center">
 					{emailer.isPrimary && (
-						<ToolTip content="Primary emailer" align="end" size="xs">
+						<ToolTip content={t('settingsUi.primaryEmailer')} align="end" size="xs">
 							<Sparkles className="h-4 w-4 text-primary" strokeWidth={1} />
 						</ToolTip>
 					)}

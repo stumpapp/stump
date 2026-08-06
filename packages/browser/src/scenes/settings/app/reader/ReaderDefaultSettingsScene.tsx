@@ -41,7 +41,10 @@ export default function ReaderDefaultSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<NewCard label="Universal" description="Settings which apply to all types of books">
+				<NewCard
+					label={t('settingsUi.readerUniversal')}
+					description={t('settingsUi.readerUniversalDescription')}
+				>
 					<DefaultReadingDirection />
 
 					{/* TODO: not sure these belong here? idk they are reading preferences. 
@@ -52,7 +55,10 @@ export default function ReaderDefaultSettingsScene() {
 					<ReadingSessionGracePeriodPreference />
 				</NewCard>
 
-				<NewCard label="Formats" description="Configure reader default settings independently">
+				<NewCard
+					label={t('settingsUi.readerFormats')}
+					description={t('settingsUi.readerFormatsDescription')}
+				>
 					<NewCard.Row
 						label={t(getSectionKey('imageBasedBooks.label'))}
 						description={t(getSectionKey('imageBasedBooks.description'))}

@@ -1,5 +1,6 @@
 import { Preformatted, Sheet, usePrevious } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 
 const fragment = graphql(`
 	fragment JobDataInspector on CoreJobOutput {
@@ -39,6 +40,7 @@ type Props = {
 }
 
 export default function JobDataInspector({ data, onClose }: Props) {
+	const { t } = useLocaleContext()
 	const inlineData = useFragment(fragment, data)
 	const fallback = usePrevious(data)
 	const displayedData = inlineData || fallback
@@ -47,10 +49,10 @@ export default function JobDataInspector({ data, onClose }: Props) {
 		<Sheet
 			open={!!data}
 			onClose={onClose}
-			title="Job data"
-			description="The final output of the job after it had completed"
+			title={t('settingsUi.jobData')}
+			description={t('settingsUi.jobDataDescription')}
 		>
-			<Preformatted title="Raw JSON" content={displayedData} />
+			<Preformatted title={t('settingsUi.rawJson')} content={displayedData} />
 		</Sheet>
 	)
 }

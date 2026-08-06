@@ -106,8 +106,8 @@ export default function CreateOrUpdateAPIKeyForm({
 				}}
 			>
 				<Input
-					label="Name"
-					placeholder="Koreader Sync"
+					label={t('settingsScene.app/apiKeys.shared.fields.name')}
+					placeholder={t('settingsUi.apiKeyNamePlaceholder')}
 					{...form.register('name')}
 					errorMessage={errors.name?.message}
 					ignoreFill

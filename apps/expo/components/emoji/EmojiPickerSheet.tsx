@@ -5,7 +5,7 @@ import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'reac
 import { Image, Pressable, View } from 'react-native'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 
 import { Input, SheetHeader, Text } from '../ui'
 import type { Emoji, EmojiSelection } from './types'
@@ -87,6 +87,7 @@ const emojiMatchesQuery = (emoji: Emoji, queryTokens: string[]) => {
 }
 
 export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmojiSelect }, ref) => {
+	const { t } = useTranslate()
 	const sheetRef = useRef<TrueSheet>(null)
 	const colors = useColors()
 	const emojisByCategory = useEmojis()
@@ -212,7 +213,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 			<Pressable
 				key={isUnicodeEmoji ? emoji.unified : `custom:${emoji.id}`}
 				onPress={handlePress}
-				className="rounded-xl items-center justify-center"
+				className="items-center justify-center rounded-xl"
 				style={{
 					width: itemSize,
 					height: itemSize,
@@ -263,14 +264,14 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 			grabber
 			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 			grabberOptions={{ color: colors.sheet.grabber }}
-			header={<SheetHeader title="Emojis" onClose={dismissSheet} />}
+			header={<SheetHeader title={t('emojiPicker.title')} onClose={dismissSheet} />}
 			scrollable
 		>
 			<View className="px-4 py-2">
 				<Input
 					value={searchQuery}
 					onChangeText={setSearchQuery}
-					placeholder="Search emojis"
+					placeholder={t('emojiPicker.search')}
 					autoCorrect={false}
 					autoCapitalize="none"
 					returnKeyType="search"
@@ -281,7 +282,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 				keyExtractor={(item) => item.key}
 				ListEmptyComponent={
 					<View className="px-4 py-8 items-center">
-						<Text className="text-foreground-muted">No emojis found</Text>
+						<Text className="text-foreground-muted">{t('emojiPicker.empty')}</Text>
 					</View>
 				}
 				renderItem={({ item }) => {

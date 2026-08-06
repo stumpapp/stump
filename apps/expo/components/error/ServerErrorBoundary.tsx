@@ -3,6 +3,8 @@ import { useRouter } from 'expo-router'
 import { Linking, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useTranslate } from '~/lib/hooks'
+
 import Owl from '../Owl'
 import { Button, Heading, Text } from '../ui'
 import PotentiallyOutdatedServer from './PotentiallyOutdatedServer'
@@ -15,6 +17,7 @@ type Props = {
 }
 
 export default function ServerErrorBoundary({ error, onRetry }: Props) {
+	const { t } = useTranslate()
 	const router = useRouter()
 
 	if (isNetworkError(error)) {
@@ -26,14 +29,14 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 	}
 
 	return (
-		<SafeAreaView className="flex-1 items-center justify-center bg-background p-4">
-			<View className="w-full flex-1 items-center justify-between gap-8">
-				<View className="flex-1 items-center justify-center gap-8">
+		<SafeAreaView className="p-4 flex-1 items-center justify-center bg-background">
+			<View className="gap-8 w-full flex-1 items-center justify-between">
+				<View className="gap-8 flex-1 items-center justify-center">
 					<Owl owl="error" />
 
 					<View className="gap-2 px-4 tablet:max-w-lg">
 						<Heading size="xl" className="text-center">
-							Something went wrong!
+							{t('errors.somethingWentWrong')}
 						</Heading>
 
 						<ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 200 }}>
@@ -44,14 +47,14 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 					</View>
 				</View>
 
-				<View className="w-full gap-3">
+				<View className="gap-3 w-full">
 					<Button
 						className="rounded-full"
 						size="lg"
 						variant="brand"
 						onPress={() => router.dismissAll()}
 					>
-						<Text>Return Home</Text>
+						<Text>{t('errors.returnHome')}</Text>
 					</Button>
 
 					<Button
@@ -63,12 +66,12 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 							Linking.openURL(issueUrl)
 						}}
 					>
-						<Text>Report Issue</Text>
+						<Text>{t('errors.reportIssue')}</Text>
 					</Button>
 
 					{onRetry && (
 						<Button className="rounded-full" size="lg" variant="ghost" onPress={onRetry}>
-							<Text>Try Again</Text>
+							<Text>{t('errors.tryAgain')}</Text>
 						</Button>
 					)}
 				</View>

@@ -11,6 +11,7 @@ import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { startOidcLogin } from '~/lib/sdk/auth'
 import { useUserStore } from '~/stores'
 
@@ -24,6 +25,7 @@ type ServerAuthDialogProps = {
 }
 
 export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogProps) {
+	const { t } = useTranslate()
 	const setUser = useUserStore((state) => state.setUser)
 	const { activeServer } = useActiveServer()
 	const oidcConfig = useOidcConfig()
@@ -40,6 +42,10 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	const hasAuthSucceeded = useRef(false)
 
 	const colors = useColors()
+	const schema = z.object({
+		password: z.string().min(1, { message: t('auth.passwordRequired') }),
+		username: z.string().min(1, { message: t('auth.usernameRequired') }),
+	})
 
 	const {
 		control,
@@ -135,12 +141,12 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						}}
 						render={({ field: { onChange, onBlur, value } }) => (
 							<Input
-								label="Username"
+								label={t('common.username')}
 								autoCorrect={false}
 								autoCapitalize="none"
 								autoComplete="username"
 								textContentType="username"
-								placeholder="Username"
+								placeholder={t('common.username')}
 								onBlur={onBlur}
 								onChangeText={onChange}
 								value={value}
@@ -157,7 +163,9 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						}}
 						render={({ field: { onChange, onBlur, value } }) => (
 							<View className="gap-1.5 w-full">
-								<Text className="text-base font-medium text-foreground-muted">Password</Text>
+								<Text className="text-base font-medium text-foreground-muted">
+									{t('common.password')}
+								</Text>
 								<View className="relative flex-row items-center">
 									<Input
 										secureTextEntry={!isPasswordVisible}
@@ -165,7 +173,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 										autoCapitalize="none"
 										autoComplete="password"
 										textContentType="password"
-										placeholder="Password"
+										placeholder={t('common.password')}
 										onBlur={onBlur}
 										onChangeText={onChange}
 										value={value}
@@ -198,14 +206,14 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							disabled={isLoggingIn}
 							variant="brand"
 						>
-							<Text>Login</Text>
+							<Text>{t('auth.login')}</Text>
 						</Button>
 
 						{oidcConfig?.enabled && (
 							<>
 								<View className="flex-row items-center">
 									<View className="border-edge flex-1 border-t" />
-									<Text className="mx-2 text-sm text-foreground-muted">Or</Text>
+									<Text className="mx-2 text-sm text-foreground-muted">{t('auth.or')}</Text>
 									<View className="border-edge flex-1 border-t" />
 								</View>
 
@@ -216,7 +224,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 									roundness="full"
 									variant="secondary"
 								>
-									<Text>Login with OIDC</Text>
+									<Text>{t('auth.loginWithOidc')}</Text>
 								</Button>
 							</>
 						)}
@@ -227,8 +235,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	)
 }
 
-const schema = z.object({
-	password: z.string().min(1, { message: 'Password must be at least 2 characters long' }),
-	username: z.string().min(1, { message: 'Username is required' }),
-})
-type LoginSchema = z.infer<typeof schema>
+type LoginSchema = {
+	password: string
+	username: string
+}

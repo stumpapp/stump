@@ -6,6 +6,7 @@ import { useActiveServer } from '~/components/activeServer'
 import { Icon, ListLabel, Text } from '~/components/ui'
 import { ContextMenu } from '~/components/ui/context-menu/context-menu'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useCuratedSearch, useSearchStore } from '~/stores/search'
 
 import { Divider } from '../Divider'
@@ -15,6 +16,7 @@ type Props = {
 }
 
 export function SearchHistoryAndFavorites({ onSelect }: Props) {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -37,8 +39,8 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 	if (!hasFavorites && !hasHistory) {
 		return (
 			<View className="px-4 pt-20 flex-1 items-center justify-center">
-				<Text size="lg" className="text-center text-foreground-muted">
-					Your favorites and recent searches will appear here
+				<Text size="lg" className="text-foreground-muted text-center">
+					{t('searchHistory.empty')}
 				</Text>
 			</View>
 		)
@@ -52,7 +54,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 		>
 			{hasFavorites && (
 				<View className="px-4 pt-6">
-					<ListLabel className="mb-1">Favorites</ListLabel>
+					<ListLabel className="mb-1">{t('searchHistory.favorites')}</ListLabel>
 					{favoriteSearches.map((record, index) => (
 						<View key={record.query}>
 							{index > 0 && <Divider />}
@@ -84,9 +86,9 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 			{hasHistory && (
 				<View className="px-4 pt-6">
 					<View className="mb-1 flex-row items-center justify-between">
-						<ListLabel>Recently Searched</ListLabel>
+						<ListLabel>{t('searchHistory.recent')}</ListLabel>
 						<Pressable onPress={() => clearSearchHistory(serverID)} hitSlop={10}>
-							<Text className="text-fill-danger">Clear</Text>
+							<Text className="text-fill-danger">{t('common.clear')}</Text>
 						</Pressable>
 					</View>
 					{searchHistory.map((record, index) => (

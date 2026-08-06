@@ -5,7 +5,7 @@ import { Fragment, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { db, downloadedFiles, libraryRefs, readProgress, seriesRefs } from '~/db'
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
 
 import { Heading } from '../ui'
 import DownloadedListItem from './DownloadedListItem'
@@ -14,6 +14,7 @@ import { useDownloadsState } from './store'
 import { intoDownloadedFile } from './types'
 
 export default function ContinueReading() {
+	const { t } = useTranslate()
 	// Note: This is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
 	const id = useDownloadsState((state) => state.fetchCounter)
 
@@ -61,7 +62,7 @@ export default function ContinueReading() {
 			{leftOffBooks.length > 0 && (
 				<View className="flex">
 					<Heading size="xl" className="px-4">
-						Continue Reading
+						{t('stumpServer.continueReading.label')}
 					</Heading>
 
 					<FlashList

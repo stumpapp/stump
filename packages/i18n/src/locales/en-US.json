@@ -3583,8 +3583,38 @@
 			"value": "Value",
 			"version": "Version"
 		},
+		"auth": {
+			"login": "Login",
+			"loginWithOidc": "Login with OIDC",
+			"or": "Or",
+			"usernameRequired": "Username is required",
+			"passwordRequired": "Password is required"
+		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Unknown error",
+			"somethingWentWrong": "Something went wrong!",
+			"returnHome": "Return Home",
+			"reportIssue": "Report Issue",
+			"tryAgain": "Try Again",
+			"outdatedServer": "Outdated Server",
+			"outdatedServerDescription": "An error suggests that your server is outdated. Update the server to continue.",
+			"connectionFailed": "Failed to Connect",
+			"connectionFailedDescription": "This server is currently unavailable. Make sure it is running and accessible from this device."
+		},
+		"searchHistory": {
+			"empty": "Your favorites and recent searches will appear here",
+			"favorites": "Favorites",
+			"recent": "Recently Searched"
+		},
+		"emojiPicker": {
+			"title": "Emojis",
+			"search": "Search emojis",
+			"empty": "No emojis found"
+		},
+		"unimplemented": {
+			"title": "Coming Soon!",
+			"description": "This feature is not yet implemented. Please check back later!",
+			"okay": "Okay"
 		},
 		"epubMenu": {
 			"tableOfContents": "Table of Contents",

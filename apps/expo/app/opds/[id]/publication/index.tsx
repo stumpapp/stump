@@ -66,10 +66,10 @@ export default function Screen() {
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
 		navigation.setOptions({
-			title: title || 'Publication',
+			title: title || t('common.publication'),
 			// headerRight: () => <PublicationMenu publicationUrl={url} metadata={metadata} />,
 		})
-	}, [navigation, url, title, metadata])
+	}, [navigation, url, title, metadata, t])
 
 	const menuFragment = usePublicationMenu({
 		publicationUrl: url,

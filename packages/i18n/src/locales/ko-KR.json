@@ -3808,6 +3808,7 @@
 			"discussionLocked": "이 토론은 잠겨 있습니다.",
 			"replyingTo": "{{name}} 님에게 답장",
 			"messagePlaceholder": "메시지 입력...",
+			"messageRoomPlaceholder": "#{{name}}에 메시지 입력...",
 			"settingsNotImplemented": "북클럽 설정은 아직 구현되지 않았습니다",
 			"currentlyReading": "현재 읽는 책"
 		},

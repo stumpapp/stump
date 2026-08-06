@@ -3808,6 +3808,7 @@
 			"discussionLocked": "This discussion is locked.",
 			"replyingTo": "Replying to {{name}}",
 			"messagePlaceholder": "Type a message...",
+			"messageRoomPlaceholder": "Message #{{name}}...",
 			"settingsNotImplemented": "Book club settings are not implemented yet",
 			"currentlyReading": "Currently reading"
 		},

@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from 'react'
 import { View } from 'react-native'
 
 import type { EmojiSelection } from '~/components/emoji/types'
+import { useTranslate } from '~/lib/hooks'
 
 import Message, { type MessageData } from './Message'
 import { MessageActionSheet, type MessageActionSheetRef } from './MessageActionSheet'
@@ -36,6 +37,7 @@ export default function DiscussionRoom({
 	listHeader,
 	parentMessageId,
 }: DiscussionRoomProps) {
+	const { t } = useTranslate()
 	const actionSheetRef = useRef<MessageActionSheetRef>(null)
 
 	const [replyingTo, setReplyingTo] = useState<MessageData | null>(null)
@@ -88,7 +90,7 @@ export default function DiscussionRoom({
 				onSend={handleSend}
 				isSending={isSending}
 				isLocked={isLocked}
-				placeholder={`Message #${name}...`}
+				placeholder={t('bookClub.messageRoomPlaceholder', { name })}
 				parentMessageId={parentMessageId}
 				replyingTo={replyingTo}
 				onCancelReply={() => setReplyingTo(null)}

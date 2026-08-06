@@ -35,7 +35,7 @@ export default function DangerSettingsScene() {
 								onClick={() => setShowConfirmation(true)}
 								className="shrink-0"
 							>
-								Delete list
+								{t(getKey('confirmation.confirm'))}
 							</Button>
 						</div>
 					}

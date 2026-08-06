@@ -89,7 +89,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(2)}>
-								Next step
+								{t('common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -101,7 +101,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								Next step
+								{t('common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -131,7 +131,7 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 						className="md:w-auto w-full"
 						isLoading={isLoading}
 					>
-						Create list
+						{t('createSmartListScene.form.buttons.confirm')}
 					</Button>
 				</div>
 			</ContentContainer>

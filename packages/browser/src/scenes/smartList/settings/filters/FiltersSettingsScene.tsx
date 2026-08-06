@@ -59,7 +59,7 @@ export default function FiltersSettingsScene() {
 
 			<div>
 				<Button type="submit" disabled={!isChanged}>
-					Update filters
+					{t('smartListSettingsScene.filters.update')}
 				</Button>
 			</div>
 		</Form>

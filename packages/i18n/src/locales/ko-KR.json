@@ -875,6 +875,16 @@
 		"size": "크기"
 	},
 	"bookClubUi": {
+		"createdBy": "만든 사람",
+		"memberSummary": "{{role}} {{count}}명 • {{date}} 생성",
+		"started": "{{date}} 시작",
+		"completedDaysAgo": "{{count}}일 전에 완독",
+		"added": "{{date}} 추가",
+		"readingDuration": "{{count}}일 동안 읽음",
+		"notCompletedYet": "아직 완독하지 않음",
+		"currentlyReading": "현재 읽는 책",
+		"pastBook": "지난 책",
+		"navigationEmpty": "북클럽에 참여하거나 새로 만들어 보세요",
 		"deleteTitle": "북클럽 삭제",
 		"deleteDescription": "이 북클럽을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
 		"deleteConfirm": "북클럽 삭제",
@@ -1597,6 +1607,7 @@
 		"heading": "스마트 목록",
 		"subtitle": "자주 사용하는 검색과 필터를 저장하여 간편하게 이용할 수 있습니다",
 		"accessCount": "접근 가능한 스마트 목록이 {{count}}개 있습니다",
+		"navigationEmpty": "첫 스마트 목록을 만들어 시작하세요",
 		"searchPlaceholder": "스마트 목록 검색",
 		"buttons": {
 			"createSmartList": "스마트 목록 만들기"
@@ -1634,7 +1645,8 @@
 		},
 		"basics": {
 			"title": "기본 정보",
-			"description": "이름과 설명 등 스마트 목록의 기본 정보"
+			"description": "이름과 설명 등 스마트 목록의 기본 정보",
+			"update": "목록 업데이트"
 		},
 		"access": {
 			"title": "접근",
@@ -1656,7 +1668,8 @@
 		},
 		"filters": {
 			"title": "필터 구성",
-			"description": "이 스마트 목록을 구성하는 필터를 관리합니다"
+			"description": "이 스마트 목록을 구성하는 필터를 관리합니다",
+			"update": "필터 업데이트"
 		},
 		"danger-zone/delete": {
 			"title": "삭제 작업",
@@ -3147,6 +3160,8 @@
 		"somethingWentWrong": "문제가 발생했습니다",
 		"back": "뒤로",
 		"continue": "계속",
+		"nextStep": "다음 단계",
+		"continueToReview": "검토 단계로 이동",
 		"book": "책",
 		"series": "시리즈",
 		"fileUpload": {

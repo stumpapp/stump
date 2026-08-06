@@ -875,6 +875,16 @@
 		"size": "Size"
 	},
 	"bookClubUi": {
+		"createdBy": "Created by",
+		"memberSummary": "{{count}} {{role}} • Created {{date}}",
+		"started": "Started {{date}}",
+		"completedDaysAgo": "Completed {{count}} days ago",
+		"added": "Added {{date}}",
+		"readingDuration": "Read for {{count}} days",
+		"notCompletedYet": "Not completed yet",
+		"currentlyReading": "Currently reading",
+		"pastBook": "Past book",
+		"navigationEmpty": "Join or create a book club to get started",
 		"deleteTitle": "Delete book club",
 		"deleteDescription": "Are you sure you want to delete this club? This action cannot be undone.",
 		"deleteConfirm": "Delete club",
@@ -1597,6 +1607,7 @@
 		"heading": "Smart lists",
 		"subtitle": "Your favorite searches and filters saved for easy access",
 		"accessCount": "You have access to {{count}} smart lists",
+		"navigationEmpty": "Create your first smart list to get started",
 		"searchPlaceholder": "Filter smart lists",
 		"buttons": {
 			"createSmartList": "Create smart list"
@@ -1634,7 +1645,8 @@
 		},
 		"basics": {
 			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"description": "The details of this smart list, including its name and description",
+			"update": "Update list"
 		},
 		"access": {
 			"title": "Access",
@@ -1656,7 +1668,8 @@
 		},
 		"filters": {
 			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"description": "Manage the filters which construct this smart list",
+			"update": "Update filters"
 		},
 		"danger-zone/delete": {
 			"title": "Deletion Actions",
@@ -3147,6 +3160,8 @@
 		"somethingWentWrong": "Something went wrong",
 		"back": "Back",
 		"continue": "Continue",
+		"nextStep": "Next step",
+		"continueToReview": "Continue to review",
 		"book": "Book",
 		"series": "Series",
 		"fileUpload": {

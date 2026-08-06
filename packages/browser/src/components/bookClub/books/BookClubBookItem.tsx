@@ -1,8 +1,8 @@
 import { AspectRatio, Badge, Card, cx, Heading, Link, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { differenceInDays, formatDistanceToNow } from 'date-fns'
 import { Book } from 'lucide-react'
-import pluralize from 'pluralize'
 import { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
@@ -38,6 +38,7 @@ type Props = {
 	data: FragmentType<typeof fragment>
 }
 export default function BookClubBookItem({ data }: Props) {
+	const { t } = useLocaleContext()
 	const book = useFragment(fragment, data)
 
 	const { bookClub } = useBookClubContext()
@@ -50,12 +51,16 @@ export default function BookClubBookItem({ data }: Props) {
 
 		let message
 		if (isCurrent) {
-			message = `Started ${formatDistanceToNow(startedAt, { addSuffix: true })}`
+			message = t('bookClubUi.started', {
+				date: formatDistanceToNow(startedAt, { addSuffix: true }),
+			})
 		} else if (completedAt) {
 			const daysAgo = differenceInDays(new Date(), completedAt)
-			message = `Completed ${daysAgo} ${pluralize('day', daysAgo)} ago`
+			message = t('bookClubUi.completedDaysAgo', { count: daysAgo })
 		} else {
-			message = `Added ${formatDistanceToNow(startedAt, { addSuffix: true })}`
+			message = t('bookClubUi.added', {
+				date: formatDistanceToNow(startedAt, { addSuffix: true }),
+			})
 		}
 
 		return {
@@ -63,7 +68,7 @@ export default function BookClubBookItem({ data }: Props) {
 			start: startedAt,
 			end: completedAt,
 		}
-	}, [book, isCurrent])
+	}, [book, isCurrent, t])
 
 	// const discussionInfo = useMemo(() => {
 	// 	const archived = !isCurrent && !isDiscussing
@@ -81,13 +86,13 @@ export default function BookClubBookItem({ data }: Props) {
 		if (isCurrent) {
 			return (
 				<Badge size="xs" variant="primary" className="shrink-0">
-					Currently reading
+					{t('bookClubUi.currentlyReading')}
 				</Badge>
 			)
 		} else {
 			return (
 				<Badge size="xs" className="shrink-0">
-					Past book
+					{t('bookClubUi.pastBook')}
 				</Badge>
 			)
 		}
@@ -169,11 +174,10 @@ export default function BookClubBookItem({ data }: Props) {
 							)}
 						>
 							{daysInfo.end
-								? `Read for ${differenceInDays(daysInfo.end, daysInfo.start)} ${pluralize(
-										'day',
-										differenceInDays(daysInfo.end, daysInfo.start),
-									)}`
-								: 'Not completed yet'}
+								? t('bookClubUi.readingDuration', {
+										count: differenceInDays(daysInfo.end, daysInfo.start),
+									})
+								: t('bookClubUi.notCompletedYet')}
 						</span>
 					</div>
 				)}

@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, cn, Form } from '@stump/components'
 import { CreateLibrarySceneExistingLibrariesQuery, UserPermission } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
@@ -33,6 +34,7 @@ type Props = {
 }
 
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
+	const { t } = useLocaleContext()
 	const { currentStep, setStep } = useSteppedFormContext()
 	const { checkPermission } = useAppContext()
 
@@ -108,7 +110,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 								className="md:w-auto w-full"
 								onClick={() => handleChangeStep(2)}
 							>
-								Next step
+								{t('common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -123,7 +125,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<IgnoreRulesConfig />
 						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button className="md:w-auto w-full" onClick={() => handleChangeStep(3)}>
-								Next step
+								{t('common.nextStep')}
 							</Button>
 						</div>
 					</>
@@ -138,7 +140,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 								onClick={() => handleChangeStep(4)}
 								type="button"
 							>
-								Continue to review
+								{t('common.continueToReview')}
 							</Button>
 						</div>
 					</>
@@ -193,7 +195,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 							className="md:w-auto w-full"
 							isLoading={isLoading}
 						>
-							Create library
+							{t('createLibraryScene.form.buttons.confirm')}
 						</Button>
 					</div>
 				</ContentContainer>

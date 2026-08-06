@@ -51,7 +51,7 @@ export default function BookClubNavigationItem({
 						<div className="text-left">
 							<Label>{t('sidebar.buttons.noBookClubs')}</Label>
 							<Text size="sm" variant="muted">
-								Join or create a book club to get started
+								{t('bookClubUi.navigationEmpty')}
 							</Text>
 						</div>
 					</div>

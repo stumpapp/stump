@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -15,9 +16,10 @@ import { useLibraryManagement } from '../../context'
 import ThumbnailManagementSection from './ThumbnailManagementSection'
 
 export default function ThumbnailSettingsScene() {
+	const { t } = useLocaleContext()
 	const { library, patch } = useLibraryManagement()
 
-	const schema = useMemo(() => buildSchema([], library), [library])
+	const schema = useMemo(() => buildSchema(t, [], library), [t, library])
 	const form = useForm<CreateOrUpdateLibrarySchema>({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',

@@ -1,5 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { graphql, SaveSmartListView } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import { useCallback } from 'react'
@@ -77,6 +78,7 @@ const deleteViewMutation = graphql(`
  * Hook to save the current working view as a new stored view
  */
 export const useSaveWorkingView = () => {
+	const { t } = useLocaleContext()
 	const { list } = useSmartListContext()
 	const workingView = useSmartListViewStore((s) => s.workingView)
 	const selectStoredView = useSmartListViewStore((s) => s.selectStoredView)
@@ -109,7 +111,7 @@ export const useSaveWorkingView = () => {
 				})
 			} catch (error) {
 				console.error(error)
-				const prefix = 'Failed to create view'
+				const prefix = t(`${LOCALE_BASE}.viewCreateError`)
 				if (error instanceof Error) {
 					toast.error(`${prefix}${error.message ? `: ${error.message}` : ''}`)
 				} else {
@@ -117,7 +119,7 @@ export const useSaveWorkingView = () => {
 				}
 			}
 		},
-		[workingView, list.id, createView],
+		[workingView, list.id, createView, t],
 	)
 
 	return { saveWorkingView }
@@ -127,6 +129,7 @@ export const useSaveWorkingView = () => {
  * Hook to update the currently selected stored view with the working view changes
  */
 export const useSaveSelectedStoredView = () => {
+	const { t } = useLocaleContext()
 	const { list } = useSmartListContext()
 	const workingView = useSmartListViewStore((s) => s.workingView)
 	const selectedView = useSmartListViewStore((s) => s.selectedView)
@@ -164,7 +167,7 @@ export const useSaveSelectedStoredView = () => {
 				})
 			} catch (error) {
 				console.error(error)
-				const prefix = 'Failed to save view'
+				const prefix = t(`${LOCALE_BASE}.viewSaveError`)
 				if (error instanceof Error) {
 					toast.error(`${prefix}${error.message ? `: ${error.message}` : ''}`)
 				} else {
@@ -172,7 +175,7 @@ export const useSaveSelectedStoredView = () => {
 				}
 			}
 		},
-		[selectedView, workingView, updateView],
+		[selectedView, workingView, updateView, t],
 	)
 
 	return { saveSelectedStoredView }
@@ -182,6 +185,7 @@ export const useSaveSelectedStoredView = () => {
  * Hook to delete the currently selected stored view
  */
 export const useDeleteSelectedView = () => {
+	const { t } = useLocaleContext()
 	const { list } = useSmartListContext()
 	const selectedView = useSmartListViewStore((s) => s.selectedView)
 	const selectStoredView = useSmartListViewStore((s) => s.selectStoredView)
@@ -208,17 +212,19 @@ export const useDeleteSelectedView = () => {
 				id: list.id,
 				name: selectedView.name,
 			})
-			toast.success('View deleted')
+			toast.success(t(`${LOCALE_BASE}.viewDeleteSuccess`))
 		} catch (error) {
 			console.error(error)
-			const prefix = 'Failed to delete view'
+			const prefix = t(`${LOCALE_BASE}.viewDeleteError`)
 			if (error instanceof Error) {
 				toast.error(`${prefix}${error.message ? `: ${error.message}` : ''}`)
 			} else {
 				toast.error(prefix)
 			}
 		}
-	}, [selectedView, list.id, deleteView])
+	}, [selectedView, list.id, deleteView, t])
 
 	return { deleteSelectedView, isDeleting: isPending }
 }
+
+const LOCALE_BASE = 'userSmartListScene.layout'

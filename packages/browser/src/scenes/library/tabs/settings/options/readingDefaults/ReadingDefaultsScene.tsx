@@ -47,7 +47,7 @@ export default function ReadingDefaultsScene() {
 
 	const schema = useMemo(
 		() =>
-			buildSchema([], library).pick({
+			buildSchema(t, [], library).pick({
 				defaultReadingDir: true,
 				defaultReadingImageScaleFit: true,
 				defaultReadingMode: true,
@@ -55,7 +55,7 @@ export default function ReadingDefaultsScene() {
 				hideSeriesView: true,
 				skipBookOverview: true,
 			}),
-		[library],
+		[t, library],
 	)
 
 	const form = useForm<PatchParams>({

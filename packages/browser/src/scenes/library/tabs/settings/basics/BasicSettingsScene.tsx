@@ -42,7 +42,7 @@ export default function BasicSettingsScene() {
 	} = useSuspenseGraphQL(query, [sdk.cacheKeys.libraryCreateLibraryQuery])
 	const { checkPermission } = useAppContext()
 
-	const schema = useMemo(() => buildSchema(libraries, library), [libraries, library])
+	const schema = useMemo(() => buildSchema(t, libraries, library), [t, libraries, library])
 	const form = useForm<CreateOrUpdateLibrarySchema>({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',

@@ -293,6 +293,17 @@
 		}
 	},
 	"createOrUpdateLibraryForm": {
+		"validation": {
+			"factorRange": "배율은 0보다 크고 1 이하여야 합니다",
+			"thumbnailQualityRange": "썸네일 품질은 0보다 크고 100 이하여야 합니다",
+			"invalidGlob": "올바른 glob 패턴을 입력하세요",
+			"nameRequired": "라이브러리 이름을 입력하세요",
+			"nameTaken": "{{name}} 이름의 라이브러리가 이미 있습니다.",
+			"pathRequired": "라이브러리 경로를 입력하세요",
+			"pathTaken": "다른 라이브러리에서 이미 사용 중인 경로입니다",
+			"pathParent": "기존 라이브러리의 상위 디렉터리는 사용할 수 없습니다",
+			"pathChild": "기존 라이브러리의 하위 디렉터리는 사용할 수 없습니다"
+		},
 		"fields": {
 			"name": {
 				"label": "이름",
@@ -1314,6 +1325,12 @@
 		"excludeField": "이 필드 제외",
 		"fieldLocked": "이 필드는 잠겨 있습니다",
 		"reviewDialog": {
+			"notifications": {
+				"accepted": "일치 항목을 수락했습니다",
+				"acceptFailed": "일치 항목을 수락하지 못했습니다",
+				"rejected": "일치 항목을 거절했습니다",
+				"rejectFailed": "일치 항목을 거절하지 못했습니다"
+			},
 			"previewEditor": {
 				"noCandidates": "이 레코드에 사용할 수 있는 후보가 없습니다",
 				"noComparableFields": "비교할 수 있는 필드가 없습니다",
@@ -1769,7 +1786,9 @@
 			"missingIdError": "이 화면의 URL에는 ID가 필요합니다",
 			"smartListNotFound": "스마트 목록을 찾을 수 없습니다",
 			"viewCreateError": "보기를 만들지 못했습니다",
-			"viewSaveError": "보기를 저장하지 못했습니다"
+			"viewSaveError": "보기를 저장하지 못했습니다",
+			"viewDeleteSuccess": "보기를 삭제했습니다",
+			"viewDeleteError": "보기를 삭제하지 못했습니다"
 		},
 		"header": {
 			"backLink": "목록"

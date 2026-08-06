@@ -11,6 +11,7 @@ import {
 	ScaledDimensionResize,
 	SupportedImageFormat,
 } from '@stump/graphql'
+import type { LocaleContextProps } from '@stump/i18n'
 import isValidGlob from 'is-valid-glob'
 import omit from 'lodash/omit'
 import { match } from 'ts-pattern'
@@ -72,45 +73,44 @@ const exactResize = z.object({
 	width: z.number().int().positive(),
 })
 
-const scaledEventlyByFactor = z.object({
-	mode: z.literal('scaleEvenlyByFactor'),
-	factor: z.number().refine((value) => value > 0 && value <= 1, {
-		message: 'Factor must be between 0 and 1',
-	}),
-})
-
 const scaledDimension = z.object({
 	mode: z.literal('scaleDimension'),
 	dimension: z.enum(['HEIGHT', 'WIDTH']),
 	size: z.number().int().positive(),
 })
 
-const resizeOptionsSchema = z.union([exactResize, scaledEventlyByFactor, scaledDimension])
-
-const thumbnailConfig = z.object({
-	enabled: z.boolean().default(false),
-	format: imageFormatSchema.default(SupportedImageFormat.Webp),
-	quality: z
-		.number()
-		.int()
-		.nullish()
-		.refine(
-			(value) => value == undefined || (value > 0 && value <= 100),
-			() => ({
-				message: 'Thumbnail quality must be between 0 and 100',
-			}),
-		),
-	resizeMethod: resizeOptionsSchema.nullish(),
-})
-
 /**
  * A function which builds a schema used for validating form data when creating or updating a library
  */
 export const buildSchema = (
+	t: LocaleContextProps['t'],
 	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes'],
 	library?: Library,
-) =>
-	z.object({
+) => {
+	const scaledEventlyByFactor = z.object({
+		mode: z.literal('scaleEvenlyByFactor'),
+		factor: z.number().refine((value) => value > 0 && value <= 1, {
+			message: t(getValidationKey('factorRange')),
+		}),
+	})
+	const resizeOptionsSchema = z.union([exactResize, scaledEventlyByFactor, scaledDimension])
+	const thumbnailConfig = z.object({
+		enabled: z.boolean().default(false),
+		format: imageFormatSchema.default(SupportedImageFormat.Webp),
+		quality: z
+			.number()
+			.int()
+			.nullish()
+			.refine(
+				(value) => value == undefined || (value > 0 && value <= 100),
+				() => ({
+					message: t(getValidationKey('thumbnailQualityRange')),
+				}),
+			),
+		resizeMethod: resizeOptionsSchema.nullish(),
+	})
+
+	return z.object({
 		convertRarToZip: z.boolean().default(false),
 		defaultReadingDir: z.enum(['LTR', 'RTL']).default('LTR').optional(),
 		defaultReadingImageScaleFit: z
@@ -129,7 +129,9 @@ export const buildSchema = (
 		ignoreRules: z
 			.array(
 				z.object({
-					glob: z.string().refine(isValidGlob, { message: 'Invalid glob pattern' }),
+					glob: z.string().refine(isValidGlob, {
+						message: t(getValidationKey('invalidGlob')),
+					}),
 					ignore_parents: z.boolean().default(false),
 					ignore_subdirs: z.boolean().default(false),
 				}),
@@ -142,7 +144,7 @@ export const buildSchema = (
 		skipBookOverview: z.boolean().default(false),
 		name: z
 			.string()
-			.min(1, { message: 'Library name is required' })
+			.min(1, { message: t(getValidationKey('nameRequired')) })
 			.refine(
 				// return falsy value to indicate failure.
 				// If the library name is already taken -> fail
@@ -152,13 +154,13 @@ export const buildSchema = (
 					const isUnchanged = library?.name === val
 					return !isTaken || isUnchanged
 				},
-				(val) => ({
-					message: `You already have a library named ${val}.`,
+				(name) => ({
+					message: t(getValidationKey('nameTaken'), { name }),
 				}),
 			),
 		path: z
 			.string()
-			.min(1, { message: 'Library path is required' })
+			.min(1, { message: t(getValidationKey('pathRequired')) })
 			.transform((val) => normalizePath(val))
 			.superRefine((val, ctx) => {
 				// If the path is unchanged -> pass
@@ -170,7 +172,7 @@ export const buildSchema = (
 
 				const isTaken = existingLibraries.some((l) => l.path === val)
 				if (isTaken) {
-					ctx.addIssue({ code: 'custom', message: 'This path is taken by an existing library' })
+					ctx.addIssue({ code: 'custom', message: t(getValidationKey('pathTaken')) })
 					return
 				}
 
@@ -180,7 +182,7 @@ export const buildSchema = (
 				if (isParent) {
 					ctx.addIssue({
 						code: 'custom',
-						message: 'This path is a parent directory of an existing library',
+						message: t(getValidationKey('pathParent')),
 					})
 					return
 				}
@@ -189,7 +191,7 @@ export const buildSchema = (
 				if (isChild) {
 					ctx.addIssue({
 						code: 'custom',
-						message: 'This path is a sub-directory of an existing library',
+						message: t(getValidationKey('pathChild')),
 					})
 					return
 				}
@@ -207,6 +209,9 @@ export const buildSchema = (
 		thumbnailConfig,
 		processThumbnailColorsEvenWithoutConfig: z.boolean().default(false),
 	})
+}
+
+const getValidationKey = (key: string) => `createOrUpdateLibraryForm.validation.${key}`
 export type CreateOrUpdateLibrarySchema = z.infer<ReturnType<typeof buildSchema>>
 
 /**

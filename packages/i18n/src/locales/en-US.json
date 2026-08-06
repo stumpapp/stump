@@ -293,6 +293,17 @@
 		}
 	},
 	"createOrUpdateLibraryForm": {
+		"validation": {
+			"factorRange": "Factor must be between 0 and 1",
+			"thumbnailQualityRange": "Thumbnail quality must be between 0 and 100",
+			"invalidGlob": "Invalid glob pattern",
+			"nameRequired": "Library name is required",
+			"nameTaken": "You already have a library named {{name}}.",
+			"pathRequired": "Library path is required",
+			"pathTaken": "This path is taken by an existing library",
+			"pathParent": "This path is a parent directory of an existing library",
+			"pathChild": "This path is a sub-directory of an existing library"
+		},
 		"fields": {
 			"name": {
 				"label": "Name",
@@ -1314,6 +1325,12 @@
 		"excludeField": "Exclude this field",
 		"fieldLocked": "This field is locked",
 		"reviewDialog": {
+			"notifications": {
+				"accepted": "Match accepted",
+				"acceptFailed": "Failed to accept match",
+				"rejected": "Match rejected",
+				"rejectFailed": "Failed to reject match"
+			},
 			"previewEditor": {
 				"noCandidates": "No candidates available for this record",
 				"noComparableFields": "No comparable fields found",
@@ -1769,7 +1786,9 @@
 			"missingIdError": "This scene requires an ID in the URL",
 			"smartListNotFound": "Smart list not found",
 			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"viewSaveError": "Failed to save view",
+			"viewDeleteSuccess": "View deleted",
+			"viewDeleteError": "Failed to delete view"
 		},
 		"header": {
 			"backLink": "Lists"

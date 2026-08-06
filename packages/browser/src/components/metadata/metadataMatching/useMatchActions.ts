@@ -1,5 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { graphql, MetadataField } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -85,6 +86,7 @@ const setSeriesLockedFieldsMutation = graphql(`
 `)
 
 export function useToggleLockedField() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { records, currentRecordIndex, toggleLockedField, getLockedFields } = useMatchReviewStore()
 
@@ -106,14 +108,15 @@ export function useToggleLockedField() {
 
 			promise.catch(() => {
 				toggleLockedField(field)
-				toast.error('Failed to update locked fields')
+				toast.error(t('entityUi.lockedFieldsUpdateFailed'))
 			})
 		},
-		[sdk, records, currentRecordIndex, toggleLockedField, getLockedFields],
+		[sdk, records, currentRecordIndex, toggleLockedField, getLockedFields, t],
 	)
 }
 
 export function useMatchActions() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const {
 		records,
@@ -165,7 +168,7 @@ export function useMatchActions() {
 		}
 	}
 	const onAcceptSuccess = () => {
-		toast.success('Match accepted')
+		toast.success(t(`${LOCALE_BASE}.accepted`))
 		invalidateQueries()
 		advance()
 	}
@@ -174,7 +177,7 @@ export function useMatchActions() {
 		acceptMediaMatchMutation,
 		{
 			onSuccess: () => onAcceptSuccess(),
-			onError: () => toast.error('Failed to accept match'),
+			onError: () => toast.error(t(`${LOCALE_BASE}.acceptFailed`)),
 		},
 	)
 
@@ -182,7 +185,7 @@ export function useMatchActions() {
 		acceptSeriesMatchMutation,
 		{
 			onSuccess: () => onAcceptSuccess(),
-			onError: () => toast.error('Failed to accept match'),
+			onError: () => toast.error(t(`${LOCALE_BASE}.acceptFailed`)),
 		},
 	)
 
@@ -190,11 +193,11 @@ export function useMatchActions() {
 		rejectMediaMatchMutation,
 		{
 			onSuccess: () => {
-				toast.success('Match rejected')
+				toast.success(t(`${LOCALE_BASE}.rejected`))
 				invalidateQueries()
 				advance()
 			},
-			onError: () => toast.error('Failed to reject match'),
+			onError: () => toast.error(t(`${LOCALE_BASE}.rejectFailed`)),
 		},
 	)
 
@@ -202,11 +205,11 @@ export function useMatchActions() {
 		rejectSeriesMatchMutation,
 		{
 			onSuccess: () => {
-				toast.success('Match rejected')
+				toast.success(t(`${LOCALE_BASE}.rejected`))
 				invalidateQueries()
 				advance()
 			},
-			onError: () => toast.error('Failed to reject match'),
+			onError: () => toast.error(t(`${LOCALE_BASE}.rejectFailed`)),
 		},
 	)
 
@@ -266,3 +269,5 @@ export function useMatchActions() {
 
 	return { accept, reject, isPending, hasCandidate }
 }
+
+const LOCALE_BASE = 'metadataMatching.reviewDialog.notifications'

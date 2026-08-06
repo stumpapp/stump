@@ -40,7 +40,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
-	const schema = useMemo(() => buildSchema(existingLibraries), [existingLibraries])
+	const schema = useMemo(() => buildSchema(t, existingLibraries), [t, existingLibraries])
 	const form = useForm<CreateOrUpdateLibrarySchema>({
 		defaultValues: formDefaults(),
 		reValidateMode: 'onChange',

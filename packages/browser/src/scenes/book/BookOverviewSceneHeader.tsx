@@ -1,6 +1,7 @@
 import { formatBytes } from '@stump/client'
 import { Badge, Heading, Link, Statistic, Text } from '@stump/components'
 import { BookCardFragment, BookOverviewSceneQuery, Tag } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { ExternalLink } from 'lucide-react'
 import { Suspense } from 'react'
 
@@ -18,6 +19,7 @@ type Props = {
 }
 
 export default function BookOverviewSceneHeader({ media, book, completedAt }: Props) {
+	const { t } = useLocaleContext()
 	const metadata = media.metadata
 	const tags = media.tags as Tag[] | undefined
 	const pages = media.pages ?? 0
@@ -49,19 +51,25 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 
 			{hasStats && (
 				<div className="gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6 grid grid-cols-2">
-					{pages > 0 && <Statistic.Item label="Pages" value={pages} />}
-					{size > 0 && <Statistic.Item label="Size" value={formatBytes(size) ?? '—'} />}
+					{pages > 0 && <Statistic.Item label={t('entityUi.pages')} value={pages} />}
+					{size > 0 && (
+						<Statistic.Item label={t('entityUi.size')} value={formatBytes(size) ?? '—'} />
+					)}
 					{media.extension && (
-						<Statistic.Item label="Format" value={media.extension.toUpperCase()} />
+						<Statistic.Item label={t('entityUi.format')} value={media.extension.toUpperCase()} />
 					)}
 					{metadata?.year && metadata.year > 0 && (
-						<Statistic.Item label="Year" value={metadata.year} />
+						<Statistic.Item label={t('entityUi.year')} value={metadata.year} />
 					)}
 					{progressPercent != null && progressPercent > 0 && progressPercent < 100 && (
 						<Statistic.Item
-							label="Progress"
+							label={t('entityUi.progress')}
 							value={`${progressPercent}%`}
-							suffix={readProgress?.page ? `(p. ${readProgress.page})` : undefined}
+							suffix={
+								readProgress?.page
+									? `(${t('entityUi.pageAbbreviation')} ${readProgress.page})`
+									: undefined
+							}
 						/>
 					)}
 				</div>
@@ -73,7 +81,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 					{metadata?.language && <Badge rounded="full">{metadata.language}</Badge>}
 					{metadata?.ageRating && metadata.ageRating > 0 && (
 						<Badge variant="warning" rounded="full">
-							Age {metadata.ageRating}+
+							{t('entityUi.age', { age: metadata.ageRating })}
 						</Badge>
 					)}
 				</div>
@@ -81,14 +89,19 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 
 			{completedAt && (
 				<Text size="xs" variant="muted">
-					{(book.readHistory?.length ?? 0) > 1 ? 'Last completed' : 'Completed'} on{' '}
-					{new Intl.DateTimeFormat(undefined, {
-						month: 'long',
-						day: 'numeric',
-						year: 'numeric',
-						hour: 'numeric',
-						minute: '2-digit',
-					}).format(new Date(completedAt))}
+					{t('entityUi.completedOn', {
+						status:
+							(book.readHistory?.length ?? 0) > 1
+								? t('entityUi.lastCompleted')
+								: t('entityUi.completed'),
+						date: new Intl.DateTimeFormat(undefined, {
+							month: 'long',
+							day: 'numeric',
+							year: 'numeric',
+							hour: 'numeric',
+							minute: '2-digit',
+						}).format(new Date(completedAt)),
+					})}
 				</Text>
 			)}
 
@@ -101,7 +114,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			{hasGenres && (
 				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
-						Genres
+						{t('entityUi.genres')}
 					</Text>
 					<BadgeList>
 						{metadata!.genres.map((genre) => (
@@ -124,7 +137,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			{hasWriters && (
 				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
-						Writers
+						{t('entityUi.writers')}
 					</Text>
 					<BadgeList>
 						{metadata!.writers.map((writer) => (
@@ -147,7 +160,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			{hasTags && (
 				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
-						Tags
+						{t('entityUi.tags')}
 					</Text>
 					<TagList
 						tags={tags}
@@ -159,7 +172,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			{hasLinks && (
 				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
-						Links
+						{t('entityUi.links')}
 					</Text>
 					<BadgeList>
 						{metadata!.links

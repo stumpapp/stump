@@ -3,6 +3,7 @@ import { EBOOK_EXTENSION, PDF_EXTENSION } from '@stump/client'
 import { Button, ButtonOrLink, DropdownMenu } from '@stump/components'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { BookCardFragment, graphql, UserPermission } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import {
 	BookMinus,
@@ -49,6 +50,7 @@ type Props = {
 	book: BookCardFragment
 }
 export default function BookActionMenu({ book }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
 
@@ -272,10 +274,10 @@ export default function BookActionMenu({ book }: Props) {
 						className="w-full shrink"
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
-						title="Download"
+						title={t('entityUi.download')}
 					>
 						<Download className="mr-2 h-4 w-4" />
-						Download
+						{t('entityUi.download')}
 					</ButtonOrLink>
 				)}
 

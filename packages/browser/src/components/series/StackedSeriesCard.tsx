@@ -1,6 +1,7 @@
 import { getThumbnailTintColor } from '@stump/client'
 import { cn, Text } from '@stump/components'
 import { ImageRef, InterfaceRoundness } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 
 import { Link } from '@/context'
@@ -71,6 +72,7 @@ export function StackedSeriesCard({
 	thumbnailData,
 	className,
 }: Props) {
+	const { t } = useLocaleContext()
 	const { isDarkVariant, getColor: getThemeColor } = useTheme()
 	const {
 		preferences: { thumbnailRatio, thumbnailRoundness },
@@ -262,7 +264,11 @@ export function StackedSeriesCard({
 						className="mt-0.5 text-xs font-medium leading-tight md:text-sm text-white/75 line-clamp-1"
 						style={{ textShadow: '2px 1px 2px rgba(0, 0, 0, 0.2)' }}
 					>
-						{!isMissing ? subtitle : <span className="text-warning">Series Missing</span>}
+						{!isMissing ? (
+							subtitle
+						) : (
+							<span className="text-warning">{t('entityUi.seriesMissing')}</span>
+						)}
 					</Text>
 				</div>
 

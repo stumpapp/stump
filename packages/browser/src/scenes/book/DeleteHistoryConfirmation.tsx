@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle, ConfirmationModal } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
+import { useLocaleContext } from '@stump/i18n'
 
 type Props = {
 	isOpen: boolean
@@ -8,10 +9,11 @@ type Props = {
 }
 
 export default function DeleteHistoryConfirmation({ isOpen, onCancel, onConfirm }: Props) {
+	const { t } = useLocaleContext()
 	return (
 		<ConfirmationModal
-			title="Delete reading history"
-			description="Are you sure you want to delete your reading history?"
+			title={t('entityUi.deleteHistoryTitle')}
+			description={t('entityUi.deleteHistoryDescription')}
 			isOpen={isOpen}
 			onClose={onCancel}
 			onConfirm={onConfirm}
@@ -19,10 +21,8 @@ export default function DeleteHistoryConfirmation({ isOpen, onCancel, onConfirm 
 		>
 			<Alert>
 				<AlertTriangle />
-				<AlertTitle>This cannot be undone</AlertTitle>
-				<AlertDescription>
-					Your completion history cannot be recovered once deleted
-				</AlertDescription>
+				<AlertTitle>{t('common.thisActionCannotBeUndone')}</AlertTitle>
+				<AlertDescription>{t('entityUi.deleteHistoryWarning')}</AlertDescription>
 			</Alert>
 		</ConfirmationModal>
 	)

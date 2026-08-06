@@ -2785,6 +2785,7 @@
 				},
 				"validation": {
 					"ageRestrictionTooLow": "연령 제한은 0보다 작을 수 없습니다",
+					"maxSessionsAllowedTooLow": "허용할 최대 세션 수는 0보다 작을 수 없습니다",
 					"missingUsername": "사용자 이름을 입력하세요",
 					"missingPassword": "비밀번호를 입력하세요",
 					"usernameAlreadyExists": "이미 사용 중인 사용자 이름입니다"
@@ -3679,6 +3680,7 @@
 			"thisBook": "이 책",
 			"thisServer": "이 서버",
 			"unknown": "알 수 없음",
+			"unknownError": "알 수 없는 오류가 발생했습니다",
 			"unknownTitle": "제목 없음",
 			"url": "URL",
 			"username": "사용자 이름",

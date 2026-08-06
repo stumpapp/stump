@@ -155,7 +155,7 @@ export default function ServerEmojisSection() {
 
 		const name = sanitizedName(emojiName)
 		if (!name) {
-			toast.error(t('customEmojis.invalidName'))
+			toast.error(t(getKey('invalidName')))
 			return
 		}
 
@@ -201,11 +201,11 @@ export default function ServerEmojisSection() {
 				id: String(renamingId),
 				input: { name },
 			})
-			toast.success(t('customEmojis.renameSuccess'))
+			toast.success(t(getKey('renameSuccess')))
 			cancelRename()
 		} catch (error) {
 			console.error(error)
-			toast.error(t('customEmojis.renameError'), {
+			toast.error(t(getKey('renameError')), {
 				description: error instanceof Error ? error.message : undefined,
 			})
 		}
@@ -216,11 +216,11 @@ export default function ServerEmojisSection() {
 
 		try {
 			await deleteEmoji({ id: String(deletingEmoji.id) })
-			toast.success(t('customEmojis.deleteSuccess'))
+			toast.success(t(getKey('deleteSuccess')))
 			setDeletingEmoji(null)
 		} catch (error) {
 			console.error(error)
-			toast.error(t('customEmojis.deleteError'), {
+			toast.error(t(getKey('deleteError')), {
 				description: error instanceof Error ? error.message : undefined,
 			})
 		}

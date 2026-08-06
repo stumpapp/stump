@@ -61,7 +61,7 @@ export default function ServerConnectionErrorScene() {
 			toast.promise(
 				new Promise((resolve) => setTimeout(resolve, 2000)).then(() => setGoHome(true)),
 				{
-					error: t('serverSOS.reconnectFailed'),
+					error: t('serverSOS.reconnectionFailed'),
 					loading: t('serverSOS.reconnected'),
 					success: t('serverSOS.reconnected'),
 				},

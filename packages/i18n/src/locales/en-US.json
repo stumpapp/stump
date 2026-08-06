@@ -2785,6 +2785,7 @@
 				},
 				"validation": {
 					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
+					"maxSessionsAllowedTooLow": "Maximum sessions allowed cannot be less than 0",
 					"missingUsername": "Username is required",
 					"missingPassword": "Password is required",
 					"usernameAlreadyExists": "Username already exists"
@@ -3679,6 +3680,7 @@
 			"thisBook": "this book",
 			"thisServer": "this server",
 			"unknown": "Unknown",
+			"unknownError": "An unknown error occurred",
 			"unknownTitle": "Untitled",
 			"url": "URL",
 			"username": "Username",

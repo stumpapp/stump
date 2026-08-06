@@ -81,7 +81,7 @@ function RecentlyAddedBooks() {
 				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 				ListEmptyComponent={
 					<Text className="text-foreground-muted">
-						{t('stumpServer.recentlyAddedBooks.emptyText)')}
+						{t('stumpServer.recentlyAddedBooks.emptyText')}
 					</Text>
 				}
 			/>

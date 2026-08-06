@@ -1695,222 +1695,222 @@
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "API 키",
+			"title": "API 키",
+			"description": "생성한 Stump API 키를 관리합니다",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "이름",
+					"expiration": "만료일",
+					"last_used": "마지막 사용",
+					"created": "생성일",
+					"permissions": "권한",
+					"inherited": "상속",
+					"explicit": "직접 지정"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "API 키",
+					"description": "이 키의 상세 정보",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "제한 없는 키",
+						"description": "서버 소유자가 권한 상속을 사용하도록 설정한 키는 모든 항목에 접근할 수 있습니다. 주의해서 사용하세요."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "API 키 만들기",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "API 키 만들기",
+							"created": "생성된 키"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "API 키는 API 인증에 사용할 수 있는 장기 유효 인증 정보입니다",
+							"created": "새 API 키를 만들었습니다. 비밀 키는 다시 표시되지 않으므로 안전한 곳에 저장하세요"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "이 API 키는 내 모든 권한을 상속하므로 내 계정으로 할 수 있는 모든 작업을 수행할 수 있습니다. 신중하게 설정하세요",
+						"createdKey": "생성된 키",
+						"savedConfirm": "키를 저장했습니다",
+						"submit": "키 만들기"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "내 API 키",
+					"description": "내가 만든 API 키 목록",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "상세 보기",
+						"delete": "삭제"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "아직 만든 API 키가 없습니다",
+						"action": "API 키를 만들어 시작하세요"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "만료일 없음"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default preferences for reading. Some of these are local-only to your current device",
+			"helmet": "리더 설정",
+			"title": "리더 설정",
+			"description": "읽기에 사용할 기본 설정입니다. 일부 설정은 현재 기기에만 적용됩니다",
 			"sections": {
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "읽기 방향",
+							"description": "리더에서 페이지를 넘기는 방향"
 						}
 					}
 				},
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "이미지 기반 책",
+					"description": "코믹스, 망가 및 기타 이미지 기반 책",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "앞쪽 미리 불러오기",
+							"description": "현재 페이지보다 앞에서 미리 불러올 페이지 수"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "뒤쪽 미리 불러오기",
+							"description": "현재 페이지보다 뒤에서 미리 불러올 페이지 수"
 						}
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
+					"label": "전자책 리더",
+					"description": "텍스트 기반 책의 기본 설정",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "글꼴 크기",
+							"description": "리더에서 사용할 글꼴의 크기"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "글꼴",
+							"description": "리더에서 사용할 글꼴"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "줄 높이",
+							"description": "리더에서 사용할 줄 높이"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "개별 설정 초기화",
+							"description": "기본값보다 우선하도록 지정한 모든 책별 설정을 초기화합니다",
+							"button": "개별 설정 초기화"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "데스크톱 설정",
+			"title": "데스크톱 설정",
+			"description": "Stump 데스크톱 애플리케이션 관련 설정",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "구성된 서버",
+					"description": "연결할 수 있는 Stump 서버 목록",
+					"getStarted": "서버를 추가하여 시작하세요",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "서버에 연결할 수 없음"
 					},
 					"activeServer": {
-						"tooltip": "Current server"
+						"tooltip": "현재 서버"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "A server with this name already exists",
-							"nameForbidden": "This name is reserved",
-							"urlExists": "A server with this URL already exists"
+							"nameExists": "같은 이름의 서버가 이미 있습니다",
+							"nameForbidden": "예약된 이름은 사용할 수 없습니다",
+							"urlExists": "같은 URL의 서버가 이미 있습니다"
 						},
 						"fields": {
 							"name": {
-								"label": "Name",
-								"description": "A friendly name to identify this server",
-								"placeholder": "My server"
+								"label": "이름",
+								"description": "이 서버를 구분할 이름",
+								"placeholder": "내 서버"
 							},
 							"uri": {
 								"label": "URI",
-								"description": "The URL of the Stump server",
+								"description": "Stump 서버의 URL",
 								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "Add server",
-						"title": "Add a new server",
-						"description": "Add a new Stump server to the desktop application",
-						"confirm": "Add server"
+						"trigger": "서버 추가",
+						"title": "새 서버 추가",
+						"description": "데스크톱 애플리케이션에 새 Stump 서버를 추가합니다",
+						"confirm": "서버 추가"
 					},
 					"editServer": {
-						"tooltip": "Edit server",
-						"title": "Edit server",
-						"description": "Edit the details of this server",
-						"confirm": "Save changes"
+						"tooltip": "서버 편집",
+						"title": "서버 편집",
+						"description": "이 서버의 정보를 편집합니다",
+						"confirm": "변경 사항 저장"
 					},
 					"deleteServer": {
-						"tooltip": "Delete server",
+						"tooltip": "서버 삭제",
 						"confirmation": {
-							"title": "Delete this server",
-							"description": "This will remove the server from the desktop application",
-							"disclaimerActiveServer": "This server is currently active. You will be logged out",
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete server"
+							"title": "이 서버 삭제",
+							"description": "데스크톱 애플리케이션에서 이 서버를 제거합니다",
+							"disclaimerActiveServer": "현재 사용 중인 서버입니다. 삭제하면 로그아웃됩니다",
+							"disclaimerLastServer": "마지막으로 구성된 서버입니다. 삭제하면 로그아웃되며 초기 설정에서 서버를 다시 구성해야 합니다",
+							"confirm": "서버 삭제"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "Switch to server",
+						"tooltip": "서버 전환",
 						"confirmation": {
-							"title": "Switch to this server",
-							"description": "This will log you out of your current server",
-							"confirm": "Switch to server",
-							"server": "Server",
+							"title": "이 서버로 전환",
+							"description": "현재 서버에서 로그아웃하고 선택한 서버로 전환합니다",
+							"confirm": "서버 전환",
+							"server": "서버",
 							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "Delete all servers",
+						"label": "모든 서버 삭제",
 						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
+							"데스크톱 애플리케이션에서 구성된 모든 서버를 삭제합니다",
+							"이 작업은 되돌릴 수 없습니다"
 						],
 						"confirmation": {
-							"trigger": "Delete all servers",
-							"title": "Delete all servers",
-							"description": "This will remove all servers from the desktop application",
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete all servers"
+							"trigger": "모든 서버 삭제",
+							"title": "모든 서버 삭제",
+							"description": "데스크톱 애플리케이션에서 모든 서버를 제거합니다",
+							"disclaimer": "로그아웃되며 초기 설정에서 서버를 다시 구성해야 합니다",
+							"confirm": "모든 서버 삭제"
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "토큰 삭제",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"API 키를 포함하여 서버에 대해 안전하게 저장된 모든 토큰을 제거합니다",
+							"각 서버를 다시 인증하거나 구성해야 합니다"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "토큰 삭제",
+							"title": "토큰 삭제",
+							"description": "저장된 모든 토큰을 삭제하시겠습니까?",
+							"confirm": "토큰 삭제"
 						}
 					}
 				},
 				"optionalFeatures": {
-					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
+					"label": "선택 기능",
+					"description": "데스크톱 애플리케이션에서만 제공하는 선택 기능을 관리합니다",
 					"bundledServer": {
-						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"label": "내장 서버",
+						"description": "데스크톱 애플리케이션이 실행되는 동안 내장 서버를 백그라운드에서 실행합니다(재시작 필요)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
-						"description": "Display your Stump activity in Discord using Discord Rich Presence",
-						"reconnect": "Reconnect to Discord"
+						"label": "Discord 상태 표시",
+						"description": "Discord Rich Presence를 사용하여 Stump 활동을 Discord에 표시합니다",
+						"reconnect": "Discord에 다시 연결"
 					}
 				}
 			}

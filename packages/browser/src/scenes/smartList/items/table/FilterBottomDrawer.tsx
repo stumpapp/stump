@@ -62,7 +62,7 @@ export default function FilterBottomDrawer() {
 							<Alert variant="warning">
 								<Construction />
 								<AlertDescription>
-									<span>This functionality is not yet implemented</span>
+									<span>{t('common.unimplemented')}</span>
 								</AlertDescription>
 							</Alert>
 						</div>

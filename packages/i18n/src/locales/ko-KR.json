@@ -592,6 +592,10 @@
 	},
 	"fileExplorer": {
 		"uploadModal": {
+			"menu": {
+				"addBooks": "책 추가",
+				"addSeries": "시리즈 추가"
+			},
 			"title": {
 				"books": "책 업로드",
 				"series": "시리즈 업로드"
@@ -611,7 +615,23 @@
 				"alt": "또는 클릭하여 업로드할 책을 선택하세요"
 			},
 			"addedFiles": "추가된 파일"
+			,"seriesName": {
+				"heading": "시리즈 이름",
+				"description": "시리즈 디렉터리 이름으로 사용됩니다. ZIP 파일은 이 디렉터리에 압축 해제됩니다.",
+				"placeholder": "시리즈 이름 입력"
+			}
 		}
+	},
+	"bookSearch": {
+		"title": "책 검색",
+		"description": "아래 검색창에서 책을 찾을 수 있습니다",
+		"placeholder": "책 검색..."
+	},
+	"serverStatus": {
+		"disconnected": "서버에 연결되지 않았습니다",
+		"checkConnection": "인터넷 연결을 확인하세요.",
+		"changeUrlLink": "여기를 눌러",
+		"changeUrlSuffix": "서버 URL을 변경할 수 있습니다."
 	},
 	"libraryHeader": {
 		"tabs": {
@@ -2820,6 +2840,13 @@
 		"confirmSelection": "선택 확인",
 		"failedToUploadImage": "이미지를 업로드하지 못했습니다",
 		"failedToUpdateThumbnail": "썸네일을 업데이트하지 못했습니다"
+		,"switchServer": "서버 전환",
+		"notifications": "알림",
+		"filterOptions": "필터 옵션",
+		"filterDescription": "아래 옵션을 사용해 검색 범위를 좁힐 수 있습니다",
+		"filter": "필터",
+		"clearFilters": "필터 지우기",
+		"applyFilters": "필터 적용"
 	},
 	"tableColumns": {
 		"configuration": {

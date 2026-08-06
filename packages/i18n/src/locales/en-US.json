@@ -592,6 +592,10 @@
 	},
 	"fileExplorer": {
 		"uploadModal": {
+			"menu": {
+				"addBooks": "Add books",
+				"addSeries": "Add series"
+			},
 			"title": {
 				"books": "Upload books",
 				"series": "Upload series"
@@ -611,7 +615,23 @@
 				"alt": "Or click to browse your computer for books to upload"
 			},
 			"addedFiles": "Added files"
+			,"seriesName": {
+				"heading": "Series name",
+				"description": "This will be used as the name of the series directory. Your zip archive will be unpacked here.",
+				"placeholder": "Enter series name"
+			}
 		}
+	},
+	"bookSearch": {
+		"title": "Search for a book",
+		"description": "You can use the search bar below to find a book",
+		"placeholder": "Search for a book..."
+	},
+	"serverStatus": {
+		"disconnected": "Server is not connected",
+		"checkConnection": "Please check your internet connection.",
+		"changeUrlLink": "Click here",
+		"changeUrlSuffix": "to change your server URL."
 	},
 	"libraryHeader": {
 		"tabs": {
@@ -2820,6 +2840,13 @@
 		"confirmSelection": "Confirm selection",
 		"failedToUploadImage": "Failed to upload image",
 		"failedToUpdateThumbnail": "Failed to update thumbnail"
+		,"switchServer": "Switch server",
+		"notifications": "Notifications",
+		"filterOptions": "Filter options",
+		"filterDescription": "Use the options below to narrow your search",
+		"filter": "Filter",
+		"clearFilters": "Clear filters",
+		"applyFilters": "Apply filters"
 	},
 	"tableColumns": {
 		"configuration": {

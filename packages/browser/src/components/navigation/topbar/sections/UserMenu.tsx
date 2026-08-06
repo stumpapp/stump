@@ -1,5 +1,6 @@
 import { invalidateQueries, useSDK } from '@stump/client'
 import { Avatar, cn, NavigationMenu } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Bell, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -12,6 +13,7 @@ import TopBarButtonItem from '../TopBarButtonItem'
 import TopBarLinkListItem from '../TopBarLinkListItem'
 
 export default function UserMenu() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { user } = useAppContext()
 
@@ -26,7 +28,7 @@ export default function UserMenu() {
 			navigate('/auth')
 		} catch (error) {
 			console.error(error)
-			toast.error('There was an error logging you out. Please try again.')
+			toast.error(t('common.unknownError'))
 		}
 	}
 
@@ -56,12 +58,12 @@ export default function UserMenu() {
 						isDisabled
 					>
 						<Bell className="mr-2 h-4 w-4 shrink-0" />
-						<span className="ml-1 font-medium line-clamp-1">Notifications</span>
+						<span className="ml-1 font-medium line-clamp-1">{t('common.notifications')}</span>
 					</TopBarLinkListItem>
 
 					<TopBarButtonItem className="py-3 rounded-md" onClick={logout}>
 						<LogOut className="mr-2 h-4 w-4 shrink-0" />
-						Logout
+						{t('signOutModal.buttons.signOut')}
 					</TopBarButtonItem>
 				</ul>
 			</NavigationMenu.Content>

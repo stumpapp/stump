@@ -310,13 +310,10 @@ export default function UploadModal() {
 
 						{uploadType === 'series' && (
 							<div className="mt-2">
-								<Heading size="xs">Series name</Heading>
-								<Dialog.Description>
-									This will be used as the name of the series directory. Your zip archive will be
-									unpacked here.
-								</Dialog.Description>
+								<Heading size="xs">{t(getKey('seriesName.heading'))}</Heading>
+								<Dialog.Description>{t(getKey('seriesName.description'))}</Dialog.Description>
 								<Input
-									placeholder="Enter series name"
+									placeholder={t(getKey('seriesName.placeholder'))}
 									value={seriesDirName}
 									onChange={(e) => setSeriesDirName(e.target.value)}
 									className="mt-2"

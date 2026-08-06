@@ -1,6 +1,7 @@
 import { useInfiniteGraphQL } from '@stump/client'
 import { Input } from '@stump/components'
 import { BookCardFragment, graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
@@ -38,6 +39,7 @@ const query = graphql(`
  *  a filter slide over. Must be used within a `FilterProvider`.
  */
 export default function BookSearch({ onBookSelect }: Props) {
+	const { t } = useLocaleContext()
 	const [search, setSearch] = useState('')
 	const [debouncedValue] = useDebouncedValue(search, 500)
 
@@ -70,7 +72,7 @@ export default function BookSearch({ onBookSelect }: Props) {
 	return (
 		<div className="gap-y-4 flex flex-1 flex-col">
 			<Input
-				placeholder="Search for a book..."
+				placeholder={t('bookSearch.placeholder')}
 				value={search}
 				onChange={(e) => setSearch(e.target.value)}
 			/>

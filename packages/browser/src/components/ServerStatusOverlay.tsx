@@ -1,10 +1,12 @@
 import { Link, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
 import { useAppStore } from '@/stores'
 
 export default function ServerStatusOverlay() {
+	const { t } = useLocaleContext()
 	const [show, setShow] = useState(false)
 
 	const isConnected = useAppStore((store) => store.isConnectedWithServer)
@@ -39,7 +41,7 @@ export default function ServerStatusOverlay() {
 				>
 					<div className="gap-1 flex w-full flex-col">
 						<div className="flex w-full items-center justify-between">
-							<Text size="sm">Server is not connected</Text>
+							<Text size="sm">{t('serverStatus.disconnected')}</Text>
 							<div className="relative">
 								<span className="h-2 w-2 flex">
 									<span className="animate-ping bg-red-400 absolute inline-flex h-full w-full rounded-full opacity-75"></span>
@@ -49,11 +51,11 @@ export default function ServerStatusOverlay() {
 						</div>
 
 						<Text size="xs" variant="muted">
-							Please check your internet connection.{' '}
+							{t('serverStatus.checkConnection')}{' '}
 							<Link to="/server-connection-error" className="underline">
-								Click here
+								{t('serverStatus.changeUrlLink')}
 							</Link>{' '}
-							to change your server URL.
+							{t('serverStatus.changeUrlSuffix')}
 						</Text>
 					</div>
 				</motion.div>

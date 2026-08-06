@@ -8,9 +8,11 @@ import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import BackLink from '~/components/BackLink'
 import { Icon } from '~/components/ui'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Layout() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const {
 		activeServer: { id: serverID },
@@ -25,7 +27,7 @@ export default function Layout() {
 				name="index"
 				options={{
 					headerShown: true,
-					headerTitle: 'Clubs',
+					headerTitle: t('bookClub.clubs'),
 					headerTransparent: Platform.OS === 'ios',
 					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					headerLargeTitle: true,
@@ -41,7 +43,7 @@ export default function Layout() {
 				name="invites"
 				options={{
 					headerShown: true,
-					title: 'Invites',
+					title: t('bookClub.invites'),
 					headerTransparent: Platform.OS === 'ios',
 					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
@@ -55,7 +57,7 @@ export default function Layout() {
 					name="create"
 					options={{
 						headerShown: true,
-						title: 'Create Club',
+						title: t('bookClub.createClub'),
 						headerTransparent: Platform.OS === 'ios',
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 						presentation: 'formSheet',

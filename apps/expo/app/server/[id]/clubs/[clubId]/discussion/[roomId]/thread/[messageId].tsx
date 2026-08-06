@@ -9,6 +9,7 @@ import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { useBookClubContext } from '~/components/bookClub/context'
 import { DiscussionRoom, Message, type MessageData } from '~/components/bookClub/discussion'
 import type { EmojiSelection } from '~/components/emoji/types'
+import { useTranslate } from '~/lib/hooks'
 
 const parentMessageQuery = graphql(`
 	query ThreadParentMessage($id: ID!) {
@@ -127,6 +128,7 @@ const discussionQuery = graphql(`
 `)
 
 export default function ThreadScreen() {
+	const { t } = useTranslate()
 	const { roomId, messageId } = useLocalSearchParams<{
 		roomId: string
 		messageId: string
@@ -151,9 +153,9 @@ export default function ThreadScreen() {
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerShown: true,
-			title: 'Thread',
+			title: t('bookClub.thread'),
 		})
-	}, [navigation])
+	}, [navigation, t])
 
 	const { data: parentData } = useSuspenseGraphQL(
 		parentMessageQuery,
@@ -229,7 +231,7 @@ export default function ThreadScreen() {
 	const threadHeader = useMemo(() => {
 		if (!parentMessage) return undefined
 		return (
-			<View className="border-b border-edge">
+			<View className="border-edge border-b">
 				<Message
 					message={parentMessage}
 					currentMemberId={currentMemberId}

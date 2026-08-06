@@ -6,6 +6,7 @@ import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_26_PLUS, ON_END_REACHED_THRESHOLD, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import BookListItem from '../book/BookListItem'
@@ -66,6 +67,7 @@ type Props = {
 }
 
 export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, ref) => {
+	const { t } = useTranslate()
 	const sheetRef = useRef<TrueSheet>(null)
 	const previewSheetRef = useRef<PreviewBookSheetRef>(null)
 
@@ -171,20 +173,26 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 					contentInsetAdjustmentBehavior="automatic"
 					ListHeaderComponentStyle={{ paddingBottom: 16 }}
 					ListHeaderComponent={
-						<Input value={search} onChangeText={setSearch} placeholder="Search books..." />
+						<Input
+							value={search}
+							onChangeText={setSearch}
+							placeholder={t('bookClub.searchBooksPlaceholder')}
+						/>
 					}
 					ListEmptyComponent={
 						<ListEmpty
-							message={isFiltered ? 'No books found matching your filters' : 'No books returned'}
+							message={
+								isFiltered ? t('bookClub.noBooksMatchingFilters') : t('bookClub.noBooksReturned')
+							}
 							actions={
 								<>
 									{isFiltered && (
 										<Button roundness="full" variant="secondary" onPress={() => setSearch('')}>
-											<Text>Clear Filters</Text>
+											<Text>{t('common.clearFilters')}</Text>
 										</Button>
 									)}
 									<Button roundness="full" onPress={() => refetch()}>
-										<Text>Refresh</Text>
+										<Text>{t('common.refresh')}</Text>
 									</Button>
 								</>
 							}

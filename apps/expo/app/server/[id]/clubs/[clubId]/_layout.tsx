@@ -6,6 +6,7 @@ import { Platform } from 'react-native'
 import BackLink from '~/components/BackLink'
 import { BookClubContext } from '~/components/bookClub/context'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 const clubContextQuery = graphql(`
@@ -21,6 +22,7 @@ const clubContextQuery = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { clubId } = useLocalSearchParams<{ clubId: string }>()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
@@ -53,14 +55,14 @@ export default function Screen() {
 					options={{
 						presentation: 'modal',
 						headerShown: true,
-						title: 'Club Settings',
+						title: t('bookClub.clubSettings'),
 					}}
 				/>
 
 				<Stack.Screen
 					name="archive"
 					options={{
-						title: 'Archive',
+						title: t('bookClub.archive'),
 						headerShown: false,
 					}}
 				/>

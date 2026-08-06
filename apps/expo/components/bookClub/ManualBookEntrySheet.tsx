@@ -1,24 +1,28 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { BookClubBookInput } from '@stump/graphql'
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Controller, useForm, useFormState } from 'react-hook-form'
 import { ScrollView, View } from 'react-native'
 import { z } from 'zod'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { SheetBackDetection } from '../SheetBackDetection'
 import { Input, SheetHeader } from '../ui'
 
-const schema = z.object({
-	title: z.string().min(1, { message: 'Title is required' }),
-	author: z.string().min(1, { message: 'Author is required' }),
-	url: z.string().optional(),
-	imageUrl: z.string().optional(),
-})
+type Translate = ReturnType<typeof useTranslate>['t']
 
-type ManualBookEntrySchema = z.infer<typeof schema>
+const createSchema = (t: Translate) =>
+	z.object({
+		title: z.string().min(1, { message: t('bookClub.titleRequired') }),
+		author: z.string().min(1, { message: t('bookClub.authorRequired') }),
+		url: z.string().optional(),
+		imageUrl: z.string().optional(),
+	})
+
+type ManualBookEntrySchema = z.infer<ReturnType<typeof createSchema>>
 
 export type ManualBookEntrySheetRef = {
 	open: () => void
@@ -31,6 +35,8 @@ type Props = {
 
 export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 	({ onAddBook }, ref) => {
+		const { t } = useTranslate()
+		const schema = useMemo(() => createSchema(t), [t])
 		const sheetRef = useRef<TrueSheet>(null)
 
 		const colors = useColors()
@@ -89,7 +95,7 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 					onDidDismiss={handleDismiss}
 					header={
 						<SheetHeader
-							title="Enter book details"
+							title={t('bookClub.enterBookDetails')}
 							onClose={() => sheetRef.current?.dismiss()}
 							onSubmit={handleSubmit(onSubmit)}
 						/>
@@ -105,8 +111,8 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 								name="title"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
-										label="Title"
-										placeholder="Book title"
+										label={t('bookClub.title')}
+										placeholder={t('bookClub.bookTitlePlaceholder')}
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
@@ -122,8 +128,8 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 								name="author"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
-										label="Author"
-										placeholder="Author name"
+										label={t('bookClub.author')}
+										placeholder={t('bookClub.authorPlaceholder')}
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
@@ -139,7 +145,7 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 								name="url"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
-										label="URL (optional)"
+										label={t('bookClub.urlOptional')}
 										placeholder="https://..."
 										value={value}
 										onChangeText={onChange}
@@ -157,7 +163,7 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 								name="imageUrl"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
-										label="Cover image URL (optional)"
+										label={t('bookClub.coverImageUrlOptional')}
 										placeholder="https://..."
 										value={value}
 										onChangeText={onChange}

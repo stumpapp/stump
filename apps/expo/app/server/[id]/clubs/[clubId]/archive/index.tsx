@@ -12,6 +12,7 @@ import { PastBookGridItem } from '~/components/bookClub'
 import { usePastDiscussionSize } from '~/components/bookClub/usePastDiscussionSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookClubPastDiscussions($bookClubId: ID!) {
@@ -30,6 +31,7 @@ const query = graphql(`
 type BookClubBook = BookClubPastDiscussionsQuery['previousBookClubDiscussions'][number]['book']
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { clubId } = useLocalSearchParams<{ clubId: string }>()
 
 	const { data, refetch } = useSuspenseGraphQL(query, ['bookClubPastDiscussions', clubId], {
@@ -101,7 +103,10 @@ export default function Screen() {
 				contentContainerStyle={{ paddingHorizontal, paddingVertical: 16 }}
 				ItemSeparatorComponent={() => <View className="h-2" />}
 				ListEmptyComponent={
-					<ListEmpty title="No Past Books" message="Completed books will appear here" />
+					<ListEmpty
+						title={t('bookClub.noPastBooks')}
+						message={t('bookClub.noPastBooksDescription')}
+					/>
 				}
 				// TODO: Support both archive discussions without books and with books
 				renderItem={({ item }) =>

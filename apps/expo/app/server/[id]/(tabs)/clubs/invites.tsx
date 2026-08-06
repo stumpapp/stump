@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import ListEmpty from '~/components/ListEmpty'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookClubInvitesScreen {
@@ -33,6 +34,7 @@ type Invitation = NonNullable<
 >
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -52,10 +54,7 @@ export default function Screen() {
 	if (!invitations.length) {
 		return (
 			<SafeAreaView className="flex-1 bg-background">
-				<ListEmpty
-					title="No pending invites"
-					message="You don't have any pending club invitations"
-				/>
+				<ListEmpty title={t('bookClub.noInvites')} message={t('bookClub.noInvitesDescription')} />
 			</SafeAreaView>
 		)
 	}

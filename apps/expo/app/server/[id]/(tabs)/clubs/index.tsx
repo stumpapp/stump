@@ -14,6 +14,7 @@ import { BookClubCard } from '~/components/bookClub'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { Icon } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookClubsScreen {
@@ -28,6 +29,7 @@ const query = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -87,10 +89,7 @@ export default function Screen() {
 					contentInsetAdjustmentBehavior="always"
 					ItemSeparatorComponent={() => <View className="h-3" />}
 					ListEmptyComponent={
-						<ListEmpty
-							title="No clubs yet"
-							message="Join a club or create your own to get started with book clubs."
-						/>
+						<ListEmpty title={t('bookClub.noClubs')} message={t('bookClub.noClubsDescription')} />
 					}
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={handleRefetch} />}
 				/>

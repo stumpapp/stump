@@ -17,6 +17,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import { toast } from 'sonner-native'
 
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../image'
@@ -77,6 +78,7 @@ type Props = {
 }
 
 export function CurrentBookCard({ data }: Props) {
+	const { t } = useTranslate()
 	const { clubId, checkRole } = useBookClubContext()
 
 	const queryClient = useQueryClient()
@@ -143,8 +145,8 @@ export function CurrentBookCard({ data }: Props) {
 		},
 		onError: (error) => {
 			console.error('Failed to add book to club', error)
-			toast.error('Failed to add book to club', {
-				description: error instanceof Error ? error.message : 'An unknown error occurred',
+			toast.error(t('bookClub.addBookFailed'), {
+				description: error instanceof Error ? error.message : t('errors.unknown'),
 			})
 		},
 	})
@@ -160,32 +162,34 @@ export function CurrentBookCard({ data }: Props) {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['bookClubById', clubId] })
 			queryClient.invalidateQueries({ queryKey: ['bookClubContext', clubId] })
-			toast.success('Book archived', {
-				description: 'The current book has been archived',
+			toast.success(t('bookClub.bookArchived'), {
+				description: t('bookClub.bookArchivedDescription'),
 			})
 		},
 		onError: (error) => {
 			console.error('Failed to archive book', error)
-			toast.error('Failed to archive book', {
-				description: error instanceof Error ? error.message : 'An unknown error occurred',
+			toast.error(t('bookClub.archiveBookFailed'), {
+				description: error instanceof Error ? error.message : t('errors.unknown'),
 			})
 		},
 	})
 
 	const confirmArchiveBook = useCallback(() => {
 		Alert.alert(
-			'Archive book',
-			`Are you sure you are ready to archive ${book?.title ? `'${book?.title}'` : 'the current book'}?`,
+			t('bookClub.archiveBook'),
+			t('bookClub.archiveBookConfirmation', {
+				book: book?.title ? `'${book.title}'` : t('common.thisBook'),
+			}),
 			[
-				{ text: 'Cancel', style: 'cancel' },
+				{ text: t('common.cancel'), style: 'cancel' },
 				{
-					text: 'Archive',
+					text: t('bookClub.archiveAction'),
 					style: 'destructive',
 					onPress: () => archiveBook({ bookClubBookId: book?.id || '' }),
 				},
 			],
 		)
-	}, [archiveBook, book])
+	}, [archiveBook, book, t])
 
 	const isModerator = checkRole(BookClubMemberRole.Moderator)
 
@@ -200,7 +204,7 @@ export function CurrentBookCard({ data }: Props) {
 				}
 				style={{ flexGrow: 1 }}
 			>
-				<View className="squircle ios:rounded-[2rem] relative flex-grow overflow-hidden rounded-3xl bg-black/5 dark:bg-white/10">
+				<View className="squircle ios:rounded-[2rem] bg-black/5 dark:bg-white/10 relative flex-grow overflow-hidden rounded-3xl">
 					{backgroundGradient && (
 						<LinearGradient
 							colors={backgroundGradient.colors}
@@ -211,7 +215,7 @@ export function CurrentBookCard({ data }: Props) {
 						/>
 					)}
 
-					<View className="relative flex-grow flex-row gap-6 p-3">
+					<View className="gap-6 p-3 relative flex-grow flex-row">
 						<View
 							className="ml-5"
 							style={{
@@ -258,14 +262,14 @@ export function CurrentBookCard({ data }: Props) {
 						</View>
 
 						{isModerator && !isEmpty && (
-							<View className="absolute right-3 top-3 flex-row items-center gap-3">
+							<View className="right-3 top-3 gap-3 absolute flex-row items-center">
 								<Pressable disabled>
-									<View className="shrink-0 items-center rounded-full border border-black/10 p-2.5 dark:border-white/20">
+									<View className="border-black/10 p-2.5 dark:border-white/20 shrink-0 items-center rounded-full border">
 										{EditIcon}
 									</View>
 								</Pressable>
 								<Pressable onPress={confirmArchiveBook} disabled={!book}>
-									<View className="shrink-0 items-center rounded-full border border-black/10 p-2.5 dark:border-white/20">
+									<View className="border-black/10 p-2.5 dark:border-white/20 shrink-0 items-center rounded-full border">
 										{ArchiveIcon}
 									</View>
 								</Pressable>
@@ -273,15 +277,15 @@ export function CurrentBookCard({ data }: Props) {
 						)}
 
 						{isModerator && isEmpty && (
-							<View className="absolute right-3 top-3">
-								<View className="shrink-0 items-center rounded-full border border-black/10 p-2.5 dark:border-white/20">
+							<View className="right-3 top-3 absolute">
+								<View className="border-black/10 p-2.5 dark:border-white/20 shrink-0 items-center rounded-full border">
 									{PlusIcon}
 								</View>
 							</View>
 						)}
 
-						<View className="flex-1 items-end justify-end gap-2 self-end p-1">
-							<Text className="text-right text-base font-medium text-foreground-muted">
+						<View className="gap-2 p-1 flex-1 items-end justify-end self-end">
+							<Text className="text-base font-medium text-foreground-muted text-right">
 								{isEmpty ? 'Add a book' : 'Currently reading'}
 							</Text>
 						</View>

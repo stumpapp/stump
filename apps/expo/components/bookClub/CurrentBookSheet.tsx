@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
@@ -29,6 +30,7 @@ type Props = {
 }
 
 export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }, ref) => {
+	const { t } = useTranslate()
 	const sheetRef = useRef<TrueSheet>(null)
 
 	useImperativeHandle(ref, () => ({
@@ -140,7 +142,7 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 									onPress={onGoToBook}
 									disabled={!book.entity?.id && !book.url}
 								>
-									<Text>Go to Book</Text>
+									<Text>{t('bookClub.goToBook')}</Text>
 								</Button>
 							</View>
 

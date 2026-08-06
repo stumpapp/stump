@@ -10,6 +10,7 @@ import { toast } from 'sonner-native'
 
 import { useActiveServer } from '~/components/activeServer'
 import { Icon, Input, Switch, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 const createMutation = graphql(`
 	mutation CreateBookClubMobile($input: CreateBookClubInput!) {
@@ -21,6 +22,7 @@ const createMutation = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const router = useRouter()
 	const {
 		activeServer: { id: serverID },
@@ -51,11 +53,11 @@ export default function Screen() {
 				router.replace(`/server/${serverID}/clubs/${result.createBookClub.id}`)
 			}
 		} catch (error) {
-			toast.error('Failed to create club', {
-				description: error instanceof Error ? error.message : 'An unknown error occurred',
+			toast.error(t('bookClub.createFailed'), {
+				description: error instanceof Error ? error.message : t('errors.unknown'),
 			})
 		}
-	}, [canSubmit, createClub, description, isPrivate, name, router, serverID])
+	}, [canSubmit, createClub, description, isPrivate, name, router, serverID, t])
 
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
@@ -82,8 +84,8 @@ export default function Screen() {
 				>
 					<View className="gap-6">
 						<Input
-							label="Name"
-							placeholder="Enter club name"
+							label={t('bookClub.name')}
+							placeholder={t('bookClub.namePlaceholder')}
 							value={name}
 							onChange={(e) => setName(e.nativeEvent.text)}
 							autoCapitalize="words"
@@ -91,8 +93,8 @@ export default function Screen() {
 						/>
 
 						<Input
-							label="Description"
-							placeholder="What is this club about? (optional)"
+							label={t('bookClub.description')}
+							placeholder={t('bookClub.descriptionPlaceholder')}
 							value={description}
 							onChange={(e) => setDescription(e.nativeEvent.text)}
 							multiline
@@ -102,7 +104,7 @@ export default function Screen() {
 
 						{/* FIXME: No idea why I need mt here, something weird with switches */}
 						<View className="mt-12 flex-row items-center justify-between">
-							<Text>Private</Text>
+							<Text>{t('bookClub.private')}</Text>
 							<Switch checked={isPrivate} onCheckedChange={setIsPrivate} />
 						</View>
 					</View>

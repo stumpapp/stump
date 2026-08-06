@@ -7,6 +7,7 @@ import { Pressable } from 'react-native-gesture-handler'
 
 import { Divider } from '~/components/Divider'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { EmojiPickerSheet, type EmojiPickerSheetRef } from '../../emoji/EmojiPickerSheet'
@@ -33,6 +34,7 @@ type Props = {
 
 export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 	({ quickEmojis = QUICK_EMOJIS, onReply, onThreadPress, onToggleReaction, onDelete }, ref) => {
+		const { t } = useTranslate()
 		const sheetRef = useRef<TrueSheet>(null)
 		const emojiPickerRef = useRef<EmojiPickerSheetRef>(null)
 
@@ -128,13 +130,18 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 
 					<View className="gap-2 px-4 pt-1">
 						{/* TODO: Support message editing */}
-						<ActionRow icon={Pencil} label="Edit" description="Edit this message" disabled />
+						<ActionRow
+							icon={Pencil}
+							label={t('common.edit')}
+							description={t('bookClub.editMessage')}
+							disabled
+						/>
 
 						{onReply && (
 							<ActionRow
 								icon={Reply}
-								label="Reply"
-								description="Reply inline"
+								label={t('bookClub.reply')}
+								description={t('bookClub.replyInline')}
 								onPress={handleReply}
 							/>
 						)}
@@ -144,8 +151,8 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 								// TODO: This icon was the one that made me not use native, although I'd prefer all native icons here.
 								// I'm kinda surprised sf doens't have yarn or spool or something thread related
 								icon={Spool}
-								label="Thread"
-								description="Start a thread"
+								label={t('bookClub.thread')}
+								description={t('bookClub.startThread')}
 								onPress={handleThread}
 							/>
 						)}
@@ -153,8 +160,8 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 						{canDelete && onDelete && (
 							<ActionRow
 								icon={Trash2}
-								label="Delete"
-								description="Delete this message"
+								label={t('common.delete')}
+								description={t('bookClub.deleteMessage')}
 								destructive
 								onPress={handleDelete}
 							/>
@@ -184,7 +191,7 @@ function ActionRow({ icon, label, description, onPress, disabled, destructive }:
 		<Pressable onPress={onPress} disabled={disabled}>
 			<View
 				className={cn(
-					'ios:rounded-[2rem] gap-4 rounded-3xl p-4 flex-row items-center',
+					'ios:rounded-[2rem] gap-4 p-4 flex-row items-center rounded-3xl',
 					destructive ? 'dark:bg-red-500/15 bg-red-500/10' : 'bg-black/5 dark:bg-white/10',
 					disabled ? 'opacity-40' : 'active:opacity-80',
 				)}

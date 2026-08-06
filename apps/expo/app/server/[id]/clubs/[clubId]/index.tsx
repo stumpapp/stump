@@ -15,6 +15,7 @@ import { DiscussionListItem } from '~/components/bookClub/discussion'
 import RefreshControl from '~/components/RefreshControl'
 import { Badge, Button, Card, Icon, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookClubDetailScreen($id: ID!) {
@@ -61,6 +62,7 @@ const query = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { clubId } = useLocalSearchParams<{ clubId: string }>()
 	const router = useRouter()
 	const {
@@ -97,10 +99,13 @@ export default function Screen() {
 
 	const renderProgression = () => {
 		if (currentBookCompletedAt) {
+			const date = intlFormat(new Date(currentBookCompletedAt), {
+				month: 'long',
+				year: 'numeric',
+			})
 			return (
 				<Text className="text-sm text-foreground-subtle">
-					Completed{' '}
-					{intlFormat(new Date(currentBookCompletedAt), { month: 'long', year: 'numeric' })}
+					{t('bookClub.completedAt', { date })}
 				</Text>
 			)
 		} else if (activeProgress) {
@@ -110,18 +115,20 @@ export default function Screen() {
 			if (decimal != null) {
 				return (
 					<Text size="lg" className="text-foreground-subtle">
-						You are {decimal.toFixed(2)}% through the book!
+						{t('bookClub.progressThroughBook', { percentage: decimal.toFixed(2) })}
 					</Text>
 				)
 			}
 			const startedAt = new Date(activeProgress.startedAt)
 			return (
 				<Text className="text-foreground-subtle">
-					Started {intlFormat(startedAt, { month: 'long', year: 'numeric' })}
+					{t('bookClub.startedAt', {
+						date: intlFormat(startedAt, { month: 'long', year: 'numeric' }),
+					})}
 				</Text>
 			)
 		} else {
-			return <Text className="text-foreground-subtle">You have not started this book yet</Text>
+			return <Text className="text-foreground-subtle">{t('bookClub.notStarted')}</Text>
 		}
 	}
 
@@ -138,7 +145,7 @@ export default function Screen() {
 					{club.moderators.length > 0 && (
 						<View className="gap-2 flex flex-row items-center justify-between">
 							<Badge>
-								<Text>Moderated by</Text>
+								<Text>{t('bookClub.moderatedBy')}</Text>
 							</Badge>
 
 							<Moderators moderators={club.moderators} />
@@ -146,7 +153,7 @@ export default function Screen() {
 					)}
 
 					{club.pinnedDiscussions.length > 0 && (
-						<Card label="Pinned Rooms">
+						<Card label={t('bookClub.pinnedRooms')}>
 							{club.pinnedDiscussions.map((discussion) => (
 								<Card.Row key={discussion.id}>
 									<DiscussionListItem data={discussion} />
@@ -179,7 +186,11 @@ export default function Screen() {
 										}
 									>
 										<Text>
-											{currentBookCompletedAt ? 'See book' : activeProgress ? 'Continue' : 'Start'}
+											{currentBookCompletedAt
+												? t('bookClub.seeBook')
+												: activeProgress
+													? t('common.continue')
+													: t('bookClub.start')}
 										</Text>
 									</Button>
 								</View>
@@ -188,9 +199,9 @@ export default function Screen() {
 					)}
 
 					<Card
-						label="Active Discussions"
+						label={t('bookClub.activeDiscussions')}
 						listEmptyStyle={{
-							message: 'No active discussions right now',
+							message: t('bookClub.noActiveDiscussions'),
 						}}
 					>
 						{club.currentBook?.discussions.map((discussion) => (

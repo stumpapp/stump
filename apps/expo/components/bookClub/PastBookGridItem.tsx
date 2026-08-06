@@ -5,6 +5,7 @@ import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
 import { cn } from '~/lib/utils'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
@@ -44,6 +45,7 @@ type Props = {
 }
 
 export function PastBookGridItem({ data }: Props) {
+	const { t } = useTranslate()
 	const book = useFragment(fragment, data)
 	const {
 		activeServer: { id: serverID },
@@ -64,7 +66,7 @@ export function PastBookGridItem({ data }: Props) {
 	})
 
 	const thumbnailUrl = book.entity?.thumbnail.url || book.imageUrl || undefined
-	const title = book.entity?.resolvedName || book.title || 'Unknown'
+	const title = book.entity?.resolvedName || book.title || t('common.unknown')
 
 	const router = useRouter()
 
@@ -75,7 +77,7 @@ export function PastBookGridItem({ data }: Props) {
 			}
 		>
 			{({ pressed }) => (
-				<View className={cn('flex-1 items-center gap-2 pb-4', { 'opacity-80': pressed })}>
+				<View className={cn('gap-2 pb-4 flex-1 items-center', { 'opacity-80': pressed })}>
 					<ThumbnailImage
 						source={{
 							uri: thumbnailUrl || '',

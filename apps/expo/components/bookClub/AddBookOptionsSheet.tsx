@@ -7,6 +7,7 @@ import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { Icon, Text } from '../ui'
 import { AddBookSheet, type AddBookSheetRef, usePrefetchAddBookSheet } from './AddBookSheet'
@@ -29,6 +30,7 @@ type Props = {
 
 export const AddBookOptionsSheet = forwardRef<AddBookOptionsSheetRef, Props>(
 	({ onAddBook }, ref) => {
+		const { t } = useTranslate()
 		const sheetRef = useRef<TrueSheet>(null)
 		const addSheetRef = useRef<AddBookSheetRef>(null)
 		const manualSheetRef = useRef<ManualBookEntrySheetRef>(null)
@@ -70,25 +72,25 @@ export const AddBookOptionsSheet = forwardRef<AddBookOptionsSheetRef, Props>(
 				onDidPresent={prefetchAddBookSheet}
 			>
 				<View className="gap-2 p-4 pb-8">
-					<Text className="mb-2 text-lg font-semibold">Add a book</Text>
+					<Text className="mb-2 text-lg font-semibold">{t('bookClub.addBook')}</Text>
 
 					<OptionRow
-						label="Search server"
-						description="Find a book from your library"
+						label={t('bookClub.searchServer')}
+						description={t('bookClub.searchServerDescription')}
 						icon="search"
 						onPress={() => handleOptionPress('search')}
 					/>
 
 					<OptionRow
-						label="Enter manually"
-						description="Add a book not on your server"
+						label={t('bookClub.enterManually')}
+						description={t('bookClub.enterManuallyDescription')}
 						icon="manual"
 						onPress={() => handleOptionPress('manual')}
 					/>
 
 					<OptionRow
-						label="From suggestions"
-						description="Pick from member suggestions"
+						label={t('bookClub.fromSuggestions')}
+						description={t('bookClub.fromSuggestionsDescription')}
 						icon="suggestions"
 						onPress={() => handleOptionPress('suggestions')}
 					/>
@@ -116,7 +118,7 @@ type OptionRowProps = {
 function OptionRow({ label, description, icon, onPress }: OptionRowProps) {
 	return (
 		<Pressable onPress={onPress}>
-			<View className="ios:rounded-[2rem] squircle gap-4 rounded-3xl bg-black/5 p-4 dark:bg-white/10 flex-row items-center active:opacity-80">
+			<View className="ios:rounded-[2rem] squircle gap-4 bg-black/5 p-4 dark:bg-white/10 flex-row items-center rounded-3xl active:opacity-80">
 				<View className="dark:bg-white/15 h-10 w-10 bg-black/10 items-center justify-center rounded-full">
 					{optionIcons[icon]}
 				</View>

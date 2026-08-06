@@ -10,6 +10,7 @@ import { useActiveServer } from '~/components/activeServer'
 import { DiscussionListItem } from '~/components/bookClub/discussion'
 import ListEmpty from '~/components/ListEmpty'
 import { Card } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookClubPastBookScreen($bookId: ID!) {
@@ -27,6 +28,7 @@ const query = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { bookId } = useLocalSearchParams<{ bookId: string }>()
 	const {
 		activeServer: { id: serverID },
@@ -43,9 +45,9 @@ export default function Screen() {
 	useEffect(() => {
 		if (!bookName) return
 		navigation.setOptions({
-			title: `${bookName} - Archive`,
+			title: t('bookClub.archiveTitle', { book: bookName }),
 		})
-	}, [bookName, navigation])
+	}, [bookName, navigation, t])
 
 	// TODO(book-club): FlashList most likely
 	return (
@@ -53,7 +55,7 @@ export default function Screen() {
 			<ScrollView className="flex-1" contentInsetAdjustmentBehavior="always">
 				<View className="gap-6 px-4 py-4">
 					{discussions.length > 0 && (
-						<Card label="Discussions">
+						<Card label={t('bookClub.discussions')}>
 							{discussions.map((discussion) => (
 								<Card.Row key={discussion.id}>
 									<DiscussionListItem data={discussion} />
@@ -61,7 +63,7 @@ export default function Screen() {
 							))}
 						</Card>
 					)}
-					{discussions.length === 0 && <ListEmpty message="No discussions for this book" />}
+					{discussions.length === 0 && <ListEmpty message={t('bookClub.noDiscussionsForBook')} />}
 				</View>
 			</ScrollView>
 		</SafeAreaView>

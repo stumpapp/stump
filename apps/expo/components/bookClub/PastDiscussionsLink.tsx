@@ -8,6 +8,7 @@ import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
@@ -47,6 +48,7 @@ type Props = {
 }
 
 export function PastDiscussionsLink({ data }: Props) {
+	const { t } = useTranslate()
 	const loadedData = useFragment(fragment, data)
 	const router = useRouter()
 	const {
@@ -103,7 +105,7 @@ export function PastDiscussionsLink({ data }: Props) {
 			className="w-1/3 shrink-0 tablet:w-[120px]"
 			disabled={isLinkDisabled}
 		>
-			<View className="squircle ios:rounded-[2rem] relative flex-grow flex-row gap-6 overflow-hidden rounded-3xl bg-black/5 p-3 dark:bg-white/10">
+			<View className="squircle ios:rounded-[2rem] gap-6 bg-black/5 p-3 dark:bg-white/10 relative flex-grow flex-row overflow-hidden rounded-3xl">
 				{backgroundGradient && (
 					<LinearGradient
 						colors={backgroundGradient.colors}
@@ -115,7 +117,7 @@ export function PastDiscussionsLink({ data }: Props) {
 				)}
 
 				{imageProps && (
-					<View className="absolute inset-0 -bottom-3 flex-1 items-center justify-end">
+					<View className="inset-0 -bottom-3 absolute flex-1 items-center justify-end">
 						<ThumbnailImage
 							key={imageProps.url}
 							source={{
@@ -133,8 +135,8 @@ export function PastDiscussionsLink({ data }: Props) {
 
 				{isLinkDisabled && (
 					<View className="items-end justify-end">
-						<Text className="text-right text-base font-medium text-foreground-muted">
-							No past discussions
+						<Text className="text-base font-medium text-foreground-muted text-right">
+							{t('bookClub.noPastDiscussions')}
 						</Text>
 					</View>
 				)}

@@ -2,9 +2,11 @@ import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
 import BackLink from '~/components/BackLink'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	return (
@@ -13,7 +15,7 @@ export default function Screen() {
 				name="index"
 				options={{
 					headerShown: true,
-					title: 'Past Discussions',
+					title: t('bookClub.pastDiscussions'),
 					headerLeft: Platform.OS === 'android' ? undefined : () => <BackLink />,
 				}}
 			/>

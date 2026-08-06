@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useOverviewAnimations } from '../book/overview'
@@ -110,6 +111,7 @@ type BookContentProps = {
 } & Pick<Props, 'onConfirmAddBook'>
 
 function BookContent({ book, onConfirmAddBook }: BookContentProps) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const thumbnailRatio = usePreferencesStore((store) => store.thumbnailRatio)
@@ -170,7 +172,7 @@ function BookContent({ book, onConfirmAddBook }: BookContentProps) {
 
 					<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 						<Button variant="brand" className="flex-1" roundness="full" onPress={onConfirmAddBook}>
-							<Text>Add to Club</Text>
+							<Text>{t('bookClub.addToClub')}</Text>
 						</Button>
 					</View>
 				</View>

@@ -5,6 +5,7 @@ import { ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookClubSettings($id: ID!) {
@@ -47,6 +48,7 @@ const leaveClubMutation = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { clubId } = useLocalSearchParams<{ clubId: string }>()
 
 	const { data } = useSuspenseGraphQL(query, ['bookClubById', clubId, 'settings'], {
@@ -57,8 +59,8 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
-			<ScrollView className="flex-1 p-4">
-				<Text>TODO: Make me</Text>
+			<ScrollView className="p-4 flex-1">
+				<Text>{t('bookClub.settingsNotImplemented')}</Text>
 			</ScrollView>
 		</SafeAreaView>
 	)

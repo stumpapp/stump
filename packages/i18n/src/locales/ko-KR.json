@@ -588,214 +588,214 @@
 	},
 	"libraryHeader": {
 		"tabs": {
-			"books": "Books",
-			"series": "Series",
-			"files": "Files"
+			"books": "책",
+			"series": "시리즈",
+			"files": "파일"
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Manage Library",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "라이브러리 설정",
+		"subtitle": "여기에서 라이브러리를 관리할 수 있습니다. 설정에 대한 설명은",
+		"subtitleLink": "관련 문서 보기",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "기본 정보",
 			"configuration": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"label": "Options"
+				"general": "일반",
+				"reading": "읽기",
+				"scanning": "스캔",
+				"thumbnails": "썸네일",
+				"ignore-rules": "무시 규칙",
+				"label": "구성"
 			},
 			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
+				"label": "연동",
+				"analysis": "분석",
+				"metadata": "메타데이터"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "접근 제어",
+				"delete": "삭제",
+				"label": "위험 영역"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "기본 정보",
+			"description": "이름, 경로, 설명 등 라이브러리의 기본 정보",
 			"form": {
-				"submit": "Update library"
+				"submit": "라이브러리 수정"
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "읽기",
+			"description": "이 라이브러리의 책에 사용할 기본 리더 설정입니다. 책마다 이 설정을 다르게 지정할 수 있습니다"
 		},
 		"options/scanning": {
-			"title": "Scanning",
-			"description": "Settings related to how Stump scans this library",
+			"title": "스캔",
+			"description": "Stump가 이 라이브러리를 스캔하는 방법에 대한 설정",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "스캔 구성",
+					"description": "세부 동작을 제어할 수 있는 추가 옵션으로 스캔합니다",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "여기에서 선택한 항목은 라이브러리 전체의 해당 설정보다 우선합니다",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "강제로 다시 구성",
+								"description": "디스크에 있는 라이브러리의 모든 책을 다시 구성합니다",
+								"alert": "메타데이터와 해시를 포함하여 라이브러리의 모든 책을 처음부터 다시 구성합니다"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "사용자 지정",
+								"description": "스캔 구성을 직접 설정합니다",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "옵션을 하나 이상 사용해야 합니다"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "메타데이터 다시 구성",
+								"description": "라이브러리의 책 메타데이터를 다시 구성합니다"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "해시 다시 생성",
+								"description": "라이브러리의 책 해시를 다시 생성합니다"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Default scan",
-					"description": "A standard scan to index your library for new content"
+					"heading": "기본 스캔",
+					"description": "새 콘텐츠를 찾고 라이브러리를 색인하는 표준 스캔"
 				},
 				"history": {
-					"heading": "Scan history",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
-					"runScan": "Run scan",
-					"inspect": "See details",
+					"heading": "스캔 기록",
+					"description": "이 라이브러리에서 실행한 모든 스캔 기록",
+					"empty": "이 라이브러리의 스캔 기록이 없습니다",
+					"runScan": "스캔 실행",
+					"inspect": "상세 보기",
 					"inspector": {
-						"title": "Scan record",
-						"description": "A detailed view of this scan record",
+						"title": "스캔 기록",
+						"description": "이 스캔 기록의 상세 정보",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
-							"config": "Config",
-							"jobOutput": "Job output",
-							"logs": "Logs"
+							"library": "라이브러리",
+							"date": "날짜",
+							"config": "구성",
+							"jobOutput": "작업 출력",
+							"logs": "로그"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "이 작업의 로그가 저장되었습니다",
+						"seeLogs": "로그 보기"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
-							"config": "Config"
+							"timestamp": "스캔 일시",
+							"config": "구성"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "기본",
+						"custom": "사용자 지정"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "스캔 기록 삭제"
 				}
 			}
 		},
 		"options/thumbnails": {
-			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library",
+			"title": "썸네일",
+			"description": "이 라이브러리의 썸네일 설정 및 관리 옵션",
 			"sections": {
 				"management": {
-					"heading": "Management",
-					"description": "Manage the existing thumbnails for this library",
+					"heading": "썸네일 관리",
+					"description": "이 라이브러리의 기존 썸네일을 관리합니다",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"integrations/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "분석",
+			"description": "라이브러리의 콘텐츠를 분석하여 잠재적인 문제나 개선 사항을 찾습니다",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "책 분석",
+					"description": "라이브러리의 책을 분석하여 이미지 기반 책의 페이지 크기와 같은 추가 메타데이터를 데이터베이스에 저장합니다",
+					"disclaimerTitle": "이 작업은 많은 시스템 자원을 사용합니다",
+					"disclaimer": "완료하는 데 시간이 걸릴 수 있습니다. 향후 더 세부적으로 설정할 수 있도록 개선될 예정입니다",
+					"analyzeButton": "책 분석"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "누락된 파일",
+					"description": "데이터베이스에 등록되어 있지만 디스크에서 찾을 수 없는 파일",
+					"noMissingFiles": "이 라이브러리에 누락된 파일이 없습니다"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "중복 파일",
+					"description": "디스크에 중복되어 있을 가능성이 있는 파일",
+					"noDuplicateFiles": "이 라이브러리에서 중복 파일이 발견되지 않았습니다"
 				}
 			}
 		},
 		"integrations/metadata": {
-			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
+			"title": "메타데이터",
+			"description": "이 라이브러리의 메타데이터 일치 결과를 관리하고 검토합니다",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
+					"heading": "메타데이터 가져오기",
+					"description": "이 라이브러리의 미디어에 대한 메타데이터를 가져옵니다",
 					"noProviders": {
-						"title": "There are no metadata providers available",
-						"description": "You can configure metadata providers in the metadata integration settings"
+						"title": "사용할 수 있는 메타데이터 공급자가 없습니다",
+						"description": "메타데이터 연동 설정에서 공급자를 구성할 수 있습니다"
 					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
+					"fetchButton": "백그라운드 가져오기 시작",
+					"fetchError": "메타데이터 가져오기를 시작하지 못했습니다"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "접근 제어",
+			"description": "이 라이브러리의 콘텐츠에 접근할 수 있는 사용자를 관리합니다",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsersTitle": "No users to exclude",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "사용자 제외",
+					"description": "특정 사용자가 이 라이브러리나 콘텐츠에 접근하지 못하도록 설정합니다",
+					"noUsersTitle": "제외할 사용자가 없습니다",
+					"noUsers": "이 라이브러리에서 제외할 수 있는 다른 등록 사용자가 없습니다",
+					"updated": "제외 목록을 수정했습니다",
+					"failure": "제외 목록을 수정하지 못했습니다"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "삭제 작업",
+			"description": "이 라이브러리와 모든 콘텐츠 또는 특정 리소스를 영구적으로 삭제합니다",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimerTitle": "No files will be deleted",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "라이브러리 정리",
+					"description": "디스크에서 찾을 수 없는 모든 미디어와 시리즈를 제거합니다",
+					"disclaimerTitle": "파일은 삭제되지 않습니다",
+					"disclaimer": "파일 자체는 삭제하지 않지만, 누락 상태인 미디어와 시리즈에 관련된 모든 레코드는 영구적으로 삭제합니다",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "라이브러리 정리",
+						"text": "이 라이브러리를 정리하시겠습니까?"
 					},
-					"emptyText": "There was nothing to clean",
+					"emptyText": "정리할 항목이 없습니다",
 					"missingEntitiesTable": {
 						"columns": {
 							"id": "ID",
-							"path": "Path",
-							"type": "Type"
+							"path": "경로",
+							"type": "유형"
 						},
 						"types": {
-							"BOOK": "Book",
-							"SERIES": "Series",
-							"LIBRARY": "Library"
+							"BOOK": "책",
+							"SERIES": "시리즈",
+							"LIBRARY": "라이브러리"
 						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
+						"emptyHeading": "이 라이브러리에 누락된 항목이 없습니다",
+						"emptySubtitle": "데이터베이스에 등록된 모든 파일을 디스크에서 찾았습니다"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "라이브러리 삭제",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"이 라이브러리와 모든 콘텐츠를 영구적으로 삭제합니다.",
+						"이 작업은 되돌릴 수 없습니다"
 					]
 				}
 			}
@@ -2543,9 +2543,9 @@
 		"backupHeading": "작업 진행 중"
 	},
 	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
+		"seriesCount": "전체 시리즈",
+		"bookCount": "전체 책",
+		"diskUsage": "디스크 사용량"
 	},
 	"noLibraries": {
 		"heading": "표시할 내용이 없습니다",

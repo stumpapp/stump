@@ -1,4 +1,5 @@
 import { cn, Command, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -8,6 +9,7 @@ import { SpineSearchResult, useEpubReaderContext } from '../context'
 import ControlButton from './ControlButton'
 
 export default function SearchCommand() {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta,
 		controls: { searchEntireBook, onGoToCfi },
@@ -81,16 +83,16 @@ export default function SearchCommand() {
 				item = toc?.find((i) => i.play_order === adjustedIdx)
 			}
 
-			return item?.label || `Spine item ${idx}`
+			return item?.label || t('readerUi.spineItem', { index: idx })
 		},
-		[toc],
+		[toc, t],
 	)
 
 	const renderResults = () => {
 		if (!results) {
 			return null
 		} else if (!results.length) {
-			return <Command.Empty>No results found.</Command.Empty>
+			return <Command.Empty>{t('readerUi.noSearchResults')}</Command.Empty>
 		} else {
 			return results.map(({ spineIndex, results }, idx) => (
 				<Command.Group key={`group-${idx}`} heading={getSpineTitle(spineIndex)}>
@@ -146,7 +148,7 @@ export default function SearchCommand() {
 				<div className="px-4 flex items-center border-b border-b-border">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					<input
-						placeholder="Enter a basic query to search for"
+						placeholder={t('readerUi.searchPlaceholder')}
 						className={cn(
 							'h-11 py-3 text-sm flex w-full rounded-md bg-transparent text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
 						)}

@@ -1,6 +1,7 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious } from '@stump/components'
 import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
@@ -128,6 +129,7 @@ function getQueryKey(
 }
 
 function BookSearchScene() {
+	const { t } = useLocaleContext()
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 	const {
 		filters: mediaFilters,
@@ -335,7 +337,7 @@ function BookSearchScene() {
 		>
 			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
 				<Helmet>
-					<title>Stump | Books</title>
+					<title>Stump | {t('sidebar.buttons.books')}</title>
 				</Helmet>
 
 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />

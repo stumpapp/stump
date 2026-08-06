@@ -1,5 +1,6 @@
 import { useGraphQLMutation } from '@stump/client'
 import { CreateBookClubInput, graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { BookClubMemberRoleSpec } from '@stump/sdk'
 import { Suspense, useCallback, useState } from 'react'
 import { Helmet } from 'react-helmet'
@@ -26,6 +27,7 @@ const mutation = graphql(`
 `)
 
 export default function CreateBookClubScene() {
+	const { t } = useLocaleContext()
 	const [formStep, setFormStep] = useState(1)
 
 	const navigate = useNavigate()
@@ -67,7 +69,7 @@ export default function CreateBookClubScene() {
 	return (
 		<div className="relative flex flex-1 flex-col">
 			<Helmet>
-				<title>Stump | Create a book club</title>
+				<title>Stump | {t('createBookClubScene.heading')}</title>
 			</Helmet>
 
 			<SteppedFormContext.Provider

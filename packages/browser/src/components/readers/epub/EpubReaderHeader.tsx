@@ -1,4 +1,5 @@
 import { cn, Spacer, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -17,6 +18,7 @@ import {
 import { LocationManager } from './locations'
 
 export default function EpubReaderHeader() {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()
@@ -27,7 +29,7 @@ export default function EpubReaderHeader() {
 	return (
 		<ControlsContainer position="top">
 			<div className="gap-x-2 flex items-center">
-				<Link to={paths.bookOverview(bookEntity?.id || '')} title="Book Overview">
+				<Link to={paths.bookOverview(bookEntity?.id || '')} title={t('readerUi.bookOverview')}>
 					<ControlButton>
 						<ArrowLeft className="h-4 w-4" />
 					</ControlButton>

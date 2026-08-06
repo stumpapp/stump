@@ -207,7 +207,9 @@ export default function LoginOrClaimScene() {
 											<div className="w-full border-t border-border" />
 										</div>
 										<div className="text-xs relative flex justify-center uppercase">
-											<span className="px-2 bg-background text-muted-foreground">Or</span>
+											<span className="px-2 bg-background text-muted-foreground">
+												{t('authScene.or')}
+											</span>
 										</div>
 									</div>
 								)}

@@ -8,6 +8,7 @@
 	"authScene": {
 		"claimHeading": "Initialize your server",
 		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"or": "Or",
 		"form": {
 			"validation": {
 				"missingUsername": "Username is required",
@@ -634,6 +635,14 @@
 		"changeUrlSuffix": "to change your server URL."
 	},
 	"readerUi": {
+		"bookOverview": "Book overview",
+		"goToMediaOverview": "Go to media overview",
+		"noSearchResults": "No results found.",
+		"searchPlaceholder": "Enter a basic query to search for",
+		"spineItem": "Spine item {{index}}",
+		"pdfLoadFailed": "PDF failed to load.",
+		"downloadPdf": "Click here",
+		"downloadPdfSuffix": "to download it directly.",
 		"locationManager": "Location manager",
 		"contents": "Contents",
 		"tableOfContents": "Table of contents",
@@ -1258,6 +1267,7 @@
 			}
 		},
 		"matchesTable": {
+			"reviewMatch": "Review match",
 			"columns": {
 				"entityName": "Name",
 				"entityType": "Type",
@@ -1560,6 +1570,7 @@
 	"userSmartListsScene": {
 		"heading": "Smart lists",
 		"subtitle": "Your favorite searches and filters saved for easy access",
+		"accessCount": "You have access to {{count}} smart lists",
 		"searchPlaceholder": "Filter smart lists",
 		"buttons": {
 			"createSmartList": "Create smart list"
@@ -1605,6 +1616,7 @@
 			"sections": {
 				"visibility": {
 					"confirmation": {
+						"title": "Change visibility",
 						"public": "This will make the list visible to everyone",
 						"private": "This will change the list to be private, hiding it from anyone who previously had access",
 						"shared": "You will need to share the list with specific users to give them access",

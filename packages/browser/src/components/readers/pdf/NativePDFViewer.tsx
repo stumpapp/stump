@@ -1,5 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Link, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useState } from 'react'
 
 type Props = {
@@ -18,6 +19,7 @@ type Props = {
  * such as reading progress, bookmarks, and annotations.
  */
 export default function NativePDFViewer({ id }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 
 	const [pdfObjectUrl, setPdfObjectUrl] = useState<string>()
@@ -55,8 +57,9 @@ export default function NativePDFViewer({ id }: Props) {
 	return (
 		<object data={pdfObjectUrl} type="application/pdf" width="100%" height="100%">
 			<Text>
-				PDF failed to load. <Link href={sdk.media.downloadURL(id)}>Click here</Link> attempt
-				downloading it directly.
+				{t('readerUi.pdfLoadFailed')}{' '}
+				<Link href={sdk.media.downloadURL(id)}>{t('readerUi.downloadPdf')}</Link>{' '}
+				{t('readerUi.downloadPdfSuffix')}
 			</Text>
 		</object>
 	)

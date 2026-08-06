@@ -8,6 +8,7 @@
 	"authScene": {
 		"claimHeading": "서버 초기화",
 		"claimText": "이 Stump 서버는 아직 초기화되지 않았습니다. 아래 양식에서 계정을 만들면 서버의 모든 기능을 사용할 수 있습니다.",
+		"or": "또는",
 		"form": {
 			"validation": {
 				"missingUsername": "사용자 이름을 입력하세요",
@@ -634,6 +635,14 @@
 		"changeUrlSuffix": "서버 URL을 변경할 수 있습니다."
 	},
 	"readerUi": {
+		"bookOverview": "책 개요",
+		"goToMediaOverview": "책 개요로 이동",
+		"noSearchResults": "검색 결과가 없습니다.",
+		"searchPlaceholder": "검색어를 입력하세요",
+		"spineItem": "본문 항목 {{index}}",
+		"pdfLoadFailed": "PDF를 불러오지 못했습니다.",
+		"downloadPdf": "여기를 눌러",
+		"downloadPdfSuffix": "PDF를 직접 다운로드하세요.",
 		"locationManager": "위치 관리",
 		"contents": "목차",
 		"tableOfContents": "목차",
@@ -1258,6 +1267,7 @@
 			}
 		},
 		"matchesTable": {
+			"reviewMatch": "일치 항목 검토",
 			"columns": {
 				"entityName": "이름",
 				"entityType": "유형",
@@ -1560,6 +1570,7 @@
 	"userSmartListsScene": {
 		"heading": "스마트 목록",
 		"subtitle": "자주 사용하는 검색과 필터를 저장하여 간편하게 이용할 수 있습니다",
+		"accessCount": "접근 가능한 스마트 목록이 {{count}}개 있습니다",
 		"searchPlaceholder": "스마트 목록 검색",
 		"buttons": {
 			"createSmartList": "스마트 목록 만들기"
@@ -1605,6 +1616,7 @@
 			"sections": {
 				"visibility": {
 					"confirmation": {
+						"title": "공개 범위 변경",
 						"public": "이 목록이 모든 사용자에게 표시됩니다",
 						"private": "목록을 비공개로 변경하면 이전에 접근할 수 있었던 사용자에게도 표시되지 않습니다",
 						"shared": "접근 권한을 부여하려면 목록을 특정 사용자와 공유해야 합니다",

@@ -23,7 +23,7 @@ export default function ChangeVisibilityConfirmation({
 	return (
 		<ConfirmationModal
 			isOpen={isOpen}
-			title="Change visibility"
+			title={t(getKey('title'))}
 			description={description}
 			onConfirm={onConfirm}
 			onClose={onCancel}

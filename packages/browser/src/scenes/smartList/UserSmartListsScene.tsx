@@ -11,7 +11,6 @@ import {
 import { graphql, SmartListsInput } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Search } from 'lucide-react'
-import pluralize from 'pluralize'
 import { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
@@ -119,13 +118,13 @@ export default function UserSmartListsScene() {
 			<header className="h-32 gap-y-2 px-4 flex w-full flex-col justify-center border-b border-border">
 				<div>
 					<Heading size="lg" bold>
-						Smart lists
+						{t(withLocaleKey('heading'))}
 					</Heading>
-					<Text>Your favorite searches and filters saved for easy access</Text>
+					<Text>{t(withLocaleKey('subtitle'))}</Text>
 				</div>
 
 				<Text variant="muted" size="sm">
-					You have access to {smartLists.length} smart {pluralize('list', smartLists.length)}
+					{t(withLocaleKey('accessCount'), { count: smartLists.length })}
 				</Text>
 			</header>
 

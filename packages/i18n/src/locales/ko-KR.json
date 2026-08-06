@@ -2297,251 +2297,253 @@
 			}
 		},
 		"server/email": {
-			"helmet": "Email settings",
-			"title": "Email",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"helmet": "이메일 설정",
+			"title": "이메일",
+			"description": "Stump 서버 인스턴스의 SMTP 이메일 전송 서비스 설정",
 			"sections": {
 				"emailers": {
-					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"title": "SMTP 이메일 전송 서비스",
+					"description": "Stump 서버 인스턴스에서 이메일을 보내도록 구성한 클라이언트",
+					"singleInstanceDisclaimer": "Stump 백엔드는 여러 SMTP 구성을 지원하지만 UI에서는 하나만 구성할 수 있습니다. 향후 개선될 예정입니다",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
+						"emptyHeading": "구성된 SMTP 이메일 전송 서비스가 없습니다",
+						"primaryEmailer": "기본 이메일 전송 서비스",
 						"sendHistory": {
-							"heading": "Send history",
-							"description": "A record of emails sent from this emailer",
+							"heading": "전송 기록",
+							"description": "이 이메일 전송 서비스에서 보낸 이메일 기록",
 							"table": {
 								"columns": {
-									"to": "To",
-									"subject": "Subject",
-									"status": "Status",
-									"createdAt": "Sent at"
+									"to": "받는 사람",
+									"subject": "제목",
+									"status": "상태",
+									"createdAt": "보낸 일시"
 								}
 							},
-							"emptyHeading": "No history",
-							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+							"emptyHeading": "전송 기록이 없습니다",
+							"emptySubtitle": "이 이메일 전송 서비스를 아직 사용하지 않았거나 기록을 삭제했습니다"
 						}
 					}
 				},
 				"devices": {
-					"title": "Email devices",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
-					"addDevice": "Add device alias",
+					"title": "이메일 기기",
+					"description": "Stump 서버 인스턴스의 이메일을 수신하도록 구성한 기기 별칭",
+					"addDevice": "기기 별칭 추가",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "기기 별칭 만들기",
+							"update": "기기 별칭 수정"
 						},
 						"name": {
-							"label": "Name",
-							"description": "A friendly name to uniquely identify this device alias"
+							"label": "이름",
+							"description": "이 기기 별칭을 구분할 고유한 이름"
 						},
 						"email": {
-							"label": "Email",
-							"description": "The email address this alias will be associated with"
+							"label": "이메일",
+							"description": "이 별칭과 연결할 이메일 주소"
 						},
 						"forbidden": {
-							"label": "Forbidden",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
+							"label": "전송 금지",
+							"description": "사용하면 어떤 사용자도 이 별칭과 연결된 주소로 이메일을 보낼 수 없습니다"
 						},
 						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "기기 별칭 만들기",
+							"update": "기기 별칭 수정"
 						}
 					},
 					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
+						"emptyHeading": "등록된 기기가 없습니다",
+						"emptySubtitle": "사용할 기기 별칭을 새로 만드세요"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Name",
-					"description": "A friendly name to uniquely identify this emailer"
+					"label": "이름",
+					"description": "이 이메일 전송 서비스를 구분할 고유한 이름"
 				},
 				"smtpSettings": {
-					"heading": "SMTP settings",
-					"description": "The SMTP-specific settings for this emailer"
+					"heading": "SMTP 설정",
+					"description": "이 이메일 전송 서비스의 SMTP 관련 설정"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "SMTP 공급자 사전 설정",
+					"description": "SMTP 서버 공급자를 선택하면 일반 설정을 미리 채웁니다. 모든 공급자가 포함되어 있지는 않습니다"
 				},
 				"smtpHost": {
-					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
+					"label": "SMTP 호스트",
+					"description": "SMTP 서버의 호스트 이름"
 				},
 				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
+					"label": "SMTP 포트",
+					"description": "SMTP 서버의 포트"
 				},
 				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
+					"label": "TLS 사용",
+					"description": "사용하면 SMTP 서버와의 연결을 암호화합니다"
 				},
 				"username": {
-					"label": "Username",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+					"label": "사용자 이름",
+					"description": "SMTP 서버 인증에 사용할 사용자 이름입니다. 일반적으로 이메일 주소를 사용합니다"
 				},
 				"password": {
-					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+					"label": "비밀번호",
+					"description": "SMTP 서버 인증에 사용할 비밀번호입니다. Gmail을 사용한다면 앱 비밀번호를 만들어야 할 수 있습니다"
 				},
 				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
+					"heading": "보내는 사람 설정",
+					"description": "이메일의 보내는 사람에 대한 설정"
 				},
 				"senderDisplayName": {
-					"label": "Sender display name",
-					"description": "The name that will be displayed to recipients"
+					"label": "보내는 사람 표시 이름",
+					"description": "받는 사람에게 표시할 이름"
 				},
 				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
+					"label": "보내는 사람 이메일 주소",
+					"description": "받는 사람에게 표시할 이메일 주소"
 				},
 				"additionalSettings": {
-					"heading": "Additional settings",
-					"description": "Additional settings for the emailer"
+					"heading": "추가 설정",
+					"description": "이메일 전송 서비스의 추가 설정"
 				},
 				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"label": "최대 첨부 파일 크기",
+					"description": "첨부 파일의 최대 크기(바이트)"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "이메일 전송 서비스 만들기",
+					"update": "이메일 전송 서비스 수정"
 				},
 				"testEmailer": {
-					"button": "Send test email",
-					"recipientLabel": "Test recipient",
-					"recipientDescription": "An email address to send the test email to",
-					"success": "Test email sent successfully",
+					"button": "테스트 이메일 보내기",
+					"recipientLabel": "테스트 수신자",
+					"recipientDescription": "테스트 이메일을 보낼 이메일 주소",
+					"success": "테스트 이메일을 보냈습니다",
 					"error": {
-						"title": "Failed to send test email",
-						"description": "Check your SMTP settings and try again"
+						"title": "테스트 이메일을 보내지 못했습니다",
+						"description": "SMTP 설정을 확인하고 다시 시도하세요"
 					}
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "이메일 전송 서비스 만들기",
+				"title": "이메일 전송 서비스 만들기",
+				"description": "Stump 서버 인스턴스에 새 SMTP 이메일 전송 서비스를 만듭니다"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "이메일 전송 서비스 수정",
+				"title": "이메일 전송 서비스 수정",
+				"description": "이 SMTP 이메일 전송 서비스의 정보를 수정합니다"
 			}
 		},
 		"server/metadataIntegrations": {
-			"helmet": "Metadata integrations",
-			"title": "Metadata integrations",
-			"addProvider": "Add provider",
-			"noProviders": "No providers configured yet. Add one to get started",
+			"helmet": "메타데이터 연동",
+			"title": "메타데이터 연동",
+			"addProvider": "공급자 추가",
+			"createProviderError": "공급자를 만들지 못했습니다",
+			"updateProviderError": "공급자를 수정하지 못했습니다",
+			"noProviders": "아직 구성된 공급자가 없습니다. 공급자를 추가하여 시작하세요",
 			"providers": {
-				"title": "Providers",
-				"description": "Configure external metadata providers to fetch and enrich your library data"
+				"title": "공급자",
+				"description": "라이브러리 데이터를 가져오고 보완할 외부 메타데이터 공급자를 구성합니다"
 			},
 			"providerForm": {
 				"apiToken": {
-					"label": "API token",
-					"description": "The API token for authenticating with this provider",
-					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
+					"label": "API 토큰",
+					"description": "이 공급자 인증에 사용할 API 토큰",
+					"validationError": "이 토큰의 자동 검증에 실패했습니다",
+					"validationRequestError": "검증 요청에 실패했습니다",
+					"validationRequestErrorUnknown": "검증 중 알 수 없는 오류가 발생했습니다",
+					"providerStatusError": "공급자가 {{status}} 상태로 응답했습니다",
+					"providerError": "공급자가 오류로 응답했습니다: {{message}}",
+					"noBearerPrefixRequired": "API 토큰에서 'Bearer ' 접두사를 제거하세요"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
-					"description": "The date when the API token will expire (optional)"
+					"label": "API 토큰 만료일",
+					"description": "API 토큰이 만료되는 날짜(선택 사항)"
 				},
 				"enableProvider": {
-					"label": "Enable provider",
-					"description": "It will be used for fetching if enabled"
+					"label": "공급자 사용",
+					"description": "사용하면 메타데이터를 가져올 때 이 공급자를 이용합니다"
 				},
 				"autoApplyConfig": {
 					"enabled": {
-						"label": "Enable auto-apply",
-						"description": "Skip manual approval and apply likely matches"
+						"label": "자동 적용 사용",
+						"description": "직접 승인하는 단계를 건너뛰고 일치 가능성이 높은 결과를 적용합니다"
 					},
 					"threshold": {
-						"label": "Confidence threshold",
-						"description": "Minimum confidence score (0-1) to auto-apply a match",
-						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+						"label": "신뢰도 기준값",
+						"description": "일치 결과를 자동 적용할 최소 신뢰도 점수(0~1)",
+						"disclaimer": "계산된 신뢰도 점수는 가능한 범위에서 추정한 값이므로 항상 정확하지는 않을 수 있습니다"
 					},
 					"strategy": {
-						"label": "Merge strategy",
+						"label": "병합 방식",
 						"options": {
-							"FILL_GAPS": "Accept missing fields",
-							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
-							"PREFER_EXTERNAL": "Prefer external data"
+							"FILL_GAPS": "비어 있는 필드 채우기",
+							"FILL_AND_MERGE_LISTS": "비어 있는 필드 채우기 및 목록 병합",
+							"PREFER_EXTERNAL": "외부 데이터 우선"
 						}
 					}
 				}
 			},
-			"providerEnabled": "This provider is enabled",
-			"providerDisabled": "This provider is disabled",
-			"providerTokenExpiresSoon": "This provider's token will expire soon",
-			"autoApplyOn": "Auto-apply on",
-			"autoApplyOff": "Auto-apply off",
+			"providerEnabled": "이 공급자는 사용 중입니다",
+			"providerDisabled": "이 공급자는 사용하지 않습니다",
+			"providerTokenExpiresSoon": "이 공급자의 토큰이 곧 만료됩니다",
+			"autoApplyOn": "자동 적용 사용",
+			"autoApplyOff": "자동 적용 안 함",
 			"editDialog": {
-				"tooltip": "Edit provider"
+				"tooltip": "공급자 편집"
 			},
 			"deleteDialog": {
-				"title": "Delete provider",
-				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+				"title": "공급자 삭제",
+				"description": "{{providerName}} 공급자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
 			}
 		},
 		"server/tags": {
-			"helmet": "Tag management",
-			"title": "Tags",
-			"description": "Create and manage tags for organizing your content",
+			"helmet": "태그 관리",
+			"title": "태그",
+			"description": "콘텐츠를 정리할 태그를 만들고 관리합니다",
 			"sections": {
 				"table": {
-					"title": "Tags",
-					"description": "All tags available on this server",
+					"title": "태그",
+					"description": "이 서버에서 사용할 수 있는 모든 태그",
 					"empty": {
-						"title": "No tags",
-						"action": "Create your first tag to get started"
+						"title": "태그가 없습니다",
+						"action": "첫 태그를 만들어 시작하세요"
 					},
 					"columns": {
-						"name": "Name"
+						"name": "이름"
 					},
 					"actionMenu": {
-						"rename": "Rename"
+						"rename": "이름 변경"
 					}
 				},
 				"createTag": {
-					"trigger": "Create tag",
+					"trigger": "태그 만들기",
 					"modal": {
-						"heading": "Create new tag",
-						"description": "Tags can be assigned to books, series, and libraries",
+						"heading": "새 태그 만들기",
+						"description": "태그는 책, 시리즈, 라이브러리에 지정할 수 있습니다",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter tag name"
+							"label": "이름",
+							"placeholder": "태그 이름 입력"
 						},
-						"submit": "Create"
+						"submit": "만들기"
 					}
 				},
 				"renameTag": {
 					"modal": {
-						"heading": "Rename tag",
-						"description": "Change the name of this tag across all assigned items",
+						"heading": "태그 이름 변경",
+						"description": "이 태그가 지정된 모든 항목에서 태그 이름을 변경합니다",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter new tag name"
+							"label": "이름",
+							"placeholder": "새 태그 이름 입력"
 						},
-						"submit": "Rename"
+						"submit": "이름 변경"
 					}
 				},
 				"deleteTag": {
-					"title": "Delete tag",
-					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
-					"confirm": "Delete"
+					"title": "태그 삭제",
+					"description": "모든 책, 시리즈, 라이브러리에서 이 태그를 제거합니다. 이 작업은 되돌릴 수 없습니다.",
+					"confirm": "삭제"
 				}
 			}
 		}

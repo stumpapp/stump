@@ -66,11 +66,11 @@
 					"label": "Anno"
 				},
 				"number": {
-					"label": "Issue number"
+					"label": "Numero edizione"
 				},
 				"comicVineVolumeId": {
-					"label": "ComicVine volume ID",
-					"placeholder": "e.g., 129260"
+					"label": "ID volume ComicVine",
+					"placeholder": "es. 129260"
 				},
 				"provider": {
 					"label": "Provider",
@@ -291,17 +291,17 @@
 				"description": "Utilizzati per categorizzare la tua libreria o applicare regole di accesso"
 			},
 			"libraryType": {
-				"label": "Library content",
-				"description": "The type of content present in this library",
+				"label": "Contenuto libreria",
+				"description": "Il tipo di contenuto presente in questa libreria",
 				"options": {
-					"COMIC": "Comics",
+					"COMIC": "Fumetti",
 					"MANGA": "Manga",
-					"BOOK": "Books",
-					"LIGHT_NOVEL": "Light Novels",
+					"BOOK": "Libri",
+					"LIGHT_NOVEL": "Light novel",
 					"MANHWA": "Manhwa",
-					"WEB_NOVEL": "Web Novels",
-					"WEBTOON": "Webtoons",
-					"MIXED": "Mixed"
+					"WEB_NOVEL": "Web novel",
+					"WEBTOON": "Webtoon",
+					"MIXED": "Misto"
 				}
 			},
 			"defaultLibraryView": {
@@ -2439,8 +2439,8 @@
 			"helmet": "Integrazioni metadati",
 			"title": "Integrazioni metadati",
 			"addProvider": "Aggiungi provider",
-			"createProviderError": "Failed to create provider",
-			"updateProviderError": "Failed to update provider",
+			"createProviderError": "Impossibile creare il provider",
+			"updateProviderError": "Impossibile aggiornare il provider",
 			"noProviders": "Nessun provider configurato. Aggiungine uno per iniziare",
 			"providers": {
 				"title": "Provider",
@@ -2453,8 +2453,8 @@
 					"validationError": "Convalida automatica del token non riuscita",
 					"validationRequestError": "Richiesta di convalida non riuscita",
 					"validationRequestErrorUnknown": "Si è verificato un errore sconosciuto durante la convalida",
-					"providerStatusError": "The provider responded with status {{status}}",
-					"providerError": "The provider responded with an error: {{message}}",
+					"providerStatusError": "Il provider ha risposto con lo stato {{status}}",
+					"providerError": "Il provider ha risposto con un errore: {{message}}",
 					"noBearerPrefixRequired": "Rimuovi il prefisso 'Bearer ' dal token API"
 				},
 				"apiTokenExpiresAt": {

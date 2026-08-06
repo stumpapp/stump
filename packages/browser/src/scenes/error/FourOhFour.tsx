@@ -1,6 +1,9 @@
 import { ButtonOrLink, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 export default function FourOhFour() {
+	const { t } = useLocaleContext()
+
 	return (
 		<div
 			data-tauri-drag-region
@@ -8,16 +11,16 @@ export default function FourOhFour() {
 		>
 			<div className="gap-1.5 flex flex-col text-left">
 				<h1 className="text-5xl font-semibold text-foreground">404</h1>
-				<Text size="lg">The page you are looking for does not seem to exist!</Text>
+				<Text size="lg">{t('errorScene.notFound.message')}</Text>
 				<div className="mt-6 gap-2 flex items-center">
-					<ButtonOrLink href="/">Go home</ButtonOrLink>
+					<ButtonOrLink href="/">{t('errorScene.buttons.goHome')}</ButtonOrLink>
 					<ButtonOrLink
 						variant="outline"
 						href="https://github.com/stumpapp/stump/issues"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						Report an issue
+						{t('errorScene.notFound.reportIssue')}
 					</ButtonOrLink>
 				</div>
 			</div>

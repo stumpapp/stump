@@ -1,6 +1,7 @@
 import { formatBytes } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 
 export const BookFileInformationFragment = graphql(`
 	fragment BookFileInformation on Media {
@@ -18,6 +19,7 @@ type Props = {
 
 // TODO: redesign!!
 export default function BookFileInformation({ fragment }: Props) {
+	const { t } = useLocaleContext()
 	const data = useFragment(BookFileInformationFragment, fragment)
 
 	/**
@@ -33,22 +35,23 @@ export default function BookFileInformation({ fragment }: Props) {
 
 	return (
 		<div className="space-y-1 pb-3 pt-2 text-sm flex flex-col">
-			<Heading size="xs">File Information</Heading>
+			<Heading size="xs">{t('bookOverviewScene.fileInformation.heading')}</Heading>
 			<div className="space-x-4 flex">
 				<Text size="sm" variant="muted">
-					Size: {formatBytes(data.size)}
+					{t('bookOverviewScene.fileInformation.labels.fileSize')}: {formatBytes(data.size)}
 				</Text>
 				<Text size="sm" variant="muted">
-					Format: {data.extension?.toUpperCase()}
+					{t('bookOverviewScene.fileInformation.labels.fileType')}: {data.extension?.toUpperCase()}
 				</Text>
 			</div>
 			{data.hash && (
 				<Text size="sm" variant="muted" title={data.hash || ''}>
-					Hash: {formatHash(data.hash || '')}
+					{t('bookOverviewScene.fileInformation.labels.fileChecksum')}:{' '}
+					{formatHash(data.hash || '')}
 				</Text>
 			)}
 			<Text size="sm" variant="muted" title={data.relativeLibraryPath}>
-				Relative path: {data.relativeLibraryPath}
+				{t('bookOverviewScene.fileInformation.labels.fileLocation')}: {data.relativeLibraryPath}
 			</Text>
 		</div>
 	)

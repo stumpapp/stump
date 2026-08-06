@@ -105,7 +105,8 @@
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Next in Series",
+		"nextInSeriesEmpty": "No books remain after this one"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
@@ -810,11 +811,22 @@
 	},
 	"errorScene": {
 		"heading": "lol, oops",
+		"criticalHeading": "A critical error occurred",
+		"emptyMessage": "The error message was empty.",
+		"copiedDetails": "Copied error details to your clipboard",
+		"imageAlt": "Construction illustration",
 		"message": "An error occurred:",
 		"buttons": {
 			"report": "Report Bug",
 			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"goHome": "Go Home",
+			"goHomeTitle": "Go back to the homepage",
+			"reportTitle": "Report this error as a potential bug on GitHub",
+			"copyTitle": "Copy the error details to your clipboard"
+		},
+		"notFound": {
+			"message": "The page you are looking for does not seem to exist!",
+			"reportIssue": "Report an issue"
 		}
 	},
 	"homeScene": {
@@ -2728,7 +2740,13 @@
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "An unknown error occurred",
+		"nothingToShow": "Nothing to show",
+		"noResultsToDisplay": "No results present to display",
+		"noResultsReturned": "No results were returned",
+		"seekBackward": "Seek backwards",
+		"seekAhead": "Seek ahead",
+		"metadata": "Metadata"
 	},
 	"tableColumns": {
 		"configuration": {

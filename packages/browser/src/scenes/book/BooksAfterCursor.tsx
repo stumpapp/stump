@@ -1,6 +1,7 @@
 import { PREFETCH_STALE_TIME, queryClient, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
@@ -60,6 +61,7 @@ export default function BooksAfterCurrentContainer({ cursor }: Props) {
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
+	const { t } = useLocaleContext()
 	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['booksAfterCursor', cursor],
@@ -83,7 +85,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 
 	return (
 		<HorizontalCardList
-			title="Next in series"
+			title={t('bookOverviewScene.nextInSeries')}
 			items={cards}
 			onFetchMore={handleFetchMore}
 			footerHeight={64 + 17}
@@ -93,9 +95,9 @@ function BooksAfterCurrent({ cursor }: Props) {
 						<BookX className="h-8 w-8 text-muted-foreground" />
 					</span>
 					<div>
-						<Text>Nothing to show</Text>
+						<Text>{t('common.nothingToShow')}</Text>
 						<Text size="sm" variant="muted">
-							No books remain after this one
+							{t('bookOverviewScene.nextInSeriesEmpty')}
 						</Text>
 					</div>
 				</div>

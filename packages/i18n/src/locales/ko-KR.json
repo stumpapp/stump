@@ -592,7 +592,16 @@
 		}
 	},
 	"fileExplorer": {
+		"table": {
+			"cover": "표지",
+			"name": "이름"
+		},
+		"noDatabaseEntry": "이 파일과 연결된 데이터베이스 항목을 찾을 수 없습니다",
 		"uploadModal": {
+			"booksUploaded": "책을 업로드했습니다",
+			"booksUploadFailed": "책을 업로드하지 못했습니다",
+			"seriesUploaded": "시리즈를 업로드했습니다",
+			"seriesUploadFailed": "시리즈를 업로드하지 못했습니다",
 			"menu": {
 				"addBooks": "책 추가",
 				"addSeries": "시리즈 추가"
@@ -743,7 +752,14 @@
 		"goToSettings": "설정으로 이동",
 		"lastVisited": "최근 방문",
 		"constructionIllustration": "공사 중임을 나타내는 그림",
-		"ofPages": "전체 {{pages}}페이지"
+		"ofPages": "전체 {{pages}}페이지",
+		"tableRange": "전체 {{total}}개 중 {{first}}~{{last}}",
+		"showRows": "{{count}}개 행 표시",
+		"perPage": "페이지당",
+		"orderBy": "정렬 기준",
+		"extension": "확장자",
+		"any": "전체",
+		"selectOption": "옵션 선택"
 	},
 	"filterUi": {
 		"search": "검색",
@@ -3060,7 +3076,10 @@
 		"uploadImage": {
 			"emptyState": "이미지 미리보기가 여기에 표시됩니다",
 			"prompt": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
-			"remove": "이미지 제거"
+			"remove": "이미지 제거",
+			"fileTooLarge": "파일이 너무 큽니다(최대 20MB)",
+			"onlyOneFile": "파일은 하나만 선택할 수 있습니다",
+			"noFile": "선택한 파일이 없습니다"
 		}
 	},
 	"common": {

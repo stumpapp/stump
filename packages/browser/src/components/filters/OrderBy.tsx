@@ -1,5 +1,6 @@
 import { Button, cx, Popover } from '@stump/components'
 import { OrderDirection } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { SortAsc } from 'lucide-react'
 import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -11,6 +12,7 @@ type Props = {
 	entity: FilterableEntity
 }
 export default function OrderBy({ entity }: Props) {
+	const { t } = useLocaleContext()
 	const [isOpen, setIsOpen] = useState(false)
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
@@ -40,7 +42,7 @@ export default function OrderBy({ entity }: Props) {
 					})}
 				>
 					<SortAsc className="mr-1.5 h-4 w-4 text-foreground" />
-					Order By
+					{t('controlUi.orderBy')}
 				</Button>
 			</Popover.Trigger>
 

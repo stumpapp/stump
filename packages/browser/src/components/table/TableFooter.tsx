@@ -1,4 +1,5 @@
 import { NativeSelect, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { PaginationState } from '@tanstack/react-table'
 
 import TablePagination from './Pagination'
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export default function TableFooter({ pagination, setPagination, pageCount, dataCount }: Props) {
+	const { t } = useLocaleContext()
 	const firstIndex = pagination.pageIndex * pagination.pageSize + 1
 	const lastIndex = Math.min(firstIndex + pagination.pageSize - 1, dataCount)
 
@@ -20,17 +22,14 @@ export default function TableFooter({ pagination, setPagination, pageCount, data
 		<div className="h-10 px-2 flex items-center justify-between border-t border-border">
 			<div className="gap-4 flex items-center">
 				<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
-					<span>
-						<strong>{firstIndex}</strong> to <strong>{lastIndex}</strong>
-					</span>
-					of <strong>{dataCount}</strong>
+					{t('controlUi.tableRange', { first: firstIndex, last: lastIndex, total: dataCount })}
 				</Text>
 
 				<NativeSelect
 					disabled={!dataCount}
 					size="xs"
 					options={[5, 10, 20, 30, 40, 50].map((pageSize) => ({
-						label: `Show ${pageSize} rows`,
+						label: t('controlUi.showRows', { count: pageSize }),
 						// FIXME: don't cast once my select can consume numbers :nomnom:
 						value: pageSize.toString(),
 					}))}

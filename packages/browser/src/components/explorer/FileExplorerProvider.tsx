@@ -1,4 +1,5 @@
 import { useDirectoryListing, UseDirectoryListingFile, useSDK } from '@stump/client'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -16,6 +17,7 @@ type Props = Pick<IExplorerContext, 'libraryID' | 'rootPath' | 'uploadConfig'>
 // TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
 export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
+	const { t } = useLocaleContext()
 	const navigate = useNavigate()
 	const { sdk } = useSDK()
 
@@ -52,11 +54,11 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 						},
 					})
 				} else {
-					toast.error('No associated DB entry found for this file')
+					toast.error(t('fileExplorer.noDatabaseEntry'))
 				}
 			} catch (err) {
 				console.error(err)
-				toast.error('An unknown error occurred')
+				toast.error(t('common.unknownError'))
 			}
 		}
 	}

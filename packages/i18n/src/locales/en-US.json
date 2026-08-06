@@ -592,7 +592,16 @@
 		}
 	},
 	"fileExplorer": {
+		"table": {
+			"cover": "Cover",
+			"name": "Name"
+		},
+		"noDatabaseEntry": "No associated database entry was found for this file",
 		"uploadModal": {
+			"booksUploaded": "Books uploaded successfully",
+			"booksUploadFailed": "Failed to upload books",
+			"seriesUploaded": "Series uploaded successfully",
+			"seriesUploadFailed": "Failed to upload series",
 			"menu": {
 				"addBooks": "Add books",
 				"addSeries": "Add series"
@@ -743,7 +752,14 @@
 		"goToSettings": "Go to settings",
 		"lastVisited": "Last visited",
 		"constructionIllustration": "Construction illustration",
-		"ofPages": "of {{pages}}"
+		"ofPages": "of {{pages}}",
+		"tableRange": "{{first}} to {{last}} of {{total}}",
+		"showRows": "Show {{count}} rows",
+		"perPage": "per page",
+		"orderBy": "Order by",
+		"extension": "Extension",
+		"any": "Any",
+		"selectOption": "Select an option"
 	},
 	"filterUi": {
 		"search": "Search",
@@ -3060,7 +3076,10 @@
 		"uploadImage": {
 			"emptyState": "A preview of your image will appear here",
 			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"remove": "Remove image",
+			"fileTooLarge": "File too large (20MB max)",
+			"onlyOneFile": "Only one file is allowed",
+			"noFile": "No file was provided"
 		}
 	},
 	"common": {

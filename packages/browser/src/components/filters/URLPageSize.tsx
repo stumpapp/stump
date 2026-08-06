@@ -1,9 +1,11 @@
 import { Input, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useURLPageParams } from './useFilterScene'
 
 export default function URLPageSize() {
+	const { t } = useLocaleContext()
 	const { pageSize, setPageSize } = useURLPageParams()
 	const [inputPageSize, setInputPageSize] = useState<number | undefined>(pageSize)
 
@@ -37,7 +39,7 @@ export default function URLPageSize() {
 				min={1}
 			/>
 			<Text size="sm" variant="muted" className="inline-flex shrink-0">
-				per page
+				{t('controlUi.perPage')}
 			</Text>
 		</form>
 	)

@@ -1,4 +1,5 @@
 import { cn, Heading, NativeSelect, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import {
 	Column,
 	ColumnDef,
@@ -55,6 +56,7 @@ export default function Table<T, V>({
 	totalCount,
 	...props
 }: TableProps<T, V>) {
+	const { t } = useLocaleContext()
 	const rootRef = useRef<HTMLDivElement | null>(null)
 	const viewportRef = useRef<HTMLDivElement | null>(null)
 
@@ -225,24 +227,20 @@ export default function Table<T, V>({
 			<div className="h-10 px-2 flex items-center justify-between border-t border-border">
 				<div className="gap-4 flex items-center">
 					<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
-						{tableRows.length > 0 ? (
-							<>
-								<span>
-									<strong>{viewBounds.firstIndex}</strong> to{' '}
-									<strong>{viewBounds.lastIndex}</strong>
-								</span>
-								of <strong>{viewBounds.totalCount}</strong>
-							</>
-						) : (
-							'Nothing to show'
-						)}
+						{tableRows.length > 0
+							? t('controlUi.tableRange', {
+									first: viewBounds.firstIndex,
+									last: viewBounds.lastIndex,
+									total: viewBounds.totalCount,
+								})
+							: t('common.nothingToShow')}
 					</Text>
 
 					<NativeSelect
 						disabled={pageCount <= 1 && dataCount <= pageSize}
 						size="xs"
 						options={[10, 20, 30, 40, 50].map((pageSize) => ({
-							label: `Show ${pageSize} rows`,
+							label: t('controlUi.showRows', { count: pageSize }),
 							// FIXME: don't cast once my select can consume numbers :nomnom:
 							value: pageSize.toString(),
 						}))}

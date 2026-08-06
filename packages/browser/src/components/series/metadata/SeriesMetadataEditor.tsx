@@ -120,7 +120,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 								onClick={() => setShowMissing((prev) => !prev)}
 							/>
 
-							<span className="ml-2">Missing</span>
+							<span className="ml-2">{t('metadataEditor.missing')}</span>
 						</Label>
 					</div>
 				),
@@ -212,7 +212,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 				cell: () => null,
 			}),
 		],
-		[metadata, paths, checkPermission],
+		[metadata, paths, checkPermission, t],
 	) as ColumnDef<SeriesMetadataEditorRow>[]
 
 	const items = useMemo(

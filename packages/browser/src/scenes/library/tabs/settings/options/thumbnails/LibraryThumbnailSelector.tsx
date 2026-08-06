@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Label, PickSelect, Text } from '@stump/components'
 import { graphql, LibraryThumbnailSelectorUpdateMutation } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -38,6 +39,7 @@ const uploadMutation = graphql(`
 type OnSuccessData = PickSelect<LibraryThumbnailSelectorUpdateMutation, 'updateLibraryThumbnail'>
 
 export default function LibraryThumbnailSelector() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const [selectedSeries, setSelectedSeries] = useState<SelectedSeries>()
 	const [selectedBook, setSelectedBook] = useState<SelectedBook>()
@@ -93,10 +95,10 @@ export default function LibraryThumbnailSelector() {
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload image')
+				toast.error(t('common.failedToUploadImage'))
 			}
 		},
-		[library.id, uploadThumbnail],
+		[library.id, uploadThumbnail, t],
 	)
 
 	const handleConfirm = useCallback(async () => {
@@ -107,9 +109,9 @@ export default function LibraryThumbnailSelector() {
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update thumbnail')
+			toast.error(t('common.failedToUpdateThumbnail'))
 		}
-	}, [patchThumbnail, selectedBook, page, library.id])
+	}, [patchThumbnail, selectedBook, page, library.id, t])
 
 	useEffect(() => {
 		return () => {
@@ -138,11 +140,11 @@ export default function LibraryThumbnailSelector() {
 
 	const renderDescription = () => {
 		if (selectedBook) {
-			return 'Choose a page from this book to use as the new thumbnail'
+			return t('common.choosePageForThumbnail')
 		} else if (selectedSeries) {
-			return 'Select a book from the series'
+			return t('common.selectBookFromSeries')
 		} else {
-			return 'Select a series from the library'
+			return t('common.selectSeriesFromLibrary')
 		}
 	}
 
@@ -161,7 +163,7 @@ export default function LibraryThumbnailSelector() {
 					}
 				}}
 			>
-				Go back
+				{t('common.goBack')}
 			</span>
 		)
 	}
@@ -169,9 +171,9 @@ export default function LibraryThumbnailSelector() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>
-				<Label>Select thumbnail</Label>
+				<Label>{t('common.selectThumbnail')}</Label>
 				<Text size="sm" variant="muted">
-					Choose a different thumbnail for this library, either from a book or upload a custom one
+					{t('common.libraryThumbnailDescription')}
 				</Text>
 			</div>
 
@@ -185,7 +187,7 @@ export default function LibraryThumbnailSelector() {
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
-						<Dialog.Title>Select a thumbnail</Dialog.Title>
+						<Dialog.Title>{t('common.selectThumbnail')}</Dialog.Title>
 						<Dialog.Description>
 							{renderDescription()}
 							{renderGoBack()}
@@ -196,14 +198,14 @@ export default function LibraryThumbnailSelector() {
 					<Suspense>{renderContent()}</Suspense>
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							Cancel
+							{t('common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!selectedSeries || !selectedBook || !page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
-							Confirm selection
+							{t('common.confirmSelection')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

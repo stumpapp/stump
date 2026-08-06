@@ -6,6 +6,7 @@ import {
 	RowData,
 	useReactTable,
 } from '@tanstack/react-table'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useLayoutEffect, useRef } from 'react'
 import { useWindowSize } from 'rooks'
 
@@ -26,6 +27,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 	items,
 	showMissing,
 }: Props<Item>) {
+	const { t } = useLocaleContext()
 	const table = useReactTable({
 		columns,
 		data: items,
@@ -172,7 +174,9 @@ export default function MetadataEditorTable<Item extends RowData>({
 					{!rows.length && (
 						<tr>
 							<td colSpan={2}>
-								<div className="h-32 flex items-center justify-center">No Metadata</div>
+								<div className="h-32 flex items-center justify-center">
+									{t('metadataEditor.noMetadata')}
+								</div>
 							</td>
 						</tr>
 					)}

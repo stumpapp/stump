@@ -43,6 +43,25 @@
 		}
 	},
 	"bookManagementScene": {
+		"heading": "Manage",
+		"description": "Make changes to this book",
+		"developmentNotice": "Book management is currently under development and has very limited functionality",
+		"analysis": {
+			"heading": "Analysis",
+			"description": "Re-analyze this book to update metadata from its file",
+			"inProgress": "Analysis already in progress",
+			"actionTitle": "Analyze this book",
+			"action": "Analyze media"
+		},
+		"tags": {
+			"heading": "Tags",
+			"bookDescription": "Assign tags to this book",
+			"seriesDescription": "Assign tags to this series"
+		},
+		"thumbnail": {
+			"heading": "Thumbnail",
+			"description": "Change the cover image for this book"
+		},
 		"metadataSearch": {
 			"heading": "Search metadata",
 			"description": "Search an external provider for this book and choose a match to apply",
@@ -860,6 +879,19 @@
 		}
 	},
 	"metadataEditor": {
+		"missing": "Missing",
+		"noMetadata": "No metadata",
+		"reset": {
+			"action": "Delete metadata",
+			"description": "Select the impact for the deletion",
+			"series": "Series",
+			"seriesDescription": "Remove only this series' metadata",
+			"books": "Books",
+			"booksDescription": "Remove all the metadata for books in this series",
+			"everything": "Everything",
+			"everythingDescription": "Remove all the metadata for everything related to this series",
+			"warning": "This will permanently delete all metadata for the selected items. You will need to trigger a custom scan to regenerate the metadata"
+		},
 		"labels": {
 			"ageRating": "Age rating",
 			"characters": "Characters",
@@ -2746,7 +2778,16 @@
 		"noResultsReturned": "No results were returned",
 		"seekBackward": "Seek backwards",
 		"seekAhead": "Seek ahead",
-		"metadata": "Metadata"
+		"metadata": "Metadata",
+		"thisActionCannotBeUndone": "This action cannot be undone",
+		"selectThumbnail": "Select a thumbnail",
+		"choosePageForThumbnail": "Choose a page from this book to use as the new thumbnail",
+		"selectBookFromSeries": "Select a book from the series",
+		"selectSeriesFromLibrary": "Select a series from the library",
+		"libraryThumbnailDescription": "Choose a different thumbnail for this library, either from a book or upload a custom one",
+		"confirmSelection": "Confirm selection",
+		"failedToUploadImage": "Failed to upload image",
+		"failedToUpdateThumbnail": "Failed to update thumbnail"
 	},
 	"tableColumns": {
 		"configuration": {

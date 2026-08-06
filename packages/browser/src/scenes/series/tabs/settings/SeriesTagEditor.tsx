@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { graphql, Tag } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -25,6 +26,7 @@ type Props = {
 }
 
 export default function SeriesTagEditor({ seriesId, tags }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const client = useQueryClient()
 
@@ -60,9 +62,9 @@ export default function SeriesTagEditor({ seriesId, tags }: Props) {
 	return (
 		<div className="gap-y-2 flex flex-col">
 			<div>
-				<Heading size="sm">Tags</Heading>
+				<Heading size="sm">{t('bookManagementScene.tags.heading')}</Heading>
 				<Text size="sm" variant="muted">
-					Assign tags to this series
+					{t('bookManagementScene.tags.seriesDescription')}
 				</Text>
 			</div>
 

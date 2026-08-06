@@ -6,6 +6,7 @@ import {
 	SeriesThumbnailSelectorUpdateMutation,
 	useFragment,
 } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -61,6 +62,7 @@ type Props = {
 // in the header thumb on hover that lets you change if you have permissions
 
 export default function SeriesThumbnailSelector({ fragment }: Props) {
+	const { t } = useLocaleContext()
 	const series = useFragment(SeriesThumbnailSelectorFragment, fragment)
 
 	const { sdk } = useSDK()
@@ -114,10 +116,10 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload image')
+				toast.error(t('common.failedToUploadImage'))
 			}
 		},
-		[series.id, uploadThumbnail],
+		[series.id, uploadThumbnail, t],
 	)
 
 	const handleConfirm = useCallback(async () => {
@@ -128,9 +130,9 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update thumbnail')
+			toast.error(t('common.failedToUpdateThumbnail'))
 		}
-	}, [patchThumbnail, page, selectedBook, series.id])
+	}, [patchThumbnail, page, selectedBook, series.id, t])
 
 	const renderContent = () => {
 		if (selectedBook) {
@@ -176,11 +178,9 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 				</Dialog.Trigger>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
-						<Dialog.Title>Select a thumbnail</Dialog.Title>
+						<Dialog.Title>{t('common.selectThumbnail')}</Dialog.Title>
 						<Dialog.Description>
-							{selectedBook
-								? 'Choose a page from this book to use as the new thumbnail'
-								: 'Select a book from the series'}
+							{selectedBook ? t('common.choosePageForThumbnail') : t('common.selectBookFromSeries')}
 
 							{selectedBook && (
 								<span
@@ -190,7 +190,7 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 										setPage(undefined)
 									}}
 								>
-									Go back
+									{t('common.goBack')}
 								</span>
 							)}
 						</Dialog.Description>
@@ -201,14 +201,14 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							Cancel
+							{t('common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!selectedBook || !page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
-							Confirm selection
+							{t('common.confirmSelection')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

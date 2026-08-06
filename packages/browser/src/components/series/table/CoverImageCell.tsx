@@ -1,5 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Book } from 'lucide-react'
+import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 
 import { EntityImage } from '@/components/entity'
@@ -17,6 +18,7 @@ type Props = {
 }
 
 export default function CoverImageCell({ id, title }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const {
 		preferences: { thumbnailRatio },
@@ -47,7 +49,7 @@ export default function CoverImageCell({ id, title }: Props) {
 	if (showFallback) {
 		return (
 			<div
-				title={`${title} (Image failed to load)`}
+				title={`${title} (${t('entityUi.imageFailedToLoad')})`}
 				className="h-14 shadow-sm flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar"
 				style={{ aspectRatio: thumbnailRatio }}
 				onClick={attemptReload}

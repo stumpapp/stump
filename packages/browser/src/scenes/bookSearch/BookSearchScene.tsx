@@ -279,13 +279,13 @@ function BookSearchScene() {
 								<GenericEmptyState
 									title={
 										Object.keys(filters || {}).length > 0
-											? 'No books match your search'
-											: "It doesn't look like there are any books here"
+											? t('entityListEmpty.books.noMatchesTitle')
+											: t('entityListEmpty.books.emptyTitle')
 									}
 									subtitle={
 										Object.keys(filters || {}).length > 0
-											? 'Try removing some filters to see more books'
-											: 'Do you have any books in your library?'
+											? t('entityListEmpty.books.noMatchesSubtitle')
+											: t('entityListEmpty.books.emptySubtitle')
 									}
 								/>
 							</div>

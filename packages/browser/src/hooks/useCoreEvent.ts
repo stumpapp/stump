@@ -1,5 +1,6 @@
 import { useGraphQLSubscription, useJobStore, useSDK } from '@stump/client'
 import { graphql, JobStatus, JobUpdate, UseCoreEventSubscription } from '@stump/graphql'
+import { type LocaleContextProps, useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
@@ -67,6 +68,7 @@ type Params = {
 
 // TODO: Attempt reconnect with re-auth
 export function useCoreEvent({ liveRefetch, onConnectionWithServerChanged }: Params) {
+	const { t } = useLocaleContext()
 	const store = useJobStore(
 		useShallow((state) => ({
 			addJob: state.addJob,
@@ -80,8 +82,8 @@ export function useCoreEvent({ liveRefetch, onConnectionWithServerChanged }: Par
 
 	const onPayloadReceived = useCallback(
 		(payload: UseCoreEventSubscription) =>
-			eventHandler(payload.readEvents, { store, client, sdk, liveRefetch }),
-		[store, client, sdk, liveRefetch],
+			eventHandler(payload.readEvents, { store, client, sdk, liveRefetch, t }),
+		[store, client, sdk, liveRefetch, t],
 	)
 
 	const [, dispose] = useGraphQLSubscription(subscription, {
@@ -117,12 +119,13 @@ type EventHandlerParams = {
 	}
 	client: QueryClient
 	sdk: Api
+	t: LocaleContextProps['t']
 	liveRefetch?: boolean
 }
 
 const eventHandler = async (
 	event: UseCoreEventSubscription['readEvents'],
-	{ store, client, sdk, liveRefetch }: EventHandlerParams,
+	{ store, client, sdk, liveRefetch, t }: EventHandlerParams,
 ) => {
 	const { __typename } = event
 
@@ -136,7 +139,7 @@ const eventHandler = async (
 				store.removeJob(event.id)
 				await client.invalidateQueries({ queryKey: [sdk.cacheKeys.jobs], exact: false })
 				if (event.status === JobStatus.Completed) {
-					toast.success(event.message || 'Job completed')
+					toast.success(event.message || t('common.jobCompleted'))
 				}
 			} else {
 				store.upsertJob(event)
@@ -171,7 +174,7 @@ const eventHandler = async (
 
 const handleJobOutput = async (
 	{ output }: Extract<UseCoreEventSubscription['readEvents'], { __typename: 'JobOutput' }>,
-	{ client, sdk }: Omit<EventHandlerParams, 'store' | 'liveRefetch'>,
+	{ client, sdk }: Omit<EventHandlerParams, 'store' | 'liveRefetch' | 't'>,
 ) => {
 	const affectedBooks = match(output)
 		.with(

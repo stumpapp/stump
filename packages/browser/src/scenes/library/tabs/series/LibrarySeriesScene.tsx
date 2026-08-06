@@ -8,6 +8,7 @@ import {
 	SeriesModelOrdering,
 	SeriesOrderBy,
 } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
@@ -185,6 +186,7 @@ function getQueryKey(
 }
 
 export default function LibrarySeriesScene() {
+	const { t } = useLocaleContext()
 	const {
 		library: { id, name },
 	} = useLibraryContext()
@@ -352,13 +354,13 @@ export default function LibrarySeriesScene() {
 								<GenericEmptyState
 									title={
 										Object.keys(filters || {}).length > 0
-											? 'No series match your search'
-											: "It doesn't look like there are any series here"
+											? t('entityListEmpty.series.noMatchesTitle')
+											: t('entityListEmpty.series.emptyTitle')
 									}
 									subtitle={
 										Object.keys(filters || {}).length > 0
-											? 'Try removing some filters to see more series'
-											: 'Do you have any series in your library?'
+											? t('entityListEmpty.series.noMatchesSubtitle')
+											: t('entityListEmpty.series.emptySubtitle')
 									}
 								/>
 							</div>

@@ -1,9 +1,8 @@
 import { LibrarySeriesQuery } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { memo, useEffect, useRef, useState } from 'react'
 
 import { StackedSeriesCard } from '@/components/series'
-
-import pluralizeStat from '../../utils/pluralize'
 
 export type LibrarySeriesCardData = LibrarySeriesQuery['series']['nodes'][number]
 
@@ -12,6 +11,7 @@ type Props = {
 }
 
 const LibrarySeriesCard = memo(function LibrarySeriesCard({ data }: Props) {
+	const { t } = useLocaleContext()
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [width, setWidth] = useState<number | null>(null)
 
@@ -44,7 +44,7 @@ const LibrarySeriesCard = memo(function LibrarySeriesCard({ data }: Props) {
 				<StackedSeriesCard
 					id={data.id}
 					name={data.resolvedName}
-					subtitle={pluralizeStat('book', data.mediaCount)}
+					subtitle={t('entityUi.booksCount', { count: data.mediaCount })}
 					isMissing={data.status === 'MISSING'}
 					width={width}
 					thumbnailData={thumbnailData}

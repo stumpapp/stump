@@ -1,6 +1,7 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ComboBox } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useState } from 'react'
 
 const query = graphql(`
@@ -25,6 +26,7 @@ type Props = {
 }
 
 export default function TagSelect({ label, description, selected = [], onChange }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const {
 		data: { tags },
@@ -74,7 +76,7 @@ export default function TagSelect({ label, description, selected = [], onChange 
 
 	return (
 		<ComboBox
-			label={label ?? 'Tags'}
+			label={label ?? t('entityUi.tags')}
 			description={description}
 			options={options}
 			value={[...selected].sort((a, b) => a.label.localeCompare(b.label)).map(({ value }) => value)}

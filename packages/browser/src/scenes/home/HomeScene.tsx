@@ -1,5 +1,6 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
@@ -33,13 +34,14 @@ export const usePrefetchHomeScene = () => {
 
 // TODO: account for new accounts, i.e. no media at all
 export default function HomeScene() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { data } = useSuspenseGraphQL(query, sdk.cacheKey('numberOfLibraries'))
 
 	const helmet = (
 		<Helmet>
 			{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
-			<title>Stump | {'Home'}</title>
+			<title>Stump | {t('homeScene.pageTitle')}</title>
 		</Helmet>
 	)
 

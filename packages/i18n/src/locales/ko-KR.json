@@ -711,7 +711,10 @@
 		"stopTimer": "타이머 중지",
 		"resetTimer": "타이머 초기화",
 		"nextUp": "다음 책:",
-		"read": "읽기"
+		"read": "읽기",
+		"enterFullscreen": "전체 화면 시작",
+		"exitFullscreen": "전체 화면 종료",
+		"pageXOfY": "{{total}}페이지 중 {{current}}페이지"
 	},
 	"bookActionMenu": {
 		"continueReading": "이어 읽기",
@@ -742,6 +745,7 @@
 		"pages": "페이지 수",
 		"size": "크기",
 		"format": "형식",
+		"imageFailedToLoad": "이미지를 불러오지 못했습니다",
 		"year": "연도",
 		"progress": "진행률",
 		"pageAbbreviation": "쪽",
@@ -1220,6 +1224,7 @@
 		}
 	},
 	"homeScene": {
+		"pageTitle": "홈",
 		"onDeck": {
 			"title": "다음에 읽을 책",
 			"emptyState": {
@@ -1248,6 +1253,24 @@
 				"message": "최근 추가한 책이 여기에 표시됩니다"
 			}
 		}
+	},
+	"entityListEmpty": {
+		"books": {
+			"noMatchesTitle": "검색 조건과 일치하는 책이 없습니다",
+			"emptyTitle": "표시할 책이 없습니다",
+			"noMatchesSubtitle": "필터를 일부 해제하여 더 많은 책을 확인해 보세요",
+			"emptySubtitle": "라이브러리에 책을 추가해 보세요"
+		},
+		"series": {
+			"noMatchesTitle": "검색 조건과 일치하는 시리즈가 없습니다",
+			"emptyTitle": "표시할 시리즈가 없습니다",
+			"noMatchesSubtitle": "필터를 일부 해제하여 더 많은 시리즈를 확인해 보세요",
+			"emptySubtitle": "라이브러리에 시리즈를 추가해 보세요"
+		}
+	},
+	"markdownPreview": {
+		"reveal": "눌러서 내용 보기",
+		"hide": "눌러서 내용 숨기기"
 	},
 	"metadataEditor": {
 		"missing": "누락",
@@ -3264,6 +3287,7 @@
 			"noValidFiles": "올바른 파일이 선택되지 않았습니다"
 		},
 		"unknownError": "알 수 없는 오류가 발생했습니다",
+		"jobCompleted": "작업이 완료되었습니다",
 		"goHome": "홈으로 이동",
 		"nothingToShow": "표시할 항목이 없습니다",
 		"noResultsToDisplay": "표시할 결과가 없습니다",

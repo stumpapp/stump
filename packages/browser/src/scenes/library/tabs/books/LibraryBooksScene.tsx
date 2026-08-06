@@ -1,6 +1,7 @@
 import { PREFETCH_STALE_TIME, useGraphQL, useSDK } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
@@ -145,6 +146,7 @@ function getQueryKey(
 }
 
 function LibraryBooksScene() {
+	const { t } = useLocaleContext()
 	const { library } = useLibraryContext()
 	const {
 		filters: mediaFilters,
@@ -318,13 +320,13 @@ function LibraryBooksScene() {
 								<GenericEmptyState
 									title={
 										Object.keys(filters || {}).length > 0
-											? 'No books match your search'
-											: "It doesn't look like there are any books here"
+											? t('entityListEmpty.books.noMatchesTitle')
+											: t('entityListEmpty.books.emptyTitle')
 									}
 									subtitle={
 										Object.keys(filters || {}).length > 0
-											? 'Try removing some filters to see more books'
-											: 'Do you have any books in your library?'
+											? t('entityListEmpty.books.noMatchesSubtitle')
+											: t('entityListEmpty.books.emptySubtitle')
 									}
 								/>
 							</div>

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { cn, cx, Divider, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { forwardRef, PropsWithChildren, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
@@ -57,6 +58,7 @@ const YouTubeVideo = ({ id, children }: PropsWithChildren<{ id: string }>) => (
  * A spoiler component, e.g. :spoiler[hidden text]
  */
 const Spoiler = ({ children }: PropsWithChildren) => {
+	const { t } = useLocaleContext()
 	const [isSpoiler, setIsSpoiler] = useState(true)
 
 	return (
@@ -70,7 +72,7 @@ const Spoiler = ({ children }: PropsWithChildren) => {
 				},
 			)}
 			onClick={() => setIsSpoiler(!isSpoiler)}
-			title={isSpoiler ? 'Click to reveal' : 'Click to hide'}
+			title={t(`markdownPreview.${isSpoiler ? 'reveal' : 'hide'}`)}
 		>
 			{children}
 		</span>

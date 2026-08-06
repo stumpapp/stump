@@ -711,7 +711,10 @@
 		"stopTimer": "Stop timer",
 		"resetTimer": "Reset timer",
 		"nextUp": "Next up:",
-		"read": "Read"
+		"read": "Read",
+		"enterFullscreen": "Enter fullscreen",
+		"exitFullscreen": "Exit fullscreen",
+		"pageXOfY": "{{current}} of {{total}}"
 	},
 	"bookActionMenu": {
 		"continueReading": "Continue reading",
@@ -742,6 +745,7 @@
 		"pages": "Pages",
 		"size": "Size",
 		"format": "Format",
+		"imageFailedToLoad": "Image failed to load",
 		"year": "Year",
 		"progress": "Progress",
 		"pageAbbreviation": "p.",
@@ -1220,6 +1224,7 @@
 		}
 	},
 	"homeScene": {
+		"pageTitle": "Home",
 		"onDeck": {
 			"title": "Your next read",
 			"emptyState": {
@@ -1248,6 +1253,24 @@
 				"message": "Any recent books you add will show up here"
 			}
 		}
+	},
+	"entityListEmpty": {
+		"books": {
+			"noMatchesTitle": "No books match your search",
+			"emptyTitle": "It doesn't look like there are any books here",
+			"noMatchesSubtitle": "Try removing some filters to see more books",
+			"emptySubtitle": "Do you have any books in your library?"
+		},
+		"series": {
+			"noMatchesTitle": "No series match your search",
+			"emptyTitle": "It doesn't look like there are any series here",
+			"noMatchesSubtitle": "Try removing some filters to see more series",
+			"emptySubtitle": "Do you have any series in your library?"
+		}
+	},
+	"markdownPreview": {
+		"reveal": "Click to reveal",
+		"hide": "Click to hide"
 	},
 	"metadataEditor": {
 		"missing": "Missing",
@@ -3264,6 +3287,7 @@
 			"noValidFiles": "No valid files were selected"
 		},
 		"unknownError": "An unknown error occurred",
+		"jobCompleted": "Job completed",
 		"goHome": "Go home",
 		"nothingToShow": "Nothing to show",
 		"noResultsToDisplay": "No results present to display",

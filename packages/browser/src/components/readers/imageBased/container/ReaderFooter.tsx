@@ -184,12 +184,13 @@ export default function ReaderFooter() {
 					)}
 
 					<Text className="text-sm text-[#898d94]">
-						{[...currentSet]
-							.map((idx) => idx + 1)
-							.sort((a, b) => a - b)
-							.join('-')}
-						{' of '}
-						{book.pages}
+						{t('readerUi.pageXOfY', {
+							current: [...currentSet]
+								.map((idx) => idx + 1)
+								.sort((a, b) => a - b)
+								.join('-'),
+							total: book.pages,
+						})}
 					</Text>
 				</div>
 			</div>

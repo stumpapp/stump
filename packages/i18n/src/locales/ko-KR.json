@@ -2895,41 +2895,41 @@
 	"mobileApp": {
 		"addOrEditServer": {
 			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
+				"title": "서버 추가",
+				"subtitle": "콘텐츠에 접근할 새 서버를 구성합니다"
 			},
 			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
+				"title": "서버 편집",
+				"subtitle": "서버 편집"
 			},
-			"kind": "Kind",
+			"kind": "유형",
 			"customHeaders": {
-				"label": "Custom Headers",
-				"addHeader": "Add header",
-				"invalidHeader": "Invalid header"
+				"label": "사용자 지정 헤더",
+				"addHeader": "헤더 추가",
+				"invalidHeader": "유효하지 않은 헤더"
 			},
 			"auth": {
-				"label": "Auth",
+				"label": "인증",
 				"default": {
-					"label": "Login",
-					"description": "You will be prompted to login when accessing content as needed"
+					"label": "로그인",
+					"description": "콘텐츠에 접근할 때 필요하면 로그인 화면이 표시됩니다"
 				},
 				"token": {
-					"label": "Token",
-					"placeholder": "Raw Token"
+					"label": "토큰",
+					"placeholder": "원본 토큰"
 				},
-				"basic": "Basic"
+				"basic": "기본 인증"
 			},
-			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
-			"failedToConnect": "Failed to connect to server",
-			"didConnect": "Connected",
-			"checkConnection": "Check Connection",
-			"setAsDefaultServer": "Set as Default Server",
-			"enableOPDS": "Enable OPDS",
+			"serverNamePlaceholder": "내 서버",
+			"catalogUrl": "카탈로그 URL",
+			"failedToConnect": "서버에 연결하지 못했습니다",
+			"didConnect": "연결됨",
+			"checkConnection": "연결 확인",
+			"setAsDefaultServer": "기본 서버로 설정",
+			"enableOPDS": "OPDS 사용",
 			"validation": {
-				"nameAlreadyExists": "Name already exists",
-				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+				"nameAlreadyExists": "이미 사용 중인 이름입니다",
+				"cannotSetAuthorizationHeader": "Authorization 헤더는 설정할 수 없습니다"
 			}
 		},
 		"bookActions": {
@@ -2981,61 +2981,61 @@
 			"identifiers": "Identifiers"
 		},
 		"common": {
-			"book": "Book",
-			"cancel": "Cancel",
-			"chapter": "Chapter",
-			"clear": "Clear",
-			"completed": "Completed",
-			"confirm": "Confirm",
-			"continue": "Continue",
-			"content": "Content",
-			"details": "Details",
-			"delete": "Delete",
-			"dismiss": "Dismiss",
-			"download": "Download",
-			"downloaded": "Downloaded",
-			"downloads": "Downloads",
-			"done": "Done",
-			"edit": "Edit",
-			"enabled": "Enabled",
-			"enable": "Enable",
-			"error": "Error",
-			"favorite": "Favorite",
-			"finished": "Finished",
-			"grid": "Grid",
-			"list": "List",
-			"lastCompleted": "Last Completed",
-			"name": "Name",
-			"none": "None",
-			"notAvailable": "Not Available",
-			"options": "Options",
-			"page": "Page",
-			"pages": "Pages",
-			"pageXOfY": "Page {{current}} of {{total}}",
-			"password": "Password",
-			"progress": "Progress",
-			"publication": "Publication",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
-			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
-			"save": "Save",
-			"select": "Select",
-			"settings": "Settings",
-			"servers": "Servers",
-			"thisBook": "this book",
-			"thisServer": "this server",
-			"unknown": "Unknown",
-			"unknownTitle": "Untitled",
+			"book": "책",
+			"cancel": "취소",
+			"chapter": "장",
+			"clear": "지우기",
+			"completed": "완료",
+			"confirm": "확인",
+			"continue": "계속",
+			"content": "콘텐츠",
+			"details": "상세 정보",
+			"delete": "삭제",
+			"dismiss": "닫기",
+			"download": "다운로드",
+			"downloaded": "다운로드됨",
+			"downloads": "다운로드",
+			"done": "완료",
+			"edit": "편집",
+			"enabled": "사용",
+			"enable": "사용",
+			"error": "오류",
+			"favorite": "즐겨찾기",
+			"finished": "완독",
+			"grid": "격자",
+			"list": "목록",
+			"lastCompleted": "마지막 완료",
+			"name": "이름",
+			"none": "없음",
+			"notAvailable": "사용할 수 없음",
+			"options": "옵션",
+			"page": "페이지",
+			"pages": "페이지",
+			"pageXOfY": "{{total}}페이지 중 {{current}}페이지",
+			"password": "비밀번호",
+			"progress": "진행률",
+			"publication": "출판물",
+			"read": "읽기",
+			"readAgain": "다시 읽기",
+			"readTime": "읽은 시간",
+			"readthrough": "회독",
+			"readMore": "더 읽기",
+			"refresh": "새로고침",
+			"save": "저장",
+			"select": "선택",
+			"settings": "설정",
+			"servers": "서버",
+			"thisBook": "이 책",
+			"thisServer": "이 서버",
+			"unknown": "알 수 없음",
+			"unknownTitle": "제목 없음",
 			"url": "URL",
-			"username": "Username",
-			"value": "Value",
-			"version": "Version"
+			"username": "사용자 이름",
+			"value": "값",
+			"version": "버전"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "알 수 없는 오류"
 		},
 		"epubMenu": {
 			"tableOfContents": "Table of Contents",
@@ -3058,89 +3058,89 @@
 			"unknownSeriesName": "series"
 		},
 		"emptyState": {
-			"noStumpServers": "No Stump servers added",
-			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No Servers Configured",
-			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation",
+			"noStumpServers": "추가된 Stump 서버가 없습니다",
+			"noOPDSServers": "추가된 OPDS 서버가 없습니다",
+			"noServers": "구성된 서버가 없습니다",
+			"cta": "서버를 추가하고 책 컬렉션을 이용해 보세요",
+			"seeDocumentation": "문서 보기",
 			"noSmartLists": {
-				"label": "No lists returned",
-				"description": "Once created they will appear here"
+				"label": "표시할 목록이 없습니다",
+				"description": "목록을 만들면 여기에 표시됩니다"
 			}
 		},
 		"tabs": {
-			"servers": "Servers",
-			"localLibrary": "Library",
-			"settings": "Settings",
-			"home": "Home",
-			"browse": "Browse",
-			"clubs": "Clubs",
-			"search": "Search"
+			"servers": "서버",
+			"localLibrary": "라이브러리",
+			"settings": "설정",
+			"home": "홈",
+			"browse": "둘러보기",
+			"clubs": "북클럽",
+			"search": "검색"
 		},
 		"localLibrary": {
-			"title": "Local Library",
+			"title": "로컬 라이브러리",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to Read Yet",
-					"description": "Once you have books for offline reading, they will appear here"
+					"title": "아직 읽을 책이 없습니다",
+					"description": "오프라인으로 읽을 책이 생기면 여기에 표시됩니다"
 				},
 				"imported": {
-					"title": "No Imported Books",
-					"description": "Import books to read them offline"
+					"title": "가져온 책이 없습니다",
+					"description": "오프라인으로 읽을 책을 가져오세요"
 				},
 				"server": {
-					"title": "No Downloaded Books",
-					"description": "Download books from your library to read them offline"
+					"title": "다운로드한 책이 없습니다",
+					"description": "오프라인으로 읽을 책을 라이브러리에서 다운로드하세요"
 				}
 			},
 			"downloadQueue": {
-				"downloading": "Downloading",
-				"failed": "Failed",
-				"nothingDownloading": "Nothing is being downloaded",
-				"noActiveDownloads": "No active downloads",
-				"noFailedDownloads": "No failed downloads",
-				"downloadStarting": "Starting..."
+				"downloading": "다운로드 중",
+				"failed": "실패",
+				"nothingDownloading": "다운로드 중인 항목이 없습니다",
+				"noActiveDownloads": "진행 중인 다운로드가 없습니다",
+				"noFailedDownloads": "실패한 다운로드가 없습니다",
+				"downloadStarting": "시작 중..."
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "Delete Books",
-					"confirmation": "Are you sure you want to delete your local library?",
-					"disclaimer": "This action cannot be undone."
+					"label": "책 삭제",
+					"confirmation": "로컬 라이브러리를 삭제하시겠습니까?",
+					"disclaimer": "이 작업은 되돌릴 수 없습니다."
 				},
-				"seeProblems": "See Problems ({{problemCount}})",
-				"hideCurated": "Hide Curated",
-				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"seeProblems": "문제 보기({{problemCount}}개)",
+				"hideCurated": "추천 항목 숨기기",
+				"showCurated": "추천 항목 표시",
+				"attemptSync": "동기화 시도"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
-					"NAME": "Name",
-					"ADDED_AT": "Date Added",
-					"SERIES": "Series"
+					"NAME": "이름",
+					"ADDED_AT": "추가일",
+					"SERIES": "시리즈"
 				},
 				"sortDirection": {
-					"ASC": "Ascending",
-					"DESC": "Descending"
+					"ASC": "오름차순",
+					"DESC": "내림차순"
 				},
 				"sortDirectionText": {
 					"ASC": "A → Z",
 					"DESC": "Z → A"
 				},
 				"sortDirectionDate": {
-					"ASC": "Oldest First",
-					"DESC": "Newest First"
+					"ASC": "오래된 순",
+					"DESC": "최신 순"
 				},
 				"sourceFilter": {
-					"all": "All Books",
-					"server": "Downloaded",
-					"imported": "Imported"
+					"all": "모든 책",
+					"server": "다운로드",
+					"imported": "가져온 항목"
 				}
 			},
 			"downloadProblemsSheet": {
-				"title": "Failed Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"retryAll": "Retry All",
-				"dismissAll": "Dismiss All"
+				"title": "실패한 다운로드",
+				"noFailedDownloads": "실패한 다운로드가 없습니다",
+				"retryAll": "모두 다시 시도",
+				"dismissAll": "모두 닫기"
 			}
 		},
 		"progressSync": {
@@ -3152,9 +3152,9 @@
 			"syncFailed": "Failed to sync offline progress"
 		},
 		"search": {
-			"label": "Search This Server",
-			"description": "Find specific content on this server",
-			"placeholder": "Search"
+			"label": "이 서버 검색",
+			"description": "이 서버에서 특정 콘텐츠를 찾습니다",
+			"placeholder": "검색"
 		},
 		"settings": {
 			"preferences": {
@@ -3317,28 +3317,28 @@
 		},
 		"stumpServer": {
 			"browse": {
-				"books": "Books",
-				"favorites": "Favorites",
-				"files": "Files",
-				"libraries": "Libraries",
-				"series": "Series",
-				"smartLists": "Smart Lists"
+				"books": "책",
+				"favorites": "즐겨찾기",
+				"files": "파일",
+				"libraries": "라이브러리",
+				"series": "시리즈",
+				"smartLists": "스마트 목록"
 			},
 			"continueReading": {
-				"label": "Continue Reading",
-				"emptyText": "No books in progress"
+				"label": "이어 읽기",
+				"emptyText": "읽는 중인 책이 없습니다"
 			},
 			"onDeck": {
-				"label": "Your Next Read",
-				"emptyText": "No books on deck"
+				"label": "다음에 읽을 책",
+				"emptyText": "읽을 예정인 책이 없습니다"
 			},
 			"recentlyAddedSeries": {
-				"label": "Recently Added Series",
-				"emptyText": "No recently added series"
+				"label": "최근 추가된 시리즈",
+				"emptyText": "최근 추가된 시리즈가 없습니다"
 			},
 			"recentlyAddedBooks": {
-				"label": "Recently Added Books",
-				"emptyText": "No recently added books"
+				"label": "최근 추가된 책",
+				"emptyText": "최근 추가된 책이 없습니다"
 			}
 		},
 		"readerSettings": {
@@ -3493,24 +3493,24 @@
 			}
 		},
 		"libraryType": {
-			"BOOK": "Books",
-			"COMIC": "Comics",
-			"LIGHT_NOVEL": "Light Novels",
-			"MANGA": "Manga",
-			"MANHWA": "Manhwa",
-			"MIXED": "Mixed",
-			"WEBTOON": "Webtoons",
-			"WEB_NOVEL": "Web Novels"
+			"BOOK": "도서",
+			"COMIC": "코믹스",
+			"LIGHT_NOVEL": "라이트 노벨",
+			"MANGA": "망가",
+			"MANHWA": "한국 만화",
+			"MIXED": "혼합",
+			"WEBTOON": "웹툰",
+			"WEB_NOVEL": "웹소설"
 		},
 		"savedServerActions": {
-			"clearCache": "Clear Cache",
+			"clearCache": "캐시 지우기",
 			"discardTokens": {
-				"label": "Discard Tokens",
-				"description": "Affects login tokens only"
+				"label": "토큰 폐기",
+				"description": "로그인 토큰에만 적용됩니다"
 			},
 			"deleteServer": {
-				"title": "Delete Server",
-				"confirmation": "Are you sure you want to delete {{serverName}}?"
+				"title": "서버 삭제",
+				"confirmation": "{{serverName}} 서버를 삭제하시겠습니까?"
 			}
 		},
 		"filtering": {

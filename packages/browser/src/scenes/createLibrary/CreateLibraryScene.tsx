@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle } from '@stump/components'
 import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { AlertCircle } from 'lucide-react'
@@ -40,6 +41,7 @@ const mutation = graphql(`
 `)
 
 export default function CreateLibraryScene() {
+	const { t } = useLocaleContext()
 	const navigate = useNavigate()
 	const { sdk } = useSDK()
 	const client = useQueryClient()
@@ -127,7 +129,7 @@ export default function CreateLibraryScene() {
 						{createError && (
 							<Alert variant="destructive">
 								<AlertCircle />
-								<AlertTitle>Failed to create library</AlertTitle>
+								<AlertTitle>{t('libraryUi.createFailed')}</AlertTitle>
 								<AlertDescription>{createError}</AlertDescription>
 							</Alert>
 						)}

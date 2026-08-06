@@ -770,6 +770,41 @@
 		"showJsonDescription": "View the raw JSON representation of the filters",
 		"adjustFilter": "Adjust filter"
 	},
+	"libraryUi": {
+		"directoryPicker": {
+			"title": "Select a directory",
+			"description": "Specify the directory where your library is located.",
+			"showHidden": "Show hidden directories"
+		},
+		"createFailed": "Failed to create library",
+		"thumbnailColors": "Thumbnail colors",
+		"thumbnailColorsDescription": "Extract dominant colors for thumbnails. This is used for thumbnail placeholders and accent colors",
+		"regenerate": "Regenerate thumbnails",
+		"regenerateDescription": "Either generate missing thumbnails or force the recreation of all thumbnails",
+		"generate": "Generate thumbnails",
+		"createMissing": "Create missing only",
+		"forceRecreate": "Force recreate all",
+		"delete": "Delete thumbnails",
+		"deleteDescription": "Remove all generated thumbnails for this library",
+		"deleteTitle": "Delete library thumbnails",
+		"deleteConfirmation": "Are you sure you want to delete all thumbnails for this library?",
+		"deleteWarning": "Deleting the library thumbnails will remove all generated images and you will have to manually regenerate them",
+		"deleteSuccess": "Library thumbnails deleted",
+		"deleteError": "An error occurred while deleting the library thumbnails",
+		"processColors": "Process thumbnail colors",
+		"processColorsDescription": "Extract missing thumbnail color metadata or force the regeneration of it for all thumbnails",
+		"extractColors": "Extract colors",
+		"missingOnly": "Missing only",
+		"reprocessAll": "Reprocess all",
+		"rebuildMetadata": "Rebuild metadata",
+		"rebuildMetadataDescription": "Rebuild metadata for all books in the library",
+		"rebuildHashes": "Rebuild hashes",
+		"rebuildHashesDescription": "Rebuild hashes for all books in the library",
+		"workInProgress": "Work in progress",
+		"workInProgressDescription": "This page has limited functionality and is a work in progress",
+		"noFiles": "No files",
+		"emptyFolder": "This folder is empty"
+	},
 	"libraryHeader": {
 		"tabs": {
 			"books": "Books",

@@ -1,6 +1,7 @@
 import { useGraphQLMutation } from '@stump/client'
 import { Button, DropdownMenu, Label, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import { useCallback } from 'react'
 
@@ -13,6 +14,7 @@ const mutation = graphql(`
 `)
 
 export default function RegenerateThumbnails() {
+	const { t } = useLocaleContext()
 	const { library } = useLibraryContext()
 
 	const { mutate } = useGraphQLMutation(mutation)
@@ -27,9 +29,9 @@ export default function RegenerateThumbnails() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>
-				<Label>Regenerate thumbnails</Label>
+				<Label>{t('libraryUi.regenerate')}</Label>
 				<Text size="sm" variant="muted">
-					Either generate missing thumbnails or force the recreation of all thumbnails
+					{t('libraryUi.regenerateDescription')}
 				</Text>
 			</div>
 
@@ -37,7 +39,7 @@ export default function RegenerateThumbnails() {
 				<DropdownMenu
 					trigger={
 						<Button variant="outline">
-							Generate thumbnails
+							{t('libraryUi.generate')}
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>
 					}
@@ -45,12 +47,12 @@ export default function RegenerateThumbnails() {
 						{
 							items: [
 								{
-									label: 'Create missing only',
+									label: t('libraryUi.createMissing'),
 									leftIcon: <ImagePlus className={iconStyle} />,
 									onClick: () => regenerate(false),
 								},
 								{
-									label: 'Force recreate all',
+									label: t('libraryUi.forceRecreate'),
 									isDestructive: true,
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => regenerate(true),

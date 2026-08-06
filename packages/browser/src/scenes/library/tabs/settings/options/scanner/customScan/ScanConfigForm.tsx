@@ -94,16 +94,16 @@ export default function ScanConfigForm({ onScan }: Props) {
 			{variant === 'custom' && (
 				<div className="gap-6 p-4 flex flex-col">
 					<WideSwitch
-						label="Rebuild metadata"
-						description="Rebuild metadata for all books in the library"
+						label={t('libraryUi.rebuildMetadata')}
+						description={t('libraryUi.rebuildMetadataDescription')}
 						name="config.regenMeta"
 						checked={regenMeta}
 						onCheckedChange={(value) => form.setValue('config.regenMeta', value)}
 					/>
 
 					<WideSwitch
-						label="Rebuild hashes"
-						description="Rebuild hashes for all books in the library"
+						label={t('libraryUi.rebuildHashes')}
+						description={t('libraryUi.rebuildHashesDescription')}
 						name="config.regenHashes"
 						checked={regenHashes}
 						onCheckedChange={(value) => form.setValue('config.regenHashes', value)}

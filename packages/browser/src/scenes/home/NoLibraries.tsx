@@ -16,7 +16,7 @@ export default function NoLibraries() {
 			<div>
 				<img
 					src="/assets/svg/mountain.svg"
-					alt="Construction illustration"
+					alt={t('controlUi.constructionIllustration')}
 					className="sm:-my-1 sm:w-1/2 sm:px-2 mx-auto h-auto w-3/5 object-scale-down"
 				/>
 

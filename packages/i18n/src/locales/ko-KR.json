@@ -770,6 +770,41 @@
 		"showJsonDescription": "필터의 원시 JSON 표현을 봅니다",
 		"adjustFilter": "필터 조정"
 	},
+	"libraryUi": {
+		"directoryPicker": {
+			"title": "디렉터리 선택",
+			"description": "라이브러리가 있는 디렉터리를 지정하세요.",
+			"showHidden": "숨김 디렉터리 표시"
+		},
+		"createFailed": "라이브러리를 만들지 못했습니다",
+		"thumbnailColors": "썸네일 색상",
+		"thumbnailColorsDescription": "썸네일에서 주요 색상을 추출합니다. 썸네일 자리표시자와 강조 색상에 사용됩니다",
+		"regenerate": "썸네일 다시 생성",
+		"regenerateDescription": "누락된 썸네일을 생성하거나 모든 썸네일을 강제로 다시 만듭니다",
+		"generate": "썸네일 생성",
+		"createMissing": "누락된 항목만 생성",
+		"forceRecreate": "모두 강제로 다시 생성",
+		"delete": "썸네일 삭제",
+		"deleteDescription": "이 라이브러리에서 생성된 모든 썸네일을 제거합니다",
+		"deleteTitle": "라이브러리 썸네일 삭제",
+		"deleteConfirmation": "이 라이브러리의 모든 썸네일을 삭제하시겠습니까?",
+		"deleteWarning": "라이브러리 썸네일을 삭제하면 생성된 이미지가 모두 제거되며 직접 다시 생성해야 합니다",
+		"deleteSuccess": "라이브러리 썸네일을 삭제했습니다",
+		"deleteError": "라이브러리 썸네일을 삭제하는 중 오류가 발생했습니다",
+		"processColors": "썸네일 색상 처리",
+		"processColorsDescription": "누락된 썸네일 색상 메타데이터를 추출하거나 모든 썸네일의 색상을 강제로 다시 처리합니다",
+		"extractColors": "색상 추출",
+		"missingOnly": "누락된 항목만",
+		"reprocessAll": "모두 다시 처리",
+		"rebuildMetadata": "메타데이터 다시 생성",
+		"rebuildMetadataDescription": "라이브러리의 모든 책에 대한 메타데이터를 다시 생성합니다",
+		"rebuildHashes": "해시 다시 생성",
+		"rebuildHashesDescription": "라이브러리의 모든 책에 대한 해시를 다시 생성합니다",
+		"workInProgress": "작업 진행 중",
+		"workInProgressDescription": "이 페이지는 개발 중이며 사용할 수 있는 기능이 제한적입니다",
+		"noFiles": "파일 없음",
+		"emptyFolder": "이 폴더는 비어 있습니다"
+	},
 	"libraryHeader": {
 		"tabs": {
 			"books": "책",

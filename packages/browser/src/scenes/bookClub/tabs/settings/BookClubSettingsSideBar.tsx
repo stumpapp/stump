@@ -87,7 +87,7 @@ export default function BookClubSettingsSideBar() {
 				{enableReplacePrimarySidebar && (
 					<div className="shrink-0">
 						<Button
-							title="Go home"
+							title={t('common.goHome')}
 							variant="ghost"
 							size="icon"
 							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"

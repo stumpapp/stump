@@ -13,6 +13,7 @@ import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { SheetBackDetection } from '../SheetBackDetection'
@@ -27,6 +28,7 @@ type OPDSAuthDialogProps = {
 }
 
 export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDialogProps) {
+	const { t } = useTranslate()
 	const { activeServer } = useActiveServer()
 	const { sdk } = useSDK()
 
@@ -93,7 +95,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 			try {
 				const newApi = await attemptRequest({ username, password })
 				if (!newApi) {
-					setLoginError('Failed to authenticate')
+					setLoginError(t('errors.connectionFailed'))
 					return
 				}
 
@@ -113,11 +115,11 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 				if (isAxiosError(error)) {
 					setLoginError(error.message)
 				} else {
-					setLoginError('An error occurred')
+					setLoginError(t('errors.unknown'))
 				}
 			}
 		},
-		[attemptRequest, sdk, onClose],
+		[attemptRequest, sdk, onClose, t],
 	)
 
 	const basicAuth = authDoc?.authentication.find(
@@ -216,7 +218,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 					/>
 					{/* eslint-disable-next-line react-hooks/refs */}
 					<Button onPress={handleSubmit(onSubmit)} className="mt-4 w-full" variant="brand">
-						<Text>Login</Text>
+						<Text>{t('auth.login')}</Text>
 					</Button>
 				</View>
 			</TrueSheet>

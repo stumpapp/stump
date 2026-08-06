@@ -6,6 +6,8 @@ import { ChevronRight, Rss } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
+
 import { useActiveServer } from '../activeServer'
 import { Card, ListEmptyMessage } from '../ui'
 import { Icon } from '../ui/icon'
@@ -21,6 +23,7 @@ export default function NavigationGroup({
 	group: { metadata, links, navigation: initialNavigation },
 	renderEmpty,
 }: Props) {
+	const { t } = useTranslate()
 	const selfURL = links.find((link) => hasLinkRel(link, 'self'))?.href
 	const hasGroupPagination = links.some((link) => hasLinkRel(link, 'next'))
 	const { sdk } = useSDK()
@@ -52,9 +55,9 @@ export default function NavigationGroup({
 
 	return (
 		<View className="px-4">
-			<View className="flex flex-row items-center justify-between pb-2">
+			<View className="pb-2 flex flex-row items-center justify-between">
 				<Card
-					label={metadata.title || 'Browse'}
+					label={metadata.title || t('opds.browse')}
 					actions={selfURL ? <FeedSelfURL url={resolveUrl_(selfURL)} /> : undefined}
 					className="flex-1"
 				>
@@ -70,7 +73,7 @@ export default function NavigationGroup({
 						>
 							{({ pressed }) => (
 								<Card.Row label={link.title} style={pressed && { opacity: 0.6 }}>
-									<Icon as={ChevronRight} className="h-5 w-5 shrink-0 text-foreground-muted" />
+									<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted shrink-0" />
 								</Card.Row>
 							)}
 						</Pressable>
@@ -78,7 +81,9 @@ export default function NavigationGroup({
 				</Card>
 			</View>
 
-			{!navigation.length && <ListEmptyMessage icon={Rss} message="No navigation links in group" />}
+			{!navigation.length && (
+				<ListEmptyMessage icon={Rss} message={t('opds.noNavigationInGroup')} />
+			)}
 		</View>
 	)
 }

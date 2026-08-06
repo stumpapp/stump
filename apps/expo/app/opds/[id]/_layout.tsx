@@ -16,6 +16,7 @@ import { FullScreenLoader } from '~/components/ui'
 import { feedHasSearch, getSearchURL, OPDSFeedContext } from '~/context/opds'
 import { getOPDSInstance, isOPDSAuthError } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
+import { useTranslate } from '~/lib/hooks'
 import { useCacheStore } from '~/stores/cache'
 
 type OPDSFeedProviderProps = {
@@ -24,6 +25,7 @@ type OPDSFeedProviderProps = {
 }
 
 function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { activeServer } = useActiveServer()
 	const { onUnauthenticatedResponse } = useClientContext()
@@ -66,13 +68,13 @@ function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 	)
 
 	if (isCatalogLoading && !catalog) {
-		return <FullScreenLoader label="Loading feed..." />
+		return <FullScreenLoader label={t('opds.loadingFeed')} />
 	}
 
 	const isAuthError = isOPDSAuthError(error)
 
 	if (isAuthError || isAuthPending) {
-		return <FullScreenLoader label="Authenticating..." />
+		return <FullScreenLoader label={t('opds.authenticating')} />
 	}
 
 	return <OPDSFeedContext.Provider value={feedContextValue}>{children}</OPDSFeedContext.Provider>

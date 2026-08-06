@@ -5,9 +5,11 @@ import BackLink from '~/components/BackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { useOPDSFeed } from '~/components/opds/useOPDSFeed'
 import { FullScreenLoader } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { url: feedURL } = useLocalSearchParams<{ url: string }>()
 
 	const {
@@ -30,7 +32,7 @@ export default function Screen() {
 		headerLeft: () => <BackLink />,
 	})
 
-	if (showLoader) return <FullScreenLoader label="Loading..." />
+	if (showLoader) return <FullScreenLoader label={t('opds.loading')} />
 
 	if (isLoading) return null
 

@@ -3,10 +3,12 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs'
 
 import { useOPDSFeedContext } from '~/context/opds'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 // TODO(opds): Support favorites and add a tab for it
 
 export default function TabLayout() {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { hasSearch } = useOPDSFeedContext()
 
@@ -26,7 +28,7 @@ export default function TabLayout() {
 			labelVisibilityMode="labeled"
 		>
 			<NativeTabs.Trigger name="feed">
-				<NativeTabs.Trigger.Label>Feeds</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Label>{t('opds.feeds')}</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon
 					sf={{ default: 'dot.radiowaves.up.forward', selected: 'dot.radiowaves.up.forward' }}
 					md="rss_feed"
@@ -34,7 +36,7 @@ export default function TabLayout() {
 			</NativeTabs.Trigger>
 			{hasSearch && (
 				<NativeTabs.Trigger name="search" role="search">
-					<NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Label>{t('opds.search')}</NativeTabs.Trigger.Label>
 					<NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
 				</NativeTabs.Trigger>
 			)}

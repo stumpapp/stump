@@ -8,7 +8,7 @@ import { Rss } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
@@ -27,6 +27,7 @@ export default function PublicationGroup({
 	// eslint-disable-next-line react/prop-types
 	renderEmpty,
 }: Props) {
+	const { t } = useTranslate()
 	const selfURL = links?.find((link) => hasLinkRel(link, 'self'))?.href
 	const hasGroupPagination = links?.some((link) => hasLinkRel(link, 'next'))
 	const router = useRouter()
@@ -88,7 +89,7 @@ export default function PublicationGroup({
 				>
 					{({ pressed }) => (
 						<View
-							className={cn('flex items-start px-1 tablet:px-2', {
+							className={cn('px-1 tablet:px-2 flex items-start', {
 								'opacity-80': pressed,
 							})}
 						>
@@ -124,8 +125,8 @@ export default function PublicationGroup({
 	// card list sections
 	return (
 		<View>
-			<View className="flex flex-row items-center justify-between px-4 pb-3">
-				<ListLabel className="ios:px-4 px-2">{metadata.title || 'Publications'}</ListLabel>
+			<View className="px-4 pb-3 flex flex-row items-center justify-between">
+				<ListLabel className="ios:px-4 px-2">{metadata.title || t('opds.publications')}</ListLabel>
 
 				{selfURL && <FeedSelfURL url={selfURL} />}
 			</View>
@@ -142,7 +143,9 @@ export default function PublicationGroup({
 				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 			/>
 
-			{!publications.length && <ListEmptyMessage icon={Rss} message="No publications in group" />}
+			{!publications.length && (
+				<ListEmptyMessage icon={Rss} message={t('opds.noPublicationsInGroup')} />
+			)}
 		</View>
 	)
 }

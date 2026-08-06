@@ -15,11 +15,12 @@ import RefreshControl from '~/components/RefreshControl'
 import { FullScreenLoader } from '~/components/ui'
 import { useOPDSLegacyFeedContext } from '~/context/opdsLegacy'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { useLegacyOPDSFeed } from '~/lib/hooks'
+import { useLegacyOPDSFeed, useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { constructLegacySearchURL } from '~/lib/opdsUtils'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { query } = useLocalSearchParams<{ query: string }>()
 	const { searchDoc } = useOPDSLegacyFeedContext()
 	const { numColumns } = useLegacyOPDSEntrySize()
@@ -42,7 +43,7 @@ export default function Screen() {
 	const showLoader = useShowSlowLoader(isLoading)
 
 	useDynamicHeader({
-		title: query || 'Search Results',
+		title: query || t('opds.searchResults'),
 		headerLeft: () => <BackLink />,
 		headerRight: () => <OPDSLegacyFeedActionMenu />,
 	})
@@ -53,14 +54,14 @@ export default function Screen() {
 		}
 	}
 
-	if (showLoader) return <FullScreenLoader label="Loading..." />
+	if (showLoader) return <FullScreenLoader label={t('opds.loading')} />
 
 	if (isLoading) return null
 
 	if (!feed || !!error) return <MaybeErrorLegacyFeed error={error} onRetry={onRefetch} />
 
 	if (!entries.length) {
-		return <EmptyState title="Empty Feed" message="Your search returned no results" />
+		return <EmptyState title={t('opds.emptyFeed')} message={t('opds.searchNoResults')} />
 	}
 
 	return (

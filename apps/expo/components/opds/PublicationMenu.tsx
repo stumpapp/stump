@@ -6,7 +6,7 @@ import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
+import { useIsOPDSPublicationDownloaded, useOPDSDownload, useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { Icon } from '../ui'
@@ -17,6 +17,7 @@ type Props = {
 }
 
 export default function PublicationMenu({ publicationUrl, metadata }: Props) {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -41,7 +42,7 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 						destructive
 						disabled={!isDownloaded || isDeleting}
 					>
-						Delete Download
+						{t('bookActions.deleteDownload.label')}
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 			</Stack.Toolbar>
@@ -71,7 +72,7 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 						disabled={isDeleting}
 						destructive
 					>
-						<DropdownMenu.ItemTitle>Delete Download</DropdownMenu.ItemTitle>
+						<DropdownMenu.ItemTitle>{t('bookActions.deleteDownload.label')}</DropdownMenu.ItemTitle>
 						<DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>

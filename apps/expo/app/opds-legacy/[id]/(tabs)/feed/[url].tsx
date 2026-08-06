@@ -13,10 +13,11 @@ import { useLegacyOPDSEntrySize } from '~/components/opdsLegacy/useLegacyOPDSEnt
 import RefreshControl from '~/components/RefreshControl'
 import { FullScreenLoader } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { useLegacyOPDSFeed } from '~/lib/hooks'
+import { useLegacyOPDSFeed, useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { url: feedURL } = useLocalSearchParams<{ url: string }>()
 	const {
 		feed, // The current page feed
@@ -43,14 +44,14 @@ export default function Screen() {
 		}
 	}
 
-	if (showLoader) return <FullScreenLoader label="Loading..." />
+	if (showLoader) return <FullScreenLoader label={t('opds.loading')} />
 
 	if (isLoading) return null
 
 	if (!feed || !!error) return <MaybeErrorLegacyFeed error={error} onRetry={onRefetch} />
 
 	if (!entries.length) {
-		return <EmptyState title="Nothing to show" message="No entries were returned for this feed" />
+		return <EmptyState title={t('opds.nothingToShow')} message={t('opds.noEntries')} />
 	}
 
 	return (

@@ -14,10 +14,11 @@ import RefreshControl from '~/components/RefreshControl'
 import { FullScreenLoader } from '~/components/ui'
 import { useOPDSLegacyFeedContext } from '~/context/opdsLegacy'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { useLegacyOPDSFeed } from '~/lib/hooks'
+import { useLegacyOPDSFeed, useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { activeServer } = useActiveServer()
 	const { catalogMeta } = useOPDSLegacyFeedContext()
 	const {
@@ -35,7 +36,7 @@ export default function Screen() {
 	const { numColumns } = useLegacyOPDSEntrySize()
 
 	useDynamicHeader({
-		title: activeServer?.name || 'OPDS Feed',
+		title: activeServer?.name || t('opds.feedTitle'),
 		headerLeft: () => <BackLink />,
 		headerRight: () => <OPDSLegacyFeedActionMenu />,
 	})
@@ -46,7 +47,7 @@ export default function Screen() {
 		}
 	}
 
-	if (showLoader) return <FullScreenLoader label="Loading..." />
+	if (showLoader) return <FullScreenLoader label={t('opds.loading')} />
 
 	if (isLoading) return null
 

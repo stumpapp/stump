@@ -4,6 +4,7 @@ import { ComponentPropsWithoutRef } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { Text } from '../ui'
@@ -13,7 +14,8 @@ type Props = {
 	label?: string
 } & Omit<ComponentPropsWithoutRef<typeof Pressable>, 'children' | 'onPress'>
 
-export default function FeedSelfURL({ label = 'See more', url }: Props) {
+export default function FeedSelfURL({ label, url }: Props) {
+	const { t } = useTranslate()
 	const router = useRouter()
 	const {
 		activeServer: { id: serverID },
@@ -42,7 +44,7 @@ export default function FeedSelfURL({ label = 'See more', url }: Props) {
 			>
 				<View className="px-3 py-2">
 					<Text className="text-base font-semibold" style={{ color: colors.fill.brand.DEFAULT }}>
-						{label}
+						{label ?? t('opds.seeMore')}
 					</Text>
 				</View>
 			</GlassView>

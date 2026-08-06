@@ -10,6 +10,7 @@ import TImage from 'react-native-turbo-image'
 import { stripHtml } from 'string-strip-html'
 
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
@@ -29,6 +30,7 @@ type Props = {
 
 export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 	function OPDSLegacyEntryItemSheet({ entry }, ref) {
+		const { t } = useTranslate()
 		const {
 			activeServer: { name: serverName },
 		} = useActiveServer()
@@ -140,8 +142,10 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 							{(pageCount != null || currentPage != null) && (
 								<Card>
 									<Card.StatGroup>
-										{pageCount != null && <Card.Stat label="Pages" value={pageCount} />}
-										{currentPage != null && <Card.Stat label="Current Page" value={currentPage} />}
+										{pageCount != null && <Card.Stat label={t('common.pages')} value={pageCount} />}
+										{currentPage != null && (
+											<Card.Stat label={t('opds.currentPage')} value={currentPage} />
+										)}
 									</Card.StatGroup>
 								</Card>
 							)}
@@ -149,15 +153,15 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 							{!!description && <DescriptionSection description={description} />}
 
 							<MetadataBadgeSection
-								label="Authors"
+								label={t('opds.authors')}
 								items={[...new Set(entry.authors?.map((author) => ({ label: author.name })) || [])]}
 							/>
 
-							<Card label="Details">
-								<Card.Row label="Server" value={serverName} />
+							<Card label={t('common.details')}>
+								<Card.Row label={t('common.servers')} value={serverName} />
 								{entry.updated && (
 									<Card.Row
-										label="Updated"
+										label={t('opds.updated')}
 										value={intlFormat(new Date(entry.updated), {
 											month: 'long',
 											day: 'numeric',

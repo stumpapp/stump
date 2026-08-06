@@ -16,8 +16,10 @@ import {
 } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
+import { useTranslate } from '~/lib/hooks'
 
 export default function FeedActionMenu() {
+	const { t } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 
 	const insets = useSafeAreaInsets()
@@ -69,9 +71,9 @@ export default function FeedActionMenu() {
 							key="displayAsGrid"
 							onSelect={() => setPreferences({ opdsLayout: 'grid' })}
 						>
-							<NativeDropdownMenu.ItemTitle>Grid</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemTitle>{t('common.grid')}</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'square.grid.3x2' }} />
-							<NativeDropdownMenu.ItemSubtitle>Grid</NativeDropdownMenu.ItemSubtitle>,
+							<NativeDropdownMenu.ItemSubtitle>{t('common.grid')}</NativeDropdownMenu.ItemSubtitle>,
 						</NativeDropdownMenu.CheckboxItem>
 
 						<NativeDropdownMenu.CheckboxItem
@@ -79,9 +81,9 @@ export default function FeedActionMenu() {
 							key="displayAsList"
 							onSelect={() => setPreferences({ opdsLayout: 'list' })}
 						>
-							<NativeDropdownMenu.ItemTitle>List</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemTitle>{t('common.list')}</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'list.bullet' }} />
-							<NativeDropdownMenu.ItemSubtitle>List</NativeDropdownMenu.ItemSubtitle>,
+							<NativeDropdownMenu.ItemSubtitle>{t('common.list')}</NativeDropdownMenu.ItemSubtitle>,
 						</NativeDropdownMenu.CheckboxItem>
 					</NativeDropdownMenu.Group>
 				</NativeDropdownMenu.Content>
@@ -91,7 +93,7 @@ export default function FeedActionMenu() {
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
-						className="squircle ml-2 mr-2 h-12 w-12 rounded-full border border-edge"
+						className="squircle ml-2 mr-2 h-12 w-12 border-edge rounded-full border"
 						variant="ghost"
 						size="icon"
 					>
@@ -114,7 +116,7 @@ export default function FeedActionMenu() {
 				<DropdownMenuContent
 					insets={contentInsets}
 					sideOffset={2}
-					className="w-2/3 tablet:w-64"
+					className="tablet:w-64 w-2/3"
 					align="end"
 				>
 					<DropdownMenuCheckboxItem
@@ -123,8 +125,8 @@ export default function FeedActionMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">Grid</Text>
-						<Icon as={Grid3x2} size={20} className="ml-auto text-foreground-muted" />
+						<Text className="text-lg">{t('common.grid')}</Text>
+						<Icon as={Grid3x2} size={20} className="text-foreground-muted ml-auto" />
 					</DropdownMenuCheckboxItem>
 
 					<DropdownMenuCheckboxItem
@@ -133,8 +135,8 @@ export default function FeedActionMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">List</Text>
-						<Icon as={List} size={20} className="ml-auto text-foreground-muted" />
+						<Text className="text-lg">{t('common.list')}</Text>
+						<Icon as={List} size={20} className="text-foreground-muted ml-auto" />
 					</DropdownMenuCheckboxItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

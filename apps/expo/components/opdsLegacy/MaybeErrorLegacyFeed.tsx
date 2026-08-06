@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { ZodError } from 'zod'
 
 import { isOPDSAuthError } from '~/lib/sdk/auth'
+import { useTranslate } from '~/lib/hooks'
 
 import Owl from '../Owl'
 import { Button, Heading, Text } from '../ui'
@@ -14,6 +15,7 @@ type Props = {
 	onRetry?: () => void
 }
 export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
+	const { t } = useTranslate()
 	const router = useRouter()
 
 	if (!error) return null
@@ -21,7 +23,7 @@ export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 	// Note: This is handled above in tree
 	if (isOPDSAuthError(error)) return null
 
-	const errorTitle = error instanceof ZodError ? 'Invalid Feed' : 'Error Loading Feed'
+	const errorTitle = error instanceof ZodError ? t('opds.invalidFeed') : t('opds.feedLoadFailed')
 	const errorMessage =
 		error instanceof ZodError
 			? `This feed does not adhere to the OPDS v1.2 specification: ${error.message}`
@@ -30,9 +32,9 @@ export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 				: 'There was an error fetching this feed.'
 
 	return (
-		<SafeAreaView className="flex-1 items-center justify-center bg-background p-4">
-			<View className="w-full flex-1 items-center justify-between gap-8">
-				<View className="flex-1 items-center justify-center gap-8">
+		<SafeAreaView className="p-4 flex-1 items-center justify-center bg-background">
+			<View className="gap-8 w-full flex-1 items-center justify-between">
+				<View className="gap-8 flex-1 items-center justify-center">
 					<Owl owl="error" />
 
 					<View className="gap-2 px-4 tablet:max-w-lg">
@@ -48,14 +50,14 @@ export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 					</View>
 				</View>
 
-				<View className="w-full gap-3">
+				<View className="gap-3 w-full">
 					<Button
 						className="rounded-full"
 						size="lg"
 						variant="brand"
 						onPress={() => router.dismissAll()}
 					>
-						<Text>Return Home</Text>
+						<Text>{t('errors.returnHome')}</Text>
 					</Button>
 
 					<Button
@@ -67,12 +69,12 @@ export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 							Linking.openURL(issueUrl)
 						}}
 					>
-						<Text>Report Issue</Text>
+						<Text>{t('errors.reportIssue')}</Text>
 					</Button>
 
 					{onRetry && (
 						<Button className="rounded-full" size="lg" variant="ghost" onPress={onRetry}>
-							<Text>Try Again</Text>
+							<Text>{t('errors.tryAgain')}</Text>
 						</Button>
 					)}
 				</View>

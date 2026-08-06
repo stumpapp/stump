@@ -5,9 +5,11 @@ import BackLink from '~/components/BackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { FullScreenLoader } from '~/components/ui'
 import { useOPDSFeedContext } from '~/context/opds'
+import { useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { activeServer } = useActiveServer()
 	const { catalog: feed, isLoading, error, refetch } = useOPDSFeedContext()
 	const [isRefetching, onRefetch] = useRefetch(refetch)
@@ -18,7 +20,7 @@ export default function Screen() {
 		headerLeft: () => <BackLink />,
 	})
 
-	if (showLoader) return <FullScreenLoader label="Loading..." />
+	if (showLoader) return <FullScreenLoader label={t('opds.loading')} />
 
 	if (isLoading) return null
 

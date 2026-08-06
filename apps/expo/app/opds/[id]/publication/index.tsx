@@ -201,11 +201,13 @@ export default function Screen() {
 		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
 
 		if (isCompleted) {
-			return <Card.Stat label="Completed" value={formatDistanceToNow(progression.modified)} />
+			return (
+				<Card.Stat label={t('opds.completed')} value={formatDistanceToNow(progression.modified)} />
+			)
 		} else {
 			return (
 				<Card.Stat
-					label="Last read"
+					label={t('opds.lastRead')}
 					value={formatDistanceToNow(progression.modified, { addSuffix: true })}
 				/>
 			)
@@ -288,7 +290,7 @@ export default function Screen() {
 								}
 								disabled={!canStream || !isSupportedStream}
 							>
-								<Text>Stream</Text>
+								<Text>{t('opds.stream')}</Text>
 							</Button>
 							{!isDownloaded && (
 								<Button
@@ -303,7 +305,7 @@ export default function Screen() {
 											<Icon className="h-5 w-5" as={Loader2} color={accentColor} />
 										</View>
 									)}
-									<Text>Download</Text>
+									<Text>{t('common.download')}</Text>
 								</Button>
 							)}
 						</View>
@@ -324,7 +326,7 @@ export default function Screen() {
 									)}
 									{progression.locator.locations?.totalProgression != null && (
 										<Card.Stat
-											label="Completed"
+											label={t('opds.completed')}
 											value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
 										/>
 									)}
@@ -347,15 +349,13 @@ export default function Screen() {
 
 							{!canStream && (
 								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
-									<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+									<Text>{t('opds.noReadingOrder')}</Text>
 								</View>
 							)}
 
 							{!isSupportedStream && (
 								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
-									<Text>
-										This publication contains unsupported media types and cannot be streamed yet
-									</Text>
+									<Text>{t('opds.unsupportedMedia')}</Text>
 								</View>
 							)}
 						</View>
@@ -367,15 +367,15 @@ export default function Screen() {
 
 					<Card className={cn(!description && 'px-2')}>
 						<Card.StatGroup>
-							{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
-							{volume != null && <Card.Stat label="Volume" value={volume} />}
-							{issue != null && <Card.Stat label="Issue" value={issue} />}
-							{!!numberOfPages && <Card.Stat label="Pages" value={numberOfPages} />}
+							{!!publisher && <Card.Stat label={t('bookMetadata.publisher')} value={publisher} />}
+							{volume != null && <Card.Stat label={t('bookMetadata.volume')} value={volume} />}
+							{issue != null && <Card.Stat label={t('opds.issue')} value={issue} />}
+							{!!numberOfPages && <Card.Stat label={t('common.pages')} value={numberOfPages} />}
 						</Card.StatGroup>
 					</Card>
 
 					<MetadataBadgeSection
-						label="Subjects"
+						label={t('opds.subjects')}
 						items={subjects.map((subject) => ({
 							label: subject.label,
 							onPress: () => goToFeedLink(getFirstLink(subject.links)),
@@ -429,19 +429,21 @@ export default function Screen() {
 						</View>
 					)}
 
-					<Card label="Details">
-						{subtitle && <Card.LongRow label="Subtitle" value={subtitle} />}
-						{language && <Card.Row label="Language" value={language} />}
-						{readingDirection && <Card.Row label="Reading direction" value={readingDirection} />}
+					<Card label={t('common.details')}>
+						{subtitle && <Card.LongRow label={t('opds.subtitle')} value={subtitle} />}
+						{language && <Card.Row label={t('bookMetadata.language')} value={language} />}
+						{readingDirection && (
+							<Card.Row label={t('opds.readingDirection')} value={readingDirection} />
+						)}
 						{modified && (
 							<Card.Row
-								label="Modified"
+								label={t('opds.modified')}
 								value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
 							/>
 						)}
 						{published && (
 							<Card.Row
-								label="Published"
+								label={t('opds.published')}
 								value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
 							/>
 						)}

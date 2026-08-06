@@ -12,7 +12,7 @@ import { useRef } from 'react'
 import { Image, Platform, Pressable, View } from 'react-native'
 
 import { getLegacyStreamingContextValue } from '~/context/opdsLegacy'
-import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
+import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload, useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -31,6 +31,7 @@ type Props = {
 }
 
 export default function OPDSEntry({ entry }: Props) {
+	const { t } = useTranslate()
 	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
 	const {
@@ -97,7 +98,7 @@ export default function OPDSEntry({ entry }: Props) {
 					{
 						items: [
 							{
-								label: 'See Details',
+								label: t('bookActions.seeDetails'),
 								icon: {
 									ios: 'info.circle',
 									android: Info,
@@ -117,7 +118,7 @@ export default function OPDSEntry({ entry }: Props) {
 					{
 						items: [
 							{
-								label: 'Download',
+								label: t('common.download'),
 								disabled: !downloadLink || isDownloaded,
 								onPress: () => {
 									if (!downloadLink) return
@@ -157,7 +158,7 @@ export default function OPDSEntry({ entry }: Props) {
 								{
 									items: [
 										{
-											label: 'Delete Download',
+											label: t('bookActions.deleteDownload.label'),
 											onPress: () => {
 												deleteBook({
 													id: entry.id,
@@ -179,8 +180,8 @@ export default function OPDSEntry({ entry }: Props) {
 				<Pressable onPress={onPress}>
 					{({ pressed }) => (
 						<View
-							className={cn('items-center gap-1', {
-								'flex-row gap-4': layout === 'list',
+							className={cn('gap-1 items-center', {
+								'gap-4 flex-row': layout === 'list',
 							})}
 							style={{
 								opacity: pressed ? 0.75 : 1,
@@ -205,7 +206,7 @@ export default function OPDSEntry({ entry }: Props) {
 								})}
 
 							{thumbnailUrl && (
-								<View className="relative my-2">
+								<View className="my-2 relative">
 									<ThumbnailImage
 										source={{
 											uri: resolveUrl(thumbnailUrl),
@@ -221,13 +222,13 @@ export default function OPDSEntry({ entry }: Props) {
 									/>
 
 									{isStreamable && (
-										<View className="squircle absolute left-1 top-1 rounded-full bg-black/70 p-2">
+										<View className="squircle left-1 top-1 bg-black/70 p-2 absolute rounded-full">
 											<Icon as={Radio} color="white" className="h-5 w-5" />
 										</View>
 									)}
 
 									{isDownloaded && (
-										<View className="squircle absolute bottom-1 left-1 rounded-full bg-black/70 p-2">
+										<View className="squircle bottom-1 left-1 bg-black/70 p-2 absolute rounded-full">
 											<Download color="white" className="h-5 w-5" />
 										</View>
 									)}
@@ -251,7 +252,9 @@ export default function OPDSEntry({ entry }: Props) {
 								</Text>
 
 								{layout === 'list' && streamingContext?.pageCount != null && (
-									<Text className="text-foreground-muted">{streamingContext.pageCount} pages</Text>
+									<Text className="text-foreground-muted">
+										{streamingContext.pageCount} {t('common.pages')}
+									</Text>
 								)}
 							</View>
 						</View>

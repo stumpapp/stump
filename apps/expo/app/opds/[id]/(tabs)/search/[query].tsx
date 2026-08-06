@@ -7,10 +7,12 @@ import EmptyState from '~/components/EmptyState'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { PaginationTarget } from '~/components/opds/useOPDSFeed'
 import { useOPDSFeedContext } from '~/context/opds'
+import { useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { constructSearchURL } from '~/lib/opdsUtils'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { query } = useLocalSearchParams<{ query: string }>()
 	const { sdk } = useSDK()
 	const { searchURL } = useOPDSFeedContext()
@@ -32,7 +34,7 @@ export default function Screen() {
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	useDynamicHeader({
-		title: query || 'Search Results',
+		title: query || t('opds.searchResults'),
 		headerLeft: () => <BackLink />,
 	})
 
@@ -42,7 +44,7 @@ export default function Screen() {
 		!feed?.groups?.length && !feed?.publications?.length && !feed?.navigation?.length
 
 	if (emptyFeed) {
-		return <EmptyState title="Empty Feed" message="Your search returned no results" />
+		return <EmptyState title={t('opds.emptyFeed')} message={t('opds.searchNoResults')} />
 	}
 
 	if (!feed || !!error) {

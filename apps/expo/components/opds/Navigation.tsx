@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router'
 import { ChevronRight, Rss } from 'lucide-react-native'
 import { Pressable, View } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
+
 import { useActiveServer } from '../activeServer'
 import { Card, ListEmptyMessage } from '../ui'
 import { Icon } from '../ui/icon'
@@ -14,6 +16,7 @@ type Props = {
 } & FeedComponentOptions
 
 export default function Navigation({ navigation, renderEmpty }: Props) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { activeServer } = useActiveServer()
 	const router = useRouter()
@@ -22,7 +25,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 
 	return (
 		<View className="px-4">
-			<Card label="Browse">
+			<Card label={t('opds.browse')}>
 				{navigation.map((link) => (
 					<Pressable
 						key={link.href}
@@ -38,14 +41,14 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 					>
 						{({ pressed }) => (
 							<Card.Row label={link.title} style={pressed && { opacity: 0.6 }}>
-								<Icon as={ChevronRight} className="h-5 w-5 shrink-0 text-foreground-muted" />
+								<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted shrink-0" />
 							</Card.Row>
 						)}
 					</Pressable>
 				))}
 			</Card>
 
-			{!navigation.length && <ListEmptyMessage icon={Rss} message="No navigation links in feed" />}
+			{!navigation.length && <ListEmptyMessage icon={Rss} message={t('opds.noNavigationInFeed')} />}
 		</View>
 	)
 }

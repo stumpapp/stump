@@ -1,38 +1,38 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "아직 준비 중입니다",
+		"message": "이 페이지는 현재 개발 중입니다. 조금만 기다려 주세요.",
+		"homeLink": "홈으로 이동",
+		"githubLink": "GitHub 이슈 보기"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "서버 초기화",
+		"claimText": "이 Stump 서버는 아직 초기화되지 않았습니다. 아래 양식에서 계정을 만들면 서버의 모든 기능을 사용할 수 있습니다.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required",
-				"usernameAlreadyExists": "Username already exists"
+				"missingUsername": "사용자 이름을 입력하세요",
+				"missingPassword": "비밀번호를 입력하세요",
+				"usernameAlreadyExists": "이미 사용 중인 사용자 이름입니다"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "암호"
+				"username": "사용자 이름",
+				"password": "비밀번호"
 			},
 			"buttons": {
 				"createAccount": "계정 생성",
 				"login": "로그인",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"loginWithOidc": "OIDC로 로그인",
+				"createAccountWithOidc": "OIDC로 계정 만들기"
 			}
 		},
 		"toasts": {
 			"loggingIn": "로그인 중...",
 			"loggedIn": "다시 오신 것을 환영합니다!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggedInFirstTime": "환영합니다!",
+			"registering": "계정을 만드는 중...",
+			"registered": "계정을 만들었습니다!",
+			"loginFailed": "로그인하지 못했습니다. 다시 시도하세요",
+			"registrationFailed": "계정을 만들지 못했습니다. 다시 시도하세요"
 		}
 	},
 	"adminLibrarySidebar": {
@@ -552,24 +552,24 @@
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "책 업로드",
+				"series": "시리즈 업로드"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "파일 탐색기의 현재 경로에 책을 바로 추가합니다",
+				"series": "파일 탐색기의 현재 경로에 시리즈를 바로 추가합니다"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"모든 책이 들어 있는 시리즈 폴더를",
+				"ZIP 파일로 압축해",
+				"업로드해야 합니다"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"books": "책을 여기에 끌어다 놓으세요",
+				"series": "ZIP 파일을 여기에 끌어다 놓으세요",
+				"alt": "또는 클릭하여 업로드할 책을 선택하세요"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "추가된 파일"
 		}
 	},
 	"libraryHeader": {
@@ -788,12 +788,12 @@
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"heading": "문제가 발생했습니다",
+		"message": "다음 오류가 발생했습니다:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "버그 신고",
+			"copy": "오류 정보 복사",
+			"goHome": "홈으로 이동"
 		}
 	},
 	"homeScene": {
@@ -1196,33 +1196,33 @@
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "만료일은 현재보다 이후여야 합니다"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "이름",
+				"placeholder": "KoReader 동기화"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "만료 기간",
+				"placeholder": "만료되지 않음"
 			},
 			"expiresAt": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "만료일",
+				"placeholder": "만료되지 않음"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "권한 상속",
+					"description": "내 계정과 같은 권한을 사용합니다"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "권한 직접 지정",
+					"description": "이 키에 부여할 권한을 선택합니다"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "이 API 키는 내 모든 권한을 상속하므로 내 계정으로 할 수 있는 모든 작업을 수행할 수 있습니다. 신중하게 설정하세요"
 	},
 	"userSmartListsScene": {
 		"heading": "Smart lists",
@@ -2526,7 +2526,7 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Job in Progress"
+		"backupHeading": "작업 진행 중"
 	},
 	"libraryStats": {
 		"seriesCount": "Total Series",
@@ -2547,23 +2547,23 @@
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Next",
-			"previous": "Previous"
+			"next": "다음",
+			"previous": "이전"
 		},
 		"popover": {
-			"heading": "Go to page",
+			"heading": "페이지로 이동",
 			"buttons": {
-				"confirm": "Go",
-				"cancel": "Cancel"
+				"confirm": "이동",
+				"cancel": "취소"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
+		"title": "로그아웃",
+		"message": "로그아웃하시겠습니까?",
 		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
+			"cancel": "취소",
+			"signOut": "로그아웃"
 		}
 	},
 	"sidebar": {
@@ -2599,274 +2599,274 @@
 		}
 	},
 	"search": {
-		"placeholder": "Search"
+		"placeholder": "검색"
 	},
 	"serverSOS": {
-		"heading": "Server Unavailable",
+		"heading": "서버에 연결할 수 없습니다",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "네트워크 오류로 Stump 서버에 연결할 수 없습니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요.\n서버 URL이 변경되었다면 아래 양식에서 수정할 수 있습니다"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "네트워크 오류로 Stump 서버에 연결할 수 없습니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요"
 		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
+		"reconnected": "서버에 다시 연결했습니다. 이동 중...",
+		"reconnectionFailed": "서버에 다시 연결하지 못했습니다"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "서버가 연결되지 않았습니다",
 		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
+			"인터넷 연결을 확인하세요",
+			"여기를 눌러",
+			"서버 URL을 변경할 수 있습니다"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "표시할 항목이 없습니다",
 		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
+			"next": "앞으로 이동",
+			"previous": "뒤로 이동"
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
+		"placeholder": "태그 선택 또는 만들기",
+		"placeholderNoTags": "사용 가능한 태그가 없습니다"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "썸네일 편집",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "책에서 선택",
+			"uploadImage": "이미지 업로드"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"emptyState": "이미지 미리보기가 여기에 표시됩니다",
+			"prompt": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
+			"remove": "이미지 제거"
 		}
 	},
 	"common": {
-		"add": "Add",
-		"andXMoreTrailing": "...and {{count}} more",
-		"cancel": "Cancel",
-		"clear": "Clear",
-		"confirm": "Confirm",
-		"created": "Created",
-		"delete": "Delete",
+		"add": "추가",
+		"andXMoreTrailing": "...외 {{count}}개",
+		"cancel": "취소",
+		"clear": "지우기",
+		"confirm": "확인",
+		"created": "생성됨",
+		"delete": "삭제",
 		"deleteConfirmation": {
-			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
-			"confirm": "Delete {{type}}",
-			"typeToConfirm": "Type {{name}} to confirm:"
+			"title": "{{type}} 삭제",
+			"description": "이 {{type}}을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+			"confirm": "{{type}} 삭제",
+			"typeToConfirm": "확인하려면 {{name}}을(를) 입력하세요:"
 		},
 		"experimentalDisclaimer": {
-			"title": "This feature is experimental",
-			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
+			"title": "실험 기능입니다",
+			"description": "일부 기능이 없거나 오류가 발생하고 제대로 작동하지 않을 수 있습니다. 신중하게 사용하고 문제가 발생하면 신고해 주세요"
 		},
-		"enter": "Enter",
-		"save": "Save",
-		"send": "Send",
-		"saveChanges": "Save changes",
-		"noChanges": "No changes",
-		"create": "Create",
-		"edit": "Edit",
-		"info": "Info",
+		"enter": "입력",
+		"save": "저장",
+		"send": "보내기",
+		"saveChanges": "변경사항 저장",
+		"noChanges": "변경사항 없음",
+		"create": "만들기",
+		"edit": "편집",
+		"info": "정보",
 		"infoSheetStats": {
-			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
+			"series": "시리즈",
+			"inProgress": "읽는 중",
+			"completedBooks": "완독",
+			"readingTime": "읽은 시간",
+			"size": "크기"
 		},
-		"update": "Update",
-		"upload": "Upload",
-		"uploading": "Uploading",
-		"uploadingEllipsis": "Uploading...",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"remove": "Remove",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready",
-		"notUsedYet": "Not used yet",
-		"never": "Never",
-		"scan": "Scan",
-		"somethingWentWrong": "Something went wrong",
-		"back": "Back",
-		"continue": "Continue",
-		"book": "Book",
-		"series": "Series",
+		"update": "업데이트",
+		"upload": "업로드",
+		"uploading": "업로드 중",
+		"uploadingEllipsis": "업로드 중...",
+		"unimplemented": "아직 구현되지 않은 기능입니다. 나중에 다시 확인해 주세요",
+		"upNext": "다음 항목",
+		"unknown": "알 수 없음",
+		"lastUpdated": "마지막 업데이트",
+		"limitedFunctionality": "아직 완전히 구현되지 않아 일부 기능이 제공되지 않습니다. 나중에 다시 확인해 주세요",
+		"logIn": "로그인",
+		"login": "로그인",
+		"seeError": "오류 보기",
+		"remove": "제거",
+		"goBack": "뒤로 이동",
+		"goToServers": "서버 목록으로 이동",
+		"notReady": "아직 준비되지 않은 기능입니다",
+		"notUsedYet": "아직 사용되지 않음",
+		"never": "없음",
+		"scan": "스캔",
+		"somethingWentWrong": "문제가 발생했습니다",
+		"back": "뒤로",
+		"continue": "계속",
+		"book": "책",
+		"series": "시리즈",
 		"fileUpload": {
-			"someRejected": "Some files were rejected. Please check the file types and try again",
-			"tooManyFiles": "You have selected too many files",
-			"noValidFiles": "No valid files were selected"
+			"someRejected": "일부 파일을 추가하지 못했습니다. 파일 형식을 확인하고 다시 시도하세요",
+			"tooManyFiles": "선택한 파일이 너무 많습니다",
+			"noValidFiles": "올바른 파일이 선택되지 않았습니다"
 		},
 		"unknownError": "알 수 없는 오류가 발생했습니다"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
+			"label": "API 키 접근",
+			"description": "자신의 API 키를 관리할 수 있습니다"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+			"label": "북클럽 접근",
+			"description": "북클럽을 보고 가입하는 등 북클럽 기능을 사용할 수 있습니다"
 		},
 		"ACCESS_KOREADER_SYNC": {
-			"label": "KoReader sync",
-			"description": "Allows the user to access the KoReader sync integration"
+			"label": "KoReader 동기화 접근",
+			"description": "KoReader 동기화 연동을 사용할 수 있습니다"
 		},
 		"ACCESS_KOBO_SYNC": {
-			"label": "Kobo sync",
-			"description": "Allows the user to access the Kobo sync integration"
+			"label": "Kobo 동기화 접근",
+			"description": "Kobo 동기화 연동을 사용할 수 있습니다"
 		},
 		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
-			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+			"label": "스마트 목록 접근",
+			"description": "스마트 목록을 만들고 관리하는 등 스마트 목록 기능을 사용할 수 있습니다"
 		},
 		"CHANGE_PASSWORD": {
-			"label": "Change password",
-			"description": "Allows the user to change their own password"
+			"label": "비밀번호 변경",
+			"description": "자신의 비밀번호를 변경할 수 있습니다"
 		},
 		"CHANGE_USERNAME": {
-			"label": "Change username",
-			"description": "Allows the user to change their own username"
+			"label": "사용자 이름 변경",
+			"description": "자신의 사용자 이름을 변경할 수 있습니다"
 		},
 		"CHANGE_AVATAR": {
-			"label": "Change avatar",
-			"description": "Allows the user to change their own avatar"
+			"label": "아바타 변경",
+			"description": "자신의 아바타를 변경할 수 있습니다"
 		},
 		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
-			"description": "Allows the user to create new book clubs"
+			"label": "북클럽 만들기",
+			"description": "새 북클럽을 만들 수 있습니다"
 		},
 		"CREATE_LIBRARY": {
-			"label": "Create libraries",
-			"description": "Allows the user to create new libraries"
+			"label": "라이브러리 만들기",
+			"description": "새 라이브러리를 만들 수 있습니다"
 		},
 		"CREATE_NOTIFIER": {
-			"label": "Create notifiers",
-			"description": "Allows the user to create new notification systems"
+			"label": "알림 서비스 만들기",
+			"description": "새 알림 서비스를 만들 수 있습니다"
 		},
 		"DELETE_LIBRARY": {
-			"label": "Delete libraries",
-			"description": "Allows the user to delete existing libraries"
+			"label": "라이브러리 삭제",
+			"description": "기존 라이브러리를 삭제할 수 있습니다"
 		},
 		"DELETE_NOTIFIER": {
-			"label": "Delete notifiers",
-			"description": "Allows the user to delete notification systems"
+			"label": "알림 서비스 삭제",
+			"description": "알림 서비스를 삭제할 수 있습니다"
 		},
 		"DOWNLOAD_FILE": {
-			"label": "Download files",
-			"description": "Allows the user to download files from the server"
+			"label": "파일 다운로드",
+			"description": "서버에서 파일을 다운로드할 수 있습니다"
 		},
 		"EDIT_LIBRARY": {
-			"label": "Edit libraries",
-			"description": "Allows the user to modify existing libraries"
+			"label": "라이브러리 편집",
+			"description": "기존 라이브러리를 수정할 수 있습니다"
 		},
 		"EMAILER_CREATE": {
-			"label": "Create emailer",
-			"description": "Allows the user to create email configuration"
+			"label": "이메일 전송 설정 만들기",
+			"description": "이메일 전송 설정을 만들 수 있습니다"
 		},
 		"EMAILER_MANAGE": {
-			"label": "Manage emailer",
-			"description": "Allows the user to manage email configuration and settings"
+			"label": "이메일 전송 설정 관리",
+			"description": "이메일 전송 구성과 설정을 관리할 수 있습니다"
 		},
 		"EMAILER_READ": {
-			"label": "Read emailer",
-			"description": "Allows the user to view email configuration"
+			"label": "이메일 전송 설정 보기",
+			"description": "이메일 전송 구성을 볼 수 있습니다"
 		},
 		"EMAIL_ARBITRARY_SEND": {
-			"label": "Send arbitrary emails",
-			"description": "Allows the user to send custom emails to any address"
+			"label": "임의 이메일 전송",
+			"description": "원하는 주소로 직접 작성한 이메일을 보낼 수 있습니다"
 		},
 		"EMAIL_SEND": {
-			"label": "Send emails",
-			"description": "Allows the user to send emails through the system"
+			"label": "이메일 전송",
+			"description": "시스템을 통해 이메일을 보낼 수 있습니다"
 		},
 		"FILE_EXPLORER": {
-			"label": "File explorer",
-			"description": "Allows the user to browse and explore the server filesystem"
+			"label": "파일 탐색기",
+			"description": "서버 파일 시스템을 탐색할 수 있습니다"
 		},
 		"MANAGE_LIBRARY": {
-			"label": "Manage libraries",
-			"description": "Allows the user to manage library settings and configuration"
+			"label": "라이브러리 관리",
+			"description": "라이브러리 설정과 구성을 관리할 수 있습니다"
 		},
 		"MANAGE_NOTIFIER": {
-			"label": "Manage notifiers",
-			"description": "Allows the user to manage notification system settings"
+			"label": "알림 서비스 관리",
+			"description": "알림 서비스 설정을 관리할 수 있습니다"
 		},
 		"MANAGE_SERVER": {
-			"label": "Manage server",
-			"description": "Allows the user to manage server configuration and settings"
+			"label": "서버 관리",
+			"description": "서버 구성과 설정을 관리할 수 있습니다"
 		},
 		"MANAGE_USERS": {
-			"label": "Manage users",
-			"description": "Allows the user to create, edit, and delete user accounts"
+			"label": "사용자 관리",
+			"description": "사용자 계정을 만들고 편집하거나 삭제할 수 있습니다"
 		},
 		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
+			"label": "작업 보기",
+			"description": "시스템 작업과 상태를 볼 수 있습니다"
 		},
 		"READ_NOTIFIER": {
-			"label": "Read notifiers",
-			"description": "Allows the user to view notification system configuration"
+			"label": "알림 서비스 보기",
+			"description": "알림 서비스 구성을 볼 수 있습니다"
 		},
 		"READ_PERSISTED_LOGS": {
-			"label": "Read persisted logs",
-			"description": "Allows the user to view stored system logs"
+			"label": "저장된 로그 보기",
+			"description": "저장된 시스템 로그를 볼 수 있습니다"
 		},
 		"READ_SYSTEM_LOGS": {
-			"label": "Read system logs",
-			"description": "Allows the user to view real-time system logs"
+			"label": "시스템 로그 보기",
+			"description": "실시간 시스템 로그를 볼 수 있습니다"
 		},
 		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
+			"label": "사용자 보기",
+			"description": "사용자 계정 정보를 볼 수 있습니다"
 		},
 		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
-			"description": "Allows the user to trigger library scans to discover new content"
+			"label": "라이브러리 스캔",
+			"description": "새 콘텐츠를 찾는 라이브러리 스캔을 실행할 수 있습니다"
 		},
 		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
+			"label": "파일 업로드",
+			"description": "서버에 파일을 업로드할 수 있습니다"
 		},
 		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+			"label": "작업 관리",
+			"description": "대기 중인 작업을 관리할 수 있습니다"
 		},
 		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
+			"label": "메타데이터 편집",
+			"description": "책과 시리즈의 메타데이터를 편집할 수 있습니다"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
+			"label": "메타데이터 원본 반영",
+			"description": "메타데이터 변경사항을 원본 파일에 다시 기록할 수 있습니다"
 		},
 		"EDIT_THUMBNAILS": {
-			"label": "Edit thumbnails",
-			"description": "Allows the user to edit thumbnails for books and series"
+			"label": "썸네일 편집",
+			"description": "책과 시리즈의 썸네일을 편집할 수 있습니다"
 		},
 		"METADATA_PROVIDER_READ": {
-			"label": "Read metadata providers",
-			"description": "Allows the user to view configured external metadata providers"
+			"label": "메타데이터 공급자 보기",
+			"description": "구성된 외부 메타데이터 공급자를 볼 수 있습니다"
 		},
 		"METADATA_PROVIDER_MANAGE": {
-			"label": "Manage metadata providers",
-			"description": "Allows the user to configure external metadata providers"
+			"label": "메타데이터 공급자 관리",
+			"description": "외부 메타데이터 공급자를 구성할 수 있습니다"
 		},
 		"METADATA_FETCH_RECORD_READ": {
-			"label": "Read metadata matches",
-			"description": "Allows the user to view metadata fetch results awaiting review"
+			"label": "메타데이터 일치 결과 보기",
+			"description": "검토 대기 중인 메타데이터 조회 결과를 볼 수 있습니다"
 		},
 		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "Manage metadata matches",
-			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
+			"label": "메타데이터 일치 결과 관리",
+			"description": "외부 공급자에서 책을 검색하고 일치 후보를 수락하거나 거절할 수 있습니다"
 		}
 	},
 	"mobileApp": {

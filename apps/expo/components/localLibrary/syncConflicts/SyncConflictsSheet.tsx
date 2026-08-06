@@ -128,8 +128,6 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 	const conflictCount = conflictingRecords?.length ?? 0
 	const isInitialLoad = !updatedAt
 
-	console.log('SyncConflictsSheet render', { conflictCount, isInitialLoad, updatedAt })
-
 	return (
 		<>
 			<TrueSheet

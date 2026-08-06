@@ -75,7 +75,7 @@ export default function SelectionRightScreenHeader() {
 				}}
 			>
 				<View
-					accessibilityLabel="options"
+					accessibilityLabel={t('common.options')}
 					style={{
 						height: 35,
 						width: 35,
@@ -131,7 +131,7 @@ export default function SelectionRightScreenHeader() {
 			}}
 		>
 			<View
-				accessibilityLabel="options"
+				accessibilityLabel={t('common.options')}
 				style={{
 					height: 35,
 					width: 35,

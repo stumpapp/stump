@@ -52,7 +52,7 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 				<DropdownMenu.Trigger>
 					<Pressable>
 						<View
-							accessibilityLabel="options"
+							accessibilityLabel={t('common.options')}
 							style={{
 								height: 35,
 								width: 35,

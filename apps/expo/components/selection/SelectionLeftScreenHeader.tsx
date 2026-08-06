@@ -2,11 +2,13 @@ import { Host, Image } from '@expo/ui/swift-ui'
 import { ListMinus, ListPlus } from 'lucide-react-native'
 import { Platform, Pressable, View } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
 import { useSelectionStore } from '~/stores/selection'
 
 import { Icon } from '../ui/icon'
 
 export default function SelectionLeftScreenHeader() {
+	const { t } = useTranslate()
 	const isSelectAll = useSelectionStore((state) => state.isSelectAll())
 	const clearSelection = useSelectionStore((state) => state.clearSelection)
 	const selectAll = useSelectionStore((state) => state.selectAll)
@@ -22,7 +24,7 @@ export default function SelectionLeftScreenHeader() {
 	const PressableChild = Platform.select({
 		ios: (
 			<View
-				accessibilityLabel="options"
+				accessibilityLabel={t('common.options')}
 				style={{
 					height: 35,
 					width: 35,
@@ -39,7 +41,7 @@ export default function SelectionLeftScreenHeader() {
 			</View>
 		),
 		android: (
-			<View className="squircle mx-2 h-12 w-12 items-center justify-center rounded-full border border-edge">
+			<View className="squircle mx-2 h-12 w-12 border-edge items-center justify-center rounded-full border">
 				<Icon as={isSelectAll ? ListMinus : ListPlus} size={20} />
 			</View>
 		),

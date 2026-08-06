@@ -2,6 +2,7 @@ import { ChevronsUpDown } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { usePortalHost } from '~/lib/PortalHostContext'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { Button } from '../button'
@@ -21,9 +22,10 @@ export function Picker<T extends string = string>({
 	options,
 	onValueChange,
 	disabled = false,
-	placeholder = 'Select...',
+	placeholder,
 	className,
 }: PickerProps<T>) {
+	const { t } = useTranslate()
 	const portalHost = usePortalHost()
 	const selectedOption = options.find((option) => option.value === value)
 
@@ -41,7 +43,7 @@ export function Picker<T extends string = string>({
 							!selectedOption && 'text-foreground-subtle',
 						)}
 					>
-						{selectedOption?.label ?? placeholder}
+						{selectedOption?.label ?? placeholder ?? t('common.select')}
 					</Text>
 					<View>
 						<Icon as={ChevronsUpDown} size={16} className="text-foreground-subtle" />

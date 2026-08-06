@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
 import { useColors, usePalette } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { SheetBackDetection } from '../SheetBackDetection'
@@ -17,9 +18,10 @@ export function PickerSheet<T extends string = string>({
 	options,
 	onValueChange,
 	disabled = false,
-	placeholder = 'Select...',
+	placeholder,
 	className,
 }: PickerProps<T>) {
+	const { t } = useTranslate()
 	const sheetRef = useRef<TrueSheet>(null)
 	const colors = useColors()
 
@@ -45,7 +47,7 @@ export function PickerSheet<T extends string = string>({
 							!selectedOption && 'text-foreground-subtle',
 						)}
 					>
-						{selectedOption?.label ?? placeholder}
+						{selectedOption?.label ?? placeholder ?? t('common.select')}
 					</Text>
 					<View>
 						<Icon as={ChevronsUpDown} size={16} className="text-foreground-subtle" />

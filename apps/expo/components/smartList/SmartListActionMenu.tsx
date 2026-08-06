@@ -56,7 +56,7 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 							}}
 						>
 							<View
-								accessibilityLabel="options"
+								accessibilityLabel={t('common.options')}
 								style={{
 									height: 35,
 									width: 35,

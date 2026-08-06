@@ -48,7 +48,7 @@ export default function FeedActionMenu() {
 							}}
 						>
 							<View
-								accessibilityLabel="options"
+								accessibilityLabel={t('common.options')}
 								style={{
 									height: 35,
 									width: 35,

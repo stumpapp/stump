@@ -3,15 +3,19 @@ import { disabled } from '@expo/ui/swift-ui/modifiers'
 import { Fragment } from 'react'
 import { View } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
+
 import type { ActionMenuProps } from './types'
 
 export function ActionMenu({ icon, groups, disabled: isDisabled }: ActionMenuProps) {
+	const { t } = useTranslate()
+
 	return (
 		<Host matchContents>
 			<ContextMenu modifiers={[disabled(isDisabled ?? false)]}>
 				<ContextMenu.Trigger>
 					<View
-						accessibilityLabel="options"
+						accessibilityLabel={t('common.options')}
 						style={{
 							height: 35,
 							width: 35,

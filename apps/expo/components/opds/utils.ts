@@ -147,27 +147,27 @@ export const getFlexibleArrayField = (
 
 type CreditFieldDefinition = {
 	keys: string[]
-	label: string
+	labelKey: string
 }
 
 export const CREDIT_FIELD_DEFINITIONS: CreditFieldDefinition[] = [
-	{ keys: ['author', 'authors'], label: 'Authors' },
-	{ keys: ['writer', 'writers'], label: 'Writers' },
-	{ keys: ['artist', 'artists'], label: 'Artists' },
-	{ keys: ['penciler', 'pencilers'], label: 'Pencilers' },
-	{ keys: ['inker', 'inkers'], label: 'Inkers' },
-	{ keys: ['colorist', 'colorists'], label: 'Colorists' },
-	{ keys: ['letterer', 'letterers'], label: 'Letterers' },
-	{ keys: ['coverArtist', 'coverArtists'], label: 'Cover Artists' },
-	{ keys: ['editor', 'editors'], label: 'Editors' },
-	{ keys: ['translator', 'translators'], label: 'Translators' },
-	{ keys: ['contributor', 'contributors'], label: 'Contributors' },
-	{ keys: ['illustrator', 'illustrators'], label: 'Illustrators' },
-	{ keys: ['narrator', 'narrators'], label: 'Narrators' },
+	{ keys: ['author', 'authors'], labelKey: 'authors' },
+	{ keys: ['writer', 'writers'], labelKey: 'writers' },
+	{ keys: ['artist', 'artists'], labelKey: 'artists' },
+	{ keys: ['penciler', 'pencilers'], labelKey: 'pencilers' },
+	{ keys: ['inker', 'inkers'], labelKey: 'inkers' },
+	{ keys: ['colorist', 'colorists'], labelKey: 'colorists' },
+	{ keys: ['letterer', 'letterers'], labelKey: 'letterers' },
+	{ keys: ['coverArtist', 'coverArtists'], labelKey: 'coverArtists' },
+	{ keys: ['editor', 'editors'], labelKey: 'editors' },
+	{ keys: ['translator', 'translators'], labelKey: 'translators' },
+	{ keys: ['contributor', 'contributors'], labelKey: 'contributors' },
+	{ keys: ['illustrator', 'illustrators'], labelKey: 'illustrators' },
+	{ keys: ['narrator', 'narrators'], labelKey: 'narrators' },
 ]
 
 export type ExtractedCredit = {
-	label: string
+	labelKey: string
 	items: OPDSMetadataLinkableItem[]
 }
 
@@ -195,7 +195,7 @@ export const extractCredits = (meta: OPDSMetadata | null | undefined): Extracted
 
 		if (uniqueItems.length > 0) {
 			credits.push({
-				label: definition.label,
+				labelKey: definition.labelKey,
 				items: uniqueItems,
 			})
 		}

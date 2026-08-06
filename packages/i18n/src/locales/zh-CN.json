@@ -44,37 +44,37 @@
 	},
 	"bookManagementScene": {
 		"metadataSearch": {
-			"heading": "Search metadata",
-			"description": "Search an external provider for this book and choose a match to apply",
-			"openButton": "Search Metadata",
-			"searchButton": "Search",
-			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
-			"noResults": "No matches were found for this search",
-			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
-			"searchFailed": "Failed to search metadata providers",
+			"heading": "搜索元数据",
+			"description": "在外部提供方中搜索此书，并选择一个匹配项以应用",
+			"openButton": "搜索元数据",
+			"searchButton": "搜索",
+			"noProviders": "此书库类型未配置任何已启用的元数据提供方。请先在服务器设置中配置",
+			"noResults": "未找到此搜索的匹配项",
+			"partialResults": "部分结果无法从提供方加载，可能是由于速率限制。请尝试重新搜索以查看更多结果",
+			"searchFailed": "搜索元数据提供方失败",
 			"form": {
 				"title": {
-					"label": "Title"
+					"label": "标题"
 				},
 				"author": {
-					"label": "Author"
+					"label": "作者"
 				},
 				"isbn": {
 					"label": "ISBN"
 				},
 				"year": {
-					"label": "Year"
+					"label": "年份"
 				},
 				"number": {
-					"label": "Issue number"
+					"label": "期号"
 				},
 				"comicVineVolumeId": {
-					"label": "ComicVine volume ID",
-					"placeholder": "e.g., 129260"
+					"label": "ComicVine 卷 ID",
+					"placeholder": "例如：129260"
 				},
 				"provider": {
-					"label": "Provider",
-					"allOption": "All enabled providers"
+					"label": "提供方",
+					"allOption": "所有已启用的提供方"
 				}
 			}
 		}
@@ -291,17 +291,17 @@
 				"description": "用于分类你的书库或强制执行访问规则"
 			},
 			"libraryType": {
-				"label": "Library content",
-				"description": "The type of content present in this library",
+				"label": "书库内容",
+				"description": "此书库中包含的内容类型",
 				"options": {
-					"COMIC": "Comics",
-					"MANGA": "Manga",
-					"BOOK": "Books",
-					"LIGHT_NOVEL": "Light Novels",
-					"MANHWA": "Manhwa",
-					"WEB_NOVEL": "Web Novels",
-					"WEBTOON": "Webtoons",
-					"MIXED": "Mixed"
+					"COMIC": "漫画",
+					"MANGA": "日漫",
+					"BOOK": "书籍",
+					"LIGHT_NOVEL": "轻小说",
+					"MANHWA": "韩漫",
+					"WEB_NOVEL": "网络小说",
+					"WEBTOON": "条漫",
+					"MIXED": "混合"
 				}
 			},
 			"defaultLibraryView": {
@@ -595,9 +595,9 @@
 	},
 	"libraryHeader": {
 		"tabs": {
-			"books": "Books",
-			"series": "Series",
-			"files": "Files"
+			"books": "书籍",
+			"series": "系列",
+			"files": "文件"
 		}
 	},
 	"librarySettingsScene": {
@@ -975,16 +975,16 @@
 	},
 	"seriesHeader": {
 		"tabs": {
-			"books": "Books",
-			"files": "Files"
+			"books": "书籍",
+			"files": "文件"
 		},
 		"actions": {
-			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
+			"markAsRead": "将系列标记为已读",
+			"markAsUnread": "将系列标记为未读",
+			"goToLibrary": "前往书库"
 		},
 		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
+			"failedToUpdateCompletion": "更新书籍完成状态失败"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1528,18 +1528,18 @@
 					"description": "自定义应用使用的字体"
 				},
 				"interfaceRoundness": {
-					"label": "Interface roundness",
-					"description": "How rounded the corners are for UI elements",
+					"label": "界面圆角",
+					"description": "UI 元素边角的圆润程度",
 					"options": {
-						"none": "None",
-						"normal": "Normal",
-						"rounded": "Rounded",
-						"pill": "Pill"
+						"none": "无",
+						"normal": "正常",
+						"rounded": "圆角",
+						"pill": "胶囊"
 					}
 				},
 				"thumbnailPreview": {
-					"label": "Preview",
-					"description": "This is how thumbnails will look with the current settings"
+					"label": "预览",
+					"description": "这是当前设置下缩略图的显示效果"
 				},
 				"thumbnailRatioSelect": {
 					"label": "缩略图比率",
@@ -1557,13 +1557,13 @@
 					}
 				},
 				"thumbnailRoundness": {
-					"label": "Thumbnail roundness",
-					"description": "How rounded the corners of thumbnail images should be",
+					"label": "缩略图圆角",
+					"description": "缩略图图片边角的圆润程度",
 					"options": {
-						"none": "None",
-						"normal": "Normal",
-						"rounded": "Rounded",
-						"large": "Large"
+						"none": "无",
+						"normal": "正常",
+						"rounded": "圆角",
+						"large": "大圆角"
 					}
 				},
 				"navigation": {
@@ -1637,24 +1637,24 @@
 					}
 				},
 				"displayAndSpacing": {
-					"label": "Display and spacing",
-					"description": "Preferences related to the presentation of content and information"
+					"label": "显示与间距",
+					"description": "与内容和信息展示相关的偏好设置"
 				},
 				"additionalPreferences": {
 					"label": "其他偏好",
 					"description": "通过这些附加设置自定义 Stump 的外观和行为"
 				},
 				"contentBrowsing": {
-					"label": "Content browsing",
-					"description": "Preferences that affect browsing and navigating content lists"
+					"label": "内容浏览",
+					"description": "影响浏览和导航内容列表的偏好设置"
 				},
 				"motionAndAnimation": {
-					"label": "Motion and animation",
-					"description": "Visual presentation and movement preferences"
+					"label": "动效与动画",
+					"description": "视觉呈现与动态效果的偏好设置"
 				},
 				"activityAndStatus": {
-					"label": "Activity and status",
-					"description": "Indicators, overlays, or functionality related to background activity"
+					"label": "活动与状态",
+					"description": "与后台活动相关的指示器、叠加层或功能"
 				},
 				"hideScrollbarToggle": {
 					"label": "启用隐藏滚动条",
@@ -1753,7 +1753,7 @@
 		"app/reader": {
 			"helmet": "阅读设置",
 			"title": "阅读设置",
-			"description": "Default preferences for reading. Some of these are local-only to your current device",
+			"description": "阅读的默认偏好设置。其中部分设置仅保存在当前设备上",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -2085,7 +2085,7 @@
 						"deleteError": "删除计划任务失败"
 					},
 					"errors": {
-						"invalidCron": "Schedule must be a valid cron expression"
+						"invalidCron": "计划必须是有效的 Cron 表达式"
 					}
 				},
 				"history": {
@@ -2160,7 +2160,7 @@
 						"libraryManagement": "书库管理",
 						"userManagement": "用户管理",
 						"serverManagement": "服务器管理",
-						"metadataManagement": "Metadata management"
+						"metadataManagement": "元数据管理"
 					},
 					"heading": "权限",
 					"subtitle": [
@@ -2439,8 +2439,8 @@
 			"helmet": "元数据集成",
 			"title": "元数据集成",
 			"addProvider": "添加提供方",
-			"createProviderError": "Failed to create provider",
-			"updateProviderError": "Failed to update provider",
+			"createProviderError": "创建提供方失败",
+			"updateProviderError": "更新提供方失败",
 			"noProviders": "尚未配置提供方。添加一个以开始使用",
 			"providers": {
 				"title": "提供方",
@@ -2453,8 +2453,8 @@
 					"validationError": "此令牌自动验证失败",
 					"validationRequestError": "验证请求失败",
 					"validationRequestErrorUnknown": "验证期间发生未知错误",
-					"providerStatusError": "The provider responded with status {{status}}",
-					"providerError": "The provider responded with an error: {{message}}",
+					"providerStatusError": "提供方返回了状态 {{status}}",
+					"providerError": "提供方返回了错误：{{message}}",
 					"noBearerPrefixRequired": "请移除 API 令牌开头的 'Bearer ' 前缀"
 				},
 				"apiTokenExpiresAt": {
@@ -2668,11 +2668,11 @@
 	},
 	"common": {
 		"add": "添加",
-		"andXMoreTrailing": "...and {{count}} more",
+		"andXMoreTrailing": "……以及另外 {{count}} 项",
 		"cancel": "取消",
 		"clear": "清除",
 		"confirm": "确认",
-		"created": "Created",
+		"created": "创建于",
 		"delete": "删除",
 		"deleteConfirmation": {
 			"title": "删除 {{type}}",
@@ -2691,22 +2691,22 @@
 		"noChanges": "没有更改",
 		"create": "创建",
 		"edit": "编辑",
-		"info": "Info",
+		"info": "信息",
 		"infoSheetStats": {
-			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
+			"series": "系列",
+			"inProgress": "阅读中",
+			"completedBooks": "已完成",
+			"readingTime": "阅读时长",
+			"size": "大小"
 		},
 		"update": "更新",
 		"upload": "上传",
 		"uploading": "上传中",
 		"uploadingEllipsis": "正在上传......",
 		"unimplemented": "此功能尚未实现！稍后再试",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
+		"upNext": "接下来",
+		"unknown": "未知",
+		"lastUpdated": "上次更新",
 		"limitedFunctionality": "这尚未完全实现，并且缺少一些功能。请稍后再试",
 		"logIn": "登录",
 		"login": "登录",
@@ -2728,7 +2728,7 @@
 			"tooManyFiles": "您选择了太多的文件",
 			"noValidFiles": "没有选择有效的文件"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "发生未知错误"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2876,20 +2876,20 @@
 			"description": "允许用户编辑书籍和系列片的缩略图"
 		},
 		"METADATA_PROVIDER_READ": {
-			"label": "Read metadata providers",
-			"description": "Allows the user to view configured external metadata providers"
+			"label": "读取元数据提供方",
+			"description": "允许用户查看已配置的外部元数据提供方"
 		},
 		"METADATA_PROVIDER_MANAGE": {
-			"label": "Manage metadata providers",
-			"description": "Allows the user to configure external metadata providers"
+			"label": "管理元数据提供方",
+			"description": "允许用户配置外部元数据提供方"
 		},
 		"METADATA_FETCH_RECORD_READ": {
-			"label": "Read metadata matches",
-			"description": "Allows the user to view metadata fetch results awaiting review"
+			"label": "读取元数据匹配",
+			"description": "允许用户查看待审核的元数据获取结果"
 		},
 		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "Manage metadata matches",
-			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
+			"label": "管理元数据匹配",
+			"description": "允许用户为书籍搜索外部提供方，并接受或拒绝候选匹配"
 		}
 	},
 	"mobileApp": {
@@ -2916,7 +2916,7 @@
 				},
 				"token": {
 					"label": "令牌",
-					"placeholder": "Raw Token"
+					"placeholder": "原始令牌"
 				},
 				"basic": "基本"
 			},
@@ -2924,8 +2924,8 @@
 			"catalogUrl": "目录 URL",
 			"failedToConnect": "连接到服务器失败",
 			"didConnect": "已连接",
-			"checkConnection": "Check Connection",
-			"setAsDefaultServer": "Set as Default Server",
+			"checkConnection": "检查连接",
+			"setAsDefaultServer": "设为默认服务器",
 			"enableOPDS": "启用 OPDS",
 			"validation": {
 				"nameAlreadyExists": "名称已存在",
@@ -2934,51 +2934,51 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as Read",
+				"label": "标记为已读",
 				"confirmation": "您确定要将 {{bookTitle}} 标记为已读吗？",
-				"failure": "Failed to mark book as read"
+				"failure": "标记书籍为已读失败"
 			},
 			"clearProgress": {
-				"label": "Clear Progress",
+				"label": "清除进度",
 				"confirmation": "您确定要清除 {{bookTitle}} 的进度吗？",
-				"failure": "Failed to delete current progress"
+				"failure": "删除当前进度失败"
 			},
 			"deleteReadHistory": {
-				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
-				"failure": "Failed to delete read history"
+				"label": "删除阅读历史",
+				"confirmation": "您确定要删除 {{bookTitle}} 的阅读历史吗？",
+				"failure": "删除阅读历史失败"
 			},
 			"deleteBook": {
-				"label": "Delete Book",
+				"label": "删除书籍",
 				"confirmation": "您确定要删除 {{bookTitle}} 吗？"
 			},
 			"deleteDownload": {
-				"label": "Delete Download",
-				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+				"label": "删除下载",
+				"confirmation": "您确定要删除 {{bookTitle}} 的已下载文件吗？"
 			},
-			"goToLibrary": "Go to Library",
-			"goToSeries": "Go to Series",
+			"goToLibrary": "前往书库",
+			"goToSeries": "前往系列",
 			"seeDetails": "查看详情"
 		},
 		"bookMetadata": {
 			"ageRating": "年龄分级",
 			"downloadedAt": "下载时间",
-			"characters": "Characters",
+			"characters": "角色",
 			"format": "格式",
 			"genres": "类型",
 			"language": "语言",
 			"publisher": "出版社",
 			"size": "大小",
 			"volume": "卷",
-			"writers": "Writers",
-			"colorists": "Colorists",
-			"inkers": "Inkers",
-			"letterers": "Letterers",
-			"coverArtists": "Cover Artists",
-			"links": "Links",
+			"writers": "作者",
+			"colorists": "上色师",
+			"inkers": "印墨师",
+			"letterers": "文字设计师",
+			"coverArtists": "封面艺术家",
+			"links": "链接",
 			"year": "年份",
-			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"identifier": "标识符",
+			"identifiers": "标识符"
 		},
 		"common": {
 			"book": "书籍",
@@ -2987,40 +2987,40 @@
 			"clear": "清除",
 			"completed": "已完成",
 			"confirm": "确认",
-			"continue": "Continue",
+			"continue": "继续",
 			"content": "内容",
 			"details": "详情",
 			"delete": "删除",
-			"dismiss": "Dismiss",
-			"download": "Download",
-			"downloaded": "Downloaded",
+			"dismiss": "忽略",
+			"download": "下载",
+			"downloaded": "已下载",
 			"downloads": "下载",
-			"done": "Done",
+			"done": "完成",
 			"edit": "编辑",
 			"enabled": "已启用",
 			"enable": "启用",
 			"error": "错误",
-			"favorite": "Favorite",
-			"finished": "Finished",
+			"favorite": "收藏",
+			"finished": "已完成",
 			"grid": "网格",
 			"list": "列表",
 			"lastCompleted": "最近完成",
 			"name": "名称",
 			"none": "无",
-			"notAvailable": "Not Available",
+			"notAvailable": "不可用",
 			"options": "选项",
 			"page": "页面",
 			"pages": "页",
-			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageXOfY": "第 {{current}} 页，共 {{total}} 页",
 			"password": "密码",
 			"progress": "进度",
 			"publication": "出版信息",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
-			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
+			"read": "阅读",
+			"readAgain": "再次阅读",
+			"readTime": "阅读时长",
+			"readthrough": "通读",
+			"readMore": "阅读更多",
+			"refresh": "刷新",
 			"save": "保存",
 			"select": "选择",
 			"settings": "设置",
@@ -3038,9 +3038,9 @@
 			"unknown": "未知错误"
 		},
 		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
+			"tableOfContents": "目录",
+			"bookmarksAndAnnotations": "书签与批注",
+			"appearance": "外观"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -3060,36 +3060,36 @@
 		"emptyState": {
 			"noStumpServers": "未添加 Stump 服务器",
 			"noOPDSServers": "未添加 OPDS 服务器",
-			"noServers": "No Servers Configured",
+			"noServers": "未配置服务器",
 			"cta": "通过添加服务器来开始访问您的书籍收藏",
 			"seeDocumentation": "查看文档",
 			"noSmartLists": {
-				"label": "No lists returned",
-				"description": "Once created they will appear here"
+				"label": "没有返回任何列表",
+				"description": "创建后将显示在这里"
 			}
 		},
 		"tabs": {
 			"servers": "服务器",
 			"localLibrary": "本地书库",
 			"settings": "设置",
-			"home": "Home",
-			"browse": "Browse",
-			"clubs": "Clubs",
-			"search": "Search"
+			"home": "首页",
+			"browse": "浏览",
+			"clubs": "俱乐部",
+			"search": "搜索"
 		},
 		"localLibrary": {
 			"title": "本地书库",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to Read Yet",
+					"title": "还没有可读的内容",
 					"description": "一旦您下载了离线阅读的书籍，它们将显示在这里"
 				},
 				"imported": {
-					"title": "No Imported Books",
+					"title": "没有导入的书籍",
 					"description": "导入书籍以离线阅读"
 				},
 				"server": {
-					"title": "No Downloaded Books",
+					"title": "没有已下载的书籍",
 					"description": "从书库下载书籍以离线阅读"
 				}
 			},
@@ -3152,9 +3152,9 @@
 			"syncFailed": "离线进度同步失败"
 		},
 		"search": {
-			"label": "Search This Server",
-			"description": "Find specific content on this server",
-			"placeholder": "Search"
+			"label": "搜索此服务器",
+			"description": "在此服务器上查找特定内容",
+			"placeholder": "搜索"
 		},
 		"settings": {
 			"preferences": {
@@ -3167,32 +3167,32 @@
 					}
 				},
 				"appPrimaryColor": {
-					"label": "Accent",
+					"label": "强调色",
 					"options": {
-						"chromaScale": "Chroma Scale",
+						"chromaScale": "色度刻度",
 						"hues": {
-							"red": "Red",
-							"orange": "Orange",
-							"amber": "Amber",
-							"yellow": "Yellow",
-							"lime": "Lime",
-							"green": "Green",
-							"emerald": "Emerald",
-							"teal": "Teal",
-							"cyan": "Cyan",
-							"sky": "Sky",
-							"blue": "Blue",
-							"indigo": "Indigo",
-							"violet": "Violet",
-							"purple": "Purple",
-							"fuchsia": "Fuchsia",
-							"pink": "Pink",
-							"rose": "Rose",
-							"slate": "Slate",
-							"gray": "Gray",
-							"zinc": "Zinc",
-							"neutral": "Neutral",
-							"stone": "Stone"
+							"red": "红",
+							"orange": "橙",
+							"amber": "琥珀",
+							"yellow": "黄",
+							"lime": "青柠",
+							"green": "绿",
+							"emerald": "翡翠",
+							"teal": "青",
+							"cyan": "青蓝",
+							"sky": "天蓝",
+							"blue": "蓝",
+							"indigo": "靛蓝",
+							"violet": "紫罗兰",
+							"purple": "紫",
+							"fuchsia": "品红",
+							"pink": "粉",
+							"rose": "玫瑰",
+							"slate": "石板灰",
+							"gray": "灰",
+							"zinc": "锌灰",
+							"neutral": "中性灰",
+							"stone": "石灰"
 						}
 					}
 				},
@@ -3203,7 +3203,7 @@
 					"label": "缩略图占位符",
 					"options": {
 						"grayscale": "灰度",
-						"averageColor": "Average Color",
+						"averageColor": "平均颜色",
 						"colorful": "彩色",
 						"thumbhash": "缩略图哈希"
 					}
@@ -3231,11 +3231,11 @@
 			},
 			"autoSyncLocalData": "自动同步本地数据",
 			"textCase": {
-				"label": "Text Case",
+				"label": "文本大小写",
 				"options": {
-					"lowerCase": "Lowercase",
-					"sentenceCase": "Sentence Case",
-					"titleCase": "Title Case"
+					"lowerCase": "小写",
+					"sentenceCase": "句首大写",
+					"titleCase": "标题大写"
 				}
 			},
 			"tintListBackground": "列表背景着色",
@@ -3243,10 +3243,10 @@
 				"label": "管理",
 				"dataUsage": {
 					"label": "数据使用",
-					"nonStumpData": "Non-Stump Data",
-					"serversTotal": "Servers Total",
-					"totalFiles": "Total Files",
-					"totalSize": "Total Size",
+					"nonStumpData": "非 Stump 数据",
+					"serversTotal": "服务器总计",
+					"totalFiles": "文件总数",
+					"totalSize": "总大小",
 					"deleteDownloads": {
 						"label": "删除下载",
 						"confirmation": "您确定要删除来自 {{serverName}} 的所有下载吗？",
@@ -3257,7 +3257,7 @@
 					},
 					"noDownloads": "此服务器无下载文件",
 					"storedPreferences": {
-						"label": "Stored Preferences",
+						"label": "已存储的偏好设置",
 						"description": "书籍首选项、阅读计时器等杂项数据"
 					},
 					"clearPreferences": "清除首选项"
@@ -3269,21 +3269,21 @@
 					"label": "清除缓存",
 					"memory": {
 						"button": "内存",
-						"success": "Memory Cache Cleared"
+						"success": "内存缓存已清除"
 					},
 					"disk": {
 						"button": "磁盘",
-						"success": "Disk Cache Cleared"
+						"success": "磁盘缓存已清除"
 					}
 				},
 				"deleteDatabase": {
 					"label": "删除数据库",
 					"success": {
-						"title": "Database Deleted",
+						"title": "数据库已删除",
 						"description": "请重启应用"
 					},
 					"error": {
-						"title": "Deletion Failed",
+						"title": "删除失败",
 						"description": "删除数据库时出错"
 					}
 				},
@@ -3317,33 +3317,33 @@
 		},
 		"stumpServer": {
 			"browse": {
-				"books": "Books",
-				"favorites": "Favorites",
-				"files": "Files",
-				"libraries": "Libraries",
-				"series": "Series",
-				"smartLists": "Smart Lists"
+				"books": "书籍",
+				"favorites": "收藏",
+				"files": "文件",
+				"libraries": "书库",
+				"series": "系列",
+				"smartLists": "智能列表"
 			},
 			"continueReading": {
-				"label": "Continue Reading",
-				"emptyText": "No books in progress"
+				"label": "继续阅读",
+				"emptyText": "没有正在阅读的书籍"
 			},
 			"onDeck": {
-				"label": "Your Next Read",
-				"emptyText": "No books on deck"
+				"label": "您的下一个阅读",
+				"emptyText": "没有待读的书籍"
 			},
 			"recentlyAddedSeries": {
-				"label": "Recently Added Series",
-				"emptyText": "No recently added series"
+				"label": "最近添加的系列",
+				"emptyText": "没有最近添加的系列"
 			},
 			"recentlyAddedBooks": {
-				"label": "Recently Added Books",
-				"emptyText": "No recently added books"
+				"label": "最近添加的书籍",
+				"emptyText": "没有最近添加的书籍"
 			}
 		},
 		"readerSettings": {
 			"title": "阅读器设置",
-			"overrideGlobalSettings": "Override Global Settings",
+			"overrideGlobalSettings": "覆盖全局设置",
 			"sections": {
 				"mode": "模式",
 				"imageOptions": "图像选项",
@@ -3399,28 +3399,28 @@
 			"allSettings": "全部设置"
 		},
 		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
+			"goToPageX": "前往第 {{pageNumber}} 页",
+			"goToPagePlaceholder": "前往页码……",
 			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
+				"pageDoesNotExist": "第 {{page}} 页不存在",
+				"invalidPage": "'{{page}}' 不是有效的页码"
 			},
-			"showCurrentChapter": "Show Current Chapter"
+			"showCurrentChapter": "显示当前章节"
 		},
 		"annotationsSheet": {
 			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
-				"highlights": "Highlights",
-				"notes": "Notes"
+				"all": "全部",
+				"bookmarks": "书签",
+				"highlights": "高亮",
+				"notes": "笔记"
 			}
 		},
 		"epubSettings": {
 			"title": "EPUB 阅读器设置",
 			"typeface": {
-				"label": "Typeface",
+				"label": "字体",
 				"options": {
-					"system": "System",
+					"system": "系统",
 					"opendyslexic": "OpenDyslexic",
 					"literata": "Literata",
 					"atkinsonHyperlegible": "Atkinson Hyperlegible",

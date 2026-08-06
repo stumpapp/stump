@@ -2115,184 +2115,184 @@
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "사용자 관리",
+			"title": "사용자",
+			"description": "이 서버의 사용자를 관리합니다",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "사용자 만들기",
+				"title": "사용자 만들기",
+				"description": "이 서버에 새 사용자를 만듭니다"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "사용자 수정",
+				"title": "사용자 수정",
+				"description": "이 사용자의 정보를 수정합니다"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "접근 제어 및 제한",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"이 사용자에게 적용할 제한을 설정합니다. 접근 제어에 대한 자세한 내용은",
+						"문서 보기"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "연령 제한",
+						"description": "설정한 연령 등급을 초과하는 콘텐츠에 사용자가 접근하지 못하도록 제한합니다",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "등급 미설정 콘텐츠에도 적용",
+							"description": "사용하면 연령 등급이 없는 콘텐츠에도 사용자가 접근하지 못합니다"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "태그 제한",
+						"description": "선택한 태그가 있는 콘텐츠에 사용자가 접근하지 못하도록 제한합니다",
+						"placeholder": "성인, 잔혹"
 					}
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "Account",
-						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
-						"emailing": "Emailing",
-						"libraryManagement": "Library management",
-						"userManagement": "User management",
-						"serverManagement": "Server management",
-						"metadataManagement": "Metadata management"
+						"accountManagement": "계정",
+						"featureAccess": "기능 접근",
+						"fileManagement": "파일",
+						"emailers": "이메일 전송 서비스",
+						"emailing": "이메일 전송",
+						"libraryManagement": "라이브러리 관리",
+						"userManagement": "사용자 관리",
+						"serverManagement": "서버 관리",
+						"metadataManagement": "메타데이터 관리"
 					},
-					"heading": "Permissions",
+					"heading": "권한",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"이 사용자에게 부여할 권한을 선택합니다. 각 권한에 대한 자세한 내용은",
+						"문서 보기"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "북클럽",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "북클럽 기능 접근",
+							"description": "북클럽 보기와 가입을 포함한 북클럽 기능에 접근할 수 있습니다"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "북클럽 만들기",
+							"description": "새 북클럽을 만들 수 있습니다"
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "선택 기능",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "API 키",
+							"description": "자신의 API 키를 관리할 수 있습니다"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "KoReader 동기화",
+							"description": "KoReader 동기화 연동에 접근할 수 있습니다"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "파일 관리",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "파일 탐색기",
+							"description": "여러 파일 탐색기에 접근할 수 있습니다.\n이 기능을 허용하면 콘텐츠 제한을 보장할 수 없습니다"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "파일 다운로드",
+							"description": "서버에서 파일을 다운로드할 수 있습니다"
 						},
 						"upload": {
-							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"label": "파일 업로드",
+							"description": "서버에 파일을 업로드할 수 있습니다"
 						}
 					},
 					"emailer": {
-						"label": "Emailers",
+						"label": "이메일 전송 서비스",
 						"read": {
-							"label": "Access emailers",
-							"description": "Allows the user to view the configured emailers"
+							"label": "이메일 전송 서비스 접근",
+							"description": "구성된 이메일 전송 서비스를 볼 수 있습니다"
 						},
 						"create": {
-							"label": "Create emailers",
-							"description": "Allows the user to create new emailers"
+							"label": "이메일 전송 서비스 만들기",
+							"description": "새 이메일 전송 서비스를 만들 수 있습니다"
 						},
 						"manage": {
-							"label": "Manage emailers",
-							"description": "Allows the user to manage existing emailers"
+							"label": "이메일 전송 서비스 관리",
+							"description": "기존 이메일 전송 서비스를 관리할 수 있습니다"
 						}
 					},
 					"email": {
-						"label": "Emailing",
+						"label": "이메일 전송",
 						"send": {
-							"label": "Send emails",
-							"description": "Allows the user to send emails from the server to any configured aliases"
+							"label": "이메일 보내기",
+							"description": "서버에서 구성된 별칭으로 이메일을 보낼 수 있습니다"
 						},
 						"arbitrary_send": {
-							"label": "Send arbitrary emails",
-							"description": "Allows the user to send emails from the server to any email address"
+							"label": "임의 주소로 이메일 보내기",
+							"description": "서버에서 원하는 이메일 주소로 이메일을 보낼 수 있습니다"
 						}
 					},
 					"library": {
-						"label": "Library Management",
+						"label": "라이브러리 관리",
 						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"label": "라이브러리 만들기",
+							"description": "새 라이브러리를 만들 수 있습니다.\n편집 및 스캔 권한을 포함합니다"
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "라이브러리 스캔",
+							"description": "기존 라이브러리의 스캔을 시작할 수 있습니다"
 						},
 						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
+							"label": "라이브러리 편집",
+							"description": "기존 라이브러리의 기본 정보를 편집할 수 있습니다"
 						},
 						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"label": "라이브러리 관리",
+							"description": "기존 라이브러리의 고급 설정을 관리할 수 있습니다.\n편집 및 스캔 권한을 포함합니다"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "라이브러리 삭제",
+							"description": "기존 라이브러리를 삭제할 수 있습니다.\n편집, 관리 및 스캔 권한을 포함합니다"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "서버 관리",
 						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+							"label": "서버 관리",
+							"description": "서버를 관리할 수 있습니다.\n다른 여러 권한을 포함합니다"
 						}
 					},
 					"user": {
-						"label": "User Management",
+						"label": "사용자 관리",
 						"read": {
-							"label": "Read users",
-							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
+							"label": "사용자 조회",
+							"description": "서버의 다른 사용자를 조회할 수 있습니다. 라이브러리 접근에서 특정 사용자를 제외하는 등의 기능에 필요합니다"
 						},
 						"manage": {
-							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"label": "사용자 관리",
+							"description": "서버의 다른 사용자를 관리할 수 있습니다.\n조회, 생성 및 수정 권한을 포함합니다"
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
+						"label": "스마트 목록",
 						"read": {
-							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"label": "스마트 목록 기능 접근",
+							"description": "스마트 목록 기능에 접근할 수 있습니다. 세부 권한은 아직 구현되지 않아 자신의 목록을 조회, 생성 및 수정하는 권한이 모두 포함됩니다"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
+					"ageRestrictionTooLow": "연령 제한은 0보다 작을 수 없습니다",
+					"missingUsername": "사용자 이름을 입력하세요",
+					"missingPassword": "비밀번호를 입력하세요",
+					"usernameAlreadyExists": "이미 사용 중인 사용자 이름입니다"
 				},
-				"createSubmitButton": "Create user",
-				"updateSubmitButton": "Update user"
+				"createSubmitButton": "사용자 만들기",
+				"updateSubmitButton": "사용자 수정"
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
+					"title": "활동 기록 삭제",
+					"description": "모든 로그인 활동 기록을 데이터베이스에서 영구적으로 삭제합니다",
+					"confirm": "삭제"
 				}
 			}
 		},

@@ -3158,161 +3158,161 @@
 		},
 		"settings": {
 			"preferences": {
-				"label": "Preferences",
+				"label": "환경설정",
 				"appTheme": {
-					"label": "Theme",
+					"label": "테마",
 					"options": {
-						"light": "Light",
-						"dark": "Dark"
+						"light": "라이트",
+						"dark": "다크"
 					}
 				},
 				"appPrimaryColor": {
-					"label": "Accent",
+					"label": "강조색",
 					"options": {
-						"chromaScale": "Chroma Scale",
+						"chromaScale": "색상표",
 						"hues": {
-							"red": "Red",
-							"orange": "Orange",
-							"amber": "Amber",
-							"yellow": "Yellow",
-							"lime": "Lime",
-							"green": "Green",
-							"emerald": "Emerald",
-							"teal": "Teal",
-							"cyan": "Cyan",
-							"sky": "Sky",
-							"blue": "Blue",
-							"indigo": "Indigo",
-							"violet": "Violet",
-							"purple": "Purple",
-							"fuchsia": "Fuchsia",
-							"pink": "Pink",
-							"rose": "Rose",
-							"slate": "Slate",
-							"gray": "Gray",
-							"zinc": "Zinc",
-							"neutral": "Neutral",
-							"stone": "Stone"
+							"red": "빨강",
+							"orange": "주황",
+							"amber": "호박색",
+							"yellow": "노랑",
+							"lime": "라임",
+							"green": "초록",
+							"emerald": "에메랄드",
+							"teal": "청록",
+							"cyan": "시안",
+							"sky": "하늘색",
+							"blue": "파랑",
+							"indigo": "남색",
+							"violet": "보라",
+							"purple": "자주",
+							"fuchsia": "푸시아",
+							"pink": "분홍",
+							"rose": "장미색",
+							"slate": "슬레이트",
+							"gray": "회색",
+							"zinc": "아연색",
+							"neutral": "무채색",
+							"stone": "돌색"
 						}
 					}
 				},
-				"appLanguage": "Language",
-				"defaultServer": "Default Server",
-				"thumbnailRatio": "Thumbnail Ratio",
+				"appLanguage": "언어",
+				"defaultServer": "기본 서버",
+				"thumbnailRatio": "썸네일 비율",
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail Placeholder",
+					"label": "썸네일 플레이스홀더",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average Color",
-						"colorful": "Colorful",
+						"grayscale": "회색조",
+						"averageColor": "평균 색상",
+						"colorful": "다채로운 색상",
 						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailResizeMode": {
-					"label": "Thumbnail Resize",
+					"label": "썸네일 크기 조정",
 					"options": {
-						"cover": "Cover",
-						"stretch": "Stretch",
-						"fit": "Fit"
+						"cover": "채우기",
+						"stretch": "늘이기",
+						"fit": "맞추기"
 					}
 				}
 			},
 			"reading": {
-				"label": "Reading",
-				"preferNativePdf": "Prefer Native PDF",
-				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
+				"label": "읽기",
+				"preferNativePdf": "기본 PDF 리더 우선",
+				"preferMinimalReader": "간소화된 리더 우선",
+				"disableDismissGesture": "닫기 제스처 사용 안 함",
+				"incognitoReading": "비공개 읽기"
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turned off if you do not need them",
-				"bookClubsEnabled": "Book Club Features"
+				"description": "Stump 기능은 선택 사항이며 필요하지 않으면 끌 수 있습니다",
+				"bookClubsEnabled": "북클럽 기능"
 			},
-			"autoSyncLocalData": "Auto-Sync Local Data",
+			"autoSyncLocalData": "로컬 데이터 자동 동기화",
 			"textCase": {
-				"label": "Text Case",
+				"label": "영문 대소문자",
 				"options": {
-					"lowerCase": "Lowercase",
-					"sentenceCase": "Sentence Case",
-					"titleCase": "Title Case"
+					"lowerCase": "소문자",
+					"sentenceCase": "문장형",
+					"titleCase": "제목형"
 				}
 			},
-			"tintListBackground": "Tint List Backgrounds",
+			"tintListBackground": "목록 배경에 강조색 적용",
 			"management": {
-				"label": "Management",
+				"label": "관리",
 				"dataUsage": {
-					"label": "Data Usage",
-					"nonStumpData": "Non-Stump Data",
-					"serversTotal": "Servers Total",
-					"totalFiles": "Total Files",
-					"totalSize": "Total Size",
+					"label": "데이터 사용량",
+					"nonStumpData": "Stump 외 데이터",
+					"serversTotal": "서버 합계",
+					"totalFiles": "전체 파일",
+					"totalSize": "전체 크기",
 					"deleteDownloads": {
-						"label": "Delete Downloads",
-						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
+						"label": "다운로드 삭제",
+						"confirmation": "{{serverName}}에서 다운로드한 모든 파일을 삭제하시겠습니까?",
 						"deleteFailed": {
-							"title": "Deletion Failed",
-							"description": "There was an error deleting all downloads from {{serverName}}"
+							"title": "삭제 실패",
+							"description": "{{serverName}}의 모든 다운로드를 삭제하는 중 오류가 발생했습니다"
 						}
 					},
-					"noDownloads": "No downloaded files for this server",
+					"noDownloads": "이 서버에서 다운로드한 파일이 없습니다",
 					"storedPreferences": {
-						"label": "Stored Preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc"
+						"label": "저장된 환경설정",
+						"description": "책별 설정, 읽기 타이머 등 기타 데이터"
 					},
-					"clearPreferences": "Clear Preferences"
+					"clearPreferences": "환경설정 지우기"
 				}
 			},
 			"debug": {
-				"label": "Debug",
+				"label": "디버그",
 				"clearCache": {
-					"label": "Clear Cache",
+					"label": "캐시 지우기",
 					"memory": {
-						"button": "Memory",
-						"success": "Memory Cache Cleared"
+						"button": "메모리",
+						"success": "메모리 캐시를 지웠습니다"
 					},
 					"disk": {
-						"button": "Disk",
-						"success": "Disk Cache Cleared"
+						"button": "디스크",
+						"success": "디스크 캐시를 지웠습니다"
 					}
 				},
 				"deleteDatabase": {
-					"label": "Delete Database",
+					"label": "데이터베이스 삭제",
 					"success": {
-						"title": "Database Deleted",
-						"description": "Please restart the app"
+						"title": "데이터베이스를 삭제했습니다",
+						"description": "앱을 다시 시작하세요"
 					},
 					"error": {
-						"title": "Deletion Failed",
-						"description": "There was an error deleting the database"
+						"title": "삭제 실패",
+						"description": "데이터베이스를 삭제하는 중 오류가 발생했습니다"
 					}
 				},
-				"performanceMonitor": "Performance Monitor",
-				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
+				"performanceMonitor": "성능 모니터",
+				"reduceAnimations": "애니메이션 줄이기",
+				"maskUrls": "URL 가리기",
 				"displayLanguageKeys": {
-					"label": "Display Language Keys",
+					"label": "번역 키 표시",
 					"options": {
-						"none": "None",
-						"abbreviated": "Abbreviated",
-						"full": "Full"
+						"none": "표시 안 함",
+						"abbreviated": "축약",
+						"full": "전체"
 					}
 				},
 				"debugAnalytics": {
-					"label": "Debug Analytics",
-					"description": "Send additional debug-related events to help troubleshoot issues"
+					"label": "디버그 분석",
+					"description": "문제 해결에 도움이 되도록 디버그 관련 이벤트를 추가로 전송합니다"
 				}
 			},
 			"contactInfo": {
-				"label": "Contact",
-				"email": "Email",
+				"label": "문의",
+				"email": "이메일",
 				"discord": "Discord",
 				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
+				"buildInformation": "빌드 정보",
+				"version": "버전: {{version}}",
+				"suuportIdentifier": "지원 식별자: {{supportID}}"
 			}
 		},
 		"stumpServer": {
@@ -3514,31 +3514,31 @@
 			}
 		},
 		"filtering": {
-			"notStarted": "Not Started",
-			"currentlyReading": "Currently Reading",
-			"finished": "Finished"
+			"notStarted": "읽기 전",
+			"currentlyReading": "읽는 중",
+			"finished": "완독"
 		},
 		"sorting": {
-			"labelEllipsis": "Sort By...",
+			"labelEllipsis": "정렬 기준...",
 			"sortField": {
-				"NAME": "Name",
-				"ADDED_AT": "Date Added",
-				"CREATED_AT": "Date Added",
-				"NUMBER": "Series Position",
-				"SERIES": "Series",
-				"YEAR": "Year Published"
+				"NAME": "이름",
+				"ADDED_AT": "추가일",
+				"CREATED_AT": "추가일",
+				"NUMBER": "시리즈 순서",
+				"SERIES": "시리즈",
+				"YEAR": "출판 연도"
 			},
 			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
+				"ASC": "오름차순",
+				"DESC": "내림차순"
 			},
 			"sortDirectionString": {
 				"ASC": "A → Z",
 				"DESC": "Z → A"
 			},
 			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
+				"ASC": "오래된 순",
+				"DESC": "최신 순"
 			},
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",

@@ -664,6 +664,7 @@
 		"noBookmarks": "북마크 없음",
 		"themeAndOptions": "테마 및 옵션",
 		"appearance": "화면 설정",
+		"default": "기본값",
 		"fontSize": "글자 크기",
 		"fontPreviewLimit": "실시간 글자 미리보기는 최대 50px까지 표시됩니다",
 		"lineHeight": "줄 높이",
@@ -700,6 +701,23 @@
 		"resetTimer": "타이머 초기화",
 		"nextUp": "다음 책:",
 		"read": "읽기"
+	},
+	"bookActionMenu": {
+		"continueReading": "이어 읽기",
+		"readFromBeginning": "처음부터 읽기",
+		"incognitoMode": "기록 없이 읽기",
+		"nativePdfViewer": "기본 PDF 뷰어",
+		"markAsRead": "읽음으로 표시",
+		"clearProgress": "진행률 지우기",
+		"deleteHistory": "읽기 기록 삭제",
+		"manage": "관리",
+		"email": "이메일로 보내기"
+	},
+	"bookClubNavigation": {
+		"home": "홈",
+		"discussion": "토론",
+		"members": "회원",
+		"settings": "설정"
 	},
 	"entityUi": {
 		"fileMissing": "파일 누락",
@@ -1458,6 +1476,29 @@
 						"deleteGroup": "그룹 삭제"
 					},
 					"is": "조건",
+					"operatorSelect": {
+						"match": "일치 조건",
+						"equality": "비교 조건",
+						"list": "목록 조건",
+						"operator": "연산자",
+						"operations": {
+							"anyOf": "목록 중 하나와 일치",
+							"contains": "문자열 포함",
+							"eq": "같음",
+							"excludes": "문자열 미포함",
+							"is": "일치",
+							"isNot": "일치하지 않음",
+							"isAnyOf": "하나 이상 일치",
+							"isNoneOf": "모두 일치하지 않음",
+							"gt": "초과",
+							"gte": "이상",
+							"lt": "미만",
+							"lte": "이하",
+							"noneOf": "목록과 모두 불일치",
+							"neq": "같지 않음",
+							"range": "범위 내"
+						}
+					},
 					"fieldSelect": {
 						"placeholder": "속성",
 						"source": {
@@ -2832,7 +2873,8 @@
 				},
 				"smtpProvider": {
 					"label": "SMTP 공급자 사전 설정",
-					"description": "SMTP 서버 공급자를 선택하면 일반 설정을 미리 채웁니다. 모든 공급자가 포함되어 있지는 않습니다"
+					"description": "SMTP 서버 공급자를 선택하면 일반 설정을 미리 채웁니다. 모든 공급자가 포함되어 있지는 않습니다",
+					"custom": "사용자 지정"
 				},
 				"smtpHost": {
 					"label": "SMTP 호스트",

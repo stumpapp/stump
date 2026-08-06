@@ -1,4 +1,5 @@
 import { Button, DropdownMenu } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Edit, MoreVertical, Trash2 } from 'lucide-react'
 
 type Props = {
@@ -6,20 +7,22 @@ type Props = {
 	onDelete?: () => void
 }
 export default function EmailerActionMenu({ onEdit, onDelete }: Props) {
+	const { t } = useLocaleContext()
+
 	return (
 		<DropdownMenu
 			groups={[
 				{
 					items: [
 						{
-							label: 'Edit',
+							label: t('common.edit'),
 							leftIcon: <Edit className={iconStyle} />,
 							onClick: onEdit,
 						},
 						...(onDelete
 							? [
 									{
-										label: 'Delete',
+										label: t('common.delete'),
 										leftIcon: <Trash2 className={iconStyle} />,
 										onClick: onDelete,
 									},

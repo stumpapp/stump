@@ -664,6 +664,7 @@
 		"noBookmarks": "No bookmarks",
 		"themeAndOptions": "Theme and options",
 		"appearance": "Appearance",
+		"default": "Default",
 		"fontSize": "Font size",
 		"fontPreviewLimit": "Live font preview is capped at 50px",
 		"lineHeight": "Line height",
@@ -700,6 +701,23 @@
 		"resetTimer": "Reset timer",
 		"nextUp": "Next up:",
 		"read": "Read"
+	},
+	"bookActionMenu": {
+		"continueReading": "Continue reading",
+		"readFromBeginning": "Read from beginning",
+		"incognitoMode": "Incognito mode",
+		"nativePdfViewer": "Native PDF viewer",
+		"markAsRead": "Mark as read",
+		"clearProgress": "Clear progress",
+		"deleteHistory": "Delete history",
+		"manage": "Manage",
+		"email": "Email"
+	},
+	"bookClubNavigation": {
+		"home": "Home",
+		"discussion": "Discussion",
+		"members": "Members",
+		"settings": "Settings"
 	},
 	"entityUi": {
 		"fileMissing": "File missing",
@@ -1458,6 +1476,29 @@
 						"deleteGroup": "Delete group"
 					},
 					"is": "is",
+					"operatorSelect": {
+						"match": "Match",
+						"equality": "Equality",
+						"list": "List",
+						"operator": "Operator",
+						"operations": {
+							"anyOf": "any in list",
+							"contains": "contains string",
+							"eq": "equal to",
+							"excludes": "excludes string",
+							"is": "is",
+							"isNot": "is not",
+							"isAnyOf": "is any of",
+							"isNoneOf": "is none of",
+							"gt": "greater than",
+							"gte": "greater than or equal to",
+							"lt": "less than",
+							"lte": "less than or equal to",
+							"noneOf": "none in list",
+							"neq": "not equal to",
+							"range": "in range"
+						}
+					},
 					"fieldSelect": {
 						"placeholder": "Attribute",
 						"source": {
@@ -2832,7 +2873,8 @@
 				},
 				"smtpProvider": {
 					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers",
+					"custom": "Custom"
 				},
 				"smtpHost": {
 					"label": "SMTP host",

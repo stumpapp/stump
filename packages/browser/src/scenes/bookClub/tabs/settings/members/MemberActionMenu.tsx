@@ -1,4 +1,5 @@
 import { Button, DropdownMenu } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { MoreVertical, Trash } from 'lucide-react'
 
 type Props = {
@@ -6,6 +7,8 @@ type Props = {
 }
 
 export default function MemberActionMenu({ onSelectForRemoval }: Props) {
+	const { t } = useLocaleContext()
+
 	return (
 		<div className="pr-2 flex flex-1 justify-end">
 			<DropdownMenu
@@ -13,7 +16,7 @@ export default function MemberActionMenu({ onSelectForRemoval }: Props) {
 					{
 						items: [
 							{
-								label: 'Remove',
+								label: t('common.remove'),
 								leftIcon: <Trash className="mr-2 h-4 w-4" />,
 								onClick: onSelectForRemoval,
 							},

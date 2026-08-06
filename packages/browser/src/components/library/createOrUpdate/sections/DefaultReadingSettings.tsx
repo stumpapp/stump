@@ -16,10 +16,10 @@ export default function DefaultReadingSettings() {
 					<Label>{t(getKey('imageScaling.label'))}</Label>
 					<NativeSelect
 						options={[
-							{ label: 'Auto', value: 'AUTO' },
-							{ label: 'Height', value: 'HEIGHT' },
-							{ label: 'Width', value: 'WIDTH' },
-							{ label: 'Original', value: 'NONE' },
+							{ label: t('readerUi.auto'), value: 'AUTO' },
+							{ label: t('readerUi.height'), value: 'HEIGHT' },
+							{ label: t('readerUi.width'), value: 'WIDTH' },
+							{ label: t('readerUi.original'), value: 'NONE' },
 						]}
 						{...form.register('defaultReadingImageScaleFit')}
 					/>
@@ -32,8 +32,8 @@ export default function DefaultReadingSettings() {
 					<Label>{t(getKey('readingDirection.label'))}</Label>
 					<NativeSelect
 						options={[
-							{ label: 'Left to right', value: 'LTR' },
-							{ label: 'Right to left', value: 'RTL' },
+							{ label: t('readerUi.leftToRight'), value: 'LTR' },
+							{ label: t('readerUi.rightToLeft'), value: 'RTL' },
 						]}
 						{...form.register('defaultReadingDir')}
 					/>
@@ -47,9 +47,9 @@ export default function DefaultReadingSettings() {
 				<Label>{t(getKey('readingMode.label'))}</Label>
 				<NativeSelect
 					options={[
-						{ label: 'Vertical scroll', value: 'CONTINUOUS_VERTICAL' },
-						{ label: 'Horizontal scroll', value: 'CONTINUOUS_HORIZONTAL' },
-						{ label: 'Paged', value: 'PAGED' },
+						{ label: t('readerUi.verticalScroll'), value: 'CONTINUOUS_VERTICAL' },
+						{ label: t('readerUi.horizontalScroll'), value: 'CONTINUOUS_HORIZONTAL' },
+						{ label: t('readerUi.paged'), value: 'PAGED' },
 					]}
 					{...form.register('defaultReadingMode')}
 				/>

@@ -29,8 +29,8 @@ export default function DefaultReadingDirection() {
 				<NativeSelect
 					id="reading-direction"
 					options={[
-						{ label: 'Left to right', value: ReadingDirection.Ltr },
-						{ label: 'Right to left', value: ReadingDirection.Rtl },
+						{ label: t('readerUi.leftToRight'), value: ReadingDirection.Ltr },
+						{ label: t('readerUi.rightToLeft'), value: ReadingDirection.Rtl },
 					]}
 					value={readingDirection}
 					onChange={handleChange}

@@ -1,4 +1,5 @@
 import { Button, cn, Command, Popover } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
@@ -25,6 +26,7 @@ type Props = {
 type FieldDef = SmartListFormSchema['filters']['groups'][number]['filters'][number]
 
 export default function OperatorSelect({ idx }: Props) {
+	const { t } = useLocaleContext()
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
@@ -76,19 +78,19 @@ export default function OperatorSelect({ idx }: Props) {
 
 		return [
 			{
-				label: isConceptual ? 'Match' : 'Equality',
+				label: t(`${LOCALE_BASE}.${isConceptual ? 'match' : 'equality'}`),
 				operators: operators,
 			},
 			...(!isDateField(fieldDef.field) && !isConceptual
 				? [
 						{
-							label: 'List',
+							label: t(`${LOCALE_BASE}.list`),
 							operators: arrayGroup,
 						},
 					]
 				: []),
 		].filter(({ operators }) => operators.length)
-	}, [operators, fieldDef])
+	}, [operators, fieldDef, t])
 
 	useEffect(() => {
 		const allOperators = [...operators, ...operatorGroups.list]
@@ -112,7 +114,9 @@ export default function OperatorSelect({ idx }: Props) {
 						{ 'text-muted-foreground': !fieldDef.operation },
 					)}
 				>
-					{operatorMap[fieldDef.operation] || 'Operator'}
+					{fieldDef.operation
+						? t(`${LOCALE_BASE}.operations.${fieldDef.operation}`)
+						: t(`${LOCALE_BASE}.operator`)}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</Popover.Trigger>
@@ -134,7 +138,7 @@ export default function OperatorSelect({ idx }: Props) {
 										})}
 										value={operator}
 									>
-										{operatorMap[operator]}
+										{t(`${LOCALE_BASE}.operations.${operator}`)}
 									</Command.Item>
 								))}
 							</Command.Group>
@@ -152,20 +156,4 @@ const operatorGroups = {
 	string: ['contains', 'excludes', 'neq', 'eq'] satisfies StringOperation[],
 }
 
-const operatorMap: Record<Operation, string> = {
-	anyOf: 'any in list',
-	contains: 'contains string',
-	eq: 'equal to',
-	excludes: 'excludes string',
-	is: 'is',
-	isNot: 'is not',
-	isAnyOf: 'is any of',
-	isNoneOf: 'is none of',
-	gt: 'greater than',
-	gte: 'greater than or equal to',
-	lt: 'less than',
-	lte: 'less than or equal to',
-	noneOf: 'none in list',
-	neq: 'not equal to',
-	range: 'in range',
-}
+const LOCALE_BASE = 'createOrUpdateSmartListForm.fields.queryBuilder.filters.operatorSelect'

@@ -44,61 +44,68 @@
 	},
 	"bookManagementScene": {
 		"metadataSearch": {
-			"heading": "Search metadata",
-			"description": "Search an external provider for this book and choose a match to apply",
-			"openButton": "Search Metadata",
-			"searchButton": "Search",
-			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
-			"noResults": "No matches were found for this search",
-			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
-			"searchFailed": "Failed to search metadata providers",
+			"heading": "메타데이터 검색",
+			"description": "외부 공급자에서 이 책을 검색하고 적용할 결과를 선택합니다",
+			"openButton": "메타데이터 검색",
+			"searchButton": "검색",
+			"noProviders": "이 라이브러리 유형에 사용 설정된 메타데이터 공급자가 없습니다. 먼저 서버 설정에서 공급자를 구성하세요.",
+			"noResults": "검색 결과와 일치하는 항목이 없습니다",
+			"partialResults": "공급자의 요청 제한으로 인해 일부 결과를 불러오지 못했을 수 있습니다. 더 많은 결과를 확인하려면 다시 검색해 보세요.",
+			"searchFailed": "메타데이터 공급자를 검색하지 못했습니다",
 			"form": {
 				"title": {
-					"label": "Title"
+					"label": "제목"
 				},
 				"author": {
-					"label": "Author"
+					"label": "저자"
 				},
 				"isbn": {
 					"label": "ISBN"
 				},
 				"year": {
-					"label": "Year"
+					"label": "연도"
+				},
+				"number": {
+					"label": "호수"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine 권 ID",
+					"placeholder": "예: 129260"
 				},
 				"provider": {
-					"label": "Provider",
-					"allOption": "All enabled providers"
+					"label": "공급자",
+					"allOption": "사용 설정된 모든 공급자"
 				}
 			}
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "파일 정보",
 			"labels": {
 				"fileSize": "파일 크기",
 				"fileType": "파일 형식",
 				"fileLocation": "파일 위치",
-				"fileChecksum": "Checksum"
+				"fileChecksum": "체크섬"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to a device or email address",
+			"heading": "책 이메일로 보내기",
+			"description": "이 책을 기기나 이메일 주소로 보냅니다",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "이메일",
+					"placeholder": "이메일 주소",
+					"description": "책을 보낼 이메일 주소입니다. 주소를 입력할 때마다 추가를 눌러 확정하세요"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "기기",
+					"placeholder": "기기 선택",
+					"noFilterMatch": "필터와 일치하는 기기가 없습니다"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "시리즈의 다음 책"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
@@ -842,142 +849,142 @@
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
-			"format": "Format",
+			"ageRating": "연령 등급",
+			"characters": "등장인물",
+			"colorists": "채색가",
+			"coverArtists": "표지 작가",
+			"day": "일",
+			"editors": "편집자",
+			"format": "형식",
 			"identifierAmazon": "Amazon ID",
 			"identifierCalibre": "Calibre ID",
 			"identifierGoogle": "Google ID",
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
-			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
-			"summary": "Summary",
-			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
-			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
-			"metaType": "Type",
-			"imprint": "Imprint",
-			"comicid": "Comic ID",
-			"booktype": "Book type",
-			"status": "Status",
-			"totalIssues": "Total issues",
-			"publicationRun": "Publication run",
-			"comicImage": "Comic image",
-			"descriptionFormatted": "Description (formatted)"
+			"identifierUuid": "책 UUID",
+			"genres": "장르",
+			"inkers": "잉크 담당",
+			"language": "언어",
+			"letterers": "레터링 담당",
+			"links": "링크",
+			"month": "월",
+			"notes": "메모",
+			"number": "번호",
+			"pageCount": "페이지 수",
+			"pencillers": "작화가",
+			"publisher": "출판사",
+			"series": "시리즈",
+			"seriesGroup": "시리즈 그룹",
+			"storyArc": "스토리 아크",
+			"storyArcNumber": "스토리 아크 번호",
+			"summary": "요약",
+			"teams": "팀",
+			"title": "제목",
+			"titleSort": "제목 정렬 기준",
+			"volume": "권",
+			"writers": "글 작가",
+			"year": "연도",
+			"metaType": "유형",
+			"imprint": "임프린트",
+			"comicid": "코믹 ID",
+			"booktype": "책 유형",
+			"status": "상태",
+			"totalIssues": "전체 호수",
+			"publicationRun": "출간 기간",
+			"comicImage": "코믹 이미지",
+			"descriptionFormatted": "설명(서식 적용)"
 		},
 		"addFields": {
-			"description": "Add each addition on its own line"
+			"description": "추가할 항목을 한 줄에 하나씩 입력하세요"
 		}
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "Pending matches",
-			"description": "Review metadata matches fetched from external providers"
+			"heading": "검토 대기 중인 일치 항목",
+			"description": "외부 공급자에서 가져온 메타데이터 일치 결과를 검토합니다"
 		},
 		"confidenceBadge": {
-			"label": "confidence"
+			"label": "신뢰도"
 		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
+		"includeField": "이 필드 포함",
+		"excludeField": "이 필드 제외",
+		"fieldLocked": "이 필드는 잠겨 있습니다",
 		"reviewDialog": {
 			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
+				"noCandidates": "이 레코드에 사용할 수 있는 후보가 없습니다",
+				"noComparableFields": "비교할 수 있는 필드가 없습니다",
 				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
+					"field": "필드",
+					"current": "현재 값",
+					"external": "외부 값",
+					"resolved": "적용할 값"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
-					"provider": "Provider"
+					"candidatePosition": "후보 {{position}}/{{total}}",
+					"provider": "공급자"
 				}
 			},
 			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
+				"accept": "수락",
+				"reject": "거절",
 				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
-					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+					"FILL_GAPS": "빈 값 채우기",
+					"PREFER_EXTERNAL": "외부 값 우선",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "외부 값 우선 및 목록 병합",
+					"FILL_AND_MERGE_LISTS": "빈 값 채우기 및 목록 병합"
 				}
 			},
 			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
-				"reset": "Reset",
-				"undoManualEdit": "Undo manual edit"
+				"keepCurrent": "현재 값 유지",
+				"takeExternal": "외부 값 사용",
+				"mergeLists": "목록 병합",
+				"editManually": "직접 편집",
+				"lockField": "필드 잠그기",
+				"unlockField": "필드 잠금 해제",
+				"reset": "초기화",
+				"undoManualEdit": "직접 편집 취소"
 			}
 		},
 		"matchesTable": {
 			"columns": {
-				"entityName": "Name",
-				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
+				"entityName": "이름",
+				"entityType": "유형",
+				"candidateCount": "후보 수",
+				"topConfidence": "최고 신뢰도",
+				"addedAt": "가져온 일시"
 			},
 			"acceptAll": {
-				"label": "Accept all",
-				"failed": "Failed to accept all matches",
-				"success": "All pending matches accepted"
+				"label": "모두 수락",
+				"failed": "모든 일치 항목을 수락하지 못했습니다",
+				"success": "대기 중인 모든 일치 항목을 수락했습니다"
 			},
 			"rejectAll": {
-				"label": "Reject all",
-				"failed": "Failed to reject all matches",
-				"success": "All pending matches rejected"
+				"label": "모두 거절",
+				"failed": "모든 일치 항목을 거절하지 못했습니다",
+				"success": "대기 중인 모든 일치 항목을 거절했습니다"
 			},
-			"startReview": "Start review",
-			"nothingToReview": "No pending metadata matches to review"
+			"startReview": "검토 시작",
+			"nothingToReview": "검토할 메타데이터 일치 항목이 없습니다"
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "이어 읽기",
+			"downloadSeries": "시리즈 다운로드"
 		}
 	},
 	"seriesHeader": {
 		"tabs": {
-			"books": "Books",
-			"files": "Files"
+			"books": "책",
+			"files": "파일"
 		},
 		"actions": {
-			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
+			"markAsRead": "시리즈를 읽음으로 표시",
+			"markAsUnread": "시리즈를 읽지 않음으로 표시",
+			"goToLibrary": "라이브러리로 이동"
 		},
 		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
+			"failedToUpdateCompletion": "책의 읽기 완료 상태를 수정하지 못했습니다"
 		}
 	},
 	"createOrUpdateSmartListForm": {

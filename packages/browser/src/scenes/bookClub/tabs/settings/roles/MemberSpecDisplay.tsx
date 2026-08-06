@@ -1,4 +1,5 @@
 import { Button, Card, Heading, Input, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useState } from 'react'
 
 import { useBookClubContext } from '@/components/bookClub'
@@ -6,6 +7,7 @@ import { useBookClubContext } from '@/components/bookClub'
 const upperFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
 export default function MemberSpecDisplay() {
+	const { t } = useLocaleContext()
 	const {
 		bookClub: { roleSpec },
 		patchClub,
@@ -20,10 +22,9 @@ export default function MemberSpecDisplay() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<div className="md:max-w-lg">
-				<Heading size="sm">Custom names</Heading>
+				<Heading size="sm">{t('bookClubUi.customNames')}</Heading>
 				<Text variant="muted" size="sm">
-					You can override the default name for any role. This is purely cosmetic and will not
-					affect permissions
+					{t('bookClubUi.customNamesDescription')}
 				</Text>
 			</div>
 
@@ -35,13 +36,13 @@ export default function MemberSpecDisplay() {
 								scope="col"
 								className="py-3.5 pl-4 pr-3 text-sm font-semibold sm:pl-6 text-left text-foreground"
 							>
-								<Text>Role</Text>
+								<Text>{t('bookClubUi.role')}</Text>
 							</th>
 							<th
 								scope="col"
 								className="px-3 py-3.5 text-sm font-semibold border-l border-l-border text-left text-foreground"
 							>
-								<Text>Show as</Text>
+								<Text>{t('bookClubUi.showAs')}</Text>
 							</th>
 						</tr>
 					</thead>
@@ -75,7 +76,7 @@ export default function MemberSpecDisplay() {
 
 			<div>
 				<Button onClick={() => patchClub({ memberRoleSpec: updatedSpec })} disabled={!isDifferent}>
-					Save changes
+					{t('common.saveChanges')}
 				</Button>
 			</div>
 		</div>

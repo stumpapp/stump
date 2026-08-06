@@ -1,6 +1,7 @@
 import { useGraphQL } from '@stump/client'
 import { ButtonOrLink, cn, Heading, ScrollArea, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch, useToggle } from 'rooks'
 
@@ -27,6 +28,7 @@ const query = graphql(`
 `)
 
 export default function BookClubBooks() {
+	const { t } = useLocaleContext()
 	const { bookClub, viewerCanManage } = useBookClubContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -73,7 +75,7 @@ export default function BookClubBooks() {
 							onClick={togglePastBooks}
 						>
 							<Text className="cursor-pointer underline" size="sm" variant="muted">
-								{showPastBooks ? 'Hide' : 'Show'} past books
+								{showPastBooks ? t('bookClubUi.hidePastBooks') : t('bookClubUi.showPastBooks')}
 							</Text>
 						</button>
 					</div>
@@ -95,14 +97,14 @@ export default function BookClubBooks() {
 			return (
 				<div className="px-4 flex flex-col">
 					<GenericEmptyState
-						title="No books to display"
-						subtitle="The club has no books scheduled"
+						title={t('bookClubUi.noBooks')}
+						subtitle={t('bookClubUi.noBooksDescription')}
 						containerClassName="md:justify-start md:items-start"
 						contentClassName="md:text-left"
 					/>
 					{viewerCanManage && (
 						<ButtonOrLink variant="secondary" href={paths.bookClubScheduler(bookClub.id)}>
-							Create a schedule
+							{t('bookClubUi.createSchedule')}
 						</ButtonOrLink>
 					)}
 				</div>
@@ -126,7 +128,7 @@ export default function BookClubBooks() {
 		<div className="md:-ml-4 md:w-2/3 lg:w-md flex h-full w-full flex-col">
 			{!!bookClub.currentBook && (
 				<Heading size="md" className="px-4 pb-4 flex items-center">
-					Books
+					{t('bookClubUi.books')}
 				</Heading>
 			)}
 			{renderContent()}

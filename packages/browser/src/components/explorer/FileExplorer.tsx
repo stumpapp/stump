@@ -1,5 +1,6 @@
-import GenericEmptyState from '@/components/GenericEmptyState'
 import { useLocaleContext } from '@stump/i18n'
+
+import GenericEmptyState from '@/components/GenericEmptyState'
 
 import { useFileExplorerContext } from './context'
 import { FileGrid } from './grid'

@@ -1,5 +1,5 @@
-import { useDebounce } from 'rooks'
 import { useLocaleContext } from '@stump/i18n'
+import { useDebounce } from 'rooks'
 
 type Props = {
 	onChange: (value: string) => void

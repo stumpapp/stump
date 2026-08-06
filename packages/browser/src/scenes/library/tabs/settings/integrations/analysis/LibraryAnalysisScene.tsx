@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@stump/components'
-import { AlertTriangle } from 'lucide-react'
 import { useLocaleContext } from '@stump/i18n'
+import { AlertTriangle } from 'lucide-react'
 
 import AnalyzeMedia from './AnalyzeMedia'
 

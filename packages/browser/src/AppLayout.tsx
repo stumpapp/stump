@@ -179,7 +179,7 @@ export function AppLayout() {
 			console.error('Error logging out:', { error })
 			toast.error(t('common.logoutFailed'))
 		}
-	}, [sdk, client, setUser, navigate])
+	}, [sdk, client, setUser, navigate, t])
 
 	useEffect(() => {
 		if (user) {

@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
-import { Book } from 'lucide-react'
 import { useLocaleContext } from '@stump/i18n'
+import { Book } from 'lucide-react'
 import { useState } from 'react'
 
 import { EntityImage } from '@/components/entity'

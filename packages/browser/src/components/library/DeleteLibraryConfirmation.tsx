@@ -76,7 +76,7 @@ export default function DeleteLibraryConfirmation({
 		} else {
 			toast.error(t('libraryUi.deleteLibraryError'))
 		}
-	}, [error])
+	}, [error, t])
 
 	const entityI18nValues = { name: libraryName, type: 'library' }
 

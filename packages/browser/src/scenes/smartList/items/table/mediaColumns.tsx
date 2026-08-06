@@ -4,8 +4,8 @@ import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat, isValid } from 'date-fns'
 
-import paths from '@/paths'
 import TableColumnHeader from '@/components/table/TableColumnHeader'
+import paths from '@/paths'
 
 import BookLinksCell from './BookLinksCell'
 import CoverImageCell from './CoverImageCell'

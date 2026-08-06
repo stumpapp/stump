@@ -1,5 +1,5 @@
-import { ChevronRight } from 'lucide-react'
 import { useLocaleContext } from '@stump/i18n'
+import { ChevronRight } from 'lucide-react'
 import { Fragment, useMemo } from 'react'
 
 import { useFileExplorerContext } from './context'

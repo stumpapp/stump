@@ -1,5 +1,5 @@
-import { Fullscreen } from 'lucide-react'
 import { useLocaleContext } from '@stump/i18n'
+import { Fullscreen } from 'lucide-react'
 
 import { useEpubReaderControls } from '../context'
 import ControlButton from './ControlButton'

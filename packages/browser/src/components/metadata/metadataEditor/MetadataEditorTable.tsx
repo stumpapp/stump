@@ -1,4 +1,5 @@
 import { Card, cn } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import {
 	ColumnDef,
 	flexRender,
@@ -6,7 +7,6 @@ import {
 	RowData,
 	useReactTable,
 } from '@tanstack/react-table'
-import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useLayoutEffect, useRef } from 'react'
 import { useWindowSize } from 'rooks'
 

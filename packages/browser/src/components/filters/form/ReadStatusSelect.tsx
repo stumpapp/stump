@@ -1,5 +1,6 @@
-import GenericFilterMultiselect from './GenericFilterMultiselect'
 import { useLocaleContext } from '@stump/i18n'
+
+import GenericFilterMultiselect from './GenericFilterMultiselect'
 
 export default function ReadStatusSelect() {
 	const { t } = useLocaleContext()

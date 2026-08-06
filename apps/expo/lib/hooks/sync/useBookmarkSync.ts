@@ -14,6 +14,7 @@ import { ReadiumLocator } from '~/modules/readium'
 
 import { PushSyncParams, SyncParams } from './types'
 import { useServerInstances } from './utils'
+import { useTranslate } from '../useTranslate'
 
 export function useBookmarkSync() {
 	const { getInstances } = useServerInstances()
@@ -65,6 +66,7 @@ type AutoSyncParams = {
 }
 
 export function useAutoSyncBookmarksForActiveServer({ enabled = true }: AutoSyncParams = {}) {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -87,8 +89,8 @@ export function useAutoSyncBookmarksForActiveServer({ enabled = true }: AutoSync
 					Sentry.captureException(error, {
 						extra: { serverId },
 					})
-					toast.error('Failed to sync offline bookmarks', {
-						description: error instanceof Error ? error.message : 'Unknown error',
+					toast.error(t('bookmarkSync.syncFailed'), {
+						description: error instanceof Error ? error.message : t('errors.unknown'),
 					})
 				}
 			}
@@ -99,7 +101,7 @@ export function useAutoSyncBookmarksForActiveServer({ enabled = true }: AutoSync
 			}
 			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [enabled, serverId]),
+		}, [enabled, serverId, t]),
 	)
 }
 

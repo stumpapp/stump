@@ -4006,6 +4006,17 @@
 				"dismissAll": "Dismiss All"
 			}
 		},
+		"fileImport": {
+			"importedTitle": "File Imported",
+			"importedDescription": "\"{{filename}}\" has been added to your library.",
+			"viewLibrary": "View Library",
+			"ok": "OK",
+			"failedTitle": "Import Failed",
+			"errorTitle": "Import Error",
+			"failedFallback": "Failed to import file",
+			"unsupportedFileType": "Unsupported file type: {{filename}}. Supported formats: {{formats}}",
+			"extensionUnknown": "Could not determine file extension for file: {{filename}}"
+		},
 		"progressSync": {
 			"skippedSync": {
 				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
@@ -4013,6 +4024,12 @@
 				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
 			},
 			"syncFailed": "Failed to sync offline progress"
+		},
+		"annotationSync": {
+			"syncFailed": "Failed to sync offline annotations"
+		},
+		"bookmarkSync": {
+			"syncFailed": "Failed to sync offline bookmarks"
 		},
 		"search": {
 			"label": "Search This Server",
@@ -4046,6 +4063,8 @@
 			"scanSeries": "Scan Series",
 			"downloadSeries": "Download Series",
 			"downloadSeriesConfirmation": "Are you sure you want to enqueue the download for this entire series?",
+			"nothingToDownload": "Nothing to download",
+			"allBooksAlreadyDownloaded": "All books in this series are already downloaded or in the queue",
 			"scanLibrary": "Scan Library"
 		},
 		"libraryOverview": {

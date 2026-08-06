@@ -6,6 +6,7 @@ import { toast } from 'sonner-native'
 import { useActiveServer } from '~/components/activeServer'
 
 import { useDownloadQueue } from './downloadQueue'
+import { useTranslate } from '../useTranslate'
 
 const seriesBooksForDownloadQuery = graphql(`
 	query SeriesBooksForDownload($id: ID!) {
@@ -100,6 +101,7 @@ export type UseDownloadSeriesParams = {
 }
 
 export function useDownloadSeries({ serverId }: UseDownloadSeriesParams = {}) {
+	const { t } = useTranslate()
 	const { activeServer } = useActiveServer()
 
 	const effectiveServerId = serverId ?? activeServer.id
@@ -138,14 +140,14 @@ export function useDownloadSeries({ serverId }: UseDownloadSeriesParams = {}) {
 			const positions = await Promise.all(enqueuePromises)
 
 			if (positions.every((pos) => pos === -1)) {
-				toast.info('Nothing to download', {
-					description: 'All books in this series are already downloaded or in the queue',
+				toast.info(t('entityActions.nothingToDownload'), {
+					description: t('entityActions.allBooksAlreadyDownloaded'),
 				})
 			}
 
 			return series.media.length
 		},
-		[enqueueBook, fetchSeriesBooks],
+		[enqueueBook, fetchSeriesBooks, t],
 	)
 
 	return {

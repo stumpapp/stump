@@ -1,4 +1,5 @@
 import { File } from 'expo-file-system'
+import type { LocaleContextProps } from '@stump/i18n'
 
 import { DownloadRepository } from '~/db/downloads'
 import { booksDirectory, toAbsolutePath } from '~/lib/filesystem'
@@ -25,6 +26,7 @@ export type ImportResult =
  */
 export async function importLocalFile(
 	externalUri: string,
+	t: LocaleContextProps['t'],
 	originalFilename?: string,
 ): Promise<ImportResult> {
 	try {
@@ -33,7 +35,10 @@ export async function importLocalFile(
 		if (!isImportableFile(filename)) {
 			return {
 				success: false,
-				error: `Unsupported file type: ${filename}. Supported formats: EPUB, CBZ, PDF`,
+				error: t('fileImport.unsupportedFileType', {
+					filename,
+					formats: 'EPUB, CBZ, PDF',
+				}),
 			}
 		}
 
@@ -42,7 +47,7 @@ export async function importLocalFile(
 		if (!extension) {
 			return {
 				success: false,
-				error: `Could not determine file extension for file: ${filename}`,
+				error: t('fileImport.extensionUnknown', { filename }),
 			}
 		}
 		const storedFilename = `${bookId}.${extension}`
@@ -80,7 +85,7 @@ export async function importLocalFile(
 		console.error('[importLocalFile] Failed to import file:', error)
 		return {
 			success: false,
-			error: error instanceof Error ? error.message : 'Unknown error during import',
+			error: t('fileImport.failedFallback'),
 		}
 	}
 }

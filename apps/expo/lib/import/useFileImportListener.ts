@@ -5,10 +5,12 @@ import { useCallback, useEffect, useRef } from 'react'
 import { Alert } from 'react-native'
 
 import { useDownloadsState } from '~/components/localLibrary/store'
+import { useTranslate } from '~/lib/hooks/useTranslate'
 
 import { importLocalFile } from './importFile'
 
 export function useFileImportListener() {
+	const { t } = useTranslate()
 	const increment = useDownloadsState((state) => state.increment)
 	const processingRef = useRef(false)
 
@@ -22,30 +24,33 @@ export function useFileImportListener() {
 			processingRef.current = true
 
 			try {
-				const result = await importLocalFile(url)
+				const result = await importLocalFile(url, t)
 
 				if (result.success) {
 					increment()
 
-					Alert.alert('File Imported', `"${result.filename}" has been added to your library.`, [
-						{ text: 'View Library', onPress: () => router.push('/library') },
-						{ text: 'OK' },
-					])
+					Alert.alert(
+						t('fileImport.importedTitle'),
+						t('fileImport.importedDescription', {
+							filename: result.filename,
+						}),
+						[
+							{ text: t('fileImport.viewLibrary'), onPress: () => router.push('/library') },
+							{ text: t('fileImport.ok') },
+						],
+					)
 				} else {
 					Sentry.captureMessage('File import failed', { extra: { url, error: result.error } })
-					Alert.alert('Import Failed', result.error)
+					Alert.alert(t('fileImport.failedTitle'), result.error)
 				}
 			} catch (error) {
 				Sentry.captureException(error, { extra: { url } })
-				Alert.alert(
-					'Import Error',
-					error instanceof Error ? error.message : 'Failed to import file',
-				)
+				Alert.alert(t('fileImport.errorTitle'), t('fileImport.failedFallback'))
 			} finally {
 				processingRef.current = false
 			}
 		},
-		[increment],
+		[increment, t],
 	)
 
 	useEffect(() => {

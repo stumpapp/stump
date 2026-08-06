@@ -14,6 +14,7 @@ import { ReadiumLocator } from '~/modules/readium'
 
 import { PushSyncParams, SyncParams } from './types'
 import { useServerInstances } from './utils'
+import { useTranslate } from '../useTranslate'
 
 export function useAnnotationSync() {
 	const { getInstances } = useServerInstances()
@@ -65,6 +66,7 @@ type AutoSyncParams = {
 }
 
 export function useAutoSyncAnnotationsForActiveServer({ enabled = true }: AutoSyncParams = {}) {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -87,8 +89,8 @@ export function useAutoSyncAnnotationsForActiveServer({ enabled = true }: AutoSy
 					Sentry.captureException(error, {
 						extra: { serverId },
 					})
-					toast.error('Failed to sync offline annotations', {
-						description: error instanceof Error ? error.message : 'Unknown error',
+					toast.error(t('annotationSync.syncFailed'), {
+						description: error instanceof Error ? error.message : t('errors.unknown'),
 					})
 				}
 			}
@@ -99,7 +101,7 @@ export function useAutoSyncAnnotationsForActiveServer({ enabled = true }: AutoSy
 			}
 			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [enabled, serverId]),
+		}, [enabled, serverId, t]),
 	)
 }
 

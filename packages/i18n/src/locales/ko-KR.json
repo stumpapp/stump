@@ -989,189 +989,189 @@
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "이름은 2자 이상이어야 합니다",
+			"nameTaken": "이 이름은 사용할 수 없습니다"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"label": "이름",
+				"placeholder": "내 스마트 목록",
+				"description": "고유한 이름이어야 하며 나중에 변경할 수 있습니다"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "설명",
+				"placeholder": "아주 똑똑한 목록",
+				"description": "스마트 목록에 대한 선택 사항인 설명"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "공개 범위",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "공개",
+						"description": "서버의 모든 사용자가 접근할 수 있습니다"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "공유",
+						"description": "지정한 사용자가 이 스마트 목록에 접근할 수 있습니다",
+						"createDisclaimer": "목록을 만든 후 공유할 사용자를 선택할 수 있습니다"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "비공개",
+						"description": "나만 이 스마트 목록에 접근할 수 있습니다"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "이 기능은 아직 UI 성능 최적화가 부족하여 결과가 많은 필터에서는 느릴 수 있습니다. 향후 개선될 예정입니다",
 				"rootJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All filter groups must be true for a book to be matched"
+						"label": "그리고",
+						"description": "책이 일치하려면 모든 필터 그룹의 조건을 만족해야 합니다"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one filter group must be true for a book to be matched"
+						"label": "또는",
+						"description": "책이 일치하려면 필터 그룹 중 하나 이상의 조건을 만족해야 합니다"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All must be true"
+						"label": "그리고",
+						"description": "모든 조건을 만족해야 합니다"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one must be true"
+						"label": "또는",
+						"description": "하나 이상의 조건을 만족해야 합니다"
 					},
 					"not": {
-						"label": "NOT",
-						"description": "None can be true"
+						"label": "제외",
+						"description": "어떤 조건도 만족하면 안 됩니다"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "그룹화 기준",
+					"description": "스마트 목록의 책을 그룹화하는 방식",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "그룹화 안 함"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "시리즈"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "라이브러리"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "그룹을 추가하여 시작하세요",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "필터 추가",
+						"addGroup": "그룹 추가",
+						"deleteFilter": "필터 삭제",
+						"deleteGroup": "그룹 삭제"
 					},
-					"is": "is",
+					"is": "조건",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "속성",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "대상",
+							"back": "뒤로",
 							"book": {
-								"label": "Book",
+								"label": "책",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags",
-									"createdAt": "Created at",
-									"updatedAt": "Updated at",
-									"readingStatus": "Reading status"
+									"name": "파일 이름",
+									"size": "크기",
+									"extension": "확장자",
+									"status": "상태",
+									"path": "경로",
+									"pages": "페이지 수",
+									"tags": "태그",
+									"createdAt": "생성일",
+									"updatedAt": "수정일",
+									"readingStatus": "읽기 상태"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "책 메타데이터",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams",
-									"genres": "Genre",
-									"coverArtists": "Cover artists",
-									"ageRating": "Age rating",
-									"year": "Year",
-									"month": "Month",
-									"day": "Day"
+									"title": "제목",
+									"summary": "요약",
+									"notes": "메모",
+									"writers": "글 작가",
+									"pencillers": "작화가",
+									"inkers": "잉크 담당",
+									"letterers": "레터링 담당",
+									"editors": "편집자",
+									"publisher": "출판사",
+									"colorists": "채색가",
+									"links": "링크",
+									"characters": "등장인물",
+									"teams": "팀",
+									"genres": "장르",
+									"coverArtists": "표지 작가",
+									"ageRating": "연령 등급",
+									"year": "연도",
+									"month": "월",
+									"day": "일"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "시리즈",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "이름",
+									"path": "경로"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "시리즈 메타데이터",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
-									"comicid": "Comic ID",
-									"booktype": "Book type",
-									"status": "Status",
-									"volume": "Volume",
-									"metaType": "Type",
-									"ageRating": "Age rating",
-									"year": "Start year"
+									"title": "제목",
+									"summary": "요약",
+									"publisher": "출판사",
+									"imprint": "임프린트",
+									"comicid": "코믹 ID",
+									"booktype": "책 유형",
+									"status": "상태",
+									"volume": "권",
+									"metaType": "유형",
+									"ageRating": "연령 등급",
+									"year": "시작 연도"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "라이브러리",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "이름",
+									"path": "경로"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Value",
-						"date": "Date"
+						"placeholder": "값",
+						"date": "날짜"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "시작 날짜",
+							"number": "최솟값"
 						},
 						"to": {
-							"date": "To date",
-							"number": "To"
+							"date": "종료 날짜",
+							"number": "최댓값"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "경곗값 포함"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "값 추가",
+						"emptyState": "표시할 값이 없습니다"
 					},
 					"enumValue": {
-						"selectPlaceholder": "Select value",
-						"READING": "Reading",
-						"FINISHED": "Finished",
-						"NOT_STARTED": "Not started",
-						"ABANDONED": "Abandoned"
+						"selectPlaceholder": "값 선택",
+						"READING": "읽는 중",
+						"FINISHED": "완독",
+						"NOT_STARTED": "읽기 전",
+						"ABANDONED": "중단"
 					}
 				}
 			}

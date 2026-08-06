@@ -4,9 +4,11 @@ import { useLayoutEffect, useMemo } from 'react'
 import { Platform } from 'react-native'
 
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 export function useFeedTitle(feed?: OPDSFeed | null) {
-	const title = useMemo(() => (feed ? feed.metadata.title || 'OPDS Feed' : null), [feed])
+	const { t } = useTranslate()
+	const title = useMemo(() => (feed ? feed.metadata.title || t('opds.feedTitle') : null), [feed, t])
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
 		if (!title) return

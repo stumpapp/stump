@@ -20,7 +20,7 @@ export default function Screen() {
 	const friendlyName = params.friendlyName
 
 	const navigation = useNavigation()
-	const basename = rootPath?.split('/').filter(Boolean).pop() ?? 'Files'
+	const basename = rootPath?.split('/').filter(Boolean).pop() ?? t('common.files')
 	useEffect(() => {
 		navigation.setOptions({
 			headerTitle: friendlyName || basename,

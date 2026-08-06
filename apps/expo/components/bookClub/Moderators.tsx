@@ -1,6 +1,7 @@
 import { useSDK } from '@stump/client'
 import { View } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { Avatar, AvatarFallback, AvatarImage, AvatarStack, Text } from '../ui'
@@ -14,6 +15,7 @@ type Props = {
 }
 
 export function Moderators({ moderators }: Props) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 
 	const headers = {
@@ -40,16 +42,16 @@ export function Moderators({ moderators }: Props) {
 	if (!moderator) return null
 
 	return (
-		<View className="flex-row items-center gap-2">
+		<View className="gap-2 flex-row items-center">
 			<Avatar
-				alt={moderator.displayName || 'Moderator'}
+				alt={moderator.displayName || t('bookClub.moderator')}
 				className={cn('h-8 w-8 border border-background', {
 					'border-black/10 dark:border-white/20': !moderator.avatarUrl,
 				})}
 			>
 				{moderator.avatarUrl && <AvatarImage source={{ uri: moderator.avatarUrl, headers }} />}
 				<AvatarFallback className="bg-black/5 dark:bg-white/10">
-					<Text className="text-[10px] font-medium text-foreground-muted">
+					<Text className="font-medium text-foreground-muted text-[10px]">
 						{getFallback(moderator.displayName)}
 					</Text>
 				</AvatarFallback>

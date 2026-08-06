@@ -11,7 +11,8 @@ export function MatchReviewDialog() {
 
 	const record = records[currentRecordIndex]
 	const isMedia = !!record?.mediaId
-	const entityName = record?.media?.resolvedName ?? record?.series?.resolvedName ?? 'Unknown'
+	const entityName =
+		record?.media?.resolvedName ?? record?.series?.resolvedName ?? t('common.unknown')
 
 	if (!record) return null
 

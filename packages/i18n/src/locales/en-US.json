@@ -2457,6 +2457,7 @@
 					"title": "Custom emojis",
 					"description": "Upload and manage custom image emojis for your server",
 					"dropzone": "Drop an image or click to select",
+					"previewAlt": "Emoji preview",
 					"input": {
 						"label": "Emoji name",
 						"placeholder": "e.g. party_parrot"
@@ -2999,6 +3000,8 @@
 			"helmet": "Metadata integrations",
 			"title": "Metadata integrations",
 			"addProvider": "Add provider",
+			"chooseProvider": "Choose provider",
+			"providerFallback": "Provider",
 			"createProviderError": "Failed to create provider",
 			"updateProviderError": "Failed to update provider",
 			"noProviders": "No providers configured yet. Add one to get started",
@@ -3297,6 +3300,7 @@
 		"nextStep": "Next step",
 		"continueToReview": "Continue to review",
 		"book": "Book",
+		"library": "Library",
 		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
@@ -3634,6 +3638,7 @@
 		},
 		"common": {
 			"book": "Book",
+			"avatar": "Avatar",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",
@@ -3647,6 +3652,7 @@
 			"download": "Download",
 			"downloaded": "Downloaded",
 			"downloads": "Downloads",
+			"files": "Files",
 			"done": "Done",
 			"edit": "Edit",
 			"enabled": "Enabled",
@@ -3803,6 +3809,7 @@
 			"startedAt": "Started {{date}}",
 			"notStarted": "You have not started this book yet",
 			"moderatedBy": "Moderated by",
+			"moderator": "Moderator",
 			"pinnedRooms": "Pinned Rooms",
 			"activeDiscussions": "Active Discussions",
 			"seeBook": "See book",

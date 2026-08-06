@@ -266,7 +266,7 @@ export default function ServerEmojisSection() {
 							{previewUrl && (
 								<img
 									src={previewUrl}
-									alt={emojiName || 'emoji preview'}
+									alt={emojiName || t(getKey('previewAlt'))}
 									className="h-full w-full object-cover"
 								/>
 							)}

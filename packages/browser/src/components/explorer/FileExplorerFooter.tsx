@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react'
+import { useLocaleContext } from '@stump/i18n'
 import { Fragment, useMemo } from 'react'
 
 import { useFileExplorerContext } from './context'
@@ -6,10 +7,11 @@ import { useFileExplorerContext } from './context'
 export const FOOTER_HEIGHT = 40
 
 export default function FileExplorerFooter() {
+	const { t } = useLocaleContext()
 	const { currentPath, rootPath, navigateToPath } = useFileExplorerContext()
 
 	const pathSegments = useMemo(() => {
-		const rootName = rootPath.split('/').filter(Boolean).pop() ?? 'Library'
+		const rootName = rootPath.split('/').filter(Boolean).pop() ?? t('common.library')
 
 		if (!currentPath || currentPath === rootPath) {
 			return [{ name: rootName, path: rootPath }]
@@ -25,7 +27,7 @@ export default function FileExplorerFooter() {
 				path: rootPath + '/' + parts.slice(0, i + 1).join('/'),
 			})),
 		]
-	}, [currentPath, rootPath])
+	}, [currentPath, rootPath, t])
 
 	return (
 		<footer className="bottom-0 h-10 px-4 fixed z-10 w-full border-t border-border bg-background">

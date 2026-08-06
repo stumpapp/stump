@@ -78,7 +78,9 @@ export function EditProviderDialog({ provider }: Props) {
 		})
 	}
 
-	const dialogTitle = PROVIDER_LABELS[provider.providerType] ?? 'Provider'
+	const dialogTitle =
+		PROVIDER_LABELS[provider.providerType] ??
+		t('settingsScene.server/metadataIntegrations.providerFallback')
 
 	const isPending = isEditPending || isDeletePending
 

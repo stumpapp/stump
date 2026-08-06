@@ -2457,6 +2457,7 @@
 					"title": "사용자 지정 이모지",
 					"description": "서버에서 사용할 이미지 이모지를 업로드하고 관리합니다",
 					"dropzone": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
+					"previewAlt": "이모지 미리보기",
 					"input": {
 						"label": "이모지 이름",
 						"placeholder": "예: party_parrot"
@@ -2999,6 +3000,8 @@
 			"helmet": "메타데이터 연동",
 			"title": "메타데이터 연동",
 			"addProvider": "공급자 추가",
+			"chooseProvider": "공급자 선택",
+			"providerFallback": "공급자",
 			"createProviderError": "공급자를 만들지 못했습니다",
 			"updateProviderError": "공급자를 수정하지 못했습니다",
 			"noProviders": "아직 구성된 공급자가 없습니다. 공급자를 추가하여 시작하세요",
@@ -3297,6 +3300,7 @@
 		"nextStep": "다음 단계",
 		"continueToReview": "검토 단계로 이동",
 		"book": "책",
+		"library": "라이브러리",
 		"series": "시리즈",
 		"fileUpload": {
 			"someRejected": "일부 파일을 추가하지 못했습니다. 파일 형식을 확인하고 다시 시도하세요",
@@ -3634,6 +3638,7 @@
 		},
 		"common": {
 			"book": "책",
+			"avatar": "아바타",
 			"cancel": "취소",
 			"chapter": "장",
 			"clear": "지우기",
@@ -3647,6 +3652,7 @@
 			"download": "다운로드",
 			"downloaded": "다운로드됨",
 			"downloads": "다운로드",
+			"files": "파일",
 			"done": "완료",
 			"edit": "편집",
 			"enabled": "사용",
@@ -3803,6 +3809,7 @@
 			"startedAt": "{{date}} 시작",
 			"notStarted": "아직 이 책을 읽기 시작하지 않았습니다",
 			"moderatedBy": "운영자",
+			"moderator": "운영자",
 			"pinnedRooms": "고정된 토론방",
 			"activeDiscussions": "진행 중인 토론",
 			"seeBook": "책 보기",

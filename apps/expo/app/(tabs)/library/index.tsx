@@ -26,6 +26,7 @@ import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	// Note: The id is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
 	const { id, increment, sortConfig, sourceFilter } = useDownloadsState(
 		useShallow((state) => ({
@@ -89,11 +90,11 @@ export default function Screen() {
 		// We create a sectioned list by grouping by series, then flatten it so that we have something like:
 		// ["Series 1", item1, item2, "Series 2", item3, item4]
 		// See  https://shopify.github.io/flash-list/docs/guides/section-list/
-		const grouped = groupBy(data, (item) => item.series_refs?.name || 'Unknown')
+		const grouped = groupBy(data, (item) => item.series_refs?.name || t('common.unknown'))
 		return Object.entries(grouped).flatMap(([seriesName, items]) => {
 			return [seriesName, ...items]
 		})
-	}, [sortConfig, data])
+	}, [sortConfig, data, t])
 
 	const renderItem = useCallback(({ item }: { item: (typeof data)[0] | string }) => {
 		if (typeof item === 'string') {

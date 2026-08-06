@@ -1178,40 +1178,40 @@
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"heading": "스마트 목록 만들기",
+		"subtitle": "설정한 필터에 따라 항목이 자동으로 구성되는 목록을 만듭니다",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "단계",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"label": "기본 정보",
+					"heading": "기본 정보",
+					"description": "이름, 설명, 공개 범위 등 스마트 목록의 기본 정보"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
+					"label": "필터",
+					"heading": "필터",
+					"description": "이 스마트 목록에 적용할 필터"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
+					"label": "검토",
+					"heading": "검토",
+					"description": "스마트 목록을 만들기 전에 설정을 검토합니다"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "예",
+				"no": "아니요",
+				"none": "없음",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"name": "이름",
+					"description": "설명",
+					"visibility": "공개 범위",
+					"grouping": "그룹화 기준"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "목록 만들기"
 			}
 		}
 	},
@@ -1246,82 +1246,82 @@
 		"inheritDisclaimer": "이 API 키는 내 모든 권한을 상속하므로 내 계정으로 할 수 있는 모든 작업을 수행할 수 있습니다. 신중하게 설정하세요"
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "스마트 목록",
+		"subtitle": "자주 사용하는 검색과 필터를 저장하여 간편하게 이용할 수 있습니다",
+		"searchPlaceholder": "스마트 목록 검색",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "스마트 목록 만들기"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "표시할 스마트 목록이 없습니다",
+				"noListsMessage": "스마트 목록을 만들어 시작하세요",
+				"noMatchesMessage": "검색어를 변경해 보세요"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "책",
+						"series": "시리즈",
+						"library": "라이브러리"
 					},
-					"matches": "Matches"
+					"matches": "일치"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "기본 정보",
 			"configuration": {
-				"label": "Configuration",
-				"access": "Access",
-				"filters": "Filters"
+				"label": "구성",
+				"access": "접근",
+				"filters": "필터"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "삭제",
+				"label": "위험 영역"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"title": "기본 정보",
+			"description": "이름과 설명 등 스마트 목록의 기본 정보"
 		},
 		"access": {
-			"title": "Access",
-			"description": "Control who can access this smart list",
+			"title": "접근",
+			"description": "이 스마트 목록에 접근할 수 있는 사용자를 관리합니다",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "This will make the list visible to everyone",
-						"private": "This will change the list to be private, hiding it from anyone who previously had access",
-						"shared": "You will need to share the list with specific users to give them access",
-						"fallback": "Are you sure you want to change the visibility of this list?"
+						"public": "이 목록이 모든 사용자에게 표시됩니다",
+						"private": "목록을 비공개로 변경하면 이전에 접근할 수 있었던 사용자에게도 표시되지 않습니다",
+						"shared": "접근 권한을 부여하려면 목록을 특정 사용자와 공유해야 합니다",
+						"fallback": "이 목록의 공개 범위를 변경하시겠습니까?"
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Sharing is not ready yet. Please check back later!"
+					"disclaimer": "공유 기능은 아직 준비 중입니다. 나중에 다시 확인해 주세요!"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"title": "필터 구성",
+			"description": "이 스마트 목록을 구성하는 필터를 관리합니다"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"title": "삭제 작업",
+			"description": "이 스마트 목록과 모든 콘텐츠 또는 특정 리소스를 영구적으로 삭제합니다",
 			"sections": {
 				"deleteList": {
-					"heading": "Delete list",
+					"heading": "목록 삭제",
 					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"이 스마트 목록과 모든 콘텐츠를 영구적으로 삭제합니다.",
+						"이 작업은 되돌릴 수 없습니다"
 					],
 					"confirmation": {
-						"title": "Delete list",
-						"description": "Are you sure you want to delete this smart list?",
-						"confirm": "Delete list"
+						"title": "목록 삭제",
+						"description": "이 스마트 목록을 삭제하시겠습니까?",
+						"confirm": "목록 삭제"
 					}
 				}
 			}
@@ -1329,73 +1329,73 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "항목",
+			"settings": "설정"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "이 화면의 URL에는 ID가 필요합니다",
+			"smartListNotFound": "스마트 목록을 찾을 수 없습니다",
+			"viewCreateError": "보기를 만들지 못했습니다",
+			"viewSaveError": "보기를 저장하지 못했습니다"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "목록"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "스마트 목록을 찾을 수 없습니다",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "사용자 지정 보기",
+					"defaultView": "기본 보기",
+					"noViewsSaved": "저장된 보기가 없습니다",
+					"selectView": "저장된 보기 선택"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "스마트 목록 필터",
+					"description": "현재 보기 세션에 적용할 필터를 변경합니다",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "원본 필터 데이터",
+						"description": "Stump는 이 데이터에 따라 필터를 처리합니다"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "저장",
+						"cancel": "취소"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "빠른 필터"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"deleteSelected": "Delete view",
-					"create": "Create new view",
+					"updateSelected": "보기 수정",
+					"deleteSelected": "보기 삭제",
+					"create": "새 보기 만들기",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "보기 만들기",
+							"update": "보기 수정"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "이 스마트 목록에 사용할 새 보기를 만듭니다",
+							"update": "보기를 수정합니다"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "이름",
+								"placeholder": "내 보기",
+								"description": "이 보기를 구분할 고유한 이름"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "이름",
+								"placeholder": "내 보기",
+								"description": "필요한 경우 보기에 사용할 새 이름"
 							}
 						}
 					},
 					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
+						"title": "보기 삭제",
+						"description": "이 보기를 삭제하시겠습니까?"
 					}
 				}
 			}

@@ -103,32 +103,20 @@ export const dateField = z.enum(['createdAt', 'updatedAt', 'completedAt'])
 export type DateField = z.infer<typeof dateField>
 export const isDateField = (field: string): field is DateField => dateField.safeParse(field).success
 
-export const filter = z
-	.object({
-		id: z.string().optional(),
-		field: z.string(),
-		operation,
-		source: z.enum(['book', 'book_meta', 'series', 'series_meta', 'library']),
-		value: z.union([
-			z.string(),
-			z.string().array(),
-			z.number(),
-			z.number().array(),
-			z.date(),
-			fromOperation,
-		]),
-	})
-	// strings may not use gt, gte, lt, lte, from
-	.refine(
-		(input) =>
-			!(
-				stringField.safeParse(input.field).success &&
-				['gt', 'gte', 'lt', 'lte', 'from'].includes(input.operation)
-			),
-		{
-			message: 'String fields may not use gt, gte, lt, lte, from',
-		},
-	)
+export const filter = z.object({
+	id: z.string().optional(),
+	field: z.string(),
+	operation,
+	source: z.enum(['book', 'book_meta', 'series', 'series_meta', 'library']),
+	value: z.union([
+		z.string(),
+		z.string().array(),
+		z.number(),
+		z.number().array(),
+		z.date(),
+		fromOperation,
+	]),
+})
 export type FilterSchema = z.infer<typeof filter>
 export type FilterSource = FilterSchema['source']
 
@@ -230,9 +218,26 @@ export const createSchema = (
 	updatingList?: SmartListParsed,
 ) => {
 	const forbiddenNames = existingNames.filter((name) => name !== updatingList?.name)
+	const localizedFilter = filter.refine(
+		(input) =>
+			!(
+				stringField.safeParse(input.field).success &&
+				['gt', 'gte', 'lt', 'lte', 'from'].includes(input.operation)
+			),
+		{ message: t(validationKey('invalidStringOperation')) },
+	)
+	const localizedFilterGroup = z.object({
+		filters: z.array(localizedFilter),
+		joiner: z.enum(['and', 'or', 'not']),
+	})
+	const localizedFilterConfig = z.object({
+		groups: z.array(localizedFilterGroup),
+		joiner: z.enum(['and', 'or']),
+	})
+
 	return z.object({
 		description: z.string().optional(),
-		filters: filterConfig,
+		filters: localizedFilterConfig,
 		grouping: grouping.optional(),
 		name: z
 			.string()

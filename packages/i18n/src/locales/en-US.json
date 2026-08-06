@@ -1412,7 +1412,8 @@
 	"createOrUpdateSmartListForm": {
 		"validation": {
 			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTaken": "Cannot use this name",
+			"invalidStringOperation": "String fields may not use numeric or range operators"
 		},
 		"fields": {
 			"name": {

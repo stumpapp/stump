@@ -1412,7 +1412,8 @@
 	"createOrUpdateSmartListForm": {
 		"validation": {
 			"nameTooShort": "이름은 2자 이상이어야 합니다",
-			"nameTaken": "이 이름은 사용할 수 없습니다"
+			"nameTaken": "이 이름은 사용할 수 없습니다",
+			"invalidStringOperation": "문자열 필드에는 숫자 비교 또는 범위 연산자를 사용할 수 없습니다"
 		},
 		"fields": {
 			"name": {

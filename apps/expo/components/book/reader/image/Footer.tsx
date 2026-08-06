@@ -11,7 +11,7 @@ import TImage from 'react-native-turbo-image'
 import { getThumbnailResizeProps, TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
-import { useDisplay, usePrevious } from '~/lib/hooks'
+import { useDisplay, usePrevious, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
@@ -22,6 +22,7 @@ import { useImageBasedReader } from './context'
 const SIZE_MODIFIER = 1.5
 
 export default function Footer() {
+	const { t } = useTranslate()
 	const { isTablet, width } = useDisplay()
 	const {
 		book,
@@ -556,13 +557,15 @@ export default function Footer() {
 				>
 					{trackElapsedTime && (
 						<View>
-							<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
+							<Text className="text-sm text-[#898d94]">
+								{t('reader.readingTime', { time: formattedReadTime })}
+							</Text>
 						</View>
 					)}
 
 					<View>
 						<Text className="text-sm text-[#898d94]">
-							Page {currentPage} of {book.pages}
+							{t('reader.pageOf', { current: currentPage, total: book.pages })}
 						</Text>
 					</View>
 				</View>

@@ -1,10 +1,12 @@
 import { View } from 'react-native'
 import { Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 export default function UnsupportedReader() {
+	const { t } = useTranslate()
 	return (
 		<View>
-			<Text>The book reader for this format is not supported yet. Check back later!</Text>
+			<Text>{t('reader.unsupportedFormat')}</Text>
 		</View>
 	)
 }

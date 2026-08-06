@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { View } from 'react-native'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { ListLabel } from '../ui'
@@ -36,6 +36,7 @@ type Props = {
 }
 
 export function BooksAfterCursor({ cursor }: Props) {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -64,7 +65,7 @@ export function BooksAfterCursor({ cursor }: Props) {
 
 	return (
 		<View className="-mx-4 gap-3">
-			<ListLabel className="ios:px-8 px-6">Up Next</ListLabel>
+			<ListLabel className="ios:px-8 px-6">{t('reader.nextUp')}</ListLabel>
 			<FlashList
 				data={nodes}
 				renderItem={({ item }) => <HorizontalBookListItem book={item} />}

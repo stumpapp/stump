@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ThumbnailImage } from '~/components/image'
 import { Button, Heading, Icon, Label, Text } from '~/components/ui'
 import { COLORS } from '~/lib/constants'
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
@@ -27,6 +27,7 @@ type Props = {
 }
 
 export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const { serverId } = useImageBasedReader()
 
@@ -106,7 +107,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 
 			<View className="inset-0 gap-4 absolute flex-1 items-center justify-center">
 				<View>
-					<Label className="text-white opacity-80">Next Up:</Label>
+					<Label className="text-white opacity-80">{t('reader.nextUp')}</Label>
 					<Heading size="xl" className="text-white text-center">
 						{book.name}
 					</Heading>
@@ -130,8 +131,8 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 						width: size + 16,
 					}}
 				>
-					<Button className="bg-white flex-1 border border-edge opacity-80" onPress={onReadNext}>
-						<Text className="text-black">Read Next</Text>
+					<Button className="bg-white border-edge flex-1 border opacity-80" onPress={onReadNext}>
+						<Text className="text-black">{t('reader.readNext')}</Text>
 					</Button>
 				</View>
 			</View>

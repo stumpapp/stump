@@ -4,6 +4,7 @@ import { ScrollView, View } from 'react-native'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { ReadiumLocator } from '~/modules/readium'
 
@@ -23,6 +24,7 @@ type Props = {
 
 const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 	({ onCreateAnnotation, onDismiss }, ref) => {
+		const { t } = useTranslate()
 		const sheetRef = useRef<TrueSheet>(null)
 		const [locator, setLocator] = useState<ReadiumLocator | null>(null)
 		const [selectedText, setSelectedText] = useState('')
@@ -79,7 +81,7 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 					onDidDismiss={handleDismiss}
 					header={
 						<AnnotationSheetHeader
-							title="New Annotation"
+							title={t('reader.newAnnotation')}
 							onClose={() => sheetRef.current?.dismiss()}
 							onPrimaryAction={handleCreate}
 						/>

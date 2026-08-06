@@ -27,7 +27,7 @@ export default function ColumnCount() {
 	}
 
 	return (
-		<Card.Row label="Columns">
+		<Card.Row label={t(getKey('label'))}>
 			<Picker
 				value={String(store.columnCount)}
 				options={columnOptions}

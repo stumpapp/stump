@@ -215,8 +215,11 @@ type Props = {
 } & SharedItemProps
 
 function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
+	const { t } = useTranslate()
 	const isHighlightOnly = !annotation.annotationText
-	const title = annotation.locator.chapterTitle || (isHighlightOnly ? 'Highlight' : 'Note')
+	const title =
+		annotation.locator.chapterTitle ||
+		(isHighlightOnly ? t('annotationsSheet.highlight') : t('annotationsSheet.note'))
 	const displayText = annotation.annotationText
 	const displayDate = annotation.createdAt
 		? intlFormat(new Date(annotation.createdAt), {
@@ -227,8 +230,6 @@ function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
 				minute: '2-digit',
 			})
 		: null
-	const { t } = useTranslate()
-
 	return (
 		<View className="w-full">
 			<ContextMenu
@@ -278,7 +279,8 @@ type BookmarkProps = {
 } & SharedItemProps
 
 function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
-	const title = bookmark.chapterTitle || 'Bookmark'
+	const { t } = useTranslate()
+	const title = bookmark.chapterTitle || t('annotationsSheet.bookmark')
 	const displayText = bookmark.previewContent
 	const displayDate = bookmark.createdAt
 		? intlFormat(new Date(bookmark.createdAt), {
@@ -289,8 +291,6 @@ function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
 				minute: '2-digit',
 			})
 		: null
-	const { t } = useTranslate()
-
 	return (
 		<View className="w-full">
 			<ContextMenu

@@ -6,6 +6,7 @@ import ColorPicker, { HueSlider, Panel1 } from 'reanimated-color-picker'
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Button, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 type Props = {
 	label: string
@@ -14,6 +15,7 @@ type Props = {
 }
 
 export function ColorPickerRow({ label, value, onChange }: Props) {
+	const { t } = useTranslate()
 	const sheetRef = useRef<TrueSheet>(null)
 	const [tempColor, setTempColor] = useState(value)
 	const colors = useColors()
@@ -68,17 +70,17 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 						</View>
 
 						<View className="gap-2 px-2">
-							<Text className="text-foreground-muted">Hue</Text>
+							<Text className="text-foreground-muted">{t('reader.hue')}</Text>
 							<HueSlider />
 						</View>
 					</ColorPicker>
 
 					<View className="mt-4 gap-4 flex-row">
 						<Button variant="outline" className="flex-1" onPress={handleCancel}>
-							<Text>Cancel</Text>
+							<Text>{t('common.cancel')}</Text>
 						</Button>
 						<Button variant="brand" className="flex-1" onPress={handleConfirm}>
-							<Text>Confirm</Text>
+							<Text>{t('common.confirm')}</Text>
 						</Button>
 					</View>
 				</View>

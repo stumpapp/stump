@@ -11,6 +11,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_26_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { MetadataBadgeSection } from '../overview'
@@ -127,6 +128,7 @@ type SheetContentProps = {
 }
 
 function SheetContent({ series: { stats, metadata, resolvedName, tags } }: SheetContentProps) {
+	const { t } = useTranslate()
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
 	const formattedTime = formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
 
@@ -137,34 +139,34 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 
 	const seriesStats = [
 		{
-			label: 'In Progress',
+			label: t('seriesOverview.inProgress'),
 			value: stats.inProgressBooks,
 			icon: BookOpen,
 			colors: STAT_COLORS.inProgress,
 		},
 		{
-			label: 'Completed',
+			label: t('seriesOverview.completed'),
 			value: stats.completedBooks,
 			suffix: `/ ${stats.bookCount}`,
 			icon: BookCheck,
 			colors: STAT_COLORS.completed,
 		},
 		{
-			label: 'Books',
+			label: t('seriesOverview.books'),
 			value: stats.bookCount,
 			icon: Library,
 			colors: STAT_COLORS.books,
 		},
 		{
-			label: 'Reading Time',
+			label: t('seriesOverview.readingTime'),
 			value: formattedTime ? formattedTime.value : '??',
 			suffix: formattedTime ? formattedTime.unit : undefined,
 			icon: Clock,
 			colors: STAT_COLORS.readingTime,
 		},
 		{
-			label: 'Size',
-			value: formattedSize ? formattedSize.value : 'Unknown',
+			label: t('seriesOverview.size'),
+			value: formattedSize ? formattedSize.value : t('common.unknown'),
 			suffix: formattedSize ? formattedSize.unit : '',
 			icon: HardDrive,
 			colors: STAT_COLORS.size,
@@ -211,50 +213,75 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 				</View>
 
 				{hasAbout && (
-					<Card label="About" className="px-6">
-						{metadata?.summary && <Card.LongRow label="Summary" value={metadata.summary} />}
+					<Card label={t('seriesOverview.about')} className="px-6">
+						{metadata?.summary && (
+							<Card.LongRow label={t('seriesOverview.summary')} value={metadata.summary} />
+						)}
 						{metadata?.descriptionFormatted && !metadata?.summary && (
-							<Card.LongRow label="Description" value={metadata.descriptionFormatted} />
+							<Card.LongRow
+								label={t('seriesOverview.description')}
+								value={metadata.descriptionFormatted}
+							/>
 						)}
 					</Card>
 				)}
 
 				{hasPublicationInfo && (
-					<Card label="Publication" className="px-6">
-						{metadata?.publisher && <Card.Row label="Publisher" value={metadata.publisher} />}
-						{metadata?.imprint && <Card.Row label="Imprint" value={metadata.imprint} />}
-						{metadata?.publicationRun && (
-							<Card.Row label="Publication Run" value={metadata.publicationRun} />
+					<Card label={t('seriesOverview.publication')} className="px-6">
+						{metadata?.publisher && (
+							<Card.Row label={t('bookMetadata.publisher')} value={metadata.publisher} />
 						)}
-						{metadata?.status && <Card.Row label="Status" value={metadata.status} />}
-						{metadata?.booktype && <Card.Row label="Book Type" value={metadata.booktype} />}
-						{metadata?.year && <Card.Row label="Year" value={metadata.year.toString()} />}
-						{metadata?.volume && <Card.Row label="Volume" value={metadata.volume.toString()} />}
+						{metadata?.imprint && (
+							<Card.Row label={t('seriesOverview.imprint')} value={metadata.imprint} />
+						)}
+						{metadata?.publicationRun && (
+							<Card.Row
+								label={t('seriesOverview.publicationRun')}
+								value={metadata.publicationRun}
+							/>
+						)}
+						{metadata?.status && (
+							<Card.Row label={t('seriesOverview.status')} value={metadata.status} />
+						)}
+						{metadata?.booktype && (
+							<Card.Row label={t('seriesOverview.bookType')} value={metadata.booktype} />
+						)}
+						{metadata?.year && (
+							<Card.Row label={t('bookMetadata.year')} value={metadata.year.toString()} />
+						)}
+						{metadata?.volume && (
+							<Card.Row label={t('bookMetadata.volume')} value={metadata.volume.toString()} />
+						)}
 						{metadata?.totalIssues && (
-							<Card.Row label="Total Issues" value={metadata.totalIssues.toString()} />
+							<Card.Row
+								label={t('seriesOverview.totalIssues')}
+								value={metadata.totalIssues.toString()}
+							/>
 						)}
 					</Card>
 				)}
 
 				{hasDetails && (
-					<Card label="Details" className="px-6">
+					<Card label={t('common.details')} className="px-6">
 						{metadata?.ageRating && (
-							<Card.Row label="Age Rating" value={metadata.ageRating.toString()} />
+							<Card.Row label={t('bookMetadata.ageRating')} value={metadata.ageRating.toString()} />
 						)}
-						{metadata?.metaType && <Card.Row label="Type" value={metadata.metaType} />}
+						{metadata?.metaType && (
+							<Card.Row label={t('seriesOverview.type')} value={metadata.metaType} />
+						)}
 					</Card>
 				)}
 
 				<MetadataBadgeSection
-					label="Genres"
+					label={t('bookMetadata.genres')}
 					items={(metadata?.genres ?? []).map((genre) => ({ label: genre }))}
 				/>
 				<MetadataBadgeSection
-					label="Writers"
+					label={t('bookMetadata.writers')}
 					items={(metadata?.writers ?? []).map((writer) => ({ label: writer }))}
 				/>
 				<MetadataBadgeSection
-					label="Characters"
+					label={t('bookMetadata.characters')}
 					items={(metadata?.characters ?? []).map((character) => ({ label: character }))}
 				/>
 			</View>

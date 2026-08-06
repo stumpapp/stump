@@ -8,7 +8,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
-import { useDownload } from '~/lib/hooks'
+import { useDownload, useTranslate } from '~/lib/hooks'
 import {
 	BookLoadedEventPayload,
 	ColumnCount,
@@ -97,6 +97,7 @@ export default function ReadiumReader({
 	timer,
 	...ctx
 }: Props) {
+	const { t } = useTranslate()
 	const { downloadImmediate } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
@@ -507,7 +508,7 @@ export default function ReadiumReader({
 
 	const insets = useSafeAreaInsets()
 
-	if (isDownloading) return <FullScreenLoader label="Downloading..." />
+	if (isDownloading) return <FullScreenLoader label={t('reader.downloading')} />
 
 	if (!localUri) return null
 

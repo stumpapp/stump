@@ -5,6 +5,7 @@ import * as ContextMenu from 'zeego/context-menu'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Icon } from '~/components/ui/icon'
+import { useTranslate } from '~/lib/hooks'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -61,6 +62,7 @@ type ThemePreviewButtonProps = {
 }
 
 const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreviewButtonProps) => {
+	const { t } = useTranslate()
 	const { onSelect, deleteTheme, addTheme } = useEpubThemesStore(
 		useShallow((store) => ({
 			onSelect: store.selectTheme,
@@ -71,21 +73,21 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
 
 	const handleDuplicate = useCallback(() => {
-		const newName = `${name} copy`
+		const newName = t('reader.themeCopyName', { name })
 		addTheme(newName, config)
 		onSelect(newName)
-	}, [name, config, addTheme, onSelect])
+	}, [name, config, addTheme, onSelect, t])
 
 	const handleDelete = useCallback(() => {
 		if (themeNames.length <= 1) {
-			Alert.alert('Error', 'You must have at least one theme')
+			Alert.alert(t('common.error'), t('reader.minimumThemeError'))
 			return
 		}
 
-		Alert.alert('Delete Theme', `Are you sure you want to delete '${name}'?`, [
-			{ text: 'Cancel', style: 'cancel' },
+		Alert.alert(t('reader.deleteTheme'), t('reader.deleteThemeConfirmation', { name }), [
+			{ text: t('common.cancel'), style: 'cancel' },
 			{
-				text: 'Delete',
+				text: t('common.delete'),
 				style: 'destructive',
 				onPress: () => {
 					if (isActive) {
@@ -101,7 +103,7 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 				},
 			},
 		])
-	}, [themeNames, name, deleteTheme, isActive, onSelect])
+	}, [themeNames, name, deleteTheme, isActive, onSelect, t])
 
 	return (
 		<ContextMenu.Root>
@@ -110,7 +112,7 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 					<ThemePreview
 						name={name}
 						theme={config}
-						className={cn(isActive && 'border-2 border-edge-brand dark:border-edge-brand')}
+						className={cn(isActive && 'border-edge-brand dark:border-edge-brand border-2')}
 					/>
 				</Pressable>
 			</ContextMenu.Trigger>
@@ -118,7 +120,7 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 			<ContextMenu.Content>
 				<ContextMenu.Item key="edit" onSelect={() => openCustomizeTheme({ mode: 'edit', name })}>
 					<ContextMenu.ItemIcon ios={{ name: 'pencil' }} androidIconName="ic_menu_edit" />
-					<ContextMenu.ItemTitle>Edit Theme</ContextMenu.ItemTitle>
+					<ContextMenu.ItemTitle>{t('reader.editTheme')}</ContextMenu.ItemTitle>
 				</ContextMenu.Item>
 
 				<ContextMenu.Item key="duplicate" onSelect={handleDuplicate}>
@@ -126,12 +128,12 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 						ios={{ name: 'plus.square.on.square' }}
 						androidIconName="ic_menu_add"
 					/>
-					<ContextMenu.ItemTitle>Duplicate</ContextMenu.ItemTitle>
+					<ContextMenu.ItemTitle>{t('reader.duplicateTheme')}</ContextMenu.ItemTitle>
 				</ContextMenu.Item>
 
 				<ContextMenu.Item key="delete" onSelect={handleDelete} destructive>
 					<ContextMenu.ItemIcon ios={{ name: 'trash' }} androidIconName="ic_menu_delete" />
-					<ContextMenu.ItemTitle>Delete</ContextMenu.ItemTitle>
+					<ContextMenu.ItemTitle>{t('common.delete')}</ContextMenu.ItemTitle>
 				</ContextMenu.Item>
 			</ContextMenu.Content>
 		</ContextMenu.Root>
@@ -142,7 +144,7 @@ const NewThemeButton = () => {
 	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
 	return (
 		<Pressable onPress={() => openCustomizeTheme({ mode: 'create' })}>
-			<View className="squircle w-24 rounded-3xl border-black/60 dark:border-white/60 aspect-[6/5] items-center justify-center border-2 border-dashed">
+			<View className="squircle w-24 border-black/60 dark:border-white/60 aspect-[6/5] items-center justify-center rounded-3xl border-2 border-dashed">
 				<Icon as={Plus} size={24} className="text-black/60 dark:text-white/60" />
 			</View>
 		</Pressable>

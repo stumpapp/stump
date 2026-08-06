@@ -3581,7 +3581,48 @@
 			"url": "URL",
 			"username": "Username",
 			"value": "Value",
+			"share": "Share",
+			"clearFilters": "Clear Filters",
 			"version": "Version"
+		},
+		"reader": {
+			"unsupportedFormat": "The book reader for this format is not supported yet. Check back later!",
+			"downloading": "Downloading...",
+			"readingTime": "Reading time: {{time}}",
+			"pageOf": "Page {{current}} of {{total}}",
+			"nextUp": "Next Up:",
+			"readNext": "Read Next",
+			"editTheme": "Edit Theme",
+			"duplicateTheme": "Duplicate",
+			"newAnnotation": "New Annotation",
+			"editAnnotation": "Edit Annotation",
+			"note": "Note",
+			"notePlaceholder": "Enter your notes...",
+			"hue": "Hue",
+			"themeCopyName": "{{name}} copy",
+			"minimumThemeError": "You must have at least one theme",
+			"deleteTheme": "Delete Theme",
+			"deleteThemeConfirmation": "Are you sure you want to delete '{{name}}'?",
+			"deleteHighlight": "Delete Highlight",
+			"deleteAnnotationConfirmation": "Are you sure you want to delete this annotation?"
+		},
+		"seriesOverview": {
+			"about": "About",
+			"summary": "Summary",
+			"description": "Description",
+			"publication": "Publication",
+			"imprint": "Imprint",
+			"publicationRun": "Publication Run",
+			"status": "Status",
+			"bookType": "Book Type",
+			"totalIssues": "Total Issues",
+			"type": "Type",
+			"booksCount": "{{count}} books",
+			"inProgress": "In Progress",
+			"completed": "Completed",
+			"books": "Books",
+			"readingTime": "Reading Time",
+			"size": "Size"
 		},
 		"auth": {
 			"login": "Login",
@@ -4025,6 +4066,9 @@
 			"showCurrentChapter": "Show Current Chapter"
 		},
 		"annotationsSheet": {
+			"highlight": "Highlight",
+			"note": "Note",
+			"bookmark": "Bookmark",
 			"tabs": {
 				"all": "All",
 				"bookmarks": "Bookmarks",

@@ -3,7 +3,7 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
@@ -48,6 +48,7 @@ type Props = {
 }
 
 export default function SeriesSearchItem({ series }: Props) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
@@ -72,7 +73,7 @@ export default function SeriesSearchItem({ series }: Props) {
 				width: width * 0.75,
 			}}
 		>
-			<View className="flex-row items-start gap-4 px-6 py-2 tablet:px-10">
+			<View className="gap-4 px-6 py-2 tablet:px-10 flex-row items-start">
 				<ThumbnailImage
 					source={{
 						uri,
@@ -90,11 +91,12 @@ export default function SeriesSearchItem({ series }: Props) {
 					}
 				/>
 
-				<View className="flex flex-1 flex-col gap-1">
+				<View className="gap-1 flex flex-1 flex-col">
 					<Text>{data.resolvedName}</Text>
 
 					<Text className="text-foreground-muted">
-						{data.readCount}/{data.mediaCount} books • {data.percentageCompleted.toFixed(1)}%
+						{data.readCount}/{data.mediaCount} {t('seriesOverview.books')} •{' '}
+						{data.percentageCompleted.toFixed(1)}%
 					</Text>
 				</View>
 			</View>

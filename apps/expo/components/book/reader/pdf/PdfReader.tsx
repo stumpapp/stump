@@ -5,7 +5,7 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
-import { useDownload } from '~/lib/hooks'
+import { useDownload, useTranslate } from '~/lib/hooks'
 import {
 	intoPDFReadiumLocator,
 	PDFBookLoadedEvent,
@@ -59,6 +59,7 @@ type Props = {
 // - settings sheet, a chunk of existing settings do not apply to PDF
 
 export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: Props) {
+	const { t } = useTranslate()
 	const { downloadImmediate } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
@@ -227,7 +228,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		[controlsVisible, setControlsVisible],
 	)
 
-	if (isDownloading) return <FullScreenLoader label="Downloading..." />
+	if (isDownloading) return <FullScreenLoader label={t('reader.downloading')} />
 
 	if (!localUri) return null
 

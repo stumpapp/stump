@@ -5,6 +5,7 @@ import { Alert, ScrollView, View } from 'react-native'
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Button, Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { Decoration } from '~/modules/readium'
 
@@ -24,6 +25,7 @@ type Props = {
 
 const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 	({ onAnnotationChange, onDelete }, ref) => {
+		const { t } = useTranslate()
 		const sheetRef = useRef<TrueSheet>(null)
 		const [decoration, setDecoration] = useState<Decoration | null>(null)
 		const [annotation, setAnnotation] = useState('')
@@ -55,10 +57,10 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 		const handleDelete = useCallback(() => {
 			if (!decoration) return
 
-			Alert.alert('Delete Highlight', 'Are you sure you want to delete this annotation?', [
-				{ text: 'Cancel', style: 'cancel' },
+			Alert.alert(t('reader.deleteHighlight'), t('reader.deleteAnnotationConfirmation'), [
+				{ text: t('common.cancel'), style: 'cancel' },
 				{
-					text: 'Delete',
+					text: t('common.delete'),
 					style: 'destructive',
 					onPress: () => {
 						onDelete(decoration.id)
@@ -66,7 +68,7 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 					},
 				},
 			])
-		}, [decoration, onDelete])
+		}, [decoration, onDelete, t])
 
 		const handleDismiss = useCallback(() => {
 			setIsOpen(false)
@@ -97,7 +99,7 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 					onDidDismiss={handleDismiss}
 					header={
 						<AnnotationSheetHeader
-							title="Edit Annotation"
+							title={t('reader.editAnnotation')}
 							onClose={() => sheetRef.current?.dismiss()}
 							onPrimaryAction={handleSaveAnnotation}
 						/>
@@ -125,7 +127,7 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 
 							{/* TODO: Probably look better as joined button with primary action, however too lazy for that now */}
 							<Button variant="destructive" onPress={handleDelete} roundness="full">
-								<Text>Delete</Text>
+								<Text>{t('common.delete')}</Text>
 							</Button>
 						</View>
 					</ScrollView>

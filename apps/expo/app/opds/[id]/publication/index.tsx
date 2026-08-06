@@ -315,7 +315,7 @@ export default function Screen() {
 								<Card.StatGroup>
 									{progression.locator.locations?.position && (
 										<Card.Stat
-											label="Page"
+											label={t('common.page')}
 											value={progression.locator.locations.position || '1'}
 											suffix={
 												numberOfPages != null && numberOfPages > 0
@@ -341,8 +341,10 @@ export default function Screen() {
 								<View className="squircle ios:rounded-3xl p-3 bg-fill-warning-secondary rounded-2xl">
 									<Text>
 										{!downloadURL
-											? 'No download link available for this publication'
-											: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
+											? t('opds.noDownloadLink')
+											: t('opds.unsupportedFileFormat', {
+													format: acquisitionLink?.type || t('common.unknown'),
+												})}
 									</Text>
 								</View>
 							)}
@@ -391,7 +393,7 @@ export default function Screen() {
 						<View className="gap-3">
 							<View className="ios:px-4 px-2 flex flex-row items-center justify-between">
 								<Text className="text-lg font-semibold text-foreground-muted">
-									{belongsToSeries?.name || 'Series Books'}
+									{belongsToSeries?.name || t('opds.seriesBooks')}
 								</Text>
 								{seriesUrl && <FeedSelfURL url={seriesUrl} />}
 							</View>
@@ -412,7 +414,7 @@ export default function Screen() {
 						<View className="gap-3">
 							<View className="ios:px-4 px-2 flex flex-row items-center justify-between">
 								<Text className="text-lg font-semibold text-foreground-muted">
-									{belongsToCollection?.name || 'Collection Books'}
+									{belongsToCollection?.name || t('opds.collectionBooks')}
 								</Text>
 								{collectionUrl && <FeedSelfURL url={collectionUrl} />}
 							</View>

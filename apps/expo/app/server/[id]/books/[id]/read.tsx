@@ -29,6 +29,7 @@ import {
 	useSyncOnlineToOfflineAnnotations,
 	useSyncOnlineToOfflineBookmarks,
 	useSyncOnlineToOfflineProgress,
+	useTranslate,
 } from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
 import { usePreferencesStore, useReaderStore } from '~/stores'
@@ -262,6 +263,7 @@ type Params = {
 // TODO(reading): support incognito, not using it here lol
 
 export default function Screen() {
+	const { t } = useTranslate()
 	useKeepAwake()
 
 	const { id: bookID } = useLocalSearchParams<Params>()
@@ -279,7 +281,7 @@ export default function Screen() {
 	const preferNativePdfReader = usePreferencesStore((store) => Boolean(store.preferNativePdf))
 
 	if (!book) {
-		throw new Error('Book not found')
+		throw new Error(t('errors.bookNotFound'))
 	}
 
 	// TODO: Swap to suspense when available

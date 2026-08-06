@@ -26,10 +26,10 @@ export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 	const errorTitle = error instanceof ZodError ? t('opds.invalidFeed') : t('opds.feedLoadFailed')
 	const errorMessage =
 		error instanceof ZodError
-			? `This feed does not adhere to the OPDS v1.2 specification: ${error.message}`
+			? t('opds.feedSpecError', { version: 'v1.2', error: error.message })
 			: error instanceof Error && error.message
 				? error.message
-				: 'There was an error fetching this feed.'
+				: t('opds.feedFetchError')
 
 	return (
 		<SafeAreaView className="p-4 flex-1 items-center justify-center bg-background">

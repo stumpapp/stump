@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 import { Pressable, PressableProps, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
+import { useTranslate } from '~/lib/hooks'
 
 import { Icon } from './icon'
 import { Text } from './text'
@@ -33,6 +34,7 @@ export function Stepper({
 	className,
 	accessibilityLabel,
 }: StepperProps) {
+	const { t } = useTranslate()
 	const canDecrement = value > min && !disabled
 	const canIncrement = value < max && !disabled
 
@@ -54,7 +56,7 @@ export function Stepper({
 
 	return (
 		<View
-			className={cn('flex-row items-center justify-between gap-2', className)}
+			className={cn('gap-2 flex-row items-center justify-between', className)}
 			accessibilityLabel={accessibilityLabel}
 			accessibilityRole="adjustable"
 			accessibilityValue={{
@@ -68,7 +70,7 @@ export function Stepper({
 				onPress={handleDecrement}
 				disabled={!canDecrement}
 				className={cn(!canDecrement && 'opacity-30')}
-				accessibilityLabel="Decrease"
+				accessibilityLabel={t('common.decrease')}
 				accessibilityRole="button"
 			>
 				{({ pressed }) => (
@@ -88,7 +90,7 @@ export function Stepper({
 				onPress={handleIncrement}
 				disabled={!canIncrement}
 				className={cn(!canIncrement && 'opacity-30')}
-				accessibilityLabel="Increase"
+				accessibilityLabel={t('common.increase')}
 				accessibilityRole="button"
 			>
 				{({ pressed }) => (

@@ -64,7 +64,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 									{
 										items: [
 											{
-												label: 'Unfavorite',
+												label: t('searchHistory.unfavorite'),
 												icon: { ios: 'bookmark.slash', android: BookmarkX },
 												onPress: () => unfavoriteSearch(record.query, serverID),
 												role: 'destructive',
@@ -102,7 +102,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 											...(!favoriteQuerySet.has(record.query)
 												? [
 														{
-															label: 'Favorite',
+															label: t('common.favorite'),
 															icon: {
 																ios: 'bookmark.fill' as const,
 																android: Bookmark,
@@ -112,7 +112,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 													]
 												: [
 														{
-															label: 'Unfavorite',
+															label: t('searchHistory.unfavorite'),
 															icon: {
 																ios: 'bookmark.slash' as const,
 																android: BookmarkX,
@@ -121,7 +121,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 														},
 													]),
 											{
-												label: 'Remove',
+												label: t('searchHistory.remove'),
 												icon: { ios: 'trash', android: Trash },
 												onPress: () => removeFromHistory(record.query, serverID),
 												role: 'destructive' as const,

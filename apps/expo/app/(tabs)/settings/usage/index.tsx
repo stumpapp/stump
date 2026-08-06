@@ -67,7 +67,7 @@ export default function Screen() {
 						{savedServers.length > 0 && (
 							<Card
 								label={t('common.servers')}
-								listEmptyStyle={{ icon: Server, message: 'No servers added' }}
+								listEmptyStyle={{ icon: Server, message: t('emptyState.noServersAdded') }}
 							>
 								{savedServers.map((server) => (
 									<Pressable

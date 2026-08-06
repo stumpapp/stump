@@ -13,6 +13,7 @@ import { useResolveURL } from '~/components/opds/utils'
 import { OPDSLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { db, downloadedFiles, readProgress, syncStatus } from '~/db'
 import { useReaderStore } from '~/stores'
+import { useTranslate } from '~/lib/hooks'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
 type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount' | 'serverLastRead'> & {
@@ -21,6 +22,7 @@ type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount' | 'serverLastRea
 }
 
 export default function Screen() {
+	const { t } = useTranslate()
 	useKeepAwake()
 
 	const params = useLocalSearchParams<Params>()
@@ -69,10 +71,10 @@ export default function Screen() {
 			if (streamingURL.includes('{pageNumber}')) {
 				return streamingURL.replace('{pageNumber}', actualPageNumber.toString())
 			} else {
-				throw new Error('Unsupported streaming URL format')
+				throw new Error(t('opds.unsupportedStreamingUrl'))
 			}
 		},
-		[resolveUrl, contextValue.streamingURL],
+		[resolveUrl, contextValue.streamingURL, t],
 	)
 
 	const book = useMemo(

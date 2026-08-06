@@ -35,17 +35,16 @@ const CATEGORY_ORDER = [
 	'flags',
 ] as const
 
-// TODO(localization): Add translation strings instead
-const LABELS: Record<(typeof CATEGORY_ORDER)[number], string> = {
-	'smileys & emotion': 'Smileys & Emotion',
-	'people & body': 'People & Body',
-	'animals & nature': 'Animals & Nature',
-	'food & drink': 'Food & Drink',
-	'travel & places': 'Travel & Places',
-	activities: 'Activities',
-	objects: 'Objects',
-	symbols: 'Symbols',
-	flags: 'Flags',
+const CATEGORY_LOCALE_KEYS: Record<(typeof CATEGORY_ORDER)[number], string> = {
+	'smileys & emotion': 'smileysAndEmotion',
+	'people & body': 'peopleAndBody',
+	'animals & nature': 'animalsAndNature',
+	'food & drink': 'foodAndDrink',
+	'travel & places': 'travelAndPlaces',
+	activities: 'activities',
+	objects: 'objects',
+	symbols: 'symbols',
+	flags: 'flags',
 }
 
 type EmojiSection = {
@@ -135,7 +134,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 		)
 		if (serverEmojis.length) {
 			nextSections.push({
-				title: 'Server',
+				title: t('emojiPicker.server'),
 				emojis: serverEmojis,
 			})
 		}
@@ -157,13 +156,18 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 			if (!categoryEmojis?.length) continue
 
 			nextSections.push({
-				title: category,
+				title:
+					category in CATEGORY_LOCALE_KEYS
+						? t(
+								`emojiPicker.categories.${CATEGORY_LOCALE_KEYS[category as keyof typeof CATEGORY_LOCALE_KEYS]}`,
+							)
+						: category,
 				emojis: categoryEmojis,
 			})
 		}
 
 		return nextSections
-	}, [emojisByCategory, queryTokens])
+	}, [emojisByCategory, queryTokens, t])
 
 	const listData = useMemo<ListItem[]>(() => {
 		const items: ListItem[] = []
@@ -289,9 +293,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 					if (item.type === 'header') {
 						return (
 							<View className="px-4 pb-1 pt-3">
-								<Text className="font-semibold text-foreground-muted">
-									{LABELS[item.title as keyof typeof LABELS] ?? item.title}
-								</Text>
+								<Text className="font-semibold text-foreground-muted">{item.title}</Text>
 							</View>
 						)
 					}

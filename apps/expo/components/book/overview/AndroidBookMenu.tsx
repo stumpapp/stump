@@ -79,7 +79,9 @@ export default function AndroidBookMenu({
 				align="end"
 			>
 				<DropdownMenuItem onPress={favoriteBook}>
-					<Text className="text-lg">{isFavorite ? 'Unfavorite' : 'Favorite'}</Text>
+					<Text className="text-lg">
+						{isFavorite ? t('common.unfavorite') : t('common.favorite')}
+					</Text>
 					<Icon
 						as={Heart}
 						size={20}

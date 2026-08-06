@@ -111,7 +111,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	}, [activeServer.url, setUser, onClose])
 
 	if (!isClaimed && !isCheckingClaimed) {
-		throw new Error('Not supported yet')
+		throw new Error(t('errors.notSupported'))
 	}
 
 	return (

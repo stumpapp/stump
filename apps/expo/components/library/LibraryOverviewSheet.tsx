@@ -11,6 +11,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_26_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { SheetBackDetection } from '../SheetBackDetection'
@@ -103,6 +104,7 @@ type SheetContentProps = {
 // TODO: make less ugly, low key kinda ugly tbh. I think my brain wants a grid rather than flex wrap maybe
 // TODO: Show more stuff
 function SheetContent({ library }: SheetContentProps) {
+	const { t } = useTranslate()
 	const { stats } = library
 
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
@@ -116,40 +118,40 @@ function SheetContent({ library }: SheetContentProps) {
 
 	const libraryStats = [
 		{
-			label: 'In Progress',
+			label: t('libraryOverview.inProgress'),
 			value: stats.inProgressBooks,
 			icon: BookOpen,
 			colors: STAT_COLORS.inProgress,
 		},
 		{
-			label: 'Completed',
+			label: t('libraryOverview.completed'),
 			value: stats.completedBooks,
 			suffix: `/ ${stats.bookCount}`,
 			icon: BookCheck,
 			colors: STAT_COLORS.completed,
 		},
 		{
-			label: 'Books',
+			label: t('libraryOverview.books'),
 			value: stats.bookCount,
 			icon: Library,
 			colors: STAT_COLORS.books,
 		},
 		{
-			label: 'Series',
+			label: t('libraryOverview.series'),
 			value: stats.seriesCount,
 			icon: Layers,
 			colors: STAT_COLORS.series,
 		},
 		{
-			label: 'Reading Time',
+			label: t('libraryOverview.readingTime'),
 			value: formattedTime ? formattedTime.value : '??',
 			suffix: formattedTime ? formattedTime.unit : undefined,
 			icon: Clock,
 			colors: STAT_COLORS.readingTime,
 		},
 		{
-			label: 'Size',
-			value: formattedSize ? formattedSize.value : 'Unknown',
+			label: t('libraryOverview.size'),
+			value: formattedSize ? formattedSize.value : t('common.unknown'),
 			suffix: formattedSize ? formattedSize.unit : '',
 			icon: HardDrive,
 			colors: STAT_COLORS.size,

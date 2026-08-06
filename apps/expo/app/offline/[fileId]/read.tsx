@@ -32,7 +32,7 @@ import {
 	toAbsolutePath,
 	unpackedBookDirectory,
 } from '~/lib/filesystem'
-import { useLocalAnnotationMutations, useLocalBookmarkMutations } from '~/lib/hooks'
+import { useLocalAnnotationMutations, useLocalBookmarkMutations, useTranslate } from '~/lib/hooks'
 import type { ReadiumLocator } from '~/modules/readium'
 import { intoReadiumLocator } from '~/modules/readium'
 import StumpStreamer from '~/modules/streamer'
@@ -45,6 +45,7 @@ type Params = {
 // TODO: Follow https://github.com/dexie/Dexie.js/pull/2205
 
 export default function Screen() {
+	const { t } = useTranslate()
 	useKeepAwake()
 
 	const { fileId } = useLocalSearchParams<Params>()
@@ -76,7 +77,7 @@ export default function Screen() {
 	)
 
 	if (!record && !!updatedAt) {
-		throw new Error('Downloaded file not found')
+		throw new Error(t('errors.downloadedFileNotFound'))
 	}
 
 	if (!record) {
@@ -102,6 +103,7 @@ type ReaderProps = {
 }
 
 function Reader({ record, bookmarks, annotations }: ReaderProps) {
+	const { t } = useTranslate()
 	const downloadedFile = useMemo(() => record.downloaded_files, [record])
 
 	const unsyncedProgress = useMemo(() => record.read_progress, [record])
@@ -144,12 +146,10 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 			})
 			console.error('Failed to initialize streamer:', error)
 			setStreamerError(
-				error instanceof Error
-					? error
-					: new Error('Failed to initialize streamer. Please reach out for support'),
+				error instanceof Error ? error : new Error(t('errors.streamerInitializationFailed')),
 			)
 		}
-	}, [book.id, downloadedFile.serverId, downloadedFile.uri])
+	}, [book.id, downloadedFile.serverId, downloadedFile.uri, t])
 
 	useEffect(
 		() => {

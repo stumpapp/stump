@@ -10,6 +10,7 @@ import { ActionDef } from '~/components/filter/types'
 import { useSeriesFilterMenu } from '~/components/series/listHeader/SeriesFilterMenu'
 import { useSeriesSortAndDisplayMenu } from '~/components/series/listHeader/SeriesSortAndDisplayMenu'
 import { MiniEntityStatCards } from '~/components/stats'
+import { useTranslate } from '~/lib/hooks'
 
 const scanMutation = graphql(`
 	mutation LibrarySeriesListHeaderScanLibrary($id: ID!) {
@@ -28,6 +29,7 @@ type Props = {
 }
 
 export function LibrarySeriesListHeader({ libraryId, stats, additionalActions }: Props) {
+	const { t } = useTranslate()
 	const client = useQueryClient()
 	const { mutate: scanLibrary } = useGraphQLMutation(scanMutation, {
 		onSuccess: () => {
@@ -48,7 +50,7 @@ export function LibrarySeriesListHeader({ libraryId, stats, additionalActions }:
 		const result: ActionDef[] = [
 			{
 				key: 'overview',
-				label: 'Overview',
+				label: t('common.overview'),
 				icon: { ios: 'info.circle', android: Info },
 				onPress: additionalActions.onShowOverview,
 			},
@@ -57,14 +59,14 @@ export function LibrarySeriesListHeader({ libraryId, stats, additionalActions }:
 		if (checkPermission(UserPermission.ScanLibrary)) {
 			result.push({
 				key: 'scan',
-				label: 'Scan Library',
+				label: t('entityActions.scanLibrary'),
 				icon: { ios: 'document.viewfinder', android: ScanLine },
 				onPress: () => scanLibrary({ id: libraryId }),
 			})
 		}
 
 		return result
-	}, [additionalActions, checkPermission, scanLibrary, libraryId])
+	}, [additionalActions, checkPermission, scanLibrary, libraryId, t])
 
 	const sortMenu = useSeriesSortAndDisplayMenu({
 		layoutKey: `library-${libraryId}-series`,

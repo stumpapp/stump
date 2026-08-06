@@ -286,7 +286,7 @@ export function CurrentBookCard({ data }: Props) {
 
 						<View className="gap-2 p-1 flex-1 items-end justify-end self-end">
 							<Text className="text-base font-medium text-foreground-muted text-right">
-								{isEmpty ? 'Add a book' : 'Currently reading'}
+								{isEmpty ? t('bookClub.addBook') : t('bookClub.currentlyReading')}
 							</Text>
 						</View>
 					</View>

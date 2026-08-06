@@ -14,6 +14,7 @@ import EmptyState from '~/components/EmptyState'
 import { ILibrarySearchItemFragment, LibrarySearchItem } from '~/components/library'
 import { ISeriesSearchItemFragment, SeriesSearchItem } from '~/components/series'
 import { Heading, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const mediaQuery = graphql(`
@@ -68,6 +69,7 @@ const libraryQuery = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { query } = useLocalSearchParams<{ query: string }>()
 	const {
 		activeServer: { id: serverID },
@@ -142,8 +144,8 @@ export default function Screen() {
 	if (noResults) {
 		return (
 			<EmptyState
-				title="Nothing was returned"
-				message={`There was nothing matching "${query}" in your library`}
+				title={t('search.results.nothingReturned')}
+				message={t('search.results.nothingMatching', { query })}
 			/>
 		)
 	}
@@ -151,17 +153,17 @@ export default function Screen() {
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScrollView
-				className="flex-1 bg-background py-4 tablet:py-7"
+				className="py-4 tablet:py-7 flex-1 bg-background"
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<View className="gap-2 pb-2">
 					{!!bookResults?.media.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
-								<Heading size="default">Books</Heading>
+							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
+								<Heading size="default">{t('search.results.books')}</Heading>
 								{getHasMore(bookResults?.media.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${query}`}>
-										<Text>See More</Text>
+										<Text>{t('search.results.seeMore')}</Text>
 									</Link>
 								)}
 							</View>
@@ -190,8 +192,8 @@ export default function Screen() {
 
 					{!!seriesResults?.series.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
-								<Heading size="default">Series</Heading>
+							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
+								<Heading size="default">{t('search.results.series')}</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
 										See More
@@ -223,8 +225,8 @@ export default function Screen() {
 
 					{!!librariesResults?.libraries.nodes.length && (
 						<View className="pb-4">
-							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
-								<Heading size="default">Libraries</Heading>
+							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
+								<Heading size="default">{t('search.results.libraries')}</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
 										See More

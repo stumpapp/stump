@@ -94,6 +94,7 @@ function OPDSFeedProvider({ children }: OPDSFeedProviderProps) {
 // minimal smart phones where theres just a few buttons for the essentials etc. Definitely something to revisit
 // for the v2 flow, as I think that can be much prettier than it currently is
 export default function Screen() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	const { savedServers, getServerConfig } = useSavedServers()
@@ -134,8 +135,8 @@ export default function Screen() {
 
 	const onAuthError = useCallback(() => {
 		removeInstanceFromCache(`${serverID}-opds`)
-		throw new Error('This OPDS server requires authentication')
-	}, [serverID, removeInstanceFromCache])
+		throw new Error(t('opds.authenticationRequired'))
+	}, [serverID, removeInstanceFromCache, t])
 
 	if (!activeServer) {
 		// @ts-expect-error: It's fine

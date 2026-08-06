@@ -16,6 +16,7 @@ import { useListSizing } from '~/components/listLayout'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { BookFilterContext, createBookFilterStore, useInitialBookFilters } from '~/stores/filters'
 import { useBooksLayout } from '~/stores/layout'
 
@@ -64,6 +65,7 @@ const statsQuery = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -154,16 +156,18 @@ export default function Screen() {
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
 					ListEmptyComponent={
 						<ListEmpty
-							message={isFiltered ? 'No books found matching your filters' : 'No books returned'}
+							message={
+								isFiltered ? t('browse.noBooksMatchingFilters') : t('browse.noBooksReturned')
+							}
 							actions={
 								<>
 									{isFiltered && (
 										<Button roundness="full" variant="secondary" onPress={() => resetFilters()}>
-											<Text>Clear Filters</Text>
+											<Text>{t('common.clearFilters')}</Text>
 										</Button>
 									)}
 									<Button roundness="full" onPress={() => refetch()}>
-										<Text>Refresh</Text>
+										<Text>{t('common.refresh')}</Text>
 									</Button>
 								</>
 							}

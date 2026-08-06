@@ -86,7 +86,7 @@ export default function FontConfig() {
 				<Switch
 					checked={store.verticalText}
 					onCheckedChange={(checked) => store.setSettings({ verticalText: checked })}
-					accessibilityLabel="Toggle Vertical Text"
+					accessibilityLabel={t('reader.toggleVerticalText')}
 				/>
 			</Card.Row>
 		</Card>

@@ -11,11 +11,13 @@ import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import { ServerConnectFailed, ServerErrorBoundary } from '~/components/error'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import { FullScreenLoader } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { authSDKInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const router = useRouter()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
@@ -259,11 +261,11 @@ export default function Screen() {
 	}
 
 	if (isAutoAuthenticating) {
-		return <FullScreenLoader label="Authenticating..." />
+		return <FullScreenLoader label={t('serverConnection.authenticating')} />
 	}
 
 	if (!sdk) {
-		return <FullScreenLoader label="Connecting..." />
+		return <FullScreenLoader label={t('serverConnection.connecting')} />
 	}
 
 	return (

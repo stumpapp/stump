@@ -20,6 +20,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { SeriesOverviewSheet, usePrefetchSeriesOverview } from '~/components/series'
 import { Button, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useDownloadSeries } from '~/lib/hooks/db/downloadSeries'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
@@ -72,6 +73,7 @@ const booksQuery = graphql(`
 type Node = SeriesBooksScreenQuery['media']['nodes'][number]
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const navigationState = useNavigationState((state) => state.routes)
 	const { id } = useLocalSearchParams<{ id: string }>()
 	const {
@@ -197,7 +199,9 @@ export default function Screen() {
 					}
 					ListEmptyComponent={
 						<ListEmpty
-							message={isFiltered ? 'No books found matching your filters' : 'No books returned'}
+							message={
+								isFiltered ? t('browse.noBooksMatchingFilters') : t('browse.noBooksReturned')
+							}
 							actions={
 								<>
 									{isFiltered && (
@@ -207,7 +211,7 @@ export default function Screen() {
 											variant="secondary"
 											onPress={() => resetFilters()}
 										>
-											<Text>Clear Filters</Text>
+											<Text>{t('common.clearFilters')}</Text>
 										</Button>
 									)}
 									<RefreshButton
@@ -216,7 +220,7 @@ export default function Screen() {
 										onPress={() => handleRefetch()}
 										isRefreshing={isRefetching}
 									>
-										<Text>Refresh</Text>
+										<Text>{t('common.refresh')}</Text>
 									</RefreshButton>
 								</>
 							}

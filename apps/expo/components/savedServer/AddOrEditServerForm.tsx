@@ -145,7 +145,7 @@ export default function AddOrEditServerForm({
 	const renderAuthMode = () => {
 		if (authMode === 'default') {
 			return (
-				<View className="squircle rounded-lg p-3 border border-dashed border-edge">
+				<View className="squircle p-3 border-edge rounded-lg border border-dashed">
 					<Text className="text-foreground-muted">{t(getKey('auth.default.description'))}</Text>
 				</View>
 			)
@@ -196,7 +196,7 @@ export default function AddOrEditServerForm({
 					control={control}
 					render={({ field: { onChange, onBlur, value } }) => (
 						<Input
-							label="Token"
+							label={t(getKey('auth.token.label'))}
 							autoCorrect={false}
 							autoCapitalize="none"
 							placeholder={t(getKey('auth.token.placeholder'))}
@@ -358,7 +358,7 @@ export default function AddOrEditServerForm({
 						tintColor={didConnect ? colors.fill.success.secondary : undefined}
 						isInteractive={!!url}
 						// only affects android
-						className={cn('border border-edge bg-background-surface', {
+						className={cn('border-edge bg-background-surface border', {
 							'border-transparent bg-transparent': isCheckingConnection,
 							'bg-fill-success-secondary': didConnect,
 						})}
@@ -385,7 +385,7 @@ export default function AddOrEditServerForm({
 				</Text>
 
 				{formValues.customHeaders?.length && (
-					<View className="squircle rounded-lg w-full overflow-hidden border border-edge">
+					<View className="squircle border-edge w-full overflow-hidden rounded-lg border">
 						{formValues.customHeaders.map((header, index) => (
 							<Swipeable
 								key={index}
@@ -399,7 +399,7 @@ export default function AddOrEditServerForm({
 									className={cn(
 										'gap-2 p-3 tablet:p-4 w-full flex-row items-center justify-between',
 										{
-											'border-b border-edge': index !== (formValues.customHeaders?.length || 0) - 1,
+											'border-edge border-b': index !== (formValues.customHeaders?.length || 0) - 1,
 										},
 									)}
 								>
@@ -412,7 +412,7 @@ export default function AddOrEditServerForm({
 				)}
 
 				{isAddingHeader ? (
-					<View className="squircle gap-2 rounded-2xl p-3 border border-edge">
+					<View className="squircle gap-2 p-3 border-edge rounded-2xl border">
 						<Input
 							label={t('common.name')}
 							autoCorrect={false}
@@ -528,7 +528,7 @@ function RenderHeaderAction(
 	return (
 		<Reanimated.View style={styleAnimation}>
 			<Pressable
-				className="w-14 h-full items-center justify-center bg-fill-danger"
+				className="w-14 bg-fill-danger h-full items-center justify-center"
 				onPress={onDelete}
 			>
 				{({ pressed }) => (

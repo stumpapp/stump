@@ -42,12 +42,12 @@ export default function TabLayout() {
 				// This can happen if the client is "newer" than the server and is trying to use an endpoint that doesn't exist.
 				// We should probably inform the user that they need to update their server.
 				// For now, throw to trigger the error boundary
-				throw new Error('Incompatible server', { cause: error })
+				throw new Error(t('errors.incompatibleServer'), { cause: error })
 			}
 		} else if (error?.message === 'Malformed response received from server') {
-			throw new Error('Incompatible server', { cause: error })
+			throw new Error(t('errors.incompatibleServer'), { cause: error })
 		}
-	}, [error, onUnauthenticatedResponse])
+	}, [error, onUnauthenticatedResponse, t])
 
 	const showClubs = bookClubsEnabled && checkPermission(UserPermission.AccessBookClub)
 

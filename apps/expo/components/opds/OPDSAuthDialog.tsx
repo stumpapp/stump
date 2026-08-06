@@ -4,7 +4,7 @@ import { queryClient, useSDK } from '@stump/client'
 import { Api, constants, OPDSAuthenticationDocument, resolveUrl } from '@stump/sdk'
 import { opdsURL } from '@stump/sdk/controllers'
 import { isAxiosError } from 'axios'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm, useFormState } from 'react-hook-form'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -29,6 +29,14 @@ type OPDSAuthDialogProps = {
 
 export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDialogProps) {
 	const { t } = useTranslate()
+	const schema = useMemo(
+		() =>
+			z.object({
+				password: z.string().min(1, { message: t('auth.passwordRequired') }),
+				username: z.string().min(1, { message: t('auth.usernameRequired') }),
+			}),
+		[t],
+	)
 	const { activeServer } = useActiveServer()
 	const { sdk } = useSDK()
 
@@ -130,8 +138,8 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 		? resolveUrl(logoLink.href, sdk?.rootURL ?? activeServer?.url)
 		: undefined
 
-	const usernameLabel = basicAuth?.labels?.login || 'Username'
-	const passwordLabel = basicAuth?.labels?.password || 'Password'
+	const usernameLabel = basicAuth?.labels?.login || t('common.username')
+	const passwordLabel = basicAuth?.labels?.password || t('common.password')
 
 	return (
 		<>
@@ -233,8 +241,4 @@ type Credentials = {
 	password: string
 }
 
-const schema = z.object({
-	password: z.string().min(1, { message: 'Password is required' }),
-	username: z.string().min(1, { message: 'Username is required' }),
-})
-type LoginSchema = z.infer<typeof schema>
+type LoginSchema = Credentials

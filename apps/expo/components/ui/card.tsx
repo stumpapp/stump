@@ -7,6 +7,7 @@ import LinearGradient from 'react-native-linear-gradient'
 
 import { Icon, Text } from '~/components/ui'
 import { useColors, usePalette } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 
@@ -157,6 +158,7 @@ function Row({ value, children, ...props }: RowProps) {
 }
 
 function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
+	const { t } = useTranslate()
 	const colors = useColors()
 	const { isDarkColorScheme } = useColorScheme()
 	const accentColor = usePalette('accent')
@@ -207,7 +209,7 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 							style={{ color: accentColor || colors.fill.brand.DEFAULT }}
 							className={cn('px-1 font-medium', !expanded && 'bottom-0 right-0 absolute')}
 						>
-							{!expanded ? 'See more' : 'See less'}
+							{!expanded ? t('common.seeMore') : t('common.seeLess')}
 						</Text>
 					)}
 				</View>
@@ -340,23 +342,26 @@ type ListEmptyMessageProps = {
 	message?: string
 }
 
-export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
-	<View
-		className={cn(
-			'squircle h-24 gap-2 p-3 border-edge w-full items-center justify-center rounded-3xl border border-dashed',
-			Platform.OS === 'android' && 'rounded-2xl',
-		)}
-	>
-		<View className="relative flex items-center justify-center">
-			<View className="squircle p-2 bg-background-surface flex items-center justify-center rounded-lg">
-				<Icon as={icon || CircleAlert} className="h-6 w-6 text-foreground-muted" />
-				{/* <Icon as={Slash} className="absolute h-6 w-6 transform text-foreground opacity-80" /> */}
+export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => {
+	const { t } = useTranslate()
+	return (
+		<View
+			className={cn(
+				'squircle h-24 gap-2 p-3 border-edge w-full items-center justify-center rounded-3xl border border-dashed',
+				Platform.OS === 'android' && 'rounded-2xl',
+			)}
+		>
+			<View className="relative flex items-center justify-center">
+				<View className="squircle p-2 bg-background-surface flex items-center justify-center rounded-lg">
+					<Icon as={icon || CircleAlert} className="h-6 w-6 text-foreground-muted" />
+					{/* <Icon as={Slash} className="absolute h-6 w-6 transform text-foreground opacity-80" /> */}
+				</View>
 			</View>
-		</View>
 
-		<Text>{message || 'Nothing to display'}</Text>
-	</View>
-)
+			<Text>{message || t('common.nothingToDisplay')}</Text>
+		</View>
+	)
+}
 
 export function ListLabel({ className, ...props }: ComponentProps<typeof Text>) {
 	return (

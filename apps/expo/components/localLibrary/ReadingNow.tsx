@@ -16,7 +16,7 @@ import { ThumbnailImage } from '~/components/image'
 import { Badge, Heading, Progress, Text } from '~/components/ui'
 import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { COLORS, useColors } from '~/lib/constants'
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { SyncIcon } from './sync-icon/SyncIcon'
@@ -140,6 +140,7 @@ type ReadingNowItemProps = {
 }
 
 function ReadingNowItem({ book }: ReadingNowItemProps) {
+	const { t } = useTranslate()
 	const { width, isTablet } = useDisplay()
 
 	const colors = useColors()
@@ -323,7 +324,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 									? formatDistanceToNow(new Date(book.readProgress?.lastModified), {
 											addSuffix: true,
 										})
-									: 'unknown time ago'}
+									: t('common.unknownTimeAgo')}
 							</Text>
 						</View>
 

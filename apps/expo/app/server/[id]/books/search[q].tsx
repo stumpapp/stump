@@ -10,6 +10,7 @@ import BackLink from '~/components/BackLink'
 import { BookListItem } from '~/components/book'
 import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookSearchScreen($filter: MediaFilterInput!, $pagination: Pagination!) {
@@ -45,6 +46,7 @@ export const prefetchBookSearch = (sdk: Api, client: QueryClient, search: string
 }
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { q: searchQuery } = useLocalSearchParams<{ q: string }>()
 
 	const navigation = useNavigation()
@@ -53,11 +55,11 @@ export default function Screen() {
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerShown: true,
-			headerTitle: 'Search Results',
+			headerTitle: t('search.results.title'),
 			headerBackButtonMenuEnabled: true,
 			headerLeft: () => <BackLink />,
 		})
-	}, [navigation])
+	}, [navigation, t])
 
 	const filter = useMemo<MediaFilterInput>(
 		() => ({

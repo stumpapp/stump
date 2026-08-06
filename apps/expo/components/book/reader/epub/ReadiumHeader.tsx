@@ -16,6 +16,7 @@ import {
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
@@ -124,6 +125,7 @@ function Title() {
 }
 
 function useChapterProgress() {
+	const { t } = useTranslate()
 	const chapterTitle = useEpubLocationStore(
 		(state) => state.currentChapter || state.book?.name || state.embeddedMetadata?.title,
 	)
@@ -177,9 +179,9 @@ function useChapterProgress() {
 
 	const progressText = useMemo(() => {
 		if (pagesLeftInChapter == null) return null
-		if (pagesLeftInChapter === 0) return 'Final page in chapter'
-		else return `${pagesLeftInChapter} pages left in chapter`
-	}, [pagesLeftInChapter])
+		if (pagesLeftInChapter === 0) return t('reader.finalPageInChapter')
+		else return t('reader.pagesLeftInChapter', { count: pagesLeftInChapter })
+	}, [pagesLeftInChapter, t])
 
 	return { chapterTitle, progressText }
 }

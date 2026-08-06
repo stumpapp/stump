@@ -8,8 +8,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { FileExplorerGridItem } from '~/components/fileExplorer'
 import { Heading, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const params = useLocalSearchParams<{
 		path: string
 		friendlyName?: string
@@ -49,11 +51,11 @@ export default function Screen() {
 	const render = () => {
 		if (errorMessage) {
 			return (
-				<View className="flex-1 items-center justify-center px-4">
+				<View className="px-4 flex-1 items-center justify-center">
 					<Heading size="lg" className="text-center">
-						Something went wrong
+						{t('errors.somethingWentWrong')}
 					</Heading>
-					<Text className="text-center text-base text-foreground-muted">{errorMessage}</Text>
+					<Text className="text-base text-foreground-muted text-center">{errorMessage}</Text>
 				</View>
 			)
 		} else {

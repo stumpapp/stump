@@ -3,11 +3,13 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function AllowDownscaling() {
+	const { t } = useTranslate()
 	const { allowDownscaling, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			allowDownscaling: state.allowDownscaling,
@@ -18,10 +20,10 @@ export default function AllowDownscaling() {
 	return (
 		<AppSettingsRow
 			icon={ImageDown}
-			title="Allow Downscaling"
+			title={t('readerSettings.allowDownscaling')}
 			onPress={() => patch({ allowDownscaling: !allowDownscaling })}
 		>
-			<View className="flex flex-row items-center gap-2">
+			<View className="gap-2 flex flex-row items-center">
 				<Switch
 					checked={allowDownscaling}
 					onCheckedChange={(checked) => patch({ allowDownscaling: checked })}

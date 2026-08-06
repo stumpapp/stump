@@ -117,7 +117,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 		const trimmedName = name.trim()
 
 		if (!trimmedName) {
-			Alert.alert('Error', 'Please enter a theme name')
+			Alert.alert(t('common.error'), t('reader.themeNameRequired'))
 			return
 		}
 
@@ -126,7 +126,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 			!customTheme.colors?.foreground ||
 			!customTheme.colors?.highlight
 		) {
-			Alert.alert('Error', 'Theme colors are required')
+			Alert.alert(t('common.error'), t('reader.themeColorsRequired'))
 			return
 		}
 
@@ -134,7 +134,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 
 		if (isCreateMode) {
 			if (themes[trimmedName]) {
-				Alert.alert('Error', 'A theme with this name already exists')
+				Alert.alert(t('common.error'), t('reader.themeNameExists'))
 				return
 			}
 			addTheme(trimmedName, customTheme)
@@ -153,6 +153,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 		isCreateMode,
 		addTheme,
 		selectTheme,
+		t,
 		onCancel,
 	])
 

@@ -3550,6 +3550,18 @@
 			"enable": "Enable",
 			"error": "Error",
 			"favorite": "Favorite",
+			"unfavorite": "Unfavorite",
+			"overview": "Overview",
+			"series": "Series",
+			"libraries": "Libraries",
+			"remove": "Remove",
+			"seeMore": "See more",
+			"seeLess": "See less",
+			"nothingToDisplay": "Nothing to display",
+			"unknownTimeAgo": "unknown time ago",
+			"textarea": "Textarea",
+			"decrease": "Decrease",
+			"increase": "Increase",
 			"finished": "Finished",
 			"grid": "Grid",
 			"list": "List",
@@ -3604,7 +3616,14 @@
 			"deleteTheme": "Delete Theme",
 			"deleteThemeConfirmation": "Are you sure you want to delete '{{name}}'?",
 			"deleteHighlight": "Delete Highlight",
-			"deleteAnnotationConfirmation": "Are you sure you want to delete this annotation?"
+			"deleteAnnotationConfirmation": "Are you sure you want to delete this annotation?",
+			"themeNameRequired": "Please enter a theme name",
+			"themeColorsRequired": "Theme colors are required",
+			"themeNameExists": "A theme with this name already exists",
+			"finalPageInChapter": "Final page in chapter",
+			"pagesLeftInChapter": "{{count}} pages left in chapter",
+			"searchBook": "Search Book",
+			"toggleVerticalText": "Toggle Vertical Text"
 		},
 		"seriesOverview": {
 			"about": "About",
@@ -3699,7 +3718,8 @@
 			"discussionLocked": "This discussion is locked.",
 			"replyingTo": "Replying to {{name}}",
 			"messagePlaceholder": "Type a message...",
-			"settingsNotImplemented": "Book club settings are not implemented yet"
+			"settingsNotImplemented": "Book club settings are not implemented yet",
+			"currentlyReading": "Currently reading"
 		},
 		"auth": {
 			"login": "Login",
@@ -3717,17 +3737,36 @@
 			"outdatedServer": "Outdated Server",
 			"outdatedServerDescription": "An error suggests that your server is outdated. Update the server to continue.",
 			"connectionFailed": "Failed to Connect",
-			"connectionFailedDescription": "This server is currently unavailable. Make sure it is running and accessible from this device."
+			"connectionFailedDescription": "This server is currently unavailable. Make sure it is running and accessible from this device.",
+			"downloadedFileNotFound": "Downloaded file not found",
+			"streamerInitializationFailed": "Failed to initialize streamer. Please reach out for support",
+			"bookNotFound": "Book not found",
+			"notSupported": "Not supported yet",
+			"incompatibleServer": "Incompatible server"
 		},
 		"searchHistory": {
 			"empty": "Your favorites and recent searches will appear here",
 			"favorites": "Favorites",
-			"recent": "Recently Searched"
+			"recent": "Recently Searched",
+			"unfavorite": "Unfavorite",
+			"remove": "Remove"
 		},
 		"emojiPicker": {
 			"title": "Emojis",
 			"search": "Search emojis",
-			"empty": "No emojis found"
+			"empty": "No emojis found",
+			"server": "Server",
+			"categories": {
+				"smileysAndEmotion": "Smileys & Emotion",
+				"peopleAndBody": "People & Body",
+				"animalsAndNature": "Animals & Nature",
+				"foodAndDrink": "Food & Drink",
+				"travelAndPlaces": "Travel & Places",
+				"activities": "Activities",
+				"objects": "Objects",
+				"symbols": "Symbols",
+				"flags": "Flags"
+			}
 		},
 		"unimplemented": {
 			"title": "Coming Soon!",
@@ -3770,7 +3809,17 @@
 			"subtitle": "Subtitle",
 			"readingDirection": "Reading direction",
 			"modified": "Modified",
-			"published": "Published"
+			"published": "Published",
+			"feedFetchError": "There was an error fetching this feed.",
+			"feedSpecError": "This feed does not adhere to the OPDS {{version}} specification: {{error}}",
+			"feedParseError": "Failed to parse OPDS feed",
+			"unknownFeedError": "Unknown OPDS feed error",
+			"authenticationRequired": "This OPDS server requires authentication",
+			"unsupportedStreamingUrl": "Unsupported streaming URL format",
+			"noDownloadLink": "No download link available for this publication",
+			"unsupportedFileFormat": "Unsupported file format: {{format}}",
+			"seriesBooks": "Series Books",
+			"collectionBooks": "Collection Books"
 		},
 		"epubMenu": {
 			"tableOfContents": "Table of Contents",
@@ -3798,6 +3847,9 @@
 			"noServers": "No Servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
 			"seeDocumentation": "See Documentation",
+			"noServersAdded": "No servers added",
+			"serverEmpty": "This server is empty",
+			"serverEmptyDescription": "Once you've added libraries to this server, they'll show up here",
 			"noSmartLists": {
 				"label": "No lists returned",
 				"description": "Once created they will appear here"
@@ -3889,7 +3941,53 @@
 		"search": {
 			"label": "Search This Server",
 			"description": "Find specific content on this server",
-			"placeholder": "Search"
+			"placeholder": "Search",
+			"results": {
+				"title": "Search Results",
+				"nothingReturned": "Nothing was returned",
+				"nothingMatching": "There was nothing matching \"{{query}}\" in your library",
+				"books": "Books",
+				"series": "Series",
+				"libraries": "Libraries",
+				"seeMore": "See More"
+			}
+		},
+		"serverConnection": {
+			"authenticating": "Authenticating...",
+			"connecting": "Connecting..."
+		},
+		"browse": {
+			"noBooksMatchingFilters": "No books found matching your filters",
+			"noBooksReturned": "No books returned",
+			"noSeriesMatchingFilters": "No series found matching your filters",
+			"noSeriesReturned": "No series returned",
+			"nothingReturned": "Nothing was returned",
+			"adjustFilters": "Try adjusting your filters to see more results",
+			"libraryEmpty": "This library is empty",
+			"libraryEmptyDescription": "When your library has books you will see them here"
+		},
+		"entityActions": {
+			"scanSeries": "Scan Series",
+			"downloadSeries": "Download Series",
+			"downloadSeriesConfirmation": "Are you sure you want to enqueue the download for this entire series?",
+			"scanLibrary": "Scan Library"
+		},
+		"libraryOverview": {
+			"inProgress": "In Progress",
+			"completed": "Completed",
+			"books": "Books",
+			"series": "Series",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
+		"selection": {
+			"deleteOneDownload": "Delete {{count}} download",
+			"deleteManyDownloads": "Delete {{count}} downloads",
+			"cannotUndo": "This action cannot be undone."
+		},
+		"smartList": {
+			"collapseAll": "Collapse All",
+			"expandAll": "Expand All"
 		},
 		"settings": {
 			"preferences": {

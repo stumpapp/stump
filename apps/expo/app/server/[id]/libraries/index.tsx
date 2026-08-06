@@ -12,6 +12,7 @@ import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query LibrariesScreen($pagination: Pagination) {
@@ -33,6 +34,7 @@ const query = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -108,8 +110,8 @@ export default function Screen() {
 				}
 				ListEmptyComponent={
 					<ListEmpty
-						title="This server is empty"
-						message="Once you've added libraries to this server, they'll show up here"
+						title={t('emptyState.serverEmpty')}
+						message={t('emptyState.serverEmptyDescription')}
 						actions={
 							<>
 								<RefreshButton
@@ -119,7 +121,7 @@ export default function Screen() {
 									onPress={() => handleRefetch()}
 									isRefreshing={isRefetching}
 								>
-									<Text>Refresh</Text>
+									<Text>{t('common.refresh')}</Text>
 								</RefreshButton>
 							</>
 						}

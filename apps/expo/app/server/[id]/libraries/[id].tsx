@@ -18,6 +18,7 @@ import RefreshControl from '~/components/RefreshControl'
 import SeriesListItem from '~/components/series/SeriesListItem'
 import { Button, FullScreenLoader, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
 import { useSeriesLayout } from '~/stores/layout'
@@ -67,6 +68,7 @@ const seriesQuery = graphql(`
 type Node = LibrarySeriesScreenQuery['series']['nodes'][number]
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { id } = useLocalSearchParams<{ id: string }>()
 	const {
 		data: { libraryById: library },
@@ -189,11 +191,9 @@ export default function Screen() {
 							<FullScreenLoader />
 						) : (
 							<ListEmpty
-								title={isFiltered ? 'Nothing was returned' : 'This library is empty'}
+								title={isFiltered ? t('browse.nothingReturned') : t('browse.libraryEmpty')}
 								message={
-									isFiltered
-										? 'Try adjusting your filters to see more results'
-										: 'When your library has books you will see them here'
+									isFiltered ? t('browse.adjustFilters') : t('browse.libraryEmptyDescription')
 								}
 								actions={
 									<>
@@ -204,7 +204,7 @@ export default function Screen() {
 												size="lg"
 												onPress={() => resetFilters()}
 											>
-												<Text>Clear Filters</Text>
+												<Text>{t('common.clearFilters')}</Text>
 											</Button>
 										)}
 
@@ -215,7 +215,7 @@ export default function Screen() {
 											onPress={() => handleRefetch()}
 											isRefreshing={isRefetching}
 										>
-											<Text>Refresh</Text>
+											<Text>{t('common.refresh')}</Text>
 										</RefreshButton>
 									</>
 								}

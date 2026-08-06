@@ -3550,6 +3550,18 @@
 			"enable": "사용",
 			"error": "오류",
 			"favorite": "즐겨찾기",
+			"unfavorite": "즐겨찾기 해제",
+			"overview": "개요",
+			"series": "시리즈",
+			"libraries": "라이브러리",
+			"remove": "제거",
+			"seeMore": "더 보기",
+			"seeLess": "간략히 보기",
+			"nothingToDisplay": "표시할 항목이 없습니다",
+			"unknownTimeAgo": "알 수 없는 시간 전",
+			"textarea": "여러 줄 입력란",
+			"decrease": "줄이기",
+			"increase": "늘리기",
 			"finished": "완독",
 			"grid": "격자",
 			"list": "목록",
@@ -3604,7 +3616,14 @@
 			"deleteTheme": "테마 삭제",
 			"deleteThemeConfirmation": "'{{name}}' 테마를 삭제하시겠습니까?",
 			"deleteHighlight": "하이라이트 삭제",
-			"deleteAnnotationConfirmation": "이 주석을 삭제하시겠습니까?"
+			"deleteAnnotationConfirmation": "이 주석을 삭제하시겠습니까?",
+			"themeNameRequired": "테마 이름을 입력하세요",
+			"themeColorsRequired": "테마 색상을 모두 지정하세요",
+			"themeNameExists": "같은 이름의 테마가 이미 있습니다",
+			"finalPageInChapter": "이 장의 마지막 페이지",
+			"pagesLeftInChapter": "이 장에서 {{count}}페이지 남음",
+			"searchBook": "책 검색",
+			"toggleVerticalText": "세로쓰기 전환"
 		},
 		"seriesOverview": {
 			"about": "소개",
@@ -3699,7 +3718,8 @@
 			"discussionLocked": "이 토론은 잠겨 있습니다.",
 			"replyingTo": "{{name}} 님에게 답장",
 			"messagePlaceholder": "메시지 입력...",
-			"settingsNotImplemented": "북클럽 설정은 아직 구현되지 않았습니다"
+			"settingsNotImplemented": "북클럽 설정은 아직 구현되지 않았습니다",
+			"currentlyReading": "현재 읽는 책"
 		},
 		"auth": {
 			"login": "로그인",
@@ -3717,17 +3737,36 @@
 			"outdatedServer": "서버 버전이 오래되었습니다",
 			"outdatedServerDescription": "서버 버전이 오래된 것으로 보입니다. 계속하려면 서버를 업데이트하세요.",
 			"connectionFailed": "연결하지 못했습니다",
-			"connectionFailedDescription": "현재 이 서버를 사용할 수 없습니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요."
+			"connectionFailedDescription": "현재 이 서버를 사용할 수 없습니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요.",
+			"downloadedFileNotFound": "다운로드한 파일을 찾을 수 없습니다",
+			"streamerInitializationFailed": "리더를 초기화하지 못했습니다. 지원팀에 문의해 주세요",
+			"bookNotFound": "책을 찾을 수 없습니다",
+			"notSupported": "아직 지원하지 않습니다",
+			"incompatibleServer": "호환되지 않는 서버입니다"
 		},
 		"searchHistory": {
 			"empty": "즐겨찾기와 최근 검색어가 여기에 표시됩니다",
 			"favorites": "즐겨찾기",
-			"recent": "최근 검색"
+			"recent": "최근 검색",
+			"unfavorite": "즐겨찾기 해제",
+			"remove": "제거"
 		},
 		"emojiPicker": {
 			"title": "이모지",
 			"search": "이모지 검색",
-			"empty": "이모지를 찾을 수 없습니다"
+			"empty": "이모지를 찾을 수 없습니다",
+			"server": "서버",
+			"categories": {
+				"smileysAndEmotion": "표정과 감정",
+				"peopleAndBody": "사람과 신체",
+				"animalsAndNature": "동물과 자연",
+				"foodAndDrink": "음식과 음료",
+				"travelAndPlaces": "여행과 장소",
+				"activities": "활동",
+				"objects": "사물",
+				"symbols": "기호",
+				"flags": "깃발"
+			}
 		},
 		"unimplemented": {
 			"title": "준비 중입니다!",
@@ -3770,7 +3809,17 @@
 			"subtitle": "부제",
 			"readingDirection": "읽기 방향",
 			"modified": "수정일",
-			"published": "출판일"
+			"published": "출판일",
+			"feedFetchError": "피드를 가져오는 중 오류가 발생했습니다.",
+			"feedSpecError": "이 피드는 OPDS {{version}} 사양을 따르지 않습니다: {{error}}",
+			"feedParseError": "OPDS 피드를 해석하지 못했습니다",
+			"unknownFeedError": "알 수 없는 OPDS 피드 오류",
+			"authenticationRequired": "이 OPDS 서버는 인증이 필요합니다",
+			"unsupportedStreamingUrl": "지원하지 않는 스트리밍 URL 형식입니다",
+			"noDownloadLink": "이 출판물에는 다운로드 링크가 없습니다",
+			"unsupportedFileFormat": "지원하지 않는 파일 형식: {{format}}",
+			"seriesBooks": "시리즈 책",
+			"collectionBooks": "컬렉션 책"
 		},
 		"epubMenu": {
 			"tableOfContents": "목차",
@@ -3798,6 +3847,9 @@
 			"noServers": "구성된 서버가 없습니다",
 			"cta": "서버를 추가하고 책 컬렉션을 이용해 보세요",
 			"seeDocumentation": "문서 보기",
+			"noServersAdded": "추가된 서버가 없습니다",
+			"serverEmpty": "이 서버는 비어 있습니다",
+			"serverEmptyDescription": "서버에 라이브러리를 추가하면 여기에 표시됩니다",
 			"noSmartLists": {
 				"label": "표시할 목록이 없습니다",
 				"description": "목록을 만들면 여기에 표시됩니다"
@@ -3889,7 +3941,53 @@
 		"search": {
 			"label": "이 서버 검색",
 			"description": "이 서버에서 특정 콘텐츠를 찾습니다",
-			"placeholder": "검색"
+			"placeholder": "검색",
+			"results": {
+				"title": "검색 결과",
+				"nothingReturned": "검색 결과가 없습니다",
+				"nothingMatching": "라이브러리에서 \"{{query}}\"과(와) 일치하는 항목을 찾지 못했습니다",
+				"books": "책",
+				"series": "시리즈",
+				"libraries": "라이브러리",
+				"seeMore": "더 보기"
+			}
+		},
+		"serverConnection": {
+			"authenticating": "인증 중...",
+			"connecting": "연결 중..."
+		},
+		"browse": {
+			"noBooksMatchingFilters": "필터와 일치하는 책이 없습니다",
+			"noBooksReturned": "표시할 책이 없습니다",
+			"noSeriesMatchingFilters": "필터와 일치하는 시리즈가 없습니다",
+			"noSeriesReturned": "표시할 시리즈가 없습니다",
+			"nothingReturned": "표시할 항목이 없습니다",
+			"adjustFilters": "필터를 조정해 더 많은 결과를 확인해 보세요",
+			"libraryEmpty": "이 라이브러리는 비어 있습니다",
+			"libraryEmptyDescription": "라이브러리에 책을 추가하면 여기에 표시됩니다"
+		},
+		"entityActions": {
+			"scanSeries": "시리즈 스캔",
+			"downloadSeries": "시리즈 다운로드",
+			"downloadSeriesConfirmation": "이 시리즈의 모든 책을 다운로드 대기열에 추가하시겠습니까?",
+			"scanLibrary": "라이브러리 스캔"
+		},
+		"libraryOverview": {
+			"inProgress": "읽는 중",
+			"completed": "완독",
+			"books": "책",
+			"series": "시리즈",
+			"readingTime": "읽은 시간",
+			"size": "크기"
+		},
+		"selection": {
+			"deleteOneDownload": "다운로드 {{count}}개 삭제",
+			"deleteManyDownloads": "다운로드 {{count}}개 삭제",
+			"cannotUndo": "이 작업은 되돌릴 수 없습니다."
+		},
+		"smartList": {
+			"collapseAll": "모두 접기",
+			"expandAll": "모두 펼치기"
 		},
 		"settings": {
 			"preferences": {

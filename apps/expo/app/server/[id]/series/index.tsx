@@ -16,6 +16,7 @@ import { SeriesListHeader } from '~/components/series/listHeader'
 import SeriesListItem from '~/components/series/SeriesListItem'
 import { Button, FullScreenLoader, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useSeriesFilterStore } from '~/stores/filters'
 import { useSeriesLayout } from '~/stores/layout'
 
@@ -64,6 +65,7 @@ const statsQuery = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -160,7 +162,9 @@ export default function Screen() {
 						<FullScreenLoader />
 					) : (
 						<ListEmpty
-							message={isFiltered ? 'No series found matching your filters' : 'No series returned'}
+							message={
+								isFiltered ? t('browse.noSeriesMatchingFilters') : t('browse.noSeriesReturned')
+							}
 							actions={
 								<>
 									{isFiltered && (
@@ -170,7 +174,7 @@ export default function Screen() {
 											size="lg"
 											onPress={() => resetFilters()}
 										>
-											<Text>Clear Filters</Text>
+											<Text>{t('common.clearFilters')}</Text>
 										</Button>
 									)}
 
@@ -181,7 +185,7 @@ export default function Screen() {
 										onPress={() => handleRefetch()}
 										isRefreshing={isRefetching}
 									>
-										<Text>Refresh</Text>
+										<Text>{t('common.refresh')}</Text>
 									</RefreshButton>
 								</>
 							}

@@ -1,11 +1,11 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { Stack } from 'expo-router'
 import { CheckCircle2, Share, Trash } from 'lucide-react-native'
-import pluralize from 'pluralize'
 import { useCallback, useMemo } from 'react'
 import { Alert, Platform, Pressable, View } from 'react-native'
 
 import { useSelectionStore } from '~/stores/selection'
+import { useTranslate } from '~/lib/hooks'
 
 import { ActionMenu } from '../ui/action-menu/action-menu'
 import { Icon } from '../ui/icon'
@@ -13,6 +13,7 @@ import { Icon } from '../ui/icon'
 // TODO: Redesign after https://github.com/software-mansion/react-native-screens/issues/2990#issuecomment-3448692775
 
 export default function SelectionRightScreenHeader() {
+	const { t } = useTranslate()
 	const onStopSelection = useSelectionStore((state) => state.resetSelection)
 	const currentSelection = useSelectionStore((state) => state.selectionState)
 	const customActions = useSelectionStore((state) => state.customActions)
@@ -27,15 +28,16 @@ export default function SelectionRightScreenHeader() {
 	}, [currentSelection, deleteAction, onStopSelection])
 
 	const confirmDeleteSelection = useCallback(() => {
+		const count = currentSelection.size
 		Alert.alert(
-			`Delete ${currentSelection.size} ${pluralize('download', currentSelection.size)}`,
-			'This action cannot be undone.',
+			t(count === 1 ? 'selection.deleteOneDownload' : 'selection.deleteManyDownloads', { count }),
+			t('selection.cannotUndo'),
 			[
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: 'Delete', style: 'destructive', onPress: onDeleteSelection },
+				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: t('common.delete'), style: 'destructive', onPress: onDeleteSelection },
 			],
 		)
-	}, [currentSelection.size, onDeleteSelection])
+	}, [currentSelection.size, onDeleteSelection, t])
 
 	return Platform.select({
 		ios: (
@@ -46,7 +48,7 @@ export default function SelectionRightScreenHeader() {
 					<Stack.Toolbar.Menu icon="ellipsis">
 						<Stack.Toolbar.Menu inline>
 							<Stack.Toolbar.MenuAction icon="square.and.arrow.up" onPress={() => {}} disabled>
-								Share
+								{t('common.share')}
 							</Stack.Toolbar.MenuAction>
 						</Stack.Toolbar.Menu>
 
@@ -57,7 +59,7 @@ export default function SelectionRightScreenHeader() {
 								destructive
 								disabled={!deleteAction}
 							>
-								Delete
+								{t('common.delete')}
 							</Stack.Toolbar.MenuAction>
 						</Stack.Toolbar.Menu>
 					</Stack.Toolbar.Menu>
@@ -90,7 +92,7 @@ export default function SelectionRightScreenHeader() {
 						{
 							items: [
 								{
-									label: 'Share',
+									label: t('common.share'),
 									icon: {
 										ios: 'square.and.arrow.up',
 										android: Share,
@@ -103,7 +105,7 @@ export default function SelectionRightScreenHeader() {
 						{
 							items: [
 								{
-									label: 'Delete',
+									label: t('common.delete'),
 									icon: {
 										ios: 'trash',
 										android: Trash,
@@ -146,7 +148,7 @@ export default function SelectionRightScreenHeader() {
 					{
 						items: [
 							{
-								label: 'Share',
+								label: t('common.share'),
 								icon: {
 									ios: 'square.and.arrow.up',
 									android: Share,
@@ -159,7 +161,7 @@ export default function SelectionRightScreenHeader() {
 					{
 						items: [
 							{
-								label: 'Delete',
+								label: t('common.delete'),
 								icon: {
 									ios: 'trash',
 									android: Trash,

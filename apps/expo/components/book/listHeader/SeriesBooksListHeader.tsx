@@ -9,6 +9,7 @@ import { useStumpServer } from '~/components/activeServer'
 import { useEntityListHeader } from '~/components/filter/EntityListHeader'
 import { ActionDef } from '~/components/filter/types'
 import { MiniEntityStatCards } from '~/components/stats'
+import { useTranslate } from '~/lib/hooks'
 
 import { useBooksFilterMenu } from './BooksFilterMenu'
 import { useSeriesBooksSortAndDisplayMenu } from './SeriesBooksSortAndDisplayMenu'
@@ -32,6 +33,7 @@ type Props = {
 }
 
 export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalActions }: Props) {
+	const { t } = useTranslate()
 	const client = useQueryClient()
 	const { mutate: scanSeries } = useGraphQLMutation(scanMutation, {
 		onSuccess: () => {
@@ -52,7 +54,7 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 		const result: ActionDef[] = [
 			{
 				key: 'overview',
-				label: 'Overview',
+				label: t('common.overview'),
 				icon: { ios: 'info.circle', android: Info },
 				onPress: additionalActions.onShowOverview,
 			},
@@ -61,7 +63,7 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 		if (checkPermission(UserPermission.ScanLibrary)) {
 			result.push({
 				key: 'scan',
-				label: 'Scan Series',
+				label: t('entityActions.scanSeries'),
 				icon: { ios: 'document.viewfinder', android: ScanLine },
 				onPress: () => scanSeries({ id: seriesId }),
 			})
@@ -70,15 +72,15 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 		if (checkPermission(UserPermission.DownloadFile)) {
 			result.push({
 				key: 'download',
-				label: 'Download Series',
+				label: t('entityActions.downloadSeries'),
 				icon: { ios: 'arrow.down.circle', android: DownloadCloud },
 				onPress: () => {
 					Alert.alert(
-						'Download Series',
-						'Are you sure you want to enqueue the download for this entire series?',
+						t('entityActions.downloadSeries'),
+						t('entityActions.downloadSeriesConfirmation'),
 						[
-							{ text: 'Cancel', style: 'cancel' },
-							{ text: 'Download', onPress: additionalActions.onDownloadSeries },
+							{ text: t('common.cancel'), style: 'cancel' },
+							{ text: t('common.download'), onPress: additionalActions.onDownloadSeries },
 						],
 					)
 				},
@@ -86,7 +88,7 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 		}
 
 		return result
-	}, [additionalActions, checkPermission, scanSeries, seriesId])
+	}, [additionalActions, checkPermission, scanSeries, seriesId, t])
 
 	const sortMenu = useSeriesBooksSortAndDisplayMenu({
 		layoutKey,

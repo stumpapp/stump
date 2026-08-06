@@ -25,10 +25,10 @@ describe('ReadingDirectionSelect', () => {
 			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
 		)
 
-		fireEvent.change(getByLabelText('Reading direction'), { target: { value: 'RTL' } })
+		fireEvent.change(getByLabelText('readerUi.readingDirection'), { target: { value: 'RTL' } })
 		expect(onChange).toHaveBeenCalledWith(ReadingDirection.Rtl)
 
-		fireEvent.change(getByLabelText('Reading direction'), { target: { value: 'LTR' } })
+		fireEvent.change(getByLabelText('readerUi.readingDirection'), { target: { value: 'LTR' } })
 		expect(onChange).toHaveBeenCalledWith(ReadingDirection.Ltr)
 	})
 
@@ -38,7 +38,9 @@ describe('ReadingDirectionSelect', () => {
 			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
 		)
 
-		fireEvent.change(getByLabelText('Reading direction'), { target: { value: 'invalid' } })
+		fireEvent.change(getByLabelText('readerUi.readingDirection'), {
+			target: { value: 'invalid' },
+		})
 		expect(onChange).not.toHaveBeenCalled()
 	})
 })

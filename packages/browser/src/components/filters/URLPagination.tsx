@@ -1,4 +1,5 @@
 import { IconButton, Input, Text, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export default function URLPagination({ pages, currentPage, onChangePage, onPrefetchPage }: Props) {
+	const { t } = useLocaleContext()
 	const [inputPage, setInputPage] = useState<number | undefined>(currentPage)
 
 	const handleNextPage = useCallback(() => {
@@ -76,11 +78,11 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					min={1}
 				/>
 				<Text size="sm" variant="muted" className="inline-flex shrink-0">
-					of {pages}
+					{t('controlUi.ofPages', { pages })}
 				</Text>
 			</form>
 			<div className="space-x-1 flex items-center">
-				<ToolTip content="Previous page" size="sm" align="end">
+				<ToolTip content={t('controlUi.previousPage')} size="sm" align="end">
 					<IconButton
 						size="xs"
 						variant="ghost"
@@ -92,7 +94,7 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					</IconButton>
 				</ToolTip>
 
-				<ToolTip content="Next page" size="sm" align="end">
+				<ToolTip content={t('controlUi.nextPage')} size="sm" align="end">
 					<IconButton
 						size="xs"
 						variant="ghost"

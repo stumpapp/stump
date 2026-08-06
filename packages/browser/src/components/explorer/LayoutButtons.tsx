@@ -1,14 +1,16 @@
 import { cn, IconButton, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Grid2X2, Table } from 'lucide-react'
 
 import { useFileExplorerContext } from './context'
 
 export default function LayoutButtons() {
+	const { t } = useLocaleContext()
 	const { layout, setLayout } = useFileExplorerContext()
 
 	return (
 		<div className="gap-0.5 flex shrink-0 items-center">
-			<ToolTip content="Grid view" align="end">
+			<ToolTip content={t('controlUi.gridView')} align="end">
 				<IconButton
 					variant="ghost"
 					size="sm"
@@ -24,7 +26,7 @@ export default function LayoutButtons() {
 				</IconButton>
 			</ToolTip>
 
-			<ToolTip content="Table view" align="end">
+			<ToolTip content={t('controlUi.tableView')} align="end">
 				<IconButton
 					variant="ghost"
 					size="sm"

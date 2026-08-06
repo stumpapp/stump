@@ -9,6 +9,7 @@ import {
 	Tabs,
 	useSticky,
 } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { EllipsisVertical, Info, Settings } from 'lucide-react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -34,6 +35,7 @@ type Props = {
 }
 
 export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoClick }: Props) {
+	const { t } = useLocaleContext()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const location = useLocation()
 	const {
@@ -124,7 +126,7 @@ export function EntityHeader({ name, tabs, actions, stats, settingsLink, onInfoC
 							'h-7 w-7 flex shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
 							{ 'bg-muted text-foreground': isSettingsActive },
 						)}
-						aria-label="Settings"
+						aria-label={t('sidebar.buttons.settings')}
 					>
 						<Settings className="h-4 w-4" />
 					</Link>

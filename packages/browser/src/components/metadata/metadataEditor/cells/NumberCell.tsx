@@ -1,4 +1,5 @@
 import { Button, Input, Text, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
@@ -16,6 +17,7 @@ export default function NumberCell<Field extends string>({
 	value,
 	isDecimal,
 }: Props<Field>) {
+	const { t } = useLocaleContext()
 	const form = useFormContext()
 
 	const { isEditing, isFieldLocked } = useMetadataEditorContext()
@@ -45,12 +47,12 @@ export default function NumberCell<Field extends string>({
 					}}
 				/>
 
-				<ToolTip content="Reset field">
+				<ToolTip content={t('controlUi.resetField')}>
 					<Button
 						variant="destructive"
 						size="icon"
 						className="h-4 w-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-						aria-label="Reset field"
+						aria-label={t('controlUi.resetField')}
 						// @ts-expect-error: Null is fine to reset it here. form.resetField didn't quite work as expected
 						onClick={() => form.setValue(binding, null)}
 					>

@@ -1,9 +1,11 @@
 import { Button, ConfirmationModal, Text, useBoolean } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { LogOut } from 'lucide-react'
 
 import { useAppContext } from '@/context'
 
 export default function SignOut() {
+	const { t } = useLocaleContext()
 	const { logout } = useAppContext()
 	const [isOpen, { on, off }] = useBoolean()
 
@@ -14,9 +16,9 @@ export default function SignOut() {
 
 	return (
 		<ConfirmationModal
-			title="Sign out"
-			description="Are you sure you want sign out?"
-			confirmText="Sign out"
+			title={t('signOutModal.title')}
+			description={t('signOutModal.message')}
+			confirmText={t('signOutModal.buttons.signOut')}
 			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={off}
@@ -29,7 +31,7 @@ export default function SignOut() {
 				>
 					<LogOut className="h-4 w-4" />
 					<Text size="sm" className="text-inherit select-none">
-						Sign out
+						{t('signOutModal.buttons.signOut')}
 					</Text>
 				</Button>
 			}

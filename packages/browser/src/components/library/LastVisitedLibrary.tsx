@@ -1,6 +1,7 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Label, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 
 import paths from '@/paths'
 
@@ -23,6 +24,7 @@ type Props = {
 }
 
 export default function LastVisitedLibrary({ container }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const {
 		data: { lastVisitedLibrary: library },
@@ -35,7 +37,7 @@ export default function LastVisitedLibrary({ container }: Props) {
 	const renderContent = () => {
 		return (
 			<div className="gap-y-2 flex flex-col">
-				<Label className="text-sm">Last visited</Label>
+				<Label className="text-sm">{t('controlUi.lastVisited')}</Label>
 				<EntityCard
 					href={paths.librarySeries(library.id)}
 					imageUrl={library.thumbnail.url}

@@ -15,7 +15,7 @@ export default function UnderConstruction({ issue }: Props) {
 		<SceneContainer className="h-full w-full flex-1">
 			<img
 				src="/assets/svg/construction-site.svg"
-				alt="Construction illustration"
+				alt={t('controlUi.constructionIllustration')}
 				className="h-72 sm:h-96 mx-auto w-1/2 shrink-0 object-scale-down"
 			/>
 

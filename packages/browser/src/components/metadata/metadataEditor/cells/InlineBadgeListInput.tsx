@@ -1,4 +1,5 @@
 import { Badge, Button, cn } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 
 import AddFieldsDialog from '../AddFieldsDialog'
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export default function InlineBadgeListInput({ values, onChange, className, binding }: Props) {
+	const { t } = useLocaleContext()
 	const onRemove = (index: number) => {
 		onChange(values.filter((_, i) => i !== index))
 	}
@@ -27,7 +29,7 @@ export default function InlineBadgeListInput({ values, onChange, className, bind
 					variant="destructive"
 					size="icon"
 					className="-right-2 -top-2 h-4 w-4 absolute z-10 opacity-0 transition-opacity group-hover:opacity-100"
-					aria-label="Remove item"
+					aria-label={t('controlUi.removeItem')}
 					onClick={() => onRemove(index)}
 				>
 					<Minus className="h-3 w-3" />

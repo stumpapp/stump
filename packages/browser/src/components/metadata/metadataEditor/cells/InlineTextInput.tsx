@@ -1,4 +1,5 @@
 import { Button, cn, Input, TextArea, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 
 type Props = {
@@ -18,6 +19,7 @@ export default function InlineTextInput({
 	className,
 	size = 'sm',
 }: Props) {
+	const { t } = useLocaleContext()
 	const Component = isLong ? TextArea : Input
 
 	return (
@@ -33,12 +35,12 @@ export default function InlineTextInput({
 				{...(isLong ? {} : { size })}
 			/>
 
-			<ToolTip content="Reset field">
+			<ToolTip content={t('controlUi.resetField')}>
 				<Button
 					variant="destructive"
 					size="icon"
 					className="h-4 w-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-					aria-label="Reset field"
+					aria-label={t('controlUi.resetField')}
 					onClick={() => onChange(null)}
 				>
 					<Minus className="h-3 w-3" />

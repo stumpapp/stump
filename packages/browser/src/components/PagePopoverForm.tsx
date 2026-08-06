@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, Input, Popover, useBoolean } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useMemo, useRef } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -20,6 +21,7 @@ export default function PagePopoverForm({
 	pos,
 	trigger,
 }: PagePopoverFormProps) {
+	const { t } = useLocaleContext()
 	const inputRef = useRef<HTMLInputElement | null>(null)
 
 	const [isOpen, { on, off }] = useBoolean()
@@ -32,7 +34,7 @@ export default function PagePopoverForm({
 				return num > 0 && num <= totalPages
 			},
 			() => ({
-				message: `Please enter a number from 1 to ${totalPages}.`,
+				message: t('controlUi.pageRangeError', { total: totalPages }),
 			}),
 		),
 	})
@@ -72,13 +74,13 @@ export default function PagePopoverForm({
 				<div className="gap-2 flex flex-col">
 					<Form id={`pagination-page-entry-form-${pos}`} form={form} onSubmit={handleSubmit}>
 						<Input
-							label="Jump to another page"
+							label={t('controlUi.jumpToPage')}
 							type="number"
 							autoFocus
 							max={totalPages}
 							defaultValue={currentPage}
 							errorMessage={errors.goTo?.message as string}
-							description={`Enter a number from 1 to ${totalPages}.`}
+							description={t('controlUi.pageRangeError', { total: totalPages })}
 							{...register}
 							ref={(ref) => {
 								if (ref) {

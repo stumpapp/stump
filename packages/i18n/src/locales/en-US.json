@@ -712,6 +712,30 @@
 		"deleteHistoryDescription": "Are you sure you want to delete your reading history?",
 		"deleteHistoryWarning": "Your completion history cannot be recovered once deleted"
 	},
+	"controlUi": {
+		"resetField": "Reset field",
+		"removeItem": "Remove item",
+		"grid": "Grid",
+		"table": "Table",
+		"gridView": "Grid view",
+		"tableView": "Table view",
+		"filterData": "Filter data",
+		"jumpToPage": "Jump to another page",
+		"pageRangeError": "Please enter a number from 1 to {{total}}.",
+		"write": "Write",
+		"preview": "Preview",
+		"addSpoiler": "Add spoiler",
+		"tagUser": "Tag a user",
+		"previousPage": "Previous page",
+		"nextPage": "Next page",
+		"configureOrdering": "Configure ordering",
+		"navigateBack": "Navigate back",
+		"navigateForward": "Navigate forward",
+		"goToSettings": "Go to settings",
+		"lastVisited": "Last visited",
+		"constructionIllustration": "Construction illustration",
+		"ofPages": "of {{pages}}"
+	},
 	"libraryHeader": {
 		"tabs": {
 			"books": "Books",

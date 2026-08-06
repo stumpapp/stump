@@ -712,6 +712,30 @@
 		"deleteHistoryDescription": "읽기 기록을 삭제하시겠습니까?",
 		"deleteHistoryWarning": "삭제한 완독 기록은 복구할 수 없습니다"
 	},
+	"controlUi": {
+		"resetField": "필드 초기화",
+		"removeItem": "항목 제거",
+		"grid": "격자",
+		"table": "표",
+		"gridView": "격자 보기",
+		"tableView": "표 보기",
+		"filterData": "데이터 필터링",
+		"jumpToPage": "다른 페이지로 이동",
+		"pageRangeError": "1부터 {{total}} 사이의 숫자를 입력하세요.",
+		"write": "작성",
+		"preview": "미리보기",
+		"addSpoiler": "스포일러 추가",
+		"tagUser": "사용자 태그",
+		"previousPage": "이전 페이지",
+		"nextPage": "다음 페이지",
+		"configureOrdering": "정렬 구성",
+		"navigateBack": "뒤로 이동",
+		"navigateForward": "앞으로 이동",
+		"goToSettings": "설정으로 이동",
+		"lastVisited": "최근 방문",
+		"constructionIllustration": "공사 중임을 나타내는 그림",
+		"ofPages": "전체 {{pages}}페이지"
+	},
 	"libraryHeader": {
 		"tabs": {
 			"books": "책",

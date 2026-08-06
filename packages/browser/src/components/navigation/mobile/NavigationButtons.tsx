@@ -1,10 +1,12 @@
 import { IconButton, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
 
 export default function NavigationButtons() {
+	const { t } = useLocaleContext()
 	const navigate = useNavigate()
 
 	const navigateForward = useCallback(() => {
@@ -28,13 +30,13 @@ export default function NavigationButtons() {
 
 	return (
 		<div className="m-0 gap-1 md:flex hidden items-center">
-			<ToolTip content="Navigate back" size="xs">
+			<ToolTip content={t('controlUi.navigateBack')} size="xs">
 				<IconButton variant="ghost" size="sm" onClick={navigateBackward}>
 					<ChevronLeft size="0.75rem" />
 				</IconButton>
 			</ToolTip>
 
-			<ToolTip content="Navigate forward" size="xs">
+			<ToolTip content={t('controlUi.navigateForward')} size="xs">
 				<IconButton variant="ghost" size="sm" onClick={navigateForward}>
 					<ChevronRight size="0.75rem" />
 				</IconButton>

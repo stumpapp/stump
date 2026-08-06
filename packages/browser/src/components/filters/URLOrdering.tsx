@@ -1,5 +1,6 @@
 import { IconButton, Popover, ToolTip } from '@stump/components'
 import { OrderDirection } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { ArrowUpDown } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export default function URLOrdering({ entity }: Props) {
+	const { t } = useLocaleContext()
 	const [isOpen, setIsOpen] = useState(false)
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const {
@@ -41,7 +43,7 @@ export default function URLOrdering({ entity }: Props) {
 
 	return (
 		<Popover onOpenChange={setIsOpen} open={isOpen}>
-			<ToolTip content="Configure ordering" size="sm" isDisabled={isOpen}>
+			<ToolTip content={t('controlUi.configureOrdering')} size="sm" isDisabled={isOpen}>
 				<Popover.Trigger asChild>
 					<IconButton variant="ghost" size="sm" className="hover:bg-accent">
 						<ArrowUpDown className="h-4 w-4" />

@@ -2934,51 +2934,51 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as Read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
+				"label": "읽음으로 표시",
+				"confirmation": "{{bookTitle}}을(를) 읽음으로 표시하시겠습니까?",
 				"failure": "책을 읽음으로 표시하지 못했습니다"
 			},
 			"clearProgress": {
-				"label": "Clear Progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
+				"label": "진행률 지우기",
+				"confirmation": "{{bookTitle}}의 읽기 진행률을 지우시겠습니까?",
 				"failure": "현재 진행률을 삭제하지 못했습니다"
 			},
 			"deleteReadHistory": {
-				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"label": "읽기 기록 삭제",
+				"confirmation": "{{bookTitle}}의 읽기 기록을 삭제하시겠습니까?",
 				"failure": "읽기 기록을 삭제하지 못했습니다"
 			},
 			"deleteBook": {
-				"label": "Delete Book",
-				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
+				"label": "책 삭제",
+				"confirmation": "{{bookTitle}}을(를) 삭제하시겠습니까?"
 			},
 			"deleteDownload": {
-				"label": "Delete Download",
-				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+				"label": "다운로드 삭제",
+				"confirmation": "{{bookTitle}}의 다운로드 파일을 삭제하시겠습니까?"
 			},
-			"goToLibrary": "Go to Library",
-			"goToSeries": "Go to Series",
-			"seeDetails": "See Details"
+			"goToLibrary": "라이브러리로 이동",
+			"goToSeries": "시리즈로 이동",
+			"seeDetails": "상세 정보 보기"
 		},
 		"bookMetadata": {
-			"ageRating": "Age Rating",
-			"downloadedAt": "Downloaded",
-			"characters": "Characters",
-			"format": "Format",
-			"genres": "Genres",
-			"language": "Language",
-			"publisher": "Publisher",
-			"size": "Size",
-			"volume": "Volume",
-			"writers": "Writers",
-			"colorists": "Colorists",
-			"inkers": "Inkers",
-			"letterers": "Letterers",
-			"coverArtists": "Cover Artists",
-			"links": "Links",
-			"year": "Year",
-			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"ageRating": "연령 등급",
+			"downloadedAt": "다운로드 일시",
+			"characters": "등장인물",
+			"format": "형식",
+			"genres": "장르",
+			"language": "언어",
+			"publisher": "출판사",
+			"size": "크기",
+			"volume": "권",
+			"writers": "글 작가",
+			"colorists": "채색가",
+			"inkers": "잉크 담당",
+			"letterers": "레터링 담당",
+			"coverArtists": "표지 작가",
+			"links": "링크",
+			"year": "연도",
+			"identifier": "식별자",
+			"identifiers": "식별자"
 		},
 		"common": {
 			"book": "책",
@@ -3038,24 +3038,24 @@
 			"unknown": "알 수 없는 오류"
 		},
 		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
+			"tableOfContents": "목차",
+			"bookmarksAndAnnotations": "북마크 및 주석",
+			"appearance": "모양"
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
-				"position": "{{position}} in {{seriesName}}"
+				"positionWithTotal": "{{seriesName}}의 {{total}}개 중 {{position}}번째",
+				"position": "{{seriesName}}의 {{position}}번째"
 			},
 			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
+				"positionWithTotal": "{{seriesName}}의 {{total}}권 중 {{position}}권",
+				"position": "{{seriesName}}의 {{position}}권"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
-				"position": "#{{position}} in {{seriesName}}"
+				"positionWithTotal": "{{seriesName}}의 {{total}}개 중 #{{position}}",
+				"position": "{{seriesName}}의 #{{position}}"
 			},
-			"unknownSeriesName": "series"
+			"unknownSeriesName": "시리즈"
 		},
 		"emptyState": {
 			"noStumpServers": "추가된 Stump 서버가 없습니다",
@@ -3145,11 +3145,11 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"skippedOneServer": "서버 {{skippedCount}}개의 동기화를 건너뛰었습니다",
+				"skippedMultipleServers": "서버 {{skippedCount}}개의 동기화를 건너뛰었습니다",
+				"explanation": "일부 서버는 자동으로 갱신할 수 없는 인증 방식을 사용합니다"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "오프라인 진행률을 동기화하지 못했습니다"
 		},
 		"search": {
 			"label": "이 서버 검색",
@@ -3342,85 +3342,85 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
-			"overrideGlobalSettings": "Override Global Settings",
+			"title": "이미지 리더 설정",
+			"overrideGlobalSettings": "전체 설정보다 우선 적용",
 			"sections": {
-				"mode": "Mode",
-				"imageOptions": "Image Options",
-				"controls": "Controls"
+				"mode": "방식",
+				"imageOptions": "이미지 옵션",
+				"controls": "조작"
 			},
 			"readingMode": {
-				"label": "Flow",
+				"label": "페이지 표시 방식",
 				"options": {
-					"PAGED": "Paged",
-					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
-					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
+					"PAGED": "페이지 넘김",
+					"CONTINUOUS_HORIZONTAL": "가로 스크롤",
+					"CONTINUOUS_VERTICAL": "세로 스크롤"
 				}
 			},
 			"readingDirection": {
-				"label": "Direction",
+				"label": "읽기 방향",
 				"options": {
-					"RTL": "Right to left",
-					"LTR": "Left to right"
+					"RTL": "오른쪽에서 왼쪽",
+					"LTR": "왼쪽에서 오른쪽"
 				}
 			},
 			"doublePageBehavior": {
-				"label": "Double Paged",
+				"label": "두 페이지 보기",
 				"options": {
-					"always": "Always",
-					"auto": "Auto",
-					"off": "Off"
+					"always": "항상",
+					"auto": "자동",
+					"off": "사용 안 함"
 				}
 			},
-			"separateSecondPage": "Separate Second Page",
+			"separateSecondPage": "두 번째 페이지 분리",
 			"imageScaling": {
-				"label": "Scaling",
+				"label": "크기 조정",
 				"options": {
-					"AUTO": "Auto",
-					"HEIGHT": "Fit Height",
-					"WIDTH": "Fit Width",
-					"NONE": "None"
+					"AUTO": "자동",
+					"HEIGHT": "높이에 맞춤",
+					"WIDTH": "너비에 맞춤",
+					"NONE": "조정 안 함"
 				}
 			},
-			"allowDownscaling": "Downscaling",
-			"tapSidesToNavigate": "Tap Sides to Navigate",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"allowDownscaling": "이미지 축소 허용",
+			"tapSidesToNavigate": "화면 가장자리를 눌러 이동",
+			"volumeButtonsNavigate": "음량 버튼으로 이동",
 			"footerControls": {
-				"label": "Footer",
+				"label": "하단 조작부",
 				"options": {
-					"images": "Image Gallery",
-					"slider": "Slider"
+					"images": "이미지 갤러리",
+					"slider": "슬라이더"
 				}
 			},
 			"readingTimer": {
-				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
+				"label": "읽기 타이머",
+				"resetTimer": "타이머 초기화"
 			},
-			"allSettings": "All Settings"
+			"allSettings": "모든 설정"
 		},
 		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
+			"goToPageX": "{{pageNumber}}페이지로 이동",
+			"goToPagePlaceholder": "페이지로 이동...",
 			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
+				"pageDoesNotExist": "{{page}}페이지가 없습니다",
+				"invalidPage": "'{{page}}'은(는) 페이지 번호가 아닙니다"
 			},
-			"showCurrentChapter": "Show Current Chapter"
+			"showCurrentChapter": "현재 장 표시"
 		},
 		"annotationsSheet": {
 			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
-				"highlights": "Highlights",
-				"notes": "Notes"
+				"all": "전체",
+				"bookmarks": "북마크",
+				"highlights": "하이라이트",
+				"notes": "메모"
 			}
 		},
 		"epubSettings": {
-			"title": "Epub Reader Settings",
+			"title": "EPUB 리더 설정",
 			"typeface": {
-				"label": "Typeface",
+				"label": "글꼴",
 				"options": {
-					"system": "System",
+					"system": "시스템",
 					"opendyslexic": "OpenDyslexic",
 					"literata": "Literata",
 					"atkinsonHyperlegible": "Atkinson Hyperlegible",
@@ -3428,68 +3428,68 @@
 					"bitter": "Bitter"
 				}
 			},
-			"fontSize": "Font Size",
+			"fontSize": "글꼴 크기",
 			"fontWeight": {
-				"label": "Font Weight",
+				"label": "글꼴 굵기",
 				"options": {
-					"light": "Light",
-					"normal": "Normal",
-					"medium": "Medium",
-					"bold": "Bold"
+					"light": "얇게",
+					"normal": "보통",
+					"medium": "중간",
+					"bold": "굵게"
 				}
 			},
-			"textNormalization": "Text Normalization",
-			"verticalText": "Vertical Text",
+			"textNormalization": "텍스트 정규화",
+			"verticalText": "세로쓰기",
 			"readingDirection": {
-				"label": "Reading Direction",
+				"label": "읽기 방향",
 				"options": {
-					"rtl": "Right to left",
-					"ltr": "Left to right"
+					"rtl": "오른쪽에서 왼쪽",
+					"ltr": "왼쪽에서 오른쪽"
 				}
 			},
 			"columns": {
-				"label": "Columns",
+				"label": "단",
 				"options": {
-					"auto": "Auto",
-					"single": "Single",
-					"double": "Double"
+					"auto": "자동",
+					"single": "한 단",
+					"double": "두 단"
 				}
 			},
-			"pageMargins": "Page Margins",
+			"pageMargins": "페이지 여백",
 			"imageFilter": {
-				"label": "Image Filter",
+				"label": "이미지 필터",
 				"options": {
-					"none": "None",
-					"darken": "Darken",
-					"invert": "Invert"
+					"none": "없음",
+					"darken": "어둡게",
+					"invert": "색상 반전"
 				}
 			},
-			"publisherStyles": "Publisher Styles",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"publisherStyles": "출판사 스타일",
+			"volumeButtonsNavigate": "음량 버튼으로 이동",
 			"textAlignment": {
-				"label": "Text Alignment",
+				"label": "텍스트 정렬",
 				"options": {
-					"start": "Start",
-					"left": "Left",
-					"center": "Center",
-					"right": "Right",
-					"justify": "Justify"
+					"start": "시작",
+					"left": "왼쪽",
+					"center": "가운데",
+					"right": "오른쪽",
+					"justify": "양쪽 맞춤"
 				}
 			},
-			"typeScale": "Type Scale",
-			"lineHeight": "Line Height",
-			"paragraphIndent": "Paragraph Indent",
-			"paragraphSpacing": "Paragraph Spacing",
-			"wordSpacing": "Word Spacing",
-			"letterSpacing": "Letter Spacing",
-			"hyphens": "Hyphens",
-			"ligatures": "Ligatures",
+			"typeScale": "글자 크기 배율",
+			"lineHeight": "줄 높이",
+			"paragraphIndent": "문단 들여쓰기",
+			"paragraphSpacing": "문단 간격",
+			"wordSpacing": "단어 간격",
+			"letterSpacing": "글자 간격",
+			"hyphens": "하이픈 연결",
+			"ligatures": "합자",
 			"customizeTheme": {
-				"placeholder": "Theme name",
-				"background": "Background",
-				"text": "Text",
-				"highlight": "Highlight",
-				"premadeThemes": "Premade themes"
+				"placeholder": "테마 이름",
+				"background": "배경",
+				"text": "텍스트",
+				"highlight": "강조",
+				"premadeThemes": "기본 제공 테마"
 			}
 		},
 		"libraryType": {

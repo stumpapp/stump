@@ -1,13 +1,13 @@
 import { useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { FileStatus } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePrefetchSeries } from '@/scenes/series'
 import { usePrefetchSeriesBooks } from '@/scenes/series/tabs/books/SeriesBooksScene'
 
 import paths from '../../paths'
-import pluralizeStat from '../../utils/pluralize'
 import { EntityCard } from '../entity'
 
 export interface SeriesCardData {
@@ -25,6 +25,7 @@ export type SeriesCardProps = {
 }
 
 export default function SeriesCard({ data, fullWidth, variant = 'default' }: SeriesCardProps) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 
 	const isCoverOnly = variant === 'cover'
@@ -53,7 +54,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 		if (isMissing) {
 			return (
 				<Text size="xs" className="text-warning uppercase">
-					Series Missing
+					{t('entityUi.seriesMissing')}
 				</Text>
 			)
 		}
@@ -61,11 +62,11 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 		return (
 			<div className="flex items-center justify-between">
 				<Text size="xs" variant="muted">
-					{pluralizeStat('book', Number(data.mediaCount))}
+					{t('entityUi.booksCount', { count: Number(data.mediaCount) })}
 				</Text>
 			</div>
 		)
-	}, [isCoverOnly, data])
+	}, [isCoverOnly, data, t])
 
 	const overrides = isCoverOnly
 		? {

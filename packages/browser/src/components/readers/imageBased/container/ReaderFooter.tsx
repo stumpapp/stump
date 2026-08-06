@@ -2,7 +2,7 @@
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { formatHumanDuration, useLocaleContext } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
@@ -16,6 +16,7 @@ import { useImageBaseReaderContext } from '../context'
 const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()
@@ -177,7 +178,9 @@ export default function ReaderFooter() {
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
+						<Text className="text-sm text-[#898d94]">
+							{t('readerUi.readingTime', { time: formattedReadTime })}
+						</Text>
 					)}
 
 					<Text className="text-sm text-[#898d94]">

@@ -1,5 +1,6 @@
 import { Link, Text } from '@stump/components'
 import { SeriesModelOrdering } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 
@@ -10,6 +11,15 @@ import CoverImageCell from './CoverImageCell'
 
 const columnHelper = createColumnHelper<SeriesCardData>()
 
+function ColumnHeader({ label }: { label: 'books' | 'cover' | 'name' }) {
+	const { t } = useLocaleContext()
+	return (
+		<Text size="sm" variant="secondary">
+			{t(`tableColumns.labels.${label}`)}
+		</Text>
+	)
+}
+
 const coverColumn = columnHelper.display({
 	cell: ({
 		row: {
@@ -17,11 +27,7 @@ const coverColumn = columnHelper.display({
 		},
 	}) => <CoverImageCell id={id} title={resolvedName} />,
 	enableGlobalFilter: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Cover
-		</Text>
-	),
+	header: () => <ColumnHeader label="cover" />,
 	id: 'cover',
 	size: 0,
 })
@@ -42,11 +48,7 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Name
-		</Text>
-	),
+	header: () => <ColumnHeader label="name" />,
 	id: SeriesModelOrdering.Name,
 	minSize: 285,
 })
@@ -60,11 +62,7 @@ const booksCountColumn = columnHelper.accessor((series) => series.mediaCount?.to
 	enableGlobalFilter: true,
 	// TODO(prisma 0.7.0): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Books
-		</Text>
-	),
+	header: () => <ColumnHeader label="books" />,
 	id: 'media_count',
 	minSize: 60,
 })

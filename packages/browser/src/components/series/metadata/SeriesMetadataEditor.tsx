@@ -248,14 +248,14 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 		},
 		onError: (error) => {
 			console.error('Failed to update metadata', error)
-			toast.error('Failed to update metadata')
+			toast.error(t('entityUi.metadataUpdateFailed'))
 		},
 	})
 
 	const { mutate: setLocked } = useGraphQLMutation(setLockedFieldsMutation, {
 		onError: () => {
 			setLockedFields(new Set(metadata?.lockedFields ?? []))
-			toast.error('Failed to update locked fields')
+			toast.error(t('entityUi.lockedFieldsUpdateFailed'))
 		},
 	})
 

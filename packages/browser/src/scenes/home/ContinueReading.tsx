@@ -163,6 +163,7 @@ type ContinueReadingCardProps = {
 const ContinueReadingCard = memo(function ContinueReadingCard({
 	fragment,
 }: ContinueReadingCardProps) {
+	const { t } = useLocaleContext()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 	const width = isAtLeastMedium ? IMAGE_WIDTH_TABLET : IMAGE_WIDTH_MOBILE
 	const data = useFragment(ContinueReadingBookFragment, fragment)
@@ -236,7 +237,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 				<div className="gap-2 flex items-center justify-between">
 					{!isEbookProgress && !!data.readProgress?.page && data.readProgress.page > 0 && (
 						<Text size="xs" className="text-gray-200 opacity-90">
-							{pagesLeft} {pagesLeft === 1 ? 'page' : 'pages'} left
+							{t('entityUi.pagesLeft', { count: pagesLeft })}
 						</Text>
 					)}
 

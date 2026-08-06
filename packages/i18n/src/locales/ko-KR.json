@@ -652,6 +652,8 @@
 		"pdfLoadFailed": "PDF를 불러오지 못했습니다.",
 		"downloadPdf": "여기를 눌러",
 		"downloadPdfSuffix": "PDF를 직접 다운로드하세요.",
+		"navigationFailed": "이동하지 못했습니다. EPUB 파일이 올바른지 확인하세요.",
+		"readingTime": "읽은 시간: {{time}}",
 		"locationManager": "위치 관리",
 		"contents": "목차",
 		"tableOfContents": "목차",
@@ -698,6 +700,14 @@
 		"read": "읽기"
 	},
 	"entityUi": {
+		"fileMissing": "파일 누락",
+		"pagesLeft": "{{count}}페이지 남음",
+		"booksCount": "책 {{count}}권",
+		"metadataUpdateFailed": "메타데이터를 업데이트하지 못했습니다",
+		"lockedFieldsUpdateFailed": "잠금 필드를 업데이트하지 못했습니다",
+		"completionUpdateFailed": "책의 완독 상태를 업데이트하지 못했습니다",
+		"currentSessionDeleteFailed": "현재 읽기 세션을 삭제하지 못했습니다",
+		"readHistoryDeleteFailed": "읽기 기록을 삭제하지 못했습니다",
 		"pages": "페이지 수",
 		"size": "크기",
 		"format": "형식",

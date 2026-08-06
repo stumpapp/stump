@@ -8,6 +8,7 @@ import {
 	ReadingMode,
 	SupportedFont,
 } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Book, Contents, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
@@ -181,6 +182,7 @@ const injectFontStylesheet = (rendition: Rendition) => {
  * epub reader as an additional option.
  */
 export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { isDarkVariant } = useTheme()
 
@@ -647,10 +649,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				await rendition.next()
 			} catch (err) {
 				console.error(err)
-				toast.error('')
+				toast.error(t('common.somethingWentWrong'))
 			}
 		}
-	}, [rendition])
+	}, [rendition, t])
 
 	/**
 	 * A callback for when the reader should paginate backward. This will only run if the
@@ -662,10 +664,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				await rendition.prev()
 			} catch (err) {
 				console.error(err)
-				toast.error('Something went wrong!')
+				toast.error(t('common.somethingWentWrong'))
 			}
 		}
-	}, [rendition])
+	}, [rendition, t])
 
 	/**
 	 * A callback for when the user wants to navigate to a specific cfi. This will only run
@@ -683,10 +685,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				await rendition.display(cfi)
 			} catch (err) {
 				console.error(err)
-				toast.error('Failed to navigate, please check the integrity of the epub file')
+				toast.error(t('readerUi.navigationFailed'))
 			}
 		},
-		[rendition],
+		[rendition, t],
 	)
 
 	// jump to a specific section
@@ -707,7 +709,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				return
 			}
 
-			const failureMessage = 'Failed to navigate, please check the integrity of the epub file'
+			const failureMessage = t('readerUi.navigationFailed')
 			const adjusted = href.split('#')[0]
 
 			let spineItem = book.spine.get(adjusted)
@@ -747,7 +749,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				toast.error(failureMessage)
 			}
 		},
-		[book, rendition],
+		[book, rendition, t],
 	)
 
 	/**

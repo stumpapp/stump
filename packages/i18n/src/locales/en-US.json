@@ -652,6 +652,8 @@
 		"pdfLoadFailed": "PDF failed to load.",
 		"downloadPdf": "Click here",
 		"downloadPdfSuffix": "to download it directly.",
+		"navigationFailed": "Failed to navigate. Please check the integrity of the EPUB file.",
+		"readingTime": "Reading time: {{time}}",
 		"locationManager": "Location manager",
 		"contents": "Contents",
 		"tableOfContents": "Table of contents",
@@ -698,6 +700,14 @@
 		"read": "Read"
 	},
 	"entityUi": {
+		"fileMissing": "File missing",
+		"pagesLeft": "{{count}} pages left",
+		"booksCount": "{{count}} books",
+		"metadataUpdateFailed": "Failed to update metadata",
+		"lockedFieldsUpdateFailed": "Failed to update locked fields",
+		"completionUpdateFailed": "Failed to update book completion status",
+		"currentSessionDeleteFailed": "Failed to delete the current reading session",
+		"readHistoryDeleteFailed": "Failed to delete reading history",
 		"pages": "Pages",
 		"size": "Size",
 		"format": "Format",

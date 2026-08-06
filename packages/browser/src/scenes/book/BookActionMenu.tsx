@@ -65,21 +65,21 @@ export default function BookActionMenu({ book }: Props) {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to update book completion status')
+			toast.error(t('entityUi.completionUpdateFailed'))
 		},
 	})
 	const { mutate: deleteCurrentSession } = useGraphQLMutation(deleteMutation, {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to delete current session')
+			toast.error(t('entityUi.currentSessionDeleteFailed'))
 		},
 	})
 	const { mutate: deleteReadHistory } = useGraphQLMutation(deleteHistoryMutation, {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error('Failed to delete read history')
+			toast.error(t('entityUi.readHistoryDeleteFailed'))
 		},
 	})
 

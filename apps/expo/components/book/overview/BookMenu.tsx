@@ -235,7 +235,7 @@ export default function BookMenu({ data }: Props) {
 								icon={isFavorite ? 'heart.fill' : 'heart'}
 								onPress={() => favoriteBook()}
 							>
-								{isFavorite ? 'Unfavorite' : 'Favorite'}
+								{t(isFavorite ? 'common.unfavorite' : 'common.favorite')}
 							</Stack.Toolbar.MenuAction>
 						</Stack.Toolbar.Menu>
 

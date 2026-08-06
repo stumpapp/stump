@@ -1,4 +1,5 @@
 import { cn, cx } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, ArrowRight, MoreHorizontal } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useWindowSize } from 'rooks'
@@ -14,6 +15,7 @@ type PaginationArrowProps = {
 }
 
 function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: PaginationArrowProps) {
+	const { t } = useLocaleContext()
 	const ArrowIcon = kind === 'previous' ? ArrowLeft : ArrowRight
 
 	// NOTE: notice I am wrapping the link (which will have pointer-events-none when
@@ -41,7 +43,7 @@ function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: Pagination
 						{ 'pl-1 pr-0': kind === 'next' },
 					)}
 				>
-					{kind === 'next' && 'Next'}
+					{kind === 'next' && t('pagination.buttons.next')}
 					<ArrowIcon
 						className={cx(
 							'h-4 w-4 md:h-5 md:w-5',
@@ -51,7 +53,7 @@ function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: Pagination
 						)}
 						aria-hidden="true"
 					/>
-					{kind === 'previous' && 'Previous'}
+					{kind === 'previous' && t('pagination.buttons.previous')}
 				</div>
 			</button>
 		</div>

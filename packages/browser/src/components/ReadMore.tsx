@@ -1,4 +1,5 @@
 import { cn, useBoolean } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 import { DEBUG_ENV } from '../index.ts'
 import Markdown from './markdown/MarkdownPreview.tsx'
@@ -12,6 +13,7 @@ const COLLAPSED_HEIGHT = 72
 const MAX_EXPANDED_HEIGHT = 300
 
 export default function ReadMore({ text, muted }: Props) {
+	const { t } = useLocaleContext()
 	const [showingAll, { toggle }] = useBoolean(false)
 
 	const resolvedText = text ? text : DEBUG_ENV ? DEBUG_FAKE_TEXT : ''
@@ -48,7 +50,7 @@ export default function ReadMore({ text, muted }: Props) {
 					onClick={toggle}
 					className="px-3 py-0.5 text-xs font-medium cursor-pointer rounded-full border border-dashed border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 				>
-					{showingAll ? 'Read less' : 'Read more'}
+					{showingAll ? t('common.readLess') : t('common.readMore')}
 				</button>
 				<div className="flex-1 border-t border-dashed border-border" />
 			</div>

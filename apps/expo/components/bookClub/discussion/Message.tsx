@@ -215,7 +215,12 @@ function Message({
 							>
 								<Icon as={MessageSquare} className="h-3.5 w-3.5 text-foreground-muted opacity-90" />
 								<Text size="xs" className="font-medium text-foreground-muted opacity-90">
-									{threadChildrenCount} {threadChildrenCount === 1 ? 'reply' : 'replies'}
+									{t(
+										threadChildrenCount === 1
+											? 'bookClub.replyCountOne'
+											: 'bookClub.replyCountOther',
+										{ count: threadChildrenCount },
+									)}
 								</Text>
 							</Pressable>
 						)}

@@ -1,8 +1,9 @@
 import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import pluralize from 'pluralize'
 import { Pressable, Text, View } from 'react-native'
+
+import { useTranslate } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
@@ -53,6 +54,7 @@ type Props = {
 }
 
 export function BookClubCard({ club }: Props) {
+	const { t } = useTranslate()
 	const data = useFragment(fragment, club)
 	const router = useRouter()
 	const {
@@ -80,7 +82,7 @@ export function BookClubCard({ club }: Props) {
 			className="w-full"
 		>
 			<Card>
-				<Card.Row className="flex-row items-start gap-3">
+				<Card.Row className="gap-3 flex-row items-start">
 					<ThumbnailImage
 						key={imageProps?.url}
 						source={{
@@ -95,7 +97,7 @@ export function BookClubCard({ club }: Props) {
 						originalDimensions={imageProps?.originalDimensions}
 					/>
 
-					<View className="flex-1 justify-between gap-4">
+					<View className="gap-4 flex-1 justify-between">
 						<View className="gap-1">
 							<Heading className="font-medium">{data.name}</Heading>
 							{data.description && (
@@ -105,7 +107,7 @@ export function BookClubCard({ club }: Props) {
 							)}
 						</View>
 
-						<View className="flex-row items-center gap-2">
+						<View className="gap-2 flex-row items-center">
 							<AvatarStack
 								avatars={avatars}
 								overflowCount={overflowCount}
@@ -115,7 +117,7 @@ export function BookClubCard({ club }: Props) {
 								}}
 							/>
 							<Text className="text-sm text-foreground-muted">
-								{pluralize('member', data.membersCount, true)}
+								{t('bookClub.memberCount', { count: data.membersCount })}
 							</Text>
 						</View>
 					</View>

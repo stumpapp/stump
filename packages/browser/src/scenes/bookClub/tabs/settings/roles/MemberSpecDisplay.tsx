@@ -4,8 +4,6 @@ import { useState } from 'react'
 
 import { useBookClubContext } from '@/components/bookClub'
 
-const upperFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
-
 export default function MemberSpecDisplay() {
 	const { t } = useLocaleContext()
 	const {
@@ -56,7 +54,11 @@ export default function MemberSpecDisplay() {
 								return (
 									<tr key={key}>
 										<td className="py-4 pl-4 pr-3 text-sm font-medium sm:pl-6 text-foreground">
-											<Text size="sm">{upperFirst(key.toLowerCase())}</Text>
+											<Text size="sm">
+												{t(
+													`createOrUpdateBookClubForm.fields.member_role_spec.${key.toLowerCase()}.label`,
+												)}
+											</Text>
 										</td>
 										<td className="px-3 py-4 border-l border-l-border">
 											<Input

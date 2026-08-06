@@ -1,7 +1,6 @@
 import { Heading, Label, Text } from '@stump/components'
 import { LibraryPattern } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import pluralize from 'pluralize'
 import { PropsWithChildren } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
@@ -76,7 +75,7 @@ export default function LibraryReview() {
 					<div>
 						<Label>{t(getLabelKey('quality'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.thumbnailConfig.quality || 'Default'}
+							{state.thumbnailConfig.quality || t(getKey('default'))}
 						</Text>
 					</div>
 
@@ -114,7 +113,7 @@ export default function LibraryReview() {
 				<div>
 					<Label>{t(getLabelKey('description'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.description || 'None'}
+						{state.description || t(getKey('none'))}
 					</Text>
 				</div>
 
@@ -158,7 +157,9 @@ export default function LibraryReview() {
 						)}
 						{!!state.ignoreRules?.length && (
 							<Text variant="muted" size="sm">
-								{state.ignoreRules.length} {pluralize('rule', state.ignoreRules.length)}
+								{t(getKey(state.ignoreRules.length === 1 ? 'ignoreRule' : 'ignoreRules'), {
+									count: state.ignoreRules.length,
+								})}
 							</Text>
 						)}
 					</div>
@@ -166,42 +167,42 @@ export default function LibraryReview() {
 					<div>
 						<Label>{t(getLabelKey('processMetadata'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.processMetadata ? 'Yes' : 'No'}
+							{t(getKey(state.processMetadata ? 'yes' : 'no'))}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('watch'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.watch ? 'Yes' : 'No'}
+							{t(getKey(state.watch ? 'yes' : 'no'))}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('generateFileHashes'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.generateFileHashes ? 'Yes' : 'No'}
+							{t(getKey(state.generateFileHashes ? 'yes' : 'no'))}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('generateKoreaderHashes'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.generateKoreaderHashes ? 'Yes' : 'No'}
+							{t(getKey(state.generateKoreaderHashes ? 'yes' : 'no'))}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('convertRar'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.convertRarToZip ? 'Yes' : 'No'}
+							{t(getKey(state.convertRarToZip ? 'yes' : 'no'))}
 						</Text>
 					</div>
 
 					<div>
 						<Label>{t(getLabelKey('deleteConversions'))}</Label>
 						<Text variant="muted" size="sm">
-							{state.hardDeleteConversions ? 'Yes' : 'No'}
+							{t(getKey(state.hardDeleteConversions ? 'yes' : 'no'))}
 						</Text>
 					</div>
 				</div>

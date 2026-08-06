@@ -1,5 +1,6 @@
 import { Button, cx } from '@stump/components'
 import { OrderDirection } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { SortAsc } from 'lucide-react'
 
 type Props = {
@@ -7,6 +8,8 @@ type Props = {
 	onChange: (value: OrderDirection) => void
 }
 export default function OrderByDirection({ value, onChange }: Props) {
+	const { t } = useLocaleContext()
+
 	return (
 		<Button
 			variant="ghost"
@@ -20,7 +23,7 @@ export default function OrderByDirection({ value, onChange }: Props) {
 					'rotate-180': value === OrderDirection.Desc,
 				})}
 			/>
-			{value === OrderDirection.Desc ? 'Descending' : 'Ascending'}
+			{value === OrderDirection.Desc ? t('common.descending') : t('common.ascending')}
 		</Button>
 	)
 }

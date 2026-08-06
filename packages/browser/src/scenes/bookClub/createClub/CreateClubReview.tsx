@@ -28,7 +28,7 @@ export default function CreateClubReview() {
 				<div>
 					<Label>{t(getLabelKey('description'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.description || 'None'}
+						{state.description || t('createBookClubScene.form.review.none')}
 					</Text>
 				</div>
 			</ReviewStepContainer>

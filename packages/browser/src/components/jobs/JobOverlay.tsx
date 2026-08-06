@@ -1,10 +1,12 @@
 import { useFooterOffsetStore, useJobStore } from '@stump/client'
 import { ProgressBar, Text } from '@stump/components'
 import { JobUpdate } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
 export default function JobOverlay() {
+	const { t } = useLocaleContext()
 	const storeJobs = useJobStore((state) => state.jobs)
 
 	/**
@@ -51,7 +53,7 @@ export default function JobOverlay() {
 				>
 					<div className="w-full">
 						<Text size="sm" className="font-medium line-clamp-2">
-							{firstRunningJob.message ?? 'Job in progress'}
+							{firstRunningJob.message ?? t('jobOverlay.backupHeading')}
 						</Text>
 						{firstRunningJob.subtitle && (
 							<Text size="xs" className="line-clamp-1 text-muted-foreground">

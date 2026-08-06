@@ -138,7 +138,7 @@ export default function LoginOrClaimScene() {
 			return (
 				<Alert variant="destructive" className="sm:max-w-md md:max-w-lg">
 					<ShieldAlert />
-					<AlertDescription>{message || 'An unknown error occurred'}</AlertDescription>
+					<AlertDescription>{message || t('common.unknownError')}</AlertDescription>
 				</Alert>
 			)
 		}

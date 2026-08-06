@@ -124,7 +124,7 @@ export default function BookClubBookItem({ data }: Props) {
 		)
 		const link = details?.url
 		const isExternal = !book.entity
-		const heading = details?.title ?? 'Untitled'
+		const heading = details?.title ?? t('common.unknownTitle')
 		const author = details?.author
 
 		return (
@@ -138,7 +138,7 @@ export default function BookClubBookItem({ data }: Props) {
 					{author && <Text size="xs">{author}</Text>}
 					{link && (
 						<Link {...(isExternal ? { href: link } : { to: link })} className="text-xs">
-							{isExternal ? 'External link' : 'Access book'}
+							{isExternal ? t('bookClubUi.externalLink') : t('bookClubUi.accessBook')}
 						</Link>
 					)}
 				</div>

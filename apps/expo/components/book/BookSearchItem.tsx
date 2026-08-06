@@ -2,10 +2,9 @@ import { useSDK } from '@stump/client'
 import { formatBytes } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import pluralize from 'pluralize'
 import { Pressable, View } from 'react-native'
 
-import { useDisplay } from '~/lib/hooks'
+import { useDisplay, useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
@@ -49,6 +48,7 @@ type Props = {
 }
 
 export default function BookSearchItem({ book }: Props) {
+	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
@@ -94,7 +94,8 @@ export default function BookSearchItem({ book }: Props) {
 					<Text>{data.resolvedName}</Text>
 
 					<Text className="text-foreground-muted">
-						{formatBytes(data.size)} • {data.pages} {pluralize('page', data.pages)}
+						{formatBytes(data.size)} • {data.pages}{' '}
+						{t(data.pages === 1 ? 'common.page' : 'common.pages')}
 					</Text>
 				</View>
 			</View>

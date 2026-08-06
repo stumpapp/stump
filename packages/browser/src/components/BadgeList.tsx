@@ -1,4 +1,5 @@
 import { cn, useBoolean } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Children, ReactNode, useEffect, useRef, useState } from 'react'
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export default function BadgeList({ children, className, maxItems = 20 }: Props) {
+	const { t } = useLocaleContext()
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	const [expanded, { toggle }] = useBoolean(false)
@@ -44,7 +46,9 @@ export default function BadgeList({ children, className, maxItems = 20 }: Props)
 						onClick={toggle}
 						className="px-3 py-0.5 text-xs font-medium cursor-pointer rounded-full border border-dashed border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 					>
-						{expanded ? 'See less' : `See ${items.length - maxItems} more`}
+						{expanded
+							? t('common.seeLess')
+							: t('common.seeMoreCount', { count: items.length - maxItems })}
 					</button>
 					<div className="flex-1 border-t border-dashed border-border" />
 				</div>

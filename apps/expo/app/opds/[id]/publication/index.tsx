@@ -267,7 +267,7 @@ export default function Screen() {
 
 						<View className="gap-2">
 							<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
-								{title || 'Untitled'}
+								{title || t('common.unknownTitle')}
 							</Heading>
 
 							{seriesText && (

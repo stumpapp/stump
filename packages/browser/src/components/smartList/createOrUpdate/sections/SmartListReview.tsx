@@ -29,7 +29,7 @@ export default function SmartListReview() {
 				<div>
 					<Label>{t(getLabelKey('description'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.description || 'None'}
+						{state.description || t('createSmartListScene.form.review.none')}
 					</Text>
 				</div>
 

@@ -152,7 +152,7 @@ export default function APIKeyTable() {
 						>
 							{valid
 								? intlFormat(parsed, { month: 'long', day: 'numeric', year: 'numeric' })
-								: 'Never'}
+								: t(getKey('noExpiration'))}
 						</Text>
 					)
 				},

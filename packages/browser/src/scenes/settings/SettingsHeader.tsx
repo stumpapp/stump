@@ -90,7 +90,7 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 							to={`${basePath}${backlink.to}`}
 							className="text-muted-foreground no-underline hover:underline"
 						>
-							{t(`settingsScene.${backlink.localeKey}`) ?? 'Back'}
+							{t(`settingsScene.${backlink.localeKey}`) ?? t('common.back')}
 						</Link>
 						{' /'}
 					</span>

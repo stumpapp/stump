@@ -2377,6 +2377,19 @@
 				"updateSubmitButton": "사용자 수정"
 			},
 			"loginActivity": {
+				"heading": "인증 기록",
+				"description": "보안을 위해 모든 로그인 시도를 기록하고 저장합니다",
+				"empty": "로그인 활동 없음",
+				"emptyDescription": "기록된 인증 시도가 없습니다",
+				"columns": {
+					"user": "사용자",
+					"timestamp": "시각",
+					"ipAddress": "IP 주소",
+					"userAgent": "사용자 에이전트",
+					"result": "인증 결과"
+				},
+				"success": "성공",
+				"failure": "실패",
 				"deleteConfirmation": {
 					"title": "활동 기록 삭제",
 					"description": "모든 로그인 활동 기록을 데이터베이스에서 영구적으로 삭제합니다",
@@ -2389,6 +2402,35 @@
 				"booksInProgress": "읽는 중인 책",
 				"powerReader": "다독가",
 				"booksRead": "{{count}}권"
+			},
+			"table": {
+				"heading": "기존 계정",
+				"description": "서버에 있는 모든 계정 목록",
+				"createUser": "사용자 만들기",
+				"columns": {
+					"user": "사용자",
+					"role": "역할",
+					"createdAt": "생성일",
+					"lastLogin": "마지막 로그인",
+					"sessions": "세션",
+					"sessionsDescription": "이 사용자의 만료되지 않은 로그인 세션 수",
+					"status": "상태"
+				},
+				"serverOwner": "서버 소유자",
+				"member": "일반 사용자",
+				"locked": "잠김",
+				"active": "활성",
+				"inspect": {
+					"title": "사용자 살펴보기",
+					"description": "사용자의 정보와 구성을 살펴봅니다",
+					"rawJson": "원시 JSON"
+				},
+				"delete": {
+					"title": "사용자 계정 삭제",
+					"description": "이 사용자를 삭제하시겠습니까? 완전 삭제 옵션을 선택하면 사용자와 관련 데이터가 모두 영구적으로 삭제됩니다.",
+					"hardDelete": "사용자 완전 삭제",
+					"confirm": "사용자 삭제"
+				}
 			}
 		},
 		"server/email": {

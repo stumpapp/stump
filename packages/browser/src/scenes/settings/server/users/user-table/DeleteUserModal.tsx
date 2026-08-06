@@ -1,6 +1,7 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, CheckBox, Dialog } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 
@@ -20,6 +21,7 @@ type Props = {
 }
 
 export default function DeleteUserModal({ deletingUser, onClose }: Props) {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 
 	const [hardDelete, setHardDelete] = useState(false)
@@ -44,10 +46,9 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 		<Dialog open={!!deletingUser}>
 			<Dialog.Content size="sm">
 				<Dialog.Header>
-					<Dialog.Title>Delete User Account</Dialog.Title>
+					<Dialog.Title>{t('settingsScene.server/users.table.delete.title')}</Dialog.Title>
 					<Dialog.Description>
-						Are you sure you want to delete this user? If you select the hard delete option, this
-						user and all of their data will be permanently deleted.
+						{t('settingsScene.server/users.table.delete.description')}
 					</Dialog.Description>
 					<Dialog.Close onClick={onClose} disabled={isPending} />
 				</Dialog.Header>
@@ -55,7 +56,7 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
 					<div className="shrink-0">
 						<CheckBox
-							label="Hard Delete User"
+							label={t('settingsScene.server/users.table.delete.hardDelete')}
 							checked={hardDelete}
 							onClick={() => setHardDelete((prev) => !prev)}
 						/>
@@ -63,10 +64,10 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 
 					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
 						<Button variant="outline" onClick={onClose} disabled={isPending}>
-							Cancel
+							{t('common.cancel')}
 						</Button>
 						<Button isLoading={isPending} disabled={isPending} onClick={handleDelete}>
-							Delete User
+							{t('settingsScene.server/users.table.delete.confirm')}
 						</Button>
 					</div>
 				</Dialog.Footer>

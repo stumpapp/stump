@@ -1,6 +1,7 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
 import { graphql, LoginActivityTableQuery } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import {
@@ -12,6 +13,7 @@ import {
 import { intlFormat } from 'date-fns'
 import { Fingerprint, Slash } from 'lucide-react'
 import { useState } from 'react'
+import { useMemo } from 'react'
 
 import { Table } from '@/components/table'
 
@@ -46,6 +48,7 @@ export const prefetchLoginActivity = async (sdk: Api, client: QueryClient) =>
 	})
 
 export default function LoginActivityTable() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const {
 		data: { loginActivity },
@@ -55,6 +58,7 @@ export default function LoginActivityTable() {
 		pageIndex: 0,
 		pageSize: 10,
 	})
+	const columns = useMemo(() => getBaseColumns(t), [t])
 
 	if (!loginActivity?.length && !pagination.pageIndex) {
 		return (
@@ -68,9 +72,9 @@ export default function LoginActivityTable() {
 					</div>
 
 					<div className="text-center">
-						<Text>No login activity</Text>
+						<Text>{t('settingsScene.server/users.loginActivity.empty')}</Text>
 						<Text size="sm" variant="muted">
-							You cleared this, didn&#39;t you?
+							{t('settingsScene.server/users.loginActivity.emptyDescription')}
 						</Text>
 					</div>
 				</div>
@@ -83,7 +87,7 @@ export default function LoginActivityTable() {
 		<Card>
 			<Table
 				data={loginActivity || []}
-				columns={baseColumns}
+				columns={columns}
 				fullWidth
 				options={{
 					defaultColumn: {
@@ -105,69 +109,72 @@ export default function LoginActivityTable() {
 
 const columnHelper = createColumnHelper<LoginActivity>()
 
-const baseColumns = [
-	columnHelper.display({
-		cell: ({
-			row: {
-				original: { user },
+const getBaseColumns = (t: ReturnType<typeof useLocaleContext>['t']) =>
+	[
+		columnHelper.display({
+			cell: ({
+				row: {
+					original: { user },
+				},
+			}) => {
+				if (!user) {
+					return null
+				}
+				return <UsernameRow {...user} />
 			},
-		}) => {
-			if (!user) {
-				return null
-			}
-			return <UsernameRow {...user} />
-		},
-		header: 'User',
-		id: 'user',
-		size: 100,
-	}),
-	columnHelper.accessor('timestamp', {
-		cell: ({ row: { original: activity } }) => {
-			const formatted = intlFormat(new Date(activity.timestamp), {
-				month: 'long',
-				day: 'numeric',
-				year: 'numeric',
-				hour: 'numeric',
-				minute: '2-digit',
-			})
-			return (
-				<Text title={formatted} className="line-clamp-1" size="sm">
-					{formatted}
+			header: t('settingsScene.server/users.loginActivity.columns.user'),
+			id: 'user',
+			size: 100,
+		}),
+		columnHelper.accessor('timestamp', {
+			cell: ({ row: { original: activity } }) => {
+				const formatted = intlFormat(new Date(activity.timestamp), {
+					month: 'long',
+					day: 'numeric',
+					year: 'numeric',
+					hour: 'numeric',
+					minute: '2-digit',
+				})
+				return (
+					<Text title={formatted} className="line-clamp-1" size="sm">
+						{formatted}
+					</Text>
+				)
+			},
+			header: t('settingsScene.server/users.loginActivity.columns.timestamp'),
+			size: 100,
+		}),
+		columnHelper.accessor('ipAddress', {
+			cell: ({ row: { original: activity } }) => (
+				<Text className="line-clamp-1" size="sm">
+					{activity.ipAddress}
 				</Text>
-			)
-		},
-		header: 'Timestamp',
-		size: 100,
-	}),
-	columnHelper.accessor('ipAddress', {
-		cell: ({ row: { original: activity } }) => (
-			<Text className="line-clamp-1" size="sm">
-				{activity.ipAddress}
-			</Text>
-		),
-		header: 'IP address',
-		size: 100,
-	}),
-	columnHelper.accessor('userAgent', {
-		cell: ({ row: { original: activity } }) => (
-			<Text
-				size="sm"
-				variant="muted"
-				className="max-w-sm md:max-w-xl line-clamp-1"
-				title={activity.userAgent}
-			>
-				{activity.userAgent}
-			</Text>
-		),
-		header: 'User-agent',
-	}),
-	columnHelper.display({
-		cell: ({ row: { original: activity } }) => (
-			<Badge variant={activity.authenticationSuccessful ? 'success' : 'error'} size="xs">
-				{activity.authenticationSuccessful ? 'Success' : 'Failure'}
-			</Badge>
-		),
-		header: 'Auth result',
-		id: 'authenticationSuccessful',
-	}),
-] as ColumnDef<LoginActivity>[]
+			),
+			header: t('settingsScene.server/users.loginActivity.columns.ipAddress'),
+			size: 100,
+		}),
+		columnHelper.accessor('userAgent', {
+			cell: ({ row: { original: activity } }) => (
+				<Text
+					size="sm"
+					variant="muted"
+					className="max-w-sm md:max-w-xl line-clamp-1"
+					title={activity.userAgent}
+				>
+					{activity.userAgent}
+				</Text>
+			),
+			header: t('settingsScene.server/users.loginActivity.columns.userAgent'),
+		}),
+		columnHelper.display({
+			cell: ({ row: { original: activity } }) => (
+				<Badge variant={activity.authenticationSuccessful ? 'success' : 'error'} size="xs">
+					{activity.authenticationSuccessful
+						? t('settingsScene.server/users.loginActivity.success')
+						: t('settingsScene.server/users.loginActivity.failure')}
+				</Badge>
+			),
+			header: t('settingsScene.server/users.loginActivity.columns.result'),
+			id: 'authenticationSuccessful',
+		}),
+	] as ColumnDef<LoginActivity>[]

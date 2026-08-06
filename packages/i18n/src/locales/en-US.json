@@ -2377,6 +2377,19 @@
 				"updateSubmitButton": "Update user"
 			},
 			"loginActivity": {
+				"heading": "Authentication history",
+				"description": "All login attempts are logged and stored for security purposes",
+				"empty": "No login activity",
+				"emptyDescription": "No authentication attempts have been recorded",
+				"columns": {
+					"user": "User",
+					"timestamp": "Timestamp",
+					"ipAddress": "IP address",
+					"userAgent": "User agent",
+					"result": "Auth result"
+				},
+				"success": "Success",
+				"failure": "Failure",
 				"deleteConfirmation": {
 					"title": "Delete activity",
 					"description": "All records of login activity will be permanently deleted from the database",
@@ -2389,6 +2402,35 @@
 				"booksInProgress": "Books in progress",
 				"powerReader": "Power reader",
 				"booksRead": "{{count}} books"
+			},
+			"table": {
+				"heading": "Existing accounts",
+				"description": "A list of all existing accounts on the server",
+				"createUser": "Create user",
+				"columns": {
+					"user": "User",
+					"role": "Role",
+					"createdAt": "Created at",
+					"lastLogin": "Last login",
+					"sessions": "Sessions",
+					"sessionsDescription": "The number of non-expired login sessions for this user",
+					"status": "Status"
+				},
+				"serverOwner": "Server owner",
+				"member": "Member",
+				"locked": "Locked",
+				"active": "Active",
+				"inspect": {
+					"title": "Inspect user",
+					"description": "Inspect a user's information and configuration",
+					"rawJson": "Raw JSON"
+				},
+				"delete": {
+					"title": "Delete user account",
+					"description": "Are you sure you want to delete this user? If you select the hard delete option, this user and all of their data will be permanently deleted.",
+					"hardDelete": "Hard delete user",
+					"confirm": "Delete user"
+				}
 			}
 		},
 		"server/email": {

@@ -1,6 +1,7 @@
 import { useGraphQL, useSDK } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { graphql, UserTableQuery } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper, PaginationState } from '@tanstack/react-table'
@@ -67,6 +68,7 @@ export const prefetchUsersTable = async (sdk: Api, client: QueryClient) =>
 export type User = NonNullable<NonNullable<UserTableQuery>['users']>['nodes'][number]
 
 export default function UserTable() {
+	const { t } = useLocaleContext()
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
 		pageSize: 10,
@@ -104,7 +106,7 @@ export default function UserTable() {
 
 	const columns = useMemo(
 		() => [
-			...baseColumns,
+			...getBaseColumns(t),
 			columnHelper.display({
 				cell: ({ row: { original } }) => (
 					<div className="md:w-2 inline-flex items-end">
@@ -119,7 +121,7 @@ export default function UserTable() {
 				size: 28,
 			}),
 		],
-		[],
+		[t],
 	)
 
 	return (
@@ -150,71 +152,80 @@ export default function UserTable() {
 
 const columnHelper = createColumnHelper<User>()
 
-const baseColumns = [
-	columnHelper.accessor('username', {
-		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
-		header: 'User',
-	}),
-	columnHelper.display({
-		cell: ({
-			row: {
-				original: { isServerOwner },
-			},
-		}) => <Text size="sm">{isServerOwner ? 'Server Owner' : 'Member'}</Text>,
-		header: 'Role',
-		id: 'isServerOwner',
-	}),
-	columnHelper.accessor('createdAt', {
-		cell: ({
-			row: {
-				original: { createdAt },
-			},
-		}) => (
-			<Text size="sm" variant="muted">
-				{intlFormat(new Date(createdAt), { month: 'long', day: 'numeric', year: 'numeric' })}
-			</Text>
-		),
-		header: 'Created at',
-	}),
-	columnHelper.accessor('lastLogin', {
-		cell: ({
-			row: {
-				original: { lastLogin },
-			},
-		}) => (
-			<Text size="sm" variant="muted">
-				{lastLogin
-					? intlFormat(new Date(lastLogin), { month: 'long', day: 'numeric', year: 'numeric' })
-					: 'Never'}
-			</Text>
-		),
-		header: 'Last login',
-	}),
-	columnHelper.display({
-		cell: ({ row: { original } }) => (
-			<Text size="sm" variant="muted">
-				{original.loginSessionsCount}
-			</Text>
-		),
-		header: () => (
-			<div className="gap-2 flex w-full items-center">
-				<span>Sessions</span>
-				<ToolTip content="The number of non-expired login sessions for this user">
-					<HelpCircle className="h-3 w-3" />
-				</ToolTip>
-			</div>
-		),
-		id: 'loginSessionsCount',
-		size: 110,
-	}),
-	columnHelper.display({
-		cell: ({ row: { original } }) => (
-			<Badge size="xs" variant={original.isLocked ? 'error' : 'success'}>
-				{original.isLocked ? 'Locked' : 'Active'}
-			</Badge>
-		),
-		header: 'Status',
-		id: 'isLocked',
-		size: 100,
-	}),
-] as ColumnDef<User>[]
+const getBaseColumns = (t: ReturnType<typeof useLocaleContext>['t']) =>
+	[
+		columnHelper.accessor('username', {
+			cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
+			header: t('settingsScene.server/users.table.columns.user'),
+		}),
+		columnHelper.display({
+			cell: ({
+				row: {
+					original: { isServerOwner },
+				},
+			}) => (
+				<Text size="sm">
+					{isServerOwner
+						? t('settingsScene.server/users.table.serverOwner')
+						: t('settingsScene.server/users.table.member')}
+				</Text>
+			),
+			header: t('settingsScene.server/users.table.columns.role'),
+			id: 'isServerOwner',
+		}),
+		columnHelper.accessor('createdAt', {
+			cell: ({
+				row: {
+					original: { createdAt },
+				},
+			}) => (
+				<Text size="sm" variant="muted">
+					{intlFormat(new Date(createdAt), { month: 'long', day: 'numeric', year: 'numeric' })}
+				</Text>
+			),
+			header: t('settingsScene.server/users.table.columns.createdAt'),
+		}),
+		columnHelper.accessor('lastLogin', {
+			cell: ({
+				row: {
+					original: { lastLogin },
+				},
+			}) => (
+				<Text size="sm" variant="muted">
+					{lastLogin
+						? intlFormat(new Date(lastLogin), { month: 'long', day: 'numeric', year: 'numeric' })
+						: t('common.never')}
+				</Text>
+			),
+			header: t('settingsScene.server/users.table.columns.lastLogin'),
+		}),
+		columnHelper.display({
+			cell: ({ row: { original } }) => (
+				<Text size="sm" variant="muted">
+					{original.loginSessionsCount}
+				</Text>
+			),
+			header: () => (
+				<div className="gap-2 flex w-full items-center">
+					<span>{t('settingsScene.server/users.table.columns.sessions')}</span>
+					<ToolTip content={t('settingsScene.server/users.table.columns.sessionsDescription')}>
+						<HelpCircle className="h-3 w-3" />
+					</ToolTip>
+				</div>
+			),
+			id: 'loginSessionsCount',
+			size: 110,
+		}),
+		columnHelper.display({
+			cell: ({ row: { original } }) => (
+				<Badge size="xs" variant={original.isLocked ? 'error' : 'success'}>
+					{original.isLocked
+						? t('settingsScene.server/users.table.locked')
+						: t('settingsScene.server/users.table.active')}
+				</Badge>
+			),
+			header: t('settingsScene.server/users.table.columns.status'),
+			id: 'isLocked',
+			size: 100,
+		}),
+	] as ColumnDef<User>[]

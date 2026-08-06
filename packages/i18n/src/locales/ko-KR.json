@@ -110,161 +110,161 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "이름",
+				"placeholder": "내 북클럽",
+				"description": "북클럽의 이름"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
-				"description": "An optional, short description of your book club"
+				"label": "설명",
+				"placeholder": "함께 좋아하는 책을 읽고 이야기하는 모임",
+				"description": "북클럽에 대한 선택 사항인 짧은 설명"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "비공개 북클럽",
+				"description": "사용하면 초대한 사용자만 북클럽에 가입할 수 있습니다"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "역할 이름 사용자 지정",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"원하는 경우 북클럽 역할에 사용할 이름을 직접 지정할 수 있습니다. 자세한 내용은",
+					"문서 보기"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "회원",
+					"placeholder": "회원",
+					"description": "북클럽의 기본 역할에 사용할 이름"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "운영자",
+					"placeholder": "운영자",
+					"description": "북클럽 운영자 역할에 사용할 이름"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "관리자",
+					"placeholder": "관리자",
+					"description": "북클럽 관리자 역할에 사용할 이름"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "개설자",
+					"placeholder": "개설자",
+					"description": "북클럽 개설자 역할에 사용할 이름입니다. 바로 회원님입니다!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "표시 이름",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "북클럽에서 사용할 선택 사항인 표시 이름입니다. 설정하면 사용자 이름보다 우선하여 표시됩니다"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"label": "진행률 숨기기",
+					"description": "사용하면 내 읽기 진행률이 다른 북클럽 회원에게 표시되지 않습니다"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "이름을 입력하세요",
+			"alreadyTaken": "은(는) 이미 사용 중입니다"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"heading": "새 북클럽 만들기",
+		"subtitle": "선택한 사용자만 참여하는 비공개 북클럽이나 서버의 누구나 참여할 수 있는 공개 북클럽을 만들 수 있습니다",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "단계",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "기본 정보",
+					"heading": "기본 정보",
+					"description": "이름과 설명 등 북클럽의 기본 정보"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "역할",
+					"heading": "역할",
+					"description": "북클럽의 역할 이름을 설정합니다"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "멤버십",
+					"heading": "멤버십 설정",
+					"description": "북클럽의 추가 옵션"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "검토",
+					"heading": "검토",
+					"description": "북클럽을 만들기 전에 설정을 검토합니다"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "예",
+				"no": "아니요",
+				"none": "없음",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "이름",
+					"description": "설명"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "북클럽 만들기"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "기본 정보",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "회원",
+				"roles": "역할",
+				"label": "멤버십"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "일정 관리",
+				"options": "옵션",
+				"label": "읽기 일정"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "삭제",
+				"label": "위험 영역"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "기본 정보",
+			"description": "이름과 설명 등 북클럽의 기본 정보",
 			"form": {
-				"submit": "Update club"
+				"submit": "북클럽 수정"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "회원",
+			"description": "이 북클럽의 회원을 관리합니다",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "역할",
+			"description": "이 북클럽의 역할 이름을 설정합니다",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "현재 역할 이름",
+					"description": "이 북클럽에서 현재 사용 중인 역할 이름"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the scheduled readings for this book club"
+			"title": "일정 관리",
+			"description": "이 북클럽의 읽기 일정을 만들고 관리합니다"
 		},
 		"scheduling/options": {
-			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"title": "옵션",
+			"description": "이 북클럽의 읽기 일정에 대한 추가 옵션"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "삭제 작업",
+			"description": "이 북클럽과 모든 콘텐츠 또는 특정 리소스를 영구적으로 삭제합니다",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "북클럽 삭제",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"이 북클럽과 모든 콘텐츠를 영구적으로 삭제합니다.",
+						"이 작업은 되돌릴 수 없습니다"
 					],
-					"trigger": "Delete club"
+					"trigger": "북클럽 삭제"
 				}
 			}
 		}

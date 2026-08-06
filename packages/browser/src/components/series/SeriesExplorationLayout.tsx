@@ -1,11 +1,13 @@
 import { IconButton, ToolTip } from '@stump/components'
 import { InterfaceLayout } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { LayoutGrid, Table } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useSeriesLayout } from '@/stores/layout'
 
 export default function SeriesExplorationLayout() {
+	const { t } = useLocaleContext()
 	const { layout, setLayout } = useSeriesLayout(
 		'global',
 		useShallow((state) => ({
@@ -16,7 +18,7 @@ export default function SeriesExplorationLayout() {
 
 	return (
 		<div className="gap-1 flex shrink-0 items-center">
-			<ToolTip content="Grid" size="sm">
+			<ToolTip content={t('controlUi.grid')} size="sm">
 				<IconButton
 					variant="ghost"
 					size="xs"
@@ -28,7 +30,7 @@ export default function SeriesExplorationLayout() {
 				</IconButton>
 			</ToolTip>
 
-			<ToolTip content="Table" size="sm" align="end">
+			<ToolTip content={t('controlUi.table')} size="sm" align="end">
 				<IconButton
 					variant="ghost"
 					size="xs"

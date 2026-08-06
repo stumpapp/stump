@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
 import { SeriesFilterInput } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import z from 'zod'
@@ -8,17 +9,6 @@ import z from 'zod'
 import { useSeriesFilterContext } from '../context'
 import AgeRatingFilter from './AgeRatingFilter'
 import GenericFilterMultiselect from './GenericFilterMultiselect'
-
-const DEFAULT_STATUS_OPTIONS = [
-	{
-		label: 'Continuing',
-		value: 'continuing',
-	},
-	{
-		label: 'Ended',
-		value: 'ended',
-	},
-]
 
 const schema = z.object({
 	metadata: z
@@ -36,6 +26,7 @@ const schema = z.object({
 export type SeriesFilterFormSchema = z.infer<typeof schema>
 
 export default function SeriesFilterForm() {
+	const { t } = useLocaleContext()
 	const { filters, setFilters } = useSeriesFilterContext()
 
 	const defaultValues = useMemo(
@@ -78,9 +69,12 @@ export default function SeriesFilterForm() {
 			onSubmit={handleSubmit}
 		>
 			<GenericFilterMultiselect
-				label="Status"
+				label={t('filterUi.status')}
 				name="metadata.status"
-				options={DEFAULT_STATUS_OPTIONS}
+				options={[
+					{ label: t('filterUi.continuing'), value: 'continuing' },
+					{ label: t('filterUi.ended'), value: 'ended' },
+				]}
 			/>
 
 			<AgeRatingFilter variant="series" />

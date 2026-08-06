@@ -8,6 +8,7 @@ import {
 	MediaMetadataFilterInput,
 	ReadingStatus,
 } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -61,6 +62,7 @@ const schema = z.object({
 export type MediaFilterFormSchema = z.infer<typeof schema>
 
 export default function MediaFilterForm() {
+	const { t } = useLocaleContext()
 	const { filters: filtersInput, setFilters } = useFilterContext()
 	const filters = useMemo(() => (filtersInput || {}) as MediaFilterInput, [filtersInput])
 
@@ -215,7 +217,7 @@ export default function MediaFilterForm() {
 		>
 			{!!seriesContext && (
 				<CheckBox
-					label="Only show options available from series"
+					label={t('filterUi.onlySeriesOptions')}
 					checked={onlyFromSeries}
 					onClick={() => setOnlyFromSeries((prev) => !prev)}
 				/>
@@ -229,7 +231,7 @@ export default function MediaFilterForm() {
 				<>
 					<GenericFilterMultiselect
 						name="metadata.genre"
-						label="Genre"
+						label={t('filterUi.genre')}
 						options={
 							data?.genres.map((genre) => ({ label: genre, value: genre.toLowerCase() })) || []
 						}
@@ -237,7 +239,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.writer"
-						label="Writer"
+						label={t('filterUi.writer')}
 						options={
 							data?.writers.map((writer) => ({ label: writer, value: writer.toLowerCase() })) || []
 						}
@@ -245,7 +247,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.penciller"
-						label="Penciller"
+						label={t('filterUi.penciller')}
 						options={
 							data?.pencillers.map((penciller) => ({
 								label: penciller,
@@ -256,7 +258,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.colorist"
-						label="Colorist"
+						label={t('filterUi.colorist')}
 						options={
 							data?.colorists.map((colorist) => ({
 								label: colorist,
@@ -267,7 +269,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.letterer"
-						label="Letterer"
+						label={t('filterUi.letterer')}
 						options={
 							data?.letterers.map((letterer) => ({
 								label: letterer,
@@ -278,7 +280,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.inker"
-						label="Inker"
+						label={t('filterUi.inker')}
 						options={
 							data?.inkers.map((inker) => ({ label: inker, value: inker.toLowerCase() })) || []
 						}
@@ -286,7 +288,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.publisher"
-						label="Publisher"
+						label={t('filterUi.publisher')}
 						options={
 							data?.publishers.map((publisher) => ({
 								label: publisher,
@@ -297,7 +299,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.editor"
-						label="Editor"
+						label={t('filterUi.editor')}
 						options={
 							data?.editors.map((editor) => ({ label: editor, value: editor.toLowerCase() })) || []
 						}
@@ -305,7 +307,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.character"
-						label="Character"
+						label={t('filterUi.character')}
 						options={
 							data?.characters.map((character) => ({
 								label: character,

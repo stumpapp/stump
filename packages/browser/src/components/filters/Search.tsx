@@ -1,4 +1,5 @@
 import { cn, ProgressSpinner, usePreviousIsDifferent } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { SearchIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
@@ -37,6 +38,7 @@ export default function Search({
 	isLoading,
 	isDisabled,
 }: Props) {
+	const { t } = useLocaleContext()
 	const inputRef = useRef<HTMLInputElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [expanded, setExpanded] = useState(() => !!initialValue)
@@ -88,7 +90,7 @@ export default function Search({
 			tabIndex={expanded ? undefined : 0}
 			onClick={expanded ? undefined : handleExpand}
 			onKeyDown={expanded ? undefined : (e) => e.key === 'Enter' && handleExpand()}
-			title={isDisabled ? "This functionality isn't available right now" : undefined}
+			title={isDisabled ? t('filterUi.searchUnavailable') : undefined}
 			className={cn(
 				'h-8 gap-2 text-sm ease-in-out relative flex shrink-0 cursor-pointer items-center overflow-hidden rounded-md border border-border bg-transparent transition-all duration-300',
 				'text-muted-foreground hover:bg-muted/30 hover:text-foreground',
@@ -105,12 +107,12 @@ export default function Search({
 					value={value}
 					onChange={(e) => setValue(e.target.value)}
 					onBlur={handleBlur}
-					placeholder={placeholder || 'Search'}
+					placeholder={placeholder || t('filterUi.search')}
 					disabled={isDisabled}
 					className="pr-8 text-sm h-full w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
 				/>
 			) : (
-				<span className="pr-2.5 text-sm whitespace-nowrap select-none">Search</span>
+				<span className="pr-2.5 text-sm whitespace-nowrap select-none">{t('filterUi.search')}</span>
 			)}
 
 			{showLoader && (

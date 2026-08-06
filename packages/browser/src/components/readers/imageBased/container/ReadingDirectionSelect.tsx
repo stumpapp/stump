@@ -1,5 +1,6 @@
 import { Label, NativeSelect } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export default function ReadingDirectionSelect({ direction, onChange }: Props) {
+	const { t } = useLocaleContext()
 	/**
 	 * A change handler for the reading direction select, asserting that the value
 	 * is either 'ltr' or 'rtl' before setting the reading direction in the book preferences.
@@ -25,13 +27,13 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="reading-direction">Reading direction</Label>
+			<Label htmlFor="reading-direction">{t('readerUi.readingDirection')}</Label>
 			<NativeSelect
 				id="reading-direction"
 				size="sm"
 				options={[
-					{ label: 'Left to right', value: 'LTR' },
-					{ label: 'Right to left', value: 'RTL' },
+					{ label: t('readerUi.leftToRight'), value: 'LTR' },
+					{ label: t('readerUi.rightToLeft'), value: 'RTL' },
 				]}
 				value={direction}
 				onChange={handleChange}

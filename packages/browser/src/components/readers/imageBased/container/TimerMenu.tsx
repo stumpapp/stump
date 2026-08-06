@@ -1,4 +1,5 @@
 import { Dropdown } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Clock } from 'lucide-react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -7,6 +8,7 @@ import { useImageBaseReaderContext } from '../context'
 import ControlButton from './ControlButton'
 
 export default function TimerMenu() {
+	const { t } = useLocaleContext()
 	const { book, timer } = useImageBaseReaderContext()
 	const {
 		bookPreferences: { trackElapsedTime },
@@ -23,10 +25,10 @@ export default function TimerMenu() {
 
 			<Dropdown.Content align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
 				<Dropdown.Item onClick={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}>
-					{trackElapsedTime ? 'Stop Timer' : 'Start Timer'}
+					{trackElapsedTime ? t('readerUi.stopTimer') : t('readerUi.startTimer')}
 				</Dropdown.Item>
 
-				<Dropdown.Item onClick={timer.reset}>Reset Timer</Dropdown.Item>
+				<Dropdown.Item onClick={timer.reset}>{t('readerUi.resetTimer')}</Dropdown.Item>
 			</Dropdown.Content>
 		</Dropdown>
 	)

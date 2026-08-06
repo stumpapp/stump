@@ -1,4 +1,5 @@
 import { Dialog, Tabs, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { List } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
@@ -9,6 +10,7 @@ import TableOfContents from './TableOfContents'
 type LocationTab = 'contents' | 'annotations' | 'bookmarks'
 
 export default function LocationManager() {
+	const { t } = useLocaleContext()
 	const [isOpen, setIsOpen] = useState(false)
 	const [activeTab, setActiveTab] = useState<LocationTab>('contents')
 
@@ -40,7 +42,7 @@ export default function LocationManager() {
 	return (
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<Dialog.Trigger asChild>
-				<ControlButton title="Location manager">
+				<ControlButton title={t('readerUi.locationManager')}>
 					<List className="h-4 w-4" onClick={() => setIsOpen(true)} />
 				</ControlButton>
 			</Dialog.Trigger>
@@ -49,11 +51,11 @@ export default function LocationManager() {
 					<Tabs value={activeTab} variant="primary" activeOnHover>
 						<Tabs.List className="border-none">
 							<Tabs.Trigger value="contents" asChild onClick={() => handleTabChange('contents')}>
-								<Text className="cursor-pointer truncate">Contents</Text>
+								<Text className="cursor-pointer truncate">{t('readerUi.contents')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger value="bookmarks" asChild onClick={() => handleTabChange('bookmarks')}>
-								<Text className="cursor-pointer truncate">Bookmarks</Text>
+								<Text className="cursor-pointer truncate">{t('readerUi.bookmarks')}</Text>
 							</Tabs.Trigger>
 
 							<Tabs.Trigger
@@ -62,7 +64,7 @@ export default function LocationManager() {
 								onClick={() => handleTabChange('annotations')}
 								disabled
 							>
-								<Text className="cursor-pointer truncate">Annotations</Text>
+								<Text className="cursor-pointer truncate">{t('readerUi.annotations')}</Text>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>

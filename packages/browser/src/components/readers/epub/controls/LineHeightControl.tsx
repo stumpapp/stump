@@ -1,4 +1,5 @@
 import { cx, IconButton, Label, TEXT_VARIANTS } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -8,6 +9,7 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useEpubReaderContext } from '../context'
 
 export default function LineHeightControl() {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookEntity },
 	} = useEpubReaderContext()
@@ -40,7 +42,7 @@ export default function LineHeightControl() {
 
 	return (
 		<div className="gap-y-2.5 flex flex-col">
-			<Label>Line height</Label>
+			<Label>{t('readerUi.lineHeight')}</Label>
 			<div className="gap-x-2 flex items-center">
 				<IconButton
 					{...bindMinus({

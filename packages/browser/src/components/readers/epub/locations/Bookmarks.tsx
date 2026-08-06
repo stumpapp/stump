@@ -1,4 +1,5 @@
 import { Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
@@ -9,6 +10,7 @@ type Props = {
 	onLocationChanged?: () => void
 }
 export default function Bookmarks({ onLocationChanged }: Props) {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookMeta },
 		controls: { onGoToCfi },
@@ -29,7 +31,7 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 	)
 
 	if (!bookmarksArray.length) {
-		return <GenericEmptyState title="No bookmarks" />
+		return <GenericEmptyState title={t('readerUi.noBookmarks')} />
 	}
 
 	return (

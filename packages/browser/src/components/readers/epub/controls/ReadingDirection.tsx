@@ -1,11 +1,13 @@
 import { Label, NativeSelect } from '@stump/components'
 import { ReadingDirection as ReadingDirectionGQL } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
 
 export default function ReadingDirection() {
+	const { t } = useLocaleContext()
 	const {
 		readerMeta: { bookEntity: book },
 	} = useEpubReaderContext()
@@ -24,13 +26,13 @@ export default function ReadingDirection() {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="reading-direction">Reading direction</Label>
+			<Label htmlFor="reading-direction">{t('readerUi.readingDirection')}</Label>
 			<NativeSelect
 				id="reading-direction"
 				size="sm"
 				options={[
-					{ label: 'Left to right', value: 'ltr' },
-					{ label: 'Right to left', value: 'rtl' },
+					{ label: t('readerUi.leftToRight'), value: 'ltr' },
+					{ label: t('readerUi.rightToLeft'), value: 'rtl' },
 				]}
 				value={readingDirection}
 				onChange={handleChange}

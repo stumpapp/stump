@@ -1,4 +1,5 @@
 import { Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { EpubContent, useEpubReaderContext } from '../context'
@@ -29,6 +30,7 @@ function TableOfContentsItem({ item, handleSelect }: ItemProps) {
 }
 
 export default function TableOfContents({ onLocationChanged }: Props) {
+	const { t } = useLocaleContext()
 	const { readerMeta, controls } = useEpubReaderContext()
 	const { toc } = readerMeta.bookMeta || {}
 
@@ -43,7 +45,7 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 	return (
 		<div
 			className="px-2 pt-4 scrollbar-hide flex max-h-full flex-col divide-y divide-border overflow-y-auto"
-			aria-label="Table of Contents"
+			aria-label={t('readerUi.tableOfContents')}
 		>
 			{toc?.map((item) => (
 				<TableOfContentsItem key={item.label} item={item} handleSelect={handleSelect} />

@@ -1,4 +1,5 @@
 import { Dialog, Tabs } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Settings2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -7,6 +8,7 @@ import ControlButton from './ControlButton'
 import ReaderSettings from './ReaderSettings'
 
 export default function SettingsDialog() {
+	const { t } = useLocaleContext()
 	const { book, currentPage } = useImageBaseReaderContext()
 
 	const [modality, setModality] = useState<'book' | 'global'>('book')
@@ -26,8 +28,8 @@ export default function SettingsDialog() {
 					onValueChange={(value) => setModality(value as 'book' | 'global')}
 				>
 					<Tabs.List>
-						<Tabs.Trigger value="book">Book</Tabs.Trigger>
-						<Tabs.Trigger value="global">Global</Tabs.Trigger>
+						<Tabs.Trigger value="book">{t('readerUi.book')}</Tabs.Trigger>
+						<Tabs.Trigger value="global">{t('readerUi.global')}</Tabs.Trigger>
 					</Tabs.List>
 				</Tabs>
 

@@ -1,4 +1,5 @@
 import { Label, Slider } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -6,6 +7,7 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useImageBaseReaderContext } from '../context'
 
 export default function BrightnessControl() {
+	const { t } = useLocaleContext()
 	const { book } = useImageBaseReaderContext()
 	const {
 		bookPreferences: { brightness },
@@ -28,7 +30,7 @@ export default function BrightnessControl() {
 
 	return (
 		<div className="space-y-2 py-1.5 flex flex-col">
-			<Label>Brightness</Label>
+			<Label>{t('readerUi.brightness')}</Label>
 			<Slider
 				value={[value]}
 				step={0.01}

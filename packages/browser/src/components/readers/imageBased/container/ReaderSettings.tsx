@@ -1,6 +1,7 @@
 import { BookPreferences, DEFAULT_BOOK_PREFERENCES } from '@stump/client'
 import { Label, RawSwitch } from '@stump/components'
 import { ReadingMode } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import omit from 'lodash/omit'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -18,6 +19,7 @@ type Props = {
 }
 
 export default function ReaderSettings({ forBook, currentPage }: Props) {
+	const { t } = useLocaleContext()
 	const [search, setSearch] = useSearchParams()
 
 	const store = useReaderStore((state) => state)
@@ -105,7 +107,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 	return (
 		<div className="gap-4 flex flex-col" key={forBook}>
 			<div>
-				<Label className="text-xs font-medium text-muted-foreground uppercase">Mode</Label>
+				<Label className="text-xs font-medium text-muted-foreground uppercase">
+					{t('readerUi.mode')}
+				</Label>
 
 				<ReadingModeSelect
 					value={activeSettings.readingMode || DEFAULT_BOOK_PREFERENCES.readingMode}
@@ -119,7 +123,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			</div>
 
 			<div>
-				<Label className="text-xs font-medium text-muted-foreground uppercase">Image Options</Label>
+				<Label className="text-xs font-medium text-muted-foreground uppercase">
+					{t('readerUi.imageOptions')}
+				</Label>
 
 				<DoubleSpreadBehavior
 					behavior={
@@ -141,10 +147,12 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			</div>
 
 			<div>
-				<Label className="text-xs font-medium text-muted-foreground uppercase">Preferences</Label>
+				<Label className="text-xs font-medium text-muted-foreground uppercase">
+					{t('readerUi.preferences')}
+				</Label>
 				<div className="gap-3 pt-2 flex flex-col">
 					<Label className="px-1 flex items-center justify-between">
-						<span>Separate second page</span>
+						<span>{t('readerUi.separateSecondPage')}</span>
 						<RawSwitch
 							checked={activeSettings.secondPageSeparate}
 							onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
@@ -152,7 +160,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					</Label>
 
 					<Label className="px-1 flex items-center justify-between">
-						<span>Pan and zoom without Ctrl / Cmd</span>
+						<span>{t('readerUi.panZoomWithoutCtrl')}</span>
 						<RawSwitch
 							checked={activeSettings.panzoomWithoutCtrl}
 							onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
@@ -160,7 +168,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					</Label>
 
 					<Label className="px-1 flex items-center justify-between">
-						<span>Tap sides to navigate</span>
+						<span>{t('readerUi.tapSidesToNavigate')}</span>
 						<RawSwitch
 							checked={activeSettings.tapSidesToNavigate}
 							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
@@ -168,7 +176,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					</Label>
 
 					<Label className="px-1 flex items-center justify-between">
-						<span>Reading timer</span>
+						<span>{t('readerUi.readingTimer')}</span>
 						<RawSwitch
 							checked={activeSettings.trackElapsedTime}
 							onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
@@ -179,7 +187,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					{!forBook && (
 						<div>
 							<Label className="p-3 flex items-center justify-between rounded-lg border border-dashed border-primary/40 bg-primary/15">
-								<span>Experimental animated reader</span>
+								<span>{t('readerUi.experimentalAnimatedReader')}</span>
 								<RawSwitch
 									checked={store.settings.animatedReader || false}
 									onCheckedChange={(checked) => onChangeExperimentalReader(checked)}

@@ -5,6 +5,7 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat, isValid } from 'date-fns'
 
 import paths from '@/paths'
+import TableColumnHeader from '@/components/table/TableColumnHeader'
 
 import BookLinksCell from './BookLinksCell'
 import CoverImageCell from './CoverImageCell'
@@ -14,11 +15,7 @@ const columnHelper = createColumnHelper<Media>()
 const coverColumn = columnHelper.display({
 	cell: ({ row: { original: book } }) => <CoverImageCell id={book.id} title={book.resolvedName} />,
 	enableGlobalFilter: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Cover
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.cover" variant="muted" />,
 	id: 'cover',
 	size: 80,
 })
@@ -39,11 +36,7 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Name
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.name" variant="muted" />,
 	id: 'name',
 	minSize: 285,
 })
@@ -56,11 +49,7 @@ const pagesColumn = columnHelper.accessor('pages', {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Pages
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.pages" variant="muted" />,
 	id: 'pages',
 	size: 100,
 })
@@ -89,9 +78,7 @@ const publishedColumn = columnHelper.accessor(
 		enableGlobalFilter: true,
 		enableSorting: true,
 		header: () => (
-			<Text size="sm" variant="muted">
-				Published
-			</Text>
+			<TableColumnHeader translationKey="tableColumns.labels.published" variant="muted" />
 		),
 		id: 'published',
 	},
@@ -115,11 +102,7 @@ const addedColumn = columnHelper.accessor(
 		),
 		enableGlobalFilter: true,
 		enableSorting: true,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Added
-			</Text>
-		),
+		header: () => <TableColumnHeader translationKey="tableColumns.labels.added" variant="muted" />,
 		id: 'added',
 	},
 )
@@ -133,9 +116,7 @@ const publisherColumn = columnHelper.accessor(({ metadata }) => metadata?.publis
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
-			Publisher
-		</Text>
+		<TableColumnHeader translationKey="tableColumns.labels.publisher" variant="muted" />
 	),
 	id: 'publisher',
 })
@@ -149,9 +130,7 @@ const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.ageRat
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
-			Age Rating
-		</Text>
+		<TableColumnHeader translationKey="tableColumns.labels.age_rating" variant="muted" />
 	),
 	id: 'age_rating',
 })
@@ -164,11 +143,7 @@ const genresColumn = columnHelper.accessor(({ metadata }) => metadata?.genres?.j
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Genres
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.genres" variant="muted" />,
 	id: 'genres',
 })
 
@@ -180,11 +155,7 @@ const volumeColumn = columnHelper.accessor(({ metadata }) => metadata?.volume, {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Volume
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.volume" variant="muted" />,
 	id: 'volume',
 })
 
@@ -196,11 +167,7 @@ const inkersColumn = columnHelper.accessor(({ metadata }) => metadata?.inkers?.j
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Inkers
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.inkers" variant="muted" />,
 	id: 'inkers',
 })
 
@@ -212,11 +179,7 @@ const writersColumn = columnHelper.accessor(({ metadata }) => metadata?.writers?
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Writers
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.writers" variant="muted" />,
 	id: 'writers',
 })
 
@@ -229,9 +192,7 @@ const pencillersColumn = columnHelper.accessor(({ metadata }) => metadata?.penci
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
-			Pencillers
-		</Text>
+		<TableColumnHeader translationKey="tableColumns.labels.pencillers" variant="muted" />
 	),
 	id: 'pencillers',
 })
@@ -245,9 +206,7 @@ const coloristsColumn = columnHelper.accessor(({ metadata }) => metadata?.colori
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
-			Colorists
-		</Text>
+		<TableColumnHeader translationKey="tableColumns.labels.colorists" variant="muted" />
 	),
 	id: 'colorists',
 })
@@ -262,9 +221,7 @@ const letterersColumn = columnHelper.accessor(({ metadata }) => metadata?.letter
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
-			Letterers
-		</Text>
+		<TableColumnHeader translationKey="tableColumns.labels.letterers" variant="muted" />
 	),
 	id: 'letterers',
 })
@@ -278,11 +235,7 @@ const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.coverArt
 
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Artists
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.artists" variant="muted" />,
 	id: 'artists',
 })
 
@@ -296,9 +249,7 @@ const charactersColumn = columnHelper.accessor(({ metadata }) => metadata?.chara
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
-		<Text size="sm" variant="muted">
-			Characters
-		</Text>
+		<TableColumnHeader translationKey="tableColumns.labels.characters" variant="muted" />
 	),
 	id: 'characters',
 })
@@ -312,11 +263,7 @@ const linksColumn = columnHelper.accessor(({ metadata }) => metadata?.links?.joi
 
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="muted">
-			Links
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.links" variant="muted" />,
 	id: 'links',
 })
 

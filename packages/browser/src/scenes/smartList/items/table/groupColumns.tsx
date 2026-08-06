@@ -1,10 +1,49 @@
 import { cn, Text } from '@stump/components'
 import { SmartListGroupedItem, SmartListViewColumn } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { ChevronDown } from 'lucide-react'
+import { MouseEventHandler, ReactNode } from 'react'
+
+import TableColumnHeader from '@/components/table/TableColumnHeader'
 
 type EntityGroup = SmartListGroupedItem
 const columnHelper = createColumnHelper<EntityGroup>()
+
+type ExpandToggleProps = {
+	expanded: boolean
+	onClick: MouseEventHandler<HTMLButtonElement>
+	disabled?: boolean
+	all?: boolean
+	children?: ReactNode
+}
+
+function ExpandToggle({ expanded, onClick, disabled, all, children }: ExpandToggleProps) {
+	const { t } = useLocaleContext()
+	const translationKey = all
+		? expanded
+			? 'tableColumns.configuration.collapseAll'
+			: 'tableColumns.configuration.expandAll'
+		: expanded
+			? 'tableColumns.configuration.collapse'
+			: 'tableColumns.configuration.expand'
+
+	return (
+		<button
+			title={t(translationKey)}
+			className="gap-x-1 flex items-center"
+			onClick={onClick}
+			disabled={disabled}
+		>
+			<ChevronDown
+				className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200', {
+					'rotate-180': expanded,
+				})}
+			/>
+			{children}
+		</button>
+	)
+}
 
 const buildNameColumn = (isGroupedBySeries: boolean) =>
 	columnHelper.accessor('entity.name', {
@@ -21,22 +60,13 @@ const buildNameColumn = (isGroupedBySeries: boolean) =>
 			const isExpanded = getIsExpanded()
 
 			return (
-				<button
-					title={isExpanded ? 'Collapse' : 'Expand'}
-					className="gap-x-1 flex items-center"
+				<ExpandToggle
+					expanded={isExpanded}
 					onClick={getToggleExpandedHandler()}
 					disabled={!getCanExpand()}
 				>
-					<ChevronDown
-						className={cn(
-							'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
-							{
-								'rotate-180': isExpanded,
-							},
-						)}
-					/>
 					<Text className="text-sm md:text-base line-clamp-1 text-left">{name}</Text>
-				</button>
+				</ExpandToggle>
 			)
 		},
 		enableGlobalFilter: true,
@@ -46,24 +76,22 @@ const buildNameColumn = (isGroupedBySeries: boolean) =>
 
 			return (
 				<div className="gap-x-1 flex items-center">
-					<button
+					<ExpandToggle
+						expanded={isAllRowsExpanded}
+						all
 						onClick={(e) => {
 							// Don't update the sorting state when clicking the expand all button
 							e.stopPropagation()
 							const handler = getToggleAllRowsExpandedHandler()
 							handler(e)
 						}}
-						title={isAllRowsExpanded ? 'Collapse all' : 'Expand all'}
-					>
-						<ChevronDown
-							className={cn('h-4 w-4 text-muted-foreground transition-transform duration-200', {
-								'rotate-180': isAllRowsExpanded,
-							})}
-						/>
-					</button>
-					<Text className="text-sm" variant="muted">
-						{isGroupedBySeries ? 'Series' : 'Library'}
-					</Text>
+					/>
+					<TableColumnHeader
+						translationKey={
+							isGroupedBySeries ? 'tableColumns.labels.series' : 'tableColumns.labels.library'
+						}
+						variant="muted"
+					/>
 				</div>
 			)
 		},
@@ -82,11 +110,7 @@ const booksCountColumn = columnHelper.accessor(({ books }) => books.length, {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" className="text-left" variant="muted">
-			Books
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.books" variant="muted" />,
 	id: 'books',
 })
 

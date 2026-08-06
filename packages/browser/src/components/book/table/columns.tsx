@@ -7,6 +7,7 @@ import { format, intlFormat } from 'date-fns'
 
 import paths from '@/paths'
 
+import TableColumnHeader from '../../table/TableColumnHeader'
 import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'
 import CoverImageCell from './CoverImageCell'
@@ -69,11 +70,7 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Name
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.name" />,
 	id: MediaModelOrdering.Name, // TODO (graphql): should this be resovledName?, sorting by `name` is different from sorting by `resolvedName`
 	minSize: 285,
 })
@@ -86,11 +83,7 @@ const pagesColumn = columnHelper.accessor('pages', {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Pages
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.pages" />,
 	id: MediaModelOrdering.Pages,
 	size: 60,
 })
@@ -103,11 +96,7 @@ const fileSizeColumn = columnHelper.accessor('size', {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			File Size
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.file_size" />,
 	id: MediaModelOrdering.Size,
 	size: 100,
 })
@@ -120,11 +109,7 @@ const extensionColumn = columnHelper.accessor('extension', {
 	),
 	enableGlobalFilter: true,
 	enableSorting: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Extension
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.extension" />,
 	id: MediaModelOrdering.Extension,
 	size: 90,
 })
@@ -153,11 +138,7 @@ const publishedColumn = columnHelper.accessor(
 		enableGlobalFilter: true,
 		// TODO(relation-ordering): Support order by relation
 		enableSorting: false,
-		header: () => (
-			<Text size="sm" variant="secondary">
-				Published
-			</Text>
-		),
+		header: () => <TableColumnHeader translationKey="tableColumns.labels.published" />,
 		id: 'published',
 	},
 )
@@ -180,11 +161,7 @@ const addedColumn = columnHelper.accessor(
 		),
 		enableGlobalFilter: true,
 		enableSorting: true,
-		header: () => (
-			<Text size="sm" variant="secondary">
-				Added
-			</Text>
-		),
+		header: () => <TableColumnHeader translationKey="tableColumns.labels.added" />,
 		id: MediaModelOrdering.CreatedAt,
 	},
 )
@@ -198,11 +175,7 @@ const publisherColumn = columnHelper.accessor(({ metadata }) => metadata?.publis
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Publisher
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.publisher" />,
 	id: 'publisher',
 })
 
@@ -215,11 +188,7 @@ const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.ageRat
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Age Rating
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.age_rating" />,
 	id: 'age_rating',
 })
 
@@ -228,11 +197,7 @@ const genresColumn = columnHelper.accessor(({ metadata }) => metadata?.genres, {
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Genres
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.genres" />,
 	id: 'genres',
 })
 
@@ -245,11 +210,7 @@ const volumeColumn = columnHelper.accessor(({ metadata }) => metadata?.volume, {
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Volume
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.volume" />,
 	id: 'volume',
 })
 
@@ -258,11 +219,7 @@ const inkersColumn = columnHelper.accessor(({ metadata }) => metadata?.inkers, {
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Inkers
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.inkers" />,
 	id: 'inkers',
 })
 
@@ -271,11 +228,7 @@ const writersColumn = columnHelper.accessor(({ metadata }) => metadata?.writers,
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Writers
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.writers" />,
 	id: 'writers',
 })
 
@@ -284,11 +237,7 @@ const pencillersColumn = columnHelper.accessor(({ metadata }) => metadata?.penci
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Pencillers
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.pencillers" />,
 	id: 'pencillers',
 })
 
@@ -297,11 +246,7 @@ const coloristsColumn = columnHelper.accessor(({ metadata }) => metadata?.colori
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Colorists
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.colorists" />,
 	id: 'colorists',
 })
 
@@ -311,11 +256,7 @@ const letterersColumn = columnHelper.accessor(({ metadata }) => metadata?.letter
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Letterers
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.letterers" />,
 	id: 'letterers',
 })
 
@@ -325,11 +266,7 @@ const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.coverArt
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Artists
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.artists" />,
 	id: 'artists',
 })
 
@@ -339,11 +276,7 @@ const charactersColumn = columnHelper.accessor(({ metadata }) => metadata?.chara
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Characters
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.characters" />,
 	id: 'characters',
 })
 
@@ -357,11 +290,7 @@ const linksColumn = columnHelper.accessor(({ metadata }) => metadata?.links?.joi
 	enableGlobalFilter: true,
 	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Links
-		</Text>
-	),
+	header: () => <TableColumnHeader translationKey="tableColumns.labels.links" />,
 	id: 'links',
 })
 

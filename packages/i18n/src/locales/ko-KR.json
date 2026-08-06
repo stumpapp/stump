@@ -2749,7 +2749,11 @@
 			"bookColumnsDescription": "중첩된 책 표에만 적용됩니다",
 			"multiSort": "다중 정렬 사용",
 			"multiSortDescription": "열을 기준으로 정렬하면 이전 정렬이 제거됩니다. 이 설정을 사용하면 여러 정렬 기준을 함께 적용할 수 있습니다",
-			"selectionRequired": "열을 하나 이상 선택해야 합니다"
+			"selectionRequired": "열을 하나 이상 선택해야 합니다",
+			"collapse": "접기",
+			"expand": "펼치기",
+			"collapseAll": "모두 접기",
+			"expandAll": "모두 펼치기"
 		},
 		"labels": {
 			"added": "추가일",
@@ -2773,6 +2777,8 @@
 			"volume": "권",
 			"writers": "글 작가",
 			"books": "책",
+			"series": "시리즈",
+			"library": "라이브러리",
 			"seriesName": "이름(시리즈)",
 			"libraryName": "이름(라이브러리)"
 		}

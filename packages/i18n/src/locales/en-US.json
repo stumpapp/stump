@@ -2749,7 +2749,11 @@
 			"bookColumnsDescription": "This only affects the nested book table(s)",
 			"multiSort": "Enable multi-sort",
 			"multiSortDescription": "Sorting by a column removes the previous sort. This setting allows combining them instead",
-			"selectionRequired": "You must select at least one column"
+			"selectionRequired": "You must select at least one column",
+			"collapse": "Collapse",
+			"expand": "Expand",
+			"collapseAll": "Collapse all",
+			"expandAll": "Expand all"
 		},
 		"labels": {
 			"added": "Added",
@@ -2773,6 +2777,8 @@
 			"volume": "Volume",
 			"writers": "Writers",
 			"books": "Books",
+			"series": "Series",
+			"library": "Library",
 			"seriesName": "Name (series)",
 			"libraryName": "Name (library)"
 		}

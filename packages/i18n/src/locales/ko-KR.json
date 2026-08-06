@@ -798,31 +798,31 @@
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "다음에 읽을 책",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "읽을 예정인 책이 없습니다",
+				"message": "다음으로 추천할 책이 여기에 표시됩니다"
 			}
 		},
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "이어 읽기",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "표시할 항목이 없습니다",
+				"message": "읽기 시작한 책이 여기에 표시됩니다"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "최근 추가된 시리즈",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "표시할 시리즈가 없습니다",
+				"message": "라이브러리에 추가한 시리즈가 여기에 표시됩니다"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "최근 추가된 책",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "표시할 항목이 없습니다",
+				"message": "최근 추가한 책이 여기에 표시됩니다"
 			}
 		}
 	},
@@ -1382,82 +1382,82 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"general": "일반",
+			"logs": "로그",
+			"server": "서버",
+			"jobs": "작업 및 구성",
+			"users": "사용자 관리",
+			"desktop": "데스크톱"
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Account",
-				"appearance": "Preferences",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Personal"
+				"account": "계정",
+				"appearance": "환경설정",
+				"api keys": "API 키",
+				"reader": "리더",
+				"desktop": "데스크톱",
+				"label": "개인"
 			},
 			"management": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
-				"metadata": "Metadata",
-				"notifications": "Notifications",
-				"tags": "Tags",
-				"label": "Management"
+				"general": "일반",
+				"logs": "로그",
+				"users": "사용자",
+				"jobs": "작업",
+				"access": "접근 제어",
+				"email": "이메일",
+				"metadata": "메타데이터",
+				"notifications": "알림",
+				"tags": "태그",
+				"label": "관리"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "계정 설정",
+			"title": "계정 설정",
+			"description": "계정 관련 설정",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "올바른 URL을 입력하세요",
+						"missingUsername": "사용자 이름을 입력하세요"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes",
+						"username": "사용자 이름",
+						"password": "비밀번호",
+						"activeChangesPrompt": "저장하지 않은 변경사항이 있습니다",
 						"uselessForm": {
-							"title": "You lack permissions to change these settings",
-							"description": "Contact your administrator if you want to make changes to these settings"
+							"title": "이 설정을 변경할 권한이 없습니다",
+							"description": "설정을 변경하려면 관리자에게 문의하세요"
 						},
-						"insufficientPermission": "You do not have permission to change this"
+						"insufficientPermission": "이 항목을 변경할 권한이 없습니다"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "프로필을 업데이트하는 중 서버 오류가 발생했습니다. 다시 시도하세요."
 					},
 					"avatarPicker": {
-						"label": "Avatar",
-						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
-						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
-						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
+						"label": "아바타",
+						"heading": "아바타 업로드",
+						"subtitle": "Stump의 소셜 기능에서 사용할 이미지를 아바타로 업로드할 수 있습니다",
+						"dropzone": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
+						"changeImage": "이미지 변경",
+						"removeImage": "이미지 제거",
+						"removeSelection": "업로드한 이미지 제거",
+						"uploadFailed": "아바타를 업로드하지 못했습니다",
+						"removeFailed": "아바타를 제거하지 못했습니다"
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "변경사항 저장"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "언어"
 					},
-					"heading": "Language and locale",
+					"heading": "언어 및 지역",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump는 여러 언어와 지역을 지원합니다. 아래에서 환경에 맞게 설정할 수 있습니다. 가능하다면",
+						"Stump 번역 개선에",
+						"참여해 주세요!"
 					]
 				}
 			}
@@ -2534,15 +2534,15 @@
 		"diskUsage": "Disk Usage"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"heading": "표시할 내용이 없습니다",
+		"messagePrefix": "없는 항목은 볼 수 없습니다",
 		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"create": "먼저 라이브러리를 만들어 보세요",
+			"wait": "라이브러리가 생성되면 여기에 표시됩니다"
 		},
 		"links": {
-			"create": "Create library",
-			"settings": "Go to settings"
+			"create": "라이브러리 만들기",
+			"settings": "설정으로 이동"
 		}
 	},
 	"pagination": {
@@ -2568,34 +2568,34 @@
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Home",
-			"libraries": "Libraries",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
-			"settings": "Settings",
-			"themeToggle": "Toggle Theme",
-			"goForward": "Go Forward",
-			"goBack": "Go Back",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list",
-			"seeAll": "See all"
+			"home": "홈",
+			"libraries": "라이브러리",
+			"books": "탐색",
+			"bookClubs": "북클럽",
+			"createLibrary": "라이브러리 만들기",
+			"noLibraries": "라이브러리 없음",
+			"createBookClub": "북클럽 만들기",
+			"noBookClubs": "북클럽 없음",
+			"settings": "설정",
+			"themeToggle": "테마 전환",
+			"goForward": "앞으로",
+			"goBack": "뒤로",
+			"smartlists": "스마트 목록",
+			"noSmartlists": "스마트 목록 없음",
+			"createSmartlist": "스마트 목록 만들기",
+			"seeAll": "모두 보기"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
-			"fileExplorer": "Files",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
+			"scanLibrary": "스캔",
+			"fileExplorer": "파일",
+			"manageLibrary": "관리",
+			"deleteLibrary": "삭제"
 		},
 		"versionInformation": {
-			"heading": "Version Information",
-			"semVer": "Semantic Version",
-			"commitHash": "Commit Hash",
-			"buildDate": "Build Date"
+			"heading": "버전 정보",
+			"semVer": "시맨틱 버전",
+			"commitHash": "커밋 해시",
+			"buildDate": "빌드 날짜"
 		}
 	},
 	"search": {

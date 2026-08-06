@@ -1,4 +1,5 @@
 import { Button, Input, InputGroup, Label, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Eye, EyeOff, Shield } from 'lucide-react'
 import { useState } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
@@ -6,6 +7,7 @@ import { useFormContext, useFormState } from 'react-hook-form'
 import { CreateOrUpdateUserSchema } from './schema'
 
 export default function AccountDetails() {
+	const { t } = useLocaleContext()
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 	const { errors } = useFormState({ control: form.control })
 
@@ -16,21 +18,23 @@ export default function AccountDetails() {
 			<Input
 				id="username"
 				fullWidth
-				label="Username"
-				placeholder="Username"
+				label={t('settingsScene.server/users.createOrUpdateForm.accountDetails.username')}
+				placeholder={t('settingsScene.server/users.createOrUpdateForm.accountDetails.username')}
 				autoComplete="off"
 				errorMessage={errors.username?.message}
 				{...form.register('username')}
 			/>
 
 			<div className="gap-2 grid w-full items-center">
-				<Label htmlFor="password">Password</Label>
+				<Label htmlFor="password">
+					{t('settingsScene.server/users.createOrUpdateForm.accountDetails.password')}
+				</Label>
 
 				<InputGroup>
 					<InputGroup.Input
 						id="password"
 						data-testid="password"
-						placeholder="Password"
+						placeholder={t('settingsScene.server/users.createOrUpdateForm.accountDetails.password')}
 						type={passwordVisible ? 'text' : 'password'}
 						autoComplete="off"
 						aria-invalid={!!errors.password?.message}
@@ -64,7 +68,8 @@ export default function AccountDetails() {
 					onClick={() => form.setValue('password', generateRandomPassword())}
 					data-testid="generatePassword"
 				>
-					<Shield className="mr-1.5 h-4 w-4" /> Generate Random Password
+					<Shield className="mr-1.5 h-4 w-4" />{' '}
+					{t('settingsScene.server/users.createOrUpdateForm.accountDetails.generatePassword')}
 				</Button>
 			</div>
 		</div>

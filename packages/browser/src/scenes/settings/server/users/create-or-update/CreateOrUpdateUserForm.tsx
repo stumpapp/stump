@@ -155,9 +155,11 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 
 				<div className="gap-6 flex flex-col">
 					<div>
-						<Heading size="sm">Account details</Heading>
+						<Heading size="sm">
+							{t('settingsScene.server/users.createOrUpdateForm.accountDetails.heading')}
+						</Heading>
 						<Text size="sm" variant="muted" className="mt-1.5">
-							They can change these values at any time
+							{t('settingsScene.server/users.createOrUpdateForm.accountDetails.description')}
 						</Text>
 					</div>
 

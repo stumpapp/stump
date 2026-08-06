@@ -1,9 +1,9 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { Statistic } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
-import pluralize from 'pluralize'
 import { useMemo } from 'react'
 
 const query = graphql(`
@@ -29,6 +29,7 @@ export const prefetchUserStats = async (sdk: Api, client: QueryClient) =>
 	})
 
 export default function UsersStats() {
+	const { t } = useLocaleContext()
 	const { data } = useSuspenseGraphQL(query, ['userStats'])
 
 	const [powerReader] = useMemo(() => data.topReaders, [data.topReaders])
@@ -36,28 +37,31 @@ export default function UsersStats() {
 	return (
 		<div className="gap-4 pb-8 scrollbar-hide flex items-center divide-x divide-border/60 overflow-x-scroll">
 			<Statistic className="pr-5 md:pr-10 shrink-0">
-				<Statistic.Label>Users</Statistic.Label>
+				<Statistic.Label>{t('settingsScene.server/users.stats.users')}</Statistic.Label>
 				<Statistic.CountUpNumber value={data.userCount} />
 			</Statistic>
 
 			<Statistic className="px-5 md:px-10 shrink-0">
-				<Statistic.Label>Books completed</Statistic.Label>
+				<Statistic.Label>{t('settingsScene.server/users.stats.booksCompleted')}</Statistic.Label>
 				<Statistic.CountUpNumber value={data.finishedReadingSessionCount} />
 			</Statistic>
 
 			<Statistic className="px-5 md:px-10 shrink-0">
-				<Statistic.Label>Books in progress</Statistic.Label>
+				<Statistic.Label>{t('settingsScene.server/users.stats.booksInProgress')}</Statistic.Label>
 				<Statistic.CountUpNumber value={data.activeReadingSessionCount} />
 			</Statistic>
 
 			{!!powerReader && (
 				<Statistic className="pl-5 md:pl-10 shrink-0">
-					<Statistic.Label>Power Reader</Statistic.Label>
+					<Statistic.Label>{t('settingsScene.server/users.stats.powerReader')}</Statistic.Label>
 					<Statistic.StringValue>
 						{powerReader.username}{' '}
 						<span className="text-sm font-normal">
-							({powerReader.finishedReadingSessionsCount}{' '}
-							{pluralize('book', powerReader.finishedReadingSessionsCount)})
+							(
+							{t('settingsScene.server/users.stats.booksRead', {
+								count: powerReader.finishedReadingSessionsCount,
+							})}
+							)
 						</span>
 					</Statistic.StringValue>
 				</Statistic>

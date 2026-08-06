@@ -1446,6 +1446,7 @@
 		}
 	},
 	"settingsScene": {
+		"section": "Section",
 		"navigation": {
 			"general": "General",
 			"logs": "Logs",
@@ -1964,6 +1965,12 @@
 			"title": "Server settings",
 			"description": "General settings related to your Stump server instance",
 			"sections": {
+				"stats": {
+					"libraries": "Libraries",
+					"series": "Series",
+					"books": "Books",
+					"diskUsage": "Disk usage"
+				},
 				"updateAvailable": {
 					"message": "Your server is not up to date. Please update to the latest version!"
 				},
@@ -1978,6 +1985,12 @@
 							"commitHash": "Exact commit",
 							"date": "Build date"
 						}
+					},
+					"labels": {
+						"semanticVersion": "Semantic version",
+						"buildChannel": "Build channel",
+						"exactCommit": "Exact commit",
+						"buildDate": "Build date"
 					},
 					"nonStableChannel": {
 						"title": "You are running a non-stable build of Stump",
@@ -2173,6 +2186,17 @@
 				"description": "Update the details of this user"
 			},
 			"createOrUpdateForm": {
+				"accountDetails": {
+					"heading": "Account details",
+					"description": "They can change these values at any time",
+					"username": "Username",
+					"password": "Password",
+					"generatePassword": "Generate random password"
+				},
+				"maxSessions": {
+					"label": "Max sessions allowed",
+					"description": "The maximum number of valid sessions allowed at a time. If a user tries to log in once this limit is reached, the oldest session will be invalidated."
+				},
 				"accessControl": {
 					"heading": "Access control and restrictions",
 					"subtitle": [
@@ -2338,6 +2362,13 @@
 					"description": "All records of login activity will be permanently deleted from the database",
 					"confirm": "Delete"
 				}
+			},
+			"stats": {
+				"users": "Users",
+				"booksCompleted": "Books completed",
+				"booksInProgress": "Books in progress",
+				"powerReader": "Power reader",
+				"booksRead": "{{count}} books"
 			}
 		},
 		"server/email": {
@@ -2773,6 +2804,7 @@
 			"noValidFiles": "No valid files were selected"
 		},
 		"unknownError": "An unknown error occurred",
+		"goHome": "Go home",
 		"nothingToShow": "Nothing to show",
 		"noResultsToDisplay": "No results present to display",
 		"noResultsReturned": "No results were returned",

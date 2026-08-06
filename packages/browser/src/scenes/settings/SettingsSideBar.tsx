@@ -83,7 +83,7 @@ export default function SettingsSideBar() {
 				{enableReplacePrimarySidebar && (
 					<div className="shrink-0">
 						<IconButton
-							title="Go home"
+							title={t('common.goHome')}
 							variant="ghost"
 							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 							onClick={() => navigate(paths.home())}

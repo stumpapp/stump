@@ -79,7 +79,7 @@ export default function SettingsNavigation() {
 			)}
 
 			<div className="gap-y-2 flex flex-col">
-				<Label>Section</Label>
+				<Label>{t('settingsScene.section')}</Label>
 				<NativeSelect
 					options={selectOptions}
 					value={activeSubRoute}

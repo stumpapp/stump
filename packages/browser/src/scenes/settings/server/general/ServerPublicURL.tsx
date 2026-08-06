@@ -43,7 +43,7 @@ export default function ServerPublicURL() {
 		},
 		onError: (error) => {
 			toast.error(t('settingsUi.publicUrlUpdateFailed'), {
-				description: error instanceof Error ? error.message : 'An unknown error occurred',
+				description: error instanceof Error ? error.message : t('common.unknownError'),
 			})
 		},
 	})

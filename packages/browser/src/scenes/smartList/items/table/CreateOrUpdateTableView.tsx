@@ -64,6 +64,9 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 	 */
 	const handleSubmit = useCallback(
 		async ({ name }: z.infer<ReturnType<typeof buildSchema>>) => {
+			const fallbackMessage = t(
+				`userSmartListScene.layout.${isCreating ? 'viewCreateError' : 'viewSaveError'}`,
+			)
 			try {
 				if (isCreating) {
 					await saveWorkingView(name)
@@ -74,17 +77,13 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 			} catch (error) {
 				console.error(error)
 				if (error instanceof Error) {
-					toast.error(
-						`Failed to ${isCreating ? 'create' : 'update'} view${
-							error.message ? `: ${error.message}` : ''
-						}`,
-					)
+					toast.error(`${fallbackMessage}${error.message ? `: ${error.message}` : ''}`)
 				} else {
-					toast.error(`Failed to ${isCreating ? 'create' : 'update'} view`)
+					toast.error(fallbackMessage)
 				}
 			}
 		},
-		[isCreating, saveWorkingView, saveSelectedStoredView, onClose],
+		[isCreating, saveWorkingView, saveSelectedStoredView, onClose, t],
 	)
 
 	return (

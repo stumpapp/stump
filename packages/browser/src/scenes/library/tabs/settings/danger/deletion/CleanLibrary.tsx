@@ -65,7 +65,10 @@ export default function CleanLibrary() {
 					} else if (result.deletedMediaCount === 0 && result.deletedSeriesCount === 0) {
 						return t(getKey('confirmation.nothingToDelete'))
 					} else {
-						return `Cleaned ${result.deletedMediaCount} media and ${result.deletedSeriesCount} series`
+						return t(getKey('cleaned'), {
+							mediaCount: result.deletedMediaCount,
+							seriesCount: result.deletedSeriesCount,
+						})
 					}
 				},
 				error: (error) => {
@@ -79,7 +82,7 @@ export default function CleanLibrary() {
 			setShowConfirmation(false)
 		} catch (error) {
 			console.error(error)
-			const fallbackMessage = 'An error occurred while cleaning the library'
+			const fallbackMessage = t(getKey('confirmation.error'))
 			if (error instanceof Error) {
 				toast.error(error.message || fallbackMessage)
 			} else {

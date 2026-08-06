@@ -1175,9 +1175,13 @@
 					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
 					"confirmation": {
 						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"text": "Are you sure you want to clean this library?",
+						"loading": "Cleaning library",
+						"nothingToDelete": "There was nothing to delete",
+						"error": "An error occurred while cleaning the library"
 					},
 					"emptyText": "There was nothing to clean",
+					"cleaned": "Cleaned {{mediaCount}} media and {{seriesCount}} series",
 					"missingEntitiesTable": {
 						"columns": {
 							"id": "ID",

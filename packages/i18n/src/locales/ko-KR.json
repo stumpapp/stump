@@ -1175,9 +1175,13 @@
 					"disclaimer": "파일 자체는 삭제하지 않지만, 누락 상태인 미디어와 시리즈에 관련된 모든 레코드는 영구적으로 삭제합니다",
 					"confirmation": {
 						"label": "라이브러리 정리",
-						"text": "이 라이브러리를 정리하시겠습니까?"
+						"text": "이 라이브러리를 정리하시겠습니까?",
+						"loading": "라이브러리 정리 중",
+						"nothingToDelete": "삭제할 항목이 없습니다",
+						"error": "라이브러리를 정리하는 중 오류가 발생했습니다"
 					},
 					"emptyText": "정리할 항목이 없습니다",
+					"cleaned": "미디어 {{mediaCount}}개와 시리즈 {{seriesCount}}개를 정리했습니다",
 					"missingEntitiesTable": {
 						"columns": {
 							"id": "ID",

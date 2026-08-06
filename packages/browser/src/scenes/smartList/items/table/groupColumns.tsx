@@ -101,12 +101,12 @@ export const getColumnMap = (isGroupedBySeries: boolean) =>
 	}) as Record<string, ColumnDef<EntityGroup>>
 
 const staticColumnOptionMap: Record<keyof typeof staticColumnMap, string> = {
-	books: 'Books',
+	books: 'tableColumns.labels.books',
 }
 
 export const getColumnOptionMap = (isGroupedBySeries: boolean) =>
 	({
-		name: `Name (${isGroupedBySeries ? 'series' : 'library'})`,
+		name: isGroupedBySeries ? 'tableColumns.labels.seriesName' : 'tableColumns.labels.libraryName',
 		...staticColumnOptionMap,
 	}) as Record<string, string>
 

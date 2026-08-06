@@ -2730,6 +2730,53 @@
 		},
 		"unknownError": "An unknown error occurred"
 	},
+	"tableColumns": {
+		"configuration": {
+			"title": "Configure columns",
+			"description": "Adjust which columns are displayed in book-exploration tables",
+			"tooltip": "Configure columns",
+			"adjustTooltip": "Adjust columns",
+			"visible": "Visible",
+			"hidden": "Hidden",
+			"moveToHidden": "Move to hidden",
+			"moveToVisible": "Move to visible",
+			"dropHere": "Drop columns here",
+			"drawerTitle": "Table configuration",
+			"drawerDescription": "Choose which columns to display or hide",
+			"groupColumns": "Group columns",
+			"groupColumnsDescription": "This only affects the parent table by which books are grouped",
+			"bookColumns": "Book columns",
+			"bookColumnsDescription": "This only affects the nested book table(s)",
+			"multiSort": "Enable multi-sort",
+			"multiSortDescription": "Sorting by a column removes the previous sort. This setting allows combining them instead",
+			"selectionRequired": "You must select at least one column"
+		},
+		"labels": {
+			"added": "Added",
+			"age_rating": "Age Rating",
+			"artists": "Artists",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"cover": "Cover",
+			"extension": "Extension",
+			"file_size": "File Size",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"links": "Links",
+			"name": "Name",
+			"pages": "Pages",
+			"pencillers": "Pencillers",
+			"position": "Position",
+			"published": "Published",
+			"publisher": "Publisher",
+			"volume": "Volume",
+			"writers": "Writers",
+			"books": "Books",
+			"seriesName": "Name (series)",
+			"libraryName": "Name (library)"
+		}
+	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
 			"label": "API keys",

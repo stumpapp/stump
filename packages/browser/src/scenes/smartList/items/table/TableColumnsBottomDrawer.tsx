@@ -8,6 +8,7 @@ import {
 	Text,
 	ToolTip,
 } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { TableProperties } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -17,6 +18,7 @@ import { getColumnOptionMap as getGroupColumnOptionMap } from './groupColumns'
 import { columnOptionMap as mediaColumnOptionMap } from './mediaColumns'
 
 export default function TableColumnsBottomDrawer() {
+	const { t } = useLocaleContext()
 	const [isOpen, setIsOpen] = useState(false)
 	const {
 		list: { defaultGrouping },
@@ -69,10 +71,10 @@ export default function TableColumnsBottomDrawer() {
 		() =>
 			Object.entries(mediaColumnOptionMap).map(([key, label]) => ({
 				isSelected: bookColumnState[key] ?? false,
-				label,
+				label: t(label),
 				value: key,
 			})),
-		[bookColumnState],
+		[bookColumnState, t],
 	)
 
 	const isGroupedBySeries = defaultGrouping === 'BY_SERIES'
@@ -81,13 +83,13 @@ export default function TableColumnsBottomDrawer() {
 			const all = getGroupColumnOptionMap(isGroupedBySeries)
 			return Object.entries(all).map(([key, label]) => ({
 				isSelected: groupByEntityColumnState[key] ?? false,
-				label,
+				label: t(label),
 				value: key,
 			}))
 		}
 
 		return []
-	}, [isGrouped, isGroupedBySeries, groupByEntityColumnState])
+	}, [isGrouped, isGroupedBySeries, groupByEntityColumnState, t])
 
 	/**
 	 * A callback to update the local state when a book column is selected or deselected
@@ -118,7 +120,7 @@ export default function TableColumnsBottomDrawer() {
 			.map(([id], idx) => ({ id, position: idx }))
 
 		if (!bookColumns.length || (isGrouped && !groupColumns.length)) {
-			toast.error('You must select at least one column')
+			toast.error(t('tableColumns.configuration.selectionRequired'))
 			return
 		}
 
@@ -181,7 +183,7 @@ export default function TableColumnsBottomDrawer() {
 
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChanged}>
-			<ToolTip content="Adjust columns">
+			<ToolTip content={t('tableColumns.configuration.adjustTooltip')}>
 				<Drawer.Trigger asChild onClick={() => setIsOpen(true)}>
 					<IconButton variant="ghost">
 						<TableProperties className="h-4 w-4 text-muted-foreground" />
@@ -191,15 +193,17 @@ export default function TableColumnsBottomDrawer() {
 			<Drawer.Content>
 				<div className="max-w-2xl mx-auto w-full">
 					<Drawer.Header>
-						<Drawer.Title>Table configuration</Drawer.Title>
-						<Drawer.Description>Choose which columns to display or hide</Drawer.Description>
+						<Drawer.Title>{t('tableColumns.configuration.drawerTitle')}</Drawer.Title>
+						<Drawer.Description>
+							{t('tableColumns.configuration.drawerDescription')}
+						</Drawer.Description>
 					</Drawer.Header>
 					<div className="gap-y-6 p-4 pb-0 flex flex-col">
 						{isGrouped && (
 							<div>
-								<Label>Group columns</Label>
+								<Label>{t('tableColumns.configuration.groupColumns')}</Label>
 								<Text size="sm" variant="muted">
-									This only affects the parent table by which books are grouped
+									{t('tableColumns.configuration.groupColumnsDescription')}
 								</Text>
 								<div className="mt-3 gap-x-2 gap-y-4 grid grid-cols-5">
 									{groupColumnOptions.map(({ label, value, isSelected }) => (
@@ -216,9 +220,9 @@ export default function TableColumnsBottomDrawer() {
 						)}
 
 						<div>
-							<Label>Book columns</Label>
+							<Label>{t('tableColumns.configuration.bookColumns')}</Label>
 							<Text size="sm" variant="muted">
-								This only affects the nested book table(s)
+								{t('tableColumns.configuration.bookColumnsDescription')}
 							</Text>
 							<div className="mt-3 gap-x-2 gap-y-4 grid grid-cols-5">
 								{bookColumnOptions.map(({ label, value, isSelected }) => (
@@ -235,10 +239,11 @@ export default function TableColumnsBottomDrawer() {
 
 						<div className="flex items-center justify-between">
 							<div className="gap-2 flex grow flex-col text-left">
-								<Label htmlFor="enable_multi_sort">Enable multi-sort</Label>
+								<Label htmlFor="enable_multi_sort">
+									{t('tableColumns.configuration.multiSort')}
+								</Label>
 								<Text size="sm" variant="muted">
-									Sorting by a column removes the previous sort. This setting allows combining them,
-									instead
+									{t('tableColumns.configuration.multiSortDescription')}
 								</Text>
 							</div>
 
@@ -253,10 +258,10 @@ export default function TableColumnsBottomDrawer() {
 					</div>
 					<Drawer.Footer className="w-full flex-row">
 						<Button className="w-full" onClick={handleSave}>
-							Save
+							{t('common.save')}
 						</Button>
 						<Drawer.Close asChild className="w-full">
-							<Button variant="outline">Cancel</Button>
+							<Button variant="outline">{t('common.cancel')}</Button>
 						</Drawer.Close>
 					</Drawer.Footer>
 				</div>

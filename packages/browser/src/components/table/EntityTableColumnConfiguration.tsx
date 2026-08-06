@@ -63,8 +63,8 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 	}, [entity])
 
 	const resolved = useMemo(
-		() => resolveConfiguration(configuration, columnMap),
-		[configuration, columnMap],
+		() => resolveConfiguration(configuration, columnMap, t),
+		[configuration, columnMap, t],
 	)
 
 	const toBuckets = (columns: ResolvedColumn[]): [ResolvedColumn[], ResolvedColumn[]] =>
@@ -262,13 +262,13 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 
 	return (
 		<Sheet
-			title="Configure columns"
-			description="Adjust which columns are displayed in book-exploration tables"
+			title={t('tableColumns.configuration.title')}
+			description={t('tableColumns.configuration.description')}
 			open={isOpen}
 			onClose={() => setIsOpen(false)}
 			onOpen={() => setIsOpen(true)}
 			trigger={
-				<ToolTip content="Configure columns" size="sm" align="start">
+				<ToolTip content={t('tableColumns.configuration.tooltip')} size="sm" align="start">
 					<IconButton size="xs" variant="ghost" onClick={() => setIsOpen(true)}>
 						<Columns className="h-4 w-4" />
 					</IconButton>
@@ -284,7 +284,7 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 						variant="outline"
 						className="w-full"
 						onClick={() => {
-							setBuckets(toBuckets(resolveConfiguration(configuration, columnMap)))
+							setBuckets(toBuckets(resolveConfiguration(configuration, columnMap, t)))
 							setIsOpen(false)
 						}}
 					>
@@ -304,14 +304,18 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 				>
 					<div className="gap-3 p-4 md:grid-cols-2 grid grid-cols-1">
 						<ColumnBucket
-							title="Visible"
+							title={t('tableColumns.configuration.visible')}
+							moveLabel={t('tableColumns.configuration.moveToHidden')}
+							emptyLabel={t('tableColumns.configuration.dropHere')}
 							containerId="visible-container"
 							items={visible}
 							identifiers={visibleIdentifiers}
 							onMoveToOtherList={(id) => handleMoveColumn(id, false)}
 						/>
 						<ColumnBucket
-							title="Hidden"
+							title={t('tableColumns.configuration.hidden')}
+							moveLabel={t('tableColumns.configuration.moveToVisible')}
+							emptyLabel={t('tableColumns.configuration.dropHere')}
 							containerId="hidden-container"
 							items={hidden}
 							identifiers={hiddenIdentifiers}
@@ -325,13 +329,17 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 	)
 }
 
-const resolveConfiguration = (configuration: ColumnSort[], columnMap: Record<string, string>) =>
+const resolveConfiguration = (
+	configuration: ColumnSort[],
+	columnMap: Record<string, string>,
+	translate: (key: string) => string,
+) =>
 	Object.entries(columnMap)
-		.map(([key, label], idx) => {
+		.map(([key, translationKey], idx) => {
 			const configPosition = configuration.findIndex((column) => column.id === key)
 			return {
 				id: key,
-				label,
+				label: translate(translationKey),
 				position: configPosition === -1 ? configuration.length + idx : configPosition,
 				selected: configPosition !== -1,
 			}
@@ -390,6 +398,8 @@ function ColumnOverlay({ column }: { column: ReturnType<typeof resolveConfigurat
 
 type ColumnBucketProps = {
 	title: string
+	moveLabel: string
+	emptyLabel: string
 	containerId: string
 	items: ReturnType<typeof resolveConfiguration>
 	identifiers: string[]
@@ -398,14 +408,14 @@ type ColumnBucketProps = {
 
 function ColumnBucket({
 	title,
+	moveLabel,
+	emptyLabel,
 	containerId,
 	items,
 	identifiers,
 	onMoveToOtherList,
 }: ColumnBucketProps) {
 	const { setNodeRef } = useDroppable({ id: containerId })
-	const moveLabel = title === 'Visible' ? 'Move to hidden' : 'Move to visible'
-
 	return (
 		<div ref={setNodeRef} className="p-3 rounded-md border border-border bg-background">
 			<div className="mb-2 flex items-center justify-between">
@@ -430,7 +440,7 @@ function ColumnBucket({
 					{items.length === 0 && (
 						<div className="min-h-10 rounded px-2 py-3 flex items-center justify-center border border-dashed border-border">
 							<Text size="xs" variant="muted">
-								Drop columns here
+								{emptyLabel}
 							</Text>
 						</div>
 					)}

@@ -345,25 +345,24 @@ export const columnMap = {
 	writers: writersColumn,
 } as Record<string, ColumnDef<Media>>
 
-// TODO: localization keys instead of hardcoded strings
 export const columnOptionMap: Record<keyof typeof columnMap, string> = {
-	added: 'Added',
-	age_rating: 'Age Rating',
-	artists: 'Artists',
-	characters: 'Characters',
-	colorists: 'Colorists',
-	cover: 'Cover',
-	genres: 'Genres',
-	inkers: 'Inkers',
-	letterers: 'Letterers',
-	links: 'Links',
-	name: 'Name',
-	pages: 'Pages',
-	pencillers: 'Pencillers',
-	published: 'Published',
-	publisher: 'Publisher',
-	volume: 'Volume',
-	writers: 'Writers',
+	added: 'tableColumns.labels.added',
+	age_rating: 'tableColumns.labels.age_rating',
+	artists: 'tableColumns.labels.artists',
+	characters: 'tableColumns.labels.characters',
+	colorists: 'tableColumns.labels.colorists',
+	cover: 'tableColumns.labels.cover',
+	genres: 'tableColumns.labels.genres',
+	inkers: 'tableColumns.labels.inkers',
+	letterers: 'tableColumns.labels.letterers',
+	links: 'tableColumns.labels.links',
+	name: 'tableColumns.labels.name',
+	pages: 'tableColumns.labels.pages',
+	pencillers: 'tableColumns.labels.pencillers',
+	published: 'tableColumns.labels.published',
+	publisher: 'tableColumns.labels.publisher',
+	volume: 'tableColumns.labels.volume',
+	writers: 'tableColumns.labels.writers',
 }
 
 export const defaultColumns = [

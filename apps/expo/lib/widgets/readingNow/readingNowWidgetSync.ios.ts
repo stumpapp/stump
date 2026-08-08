@@ -198,13 +198,22 @@ type RefreshReadingNowWidgetParams = Pick<
 	ReadingNowWidgetProps,
 	'thumbnailRatio' | 'accentColor'
 > & {
+	/**
+	 * the translation function. DO NOT pass through to the widget, translate any strings before
+	 * passing through to worklet
+	 */
 	t: (key: string, options?: Record<string, unknown>) => string
 }
 
 export async function refreshReadingNowWidget(
 	serverBooks: ServerBookInput[],
 	api: Api | null,
-	params: RefreshReadingNowWidgetParams,
+	{
+		// we absolutely cannot pass t through to the widget, we get a hard crash on ios
+		// when trying to serialize it to the worklet
+		t,
+		...params
+	}: RefreshReadingNowWidgetParams,
 ): Promise<void> {
 	const incomingById = new Map(serverBooks.map((b) => [b.id, b]))
 
@@ -223,7 +232,7 @@ export async function refreshReadingNowWidget(
 		thumbnailPath: book.thumbnailPath ?? thumbnailMap.get(book.id),
 	}))
 
-	const nothingInProgress = params.t('widgets.readingNow.nothingInProgress')
+	const nothingInProgress = t('widgets.readingNow.nothingInProgress')
 
 	const snapshot: ReadingNowWidgetProps = {
 		books,

@@ -174,26 +174,6 @@ const ReadingNowWidget = (
 		)
 	}
 
-	if (widgetFamily === 'systemMedium' && books.length === 1) {
-		return (
-			<ZStack
-				modifiers={[
-					containerBackground(PlatformColor('systemBackground'), 'widget'),
-					clipShape('containerRelativeShape'),
-				]}
-			>
-				<Text
-					modifiers={[
-						foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-						font({ textStyle: 'callout' }),
-					]}
-				>
-					Medium (single book large format)
-				</Text>
-			</ZStack>
-		)
-	}
-
 	if (widgetFamily === 'systemMedium') {
 		const visibleBooks = books.slice(0, 3)
 		const thumbnailWidth = 30

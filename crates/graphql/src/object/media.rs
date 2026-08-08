@@ -7,10 +7,7 @@ use models::{
 	shared::{analysis::MediaAnalysisData, image::ImageRef},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{
-	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QuerySelect,
-	Statement,
-};
+use sea_orm::{prelude::*, sea_query::Query, FromQueryResult, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -26,6 +23,7 @@ use crate::{
 	},
 	object::epub::Epub,
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
+	utils::db_statement,
 };
 
 use super::{
@@ -258,24 +256,24 @@ impl Media {
 		Ok(history)
 	}
 
-	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i32>> {
+	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i64>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		if let Some(position) = self.metadata.as_ref().and_then(|m| m.model.number) {
 			if position.fract().is_zero() {
-				return Ok(Some(position.to_i32().unwrap_or(0)));
+				return Ok(Some(position.to_i64().unwrap_or(0)));
 			}
 		}
 
 		#[derive(Debug, FromQueryResult)]
 		struct PositionResult {
-			position: i32,
+			position: i64,
 		}
 
 		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
-		let position = PositionResult::find_by_statement(Statement::from_sql_and_values(
-			DatabaseBackend::Sqlite,
+		let position = PositionResult::find_by_statement(db_statement(
+			conn,
 			r#"
             SELECT position
             FROM (
@@ -286,10 +284,10 @@ impl Media {
                         ORDER BY name
                     ) as position
                 FROM media
-                WHERE series_id = ?
+                WHERE series_id = $1
                 AND deleted_at IS NULL
             ) ranked
-            WHERE id = ?
+            WHERE id = $2
             "#,
 			[series_id.into(), self.model.id.clone().into()],
 		))

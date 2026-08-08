@@ -23,7 +23,7 @@ use strum::{Display, EnumString};
 #[sea_orm(
 	rs_type = "String",
 	rename_all = "SCREAMING_SNAKE_CASE",
-	db_type = "String(StringLen::None)"
+	db_type = "Integer"
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]

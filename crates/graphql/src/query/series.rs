@@ -8,9 +8,7 @@ use models::{
 		ordering::OrderBy,
 	},
 };
-use sea_orm::{
-	prelude::*, DatabaseBackend, FromQueryResult, QueryOrder, QuerySelect, Statement,
-};
+use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -21,6 +19,7 @@ use crate::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
+	utils::db_statement,
 };
 
 #[derive(Default)]
@@ -132,8 +131,8 @@ impl SeriesQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(series_metadata.title, series.name), 1, 1) AS letter,

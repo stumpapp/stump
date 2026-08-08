@@ -1,6 +1,6 @@
 import { ComboBox } from '@stump/components'
 import { useCallback } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 type Props = {
 	/**
@@ -24,9 +24,12 @@ type Props = {
  * update the form context.
  */
 export default function GenericFilterMultiselect({ name, label, options }: Props) {
-	const { watch, setValue } = useFormContext()
+	const { setValue, control } = useFormContext()
 
-	const formValue = watch(name)
+	const formValue = useWatch({
+		name,
+		control,
+	})
 
 	const handleChange = useCallback(
 		(value: string[] | undefined) => setValue(name, value),

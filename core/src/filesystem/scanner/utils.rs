@@ -40,34 +40,19 @@ const MAX_INSERT_CHUNK_SIZE: usize = 250;
 
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
-	last_modified_at: String,
-) -> CoreResult<bool> {
+	last_modified_at: &DateTimeWithTimeZone,
+) -> bool {
 	if let Ok(Ok(system_time)) = entry.metadata().map(|m| m.modified()) {
-		let media_modified_at =
-			last_modified_at.parse::<DateTime<Utc>>().map_err(|e| {
-				tracing::error!(
-					path = ?entry.path(),
-					error = ?e,
-					"Error occurred trying to read modified date for media",
-				);
-
-				CoreError::Unknown(e.to_string())
-			})?;
 		let system_time_converted: DateTime<Utc> = system_time.into();
-		tracing::trace!(?system_time_converted, ?media_modified_at,);
-
-		if system_time_converted > media_modified_at {
-			return Ok(true);
-		}
-
-		Ok(false)
+		let media_modified_at = last_modified_at.with_timezone(&Utc);
+		tracing::trace!(?system_time_converted, ?media_modified_at);
+		system_time_converted > media_modified_at
 	} else {
 		tracing::error!(
 			path = ?entry.path(),
 			"Error occurred trying to read modified date for media",
 		);
-
-		Ok(true)
+		true
 	}
 }
 

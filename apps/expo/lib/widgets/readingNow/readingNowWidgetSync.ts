@@ -12,6 +12,13 @@ export type ServerBookInput = {
 	isReadingOffline: boolean
 }
 
+type RefreshReadingNowWidgetParams = Pick<
+	ReadingNowWidgetProps,
+	'thumbnailRatio' | 'accentColor'
+> & {
+	t: (key: string, options?: Record<string, unknown>) => string
+}
+
 // TODO(widgets): rm lint supress, we need this to stub for android until expo-widgets
 // supports android widgets
 
@@ -20,9 +27,8 @@ export async function refreshReadingNowWidget(
 	_serverBooks: ServerBookInput[],
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_api: Api | null,
-	// _t: (key: string, options?: Record<string, unknown> | undefined) => string,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	_params: Pick<ReadingNowWidgetProps, 'thumbnailRatio' | 'accentColor'>,
+	_params: RefreshReadingNowWidgetParams,
 ): Promise<void> {}
 
 export function refreshWidgetFromCache(): void {}

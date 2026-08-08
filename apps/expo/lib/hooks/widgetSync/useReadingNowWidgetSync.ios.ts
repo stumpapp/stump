@@ -8,6 +8,7 @@ import {
 import { usePreferencesStore } from '~/stores'
 
 import { usePalette } from '../../constants'
+import { useTranslate } from '../useTranslate'
 import { WidgetSyncBook } from './types'
 
 export type { WidgetSyncBook } from './types'
@@ -17,6 +18,8 @@ export function useReadingNowWidgetSync(books: WidgetSyncBook[]) {
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const accentColor = usePalette('accent')
+
+	const { t } = useTranslate()
 
 	useEffect(() => {
 		if (!books.length) return
@@ -34,6 +37,6 @@ export function useReadingNowWidgetSync(books: WidgetSyncBook[]) {
 				}) satisfies ServerBookInput,
 		)
 
-		refreshReadingNowWidget(inputs, sdkContext?.sdk || null, { thumbnailRatio, accentColor })
-	}, [books, sdkContext?.sdk, thumbnailRatio, accentColor])
+		refreshReadingNowWidget(inputs, sdkContext?.sdk || null, { thumbnailRatio, accentColor, t })
+	}, [books, sdkContext?.sdk, thumbnailRatio, accentColor, t])
 }

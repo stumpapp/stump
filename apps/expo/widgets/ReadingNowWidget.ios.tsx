@@ -16,21 +16,10 @@ import { PlatformColor } from 'react-native'
 
 import type { ReadingNowWidgetProps, WidgetBook } from './types'
 
-// TODO:
-// - localization, etc
-// - use owl for empty state!!
-// - link? what happens when clicked? can i deep link:
-//    - small widget = direct to book (entire widget is link)
-//    - other widgets more complex, can i do multiple links? prolly not
-// - offline reading compat, i.e. link differently if offline, etc
-
-// TODO: it would be nice to be able to measure the widget, but not dealing
-// with trying to sort this table out rn: https://developer.apple.com/design/human-interface-guidelines/widgets#iOS-dimensions
-// we may need to pass the widget info if it can not inspect things like e.g.
-// phone model, ipad, etc
+// TODO: use WidgetEnvironment[widgetContentMargins] to ensure ideal fit of content
 
 const ReadingNowWidget = (
-	{ books, accentColor, thumbnailRatio, assetsPath }: ReadingNowWidgetProps,
+	{ books, accentColor, thumbnailRatio, assetsPath, strings }: ReadingNowWidgetProps,
 	{ widgetFamily, colorScheme }: WidgetEnvironment,
 ) => {
 	'widget'
@@ -73,7 +62,7 @@ const ReadingNowWidget = (
 							lineLimit(1),
 						]}
 					>
-						Nothing in progress
+						{strings.nothingInProgress}
 					</Text>
 				</HStack>
 			)
@@ -98,7 +87,7 @@ const ReadingNowWidget = (
 							font({ textStyle: 'callout' }),
 						]}
 					>
-						Nothing in progress
+						{strings.nothingInProgress}
 					</Text>
 				</VStack>
 			</ZStack>

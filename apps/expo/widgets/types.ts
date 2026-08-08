@@ -13,9 +13,14 @@ export type WidgetBook = {
 	isReadingOffline: boolean
 }
 
+type ReadingNowStrings = {
+	nothingInProgress: string
+}
+
 export type ReadingNowWidgetProps = {
 	books: WidgetBook[]
 	thumbnailRatio: number
 	accentColor: string
 	assetsPath: string
+	strings: ReadingNowStrings
 }

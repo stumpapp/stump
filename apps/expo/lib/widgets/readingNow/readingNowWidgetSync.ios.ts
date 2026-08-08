@@ -194,10 +194,17 @@ function getSnapshotFromCache(): ReadingNowWidgetProps | null {
 	}
 }
 
+type RefreshReadingNowWidgetParams = Pick<
+	ReadingNowWidgetProps,
+	'thumbnailRatio' | 'accentColor'
+> & {
+	t: (key: string, options?: Record<string, unknown>) => string
+}
+
 export async function refreshReadingNowWidget(
 	serverBooks: ServerBookInput[],
 	api: Api | null,
-	params: Pick<ReadingNowWidgetProps, 'thumbnailRatio' | 'accentColor'>,
+	params: RefreshReadingNowWidgetParams,
 ): Promise<void> {
 	const incomingById = new Map(serverBooks.map((b) => [b.id, b]))
 
@@ -216,10 +223,15 @@ export async function refreshReadingNowWidget(
 		thumbnailPath: book.thumbnailPath ?? thumbnailMap.get(book.id),
 	}))
 
+	const nothingInProgress = params.t('widgets.readingNow.nothingInProgress')
+
 	const snapshot: ReadingNowWidgetProps = {
 		books,
 		...params,
 		assetsPath: widgetAssetsDirectory.uri,
+		strings: {
+			nothingInProgress,
+		},
 	}
 	storage.set(SNAPSHOT_KEY, JSON.stringify(snapshot))
 

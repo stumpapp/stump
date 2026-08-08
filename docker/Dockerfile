@@ -14,9 +14,9 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 RUN set -ex; \
     mkdir -p pdfium; \
     if [ "$TARGETARCH" = "amd64" ]; then \
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/7763/pdfium-linux-x64.tgz; \
+    curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/7763/pdfium-linux-x64.tgz; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
-        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/7763/pdfium-linux-arm64.tgz; \
+    curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/7763/pdfium-linux-arm64.tgz; \
     fi; \
     tar -xzvf pdfium.tgz -C ./pdfium; \
     rm pdfium.tgz
@@ -26,12 +26,12 @@ RUN set -ex; \
 # arm64 -> c23942df3dc35f95a7bfa75fc52a480e77b5b0ca
 RUN set -ex; \
     if [ "$TARGETARCH" = "amd64" ]; then \
-        echo "727145701ce5bb0344c389071b7aa8f1e15ae81a /pdfium/lib/libpdfium.so" | sha1sum -c -; \
+    echo "727145701ce5bb0344c389071b7aa8f1e15ae81a /pdfium/lib/libpdfium.so" | sha1sum -c -; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
-        echo "c23942df3dc35f95a7bfa75fc52a480e77b5b0ca /pdfium/lib/libpdfium.so" | sha1sum -c -; \
+    echo "c23942df3dc35f95a7bfa75fc52a480e77b5b0ca /pdfium/lib/libpdfium.so" | sha1sum -c -; \
     else \
-        echo "Unsupported architecture: $TARGETARCH"; \
-        exit 1; \
+    echo "Unsupported architecture: $TARGETARCH"; \
+    exit 1; \
     fi
 
 # ------------------------------------------------------------------------------
@@ -51,16 +51,16 @@ RUN apk add --no-cache git
 RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \
     # https://github.com/nodejs/docker-node/issues/1335
     yarn config set network-timeout 300000 && \
-        YARN_CACHE_FOLDER=/usr/local/yarn/.cache yarn install --frozen-lockfile && \
-        yarn web build && \
-        mv ./apps/web/dist/ ./build && \
-        if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
+    YARN_CACHE_FOLDER=/usr/local/yarn/.cache yarn install --frozen-lockfile && \
+    yarn web build && \
+    mv ./apps/web/dist/ ./build && \
+    if [ ! -d "./build" ] || [ ! "$(ls -A ./build)" ]; then exit 1; fi
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.92-bookworm AS builder
+FROM rust:1.97-bookworm AS builder
 
 ARG GIT_REV
 ARG BUILD_CHANNEL
@@ -71,14 +71,14 @@ ENV BUILD_CHANNEL=${BUILD_CHANNEL}
 
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     apt-get update && apt-get install -y \
-        build-essential \
-        cmake \
-        wget \
-        git \
-        libssl-dev \
-        pkg-config \
-        curl \
-        libsqlite3-dev;
+    build-essential \
+    cmake \
+    wget \
+    git \
+    libssl-dev \
+    pkg-config \
+    curl \
+    libsqlite3-dev;
 
 # Cargo build for stump
 WORKDIR /app
@@ -100,12 +100,12 @@ FROM gcr.io/distroless/cc-debian12:debug
 ARG PORT=10801
 
 LABEL org.opencontainers.image.title="Stump" \
-      org.opencontainers.image.description="A free and open source comics, manga and digital book server with OPDS support" \
-      org.opencontainers.image.source="https://github.com/stumpapp/stump" \
-      org.opencontainers.image.url="https://stumpapp.dev" \
-      org.opencontainers.image.documentation="https://stumpapp.dev/guides" \
-      org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.vendor="stumpapp"
+    org.opencontainers.image.description="A free and open source comics, manga and digital book server with OPDS support" \
+    org.opencontainers.image.source="https://github.com/stumpapp/stump" \
+    org.opencontainers.image.url="https://stumpapp.dev" \
+    org.opencontainers.image.documentation="https://stumpapp.dev/guides" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.vendor="stumpapp"
 
 RUN [ "/busybox/ln", "-s", "/busybox/sh", "/bin/sh" ]
 RUN ln -s /busybox/env /usr/bin/env

@@ -65,6 +65,13 @@
 				"year": {
 					"label": "Year"
 				},
+				"number": {
+					"label": "Issue number"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine volume ID",
+					"placeholder": "e.g., 129260"
+				},
 				"provider": {
 					"label": "Provider",
 					"allOption": "All enabled providers"
@@ -282,6 +289,20 @@
 			"tags": {
 				"label": "Tags",
 				"description": "Used to categorise your library or enforce access rules"
+			},
+			"libraryType": {
+				"label": "Library content",
+				"description": "The type of content present in this library",
+				"options": {
+					"COMIC": "Comics",
+					"MANGA": "Manga",
+					"BOOK": "Books",
+					"LIGHT_NOVEL": "Light Novels",
+					"MANHWA": "Manhwa",
+					"WEB_NOVEL": "Web Novels",
+					"WEBTOON": "Webtoons",
+					"MIXED": "Mixed"
+				}
 			},
 			"defaultLibraryView": {
 				"label": "Default library view",
@@ -2418,6 +2439,8 @@
 			"helmet": "Metadata integrations",
 			"title": "Metadata integrations",
 			"addProvider": "Add provider",
+			"createProviderError": "Failed to create provider",
+			"updateProviderError": "Failed to update provider",
 			"noProviders": "No providers configured yet. Add one to get started",
 			"providers": {
 				"title": "Providers",
@@ -2430,8 +2453,8 @@
 					"validationError": "The auto-validation failed for this token",
 					"validationRequestError": "The validation request failed",
 					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
+					"providerStatusError": "The provider responded with status {{status}}",
+					"providerError": "The provider responded with an error: {{message}}",
 					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {

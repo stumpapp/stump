@@ -323,7 +323,7 @@ impl EpubProcessor {
 						.any(|accepted_mime| accepted_mime == mime)
 				})
 				.collect::<Vec<_>>();
-			sorted.sort_by(|(a, _), (b, _)| a.cmp(b));
+			sorted.sort_by_key(|(a, _)| *a);
 			return sorted.first().map(|(id, _)| id.to_string());
 		}
 

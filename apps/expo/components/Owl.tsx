@@ -134,3 +134,23 @@ export const useOwlHeaderOffset = () => {
 	const headerHeight = useHeaderHeight()
 	return isLandscape && Platform.OS === 'ios' ? { paddingTop: headerHeight } : undefined
 }
+
+export const useOwlAssets = () => {
+	const { isDarkColorScheme } = useColorScheme()
+
+	const [assets, error] = useAssets(OWL_REQUIRES)
+
+	useEffect(() => {
+		if (error) {
+			Sentry.captureException(error, { tags: { component: 'useOwlAssets' } })
+		}
+	}, [error])
+
+	const getOwlCallback = (owl: OwlType) => getOwl(owl, assets || [], isDarkColorScheme)
+	const getOwlVariants = (owl: OwlType) => ({
+		dark: getOwl(owl, assets || [], true),
+		light: getOwl(owl, assets || [], false),
+	})
+
+	return { assets, getOwl: getOwlCallback, getOwlVariants, error }
+}

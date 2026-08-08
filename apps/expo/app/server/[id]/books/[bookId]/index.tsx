@@ -133,7 +133,7 @@ const query = graphql(`
 `)
 
 export default function Screen() {
-	const { id: bookID } = useLocalSearchParams<{ id: string }>()
+	const { bookId } = useLocalSearchParams<{ bookId: string }>()
 	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverID },
@@ -143,8 +143,8 @@ export default function Screen() {
 	const {
 		data: { mediaById: book },
 		refetch,
-	} = useSuspenseGraphQL(query, ['bookById', bookID], {
-		id: bookID,
+	} = useSuspenseGraphQL(query, ['bookById', bookId], {
+		id: bookId,
 	})
 	const { downloadBook } = useDownload({ serverId: serverID })
 
@@ -362,7 +362,7 @@ export default function Screen() {
 								onPress={() =>
 									router.push({
 										// @ts-expect-error: String path
-										pathname: `/server/${serverID}/books/${bookID}/read`,
+										pathname: `/server/${serverID}/books/${bookId}/read`,
 									})
 								}
 								variant="brand"
@@ -370,7 +370,7 @@ export default function Screen() {
 								{renderRead()}
 							</Button>
 							{checkPermission(UserPermission.DownloadFile) && (
-								<DownloadButton bookId={bookID} serverId={serverID} onDownload={onDownloadBook} />
+								<DownloadButton bookId={bookId} serverId={serverID} onDownload={onDownloadBook} />
 							)}
 						</View>
 
@@ -469,7 +469,7 @@ export default function Screen() {
 						}))}
 					/>
 
-					<BooksAfterCursor cursor={bookID} />
+					<BooksAfterCursor cursor={bookId} />
 
 					{links.length > 0 && (
 						<View className="gap-2 flex w-full">

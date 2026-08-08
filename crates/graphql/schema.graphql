@@ -3243,6 +3243,7 @@ type StumpConfig {
 	colorfulLogs: Boolean!
 	"An optional custom path for the database."
 	dbPath: String
+	dbTimeoutSecs: Int!
 	"The client directory."
 	clientDir: String!
 	"The configuration root for the Stump application, contains thumbnails, cache, and logs."

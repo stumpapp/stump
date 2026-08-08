@@ -12,5 +12,10 @@ export const redirectSystemPath: NativeIntent['redirectSystemPath'] = ({ path })
 		return '/'
 	}
 
+	if (path.startsWith('stump://')) {
+		const result = '/' + path.slice('stump://'.length)
+		return result
+	}
+
 	return path
 }

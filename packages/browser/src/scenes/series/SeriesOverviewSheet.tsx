@@ -151,7 +151,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 				</NewCard>
 			)}
 
-			{upNext?.length && (
+			{!!upNext?.length && (
 				<MultiRowHorizontalCardList
 					title={t('common.upNext')}
 					items={upNext}

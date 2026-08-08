@@ -466,17 +466,7 @@ pub async fn walk_series(
 			let modified = media
 				.modified_at
 				.as_ref()
-				.and_then(|dt| {
-					file_updated_since_scan(&entry, dt.to_rfc3339())
-						.map_err(|err| {
-							tracing::error!(
-								error = ?err,
-								path = ?entry.path(),
-								"Failed to determine if entry has been modified since last scan"
-							);
-						})
-						.ok()
-				})
+				.map(|dt| file_updated_since_scan(&entry, dt))
 				.unwrap_or_default();
 
 			// We always rebuild when modified

@@ -988,7 +988,7 @@ async fn handle_scan_complete(
 	let update_result = library::Entity::update_many()
 		.col_expr(
 			library::Column::LastScannedAt,
-			Expr::value(now.to_rfc3339()),
+			Expr::value(now.fixed_offset()),
 		)
 		.filter(library::Column::Id.eq(job.id.clone()))
 		.exec(conn)

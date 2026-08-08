@@ -82,7 +82,7 @@ fn do_generate_book_thumbnail(
 
 	let thumbnail_path = config
 		.get_thumbnails_dir()
-		.join(format!("{}.{ext}", &file_name));
+		.join(format!("{}.{ext}", file_name));
 
 	let thumbnail_buffer = match options.format {
 		SupportedImageFormat::Webp => WebpProcessor::generate(&page_data, options),
@@ -117,7 +117,7 @@ pub async fn generate_book_thumbnail(
 	} else {
 		core_config.get_thumbnails_dir().join(format!(
 			"{}.{}",
-			&file_name,
+			file_name,
 			image_options.format.extension()
 		))
 	};

@@ -2,7 +2,9 @@ use async_graphql::{InputObject, InputType, OneofObject};
 use filter_gen::IntoFilter;
 use models::shared::enums::{FileStatus, LibraryType, ReadingStatus};
 use sea_orm::{
-	prelude::DateTimeWithTimeZone, sea_query::ConditionExpression, Condition, Value,
+	prelude::DateTimeWithTimeZone,
+	sea_query::{ConditionExpression, Expr as QExpr, Func},
+	Condition, Value,
 };
 use serde::{Deserialize, Serialize};
 
@@ -50,7 +52,7 @@ pub(crate) fn apply_string_filter<C, T>(
 	filter: StringLikeFilter<T>,
 ) -> Condition
 where
-	C: sea_orm::ColumnTrait,
+	C: sea_orm::ColumnTrait + Copy,
 	T: InputType + Into<Value> + Into<String>,
 {
 	match filter {
@@ -60,24 +62,62 @@ where
 		StringLikeFilter::NoneOf(values) => {
 			Condition::all().add(column.is_not_in(values))
 		},
-		StringLikeFilter::Like(value) => Condition::all().add(column.like(value)),
-		StringLikeFilter::Contains(value) => Condition::all().add(column.contains(value)),
-		StringLikeFilter::Excludes(value) => Condition::all().add(column.not_like(value)),
+		// FIXME: a bunch of these string filters have different case sensitivity depending on sqlite vs pgsql,
+		// so to align them a bit i just lowercased the column and the value for all of them. honestly
+		// not ideal, i'd rather use the dedicated fns for each, but for now leaving
+		// like this
+		StringLikeFilter::Like(value) => {
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(format!("%{}%", v.to_lowercase())),
+			)
+		},
+		StringLikeFilter::Contains(value) => {
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(format!("%{}%", v.to_lowercase())),
+			)
+		},
+		StringLikeFilter::Excludes(value) => {
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.not_like(format!("%{}%", v.to_lowercase())),
+			)
+		},
 		StringLikeFilter::StartsWith(value) => {
-			Condition::all().add(column.starts_with(value))
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(format!("{}%", v.to_lowercase())),
+			)
 		},
 		StringLikeFilter::EndsWith(value) => {
-			Condition::all().add(column.ends_with(value))
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(format!("%{}", v.to_lowercase())),
+			)
 		},
 		StringLikeFilter::LikeAnyOf(values) => {
 			values.into_iter().fold(Condition::any(), |acc, value| {
-				acc.add(column.contains(value))
+				let v: String = value.into();
+				acc.add(
+					QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+						.like(format!("%{}%", v.to_lowercase())),
+				)
 			})
 		},
 		StringLikeFilter::LikeNoneOf(values) => values
 			.into_iter()
 			.fold(Condition::any(), |acc, value| {
-				acc.add(column.contains(value))
+				let v: String = value.into();
+				acc.add(
+					QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+						.like(format!("%{}%", v.to_lowercase())),
+				)
 			})
 			.not(),
 	}
@@ -186,7 +226,7 @@ mod tests {
 
 		assert_eq!(
 			sql,
-			r#"SELECT  FROM "media" WHERE "media"."name" LIKE '%test%' OR "media"."name" LIKE '%example%'"#
+			r#"SELECT  FROM "media" WHERE LOWER("media"."name") LIKE '%test%' OR LOWER("media"."name") LIKE '%example%'"#
 		);
 	}
 
@@ -203,7 +243,7 @@ mod tests {
 
 		assert_eq!(
 			sql,
-			r#"SELECT  FROM "media" WHERE NOT ("media"."name" LIKE '%test%' OR "media"."name" LIKE '%example%')"#
+			r#"SELECT  FROM "media" WHERE NOT (LOWER("media"."name") LIKE '%test%' OR LOWER("media"."name") LIKE '%example%')"#
 		);
 	}
 }

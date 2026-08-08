@@ -65,6 +65,13 @@
 				"year": {
 					"label": "Anno"
 				},
+				"number": {
+					"label": "Numero edizione"
+				},
+				"comicVineVolumeId": {
+					"label": "ID volume ComicVine",
+					"placeholder": "es. 129260"
+				},
 				"provider": {
 					"label": "Provider",
 					"allOption": "Tutti i provider abilitati"
@@ -282,6 +289,20 @@
 			"tags": {
 				"label": "Tag",
 				"description": "Utilizzati per categorizzare la tua libreria o applicare regole di accesso"
+			},
+			"libraryType": {
+				"label": "Contenuto libreria",
+				"description": "Il tipo di contenuto presente in questa libreria",
+				"options": {
+					"COMIC": "Fumetti",
+					"MANGA": "Manga",
+					"BOOK": "Libri",
+					"LIGHT_NOVEL": "Light novel",
+					"MANHWA": "Manhwa",
+					"WEB_NOVEL": "Web novel",
+					"WEBTOON": "Webtoon",
+					"MIXED": "Misto"
+				}
 			},
 			"defaultLibraryView": {
 				"label": "Visualizzazione predefinita della libreria",
@@ -2418,6 +2439,8 @@
 			"helmet": "Integrazioni metadati",
 			"title": "Integrazioni metadati",
 			"addProvider": "Aggiungi provider",
+			"createProviderError": "Impossibile creare il provider",
+			"updateProviderError": "Impossibile aggiornare il provider",
 			"noProviders": "Nessun provider configurato. Aggiungine uno per iniziare",
 			"providers": {
 				"title": "Provider",
@@ -2430,8 +2453,8 @@
 					"validationError": "Convalida automatica del token non riuscita",
 					"validationRequestError": "Richiesta di convalida non riuscita",
 					"validationRequestErrorUnknown": "Si è verificato un errore sconosciuto durante la convalida",
-					"hardcoverStatusError": "L'API Hardcover ha risposto con lo stato {{status}}",
-					"hardcoverValidationError": "L'API Hardcover ha risposto con un errore: {{message}}",
+					"providerStatusError": "Il provider ha risposto con lo stato {{status}}",
+					"providerError": "Il provider ha risposto con un errore: {{message}}",
 					"noBearerPrefixRequired": "Rimuovi il prefisso 'Bearer ' dal token API"
 				},
 				"apiTokenExpiresAt": {
@@ -2970,7 +2993,7 @@
 			"delete": "Elimina",
 			"dismiss": "Ignora",
 			"download": "Scarica",
-			"downloaded": "Downloaded",
+			"downloaded": "Scaricato",
 			"downloads": "Download",
 			"done": "Fatto",
 			"edit": "Modifica",

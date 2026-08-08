@@ -15,7 +15,7 @@ exclude = [
 
 [workspace.package]
 version = "0.1.6"
-rust-version = "1.92.0"
+rust-version = "1.97.1"
 
 # I've defined majority of dependencies here in the workspace so that they are
 # significantly easier to manage and update. Every crate in the workspace should be
@@ -72,12 +72,14 @@ sea-orm = { version = "1.1.16", features = [
   "mock",
   "macros",
   "sqlx-sqlite",
+  "sqlx-postgres",
   "sqlite-use-returning-for-3_35",
   "runtime-tokio-native-tls",
   "debug-print",
 ] }
 sea-orm-migration = { version = "1.1.16", features = [
   "sqlx-sqlite",
+  "sqlx-postgres",
   "runtime-tokio-native-tls",
 ] }
 serde = { version = "1.0.228", features = ["derive"] }

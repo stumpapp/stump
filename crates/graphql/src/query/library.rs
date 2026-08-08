@@ -11,10 +11,7 @@ use models::{
 		ordering::{OrderBy, OrderDirection},
 	},
 };
-use sea_orm::{
-	prelude::*, DatabaseBackend, FromQueryResult, QueryOrder, QuerySelect, QueryTrait,
-	Statement,
-};
+use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect, QueryTrait};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -23,6 +20,7 @@ use crate::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
+	utils::db_statement,
 };
 
 #[derive(Default)]
@@ -141,8 +139,8 @@ impl LibraryQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(libraries.name, 1, 1) AS letter,
@@ -222,19 +220,19 @@ impl LibraryQuery {
 		};
 
 		let total_count_result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r"
                 SELECT COUNT(*) as count FROM (
                     SELECT m.id FROM media m
                     INNER JOIN series s ON m.series_id = s.id
-                    WHERE m.status = 'MISSING' AND s.library_id = ?
+                    WHERE m.status = 'MISSING' AND s.library_id = $1
                     UNION ALL
                     SELECT s.id FROM series s
-                    WHERE s.status = 'MISSING' AND s.library_id = ?
+                    WHERE s.status = 'MISSING' AND s.library_id = $1
                 ) AS subquery;
                 ",
-				[library_id.as_str().into(), library_id.as_str().into()],
+				[library_id.as_str().into()],
 			))
 			.await?
 			.ok_or("Failed to count missing entities")?;
@@ -251,12 +249,12 @@ impl LibraryQuery {
 		let limit = offset_pagination.limit();
 
 		let result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
-				r"
+			.query_all(db_statement(
+				conn,
+				r#"
 				SELECT
                     id,
-                    path,
+                    "path",
                     CASE
                         WHEN id IN (SELECT id FROM media) THEN 'BOOK'
                         WHEN id IN (SELECT id FROM series) THEN 'SERIES'
@@ -264,22 +262,17 @@ impl LibraryQuery {
                     END AS type
                 FROM
                     (
-                        SELECT m.id, m.path FROM media m
+                        SELECT m.id, m."path" FROM media m
                         INNER JOIN series s ON m.series_id = s.id
-                        WHERE m.status = 'MISSING' AND s.library_id = ?
+                        WHERE m.status = 'MISSING' AND s.library_id = $1
                         UNION ALL
-                        SELECT s.id, s.path FROM series s
-                        WHERE s.status = 'MISSING' AND s.library_id = ?
+                        SELECT s.id, s."path" FROM series s
+                        WHERE s.status = 'MISSING' AND s.library_id = $1
                     ) AS missing_entities
-                ORDER BY path ASC
-                LIMIT ? OFFSET ?;
-                ",
-				[
-					library_id.as_str().into(),
-					library_id.as_str().into(),
-					limit.into(),
-					offset.into(),
-				],
+                ORDER BY "path" ASC
+                LIMIT $2 OFFSET $3;
+                "#,
+				[library_id.as_str().into(), limit.into(), offset.into()],
 			))
 			.await?;
 

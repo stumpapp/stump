@@ -16,6 +16,13 @@ import { authSDKInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 
+// this is required for ensuring deep links don't just drop routes into a totally
+// isolated stack, thereby stranding the user in the route.
+// see docs.expo.dev/router/advanced/modals/#handle-deep-linked-modals
+export const unstable_settings = {
+	anchor: 'index',
+}
+
 export default function Screen() {
 	const { t } = useTranslate()
 	const router = useRouter()

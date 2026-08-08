@@ -76,10 +76,10 @@ export default function URLFilterDrawer({ entity }: Props) {
 			}
 			size={isMobile ? 'xl' : 'default'}
 			footer={
-				<div className="-mt-4 gap-x-4 py-2 flex w-full items-center">
+				<div className="-mt-4 gap-x-4 py-2 flex w-full flex-row items-center">
 					<Button
 						size="sm"
-						className="w-full"
+						className="flex-1"
 						type="button"
 						variant="destructive"
 						onClick={handleClearFilters}
@@ -87,7 +87,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 						{t('common.clearFilters')}
 					</Button>
 
-					<Button size="sm" type="submit" form="filter-form" className="w-full">
+					<Button size="sm" type="submit" form="filter-form" className="flex-1">
 						{t('common.applyFilters')}
 					</Button>
 				</div>

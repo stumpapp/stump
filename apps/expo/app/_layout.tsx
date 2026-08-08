@@ -32,6 +32,8 @@ import { NAV_THEME, Shade, toRgbChannels, useColors, usePalette } from '~/lib/co
 import { getDownloadQueueManager } from '~/lib/downloadQueue'
 import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { refreshWidgetFromCache } from '~/lib/widgets/readingNow/readingNowWidgetSync'
+import { useEnsureWidgetAssetsWritten } from '~/lib/widgets/utils'
 import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useHideSystemBars, useReaderStore } from '~/stores/reader'
@@ -130,6 +132,15 @@ export default function RootLayout() {
 	}, [error])
 
 	React.useEffect(() => {
+		const subscription = AppState.addEventListener('change', (status) => {
+			if (status === 'active') {
+				refreshWidgetFromCache()
+			}
+		})
+		return () => subscription.remove()
+	}, [])
+
+	React.useEffect(() => {
 		const subscription = AppState.addEventListener('memoryWarning', (status) => {
 			Sentry.addBreadcrumb({
 				category: 'system',
@@ -151,6 +162,8 @@ export default function RootLayout() {
 			Sentry.captureException(err)
 		})
 	}, [success])
+
+	useEnsureWidgetAssetsWritten()
 
 	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
 

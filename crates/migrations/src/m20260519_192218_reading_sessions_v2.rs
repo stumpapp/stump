@@ -73,10 +73,13 @@ impl MigrationTrait for Migration {
 					.col(ColumnDef::new(ReadingSessionsV2::UserId).text().not_null())
 					.col(
 						ColumnDef::new(ReadingSessionsV2::CreatedAt)
-							.date_time()
+							.timestamp_with_time_zone()
 							.not_null(),
 					)
-					.col(ColumnDef::new(ReadingSessionsV2::UpdatedAt).date_time())
+					.col(
+						ColumnDef::new(ReadingSessionsV2::UpdatedAt)
+							.timestamp_with_time_zone(),
+					)
 					.foreign_key(
 						ForeignKey::create()
 							.name("fk-reading_sessions-media")
@@ -336,10 +339,13 @@ impl MigrationTrait for Migration {
 					.col(ColumnDef::new(ReadingSessionsV1::KoreaderProgress).text())
 					.col(
 						ColumnDef::new(ReadingSessionsV1::StartedAt)
-							.date_time()
+							.timestamp_with_time_zone()
 							.not_null(),
 					)
-					.col(ColumnDef::new(ReadingSessionsV1::UpdatedAt).date_time())
+					.col(
+						ColumnDef::new(ReadingSessionsV1::UpdatedAt)
+							.timestamp_with_time_zone(),
+					)
 					.col(ColumnDef::new(ReadingSessionsV1::MediaId).text().not_null())
 					.col(ColumnDef::new(ReadingSessionsV1::UserId).text().not_null())
 					.col(ColumnDef::new(ReadingSessionsV1::DeviceId).text())
@@ -401,12 +407,12 @@ impl MigrationTrait for Migration {
 					)
 					.col(
 						ColumnDef::new(FinishedReadingSessionsV1::StartedAt)
-							.date_time()
+							.timestamp_with_time_zone()
 							.not_null(),
 					)
 					.col(
 						ColumnDef::new(FinishedReadingSessionsV1::CompletedAt)
-							.date_time()
+							.timestamp_with_time_zone()
 							.not_null(),
 					)
 					.col(

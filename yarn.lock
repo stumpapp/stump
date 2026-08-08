@@ -2843,6 +2843,14 @@
     sf-symbols-typescript "^2.1.0"
     vaul "^1.1.2"
 
+"@expo/ui@~56.0.23":
+  version "56.0.23"
+  resolved "https://registry.yarnpkg.com/@expo/ui/-/ui-56.0.23.tgz#59c7e6f49711a410346398622fd2d54926b15465"
+  integrity sha512-NEYz6dYmGU51mwtx/ce5FpsyN1HJSG600mNafdzR9dWYfgAbP/bZQurXC3M6EFXdh+cI4HArJ/ltLDeM+spVqw==
+  dependencies:
+    sf-symbols-typescript "^2.1.0"
+    vaul "^1.1.2"
+
 "@expo/ws-tunnel@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@expo/ws-tunnel/-/ws-tunnel-2.0.0.tgz#32d5fae46c7deb34cdf6b319a53b8a19b7915c93"
@@ -14008,6 +14016,18 @@ expo-haptics@~56.0.3:
   resolved "https://registry.yarnpkg.com/expo-haptics/-/expo-haptics-56.0.3.tgz#55112832e0834ca8f505ee099f70092cfacdd945"
   integrity sha512-ycoahZJnR9tWAVh/0mJYxbETtHRYaWjiWS8cHlP6aDGU6Q6Y8rZ5NKsuBwWw6HR2Pe30mfVFgbF2HrBR6gtYmw==
 
+expo-image-loader@~56.0.3:
+  version "56.0.3"
+  resolved "https://registry.yarnpkg.com/expo-image-loader/-/expo-image-loader-56.0.3.tgz#665112665e78d0fd9629f6160e2ca419d7f0c5c6"
+  integrity sha512-JgUo4fUeU1ZC+z8iBFj8v7yoGQnZrLbOVPyNE+DWVrld55F2F6R1ck+rmdm/8TNWLz1LhNQfD7c3XYP1ZikxXA==
+
+expo-image-manipulator@~56.0.23:
+  version "56.0.23"
+  resolved "https://registry.yarnpkg.com/expo-image-manipulator/-/expo-image-manipulator-56.0.23.tgz#f47a5ff1c965c1ce0849b555858dee3c46d81234"
+  integrity sha512-68bcPNlIAaxPPSTkWeb//bqO9Y+qkG8DHmZTJibjmiN8dfZ2PiwSaW35AZEl4OR+CMMWybUvujV8Y352s8bkPA==
+  dependencies:
+    expo-image-loader "~56.0.3"
+
 expo-json-utils@~56.0.0:
   version "56.0.0"
   resolved "https://registry.yarnpkg.com/expo-json-utils/-/expo-json-utils-56.0.0.tgz#ddf903e571c3d985ca670c028d06970926a1d3e0"
@@ -14167,6 +14187,14 @@ expo-web-browser@~56.0.5:
   version "56.0.5"
   resolved "https://registry.yarnpkg.com/expo-web-browser/-/expo-web-browser-56.0.5.tgz#1869c2ffcd75d1be3b57706f366f631d45a9c0e7"
   integrity sha512-kaN+wcR5lHwPCH1IgrU1XyPUQvBRzdF1TMp65uAF9iUCyipqYnmrvV87eqAmrdkFFopWVgU7FcxPu1UZw+gvUQ==
+
+expo-widgets@~56.0.24:
+  version "56.0.24"
+  resolved "https://registry.yarnpkg.com/expo-widgets/-/expo-widgets-56.0.24.tgz#99526cd0ee857ac40acf8a98331f69ee1c65c34e"
+  integrity sha512-cInfCF3/XhN9WoH3IskW9TefcPmJdrOfASOvKpmHbb023bHGWgrxJuysbHnQrlJhhohl20c5odJhi+2VE8bf+A==
+  dependencies:
+    "@expo/plist" "^0.7.0"
+    "@expo/ui" "~56.0.23"
 
 expo@^56.0.12:
   version "56.0.12"

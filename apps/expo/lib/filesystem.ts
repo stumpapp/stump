@@ -1,4 +1,6 @@
 import { Directory, File, Paths } from 'expo-file-system'
+import { widgetsDirectory } from 'expo-widgets'
+import { Platform } from 'react-native'
 import urlJoin from 'url-join'
 
 import { useReaderStore } from '~/stores'
@@ -209,3 +211,20 @@ export function getAppUsage() {
 		total: appUsageTotal + serverUsageTotal,
 	}
 }
+
+// widgets are not supported for android yet and without this conditional it would throw
+// an error along the longs of "dirs must be absolute paths" bc i assume it isn't a real
+// path on android (yet)
+// TODO(widgets): for now we just use cache directory but eventually needs a swap
+export const widgetStorage = new Directory(
+	Platform.OS === 'android' ? cacheDirectory : widgetsDirectory,
+)
+
+export const widgetThumbnailDirectory = new Directory(urlJoin(widgetStorage.uri, 'thumbnails'))
+export const widgetAssetsDirectory = new Directory(urlJoin(widgetStorage.uri, 'assets'))
+
+export const widgetThumbnailPath = (bookId: string): string =>
+	urlJoin(widgetThumbnailDirectory.uri, `${bookId}.jpg`)
+
+export const widgetAssetPath = (assetName: string): string =>
+	urlJoin(widgetAssetsDirectory.uri, assetName)

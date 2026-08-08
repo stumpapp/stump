@@ -35,12 +35,12 @@ export default function InlineTextInput({
 				{...(isLong ? {} : { size })}
 			/>
 
-			<ToolTip content={t('controlUi.resetField')}>
+			<ToolTip content={t('controlUi.metadataEditor.resetField')}>
 				<Button
 					variant="destructive"
 					size="icon"
 					className="h-4 w-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-					aria-label={t('controlUi.resetField')}
+					aria-label={t('controlUi.metadataEditor.resetField')}
 					onClick={() => onChange(null)}
 				>
 					<Minus className="h-3 w-3" />

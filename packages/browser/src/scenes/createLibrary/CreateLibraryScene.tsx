@@ -129,7 +129,7 @@ export default function CreateLibraryScene() {
 						{createError && (
 							<Alert variant="destructive">
 								<AlertCircle />
-								<AlertTitle>{t('libraryUi.createFailed')}</AlertTitle>
+								<AlertTitle>{t('libraryUi.create.error')}</AlertTitle>
 								<AlertDescription>{createError}</AlertDescription>
 							</Alert>
 						)}

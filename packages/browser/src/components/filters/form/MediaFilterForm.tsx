@@ -217,7 +217,7 @@ export default function MediaFilterForm() {
 		>
 			{!!seriesContext && (
 				<CheckBox
-					label={t('filterUi.onlySeriesOptions')}
+					label={t('filterUi.mediaFilter.onlySeriesOptions')}
 					checked={onlyFromSeries}
 					onClick={() => setOnlyFromSeries((prev) => !prev)}
 				/>
@@ -231,7 +231,7 @@ export default function MediaFilterForm() {
 				<>
 					<GenericFilterMultiselect
 						name="metadata.genre"
-						label={t('filterUi.genre')}
+						label={t('filterUi.mediaFilter.fields.genre')}
 						options={
 							data?.genres.map((genre) => ({ label: genre, value: genre.toLowerCase() })) || []
 						}
@@ -239,7 +239,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.writer"
-						label={t('filterUi.writer')}
+						label={t('filterUi.mediaFilter.fields.writer')}
 						options={
 							data?.writers.map((writer) => ({ label: writer, value: writer.toLowerCase() })) || []
 						}
@@ -247,7 +247,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.penciller"
-						label={t('filterUi.penciller')}
+						label={t('filterUi.mediaFilter.fields.penciller')}
 						options={
 							data?.pencillers.map((penciller) => ({
 								label: penciller,
@@ -258,7 +258,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.colorist"
-						label={t('filterUi.colorist')}
+						label={t('filterUi.mediaFilter.fields.colorist')}
 						options={
 							data?.colorists.map((colorist) => ({
 								label: colorist,
@@ -269,7 +269,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.letterer"
-						label={t('filterUi.letterer')}
+						label={t('filterUi.mediaFilter.fields.letterer')}
 						options={
 							data?.letterers.map((letterer) => ({
 								label: letterer,
@@ -280,7 +280,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.inker"
-						label={t('filterUi.inker')}
+						label={t('filterUi.mediaFilter.fields.inker')}
 						options={
 							data?.inkers.map((inker) => ({ label: inker, value: inker.toLowerCase() })) || []
 						}
@@ -288,7 +288,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.publisher"
-						label={t('filterUi.publisher')}
+						label={t('filterUi.mediaFilter.fields.publisher')}
 						options={
 							data?.publishers.map((publisher) => ({
 								label: publisher,
@@ -299,7 +299,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.editor"
-						label={t('filterUi.editor')}
+						label={t('filterUi.mediaFilter.fields.editor')}
 						options={
 							data?.editors.map((editor) => ({ label: editor, value: editor.toLowerCase() })) || []
 						}
@@ -307,7 +307,7 @@ export default function MediaFilterForm() {
 
 					<GenericFilterMultiselect
 						name="metadata.character"
-						label={t('filterUi.character')}
+						label={t('filterUi.mediaFilter.fields.character')}
 						options={
 							data?.characters.map((character) => ({
 								label: character,

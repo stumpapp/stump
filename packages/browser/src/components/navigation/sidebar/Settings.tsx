@@ -14,7 +14,7 @@ export default function SettingsButton() {
 	const isActive = location.pathname.startsWith(paths.settings())
 
 	return (
-		<ToolTip content={t('controlUi.goToSettings')} align="end">
+		<ToolTip content={t('noLibraries.links.settings')} align="end">
 			<IconButton
 				variant="ghost"
 				className={cn(

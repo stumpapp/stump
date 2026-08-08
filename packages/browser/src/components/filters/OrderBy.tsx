@@ -42,7 +42,7 @@ export default function OrderBy({ entity }: Props) {
 					})}
 				>
 					<SortAsc className="mr-1.5 h-4 w-4 text-foreground" />
-					{t('controlUi.orderBy')}
+					{t('controlUi.ordering.label')}
 				</Button>
 			</Popover.Trigger>
 

@@ -108,7 +108,7 @@ export function useToggleLockedField() {
 
 			promise.catch(() => {
 				toggleLockedField(field)
-				toast.error(t('entityUi.lockedFieldsUpdateFailed'))
+				toast.error(t('entityUi.metadataEditor.errors.lockedFieldsUpdateFailed'))
 			})
 		},
 		[sdk, records, currentRecordIndex, toggleLockedField, getLockedFields, t],

@@ -73,7 +73,9 @@ describe('APIKeyInspector', () => {
 		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
-		expect(screen.getByText('settingsUi.permissions')).toBeInTheDocument()
+		expect(
+			screen.getByText('settingsScene.app/apiKeys.shared.fields.permissions'),
+		).toBeInTheDocument()
 		expect(screen.getAllByTestId('permission-badge')).toHaveLength(2)
 	})
 
@@ -97,7 +99,9 @@ describe('APIKeyInspector', () => {
 		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
-		expect(screen.getByText('settingsUi.permissions')).toBeInTheDocument()
+		expect(
+			screen.getByText('settingsScene.app/apiKeys.shared.fields.permissions'),
+		).toBeInTheDocument()
 		expect(screen.getAllByTestId('permission-badge')).toHaveLength(2)
 	})
 

@@ -19,12 +19,12 @@ function DebugSettings() {
 	return (
 		<NewCard
 			tone="debug"
-			label={t('settingsUi.debugSettings')}
-			description={t('settingsUi.debugDescription')}
+			label={t('settingsScene.app/preferences.sections.debug.title')}
+			description={t('settingsScene.app/preferences.sections.debug.description')}
 		>
 			<NewCard.Row
-				label={t('settingsUi.queryTools')}
-				description={t('settingsUi.queryToolsDescription')}
+				label={t('settingsScene.app/preferences.sections.debug.queryTools.label')}
+				description={t('settingsScene.app/preferences.sections.debug.queryTools.description')}
 				onClick={() => store.patch({ showQueryTools: !store.showQueryTools })}
 			>
 				<RawSwitch

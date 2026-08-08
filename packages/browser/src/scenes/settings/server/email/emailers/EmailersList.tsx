@@ -35,7 +35,7 @@ export default function EmailersList() {
 					<Heading size="xs">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 					{canCreateEmailer && (
 						<ButtonOrLink href={paths.createEmailer()} className="mt-2">
-							{t('settingsUi.createEmailer')}
+							{t('settingsScene.server/email.sections.emailers.list.createEmailer')}
 						</ButtonOrLink>
 					)}
 				</div>

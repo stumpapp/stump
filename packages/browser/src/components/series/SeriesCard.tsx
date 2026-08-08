@@ -54,7 +54,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 		if (isMissing) {
 			return (
 				<Text size="xs" className="text-warning uppercase">
-					{t('entityUi.seriesMissing')}
+					{t('entityUi.seriesCard.seriesMissing')}
 				</Text>
 			)
 		}
@@ -62,7 +62,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 		return (
 			<div className="flex items-center justify-between">
 				<Text size="xs" variant="muted">
-					{t('entityUi.booksCount', { count: Number(data.mediaCount) })}
+					{t('entityUi.seriesCard.booksCount', { count: Number(data.mediaCount) })}
 				</Text>
 			</div>
 		)

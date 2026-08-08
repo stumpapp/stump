@@ -35,7 +35,7 @@ export default function FontFamily() {
 			<Label htmlFor="font-family">{t(getKey('fontFamily.label'))}</Label>
 			<ComboBox
 				size="full"
-				options={[{ value: '', label: t('readerUi.default'), fontClassName: '' }].concat(
+				options={[{ value: '', label: t('readerUi.fontFamily.default'), fontClassName: '' }].concat(
 					SUPPORTED_FONT_OPTIONS,
 				)}
 				value={fontFamily ?? ''}

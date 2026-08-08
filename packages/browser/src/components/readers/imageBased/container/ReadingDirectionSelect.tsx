@@ -27,13 +27,13 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="reading-direction">{t('readerUi.readingDirection')}</Label>
+			<Label htmlFor="reading-direction">{t('readerUi.readingDirection.label')}</Label>
 			<NativeSelect
 				id="reading-direction"
 				size="sm"
 				options={[
-					{ label: t('readerUi.leftToRight'), value: 'LTR' },
-					{ label: t('readerUi.rightToLeft'), value: 'RTL' },
+					{ label: t('readerUi.readingDirection.options.leftToRight'), value: 'LTR' },
+					{ label: t('readerUi.readingDirection.options.rightToLeft'), value: 'RTL' },
 				]}
 				value={direction}
 				onChange={handleChange}

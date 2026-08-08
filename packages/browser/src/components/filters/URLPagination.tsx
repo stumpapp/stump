@@ -78,11 +78,11 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					min={1}
 				/>
 				<Text size="sm" variant="muted" className="inline-flex shrink-0">
-					{t('controlUi.ofPages', { pages })}
+					{t('controlUi.pagination.ofPages', { pages })}
 				</Text>
 			</form>
 			<div className="space-x-1 flex items-center">
-				<ToolTip content={t('controlUi.previousPage')} size="sm" align="end">
+				<ToolTip content={t('controlUi.pagination.previous')} size="sm" align="end">
 					<IconButton
 						size="xs"
 						variant="ghost"
@@ -94,7 +94,7 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					</IconButton>
 				</ToolTip>
 
-				<ToolTip content={t('controlUi.nextPage')} size="sm" align="end">
+				<ToolTip content={t('controlUi.pagination.next')} size="sm" align="end">
 					<IconButton
 						size="xs"
 						variant="ghost"

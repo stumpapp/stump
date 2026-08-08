@@ -62,7 +62,7 @@ export default function BasicSettingsScene() {
 			<BasicBookClubInformation />
 
 			<div>
-				<Button type="submit">{t('bookClubUi.updateClub')}</Button>
+				<Button type="submit">{t('bookClubSettingsScene.basics.form.submit')}</Button>
 			</div>
 		</Form>
 	)

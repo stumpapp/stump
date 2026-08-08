@@ -27,14 +27,17 @@ export default function ReadingModeSelect({ value, onChange }: Props) {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="reading-mode">{t('readerUi.flow')}</Label>
+			<Label htmlFor="reading-mode">{t('readerUi.readingMode.options.flow')}</Label>
 			<NativeSelect
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: t('readerUi.verticalScroll'), value: 'CONTINUOUS_VERTICAL' },
-					{ label: t('readerUi.horizontalScroll'), value: 'CONTINUOUS_HORIZONTAL' },
-					{ label: t('readerUi.paged'), value: 'PAGED' },
+					{ label: t('readerUi.readingMode.options.verticalScroll'), value: 'CONTINUOUS_VERTICAL' },
+					{
+						label: t('readerUi.readingMode.options.horizontalScroll'),
+						value: 'CONTINUOUS_HORIZONTAL',
+					},
+					{ label: t('readerUi.readingMode.options.paged'), value: 'PAGED' },
 				]}
 				value={value}
 				onChange={handleChange}

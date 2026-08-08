@@ -55,7 +55,9 @@ export default function MarkdownEditor({ initialState = 'writing', initialConten
 				<Tabs value={writingState} variant="primary" activeOnHover>
 					<Tabs.List className="border-none">
 						<Tabs.Trigger value="writing" asChild onClick={changeHandler('writing')}>
-							<Text className="cursor-pointer truncate">{t('controlUi.write')}</Text>
+							<Text className="cursor-pointer truncate">
+								{t('controlUi.markdownEditor.tabs.write')}
+							</Text>
 						</Tabs.Trigger>
 
 						<Tabs.Trigger
@@ -65,14 +67,17 @@ export default function MarkdownEditor({ initialState = 'writing', initialConten
 							disabled={!content.length}
 						>
 							<Text className={cx('truncate', { 'cursor-pointer': content.length })}>
-								{t('controlUi.preview')}
+								{t('controlUi.markdownEditor.tabs.preview')}
 							</Text>
 						</Tabs.Trigger>
 					</Tabs.List>
 				</Tabs>
 
 				<div className="gap-x-1.5 pr-1 flex items-center">
-					<ToolTip content={t('controlUi.addSpoiler')} isDisabled={writingState === 'preview'}>
+					<ToolTip
+						content={t('controlUi.markdownEditor.actions.addSpoiler')}
+						isDisabled={writingState === 'preview'}
+					>
 						<IconButton
 							size="xs"
 							variant="ghost"
@@ -84,7 +89,7 @@ export default function MarkdownEditor({ initialState = 'writing', initialConten
 						</IconButton>
 					</ToolTip>
 
-					<ToolTip content={t('controlUi.tagUser')} isDisabled>
+					<ToolTip content={t('controlUi.markdownEditor.actions.tagUser')} isDisabled>
 						<IconButton size="xs" variant="ghost" type="button" disabled>
 							<AtSign className="h-5 w-5" />
 						</IconButton>

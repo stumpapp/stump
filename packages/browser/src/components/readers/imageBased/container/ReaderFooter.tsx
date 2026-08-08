@@ -179,12 +179,12 @@ export default function ReaderFooter() {
 				>
 					{trackElapsedTime && (
 						<Text className="text-sm text-[#898d94]">
-							{t('readerUi.readingTime', { time: formattedReadTime })}
+							{t('readerUi.footer.readingTime', { time: formattedReadTime })}
 						</Text>
 					)}
 
 					<Text className="text-sm text-[#898d94]">
-						{t('readerUi.pageXOfY', {
+						{t('readerUi.footer.pageXOfY', {
 							current: [...currentSet]
 								.map((idx) => idx + 1)
 								.sort((a, b) => a - b)

@@ -31,7 +31,7 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 	)
 
 	if (!bookmarksArray.length) {
-		return <GenericEmptyState title={t('readerUi.noBookmarks')} />
+		return <GenericEmptyState title={t('readerUi.locations.noBookmarks')} />
 	}
 
 	return (

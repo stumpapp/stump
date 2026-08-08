@@ -76,7 +76,7 @@ export default function TagSelect({ label, description, selected = [], onChange 
 
 	return (
 		<ComboBox
-			label={label ?? t('entityUi.tags')}
+			label={label ?? t('entityUi.fields.tags')}
 			description={description}
 			options={options}
 			value={[...selected].sort((a, b) => a.label.localeCompare(b.label)).map(({ value }) => value)}

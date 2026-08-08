@@ -47,14 +47,14 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 		},
 		onError: (error) => {
 			console.error(error)
-			toast.error(t('settingsUi.userLockUpdateFailed'))
+			toast.error(t('settingsScene.server/users.table.errors.lockUpdateFailed'))
 		},
 	})
 
 	const { mutateAsync: deleteSessions } = useGraphQLMutation(deleteSessionsMutation, {
 		onError: (error) => {
 			console.error(error)
-			toast.error(t('settingsUi.userSessionsDeleteFailed'))
+			toast.error(t('settingsScene.server/users.table.errors.sessionsDeleteFailed'))
 		},
 	})
 
@@ -80,13 +80,13 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 			{
 				items: [
 					{
-						label: t('settingsUi.inspectUser'),
+						label: t('settingsScene.server/users.table.actions.inspect'),
 						leftIcon: <Search className="mr-2 h-4 w-4" />,
 						onClick: () => onSelectForInspect(user),
 					},
 					{
 						disabled: user.loginSessionsCount === 0,
-						label: t('settingsUi.clearSessions'),
+						label: t('settingsScene.server/users.table.actions.clearSessions'),
 						isDestructive: true,
 						leftIcon: <Database className="mr-2 h-4 w-4" />,
 						onClick: handleClearUserSessions,
@@ -110,7 +110,9 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 					},
 					{
 						disabled: isSelf || user.isServerOwner,
-						label: user.isLocked ? t('settingsUi.unlockAccount') : t('settingsUi.lockAccount'),
+						label: user.isLocked
+							? t('settingsScene.server/users.table.actions.unlockAccount')
+							: t('settingsScene.server/users.table.actions.lockAccount'),
 						leftIcon: user.isLocked ? (
 							<Unlock className="mr-2 h-4 w-4" />
 						) : (

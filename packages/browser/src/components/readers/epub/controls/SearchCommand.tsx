@@ -83,7 +83,7 @@ export default function SearchCommand() {
 				item = toc?.find((i) => i.play_order === adjustedIdx)
 			}
 
-			return item?.label || t('readerUi.spineItem', { index: idx })
+			return item?.label || t('readerUi.search.spineItem', { index: idx })
 		},
 		[toc, t],
 	)
@@ -92,7 +92,7 @@ export default function SearchCommand() {
 		if (!results) {
 			return null
 		} else if (!results.length) {
-			return <Command.Empty>{t('readerUi.noSearchResults')}</Command.Empty>
+			return <Command.Empty>{t('readerUi.search.noResults')}</Command.Empty>
 		} else {
 			return results.map(({ spineIndex, results }, idx) => (
 				<Command.Group key={`group-${idx}`} heading={getSpineTitle(spineIndex)}>
@@ -148,7 +148,7 @@ export default function SearchCommand() {
 				<div className="px-4 flex items-center border-b border-b-border">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					<input
-						placeholder={t('readerUi.searchPlaceholder')}
+						placeholder={t('readerUi.search.placeholder')}
 						className={cn(
 							'h-11 py-3 text-sm flex w-full rounded-md bg-transparent text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
 						)}

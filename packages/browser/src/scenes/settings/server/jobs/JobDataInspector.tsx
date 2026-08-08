@@ -49,10 +49,13 @@ export default function JobDataInspector({ data, onClose }: Props) {
 		<Sheet
 			open={!!data}
 			onClose={onClose}
-			title={t('settingsUi.jobData')}
-			description={t('settingsUi.jobDataDescription')}
+			title={t('settingsScene.server/jobs.sections.history.dataInspector.title')}
+			description={t('settingsScene.server/jobs.sections.history.dataInspector.description')}
 		>
-			<Preformatted title={t('settingsUi.rawJson')} content={displayedData} />
+			<Preformatted
+				title={t('settingsScene.server/jobs.sections.history.dataInspector.rawJson')}
+				content={displayedData}
+			/>
 		</Sheet>
 	)
 }

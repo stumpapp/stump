@@ -192,7 +192,7 @@ export default function ServerEmojisSection() {
 
 		const name = sanitizedName(renameValue)
 		if (!name) {
-			toast.error(t('settingsUi.emojiNameRequired'))
+			toast.error(t('settingsScene.server/general.sections.customEmojis.nameRequired'))
 			return
 		}
 

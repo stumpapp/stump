@@ -35,7 +35,7 @@ export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 		},
 		onError: (error) => {
 			console.error(error)
-			toast.error(t('settingsUi.deleteDeviceError'))
+			toast.error(t('settingsScene.server/email.sections.devices.deleteDevice.error'))
 		},
 	})
 
@@ -47,9 +47,9 @@ export default function DeleteDeviceConfirmation({ device, onClose }: Props) {
 
 	return (
 		<ConfirmationModal
-			title={t('settingsUi.deleteDevice')}
-			description={t('settingsUi.deleteDeviceDescription')}
-			confirmText={t('settingsUi.deleteDevice')}
+			title={t('settingsScene.server/email.sections.devices.deleteDevice.title')}
+			description={t('settingsScene.server/email.sections.devices.deleteDevice.description')}
+			confirmText={t('settingsScene.server/email.sections.devices.deleteDevice.title')}
 			confirmVariant="destructive"
 			isOpen={!!device}
 			onClose={onClose}

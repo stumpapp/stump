@@ -14,13 +14,13 @@ export default function ThemeControls() {
 	return (
 		<Dialog>
 			<Dialog.Trigger asChild>
-				<ControlButton title={t('readerUi.themeAndOptions')}>
+				<ControlButton title={t('readerUi.themeControls.title')}>
 					<Paintbrush className="h-4 w-4" />
 				</ControlButton>
 			</Dialog.Trigger>
 
 			<Dialog.Content size="md" className="gap-4 z-101 flex flex-col bg-muted">
-				<Heading size="md">{t('readerUi.appearance')}</Heading>
+				<Heading size="md">{t('readerUi.themeControls.appearance')}</Heading>
 
 				<FontFamily />
 				<FontSizeControl />
@@ -34,7 +34,7 @@ export default function ThemeControls() {
 	return (
 		<Popover>
 			<Popover.Trigger asChild>
-				<ControlButton title={t('readerUi.themeAndOptions')}>
+				<ControlButton title={t('readerUi.themeControls.title')}>
 					<Paintbrush className="h-4 w-4" />
 				</ControlButton>
 			</Popover.Trigger>

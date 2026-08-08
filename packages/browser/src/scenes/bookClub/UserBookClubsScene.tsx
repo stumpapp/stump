@@ -51,7 +51,9 @@ export default function UserBookClubsScene() {
 								'mt-0.5 px-1.5 py-0.5 text-xs font-medium rounded-md whitespace-nowrap ring-1 ring-inset',
 							)}
 						>
-							{isActive ? t('bookClubUi.active') : t('bookClubUi.inactive')}
+							{isActive
+								? t('bookClubUi.clubList.status.active')
+								: t('bookClubUi.clubList.status.inactive')}
 						</p>
 					</div>
 					<div className="mt-1 gap-x-2 text-xs leading-5 flex items-center text-gray-500">
@@ -60,13 +62,13 @@ export default function UserBookClubsScene() {
 							<circle cx={1} cy={1} r={1} />
 						</svg>
 						<p className="truncate">
-							{t('bookClubUi.memberCount', { count: bookClub.membersCount })}
+							{t('bookClubUi.clubList.memberCount', { count: bookClub.membersCount })}
 						</p>
 					</div>
 				</div>
 				<div className="gap-x-4 flex flex-none items-center">
 					<ButtonOrLink href={paths.bookClub(bookClub.slug)} variant="secondary">
-						{t('bookClubUi.goToClub')}
+						{t('bookClubUi.clubList.actions.goToClub')}
 					</ButtonOrLink>
 				</div>
 			</>
@@ -78,9 +80,11 @@ export default function UserBookClubsScene() {
 			return (
 				<Card className="p-6 flex items-center justify-center border-dashed">
 					<div className="gap-3 flex flex-col items-center">
-						{!bookClubs?.length && <Heading size="xs">{t('bookClubUi.noMemberships')}</Heading>}
+						{!bookClubs?.length && (
+							<Heading size="xs">{t('bookClubUi.clubList.empty.title')}</Heading>
+						)}
 						<ButtonOrLink href="explore" variant="secondary">
-							{t('bookClubUi.explorePublic')}
+							{t('bookClubUi.clubList.empty.explorePublic')}
 						</ButtonOrLink>
 					</div>
 				</Card>
@@ -89,7 +93,7 @@ export default function UserBookClubsScene() {
 
 		return (
 			<>
-				<Heading>{t('bookClubUi.yourClubs')}</Heading>
+				<Heading>{t('bookClubUi.clubList.yourClubs')}</Heading>
 				<ul role="list" className="divide-y divide-gray-100">
 					{bookClubs?.map((club) => (
 						<li
@@ -109,7 +113,7 @@ export default function UserBookClubsScene() {
 			className={cx({ 'flex h-full items-center justify-center': !bookClubs?.length })}
 		>
 			<Helmet>
-				<title>Stump | {t('bookClubUi.pageTitle')}</title>
+				<title>Stump | {t('bookClubUi.clubList.pageTitle')}</title>
 			</Helmet>
 
 			{renderContent()}

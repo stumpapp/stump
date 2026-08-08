@@ -10,8 +10,8 @@ export default function LibraryAnalysisScene() {
 		<div className="gap-12 flex flex-col">
 			<Alert variant="warning">
 				<AlertTriangle />
-				<AlertTitle>{t('libraryUi.workInProgress')}</AlertTitle>
-				<AlertDescription>{t('libraryUi.workInProgressDescription')}</AlertDescription>
+				<AlertTitle>{t('libraryUi.analysis.workInProgress.title')}</AlertTitle>
+				<AlertDescription>{t('libraryUi.analysis.workInProgress.description')}</AlertDescription>
 			</Alert>
 
 			<AnalyzeMedia />

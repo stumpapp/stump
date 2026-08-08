@@ -58,8 +58,8 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 				}),
 			onError: (error: unknown) => {
 				if (isBadStateError(error)) {
-					toast.warning(t('settingsUi.jobInvalidState'), {
-						description: t('settingsUi.checkServerLogs'),
+					toast.warning(t('settingsScene.server/jobs.sections.history.errors.invalidState'), {
+						description: t('settingsScene.server/jobs.sections.history.errors.checkServerLogs'),
 					})
 					client.refetchQueries({
 						predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.jobs),
@@ -114,7 +114,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			...(isCancelable
 				? [
 						{
-							label: t('settingsUi.cancelJob'),
+							label: t('common.cancel'),
 							leftIcon: <Ban className="mr-2 h-4 w-4" />,
 							onClick: () => handleAction('cancel'),
 						},
@@ -123,7 +123,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			...(jobData
 				? [
 						{
-							label: t('settingsUi.viewJobData'),
+							label: t('settingsScene.server/jobs.sections.history.actionMenu.viewData'),
 							leftIcon: <Database className="mr-2 h-4 w-4" />,
 							onClick: () => onInspectData(jobData),
 						},
@@ -132,12 +132,12 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			...(hasLogs
 				? [
 						{
-							label: t('settingsUi.viewLogs'),
+							label: t('settingsScene.server/jobs.sections.history.actionMenu.viewLogs'),
 							leftIcon: <FileClock className="mr-2 h-4 w-4" />,
 							onClick: () => navigate(paths.serverLogs(jobId)),
 						},
 						{
-							label: t('settingsUi.clearLogs'),
+							label: t('settingsScene.server/jobs.sections.history.actionMenu.clearLogs'),
 							leftIcon: <ListX className="mr-2 h-4 w-4" />,
 							onClick: () => handleAction('deleteLogs'),
 						},

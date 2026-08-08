@@ -48,7 +48,7 @@ export default function FontSizeControl() {
 
 	return (
 		<div className="gap-y-2.5 flex flex-col">
-			<Label>{t('readerUi.fontSize')}</Label>
+			<Label>{t('readerUi.fontSize.label')}</Label>
 			<div className="gap-x-2 flex items-center">
 				<IconButton
 					{...bindMinus({
@@ -79,7 +79,7 @@ export default function FontSizeControl() {
 			</div>
 			{localFontSize > 50 && (
 				<Text size="xs" className="text-left" variant="muted">
-					{t('readerUi.fontPreviewLimit')}
+					{t('readerUi.fontSize.previewLimit')}
 				</Text>
 			)}
 		</div>

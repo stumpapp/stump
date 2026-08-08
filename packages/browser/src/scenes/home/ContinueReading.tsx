@@ -237,7 +237,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 				<div className="gap-2 flex items-center justify-between">
 					{!isEbookProgress && !!data.readProgress?.page && data.readProgress.page > 0 && (
 						<Text size="xs" className="text-gray-200 opacity-90">
-							{t('entityUi.pagesLeft', { count: pagesLeft })}
+							{t('entityUi.bookCard.pagesLeft', { count: pagesLeft })}
 						</Text>
 					)}
 

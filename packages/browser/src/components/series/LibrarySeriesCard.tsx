@@ -44,7 +44,7 @@ const LibrarySeriesCard = memo(function LibrarySeriesCard({ data }: Props) {
 				<StackedSeriesCard
 					id={data.id}
 					name={data.resolvedName}
-					subtitle={t('entityUi.booksCount', { count: data.mediaCount })}
+					subtitle={t('entityUi.seriesCard.booksCount', { count: data.mediaCount })}
 					isMissing={data.status === 'MISSING'}
 					width={width}
 					thumbnailData={thumbnailData}

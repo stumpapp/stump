@@ -29,9 +29,9 @@ export default function ProcessLibraryThumbnails() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>
-				<Label>{t('libraryUi.processColors')}</Label>
+				<Label>{t('libraryUi.thumbnailSettings.processColors.title')}</Label>
 				<Text size="sm" variant="muted">
-					{t('libraryUi.processColorsDescription')}
+					{t('libraryUi.thumbnailSettings.processColors.description')}
 				</Text>
 			</div>
 
@@ -39,7 +39,7 @@ export default function ProcessLibraryThumbnails() {
 				<DropdownMenu
 					trigger={
 						<Button variant="outline">
-							{t('libraryUi.extractColors')}
+							{t('libraryUi.thumbnailSettings.processColors.action')}
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>
 					}
@@ -47,12 +47,12 @@ export default function ProcessLibraryThumbnails() {
 						{
 							items: [
 								{
-									label: t('libraryUi.missingOnly'),
+									label: t('libraryUi.thumbnailSettings.processColors.options.missingOnly'),
 									leftIcon: <ImagePlus className={iconStyle} />,
 									onClick: () => process(false),
 								},
 								{
-									label: t('libraryUi.reprocessAll'),
+									label: t('libraryUi.thumbnailSettings.processColors.options.reprocessAll'),
 									isDestructive: true,
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => process(true),

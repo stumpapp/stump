@@ -43,7 +43,7 @@ export default function URLOrdering({ entity }: Props) {
 
 	return (
 		<Popover onOpenChange={setIsOpen} open={isOpen}>
-			<ToolTip content={t('controlUi.configureOrdering')} size="sm" isDisabled={isOpen}>
+			<ToolTip content={t('controlUi.ordering.configure')} size="sm" isDisabled={isOpen}>
 				<Popover.Trigger asChild>
 					<IconButton variant="ghost" size="sm" className="hover:bg-accent">
 						<ArrowUpDown className="h-4 w-4" />

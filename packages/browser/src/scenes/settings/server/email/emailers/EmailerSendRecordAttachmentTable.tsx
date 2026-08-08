@@ -119,7 +119,13 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 			} = row
 
 			if (!media) {
-				return <Text size="sm">{t('settingsUi.notFound')}</Text>
+				return (
+					<Text size="sm">
+						{t(
+							'settingsScene.server/email.sections.emailers.list.sendHistory.attachmentTable.notFound',
+						)}
+					</Text>
+				)
 			}
 
 			return (
@@ -130,7 +136,9 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 		},
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				{t('settingsUi.media')}
+				{t(
+					'settingsScene.server/email.sections.emailers.list.sendHistory.attachmentTable.columns.media',
+				)}
 			</Text>
 		),
 	}),
@@ -138,7 +146,9 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				{t('settingsUi.filename')}
+				{t(
+					'settingsScene.server/email.sections.emailers.list.sendHistory.attachmentTable.columns.filename',
+				)}
 			</Text>
 		),
 	}),
@@ -146,7 +156,7 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 		cell: ({ getValue }) => <Text size="sm">{formatBytes(getValue())}</Text>,
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				{t('settingsUi.size')}
+				{t('common.size')}
 			</Text>
 		),
 	}),

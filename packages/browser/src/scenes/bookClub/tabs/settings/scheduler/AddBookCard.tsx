@@ -77,7 +77,7 @@ export default function AddBookCard({ index }: Props) {
 							onClick={() => setSelectedBook(null)}
 							className="shrink-0"
 						>
-							{t('bookClubUi.removeSelection')}
+							{t('bookClubUi.schedule.bookPicker.actions.removeSelection')}
 						</Button>
 					</div>
 				</div>
@@ -99,9 +99,9 @@ export default function AddBookCard({ index }: Props) {
 		return (
 			<>
 				<div>
-					<Heading size="xs">{t('bookClubUi.pickBook')}</Heading>
+					<Heading size="xs">{t('bookClubUi.schedule.bookPicker.libraryBook.title')}</Heading>
 					<Text variant="muted" size="sm" className="mt-1">
-						{t('bookClubUi.pickBookDescription')}
+						{t('bookClubUi.schedule.bookPicker.libraryBook.description')}
 					</Text>
 				</div>
 
@@ -119,28 +119,28 @@ export default function AddBookCard({ index }: Props) {
 		return (
 			<>
 				<div>
-					<Heading size="xs">{t('bookClubUi.addExternalBook')}</Heading>
+					<Heading size="xs">{t('bookClubUi.schedule.bookPicker.externalBook.title')}</Heading>
 					<Text variant="muted" size="sm" className="mt-1">
-						{t('bookClubUi.addExternalBookDescription')}
+						{t('bookClubUi.schedule.bookPicker.externalBook.description')}
 					</Text>
 				</div>
 
 				<div className="gap-x-4 gap-y-4 md:flex-row md:gap-y-0 flex w-full flex-col items-start">
 					<Input
 						fullWidth
-						label={t('bookClubUi.title')}
+						label={t('bookClubUi.schedule.bookPicker.externalBook.fields.title')}
 						disabled={isEntityBook}
 						{...form.register(`books.${index}.book.title`)}
 					/>
 					<Input
-						label={t('bookClubUi.author')}
+						label={t('bookClubUi.schedule.bookPicker.externalBook.fields.author')}
 						disabled={isEntityBook}
 						{...form.register(`books.${index}.book.author`)}
 					/>
 				</div>
 
 				<Input
-					label={t('bookClubUi.bookUrl')}
+					label={t('bookClubUi.schedule.bookPicker.externalBook.fields.url')}
 					disabled={isEntityBook}
 					{...form.register(`books.${index}.book.url`)}
 				/>
@@ -151,27 +151,29 @@ export default function AddBookCard({ index }: Props) {
 	return (
 		<Card className="gap-4 p-4 flex w-full flex-col">
 			{renderBookPickerOption()}
-			{!isEntityBook && !isDefiningExternalBook && <LeftAlignedDivider text={t('bookClubUi.or')} />}
+			{!isEntityBook && !isDefiningExternalBook && (
+				<LeftAlignedDivider text={t('bookClubUi.schedule.bookPicker.separators.or')} />
+			)}
 			{renderExternalBookOption()}
 
-			<LeftAlignedDivider text={t('bookClubUi.andThen')} />
+			<LeftAlignedDivider text={t('bookClubUi.schedule.bookPicker.separators.andThen')} />
 
 			<div>
-				<Heading size="xs">{t('bookClubUi.configureDates')}</Heading>
+				<Heading size="xs">{t('bookClubUi.schedule.bookPicker.dates.title')}</Heading>
 				<Text variant="muted" size="sm" className="mt-1">
-					{t('bookClubUi.configureDatesDescription')}
+					{t('bookClubUi.schedule.bookPicker.dates.description')}
 				</Text>
 			</div>
 
 			<div className="gap-x-4 gap-y-4 md:flex-row md:gap-y-0 flex w-full flex-col items-start">
 				<DatePicker
-					label={t('bookClubUi.startDate')}
+					label={t('bookClubUi.schedule.bookPicker.dates.start')}
 					minDate={new Date()}
 					onChange={(date) => form.setValue(`books.${index}.startAt`, date?.toISOString())}
 				/>
 
 				<DatePicker
-					label={t('bookClubUi.endDate')}
+					label={t('bookClubUi.schedule.bookPicker.dates.end')}
 					minDate={new Date()}
 					onChange={(date) => form.setValue(`books.${index}.endAt`, date?.toISOString())}
 				/>

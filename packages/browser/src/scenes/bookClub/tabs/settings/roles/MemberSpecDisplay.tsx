@@ -20,9 +20,9 @@ export default function MemberSpecDisplay() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<div className="md:max-w-lg">
-				<Heading size="sm">{t('bookClubUi.customNames')}</Heading>
+				<Heading size="sm">{t('bookClubUi.roleNames.title')}</Heading>
 				<Text variant="muted" size="sm">
-					{t('bookClubUi.customNamesDescription')}
+					{t('bookClubUi.roleNames.description')}
 				</Text>
 			</div>
 
@@ -34,13 +34,13 @@ export default function MemberSpecDisplay() {
 								scope="col"
 								className="py-3.5 pl-4 pr-3 text-sm font-semibold sm:pl-6 text-left text-foreground"
 							>
-								<Text>{t('bookClubUi.role')}</Text>
+								<Text>{t('bookClubUi.roleNames.columns.role')}</Text>
 							</th>
 							<th
 								scope="col"
 								className="px-3 py-3.5 text-sm font-semibold border-l border-l-border text-left text-foreground"
 							>
-								<Text>{t('bookClubUi.showAs')}</Text>
+								<Text>{t('bookClubUi.roleNames.columns.showAs')}</Text>
 							</th>
 						</tr>
 					</thead>

@@ -25,10 +25,10 @@ export default function TimerMenu() {
 
 			<Dropdown.Content align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
 				<Dropdown.Item onClick={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}>
-					{trackElapsedTime ? t('readerUi.stopTimer') : t('readerUi.startTimer')}
+					{trackElapsedTime ? t('readerUi.timer.stop') : t('readerUi.timer.start')}
 				</Dropdown.Item>
 
-				<Dropdown.Item onClick={timer.reset}>{t('readerUi.resetTimer')}</Dropdown.Item>
+				<Dropdown.Item onClick={timer.reset}>{t('readerUi.timer.reset')}</Dropdown.Item>
 			</Dropdown.Content>
 		</Dropdown>
 	)

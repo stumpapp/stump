@@ -13,8 +13,8 @@ export default function RemoveMemberConfirmation({ isOpen, onClose }: Props) {
 			isOpen={isOpen}
 			onConfirm={() => onClose(true)}
 			onClose={() => onClose(false)}
-			title={t('bookClubUi.removeMember')}
-			description={t('bookClubUi.removeMemberDescription')}
+			title={t('bookClubUi.members.removeConfirmation.title')}
+			description={t('bookClubUi.members.removeConfirmation.description')}
 			confirmText={t('common.confirm')}
 			confirmVariant="destructive"
 			size="sm"

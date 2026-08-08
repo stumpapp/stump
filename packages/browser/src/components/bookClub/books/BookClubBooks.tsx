@@ -75,7 +75,9 @@ export default function BookClubBooks() {
 							onClick={togglePastBooks}
 						>
 							<Text className="cursor-pointer underline" size="sm" variant="muted">
-								{showPastBooks ? t('bookClubUi.hidePastBooks') : t('bookClubUi.showPastBooks')}
+								{showPastBooks
+									? t('bookClubUi.booksList.actions.hidePast')
+									: t('bookClubUi.booksList.actions.showPast')}
 							</Text>
 						</button>
 					</div>
@@ -97,14 +99,14 @@ export default function BookClubBooks() {
 			return (
 				<div className="px-4 flex flex-col">
 					<GenericEmptyState
-						title={t('bookClubUi.noBooks')}
-						subtitle={t('bookClubUi.noBooksDescription')}
+						title={t('bookClubUi.booksList.empty.title')}
+						subtitle={t('bookClubUi.booksList.empty.description')}
 						containerClassName="md:justify-start md:items-start"
 						contentClassName="md:text-left"
 					/>
 					{viewerCanManage && (
 						<ButtonOrLink variant="secondary" href={paths.bookClubScheduler(bookClub.id)}>
-							{t('bookClubUi.createSchedule')}
+							{t('bookClubUi.booksList.empty.createSchedule')}
 						</ButtonOrLink>
 					)}
 				</div>
@@ -128,7 +130,7 @@ export default function BookClubBooks() {
 		<div className="md:-ml-4 md:w-2/3 lg:w-md flex h-full w-full flex-col">
 			{!!bookClub.currentBook && (
 				<Heading size="md" className="px-4 pb-4 flex items-center">
-					{t('bookClubUi.books')}
+					{t('bookClubUi.booksList.title')}
 				</Heading>
 			)}
 			{renderContent()}

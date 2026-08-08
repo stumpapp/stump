@@ -57,9 +57,9 @@ export default function NativePDFViewer({ id }: Props) {
 	return (
 		<object data={pdfObjectUrl} type="application/pdf" width="100%" height="100%">
 			<Text>
-				{t('readerUi.pdfLoadFailed')}{' '}
-				<Link href={sdk.media.downloadURL(id)}>{t('readerUi.downloadPdf')}</Link>{' '}
-				{t('readerUi.downloadPdfSuffix')}
+				{t('readerUi.pdf.loadFailed')}{' '}
+				<Link href={sdk.media.downloadURL(id)}>{t('common.clickHere')}</Link>{' '}
+				{t('readerUi.pdf.downloadSuffix')}
 			</Text>
 		</object>
 	)

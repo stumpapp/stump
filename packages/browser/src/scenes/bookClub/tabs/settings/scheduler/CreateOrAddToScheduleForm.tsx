@@ -72,7 +72,7 @@ export default function CreateOrAddToScheduleForm() {
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
 			<Input
-				label={t('bookClubUi.booksToAdd')}
+				label={t('bookClubUi.schedule.form.booksToAdd')}
 				type="number"
 				value={books.length}
 				onChange={handleChange}

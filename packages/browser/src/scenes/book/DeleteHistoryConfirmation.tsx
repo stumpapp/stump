@@ -12,8 +12,8 @@ export default function DeleteHistoryConfirmation({ isOpen, onCancel, onConfirm 
 	const { t } = useLocaleContext()
 	return (
 		<ConfirmationModal
-			title={t('entityUi.deleteHistoryTitle')}
-			description={t('entityUi.deleteHistoryDescription')}
+			title={t('entityUi.deleteHistory.title')}
+			description={t('entityUi.deleteHistory.description')}
 			isOpen={isOpen}
 			onClose={onCancel}
 			onConfirm={onConfirm}
@@ -22,7 +22,7 @@ export default function DeleteHistoryConfirmation({ isOpen, onCancel, onConfirm 
 			<Alert>
 				<AlertTriangle />
 				<AlertTitle>{t('common.thisActionCannotBeUndone')}</AlertTitle>
-				<AlertDescription>{t('entityUi.deleteHistoryWarning')}</AlertDescription>
+				<AlertDescription>{t('entityUi.deleteHistory.warning')}</AlertDescription>
 			</Alert>
 		</ConfirmationModal>
 	)

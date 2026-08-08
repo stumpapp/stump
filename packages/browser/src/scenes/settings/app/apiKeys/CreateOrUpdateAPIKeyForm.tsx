@@ -107,7 +107,7 @@ export default function CreateOrUpdateAPIKeyForm({
 			>
 				<Input
 					label={t('settingsScene.app/apiKeys.shared.fields.name')}
-					placeholder={t('settingsUi.apiKeyNamePlaceholder')}
+					placeholder={t('createOrUpdateApiKey.fields.name.placeholder')}
 					{...form.register('name')}
 					errorMessage={errors.name?.message}
 					ignoreFill

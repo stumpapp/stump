@@ -105,7 +105,7 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 		),
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				{t('settingsUi.sentAt')}
+				{t('settingsScene.server/email.sections.emailers.list.sendHistory.table.columns.createdAt')}
 			</Text>
 		),
 		id: 'sentAt',
@@ -114,7 +114,7 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				{t('settingsUi.recipient')}
+				{t('settingsScene.server/email.sections.emailers.list.sendHistory.recipient')}
 			</Text>
 		),
 		id: 'recipientEmail',
@@ -143,12 +143,12 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 					</div>
 				)
 			} else {
-				return <Text size="sm">{t('settingsUi.unknown')}</Text>
+				return <Text size="sm">{t('common.unknown')}</Text>
 			}
 		},
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				{t('settingsUi.sender')}
+				{t('settingsScene.server/email.sections.emailers.list.sendHistory.sender')}
 			</Text>
 		),
 		id: 'sender',
@@ -161,7 +161,7 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 			} = row
 
 			if (!attachmentMeta) {
-				return <Text size="sm">{t('settingsUi.none')}</Text>
+				return <Text size="sm">{t('common.none')}</Text>
 			}
 
 			const isAlreadyExpanded = row.getIsExpanded()
@@ -170,7 +170,11 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 					className="space-x-2 flex cursor-pointer items-center"
 					onClick={row.getToggleExpandedHandler()}
 				>
-					<Text size="sm">{isAlreadyExpanded ? t('settingsUi.hide') : t('settingsUi.show')}</Text>
+					<Text size="sm">
+						{isAlreadyExpanded
+							? t('settingsScene.server/email.sections.emailers.list.sendHistory.actions.hide')
+							: t('settingsScene.server/email.sections.emailers.list.sendHistory.actions.show')}
+					</Text>
 					<span className="text-muted-foreground">
 						<ChevronDown
 							className={cn('h-4 w-4', {
@@ -183,7 +187,7 @@ const getColumns = (t: ReturnType<typeof useLocaleContext>['t']) => [
 		},
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
-				{t('settingsUi.attachments')}
+				{t('settingsScene.server/email.sections.emailers.list.sendHistory.attachments')}
 			</Text>
 		),
 		id: 'attachments-sub-table',

@@ -29,9 +29,9 @@ export default function RegenerateThumbnails() {
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>
-				<Label>{t('libraryUi.regenerate')}</Label>
+				<Label>{t('libraryUi.thumbnailSettings.regenerate.title')}</Label>
 				<Text size="sm" variant="muted">
-					{t('libraryUi.regenerateDescription')}
+					{t('libraryUi.thumbnailSettings.regenerate.description')}
 				</Text>
 			</div>
 
@@ -39,7 +39,7 @@ export default function RegenerateThumbnails() {
 				<DropdownMenu
 					trigger={
 						<Button variant="outline">
-							{t('libraryUi.generate')}
+							{t('libraryUi.thumbnailSettings.regenerate.action')}
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>
 					}
@@ -47,12 +47,12 @@ export default function RegenerateThumbnails() {
 						{
 							items: [
 								{
-									label: t('libraryUi.createMissing'),
+									label: t('libraryUi.thumbnailSettings.regenerate.options.missingOnly'),
 									leftIcon: <ImagePlus className={iconStyle} />,
 									onClick: () => regenerate(false),
 								},
 								{
-									label: t('libraryUi.forceRecreate'),
+									label: t('libraryUi.thumbnailSettings.regenerate.options.forceAll'),
 									isDestructive: true,
 									leftIcon: <AlertTriangle className={iconStyle} />,
 									onClick: () => regenerate(true),

@@ -9,7 +9,7 @@ export default function FullScreenToggle() {
 	const { fullscreen, setFullscreen } = useEpubReaderControls()
 
 	return (
-		<ControlButton title={t(`readerUi.${fullscreen ? 'exitFullscreen' : 'enterFullscreen'}`)}>
+		<ControlButton title={t(`readerUi.fullscreen.${fullscreen ? 'exit' : 'enter'}`)}>
 			<Fullscreen className="h-4 w-4" onClick={() => setFullscreen(!fullscreen)} />
 		</ControlButton>
 	)

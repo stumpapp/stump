@@ -41,12 +41,12 @@ export default function TextCell<Field extends string>({
 					{...form.register(binding)}
 				/>
 
-				<ToolTip content={t('controlUi.resetField')}>
+				<ToolTip content={t('controlUi.metadataEditor.resetField')}>
 					<Button
 						variant="destructive"
 						size="icon"
 						className="h-4 w-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-						aria-label={t('controlUi.resetField')}
+						aria-label={t('controlUi.metadataEditor.resetField')}
 						// @ts-expect-error: Null is fine to reset it here. form.resetField didn't quite work as expected
 						onClick={() => form.setValue(binding, null)}
 					>

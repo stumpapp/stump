@@ -228,7 +228,7 @@ export default function Table<T, V>({
 				<div className="gap-4 flex items-center">
 					<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
 						{tableRows.length > 0
-							? t('controlUi.tableRange', {
+							? t('controlUi.table.range', {
 									first: viewBounds.firstIndex,
 									last: viewBounds.lastIndex,
 									total: viewBounds.totalCount,
@@ -240,7 +240,7 @@ export default function Table<T, V>({
 						disabled={pageCount <= 1 && dataCount <= pageSize}
 						size="xs"
 						options={[10, 20, 30, 40, 50].map((pageSize) => ({
-							label: t('controlUi.showRows', { count: pageSize }),
+							label: t('controlUi.table.showRows', { count: pageSize }),
 							// FIXME: don't cast once my select can consume numbers :nomnom:
 							value: pageSize.toString(),
 						}))}

@@ -46,9 +46,9 @@ export default function DeleteAPIKeyConfirmModal({ apiKey, onClose }: Props) {
 
 	return (
 		<ConfirmationModal
-			title={t('settingsUi.deleteApiKey')}
-			description={t('settingsUi.deleteApiKeyDescription')}
-			confirmText={t('settingsUi.deleteKey')}
+			title={t('settingsScene.app/apiKeys.sections.table.deleteKey.title')}
+			description={t('settingsScene.app/apiKeys.sections.table.deleteKey.description')}
+			confirmText={t('settingsScene.app/apiKeys.sections.table.deleteKey.confirm')}
 			confirmVariant="destructive"
 			isOpen={!!apiKey}
 			onClose={onClose}

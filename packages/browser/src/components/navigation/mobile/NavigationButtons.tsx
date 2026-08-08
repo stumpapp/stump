@@ -30,13 +30,13 @@ export default function NavigationButtons() {
 
 	return (
 		<div className="m-0 gap-1 md:flex hidden items-center">
-			<ToolTip content={t('controlUi.navigateBack')} size="xs">
+			<ToolTip content={t('controlUi.navigation.back')} size="xs">
 				<IconButton variant="ghost" size="sm" onClick={navigateBackward}>
 					<ChevronLeft size="0.75rem" />
 				</IconButton>
 			</ToolTip>
 
-			<ToolTip content={t('controlUi.navigateForward')} size="xs">
+			<ToolTip content={t('controlUi.navigation.forward')} size="xs">
 				<IconButton variant="ghost" size="sm" onClick={navigateForward}>
 					<ChevronRight size="0.75rem" />
 				</IconButton>

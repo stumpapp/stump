@@ -30,7 +30,7 @@ export default function BrightnessControl() {
 
 	return (
 		<div className="space-y-2 py-1.5 flex flex-col">
-			<Label>{t('readerUi.brightness')}</Label>
+			<Label>{t('readerUi.brightness.label')}</Label>
 			<Slider
 				value={[value]}
 				step={0.01}

@@ -36,7 +36,7 @@ export default function DeleteLibrary() {
 							onClick={() => setShowConfirmation(true)}
 							className="shrink-0"
 						>
-							{t('libraryUi.deleteLibrary')}
+							{t('libraryUi.deleteLibrary.title')}
 						</Button>
 					</div>
 				}

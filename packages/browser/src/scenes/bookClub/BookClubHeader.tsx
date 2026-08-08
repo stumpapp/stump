@@ -25,7 +25,7 @@ export default function BookClubHeader() {
 		return (
 			<Card className="gap-4 p-2.5 flex items-center justify-between">
 				<Text size="sm" variant="muted">
-					{t('bookClubUi.createdBy')}
+					{t('bookClubUi.header.createdBy')}
 				</Text>
 
 				<div className="gap-2 flex items-center">
@@ -59,7 +59,7 @@ export default function BookClubHeader() {
 
 				<div className="mt-2">
 					<Text size="sm">
-						{t('bookClubUi.memberSummary', {
+						{t('bookClubUi.header.memberSummary', {
 							count: membersCount,
 							role: roleSpec['MEMBER'],
 							date: intlFormat(new Date(createdAt), { month: 'long', year: 'numeric' }, { locale }),

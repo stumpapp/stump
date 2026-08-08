@@ -11,11 +11,11 @@ export default function ExtensionSelect() {
 	return (
 		<div className="py-1.5">
 			<Label htmlFor="extension" className="mb-1.5">
-				{t('controlUi.extension')}
+				{t('controlUi.extensionSelect.label')}
 			</Label>
 			<NativeSelect
 				options={[
-					{ label: t('controlUi.any'), value: '' },
+					{ label: t('controlUi.extensionSelect.any'), value: '' },
 					{ label: 'CBZ', value: 'cbz' },
 					{ label: 'CBR', value: 'cbr' },
 					{ label: 'ZIP', value: 'zip' },

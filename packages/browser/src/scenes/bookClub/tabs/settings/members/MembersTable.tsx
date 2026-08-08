@@ -67,7 +67,7 @@ export default function MembersTable() {
 		onSuccess: () => refetch(),
 		onError: (error) => {
 			console.error('Error removing member:', error)
-			toast.error(t('bookClubUi.removeMemberFailed'))
+			toast.error(t('bookClubUi.members.errors.removeFailed'))
 		},
 	})
 

@@ -267,7 +267,7 @@ export function StackedSeriesCard({
 						{!isMissing ? (
 							subtitle
 						) : (
-							<span className="text-warning">{t('entityUi.seriesMissing')}</span>
+							<span className="text-warning">{t('entityUi.seriesCard.seriesMissing')}</span>
 						)}
 					</Text>
 				</div>

@@ -42,7 +42,7 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 
 	return (
 		<div>
-			<Label>{t('filterUi.ageRating')}</Label>
+			<Label>{t('filterUi.ageRating.label')}</Label>
 			<RadioGroup
 				value={selection !== null ? 'custom' : 'any-age'}
 				onValueChange={handleSelection}
@@ -50,17 +50,17 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 			>
 				<RadioGroup.CardItem
 					isActive={selection === null}
-					label={t('filterUi.anyAge')}
-					description={t('filterUi.anyAgeDescription')}
+					label={t('filterUi.ageRating.options.any.label')}
+					description={t('filterUi.ageRating.options.any.description')}
 					value="any-age"
 					innerContainerClassName="flex-col sm:items-start sm:justify-start gap-1.5"
 				/>
 
 				<RadioGroup.CardItem
 					isActive={selection !== null}
-					label={t('filterUi.agedAndUp')}
-					description={t('filterUi.agedAndUpDescription', {
-						variant: t(`filterUi.${variant}Variant`),
+					label={t('filterUi.ageRating.options.threshold.label')}
+					description={t('filterUi.ageRating.options.threshold.description', {
+						variant: t(`filterUi.ageRating.variants.${variant}`),
 					})}
 					value="custom"
 					innerContainerClassName="flex-col sm:items-start sm:justify-start gap-1.5"

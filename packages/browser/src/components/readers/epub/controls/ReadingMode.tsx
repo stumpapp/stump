@@ -22,13 +22,16 @@ export default function ReadingMode() {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="reading-mode">{t('readerUi.readingMode')}</Label>
+			<Label htmlFor="reading-mode">{t('readerUi.readingMode.label')}</Label>
 			<NativeSelect
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: t('readerUi.paged'), value: ReadingModeType.Paged },
-					{ label: t('readerUi.continuous'), value: ReadingModeType.ContinuousVertical },
+					{ label: t('readerUi.readingMode.options.paged'), value: ReadingModeType.Paged },
+					{
+						label: t('readerUi.readingMode.options.continuous'),
+						value: ReadingModeType.ContinuousVertical,
+					},
 				]}
 				value={readingMode}
 				onChange={handleChange}

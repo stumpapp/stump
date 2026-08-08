@@ -49,7 +49,7 @@ export default function NextInSeries() {
 
 				<div className="gap-4 flex flex-col">
 					<div>
-						<Label className="opacity-80">{t('readerUi.nextUp')}</Label>
+						<Label className="opacity-80">{t('readerUi.nextInSeries.title')}</Label>
 						<Text size="lg">{nextInSeries.name}</Text>
 					</div>
 
@@ -59,7 +59,7 @@ export default function NextInSeries() {
 					/>
 
 					<ButtonOrLink variant="secondary" href={paths.bookReader(nextInSeries.id)}>
-						{t('readerUi.read')}
+						{t('readerUi.actions.read')}
 					</ButtonOrLink>
 				</div>
 			</>

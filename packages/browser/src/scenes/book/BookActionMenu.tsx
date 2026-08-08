@@ -65,21 +65,21 @@ export default function BookActionMenu({ book }: Props) {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error(t('entityUi.completionUpdateFailed'))
+			toast.error(t('entityUi.bookActions.errors.completionUpdateFailed'))
 		},
 	})
 	const { mutate: deleteCurrentSession } = useGraphQLMutation(deleteMutation, {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error(t('entityUi.currentSessionDeleteFailed'))
+			toast.error(t('entityUi.bookActions.errors.currentSessionDeleteFailed'))
 		},
 	})
 	const { mutate: deleteReadHistory } = useGraphQLMutation(deleteHistoryMutation, {
 		onSuccess,
 		onError: (error) => {
 			console.error(error)
-			toast.error(t('entityUi.readHistoryDeleteFailed'))
+			toast.error(t('entityUi.bookActions.errors.readHistoryDeleteFailed'))
 		},
 	})
 
@@ -275,10 +275,10 @@ export default function BookActionMenu({ book }: Props) {
 						className="w-full shrink"
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
-						title={t('entityUi.download')}
+						title={t('entityUi.bookActions.download')}
 					>
 						<Download className="mr-2 h-4 w-4" />
-						{t('entityUi.download')}
+						{t('entityUi.bookActions.download')}
 					</ButtonOrLink>
 				)}
 

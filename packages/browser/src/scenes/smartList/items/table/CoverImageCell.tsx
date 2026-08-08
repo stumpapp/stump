@@ -42,7 +42,7 @@ export default function CoverImageCell({ id, title }: Props) {
 	if (showFallback) {
 		return (
 			<div
-				title={`${title} (${t('entityUi.imageFailedToLoad')})`}
+				title={`${title} (${t('entityUi.coverImage.loadFailed')})`}
 				className="h-20 shadow-sm flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar"
 				style={{ aspectRatio: thumbnailRatio }}
 				onClick={attemptReload}

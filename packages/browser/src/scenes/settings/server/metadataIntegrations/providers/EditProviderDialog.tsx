@@ -86,7 +86,11 @@ export function EditProviderDialog({ provider }: Props) {
 
 	return (
 		<>
-			<ToolTip content={t('settingsUi.editProvider')} align="end" size="xs">
+			<ToolTip
+				content={t('settingsScene.server/metadataIntegrations.editDialog.tooltip')}
+				align="end"
+				size="xs"
+			>
 				<Button
 					onClick={() => setIsEditDialogOpen(true)}
 					size="icon"

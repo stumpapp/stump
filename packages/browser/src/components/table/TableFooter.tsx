@@ -22,14 +22,14 @@ export default function TableFooter({ pagination, setPagination, pageCount, data
 		<div className="h-10 px-2 flex items-center justify-between border-t border-border">
 			<div className="gap-4 flex items-center">
 				<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
-					{t('controlUi.tableRange', { first: firstIndex, last: lastIndex, total: dataCount })}
+					{t('controlUi.table.range', { first: firstIndex, last: lastIndex, total: dataCount })}
 				</Text>
 
 				<NativeSelect
 					disabled={!dataCount}
 					size="xs"
 					options={[5, 10, 20, 30, 40, 50].map((pageSize) => ({
-						label: t('controlUi.showRows', { count: pageSize }),
+						label: t('controlUi.table.showRows', { count: pageSize }),
 						// FIXME: don't cast once my select can consume numbers :nomnom:
 						value: pageSize.toString(),
 					}))}

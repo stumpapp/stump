@@ -12,8 +12,8 @@ export default function CompleteSeriesConfirmation({ isOpen, onCancel, onConfirm
 	const { t } = useLocaleContext()
 	return (
 		<ConfirmationModal
-			title={t('entityUi.completeSeriesTitle')}
-			description={t('entityUi.completeSeriesDescription')}
+			title={t('entityUi.completeSeries.title')}
+			description={t('entityUi.completeSeries.description')}
 			isOpen={isOpen}
 			onClose={onCancel}
 			onConfirm={onConfirm}

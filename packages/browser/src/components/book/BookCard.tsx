@@ -134,7 +134,7 @@ const BookCard = memo(function BookCard({
 		if (isMissing) {
 			return (
 				<Text size="xs" className="text-warning uppercase">
-					{t('entityUi.fileMissing')}
+					{t('entityUi.bookCard.fileMissing')}
 				</Text>
 			)
 		}
@@ -147,7 +147,7 @@ const BookCard = memo(function BookCard({
 					</Text>
 					{!isEbookProgress && (
 						<Text size="xs" variant="muted">
-							{t('entityUi.pagesLeft', { count: pagesLeft })}
+							{t('entityUi.bookCard.pagesLeft', { count: pagesLeft })}
 						</Text>
 					)}
 				</div>
@@ -155,7 +155,7 @@ const BookCard = memo(function BookCard({
 		} else if (progressPercent === 100) {
 			return (
 				<Text size="xs" variant="muted">
-					{t('entityUi.completed')}
+					{t('common.completed')}
 				</Text>
 			)
 		}

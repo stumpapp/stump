@@ -33,15 +33,15 @@ export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigge
 		},
 		onError: (error) => {
 			console.error('Error deleting book club:', error)
-			toast.error(t('bookClubUi.deleteError'))
+			toast.error(t('bookClubUi.deleteConfirmation.error'))
 		},
 	})
 
 	return (
 		<ConfirmationModal
-			title={t('bookClubUi.deleteTitle')}
-			description={t('bookClubUi.deleteDescription')}
-			confirmText={t('bookClubUi.deleteConfirm')}
+			title={t('bookClubUi.deleteConfirmation.title')}
+			description={t('bookClubUi.deleteConfirmation.description')}
+			confirmText={t('bookClubUi.deleteConfirmation.confirm')}
 			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={onClose}

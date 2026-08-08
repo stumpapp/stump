@@ -90,7 +90,11 @@ export default function EmailerListItem({ fragment }: Props) {
 				</Text>
 				<div className="space-x-2 flex items-center">
 					{emailer.isPrimary && (
-						<ToolTip content={t('settingsUi.primaryEmailer')} align="end" size="xs">
+						<ToolTip
+							content={t('settingsScene.server/email.sections.emailers.list.primaryEmailer')}
+							align="end"
+							size="xs"
+						>
 							<Sparkles className="h-4 w-4 text-primary" strokeWidth={1} />
 						</ToolTip>
 					)}

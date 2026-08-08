@@ -90,7 +90,7 @@ export default function Search({
 			tabIndex={expanded ? undefined : 0}
 			onClick={expanded ? undefined : handleExpand}
 			onKeyDown={expanded ? undefined : (e) => e.key === 'Enter' && handleExpand()}
-			title={isDisabled ? t('filterUi.searchUnavailable') : undefined}
+			title={isDisabled ? t('filterUi.search.unavailable') : undefined}
 			className={cn(
 				'h-8 gap-2 text-sm ease-in-out relative flex shrink-0 cursor-pointer items-center overflow-hidden rounded-md border border-border bg-transparent transition-all duration-300',
 				'text-muted-foreground hover:bg-muted/30 hover:text-foreground',
@@ -107,12 +107,14 @@ export default function Search({
 					value={value}
 					onChange={(e) => setValue(e.target.value)}
 					onBlur={handleBlur}
-					placeholder={placeholder || t('filterUi.search')}
+					placeholder={placeholder || t('filterUi.search.label')}
 					disabled={isDisabled}
 					className="pr-8 text-sm h-full w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
 				/>
 			) : (
-				<span className="pr-2.5 text-sm whitespace-nowrap select-none">{t('filterUi.search')}</span>
+				<span className="pr-2.5 text-sm whitespace-nowrap select-none">
+					{t('filterUi.search.label')}
+				</span>
 			)}
 
 			{showLoader && (

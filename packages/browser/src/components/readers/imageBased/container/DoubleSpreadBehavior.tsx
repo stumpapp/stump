@@ -23,14 +23,14 @@ export default function DoubleSpreadBehavior({ behavior, onChange }: Props) {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="double-spread-behavior">{t('readerUi.doublePaged')}</Label>
+			<Label htmlFor="double-spread-behavior">{t('readerUi.doublePageBehavior.label')}</Label>
 			<NativeSelect
 				id="double-spread-behavior"
 				size="sm"
 				options={[
-					{ label: t('readerUi.auto'), value: 'auto' },
-					{ label: t('readerUi.always'), value: 'always' },
-					{ label: t('readerUi.off'), value: 'off' },
+					{ label: t('common.auto'), value: 'auto' },
+					{ label: t('readerUi.doublePageBehavior.options.always'), value: 'always' },
+					{ label: t('readerUi.doublePageBehavior.options.off'), value: 'off' },
 				]}
 				value={behavior}
 				onChange={handleChange}

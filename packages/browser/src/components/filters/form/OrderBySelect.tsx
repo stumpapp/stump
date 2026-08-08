@@ -58,11 +58,11 @@ export default function OrderBySelect({ entity, value, onChange }: Props) {
 	return (
 		<div>
 			<Label htmlFor="orderBy" className="mb-1.5">
-				{t('controlUi.orderBy')}
+				{t('controlUi.ordering.label')}
 			</Label>
 			<NativeSelect
 				options={entityOptions}
-				emptyOption={{ label: t('controlUi.selectOption'), value: '' }}
+				emptyOption={{ label: t('controlUi.select.placeholder'), value: '' }}
 				value={value}
 				onChange={(e) => onChange?.(e.target.value as OrderingField)}
 				size="sm"

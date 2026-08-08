@@ -34,7 +34,7 @@ export default function PagePopoverForm({
 				return num > 0 && num <= totalPages
 			},
 			() => ({
-				message: t('controlUi.pageRangeError', { total: totalPages }),
+				message: t('controlUi.pagination.rangeError', { total: totalPages }),
 			}),
 		),
 	})
@@ -74,13 +74,13 @@ export default function PagePopoverForm({
 				<div className="gap-2 flex flex-col">
 					<Form id={`pagination-page-entry-form-${pos}`} form={form} onSubmit={handleSubmit}>
 						<Input
-							label={t('controlUi.jumpToPage')}
+							label={t('controlUi.pagination.jumpToPage')}
 							type="number"
 							autoFocus
 							max={totalPages}
 							defaultValue={currentPage}
 							errorMessage={errors.goTo?.message as string}
-							description={t('controlUi.pageRangeError', { total: totalPages })}
+							description={t('controlUi.pagination.rangeError', { total: totalPages })}
 							{...register}
 							ref={(ref) => {
 								if (ref) {

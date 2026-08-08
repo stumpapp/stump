@@ -28,8 +28,8 @@ export default function SettingsDialog() {
 					onValueChange={(value) => setModality(value as 'book' | 'global')}
 				>
 					<Tabs.List>
-						<Tabs.Trigger value="book">{t('readerUi.book')}</Tabs.Trigger>
-						<Tabs.Trigger value="global">{t('readerUi.global')}</Tabs.Trigger>
+						<Tabs.Trigger value="book">{t('common.book')}</Tabs.Trigger>
+						<Tabs.Trigger value="global">{t('readerUi.settings.scopes.global')}</Tabs.Trigger>
 					</Tabs.List>
 				</Tabs>
 

@@ -53,7 +53,7 @@ export default function ServerStatusOverlay() {
 						<Text size="xs" variant="muted">
 							{t('serverStatus.checkConnection')}{' '}
 							<Link to="/server-connection-error" className="underline">
-								{t('serverStatus.changeUrlLink')}
+								{t('common.clickHere')}
 							</Link>{' '}
 							{t('serverStatus.changeUrlSuffix')}
 						</Text>

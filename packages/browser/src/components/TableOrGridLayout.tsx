@@ -12,7 +12,7 @@ export default function TableOrGridLayout({ layout, setLayout }: Props) {
 	const { t } = useLocaleContext()
 	return (
 		<div className="gap-1 flex shrink-0 items-center">
-			<ToolTip content={t('controlUi.grid')} size="sm">
+			<ToolTip content={t('controlUi.layout.grid')} size="sm">
 				<IconButton
 					variant="ghost"
 					size="sm"
@@ -24,7 +24,7 @@ export default function TableOrGridLayout({ layout, setLayout }: Props) {
 				</IconButton>
 			</ToolTip>
 
-			<ToolTip content={t('controlUi.table')} size="sm" align="end">
+			<ToolTip content={t('controlUi.layout.table')} size="sm" align="end">
 				<IconButton
 					variant="ghost"
 					size="sm"

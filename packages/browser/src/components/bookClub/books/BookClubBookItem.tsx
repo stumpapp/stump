@@ -51,14 +51,14 @@ export default function BookClubBookItem({ data }: Props) {
 
 		let message
 		if (isCurrent) {
-			message = t('bookClubUi.started', {
+			message = t('bookClubUi.bookItem.started', {
 				date: formatDistanceToNow(startedAt, { addSuffix: true }),
 			})
 		} else if (completedAt) {
 			const daysAgo = differenceInDays(new Date(), completedAt)
-			message = t('bookClubUi.completedDaysAgo', { count: daysAgo })
+			message = t('bookClubUi.bookItem.completedDaysAgo', { count: daysAgo })
 		} else {
-			message = t('bookClubUi.added', {
+			message = t('common.addedAt', {
 				date: formatDistanceToNow(startedAt, { addSuffix: true }),
 			})
 		}
@@ -86,13 +86,13 @@ export default function BookClubBookItem({ data }: Props) {
 		if (isCurrent) {
 			return (
 				<Badge size="xs" variant="primary" className="shrink-0">
-					{t('bookClubUi.currentlyReading')}
+					{t('bookClubUi.bookItem.currentlyReading')}
 				</Badge>
 			)
 		} else {
 			return (
 				<Badge size="xs" className="shrink-0">
-					{t('bookClubUi.pastBook')}
+					{t('bookClubUi.bookItem.pastBook')}
 				</Badge>
 			)
 		}
@@ -138,7 +138,9 @@ export default function BookClubBookItem({ data }: Props) {
 					{author && <Text size="xs">{author}</Text>}
 					{link && (
 						<Link {...(isExternal ? { href: link } : { to: link })} className="text-xs">
-							{isExternal ? t('bookClubUi.externalLink') : t('bookClubUi.accessBook')}
+							{isExternal
+								? t('bookClubUi.bookItem.externalLink')
+								: t('bookClubUi.bookItem.accessBook')}
 						</Link>
 					)}
 				</div>
@@ -174,10 +176,10 @@ export default function BookClubBookItem({ data }: Props) {
 							)}
 						>
 							{daysInfo.end
-								? t('bookClubUi.readingDuration', {
+								? t('bookClubUi.bookItem.readingDuration', {
 										count: differenceInDays(daysInfo.end, daysInfo.start),
 									})
-								: t('bookClubUi.notCompletedYet')}
+								: t('bookClubUi.bookItem.notCompletedYet')}
 						</span>
 					</div>
 				)}

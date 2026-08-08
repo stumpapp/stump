@@ -84,24 +84,28 @@ export default function SeriesSettingsScene() {
 			<div className="gap-y-6 flex flex-col items-start text-left">
 				<Alert variant="warning">
 					<Construction />
-					<AlertDescription>{t('entityUi.seriesManagementNotice')}</AlertDescription>
+					<AlertDescription>{t('entityUi.seriesSettings.notice')}</AlertDescription>
 				</Alert>
 
 				<div className="gap-y-2 flex flex-col">
 					<div>
-						<Heading size="sm">{t('entityUi.analysis')}</Heading>
+						<Heading size="sm">{t('entityUi.seriesSettings.analysis.title')}</Heading>
 						<Text size="sm" variant="muted">
-							{t('entityUi.seriesAnalysisDescription')}
+							{t('entityUi.seriesSettings.analysis.description')}
 						</Text>
 					</div>
 
 					<div>
 						<Button
-							title={data ? t('entityUi.analysisInProgress') : t('entityUi.analyzeSeriesTitle')}
+							title={
+								data
+									? t('entityUi.seriesSettings.analysis.inProgress')
+									: t('entityUi.seriesSettings.analysis.confirmationTitle')
+							}
 							onClick={handleAnalyze}
 							disabled={!!data || isPending}
 						>
-							{t('entityUi.analyzeSeries')}
+							{t('entityUi.seriesSettings.analysis.action')}
 						</Button>
 					</div>
 				</div>
@@ -114,9 +118,9 @@ export default function SeriesSettingsScene() {
 
 				<div className="gap-y-2 flex flex-col">
 					<div>
-						<Heading size="sm">{t('entityUi.thumbnail')}</Heading>
+						<Heading size="sm">{t('entityUi.seriesSettings.thumbnail.title')}</Heading>
 						<Text size="sm" variant="muted">
-							{t('entityUi.seriesThumbnailDescription')}
+							{t('entityUi.seriesSettings.thumbnail.description')}
 						</Text>
 					</div>
 
@@ -126,8 +130,8 @@ export default function SeriesSettingsScene() {
 				<div className="gap-y-2 flex w-full flex-col">
 					<div className="flex items-end justify-between">
 						<div>
-							<Heading size="sm">{t('entityUi.metadata')}</Heading>
-							<Text variant="muted">{t('entityUi.seriesMetadataDescription')}</Text>
+							<Heading size="sm">{t('common.metadata')}</Heading>
+							<Text variant="muted">{t('entityUi.seriesSettings.metadata.description')}</Text>
 						</div>
 						{checkPermission(UserPermission.EditMetadata) && (
 							<ResetMetadata onConfirmReset={handleResetMetadata} />

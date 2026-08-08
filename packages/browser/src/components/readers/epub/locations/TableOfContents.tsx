@@ -45,7 +45,7 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 	return (
 		<div
 			className="px-2 pt-4 scrollbar-hide flex max-h-full flex-col divide-y divide-border overflow-y-auto"
-			aria-label={t('readerUi.tableOfContents')}
+			aria-label={t('readerUi.locations.tableOfContents')}
 		>
 			{toc?.map((item) => (
 				<TableOfContentsItem key={item.label} item={item} handleSelect={handleSelect} />

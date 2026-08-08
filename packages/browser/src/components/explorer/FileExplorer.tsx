@@ -16,7 +16,10 @@ export default function FileExplorer() {
 	if (!files.length) {
 		return (
 			<div className="px-4 flex h-full w-full items-center justify-center">
-				<GenericEmptyState title={t('libraryUi.noFiles')} subtitle={t('libraryUi.emptyFolder')} />
+				<GenericEmptyState
+					title={t('libraryUi.fileExplorer.empty.noFiles')}
+					subtitle={t('libraryUi.fileExplorer.empty.folder')}
+				/>
 			</div>
 		)
 	}

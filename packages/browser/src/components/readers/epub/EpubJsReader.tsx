@@ -685,7 +685,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				await rendition.display(cfi)
 			} catch (err) {
 				console.error(err)
-				toast.error(t('readerUi.navigationFailed'))
+				toast.error(t('readerUi.errors.navigationFailed'))
 			}
 		},
 		[rendition, t],
@@ -709,7 +709,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				return
 			}
 
-			const failureMessage = t('readerUi.navigationFailed')
+			const failureMessage = t('readerUi.errors.navigationFailed')
 			const adjusted = href.split('#')[0]
 
 			let spineItem = book.spine.get(adjusted)

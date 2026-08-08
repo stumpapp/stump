@@ -23,8 +23,8 @@ export default function GenerateThumbnailColorsSwitch() {
 	return (
 		<div className="py-4">
 			<WideSwitch
-				label={t('libraryUi.thumbnailColors')}
-				description={t('libraryUi.thumbnailColorsDescription')}
+				label={t('libraryUi.createForm.thumbnailColors.label')}
+				description={t('libraryUi.createForm.thumbnailColors.description')}
 				checked={enabled}
 				disabled={thumbnailsEnabled}
 				onCheckedChange={() =>

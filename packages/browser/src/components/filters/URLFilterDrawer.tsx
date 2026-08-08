@@ -50,10 +50,10 @@ export default function URLFilterDrawer({ entity }: Props) {
 			open={isOpen}
 			onClose={() => setIsOpen(false)}
 			onOpen={() => setIsOpen(true)}
-			title={t('filterUi.configureTitle')}
-			description={t('filterUi.configureDescription')}
+			title={t('filterUi.urlFilterDrawer.title')}
+			description={t('filterUi.urlFilterDrawer.description')}
 			trigger={
-				<ToolTip content={t('filterUi.configureTooltip')} size="sm">
+				<ToolTip content={t('filterUi.urlFilterDrawer.tooltip')} size="sm">
 					<span className="relative inline-flex">
 						<IconButton
 							variant="ghost"

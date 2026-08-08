@@ -10,7 +10,7 @@ export default function LayoutButtons() {
 
 	return (
 		<div className="gap-0.5 flex shrink-0 items-center">
-			<ToolTip content={t('controlUi.gridView')} align="end">
+			<ToolTip content={t('controlUi.layout.gridView')} align="end">
 				<IconButton
 					variant="ghost"
 					size="sm"
@@ -26,7 +26,7 @@ export default function LayoutButtons() {
 				</IconButton>
 			</ToolTip>
 
-			<ToolTip content={t('controlUi.tableView')} align="end">
+			<ToolTip content={t('controlUi.layout.tableView')} align="end">
 				<IconButton
 					variant="ghost"
 					size="sm"

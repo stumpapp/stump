@@ -37,7 +37,7 @@ export default function LastVisitedLibrary({ container }: Props) {
 	const renderContent = () => {
 		return (
 			<div className="gap-y-2 flex flex-col">
-				<Label className="text-sm">{t('controlUi.lastVisited')}</Label>
+				<Label className="text-sm">{t('controlUi.library.lastVisited')}</Label>
 				<EntityCard
 					href={paths.librarySeries(library.id)}
 					imageUrl={library.thumbnail.url}

@@ -39,7 +39,7 @@ export default function URLPageSize() {
 				min={1}
 			/>
 			<Text size="sm" variant="muted" className="inline-flex shrink-0">
-				{t('controlUi.perPage')}
+				{t('controlUi.pagination.perPage')}
 			</Text>
 		</form>
 	)

@@ -37,10 +37,10 @@ export default function DeleteLibraryThumbnails() {
 	const handleDeleteThumbnails = useCallback(async () => {
 		try {
 			await deleteThumbnails({ id })
-			toast.success(t('libraryUi.deleteSuccess'))
+			toast.success(t('libraryUi.thumbnailSettings.delete.success'))
 		} catch (error) {
 			console.error(error)
-			const fallbackMessage = t('libraryUi.deleteError')
+			const fallbackMessage = t('libraryUi.thumbnailSettings.delete.error')
 			if (error instanceof Error) {
 				toast.error(error.message || fallbackMessage)
 			} else {
@@ -52,9 +52,9 @@ export default function DeleteLibraryThumbnails() {
 	return (
 		<>
 			<div>
-				<Heading size="sm">{t('libraryUi.delete')}</Heading>
+				<Heading size="sm">{t('common.delete')}</Heading>
 				<Text size="sm" variant="muted">
-					{t('libraryUi.deleteDescription')}
+					{t('libraryUi.thumbnailSettings.delete.description')}
 				</Text>
 			</div>
 
@@ -65,14 +65,14 @@ export default function DeleteLibraryThumbnails() {
 					className="shrink-0"
 					disabled={isPending || !!data}
 				>
-					{t('libraryUi.delete')}
+					{t('common.delete')}
 				</Button>
 			</div>
 
 			<ConfirmationModal
-				title={t('libraryUi.deleteTitle')}
-				description={t('libraryUi.deleteConfirmation')}
-				confirmText={t('libraryUi.delete')}
+				title={t('libraryUi.thumbnailSettings.delete.title')}
+				description={t('libraryUi.thumbnailSettings.delete.confirmation')}
+				confirmText={t('common.delete')}
 				confirmVariant="destructive"
 				isOpen={showConfirmation && !data}
 				onClose={() => setShowConfirmation(false)}
@@ -83,7 +83,7 @@ export default function DeleteLibraryThumbnails() {
 				<Alert variant="warning">
 					<AlertTriangle />
 					<AlertTitle>{t('common.thisActionCannotBeUndone')}</AlertTitle>
-					<AlertDescription>{t('libraryUi.deleteWarning')}</AlertDescription>
+					<AlertDescription>{t('libraryUi.thumbnailSettings.delete.warning')}</AlertDescription>
 				</Alert>
 			</ConfirmationModal>
 		</>

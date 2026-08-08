@@ -42,8 +42,8 @@ export default function ReaderDefaultSettingsScene() {
 
 			<ContentContainer>
 				<NewCard
-					label={t('settingsUi.readerUniversal')}
-					description={t('settingsUi.readerUniversalDescription')}
+					label={t('settingsScene.app/reader.sections.universal.label')}
+					description={t('settingsScene.app/reader.sections.universal.description')}
 				>
 					<DefaultReadingDirection />
 
@@ -56,8 +56,8 @@ export default function ReaderDefaultSettingsScene() {
 				</NewCard>
 
 				<NewCard
-					label={t('settingsUi.readerFormats')}
-					description={t('settingsUi.readerFormatsDescription')}
+					label={t('settingsScene.app/reader.sections.formats.label')}
+					description={t('settingsScene.app/reader.sections.formats.description')}
 				>
 					<NewCard.Row
 						label={t(getSectionKey('imageBasedBooks.label'))}

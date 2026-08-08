@@ -39,7 +39,7 @@ export default function ReaderHeader() {
 				<div className="space-x-4 flex items-center">
 					<Link
 						className="flex items-center text-foreground hover:text-foreground/80"
-						title={t('readerUi.goToMediaOverview')}
+						title={t('readerUi.header.goToMediaOverview')}
 						to={paths.bookOverview(id)}
 					>
 						<ArrowLeft size={'1.25rem'} />

@@ -27,9 +27,9 @@ export default function FilterConfigJSON() {
 			<Accordion.Item value="raw_filters" className="border-none">
 				<Accordion.Trigger noUnderline asLabel>
 					<div className="gap-y-1 flex flex-col items-start">
-						<span>{t('filterUi.showJson')}</span>
+						<span>{t('filterUi.filterConfigJson.action')}</span>
 						<Text variant="muted" size="sm">
-							{t('filterUi.showJsonDescription')}
+							{t('filterUi.filterConfigJson.description')}
 						</Text>
 					</div>
 				</Accordion.Trigger>

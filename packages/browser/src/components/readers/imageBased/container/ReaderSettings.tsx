@@ -108,7 +108,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 		<div className="gap-4 flex flex-col" key={forBook}>
 			<div>
 				<Label className="text-xs font-medium text-muted-foreground uppercase">
-					{t('readerUi.mode')}
+					{t('readerUi.settings.sections.mode')}
 				</Label>
 
 				<ReadingModeSelect
@@ -124,7 +124,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 
 			<div>
 				<Label className="text-xs font-medium text-muted-foreground uppercase">
-					{t('readerUi.imageOptions')}
+					{t('readerUi.settings.sections.imageOptions')}
 				</Label>
 
 				<DoubleSpreadBehavior
@@ -148,11 +148,11 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 
 			<div>
 				<Label className="text-xs font-medium text-muted-foreground uppercase">
-					{t('readerUi.preferences')}
+					{t('readerUi.settings.sections.preferences')}
 				</Label>
 				<div className="gap-3 pt-2 flex flex-col">
 					<Label className="px-1 flex items-center justify-between">
-						<span>{t('readerUi.separateSecondPage')}</span>
+						<span>{t('readerUi.settings.options.separateSecondPage')}</span>
 						<RawSwitch
 							checked={activeSettings.secondPageSeparate}
 							onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
@@ -160,7 +160,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					</Label>
 
 					<Label className="px-1 flex items-center justify-between">
-						<span>{t('readerUi.panZoomWithoutCtrl')}</span>
+						<span>{t('readerUi.settings.options.panZoomWithoutCtrl')}</span>
 						<RawSwitch
 							checked={activeSettings.panzoomWithoutCtrl}
 							onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
@@ -168,7 +168,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					</Label>
 
 					<Label className="px-1 flex items-center justify-between">
-						<span>{t('readerUi.tapSidesToNavigate')}</span>
+						<span>{t('readerUi.settings.options.tapSidesToNavigate')}</span>
 						<RawSwitch
 							checked={activeSettings.tapSidesToNavigate}
 							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
@@ -176,7 +176,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					</Label>
 
 					<Label className="px-1 flex items-center justify-between">
-						<span>{t('readerUi.readingTimer')}</span>
+						<span>{t('readerUi.settings.options.readingTimer')}</span>
 						<RawSwitch
 							checked={activeSettings.trackElapsedTime}
 							onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
@@ -187,7 +187,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					{!forBook && (
 						<div>
 							<Label className="p-3 flex items-center justify-between rounded-lg border border-dashed border-primary/40 bg-primary/15">
-								<span>{t('readerUi.experimentalAnimatedReader')}</span>
+								<span>{t('readerUi.settings.options.experimentalAnimatedReader')}</span>
 								<RawSwitch
 									checked={store.settings.animatedReader || false}
 									onCheckedChange={(checked) => onChangeExperimentalReader(checked)}

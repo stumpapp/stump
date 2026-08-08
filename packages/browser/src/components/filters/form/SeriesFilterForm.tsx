@@ -69,11 +69,11 @@ export default function SeriesFilterForm() {
 			onSubmit={handleSubmit}
 		>
 			<GenericFilterMultiselect
-				label={t('filterUi.status')}
+				label={t('common.status')}
 				name="metadata.status"
 				options={[
-					{ label: t('filterUi.continuing'), value: 'continuing' },
-					{ label: t('filterUi.ended'), value: 'ended' },
+					{ label: t('filterUi.seriesStatus.options.continuing'), value: 'continuing' },
+					{ label: t('filterUi.seriesStatus.options.ended'), value: 'ended' },
 				]}
 			/>
 

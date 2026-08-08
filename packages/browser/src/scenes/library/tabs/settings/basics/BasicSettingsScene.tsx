@@ -106,7 +106,7 @@ export default function BasicSettingsScene() {
 
 			<div>
 				<Button type="submit" disabled={!hasChanges}>
-					{t('libraryUi.updateLibrary')}
+					{t('librarySettingsScene.basics.form.submit')}
 				</Button>
 			</div>
 		</Form>

@@ -1,16 +1,17 @@
-import { useBoolean } from '@stump/components'
+import { cn, useBoolean } from '@stump/components'
 
 import { DEBUG_ENV } from '../index.ts'
 import Markdown from './markdown/MarkdownPreview.tsx'
 
 type Props = {
 	text?: string | null
+	muted?: boolean
 }
 
 const COLLAPSED_HEIGHT = 72
 const MAX_EXPANDED_HEIGHT = 300
 
-export default function ReadMore({ text }: Props) {
+export default function ReadMore({ text, muted }: Props) {
 	const [showingAll, { toggle }] = useBoolean(false)
 
 	const resolvedText = text ? text : DEBUG_ENV ? DEBUG_FAKE_TEXT : ''
@@ -21,7 +22,7 @@ export default function ReadMore({ text }: Props) {
 	}
 
 	if (!canReadMore) {
-		return <Markdown>{resolvedText}</Markdown>
+		return <Markdown className={cn({ 'opacity-80': muted })}>{resolvedText}</Markdown>
 	}
 
 	return (
@@ -33,7 +34,7 @@ export default function ReadMore({ text }: Props) {
 					transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 				}}
 			>
-				<Markdown>{resolvedText}</Markdown>
+				<Markdown className={cn({ 'opacity-80': muted })}>{resolvedText}</Markdown>
 			</div>
 
 			<div

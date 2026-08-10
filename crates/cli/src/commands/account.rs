@@ -371,8 +371,6 @@ async fn migrate_oidc_account(
 
 	let progress = default_progress_spinner();
 
-	conn.execute_unprepared("PRAGMA foreign_keys = OFF").await?;
-
 	let result = do_migrate_oidc_account(
 		local_user,
 		oidc_user,
@@ -381,8 +379,6 @@ async fn migrate_oidc_account(
 		transferred_permissions,
 	)
 	.await;
-
-	conn.execute_unprepared("PRAGMA foreign_keys = ON").await?;
 
 	match result {
 		Ok(_) => {
@@ -554,11 +550,20 @@ where
 		.await?;
 
 	post_message("Transferring user preferences and permissions...");
+	let previous_oidc_prefs_id = oidc_user.user_preferences_id;
 
-	if let Some(oidc_prefs_id) = oidc_user.user_preferences_id {
-		user_preferences::Entity::delete_by_id(oidc_prefs_id)
-			.exec(&txn)
-			.await?;
+	match previous_oidc_prefs_id {
+		Some(oidc_prefs_id) if Some(oidc_prefs_id) != local_user.user_preferences_id => {
+			user_preferences::Entity::update_many()
+				.col_expr(
+					user_preferences::Column::UserId,
+					sea_orm::sea_query::Expr::value(Option::<String>::None),
+				)
+				.filter(user_preferences::Column::Id.eq(oidc_prefs_id))
+				.exec(&txn)
+				.await?;
+		},
+		_ => {},
 	}
 
 	// if we do not swap the user_preferences_id the account "breaks" because no preferences exist.
@@ -592,6 +597,16 @@ where
 	oidc_active.username = Set(local_user.username.clone());
 	oidc_active.update(&txn).await?;
 
+	match previous_oidc_prefs_id {
+		Some(oidc_prefs_id) if Some(oidc_prefs_id) != local_user.user_preferences_id => {
+			post_message("Cleaning up old OIDC user preferences...");
+			user_preferences::Entity::delete_by_id(oidc_prefs_id)
+				.exec(&txn)
+				.await?;
+		},
+		_ => {},
+	}
+
 	post_message("Committing changes...");
 	txn.commit().await?;
 
@@ -621,8 +636,7 @@ mod tests {
 	use sea_orm::{
 		prelude::{Date, DateTimeWithTimeZone},
 		sqlx::types::chrono::Utc,
-		ActiveModelTrait, ColumnTrait, ConnectionTrait, Database, DbConn, EntityTrait,
-		QueryFilter, Set,
+		ActiveModelTrait, ColumnTrait, Database, DbConn, EntityTrait, QueryFilter, Set,
 	};
 
 	use super::do_migrate_oidc_account;
@@ -656,7 +670,7 @@ mod tests {
 			db: &DbConn,
 			user: Option<user::ActiveModel>,
 		) -> user::Model {
-			let model = user.unwrap_or_else(|| Self::active_model());
+			let model = user.unwrap_or_else(Self::active_model);
 
 			let user = model.insert(db).await.expect("could not insert user");
 			let user_preferences = user_preferences::ActiveModel {
@@ -772,10 +786,10 @@ mod tests {
 			.expect("could not fetch media");
 
 		// let's have an active session for books 0 and 2, and a finished reading session for book 1
-		for i in 0..3 {
+		for (i, media) in media_list.iter().enumerate().take(3) {
 			let mut active = reading_session::ActiveModel {
 				user_id: Set(local_user.id.clone()),
-				media_id: Set(media_list[i].id.clone()),
+				media_id: Set(media.id.clone()),
 				end_page: Set(Some(10)),
 				session_date: Set(Date::parse_from_str("2026-05-22", "%Y-%m-%d")
 					.expect("failed to parse date")),
@@ -787,7 +801,7 @@ mod tests {
 			active
 				.insert(db)
 				.await
-				.expect(&format!("could not insert reading session for media {}", i));
+				.expect("could not insert reading session for media");
 		}
 
 		// let's create a review for media 0 as well
@@ -955,10 +969,6 @@ mod tests {
 
 		setup_oidc_migration_test(&local_user, &db).await;
 
-		db.execute_unprepared("PRAGMA foreign_keys = OFF")
-			.await
-			.expect("Failed to disable foreign keys");
-
 		let result = do_migrate_oidc_account(
 			local_user.clone(),
 			oidc_user.clone(),
@@ -967,10 +977,6 @@ mod tests {
 			PermissionSet::new(vec![UserPermission::ManageServer]),
 		)
 		.await;
-
-		db.execute_unprepared("PRAGMA foreign_keys = ON")
-			.await
-			.expect("Failed to re-enable foreign keys");
 
 		assert!(result.is_ok(), "Migration failed: {:?}", result.err());
 

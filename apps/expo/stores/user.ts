@@ -1,5 +1,6 @@
 import { createUserStore } from '@stump/client'
 import type { AllowedLocale } from '@stump/i18n'
+import { Platform } from 'react-native'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -7,6 +8,7 @@ import {
 	ThumbnailPlaceholderType,
 	ThumbnailResizeMode,
 } from '~/components/image/ThumbnailPlaceholder'
+import { Hue } from '~/lib/constants'
 
 import { ZustandMMKVStorage } from './store'
 
@@ -15,6 +17,8 @@ export const useUserStore = createUserStore(ZustandMMKVStorage)
 export type ListLayout = 'grid' | 'list'
 
 export type DisplayLanguageKeysType = 'none' | 'abbreviated' | 'full'
+
+export type TextCase = 'lowerCase' | 'sentenceCase' | 'titleCase'
 
 type MobilePreferencesStore = {
 	showTabLabels: boolean
@@ -27,7 +31,8 @@ type MobilePreferencesStore = {
 	thumbnailResizeMode: ThumbnailResizeMode
 	thumbnailPlaceholder: ThumbnailPlaceholderType
 	performanceMonitor: boolean
-	accentColor?: string | undefined
+	accentHue: Hue
+	accentChromaScale: number
 	showCuratedDownloads?: boolean | undefined
 	preferNativePdf?: boolean | undefined
 	disableDismissGesture: boolean
@@ -41,7 +46,7 @@ type MobilePreferencesStore = {
 	preferMinimalReader: boolean
 	displayLanguageKeys: DisplayLanguageKeysType
 	tintListBackground: boolean
-	lowercaseTranslation: boolean
+	textCase: TextCase
 	/**
 	 * Patch the store with new values.
 	 */
@@ -63,7 +68,8 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			allowDownscaling: true,
 			thumbnailRatio: 2 / 3,
 			thumbnailPlaceholder: 'grayscale',
-			accentColor: undefined,
+			accentHue: 'orange',
+			accentChromaScale: 1,
 			performanceMonitor: false,
 			showCuratedDownloads: true,
 			preferNativePdf: false,
@@ -78,7 +84,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			enableDebugAnalytics: false,
 			preferMinimalReader: false,
 			displayLanguageKeys: 'none',
-			lowercaseTranslation: false,
+			textCase: Platform.OS === 'android' ? 'sentenceCase' : 'titleCase',
 			tintListBackground: false,
 			patch: (data) => set(data),
 		}),

@@ -1,4 +1,7 @@
 mod common;
+mod graphql;
+mod kobo;
+mod koreader;
 mod opds;
 mod reading_progress;
 

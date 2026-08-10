@@ -7,7 +7,11 @@ import { View } from 'react-native'
 import { HorizontalBookListItem } from '~/components/book'
 import { HorizontalBookListItemFragmentType } from '~/components/book/HorizontalBookListItem'
 import { Heading, Text } from '~/components/ui'
-import { useListItemSize } from '~/lib/hooks'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
+import {
+	useReadingNowWidgetSync,
+	WidgetSyncBook,
+} from '~/lib/hooks/widgetSync/useReadingNowWidgetSync'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
@@ -38,7 +42,7 @@ function ContinueReading() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-
+	const { t } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['continueReading', serverID],
@@ -50,6 +54,21 @@ function ContinueReading() {
 
 	// Take the first 5 books as "currently reading"
 	const activeBooks = useMemo(() => data?.pages.at(0)?.keepReading.nodes.slice(0, 5) || [], [data])
+	const widgetBooks = useMemo(
+		() =>
+			activeBooks.map(
+				(book) =>
+					({
+						...book,
+						serverId: serverID,
+						isReadingOffline: false,
+					}) as WidgetSyncBook,
+			),
+		[activeBooks, serverID],
+	)
+
+	// the cast should be fine, fragment is just masked
+	useReadingNowWidgetSync(widgetBooks as WidgetSyncBook[])
 
 	const leftOffBooks = useMemo(
 		() => nodes.filter(({ id }) => !activeBooks.some((book) => book.id === id)),
@@ -80,7 +99,7 @@ function ContinueReading() {
 			{(leftOffBooks.length > 0 || activeBooks.length === 0) && (
 				<View className="flex">
 					<Heading size="xl" className="px-4">
-						Continue Reading
+						{t('stumpServer.continueReading.label')}
 					</Heading>
 
 					<FlashList
@@ -94,7 +113,9 @@ function ContinueReading() {
 						showsHorizontalScrollIndicator={false}
 						ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 						ListEmptyComponent={
-							<Text className="px-4 text-foreground-muted">No books in progress</Text>
+							<Text className="px-4 text-foreground-muted">
+								{t('stumpServer.continueReading.emptyText')}
+							</Text>
 						}
 					/>
 				</View>

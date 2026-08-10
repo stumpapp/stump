@@ -1,4 +1,5 @@
 import { getThumbnailTintColor } from '@stump/client'
+import { formatBytes } from '@stump/client'
 import { cn, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import pluralize from 'pluralize'
@@ -9,7 +10,6 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
-import { formatBytes } from '@/utils/format'
 
 import { ThumbnailImage } from '../thumbnail/ThumbnailImage'
 import { usePrefetchBook } from './useBookOverview'
@@ -197,7 +197,7 @@ const BookCard = memo(function BookCard({
 		>
 			<div
 				className={cn(
-					'-inset-0.5 absolute -z-10 rounded-lg',
+					'-inset-0.5 absolute -z-10 rounded-thumbnail',
 					'scale-95 opacity-0 duration-100',
 					'group-hover:scale-100 group-hover:opacity-100',
 					'group-focus-visible:scale-100 group-focus-visible:opacity-100',
@@ -213,7 +213,6 @@ const BookCard = memo(function BookCard({
 					placeholderData={placeholderData}
 					lazy
 					borderAndShadowStyle={{
-						borderRadius: 8,
 						shadowColor: 'rgba(0, 0, 0, 0.15)',
 						shadowRadius: 2,
 					}}

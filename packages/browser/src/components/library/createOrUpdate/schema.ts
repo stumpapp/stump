@@ -3,6 +3,7 @@ import {
 	LibraryConfigInput,
 	LibraryPattern,
 	LibrarySettingsConfigFragment,
+	LibraryType,
 	LibraryViewMode,
 	ReadingDirection,
 	ReadingImageScaleFit,
@@ -135,6 +136,7 @@ export const buildSchema = (
 			)
 			.default([]),
 		libraryPattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
+		libraryType: z.nativeEnum(LibraryType).default(LibraryType.Mixed),
 		defaultLibraryViewMode: z.string().refine(isLibraryViewMode).default('SERIES'),
 		hideSeriesView: z.boolean().default(false),
 		skipBookOverview: z.boolean().default(false),
@@ -229,6 +231,7 @@ export const formDefaults = (
 	watch: library?.config.watch ?? true,
 	ignoreRules: toFormIgnoreRules(library?.config.ignoreRules || []),
 	libraryPattern: library?.config.libraryPattern || LibraryPattern.SeriesBased,
+	libraryType: library?.config.libraryType || LibraryType.Mixed,
 	name: library?.name || '',
 	path: library?.path || '',
 	processMetadata: library?.config.processMetadata ?? true,

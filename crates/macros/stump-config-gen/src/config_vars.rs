@@ -12,6 +12,7 @@ pub struct StumpConfigVariable {
 	pub attributes: StumpConfigVariableAttributes,
 }
 
+#[derive(Default)]
 pub struct StumpConfigVariableAttributes {
 	pub default_value: Option<Expr>,
 	pub debug_value: Option<Expr>,
@@ -55,8 +56,7 @@ pub fn get_config_variables(data_struct: &DataStruct) -> Vec<StumpConfigVariable
 			let variable_name = field.ident.as_ref().unwrap().clone();
 
 			// Parse the field's type info
-			let (variable_type, is_optional, is_vec) =
-				type_utils::parse_field_type(field);
+			let field_type = type_utils::parse_field_type(field);
 			// Parse attributes
 			let attributes = parse_config_var_attributes(field);
 
@@ -64,9 +64,9 @@ pub fn get_config_variables(data_struct: &DataStruct) -> Vec<StumpConfigVariable
 			output_vec.push(StumpConfigVariable {
 				span: variable_name.span(),
 				variable_name,
-				variable_type,
-				is_optional,
-				is_vec,
+				variable_type: field_type.inner_type_tokens,
+				is_optional: field_type.is_optional,
+				is_vec: field_type.is_vec,
 				attributes,
 			});
 		}
@@ -78,25 +78,21 @@ pub fn get_config_variables(data_struct: &DataStruct) -> Vec<StumpConfigVariable
 /// Parses the attributes on a config variable, this is where
 /// any of the #[attribute] values are unwrapped and stored
 fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
-	let mut default_value = None;
-	let mut debug_value = None;
-	let mut required_by_new = false;
-	let mut env_key = None;
-	let mut validator = None;
 	let field_ident = field.ident.as_ref().unwrap();
 
+	let mut config_var_attributes = StumpConfigVariableAttributes::default();
 	for attr in &field.attrs {
 		// #[default_value(Expr)]
 		if attr.path().is_ident("default_value") {
 			let default_value_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
 				panic!("Failed to parse default_value expression for {field_ident}: {e}")
 			});
-			default_value = Some(default_value_expr);
+			config_var_attributes.default_value = Some(default_value_expr);
 		}
 
 		// #[required_by_new]
 		if attr.path().is_ident("required_by_new") {
-			required_by_new = true;
+			config_var_attributes.required_by_new = true;
 		}
 
 		// #[env_key(Expr)]
@@ -104,7 +100,7 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 			let env_key_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
 				panic!("Failed to parse env_key expression for {field_ident}: {e}")
 			});
-			env_key = Some(env_key_expr);
+			config_var_attributes.env_key = Some(env_key_expr);
 		}
 
 		// #[debug_value(Expr)]
@@ -112,7 +108,7 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 			let debug_value_expr: Expr = attr.parse_args().unwrap_or_else(|e| {
 				panic!("Failed to parse debug_value expression for {field_ident}: {e}")
 			});
-			debug_value = Some(debug_value_expr);
+			config_var_attributes.debug_value = Some(debug_value_expr);
 		}
 
 		// #[validator(fn)]
@@ -120,15 +116,9 @@ fn parse_config_var_attributes(field: &Field) -> StumpConfigVariableAttributes {
 			let validator_ident: Ident = attr.parse_args().unwrap_or_else(|e| {
 				panic!("Failed to parse validator identity for {field_ident}: {e}")
 			});
-			validator = Some(validator_ident);
+			config_var_attributes.validator = Some(validator_ident);
 		}
 	}
 
-	StumpConfigVariableAttributes {
-		default_value,
-		debug_value,
-		required_by_new,
-		env_key,
-		validator,
-	}
+	config_var_attributes
 }

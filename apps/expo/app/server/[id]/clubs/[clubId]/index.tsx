@@ -1,5 +1,6 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { useRefetch, useSuspenseGraphQL } from '@stump/client'
+import { parseGraphQLDecimal } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { intlFormat } from 'date-fns'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
@@ -14,7 +15,6 @@ import { DiscussionListItem } from '~/components/bookClub/discussion'
 import RefreshControl from '~/components/RefreshControl'
 import { Badge, Button, Card, Icon, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
-import { parseGraphQLDecimal } from '~/lib/format'
 
 const query = graphql(`
 	query BookClubDetailScreen($id: ID!) {
@@ -136,7 +136,7 @@ export default function Screen() {
 			>
 				<View className="gap-6 px-4 py-4">
 					{club.moderators.length > 0 && (
-						<View className="flex flex-row items-center justify-between gap-2">
+						<View className="gap-2 flex flex-row items-center justify-between">
 							<Badge>
 								<Text>Moderated by</Text>
 							</Badge>
@@ -155,19 +155,19 @@ export default function Screen() {
 						</Card>
 					)}
 
-					<View className="flex-row gap-3">
+					<View className="gap-3 flex-row">
 						<CurrentBookCard data={club.currentBook} />
 						<PastDiscussionsLink data={club} />
 					</View>
 
 					{club.currentBook?.entity?.id != null && (
 						<View
-							className="squircle ios:rounded-[2rem] relative flex-grow overflow-hidden rounded-3xl p-3"
+							className="squircle ios:rounded-[2rem] p-3 relative flex-grow overflow-hidden rounded-3xl"
 							style={{
 								backgroundColor: colors.fill.brand.secondary,
 							}}
 						>
-							<View className="flex-row items-center justify-between gap-4 px-4 py-3.5">
+							<View className="gap-4 px-4 py-3.5 flex-row items-center justify-between">
 								{renderProgression()}
 
 								<View className="shrink-0">

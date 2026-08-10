@@ -5,16 +5,7 @@ import { ComponentProps, forwardRef } from 'react'
 
 const ControlButton = forwardRef<HTMLButtonElement, ComponentProps<typeof IconButton>>(
 	({ className, ...props }, ref) => {
-		return (
-			<IconButton
-				variant="ghost"
-				size="sm"
-				className="hover:bg-accent"
-				ref={ref}
-				pressEffect={false}
-				{...props}
-			/>
-		)
+		return <IconButton variant="ghost" size="sm" className="hover:bg-accent" ref={ref} {...props} />
 	},
 )
 ControlButton.displayName = 'ControlButton'

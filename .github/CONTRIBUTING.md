@@ -25,7 +25,8 @@ I write good (and bad) code with my own two hands. There are some areas of the c
 
 I understand that LLM-assisted contributions are a reality in the open source ecosystem today and largely unavoidable. While I will not outright reject contributions that have been generated with the help of LLMs, I ask that you please:
 
-1. Be transparent about it in your PR. I can usually tell, but I appreciate the transparency
+1. Be transparent about it in your PR. I can usually tell, but I appreciate the transparency through an explicit disclosure in the PR body
+2. Do NOT sign commits with whatever LLM tool you used. I don't want to be forever associated with them, which a signed and merged commit would do. This is not an exception to the first point, LLM usage should still be disclosed
 2. Put in time to review the work, don't just pass it off to me without quality checks
 3. Be mindful of the implications of using these tools
 

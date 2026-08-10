@@ -31,6 +31,30 @@ use crate::{
 /// A file processor for RAR files.
 pub struct RarProcessor;
 
+fn validate_converted_zip(zip_path: &Path) -> Result<(), FileError> {
+	if !zip_path.exists() {
+		return Err(FileError::NotFound);
+	}
+
+	let metadata = std::fs::metadata(zip_path)?;
+	if metadata.len() == 0 {
+		return Err(FileError::ArchiveEmptyError);
+	}
+
+	let file = std::fs::File::open(zip_path)?;
+	let archive = zip::ZipArchive::new(file)?;
+
+	if archive.is_empty() {
+		return Err(FileError::ArchiveEmptyError);
+	}
+
+	// note: there are more checks we can likely add here, however i'd like to think
+	// about it a bit more before adding them to prevent accidentally failing valid
+	// conversions. see https://github.com/stumpapp/stump/issues/1284
+
+	Ok(())
+}
+
 impl RarProcessor {
 	fn init() {
 		// See https://github.com/muja/unrar.rs/issues/44
@@ -399,33 +423,65 @@ impl FileConverter for RarProcessor {
 	) -> Result<PathBuf, FileError> {
 		debug!(path, "Converting RAR to ZIP");
 
-		// TODO: remove these defaults and bubble up an error...
 		let path_buf = PathBuf::from(path);
 		let parent = path_buf.parent().unwrap_or_else(|| Path::new("/"));
 		let FileParts {
 			extension,
 			file_stem,
-			file_name,
+			..
 		} = path_buf.as_path().file_parts();
 
 		let cache_dir = config.get_cache_dir();
-		let unpacked_path = cache_dir.join(file_stem);
+		// stem as to not get double extensions like .cbr.cbz, see
+		// https://github.com/stumpapp/stump/issues/1284
+		let unpacked_path = cache_dir.join(&file_stem);
 
 		trace!(?unpacked_path, "Extracting RAR to disk");
 
+		std::fs::create_dir_all(&unpacked_path)?;
+
 		let mut archive = RarProcessor::open_for_processing(path)?;
+		let mut extracted_count = 0;
 		while let Ok(Some(header)) = archive.read_header() {
-			archive = if header.entry().is_file() {
-				header.extract_to(&unpacked_path)?
+			let entry = header.entry();
+			if entry.is_file() {
+				let entry_path = entry.filename.as_path();
+				let target_path = unpacked_path.join(entry_path);
+
+				if let Some(parent_dir) = target_path.parent() {
+					std::fs::create_dir_all(parent_dir)?;
+				}
+
+				archive = header.extract_to(&target_path)?;
+				extracted_count += 1;
 			} else {
-				header.skip()?
-			};
+				archive = header.skip()?;
+			}
+		}
+
+		if extracted_count == 0 {
+			let cleanup_err = std::fs::remove_dir_all(&unpacked_path);
+			if let Err(err) = cleanup_err {
+				error!(error = ?err, ?unpacked_path, "Failed to clean up empty extraction directory");
+			}
+			return Err(FileError::RarEmpty);
 		}
 
 		let zip_path =
-			create_zip_archive(&unpacked_path, &file_name, &extension, parent)?;
+			create_zip_archive(&unpacked_path, &file_stem, &extension, parent)?;
 
-		// TODO: won't work in docker
+		let validation_result = validate_converted_zip(&zip_path);
+		if let Err(e) = validation_result {
+			error!(
+				error = ?e,
+				?zip_path,
+				"Validation failed, keeping original RAR file"
+			);
+			let _ = std::fs::remove_file(&zip_path);
+			let _ = std::fs::remove_dir_all(&unpacked_path);
+			return Err(e);
+		}
+
 		if delete_source {
 			if let Err(err) = trash::delete(path) {
 				warn!(error = ?err, path, "Failed to delete converted RAR file");
@@ -458,11 +514,11 @@ mod tests {
 		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
 		let temp_rar_file_path = tempdir
 			.path()
-			.join("book.rar")
+			.join("test_process.rar")
 			.to_string_lossy()
 			.to_string();
 		fs::write(&temp_rar_file_path, get_test_rar_file_data())
-			.expect("Failed to write temporary book.rar");
+			.expect("Failed to write temporary test_process.rar");
 		let config = StumpConfig::debug();
 
 		// We can test deletion since it's a temporary file
@@ -476,31 +532,55 @@ mod tests {
 			&config,
 		);
 
-		// Assert that the operation succeeded
-		assert!(processed_file.is_ok());
-		// And that the original file was deleted
+		assert!(
+			processed_file.is_ok(),
+			"Failed to process RAR: {:?}",
+			processed_file.err()
+		);
 		assert!(!Path::new(&temp_rar_file_path).exists());
 	}
 
 	#[test]
 	fn test_rar_to_zip() {
-		// Create temporary directory and place a copy of our mock book.rar in it
+		let config = StumpConfig::debug();
 		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
-		let temp_rar_file_path = tempdir
+
+		let temp_cbr_path = tempdir
 			.path()
-			.join("book.rar")
+			.join("test_rar_to_zip.cbr")
 			.to_string_lossy()
 			.to_string();
-		fs::write(&temp_rar_file_path, get_test_rar_file_data())
-			.expect("Failed to write temporary book.rar");
-		let config = StumpConfig::debug();
+		fs::write(&temp_cbr_path, get_test_rar_file_data())
+			.expect("failed to write temporary test_rar_to_zip.cbr");
 
-		// We have a temporary file, so we may as well test deletion also
-		let zip_result = RarProcessor::to_zip(&temp_rar_file_path, true, None, &config);
-		// Assert that operation succeeded
-		assert!(zip_result.is_ok());
-		// And that the original file was deleted
-		assert!(!Path::new(&temp_rar_file_path).exists());
+		let cbz_result = RarProcessor::to_zip(&temp_cbr_path, true, None, &config);
+		assert!(
+			cbz_result.is_ok(),
+			"conversion failed: {:?}",
+			cbz_result.err()
+		);
+		let cbz_path = cbz_result.unwrap();
+
+		assert!(
+			!Path::new(&temp_cbr_path).exists(),
+			"original should be deleted"
+		);
+
+		assert!(
+			cbz_path.extension().is_some_and(|ext| ext == "cbz"),
+			"should convert to .cbz, got: {:?}",
+			cbz_path.extension()
+		);
+		// https://github.com/stumpapp/stump/issues/1284
+		assert!(
+			!cbz_path.to_string_lossy().contains(".cbr.cbz"),
+			"should not have double extension .cbr.cbz"
+		);
+
+		let cbz_file = fs::File::open(&cbz_path).expect("failed to open CBZ");
+		let cbz_archive =
+			zip::ZipArchive::new(cbz_file).expect("failed to read CBZ archive");
+		assert!(cbz_archive.len() > 0, "should contain at least one entry");
 	}
 
 	#[test]

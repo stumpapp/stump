@@ -1578,6 +1578,31 @@ type MediaMetadataOverview {
 	series: [String!]!
 }
 
+"""
+A manual override for searching metadata providers for a single media item. When
+provided, the caller's fields take precedence over whatever is already stored on the
+media, and the search is restricted to a single provider if one is given.
+"""
+input MediaMetadataSearchInput {
+	title: String
+	author: String
+	isbn: String
+	year: Int
+	"The issue number (for comics/manga)"
+	number: Float
+	"""
+	The volume ID to search within, which will swap to a more precise lookup if provided alongside
+	`number`
+	"""
+	comicVineVolumeId: String
+	"""
+	Restrict the search to this provider only. If omitted, all enabled providers
+	configured for the media's library type are searched.
+	"""
+	provider: MetadataProvider
+	limit: Int
+}
+
 enum MediaModelOrdering {
 	ID
 	NAME
@@ -1646,6 +1671,12 @@ type MetadataFetchRecord {
 	status: MetadataFetchStatus!
 	mediaId: String
 	seriesId: String
+	"""
+	The total number of raw hits reported by provider searches, across all
+	providers searched. Compare against `match_candidates.len()` to detect when
+	hits were dropped (e.g. a per-hit detail fetch failed after the initial search).
+	"""
+	rawHits: Int!
 	addedAt: DateTime!
 	updatedAt: DateTime
 	matchCandidates: [MatchCandidate!]!
@@ -1740,6 +1771,8 @@ input MetadataFieldOverride {
 enum MetadataProvider {
 	"Hardcover (https://hardcover.app)"
 	HARDCOVER
+	"ComicVine (https://comicvine.gamespot.com/api/)"
+	COMIC_VINE
 }
 
 type MetadataProviderConfigModel {
@@ -1853,8 +1886,14 @@ type Mutation {
 	"""
 	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
 	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
-	"Search external metadata providers for a media item and return match candidates"
-	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
+	"""
+	Search external metadata providers for a media item and return the resulting fetch
+	record with its match candidates. When `search` is provided, the caller's fields
+	take precedence over the media's stored metadata, the search can be restricted to a
+	single provider, and auto-apply is skipped so the caller can review candidates before
+	anything is written.
+	"""
+	fetchMediaMetadata(id: ID!, search: MediaMetadataSearchInput): MetadataFetchRecord!
 	"Accept a match candidate and apply it to media metadata"
 	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
 	"Reject the current match candidates for a media item"
@@ -2050,6 +2089,8 @@ type Mutation {
 	createMetadataProvider(input: CreateMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	updateMetadataProvider(id: Int!, input: PatchMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	deleteMetadataProvider(id: Int!): MetadataProviderConfigModel!
+	"Validate the provided API token by making a test request using a client instance"
+	validateProviderConfig(config: ValidateMetadataProviderConfigInput!): ProviderCredentialVerification!
 	"Accept the top-ranked candidate for all pending metadata matches"
 	acceptAllPendingMatches(strategy: MergeStrategy, excludeFields: [MetadataField!]): Int!
 	"Reject all pending metadata matches, setting their status to NoMatch"
@@ -2362,6 +2403,12 @@ type PlaceholderGenerationOutput {
 	skippedEntities: Int!
 	"The number of placeholder metadata entries that were generated"
 	generatedMetadata: Int!
+}
+
+type ProviderCredentialVerification {
+	responseStatus: Int!
+	isValid: Boolean!
+	error: String
 }
 
 enum PublicationStatus {
@@ -3193,6 +3240,7 @@ type StumpConfig {
 	colorfulLogs: Boolean!
 	"An optional custom path for the database."
 	dbPath: String
+	dbTimeoutSecs: Int!
 	"The client directory."
 	clientDir: String!
 	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
@@ -3390,6 +3438,7 @@ input UpdateUserPreferencesInput {
 	locale: String!
 	preferredLayoutMode: InterfaceLayout!
 	interfaceRoundness: InterfaceRoundness!
+	thumbnailRoundness: InterfaceRoundness!
 	primaryNavigationMode: String!
 	layoutMaxWidthPx: Int
 	appTheme: String!
@@ -3405,7 +3454,6 @@ input UpdateUserPreferencesInput {
 	enableJobOverlay: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
-	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableAlphabetSelect: Boolean!
@@ -3609,12 +3657,12 @@ type UserPreferences {
 	enableHideScrollbar: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
-	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
 	interfaceRoundness: InterfaceRoundness!
+	thumbnailRoundness: InterfaceRoundness!
 	enableReadingJournal: Boolean!
 	"""
 	hour offset from midnight at which a new "logical day" begins for reading sessions
@@ -3626,6 +3674,13 @@ type UserPreferences {
 	userId: String
 	homeArrangement: Arrangement!
 	navigationArrangement: Arrangement!
+}
+
+input ValidateMetadataProviderConfigInput {
+	"The provider type"
+	providerType: MetadataProvider!
+	"The API token for authenticating with the provider"
+	apiToken: String!
 }
 
 "Marks an element of a GraphQL schema as no longer supported."

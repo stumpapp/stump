@@ -12,8 +12,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, DatabaseBackend, FromQueryResult, JoinType, QueryOrder, QuerySelect,
-	Statement,
+	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect,
 };
 
 use crate::{
@@ -26,6 +25,7 @@ use crate::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
+	utils::db_statement,
 };
 
 #[derive(Default)]
@@ -108,21 +108,21 @@ impl MediaQuery {
 		Ok(count as i64)
 	}
 
-	// Note: This could be slightly inaccurate based on permissions, but it's close enough and I'm too lazy
-	// to write a more complex query right now.
+	// Note: this could be slightly inaccurate based on permissions, but it's close enough and I'm not
+	// motivated enough to write a more complex query right now
 	async fn media_disk_usage(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r"
-				SELECT
-					COALESCE(SUM(size), 0) as total_size
-				FROM
-					media
-				WHERE deleted_at IS NULL
-				",
+			SELECT
+				CAST(COALESCE(SUM(size), 0) AS BIGINT) as total_size
+			FROM
+				media
+			WHERE deleted_at IS NULL
+			",
 				[],
 			))
 			.await?;
@@ -265,8 +265,8 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
@@ -395,7 +395,7 @@ impl MediaQuery {
 				let count = query.clone().count(conn).await?;
 
 				let models = query
-					.find_also_related(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.offset(info.offset())
 					.limit(info.limit())
 					.all(conn)
@@ -414,7 +414,7 @@ impl MediaQuery {
 			},
 			Pagination::None(_) => {
 				let models = query
-					.find_also_related(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.all(conn)
 					.await?
 					.into_iter()
@@ -457,17 +457,16 @@ impl MediaQuery {
 			id: String,
 		}
 
-		let on_deck_media_ids =
-			OnDeckMediaId::find_by_statement(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
-				r#"
+		let on_deck_media_ids = OnDeckMediaId::find_by_statement(db_statement(
+			conn,
+			r#"
 				WITH
 				-- Find all series where the user has read at least one book
 				user_read_series AS (
 					SELECT DISTINCT m.series_id
 					FROM media m
 					JOIN reading_sessions rs ON rs.media_id = m.id
-					WHERE rs.user_id = ?
+					WHERE rs.user_id = $1
 					AND rs.status = 'FINISHED'
 					AND m.series_id IS NOT NULL
 				),
@@ -476,7 +475,7 @@ impl MediaQuery {
 				user_read_media AS (
 					SELECT DISTINCT media_id
 					FROM reading_sessions
-					WHERE user_id = ?
+					WHERE user_id = $1
 					AND status = 'FINISHED'
 				),
 
@@ -485,7 +484,7 @@ impl MediaQuery {
 					SELECT DISTINCT m.series_id
 					FROM media m
 					JOIN reading_sessions rs ON rs.media_id = m.id
-					WHERE rs.user_id = ?
+					WHERE rs.user_id = $1
 					AND m.series_id IS NOT NULL
 					AND rs.status = 'READING'
 					AND NOT EXISTS (
@@ -515,7 +514,7 @@ impl MediaQuery {
 						MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
 					FROM reading_sessions rs
 					JOIN media m ON m.id = rs.media_id
-					WHERE rs.user_id = ?
+					WHERE rs.user_id = $1
 					AND rs.status = 'FINISHED'
 					AND m.series_id IN (SELECT series_id FROM user_read_series)
 					GROUP BY m.series_id
@@ -554,20 +553,13 @@ impl MediaQuery {
 				ORDER BY
 					-- Most recently read series first
 					series_last_read_date DESC
-				LIMIT ?
-				OFFSET ?
+				LIMIT $2
+				OFFSET $3
 				"#,
-				[
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.clone().into(),
-					limit.into(),
-					offset.into(),
-				],
-			))
-			.all(conn)
-			.await?;
+			[user_id.clone().into(), limit.into(), offset.into()],
+		))
+		.all(conn)
+		.await?;
 
 		let media_ids: Vec<String> =
 			on_deck_media_ids.into_iter().map(|row| row.id).collect();
@@ -599,8 +591,8 @@ impl MediaQuery {
 			.collect();
 
 		let total_count = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r#"
 					-- Count total number of on deck items (for pagination)
 					WITH
@@ -609,7 +601,7 @@ impl MediaQuery {
 						SELECT DISTINCT m.series_id
 						FROM media m
 						JOIN reading_sessions rs ON rs.media_id = m.id
-						WHERE rs.user_id = ?
+						WHERE rs.user_id = $1
 						AND rs.status = 'FINISHED'
 						AND m.series_id IS NOT NULL
 					),
@@ -619,7 +611,7 @@ impl MediaQuery {
 						-- Media that user has finished
 						SELECT DISTINCT media_id
 						FROM reading_sessions
-						WHERE user_id = ?
+						WHERE user_id = $1
 						AND status = 'FINISHED'
 
 						UNION
@@ -627,7 +619,7 @@ impl MediaQuery {
 						-- Media that user is currently reading
 						SELECT DISTINCT rs.media_id
 						FROM reading_sessions rs
-						WHERE rs.user_id = ?
+						WHERE rs.user_id = $1
 						AND rs.status = 'READING'
 						AND NOT EXISTS (
 							SELECT 1
@@ -675,11 +667,7 @@ impl MediaQuery {
 					WHERE
 						book_rank = 1
 					"#,
-				[
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.into(),
-				],
+				[user_id.into()],
 			))
 			.await?
 			.ok_or_else(|| async_graphql::Error::new("Failed to get count"))?

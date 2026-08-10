@@ -112,10 +112,16 @@ export default function FileTable() {
 								const row = rows[index]
 
 								return (
-									<tr {...props} className={cn({ 'bg-muted': !isEven })}>
+									<tr
+										{...props}
+										className={cn(
+											'transition-colors hover:bg-muted/60',
+											isEven ? 'bg-transparent' : 'bg-muted/30',
+										)}
+									>
 										{row?.getVisibleCells().map((cell) => (
 											<td
-												className="py-1 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+												className="py-1.5 pl-2 pr-2 first:pl-4 last:pr-4"
 												key={cell.id}
 												style={{
 													width: cell.column.getSize(),
@@ -132,7 +138,7 @@ export default function FileTable() {
 							table.getFlatHeaders().map((header) => (
 								<th
 									key={header.id}
-									className="h-10 pl-1.5 pr-1.5 first:pl-4 last:pr-4 bg-background"
+									className="h-10 pl-2 pr-2 first:pl-4 last:pr-4 border-b border-border bg-background"
 									style={{
 										width: header.getSize(),
 									}}

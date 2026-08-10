@@ -27,11 +27,14 @@ impl MigrationTrait for Migration {
 					)
 					.col(
 						ColumnDef::new(KoboSyncSessions::CreatedAt)
-							.timestamp()
+							.timestamp_with_time_zone()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
-					.col(ColumnDef::new(KoboSyncSessions::PreviousSyncAt).timestamp())
+					.col(
+						ColumnDef::new(KoboSyncSessions::PreviousSyncAt)
+							.timestamp_with_time_zone(),
+					)
 					.foreign_key(
 						ForeignKey::create()
 							.name("fk-kobo-sync-user")

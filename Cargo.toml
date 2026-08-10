@@ -14,8 +14,8 @@ exclude = [
 ]
 
 [workspace.package]
-version = "0.1.4"
-rust-version = "1.92.0"
+version = "0.1.6"
+rust-version = "1.97.1"
 
 # I've defined majority of dependencies here in the workspace so that they are
 # significantly easier to manage and update. Every crate in the workspace should be
@@ -41,6 +41,7 @@ derive_builder = "0.20.2"
 derivative = "2.2.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.48", features = ["derive"] }
+croner = "3.0.1"
 english-to-cron = "0.1.7"
 futures = "0.3.31"
 futures-util = "0.3.31"
@@ -48,6 +49,7 @@ globset = "0.4.16"
 infer = "0.19.0"
 itertools = "0.14.0"
 heck = "0.5.0"
+http-cache-reqwest = { version = "1.0.0-alpha.6", features = ["manager-moka"] }
 keyring = { version = "3.6.3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 lettre = { version = "0.11.18", default-features = false, features = [
   "builder",
@@ -70,12 +72,14 @@ sea-orm = { version = "1.1.16", features = [
   "mock",
   "macros",
   "sqlx-sqlite",
+  "sqlx-postgres",
   "sqlite-use-returning-for-3_35",
   "runtime-tokio-native-tls",
   "debug-print",
 ] }
 sea-orm-migration = { version = "1.1.16", features = [
   "sqlx-sqlite",
+  "sqlx-postgres",
   "runtime-tokio-native-tls",
 ] }
 serde = { version = "1.0.228", features = ["derive"] }

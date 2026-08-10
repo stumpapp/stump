@@ -4,7 +4,7 @@ import React from 'react'
 import { cn } from '../../utils'
 
 export const RAW_INPUT_BASE_CLASSES = [
-	'flex h-9 w-full min-w-0 items-center justify-between rounded-md border border-border bg-input/30 px-3 py-1 text-base text-foreground transition-colors outline-none md:text-sm',
+	'flex h-9 w-full min-w-0 items-center justify-between rounded-interactive border border-border bg-input/30 px-3 py-1 text-base text-foreground transition-colors outline-none md:text-sm',
 	'file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
 	'placeholder:text-muted-foreground',
 	'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',

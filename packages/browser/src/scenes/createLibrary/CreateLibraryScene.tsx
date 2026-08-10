@@ -1,6 +1,6 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle } from '@stump/components'
-import { CreateOrUpdateLibraryInput, graphql, LibraryType } from '@stump/graphql'
+import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { AlertCircle } from 'lucide-react'
@@ -86,7 +86,6 @@ export default function CreateLibraryScene() {
 				config: {
 					...config,
 					ignoreRules: ignoreRules.map(({ glob }) => glob),
-					libraryType: LibraryType.Mixed,
 					thumbnailConfig: intoThumbnailConfig(thumbnailConfig),
 				} as CreateOrUpdateLibraryInput['config'],
 				description,

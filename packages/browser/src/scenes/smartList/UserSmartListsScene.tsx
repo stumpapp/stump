@@ -22,7 +22,7 @@ import paths from '@/paths'
 import SmartListCard from './SmartListCard'
 
 // TODO: move filter to URL params
-// TODO(ui): this scene lowkey ugly
+// TODO(cleanup): this scene lowkey ugly
 
 const LOCALE_BASE_KEY = `userSmartListsScene`
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`

@@ -402,7 +402,7 @@ async fn get_library_by_id(
 		id,
 		title: library.name.clone(),
 		entries,
-		href_postfix: format!("libraries/{}", &library.id),
+		href_postfix: format!("libraries/{}", library.id),
 		page_params: Some(OPDSFeedBuilderPageParams {
 			page: pagination.page,
 			count,
@@ -559,7 +559,7 @@ async fn get_series_by_id(
 		id: series.id.clone(),
 		title,
 		entries,
-		href_postfix: format!("series/{}", &series.id),
+		href_postfix: format!("series/{}", series.id),
 		page_params: Some(OPDSFeedBuilderPageParams {
 			page: pagination.page,
 			count,
@@ -657,7 +657,7 @@ async fn search_feed(
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::ItSelf,
-				href: catalog_url(&req, &format!("search/feed?search={}", &search)),
+				href: catalog_url(&req, &format!("search/feed?search={}", search)),
 			},
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,

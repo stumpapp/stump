@@ -269,7 +269,7 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 			onOpen={() => setIsOpen(true)}
 			trigger={
 				<ToolTip content="Configure columns" size="sm" align="start">
-					<IconButton size="xs" variant="ghost" pressEffect={false} onClick={() => setIsOpen(true)}>
+					<IconButton size="xs" variant="ghost" onClick={() => setIsOpen(true)}>
 						<Columns className="h-4 w-4" />
 					</IconButton>
 				</ToolTip>

@@ -70,6 +70,7 @@ export { ScrollArea, ScrollBar } from './scroll-area'
 export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
 export { Sheet, SheetPrimitive } from './sheet'
 export { Slider } from './slider'
+export { MiniStatCard, STAT_COLORS, StatCard, type StatColorPalette } from './stats'
 export { Tabs } from './tabs'
 export {
 	Heading,

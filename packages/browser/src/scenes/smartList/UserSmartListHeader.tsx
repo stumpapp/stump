@@ -1,69 +1,50 @@
-import { cn, Heading, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { Book, Layers, Library } from 'lucide-react'
 
-import { usePreferences } from '@/hooks'
-import paths from '@/paths'
+import { EntityHeader } from '@/components/sharedLayout'
 
 import { useSmartListContext } from './context'
-import { parseListMeta } from './utils'
+import { usePrefetchSmartList } from './graphql'
 
-const LOCALE_BASE_KEY = 'userSmartListScene.header'
+const LOCALE_BASE_KEY = 'userSmartListScene.navigation'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function UserSmartListHeader() {
 	const { t } = useLocaleContext()
 	const {
-		preferences: { primaryNavigationMode, layoutMaxWidthPx },
-	} = usePreferences()
-	const {
-		list: { name, description },
+		list: { id, name },
 		meta,
 	} = useSmartListContext()
+	const { prefetch } = usePrefetchSmartList()
 
-	const renderMeta = () => {
-		if (!meta) {
-			return null
-		}
+	const tabs = [
+		{
+			isActive: !!location.pathname.match(/\/smart-lists\/[^/]+(\/items)?$/),
+			label: t(withLocaleKey('items')),
+			onHover: () => prefetch({ id }),
+			to: 'items',
+		},
+	]
 
-		const { figureString } = parseListMeta(meta) ?? {}
-		if (!figureString) {
-			return null
-		}
+	const resolvedStats = meta
+		? [
+				{
+					key: 'bookCount',
+					icon: Book,
+					value: meta.matchedBooks,
+				},
+				{
+					key: 'seriesCount',
+					icon: Layers,
+					value: meta.matchedSeries,
+				},
+				{
+					key: 'libraryCount',
+					icon: Library,
+					value: meta.matchedLibraries,
+				},
+			]
+		: undefined
 
-		return (
-			<Text size="sm" variant="muted">
-				{figureString}
-			</Text>
-		)
-	}
-
-	const preferTopBar = primaryNavigationMode === 'TOPBAR'
-
-	return (
-		<header
-			className={cn('gap-y-4 p-4 flex w-full flex-col', {
-				'mx-auto': preferTopBar && !!layoutMaxWidthPx,
-			})}
-			style={{
-				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
-			}}
-		>
-			<div>
-				<Link
-					to={paths.smartLists()}
-					variant="muted"
-					className="text-sm no-underline hover:underline"
-				>
-					{t(withLocaleKey('backLink'))} /
-				</Link>
-				<Heading size="lg" bold>
-					{name}
-				</Heading>
-				<Text size="md" variant="muted">
-					{description}
-				</Text>
-			</div>
-			{renderMeta()}
-		</header>
-	)
+	return <EntityHeader name={name} tabs={tabs} stats={resolvedStats} settingsLink="settings" />
 }

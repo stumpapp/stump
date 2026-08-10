@@ -12,39 +12,41 @@ import { annotations, db, downloadedFiles, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
 import { ReadiumLocator } from '~/modules/readium'
 
+import { PushSyncParams, SyncParams } from './types'
 import { useServerInstances } from './utils'
 
 export function useAnnotationSync() {
 	const { getInstances } = useServerInstances()
 
-	type PushAnnotationsParams = {
-		forServers?: string[]
-		ignoreBookIds?: string[]
-	}
-
 	const pushAnnotations = useCallback(
-		async ({ forServers, ignoreBookIds }: PushAnnotationsParams = {}) => {
-			const instances = await getInstances(forServers)
-			return executePushAnnotationsSync(instances, ignoreBookIds)
+		async ({ forServers, ignoreBookIds, instances }: PushSyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+			return executePushAnnotationsSync(resolvedInstances, ignoreBookIds)
 		},
 		[getInstances],
 	)
 
 	const pullAnnotations = useCallback(
-		async (forServers?: string[]) => {
-			const instances = await getInstances(forServers)
-			return executePullAnnotationsSync(instances)
+		async ({ forServers, instances }: SyncParams) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+			return executePullAnnotationsSync(resolvedInstances)
 		},
 		[getInstances],
 	)
 
 	const syncAnnotations = useCallback(
-		async (forServers?: string[]) => {
-			const pullResults = await pullAnnotations(forServers)
+		async ({ forServers, instances }: SyncParams) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers))
+
+			const pullResults = await pullAnnotations({ forServers, instances: resolvedInstances })
 
 			const ignoreBookIds = Object.values(pullResults).flatMap((r) => r.failedBookIds)
 
-			const pushResults = await pushAnnotations({ forServers, ignoreBookIds })
+			const pushResults = await pushAnnotations({
+				forServers,
+				ignoreBookIds,
+				instances: resolvedInstances,
+			})
 
 			if (ignoreBookIds.length > 0) {
 				throw new Error(`Failed to pull annotations for ${ignoreBookIds.length} book(s)`)
@@ -52,7 +54,7 @@ export function useAnnotationSync() {
 
 			return { pullResults, pushResults }
 		},
-		[pullAnnotations, pushAnnotations],
+		[getInstances, pullAnnotations, pushAnnotations],
 	)
 
 	return { syncAnnotations, pushAnnotations, pullAnnotations }
@@ -79,7 +81,7 @@ export function useAutoSyncAnnotationsForActiveServer({ enabled = true }: AutoSy
 				didSync.current = true
 
 				try {
-					await syncAnnotations([serverId])
+					await syncAnnotations({ forServers: [serverId] })
 				} catch (error) {
 					console.error('Failed to sync annotations', error)
 					Sentry.captureException(error, {
@@ -140,21 +142,17 @@ export function useSyncOnlineToOfflineAnnotations({
 							syncStatus: syncStatus.enum.SYNCED,
 						})
 						.where(eq(annotations.serverAnnotationId, serverAnnotationId))
-						.run()
 				} else {
-					await db
-						.insert(annotations)
-						.values({
-							bookId,
-							serverId,
-							serverAnnotationId,
-							locator,
-							annotationText,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-							syncStatus: syncStatus.enum.SYNCED,
-						})
-						.run()
+					await db.insert(annotations).values({
+						bookId,
+						serverId,
+						serverAnnotationId,
+						locator,
+						annotationText,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						syncStatus: syncStatus.enum.SYNCED,
+					})
 				}
 			} catch (error) {
 				console.error('Failed to sync online annotation create to offline DB', { error })
@@ -177,7 +175,6 @@ export function useSyncOnlineToOfflineAnnotations({
 						syncStatus: syncStatus.enum.SYNCED,
 					})
 					.where(eq(annotations.serverAnnotationId, serverAnnotationId))
-					.run()
 			} catch (error) {
 				console.error('Failed to sync online annotation update to offline DB', { error })
 				Sentry.captureException(error, { extra: { serverAnnotationId } })
@@ -191,10 +188,7 @@ export function useSyncOnlineToOfflineAnnotations({
 			if (!isOfflineSyncable) return
 
 			try {
-				await db
-					.delete(annotations)
-					.where(eq(annotations.serverAnnotationId, serverAnnotationId))
-					.run()
+				await db.delete(annotations).where(eq(annotations.serverAnnotationId, serverAnnotationId))
 			} catch (error) {
 				console.error('Failed to sync online annotation delete to offline DB', { error })
 				Sentry.captureException(error, { extra: { serverAnnotationId } })

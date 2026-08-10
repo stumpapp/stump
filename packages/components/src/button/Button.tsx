@@ -22,10 +22,10 @@ export const BUTTON_VARIANTS = {
 	link: 'text-primary underline-offset-4 hover:underline',
 }
 
+// TODO(cleanup): remove this and just pass class
 export const BUTTON_ROUNDED_VARIANTS = {
-	default: 'rounded-md',
+	default: 'rounded-interactive',
 	full: 'rounded-full',
-	lg: 'rounded-lg',
 	none: 'rounded-none',
 }
 

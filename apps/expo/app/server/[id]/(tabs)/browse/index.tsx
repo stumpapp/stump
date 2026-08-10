@@ -18,59 +18,61 @@ import { Divider } from '~/components/Divider'
 import { RecentlyAddedSeries } from '~/components/series'
 import { Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-
-const ITEMS = [
-	{
-		id: 'books',
-		title: 'Books',
-		icon: BookText,
-		to: '/server/[id]/books',
-	},
-	{
-		id: 'favorites',
-		title: 'Favorites',
-		to: '/server/[id]/favorites',
-		icon: Heart,
-	},
-	{
-		id: 'files',
-		title: 'Files',
-		to: '/server/[id]/files',
-		icon: FolderTree,
-		permission: UserPermission.FileExplorer,
-	},
-	{
-		id: 'libraries',
-		title: 'Libraries',
-		to: '/server/[id]/libraries',
-		icon: LibraryBig,
-	},
-	{
-		id: 'series',
-		title: 'Series',
-		icon: BookCopy,
-		to: '/server/[id]/series',
-	},
-
-	{
-		id: 'smart-lists',
-		title: 'Smart Lists',
-		icon: Rows3,
-		permission: UserPermission.AccessSmartList,
-		to: '/server/[id]/smart-lists',
-	},
-]
 
 export default function Screen() {
 	const {
 		checkPermission,
 		activeServer: { id: serverID },
 	} = useStumpServer()
+	const { t } = useTranslate()
+
+	const items = [
+		{
+			id: 'books',
+			title: t('stumpServer.browse.books'),
+			icon: BookText,
+			to: '/server/[id]/books',
+		},
+		{
+			id: 'favorites',
+			title: t('stumpServer.browse.favorites'),
+			to: '/server/[id]/favorites',
+			icon: Heart,
+		},
+		{
+			id: 'files',
+			title: t('stumpServer.browse.files'),
+			to: '/server/[id]/files',
+			icon: FolderTree,
+			permission: UserPermission.FileExplorer,
+		},
+		{
+			id: 'libraries',
+			title: t('stumpServer.browse.libraries'),
+			to: '/server/[id]/libraries',
+			icon: LibraryBig,
+		},
+		{
+			id: 'series',
+			title: t('stumpServer.browse.series'),
+			icon: BookCopy,
+			to: '/server/[id]/series',
+		},
+
+		{
+			id: 'smart-lists',
+			title: t('stumpServer.browse.smartLists'),
+			icon: Rows3,
+			permission: UserPermission.AccessSmartList,
+			to: '/server/[id]/smart-lists',
+		},
+	]
 
 	const router = useRouter()
 
-	const visibleItems = ITEMS.filter((item) => !item.permission || checkPermission(item.permission))
+	const visibleItems = items.filter((item) => !item.permission || checkPermission(item.permission))
 
 	return (
 		<SafeAreaView
@@ -118,7 +120,7 @@ export default function Screen() {
 						</View>
 
 						<Heading size="xl" className="px-4">
-							Recently Added Series
+							{t('stumpServer.recentlyAddedSeries.label')}
 						</Heading>
 					</View>
 				}

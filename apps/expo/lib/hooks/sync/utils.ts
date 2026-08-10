@@ -56,11 +56,16 @@ export function useServerInstances() {
 		const skipped = servers.filter((s) => s.kind === 'stump' && !instances[s.id])
 		if (skipped.length > 0) {
 			toast.warning(
-				t(`progressSync.${skipped.length === 1 ? 'skippedOneServer' : 'skippedMultipleServers'}`, {
-					skippedCount: skipped.length,
-				}),
+				t(
+					`progressSync.skippedSync.${skipped.length === 1 ? 'skippedOneServer' : 'skippedMultipleServers'}`,
+					{
+						skippedCount: skipped.length,
+					},
+				),
 				{
-					description: t('progressSync.explanation'),
+					// pretty sure providing an id will let sonner dedupe for us
+					id: 'progress-sync-skipped',
+					description: t('progressSync.skippedSync.explanation'),
 				},
 			)
 		}

@@ -131,6 +131,7 @@ impl IntoFilter for MediaFilterInput {
 				}
 				or_condition
 			}))
+			.add_option(self.id.map(|f| apply_string_filter(media::Column::Id, f)))
 			.add_option(
 				self.name
 					.map(|f| apply_string_filter(media::Column::Name, f)),

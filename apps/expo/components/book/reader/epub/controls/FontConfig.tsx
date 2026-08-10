@@ -6,15 +6,6 @@ import type { PickerOption } from '~/components/ui/picker/types'
 import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
-const FONT_OPTIONS: PickerOption[] = [
-	{ label: 'System', value: '' },
-	{ label: 'OpenDyslexic', value: 'OpenDyslexic' },
-	{ label: 'Literata', value: 'Literata' },
-	{ label: 'Atkinson Hyperlegible', value: 'Atkinson-Hyperlegible' },
-	{ label: 'Charis SIL', value: 'CharisSIL' },
-	{ label: 'Bitter', value: 'Bitter' },
-]
-
 export default function FontConfig() {
 	const { t } = useTranslate()
 	const store = useReaderStore(
@@ -27,6 +18,15 @@ export default function FontConfig() {
 			setSettings: state.setGlobalSettings,
 		})),
 	)
+
+	const fontOptions: PickerOption[] = [
+		{ label: t(getKey('typeface.options.system')), value: '' },
+		{ label: t(getKey('typeface.options.opendyslexic')), value: 'OpenDyslexic' },
+		{ label: t(getKey('typeface.options.literata')), value: 'Literata' },
+		{ label: t(getKey('typeface.options.atkinsonHyperlegible')), value: 'Atkinson-Hyperlegible' },
+		{ label: t(getKey('typeface.options.charisSIL')), value: 'CharisSIL' },
+		{ label: t(getKey('typeface.options.bitter')), value: 'Bitter' },
+	]
 
 	const fontWeightOptions: PickerOption[] = [
 		{ label: t(getKey('fontWeight.options.light')), value: '300' },
@@ -44,10 +44,10 @@ export default function FontConfig() {
 
 	return (
 		<Card>
-			<Card.Row label={t(getKey('typeface'))}>
+			<Card.Row label={t(getKey('typeface.label'))}>
 				<Picker
 					value={store.fontFamily}
-					options={FONT_OPTIONS}
+					options={fontOptions}
 					onValueChange={(value) => store.setSettings({ fontFamily: value || undefined })}
 				/>
 			</Card.Row>

@@ -1,6 +1,6 @@
 [package]
 name = "stump-config-gen"
-version = "0.1.3"
+version.workspace = true
 description = "A procedural macro for generating the StumpConfig struct."
 edition = "2021"
 

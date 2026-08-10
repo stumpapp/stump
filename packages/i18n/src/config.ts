@@ -1,4 +1,4 @@
-import i18n, { Resource } from 'i18next'
+import i18n, { Resource, ResourceKey } from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
 import {
@@ -97,9 +97,11 @@ export const resources: Resource = {
 	},
 	'en-GB': {
 		'en-GB': enGB,
+		sentenceCase: sentenceCase(enGB),
 	},
 	'en-US': {
 		'en-US': enUS,
+		sentenceCase: sentenceCase(enUS),
 	},
 	'es-ES': {
 		'es-ES': esES,
@@ -174,6 +176,18 @@ export const resources: Resource = {
 
 export type Translation = (typeof resources)['en-US']['en-US']
 
+i18n.use(initReactI18next).init({
+	fallbackLng: 'en-US',
+	fallbackNS: 'en-US',
+	interpolation: {
+		escapeValue: false, // not needed for react as it escapes by default
+	},
+	parseMissingKeyHandler,
+	resources,
+})
+
+export { i18n }
+
 function parseMissingKeyHandler(missingKey: string) {
 	try {
 		const translation = (missingKey ?? '')
@@ -193,14 +207,37 @@ function parseMissingKeyHandler(missingKey: string) {
 	}
 }
 
-i18n.use(initReactI18next).init({
-	fallbackLng: 'en-US',
-	fallbackNS: 'en-US',
-	interpolation: {
-		escapeValue: false, // not needed for react as it escapes by default
-	},
-	parseMissingKeyHandler,
-	resources,
-})
+type RecursiveResource = string | RecursiveResource[] | { [key: string]: RecursiveResource }
 
-export { i18n }
+function sentenceCase(obj: RecursiveResource): ResourceKey {
+	const preservedWords = new Set(['Stump', 'OPDS', 'URL', 'URLs', 'PDF'])
+
+	if (typeof obj === 'string') {
+		let isFirstMatch = true
+		return obj.replace(/\{\{.*?\}\}|\S+/g, (match) => {
+			let result
+			if (match.startsWith('{{')) {
+				result = match
+			} else if (preservedWords.has(match)) {
+				result = match
+			} else if (isFirstMatch === true) {
+				result = match
+			} else {
+				result = match.toLowerCase()
+			}
+
+			isFirstMatch = false
+			return result
+		})
+	}
+
+	if (Array.isArray(obj)) {
+		return obj.map(sentenceCase)
+	}
+
+	if (typeof obj === 'object' && obj !== null) {
+		return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, sentenceCase(value)]))
+	}
+
+	return obj
+}

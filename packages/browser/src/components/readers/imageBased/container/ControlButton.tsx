@@ -13,7 +13,6 @@ const ControlButton = forwardRef<HTMLButtonElement, ComponentProps<typeof IconBu
 					className,
 				)}
 				ref={ref}
-				pressEffect={false}
 				{...props}
 			/>
 		)

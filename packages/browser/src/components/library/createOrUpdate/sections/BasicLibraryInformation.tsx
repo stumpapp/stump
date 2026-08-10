@@ -10,6 +10,7 @@ import { useAppContext } from '@/context'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
+import LibraryTypeSelect from './LibraryType'
 
 const LOCALE_KEY = 'createOrUpdateLibraryForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
@@ -105,6 +106,10 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					onChange={(value) => form.setValue('tags', value)}
 				/>
 			</Suspense>
+
+			<div className="flex">
+				<LibraryTypeSelect />
+			</div>
 		</div>
 	)
 }

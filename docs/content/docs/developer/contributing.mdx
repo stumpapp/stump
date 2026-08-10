@@ -49,6 +49,33 @@ Or `cargo` for the server:
 cargo run --package stump_server --bin stump_server
 ```
 
+#### Database
+
+Stump uses SQLite by default and no database setup is required to get started. PostgreSQL is also experimentally supported. A quick command to get a local instance up for development could be (assuming you have Docker installed):
+
+```bash
+docker run -d \
+  --name stump-postgres-dev \
+  -e POSTGRES_USER=stump \
+  -e POSTGRES_PASSWORD=stump \
+  -e POSTGRES_DB=stump \
+  -p 5432:5432 \
+  postgres:16-alpine
+```
+
+Then run the server with the `STUMP_DATABASE_URL` env var pointing at it:
+
+```bash
+STUMP_DATABASE_URL=postgresql://stump:stump@localhost:5432/stump \
+cargo run --package stump_server --bin stump_server
+```
+
+When you're done:
+
+```bash
+docker rm -f stump-postgres-dev
+```
+
 #### GraphQL
 
 If you plan to update or add any GraphQL queries or mutations, you'll likely want to keep a process running to watch for changes and automatically generate the TypeScript types. You can do this by running the following in the `packages/graphql` directory:

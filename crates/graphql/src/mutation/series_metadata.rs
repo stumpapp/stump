@@ -142,16 +142,9 @@ impl SeriesMetadataMutation {
 		let encryption_key = core_ctx.get_encryption_key().await?;
 		let provider_cache = ProviderClientCache::new(encryption_key);
 
-		let search_name = model
-			.metadata
-			.as_ref()
-			.and_then(|m| m.title.clone())
-			.unwrap_or_else(|| model.series.name.clone());
-
 		let candidates = stump_core::filesystem::metadata::fetch_series_metadata(
 			conn,
-			&model.series.id,
-			&search_name,
+			model,
 			&provider_cache,
 		)
 		.await?;

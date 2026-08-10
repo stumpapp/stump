@@ -218,6 +218,10 @@ mod tests {
 
 	#[test]
 	fn test_build_media_pdf() {
+		if crate::filesystem::media::format::pdf::PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
 		let media = build_media_test_helper(get_test_pdf_path());
 		assert!(media.is_ok());
 		let media = media.unwrap().media;

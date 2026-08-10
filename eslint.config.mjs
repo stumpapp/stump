@@ -10,7 +10,14 @@ import tseslint from 'typescript-eslint'
 
 export default [
 	{
-		ignores: ['**/dist/*', '**/dev-dist/**', '**/target/**', '**/.next/**', '**/.vercel/**', '**/emoji/data.json'],
+		ignores: [
+			'**/dist/*',
+			'**/dev-dist/**',
+			'**/target/**',
+			'**/.next/**',
+			'**/.vercel/**',
+			'**/emoji/data.json',
+		],
 	},
 	{
 		files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
@@ -61,6 +68,13 @@ export default [
 		files: ['**/*.config.js'],
 		rules: {
 			'@typescript-eslint/no-require-imports': 'off',
+		},
+	},
+	{
+		files: ['scripts/**/*.{js,ts,mjs}'],
+		rules: {
+			'@typescript-eslint/no-require-imports': 'off',
+			'no-console': 'off',
 		},
 	},
 ]

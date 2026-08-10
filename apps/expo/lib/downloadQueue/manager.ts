@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native'
 import { Api } from '@stump/sdk'
 import { and, eq } from 'drizzle-orm'
-import * as FileSystem from 'expo-file-system/legacy'
+import { DownloadTask, File } from 'expo-file-system'
 
 import { db, DownloadRepository } from '~/db'
 import {
@@ -35,7 +35,7 @@ type ActiveDownload = {
 	queueId: number
 	bookId: string
 	serverId: string
-	resumable: FileSystem.DownloadResumable | null // null if pending etc
+	downloadTask: DownloadTask | null // null if pending etc
 	progress: DownloadProgress
 }
 
@@ -113,13 +113,13 @@ class DownloadQueueManager {
 	 * @returns The queue ID of the enqueued download, or -1 if already downloaded
 	 */
 	async enqueue(params: EnqueueDownloadParams): Promise<number> {
-		const existingRecord = await db
+		const [existingRecord] = await db
 			.select()
 			.from(downloadQueue)
 			.where(
 				and(eq(downloadQueue.bookId, params.bookId), eq(downloadQueue.serverId, params.serverId)),
 			)
-			.get()
+			.limit(1)
 
 		if (existingRecord) {
 			if (existingRecord.status === downloadQueueStatus.enum.failed) {
@@ -174,9 +174,9 @@ class DownloadQueueManager {
 		const active = this.activeDownloads.get(queueId)
 
 		if (active) {
-			if (active.resumable) {
+			if (active.downloadTask) {
 				try {
-					await active.resumable.cancelAsync()
+					active.downloadTask.cancel()
 				} catch {
 					// Ignore cancellation errors, might be irrelevant
 				}
@@ -185,7 +185,7 @@ class DownloadQueueManager {
 			this.emit({ type: 'cancelled', queueId, bookId: active.bookId })
 		}
 
-		const item = await db.select().from(downloadQueue).where(eq(downloadQueue.id, queueId)).get()
+		const [item] = await db.select().from(downloadQueue).where(eq(downloadQueue.id, queueId))
 
 		if (item) {
 			await db.delete(downloadQueue).where(eq(downloadQueue.id, queueId))
@@ -244,54 +244,39 @@ class DownloadQueueManager {
 			throw new Error('Server not connected. Please reconnect and try again.')
 		}
 
-		await ensureDirectoryExists(booksDirectory(params.serverId))
+		ensureDirectoryExists(booksDirectory(params.serverId))
 
 		const placementUrl = `${booksDirectory(params.serverId)}/${params.filename}`
 
-		// TODO(filesystem): Use non-deprecated filesystem
-		const progressCallback: FileSystem.DownloadProgressCallback = (progress) => {
-			const downloadProgress: DownloadProgress = {
-				totalBytes: progress.totalBytesExpectedToWrite,
-				downloadedBytes: progress.totalBytesWritten,
-				percentage:
-					progress.totalBytesExpectedToWrite > 0
-						? Math.round((progress.totalBytesWritten / progress.totalBytesExpectedToWrite) * 100)
-						: 0,
-			}
-			onProgress?.(downloadProgress)
-		}
-
-		const resumable = FileSystem.createDownloadResumable(
-			params.downloadUrl,
-			placementUrl,
-			{
-				headers: sdk.headers,
+		const destFile = new File(placementUrl)
+		const downloadTask = File.createDownloadTask(params.downloadUrl, destFile, {
+			headers: sdk.headers,
+			onProgress: ({ bytesWritten, totalBytes }) => {
+				const downloadProgress: DownloadProgress = {
+					totalBytes,
+					downloadedBytes: bytesWritten,
+					percentage: totalBytes > 0 ? Math.round((bytesWritten / totalBytes) * 100) : 0,
+				}
+				onProgress?.(downloadProgress)
 			},
-			progressCallback,
-		)
+		})
 
-		const result = await resumable.downloadAsync()
+		const file = await downloadTask.downloadAsync()
 
-		if (!result) {
+		if (!file) {
 			throw new Error('Download was cancelled')
 		}
 
-		// TODO: This is fine for Stump, but will it hold true for all servers? I assume so.
-		// I could always just assert > 2xx?
-		if (result.status !== 200) {
-			throw new Error(`Download failed with status ${result.status}`)
-		}
-
-		const size = Number(result.headers['Content-Length'] ?? 0)
+		const size = file.size > 0 ? file.size : undefined
 		const metadata = params.metadata ? downloadQueueMetadata.safeParse(params.metadata).data : null
 
 		await DownloadRepository.addFile(
 			{
 				id: params.bookId,
 				filename: params.filename,
-				uri: result.uri,
+				uri: file.uri,
 				serverId: params.serverId,
-				size: !isNaN(size) && size > 0 ? size : undefined,
+				size,
 				bookName: metadata?.bookName,
 				metadata: metadata?.bookMetadata,
 				seriesId: metadata?.seriesId,
@@ -301,7 +286,7 @@ class DownloadQueueManager {
 			downloadMetaIntoDownloadRelations(metadata),
 		)
 
-		return result.uri
+		return file.uri
 	}
 
 	/**
@@ -345,13 +330,12 @@ class DownloadQueueManager {
 
 		try {
 			while (this.activeDownloads.size < MAX_CONCURRENT_DOWNLOADS) {
-				const nextItem = await db
+				const [nextItem] = await db
 					.select()
 					.from(downloadQueue)
 					.where(eq(downloadQueue.status, downloadQueueStatus.enum.pending))
 					.orderBy(downloadQueue.createdAt)
 					.limit(1)
-					.get()
 
 				if (!nextItem) break
 
@@ -384,7 +368,7 @@ class DownloadQueueManager {
 			queueId: item.id,
 			bookId: item.bookId,
 			serverId: item.serverId,
-			resumable: null,
+			downloadTask: null,
 			progress: { totalBytes: 0, downloadedBytes: 0, percentage: 0 },
 		})
 
@@ -404,71 +388,53 @@ class DownloadQueueManager {
 		}
 
 		try {
-			await ensureDirectoryExists(booksDirectory(item.serverId))
+			ensureDirectoryExists(booksDirectory(item.serverId))
 
 			const placementUrl = `${booksDirectory(item.serverId)}/${item.filename}`
 
-			// TODO(filesystem): Use non-deprecated filesystem
-			const progressCallback: FileSystem.DownloadProgressCallback = (progress) => {
-				const downloadProgress: DownloadProgress = {
-					totalBytes: progress.totalBytesExpectedToWrite,
-					downloadedBytes: progress.totalBytesWritten,
-					percentage:
-						progress.totalBytesExpectedToWrite > 0
-							? Math.round((progress.totalBytesWritten / progress.totalBytesExpectedToWrite) * 100)
-							: 0,
-				}
+			const destFile = new File(placementUrl)
+			const downloadTask = File.createDownloadTask(item.downloadUrl, destFile, {
+				headers: { ...sdk.headers },
+				onProgress: ({ bytesWritten, totalBytes }) => {
+					const downloadProgress: DownloadProgress = {
+						totalBytes,
+						downloadedBytes: bytesWritten,
+						percentage: totalBytes > 0 ? Math.round((bytesWritten / totalBytes) * 100) : 0,
+					}
 
-				const active = this.activeDownloads.get(item.id)
-				if (active) {
-					active.progress = downloadProgress
-				}
+					const active = this.activeDownloads.get(item.id)
+					if (active) {
+						active.progress = downloadProgress
+					}
 
-				this.emit({
-					type: 'progress',
-					queueId: item.id,
-					bookId: item.bookId,
-					progress: downloadProgress,
-				})
-			}
-
-			const resumable = FileSystem.createDownloadResumable(
-				item.downloadUrl,
-				placementUrl,
-				{
-					headers: {
-						...sdk.headers,
-					},
+					this.emit({
+						type: 'progress',
+						queueId: item.id,
+						bookId: item.bookId,
+						progress: downloadProgress,
+					})
 				},
-				progressCallback,
-			)
+			})
 
 			const active = this.activeDownloads.get(item.id)
 			if (active) {
-				active.resumable = resumable
+				active.downloadTask = downloadTask
 			} else {
 				// Note: This shouldn't happen, I think maybe if cancel before initialized
 				// it could
 				return
 			}
 
-			const result = await resumable.downloadAsync()
+			const file = await downloadTask.downloadAsync()
 
 			this.activeDownloads.delete(item.id)
 
-			if (!result) {
+			if (!file) {
 				await this.markFailed(item.id, 'Download was cancelled')
 				return
 			}
 
-			// TODO: This is fine for Stump, but will it hold true for all servers? I assume so.
-			// I could always just assert > 2xx?
-			if (result.status !== 200) {
-				await this.markFailed(item.id, `Download failed with status ${result.status}`)
-				return
-			}
-
-			await this.completeDownload(item, result)
+			await this.completeDownload(item, file)
 		} catch (error) {
 			this.activeDownloads.delete(item.id)
 
@@ -486,7 +452,11 @@ class DownloadQueueManager {
 	}
 
 	private async markFailed(queueId: number, reason: string): Promise<void> {
-		const item = await db.select().from(downloadQueue).where(eq(downloadQueue.id, queueId)).get()
+		const [item] = await db
+			.select()
+			.from(downloadQueue)
+			.where(eq(downloadQueue.id, queueId))
+			.limit(1)
 
 		await db
 			.update(downloadQueue)
@@ -504,22 +474,18 @@ class DownloadQueueManager {
 		this.processQueue()
 	}
 
-	private async completeDownload(
-		item: DownloadQueueItem,
-		result: FileSystem.FileSystemDownloadResult,
-	): Promise<void> {
+	private async completeDownload(item: DownloadQueueItem, file: File): Promise<void> {
 		try {
-			// android seems to have all lowercase headers
-			const size = Number(result.headers['Content-Length'] ?? result.headers['content-length'] ?? 0)
+			const size = file.size > 0 ? file.size : undefined
 			const metadata = item.metadata ? downloadQueueMetadata.safeParse(item.metadata).data : null
 
 			await DownloadRepository.addFile(
 				{
 					id: item.bookId,
 					filename: item.filename,
-					uri: result.uri,
+					uri: file.uri,
 					serverId: item.serverId,
-					size: !isNaN(size) && size > 0 ? size : undefined,
+					size,
 					bookName: metadata?.bookName,
 					metadata: metadata?.bookMetadata,
 					seriesId: metadata?.seriesId,
@@ -553,3 +519,35 @@ class DownloadQueueManager {
 export const getDownloadQueueManager = DownloadQueueManager.getInstance.bind(DownloadQueueManager)
 
 export { DownloadQueueManager }
+
+function extractSizeFromHeaders(headers: Record<string, string>): number | undefined {
+	const raw = headers['Content-Length'] ?? headers['content-length']
+	if (!raw) return undefined
+	const size = Number(raw)
+	return isNaN(size) ? undefined : size
+}
+
+async function determineFileSize(
+	headers: Record<string, string>,
+	lookupUri?: string,
+): Promise<number | undefined> {
+	const sizeFromHeaders = extractSizeFromHeaders(headers)
+	if (sizeFromHeaders != undefined) {
+		return sizeFromHeaders
+	}
+
+	console.warn('could not determine file size from headers, looking up manually', {
+		headers: headers,
+		lookupUri,
+	})
+
+	if (lookupUri) {
+		const info = await FileSystem.getInfoAsync(lookupUri)
+		// an annoying type union, size only present if exists: true lol
+		if (info.exists && info.size) {
+			return info.size
+		}
+	}
+
+	return undefined
+}

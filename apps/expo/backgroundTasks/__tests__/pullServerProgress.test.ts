@@ -11,9 +11,13 @@ vi.mock('@sentry/react-native', () => ({
 	captureMessage: vi.fn(),
 }))
 
-vi.mock('@stump/graphql', () => ({
-	graphql: vi.fn((q) => q),
-}))
+vi.mock('@stump/graphql', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@stump/graphql')>()
+	return {
+		...actual,
+		graphql: vi.fn((q) => q),
+	}
+})
 
 vi.mock('~/db', async () => {
 	const { createDbMock } = await import('~/__tests__/utils/db')

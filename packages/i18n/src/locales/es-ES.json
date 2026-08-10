@@ -44,26 +44,26 @@
 	},
 	"bookManagementScene": {
 		"metadataSearch": {
-			"heading": "Search metadata",
+			"heading": "Buscar metadatos",
 			"description": "Search an external provider for this book and choose a match to apply",
-			"openButton": "Search Metadata",
-			"searchButton": "Search",
+			"openButton": "Buscar metadatos",
+			"searchButton": "Buscar",
 			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
 			"noResults": "No matches were found for this search",
 			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
 			"searchFailed": "Failed to search metadata providers",
 			"form": {
 				"title": {
-					"label": "Title"
+					"label": "Título"
 				},
 				"author": {
-					"label": "Author"
+					"label": "Autor"
 				},
 				"isbn": {
 					"label": "ISBN"
 				},
 				"year": {
-					"label": "Year"
+					"label": "Año"
 				},
 				"number": {
 					"label": "Issue number"

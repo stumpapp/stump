@@ -33,6 +33,16 @@ describe('GoToPage', () => {
 		expect(screen.getByText('3 of 42')).toBeInTheDocument()
 	})
 
+	it('associates the label with the input', () => {
+		render(<GoToPage currentPage={1} totalPages={42} onSubmit={jest.fn()} />)
+		openPopover()
+
+		// The label lives outside the Input and is tied to it via htmlFor/id, so the
+		// input should still be reachable by its accessible label. Scope to the input
+		// since the trigger button also carries a "Go to page" aria-label.
+		expect(screen.getByLabelText('Go to page', { selector: 'input' })).toBe(getInput())
+	})
+
 	it('submits the entered page when valid', () => {
 		const onSubmit = jest.fn()
 		render(<GoToPage currentPage={1} totalPages={42} onSubmit={onSubmit} />)

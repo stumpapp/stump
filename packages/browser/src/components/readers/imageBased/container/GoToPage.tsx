@@ -1,15 +1,10 @@
-import { Button, Input, Popover } from '@stump/components'
-import { ChevronsRight } from 'lucide-react'
+import { Button, Input, Label, Popover } from '@stump/components'
 import { ChangeEvent, KeyboardEvent, useState } from 'react'
 
 export type GoToPageProps = {
-	/**
-	 * The page the reader is currently on meaning between 1 to indexed.
-	 */
+	// The page the reader is currently on //
 	currentPage: number
-	/**
-	 * The total number of pages in the book.
-	 */
+	//The total number of pages in the book //
 	totalPages: number
 	/**
 	 * Called with a validated, clamped page number when the user submits a jump.
@@ -23,9 +18,7 @@ export type GoToPageProps = {
 	 * localized as a whole.
 	 */
 	label?: string
-	/**
-	 * Text for the submit button. See `label` re: localization.
-	 */
+	//Text for the submit button. See `label` re: localization //
 	submitLabel?: string
 	/**
 	 * Optional text to show on the trigger. Lets the parent preserve its existing page
@@ -67,7 +60,7 @@ export default function GoToPage({
 
 	const handleSubmit = () => {
 		const parsed = parseInt(value, 10)
-		// Ignore anything that isn't a number (empty input, stray characters, etc.).
+		// Ignore anything that isn't a number.
 		if (Number.isNaN(parsed)) {
 			return
 		}
@@ -99,22 +92,26 @@ export default function GoToPage({
 				</button>
 			</Popover.Trigger>
 
-			<Popover.Content size="sm" className="gap-2 p-3 flex items-end">
-				<Input
-					label={label}
-					type="number"
-					min={1}
-					max={totalPages}
-					value={value}
-					onChange={handleChange}
-					onKeyDown={handleKeyDown}
-					fullWidth
-					autoFocus
-				/>
-				<Button size="sm" onClick={handleSubmit}>
-					<ChevronsRight className="mr-1 h-4 w-4" />
-					{submitLabel}
-				</Button>
+			<Popover.Content size="sm" className="gap-2 p-3 flex flex-col">
+				{/* The label sits atop input/button group so it doesn't throw off the
+				    alignment of row below. */}
+				<Label htmlFor="go-to-page-input">{label}</Label>
+				<div className="gap-2 flex items-center">
+					<Input
+						id="go-to-page-input"
+						type="number"
+						min={1}
+						max={totalPages}
+						value={value}
+						onChange={handleChange}
+						onKeyDown={handleKeyDown}
+						fullWidth
+						autoFocus
+					/>
+					<Button size="sm" onClick={handleSubmit}>
+						{submitLabel}
+					</Button>
+				</div>
 			</Popover.Content>
 		</Popover>
 	)

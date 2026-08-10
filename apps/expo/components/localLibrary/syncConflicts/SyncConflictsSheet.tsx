@@ -1,4 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { parseGraphQLDateTime } from '@stump/client'
 import { useMutation } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -14,17 +15,13 @@ import { OwlEmptyState } from '../../OwlEmptyState'
 import { SheetBackDetection } from '../../SheetBackDetection'
 import { Badge, Heading, Text } from '../../ui'
 import { ConflictCarousel } from './ConflictCarousel'
-import { AcceptedProgressionData, ConflictRecord } from './types'
+import { AcceptedRemoteProgressionData, ConflictRecord } from './types'
 
 export const SYNC_CONFLICTS_SHEET_NAME = 'syncConflictsSheet'
 
 type Props = {
 	onDismiss?: () => void
 }
-
-// TODO: general list of things:
-// - prolly should detach the actions from the carousel, not a huge deal but i think it would make
-//   more sense for them to be more fixed? would mean coordinating index thru parent tho so
 
 export function SyncConflictsSheet({ onDismiss }: Props) {
 	const { t } = useTranslate()
@@ -99,30 +96,43 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		[isOpen, shouldPull],
 	)
 
-	const locallyPersistProgress = async (
+	const onAcceptLocal = async (bookId: string, serverId: string, latestRemoteUpdatedAt: string) => {
+		await db
+			.update(readProgress)
+			.set({
+				syncStatus: syncStatus.enum.UNSYNCED,
+				lastPulledSessionUpdatedAt: parseGraphQLDateTime(latestRemoteUpdatedAt) ?? new Date(),
+			})
+			.where(eq(readProgress.bookId, bookId))
+		serverIdsToSyncUponClose.current.add(serverId)
+	}
+
+	const onAcceptRemote = async (
 		bookId: string,
 		serverId: string,
-		progression: AcceptedProgressionData,
+		data: AcceptedRemoteProgressionData,
 	) => {
-		const now = new Date()
+		const sessionUpdatedAt = data.sessionUpdatedAt
+			? parseGraphQLDateTime(data.sessionUpdatedAt)
+			: null
 		const values: typeof readProgress.$inferInsert = {
 			bookId,
 			serverId,
-			page: progression.page,
-			elapsedSeconds: progression.elapsedSeconds,
-			lastSyncedElapsedSeconds: progression.elapsedSeconds,
-			percentage: progression.percentageCompleted,
-			epubProgress: epubProgress.safeParse(progression.locator).data,
-			syncStatus: syncStatus.enum.UNSYNCED,
-			lastModified: now,
-			// TODO: i def need to think about this one!!
+			page: data.page,
+			elapsedSeconds: data.elapsedSeconds,
+			lastSyncedElapsedSeconds: data.elapsedSeconds, // samsies since we are "syncing" now
+			percentage: data.percentageCompleted,
+			epubProgress: epubProgress.safeParse(data.locator).data,
+			syncStatus: syncStatus.enum.SYNCED, // accepting remote = effectively synced
+			lastModified: sessionUpdatedAt ?? new Date(),
+			...(sessionUpdatedAt ? { lastPulledSessionUpdatedAt: sessionUpdatedAt } : {}),
+			...(data.sessionId != null ? { lastSyncedSessionId: data.sessionId } : {}),
 			pendingReset: false,
 		}
 		await db.insert(readProgress).values(values).onConflictDoUpdate({
 			target: readProgress.bookId,
 			set: values,
 		})
-		serverIdsToSyncUponClose.current.add(serverId)
 	}
 
 	const conflictCount = conflictingRecords?.length ?? 0
@@ -170,7 +180,8 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 					<ConflictCarousel
 						// cast is fine, we in asserted read_progress exists thru query join and filter
 						records={(conflictingRecords ?? []) as ConflictRecord[]}
-						locallyPersistProgress={locallyPersistProgress}
+						onAcceptLocal={onAcceptLocal}
+						onAcceptRemote={onAcceptRemote}
 					/>
 				)}
 			</TrueSheet>

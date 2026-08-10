@@ -3144,10 +3144,14 @@
 			"remoteSessionWithId": "Remote Session {{sessionId}}",
 			"noCommonSession": "No common reading history",
 			"noRemoteSessions": "No remote sessions",
+			"gracePeriodConflict": {
+				"title": "Divergent Progress",
+				"description": "The last common session was modified on the server after your last sync. Keeping your progress will push your offline reading to the server as a continuation"
+			},
 			"acceptSource": {
 				"local": "Accept Local",
 				"remote": "Accept Remote",
-				"both": "Accept Both"
+				"both": "Keep Both"
 			}
 		},
 		"search": {

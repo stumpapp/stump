@@ -1,6 +1,7 @@
 import { SDKContext, useDetachedGraphQL, useSDK } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { AlertCircle } from 'lucide-react-native'
+import { useState } from 'react'
 import { View } from 'react-native'
 
 import { Alert } from '~/components/ui/alert'
@@ -12,7 +13,7 @@ import { Button, Text } from '../../ui'
 import { getThumbnailPath } from '../utils'
 import { BranchSplitSvg } from './BranchSplitSvg'
 import { LastCommonSessionCard, RemoteSessionList, SourceSessionCard } from './SessionCards'
-import { AcceptedProgressionData, ConflictRecord } from './types'
+import { AcceptedRemoteProgressionData, ConflictRecord } from './types'
 
 const conflictViewQuery = graphql(`
 	query ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int!) {
@@ -62,11 +63,12 @@ export type SyncConflictPageProps = {
 	// we don't want to load query for each page at once so the parent will inform
 	// when the page is within acceptable range to kick off the query
 	isWithinLoadingRange: boolean
-	locallyPersistProgress: (
+	onAcceptRemote: (
 		bookId: string,
 		serverId: string,
-		progression: AcceptedProgressionData,
+		data: AcceptedRemoteProgressionData,
 	) => Promise<void>
+	onAcceptLocal: (bookId: string, serverId: string, latestRemoteUpdatedAt: string) => Promise<void>
 }
 
 export function SyncConflictPage(props: SyncConflictPageProps) {
@@ -81,7 +83,12 @@ export function SyncConflictPage(props: SyncConflictPageProps) {
 	)
 }
 
-function SyncConflictPageContent({ record, isWithinLoadingRange }: SyncConflictPageProps) {
+function SyncConflictPageContent({
+	record,
+	isWithinLoadingRange,
+	onAcceptRemote,
+	onAcceptLocal,
+}: SyncConflictPageProps) {
 	const branchedSessionId = record.read_progress.lastSyncedSessionId
 
 	const { t } = useTranslate()
@@ -108,6 +115,43 @@ function SyncConflictPageContent({ record, isWithinLoadingRange }: SyncConflictP
 	const hasGracePeriodConflict =
 		remoteSessions.length > 0 && remoteSessions[0]?.id === ancestorSession?.id
 
+	const latestRemote = remoteSessions.at(-1)
+
+	const [isPending, setIsPending] = useState(false)
+
+	// note that this is functionally equivalent in the scenario where we have a grace period conflict,
+	// the difference is really only semantics (local because a sequential session) since we are not
+	// reordering the entire history from the point of departure
+	const handleAcceptLocal = async () => {
+		setIsPending(true)
+		try {
+			await onAcceptLocal(
+				record.downloaded_files.id,
+				record.downloaded_files.serverId,
+				latestRemote?.updatedAt ?? new Date().toISOString(),
+			)
+		} finally {
+			setIsPending(false)
+		}
+	}
+
+	const handleAcceptRemote = async () => {
+		if (!latestRemote) return
+		setIsPending(true)
+		try {
+			await onAcceptRemote(record.downloaded_files.id, record.downloaded_files.serverId, {
+				page: latestRemote.endPage,
+				elapsedSeconds: latestRemote.elapsedSeconds,
+				percentageCompleted: latestRemote.endPercentage,
+				locator: latestRemote.endLocator,
+				sessionId: latestRemote.id,
+				sessionUpdatedAt: latestRemote.updatedAt,
+			})
+		} finally {
+			setIsPending(false)
+		}
+	}
+
 	if (isLoading) return null
 
 	return (
@@ -133,25 +177,40 @@ function SyncConflictPageContent({ record, isWithinLoadingRange }: SyncConflictP
 
 			{hasGracePeriodConflict && (
 				<Alert icon={AlertCircle} variant="destructive" className="mt-3">
-					<Alert.Title>Grace Period Conflict</Alert.Title>
+					<Alert.Title>{t('syncConflicts.gracePeriodConflict.title')}</Alert.Title>
 					<Alert.Description>
-						TODO: hasGracePeriodConflict, idk figure out what to say or do here!
+						{t('syncConflicts.gracePeriodConflict.description')}
 					</Alert.Description>
 				</Alert>
 			)}
 
 			<View className="gap-2 pt-3">
 				<View className="gap-2 flex-row">
-					<Button className="flex-1" variant="outline" roundness="full" disabled>
-						<Text>{t('syncConflicts.acceptSource.local')}</Text>
+					<Button
+						className="flex-1"
+						variant="outline"
+						roundness="full"
+						disabled={isPending}
+						onPress={handleAcceptLocal}
+					>
+						<Text>
+							{t(
+								hasGracePeriodConflict
+									? 'syncConflicts.acceptSource.both'
+									: 'syncConflicts.acceptSource.local',
+							)}
+						</Text>
 					</Button>
-					<Button className="flex-1" roundness="full" disabled>
+
+					<Button
+						className="flex-1"
+						roundness="full"
+						disabled={isPending || !latestRemote}
+						onPress={handleAcceptRemote}
+					>
 						<Text>{t('syncConflicts.acceptSource.remote')}</Text>
 					</Button>
 				</View>
-				<Button className="w-full" variant="outline" roundness="full" disabled>
-					<Text>{t('syncConflicts.acceptSource.both')}</Text>
-				</Button>
 			</View>
 		</View>
 	)

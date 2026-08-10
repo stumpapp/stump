@@ -11,10 +11,11 @@ type ConflictResolutionView = ReadingSessionConflictViewQuery['readingSessionCon
 export type AncestorSession = ConflictResolutionView['ancestorSession']
 export type RemoteSession = ConflictResolutionView['remoteSessions'][number]
 
-// TODO: type correctly
-export type AcceptedProgressionData = {
+export type AcceptedRemoteProgressionData = {
 	page?: number | null
 	elapsedSeconds?: number | null
 	percentageCompleted?: string | null
 	locator?: unknown
+	sessionId?: number | null
+	sessionUpdatedAt?: string | null
 }

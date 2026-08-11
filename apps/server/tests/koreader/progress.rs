@@ -1,5 +1,6 @@
 use crate::common::{
-	api_key::create_api_key_for_user, series::setup_single_series_with_n_books, TestApp,
+	api_key::create_api_key_for_user, library::setup_library,
+	series::setup_single_series_with_n_books, TestApp,
 };
 use models::{
 	entity::{media, user},
@@ -26,12 +27,15 @@ async fn setup() -> (TestApp, String, media::Model, user::Model) {
 	)
 	.await;
 
-	let image = fake_data::Library {
-		id: Some("image".to_string()),
-		name: Some("Image".to_string()),
-		..Default::default()
-	}
-	.insert(db)
+	let image = setup_library(
+		&app,
+		fake_data::Library {
+			id: Some("image".to_string()),
+			name: Some("Image".to_string()),
+			..Default::default()
+		},
+		Some(user.id.clone()),
+	)
 	.await;
 
 	let (_, books) = setup_single_series_with_n_books(

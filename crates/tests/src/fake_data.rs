@@ -1,5 +1,7 @@
 use chrono::Utc;
-use models::entity::{library, library_config, media, reading_session, series, user};
+use models::entity::{
+	library, library_access, library_config, media, reading_session, series, user,
+};
 use models::shared::enums::{FileStatus, ReadingStatus};
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
@@ -132,6 +134,21 @@ impl Library {
 		};
 
 		model.insert(db).await.expect("could not insert library")
+	}
+
+	pub async fn insert_with_user(&self, db: &DbConn, user_id: &str) -> library::Model {
+		let library = self.insert(db).await;
+
+		let _access_record = library_access::ActiveModel {
+			library_id: sea_orm::Set(library.id.clone()),
+			user_id: sea_orm::Set(user_id.to_string()),
+			..Default::default()
+		}
+		.insert(db)
+		.await
+		.expect("could not insert library access record");
+
+		library
 	}
 }
 

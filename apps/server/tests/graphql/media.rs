@@ -1,4 +1,6 @@
-use crate::common::{series::setup_single_series_with_n_books, TestApp};
+use crate::common::{
+	library::setup_library, series::setup_single_series_with_n_books, TestApp,
+};
 use models::entity::media_metadata;
 use sea_orm::{prelude::Decimal, ActiveModelTrait};
 use tests::fake_data;
@@ -39,7 +41,7 @@ async fn test_media_metadata_number_is_returned() {
 	let app = TestApp::new_with_default_user().await;
 	let conn = app.conn();
 
-	let library = fake_data::Library::default().insert(conn).await;
+	let library = setup_library(&app, fake_data::Library::default(), None).await;
 	let (_, books) = setup_single_series_with_n_books(
 		&app,
 		fake_data::Series {
@@ -81,9 +83,8 @@ async fn test_media_metadata_number_is_returned() {
 #[tokio::test]
 async fn test_series_position_via_row_number() {
 	let app = TestApp::new_with_default_user().await;
-	let conn = app.conn();
 
-	let library = fake_data::Library::default().insert(conn).await;
+	let library = setup_library(&app, fake_data::Library::default(), None).await;
 	// will insert named with order, so should get position as 1, 2, 3
 	let (_, books) = setup_single_series_with_n_books(
 		&app,

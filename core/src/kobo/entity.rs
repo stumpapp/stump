@@ -460,7 +460,17 @@ mod tests {
 			..Default::default()
 		};
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
 		let media = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
@@ -499,7 +509,17 @@ mod tests {
 			..Default::default()
 		};
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
 		let media = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
@@ -547,7 +567,17 @@ mod tests {
 			..Default::default()
 		};
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
 		let media = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
@@ -590,7 +620,17 @@ mod tests {
 			..Default::default()
 		};
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
 		let media = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
@@ -643,7 +683,17 @@ mod tests {
 			..Default::default()
 		};
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
 		let media = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
@@ -702,7 +752,17 @@ mod tests {
 			..Default::default()
 		};
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
 		let media = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
@@ -755,7 +815,17 @@ mod tests {
 			..Default::default()
 		};
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &user.id)
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
 		let media = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),

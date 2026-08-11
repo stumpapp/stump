@@ -114,6 +114,16 @@ impl TestApp {
 			.to_string()
 	}
 
+	pub async fn get_viewer(&self) -> Value {
+		let response = self
+			.server
+			.get("/api/v2/auth/me")
+			.add_header("Authorization", self.auth_header().await)
+			.await;
+		response.assert_status_ok();
+		response.json()
+	}
+
 	/// issue a GET request to the specified path with auth headers, returning the response directly
 	pub async fn get(&self, path: &str) -> TestResponse {
 		let response = self

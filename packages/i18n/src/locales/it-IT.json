@@ -3544,6 +3544,11 @@
 				"ASC": "1 → 10",
 				"DESC": "10 → 1"
 			}
+		},
+		"widgets": {
+			"readingNow": {
+				"nothingInProgress": "Nulla in corso"
+			}
 		}
 	}
 }

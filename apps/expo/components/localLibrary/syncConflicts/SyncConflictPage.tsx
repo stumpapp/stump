@@ -122,6 +122,13 @@ function SyncConflictPageContent({
 	// note that this is functionally equivalent in the scenario where we have a grace period conflict,
 	// the difference is really only semantics (local because a sequential session) since we are not
 	// reordering the entire history from the point of departure
+	//
+	// TODO: ^ i don't think this is communicated well in ui, like if i download a book, read on remote, read
+	// on local, sync, then we satisfy the grace period conflict BUT a push would extend the session since we
+	// are STILL WITHIN the grace period. building this out i just took the assumption this will likely only
+	// happen in practice when that grace period has lapsed, and so a push would be a new session. this is
+	// fairly easy to detect (if sessions exist newer than ancestor) but no time rn so instead i am leaving myself
+	// this long note that arguably i could have just made the changes in this time + a lil extra but is fine
 	const handleAcceptLocal = async () => {
 		setIsPending(true)
 		try {

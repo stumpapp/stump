@@ -136,7 +136,6 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 	}
 
 	const conflictCount = conflictingRecords?.length ?? 0
-	const isInitialLoad = !updatedAt
 
 	return (
 		<>
@@ -167,23 +166,26 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 				}}
 				insetAdjustment="automatic"
 			>
-				{!isInitialLoad && !conflictCount && (
-					<View className="p-6 flex-1 justify-center">
-						<OwlEmptyState
-							title={t('syncConflicts.noConflicts.title')}
-							description={t('syncConflicts.noConflicts.description')}
-						/>
-					</View>
-				)}
+				{/*i find it irritating i need this key for stuff to show up*/}
+				<View key={updatedAt?.toISOString()}>
+					{!conflictCount && (
+						<View className="p-6 flex-1 justify-center">
+							<OwlEmptyState
+								title={t('syncConflicts.noConflicts.title')}
+								description={t('syncConflicts.noConflicts.description')}
+							/>
+						</View>
+					)}
 
-				{!isInitialLoad && conflictCount > 0 && (
-					<ConflictCarousel
-						// cast is fine, we in asserted read_progress exists thru query join and filter
-						records={(conflictingRecords ?? []) as ConflictRecord[]}
-						onAcceptLocal={onAcceptLocal}
-						onAcceptRemote={onAcceptRemote}
-					/>
-				)}
+					{conflictCount > 0 && (
+						<ConflictCarousel
+							// cast is fine, we in asserted read_progress exists thru query join and filter
+							records={(conflictingRecords ?? []) as ConflictRecord[]}
+							onAcceptLocal={onAcceptLocal}
+							onAcceptRemote={onAcceptRemote}
+						/>
+					)}
+				</View>
 			</TrueSheet>
 
 			<SheetBackDetection ref={ref} isOpen={isOpen} />

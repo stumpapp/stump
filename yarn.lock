@@ -13931,10 +13931,10 @@ expo-auth-session@~56.0.14:
     expo-web-browser "~56.0.5"
     invariant "^2.2.4"
 
-expo-blur@~56.0.3:
-  version "56.0.3"
-  resolved "https://registry.yarnpkg.com/expo-blur/-/expo-blur-56.0.3.tgz#4420700813be7ed47298b9280d83fdfb32d04cdb"
-  integrity sha512-KDDtrpWc2tYlm1WCPaOgBtv+YEGqe5ELheFPIgSNgHt28NQUDcfBcFsA9Us2StDh6osmSD6NbKxOt5bU6PcDbQ==
+expo-blur@~56.0.4:
+  version "56.0.4"
+  resolved "https://registry.yarnpkg.com/expo-blur/-/expo-blur-56.0.4.tgz#7706b6348c7a12fd423651667b2de34a40959471"
+  integrity sha512-/rNpe2NDTmMbSktVJb5z7HoX6apYtq8KVKJNjWOQV7NG01+LvctWzFeMNxWSZVWfIKTndqdqABwqcpYmiCRxxg==
 
 expo-brightness@~56.0.5:
   version "56.0.5"

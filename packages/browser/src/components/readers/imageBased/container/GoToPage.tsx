@@ -2,9 +2,13 @@ import { Button, Input, Label, Popover } from '@stump/components'
 import { ChangeEvent, KeyboardEvent, useState } from 'react'
 
 export type GoToPageProps = {
-	// The page the reader is currently on //
+	/**
+	 * The page the reader is currently on
+	 */
 	currentPage: number
-	//The total number of pages in the book //
+	/**
+	 * The total number of pages in the book
+	 */
 	totalPages: number
 	/**
 	 * Called with a validated, clamped page number when the user submits a jump.
@@ -18,7 +22,9 @@ export type GoToPageProps = {
 	 * localized as a whole.
 	 */
 	label?: string
-	//Text for the submit button. See `label` re: localization //
+	/**
+	 * Text for the submit button. See `label` re: localization
+	 */
 	submitLabel?: string
 	/**
 	 * Optional text to show on the trigger. Lets the parent preserve its existing page
@@ -50,8 +56,10 @@ export default function GoToPage({
 	const [value, setValue] = useState(() => String(currentPage))
 
 	const handleOpenChange = (next: boolean) => {
-		// Re-seed the input with the live current page whenever the popover opens, so a
-		// stale value from a previous jump isn't shown.
+		/**
+		 * Re-seed the input with the live current page whenever the popover opens, so a
+		 * stale value from a previous jump isn't shown.
+		 */
 		if (next) {
 			setValue(String(currentPage))
 		}
@@ -60,7 +68,9 @@ export default function GoToPage({
 
 	const handleSubmit = () => {
 		const parsed = parseInt(value, 10)
-		// Ignore anything that isn't a number.
+		/**
+		 * Ignore anything that isn't a number.
+		 */
 		if (Number.isNaN(parsed)) {
 			return
 		}

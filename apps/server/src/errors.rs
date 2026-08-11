@@ -324,7 +324,9 @@ impl IntoResponse for APIErrorResponse {
 
 		let mut builder = Response::builder()
 			.status(self.status)
-			.header("Content-Type", "application/json");
+			.header("Content-Type", "application/json")
+			// do not cache error responses
+			.header("Cache-Control", "no-store");
 
 		// if the status is 401, we want to encourage the client to delete their
 		// session cookie

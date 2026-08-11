@@ -1,9 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
 import {
 	Alert,
 	AlertDescription,
 	Button,
 	Dialog,
+	Form,
 	Input,
 	Label,
 	NativeSelect,
@@ -11,8 +13,10 @@ import {
 import { extractErrorMessage, graphql, MergeStrategy, MetadataProvider } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Info } from 'lucide-react'
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { z } from 'zod'
 
 import { MatchRecord, useMatchReviewStore } from '@/components/metadata/metadataMatching'
 import { PROVIDER_LABELS } from '@/scenes/settings/server/metadataIntegrations/providers/constants'
@@ -23,6 +27,20 @@ const providersQuery = graphql(`
 			id
 			providerType
 			enabled
+		}
+	}
+`)
+
+const mediaContextQuery = graphql(`
+	query BookMetadataSearchContext($id: ID!) {
+		mediaById(id: $id) {
+			id
+			series {
+				id
+				metadata {
+					comicid
+				}
+			}
 		}
 	}
 `)
@@ -82,13 +100,33 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 	} = useSuspenseGraphQL(providersQuery, ['metadataProviderConfigs', 'bookMetadataSearch', mediaId])
 	const enabledProviders = providers.filter((provider) => provider.enabled)
 
+	const {
+		data: { mediaById: media },
+	} = useSuspenseGraphQL(mediaContextQuery, ['mediaById', 'bookMetadataSearch', mediaId], {
+		id: mediaId,
+	})
+	const suggestedVolumeId = media?.series?.metadata?.comicid?.toString()
+
 	const openReview = useMatchReviewStore((s) => s.open)
 
-	const [title, setTitle] = useState(initialTitle)
-	const [author, setAuthor] = useState('')
-	const [isbn, setIsbn] = useState('')
-	const [year, setYear] = useState('')
-	const [provider, setProvider] = useState<MetadataProvider | ''>('')
+	const form = useForm<SearchFormValues>({
+		resolver: zodResolver(searchFormSchema),
+		defaultValues: {
+			title: initialTitle,
+			author: '',
+			isbn: '',
+			year: undefined,
+			number: undefined,
+			comicVineVolumeId: suggestedVolumeId ? String(suggestedVolumeId) : undefined,
+			provider: undefined,
+		},
+	})
+
+	useEffect(() => {
+		if (suggestedVolumeId) {
+			form.setValue('comicVineVolumeId', String(suggestedVolumeId))
+		}
+	}, [suggestedVolumeId, form])
 
 	const { mutate, isPending } = useGraphQLMutation(searchMutation, {
 		onSuccess: (data) => {
@@ -112,78 +150,77 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 		},
 	})
 
-	const handleSubmit = () => {
-		const parsedYear = parseInt(year, 10)
-
+	const onSubmit = (values: SearchFormValues) =>
 		mutate({
 			id: mediaId,
 			search: {
-				title: title.trim() || undefined,
-				author: author.trim() || undefined,
-				isbn: isbn.trim() || undefined,
-				year: Number.isNaN(parsedYear) ? undefined : parsedYear,
-				provider: provider || undefined,
+				title: values.title?.trim() || undefined,
+				author: values.author?.trim() || undefined,
+				isbn: values.isbn?.trim() || undefined,
+				year: values.year,
+				number: values.number,
+				comicVineVolumeId: values.comicVineVolumeId?.trim() || undefined,
+				provider: (values.provider as MetadataProvider) || null,
 			},
 		})
-	}
 
 	return (
 		<>
-			<div className="space-y-4 flex flex-col">
-				{enabledProviders.length === 0 && (
-					<Alert variant="info">
-						<Info />
-						<AlertDescription>{t(getKey('noProviders'))}</AlertDescription>
-					</Alert>
-				)}
+			<Form id="book-metadata-search-form" form={form} onSubmit={onSubmit}>
+				<div className="space-y-4 flex flex-col">
+					{enabledProviders.length === 0 && (
+						<Alert variant="info">
+							<Info />
+							<AlertDescription>{t(getKey('noProviders'))}</AlertDescription>
+						</Alert>
+					)}
 
-				<Input
-					label={t(getFormKey('title.label'))}
-					value={title}
-					onChange={(e) => setTitle(e.target.value)}
-					fullWidth
-				/>
-				<Input
-					label={t(getFormKey('author.label'))}
-					value={author}
-					onChange={(e) => setAuthor(e.target.value)}
-					fullWidth
-				/>
-				<Input
-					label={t(getFormKey('isbn.label'))}
-					value={isbn}
-					onChange={(e) => setIsbn(e.target.value)}
-					fullWidth
-				/>
-				<Input
-					label={t(getFormKey('year.label'))}
-					type="number"
-					value={year}
-					onChange={(e) => setYear(e.target.value)}
-					fullWidth
-				/>
-
-				<div className="gap-2 flex flex-col">
-					<Label>{t(getFormKey('provider.label'))}</Label>
-					<NativeSelect
-						options={enabledProviders.map((p) => ({
-							label: PROVIDER_LABELS[p.providerType] ?? p.providerType,
-							value: p.providerType,
-						}))}
-						emptyOption={{ label: t(getFormKey('provider.allOption')), value: '' }}
-						value={provider}
-						onChange={(e) => setProvider(e.target.value as MetadataProvider)}
-						disabled={enabledProviders.length === 0}
+					<Input label={t(getFormKey('title.label'))} {...form.register('title')} fullWidth />
+					<Input label={t(getFormKey('author.label'))} {...form.register('author')} fullWidth />
+					<Input label={t(getFormKey('isbn.label'))} {...form.register('isbn')} fullWidth />
+					<Input
+						label={t(getFormKey('year.label'))}
+						type="number"
+						{...form.register('year')}
+						fullWidth
 					/>
+					<Input
+						label={t(getFormKey('number.label'))}
+						type="number"
+						{...form.register('number')}
+						placeholder="e.g., 1, 2.5"
+						step="0.01"
+						fullWidth
+					/>
+					<Input
+						label={t(getFormKey('comicVineVolumeId.label'))}
+						{...form.register('comicVineVolumeId')}
+						placeholder={t(getFormKey('comicVineVolumeId.placeholder'))}
+						fullWidth
+					/>
+
+					<div className="gap-2 flex flex-col">
+						<Label>{t(getFormKey('provider.label'))}</Label>
+						<NativeSelect
+							options={enabledProviders.map((p) => ({
+								label: PROVIDER_LABELS[p.providerType] ?? p.providerType,
+								value: p.providerType,
+							}))}
+							emptyOption={{ label: t(getFormKey('provider.allOption')), value: '' }}
+							{...form.register('provider')}
+							disabled={enabledProviders.length === 0}
+						/>
+					</div>
 				</div>
-			</div>
+			</Form>
 
 			<Dialog.Footer>
 				<Button variant="outline" onClick={onClose} disabled={isPending}>
 					{t('common.cancel')}
 				</Button>
 				<Button
-					onClick={handleSubmit}
+					type="submit"
+					form="book-metadata-search-form"
 					disabled={isPending || enabledProviders.length === 0}
 					isLoading={isPending}
 				>
@@ -197,3 +234,20 @@ function BookMetadataSearchForm({ mediaId, initialTitle, onClose }: FormProps) {
 const LOCALE_KEY = 'bookManagementScene.metadataSearch'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
 const getFormKey = (key: string) => `${LOCALE_KEY}.form.${key}`
+
+const searchFormSchema = z
+	.object({
+		title: z.string().nullish(),
+		author: z.string().nullish(),
+		isbn: z.string().nullish(),
+		year: z.coerce.number().int().nullish(),
+		number: z.coerce.number().nullish(),
+		comicVineVolumeId: z.string().nullish(),
+		provider: z.union([z.string(), z.nativeEnum(MetadataProvider)]).nullish(),
+	})
+	.transform((values) => ({
+		...values,
+		provider: values.provider ? values.provider : null,
+	}))
+
+type SearchFormValues = z.infer<typeof searchFormSchema>

@@ -235,6 +235,11 @@ impl StumpCore {
 	pub async fn init_journal_mode(&self) -> Result<JournalModeChanged, CoreError> {
 		let conn = self.ctx.conn.as_ref();
 
+		if conn.get_database_backend() != DatabaseBackend::Sqlite {
+			tracing::trace!("Not using SQLite, skipping journal mode initialization");
+			return Ok(false);
+		}
+
 		let wal_mode_setup_completed = server_config::Entity::find()
 			.filter(server_config::Column::InitialWalSetupComplete.eq(true))
 			.count(conn)

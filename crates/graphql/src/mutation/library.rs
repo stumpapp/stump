@@ -35,6 +35,7 @@ use crate::{
 	guard::PermissionGuard,
 	input::{library::CreateOrUpdateLibraryInput, thumbnail::UpdateThumbnailInput},
 	object::library::Library,
+	utils::db_statement,
 };
 
 #[derive(Default, SimpleObject)]
@@ -1111,15 +1112,26 @@ async fn enforce_valid_library_path(
 
 	// example: new_path = "/data/books/fiction", existing_library = "/data/books"
 	// check if new_path matches the pattern "/data/books/_%".
-	let values: [sea_orm::Value; 1] = [path.into()];
-	let mut parent_query = library::Entity::find()
-		.filter(Expr::cust_with_values("? LIKE path || '/_%'", values));
+	let (parent_sql, parent_values): (String, Vec<sea_orm::Value>) = if let Some(ep) =
+		existing_path
+	{
+		(
+				r#"SELECT COUNT(*) AS count FROM libraries WHERE $1 LIKE "path" || '/_%' AND "path" != $2"#.to_string(),
+				vec![path.into(), ep.into()],
+			)
+	} else {
+		(
+			r#"SELECT COUNT(*) AS count FROM libraries WHERE $1 LIKE "path" || '/_%'"#
+				.to_string(),
+			vec![path.into()],
+		)
+	};
 
-	if let Some(existing_path) = existing_path {
-		parent_query = parent_query.filter(library::Column::Path.ne(existing_path));
-	}
-
-	let parent_libraries_count = parent_query.count(conn).await?;
+	let parent_libraries_count: i64 = conn
+		.query_one(db_statement(conn, parent_sql, parent_values))
+		.await?
+		.ok_or("Failed to count parent libraries")?
+		.try_get("", "count")?;
 
 	if parent_libraries_count > 0 {
 		return Err("Path is a child of another library on the filesystem".into());

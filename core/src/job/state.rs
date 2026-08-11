@@ -68,7 +68,7 @@ impl ApalisWorkerState {
 			)
 			.col_expr(
 				job::Column::CompletedAt,
-				Expr::value(Some(Utc::now().to_rfc3339())),
+				Expr::value(Some(Utc::now().fixed_offset())),
 			)
 			.exec(self.conn.as_ref())
 			.await?
@@ -215,7 +215,7 @@ impl JobContext {
 			)
 			.col_expr(
 				job::Column::CompletedAt,
-				Expr::value(Some(Utc::now().to_rfc3339())),
+				Expr::value(Some(Utc::now().fixed_offset())),
 			)
 			.exec(self.conn())
 			.await?;
@@ -239,7 +239,7 @@ impl JobContext {
 			)
 			.col_expr(
 				job::Column::CompletedAt,
-				Expr::value(Some(Utc::now().to_rfc3339())),
+				Expr::value(Some(Utc::now().fixed_offset())),
 			)
 			.exec(self.conn())
 			.await?;

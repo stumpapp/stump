@@ -17,8 +17,7 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QueryOrder,
-	QuerySelect, QueryTrait, Statement,
+	prelude::*, sea_query::Query, FromQueryResult, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -26,6 +25,7 @@ use crate::{
 	guard::PermissionGuard,
 	loader::favorite::{FavoriteLibraryLoaderKey, FavoritesLoader},
 	object::{library_scan_record::LibraryScanRecord, media::Media, stats::LibraryStats},
+	utils::db_statement,
 };
 
 use super::{
@@ -199,8 +199,8 @@ impl Library {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
@@ -273,8 +273,8 @@ impl Library {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(series_metadata.title, series.name), 1, 1) AS letter,

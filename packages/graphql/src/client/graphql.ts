@@ -1699,8 +1699,15 @@ export type MediaMetadataOverview = {
  */
 export type MediaMetadataSearchInput = {
   author?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The volume ID to search within, which will swap to a more precise lookup if provided alongside
+   * `number`
+   */
+  comicVineVolumeId?: InputMaybe<Scalars['String']['input']>;
   isbn?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  /** The issue number (for comics/manga) */
+  number?: InputMaybe<Scalars['Float']['input']>;
   /**
    * Restrict the search to this provider only. If omitted, all enabled providers
    * configured for the media's library type are searched.
@@ -1875,6 +1882,8 @@ export type MetadataFieldOverride = {
 
 /** The supported external metadata providers */
 export enum MetadataProvider {
+  /** ComicVine (https://comicvine.gamespot.com/api/) */
+  ComicVine = 'COMIC_VINE',
   /** Hardcover (https://hardcover.app) */
   Hardcover = 'HARDCOVER'
 }
@@ -2254,6 +2263,8 @@ export type Mutation = {
    * called by a server owner
    */
   uploadUserAvatar: User;
+  /** Validate the provided API token by making a test request using a client instance */
+  validateProviderConfig: ProviderCredentialVerification;
   /**
    * "Visit" a library, which will upsert a record of the user's last visit to the library.
    * This is used to inform the UI of the last library which was visited by the user
@@ -3023,6 +3034,11 @@ export type MutationUploadUserAvatarArgs = {
 };
 
 
+export type MutationValidateProviderConfigArgs = {
+  config: ValidateMetadataProviderConfigInput;
+};
+
+
 export type MutationVisitLibraryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3277,6 +3293,13 @@ export type PlaceholderGenerationOutput = {
   skippedEntities: Scalars['Int']['output'];
   /** The total number of entities that were visited */
   visitedEntities: Scalars['Int']['output'];
+};
+
+export type ProviderCredentialVerification = {
+  __typename?: 'ProviderCredentialVerification';
+  error?: Maybe<Scalars['String']['output']>;
+  isValid: Scalars['Boolean']['output'];
+  responseStatus: Scalars['Int']['output'];
 };
 
 export enum PublicationStatus {
@@ -4872,6 +4895,13 @@ export type UserPreferences = {
   userId?: Maybe<Scalars['String']['output']>;
 };
 
+export type ValidateMetadataProviderConfigInput = {
+  /** The API token for authenticating with the provider */
+  apiToken: Scalars['String']['input'];
+  /** The provider type */
+  providerType: MetadataProvider;
+};
+
 export type CreateBookClubMobileMutationVariables = Exact<{
   input: CreateBookClubInput;
 }>;
@@ -6003,6 +6033,13 @@ export type BookMetadataSearchProvidersQueryVariables = Exact<{ [key: string]: n
 
 export type BookMetadataSearchProvidersQuery = { __typename?: 'Query', metadataProviderConfigs: Array<{ __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean }> };
 
+export type BookMetadataSearchContextQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookMetadataSearchContextQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, series: { __typename?: 'Series', id: string, metadata?: { __typename?: 'SeriesMetadata', comicid?: number | null } | null } } | null };
+
 export type SearchMediaMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   search?: InputMaybe<MediaMetadataSearchInput>;
@@ -6805,6 +6842,13 @@ export type DeleteProviderDialogMutationVariables = Exact<{
 export type DeleteProviderDialogMutation = { __typename?: 'Mutation', deleteMetadataProvider: { __typename?: 'MetadataProviderConfigModel', id: number } };
 
 export type ExistingProviderCardFragment = { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean, apiTokenExpiresAt?: any | null, autoApplyConfig?: any | null, createdAt: any, updatedAt?: any | null } & { ' $fragmentName'?: 'ExistingProviderCardFragment' };
+
+export type ProviderApiKeyInputValidateKeyMutationVariables = Exact<{
+  config: ValidateMetadataProviderConfigInput;
+}>;
+
+
+export type ProviderApiKeyInputValidateKeyMutation = { __typename?: 'Mutation', validateProviderConfig: { __typename?: 'ProviderCredentialVerification', isValid: boolean, error?: string | null, responseStatus: number } };
 
 export type ProvidersSectionGetProvidersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -11463,6 +11507,19 @@ export const BookMetadataSearchProvidersDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookMetadataSearchProvidersQuery, BookMetadataSearchProvidersQueryVariables>;
+export const BookMetadataSearchContextDocument = new TypedDocumentString(`
+    query BookMetadataSearchContext($id: ID!) {
+  mediaById(id: $id) {
+    id
+    series {
+      id
+      metadata {
+        comicid
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookMetadataSearchContextQuery, BookMetadataSearchContextQueryVariables>;
 export const SearchMediaMetadataDocument = new TypedDocumentString(`
     mutation SearchMediaMetadata($id: ID!, $search: MediaMetadataSearchInput) {
   fetchMediaMetadata(id: $id, search: $search) {
@@ -13183,6 +13240,15 @@ export const DeleteProviderDialogDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteProviderDialogMutation, DeleteProviderDialogMutationVariables>;
+export const ProviderApiKeyInputValidateKeyDocument = new TypedDocumentString(`
+    mutation ProviderApiKeyInputValidateKey($config: ValidateMetadataProviderConfigInput!) {
+  validateProviderConfig(config: $config) {
+    isValid
+    error
+    responseStatus
+  }
+}
+    `) as unknown as TypedDocumentString<ProviderApiKeyInputValidateKeyMutation, ProviderApiKeyInputValidateKeyMutationVariables>;
 export const ProvidersSectionGetProvidersDocument = new TypedDocumentString(`
     query ProvidersSectionGetProviders {
   metadataProviderConfigs {

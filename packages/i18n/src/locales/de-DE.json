@@ -44,30 +44,37 @@
 	},
 	"bookManagementScene": {
 		"metadataSearch": {
-			"heading": "Search metadata",
-			"description": "Search an external provider for this book and choose a match to apply",
-			"openButton": "Search Metadata",
-			"searchButton": "Search",
-			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
-			"noResults": "No matches were found for this search",
-			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
-			"searchFailed": "Failed to search metadata providers",
+			"heading": "Metadaten suchen",
+			"description": "Suche einen externen Anbieter für dieses Buch und wähle einen Treffer zum Anwenden",
+			"openButton": "Metadaten suchen",
+			"searchButton": "Suche",
+			"noProviders": "Es sind keine Metadatenanbieter für diesen Bibliothekstypen konfiguriert. Konfiguriere zuerst einen in den Servereinstellungen.",
+			"noResults": "Keine Treffer für diese Suche gefunden",
+			"partialResults": "Manche Ergebnisse konnten nicht von dem Anbieter geladen werden, wahrscheinlich aufgrund von Ratenbegrenzung. Versuche nochmal zu suchen und schaue ob mehr angezeigt wird.",
+			"searchFailed": "Fehler beim Suchen der Metadatenanbieter",
 			"form": {
 				"title": {
-					"label": "Title"
+					"label": "Titel"
 				},
 				"author": {
-					"label": "Author"
+					"label": "Autor"
 				},
 				"isbn": {
 					"label": "ISBN"
 				},
 				"year": {
-					"label": "Year"
+					"label": "Jahr"
+				},
+				"number": {
+					"label": "Ausgabennummer"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine Band ID",
+					"placeholder": "z.B.: 129260"
 				},
 				"provider": {
-					"label": "Provider",
-					"allOption": "All enabled providers"
+					"label": "Anbieter",
+					"allOption": "Alle aktivierten Anbieter"
 				}
 			}
 		}
@@ -282,6 +289,20 @@
 			"tags": {
 				"label": "Tags",
 				"description": "Wird verwendet, um deine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
+			},
+			"libraryType": {
+				"label": "Bibliotheksinhalt",
+				"description": "Die Art des Inhalts in dieser Bibliothek",
+				"options": {
+					"COMIC": "Comics",
+					"MANGA": "Manga",
+					"BOOK": "Bücher",
+					"LIGHT_NOVEL": "Light Novels",
+					"MANHWA": "Manwha",
+					"WEB_NOVEL": "Webromane",
+					"WEBTOON": "Webtoons",
+					"MIXED": "Gemischt"
+				}
 			},
 			"defaultLibraryView": {
 				"label": "Standard-Bibliotheksansicht",
@@ -1507,13 +1528,13 @@
 					"description": "Passe die Schriftart an, die in der Anwendung genutzt wird"
 				},
 				"interfaceRoundness": {
-					"label": "Interface roundness",
-					"description": "How rounded the corners are for UI elements",
+					"label": "Oberflächenrundheit",
+					"description": "Wie abgerundet die Ecken der Benutzerelemente",
 					"options": {
-						"none": "None",
+						"none": "Keine",
 						"normal": "Normal",
-						"rounded": "Rounded",
-						"pill": "Pill"
+						"rounded": "Abgerundet",
+						"pill": "Pille"
 					}
 				},
 				"thumbnailPreview": {
@@ -1616,24 +1637,24 @@
 					}
 				},
 				"displayAndSpacing": {
-					"label": "Display and spacing",
-					"description": "Preferences related to the presentation of content and information"
+					"label": "Anzeigeabstand",
+					"description": "Einstellungen für die Darstellung von Inhalten und Informationen"
 				},
 				"additionalPreferences": {
 					"label": "Zusätzliche Präferenzen",
 					"description": "Passe das Aussehen und Verhalten von Stump mit diesen zusätzlichen Einstellungen an"
 				},
 				"contentBrowsing": {
-					"label": "Content browsing",
-					"description": "Preferences that affect browsing and navigating content lists"
+					"label": "Inhalt durchsuchen",
+					"description": "Einstellungen, die das Durchsuchen und Navigieren von Inhaltslisten beeinflussen"
 				},
 				"motionAndAnimation": {
-					"label": "Motion and animation",
-					"description": "Visual presentation and movement preferences"
+					"label": "Bewegung und Animation",
+					"description": "Visuelle Darstellung und Bewegungspräferenzen"
 				},
 				"activityAndStatus": {
-					"label": "Activity and status",
-					"description": "Indicators, overlays, or functionality related to background activity"
+					"label": "Aktivität und Status",
+					"description": "Indikatoren, Overlays oder Funktionen im Zusammenhang mit der Hintergrundaktivität"
 				},
 				"hideScrollbarToggle": {
 					"label": "Scrollbar ausblenden",
@@ -2064,7 +2085,7 @@
 						"deleteError": "Fehler beim Löschen des geplanten Job"
 					},
 					"errors": {
-						"invalidCron": "Schedule must be a valid cron expression"
+						"invalidCron": "Zeitplan muss ein gültiger Cron-Ausdruck sein"
 					}
 				},
 				"history": {
@@ -2139,7 +2160,7 @@
 						"libraryManagement": "Bibliotheksverwaltung",
 						"userManagement": "Benutzerverwaltung",
 						"serverManagement": "Serververwaltung",
-						"metadataManagement": "Metadata management"
+						"metadataManagement": "Metadatenmanagement"
 					},
 					"heading": "Berechtigungen",
 					"subtitle": [
@@ -2418,6 +2439,8 @@
 			"helmet": "Metadatenintegrationen",
 			"title": "Metadatenintegrationen",
 			"addProvider": "Anbieter hinzufügen",
+			"createProviderError": "Fehler beim Erstellen des Anbieters",
+			"updateProviderError": "Fehler beim Aktualisieren des Anbieters",
 			"noProviders": "Noch keine Anbieter konfiguriert. Füge einen hinzu, um loszulegen",
 			"providers": {
 				"title": "Anbieter",
@@ -2430,8 +2453,8 @@
 					"validationError": "Die automatische Validierung für diesen Token fehlgeschlagen",
 					"validationRequestError": "Die Validierungsanfrage ist fehlgeschlagen",
 					"validationRequestErrorUnknown": "Ein unbekannter Fehler ist bei der Validierung aufgetreten",
-					"hardcoverStatusError": "Hardcover-API antwortete mit Status {{status}}",
-					"hardcoverValidationError": "Hardcover-API antwortete mit einem Fehler: {{message}}",
+					"providerStatusError": "Der Anbieter antwortete mit dem Status {{status}}",
+					"providerError": "Der Anbieter antwortete mit dem Fehler: {{message}}",
 					"noBearerPrefixRequired": "Entferne den Präfix 'Bearer' von dem API-Token"
 				},
 				"apiTokenExpiresAt": {
@@ -2853,20 +2876,20 @@
 			"description": "Erlaubt dem Benutzer Vorschaubilder für Bücher und Serien zu bearbeiten"
 		},
 		"METADATA_PROVIDER_READ": {
-			"label": "Read metadata providers",
-			"description": "Allows the user to view configured external metadata providers"
+			"label": "Metadatenanbieter lesen",
+			"description": "Erlaubt dem Benutzer die konfigurierte Metadatenanbieter anzuzeigen"
 		},
 		"METADATA_PROVIDER_MANAGE": {
-			"label": "Manage metadata providers",
-			"description": "Allows the user to configure external metadata providers"
+			"label": "Metadatenanbieter verwalten",
+			"description": "Erlaubt dem Benutzer externe Metadatenanbieter zu konfigurieren"
 		},
 		"METADATA_FETCH_RECORD_READ": {
-			"label": "Read metadata matches",
-			"description": "Allows the user to view metadata fetch results awaiting review"
+			"label": "Metadatentreffer lesen",
+			"description": "Erlaubt dem Benutzer die Ergebnisse der Metadatenabfrage anzuzeigen, die noch auf Überprüfung warten"
 		},
 		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "Manage metadata matches",
-			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
+			"label": "Metadatentreffer verwalten",
+			"description": "Erlaubt dem Benutzer externe Anbieter für Bucher zu durchsuchen und Trefferkandidaten zu akzeptieren oder abzulehnen"
 		}
 	},
 	"mobileApp": {
@@ -2970,6 +2993,7 @@
 			"delete": "Löschen",
 			"dismiss": "Verwerfen",
 			"download": "Download",
+			"downloaded": "Heruntergeladen",
 			"downloads": "Downloads",
 			"done": "Fertig",
 			"edit": "Bearbeiten",
@@ -3143,32 +3167,32 @@
 					}
 				},
 				"appPrimaryColor": {
-					"label": "Accent",
+					"label": "Akzent",
 					"options": {
-						"chromaScale": "Chroma Scale",
+						"chromaScale": "Chroma-Skala",
 						"hues": {
-							"red": "Red",
+							"red": "Rot",
 							"orange": "Orange",
-							"amber": "Amber",
-							"yellow": "Yellow",
-							"lime": "Lime",
-							"green": "Green",
-							"emerald": "Emerald",
-							"teal": "Teal",
+							"amber": "Bernstein",
+							"yellow": "Gelb",
+							"lime": "Limette",
+							"green": "Grün",
+							"emerald": "Smaragd",
+							"teal": "Türkis",
 							"cyan": "Cyan",
-							"sky": "Sky",
-							"blue": "Blue",
+							"sky": "Himmel",
+							"blue": "Blau",
 							"indigo": "Indigo",
-							"violet": "Violet",
-							"purple": "Purple",
-							"fuchsia": "Fuchsia",
+							"violet": "Violett",
+							"purple": "Lila",
+							"fuchsia": "Fuchsie",
 							"pink": "Pink",
-							"rose": "Rose",
-							"slate": "Slate",
-							"gray": "Gray",
-							"zinc": "Zinc",
+							"rose": "Rosa",
+							"slate": "Schiefer",
+							"gray": "Grau",
+							"zinc": "Zink",
 							"neutral": "Neutral",
-							"stone": "Stone"
+							"stone": "Stein"
 						}
 					}
 				},
@@ -3474,7 +3498,7 @@
 			"LIGHT_NOVEL": "Light Novels",
 			"MANGA": "Manga",
 			"MANHWA": "Manwha",
-			"MIXED": "Gemixt",
+			"MIXED": "Gemischt",
 			"WEBTOON": "Webtoons",
 			"WEB_NOVEL": "Webromane"
 		},

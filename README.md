@@ -133,5 +133,5 @@ There are a number of other projects that are similar to Stump, it certainly isn
 
 ## Attribution
 
-- Some of the icons used in the web and mobile applications are from the [Spacedrive](https://github.com/spacedriveapp/spacedrive/tree/main/packages/assets/icons) repository, and are licensed under the [AGPL-3.0](<https://www.tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)>) license.
+- Some of the icons used in the web and mobile applications are from the [Spacedrive](https://github.com/spacedriveapp/spacedrive/tree/main/packages/assets/icons) repository, and are licensed under the [FSL-1.1-ALv2](https://github.com/spacedriveapp/spacedrive/blob/main/LICENSE) license.
 - The native Readium expo modules were adapted from [Storyteller](https://gitlab.com/storyteller-platform/storyteller)

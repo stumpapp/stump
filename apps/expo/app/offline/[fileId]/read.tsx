@@ -217,16 +217,19 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 		mutationFn: async ({
 			bookId,
 			serverId,
+			totalPages,
 			...input
-		}: PagedProgressInput & { bookId: string; serverId: string }) => {
+		}: PagedProgressInput & { bookId: string; serverId: string; totalPages: number }) => {
 			timer.popDeltaSeconds()
 			const totalSeconds = timer.getTotalSeconds()
+			const percentage = totalPages > 0 ? (input.page / totalPages).toString() : null
 
 			const result = await db
 				.insert(readProgress)
 				.values({
 					bookId,
 					page: input.page,
+					percentage,
 					elapsedSeconds: totalSeconds,
 					lastModified: new Date(),
 					serverId,
@@ -235,6 +238,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 					target: readProgress.bookId,
 					set: {
 						page: input.page,
+						percentage,
 						elapsedSeconds: totalSeconds,
 						lastModified: new Date(),
 						syncStatus: syncStatus.enum.UNSYNCED,
@@ -248,9 +252,14 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 
 	const onPageChanged = useCallback(
 		(page: number) => {
-			updatePagedProgress({ bookId: book.id, serverId: downloadedFile.serverId, page })
+			updatePagedProgress({
+				bookId: book.id,
+				serverId: downloadedFile.serverId,
+				page,
+				totalPages: book.pages,
+			})
 		},
-		[book.id, downloadedFile.serverId, updatePagedProgress],
+		[book.id, book.pages, downloadedFile.serverId, updatePagedProgress],
 	)
 
 	const resetTimer = useCallback(() => {

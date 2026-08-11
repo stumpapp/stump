@@ -176,7 +176,7 @@ impl AuthorSeries {
 		}
 
 		let mut authors: Vec<_> = author_appearances.into_iter().collect();
-		authors.sort_by(|a, b| b.1 .0.cmp(&a.1 .0)); // descending by appearance count
+		authors.sort_by_key(|b| std::cmp::Reverse(b.1 .0)); // descending by appearance count
 
 		Ok(authors
 			.into_iter()

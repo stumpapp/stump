@@ -265,7 +265,7 @@ const deleteAnnotationMutation = graphql(`
 `)
 
 type Params = {
-	id: string
+	bookId: string
 }
 
 // TODO(reading): support incognito, not using it here lol
@@ -273,15 +273,15 @@ type Params = {
 export default function Screen() {
 	useKeepAwake()
 
-	const { id: bookID } = useLocalSearchParams<Params>()
+	const { bookId } = useLocalSearchParams<Params>()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { sdk } = useSDK()
 	const {
 		data: { mediaById: book },
-	} = useSuspenseGraphQL(query, ['readBook', bookID], {
-		id: bookID,
+	} = useSuspenseGraphQL(query, ['readBook', bookId], {
+		id: bookId,
 	})
 	const queryClient = useQueryClient()
 
@@ -348,9 +348,8 @@ export default function Screen() {
 			}
 
 			// invalidate but do not refetch
-			queryClient.invalidateQueries({ queryKey: ['bookById', bookID], exact: false })
-			queryClient.invalidateQueries({ queryKey: ['readBook', bookID], exact: false })
-
+			queryClient.invalidateQueries({ queryKey: ['bookById', bookId], exact: false })
+			queryClient.invalidateQueries({ queryKey: ['readBook', bookId], exact: false })
 			// TODO: Consider a preference to disable online-to-offline sync?
 			syncProgress(onlineProgress, {
 				updatedAt: parseGraphQLDateTime(data.updateMediaProgress.updatedAt),
@@ -613,15 +612,15 @@ export default function Screen() {
 		}
 
 		await Promise.all([
-			queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false }),
-			queryClient.refetchQueries({ queryKey: ['readBook', bookID], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['bookById', bookId], exact: false }),
+			queryClient.refetchQueries({ queryKey: ['readBook', bookId], exact: false }),
 			queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false }),
 			queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
 			queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
 			queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
 			queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
 		])
-	}, [bookID, onLocationChanged, onPageChanged, queryClient])
+	}, [bookId, onLocationChanged, onPageChanged, queryClient])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -639,7 +638,7 @@ export default function Screen() {
 		// if we can, and spamming the navigation bar visibility
 		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[bookID],
+		[bookId],
 	)
 
 	const requestHeaders = useCallback(

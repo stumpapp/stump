@@ -1,3 +1,4 @@
+use async_graphql::SimpleObject;
 use async_trait::async_trait;
 
 use crate::{
@@ -8,6 +9,13 @@ use crate::{
 	},
 	MatchScorer,
 };
+
+#[derive(SimpleObject)]
+pub struct ProviderCredentialVerification {
+	pub response_status: u16,
+	pub is_valid: bool,
+	pub error: Option<String>,
+}
 
 /// Represents an external metadata source
 #[async_trait]
@@ -62,4 +70,8 @@ pub trait MetadataProvider: Send + Sync {
 	// 	external_id: &str,
 	//  source_type ??? like Series/Media?
 	// ) -> Result<Option<String>, MetadataProviderError>;
+
+	async fn verify_credentials(
+		&self,
+	) -> Result<ProviderCredentialVerification, MetadataProviderError>;
 }

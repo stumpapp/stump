@@ -293,10 +293,10 @@ impl StumpCore {
 		}
 	}
 
-	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
+	pub async fn init_scheduler(&self) -> Result<JobScheduler, CoreError> {
 		let ctx = self.ctx.arced();
 		let scheduler = JobScheduler::init(ctx).await?;
-		Ok(Arc::new(scheduler))
+		Ok(scheduler)
 	}
 
 	pub async fn init_library_watcher(&self) -> CoreResult<()> {

@@ -155,7 +155,7 @@ impl AssociatedPermission for UserPermission {
 				UserPermission::WriteBackMetadata,
 				UserPermission::EditThumbnails,
 				UserPermission::ViewAllSmartLists,
-				UserPermission::AccessAPIKeys,
+				UserPermission::AccessApiKeys,
 				UserPermission::ChangePassword,
 				UserPermission::ChangeUsername,
 				UserPermission::ChangeAvatar,
@@ -216,10 +216,10 @@ mod tests {
 
 	#[test]
 	fn test_with_adds_and_is_idempotent_on_explicit_grant() {
-		let set = PermissionSet::new(vec![UserPermission::AccessAPIKeys]);
+		let set = PermissionSet::new(vec![UserPermission::AccessApiKeys]);
 		let extended = set.with(UserPermission::ManageServer);
 		assert!(extended.contains(UserPermission::ManageServer));
-		assert!(extended.contains(UserPermission::AccessAPIKeys));
+		assert!(extended.contains(UserPermission::AccessApiKeys));
 
 		// Idempotent: adding an already-present explicit grant does not duplicate it.
 		let extended_again = extended.with(UserPermission::ManageServer);
@@ -230,13 +230,13 @@ mod tests {
 	fn test_without_strips_explicit_grant_only() {
 		let set = PermissionSet::new(vec![
 			UserPermission::ManageUsers,
-			UserPermission::AccessAPIKeys,
+			UserPermission::AccessApiKeys,
 		]);
 		let pruned = set.without(UserPermission::ManageUsers);
 		assert!(!pruned.contains(UserPermission::ManageUsers));
 		// CreateUser was reachable transitively via ManageUsers; with ManageUsers
 		// stripped, it's no longer reachable.
 		assert!(!pruned.contains(UserPermission::CreateUser));
-		assert!(pruned.contains(UserPermission::AccessAPIKeys));
+		assert!(pruned.contains(UserPermission::AccessApiKeys));
 	}
 }

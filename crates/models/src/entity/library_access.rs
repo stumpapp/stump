@@ -4,8 +4,9 @@ use sea_orm::{
 	sea_query::{Query, SelectStatement},
 };
 
+/// a junction table for granting users access to libraries
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "library_exclusions")]
+#[sea_orm(table_name = "library_access")]
 pub struct Model {
 	#[sea_orm(primary_key)]
 	pub id: i32,
@@ -50,7 +51,7 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 impl Entity {
-	pub fn library_hidden_to_user_query(user: &AuthUser) -> SelectStatement {
+	pub fn for_user(user: &AuthUser) -> SelectStatement {
 		Query::select()
 			.column(Column::LibraryId)
 			.from(Entity)
@@ -68,11 +69,11 @@ mod tests {
 	#[test]
 	fn test_query() {
 		let user = get_default_user();
-		let stmt_str = Entity::library_hidden_to_user_query(&user)
-			.to_string(sea_orm::sea_query::SqliteQueryBuilder);
+		let stmt_str =
+			Entity::for_user(&user).to_string(sea_orm::sea_query::SqliteQueryBuilder);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42'"#
+			r#"SELECT "library_id" FROM "library_access" WHERE "library_access"."user_id" = '42'"#
 		);
 	}
 }

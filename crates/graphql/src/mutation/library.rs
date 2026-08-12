@@ -211,6 +211,7 @@ impl LibraryMutation {
 		ctx: &Context<'_>,
 		mut input: CreateOrUpdateLibraryInput,
 	) -> Result<Library> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		enforce_valid_library_path(core.conn.as_ref(), &input.path, None).await?;
@@ -239,6 +240,14 @@ impl LibraryMutation {
 			config_id: Set(created_config.id),
 			status: Set(FileStatus::Ready),
 			..library
+		}
+		.insert(&txn)
+		.await?;
+
+		let _access_record = library_access::ActiveModel {
+			library_id: Set(created_library.id.clone()),
+			user_id: Set(user.id.clone()),
+			..Default::default()
 		}
 		.insert(&txn)
 		.await?;

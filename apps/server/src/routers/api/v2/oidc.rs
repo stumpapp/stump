@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use axum::{
 	extract::{Query, State},
@@ -11,8 +11,8 @@ use models::{
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
-	ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait,
-	QueryFilter, Set, TransactionTrait,
+	sea_query::Expr, ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait,
+	IntoActiveModel, PaginatorTrait, QueryFilter, Set, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
@@ -40,6 +40,36 @@ pub(crate) fn mount() -> Router<AppState> {
 			.route("/authorize", get(authorize))
 			.route("/callback", get(callback)),
 	)
+}
+
+fn oidc_claims_to_permissions(
+	groups: &[String],
+	mapping: &HashMap<String, Vec<UserPermission>>,
+) -> PermissionSet {
+	let new_permissions: Vec<UserPermission> = groups
+		.iter()
+		.flat_map(|g| mapping.get(g).into_iter().flatten().copied())
+		.collect::<std::collections::HashSet<_>>() // deduplicate
+		.into_iter()
+		.collect();
+	PermissionSet::new(new_permissions)
+}
+
+async fn sync_oidc_permissions(
+	tx: &impl ConnectionTrait,
+	user_id: &str,
+	groups: &[String],
+	mapping: &HashMap<String, Vec<UserPermission>>,
+) -> APIResult<()> {
+	let resolved = oidc_claims_to_permissions(groups, mapping).resolve_into_string();
+
+	user::Entity::update_many()
+		.col_expr(user::Column::Permissions, Expr::value(resolved))
+		.filter(user::Column::Id.eq(user_id))
+		.exec(tx)
+		.await?;
+
+	Ok(())
 }
 
 #[derive(Debug, Serialize)]
@@ -221,6 +251,7 @@ async fn callback(
 		query.code,
 		extra_audiences,
 		pkce_verifier,
+		&oidc_config.groups_claim,
 	)
 	.await
 	.map_err(|e| {
@@ -272,9 +303,17 @@ async fn callback(
 
 		let bootstrap_permissions = if is_server_owner {
 			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
+		} else if !oidc_config.group_permission_mapping.is_empty() {
+			oidc_claims_to_permissions(
+				&claims.groups,
+				&oidc_config.group_permission_mapping,
+			)
+			.resolve_into_string()
 		} else {
 			None
 		};
+
+		// TODO: sync_oidc_library_access or something?
 
 		let tx = ctx.conn.begin().await?;
 
@@ -347,6 +386,22 @@ async fn callback(
 		tracing::warn!(user_id = %user_model.id, "Locked user attempted login via OIDC");
 		return Err(APIError::Forbidden("Account is locked".to_string()));
 	};
+
+	// TODO: sync_oidc_library_access or something? prolly should refactor a lil
+	// so that txn is outside the the if/else above and commit after sync
+
+	if !is_new_user && !oidc_config.group_permission_mapping.is_empty() {
+		if let Err(e) = sync_oidc_permissions(
+			ctx.conn.as_ref(),
+			&user_model.id,
+			&claims.groups,
+			&oidc_config.group_permission_mapping,
+		)
+		.await
+		{
+			tracing::warn!(?e, user_id = %user_model.id, "Failed to sync OIDC permissions");
+		}
+	}
 
 	let auth_user = user::LoginUser::find()
 		.filter(user::Column::Id.eq(user_model.id.clone()))
@@ -440,4 +495,42 @@ async fn get_frontend_url(
 		APIError::InternalServerError("Missing server config".to_string()),
 	)?;
 	Ok(config.public_url.unwrap_or_else(|| service.url()))
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_oidc_claims_to_permissions_deduplication() {
+		let groups = vec![
+			"group1".to_string(),
+			"group2".to_string(),
+			"group1".to_string(), // duplicate
+		];
+
+		let mut mapping = HashMap::new();
+		mapping.insert("group1".to_string(), vec![UserPermission::ManageServer]);
+		mapping.insert("group2".to_string(), vec![UserPermission::ManageUsers]);
+
+		let permissions = oidc_claims_to_permissions(&groups, &mapping);
+		let resolved = permissions
+			.resolve_into_string()
+			.expect("Failed to resolve permissions");
+
+		assert!(resolved.contains(UserPermission::ManageServer.to_string().as_str()));
+		assert!(resolved.contains(UserPermission::ManageUsers.to_string().as_str()));
+	}
+
+	#[test]
+	fn test_oidc_claims_to_permissions_no_mapping() {
+		let groups = vec!["group1".to_string(), "group2".to_string()];
+
+		let mapping = HashMap::new(); // empty mapping
+
+		let permissions = oidc_claims_to_permissions(&groups, &mapping);
+		let resolved = permissions.resolve_into_string();
+
+		assert!(resolved.is_none());
+	}
 }

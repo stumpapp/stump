@@ -1,31 +1,48 @@
 use openidconnect::{
 	core::{
-		CoreAuthDisplay, CoreAuthPrompt, CoreAuthenticationFlow, CoreClient,
-		CoreErrorResponseType, CoreGenderClaim, CoreJsonWebKey,
-		CoreJweContentEncryptionAlgorithm, CoreProviderMetadata, CoreRevocableToken,
-		CoreRevocationErrorResponse, CoreTokenIntrospectionResponse, CoreTokenResponse,
+		CoreAuthDisplay, CoreAuthPrompt, CoreAuthenticationFlow, CoreErrorResponseType,
+		CoreGenderClaim, CoreJsonWebKey, CoreJweContentEncryptionAlgorithm,
+		CoreJwsSigningAlgorithm, CoreProviderMetadata, CoreRevocableToken,
+		CoreRevocationErrorResponse, CoreTokenIntrospectionResponse, CoreTokenType,
 		CoreUserInfoClaims,
 	},
-	AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims,
-	EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl, Nonce, OAuth2TokenResponse,
-	PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, StandardErrorResponse,
-	TokenResponse,
+	AdditionalClaims, AuthorizationCode, Client, ClientId, ClientSecret, CsrfToken,
+	EmptyExtraTokenFields, EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenFields,
+	IssuerUrl, Nonce, OAuth2TokenResponse, PkceCodeChallenge, PkceCodeVerifier,
+	RedirectUrl, Scope, StandardErrorResponse, StandardTokenResponse, TokenResponse,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::config::OidcConfig;
 
 use crate::errors::APIError;
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct StumpAdditionalClaims(pub serde_json::Value);
+impl AdditionalClaims for StumpAdditionalClaims {}
+
+/// this alias is to workaround the fact that `CoreTokenResponse` is not generic over the additional claims type,
+/// so when i changed to the `StumpAdditionalClaims` type, it broke the `TokenResponse` bound on the client methods
+pub type StumpTokenResponse = StandardTokenResponse<
+	IdTokenFields<
+		StumpAdditionalClaims,
+		EmptyExtraTokenFields,
+		CoreGenderClaim,
+		CoreJweContentEncryptionAlgorithm,
+		CoreJwsSigningAlgorithm,
+	>,
+	CoreTokenType,
+>;
+
 // lol this is an absurd type alias
 pub type StumpOidcClient = Client<
-	EmptyAdditionalClaims,
+	StumpAdditionalClaims,
 	CoreAuthDisplay,
 	CoreGenderClaim,
 	CoreJweContentEncryptionAlgorithm,
 	CoreJsonWebKey,
 	CoreAuthPrompt,
 	StandardErrorResponse<CoreErrorResponseType>,
-	CoreTokenResponse,
+	StumpTokenResponse,
 	CoreTokenIntrospectionResponse,
 	CoreRevocableToken,
 	CoreRevocationErrorResponse,
@@ -117,7 +134,7 @@ impl OidcProvider {
 			))
 		})?;
 
-		Ok(CoreClient::from_provider_metadata(
+		Ok(Client::from_provider_metadata(
 			self.provider_metadata.clone(),
 			ClientId::new(self.client_id.clone()),
 			Some(ClientSecret::new(self.client_secret.clone())),
@@ -166,6 +183,9 @@ pub struct OidcClaims {
 	pub name: Option<String>,
 	/// A URL to the user's profile picture, if one exists
 	pub picture: Option<String>,
+	/// Group memberships extracted from the configured claim key,
+	/// empty if claim is not present or key is not configured
+	pub groups: Vec<String>,
 }
 
 /// Exchange authorization code for tokens and extract claims
@@ -175,6 +195,7 @@ pub async fn exchange_code_for_claims(
 	code: String,
 	extra_audiences: Vec<String>,
 	pkce_verifier: Option<PkceCodeVerifier>,
+	groups_claim: &str,
 ) -> Result<OidcClaims, APIError> {
 	let mut request = client.exchange_code(AuthorizationCode::new(code))?;
 	if let Some(verifier) = pkce_verifier {
@@ -207,6 +228,13 @@ pub async fn exchange_code_for_claims(
 			APIError::OIDCTokenExchangeFailed(error.to_string())
 		})?;
 
+	let groups = id_token_claims
+		.additional_claims()
+		.0
+		.get(groups_claim)
+		.and_then(|v| serde_json::from_value::<Vec<String>>(v.clone()).ok())
+		.unwrap_or_default();
+
 	Ok(OidcClaims {
 		subject: id_token_claims.subject().to_string(),
 		email: user_info
@@ -221,6 +249,7 @@ pub async fn exchange_code_for_claims(
 			.picture()
 			.and_then(|p| p.get(None))
 			.map(|p| p.to_string()),
+		groups,
 	})
 }
 

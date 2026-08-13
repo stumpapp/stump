@@ -1,29 +1,12 @@
-use std::env;
+use std::{collections::HashMap, env};
 
 use async_graphql::SimpleObject;
+use models::shared::enums::UserPermission;
 use serde::{Deserialize, Serialize};
 
 use super::env_keys::*;
 
 const REQUIRED_SCOPES: &str = "email";
-
-// TODO(permissions): i am not sure how to go about claims and permissions, or at the very least i am not sure what is standard. i figure there are really two routes:
-// 1. provider supplies all permissions in a claim and we just reconcile with that
-// 2. a mapping of groups to permissions is defined in config and the provider just supplies the group(s) the user belongs to
-// i lean towards 2, feels way more flexible, but should ask around.
-// a loose dump of ideas:
-/*
-inside OidcConfig:
-	- group_claim: Option<String> // the claim that contains the user's groups/roles, default "groups"
-	- group_permission_mapping: Option<HashMap<String, Vec<UserPermission>>> // mapping of group names to permissions
-
-i could then do e.g.
-[oidc.group_permission_mapping]
-admin = ["MANAGE_SERVER", "MANAGE_USERS"]
-user = ["CHANGE_USERNAME", "CHANGE_AVATAR"]
-
-and then (re)sync permissions each login
-*/
 
 /// Configuration for OpenID Connect (OIDC) authentication
 #[derive(Clone, Serialize, Deserialize, PartialEq, SimpleObject)]
@@ -46,6 +29,15 @@ pub struct OidcConfig {
 	/// Default: "openid,email,profile"
 	#[serde(default = "default_oidc_scopes")]
 	pub scopes: String,
+	/// The claim name containing the user's group memberships
+	#[serde(default = "default_groups_claim")]
+	#[graphql(skip)]
+	pub groups_claim: String,
+	/// Maps provider group names to Stump permissions. If empty, permissions are
+	/// not managed by OIDC at all
+	#[serde(default)]
+	#[graphql(skip)] // HashMap is not a SimpleObject
+	pub group_permission_mapping: HashMap<String, Vec<UserPermission>>,
 	/// Allow automatic user registration via OIDC
 	#[serde(default = "default_true")]
 	pub allow_registration: bool,
@@ -69,6 +61,8 @@ impl Default for OidcConfig {
 			issuer_url: String::new(),
 			client_secret: String::new(),
 			scopes: default_oidc_scopes(),
+			groups_claim: default_groups_claim(),
+			group_permission_mapping: HashMap::new(),
 			allow_registration: true,
 			disable_local_auth: false,
 			extra_audiences: Vec::new(),
@@ -85,6 +79,10 @@ fn default_true() -> bool {
 	true
 }
 
+fn default_groups_claim() -> String {
+	"groups".to_string()
+}
+
 impl std::fmt::Debug for OidcConfig {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.debug_struct("OidcConfig")
@@ -93,6 +91,8 @@ impl std::fmt::Debug for OidcConfig {
 			.field("issuer_url", &self.issuer_url)
 			.field("client_secret", &"[REDACTED]")
 			.field("scopes", &self.scopes)
+			.field("groups_claim", &self.groups_claim)
+			.field("group_permission_mapping", &self.group_permission_mapping)
 			.field("allow_registration", &self.allow_registration)
 			.field("disable_local_auth", &self.disable_local_auth)
 			.field("extra_audiences", &self.extra_audiences)
@@ -140,6 +140,19 @@ impl OidcConfig {
 		}
 		let scopes = scopes_set.join(",");
 
+		let groups_claim =
+			env::var(OIDC_GROUPS_CLAIM_KEY).unwrap_or_else(|_| default_groups_claim());
+
+		// TODO: group_permission_mapping is too complex for flat env vars, for now
+		// went the route of being able to pass raw json here but ideally we have sm
+		// a bit cleaner?
+		let group_permission_mapping = env::var(OIDC_GROUP_PERMISSION_MAPPING_KEY)
+			.ok()
+			.and_then(|v| {
+				serde_json::from_str::<HashMap<String, Vec<UserPermission>>>(&v).ok()
+			})
+			.unwrap_or_default();
+
 		let allow_registration = env::var(OIDC_ALLOW_REGISTRATION_KEY)
 			.ok()
 			.and_then(|v| v.parse::<bool>().ok())
@@ -172,6 +185,8 @@ impl OidcConfig {
 			issuer_url,
 			client_secret,
 			scopes,
+			groups_claim,
+			group_permission_mapping,
 			allow_registration,
 			disable_local_auth,
 			extra_audiences,

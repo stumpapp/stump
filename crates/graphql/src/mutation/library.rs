@@ -649,6 +649,30 @@ impl LibraryMutation {
 		Ok(Library::from(library))
 	}
 
+	/// update the OIDC groups which have access to a library
+	#[graphql(guard = "PermissionGuard::new(&[UserPermission::ManageLibrary])")]
+	async fn update_library_oidc_groups(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		oidc_groups: Vec<String>,
+	) -> Result<Library> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let mut active_model = library.into_active_model();
+		active_model.oidc_groups = Set(Some(oidc_groups.join(",")));
+		let updated_library = active_model.update(core.conn.as_ref()).await?;
+
+		Ok(Library::from(updated_library))
+	}
+
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn delete_library_scan_history(
 		&self,

@@ -518,6 +518,7 @@ export type CreateOrUpdateLibraryInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   emoji?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  oidcGroups?: InputMaybe<Array<Scalars['String']['input']>>;
   path: Scalars['String']['input'];
   scanAfterPersist?: Scalars['Boolean']['input'];
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -1107,13 +1108,13 @@ export type JobUpdate = {
 
 export type Library = {
   __typename?: 'Library';
+  allowedUsers: Array<User>;
   authors: Array<Author>;
   config: LibraryConfig;
   configId: Scalars['Int']['output'];
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   emoji?: Maybe<Scalars['String']['output']>;
-  allowedUsers: Array<User>;
   genres: Array<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isFavorite: Scalars['Boolean']['output'];
@@ -1124,6 +1125,7 @@ export type Library = {
   media: Array<Media>;
   mediaAlphabet: Scalars['JSONObject']['output'];
   name: Scalars['String']['output'];
+  oidcGroups?: Maybe<Array<Scalars['String']['output']>>;
   path: Scalars['String']['output'];
   publishers: Array<Scalars['String']['output']>;
   /** Get the full history of scan jobs for this library. */
@@ -1235,6 +1237,7 @@ export enum LibraryModelOrdering {
   Id = 'ID',
   LastScannedAt = 'LAST_SCANNED_AT',
   Name = 'NAME',
+  OidcGroups = 'OIDC_GROUPS',
   Path = 'PATH',
   Status = 'STATUS',
   ThumbnailMeta = 'THUMBNAIL_META',
@@ -2183,17 +2186,19 @@ export type Mutation = {
    * the library will be scanned immediately after updating.
    */
   updateLibrary: Library;
-  /** Update the emoji for a library */
-  updateLibraryEmoji: Library;
   /**
    * Grant users access to a library. This operates as a full replacement of the
    * granted users list, so any users not included in the provided list will have
-   * their access revoked if they were previously granted access.
+   * their access revoked if they were previously granted access
    *
    * The server owner cannot have their access modified, nor can the user performing
-   * the action modify their own access.
+   * the action modify their own access
    */
   updateLibraryAccess: Library;
+  /** Update the emoji for a library */
+  updateLibraryEmoji: Library;
+  /** update the OIDC groups which have access to a library */
+  updateLibraryOidcGroups: Library;
   /**
    * Update the thumbnail for a library. This will replace the existing thumbnail with the the one
    * associated with the provided input (book). If the book does not have a thumbnail, one
@@ -2256,10 +2261,7 @@ export type Mutation = {
    * implement multipart uploads for
    */
   uploadSeriesThumbnailBase64: Series;
-  /**
-   * Upload an avatar image for either the authenticated viewer or for any user if
-   * called by a server owner
-   */
+  /** Upload an avatar image for either the authenticated viewer or for any user (if authorized by permissions) */
   uploadUserAvatar: User;
   /** Validate the provided API token by making a test request using a client instance */
   validateProviderConfig: ProviderCredentialVerification;
@@ -2848,15 +2850,21 @@ export type MutationUpdateLibraryArgs = {
 };
 
 
+export type MutationUpdateLibraryAccessArgs = {
+  id: Scalars['ID']['input'];
+  userIds: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationUpdateLibraryEmojiArgs = {
   emoji?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
 };
 
 
-export type MutationUpdateLibraryAccessArgs = {
+export type MutationUpdateLibraryOidcGroupsArgs = {
   id: Scalars['ID']['input'];
-  userIds: Array<Scalars['String']['input']>;
+  oidcGroups: Array<Scalars['String']['input']>;
 };
 
 
@@ -4436,6 +4444,7 @@ export type StumpConfig = {
   configDir: Scalars['String']['output'];
   /** An optional custom path for the database. */
   dbPath?: Maybe<Scalars['String']['output']>;
+  dbTimeoutSecs: Scalars['Int']['output'];
   /** Indicates if the Kobo sync feature should be enabled. */
   enableKoboSync: Scalars['Boolean']['output'];
   /** Indicates if the KoReader sync feature should be enabled. */
@@ -4732,6 +4741,8 @@ export enum UserPermission {
    * Grant access to the book club feature
    */
   AccessBookClub = 'ACCESS_BOOK_CLUB',
+  /** Grant access to the GraphQL playground interface */
+  AccessGraphQlPlayground = 'ACCESS_GRAPH_QL_PLAYGROUND',
   /** Grant access to the kobo sync feature */
   AccessKoboSync = 'ACCESS_KOBO_SYNC',
   /** Grant access to the koreader sync feature */
@@ -4750,10 +4761,14 @@ export enum UserPermission {
   CreateLibrary = 'CREATE_LIBRARY',
   /** Grant access to create a notifier */
   CreateNotifier = 'CREATE_NOTIFIER',
+  /** Grant access to create managed user accounts */
+  CreateUser = 'CREATE_USER',
   /** Grant access to delete the library (manage library) */
   DeleteLibrary = 'DELETE_LIBRARY',
   /** Grant access to delete a notifier */
   DeleteNotifier = 'DELETE_NOTIFIER',
+  /** Grant access to delete another user */
+  DeleteUser = 'DELETE_USER',
   /** Grant access to download files from a library */
   DownloadFile = 'DOWNLOAD_FILE',
   /** Grant access to edit basic details about the library */
@@ -4777,16 +4792,25 @@ export enum UserPermission {
   EmailSend = 'EMAIL_SEND',
   /** Grant access to access the file explorer */
   FileExplorer = 'FILE_EXPLORER',
+  /** Grant access to lock another user, preventing them from logging in until an admin unlocks them */
+  LockUser = 'LOCK_USER',
+  /**
+   * Grant admin-level powers across all book clubs (everything ModerateBookClubs
+   * grants, plus suggestion administration)
+   */
+  ManageBookClubs = 'MANAGE_BOOK_CLUBS',
   /** Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them */
   ManageJobs = 'MANAGE_JOBS',
   /** Grant access to manage the library (scan,edit,manage relations) */
   ManageLibrary = 'MANAGE_LIBRARY',
   /** Grant access to manage a notifier */
   ManageNotifier = 'MANAGE_NOTIFIER',
-  /** Grant access to manage the server. This is effectively a step below server owner */
+  /** Grant access to manage the server. This is effectively full access and encompasses all other permissions */
   ManageServer = 'MANAGE_SERVER',
   /** Grant access to manage users (create,edit,delete) */
   ManageUsers = 'MANAGE_USERS',
+  /** Grant access to view and manage active sessions and auth tokens for other users */
+  ManageUserSessions = 'MANAGE_USER_SESSIONS',
   /** Grant access to manage metadata fetch statuses (accept matches, etc) */
   MetadataFetchRecordManage = 'METADATA_FETCH_RECORD_MANAGE',
   /** Grant access to read metadata fetch statuses */
@@ -4795,6 +4819,11 @@ export enum UserPermission {
   MetadataProviderManage = 'METADATA_PROVIDER_MANAGE',
   /** Grant access to read metadata provider configurations */
   MetadataProviderRead = 'METADATA_PROVIDER_READ',
+  /**
+   * Grant moderator-level powers across all book clubs (edit/delete any message,
+   * lock/pin/create/archive discussions, see private clubs they're not a member of)
+   */
+  ModerateBookClubs = 'MODERATE_BOOK_CLUBS',
   /** Grant access to read jobs */
   ReadJobs = 'READ_JOBS',
   /** Grant access to read notifiers */
@@ -4812,8 +4841,12 @@ export enum UserPermission {
   ReadUsers = 'READ_USERS',
   /** Grant access to scan the library for new files */
   ScanLibrary = 'SCAN_LIBRARY',
+  /** Grant access to update another user account, excluding preferences */
+  UpdateUser = 'UPDATE_USER',
   /** Grant access to upload files to a library */
   UploadFile = 'UPLOAD_FILE',
+  /** Grant access to view all smart lists, even those they don't have explicit access to */
+  ViewAllSmartLists = 'VIEW_ALL_SMART_LISTS',
   /**
    * Grants access to write back the database-level metadata for media/series.
    * This should be treated with caution, as technically it would allow for
@@ -6169,7 +6202,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, oidcGroups?: Array<string> | null, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -6251,6 +6284,14 @@ export type UpdateLibraryAccessMutationVariables = Exact<{
 
 
 export type UpdateLibraryAccessMutation = { __typename?: 'Mutation', updateLibraryAccess: { __typename?: 'Library', id: string, allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
+
+export type UpdateLibraryOidcGroupsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  oidcGroups: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateLibraryOidcGroupsMutation = { __typename?: 'Mutation', updateLibraryOidcGroups: { __typename?: 'Library', id: string, oidcGroups?: Array<string> | null } };
 
 export type CleanLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11963,6 +12004,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     name
     description
     path
+    oidcGroups
     stats {
       seriesCount
       bookCount
@@ -12240,6 +12282,14 @@ export const UpdateLibraryAccessDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateLibraryAccessMutation, UpdateLibraryAccessMutationVariables>;
+export const UpdateLibraryOidcGroupsDocument = new TypedDocumentString(`
+    mutation UpdateLibraryOidcGroups($id: ID!, $oidcGroups: [String!]!) {
+  updateLibraryOidcGroups(id: $id, oidcGroups: $oidcGroups) {
+    id
+    oidcGroups
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateLibraryOidcGroupsMutation, UpdateLibraryOidcGroupsMutationVariables>;
 export const CleanLibraryDocument = new TypedDocumentString(`
     mutation CleanLibrary($id: ID!) {
   cleanLibrary(id: $id) {

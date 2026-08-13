@@ -26,6 +26,11 @@ pub struct Model {
 	pub description: Option<String>,
 	#[sea_orm(column_type = "Text", unique)]
 	pub path: String,
+	/// a comma-separated list of OIDC groups that have access to this library. If this is set, then
+	/// the access of the library will be managed by syncing against configured OIDC groups
+	#[graphql(skip)]
+	#[sea_orm(column_type = "Text", nullable)]
+	pub oidc_groups: Option<String>,
 	#[sea_orm(column_type = "Text")]
 	pub status: FileStatus,
 	#[sea_orm(column_type = "Json", nullable)]

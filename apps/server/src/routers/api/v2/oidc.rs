@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use axum::{
 	extract::{Query, State},
@@ -7,12 +7,14 @@ use axum::{
 	Extension, Json, Router,
 };
 use models::{
+	domain::oidc_sync::oidc_claims_to_permission_set,
 	entity::{server_config, user, user_preferences},
+	services::oidc_sync::sync_oidc,
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
-	sea_query::Expr, ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait,
-	IntoActiveModel, PaginatorTrait, QueryFilter, Set, TransactionTrait,
+	ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, IntoActiveModel,
+	PaginatorTrait, QueryFilter, Set, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
@@ -40,36 +42,6 @@ pub(crate) fn mount() -> Router<AppState> {
 			.route("/authorize", get(authorize))
 			.route("/callback", get(callback)),
 	)
-}
-
-fn oidc_claims_to_permissions(
-	groups: &[String],
-	mapping: &HashMap<String, Vec<UserPermission>>,
-) -> PermissionSet {
-	let new_permissions: Vec<UserPermission> = groups
-		.iter()
-		.flat_map(|g| mapping.get(g).into_iter().flatten().copied())
-		.collect::<std::collections::HashSet<_>>() // deduplicate
-		.into_iter()
-		.collect();
-	PermissionSet::new(new_permissions)
-}
-
-async fn sync_oidc_permissions(
-	tx: &impl ConnectionTrait,
-	user_id: &str,
-	groups: &[String],
-	mapping: &HashMap<String, Vec<UserPermission>>,
-) -> APIResult<()> {
-	let resolved = oidc_claims_to_permissions(groups, mapping).resolve_into_string();
-
-	user::Entity::update_many()
-		.col_expr(user::Column::Permissions, Expr::value(resolved))
-		.filter(user::Column::Id.eq(user_id))
-		.exec(tx)
-		.await?;
-
-	Ok(())
 }
 
 #[derive(Debug, Serialize)]
@@ -261,9 +233,11 @@ async fn callback(
 
 	tracing::debug!(subject = %claims.subject, email = ?claims.email, "OIDC claims received");
 
+	let txn = ctx.conn.begin().await?;
+
 	let existing_user = user::Entity::find()
 		.filter(user::Column::OidcIssuerId.eq(&claims.subject))
-		.one(ctx.conn.as_ref())
+		.one(&txn)
 		.await
 		.map_err(|e| {
 			tracing::error!("Database error finding user: {:?}", e);
@@ -290,21 +264,18 @@ async fn callback(
 		}
 
 		// Determine if this is the first user (should be server owner)
-		let user_count = user::Entity::find()
-			.count(ctx.conn.as_ref())
-			.await
-			.map_err(|e| {
-				tracing::error!(?e, "Failed to count users for OIDC registration");
-				APIError::InternalServerError("Database error".to_string())
-			})?;
+		let user_count = user::Entity::find().count(&txn).await.map_err(|e| {
+			tracing::error!(?e, "Failed to count users for OIDC registration");
+			APIError::InternalServerError("Database error".to_string())
+		})?;
 		let is_server_owner = user_count == 0;
 
-		let username = ensure_unique_username(ctx.conn.as_ref(), &claims.email).await?;
+		let username = ensure_unique_username(&txn, &claims.email).await?;
 
 		let bootstrap_permissions = if is_server_owner {
 			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
 		} else if !oidc_config.group_permission_mapping.is_empty() {
-			oidc_claims_to_permissions(
+			oidc_claims_to_permission_set(
 				&claims.groups,
 				&oidc_config.group_permission_mapping,
 			)
@@ -312,10 +283,6 @@ async fn callback(
 		} else {
 			None
 		};
-
-		// TODO: sync_oidc_library_access or something?
-
-		let tx = ctx.conn.begin().await?;
 
 		let active_model = user::ActiveModel {
 			username: Set(username),
@@ -326,20 +293,18 @@ async fn callback(
 			permissions: Set(bootstrap_permissions),
 			..Default::default()
 		};
-		let created_user = active_model.insert(&tx).await?;
+		let created_user = active_model.insert(&txn).await?;
 		let created_user_preferences = user_preferences::ActiveModel {
 			user_id: Set(Some(created_user.id.clone())),
 			..Default::default()
 		}
-		.insert(&tx)
+		.insert(&txn)
 		.await?;
 
 		let mut updated_user = created_user.into_active_model();
 		updated_user.user_preferences_id = Set(Some(created_user_preferences.id));
 
-		let user = updated_user.update(&tx).await?;
-
-		tx.commit().await?;
+		let user = updated_user.update(&txn).await?;
 
 		if let Some(picture_url) = &claims.picture {
 			match download_image(picture_url).await {
@@ -360,7 +325,7 @@ async fn callback(
 									)),
 								)
 								.filter(user::Column::Id.eq(user.id.clone()))
-								.exec(ctx.conn.as_ref())
+								.exec(&txn)
 								.await
 							{
 								tracing::warn!(?e, "Failed to persist OIDC avatar path");
@@ -372,7 +337,7 @@ async fn callback(
 					}
 				},
 				Err(e) => {
-					tracing::warn!(?e, "Failed to download OIDC avatar — continuing")
+					tracing::warn!(?e, "Failed to download OIDC avatar")
 				},
 			}
 		}
@@ -382,26 +347,25 @@ async fn callback(
 		(user, true)
 	};
 
-	if user_model.is_locked {
-		tracing::warn!(user_id = %user_model.id, "Locked user attempted login via OIDC");
-		return Err(APIError::Forbidden("Account is locked".to_string()));
-	};
-
-	// TODO: sync_oidc_library_access or something? prolly should refactor a lil
-	// so that txn is outside the the if/else above and commit after sync
-
-	if !is_new_user && !oidc_config.group_permission_mapping.is_empty() {
-		if let Err(e) = sync_oidc_permissions(
-			ctx.conn.as_ref(),
+	if !oidc_config.group_permission_mapping.is_empty() {
+		if let Err(error) = sync_oidc(
+			&txn,
 			&user_model.id,
 			&claims.groups,
 			&oidc_config.group_permission_mapping,
 		)
 		.await
 		{
-			tracing::warn!(?e, user_id = %user_model.id, "Failed to sync OIDC permissions");
+			tracing::warn!(?error, user_id = %user_model.id, "Failed to sync OIDC permissions");
 		}
 	}
+
+	txn.commit().await?;
+
+	if user_model.is_locked {
+		tracing::warn!(user_id = %user_model.id, "Locked user attempted login via OIDC");
+		return Err(APIError::Forbidden("Account is locked".to_string()));
+	};
 
 	let auth_user = user::LoginUser::find()
 		.filter(user::Column::Id.eq(user_model.id.clone()))
@@ -455,7 +419,7 @@ async fn callback(
 
 /// Ensure username is unique by adding a suffix as needed
 async fn ensure_unique_username(
-	db: &sea_orm::DatabaseConnection,
+	db: &impl ConnectionTrait,
 	base_username: &str,
 ) -> APIResult<String> {
 	let mut username = base_username.to_string();
@@ -495,42 +459,4 @@ async fn get_frontend_url(
 		APIError::InternalServerError("Missing server config".to_string()),
 	)?;
 	Ok(config.public_url.unwrap_or_else(|| service.url()))
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	#[test]
-	fn test_oidc_claims_to_permissions_deduplication() {
-		let groups = vec![
-			"group1".to_string(),
-			"group2".to_string(),
-			"group1".to_string(), // duplicate
-		];
-
-		let mut mapping = HashMap::new();
-		mapping.insert("group1".to_string(), vec![UserPermission::ManageServer]);
-		mapping.insert("group2".to_string(), vec![UserPermission::ManageUsers]);
-
-		let permissions = oidc_claims_to_permissions(&groups, &mapping);
-		let resolved = permissions
-			.resolve_into_string()
-			.expect("Failed to resolve permissions");
-
-		assert!(resolved.contains(UserPermission::ManageServer.to_string().as_str()));
-		assert!(resolved.contains(UserPermission::ManageUsers.to_string().as_str()));
-	}
-
-	#[test]
-	fn test_oidc_claims_to_permissions_no_mapping() {
-		let groups = vec!["group1".to_string(), "group2".to_string()];
-
-		let mapping = HashMap::new(); // empty mapping
-
-		let permissions = oidc_claims_to_permissions(&groups, &mapping);
-		let resolved = permissions.resolve_into_string();
-
-		assert!(resolved.is_none());
-	}
 }

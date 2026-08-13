@@ -12,13 +12,19 @@ export default function AccessControlScene() {
 	const { library } = useLibraryContext()
 	const oidcConfig = useOidcConfig()
 
+	// we pretty much always show the oidc controls if enabled or if there are existing oidc groups,
+	// the latter so we can remove them
 	const showOidcAccessControl = !!library.oidcGroups || !!oidcConfig?.enabled
-	const showManualAccessControl = !library.oidcGroups || !library.oidcGroups.length
 
-	// so if we have oidc groups we don't need to show manual access control that makes sense.
-	// if we don't have groups (or are empty) then we should show manual access control regardless
-	// of oidc enablement? that feels right, but also feels like i am missing something. the implicit
-	// on/off derived from oidc groups made sense when considering backend, but less so for frontend wiring
+	const showManualAccessControl =
+		// if we don't have oidc groups (effectively) then show manual access control
+		!library.oidcGroups ||
+		!library.oidcGroups.length ||
+		// if oidc is not enabled OR local auth is allowed, then we likely have non-oidc users and
+		// therefore need to also show manual access control
+		!oidcConfig?.enabled ||
+		!oidcConfig.disableLocalAuth
+
 	return (
 		<div className="gap-12 flex flex-col">
 			{showManualAccessControl && <LibraryAccess />}

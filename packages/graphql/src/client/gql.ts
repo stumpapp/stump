@@ -211,9 +211,9 @@ type Documents = {
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": typeof types.LibrarySettingsRouterScanLibraryMutationDocument,
     "\n\tquery BasicSettingsSceneExistingLibraries {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tpath\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BasicSettingsSceneExistingLibrariesDocument,
-    "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryExclusionsUsersQueryDocument,
-    "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryExclusionsQueryDocument,
-    "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateLibraryExclusionsDocument,
+    "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryAccessUsersQueryDocument,
+    "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryAccessQueryDocument,
+    "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateLibraryAccessDocument,
     "\n\tmutation CleanLibrary($id: ID!) {\n\t\tcleanLibrary(id: $id) {\n\t\t\tdeletedMediaCount\n\t\t\tdeletedSeriesCount\n\t\t\tisEmpty\n\t\t}\n\t}\n": typeof types.CleanLibraryDocument,
     "\n\tquery LibraryMissingEntities($libraryId: ID!, $pagination: Pagination!) {\n\t\tlibraryMissingEntities(libraryId: $libraryId, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tpath\n\t\t\t\ttype\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t\ttotalItems\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryMissingEntitiesDocument,
     "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeLibrary(id: $id)\n\t}\n": typeof types.AnalyzeLibraryMediaDocument,
@@ -516,9 +516,9 @@ const documents: Documents = {
     "\n\tmutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {\n\t\tupdateLibrary(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.LibrarySettingsRouterEditLibraryMutationDocument,
     "\n\tmutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {\n\t\tscanLibrary(id: $id, options: $options)\n\t}\n": types.LibrarySettingsRouterScanLibraryMutationDocument,
     "\n\tquery BasicSettingsSceneExistingLibraries {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tpath\n\t\t\t}\n\t\t}\n\t}\n": types.BasicSettingsSceneExistingLibrariesDocument,
-    "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryExclusionsUsersQueryDocument,
-    "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryExclusionsQueryDocument,
-    "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateLibraryExclusionsDocument,
+    "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryAccessUsersQueryDocument,
+    "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryAccessQueryDocument,
+    "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateLibraryAccessDocument,
     "\n\tmutation CleanLibrary($id: ID!) {\n\t\tcleanLibrary(id: $id) {\n\t\t\tdeletedMediaCount\n\t\t\tdeletedSeriesCount\n\t\t\tisEmpty\n\t\t}\n\t}\n": types.CleanLibraryDocument,
     "\n\tquery LibraryMissingEntities($libraryId: ID!, $pagination: Pagination!) {\n\t\tlibraryMissingEntities(libraryId: $libraryId, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tpath\n\t\t\t\ttype\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t\ttotalItems\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryMissingEntitiesDocument,
     "\n\tmutation AnalyzeLibraryMedia($id: ID!) {\n\t\tanalyzeLibrary(id: $id)\n\t}\n": types.AnalyzeLibraryMediaDocument,
@@ -1412,15 +1412,15 @@ export function graphql(source: "\n\tquery BasicSettingsSceneExistingLibraries {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery LibraryExclusionsUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryExclusionsUsersQueryDocument;
+export function graphql(source: "\n\tquery LibraryAccessUsersQuery {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryAccessUsersQueryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery LibraryExclusionsQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryExclusionsQueryDocument;
+export function graphql(source: "\n\tquery LibraryAccessQuery($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryAccessQueryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryExcludedUsers(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\texcludedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryExclusionsDocument;
+export function graphql(source: "\n\tmutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {\n\t\tupdateLibraryAccess(id: $id, userIds: $userIds) {\n\t\t\tid\n\t\t\tallowedUsers {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateLibraryAccessDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

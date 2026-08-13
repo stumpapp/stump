@@ -20,7 +20,7 @@ import { useAppContext } from '@/context'
 import { useLibraryContext } from '../../../../context'
 
 const usersQuery = graphql(`
-	query LibraryExclusionsUsersQuery {
+	query LibraryAccessUsersQuery {
 		users(pagination: { none: { unpaginated: true } }) {
 			nodes {
 				id
@@ -30,10 +30,10 @@ const usersQuery = graphql(`
 	}
 `)
 
-const excludedUsersQuery = graphql(`
-	query LibraryExclusionsQuery($id: ID!) {
+const allowedUsersQuery = graphql(`
+	query LibraryAccessQuery($id: ID!) {
 		libraryById(id: $id) {
-			excludedUsers {
+			allowedUsers {
 				id
 				username
 			}
@@ -42,10 +42,10 @@ const excludedUsersQuery = graphql(`
 `)
 
 const mutation = graphql(`
-	mutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {
-		updateLibraryExcludedUsers(id: $id, userIds: $userIds) {
+	mutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {
+		updateLibraryAccess(id: $id, userIds: $userIds) {
 			id
-			excludedUsers {
+			allowedUsers {
 				id
 				username
 			}
@@ -53,7 +53,7 @@ const mutation = graphql(`
 	}
 `)
 
-export default function LibraryExclusions() {
+export default function LibraryAccess() {
 	const { library } = useLibraryContext()
 	const { user } = useAppContext()
 	const { t } = useLocaleContext()
@@ -73,55 +73,55 @@ export default function LibraryExclusions() {
 			queryKey: ['users'],
 		},
 		{
-			document: excludedUsersQuery,
-			queryKey: ['libraryExclusions', library.id],
+			document: allowedUsersQuery,
+			queryKey: ['libraryAccess', library.id],
 			// @ts-expect-error: Need to fix this type error with useSuspenseGraphQLQueries
 			variables: { id: library.id },
 		},
 	])
-	const excludedUsers = useMemo(() => libraryById?.excludedUsers || [], [libraryById])
+	const allowedUsers = useMemo(() => libraryById?.allowedUsers || [], [libraryById])
 
 	const client = useQueryClient()
 
 	const { mutate } = useGraphQLMutation(mutation, {
-		onSuccess: ({ updateLibraryExcludedUsers: { excludedUsers } }) => {
+		onSuccess: ({ updateLibraryAccess: { allowedUsers } }) => {
 			// Update without refetching to reduce network
-			client.setQueryData(['libraryExclusions', library.id], {
+			client.setQueryData(['libraryAccess', library.id], {
 				libraryById: {
 					...libraryById,
-					excludedUsers,
+					allowedUsers,
 				},
 			})
 		},
 	})
 
-	const updateExclusions = useCallback(
+	const updateGrants = useCallback(
 		(ids: string[]) => {
 			mutate({ id: library.id, userIds: ids })
 		},
 		[mutate, library],
 	)
 
-	const [excludedUserIds, setExcludedUserIds] = useState<string[] | undefined>(() =>
-		excludedUsers?.map((user) => user.id),
+	const [grantedUserIds, setGrantedUserIds] = useState<string[] | undefined>(() =>
+		allowedUsers?.map((user) => user.id),
 	)
-	const [debouncedUserIds] = useDebouncedValue(excludedUserIds, 500)
+	const [debouncedUserIds] = useDebouncedValue(grantedUserIds, 500)
 
 	useEffect(() => {
-		setExcludedUserIds(excludedUsers?.map((user) => user.id) || [])
-	}, [excludedUsers])
+		setGrantedUserIds(allowedUsers?.map((user) => user.id) || [])
+	}, [allowedUsers])
 
 	const previousLibrary = usePrevious(library)
 	const isSameLibrary = previousLibrary?.id === library.id
-	const variablesLoaded = !!debouncedUserIds && !!excludedUsers
+	const variablesLoaded = !!debouncedUserIds && !!allowedUsers
 	const shouldCall =
-		variablesLoaded && debouncedUserIds.length !== excludedUsers.length && isSameLibrary
+		variablesLoaded && debouncedUserIds.length !== allowedUsers.length && isSameLibrary
 
 	useEffect(() => {
 		if (shouldCall) {
-			updateExclusions(debouncedUserIds)
+			updateGrants(debouncedUserIds)
 		}
-	}, [debouncedUserIds, updateExclusions, shouldCall])
+	}, [debouncedUserIds, updateGrants, shouldCall])
 
 	const userOptions = useMemo(
 		() =>
@@ -152,15 +152,15 @@ export default function LibraryExclusions() {
 			<ComboBox
 				disabled={allUsers?.length === 1}
 				options={userOptions}
-				value={excludedUserIds}
+				value={grantedUserIds}
 				isMultiSelect
 				onChange={(userIds) => {
-					setExcludedUserIds(userIds || [])
+					setGrantedUserIds(userIds || [])
 				}}
 			/>
 		</div>
 	)
 }
 
-const LOCALE_KEY = 'librarySettingsScene.danger-zone/access-control.sections.libraryExclusions'
+const LOCALE_KEY = 'librarySettingsScene.danger-zone/access-control.sections.libraryAccess'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

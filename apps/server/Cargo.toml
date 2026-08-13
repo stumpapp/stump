@@ -64,6 +64,8 @@ urlencoding.workspace = true
 uuid.workspace = true
 zip.workspace = true
 
+tikv-jemallocator = { workspace = true, optional = true }
+
 [dev-dependencies]
 axum-test = "17.2.0"
 maplit.workspace = true
@@ -72,6 +74,9 @@ tests = { path = "../../crates/tests" }
 
 [build-dependencies]
 chrono.workspace = true
+
+[features]
+jemalloc = ["dep:tikv-jemallocator"]
 
 [target.aarch64-unknown-linux-musl.dependencies]
 openssl = { version = "0.10.66", features = ["vendored"] }

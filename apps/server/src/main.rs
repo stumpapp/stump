@@ -1,3 +1,7 @@
+#[cfg(feature = "jemalloc")]
+#[global_allocator]
+static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
 use cli::{handle_command, Cli, Parser};
 use errors::EntryError;
 use stump_core::{

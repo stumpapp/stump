@@ -13,6 +13,10 @@ on:
         description: 'Branch to build against'
         required: true
         default: 'unstable'
+      archs:
+        description: 'Comma-separated list of architectures to build for'
+        required: false
+        default: 'amd64'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -60,5 +64,5 @@ jobs:
           build-channel: 'unstable'
           load: ${{ github.event_name == 'pull_request' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          archs: 'amd64'
+          archs: ${{ github.event.inputs.archs || 'amd64' }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

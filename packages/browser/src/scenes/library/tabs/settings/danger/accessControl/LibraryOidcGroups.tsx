@@ -1,8 +1,9 @@
 import { useGraphQLMutation, useOidcConfig } from '@stump/client'
-import { ComboBox, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, AlertTitle, ComboBox, Heading, Text } from '@stump/components'
 import { graphql, LibraryLayoutQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
+import { AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
@@ -53,7 +54,7 @@ export function LibraryOidcGroups() {
 		}
 	}, [debouncedSelection, library.oidcGroups, library.id, mutate])
 
-	if (!oidcConfig?.enabled) return null
+	if (!oidcConfig.enabled) return null
 
 	return (
 		<div className="gap-4 flex flex-col">
@@ -64,12 +65,19 @@ export function LibraryOidcGroups() {
 				</Text>
 			</div>
 
+			<Alert variant="info" dismissible id={`oidc-groups-info-${library.id}`}>
+				<AlertCircle />
+				<AlertTitle>{t(getKey('disclaimer.title'))}</AlertTitle>
+				<AlertDescription>{t(getKey('disclaimer.description'))}</AlertDescription>
+			</Alert>
+
 			<ComboBox
 				options={groupOptions}
 				value={selection}
 				isMultiSelect
 				onChange={(value) => setSelection(value ?? [])}
 				onAddOption={(option) => setGroupOptions((prev) => [...prev, option])}
+				filterable
 			/>
 		</div>
 	)

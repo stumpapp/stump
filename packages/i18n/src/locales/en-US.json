@@ -290,6 +290,10 @@
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
 			},
+			"oidcGroups": {
+				"label": "OIDC groups",
+				"description": "Allow certain OIDC groups to access this library and its contents"
+			},
 			"libraryType": {
 				"label": "Library content",
 				"description": "The type of content present in this library",
@@ -767,6 +771,14 @@
 					"selfAccessRevokeConfirmation": {
 						"title": "You revoked your own access",
 						"description": "If you continue, you will lose access to the library. Are you sure you want to continue?"
+					}
+				},
+				"oidcGroups": {
+					"heading": "OIDC groups",
+					"description": "Allow certain OIDC groups to access this library and its contents",
+					"disclaimer": {
+						"title": "This will override manual authorization",
+						"description": "When set you will be unable to manually authorize users for this library. Only users in the specified OIDC groups will be able to access this library"
 					}
 				}
 			}

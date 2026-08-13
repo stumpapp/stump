@@ -169,9 +169,6 @@ pub fn get_oidc_authorize_url(
 	authorize_url.to_string()
 }
 
-// TODO(oidc): Support permissions from OIDC claims? See https://pocket-id.org/docs/client-examples/audiobookshelf for an example
-// TODO(oidc): Support library access control based on OIDC claims? https://github.com/stumpapp/stump/issues/1151
-
 /// Claims extracted from OIDC token
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OidcClaims {

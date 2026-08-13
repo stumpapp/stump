@@ -2,7 +2,7 @@
 title: OpenID Connect (OIDC)
 ---
 
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 Stump supports OpenID Connect (OIDC) authentication, allowing users to sign in using external identity providers like Authelia, Keycloak, PocketID, and others.
 
@@ -119,7 +119,11 @@ services:
 OIDC can be configured using either environment variables or the TOML configuration file. See [server configuration](/docs/guides/configuration/server-config) for more details.
 
 <Callout type="info">
-	**Running behind a reverse proxy?** You might need to set `STUMP_TRUST_PROXY_HEADERS=true` (or `trust_proxy_headers = true` in `Stump.toml`). Without it, Stump ignores forwarded headers and may generate incorrect URLs (like the OIDC redirect callbacks). See [`STUMP_TRUST_PROXY_HEADERS`](/docs/guides/configuration/server-config#stump_trust_proxy_headers) for details.
+	**Running behind a reverse proxy?** You might need to set `STUMP_TRUST_PROXY_HEADERS=true` (or
+	`trust_proxy_headers = true` in `Stump.toml`). Without it, Stump ignores forwarded headers and may
+	generate incorrect URLs (like the OIDC redirect callbacks). See
+	[`STUMP_TRUST_PROXY_HEADERS`](/docs/guides/configuration/server-config#stump_trust_proxy_headers)
+	for details.
 </Callout>
 
 <Callout type="warning">
@@ -139,12 +143,14 @@ OIDC can be configured using either environment variables or the TOML configurat
 
 ### Optional Settings
 
-| Variable                        | Default                | Description                                                          |
-| ------------------------------- | ---------------------- | -------------------------------------------------------------------- |
-| `STUMP_OIDC_SCOPES`             | `openid,email,profile` | Additional scopes to request from the provider (comma-separated)     |
-| `STUMP_OIDC_ALLOW_REGISTRATION` | `true`                 | Allow automatic user registration via OIDC on first login            |
-| `STUMP_OIDC_DISABLE_LOCAL_AUTH` | `false`                | Disable local username/password authentication when OIDC is enabled  |
-| `STUMP_OIDC_EXTRA_AUDIENCES`    | _(none)_               | Comma-separated list of additional trusted audiences in the ID token |
+| Variable                              | Default                | Description                                                          |
+| ------------------------------------- | ---------------------- | -------------------------------------------------------------------- |
+| `STUMP_OIDC_SCOPES`                   | `openid,email,profile` | Additional scopes to request from the provider (comma-separated)     |
+| `STUMP_OIDC_ALLOW_REGISTRATION`       | `true`                 | Allow automatic user registration via OIDC on first login            |
+| `STUMP_OIDC_DISABLE_LOCAL_AUTH`       | `false`                | Disable local username/password authentication when OIDC is enabled  |
+| `STUMP_OIDC_EXTRA_AUDIENCES`          | _(none)_               | Comma-separated list of additional trusted audiences in the ID token |
+| `STUMP_OIDC_GROUPS_CLAIM`             | `groups`               | The claim name in the ID token that contains the user's groups       |
+| `STUMP_OIDC_GROUP_PERMISSION_MAPPING` | _(none)_               | A JSON object mapping OIDC groups to Stump permissions               |
 
 ### Configuration Examples
 
@@ -198,6 +204,53 @@ disable_local_auth = false
 
 </Tab>
 </Tabs>
+
+## Syncing User Groups
+
+If you define `STUMP_OIDC_GROUPS_CLAIM` and `STUMP_OIDC_GROUP_PERMISSION_MAPPING`, Stump will automatically attempt to sync the user's groups from the OIDC provider on each login. This currently allows you to:
+
+- Define OIDC-group-to-Stump-permission mappings, and persist them every time the user logs in
+- Assign libraries to OIDC groups, ensuring that corresponding users in those groups have access to the libraries
+
+<b> Shared Example </b>
+
+For all sections below, let's say you have an OIDC provider that returns the following for a user:
+
+```json
+{
+	"sub": "user123",
+	"email": "oromei@me.com",
+	"groups": ["admins", "regular"],
+	"name": "oromei"
+}
+```
+
+And you have the following mapping in your Stump configuration:
+
+```toml
+[oidc.group_permission_mapping]
+admins = ["MANAGE_LIBRARY", "READ_USERS"]
+regular = ["DOWNLOAD_FILE"]
+```
+
+And, finally, a two libraries configured along the lines of:
+
+| Library   | OIDC Groups     |
+| --------- | --------------- |
+| Library A | admins          |
+| Library B | admins, regular |
+
+### OIDC-Managed Libraries
+
+You can configure a library to be OIDC-managed by specifying the groups which are allowed to access the library.
+
+Using the example above, users in the `admins` group will have access to both Library A and Library B, while users in the `regular` group will only have access to Library B.
+
+### OIDC-Synced Permissions
+
+Stump will use the `STUMP_OIDC_GROUPS_CLAIM` to read the user's groups from the OIDC provider, and then map those groups to Stump permissions using the `STUMP_OIDC_GROUP_PERMISSION_MAPPING`. This allows you to manage user permissions centrally in your OIDC provider.
+
+Using the example above, a user in the `admins` group will have the `MANAGE_LIBRARY` and `READ_USERS` permissions, while a user in the `regular` group will only have the `DOWNLOAD_FILE` permission.
 
 ## User Management
 

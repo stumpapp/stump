@@ -2,7 +2,8 @@ use chrono::Utc;
 use models::entity::{
 	library, library_access, library_config, media, reading_session, series, user,
 };
-use models::shared::enums::{FileStatus, ReadingStatus};
+use models::shared::enums::{FileStatus, ReadingStatus, UserPermission};
+use models::shared::permission_set::PermissionSet;
 use rand::distr::SampleString;
 use rust_decimal::prelude::FromPrimitive;
 use sea_orm::{prelude::DateTimeWithTimeZone, ActiveModelTrait, ActiveValue, DbConn};
@@ -70,8 +71,9 @@ impl Media {
 
 #[derive(Default)]
 pub struct User {
-	username: String,
-	hashed_password: Option<String>,
+	pub username: String,
+	pub hashed_password: Option<String>,
+	pub permissions: Option<Vec<UserPermission>>,
 }
 
 impl User {
@@ -89,6 +91,10 @@ impl User {
 				self.hashed_password.clone().unwrap_or("".to_string()),
 			),
 			is_server_owner: sea_orm::Set(true),
+			permissions: sea_orm::Set(
+				PermissionSet::new(self.permissions.clone().unwrap_or_default())
+					.resolve_into_string(),
+			),
 			is_locked: sea_orm::Set(false),
 			..Default::default()
 		};

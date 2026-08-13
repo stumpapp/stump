@@ -16,7 +16,16 @@ async fn setup() -> (TestApp, String, media::Model, user::Model) {
 	let app = TestApp::new().await;
 	let db = app.conn();
 
-	let user = fake_data::User::new("koreader").insert(db).await;
+	let user = fake_data::User {
+		username: "koreader".to_string(),
+		permissions: Some(vec![
+			UserPermission::AccessKoreaderSync,
+			UserPermission::AccessApiKeys,
+		]),
+		..Default::default()
+	}
+	.insert(db)
+	.await;
 
 	let (token, _) = create_api_key_for_user(
 		&app,

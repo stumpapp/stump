@@ -62,7 +62,7 @@ impl NormalizedProgression {
 /// creates a [`reading_session`] record or extends the most recent one if it falls within
 /// the same logical day and the grace period has not elapsed
 pub async fn upsert_reading_session(
-	db: &impl ConnectionTrait,
+	txn: &impl ConnectionTrait,
 	user: &AuthUser,
 	media_id: &str,
 	input: NormalizedProgression,
@@ -78,11 +78,11 @@ pub async fn upsert_reading_session(
 	// important to reset _before_ fetching latest so the find below makes the
 	// elapsed delta apply against a clean slate (i.e., 0)
 	if input.reset_elapsed_seconds {
-		reset_cumulative_elapsed_seconds(db, &user.id, media_id).await?;
+		reset_cumulative_elapsed_seconds(txn, &user.id, media_id).await?;
 	}
 
 	let latest = reading_session::Entity::find_latest_for_user_and_media(user, media_id)
-		.one(db)
+		.one(txn)
 		.await?;
 
 	match latest {
@@ -93,11 +93,11 @@ pub async fn upsert_reading_session(
 				&& should_extend_session(&session, grace_period) =>
 		{
 			let active = input.apply(session);
-			active.update(db).await
+			active.update(txn).await
 		},
 		_ => {
 			let readthrough_number =
-				derive_readthrough_number(db, &user.id, media_id).await?;
+				derive_readthrough_number(txn, &user.id, media_id).await?;
 
 			reading_session::ActiveModel {
 				session_date: Set(logical_today),
@@ -125,7 +125,7 @@ pub async fn upsert_reading_session(
 				user_id: Set(user.id.clone()),
 				..Default::default()
 			}
-			.insert(db)
+			.insert(txn)
 			.await
 		},
 	}

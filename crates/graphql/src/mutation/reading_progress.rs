@@ -77,7 +77,7 @@ impl ReadProgressMutation {
 
 		let upsert_txn = conn.begin().await?;
 
-		let session = upsert_reading_session(conn, user, id.as_ref(), progression)
+		let session = upsert_reading_session(&upsert_txn, user, id.as_ref(), progression)
 			.await
 			.map(ReadingSession::from)?;
 

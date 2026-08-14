@@ -777,6 +777,7 @@ export type EpubProgressInput = {
   isComplete?: InputMaybe<Scalars['Boolean']['input']>;
   locator: EpubProgressLocatorInput;
   percentage?: InputMaybe<Scalars['Decimal']['input']>;
+  resetElapsedSeconds?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type EpubProgressLocatorInput =
@@ -1948,6 +1949,14 @@ export type Mutation = {
   __typename?: 'Mutation';
   /** Accept the top-ranked candidate for all pending metadata matches */
   acceptAllPendingMatches: Scalars['Int']['output'];
+  /**
+   * a more focused version of `update_media_progress` that splices the history so that
+   * any sessions after the ancestor_session_id are deleted in favor of the input
+   * provided. this should be called when resolving local vs remote progress conflicts, where
+   * the user has chosen to keep their local progress and discard the remote progress beyond
+   * the ancestor session (i.e., the last session that both local and remote progress share)
+   */
+  acceptLocalProgress: ReadingSession;
   /** Accept a match candidate and apply it to media metadata */
   acceptMediaMatch: MetadataFetchRecord;
   /** Accept a match candidate and apply it to the series metadata */
@@ -2276,6 +2285,13 @@ export type Mutation = {
 export type MutationAcceptAllPendingMatchesArgs = {
   excludeFields?: InputMaybe<Array<MetadataField>>;
   strategy?: InputMaybe<MergeStrategy>;
+};
+
+
+export type MutationAcceptLocalProgressArgs = {
+  ancestorSessionId?: InputMaybe<Scalars['Int']['input']>;
+  id: Scalars['ID']['input'];
+  input: MediaProgressInput;
 };
 
 
@@ -3171,6 +3187,7 @@ export type PagedProgressInput = {
   deviceId?: InputMaybe<Scalars['String']['input']>;
   elapsedSecondsDelta?: InputMaybe<Scalars['Int']['input']>;
   page: Scalars['Int']['input'];
+  resetElapsedSeconds?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type PaginatedAuthorResponse = {
@@ -4467,6 +4484,7 @@ export type StumpConfig = {
   configDir: Scalars['String']['output'];
   /** An optional custom path for the database. */
   dbPath?: Maybe<Scalars['String']['output']>;
+  dbTimeoutSecs: Scalars['Int']['output'];
   /** Indicates if the Kobo sync feature should be enabled. */
   enableKoboSync: Scalars['Boolean']['output'];
   /** Indicates if the KoReader sync feature should be enabled. */
@@ -5550,6 +5568,15 @@ export type ReadingSessionConflictViewQueryVariables = Exact<{
 
 
 export type ReadingSessionConflictViewQuery = { __typename?: 'Query', readingSessionConflictView: { __typename?: 'ReadingSessionConflictResolutionView', ancestorSession: { __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }, remoteSessions: Array<{ __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }> } };
+
+export type AcceptLocalProgressMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  ancestorSessionId?: InputMaybe<Scalars['Int']['input']>;
+  input: MediaProgressInput;
+}>;
+
+
+export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -9971,6 +9998,29 @@ export const ReadingSessionConflictViewDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ReadingSessionConflictViewQuery, ReadingSessionConflictViewQueryVariables>;
+export const AcceptLocalProgressDocument = new TypedDocumentString(`
+    mutation AcceptLocalProgress($id: ID!, $ancestorSessionId: Int, $input: MediaProgressInput!) {
+  acceptLocalProgress(
+    id: $id
+    ancestorSessionId: $ancestorSessionId
+    input: $input
+  ) {
+    id
+    endPage
+    endPercentage
+    elapsedSeconds
+    updatedAt
+    endLocator {
+      href
+      chapterTitle
+      locations {
+        progression
+        totalProgression
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AcceptLocalProgressMutation, AcceptLocalProgressMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

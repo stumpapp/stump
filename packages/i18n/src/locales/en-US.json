@@ -3167,14 +3167,18 @@
 			"remoteSessionWithId": "Remote Session {{sessionId}}",
 			"noCommonSession": "No common reading history",
 			"noRemoteSessions": "No remote sessions",
-			"gracePeriodConflict": {
+			"divergentProgress": {
 				"title": "Divergent Progress",
-				"description": "The last common session was modified on the server after your last sync. Keeping both will push your offline reading to the server as a continuation"
+				"description": "The last common session was modified on the server after your last sync"
+			},
+			"noCommonReadingHistory": {
+				"title": "No Common Reading History",
+				"description": "This book had no synced history when you started reading offline"
 			},
 			"acceptSource": {
 				"local": "Accept Local",
 				"remote": "Accept Remote",
-				"both": "Keep Both"
+				"both": "Accept Both"
 			}
 		},
 		"search": {

@@ -15,7 +15,7 @@ import { OwlEmptyState } from '../../OwlEmptyState'
 import { SheetBackDetection } from '../../SheetBackDetection'
 import { Badge, Heading, Text } from '../../ui'
 import { ConflictCarousel } from './ConflictCarousel'
-import { AcceptedRemoteProgressionData, ConflictRecord } from './types'
+import { AcceptedProgressionData, ConflictRecord } from './types'
 
 export const SYNC_CONFLICTS_SHEET_NAME = 'syncConflictsSheet'
 
@@ -96,7 +96,7 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		[isOpen, shouldPull],
 	)
 
-	const onAcceptLocal = async (bookId: string, serverId: string, latestRemoteUpdatedAt: string) => {
+	const onAcceptBoth = async (bookId: string, serverId: string, latestRemoteUpdatedAt: string) => {
 		await db
 			.update(readProgress)
 			.set({
@@ -107,10 +107,10 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		serverIdsToSyncUponClose.current.add(serverId)
 	}
 
-	const onAcceptRemote = async (
+	const onApplySyncedSessionData = async (
 		bookId: string,
 		serverId: string,
-		data: AcceptedRemoteProgressionData,
+		data: AcceptedProgressionData,
 	) => {
 		const sessionUpdatedAt = data.sessionUpdatedAt
 			? parseGraphQLDateTime(data.sessionUpdatedAt)
@@ -181,8 +181,8 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 						<ConflictCarousel
 							// cast is fine, we in asserted read_progress exists thru query join and filter
 							records={(conflictingRecords ?? []) as ConflictRecord[]}
-							onAcceptLocal={onAcceptLocal}
-							onAcceptRemote={onAcceptRemote}
+							onAcceptBoth={onAcceptBoth}
+							onApplySyncedSessionData={onApplySyncedSessionData}
 						/>
 					)}
 				</View>

@@ -96,7 +96,7 @@ impl ReadProgressMutation {
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
-		ancestor_session_id: i32,
+		ancestor_session_id: Option<i32>,
 		input: MediaProgressInput,
 	) -> Result<ReadingSession> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
@@ -104,12 +104,19 @@ impl ReadProgressMutation {
 
 		let media_id = id.as_str();
 
-		let ancestor = reading_session::Entity::find_by_id(ancestor_session_id)
-			.filter(reading_session::Column::UserId.eq(&user.id))
-			.filter(reading_session::Column::MediaId.eq(media_id))
-			.one(core.conn.as_ref())
-			.await?
-			.ok_or_else(|| "Reading session not found".to_string())?;
+		let ancestor = match ancestor_session_id {
+			Some(session_id) => Some(
+				reading_session::Entity::find_by_id(session_id)
+					.filter(reading_session::Column::UserId.eq(&user.id))
+					.filter(reading_session::Column::MediaId.eq(id.as_str()))
+					.one(core.conn.as_ref())
+					.await?
+					.ok_or_else(|| {
+						async_graphql::Error::new("Ancestor session not found")
+					})?,
+			),
+			None => None,
+		};
 
 		// TODO: do i delete all or all within same readthrough?? kinda haven't considered that enough lol
 		// i think if you manage to be a readthrough behind locally and opt to accept local, then yes??
@@ -117,21 +124,30 @@ impl ReadProgressMutation {
 
 		let txn = core.conn.begin().await?;
 
-		let affected_rows = reading_session::Entity::delete_many()
-			.filter(
-				reading_session::Column::UserId
-					.eq(&user.id)
-					.and(reading_session::Column::MediaId.eq(media_id)),
-			)
-			// i debated whether to filter on created_at, but ids are serial so should be fine
-			.filter(reading_session::Column::Id.gt(ancestor.id))
-			.exec(&txn)
-			.await?
-			.rows_affected;
+		let base_delete = reading_session::Entity::delete_many().filter(
+			reading_session::Column::UserId
+				.eq(user.id.clone())
+				.and(reading_session::Column::MediaId.eq(id.as_str())),
+		);
 
+		let affected_rows = match ancestor {
+			Some(ref session) => {
+				// delete all sessions after the ancestor session
+				base_delete
+					.filter(reading_session::Column::Id.gt(session.id))
+					.exec(&txn)
+					.await?
+			},
+			None => {
+				// delete all sessions for this media (and user obv)
+				base_delete.exec(&txn).await?
+			},
+		}
+		.rows_affected;
 		tracing::debug!(affected_rows, "Deleted divergent remote sessions");
 
-		let reset_elapsed_seconds = input.reset_elapsed_seconds();
+		// if ancestor is none, nothing to clear
+		let reset_elapsed_seconds = input.reset_elapsed_seconds() && ancestor.is_some();
 
 		let progression = match input {
 			MediaProgressInput::Epub(input) => {

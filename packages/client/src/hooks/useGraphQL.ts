@@ -194,6 +194,37 @@ export function useGraphQLMutation<TResult, TVariables>(
 	>
 }
 
+export function useDetachedGraphQLMutation<TResult, TVariables>(
+	sdk: Api,
+	document: TypedDocumentString<TResult, TVariables>,
+	options: UseGraphQLMutationOptions<TResult, TVariables> = {},
+) {
+	const mutationFn = useCallback(
+		async (variables?: TVariables extends Record<string, never> ? never : TVariables) =>
+			sdk.execute(document, variables),
+		[sdk, document],
+	)
+	const { error, ...rest } = useMutation({
+		...options,
+		mutationFn,
+		onError: (error, variables, context) => {
+			handleError({
+				sdk,
+				error,
+			})
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			options?.onError?.(error, variables, noop, context as any)
+		},
+	})
+
+	return { error, ...rest } as UseMutationResult<
+		TResult,
+		unknown,
+		TVariables extends Record<string, never> ? never : TVariables,
+		unknown
+	>
+}
+
 type UseGraphQLUploadMutationOptions<TResult, TVariables> = Omit<
 	UseMutationOptions<
 		TResult,

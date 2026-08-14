@@ -11,7 +11,7 @@ const FIXED_OVERHEAD = 96
 
 type Props = {
 	records: ConflictRecord[]
-} & Pick<SyncConflictPageProps, 'onAcceptLocal' | 'onAcceptRemote'>
+} & Pick<SyncConflictPageProps, 'onAcceptBoth' | 'onApplySyncedSessionData'>
 
 export function ConflictCarousel({ records, ...pageProps }: Props) {
 	const { width, height } = useWindowDimensions()

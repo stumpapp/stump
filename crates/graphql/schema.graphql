@@ -714,6 +714,7 @@ input EpubProgressInput {
 	isComplete: Boolean
 	elapsedSecondsDelta: Int
 	deviceId: String
+	resetElapsedSeconds: Boolean
 }
 
 input EpubProgressLocatorInput @oneOf {
@@ -2135,6 +2136,14 @@ type Mutation {
 	"Rename a custom emoji"
 	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
 	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingSession!
+	"""
+	a more focused version of `update_media_progress` that splices the history so that
+	any sessions after the ancestor_session_id are deleted in favor of the input
+	provided. this should be called when resolving local vs remote progress conflicts, where
+	the user has chosen to keep their local progress and discard the remote progress beyond
+	the ancestor session (i.e., the last session that both local and remote progress share)
+	"""
+	acceptLocalProgress(id: ID!, ancestorSessionId: Int, input: MediaProgressInput!): ReadingSession!
 	"trashes current readthrough, if there is one"
 	clearMediaProgress(id: ID!): Boolean!
 	"resets the elapsed seconds for all reading sessions in the current readthrough, if there is one"
@@ -2296,6 +2305,7 @@ input PagedProgressInput {
 	page: Int!
 	elapsedSecondsDelta: Int
 	deviceId: String
+	resetElapsedSeconds: Boolean
 }
 
 type PaginatedAuthorResponse {

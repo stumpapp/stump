@@ -11,7 +11,7 @@ type ConflictResolutionView = ReadingSessionConflictViewQuery['readingSessionCon
 export type AncestorSession = ConflictResolutionView['ancestorSession']
 export type RemoteSession = ConflictResolutionView['remoteSessions'][number]
 
-export type AcceptedRemoteProgressionData = {
+export type AcceptedProgressionData = {
 	page?: number | null
 	elapsedSeconds?: number | null
 	percentageCompleted?: string | null

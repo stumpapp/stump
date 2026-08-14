@@ -8,15 +8,14 @@ use models::{
 	},
 	entity::{media, reading_session},
 	services::reading_progress::{
-		derive_readthrough_number, get_book_pages, upsert_reading_session,
-		NormalizedProgression,
+		derive_readthrough_number, get_book_pages, reset_cumulative_elapsed_seconds,
+		upsert_reading_session, NormalizedProgression,
 	},
 	shared::enums::ReadingStatus,
 };
 use sea_orm::{
-	prelude::Decimal, sea_query::Expr, ActiveModelTrait, ActiveValue::Set, ColumnTrait,
-	EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
-	TransactionTrait,
+	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait,
+	IntoActiveModel, QueryFilter, QueryOrder, QuerySelect, QueryTrait, TransactionTrait,
 };
 
 use crate::{
@@ -40,6 +39,8 @@ impl ReadProgressMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
+		let reset_elapsed_seconds = input.reset_elapsed_seconds();
+
 		let progression = match input {
 			MediaProgressInput::Epub(input) => {
 				let (epubcfi, locator) = input.locator.as_tuple();
@@ -54,6 +55,7 @@ impl ReadProgressMutation {
 					elapsed_seconds_delta: input.elapsed_seconds_delta,
 					did_complete: is_complete,
 					device_id: input.device_id,
+					reset_elapsed_seconds,
 				}
 			},
 			MediaProgressInput::Paged(input) => {
@@ -68,14 +70,20 @@ impl ReadProgressMutation {
 					elapsed_seconds_delta: input.elapsed_seconds_delta,
 					did_complete: is_complete,
 					device_id: input.device_id,
+					reset_elapsed_seconds,
 				}
 			},
 		};
 
-		upsert_reading_session(conn, user, id.as_ref(), progression)
+		let upsert_txn = conn.begin().await?;
+
+		let session = upsert_reading_session(conn, user, id.as_ref(), progression)
 			.await
-			.map(ReadingSession::from)
-			.map_err(Into::into)
+			.map(ReadingSession::from)?;
+
+		upsert_txn.commit().await?;
+
+		Ok(session)
 	}
 
 	/// a more focused version of `update_media_progress` that splices the history so that
@@ -107,6 +115,8 @@ impl ReadProgressMutation {
 		// i think if you manage to be a readthrough behind locally and opt to accept local, then yes??
 		// perhaps more messaging on frontend... ugh. delete for now ig
 
+		let txn = core.conn.begin().await?;
+
 		let affected_rows = reading_session::Entity::delete_many()
 			.filter(
 				reading_session::Column::UserId
@@ -115,20 +125,55 @@ impl ReadProgressMutation {
 			)
 			// i debated whether to filter on created_at, but ids are serial so should be fine
 			.filter(reading_session::Column::Id.gt(ancestor.id))
-			.exec(core.conn.as_ref())
+			.exec(&txn)
 			.await?
 			.rows_affected;
 
 		tracing::debug!(affected_rows, "Deleted divergent remote sessions");
 
-		// TODO: normal update_media_progress here, don't want to dupe things so perhaps shove
-		// more of existing update_media_progress logic into services/ then do it
-		// TODO: i also think we should just add a pending_reset flag to server,
-		// instead of relying on client to flush then push.
-		// also also, obv, this should be one txn so failure doesn't mean ruh roh raggy,
-		// i lost all your sessions and couldn't write the new one. oopsie poopsie.
+		let reset_elapsed_seconds = input.reset_elapsed_seconds();
 
-		unimplemented!()
+		let progression = match input {
+			MediaProgressInput::Epub(input) => {
+				let (epubcfi, locator) = input.locator.as_tuple();
+				let is_complete = input.is_complete.unwrap_or(
+					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
+				);
+				NormalizedProgression {
+					page: None,
+					locator,
+					epubcfi,
+					percentage: input.percentage,
+					elapsed_seconds_delta: input.elapsed_seconds_delta,
+					did_complete: is_complete,
+					device_id: input.device_id,
+					reset_elapsed_seconds,
+				}
+			},
+			MediaProgressInput::Paged(input) => {
+				let book_pages = get_book_pages(id.to_string(), &txn).await?;
+				let is_complete = input.page >= book_pages;
+				let percentage = compute_page_based_percentage(input.page, book_pages);
+				NormalizedProgression {
+					page: Some(input.page),
+					locator: None,
+					epubcfi: None,
+					percentage: Some(percentage),
+					elapsed_seconds_delta: input.elapsed_seconds_delta,
+					did_complete: is_complete,
+					device_id: input.device_id,
+					reset_elapsed_seconds,
+				}
+			},
+		};
+
+		let session = upsert_reading_session(&txn, user, id.as_ref(), progression)
+			.await
+			.map(ReadingSession::from)?;
+
+		txn.commit().await?;
+
+		Ok(session)
 	}
 
 	/// trashes current readthrough, if there is one
@@ -193,44 +238,12 @@ impl ReadProgressMutation {
 
 		let tx = core.conn.begin().await?;
 
-		let current_session = reading_session::Entity::find()
-			.filter(
-				reading_session::Column::UserId
-					.eq(user.id.clone())
-					.and(reading_session::Column::MediaId.eq(id.to_string())),
-			)
-			.order_by_desc(reading_session::Column::CreatedAt)
-			.one(&tx)
-			.await?;
-
-		let Some(session) = current_session else {
-			// no active session = no work to do
-			return Ok(false);
-		};
-
-		let affected_rows = reading_session::Entity::update_many()
-			.col_expr(reading_session::Column::ElapsedSeconds, Expr::value(0))
-			.filter(
-				reading_session::Column::UserId
-					.eq(user.id.clone())
-					.and(reading_session::Column::MediaId.eq(id.to_string())),
-			)
-			.filter(
-				reading_session::Column::ReadthroughNumber.eq(session.readthrough_number),
-			)
-			.exec(&tx)
-			.await?
-			.rows_affected;
-
-		tracing::debug!(
-			?affected_rows,
-			readthrough_number = session.readthrough_number,
-			"Reset elapsed seconds in all reading sessions of the book's current readthrough"
-		);
+		let did_reset =
+			reset_cumulative_elapsed_seconds(&tx, &user.id, id.as_str()).await?;
 
 		tx.commit().await?;
 
-		Ok(affected_rows > 0)
+		Ok(did_reset)
 	}
 
 	/// marks current readthrough as complete:

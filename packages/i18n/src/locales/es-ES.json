@@ -66,15 +66,15 @@
 					"label": "Año"
 				},
 				"number": {
-					"label": "Issue number"
+					"label": "Número"
 				},
 				"comicVineVolumeId": {
-					"label": "ComicVine volume ID",
-					"placeholder": "e.g., 129260"
+					"label": "ID del volumen de ComicVine",
+					"placeholder": "ej. 129260"
 				},
 				"provider": {
-					"label": "Provider",
-					"allOption": "All enabled providers"
+					"label": "Proveedor",
+					"allOption": "Todos los proveedores habilitados"
 				}
 			}
 		}
@@ -291,17 +291,17 @@
 				"description": "Utilizado para categorizar tu biblioteca o imponer reglas de acceso"
 			},
 			"libraryType": {
-				"label": "Library content",
-				"description": "The type of content present in this library",
+				"label": "Contenido de la librería",
+				"description": "Tipo de contenido presente en la librería",
 				"options": {
-					"COMIC": "Comics",
-					"MANGA": "Manga",
-					"BOOK": "Books",
-					"LIGHT_NOVEL": "Light Novels",
-					"MANHWA": "Manhwa",
-					"WEB_NOVEL": "Web Novels",
+					"COMIC": "Cómics",
+					"MANGA": "Mangas",
+					"BOOK": "Libros",
+					"LIGHT_NOVEL": "Novelas Ligeras",
+					"MANHWA": "Manhwas",
+					"WEB_NOVEL": "Novelas Web",
 					"WEBTOON": "Webtoons",
-					"MIXED": "Mixed"
+					"MIXED": "Mixto"
 				}
 			},
 			"defaultLibraryView": {
@@ -930,7 +930,7 @@
 				"strategies": {
 					"FILL_GAPS": "Rellenar huecos",
 					"PREFER_EXTERNAL": "Preferir externo",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferir externas y combinar listas",
 					"FILL_AND_MERGE_LISTS": "Llenar y combinar listas"
 				}
 			},
@@ -956,7 +956,7 @@
 			"acceptAll": {
 				"label": "Aceptar todo",
 				"failed": "Error al aceptar todas las coincidencias",
-				"success": "All pending matches accepted"
+				"success": "Todas las coincidencias pendientes aceptadas"
 			},
 			"rejectAll": {
 				"label": "Rechazar todo",
@@ -964,7 +964,7 @@
 				"success": "Todas las coincidencias pendientes rechazadas"
 			},
 			"startReview": "Iniciar la revisión",
-			"nothingToReview": "No pending metadata matches to review"
+			"nothingToReview": "No hay coincidencias de metadatos pendientes para revisar"
 		}
 	},
 	"seriesOverviewScene": {
@@ -984,7 +984,7 @@
 			"goToLibrary": "Ir a la librería"
 		},
 		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
+			"failedToUpdateCompletion": "No se pudo actualizar el estado de finalización del libro"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1447,10 +1447,10 @@
 						"password": "Contraseña",
 						"activeChangesPrompt": "Tienes cambios sin guardar",
 						"uselessForm": {
-							"title": "You lack permissions to change these settings",
-							"description": "Contact your administrator if you want to make changes to these settings"
+							"title": "No tienes permisos para cambiar esta configuración",
+							"description": "Contacta tu administrador si deseas realizar cambios a esta configuración"
 						},
-						"insufficientPermission": "You do not have permission to change this"
+						"insufficientPermission": "No tienes los permisos para cambiar esto"
 					},
 					"errors": {
 						"updateFailed": "Se ha producido un error en el servidor al actualizar tu perfil. Por favor, inténtalo de nuevo."
@@ -1494,11 +1494,11 @@
 				},
 				"interface": {
 					"title": "Interfaz",
-					"description": "Primary UI surfaces and interaction elements"
+					"description": "Superficies y elementos de interacción primarios de la interfaz"
 				},
 				"thumbnails": {
 					"title": "Miniaturas",
-					"description": "Display options for thumbnail images"
+					"description": "Opciones de visualización para las miniaturas"
 				},
 				"themeSelect": {
 					"label": "Tema",
@@ -1528,18 +1528,18 @@
 					"description": "Customize the font used in the application"
 				},
 				"interfaceRoundness": {
-					"label": "Interface roundness",
-					"description": "How rounded the corners are for UI elements",
+					"label": "Redondeo de la interfaz",
+					"description": "Cuán redondeadas son las esquinas de los elementos de la interfaz",
 					"options": {
-						"none": "None",
+						"none": "Ninguno",
 						"normal": "Normal",
-						"rounded": "Rounded",
-						"pill": "Pill"
+						"rounded": "Redondeado",
+						"pill": "Píldora"
 					}
 				},
 				"thumbnailPreview": {
-					"label": "Preview",
-					"description": "This is how thumbnails will look with the current settings"
+					"label": "Vista previa",
+					"description": "Así se verán las miniaturas con los ajustes actuales"
 				},
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
@@ -1557,18 +1557,18 @@
 					}
 				},
 				"thumbnailRoundness": {
-					"label": "Thumbnail roundness",
-					"description": "How rounded the corners of thumbnail images should be",
+					"label": "Redondez de las miniaturas",
+					"description": "Cuán redondeadas deben ser las esquinas de las miniaturas",
 					"options": {
-						"none": "None",
+						"none": "Ninguno",
 						"normal": "Normal",
-						"rounded": "Rounded",
-						"large": "Large"
+						"rounded": "Redondeado",
+						"large": "Grande"
 					}
 				},
 				"navigation": {
 					"title": "Navegación",
-					"description": "Customize the navigation elements of the app"
+					"description": "Personalizar los elementos de navegación de la aplicación"
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
@@ -1585,11 +1585,11 @@
 				},
 				"doubleSidebar": {
 					"label": "Settings sidebar",
-					"description": "Enables sidebar navigation for the settings pages"
+					"description": "Habilita la navegación lateral para las páginas de configuración"
 				},
 				"replacePrimarySidebar": {
 					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
+					"description": "Cualquier instancia de una barra lateral secundaria reemplazará a la primaria en lugar de apilarlas",
 					"tooltips": {
 						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
 						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
@@ -1597,7 +1597,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
-					"description": "Rearrange or tweak the navigation items in your primary navigation",
+					"description": "Reorganizar o ajustar los elementos de navegación de tu navegación principal",
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
@@ -1637,24 +1637,24 @@
 					}
 				},
 				"displayAndSpacing": {
-					"label": "Display and spacing",
-					"description": "Preferences related to the presentation of content and information"
+					"label": "Visualización y espaciado",
+					"description": "Preferencias relacionadas con la presentación de contenido e información"
 				},
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
 				},
 				"contentBrowsing": {
-					"label": "Content browsing",
-					"description": "Preferences that affect browsing and navigating content lists"
+					"label": "Búsqueda de contenido",
+					"description": "Preferencias que afectan la búsqueda y navegación de listas de contenido"
 				},
 				"motionAndAnimation": {
-					"label": "Motion and animation",
-					"description": "Visual presentation and movement preferences"
+					"label": "Movimiento y animación",
+					"description": "Preferencias de presentación visual y movimiento"
 				},
 				"activityAndStatus": {
-					"label": "Activity and status",
-					"description": "Indicators, overlays, or functionality related to background activity"
+					"label": "Actividad y estado",
+					"description": "Indicadores, superposiciones, o funcionalidad relacionada con la actividad en segundo plano"
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -1685,12 +1685,12 @@
 					"description": "Show a floating overlay while a job is running"
 				},
 				"dayResetHourOffset": {
-					"label": "Reading day reset offset",
-					"description": "Shift when a reading day resets, in hours from midnight"
+					"label": "Desfase de reinicio del día de lectura",
+					"description": "Desplazar la hora de reinicio del día de lectura, en horas desde medianoche"
 				},
 				"readingSessionGracePeriod": {
-					"label": "Reading session grace period",
-					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+					"label": "Período de gracia de sesión de lectura",
+					"description": "Si no se detecta ninguna actividad dentro de este periodo de tiempo, en segundos, la próxima actualización iniciará una nueva sesión"
 				}
 			}
 		},
@@ -1753,7 +1753,7 @@
 		"app/reader": {
 			"helmet": "Configuración del lector",
 			"title": "Configuración del lector",
-			"description": "Default preferences for reading. Some of these are local-only to your current device",
+			"description": "Preferencias de lectura predeterminadas. Algunas son locales solo para el dispositivo actual",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -2021,7 +2021,7 @@
 					"newScheduledJob": "Nueva tarea programada",
 					"deleteScheduledJob": {
 						"title": "Eliminar tarea programada",
-						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+						"description": "¿Seguro de que quieres eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
 						"confirm": "Eliminar"
 					},
 					"dialog": {
@@ -2037,8 +2037,8 @@
 							"placeholder": "ej. \"Escaneo diario de biblioteca\""
 						},
 						"schedule": {
-							"label": "Cron schedule",
-							"description": "A cron expression to define the frequency",
+							"label": "Horario Cron",
+							"description": "Una expresión cron para definir la frecuencia",
 							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
@@ -2078,14 +2078,14 @@
 					},
 					"toasts": {
 						"createSuccess": "Tarea programada creada",
-						"createError": "Failed to create scheduled job",
+						"createError": "No se pudo crear el trabajo programado",
 						"updateSuccess": "Tarea programada actualizada",
 						"updateError": "Error al actualizar el trabajo programado",
 						"deleteSuccess": "Tarea programada eliminada",
 						"deleteError": "Error al eliminar la tarea programada"
 					},
 					"errors": {
-						"invalidCron": "Schedule must be a valid cron expression"
+						"invalidCron": "El horario debe ser una expresión cron válida"
 					}
 				},
 				"history": {
@@ -2160,7 +2160,7 @@
 						"libraryManagement": "Gestión de la biblioteca",
 						"userManagement": "Gestión de usuarios",
 						"serverManagement": "Gestión del servidor",
-						"metadataManagement": "Metadata management"
+						"metadataManagement": "Gestión de metadatos"
 					},
 					"heading": "Permisos",
 					"subtitle": [
@@ -2439,47 +2439,47 @@
 			"helmet": "Integraciones de metadatos",
 			"title": "Integraciones de metadatos",
 			"addProvider": "Agregar proveedor",
-			"createProviderError": "Failed to create provider",
-			"updateProviderError": "Failed to update provider",
-			"noProviders": "No providers configured yet. Add one to get started",
+			"createProviderError": "No se pudo crear el proveedor",
+			"updateProviderError": "No se pudo actualizar el proveedor",
+			"noProviders": "Aún no hay proveedores configurados. Agrega uno para empezar",
 			"providers": {
 				"title": "Proveedores",
-				"description": "Configure external metadata providers to fetch and enrich your library data"
+				"description": "Configurar proveedores de metadatos externos para buscar y enriquecer los datos de tu librería"
 			},
 			"providerForm": {
 				"apiToken": {
 					"label": "Token de API",
-					"description": "The API token for authenticating with this provider",
-					"validationError": "The auto-validation failed for this token",
+					"description": "El token API para autenticar con este proveedor",
+					"validationError": "La validación automática falló para este token",
 					"validationRequestError": "La solicitud de validación falló",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"providerStatusError": "The provider responded with status {{status}}",
-					"providerError": "The provider responded with an error: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
+					"validationRequestErrorUnknown": "Se ha producido un error desconocido durante la validación",
+					"providerStatusError": "El proveedor respondió con estado {{status}}",
+					"providerError": "El proveedor respondió con un error: {{message}}",
+					"noBearerPrefixRequired": "Quitar el prefijo 'Bearer' del token API"
 				},
 				"apiTokenExpiresAt": {
-					"label": "API token expiration",
-					"description": "The date when the API token will expire (optional)"
+					"label": "Expiración del token API",
+					"description": "La fecha en que el token de API caducará (opcional)"
 				},
 				"enableProvider": {
 					"label": "Activar proveedor",
-					"description": "It will be used for fetching if enabled"
+					"description": "Se usará para buscar si está habilitado"
 				},
 				"autoApplyConfig": {
 					"enabled": {
-						"label": "Enable auto-apply",
-						"description": "Skip manual approval and apply likely matches"
+						"label": "Habilitar autoaplicación",
+						"description": "Omitir aprobación manual y aplicar coincidencias probables"
 					},
 					"threshold": {
-						"label": "Confidence threshold",
-						"description": "Minimum confidence score (0-1) to auto-apply a match",
-						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+						"label": "Umbral de confianza",
+						"description": "Puntuación de confianza mínima (0 - 1) para autoaplicar una coincidencia",
+						"disclaimer": "La puntuación de confianza es calculada lo mejor posible. Puede no siempre ser precisa"
 					},
 					"strategy": {
 						"label": "Combinar estrategia",
 						"options": {
 							"FILL_GAPS": "Aceptar campos faltantes",
-							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
+							"FILL_AND_MERGE_LISTS": "Aceptar campos faltantes y combinar listas",
 							"PREFER_EXTERNAL": "Datos externos preferidos"
 						}
 					}
@@ -2487,7 +2487,7 @@
 			},
 			"providerEnabled": "Este proveedor está habilitado",
 			"providerDisabled": "Este proveedor está desactivado",
-			"providerTokenExpiresSoon": "This provider's token will expire soon",
+			"providerTokenExpiresSoon": "El token del proveedor caducará pronto",
 			"autoApplyOn": "Autoaplicar activado",
 			"autoApplyOff": "Autoaplicar desactivado",
 			"editDialog": {
@@ -2495,7 +2495,7 @@
 			},
 			"deleteDialog": {
 				"title": "Eliminar Proveedor",
-				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+				"description": "¿Seguro de que quieres eliminar \"{{providerName}}\"? Esta acción no se puede deshacer"
 			}
 		},
 		"server/tags": {
@@ -2668,11 +2668,11 @@
 	},
 	"common": {
 		"add": "Agregar",
-		"andXMoreTrailing": "...and {{count}} more",
+		"andXMoreTrailing": "...y {{count}} más",
 		"cancel": "Cancelar",
 		"clear": "Clear",
 		"confirm": "Confirmar",
-		"created": "Created",
+		"created": "Creado",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2682,7 +2682,7 @@
 		},
 		"experimentalDisclaimer": {
 			"title": "Esta característica es experimental",
-			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
+			"description": "Puede que le falten funciones, haya errores o no funcione en absoluto. Usa bajo tu propia discreción y reporta cualquier problema que encuentres"
 		},
 		"enter": "Enter",
 		"save": "Guardar",
@@ -2691,22 +2691,22 @@
 		"noChanges": "Sin cambios",
 		"create": "Crear",
 		"edit": "Editar",
-		"info": "Info",
+		"info": "Información",
 		"infoSheetStats": {
 			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
+			"inProgress": "En progreso",
+			"completedBooks": "Completado",
+			"readingTime": "Tiempo de Lectura",
+			"size": "Tamaño"
 		},
 		"update": "Actualizar",
 		"upload": "Subir",
 		"uploading": "Subiendo",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "¡Esta funcionalidad aún no está implementada! Vuelve a intentarlo más tarde",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
+		"upNext": "A continuación",
+		"unknown": "Desconocido",
+		"lastUpdated": "Última actualización",
 		"limitedFunctionality": "Esto aún no está completamente implementado y falta algunas características. Vuelve más tarde",
 		"logIn": "Iniciar sesión",
 		"login": "Inicio de sesión",
@@ -2728,7 +2728,7 @@
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "Se produjo un error desconocido"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2745,7 +2745,7 @@
 		},
 		"ACCESS_KOBO_SYNC": {
 			"label": "Kobo sync",
-			"description": "Allows the user to access the Kobo sync integration"
+			"description": "Permite al usuario acceder a la integración de la sincronización de Kobo"
 		},
 		"ACCESS_SMART_LIST": {
 			"label": "Smart Lists",
@@ -2876,20 +2876,20 @@
 			"description": "Allows the user to edit thumbnails for books and series"
 		},
 		"METADATA_PROVIDER_READ": {
-			"label": "Read metadata providers",
-			"description": "Allows the user to view configured external metadata providers"
+			"label": "Ver proveedores de metadatos",
+			"description": "Permite al usuario ver los proveedores de metadatos externos configurados"
 		},
 		"METADATA_PROVIDER_MANAGE": {
-			"label": "Manage metadata providers",
-			"description": "Allows the user to configure external metadata providers"
+			"label": "Administrar proveedores de metadatos",
+			"description": "Permite al usuario configurar los proveedores externos de metadatos"
 		},
 		"METADATA_FETCH_RECORD_READ": {
-			"label": "Read metadata matches",
-			"description": "Allows the user to view metadata fetch results awaiting review"
+			"label": "Ver las coincidencias de metadatos",
+			"description": "Permite al usuario ver los resultados de búsqueda de metadatos en espera de revisión"
 		},
 		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "Manage metadata matches",
-			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
+			"label": "Administrar coincidencias de metadatos",
+			"description": "Permite al usuario buscar un libro en los proveedores externos y aceptar o rechazar las coincidencias de candidatos"
 		}
 	},
 	"mobileApp": {
@@ -2916,7 +2916,7 @@
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw Token"
+					"placeholder": "Token en bruto"
 				},
 				"basic": "Basic"
 			},
@@ -2924,8 +2924,8 @@
 			"catalogUrl": "Catalog URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
-			"checkConnection": "Check Connection",
-			"setAsDefaultServer": "Set as Default Server",
+			"checkConnection": "Verificar conexión",
+			"setAsDefaultServer": "Establecer como servidor predeterminado",
 			"enableOPDS": "Enable OPDS",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
@@ -2934,51 +2934,51 @@
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as Read",
+				"label": "Marcar como Leído",
 				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
-				"failure": "Failed to mark book as read"
+				"failure": "No se pudo marcar el libro como leído"
 			},
 			"clearProgress": {
-				"label": "Clear Progress",
+				"label": "Borrar progreso",
 				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
-				"failure": "Failed to delete current progress"
+				"failure": "Error al eliminar el progreso actual"
 			},
 			"deleteReadHistory": {
-				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
-				"failure": "Failed to delete read history"
+				"label": "Borrar historial de lectura",
+				"confirmation": "¿Seguro que quieres borrar tu historial de lectura para {{bookTitle}}?",
+				"failure": "No se pudo eliminar el historial de lectura"
 			},
 			"deleteBook": {
-				"label": "Delete Book",
+				"label": "Eliminar libro",
 				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
 			},
 			"deleteDownload": {
-				"label": "Delete Download",
-				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+				"label": "Eliminar descarga",
+				"confirmation": "¿Seguro que quieres eliminar el archivo descargado de {{bookTitle}}?"
 			},
-			"goToLibrary": "Go to Library",
-			"goToSeries": "Go to Series",
+			"goToLibrary": "Ir a Librería",
+			"goToSeries": "Ir a series",
 			"seeDetails": "See Details"
 		},
 		"bookMetadata": {
 			"ageRating": "Age Rating",
 			"downloadedAt": "Downloaded",
-			"characters": "Characters",
+			"characters": "Personajes",
 			"format": "Format",
 			"genres": "Genres",
 			"language": "Language",
 			"publisher": "Publisher",
 			"size": "Size",
 			"volume": "Volume",
-			"writers": "Writers",
-			"colorists": "Colorists",
-			"inkers": "Inkers",
-			"letterers": "Letterers",
-			"coverArtists": "Cover Artists",
-			"links": "Links",
+			"writers": "Escritores",
+			"colorists": "Coloristas",
+			"inkers": "entintadores",
+			"letterers": "rotuladores",
+			"coverArtists": "Artistas de portada",
+			"links": "Enlaces",
 			"year": "Year",
-			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"identifier": "Identificador",
+			"identifiers": "Identificadores"
 		},
 		"common": {
 			"book": "Libro",
@@ -2987,40 +2987,40 @@
 			"clear": "Clear",
 			"completed": "Completado",
 			"confirm": "Confirm",
-			"continue": "Continue",
+			"continue": "Continuar",
 			"content": "Contenido",
 			"details": "Details",
 			"delete": "Delete",
-			"dismiss": "Dismiss",
-			"download": "Download",
-			"downloaded": "Downloaded",
+			"dismiss": "Descartar",
+			"download": "Descargar",
+			"downloaded": "Descargado",
 			"downloads": "Downloads",
-			"done": "Done",
+			"done": "Hecho",
 			"edit": "Edit",
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
-			"favorite": "Favorite",
-			"finished": "Finished",
+			"favorite": "Favorito",
+			"finished": "Finalizado",
 			"grid": "Cuadrícula",
 			"list": "Lista",
 			"lastCompleted": "Último completado",
 			"name": "Name",
 			"none": "None",
-			"notAvailable": "Not Available",
+			"notAvailable": "No Disponible",
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",
-			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageXOfY": "Página {{current}} de {{total}}",
 			"password": "Password",
 			"progress": "Progress",
 			"publication": "Publicación",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
-			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
+			"read": "Leído",
+			"readAgain": "Volver a leer",
+			"readTime": "Tiempo de Lectura",
+			"readthrough": "Lectura completa",
+			"readMore": "Leer Más",
+			"refresh": "Actualizar",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
@@ -3035,12 +3035,12 @@
 			"version": "Version"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Error desconocido"
 		},
 		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
+			"tableOfContents": "Tabla de Contenidos",
+			"bookmarksAndAnnotations": "Marcadores y Anotaciones",
+			"appearance": "Apariencia"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -3060,36 +3060,36 @@
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No Servers Configured",
+			"noServers": "No hay servidores configurados",
 			"cta": "Get started by adding a server to access your book collections",
 			"seeDocumentation": "See Documentation",
 			"noSmartLists": {
-				"label": "No lists returned",
-				"description": "Once created they will appear here"
+				"label": "Ninguna lista devuelta",
+				"description": "Una vez creadas aparecerán aquí"
 			}
 		},
 		"tabs": {
 			"servers": "Servers",
 			"localLibrary": "Library",
 			"settings": "Settings",
-			"home": "Home",
-			"browse": "Browse",
-			"clubs": "Clubs",
-			"search": "Search"
+			"home": "Inicio",
+			"browse": "Navegar",
+			"clubs": "Clubes",
+			"search": "Buscar"
 		},
 		"localLibrary": {
 			"title": "Local Library",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to Read Yet",
+					"title": "Nada que leer aún",
 					"description": "Once you have books for offline reading, they will appear here"
 				},
 				"imported": {
-					"title": "No Imported Books",
+					"title": "No hay libros importados",
 					"description": "Import books to read them offline"
 				},
 				"server": {
-					"title": "No Downloaded Books",
+					"title": "No hay libros descargados",
 					"description": "Download books from your library to read them offline"
 				}
 			},
@@ -3145,16 +3145,16 @@
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+				"skippedOneServer": "Sincronización omitida para {{skippedCount}} servidor",
+				"skippedMultipleServers": "Sincronización omitida para {{skippedCount}} servidores",
+				"explanation": "Algunos servidores utilizan métodos de autenticación que no se pueden actualizar automáticamente"
 			},
-			"syncFailed": "Failed to sync offline progress"
+			"syncFailed": "No se pudo sincronizar el progreso sin conexión"
 		},
 		"search": {
-			"label": "Search This Server",
-			"description": "Find specific content on this server",
-			"placeholder": "Search"
+			"label": "Buscar en este servidor",
+			"description": "Buscar contenido específico en este servidor",
+			"placeholder": "Buscar"
 		},
 		"settings": {
 			"preferences": {
@@ -3167,32 +3167,32 @@
 					}
 				},
 				"appPrimaryColor": {
-					"label": "Accent",
+					"label": "Acento",
 					"options": {
-						"chromaScale": "Chroma Scale",
+						"chromaScale": "Escala cromática",
 						"hues": {
-							"red": "Red",
-							"orange": "Orange",
-							"amber": "Amber",
-							"yellow": "Yellow",
-							"lime": "Lime",
-							"green": "Green",
-							"emerald": "Emerald",
-							"teal": "Teal",
-							"cyan": "Cyan",
-							"sky": "Sky",
-							"blue": "Blue",
-							"indigo": "Indigo",
-							"violet": "Violet",
-							"purple": "Purple",
-							"fuchsia": "Fuchsia",
-							"pink": "Pink",
-							"rose": "Rose",
-							"slate": "Slate",
-							"gray": "Gray",
-							"zinc": "Zinc",
+							"red": "Rojo",
+							"orange": "Naranja",
+							"amber": "Ámbar",
+							"yellow": "Amarillo",
+							"lime": "Lima",
+							"green": "Verde",
+							"emerald": "Esmeralda",
+							"teal": "Verde Azulado",
+							"cyan": "Cian",
+							"sky": "Cielo",
+							"blue": "Azul",
+							"indigo": "Añil",
+							"violet": "Violeta",
+							"purple": "Púrpura",
+							"fuchsia": "Fucsia",
+							"pink": "Rosado",
+							"rose": "Rosa",
+							"slate": "Pizarra",
+							"gray": "Gris",
+							"zinc": "Cinc",
 							"neutral": "Neutral",
-							"stone": "Stone"
+							"stone": "Piedra"
 						}
 					}
 				},
@@ -3203,7 +3203,7 @@
 					"label": "Thumbnail Placeholder",
 					"options": {
 						"grayscale": "Grayscale",
-						"averageColor": "Average Color",
+						"averageColor": "Color Promedio",
 						"colorful": "Colorful",
 						"thumbhash": "Thumbhash"
 					}
@@ -3233,20 +3233,20 @@
 			"textCase": {
 				"label": "Text Case",
 				"options": {
-					"lowerCase": "Lowercase",
+					"lowerCase": "Minúsculas",
 					"sentenceCase": "Sentence Case",
 					"titleCase": "Title Case"
 				}
 			},
-			"tintListBackground": "Tint List Backgrounds",
+			"tintListBackground": "Teñir el fondo de las listas",
 			"management": {
 				"label": "Management",
 				"dataUsage": {
 					"label": "Data Usage",
-					"nonStumpData": "Non-Stump Data",
-					"serversTotal": "Servers Total",
-					"totalFiles": "Total Files",
-					"totalSize": "Total Size",
+					"nonStumpData": "Datos no de Stump",
+					"serversTotal": "Total de servidores",
+					"totalFiles": "Archivos totales",
+					"totalSize": "Tamaño total",
 					"deleteDownloads": {
 						"label": "Delete Downloads",
 						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
@@ -3257,7 +3257,7 @@
 					},
 					"noDownloads": "No downloaded files for this server",
 					"storedPreferences": {
-						"label": "Stored Preferences",
+						"label": "Preferencias guardadas",
 						"description": "Miscellaneous data like book preferences, reading timers, etc"
 					},
 					"clearPreferences": "Clear Preferences"
@@ -3269,21 +3269,21 @@
 					"label": "Limpiar caché",
 					"memory": {
 						"button": "Memory",
-						"success": "Memory Cache Cleared"
+						"success": "Caché de memoria limpiado"
 					},
 					"disk": {
 						"button": "Disk",
-						"success": "Disk Cache Cleared"
+						"success": "Caché de disco limpiado"
 					}
 				},
 				"deleteDatabase": {
 					"label": "Delete Database",
 					"success": {
-						"title": "Database Deleted",
+						"title": "Base de datos eliminada",
 						"description": "Please restart the app"
 					},
 					"error": {
-						"title": "Deletion Failed",
+						"title": "Falló la eliminación",
 						"description": "There was an error deleting the database"
 					}
 				},
@@ -3317,15 +3317,15 @@
 		},
 		"stumpServer": {
 			"browse": {
-				"books": "Books",
-				"favorites": "Favorites",
-				"files": "Files",
-				"libraries": "Libraries",
+				"books": "Libros",
+				"favorites": "Favoritos",
+				"files": "Archivos",
+				"libraries": "Librerías",
 				"series": "Series",
-				"smartLists": "Smart Lists"
+				"smartLists": "Listas inteligentes"
 			},
 			"continueReading": {
-				"label": "Continue Reading",
+				"label": "Continuar leyendo",
 				"emptyText": "No books in progress"
 			},
 			"onDeck": {

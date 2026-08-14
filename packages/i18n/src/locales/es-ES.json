@@ -45,13 +45,13 @@
 	"bookManagementScene": {
 		"metadataSearch": {
 			"heading": "Buscar metadatos",
-			"description": "Search an external provider for this book and choose a match to apply",
+			"description": "Buscar un proveedor externo para este libro y elegir una coincidencia para aplicar",
 			"openButton": "Buscar metadatos",
 			"searchButton": "Buscar",
-			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
-			"noResults": "No matches were found for this search",
-			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
-			"searchFailed": "Failed to search metadata providers",
+			"noProviders": "Ningún proveedor de metadatos habilitado está configurado para este tipo de librería. Configure uno en la configuración del servidor primero.",
+			"noResults": "No se encontraron coincidencias para esa búsqueda",
+			"partialResults": "Algunos resultados no se pudieron cargar desde el proveedor, probablemente debido a la limitación de la velocidad. Intenta buscar de nuevo para ver si aparecen más.",
+			"searchFailed": "Error al buscar proveedores de metadatos",
 			"form": {
 				"title": {
 					"label": "Título"

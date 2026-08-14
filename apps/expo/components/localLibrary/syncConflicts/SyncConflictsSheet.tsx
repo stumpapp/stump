@@ -3,7 +3,7 @@ import { parseGraphQLDateTime } from '@stump/client'
 import { useMutation } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -96,44 +96,46 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		[isOpen, shouldPull],
 	)
 
-	const onAcceptBoth = async (bookId: string, serverId: string, latestRemoteUpdatedAt: string) => {
-		await db
-			.update(readProgress)
-			.set({
-				syncStatus: syncStatus.enum.UNSYNCED,
-				lastPulledSessionUpdatedAt: parseGraphQLDateTime(latestRemoteUpdatedAt) ?? new Date(),
-			})
-			.where(eq(readProgress.bookId, bookId))
-		serverIdsToSyncUponClose.current.add(serverId)
-	}
+	const onAcceptBoth = useCallback(
+		async (bookId: string, serverId: string, latestRemoteUpdatedAt: string) => {
+			await db
+				.update(readProgress)
+				.set({
+					syncStatus: syncStatus.enum.UNSYNCED,
+					lastPulledSessionUpdatedAt: parseGraphQLDateTime(latestRemoteUpdatedAt) ?? new Date(),
+				})
+				.where(eq(readProgress.bookId, bookId))
+			serverIdsToSyncUponClose.current.add(serverId)
+		},
+		[],
+	)
 
-	const onApplySyncedSessionData = async (
-		bookId: string,
-		serverId: string,
-		data: AcceptedProgressionData,
-	) => {
-		const sessionUpdatedAt = data.sessionUpdatedAt
-			? parseGraphQLDateTime(data.sessionUpdatedAt)
-			: null
-		const values: typeof readProgress.$inferInsert = {
-			bookId,
-			serverId,
-			page: data.page,
-			elapsedSeconds: data.elapsedSeconds,
-			lastSyncedElapsedSeconds: data.elapsedSeconds, // samsies since we are "syncing" now
-			percentage: data.percentageCompleted,
-			epubProgress: epubProgress.safeParse(data.locator).data,
-			syncStatus: syncStatus.enum.SYNCED, // accepting remote = effectively synced
-			lastModified: sessionUpdatedAt ?? new Date(),
-			...(sessionUpdatedAt ? { lastPulledSessionUpdatedAt: sessionUpdatedAt } : {}),
-			...(data.sessionId != null ? { lastSyncedSessionId: data.sessionId } : {}),
-			pendingReset: false,
-		}
-		await db.insert(readProgress).values(values).onConflictDoUpdate({
-			target: readProgress.bookId,
-			set: values,
-		})
-	}
+	const onApplySyncedSessionData = useCallback(
+		async (bookId: string, serverId: string, data: AcceptedProgressionData) => {
+			const sessionUpdatedAt = data.sessionUpdatedAt
+				? parseGraphQLDateTime(data.sessionUpdatedAt)
+				: null
+			const values: typeof readProgress.$inferInsert = {
+				bookId,
+				serverId,
+				page: data.page,
+				elapsedSeconds: data.elapsedSeconds,
+				lastSyncedElapsedSeconds: data.elapsedSeconds, // samsies since we are "syncing" now
+				percentage: data.percentageCompleted,
+				epubProgress: epubProgress.safeParse(data.locator).data,
+				syncStatus: syncStatus.enum.SYNCED, // accepting remote = effectively synced
+				lastModified: sessionUpdatedAt ?? new Date(),
+				...(sessionUpdatedAt ? { lastPulledSessionUpdatedAt: sessionUpdatedAt } : {}),
+				...(data.sessionId != null ? { lastSyncedSessionId: data.sessionId } : {}),
+				pendingReset: false,
+			}
+			await db.insert(readProgress).values(values).onConflictDoUpdate({
+				target: readProgress.bookId,
+				set: values,
+			})
+		},
+		[],
+	)
 
 	const conflictCount = conflictingRecords?.length ?? 0
 

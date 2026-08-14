@@ -102,8 +102,6 @@ impl ReadProgressMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		let media_id = id.as_str();
-
 		let ancestor = match ancestor_session_id {
 			Some(session_id) => Some(
 				reading_session::Entity::find_by_id(session_id)

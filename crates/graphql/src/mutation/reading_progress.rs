@@ -78,6 +78,59 @@ impl ReadProgressMutation {
 			.map_err(Into::into)
 	}
 
+	/// a more focused version of `update_media_progress` that splices the history so that
+	/// any sessions after the ancestor_session_id are deleted in favor of the input
+	/// provided. this should be called when resolving local vs remote progress conflicts, where
+	/// the user has chosen to keep their local progress and discard the remote progress beyond
+	/// the ancestor session (i.e., the last session that both local and remote progress share)
+	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id, ancestor_session_id))]
+	async fn accept_local_progress(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		ancestor_session_id: i32,
+		input: MediaProgressInput,
+	) -> Result<ReadingSession> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let media_id = id.as_str();
+
+		let ancestor = reading_session::Entity::find_by_id(ancestor_session_id)
+			.filter(reading_session::Column::UserId.eq(&user.id))
+			.filter(reading_session::Column::MediaId.eq(media_id))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or_else(|| "Reading session not found".to_string())?;
+
+		// TODO: do i delete all or all within same readthrough?? kinda haven't considered that enough lol
+		// i think if you manage to be a readthrough behind locally and opt to accept local, then yes??
+		// perhaps more messaging on frontend... ugh. delete for now ig
+
+		let affected_rows = reading_session::Entity::delete_many()
+			.filter(
+				reading_session::Column::UserId
+					.eq(&user.id)
+					.and(reading_session::Column::MediaId.eq(media_id)),
+			)
+			// i debated whether to filter on created_at, but ids are serial so should be fine
+			.filter(reading_session::Column::Id.gt(ancestor.id))
+			.exec(core.conn.as_ref())
+			.await?
+			.rows_affected;
+
+		tracing::debug!(affected_rows, "Deleted divergent remote sessions");
+
+		// TODO: normal update_media_progress here, don't want to dupe things so perhaps shove
+		// more of existing update_media_progress logic into services/ then do it
+		// TODO: i also think we should just add a pending_reset flag to server,
+		// instead of relying on client to flush then push.
+		// also also, obv, this should be one txn so failure doesn't mean ruh roh raggy,
+		// i lost all your sessions and couldn't write the new one. oopsie poopsie.
+
+		unimplemented!()
+	}
+
 	/// trashes current readthrough, if there is one
 	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
 	async fn clear_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {

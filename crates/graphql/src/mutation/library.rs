@@ -9,6 +9,7 @@ use models::{
 		library_access, library_config, library_scan_record, library_tag, media,
 		media_metadata, metadata_provider_config, series, series_metadata, tag, user,
 	},
+	services::oidc_sync::sync_oidc_library_access_for_library,
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{
@@ -439,6 +440,22 @@ impl LibraryMutation {
 		.update(&txn)
 		.await?;
 
+		let oidc_groups = updated_library
+			.oidc_groups
+			.clone()
+			.map(|groups| {
+				groups
+					.split(',')
+					.map(|g| g.trim().to_string())
+					.collect::<Vec<_>>()
+			})
+			.unwrap_or_default();
+
+		if updated_library.oidc_groups != existing_library.oidc_groups {
+			sync_oidc_library_access_for_library(&txn, &updated_library.id, &oidc_groups)
+				.await?;
+		}
+
 		if let Some(tags) = tags {
 			let (to_connect, to_disconnect) =
 				super::tag::sync_tags(&txn, &tags, &existing_tags).await?;
@@ -660,15 +677,22 @@ impl LibraryMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
+		let tx = core.conn.as_ref().begin().await?;
+
 		let library = library::Entity::find_for_user(user)
 			.filter(library::Column::Id.eq(id.to_string()))
-			.one(core.conn.as_ref())
+			.one(&tx)
 			.await?
 			.ok_or("Library not found")?;
 
 		let mut active_model = library.into_active_model();
-		active_model.oidc_groups = Set(Some(oidc_groups.join(",")));
-		let updated_library = active_model.update(core.conn.as_ref()).await?;
+		active_model.oidc_groups = Set(Some(oidc_groups.clone().join(",")));
+		let updated_library = active_model.update(&tx).await?;
+
+		sync_oidc_library_access_for_library(&tx, &updated_library.id, &oidc_groups)
+			.await?;
+
+		tx.commit().await?;
 
 		Ok(Library::from(updated_library))
 	}

@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use sea_orm::{prelude::*, sea_query::Expr, ActiveValue, ConnectionTrait, QuerySelect};
+use sea_orm::{prelude::*, ActiveValue, ConnectionTrait, IntoActiveModel, QuerySelect};
 
 use crate::{
 	domain::oidc_sync::oidc_claims_to_permission_set,
@@ -10,33 +10,45 @@ use crate::{
 
 /// sync everything there is to sync wrt permissions, access, etc. for a user based on their
 /// OIDC groups and the mapping of groups to permissions
-pub async fn sync_oidc(
+pub async fn sync_oidc_user(
 	tx: &impl ConnectionTrait,
 	user_id: &str,
 	groups: &[String],
-	mapping: &HashMap<String, Vec<UserPermission>>,
+	mapping: Option<HashMap<String, Vec<UserPermission>>>,
 ) -> Result<(), sea_orm::DbErr> {
 	sync_oidc_permissions(tx, user_id, groups, mapping).await?;
 	sync_oidc_library_access(tx, user_id, groups).await?;
 	Ok(())
 }
 
-/// sync the user's permissions based on their OIDC groups and the mapping of groups to permissions
+/// sync the user's permissions based on their OIDC groups and the mapping of groups to permissions,
+/// and update the user's stored OIDC groups for future reference
 #[tracing::instrument(skip(tx, groups, mapping), err)]
 pub async fn sync_oidc_permissions(
 	tx: &impl ConnectionTrait,
 	user_id: &str,
 	groups: &[String],
-	mapping: &HashMap<String, Vec<UserPermission>>,
+	mapping: Option<HashMap<String, Vec<UserPermission>>>,
 ) -> Result<(), sea_orm::DbErr> {
-	let resolved_permissions =
-		oidc_claims_to_permission_set(groups, mapping).resolve_into_string();
+	let Some(user) = user::Entity::find_by_id(user_id.to_string())
+		.one(tx)
+		.await?
+	else {
+		return Err(sea_orm::DbErr::Custom(format!(
+			"User with ID {} not found",
+			user_id
+		)));
+	};
 
-	user::Entity::update_many()
-		.col_expr(user::Column::Permissions, Expr::value(resolved_permissions))
-		.filter(user::Column::Id.eq(user_id))
-		.exec(tx)
-		.await?;
+	let mut active_model = user.into_active_model();
+	if let Some(mapping) = mapping {
+		let resolved_permissions =
+			oidc_claims_to_permission_set(groups, &mapping).resolve_into_string();
+		active_model.permissions = ActiveValue::Set(resolved_permissions);
+	}
+
+	active_model.oidc_groups = ActiveValue::Set(Some(groups.join(",")));
+	active_model.update(tx).await?;
 
 	tracing::debug!("Synced OIDC permissions for user");
 
@@ -138,6 +150,67 @@ pub async fn sync_oidc_library_access(
 		removed = to_revoke_num,
 		"Synced OIDC library access for user"
 	);
+
+	Ok(())
+}
+
+/// sync changes to library access for a specific library after its OIDC groups have
+/// been updated
+pub async fn sync_oidc_library_access_for_library(
+	tx: &impl ConnectionTrait,
+	library_id: &str,
+	new_oidc_groups: &[String],
+) -> Result<(), sea_orm::DbErr> {
+	let oidc_users: Vec<(String, Vec<String>)> = user::Entity::find()
+		.select_only()
+		.columns([user::Column::Id, user::Column::OidcGroups])
+		.filter(user::Column::OidcGroups.is_not_null())
+		.into_tuple::<(String, String)>()
+		.all(tx)
+		.await?
+		.into_iter()
+		// groups is a string, should be split by comma and trimmed
+		.filter_map(|(id, oidc_groups): (String, String)| {
+			let user_groups: Vec<String> = oidc_groups
+				.split(',')
+				.map(|g| g.trim().to_string())
+				.collect();
+			if user_groups.is_empty() {
+				tracing::warn!(
+					user_id = id.as_str(),
+					"User has OIDC groups but none are valid, skipping"
+				);
+				return None;
+			}
+			Some((id, user_groups))
+		})
+		.collect();
+
+	for (user_id, user_groups) in oidc_users {
+		let should_have = new_oidc_groups.iter().any(|g| user_groups.contains(g));
+
+		let currently_has = library_access::Entity::find()
+			.filter(library_access::Column::UserId.eq(&user_id))
+			.filter(library_access::Column::LibraryId.eq(library_id))
+			.count(tx)
+			.await? > 0;
+
+		if should_have && !currently_has {
+			library_access::ActiveModel {
+				user_id: ActiveValue::Set(user_id.clone()),
+				library_id: ActiveValue::Set(library_id.to_string()),
+				..Default::default()
+			}
+			.insert(tx)
+			.await?;
+		} else if !should_have && currently_has {
+			library_access::Entity::delete_many()
+				.filter(library_access::Column::UserId.eq(&user_id))
+				.filter(library_access::Column::LibraryId.eq(library_id))
+				.exec(tx)
+				.await?;
+		}
+	}
 
 	Ok(())
 }

@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, MultiSelect, Select};
-use models::entity::{library, library_access, refresh_token, session, user};
+use models::{
+	entity::{library, library_access, user},
+	services::oidc_sync::sync_oidc_library_access_for_library,
+};
 use sea_orm::{prelude::*, ActiveModelTrait, ActiveValue::Set, TransactionTrait};
 use stump_core::{config::StumpConfig, database::connect};
 
@@ -52,7 +55,7 @@ async fn ask_for_library(conn: &DatabaseConnection) -> CliResult<String> {
 
 async fn change_oidc_groups(
 	library: library::Model,
-	conn: &DatabaseConnection,
+	conn: &impl ConnectionTrait,
 ) -> CliResult<()> {
 	let current_oidc_groups = library.oidc_groups.clone().unwrap_or_default();
 
@@ -64,51 +67,22 @@ async fn change_oidc_groups(
 		.default(current_oidc_groups.clone())
 		.interact_text()?;
 
+	let oidc_groups: Vec<String> = new_oidc_groups
+		.split(',')
+		.map(|g| g.trim().to_string())
+		.filter(|g| !g.is_empty())
+		.collect();
+
 	let progress = default_progress_spinner();
 	progress.set_message("Updating OIDC groups for library...");
 
 	let mut library_model: library::ActiveModel = library.into();
-	library_model.oidc_groups = Set(Some(new_oidc_groups));
-	library_model.update(conn).await?;
+	library_model.oidc_groups = Set(Some(oidc_groups.join(",")));
+	let updated_library = library_model.update(conn).await?;
 
 	progress.finish_with_message("OIDC groups updated successfully!");
 
-	let confirm = Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("OIDC access changes will not be applied until the next login. Do you want to log out all OIDC users to force a login?")
-        .interact()?;
-
-	if !confirm {
-		return Ok(());
-	}
-
-	let progress = default_progress_spinner();
-	progress.set_message("Logging out all OIDC users...");
-
-	let oidc_users = user::Entity::find()
-		.filter(user::Column::OidcIssuerId.is_not_null())
-		.all(conn)
-		.await?;
-
-	session::Entity::delete_many()
-		.filter(
-			session::Column::UserId.is_in(oidc_users.iter().map(|user| user.id.clone())),
-		)
-		.exec(conn)
-		.await?;
-	refresh_token::Entity::delete_many()
-		.filter(
-			refresh_token::Column::UserId
-				.is_in(oidc_users.iter().map(|user| user.id.clone())),
-		)
-		.exec(conn)
-		.await?;
-
-	progress.finish_with_message("All OIDC users logged out successfully!");
-
-	// FIXME: ^^ that is a terribly awkward dance and made me realize there are more complex
-	// staleness problems to sort out in the realm of revocation and access changes. will
-	// commit as-is for now, but im thinking maybe i need to store oidc groups of users in the
-	// db and use that to determine access after this change
+	sync_oidc_library_access_for_library(conn, &updated_library.id, &oidc_groups).await?;
 
 	Ok(())
 }
@@ -152,14 +126,19 @@ async fn change_access(
 
 	// forced is just always only changing groups
 	if is_forced_oidc {
-		return change_oidc_groups(library, &conn).await;
+		let oidc_txn = conn.begin().await?;
+		change_oidc_groups(library, &oidc_txn).await?;
+		oidc_txn.commit().await?;
+		return Ok(());
 	} else if is_oidc_enabled && should_optionally_change_oidc_groups {
-		let _ = change_oidc_groups(library.clone(), &conn).await?;
+		let oidc_txn = conn.begin().await?;
+		let _ = change_oidc_groups(library.clone(), &oidc_txn).await?;
 		let confirm = Confirm::with_theme(&ColorfulTheme::default())
 			.with_prompt(
 				"Would you like to also manually change access for non-OIDC users?",
 			)
 			.interact()?;
+		oidc_txn.commit().await?;
 		if !confirm {
 			println!("Exiting...");
 			return Ok(());

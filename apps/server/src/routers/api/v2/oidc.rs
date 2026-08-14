@@ -9,7 +9,7 @@ use axum::{
 use models::{
 	domain::oidc_sync::oidc_claims_to_permission_set,
 	entity::{server_config, user, user_preferences},
-	services::oidc_sync::sync_oidc,
+	services::oidc_sync::sync_oidc_user,
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
@@ -347,17 +347,16 @@ async fn callback(
 		(user, true)
 	};
 
-	if !oidc_config.group_permission_mapping.is_empty() {
-		if let Err(error) = sync_oidc(
-			&txn,
-			&user_model.id,
-			&claims.groups,
-			&oidc_config.group_permission_mapping,
-		)
-		.await
-		{
-			tracing::warn!(?error, user_id = %user_model.id, "Failed to sync OIDC permissions");
-		}
+	let oidc_group_mapping = if oidc_config.group_permission_mapping.is_empty() {
+		None
+	} else {
+		Some(oidc_config.group_permission_mapping.clone())
+	};
+
+	if let Err(error) =
+		sync_oidc_user(&txn, &user_model.id, &claims.groups, oidc_group_mapping).await
+	{
+		tracing::warn!(?error, user_id = %user_model.id, "Failed to sync OIDC groups and permissions for user");
 	}
 
 	txn.commit().await?;

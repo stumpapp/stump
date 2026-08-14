@@ -3326,24 +3326,24 @@
 			},
 			"continueReading": {
 				"label": "Continuar leyendo",
-				"emptyText": "No books in progress"
+				"emptyText": "No hay libros en progreso"
 			},
 			"onDeck": {
-				"label": "Your Next Read",
-				"emptyText": "No books on deck"
+				"label": "Tu próxima lectura",
+				"emptyText": "No hay libros a mano"
 			},
 			"recentlyAddedSeries": {
-				"label": "Recently Added Series",
-				"emptyText": "No recently added series"
+				"label": "Series añadidas recientemente",
+				"emptyText": "No hay series añadidas recientemente"
 			},
 			"recentlyAddedBooks": {
-				"label": "Recently Added Books",
-				"emptyText": "No recently added books"
+				"label": "Libros añadidos recientemente",
+				"emptyText": "No hay libros añadidos recientemente"
 			}
 		},
 		"readerSettings": {
 			"title": "Reader Settings",
-			"overrideGlobalSettings": "Override Global Settings",
+			"overrideGlobalSettings": "Sobreescribir ajustes globales",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -3384,7 +3384,7 @@
 			},
 			"allowDownscaling": "Downscaling",
 			"tapSidesToNavigate": "Tap Sides to Navigate",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"volumeButtonsNavigate": "Navegar con los botones de volumen",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
@@ -3399,26 +3399,26 @@
 			"allSettings": "Todos los ajustes"
 		},
 		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
+			"goToPageX": "Ir a la página {{pageNumber}}",
+			"goToPagePlaceholder": "Ir a la página...",
 			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
+				"pageDoesNotExist": "La página {{page}} no existe",
+				"invalidPage": "'{{page}}' no es un número de página"
 			},
-			"showCurrentChapter": "Show Current Chapter"
+			"showCurrentChapter": "Mostrar capítulo actual"
 		},
 		"annotationsSheet": {
 			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
-				"highlights": "Highlights",
-				"notes": "Notes"
+				"all": "Todas",
+				"bookmarks": "Marcadores",
+				"highlights": "Destacados",
+				"notes": "Notas"
 			}
 		},
 		"epubSettings": {
-			"title": "Epub Reader Settings",
+			"title": "Configuración del lector de Epub",
 			"typeface": {
-				"label": "Typeface",
+				"label": "Tipografía",
 				"options": {
 					"system": "System",
 					"opendyslexic": "OpenDyslexic",
@@ -3428,79 +3428,79 @@
 					"bitter": "Bitter"
 				}
 			},
-			"fontSize": "Font Size",
+			"fontSize": "Tamaño de fuente",
 			"fontWeight": {
-				"label": "Font Weight",
+				"label": "Peso de Fuente",
 				"options": {
-					"light": "Light",
+					"light": "Ligero",
 					"normal": "Normal",
-					"medium": "Medium",
-					"bold": "Bold"
+					"medium": "Medio",
+					"bold": "Negrita"
 				}
 			},
-			"textNormalization": "Text Normalization",
-			"verticalText": "Vertical Text",
+			"textNormalization": "Normalización de texto",
+			"verticalText": "Texto vertical",
 			"readingDirection": {
-				"label": "Reading Direction",
+				"label": "Dirección de lectura",
 				"options": {
-					"rtl": "Right to left",
-					"ltr": "Left to right"
+					"rtl": "De derecha a izquierda",
+					"ltr": "De izquierda a derecha"
 				}
 			},
 			"columns": {
-				"label": "Columns",
+				"label": "Columnas",
 				"options": {
-					"auto": "Auto",
-					"single": "Single",
-					"double": "Double"
+					"auto": "Automático",
+					"single": "Único",
+					"double": "Doble"
 				}
 			},
-			"pageMargins": "Page Margins",
+			"pageMargins": "Márgenes de página",
 			"imageFilter": {
-				"label": "Image Filter",
+				"label": "Filtro de imagen",
 				"options": {
-					"none": "None",
-					"darken": "Darken",
-					"invert": "Invert"
+					"none": "Ninguno",
+					"darken": "Oscurecer",
+					"invert": "Invertir"
 				}
 			},
-			"publisherStyles": "Publisher Styles",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
+			"publisherStyles": "Estilos del editor",
+			"volumeButtonsNavigate": "Navegar con los botones de volumen",
 			"textAlignment": {
-				"label": "Text Alignment",
+				"label": "Alineación de texto",
 				"options": {
-					"start": "Start",
-					"left": "Left",
-					"center": "Center",
-					"right": "Right",
-					"justify": "Justify"
+					"start": "Inicio",
+					"left": "Izquierda",
+					"center": "Centro",
+					"right": "Derecha",
+					"justify": "Justificado"
 				}
 			},
-			"typeScale": "Type Scale",
-			"lineHeight": "Line Height",
-			"paragraphIndent": "Paragraph Indent",
-			"paragraphSpacing": "Paragraph Spacing",
-			"wordSpacing": "Word Spacing",
-			"letterSpacing": "Letter Spacing",
-			"hyphens": "Hyphens",
-			"ligatures": "Ligatures",
+			"typeScale": "Tipo de escala",
+			"lineHeight": "Altura de línea",
+			"paragraphIndent": "Sangría de párrafo",
+			"paragraphSpacing": "Espaciado entre párrafos",
+			"wordSpacing": "Espaciado entre palabras",
+			"letterSpacing": "Espaciado de letras",
+			"hyphens": "Guiones",
+			"ligatures": "Ligaduras",
 			"customizeTheme": {
-				"placeholder": "Theme name",
-				"background": "Background",
-				"text": "Text",
-				"highlight": "Highlight",
-				"premadeThemes": "Premade themes"
+				"placeholder": "Nombre del tema",
+				"background": "Fondo",
+				"text": "Texto",
+				"highlight": "Resaltado",
+				"premadeThemes": "Temas predefinidos"
 			}
 		},
 		"libraryType": {
-			"BOOK": "Books",
-			"COMIC": "Comics",
-			"LIGHT_NOVEL": "Light Novels",
-			"MANGA": "Manga",
-			"MANHWA": "Manhwa",
-			"MIXED": "Mixed",
+			"BOOK": "Libros",
+			"COMIC": "Cómics",
+			"LIGHT_NOVEL": "Novelas Ligeras",
+			"MANGA": "Mangas",
+			"MANHWA": "Manhwas",
+			"MIXED": "Mixto",
 			"WEBTOON": "Webtoons",
-			"WEB_NOVEL": "Web Novels"
+			"WEB_NOVEL": "Novelas Web"
 		},
 		"savedServerActions": {
 			"clearCache": "Clear Cache",
@@ -3514,31 +3514,31 @@
 			}
 		},
 		"filtering": {
-			"notStarted": "Not Started",
-			"currentlyReading": "Currently Reading",
-			"finished": "Finished"
+			"notStarted": "No iniciados",
+			"currentlyReading": "Leyendo actualmente",
+			"finished": "Finalizado"
 		},
 		"sorting": {
-			"labelEllipsis": "Sort By...",
+			"labelEllipsis": "Ordenar por...",
 			"sortField": {
-				"NAME": "Name",
-				"ADDED_AT": "Date Added",
-				"CREATED_AT": "Date Added",
-				"NUMBER": "Series Position",
-				"SERIES": "Series",
-				"YEAR": "Year Published"
+				"NAME": "Nombre",
+				"ADDED_AT": "Fecha de adición",
+				"CREATED_AT": "Fecha de creación",
+				"NUMBER": "Posición en la serie",
+				"SERIES": "Serie",
+				"YEAR": "Año de publicación"
 			},
 			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
+				"ASC": "Ascendente",
+				"DESC": "Descendente"
 			},
 			"sortDirectionString": {
 				"ASC": "A → Z",
 				"DESC": "Z → A"
 			},
 			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
+				"ASC": "Más antiguos primero",
+				"DESC": "Más reciente primero"
 			},
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",
@@ -3547,7 +3547,7 @@
 		},
 		"widgets": {
 			"readingNow": {
-				"nothingInProgress": "Nothing in Progress"
+				"nothingInProgress": "Nada en progreso"
 			}
 		}
 	}

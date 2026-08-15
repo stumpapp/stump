@@ -898,7 +898,7 @@ mod tests {
 		}
 		.insert(db)
 		.await
-		.expect("could not insert library access grant for local user");
+		.expect("could not insert library access record for local user");
 
 		api_key::ActiveModel {
 			user_id: Set(local_user.id.clone()),
@@ -1101,15 +1101,15 @@ mod tests {
 			"Should have 1 favorite series transferred"
 		);
 
-		let grants = library_access::Entity::find()
+		let access_records = library_access::Entity::find()
 			.filter(library_access::Column::UserId.eq(&oidc_user.id))
 			.all(&db)
 			.await
 			.expect("Failed to query library access");
 		assert_eq!(
-			grants.len(),
+			access_records.len(),
 			1,
-			"Should have 1 library access grant transferred"
+			"Should have 1 library access record transferred"
 		);
 
 		let visits = last_library_visit::Entity::find()

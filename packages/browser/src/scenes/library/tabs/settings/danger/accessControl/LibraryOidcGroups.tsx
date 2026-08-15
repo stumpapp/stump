@@ -57,6 +57,12 @@ export function LibraryOidcGroups() {
 		},
 	})
 
+	const isUnset = !library.oidcGroups
+	const isDifferent = isUnset
+		? selection.length > 0 // when unset, any selection is different
+		: !selection.every((group) => library.oidcGroups?.includes(group)) ||
+			selection.length !== library.oidcGroups?.length
+
 	const onSaveChanges = () => mutate({ id: library.id, oidcGroups: selection })
 
 	if (!oidcConfig.enabled) return null
@@ -86,7 +92,9 @@ export function LibraryOidcGroups() {
 			/>
 
 			<div>
-				<Button onClick={() => setShowConfirmationModal(true)}>{t('common.saveChanges')}</Button>
+				<Button disabled={!isDifferent || isPending} onClick={() => setShowConfirmationModal(true)}>
+					{t('common.saveChanges')}
+				</Button>
 			</div>
 
 			<ConfirmationModal

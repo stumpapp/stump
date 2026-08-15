@@ -17,7 +17,7 @@ import { LastCommonSessionCard, RemoteSessionList, SourceSessionCard } from './S
 import { AcceptedProgressionData, ConflictRecord } from './types'
 
 const conflictViewQuery = graphql(`
-	query ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int!) {
+	query ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int) {
 		readingSessionConflictView(mediaId: $mediaId, branchedSessionId: $branchedSessionId) {
 			ancestorSession {
 				__typename
@@ -123,8 +123,8 @@ function SyncConflictPageContent({
 		sdk,
 		conflictViewQuery,
 		['conflictView', record.downloaded_files.id, branchedSessionId],
-		{ mediaId: record.downloaded_files.id, branchedSessionId: branchedSessionId ?? 0 },
-		{ enabled: isWithinLoadingRange && branchedSessionId != null },
+		{ mediaId: record.downloaded_files.id, branchedSessionId },
+		{ enabled: isWithinLoadingRange },
 	)
 
 	const conflictView = data?.readingSessionConflictView

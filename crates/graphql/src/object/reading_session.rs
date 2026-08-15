@@ -27,14 +27,13 @@ impl From<reading_session::Model> for ReadingSession {
 	}
 }
 
-// TODO(conflicts): this should be optional since if downloaded on client before readign started there wouldn't be an ancestor session
-
 /// a view through which a client can resolve conflicts relative to a local ancestor session
 /// and any number of remote sessions which were created afterwards
 #[derive(Debug, Clone, SimpleObject)]
 pub struct ReadingSessionConflictResolutionView {
-	/// the last session which was known to be in sync with the local client
-	pub ancestor_session: ReadingSession,
+	/// the last session which was known to be in sync with the local client. it's possible there is no ancestor session, e.g. if
+	/// the book was downloaded on the client before any reading sessions were created on the server
+	pub ancestor_session: Option<ReadingSession>,
 	/// all sessions created/updated on **this server** (remote) after the ancestor session, ordered
 	/// by created_at ascending
 	pub remote_sessions: Vec<ReadingSession>,

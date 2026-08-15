@@ -3668,7 +3668,7 @@ export type QueryReadingListsArgs = {
 
 
 export type QueryReadingSessionConflictViewArgs = {
-  branchedSessionId: Scalars['Int']['input'];
+  branchedSessionId?: InputMaybe<Scalars['Int']['input']>;
   mediaId: Scalars['ID']['input'];
 };
 
@@ -3807,8 +3807,11 @@ export type ReadingSession = {
  */
 export type ReadingSessionConflictResolutionView = {
   __typename?: 'ReadingSessionConflictResolutionView';
-  /** the last session which was known to be in sync with the local client */
-  ancestorSession: ReadingSession;
+  /**
+   * the last session which was known to be in sync with the local client. it's possible there is no ancestor session, e.g. if
+   * the book was downloaded on the client before any reading sessions were created on the server
+   */
+  ancestorSession?: Maybe<ReadingSession>;
   /**
    * all sessions created/updated on **this server** (remote) after the ancestor session, ordered
    * by created_at ascending
@@ -5389,13 +5392,6 @@ export type PushLocalReadProgressionMutationVariables = Exact<{
 
 export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', id: number, updatedAt?: any | null } };
 
-export type PushResetElapsedSecondsMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type PushResetElapsedSecondsMutation = { __typename?: 'Mutation', resetElapsedSeconds: boolean };
-
 export type ContinueReadingQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
 }>;
@@ -5563,11 +5559,11 @@ export type LibrarySeriesListHeaderScanLibraryMutation = { __typename?: 'Mutatio
 
 export type ReadingSessionConflictViewQueryVariables = Exact<{
   mediaId: Scalars['ID']['input'];
-  branchedSessionId: Scalars['Int']['input'];
+  branchedSessionId?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type ReadingSessionConflictViewQuery = { __typename?: 'Query', readingSessionConflictView: { __typename?: 'ReadingSessionConflictResolutionView', ancestorSession: { __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }, remoteSessions: Array<{ __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }> } };
+export type ReadingSessionConflictViewQuery = { __typename?: 'Query', readingSessionConflictView: { __typename?: 'ReadingSessionConflictResolutionView', ancestorSession?: { __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } | null, remoteSessions: Array<{ __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }> } };
 
 export type AcceptLocalProgressMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9552,11 +9548,6 @@ export const PushLocalReadProgressionDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PushLocalReadProgressionMutation, PushLocalReadProgressionMutationVariables>;
-export const PushResetElapsedSecondsDocument = new TypedDocumentString(`
-    mutation PushResetElapsedSeconds($id: ID!) {
-  resetElapsedSeconds(id: $id)
-}
-    `) as unknown as TypedDocumentString<PushResetElapsedSecondsMutation, PushResetElapsedSecondsMutationVariables>;
 export const ContinueReadingDocument = new TypedDocumentString(`
     query ContinueReading($pagination: Pagination) {
   keepReading(pagination: $pagination) {
@@ -9954,7 +9945,7 @@ export const LibrarySeriesListHeaderScanLibraryDocument = new TypedDocumentStrin
 }
     `) as unknown as TypedDocumentString<LibrarySeriesListHeaderScanLibraryMutation, LibrarySeriesListHeaderScanLibraryMutationVariables>;
 export const ReadingSessionConflictViewDocument = new TypedDocumentString(`
-    query ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int!) {
+    query ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int) {
   readingSessionConflictView(
     mediaId: $mediaId
     branchedSessionId: $branchedSessionId

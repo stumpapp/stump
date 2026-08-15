@@ -12,7 +12,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect,
+	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -800,43 +800,54 @@ impl MediaQuery {
 		&self,
 		ctx: &Context<'_>,
 		media_id: ID,
-		branched_session_id: i32,
+		branched_session_id: Option<i32>,
 	) -> Result<ReadingSessionConflictResolutionView> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let media_id_str = media_id.as_str();
 
-		let ancestor = reading_session::Entity::find_by_id(branched_session_id)
-			.filter(reading_session::Column::UserId.eq(&user.id))
-			.filter(reading_session::Column::MediaId.eq(media_id_str))
-			.one(conn)
-			.await?
-			.ok_or_else(|| "Reading session not found".to_string())?;
+		let ancestor_session = match branched_session_id {
+			Some(session_id) => {
+				reading_session::Entity::find_by_id(session_id)
+					.filter(reading_session::Column::UserId.eq(&user.id))
+					.filter(reading_session::Column::MediaId.eq(media_id_str))
+					.one(conn)
+					.await?
+			},
+			None => None,
+		};
 
 		let remote_sessions =
 			reading_session::Entity::find_for_user_and_media(user, media_id_str)
-				.filter(
-					Condition::any()
-						// any new sessions created after the ancestor
-						.add(reading_session::Column::CreatedAt.gt(ancestor.created_at))
-						// the ancestor itself was updated after its creation, should be included but it is a bit awkward
-						.add(
-							Condition::all()
-								.add(reading_session::Column::Id.eq(ancestor.id))
-								.add(
-									reading_session::Column::UpdatedAt
-										.gt(ancestor.created_at),
-								),
-						),
-				)
+				// find_for_user_and_media, you might guess, filters by user and media already. so we only need to filter by ancestor session
+				// when it exists, otherwise its just all sessions for the user and media
+				.apply_if(ancestor_session.clone(), |query, ancestor| {
+					query.filter(
+						Condition::any()
+							// any new sessions created after the ancestor
+							.add(
+								reading_session::Column::CreatedAt
+									.gt(ancestor.created_at),
+							)
+							// the ancestor itself was updated after its creation, should be included but it is a bit awkward
+							.add(
+								Condition::all()
+									.add(reading_session::Column::Id.eq(ancestor.id))
+									.add(
+										reading_session::Column::UpdatedAt
+											.gt(ancestor.created_at),
+									),
+							),
+					)
+				})
 				.order_by_asc(reading_session::Column::CreatedAt)
 				.order_by_asc(reading_session::Column::Id)
 				.all(conn)
 				.await?;
 
 		Ok(ReadingSessionConflictResolutionView {
-			ancestor_session: ReadingSession::from(ancestor),
+			ancestor_session: ancestor_session.map(ReadingSession::from),
 			remote_sessions: remote_sessions
 				.into_iter()
 				.map(ReadingSession::from)

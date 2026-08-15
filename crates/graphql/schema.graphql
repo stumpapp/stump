@@ -2487,7 +2487,7 @@ type Query {
 	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
-	readingSessionConflictView(mediaId: ID!, branchedSessionId: Int!): ReadingSessionConflictResolutionView!
+	readingSessionConflictView(mediaId: ID!, branchedSessionId: Int): ReadingSessionConflictResolutionView!
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
@@ -2641,8 +2641,11 @@ a view through which a client can resolve conflicts relative to a local ancestor
 and any number of remote sessions which were created afterwards
 """
 type ReadingSessionConflictResolutionView {
-	"the last session which was known to be in sync with the local client"
-	ancestorSession: ReadingSession!
+	"""
+	the last session which was known to be in sync with the local client. it's possible there is no ancestor session, e.g. if
+	the book was downloaded on the client before any reading sessions were created on the server
+	"""
+	ancestorSession: ReadingSession
 	"""
 	all sessions created/updated on **this server** (remote) after the ancestor session, ordered
 	by created_at ascending

@@ -8,6 +8,7 @@ use models::{
 	},
 	shared::{
 		enums::{ReadingStatus, UserPermission},
+		image::ImageRef,
 		permission_set::PermissionSet,
 	},
 };
@@ -37,6 +38,7 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
+	#[graphql(deprecation = "TODO: aaron kill me plz")]
 	async fn avatar_url(&self, ctx: &Context<'_>) -> Result<Option<String>> {
 		let service = ctx.data::<ServiceContext>()?;
 
@@ -48,6 +50,25 @@ impl User {
 			"/api/v2/users/{}/avatar",
 			self.model.id
 		))))
+	}
+
+	/// a reference to the avatar image and its metadata for this user
+	async fn avatar(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		let dimensions = self
+			.model
+			.avatar_meta
+			.as_ref()
+			.and_then(|meta| meta.dimensions.as_ref())
+			.map(|dim| (dim.width, dim.height));
+
+		Ok(ImageRef {
+			url: service.format_url(format!("/api/v2/users/{}/avatar", self.model.id)),
+			height: dimensions.as_ref().map(|dim| dim.1),
+			width: dimensions.as_ref().map(|dim| dim.0),
+			metadata: self.model.avatar_meta.clone(),
+		})
 	}
 
 	#[graphql(

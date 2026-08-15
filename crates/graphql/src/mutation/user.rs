@@ -25,7 +25,9 @@ use sea_orm::{
 	Set, TransactionTrait, TryIntoModel,
 };
 use std::{io::Read, path::Path};
-use stump_core::config::StumpConfig;
+use stump_core::{
+	config::StumpConfig, filesystem::image::generate_image_metadata_from_bytes,
+};
 use tower_sessions::Session;
 
 #[derive(Default)]
@@ -118,6 +120,15 @@ impl UserMutation {
 			}
 		}
 
+		let avatar_meta =
+			match generate_image_metadata_from_bytes(image_bytes.clone()).await {
+				Ok(meta) => Some(meta),
+				Err(e) => {
+					tracing::error!(error = ?e, "Failed to generate image metadata");
+					None
+				},
+			};
+
 		let avatar_path = avatars_dir.join(format!("{}.{}", target_id, extension));
 		tokio::fs::write(&avatar_path, &image_bytes)
 			.await
@@ -134,6 +145,7 @@ impl UserMutation {
 
 		let mut active = updated_user;
 		active.avatar_path = Set(Some(avatar_path_str));
+		active.avatar_meta = Set(avatar_meta);
 		let result = active.update(conn).await?;
 
 		Ok(User::from(result))
@@ -172,6 +184,7 @@ impl UserMutation {
 
 		let mut active = existing.into_active_model();
 		active.avatar_path = Set(None);
+		active.avatar_meta = Set(None);
 		let result = active.update(conn).await?;
 
 		Ok(User::from(result))

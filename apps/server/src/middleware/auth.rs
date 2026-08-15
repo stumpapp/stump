@@ -50,6 +50,7 @@ use super::host::HostExtractor;
 
 pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
+// TODO(avatar): need to inject avatar image ref
 fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
 	if user.avatar_path.is_some() {
 		user.avatar_url =

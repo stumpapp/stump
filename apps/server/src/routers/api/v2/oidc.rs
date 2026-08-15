@@ -12,6 +12,7 @@ use sea_orm::{
 	QueryFilter, Set, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
+use stump_core::filesystem::image::generate_image_metadata_from_bytes;
 use tower_sessions::Session;
 
 use openidconnect::PkceCodeChallenge;
@@ -300,6 +301,15 @@ async fn callback(
 						.get_avatars_dir()
 						.join(format!("{}.{}", user.id, ext));
 
+					let avatar_meta =
+						match generate_image_metadata_from_bytes(bytes.clone()).await {
+							Ok(meta) => Some(meta),
+							Err(e) => {
+								tracing::error!(error = ?e, "Failed to generate image metadata");
+								None
+							},
+						};
+
 					match tokio::fs::write(&dest_path, &bytes).await {
 						Ok(_) => {
 							let avatar_path_str = dest_path.to_string_lossy().to_string();
@@ -309,6 +319,10 @@ async fn callback(
 									sea_orm::sea_query::Expr::value(Some(
 										avatar_path_str,
 									)),
+								)
+								.col_expr(
+									user::Column::AvatarMeta,
+									sea_orm::sea_query::Expr::value(avatar_meta),
 								)
 								.filter(user::Column::Id.eq(user.id.clone()))
 								.exec(ctx.conn.as_ref())

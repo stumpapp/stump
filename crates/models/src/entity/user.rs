@@ -9,7 +9,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
-	shared::{enums::UserPermission, permission_set::PermissionSet},
+	shared::{
+		enums::UserPermission, image::ImageMetadata, permission_set::PermissionSet,
+	},
 };
 
 use super::{age_restriction, user_preferences};
@@ -28,6 +30,8 @@ pub struct Model {
 	pub is_server_owner: bool,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub avatar_path: Option<String>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub avatar_meta: Option<ImageMetadata>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -52,7 +56,9 @@ pub struct Model {
 pub struct AuthUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
+	// TODO(avatar): need to do avatar: Option<ImageRef> here
 	pub avatar_url: Option<String>,
+	pub avatar_meta: Option<ImageMetadata>,
 	pub username: String,
 	pub is_server_owner: bool,
 	pub is_locked: bool,
@@ -83,6 +89,7 @@ impl FromQueryResult for AuthUser {
 		let permissions_str: String = res.try_get("", "permissions")?;
 		let permissions = PermissionSet::from(permissions_str).resolve_into_vec();
 		let avatar_path: Option<String> = res.try_get("", "avatar_path")?;
+		let avatar_meta: Option<ImageMetadata> = res.try_get("", "avatar_meta")?;
 		let age_restriction = match age_restriction::Model::from_query_result(res, "") {
 			Ok(age_restriction) => Some(age_restriction),
 			Err(sea_orm::DbErr::RecordNotFound(_)) => None,
@@ -109,6 +116,7 @@ impl FromQueryResult for AuthUser {
 			// Note: This will never get populated at the db-level, the API will
 			// inject based on the service details
 			avatar_url: None,
+			avatar_meta,
 			username,
 			is_server_owner,
 			is_locked,
@@ -123,6 +131,7 @@ impl FromQueryResult for AuthUser {
 pub struct LoginUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
+	pub avatar_meta: Option<ImageMetadata>,
 	pub username: String,
 	pub hashed_password: String,
 	pub is_server_owner: bool,
@@ -175,6 +184,7 @@ impl FromQueryResult for LoginUser {
 		Ok(LoginUser {
 			id: user.id,
 			avatar_path: user.avatar_path,
+			avatar_meta: user.avatar_meta,
 			username: user.username,
 			hashed_password: user.hashed_password,
 			is_server_owner: user.is_server_owner,
@@ -198,6 +208,7 @@ impl From<LoginUser> for AuthUser {
 			// Note: This will never get populated at the db-level, the API will
 			// inject based on the service details
 			avatar_url: None,
+			avatar_meta: user.avatar_meta,
 			username: user.username,
 			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,

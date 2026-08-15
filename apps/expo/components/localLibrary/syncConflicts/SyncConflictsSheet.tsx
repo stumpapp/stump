@@ -142,6 +142,8 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 	return (
 		<>
 			<TrueSheet
+				// i find it irritating i need this key for stuff to show up!
+				key={conflictCount > 0 ? 'hasConflicts' : 'noConflicts'}
 				name={SYNC_CONFLICTS_SHEET_NAME}
 				ref={ref}
 				detents={[1]}
@@ -168,7 +170,6 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 				}}
 				insetAdjustment="automatic"
 			>
-				{/*i find it irritating i need this key for stuff to show up*/}
 				<View key={updatedAt?.toISOString()}>
 					{!conflictCount && (
 						<View className="p-6 flex-1 justify-center">

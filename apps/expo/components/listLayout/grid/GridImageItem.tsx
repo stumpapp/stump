@@ -91,37 +91,36 @@ export default function GridImageItem({
 						)}
 
 						{hasCompleted && (
-							<BlurView
-								blurTarget={blurTargetRef}
-								blurMethod="dimezisBlurView"
+							<View
 								className={cn(
 									'right-2 bottom-2 squircle absolute z-30 rounded-full',
 									isReading && 'bottom-5',
 								)}
-								intensity={4}
 							>
-								<View className="bg-white/30 flex flex-row items-center justify-center">
-									{showNumber && (
-										<Text
-											className="font-bold ml-2 shadow tablet:text-base"
-											style={{
-												color: '#f5f3ef',
-											}}
-										>
-											{numberOfReads}
-										</Text>
-									)}
+								<BlurView blurTarget={blurTargetRef} blurMethod="dimezisBlurView" intensity={4}>
+									<View className="bg-white/30 flex flex-row items-center justify-center">
+										{showNumber && (
+											<Text
+												className="font-bold ml-2 shadow tablet:text-base"
+												style={{
+													color: '#f5f3ef',
+												}}
+											>
+												{numberOfReads}
+											</Text>
+										)}
 
-									<Icon
-										as={Check}
-										// This icon looks optically off center so I've adjusted it down a bit
-										className="shadow m-1 top-[0.7]"
-										size={20}
-										color="#f5f3ef"
-										strokeWidth={2.5}
-									/>
-								</View>
-							</BlurView>
+										<Icon
+											as={Check}
+											// This icon looks optically off center so I've adjusted it down a bit
+											className="shadow m-1 top-[0.7] z-50"
+											size={20}
+											color="#f5f3ef"
+											strokeWidth={2.5}
+										/>
+									</View>
+								</BlurView>
+							</View>
 						)}
 					</View>
 

@@ -54,8 +54,13 @@ async fn sync_oidc_groups_and_permissions(
 	Ok(())
 }
 
+// Note: i feel like this is easily conflated with sync_oidc_library_access_for_library, the
+// difference here is that this function is for syncing access after a user logs in and we get
+// their oidc group, while sync_oidc_library_access_for_library is for syncing access after a library
+// has been updated with new oidc groups (applied to all oidc users).
+
 /// sync the user's library access based on their OIDC groups and libraries which are managed by
-/// OIDC groups
+/// OIDC groups.
 #[tracing::instrument(skip(tx, groups), err)]
 pub async fn sync_oidc_library_access(
 	tx: &impl ConnectionTrait,
@@ -214,4 +219,118 @@ pub async fn sync_oidc_library_access_for_library(
 	Ok(())
 }
 
-// TODO(oidc): tests plz
+#[cfg(test)]
+mod tests {
+	use std::collections::HashMap;
+
+	use crate::{
+		entity::user,
+		services::oidc_sync::{
+			sync_oidc_groups_and_permissions, sync_oidc_library_access,
+		},
+		shared::{enums::UserPermission, permission_set::PermissionSet},
+	};
+
+	use sea_orm::prelude::*;
+	use tests::{db::test_database, fake_data};
+
+	#[tokio::test]
+	async fn test_sync_oidc_groups_and_permissions_only_permissions() {
+		let db = test_database().await;
+
+		let user = fake_data::User::new("oromei").insert(&db).await;
+		assert!(user.oidc_groups.is_none());
+
+		sync_oidc_groups_and_permissions(
+			&db,
+			&user.id,
+			&["silly".to_string(), "goose".to_string()],
+			None,
+		)
+		.await
+		.expect("should have synced oidc groups");
+
+		let updated_user = user::Entity::find_by_id(user.id.clone())
+			.one(&db)
+			.await
+			.expect("should have queried user")
+			.expect("user should exist");
+		assert_eq!(updated_user.oidc_groups, Some("silly,goose".to_string()));
+		assert!(updated_user.permissions.is_none());
+	}
+
+	#[tokio::test]
+	async fn test_sync_oidc_groups_and_permissions() {
+		let db = test_database().await;
+
+		let user = fake_data::User::new("oromei").insert(&db).await;
+		assert!(user.oidc_groups.is_none());
+
+		let group_permission_mapping = [
+			(
+				"silly".to_string(),
+				vec![UserPermission::AccessApiKeys, UserPermission::DownloadFile],
+			),
+			(
+				"goose".to_string(),
+				vec![UserPermission::AccessBookClub, UserPermission::ReadUsers],
+			),
+		]
+		.into_iter()
+		.collect::<HashMap<String, Vec<UserPermission>>>();
+
+		sync_oidc_groups_and_permissions(
+			&db,
+			&user.id,
+			&["silly".to_string(), "goose".to_string()],
+			Some(group_permission_mapping.clone()),
+		)
+		.await
+		.expect("should have synced oidc groups");
+
+		let updated_user = user::Entity::find_by_id(user.id.clone())
+			.one(&db)
+			.await
+			.expect("should have queried user")
+			.expect("user should exist");
+		assert_eq!(updated_user.oidc_groups, Some("silly,goose".to_string()));
+
+		let permission_set = PermissionSet::from(
+			updated_user.permissions.expect("permissions should be set"),
+		);
+		for permissions in group_permission_mapping.values() {
+			assert!(permissions.iter().all(|p| permission_set.contains(*p)));
+		}
+	}
+
+	#[tokio::test]
+	async fn test_sync_oidc_groups_and_permissions_not_found() {
+		let db = test_database().await;
+
+		let err = sync_oidc_groups_and_permissions(
+			&db,
+			"droids-you-are-looking-for",
+			&["silly".to_string(), "goose".to_string()],
+			None,
+		)
+		.await
+		.expect_err("should have failed to find user and thus failed to sync");
+
+		assert!(matches!(err, sea_orm::DbErr::Custom(msg) if msg.contains("not found")));
+	}
+
+	#[tokio::test]
+	async fn test_sync_oidc_library_access() {}
+
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_no_oidc_libraries() {}
+
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_empty_groups_skipped() {}
+
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_for_library() {}
+
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_for_library_empty_groups_skipped() {}
+}

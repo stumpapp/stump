@@ -7,7 +7,7 @@ use models::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
 		library_access, library_config, library_scan_record, library_tag, media,
-		media_metadata, metadata_provider_config, series, series_metadata, tag, user,
+		media_metadata, metadata_provider_config, series, series_metadata, tag,
 	},
 	services::oidc_sync::sync_oidc_library_access_for_library,
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
@@ -32,7 +32,6 @@ use tokio::fs;
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	error_message,
 	guard::PermissionGuard,
 	input::{library::CreateOrUpdateLibraryInput, thumbnail::UpdateThumbnailInput},
 	object::library::Library,

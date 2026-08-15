@@ -291,9 +291,17 @@ const columns = [
 	}),
 ]
 
+// TODO(permissions): i added the missing permissions to satisfy the record type and avoid ts errors, but we will need localization
+// and another pass at the permission groups/inheritance before merge
 export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
-	[UserPermission.CreateBookClub]: [UserPermission.AccessBookClub],
 	[UserPermission.AccessBookClub]: [],
+	[UserPermission.CreateBookClub]: [UserPermission.AccessBookClub],
+	[UserPermission.ModerateBookClubs]: [UserPermission.AccessBookClub],
+	[UserPermission.ManageBookClubs]: [
+		UserPermission.AccessBookClub,
+		UserPermission.CreateBookClub,
+		UserPermission.ModerateBookClubs,
+	],
 	[UserPermission.EmailArbitrarySend]: [UserPermission.EmailSend],
 	[UserPermission.EmailSend]: [UserPermission.EmailerRead],
 	[UserPermission.EmailerCreate]: [UserPermission.EmailerRead],
@@ -303,6 +311,7 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.AccessKoreaderSync]: [],
 	[UserPermission.AccessKoboSync]: [],
 	[UserPermission.AccessSmartList]: [],
+	[UserPermission.ViewAllSmartLists]: [UserPermission.AccessSmartList],
 	[UserPermission.DownloadFile]: [],
 	[UserPermission.FileExplorer]: [],
 	[UserPermission.UploadFile]: [UserPermission.ScanLibrary],
@@ -320,7 +329,18 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.ManageNotifier]: [UserPermission.CreateNotifier, UserPermission.ReadNotifier],
 	[UserPermission.DeleteNotifier]: [UserPermission.ManageNotifier],
 	[UserPermission.ReadUsers]: [],
-	[UserPermission.ManageUsers]: [UserPermission.ReadUsers],
+	[UserPermission.CreateUser]: [UserPermission.ReadUsers],
+	[UserPermission.UpdateUser]: [UserPermission.ReadUsers],
+	[UserPermission.DeleteUser]: [UserPermission.ReadUsers],
+	[UserPermission.LockUser]: [UserPermission.ReadUsers],
+	[UserPermission.ManageUserSessions]: [UserPermission.ReadUsers],
+	[UserPermission.ManageUsers]: [
+		UserPermission.ReadUsers,
+		UserPermission.CreateUser,
+		UserPermission.DeleteUser,
+		UserPermission.LockUser,
+		UserPermission.ManageUserSessions,
+	],
 	[UserPermission.ReadJobs]: [],
 	[UserPermission.ManageJobs]: [UserPermission.ReadJobs],
 	[UserPermission.ReadPersistedLogs]: [],
@@ -341,4 +361,5 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.ChangePassword]: [],
 	[UserPermission.ChangeUsername]: [],
 	[UserPermission.ChangeAvatar]: [],
+	[UserPermission.AccessGraphQlPlayground]: [],
 }

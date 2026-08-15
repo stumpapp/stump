@@ -1,0 +1,34 @@
+---
+title: System
+description: Subcommands for interacting with the system
+---
+
+<Callout title="Help" type="idea">
+
+You can see all available subcommands for the `system` by running:
+
+```bash copy
+./stump system --help
+```
+
+</Callout>
+
+## Journal Mode
+
+You can set the journal mode for your Stump SQLite database by running:
+
+```bash copy
+./stump system set-journal-mode --mode <mode>
+```
+
+You should really avoid interacting with this command unless you really know what you're doing. The default journal mode is `WAL`, which is the recommended mode for Stump.
+
+## Rotating JWT Secrets
+
+If you need to rotate the secrets used for signing JWTs, you can do so by running:
+
+```bash copy
+./stump system rotate-jwt-secrets
+```
+
+This will generate new signing keys, encrypted at rest in your database, and will immediately invalidate any existing tokens.

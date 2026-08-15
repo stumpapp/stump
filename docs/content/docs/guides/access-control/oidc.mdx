@@ -6,6 +6,21 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 Stump supports OpenID Connect (OIDC) authentication, allowing users to sign in using external identity providers like Authelia, Keycloak, PocketID, and others.
 
+## Important Limitations
+
+I want to highlight a few important limitations of Stump's OIDC implementation:
+
+### Revocation After Access Changes
+
+A user may be using JWT auth for interacting with Stump, and if their access token is valid while their permissions are changed in the OIDC provider, Stump will be unaware of the change until the next time the user logs in or attempts to refresh their access token.
+
+You control how long short-lived access tokens are valid via [`access_token_ttl`](/docs/guides/configuration/server-config#stump_access_token_ttl), but unless you [rotate the secrets](/docs/developer/cli/system#rotating-jwt-secrets) used for signing JWTs after updating permissions in your OIDC provider, Stump won't be able to revoke access for a user until their access token expires (1 hour by default) and they attempt to refresh it / log in again.
+
+This is largely a limitation from the fact that the change happens outside of Stump's control. If you need to revoke access immediately, you can:
+
+- [Rotate the secrets](/docs/developer/cli/system#rotating-jwt-secrets) used for signing JWTs, which will immediately invalidate all existing tokens
+- Delete all sessions for particular users via the Users Management page(s) at `/settings/users` in the Stump web interface
+
 ## Provider Configuration
 
 This section provides general guidance for configuring popular OIDC providers to work with Stump. I cannot feasibly cover every provider, however the below examples should give you a good starting point.
@@ -245,6 +260,10 @@ And, finally, a two libraries configured along the lines of:
 You can configure a library to be OIDC-managed by specifying the groups which are allowed to access the library.
 
 Using the example above, users in the `admins` group will have access to both Library A and Library B, while users in the `regular` group will only have access to Library B.
+
+#### Mixing OIDC and Local Users
+
+If you haven't disabled local authentication, you can also manually assign local users to libraries in addition to OIDC groups. This process is outlined in the [Library Access](/docs/guides/access-control/library-access#configure-access) guide.
 
 ### OIDC-Synced Permissions
 

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, MultiSelect, Select};
 use models::entity::{library, library_access, user};
@@ -72,7 +74,7 @@ async fn change_access(
 	let user_username_to_id = users
 		.iter()
 		.map(|user| (user.username.clone(), user.id.clone()))
-		.collect::<std::collections::HashMap<String, String>>();
+		.collect::<HashMap<String, String>>();
 
 	let user_ids_with_access = library_access::Entity::find()
 		.filter(library_access::Column::LibraryId.eq(library_id.clone()))
@@ -84,7 +86,7 @@ async fn change_access(
 	let user_id_to_can_access = users
 		.iter()
 		.map(|user| (user.id.clone(), user_ids_with_access.contains(&user.id)))
-		.collect::<std::collections::HashMap<String, bool>>();
+		.collect::<HashMap<String, bool>>();
 
 	let selections = MultiSelect::with_theme(&ColorfulTheme::default())
 		.with_prompt(format!(

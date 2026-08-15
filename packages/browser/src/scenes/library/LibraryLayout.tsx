@@ -20,6 +20,7 @@ const query = graphql(`
 			name
 			description
 			path
+			oidcGroups
 			stats {
 				seriesCount
 				bookCount

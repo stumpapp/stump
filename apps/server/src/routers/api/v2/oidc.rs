@@ -7,12 +7,14 @@ use axum::{
 	Extension, Json, Router,
 };
 use models::{
+	domain::oidc_sync::oidc_claims_to_permission_set,
 	entity::{server_config, user, user_preferences},
+	services::oidc_sync::sync_oidc_user,
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
-	ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait,
-	QueryFilter, Set, TransactionTrait,
+	ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, IntoActiveModel,
+	PaginatorTrait, QueryFilter, Set, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
@@ -221,6 +223,7 @@ async fn callback(
 		query.code,
 		extra_audiences,
 		pkce_verifier,
+		&oidc_config.groups_claim,
 	)
 	.await
 	.map_err(|e| {
@@ -230,9 +233,11 @@ async fn callback(
 
 	tracing::debug!(subject = %claims.subject, email = ?claims.email, "OIDC claims received");
 
+	let txn = ctx.conn.begin().await?;
+
 	let existing_user = user::Entity::find()
 		.filter(user::Column::OidcIssuerId.eq(&claims.subject))
-		.one(ctx.conn.as_ref())
+		.one(&txn)
 		.await
 		.map_err(|e| {
 			tracing::error!("Database error finding user: {:?}", e);
@@ -259,48 +264,50 @@ async fn callback(
 		}
 
 		// Determine if this is the first user (should be server owner)
-		let user_count = user::Entity::find()
-			.count(ctx.conn.as_ref())
-			.await
-			.map_err(|e| {
-				tracing::error!(?e, "Failed to count users for OIDC registration");
-				APIError::InternalServerError("Database error".to_string())
-			})?;
-		let is_server_owner = user_count == 0;
+		let user_count = user::Entity::find().count(&txn).await.map_err(|e| {
+			tracing::error!(?e, "Failed to count users for OIDC registration");
+			APIError::InternalServerError("Database error".to_string())
+		})?;
+		let is_first_user = user_count == 0;
 
-		let username = ensure_unique_username(ctx.conn.as_ref(), &claims.email).await?;
+		let username = ensure_unique_username(&txn, &claims.email).await?;
 
-		let bootstrap_permissions = if is_server_owner {
+		// oidc group mapping will take precedence over what we typically do for a userless server
+		// getting its first user
+		let bootstrap_permissions = if !oidc_config.group_permission_mapping.is_empty() {
+			oidc_claims_to_permission_set(
+				&claims.groups,
+				&oidc_config.group_permission_mapping,
+			)
+			.resolve_into_string()
+		} else if is_first_user {
 			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
 		} else {
 			None
 		};
-
-		let tx = ctx.conn.begin().await?;
 
 		let active_model = user::ActiveModel {
 			username: Set(username),
 			hashed_password: Set(String::new()), // OIDC users don't have a password
 			oidc_issuer_id: Set(Some(claims.subject.clone())),
 			oidc_email: Set(Some(claims.email.clone())),
-			is_server_owner: Set(is_server_owner),
+			// TODO(permissions): rm is_server_owner
+			is_server_owner: Set(is_first_user),
 			permissions: Set(bootstrap_permissions),
 			..Default::default()
 		};
-		let created_user = active_model.insert(&tx).await?;
+		let created_user = active_model.insert(&txn).await?;
 		let created_user_preferences = user_preferences::ActiveModel {
 			user_id: Set(Some(created_user.id.clone())),
 			..Default::default()
 		}
-		.insert(&tx)
+		.insert(&txn)
 		.await?;
 
 		let mut updated_user = created_user.into_active_model();
 		updated_user.user_preferences_id = Set(Some(created_user_preferences.id));
 
-		let user = updated_user.update(&tx).await?;
-
-		tx.commit().await?;
+		let user = updated_user.update(&txn).await?;
 
 		if let Some(picture_url) = &claims.picture {
 			match download_image(picture_url).await {
@@ -321,7 +328,7 @@ async fn callback(
 									)),
 								)
 								.filter(user::Column::Id.eq(user.id.clone()))
-								.exec(ctx.conn.as_ref())
+								.exec(&txn)
 								.await
 							{
 								tracing::warn!(?e, "Failed to persist OIDC avatar path");
@@ -333,15 +340,29 @@ async fn callback(
 					}
 				},
 				Err(e) => {
-					tracing::warn!(?e, "Failed to download OIDC avatar — continuing")
+					tracing::warn!(?e, "Failed to download OIDC avatar")
 				},
 			}
 		}
 
-		tracing::info!(user_id = %user.id, is_server_owner = %is_server_owner, "Created new OIDC user");
+		tracing::info!(user_id = %user.id, is_first_user, "Created new OIDC user");
 
 		(user, true)
 	};
+
+	let oidc_group_mapping = if oidc_config.group_permission_mapping.is_empty() {
+		None
+	} else {
+		Some(oidc_config.group_permission_mapping.clone())
+	};
+
+	if let Err(error) =
+		sync_oidc_user(&txn, &user_model.id, &claims.groups, oidc_group_mapping).await
+	{
+		tracing::warn!(?error, user_id = %user_model.id, "Failed to sync OIDC groups and permissions for user");
+	}
+
+	txn.commit().await?;
 
 	if user_model.is_locked {
 		tracing::warn!(user_id = %user_model.id, "Locked user attempted login via OIDC");
@@ -400,7 +421,7 @@ async fn callback(
 
 /// Ensure username is unique by adding a suffix as needed
 async fn ensure_unique_username(
-	db: &sea_orm::DatabaseConnection,
+	db: &impl ConnectionTrait,
 	base_username: &str,
 ) -> APIResult<String> {
 	let mut username = base_username.to_string();

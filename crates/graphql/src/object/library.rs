@@ -47,6 +47,16 @@ impl From<library::Model> for Library {
 
 #[ComplexObject]
 impl Library {
+	async fn oidc_groups(&self) -> Option<Vec<String>> {
+		self.model.oidc_groups.as_ref().map(|groups| {
+			groups
+				.split(',')
+				.map(|s| s.trim().to_string())
+				.filter(|s| !s.is_empty())
+				.collect()
+		})
+	}
+
 	async fn authors(&self, ctx: &Context<'_>) -> Result<Vec<Author>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

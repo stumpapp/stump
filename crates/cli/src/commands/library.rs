@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, MultiSelect, Select};
-use models::entity::{library, library_access, user};
+use models::{
+	entity::{library, library_access, user},
+	services::oidc_sync::sync_oidc_library_access_for_library,
+};
 use sea_orm::{prelude::*, ActiveModelTrait, ActiveValue::Set, TransactionTrait};
 use stump_core::{config::StumpConfig, database::connect};
 
@@ -50,6 +53,40 @@ async fn ask_for_library(conn: &DatabaseConnection) -> CliResult<String> {
 	Ok(libraries[selection].id.clone())
 }
 
+async fn change_oidc_groups(
+	library: library::Model,
+	conn: &impl ConnectionTrait,
+) -> CliResult<()> {
+	let current_oidc_groups = library.oidc_groups.clone().unwrap_or_default();
+
+	let new_oidc_groups: String = dialoguer::Input::with_theme(&ColorfulTheme::default())
+		.with_prompt(format!(
+			"Enter new OIDC groups for library '{}' (comma-separated)",
+			library.name
+		))
+		.default(current_oidc_groups.clone())
+		.interact_text()?;
+
+	let oidc_groups: Vec<String> = new_oidc_groups
+		.split(',')
+		.map(|g| g.trim().to_string())
+		.filter(|g| !g.is_empty())
+		.collect();
+
+	let progress = default_progress_spinner();
+	progress.set_message("Updating OIDC groups for library...");
+
+	let mut library_model: library::ActiveModel = library.into();
+	library_model.oidc_groups = Set(Some(oidc_groups.join(",")));
+	let updated_library = library_model.update(conn).await?;
+
+	progress.finish_with_message("OIDC groups updated successfully!");
+
+	sync_oidc_library_access_for_library(conn, &updated_library.id, &oidc_groups).await?;
+
+	Ok(())
+}
+
 async fn change_access(
 	LibraryByIdOrAsk { library_id }: LibraryByIdOrAsk,
 	config: &StumpConfig,
@@ -70,7 +107,48 @@ async fn change_access(
 		));
 	};
 
-	let users = user::Entity::find().all(&conn).await?;
+	let is_oidc_enabled = config.oidc.as_ref().is_some_and(|config| config.enabled);
+	let is_forced_oidc = is_oidc_enabled
+		&& config
+			.oidc
+			.as_ref()
+			.is_some_and(|config| config.disable_local_auth);
+
+	let mut should_optionally_change_oidc_groups = false;
+	// if enabled but not forced, means we could have non-oidc users and thus might need to change access for them
+	// in addition to changing groups
+	if is_oidc_enabled && !is_forced_oidc {
+		let confirm = Confirm::with_theme(&ColorfulTheme::default())
+			.with_prompt("OIDC is enabled but not enforced. Do you want to change OIDC group access for this library?")
+			.interact()?;
+		should_optionally_change_oidc_groups = confirm;
+	}
+
+	// forced is just always only changing groups
+	if is_forced_oidc {
+		let oidc_txn = conn.begin().await?;
+		change_oidc_groups(library, &oidc_txn).await?;
+		oidc_txn.commit().await?;
+		return Ok(());
+	} else if is_oidc_enabled && should_optionally_change_oidc_groups {
+		let oidc_txn = conn.begin().await?;
+		change_oidc_groups(library.clone(), &oidc_txn).await?;
+		let confirm = Confirm::with_theme(&ColorfulTheme::default())
+			.with_prompt(
+				"Would you like to also manually change access for non-OIDC users?",
+			)
+			.interact()?;
+		oidc_txn.commit().await?;
+		if !confirm {
+			println!("Exiting...");
+			return Ok(());
+		}
+	}
+
+	let users = user::Entity::find()
+		.filter(user::Column::OidcIssuerId.is_null())
+		.all(&conn)
+		.await?;
 	let user_username_to_id = users
 		.iter()
 		.map(|user| (user.username.clone(), user.id.clone()))

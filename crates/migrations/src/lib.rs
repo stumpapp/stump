@@ -32,6 +32,8 @@ mod m20260617_200820_rm_thumbnails_in_headers_pref;
 mod m20260702_000000_metadata_fetch_partial_results;
 mod m20260804_000000_smart_list_role_to_integer;
 mod m20260811_182550_library_access;
+mod m20260813_151835_library_oidc_groups;
+mod m20260813_220807_user_oidc_groups;
 
 pub struct Migrator;
 
@@ -70,6 +72,8 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260702_000000_metadata_fetch_partial_results::Migration),
 			Box::new(m20260804_000000_smart_list_role_to_integer::Migration),
 			Box::new(m20260811_182550_library_access::Migration),
+			Box::new(m20260813_151835_library_oidc_groups::Migration),
+			Box::new(m20260813_220807_user_oidc_groups::Migration),
 		]
 	}
 }

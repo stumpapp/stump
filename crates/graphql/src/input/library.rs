@@ -22,6 +22,7 @@ pub struct CreateOrUpdateLibraryInput {
 	pub config: Option<LibraryConfigInput>,
 	#[graphql(default = true)]
 	pub scan_after_persist: bool,
+	pub oidc_groups: Option<Vec<String>>,
 }
 
 impl CreateOrUpdateLibraryInput {
@@ -34,6 +35,7 @@ impl CreateOrUpdateLibraryInput {
 			path,
 			emoji,
 			config,
+			oidc_groups,
 			..
 		} = self;
 
@@ -44,6 +46,9 @@ impl CreateOrUpdateLibraryInput {
 			description: Set(description),
 			path: Set(path),
 			emoji: Set(emoji),
+			// TODO(oidc): probably good to assert there is overlap between user creating
+			// library and the oidc_groups, but fine for now
+			oidc_groups: Set(oidc_groups.map(|groups| groups.join(","))),
 			..Default::default()
 		};
 

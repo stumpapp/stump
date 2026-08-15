@@ -49,6 +49,9 @@ pub struct Model {
 	pub oidc_issuer_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub oidc_email: Option<String>,
+	/// a comma-separated list of OIDC groups assigned to this user
+	#[sea_orm(column_type = "Text", nullable)]
+	pub oidc_groups: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

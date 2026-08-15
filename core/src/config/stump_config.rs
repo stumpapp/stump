@@ -63,20 +63,25 @@ pub mod env_keys {
 	pub const OIDC_CLIENT_SECRET_KEY: &str = "STUMP_OIDC_CLIENT_SECRET";
 	pub const OIDC_ISSUER_URL_KEY: &str = "STUMP_OIDC_ISSUER_URL";
 	pub const OIDC_SCOPES_KEY: &str = "STUMP_OIDC_SCOPES";
+	pub const OIDC_GROUPS_CLAIM_KEY: &str = "STUMP_OIDC_GROUPS_CLAIM";
+	pub const OIDC_GROUP_PERMISSION_MAPPING_KEY: &str =
+		"STUMP_OIDC_GROUP_PERMISSION_MAPPING";
 	pub const OIDC_ALLOW_REGISTRATION_KEY: &str = "STUMP_OIDC_ALLOW_REGISTRATION";
 	pub const OIDC_DISABLE_LOCAL_AUTH_KEY: &str = "STUMP_OIDC_DISABLE_LOCAL_AUTH";
 	pub const OIDC_EXTRA_AUDIENCES_KEY: &str = "STUMP_OIDC_EXTRA_AUDIENCES";
 	pub const OIDC_CA_CERT_FILE_KEY: &str = "STUMP_OIDC_CA_CERT_FILE";
 	pub const TRUST_PROXY_HEADERS_KEY: &str = "STUMP_TRUST_PROXY_HEADERS";
 	pub const PARALLELISM_MULTIPLIER_KEY: &str = "STUMP_PARALLELISM_MULTIPLIER";
+	pub const ACCESS_TOKEN_TTL_KEY: &str = "STUMP_ACCESS_TOKEN_TTL";
+	pub const REFRESH_TOKEN_TTL_KEY: &str = "STUMP_REFRESH_TOKEN_TTL";
 }
 use env_keys::*;
 
 pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
-	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
-	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 30; // 30 days
+	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600; // 1 hour
+	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 7; // 7 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
@@ -226,11 +231,11 @@ pub struct StumpConfig {
 	pub session_ttl: i64,
 
 	#[default_value(DEFAULT_ACCESS_TOKEN_TTL)]
-	#[env_key("ACCESS_TOKEN_TTL")]
+	#[env_key(ACCESS_TOKEN_TTL_KEY)]
 	pub access_token_ttl: i64,
 
 	#[default_value(DEFAULT_REFRESH_TOKEN_TTL)]
-	#[env_key("REFRESH_TOKEN_TTL")]
+	#[env_key(REFRESH_TOKEN_TTL_KEY)]
 	pub refresh_token_ttl: i64,
 
 	/// The interval at which automatic deleted session cleanup is performed.

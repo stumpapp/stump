@@ -1,8 +1,9 @@
-import { Input, InputGroup, Label, Text, TextArea } from '@stump/components'
+import { useOidcConfig } from '@stump/client'
+import { ComboBox, Input, InputGroup, Label, Text, TextArea } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
@@ -31,6 +32,13 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 	const { errors } = useFormState({
 		control: form.control,
 	})
+
+	const oidcConfig = useOidcConfig()
+	const oidcGroups = useWatch({ control: form.control, name: 'oidcGroups' })
+
+	const [groupOptions, setGroupOptions] = useState(
+		(oidcGroups || []).map((group) => ({ label: group, value: group })),
+	)
 
 	return (
 		<div className="gap-6 flex grow flex-col">
@@ -110,6 +118,19 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 			<div className="flex">
 				<LibraryTypeSelect />
 			</div>
+
+			{oidcConfig.enabled && (
+				<ComboBox
+					options={groupOptions}
+					value={oidcGroups ?? []}
+					isMultiSelect
+					onChange={(value) => form.setValue('oidcGroups', value ?? [])}
+					onAddOption={(option) => setGroupOptions((prev) => [...prev, option])}
+					label={t(getKey('oidcGroups.label'))}
+					description={t(getKey('oidcGroups.description'))}
+					filterable
+				/>
+			)}
 		</div>
 	)
 }

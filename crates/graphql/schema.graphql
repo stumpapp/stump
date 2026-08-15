@@ -465,6 +465,7 @@ input CreateOrUpdateLibraryInput {
 	tags: [String!]
 	config: LibraryConfigInput
 	scanAfterPersist: Boolean! = true
+	oidcGroups: [String!]
 }
 
 input CreateScheduledJobInput {
@@ -1050,6 +1051,7 @@ type Library {
 	emoji: String
 	configId: Int!
 	lastScannedAt: DateTime
+	oidcGroups: [String!]
 	authors: [Author!]!
 	config: LibraryConfig!
 	allowedUsers: [User!]!
@@ -1136,6 +1138,7 @@ enum LibraryModelOrdering {
 	NAME
 	DESCRIPTION
 	PATH
+	OIDC_GROUPS
 	STATUS
 	THUMBNAIL_META
 	THUMBNAIL_PATH
@@ -1947,10 +1950,11 @@ type Mutation {
 	granted users list, so any users not included in the provided list will have
 	their access revoked if they were previously granted access
 	
-	The server owner cannot have their access modified, nor can the user performing
-	the action modify their own access
+	Be aware you can revoke your own access. If that happens, use the CLI to correct as needed.
 	"""
 	updateLibraryAccess(id: ID!, userIds: [String!]!): Library!
+	"update the OIDC groups which have access to a library"
+	updateLibraryOidcGroups(id: ID!, oidcGroups: [String!]!): Library!
 	deleteLibraryScanHistory(id: ID!): Library!
 	"""
 	Delete a library, including all associated media and series via cascading deletes. This
@@ -3493,6 +3497,8 @@ type User {
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
 	oidcEmail: String
+	"a comma-separated list of OIDC groups assigned to this user"
+	oidcGroups: String
 	avatarUrl: String
 	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!

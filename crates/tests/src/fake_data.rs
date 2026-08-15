@@ -74,6 +74,7 @@ pub struct User {
 	pub username: String,
 	pub hashed_password: Option<String>,
 	pub permissions: Option<Vec<UserPermission>>,
+	pub oidc_groups: Option<String>,
 }
 
 impl User {
@@ -95,6 +96,11 @@ impl User {
 				PermissionSet::new(self.permissions.clone().unwrap_or_default())
 					.resolve_into_string(),
 			),
+			oidc_groups: self
+				.oidc_groups
+				.as_ref()
+				.map(|groups| sea_orm::Set(Some(groups.clone())))
+				.unwrap_or(sea_orm::NotSet),
 			is_locked: sea_orm::Set(false),
 			..Default::default()
 		};
@@ -108,6 +114,7 @@ pub struct Library {
 	pub id: Option<String>,
 	pub name: Option<String>,
 	pub path: Option<String>,
+	pub oidc_groups: Option<String>,
 }
 
 impl Library {
@@ -122,6 +129,11 @@ impl Library {
 		});
 
 		let path = self.path.clone().unwrap_or_else(|| format!("/tmp/{name}"));
+		let oidc_groups = self
+			.oidc_groups
+			.as_ref()
+			.map(|groups| sea_orm::Set(Some(groups.clone())))
+			.unwrap_or(sea_orm::NotSet);
 
 		let config = library_config::ActiveModel {
 			library_id: sea_orm::Set(Some(id.clone())),
@@ -136,6 +148,7 @@ impl Library {
 			name: sea_orm::Set(name),
 			path: sea_orm::Set(path),
 			config_id: sea_orm::Set(config.id),
+			oidc_groups,
 			..Default::default()
 		};
 

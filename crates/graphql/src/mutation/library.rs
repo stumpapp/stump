@@ -579,8 +579,7 @@ impl LibraryMutation {
 	/// granted users list, so any users not included in the provided list will have
 	/// their access revoked if they were previously granted access
 	///
-	/// The server owner cannot have their access modified, nor can the user performing
-	/// the action modify their own access
+	/// Be aware you can revoke your own access. If that happens, use the CLI to correct as needed.
 	#[graphql(
 		guard = "PermissionGuard::new(&[UserPermission::ManageLibrary, UserPermission::ReadUsers])"
 	)]
@@ -594,27 +593,7 @@ impl LibraryMutation {
 		let core = ctx.data::<CoreContext>()?;
 
 		if user_ids.contains(&user.id) {
-			return Err("Cannot modify own library access".into());
-		}
-
-		// TODO(permissions): rm this server owner shit
-		let server_owner_id = if user.is_server_owner {
-			user.id.clone()
-		} else {
-			user::Entity::find()
-				.select_only()
-				.columns(vec![user::Column::Id, user::Column::Username])
-				.filter(user::Column::IsServerOwner.eq(true))
-				.into_model::<user::UserIdentSelect>()
-				.one(core.conn.as_ref())
-				.await?
-				.ok_or("Server owner not found")?
-				.id
-		};
-
-		if user_ids.contains(&server_owner_id) {
-			tracing::error!(?user, library = ?id, "Attempted to modify access grants for server owner");
-			return Err(error_message::FORBIDDEN_ACTION.into());
+			tracing::warn!(username = ?user.username, "You removed access to this library for yourself");
 		}
 
 		let library = library::Entity::find_for_user(user)

@@ -80,6 +80,7 @@ pub async fn sync_oidc_library_access(
 			let library_groups: Vec<String> = oidc_groups
 				.split(',')
 				.map(|g| g.trim().to_string())
+				.filter(|g| !g.is_empty())
 				.collect();
 			if library_groups.is_empty() {
 				tracing::warn!(
@@ -178,6 +179,7 @@ pub async fn sync_oidc_library_access_for_library(
 			let user_groups: Vec<String> = oidc_groups
 				.split(',')
 				.map(|g| g.trim().to_string())
+				.filter(|g| !g.is_empty())
 				.collect();
 			if user_groups.is_empty() {
 				tracing::warn!(
@@ -189,6 +191,11 @@ pub async fn sync_oidc_library_access_for_library(
 			Some((id, user_groups))
 		})
 		.collect();
+
+	if oidc_users.is_empty() {
+		tracing::debug!("No OIDC-managed users found, skipping library access sync");
+		return Ok(());
+	}
 
 	for (user_id, user_groups) in oidc_users {
 		let should_have = new_oidc_groups.iter().any(|g| user_groups.contains(g));
@@ -224,18 +231,20 @@ mod tests {
 	use std::collections::HashMap;
 
 	use crate::{
-		entity::user,
+		entity::{library_access, user},
 		services::oidc_sync::{
 			sync_oidc_groups_and_permissions, sync_oidc_library_access,
+			sync_oidc_library_access_for_library,
 		},
 		shared::{enums::UserPermission, permission_set::PermissionSet},
 	};
 
-	use sea_orm::prelude::*;
+	use sea_orm::{prelude::*, ActiveValue};
 	use tests::{db::test_database, fake_data};
 
+	/// should only sync groups if no mapping for permissions is provided
 	#[tokio::test]
-	async fn test_sync_oidc_groups_and_permissions_only_permissions() {
+	async fn test_sync_oidc_groups_and_permissions_only_groups() {
 		let db = test_database().await;
 
 		let user = fake_data::User::new("oromei").insert(&db).await;
@@ -259,6 +268,7 @@ mod tests {
 		assert!(updated_user.permissions.is_none());
 	}
 
+	/// should sync both groups and permissions if a mapping is provided
 	#[tokio::test]
 	async fn test_sync_oidc_groups_and_permissions() {
 		let db = test_database().await;
@@ -303,6 +313,7 @@ mod tests {
 		}
 	}
 
+	/// permissions won't sync if a user doesn't exist lol
 	#[tokio::test]
 	async fn test_sync_oidc_groups_and_permissions_not_found() {
 		let db = test_database().await;
@@ -319,18 +330,371 @@ mod tests {
 		assert!(matches!(err, sea_orm::DbErr::Custom(msg) if msg.contains("not found")));
 	}
 
+	/// if a user has valid oidc groups and a library is managed by those groups, then the
+	/// user should have access to the library after sync, and any users who no longer
+	/// have the target oidc groups should have their access revoked
 	#[tokio::test]
-	async fn test_sync_oidc_library_access() {}
+	async fn test_sync_oidc_library_access() {
+		let db = test_database().await;
 
-	#[tokio::test]
-	async fn test_sync_oidc_library_access_no_oidc_libraries() {}
+		let oromei = fake_data::User {
+			username: "oromei".to_string(),
+			oidc_groups: Some("silly,goose".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+		let stinky = fake_data::User {
+			username: "stinky".to_string(),
+			oidc_groups: Some("smelly,poopy".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
-	#[tokio::test]
-	async fn test_sync_oidc_library_access_empty_groups_skipped() {}
+		let library = fake_data::Library {
+			name: Some("Geese".to_string()),
+			oidc_groups: Some("silly,goose".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
-	#[tokio::test]
-	async fn test_sync_oidc_library_access_for_library() {}
+		let user_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.is_in(vec![oromei.id.clone(), stinky.id.clone()])
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(user_access_records, 0); // no users should have access yet
 
+		// create a manual access record for stinky, which should be revoked after the sync
+		library_access::ActiveModel {
+			user_id: ActiveValue::Set(stinky.id.clone()),
+			library_id: ActiveValue::Set(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("should have inserted library access for stinky");
+
+		let stinky_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&stinky.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(stinky_access_records, 1);
+
+		for user in &mut [oromei.clone(), stinky.clone()] {
+			let groups = user
+				.oidc_groups
+				.take()
+				.expect("user should have oidc groups")
+				.split(',')
+				.map(|g| g.trim().to_string())
+				.collect::<Vec<String>>();
+			sync_oidc_library_access(&db, &user.id, &groups)
+				.await
+				.expect("should have synced oidc library access");
+		}
+
+		let oromei_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&oromei.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(oromei_access_records, 1); // oromei should have access now
+
+		let stinky_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&stinky.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(stinky_access_records, 0); // stinky should have had access revoked
+	}
+
+	/// if there are no oidc-managed libraries, then no access records should be created for any users
 	#[tokio::test]
-	async fn test_sync_oidc_library_access_for_library_empty_groups_skipped() {}
+	async fn test_sync_oidc_library_access_no_oidc_libraries() {
+		let db = test_database().await;
+
+		sync_oidc_library_access(
+			&db,
+			"does-not-matter",
+			&["silly".to_string(), "goose".to_string()],
+		)
+		.await
+		.expect("should have synced oidc library access without error");
+
+		let sanity_count = library_access::Entity::find()
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(sanity_count, 0); // no libraries exist, so no access records should exist
+	}
+
+	/// if a library has no valid oidc groups, then no users should be granted access to it after sync
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_empty_groups_skipped() {
+		let db = test_database().await;
+
+		let oromei = fake_data::User {
+			username: "oromei".to_string(),
+			oidc_groups: Some("silly,goose".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let library = fake_data::Library {
+			name: Some("Geese".to_string()),
+			oidc_groups: Some(",".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		sync_oidc_library_access(
+			&db,
+			&oromei.id,
+			&["silly".to_string(), "goose".to_string()],
+		)
+		.await
+		.expect("should have synced oidc library access without error");
+
+		let access_count = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&oromei.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(access_count, 0); // no valid oidc groups = no access granted
+	}
+
+	/// if a user has valid oidc groups and a library is updated with new oidc groups, then the
+	/// user should have access to the library after sync, and any users who no longer have
+	/// the target oidc groups should have their access revoked
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_for_library() {
+		let db = test_database().await;
+
+		let oromei = fake_data::User {
+			username: "oromei".to_string(),
+			oidc_groups: Some("silly,goose".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let stinky = fake_data::User {
+			username: "stinky".to_string(),
+			oidc_groups: Some("smelly,poopy".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let library = fake_data::Library {
+			name: Some("Geese".to_string()),
+			// omit groups because it isn't loaded, caller loaded from
+			// library so assume correctness here
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// create a manual access record for stinky, which should be revoked after the sync
+		library_access::ActiveModel {
+			user_id: ActiveValue::Set(stinky.id.clone()),
+			library_id: ActiveValue::Set(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("should have inserted library access for stinky");
+
+		let access_counts = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.is_in(vec![oromei.id.clone(), stinky.id.clone()])
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(access_counts, 1); // only for stinky
+
+		sync_oidc_library_access_for_library(
+			&db,
+			&library.id,
+			&["silly".to_string(), "goose".to_string()],
+		)
+		.await
+		.expect("should have synced oidc library access for library");
+
+		let oromei_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&oromei.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(oromei_access_records, 1); // oromei should have access now
+
+		let stinky_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&stinky.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(stinky_access_records, 0); // stinky should have had access revoked
+	}
+
+	/// if a user is not oidc-managed, or rather does not have any groups, then any
+	/// existing access records for that user should stay put after sync
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_for_library_skip_revoke_non_oidc_user() {
+		let db = test_database().await;
+
+		let oromei = fake_data::User {
+			username: "oromei".to_string(),
+			oidc_groups: Some("silly,goose".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let stinky = fake_data::User {
+			username: "stinky".to_string(),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let library = fake_data::Library {
+			name: Some("Geese".to_string()),
+			// omit groups because it isn't loaded, caller loaded from
+			// library so assume correctness here
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// should not revoke after sync since non-oidc user
+		library_access::ActiveModel {
+			user_id: ActiveValue::Set(stinky.id.clone()),
+			library_id: ActiveValue::Set(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await
+		.expect("should have inserted library access for stinky");
+
+		let access_counts = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.is_in(vec![oromei.id.clone(), stinky.id.clone()])
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(access_counts, 1); // only for stinky
+
+		sync_oidc_library_access_for_library(
+			&db,
+			&library.id,
+			&["silly".to_string(), "goose".to_string()],
+		)
+		.await
+		.expect("should have synced oidc library access for library");
+
+		let oromei_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&oromei.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(oromei_access_records, 1); // oromei should have access now
+
+		let stinky_access_records = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&stinky.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(stinky_access_records, 1); // same as before
+	}
+
+	/// if a user has no valid oidc groups then they will not sync access to an
+	/// oidc-managed library
+	#[tokio::test]
+	async fn test_sync_oidc_library_access_for_library_empty_groups_skipped() {
+		let db = test_database().await;
+
+		let oromei = fake_data::User {
+			username: "oromei".to_string(),
+			oidc_groups: Some(",".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let library = fake_data::Library {
+			name: Some("Geese".to_string()),
+			// omit groups because it isn't loaded, caller loaded from
+			// library so assume correctness here
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		sync_oidc_library_access_for_library(
+			&db,
+			&library.id,
+			&["silly".to_string(), "goose".to_string()],
+		)
+		.await
+		.expect("should have synced oidc library access for library without error");
+
+		let sanity_count = library_access::Entity::find()
+			.filter(
+				library_access::Column::UserId
+					.eq(&oromei.id)
+					.and(library_access::Column::LibraryId.eq(&library.id)),
+			)
+			.count(&db)
+			.await
+			.expect("should have queried library access");
+		assert_eq!(sanity_count, 0); // no valid oidc groups = no access granted
+	}
 }

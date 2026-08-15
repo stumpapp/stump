@@ -268,18 +268,20 @@ async fn callback(
 			tracing::error!(?e, "Failed to count users for OIDC registration");
 			APIError::InternalServerError("Database error".to_string())
 		})?;
-		let is_server_owner = user_count == 0;
+		let is_first_user = user_count == 0;
 
 		let username = ensure_unique_username(&txn, &claims.email).await?;
 
-		let bootstrap_permissions = if is_server_owner {
-			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
-		} else if !oidc_config.group_permission_mapping.is_empty() {
+		// oidc group mapping will take precedence over what we typically do for a userless server
+		// getting its first user
+		let bootstrap_permissions = if !oidc_config.group_permission_mapping.is_empty() {
 			oidc_claims_to_permission_set(
 				&claims.groups,
 				&oidc_config.group_permission_mapping,
 			)
 			.resolve_into_string()
+		} else if is_first_user {
+			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
 		} else {
 			None
 		};
@@ -289,7 +291,8 @@ async fn callback(
 			hashed_password: Set(String::new()), // OIDC users don't have a password
 			oidc_issuer_id: Set(Some(claims.subject.clone())),
 			oidc_email: Set(Some(claims.email.clone())),
-			is_server_owner: Set(is_server_owner),
+			// TODO(permissions): rm is_server_owner
+			is_server_owner: Set(is_first_user),
 			permissions: Set(bootstrap_permissions),
 			..Default::default()
 		};
@@ -342,7 +345,7 @@ async fn callback(
 			}
 		}
 
-		tracing::info!(user_id = %user.id, is_server_owner = %is_server_owner, "Created new OIDC user");
+		tracing::info!(user_id = %user.id, is_first_user, "Created new OIDC user");
 
 		(user, true)
 	};

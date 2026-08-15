@@ -1,3 +1,4 @@
+import { MediaProgressInput } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { eq } from 'drizzle-orm'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -62,11 +63,7 @@ function makeMockApi(opts: { shouldFail?: boolean } = {}) {
 	return {
 		execute: opts.shouldFail
 			? vi.fn().mockRejectedValue(new Error('network error'))
-			: vi.fn().mockImplementation((query: string) => {
-					// reset mutation returns a bool
-					if (typeof query === 'string' && query.includes('resetElapsedSeconds')) {
-						return Promise.resolve(true)
-					}
+			: vi.fn().mockImplementation(() => {
 					return Promise.resolve({ updateMediaProgress: { id: 1, updatedAt: MOCK_UPDATED_AT } })
 				}),
 	} as unknown as Api
@@ -232,9 +229,9 @@ describe('elapsedSeconds delta', () => {
 		await executePushProgressSync({ [SERVER_ID]: api })
 
 		const payload = (api.execute as ReturnType<typeof vi.fn>).mock.calls[0]![1] as {
-			input: { paged: { elapsedSecondsDelta?: number } }
+			input: MediaProgressInput
 		}
-		expect(payload.input.paged.elapsedSecondsDelta).toBe(300)
+		expect(payload.input.paged?.elapsedSecondsDelta).toBe(300)
 	})
 
 	it('omits elapsedSecondsDelta when elapsed has not increased', async () => {
@@ -252,14 +249,14 @@ describe('elapsedSeconds delta', () => {
 		await executePushProgressSync({ [SERVER_ID]: api })
 
 		const payload = (api.execute as ReturnType<typeof vi.fn>).mock.calls[0]![1] as {
-			input: { paged: { elapsedSecondsDelta?: number } }
+			input: MediaProgressInput
 		}
-		expect(payload.input.paged.elapsedSecondsDelta).toBeUndefined()
+		expect(payload.input.paged?.elapsedSecondsDelta).toBeUndefined()
 	})
 })
 
 describe('pendingReset', () => {
-	it('calls the reset mutation when pendingReset is true', async () => {
+	it('calls the updateMediaProgress with resetElapsedSeconds = pendingReset', async () => {
 		const db = dbProxy.current
 		const executePushProgressSync = await loadPushProgressFn()
 
@@ -274,9 +271,11 @@ describe('pendingReset', () => {
 		const api = makeMockApi()
 		await executePushProgressSync({ [SERVER_ID]: api })
 
-		expect(api.execute).toHaveBeenCalledTimes(2)
-		const firstCall = (api.execute as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string
-		expect(firstCall).toContain('resetElapsedSeconds')
+		expect(api.execute).toHaveBeenCalledTimes(1)
+		const payload = (api.execute as ReturnType<typeof vi.fn>).mock.calls[0]![1] as {
+			input: MediaProgressInput
+		}
+		expect(payload.input.paged?.resetElapsedSeconds).toBe(true)
 	})
 
 	it('sends elapsedSeconds directly as the delta after a reset', async () => {
@@ -294,10 +293,10 @@ describe('pendingReset', () => {
 		const api = makeMockApi()
 		await executePushProgressSync({ [SERVER_ID]: api })
 
-		const progressCall = (api.execute as ReturnType<typeof vi.fn>).mock.calls[1]![1] as {
-			input: { paged: { elapsedSecondsDelta?: number } }
+		const progressCall = (api.execute as ReturnType<typeof vi.fn>).mock.calls[0]![1] as {
+			input: MediaProgressInput
 		}
-		expect(progressCall.input.paged.elapsedSecondsDelta).toBe(120)
+		expect(progressCall.input.paged?.elapsedSecondsDelta).toBe(120)
 
 		// cleared + pushed -> should be synced without pendingReset
 		const after = await db

@@ -4436,6 +4436,7 @@ export type StumpConfig = {
   configDir: Scalars['String']['output'];
   /** An optional custom path for the database. */
   dbPath?: Maybe<Scalars['String']['output']>;
+  dbTimeoutSecs: Scalars['Int']['output'];
   /** Indicates if the Kobo sync feature should be enabled. */
   enableKoboSync: Scalars['Boolean']['output'];
   /** Indicates if the KoReader sync feature should be enabled. */
@@ -4689,7 +4690,11 @@ export type UploadSeriesInput = {
 export type User = {
   __typename?: 'User';
   ageRestriction?: Maybe<AgeRestriction>;
+  /** a reference to the avatar image and its metadata for this user */
+  avatar: ImageRef;
+  avatarMeta?: Maybe<ImageMetadata>;
   avatarPath?: Maybe<Scalars['String']['output']>;
+  /** @deprecated TODO: aaron kill me plz */
   avatarUrl?: Maybe<Scalars['String']['output']>;
   continueReading: PaginatedMediaResponse;
   createdAt: Scalars['DateTime']['output'];
@@ -5282,6 +5287,11 @@ export type PullServerBookmarksQueryVariables = Exact<{
 
 
 export type PullServerBookmarksQuery = { __typename?: 'Query', bookmarksByMediaId: Array<{ __typename?: 'Bookmark', id: string, epubcfi?: string | null, mediaId: string, previewContent?: string | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null }> };
+
+export type PullServerAvatarQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PullServerAvatarQuery = { __typename?: 'Query', me: { __typename?: 'User', avatar: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } };
 
 export type PullServerReadProgressionQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -9389,6 +9399,23 @@ export const PullServerBookmarksDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PullServerBookmarksQuery, PullServerBookmarksQueryVariables>;
+export const PullServerAvatarDocument = new TypedDocumentString(`
+    query PullServerAvatar {
+  me {
+    avatar {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PullServerAvatarQuery, PullServerAvatarQueryVariables>;
 export const PullServerReadProgressionDocument = new TypedDocumentString(`
     query PullServerReadProgression($filter: MediaFilterInput!) {
   media(filter: $filter, pagination: {none: {unpaginated: true}}) {

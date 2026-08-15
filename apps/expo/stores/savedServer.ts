@@ -20,6 +20,7 @@ export type SavedServer = {
 	kind: ServerKind
 	stumpOPDS?: boolean
 	defaultServer?: boolean
+	avatar?: ServerAvatar | null
 }
 
 export type SavedServerWithConfig = SavedServer & {
@@ -52,6 +53,31 @@ const managedToken = z.object({
 	expiresAt: z.string(),
 })
 export type ManagedToken = z.infer<typeof managedToken>
+
+export const serverAvatar = z.union([
+	z.object({
+		uri: z.string(),
+		metadata: z
+			.object({
+				averageColor: z.string().nullish(),
+				colors: z
+					.array(
+						z.object({
+							color: z.string(),
+							percentage: z.number(),
+						}),
+					)
+					.nullish(),
+				thumbhash: z.string().nullish(),
+			})
+			.nullish(),
+	}),
+	// TODO: precompute colors for these for gradient
+	z.object({
+		logo: z.enum(['codex', 'kavita', 'komga', 'stump', 'opds']),
+	}),
+])
+export type ServerAvatar = z.infer<typeof serverAvatar>
 
 const SAVED_TOKEN_PREFIX = 'stump-mobile-saved-tokens-' as const
 const SAVED_CONFIG_PREFIX = 'stump-mobile-saved-configs-' as const

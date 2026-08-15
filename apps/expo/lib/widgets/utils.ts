@@ -8,6 +8,7 @@ import { useOwlAssets } from '~/components/Owl'
 
 import { widgetAssetsDirectory } from '../filesystem'
 
+// TODO: move to more shared location
 // this is VERY important, because the widget will crash if the image is too large to render. ask me
 // how i know :(
 export async function createThumbnail(sourceUri: string): Promise<File> {

@@ -1,21 +1,13 @@
 import { useGraphQLMutation, useSuspenseGraphQLQueries } from '@stump/client'
-import {
-	Alert,
-	AlertDescription,
-	AlertTitle,
-	ComboBox,
-	Heading,
-	Text,
-	usePrevious,
-} from '@stump/components'
+import { Button, ComboBox, ConfirmationModal, Heading, Text, usePrevious } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { Info } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useDebouncedValue } from 'rooks'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { usePaths } from '@/paths'
 
 import { useLibraryContext } from '../../../../context'
 
@@ -82,56 +74,62 @@ export default function LibraryAccess() {
 	const allowedUsers = useMemo(() => libraryById?.allowedUsers || [], [libraryById])
 
 	const client = useQueryClient()
+	const navigate = useNavigate()
+	const paths = usePaths()
 
 	const { mutate } = useGraphQLMutation(mutation, {
-		onSuccess: ({ updateLibraryAccess: { allowedUsers } }) => {
-			// Update without refetching to reduce network
-			client.setQueryData(['libraryAccess', library.id], {
-				libraryById: {
-					...libraryById,
-					allowedUsers,
-				},
-			})
+		onSuccess: async ({ updateLibraryAccess: { allowedUsers } }) => {
+			const didRevokeSelfAccess = !allowedUsers.some((u) => u.id === user.id)
+			if (didRevokeSelfAccess) {
+				await client.cancelQueries()
+				client.clear()
+				navigate(paths.home())
+			} else {
+				// update without refetching to reduce network
+				client.setQueryData(['libraryAccess', library.id], {
+					libraryById: {
+						...libraryById,
+						allowedUsers,
+					},
+				})
+			}
 		},
 	})
-
-	const updateGrants = useCallback(
-		(ids: string[]) => {
-			mutate({ id: library.id, userIds: ids })
-		},
-		[mutate, library],
-	)
 
 	const [grantedUserIds, setGrantedUserIds] = useState<string[] | undefined>(() =>
 		allowedUsers?.map((user) => user.id),
 	)
-	const [debouncedUserIds] = useDebouncedValue(grantedUserIds, 500)
+	const [showConfirmationModal, setShowConfirmationModal] = useState(false)
 
 	useEffect(() => {
 		setGrantedUserIds(allowedUsers?.map((user) => user.id) || [])
 	}, [allowedUsers])
 
+	const updateGrants = () => {
+		if (!grantedUserIds) return
+		mutate({ id: library.id, userIds: grantedUserIds })
+	}
+
+	const onSaveChanges = () => {
+		if (!grantedUserIds) return
+		const isRevokingOwnAccess = !grantedUserIds.includes(user.id)
+
+		if (isRevokingOwnAccess) {
+			setShowConfirmationModal(true)
+		} else {
+			updateGrants()
+		}
+	}
+
 	const previousLibrary = usePrevious(library)
 	const isSameLibrary = previousLibrary?.id === library.id
-	const variablesLoaded = !!debouncedUserIds && !!allowedUsers
-	const shouldCall =
-		variablesLoaded && debouncedUserIds.length !== allowedUsers.length && isSameLibrary
-
-	useEffect(() => {
-		if (shouldCall) {
-			updateGrants(debouncedUserIds)
-		}
-	}, [debouncedUserIds, updateGrants, shouldCall])
-
-	const userOptions = useMemo(
-		() =>
-			(allUsers?.map((user) => ({ label: user.username, value: user.id })) || []).filter(
-				(option) => option.value !== user.id,
-			),
-		[allUsers, user],
+	const isDifferentUsers = !(
+		grantedUserIds?.length === allowedUsers?.length &&
+		grantedUserIds?.every((id) => allowedUsers?.some((user) => user.id === id))
 	)
 
-	// TODO: disabled state if no options
+	const userOptions = allUsers?.map((user) => ({ label: user.username, value: user.id })) || []
+
 	return (
 		<div className="gap-4 flex flex-col">
 			<div>
@@ -141,22 +139,27 @@ export default function LibraryAccess() {
 				</Text>
 			</div>
 
-			{allUsers?.length === 1 && (
-				<Alert variant="info">
-					<Info />
-					<AlertTitle>{t(getKey('noUsersTitle'))}</AlertTitle>
-					<AlertDescription>{t(getKey('noUsers'))}</AlertDescription>
-				</Alert>
-			)}
-
 			<ComboBox
-				disabled={allUsers?.length === 1}
 				options={userOptions}
 				value={grantedUserIds}
 				isMultiSelect
 				onChange={(userIds) => {
 					setGrantedUserIds(userIds || [])
 				}}
+			/>
+
+			<div>
+				<Button disabled={!isDifferentUsers || !isSameLibrary} onClick={onSaveChanges}>
+					{t('common.saveChanges')}
+				</Button>
+			</div>
+
+			<ConfirmationModal
+				title={t(getKey('selfAccessRevokeConfirmation.title'))}
+				description={t(getKey('selfAccessRevokeConfirmation.description'))}
+				isOpen={showConfirmationModal}
+				onClose={() => setShowConfirmationModal(false)}
+				onConfirm={updateGrants}
 			/>
 		</div>
 	)

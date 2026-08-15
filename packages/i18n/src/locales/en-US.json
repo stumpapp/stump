@@ -762,10 +762,12 @@
 				"libraryAccess": {
 					"heading": "Authorize users",
 					"description": "Allow certain users to access this library and its contents",
-					"noUsersTitle": "No users to authorize",
-					"noUsers": "There are no other registered users to authorize for this library",
 					"updated": "Access updated",
-					"failure": "Failed to update access"
+					"failure": "Failed to update access",
+					"selfAccessRevokeConfirmation": {
+						"title": "You revoked your own access",
+						"description": "If you continue, you will lose access to the library. Are you sure you want to continue?"
+					}
 				}
 			}
 		},

@@ -2191,8 +2191,7 @@ export type Mutation = {
    * granted users list, so any users not included in the provided list will have
    * their access revoked if they were previously granted access
    *
-   * The server owner cannot have their access modified, nor can the user performing
-   * the action modify their own access
+   * Be aware you can revoke your own access. If that happens, use the CLI to correct as needed.
    */
   updateLibraryAccess: Library;
   /** Update the emoji for a library */
@@ -4711,6 +4710,8 @@ export type User = {
   loginSessionsCount: Scalars['Int']['output'];
   maxSessionsAllowed?: Maybe<Scalars['Int']['output']>;
   oidcEmail?: Maybe<Scalars['String']['output']>;
+  /** a comma-separated list of OIDC groups assigned to this user */
+  oidcGroups?: Maybe<Scalars['String']['output']>;
   permissions: Array<UserPermission>;
   preferences: UserPreferences;
   username: Scalars['String']['output'];

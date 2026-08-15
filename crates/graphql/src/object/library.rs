@@ -6,8 +6,8 @@ use async_graphql::{
 
 use models::{
 	entity::{
-		library, library_config, library_exclusion, library_scan_record, library_tag,
-		media, media_metadata, series, tag, user,
+		library, library_access, library_config, library_scan_record, library_tag, media,
+		media_metadata, series, tag, user,
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
@@ -116,18 +116,17 @@ impl Library {
 	#[graphql(
 		guard = "PermissionGuard::new(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])"
 	)]
-	async fn excluded_users(&self, ctx: &Context<'_>) -> Result<Vec<User>> {
+	async fn allowed_users(&self, ctx: &Context<'_>) -> Result<Vec<User>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let users = user::Entity::find()
 			.filter(
 				user::Column::Id.in_subquery(
 					Query::select()
-						.column(library_exclusion::Column::UserId)
-						.from(library_exclusion::Entity)
+						.column(library_access::Column::UserId)
+						.from(library_access::Entity)
 						.and_where(
-							library_exclusion::Column::LibraryId
-								.eq(self.model.id.clone()),
+							library_access::Column::LibraryId.eq(self.model.id.clone()),
 						)
 						.to_owned(),
 				),

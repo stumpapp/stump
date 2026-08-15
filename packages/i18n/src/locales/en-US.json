@@ -759,13 +759,15 @@
 			"title": "Access Control",
 			"description": "Control who can access the content in this library",
 			"sections": {
-				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsersTitle": "No users to exclude",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+				"libraryAccess": {
+					"heading": "Authorize users",
+					"description": "Allow certain users to access this library and its contents",
+					"updated": "Access updated",
+					"failure": "Failed to update access",
+					"selfAccessRevokeConfirmation": {
+						"title": "You revoked your own access",
+						"description": "If you continue, you will lose access to the library. Are you sure you want to continue?"
+					}
 				}
 			}
 		},

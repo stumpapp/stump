@@ -3,6 +3,7 @@ use crate::common::{
 		active_session_for_book, create_nth_readthrough, fudge_session_time,
 		fudge_session_time_with_timestamp, update_progress,
 	},
+	library::setup_library,
 	series::setup_single_series_with_n_books,
 	TestApp,
 };
@@ -18,14 +19,16 @@ use tests::fake_data;
 
 async fn setup() -> (TestApp, Vec<String>) {
 	let app = TestApp::new_with_default_user().await;
-	let db = app.conn();
 
-	let image = fake_data::Library {
-		id: Some("image".to_string()),
-		name: Some("Image".to_string()),
-		..Default::default()
-	}
-	.insert(db)
+	let image = setup_library(
+		&app,
+		fake_data::Library {
+			id: Some("image".to_string()),
+			name: Some("Image".to_string()),
+			..Default::default()
+		},
+		None,
+	)
 	.await;
 
 	let (_, books) = setup_single_series_with_n_books(

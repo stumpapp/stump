@@ -1,5 +1,6 @@
 use crate::common::{
 	book::{create_nth_readthrough, fudge_session_time, update_progress},
+	library::setup_library,
 	series::setup_single_series_with_n_books,
 	TestApp,
 };
@@ -12,11 +13,23 @@ use tests::fake_data;
 async fn setup() -> TestApp {
 	let app = TestApp::new_with_default_user().await;
 
+	let image = setup_library(
+		&app,
+		fake_data::Library {
+			id: Some("image".to_string()),
+			name: Some("Image".to_string()),
+			..Default::default()
+		},
+		None,
+	)
+	.await;
+
 	let _ = setup_single_series_with_n_books(
 		&app,
 		fake_data::Series {
 			id: Some("black_science".to_string()),
 			name: Some("Black Science".to_string()),
+			library_id: Some(image.id.clone()),
 			..Default::default()
 		},
 		5,

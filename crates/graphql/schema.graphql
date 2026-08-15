@@ -1052,7 +1052,7 @@ type Library {
 	lastScannedAt: DateTime
 	authors: [Author!]!
 	config: LibraryConfig!
-	excludedUsers: [User!]!
+	allowedUsers: [User!]!
 	isFavorite: Boolean!
 	"Get the details of the last scan job for this library, if any exists."
 	lastScan: LibraryScanRecord
@@ -1943,14 +1943,14 @@ type Mutation {
 	"""
 	updateLibraryThumbnail(id: ID!, input: UpdateThumbnailInput!): Library!
 	"""
-	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
-	full replacement of the excluded users list, so any users not included in the provided list will be
-	removed from the exclusion list if they were previously excluded.
+	Grant users access to a library. This operates as a full replacement of the
+	granted users list, so any users not included in the provided list will have
+	their access revoked if they were previously granted access
 	
-	The server owner cannot be excluded from a library, nor can the user performing the action exclude
-	themselves.
+	The server owner cannot have their access modified, nor can the user performing
+	the action modify their own access
 	"""
-	updateLibraryExcludedUsers(id: ID!, userIds: [String!]!): Library!
+	updateLibraryAccess(id: ID!, userIds: [String!]!): Library!
 	deleteLibraryScanHistory(id: ID!): Library!
 	"""
 	Delete a library, including all associated media and series via cascading deletes. This

@@ -32,6 +32,9 @@ type Props = {
 	isLoading?: boolean
 }
 
+// TODO: user access as part of library creation? i don't have time now, and you can invite
+// in settings right after so not a huge deal, but makes sense to have here eventually
+
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
 	const { currentStep, setStep } = useSteppedFormContext()
 	const { checkPermission } = useAppContext()

@@ -1113,7 +1113,7 @@ export type Library = {
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   emoji?: Maybe<Scalars['String']['output']>;
-  excludedUsers: Array<User>;
+  allowedUsers: Array<User>;
   genres: Array<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isFavorite: Scalars['Boolean']['output'];
@@ -2186,14 +2186,14 @@ export type Mutation = {
   /** Update the emoji for a library */
   updateLibraryEmoji: Library;
   /**
-   * Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
-   * full replacement of the excluded users list, so any users not included in the provided list will be
-   * removed from the exclusion list if they were previously excluded.
+   * Grant users access to a library. This operates as a full replacement of the
+   * granted users list, so any users not included in the provided list will have
+   * their access revoked if they were previously granted access.
    *
-   * The server owner cannot be excluded from a library, nor can the user performing the action exclude
-   * themselves.
+   * The server owner cannot have their access modified, nor can the user performing
+   * the action modify their own access.
    */
-  updateLibraryExcludedUsers: Library;
+  updateLibraryAccess: Library;
   /**
    * Update the thumbnail for a library. This will replace the existing thumbnail with the the one
    * associated with the provided input (book). If the book does not have a thumbnail, one
@@ -2854,7 +2854,7 @@ export type MutationUpdateLibraryEmojiArgs = {
 };
 
 
-export type MutationUpdateLibraryExcludedUsersArgs = {
+export type MutationUpdateLibraryAccessArgs = {
   id: Scalars['ID']['input'];
   userIds: Array<Scalars['String']['input']>;
 };
@@ -6232,25 +6232,25 @@ export type BasicSettingsSceneExistingLibrariesQueryVariables = Exact<{ [key: st
 
 export type BasicSettingsSceneExistingLibrariesQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, path: string }> } };
 
-export type LibraryExclusionsUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
+export type LibraryAccessUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LibraryExclusionsUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string }> } };
+export type LibraryAccessUsersQueryQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, username: string }> } };
 
-export type LibraryExclusionsQueryQueryVariables = Exact<{
+export type LibraryAccessQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type LibraryExclusionsQueryQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', excludedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
+export type LibraryAccessQueryQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } | null };
 
-export type UpdateLibraryExclusionsMutationVariables = Exact<{
+export type UpdateLibraryAccessMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   userIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
 }>;
 
 
-export type UpdateLibraryExclusionsMutation = { __typename?: 'Mutation', updateLibraryExcludedUsers: { __typename?: 'Library', id: string, excludedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
+export type UpdateLibraryAccessMutation = { __typename?: 'Mutation', updateLibraryAccess: { __typename?: 'Library', id: string, allowedUsers: Array<{ __typename?: 'User', id: string, username: string }> } };
 
 export type CleanLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12209,8 +12209,8 @@ export const BasicSettingsSceneExistingLibrariesDocument = new TypedDocumentStri
   }
 }
     `) as unknown as TypedDocumentString<BasicSettingsSceneExistingLibrariesQuery, BasicSettingsSceneExistingLibrariesQueryVariables>;
-export const LibraryExclusionsUsersQueryDocument = new TypedDocumentString(`
-    query LibraryExclusionsUsersQuery {
+export const LibraryAccessUsersQueryDocument = new TypedDocumentString(`
+    query LibraryAccessUsersQuery {
   users(pagination: {none: {unpaginated: true}}) {
     nodes {
       id
@@ -12218,28 +12218,28 @@ export const LibraryExclusionsUsersQueryDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<LibraryExclusionsUsersQueryQuery, LibraryExclusionsUsersQueryQueryVariables>;
-export const LibraryExclusionsQueryDocument = new TypedDocumentString(`
-    query LibraryExclusionsQuery($id: ID!) {
+    `) as unknown as TypedDocumentString<LibraryAccessUsersQueryQuery, LibraryAccessUsersQueryQueryVariables>;
+export const LibraryAccessQueryDocument = new TypedDocumentString(`
+    query LibraryAccessQuery($id: ID!) {
   libraryById(id: $id) {
-    excludedUsers {
+    allowedUsers {
       id
       username
     }
   }
 }
-    `) as unknown as TypedDocumentString<LibraryExclusionsQueryQuery, LibraryExclusionsQueryQueryVariables>;
-export const UpdateLibraryExclusionsDocument = new TypedDocumentString(`
-    mutation UpdateLibraryExclusions($id: ID!, $userIds: [String!]!) {
-  updateLibraryExcludedUsers(id: $id, userIds: $userIds) {
+    `) as unknown as TypedDocumentString<LibraryAccessQueryQuery, LibraryAccessQueryQueryVariables>;
+export const UpdateLibraryAccessDocument = new TypedDocumentString(`
+    mutation UpdateLibraryAccess($id: ID!, $userIds: [String!]!) {
+  updateLibraryAccess(id: $id, userIds: $userIds) {
     id
-    excludedUsers {
+    allowedUsers {
       id
       username
     }
   }
 }
-    `) as unknown as TypedDocumentString<UpdateLibraryExclusionsMutation, UpdateLibraryExclusionsMutationVariables>;
+    `) as unknown as TypedDocumentString<UpdateLibraryAccessMutation, UpdateLibraryAccessMutationVariables>;
 export const CleanLibraryDocument = new TypedDocumentString(`
     mutation CleanLibrary($id: ID!) {
   cleanLibrary(id: $id) {

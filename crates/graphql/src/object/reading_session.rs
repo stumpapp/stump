@@ -27,6 +27,8 @@ impl From<reading_session::Model> for ReadingSession {
 	}
 }
 
+// TODO(conflicts): this should be optional since if downloaded on client before readign started there wouldn't be an ancestor session
+
 /// a view through which a client can resolve conflicts relative to a local ancestor session
 /// and any number of remote sessions which were created afterwards
 #[derive(Debug, Clone, SimpleObject)]

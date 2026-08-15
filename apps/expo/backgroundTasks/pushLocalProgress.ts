@@ -15,12 +15,6 @@ const mutation = graphql(`
 	}
 `)
 
-const resetElapsedSecondsMutation = graphql(`
-	mutation PushResetElapsedSeconds($id: ID!) {
-		resetElapsedSeconds(id: $id)
-	}
-`)
-
 // TODO(sync): mv to shared types file(?) and reuse across other TODO(sync) tasks
 type SyncResult = {
 	failureCount: number
@@ -87,10 +81,6 @@ const executeSingleServerSync = async (
 		// and it might just be better to have the mutation intake the reset flag to handle it in a single txn. i will
 		// prolly come back to this before letting it merge to do just that
 		try {
-			if (record.pendingReset) {
-				await api.execute(resetElapsedSecondsMutation, { id: record.bookId })
-			}
-
 			const elapsedDelta = record.pendingReset
 				? (record.elapsedSeconds ?? 0)
 				: (record.elapsedSeconds ?? 0) - (record.lastSyncedElapsedSeconds ?? 0)
@@ -107,6 +97,7 @@ const executeSingleServerSync = async (
 								elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
 								isComplete: record.percentage ? parseFloat(record.percentage) >= 1.0 : false,
 								percentage: record.percentage,
+								resetElapsedSeconds: record.pendingReset ?? false,
 							},
 						}) satisfies MediaProgressInput,
 				)
@@ -116,6 +107,7 @@ const executeSingleServerSync = async (
 							paged: {
 								page: record.page ?? 1,
 								elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
+								resetElapsedSeconds: record.pendingReset ?? false,
 							},
 						}) satisfies MediaProgressInput,
 				)

@@ -171,7 +171,6 @@ export function useLocalLibrarySortAndDisplayMenu() {
 						{t(getActionsKey('attemptSync'))}
 					</Stack.Toolbar.MenuAction>
 
-					{/*{syncConflictsCount > 0 && (*/}
 					{syncConflictsCount > -1 && (
 						<Stack.Toolbar.MenuAction
 							icon="exclamationmark.circle"
@@ -384,7 +383,7 @@ function AndroidSortAndActionsMenu({
 
 				<DropdownMenuItem
 					onPress={() => {
-						// TODO: launch sync conflicts sheet
+						// TODO(conflicts): launch sync conflicts sheet
 					}}
 					className="text-foreground"
 				>

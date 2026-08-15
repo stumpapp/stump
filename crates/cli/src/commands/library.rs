@@ -132,7 +132,7 @@ async fn change_access(
 		return Ok(());
 	} else if is_oidc_enabled && should_optionally_change_oidc_groups {
 		let oidc_txn = conn.begin().await?;
-		let _ = change_oidc_groups(library.clone(), &oidc_txn).await?;
+		change_oidc_groups(library.clone(), &oidc_txn).await?;
 		let confirm = Confirm::with_theme(&ColorfulTheme::default())
 			.with_prompt(
 				"Would you like to also manually change access for non-OIDC users?",

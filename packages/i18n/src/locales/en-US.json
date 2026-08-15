@@ -779,6 +779,10 @@
 					"disclaimer": {
 						"title": "This will override manual authorization",
 						"description": "When set you will be unable to manually authorize users for this library. Only users in the specified OIDC groups will be able to access this library"
+					},
+					"confirmationModal": {
+						"title": "Update OIDC groups",
+						"description": "Are you sure you want to update the OIDC groups for this library? The changes will take effect immediately and revoke access for any OIDC user not in the specified groups"
 					}
 				}
 			}

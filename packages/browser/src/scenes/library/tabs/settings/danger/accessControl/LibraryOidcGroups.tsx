@@ -1,11 +1,19 @@
 import { useGraphQLMutation, useOidcConfig } from '@stump/client'
-import { Alert, AlertDescription, AlertTitle, ComboBox, Heading, Text } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	Button,
+	ComboBox,
+	ConfirmationModal,
+	Heading,
+	Text,
+} from '@stump/components'
 import { graphql, LibraryLayoutQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { AlertCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useDebouncedValue } from 'rooks'
+import { useState } from 'react'
 
 import { useLibraryContext } from '@/scenes/library/context'
 
@@ -28,11 +36,13 @@ export function LibraryOidcGroups() {
 		(library?.oidcGroups || []).map((group) => ({ label: group, value: group })),
 	)
 	const [selection, setSelection] = useState(library.oidcGroups || [])
+	const [showConfirmationModal, setShowConfirmationModal] = useState(false)
 
 	const client = useQueryClient()
 
-	const { mutate } = useGraphQLMutation(mutation, {
+	const { mutate, isPending } = useGraphQLMutation(mutation, {
 		onSuccess: ({ updateLibraryOidcGroups: { oidcGroups } }) => {
+			setShowConfirmationModal(false)
 			const libraryById = client.getQueryData<LibraryLayoutQuery>([
 				'libraryById',
 				[library.id],
@@ -47,12 +57,7 @@ export function LibraryOidcGroups() {
 		},
 	})
 
-	const [debouncedSelection] = useDebouncedValue(selection, 500)
-	useEffect(() => {
-		if (debouncedSelection !== library.oidcGroups) {
-			mutate({ id: library.id, oidcGroups: debouncedSelection })
-		}
-	}, [debouncedSelection, library.oidcGroups, library.id, mutate])
+	const onSaveChanges = () => mutate({ id: library.id, oidcGroups: selection })
 
 	if (!oidcConfig.enabled) return null
 
@@ -78,6 +83,19 @@ export function LibraryOidcGroups() {
 				onChange={(value) => setSelection(value ?? [])}
 				onAddOption={(option) => setGroupOptions((prev) => [...prev, option])}
 				filterable
+			/>
+
+			<div>
+				<Button onClick={() => setShowConfirmationModal(true)}>{t('common.saveChanges')}</Button>
+			</div>
+
+			<ConfirmationModal
+				title={t(getKey('confirmationModal.title'))}
+				description={t(getKey('confirmationModal.description'))}
+				isOpen={showConfirmationModal}
+				onClose={() => setShowConfirmationModal(false)}
+				onConfirm={onSaveChanges}
+				confirmDisabled={isPending}
 			/>
 		</div>
 	)

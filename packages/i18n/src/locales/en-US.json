@@ -3032,7 +3032,9 @@
 			"url": "URL",
 			"username": "Username",
 			"value": "Value",
-			"version": "Version"
+			"version": "Version",
+			"accessOpdsV2": "Access OPDS v2.0",
+			"accessOpdsV1": "Access OPDS v1.2"
 		},
 		"errors": {
 			"unknown": "Unknown error"

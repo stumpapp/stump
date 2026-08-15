@@ -16,15 +16,14 @@ pub async fn sync_oidc_user(
 	groups: &[String],
 	mapping: Option<HashMap<String, Vec<UserPermission>>>,
 ) -> Result<(), sea_orm::DbErr> {
-	sync_oidc_permissions(tx, user_id, groups, mapping).await?;
+	sync_oidc_groups_and_permissions(tx, user_id, groups, mapping).await?;
 	sync_oidc_library_access(tx, user_id, groups).await?;
 	Ok(())
 }
 
-/// sync the user's permissions based on their OIDC groups and the mapping of groups to permissions,
-/// and update the user's stored OIDC groups for future reference
+/// sync the user's groups and group-associated permissions if a group-permission mapping is provided
 #[tracing::instrument(skip(tx, groups, mapping), err)]
-pub async fn sync_oidc_permissions(
+async fn sync_oidc_groups_and_permissions(
 	tx: &impl ConnectionTrait,
 	user_id: &str,
 	groups: &[String],
@@ -155,7 +154,7 @@ pub async fn sync_oidc_library_access(
 }
 
 /// sync changes to library access for a specific library after its OIDC groups have
-/// been updated
+/// been updated. users who are not oidc-managed will not be affected by this function
 pub async fn sync_oidc_library_access_for_library(
 	tx: &impl ConnectionTrait,
 	library_id: &str,

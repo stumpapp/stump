@@ -677,7 +677,11 @@
 		},
 		"footer": {
 			"readingTime": "읽은 시간: {{time}}",
-			"pageXOfY": "{{total}}페이지 중 {{current}}페이지"
+			"pageXOfY": "{{total}}페이지 중 {{current}}페이지",
+			"goToPage": {
+				"label": "페이지로 이동",
+				"submit": "이동"
+			}
 		},
 		"locations": {
 			"manager": "위치 관리",

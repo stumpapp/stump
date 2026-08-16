@@ -12,6 +12,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
+import GoToPage from './GoToPage'
 
 const SIZE_MODIFIER = 1.5
 
@@ -37,6 +38,20 @@ export default function ReaderFooter() {
 	const currentSet = useMemo(
 		() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
 		[currentPage, pageSets],
+	)
+
+	// The position label, e.g. "4-5 of 42". Shown as plain text in continuous modes and
+	// reused as the "go to page" trigger text in paged mode.
+	const pageRangeLabel = useMemo(
+		() =>
+			t('readerUi.footer.pageXOfY', {
+				current: [...currentSet]
+					.map((idx) => idx + 1)
+					.sort((a, b) => a - b)
+					.join('-'),
+				total: book.pages,
+			}),
+		[currentSet, book.pages, t],
 	)
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
@@ -183,15 +198,21 @@ export default function ReaderFooter() {
 						</Text>
 					)}
 
-					<Text className="text-sm text-[#898d94]">
-						{t('readerUi.footer.pageXOfY', {
-							current: [...currentSet]
-								.map((idx) => idx + 1)
-								.sort((a, b) => a - b)
-								.join('-'),
-							total: book.pages,
-						})}
-					</Text>
+					{/* In paged mode, the position indicator doubles as a "go to page" trigger for
+					    quick recovery. Continuous modes keep the plain text since their page
+					    change path doesn't sync to the URL the same way. */}
+					{readingMode === ReadingMode.Paged ? (
+						<GoToPage
+							currentPage={currentPage}
+							totalPages={book.pages}
+							onSubmit={setCurrentPage}
+							triggerLabel={pageRangeLabel}
+							label={t('readerUi.footer.goToPage.label')}
+							submitLabel={t('readerUi.footer.goToPage.submit')}
+						/>
+					) : (
+						<Text className="text-sm text-[#898d94]">{pageRangeLabel}</Text>
+					)}
 				</div>
 			</div>
 		</motion.nav>

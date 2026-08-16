@@ -677,7 +677,11 @@
 		},
 		"footer": {
 			"readingTime": "Reading time: {{time}}",
-			"pageXOfY": "{{current}} of {{total}}"
+			"pageXOfY": "{{current}} of {{total}}",
+			"goToPage": {
+				"label": "Go to page",
+				"submit": "Go"
+			}
 		},
 		"locations": {
 			"manager": "Location manager",

@@ -118,6 +118,13 @@ export default function BookMenu({ data }: Props) {
 			client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
 			client.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
 			client.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+			// TODO: would be better to have a little bit smarter cache invalidation here,
+			// im casting a wide net because i don't want to have to figure out where i am
+			// in the router (e.g., did i come from books? a series? etc)
+			client.invalidateQueries({ queryKey: ['seriesById', book.series.id], exact: false }), // stats
+			client.invalidateQueries({ queryKey: ['seriesBooks', book.series.id], exact: false }),
+			client.invalidateQueries({ queryKey: ['booksStats', serverID], exact: false }), // stats
+			client.invalidateQueries({ queryKey: ['books', serverID], exact: false }), // server books
 		])
 	}
 

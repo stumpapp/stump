@@ -16,7 +16,7 @@ pub use epub_search::{
 pub use format::*;
 pub use metadata::*;
 pub use process::*;
-pub use readium::{RWPMPositions, RWPManifest, ReadiumManifestGenerator};
+pub use readium::ReadiumManifestGenerator;
 pub use utils::is_accepted_cover_name;
 
 #[cfg(test)]

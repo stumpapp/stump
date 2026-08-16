@@ -97,7 +97,7 @@ struct GetProgressResponse {
 	///
 	/// - A page number for page-based books (e.g. "24")
 	/// - An x-pointer for DOM-based books, using their "scrolling" reader. This maps to the location
-	///   in the DOM at the top of the screen at the time of sync. This is **not** an epubcfi string.
+	///   in the DOM at the top of the screen at the time of sync. This is not a Readium locator.
 	///
 	/// Please see this wonderful comment for additional context: https://github.com/stumpapp/stump/issues/239#issuecomment-2428256328
 	progress: Option<String>,

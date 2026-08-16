@@ -32,6 +32,7 @@ mod m20260617_200820_rm_thumbnails_in_headers_pref;
 mod m20260702_000000_metadata_fetch_partial_results;
 mod m20260804_000000_smart_list_role_to_integer;
 mod m20260815_205755_avatar_image_metadata;
+mod m20260816_000000_drop_legacy_epubcfi;
 
 pub struct Migrator;
 
@@ -70,6 +71,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260702_000000_metadata_fetch_partial_results::Migration),
 			Box::new(m20260804_000000_smart_list_role_to_integer::Migration),
 			Box::new(m20260815_205755_avatar_image_metadata::Migration),
+			Box::new(m20260816_000000_drop_legacy_epubcfi::Migration),
 		]
 	}
 }

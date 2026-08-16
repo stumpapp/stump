@@ -2,18 +2,22 @@ use std::path::PathBuf;
 
 use axum::{
 	extract::{Path, Query, State},
+	http::header,
 	middleware,
-	response::IntoResponse,
+	response::{IntoResponse, Response},
 	routing::get,
 	Extension, Json, Router,
 };
 use graphql::data::AuthContext;
-use models::entity::{media, user::AuthUser};
+use models::{
+	entity::{media, user::AuthUser},
+	shared::readium::{RWPMPositions, RWPManifest},
+};
 use sea_orm::prelude::*;
 use serde::Deserialize;
 use stump_core::filesystem::media::{
-	search_epub, EpubProcessor, EpubSearchError, EpubSearchOptions, RWPMPositions,
-	RWPManifest, ReadiumManifestGenerator, EPUB_SEARCH_DEFAULT_LIMIT,
+	search_epub, EpubProcessor, EpubSearchError, EpubSearchOptions,
+	ReadiumManifestGenerator, EPUB_SEARCH_DEFAULT_LIMIT,
 };
 use tokio_util::sync::CancellationToken;
 
@@ -65,6 +69,33 @@ fn epub_service_base_url(host_details: &HostDetails, id: &str) -> String {
 	host_details.url_for_path(&format!("api/v2/epub/{id}"))
 }
 
+struct WebPubManifestResponse(RWPManifest);
+
+impl IntoResponse for WebPubManifestResponse {
+	fn into_response(self) -> Response {
+		(
+			[(header::CONTENT_TYPE, "application/webpub+json")],
+			Json(self.0),
+		)
+			.into_response()
+	}
+}
+
+struct WebPubPositionsResponse(RWPMPositions);
+
+impl IntoResponse for WebPubPositionsResponse {
+	fn into_response(self) -> Response {
+		(
+			[(
+				header::CONTENT_TYPE,
+				"application/vnd.readium.position-list+json",
+			)],
+			Json(self.0),
+		)
+			.into_response()
+	}
+}
+
 /// Get the Readium Web Publication Manifest for an epub file
 ///
 /// See: https://readium.org/webpub-manifest/
@@ -73,7 +104,7 @@ async fn get_epub_manifest(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 	HostExtractor(host_details): HostExtractor,
-) -> APIResult<RWPManifest> {
+) -> APIResult<WebPubManifestResponse> {
 	let AuthContext { user, .. } = req;
 	let ebook = find_ebook_for_user(ctx.conn.as_ref(), &user, &id).await?;
 
@@ -81,7 +112,7 @@ async fn get_epub_manifest(
 	let generator = ReadiumManifestGenerator::new(&ebook.path, base_url);
 	let manifest = generator.generate_manifest()?;
 
-	Ok(manifest)
+	Ok(WebPubManifestResponse(manifest))
 }
 
 /// Get the positions list for an epub file
@@ -92,7 +123,7 @@ async fn get_epub_positions(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 	HostExtractor(host_details): HostExtractor,
-) -> APIResult<RWPMPositions> {
+) -> APIResult<WebPubPositionsResponse> {
 	let AuthContext { user, .. } = req;
 	let ebook = find_ebook_for_user(ctx.conn.as_ref(), &user, &id).await?;
 
@@ -100,7 +131,7 @@ async fn get_epub_positions(
 	let generator = ReadiumManifestGenerator::new(&ebook.path, base_url);
 	let positions = generator.generate_positions()?;
 
-	Ok(positions)
+	Ok(WebPubPositionsResponse(positions))
 }
 
 #[derive(Debug, Deserialize)]

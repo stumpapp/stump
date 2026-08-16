@@ -1,162 +1,13 @@
-use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
+use std::{fs::File, io::BufReader, path::PathBuf};
 
-use axum::{
-	http::header,
-	response::{IntoResponse, Response},
-	Json,
-};
 use epub::doc::{EpubDoc, NavPoint};
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
+use models::shared::readium::{
+	RWPMLink, RWPMLinkBuilder, RWPMMetadata, RWPMMetadataBuilder, RWPMPosition,
+	RWPMPositionBuilder, RWPMPositionLocationsBuilder, RWPMPositions,
+	RWPMPositionsBuilder, RWPManifest, RWPManifestBuilder,
+};
 
 use crate::filesystem::error::FileError;
-
-pub const RWPM_CONTEXT: &str = "https://readium.org/webpub-manifest/context.jsonld";
-
-/// A link in a Readium Web Publication Manifest
-#[skip_serializing_none]
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct RWPMLink {
-	pub href: String,
-	#[serde(rename = "type")]
-	pub media_type: Option<String>,
-	pub title: Option<String>,
-	pub rel: Option<Vec<String>>,
-	#[serde(skip_serializing_if = "HashMap::is_empty", default)]
-	pub properties: HashMap<String, serde_json::Value>,
-	#[serde(skip_serializing_if = "Vec::is_empty", default)]
-	pub children: Vec<RWPMLink>,
-	pub duration: Option<f64>, //  for audio/video
-	pub width: Option<u32>,    // for images
-	pub height: Option<u32>,   // for images
-}
-
-impl RWPMLink {
-	pub fn new(href: impl Into<String>, media_type: Option<String>) -> Self {
-		Self {
-			href: href.into(),
-			media_type,
-			..Default::default()
-		}
-	}
-
-	pub fn with_title(mut self, title: impl Into<String>) -> Self {
-		self.title = Some(title.into());
-		self
-	}
-
-	pub fn with_rel(mut self, rel: impl Into<String>) -> Self {
-		self.rel = Some(vec![rel.into()]);
-		self
-	}
-
-	pub fn with_children(mut self, children: Vec<RWPMLink>) -> Self {
-		self.children = children;
-		self
-	}
-}
-
-/// Metadata for a Readium Web Publication
-#[skip_serializing_none]
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct RWPMMetadata {
-	pub title: String,
-	pub identifier: Option<String>, // e.g., ISBN, UUID
-	#[serde(skip_serializing_if = "Vec::is_empty", default)]
-	pub author: Vec<String>,
-	pub publisher: Option<String>,
-	pub language: Option<String>, // Supposedly a BCP 47
-	pub published: Option<String>,
-	pub modified: Option<String>,
-	pub description: Option<String>,
-	pub number_of_pages: Option<u32>,
-	pub reading_progression: Option<String>,
-}
-
-/// A Readium Web Publication Manifest
-#[skip_serializing_none]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RWPManifest {
-	#[serde(rename = "@context")]
-	pub context: String,
-	pub metadata: RWPMMetadata,
-	pub links: Vec<RWPMLink>,
-	pub reading_order: Vec<RWPMLink>,
-	#[serde(skip_serializing_if = "Vec::is_empty", default)]
-	pub resources: Vec<RWPMLink>,
-	#[serde(skip_serializing_if = "Vec::is_empty", default)]
-	pub toc: Vec<RWPMLink>,
-}
-
-impl Default for RWPManifest {
-	fn default() -> Self {
-		Self {
-			context: RWPM_CONTEXT.to_string(),
-			metadata: RWPMMetadata::default(),
-			links: Vec::new(),
-			reading_order: Vec::new(),
-			resources: Vec::new(),
-			toc: Vec::new(),
-		}
-	}
-}
-
-impl IntoResponse for RWPManifest {
-	fn into_response(self) -> Response {
-		(
-			[(header::CONTENT_TYPE, "application/webpub+json")],
-			Json(self),
-		)
-			.into_response()
-	}
-}
-
-/// A position locator for Readium navigation
-///
-/// See: https://readium.org/architecture/models/locators/positions/
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RWPMPosition {
-	pub href: String,
-	#[serde(rename = "type")]
-	pub media_type: String,
-	pub title: Option<String>,
-	pub locations: RWPMPositionLocations,
-}
-
-/// Location information within a position
-///
-/// See: https://readium.org/architecture/models/locators/#the-locator-object
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RWPMPositionLocations {
-	pub position: u32,          // 1-based
-	pub progression: f64,       // 0.0-1.0
-	pub total_progression: f64, // 0.0-1.0
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RWPMPositions {
-	pub total: u32,
-	pub positions: Vec<RWPMPosition>,
-}
-
-impl IntoResponse for RWPMPositions {
-	fn into_response(self) -> Response {
-		(
-			[(
-				header::CONTENT_TYPE,
-				"application/vnd.readium.position-list+json",
-			)],
-			Json(self),
-		)
-			.into_response()
-	}
-}
 
 /// A utility struct for generating Readium Web Publication Manifests
 pub struct ReadiumManifestGenerator {
@@ -176,46 +27,61 @@ impl ReadiumManifestGenerator {
 		let mut epub = EpubDoc::new(&self.epub_path)
 			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
 
-		let metadata = self.extract_metadata(&epub);
-		let links = self.generate_links();
+		let metadata = self.extract_metadata(&epub)?;
+		let links = self.generate_links()?;
 		let reading_order = self.generate_reading_order(&mut epub)?;
-		let resources = self.generate_resources(&epub);
-		let toc = self.generate_toc(&epub);
+		let resources = self.generate_resources(&epub)?;
+		let toc = self.generate_toc(&epub)?;
 
-		Ok(RWPManifest {
-			context: RWPM_CONTEXT.to_string(),
-			metadata,
-			links,
-			reading_order,
-			resources,
-			toc,
-		})
+		RWPManifestBuilder::default()
+			.metadata(metadata)
+			.links(links)
+			.reading_order(reading_order)
+			.resources(resources)
+			.toc(toc)
+			.build()
+			.map_err(|error| FileError::EpubReadError(error.to_string()))
 	}
 
 	/// Generate a positions list for the EPUB
 	pub fn generate_positions(&self) -> Result<RWPMPositions, FileError> {
 		let items = self.enumerate_spine_for_positions()?;
-		let positions: Vec<RWPMPosition> = items
+		let positions: Result<Vec<RWPMPosition>, FileError> = items
 			.into_iter()
-			.map(|item| RWPMPosition {
-				href: self.resource_url(&item.package_path),
-				media_type: item.media_type,
-				title: item.title,
-				locations: RWPMPositionLocations {
-					position: item.position,
-					progression: 0.0,
-					total_progression: item.total_progression,
-				},
+			.map(|item| {
+				let locations = RWPMPositionLocationsBuilder::default()
+					.position(item.position)
+					.progression(0.0)
+					.total_progression(item.total_progression)
+					.build()
+					.map_err(|error| FileError::EpubReadError(error.to_string()))?;
+
+				let mut builder = RWPMPositionBuilder::default();
+				builder
+					.href(self.resource_url(&item.package_path))
+					.media_type(item.media_type)
+					.locations(locations);
+				if let Some(title) = item.title {
+					builder.title(title);
+				}
+				builder
+					.build()
+					.map_err(|error| FileError::EpubReadError(error.to_string()))
 			})
 			.collect();
+		let positions = positions?;
 
-		Ok(RWPMPositions {
-			total: positions.len() as u32,
-			positions,
-		})
+		RWPMPositionsBuilder::default()
+			.total(positions.len() as u32)
+			.positions(positions)
+			.build()
+			.map_err(|error| FileError::EpubReadError(error.to_string()))
 	}
 
-	fn extract_metadata(&self, epub: &EpubDoc<BufReader<File>>) -> RWPMMetadata {
+	fn extract_metadata(
+		&self,
+		epub: &EpubDoc<BufReader<File>>,
+	) -> Result<RWPMMetadata, FileError> {
 		let get_first = |key: &str| -> Option<String> {
 			epub.metadata
 				.iter()
@@ -238,36 +104,52 @@ impl ReadiumManifestGenerator {
 				.unwrap_or_else(|| "Untitled".to_string())
 		});
 
-		RWPMMetadata {
-			title,
-			identifier: get_first("identifier"),
-			author: get_all("creator"),
-			publisher: get_first("publisher"),
-			language: get_first("language"),
-			published: get_first("date"),
-			modified: None,
-			description: get_first("description"),
-			number_of_pages: Some(epub.get_num_chapters() as u32),
-			reading_progression: Some(
+		let mut builder = RWPMMetadataBuilder::default();
+		builder
+			.title(title)
+			.author(get_all("creator"))
+			.number_of_pages(epub.get_num_chapters() as u32)
+			.reading_progression(
 				get_first("direction").unwrap_or_else(|| "ltr".to_string()),
-			),
+			);
+		if let Some(identifier) = get_first("identifier") {
+			builder.identifier(identifier);
 		}
+		if let Some(publisher) = get_first("publisher") {
+			builder.publisher(publisher);
+		}
+		if let Some(language) = get_first("language") {
+			builder.language(language);
+		}
+		if let Some(published) = get_first("date") {
+			builder.published(published);
+		}
+		if let Some(description) = get_first("description") {
+			builder.description(description);
+		}
+		builder
+			.build()
+			.map_err(|error| FileError::EpubReadError(error.to_string()))
 	}
 
-	fn generate_links(&self) -> Vec<RWPMLink> {
-		vec![
-			RWPMLink::new(
-				format!("{}/manifest.json", self.base_url),
-				Some("application/webpub+json".to_string()),
-			)
-			.with_rel("self"),
+	fn generate_links(&self) -> Result<Vec<RWPMLink>, FileError> {
+		[
+			RWPMLinkBuilder::default()
+				.href(format!("{}/manifest.json", self.base_url))
+				.media_type("application/webpub+json")
+				.rel(vec!["self".to_string()])
+				.build()
+				.map_err(|error| FileError::EpubReadError(error.to_string())),
 			// Required by @readium/shared Publication.positionsFromManifest() —
 			// media type is how the client discovers the list (not rel alone).
-			RWPMLink::new(
-				format!("{}/positions.json", self.base_url),
-				Some("application/vnd.readium.position-list+json".to_string()),
-			),
+			RWPMLinkBuilder::default()
+				.href(format!("{}/positions.json", self.base_url))
+				.media_type("application/vnd.readium.position-list+json")
+				.build()
+				.map_err(|error| FileError::EpubReadError(error.to_string())),
 		]
+		.into_iter()
+		.collect()
 	}
 
 	fn generate_reading_order(
@@ -289,12 +171,20 @@ impl ReadiumManifestGenerator {
 					.find(|nav| nav.content.to_string_lossy().contains(&href))
 					.map(|nav| nav.label.clone());
 
-				let mut link = RWPMLink::new(self.resource_url(&href), media_type);
-				if let Some(t) = title {
-					link = link.with_title(t);
+				let mut builder = RWPMLinkBuilder::default();
+				builder.href(self.resource_url(&href));
+				if let Some(media_type) = media_type {
+					builder.media_type(media_type);
+				}
+				if let Some(title) = title {
+					builder.title(title);
 				}
 
-				reading_order.push(link);
+				reading_order.push(
+					builder
+						.build()
+						.map_err(|error| FileError::EpubReadError(error.to_string()))?,
+				);
 			} else {
 				tracing::warn!(
 					spine_idref = %spine_item.idref,
@@ -307,7 +197,10 @@ impl ReadiumManifestGenerator {
 		Ok(reading_order)
 	}
 
-	fn generate_resources(&self, epub: &EpubDoc<BufReader<File>>) -> Vec<RWPMLink> {
+	fn generate_resources(
+		&self,
+		epub: &EpubDoc<BufReader<File>>,
+	) -> Result<Vec<RWPMLink>, FileError> {
 		let spine_idrefs: std::collections::HashSet<_> =
 			epub.spine.iter().map(|item| item.idref.as_str()).collect();
 
@@ -316,31 +209,39 @@ impl ReadiumManifestGenerator {
 			.filter(|(id, _)| !spine_idrefs.contains(id.as_str()))
 			.map(|(_, resource)| {
 				let href = resource.path.to_string_lossy().to_string();
-				RWPMLink::new(self.resource_url(&href), Some(resource.mime.clone()))
+				RWPMLinkBuilder::default()
+					.href(self.resource_url(&href))
+					.media_type(resource.mime.clone())
+					.build()
+					.map_err(|error| FileError::EpubReadError(error.to_string()))
 			})
 			.collect()
 	}
 
-	fn generate_toc(&self, epub: &EpubDoc<BufReader<File>>) -> Vec<RWPMLink> {
+	fn generate_toc(
+		&self,
+		epub: &EpubDoc<BufReader<File>>,
+	) -> Result<Vec<RWPMLink>, FileError> {
 		epub.toc
 			.iter()
 			.map(|nav| self.nav_point_to_link(nav))
 			.collect()
 	}
 
-	fn nav_point_to_link(&self, nav: &NavPoint) -> RWPMLink {
+	fn nav_point_to_link(&self, nav: &NavPoint) -> Result<RWPMLink, FileError> {
 		let href = nav.content.to_string_lossy().to_string();
-		RWPMLink::new(
-			self.resource_url(&href),
-			Some("application/xhtml+xml".to_string()),
-		)
-		.with_title(&nav.label)
-		.with_children(
-			nav.children
-				.iter()
-				.map(|child| self.nav_point_to_link(child))
-				.collect(),
-		)
+		let children = nav
+			.children
+			.iter()
+			.map(|child| self.nav_point_to_link(child))
+			.collect::<Result<Vec<_>, _>>()?;
+		RWPMLinkBuilder::default()
+			.href(self.resource_url(&href))
+			.media_type("application/xhtml+xml")
+			.title(&nav.label)
+			.children(children)
+			.build()
+			.map_err(|error| FileError::EpubReadError(error.to_string()))
 	}
 
 	/// Build an absolute RWPM resource URL for a package-relative path.
@@ -490,12 +391,17 @@ fn enumerate_spine_position_meta(
 mod tests {
 	use super::*;
 	use crate::filesystem::media::tests::get_test_epub_path;
+	use models::shared::readium::RWPM_CONTEXT;
 
 	#[test]
 	fn test_rwpm_link_builder() {
-		let link = RWPMLink::new("/test.html", Some("text/html".to_string()))
-			.with_title("Test")
-			.with_rel("self");
+		let link = RWPMLinkBuilder::default()
+			.href("/test.html")
+			.media_type("text/html")
+			.title("Test")
+			.rel(vec!["self".to_string()])
+			.build()
+			.unwrap();
 
 		assert_eq!(link.href, "/test.html");
 		assert_eq!(link.media_type, Some("text/html".to_string()));
@@ -506,13 +412,19 @@ mod tests {
 
 	#[test]
 	fn test_rwpm_link_children_builder() {
-		let child =
-			RWPMLink::new("/child.xhtml", Some("application/xhtml+xml".to_string()))
-				.with_title("Child");
-		let parent =
-			RWPMLink::new("/parent.xhtml", Some("application/xhtml+xml".to_string()))
-				.with_title("Parent")
-				.with_children(vec![child]);
+		let child = RWPMLinkBuilder::default()
+			.href("/child.xhtml")
+			.media_type("application/xhtml+xml")
+			.title("Child")
+			.build()
+			.unwrap();
+		let parent = RWPMLinkBuilder::default()
+			.href("/parent.xhtml")
+			.media_type("application/xhtml+xml")
+			.title("Parent")
+			.children(vec![child])
+			.build()
+			.unwrap();
 
 		assert_eq!(parent.children.len(), 1);
 		assert_eq!(parent.children[0].title, Some("Child".to_string()));
@@ -520,26 +432,27 @@ mod tests {
 
 	#[test]
 	fn test_manifest_serialization() {
-		let manifest = RWPManifest {
-			context: RWPM_CONTEXT.to_string(),
-			metadata: RWPMMetadata {
-				title: "Test Book".to_string(),
-				author: vec!["Author".to_string()],
-				..Default::default()
-			},
-			links: vec![RWPMLink::new(
-				"/manifest.json",
-				Some("application/webpub+json".to_string()),
-			)
-			.with_rel("self")],
-			reading_order: vec![RWPMLink::new(
-				"/chapter1.xhtml",
-				Some("application/xhtml+xml".to_string()),
-			)
-			.with_title("Chapter 1")],
-			resources: vec![],
-			toc: vec![],
-		};
+		let metadata = RWPMMetadataBuilder::default()
+			.title("Test Book")
+			.author(vec!["Author".to_string()])
+			.build()
+			.unwrap();
+		let manifest = RWPManifestBuilder::default()
+			.metadata(metadata)
+			.links(vec![RWPMLinkBuilder::default()
+				.href("/manifest.json")
+				.media_type("application/webpub+json")
+				.rel(vec!["self".to_string()])
+				.build()
+				.unwrap()])
+			.reading_order(vec![RWPMLinkBuilder::default()
+				.href("/chapter1.xhtml")
+				.media_type("application/xhtml+xml")
+				.title("Chapter 1")
+				.build()
+				.unwrap()])
+			.build()
+			.unwrap();
 
 		let json = serde_json::to_string(&manifest).unwrap();
 		assert!(json.contains("Test Book"));
@@ -549,29 +462,29 @@ mod tests {
 
 	#[test]
 	fn test_manifest_serialization_nested_toc() {
-		let child = RWPMLink::new(
-			"/OEBPS/ch1.xhtml",
-			Some("application/xhtml+xml".to_string()),
-		)
-		.with_title("Chapter 1");
-		let parent = RWPMLink::new(
-			"/OEBPS/volume1.xhtml",
-			Some("application/xhtml+xml".to_string()),
-		)
-		.with_title("Volume 1")
-		.with_children(vec![child]);
-
-		let manifest = RWPManifest {
-			context: RWPM_CONTEXT.to_string(),
-			metadata: RWPMMetadata {
-				title: "Test Book".to_string(),
-				..Default::default()
-			},
-			links: vec![],
-			reading_order: vec![],
-			resources: vec![],
-			toc: vec![parent],
-		};
+		let child = RWPMLinkBuilder::default()
+			.href("/OEBPS/ch1.xhtml")
+			.media_type("application/xhtml+xml")
+			.title("Chapter 1")
+			.build()
+			.unwrap();
+		let parent = RWPMLinkBuilder::default()
+			.href("/OEBPS/volume1.xhtml")
+			.media_type("application/xhtml+xml")
+			.title("Volume 1")
+			.children(vec![child])
+			.build()
+			.unwrap();
+		let manifest = RWPManifestBuilder::default()
+			.metadata(
+				RWPMMetadataBuilder::default()
+					.title("Test Book")
+					.build()
+					.unwrap(),
+			)
+			.toc(vec![parent])
+			.build()
+			.unwrap();
 
 		let json = serde_json::to_string(&manifest).unwrap();
 		assert!(json.contains("Volume 1"));

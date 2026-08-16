@@ -3,9 +3,11 @@ import { Locator, LocatorLocations } from '@readium/shared'
 import {
 	hrefsMatch,
 	locatorsRoughlyMatch,
+	locatorToHref,
 	nearestPositionByTotalProgression,
 	packagePathFromHref,
 	resolveInitialLocator,
+	resolvePublicationLinkLocator,
 } from '../locator'
 
 describe('packagePathFromHref', () => {
@@ -28,6 +30,49 @@ describe('hrefsMatch', () => {
 				'OEBPS/ch1.xhtml#section',
 			),
 		).toBe(true)
+	})
+})
+
+describe('resolvePublicationLinkLocator', () => {
+	const position = new Locator({
+		href: 'http://localhost:10801/api/v2/epub/book/resource/OEBPS/appendix.xhtml',
+		type: 'application/xhtml+xml',
+		locations: new LocatorLocations({ position: 4, totalProgression: 0.7 }),
+	})
+
+	it('recognizes an absolute API URL as an internal publication link', () => {
+		const clicked = new Locator({
+			href: `${position.href}#sec1-103`,
+			type: '',
+		})
+		const resolved = resolvePublicationLinkLocator(clicked, [position])
+
+		expect(resolved?.href).toBe(position.href)
+		expect(resolved?.locations.position).toBe(4)
+		expect(resolved?.locations.fragments).toEqual(['sec1-103'])
+	})
+
+	it('resolves relative links against the current resource', () => {
+		const clicked = new Locator({ href: 'appendix.xhtml#target', type: '' })
+		const resolved = resolvePublicationLinkLocator(
+			clicked,
+			[position],
+			'http://localhost:10801/api/v2/epub/book/resource/OEBPS/chapter.xhtml',
+		)
+		expect(resolved?.locations.fragments).toEqual(['target'])
+	})
+
+	it('does not classify an unrelated URL as an internal link', () => {
+		const clicked = new Locator({ href: 'https://example.com/page#part', type: '' })
+		expect(resolvePublicationLinkLocator(clicked, [position])).toBeNull()
+		expect(locatorToHref(clicked)).toBe('https://example.com/page#part')
+	})
+
+	it('resolves a relative external destination before opening it', () => {
+		const clicked = new Locator({ href: '../../outside.xhtml#part', type: '' })
+		expect(locatorToHref(clicked, position.href)).toBe(
+			'http://localhost:10801/api/v2/epub/book/outside.xhtml#part',
+		)
 	})
 })
 

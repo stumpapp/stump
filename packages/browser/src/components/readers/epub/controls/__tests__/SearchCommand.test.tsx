@@ -99,7 +99,7 @@ function mockControls(overrides: Partial<EpubReaderControls> = {}) {
 			onPaginateBackward: jest.fn(),
 			jumpToSection: jest.fn(),
 			onGoToLocator: jest.fn(),
-			getLocatorPreviewText: jest.fn(async () => null),
+			getLocatorPreviewText: jest.fn(() => null),
 			...overrides,
 		},
 		readerMeta: {

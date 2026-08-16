@@ -21,7 +21,6 @@ export function annotationToDecoration(
 		style: {
 			type: DecorationStyleType.Highlight,
 			tint,
-			isActive: true,
 		},
 		extras: {
 			annotationText: annotation.annotationText ?? null,

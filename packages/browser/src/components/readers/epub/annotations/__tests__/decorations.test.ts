@@ -30,7 +30,6 @@ describe('annotationToDecoration', () => {
 		expect(decoration?.style).toEqual({
 			type: DecorationStyleType.Highlight,
 			tint: DEFAULT_HIGHLIGHT_TINT,
-			isActive: true,
 		})
 		expect(decoration?.locator.href).toBe('/resource/chapter-1.xhtml')
 		expect(decoration?.locator.text?.highlight).toBe('highlighted text')

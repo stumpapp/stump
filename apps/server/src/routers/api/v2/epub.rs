@@ -62,7 +62,7 @@ async fn find_ebook_for_user(
 
 /// Resolve the request-scoped base URL used in RWPM absolute resource links.
 fn epub_service_base_url(host_details: &HostDetails, id: &str) -> String {
-	host_details.url() + "/api/v2/epub/" + id
+	host_details.url_for_path(&format!("api/v2/epub/{id}"))
 }
 
 /// Get the Readium Web Publication Manifest for an epub file

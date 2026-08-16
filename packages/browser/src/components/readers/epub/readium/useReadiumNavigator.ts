@@ -12,6 +12,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { clearFramesSelection } from '../annotations/clearSelection'
+import { locatorToHref, resolvePublicationLinkLocator } from './locator'
 import {
 	attachFrameReloadGuard,
 	patchDurableIframeSrc,
@@ -181,6 +182,7 @@ export function useReadiumNavigator({
 
 				const listeners: EpubNavigatorListeners = {
 					frameLoaded: () => {},
+					timelineItemChanged: () => {},
 					positionChanged: (locator: Locator) => {
 						setCurrentLocator(locator)
 						syncNavButtons(navigatorRef.current)
@@ -197,7 +199,25 @@ export function useReadiumNavigator({
 					miscPointer: () => {},
 					scroll: () => {},
 					customEvent: () => {},
-					handleLocator: () => false,
+					handleLocator: (locator) => {
+						const internal = resolvePublicationLinkLocator(
+							locator,
+							positions,
+							navigator?.currentLocator?.href,
+						)
+						if (internal && navigator) {
+							navigator.go(internal, false, () => syncNavButtons(navigator))
+							return true
+						}
+
+						const href = locatorToHref(locator, navigator?.currentLocator?.href)
+						if (/^(https?:|mailto:|tel:)/i.test(href)) {
+							window.open(href, '_blank', 'noopener,noreferrer')
+							return true
+						}
+
+						return false
+					},
 					textSelected: (selection) => {
 						onTextSelectedRef.current?.(selection)
 					},

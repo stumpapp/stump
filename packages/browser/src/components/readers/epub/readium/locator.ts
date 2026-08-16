@@ -1,6 +1,6 @@
 import { Locator, LocatorLocations, LocatorText } from '@readium/shared'
 import type { ReadiumLocator, ReadiumLocatorInput } from '@stump/graphql'
-import type { EpubSearchResult } from '@stump/sdk'
+import { type EpubSearchResult, resolveUrl } from '@stump/sdk'
 
 import type { ReaderLocator } from '../context'
 
@@ -44,6 +44,35 @@ export function fragmentFromHref(href: string): string | undefined {
 	if (hash < 0) return undefined
 	const frag = href.slice(hash + 1)
 	return frag.length ? frag : undefined
+}
+
+/**
+ * Resolve a locator emitted by Readium's external-link callback back into the
+ * publication positions list. Readium sends absolute HTTP(S) links through that
+ * callback even when they point at another resource in the same publication.
+ */
+export function resolvePublicationLinkLocator(
+	locator: Locator,
+	positions: Locator[],
+	currentHref?: string,
+): Locator | null {
+	const resolvedHref = resolveUrl(locator.href, currentHref)
+	const position = positions.find((candidate) => hrefsMatch(candidate.href, resolvedHref))
+	if (!position) return null
+
+	return position.copyWithLocations({
+		...(locator.locations.fragments.length ? { fragments: [...locator.locations.fragments] } : {}),
+		...(locator.locations.progression != null
+			? { progression: locator.locations.progression }
+			: {}),
+	})
+}
+
+/** Recombine a Locator's normalized href and first fragment for browser navigation. */
+export function locatorToHref(locator: Locator, currentHref?: string): string {
+	const href = resolveUrl(locator.href, currentHref)
+	const fragment = locator.locations.fragments[0]
+	return fragment ? `${href}#${fragment}` : href
 }
 
 function safeNumber(value: unknown): number | undefined {

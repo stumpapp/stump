@@ -1,11 +1,11 @@
 import { graphql } from '@stump/graphql'
 import { Api } from '@stump/sdk'
-import { File } from 'expo-file-system'
+import { DownloadOptions, File } from 'expo-file-system'
 import { match, P } from 'ts-pattern'
 
 import { cacheDirectory, serverPath } from '~/lib/filesystem'
 import { createThumbnail } from '~/lib/widgets/utils'
-import { SavedServer, ServerAvatar, useSavedServerStore } from '~/stores/savedServer'
+import { isKnownServer, SavedServer, ServerAvatar, useSavedServerStore } from '~/stores/savedServer'
 
 const avatarQuery = graphql(`
 	query PullServerAvatar {
@@ -25,11 +25,15 @@ const avatarQuery = graphql(`
 	}
 `)
 
-async function downloadImage(serverId: string, url: string): Promise<File> {
+async function downloadImage(
+	serverId: string,
+	url: string,
+	options?: DownloadOptions,
+): Promise<File> {
 	const destination = new File(cacheDirectory, `${serverId}.png`)
-	const tmp = await File.downloadFileAsync(url, destination, { idempotent: true })
+	const tmp = await File.downloadFileAsync(url, destination, { ...options, idempotent: true })
 	const resized = await createThumbnail(tmp.uri)
-	await resized.move(destination)
+	await resized.move(destination, { overwrite: true })
 	return destination
 }
 
@@ -40,7 +44,9 @@ async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvata
 
 	if (!avatar) return null
 
-	const file = await downloadImage(serverId, avatar.url)
+	const file = await downloadImage(serverId, avatar.url, {
+		headers: await api.getHeaders(),
+	})
 
 	return {
 		uri: file.uri,
@@ -48,28 +54,74 @@ async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvata
 	}
 }
 
-async function fetchServerHeader(url: string): Promise<string | null> {
+async function identifyFromServerHeader(serverHeader: string) {
+	if (serverHeader.startsWith('Codex/')) {
+		return 'codex'
+	}
+
+	return null
+}
+
+async function fetchServerHeader(url: string) {
 	try {
 		const response = await fetch(url, { method: 'HEAD' })
-		const serverHeader = response.headers.get('Server')
+		const serverHeader = await identifyFromServerHeader(response.headers.get('Server') || '')
+		console.log({
+			url,
+			serverHeader,
+			headers: response.headers,
+		})
 		return serverHeader
 	} catch {
 		return null
 	}
 }
 
+async function fetchCatalogAuthor(server: SavedServer, api: Api) {
+	let author: string | null = null
+
+	const opdsVersion = server.kind === 'opds' ? 2 : 1
+	console.log('opdsVersion', opdsVersion)
+
+	if (opdsVersion === 1) {
+		const catalog = await api.opdsLegacy.feed(server.url)
+		author = catalog.author?.name?.toLowerCase() || null
+	} else {
+		const catalog = await api.opds.feed(server.url)
+		author = match(catalog.metadata.author)
+			.with(
+				P.array(P.shape({ name: P.string })),
+				(authors) => authors[0]?.name?.toLowerCase() || null,
+			)
+			.with(P.shape({ name: P.string }), (author) => author.name.toLowerCase())
+			.with(P.string, (author) => author.toLowerCase())
+			.otherwise(() => null)
+		if (!author) {
+			console.log('catalog metadata', catalog.metadata)
+		}
+	}
+
+	console.log('catalog author', author)
+
+	return author && isKnownServer(author) ? author : null
+}
+
 // TODO: codex sends an ident in the `Server` header, e.g. `Server: Codex/1.0.0`,
 // but no clue about others. i figure i can bake a few big ones directly
 // in app (komga kavita codex etc) and use some default logo for OPDS
 // if ident fails
+//
+//
 
-async function identifyServer(url: string) {
-	const serverHeader = await fetchServerHeader(url)
-	if (!serverHeader) return null
+async function identifyServer(server: SavedServer, api: Api) {
+	const serverHeader = await fetchServerHeader(server.url)
+	console.log('serverHeader', serverHeader)
+	if (serverHeader) return serverHeader
 
-	if (serverHeader.startsWith('Codex/')) {
-		return 'codex'
-	}
+	const catalogAuthor = await fetchCatalogAuthor(server, api)
+	if (catalogAuthor) return catalogAuthor
+
+	return null
 }
 
 // stump servers = user avatar OR stump logo (if no avatar set)
@@ -89,7 +141,8 @@ export async function pullServerAvatar(server: SavedServer, api: Api) {
 	if (server.kind === 'stump') {
 		serverAvatar = await fetchStumpAvatar(server.id, api)
 	} else {
-		const serverType = await identifyServer(server.url)
+		const serverType = await identifyServer(server, api)
+		console.log('serverType', serverType)
 		if (serverType != null) {
 			serverAvatar = { logo: serverType }
 		}

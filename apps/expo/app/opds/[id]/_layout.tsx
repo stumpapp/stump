@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
 import OPDSAuthDialog from '~/components/opds/OPDSAuthDialog'
 import { FullScreenLoader } from '~/components/ui'
@@ -52,6 +53,24 @@ function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 			onUnauthenticatedResponse?.(undefined, error.response?.data)
 		}
 	}, [error, isAuthPending, onUnauthenticatedResponse])
+
+	// TODO: i don't think every time we enter until success is necessarily correct,
+	// but fine for testing
+	// for stump specifically i think we can repull based on changes to avatar metadata?
+	// hypothetically that would be a decent indicator of whether it changed. can also
+	// just add an updated stamp e.g. avatar_updated_at and use that idk
+	const didPullLogo = useRef(false)
+	useEffect(() => {
+		if (error || isAuthPending || didPullLogo.current) return
+		if (activeServer.avatar) return
+
+		async function pullLogo() {
+			await pullServerAvatar(activeServer, sdk)
+			didPullLogo.current = true
+		}
+
+		pullLogo()
+	}, [sdk, activeServer, error, isAuthPending])
 
 	const feedContextValue = useMemo(
 		() => ({

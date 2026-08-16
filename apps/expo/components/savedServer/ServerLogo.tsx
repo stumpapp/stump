@@ -73,6 +73,7 @@ export function ServerLogo({ server }: Props) {
 			style={{
 				...defaultSize,
 			}}
+			rounded
 		/>
 	)
 }
@@ -81,7 +82,7 @@ const LOGO_REQUIRES = [
 	require('../../assets/images/serverLogos/codex.svg'),
 	require('../../assets/images/serverLogos/kavita.svg'),
 	require('../../assets/images/serverLogos/komga.svg'),
-	require('../../assets/images/favicon.png'), // stump
+	require('../../assets/images/serverLogos/stump.png'),
 ]
 
 const getServerLogo = (name: string, assets: Array<Asset>) => {

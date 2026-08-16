@@ -54,6 +54,12 @@ const managedToken = z.object({
 })
 export type ManagedToken = z.infer<typeof managedToken>
 
+export const knownServer = z.enum(['codex', 'kavita', 'komga', 'stump', 'opds'])
+export type KnownServer = z.infer<typeof knownServer>
+export const isKnownServer = (server: string): server is KnownServer => {
+	return knownServer.options.includes(server as KnownServer)
+}
+
 export const serverAvatar = z.union([
 	z.object({
 		uri: z.string(),
@@ -74,7 +80,7 @@ export const serverAvatar = z.union([
 	}),
 	// TODO: precompute colors for these for gradient
 	z.object({
-		logo: z.enum(['codex', 'kavita', 'komga', 'stump', 'opds']),
+		logo: knownServer,
 	}),
 ])
 export type ServerAvatar = z.infer<typeof serverAvatar>

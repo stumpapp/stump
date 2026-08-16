@@ -6,6 +6,7 @@ import { Redirect, Stack, useFocusEffect, useLocalSearchParams, useRouter } from
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
+import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import { ActiveServerContext, StumpServerContext } from '~/components/activeServer'
 import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import { ServerConnectFailed, ServerErrorBoundary } from '~/components/error'
@@ -145,6 +146,24 @@ export default function Screen() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[sdk, user],
 	)
+
+	// TODO: i don't think every time we enter until success is necessarily correct,
+	// but fine for testing
+	// for stump specifically i think we can repull based on changes to avatar metadata?
+	// hypothetically that would be a decent indicator of whether it changed. can also
+	// just add an updated stamp e.g. avatar_updated_at and use that idk
+	const didPullLogo = useRef(false)
+	useEffect(() => {
+		if (!user || !sdk || !sdk.isAuthed || didPullLogo.current || !activeServer) return
+
+		async function pullLogo() {
+			if (!activeServer || !sdk) return
+			await pullServerAvatar(activeServer, sdk)
+			didPullLogo.current = true
+		}
+
+		pullLogo()
+	}, [sdk, activeServer, user])
 
 	const onResetState = useCallback(() => {
 		isServerAccessible.current = true

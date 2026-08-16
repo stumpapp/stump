@@ -1,7 +1,7 @@
 import { queryClient } from '@stump/client'
 import { Api } from '@stump/sdk'
 import { useRouter } from 'expo-router'
-import { KeyRound, Rss, Server, Sliders, SquareX, Trash } from 'lucide-react-native'
+import { KeyRound, Rss, Sliders, SquareX, Trash } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { View } from 'react-native'
 import { match } from 'ts-pattern'
@@ -12,8 +12,9 @@ import { useCacheStore } from '~/stores/cache'
 import { SavedServer, useSavedServers } from '~/stores/savedServer'
 
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
-import { Icon, Text } from '../ui'
+import { Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
+import { ServerLogo } from './ServerLogo'
 
 type Props = {
 	server: SavedServer
@@ -191,7 +192,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 							</Text>
 							{/*TODO: user avatar OR icon based on type of server (opds)*/}
 							{/*TODO: if opds server supports some kind of favicon or whatever, cache it?*/}
-							<Icon as={Server} className="w-7 h-7" />
+							<ServerLogo server={server} />
 						</View>
 
 						{/*TODO: gradient, using avatar meta for colors, or hardcode a few others based on ^^ (e.g., codex colors, kavita green, etc)

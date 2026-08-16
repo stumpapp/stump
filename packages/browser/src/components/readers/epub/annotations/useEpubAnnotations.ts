@@ -6,8 +6,8 @@ import {
 	type ReadiumWebReaderQuery,
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 
 import type { ReaderLocator } from '../context'
@@ -82,7 +82,7 @@ export function useEpubAnnotations({
 }: UseEpubAnnotationsArgs) {
 	const { t } = useLocaleContext()
 	const queryClient = useQueryClient()
-	const queryKey = ['readiumWebReader', mediaId] as const
+	const queryKey = useMemo(() => ['readiumWebReader', mediaId] as const, [mediaId])
 	const cachedAnnotations = useSyncExternalStore(
 		(onStoreChange) => queryClient.getQueryCache().subscribe(onStoreChange),
 		() => queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)?.epubById?.annotations ?? null,
@@ -109,12 +109,92 @@ export function useEpubAnnotations({
 		[queryClient, queryKey],
 	)
 
-	const { mutateAsync: createMutation, isPending: isCreating } = useGraphQLMutation(_createMutation)
-	const { mutateAsync: updateMutation, isPending: isUpdating } = useGraphQLMutation(_updateMutation)
-	const { mutateAsync: deleteMutation, isPending: isDeleting } = useGraphQLMutation(_deleteMutation)
+	const { mutate: createMutation, isPending: isCreating } = useGraphQLMutation(_createMutation, {
+		mutationKey: ['createEpubAnnotation', mediaId],
+		onMutate: async ({ input }) => {
+			await queryClient.cancelQueries({ queryKey })
+			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
+			const optimisticId = makeOptimisticId()
+
+			updateCachedAnnotations((annotations) => [
+				...annotations,
+				{
+					id: optimisticId,
+					mediaId,
+					userId: '',
+					annotationText: input.annotationText ?? null,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
+					locator: readiumLocatorInputToReaderLocator(input.locator),
+				},
+			])
+
+			return { optimisticId, previous }
+		},
+		onSuccess: ({ createAnnotation }, _variables, context) => {
+			updateCachedAnnotations((annotations) =>
+				annotations.map((annotation) =>
+					annotation.id === context.optimisticId
+						? graphqlAnnotationToEpubAnnotation(createAnnotation)
+						: annotation,
+				),
+			)
+		},
+		onError: (error, _variables, context) => {
+			queryClient.setQueryData(queryKey, context?.previous)
+			console.error('[useEpubAnnotations] createAnnotation failed', error)
+			toast.error(t('epubReader.annotation.saveFailed'))
+		},
+		onSettled: () => queryClient.invalidateQueries({ queryKey }),
+	})
+	const { mutate: updateMutation, isPending: isUpdating } = useGraphQLMutation(_updateMutation, {
+		mutationKey: ['updateEpubAnnotation', mediaId],
+		onMutate: async ({ input }) => {
+			await queryClient.cancelQueries({ queryKey })
+			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
+
+			updateCachedAnnotations((annotations) =>
+				annotations.map((annotation) =>
+					annotation.id === input.id
+						? {
+								...annotation,
+								annotationText: input.annotationText,
+								updatedAt: new Date().toISOString(),
+							}
+						: annotation,
+				),
+			)
+
+			return { previous }
+		},
+		onError: (error, _variables, context) => {
+			queryClient.setQueryData(queryKey, context?.previous)
+			console.error('[useEpubAnnotations] updateAnnotation failed', error)
+			toast.error(t('epubReader.annotation.updateFailed'))
+		},
+		onSettled: () => queryClient.invalidateQueries({ queryKey }),
+	})
+	const { mutate: deleteMutation, isPending: isDeleting } = useGraphQLMutation(_deleteMutation, {
+		mutationKey: ['deleteEpubAnnotation', mediaId],
+		onMutate: async ({ id }) => {
+			await queryClient.cancelQueries({ queryKey })
+			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
+			updateCachedAnnotations((annotations) =>
+				annotations.filter((annotation) => annotation.id !== id),
+			)
+
+			return { previous }
+		},
+		onError: (error, _variables, context) => {
+			queryClient.setQueryData(queryKey, context?.previous)
+			console.error('[useEpubAnnotations] deleteAnnotation failed', error)
+			toast.error(t('epubReader.annotation.deleteFailed'))
+		},
+		onSettled: () => queryClient.invalidateQueries({ queryKey }),
+	})
 
 	const createAnnotation = useCallback(
-		async (locator: ReaderLocator, annotationText?: string) => {
+		(locator: ReaderLocator, annotationText?: string) => {
 			if (isIncognito) {
 				toast.info(t('epubReader.annotation.disabledInIncognito'))
 				return undefined
@@ -126,81 +206,27 @@ export function useEpubAnnotations({
 				annotationText: annotationText || undefined,
 			}
 
-			const optimisticId = makeOptimisticId()
-			const optimistic: EpubAnnotation = {
-				id: optimisticId,
-				mediaId,
-				userId: '',
-				annotationText: annotationText ?? null,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-				locator,
-			}
-			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
-			updateCachedAnnotations((annotations) => [...annotations, optimistic])
-
-			try {
-				const { createAnnotation: created } = await createMutation({ input })
-				updateCachedAnnotations((annotations) =>
-					annotations.map((annotation) =>
-						annotation.id === optimisticId
-							? graphqlAnnotationToEpubAnnotation(created)
-							: annotation,
-					),
-				)
-				return created.id
-			} catch (error) {
-				queryClient.setQueryData(queryKey, previous)
-				console.error('[useEpubAnnotations] createAnnotation failed', error)
-				toast.error(t('epubReader.annotation.saveFailed'))
-				return undefined
-			}
+			return createMutation({ input })
 		},
-		[mediaId, isIncognito, createMutation, queryClient, queryKey, t, updateCachedAnnotations],
+		[mediaId, isIncognito, createMutation, t],
 	)
 
 	const updateAnnotation = useCallback(
-		async (id: string, annotationText: string | null) => {
+		(id: string, annotationText: string | null) => {
 			if (isIncognito) return
 
-			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
-			updateCachedAnnotations((annotations) =>
-				annotations.map((annotation) =>
-					annotation.id === id
-						? { ...annotation, annotationText, updatedAt: new Date().toISOString() }
-						: annotation,
-				),
-			)
-
-			try {
-				await updateMutation({ input: { id, annotationText } })
-			} catch (error) {
-				queryClient.setQueryData(queryKey, previous)
-				console.error('[useEpubAnnotations] updateAnnotation failed', error)
-				toast.error(t('epubReader.annotation.updateFailed'))
-			}
+			return updateMutation({ input: { id, annotationText } })
 		},
-		[isIncognito, queryClient, queryKey, t, updateCachedAnnotations, updateMutation],
+		[isIncognito, updateMutation],
 	)
 
 	const deleteAnnotation = useCallback(
-		async (id: string) => {
+		(id: string) => {
 			if (isIncognito) return
 
-			const previous = queryClient.getQueryData<ReadiumWebReaderQuery>(queryKey)
-			updateCachedAnnotations((annotations) =>
-				annotations.filter((annotation) => annotation.id !== id),
-			)
-
-			try {
-				await deleteMutation({ id })
-			} catch (error) {
-				queryClient.setQueryData(queryKey, previous)
-				console.error('[useEpubAnnotations] deleteAnnotation failed', error)
-				toast.error(t('epubReader.annotation.deleteFailed'))
-			}
+			return deleteMutation({ id })
 		},
-		[isIncognito, deleteMutation, queryClient, queryKey, t, updateCachedAnnotations],
+		[isIncognito, deleteMutation],
 	)
 
 	return {
@@ -222,6 +248,32 @@ function readerLocatorToInput(locator: ReaderLocator): ReadiumLocatorInput {
 		href: locator.href,
 		title: locator.title ?? undefined,
 		type: locator.type || 'application/xhtml+xml',
+		locations: locator.locations
+			? {
+					fragments: locator.locations.fragments ?? undefined,
+					position: locator.locations.position ?? undefined,
+					progression: locator.locations.progression ?? undefined,
+					totalProgression: locator.locations.totalProgression ?? undefined,
+					cssSelector: locator.locations.cssSelector ?? undefined,
+					partialCfi: locator.locations.partialCfi ?? undefined,
+				}
+			: undefined,
+		text: locator.text
+			? {
+					after: locator.text.after ?? undefined,
+					before: locator.text.before ?? undefined,
+					highlight: locator.text.highlight ?? undefined,
+				}
+			: undefined,
+	}
+}
+
+function readiumLocatorInputToReaderLocator(locator: ReadiumLocatorInput): ReaderLocator {
+	return {
+		chapterTitle: locator.chapterTitle ?? locator.title ?? '',
+		href: locator.href,
+		title: locator.title ?? undefined,
+		type: locator.type ?? 'application/xhtml+xml',
 		locations: locator.locations
 			? {
 					fragments: locator.locations.fragments ?? undefined,

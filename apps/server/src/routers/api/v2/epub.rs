@@ -16,8 +16,8 @@ use models::{
 use sea_orm::prelude::*;
 use serde::Deserialize;
 use stump_core::filesystem::media::{
-	search_epub, EpubProcessor, EpubSearchError, EpubSearchOptions,
-	ReadiumManifestGenerator, EPUB_SEARCH_DEFAULT_LIMIT,
+	search_epub, EpubProcessor, EpubSearchOptions, ReadiumManifestGenerator,
+	EPUB_SEARCH_DEFAULT_LIMIT,
 };
 use tokio_util::sync::CancellationToken;
 
@@ -162,16 +162,14 @@ async fn get_epub_search(
 	let base_url = epub_service_base_url(&host_details, &id);
 
 	let cursor = match params.cursor.as_deref() {
-		Some(raw) if !raw.is_empty() => {
-			Some(EpubSearchOptions::decode_cursor(raw).map_err(search_error_to_api)?)
-		},
+		Some(raw) if !raw.is_empty() => Some(EpubSearchOptions::decode_cursor(raw)?),
 		_ => None,
 	};
 
 	let options = EpubSearchOptions::new(params.q)
 		.with_limit(params.limit)
 		.with_cursor(cursor);
-	options.validate().map_err(search_error_to_api)?;
+	options.validate()?;
 
 	let cancel = CancellationToken::new();
 	let cancel_for_task = cancel.clone();
@@ -184,22 +182,9 @@ async fn get_epub_search(
 		search_epub(&path, &base_url, options, &cancel_for_task)
 	})
 	.await
-	.map_err(|e| APIError::InternalServerError(e.to_string()))?
-	.map_err(search_error_to_api)?;
+	.map_err(|e| APIError::InternalServerError(e.to_string()))??;
 
 	Ok(Json(response))
-}
-
-fn search_error_to_api(error: EpubSearchError) -> APIError {
-	match error {
-		EpubSearchError::InvalidQueryLength { .. }
-		| EpubSearchError::InvalidCursor
-		| EpubSearchError::InvalidLimit { .. } => APIError::BadRequest(error.to_string()),
-		EpubSearchError::Cancelled => {
-			APIError::BadRequest("Search cancelled".to_string())
-		},
-		EpubSearchError::File(err) => APIError::from(err),
-	}
 }
 
 /// Get a resource from an epub file by package-relative path.

@@ -1,4 +1,4 @@
-import type { DecorationActivationEvent } from '@readium/navigator'
+import type { OnDecorationActivatedEvent } from '@readium/navigator'
 import type { BasicTextSelection } from '@readium/navigator-html-injectables'
 import { Link, Locator } from '@readium/shared'
 import { queryClient, useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
@@ -32,7 +32,12 @@ import {
 } from '../annotations/useEpubAnnotations'
 import { EpubContent, type ReaderLocator } from '../context'
 import EpubReaderContainer from '../EpubReaderContainer'
-import { hrefsMatch, resolveInitialLocator, toolkitLocatorToInput } from './locator'
+import {
+	hrefsMatch,
+	resolveInitialLocator,
+	toolkitLocatorToInput,
+	toolkitLocatorToReaderLocator,
+} from './locator'
 import { type OpenedPublication, openStumpPublication } from './openPublication'
 import { bookPreferencesToEpubPreferences } from './preferences'
 import { useReadiumNavigator } from './useReadiumNavigator'
@@ -433,7 +438,9 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 
 	const [selection, setSelection] = useState<AnnotationSelection | null>(null)
 	const [dialogState, setDialogState] = useState<
-		{ mode: 'create' } | { mode: 'edit'; annotationId: string } | null
+		| { mode: 'create'; selection: AnnotationSelection }
+		| { mode: 'edit'; annotationId: string }
+		| null
 	>(null)
 
 	const onTextSelected = useCallback(
@@ -481,7 +488,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		[opened, toc],
 	)
 
-	const onDecorationActivated = useCallback((event: DecorationActivationEvent): boolean => {
+	const onDecorationActivated = useCallback((event: OnDecorationActivatedEvent): boolean => {
 		if (event.group !== ANNOTATION_DECORATION_GROUP) return false
 		setDialogState({ mode: 'edit', annotationId: event.decoration.id })
 		return true
@@ -527,7 +534,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 
 	const handleAddNoteFromSelection = useCallback(() => {
 		if (!selection) return
-		setDialogState({ mode: 'create' })
+		setDialogState({ mode: 'create', selection })
 	}, [selection])
 
 	const activeAnnotation = useMemo(
@@ -544,8 +551,8 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 
 	const handleSaveAnnotation = useCallback(
 		(noteText: string) => {
-			if (dialogState?.mode === 'create' && selection) {
-				void createAnnotation(selection.locator, noteText || undefined)
+			if (dialogState?.mode === 'create') {
+				void createAnnotation(dialogState.selection.locator, noteText || undefined)
 				clearSelectionState()
 			} else if (dialogState?.mode === 'edit' && activeAnnotation) {
 				void updateAnnotation(activeAnnotation.id, noteText || null)
@@ -589,34 +596,8 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		const locatorPosition = currentLocator?.locations.position
 		const totalPositions = opened?.positions.length
 
-		const input = currentLocator
-			? toolkitLocatorToInput(currentLocator, chapterTitle ?? undefined)
-			: null
-
-		const readerLocator: ReaderLocator | null = input
-			? {
-					href: input.href,
-					type: input.type || 'application/xhtml+xml',
-					title: input.title ?? undefined,
-					chapterTitle: input.chapterTitle ?? undefined,
-					locations: input.locations
-						? {
-								fragments: input.locations.fragments,
-								progression: input.locations.progression,
-								position: input.locations.position,
-								totalProgression: input.locations.totalProgression,
-								cssSelector: input.locations.cssSelector,
-								partialCfi: input.locations.partialCfi,
-							}
-						: null,
-					text: input.text
-						? {
-								after: input.text.after,
-								before: input.text.before,
-								highlight: input.text.highlight,
-							}
-						: null,
-				}
+		const readerLocator = currentLocator
+			? toolkitLocatorToReaderLocator(currentLocator, chapterTitle ?? undefined)
 			: null
 
 		return {
@@ -711,7 +692,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		[api, opened],
 	)
 
-	const getLocatorPreviewText = useCallback(async (locator: ReaderLocator) => {
+	const getLocatorPreviewText = useCallback((locator: ReaderLocator) => {
 		return locator.text?.highlight ?? locator.chapterTitle ?? locator.title ?? null
 	}, [])
 
@@ -839,7 +820,9 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				open={dialogState !== null}
 				mode={dialogState?.mode ?? 'create'}
 				quotedText={
-					dialogState?.mode === 'edit' ? activeAnnotation?.locator.text?.highlight : selection?.text
+					dialogState?.mode === 'edit'
+						? activeAnnotation?.locator.text?.highlight
+						: dialogState?.selection.text
 				}
 				initialNote={dialogState?.mode === 'edit' ? activeAnnotation?.annotationText : undefined}
 				isPending={isAnnotationMutationPending}

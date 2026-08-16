@@ -94,9 +94,7 @@ export function bookPreferencesToEpubPreferences({
 		preferences.lineHeight = clamp(lineHeight, 1, 2.5)
 	}
 
-	if (fontFamily) {
-		preferences.fontFamily = toFamilyName(fontFamily as SupportedFont)
-	}
+	preferences.fontFamily = fontFamily ? toFamilyName(fontFamily as SupportedFont) : null
 
 	if (!isContinuous && pageMargins != null && pageMargins > 0) {
 		preferences.pageGutter = clamp(pageMargins * DEFAULT_PX, 0, DEFAULT_PX * 4)

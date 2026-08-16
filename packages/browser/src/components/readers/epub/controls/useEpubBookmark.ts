@@ -58,10 +58,10 @@ export function useEpubBookmark() {
 		onSuccess,
 	})
 
-	const createPayload = useCallback(async (): Promise<BookmarkInput | null> => {
+	const createPayload = useCallback((): BookmarkInput | null => {
 		if (!currentLocator?.href) return null
 
-		const preview = await getLocatorPreviewText(currentLocator)
+		const preview = getLocatorPreviewText(currentLocator)
 		return {
 			locator: {
 				chapterTitle: currentLocator.chapterTitle ?? currentLocator.title ?? '',
@@ -84,9 +84,9 @@ export function useEpubBookmark() {
 	}, [currentLocator, getLocatorPreviewText, bookId])
 
 	const createBookmark = useCallback(
-		async (payload?: BookmarkInput) => {
+		(payload?: BookmarkInput) => {
 			if (!createMutation) return
-			const resolvedPayload = payload ?? (await createPayload())
+			const resolvedPayload = payload ?? createPayload()
 			if (!resolvedPayload) return
 			createMutation({ input: resolvedPayload })
 		},

@@ -89,6 +89,33 @@ export function toolkitLocatorToInput(
 	} satisfies ReadiumLocatorInput
 }
 
+/** Convert a toolkit locator directly into the reader's serializable locator shape. */
+export function toolkitLocatorToReaderLocator(
+	locator: Locator,
+	chapterTitle?: string,
+): ReaderLocator {
+	const input = toolkitLocatorToInput(locator, chapterTitle)
+	return {
+		href: input.href,
+		type: input.type || 'application/xhtml+xml',
+		title: input.title ?? undefined,
+		chapterTitle: input.chapterTitle ?? undefined,
+		locations: input.locations
+			? {
+					fragments: input.locations.fragments,
+					progression: input.locations.progression,
+					position: input.locations.position,
+					totalProgression: input.locations.totalProgression,
+					cssSelector: input.locations.cssSelector,
+					partialCfi: input.locations.partialCfi,
+				}
+			: null,
+		text: input.text
+			? { after: input.text.after, before: input.text.before, highlight: input.text.highlight }
+			: null,
+	}
+}
+
 /**
  * Build a toolkit Locator from a GraphQL ReadiumLocator (e.g. saved progress).
  */
@@ -211,12 +238,6 @@ export function nearestPositionByTotalProgression(positions: Locator[], target: 
 export function locatorsRoughlyMatch(a: ComparableLocator, b: ComparableLocator): boolean {
 	if (!hrefsMatch(a.href, b.href)) return false
 
-	const aPos = a.locations?.position
-	const bPos = b.locations?.position
-	if (aPos != null && bPos != null) {
-		return aPos === bPos
-	}
-
 	const aProg = safeNumber(a.locations?.progression)
 	const bProg = safeNumber(b.locations?.progression)
 	if (aProg != null && bProg != null) {
@@ -224,6 +245,11 @@ export function locatorsRoughlyMatch(a: ComparableLocator, b: ComparableLocator)
 		// unrelated positions in the same chapter as the same bookmark.
 		return Math.abs(aProg - bProg) < 0.02
 	}
+	if (aProg != null || bProg != null) return false
+
+	const aPos = a.locations?.position
+	const bPos = b.locations?.position
+	if (aPos != null && bPos != null) return aPos === bPos
 
 	return false
 }

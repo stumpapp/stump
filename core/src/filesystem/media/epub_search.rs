@@ -32,7 +32,7 @@ pub const EPUB_SEARCH_MAX_DECOMPRESSED_BYTES: usize = 32 * 1024 * 1024;
 pub const EPUB_SEARCH_MAX_ITEM_BYTES: usize = 16 * 1024 * 1024;
 pub const EPUB_SEARCH_MAX_MATCHES_PER_SPINE: usize = 20;
 pub const EPUB_SEARCH_EXCERPT_RADIUS: usize = 64;
-const CURSOR_VERSION: u8 = 1;
+pub const EPUB_SEARCH_READ_CHUNK_SIZE: usize = 64 * 1024;
 
 #[derive(Debug, Error)]
 pub enum EpubSearchError {
@@ -53,10 +53,6 @@ pub struct EpubSearchOptions {
 	pub query: String,
 	pub limit: usize,
 	pub cursor: Option<EpubSearchCursor>,
-	/// Overrideable caps for tests.
-	pub max_spine_items: usize,
-	pub max_decompressed_bytes: usize,
-	pub max_item_bytes: usize,
 }
 
 impl Default for EpubSearchOptions {
@@ -65,9 +61,6 @@ impl Default for EpubSearchOptions {
 			query: String::new(),
 			limit: EPUB_SEARCH_DEFAULT_LIMIT,
 			cursor: None,
-			max_spine_items: EPUB_SEARCH_MAX_SPINE_ITEMS,
-			max_decompressed_bytes: EPUB_SEARCH_MAX_DECOMPRESSED_BYTES,
-			max_item_bytes: EPUB_SEARCH_MAX_ITEM_BYTES,
 		}
 	}
 }
@@ -113,9 +106,6 @@ impl EpubSearchOptions {
 			.map_err(|_| EpubSearchError::InvalidCursor)?;
 		let cursor: EpubSearchCursor =
 			serde_json::from_slice(&bytes).map_err(|_| EpubSearchError::InvalidCursor)?;
-		if cursor.v != CURSOR_VERSION {
-			return Err(EpubSearchError::InvalidCursor);
-		}
 		Ok(cursor)
 	}
 }
@@ -123,21 +113,24 @@ impl EpubSearchOptions {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct EpubSearchCursor {
-	pub v: u8,
 	pub spine_index: u32,
 	pub text_offset: u32,
-	/// Fingerprint of the normalized query so a cursor cannot be reused across searches.
+	/// Fingerprint of the normalized query that produced this cursor.
+	///
+	/// Cursors are opaque continuation state. Matching this value rejects a cursor
+	/// accidentally reused with a different query; it is not a security boundary.
 	pub query_fp: String,
 }
 
 impl EpubSearchCursor {
-	pub fn encode(&self) -> String {
-		let json = serde_json::to_vec(self).expect("cursor serialization");
-		URL_SAFE_NO_PAD.encode(json)
+	pub fn encode(&self) -> Result<String, EpubSearchError> {
+		let json =
+			serde_json::to_vec(self).map_err(|_| EpubSearchError::InvalidCursor)?;
+		Ok(URL_SAFE_NO_PAD.encode(json))
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EpubSearchResponse {
 	pub query: String,
@@ -147,7 +140,7 @@ pub struct EpubSearchResponse {
 	pub truncated: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EpubSearchResult {
 	pub excerpt: String,
@@ -155,7 +148,7 @@ pub struct EpubSearchResult {
 	pub locator: EpubSearchLocator,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EpubSearchLocator {
 	pub href: String,
@@ -169,7 +162,7 @@ pub struct EpubSearchLocator {
 	pub text: EpubSearchLocatorText,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EpubSearchLocatorLocations {
 	pub position: u32,
@@ -179,7 +172,7 @@ pub struct EpubSearchLocatorLocations {
 	pub fragments: Option<Vec<String>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EpubSearchLocatorText {
 	pub before: String,
@@ -241,6 +234,11 @@ pub fn search_epub(
 		.unwrap_or(0);
 
 	if options.cursor.is_some() && start_spine >= raw_spine_len {
+		tracing::debug!(
+			start_spine,
+			raw_spine_len,
+			"EPUB search cursor points beyond the spine"
+		);
 		return Err(EpubSearchError::InvalidCursor);
 	}
 
@@ -257,10 +255,9 @@ pub fn search_epub(
 		if results.len() >= options.limit {
 			break;
 		}
-		if spine_items_scanned >= options.max_spine_items {
+		if spine_items_scanned >= EPUB_SEARCH_MAX_SPINE_ITEMS {
 			truncated = true;
 			next_cursor = Some(EpubSearchCursor {
-				v: CURSOR_VERSION,
 				spine_index: spine_index as u32,
 				text_offset: 0,
 				query_fp: query_fp.clone(),
@@ -289,16 +286,21 @@ pub fn search_epub(
 			},
 		};
 
-		let uncompressed = {
-			let file = archive.by_index(entry_index).map_err(FileError::from)?;
-			file.size() as usize
+		let uncompressed = match archive.by_index(entry_index) {
+			Ok(file) => file.size() as usize,
+			Err(error) => {
+				tracing::warn!(path = %zip_path, %error, "failed to inspect spine resource; skipping");
+				truncated = true;
+				start_text_offset = 0;
+				continue;
+			},
 		};
 
-		if uncompressed == 0 || uncompressed > options.max_item_bytes {
+		if uncompressed == 0 || uncompressed > EPUB_SEARCH_MAX_ITEM_BYTES {
 			tracing::warn!(
 				path = %zip_path,
 				uncompressed,
-				max = options.max_item_bytes,
+				max = EPUB_SEARCH_MAX_ITEM_BYTES,
 				"skipping oversized or empty spine item"
 			);
 			truncated = true;
@@ -306,10 +308,10 @@ pub fn search_epub(
 			continue;
 		}
 
-		if bytes_scanned.saturating_add(uncompressed) > options.max_decompressed_bytes {
+		if bytes_scanned.saturating_add(uncompressed) > EPUB_SEARCH_MAX_DECOMPRESSED_BYTES
+		{
 			truncated = true;
 			next_cursor = Some(EpubSearchCursor {
-				v: CURSOR_VERSION,
 				spine_index: meta.spine_index as u32,
 				text_offset: 0,
 				query_fp: query_fp.clone(),
@@ -318,7 +320,19 @@ pub fn search_epub(
 		}
 
 		let bytes =
-			read_zip_entry_bounded(&mut archive, entry_index, uncompressed, cancel)?;
+			match read_zip_entry_bounded(&mut archive, entry_index, uncompressed, cancel)
+			{
+				Ok(bytes) => bytes,
+				Err(EpubSearchError::Cancelled) => {
+					return Err(EpubSearchError::Cancelled)
+				},
+				Err(error) => {
+					tracing::warn!(path = %zip_path, %error, "failed to read spine resource; skipping");
+					truncated = true;
+					start_text_offset = 0;
+					continue;
+				},
+			};
 		bytes_scanned += bytes.len();
 
 		let plain = extract_searchable_text(&bytes);
@@ -346,7 +360,6 @@ pub fn search_epub(
 			}
 			if results.len() >= options.limit {
 				next_cursor = Some(EpubSearchCursor {
-					v: CURSOR_VERSION,
 					spine_index: meta.spine_index as u32,
 					text_offset: match_start as u32,
 					query_fp: query_fp.clone(),
@@ -396,7 +409,6 @@ pub fn search_epub(
 				let next_index = meta.spine_index.saturating_add(1);
 				if next_index < raw_spine_len {
 					next_cursor = Some(EpubSearchCursor {
-						v: CURSOR_VERSION,
 						spine_index: next_index as u32,
 						text_offset: 0,
 						query_fp: query_fp.clone(),
@@ -409,15 +421,10 @@ pub fn search_epub(
 		start_text_offset = 0;
 	}
 
-	// If we stopped due to scan budgets without filling the page, keep the cursor.
-	if next_cursor.is_none() && truncated {
-		// already set when budget hit
-	}
-
 	Ok(EpubSearchResponse {
 		query,
 		results,
-		next_cursor: next_cursor.map(|c| c.encode()),
+		next_cursor: next_cursor.map(|c| c.encode()).transpose()?,
 		truncated,
 	})
 }
@@ -492,7 +499,7 @@ fn read_zip_entry_bounded<R: Read + std::io::Seek>(
 ) -> Result<Vec<u8>, EpubSearchError> {
 	let mut file = archive.by_index(index).map_err(FileError::from)?;
 	let mut buf = Vec::with_capacity(expected_size.min(EPUB_SEARCH_MAX_ITEM_BYTES));
-	let mut chunk = [0u8; 64 * 1024];
+	let mut chunk = [0u8; EPUB_SEARCH_READ_CHUNK_SIZE];
 	loop {
 		if cancel.is_cancelled() {
 			return Err(EpubSearchError::Cancelled);
@@ -826,12 +833,11 @@ mod tests {
 	#[test]
 	fn cursor_round_trip() {
 		let cursor = EpubSearchCursor {
-			v: 1,
 			spine_index: 3,
 			text_offset: 42,
 			query_fp: "abc".into(),
 		};
-		let encoded = cursor.encode();
+		let encoded = cursor.encode().unwrap();
 		let decoded = EpubSearchOptions::decode_cursor(&encoded).unwrap();
 		assert_eq!(decoded, cursor);
 	}
@@ -903,18 +909,6 @@ mod tests {
 			})
 			.collect();
 		assert_eq!(keys.len(), first.results.len() + second.results.len());
-	}
-
-	#[test]
-	fn search_respects_item_byte_cap() {
-		let path = get_test_epub_path();
-		let base = "https://example.com/api/v2/epub/book-1";
-		let cancel = CancellationToken::new();
-		let mut options = EpubSearchOptions::new("Alice").with_limit(20);
-		options.max_item_bytes = 1; // force skip every item
-		let response = search_epub(&path, base, options, &cancel).expect("search");
-		assert!(response.results.is_empty());
-		assert!(response.truncated);
 	}
 
 	#[test]

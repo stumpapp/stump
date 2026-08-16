@@ -137,6 +137,7 @@ impl OPDSProgressionLocator {
 		OPDSProgressionLocatorBuilder::default()
 			.title(Some(format!("Page {current_page}")))
 			.href(Some(href))
+			// TODO: Don't assume JPEG; use analysis to determine this.
 			._type(Some(OPDSLinkType::ImageJpeg))
 			.locations(Some(locations))
 			.build()

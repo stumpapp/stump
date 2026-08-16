@@ -276,7 +276,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		const abort = new AbortController()
 		setOpenState({ status: 'loading' })
 
-		void (async () => {
+		const open = async () => {
 			try {
 				const opened = await openStumpPublication(sdk, id, abort.signal)
 				if (abort.signal.aborted) return
@@ -285,7 +285,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 					? Number(ebook.media.readProgress.percentageCompleted)
 					: null
 
-				let initialLocator = isIncognito
+				const initialLocator = isIncognito
 					? undefined
 					: resolveInitialLocator({
 							positions: opened.positions,
@@ -302,7 +302,9 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 					message: error instanceof Error ? error.message : t('epubReader.errors.openFailed'),
 				})
 			}
-		})()
+		}
+
+		void open()
 
 		return () => abort.abort()
 		// Only re-open when the book id or auth surface changes.

@@ -19,10 +19,7 @@ import {
 	recoverBlankFrames,
 } from './patchDurableIframeSrc'
 
-type LoadState =
-	| { status: 'idle' | 'loading' }
-	| { status: 'ready' }
-	| { status: 'error'; message: string }
+type LoadState = { status: 'idle' | 'loading' | 'ready' } | { status: 'error'; message: string }
 
 type UseReadiumNavigatorArgs = {
 	containerRef: React.RefObject<HTMLDivElement | null>

@@ -6488,12 +6488,12 @@ export type UploadUserAvatarMutationVariables = Exact<{
 }>;
 
 
-export type UploadUserAvatarMutation = { __typename?: 'Mutation', uploadUserAvatar: { __typename?: 'User', id: string, avatarUrl?: string | null } };
+export type UploadUserAvatarMutation = { __typename?: 'Mutation', uploadUserAvatar: { __typename?: 'User', id: string, avatar: { __typename?: 'ImageRef', url: string } } };
 
 export type DeleteUserAvatarMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeleteUserAvatarMutation = { __typename?: 'Mutation', deleteUserAvatar: { __typename?: 'User', id: string, avatarUrl?: string | null } };
+export type DeleteUserAvatarMutation = { __typename?: 'Mutation', deleteUserAvatar: { __typename?: 'User', id: string, avatar: { __typename?: 'ImageRef', url: string } } };
 
 export type UpdateUserProfileFormMutationVariables = Exact<{
   input: UpdateUserInput;
@@ -12701,7 +12701,9 @@ export const UploadUserAvatarDocument = new TypedDocumentString(`
     mutation UploadUserAvatar($file: Upload!) {
   uploadUserAvatar(upload: $file) {
     id
-    avatarUrl
+    avatar {
+      url
+    }
   }
 }
     `) as unknown as TypedDocumentString<UploadUserAvatarMutation, UploadUserAvatarMutationVariables>;
@@ -12709,7 +12711,9 @@ export const DeleteUserAvatarDocument = new TypedDocumentString(`
     mutation DeleteUserAvatar {
   deleteUserAvatar {
     id
-    avatarUrl
+    avatar {
+      url
+    }
   }
 }
     `) as unknown as TypedDocumentString<DeleteUserAvatarMutation, DeleteUserAvatarMutationVariables>;

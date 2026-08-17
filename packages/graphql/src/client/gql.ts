@@ -244,8 +244,8 @@ type Documents = {
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": typeof types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": typeof types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteApiKeyConfirmModalDocument,
-    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": typeof types.UploadUserAvatarDocument,
-    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": typeof types.DeleteUserAvatarDocument,
+    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UploadUserAvatarDocument,
+    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.DeleteUserAvatarDocument,
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": typeof types.UpdateUserProfileFormDocument,
     "\n\tquery NavigationArrangement {\n\t\tme {\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.NavigationArrangementDocument,
     "\n\tmutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {\n\t\tupdateNavigationArrangement(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.NavigationArrangementUpdateDocument,
@@ -550,8 +550,8 @@ const documents: Documents = {
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteApiKeyConfirmModalDocument,
-    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": types.UploadUserAvatarDocument,
-    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": types.DeleteUserAvatarDocument,
+    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.UploadUserAvatarDocument,
+    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.DeleteUserAvatarDocument,
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": types.UpdateUserProfileFormDocument,
     "\n\tquery NavigationArrangement {\n\t\tme {\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.NavigationArrangementDocument,
     "\n\tmutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {\n\t\tupdateNavigationArrangement(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.NavigationArrangementUpdateDocument,
@@ -1546,11 +1546,11 @@ export function graphql(source: "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n"): typeof import('./graphql').UploadUserAvatarDocument;
+export function graphql(source: "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UploadUserAvatarDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteUserAvatarDocument;
+export function graphql(source: "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteUserAvatarDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -9,10 +9,13 @@ use axum::{
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use graphql::data::{AuthContext, ServiceContext};
-use models::entity::{
-	session,
-	user::{self, AuthUser, LoginUser},
-	user_login_activity, user_preferences,
+use models::{
+	entity::{
+		session,
+		user::{self, AuthUser, LoginUser},
+		user_login_activity, user_preferences,
+	},
+	shared::image::ImageRef,
 };
 use reqwest::header;
 use sea_orm::{prelude::*, IntoActiveModel, TransactionTrait};
@@ -39,6 +42,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
+			// TODO: I really need to just deprecate this route, it gives me way too much headache
+			// to have to have a two different public-facing users and mixing (de)serialization
+			// btw gql and rest
 			.route(
 				"/me",
 				get(viewer).layer(middleware::from_fn_with_state(
@@ -167,11 +173,15 @@ async fn handle_remove_earliest_session(
 	}
 }
 
-// TODO(avatar): need to inject avatar image ref
 fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
-	if user.avatar_path.is_some() {
-		user.avatar_url =
-			Some(service.format_url(format!("/api/v2/users/{}/avatar", user.id)));
+	if let Some(avatar) = user.avatar {
+		user.avatar = Some(ImageRef {
+			url: service.cache_friendly_url(
+				format!("/api/v2/users/{}/avatar", user.id),
+				&avatar.last_modified,
+			),
+			..avatar
+		})
 	}
 	user
 }

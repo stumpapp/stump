@@ -40,7 +40,7 @@ export function ServerLogo({ server }: Props) {
 
 	const normalizedLogo: NormalizedLogo = match(server)
 		.with({ avatar: P.shape({ uri: P.string }) }, ({ avatar }) => ({
-			uri: avatar.uri,
+			uri: avatar.lastModified ? `${avatar.uri}?lastModified=${avatar.lastModified}` : avatar.uri,
 			isLocalAsset: false,
 			metadata: avatar.metadata,
 		}))

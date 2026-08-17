@@ -138,7 +138,7 @@ export async function pullServerAvatar(server: SavedServer, api: Api) {
 				serverAvatar.safeParse({
 					uri: destination.uri,
 					metadata: data.metadata,
-					lastModified: data.lastModified,
+					lastModified: data.lastModified ?? new Date(),
 				}).data ?? null
 			)
 		})

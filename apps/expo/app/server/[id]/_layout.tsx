@@ -158,7 +158,7 @@ export default function Screen() {
 		if (!user || !sdk || !sdk.isAuthed || didSyncAvatar.current || !activeServer) return
 
 		const lastPulledAt = getProperty(activeServer.avatar, 'lastModified')
-		const avatarUpdatedAt = parseGraphQLDateTime(user.avatarUpdatedAt)
+		const avatarUpdatedAt = parseGraphQLDateTime(user.avatar.lastModified)
 
 		// no update stamp = no avatar (moving forward)
 		if (!avatarUpdatedAt) return

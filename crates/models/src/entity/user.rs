@@ -10,7 +10,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
-		enums::UserPermission, image::ImageMetadata, permission_set::PermissionSet,
+		enums::UserPermission,
+		image::{ImageMetadata, ImageRef},
+		permission_set::PermissionSet,
 	},
 };
 
@@ -57,10 +59,10 @@ pub struct Model {
 pub struct AuthUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
-	// TODO(avatar): need to do avatar: Option<ImageRef> here
-	pub avatar_url: Option<String>,
-	pub avatar_meta: Option<ImageMetadata>,
-	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
+	// pub avatar_url: Option<String>,
+	// pub avatar_meta: Option<ImageMetadata>,
+	// pub avatar_updated_at: Option<DateTimeWithTimeZone>,
+	pub avatar: Option<ImageRef>,
 	pub username: String,
 	pub is_server_owner: bool,
 	pub is_locked: bool,
@@ -92,7 +94,8 @@ impl FromQueryResult for AuthUser {
 		let permissions = PermissionSet::from(permissions_str).resolve_into_vec();
 		let avatar_path: Option<String> = res.try_get("", "avatar_path")?;
 		let avatar_meta: Option<ImageMetadata> = res.try_get("", "avatar_meta")?;
-		let avatar_updated_at = res.try_get("", "avatar_updated_at")?;
+		let avatar_updated_at: Option<DateTimeWithTimeZone> =
+			res.try_get("", "avatar_updated_at")?;
 		let age_restriction = match age_restriction::Model::from_query_result(res, "") {
 			Ok(age_restriction) => Some(age_restriction),
 			Err(sea_orm::DbErr::RecordNotFound(_)) => None,
@@ -112,15 +115,28 @@ impl FromQueryResult for AuthUser {
 					.or_else(user_preferences::Model::default_navigation_arrangement),
 				..p
 			});
+		let avatar: Option<ImageRef> = if avatar_path.is_some() {
+			Some(ImageRef {
+				// Note: This will never get populated at the db-level, the API will
+				// inject based on the service details
+				url: String::default(),
+				metadata: avatar_meta,
+				last_modified: avatar_updated_at,
+				..Default::default()
+			})
+		} else {
+			None
+		};
 
 		Ok(AuthUser {
 			id,
 			avatar_path,
 			// Note: This will never get populated at the db-level, the API will
 			// inject based on the service details
-			avatar_url: None,
-			avatar_meta,
-			avatar_updated_at,
+			// avatar_url: None,
+			// avatar_meta,
+			// avatar_updated_at,
+			avatar,
 			username,
 			is_server_owner,
 			is_locked,
@@ -208,14 +224,23 @@ impl FromQueryResult for LoginUser {
 
 impl From<LoginUser> for AuthUser {
 	fn from(user: LoginUser) -> Self {
+		let has_avatar = user.avatar_path.is_some();
+
 		AuthUser {
 			id: user.id,
 			avatar_path: user.avatar_path,
-			// Note: This will never get populated at the db-level, the API will
-			// inject based on the service details
-			avatar_url: None,
-			avatar_meta: user.avatar_meta,
-			avatar_updated_at: user.avatar_updated_at,
+			avatar: if has_avatar {
+				Some(ImageRef {
+					// Note: This will never get populated at the db-level, the API will
+					// inject based on the service details
+					url: String::default(),
+					metadata: user.avatar_meta,
+					last_modified: user.avatar_updated_at,
+					..Default::default()
+				})
+			} else {
+				None
+			},
 			username: user.username,
 			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,

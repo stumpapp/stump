@@ -18,6 +18,7 @@ use models::{
 	shared::{
 		api_key::{APIKeyPermissions, API_KEY_PREFIX},
 		enums::UserPermission,
+		image::ImageRef,
 	},
 };
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
@@ -50,11 +51,15 @@ use super::host::HostExtractor;
 
 pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
-// TODO(avatar): need to inject avatar image ref
 fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
-	if user.avatar_path.is_some() {
-		user.avatar_url =
-			Some(service.format_url(format!("/api/v2/users/{}/avatar", user.id)));
+	if let Some(avatar) = user.avatar {
+		user.avatar = Some(ImageRef {
+			url: service.cache_friendly_url(
+				format!("/api/v2/users/{}/avatar", user.id),
+				&avatar.last_modified,
+			),
+			..avatar
+		})
 	}
 	user
 }

@@ -4,7 +4,8 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Debug, Clone, SimpleObject)]
+#[derive(Default, Debug, Clone, SimpleObject, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ImageRef {
 	pub url: String,
 	pub height: Option<u32>,

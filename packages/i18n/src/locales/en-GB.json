@@ -1,256 +1,256 @@
 {
-	"authScene": {
-		"claimHeading": "Initialise your server",
-		"claimText": "This Stump server is not initialised. Fill in the form below to create your account. Once created, you will have full access to all server features."
-	},
-	"bookOverviewScene": {
-		"emailBook": {
-			"form": {
-				"email": {
-					"description": "An email address to send the book to. Click add to finalise each input"
-				}
-			}
-		}
-	},
-	"createBookClubScene": {
-		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
-				},
-				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customise the roles in your book club"
-				},
-				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
-				}
-			]
-		}
-	},
-	"bookClubSettingsScene": {
-		"roles": {
-			"description": "Customise the roles in this book club"
-		}
-	},
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"description": {
-				"placeholder": "A library of all my favourite books"
-			},
-			"tags": {
-				"description": "Used to categorise your library or enforce access rules"
-			},
-			"libraryPattern": {
-				"section": {
-					"heading": "Organisation",
-					"description": "Identify which pattern most closely matches the organisation of your library"
-				},
-				"options": {
-					"description": "The setting which determines how Stump will organise your library"
-				}
-			}
-		}
-	},
-	"createLibraryScene": {
-		"form": {
-			"review": {
-				"labels": {
-					"processThumbnailColors": "Process thumbnail colours"
-				}
-			}
-		}
-	},
-	"librarySettingsScene": {
-		"options/scanning": {
-			"sections": {
-				"configureScan": {
-					"form": {
-						"options": {
-							"custom": {
-								"description": "Customise the scan configuration"
-							}
-						}
-					}
-				}
-			}
-		},
-		"integrations/analysis": {
-			"description": "Analyse the contents of this library to identify potential issues or improvements",
-			"sections": {
-				"analyzeBooks": {
-					"heading": "Analyse books",
-					"description": "Analyse the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"analyzeButton": "Analyse books"
-				}
-			}
-		}
-	},
-	"metadataEditor": {
-		"labels": {
-			"colorists": "Colourists"
-		}
-	},
-	"createOrUpdateSmartListForm": {
-		"fields": {
-			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimisations on the UI and may be slow with filters that produce large result sets. This will be improved in the future",
-				"filters": {
-					"fieldSelect": {
-						"source": {
-							"book_meta": {
-								"attributes": {
-									"colorists": "Colourists"
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	},
-	"createOrUpdateApiKey": {
-		"validation": {
-			"futureDate": "Expiry date must be in the future"
-		},
-		"fields": {
-			"expiration": {
-				"label": "Expiry"
-			}
-		}
-	},
-	"userSmartListsScene": {
-		"subtitle": "Your favourite searches and filters saved for easy access"
-	},
-	"settingsScene": {
-		"app/account": {
-			"sections": {
-				"locale": {
-					"subtitle": [
-						"Stump supports multiple languages and locales; set your preferences below. Please consider helping to improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
-				}
-			}
-		},
-		"app/preferences": {
-			"description": "Customise the look and feel of the application",
-			"sections": {
-				"fontSelect": {
-					"description": "Customise the font used in the application"
-				},
-				"thumbnailPlaceholder": {
-					"options": {
-						"grayscale": "Greyscale",
-						"averageColor": "Average colour",
-						"colorful": "Colourful"
-					}
-				},
-				"navigation": {
-					"description": "Customise the navigation elements of the app"
-				},
-				"layoutAndArrangement": {
-					"description": "Customise how Stump displays information and organises content"
-				},
-				"additionalPreferences": {
-					"description": "Customise the appearance and behaviour of Stump with these additional settings"
-				}
-			}
-		},
-		"app/apiKeys": {
-			"shared": {
-				"fields": {
-					"expiration": "Expiry"
-				}
-			},
-			"sections": {
-				"createKey": {
-					"modal": {
-						"savedConfirm": "I've saved my key"
-					}
-				},
-				"table": {
-					"noExpiration": "No expiry set"
-				}
-			}
-		},
-		"app/desktop": {
-			"sections": {
-				"configuredServers": {
-					"deleteServer": {
-						"confirmation": {
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialisation process"
-						}
-					},
-					"resetConfiguration": {
-						"confirmation": {
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialisation process"
-						}
-					}
-				}
-			}
-		},
-		"server/jobs": {
-			"sections": {
-				"scheduling": {
-					"title": "Scheduled Jobs"
-				}
-			}
-		},
-		"server/metadataIntegrations": {
-			"providerForm": {
-				"apiTokenExpiresAt": {
-					"label": "API token expiry"
-				}
-			}
-		}
-	},
-	"mobileApp": {
-		"addOrEditServer": {
-			"catalogUrl": "Catalogue URL"
-		},
-		"bookMetadata": {
-			"colorists": "Colourists"
-		},
-		"common": {
-			"favorite": "Favourite"
-		},
-		"settings": {
-			"preferences": {
-				"thumbnailPlaceholder": {
-					"options": {
-						"grayscale": "Greyscale",
-						"averageColor": "Average Colour",
-						"colorful": "Colourful"
-					}
-				}
-			}
-		},
-		"stumpServer": {
-			"browse": {
-				"favorites": "Favourites"
-			}
-		},
-		"readerSettings": {
-			"title": "Reader Settings"
-		},
-		"epubSettings": {
-			"textAlignment": {
-				"options": {
-					"center": "Centre"
-				}
-			}
-		}
-	}
+    "authScene": {
+        "claimHeading": "Initialise your server",
+        "claimText": "This Stump server is not initialised. Fill in the form below to create your account. Once created, you will have full access to all server features."
+    },
+    "bookOverviewScene": {
+        "emailBook": {
+            "form": {
+                "email": {
+                    "description": "An email address to send the book to. Click add to finalise each input"
+                }
+            }
+        }
+    },
+    "createBookClubScene": {
+        "form": {
+            "steps": [
+                {
+                    "label": "Basics",
+                    "heading": "Basic Information",
+                    "description": "The details of the club, including its name and description"
+                },
+                {
+                    "label": "Roles",
+                    "heading": "Roles",
+                    "description": "Customise the roles in your book club"
+                },
+                {
+                    "label": "Membership",
+                    "heading": "Membership Preferences",
+                    "description": "Additional options for your book club"
+                },
+                {
+                    "label": "Review",
+                    "heading": "Review",
+                    "description": "Review your club settings before creating it"
+                }
+            ]
+        }
+    },
+    "bookClubSettingsScene": {
+        "roles": {
+            "description": "Customise the roles in this book club"
+        }
+    },
+    "createOrUpdateLibraryForm": {
+        "fields": {
+            "description": {
+                "placeholder": "A library of all my favourite books"
+            },
+            "tags": {
+                "description": "Used to categorise your library or enforce access rules"
+            },
+            "libraryPattern": {
+                "section": {
+                    "heading": "Organisation",
+                    "description": "Identify which pattern most closely matches the organisation of your library"
+                },
+                "options": {
+                    "description": "The setting which determines how Stump will organise your library"
+                }
+            }
+        }
+    },
+    "createLibraryScene": {
+        "form": {
+            "review": {
+                "labels": {
+                    "processThumbnailColors": "Process thumbnail colours"
+                }
+            }
+        }
+    },
+    "librarySettingsScene": {
+        "options/scanning": {
+            "sections": {
+                "configureScan": {
+                    "form": {
+                        "options": {
+                            "custom": {
+                                "description": "Customise the scan configuration"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "integrations/analysis": {
+            "description": "Analyse the contents of this library to identify potential issues or improvements",
+            "sections": {
+                "analyzeBooks": {
+                    "heading": "Analyse books",
+                    "description": "Analyse the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+                    "analyzeButton": "Analyse books"
+                }
+            }
+        }
+    },
+    "metadataEditor": {
+        "labels": {
+            "colorists": "Colourists"
+        }
+    },
+    "createOrUpdateSmartListForm": {
+        "fields": {
+            "queryBuilder": {
+                "uiPerformance": "This feature is missing performance optimisations on the UI and may be slow with filters that produce large result sets. This will be improved in the future",
+                "filters": {
+                    "fieldSelect": {
+                        "source": {
+                            "book_meta": {
+                                "attributes": {
+                                    "colorists": "Colourists"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "createOrUpdateApiKey": {
+        "validation": {
+            "futureDate": "Expiry date must be in the future"
+        },
+        "fields": {
+            "expiration": {
+                "label": "Expiry"
+            }
+        }
+    },
+    "userSmartListsScene": {
+        "subtitle": "Your favourite searches and filters saved for easy access"
+    },
+    "settingsScene": {
+        "app/account": {
+            "sections": {
+                "locale": {
+                    "subtitle": [
+                        "Stump supports multiple languages and locales; set your preferences below. Please consider helping to improve the quality of",
+                        "Stump's translations",
+                        "if you're able to!"
+                    ]
+                }
+            }
+        },
+        "app/preferences": {
+            "description": "Customise the look and feel of the application",
+            "sections": {
+                "fontSelect": {
+                    "description": "Customise the font used in the application"
+                },
+                "thumbnailPlaceholder": {
+                    "options": {
+                        "grayscale": "Greyscale",
+                        "averageColor": "Average colour",
+                        "colorful": "Colourful"
+                    }
+                },
+                "navigation": {
+                    "description": "Customise the navigation elements of the app"
+                },
+                "layoutAndArrangement": {
+                    "description": "Customise how Stump displays information and organises content"
+                },
+                "additionalPreferences": {
+                    "description": "Customise the appearance and behaviour of Stump with these additional settings"
+                }
+            }
+        },
+        "app/apiKeys": {
+            "shared": {
+                "fields": {
+                    "expiration": "Expiry"
+                }
+            },
+            "sections": {
+                "createKey": {
+                    "modal": {
+                        "savedConfirm": "I've saved my key"
+                    }
+                },
+                "table": {
+                    "noExpiration": "No expiry set"
+                }
+            }
+        },
+        "app/desktop": {
+            "sections": {
+                "configuredServers": {
+                    "deleteServer": {
+                        "confirmation": {
+                            "disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialisation process"
+                        }
+                    },
+                    "resetConfiguration": {
+                        "confirmation": {
+                            "disclaimer": "You will be logged out and have to reconfigure any servers in the initialisation process"
+                        }
+                    }
+                }
+            }
+        },
+        "server/jobs": {
+            "sections": {
+                "scheduling": {
+                    "title": "Scheduled Jobs"
+                }
+            }
+        },
+        "server/metadataIntegrations": {
+            "providerForm": {
+                "apiTokenExpiresAt": {
+                    "label": "API token expiry"
+                }
+            }
+        }
+    },
+    "mobileApp": {
+        "addOrEditServer": {
+            "catalogUrl": "Catalogue URL"
+        },
+        "bookMetadata": {
+            "colorists": "Colourists"
+        },
+        "common": {
+            "favorite": "Favourite"
+        },
+        "settings": {
+            "preferences": {
+                "thumbnailPlaceholder": {
+                    "options": {
+                        "grayscale": "Greyscale",
+                        "averageColor": "Average Colour",
+                        "colorful": "Colourful"
+                    }
+                }
+            }
+        },
+        "stumpServer": {
+            "browse": {
+                "favorites": "Favourites"
+            }
+        },
+        "readerSettings": {
+            "title": "Reader Settings"
+        },
+        "epubSettings": {
+            "textAlignment": {
+                "options": {
+                    "center": "Centre"
+                }
+            }
+        }
+    }
 }

@@ -1,43 +1,43 @@
 {
-	"createOrUpdateBookClubForm": {
-		"fields": {
-			"member_role_spec": {
-				"member": {
-					"placeholder": "Medlem"
-				},
-				"moderator": {
-					"description": "Navnet på moderatorrollen for din bogklub"
-				},
-				"admin": {
-					"label": "Administrator",
-					"placeholder": "Administrator",
-					"description": "Navnet på moderatorrollen for din bogklub"
-				}
-			}
-		},
-		"validation": {
-			"missingName": "Navnet er påkrævet",
-			"alreadyTaken": "er allerede i brug"
-		}
-	},
-	"createBookClubScene": {
-		"heading": "Opret en ny bogklub"
-	},
-	"bookClubSettingsScene": {
-		"sidebar": {
-			"scheduling": {
-				"options": "Indstillinger"
-			}
-		},
-		"members": {
-			"title": "Medlemmer"
-		}
-	},
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"path": {
-				"placeholder": "/sti/til/bibliotek"
-			}
-		}
-	}
+    "createOrUpdateBookClubForm": {
+        "fields": {
+            "member_role_spec": {
+                "member": {
+                    "placeholder": "Medlem"
+                },
+                "moderator": {
+                    "description": "Navnet på moderatorrollen for din bogklub"
+                },
+                "admin": {
+                    "label": "Administrator",
+                    "placeholder": "Administrator",
+                    "description": "Navnet på moderatorrollen for din bogklub"
+                }
+            }
+        },
+        "validation": {
+            "missingName": "Navnet er påkrævet",
+            "alreadyTaken": "er allerede i brug"
+        }
+    },
+    "createBookClubScene": {
+        "heading": "Opret en ny bogklub"
+    },
+    "bookClubSettingsScene": {
+        "sidebar": {
+            "scheduling": {
+                "options": "Indstillinger"
+            }
+        },
+        "members": {
+            "title": "Medlemmer"
+        }
+    },
+    "createOrUpdateLibraryForm": {
+        "fields": {
+            "path": {
+                "placeholder": "/sti/til/bibliotek"
+            }
+        }
+    }
 }

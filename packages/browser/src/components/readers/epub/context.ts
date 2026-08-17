@@ -20,7 +20,6 @@ export type ReaderLocator = {
 		position?: number | null
 		totalProgression?: number | null
 		cssSelector?: string | null
-		partialCfi?: string | null
 	} | null
 	text?: {
 		after?: string | null
@@ -72,7 +71,7 @@ export type EpubReaderControls = {
 	jumpToSection: (section: number) => void
 	canGoForward?: boolean
 	canGoBackward?: boolean
-	onGoToLocator: (locator: ReaderLocator) => void
+	onGoToLocator: (locator: ReaderLocator) => Promise<boolean>
 	getLocatorPreviewText: (locator: ReaderLocator) => string | null
 	searchBook?: (
 		query: string,
@@ -89,7 +88,7 @@ export const EpubReaderContext = createContext<EpubReaderContextProps>({
 	controls: {
 		fullscreen: false,
 		getLocatorPreviewText: () => null,
-		onGoToLocator: noop,
+		onGoToLocator: async () => false,
 		onLinkClick: noop,
 		onMouseEnterControls: noop,
 		onMouseLeaveControls: noop,

@@ -41,10 +41,10 @@ export type UseReadiumNavigatorResult = {
 }
 
 export type ReadiumNavigatorApi = {
-	goForward: () => void
-	goBackward: () => void
-	go: (locator: Locator) => void
-	goLink: (link: Link) => void
+	goForward: () => Promise<boolean>
+	goBackward: () => Promise<boolean>
+	go: (locator: Locator) => Promise<boolean>
+	goLink: (link: Link) => Promise<boolean>
 	canGoForward: boolean
 	canGoBackward: boolean
 	currentLocator: Locator | null
@@ -97,13 +97,24 @@ export function useReadiumNavigator({
 	const preferencesRef = useRef(preferences)
 	const decorationObserverRef = useRef<DecorationObserver | null>(null)
 	const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const navigationTailRef = useRef<Promise<void>>(Promise.resolve())
+	const navigationGenerationRef = useRef(0)
 
-	onPositionChangedRef.current = onPositionChanged
-	onToggleControlsRef.current = onToggleControls
-	onTextSelectedRef.current = onTextSelected
-	onTextClearedRef.current = onTextCleared
-	onDecorationActivatedRef.current = onDecorationActivated
-	preferencesRef.current = preferences
+	useEffect(() => {
+		onPositionChangedRef.current = onPositionChanged
+		onToggleControlsRef.current = onToggleControls
+		onTextSelectedRef.current = onTextSelected
+		onTextClearedRef.current = onTextCleared
+		onDecorationActivatedRef.current = onDecorationActivated
+		preferencesRef.current = preferences
+	}, [
+		onPositionChanged,
+		onToggleControls,
+		onTextSelected,
+		onTextCleared,
+		onDecorationActivated,
+		preferences,
+	])
 
 	const syncNavButtons = useCallback((nav: EpubNavigator | null) => {
 		if (!nav) return
@@ -112,6 +123,46 @@ export function useReadiumNavigator({
 			canGoForward: nav.canGoForward,
 		})
 	}, [])
+
+	/**
+	 * Readium rejects a navigation immediately while another one is active. Serialize
+	 * Stump-originated requests so bookmark, annotation, search, keyboard, and link
+	 * navigation cannot silently race each other.
+	 */
+	const enqueueNavigation = useCallback(
+		(
+			navigator: EpubNavigator,
+			navigate: (complete: (ok: boolean) => void) => void,
+		): Promise<boolean> => {
+			const generation = navigationGenerationRef.current
+			const result = navigationTailRef.current.then(() => {
+				if (generation !== navigationGenerationRef.current || navigator !== navigatorRef.current) {
+					return false
+				}
+
+				return new Promise<boolean>((resolve) => {
+					let settled = false
+					const complete = (ok: boolean) => {
+						if (settled) return
+						settled = true
+						syncNavButtons(navigator)
+						resolve(ok)
+					}
+
+					try {
+						navigate(complete)
+					} catch (error) {
+						console.error('[useReadiumNavigator] navigation failed', error)
+						complete(false)
+					}
+				})
+			})
+
+			navigationTailRef.current = result.then(() => undefined)
+			return result
+		},
+		[syncNavButtons],
+	)
 
 	const clearSelection = useCallback(() => {
 		const nav = navigatorRef.current
@@ -203,7 +254,10 @@ export function useReadiumNavigator({
 							navigator?.currentLocator?.href,
 						)
 						if (internal && navigator) {
-							navigator.go(internal, false, () => syncNavButtons(navigator))
+							const currentNavigator = navigator
+							void enqueueNavigation(currentNavigator, (complete) =>
+								currentNavigator.go(internal, false, complete),
+							)
 							return true
 						}
 
@@ -294,6 +348,8 @@ export function useReadiumNavigator({
 
 		return () => {
 			cancelled = true
+			navigationGenerationRef.current += 1
+			navigationTailRef.current = Promise.resolve()
 			if (clearTimerRef.current) {
 				clearTimeout(clearTimerRef.current)
 				clearTimerRef.current = null
@@ -319,7 +375,17 @@ export function useReadiumNavigator({
 			}
 		}
 		// Intentionally omit preferences — applied via submitPreferences on change.
-	}, [publication, positions, initialLocator, allowedDomains, containerRef, syncNavButtons, t])
+	}, [
+		publication,
+		positions,
+		initialLocator,
+		allowedDomains,
+		attachSelectionClearListeners,
+		containerRef,
+		enqueueNavigation,
+		syncNavButtons,
+		t,
+	])
 
 	useEffect(() => {
 		const nav = navigatorRef.current
@@ -332,16 +398,28 @@ export function useReadiumNavigator({
 	const api = useMemo<ReadiumNavigatorApi>(
 		() => ({
 			goForward: () => {
-				navigatorRef.current?.goForward(false, () => syncNavButtons(navigatorRef.current))
+				const navigator = navigatorRef.current
+				return navigator
+					? enqueueNavigation(navigator, (complete) => navigator.goForward(false, complete))
+					: Promise.resolve(false)
 			},
 			goBackward: () => {
-				navigatorRef.current?.goBackward(false, () => syncNavButtons(navigatorRef.current))
+				const navigator = navigatorRef.current
+				return navigator
+					? enqueueNavigation(navigator, (complete) => navigator.goBackward(false, complete))
+					: Promise.resolve(false)
 			},
 			go: (locator: Locator) => {
-				navigatorRef.current?.go(locator, false, () => syncNavButtons(navigatorRef.current))
+				const navigator = navigatorRef.current
+				return navigator
+					? enqueueNavigation(navigator, (complete) => navigator.go(locator, false, complete))
+					: Promise.resolve(false)
 			},
 			goLink: (link: Link) => {
-				navigatorRef.current?.goLink(link, false, () => syncNavButtons(navigatorRef.current))
+				const navigator = navigatorRef.current
+				return navigator
+					? enqueueNavigation(navigator, (complete) => navigator.goLink(link, false, complete))
+					: Promise.resolve(false)
 			},
 			canGoForward: navButtons.canGoForward,
 			canGoBackward: navButtons.canGoBackward,
@@ -352,7 +430,7 @@ export function useReadiumNavigator({
 			applyDecorations,
 			clearSelection,
 		}),
-		[applyDecorations, clearSelection, currentLocator, navButtons, syncNavButtons],
+		[applyDecorations, clearSelection, currentLocator, enqueueNavigation, navButtons],
 	)
 
 	return { loadState, api }

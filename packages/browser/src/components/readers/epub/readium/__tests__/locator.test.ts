@@ -115,10 +115,13 @@ describe('resolveInitialLocator', () => {
 					progression: 0.4,
 					position: 99,
 					totalProgression: 0.55,
-					cssSelector: null,
-					partialCfi: null,
+					cssSelector: '#paragraph-4',
 				},
-				text: null,
+				text: {
+					before: 'before',
+					highlight: 'highlight',
+					after: 'after',
+				},
 				title: null,
 			},
 		})
@@ -127,6 +130,8 @@ describe('resolveInitialLocator', () => {
 		expect(matched?.locations.progression).toBe(0.4)
 		expect(matched?.locations.position).toBe(2)
 		expect(matched?.locations.fragments).toEqual(['sec'])
+		expect(matched?.locations.otherLocations?.get('cssSelector')).toBe('#paragraph-4')
+		expect(matched?.text?.highlight).toBe('highlight')
 	})
 
 	it('falls back to nearest totalProgression from percentage', () => {

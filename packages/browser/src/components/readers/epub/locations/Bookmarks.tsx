@@ -22,7 +22,7 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 	const handleSelectLocator = useCallback(
 		async (bookmark: (typeof bookmarks)[number]) => {
 			if (bookmark.locator?.href) {
-				onGoToLocator({
+				const navigated = await onGoToLocator({
 					href: bookmark.locator.href,
 					type: bookmark.locator.type || 'application/xhtml+xml',
 					title: bookmark.locator.title ?? undefined,
@@ -30,7 +30,9 @@ export default function Bookmarks({ onLocationChanged }: Props) {
 					locations: bookmark.locator.locations,
 					text: bookmark.locator.text,
 				})
-				onLocationChanged?.()
+				if (navigated) {
+					onLocationChanged?.()
+				}
 			}
 		},
 		[onGoToLocator, onLocationChanged],

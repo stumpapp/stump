@@ -33,7 +33,6 @@ const _createMutation = graphql(`
 					position
 					totalProgression
 					cssSelector
-					partialCfi
 				}
 				text {
 					after
@@ -255,7 +254,6 @@ function readerLocatorToInput(locator: ReaderLocator): ReadiumLocatorInput {
 					progression: locator.locations.progression ?? undefined,
 					totalProgression: locator.locations.totalProgression ?? undefined,
 					cssSelector: locator.locations.cssSelector ?? undefined,
-					partialCfi: locator.locations.partialCfi ?? undefined,
 				}
 			: undefined,
 		text: locator.text
@@ -281,7 +279,6 @@ function readiumLocatorInputToReaderLocator(locator: ReadiumLocatorInput): Reade
 					progression: locator.locations.progression ?? undefined,
 					totalProgression: locator.locations.totalProgression ?? undefined,
 					cssSelector: locator.locations.cssSelector ?? undefined,
-					partialCfi: locator.locations.partialCfi ?? undefined,
 				}
 			: undefined,
 		text: locator.text
@@ -333,7 +330,6 @@ type GraphQLLocatorLike = {
 		position?: number | null
 		totalProgression?: number | null
 		cssSelector?: string | null
-		partialCfi?: string | null
 	} | null
 	text?: {
 		after?: string | null
@@ -355,7 +351,6 @@ function graphQLLocatorToReaderLocator(locator: GraphQLLocatorLike): ReaderLocat
 					position: locator.locations.position ?? undefined,
 					totalProgression: locator.locations.totalProgression ?? undefined,
 					cssSelector: locator.locations.cssSelector ?? undefined,
-					partialCfi: locator.locations.partialCfi ?? undefined,
 				}
 			: undefined,
 		text: locator.text

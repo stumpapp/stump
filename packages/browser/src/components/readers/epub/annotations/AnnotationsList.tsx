@@ -21,9 +21,11 @@ export default function AnnotationsList({ onLocationChanged }: Props) {
 	const annotations = bookMeta?.annotations ?? []
 
 	const handleSelect = useCallback(
-		(annotation: EpubAnnotation) => {
-			onGoToLocator(annotation.locator)
-			onLocationChanged?.()
+		async (annotation: EpubAnnotation) => {
+			const navigated = await onGoToLocator(annotation.locator)
+			if (navigated) {
+				onLocationChanged?.()
+			}
 		},
 		[onGoToLocator, onLocationChanged],
 	)
@@ -42,7 +44,7 @@ export default function AnnotationsList({ onLocationChanged }: Props) {
 					<button
 						key={annotation.id}
 						className="gap-1.5 p-2 px-1 py-1.5 flex flex-col justify-start text-left hover:bg-muted"
-						onClick={() => handleSelect(annotation)}
+						onClick={() => void handleSelect(annotation)}
 					>
 						<Text variant="muted" size="xs" className="line-clamp-1">
 							{subtitle}

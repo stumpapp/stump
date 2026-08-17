@@ -69,7 +69,6 @@ const query = graphql(`
 						position
 						totalProgression
 						cssSelector
-						partialCfi
 					}
 					text {
 						after
@@ -96,7 +95,6 @@ const query = graphql(`
 						position
 						totalProgression
 						cssSelector
-						partialCfi
 					}
 					text {
 						after
@@ -125,7 +123,6 @@ const query = graphql(`
 							position
 							totalProgression
 							cssSelector
-							partialCfi
 						}
 						text {
 							after
@@ -353,7 +350,6 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 							position: payload.locations.position,
 							totalProgression: payload.locations.totalProgression,
 							cssSelector: payload.locations.cssSelector,
-							partialCfi: payload.locations.partialCfi,
 						}
 					: null,
 				text: payload.text ?? null,
@@ -614,16 +610,16 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 	}, [currentLocator, toc, opened])
 
 	const onPaginateForward = useCallback(() => {
-		api.goForward()
+		void api.goForward()
 	}, [api])
 
 	const onPaginateBackward = useCallback(() => {
-		api.goBackward()
+		void api.goBackward()
 	}, [api])
 
 	const onGoToLocator = useCallback(
-		(locator: ReaderLocator) => {
-			if (!opened) return
+		async (locator: ReaderLocator): Promise<boolean> => {
+			if (!opened) return false
 			try {
 				const toolkit = resolveInitialLocator({
 					positions: opened.positions,
@@ -639,19 +635,21 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 									position: locator.locations.position,
 									totalProgression: locator.locations.totalProgression,
 									cssSelector: locator.locations.cssSelector ?? null,
-									partialCfi: locator.locations.partialCfi ?? null,
 								}
 							: null,
 						text: locator.text ?? null,
 					},
 				})
 				if (toolkit) {
-					api.go(toolkit)
+					const navigated = await api.go(toolkit)
+					if (navigated) return true
 				}
 			} catch (err) {
 				console.error(err)
-				toast.error(t('epubReader.errors.navigateFailed'))
 			}
+
+			toast.error(t('epubReader.errors.navigateFailed'))
+			return false
 		},
 		[api, opened, t],
 	)
@@ -668,14 +666,14 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 				resources.find((l) => hrefsMatch(l.href, href) || l.href.endsWith(href))
 
 			if (match) {
-				api.goLink(match)
+				void api.goLink(match)
 				return
 			}
 
 			// Fall back to first position with matching package path
 			const position = opened.positions.find((p) => hrefsMatch(p.href, href))
 			if (position) {
-				api.go(position)
+				void api.go(position)
 				return
 			}
 
@@ -688,7 +686,7 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 		(section: number) => {
 			const item = opened?.publication.manifest.readingOrder?.items?.[section]
 			if (item) {
-				api.goLink(item)
+				void api.goLink(item)
 			}
 		},
 		[api, opened],
@@ -722,10 +720,10 @@ export default function ReadiumWebReader({ id, isIncognito }: Props) {
 			const prevKey = isLtr ? 'ArrowLeft' : 'ArrowRight'
 			if (event.key === nextKey) {
 				event.preventDefault()
-				api.goForward()
+				void api.goForward()
 			} else if (event.key === prevKey) {
 				event.preventDefault()
-				api.goBackward()
+				void api.goBackward()
 			}
 		}
 

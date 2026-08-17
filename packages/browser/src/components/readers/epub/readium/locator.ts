@@ -103,10 +103,6 @@ export function toolkitLocatorToInput(
 				typeof locations.otherLocations?.get === 'function'
 					? (locations.otherLocations.get('cssSelector') as string | undefined)
 					: undefined,
-			partialCfi:
-				typeof locations.otherLocations?.get === 'function'
-					? (locations.otherLocations.get('partialCfi') as string | undefined)
-					: undefined,
 		},
 		text: locator.text
 			? {
@@ -136,7 +132,6 @@ export function toolkitLocatorToReaderLocator(
 					position: input.locations.position,
 					totalProgression: input.locations.totalProgression,
 					cssSelector: input.locations.cssSelector,
-					partialCfi: input.locations.partialCfi,
 				}
 			: null,
 		text: input.text
@@ -203,7 +198,6 @@ function buildOtherLocations(
 	if (!locations) return undefined
 	const map = new Map<string, unknown>()
 	if (locations.cssSelector) map.set('cssSelector', locations.cssSelector)
-	if (locations.partialCfi) map.set('partialCfi', locations.partialCfi)
 	return map.size ? map : undefined
 }
 
@@ -227,11 +221,26 @@ export function resolveInitialLocator(args: ResolveInitialLocatorArgs): Locator 
 					? [fragmentFromHref(storedLocator.href)!]
 					: undefined
 
-			return match.copyWithLocations({
-				progression: progression ?? match.locations.progression,
-				fragments: fragments ?? match.locations.fragments,
-				totalProgression:
-					safeNumber(storedLocator.locations?.totalProgression) ?? match.locations.totalProgression,
+			return new Locator({
+				href: match.href,
+				type: storedLocator.type || match.type,
+				title: storedLocator.title ?? storedLocator.chapterTitle ?? match.title,
+				locations: new LocatorLocations({
+					progression: progression ?? match.locations.progression,
+					fragments: fragments ?? match.locations.fragments,
+					position: match.locations.position,
+					totalProgression:
+						safeNumber(storedLocator.locations?.totalProgression) ??
+						match.locations.totalProgression,
+					otherLocations: buildOtherLocations(storedLocator.locations),
+				}),
+				text: storedLocator.text
+					? new LocatorText({
+							after: storedLocator.text.after ?? undefined,
+							before: storedLocator.text.before ?? undefined,
+							highlight: storedLocator.text.highlight ?? undefined,
+						})
+					: match.text,
 			})
 		}
 	}

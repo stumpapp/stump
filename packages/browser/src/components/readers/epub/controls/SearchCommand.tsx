@@ -132,9 +132,11 @@ export default function SearchCommand() {
 	}, [query, nextCursor, isLoadingMore, runServerSearch])
 
 	const handleGoToResult = useCallback(
-		(result: EpubSearchResult) => {
-			onGoToLocator(searchResultToReaderLocator(result))
-			setOpen(false)
+		async (result: EpubSearchResult) => {
+			const navigated = await onGoToLocator(searchResultToReaderLocator(result))
+			if (navigated) {
+				setOpen(false)
+			}
 		},
 		[onGoToLocator],
 	)
@@ -209,7 +211,7 @@ export default function SearchCommand() {
 							<Command.Item
 								key={`${result.locator.href}:${result.locator.locations.position}:${idx}`}
 								value={`${result.locator.href}:${result.locator.locations.position}:${idx}`}
-								onSelect={() => handleGoToResult(result)}
+								onSelect={() => void handleGoToResult(result)}
 								className="space-y-1 flex flex-col"
 							>
 								<p className="w-full">

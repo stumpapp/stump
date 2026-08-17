@@ -98,7 +98,7 @@ function mockControls(overrides: Partial<EpubReaderControls> = {}) {
 			onPaginateForward: jest.fn(),
 			onPaginateBackward: jest.fn(),
 			jumpToSection: jest.fn(),
-			onGoToLocator: jest.fn(),
+			onGoToLocator: jest.fn().mockResolvedValue(true),
 			getLocatorPreviewText: jest.fn(() => null),
 			...overrides,
 		},
@@ -132,7 +132,7 @@ describe('SearchCommand', () => {
 	it('navigates via onGoToLocator when a result is clicked', async () => {
 		const result = buildResult({ before: 'the ', highlight: 'quick', after: ' fox' })
 		const searchBook = jest.fn().mockResolvedValue(buildResponse([result]))
-		const onGoToLocator = jest.fn()
+		const onGoToLocator = jest.fn().mockResolvedValue(true)
 		mockControls({ searchBook, onGoToLocator })
 
 		render(<SearchCommand />)

@@ -72,6 +72,9 @@
 				"provider": {
 					"label": "Proveedor",
 					"allOption": "Todos los proveedores habilitados"
+				},
+				"isbn": {
+					"label": "ISBN"
 				}
 			}
 		}
@@ -196,7 +199,8 @@
 				"labels": {
 					"name": "Nombre",
 					"description": "Descripción"
-				}
+				},
+				"no": "No"
 			},
 			"submit": "Crear Club de Libros"
 		}
@@ -206,7 +210,8 @@
 			"basics": "Fundamentos",
 			"members": {
 				"members": "Miembros",
-				"label": "Membresía"
+				"label": "Membresía",
+				"roles": "Roles"
 			},
 			"scheduling": {
 				"scheduler": "Planificador",
@@ -220,7 +225,10 @@
 		},
 		"basics": {
 			"title": "Información básica",
-			"description": "Los detalles de este club de libros, incluyendo su nombre y descripción"
+			"description": "Los detalles de este club de libros, incluyendo su nombre y descripción",
+			"form": {
+				"submit": "Actualizar club"
+			}
 		},
 		"members": {
 			"title": "Miembros",
@@ -233,7 +241,8 @@
 					"heading": "Asignación de roles existentes",
 					"description": "Las asignaciones de roles actuales para este club de libros"
 				}
-			}
+			},
+			"title": "Roles"
 		},
 		"scheduling/scheduler": {
 			"title": "Planificador",
@@ -289,7 +298,8 @@
 					"LIGHT_NOVEL": "Novelas Ligeras",
 					"MANHWA": "Manhwas",
 					"WEB_NOVEL": "Novelas Web",
-					"MIXED": "Mixto"
+					"MIXED": "Mixto",
+					"WEBTOON": "Webtoons"
 				}
 			},
 			"defaultLibraryView": {
@@ -301,12 +311,16 @@
 				},
 				"options": {
 					"series": {
-						"description": "Mostrar por defecto la pestaña de series"
+						"description": "Mostrar por defecto la pestaña de series",
+						"label": "Series"
 					},
 					"books": {
 						"label": "Libros",
 						"description": "Mostrar por defecto la pestaña de libros"
 					}
+				},
+				"skipBookOverview": {
+					"description": "Abrir lector directamente al seleccionar libros en esta librería"
 				}
 			},
 			"readingSettings": {

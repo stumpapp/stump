@@ -55,7 +55,7 @@ I develop and maintain Stump in my free time. In other words, this is not my job
 - Built-in readers for all supported formats
 - Annotations and highlights for EPUB books
 - OIDC authentication
-- Translations with [Crowdin](https://crowdin.com/project/stump)
+- Translations with [Weblate](https://weblate.org/en/)
 - Multi-user account management with permissions, age restrictions, and other access control features
 - Theming support with a handful of [built-in themes](https://www.stumpapp.dev/docs/apps/web/themes)
 - [Kobo](https://www.stumpapp.dev/docs/guides/integrations/kobo) and [KoReader](https://www.stumpapp.dev/docs/guides/integrations/koreader) sync integrations
@@ -77,7 +77,7 @@ The installation guides are available in the [documentation](https://www.stumpap
 
 The developer guide is available in the [documentation](https://www.stumpapp.dev/docs/developer/contributing) (or [the markdown](/docs/content/docs/developer/contributing.mdx), if you prefer). To not have to maintain two copies of the same information, please refer to those links for the most up-to-date information.
 
-### Contributing
+## Contributing
 
 Contributions are very **welcome**! Please review the [CONTRIBUTING.md](./.github/CONTRIBUTING.md) before getting started.
 
@@ -85,14 +85,13 @@ I recommend taking a look at [open issues](https://github.com/stumpapp/stump/iss
 
 In general, the following areas could always use help:
 
-- Translations, so Stump is accessible to as many people as possible
-  - You can translate through [Crowdin](https://crowdin.com/project/stump) or help find/fix areas of the app that need better translation coverage
+- Translations via [Weblate](https://hosted.weblate.org/engage/stump/), so Stump is accessible to as many people as possible
 - Writing comprehensive tests
 - Improving the UI/UX, even small changes can go a long way
 - CI pipelines, automated release processes, and other devops-related efforts
 - Addressing `TODO` or `FIXME` comments in the codebase
 
-## Repository Structure
+### Repository Structure
 
 The repository is managed via yarn workspaces and cargo workspaces:
 
@@ -113,6 +112,10 @@ docs/
 # Shared TypeScript packages
 packages/
 ```
+
+## Translations
+
+[![Translation status](https://hosted.weblate.org/widgets/stump/-/stump/horizontal-auto.svg)](https://hosted.weblate.org/engage/stump/)
 
 ## Similar Projects
 

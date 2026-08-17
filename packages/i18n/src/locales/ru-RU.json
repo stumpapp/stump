@@ -20,9 +20,7 @@
 			},
 			"buttons": {
 				"createAccount": "Создать Аккаунт",
-				"login": "Войти",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"login": "Войти"
 			}
 		},
 		"toasts": {
@@ -42,43 +40,6 @@
 			"subtitleEditing": "Предварительный просмотр правок вашей библиотеки будет показан ниже"
 		}
 	},
-	"bookManagementScene": {
-		"metadataSearch": {
-			"heading": "Search metadata",
-			"description": "Search an external provider for this book and choose a match to apply",
-			"openButton": "Search Metadata",
-			"searchButton": "Search",
-			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
-			"noResults": "No matches were found for this search",
-			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
-			"searchFailed": "Failed to search metadata providers",
-			"form": {
-				"title": {
-					"label": "Title"
-				},
-				"author": {
-					"label": "Author"
-				},
-				"isbn": {
-					"label": "ISBN"
-				},
-				"year": {
-					"label": "Year"
-				},
-				"number": {
-					"label": "Issue number"
-				},
-				"comicVineVolumeId": {
-					"label": "ComicVine volume ID",
-					"placeholder": "e.g., 129260"
-				},
-				"provider": {
-					"label": "Provider",
-					"allOption": "All enabled providers"
-				}
-			}
-		}
-	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "Информация о файле",
@@ -91,7 +52,6 @@
 		},
 		"emailBook": {
 			"heading": "Email книга",
-			"description": "Send this book to a device or email address",
 			"form": {
 				"email": {
 					"label": "Электронная почта",
@@ -116,7 +76,6 @@
 			},
 			"description": {
 				"label": "Описание",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
 				"description": "Краткое описание вашего книжного клуба — опционально"
 			},
 			"is_private": {
@@ -157,8 +116,7 @@
 					"description": "Опциональное отображаемое имя в книжном клубе. Если установлено, то замещает ваше имя пользователя"
 				},
 				"hideProgress": {
-					"label": "Скрыть прогресс",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"label": "Скрыть прогресс"
 				}
 			}
 		},
@@ -169,7 +127,6 @@
 	},
 	"createBookClubScene": {
 		"heading": "Создать новый книжный клуб",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
 		"form": {
 			"stepLabel": "Шаг",
 			"steps": [
@@ -233,8 +190,7 @@
 		},
 		"members": {
 			"title": "Участники",
-			"description": "Управление участниками книжного клуба",
-			"sections": {}
+			"description": "Управление участниками книжного клуба"
 		},
 		"roles": {
 			"title": "Роли",
@@ -247,8 +203,7 @@
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Планировщик",
-			"description": "Create and manage the scheduled readings for this book club"
+			"title": "Планировщик"
 		},
 		"scheduling/options": {
 			"title": "Настройки",
@@ -290,42 +245,6 @@
 				"label": "Метки",
 				"description": "Используется для категоризации вашей библиотеки или обеспечения соблюдения правил доступа"
 			},
-			"libraryType": {
-				"label": "Library content",
-				"description": "The type of content present in this library",
-				"options": {
-					"COMIC": "Comics",
-					"MANGA": "Manga",
-					"BOOK": "Books",
-					"LIGHT_NOVEL": "Light Novels",
-					"MANHWA": "Manhwa",
-					"WEB_NOVEL": "Web Novels",
-					"WEBTOON": "Webtoons",
-					"MIXED": "Mixed"
-				}
-			},
-			"defaultLibraryView": {
-				"label": "Default library view",
-				"description": "Configure which tab is shown by default when opening this library",
-				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
-				},
-				"skipBookOverview": {
-					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
-				},
-				"options": {
-					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
-					},
-					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
-					}
-				}
-			},
 			"readingSettings": {
 				"section": {
 					"heading": "Настройки чтения",
@@ -350,50 +269,11 @@
 						"create": "Настройки миниатюр",
 						"update": "Создание"
 					},
-					"description": "Ускорьте загрузку при просмотре вашей библиотеки путем создания эскизов для ваших книг",
-					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+					"description": "Ускорьте загрузку при просмотре вашей библиотеки путем создания эскизов для ваших книг"
 				},
 				"enableSwitch": {
 					"label": "Включено",
 					"description": "Создать эскизы для этой библиотеки"
-				},
-				"resizeMethod": {
-					"label": "Resize Method",
-					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
-					}
-				},
-				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
-					"factor": {
-						"label": "Scale Factor"
-					}
-				},
-				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
-					"width": {
-						"label": "Width"
-					},
-					"height": {
-						"label": "Height"
-					}
-				},
-				"scaleDimension": {
-					"label": "Auto Scaled",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
-					"dimension": {
-						"label": "Dimension",
-						"options": {
-							"width": "Width",
-							"height": "Height"
-						}
-					},
-					"size": {
-						"label": "Size"
-					}
 				},
 				"format": {
 					"label": "Формат изображения",
@@ -504,15 +384,10 @@
 				"update": "Сканировать после обновления"
 			},
 			"description": "Индексация файлов библиотеки для заполнения базы данных"
-		},
-		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
 		"heading": "Создать библиотеку",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
 		"subtitleLink": "соответствующую документацию",
 		"form": {
 			"stepLabel": "Шаг",
@@ -544,7 +419,6 @@
 				"none": "Отсутствует",
 				"labels": {
 					"generateThumbnails": "Создать миниатюры",
-					"processThumbnailColors": "Process thumbnail colors",
 					"mode": "Режим",
 					"format": "Формат",
 					"quality": "Качество",
@@ -558,11 +432,7 @@
 					"deleteConversions": "Удалить преобразованные файлы",
 					"watch": "Следить за изменениями в каталоге",
 					"processMetadata": "Обработка метаданных",
-					"generateFileHashes": "Генерировать хэши файлов",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateFileHashes": "Генерировать хэши файлов"
 				}
 			},
 			"buttons": {
@@ -593,16 +463,8 @@
 			"addedFiles": "Добавленные файлы"
 		}
 	},
-	"libraryHeader": {
-		"tabs": {
-			"books": "Books",
-			"series": "Series",
-			"files": "Files"
-		}
-	},
 	"librarySettingsScene": {
 		"heading": "Управление Библиотекой",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
 		"subtitleLink": "соответствующую документацию",
 		"sidebar": {
 			"basics": "Базовые сведения",
@@ -613,11 +475,6 @@
 				"thumbnails": "Эскизы",
 				"ignore-rules": "Правила игнорирования",
 				"label": "Настройки"
-			},
-			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
 			},
 			"danger-zone": {
 				"access-control": "Управление доступом",
@@ -710,9 +567,7 @@
 			"sections": {
 				"management": {
 					"heading": "Управление",
-					"description": "Управление существующими миниатюрами для этой библиотеки",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
+					"description": "Управление существующими миниатюрами для этой библиотеки"
 				}
 			}
 		},
@@ -723,7 +578,6 @@
 				"analyzeBooks": {
 					"heading": "Анализ книг",
 					"description": "Анализ книг в этой библиотеке для прикрепления дополнительных метаданных в базе данных, таких, как размеры страниц для книг на основе изображений",
-					"disclaimerTitle": "This process is resource-intensive",
 					"disclaimer": "Этот процесс потребляет много ресурсов и может длиться продолжительное время. В будущем он будет более настраиваемым",
 					"analyzeButton": "Анализ книг"
 				},
@@ -739,22 +593,6 @@
 				}
 			}
 		},
-		"integrations/metadata": {
-			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
-			"sections": {
-				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
-					"noProviders": {
-						"title": "There are no metadata providers available",
-						"description": "You can configure metadata providers in the metadata integration settings"
-					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
-				}
-			}
-		},
 		"danger-zone/access-control": {
 			"title": "Управление доступом",
 			"description": "Контролирование получения доступа к содержимому этой библиотеки",
@@ -762,7 +600,6 @@
 				"libraryExclusions": {
 					"heading": "Исключенные пользователи",
 					"description": "Запретить определенным пользователям доступ к этой библиотеке или ее содержимому",
-					"noUsersTitle": "No users to exclude",
 					"noUsers": "Нет зарегистрированных пользователей для исключения из этой библиотеки",
 					"updated": "Исключения обновлены",
 					"failure": "Не удалось обновить исключения"
@@ -776,26 +613,10 @@
 				"cleanLibrary": {
 					"heading": "Почистить библиотеку",
 					"description": "Удалить все медиа и серии, которые не удалось обнаружить на диске",
-					"disclaimerTitle": "No files will be deleted",
 					"disclaimer": "Хотя это действие не удалит ни одного файла, оно навсегда удалит все записи, относящиеся к медиа и сериям со статусом \"отсутствует\"",
 					"confirmation": {
 						"label": "Почистить библиотеку",
 						"text": "Вы уверены, что хотите почистить эту библиотеку?"
-					},
-					"emptyText": "There was nothing to clean",
-					"missingEntitiesTable": {
-						"columns": {
-							"id": "ID",
-							"path": "Path",
-							"type": "Type"
-						},
-						"types": {
-							"BOOK": "Book",
-							"SERIES": "Series",
-							"LIBRARY": "Library"
-						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
 					}
 				},
 				"deleteLibrary": {
@@ -818,13 +639,6 @@
 		}
 	},
 	"homeScene": {
-		"onDeck": {
-			"title": "Your next read",
-			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
-			}
-		},
 		"continueReading": {
 			"title": "Продолжить чтение",
 			"emptyState": {
@@ -847,144 +661,10 @@
 			}
 		}
 	},
-	"metadataEditor": {
-		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
-			"format": "Format",
-			"identifierAmazon": "Amazon ID",
-			"identifierCalibre": "Calibre ID",
-			"identifierGoogle": "Google ID",
-			"identifierIsbn": "ISBN",
-			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
-			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
-			"summary": "Summary",
-			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
-			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
-			"metaType": "Type",
-			"imprint": "Imprint",
-			"comicid": "Comic ID",
-			"booktype": "Book type",
-			"status": "Status",
-			"totalIssues": "Total issues",
-			"publicationRun": "Publication run",
-			"comicImage": "Comic image",
-			"descriptionFormatted": "Description (formatted)"
-		},
-		"addFields": {
-			"description": "Add each addition on its own line"
-		}
-	},
-	"metadataMatching": {
-		"section": {
-			"heading": "Pending matches",
-			"description": "Review metadata matches fetched from external providers"
-		},
-		"confidenceBadge": {
-			"label": "confidence"
-		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
-		"reviewDialog": {
-			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
-				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
-				},
-				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
-					"provider": "Provider"
-				}
-			},
-			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
-				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
-					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
-				}
-			},
-			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
-				"reset": "Reset",
-				"undoManualEdit": "Undo manual edit"
-			}
-		},
-		"matchesTable": {
-			"columns": {
-				"entityName": "Name",
-				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
-			},
-			"acceptAll": {
-				"label": "Accept all",
-				"failed": "Failed to accept all matches",
-				"success": "All pending matches accepted"
-			},
-			"rejectAll": {
-				"label": "Reject all",
-				"failed": "Failed to reject all matches",
-				"success": "All pending matches rejected"
-			},
-			"startReview": "Start review",
-			"nothingToReview": "No pending metadata matches to review"
-		}
-	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Продолжить чтение",
 			"downloadSeries": "Скачать серии"
-		}
-	},
-	"seriesHeader": {
-		"tabs": {
-			"books": "Books",
-			"files": "Files"
-		},
-		"actions": {
-			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
-		},
-		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1087,8 +767,7 @@
 									"pages": "Страницы",
 									"tags": "Метки",
 									"createdAt": "Дата создания",
-									"updatedAt": "Дата изменения",
-									"readingStatus": "Reading status"
+									"updatedAt": "Дата изменения"
 								}
 							},
 							"book_meta": {
@@ -1108,11 +787,7 @@
 									"characters": "Персонажи",
 									"teams": "Команды",
 									"genres": "Жанр",
-									"coverArtists": "Иллюстраторы обложек",
-									"ageRating": "Age rating",
-									"year": "Year",
-									"month": "Month",
-									"day": "Day"
+									"coverArtists": "Иллюстраторы обложек"
 								}
 							},
 							"series": {
@@ -1134,8 +809,7 @@
 									"status": "Статус",
 									"volume": "Том",
 									"metaType": "Тип",
-									"ageRating": "Возрастной рейтинг",
-									"year": "Start year"
+									"ageRating": "Возрастной рейтинг"
 								}
 							},
 							"library": {
@@ -1165,13 +839,6 @@
 					"listValue": {
 						"placeholder": "Добавить значение",
 						"emptyState": "Нет значений для отображения"
-					},
-					"enumValue": {
-						"selectPlaceholder": "Select value",
-						"READING": "Reading",
-						"FINISHED": "Finished",
-						"NOT_STARTED": "Not started",
-						"ABANDONED": "Abandoned"
 					}
 				}
 			}
@@ -1227,10 +894,6 @@
 			"expiration": {
 				"label": "Срок действия",
 				"placeholder": "Никогда"
-			},
-			"expiresAt": {
-				"label": "Expires at",
-				"placeholder": "Never"
 			},
 			"permissions": {
 				"inherit": {
@@ -1294,7 +957,6 @@
 				"visibility": {
 					"confirmation": {
 						"public": "Это сделает список видимым для всех",
-						"private": "This will change the list to be private, hiding it from anyone who previously had access",
 						"shared": "Вам нужно поделиться списком с конкретными пользователями, чтобы предоставить им доступ",
 						"fallback": "Вы уверены, что хотите изменить видимость этого списка?"
 					}
@@ -1367,7 +1029,6 @@
 				},
 				"viewManager": {
 					"updateSelected": "Обновить выбранное",
-					"deleteSelected": "Delete view",
 					"create": "Создать новый вид",
 					"modal": {
 						"heading": {
@@ -1392,10 +1053,6 @@
 								"description": "Обновленное название для этого вида, если необходимо"
 							}
 						}
-					},
-					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
 					}
 				}
 			}
@@ -1411,14 +1068,6 @@
 			"desktop": "Компьютер"
 		},
 		"sidebar": {
-			"personal": {
-				"account": "Account",
-				"appearance": "Preferences",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Personal"
-			},
 			"management": {
 				"general": "Общие",
 				"logs": "Логи",
@@ -1426,9 +1075,7 @@
 				"jobs": "Задачи",
 				"access": "Права доступа",
 				"email": "Электронная почта",
-				"metadata": "Metadata",
 				"notifications": "Уведомления",
-				"tags": "Tags",
 				"label": "Сервер"
 			}
 		},
@@ -1445,26 +1092,10 @@
 					"labels": {
 						"username": "Имя пользователя",
 						"password": "Пароль",
-						"activeChangesPrompt": "У вас есть несохраненные изменения",
-						"uselessForm": {
-							"title": "You lack permissions to change these settings",
-							"description": "Contact your administrator if you want to make changes to these settings"
-						},
-						"insufficientPermission": "You do not have permission to change this"
+						"activeChangesPrompt": "У вас есть несохраненные изменения"
 					},
 					"errors": {
 						"updateFailed": "Произошла ошибка сервера при обновлении вашего профиля. Пожалуйста, попробуйте еще раз."
-					},
-					"avatarPicker": {
-						"label": "Avatar",
-						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
-						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
-						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
 					},
 					"buttons": {
 						"confirm": "Сохранить изменения"
@@ -1488,18 +1119,6 @@
 			"title": "Внешний вид",
 			"description": "Настроить внешний вид приложения",
 			"sections": {
-				"themeAndAppearance": {
-					"label": "Theme and appearance",
-					"description": "The basic look and feel options for Stump"
-				},
-				"interface": {
-					"title": "Interface",
-					"description": "Primary UI surfaces and interaction elements"
-				},
-				"thumbnails": {
-					"title": "Thumbnails",
-					"description": "Display options for thumbnail images"
-				},
 				"themeSelect": {
 					"label": "Тема оформления",
 					"description": [
@@ -1507,7 +1126,6 @@
 						"документацию"
 					],
 					"options": {
-						"system": "System",
 						"light": "Светлая",
 						"dark": "Темная",
 						"bronze": "Светлая бронза",
@@ -1515,99 +1133,18 @@
 						"autumn": "Осень",
 						"cosmic": "Космическая",
 						"pumpkin": "Тыквенная",
-						"midnight": "Midnight",
 						"matrix": "Матрица"
 					}
-				},
-				"gradientToggle": {
-					"label": "Enable gradients",
-					"description": "Some themes optionally support gradients for a more dynamic look"
 				},
 				"fontSelect": {
 					"label": "Шрифт",
 					"description": "Настроить шрифт, используемый в приложении"
 				},
-				"interfaceRoundness": {
-					"label": "Interface roundness",
-					"description": "How rounded the corners are for UI elements",
-					"options": {
-						"none": "None",
-						"normal": "Normal",
-						"rounded": "Rounded",
-						"pill": "Pill"
-					}
-				},
-				"thumbnailPreview": {
-					"label": "Preview",
-					"description": "This is how thumbnails will look with the current settings"
-				},
-				"thumbnailRatioSelect": {
-					"label": "Thumbnail Ratio",
-					"description": "The aspect ratio to use for thumbnails",
-					"defaultSuffix": "Default"
-				},
-				"thumbnailPlaceholder": {
-					"label": "Thumbnail placeholder",
-					"description": "The style to use for thumbnail placeholders",
-					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
-						"thumbhash": "Thumbhash"
-					}
-				},
-				"thumbnailRoundness": {
-					"label": "Thumbnail roundness",
-					"description": "How rounded the corners of thumbnail images should be",
-					"options": {
-						"none": "None",
-						"normal": "Normal",
-						"rounded": "Rounded",
-						"large": "Large"
-					}
-				},
-				"navigation": {
-					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
-				},
-				"layoutAndArrangement": {
-					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
-				},
-				"primaryNavigation": {
-					"label": "Primary navigation",
-					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
-					},
-					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
-				},
-				"doubleSidebar": {
-					"label": "Settings sidebar",
-					"description": "Enables sidebar navigation for the settings pages"
-				},
-				"replacePrimarySidebar": {
-					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
-					"tooltips": {
-						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
-						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
-					}
-				},
 				"navigationArrangement": {
 					"label": "Расположение навигации",
-					"description": "Rearrange or tweak the navigation items in your primary navigation",
 					"isLocked": "Размещение заблокировано",
 					"lock": "Заблокировать размещения",
 					"unlock": "Разблокировать размещения",
-					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
-					},
 					"entityOptions": {
 						"createAction": {
 							"label": "Показывать действие создания",
@@ -1618,79 +1155,6 @@
 							"help": "Ссылка на страницу, посвященную просмотру всех элементов этого типа"
 						}
 					}
-				},
-				"displaySpacing": {
-					"label": "Display spacing",
-					"description": "Adjusts the overall spacing between elements throughout the app",
-					"options": {
-						"default": "Default",
-						"compact": "Compact"
-					},
-					"disclaimer": "* Compact display mode is not implemented yet"
-				},
-				"maxWidthPreference": {
-					"label": "Adjusted width",
-					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
-					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar",
-					"options": {
-						"noLimit": "No limit"
-					}
-				},
-				"displayAndSpacing": {
-					"label": "Display and spacing",
-					"description": "Preferences related to the presentation of content and information"
-				},
-				"additionalPreferences": {
-					"label": "Additional preferences",
-					"description": "Customize the appearance and behavior of Stump with these additional settings"
-				},
-				"contentBrowsing": {
-					"label": "Content browsing",
-					"description": "Preferences that affect browsing and navigating content lists"
-				},
-				"motionAndAnimation": {
-					"label": "Motion and animation",
-					"description": "Visual presentation and movement preferences"
-				},
-				"activityAndStatus": {
-					"label": "Activity and status",
-					"description": "Indicators, overlays, or functionality related to background activity"
-				},
-				"hideScrollbarToggle": {
-					"label": "Hide scrollbar",
-					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
-					"tooltips": {
-						"enabled": "This setting will hide the scrollbar on some pages",
-						"disabled": "This setting will show the scrollbar on some pages"
-					}
-				},
-				"enableAlphabetFiltering": {
-					"label": "Alphabet filtering",
-					"description": "Show an alphabet filter when applicable"
-				},
-				"enableFancyAnimations": {
-					"label": "Fancy animations",
-					"description": "A broad opt-in for fancier animations throughout the app"
-				},
-				"queryIndicatorToggle": {
-					"label": "Background fetch indicator",
-					"description": "Show a loading indicator whenever a query is running in the background"
-				},
-				"liveRefetchToggle": {
-					"label": "Live refetch",
-					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
-				},
-				"enableJobOverlayToggle": {
-					"label": "Job overlay",
-					"description": "Show a floating overlay while a job is running"
-				},
-				"dayResetHourOffset": {
-					"label": "Reading day reset offset",
-					"description": "Shift when a reading day resets, in hours from midnight"
-				},
-				"readingSessionGracePeriod": {
-					"label": "Reading session grace period",
-					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},
@@ -1753,7 +1217,6 @@
 		"app/reader": {
 			"helmet": "Настройки читалки",
 			"title": "Настройки читалки",
-			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -1834,9 +1297,7 @@
 								"placeholder": "Мой сервер"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "URL-адрес сервера Stump",
-								"placeholder": "https://stump.example.com"
+								"description": "URL-адрес сервера Stump"
 							}
 						}
 					},
@@ -1868,8 +1329,7 @@
 							"title": "Переключиться на этот сервер",
 							"description": "Вы выйдете из вашего текущего сервера",
 							"confirm": "Переключиться на сервер",
-							"server": "Сервер",
-							"uri": "URL"
+							"server": "Сервер"
 						}
 					},
 					"resetConfiguration": {
@@ -1934,47 +1394,11 @@
 							"commitHash": "Точный коммит",
 							"date": "Дата сборки"
 						}
-					},
-					"nonStableChannel": {
-						"title": "You are running a non-stable build of Stump",
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
-					}
-				},
-				"helpfulLinks": {
-					"title": "Helpful links",
-					"description": "Links to resources that may be helpful for managing your Stump server instance",
-					"links": {
-						"documentation": "Documentation",
-						"changelog": "Changelog"
 					}
 				},
 				"serverPublicUrl": {
 					"label": "Общедоступный URL",
 					"description": "URL, по которому сервер доступен извне вашей локальной сети, если применимо. Это даст доступ к пригласительным ссылкам и другим функциям"
-				},
-				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
-					"dropzone": "Drop an image or click to select",
-					"input": {
-						"label": "Emoji name",
-						"placeholder": "e.g. party_parrot"
-					},
-					"deleteModal": {
-						"title": "Delete emoji",
-						"description": "Are you sure you want to delete this emoji?"
-					},
-					"noCustomEmojis": "No custom emojis have been added yet",
-					"invalidName": "Please enter a valid name for your emoji",
-					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
-					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
-					"deleteError": "Failed to delete emoji"
 				}
 			}
 		},
@@ -2015,78 +1439,7 @@
 			"sections": {
 				"scheduling": {
 					"title": "Планирование",
-					"description": "Некоторые задачи могут быть настроены для запуска по расписанию. Изменения в этой конфигурации вступят в силу после перезапуска сервера",
-					"restartRequiredTitle": "Restart required",
-					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
-					"deleteScheduledJob": {
-						"title": "Delete scheduled job",
-						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-						"confirm": "Delete"
-					},
-					"dialog": {
-						"titleCreate": "New scheduled job",
-						"titleEdit": "Edit scheduled job",
-						"cancel": "Cancel",
-						"create": "Create",
-						"saveChanges": "Save changes"
-					},
-					"fields": {
-						"name": {
-							"label": "Name",
-							"placeholder": "e.g. \"Daily library scan\""
-						},
-						"schedule": {
-							"label": "Cron schedule",
-							"description": "A cron expression to define the frequency",
-							"placeholder": "0 0 0 * * *"
-						},
-						"schedulePreset": {
-							"label": "Preset",
-							"custom": "Custom",
-							"everySixHours": "Every 6 hours",
-							"everyTwelveHours": "Every 12 hours",
-							"dailyAtMidnight": "Daily at midnight",
-							"weeklySunday": "Weekly (Sunday)",
-							"monthlyFirst": "Monthly (1st)"
-						},
-						"kind": {
-							"label": "Job type",
-							"libraryScan": "Library Scan",
-							"metadataRetry": "Metadata Retry"
-						},
-						"libraryIds": {
-							"label": "Libraries to scan",
-							"description": "Leave empty to scan all libraries"
-						},
-						"statuses": {
-							"label": "Statuses to retry",
-							"description": "Which metadata fetch statuses should be retried",
-							"rateLimited": "Rate Limited",
-							"failed": "Failed"
-						},
-						"enabled": "Enabled"
-					},
-					"row": {
-						"enabled": "Enabled",
-						"disabled": "Disabled",
-						"allLibraries": "All libraries",
-						"rateLimited": "rate limited",
-						"lastRun": "Last run at {{date}}",
-						"edit": "Edit",
-						"delete": "Delete"
-					},
-					"toasts": {
-						"createSuccess": "Scheduled job created",
-						"createError": "Failed to create scheduled job",
-						"updateSuccess": "Scheduled job updated",
-						"updateError": "Failed to update scheduled job",
-						"deleteSuccess": "Scheduled job deleted",
-						"deleteError": "Failed to delete scheduled job"
-					},
-					"errors": {
-						"invalidCron": "Schedule must be a valid cron expression"
-					}
+					"description": "Некоторые задачи могут быть настроены для запуска по расписанию. Изменения в этой конфигурации вступят в силу после перезапуска сервера"
 				},
 				"history": {
 					"title": "История",
@@ -2103,13 +1456,6 @@
 						"emptyHeading": "Нет задач для отображения",
 						"emptySubtitle": "У вас не может быт задач, если у вас нет задач",
 						"deleteAllMessage": "История задач и статистика могут быть удалены из базы данных в любое время. Это действие не может быть отменено"
-					},
-					"deleteJobHistory": {
-						"title": "Delete job history",
-						"description": "Permanently delete all job history from the database",
-						"confirmText": "Are you sure you want to delete all job history?",
-						"confirm": "Delete",
-						"emptyState": "No jobs to clear"
 					}
 				}
 			}
@@ -2138,7 +1484,6 @@
 					"ageRestriction": {
 						"label": "Ограничение по возрасту",
 						"description": "Ограничивает доступ пользователя к содержимому выше установленного возрастного рейтинга",
-						"placeholder": "13",
 						"enforceUnset": {
 							"label": "Принудительно применять при отключении",
 							"description": "Если этот параметр включен, пользователи будут ограничены доступом к содержимому без возрастной оценки"
@@ -2151,17 +1496,6 @@
 					}
 				},
 				"permissions": {
-					"groups": {
-						"accountManagement": "Account",
-						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
-						"emailing": "Emailing",
-						"libraryManagement": "Library management",
-						"userManagement": "User management",
-						"serverManagement": "Server management",
-						"metadataManagement": "Metadata management"
-					},
 					"heading": "Права доступа",
 					"subtitle": [
 						"Выберите разрешения, которые вы хотите предоставить этому пользователю. Для получения дополнительной информации о том, что делает каждое разрешение, смотрите",
@@ -2287,19 +1621,11 @@
 				},
 				"createSubmitButton": "Создать пользователя",
 				"updateSubmitButton": "Обновить пользователя"
-			},
-			"loginActivity": {
-				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
-				}
 			}
 		},
 		"server/email": {
 			"helmet": "Настройки электронной почты",
 			"title": "Электронная почта",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
 			"sections": {
 				"emailers": {
 					"title": "SMTP модулей отправки",
@@ -2412,16 +1738,6 @@
 				"submit": {
 					"create": "Создать модуль отправки",
 					"update": "Обновить модуль отправки"
-				},
-				"testEmailer": {
-					"button": "Send test email",
-					"recipientLabel": "Test recipient",
-					"recipientDescription": "An email address to send the test email to",
-					"success": "Test email sent successfully",
-					"error": {
-						"title": "Failed to send test email",
-						"description": "Check your SMTP settings and try again"
-					}
 				}
 			},
 			"createEmailer": {
@@ -2433,118 +1749,6 @@
 				"helmet": "Обновить модуль отправки",
 				"title": "Обновить модуль отправки",
 				"description": "Обновить сведения об этом SMTP модуля отправки"
-			}
-		},
-		"server/metadataIntegrations": {
-			"helmet": "Metadata integrations",
-			"title": "Metadata integrations",
-			"addProvider": "Add provider",
-			"createProviderError": "Failed to create provider",
-			"updateProviderError": "Failed to update provider",
-			"noProviders": "No providers configured yet. Add one to get started",
-			"providers": {
-				"title": "Providers",
-				"description": "Configure external metadata providers to fetch and enrich your library data"
-			},
-			"providerForm": {
-				"apiToken": {
-					"label": "API token",
-					"description": "The API token for authenticating with this provider",
-					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"providerStatusError": "The provider responded with status {{status}}",
-					"providerError": "The provider responded with an error: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
-				},
-				"apiTokenExpiresAt": {
-					"label": "API token expiration",
-					"description": "The date when the API token will expire (optional)"
-				},
-				"enableProvider": {
-					"label": "Enable provider",
-					"description": "It will be used for fetching if enabled"
-				},
-				"autoApplyConfig": {
-					"enabled": {
-						"label": "Enable auto-apply",
-						"description": "Skip manual approval and apply likely matches"
-					},
-					"threshold": {
-						"label": "Confidence threshold",
-						"description": "Minimum confidence score (0-1) to auto-apply a match",
-						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
-					},
-					"strategy": {
-						"label": "Merge strategy",
-						"options": {
-							"FILL_GAPS": "Accept missing fields",
-							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
-							"PREFER_EXTERNAL": "Prefer external data"
-						}
-					}
-				}
-			},
-			"providerEnabled": "This provider is enabled",
-			"providerDisabled": "This provider is disabled",
-			"providerTokenExpiresSoon": "This provider's token will expire soon",
-			"autoApplyOn": "Auto-apply on",
-			"autoApplyOff": "Auto-apply off",
-			"editDialog": {
-				"tooltip": "Edit provider"
-			},
-			"deleteDialog": {
-				"title": "Delete provider",
-				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
-			}
-		},
-		"server/tags": {
-			"helmet": "Tag management",
-			"title": "Tags",
-			"description": "Create and manage tags for organizing your content",
-			"sections": {
-				"table": {
-					"title": "Tags",
-					"description": "All tags available on this server",
-					"empty": {
-						"title": "No tags",
-						"action": "Create your first tag to get started"
-					},
-					"columns": {
-						"name": "Name"
-					},
-					"actionMenu": {
-						"rename": "Rename"
-					}
-				},
-				"createTag": {
-					"trigger": "Create tag",
-					"modal": {
-						"heading": "Create new tag",
-						"description": "Tags can be assigned to books, series, and libraries",
-						"name": {
-							"label": "Name",
-							"placeholder": "Enter tag name"
-						},
-						"submit": "Create"
-					}
-				},
-				"renameTag": {
-					"modal": {
-						"heading": "Rename tag",
-						"description": "Change the name of this tag across all assigned items",
-						"name": {
-							"label": "Name",
-							"placeholder": "Enter new tag name"
-						},
-						"submit": "Rename"
-					}
-				},
-				"deleteTag": {
-					"title": "Delete tag",
-					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
-					"confirm": "Delete"
-				}
 			}
 		}
 	},
@@ -2668,45 +1872,18 @@
 	},
 	"common": {
 		"add": "Добавить",
-		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Отменить",
-		"clear": "Clear",
 		"confirm": "Подтвердить",
-		"created": "Created",
-		"delete": "Delete",
-		"deleteConfirmation": {
-			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
-			"confirm": "Delete {{type}}",
-			"typeToConfirm": "Type {{name}} to confirm:"
-		},
-		"experimentalDisclaimer": {
-			"title": "This feature is experimental",
-			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
-		},
-		"enter": "Enter",
 		"save": "Сохранить",
 		"send": "Отправить",
 		"saveChanges": "Сохранить изменения",
 		"noChanges": "Нет изменений",
 		"create": "Создать",
 		"edit": "Редактировать",
-		"info": "Info",
-		"infoSheetStats": {
-			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
-		},
 		"update": "Обновить",
 		"upload": "Загрузить",
 		"uploading": "Загрузка",
-		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "Эта функция еще не реализована! Проверьте позже",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
 		"limitedFunctionality": "Это еще не полностью реализовано, некоторые функции отсутствуют. Проверьте позже",
 		"logIn": "Войти",
 		"login": "Вход",
@@ -2717,838 +1894,11 @@
 		"notReady": "Эта функция еще не готова",
 		"notUsedYet": "Пока не используется",
 		"never": "Никогда",
-		"scan": "Сканирование",
-		"somethingWentWrong": "Something went wrong",
-		"back": "Back",
-		"continue": "Continue",
-		"book": "Book",
-		"series": "Series",
-		"fileUpload": {
-			"someRejected": "Some files were rejected. Please check the file types and try again",
-			"tooManyFiles": "You have selected too many files",
-			"noValidFiles": "No valid files were selected"
-		},
-		"unknownError": "An unknown error occurred"
-	},
-	"userPermissions": {
-		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
-		},
-		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
-		},
-		"ACCESS_KOREADER_SYNC": {
-			"label": "KoReader sync",
-			"description": "Allows the user to access the KoReader sync integration"
-		},
-		"ACCESS_KOBO_SYNC": {
-			"label": "Kobo sync",
-			"description": "Allows the user to access the Kobo sync integration"
-		},
-		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
-			"description": "Allows the user to access smart list features, including creating and managing smart lists"
-		},
-		"CHANGE_PASSWORD": {
-			"label": "Change password",
-			"description": "Allows the user to change their own password"
-		},
-		"CHANGE_USERNAME": {
-			"label": "Change username",
-			"description": "Allows the user to change their own username"
-		},
-		"CHANGE_AVATAR": {
-			"label": "Change avatar",
-			"description": "Allows the user to change their own avatar"
-		},
-		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
-			"description": "Allows the user to create new book clubs"
-		},
-		"CREATE_LIBRARY": {
-			"label": "Create libraries",
-			"description": "Allows the user to create new libraries"
-		},
-		"CREATE_NOTIFIER": {
-			"label": "Create notifiers",
-			"description": "Allows the user to create new notification systems"
-		},
-		"DELETE_LIBRARY": {
-			"label": "Delete libraries",
-			"description": "Allows the user to delete existing libraries"
-		},
-		"DELETE_NOTIFIER": {
-			"label": "Delete notifiers",
-			"description": "Allows the user to delete notification systems"
-		},
-		"DOWNLOAD_FILE": {
-			"label": "Download files",
-			"description": "Allows the user to download files from the server"
-		},
-		"EDIT_LIBRARY": {
-			"label": "Edit libraries",
-			"description": "Allows the user to modify existing libraries"
-		},
-		"EMAILER_CREATE": {
-			"label": "Create emailer",
-			"description": "Allows the user to create email configuration"
-		},
-		"EMAILER_MANAGE": {
-			"label": "Manage emailer",
-			"description": "Allows the user to manage email configuration and settings"
-		},
-		"EMAILER_READ": {
-			"label": "Read emailer",
-			"description": "Allows the user to view email configuration"
-		},
-		"EMAIL_ARBITRARY_SEND": {
-			"label": "Send arbitrary emails",
-			"description": "Allows the user to send custom emails to any address"
-		},
-		"EMAIL_SEND": {
-			"label": "Send emails",
-			"description": "Allows the user to send emails through the system"
-		},
-		"FILE_EXPLORER": {
-			"label": "File explorer",
-			"description": "Allows the user to browse and explore the server filesystem"
-		},
-		"MANAGE_LIBRARY": {
-			"label": "Manage libraries",
-			"description": "Allows the user to manage library settings and configuration"
-		},
-		"MANAGE_NOTIFIER": {
-			"label": "Manage notifiers",
-			"description": "Allows the user to manage notification system settings"
-		},
-		"MANAGE_SERVER": {
-			"label": "Manage server",
-			"description": "Allows the user to manage server configuration and settings"
-		},
-		"MANAGE_USERS": {
-			"label": "Manage users",
-			"description": "Allows the user to create, edit, and delete user accounts"
-		},
-		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
-		},
-		"READ_NOTIFIER": {
-			"label": "Read notifiers",
-			"description": "Allows the user to view notification system configuration"
-		},
-		"READ_PERSISTED_LOGS": {
-			"label": "Read persisted logs",
-			"description": "Allows the user to view stored system logs"
-		},
-		"READ_SYSTEM_LOGS": {
-			"label": "Read system logs",
-			"description": "Allows the user to view real-time system logs"
-		},
-		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
-		},
-		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
-			"description": "Allows the user to trigger library scans to discover new content"
-		},
-		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
-		},
-		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
-		},
-		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
-		},
-		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
-		},
-		"EDIT_THUMBNAILS": {
-			"label": "Edit thumbnails",
-			"description": "Allows the user to edit thumbnails for books and series"
-		},
-		"METADATA_PROVIDER_READ": {
-			"label": "Read metadata providers",
-			"description": "Allows the user to view configured external metadata providers"
-		},
-		"METADATA_PROVIDER_MANAGE": {
-			"label": "Manage metadata providers",
-			"description": "Allows the user to configure external metadata providers"
-		},
-		"METADATA_FETCH_RECORD_READ": {
-			"label": "Read metadata matches",
-			"description": "Allows the user to view metadata fetch results awaiting review"
-		},
-		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "Manage metadata matches",
-			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
-		}
+		"scan": "Сканирование"
 	},
 	"mobileApp": {
-		"addOrEditServer": {
-			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
-			},
-			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
-			},
-			"kind": "Kind",
-			"customHeaders": {
-				"label": "Custom Headers",
-				"addHeader": "Add header",
-				"invalidHeader": "Invalid header"
-			},
-			"auth": {
-				"label": "Auth",
-				"default": {
-					"label": "Login",
-					"description": "You will be prompted to login when accessing content as needed"
-				},
-				"token": {
-					"label": "Token",
-					"placeholder": "Raw Token"
-				},
-				"basic": "Basic"
-			},
-			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
-			"failedToConnect": "Failed to connect to server",
-			"didConnect": "Connected",
-			"checkConnection": "Check Connection",
-			"setAsDefaultServer": "Set as Default Server",
-			"enableOPDS": "Enable OPDS",
-			"validation": {
-				"nameAlreadyExists": "Name already exists",
-				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
-			}
-		},
-		"bookActions": {
-			"markAsRead": {
-				"label": "Mark as Read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
-				"failure": "Failed to mark book as read"
-			},
-			"clearProgress": {
-				"label": "Clear Progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
-				"failure": "Failed to delete current progress"
-			},
-			"deleteReadHistory": {
-				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
-				"failure": "Failed to delete read history"
-			},
-			"deleteBook": {
-				"label": "Delete Book",
-				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
-			},
-			"deleteDownload": {
-				"label": "Delete Download",
-				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
-			},
-			"goToLibrary": "Go to Library",
-			"goToSeries": "Go to Series",
-			"seeDetails": "See Details"
-		},
-		"bookMetadata": {
-			"ageRating": "Age Rating",
-			"downloadedAt": "Downloaded",
-			"characters": "Characters",
-			"format": "Format",
-			"genres": "Genres",
-			"language": "Language",
-			"publisher": "Publisher",
-			"size": "Size",
-			"volume": "Volume",
-			"writers": "Writers",
-			"colorists": "Colorists",
-			"inkers": "Inkers",
-			"letterers": "Letterers",
-			"coverArtists": "Cover Artists",
-			"links": "Links",
-			"year": "Year",
-			"identifier": "Identifier",
-			"identifiers": "Identifiers"
-		},
-		"common": {
-			"book": "Book",
-			"cancel": "Cancel",
-			"chapter": "Chapter",
-			"clear": "Clear",
-			"completed": "Completed",
-			"confirm": "Confirm",
-			"continue": "Continue",
-			"content": "Content",
-			"details": "Details",
-			"delete": "Delete",
-			"dismiss": "Dismiss",
-			"download": "Download",
-			"downloaded": "Downloaded",
-			"downloads": "Downloads",
-			"done": "Done",
-			"edit": "Edit",
-			"enabled": "Enabled",
-			"enable": "Enable",
-			"error": "Error",
-			"favorite": "Favorite",
-			"finished": "Finished",
-			"grid": "Grid",
-			"list": "List",
-			"lastCompleted": "Last Completed",
-			"name": "Name",
-			"none": "None",
-			"notAvailable": "Not Available",
-			"options": "Options",
-			"page": "Page",
-			"pages": "Pages",
-			"pageXOfY": "Page {{current}} of {{total}}",
-			"password": "Password",
-			"progress": "Progress",
-			"publication": "Publication",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
-			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
-			"save": "Save",
-			"select": "Select",
-			"settings": "Settings",
-			"servers": "Servers",
-			"thisBook": "this book",
-			"thisServer": "this server",
-			"unknown": "Unknown",
-			"unknownTitle": "Untitled",
-			"url": "URL",
-			"username": "Username",
-			"value": "Value",
-			"version": "Version"
-		},
-		"errors": {
-			"unknown": "Unknown error"
-		},
-		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
-		},
-		"formatSeriesPosition": {
-			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
-				"position": "{{position}} in {{seriesName}}"
-			},
-			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
-			},
-			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
-				"position": "#{{position}} in {{seriesName}}"
-			},
-			"unknownSeriesName": "series"
-		},
-		"emptyState": {
-			"noStumpServers": "No Stump servers added",
-			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No Servers Configured",
-			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation",
-			"noSmartLists": {
-				"label": "No lists returned",
-				"description": "Once created they will appear here"
-			}
-		},
-		"tabs": {
-			"servers": "Servers",
-			"localLibrary": "Library",
-			"settings": "Settings",
-			"home": "Home",
-			"browse": "Browse",
-			"clubs": "Clubs",
-			"search": "Search"
-		},
-		"localLibrary": {
-			"title": "Local Library",
-			"emptyState": {
-				"all": {
-					"title": "Nothing to Read Yet",
-					"description": "Once you have books for offline reading, they will appear here"
-				},
-				"imported": {
-					"title": "No Imported Books",
-					"description": "Import books to read them offline"
-				},
-				"server": {
-					"title": "No Downloaded Books",
-					"description": "Download books from your library to read them offline"
-				}
-			},
-			"downloadQueue": {
-				"downloading": "Downloading",
-				"failed": "Failed",
-				"nothingDownloading": "Nothing is being downloaded",
-				"noActiveDownloads": "No active downloads",
-				"noFailedDownloads": "No failed downloads",
-				"downloadStarting": "Starting..."
-			},
-			"downloadsHeaderMenu": {
-				"deleteAllDownloads": {
-					"label": "Delete Books",
-					"confirmation": "Are you sure you want to delete your local library?",
-					"disclaimer": "This action cannot be undone."
-				},
-				"seeProblems": "See Problems ({{problemCount}})",
-				"hideCurated": "Hide Curated",
-				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
-			},
-			"downloadsHeaderSortMenu": {
-				"sortBy": {
-					"NAME": "Name",
-					"ADDED_AT": "Date Added",
-					"SERIES": "Series"
-				},
-				"sortDirection": {
-					"ASC": "Ascending",
-					"DESC": "Descending"
-				},
-				"sortDirectionText": {
-					"ASC": "A → Z",
-					"DESC": "Z → A"
-				},
-				"sortDirectionDate": {
-					"ASC": "Oldest First",
-					"DESC": "Newest First"
-				},
-				"sourceFilter": {
-					"all": "All Books",
-					"server": "Downloaded",
-					"imported": "Imported"
-				}
-			},
-			"downloadProblemsSheet": {
-				"title": "Failed Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"retryAll": "Retry All",
-				"dismissAll": "Dismiss All"
-			}
-		},
-		"progressSync": {
-			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
-			},
-			"syncFailed": "Failed to sync offline progress"
-		},
-		"search": {
-			"label": "Search This Server",
-			"description": "Find specific content on this server",
-			"placeholder": "Search"
-		},
-		"settings": {
-			"preferences": {
-				"label": "Preferences",
-				"appTheme": {
-					"label": "Theme",
-					"options": {
-						"light": "Light",
-						"dark": "Dark"
-					}
-				},
-				"appPrimaryColor": {
-					"label": "Accent",
-					"options": {
-						"chromaScale": "Chroma Scale",
-						"hues": {
-							"red": "Red",
-							"orange": "Orange",
-							"amber": "Amber",
-							"yellow": "Yellow",
-							"lime": "Lime",
-							"green": "Green",
-							"emerald": "Emerald",
-							"teal": "Teal",
-							"cyan": "Cyan",
-							"sky": "Sky",
-							"blue": "Blue",
-							"indigo": "Indigo",
-							"violet": "Violet",
-							"purple": "Purple",
-							"fuchsia": "Fuchsia",
-							"pink": "Pink",
-							"rose": "Rose",
-							"slate": "Slate",
-							"gray": "Gray",
-							"zinc": "Zinc",
-							"neutral": "Neutral",
-							"stone": "Stone"
-						}
-					}
-				},
-				"appLanguage": "Language",
-				"defaultServer": "Default Server",
-				"thumbnailRatio": "Thumbnail Ratio",
-				"thumbnailPlaceholder": {
-					"label": "Thumbnail Placeholder",
-					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average Color",
-						"colorful": "Colorful",
-						"thumbhash": "Thumbhash"
-					}
-				},
-				"thumbnailResizeMode": {
-					"label": "Thumbnail Resize",
-					"options": {
-						"cover": "Cover",
-						"stretch": "Stretch",
-						"fit": "Fit"
-					}
-				}
-			},
-			"reading": {
-				"label": "Reading",
-				"preferNativePdf": "Prefer Native PDF",
-				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
-			},
-			"stump": {
-				"label": "Stump",
-				"description": "Stump features are optional and can be turned off if you do not need them",
-				"bookClubsEnabled": "Book Club Features"
-			},
-			"autoSyncLocalData": "Auto-Sync Local Data",
-			"textCase": {
-				"label": "Text Case",
-				"options": {
-					"lowerCase": "Lowercase",
-					"sentenceCase": "Sentence Case",
-					"titleCase": "Title Case"
-				}
-			},
-			"tintListBackground": "Tint List Backgrounds",
-			"management": {
-				"label": "Management",
-				"dataUsage": {
-					"label": "Data Usage",
-					"nonStumpData": "Non-Stump Data",
-					"serversTotal": "Servers Total",
-					"totalFiles": "Total Files",
-					"totalSize": "Total Size",
-					"deleteDownloads": {
-						"label": "Delete Downloads",
-						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
-						"deleteFailed": {
-							"title": "Deletion Failed",
-							"description": "There was an error deleting all downloads from {{serverName}}"
-						}
-					},
-					"noDownloads": "No downloaded files for this server",
-					"storedPreferences": {
-						"label": "Stored Preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc"
-					},
-					"clearPreferences": "Clear Preferences"
-				}
-			},
-			"debug": {
-				"label": "Debug",
-				"clearCache": {
-					"label": "Clear Cache",
-					"memory": {
-						"button": "Memory",
-						"success": "Memory Cache Cleared"
-					},
-					"disk": {
-						"button": "Disk",
-						"success": "Disk Cache Cleared"
-					}
-				},
-				"deleteDatabase": {
-					"label": "Delete Database",
-					"success": {
-						"title": "Database Deleted",
-						"description": "Please restart the app"
-					},
-					"error": {
-						"title": "Deletion Failed",
-						"description": "There was an error deleting the database"
-					}
-				},
-				"performanceMonitor": "Performance Monitor",
-				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
-				"displayLanguageKeys": {
-					"label": "Display Language Keys",
-					"options": {
-						"none": "None",
-						"abbreviated": "Abbreviated",
-						"full": "Full"
-					}
-				},
-				"debugAnalytics": {
-					"label": "Debug Analytics",
-					"description": "Send additional debug-related events to help troubleshoot issues"
-				}
-			},
-			"contactInfo": {
-				"label": "Contact",
-				"email": "Email",
-				"discord": "Discord",
-				"github": "GitHub"
-			},
-			"supportInfo": {
-				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
-			}
-		},
-		"stumpServer": {
-			"browse": {
-				"books": "Books",
-				"favorites": "Favorites",
-				"files": "Files",
-				"libraries": "Libraries",
-				"series": "Series",
-				"smartLists": "Smart Lists"
-			},
-			"continueReading": {
-				"label": "Continue Reading",
-				"emptyText": "No books in progress"
-			},
-			"onDeck": {
-				"label": "Your Next Read",
-				"emptyText": "No books on deck"
-			},
-			"recentlyAddedSeries": {
-				"label": "Recently Added Series",
-				"emptyText": "No recently added series"
-			},
-			"recentlyAddedBooks": {
-				"label": "Recently Added Books",
-				"emptyText": "No recently added books"
-			}
-		},
 		"readerSettings": {
-			"title": "Reader Settings",
-			"overrideGlobalSettings": "Override Global Settings",
-			"sections": {
-				"mode": "Mode",
-				"imageOptions": "Image Options",
-				"controls": "Controls"
-			},
-			"readingMode": {
-				"label": "Flow",
-				"options": {
-					"PAGED": "Paged",
-					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
-					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
-				}
-			},
-			"readingDirection": {
-				"label": "Direction",
-				"options": {
-					"RTL": "Right to left",
-					"LTR": "Left to right"
-				}
-			},
-			"doublePageBehavior": {
-				"label": "Double Paged",
-				"options": {
-					"always": "Always",
-					"auto": "Auto",
-					"off": "Off"
-				}
-			},
-			"separateSecondPage": "Separate Second Page",
-			"imageScaling": {
-				"label": "Scaling",
-				"options": {
-					"AUTO": "Auto",
-					"HEIGHT": "Fit Height",
-					"WIDTH": "Fit Width",
-					"NONE": "None"
-				}
-			},
-			"allowDownscaling": "Downscaling",
-			"tapSidesToNavigate": "Tap Sides to Navigate",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
-			"footerControls": {
-				"label": "Footer",
-				"options": {
-					"images": "Image Gallery",
-					"slider": "Slider"
-				}
-			},
-			"readingTimer": {
-				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
-			},
-			"allSettings": "All Settings"
-		},
-		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
-			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
-			},
-			"showCurrentChapter": "Show Current Chapter"
-		},
-		"annotationsSheet": {
-			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
-				"highlights": "Highlights",
-				"notes": "Notes"
-			}
-		},
-		"epubSettings": {
-			"title": "Epub Reader Settings",
-			"typeface": {
-				"label": "Typeface",
-				"options": {
-					"system": "System",
-					"opendyslexic": "OpenDyslexic",
-					"literata": "Literata",
-					"atkinsonHyperlegible": "Atkinson Hyperlegible",
-					"charisSIL": "Charis SIL",
-					"bitter": "Bitter"
-				}
-			},
-			"fontSize": "Font Size",
-			"fontWeight": {
-				"label": "Font Weight",
-				"options": {
-					"light": "Light",
-					"normal": "Normal",
-					"medium": "Medium",
-					"bold": "Bold"
-				}
-			},
-			"textNormalization": "Text Normalization",
-			"verticalText": "Vertical Text",
-			"readingDirection": {
-				"label": "Reading Direction",
-				"options": {
-					"rtl": "Right to left",
-					"ltr": "Left to right"
-				}
-			},
-			"columns": {
-				"label": "Columns",
-				"options": {
-					"auto": "Auto",
-					"single": "Single",
-					"double": "Double"
-				}
-			},
-			"pageMargins": "Page Margins",
-			"imageFilter": {
-				"label": "Image Filter",
-				"options": {
-					"none": "None",
-					"darken": "Darken",
-					"invert": "Invert"
-				}
-			},
-			"publisherStyles": "Publisher Styles",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
-			"textAlignment": {
-				"label": "Text Alignment",
-				"options": {
-					"start": "Start",
-					"left": "Left",
-					"center": "Center",
-					"right": "Right",
-					"justify": "Justify"
-				}
-			},
-			"typeScale": "Type Scale",
-			"lineHeight": "Line Height",
-			"paragraphIndent": "Paragraph Indent",
-			"paragraphSpacing": "Paragraph Spacing",
-			"wordSpacing": "Word Spacing",
-			"letterSpacing": "Letter Spacing",
-			"hyphens": "Hyphens",
-			"ligatures": "Ligatures",
-			"customizeTheme": {
-				"placeholder": "Theme name",
-				"background": "Background",
-				"text": "Text",
-				"highlight": "Highlight",
-				"premadeThemes": "Premade themes"
-			}
-		},
-		"libraryType": {
-			"BOOK": "Books",
-			"COMIC": "Comics",
-			"LIGHT_NOVEL": "Light Novels",
-			"MANGA": "Manga",
-			"MANHWA": "Manhwa",
-			"MIXED": "Mixed",
-			"WEBTOON": "Webtoons",
-			"WEB_NOVEL": "Web Novels"
-		},
-		"savedServerActions": {
-			"clearCache": "Clear Cache",
-			"discardTokens": {
-				"label": "Discard Tokens",
-				"description": "Affects login tokens only"
-			},
-			"deleteServer": {
-				"title": "Delete Server",
-				"confirmation": "Are you sure you want to delete {{serverName}}?"
-			}
-		},
-		"filtering": {
-			"notStarted": "Not Started",
-			"currentlyReading": "Currently Reading",
-			"finished": "Finished"
-		},
-		"sorting": {
-			"labelEllipsis": "Sort By...",
-			"sortField": {
-				"NAME": "Name",
-				"ADDED_AT": "Date Added",
-				"CREATED_AT": "Date Added",
-				"NUMBER": "Series Position",
-				"SERIES": "Series",
-				"YEAR": "Year Published"
-			},
-			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
-			},
-			"sortDirectionString": {
-				"ASC": "A → Z",
-				"DESC": "Z → A"
-			},
-			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
-			},
-			"sortDirectionNumber": {
-				"ASC": "1 → 10",
-				"DESC": "10 → 1"
-			}
-		},
-		"widgets": {
-			"readingNow": {
-				"nothingInProgress": "Nothing in Progress"
-			}
+			"title": "Reader Settings"
 		}
 	}
 }

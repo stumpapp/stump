@@ -59,9 +59,6 @@
 				"author": {
 					"label": "作者"
 				},
-				"isbn": {
-					"label": "ISBN"
-				},
 				"year": {
 					"label": "年份"
 				},
@@ -153,7 +150,6 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "显示名",
-					"placeholder": "oromei",
 					"description": "你在读书俱乐部中的可选显示名称。如果设置，它将优先于你的用户名"
 				},
 				"hideProgress": {
@@ -233,8 +229,7 @@
 		},
 		"members": {
 			"title": "成员",
-			"description": "管理此读书俱乐部的成员",
-			"sections": {}
+			"description": "管理此读书俱乐部的成员"
 		},
 		"roles": {
 			"title": "角色",
@@ -278,8 +273,7 @@
 			},
 			"path": {
 				"label": "路径",
-				"description": "您服务器上的书库路径",
-				"placeholder": "/path/to/library"
+				"description": "您服务器上的书库路径"
 			},
 			"description": {
 				"label": "描述",
@@ -710,9 +704,7 @@
 			"sections": {
 				"management": {
 					"heading": "管理缩略图",
-					"description": "管理此库现有的缩略图",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
+					"description": "管理此库现有的缩略图"
 				}
 			}
 		},
@@ -857,10 +849,6 @@
 			"editors": "编辑",
 			"format": "格式",
 			"identifierAmazon": "亚马逊 ID",
-			"identifierCalibre": "Calibre ID",
-			"identifierGoogle": "Google ID",
-			"identifierIsbn": "ISBN",
-			"identifierMobiAsin": "Mobi ASIN",
 			"identifierUuid": "书籍 UUID",
 			"genres": "流派",
 			"inkers": "印墨师",
@@ -1834,9 +1822,7 @@
 								"placeholder": "我的服务器"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "Stump 服务器的 URL",
-								"placeholder": "https://stump.example.com"
+								"description": "Stump 服务器的 URL"
 							}
 						}
 					},
@@ -1868,8 +1854,7 @@
 							"title": "切换到此服务器",
 							"description": "这将登出你当前的服务器",
 							"confirm": "切换到服务器",
-							"server": "服务器",
-							"uri": "URL"
+							"server": "服务器"
 						}
 					},
 					"resetConfiguration": {
@@ -2038,8 +2023,7 @@
 						},
 						"schedule": {
 							"label": "Cron 表达式",
-							"description": "使用 Cron 表达式定义执行频率",
-							"placeholder": "0 0 0 * * *"
+							"description": "使用 Cron 表达式定义执行频率"
 						},
 						"schedulePreset": {
 							"label": "预设",
@@ -2138,7 +2122,6 @@
 					"ageRestriction": {
 						"label": "年龄限制",
 						"description": "限制用户访问设定年龄分级阈值以上的内容",
-						"placeholder": "13",
 						"enforceUnset": {
 							"label": "在未设置时生效",
 							"description": "如果启用此选项，用户将被限制访问没有年龄评级的内容"
@@ -2677,8 +2660,7 @@
 		"deleteConfirmation": {
 			"title": "删除 {{type}}",
 			"description": "确定要删除此 {{type}} 吗？此操作不可撤销。",
-			"confirm": "删除 {{type}}",
-			"typeToConfirm": "Type {{name}} to confirm:"
+			"confirm": "删除 {{type}}"
 		},
 		"experimentalDisclaimer": {
 			"title": "该功能为实验性功能",
@@ -3029,7 +3011,6 @@
 			"thisServer": "此服务器",
 			"unknown": "未知",
 			"unknownTitle": "无标题",
-			"url": "URL",
 			"username": "用户名",
 			"value": "值",
 			"version": "版本"
@@ -3306,7 +3287,6 @@
 			"contactInfo": {
 				"label": "联系信息",
 				"email": "电子邮件",
-				"discord": "Discord",
 				"github": "Github"
 			},
 			"supportInfo": {
@@ -3420,12 +3400,7 @@
 			"typeface": {
 				"label": "字体",
 				"options": {
-					"system": "系统",
-					"opendyslexic": "OpenDyslexic",
-					"literata": "Literata",
-					"atkinsonHyperlegible": "Atkinson Hyperlegible",
-					"charisSIL": "Charis SIL",
-					"bitter": "Bitter"
+					"system": "系统"
 				}
 			},
 			"fontSize": "字号",
@@ -3539,15 +3514,6 @@
 			"sortDirectionDate": {
 				"ASC": "最早优先",
 				"DESC": "最新优先"
-			},
-			"sortDirectionNumber": {
-				"ASC": "1 → 10",
-				"DESC": "10 → 1"
-			}
-		},
-		"widgets": {
-			"readingNow": {
-				"nothingInProgress": "Nothing in Progress"
 			}
 		}
 	}

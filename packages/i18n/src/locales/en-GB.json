@@ -12,16 +12,6 @@
 			}
 		}
 	},
-	"createOrUpdateBookClubForm": {
-		"fields": {
-			"member_role_spec": {
-				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
-				]
-			}
-		}
-	},
 	"createBookClubScene": {
 		"form": {
 			"steps": [
@@ -51,16 +41,6 @@
 	"bookClubSettingsScene": {
 		"roles": {
 			"description": "Customise the roles in this book club"
-		},
-		"danger-zone/delete": {
-			"sections": {
-				"deleteClub": {
-					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
 		}
 	},
 	"createOrUpdateLibraryForm": {
@@ -74,13 +54,7 @@
 			"libraryPattern": {
 				"section": {
 					"heading": "Organisation",
-					"description": "Identify which pattern most closely matches the organisation of your library",
-					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
-					]
+					"description": "Identify which pattern most closely matches the organisation of your library"
 				},
 				"options": {
 					"description": "The setting which determines how Stump will organise your library"
@@ -90,42 +64,11 @@
 	},
 	"createLibraryScene": {
 		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
-				},
-				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
-				},
-				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
-				}
-			],
 			"review": {
 				"labels": {
 					"processThumbnailColors": "Process thumbnail colours"
 				}
 			}
-		}
-	},
-	"fileExplorer": {
-		"uploadModal": {
-			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
-			]
 		}
 	},
 	"librarySettingsScene": {
@@ -149,16 +92,6 @@
 					"heading": "Analyse books",
 					"description": "Analyse the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
 					"analyzeButton": "Analyse books"
-				}
-			}
-		},
-		"danger-zone/delete": {
-			"sections": {
-				"deleteLibrary": {
-					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
-					]
 				}
 			}
 		}
@@ -186,27 +119,6 @@
 			}
 		}
 	},
-	"createSmartListScene": {
-		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
-				},
-				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
-				}
-			]
-		}
-	},
 	"createOrUpdateApiKey": {
 		"validation": {
 			"futureDate": "Expiry date must be in the future"
@@ -219,18 +131,6 @@
 	},
 	"userSmartListsScene": {
 		"subtitle": "Your favourite searches and filters saved for easy access"
-	},
-	"smartListSettingsScene": {
-		"danger-zone/delete": {
-			"sections": {
-				"deleteList": {
-					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
-		}
 	},
 	"settingsScene": {
 		"app/account": {
@@ -247,12 +147,6 @@
 		"app/preferences": {
 			"description": "Customise the look and feel of the application",
 			"sections": {
-				"themeSelect": {
-					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
-					]
-				},
 				"fontSelect": {
 					"description": "Customise the font used in the application"
 				},
@@ -300,31 +194,9 @@
 						}
 					},
 					"resetConfiguration": {
-						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
-						],
 						"confirmation": {
 							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialisation process"
 						}
-					},
-					"resetTokens": {
-						"description": [
-							"Remove all securely-stored tokens for your servers, including API keys",
-							"You will have to re-authenticate with and/or re-configure each server"
-						]
-					}
-				}
-			}
-		},
-		"server/general": {
-			"sections": {
-				"serverInfo": {
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
 					}
 				}
 			}
@@ -336,22 +208,6 @@
 				}
 			}
 		},
-		"server/users": {
-			"createOrUpdateForm": {
-				"accessControl": {
-					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
-					]
-				},
-				"permissions": {
-					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
-					]
-				}
-			}
-		},
 		"server/metadataIntegrations": {
 			"providerForm": {
 				"apiTokenExpiresAt": {
@@ -359,13 +215,6 @@
 				}
 			}
 		}
-	},
-	"serverStatusOverlay": {
-		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
-		]
 	},
 	"mobileApp": {
 		"addOrEditServer": {

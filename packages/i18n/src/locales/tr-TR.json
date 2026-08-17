@@ -1183,13 +1183,6 @@
 					"errors": {
 						"updateFailed": "Profilinizi güncellerken bir sunucu hatası oluştu. Lütfen tekrar deneyin."
 					}
-				},
-				"locale": {
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
 				}
 			}
 		},
@@ -1197,12 +1190,6 @@
 			"helmet": "Appearance",
 			"title": "Appearance",
 			"sections": {
-				"themeSelect": {
-					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
-					]
-				},
 				"fontSelect": {
 					"label": "Yazı Tipi"
 				},
@@ -1399,17 +1386,7 @@
 		},
 		"server/general": {
 			"helmet": "General server settings",
-			"title": "General settings",
-			"sections": {
-				"serverInfo": {
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
-					}
-				}
-			}
+			"title": "General settings"
 		},
 		"server/jobs": {
 			"sections": {
@@ -1535,13 +1512,6 @@
 		"libraryOptions": {
 			"manageLibrary": "Manage"
 		}
-	},
-	"serverStatusOverlay": {
-		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
-		]
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail"

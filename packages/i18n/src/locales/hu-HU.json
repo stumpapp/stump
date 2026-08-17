@@ -479,15 +479,7 @@
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"sections": {
-				"deleteLibrary": {
-					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
+			"title": "Deletion Actions"
 		}
 	},
 	"errorScene": {
@@ -553,27 +545,6 @@
 					}
 				}
 			}
-		}
-	},
-	"createSmartListScene": {
-		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
-				},
-				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
-				}
-			]
 		}
 	},
 	"userSmartListsScene": {
@@ -732,38 +703,13 @@
 				"general": "General"
 			}
 		},
-		"app/account": {
-			"sections": {
-				"locale": {
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
-				}
-			}
-		},
 		"app/preferences": {
 			"helmet": "Appearance",
-			"title": "Appearance",
-			"sections": {
-				"themeSelect": {
-					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
-					]
-				}
-			}
+			"title": "Appearance"
 		},
 		"app/desktop": {
 			"sections": {
 				"configuredServers": {
-					"resetConfiguration": {
-						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
-						]
-					},
 					"resetTokens": {
 						"label": "Clear authentication",
 						"description": [
@@ -782,17 +728,7 @@
 		},
 		"server/general": {
 			"helmet": "General server settings",
-			"title": "General settings",
-			"sections": {
-				"serverInfo": {
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
-					}
-				}
-			}
+			"title": "General settings"
 		},
 		"server/jobs": {
 			"sections": {
@@ -804,17 +740,7 @@
 		},
 		"server/users": {
 			"createOrUpdateForm": {
-				"accessControl": {
-					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
-					]
-				},
 				"permissions": {
-					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
-					],
 					"file": {
 						"explorer": {
 							"label": "File Explorer",
@@ -862,13 +788,6 @@
 			"scanLibrary": "Szkennelés",
 			"manageLibrary": "Manage"
 		}
-	},
-	"serverStatusOverlay": {
-		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
-		]
 	},
 	"thumbnailDropdown": {
 		"label": "Bélyegkép kiválasztása"

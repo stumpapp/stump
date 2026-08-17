@@ -1392,12 +1392,6 @@
 							"commitHash": "Přesná revize",
 							"date": "Datum sestavení"
 						}
-					},
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
 					}
 				},
 				"serverPublicUrl": {

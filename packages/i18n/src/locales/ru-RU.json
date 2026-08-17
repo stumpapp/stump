@@ -1394,12 +1394,6 @@
 							"commitHash": "Точный коммит",
 							"date": "Дата сборки"
 						}
-					},
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
 					}
 				},
 				"serverPublicUrl": {

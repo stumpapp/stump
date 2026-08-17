@@ -143,70 +143,13 @@
 			"submit": "创建读书俱乐部"
 		}
 	},
-	"bookClubSettingsScene": {
-		"danger-zone/delete": {
-			"sections": {
-				"deleteClub": {
-					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
-		}
-	},
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"libraryPattern": {
-				"section": {
-					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
-					]
-				}
-			}
-		}
-	},
 	"createLibraryScene": {
 		"heading": "创建库",
 		"subtitleLink": "相关文档",
 		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
-				},
-				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
-				},
-				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
-				}
-			],
 			"buttons": {
 				"confirm": "新建书库"
 			}
-		}
-	},
-	"fileExplorer": {
-		"uploadModal": {
-			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
-			]
 		}
 	},
 	"librarySettingsScene": {
@@ -232,15 +175,7 @@
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"sections": {
-				"deleteLibrary": {
-					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
+			"title": "Deletion Actions"
 		}
 	},
 	"errorScene": {
@@ -266,27 +201,6 @@
 			"downloadSeries": "下载系列"
 		}
 	},
-	"createSmartListScene": {
-		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
-				},
-				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
-				}
-			]
-		}
-	},
 	"userSmartListsScene": {
 		"heading": "智能清单",
 		"subtitle": "保存您喜欢的搜索和过滤器以便于访问",
@@ -308,18 +222,6 @@
 						"library": "库"
 					},
 					"matches": "匹配项"
-				}
-			}
-		}
-	},
-	"smartListSettingsScene": {
-		"danger-zone/delete": {
-			"sections": {
-				"deleteList": {
-					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
-					]
 				}
 			}
 		}
@@ -455,10 +357,6 @@
 			"sections": {
 				"themeSelect": {
 					"label": "主题",
-					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
-					],
 					"options": {
 						"light": "亮色",
 						"dark": "深色",
@@ -493,12 +391,6 @@
 			"description": "Stump 桌面应用程序相关设置",
 			"sections": {
 				"configuredServers": {
-					"resetConfiguration": {
-						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
-						]
-					},
 					"resetTokens": {
 						"label": "Clear authentication",
 						"description": [
@@ -534,12 +426,6 @@
 							"commitHash": "确切提交",
 							"date": "编译日期"
 						}
-					},
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
 					}
 				}
 			}

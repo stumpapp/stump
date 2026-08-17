@@ -23,103 +23,8 @@
 			}
 		}
 	},
-	"createOrUpdateBookClubForm": {
-		"fields": {
-			"member_role_spec": {
-				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
-				]
-			}
-		}
-	},
-	"createBookClubScene": {
-		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
-				},
-				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
-				},
-				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
-				}
-			]
-		}
-	},
-	"bookClubSettingsScene": {
-		"danger-zone/delete": {
-			"sections": {
-				"deleteClub": {
-					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
-		}
-	},
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"libraryPattern": {
-				"section": {
-					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
-					]
-				}
-			}
-		}
-	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
-				},
-				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
-				},
-				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
-				}
-			]
-		}
-	},
-	"fileExplorer": {
-		"uploadModal": {
-			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
-			]
-		}
+		"heading": "Create New Library"
 	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
@@ -143,48 +48,7 @@
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"sections": {
-				"deleteLibrary": {
-					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
-		}
-	},
-	"createSmartListScene": {
-		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
-				},
-				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
-				}
-			]
-		}
-	},
-	"smartListSettingsScene": {
-		"danger-zone/delete": {
-			"sections": {
-				"deleteList": {
-					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
-					]
-				}
-			}
+			"title": "Deletion Actions"
 		}
 	},
 	"userSmartListScene": {
@@ -200,17 +64,6 @@
 		"sidebar": {
 			"management": {
 				"general": "General"
-			}
-		},
-		"app/account": {
-			"sections": {
-				"locale": {
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
-				}
 			}
 		},
 		"app/preferences": {
@@ -424,12 +277,6 @@
 		"app/desktop": {
 			"sections": {
 				"configuredServers": {
-					"resetConfiguration": {
-						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
-						]
-					},
 					"resetTokens": {
 						"label": "Clear authentication",
 						"description": [
@@ -448,17 +295,7 @@
 		},
 		"server/general": {
 			"helmet": "General server settings",
-			"title": "General settings",
-			"sections": {
-				"serverInfo": {
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
-					}
-				}
-			}
+			"title": "General settings"
 		},
 		"server/jobs": {
 			"sections": {
@@ -470,17 +307,7 @@
 		},
 		"server/users": {
 			"createOrUpdateForm": {
-				"accessControl": {
-					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
-					]
-				},
 				"permissions": {
-					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
-					],
 					"file": {
 						"explorer": {
 							"label": "File Explorer",
@@ -505,13 +332,6 @@
 		"libraryOptions": {
 			"manageLibrary": "Manage"
 		}
-	},
-	"serverStatusOverlay": {
-		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
-		]
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail"

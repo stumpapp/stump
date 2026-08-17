@@ -1187,12 +1187,6 @@
 					"label": "サーバーの設定",
 					"description": "接続できるStumpサーバーのリスト",
 					"getStarted": "開始するサーバーを追加します",
-					"resetConfiguration": {
-						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
-						]
-					},
 					"resetTokens": {
 						"label": "Clear authentication",
 						"description": [
@@ -1211,17 +1205,7 @@
 		},
 		"server/general": {
 			"helmet": "General server settings",
-			"title": "General settings",
-			"sections": {
-				"serverInfo": {
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
-					}
-				}
-			}
+			"title": "General settings"
 		},
 		"server/jobs": {
 			"sections": {
@@ -1233,17 +1217,7 @@
 		},
 		"server/users": {
 			"createOrUpdateForm": {
-				"accessControl": {
-					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
-					]
-				},
 				"permissions": {
-					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
-					],
 					"bookclub": {
 						"label": "読書クラブ",
 						"read": {
@@ -1284,13 +1258,6 @@
 			"fileExplorer": "ファイル",
 			"manageLibrary": "Manage"
 		}
-	},
-	"serverStatusOverlay": {
-		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
-		]
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail"

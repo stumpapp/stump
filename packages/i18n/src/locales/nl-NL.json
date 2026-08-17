@@ -207,16 +207,6 @@
 				"enableSwitch": {
 					"label": "Ingeschakeld"
 				}
-			},
-			"libraryPattern": {
-				"section": {
-					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
-					]
-				}
 			}
 		}
 	},
@@ -224,28 +214,6 @@
 		"heading": "Create New Library",
 		"subtitleLink": "relevante documentatie",
 		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
-				},
-				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
-				},
-				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
-				}
-			],
 			"review": {
 				"yes": "Ja",
 				"none": "Geen",
@@ -259,15 +227,6 @@
 			"buttons": {
 				"confirm": "Bibliotheek creëren"
 			}
-		}
-	},
-	"fileExplorer": {
-		"uploadModal": {
-			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
-			]
 		}
 	},
 	"librarySettingsScene": {
@@ -344,12 +303,6 @@
 					"confirmation": {
 						"label": "Bibliotheek opschonen"
 					}
-				},
-				"deleteLibrary": {
-					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
-					]
 				}
 			}
 		}
@@ -461,23 +414,6 @@
 	},
 	"createSmartListScene": {
 		"form": {
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
-				},
-				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
-				}
-			],
 			"review": {
 				"yes": "Ja",
 				"no": "Nee",
@@ -527,16 +463,6 @@
 		"sidebar": {
 			"configuration": {
 				"label": "Configuratie"
-			}
-		},
-		"danger-zone/delete": {
-			"sections": {
-				"deleteList": {
-					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
-					]
-				}
 			}
 		}
 	},
@@ -620,17 +546,6 @@
 				"general": "General"
 			}
 		},
-		"app/account": {
-			"sections": {
-				"locale": {
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
-				}
-			}
-		},
 		"app/preferences": {
 			"helmet": "Appearance",
 			"title": "Appearance",
@@ -695,12 +610,6 @@
 			"description": "Instellingen gerelateerd aan de Stump desktop applicatie",
 			"sections": {
 				"configuredServers": {
-					"resetConfiguration": {
-						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
-						]
-					},
 					"resetTokens": {
 						"label": "Clear authentication",
 						"description": [
@@ -736,12 +645,6 @@
 							"commitHash": "Exacte commit",
 							"date": "Build-datum"
 						}
-					},
-					"nonStableChannel": {
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
 					}
 				},
 				"serverPublicUrl": {
@@ -762,17 +665,7 @@
 		},
 		"server/users": {
 			"createOrUpdateForm": {
-				"accessControl": {
-					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
-					]
-				},
 				"permissions": {
-					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
-					],
 					"file": {
 						"explorer": {
 							"label": "File Explorer",

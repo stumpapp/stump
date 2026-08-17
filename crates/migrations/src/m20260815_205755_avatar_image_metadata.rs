@@ -1,3 +1,4 @@
+use sea_orm::{prelude::DateTimeWithTimeZone, sqlx::types::chrono::Utc, Statement};
 use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
@@ -28,7 +29,18 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		// TODO: backfill those with existing as avatar_updated_at = now so we sync on app correctly
+		let now: DateTimeWithTimeZone = Utc::now().into();
+		let conn = manager.get_connection();
+
+		conn.execute(Statement::from_sql_and_values(
+			conn.get_database_backend(),
+			r#"
+				UPDATE users SET avatar_updated_at = ?
+				WHERE avatar_path IS NOT NULL
+			"#,
+			vec![now.into()],
+		))
+		.await?;
 
 		Ok(())
 	}

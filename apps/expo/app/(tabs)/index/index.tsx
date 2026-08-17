@@ -100,6 +100,7 @@ export default function Screen() {
 		async (server: CreateServer) => {
 			if (editingServer) {
 				setEditingServer(null)
+				// not overly ideal, but otherwise edit will undo the avatar
 				await updateServer(editingServer.id, { ...server, avatar: editingServer.avatar })
 			}
 		},

@@ -61,10 +61,7 @@ export function useSyncServerAvatars() {
 	useEffect(() => {
 		const unsyncedItems = autoSyncableServers.difference(lastSyncedSet.current)
 		if (unsyncedItems.size) {
-			console.log('syncing the following', Array.from(unsyncedItems))
 			syncServerLogos(Array.from(unsyncedItems))
-		} else {
-			console.log('did not sync anything')
 		}
 	}, [autoSyncableServers, syncServerLogos])
 }

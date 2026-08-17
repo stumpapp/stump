@@ -64,8 +64,6 @@ async function identifyFromServerHeader(serverHeader: string): Promise<KnownServ
 		return 'codex'
 	}
 
-	console.log('serverHeader', serverHeader)
-
 	return null
 }
 
@@ -87,7 +85,6 @@ async function fetchCatalogAuthor(server: SavedServer, api: Api) {
 	if (opdsVersion === 1) {
 		const catalog = await api.opdsLegacy.feed(server.url)
 		author = catalog.author?.name?.toLowerCase() || null
-		console.log('opds 1.2 author', author)
 	} else {
 		const catalog = await api.opds.feed(server.url)
 		author = match(catalog.metadata.author)
@@ -116,21 +113,6 @@ async function identifyServer(server: SavedServer, api: Api): Promise<KnownServe
 
 	return null
 }
-
-// stump servers = user avatar OR stump logo (if no avatar set)
-// other servers = server logo if can ident
-// ^ because of this, i think the language here is a little misleading "pull avatar"
-// but fine for now until i have more thinking space. it's weird because
-// really only stump will pull avatars, the rest is just using baked-in logos
-// depending on identification. this also means storage in sqlite needs consideration,
-// because no point pointing to uri if it is a baked-in asset
-// perhaps it just needs to be something like:
-// type ServerAvatar = { uri: string; metadata: json } | { serverLogo: 'codex' | 'kavita' | 'komga' | 'opds' }
-// omg coming back to this i forgot servers aren't sqlite lol hmm that's fine
-// ^ re above, i looked into it because i do love the dx of just writing sqlite everywhere and found it a bit
-// stinky to return my brain back to json-based storage patterns. but, mmkv is a good amount more performant than
-// sqlite for simple things, so for now will leave servers in it.
-
 
 export async function pullServerAvatar(server: SavedServer, api: Api) {
 	let avatarData: ServerAvatar | null = null

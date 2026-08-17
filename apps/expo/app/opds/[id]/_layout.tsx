@@ -54,19 +54,16 @@ function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 		}
 	}, [error, isAuthPending, onUnauthenticatedResponse])
 
-	// TODO: i don't think every time we enter until success is necessarily correct,
-	// but fine for testing
-	// for stump specifically i think we can repull based on changes to avatar metadata?
-	// hypothetically that would be a decent indicator of whether it changed. can also
-	// just add an updated stamp e.g. avatar_updated_at and use that idk
-	const didPullLogo = useRef(false)
+	// it isn't overly ideal to sync until failure, but i think it's also largely
+	// fine. it's a tiny operation
+	const didSyncLogo = useRef(false)
 	useEffect(() => {
-		if (error || isAuthPending || didPullLogo.current) return
+		if (error || isAuthPending || didSyncLogo.current) return
 		if (activeServer.avatar) return
 
 		async function pullLogo() {
 			await pullServerAvatar(activeServer, sdk)
-			didPullLogo.current = true
+			didSyncLogo.current = true
 		}
 
 		pullLogo()

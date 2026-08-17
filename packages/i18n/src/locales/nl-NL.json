@@ -1,833 +1,833 @@
 {
-	"underConstruction": {
-		"heading": "Dit is ongemakkelijk",
-		"message": "Je stuitte op een pagina die nog wordt ontwikkeld. Ik zou het graag aan je laten zien, maar het is nog niet helemaal klaar.",
-		"homeLink": "Ga naar start",
-		"githubLink": "Bekijk de GitHub issue"
-	},
-	"authScene": {
-		"claimHeading": "Initialiseer je server",
-		"claimText": "Deze Stump-server is nog niet ingesteld. Gebruik het onderstaande formulier om je account aan te maken. Zodra je dat hebt gedaan, heb je volledige toegang tot alle functies van de server.",
-		"form": {
-			"validation": {
-				"missingUsername": "Gebruikersnaam is vereist",
-				"missingPassword": "Wachtwoord is vereist",
-				"usernameAlreadyExists": "Gebruikersnaam bestaat al"
-			},
-			"labels": {
-				"username": "Gebruikersnaam",
-				"password": "Wachtwoord"
-			},
-			"buttons": {
-				"createAccount": "Account aanmaken",
-				"loginWithOidc": "Log in met OIDC",
-				"createAccountWithOidc": "Account aanmaken met OIDC"
-			}
-		},
-		"toasts": {
-			"loggingIn": "Inloggen...",
-			"loggedIn": "Welkom terug!",
-			"loggedInFirstTime": "Welkom!",
-			"registering": "Registreren...",
-			"registered": "Geregistreerd!",
-			"loginFailed": "Inloggen mislukt. Probeer het nog een keer",
-			"registrationFailed": "Registratie mislukt. Probeer het nog een keer"
-		}
-	},
-	"adminLibrarySidebar": {
-		"libraryConfiguration": {
-			"heading": "Bibliotheek instellingen",
-			"subtitleCreating": "Een voorbeeld van uw nieuwe bibliotheek wordt hieronder weergegeven",
-			"subtitleEditing": "Een voorbeeld van uw wijzigingen aan de bibliotheek worden hieronder weergegeven"
-		}
-	},
-	"bookOverviewScene": {
-		"fileInformation": {
-			"heading": "Bestand informatie",
-			"labels": {
-				"fileSize": "Bestandsgrootte",
-				"fileType": "Bestandstype",
-				"fileLocation": "Bestandslocatie"
-			}
-		},
-		"emailBook": {
-			"heading": "E-mail dit boek",
-			"description": "Stuur dit boek naar een apparaat of e-mailadres",
-			"form": {
-				"email": {
-					"label": "E-mail",
-					"placeholder": "E-mail adres",
-					"description": "Een e-mailadres om het boek naar te verzenden. Klik op toevoegen om elke invoer af te ronden"
-				},
-				"devices": {
-					"label": "Apparaten",
-					"placeholder": "Selecteer apparaten",
-					"noFilterMatch": "Geen apparaten die overeenkomen met de filter"
-				}
-			}
-		},
-		"nextInSeries": "Volgende in serie"
-	},
-	"createOrUpdateBookClubForm": {
-		"fields": {
-			"name": {
-				"label": "Naam",
-				"placeholder": "Mijn boekenclub",
-				"description": "De naam van jouw boekenclub"
-			},
-			"description": {
-				"label": "Omschrijving",
-				"description": "Een korte, optionele beschrijving van je boekenclub"
-			},
-			"is_private": {
-				"label": "Privéclub",
-				"description": "Als je dit aanzet, kunnen alleen mensen die jij uitnodigt lid worden van je boekenclub"
-			},
-			"member_role_spec": {
-				"heading": "Aangepaste roltoewijzing",
-				"subtitle": [
-					"Je kunt zelf namen verzinnen voor de rollen in je boekenclub als je dat leuk vindt. Voor meer info kun je kijken bij de",
-					"documentatie"
-				],
-				"member": {
-					"label": "Gebruiker",
-					"placeholder": "Gebruiker",
-					"description": "De naam van de standaardrol voor je boekenclub"
-				},
-				"moderator": {
-					"description": "De naam van de moderatorrol voor je boekenclub"
-				},
-				"admin": {
-					"label": "Beheerder",
-					"placeholder": "Beheerder",
-					"description": "De naam van de administrator voor je boekenclub"
-				},
-				"creator": {
-					"description": "De naam van de rol voor degene die je boekenclub heeft aangemaakt. Dit ben jij!"
-				}
-			},
-			"membershipOptions": {
-				"displayName": {
-					"label": "Toon naam",
-					"description": "Een optionele bijnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam"
-				},
-				"hideProgress": {
-					"label": "Verberg voortgang",
-					"description": "Indien dit is ingeschakeld wordt je leesvoortgang verborgen voor andere leden van de boekenclub"
-				}
-			}
-		},
-		"validation": {
-			"missingName": "Naam is verplicht",
-			"alreadyTaken": "Is al in gebruik"
-		}
-	},
-	"createBookClubScene": {
-		"heading": "Maak een nieuwe boekenclub",
-		"subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server kan deelnemen",
-		"form": {
-			"stepLabel": "Stap",
-			"steps": [
-				{
-					"label": "Basics",
-					"heading": "Basisinformatie",
-					"description": "The details of the club, including its name and description"
-				},
-				{
-					"label": "Rollen",
-					"heading": "Rollen",
-					"description": "De rollen in je boekenclub aanpassen"
-				},
-				{
-					"label": "Lidmaatschap",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
-				},
-				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
-				}
-			],
-			"review": {
-				"yes": "Ja",
-				"none": "Geen",
-				"labels": {
-					"name": "Naam",
-					"description": "Omschrijving"
-				}
-			},
-			"submit": "Maak een boekenclub"
-		}
-	},
-	"bookClubSettingsScene": {
-		"sidebar": {
-			"members": {
-				"members": "Gebruikers"
-			},
-			"scheduling": {
-				"options": "Opties"
-			},
-			"danger-zone": {
-				"label": "Gevarenzone"
-			}
-		},
-		"members": {
-			"title": "Gebruikers"
-		},
-		"scheduling/scheduler": {
-			"description": ""
-		},
-		"danger-zone/delete": {
-			"sections": {
-				"deleteClub": {
-					"description": [
-						"Verwijder permanent deze boekenclub en alle inhoud ervan.",
-						"This action cannot be undone"
-					]
-				}
-			}
-		}
-	},
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"name": {
-				"label": "Naam",
-				"placeholder": "Mijn bibliotheek"
-			},
-			"readingSettings": {
-				"section": {
-					"heading": "Leesinstellingen"
-				},
-				"imageScaling": {
-					"label": "Afbeelding schalen"
-				}
-			},
-			"thumbnailConfig": {
-				"enableSwitch": {
-					"label": "Ingeschakeld"
-				}
-			}
-		}
-	},
-	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitleLink": "relevante documentatie",
-		"form": {
-			"review": {
-				"yes": "Ja",
-				"none": "Geen",
-				"labels": {
-					"format": "Formaat",
-					"quality": "Kwaliteit",
-					"name": "Naam",
-					"description": "Omschrijving"
-				}
-			},
-			"buttons": {
-				"confirm": "Bibliotheek creëren"
-			}
-		}
-	},
-	"librarySettingsScene": {
-		"heading": "Manage Library",
-		"subtitleLink": "relevante documentatie",
-		"sidebar": {
-			"configuration": {
-				"general": "Algemeen",
-				"reading": "Lezen",
-				"scanning": "Scannen",
-				"label": "Opties"
-			},
-			"integrations": {
-				"label": "Integraties",
-				"analysis": "Analyse"
-			}
-		},
-		"options/scanning": {
-			"sections": {
-				"history": {
-					"inspector": {
-						"fields": {
-							"library": "Bibliotheek",
-							"date": "Datum"
-						}
-					},
-					"table": {
-						"columns": {
-							"config": "Configuratie"
-						},
-						"default": "Standaard",
-						"custom": "Aangepast"
-					}
-				}
-			}
-		},
-		"options/thumbnails": {
-			"sections": {
-				"management": {
-					"heading": "Management"
-				}
-			}
-		},
-		"integrations/analysis": {
-			"sections": {
-				"analyzeBooks": {
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
-				},
-				"missingFiles": {
-					"heading": "Ontbrekende bestanden"
-				}
-			}
-		},
-		"integrations/metadata": {
-			"description": "Beheer en controleer de metadata overeenkomsten voor deze bibliotheek",
-			"sections": {
-				"fetchMetadata": {
-					"heading": "Metadata ophalen",
-					"description": "Metadata voor de media in deze bibliotheek ophalen",
-					"noProviders": {
-						"title": "Er zijn geen metadata aanbieders beschikbaar",
-						"description": "U kunt metadata aanbieders configureren in de metadata integratie instellingen"
-					},
-					"fetchButton": "Start ophalen in achtergrond",
-					"fetchError": "Ophalen van metadata mislukt"
-				}
-			}
-		},
-		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"sections": {
-				"cleanLibrary": {
-					"heading": "Bibliotheek opschonen",
-					"confirmation": {
-						"label": "Bibliotheek opschonen"
-					}
-				}
-			}
-		}
-	},
-	"errorScene": {
-		"message": "Er is een fout opgetreden:",
-		"buttons": {
-			"report": "Fout melden",
-			"copy": "Kopieer foutgegevens",
-			"goHome": "Ga naar start"
-		}
-	},
-	"homeScene": {
-		"recentlyAddedSeries": {
-			"emptyState": {
-				"heading": "Geen series om weer te geven",
-				"message": "Alle series die je toevoegt aan je bibliotheken worden hier weergegeven"
-			}
-		}
-	},
-	"metadataMatching": {
-		"section": {
-			"heading": "Afwachtende overeenkomsten",
-			"description": "Overeenkomsten met metadata van externe aanbieders controleren"
-		},
-		"confidenceBadge": {
-			"label": "Vertrouwensniveau"
-		},
-		"includeField": "Voeg dit veld toe",
-		"excludeField": "Dit veld uitsluiten",
-		"fieldLocked": "Dit veld is vergrendeld",
-		"reviewDialog": {
-			"previewEditor": {
-				"noComparableFields": "Geen vergelijkbare velden gevonden",
-				"headers": {
-					"field": "Veld",
-					"current": "Huidige",
-					"external": "Extern",
-					"resolved": "Opgelost"
-				},
-				"toolbar": {
-					"candidatePosition": "Kandidaat {{position}} van {{total}}",
-					"provider": "Aanbieder"
-				}
-			},
-			"footer": {
-				"accept": "Accepteer",
-				"reject": "Wijs af",
-				"strategies": {
-					"FILL_GAPS": "Gaten opvullen",
-					"PREFER_EXTERNAL": "Voorkeur voor extern",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Voorkeur voor extern en voeg lijsten samen",
-					"FILL_AND_MERGE_LISTS": "Vul en voeg lijsten samen"
-				}
-			},
-			"fieldAction": {
-				"keepCurrent": "Huidige behouden",
-				"takeExternal": "Neem extern op",
-				"mergeLists": "Lijsten samenvoegen",
-				"editManually": "Handmatig bewerken",
-				"lockField": "Vergrendel veld",
-				"unlockField": "Ontgrendel veld"
-			}
-		},
-		"matchesTable": {
-			"columns": {
-				"entityName": "Naam",
-				"candidateCount": "Kandidaten",
-				"topConfidence": "Hoogste vertrouwen",
-				"addedAt": "Opgehaald"
-			},
-			"acceptAll": {
-				"label": "Alles accepteren",
-				"failed": "Accepteren van alle overeenkomsten mislukt",
-				"success": "Alle openstaande overeenkomsten geaccepteerd"
-			},
-			"rejectAll": {
-				"label": "Alles afwijzen",
-				"failed": "Afwijzen van alle overeenkomsten mislukt",
-				"success": "Alle openstaande overeenkomsten afgewezen"
-			}
-		}
-	},
-	"seriesOverviewScene": {
-		"buttons": {
-			"continueReading": "Verder lezen",
-			"downloadSeries": "Download serie"
-		}
-	},
-	"createOrUpdateSmartListForm": {
-		"fields": {
-			"name": {
-				"label": "Naam"
-			},
-			"description": {
-				"label": "Omschrijving"
-			},
-			"visibility": {
-				"options": {
-					"public": {
-						"label": "Openbaar"
-					},
-					"private": {
-						"label": "Privé"
-					}
-				}
-			}
-		}
-	},
-	"createSmartListScene": {
-		"form": {
-			"review": {
-				"yes": "Ja",
-				"no": "Nee",
-				"none": "Geen",
-				"labels": {
-					"name": "Naam",
-					"description": "Omschrijving"
-				}
-			}
-		}
-	},
-	"createOrUpdateApiKey": {
-		"fields": {
-			"name": {
-				"label": "Naam"
-			},
-			"expiration": {
-				"placeholder": "Nooit"
-			}
-		}
-	},
-	"userSmartListsScene": {
-		"heading": "Slimme lijsten",
-		"subtitle": "Uw favoriete zoekopdrachten en filters opgeslagen voor eenvoudige toegang",
-		"searchPlaceholder": "Filter slimme lijsten",
-		"buttons": {
-			"createSmartList": "Maak slimme lijst"
-		},
-		"list": {
-			"emptyState": {
-				"heading": "Geen slimme lijsten om weer te geven",
-				"noListsMessage": "Maak een slimme lijst om te beginnen",
-				"noMatchesMessage": "Probeer je zoekopdracht te veranderen"
-			},
-			"card": {
-				"meta": {
-					"figures": {
-						"books": "boek",
-						"library": "bibliotheek"
-					},
-					"matches": "Overeenkomsten"
-				}
-			}
-		}
-	},
-	"smartListSettingsScene": {
-		"sidebar": {
-			"configuration": {
-				"label": "Configuratie"
-			}
-		}
-	},
-	"userSmartListScene": {
-		"navigation": {
-			"settings": "Instellingen"
-		},
-		"layout": {
-			"missingIdError": "Deze scène vereist een ID in de URL",
-			"smartListNotFound": "Slimme lijst niet gevonden",
-			"viewCreateError": "Aanmaken weergave mislukt",
-			"viewSaveError": "Opslaan weergave mislukt"
-		},
-		"header": {
-			"backLink": "Lijsten"
-		},
-		"itemsScene": {
-			"smartListNotFound": "Slimme lijst niet gevonden",
-			"actionHeader": {
-				"viewSelector": {
-					"customView": "Aangepaste weergave",
-					"defaultView": "Standaard weergave",
-					"noViewsSaved": "Geen weergaves opgeslagen",
-					"selectView": "Kies een opgeslagen weergave"
-				},
-				"filterDrawer": {
-					"heading": "Slimme lijst filters",
-					"description": "Wijzig de filters voor deze kijksessie",
-					"rawData": {
-						"heading": "Onbewerkte filtergegevens",
-						"description": "Zo worden de filters verwerkt door Stump"
-					},
-					"buttons": {
-						"save": "Opslaan",
-						"cancel": "Annuleer"
-					}
-				},
-				"search": {
-					"placeholder": "Snelle filter"
-				},
-				"viewManager": {
-					"updateSelected": "Selectie bijwerken",
-					"create": "Nieuwe weergave aanmaken",
-					"modal": {
-						"heading": {
-							"create": "Weergave maken",
-							"update": "Weergave bijwerken"
-						},
-						"description": {
-							"create": "Maak een nieuwe weergave voor deze slimme lijst",
-							"update": "Weergave bijwerken"
-						},
-						"createForm": {
-							"name": {
-								"label": "Naam",
-								"placeholder": "Mijn weergave",
-								"description": "Een vriendelijke naam om deze weergave te identificeren"
-							}
-						},
-						"updateForm": {
-							"name": {
-								"label": "Naam",
-								"placeholder": "Mijn weergave",
-								"description": "De bijgewerkte naam voor deze weergave, indien gewenst"
-							}
-						}
-					}
-				}
-			}
-		}
-	},
-	"settingsScene": {
-		"navigation": {
-			"general": "Algemeen",
-			"logs": "Logboeken",
-			"jobs": "Taken en instellingen",
-			"users": "Gebruikersbeheer"
-		},
-		"sidebar": {
-			"management": {
-				"general": "General"
-			}
-		},
-		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"sections": {
-				"themeSelect": {
-					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentatie"
-					],
-					"options": {
-						"light": "Licht",
-						"dark": "Donker"
-					}
-				},
-				"navigationArrangement": {
-					"entityOptions": {
-						"createAction": {
-							"label": "Toon aanmaak actie",
-							"help": "Toon de aanmaak actie in de navigatie"
-						},
-						"linkToAll": {
-							"label": "Laat \"bekijk alle\" knop zien",
-							"help": "Een link naar een pagina gewijd aan het bekijken van alle items van dit type"
-						}
-					}
-				}
-			}
-		},
-		"app/apiKeys": {
-			"helmet": "API-sleutels",
-			"title": "API-sleutels",
-			"shared": {
-				"fields": {
-					"name": "Naam",
-					"last_used": "Laatst gebruikt"
-				}
-			}
-		},
-		"app/reader": {
-			"helmet": "Lezer instellingen",
-			"title": "Lezer instellingen",
-			"sections": {
-				"imageBasedBooks": {
-					"label": "Op afbeelding gebaseerde boeken",
-					"description": "Strips, manga en andere op afbeeldingen gebaseerde boeken",
-					"sections": {
-						"preloadAheadCount": {
-							"label": "Vooruit laden aantal",
-							"description": "Het aantal vooraf te laden pagina's vanaf de huidige pagina"
-						},
-						"preloadBehindCount": {
-							"label": "Achter vooruit laden aantal",
-							"description": "Het aantal vooraf te laden pagina's voor de huidige pagina"
-						}
-					}
-				}
-			}
-		},
-		"app/desktop": {
-			"helmet": "Desktop instellingen",
-			"title": "Desktop instellingen",
-			"description": "Instellingen gerelateerd aan de Stump desktop applicatie",
-			"sections": {
-				"configuredServers": {
-					"resetTokens": {
-						"label": "Clear authentication",
-						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
-						],
-						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
-						}
-					}
-				}
-			}
-		},
-		"server/general": {
-			"helmet": "Algemene serverinstellingen",
-			"title": "Algemene instellingen",
-			"description": "Algemene instellingen gerelateerd aan je Stump server",
-			"sections": {
-				"updateAvailable": {
-					"message": "Uw server is niet up-to-date. Update alsjeblieft naar de nieuwste versie!"
-				},
-				"serverInfo": {
-					"title": "Serverinformatie",
-					"description": "Basisgegevens over uw Stump server instantie",
-					"build": {
-						"label": "Bouwversie",
-						"description": "Details over de versie en bouwversie",
-						"version": {
-							"semver": "Versie",
-							"commitHash": "Exacte commit",
-							"date": "Build-datum"
-						}
-					}
-				},
-				"serverPublicUrl": {
-					"label": "Openbare URL"
-				}
-			}
-		},
-		"server/jobs": {
-			"sections": {
-				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
-					"row": {
-						"edit": "Wijzig"
-					}
-				}
-			}
-		},
-		"server/users": {
-			"createOrUpdateForm": {
-				"permissions": {
-					"file": {
-						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
-						}
-					},
-					"user": {
-						"manage": {
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
-						}
-					},
-					"smartlist": {
-						"read": {
-							"description": "Allows the user to access smart lists features"
-						}
-					}
-				}
-			}
-		},
-		"server/email": {
-			"createOrUpdateForm": {
-				"maxAttachmentSize": {
-					"description": "De maximale grootte, in bytes, die een bijlage mag hebben"
-				}
-			},
-			"createEmailer": {
-				"description": "Maak een nieuwe SMTP-mailer aan voor je Stump-server"
-			}
-		}
-	},
-	"libraryStats": {
-		"seriesCount": "Totaal aantal series",
-		"bookCount": "Totaal aantal boeken",
-		"diskUsage": "Schijfgebruik"
-	},
-	"noLibraries": {
-		"heading": "Hier valt niks te zien",
-		"messagePrefix": "Je kunt niet zien wat je niet hebt",
-		"message": {
-			"create": "Maak een bibliotheek om te beginnen",
-			"wait": "Zodra er bibliotheken zijn aangemaakt, worden ze hier weergegeven"
-		},
-		"links": {
-			"create": "Bibliotheek aanmaken",
-			"settings": "Ga naar instellingen"
-		}
-	},
-	"pagination": {
-		"buttons": {
-			"next": "Volgende",
-			"previous": "Vorige"
-		},
-		"popover": {
-			"heading": "Ga naar pagina",
-			"buttons": {
-				"confirm": "Start",
-				"cancel": "Annuleren"
-			}
-		}
-	},
-	"signOutModal": {
-		"title": "Uitloggen",
-		"message": "Weet je zeker dat je wilt uitloggen?",
-		"buttons": {
-			"cancel": "Annuleren",
-			"signOut": "Uitloggen"
-		}
-	},
-	"sidebar": {
-		"buttons": {
-			"libraries": "Bibliotheken",
-			"books": "Ontdekken",
-			"bookClubs": "Boekenclubs",
-			"createLibrary": "Bibliotheek aanmaken",
-			"noLibraries": "Geen bibliotheken",
-			"createBookClub": "Maak een boekenclub",
-			"noBookClubs": "Geen boekenclubs",
-			"settings": "Instellingen"
-		},
-		"libraryOptions": {
-			"scanLibrary": "Scannen",
-			"fileExplorer": "Bestanden",
-			"manageLibrary": "Manage"
-		}
-	},
-	"search": {
-		"placeholder": "Zoeken"
-	},
-	"serverSOS": {
-		"heading": "Server niet beschikbaar",
-		"desktop": {
-			"message": "Er is een netwerkfout opgetreden die erop wijst dat uw Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat.\nAls de URL van uw server is gewijzigd, kunt u deze bijwerken met behulp van het onderstaande formulier."
-		},
-		"web": {
-			"message": "Er is een netwerkfout opgetreden die erop wijst dat je Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat."
-		},
-		"reconnected": "Opnieuw verbonden met server! Doorsturen...",
-		"reconnectionFailed": "Er is iets misgegaan!"
-	},
-	"serverStatusOverlay": {
-		"heading": "Server is niet verbonden",
-		"message": [
-			"Controleer je internetverbinding",
-			"Klik hier",
-			"om de server-URL te wijzigen"
-		]
-	},
-	"slidingList": {
-		"empty": "Geen items om weer te geven",
-		"buttons": {
-			"next": "Vooruitzoeken",
-			"previous": "Terugzoeken"
-		}
-	},
-	"tagSelect": {
-		"placeholder": "Kies of maak een tag",
-		"placeholderNoTags": "Geen tags beschikbaar"
-	},
-	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
-		"options": {
-			"selectFromBooks": "Kies uit boeken",
-			"uploadImage": "Afbeelding uploaden"
-		},
-		"uploadImage": {
-			"emptyState": "Een voorbeeld van je afbeelding verschijnt hier"
-		}
-	},
-	"common": {
-		"add": "Toevoegen",
-		"cancel": "Annuleren",
-		"confirm": "Bevestigen",
-		"save": "Opslaan",
-		"send": "Verzenden",
-		"saveChanges": "Wijzigen opslaan",
-		"noChanges": "Geen wijzigingen",
-		"create": "Maken",
-		"edit": "Bewerken",
-		"uploading": "Uploaden",
-		"unimplemented": "Deze functionaliteit is nog niet ingebouwd! Kom later terug",
-		"limitedFunctionality": "Dit is nog niet volledig ingebouwd en mist nog wat functies. Kom later terug",
-		"logIn": "Inloggen",
-		"login": "Inloggen",
-		"seeError": "Zie foutmelding",
-		"remove": "Verwijderen",
-		"notUsedYet": "Nog niet gebruikt",
-		"never": "Nooit",
-		"scan": "Scannen"
-	},
-	"mobileApp": {
-		"readerSettings": {
-			"title": "Reader Settings"
-		},
-		"sorting": {
-			"sortDirection": {
-				"ASC": "Oplopend",
-				"DESC": "Aflopend"
-			},
-			"sortDirectionDate": {
-				"ASC": "Oudste eerst",
-				"DESC": "Nieuwste eerst"
-			}
-		}
-	}
+    "underConstruction": {
+        "heading": "Dit is ongemakkelijk",
+        "message": "Je stuitte op een pagina die nog wordt ontwikkeld. Ik zou het graag aan je laten zien, maar het is nog niet helemaal klaar.",
+        "homeLink": "Ga naar start",
+        "githubLink": "Bekijk de GitHub issue"
+    },
+    "authScene": {
+        "claimHeading": "Initialiseer je server",
+        "claimText": "Deze Stump-server is nog niet ingesteld. Gebruik het onderstaande formulier om je account aan te maken. Zodra je dat hebt gedaan, heb je volledige toegang tot alle functies van de server.",
+        "form": {
+            "validation": {
+                "missingUsername": "Gebruikersnaam is vereist",
+                "missingPassword": "Wachtwoord is vereist",
+                "usernameAlreadyExists": "Gebruikersnaam bestaat al"
+            },
+            "labels": {
+                "username": "Gebruikersnaam",
+                "password": "Wachtwoord"
+            },
+            "buttons": {
+                "createAccount": "Account aanmaken",
+                "loginWithOidc": "Log in met OIDC",
+                "createAccountWithOidc": "Account aanmaken met OIDC"
+            }
+        },
+        "toasts": {
+            "loggingIn": "Inloggen...",
+            "loggedIn": "Welkom terug!",
+            "loggedInFirstTime": "Welkom!",
+            "registering": "Registreren...",
+            "registered": "Geregistreerd!",
+            "loginFailed": "Inloggen mislukt. Probeer het nog een keer",
+            "registrationFailed": "Registratie mislukt. Probeer het nog een keer"
+        }
+    },
+    "adminLibrarySidebar": {
+        "libraryConfiguration": {
+            "heading": "Bibliotheek instellingen",
+            "subtitleCreating": "Een voorbeeld van uw nieuwe bibliotheek wordt hieronder weergegeven",
+            "subtitleEditing": "Een voorbeeld van uw wijzigingen aan de bibliotheek worden hieronder weergegeven"
+        }
+    },
+    "bookOverviewScene": {
+        "fileInformation": {
+            "heading": "Bestand informatie",
+            "labels": {
+                "fileSize": "Bestandsgrootte",
+                "fileType": "Bestandstype",
+                "fileLocation": "Bestandslocatie"
+            }
+        },
+        "emailBook": {
+            "heading": "E-mail dit boek",
+            "description": "Stuur dit boek naar een apparaat of e-mailadres",
+            "form": {
+                "email": {
+                    "label": "E-mail",
+                    "placeholder": "E-mail adres",
+                    "description": "Een e-mailadres om het boek naar te verzenden. Klik op toevoegen om elke invoer af te ronden"
+                },
+                "devices": {
+                    "label": "Apparaten",
+                    "placeholder": "Selecteer apparaten",
+                    "noFilterMatch": "Geen apparaten die overeenkomen met de filter"
+                }
+            }
+        },
+        "nextInSeries": "Volgende in serie"
+    },
+    "createOrUpdateBookClubForm": {
+        "fields": {
+            "name": {
+                "label": "Naam",
+                "placeholder": "Mijn boekenclub",
+                "description": "De naam van jouw boekenclub"
+            },
+            "description": {
+                "label": "Omschrijving",
+                "description": "Een korte, optionele beschrijving van je boekenclub"
+            },
+            "is_private": {
+                "label": "Privéclub",
+                "description": "Als je dit aanzet, kunnen alleen mensen die jij uitnodigt lid worden van je boekenclub"
+            },
+            "member_role_spec": {
+                "heading": "Aangepaste roltoewijzing",
+                "subtitle": [
+                    "Je kunt zelf namen verzinnen voor de rollen in je boekenclub als je dat leuk vindt. Voor meer info kun je kijken bij de",
+                    "documentatie"
+                ],
+                "member": {
+                    "label": "Gebruiker",
+                    "placeholder": "Gebruiker",
+                    "description": "De naam van de standaardrol voor je boekenclub"
+                },
+                "moderator": {
+                    "description": "De naam van de moderatorrol voor je boekenclub"
+                },
+                "admin": {
+                    "label": "Beheerder",
+                    "placeholder": "Beheerder",
+                    "description": "De naam van de administrator voor je boekenclub"
+                },
+                "creator": {
+                    "description": "De naam van de rol voor degene die je boekenclub heeft aangemaakt. Dit ben jij!"
+                }
+            },
+            "membershipOptions": {
+                "displayName": {
+                    "label": "Toon naam",
+                    "description": "Een optionele bijnaam voor je lidmaatschap in de boekenclub. Als dit is ingesteld heeft dit voorrang op je gebruikersnaam"
+                },
+                "hideProgress": {
+                    "label": "Verberg voortgang",
+                    "description": "Indien dit is ingeschakeld wordt je leesvoortgang verborgen voor andere leden van de boekenclub"
+                }
+            }
+        },
+        "validation": {
+            "missingName": "Naam is verplicht",
+            "alreadyTaken": "Is al in gebruik"
+        }
+    },
+    "createBookClubScene": {
+        "heading": "Maak een nieuwe boekenclub",
+        "subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server kan deelnemen",
+        "form": {
+            "stepLabel": "Stap",
+            "steps": [
+                {
+                    "label": "Basics",
+                    "heading": "Basisinformatie",
+                    "description": "The details of the club, including its name and description"
+                },
+                {
+                    "label": "Rollen",
+                    "heading": "Rollen",
+                    "description": "De rollen in je boekenclub aanpassen"
+                },
+                {
+                    "label": "Lidmaatschap",
+                    "heading": "Membership Preferences",
+                    "description": "Additional options for your book club"
+                },
+                {
+                    "label": "Review",
+                    "heading": "Review",
+                    "description": "Review your club settings before creating it"
+                }
+            ],
+            "review": {
+                "yes": "Ja",
+                "none": "Geen",
+                "labels": {
+                    "name": "Naam",
+                    "description": "Omschrijving"
+                }
+            },
+            "submit": "Maak een boekenclub"
+        }
+    },
+    "bookClubSettingsScene": {
+        "sidebar": {
+            "members": {
+                "members": "Gebruikers"
+            },
+            "scheduling": {
+                "options": "Opties"
+            },
+            "danger-zone": {
+                "label": "Gevarenzone"
+            }
+        },
+        "members": {
+            "title": "Gebruikers"
+        },
+        "scheduling/scheduler": {
+            "description": ""
+        },
+        "danger-zone/delete": {
+            "sections": {
+                "deleteClub": {
+                    "description": [
+                        "Verwijder permanent deze boekenclub en alle inhoud ervan.",
+                        "This action cannot be undone"
+                    ]
+                }
+            }
+        }
+    },
+    "createOrUpdateLibraryForm": {
+        "fields": {
+            "name": {
+                "label": "Naam",
+                "placeholder": "Mijn bibliotheek"
+            },
+            "readingSettings": {
+                "section": {
+                    "heading": "Leesinstellingen"
+                },
+                "imageScaling": {
+                    "label": "Afbeelding schalen"
+                }
+            },
+            "thumbnailConfig": {
+                "enableSwitch": {
+                    "label": "Ingeschakeld"
+                }
+            }
+        }
+    },
+    "createLibraryScene": {
+        "heading": "Create New Library",
+        "subtitleLink": "relevante documentatie",
+        "form": {
+            "review": {
+                "yes": "Ja",
+                "none": "Geen",
+                "labels": {
+                    "format": "Formaat",
+                    "quality": "Kwaliteit",
+                    "name": "Naam",
+                    "description": "Omschrijving"
+                }
+            },
+            "buttons": {
+                "confirm": "Bibliotheek creëren"
+            }
+        }
+    },
+    "librarySettingsScene": {
+        "heading": "Manage Library",
+        "subtitleLink": "relevante documentatie",
+        "sidebar": {
+            "configuration": {
+                "general": "Algemeen",
+                "reading": "Lezen",
+                "scanning": "Scannen",
+                "label": "Opties"
+            },
+            "integrations": {
+                "label": "Integraties",
+                "analysis": "Analyse"
+            }
+        },
+        "options/scanning": {
+            "sections": {
+                "history": {
+                    "inspector": {
+                        "fields": {
+                            "library": "Bibliotheek",
+                            "date": "Datum"
+                        }
+                    },
+                    "table": {
+                        "columns": {
+                            "config": "Configuratie"
+                        },
+                        "default": "Standaard",
+                        "custom": "Aangepast"
+                    }
+                }
+            }
+        },
+        "options/thumbnails": {
+            "sections": {
+                "management": {
+                    "heading": "Management"
+                }
+            }
+        },
+        "integrations/analysis": {
+            "sections": {
+                "analyzeBooks": {
+                    "disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
+                },
+                "missingFiles": {
+                    "heading": "Ontbrekende bestanden"
+                }
+            }
+        },
+        "integrations/metadata": {
+            "description": "Beheer en controleer de metadata overeenkomsten voor deze bibliotheek",
+            "sections": {
+                "fetchMetadata": {
+                    "heading": "Metadata ophalen",
+                    "description": "Metadata voor de media in deze bibliotheek ophalen",
+                    "noProviders": {
+                        "title": "Er zijn geen metadata aanbieders beschikbaar",
+                        "description": "U kunt metadata aanbieders configureren in de metadata integratie instellingen"
+                    },
+                    "fetchButton": "Start ophalen in achtergrond",
+                    "fetchError": "Ophalen van metadata mislukt"
+                }
+            }
+        },
+        "danger-zone/delete": {
+            "title": "Deletion Actions",
+            "sections": {
+                "cleanLibrary": {
+                    "heading": "Bibliotheek opschonen",
+                    "confirmation": {
+                        "label": "Bibliotheek opschonen"
+                    }
+                }
+            }
+        }
+    },
+    "errorScene": {
+        "message": "Er is een fout opgetreden:",
+        "buttons": {
+            "report": "Fout melden",
+            "copy": "Kopieer foutgegevens",
+            "goHome": "Ga naar start"
+        }
+    },
+    "homeScene": {
+        "recentlyAddedSeries": {
+            "emptyState": {
+                "heading": "Geen series om weer te geven",
+                "message": "Alle series die je toevoegt aan je bibliotheken worden hier weergegeven"
+            }
+        }
+    },
+    "metadataMatching": {
+        "section": {
+            "heading": "Afwachtende overeenkomsten",
+            "description": "Overeenkomsten met metadata van externe aanbieders controleren"
+        },
+        "confidenceBadge": {
+            "label": "Vertrouwensniveau"
+        },
+        "includeField": "Voeg dit veld toe",
+        "excludeField": "Dit veld uitsluiten",
+        "fieldLocked": "Dit veld is vergrendeld",
+        "reviewDialog": {
+            "previewEditor": {
+                "noComparableFields": "Geen vergelijkbare velden gevonden",
+                "headers": {
+                    "field": "Veld",
+                    "current": "Huidige",
+                    "external": "Extern",
+                    "resolved": "Opgelost"
+                },
+                "toolbar": {
+                    "candidatePosition": "Kandidaat {{position}} van {{total}}",
+                    "provider": "Aanbieder"
+                }
+            },
+            "footer": {
+                "accept": "Accepteer",
+                "reject": "Wijs af",
+                "strategies": {
+                    "FILL_GAPS": "Gaten opvullen",
+                    "PREFER_EXTERNAL": "Voorkeur voor extern",
+                    "PREFER_EXTERNAL_AND_MERGE_LISTS": "Voorkeur voor extern en voeg lijsten samen",
+                    "FILL_AND_MERGE_LISTS": "Vul en voeg lijsten samen"
+                }
+            },
+            "fieldAction": {
+                "keepCurrent": "Huidige behouden",
+                "takeExternal": "Neem extern op",
+                "mergeLists": "Lijsten samenvoegen",
+                "editManually": "Handmatig bewerken",
+                "lockField": "Vergrendel veld",
+                "unlockField": "Ontgrendel veld"
+            }
+        },
+        "matchesTable": {
+            "columns": {
+                "entityName": "Naam",
+                "candidateCount": "Kandidaten",
+                "topConfidence": "Hoogste vertrouwen",
+                "addedAt": "Opgehaald"
+            },
+            "acceptAll": {
+                "label": "Alles accepteren",
+                "failed": "Accepteren van alle overeenkomsten mislukt",
+                "success": "Alle openstaande overeenkomsten geaccepteerd"
+            },
+            "rejectAll": {
+                "label": "Alles afwijzen",
+                "failed": "Afwijzen van alle overeenkomsten mislukt",
+                "success": "Alle openstaande overeenkomsten afgewezen"
+            }
+        }
+    },
+    "seriesOverviewScene": {
+        "buttons": {
+            "continueReading": "Verder lezen",
+            "downloadSeries": "Download serie"
+        }
+    },
+    "createOrUpdateSmartListForm": {
+        "fields": {
+            "name": {
+                "label": "Naam"
+            },
+            "description": {
+                "label": "Omschrijving"
+            },
+            "visibility": {
+                "options": {
+                    "public": {
+                        "label": "Openbaar"
+                    },
+                    "private": {
+                        "label": "Privé"
+                    }
+                }
+            }
+        }
+    },
+    "createSmartListScene": {
+        "form": {
+            "review": {
+                "yes": "Ja",
+                "no": "Nee",
+                "none": "Geen",
+                "labels": {
+                    "name": "Naam",
+                    "description": "Omschrijving"
+                }
+            }
+        }
+    },
+    "createOrUpdateApiKey": {
+        "fields": {
+            "name": {
+                "label": "Naam"
+            },
+            "expiration": {
+                "placeholder": "Nooit"
+            }
+        }
+    },
+    "userSmartListsScene": {
+        "heading": "Slimme lijsten",
+        "subtitle": "Uw favoriete zoekopdrachten en filters opgeslagen voor eenvoudige toegang",
+        "searchPlaceholder": "Filter slimme lijsten",
+        "buttons": {
+            "createSmartList": "Maak slimme lijst"
+        },
+        "list": {
+            "emptyState": {
+                "heading": "Geen slimme lijsten om weer te geven",
+                "noListsMessage": "Maak een slimme lijst om te beginnen",
+                "noMatchesMessage": "Probeer je zoekopdracht te veranderen"
+            },
+            "card": {
+                "meta": {
+                    "figures": {
+                        "books": "boek",
+                        "library": "bibliotheek"
+                    },
+                    "matches": "Overeenkomsten"
+                }
+            }
+        }
+    },
+    "smartListSettingsScene": {
+        "sidebar": {
+            "configuration": {
+                "label": "Configuratie"
+            }
+        }
+    },
+    "userSmartListScene": {
+        "navigation": {
+            "settings": "Instellingen"
+        },
+        "layout": {
+            "missingIdError": "Deze scène vereist een ID in de URL",
+            "smartListNotFound": "Slimme lijst niet gevonden",
+            "viewCreateError": "Aanmaken weergave mislukt",
+            "viewSaveError": "Opslaan weergave mislukt"
+        },
+        "header": {
+            "backLink": "Lijsten"
+        },
+        "itemsScene": {
+            "smartListNotFound": "Slimme lijst niet gevonden",
+            "actionHeader": {
+                "viewSelector": {
+                    "customView": "Aangepaste weergave",
+                    "defaultView": "Standaard weergave",
+                    "noViewsSaved": "Geen weergaves opgeslagen",
+                    "selectView": "Kies een opgeslagen weergave"
+                },
+                "filterDrawer": {
+                    "heading": "Slimme lijst filters",
+                    "description": "Wijzig de filters voor deze kijksessie",
+                    "rawData": {
+                        "heading": "Onbewerkte filtergegevens",
+                        "description": "Zo worden de filters verwerkt door Stump"
+                    },
+                    "buttons": {
+                        "save": "Opslaan",
+                        "cancel": "Annuleer"
+                    }
+                },
+                "search": {
+                    "placeholder": "Snelle filter"
+                },
+                "viewManager": {
+                    "updateSelected": "Selectie bijwerken",
+                    "create": "Nieuwe weergave aanmaken",
+                    "modal": {
+                        "heading": {
+                            "create": "Weergave maken",
+                            "update": "Weergave bijwerken"
+                        },
+                        "description": {
+                            "create": "Maak een nieuwe weergave voor deze slimme lijst",
+                            "update": "Weergave bijwerken"
+                        },
+                        "createForm": {
+                            "name": {
+                                "label": "Naam",
+                                "placeholder": "Mijn weergave",
+                                "description": "Een vriendelijke naam om deze weergave te identificeren"
+                            }
+                        },
+                        "updateForm": {
+                            "name": {
+                                "label": "Naam",
+                                "placeholder": "Mijn weergave",
+                                "description": "De bijgewerkte naam voor deze weergave, indien gewenst"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "settingsScene": {
+        "navigation": {
+            "general": "Algemeen",
+            "logs": "Logboeken",
+            "jobs": "Taken en instellingen",
+            "users": "Gebruikersbeheer"
+        },
+        "sidebar": {
+            "management": {
+                "general": "General"
+            }
+        },
+        "app/preferences": {
+            "helmet": "Appearance",
+            "title": "Appearance",
+            "sections": {
+                "themeSelect": {
+                    "description": [
+                        "If you're interested in creating your own custom theme, check out the",
+                        "documentatie"
+                    ],
+                    "options": {
+                        "light": "Licht",
+                        "dark": "Donker"
+                    }
+                },
+                "navigationArrangement": {
+                    "entityOptions": {
+                        "createAction": {
+                            "label": "Toon aanmaak actie",
+                            "help": "Toon de aanmaak actie in de navigatie"
+                        },
+                        "linkToAll": {
+                            "label": "Laat \"bekijk alle\" knop zien",
+                            "help": "Een link naar een pagina gewijd aan het bekijken van alle items van dit type"
+                        }
+                    }
+                }
+            }
+        },
+        "app/apiKeys": {
+            "helmet": "API-sleutels",
+            "title": "API-sleutels",
+            "shared": {
+                "fields": {
+                    "name": "Naam",
+                    "last_used": "Laatst gebruikt"
+                }
+            }
+        },
+        "app/reader": {
+            "helmet": "Lezer instellingen",
+            "title": "Lezer instellingen",
+            "sections": {
+                "imageBasedBooks": {
+                    "label": "Op afbeelding gebaseerde boeken",
+                    "description": "Strips, manga en andere op afbeeldingen gebaseerde boeken",
+                    "sections": {
+                        "preloadAheadCount": {
+                            "label": "Vooruit laden aantal",
+                            "description": "Het aantal vooraf te laden pagina's vanaf de huidige pagina"
+                        },
+                        "preloadBehindCount": {
+                            "label": "Achter vooruit laden aantal",
+                            "description": "Het aantal vooraf te laden pagina's voor de huidige pagina"
+                        }
+                    }
+                }
+            }
+        },
+        "app/desktop": {
+            "helmet": "Desktop instellingen",
+            "title": "Desktop instellingen",
+            "description": "Instellingen gerelateerd aan de Stump desktop applicatie",
+            "sections": {
+                "configuredServers": {
+                    "resetTokens": {
+                        "label": "Clear authentication",
+                        "description": [
+                            "Remove all securely-stored access tokens for your servers",
+                            "You will have to re-authenticate with each server"
+                        ],
+                        "confirmation": {
+                            "trigger": "Clear authentication",
+                            "title": "Clear authentication",
+                            "description": "This will remove all securely-stored access tokens for your servers",
+                            "confirm": "Clear authentication"
+                        }
+                    }
+                }
+            }
+        },
+        "server/general": {
+            "helmet": "Algemene serverinstellingen",
+            "title": "Algemene instellingen",
+            "description": "Algemene instellingen gerelateerd aan je Stump server",
+            "sections": {
+                "updateAvailable": {
+                    "message": "Uw server is niet up-to-date. Update alsjeblieft naar de nieuwste versie!"
+                },
+                "serverInfo": {
+                    "title": "Serverinformatie",
+                    "description": "Basisgegevens over uw Stump server instantie",
+                    "build": {
+                        "label": "Bouwversie",
+                        "description": "Details over de versie en bouwversie",
+                        "version": {
+                            "semver": "Versie",
+                            "commitHash": "Exacte commit",
+                            "date": "Build-datum"
+                        }
+                    }
+                },
+                "serverPublicUrl": {
+                    "label": "Openbare URL"
+                }
+            }
+        },
+        "server/jobs": {
+            "sections": {
+                "scheduling": {
+                    "title": "Scheduling",
+                    "description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
+                    "row": {
+                        "edit": "Wijzig"
+                    }
+                }
+            }
+        },
+        "server/users": {
+            "createOrUpdateForm": {
+                "permissions": {
+                    "file": {
+                        "explorer": {
+                            "label": "File Explorer",
+                            "description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+                        }
+                    },
+                    "user": {
+                        "manage": {
+                            "description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+                        }
+                    },
+                    "smartlist": {
+                        "read": {
+                            "description": "Allows the user to access smart lists features"
+                        }
+                    }
+                }
+            }
+        },
+        "server/email": {
+            "createOrUpdateForm": {
+                "maxAttachmentSize": {
+                    "description": "De maximale grootte, in bytes, die een bijlage mag hebben"
+                }
+            },
+            "createEmailer": {
+                "description": "Maak een nieuwe SMTP-mailer aan voor je Stump-server"
+            }
+        }
+    },
+    "libraryStats": {
+        "seriesCount": "Totaal aantal series",
+        "bookCount": "Totaal aantal boeken",
+        "diskUsage": "Schijfgebruik"
+    },
+    "noLibraries": {
+        "heading": "Hier valt niks te zien",
+        "messagePrefix": "Je kunt niet zien wat je niet hebt",
+        "message": {
+            "create": "Maak een bibliotheek om te beginnen",
+            "wait": "Zodra er bibliotheken zijn aangemaakt, worden ze hier weergegeven"
+        },
+        "links": {
+            "create": "Bibliotheek aanmaken",
+            "settings": "Ga naar instellingen"
+        }
+    },
+    "pagination": {
+        "buttons": {
+            "next": "Volgende",
+            "previous": "Vorige"
+        },
+        "popover": {
+            "heading": "Ga naar pagina",
+            "buttons": {
+                "confirm": "Start",
+                "cancel": "Annuleren"
+            }
+        }
+    },
+    "signOutModal": {
+        "title": "Uitloggen",
+        "message": "Weet je zeker dat je wilt uitloggen?",
+        "buttons": {
+            "cancel": "Annuleren",
+            "signOut": "Uitloggen"
+        }
+    },
+    "sidebar": {
+        "buttons": {
+            "libraries": "Bibliotheken",
+            "books": "Ontdekken",
+            "bookClubs": "Boekenclubs",
+            "createLibrary": "Bibliotheek aanmaken",
+            "noLibraries": "Geen bibliotheken",
+            "createBookClub": "Maak een boekenclub",
+            "noBookClubs": "Geen boekenclubs",
+            "settings": "Instellingen"
+        },
+        "libraryOptions": {
+            "scanLibrary": "Scannen",
+            "fileExplorer": "Bestanden",
+            "manageLibrary": "Manage"
+        }
+    },
+    "search": {
+        "placeholder": "Zoeken"
+    },
+    "serverSOS": {
+        "heading": "Server niet beschikbaar",
+        "desktop": {
+            "message": "Er is een netwerkfout opgetreden die erop wijst dat uw Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat.\nAls de URL van uw server is gewijzigd, kunt u deze bijwerken met behulp van het onderstaande formulier."
+        },
+        "web": {
+            "message": "Er is een netwerkfout opgetreden die erop wijst dat je Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat."
+        },
+        "reconnected": "Opnieuw verbonden met server! Doorsturen...",
+        "reconnectionFailed": "Er is iets misgegaan!"
+    },
+    "serverStatusOverlay": {
+        "heading": "Server is niet verbonden",
+        "message": [
+            "Controleer je internetverbinding",
+            "Klik hier",
+            "om de server-URL te wijzigen"
+        ]
+    },
+    "slidingList": {
+        "empty": "Geen items om weer te geven",
+        "buttons": {
+            "next": "Vooruitzoeken",
+            "previous": "Terugzoeken"
+        }
+    },
+    "tagSelect": {
+        "placeholder": "Kies of maak een tag",
+        "placeholderNoTags": "Geen tags beschikbaar"
+    },
+    "thumbnailDropdown": {
+        "label": "Edit thumbnail",
+        "options": {
+            "selectFromBooks": "Kies uit boeken",
+            "uploadImage": "Afbeelding uploaden"
+        },
+        "uploadImage": {
+            "emptyState": "Een voorbeeld van je afbeelding verschijnt hier"
+        }
+    },
+    "common": {
+        "add": "Toevoegen",
+        "cancel": "Annuleren",
+        "confirm": "Bevestigen",
+        "save": "Opslaan",
+        "send": "Verzenden",
+        "saveChanges": "Wijzigen opslaan",
+        "noChanges": "Geen wijzigingen",
+        "create": "Maken",
+        "edit": "Bewerken",
+        "uploading": "Uploaden",
+        "unimplemented": "Deze functionaliteit is nog niet ingebouwd! Kom later terug",
+        "limitedFunctionality": "Dit is nog niet volledig ingebouwd en mist nog wat functies. Kom later terug",
+        "logIn": "Inloggen",
+        "login": "Inloggen",
+        "seeError": "Zie foutmelding",
+        "remove": "Verwijderen",
+        "notUsedYet": "Nog niet gebruikt",
+        "never": "Nooit",
+        "scan": "Scannen"
+    },
+    "mobileApp": {
+        "readerSettings": {
+            "title": "Reader Settings"
+        },
+        "sorting": {
+            "sortDirection": {
+                "ASC": "Oplopend",
+                "DESC": "Aflopend"
+            },
+            "sortDirectionDate": {
+                "ASC": "Oudste eerst",
+                "DESC": "Nieuwste eerst"
+            }
+        }
+    }
 }

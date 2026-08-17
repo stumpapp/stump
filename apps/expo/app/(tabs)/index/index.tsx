@@ -100,7 +100,7 @@ export default function Screen() {
 		async (server: CreateServer) => {
 			if (editingServer) {
 				setEditingServer(null)
-				await updateServer(editingServer.id, server)
+				await updateServer(editingServer.id, { ...server, avatar: editingServer.avatar })
 			}
 		},
 		[setEditingServer, updateServer, editingServer],
@@ -165,6 +165,15 @@ export default function Screen() {
 				paddingHorizontal,
 			}}
 			ItemSeparatorComponent={() => <View className="h-4" />}
+			ListHeaderComponent={
+				<>
+					<EditServerDialog
+						editingServer={editingServer}
+						onClose={() => setEditingServer(null)}
+						onSubmit={onEdit}
+					/>
+				</>
+			}
 		/>
 	)
 

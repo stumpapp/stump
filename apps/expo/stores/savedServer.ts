@@ -38,6 +38,9 @@ const auth = z
 				password: z.string(), // Encrypted with expo-secure-store, so should be OK
 			}),
 		}),
+		z.object({
+			authless: z.boolean().refine((val) => !!val),
+		}),
 	])
 	.optional()
 
@@ -66,19 +69,13 @@ export const serverAvatar = z.union([
 		metadata: z
 			.object({
 				averageColor: z.string().nullish(),
-				colors: z
-					.array(
-						z.object({
-							color: z.string(),
-							percentage: z.number(),
-						}),
-					)
-					.nullish(),
-				thumbhash: z.string().nullish(),
+				// i removed the colors array for now, i think things look good
+				// using average color, but is easy enough to pull more colors
+				// down the road as needed
 			})
 			.nullish(),
+		lastModified: z.coerce.date().nullish(),
 	}),
-	// TODO: precompute colors for these for gradient
 	z.object({
 		logo: knownServer,
 	}),

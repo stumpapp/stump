@@ -2910,9 +2910,13 @@
 			},
 			"auth": {
 				"label": "Auth",
-				"default": {
+				"login": {
 					"label": "Login",
 					"description": "You will be prompted to login when accessing content as needed"
+				},
+				"none": {
+					"label": "None",
+					"description": "No authentication is required for this server or auth is provided through the URL"
 				},
 				"token": {
 					"label": "Token",

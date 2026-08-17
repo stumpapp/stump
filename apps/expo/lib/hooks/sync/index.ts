@@ -14,6 +14,7 @@ export {
 	useProgressSync,
 	useSyncOnlineToOfflineProgress,
 } from './useProgressSync'
+export { useSyncServerAvatars } from './useSyncServerAvatars'
 export { useServerInstances } from './utils'
 
 // TODO: one scenario not covered well which i encountered during development is a local book

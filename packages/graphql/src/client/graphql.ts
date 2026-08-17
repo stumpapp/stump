@@ -995,6 +995,7 @@ export type ImageProcessorOptionsInput = {
 export type ImageRef = {
   __typename?: 'ImageRef';
   height?: Maybe<Scalars['Int']['output']>;
+  lastModified?: Maybe<Scalars['DateTime']['output']>;
   metadata?: Maybe<ImageMetadata>;
   url: Scalars['String']['output'];
   width?: Maybe<Scalars['Int']['output']>;
@@ -4694,6 +4695,7 @@ export type User = {
   avatar: ImageRef;
   avatarMeta?: Maybe<ImageMetadata>;
   avatarPath?: Maybe<Scalars['String']['output']>;
+  avatarUpdatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** @deprecated TODO: aaron kill me plz */
   avatarUrl?: Maybe<Scalars['String']['output']>;
   continueReading: PaginatedMediaResponse;
@@ -5291,7 +5293,7 @@ export type PullServerBookmarksQuery = { __typename?: 'Query', bookmarksByMediaI
 export type PullServerAvatarQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PullServerAvatarQuery = { __typename?: 'Query', me: { __typename?: 'User', avatar: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } };
+export type PullServerAvatarQuery = { __typename?: 'Query', me: { __typename?: 'User', avatar: { __typename?: 'ImageRef', url: string, lastModified?: any | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null } | null } } };
 
 export type PullServerReadProgressionQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -9406,12 +9408,8 @@ export const PullServerAvatarDocument = new TypedDocumentString(`
       url
       metadata {
         averageColor
-        colors {
-          color
-          percentage
-        }
-        thumbhash
       }
+      lastModified
     }
   }
 }

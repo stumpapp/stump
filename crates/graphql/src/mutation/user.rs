@@ -10,6 +10,7 @@ use crate::{
 	utils::save_user_session,
 };
 use async_graphql::{Context, Object, Result, Upload, ID};
+use chrono::Utc;
 use models::{
 	entity::{
 		age_restriction, session,
@@ -146,6 +147,7 @@ impl UserMutation {
 		let mut active = updated_user;
 		active.avatar_path = Set(Some(avatar_path_str));
 		active.avatar_meta = Set(avatar_meta);
+		active.avatar_updated_at = Set(Some(Utc::now().into()));
 		let result = active.update(conn).await?;
 
 		Ok(User::from(result))
@@ -185,6 +187,7 @@ impl UserMutation {
 		let mut active = existing.into_active_model();
 		active.avatar_path = Set(None);
 		active.avatar_meta = Set(None);
+		active.avatar_updated_at = Set(Some(Utc::now().into()));
 		let result = active.update(conn).await?;
 
 		Ok(User::from(result))
@@ -752,6 +755,8 @@ mod tests {
 					permissions: None,
 					max_sessions_allowed: None,
 					avatar_path: None,
+					avatar_meta: None,
+					avatar_updated_at: None,
 					created_at: chrono::Utc::now().into(),
 					deleted_at: None,
 					user_preferences_id: None,

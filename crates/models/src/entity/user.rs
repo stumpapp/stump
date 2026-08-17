@@ -32,6 +32,7 @@ pub struct Model {
 	pub avatar_path: Option<String>,
 	#[sea_orm(column_type = "Json", nullable)]
 	pub avatar_meta: Option<ImageMetadata>,
+	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -59,6 +60,7 @@ pub struct AuthUser {
 	// TODO(avatar): need to do avatar: Option<ImageRef> here
 	pub avatar_url: Option<String>,
 	pub avatar_meta: Option<ImageMetadata>,
+	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	pub username: String,
 	pub is_server_owner: bool,
 	pub is_locked: bool,
@@ -90,6 +92,7 @@ impl FromQueryResult for AuthUser {
 		let permissions = PermissionSet::from(permissions_str).resolve_into_vec();
 		let avatar_path: Option<String> = res.try_get("", "avatar_path")?;
 		let avatar_meta: Option<ImageMetadata> = res.try_get("", "avatar_meta")?;
+		let avatar_updated_at = res.try_get("", "avatar_updated_at")?;
 		let age_restriction = match age_restriction::Model::from_query_result(res, "") {
 			Ok(age_restriction) => Some(age_restriction),
 			Err(sea_orm::DbErr::RecordNotFound(_)) => None,
@@ -117,6 +120,7 @@ impl FromQueryResult for AuthUser {
 			// inject based on the service details
 			avatar_url: None,
 			avatar_meta,
+			avatar_updated_at,
 			username,
 			is_server_owner,
 			is_locked,
@@ -132,6 +136,7 @@ pub struct LoginUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
 	pub avatar_meta: Option<ImageMetadata>,
+	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	pub username: String,
 	pub hashed_password: String,
 	pub is_server_owner: bool,
@@ -185,6 +190,7 @@ impl FromQueryResult for LoginUser {
 			id: user.id,
 			avatar_path: user.avatar_path,
 			avatar_meta: user.avatar_meta,
+			avatar_updated_at: user.avatar_updated_at,
 			username: user.username,
 			hashed_password: user.hashed_password,
 			is_server_owner: user.is_server_owner,
@@ -209,6 +215,7 @@ impl From<LoginUser> for AuthUser {
 			// inject based on the service details
 			avatar_url: None,
 			avatar_meta: user.avatar_meta,
+			avatar_updated_at: user.avatar_updated_at,
 			username: user.username,
 			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,

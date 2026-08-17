@@ -929,6 +929,7 @@ type ImageRef {
 	height: Int
 	width: Int
 	metadata: ImageMetadata
+	lastModified: DateTime
 }
 
 "The resize options to use when generating an image"
@@ -3492,6 +3493,7 @@ type User {
 	isServerOwner: Boolean!
 	avatarPath: String
 	avatarMeta: ImageMetadata
+	avatarUpdatedAt: DateTime
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!

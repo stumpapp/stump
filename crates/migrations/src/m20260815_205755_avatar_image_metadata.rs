@@ -17,6 +17,19 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
+		manager
+			.alter_table(
+				Table::alter()
+					.table(Users::Table)
+					.add_column_if_not_exists(
+						ColumnDef::new(Users::AvatarUpdatedAt).timestamp_with_time_zone(),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		// TODO: backfill those with existing as avatar_updated_at = now so we sync on app correctly
+
 		Ok(())
 	}
 
@@ -30,6 +43,15 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
+		manager
+			.alter_table(
+				Table::alter()
+					.table(Users::Table)
+					.drop_column(Users::AvatarUpdatedAt)
+					.to_owned(),
+			)
+			.await?;
+
 		Ok(())
 	}
 }
@@ -38,4 +60,5 @@ impl MigrationTrait for Migration {
 enum Users {
 	Table,
 	AvatarMeta,
+	AvatarUpdatedAt,
 }

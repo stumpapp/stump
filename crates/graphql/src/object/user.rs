@@ -62,12 +62,17 @@ impl User {
 			.as_ref()
 			.and_then(|meta| meta.dimensions.as_ref())
 			.map(|dim| (dim.width, dim.height));
+		let last_modified = self.model.avatar_updated_at;
 
 		Ok(ImageRef {
-			url: service.format_url(format!("/api/v2/users/{}/avatar", self.model.id)),
+			url: service.cache_friendly_url(
+				format!("/api/v2/users/{}/avatar", self.model.id),
+				&last_modified,
+			),
 			height: dimensions.as_ref().map(|dim| dim.1),
 			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.avatar_meta.clone(),
+			last_modified,
 		})
 	}
 

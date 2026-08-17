@@ -126,6 +126,10 @@ export class Api {
 		this.axiosInstance = instance
 	}
 
+	get isAuthless(): boolean {
+		return this.config.authMethod === 'none'
+	}
+
 	/**
 	 * Check if the current authentication method is token-based
 	 */
@@ -202,11 +206,11 @@ export class Api {
 	}
 
 	/**
-	 * Check if the API is currently *has* auth. This could return a false positive if the
-	 * access token is expired or invalid.
+	 * Check if the API is currently *has* what it needs for auth (e.g., tokens), or if the API
+	 * is operating explicitly without auth (i.e., authMethod is `none`).
 	 */
 	get isAuthed(): boolean {
-		return !!this._tokens || !!this._basicAuth || !!this._apiKey
+		return !!this._tokens || !!this._basicAuth || !!this._apiKey || this.isAuthless
 	}
 
 	/**

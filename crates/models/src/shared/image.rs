@@ -1,5 +1,7 @@
 use async_graphql::SimpleObject;
-use sea_orm::{prelude::Decimal, FromJsonQueryResult};
+use sea_orm::{
+	entity::prelude::DateTimeWithTimeZone, prelude::Decimal, FromJsonQueryResult,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, SimpleObject)]
@@ -8,6 +10,7 @@ pub struct ImageRef {
 	pub height: Option<u32>,
 	pub width: Option<u32>,
 	pub metadata: Option<ImageMetadata>,
+	pub last_modified: Option<DateTimeWithTimeZone>,
 }
 
 #[derive(

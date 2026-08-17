@@ -22,6 +22,9 @@ export type TextCase = 'lowerCase' | 'sentenceCase' | 'titleCase'
 
 type MobilePreferencesStore = {
 	showTabLabels: boolean
+	// TODO: i removed the URLs from the cards when refreshing the look of them,
+	// and there are no other surfaces that display the URLs unless you edit a server,
+	// so i think this setting could probably be removed?
 	maskURLs: boolean
 	setMaskURLs: (mask: boolean) => void
 	storeLastRead: boolean

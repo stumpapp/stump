@@ -6,10 +6,11 @@ use axum::{
 	routing::get,
 	Extension, Json, Router,
 };
+use chrono::Utc;
 use models::entity::{server_config, user, user_preferences};
 use sea_orm::{
-	ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait,
-	QueryFilter, Set, TransactionTrait,
+	entity::prelude::DateTimeWithTimeZone, ActiveModelTrait, ColumnTrait, EntityTrait,
+	IntoActiveModel, PaginatorTrait, QueryFilter, Set, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 use stump_core::filesystem::image::generate_image_metadata_from_bytes;
@@ -323,6 +324,12 @@ async fn callback(
 								.col_expr(
 									user::Column::AvatarMeta,
 									sea_orm::sea_query::Expr::value(avatar_meta),
+								)
+								.col_expr(
+									user::Column::AvatarUpdatedAt,
+									sea_orm::sea_query::Expr::value::<
+										Option<DateTimeWithTimeZone>,
+									>(Some(Utc::now().into())),
 								)
 								.filter(user::Column::Id.eq(user.id.clone()))
 								.exec(ctx.conn.as_ref())

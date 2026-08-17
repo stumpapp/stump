@@ -26,6 +26,8 @@ pub fn get_default_user() -> AuthUser {
 		username: "test".to_string(),
 		avatar_path: None,
 		avatar_url: None,
+		avatar_meta: None,
+		avatar_updated_at: None,
 		is_server_owner: true,
 		is_locked: false,
 		permissions: vec![],

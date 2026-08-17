@@ -5,7 +5,14 @@ import { match, P } from 'ts-pattern'
 
 import { cacheDirectory, serverPath } from '~/lib/filesystem'
 import { createThumbnail } from '~/lib/widgets/utils'
-import { isKnownServer, SavedServer, ServerAvatar, useSavedServerStore } from '~/stores/savedServer'
+import {
+	isKnownServer,
+	KnownServer,
+	SavedServer,
+	ServerAvatar,
+	serverAvatar,
+	useSavedServerStore,
+} from '~/stores/savedServer'
 
 const avatarQuery = graphql(`
 	query PullServerAvatar {
@@ -14,12 +21,8 @@ const avatarQuery = graphql(`
 				url
 				metadata {
 					averageColor
-					colors {
-						color
-						percentage
-					}
-					thumbhash
 				}
+				lastModified
 			}
 		}
 	}
@@ -45,7 +48,7 @@ async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvata
 	if (!avatar) return null
 
 	const file = await downloadImage(serverId, avatar.url, {
-		headers: await api.getHeaders(),
+		headers: await api.getHeaders(), // auth is important ig
 	})
 
 	return {
@@ -54,25 +57,22 @@ async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvata
 	}
 }
 
-async function identifyFromServerHeader(serverHeader: string) {
+async function identifyFromServerHeader(serverHeader: string): Promise<KnownServer | null> {
 	const normalized = serverHeader.toLowerCase()
 
 	if (normalized.startsWith('codex/')) {
 		return 'codex'
 	}
 
+	console.log('serverHeader', serverHeader)
+
 	return null
 }
 
-async function fetchServerHeader(url: string) {
+async function fetchServerHeader(url: string): Promise<KnownServer | null> {
 	try {
 		const response = await fetch(url, { method: 'HEAD' })
 		const serverHeader = await identifyFromServerHeader(response.headers.get('Server') || '')
-		console.log({
-			url,
-			serverHeader,
-			headers: response.headers,
-		})
 		return serverHeader
 	} catch {
 		return null
@@ -83,11 +83,11 @@ async function fetchCatalogAuthor(server: SavedServer, api: Api) {
 	let author: string | null = null
 
 	const opdsVersion = server.kind === 'opds' ? 2 : 1
-	console.log('opdsVersion', opdsVersion)
 
 	if (opdsVersion === 1) {
 		const catalog = await api.opdsLegacy.feed(server.url)
 		author = catalog.author?.name?.toLowerCase() || null
+		console.log('opds 1.2 author', author)
 	} else {
 		const catalog = await api.opds.feed(server.url)
 		author = match(catalog.metadata.author)
@@ -98,26 +98,17 @@ async function fetchCatalogAuthor(server: SavedServer, api: Api) {
 			.with(P.shape({ name: P.string }), (author) => author.name.toLowerCase())
 			.with(P.string, (author) => author.toLowerCase())
 			.otherwise(() => null)
-		if (!author) {
-			console.log('catalog metadata', catalog.metadata)
-		}
 	}
-
-	console.log('catalog author', author)
 
 	return author && isKnownServer(author) ? author : null
 }
 
-// TODO: codex sends an ident in the `Server` header, e.g. `Server: Codex/1.0.0`,
-// but no clue about others. i figure i can bake a few big ones directly
-// in app (komga kavita codex etc) and use some default logo for OPDS
-// if ident fails
-//
-//
-
-async function identifyServer(server: SavedServer, api: Api) {
+// a few knowns to document:
+// - codex does not write an author field in opds feeds, but _does_ send ident in `Server` header
+//   if you configure properly (e.g., a reverse proxy might overwrite by default)
+// - kavita writes `Kavita` in author field in opds feeds
+async function identifyServer(server: SavedServer, api: Api): Promise<KnownServer | null> {
 	const serverHeader = await fetchServerHeader(server.url)
-	console.log('serverHeader', serverHeader)
 	if (serverHeader) return serverHeader
 
 	const catalogAuthor = await fetchCatalogAuthor(server, api)
@@ -136,29 +127,38 @@ async function identifyServer(server: SavedServer, api: Api) {
 // perhaps it just needs to be something like:
 // type ServerAvatar = { uri: string; metadata: json } | { serverLogo: 'codex' | 'kavita' | 'komga' | 'opds' }
 // omg coming back to this i forgot servers aren't sqlite lol hmm that's fine
+// ^ re above, i looked into it because i do love the dx of just writing sqlite everywhere and found it a bit
+// stinky to return my brain back to json-based storage patterns. but, mmkv is a good amount more performant than
+// sqlite for simple things, so for now will leave servers in it.
+
 
 export async function pullServerAvatar(server: SavedServer, api: Api) {
-	let serverAvatar: ServerAvatar | null = null
+	let avatarData: ServerAvatar | null = null
 
+	// when server is stump, we just pull an avatar if the user has one uploaded
 	if (server.kind === 'stump') {
-		serverAvatar = await fetchStumpAvatar(server.id, api)
+		avatarData = await fetchStumpAvatar(server.id, api)
 	} else {
-		const serverType = await identifyServer(server, api)
-		console.log('serverType', serverType)
-		if (serverType != null) {
-			serverAvatar = { logo: serverType }
+		// otherwise we try to sus out what kind of server this is and use one of the baked-in
+		// logos if it is a "known" server
+		const knownServer = await identifyServer(server, api)
+		if (knownServer != null) {
+			avatarData = { logo: knownServer }
 		}
 	}
 
-	const avatar = await match(serverAvatar)
+	const avatar = await match(avatarData)
 		.with({ logo: P.string }, (s) => s)
-		.with({ uri: P.string }, async (stumpAvatar) => {
+		.with({ uri: P.string }, async (data) => {
 			const destination = new File(serverPath(server.id, 'avatar.png'))
-			await new File(stumpAvatar.uri).move(destination, { overwrite: true })
-			return {
-				uri: destination.uri,
-				metadata: stumpAvatar.metadata,
-			}
+			await new File(data.uri).move(destination, { overwrite: true })
+			return (
+				serverAvatar.safeParse({
+					uri: destination.uri,
+					metadata: data.metadata,
+					lastModified: data.lastModified,
+				}).data ?? null
+			)
 		})
 		.otherwise(() => null)
 
@@ -169,4 +169,13 @@ export async function pullServerAvatar(server: SavedServer, api: Api) {
 			avatar,
 		})
 	}
+}
+
+type ServerSdkPair = {
+	server: SavedServer
+	api: Api
+}
+
+export const executePullServerLogos = async (params: ServerSdkPair[]): Promise<void> => {
+	await Promise.all(params.map(({ server, api }) => pullServerAvatar(server, api)))
 }

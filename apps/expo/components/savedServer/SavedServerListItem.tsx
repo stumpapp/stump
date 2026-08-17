@@ -14,7 +14,7 @@ import { SavedServer, useSavedServers } from '~/stores/savedServer'
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
-import { ServerLogo } from './ServerLogo'
+import { ServerLogo, ServerLogoGlow } from './ServerLogo'
 
 type Props = {
 	server: SavedServer
@@ -24,21 +24,6 @@ type Props = {
 
 export default function SavedServerListItem({ server, onEdit, onDelete }: Props) {
 	const { t } = useTranslate()
-
-	// const maskURLs = usePreferencesStore((state) => state.maskURLs)
-	// const formatURL = (url: string) => {
-	// 	try {
-	// 		const urlObj = new URL(url)
-	// 		const host = urlObj.host
-	// 		const domain = urlObj.hostname
-
-	// 		return maskURLs
-	// 			? `${urlObj.protocol}//${host.replace(domain, domain.replace(/./g, '*'))}`
-	// 			: `${urlObj.protocol}//${host}`
-	// 	} catch {
-	// 		return maskURLs ? url.replace(/./g, '*') : url
-	// 	}
-	// }
 
 	const { deleteServerToken } = useSavedServers()
 
@@ -89,10 +74,8 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 		})
 	}
 
-	// https://discord.com/channels/1299159951117127700/1299159951117127703/1496961437547892856
-	// ^ "Codex identifies itself in the HTTP Server: header" e.g. Server: Codex/v1.10.12
 	return (
-		<View className="flex-1">
+		<View className="mx-auto flex-1" style={{ width: itemWidth }}>
 			<ContextMenu
 				onPress={() => onPress()}
 				groups={[
@@ -176,34 +159,27 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 					},
 				]}
 			>
-				<View style={{ width: itemWidth }} className="mx-auto">
-					{/*FIXME: the opacity on bg looks funky when menu active since overlap over other item*/}
-					<View className="px-4 py-4 tablet:py-5 squircle ios:rounded-[2rem] bg-black/5 dark:bg-white/10 h-36 flex w-full flex-1 overflow-hidden rounded-3xl">
-						<View className="flex-1 flex-row items-start justify-between">
-							{/*TODO: pulsing dot, green = ping works + authed, yellow = ping works but 4xx err, red ping failed*/}
-							<Text
-								className="text-base font-medium"
-								numberOfLines={2}
-								style={{
-									maxWidth: itemWidth - 56, // breathing room for icon and text
-								}}
-							>
-								{server.name}
-							</Text>
-							{/*TODO: user avatar OR icon based on type of server (opds)*/}
-							{/*TODO: if opds server supports some kind of favicon or whatever, cache it?*/}
-							<ServerLogo server={server} />
-						</View>
+				<View className="px-4 py-4 tablet:py-5 squircle ios:rounded-[2rem] bg-background-surface h-36 border-black/5 dark:border-white/[0.07] flex w-full flex-1 overflow-hidden rounded-3xl border">
+					<ServerLogoGlow server={server} width={itemWidth} height={144} />
 
-						{/*TODO: gradient, using avatar meta for colors, or hardcode a few others based on ^^ (e.g., codex colors, kavita green, etc)
-              i imagine it like senplayer where it emanates from the logo (strongest there) and fades out to edges of card
-              */}
+					<View className="flex-1 flex-row items-start justify-between">
+						{/*TODO: pulsing dot, green = ping works + authed, yellow = ping works but 4xx err, red ping failed*/}
+						<Text
+							className="text-base font-medium"
+							numberOfLines={2}
+							style={{
+								maxWidth: itemWidth - 56, // breathing room for icon and text
+							}}
+						>
+							{server.name}
+						</Text>
+						<ServerLogo server={server} />
+					</View>
 
-						<View className="flex-row items-start justify-between">
-							<Text size="sm" className="text-foreground-muted">
-								{serverKind}
-							</Text>
-						</View>
+					<View className="flex-row items-start justify-between">
+						<Text size="sm" className="text-foreground-muted">
+							{serverKind}
+						</Text>
 					</View>
 				</View>
 			</ContextMenu>

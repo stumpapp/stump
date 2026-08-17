@@ -1,8 +1,14 @@
-import { queryClient, SDKContext, StumpClientContextProvider } from '@stump/client'
+import {
+	parseGraphQLDateTime,
+	queryClient,
+	SDKContext,
+	StumpClientContextProvider,
+} from '@stump/client'
 import { UserPermission } from '@stump/graphql'
 import { Api, AuthUser, LoginResponse } from '@stump/sdk'
 import { isAxiosError } from 'axios'
 import { Redirect, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import getProperty from 'lodash/get'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
@@ -147,22 +153,24 @@ export default function Screen() {
 		[sdk, user],
 	)
 
-	// TODO: i don't think every time we enter until success is necessarily correct,
-	// but fine for testing
-	// for stump specifically i think we can repull based on changes to avatar metadata?
-	// hypothetically that would be a decent indicator of whether it changed. can also
-	// just add an updated stamp e.g. avatar_updated_at and use that idk
-	const didPullLogo = useRef(false)
+	const didSyncAvatar = useRef(false)
 	useEffect(() => {
-		if (!user || !sdk || !sdk.isAuthed || didPullLogo.current || !activeServer) return
+		if (!user || !sdk || !sdk.isAuthed || didSyncAvatar.current || !activeServer) return
 
-		async function pullLogo() {
-			if (!activeServer || !sdk) return
+		const lastPulledAt = getProperty(activeServer.avatar, 'lastModified')
+		const avatarUpdatedAt = parseGraphQLDateTime(user.avatarUpdatedAt)
+
+		// no update stamp = no avatar (moving forward)
+		if (!avatarUpdatedAt) return
+
+		// pulled more recently than update = nothing to pull
+		if (!!lastPulledAt && lastPulledAt >= avatarUpdatedAt) return
+
+		const syncUserAvatar = async () => {
 			await pullServerAvatar(activeServer, sdk)
-			didPullLogo.current = true
+			didSyncAvatar.current = true
 		}
-
-		pullLogo()
+		syncUserAvatar()
 	}, [sdk, activeServer, user])
 
 	const onResetState = useCallback(() => {

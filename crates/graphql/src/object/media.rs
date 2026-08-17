@@ -210,6 +210,7 @@ impl Media {
 			height: dimensions.as_ref().map(|dim| dim.1),
 			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.thumbnail_meta.clone(),
+			..Default::default()
 		})
 	}
 

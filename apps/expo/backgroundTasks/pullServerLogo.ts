@@ -55,7 +55,9 @@ async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvata
 }
 
 async function identifyFromServerHeader(serverHeader: string) {
-	if (serverHeader.startsWith('Codex/')) {
+	const normalized = serverHeader.toLowerCase()
+
+	if (normalized.startsWith('codex/')) {
 		return 'codex'
 	}
 

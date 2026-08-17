@@ -62,7 +62,7 @@ export function ServerLogo({ server }: Props) {
 					uri: normalizedLogo.uri,
 				}}
 				resizeMode="contain"
-				// style={{ ...defaultStyle, ...size }}
+				style={{ ...defaultSize }}
 			/>
 		)
 	}
@@ -79,9 +79,9 @@ export function ServerLogo({ server }: Props) {
 }
 
 const LOGO_REQUIRES = [
-	require('../../assets/images/serverLogos/codex.svg'),
-	require('../../assets/images/serverLogos/kavita.svg'),
-	require('../../assets/images/serverLogos/komga.svg'),
+	require('../../assets/images/serverLogos/codex.png'),
+	require('../../assets/images/serverLogos/kavita.png'),
+	require('../../assets/images/serverLogos/komga.png'),
 	require('../../assets/images/serverLogos/stump.png'),
 ]
 

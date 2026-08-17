@@ -1,1524 +1,1524 @@
 {
-	"underConstruction": {
-		"heading": "Garip",
-		"message": "Halen geliştirilme aşamasında olan bir sayfaya rastladınız. Size bu sayfayı göstermeyi çok isterdim, ancak henüz tam olarak hazır değil.",
-		"homeLink": "Anasayfaya Git",
-		"githubLink": "GitHub sorununu görüntüle"
-	},
-	"authScene": {
-		"claimHeading": "Sunucunuzu başlatın",
-		"claimText": "Bu Stump sunucusu henüz başlatılmamıştır. Hesabınızı oluşturmak için aşağıdaki formu kullanın. Hesabınız oluşturulduktan sonra, sunucunun tüm özelliklerine tam erişim hakkına sahip olacaksınız.",
-		"form": {
-			"validation": {
-				"missingUsername": "Kullanıcı adı gereklidir",
-				"missingPassword": "Parola gereklidir",
-				"usernameAlreadyExists": "Kullanıcı adı zaten mevcut"
-			},
-			"labels": {
-				"username": "Kullanıcı Adı",
-				"password": "Parola"
-			},
-			"buttons": {
-				"createAccount": "Hesap Oluştur",
-				"login": "Giriş yap",
-				"loginWithOidc": "OIDC ile giriş yap",
-				"createAccountWithOidc": "OIDC ile hesap oluştur"
-			}
-		},
-		"toasts": {
-			"loggingIn": "Giriş yapılıyor...",
-			"loggedIn": "Tekrar hoş geldin!",
-			"loggedInFirstTime": "Hoşgeldin!",
-			"registering": "Kaydediliyor...",
-			"registered": "Kaydedildi!",
-			"loginFailed": "Giriş başarısız. Lütfen tekrar deneyin",
-			"registrationFailed": "Kayıt başarısız. Lütfen tekrar deneyin"
-		}
-	},
-	"adminLibrarySidebar": {
-		"libraryConfiguration": {
-			"heading": "Kütüphane Yapılandırması",
-			"subtitleCreating": "Yeni kütüphanenizin önizlemesi aşağıda gösterilecektir",
-			"subtitleEditing": "Kütüphanenizde yaptığınız değişikliklerin önizlemesi aşağıda gösterilecektir"
-		}
-	},
-	"bookOverviewScene": {
-		"fileInformation": {
-			"heading": "Dosya Bilgisi",
-			"labels": {
-				"fileSize": "Dosya Boyutu",
-				"fileType": "Dosya Türü",
-				"fileLocation": "Dosya Konumu",
-				"fileChecksum": "Sağlama"
-			}
-		},
-		"emailBook": {
-			"heading": "Kitabı e-posta ile gönder",
-			"description": "Bu kitabı bir cihaza veya e-posta adresine gönder",
-			"form": {
-				"email": {
-					"label": "E-posta",
-					"placeholder": "E-posta adresi",
-					"description": "Kitabı göndereceğiniz e-posta adresi. Her bir girişi tamamlamak için ekleyi tıklayın"
-				},
-				"devices": {
-					"label": "Cihazlar",
-					"placeholder": "Cihazları seç",
-					"noFilterMatch": "Filtreye uyan cihaz bulunamadı"
-				}
-			}
-		},
-		"nextInSeries": "Serideki Bir Sonraki"
-	},
-	"createOrUpdateBookClubForm": {
-		"fields": {
-			"name": {
-				"label": "İsim",
-				"placeholder": "Kitap klübüm",
-				"description": "Kitap klübünüzün adı"
-			},
-			"description": {
-				"label": "Açıklama",
-				"placeholder": "“Our Flag Means Death” hayran kulübü. Korsan romanlarını doya doya okuyoruz",
-				"description": "Kitap klübünüzün opsiyonel, kısa bir açıklaması"
-			},
-			"is_private": {
-				"label": "Özel klüp",
-				"description": "Etkinleştirildiğinde, kitap kulübünüze yalnızca davet ettiğiniz kullanıcılar katılabilir"
-			},
-			"member_role_spec": {
-				"heading": "Özel rol eşlemesi",
-				"subtitle": [
-					"İsterseniz kitap kulübünüzdeki roller için özel isimler oluşturabilirsiniz. Daha fazla bilgi için",
-					"dokümantasyon"
-				],
-				"member": {
-					"label": "Üye",
-					"placeholder": "Üye",
-					"description": "Kitap kulübünüzün varsayılan rolünün adı"
-				},
-				"moderator": {
-					"label": "Moderatör",
-					"placeholder": "Moderatör",
-					"description": "Kitap kulübünüzün moderatör rolünün adı"
-				},
-				"admin": {
-					"label": "Yönetici",
-					"placeholder": "Yönetici",
-					"description": "Kitap kulübünüzün yönetici rolünün adı"
-				},
-				"creator": {
-					"label": "Kurucu",
-					"placeholder": "Kurucu",
-					"description": "Kitap kulübünüzün kurucu rolünün adı. Bu sizsiniz!"
-				}
-			},
-			"membershipOptions": {
-				"displayName": {
-					"label": "Görünen Ad",
-					"description": "Kitap kulübündeki üyeliğiniz için isteğe bağlı bir görünen ad. Bu alan doldurulursa, kullanıcı adınızın yerine bu ad kullanılır"
-				},
-				"hideProgress": {
-					"label": "İlerlemeyi Gizle",
-					"description": "Bu seçenek etkinleştirildiğinde, okuma ilerlemeniz kitap kulübünün diğer üyelerinden gizlenecektir"
-				}
-			}
-		},
-		"validation": {
-			"missingName": "İsim gereklidir",
-			"alreadyTaken": "çoktan alınmış"
-		}
-	},
-	"createBookClubScene": {
-		"heading": "Yeni bir kitap klübü oluştur",
-		"subtitle": "Seçkin birkaç kişi için özel bir kitap kulübü oluşturabilir ya da sunucudaki herkesin katılabileceği şekilde herkese açık hale getirebilirsiniz",
-		"form": {
-			"stepLabel": "Adım",
-			"steps": [
-				{
-					"label": "Temeller",
-					"heading": "Temel Bilgi",
-					"description": "Kitap kulübünün adı ve açıklaması dahil olmak üzere ayrıntıları"
-				},
-				{
-					"label": "Roller",
-					"heading": "Roller",
-					"description": "Kitap klübündeki rolleri özelleştirin"
-				},
-				{
-					"label": "Üyelik",
-					"heading": "Üyelik Tercihleri",
-					"description": "Kitap klübünüz için ek yapılandırmalar"
-				},
-				{
-					"label": "Önizleme",
-					"heading": "Önizleme",
-					"description": "Oluşturmadan önce klüp ayarlarınızı kontrol edin"
-				}
-			],
-			"review": {
-				"yes": "Evet",
-				"no": "Hayır",
-				"none": "Hiçbiri",
-				"labels": {
-					"name": "İsim",
-					"description": "Açıklama"
-				}
-			},
-			"submit": "Kitap Klübü Oluştur"
-		}
-	},
-	"bookClubSettingsScene": {
-		"sidebar": {
-			"basics": "Temeller",
-			"members": {
-				"members": "Üyelik",
-				"roles": "Roller",
-				"label": "Üyelik"
-			},
-			"scheduling": {
-				"scheduler": "Planlayıcı",
-				"options": "Şeçenekler",
-				"label": "Zamanlama"
-			},
-			"danger-zone": {
-				"delete": "Silme",
-				"label": "Tehlikeli Bölge"
-			}
-		},
-		"basics": {
-			"title": "Temel Bilgi",
-			"description": "Bu kitap kulübünün adı ve açıklaması dahil olmak üzere ayrıntıları",
-			"form": {
-				"submit": "Klübü güncelle"
-			}
-		},
-		"members": {
-			"title": "Üyeler",
-			"description": "Bu kitap klübünün üyelerini yönetin"
-		},
-		"roles": {
-			"title": "Roller",
-			"description": "Bu kitap klübündeki rolleri özelleştirin",
-			"sections": {
-				"roleMappings": {
-					"heading": "Mevcut rol eşlemeleri",
-					"description": "Bu kitap klübünün mevcut rol eşlemeleri"
-				}
-			}
-		},
-		"scheduling/scheduler": {
-			"title": "Planlayıcı",
-			"description": "Bu kitap kulübü için planlanmış okumaları oluşturun ve yönetin"
-		},
-		"scheduling/options": {
-			"title": "Şeçenekler",
-			"description": "Bu kitap klübünün planlamasına ilişkin ek seçenekler"
-		},
-		"danger-zone/delete": {
-			"title": "Silme Eylemleri",
-			"description": "Bu kitap kulübünü ve tüm içeriğini ya da belirli kaynakları kalıcı olarak sil",
-			"sections": {
-				"deleteClub": {
-					"heading": "Klübü sil",
-					"description": [
-						"Bu kitap kulübünü ve tüm içeriğini kalıcı olarak sil.",
-						"Bu işlem geri alınamaz"
-					],
-					"trigger": "Klübü sil"
-				}
-			}
-		}
-	},
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"name": {
-				"label": "İsim",
-				"description": "Kütüphaneniz için kolay anlaşılır bir ad",
-				"placeholder": "Kütüphanem"
-			},
-			"path": {
-				"label": "Yol",
-				"description": "Sunucunuzda bulunan kütüphaneye giden yol",
-				"placeholder": "/kütüphane/yolu"
-			},
-			"description": {
-				"label": "Açıklama",
-				"description": "Kütüphanenizin kısa bir açıklaması",
-				"placeholder": "En sevdiğim kitapların bulunduğu bir kütüphane"
-			},
-			"tags": {
-				"label": "Etiketler",
-				"description": "Kütüphanenizi sınıflandırmak veya erişim kurallarını uygulamak için kullanılır"
-			},
-			"defaultLibraryView": {
-				"label": "Varsayılan kütüphane görünümü",
-				"description": "Bu kütüphane açıldığında varsayılan olarak hangi sekmenin gösterileceğini ayarla",
-				"hideSeriesView": {
-					"label": "Seriler sekmesini gizle",
-					"description": "Kütüphane gezinme menüsünden seriler sekmesini gizle"
-				},
-				"options": {
-					"series": {
-						"label": "Seriler",
-						"description": "Seriler sekmesini varsayılan olarak göster"
-					},
-					"books": {
-						"label": "Kitaplar",
-						"description": "Kitaplar sekmesini varsayılan olarak göster"
-					}
-				}
-			},
-			"readingSettings": {
-				"section": {
-					"heading": "Okuma ayarları",
-					"description": "Kitaplar için kullanılacak varsayılan okuma ayarları"
-				},
-				"imageScaling": {
-					"label": "Görüntü ölçeklendirme",
-					"description": "Görsel tabanlı okuyucu, görüntüleri sayfaya nasıl sığdıracak"
-				},
-				"readingMode": {
-					"label": "Varsayılan okuyucu",
-					"description": "Görsel tabanlı kitaplar için kullanılacak varsayılan okuyucu"
-				},
-				"readingDirection": {
-					"label": "Okuma yönü",
-					"description": "Okuyucunun sayfalar arasında hangi yönde ilerleyeceği"
-				}
-			},
-			"thumbnailConfig": {
-				"section": {
-					"heading": {
-						"create": "Küçük resim yapılandırması",
-						"update": "Nesil"
-					},
-					"description": "Kitaplarınız için küçük resimler oluşturarak kütüphanenizi tararkenki yükleme sürelerini kısaltın",
-					"disabled": "Küçük resim oluşturma devre dışı bırakıldığında ek bir yapılandırma gerekmez"
-				},
-				"enableSwitch": {
-					"label": "Etkin",
-					"description": "Bu kitaplık için küçük resimler oluştur"
-				},
-				"resizeMethod": {
-					"label": "Yeniden Boyutlandırma Yöntemi",
-					"options": {
-						"scaleEvenlyByFactor": "Eşit Ölçeklendirme",
-						"exact": "Tam Boyut",
-						"scaleDimension": "Otomatik Ölçeklendirme",
-						"none": "Hiçbiri"
-					}
-				},
-				"scaleEvenlyByFactor": {
-					"description": "Küçük resmi orijinal boyutunun belirli bir katı oranında küçültün. Örneğin, 0.65 değeri, orijinal boyutun %65'i kadar bir küçük resim oluşturur",
-					"factor": {
-						"label": "Ölçek Faktörü"
-					}
-				},
-				"exact": {
-					"description": "Küçük resmi tam olarak piksel cinsinden belirtilen boyuta getirin",
-					"width": {
-						"label": "Genişlik"
-					},
-					"height": {
-						"label": "Yükseklik"
-					}
-				},
-				"scaleDimension": {
-					"label": "Otomatik Ölçeklendirme",
-					"description": "Küçük resmin genişliğini veya yüksekliğini ayarlayın; orijinal en-boy oranını korumak için diğer boyut otomatik olarak ölçeklenecektir",
-					"dimension": {
-						"label": "Boyut",
-						"options": {
-							"width": "Genişlik",
-							"height": "Yükseklik"
-						}
-					},
-					"size": {
-						"label": "Boyut"
-					}
-				},
-				"format": {
-					"label": "Görüntü formatı",
-					"description": "Oluşturulan küçük resim formatı"
-				},
-				"quality": {
-					"label": "Kalite",
-					"description": "Oluşturulan küçük resim kalitesi, 1 ile 100 arası"
-				}
-			},
-			"ignoreRules": {
-				"section": {
-					"heading": "Yoksayma kuralları",
-					"description": "Tarama sırasında belirli dosya veya dizinleri göz ardı etmek için glob kalıplarını tanımlayın"
-				},
-				"noRules": "Hiçbir yoksayma kuralı yapılandırılmamış",
-				"save": "Değişiklikleri kaydet",
-				"addRule": {
-					"label": "Yeni kural",
-					"description": "Dosyaları ve klasörleri yoksaymak için glob kalıbı",
-					"addButton": "Kural ekle",
-					"ignoreParents": {
-						"title": "Tüm üst dizinleri yok say",
-						"label": "Üst dizinleri yok say"
-					},
-					"ignoreSubdirs": {
-						"title": "Tüm alt dizinleri yok say",
-						"label": "Alt dizinleri yok say"
-					}
-				},
-				"invalidGlob": "Geçersiz glob kalıbı",
-				"duplicateGlob": "Mevcut bir kuralın kopyası",
-				"lockConfig": {
-					"lock": "Yapılandırmayı kilitle",
-					"unlock": "Yapılandırma kilidini aç"
-				},
-				"editRule": "Kuralı düzenle",
-				"deleteRule": "Kuralı sil",
-				"cancelEdit": "Düzenlemeyi iptal et",
-				"confirmEdit": "Düzenlemeyi onayla"
-			},
-			"convertOptions": {
-				"section": {
-					"heading": "Dosya dönüştürme",
-					"description": "Stump, belirli dosya formatlarını daha uyumlu formatlara dönüştürebilir"
-				},
-				"rarToZip": {
-					"label": "RAR'ı ZIP'e dönüştür",
-					"description": "Tarama sırasında RAR/CBR dosyalarını ZIP/CBZ dosyalarına dönüştür"
-				},
-				"deleteRarAfter": {
-					"label": "Dönüştürme sonrası RAR'ı sil",
-					"description": "Dönüştürme işleminden sonra orijinal RAR/CBR dosyasını silin. Bu işlem geri alınamaz"
-				}
-			},
-			"scannerFeatures": {
-				"section": {
-					"heading": "İsteğe bağlı işleme",
-					"description": "Tarayıcı için isteğe bağlı işlem özellikleri",
-					"disclaimer": "Bu özellikler, tarama işlemini yavaşlatabilecek ek dosya okuma işlemlerini gerektirir"
-				},
-				"processMetadata": {
-					"label": "Meta veriyi işle",
-					"description": "Kütüphane dosyalarından meta verileri ayıklayın ve sonuçları veritabanında saklayın"
-				},
-				"watch": {
-					"label": "İzle",
-					"description": "Kütüphane dizinindeki değişiklikleri takip edin ve veritabanını buna göre güncelleyin"
-				},
-				"generateFileHashes": {
-					"label": "Dosya hash değerlerini oluştur",
-					"description": "Yinelenen dosyaları tespit etmek için kütüphanedeki her dosya için bir hash değeri oluşturun"
-				},
-				"koreaderHashes": {
-					"label": "KoReader uyumlu hash değerleri",
-					"description": "KoReader kullanıyorsanız, programın beklediği biçimde ek hash değerleri oluşturun"
-				}
-			},
-			"libraryPattern": {
-				"section": {
-					"heading": "Düzen",
-					"description": "Kütüphanenizin yapısına en çok uyan düzeni belirleyin",
-					"docs": [
-						"Hangisini seçeceğinden emin değil misin? Daha fazla bilgi için",
-						"buraya",
-						"tıkla.",
-						"Bu ayarı daha sonra değiştiremezsin"
-					],
-					"disabled": "Bu ayarı değiştiremezsin"
-				},
-				"options": {
-					"label": "Kütüphane düzeni",
-					"description": "Stump'ın kitaplığınızı nasıl düzenleyeceğini belirleyen ayar",
-					"collectionPriority": {
-						"label": "Koleksiyon öncelikli",
-						"description": "Kütüphane kök dizinindeki en üst düzeydeki her klasör tek bir seridir"
-					},
-					"seriesPriority": {
-						"label": "Seri öncelikli",
-						"description": "Her seviyedeki her klasör, özyinelemeli olarak tek bir seridir"
-					}
-				}
-			}
-		},
-		"scan": {
-			"label": {
-				"create": "Oluşturduktan sonra tara",
-				"update": "Güncellemeden sonra tara"
-			},
-			"description": "Veritabanınızı doldurmak için kütüphane dosyalarını tarayın"
-		}
-	},
-	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Kütüphaneler, kitaplarınızı gruplandırmak için kullanılır. Nasıl çalıştıklarını hatırlamak isterseniz,",
-		"subtitleLink": "ilgili belgelere göz atın",
-		"form": {
-			"stepLabel": "Adım",
-			"steps": [
-				{
-					"label": "Temeller",
-					"heading": "Temel Bilgi",
-					"description": "Bu kütüphanenin adı, yolu ve açıklaması dahil olmak üzere ayrıntıları"
-				},
-				{
-					"label": "Taranıyor",
-					"heading": "Taranıyor",
-					"description": "Stump'ın bu kütüphaneyi nasıl taradığına ilişkin ayarlar"
-				},
-				{
-					"label": "Küçük Resimler",
-					"heading": "Küçük Resimler",
-					"description": "Stump'ın bu kütüphane için küçük resimler oluşturup oluşturmayacağına ve nasıl oluşturacağına dair seçenekler"
-				},
-				{
-					"label": "Önizleme",
-					"heading": "Önizleme",
-					"description": "Kütüphaneyi oluşturmadan önce ayarlarını kontrol edin"
-				}
-			],
-			"review": {
-				"yes": "Evet",
-				"no": "Hayır",
-				"none": "Hiçbiri",
-				"labels": {
-					"generateThumbnails": "Küçük resimler oluştur",
-					"processThumbnailColors": "Küçük resim renklerini işle",
-					"mode": "Mod",
-					"quality": "Kalite",
-					"name": "İsim",
-					"path": "Yol",
-					"description": "Açıklama",
-					"tags": "Etiketler",
-					"pattern": "Desen",
-					"ignoreRules": "Yoksayma kuralları",
-					"convertRar": "RAR/CBR Dönüştür",
-					"deleteConversions": "Dönüştürülmüş dosyaları sil",
-					"watch": "Değişiklikler için dizini izle",
-					"processMetadata": "Meta veriyi işle",
-					"generateFileHashes": "Dosya hash değerlerini oluştur",
-					"generateKoreaderHashes": "KoReader hash değerlerini oluştur",
-					"scaleEvenlyByFactor": "Eşit Ölçeklendirme",
-					"exact": "Tam Boyut",
-					"scaleDimension": "Belirli Boyutta"
-				}
-			},
-			"buttons": {
-				"confirm": "Kütüphane Oluştur"
-			}
-		}
-	},
-	"fileExplorer": {
-		"uploadModal": {
-			"title": {
-				"books": "Kitap yükle",
-				"series": "Seri yükle"
-			},
-			"description": {
-				"books": "Dosya gezgininde kitapları doğrudan geçerli konuma ekle",
-				"series": "Dosya gezgininde mevcut yola doğrudan bir seri ekle"
-			},
-			"seriesDisclaimer": [
-				"Bu, diziyi oluşturan klasörü içeren ve içinde tüm kitapların bulunduğu",
-				"bir sıkıştırılmış",
-				"dosya olmalıdır"
-			],
-			"dropzone": {
-				"books": "Kitapları buraya sürükle ve bırak",
-				"series": "Biri zip dosyasını buraya sürükle ve bırak",
-				"alt": "Ya da yüklemek istediğiniz kitapları bilgisayarınızda aramak için buraya tıklayın"
-			},
-			"addedFiles": "Eklenen dosyalar"
-		}
-	},
-	"librarySettingsScene": {
-		"heading": "Manage Library",
-		"subtitle": "Kütüphanenizi buradan yönetin. Bu ayarlarla ilgili bilgilerinizi tazelemek isterseniz,",
-		"subtitleLink": "ilgili belgelere göz atın",
-		"sidebar": {
-			"basics": "Temeller",
-			"danger-zone": {
-				"access-control": "Erişim Kontrolü",
-				"delete": "Silme",
-				"label": "Tehlikeli Bölge"
-			}
-		},
-		"basics": {
-			"title": "Temel Bilgi",
-			"description": "Bu kütüphanenin adı, yolu ve açıklaması dahil olmak üzere ayrıntıları",
-			"form": {
-				"submit": "Kütüphaneyi güncelle"
-			}
-		},
-		"options/reading": {
-			"title": "Okuma",
-			"description": "Bu kütüphanedeki kitaplar için kullanılacak varsayılan okuyucu ayarları. Herhangi bir kitap bu ayarları geçersiz kılabilir"
-		},
-		"options/scanning": {
-			"title": "Tarama",
-			"description": "Stump'ın bu kütüphaneyi nasıl taradığına ilişkin ayarlar",
-			"sections": {
-				"configureScan": {
-					"heading": "Taramayı yapılandır",
-					"description": "Daha ayrıntılı kontrol imkanı sunan ek seçeneklere sahip bir tarama",
-					"form": {
-						"alert": "Bunlar, kütüphane genelindeki ilgili ayarların yerine geçecektir",
-						"options": {
-							"forceRebuild": {
-								"label": "Yeniden oluşturmayı zorla",
-								"description": "Kütüphanedeki tüm kitapları diskten yeniden oluştur",
-								"alert": "Bu işlem, meta veriler ve hash değerleri de dahil olmak üzere, kütüphanedeki tüm kitapları sıfırdan yeniden oluşturacaktır"
-							},
-							"custom": {
-								"label": "Özel",
-								"description": "Tarama ayarlarını özelleştirin",
-								"validation": {
-									"noSelection": "En az bir seçenek etkinleştirilmeli"
-								}
-							},
-							"rebuildMeta": {
-								"label": "Meta veriyi yeniden oluştur",
-								"description": "Kütüphanedeki kitapların meta verilerini yeniden oluştur"
-							},
-							"regenHashes": {
-								"label": "Has değerlerini yeniden oluştur",
-								"description": "Kütüphanedeki kitapların hash değerlerini yeniden oluştur"
-							}
-						}
-					}
-				},
-				"defaultScan": {
-					"heading": "Varsayılan tarama",
-					"description": "Kütüphanenizi yeni içeriklere göre indekslemek için yapılan standart bir tarama"
-				},
-				"history": {
-					"heading": "Tarama geçmişi",
-					"description": "Bu kütüphane için kaydedilen tüm taramaların geçmişi",
-					"empty": "Bu kütüphane için kaydedilmiş hiçbir tarama yok",
-					"runScan": "Taramayı başlat",
-					"inspect": "Detayları gör",
-					"inspector": {
-						"title": "Tarama kayıtları",
-						"description": "Bu tarama kaydının ayrıntılı görünümü",
-						"fields": {
-							"library": "Kütüphane",
-							"date": "Tarih",
-							"config": "Yapılandırma",
-							"jobOutput": "Görev çıktısı",
-							"logs": "Günlükler"
-						},
-						"logsPresent": "Bu iş için günlükler kaydedildi",
-						"seeLogs": "Günlükleri gör"
-					},
-					"table": {
-						"columns": {
-							"timestamp": "Tarandı",
-							"config": "Yapılandırma"
-						},
-						"default": "Varsayılan",
-						"custom": "Özel"
-					},
-					"clearHistory": "Tarama geçmişini sil"
-				}
-			}
-		},
-		"options/thumbnails": {
-			"title": "Küçük Resimler",
-			"description": "Bu kütüphanedeki küçük resimler için ayar ve yönetim seçenekleri",
-			"sections": {
-				"management": {
-					"heading": "Management",
-					"description": "Bu kütüphane için mevcut küçük resimleri yönet"
-				}
-			}
-		},
-		"danger-zone/access-control": {
-			"title": "Erişim Kontrolü",
-			"description": "Bu kütüphanedeki içeriğe kimlerin erişebileceğini kontrol edin",
-			"sections": {
-				"libraryExclusions": {
-					"heading": "Kullanıcıları hariç tut",
-					"description": "Belirli kullanıcıların bu kütüphaneye veya içeriğine erişmesini engelle",
-					"noUsersTitle": "Hariç tutulacak kullanıcı yok",
-					"noUsers": "Bu kütüphaneden hariç tutulacak başka kayıtlı kullanıcı bulunmamaktadır",
-					"updated": "Hariç tutma güncellendi",
-					"failure": "Hariç tutmalar güncellenemedi"
-				}
-			}
-		},
-		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Bu kütüphaneyi ve tüm içeriğini ya da belirli kaynaklarını kalıcı olarak sil",
-			"sections": {
-				"cleanLibrary": {
-					"heading": "Kütüphaneyi temizle",
-					"description": "Diskte bulunamayan tüm medya ve serileri kaldır",
-					"disclaimerTitle": "Hiçbir dosya silinmeyecek",
-					"disclaimer": "Bu işlem herhangi bir dosyayı silmeyecek olsa da, eksik durumundaki medya ve serilerle ilgili tüm kayıtları kalıcı olarak silecektir",
-					"confirmation": {
-						"label": "Kütüphaneyi temizle",
-						"text": "Kütüphaneyi temizlemek istediğinizdem emin misiniz?"
-					},
-					"emptyText": "Temizlenecek bir şey yoktu"
-				},
-				"deleteLibrary": {
-					"heading": "Kütüphaneyi sil",
-					"description": [
-						"Bu kütüphaneyi ve tüm içeriğini kalıcı olarak sil.",
-						"Bu işlem geri alınamaz"
-					]
-				}
-			}
-		}
-	},
-	"errorScene": {
-		"heading": "haydaaa, bak sen şu işe",
-		"message": "Bir hata oluştu:",
-		"buttons": {
-			"report": "Hata Bildir",
-			"copy": "Hata Detaylarını Kopyala",
-			"goHome": "Anasayfaya Git"
-		}
-	},
-	"homeScene": {
-		"onDeck": {
-			"title": "Sıradaki okumanız",
-			"emptyState": {
-				"heading": "Sırada kitap yok",
-				"message": "Sıradaki kitap önerilerin burada görünecek"
-			}
-		},
-		"continueReading": {
-			"title": "Okumaya devam et",
-			"emptyState": {
-				"heading": "Gösterilecek bir şey yok",
-				"message": "Devam ettiğin kitaplar burada gösterilecek"
-			}
-		},
-		"recentlyAddedSeries": {
-			"title": "En son eklenen seriler",
-			"emptyState": {
-				"heading": "Gösterilecek seri yok",
-				"message": "Kütüphanelerine eklediğin seriler burada gösterilecek"
-			}
-		},
-		"recentlyAddedBooks": {
-			"title": "En son eklenen kitaplar",
-			"emptyState": {
-				"heading": "Gösterilecek bir şey yok",
-				"message": "En son eklediğin kitaplar burada gösterilecek"
-			}
-		}
-	},
-	"metadataEditor": {
-		"labels": {
-			"ageRating": "Yaş sınırı",
-			"characters": "Karakterler",
-			"colorists": "Renklendirenler",
-			"coverArtists": "Kapak sanatçıları",
-			"day": "Gün",
-			"editors": "Editörler",
-			"identifierUuid": "Kitap UUID",
-			"genres": "Türler",
-			"inkers": "Mürekkepleyenler",
-			"language": "Dil",
-			"letterers": "Balonlayanlar",
-			"links": "Linkler",
-			"month": "Ay",
-			"notes": "Notlar",
-			"number": "Numara",
-			"pageCount": "Sayfalar",
-			"pencillers": "Çizimciler",
-			"publisher": "Yayıncı",
-			"series": "Seriler",
-			"seriesGroup": "Seri grubu",
-			"storyArc": "Hikaye arkı",
-			"storyArcNumber": "Hikaye ark numarası",
-			"summary": "Özet",
-			"teams": "Takımlar",
-			"title": "Başlık",
-			"titleSort": "Başlık sıralaması",
-			"volume": "Cilt",
-			"writers": "Yazarlar",
-			"year": "Yıl",
-			"metaType": "Tür",
-			"imprint": "Künye",
-			"comicid": "Çizgi Roman ID",
-			"booktype": "Kitap türü",
-			"status": "Durum",
-			"totalIssues": "Toplam sayılar",
-			"publicationRun": "Yayın aralığı",
-			"comicImage": "Çizgi roman görseli",
-			"descriptionFormatted": "Açıklama (biçimlendirilmiş)"
-		},
-		"addFields": {
-			"description": "Her bir girişi ayrı bir satıra yazın"
-		}
-	},
-	"seriesOverviewScene": {
-		"buttons": {
-			"continueReading": "Okumaya Devam Et",
-			"downloadSeries": "Serileri İndir"
-		}
-	},
-	"createOrUpdateSmartListForm": {
-		"validation": {
-			"nameTooShort": "İsim en az 2 karakter olmalıdır",
-			"nameTaken": "Bu isim kullanılamaz"
-		},
-		"fields": {
-			"name": {
-				"label": "İsim",
-				"placeholder": "Akıllı listem",
-				"description": "Benzersiz olmalı, fakat daha sonra değiştirilebilir"
-			},
-			"description": {
-				"label": "Açıklama",
-				"placeholder": "Oldukça akıllı bir liste",
-				"description": "Akıllı listeniz için opsiyonel bir açıklama"
-			},
-			"visibility": {
-				"label": "Görünürlük",
-				"options": {
-					"public": {
-						"label": "Herkese Açık",
-						"description": "Bu sunucudaki tüm kullanıcılarca erişilebilir"
-					},
-					"shared": {
-						"label": "Paylaşımlı",
-						"description": "Belirli kullanıcılar bu akıllı listeye erişebilir",
-						"createDisclaimer": "Bu listeyi oluşturduktan sonra kiminle paylaşılacağını seçebilirsiniz"
-					},
-					"private": {
-						"label": "Özel",
-						"description": "Bu akıllı listeye sadece sen erişebilirsin"
-					}
-				}
-			},
-			"queryBuilder": {
-				"uiPerformance": "Bu özelliğin kullanıcı arayüzü tarafında performans optimizasyonları henüz tamamlanmamıştır ve çok sayıda sonuç getiren filtrelemelerde yavaşlık yaşanabilir. Bu durum gelecek sürümlerde iyileştirilecektir",
-				"rootJoiner": {
-					"and": {
-						"label": "VE",
-						"description": "Bir kitabın eşleşmesi için tüm filtre gruplarının doğru olması gerekir"
-					},
-					"or": {
-						"label": "VEYA",
-						"description": "Bir kitabın eşleşmesi için en az bir filtre grubunun doğru olması gerekir"
-					}
-				},
-				"groupJoiner": {
-					"and": {
-						"label": "VE",
-						"description": "Tümü doğru olmalı"
-					},
-					"or": {
-						"label": "VEYA",
-						"description": "En az bir tanesi doğru olmalı"
-					},
-					"not": {
-						"label": "DEĞİL",
-						"description": "Hiçbiri doğru olmamalı"
-					}
-				},
-				"grouping": {
-					"label": "Şuna göre grupla",
-					"description": "Bu akıllı listedeki kitaplar nasıl gruplandırılacağı",
-					"options": {
-						"by_books": {
-							"label": "Hiçbiri"
-						},
-						"by_series": {
-							"label": "Seriler"
-						},
-						"by_library": {
-							"label": "Kütüphane"
-						}
-					}
-				},
-				"filters": {
-					"emptyState": "Başlamak için bir grup ekleyin",
-					"actions": {
-						"addFilter": "Filtre ekle",
-						"addGroup": "Grup ekle",
-						"deleteFilter": "Filtreyi sil",
-						"deleteGroup": "Grubu sil"
-					},
-					"fieldSelect": {
-						"source": {
-							"label": "Kaynak",
-							"back": "Geri",
-							"book": {
-								"label": "Kitap",
-								"attributes": {
-									"name": "Dosya adı",
-									"size": "Boyut",
-									"extension": "Uzantı",
-									"status": "Durum",
-									"path": "Yol",
-									"pages": "Sayfalar",
-									"tags": "Etiketler",
-									"createdAt": "Oluşturulma tarihi",
-									"updatedAt": "Güncellenme tarihi"
-								}
-							},
-							"book_meta": {
-								"attributes": {
-									"title": "Başlık",
-									"summary": "Özet",
-									"notes": "Notlar",
-									"writers": "Yazarlar",
-									"pencillers": "Çizimciler",
-									"inkers": "Mürekkepleyenler",
-									"letterers": "Balonlayanlar",
-									"editors": "Editörler",
-									"publisher": "Yayıncı",
-									"colorists": "Renklendiren",
-									"links": "Linkler",
-									"characters": "Karakterler",
-									"teams": "Takımlar",
-									"genres": "Tür",
-									"coverArtists": "Kapak sanatçıları"
-								}
-							},
-							"series": {
-								"label": "Seriler",
-								"attributes": {
-									"name": "İsim",
-									"path": "Yol"
-								}
-							},
-							"series_meta": {
-								"attributes": {
-									"title": "Başlık",
-									"summary": "Özet",
-									"publisher": "Yayıncı",
-									"imprint": "Künye",
-									"comicid": "Çizgi Roman ID",
-									"booktype": "Kitap türü",
-									"status": "Durum",
-									"volume": "Cilt",
-									"metaType": "Tür",
-									"ageRating": "Yaş sınırı"
-								}
-							},
-							"library": {
-								"label": "Kütüphane",
-								"attributes": {
-									"name": "İsim",
-									"path": "Yol"
-								}
-							}
-						}
-					},
-					"basicValue": {
-						"placeholder": "Değer",
-						"date": "Tarih"
-					},
-					"rangeValue": {
-						"from": {
-							"date": "Başlangıç tarihi",
-							"number": "Başlangıç"
-						},
-						"to": {
-							"date": "Günümüze",
-							"number": "Bitiş"
-						},
-						"inclusive": "Dahil"
-					},
-					"listValue": {
-						"placeholder": "Değerleri ekle",
-						"emptyState": "Gösterilecek değer yok"
-					}
-				}
-			}
-		}
-	},
-	"createSmartListScene": {
-		"heading": "Akıllı liste oluştur",
-		"subtitle": "Bir dizi filtreye dayalı anında liste oluşturma",
-		"form": {
-			"stepLabel": "Adım",
-			"steps": [
-				{
-					"label": "Temeller",
-					"heading": "Temel Bilgi",
-					"description": "Bu akıllı listenin adı, açıklaması ve görünürlük ayarları dahil olmak üzere ayrıntıları"
-				},
-				{
-					"label": "Filtreler",
-					"heading": "Filtreler",
-					"description": "Bu akıllı listeye uygulanacak filtreler"
-				},
-				{
-					"label": "Önizleme",
-					"heading": "Önizleme",
-					"description": "Akıllı listeyi oluşturmadan önce ayarlarını kontrol edin"
-				}
-			],
-			"review": {
-				"yes": "Evet",
-				"no": "Hayır",
-				"none": "Hiçbiri",
-				"labels": {
-					"name": "İsim",
-					"description": "Açıklama",
-					"visibility": "Görünürlük",
-					"grouping": "Şuna göre grupla"
-				}
-			},
-			"buttons": {
-				"confirm": "Liste oluştur"
-			}
-		}
-	},
-	"createOrUpdateApiKey": {
-		"validation": {
-			"futureDate": "Son geçerlilik tarihi gelecekte olmalıdır"
-		},
-		"fields": {
-			"name": {
-				"label": "İsim",
-				"placeholder": "Koreader Senkronizasyonu"
-			},
-			"expiration": {
-				"label": "Süre sonu",
-				"placeholder": "Hiçbir zaman"
-			},
-			"expiresAt": {
-				"label": "Sona erme tarihi",
-				"placeholder": "Hiçbir zaman"
-			},
-			"permissions": {
-				"inherit": {
-					"label": "İzinleri devral",
-					"description": "Hesabınızla aynı izinler"
-				},
-				"explicit": {
-					"label": "Açık izinler",
-					"description": "Bu anahtarın sahip olması gereken izinleri seçin"
-				}
-			}
-		},
-		"inheritDisclaimer": "Bu API anahtarı tüm izinlerinizi devralacaktır, yani sizin yapabileceğiniz her şeyi yapabilir. Bu ayara dikkat edin"
-	},
-	"userSmartListsScene": {
-		"heading": "Akıllı listeler",
-		"buttons": {
-			"createSmartList": "Akıllı liste oluştur"
-		},
-		"list": {
-			"card": {
-				"meta": {
-					"figures": {
-						"books": "kitap",
-						"series": "seriler",
-						"library": "kütüphane"
-					},
-					"matches": "Eşleşmeler"
-				}
-			}
-		}
-	},
-	"smartListSettingsScene": {
-		"sidebar": {
-			"basics": "Temeller",
-			"configuration": {
-				"label": "Yapılandırma",
-				"access": "Erişim",
-				"filters": "Filtreler"
-			},
-			"danger-zone": {
-				"delete": "Silme",
-				"label": "Tehlikeli Bölge"
-			}
-		},
-		"basics": {
-			"title": "Temel Bilgi",
-			"description": "Bu akıllı listenin adı ve açıklaması dahil olmak üzere ayrıntıları"
-		},
-		"access": {
-			"title": "Erişim",
-			"description": "Bu akıllı listeye kimlerin erişebileceğini kontrol et",
-			"sections": {
-				"visibility": {
-					"confirmation": {
-						"public": "Bu, listeyi herkese açık yapacaktır",
-						"private": "Bu, listeyi özel hale getirecek ve daha önce erişim izni olan herkesten gizleyecektir",
-						"shared": "Bu listeye erişim izni vermek için belirli kullanıcılarla paylaşmanız gerekecek",
-						"fallback": "Bu listenin görünürlüğünü değiştirmek istediğinizden emin misiniz?"
-					}
-				},
-				"accessManager": {
-					"disclaimer": "Paylaşım henüz hazır değil. Lütfen daha sonra tekrar kontrol et!"
-				}
-			}
-		},
-		"filters": {
-			"title": "Filtre Oluşturucu",
-			"description": "Bu akıllı listeyi oluşturan filtreleri yönetin"
-		},
-		"danger-zone/delete": {
-			"title": "Silme Eylemleri",
-			"description": "Bu akıllı listeyi ve tüm içeriğini ya da belirli kaynaklarını kalıcı olarak sil",
-			"sections": {
-				"deleteList": {
-					"heading": "Listeyi sil",
-					"description": [
-						"Bu akıllı listeyi ve tüm içeriğini kalıcı olarak sil.",
-						"Bu işlem geri alınamaz"
-					],
-					"confirmation": {
-						"title": "Listeyi sil",
-						"description": "Bu akıllı listeyi silmek istediğinizden emin misiniz?",
-						"confirm": "Listeyi sil"
-					}
-				}
-			}
-		}
-	},
-	"userSmartListScene": {
-		"navigation": {
-			"items": "Ögeler",
-			"settings": "Ayarlar"
-		},
-		"layout": {
-			"smartListNotFound": "Akıllı liste bulunamadı"
-		},
-		"itemsScene": {
-			"actionHeader": {
-				"filterDrawer": {
-					"rawData": {
-						"heading": "Ham filtre verisi",
-						"description": "Stump filtreleri bu şekilde işleyecek"
-					},
-					"buttons": {
-						"save": "Kaydet",
-						"cancel": "İptal"
-					}
-				},
-				"search": {
-					"placeholder": "Hızlı filtre"
-				},
-				"viewManager": {
-					"updateSelected": "Update selected",
-					"deleteSelected": "Görünümü sil",
-					"create": "Yeni görünüm oluştur",
-					"modal": {
-						"heading": {
-							"create": "Görünüm oluştur",
-							"update": "Görünümü güncelle"
-						},
-						"description": {
-							"create": "Bu akıllı liste için yeni bir görünüm oluştur",
-							"update": "Görünümü güncelle"
-						},
-						"createForm": {
-							"name": {
-								"label": "İsim",
-								"placeholder": "Görünümüm",
-								"description": "Bu görünümü benzersiz bir şekilde tanımlamak için kullanılan bir ad"
-							}
-						},
-						"updateForm": {
-							"name": {
-								"label": "İsim",
-								"placeholder": "Görünümüm",
-								"description": "İstenirse bu görünümün güncellenmiş adı"
-							}
-						}
-					},
-					"deleteModal": {
-						"title": "Görünümü sil",
-						"description": "Bu görünümü silmek istediğinizden emin misiniz?"
-					}
-				}
-			}
-		}
-	},
-	"settingsScene": {
-		"navigation": {
-			"general": "Genel",
-			"logs": "Günlükler",
-			"server": "Sunucu",
-			"jobs": "Görevler ve Yapılandırma",
-			"users": "Kullanıcı Yönetimi",
-			"desktop": "Masaüstü"
-		},
-		"sidebar": {
-			"personal": {
-				"account": "Hesap",
-				"appearance": "Tercihler",
-				"api keys": "API anahtarları",
-				"reader": "Okuyucu",
-				"desktop": "Masaüstü",
-				"label": "Kişisel"
-			},
-			"management": {
-				"general": "General",
-				"logs": "Günlükler",
-				"users": "Kullanıcılar",
-				"jobs": "Görevler",
-				"access": "Erişim",
-				"email": "E-posta",
-				"notifications": "Bildirimler",
-				"label": "Yönetim"
-			}
-		},
-		"app/account": {
-			"helmet": "Hesap ayarları",
-			"title": "Hesap ayarları",
-			"description": "Hesabınızla ilgili ayarlar",
-			"sections": {
-				"account": {
-					"validation": {
-						"invalidUrl": "Lütfen geçerli bir URL girin",
-						"missingUsername": "Kullanıcı adı gereklidir"
-					},
-					"labels": {
-						"username": "Kullanıcı Adı",
-						"password": "Parola",
-						"activeChangesPrompt": "Kaydedilmemiş değişiklikleriniz var"
-					},
-					"errors": {
-						"updateFailed": "Profilinizi güncellerken bir sunucu hatası oluştu. Lütfen tekrar deneyin."
-					}
-				}
-			}
-		},
-		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"sections": {
-				"fontSelect": {
-					"label": "Yazı Tipi"
-				},
-				"replacePrimarySidebar": {
-					"tooltips": {
-						"doubleSidebar": "Bu ayarın kullanılabilmesi için ayarlar kenar çubuğunun etkinleştirilmesi gerekir",
-						"topbar": "Ana gezinme yöntemi üst çubuk olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
-					}
-				},
-				"navigationArrangement": {
-					"label": "Gezinme düzeni",
-					"isLocked": "Düzenleme kilitli",
-					"lock": "Düzenlemeyi kilitle",
-					"unlock": "Düzenleme kilidini aç",
-					"options": {
-						"HOME": "Anasayfa",
-						"EXPLORE": "Keşfet",
-						"LIBRARIES": "Kütüphaneler",
-						"BOOK_CLUBS": "Kitap klüpleri",
-						"SMART_LISTS": "Akıllı listeler"
-					},
-					"entityOptions": {
-						"createAction": {
-							"label": "Oluşturma eylemini göster",
-							"help": "Navigasyonda oluşturma eylemini göster"
-						},
-						"linkToAll": {
-							"label": "Tüm linkleri gör",
-							"help": "Bu türdeki tüm öğeleri görüntülemek için ayrılmış bir sayfaya bağlantı"
-						}
-					}
-				},
-				"displaySpacing": {
-					"label": "Görüntü aralığı",
-					"description": "Uygulama genelinde öğeler arasındaki genel aralığı ayarlar",
-					"options": {
-						"default": "Varsayılan",
-						"compact": "Sıkışık"
-					},
-					"disclaimer": "Sıkışık görüntü modu henüz devreye alınmamıştır"
-				},
-				"maxWidthPreference": {
-					"label": "Ayarlanmış genişlik",
-					"description": "Stump, görüntü alanına bir maksimum genişlik uygular. Bu ayar, bu sınırı değiştirmenize veya kaldırmanıza olanak tanır",
-					"tooltip": "Ana gezinme yöntemi kenar çubuğu olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
-				},
-				"additionalPreferences": {
-					"label": "Diğer tercihler",
-					"description": "Bu ek ayarlarla Stump'ın görünümünü ve davranışını özelleştirin"
-				},
-				"hideScrollbarToggle": {
-					"label": "Kaydırma çubuğunu gizle",
-					"description": "Bazı sayfalar kaydırma çubuğu olmadan daha iyi görünür, bu ayar mümkün olduğunda kaydırma çubuğunu gizler",
-					"tooltips": {
-						"enabled": "Bu ayar, bazı sayfalarda kaydırma çubuğunu gizleyecektir",
-						"disabled": "Bu ayar, bazı sayfalarda kaydırma çubuğunu gösterecektir"
-					}
-				},
-				"enableAlphabetFiltering": {
-					"label": "Alfabetik filtreleme",
-					"description": "Mümkün olduğunda alfabetik filtreyi göster"
-				},
-				"enableFancyAnimations": {
-					"label": "Gösterişli animasyonlar",
-					"description": "Uygulama genelinde daha gösterişli animasyonlar için genel bir tercih seçeneği"
-				},
-				"queryIndicatorToggle": {
-					"label": "Arka planda veri alma göstergesi",
-					"description": "Arka planda bir sorgu çalıştırıldığında yükleme göstergesini göster"
-				},
-				"liveRefetchToggle": {
-					"label": "Anlık veri tazeleme",
-					"description": "Yeni veriler ulaştıkça arayüzü güncellemek için sorguları anlık olarak yeniler. Bu özellik yüksek kaynak tüketimine neden olabilir"
-				},
-				"enableJobOverlayToggle": {
-					"label": "Görev katmanı",
-					"description": "Görev yürütülürken ekran üzerinde bir katman göster"
-				}
-			}
-		},
-		"app/apiKeys": {
-			"helmet": "API anahtarları",
-			"title": "API anahtarları",
-			"description": "Oluşturduğunuz Stump API anahtarlarını yönetin",
-			"shared": {
-				"fields": {
-					"name": "İsim"
-				}
-			}
-		},
-		"app/desktop": {
-			"description": "Stump masaüstü uygulamasıyla ilgili ayarlar",
-			"sections": {
-				"configuredServers": {
-					"label": "Yapılandırılmış sunucular",
-					"description": "Bağlanabileceğiniz Stump sunucularının listesi",
-					"getStarted": "Başlamak için bir sunucu ekleyin",
-					"unreachableServer": {
-						"tooltip": "Sunucuya ulaşılamıyor"
-					},
-					"activeServer": {
-						"tooltip": "Mevcut sunucu"
-					},
-					"addOrEditServer": {
-						"validation": {
-							"nameExists": "Bu isimde bir sunucu zaten var",
-							"nameForbidden": "Bu isim ayrılmış",
-							"urlExists": "Bu URL'de bir sunucu zaten var"
-						},
-						"fields": {
-							"name": {
-								"label": "İsim",
-								"description": "Bu sunucuyu tanımlamak için bir isim",
-								"placeholder": "Sunucum"
-							},
-							"uri": {
-								"description": "Stump sunucusunun URL'si"
-							}
-						}
-					},
-					"addServer": {
-						"trigger": "Sunucu ekle",
-						"title": "Yeni bir sunucu ekle",
-						"description": "Masaüstü uygulamasına yeni bir Stump sunucusu ekle",
-						"confirm": "Sunucu ekle"
-					},
-					"editServer": {
-						"tooltip": "Sunucuyu düzenle",
-						"title": "Sunucuyu düzenle",
-						"description": "Bu sunucunun detaylarını düzenle",
-						"confirm": "Değişiklikleri kaydet"
-					},
-					"deleteServer": {
-						"tooltip": "Sunucuyu sil",
-						"confirmation": {
-							"title": "Bu sunucuyu sil",
-							"description": "Bu işlem, sunucuyu masaüstü uygulamasından kaldıracaktır",
-							"disclaimerActiveServer": "Bu sunucu şu anda aktif. Oturumunuz kapatılacak",
-							"disclaimerLastServer": "Bu, yapılandırılmış son sunucudur. Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir",
-							"confirm": "Sunucuyu sil"
-						}
-					},
-					"switchToServer": {
-						"tooltip": "Sunucuya geç",
-						"confirmation": {
-							"title": "Bu sunucuya geç",
-							"description": "Bu işlem, mevcut sunucunuzdaki oturumunuzu kapatacak",
-							"confirm": "Sunucuya geç",
-							"server": "Sunucu"
-						}
-					},
-					"resetConfiguration": {
-						"label": "Tüm sunucuları sil",
-						"description": [
-							"Masaüstü uygulamasından tüm yapılandırılmış sunucuları kaldır",
-							"Bu işlem geri alınamaz"
-						],
-						"confirmation": {
-							"trigger": "Tüm sunucuları sil",
-							"title": "Tüm sunucuları sil",
-							"description": "Bu işlem, tüm sunucuları masaüstü uygulamasından kaldıracaktır",
-							"disclaimer": "Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir",
-							"confirm": "Tüm sunucuları sil"
-						}
-					},
-					"resetTokens": {
-						"label": "Clear authentication",
-						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
-						],
-						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
-						}
-					}
-				},
-				"optionalFeatures": {
-					"label": "İsteğe bağlı özellikler",
-					"description": "Masaüstü uygulamasına özgü isteğe bağlı özellikleri yönetin",
-					"bundledServer": {
-						"label": "Dahili sunucu",
-						"description": "Masaüstü uygulaması çalışırken dahili sunucuyu arka planda çalıştır (yeniden başlatma gerektirir)"
-					},
-					"discordPresence": {
-						"label": "Discord Durumu",
-						"description": "Discord Rich Presence özelliğini kullanarak Discord'da Stump etkinliklerinizi görüntüleyin",
-						"reconnect": "Discord'a Yeniden Bağlan"
-					}
-				}
-			}
-		},
-		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings"
-		},
-		"server/jobs": {
-			"sections": {
-				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
-				},
-				"history": {
-					"table": {
-						"columns": {
-							"status": "Durum",
-							"createdAt": "Başlangıç Tarihi",
-							"elapsed": "Geçen süre",
-							"tasks": "Görevler"
-						},
-						"emptyHeading": "Gösterilecek görev yok",
-						"emptySubtitle": "Görevin yoksa görevin yoktur",
-						"deleteAllMessage": "Görev geçmişi ve istatistikler herhangi bir zamanda veritabanından silinebilir. Bu işlem geri alınamaz"
-					},
-					"deleteJobHistory": {
-						"title": "Görev geçmişini sil",
-						"description": "Veritabanından kalıcı olarak tüm görev geçmişini sil",
-						"confirmText": "Tüm görev geçmişini silmek istediğinden emin misin?",
-						"confirm": "Sil",
-						"emptyState": "Temizlenecek görev yok"
-					}
-				}
-			}
-		},
-		"server/users": {
-			"helmet": "Kullanıcı yönetimi",
-			"title": "Kullanıcılar",
-			"description": "Bu sunucudaki kullanıcıları yönet",
-			"createUser": {
-				"helmet": "Kullanıcı oluştur",
-				"title": "Kullanıcı oluştur",
-				"description": "Bu sunucudaki yeni bir kullanıcı oluştur"
-			},
-			"updateUser": {
-				"helmet": "Kullanıcıyı güncelle",
-				"title": "Kullanıcıyı güncelle",
-				"description": "Bu kullanıcının detaylarını güncelle"
-			},
-			"createOrUpdateForm": {
-				"accessControl": {
-					"heading": "Erişim kontrolü ve kısıtlamalar",
-					"subtitle": [
-						"Bu kullanıcıya uygulamak istediğiniz kısıtlamaları yapılandırın. Erişim denetimi hakkında daha fazla bilgi için",
-						"dökümantasyona bakınız"
-					],
-					"ageRestriction": {
-						"label": "Yaş kısıtlaması",
-						"description": "Kullanıcının, belirlenen yaş sınırının üzerindeki içeriğe erişmesini engeller",
-						"enforceUnset": {
-							"label": "Derecelendirilmemiş olanları kısıtla",
-							"description": "Etkinleştirildiğinde, yaş derecelendirmesi bulunmayan içeriklere erişim kısıtlanır"
-						}
-					},
-					"tagRestriction": {
-						"label": "Etiket kısıtlamaları",
-						"description": "Kullanıcının, seçili etiketlere sahip içeriğe erişmesini engeller",
-						"placeholder": "Yetişkin, Şiddet"
-					}
-				},
-				"permissions": {
-					"heading": "İzinler",
-					"subtitle": [
-						"Bu kullanıcıya vermek istediğiniz izinleri seçin. Her bir iznin ne işe yaradığı hakkında daha fazla bilgi için",
-						"dökümantasyona bakınız"
-					],
-					"bookclub": {
-						"label": "Kitap Klüpleri",
-						"read": {
-							"label": "Kitap kulübü özelliklerine erişin",
-							"description": "Kullanıcının kitap kulüplerini görüntüleme ve bunlara katılma gibi kitap kulübü özelliklerine erişmesini sağlar"
-						},
-						"create": {
-							"label": "Kitap klüpleri oluştur",
-							"description": "Kullanıcının yeni kitap kulüpleri oluşturmasına olanak tanır"
-						}
-					},
-					"feature": {
-						"label": "Özellik Aboneliği",
-						"api_keys": {
-							"label": "API anahtarları",
-							"description": "Kullanıcının kendi API anahtarlarını yönetmesine izin verir"
-						},
-						"koreader_sync": {
-							"label": "KoReader senkronizasyonu",
-							"description": "Kullanıcının KoReader senkronizasyon entegrasyonuna erişmesine izin verir"
-						}
-					},
-					"file": {
-						"label": "Dosya Yönetimi",
-						"explorer": {
-							"label": "File Explorer",
-							"description": "Kullanıcının çeşitli dosya gezginlerine erişmesine olanak tanır.\nBu özellik etkinleştirildiğinde içerik kısıtlamasının sağlanamayacağı unutulmamalıdır"
-						},
-						"download": {
-							"label": "Dosyaları indir",
-							"description": "Kullanıcının sunucudan dosyaları indirmesine izin verir"
-						},
-						"upload": {
-							"label": "Dosya yükle",
-							"description": "Kullanıcının sunucuya dosya yüklemesine izin verir"
-						}
-					},
-					"user": {
-						"manage": {
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
-						}
-					},
-					"smartlist": {
-						"read": {
-							"description": "Allows the user to access smart lists features"
-						}
-					}
-				}
-			}
-		}
-	},
-	"sidebar": {
-		"libraryOptions": {
-			"manageLibrary": "Manage"
-		}
-	},
-	"thumbnailDropdown": {
-		"label": "Edit thumbnail"
-	},
-	"mobileApp": {
-		"readerSettings": {
-			"title": "Reader Settings"
-		}
-	}
+    "underConstruction": {
+        "heading": "Garip",
+        "message": "Halen geliştirilme aşamasında olan bir sayfaya rastladınız. Size bu sayfayı göstermeyi çok isterdim, ancak henüz tam olarak hazır değil.",
+        "homeLink": "Anasayfaya Git",
+        "githubLink": "GitHub sorununu görüntüle"
+    },
+    "authScene": {
+        "claimHeading": "Sunucunuzu başlatın",
+        "claimText": "Bu Stump sunucusu henüz başlatılmamıştır. Hesabınızı oluşturmak için aşağıdaki formu kullanın. Hesabınız oluşturulduktan sonra, sunucunun tüm özelliklerine tam erişim hakkına sahip olacaksınız.",
+        "form": {
+            "validation": {
+                "missingUsername": "Kullanıcı adı gereklidir",
+                "missingPassword": "Parola gereklidir",
+                "usernameAlreadyExists": "Kullanıcı adı zaten mevcut"
+            },
+            "labels": {
+                "username": "Kullanıcı Adı",
+                "password": "Parola"
+            },
+            "buttons": {
+                "createAccount": "Hesap Oluştur",
+                "login": "Giriş yap",
+                "loginWithOidc": "OIDC ile giriş yap",
+                "createAccountWithOidc": "OIDC ile hesap oluştur"
+            }
+        },
+        "toasts": {
+            "loggingIn": "Giriş yapılıyor...",
+            "loggedIn": "Tekrar hoş geldin!",
+            "loggedInFirstTime": "Hoşgeldin!",
+            "registering": "Kaydediliyor...",
+            "registered": "Kaydedildi!",
+            "loginFailed": "Giriş başarısız. Lütfen tekrar deneyin",
+            "registrationFailed": "Kayıt başarısız. Lütfen tekrar deneyin"
+        }
+    },
+    "adminLibrarySidebar": {
+        "libraryConfiguration": {
+            "heading": "Kütüphane Yapılandırması",
+            "subtitleCreating": "Yeni kütüphanenizin önizlemesi aşağıda gösterilecektir",
+            "subtitleEditing": "Kütüphanenizde yaptığınız değişikliklerin önizlemesi aşağıda gösterilecektir"
+        }
+    },
+    "bookOverviewScene": {
+        "fileInformation": {
+            "heading": "Dosya Bilgisi",
+            "labels": {
+                "fileSize": "Dosya Boyutu",
+                "fileType": "Dosya Türü",
+                "fileLocation": "Dosya Konumu",
+                "fileChecksum": "Sağlama"
+            }
+        },
+        "emailBook": {
+            "heading": "Kitabı e-posta ile gönder",
+            "description": "Bu kitabı bir cihaza veya e-posta adresine gönder",
+            "form": {
+                "email": {
+                    "label": "E-posta",
+                    "placeholder": "E-posta adresi",
+                    "description": "Kitabı göndereceğiniz e-posta adresi. Her bir girişi tamamlamak için ekleyi tıklayın"
+                },
+                "devices": {
+                    "label": "Cihazlar",
+                    "placeholder": "Cihazları seç",
+                    "noFilterMatch": "Filtreye uyan cihaz bulunamadı"
+                }
+            }
+        },
+        "nextInSeries": "Serideki Bir Sonraki"
+    },
+    "createOrUpdateBookClubForm": {
+        "fields": {
+            "name": {
+                "label": "İsim",
+                "placeholder": "Kitap klübüm",
+                "description": "Kitap klübünüzün adı"
+            },
+            "description": {
+                "label": "Açıklama",
+                "placeholder": "“Our Flag Means Death” hayran kulübü. Korsan romanlarını doya doya okuyoruz",
+                "description": "Kitap klübünüzün opsiyonel, kısa bir açıklaması"
+            },
+            "is_private": {
+                "label": "Özel klüp",
+                "description": "Etkinleştirildiğinde, kitap kulübünüze yalnızca davet ettiğiniz kullanıcılar katılabilir"
+            },
+            "member_role_spec": {
+                "heading": "Özel rol eşlemesi",
+                "subtitle": [
+                    "İsterseniz kitap kulübünüzdeki roller için özel isimler oluşturabilirsiniz. Daha fazla bilgi için",
+                    "dokümantasyon"
+                ],
+                "member": {
+                    "label": "Üye",
+                    "placeholder": "Üye",
+                    "description": "Kitap kulübünüzün varsayılan rolünün adı"
+                },
+                "moderator": {
+                    "label": "Moderatör",
+                    "placeholder": "Moderatör",
+                    "description": "Kitap kulübünüzün moderatör rolünün adı"
+                },
+                "admin": {
+                    "label": "Yönetici",
+                    "placeholder": "Yönetici",
+                    "description": "Kitap kulübünüzün yönetici rolünün adı"
+                },
+                "creator": {
+                    "label": "Kurucu",
+                    "placeholder": "Kurucu",
+                    "description": "Kitap kulübünüzün kurucu rolünün adı. Bu sizsiniz!"
+                }
+            },
+            "membershipOptions": {
+                "displayName": {
+                    "label": "Görünen Ad",
+                    "description": "Kitap kulübündeki üyeliğiniz için isteğe bağlı bir görünen ad. Bu alan doldurulursa, kullanıcı adınızın yerine bu ad kullanılır"
+                },
+                "hideProgress": {
+                    "label": "İlerlemeyi Gizle",
+                    "description": "Bu seçenek etkinleştirildiğinde, okuma ilerlemeniz kitap kulübünün diğer üyelerinden gizlenecektir"
+                }
+            }
+        },
+        "validation": {
+            "missingName": "İsim gereklidir",
+            "alreadyTaken": "çoktan alınmış"
+        }
+    },
+    "createBookClubScene": {
+        "heading": "Yeni bir kitap klübü oluştur",
+        "subtitle": "Seçkin birkaç kişi için özel bir kitap kulübü oluşturabilir ya da sunucudaki herkesin katılabileceği şekilde herkese açık hale getirebilirsiniz",
+        "form": {
+            "stepLabel": "Adım",
+            "steps": [
+                {
+                    "label": "Temeller",
+                    "heading": "Temel Bilgi",
+                    "description": "Kitap kulübünün adı ve açıklaması dahil olmak üzere ayrıntıları"
+                },
+                {
+                    "label": "Roller",
+                    "heading": "Roller",
+                    "description": "Kitap klübündeki rolleri özelleştirin"
+                },
+                {
+                    "label": "Üyelik",
+                    "heading": "Üyelik Tercihleri",
+                    "description": "Kitap klübünüz için ek yapılandırmalar"
+                },
+                {
+                    "label": "Önizleme",
+                    "heading": "Önizleme",
+                    "description": "Oluşturmadan önce klüp ayarlarınızı kontrol edin"
+                }
+            ],
+            "review": {
+                "yes": "Evet",
+                "no": "Hayır",
+                "none": "Hiçbiri",
+                "labels": {
+                    "name": "İsim",
+                    "description": "Açıklama"
+                }
+            },
+            "submit": "Kitap Klübü Oluştur"
+        }
+    },
+    "bookClubSettingsScene": {
+        "sidebar": {
+            "basics": "Temeller",
+            "members": {
+                "members": "Üyelik",
+                "roles": "Roller",
+                "label": "Üyelik"
+            },
+            "scheduling": {
+                "scheduler": "Planlayıcı",
+                "options": "Şeçenekler",
+                "label": "Zamanlama"
+            },
+            "danger-zone": {
+                "delete": "Silme",
+                "label": "Tehlikeli Bölge"
+            }
+        },
+        "basics": {
+            "title": "Temel Bilgi",
+            "description": "Bu kitap kulübünün adı ve açıklaması dahil olmak üzere ayrıntıları",
+            "form": {
+                "submit": "Klübü güncelle"
+            }
+        },
+        "members": {
+            "title": "Üyeler",
+            "description": "Bu kitap klübünün üyelerini yönetin"
+        },
+        "roles": {
+            "title": "Roller",
+            "description": "Bu kitap klübündeki rolleri özelleştirin",
+            "sections": {
+                "roleMappings": {
+                    "heading": "Mevcut rol eşlemeleri",
+                    "description": "Bu kitap klübünün mevcut rol eşlemeleri"
+                }
+            }
+        },
+        "scheduling/scheduler": {
+            "title": "Planlayıcı",
+            "description": "Bu kitap kulübü için planlanmış okumaları oluşturun ve yönetin"
+        },
+        "scheduling/options": {
+            "title": "Şeçenekler",
+            "description": "Bu kitap klübünün planlamasına ilişkin ek seçenekler"
+        },
+        "danger-zone/delete": {
+            "title": "Silme Eylemleri",
+            "description": "Bu kitap kulübünü ve tüm içeriğini ya da belirli kaynakları kalıcı olarak sil",
+            "sections": {
+                "deleteClub": {
+                    "heading": "Klübü sil",
+                    "description": [
+                        "Bu kitap kulübünü ve tüm içeriğini kalıcı olarak sil.",
+                        "Bu işlem geri alınamaz"
+                    ],
+                    "trigger": "Klübü sil"
+                }
+            }
+        }
+    },
+    "createOrUpdateLibraryForm": {
+        "fields": {
+            "name": {
+                "label": "İsim",
+                "description": "Kütüphaneniz için kolay anlaşılır bir ad",
+                "placeholder": "Kütüphanem"
+            },
+            "path": {
+                "label": "Yol",
+                "description": "Sunucunuzda bulunan kütüphaneye giden yol",
+                "placeholder": "/kütüphane/yolu"
+            },
+            "description": {
+                "label": "Açıklama",
+                "description": "Kütüphanenizin kısa bir açıklaması",
+                "placeholder": "En sevdiğim kitapların bulunduğu bir kütüphane"
+            },
+            "tags": {
+                "label": "Etiketler",
+                "description": "Kütüphanenizi sınıflandırmak veya erişim kurallarını uygulamak için kullanılır"
+            },
+            "defaultLibraryView": {
+                "label": "Varsayılan kütüphane görünümü",
+                "description": "Bu kütüphane açıldığında varsayılan olarak hangi sekmenin gösterileceğini ayarla",
+                "hideSeriesView": {
+                    "label": "Seriler sekmesini gizle",
+                    "description": "Kütüphane gezinme menüsünden seriler sekmesini gizle"
+                },
+                "options": {
+                    "series": {
+                        "label": "Seriler",
+                        "description": "Seriler sekmesini varsayılan olarak göster"
+                    },
+                    "books": {
+                        "label": "Kitaplar",
+                        "description": "Kitaplar sekmesini varsayılan olarak göster"
+                    }
+                }
+            },
+            "readingSettings": {
+                "section": {
+                    "heading": "Okuma ayarları",
+                    "description": "Kitaplar için kullanılacak varsayılan okuma ayarları"
+                },
+                "imageScaling": {
+                    "label": "Görüntü ölçeklendirme",
+                    "description": "Görsel tabanlı okuyucu, görüntüleri sayfaya nasıl sığdıracak"
+                },
+                "readingMode": {
+                    "label": "Varsayılan okuyucu",
+                    "description": "Görsel tabanlı kitaplar için kullanılacak varsayılan okuyucu"
+                },
+                "readingDirection": {
+                    "label": "Okuma yönü",
+                    "description": "Okuyucunun sayfalar arasında hangi yönde ilerleyeceği"
+                }
+            },
+            "thumbnailConfig": {
+                "section": {
+                    "heading": {
+                        "create": "Küçük resim yapılandırması",
+                        "update": "Nesil"
+                    },
+                    "description": "Kitaplarınız için küçük resimler oluşturarak kütüphanenizi tararkenki yükleme sürelerini kısaltın",
+                    "disabled": "Küçük resim oluşturma devre dışı bırakıldığında ek bir yapılandırma gerekmez"
+                },
+                "enableSwitch": {
+                    "label": "Etkin",
+                    "description": "Bu kitaplık için küçük resimler oluştur"
+                },
+                "resizeMethod": {
+                    "label": "Yeniden Boyutlandırma Yöntemi",
+                    "options": {
+                        "scaleEvenlyByFactor": "Eşit Ölçeklendirme",
+                        "exact": "Tam Boyut",
+                        "scaleDimension": "Otomatik Ölçeklendirme",
+                        "none": "Hiçbiri"
+                    }
+                },
+                "scaleEvenlyByFactor": {
+                    "description": "Küçük resmi orijinal boyutunun belirli bir katı oranında küçültün. Örneğin, 0.65 değeri, orijinal boyutun %65'i kadar bir küçük resim oluşturur",
+                    "factor": {
+                        "label": "Ölçek Faktörü"
+                    }
+                },
+                "exact": {
+                    "description": "Küçük resmi tam olarak piksel cinsinden belirtilen boyuta getirin",
+                    "width": {
+                        "label": "Genişlik"
+                    },
+                    "height": {
+                        "label": "Yükseklik"
+                    }
+                },
+                "scaleDimension": {
+                    "label": "Otomatik Ölçeklendirme",
+                    "description": "Küçük resmin genişliğini veya yüksekliğini ayarlayın; orijinal en-boy oranını korumak için diğer boyut otomatik olarak ölçeklenecektir",
+                    "dimension": {
+                        "label": "Boyut",
+                        "options": {
+                            "width": "Genişlik",
+                            "height": "Yükseklik"
+                        }
+                    },
+                    "size": {
+                        "label": "Boyut"
+                    }
+                },
+                "format": {
+                    "label": "Görüntü formatı",
+                    "description": "Oluşturulan küçük resim formatı"
+                },
+                "quality": {
+                    "label": "Kalite",
+                    "description": "Oluşturulan küçük resim kalitesi, 1 ile 100 arası"
+                }
+            },
+            "ignoreRules": {
+                "section": {
+                    "heading": "Yoksayma kuralları",
+                    "description": "Tarama sırasında belirli dosya veya dizinleri göz ardı etmek için glob kalıplarını tanımlayın"
+                },
+                "noRules": "Hiçbir yoksayma kuralı yapılandırılmamış",
+                "save": "Değişiklikleri kaydet",
+                "addRule": {
+                    "label": "Yeni kural",
+                    "description": "Dosyaları ve klasörleri yoksaymak için glob kalıbı",
+                    "addButton": "Kural ekle",
+                    "ignoreParents": {
+                        "title": "Tüm üst dizinleri yok say",
+                        "label": "Üst dizinleri yok say"
+                    },
+                    "ignoreSubdirs": {
+                        "title": "Tüm alt dizinleri yok say",
+                        "label": "Alt dizinleri yok say"
+                    }
+                },
+                "invalidGlob": "Geçersiz glob kalıbı",
+                "duplicateGlob": "Mevcut bir kuralın kopyası",
+                "lockConfig": {
+                    "lock": "Yapılandırmayı kilitle",
+                    "unlock": "Yapılandırma kilidini aç"
+                },
+                "editRule": "Kuralı düzenle",
+                "deleteRule": "Kuralı sil",
+                "cancelEdit": "Düzenlemeyi iptal et",
+                "confirmEdit": "Düzenlemeyi onayla"
+            },
+            "convertOptions": {
+                "section": {
+                    "heading": "Dosya dönüştürme",
+                    "description": "Stump, belirli dosya formatlarını daha uyumlu formatlara dönüştürebilir"
+                },
+                "rarToZip": {
+                    "label": "RAR'ı ZIP'e dönüştür",
+                    "description": "Tarama sırasında RAR/CBR dosyalarını ZIP/CBZ dosyalarına dönüştür"
+                },
+                "deleteRarAfter": {
+                    "label": "Dönüştürme sonrası RAR'ı sil",
+                    "description": "Dönüştürme işleminden sonra orijinal RAR/CBR dosyasını silin. Bu işlem geri alınamaz"
+                }
+            },
+            "scannerFeatures": {
+                "section": {
+                    "heading": "İsteğe bağlı işleme",
+                    "description": "Tarayıcı için isteğe bağlı işlem özellikleri",
+                    "disclaimer": "Bu özellikler, tarama işlemini yavaşlatabilecek ek dosya okuma işlemlerini gerektirir"
+                },
+                "processMetadata": {
+                    "label": "Meta veriyi işle",
+                    "description": "Kütüphane dosyalarından meta verileri ayıklayın ve sonuçları veritabanında saklayın"
+                },
+                "watch": {
+                    "label": "İzle",
+                    "description": "Kütüphane dizinindeki değişiklikleri takip edin ve veritabanını buna göre güncelleyin"
+                },
+                "generateFileHashes": {
+                    "label": "Dosya hash değerlerini oluştur",
+                    "description": "Yinelenen dosyaları tespit etmek için kütüphanedeki her dosya için bir hash değeri oluşturun"
+                },
+                "koreaderHashes": {
+                    "label": "KoReader uyumlu hash değerleri",
+                    "description": "KoReader kullanıyorsanız, programın beklediği biçimde ek hash değerleri oluşturun"
+                }
+            },
+            "libraryPattern": {
+                "section": {
+                    "heading": "Düzen",
+                    "description": "Kütüphanenizin yapısına en çok uyan düzeni belirleyin",
+                    "docs": [
+                        "Hangisini seçeceğinden emin değil misin? Daha fazla bilgi için",
+                        "buraya",
+                        "tıkla.",
+                        "Bu ayarı daha sonra değiştiremezsin"
+                    ],
+                    "disabled": "Bu ayarı değiştiremezsin"
+                },
+                "options": {
+                    "label": "Kütüphane düzeni",
+                    "description": "Stump'ın kitaplığınızı nasıl düzenleyeceğini belirleyen ayar",
+                    "collectionPriority": {
+                        "label": "Koleksiyon öncelikli",
+                        "description": "Kütüphane kök dizinindeki en üst düzeydeki her klasör tek bir seridir"
+                    },
+                    "seriesPriority": {
+                        "label": "Seri öncelikli",
+                        "description": "Her seviyedeki her klasör, özyinelemeli olarak tek bir seridir"
+                    }
+                }
+            }
+        },
+        "scan": {
+            "label": {
+                "create": "Oluşturduktan sonra tara",
+                "update": "Güncellemeden sonra tara"
+            },
+            "description": "Veritabanınızı doldurmak için kütüphane dosyalarını tarayın"
+        }
+    },
+    "createLibraryScene": {
+        "heading": "Create New Library",
+        "subtitle": "Kütüphaneler, kitaplarınızı gruplandırmak için kullanılır. Nasıl çalıştıklarını hatırlamak isterseniz,",
+        "subtitleLink": "ilgili belgelere göz atın",
+        "form": {
+            "stepLabel": "Adım",
+            "steps": [
+                {
+                    "label": "Temeller",
+                    "heading": "Temel Bilgi",
+                    "description": "Bu kütüphanenin adı, yolu ve açıklaması dahil olmak üzere ayrıntıları"
+                },
+                {
+                    "label": "Taranıyor",
+                    "heading": "Taranıyor",
+                    "description": "Stump'ın bu kütüphaneyi nasıl taradığına ilişkin ayarlar"
+                },
+                {
+                    "label": "Küçük Resimler",
+                    "heading": "Küçük Resimler",
+                    "description": "Stump'ın bu kütüphane için küçük resimler oluşturup oluşturmayacağına ve nasıl oluşturacağına dair seçenekler"
+                },
+                {
+                    "label": "Önizleme",
+                    "heading": "Önizleme",
+                    "description": "Kütüphaneyi oluşturmadan önce ayarlarını kontrol edin"
+                }
+            ],
+            "review": {
+                "yes": "Evet",
+                "no": "Hayır",
+                "none": "Hiçbiri",
+                "labels": {
+                    "generateThumbnails": "Küçük resimler oluştur",
+                    "processThumbnailColors": "Küçük resim renklerini işle",
+                    "mode": "Mod",
+                    "quality": "Kalite",
+                    "name": "İsim",
+                    "path": "Yol",
+                    "description": "Açıklama",
+                    "tags": "Etiketler",
+                    "pattern": "Desen",
+                    "ignoreRules": "Yoksayma kuralları",
+                    "convertRar": "RAR/CBR Dönüştür",
+                    "deleteConversions": "Dönüştürülmüş dosyaları sil",
+                    "watch": "Değişiklikler için dizini izle",
+                    "processMetadata": "Meta veriyi işle",
+                    "generateFileHashes": "Dosya hash değerlerini oluştur",
+                    "generateKoreaderHashes": "KoReader hash değerlerini oluştur",
+                    "scaleEvenlyByFactor": "Eşit Ölçeklendirme",
+                    "exact": "Tam Boyut",
+                    "scaleDimension": "Belirli Boyutta"
+                }
+            },
+            "buttons": {
+                "confirm": "Kütüphane Oluştur"
+            }
+        }
+    },
+    "fileExplorer": {
+        "uploadModal": {
+            "title": {
+                "books": "Kitap yükle",
+                "series": "Seri yükle"
+            },
+            "description": {
+                "books": "Dosya gezgininde kitapları doğrudan geçerli konuma ekle",
+                "series": "Dosya gezgininde mevcut yola doğrudan bir seri ekle"
+            },
+            "seriesDisclaimer": [
+                "Bu, diziyi oluşturan klasörü içeren ve içinde tüm kitapların bulunduğu",
+                "bir sıkıştırılmış",
+                "dosya olmalıdır"
+            ],
+            "dropzone": {
+                "books": "Kitapları buraya sürükle ve bırak",
+                "series": "Biri zip dosyasını buraya sürükle ve bırak",
+                "alt": "Ya da yüklemek istediğiniz kitapları bilgisayarınızda aramak için buraya tıklayın"
+            },
+            "addedFiles": "Eklenen dosyalar"
+        }
+    },
+    "librarySettingsScene": {
+        "heading": "Manage Library",
+        "subtitle": "Kütüphanenizi buradan yönetin. Bu ayarlarla ilgili bilgilerinizi tazelemek isterseniz,",
+        "subtitleLink": "ilgili belgelere göz atın",
+        "sidebar": {
+            "basics": "Temeller",
+            "danger-zone": {
+                "access-control": "Erişim Kontrolü",
+                "delete": "Silme",
+                "label": "Tehlikeli Bölge"
+            }
+        },
+        "basics": {
+            "title": "Temel Bilgi",
+            "description": "Bu kütüphanenin adı, yolu ve açıklaması dahil olmak üzere ayrıntıları",
+            "form": {
+                "submit": "Kütüphaneyi güncelle"
+            }
+        },
+        "options/reading": {
+            "title": "Okuma",
+            "description": "Bu kütüphanedeki kitaplar için kullanılacak varsayılan okuyucu ayarları. Herhangi bir kitap bu ayarları geçersiz kılabilir"
+        },
+        "options/scanning": {
+            "title": "Tarama",
+            "description": "Stump'ın bu kütüphaneyi nasıl taradığına ilişkin ayarlar",
+            "sections": {
+                "configureScan": {
+                    "heading": "Taramayı yapılandır",
+                    "description": "Daha ayrıntılı kontrol imkanı sunan ek seçeneklere sahip bir tarama",
+                    "form": {
+                        "alert": "Bunlar, kütüphane genelindeki ilgili ayarların yerine geçecektir",
+                        "options": {
+                            "forceRebuild": {
+                                "label": "Yeniden oluşturmayı zorla",
+                                "description": "Kütüphanedeki tüm kitapları diskten yeniden oluştur",
+                                "alert": "Bu işlem, meta veriler ve hash değerleri de dahil olmak üzere, kütüphanedeki tüm kitapları sıfırdan yeniden oluşturacaktır"
+                            },
+                            "custom": {
+                                "label": "Özel",
+                                "description": "Tarama ayarlarını özelleştirin",
+                                "validation": {
+                                    "noSelection": "En az bir seçenek etkinleştirilmeli"
+                                }
+                            },
+                            "rebuildMeta": {
+                                "label": "Meta veriyi yeniden oluştur",
+                                "description": "Kütüphanedeki kitapların meta verilerini yeniden oluştur"
+                            },
+                            "regenHashes": {
+                                "label": "Has değerlerini yeniden oluştur",
+                                "description": "Kütüphanedeki kitapların hash değerlerini yeniden oluştur"
+                            }
+                        }
+                    }
+                },
+                "defaultScan": {
+                    "heading": "Varsayılan tarama",
+                    "description": "Kütüphanenizi yeni içeriklere göre indekslemek için yapılan standart bir tarama"
+                },
+                "history": {
+                    "heading": "Tarama geçmişi",
+                    "description": "Bu kütüphane için kaydedilen tüm taramaların geçmişi",
+                    "empty": "Bu kütüphane için kaydedilmiş hiçbir tarama yok",
+                    "runScan": "Taramayı başlat",
+                    "inspect": "Detayları gör",
+                    "inspector": {
+                        "title": "Tarama kayıtları",
+                        "description": "Bu tarama kaydının ayrıntılı görünümü",
+                        "fields": {
+                            "library": "Kütüphane",
+                            "date": "Tarih",
+                            "config": "Yapılandırma",
+                            "jobOutput": "Görev çıktısı",
+                            "logs": "Günlükler"
+                        },
+                        "logsPresent": "Bu iş için günlükler kaydedildi",
+                        "seeLogs": "Günlükleri gör"
+                    },
+                    "table": {
+                        "columns": {
+                            "timestamp": "Tarandı",
+                            "config": "Yapılandırma"
+                        },
+                        "default": "Varsayılan",
+                        "custom": "Özel"
+                    },
+                    "clearHistory": "Tarama geçmişini sil"
+                }
+            }
+        },
+        "options/thumbnails": {
+            "title": "Küçük Resimler",
+            "description": "Bu kütüphanedeki küçük resimler için ayar ve yönetim seçenekleri",
+            "sections": {
+                "management": {
+                    "heading": "Management",
+                    "description": "Bu kütüphane için mevcut küçük resimleri yönet"
+                }
+            }
+        },
+        "danger-zone/access-control": {
+            "title": "Erişim Kontrolü",
+            "description": "Bu kütüphanedeki içeriğe kimlerin erişebileceğini kontrol edin",
+            "sections": {
+                "libraryExclusions": {
+                    "heading": "Kullanıcıları hariç tut",
+                    "description": "Belirli kullanıcıların bu kütüphaneye veya içeriğine erişmesini engelle",
+                    "noUsersTitle": "Hariç tutulacak kullanıcı yok",
+                    "noUsers": "Bu kütüphaneden hariç tutulacak başka kayıtlı kullanıcı bulunmamaktadır",
+                    "updated": "Hariç tutma güncellendi",
+                    "failure": "Hariç tutmalar güncellenemedi"
+                }
+            }
+        },
+        "danger-zone/delete": {
+            "title": "Deletion Actions",
+            "description": "Bu kütüphaneyi ve tüm içeriğini ya da belirli kaynaklarını kalıcı olarak sil",
+            "sections": {
+                "cleanLibrary": {
+                    "heading": "Kütüphaneyi temizle",
+                    "description": "Diskte bulunamayan tüm medya ve serileri kaldır",
+                    "disclaimerTitle": "Hiçbir dosya silinmeyecek",
+                    "disclaimer": "Bu işlem herhangi bir dosyayı silmeyecek olsa da, eksik durumundaki medya ve serilerle ilgili tüm kayıtları kalıcı olarak silecektir",
+                    "confirmation": {
+                        "label": "Kütüphaneyi temizle",
+                        "text": "Kütüphaneyi temizlemek istediğinizdem emin misiniz?"
+                    },
+                    "emptyText": "Temizlenecek bir şey yoktu"
+                },
+                "deleteLibrary": {
+                    "heading": "Kütüphaneyi sil",
+                    "description": [
+                        "Bu kütüphaneyi ve tüm içeriğini kalıcı olarak sil.",
+                        "Bu işlem geri alınamaz"
+                    ]
+                }
+            }
+        }
+    },
+    "errorScene": {
+        "heading": "haydaaa, bak sen şu işe",
+        "message": "Bir hata oluştu:",
+        "buttons": {
+            "report": "Hata Bildir",
+            "copy": "Hata Detaylarını Kopyala",
+            "goHome": "Anasayfaya Git"
+        }
+    },
+    "homeScene": {
+        "onDeck": {
+            "title": "Sıradaki okumanız",
+            "emptyState": {
+                "heading": "Sırada kitap yok",
+                "message": "Sıradaki kitap önerilerin burada görünecek"
+            }
+        },
+        "continueReading": {
+            "title": "Okumaya devam et",
+            "emptyState": {
+                "heading": "Gösterilecek bir şey yok",
+                "message": "Devam ettiğin kitaplar burada gösterilecek"
+            }
+        },
+        "recentlyAddedSeries": {
+            "title": "En son eklenen seriler",
+            "emptyState": {
+                "heading": "Gösterilecek seri yok",
+                "message": "Kütüphanelerine eklediğin seriler burada gösterilecek"
+            }
+        },
+        "recentlyAddedBooks": {
+            "title": "En son eklenen kitaplar",
+            "emptyState": {
+                "heading": "Gösterilecek bir şey yok",
+                "message": "En son eklediğin kitaplar burada gösterilecek"
+            }
+        }
+    },
+    "metadataEditor": {
+        "labels": {
+            "ageRating": "Yaş sınırı",
+            "characters": "Karakterler",
+            "colorists": "Renklendirenler",
+            "coverArtists": "Kapak sanatçıları",
+            "day": "Gün",
+            "editors": "Editörler",
+            "identifierUuid": "Kitap UUID",
+            "genres": "Türler",
+            "inkers": "Mürekkepleyenler",
+            "language": "Dil",
+            "letterers": "Balonlayanlar",
+            "links": "Linkler",
+            "month": "Ay",
+            "notes": "Notlar",
+            "number": "Numara",
+            "pageCount": "Sayfalar",
+            "pencillers": "Çizimciler",
+            "publisher": "Yayıncı",
+            "series": "Seriler",
+            "seriesGroup": "Seri grubu",
+            "storyArc": "Hikaye arkı",
+            "storyArcNumber": "Hikaye ark numarası",
+            "summary": "Özet",
+            "teams": "Takımlar",
+            "title": "Başlık",
+            "titleSort": "Başlık sıralaması",
+            "volume": "Cilt",
+            "writers": "Yazarlar",
+            "year": "Yıl",
+            "metaType": "Tür",
+            "imprint": "Künye",
+            "comicid": "Çizgi Roman ID",
+            "booktype": "Kitap türü",
+            "status": "Durum",
+            "totalIssues": "Toplam sayılar",
+            "publicationRun": "Yayın aralığı",
+            "comicImage": "Çizgi roman görseli",
+            "descriptionFormatted": "Açıklama (biçimlendirilmiş)"
+        },
+        "addFields": {
+            "description": "Her bir girişi ayrı bir satıra yazın"
+        }
+    },
+    "seriesOverviewScene": {
+        "buttons": {
+            "continueReading": "Okumaya Devam Et",
+            "downloadSeries": "Serileri İndir"
+        }
+    },
+    "createOrUpdateSmartListForm": {
+        "validation": {
+            "nameTooShort": "İsim en az 2 karakter olmalıdır",
+            "nameTaken": "Bu isim kullanılamaz"
+        },
+        "fields": {
+            "name": {
+                "label": "İsim",
+                "placeholder": "Akıllı listem",
+                "description": "Benzersiz olmalı, fakat daha sonra değiştirilebilir"
+            },
+            "description": {
+                "label": "Açıklama",
+                "placeholder": "Oldukça akıllı bir liste",
+                "description": "Akıllı listeniz için opsiyonel bir açıklama"
+            },
+            "visibility": {
+                "label": "Görünürlük",
+                "options": {
+                    "public": {
+                        "label": "Herkese Açık",
+                        "description": "Bu sunucudaki tüm kullanıcılarca erişilebilir"
+                    },
+                    "shared": {
+                        "label": "Paylaşımlı",
+                        "description": "Belirli kullanıcılar bu akıllı listeye erişebilir",
+                        "createDisclaimer": "Bu listeyi oluşturduktan sonra kiminle paylaşılacağını seçebilirsiniz"
+                    },
+                    "private": {
+                        "label": "Özel",
+                        "description": "Bu akıllı listeye sadece sen erişebilirsin"
+                    }
+                }
+            },
+            "queryBuilder": {
+                "uiPerformance": "Bu özelliğin kullanıcı arayüzü tarafında performans optimizasyonları henüz tamamlanmamıştır ve çok sayıda sonuç getiren filtrelemelerde yavaşlık yaşanabilir. Bu durum gelecek sürümlerde iyileştirilecektir",
+                "rootJoiner": {
+                    "and": {
+                        "label": "VE",
+                        "description": "Bir kitabın eşleşmesi için tüm filtre gruplarının doğru olması gerekir"
+                    },
+                    "or": {
+                        "label": "VEYA",
+                        "description": "Bir kitabın eşleşmesi için en az bir filtre grubunun doğru olması gerekir"
+                    }
+                },
+                "groupJoiner": {
+                    "and": {
+                        "label": "VE",
+                        "description": "Tümü doğru olmalı"
+                    },
+                    "or": {
+                        "label": "VEYA",
+                        "description": "En az bir tanesi doğru olmalı"
+                    },
+                    "not": {
+                        "label": "DEĞİL",
+                        "description": "Hiçbiri doğru olmamalı"
+                    }
+                },
+                "grouping": {
+                    "label": "Şuna göre grupla",
+                    "description": "Bu akıllı listedeki kitaplar nasıl gruplandırılacağı",
+                    "options": {
+                        "by_books": {
+                            "label": "Hiçbiri"
+                        },
+                        "by_series": {
+                            "label": "Seriler"
+                        },
+                        "by_library": {
+                            "label": "Kütüphane"
+                        }
+                    }
+                },
+                "filters": {
+                    "emptyState": "Başlamak için bir grup ekleyin",
+                    "actions": {
+                        "addFilter": "Filtre ekle",
+                        "addGroup": "Grup ekle",
+                        "deleteFilter": "Filtreyi sil",
+                        "deleteGroup": "Grubu sil"
+                    },
+                    "fieldSelect": {
+                        "source": {
+                            "label": "Kaynak",
+                            "back": "Geri",
+                            "book": {
+                                "label": "Kitap",
+                                "attributes": {
+                                    "name": "Dosya adı",
+                                    "size": "Boyut",
+                                    "extension": "Uzantı",
+                                    "status": "Durum",
+                                    "path": "Yol",
+                                    "pages": "Sayfalar",
+                                    "tags": "Etiketler",
+                                    "createdAt": "Oluşturulma tarihi",
+                                    "updatedAt": "Güncellenme tarihi"
+                                }
+                            },
+                            "book_meta": {
+                                "attributes": {
+                                    "title": "Başlık",
+                                    "summary": "Özet",
+                                    "notes": "Notlar",
+                                    "writers": "Yazarlar",
+                                    "pencillers": "Çizimciler",
+                                    "inkers": "Mürekkepleyenler",
+                                    "letterers": "Balonlayanlar",
+                                    "editors": "Editörler",
+                                    "publisher": "Yayıncı",
+                                    "colorists": "Renklendiren",
+                                    "links": "Linkler",
+                                    "characters": "Karakterler",
+                                    "teams": "Takımlar",
+                                    "genres": "Tür",
+                                    "coverArtists": "Kapak sanatçıları"
+                                }
+                            },
+                            "series": {
+                                "label": "Seriler",
+                                "attributes": {
+                                    "name": "İsim",
+                                    "path": "Yol"
+                                }
+                            },
+                            "series_meta": {
+                                "attributes": {
+                                    "title": "Başlık",
+                                    "summary": "Özet",
+                                    "publisher": "Yayıncı",
+                                    "imprint": "Künye",
+                                    "comicid": "Çizgi Roman ID",
+                                    "booktype": "Kitap türü",
+                                    "status": "Durum",
+                                    "volume": "Cilt",
+                                    "metaType": "Tür",
+                                    "ageRating": "Yaş sınırı"
+                                }
+                            },
+                            "library": {
+                                "label": "Kütüphane",
+                                "attributes": {
+                                    "name": "İsim",
+                                    "path": "Yol"
+                                }
+                            }
+                        }
+                    },
+                    "basicValue": {
+                        "placeholder": "Değer",
+                        "date": "Tarih"
+                    },
+                    "rangeValue": {
+                        "from": {
+                            "date": "Başlangıç tarihi",
+                            "number": "Başlangıç"
+                        },
+                        "to": {
+                            "date": "Günümüze",
+                            "number": "Bitiş"
+                        },
+                        "inclusive": "Dahil"
+                    },
+                    "listValue": {
+                        "placeholder": "Değerleri ekle",
+                        "emptyState": "Gösterilecek değer yok"
+                    }
+                }
+            }
+        }
+    },
+    "createSmartListScene": {
+        "heading": "Akıllı liste oluştur",
+        "subtitle": "Bir dizi filtreye dayalı anında liste oluşturma",
+        "form": {
+            "stepLabel": "Adım",
+            "steps": [
+                {
+                    "label": "Temeller",
+                    "heading": "Temel Bilgi",
+                    "description": "Bu akıllı listenin adı, açıklaması ve görünürlük ayarları dahil olmak üzere ayrıntıları"
+                },
+                {
+                    "label": "Filtreler",
+                    "heading": "Filtreler",
+                    "description": "Bu akıllı listeye uygulanacak filtreler"
+                },
+                {
+                    "label": "Önizleme",
+                    "heading": "Önizleme",
+                    "description": "Akıllı listeyi oluşturmadan önce ayarlarını kontrol edin"
+                }
+            ],
+            "review": {
+                "yes": "Evet",
+                "no": "Hayır",
+                "none": "Hiçbiri",
+                "labels": {
+                    "name": "İsim",
+                    "description": "Açıklama",
+                    "visibility": "Görünürlük",
+                    "grouping": "Şuna göre grupla"
+                }
+            },
+            "buttons": {
+                "confirm": "Liste oluştur"
+            }
+        }
+    },
+    "createOrUpdateApiKey": {
+        "validation": {
+            "futureDate": "Son geçerlilik tarihi gelecekte olmalıdır"
+        },
+        "fields": {
+            "name": {
+                "label": "İsim",
+                "placeholder": "Koreader Senkronizasyonu"
+            },
+            "expiration": {
+                "label": "Süre sonu",
+                "placeholder": "Hiçbir zaman"
+            },
+            "expiresAt": {
+                "label": "Sona erme tarihi",
+                "placeholder": "Hiçbir zaman"
+            },
+            "permissions": {
+                "inherit": {
+                    "label": "İzinleri devral",
+                    "description": "Hesabınızla aynı izinler"
+                },
+                "explicit": {
+                    "label": "Açık izinler",
+                    "description": "Bu anahtarın sahip olması gereken izinleri seçin"
+                }
+            }
+        },
+        "inheritDisclaimer": "Bu API anahtarı tüm izinlerinizi devralacaktır, yani sizin yapabileceğiniz her şeyi yapabilir. Bu ayara dikkat edin"
+    },
+    "userSmartListsScene": {
+        "heading": "Akıllı listeler",
+        "buttons": {
+            "createSmartList": "Akıllı liste oluştur"
+        },
+        "list": {
+            "card": {
+                "meta": {
+                    "figures": {
+                        "books": "kitap",
+                        "series": "seriler",
+                        "library": "kütüphane"
+                    },
+                    "matches": "Eşleşmeler"
+                }
+            }
+        }
+    },
+    "smartListSettingsScene": {
+        "sidebar": {
+            "basics": "Temeller",
+            "configuration": {
+                "label": "Yapılandırma",
+                "access": "Erişim",
+                "filters": "Filtreler"
+            },
+            "danger-zone": {
+                "delete": "Silme",
+                "label": "Tehlikeli Bölge"
+            }
+        },
+        "basics": {
+            "title": "Temel Bilgi",
+            "description": "Bu akıllı listenin adı ve açıklaması dahil olmak üzere ayrıntıları"
+        },
+        "access": {
+            "title": "Erişim",
+            "description": "Bu akıllı listeye kimlerin erişebileceğini kontrol et",
+            "sections": {
+                "visibility": {
+                    "confirmation": {
+                        "public": "Bu, listeyi herkese açık yapacaktır",
+                        "private": "Bu, listeyi özel hale getirecek ve daha önce erişim izni olan herkesten gizleyecektir",
+                        "shared": "Bu listeye erişim izni vermek için belirli kullanıcılarla paylaşmanız gerekecek",
+                        "fallback": "Bu listenin görünürlüğünü değiştirmek istediğinizden emin misiniz?"
+                    }
+                },
+                "accessManager": {
+                    "disclaimer": "Paylaşım henüz hazır değil. Lütfen daha sonra tekrar kontrol et!"
+                }
+            }
+        },
+        "filters": {
+            "title": "Filtre Oluşturucu",
+            "description": "Bu akıllı listeyi oluşturan filtreleri yönetin"
+        },
+        "danger-zone/delete": {
+            "title": "Silme Eylemleri",
+            "description": "Bu akıllı listeyi ve tüm içeriğini ya da belirli kaynaklarını kalıcı olarak sil",
+            "sections": {
+                "deleteList": {
+                    "heading": "Listeyi sil",
+                    "description": [
+                        "Bu akıllı listeyi ve tüm içeriğini kalıcı olarak sil.",
+                        "Bu işlem geri alınamaz"
+                    ],
+                    "confirmation": {
+                        "title": "Listeyi sil",
+                        "description": "Bu akıllı listeyi silmek istediğinizden emin misiniz?",
+                        "confirm": "Listeyi sil"
+                    }
+                }
+            }
+        }
+    },
+    "userSmartListScene": {
+        "navigation": {
+            "items": "Ögeler",
+            "settings": "Ayarlar"
+        },
+        "layout": {
+            "smartListNotFound": "Akıllı liste bulunamadı"
+        },
+        "itemsScene": {
+            "actionHeader": {
+                "filterDrawer": {
+                    "rawData": {
+                        "heading": "Ham filtre verisi",
+                        "description": "Stump filtreleri bu şekilde işleyecek"
+                    },
+                    "buttons": {
+                        "save": "Kaydet",
+                        "cancel": "İptal"
+                    }
+                },
+                "search": {
+                    "placeholder": "Hızlı filtre"
+                },
+                "viewManager": {
+                    "updateSelected": "Update selected",
+                    "deleteSelected": "Görünümü sil",
+                    "create": "Yeni görünüm oluştur",
+                    "modal": {
+                        "heading": {
+                            "create": "Görünüm oluştur",
+                            "update": "Görünümü güncelle"
+                        },
+                        "description": {
+                            "create": "Bu akıllı liste için yeni bir görünüm oluştur",
+                            "update": "Görünümü güncelle"
+                        },
+                        "createForm": {
+                            "name": {
+                                "label": "İsim",
+                                "placeholder": "Görünümüm",
+                                "description": "Bu görünümü benzersiz bir şekilde tanımlamak için kullanılan bir ad"
+                            }
+                        },
+                        "updateForm": {
+                            "name": {
+                                "label": "İsim",
+                                "placeholder": "Görünümüm",
+                                "description": "İstenirse bu görünümün güncellenmiş adı"
+                            }
+                        }
+                    },
+                    "deleteModal": {
+                        "title": "Görünümü sil",
+                        "description": "Bu görünümü silmek istediğinizden emin misiniz?"
+                    }
+                }
+            }
+        }
+    },
+    "settingsScene": {
+        "navigation": {
+            "general": "Genel",
+            "logs": "Günlükler",
+            "server": "Sunucu",
+            "jobs": "Görevler ve Yapılandırma",
+            "users": "Kullanıcı Yönetimi",
+            "desktop": "Masaüstü"
+        },
+        "sidebar": {
+            "personal": {
+                "account": "Hesap",
+                "appearance": "Tercihler",
+                "api keys": "API anahtarları",
+                "reader": "Okuyucu",
+                "desktop": "Masaüstü",
+                "label": "Kişisel"
+            },
+            "management": {
+                "general": "General",
+                "logs": "Günlükler",
+                "users": "Kullanıcılar",
+                "jobs": "Görevler",
+                "access": "Erişim",
+                "email": "E-posta",
+                "notifications": "Bildirimler",
+                "label": "Yönetim"
+            }
+        },
+        "app/account": {
+            "helmet": "Hesap ayarları",
+            "title": "Hesap ayarları",
+            "description": "Hesabınızla ilgili ayarlar",
+            "sections": {
+                "account": {
+                    "validation": {
+                        "invalidUrl": "Lütfen geçerli bir URL girin",
+                        "missingUsername": "Kullanıcı adı gereklidir"
+                    },
+                    "labels": {
+                        "username": "Kullanıcı Adı",
+                        "password": "Parola",
+                        "activeChangesPrompt": "Kaydedilmemiş değişiklikleriniz var"
+                    },
+                    "errors": {
+                        "updateFailed": "Profilinizi güncellerken bir sunucu hatası oluştu. Lütfen tekrar deneyin."
+                    }
+                }
+            }
+        },
+        "app/preferences": {
+            "helmet": "Appearance",
+            "title": "Appearance",
+            "sections": {
+                "fontSelect": {
+                    "label": "Yazı Tipi"
+                },
+                "replacePrimarySidebar": {
+                    "tooltips": {
+                        "doubleSidebar": "Bu ayarın kullanılabilmesi için ayarlar kenar çubuğunun etkinleştirilmesi gerekir",
+                        "topbar": "Ana gezinme yöntemi üst çubuk olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
+                    }
+                },
+                "navigationArrangement": {
+                    "label": "Gezinme düzeni",
+                    "isLocked": "Düzenleme kilitli",
+                    "lock": "Düzenlemeyi kilitle",
+                    "unlock": "Düzenleme kilidini aç",
+                    "options": {
+                        "HOME": "Anasayfa",
+                        "EXPLORE": "Keşfet",
+                        "LIBRARIES": "Kütüphaneler",
+                        "BOOK_CLUBS": "Kitap klüpleri",
+                        "SMART_LISTS": "Akıllı listeler"
+                    },
+                    "entityOptions": {
+                        "createAction": {
+                            "label": "Oluşturma eylemini göster",
+                            "help": "Navigasyonda oluşturma eylemini göster"
+                        },
+                        "linkToAll": {
+                            "label": "Tüm linkleri gör",
+                            "help": "Bu türdeki tüm öğeleri görüntülemek için ayrılmış bir sayfaya bağlantı"
+                        }
+                    }
+                },
+                "displaySpacing": {
+                    "label": "Görüntü aralığı",
+                    "description": "Uygulama genelinde öğeler arasındaki genel aralığı ayarlar",
+                    "options": {
+                        "default": "Varsayılan",
+                        "compact": "Sıkışık"
+                    },
+                    "disclaimer": "Sıkışık görüntü modu henüz devreye alınmamıştır"
+                },
+                "maxWidthPreference": {
+                    "label": "Ayarlanmış genişlik",
+                    "description": "Stump, görüntü alanına bir maksimum genişlik uygular. Bu ayar, bu sınırı değiştirmenize veya kaldırmanıza olanak tanır",
+                    "tooltip": "Ana gezinme yöntemi kenar çubuğu olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
+                },
+                "additionalPreferences": {
+                    "label": "Diğer tercihler",
+                    "description": "Bu ek ayarlarla Stump'ın görünümünü ve davranışını özelleştirin"
+                },
+                "hideScrollbarToggle": {
+                    "label": "Kaydırma çubuğunu gizle",
+                    "description": "Bazı sayfalar kaydırma çubuğu olmadan daha iyi görünür, bu ayar mümkün olduğunda kaydırma çubuğunu gizler",
+                    "tooltips": {
+                        "enabled": "Bu ayar, bazı sayfalarda kaydırma çubuğunu gizleyecektir",
+                        "disabled": "Bu ayar, bazı sayfalarda kaydırma çubuğunu gösterecektir"
+                    }
+                },
+                "enableAlphabetFiltering": {
+                    "label": "Alfabetik filtreleme",
+                    "description": "Mümkün olduğunda alfabetik filtreyi göster"
+                },
+                "enableFancyAnimations": {
+                    "label": "Gösterişli animasyonlar",
+                    "description": "Uygulama genelinde daha gösterişli animasyonlar için genel bir tercih seçeneği"
+                },
+                "queryIndicatorToggle": {
+                    "label": "Arka planda veri alma göstergesi",
+                    "description": "Arka planda bir sorgu çalıştırıldığında yükleme göstergesini göster"
+                },
+                "liveRefetchToggle": {
+                    "label": "Anlık veri tazeleme",
+                    "description": "Yeni veriler ulaştıkça arayüzü güncellemek için sorguları anlık olarak yeniler. Bu özellik yüksek kaynak tüketimine neden olabilir"
+                },
+                "enableJobOverlayToggle": {
+                    "label": "Görev katmanı",
+                    "description": "Görev yürütülürken ekran üzerinde bir katman göster"
+                }
+            }
+        },
+        "app/apiKeys": {
+            "helmet": "API anahtarları",
+            "title": "API anahtarları",
+            "description": "Oluşturduğunuz Stump API anahtarlarını yönetin",
+            "shared": {
+                "fields": {
+                    "name": "İsim"
+                }
+            }
+        },
+        "app/desktop": {
+            "description": "Stump masaüstü uygulamasıyla ilgili ayarlar",
+            "sections": {
+                "configuredServers": {
+                    "label": "Yapılandırılmış sunucular",
+                    "description": "Bağlanabileceğiniz Stump sunucularının listesi",
+                    "getStarted": "Başlamak için bir sunucu ekleyin",
+                    "unreachableServer": {
+                        "tooltip": "Sunucuya ulaşılamıyor"
+                    },
+                    "activeServer": {
+                        "tooltip": "Mevcut sunucu"
+                    },
+                    "addOrEditServer": {
+                        "validation": {
+                            "nameExists": "Bu isimde bir sunucu zaten var",
+                            "nameForbidden": "Bu isim ayrılmış",
+                            "urlExists": "Bu URL'de bir sunucu zaten var"
+                        },
+                        "fields": {
+                            "name": {
+                                "label": "İsim",
+                                "description": "Bu sunucuyu tanımlamak için bir isim",
+                                "placeholder": "Sunucum"
+                            },
+                            "uri": {
+                                "description": "Stump sunucusunun URL'si"
+                            }
+                        }
+                    },
+                    "addServer": {
+                        "trigger": "Sunucu ekle",
+                        "title": "Yeni bir sunucu ekle",
+                        "description": "Masaüstü uygulamasına yeni bir Stump sunucusu ekle",
+                        "confirm": "Sunucu ekle"
+                    },
+                    "editServer": {
+                        "tooltip": "Sunucuyu düzenle",
+                        "title": "Sunucuyu düzenle",
+                        "description": "Bu sunucunun detaylarını düzenle",
+                        "confirm": "Değişiklikleri kaydet"
+                    },
+                    "deleteServer": {
+                        "tooltip": "Sunucuyu sil",
+                        "confirmation": {
+                            "title": "Bu sunucuyu sil",
+                            "description": "Bu işlem, sunucuyu masaüstü uygulamasından kaldıracaktır",
+                            "disclaimerActiveServer": "Bu sunucu şu anda aktif. Oturumunuz kapatılacak",
+                            "disclaimerLastServer": "Bu, yapılandırılmış son sunucudur. Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir",
+                            "confirm": "Sunucuyu sil"
+                        }
+                    },
+                    "switchToServer": {
+                        "tooltip": "Sunucuya geç",
+                        "confirmation": {
+                            "title": "Bu sunucuya geç",
+                            "description": "Bu işlem, mevcut sunucunuzdaki oturumunuzu kapatacak",
+                            "confirm": "Sunucuya geç",
+                            "server": "Sunucu"
+                        }
+                    },
+                    "resetConfiguration": {
+                        "label": "Tüm sunucuları sil",
+                        "description": [
+                            "Masaüstü uygulamasından tüm yapılandırılmış sunucuları kaldır",
+                            "Bu işlem geri alınamaz"
+                        ],
+                        "confirmation": {
+                            "trigger": "Tüm sunucuları sil",
+                            "title": "Tüm sunucuları sil",
+                            "description": "Bu işlem, tüm sunucuları masaüstü uygulamasından kaldıracaktır",
+                            "disclaimer": "Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir",
+                            "confirm": "Tüm sunucuları sil"
+                        }
+                    },
+                    "resetTokens": {
+                        "label": "Clear authentication",
+                        "description": [
+                            "Remove all securely-stored access tokens for your servers",
+                            "You will have to re-authenticate with each server"
+                        ],
+                        "confirmation": {
+                            "trigger": "Clear authentication",
+                            "title": "Clear authentication",
+                            "description": "This will remove all securely-stored access tokens for your servers",
+                            "confirm": "Clear authentication"
+                        }
+                    }
+                },
+                "optionalFeatures": {
+                    "label": "İsteğe bağlı özellikler",
+                    "description": "Masaüstü uygulamasına özgü isteğe bağlı özellikleri yönetin",
+                    "bundledServer": {
+                        "label": "Dahili sunucu",
+                        "description": "Masaüstü uygulaması çalışırken dahili sunucuyu arka planda çalıştır (yeniden başlatma gerektirir)"
+                    },
+                    "discordPresence": {
+                        "label": "Discord Durumu",
+                        "description": "Discord Rich Presence özelliğini kullanarak Discord'da Stump etkinliklerinizi görüntüleyin",
+                        "reconnect": "Discord'a Yeniden Bağlan"
+                    }
+                }
+            }
+        },
+        "server/general": {
+            "helmet": "General server settings",
+            "title": "General settings"
+        },
+        "server/jobs": {
+            "sections": {
+                "scheduling": {
+                    "title": "Scheduling",
+                    "description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+                },
+                "history": {
+                    "table": {
+                        "columns": {
+                            "status": "Durum",
+                            "createdAt": "Başlangıç Tarihi",
+                            "elapsed": "Geçen süre",
+                            "tasks": "Görevler"
+                        },
+                        "emptyHeading": "Gösterilecek görev yok",
+                        "emptySubtitle": "Görevin yoksa görevin yoktur",
+                        "deleteAllMessage": "Görev geçmişi ve istatistikler herhangi bir zamanda veritabanından silinebilir. Bu işlem geri alınamaz"
+                    },
+                    "deleteJobHistory": {
+                        "title": "Görev geçmişini sil",
+                        "description": "Veritabanından kalıcı olarak tüm görev geçmişini sil",
+                        "confirmText": "Tüm görev geçmişini silmek istediğinden emin misin?",
+                        "confirm": "Sil",
+                        "emptyState": "Temizlenecek görev yok"
+                    }
+                }
+            }
+        },
+        "server/users": {
+            "helmet": "Kullanıcı yönetimi",
+            "title": "Kullanıcılar",
+            "description": "Bu sunucudaki kullanıcıları yönet",
+            "createUser": {
+                "helmet": "Kullanıcı oluştur",
+                "title": "Kullanıcı oluştur",
+                "description": "Bu sunucudaki yeni bir kullanıcı oluştur"
+            },
+            "updateUser": {
+                "helmet": "Kullanıcıyı güncelle",
+                "title": "Kullanıcıyı güncelle",
+                "description": "Bu kullanıcının detaylarını güncelle"
+            },
+            "createOrUpdateForm": {
+                "accessControl": {
+                    "heading": "Erişim kontrolü ve kısıtlamalar",
+                    "subtitle": [
+                        "Bu kullanıcıya uygulamak istediğiniz kısıtlamaları yapılandırın. Erişim denetimi hakkında daha fazla bilgi için",
+                        "dökümantasyona bakınız"
+                    ],
+                    "ageRestriction": {
+                        "label": "Yaş kısıtlaması",
+                        "description": "Kullanıcının, belirlenen yaş sınırının üzerindeki içeriğe erişmesini engeller",
+                        "enforceUnset": {
+                            "label": "Derecelendirilmemiş olanları kısıtla",
+                            "description": "Etkinleştirildiğinde, yaş derecelendirmesi bulunmayan içeriklere erişim kısıtlanır"
+                        }
+                    },
+                    "tagRestriction": {
+                        "label": "Etiket kısıtlamaları",
+                        "description": "Kullanıcının, seçili etiketlere sahip içeriğe erişmesini engeller",
+                        "placeholder": "Yetişkin, Şiddet"
+                    }
+                },
+                "permissions": {
+                    "heading": "İzinler",
+                    "subtitle": [
+                        "Bu kullanıcıya vermek istediğiniz izinleri seçin. Her bir iznin ne işe yaradığı hakkında daha fazla bilgi için",
+                        "dökümantasyona bakınız"
+                    ],
+                    "bookclub": {
+                        "label": "Kitap Klüpleri",
+                        "read": {
+                            "label": "Kitap kulübü özelliklerine erişin",
+                            "description": "Kullanıcının kitap kulüplerini görüntüleme ve bunlara katılma gibi kitap kulübü özelliklerine erişmesini sağlar"
+                        },
+                        "create": {
+                            "label": "Kitap klüpleri oluştur",
+                            "description": "Kullanıcının yeni kitap kulüpleri oluşturmasına olanak tanır"
+                        }
+                    },
+                    "feature": {
+                        "label": "Özellik Aboneliği",
+                        "api_keys": {
+                            "label": "API anahtarları",
+                            "description": "Kullanıcının kendi API anahtarlarını yönetmesine izin verir"
+                        },
+                        "koreader_sync": {
+                            "label": "KoReader senkronizasyonu",
+                            "description": "Kullanıcının KoReader senkronizasyon entegrasyonuna erişmesine izin verir"
+                        }
+                    },
+                    "file": {
+                        "label": "Dosya Yönetimi",
+                        "explorer": {
+                            "label": "File Explorer",
+                            "description": "Kullanıcının çeşitli dosya gezginlerine erişmesine olanak tanır.\nBu özellik etkinleştirildiğinde içerik kısıtlamasının sağlanamayacağı unutulmamalıdır"
+                        },
+                        "download": {
+                            "label": "Dosyaları indir",
+                            "description": "Kullanıcının sunucudan dosyaları indirmesine izin verir"
+                        },
+                        "upload": {
+                            "label": "Dosya yükle",
+                            "description": "Kullanıcının sunucuya dosya yüklemesine izin verir"
+                        }
+                    },
+                    "user": {
+                        "manage": {
+                            "description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+                        }
+                    },
+                    "smartlist": {
+                        "read": {
+                            "description": "Allows the user to access smart lists features"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sidebar": {
+        "libraryOptions": {
+            "manageLibrary": "Manage"
+        }
+    },
+    "thumbnailDropdown": {
+        "label": "Edit thumbnail"
+    },
+    "mobileApp": {
+        "readerSettings": {
+            "title": "Reader Settings"
+        }
+    }
 }

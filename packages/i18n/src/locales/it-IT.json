@@ -15,8 +15,7 @@
 				"usernameAlreadyExists": "Il nome utente esiste già"
 			},
 			"labels": {
-				"username": "Nome utente",
-				"password": "Password"
+				"username": "Nome utente"
 			},
 			"buttons": {
 				"createAccount": "Crea account",
@@ -59,9 +58,6 @@
 				"author": {
 					"label": "Autore"
 				},
-				"isbn": {
-					"label": "ISBN"
-				},
 				"year": {
 					"label": "Anno"
 				},
@@ -73,7 +69,6 @@
 					"placeholder": "es. 129260"
 				},
 				"provider": {
-					"label": "Provider",
 					"allOption": "Tutti i provider abilitati"
 				}
 			}
@@ -85,8 +80,7 @@
 			"labels": {
 				"fileSize": "Dimensioni del file",
 				"fileType": "Tipo di file",
-				"fileLocation": "Posizione del file",
-				"fileChecksum": "Checksum"
+				"fileLocation": "Posizione del file"
 			}
 		},
 		"emailBook": {
@@ -153,7 +147,6 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Nome visualizzato",
-					"placeholder": "oromei",
 					"description": "Un nome opzionale per la tua iscrizione nel club del libro. Se impostato, ha la precedenza sul tuo nome utente"
 				},
 				"hideProgress": {
@@ -171,7 +164,6 @@
 		"heading": "Crea un nuovo club del libro",
 		"subtitle": "Puoi creare un club del libro privato per un gruppo ristretto di persone, oppure renderlo pubblico per permettere a chiunque sul server di partecipare",
 		"form": {
-			"stepLabel": "Step",
 			"steps": [
 				{
 					"label": "Base",
@@ -196,7 +188,6 @@
 			],
 			"review": {
 				"yes": "Sì",
-				"no": "No",
 				"none": "Nessuno",
 				"labels": {
 					"name": "Nome",
@@ -233,8 +224,7 @@
 		},
 		"members": {
 			"title": "Membri",
-			"description": "Gestisci i membri di questo club del libro",
-			"sections": {}
+			"description": "Gestisci i membri di questo club del libro"
 		},
 		"roles": {
 			"title": "Ruoli",
@@ -278,8 +268,7 @@
 			},
 			"path": {
 				"label": "Percorso",
-				"description": "Il percorso della libreria così come presente sul tuo server",
-				"placeholder": "/path/to/library"
+				"description": "Il percorso della libreria così come presente sul tuo server"
 			},
 			"description": {
 				"label": "Descrizione",
@@ -295,10 +284,8 @@
 				"description": "Il tipo di contenuto presente in questa libreria",
 				"options": {
 					"COMIC": "Fumetti",
-					"MANGA": "Manga",
 					"BOOK": "Libri",
 					"LIGHT_NOVEL": "Light novel",
-					"MANHWA": "Manhwa",
 					"WEB_NOVEL": "Web novel",
 					"WEBTOON": "Webtoon",
 					"MIXED": "Misto"
@@ -515,7 +502,6 @@
 		"subtitle": "Le librerie sono usate per raggruppare i tuoi libri insieme. Se vuoi un ripasso su come funzionano, dai un'occhiata alla",
 		"subtitleLink": "documentazione correlata",
 		"form": {
-			"stepLabel": "Step",
 			"steps": [
 				{
 					"label": "Base",
@@ -540,7 +526,6 @@
 			],
 			"review": {
 				"yes": "Sì",
-				"no": "No",
 				"none": "Nessuno",
 				"labels": {
 					"generateThumbnails": "Genera miniature",
@@ -710,9 +695,7 @@
 			"sections": {
 				"management": {
 					"heading": "Gestisci miniature",
-					"description": "Gestisci le miniature esistenti per questa libreria",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
+					"description": "Gestisci le miniature esistenti per questa libreria"
 				}
 			}
 		},
@@ -785,7 +768,6 @@
 					"emptyText": "Non c'era nulla da pulire",
 					"missingEntitiesTable": {
 						"columns": {
-							"id": "ID",
 							"path": "Percorso",
 							"type": "Tipo"
 						},
@@ -809,7 +791,6 @@
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
 		"message": "Si è verificato un errore:",
 		"buttons": {
 			"report": "Segnala problema",
@@ -859,8 +840,6 @@
 			"identifierAmazon": "ID Amazon",
 			"identifierCalibre": "ID Calibre",
 			"identifierGoogle": "ID Google",
-			"identifierIsbn": "ISBN",
-			"identifierMobiAsin": "Mobi ASIN",
 			"identifierUuid": "UUID del libro",
 			"genres": "Generi",
 			"inkers": "Inchiostratori",
@@ -881,7 +860,6 @@
 			"teams": "Gruppi",
 			"title": "Titolo",
 			"titleSort": "Titolo per ordinamento",
-			"volume": "Volume",
 			"writers": "Autori",
 			"year": "Anno",
 			"metaType": "Tipo",
@@ -920,8 +898,7 @@
 					"resolved": "Risolto"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidato {{position}} di {{total}}",
-					"provider": "Provider"
+					"candidatePosition": "Candidato {{position}} di {{total}}"
 				}
 			},
 			"footer": {
@@ -1025,25 +1002,20 @@
 				"uiPerformance": "Questa funzionalità non dispone di ottimizzazioni delle prestazioni a livello d'interfaccia utente e potrebbe risultare lenta con filtri che generano un gran numero di risultati. Questo aspetto verrà migliorato in futuro",
 				"rootJoiner": {
 					"and": {
-						"label": "AND",
 						"description": "Tutti i gruppi di filtri devono essere soddisfatti affinché un libro venga incluso"
 					},
 					"or": {
-						"label": "OR",
 						"description": "Almeno un gruppo di filtri deve essere soddisfatto affinché un libro venga incluso"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "AND",
 						"description": "Tutto deve essere vero"
 					},
 					"or": {
-						"label": "OR",
 						"description": "Almeno uno deve essere vero"
 					},
 					"not": {
-						"label": "NOT",
 						"description": "Nessuno può essere vero"
 					}
 				},
@@ -1132,7 +1104,6 @@
 									"comicid": "ID fumetto",
 									"booktype": "Tipo di libro",
 									"status": "Stato",
-									"volume": "Volume",
 									"metaType": "Tipo",
 									"ageRating": "Classificazione per età",
 									"year": "Anno d'inizio"
@@ -1181,7 +1152,6 @@
 		"heading": "Create lista smart",
 		"subtitle": "Creazione di liste al volo basata su un insieme di filtri",
 		"form": {
-			"stepLabel": "Step",
 			"steps": [
 				{
 					"label": "Base",
@@ -1201,7 +1171,6 @@
 			],
 			"review": {
 				"yes": "Sì",
-				"no": "No",
 				"none": "Nessuno",
 				"labels": {
 					"name": "Nome",
@@ -1405,22 +1374,17 @@
 		"navigation": {
 			"general": "Generale",
 			"logs": "Log",
-			"server": "Server",
 			"jobs": "Attività e configurazione",
-			"users": "Gestione utenti",
-			"desktop": "Desktop"
+			"users": "Gestione utenti"
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Account",
 				"appearance": "Preferenze",
 				"api keys": "Chiavi API",
 				"reader": "Lettore",
-				"desktop": "Desktop",
 				"label": "Personale"
 			},
 			"management": {
-				"general": "Server",
 				"logs": "Log",
 				"users": "Utenti",
 				"jobs": "Attività",
@@ -1444,7 +1408,6 @@
 					},
 					"labels": {
 						"username": "Nome utente",
-						"password": "Password",
 						"activeChangesPrompt": "Ci sono modifiche non salvate",
 						"uselessForm": {
 							"title": "Non hai l'autorizzazione per modificare queste impostazioni",
@@ -1456,7 +1419,6 @@
 						"updateFailed": "Si è verificato un errore nel server durante l'aggiornamento del tuo profilo. Riprova."
 					},
 					"avatarPicker": {
-						"label": "Avatar",
 						"heading": "Carica avatar",
 						"subtitle": "Puoi caricare qualsiasi immagine da usare come avatar per le funzioni sociali in Stump",
 						"dropzone": "Trascina un'immagine o fai clic per selezionare",
@@ -1515,8 +1477,7 @@
 						"autumn": "Autunno",
 						"cosmic": "Cosmico",
 						"pumpkin": "Zucca",
-						"midnight": "Mezzanotte",
-						"matrix": "Matrix"
+						"midnight": "Mezzanotte"
 					}
 				},
 				"gradientToggle": {
@@ -1552,8 +1513,7 @@
 					"options": {
 						"grayscale": "Scala di grigi",
 						"averageColor": "Colore medio",
-						"colorful": "Colorato",
-						"thumbhash": "Thumbhash"
+						"colorful": "Colorato"
 					}
 				},
 				"thumbnailRoundness": {
@@ -1602,7 +1562,6 @@
 					"lock": "Blocca disposizione",
 					"unlock": "Sblocca disposizione",
 					"options": {
-						"HOME": "Home",
 						"EXPLORE": "Esplora",
 						"LIBRARIES": "Librerie",
 						"BOOK_CLUBS": "Club del libro",
@@ -1834,9 +1793,7 @@
 								"placeholder": "Il mio server"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "L'URL del server Stump",
-								"placeholder": "https://stump.example.com"
+								"description": "L'URL del server Stump"
 							}
 						}
 					},
@@ -1867,9 +1824,7 @@
 						"confirmation": {
 							"title": "Passa a questo server",
 							"description": "Verrai disconnesso dal server attuale",
-							"confirm": "Passa al server",
-							"server": "Server",
-							"uri": "URL"
+							"confirm": "Passa al server"
 						}
 					},
 					"resetConfiguration": {
@@ -1927,7 +1882,6 @@
 					"title": "Informazioni sul server",
 					"description": "Dettagli di base sulla tua istanza del server Stump",
 					"build": {
-						"label": "Build",
 						"description": "Dettagli relativi alla versione e alla build",
 						"version": {
 							"semver": "Versione",
@@ -1947,8 +1901,7 @@
 					"title": "Link utili",
 					"description": "Collegamenti a risorse che possono essere utili per gestire l'istanza del tuo server Stump",
 					"links": {
-						"documentation": "Documentazione",
-						"changelog": "Changelog"
+						"documentation": "Documentazione"
 					}
 				},
 				"serverPublicUrl": {
@@ -2038,11 +1991,9 @@
 						},
 						"schedule": {
 							"label": "Pianificazione cron",
-							"description": "Un'espressione cron per definire la frequenza",
-							"placeholder": "0 0 0 * * *"
+							"description": "Un'espressione cron per definire la frequenza"
 						},
 						"schedulePreset": {
-							"label": "Preset",
 							"custom": "Personalizzato",
 							"everySixHours": "Ogni 6 ore",
 							"everyTwelveHours": "Ogni 12 ore",
@@ -2138,7 +2089,6 @@
 					"ageRestriction": {
 						"label": "Limitazioni d'età",
 						"description": "Impedisce all'utente di accedere a contenuti che superano la soglia della fascia d'età impostata",
-						"placeholder": "13",
 						"enforceUnset": {
 							"label": "Forza se non impostato",
 							"description": "Se abilitato, agli utenti sarà vietato l'accesso ai contenuti privi di classificazione dell'età"
@@ -2152,7 +2102,6 @@
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "Account",
 						"featureAccess": "Accesso alle funzionalità",
 						"fileManagement": "File",
 						"emailers": "Sistemi di invio e-mail",
@@ -2386,7 +2335,6 @@
 					"description": "Il nome utente per l'autenticazione con il server SMTP. In genere coincide con l'indirizzo e-mail"
 				},
 				"password": {
-					"label": "Password",
 					"description": "La password per l'autenticazione con il server SMTP. Se stai usando Gmail, potrebbe essere necessario generare una password specifica per l'app"
 				},
 				"senderSettings": {
@@ -2591,7 +2539,6 @@
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Home",
 			"libraries": "Librerie",
 			"books": "Esplora",
 			"bookClubs": "Club del libro",
@@ -2915,7 +2862,6 @@
 					"description": "Ti verrà richiesto di accedere quando necessario per consultare i contenuti"
 				},
 				"token": {
-					"label": "Token",
 					"placeholder": "Token grezzo"
 				},
 				"basic": "Base"
@@ -2969,7 +2915,6 @@
 			"language": "Lingua",
 			"publisher": "Editore",
 			"size": "Dimensione",
-			"volume": "Volume",
 			"writers": "Autori",
 			"colorists": "Coloristi",
 			"inkers": "Inchiostratori",
@@ -3012,7 +2957,6 @@
 			"page": "Pagina",
 			"pages": "Pagine",
 			"pageXOfY": "Pagina {{current}} di {{total}}",
-			"password": "Password",
 			"progress": "Progresso",
 			"publication": "Pubblicazione",
 			"read": "Leggi",
@@ -3029,7 +2973,6 @@
 			"thisServer": "questo server",
 			"unknown": "Sconosciuto",
 			"unknownTitle": "Senza titolo",
-			"url": "URL",
 			"username": "Nome utente",
 			"value": "Valore",
 			"version": "Versione"
@@ -3044,16 +2987,14 @@
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} di {{total}} in {{seriesName}}",
-				"position": "{{position}} in {{seriesName}}"
+				"positionWithTotal": "{{position}} di {{total}} in {{seriesName}}"
 			},
 			"book": {
 				"positionWithTotal": "Libro {{position}} di {{total}} in {{seriesName}}",
 				"position": "Libro {{position}} in {{seriesName}}"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} di {{total}} in {{seriesName}}",
-				"position": "#{{position}} in {{seriesName}}"
+				"positionWithTotal": "#{{position}} di {{total}} in {{seriesName}}"
 			},
 			"unknownSeriesName": "serie"
 		},
@@ -3072,7 +3013,6 @@
 			"servers": "Server",
 			"localLibrary": "Libreria",
 			"settings": "Impostazioni",
-			"home": "Home",
 			"browse": "Esplora",
 			"clubs": "Club",
 			"search": "Cerca"
@@ -3121,10 +3061,6 @@
 				"sortDirection": {
 					"ASC": "Crescente",
 					"DESC": "Decrescente"
-				},
-				"sortDirectionText": {
-					"ASC": "A → Z",
-					"DESC": "Z → A"
 				},
 				"sortDirectionDate": {
 					"ASC": "Dal più vecchio",
@@ -3175,7 +3111,6 @@
 							"orange": "Arancione",
 							"amber": "Ambra",
 							"yellow": "Giallo",
-							"lime": "Lime",
 							"green": "Verde",
 							"emerald": "Smeraldo",
 							"teal": "Ottanio",
@@ -3204,8 +3139,7 @@
 					"options": {
 						"grayscale": "Scala di grigi",
 						"averageColor": "Colore medio",
-						"colorful": "Colorato",
-						"thumbhash": "Thumbhash"
+						"colorful": "Colorato"
 					}
 				},
 				"thumbnailResizeMode": {
@@ -3225,7 +3159,6 @@
 				"incognitoReading": "Lettura in incognito"
 			},
 			"stump": {
-				"label": "Stump",
 				"description": "Le funzionalità di Stump sono opzionali e possono essere disattivate se non sono necessarie",
 				"bookClubsEnabled": "Funzionalità club del libro"
 			},
@@ -3264,7 +3197,6 @@
 				}
 			},
 			"debug": {
-				"label": "Debug",
 				"clearCache": {
 					"label": "Svuota cache",
 					"memory": {
@@ -3305,9 +3237,7 @@
 			},
 			"contactInfo": {
 				"label": "Contatti",
-				"email": "E-mail",
-				"discord": "Discord",
-				"github": "GitHub"
+				"email": "E-mail"
 			},
 			"supportInfo": {
 				"buildInformation": "Informazioni build",
@@ -3420,12 +3350,7 @@
 			"typeface": {
 				"label": "Carattere",
 				"options": {
-					"system": "Sistema",
-					"opendyslexic": "OpenDyslexic",
-					"literata": "Literata",
-					"atkinsonHyperlegible": "Atkinson Hyperlegible",
-					"charisSIL": "Charis SIL",
-					"bitter": "Bitter"
+					"system": "Sistema"
 				}
 			},
 			"fontSize": "Dimensioni carattere",
@@ -3496,8 +3421,6 @@
 			"BOOK": "Libri",
 			"COMIC": "Fumetti",
 			"LIGHT_NOVEL": "Light novel",
-			"MANGA": "Manga",
-			"MANHWA": "Manhwa",
 			"MIXED": "Misto",
 			"WEBTOON": "Webtoon",
 			"WEB_NOVEL": "Web novel"
@@ -3532,17 +3455,9 @@
 				"ASC": "Crescente",
 				"DESC": "Decrescente"
 			},
-			"sortDirectionString": {
-				"ASC": "A → Z",
-				"DESC": "Z → A"
-			},
 			"sortDirectionDate": {
 				"ASC": "Dal più vecchio",
 				"DESC": "Dal più recente"
-			},
-			"sortDirectionNumber": {
-				"ASC": "1 → 10",
-				"DESC": "10 → 1"
 			}
 		},
 		"widgets": {

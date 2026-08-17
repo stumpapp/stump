@@ -16,16 +16,11 @@ import { CreateServer, SavedServer, SavedServerWithConfig } from '~/stores/saved
 
 export default function Screen() {
 	const { t } = useTranslate()
-	const { savedServers, stumpEnabled, updateServer, deleteServer, getServerConfig } =
-		useSavedServers()
+	const { savedServers, updateServer, deleteServer, getServerConfig } = useSavedServers()
 	const router = useRouter()
 	const { width } = useWindowDimensions()
 
 	const [editingServer, setEditingServer] = useState<SavedServerWithConfig | null>(null)
-
-	const displayedServers = stumpEnabled
-		? savedServers
-		: savedServers.filter(({ kind }) => kind !== 'stump')
 
 	const defaultServer = savedServers.find((server) => server.defaultServer)
 
@@ -107,7 +102,7 @@ export default function Screen() {
 		[setEditingServer, updateServer, editingServer],
 	)
 
-	const isCleanSlate = displayedServers.length === 0
+	const isCleanSlate = savedServers.length === 0
 	const emptyContainerStyle = useOwlHeaderOffset()
 
 	// TODO: isn't rly meant for this, so create more generic grid sizing hook?
@@ -116,7 +111,7 @@ export default function Screen() {
 	if (isCleanSlate) {
 		return (
 			<ScrollView
-				key={`${width}-${displayedServers.length}-${stumpEnabled}`}
+				key={`${width}-${savedServers.length}`}
 				className="flex-1 bg-background"
 				contentInsetAdjustmentBehavior="automatic"
 			>
@@ -151,7 +146,7 @@ export default function Screen() {
 	// TODO: refresh could re-pull avatars?
 	return (
 		<FlashList
-			data={displayedServers}
+			data={savedServers}
 			renderItem={({ item: server }) => (
 				<SavedServerListItem
 					key={server.id}

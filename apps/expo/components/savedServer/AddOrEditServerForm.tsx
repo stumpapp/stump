@@ -16,7 +16,7 @@ import { z } from 'zod'
 import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore, useSavedServers } from '~/stores'
+import { useSavedServers } from '~/stores'
 import { SavedServerWithConfig, ServerConfig } from '~/stores/savedServer'
 
 import { DottedLine } from '../book/overview/DottedLine'
@@ -39,10 +39,10 @@ export default function AddOrEditServerForm({
 }: Props) {
 	const colors = useColors()
 	const { t } = useTranslate()
-	const { savedServers, stumpEnabled } = useSavedServers()
+	const { savedServers } = useSavedServers()
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
-		defaultValues: getDefaultValues(stumpEnabled, editingServer),
+		defaultValues: getDefaultValues(editingServer),
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
@@ -53,8 +53,6 @@ export default function AddOrEditServerForm({
 	const { errors } = useFormState({ control })
 
 	const headerSchema = createHeaderSchema(t)
-
-	const maskURLs = usePreferencesStore((state) => state.maskURLs)
 
 	const [didConnect, setDidConnect] = useState(false)
 	const [isCheckingConnection, setIsCheckingConnection] = useState(false)
@@ -216,8 +214,8 @@ export default function AddOrEditServerForm({
 
 	const formValues = useWatch({ control })
 	const isUpdateReady = useMemo(
-		() => !isEqual(getDefaultValues(stumpEnabled, editingServer), formValues),
-		[formValues, stumpEnabled, editingServer],
+		() => !isEqual(getDefaultValues(editingServer), formValues),
+		[formValues, editingServer],
 	)
 
 	const onURLFocused = useCallback(
@@ -342,7 +340,6 @@ export default function AddOrEditServerForm({
 						onChangeText={onChange}
 						value={value}
 						errorMessage={errors.url?.message}
-						secureTextEntry={maskURLs}
 						onFocus={onURLFocused}
 					/>
 				)}
@@ -552,9 +549,9 @@ const defaultValues = {
 	basicPassword: '',
 } as AddOrEditServerSchema
 
-const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWithConfig | null) => {
+const getDefaultValues = (editingServer?: SavedServerWithConfig | null) => {
 	if (!editingServer) {
-		return { ...defaultValues, kind: stumpEnabled ? 'stump' : 'opds' } as AddOrEditServerSchema
+		return { ...defaultValues, kind: 'stump' } as AddOrEditServerSchema
 	}
 
 	const configs = match(editingServer.config?.auth)

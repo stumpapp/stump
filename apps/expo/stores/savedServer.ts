@@ -200,23 +200,13 @@ export const saveServerToken = async (id: ServerID, token: ManagedToken) => {
  * An RPC-like hook for interacting with saved servers and their encrypted tokens/configs.
  */
 export const useSavedServers = () => {
-	const {
-		servers,
-		addServer,
-		editServer,
-		removeServer,
-		setDefaultServer,
-		showStumpServers,
-		setShowStumpServers,
-	} = useSavedServerStore(
+	const { servers, addServer, editServer, removeServer, setDefaultServer } = useSavedServerStore(
 		useShallow((state) => ({
 			servers: state.servers,
 			addServer: state.addServer,
 			editServer: state.editServer,
 			removeServer: state.removeServer,
 			setDefaultServer: state.setDefaultServer,
-			showStumpServers: state.showStumpServers,
-			setShowStumpServers: state.setShowStumpServers,
 		})),
 	)
 
@@ -345,27 +335,8 @@ export const useSavedServers = () => {
 		queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(id) })
 	}
 
-	/**
-	 * Set whether or not to show stump servers in the list of saved servers
-	 */
-	const setStumpEnabled = useCallback(
-		(enabled: boolean) => {
-			const defaultServer = servers.find((server) => server.defaultServer)
-			if (!enabled && defaultServer?.kind === 'stump') {
-				// If we're disabling stump servers, and the default server is a stump server, we need to unset it
-				setDefaultServer()
-			}
-			setShowStumpServers(enabled)
-		},
-		[servers, setDefaultServer, setShowStumpServers],
-	)
-
 	return {
-		savedServers: showStumpServers
-			? servers
-			: servers.filter((server) => server.kind !== 'stump' || server.stumpOPDS),
-		stumpEnabled: showStumpServers,
-		setStumpEnabled,
+		savedServers: servers,
 		createServer,
 		updateServer,
 		deleteServer,

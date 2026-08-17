@@ -3295,7 +3295,6 @@
 				},
 				"performanceMonitor": "Performance Monitor",
 				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
 				"displayLanguageKeys": {
 					"label": "Display Language Keys",
 					"options": {

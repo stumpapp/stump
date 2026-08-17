@@ -3270,7 +3270,6 @@
 				},
 				"performanceMonitor": "性能监控",
 				"reduceAnimations": "减少动画",
-				"maskUrls": "隐藏 URL",
 				"displayLanguageKeys": {
 					"label": "显示语言键",
 					"options": {

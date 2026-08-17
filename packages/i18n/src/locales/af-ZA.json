@@ -1,133 +1,133 @@
 {
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"thumbnailConfig": {
-				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. For example, a scale factor of 0.65 will result in a thumbnail that is 65% of the original size"
-				},
-				"exact": {
-					"width": {
-						"label": "Width scale"
-					},
-					"height": {
-						"label": "Height scale"
-					}
-				}
-			}
-		}
-	},
-	"createLibraryScene": {
-		"heading": "Create New Library"
-	},
-	"librarySettingsScene": {
-		"heading": "Manage Library",
-		"sidebar": {
-			"configuration": {
-				"label": "Options"
-			}
-		},
-		"options/thumbnails": {
-			"sections": {
-				"management": {
-					"heading": "Management"
-				}
-			}
-		},
-		"integrations/analysis": {
-			"sections": {
-				"analyzeBooks": {
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
-				}
-			}
-		},
-		"danger-zone/delete": {
-			"title": "Deletion Actions"
-		}
-	},
-	"userSmartListScene": {
-		"itemsScene": {
-			"actionHeader": {
-				"viewManager": {
-					"updateSelected": "Update selected"
-				}
-			}
-		}
-	},
-	"settingsScene": {
-		"sidebar": {
-			"management": {
-				"general": "General"
-			}
-		},
-		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance"
-		},
-		"app/desktop": {
-			"sections": {
-				"configuredServers": {
-					"resetTokens": {
-						"label": "Clear authentication",
-						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
-						],
-						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
-						}
-					}
-				}
-			}
-		},
-		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings"
-		},
-		"server/jobs": {
-			"sections": {
-				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
-				}
-			}
-		},
-		"server/users": {
-			"createOrUpdateForm": {
-				"permissions": {
-					"file": {
-						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
-						}
-					},
-					"user": {
-						"manage": {
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
-						}
-					},
-					"smartlist": {
-						"read": {
-							"description": "Allows the user to access smart lists features"
-						}
-					}
-				}
-			}
-		}
-	},
-	"sidebar": {
-		"libraryOptions": {
-			"manageLibrary": "Manage"
-		}
-	},
-	"thumbnailDropdown": {
-		"label": "Edit thumbnail"
-	},
-	"mobileApp": {
-		"readerSettings": {
-			"title": "Reader Settings"
-		}
-	}
+    "createOrUpdateLibraryForm": {
+        "fields": {
+            "thumbnailConfig": {
+                "scaleEvenlyByFactor": {
+                    "description": "Scale the thumbnail by a factor of the original size. For example, a scale factor of 0.65 will result in a thumbnail that is 65% of the original size"
+                },
+                "exact": {
+                    "width": {
+                        "label": "Width scale"
+                    },
+                    "height": {
+                        "label": "Height scale"
+                    }
+                }
+            }
+        }
+    },
+    "createLibraryScene": {
+        "heading": "Create New Library"
+    },
+    "librarySettingsScene": {
+        "heading": "Manage Library",
+        "sidebar": {
+            "configuration": {
+                "label": "Options"
+            }
+        },
+        "options/thumbnails": {
+            "sections": {
+                "management": {
+                    "heading": "Management"
+                }
+            }
+        },
+        "integrations/analysis": {
+            "sections": {
+                "analyzeBooks": {
+                    "disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
+                }
+            }
+        },
+        "danger-zone/delete": {
+            "title": "Deletion Actions"
+        }
+    },
+    "userSmartListScene": {
+        "itemsScene": {
+            "actionHeader": {
+                "viewManager": {
+                    "updateSelected": "Update selected"
+                }
+            }
+        }
+    },
+    "settingsScene": {
+        "sidebar": {
+            "management": {
+                "general": "General"
+            }
+        },
+        "app/preferences": {
+            "helmet": "Appearance",
+            "title": "Appearance"
+        },
+        "app/desktop": {
+            "sections": {
+                "configuredServers": {
+                    "resetTokens": {
+                        "label": "Clear authentication",
+                        "description": [
+                            "Remove all securely-stored access tokens for your servers",
+                            "You will have to re-authenticate with each server"
+                        ],
+                        "confirmation": {
+                            "trigger": "Clear authentication",
+                            "title": "Clear authentication",
+                            "description": "This will remove all securely-stored access tokens for your servers",
+                            "confirm": "Clear authentication"
+                        }
+                    }
+                }
+            }
+        },
+        "server/general": {
+            "helmet": "General server settings",
+            "title": "General settings"
+        },
+        "server/jobs": {
+            "sections": {
+                "scheduling": {
+                    "title": "Scheduling",
+                    "description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+                }
+            }
+        },
+        "server/users": {
+            "createOrUpdateForm": {
+                "permissions": {
+                    "file": {
+                        "explorer": {
+                            "label": "File Explorer",
+                            "description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+                        }
+                    },
+                    "user": {
+                        "manage": {
+                            "description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+                        }
+                    },
+                    "smartlist": {
+                        "read": {
+                            "description": "Allows the user to access smart lists features"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sidebar": {
+        "libraryOptions": {
+            "manageLibrary": "Manage"
+        }
+    },
+    "thumbnailDropdown": {
+        "label": "Edit thumbnail"
+    },
+    "mobileApp": {
+        "readerSettings": {
+            "title": "Reader Settings"
+        }
+    }
 }

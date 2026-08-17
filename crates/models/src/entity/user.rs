@@ -59,9 +59,6 @@ pub struct Model {
 pub struct AuthUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
-	// pub avatar_url: Option<String>,
-	// pub avatar_meta: Option<ImageMetadata>,
-	// pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	pub avatar: Option<ImageRef>,
 	pub username: String,
 	pub is_server_owner: bool,

@@ -8,6 +8,8 @@
  * - `FrameManager.prototype.load` — patched in place (`patchDurableIframeSrc`) to navigate via
  *   `iframe.src` instead of `contentWindow.location.replace(blob)`, so a browser-driven reload
  *   (e.g. on resize) lands back on the publication resource instead of `about:blank`.
+ * - `FrameManager.prototype.show` — patched by `patchHiddenFrameAnimationFrames` so Firefox can
+ *   run Readium's rAF-based activation commands before the frame is visually revealed.
  * - `FrameManager#iframe` / `#source` / `#loader` / `#comms` / `#currModules` — private instance
  *   fields read/written directly (no public getters exist).
  * - `EpubNavigator#_cframes` — private field (underscore-prefixed, unexported type) read to
@@ -105,6 +107,43 @@ export function patchDurableIframeSrc(): void {
 			// Durable navigation — survives document reloads.
 			this.iframe.src = this.source
 		})
+	}
+}
+
+/**
+ * Firefox throttles `requestAnimationFrame` in an iframe with `visibility: hidden` to roughly
+ * one frame per second. Readium's `FrameManager.show()` waits for two rAF-backed commands from
+ * ColumnSnapper (`focus` and `go_progression`) before it removes that hidden state, turning a
+ * cross-chapter transition into a two-second wait.
+ *
+ * Make the frame renderable before calling Readium's show lifecycle, while keeping it fully
+ * transparent, non-interactive, and aria-hidden. Readium still removes all temporary styles on
+ * success. Restore the previous visibility if its lifecycle fails.
+ */
+export function patchHiddenFrameAnimationFrames(): void {
+	const proto = FrameManager.prototype as unknown as FrameManagerInternal & {
+		__stumpFrameAnimationFrames?: boolean
+	}
+
+	if (proto.__stumpFrameAnimationFrames) return
+	proto.__stumpFrameAnimationFrames = true
+
+	const show = proto.show
+	proto.show = async function showWithRenderableFrame(
+		this: FrameManagerInternal,
+		atProgress?: number,
+	) {
+		const previousVisibility = this.iframe.style.visibility
+		if (previousVisibility === 'hidden') {
+			this.iframe.style.visibility = 'visible'
+		}
+
+		try {
+			await show.call(this, atProgress)
+		} catch (error) {
+			this.iframe.style.visibility = previousVisibility
+			throw error
+		}
 	}
 }
 

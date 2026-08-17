@@ -16,6 +16,7 @@ import { locatorToHref, resolvePublicationLinkLocator } from './locator'
 import {
 	attachFrameReloadGuard,
 	patchDurableIframeSrc,
+	patchHiddenFrameAnimationFrames,
 	recoverBlankFrames,
 } from './patchDurableIframeSrc'
 
@@ -227,6 +228,7 @@ export function useReadiumNavigator({
 				// FrameManager uses location.replace(blob) without setting iframe.src;
 				// browser reload then lands on about:blank. Patch navigates via src.
 				patchDurableIframeSrc()
+				patchHiddenFrameAnimationFrames()
 
 				const listeners: EpubNavigatorListeners = {
 					frameLoaded: () => {},

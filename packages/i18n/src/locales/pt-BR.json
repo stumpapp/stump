@@ -1,296 +1,296 @@
 {
-	"authScene": {
-		"form": {
-			"validation": {
-				"missingUsername": "O nome de usuário é necessário",
-				"missingPassword": "A senha é necessária",
-				"usernameAlreadyExists": "O nome de usuário já existe"
-			},
-			"labels": {
-				"username": "Nome de usuário",
-				"password": "Senha"
-			},
-			"buttons": {
-				"createAccount": "Criar Conta"
-			}
-		},
-		"toasts": {
-			"loggingIn": "Entrando...",
-			"loggedIn": "Bem-vindo de volta!",
-			"loggedInFirstTime": "Bem-vindo!",
-			"registering": "Registrando...",
-			"registered": "Registrado!",
-			"loginFailed": "Falha no login. Tente novamente",
-			"registrationFailed": "Falha ao registrar. Por favor, tente novamente"
-		}
-	},
-	"adminLibrarySidebar": {
-		"libraryConfiguration": {
-			"heading": "Configuração da Biblioteca",
-			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
-			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
-		}
-	},
-	"bookOverviewScene": {
-		"fileInformation": {
-			"heading": "Informações do Arquivo",
-			"labels": {
-				"fileSize": "Tamanho do arquivo",
-				"fileType": "Tipo de arquivo",
-				"fileLocation": "Localização do Arquivo"
-			}
-		},
-		"emailBook": {
-			"form": {
-				"email": {
-					"label": "E-mail"
-				},
-				"devices": {
-					"label": "Dispositivos"
-				}
-			}
-		},
-		"nextInSeries": "Seguinte na série"
-	},
-	"createOrUpdateBookClubForm": {
-		"fields": {
-			"name": {
-				"label": "Nome"
-			},
-			"description": {
-				"label": "Descrição"
-			},
-			"member_role_spec": {
-				"member": {
-					"label": "Membro",
-					"placeholder": "Membro"
-				}
-			}
-		}
-	},
-	"createBookClubScene": {
-		"form": {
-			"review": {
-				"labels": {
-					"description": "Descrição"
-				}
-			}
-		}
-	},
-	"createLibraryScene": {
-		"heading": "Criar nova biblioteca",
-		"subtitleLink": "documentação relevante",
-		"form": {
-			"buttons": {
-				"confirm": "Criar Biblioteca"
-			}
-		}
-	},
-	"librarySettingsScene": {
-		"heading": "Gerenciar Biblioteca",
-		"subtitleLink": "documentação relevante",
-		"sidebar": {
-			"configuration": {
-				"label": "Options"
-			}
-		},
-		"options/thumbnails": {
-			"sections": {
-				"management": {
-					"heading": "Management"
-				}
-			}
-		},
-		"integrations/analysis": {
-			"sections": {
-				"analyzeBooks": {
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
-				}
-			}
-		},
-		"danger-zone/delete": {
-			"title": "Deletion Actions"
-		}
-	},
-	"errorScene": {
-		"message": "Ocorreu um erro:",
-		"buttons": {
-			"report": "Reportar Bug",
-			"copy": "Copiar os detalhes do erro",
-			"goHome": "Ir ao Início"
-		}
-	},
-	"seriesOverviewScene": {
-		"buttons": {
-			"continueReading": "Continuar Lendo",
-			"downloadSeries": "Baixar Séries"
-		}
-	},
-	"userSmartListScene": {
-		"itemsScene": {
-			"actionHeader": {
-				"viewManager": {
-					"updateSelected": "Update selected"
-				}
-			}
-		}
-	},
-	"settingsScene": {
-		"navigation": {
-			"general": "Geral",
-			"server": "Servidor",
-			"jobs": "Ações e configurações",
-			"users": "Gerenciamento de usuários"
-		},
-		"sidebar": {
-			"management": {
-				"general": "General"
-			}
-		},
-		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance"
-		},
-		"app/desktop": {
-			"sections": {
-				"configuredServers": {
-					"resetTokens": {
-						"label": "Clear authentication",
-						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
-						],
-						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
-						}
-					}
-				}
-			}
-		},
-		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings"
-		},
-		"server/jobs": {
-			"sections": {
-				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
-				}
-			}
-		},
-		"server/users": {
-			"createOrUpdateForm": {
-				"permissions": {
-					"file": {
-						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
-						}
-					},
-					"user": {
-						"manage": {
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
-						}
-					},
-					"smartlist": {
-						"read": {
-							"description": "Allows the user to access smart lists features"
-						}
-					}
-				}
-			}
-		}
-	},
-	"jobOverlay": {
-		"backupHeading": "Trabalho em Progresso"
-	},
-	"libraryStats": {
-		"seriesCount": "Total de Séries",
-		"bookCount": "Número Total de Livros",
-		"diskUsage": "Uso de disco"
-	},
-	"pagination": {
-		"buttons": {
-			"next": "Próxima",
-			"previous": "Anterior"
-		},
-		"popover": {
-			"heading": "Ir para a página",
-			"buttons": {
-				"confirm": "Ir",
-				"cancel": "Cancelar"
-			}
-		}
-	},
-	"signOutModal": {
-		"title": "Terminar Sessão",
-		"message": "Você tem certeza que deseja sair?",
-		"buttons": {
-			"cancel": "Cancelar",
-			"signOut": "Terminar Sessão"
-		}
-	},
-	"sidebar": {
-		"buttons": {
-			"home": "Início",
-			"libraries": "Bibliotecas",
-			"settings": "Configurações",
-			"themeToggle": "Alternar tema",
-			"goForward": "Ir adiante",
-			"goBack": "Retornar"
-		},
-		"libraryOptions": {
-			"manageLibrary": "Manage"
-		},
-		"versionInformation": {
-			"heading": "Informações da versão",
-			"semVer": "Versionamento Semântico",
-			"commitHash": "Hash do Commit",
-			"buildDate": "Data da Compilação"
-		}
-	},
-	"search": {
-		"placeholder": "Pesquisar"
-	},
-	"serverSOS": {
-		"heading": "Servidor indisponível",
-		"desktop": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
-		},
-		"web": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
-		},
-		"reconnected": "Reconectado ao servidor! Redirecionando...",
-		"reconnectionFailed": "Algo deu errado!"
-	},
-	"serverStatusOverlay": {
-		"heading": "Servidor não está conectado",
-		"message": [
-			"Por favor, verifique sua conexão com a internet",
-			"Clique aqui",
-			"para mudar a URL de seu servidor"
-		]
-	},
-	"slidingList": {
-		"empty": "Nenhum item para exibir",
-		"buttons": {
-			"next": "Buscar à frente",
-			"previous": "Procurar Anterior"
-		}
-	},
-	"tagSelect": {
-		"placeholderNoTags": "Não há tags disponíveis"
-	},
-	"thumbnailDropdown": {
-		"label": "Edit thumbnail"
-	},
-	"mobileApp": {
-		"readerSettings": {
-			"title": "Reader Settings"
-		}
-	}
+    "authScene": {
+        "form": {
+            "validation": {
+                "missingUsername": "O nome de usuário é necessário",
+                "missingPassword": "A senha é necessária",
+                "usernameAlreadyExists": "O nome de usuário já existe"
+            },
+            "labels": {
+                "username": "Nome de usuário",
+                "password": "Senha"
+            },
+            "buttons": {
+                "createAccount": "Criar Conta"
+            }
+        },
+        "toasts": {
+            "loggingIn": "Entrando...",
+            "loggedIn": "Bem-vindo de volta!",
+            "loggedInFirstTime": "Bem-vindo!",
+            "registering": "Registrando...",
+            "registered": "Registrado!",
+            "loginFailed": "Falha no login. Tente novamente",
+            "registrationFailed": "Falha ao registrar. Por favor, tente novamente"
+        }
+    },
+    "adminLibrarySidebar": {
+        "libraryConfiguration": {
+            "heading": "Configuração da Biblioteca",
+            "subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
+            "subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
+        }
+    },
+    "bookOverviewScene": {
+        "fileInformation": {
+            "heading": "Informações do Arquivo",
+            "labels": {
+                "fileSize": "Tamanho do arquivo",
+                "fileType": "Tipo de arquivo",
+                "fileLocation": "Localização do Arquivo"
+            }
+        },
+        "emailBook": {
+            "form": {
+                "email": {
+                    "label": "E-mail"
+                },
+                "devices": {
+                    "label": "Dispositivos"
+                }
+            }
+        },
+        "nextInSeries": "Seguinte na série"
+    },
+    "createOrUpdateBookClubForm": {
+        "fields": {
+            "name": {
+                "label": "Nome"
+            },
+            "description": {
+                "label": "Descrição"
+            },
+            "member_role_spec": {
+                "member": {
+                    "label": "Membro",
+                    "placeholder": "Membro"
+                }
+            }
+        }
+    },
+    "createBookClubScene": {
+        "form": {
+            "review": {
+                "labels": {
+                    "description": "Descrição"
+                }
+            }
+        }
+    },
+    "createLibraryScene": {
+        "heading": "Criar nova biblioteca",
+        "subtitleLink": "documentação relevante",
+        "form": {
+            "buttons": {
+                "confirm": "Criar Biblioteca"
+            }
+        }
+    },
+    "librarySettingsScene": {
+        "heading": "Gerenciar Biblioteca",
+        "subtitleLink": "documentação relevante",
+        "sidebar": {
+            "configuration": {
+                "label": "Options"
+            }
+        },
+        "options/thumbnails": {
+            "sections": {
+                "management": {
+                    "heading": "Management"
+                }
+            }
+        },
+        "integrations/analysis": {
+            "sections": {
+                "analyzeBooks": {
+                    "disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
+                }
+            }
+        },
+        "danger-zone/delete": {
+            "title": "Deletion Actions"
+        }
+    },
+    "errorScene": {
+        "message": "Ocorreu um erro:",
+        "buttons": {
+            "report": "Reportar Bug",
+            "copy": "Copiar os detalhes do erro",
+            "goHome": "Ir ao Início"
+        }
+    },
+    "seriesOverviewScene": {
+        "buttons": {
+            "continueReading": "Continuar Lendo",
+            "downloadSeries": "Baixar Séries"
+        }
+    },
+    "userSmartListScene": {
+        "itemsScene": {
+            "actionHeader": {
+                "viewManager": {
+                    "updateSelected": "Update selected"
+                }
+            }
+        }
+    },
+    "settingsScene": {
+        "navigation": {
+            "general": "Geral",
+            "server": "Servidor",
+            "jobs": "Ações e configurações",
+            "users": "Gerenciamento de usuários"
+        },
+        "sidebar": {
+            "management": {
+                "general": "General"
+            }
+        },
+        "app/preferences": {
+            "helmet": "Appearance",
+            "title": "Appearance"
+        },
+        "app/desktop": {
+            "sections": {
+                "configuredServers": {
+                    "resetTokens": {
+                        "label": "Clear authentication",
+                        "description": [
+                            "Remove all securely-stored access tokens for your servers",
+                            "You will have to re-authenticate with each server"
+                        ],
+                        "confirmation": {
+                            "trigger": "Clear authentication",
+                            "title": "Clear authentication",
+                            "description": "This will remove all securely-stored access tokens for your servers",
+                            "confirm": "Clear authentication"
+                        }
+                    }
+                }
+            }
+        },
+        "server/general": {
+            "helmet": "General server settings",
+            "title": "General settings"
+        },
+        "server/jobs": {
+            "sections": {
+                "scheduling": {
+                    "title": "Scheduling",
+                    "description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+                }
+            }
+        },
+        "server/users": {
+            "createOrUpdateForm": {
+                "permissions": {
+                    "file": {
+                        "explorer": {
+                            "label": "File Explorer",
+                            "description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+                        }
+                    },
+                    "user": {
+                        "manage": {
+                            "description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+                        }
+                    },
+                    "smartlist": {
+                        "read": {
+                            "description": "Allows the user to access smart lists features"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "jobOverlay": {
+        "backupHeading": "Trabalho em Progresso"
+    },
+    "libraryStats": {
+        "seriesCount": "Total de Séries",
+        "bookCount": "Número Total de Livros",
+        "diskUsage": "Uso de disco"
+    },
+    "pagination": {
+        "buttons": {
+            "next": "Próxima",
+            "previous": "Anterior"
+        },
+        "popover": {
+            "heading": "Ir para a página",
+            "buttons": {
+                "confirm": "Ir",
+                "cancel": "Cancelar"
+            }
+        }
+    },
+    "signOutModal": {
+        "title": "Terminar Sessão",
+        "message": "Você tem certeza que deseja sair?",
+        "buttons": {
+            "cancel": "Cancelar",
+            "signOut": "Terminar Sessão"
+        }
+    },
+    "sidebar": {
+        "buttons": {
+            "home": "Início",
+            "libraries": "Bibliotecas",
+            "settings": "Configurações",
+            "themeToggle": "Alternar tema",
+            "goForward": "Ir adiante",
+            "goBack": "Retornar"
+        },
+        "libraryOptions": {
+            "manageLibrary": "Manage"
+        },
+        "versionInformation": {
+            "heading": "Informações da versão",
+            "semVer": "Versionamento Semântico",
+            "commitHash": "Hash do Commit",
+            "buildDate": "Data da Compilação"
+        }
+    },
+    "search": {
+        "placeholder": "Pesquisar"
+    },
+    "serverSOS": {
+        "heading": "Servidor indisponível",
+        "desktop": {
+            "message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
+        },
+        "web": {
+            "message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
+        },
+        "reconnected": "Reconectado ao servidor! Redirecionando...",
+        "reconnectionFailed": "Algo deu errado!"
+    },
+    "serverStatusOverlay": {
+        "heading": "Servidor não está conectado",
+        "message": [
+            "Por favor, verifique sua conexão com a internet",
+            "Clique aqui",
+            "para mudar a URL de seu servidor"
+        ]
+    },
+    "slidingList": {
+        "empty": "Nenhum item para exibir",
+        "buttons": {
+            "next": "Buscar à frente",
+            "previous": "Procurar Anterior"
+        }
+    },
+    "tagSelect": {
+        "placeholderNoTags": "Não há tags disponíveis"
+    },
+    "thumbnailDropdown": {
+        "label": "Edit thumbnail"
+    },
+    "mobileApp": {
+        "readerSettings": {
+            "title": "Reader Settings"
+        }
+    }
 }

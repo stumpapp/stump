@@ -1,800 +1,800 @@
 {
-	"underConstruction": {
-		"heading": "Ez kínos",
-		"message": "Egy még fejlesztés alatt álló oldalra bukkantál. Szívesen megmutatnám neked, de még nincs teljesen készen.",
-		"homeLink": "Vissza a főoldalra",
-		"githubLink": "GitHub megtekintése"
-	},
-	"authScene": {
-		"claimHeading": "Szerver inicializálása",
-		"claimText": "Ez a Stump szerver nincs inicializálva. Használd az alábbi űrlapot fiókod létrehozásához. A létrehozás után teljes hozzáférést kapsz az összes szerverfunkcióhoz.",
-		"form": {
-			"validation": {
-				"missingUsername": "Felhasználónév szükséges",
-				"missingPassword": "Jelszó szükséges",
-				"usernameAlreadyExists": "A felhasználónév már létezik"
-			},
-			"labels": {
-				"username": "Felhasználónév",
-				"password": "Jelszó"
-			},
-			"buttons": {
-				"createAccount": "Fiók létrehozása",
-				"login": "Bejelentkezés"
-			}
-		},
-		"toasts": {
-			"loggingIn": "Bejelentkezés folyamatban...",
-			"loggedIn": "Üdv újra!",
-			"loggedInFirstTime": "Üdvözöljük!",
-			"registering": "Regisztráció folyamatban...",
-			"registered": "Regisztrálva!",
-			"loginFailed": "Bejelentkezés sikertelen. Kérlek próbáld újra",
-			"registrationFailed": "Regisztráció sikertelen. Kérlek próbáld újra"
-		}
-	},
-	"adminLibrarySidebar": {
-		"libraryConfiguration": {
-			"heading": "Könyvtár konfiguráció",
-			"subtitleCreating": "Az új könyvtárad előnézete alább látható",
-			"subtitleEditing": "A könyvtárad szerkesztéseinek előnézete alább látható"
-		}
-	},
-	"bookOverviewScene": {
-		"fileInformation": {
-			"heading": "Fájlinformációk",
-			"labels": {
-				"fileSize": "Fájlméret",
-				"fileType": "Fájltípus",
-				"fileLocation": "Fájl helye",
-				"fileChecksum": "Ellenőrző összeg"
-			}
-		},
-		"emailBook": {
-			"heading": "Könyv elküldése",
-			"form": {
-				"email": {
-					"label": "E-mail",
-					"placeholder": "E-mail cím",
-					"description": "Egy e-mail cím, amelyre a könyvet szeretnéd elküldeni. Kattints a hozzáadás gombra az egyes címek véglegesítéséhez"
-				},
-				"devices": {
-					"label": "Eszközök",
-					"placeholder": "Eszközök kiválasztása",
-					"noFilterMatch": "Egyetlen eszköz sem felel meg a szűrőnek"
-				}
-			}
-		},
-		"nextInSeries": "Következő a sorozatban"
-	},
-	"createOrUpdateBookClubForm": {
-		"fields": {
-			"name": {
-				"label": "Név",
-				"placeholder": "Az én könyvklubom",
-				"description": "A könyvklubod neve"
-			},
-			"description": {
-				"label": "Leírás",
-				"description": "Egy opcionális, rövid leírás a könyvklubodról"
-			},
-			"is_private": {
-				"label": "Privát klub",
-				"description": "Ha be van kapcsolva, csak a te általad meghívott felhasználók csatlakozhatnak a könyvklubodhoz"
-			},
-			"member_role_spec": {
-				"heading": "Egyéni szerepkör-hozzárendelés",
-				"subtitle": [
-					"Ha szeretnéd, egyéni neveket is létrehozhatsz a könyvklubodban betöltött szerepek számára. További információért olvassa el a",
-					"dokumentációt"
-				],
-				"member": {
-					"label": "Tag",
-					"placeholder": "Tag",
-					"description": "A könyvklubod alapértelmezett szerepének neve"
-				},
-				"moderator": {
-					"label": "Moderátor",
-					"placeholder": "Moderátor",
-					"description": "A könyvklubod moderátori szerepének neve"
-				},
-				"admin": {
-					"label": "Adminisztrátor",
-					"placeholder": "Adminisztrátor",
-					"description": "A könyvklubod adminisztrátori szerepének neve"
-				},
-				"creator": {
-					"label": "Készítő",
-					"placeholder": "Készítő",
-					"description": "A könyvklubod készítői szerepének neve. Ez te vagy!"
-				}
-			},
-			"membershipOptions": {
-				"displayName": {
-					"label": "Megjelenített név",
-					"description": "A könyvklubban való tagságának opcionális megjelenítő neve. Ha be van állítva, ez elsőbbséget élvez a felhasználónévvel szemben"
-				},
-				"hideProgress": {
-					"label": "Előrehaladás elrejtése"
-				}
-			}
-		},
-		"validation": {
-			"missingName": "Név megadása kötelező",
-			"alreadyTaken": "már le van foglalva"
-		}
-	},
-	"createBookClubScene": {
-		"heading": "Új könyvklub létrehozása",
-		"form": {
-			"stepLabel": "Lépés",
-			"steps": [
-				{
-					"label": "Alapok",
-					"heading": "Alap adatok",
-					"description": "A klub részletei, beleértve a nevét és leírását"
-				},
-				{
-					"label": "Szerepkörök",
-					"heading": "Szerepkörök",
-					"description": "Szerepkörök testreszabása a könyvklubodban"
-				},
-				{
-					"label": "Tagság",
-					"heading": "Tagsági preferenciák",
-					"description": "További lehetőségek a könyvkluboddal kapcsolatban"
-				},
-				{
-					"label": "Áttekintés",
-					"heading": "Áttekintés",
-					"description": "Ellenőrizd a klubod beállításait a létrehozás előtt"
-				}
-			],
-			"review": {
-				"yes": "Igen",
-				"no": "Nem",
-				"none": "Nincs",
-				"labels": {
-					"name": "Név",
-					"description": "Leírás"
-				}
-			},
-			"submit": "Könyvklub létrehozása"
-		}
-	},
-	"bookClubSettingsScene": {
-		"sidebar": {
-			"basics": "Alapok",
-			"members": {
-				"members": "Tagok",
-				"roles": "Szerepkörök",
-				"label": "Tagság"
-			},
-			"scheduling": {
-				"scheduler": "Ütemező",
-				"options": "Lehetőségek",
-				"label": "Ütemezés"
-			},
-			"danger-zone": {
-				"delete": "Törlés",
-				"label": "Veszélyzóna"
-			}
-		},
-		"basics": {
-			"title": "Alap adatok",
-			"description": "Ennek a könyvklubnak a részletei, beleértve a nevét és leírását",
-			"form": {
-				"submit": "Klub frissítése"
-			}
-		},
-		"members": {
-			"title": "Tagok",
-			"description": "Könyvklub tagjainak kezelése"
-		},
-		"roles": {
-			"title": "Szerepkörök",
-			"description": "Szerepkörök testreszabása ebben a könyvklubban",
-			"sections": {
-				"roleMappings": {
-					"heading": "Meglévő szerepkör-hozzárendelések",
-					"description": "A könyvklub jelenlegi szerepkör-hozzárendelései"
-				}
-			}
-		},
-		"scheduling/scheduler": {
-			"title": "Ütemező"
-		},
-		"scheduling/options": {
-			"title": "Lehetőségek",
-			"description": "További lehetőségek ennek a könyvklubnak az ütemezéséhez"
-		},
-		"danger-zone/delete": {
-			"title": "Törlési műveletek",
-			"description": "Töröld véglegesen ezt a könyvklubot és annak minden tartalmát vagy bizonyos anyagait",
-			"sections": {
-				"deleteClub": {
-					"heading": "Klub törlése",
-					"description": [
-						"Könyvklub és minden tartalmának végleges törlése.",
-						"Ezt a műveletet nem lehet visszavonni"
-					],
-					"trigger": "Klub törlése"
-				}
-			}
-		}
-	},
-	"createOrUpdateLibraryForm": {
-		"fields": {
-			"name": {
-				"label": "Név",
-				"description": "Egy barátságos név a könyvtáradnak",
-				"placeholder": "Az én könyvtáram"
-			},
-			"path": {
-				"label": "Elérési út",
-				"description": "A könyvtár elérési útvonala, ahogyan az a szerveren található",
-				"placeholder": "/könyvtár/elérési/útvonala"
-			},
-			"description": {
-				"label": "Leírás",
-				"description": "Egy rövid leírás a könyvtáradhoz",
-				"placeholder": "Egy könyvtár tele a kedvenc könyveimmel"
-			},
-			"tags": {
-				"label": "Címkék",
-				"description": "A könyvtár kategorizálására vagy a hozzáférési szabályok érvényesítésére használható"
-			},
-			"readingSettings": {
-				"section": {
-					"heading": "Olvasási beállítások",
-					"description": "A könyvekhez használt alapértelmezett olvasói beállítások"
-				},
-				"imageScaling": {
-					"label": "Kép méretezése",
-					"description": "Hogyan méretezi a képalapú olvasó a képeket az oldalra"
-				},
-				"readingMode": {
-					"label": "Alapértelmezett olvasó",
-					"description": "A képalapú könyvek alapértelmezett olvasója"
-				},
-				"readingDirection": {
-					"label": "Olvasási irány",
-					"description": "Melyik irányban halad az olvasó az oldalakon keresztül"
-				}
-			},
-			"thumbnailConfig": {
-				"section": {
-					"heading": {
-						"create": "Bélyegkép konfiguráció",
-						"update": "Generálás"
-					},
-					"description": "A könyvtár böngészése közbeni betöltési idők javítása a könyvek bélyegképeinek generálásával"
-				},
-				"enableSwitch": {
-					"label": "Engedélyezve",
-					"description": "Bélyegképek generálása ehhez a könyvtárhoz"
-				},
-				"format": {
-					"label": "Képformátum",
-					"description": "A generált bélyegképek formátuma"
-				},
-				"quality": {
-					"label": "Minőség",
-					"description": "A generált bélyegképek minősége, 0 és 1,0 között"
-				}
-			},
-			"ignoreRules": {
-				"section": {
-					"heading": "Szabályok mellőzése",
-					"description": "Glob-minták definiálása bizonyos fájlok vagy könyvtárak figyelmen kívül hagyásához a szkennelés során"
-				},
-				"noRules": "Nem kerültek konfigurálásra figyelmen kívül hagyási szabályok",
-				"save": "Módosítások mentése",
-				"addRule": {
-					"label": "Új szabály",
-					"description": "Glob-minta fájlok vagy könyvtárak figyelmen kívül hagyásához",
-					"addButton": "Szabály hozzáadása",
-					"ignoreParents": {
-						"title": "Minden felsőbb szintű mappa figyelmen kívül hagyása",
-						"label": "Felsőbb szintűek figyelmen kívül hagyása"
-					},
-					"ignoreSubdirs": {
-						"title": "Minden almappa figyelmen kívül hagyása",
-						"label": "Almappák figyelmen kívül hagyása"
-					}
-				},
-				"invalidGlob": "Érvénytelen glob-minta",
-				"lockConfig": {
-					"lock": "Konfiguráció zárolása",
-					"unlock": "Konfiguráció zárolásának feloldása"
-				},
-				"editRule": "Szabály szerkesztése",
-				"deleteRule": "Szabály törlése",
-				"cancelEdit": "Szerkesztés megszakítása",
-				"confirmEdit": "Szerkesztés megerősítése"
-			},
-			"convertOptions": {
-				"section": {
-					"heading": "Fájl átalakítás",
-					"description": "A Stump képes bizonyos fájlformátumokat kompatibilisebbé konvertálni"
-				},
-				"rarToZip": {
-					"label": "RAR átalakítása ZIP-é",
-					"description": "RAR/CBR fájlok átalakítása ZIP/CBZ fájlokká a szkennelés során"
-				},
-				"deleteRarAfter": {
-					"label": "RAR törlése átalakítás után",
-					"description": "Az eredeti RAR/CBR fájlok törlése az átalakítás után. Ez visszafordíthatatlan"
-				}
-			},
-			"scannerFeatures": {
-				"section": {
-					"heading": "Választható feldolgozás",
-					"description": "Választható feldolgozási funkciók a szkennerhez",
-					"disclaimer": "Ezek a funkciók további fájlolvasással járnak, ami lelassíthatja a szkennelési folyamatot"
-				},
-				"processMetadata": {
-					"label": "Metaadatok feldolgozása",
-					"description": "Minden metaadat kinyerése a könyvtár fájljaiból, és eredmények tárolása az adatbázisban"
-				},
-				"generateFileHashes": {
-					"label": "Fájl hash-ek generálása",
-					"description": "Fájl hash-ek generálása minden fájlhoz a könyvtárban, duplikák megtalálása érdekében"
-				},
-				"koreaderHashes": {
-					"label": "KoReader-kompatibilis hash-ek",
-					"description": "Ha KoReader-t használsz, generálj további hash-eket az általa elvárt formátumban"
-				}
-			},
-			"libraryPattern": {
-				"section": {
-					"heading": "Felépítés",
-					"description": "Határozd meg, hogy melyik minta illeszkedik legjobban a könyvtárad felépítéséhez",
-					"docs": [
-						"Nem tudod, melyiket válaszd? Kattints",
-						"ide",
-						"több információért.",
-						"Ezt a beállítást később nem lehet megváltoztatni"
-					],
-					"disabled": "Ezt a beállítást nem lehet megváltoztatni"
-				},
-				"options": {
-					"label": "Könyvtári minta",
-					"description": "Az a beállítás, amely meghatározza, hogy a Stump hogyan építse fel a könyvtáradat"
-				}
-			}
-		},
-		"scan": {
-			"label": {
-				"create": "Szkennelés a létrehozás után",
-				"update": "Szkennelés a frissítések után"
-			},
-			"description": "Indexelje a könyvtárfájlokat az adatbázis feltöltéséhez"
-		}
-	},
-	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitleLink": "vonatkozó dokumentáció",
-		"form": {
-			"stepLabel": "Lépés",
-			"steps": [
-				{
-					"label": "Alapok",
-					"heading": "Alap adatok",
-					"description": "Ennek a könyvtárnak a részletei, beleértve a nevét, elérési útját és leírását"
-				},
-				{
-					"label": "Szkennelés",
-					"heading": "Scanning",
-					"description": "Beállítások, hogy a Stump hogyan szkennelje ezt a könyvtárat"
-				},
-				{
-					"label": "Bélyegképek",
-					"heading": "Bélyegképek",
-					"description": "A beállítások, hogy a Stump generáljon-e és hogyan bélyegképeket ehhez a könyvtárhoz"
-				},
-				{
-					"label": "Áttekintés",
-					"heading": "Áttekintés",
-					"description": "Ellenőrizd a könyvtárad beállításait a létrehozás előtt"
-				}
-			],
-			"review": {
-				"yes": "Igen",
-				"no": "Nem",
-				"none": "Nincs",
-				"labels": {
-					"generateThumbnails": "Generáljon bélyegképeket",
-					"mode": "Mód",
-					"format": "Formátum",
-					"quality": "Minőség",
-					"name": "Név",
-					"path": "Elérési út",
-					"description": "Leírás",
-					"tags": "Címkék",
-					"pattern": "Minta",
-					"ignoreRules": "Szabályok mellőzése",
-					"convertRar": "RAR/CBR átalakítása",
-					"deleteConversions": "Átalakított fájlok törlése",
-					"processMetadata": "Metaadatok feldolgozása",
-					"generateFileHashes": "Fájl hash-ek generálása"
-				}
-			},
-			"buttons": {
-				"confirm": "Könyvtár létrehozása"
-			}
-		}
-	},
-	"fileExplorer": {
-		"uploadModal": {
-			"title": {
-				"books": "Könyvek feltöltése",
-				"series": "Sorozat feltöltése"
-			},
-			"description": {
-				"books": "Könyvek hozzáadása közvetlenül az aktuális elérési útvonalhoz a fájlkezelőben",
-				"series": "Sorozat hozzáadása közvetlenül az aktuális elérési útvonalhoz a fájlkezelőben"
-			},
-			"seriesDisclaimer": [
-				"Ennek kell lennie: ",
-				"zip fájl",
-				"amely a sorozatot tartalmazó mappát tartalmazza, benne az összes könyvvel"
-			],
-			"dropzone": {
-				"books": "Húzd ide a könyveket",
-				"series": "Húzd ide egy zip fájlt",
-				"alt": "Vagy kattints a számítógépen a feltölthető könyvek kereséséhez"
-			},
-			"addedFiles": "Hozzáadott fájlok"
-		}
-	},
-	"librarySettingsScene": {
-		"heading": "Manage Library",
-		"subtitleLink": "vonatkozó dokumentáció",
-		"sidebar": {
-			"basics": "Alapok",
-			"configuration": {
-				"general": "Általános",
-				"reading": "Olvasás",
-				"scanning": "Szkennelés",
-				"thumbnails": "Bélyegképek",
-				"label": "Options"
-			}
-		},
-		"options/scanning": {
-			"description": "Beállítások, hogy a Stump hogyan szkennelje ezt a könyvtárat"
-		},
-		"options/thumbnails": {
-			"sections": {
-				"management": {
-					"heading": "Management"
-				}
-			}
-		},
-		"integrations/analysis": {
-			"sections": {
-				"analyzeBooks": {
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
-				}
-			}
-		},
-		"danger-zone/delete": {
-			"title": "Deletion Actions"
-		}
-	},
-	"errorScene": {
-		"buttons": {
-			"goHome": "Vissza a főoldalra"
-		}
-	},
-	"homeScene": {
-		"continueReading": {
-			"title": "Olvasás folytatása",
-			"emptyState": {
-				"heading": "Nincs megjeleníthető tartalom",
-				"message": "Minden folyamatban lévő könyv, amit elkezdesz, itt fog megjelenni"
-			}
-		},
-		"recentlyAddedSeries": {
-			"title": "Nemrégiben hozzáadott sorozatok",
-			"emptyState": {
-				"heading": "Nincs megjeleníthető sorozat",
-				"message": "Minden sorozat, amelyet a könyvtáraidhoz hozzáadsz, itt fog megjelenni"
-			}
-		},
-		"recentlyAddedBooks": {
-			"title": "Nemrégiben hozzáadott könyvek",
-			"emptyState": {
-				"heading": "Nincs megjeleníthető tartalom",
-				"message": "Minden újonnan hozzáadott könyv itt fog megjelenni"
-			}
-		}
-	},
-	"seriesOverviewScene": {
-		"buttons": {
-			"continueReading": "Olvasás folytatása",
-			"downloadSeries": "Sorozat letöltése"
-		}
-	},
-	"createOrUpdateSmartListForm": {
-		"validation": {
-			"nameTooShort": "A névnek legalább 2 karakterből kell állnia",
-			"nameTaken": "Ezt a nevet nem lehet használni"
-		},
-		"fields": {
-			"name": {
-				"label": "Név",
-				"placeholder": "Az én okoslistám",
-				"description": "Egyedi kell, hogy legyen, de később módosítható"
-			},
-			"description": {
-				"label": "Leírás",
-				"placeholder": "Egy nagyon intelligens lista",
-				"description": "Egy opcionális leírás az okoslistádhoz"
-			},
-			"visibility": {
-				"label": "Láthatóság",
-				"options": {
-					"public": {
-						"label": "Nyilvános",
-						"description": "A szerver összes felhasználója számára elérhető"
-					},
-					"shared": {
-						"label": "Megosztott",
-						"description": "Bizonyos felhasználók hozzáférhetnek ehhez az okoslistához"
-					}
-				}
-			}
-		}
-	},
-	"userSmartListsScene": {
-		"heading": "Okoslisták",
-		"subtitle": "A kedvenc keresések és szűrők mentése könnyű hozzáférés érdekében",
-		"searchPlaceholder": "Okoslisták szűrése",
-		"buttons": {
-			"createSmartList": "Okoslista létrehozása"
-		},
-		"list": {
-			"emptyState": {
-				"heading": "Nincs megjeleníthető okoslista",
-				"noListsMessage": "Hozz létre egy okoslistát a kezdéshez",
-				"noMatchesMessage": "Próbáld meg megváltoztatni a keresési paramétereket"
-			},
-			"card": {
-				"meta": {
-					"figures": {
-						"books": "könyv",
-						"series": "sorozat",
-						"library": "könyvtár"
-					},
-					"matches": "Találatok"
-				}
-			}
-		}
-	},
-	"smartListSettingsScene": {
-		"sidebar": {
-			"basics": "Alapok",
-			"configuration": {
-				"label": "Konfiguráció",
-				"access": "Hozzáférés",
-				"filters": "Szűrők"
-			},
-			"danger-zone": {
-				"delete": "Törlés",
-				"label": "Veszélyzóna"
-			}
-		},
-		"basics": {
-			"title": "Alap adatok",
-			"description": "Ennek az okoslistának a részletei, beleértve a nevét és leírását"
-		},
-		"access": {
-			"title": "Hozzáférés",
-			"description": "Szabályozd, hogy ki férhet hozzá ehhez az okoslistához",
-			"sections": {
-				"visibility": {
-					"confirmation": {
-						"public": "Ezáltal a lista mindenki számára láthatóvá válik",
-						"shared": "Meg kell osztania a listát bizonyos felhasználókkal, hogy hozzáférhessenek",
-						"fallback": "Biztos, hogy meg akarod változtatni a lista láthatóságát?"
-					}
-				},
-				"accessManager": {
-					"disclaimer": "A megosztás még nem készült el. Kérjük, nézz vissza később!"
-				}
-			}
-		},
-		"filters": {
-			"title": "Szűrő készítő",
-			"description": "Az okoslistát felépítő szűrők kezelése"
-		},
-		"danger-zone/delete": {
-			"title": "Törlési műveletek",
-			"description": "Töröld véglegesen ezt az okoslistát és annak minden tartalmát vagy bizonyos anyagait",
-			"sections": {
-				"deleteList": {
-					"heading": "Lista törlése",
-					"description": [
-						"Okoslista és minden tartalmának végleges törlése.",
-						"Ezt a műveletet nem lehet visszavonni"
-					],
-					"confirmation": {
-						"title": "Lista törlése",
-						"description": "Biztos, hogy törölni szeretnéd ezt az okoslistát?",
-						"confirm": "Lista törlése"
-					}
-				}
-			}
-		}
-	},
-	"userSmartListScene": {
-		"navigation": {
-			"items": "Elemek",
-			"settings": "Beállítások"
-		},
-		"layout": {
-			"missingIdError": "Ez a jelenet egy azonosítót igényel az URL-ben",
-			"smartListNotFound": "Okoslista nem található",
-			"viewCreateError": "Nézet létrehozása sikertelen",
-			"viewSaveError": "Nézet mentése sikertelen"
-		},
-		"header": {
-			"backLink": "Listák"
-		},
-		"itemsScene": {
-			"smartListNotFound": "Okoslista nem található",
-			"actionHeader": {
-				"viewSelector": {
-					"customView": "Egyéni nézet",
-					"defaultView": "Alapértelmezett nézet",
-					"noViewsSaved": "Nincs elmentett nézet",
-					"selectView": "Egy mentett nézet kiválasztása"
-				},
-				"filterDrawer": {
-					"heading": "Okoslistaszűrők",
-					"description": "A szűrők módosítása ehhez a megtekintési munkamenethez",
-					"rawData": {
-						"heading": "Nyers szűrési adatok",
-						"description": "A Stump így fogja dolgozni a szűrőket"
-					},
-					"buttons": {
-						"save": "Mentés",
-						"cancel": "Mégse"
-					}
-				},
-				"search": {
-					"placeholder": "Gyorsszűrő"
-				},
-				"viewManager": {
-					"updateSelected": "Kiválasztás frissítése",
-					"create": "Új nézet létrehozása",
-					"modal": {
-						"heading": {
-							"create": "Nézet létrehozása",
-							"update": "Nézet frissítése"
-						},
-						"description": {
-							"create": "Új nézet létrehozása ehhez az okoslistához",
-							"update": "Nézet frissítése"
-						},
-						"createForm": {
-							"name": {
-								"label": "Név",
-								"placeholder": "Az én nézetem",
-								"description": "A nézet egyedi azonosítására szolgáló barátságos név"
-							}
-						},
-						"updateForm": {
-							"name": {
-								"label": "Név",
-								"placeholder": "Az én nézetem",
-								"description": "A nézet frissített neve, ha szükséges"
-							}
-						}
-					}
-				}
-			}
-		}
-	},
-	"settingsScene": {
-		"sidebar": {
-			"management": {
-				"general": "General"
-			}
-		},
-		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance"
-		},
-		"app/desktop": {
-			"sections": {
-				"configuredServers": {
-					"resetTokens": {
-						"label": "Clear authentication",
-						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
-						],
-						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
-						}
-					}
-				}
-			}
-		},
-		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings"
-		},
-		"server/jobs": {
-			"sections": {
-				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
-				}
-			}
-		},
-		"server/users": {
-			"createOrUpdateForm": {
-				"permissions": {
-					"file": {
-						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
-						}
-					},
-					"library": {
-						"create": {
-							"description": "Lehetővé teszi a felhasználó számára új könyvtárak létrehozását.\nTartalmazza a szerkesztési és szkennelési engedélyeket"
-						},
-						"scan": {
-							"label": "Könyvtárak szkennelése",
-							"description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak szkennelésének kezdeményezését"
-						},
-						"manage": {
-							"description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak speciális beállításainak kezelését.\nTartalmazza a szerkesztési és szkennelési engedélyeket"
-						},
-						"delete": {
-							"description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak törlését.\nTartalmazza a szerkesztési, kezelési és szkennelési engedélyeket"
-						}
-					},
-					"user": {
-						"manage": {
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
-						}
-					},
-					"smartlist": {
-						"label": "Okoslisták",
-						"read": {
-							"label": "Hozzáférés az okoslista funkcióhoz",
-							"description": "Lehetővé teszi a felhasználó számára, hogy hozzáférjen az okoslisták funkcióihoz. A granuláris jogosultságok még nem kerültek bevezetésre, ezért ez tartalmazza a saját listák olvasására, létrehozására és frissítésére vonatkozó engedélyeket"
-						}
-					}
-				}
-			}
-		}
-	},
-	"sidebar": {
-		"buttons": {
-			"smartlists": "Okoslisták",
-			"noSmartlists": "Nincsenek okoslisták",
-			"createSmartlist": "Okoslista létrehozása"
-		},
-		"libraryOptions": {
-			"scanLibrary": "Szkennelés",
-			"manageLibrary": "Manage"
-		}
-	},
-	"thumbnailDropdown": {
-		"label": "Bélyegkép kiválasztása"
-	},
-	"mobileApp": {
-		"readerSettings": {
-			"title": "Reader Settings"
-		}
-	}
+    "underConstruction": {
+        "heading": "Ez kínos",
+        "message": "Egy még fejlesztés alatt álló oldalra bukkantál. Szívesen megmutatnám neked, de még nincs teljesen készen.",
+        "homeLink": "Vissza a főoldalra",
+        "githubLink": "GitHub megtekintése"
+    },
+    "authScene": {
+        "claimHeading": "Szerver inicializálása",
+        "claimText": "Ez a Stump szerver nincs inicializálva. Használd az alábbi űrlapot fiókod létrehozásához. A létrehozás után teljes hozzáférést kapsz az összes szerverfunkcióhoz.",
+        "form": {
+            "validation": {
+                "missingUsername": "Felhasználónév szükséges",
+                "missingPassword": "Jelszó szükséges",
+                "usernameAlreadyExists": "A felhasználónév már létezik"
+            },
+            "labels": {
+                "username": "Felhasználónév",
+                "password": "Jelszó"
+            },
+            "buttons": {
+                "createAccount": "Fiók létrehozása",
+                "login": "Bejelentkezés"
+            }
+        },
+        "toasts": {
+            "loggingIn": "Bejelentkezés folyamatban...",
+            "loggedIn": "Üdv újra!",
+            "loggedInFirstTime": "Üdvözöljük!",
+            "registering": "Regisztráció folyamatban...",
+            "registered": "Regisztrálva!",
+            "loginFailed": "Bejelentkezés sikertelen. Kérlek próbáld újra",
+            "registrationFailed": "Regisztráció sikertelen. Kérlek próbáld újra"
+        }
+    },
+    "adminLibrarySidebar": {
+        "libraryConfiguration": {
+            "heading": "Könyvtár konfiguráció",
+            "subtitleCreating": "Az új könyvtárad előnézete alább látható",
+            "subtitleEditing": "A könyvtárad szerkesztéseinek előnézete alább látható"
+        }
+    },
+    "bookOverviewScene": {
+        "fileInformation": {
+            "heading": "Fájlinformációk",
+            "labels": {
+                "fileSize": "Fájlméret",
+                "fileType": "Fájltípus",
+                "fileLocation": "Fájl helye",
+                "fileChecksum": "Ellenőrző összeg"
+            }
+        },
+        "emailBook": {
+            "heading": "Könyv elküldése",
+            "form": {
+                "email": {
+                    "label": "E-mail",
+                    "placeholder": "E-mail cím",
+                    "description": "Egy e-mail cím, amelyre a könyvet szeretnéd elküldeni. Kattints a hozzáadás gombra az egyes címek véglegesítéséhez"
+                },
+                "devices": {
+                    "label": "Eszközök",
+                    "placeholder": "Eszközök kiválasztása",
+                    "noFilterMatch": "Egyetlen eszköz sem felel meg a szűrőnek"
+                }
+            }
+        },
+        "nextInSeries": "Következő a sorozatban"
+    },
+    "createOrUpdateBookClubForm": {
+        "fields": {
+            "name": {
+                "label": "Név",
+                "placeholder": "Az én könyvklubom",
+                "description": "A könyvklubod neve"
+            },
+            "description": {
+                "label": "Leírás",
+                "description": "Egy opcionális, rövid leírás a könyvklubodról"
+            },
+            "is_private": {
+                "label": "Privát klub",
+                "description": "Ha be van kapcsolva, csak a te általad meghívott felhasználók csatlakozhatnak a könyvklubodhoz"
+            },
+            "member_role_spec": {
+                "heading": "Egyéni szerepkör-hozzárendelés",
+                "subtitle": [
+                    "Ha szeretnéd, egyéni neveket is létrehozhatsz a könyvklubodban betöltött szerepek számára. További információért olvassa el a",
+                    "dokumentációt"
+                ],
+                "member": {
+                    "label": "Tag",
+                    "placeholder": "Tag",
+                    "description": "A könyvklubod alapértelmezett szerepének neve"
+                },
+                "moderator": {
+                    "label": "Moderátor",
+                    "placeholder": "Moderátor",
+                    "description": "A könyvklubod moderátori szerepének neve"
+                },
+                "admin": {
+                    "label": "Adminisztrátor",
+                    "placeholder": "Adminisztrátor",
+                    "description": "A könyvklubod adminisztrátori szerepének neve"
+                },
+                "creator": {
+                    "label": "Készítő",
+                    "placeholder": "Készítő",
+                    "description": "A könyvklubod készítői szerepének neve. Ez te vagy!"
+                }
+            },
+            "membershipOptions": {
+                "displayName": {
+                    "label": "Megjelenített név",
+                    "description": "A könyvklubban való tagságának opcionális megjelenítő neve. Ha be van állítva, ez elsőbbséget élvez a felhasználónévvel szemben"
+                },
+                "hideProgress": {
+                    "label": "Előrehaladás elrejtése"
+                }
+            }
+        },
+        "validation": {
+            "missingName": "Név megadása kötelező",
+            "alreadyTaken": "már le van foglalva"
+        }
+    },
+    "createBookClubScene": {
+        "heading": "Új könyvklub létrehozása",
+        "form": {
+            "stepLabel": "Lépés",
+            "steps": [
+                {
+                    "label": "Alapok",
+                    "heading": "Alap adatok",
+                    "description": "A klub részletei, beleértve a nevét és leírását"
+                },
+                {
+                    "label": "Szerepkörök",
+                    "heading": "Szerepkörök",
+                    "description": "Szerepkörök testreszabása a könyvklubodban"
+                },
+                {
+                    "label": "Tagság",
+                    "heading": "Tagsági preferenciák",
+                    "description": "További lehetőségek a könyvkluboddal kapcsolatban"
+                },
+                {
+                    "label": "Áttekintés",
+                    "heading": "Áttekintés",
+                    "description": "Ellenőrizd a klubod beállításait a létrehozás előtt"
+                }
+            ],
+            "review": {
+                "yes": "Igen",
+                "no": "Nem",
+                "none": "Nincs",
+                "labels": {
+                    "name": "Név",
+                    "description": "Leírás"
+                }
+            },
+            "submit": "Könyvklub létrehozása"
+        }
+    },
+    "bookClubSettingsScene": {
+        "sidebar": {
+            "basics": "Alapok",
+            "members": {
+                "members": "Tagok",
+                "roles": "Szerepkörök",
+                "label": "Tagság"
+            },
+            "scheduling": {
+                "scheduler": "Ütemező",
+                "options": "Lehetőségek",
+                "label": "Ütemezés"
+            },
+            "danger-zone": {
+                "delete": "Törlés",
+                "label": "Veszélyzóna"
+            }
+        },
+        "basics": {
+            "title": "Alap adatok",
+            "description": "Ennek a könyvklubnak a részletei, beleértve a nevét és leírását",
+            "form": {
+                "submit": "Klub frissítése"
+            }
+        },
+        "members": {
+            "title": "Tagok",
+            "description": "Könyvklub tagjainak kezelése"
+        },
+        "roles": {
+            "title": "Szerepkörök",
+            "description": "Szerepkörök testreszabása ebben a könyvklubban",
+            "sections": {
+                "roleMappings": {
+                    "heading": "Meglévő szerepkör-hozzárendelések",
+                    "description": "A könyvklub jelenlegi szerepkör-hozzárendelései"
+                }
+            }
+        },
+        "scheduling/scheduler": {
+            "title": "Ütemező"
+        },
+        "scheduling/options": {
+            "title": "Lehetőségek",
+            "description": "További lehetőségek ennek a könyvklubnak az ütemezéséhez"
+        },
+        "danger-zone/delete": {
+            "title": "Törlési műveletek",
+            "description": "Töröld véglegesen ezt a könyvklubot és annak minden tartalmát vagy bizonyos anyagait",
+            "sections": {
+                "deleteClub": {
+                    "heading": "Klub törlése",
+                    "description": [
+                        "Könyvklub és minden tartalmának végleges törlése.",
+                        "Ezt a műveletet nem lehet visszavonni"
+                    ],
+                    "trigger": "Klub törlése"
+                }
+            }
+        }
+    },
+    "createOrUpdateLibraryForm": {
+        "fields": {
+            "name": {
+                "label": "Név",
+                "description": "Egy barátságos név a könyvtáradnak",
+                "placeholder": "Az én könyvtáram"
+            },
+            "path": {
+                "label": "Elérési út",
+                "description": "A könyvtár elérési útvonala, ahogyan az a szerveren található",
+                "placeholder": "/könyvtár/elérési/útvonala"
+            },
+            "description": {
+                "label": "Leírás",
+                "description": "Egy rövid leírás a könyvtáradhoz",
+                "placeholder": "Egy könyvtár tele a kedvenc könyveimmel"
+            },
+            "tags": {
+                "label": "Címkék",
+                "description": "A könyvtár kategorizálására vagy a hozzáférési szabályok érvényesítésére használható"
+            },
+            "readingSettings": {
+                "section": {
+                    "heading": "Olvasási beállítások",
+                    "description": "A könyvekhez használt alapértelmezett olvasói beállítások"
+                },
+                "imageScaling": {
+                    "label": "Kép méretezése",
+                    "description": "Hogyan méretezi a képalapú olvasó a képeket az oldalra"
+                },
+                "readingMode": {
+                    "label": "Alapértelmezett olvasó",
+                    "description": "A képalapú könyvek alapértelmezett olvasója"
+                },
+                "readingDirection": {
+                    "label": "Olvasási irány",
+                    "description": "Melyik irányban halad az olvasó az oldalakon keresztül"
+                }
+            },
+            "thumbnailConfig": {
+                "section": {
+                    "heading": {
+                        "create": "Bélyegkép konfiguráció",
+                        "update": "Generálás"
+                    },
+                    "description": "A könyvtár böngészése közbeni betöltési idők javítása a könyvek bélyegképeinek generálásával"
+                },
+                "enableSwitch": {
+                    "label": "Engedélyezve",
+                    "description": "Bélyegképek generálása ehhez a könyvtárhoz"
+                },
+                "format": {
+                    "label": "Képformátum",
+                    "description": "A generált bélyegképek formátuma"
+                },
+                "quality": {
+                    "label": "Minőség",
+                    "description": "A generált bélyegképek minősége, 0 és 1,0 között"
+                }
+            },
+            "ignoreRules": {
+                "section": {
+                    "heading": "Szabályok mellőzése",
+                    "description": "Glob-minták definiálása bizonyos fájlok vagy könyvtárak figyelmen kívül hagyásához a szkennelés során"
+                },
+                "noRules": "Nem kerültek konfigurálásra figyelmen kívül hagyási szabályok",
+                "save": "Módosítások mentése",
+                "addRule": {
+                    "label": "Új szabály",
+                    "description": "Glob-minta fájlok vagy könyvtárak figyelmen kívül hagyásához",
+                    "addButton": "Szabály hozzáadása",
+                    "ignoreParents": {
+                        "title": "Minden felsőbb szintű mappa figyelmen kívül hagyása",
+                        "label": "Felsőbb szintűek figyelmen kívül hagyása"
+                    },
+                    "ignoreSubdirs": {
+                        "title": "Minden almappa figyelmen kívül hagyása",
+                        "label": "Almappák figyelmen kívül hagyása"
+                    }
+                },
+                "invalidGlob": "Érvénytelen glob-minta",
+                "lockConfig": {
+                    "lock": "Konfiguráció zárolása",
+                    "unlock": "Konfiguráció zárolásának feloldása"
+                },
+                "editRule": "Szabály szerkesztése",
+                "deleteRule": "Szabály törlése",
+                "cancelEdit": "Szerkesztés megszakítása",
+                "confirmEdit": "Szerkesztés megerősítése"
+            },
+            "convertOptions": {
+                "section": {
+                    "heading": "Fájl átalakítás",
+                    "description": "A Stump képes bizonyos fájlformátumokat kompatibilisebbé konvertálni"
+                },
+                "rarToZip": {
+                    "label": "RAR átalakítása ZIP-é",
+                    "description": "RAR/CBR fájlok átalakítása ZIP/CBZ fájlokká a szkennelés során"
+                },
+                "deleteRarAfter": {
+                    "label": "RAR törlése átalakítás után",
+                    "description": "Az eredeti RAR/CBR fájlok törlése az átalakítás után. Ez visszafordíthatatlan"
+                }
+            },
+            "scannerFeatures": {
+                "section": {
+                    "heading": "Választható feldolgozás",
+                    "description": "Választható feldolgozási funkciók a szkennerhez",
+                    "disclaimer": "Ezek a funkciók további fájlolvasással járnak, ami lelassíthatja a szkennelési folyamatot"
+                },
+                "processMetadata": {
+                    "label": "Metaadatok feldolgozása",
+                    "description": "Minden metaadat kinyerése a könyvtár fájljaiból, és eredmények tárolása az adatbázisban"
+                },
+                "generateFileHashes": {
+                    "label": "Fájl hash-ek generálása",
+                    "description": "Fájl hash-ek generálása minden fájlhoz a könyvtárban, duplikák megtalálása érdekében"
+                },
+                "koreaderHashes": {
+                    "label": "KoReader-kompatibilis hash-ek",
+                    "description": "Ha KoReader-t használsz, generálj további hash-eket az általa elvárt formátumban"
+                }
+            },
+            "libraryPattern": {
+                "section": {
+                    "heading": "Felépítés",
+                    "description": "Határozd meg, hogy melyik minta illeszkedik legjobban a könyvtárad felépítéséhez",
+                    "docs": [
+                        "Nem tudod, melyiket válaszd? Kattints",
+                        "ide",
+                        "több információért.",
+                        "Ezt a beállítást később nem lehet megváltoztatni"
+                    ],
+                    "disabled": "Ezt a beállítást nem lehet megváltoztatni"
+                },
+                "options": {
+                    "label": "Könyvtári minta",
+                    "description": "Az a beállítás, amely meghatározza, hogy a Stump hogyan építse fel a könyvtáradat"
+                }
+            }
+        },
+        "scan": {
+            "label": {
+                "create": "Szkennelés a létrehozás után",
+                "update": "Szkennelés a frissítések után"
+            },
+            "description": "Indexelje a könyvtárfájlokat az adatbázis feltöltéséhez"
+        }
+    },
+    "createLibraryScene": {
+        "heading": "Create New Library",
+        "subtitleLink": "vonatkozó dokumentáció",
+        "form": {
+            "stepLabel": "Lépés",
+            "steps": [
+                {
+                    "label": "Alapok",
+                    "heading": "Alap adatok",
+                    "description": "Ennek a könyvtárnak a részletei, beleértve a nevét, elérési útját és leírását"
+                },
+                {
+                    "label": "Szkennelés",
+                    "heading": "Scanning",
+                    "description": "Beállítások, hogy a Stump hogyan szkennelje ezt a könyvtárat"
+                },
+                {
+                    "label": "Bélyegképek",
+                    "heading": "Bélyegképek",
+                    "description": "A beállítások, hogy a Stump generáljon-e és hogyan bélyegképeket ehhez a könyvtárhoz"
+                },
+                {
+                    "label": "Áttekintés",
+                    "heading": "Áttekintés",
+                    "description": "Ellenőrizd a könyvtárad beállításait a létrehozás előtt"
+                }
+            ],
+            "review": {
+                "yes": "Igen",
+                "no": "Nem",
+                "none": "Nincs",
+                "labels": {
+                    "generateThumbnails": "Generáljon bélyegképeket",
+                    "mode": "Mód",
+                    "format": "Formátum",
+                    "quality": "Minőség",
+                    "name": "Név",
+                    "path": "Elérési út",
+                    "description": "Leírás",
+                    "tags": "Címkék",
+                    "pattern": "Minta",
+                    "ignoreRules": "Szabályok mellőzése",
+                    "convertRar": "RAR/CBR átalakítása",
+                    "deleteConversions": "Átalakított fájlok törlése",
+                    "processMetadata": "Metaadatok feldolgozása",
+                    "generateFileHashes": "Fájl hash-ek generálása"
+                }
+            },
+            "buttons": {
+                "confirm": "Könyvtár létrehozása"
+            }
+        }
+    },
+    "fileExplorer": {
+        "uploadModal": {
+            "title": {
+                "books": "Könyvek feltöltése",
+                "series": "Sorozat feltöltése"
+            },
+            "description": {
+                "books": "Könyvek hozzáadása közvetlenül az aktuális elérési útvonalhoz a fájlkezelőben",
+                "series": "Sorozat hozzáadása közvetlenül az aktuális elérési útvonalhoz a fájlkezelőben"
+            },
+            "seriesDisclaimer": [
+                "Ennek kell lennie: ",
+                "zip fájl",
+                "amely a sorozatot tartalmazó mappát tartalmazza, benne az összes könyvvel"
+            ],
+            "dropzone": {
+                "books": "Húzd ide a könyveket",
+                "series": "Húzd ide egy zip fájlt",
+                "alt": "Vagy kattints a számítógépen a feltölthető könyvek kereséséhez"
+            },
+            "addedFiles": "Hozzáadott fájlok"
+        }
+    },
+    "librarySettingsScene": {
+        "heading": "Manage Library",
+        "subtitleLink": "vonatkozó dokumentáció",
+        "sidebar": {
+            "basics": "Alapok",
+            "configuration": {
+                "general": "Általános",
+                "reading": "Olvasás",
+                "scanning": "Szkennelés",
+                "thumbnails": "Bélyegképek",
+                "label": "Options"
+            }
+        },
+        "options/scanning": {
+            "description": "Beállítások, hogy a Stump hogyan szkennelje ezt a könyvtárat"
+        },
+        "options/thumbnails": {
+            "sections": {
+                "management": {
+                    "heading": "Management"
+                }
+            }
+        },
+        "integrations/analysis": {
+            "sections": {
+                "analyzeBooks": {
+                    "disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
+                }
+            }
+        },
+        "danger-zone/delete": {
+            "title": "Deletion Actions"
+        }
+    },
+    "errorScene": {
+        "buttons": {
+            "goHome": "Vissza a főoldalra"
+        }
+    },
+    "homeScene": {
+        "continueReading": {
+            "title": "Olvasás folytatása",
+            "emptyState": {
+                "heading": "Nincs megjeleníthető tartalom",
+                "message": "Minden folyamatban lévő könyv, amit elkezdesz, itt fog megjelenni"
+            }
+        },
+        "recentlyAddedSeries": {
+            "title": "Nemrégiben hozzáadott sorozatok",
+            "emptyState": {
+                "heading": "Nincs megjeleníthető sorozat",
+                "message": "Minden sorozat, amelyet a könyvtáraidhoz hozzáadsz, itt fog megjelenni"
+            }
+        },
+        "recentlyAddedBooks": {
+            "title": "Nemrégiben hozzáadott könyvek",
+            "emptyState": {
+                "heading": "Nincs megjeleníthető tartalom",
+                "message": "Minden újonnan hozzáadott könyv itt fog megjelenni"
+            }
+        }
+    },
+    "seriesOverviewScene": {
+        "buttons": {
+            "continueReading": "Olvasás folytatása",
+            "downloadSeries": "Sorozat letöltése"
+        }
+    },
+    "createOrUpdateSmartListForm": {
+        "validation": {
+            "nameTooShort": "A névnek legalább 2 karakterből kell állnia",
+            "nameTaken": "Ezt a nevet nem lehet használni"
+        },
+        "fields": {
+            "name": {
+                "label": "Név",
+                "placeholder": "Az én okoslistám",
+                "description": "Egyedi kell, hogy legyen, de később módosítható"
+            },
+            "description": {
+                "label": "Leírás",
+                "placeholder": "Egy nagyon intelligens lista",
+                "description": "Egy opcionális leírás az okoslistádhoz"
+            },
+            "visibility": {
+                "label": "Láthatóság",
+                "options": {
+                    "public": {
+                        "label": "Nyilvános",
+                        "description": "A szerver összes felhasználója számára elérhető"
+                    },
+                    "shared": {
+                        "label": "Megosztott",
+                        "description": "Bizonyos felhasználók hozzáférhetnek ehhez az okoslistához"
+                    }
+                }
+            }
+        }
+    },
+    "userSmartListsScene": {
+        "heading": "Okoslisták",
+        "subtitle": "A kedvenc keresések és szűrők mentése könnyű hozzáférés érdekében",
+        "searchPlaceholder": "Okoslisták szűrése",
+        "buttons": {
+            "createSmartList": "Okoslista létrehozása"
+        },
+        "list": {
+            "emptyState": {
+                "heading": "Nincs megjeleníthető okoslista",
+                "noListsMessage": "Hozz létre egy okoslistát a kezdéshez",
+                "noMatchesMessage": "Próbáld meg megváltoztatni a keresési paramétereket"
+            },
+            "card": {
+                "meta": {
+                    "figures": {
+                        "books": "könyv",
+                        "series": "sorozat",
+                        "library": "könyvtár"
+                    },
+                    "matches": "Találatok"
+                }
+            }
+        }
+    },
+    "smartListSettingsScene": {
+        "sidebar": {
+            "basics": "Alapok",
+            "configuration": {
+                "label": "Konfiguráció",
+                "access": "Hozzáférés",
+                "filters": "Szűrők"
+            },
+            "danger-zone": {
+                "delete": "Törlés",
+                "label": "Veszélyzóna"
+            }
+        },
+        "basics": {
+            "title": "Alap adatok",
+            "description": "Ennek az okoslistának a részletei, beleértve a nevét és leírását"
+        },
+        "access": {
+            "title": "Hozzáférés",
+            "description": "Szabályozd, hogy ki férhet hozzá ehhez az okoslistához",
+            "sections": {
+                "visibility": {
+                    "confirmation": {
+                        "public": "Ezáltal a lista mindenki számára láthatóvá válik",
+                        "shared": "Meg kell osztania a listát bizonyos felhasználókkal, hogy hozzáférhessenek",
+                        "fallback": "Biztos, hogy meg akarod változtatni a lista láthatóságát?"
+                    }
+                },
+                "accessManager": {
+                    "disclaimer": "A megosztás még nem készült el. Kérjük, nézz vissza később!"
+                }
+            }
+        },
+        "filters": {
+            "title": "Szűrő készítő",
+            "description": "Az okoslistát felépítő szűrők kezelése"
+        },
+        "danger-zone/delete": {
+            "title": "Törlési műveletek",
+            "description": "Töröld véglegesen ezt az okoslistát és annak minden tartalmát vagy bizonyos anyagait",
+            "sections": {
+                "deleteList": {
+                    "heading": "Lista törlése",
+                    "description": [
+                        "Okoslista és minden tartalmának végleges törlése.",
+                        "Ezt a műveletet nem lehet visszavonni"
+                    ],
+                    "confirmation": {
+                        "title": "Lista törlése",
+                        "description": "Biztos, hogy törölni szeretnéd ezt az okoslistát?",
+                        "confirm": "Lista törlése"
+                    }
+                }
+            }
+        }
+    },
+    "userSmartListScene": {
+        "navigation": {
+            "items": "Elemek",
+            "settings": "Beállítások"
+        },
+        "layout": {
+            "missingIdError": "Ez a jelenet egy azonosítót igényel az URL-ben",
+            "smartListNotFound": "Okoslista nem található",
+            "viewCreateError": "Nézet létrehozása sikertelen",
+            "viewSaveError": "Nézet mentése sikertelen"
+        },
+        "header": {
+            "backLink": "Listák"
+        },
+        "itemsScene": {
+            "smartListNotFound": "Okoslista nem található",
+            "actionHeader": {
+                "viewSelector": {
+                    "customView": "Egyéni nézet",
+                    "defaultView": "Alapértelmezett nézet",
+                    "noViewsSaved": "Nincs elmentett nézet",
+                    "selectView": "Egy mentett nézet kiválasztása"
+                },
+                "filterDrawer": {
+                    "heading": "Okoslistaszűrők",
+                    "description": "A szűrők módosítása ehhez a megtekintési munkamenethez",
+                    "rawData": {
+                        "heading": "Nyers szűrési adatok",
+                        "description": "A Stump így fogja dolgozni a szűrőket"
+                    },
+                    "buttons": {
+                        "save": "Mentés",
+                        "cancel": "Mégse"
+                    }
+                },
+                "search": {
+                    "placeholder": "Gyorsszűrő"
+                },
+                "viewManager": {
+                    "updateSelected": "Kiválasztás frissítése",
+                    "create": "Új nézet létrehozása",
+                    "modal": {
+                        "heading": {
+                            "create": "Nézet létrehozása",
+                            "update": "Nézet frissítése"
+                        },
+                        "description": {
+                            "create": "Új nézet létrehozása ehhez az okoslistához",
+                            "update": "Nézet frissítése"
+                        },
+                        "createForm": {
+                            "name": {
+                                "label": "Név",
+                                "placeholder": "Az én nézetem",
+                                "description": "A nézet egyedi azonosítására szolgáló barátságos név"
+                            }
+                        },
+                        "updateForm": {
+                            "name": {
+                                "label": "Név",
+                                "placeholder": "Az én nézetem",
+                                "description": "A nézet frissített neve, ha szükséges"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "settingsScene": {
+        "sidebar": {
+            "management": {
+                "general": "General"
+            }
+        },
+        "app/preferences": {
+            "helmet": "Appearance",
+            "title": "Appearance"
+        },
+        "app/desktop": {
+            "sections": {
+                "configuredServers": {
+                    "resetTokens": {
+                        "label": "Clear authentication",
+                        "description": [
+                            "Remove all securely-stored access tokens for your servers",
+                            "You will have to re-authenticate with each server"
+                        ],
+                        "confirmation": {
+                            "trigger": "Clear authentication",
+                            "title": "Clear authentication",
+                            "description": "This will remove all securely-stored access tokens for your servers",
+                            "confirm": "Clear authentication"
+                        }
+                    }
+                }
+            }
+        },
+        "server/general": {
+            "helmet": "General server settings",
+            "title": "General settings"
+        },
+        "server/jobs": {
+            "sections": {
+                "scheduling": {
+                    "title": "Scheduling",
+                    "description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+                }
+            }
+        },
+        "server/users": {
+            "createOrUpdateForm": {
+                "permissions": {
+                    "file": {
+                        "explorer": {
+                            "label": "File Explorer",
+                            "description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+                        }
+                    },
+                    "library": {
+                        "create": {
+                            "description": "Lehetővé teszi a felhasználó számára új könyvtárak létrehozását.\nTartalmazza a szerkesztési és szkennelési engedélyeket"
+                        },
+                        "scan": {
+                            "label": "Könyvtárak szkennelése",
+                            "description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak szkennelésének kezdeményezését"
+                        },
+                        "manage": {
+                            "description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak speciális beállításainak kezelését.\nTartalmazza a szerkesztési és szkennelési engedélyeket"
+                        },
+                        "delete": {
+                            "description": "Lehetővé teszi a felhasználó számára a meglévő könyvtárak törlését.\nTartalmazza a szerkesztési, kezelési és szkennelési engedélyeket"
+                        }
+                    },
+                    "user": {
+                        "manage": {
+                            "description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+                        }
+                    },
+                    "smartlist": {
+                        "label": "Okoslisták",
+                        "read": {
+                            "label": "Hozzáférés az okoslista funkcióhoz",
+                            "description": "Lehetővé teszi a felhasználó számára, hogy hozzáférjen az okoslisták funkcióihoz. A granuláris jogosultságok még nem kerültek bevezetésre, ezért ez tartalmazza a saját listák olvasására, létrehozására és frissítésére vonatkozó engedélyeket"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sidebar": {
+        "buttons": {
+            "smartlists": "Okoslisták",
+            "noSmartlists": "Nincsenek okoslisták",
+            "createSmartlist": "Okoslista létrehozása"
+        },
+        "libraryOptions": {
+            "scanLibrary": "Szkennelés",
+            "manageLibrary": "Manage"
+        }
+    },
+    "thumbnailDropdown": {
+        "label": "Bélyegkép kiválasztása"
+    },
+    "mobileApp": {
+        "readerSettings": {
+            "title": "Reader Settings"
+        }
+    }
 }

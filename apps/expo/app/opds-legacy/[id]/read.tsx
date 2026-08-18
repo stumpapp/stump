@@ -9,14 +9,14 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { useResolveURL } from '~/components/opds/utils'
-import { OPDSLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { db, downloadedFiles, readProgress, syncStatus } from '~/db'
 import { useReadingTimer } from '~/lib/hooks'
+import { OPDSLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
-type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount' | 'serverLastRead'> & {
+type Params = Omit<OPDSLegacyStreamingData, 'pageCount' | 'serverLastRead'> & {
 	pageCount: string // conform to Route params, reqs being a string
 	serverLastRead?: string
 }

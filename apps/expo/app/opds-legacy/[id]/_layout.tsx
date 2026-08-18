@@ -1,20 +1,14 @@
-import { SDKContext, StumpClientContextProvider, useClientContext, useSDK } from '@stump/client'
+import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api } from '@stump/sdk'
-import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import { ServerErrorBoundary } from '~/components/error'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
-import { FullScreenLoader } from '~/components/ui'
-import {
-	feedLegacyHasSearch,
-	getLegacySearchDocumentURL,
-	OPDSLegacyFeedContext,
-} from '~/context/opdsLegacy'
-import { getOPDSInstance, isOPDSAuthError } from '~/lib/sdk/auth'
+import { getOPDSInstance } from '~/lib/sdk/auth'
 import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
+import { OPDSLegacyFeedProvider } from '~/providers/OPDSLegacyFeedProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 
@@ -35,74 +29,6 @@ export default function Wrapper() {
 		<ActiveServerProvider activeServer={activeServer}>
 			<Screen />
 		</ActiveServerProvider>
-	)
-}
-
-type OPDSFeedProviderProps = {
-	children: React.ReactNode
-}
-
-function OPDSFeedProvider({ children }: OPDSFeedProviderProps) {
-	const { sdk } = useSDK()
-	const { activeServer } = useActiveServer()
-	const { onUnauthenticatedResponse } = useClientContext()
-
-	const {
-		data: catalog,
-		isLoading: isCatalogLoading,
-		error,
-		refetch,
-	} = useQuery({
-		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
-		queryFn: () => sdk.opdsLegacy.feed(activeServer?.url || ''),
-		enabled: !!activeServer,
-		throwOnError: false,
-	})
-
-	const searchDocumentURL = getLegacySearchDocumentURL(catalog, sdk?.rootURL)
-
-	const { data: searchDocument } = useQuery({
-		enabled: !!searchDocumentURL,
-		queryKey: ['searchDocument', searchDocumentURL],
-		queryFn: () => sdk.opdsLegacy.searchDocument(searchDocumentURL!),
-	})
-
-	useEffect(() => {
-		if (!error) return
-		if (isOPDSAuthError(error)) {
-			onUnauthenticatedResponse?.(undefined, error.response?.data)
-		} else if (error) {
-			throw error
-		}
-	}, [error, onUnauthenticatedResponse])
-
-	const feedContextValue = useMemo(
-		() => ({
-			catalogMeta: catalog
-				? {
-						id: catalog.id,
-						url: activeServer?.url,
-						title: catalog.title,
-						author: catalog.author,
-					}
-				: null,
-			searchDoc: searchDocument ?? null,
-			hasSearch: feedLegacyHasSearch(catalog),
-			isLoading: isCatalogLoading,
-			error: error ?? null,
-			refetch,
-		}),
-		[catalog, searchDocument, isCatalogLoading, error, refetch, activeServer?.url],
-	)
-
-	if (isCatalogLoading && !catalog) {
-		return <FullScreenLoader label="Loading feed..." />
-	}
-
-	return (
-		<OPDSLegacyFeedContext.Provider value={feedContextValue}>
-			{children}
-		</OPDSLegacyFeedContext.Provider>
 	)
 }
 
@@ -176,14 +102,14 @@ function Screen() {
 		<FileExplorerAssetsProvider>
 			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
 				<SDKContext.Provider value={{ sdk, setSDK }}>
-					<OPDSFeedProvider>
+					<OPDSLegacyFeedProvider>
 						<Stack
 							screenOptions={{
 								headerShown: false,
 								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
-					</OPDSFeedProvider>
+					</OPDSLegacyFeedProvider>
 				</SDKContext.Provider>
 			</StumpClientContextProvider>
 		</FileExplorerAssetsProvider>

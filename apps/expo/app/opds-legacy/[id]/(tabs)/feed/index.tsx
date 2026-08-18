@@ -11,11 +11,11 @@ import {
 import { useLegacyOPDSEntrySize } from '~/components/opdsLegacy/useLegacyOPDSEntrySize'
 import RefreshControl from '~/components/RefreshControl'
 import { FullScreenLoader } from '~/components/ui'
-import { useOPDSLegacyFeedContext } from '~/context/opdsLegacy'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useLegacyOPDSFeed } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useOPDSLegacyFeedContext } from '~/providers/OPDSLegacyFeedProvider'
 
 export default function Screen() {
 	const { activeServer } = useActiveServer()

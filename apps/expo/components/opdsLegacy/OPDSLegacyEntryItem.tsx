@@ -11,8 +11,8 @@ import { Download, Info, Radio, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
 import { Image, Platform, Pressable, View } from 'react-native'
 
-import { getLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
+import { getLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
@@ -54,8 +54,8 @@ export default function OPDSEntry({ entry }: Props) {
 	const thumbnailUrl = entry.links.find(
 		(link) => link.rel === 'http://opds-spec.org/image/thumbnail',
 	)?.href
-	const streamingContext = getLegacyStreamingContextValue(entry, sdk?.rootURL)
-	const isStreamable = !!streamingContext
+	const streamingData = getLegacyStreamingData(entry, sdk?.rootURL)
+	const isStreamable = !!streamingData
 
 	const friendlyName = entry.title
 
@@ -64,7 +64,7 @@ export default function OPDSEntry({ entry }: Props) {
 
 	const onPress = () => {
 		const toUrl = navigateUrl || subsectionUrl
-		if (streamingContext) {
+		if (streamingData) {
 			router.push({
 				pathname: `/opds-legacy/[id]/read`,
 				params: {
@@ -72,8 +72,8 @@ export default function OPDSEntry({ entry }: Props) {
 					entryId: entry.id,
 					entryTitle: entry.title,
 					entryContent: entry.content,
-					streamingURL: streamingContext.streamingURL,
-					pageCount: streamingContext.pageCount.toString(),
+					streamingURL: streamingData.streamingURL,
+					pageCount: streamingData.pageCount.toString(),
 				},
 			})
 		} else if (toUrl) {
@@ -250,8 +250,8 @@ export default function OPDSEntry({ entry }: Props) {
 									{friendlyName}
 								</Text>
 
-								{layout === 'list' && streamingContext?.pageCount != null && (
-									<Text className="text-foreground-muted">{streamingContext.pageCount} pages</Text>
+								{layout === 'list' && streamingData?.pageCount != null && (
+									<Text className="text-foreground-muted">{streamingData.pageCount} pages</Text>
 								)}
 							</View>
 						</View>

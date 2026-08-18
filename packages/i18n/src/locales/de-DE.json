@@ -21,7 +21,7 @@
 			"buttons": {
 				"createAccount": "Benutzerkonto erstellen",
 				"login": "Anmelden",
-				"loginWithOidc": "Mit OIDC einloggen",
+				"loginWithOidc": "Mit OIDC anmelden",
 				"createAccountWithOidc": "Benutzerkonto mit OIDC erstellen"
 			}
 		},
@@ -72,6 +72,9 @@
 				"provider": {
 					"label": "Anbieter",
 					"allOption": "Alle aktivierten Anbieter"
+				},
+				"isbn": {
+					"label": "ISBN"
 				}
 			}
 		}
@@ -108,7 +111,8 @@
 		"fields": {
 			"name": {
 				"placeholder": "Mein Buchclub",
-				"description": "Der Name deines Buchclubs"
+				"description": "Der Name deines Buchclubs",
+				"label": "Name"
 			},
 			"description": {
 				"label": "Beschreibung",
@@ -131,7 +135,9 @@
 					"description": "Der Name der Standardrolle für deinen Buchclub"
 				},
 				"moderator": {
-					"description": "Der Name für die Moderatorenrolle deines Buchclubs"
+					"description": "Der Name für die Moderatorenrolle deines Buchclubs",
+					"label": "Moderator",
+					"placeholder": "Moderator"
 				},
 				"admin": {
 					"label": "Administrator",
@@ -147,7 +153,8 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Anzeigename",
-					"description": "Ein optionaler Anzeigename für deine Mitgliedschaft im Buchclub. Wenn aktiviert, wird dieser statt des Benutzernamens angezeigt"
+					"description": "Ein optionaler Anzeigename für deine Mitgliedschaft im Buchclub. Wenn aktiviert, wird dieser statt des Benutzernamens angezeigt",
+					"placeholder": "oromei"
 				},
 				"hideProgress": {
 					"label": "Fortschritt verbergen",
@@ -192,7 +199,8 @@
 				"no": "Nein",
 				"none": "Keine",
 				"labels": {
-					"description": "Beschreibung"
+					"description": "Beschreibung",
+					"name": "Name"
 				}
 			},
 			"submit": "Buchclub erstellen"
@@ -264,7 +272,8 @@
 		"fields": {
 			"name": {
 				"description": "Ein freundlicher Name für deine Bibliothek",
-				"placeholder": "Meine Bibliothek"
+				"placeholder": "Meine Bibliothek",
+				"label": "Name"
 			},
 			"path": {
 				"label": "Pfad",
@@ -277,7 +286,8 @@
 				"placeholder": "Eine Bibliothek für alle meine Lieblingsbücher"
 			},
 			"tags": {
-				"description": "Wird verwendet, um deine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
+				"description": "Wird verwendet, um deine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden",
+				"label": "Tags"
 			},
 			"libraryType": {
 				"label": "Bibliotheksinhalt",
@@ -286,7 +296,11 @@
 					"BOOK": "Bücher",
 					"MANHWA": "Manwha",
 					"WEB_NOVEL": "Webromane",
-					"MIXED": "Gemischt"
+					"MIXED": "Gemischt",
+					"COMIC": "Comics",
+					"MANGA": "Manga",
+					"LIGHT_NOVEL": "Light Novels",
+					"WEBTOON": "Webtoons"
 				}
 			},
 			"defaultLibraryView": {
@@ -544,7 +558,10 @@
 					"generateKoreaderHashes": "KoReader-Hashes generieren",
 					"scaleEvenlyByFactor": "Gleichmäßig skalieren",
 					"exact": "Genaue Größe",
-					"scaleDimension": "Explizite Größe"
+					"scaleDimension": "Explizite Größe",
+					"format": "Format",
+					"name": "Name",
+					"tags": "Tags"
 				}
 			},
 			"buttons": {
@@ -766,7 +783,8 @@
 					"missingEntitiesTable": {
 						"columns": {
 							"path": "Pfad",
-							"type": "Typ"
+							"type": "Typ",
+							"id": "ID"
 						},
 						"types": {
 							"BOOK": "Buch",
@@ -781,7 +799,7 @@
 					"heading": "Bibliothek löschen",
 					"description": [
 						"Diese Bibliothek und ihren gesamten Inhalt dauerhaft löschen.",
-						"Diese Aktion kann nicht rückgängig gemacht werden."
+						"Diese Aktion kann nicht rückgängig gemacht werden"
 					]
 				}
 			}
@@ -860,7 +878,18 @@
 			"totalIssues": "Gesamtanzahl der Ausgaben",
 			"publicationRun": "Veröffentlichungslauf",
 			"comicImage": "Comicbild",
-			"descriptionFormatted": "Beschreibung (formatiert)"
+			"descriptionFormatted": "Beschreibung (formatiert)",
+			"format": "Format",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"genres": "Genres",
+			"links": "Links",
+			"teams": "Teams",
+			"comicid": "Comic ID",
+			"status": "Status"
 		},
 		"addFields": {
 			"description": "Füge jede Ergänzung in eine eigene Zeile hinzu"
@@ -918,7 +947,8 @@
 				"entityType": "Typ",
 				"candidateCount": "Kandidaten",
 				"topConfidence": "Top Vertrauen",
-				"addedAt": "Abgerufen"
+				"addedAt": "Abgerufen",
+				"entityName": "Name"
 			},
 			"acceptAll": {
 				"label": "Alle akzeptieren",
@@ -962,7 +992,8 @@
 		"fields": {
 			"name": {
 				"placeholder": "Meine intelligente Liste",
-				"description": "Muss einzigartig sein, kann aber später geändert werden"
+				"description": "Muss einzigartig sein, kann aber später geändert werden",
+				"label": "Name"
 			},
 			"description": {
 				"label": "Beschreibung",
@@ -1052,7 +1083,9 @@
 									"pages": "Seiten",
 									"createdAt": "Erstellt am",
 									"updatedAt": "Aktualisiert am",
-									"readingStatus": "Lesestatus"
+									"readingStatus": "Lesestatus",
+									"status": "Status",
+									"tags": "Tags"
 								}
 							},
 							"book_meta": {
@@ -1073,13 +1106,17 @@
 									"ageRating": "Altersfreigabe",
 									"year": "Jahr",
 									"month": "Monat",
-									"day": "Tag"
+									"day": "Tag",
+									"links": "Links",
+									"teams": "Teams",
+									"genres": "Genre"
 								}
 							},
 							"series": {
 								"label": "Serie",
 								"attributes": {
-									"path": "Pfad"
+									"path": "Pfad",
+									"name": "Name"
 								}
 							},
 							"series_meta": {
@@ -1093,13 +1130,16 @@
 									"volume": "Band",
 									"metaType": "Typ",
 									"ageRating": "Altersfreigabe",
-									"year": "Startjahr"
+									"year": "Startjahr",
+									"comicid": "Comic ID",
+									"status": "Status"
 								}
 							},
 							"library": {
 								"label": "Bibliothek",
 								"attributes": {
-									"path": "Pfad"
+									"path": "Pfad",
+									"name": "Name"
 								}
 							}
 						}
@@ -1163,7 +1203,8 @@
 				"labels": {
 					"description": "Beschreibung",
 					"visibility": "Sichtbarkeit",
-					"grouping": "Gruppiere nach"
+					"grouping": "Gruppiere nach",
+					"name": "Name"
 				}
 			},
 			"buttons": {
@@ -1177,7 +1218,8 @@
 		},
 		"fields": {
 			"name": {
-				"placeholder": "Koreader Synchronisierung"
+				"placeholder": "Koreader Synchronisierung",
+				"label": "Name"
 			},
 			"expiration": {
 				"label": "Verfallsdatum",
@@ -1327,7 +1369,7 @@
 					"modal": {
 						"heading": {
 							"create": "Ansicht erstellen",
-							"update": "Ansicht aktualisieren "
+							"update": "Ansicht aktualisieren"
 						},
 						"description": {
 							"create": "Neue Ansicht für diese intelligente Liste erstellen",
@@ -1336,13 +1378,15 @@
 						"createForm": {
 							"name": {
 								"placeholder": "Meine Ansicht",
-								"description": "Ein freundlicher Anzeigename um die Ansicht eindeutig zu bestimmen"
+								"description": "Ein freundlicher Anzeigename um die Ansicht eindeutig zu bestimmen",
+								"label": "Name"
 							}
 						},
 						"updateForm": {
 							"name": {
 								"placeholder": "Meine Ansicht",
-								"description": "Der aktualisierte Name für diese Ansicht, falls erwünscht"
+								"description": "Der aktualisierte Name für diese Ansicht, falls erwünscht",
+								"label": "Name"
 							}
 						}
 					},
@@ -1359,14 +1403,18 @@
 			"general": "Allgemein",
 			"logs": "Protokolle",
 			"jobs": "Jobs und Einstellungen",
-			"users": "Benutzerverwaltung"
+			"users": "Benutzerverwaltung",
+			"server": "Server",
+			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"personal": {
 				"account": "Konto",
 				"appearance": "Präferenzen",
 				"api keys": "API Schlüssel",
-				"label": "Persönlich"
+				"label": "Persönlich",
+				"reader": "Reader",
+				"desktop": "Desktop"
 			},
 			"management": {
 				"logs": "Protokolle",
@@ -1375,7 +1423,10 @@
 				"email": "E-Mail",
 				"metadata": "Metadaten",
 				"notifications": "Benachrichtigungen",
-				"label": "Verwaltung"
+				"label": "Verwaltung",
+				"general": "Server",
+				"jobs": "Jobs",
+				"tags": "Tags"
 			}
 		},
 		"app/account": {
@@ -1409,7 +1460,8 @@
 						"removeImage": "Bild entfernen",
 						"removeSelection": "Hochgeladenes Bild entfernen",
 						"uploadFailed": "Avatar konnte nicht hochgeladen werden",
-						"removeFailed": "Avatar konnte nicht entfernt werden"
+						"removeFailed": "Avatar konnte nicht entfernt werden",
+						"label": "Avatar"
 					},
 					"buttons": {
 						"confirm": "Änderungen speichern"
@@ -1423,7 +1475,7 @@
 					"subtitle": [
 						"Stump unterstützt mehrere Sprachen, die hierunter eingestellt werden können. Bitte überlege dir mitzuhelfen die Qualität von den",
 						"Stump-Übersetzungen",
-						" zu verbessern, wenn du dazu in der Lage bist!"
+						"zu verbessern, wenn du dazu in der Lage bist!"
 					]
 				}
 			}
@@ -1459,7 +1511,9 @@
 						"autumn": "Herbst",
 						"cosmic": "Kosmisch",
 						"pumpkin": "Kürbis",
-						"midnight": "Mitternacht"
+						"midnight": "Mitternacht",
+						"system": "System",
+						"matrix": "Matrix"
 					}
 				},
 				"gradientToggle": {
@@ -1476,7 +1530,8 @@
 					"options": {
 						"none": "Keine",
 						"rounded": "Abgerundet",
-						"pill": "Pille"
+						"pill": "Pille",
+						"normal": "Normal"
 					}
 				},
 				"thumbnailPreview": {
@@ -1494,7 +1549,8 @@
 					"options": {
 						"grayscale": "Graustufen",
 						"averageColor": "Durchschnittsfarbe",
-						"colorful": "Farbenfroh"
+						"colorful": "Farbenfroh",
+						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailRoundness": {
@@ -1503,11 +1559,13 @@
 					"options": {
 						"none": "Keine",
 						"rounded": "Abgerundet",
-						"large": "Groß"
+						"large": "Groß",
+						"normal": "Normal"
 					}
 				},
 				"navigation": {
-					"description": "Passe die Navigationselemente der App an"
+					"description": "Passe die Navigationselemente der App an",
+					"title": "Navigation"
 				},
 				"layoutAndArrangement": {
 					"label": "Layout und Anordnung",
@@ -1644,7 +1702,8 @@
 					"created": "Erstellt",
 					"permissions": "Berechtigungen",
 					"inherited": "Übernommen",
-					"explicit": "Explizit"
+					"explicit": "Explizit",
+					"name": "Name"
 				}
 			},
 			"sections": {
@@ -1768,11 +1827,13 @@
 						"fields": {
 							"name": {
 								"description": "Ein freundlicher Name um diesen Server zu identifizieren",
-								"placeholder": "Mein Server"
+								"placeholder": "Mein Server",
+								"label": "Name"
 							},
 							"uri": {
-								"label": "URL",
-								"description": "Die URL des Stump Servers"
+								"label": "URI",
+								"description": "Die URL des Stump Servers",
+								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
@@ -1803,7 +1864,9 @@
 						"confirmation": {
 							"title": "Zu diesem Server wechseln",
 							"description": "Dadurch wirst du vom aktuellen Server abgemeldet",
-							"confirm": "Zu Server wechseln"
+							"confirm": "Zu Server wechseln",
+							"server": "Server",
+							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
@@ -1864,8 +1927,10 @@
 						"description": "Versions- und Build-Details",
 						"version": {
 							"commitHash": "Exakter Commit",
-							"date": "Build-Datum"
-						}
+							"date": "Build-Datum",
+							"semver": "Version"
+						},
+						"label": "Buid"
 					},
 					"nonStableChannel": {
 						"title": "Du führst eine instabile Version von Stump aus",
@@ -1921,7 +1986,8 @@
 					"table": {
 						"columns": {
 							"message": "Nachricht",
-							"timestamp": "Zeitstempel"
+							"timestamp": "Zeitstempel",
+							"level": "Level"
 						},
 						"emptyHeading": "Keine Protokolle zur Ansicht verfügbar",
 						"emptySubtitle": "Dein Server ist entweder in einem sehr guten oder sehr schlechten Zustand"
@@ -1962,11 +2028,13 @@
 					},
 					"fields": {
 						"name": {
-							"placeholder": "z.B. \"Täglicher Bibliotheksscan\""
+							"placeholder": "z.B. \"Täglicher Bibliotheksscan\"",
+							"label": "Name"
 						},
 						"schedule": {
 							"label": "Cron-Zeitplan",
-							"description": "Ein Cron-Ausdruck zur Definition der Frequenz"
+							"description": "Ein Cron-Ausdruck zur Definition der Frequenz",
+							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
 							"label": "Voreinstellung",
@@ -2024,7 +2092,8 @@
 							"description": "Beschreibung",
 							"createdAt": "Gestartet am",
 							"elapsed": "Dauer",
-							"tasks": "Aufgabe"
+							"tasks": "Aufgabe",
+							"status": "Status"
 						},
 						"emptyHeading": "Keine Jobs zur Ansicht verfügbar",
 						"emptySubtitle": "Du kannst keinen Job haben, falls du keinen Job hast",
@@ -2038,7 +2107,9 @@
 						"emptyState": "Keine Jobs zum Löschen"
 					}
 				}
-			}
+			},
+			"helmet": "Jobs",
+			"title": "Jobs"
 		},
 		"server/users": {
 			"helmet": "Benutzerverwaltung",
@@ -2067,7 +2138,8 @@
 						"enforceUnset": {
 							"label": "Kein Zugriff auf nicht gesetzte",
 							"description": "Wenn aktiviert, wird Benutzern der Zugriff auf Inhalte ohne Altersbeschränkung verwehrt"
-						}
+						},
+						"placeholder": "13"
 					},
 					"tagRestriction": {
 						"label": "Tageinschränkungen",
@@ -2132,7 +2204,7 @@
 					"emailer": {
 						"label": "Mailserver",
 						"read": {
-							"label": "Zugriff auf Mailserver ",
+							"label": "Zugriff auf Mailserver",
 							"description": "Erlaubt dem Benutzer die konfigurierten Mailserver anzuzeigen"
 						},
 						"create": {
@@ -2216,7 +2288,7 @@
 			"loginActivity": {
 				"deleteConfirmation": {
 					"title": "Aktivität löschen",
-					"description": "Alle Aufzeichnungen der Login-Aktivitäten werden dauerhaft von der Datenbank gelöscht",
+					"description": "Alle Aufzeichnungen der Anmeldungsaktivitäten werden dauerhaft von der Datenbank gelöscht",
 					"confirm": "Löschen"
 				}
 			}
@@ -2240,7 +2312,8 @@
 								"columns": {
 									"to": "An",
 									"subject": "Betreff",
-									"createdAt": "Gesendet am"
+									"createdAt": "Gesendet am",
+									"status": "Status"
 								}
 							},
 							"emptyHeading": "Kein Verlauf",
@@ -2258,7 +2331,8 @@
 							"update": "Gerätealias aktualisieren"
 						},
 						"name": {
-							"description": "Ein freundlicher Anzeigename um diesen Gerätealias eindeutig zu bestimmen"
+							"description": "Ein freundlicher Anzeigename um diesen Gerätealias eindeutig zu bestimmen",
+							"label": "Name"
 						},
 						"email": {
 							"label": "E-Mail",
@@ -2281,7 +2355,8 @@
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"description": "Ein freundlicher Anzeigename um diesen Mailserver eindeutig zu bestimmen"
+					"description": "Ein freundlicher Anzeigename um diesen Mailserver eindeutig zu bestimmen",
+					"label": "Name"
 				},
 				"smtpSettings": {
 					"heading": "SMTP-Einstellungen",
@@ -2432,6 +2507,10 @@
 					},
 					"actionMenu": {
 						"rename": "Umbenennen"
+					},
+					"title": "Tags",
+					"columns": {
+						"name": "Name"
 					}
 				},
 				"createTag": {
@@ -2440,7 +2519,8 @@
 						"heading": "Erstelle einen neuen Tag",
 						"description": "Tags können Büchern, Serien und Bibliotheken zugewiesen werden",
 						"name": {
-							"placeholder": "Tag-Name eingeben"
+							"placeholder": "Tag-Name eingeben",
+							"label": "Name"
 						},
 						"submit": "Erstellen"
 					}
@@ -2450,7 +2530,8 @@
 						"heading": "Tag umbenennen",
 						"description": "Ändere den Namen dieses Tags über alle zugewiesenen Elemente",
 						"name": {
-							"placeholder": "Neuen Tag-Namen eingeben"
+							"placeholder": "Neuen Tag-Namen eingeben",
+							"label": "Name"
 						},
 						"submit": "Umbenennen"
 					}
@@ -2460,7 +2541,8 @@
 					"description": "Dieser Tag wird von allen Büchern, Serien und Bibliotheken entfernt. Dies kann nicht rückgängig gemacht werden.",
 					"confirm": "Löschen"
 				}
-			}
+			},
+			"title": "Tags"
 		}
 	},
 	"jobOverlay": {
@@ -2532,7 +2614,8 @@
 		"versionInformation": {
 			"heading": "Versionsinformationen",
 			"semVer": "Semantische Version",
-			"buildDate": "Build-Datum"
+			"buildDate": "Build-Datum",
+			"commitHash": "Commit Hash"
 		}
 	},
 	"search": {
@@ -2633,7 +2716,16 @@
 			"tooManyFiles": "Du hast zu viele Dateien ausgewählt",
 			"noValidFiles": "Es wurden keine gültigen Dateien ausgewählt"
 		},
-		"unknownError": "Ein unbekannter Fehler ist aufgetreten"
+		"unknownError": "Ein unbekannter Fehler ist aufgetreten",
+		"deleteConfirmation": {
+			"title": "Lösche {{type}}",
+			"description": "Bist du sicher, dass du diesen {{type}} löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+			"confirm": "Lösche {{type}}",
+			"typeToConfirm": "Gib {{name}} ein, um zu bestätigen:"
+		},
+		"enter": "Enter",
+		"info": "Info",
+		"login": "Anmeldung"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2649,7 +2741,8 @@
 			"description": "Erlaubt dem Benutzer auf die KoReader Synchronisierungsintegration zuzugreifen"
 		},
 		"ACCESS_KOBO_SYNC": {
-			"description": "Erlaubt dem Benutzer auf die Kobo Synchronisierungsintegration zuzugreifen"
+			"description": "Erlaubt dem Benutzer auf die Kobo Synchronisierungsintegration zuzugreifen",
+			"label": "Kobo sync"
 		},
 		"ACCESS_SMART_LIST": {
 			"label": "Intelligente Listen",
@@ -2815,9 +2908,14 @@
 			"auth": {
 				"label": "Authentifizierung",
 				"default": {
-					"description": "Du wirst aufgefordert, dich nach Bedarf anzumelden, wenn du auf Inhalte zugreifst"
+					"description": "Du wirst aufgefordert, dich nach Bedarf anzumelden, wenn du auf Inhalte zugreifst",
+					"label": "Anmeldung"
 				},
-				"basic": "Einfach"
+				"basic": "Einfach",
+				"token": {
+					"label": "Token",
+					"placeholder": "Raw Token"
+				}
 			},
 			"serverNamePlaceholder": "Mein Server",
 			"catalogUrl": "Katalog URL",
@@ -2874,7 +2972,10 @@
 			"coverArtists": "Cover-Künstler",
 			"year": "Jahr",
 			"identifier": "Identifikator",
-			"identifiers": "Identifikatoren"
+			"identifiers": "Identifikatoren",
+			"format": "Format",
+			"genres": "Genres",
+			"links": "Links"
 		},
 		"common": {
 			"book": "Buch",
@@ -2922,7 +3023,13 @@
 			"unknown": "Unbekannt",
 			"unknownTitle": "Unbenannt",
 			"username": "Benutzername",
-			"value": "Wert"
+			"value": "Wert",
+			"details": "Details",
+			"download": "Download",
+			"downloads": "Downloads",
+			"name": "Name",
+			"url": "URL",
+			"version": "Version"
 		},
 		"errors": {
 			"unknown": "Unbekannter Fehler"
@@ -2934,14 +3041,16 @@
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "{{position}} von {{total}} in {{seriesName}}"
+				"positionWithTotal": "{{position}} von {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
 			},
 			"book": {
 				"positionWithTotal": "Buch {{position}} von {{total}} in {{seriesName}}",
 				"position": "Buch {{position}} in {{seriesName}}"
 			},
 			"hashtag": {
-				"positionWithTotal": "#{{position}} von {{total}} in {{seriesName}}"
+				"positionWithTotal": "#{{position}} von {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
 			},
 			"unknownSeriesName": "Serie"
 		},
@@ -3003,7 +3112,8 @@
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
 					"ADDED_AT": "Datum Hinzugefügt",
-					"SERIES": "Serien"
+					"SERIES": "Serien",
+					"NAME": "Name"
 				},
 				"sortDirection": {
 					"ASC": "Aufsteigend",
@@ -3017,6 +3127,10 @@
 					"all": "Alle Bücher",
 					"server": "Heruntergeladen",
 					"imported": "Importiert"
+				},
+				"sortDirectionText": {
+					"ASC": "A → Z",
+					"DESC": "Z → A"
 				}
 			},
 			"downloadProblemsSheet": {
@@ -3070,7 +3184,12 @@
 							"slate": "Schiefer",
 							"gray": "Grau",
 							"zinc": "Zink",
-							"stone": "Stein"
+							"stone": "Stein",
+							"orange": "Orange",
+							"cyan": "Cyan",
+							"indigo": "Indigo",
+							"pink": "Pink",
+							"neutral": "Neutral"
 						}
 					}
 				},
@@ -3082,14 +3201,16 @@
 					"options": {
 						"grayscale": "Graustufen",
 						"averageColor": "Durchschnittsfarbe",
-						"colorful": "Farbenfroh"
+						"colorful": "Farbenfroh",
+						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailResizeMode": {
 					"label": "Vorschaubildgrößenanpassung",
 					"options": {
 						"stretch": "Strecken",
-						"fit": "Anpassen"
+						"fit": "Anpassen",
+						"cover": "Cover"
 					}
 				}
 			},
@@ -3102,7 +3223,8 @@
 			},
 			"stump": {
 				"description": "Stump-Funktionen sind optional und können deaktiviert, wenn du diese nicht benötigst",
-				"bookClubsEnabled": "Buchclubfunktionen"
+				"bookClubsEnabled": "Buchclubfunktionen",
+				"label": "Stump"
 			},
 			"autoSyncLocalData": "Lokale Daten automatisch synchronisieren",
 			"textCase": {
@@ -3175,15 +3297,19 @@
 				"debugAnalytics": {
 					"label": "Debug-Analysen",
 					"description": "Sende zusätzliche Debug-bezogene Ereignisse, um bei der Fehlerbehebung zu helfen"
-				}
+				},
+				"label": "Debug"
 			},
 			"contactInfo": {
 				"label": "Kontakt",
-				"email": "E-Mail"
+				"email": "E-Mail",
+				"discord": "Discord",
+				"github": "GitHub"
 			},
 			"supportInfo": {
 				"buildInformation": "Versionsinformationen",
-				"suuportIdentifier": "Support-Identifikator: {{supportID}}"
+				"suuportIdentifier": "Support-Identifikator: {{supportID}}",
+				"version": "Version: {{version}}"
 			}
 		},
 		"stumpServer": {
@@ -3239,7 +3365,8 @@
 				"label": "Zweiseitig",
 				"options": {
 					"always": "Immer",
-					"off": "Aus"
+					"off": "Aus",
+					"auto": "Auto"
 				}
 			},
 			"separateSecondPage": "Separate zweite Seite",
@@ -3248,7 +3375,8 @@
 				"options": {
 					"HEIGHT": "Höhe anpassen",
 					"WIDTH": "Breite anpassen",
-					"NONE": "Keine"
+					"NONE": "Keine",
+					"AUTO": "Auto"
 				}
 			},
 			"allowDownscaling": "Herabskalieren",
@@ -3258,7 +3386,8 @@
 				"options": {
 					"images": "Bildergalerie",
 					"slider": "Schieberegler"
-				}
+				},
+				"label": "Fußzeile"
 			},
 			"readingTimer": {
 				"label": "Lesezeit",
@@ -3279,13 +3408,22 @@
 			"tabs": {
 				"all": "Alle",
 				"bookmarks": "Lesezeichen",
-				"notes": "Notizen"
+				"notes": "Notizen",
+				"highlights": "Markierungen"
 			}
 		},
 		"epubSettings": {
 			"title": "Epub-Readereinstellungen",
 			"typeface": {
-				"label": "Schriftart"
+				"label": "Schriftart",
+				"options": {
+					"system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
 			},
 			"fontSize": "Schriftgröße",
 			"fontWeight": {
@@ -3293,7 +3431,8 @@
 				"options": {
 					"light": "Dünn",
 					"medium": "Mittel",
-					"bold": "Fett"
+					"bold": "Fett",
+					"normal": "Normal"
 				}
 			},
 			"textNormalization": "Textnormalisierung",
@@ -3309,7 +3448,8 @@
 				"label": "Spalten",
 				"options": {
 					"single": "Einzeln",
-					"double": "Doppel"
+					"double": "Doppel",
+					"auto": "Auto"
 				}
 			},
 			"pageMargins": "Seitenränder",
@@ -3329,7 +3469,8 @@
 					"left": "Links",
 					"center": "Mittig",
 					"right": "Rechts",
-					"justify": "Blocksatz"
+					"justify": "Blocksatz",
+					"start": "Start"
 				}
 			},
 			"typeScale": "Schriftgröße",
@@ -3343,21 +3484,26 @@
 			"customizeTheme": {
 				"placeholder": "Designname",
 				"background": "Hintergrund",
-				"highlight": "Markieren",
-				"premadeThemes": "Vorgefertigte Designs"
+				"highlight": "Markierung",
+				"premadeThemes": "Vorgefertigte Designs",
+				"text": "Text"
 			}
 		},
 		"libraryType": {
 			"BOOK": "Bücher",
 			"MANHWA": "Manwha",
 			"MIXED": "Gemischt",
-			"WEB_NOVEL": "Webromane"
+			"WEB_NOVEL": "Webromane",
+			"COMIC": "Comics",
+			"LIGHT_NOVEL": "Light Novels",
+			"MANGA": "Manga",
+			"WEBTOON": "Webtoons"
 		},
 		"savedServerActions": {
 			"clearCache": "Cache leeren",
 			"discardTokens": {
 				"label": "Token verwerfen",
-				"description": "Betrifft nur Login-Tokens"
+				"description": "Betrifft nur Anmelde-Tokens"
 			},
 			"deleteServer": {
 				"title": "Server löschen",
@@ -3376,7 +3522,8 @@
 				"CREATED_AT": "Datum Hinzugefügt",
 				"NUMBER": "Serienposition",
 				"SERIES": "Serien",
-				"YEAR": "Jahr Veröffentlicht"
+				"YEAR": "Jahr Veröffentlicht",
+				"NAME": "Name"
 			},
 			"sortDirection": {
 				"ASC": "Aufsteigend",
@@ -3385,6 +3532,19 @@
 			"sortDirectionDate": {
 				"ASC": "Älteste Zuerst",
 				"DESC": "Neueste Zuerst"
+			},
+			"sortDirectionString": {
+				"ASC": "A → Z",
+				"DESC": "Z → A"
+			},
+			"sortDirectionNumber": {
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
+			}
+		},
+		"widgets": {
+			"readingNow": {
+				"nothingInProgress": "Nichts in Bearbeitung"
 			}
 		}
 	}

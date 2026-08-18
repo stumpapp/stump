@@ -132,6 +132,7 @@ There are a number of other projects that are similar to Stump, it certainly isn
 > If a package or subfolder has its own license file, that license takes precedence over the repository-level license and will be listed below.
 
 - The [expo application](./apps/expo/LICENSE) is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)
+- The [`wifi-ssid` native module](./apps/expo/modules/wifi-ssid) was sourced from Streamyfin and licensed under [MPL-2.0](https://www.tldrlegal.com/license/mozilla-public-license-2-0-mpl-2)
 - All other code in the repository is licensed under [MIT License](https://www.tldrlegal.com/license/mit-license)
 
 ## Attribution

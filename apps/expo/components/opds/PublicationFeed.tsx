@@ -7,12 +7,12 @@ import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { getPublicationThumbnailURL, hasLinkRel } from '~/lib/opds/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { GridImageItem } from '../listLayout/grid'
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import RefreshControl from '../RefreshControl'
-import { getPublicationThumbnailURL, hasLinkRel } from './utils'
 
 type Props = {
 	publications: OPDSPublication[]

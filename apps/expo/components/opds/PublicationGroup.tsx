@@ -9,6 +9,7 @@ import { useCallback, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { useListItemSize } from '~/lib/hooks'
+import { hasLinkRel, useResolveURL } from '~/lib/opds/utils'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
@@ -16,7 +17,6 @@ import { ThumbnailImage } from '../image'
 import { ListEmptyMessage, ListLabel, Text } from '../ui'
 import FeedSelfURL from './FeedSelfURL'
 import { FeedComponentOptions } from './types'
-import { hasLinkRel, useResolveURL } from './utils'
 
 type Props = {
 	group: OPDSFeedGroup

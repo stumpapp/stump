@@ -6,9 +6,9 @@ import { NativeSyntheticEvent, Platform, TextInputChangeEventData, View } from '
 import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
 import { Text } from '~/components/ui'
-import { useOPDSFeedContext } from '~/context/opds'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useOPDSFeedContext } from '~/providers/OPDSFeedProvider'
 import { useSearchStore } from '~/stores/search'
 
 export default function Screen() {

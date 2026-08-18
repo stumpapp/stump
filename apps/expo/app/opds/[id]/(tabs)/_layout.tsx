@@ -1,8 +1,8 @@
 import { useSDK } from '@stump/client'
 import { NativeTabs } from 'expo-router/unstable-native-tabs'
 
-import { useOPDSFeedContext } from '~/context/opds'
 import { useColors } from '~/lib/constants'
+import { useOPDSFeedContext } from '~/providers/OPDSFeedProvider'
 
 // TODO(opds): Support favorites and add a tab for it
 

@@ -7,6 +7,8 @@ import { stringMd5 } from 'react-native-quick-md5'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
+// TODO: split up a bit, e.g. progression and metadata can easily be separate modules
+
 const CANTOOK_PROGRESSION_REL = 'http://www.cantook.com/api/progression'
 const READIUM_PROGRESSION_TYPE = 'application/vnd.readium.progression+json'
 

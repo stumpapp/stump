@@ -6,9 +6,9 @@ import BackLink from '~/components/BackLink'
 import EmptyState from '~/components/EmptyState'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { PaginationTarget } from '~/components/opds/useOPDSFeed'
-import { useOPDSFeedContext } from '~/context/opds'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-import { constructSearchURL } from '~/lib/opdsUtils'
+import { constructSearchURL } from '~/lib/opds/search'
+import { useOPDSFeedContext } from '~/providers/OPDSFeedProvider'
 
 export default function Screen() {
 	const { query } = useLocalSearchParams<{ query: string }>()

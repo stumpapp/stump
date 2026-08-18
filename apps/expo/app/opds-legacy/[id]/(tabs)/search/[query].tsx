@@ -16,7 +16,7 @@ import { FullScreenLoader } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useLegacyOPDSFeed } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-import { constructLegacySearchURL } from '~/lib/opdsUtils'
+import { constructLegacySearchURL } from '~/lib/opds/search'
 import { useOPDSLegacyFeedContext } from '~/providers/OPDSLegacyFeedProvider'
 
 export default function Screen() {

@@ -6,7 +6,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { File } from 'expo-file-system'
 import { useEffect, useMemo } from 'react'
 
-import { getPublicationId } from '~/components/opds/utils'
+import { getPublicationId } from '~/lib/opds/utils'
 import { db, downloadedFiles, downloadQueue, DownloadRepository } from '~/db'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
 import { useActiveServerSafe } from '~/providers/ActiveServerProvider'

@@ -20,7 +20,7 @@ import { usePreferencesStore } from '~/stores'
 
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
-import { useResolveURL } from '../opds/utils'
+import { useResolveURL } from '../../lib/opds/utils'
 import { Icon, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
 import { OPDSLegacyEntryItemSheet } from './OPDSLegacyEntryItemSheet'

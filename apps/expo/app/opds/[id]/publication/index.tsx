@@ -18,6 +18,16 @@ import { ThumbnailImage } from '~/components/image'
 import { CreditsSection, RelatedPublicationItem, useRelatedPublications } from '~/components/opds'
 import FeedSelfURL from '~/components/opds/FeedSelfURL'
 import { usePublicationMenu } from '~/components/opds/PublicationMenu'
+import MetadataBadgeSection from '~/components/overview/MetadataBadgeSection'
+import { Button, Card, Heading, Icon, Text } from '~/components/ui'
+import { formatSeriesPosition } from '~/lib/bookUtils'
+import { usePalette } from '~/lib/constants'
+import {
+	useIsOPDSBookDownloading,
+	useIsOPDSPublicationDownloaded,
+	useOPDSDownload,
+	useTranslate,
+} from '~/lib/hooks'
 import {
 	extensionFromMime,
 	getAcquisitionLink,
@@ -29,17 +39,7 @@ import {
 	getNumberField,
 	getPublicationThumbnailURL,
 	getStringField,
-} from '~/components/opds/utils'
-import MetadataBadgeSection from '~/components/overview/MetadataBadgeSection'
-import { Button, Card, Heading, Icon, Text } from '~/components/ui'
-import { formatSeriesPosition } from '~/lib/bookUtils'
-import { usePalette } from '~/lib/constants'
-import {
-	useIsOPDSBookDownloading,
-	useIsOPDSPublicationDownloaded,
-	useOPDSDownload,
-	useTranslate,
-} from '~/lib/hooks'
+} from '~/lib/opds/utils'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'

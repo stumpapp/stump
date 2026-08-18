@@ -1,28 +1,14 @@
-import {
-	queryClient,
-	SDKContext,
-	StumpClientContextProvider,
-	useClientContext,
-	useSDK,
-} from '@stump/client'
+import { queryClient, SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api, authDocument, OPDSAuthenticationDocument } from '@stump/sdk'
-import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import OPDSAuthDialog from '~/components/opds/OPDSAuthDialog'
-import { FullScreenLoader } from '~/components/ui'
-import { feedHasSearch, getSearchURL, OPDSFeedContext } from '~/context/opds'
-import { getOPDSInstance, isOPDSAuthError } from '~/lib/sdk/auth'
+import { getOPDSInstance } from '~/lib/sdk/auth'
 import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
+import { OPDSFeedProvider } from '~/providers/OPDSFeedProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
-
-type OPDSFeedProviderProps = {
-	children: React.ReactNode
-	isAuthPending: boolean
-}
 
 export default function Wrapper() {
 	const { savedServers } = useSavedServers()
@@ -42,76 +28,6 @@ export default function Wrapper() {
 			<Screen />
 		</ActiveServerProvider>
 	)
-}
-
-function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
-	const { sdk } = useSDK()
-	const { activeServer } = useActiveServer()
-	const { onUnauthenticatedResponse } = useClientContext()
-
-	const {
-		data: catalog,
-		isLoading: isCatalogLoading,
-		error,
-		refetch,
-	} = useQuery({
-		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
-		queryFn: () => {
-			if (activeServer?.kind === 'stump') {
-				return sdk.opds.catalog()
-			} else {
-				return sdk.opds.feed(activeServer?.url || '')
-			}
-		},
-		enabled: !!activeServer && !isAuthPending,
-		throwOnError: false,
-	})
-
-	useEffect(() => {
-		if (!error || isAuthPending) return
-		if (isOPDSAuthError(error)) {
-			onUnauthenticatedResponse?.(undefined, error.response?.data)
-		}
-	}, [error, isAuthPending, onUnauthenticatedResponse])
-
-	// it isn't overly ideal to sync until failure, but i think it's also largely
-	// fine. it's a tiny operation
-	const didSyncLogo = useRef(false)
-	useEffect(() => {
-		if (error || isAuthPending || didSyncLogo.current) return
-		if (activeServer.avatar) return
-
-		async function pullLogo() {
-			await pullServerAvatar(activeServer, sdk)
-			didSyncLogo.current = true
-		}
-
-		pullLogo()
-	}, [sdk, activeServer, error, isAuthPending])
-
-	const feedContextValue = useMemo(
-		() => ({
-			catalog: catalog ?? null,
-			searchURL: getSearchURL(catalog, sdk?.rootURL),
-			hasSearch: feedHasSearch(catalog),
-			isLoading: isCatalogLoading,
-			error: error ?? null,
-			refetch,
-		}),
-		[catalog, sdk?.rootURL, isCatalogLoading, error, refetch],
-	)
-
-	if (isCatalogLoading && !catalog) {
-		return <FullScreenLoader label="Loading feed..." />
-	}
-
-	const isAuthError = isOPDSAuthError(error)
-
-	if (isAuthError || isAuthPending) {
-		return <FullScreenLoader label="Authenticating..." />
-	}
-
-	return <OPDSFeedContext.Provider value={feedContextValue}>{children}</OPDSFeedContext.Provider>
 }
 
 function Screen() {

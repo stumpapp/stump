@@ -2,8 +2,9 @@ import { useClientContext, useSDK } from '@stump/client'
 import { OPDSLegacyOpenSearchDoc } from '@stump/sdk'
 import { OPDSLegacyFeed } from '@stump/sdk'
 import { QueryObserverResult, RefetchOptions, useQuery } from '@tanstack/react-query'
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef } from 'react'
 
+import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import { FullScreenLoader } from '~/components/ui'
 import {
 	feedLegacyHasSearch,
@@ -81,6 +82,18 @@ export function OPDSLegacyFeedProvider({ children }: OPDSFeedProviderProps) {
 			throw error
 		}
 	}, [error, onUnauthenticatedResponse])
+
+	const didSyncAvatar = useRef(false)
+	useEffect(() => {
+		if (!sdk || !sdk.isAuthed || didSyncAvatar.current || !activeServer) return
+		if (activeServer.avatar) return
+
+		const syncUserAvatar = async () => {
+			await pullServerAvatar(activeServer, sdk)
+			didSyncAvatar.current = true
+		}
+		syncUserAvatar()
+	}, [sdk, activeServer])
 
 	const feedContextValue = useMemo(
 		() => ({

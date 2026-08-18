@@ -3,13 +3,13 @@ import { OPDSPublication, resolveUrl } from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
+import { getPublicationThumbnailURL, hasLinkRel } from '~/lib/opds/utils'
 import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
-import { getPublicationThumbnailURL, hasLinkRel } from './utils'
 
 type Props = {
 	item: OPDSPublication

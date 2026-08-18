@@ -5,8 +5,8 @@ import { useMemo } from 'react'
 import { Platform } from 'react-native'
 
 import BackLink from '~/components/BackLink'
-import { getProgressionURL } from '~/components/opds/utils'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { getProgressionURL } from '~/lib/opds/utils'
 
 import { PublicationContext } from './context'
 

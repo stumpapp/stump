@@ -6,13 +6,13 @@ import { ChevronRight, Rss } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
+import { hasLinkRel, useResolveURL } from '~/lib/opds/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { Card, ListEmptyMessage } from '../ui'
 import { Icon } from '../ui/icon'
 import FeedSelfURL from './FeedSelfURL'
 import { FeedComponentOptions } from './types'
-import { hasLinkRel, useResolveURL } from './utils'
 
 type Props = {
 	group: OPDSFeedGroup

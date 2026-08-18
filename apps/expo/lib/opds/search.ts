@@ -1,3 +1,7 @@
+import { OPDSFeed, resolveUrl } from '@stump/sdk'
+
+import { hasLinkRel } from './utils'
+
 /**
  * Constructs a search URL by replacing the {?query} template with the actual query parameter.
  * Note that OPDS v2 spec supports more complex templating, but that isn't implemented yet.
@@ -31,4 +35,13 @@ export function constructLegacySearchURL(templatedUrl: string, query: string) {
 	// know if there will be mutltiple but for now this is fine for a POC
 	const encodedQuery = encodeURIComponent(query)
 	return templatedUrl.replace(/{[^}]+}/g, encodedQuery)
+}
+
+export function getSearchURL(feed: OPDSFeed | null | undefined, rootURL: string | undefined) {
+	const searchLink = feed?.links.find((link) => hasLinkRel(link, 'search') && link.templated)?.href
+	return searchLink ? resolveUrl(searchLink, rootURL) : undefined
+}
+
+export function feedHasSearch(feed: OPDSFeed | null | undefined) {
+	return feed?.links.some((link) => hasLinkRel(link, 'search')) ?? false
 }

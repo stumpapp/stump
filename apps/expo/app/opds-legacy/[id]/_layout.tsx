@@ -3,7 +3,6 @@ import { Api } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import { ServerErrorBoundary } from '~/components/error'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { getOPDSInstance } from '~/lib/sdk/auth'
@@ -71,18 +70,6 @@ function Screen() {
 			configureSDK()
 		}
 	}, [activeServer, sdk, getServerConfig, addInstanceToCache])
-
-	const didSyncAvatar = useRef(false)
-	useEffect(() => {
-		if (!sdk || !sdk.isAuthed || didSyncAvatar.current || !activeServer) return
-		if (activeServer.avatar) return
-
-		const syncUserAvatar = async () => {
-			await pullServerAvatar(activeServer, sdk)
-			didSyncAvatar.current = true
-		}
-		syncUserAvatar()
-	}, [sdk, activeServer])
 
 	const onAuthError = useCallback(() => {
 		removeInstanceFromCache(`${activeServer.id}-opds`)

@@ -7,8 +7,8 @@ import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { GridImageItem } from '../listLayout/grid'
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import RefreshControl from '../RefreshControl'

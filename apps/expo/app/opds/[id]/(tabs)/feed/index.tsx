@@ -1,11 +1,11 @@
 import { useRefetch, useShowSlowLoader } from '@stump/client'
 
-import { useActiveServer } from '~/components/activeServer'
 import BackLink from '~/components/BackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { FullScreenLoader } from '~/components/ui'
 import { useOPDSFeedContext } from '~/context/opds'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 export default function Screen() {
 	const { activeServer } = useActiveServer()

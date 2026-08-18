@@ -13,13 +13,13 @@ import { Fragment } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useStumpServer } from '~/components/activeServer'
 import { Divider } from '~/components/Divider'
 import { RecentlyAddedSeries } from '~/components/series'
 import { Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { useStumpServer } from '~/providers/StumpServerProvider'
 
 export default function Screen() {
 	const {

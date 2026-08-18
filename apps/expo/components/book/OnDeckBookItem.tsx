@@ -8,8 +8,8 @@ import { easeGradient } from 'react-native-easing-gradient'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { COLORS } from '~/lib/constants'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 

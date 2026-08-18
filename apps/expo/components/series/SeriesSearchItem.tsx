@@ -4,9 +4,9 @@ import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
@@ -72,7 +72,7 @@ export default function SeriesSearchItem({ series }: Props) {
 				width: width * 0.75,
 			}}
 		>
-			<View className="flex-row items-start gap-4 px-6 py-2 tablet:px-10">
+			<View className="gap-4 px-6 py-2 tablet:px-10 flex-row items-start">
 				<ThumbnailImage
 					source={{
 						uri,
@@ -90,7 +90,7 @@ export default function SeriesSearchItem({ series }: Props) {
 					}
 				/>
 
-				<View className="flex flex-1 flex-col gap-1">
+				<View className="gap-1 flex flex-1 flex-col">
 					<Text>{data.resolvedName}</Text>
 
 					<Text className="text-foreground-muted">

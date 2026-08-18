@@ -6,10 +6,10 @@ import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import { DiscussionListItem } from '~/components/bookClub/discussion'
 import ListEmpty from '~/components/ListEmpty'
 import { Card } from '~/components/ui'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query BookClubPastBookScreen($bookId: ID!) {

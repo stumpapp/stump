@@ -1,8 +1,8 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
 export default function Layout() {

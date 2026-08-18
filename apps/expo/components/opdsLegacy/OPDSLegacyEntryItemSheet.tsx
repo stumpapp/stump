@@ -11,9 +11,9 @@ import { stripHtml } from 'string-strip-html'
 
 import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { DescriptionSection, IdentifiersSheet, useOverviewAnimations } from '../book/overview'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'

@@ -1,7 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useShowSlowLoader } from '@stump/client'
 
-import { useActiveServer } from '~/components/activeServer'
 import BackLink from '~/components/BackLink'
 import {
 	MaybeErrorLegacyFeed,
@@ -16,6 +15,7 @@ import { useOPDSLegacyFeedContext } from '~/context/opdsLegacy'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useLegacyOPDSFeed } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 export default function Screen() {
 	const { activeServer } = useActiveServer()

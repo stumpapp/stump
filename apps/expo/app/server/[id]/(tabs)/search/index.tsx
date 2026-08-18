@@ -6,12 +6,12 @@ import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
 import { Platform, TextInputChangeEventData, View } from 'react-native'
 import { NativeSyntheticEvent } from 'react-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
 import { Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useSearchStore } from '~/stores/search'
 
 import { prefetchBookSearch } from '../../books/search[q]'

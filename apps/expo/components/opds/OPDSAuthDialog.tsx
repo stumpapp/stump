@@ -13,8 +13,8 @@ import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Input, Text } from '../ui'
 import { HeaderButton } from '../ui/header-button/header-button'

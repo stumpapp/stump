@@ -9,7 +9,6 @@ import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 
-import { useActiveServer } from '~/components/activeServer'
 import {
 	DescriptionSection,
 	IdentifiersSheet,
@@ -42,6 +41,7 @@ import {
 	useTranslate,
 } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'

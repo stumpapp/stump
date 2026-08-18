@@ -10,9 +10,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { useOverviewAnimations } from '../book/overview'
 import { ThumbnailImage } from '../image'
 import { SheetBackDetection } from '../SheetBackDetection'

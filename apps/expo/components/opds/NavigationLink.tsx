@@ -6,8 +6,8 @@ import { ComponentPropsWithoutRef } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { Text } from '../ui'
 import { Icon } from '../ui/icon'
 
@@ -34,14 +34,14 @@ export default function NavigationLink({ link }: Props) {
 		>
 			{({ pressed }) => (
 				<View
-					className={cn('flex-row items-center justify-between p-4', {
+					className={cn('p-4 flex-row items-center justify-between', {
 						'opacity-60': pressed,
 					})}
 				>
 					<Text size="lg" className="shrink">
 						{link.title}
 					</Text>
-					<Icon as={ChevronRight} className="h-6 w-6 shrink-0 text-foreground-muted opacity-70" />
+					<Icon as={ChevronRight} className="h-6 w-6 text-foreground-muted shrink-0 opacity-70" />
 				</View>
 			)}
 		</Pressable>

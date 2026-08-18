@@ -15,9 +15,9 @@ import { getLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
@@ -179,8 +179,8 @@ export default function OPDSEntry({ entry }: Props) {
 				<Pressable onPress={onPress}>
 					{({ pressed }) => (
 						<View
-							className={cn('items-center gap-1', {
-								'flex-row gap-4': layout === 'list',
+							className={cn('gap-1 items-center', {
+								'gap-4 flex-row': layout === 'list',
 							})}
 							style={{
 								opacity: pressed ? 0.75 : 1,
@@ -205,7 +205,7 @@ export default function OPDSEntry({ entry }: Props) {
 								})}
 
 							{thumbnailUrl && (
-								<View className="relative my-2">
+								<View className="my-2 relative">
 									<ThumbnailImage
 										source={{
 											uri: resolveUrl(thumbnailUrl),
@@ -221,13 +221,13 @@ export default function OPDSEntry({ entry }: Props) {
 									/>
 
 									{isStreamable && (
-										<View className="squircle absolute left-1 top-1 rounded-full bg-black/70 p-2">
+										<View className="squircle left-1 top-1 bg-black/70 p-2 absolute rounded-full">
 											<Icon as={Radio} color="white" className="h-5 w-5" />
 										</View>
 									)}
 
 									{isDownloaded && (
-										<View className="squircle absolute bottom-1 left-1 rounded-full bg-black/70 p-2">
+										<View className="squircle bottom-1 left-1 bg-black/70 p-2 absolute rounded-full">
 											<Download color="white" className="h-5 w-5" />
 										</View>
 									)}

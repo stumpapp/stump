@@ -8,8 +8,8 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { toast } from 'sonner-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import { Icon, Input, Switch, Text } from '~/components/ui'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const createMutation = graphql(`
 	mutation CreateBookClubMobile($input: CreateBookClubInput!) {

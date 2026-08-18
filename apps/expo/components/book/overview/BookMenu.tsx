@@ -15,10 +15,10 @@ import { useCallback, useLayoutEffect } from 'react'
 import { Alert, Platform } from 'react-native'
 import { toast } from 'sonner-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import { db, downloadedFiles } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import AndroidBookMenu from './AndroidBookMenu'
 

@@ -8,7 +8,6 @@ import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
-import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import BackLink from '~/components/BackLink'
 import { BookMetaLink, BooksAfterCursor } from '~/components/book'
 import {
@@ -29,6 +28,8 @@ import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useStumpServer } from '~/providers/StumpServerProvider'
 import { usePreferencesStore } from '~/stores'
 
 const query = graphql(`

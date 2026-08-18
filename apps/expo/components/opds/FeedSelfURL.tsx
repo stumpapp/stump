@@ -4,8 +4,8 @@ import { ComponentPropsWithoutRef } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { Text } from '../ui'
 
 type Props = {

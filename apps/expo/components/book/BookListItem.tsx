@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
 import { useTranslate } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import GridImageItem from '../listLayout/grid/GridImageItem'
 import { ListRowItem } from '../listLayout/list'
 import { Text } from '../ui'

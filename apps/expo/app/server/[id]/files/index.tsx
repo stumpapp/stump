@@ -5,12 +5,12 @@ import { useRouter } from 'expo-router'
 import { Image, Platform, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import { useFileExplorerAssets } from '~/components/fileExplorer/FileExplorerAssetsContext'
 import { TurboImage } from '~/components/image'
 import { Text } from '~/components/ui'
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query LibraryPaths {

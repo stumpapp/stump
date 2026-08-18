@@ -1,5 +1,3 @@
-import { UserPermission } from '@stump/graphql'
-import { AuthUser } from '@stump/sdk'
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useDebounce } from 'rooks'
 
@@ -69,28 +67,3 @@ export const useActiveServer = () => {
  * Pretty much just used for features that persist across servers (e.g., downloads)
  */
 export const useActiveServerSafe = () => useContext(ActiveServerContext)
-
-export type PermissionEnforcerOptions = {
-	onFailure?: () => void
-}
-
-export type IStumpServerContext = {
-	user: AuthUser | null
-	isServerOwner: boolean
-	checkPermission: (permission: UserPermission) => boolean
-	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void
-}
-
-export const StumpServerContext = createContext<IStumpServerContext | undefined>(undefined)
-
-export const useStumpServer = () => {
-	const context = useContext(StumpServerContext)
-	const activeServerCtx = useActiveServer()
-	if (!context) {
-		throw new Error('useStumpServer must be used within a StumpServerProvider')
-	}
-	return {
-		...context,
-		...activeServerCtx,
-	}
-}

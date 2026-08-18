@@ -5,9 +5,9 @@ import { useCallback } from 'react'
 import { Image, Platform, Pressable, View } from 'react-native'
 
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { Text } from '../ui'
 import { useFileExplorerAssets } from './FileExplorerAssetsContext'

@@ -16,7 +16,6 @@ import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useActiveServer } from '~/components/activeServer'
 import {
 	ImageBasedReader,
 	PdfReader,
@@ -33,6 +32,7 @@ import {
 	useSyncOnlineToOfflineProgress,
 } from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 

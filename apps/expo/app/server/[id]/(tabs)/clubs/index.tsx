@@ -9,11 +9,12 @@ import { useEffect } from 'react'
 import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import { BookClubCard } from '~/components/bookClub'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { Icon } from '~/components/ui'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useStumpServer } from '~/providers/StumpServerProvider'
 
 const query = graphql(`
 	query BookClubsScreen {

@@ -4,8 +4,8 @@ import { Pressable, View } from 'react-native'
 
 import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { CollectionStackedThumbnails } from '../image/collection-image'
 import { Text } from '../ui'
 
@@ -63,7 +63,7 @@ export default function LibraryGridItem({ library, getLayoutNumber }: Props) {
 							layoutNumber={layoutNumber}
 						/>
 
-						<View className="absolute bottom-0 left-0 z-20 w-full px-4 py-2">
+						<View className="bottom-0 left-0 px-4 py-2 absolute z-20 w-full">
 							<Text
 								size="2xl"
 								className="font-bold leading-8 tracking-wide"

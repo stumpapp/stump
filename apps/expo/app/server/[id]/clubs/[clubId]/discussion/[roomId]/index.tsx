@@ -6,10 +6,10 @@ import { useLayoutEffect, useMemo } from 'react'
 import { Platform } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 
-import { useActiveServer } from '~/components/activeServer'
 import type { MessageData } from '~/components/bookClub/discussion'
 import { DiscussionRoom } from '~/components/bookClub/discussion'
 import type { EmojiSelection } from '~/components/emoji/types'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const discussionQuery = graphql(`
 	query BookClubDiscussionRoom($id: ID!) {

@@ -2,7 +2,8 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { useActiveServer } from '../activeServer'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+
 import GridImageItem from '../listLayout/grid/GridImageItem'
 
 const fragment = graphql(`

@@ -24,9 +24,8 @@ import { Badge, Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
 import { useDisplay, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
-
-import { useActiveServer } from '../context'
 
 const fragment = graphql(`
 	fragment ReadingNow on Media {

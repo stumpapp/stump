@@ -11,17 +11,37 @@ import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
-import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
 import OPDSAuthDialog from '~/components/opds/OPDSAuthDialog'
 import { FullScreenLoader } from '~/components/ui'
 import { feedHasSearch, getSearchURL, OPDSFeedContext } from '~/context/opds'
 import { getOPDSInstance, isOPDSAuthError } from '~/lib/sdk/auth'
+import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 
 type OPDSFeedProviderProps = {
 	children: React.ReactNode
 	isAuthPending: boolean
+}
+
+export default function Wrapper() {
+	const { savedServers } = useSavedServers()
+	const { id: serverId } = useLocalSearchParams<{ id: string }>()
+
+	const activeServer = useMemo(
+		() => savedServers.find((server) => server.id === serverId),
+		[serverId, savedServers],
+	)
+
+	if (!activeServer) {
+		throw new Error('No active server found. This should never happen.')
+	}
+
+	return (
+		<ActiveServerProvider activeServer={activeServer}>
+			<Screen />
+		</ActiveServerProvider>
+	)
 }
 
 function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
@@ -94,19 +114,14 @@ function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 	return <OPDSFeedContext.Provider value={feedContextValue}>{children}</OPDSFeedContext.Provider>
 }
 
-export default function Screen() {
+function Screen() {
 	const router = useRouter()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
-	const { savedServers, getServerConfig } = useSavedServers()
-	const { id: serverID } = useLocalSearchParams<{ id: string }>()
+	const { getServerConfig } = useSavedServers()
+	const { activeServer } = useActiveServer()
 
-	const activeServer = useMemo(
-		() => savedServers.find((server) => server.id === serverID),
-		[serverID, savedServers],
-	)
-
-	const cachedInstance = useRef(useCacheStore((state) => state.sdks[`${serverID}-opds`]))
+	const cachedInstance = useRef(useCacheStore((state) => state.sdks[`${activeServer.id}-opds`]))
 	const addInstanceToCache = useCacheStore((state) => state.addSDK)
 	const removeInstanceFromCache = useCacheStore((state) => state.removeSDK)
 
@@ -115,8 +130,6 @@ export default function Screen() {
 	const [pendingAuthDoc, setPendingAuthDoc] = useState<OPDSAuthenticationDocument | null>(null)
 
 	useEffect(() => {
-		if (!activeServer) return
-
 		const configureSDK = async () => {
 			const { id, url, kind } = activeServer
 
@@ -137,7 +150,7 @@ export default function Screen() {
 
 	const onAuthError = useCallback(
 		(_: string | undefined, data: unknown) => {
-			removeInstanceFromCache(`${serverID}-opds`)
+			removeInstanceFromCache(`${activeServer.id}-opds`)
 
 			const authDoc = authDocument.safeParse(data)
 			if (!authDoc.success) {
@@ -155,7 +168,7 @@ export default function Screen() {
 
 			setPendingAuthDoc(authDoc.data)
 		},
-		[serverID, removeInstanceFromCache],
+		[activeServer.id, removeInstanceFromCache],
 	)
 
 	const handleAuthDialogClose = useCallback(
@@ -183,29 +196,23 @@ export default function Screen() {
 	}
 
 	return (
-		<ActiveServerContext.Provider
-			value={{
-				activeServer: activeServer,
-			}}
-		>
-			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
-				<SDKContext.Provider value={{ sdk, setSDK }}>
-					<OPDSFeedProvider isAuthPending={!!pendingAuthDoc}>
-						<Stack
-							screenOptions={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-					</OPDSFeedProvider>
-
-					<OPDSAuthDialog
-						isOpen={!!pendingAuthDoc}
-						authDoc={pendingAuthDoc}
-						onClose={handleAuthDialogClose}
+		<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
+			<SDKContext.Provider value={{ sdk, setSDK }}>
+				<OPDSFeedProvider isAuthPending={!!pendingAuthDoc}>
+					<Stack
+						screenOptions={{
+							headerShown: false,
+							animation: animationEnabled ? 'default' : 'none',
+						}}
 					/>
-				</SDKContext.Provider>
-			</StumpClientContextProvider>
-		</ActiveServerContext.Provider>
+				</OPDSFeedProvider>
+
+				<OPDSAuthDialog
+					isOpen={!!pendingAuthDoc}
+					authDoc={pendingAuthDoc}
+					onClose={handleAuthDialogClose}
+				/>
+			</SDKContext.Provider>
+		</StumpClientContextProvider>
 	)
 }

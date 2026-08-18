@@ -8,8 +8,7 @@ import { RecentlyAddedSeriesItem } from '~/components/series'
 import { IRecentlyAddedSeriesItemFragment } from '~/components/series/RecentlyAddedSeriesItem'
 import { Heading, Text } from '~/components/ui'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
-
-import { useActiveServer } from '../context'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query RecentlyAddedSeriesHorizontal($pagination: Pagination) {

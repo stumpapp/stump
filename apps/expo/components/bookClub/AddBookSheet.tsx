@@ -6,8 +6,8 @@ import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_26_PLUS, ON_END_REACHED_THRESHOLD, useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import BookListItem from '../book/BookListItem'
 import ListEmpty from '../ListEmpty'
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'

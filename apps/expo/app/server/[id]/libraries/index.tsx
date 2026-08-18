@@ -5,13 +5,13 @@ import { useCallback, useRef } from 'react'
 import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import { useCollectionItemSize } from '~/components/image/collection-image/useCollectionSizes'
 import { LibraryGridItem } from '~/components/library'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query LibrariesScreen($pagination: Pagination) {

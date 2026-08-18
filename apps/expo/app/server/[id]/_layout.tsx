@@ -4,7 +4,6 @@ import {
 	SDKContext,
 	StumpClientContextProvider,
 } from '@stump/client'
-import { UserPermission } from '@stump/graphql'
 import { Api, AuthUser, LoginResponse } from '@stump/sdk'
 import { isAxiosError } from 'axios'
 import { Redirect, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
@@ -13,12 +12,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
 import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
-import { ActiveServerContext, StumpServerContext } from '~/components/activeServer'
-import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import { ServerConnectFailed, ServerErrorBoundary } from '~/components/error'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import { FullScreenLoader } from '~/components/ui'
 import { authSDKInstance } from '~/lib/sdk/auth'
+import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
+import { StumpServerProvider } from '~/providers/StumpServerProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 
@@ -29,20 +28,34 @@ export const unstable_settings = {
 	anchor: 'index',
 }
 
-export default function Screen() {
+export default function Wrapper() {
+	const { savedServers } = useSavedServers()
+	const { id: serverId } = useLocalSearchParams<{ id: string }>()
+
+	const activeServer = useMemo(
+		() => savedServers.find((server) => server.id === serverId),
+		[serverId, savedServers],
+	)
+
+	if (!activeServer) {
+		throw new Error('No active server found. This should never happen.')
+	}
+
+	return (
+		<ActiveServerProvider activeServer={activeServer}>
+			<Screen />
+		</ActiveServerProvider>
+	)
+}
+
+function Screen() {
 	const router = useRouter()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
-	const { savedServers, getServerToken, saveServerToken, deleteServerToken, getServerConfig } =
-		useSavedServers()
-	const { id: serverID } = useLocalSearchParams<{ id: string }>()
+	const { getServerToken, saveServerToken, deleteServerToken, getServerConfig } = useSavedServers()
+	const { activeServer } = useActiveServer()
 
-	const activeServer = useMemo(
-		() => savedServers.find((server) => server.id === serverID),
-		[serverID, savedServers],
-	)
-
-	const cachedInstance = useRef(useCacheStore((state) => state.sdks[serverID || '']))
+	const cachedInstance = useRef(useCacheStore((state) => state.sdks[activeServer.id]))
 	const addInstanceToCache = useCacheStore((state) => state.addSDK)
 	const removeInstanceFromCache = useCacheStore((state) => state.removeSDK)
 
@@ -57,7 +70,6 @@ export default function Screen() {
 	const isServerAccessible = useRef(true)
 
 	useEffect(() => {
-		if (!activeServer) return
 		if (isAutoAuthenticating || !isServerAccessible.current) return
 
 		const configureSDK = async () => {
@@ -183,6 +195,7 @@ export default function Screen() {
 		setRetryCounter((k) => k + 1)
 	}, [])
 
+	const serverId = activeServer.id
 	/**
 	 * At a glace this is a little hard to parse, but what we're doing here is setting up an
 	 * effect to run each time this screen is focused which, on cleanup, resets the state if
@@ -193,12 +206,12 @@ export default function Screen() {
 		useCallback(() => {
 			return () => {
 				if (!isServerAccessible.current) {
-					queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(serverID) })
+					queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(serverId) })
 					onResetState()
 				}
 				isServerAccessible.current = true
 			}
-		}, [serverID, onResetState]),
+		}, [serverId, onResetState]),
 	)
 
 	const handleAuthDialogClose = useCallback(
@@ -249,27 +262,12 @@ export default function Screen() {
 
 	const onServerConnectionError = useCallback(
 		(connected: boolean) => {
-			queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(serverID) })
+			queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(serverId) })
 			isServerAccessible.current = connected
 			setSDK(null)
 			setUser(null)
 		},
-		[serverID],
-	)
-
-	const checkPermission = useCallback(
-		(permission: UserPermission) =>
-			user?.isServerOwner || user?.permissions.includes(permission) || false,
-		[user],
-	)
-
-	const enforcePermission = useCallback(
-		(permission: UserPermission, { onFailure }: PermissionEnforcerOptions = {}) => {
-			if (!checkPermission(permission)) {
-				onFailure?.()
-			}
-		},
-		[checkPermission],
+		[serverId],
 	)
 
 	// TODO: Maybe a conditional useFocusEffect to redirect to fix the issue someone reported
@@ -301,35 +299,22 @@ export default function Screen() {
 	}
 
 	return (
-		<ActiveServerContext.Provider
-			value={{
-				activeServer: activeServer,
-			}}
-		>
-			<StumpServerContext.Provider
-				value={{
-					user,
-					isServerOwner: user?.isServerOwner || false,
-					checkPermission,
-					enforcePermission,
-				}}
+		<StumpServerProvider user={user}>
+			<StumpClientContextProvider
+				onUnauthenticatedResponse={onAuthError}
+				onConnectionWithServerChanged={onServerConnectionError}
 			>
-				<StumpClientContextProvider
-					onUnauthenticatedResponse={onAuthError}
-					onConnectionWithServerChanged={onServerConnectionError}
-				>
-					<SDKContext.Provider value={{ sdk, setSDK }}>
-						<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
-						<Stack
-							screenOptions={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-					</SDKContext.Provider>
-				</StumpClientContextProvider>
-			</StumpServerContext.Provider>
-		</ActiveServerContext.Provider>
+				<SDKContext.Provider value={{ sdk, setSDK }}>
+					<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
+					<Stack
+						screenOptions={{
+							headerShown: false,
+							animation: animationEnabled ? 'default' : 'none',
+						}}
+					/>
+				</SDKContext.Provider>
+			</StumpClientContextProvider>
+		</StumpServerProvider>
 	)
 }
 

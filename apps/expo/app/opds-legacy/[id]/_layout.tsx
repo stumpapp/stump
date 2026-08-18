@@ -5,7 +5,6 @@ import { Redirect, Stack, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
-import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
 import { ServerErrorBoundary } from '~/components/error'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { FullScreenLoader } from '~/components/ui'
@@ -15,8 +14,29 @@ import {
 	OPDSLegacyFeedContext,
 } from '~/context/opdsLegacy'
 import { getOPDSInstance, isOPDSAuthError } from '~/lib/sdk/auth'
+import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
+
+export default function Wrapper() {
+	const { savedServers } = useSavedServers()
+	const { id: serverId } = useLocalSearchParams<{ id: string }>()
+
+	const activeServer = useMemo(
+		() => savedServers.find((server) => server.id === serverId),
+		[serverId, savedServers],
+	)
+
+	if (!activeServer) {
+		throw new Error('No active server found. This should never happen.')
+	}
+
+	return (
+		<ActiveServerProvider activeServer={activeServer}>
+			<Screen />
+		</ActiveServerProvider>
+	)
+}
 
 type OPDSFeedProviderProps = {
 	children: React.ReactNode
@@ -92,18 +112,13 @@ function OPDSFeedProvider({ children }: OPDSFeedProviderProps) {
 // to the OPDS v2 flow, but I don't think this one kinda just looks and feels better? It's like using one of those
 // minimal smart phones where theres just a few buttons for the essentials etc. Definitely something to revisit
 // for the v2 flow, as I think that can be much prettier than it currently is
-export default function Screen() {
+function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
-	const { savedServers, getServerConfig } = useSavedServers()
-	const { id: serverID } = useLocalSearchParams<{ id: string }>()
+	const { getServerConfig } = useSavedServers()
+	const { activeServer } = useActiveServer()
 
-	const activeServer = useMemo(
-		() => savedServers.find((server) => server.id === serverID),
-		[serverID, savedServers],
-	)
-
-	const cachedInstance = useRef(useCacheStore((state) => state.sdks[`${serverID}-opds`]))
+	const cachedInstance = useRef(useCacheStore((state) => state.sdks[`${activeServer.id}-opds`]))
 	const addInstanceToCache = useCacheStore((state) => state.addSDK)
 	const removeInstanceFromCache = useCacheStore((state) => state.removeSDK)
 
@@ -144,9 +159,9 @@ export default function Screen() {
 	}, [sdk, activeServer])
 
 	const onAuthError = useCallback(() => {
-		removeInstanceFromCache(`${serverID}-opds`)
+		removeInstanceFromCache(`${activeServer.id}-opds`)
 		throw new Error('This OPDS server requires authentication')
-	}, [serverID, removeInstanceFromCache])
+	}, [activeServer.id, removeInstanceFromCache])
 
 	if (!activeServer) {
 		// @ts-expect-error: It's fine
@@ -159,24 +174,18 @@ export default function Screen() {
 
 	return (
 		<FileExplorerAssetsProvider>
-			<ActiveServerContext.Provider
-				value={{
-					activeServer: activeServer,
-				}}
-			>
-				<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
-					<SDKContext.Provider value={{ sdk, setSDK }}>
-						<OPDSFeedProvider>
-							<Stack
-								screenOptions={{
-									headerShown: false,
-									animation: animationEnabled ? 'default' : 'none',
-								}}
-							/>
-						</OPDSFeedProvider>
-					</SDKContext.Provider>
-				</StumpClientContextProvider>
-			</ActiveServerContext.Provider>
+			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
+				<SDKContext.Provider value={{ sdk, setSDK }}>
+					<OPDSFeedProvider>
+						<Stack
+							screenOptions={{
+								headerShown: false,
+								animation: animationEnabled ? 'default' : 'none',
+							}}
+						/>
+					</OPDSFeedProvider>
+				</SDKContext.Provider>
+			</StumpClientContextProvider>
 		</FileExplorerAssetsProvider>
 	)
 }

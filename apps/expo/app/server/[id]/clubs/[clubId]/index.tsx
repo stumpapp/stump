@@ -9,12 +9,12 @@ import { useLayoutEffect } from 'react'
 import { Platform, Pressable, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import { CurrentBookCard, Moderators, PastDiscussionsLink } from '~/components/bookClub'
 import { DiscussionListItem } from '~/components/bookClub/discussion'
 import RefreshControl from '~/components/RefreshControl'
 import { Badge, Button, Card, Icon, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query BookClubDetailScreen($id: ID!) {

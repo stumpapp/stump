@@ -8,13 +8,13 @@ import { FlatList, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import { BookSearchItem, IBookSearchItemFragment } from '~/components/book'
 import EmptyState from '~/components/EmptyState'
 import { ILibrarySearchItemFragment, LibrarySearchItem } from '~/components/library'
 import { ISeriesSearchItemFragment, SeriesSearchItem } from '~/components/series'
 import { Heading, Text } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const mediaQuery = graphql(`
 	query SearchMedia($filter: MediaFilterInput!) {
@@ -151,13 +151,13 @@ export default function Screen() {
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScrollView
-				className="flex-1 bg-background py-4 tablet:py-7"
+				className="py-4 tablet:py-7 flex-1 bg-background"
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<View className="gap-2 pb-2">
 					{!!bookResults?.media.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
+							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
 								<Heading size="default">Books</Heading>
 								{getHasMore(bookResults?.media.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${query}`}>
@@ -190,7 +190,7 @@ export default function Screen() {
 
 					{!!seriesResults?.series.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
+							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
 								<Heading size="default">Series</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
@@ -223,7 +223,7 @@ export default function Screen() {
 
 					{!!librariesResults?.libraries.nodes.length && (
 						<View className="pb-4">
-							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
+							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
 								<Heading size="default">Libraries</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>

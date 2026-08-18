@@ -4,10 +4,11 @@ import { Link, Stack } from 'expo-router'
 import { Plus } from 'lucide-react-native'
 import { Platform } from 'react-native'
 
-import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import BackLink from '~/components/BackLink'
 import { Icon } from '~/components/ui'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useStumpServer } from '~/providers/StumpServerProvider'
 import { usePreferencesStore } from '~/stores'
 
 export default function Layout() {

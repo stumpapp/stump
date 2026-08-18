@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
 import { COLORS } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { Text } from '../ui'
 import SeriesStackedThumbnails from './SeriesStackedThumbnails'
 
@@ -71,9 +71,9 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<SeriesStackedThumbnails width={160} thumbnailData={thumbnailData} />
 
-					<View className="absolute top-0 z-20 w-full px-2.5 py-2">
+					<View className="top-0 px-2.5 py-2 absolute z-20 w-full">
 						<Text
-							className="flex-1 flex-wrap text-xl font-bold"
+							className="text-xl font-bold flex-1 flex-wrap"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,
@@ -86,7 +86,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 							{data.resolvedName}
 						</Text>
 						<Text
-							className="flex-1 flex-wrap font-medium tablet:text-base"
+							className="font-medium tablet:text-base flex-1 flex-wrap"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,

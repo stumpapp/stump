@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NativeSyntheticEvent, TextInputFocusEventData, View } from 'react-native'
 import { match } from 'ts-pattern'
 
-import { useActiveServer } from '~/components/activeServer'
 import RefreshControl from '~/components/RefreshControl'
 import {
 	SmartListBookItem,
@@ -16,6 +15,7 @@ import {
 } from '~/components/smartList'
 import SmartListActionMenu from '~/components/smartList/SmartListActionMenu'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useSmartListGroupStore } from '~/stores/smartList'
 
 const query = graphql(`

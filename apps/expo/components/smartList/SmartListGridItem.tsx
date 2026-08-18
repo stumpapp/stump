@@ -8,8 +8,8 @@ import { Platform, Pressable, View } from 'react-native'
 
 import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { CollectionStackedThumbnails } from '../image/collection-image'
 import { Icon, Text } from '../ui'
 

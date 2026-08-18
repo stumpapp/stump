@@ -7,9 +7,9 @@ import { easeGradient } from 'react-native-easing-gradient'
 
 import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Progress, Text } from '../ui'
 import { useSmartListItemsSize } from './useSmartListItemsSize'

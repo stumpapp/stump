@@ -2,8 +2,8 @@ import { useGraphQLMutation, useRefetch, useSuspenseGraphQL } from '@stump/clien
 import { BookClubInvitesScreenQuery, graphql } from '@stump/graphql'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import ListEmpty from '~/components/ListEmpty'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query BookClubInvitesScreen {

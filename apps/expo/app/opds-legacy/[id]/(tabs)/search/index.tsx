@@ -3,12 +3,12 @@ import debounce from 'lodash/debounce'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { NativeSyntheticEvent, Platform, TextInputChangeEventData, View } from 'react-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import Owl from '~/components/Owl'
 import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
 import { Text } from '~/components/ui'
 import { useOPDSLegacyFeedContext } from '~/context/opdsLegacy'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useSearchStore } from '~/stores/search'
 
 export default function Screen() {
@@ -79,7 +79,7 @@ export default function Screen() {
 						Search the feed
 					</Text>
 
-					<Text size="lg" className="text-center text-foreground-muted">
+					<Text size="lg" className="text-foreground-muted text-center">
 						Enter a search query to find content in this OPDS feed
 					</Text>
 				</View>

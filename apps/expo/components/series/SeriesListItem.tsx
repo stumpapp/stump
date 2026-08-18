@@ -2,7 +2,8 @@ import { FragmentType, graphql, InterfaceLayout, useFragment } from '@stump/grap
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { useActiveServer } from '../activeServer'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+
 import GridImageItem from '../listLayout/grid/GridImageItem'
 import { ListRowItem } from '../listLayout/list'
 import { Text } from '../ui'

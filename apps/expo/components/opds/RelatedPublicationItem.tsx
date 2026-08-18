@@ -4,9 +4,9 @@ import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 import { getPublicationThumbnailURL, hasLinkRel } from './utils'

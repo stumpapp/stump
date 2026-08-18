@@ -4,10 +4,10 @@ import { isAxiosError } from 'axios'
 import { NativeTabs } from 'expo-router/unstable-native-tabs'
 import { useEffect } from 'react'
 
-import { useStumpServer } from '~/components/activeServer'
 import { ServerErrorBoundary } from '~/components/error'
 import { useColors } from '~/lib/constants'
 import { useAutoSyncActiveServer, useTranslate } from '~/lib/hooks'
+import { useStumpServer } from '~/providers/StumpServerProvider'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
 export default function TabLayout() {

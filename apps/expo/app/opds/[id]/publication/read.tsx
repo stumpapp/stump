@@ -10,12 +10,12 @@ import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { hashFromURL, useResolveURL } from '~/components/opds/utils'
 import { db, readProgress } from '~/db'
 import { useReadingTimer } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 

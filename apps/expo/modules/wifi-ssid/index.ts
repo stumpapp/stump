@@ -1,6 +1,11 @@
 import { Platform, requireNativeModule } from 'expo-modules-core'
 import { Linking } from 'react-native'
 
+// TODO(aaron): read through and do following:
+// - rm llm speak :sob:
+// - rm things i likely won't use
+// ^ ideally through this i will understand what this is doing lol
+
 export interface WifiSsidResult {
 	ssid: string | null
 	/**

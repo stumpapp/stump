@@ -38,7 +38,9 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
-	#[graphql(deprecation = "TODO: aaron kill me plz")]
+	#[graphql(
+		deprecation = "This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays."
+	)]
 	async fn avatar_url(&self, ctx: &Context<'_>) -> Result<Option<String>> {
 		let service = ctx.data::<ServiceContext>()?;
 

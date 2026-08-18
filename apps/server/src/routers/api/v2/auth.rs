@@ -42,7 +42,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
-			// TODO: I really need to just deprecate this route, it gives me way too much headache
+			// TODO(chore): I really need to just deprecate this route, it gives me way too much headache
 			// to have to have a two different public-facing users and mixing (de)serialization
 			// btw gql and rest
 			.route(

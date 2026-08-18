@@ -13,10 +13,16 @@ import { ZustandMMKVStorage } from './store'
 type ServerID = string
 export type ServerKind = 'stump' | 'opds' | 'opds-legacy'
 
+export type NetworkProfile = {
+	ssid: string
+	url: string
+}
+
 export type SavedServer = {
 	id: ServerID
 	name: string
 	url: string
+	localProfile?: NetworkProfile
 	kind: ServerKind
 	defaultServer?: boolean
 	avatar?: ServerAvatar | null

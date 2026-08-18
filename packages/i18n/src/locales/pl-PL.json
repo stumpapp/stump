@@ -59,18 +59,8 @@
 				"author": {
 					"label": "Autor"
 				},
-				"isbn": {
-					"label": "ISBN"
-				},
 				"year": {
 					"label": "Rok"
-				},
-				"number": {
-					"label": "Issue number"
-				},
-				"comicVineVolumeId": {
-					"label": "ComicVine volume ID",
-					"placeholder": "e.g., 129260"
 				},
 				"provider": {
 					"label": "Dostawca",
@@ -135,8 +125,6 @@
 					"description": "Nazwa domyślnej roli dla Twojego klubu książki"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
 					"description": "Nazwa roli moderatora dla Twojego klubu książki"
 				},
 				"admin": {
@@ -153,7 +141,6 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Nazwa wyświetlana",
-					"placeholder": "oromei",
 					"description": "Opcjonalna wyświetlana nazwa dla Twojego członkostwa w klubie książki. Ustawiona ma pierwszeństwo przed Twoją nazwą użytkownika"
 				},
 				"hideProgress": {
@@ -233,8 +220,7 @@
 		},
 		"members": {
 			"title": "Członkowie",
-			"description": "Zarządzaj członkami tego klubu książki",
-			"sections": {}
+			"description": "Zarządzaj członkami tego klubu książki"
 		},
 		"roles": {
 			"title": "Role",
@@ -289,20 +275,6 @@
 			"tags": {
 				"label": "Etykiety",
 				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
-			},
-			"libraryType": {
-				"label": "Library content",
-				"description": "The type of content present in this library",
-				"options": {
-					"COMIC": "Comics",
-					"MANGA": "Manga",
-					"BOOK": "Books",
-					"LIGHT_NOVEL": "Light Novels",
-					"MANHWA": "Manhwa",
-					"WEB_NOVEL": "Web Novels",
-					"WEBTOON": "Webtoons",
-					"MIXED": "Mixed"
-				}
 			},
 			"defaultLibraryView": {
 				"label": "Domyślny widok biblioteki",
@@ -546,7 +518,6 @@
 					"generateThumbnails": "Generuj miniaturki",
 					"processThumbnailColors": "Przetwarzaj kolory miniatur",
 					"mode": "Tryb",
-					"format": "Format",
 					"quality": "Jakość",
 					"name": "Nazwa",
 					"path": "Ścieżka",
@@ -710,9 +681,7 @@
 			"sections": {
 				"management": {
 					"heading": "Zarządzanie",
-					"description": "Zarządzaj istniejącymi miniaturami tej biblioteki",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
+					"description": "Zarządzaj istniejącymi miniaturami tej biblioteki"
 				}
 			}
 		},
@@ -785,7 +754,6 @@
 					"emptyText": "Nie było nic do wyczyszczenia",
 					"missingEntitiesTable": {
 						"columns": {
-							"id": "ID",
 							"path": "Ścieżka",
 							"type": "Typ"
 						},
@@ -855,11 +823,9 @@
 			"coverArtists": "Twórca okładki",
 			"day": "Dzień",
 			"editors": "Edytorzy",
-			"format": "Format",
 			"identifierAmazon": "Identyfikator Amazon",
 			"identifierCalibre": "Identyfikator Calibre",
 			"identifierGoogle": "Identyfikator Google",
-			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "ASIN Mobi",
 			"identifierUuid": "UUID książki",
 			"genres": "Gatunki",
@@ -888,7 +854,6 @@
 			"imprint": "Nadruk",
 			"comicid": "Identyfikator komiksu",
 			"booktype": "Typ książki",
-			"status": "Status",
 			"totalIssues": "Łącznie wydań",
 			"publicationRun": "Okres publikacji",
 			"comicImage": "Grafika komiksu",
@@ -1082,7 +1047,6 @@
 									"name": "Nazwa pliku",
 									"size": "Rozmiar",
 									"extension": "Rozszerzenie",
-									"status": "Status",
 									"path": "Ścieżka",
 									"pages": "Strony",
 									"tags": "Etykiety",
@@ -1131,7 +1095,6 @@
 									"imprint": "Nadruk",
 									"comicid": "Identyfikator komiksu",
 									"booktype": "Typ książki",
-									"status": "Status",
 									"volume": "Tom",
 									"metaType": "Typ",
 									"ageRating": "Klasyfikacja wiekowa",
@@ -1507,16 +1470,13 @@
 						"dokumentację"
 					],
 					"options": {
-						"system": "System",
 						"light": "Jasny",
 						"dark": "Ciemny",
 						"bronze": "Jasnobrązowy",
-						"ocean": "Ocean",
 						"autumn": "Jesień",
 						"cosmic": "Kosmiczny",
 						"pumpkin": "Dynia",
-						"midnight": "Północ",
-						"matrix": "Matrix"
+						"midnight": "Północ"
 					}
 				},
 				"gradientToggle": {
@@ -1552,8 +1512,7 @@
 					"options": {
 						"grayscale": "Odcienie szarości",
 						"averageColor": "Średnie wartości kolorów",
-						"colorful": "Kolorowe",
-						"thumbhash": "Thumbhash"
+						"colorful": "Kolorowe"
 					}
 				},
 				"thumbnailRoundness": {
@@ -1834,9 +1793,7 @@
 								"placeholder": "Mój serwer"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "Adres serwera Stump",
-								"placeholder": "https://stump.example.com"
+								"description": "Adres serwera Stump"
 							}
 						}
 					},
@@ -2038,8 +1995,7 @@
 						},
 						"schedule": {
 							"label": "Harmonogram cron",
-							"description": "Wyrażenie cron definiujące częstotliwość",
-							"placeholder": "0 0 0 * * *"
+							"description": "Wyrażenie cron definiujące częstotliwość"
 						},
 						"schedulePreset": {
 							"label": "Predefiniowane",
@@ -2095,7 +2051,6 @@
 						"columns": {
 							"name": "Rodzaj",
 							"description": "Opis",
-							"status": "Status",
 							"createdAt": "Rozpoczęto o",
 							"elapsed": "Upłynęło",
 							"tasks": "Zadania"
@@ -2138,7 +2093,6 @@
 					"ageRestriction": {
 						"label": "Ograniczenie wiekowe",
 						"description": "Ogranicza użytkownikowi dostęp do treści powyżej ustalonego progu wiekowego",
-						"placeholder": "13",
 						"enforceUnset": {
 							"label": "Wymuś na nieokreślonych",
 							"description": "Jeśli opcja ta jest włączona, użytkownik nie będzie miał dostępu do treści bez ocen wiekowych"
@@ -2315,7 +2269,6 @@
 								"columns": {
 									"to": "Do",
 									"subject": "Temat",
-									"status": "Status",
 									"createdAt": "Wysłane o"
 								}
 							},
@@ -2439,8 +2392,6 @@
 			"helmet": "Integracja metadanych",
 			"title": "Integracja metadanych",
 			"addProvider": "Dodaj dostawcę",
-			"createProviderError": "Failed to create provider",
-			"updateProviderError": "Failed to update provider",
 			"noProviders": "Brak skonfigurowanych dostawców. Dodaj jednego, aby rozpocząć",
 			"providers": {
 				"title": "Dostawcy",
@@ -2453,8 +2404,6 @@
 					"validationError": "Automatyczna walidacja dla tego tokenu zakończyła się niepowodzeniem",
 					"validationRequestError": "Żądanie walidacji zakończyło się niepowodzeniem",
 					"validationRequestErrorUnknown": "Żądanie walidacji napotkało na nieznany błąd",
-					"providerStatusError": "The provider responded with status {{status}}",
-					"providerError": "The provider responded with an error: {{message}}",
 					"noBearerPrefixRequired": "Usuń przedrostek 'Bearer ' z tokenu API"
 				},
 				"apiTokenExpiresAt": {
@@ -2684,7 +2633,6 @@
 			"title": "Ta funkcja jest eksperymentalna",
 			"description": "Może brakować funkcjonalności, posiadać błędy lub w ogóle nie działać. Uzywaj według własnego uznania i zgłoś wszelkie błędy, które napotkasz"
 		},
-		"enter": "Enter",
 		"save": "Zapisz",
 		"send": "Wyślij",
 		"saveChanges": "Zapisz zmiany",
@@ -2915,7 +2863,6 @@
 					"description": "Zostaniesz poproszony w razie potrzeby o zalogowanie się podczas dostępu do zawartości"
 				},
 				"token": {
-					"label": "Token",
 					"placeholder": "Nieprzetworzony token"
 				},
 				"basic": "Podstawowe"
@@ -2964,7 +2911,6 @@
 			"ageRating": "Klasyfikacja wiekowa",
 			"downloadedAt": "Pobrane",
 			"characters": "Postacie",
-			"format": "Format",
 			"genres": "Gatunki",
 			"language": "Język",
 			"publisher": "Wydawca",
@@ -2993,7 +2939,6 @@
 			"delete": "Usuń",
 			"dismiss": "Odrzuć",
 			"download": "Pobierz",
-			"downloaded": "Downloaded",
 			"downloads": "Pobrane",
 			"done": "Zakończone",
 			"edit": "Edytuj",
@@ -3122,10 +3067,6 @@
 					"ASC": "Rosnąco",
 					"DESC": "Malejąco"
 				},
-				"sortDirectionText": {
-					"ASC": "A → Z",
-					"DESC": "Z → A"
-				},
 				"sortDirectionDate": {
 					"ASC": "Najpierw najstarsze",
 					"DESC": "Najpierw najnowsze"
@@ -3204,8 +3145,7 @@
 					"options": {
 						"grayscale": "Odcienie szarości",
 						"averageColor": "Średnie wartości kolorów",
-						"colorful": "Kolorowe",
-						"thumbhash": "Thumbhash"
+						"colorful": "Kolorowe"
 					}
 				},
 				"thumbnailResizeMode": {
@@ -3225,7 +3165,6 @@
 				"incognitoReading": "Czytanie w trybie prywatnym"
 			},
 			"stump": {
-				"label": "Stump",
 				"description": "Funkcje Stump są opcjonalne i, jeśli ich nie potrzebujesz, możesz je wyłączyć",
 				"bookClubsEnabled": "Funkcje klubu książki"
 			},
@@ -3305,9 +3244,7 @@
 			},
 			"contactInfo": {
 				"label": "Kontakt",
-				"email": "Wiadomość e-mail",
-				"discord": "Discord",
-				"github": "GitHub"
+				"email": "Wiadomość e-mail"
 			},
 			"supportInfo": {
 				"buildInformation": "Informacje o kompilacji",
@@ -3418,15 +3355,7 @@
 		"epubSettings": {
 			"title": "Ustawienia czytnika Epub",
 			"typeface": {
-				"label": "Krój czcionki",
-				"options": {
-					"system": "System",
-					"opendyslexic": "OpenDyslexic",
-					"literata": "Literata",
-					"atkinsonHyperlegible": "Atkinson Hyperlegible",
-					"charisSIL": "Charis SIL",
-					"bitter": "Bitter"
-				}
+				"label": "Krój czcionki"
 			},
 			"fontSize": "Rozmiar czcionki",
 			"fontWeight": {
@@ -3496,8 +3425,6 @@
 			"BOOK": "Książki",
 			"COMIC": "Komiksy",
 			"LIGHT_NOVEL": "Light Novel",
-			"MANGA": "Manga",
-			"MANHWA": "Manhwa",
 			"MIXED": "Mieszane",
 			"WEBTOON": "Webtoon",
 			"WEB_NOVEL": "Web Novel"
@@ -3532,22 +3459,9 @@
 				"ASC": "Rosnąco",
 				"DESC": "Malejąco"
 			},
-			"sortDirectionString": {
-				"ASC": "A → Z",
-				"DESC": "Z → A"
-			},
 			"sortDirectionDate": {
 				"ASC": "Najpierw najstarsze",
 				"DESC": "Najpierw najnowsze"
-			},
-			"sortDirectionNumber": {
-				"ASC": "1 → 10",
-				"DESC": "10 → 1"
-			}
-		},
-		"widgets": {
-			"readingNow": {
-				"nothingInProgress": "Nothing in Progress"
 			}
 		}
 	}

@@ -13,7 +13,7 @@ import { useCacheStore } from '~/stores/cache'
 
 export default function Wrapper() {
 	const { savedServers } = useSavedServers()
-	const { id: serverId } = useLocalSearchParams<{ id: string }>()
+	const { serverId } = useLocalSearchParams<{ serverId: string }>()
 
 	const activeServer = useMemo(
 		() => savedServers.find((server) => server.id === serverId),

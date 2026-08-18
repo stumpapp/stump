@@ -22,5 +22,5 @@
     - e.g., (opds|opds-legacy|server)/[serverId], libraries/[libraryId], etc
     - it's really things like server/[id]/series/[id] that are the problem, nested ids
 - [ ] ^ rename server stack to stump, just kinda makes more sense
-- [ ] more ephemeral context (or context without need for custom provider) can stay in context/ but others prolly in providers/
+- [x] more ephemeral context (or context without need for custom provider) can stay in context/ but others prolly in providers/
       i kinda dig that pattern after seeing it in streamyfin

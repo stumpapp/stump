@@ -77,9 +77,10 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 			})
 			api.basicAuth = { username, password }
 
-			const catalogURL = activeServer.stumpOPDS
-				? urlJoin(activeServer.url, opdsURL('/catalog'))
-				: activeServer.url
+			const catalogURL =
+				activeServer.kind === 'stump'
+					? urlJoin(activeServer.url, opdsURL('/catalog'))
+					: activeServer.url
 
 			await api.axios.get(catalogURL)
 

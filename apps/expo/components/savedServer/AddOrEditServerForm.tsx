@@ -122,7 +122,6 @@ export default function AddOrEditServerForm({
 	useEffect(() => {
 		if (kind !== 'stump') {
 			setValue('defaultServer', false)
-			setValue('stumpOPDS', false)
 		}
 	}, [setValue, kind])
 
@@ -135,9 +134,9 @@ export default function AddOrEditServerForm({
 		}
 	}, [didConnect])
 
-	const [defaultServer, stumpOPDS, authMode] = useWatch({
+	const [defaultServer, authMode] = useWatch({
 		control,
-		name: ['defaultServer', 'stumpOPDS', 'authMode'],
+		name: ['defaultServer', 'authMode'],
 	})
 
 	const renderAuthMode = () => {
@@ -485,27 +484,6 @@ export default function AddOrEditServerForm({
 						disabled={kind !== 'stump'}
 					/>
 				</View>
-
-				{kind === 'stump' && (
-					<View className="gap-6 w-full flex-row items-center justify-between">
-						<Label
-							nativeID="stumpOPDS"
-							onPress={() => {
-								form.setValue('stumpOPDS', !stumpOPDS)
-							}}
-							disabled={kind !== 'stump'}
-						>
-							{t(getKey('enableOPDS'))}
-						</Label>
-
-						<Switch
-							checked={stumpOPDS}
-							onCheckedChange={(value) => form.setValue('stumpOPDS', value)}
-							nativeID="stumpOPDS"
-							disabled={kind !== 'stump'}
-						/>
-					</View>
-				)}
 			</View>
 		</View>
 	)
@@ -540,7 +518,6 @@ function RenderHeaderAction(
 const defaultValues = {
 	defaultServer: false,
 	kind: 'stump',
-	stumpOPDS: false,
 	name: '',
 	url: '',
 	authMode: 'login',
@@ -587,7 +564,6 @@ const getDefaultValues = (editingServer?: SavedServerWithConfig | null) => {
 		name: editingServer.name,
 		url: editingServer.url,
 		defaultServer: editingServer.defaultServer ?? false,
-		stumpOPDS: editingServer.stumpOPDS,
 		customHeaders: Object.entries(editingServer.config?.customHeaders || {}).map(
 			([key, value]) => ({
 				key,
@@ -634,7 +610,6 @@ const createSchema = (names: string[], t: (key: string) => string) =>
 			.union([z.literal('stump'), z.literal('opds'), z.literal('opds-legacy')])
 			.default('stump'),
 		defaultServer: z.boolean().default(false),
-		stumpOPDS: z.boolean().default(false),
 		authMode: authMode.default('login'),
 		token: z.string().optional(),
 		basicUser: z.string().optional(),
@@ -669,7 +644,6 @@ export const transformFormData = (data: AddOrEditServerSchema) => {
 
 	return {
 		...omit(data, ['authMode', 'token', 'basicUser', 'basicPassword', 'customHeaders']),
-		stumpOPDS: data.kind === 'stump' ? data.stumpOPDS : false,
 		config,
 	}
 }

@@ -2930,7 +2930,6 @@
 			"didConnect": "Connected",
 			"checkConnection": "Check Connection",
 			"setAsDefaultServer": "Set as Default Server",
-			"enableOPDS": "Enable OPDS",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
 				"cannotSetAuthorizationHeader": "Cannot set Authorization header"

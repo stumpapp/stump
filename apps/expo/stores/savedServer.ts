@@ -18,7 +18,6 @@ export type SavedServer = {
 	name: string
 	url: string
 	kind: ServerKind
-	stumpOPDS?: boolean
 	defaultServer?: boolean
 	avatar?: ServerAvatar | null
 }

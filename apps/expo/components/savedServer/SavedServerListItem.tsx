@@ -134,7 +134,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 												await deleteServerToken(server.id)
 												const idsToDelete = [
 													server.id,
-													...(server.stumpOPDS ? [`${server.id}-opds`] : []),
+													...(server.kind === 'stump' ? [`${server.id}-opds`] : []),
 												]
 												idsToDelete.forEach((id) => deleteCachedSdk(id))
 											},

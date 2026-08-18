@@ -37,7 +37,7 @@ function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 	} = useQuery({
 		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
 		queryFn: () => {
-			if (activeServer?.stumpOPDS) {
+			if (activeServer?.kind === 'stump') {
 				return sdk.opds.catalog()
 			} else {
 				return sdk.opds.feed(activeServer?.url || '')

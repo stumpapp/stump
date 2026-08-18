@@ -3499,7 +3499,7 @@ type User {
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
 	oidcEmail: String
-	avatarUrl: String @deprecated(reason: "TODO: aaron kill me plz")
+	avatarUrl: String @deprecated(reason: "This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays.")
 	"a reference to the avatar image and its metadata for this user"
 	avatar: ImageRef!
 	ageRestriction: AgeRestriction

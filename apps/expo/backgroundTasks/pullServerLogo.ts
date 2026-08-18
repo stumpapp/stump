@@ -145,7 +145,10 @@ export async function pullServerAvatar(server: SavedServer, api: Api) {
 		.otherwise(() => null)
 
 	const editServer = useSavedServerStore.getState().editServer
-	if (serverAvatar) {
+	// TODO: so if we gate on truthy here, we effectively rm ability to auto-unset
+	// i think fine for now, but may become a problem if e.g. we unset an avatar
+	// future aaron problem
+	if (avatar) {
 		editServer(server.id, {
 			...server,
 			avatar,

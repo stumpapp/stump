@@ -105,7 +105,6 @@ export default function Screen() {
 	const isCleanSlate = savedServers.length === 0
 	const emptyContainerStyle = useOwlHeaderOffset()
 
-	// TODO: isn't rly meant for this, so create more generic grid sizing hook?
 	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	if (isCleanSlate) {

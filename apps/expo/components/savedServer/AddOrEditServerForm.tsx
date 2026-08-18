@@ -452,11 +452,11 @@ export default function AddOrEditServerForm({
 							value={value}
 							options={[
 								{ label: t(getKey('auth.none.label')), value: 'none' },
-								{ label: t(getKey('auth.login.label')), value: 'default' },
+								{ label: t(getKey('auth.login.label')), value: 'login' },
 								{ label: t(getKey('auth.basic')), value: 'basic' },
 								{ label: t(getKey('auth.token.label')), value: 'token' },
 							]}
-							onValueChange={(v) => onChange(v as 'default' | 'basic' | 'token')}
+							onValueChange={(v) => onChange(v)}
 						/>
 					)}
 					name="authMode"

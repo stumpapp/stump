@@ -8,6 +8,7 @@ import { Image, Platform } from 'react-native'
 import { match, P } from 'ts-pattern'
 
 import { toRgba } from '~/lib/constants'
+import { useColorScheme } from '~/lib/useColorScheme'
 import { KnownServer, SavedServer } from '~/stores/savedServer'
 
 import { TurboImage } from '../image'
@@ -23,6 +24,8 @@ type NormalizedLogo = {
 }
 
 export function ServerLogo({ server }: Props) {
+	const { isDarkColorScheme } = useColorScheme()
+
 	const [assets, error] = useAssets(LOGO_REQUIRES)
 
 	useEffect(() => {
@@ -36,7 +39,7 @@ export function ServerLogo({ server }: Props) {
 		.with({ avatar: P.shape({ logo: P.string }) }, (s) => s.avatar.logo)
 		.otherwise(() => 'stump')
 
-	const logoAsset = getServerLogo(serverName, assets || [])
+	const logoAsset = getServerLogo(serverName, assets || [], isDarkColorScheme)
 
 	const normalizedLogo: NormalizedLogo = match(server)
 		.with({ avatar: P.shape({ uri: P.string }) }, ({ avatar }) => ({
@@ -63,8 +66,8 @@ export function ServerLogo({ server }: Props) {
 				source={{
 					uri: normalizedLogo.uri,
 				}}
-				resizeMode="contain"
-				style={{ ...defaultSize }}
+				resizeMode="cover"
+				style={{ ...defaultSize, borderRadius: 999 }}
 			/>
 		)
 	}
@@ -85,9 +88,11 @@ const LOGO_REQUIRES = [
 	require('../../assets/images/serverLogos/kavita.png'),
 	require('../../assets/images/serverLogos/komga.png'),
 	require('../../assets/images/serverLogos/stump.png'),
+	require('../../assets/icons/Server.png'),
+	require('../../assets/icons/Server_Light.png'),
 ]
 
-const getServerLogo = (name: string, assets: Array<Asset>) => {
+const getServerLogo = (name: string, assets: Array<Asset>, isDark: boolean) => {
 	switch (name.toLowerCase()) {
 		case 'codex':
 			return assets[0]
@@ -98,7 +103,8 @@ const getServerLogo = (name: string, assets: Array<Asset>) => {
 		case 'stump':
 			return assets[3]
 		default:
-			return assets[3] // FIXME: some unknown logo, for OPDS i guess
+			// note: inverted for contrast
+			return isDark ? assets[5] : assets[4]
 	}
 }
 

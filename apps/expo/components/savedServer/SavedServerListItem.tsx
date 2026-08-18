@@ -61,7 +61,6 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 		return textCase === 'lowerCase' ? kind.toLowerCase() : kind
 	}, [server.kind, textCase])
 
-	// TODO: isn't rly meant for this, so create more generic grid sizing hook?
 	const { itemWidth } = useGridItemSize()
 
 	const onPress = (overridePath?: string) => {

@@ -14,6 +14,7 @@ import { useProgressSync, useTranslate } from '~/lib/hooks'
 import { OwlEmptyState } from '../../OwlEmptyState'
 import { SheetBackDetection } from '../../SheetBackDetection'
 import { Badge, Heading, Text } from '../../ui'
+import { useDownloadsState } from '../store'
 import { ConflictCarousel } from './ConflictCarousel'
 import { AcceptedProgressionData, ConflictRecord } from './types'
 
@@ -35,8 +36,11 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 	const { data: conflictingRecords, updatedAt } = useLiveQuery(
 		db
 			.select()
-			.from(downloadedFiles)
-			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
+			// it is very important to select on the mutating table for live queries to work properly,
+			// ask me how i know :sob: i spent way too much time trying to understand why it wasn't reactive
+			// like i expected after accepting a conflict
+			.from(readProgress)
+			.innerJoin(downloadedFiles, eq(downloadedFiles.id, readProgress.bookId))
 			.where(eq(readProgress.syncStatus, 'CONFLICT')),
 	)
 
@@ -44,7 +48,7 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		() =>
 			conflictingRecords?.reduce(
 				(oldest, record) => {
-					const modifiedAt = record.read_progress?.lastModified
+					const modifiedAt = record.read_progress.lastModified
 					if (!modifiedAt) return oldest
 					if (!oldest) return modifiedAt
 					return modifiedAt < oldest ? modifiedAt : oldest
@@ -79,6 +83,7 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		[oldestModifiedAt],
 	)
 
+	const refreshDownloads = useDownloadsState((state) => state.increment)
 	useEffect(
 		() => {
 			if (isOpen && shouldPull) {
@@ -89,6 +94,7 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 					suppressAlerts: true,
 				})
 				serverIdsToSyncUponClose.current.clear()
+				refreshDownloads()
 			}
 		},
 		// eslint-disable-next-line react-compiler/react-compiler
@@ -96,8 +102,16 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		[isOpen, shouldPull],
 	)
 
+	const conflictCount = conflictingRecords?.length ?? 0
+
+	const onAutoClose = useCallback(() => {
+		refreshDownloads()
+		ref.current?.dismiss()
+	}, [refreshDownloads])
+
 	const onAcceptBoth = useCallback(
 		async (bookId: string, serverId: string, latestRemoteUpdatedAt: string) => {
+			const isLastConflict = conflictCount === 1
 			await db
 				.update(readProgress)
 				.set({
@@ -106,12 +120,14 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 				})
 				.where(eq(readProgress.bookId, bookId))
 			serverIdsToSyncUponClose.current.add(serverId)
+			if (isLastConflict) onAutoClose()
 		},
-		[],
+		[onAutoClose, conflictCount],
 	)
 
 	const onApplySyncedSessionData = useCallback(
 		async (bookId: string, serverId: string, data: AcceptedProgressionData) => {
+			const isLastConflict = conflictCount === 1
 			const sessionUpdatedAt = data.sessionUpdatedAt
 				? parseGraphQLDateTime(data.sessionUpdatedAt)
 				: null
@@ -133,17 +149,15 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 				target: readProgress.bookId,
 				set: values,
 			})
+			if (isLastConflict) onAutoClose()
 		},
-		[],
+		[conflictCount, onAutoClose],
 	)
-
-	const conflictCount = conflictingRecords?.length ?? 0
 
 	return (
 		<>
 			<TrueSheet
 				// i find it irritating i need this key for stuff to show up!
-				key={conflictCount > 0 ? 'hasConflicts' : 'noConflicts'}
 				name={SYNC_CONFLICTS_SHEET_NAME}
 				ref={ref}
 				detents={[1]}
@@ -170,14 +184,15 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 				}}
 				insetAdjustment="automatic"
 			>
-				<View key={updatedAt?.toISOString()}>
+				<View
+					key={`${updatedAt?.toISOString()}-${conflictCount}`}
+					className="items-center justify-center"
+				>
 					{!conflictCount && (
-						<View className="p-6 flex-1 justify-center">
-							<OwlEmptyState
-								title={t('syncConflicts.noConflicts.title')}
-								description={t('syncConflicts.noConflicts.description')}
-							/>
-						</View>
+						<OwlEmptyState
+							title={t('syncConflicts.noConflicts.title')}
+							description={t('syncConflicts.noConflicts.description')}
+						/>
 					)}
 
 					{conflictCount > 0 && (

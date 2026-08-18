@@ -14,7 +14,8 @@ export function OwlEmptyState({ title, description, owl = 'empty' }: Props) {
 
 	return (
 		<View
-			className="gap-6 p-4 h-full flex-1 items-center justify-center"
+			// it seems flex-1 really fucks with the layout within sheets, for some reason
+			className="gap-6 p-4 items-center justify-center"
 			style={emptyContainerStyle}
 		>
 			<Owl owl={owl} />

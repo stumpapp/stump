@@ -18,6 +18,11 @@ export type NetworkProfile = {
 	url: string
 }
 
+// TODO: i don't love that the current methodolgy for dynamic urls is to
+// overwrite url in the provider, it kinda masks what is being done and isn't
+// immediately clear e.g. when inspecting this type. i can document the url
+// field here as such, but still don't love that. i'll sit on it.
+
 export type SavedServer = {
 	id: ServerID
 	name: string

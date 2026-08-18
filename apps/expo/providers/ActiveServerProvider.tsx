@@ -16,6 +16,11 @@ type ActiveServerProviderProps = {
 	activeServer: SavedServer
 }
 
+// TODO: i don't love that the current methodolgy for dynamic urls is to
+// overwrite url in the provider, it kinda masks what is being done and isn't
+// immediately clear e.g. when inspecting the active server type. i can document
+// the url field in the type as such, but still don't love it. i'll sit on it.
+//
 export function ActiveServerProvider({ children, activeServer }: ActiveServerProviderProps) {
 	const { ssid, permissionStatus } = useWifiSsid()
 

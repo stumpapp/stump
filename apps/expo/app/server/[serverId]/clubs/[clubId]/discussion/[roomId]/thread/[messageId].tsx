@@ -229,7 +229,7 @@ export default function ThreadScreen() {
 	const threadHeader = useMemo(() => {
 		if (!parentMessage) return undefined
 		return (
-			<View className="border-b border-edge">
+			<View className="border-edge border-b">
 				<Message
 					message={parentMessage}
 					currentMemberId={currentMemberId}

@@ -57,7 +57,7 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background">
-			<ScrollView className="flex-1 p-4">
+			<ScrollView className="p-4 flex-1">
 				<Text>TODO: Make me</Text>
 			</ScrollView>
 		</SafeAreaView>

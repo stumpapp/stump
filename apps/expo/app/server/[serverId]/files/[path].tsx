@@ -49,11 +49,11 @@ export default function Screen() {
 	const render = () => {
 		if (errorMessage) {
 			return (
-				<View className="flex-1 items-center justify-center px-4">
+				<View className="px-4 flex-1 items-center justify-center">
 					<Heading size="lg" className="text-center">
 						Something went wrong
 					</Heading>
-					<Text className="text-center text-base text-foreground-muted">{errorMessage}</Text>
+					<Text className="text-base text-foreground-muted text-center">{errorMessage}</Text>
 				</View>
 			)
 		} else {

@@ -127,6 +127,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 			['expo-localization'],
+			[
+				'expo-location',
+				{
+					locationWhenInUsePermission:
+						'Allow $(PRODUCT_NAME) to use your location in order to determine your Wi-Fi SSID for local server access.',
+				},
+			],
 			['./plugins/withGradle.ts'],
 			['./plugins/withNetworkSecurityConfig.ts'],
 			[

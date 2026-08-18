@@ -233,7 +233,7 @@ export default function RootLayout() {
 										/>
 
 										<Stack.Screen
-											name="server/[id]"
+											name="stump/[serverId]"
 											options={{
 												headerShown: false,
 												title: '',
@@ -245,14 +245,14 @@ export default function RootLayout() {
 											}}
 										/>
 										<Stack.Screen
-											name="opds/[id]"
+											name="opds/[serverId]"
 											options={{
 												headerShown: false,
 												animation: animationEnabled ? 'default' : 'none',
 											}}
 										/>
 										<Stack.Screen
-											name="opds-legacy/[id]"
+											name="opds-legacy/[serverId]"
 											options={{
 												headerShown: false,
 												animation: animationEnabled ? 'default' : 'none',

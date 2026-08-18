@@ -27,7 +27,7 @@ export default function NavigationGroup({
 	const { sdk } = useSDK()
 	const router = useRouter()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 
 	const resolveUrl_ = useResolveURL()
@@ -64,8 +64,8 @@ export default function NavigationGroup({
 							key={link.href}
 							onPress={() =>
 								router.push({
-									pathname: '/opds/[id]/feed/[url]',
-									params: { id: serverID, url: resolveUrl(link.href, sdk.rootURL) },
+									pathname: '/opds/[serverId]/feed/[url]',
+									params: { serverId, url: resolveUrl(link.href, sdk.rootURL) },
 								})
 							}
 						>

@@ -50,7 +50,7 @@ export default function Screen() {
 	const { t } = useTranslate()
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID, kind },
+		activeServer: { id: serverId, kind },
 	} = useActiveServer()
 	const { publication, url, progression } = usePublicationContext()
 	const { metadata, images, readingOrder, links, resources } = publication
@@ -61,7 +61,7 @@ export default function Screen() {
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const isDownloaded = useIsOPDSPublicationDownloaded(url, metadata, serverID)
+	const isDownloaded = useIsOPDSPublicationDownloaded(url, metadata, serverId)
 
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
@@ -94,7 +94,7 @@ export default function Screen() {
 		}
 	}, [sdk, firstPageURL])
 
-	const { downloadBook } = useOPDSDownload({ serverId: serverID })
+	const { downloadBook } = useOPDSDownload({ serverId: serverId })
 
 	const acquisitionLink = getAcquisitionLink(links)
 	const downloadURL = acquisitionLink?.href
@@ -162,11 +162,11 @@ export default function Screen() {
 			if (!resolvedURL) return
 
 			router.push({
-				pathname: '/opds/[id]/feed/[url]',
-				params: { url: resolvedURL, id: serverID },
+				pathname: '/opds/[serverId]/feed/[url]',
+				params: { url: resolvedURL, serverId },
 			})
 		},
-		[toResolvedURL, router, serverID],
+		[toResolvedURL, router, serverId],
 	)
 
 	const seriesLink = getFirstSubsectionLink(belongsToSeries?.links)
@@ -282,8 +282,8 @@ export default function Screen() {
 								roundness="full"
 								onPress={() =>
 									router.push({
-										pathname: `/opds/[id]/publication/read`,
-										params: { url, id: serverID },
+										pathname: `/opds/[serverId]/publication/read`,
+										params: { url, serverId },
 									})
 								}
 								disabled={!canStream || !isSupportedStream}

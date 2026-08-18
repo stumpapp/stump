@@ -24,7 +24,7 @@ import { useStumpServer } from '~/providers/StumpServerProvider'
 export default function Screen() {
 	const {
 		checkPermission,
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useStumpServer()
 	const { t } = useTranslate()
 
@@ -33,32 +33,32 @@ export default function Screen() {
 			id: 'books',
 			title: t('stumpServer.browse.books'),
 			icon: BookText,
-			to: '/server/[id]/books',
+			to: '/stump/[serverId]/books',
 		},
 		{
 			id: 'favorites',
 			title: t('stumpServer.browse.favorites'),
-			to: '/server/[id]/favorites',
+			to: '/stump/[serverId]/favorites',
 			icon: Heart,
 		},
 		{
 			id: 'files',
 			title: t('stumpServer.browse.files'),
-			to: '/server/[id]/files',
+			to: '/stump/[serverId]/files',
 			icon: FolderTree,
 			permission: UserPermission.FileExplorer,
 		},
 		{
 			id: 'libraries',
 			title: t('stumpServer.browse.libraries'),
-			to: '/server/[id]/libraries',
+			to: '/stump/[serverId]/libraries',
 			icon: LibraryBig,
 		},
 		{
 			id: 'series',
 			title: t('stumpServer.browse.series'),
 			icon: BookCopy,
-			to: '/server/[id]/series',
+			to: '/stump/[serverId]/series',
 		},
 
 		{
@@ -66,7 +66,7 @@ export default function Screen() {
 			title: t('stumpServer.browse.smartLists'),
 			icon: Rows3,
 			permission: UserPermission.AccessSmartList,
-			to: '/server/[id]/smart-lists',
+			to: '/stump/[serverId]/smart-lists',
 		},
 	]
 
@@ -88,7 +88,7 @@ export default function Screen() {
 								<Fragment key={item.id}>
 									<Pressable
 										// @ts-expect-error: String path
-										onPress={() => router.push({ pathname: item.to, params: { id: serverID } })}
+										onPress={() => router.push({ pathname: item.to, params: { serverId } })}
 									>
 										{({ pressed }) => (
 											<View

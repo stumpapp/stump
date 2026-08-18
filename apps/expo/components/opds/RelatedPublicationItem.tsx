@@ -18,7 +18,7 @@ type Props = {
 export function RelatedPublicationItem({ item }: Props) {
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const router = useRouter()
 
@@ -36,9 +36,9 @@ export function RelatedPublicationItem({ item }: Props) {
 		<Pressable
 			onPress={() =>
 				router.push({
-					pathname: '/opds/[id]/publication',
+					pathname: '/opds/[serverId]/publication',
 					params: {
-						id: serverID,
+						serverId,
 						url: resolvedPublicationURL,
 					},
 				})

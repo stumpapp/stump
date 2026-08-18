@@ -18,7 +18,7 @@ import { prefetchBookSearch } from '../../books/search[q]'
 
 export default function Screen() {
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { sdk } = useSDK()
 	const { t } = useTranslate()
@@ -43,13 +43,13 @@ export default function Screen() {
 
 	const navigateToQuery = useCallback(
 		(query: string) => {
-			trackSearch(query, serverID)
+			trackSearch(query, serverId)
 			router.push({
-				pathname: `/server/[id]/search/[query]`,
-				params: { id: serverID, query },
+				pathname: `/stump/[serverId]/search/[query]`,
+				params: { serverId, query },
 			})
 		},
-		[serverID, router, trackSearch],
+		[serverId, router, trackSearch],
 	)
 
 	const onSearch = useCallback(() => {

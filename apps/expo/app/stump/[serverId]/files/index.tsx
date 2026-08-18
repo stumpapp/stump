@@ -26,7 +26,7 @@ const query = graphql(`
 
 export default function Screen() {
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const {
 		data: {
@@ -53,9 +53,9 @@ export default function Screen() {
 						onPress={() =>
 							router.push({
 								// @ts-expect-error: String path
-								pathname: `/server/[id]/files/[path]?friendlyName=${item.name}`,
+								pathname: `/stump/[serverId]/files/[path]?friendlyName=${item.name}`,
 								params: {
-									id: serverID,
+									serverId,
 									path: item.path,
 								},
 							})

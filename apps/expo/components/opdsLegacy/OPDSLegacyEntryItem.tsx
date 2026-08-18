@@ -18,9 +18,9 @@ import { cn } from '~/lib/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
+import { useResolveURL } from '../../lib/opds/utils'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
-import { useResolveURL } from '../../lib/opds/utils'
 import { Icon, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
 import { OPDSLegacyEntryItemSheet } from './OPDSLegacyEntryItemSheet'
@@ -34,12 +34,12 @@ export default function OPDSEntry({ entry }: Props) {
 	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { itemWidth, thumbnailWidth, paddingHorizontal } = useLegacyOPDSEntrySize()
-	const { downloadBook, deleteBook } = useOPDSDownload({ serverId: serverID })
+	const { downloadBook, deleteBook } = useOPDSDownload({ serverId: serverId })
 
-	const isDownloaded = useIsLegacyOPDSEntryDownloaded(entry.id, serverID)
+	const isDownloaded = useIsLegacyOPDSEntryDownloaded(entry.id, serverId)
 	const sheetRef = useRef<TrueSheet>(null)
 
 	const assets = useFileExplorerAssets()
@@ -66,9 +66,9 @@ export default function OPDSEntry({ entry }: Props) {
 		const toUrl = navigateUrl || subsectionUrl
 		if (streamingData) {
 			router.push({
-				pathname: `/opds-legacy/[id]/read`,
+				pathname: `/opds-legacy/[serverId]/read`,
 				params: {
-					id: serverID,
+					serverId,
 					entryId: entry.id,
 					entryTitle: entry.title,
 					entryContent: entry.content,
@@ -78,9 +78,9 @@ export default function OPDSEntry({ entry }: Props) {
 			})
 		} else if (toUrl) {
 			router.push({
-				pathname: `/opds-legacy/[id]/feed/[url]`,
+				pathname: `/opds-legacy/[serverId]/feed/[url]`,
 				params: {
-					id: serverID,
+					serverId,
 					url: toUrl,
 				},
 			})

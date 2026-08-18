@@ -31,7 +31,7 @@ export default function PublicationGroup({
 	const hasGroupPagination = links?.some((link) => hasLinkRel(link, 'next'))
 	const router = useRouter()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { sdk } = useSDK()
 	const { width, height, horizontalGap } = useListItemSize()
@@ -77,9 +77,9 @@ export default function PublicationGroup({
 					onPress={() =>
 						selfURL
 							? router.push({
-									pathname: '/opds/[id]/publication',
+									pathname: '/opds/[serverId]/publication',
 									params: {
-										id: serverID,
+										serverId,
 										url: resolveUrl(selfURL),
 									},
 								})
@@ -114,7 +114,7 @@ export default function PublicationGroup({
 				</Pressable>
 			)
 		},
-		[router, serverID, sdk, width, height, resolveUrl],
+		[router, serverId, sdk, width, height, resolveUrl],
 	)
 
 	if (!publications.length && !renderEmpty) return null

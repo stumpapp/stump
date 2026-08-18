@@ -16,7 +16,7 @@ type Props = {
 export default function FeedSelfURL({ label = 'See more', url }: Props) {
 	const router = useRouter()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const colors = useColors()
 
@@ -25,9 +25,9 @@ export default function FeedSelfURL({ label = 'See more', url }: Props) {
 		<Pressable
 			onPress={() =>
 				router.push({
-					pathname: '/opds/[id]/feed/[url]',
+					pathname: '/opds/[serverId]/feed/[url]',
 					params: {
-						id: serverID,
+						serverId,
 						url,
 					},
 				})

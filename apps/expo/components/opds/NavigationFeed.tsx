@@ -36,7 +36,7 @@ export default function NavigationFeed({
 	const router = useRouter()
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 
 	const onEndReached = () => {
@@ -50,8 +50,8 @@ export default function NavigationFeed({
 			<Pressable
 				onPress={() =>
 					router.push({
-						pathname: '/opds/[id]/feed/[url]',
-						params: { id: serverID, url: resolveUrl(item.href, sdk.rootURL) },
+						pathname: '/opds/[serverId]/feed/[url]',
+						params: { serverId, url: resolveUrl(item.href, sdk.rootURL) },
 					})
 				}
 			>

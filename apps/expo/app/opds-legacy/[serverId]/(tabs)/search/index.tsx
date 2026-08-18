@@ -13,7 +13,7 @@ import { useSearchStore } from '~/stores/search'
 
 export default function Screen() {
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { searchDoc } = useOPDSLegacyFeedContext()
 
@@ -33,13 +33,13 @@ export default function Screen() {
 
 	const navigateToQuery = useCallback(
 		(query: string) => {
-			trackSearch(query, serverID)
+			trackSearch(query, serverId)
 			router.push({
-				pathname: `/opds-legacy/[id]/search/[query]`,
-				params: { id: serverID, query },
+				pathname: `/opds-legacy/[serverId]/search/[query]`,
+				params: { serverId, query },
 			})
 		},
-		[serverID, router, trackSearch],
+		[serverId, router, trackSearch],
 	)
 
 	const onSearch = useCallback(() => {

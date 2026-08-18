@@ -49,7 +49,7 @@ export default function SeriesListItem({ layout, series, onPress }: Props) {
 	const sharedProps = {
 		uri: data.thumbnail.url,
 		title: data.resolvedName,
-		onPress: onPress ?? (() => router.navigate(`/server/${serverID}/series/${data.id}`)),
+		onPress: onPress ?? (() => router.navigate(`/stump/${serverID}/series/${data.id}`)),
 		placeholderData: data.thumbnail.metadata,
 		originalDimensions:
 			data.thumbnail.width && data.thumbnail.height

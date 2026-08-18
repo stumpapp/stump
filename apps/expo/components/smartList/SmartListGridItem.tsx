@@ -93,7 +93,7 @@ export default function SmartListGridItem({ smartList, getLayoutNumber }: Props)
 	const data = useFragment(fragment, smartList)
 
 	const title = data.name
-	const href: Href = `/server/${serverID}/smart-lists/${data.id}`
+	const href: Href = `/stump/${serverID}/smart-lists/${data.id}`
 
 	const thumbnailData = data.books.map((b) => b.thumbnail)
 

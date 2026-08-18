@@ -265,7 +265,7 @@ export default function BookMenu({ data }: Props) {
 
 						<Stack.Toolbar.MenuAction
 							icon="arrow.up.right"
-							onPress={() => router.push(`/server/${book.id}/libraries/${book.library.id}`)}
+							onPress={() => router.push(`/stump/${book.id}/libraries/${book.library.id}`)}
 							subtitle={book.library.name}
 						>
 							{t('bookActions.goToLibrary')}
@@ -273,7 +273,7 @@ export default function BookMenu({ data }: Props) {
 
 						<Stack.Toolbar.MenuAction
 							icon="arrow.up.right"
-							onPress={() => router.push(`/server/${book.id}/series/${book.series.id}`)}
+							onPress={() => router.push(`/stump/${book.id}/series/${book.series.id}`)}
 							subtitle={book.series.resolvedName}
 						>
 							{t('bookActions.goToSeries')}

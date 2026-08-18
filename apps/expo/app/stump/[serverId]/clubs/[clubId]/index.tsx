@@ -84,7 +84,7 @@ export default function Screen() {
 			title: club.name,
 			headerRight: isAdmin
 				? () => (
-						<Pressable onPress={() => router.push(`/server/${serverID}/clubs/${clubId}/settings`)}>
+						<Pressable onPress={() => router.push(`/stump/${serverID}/clubs/${clubId}/settings`)}>
 							{SettingsIcon}
 						</Pressable>
 					)
@@ -175,7 +175,7 @@ export default function Screen() {
 										size="sm"
 										roundness="full"
 										onPress={() =>
-											router.push(`/server/${serverID}/books/${club.currentBook!.entity!.id}`)
+											router.push(`/stump/${serverID}/books/${club.currentBook!.entity!.id}`)
 										}
 									>
 										<Text>

@@ -66,7 +66,7 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 		if (book.url) {
 			Linking.openURL(book.url)
 		} else if (book.entity?.id) {
-			router.navigate(`/server/${serverId}/books/${book.entity.id}`)
+			router.navigate(`/stump/${serverId}/books/${book.entity.id}`)
 		}
 	}
 

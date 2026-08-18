@@ -33,7 +33,7 @@ export default function Layout() {
 					headerLargeTitleStyle: { fontSize: 30 },
 					headerRight:
 						canCreateClubs && Platform.OS === 'android'
-							? () => <Link href={`/server/${serverID}/clubs/create`}>{PlusIcon}</Link>
+							? () => <Link href={`/stump/${serverID}/clubs/create`}>{PlusIcon}</Link>
 							: undefined,
 				}}
 			/>

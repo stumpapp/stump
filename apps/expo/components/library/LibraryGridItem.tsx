@@ -46,7 +46,7 @@ export default function LibraryGridItem({ library, getLayoutNumber }: Props) {
 	const data = useFragment(fragment, library)
 
 	const title = data.name
-	const href = `/server/${serverID}/libraries/${data.id}`
+	const href = `/stump/${serverID}/libraries/${data.id}`
 
 	const thumbnailData = data.series.map((s) => s.thumbnail)
 

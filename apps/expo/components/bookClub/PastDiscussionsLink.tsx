@@ -99,7 +99,7 @@ export function PastDiscussionsLink({ data }: Props) {
 	// the case would basically be an empty card...
 	return (
 		<Pressable
-			onPress={() => router.push(`/server/${serverID}/clubs/${clubId}/archive`)}
+			onPress={() => router.push(`/stump/${serverID}/clubs/${clubId}/archive`)}
 			className="w-1/3 shrink-0 tablet:w-[120px]"
 			disabled={isLinkDisabled}
 		>

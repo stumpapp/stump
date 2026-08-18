@@ -90,7 +90,7 @@ function OnDeckBookItem({ book }: Props) {
 	)
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<ThumbnailImage

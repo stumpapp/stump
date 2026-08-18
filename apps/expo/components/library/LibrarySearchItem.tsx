@@ -63,7 +63,7 @@ export default function LibrarySearchItem({ library }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.navigate(`/server/${serverID}/libraries/${data.id}`)}
+			onPress={() => router.navigate(`/stump/${serverID}/libraries/${data.id}`)}
 			style={{
 				width: width * 0.75,
 			}}

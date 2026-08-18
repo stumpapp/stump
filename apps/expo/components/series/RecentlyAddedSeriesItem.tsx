@@ -66,7 +66,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	const thumbnailData = [data.thumbnail, ...data.media.map((m) => m.thumbnail)]
 
 	return (
-		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>
+		<Pressable onPress={() => router.push(`/stump/${serverID}/series/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<SeriesStackedThumbnails width={160} thumbnailData={thumbnailData} />

@@ -131,7 +131,7 @@ export default function SmartListBookItem({ book }: Props) {
 			: undefined
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}>
 			<View
 				className={cn('gap-2 relative items-center', {
 					'gap-4 flex-row': layout === 'list',

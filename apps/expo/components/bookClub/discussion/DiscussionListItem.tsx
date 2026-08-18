@@ -34,7 +34,7 @@ export default function DiscussionListItem({ data }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.push(`/server/${serverID}/clubs/${clubId}/discussion/${discussion.id}`)}
+			onPress={() => router.push(`/stump/${serverID}/clubs/${clubId}/discussion/${discussion.id}`)}
 			className="p-3 flex-row items-center justify-between"
 		>
 			<View className="gap-2 flex flex-1 flex-row items-center">

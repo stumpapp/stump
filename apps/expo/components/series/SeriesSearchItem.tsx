@@ -67,7 +67,7 @@ export default function SeriesSearchItem({ series }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}
+			onPress={() => router.navigate(`/stump/${serverID}/series/${data.id}`)}
 			style={{
 				width: width * 0.75,
 			}}

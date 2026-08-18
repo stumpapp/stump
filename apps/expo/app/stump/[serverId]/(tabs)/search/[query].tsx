@@ -160,7 +160,7 @@ export default function Screen() {
 							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
 								<Heading size="default">Books</Heading>
 								{getHasMore(bookResults?.media.pageInfo) && (
-									<Link href={`/server/${serverID}/books/search[q]?q=${query}`}>
+									<Link href={`/stump/${serverID}/books/search[q]?q=${query}`}>
 										<Text>See More</Text>
 									</Link>
 								)}
@@ -193,7 +193,7 @@ export default function Screen() {
 							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
 								<Heading size="default">Series</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
-									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
+									<Link href={`/stump/${serverID}/books/search[q]?q=${searchQuery}`}>
 										See More
 									</Link>
 								)} */}
@@ -226,7 +226,7 @@ export default function Screen() {
 							<View className="mb-1 px-4 tablet:px-7 flex flex-row items-center justify-between">
 								<Heading size="default">Libraries</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
-									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
+									<Link href={`/stump/${serverID}/books/search[q]?q=${searchQuery}`}>
 										See More
 									</Link>
 								)} */}

@@ -46,7 +46,7 @@ export default function Screen() {
 	useEffect(() => {
 		if (pendingInvitesCount > 0 && Platform.OS === 'android') {
 			navigation.setOptions({
-				headerLeft: () => <Link href={`/server/${serverID}/clubs/invites`}>{InvitationsIcon}</Link>,
+				headerLeft: () => <Link href={`/stump/${serverID}/clubs/invites`}>{InvitationsIcon}</Link>,
 			})
 		}
 	}, [navigation, serverID, pendingInvitesCount])
@@ -58,7 +58,7 @@ export default function Screen() {
 			{pendingInvitesCount > 0 && Platform.OS === 'ios' && (
 				<Stack.Toolbar placement="left">
 					<Stack.Toolbar.Button
-						onPress={() => router.navigate(`/server/${serverID}/clubs/invites`)}
+						onPress={() => router.navigate(`/stump/${serverID}/clubs/invites`)}
 						icon="tray.badge.fill"
 					>
 						<Stack.Toolbar.Badge>{String(pendingInvitesCount)}</Stack.Toolbar.Badge>
@@ -69,7 +69,7 @@ export default function Screen() {
 			{canCreateClubs && Platform.OS === 'ios' && (
 				<Stack.Toolbar placement="right">
 					<Stack.Toolbar.Button
-						onPress={() => router.navigate(`/server/${serverID}/clubs/create`)}
+						onPress={() => router.navigate(`/stump/${serverID}/clubs/create`)}
 						icon="plus"
 					/>
 				</Stack.Toolbar>

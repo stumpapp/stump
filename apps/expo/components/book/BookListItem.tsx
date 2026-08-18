@@ -66,7 +66,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 	const sharedProps = {
 		uri: data.thumbnail.url,
 		title: data.resolvedName,
-		onPress: onPress ?? (() => router.navigate(`/server/${serverID}/books/${data.id}`)),
+		onPress: onPress ?? (() => router.navigate(`/stump/${serverID}/books/${data.id}`)),
 		placeholderData: data.thumbnail.metadata,
 		originalDimensions:
 			data.thumbnail.width && data.thumbnail.height

@@ -77,7 +77,7 @@ export function BookClubCard({ club }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.push(`/server/${serverID}/clubs/${data.id}`)}
+			onPress={() => router.push(`/stump/${serverID}/clubs/${data.id}`)}
 			className="w-full"
 		>
 			<Card>

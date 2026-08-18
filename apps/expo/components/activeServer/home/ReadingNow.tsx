@@ -226,7 +226,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		const filterString = JSON.stringify(filter)
 		router.push({
 			// @ts-expect-error: String path
-			pathname: `/server/${serverID}/books?initialFilters=${filterString}`,
+			pathname: `/stump/${serverID}/books?initialFilters=${filterString}`,
 		})
 	}
 
@@ -341,7 +341,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 	return (
 		<View className="gap-4 flex flex-row">
-			<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+			<Pressable onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}>
 				<BlurTargetView ref={blurTargetRef}>
 					<ThumbnailImage
 						source={{

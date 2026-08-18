@@ -177,7 +177,7 @@ export default function Screen() {
 	}
 
 	const handleThreadPress = (message: MessageData) =>
-		router.push(`/server/${serverID}/clubs/${clubId}/discussion/${roomId}/thread/${message.id}`)
+		router.push(`/stump/${serverID}/clubs/${clubId}/discussion/${roomId}/thread/${message.id}`)
 
 	const handleLoadMore = () => {
 		if (hasNextPage && !isFetchingNextPage) {

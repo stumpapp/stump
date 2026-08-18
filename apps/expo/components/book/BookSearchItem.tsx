@@ -67,7 +67,7 @@ export default function BookSearchItem({ book }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}
+			onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}
 			style={{
 				width: width * 0.75,
 			}}

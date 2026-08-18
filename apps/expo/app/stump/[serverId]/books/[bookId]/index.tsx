@@ -266,7 +266,7 @@ export default function Screen() {
 		const filterString = JSON.stringify(filter)
 		router.push({
 			// @ts-expect-error: String path
-			pathname: `/server/${serverID}/books?initialFilters=${filterString}`,
+			pathname: `/stump/${serverID}/books?initialFilters=${filterString}`,
 		})
 	}
 
@@ -363,7 +363,7 @@ export default function Screen() {
 								onPress={() =>
 									router.push({
 										// @ts-expect-error: String path
-										pathname: `/server/${serverID}/books/${bookId}/read`,
+										pathname: `/stump/${serverID}/books/${bookId}/read`,
 									})
 								}
 								variant="brand"

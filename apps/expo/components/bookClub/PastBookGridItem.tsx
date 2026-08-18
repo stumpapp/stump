@@ -71,7 +71,7 @@ export function PastBookGridItem({ data }: Props) {
 	return (
 		<Pressable
 			onPress={() =>
-				router.navigate(`/server/${serverID}/clubs/${clubId}/archive/past-book/${book.id}`)
+				router.navigate(`/stump/${serverID}/clubs/${clubId}/archive/past-book/${book.id}`)
 			}
 		>
 			{({ pressed }) => (

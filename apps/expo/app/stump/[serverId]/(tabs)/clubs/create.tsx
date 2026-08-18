@@ -48,7 +48,7 @@ export default function Screen() {
 			})
 
 			if (result.createBookClub?.id) {
-				router.replace(`/server/${serverID}/clubs/${result.createBookClub.id}`)
+				router.replace(`/stump/${serverID}/clubs/${result.createBookClub.id}`)
 			}
 		} catch (error) {
 			toast.error('Failed to create club', {

@@ -50,7 +50,7 @@ function HorizontalBookListItem({ book }: Props) {
 	const { url: uri, metadata: placeholderData, ...originalDimensions } = data.thumbnail
 
 	return (
-		<Pressable onPress={() => router.push(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.push(`/stump/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<ThumbnailImage

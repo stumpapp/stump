@@ -171,7 +171,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 						{t(getActionsKey('attemptSync'))}
 					</Stack.Toolbar.MenuAction>
 
-					{syncConflictsCount > -1 && (
+					{syncConflictsCount > 0 && (
 						<Stack.Toolbar.MenuAction
 							icon="exclamationmark.circle"
 							onPress={() => TrueSheet.present(SYNC_CONFLICTS_SHEET_NAME)}
@@ -214,6 +214,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 				sortConfig={sortConfig}
 				downloadsCount={downloadsCount}
 				failedDownloadsCount={failedDownloadsCount}
+				syncConflictsCount={syncConflictsCount}
 				isCuratedDownloadsEnabled={isCuratedDownloadsEnabled}
 				onSortSelection={handleSortSelection}
 				onSelect={() => setIsSelecting(true)}
@@ -231,6 +232,7 @@ type AndroidMenuProps = {
 	sortConfig: { option: DownloadSortOption; direction: 'ASC' | 'DESC' }
 	downloadsCount: number
 	failedDownloadsCount: number
+	syncConflictsCount: number
 	isCuratedDownloadsEnabled: boolean
 	onSortSelection: (option: DownloadSortOption) => void
 	onSelect: () => void
@@ -244,6 +246,7 @@ function AndroidSortAndActionsMenu({
 	sortConfig,
 	downloadsCount,
 	failedDownloadsCount,
+	syncConflictsCount,
 	isCuratedDownloadsEnabled,
 	onSortSelection,
 	onSelect,
@@ -381,19 +384,19 @@ function AndroidSortAndActionsMenu({
 					</View>
 				</DropdownMenuItem>
 
-				<DropdownMenuItem
-					onPress={() => {
-						// TODO(conflicts): launch sync conflicts sheet
-					}}
-					className="text-foreground"
-				>
-					<View className="gap-4 flex w-full flex-row items-center justify-between">
-						<View className="gap-4 flex flex-row items-center">
-							<Icon as={CircleAlert} size={20} className="text-foreground-muted ml-auto" />
-							<Text className="text-lg">{t(getActionsKey('syncConflicts'))}</Text>
+				{syncConflictsCount > 0 && (
+					<DropdownMenuItem
+						onPress={() => TrueSheet.present(SYNC_CONFLICTS_SHEET_NAME)}
+						className="text-foreground"
+					>
+						<View className="gap-4 flex w-full flex-row items-center justify-between">
+							<View className="gap-4 flex flex-row items-center">
+								<Icon as={CircleAlert} size={20} className="text-foreground-muted ml-auto" />
+								<Text className="text-lg">{t(getActionsKey('syncConflicts'))}</Text>
+							</View>
 						</View>
-					</View>
-				</DropdownMenuItem>
+					</DropdownMenuItem>
+				)}
 
 				<DropdownMenuItem onPress={onToggleCurated} className="text-foreground">
 					<View className="gap-4 flex w-full flex-row items-center justify-between">

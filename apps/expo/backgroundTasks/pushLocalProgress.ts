@@ -75,11 +75,7 @@ const executeSingleServerSync = async (
 
 	let failureCount = 0
 
-	// Note: I didn't do a transaction here because each iteration involves an external API call
 	for (const record of progressRecords) {
-		// FIXME: this is easiest for now, but sequentially resetting and then pushing progress is more error-prone,
-		// and it might just be better to have the mutation intake the reset flag to handle it in a single txn. i will
-		// prolly come back to this before letting it merge to do just that
 		try {
 			const elapsedDelta = record.pendingReset
 				? (record.elapsedSeconds ?? 0)

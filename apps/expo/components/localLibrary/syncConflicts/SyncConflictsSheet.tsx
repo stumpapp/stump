@@ -1,11 +1,13 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { parseGraphQLDateTime } from '@stump/client'
+import { extractErrorMessage } from '@stump/graphql'
 import { useMutation } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { toast } from 'sonner-native'
 
 import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
@@ -16,7 +18,7 @@ import { SheetBackDetection } from '../../SheetBackDetection'
 import { Badge, Heading, Text } from '../../ui'
 import { useDownloadsState } from '../store'
 import { ConflictCarousel } from './ConflictCarousel'
-import { AcceptedProgressionData, ConflictRecord } from './types'
+import { AcceptedProgressionData } from './types'
 
 export const SYNC_CONFLICTS_SHEET_NAME = 'syncConflictsSheet'
 
@@ -65,7 +67,6 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 		// TODO: loading state to show updating background etc, otherwise might flash
 		// stale data after pull finishes
 		// isPending: isPullingProgression,
-		// error: pullError, TODO: handle me plz
 	} = useMutation({
 		mutationFn: () => {
 			const serverIds = [
@@ -74,6 +75,10 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 			return pullProgress({ forServers: serverIds, suppressAlerts: true })
 		},
 		throwOnError: false,
+		onError: (error) => {
+			const message = extractErrorMessage(error)
+			toast.error(t('syncConflicts.pullError', { message }))
+		},
 	})
 
 	const serverIdsToSyncUponClose = useRef(new Set<string>())
@@ -157,7 +162,6 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 	return (
 		<>
 			<TrueSheet
-				// i find it irritating i need this key for stuff to show up!
 				name={SYNC_CONFLICTS_SHEET_NAME}
 				ref={ref}
 				detents={[1]}
@@ -197,8 +201,7 @@ export function SyncConflictsSheet({ onDismiss }: Props) {
 
 					{conflictCount > 0 && (
 						<ConflictCarousel
-							// cast is fine, we in asserted read_progress exists thru query join and filter
-							records={(conflictingRecords ?? []) as ConflictRecord[]}
+							records={conflictingRecords ?? []}
 							onAcceptBoth={onAcceptBoth}
 							onApplySyncedSessionData={onApplySyncedSessionData}
 						/>

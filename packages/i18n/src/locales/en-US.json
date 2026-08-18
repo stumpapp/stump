@@ -3179,7 +3179,8 @@
 				"local": "Accept Local",
 				"remote": "Accept Remote",
 				"both": "Accept Both"
-			}
+			},
+			"pullError": "Failed to pull remote progress"
 		},
 		"search": {
 			"label": "Search This Server",

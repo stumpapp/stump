@@ -59,7 +59,7 @@ pub struct Model {
 pub struct AuthUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
-	pub avatar: Option<ImageRef>,
+	pub avatar: ImageRef,
 	pub username: String,
 	pub is_server_owner: bool,
 	pub is_locked: bool,
@@ -112,17 +112,14 @@ impl FromQueryResult for AuthUser {
 					.or_else(user_preferences::Model::default_navigation_arrangement),
 				..p
 			});
-		let avatar: Option<ImageRef> = if avatar_path.is_some() {
-			Some(ImageRef {
-				// Note: This will never get populated at the db-level, the API will
-				// inject based on the service details
-				url: String::default(),
-				metadata: avatar_meta,
-				last_modified: avatar_updated_at,
-				..Default::default()
-			})
-		} else {
-			None
+
+		let avatar = ImageRef {
+			// Note: This will never get populated at the db-level, the API will
+			// inject based on the service details
+			url: String::default(),
+			metadata: avatar_meta,
+			last_modified: avatar_updated_at,
+			..Default::default()
 		};
 
 		Ok(AuthUser {
@@ -221,22 +218,20 @@ impl FromQueryResult for LoginUser {
 
 impl From<LoginUser> for AuthUser {
 	fn from(user: LoginUser) -> Self {
-		let has_avatar = user.avatar_path.is_some();
-
 		AuthUser {
 			id: user.id,
 			avatar_path: user.avatar_path,
-			avatar: if has_avatar {
-				Some(ImageRef {
-					// Note: This will never get populated at the db-level, the API will
-					// inject based on the service details
-					url: String::default(),
-					metadata: user.avatar_meta,
-					last_modified: user.avatar_updated_at,
-					..Default::default()
-				})
-			} else {
-				None
+			// even if a user has no avatar, we still provide an empty ImageRef so that clients can still understand
+			// where to fetch the avatar from. they will need to properly handle the not-found case and
+			// what not but that feels acceptable for now. the alternative down the road could be to option `url`
+			// but i hate that for things like media and other consumers of ImageRef
+			avatar: ImageRef {
+				// Note: This will never get populated at the db-level, the API will
+				// inject based on the service details
+				url: String::default(),
+				metadata: user.avatar_meta,
+				last_modified: user.avatar_updated_at,
+				..Default::default()
 			},
 			username: user.username,
 			is_server_owner: user.is_server_owner,

@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use models::entity::user::AuthUser;
+use models::{entity::user::AuthUser, shared::image::ImageRef};
 use sea_orm::{DatabaseBackend::Sqlite, MockDatabase, ModelTrait};
 use std::path::PathBuf;
 
@@ -21,7 +21,7 @@ pub fn get_default_user() -> AuthUser {
 		id: "42".to_string(),
 		username: "test".to_string(),
 		avatar_path: None,
-		avatar: None,
+		avatar: ImageRef::default(),
 		is_server_owner: true,
 		is_locked: false,
 		permissions: vec![],

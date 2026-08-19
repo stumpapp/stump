@@ -1,6 +1,7 @@
 import { graphql } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { DownloadOptions, File } from 'expo-file-system'
+import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 
 import { cacheDirectory, serverPath } from '~/lib/filesystem'
@@ -40,7 +41,13 @@ async function downloadImage(
 	return destination
 }
 
-async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvatar | null> {
+type FetchedStumpAvatar =
+	| ServerAvatar
+	| {
+			removeAvatar: true
+	  }
+
+async function fetchStumpAvatar(serverId: string, api: Api): Promise<FetchedStumpAvatar | null> {
 	const {
 		me: { avatar },
 	} = await api.execute(avatarQuery)
@@ -56,11 +63,17 @@ async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvata
 			uri: file.uri,
 			metadata: avatar.metadata,
 		}
-	} catch (e) {
-		// if an avatar doesn't actually exist, e.g. it was deleted, the server will 404. downloadImage internally
-		// uses File.downloadFileAsync which will throw if it gets any non-2xx code
-		console.error('Failed to download avatar', e)
-		return null
+	} catch (error) {
+		if (error instanceof Error && error.message.includes('response has status 404')) {
+			// if an avatar doesn't actually exist, e.g. it was deleted, the server will 404. downloadImage internally
+			// uses File.downloadFileAsync which will throw if it gets any non-2xx code. unfortunately ofc, for the
+			// life of me i could not find an actual exported error class or anything to check against,
+			// so using the message >:(
+			return { removeAvatar: true }
+		} else {
+			console.error('Failed to download avatar', error)
+			return null
+		}
 	}
 }
 
@@ -122,7 +135,7 @@ async function identifyServer(server: SavedServer, api: Api): Promise<KnownServe
 }
 
 export async function pullServerAvatar(server: SavedServer, api: Api) {
-	let avatarData: ServerAvatar | null = null
+	let avatarData: (ServerAvatar | FetchedStumpAvatar) | null = null
 
 	// when server is stump, we just pull an avatar if the user has one uploaded
 	if (server.kind === 'stump') {
@@ -150,12 +163,10 @@ export async function pullServerAvatar(server: SavedServer, api: Api) {
 			)
 		})
 		.otherwise(() => null)
+	const shouldUpdate = avatar || Boolean(getProperty(avatarData, 'removeAvatar'))
 
 	const editServer = useSavedServerStore.getState().editServer
-	// TODO: so if we gate on truthy here, we effectively rm ability to auto-unset
-	// i think fine for now, but may become a problem if e.g. we unset an avatar
-	// future aaron problem
-	if (avatar) {
+	if (shouldUpdate) {
 		editServer(server.id, {
 			...server,
 			avatar,

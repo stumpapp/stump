@@ -52,15 +52,13 @@ use super::host::HostExtractor;
 pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
 fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
-	if let Some(avatar) = user.avatar {
-		user.avatar = Some(ImageRef {
-			url: service.cache_friendly_url(
-				format!("/api/v2/users/{}/avatar", user.id),
-				&avatar.last_modified,
-			),
-			..avatar
-		})
-	}
+	user.avatar = ImageRef {
+		url: service.cache_friendly_url(
+			format!("/api/v2/users/{}/avatar", user.id),
+			&user.avatar.last_modified,
+		),
+		..user.avatar
+	};
 	user
 }
 

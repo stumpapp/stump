@@ -233,6 +233,24 @@ export default function RootLayout() {
 										/>
 
 										<Stack.Screen
+											name="create-server"
+											options={{
+												headerShown: false,
+												presentation: 'formSheet',
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
+
+										<Stack.Screen
+											name="edit-server/[serverId]"
+											options={{
+												headerShown: false,
+												presentation: 'formSheet',
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
+
+										<Stack.Screen
 											name="stump/[serverId]"
 											options={{
 												headerShown: false,

@@ -1,4 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { useRouter } from 'expo-router'
 import { Plus } from 'lucide-react-native'
 import { useCallback, useRef, useState } from 'react'
 import { View } from 'react-native'
@@ -32,10 +33,13 @@ export default function AddServerDialog() {
 
 	const [isOpen, setIsOpen] = useState(false)
 
+	const router = useRouter()
+
 	return (
 		<View>
 			<Pressable
-				onPress={() => ref.current?.present()}
+				// onPress={() => ref.current?.present()}
+				onPress={() => router.push('/create-server')}
 				style={
 					IS_IOS_26_PLUS
 						? {

@@ -14,6 +14,8 @@ type Props = {
 	activeServer?: SavedServer
 } & TrueSheetProps
 
+// TODO: i kinda don't love the nested full page sheet look, e.g. settings -> network settings
+// could maybe just make this a route in the stack and lauch _other_ sheets only at one level
 export function ServerSettingsSheet({ activeServer, ...sheetProps }: Props) {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()

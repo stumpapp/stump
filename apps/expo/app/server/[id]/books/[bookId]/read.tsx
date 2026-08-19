@@ -1,6 +1,7 @@
 import {
 	ARCHIVE_EXTENSION,
 	EBOOK_EXTENSION,
+	parseGraphQLDateTime,
 	PDF_EXTENSION,
 	useGraphQLMutation,
 	useSDK,
@@ -26,13 +27,14 @@ import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
 import { db, downloadedFiles } from '~/db'
 import { booksDirectory } from '~/lib/filesystem'
 import {
+	useReadingTimer,
 	useSyncOnlineToOfflineAnnotations,
 	useSyncOnlineToOfflineBookmarks,
 	useSyncOnlineToOfflineProgress,
 } from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
 import { usePreferencesStore, useReaderStore } from '~/stores'
-import { useBookPreferences, useBookTimer } from '~/stores/reader'
+import { useBookPreferences } from '~/stores/reader'
 
 export const query = graphql(`
 	query BookReadScreen($id: ID!) {
@@ -171,8 +173,15 @@ export const query = graphql(`
 const mutation = graphql(`
 	mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
-			__typename
+			id
+			updatedAt
 		}
+	}
+`)
+
+const resetElapsedSecondsMutation = graphql(`
+	mutation ResetElapsedSeconds($id: ID!) {
+		resetElapsedSeconds(id: $id)
 	}
 `)
 
@@ -305,19 +314,18 @@ export default function Screen() {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
-	const timer = useBookTimer(book?.id || '', {
-		initial: book?.readProgress?.elapsedSeconds,
+
+	const timer = useReadingTimer({
+		databaseSeconds: book.readProgress?.elapsedSeconds,
 		enabled: trackElapsedTime,
 	})
 
-	// tracks the elapsed total at the time of the last successful sync so we can
-	// send a delta
-	const lastSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
 	// tracks the last synced locator so that on exit we can send a final update so timer progression
 	// is not lost if the page did not change
-	const lastSyncedLocator = useRef(
+	const lastSyncedReadiumLocator = useRef(
 		book.readProgress?.locator ? intoReadiumLocator(book.readProgress.locator) : undefined,
 	)
+	const lastSyncedImageReaderPage = useRef(book.readProgress?.page)
 
 	const { syncProgress } = useSyncOnlineToOfflineProgress({ bookId: book.id, serverId })
 
@@ -327,27 +335,33 @@ export default function Screen() {
 		onError: (error) => {
 			console.error('Failed to update read progress:', error)
 		},
-		onSuccess: (_, { input: onlineProgress }) => {
-			lastSyncedElapsedRef.current = timer.getCurrentTime()
+		onSuccess: (data, { input: onlineProgress }) => {
 			if (onlineProgress.epub?.locator?.readium) {
-				lastSyncedLocator.current = intoReadiumLocator({
+				lastSyncedReadiumLocator.current = intoReadiumLocator({
 					...onlineProgress.epub.locator.readium,
 					chapterTitle: onlineProgress.epub.locator.readium.chapterTitle || '',
 					type: onlineProgress.epub.locator.readium.type || 'application/xhtml+xml',
 				})
 			}
+			if (onlineProgress.paged?.page) {
+				lastSyncedImageReaderPage.current = onlineProgress.paged.page
+			}
+
 			// invalidate but do not refetch
 			queryClient.invalidateQueries({ queryKey: ['bookById', bookId], exact: false })
 			queryClient.invalidateQueries({ queryKey: ['readBook', bookId], exact: false })
 			// TODO: Consider a preference to disable online-to-offline sync?
-			syncProgress(onlineProgress)
+			syncProgress(onlineProgress, {
+				updatedAt: parseGraphQLDateTime(data.updateMediaProgress.updatedAt),
+				sessionId: data.updateMediaProgress.id,
+			})
 		},
 	})
 
 	const onPageChanged = useCallback(
 		(page: number) => {
-			const totalSeconds = timer.getCurrentTime()
-			const delta = Math.max(0, totalSeconds - lastSyncedElapsedRef.current)
+			const delta = timer.popDeltaSeconds()
+
 			updateProgress({
 				id: book.id,
 				input: {
@@ -363,8 +377,8 @@ export default function Screen() {
 
 	const onLocationChanged = useCallback(
 		(locator: ReadiumLocator, percentage: number) => {
-			const totalSeconds = timer.getCurrentTime()
-			const delta = Math.max(0, totalSeconds - lastSyncedElapsedRef.current)
+			const delta = timer.popDeltaSeconds()
+
 			updateProgress({
 				id: book.id,
 				input: {
@@ -391,8 +405,8 @@ export default function Screen() {
 
 	const onReachedEnd = useCallback(
 		(locator: ReadiumLocator) => {
-			const totalSeconds = timer.getCurrentTime()
-			const delta = Math.max(0, totalSeconds - lastSyncedElapsedRef.current)
+			const delta = timer.popDeltaSeconds()
+
 			updateProgress({
 				id: book.id,
 				input: {
@@ -412,20 +426,20 @@ export default function Screen() {
 					},
 				},
 			})
-			// TODO: in order for subsequent reads to track time we need to remove the local timer, however
-			// i don't think we can just remove it here since the reader is still mounted. there will need to
-			// be a more thoughtful approach, and i don't have the time to consider it now. my immediate ideas:
-			// - when entering book overview, delete local timers if book is completed (don't _love_ effect-based approach but what ya gonna do)
-			// - add an explicit reset timer action, defers to user which isn't a solve imo but something that should
-			//   exist regardless imo
-			// - add a didReachEnd ref that resets on non-end progression but set true here, then in cleanup of effect
-			//   delete if true <-- prolly the best? still kinda effect-based but at least directly tied to reader
-			// - just reset the timer before navigating to read.tsx from overview if rereading a completed book (ty arklaum for idea)
-			// - just use non-persisted timers for online reading, and only persist for offline. although even then it might
-			//   not be needed since secs is tracked in sqlite too
 		},
 		[book.id, timer, updateProgress],
 	)
+
+	const { mutate: resetElapsedSeconds } = useGraphQLMutation(resetElapsedSecondsMutation, {
+		onError: (error) => {
+			console.error('Failed to reset elapsed seconds:', error)
+		},
+		onSuccess: timer.clearTotalSeconds,
+	})
+
+	const resetTimer = useCallback(() => {
+		resetElapsedSeconds({ id: book.id })
+	}, [resetElapsedSeconds, book.id])
 
 	const { syncCreate: syncBookmarkCreate, syncDelete: syncBookmarkDelete } =
 		useSyncOnlineToOfflineBookmarks({
@@ -586,11 +600,15 @@ export default function Screen() {
 
 	const onExitReader = useCallback(async () => {
 		// update progress first so refetch picks up changes
-		if (lastSyncedLocator.current) {
+		if (lastSyncedReadiumLocator.current) {
 			onLocationChanged(
-				lastSyncedLocator.current,
-				lastSyncedLocator.current.locations?.totalProgression ?? 0,
+				lastSyncedReadiumLocator.current,
+				lastSyncedReadiumLocator.current.locations?.totalProgression ?? 0,
 			)
+		}
+
+		if (lastSyncedImageReaderPage.current) {
+			onPageChanged(lastSyncedImageReaderPage.current)
 		}
 
 		await Promise.all([
@@ -602,7 +620,7 @@ export default function Screen() {
 			queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
 			queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
 		])
-	}, [bookId, onLocationChanged, queryClient])
+	}, [bookId, onLocationChanged, onPageChanged, queryClient])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -678,6 +696,7 @@ export default function Screen() {
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
 				onPageChanged={onPageChanged}
 				timer={timer}
+				resetTimer={resetTimer}
 				nextInSeries={nextInSeries}
 				serverId={serverId}
 				requestHeaders={requestHeaders}

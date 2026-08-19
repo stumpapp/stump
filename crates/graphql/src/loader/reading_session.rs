@@ -93,6 +93,7 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionLoader {
 						key.clone(),
 						ResumeReadingCursor {
 							readthrough_number: s.readthrough_number,
+							session_id: s.id,
 							page: s.end_page,
 							locator: s.end_locator.clone(),
 							percentage_completed: s.end_percentage,

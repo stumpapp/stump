@@ -8,8 +8,8 @@ use models::{
 	},
 	entity::{media, reading_session},
 	services::reading_progress::{
-		derive_readthrough_number, get_book_pages, upsert_reading_session,
-		NormalizedProgression,
+		derive_readthrough_number, get_book_pages, reset_cumulative_elapsed_seconds,
+		upsert_reading_session, NormalizedProgression,
 	},
 	shared::enums::ReadingStatus,
 };
@@ -39,6 +39,8 @@ impl ReadProgressMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
+		let reset_elapsed_seconds = input.reset_elapsed_seconds();
+
 		let progression = match input {
 			MediaProgressInput::Epub(input) => {
 				let (epubcfi, locator) = input.locator.as_tuple();
@@ -53,6 +55,7 @@ impl ReadProgressMutation {
 					elapsed_seconds_delta: input.elapsed_seconds_delta,
 					did_complete: is_complete,
 					device_id: input.device_id,
+					reset_elapsed_seconds,
 				}
 			},
 			MediaProgressInput::Paged(input) => {
@@ -67,14 +70,124 @@ impl ReadProgressMutation {
 					elapsed_seconds_delta: input.elapsed_seconds_delta,
 					did_complete: is_complete,
 					device_id: input.device_id,
+					reset_elapsed_seconds,
 				}
 			},
 		};
 
-		upsert_reading_session(conn, user, id.as_ref(), progression)
+		let upsert_txn = conn.begin().await?;
+
+		let session = upsert_reading_session(&upsert_txn, user, id.as_ref(), progression)
 			.await
-			.map(ReadingSession::from)
-			.map_err(Into::into)
+			.map(ReadingSession::from)?;
+
+		upsert_txn.commit().await?;
+
+		Ok(session)
+	}
+
+	/// a more focused version of `update_media_progress` that splices the history so that
+	/// any sessions after the ancestor_session_id are deleted in favor of the input
+	/// provided. this should be called when resolving local vs remote progress conflicts, where
+	/// the user has chosen to keep their local progress and discard the remote progress beyond
+	/// the ancestor session (i.e., the last session that both local and remote progress share)
+	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id, ancestor_session_id))]
+	async fn accept_local_progress(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		ancestor_session_id: Option<i32>,
+		input: MediaProgressInput,
+	) -> Result<ReadingSession> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let ancestor = match ancestor_session_id {
+			Some(session_id) => Some(
+				reading_session::Entity::find_by_id(session_id)
+					.filter(reading_session::Column::UserId.eq(&user.id))
+					.filter(reading_session::Column::MediaId.eq(id.as_str()))
+					.one(core.conn.as_ref())
+					.await?
+					.ok_or_else(|| {
+						async_graphql::Error::new("Ancestor session not found")
+					})?,
+			),
+			None => None,
+		};
+
+		// TODO: do i delete all or all within same readthrough?? kinda haven't considered that enough lol
+		// i think if you manage to be a readthrough behind locally and opt to accept local, then yes??
+		// perhaps more messaging on frontend... ugh. delete for now ig
+
+		let txn = core.conn.begin().await?;
+
+		let base_delete = reading_session::Entity::delete_many().filter(
+			reading_session::Column::UserId
+				.eq(user.id.clone())
+				.and(reading_session::Column::MediaId.eq(id.as_str())),
+		);
+
+		let affected_rows = match ancestor {
+			Some(ref session) => {
+				// delete all sessions after the ancestor session
+				base_delete
+					.filter(reading_session::Column::Id.gt(session.id))
+					.exec(&txn)
+					.await?
+			},
+			None => {
+				// delete all sessions for this media (and user obv)
+				base_delete.exec(&txn).await?
+			},
+		}
+		.rows_affected;
+		tracing::debug!(affected_rows, "Deleted divergent remote sessions");
+
+		// if ancestor is none, nothing to clear
+		let reset_elapsed_seconds = input.reset_elapsed_seconds() && ancestor.is_some();
+
+		let progression = match input {
+			MediaProgressInput::Epub(input) => {
+				let (epubcfi, locator) = input.locator.as_tuple();
+				let is_complete = input.is_complete.unwrap_or(
+					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
+				);
+				NormalizedProgression {
+					page: None,
+					locator,
+					epubcfi,
+					percentage: input.percentage,
+					elapsed_seconds_delta: input.elapsed_seconds_delta,
+					did_complete: is_complete,
+					device_id: input.device_id,
+					reset_elapsed_seconds,
+				}
+			},
+			MediaProgressInput::Paged(input) => {
+				let book_pages = get_book_pages(id.to_string(), &txn).await?;
+				let is_complete = input.page >= book_pages;
+				let percentage = compute_page_based_percentage(input.page, book_pages);
+				NormalizedProgression {
+					page: Some(input.page),
+					locator: None,
+					epubcfi: None,
+					percentage: Some(percentage),
+					elapsed_seconds_delta: input.elapsed_seconds_delta,
+					did_complete: is_complete,
+					device_id: input.device_id,
+					reset_elapsed_seconds,
+				}
+			},
+		};
+
+		let session = upsert_reading_session(&txn, user, id.as_ref(), progression)
+			.await
+			.map(ReadingSession::from)?;
+
+		txn.commit().await?;
+
+		Ok(session)
 	}
 
 	/// trashes current readthrough, if there is one
@@ -129,6 +242,22 @@ impl ReadProgressMutation {
 		tx.commit().await?;
 
 		Ok(affected_rows > 0)
+	}
+
+	/// resets the elapsed seconds for all reading sessions in the current readthrough, if there is one
+	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
+	async fn reset_elapsed_seconds(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let tx = core.conn.begin().await?;
+
+		let did_reset =
+			reset_cumulative_elapsed_seconds(&tx, &user.id, id.as_str()).await?;
+
+		tx.commit().await?;
+
+		Ok(did_reset)
 	}
 
 	/// marks current readthrough as complete:

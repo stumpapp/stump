@@ -777,6 +777,7 @@ export type EpubProgressInput = {
   isComplete?: InputMaybe<Scalars['Boolean']['input']>;
   locator: EpubProgressLocatorInput;
   percentage?: InputMaybe<Scalars['Decimal']['input']>;
+  resetElapsedSeconds?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type EpubProgressLocatorInput =
@@ -1948,6 +1949,14 @@ export type Mutation = {
   __typename?: 'Mutation';
   /** Accept the top-ranked candidate for all pending metadata matches */
   acceptAllPendingMatches: Scalars['Int']['output'];
+  /**
+   * a more focused version of `update_media_progress` that splices the history so that
+   * any sessions after the ancestor_session_id are deleted in favor of the input
+   * provided. this should be called when resolving local vs remote progress conflicts, where
+   * the user has chosen to keep their local progress and discard the remote progress beyond
+   * the ancestor session (i.e., the last session that both local and remote progress share)
+   */
+  acceptLocalProgress: ReadingSession;
   /** Accept a match candidate and apply it to media metadata */
   acceptMediaMatch: MetadataFetchRecord;
   /** Accept a match candidate and apply it to the series metadata */
@@ -2128,6 +2137,8 @@ export type Mutation = {
   renameTag: Tag;
   /** Reorder uncompleted books in the club's queue. Completed books cannot be reordered since they are effectively archived */
   reorderBooks: BookClub;
+  /** resets the elapsed seconds for all reading sessions in the current readthrough, if there is one */
+  resetElapsedSeconds: Scalars['Boolean']['output'];
   resetLibraryMetadata: Library;
   resetSeriesMetadata: Series;
   respondToBookClubInvitation: BookClubInvitation;
@@ -2274,6 +2285,13 @@ export type Mutation = {
 export type MutationAcceptAllPendingMatchesArgs = {
   excludeFields?: InputMaybe<Array<MetadataField>>;
   strategy?: InputMaybe<MergeStrategy>;
+};
+
+
+export type MutationAcceptLocalProgressArgs = {
+  ancestorSessionId?: InputMaybe<Scalars['Int']['input']>;
+  id: Scalars['ID']['input'];
+  input: MediaProgressInput;
 };
 
 
@@ -2704,6 +2722,11 @@ export type MutationRenameTagArgs = {
 export type MutationReorderBooksArgs = {
   bookClubId: Scalars['ID']['input'];
   bookIds: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationResetElapsedSecondsArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3164,6 +3187,7 @@ export type PagedProgressInput = {
   deviceId?: InputMaybe<Scalars['String']['input']>;
   elapsedSecondsDelta?: InputMaybe<Scalars['Int']['input']>;
   page: Scalars['Int']['input'];
+  resetElapsedSeconds?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type PaginatedAuthorResponse = {
@@ -3403,6 +3427,7 @@ export type Query = {
    * A paginated list of reading lists.
    */
   readingLists: PaginatedReadingListResponse;
+  readingSessionConflictView: ReadingSessionConflictResolutionView;
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
   scheduledJobs: Array<ScheduledJob>;
@@ -3642,6 +3667,12 @@ export type QueryReadingListsArgs = {
 };
 
 
+export type QueryReadingSessionConflictViewArgs = {
+  branchedSessionId?: InputMaybe<Scalars['Int']['input']>;
+  mediaId: Scalars['ID']['input'];
+};
+
+
 export type QueryRecentlyAddedMediaArgs = {
   pagination?: Pagination;
 };
@@ -3771,6 +3802,24 @@ export type ReadingSession = {
 };
 
 /**
+ * a view through which a client can resolve conflicts relative to a local ancestor session
+ * and any number of remote sessions which were created afterwards
+ */
+export type ReadingSessionConflictResolutionView = {
+  __typename?: 'ReadingSessionConflictResolutionView';
+  /**
+   * the last session which was known to be in sync with the local client. it's possible there is no ancestor session, e.g. if
+   * the book was downloaded on the client before any reading sessions were created on the server
+   */
+  ancestorSession?: Maybe<ReadingSession>;
+  /**
+   * all sessions created/updated on **this server** (remote) after the ancestor session, ordered
+   * by created_at ascending
+   */
+  remoteSessions: Array<ReadingSession>;
+};
+
+/**
  * the different reading statuses a book can be categorized as based on a user's
  * reading sessions
  */
@@ -3887,6 +3936,8 @@ export type ResumeReadingCursor = {
   page?: Maybe<Scalars['Int']['output']>;
   percentageCompleted?: Maybe<Scalars['Decimal']['output']>;
   readthroughNumber: Scalars['Int']['output'];
+  /** the id of the session this cursor is derived from */
+  sessionId: Scalars['Int']['output'];
   /** when the very first session in the current readthrough started */
   startedAt?: Maybe<Scalars['DateTime']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -4436,6 +4487,7 @@ export type StumpConfig = {
   configDir: Scalars['String']['output'];
   /** An optional custom path for the database. */
   dbPath?: Maybe<Scalars['String']['output']>;
+  dbTimeoutSecs: Scalars['Int']['output'];
   /** Indicates if the Kobo sync feature should be enabled. */
   enableKoboSync: Scalars['Boolean']['output'];
   /** Indicates if the KoReader sync feature should be enabled. */
@@ -4952,7 +5004,14 @@ export type UpdateReadProgressionMutationVariables = Exact<{
 }>;
 
 
-export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
+export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', id: number, updatedAt?: any | null } };
+
+export type ResetElapsedSecondsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ResetElapsedSecondsMutation = { __typename?: 'Mutation', resetElapsedSeconds: boolean };
 
 export type CreateBookmarkMobileMutationVariables = Exact<{
   input: BookmarkInput;
@@ -5288,7 +5347,7 @@ export type PullServerReadProgressionQueryVariables = Exact<{
 }>;
 
 
-export type PullServerReadProgressionQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, readProgress?: { __typename?: 'ResumeReadingCursor', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, updatedAt?: any | null, elapsedSeconds: number, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, readHistory: Array<{ __typename?: 'ReadthroughRecord', completedAt: any }> }> } };
+export type PullServerReadProgressionQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, readProgress?: { __typename?: 'ResumeReadingCursor', sessionId: number, page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, updatedAt?: any | null, elapsedSeconds: number, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, readHistory: Array<{ __typename?: 'ReadthroughRecord', completedAt: any }> }> } };
 
 export type PushCreateAnnotationMutationVariables = Exact<{
   input: CreateAnnotationInput;
@@ -5331,7 +5390,7 @@ export type PushLocalReadProgressionMutationVariables = Exact<{
 }>;
 
 
-export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingSession' } };
+export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename?: 'ReadingSession', id: number, updatedAt?: any | null } };
 
 export type ContinueReadingQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5497,6 +5556,23 @@ export type LibrarySeriesListHeaderScanLibraryMutationVariables = Exact<{
 
 
 export type LibrarySeriesListHeaderScanLibraryMutation = { __typename?: 'Mutation', scanLibrary: boolean };
+
+export type ReadingSessionConflictViewQueryVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  branchedSessionId?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ReadingSessionConflictViewQuery = { __typename?: 'Query', readingSessionConflictView: { __typename?: 'ReadingSessionConflictResolutionView', ancestorSession?: { __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } | null, remoteSessions: Array<{ __typename: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, createdAt: any, updatedAt?: any | null, readthroughNumber: number, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null }> } };
+
+export type AcceptLocalProgressMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  ancestorSessionId?: InputMaybe<Scalars['Int']['input']>;
+  input: MediaProgressInput;
+}>;
+
+
+export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -8429,10 +8505,16 @@ export const BookReadScreenDocument = new TypedDocumentString(`
 export const UpdateReadProgressionDocument = new TypedDocumentString(`
     mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
   updateMediaProgress(id: $id, input: $input) {
-    __typename
+    id
+    updatedAt
   }
 }
     `) as unknown as TypedDocumentString<UpdateReadProgressionMutation, UpdateReadProgressionMutationVariables>;
+export const ResetElapsedSecondsDocument = new TypedDocumentString(`
+    mutation ResetElapsedSeconds($id: ID!) {
+  resetElapsedSeconds(id: $id)
+}
+    `) as unknown as TypedDocumentString<ResetElapsedSecondsMutation, ResetElapsedSecondsMutationVariables>;
 export const CreateBookmarkMobileDocument = new TypedDocumentString(`
     mutation CreateBookmarkMobile($input: BookmarkInput!) {
   createBookmark(input: $input) {
@@ -9395,6 +9477,7 @@ export const PullServerReadProgressionDocument = new TypedDocumentString(`
     nodes {
       id
       readProgress {
+        sessionId
         page
         percentageCompleted
         epubcfi
@@ -9460,7 +9543,8 @@ export const PushDeleteBookmarkDocument = new TypedDocumentString(`
 export const PushLocalReadProgressionDocument = new TypedDocumentString(`
     mutation PushLocalReadProgression($id: ID!, $input: MediaProgressInput!) {
   updateMediaProgress(id: $id, input: $input) {
-    __typename
+    id
+    updatedAt
   }
 }
     `) as unknown as TypedDocumentString<PushLocalReadProgressionMutation, PushLocalReadProgressionMutationVariables>;
@@ -9860,6 +9944,74 @@ export const LibrarySeriesListHeaderScanLibraryDocument = new TypedDocumentStrin
   scanLibrary(id: $id)
 }
     `) as unknown as TypedDocumentString<LibrarySeriesListHeaderScanLibraryMutation, LibrarySeriesListHeaderScanLibraryMutationVariables>;
+export const ReadingSessionConflictViewDocument = new TypedDocumentString(`
+    query ReadingSessionConflictView($mediaId: ID!, $branchedSessionId: Int) {
+  readingSessionConflictView(
+    mediaId: $mediaId
+    branchedSessionId: $branchedSessionId
+  ) {
+    ancestorSession {
+      __typename
+      id
+      endPage
+      endPercentage
+      elapsedSeconds
+      createdAt
+      updatedAt
+      readthroughNumber
+      endLocator {
+        href
+        chapterTitle
+        locations {
+          progression
+          totalProgression
+        }
+      }
+    }
+    remoteSessions {
+      __typename
+      id
+      endPage
+      endPercentage
+      elapsedSeconds
+      createdAt
+      updatedAt
+      readthroughNumber
+      endLocator {
+        href
+        chapterTitle
+        locations {
+          progression
+          totalProgression
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ReadingSessionConflictViewQuery, ReadingSessionConflictViewQueryVariables>;
+export const AcceptLocalProgressDocument = new TypedDocumentString(`
+    mutation AcceptLocalProgress($id: ID!, $ancestorSessionId: Int, $input: MediaProgressInput!) {
+  acceptLocalProgress(
+    id: $id
+    ancestorSessionId: $ancestorSessionId
+    input: $input
+  ) {
+    id
+    endPage
+    endPercentage
+    elapsedSeconds
+    updatedAt
+    endLocator {
+      href
+      chapterTitle
+      locations {
+        progression
+        totalProgression
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AcceptLocalProgressMutation, AcceptLocalProgressMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

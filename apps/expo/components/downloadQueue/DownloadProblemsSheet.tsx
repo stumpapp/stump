@@ -37,6 +37,7 @@ export function DownloadProblemsSheet({ onDismiss }: Props) {
 	return (
 		<>
 			<TrueSheet
+				name={DOWNLOAD_PROBLEMS_SHEET_NAME}
 				ref={ref}
 				detents={['auto', 1]}
 				grabber

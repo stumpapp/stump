@@ -714,6 +714,7 @@ input EpubProgressInput {
 	isComplete: Boolean
 	elapsedSecondsDelta: Int
 	deviceId: String
+	resetElapsedSeconds: Boolean
 }
 
 input EpubProgressLocatorInput @oneOf {
@@ -2135,8 +2136,18 @@ type Mutation {
 	"Rename a custom emoji"
 	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
 	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingSession!
+	"""
+	a more focused version of `update_media_progress` that splices the history so that
+	any sessions after the ancestor_session_id are deleted in favor of the input
+	provided. this should be called when resolving local vs remote progress conflicts, where
+	the user has chosen to keep their local progress and discard the remote progress beyond
+	the ancestor session (i.e., the last session that both local and remote progress share)
+	"""
+	acceptLocalProgress(id: ID!, ancestorSessionId: Int, input: MediaProgressInput!): ReadingSession!
 	"trashes current readthrough, if there is one"
 	clearMediaProgress(id: ID!): Boolean!
+	"resets the elapsed seconds for all reading sessions in the current readthrough, if there is one"
+	resetElapsedSeconds(id: ID!): Boolean!
 	"""
 	marks current readthrough as complete:
 	- if no current readthrough, creates one
@@ -2294,6 +2305,7 @@ input PagedProgressInput {
 	page: Int!
 	elapsedSecondsDelta: Int
 	deviceId: String
+	resetElapsedSeconds: Boolean
 }
 
 type PaginatedAuthorResponse {
@@ -2475,6 +2487,7 @@ type Query {
 	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
+	readingSessionConflictView(mediaId: ID!, branchedSessionId: Int): ReadingSessionConflictResolutionView!
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
@@ -2624,6 +2637,23 @@ type ReadingSession {
 }
 
 """
+a view through which a client can resolve conflicts relative to a local ancestor session
+and any number of remote sessions which were created afterwards
+"""
+type ReadingSessionConflictResolutionView {
+	"""
+	the last session which was known to be in sync with the local client. it's possible there is no ancestor session, e.g. if
+	the book was downloaded on the client before any reading sessions were created on the server
+	"""
+	ancestorSession: ReadingSession
+	"""
+	all sessions created/updated on **this server** (remote) after the ancestor session, ordered
+	by created_at ascending
+	"""
+	remoteSessions: [ReadingSession!]!
+}
+
+"""
 the different reading statuses a book can be categorized as based on a user's
 reading sessions
 """
@@ -2727,6 +2757,8 @@ with the highest `readthrough_number`
 """
 type ResumeReadingCursor {
 	readthroughNumber: Int!
+	"the id of the session this cursor is derived from"
+	sessionId: Int!
 	page: Int
 	locator: ReadiumLocator
 	percentageCompleted: Decimal

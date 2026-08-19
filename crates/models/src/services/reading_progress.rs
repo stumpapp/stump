@@ -1,7 +1,7 @@
 use chrono::Utc;
 use sea_orm::{
-	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait,
-	EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
+	prelude::Decimal, sea_query::Expr, ActiveModelTrait, ActiveValue::Set, ColumnTrait,
+	ConnectionTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
 };
 
 use crate::{
@@ -20,6 +20,7 @@ pub struct NormalizedProgression {
 	pub elapsed_seconds_delta: Option<i64>,
 	pub did_complete: bool,
 	pub device_id: Option<String>,
+	pub reset_elapsed_seconds: bool,
 }
 
 impl NormalizedProgression {
@@ -61,7 +62,7 @@ impl NormalizedProgression {
 /// creates a [`reading_session`] record or extends the most recent one if it falls within
 /// the same logical day and the grace period has not elapsed
 pub async fn upsert_reading_session(
-	db: &impl ConnectionTrait,
+	txn: &impl ConnectionTrait,
 	user: &AuthUser,
 	media_id: &str,
 	input: NormalizedProgression,
@@ -74,8 +75,14 @@ pub async fn upsert_reading_session(
 
 	let logical_today = calculate_logical_date(Utc::now(), day_reset_offset);
 
+	// important to reset _before_ fetching latest so the find below makes the
+	// elapsed delta apply against a clean slate (i.e., 0)
+	if input.reset_elapsed_seconds {
+		reset_cumulative_elapsed_seconds(txn, &user.id, media_id).await?;
+	}
+
 	let latest = reading_session::Entity::find_latest_for_user_and_media(user, media_id)
-		.one(db)
+		.one(txn)
 		.await?;
 
 	match latest {
@@ -86,11 +93,11 @@ pub async fn upsert_reading_session(
 				&& should_extend_session(&session, grace_period) =>
 		{
 			let active = input.apply(session);
-			active.update(db).await
+			active.update(txn).await
 		},
 		_ => {
 			let readthrough_number =
-				derive_readthrough_number(db, &user.id, media_id).await?;
+				derive_readthrough_number(txn, &user.id, media_id).await?;
 
 			reading_session::ActiveModel {
 				session_date: Set(logical_today),
@@ -118,7 +125,7 @@ pub async fn upsert_reading_session(
 				user_id: Set(user.id.clone()),
 				..Default::default()
 			}
-			.insert(db)
+			.insert(txn)
 			.await
 		},
 	}
@@ -161,4 +168,46 @@ pub async fn get_book_pages(
 			sea_orm::DbErr::RecordNotFound(format!("Media with id {} not found", book_id))
 		})?;
 	Ok(pages)
+}
+
+#[tracing::instrument(skip(tx))]
+pub async fn reset_cumulative_elapsed_seconds(
+	tx: &impl ConnectionTrait,
+	user_id: &str,
+	media_id: &str,
+) -> Result<bool, sea_orm::DbErr> {
+	let current_session = reading_session::Entity::find()
+		.filter(
+			reading_session::Column::UserId
+				.eq(user_id)
+				.and(reading_session::Column::MediaId.eq(media_id)),
+		)
+		.order_by_desc(reading_session::Column::CreatedAt)
+		.one(tx)
+		.await?;
+
+	let Some(session) = current_session else {
+		// no active session = no work to do
+		return Ok(false);
+	};
+
+	let affected_rows = reading_session::Entity::update_many()
+		.col_expr(reading_session::Column::ElapsedSeconds, Expr::value(0))
+		.filter(
+			reading_session::Column::UserId
+				.eq(user_id)
+				.and(reading_session::Column::MediaId.eq(media_id)),
+		)
+		.filter(reading_session::Column::ReadthroughNumber.eq(session.readthrough_number))
+		.exec(tx)
+		.await?
+		.rows_affected;
+
+	tracing::debug!(
+		?affected_rows,
+		readthrough_number = session.readthrough_number,
+		"Reset elapsed seconds in all reading sessions of the book's current readthrough"
+	);
+
+	Ok(affected_rows > 0)
 }

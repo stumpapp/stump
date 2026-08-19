@@ -6459,7 +6459,7 @@
   resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.4.0.tgz#2e1cdf5ec70ec1c0f23147fd2261b0ebd74f2a3e"
   integrity sha512-p8qIYH44HgXDbsxPFIbRS/IrKWOqb2/JDT8ivFAfhL8QSW0gtVZZo8I/wFip1vV9vRl8D3zMHUBB/PrzrN0Qww==
 
-"@rn-primitives/slot@1.5.2", "@rn-primitives/slot@^1.2.0":
+"@rn-primitives/slot@1.5.2", "@rn-primitives/slot@^1.5.2":
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.5.2.tgz#f74d8ab7b06fda13c76db6392367eb2f9fc03d47"
   integrity sha512-TGSMB8hMALrcI6d5logiS8/0YzPRUQvsHghaF7FAuia+MF84WZS96Jvm959W4sDEP26AiDJtuQfCkTHOv0oxbw==

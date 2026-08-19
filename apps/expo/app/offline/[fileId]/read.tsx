@@ -32,11 +32,15 @@ import {
 	toAbsolutePath,
 	unpackedBookDirectory,
 } from '~/lib/filesystem'
-import { useLocalAnnotationMutations, useLocalBookmarkMutations } from '~/lib/hooks'
+import {
+	useLocalAnnotationMutations,
+	useLocalBookmarkMutations,
+	useReadingTimer,
+} from '~/lib/hooks'
 import type { ReadiumLocator } from '~/modules/readium'
 import { intoReadiumLocator } from '~/modules/readium'
 import StumpStreamer from '~/modules/streamer'
-import { useBookPreferences, useBookTimer, useReaderStore } from '~/stores/reader'
+import { useBookPreferences, useReaderStore } from '~/stores/reader'
 
 type Params = {
 	fileId: string
@@ -174,9 +178,35 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book, serverId: downloadedFile.serverId })
 
-	const timer = useBookTimer(book?.id || '', {
-		initial: book?.readProgress?.elapsedSeconds,
+	const timer = useReadingTimer({
+		databaseSeconds: book?.readProgress?.elapsedSeconds,
 		enabled: trackElapsedTime,
+	})
+
+	const { mutate: resetElapsedSeconds } = useMutation({
+		retry: (attempts) => attempts < 3,
+		onError: (error) => {
+			console.error('Failed to reset reading time:', error)
+		},
+		mutationFn: async ({ bookId, serverId }: { bookId: string; serverId: string }) => {
+			await db
+				.insert(readProgress)
+				.values({
+					bookId,
+					elapsedSeconds: 0,
+					lastModified: new Date(),
+					serverId,
+				})
+				.onConflictDoUpdate({
+					target: readProgress.bookId,
+					set: {
+						elapsedSeconds: 0,
+						lastModified: new Date(),
+						syncStatus: syncStatus.enum.UNSYNCED,
+						pendingReset: true,
+					},
+				})
+		},
 	})
 
 	const { mutate: updatePagedProgress } = useMutation({
@@ -190,7 +220,8 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 			totalPages,
 			...input
 		}: PagedProgressInput & { bookId: string; serverId: string; totalPages: number }) => {
-			const totalSeconds = timer.getCurrentTime()
+			timer.popDeltaSeconds()
+			const totalSeconds = timer.getTotalSeconds()
 			const percentage = totalPages > 0 ? (input.page / totalPages).toString() : null
 
 			const result = await db
@@ -231,6 +262,11 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 		[book.id, book.pages, downloadedFile.serverId, updatePagedProgress],
 	)
 
+	const resetTimer = useCallback(() => {
+		resetElapsedSeconds({ bookId: book.id, serverId: downloadedFile.serverId })
+		timer.clearTotalSeconds()
+	}, [book.id, downloadedFile.serverId, resetElapsedSeconds, timer])
+
 	const { mutate: updateEbookProgress } = useMutation({
 		retry: (attempts) => attempts < 3,
 		onError: (error) => {
@@ -242,7 +278,8 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 			percentage,
 			...epubProgress
 		}: ReadiumLocator & { bookId: string; serverId: string; percentage: number }) => {
-			const totalSeconds = timer.getCurrentTime()
+			timer.popDeltaSeconds()
+			const totalSeconds = timer.getTotalSeconds()
 
 			const result = await db
 				.insert(readProgress)
@@ -359,6 +396,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 				pageURL={pageURL}
 				onPageChanged={onPageChanged}
 				timer={timer}
+				resetTimer={resetTimer}
 				serverId={downloadedFile.serverId}
 			/>
 		)

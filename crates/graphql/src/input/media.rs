@@ -27,6 +27,7 @@ pub struct EpubProgressInput {
 	pub is_complete: Option<bool>,
 	pub elapsed_seconds_delta: Option<i64>,
 	pub device_id: Option<String>,
+	pub reset_elapsed_seconds: Option<bool>,
 }
 
 #[derive(Default, Debug, Clone, InputObject)]
@@ -34,12 +35,28 @@ pub struct PagedProgressInput {
 	pub page: i32,
 	pub elapsed_seconds_delta: Option<i64>,
 	pub device_id: Option<String>,
+	pub reset_elapsed_seconds: Option<bool>,
 }
 
 #[derive(Debug, Clone, OneofObject)]
 pub enum MediaProgressInput {
 	Epub(Box<EpubProgressInput>),
 	Paged(PagedProgressInput),
+}
+
+impl MediaProgressInput {
+	/// whether applying the input should first reset the elapsed seconds for the media progress
+	pub fn reset_elapsed_seconds(&self) -> bool {
+		match self {
+			MediaProgressInput::Epub(epub_progress) => {
+				epub_progress.reset_elapsed_seconds
+			},
+			MediaProgressInput::Paged(paged_progress) => {
+				paged_progress.reset_elapsed_seconds
+			},
+		}
+		.unwrap_or(false)
+	}
 }
 
 #[derive(InputObject)]

@@ -22,7 +22,7 @@ use models::{
 };
 use sea_orm::{
 	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, Order, QueryOrder,
-	QueryTrait,
+	QueryTrait, TransactionTrait,
 };
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
@@ -1388,9 +1388,12 @@ async fn update_book_progression(
 		elapsed_seconds_delta: None,
 		did_complete,
 		device_id,
+		reset_elapsed_seconds: false,
 	};
 
-	upsert_reading_session(conn, &user, &id, progression).await?;
+	let txn = conn.begin().await?;
+	upsert_reading_session(&txn, &user, &id, progression).await?;
+	txn.commit().await?;
 
 	Ok(axum::http::StatusCode::NO_CONTENT)
 }

@@ -1,4 +1,7 @@
+import { MediaProgressInput } from '@stump/graphql'
 import { randomUUID } from 'expo-crypto'
+
+import { epubProgress, readProgress } from '~/db'
 
 /**
  * A constant representing the "local library" which will just contain
@@ -21,4 +24,33 @@ export const isImportableFile = (filename: string): boolean => {
 
 export const getFileExtension = (filename: string): string | undefined => {
 	return filename.split('.').pop()?.toLowerCase()
+}
+
+export function buildLocalToRemoteProgressInput(
+	local: typeof readProgress.$inferSelect,
+): MediaProgressInput {
+	const epubData = epubProgress.safeParse(local.epubProgress).data
+	const elapsedDelta = local.pendingReset
+		? (local.elapsedSeconds ?? 0)
+		: Math.max(0, (local.elapsedSeconds ?? 0) - (local.lastSyncedElapsedSeconds ?? 0))
+
+	if (epubData) {
+		return {
+			epub: {
+				locator: { readium: epubData },
+				elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
+				isComplete: local.percentage ? parseFloat(local.percentage) >= 1.0 : false,
+				percentage: local.percentage,
+				resetElapsedSeconds: local.pendingReset ?? undefined,
+			},
+		}
+	}
+
+	return {
+		paged: {
+			page: local.page ?? 1,
+			elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
+			resetElapsedSeconds: local.pendingReset ?? undefined,
+		},
+	}
 }

@@ -45,6 +45,7 @@ type MobilePreferencesStore = {
 	displayLanguageKeys: DisplayLanguageKeysType
 	tintListBackground: boolean
 	textCase: TextCase
+	maxPageViewingSeconds: number
 	/**
 	 * Patch the store with new values.
 	 */
@@ -82,6 +83,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			displayLanguageKeys: 'none',
 			textCase: Platform.OS === 'android' ? 'sentenceCase' : 'titleCase',
 			tintListBackground: false,
+			maxPageViewingSeconds: 600,
 			patch: (data) => set(data),
 		}),
 		{

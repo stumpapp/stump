@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
 
 import { ThumbnailImage } from '~/components/image'
+import { DraftNumber } from '~/components/keyboard'
 import { Heading, Icon, Text } from '~/components/ui'
 import { IS_IOS_26_PLUS, useColors, usePalette } from '~/lib/constants'
 import { useDisplay, useTranslate } from '~/lib/hooks'
@@ -21,10 +22,9 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { ENTERING_ANIMATION, EXITING_ANIMATION } from '../shared'
 import { useEpubReaderContext } from './context'
-import { GoToPage } from './TableOfContentsSheet'
 
 type Props = {
-	goToPage: GoToPage
+	goToPage: DraftNumber
 	isOpen: boolean
 }
 
@@ -178,6 +178,7 @@ export default function TableOfContentsSheetContent({ goToPage, isOpen }: Props)
 									value={goToPage.string}
 									style={{
 										width: textInputWidth,
+										height: 50,
 										color:
 											goToPage.isValid || goToPage.isEmpty
 												? colors.foreground.DEFAULT

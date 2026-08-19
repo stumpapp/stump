@@ -19,7 +19,6 @@ import { useActiveServer } from '~/components/activeServer'
 import { db, downloadedFiles } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
-import { deleteBookTimer } from '~/stores/reader'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -106,11 +105,6 @@ export default function BookMenu({ data }: Props) {
 	})
 
 	const onSuccess = async () => {
-		// see https://github.com/stumpapp/stump/issues/1254
-		// for now every action here using onSuccess will clear the timer
-		// however this NEEDS to be removed if that changes
-		deleteBookTimer(book.id)
-
 		await Promise.all([
 			client.refetchQueries({ queryKey: ['bookById', book.id], exact: false }),
 			client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),

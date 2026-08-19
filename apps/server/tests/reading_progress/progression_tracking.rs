@@ -441,6 +441,7 @@ async fn test_detect_finishing_session_for_ebook() {
 			is_complete: Some(false),
 			elapsed_seconds_delta: Some(300),
 			device_id: None,
+			reset_elapsed_seconds: Some(false),
 		})),
 	)
 	.await;
@@ -464,6 +465,7 @@ async fn test_detect_finishing_session_for_ebook() {
 			is_complete: Some(true),
 			elapsed_seconds_delta: Some(300),
 			device_id: None,
+			reset_elapsed_seconds: Some(false),
 		})),
 	)
 	.await;

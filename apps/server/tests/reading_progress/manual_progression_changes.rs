@@ -1,9 +1,13 @@
 use crate::common::{
-	book::{create_nth_readthrough, fudge_session_time, update_progress},
+	book::{
+		active_session_for_book, create_nth_readthrough, fudge_session_time,
+		update_progress,
+	},
 	series::setup_single_series_with_n_books,
 	TestApp,
 };
 
+use async_graphql::InputType;
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
 use models::{entity::reading_session, shared::enums::ReadingStatus};
 use sea_orm::{prelude::*, QueryOrder};
@@ -527,4 +531,227 @@ async fn test_clear_media_reading_history_retains_current() {
 		.expect("db error")
 		.is_some();
 	assert!(in_progress_sessions_exist);
+}
+
+async fn accept_local_progress(
+	app: &TestApp,
+	book_id: &str,
+	ancestor_session_id: i32,
+	input: MediaProgressInput,
+) {
+	let json_input = input
+		.to_value()
+		.into_json()
+		.expect("failed to convert input to json");
+	let result = app
+        .execute_gql(
+            r#"
+            mutation AcceptLocalProgress($id: ID!, $ancestorSessionId: Int!, $input: MediaProgressInput!) {
+                acceptLocalProgress(id: $id, ancestorSessionId: $ancestorSessionId, input: $input) {
+                    id
+                }
+            }
+            "#,
+            Some(serde_json::json!({
+                "id": book_id,
+                "ancestorSessionId": ancestor_session_id,
+                "input": json_input,
+            })),
+        )
+        .await;
+	assert!(result.get("data").is_some_and(|d| !d.is_null()));
+}
+
+#[tokio::test]
+async fn test_accept_local_progress_splices_history_from_ancestor() {
+	let app = setup().await;
+
+	let conn = app.conn();
+
+	// shove session before the ancestor session for completeness in tests
+	// really, not strictly required but a likely scenario
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	let pre_ancestor_session = active_session_for_book(&app, "black_science_1").await;
+	fudge_session_time(&pre_ancestor_session, conn).await;
+
+	// this is the ancestor session
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 20,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	let ancestor = active_session_for_book(&app, "black_science_1").await;
+	fudge_session_time(&ancestor, conn).await;
+
+	// the next two are conflicting remote sessions that we want to remove in favor
+	// of the lcoal progress
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 30,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	let conflicting_session_1 = active_session_for_book(&app, "black_science_1").await;
+	fudge_session_time(&conflicting_session_1, conn).await;
+
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 40,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	let conflicting_session_2 = active_session_for_book(&app, "black_science_1").await;
+
+	let remote_count = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.count(conn)
+		.await
+		.expect("db error");
+	assert_eq!(remote_count, 4);
+
+	accept_local_progress(
+		&app,
+		"black_science_1",
+		ancestor.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 25,
+			elapsed_seconds_delta: Some(600),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let remote_sessions = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.order_by_asc(reading_session::Column::CreatedAt)
+		.all(conn)
+		.await
+		.expect("db error");
+	assert_eq!(remote_sessions.len(), 3); // pre-ancestor, ancestor, and new local progress
+
+	let og_conflicting_ids = vec![conflicting_session_1.id, conflicting_session_2.id];
+	assert!(remote_sessions
+		.iter()
+		.all(|session| !og_conflicting_ids.contains(&session.id)));
+
+	let ancestor_after = remote_sessions
+		.iter()
+		.find(|s| s.id == ancestor.id)
+		.expect("ancestor should still exist");
+	assert_eq!(ancestor_after.end_page, Some(20));
+
+	let local_now_remote_session = remote_sessions
+		.iter()
+		.last()
+		.expect("should be a new session");
+	assert_eq!(local_now_remote_session.end_page, Some(25));
+}
+
+#[tokio::test]
+async fn test_accept_local_progress_with_no_conflicts() {
+	let app = setup().await;
+
+	let conn = app.conn();
+
+	// pre-ancestor, 5 min
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	let pre_ancestor_session = active_session_for_book(&app, "black_science_1").await;
+	fudge_session_time(&pre_ancestor_session, conn).await;
+
+	// the ancestor, 10 min
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 20,
+			elapsed_seconds_delta: Some(600),
+			..Default::default()
+		}),
+	)
+	.await;
+	let ancestor = active_session_for_book(&app, "black_science_1").await;
+	fudge_session_time(&ancestor, conn).await;
+
+	// post-ancestor, 5 min (but will be removed)
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 30,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	let conflicting_remote_session =
+		active_session_for_book(&app, "black_science_1").await;
+	fudge_session_time(&conflicting_remote_session, conn).await;
+
+	accept_local_progress(
+		&app,
+		"black_science_1",
+		ancestor.id,
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 25,
+			elapsed_seconds_delta: Some(120),
+			reset_elapsed_seconds: Some(true),
+			..Default::default()
+		}),
+	)
+	.await;
+
+	let remote_sessions = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.order_by_asc(reading_session::Column::CreatedAt)
+		.all(conn)
+		.await
+		.expect("db error");
+	assert_eq!(remote_sessions.len(), 3); // pre-ancestor, ancestor, and new local progress
+
+	assert!(!remote_sessions
+		.iter()
+		.any(|s| s.id == conflicting_remote_session.id)); // it was replaced iwth local
+
+	let local_now_remote_session = remote_sessions
+		.iter()
+		.last()
+		.expect("should be new session");
+	assert_eq!(local_now_remote_session.elapsed_seconds, Some(120));
+
+	// no sessions besides new local should have elapsed time
+	assert!(remote_sessions
+		.iter()
+		.filter(|s| s.id != local_now_remote_session.id)
+		.all(|s| s.elapsed_seconds == Some(0)));
 }

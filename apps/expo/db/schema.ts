@@ -46,49 +46,7 @@ export const libraryRefs = sqliteTable('library_refs', {
 	name: text('name').notNull(),
 })
 
-export const syncStatus = z.enum(['UNSYNCED', 'SYNCING', 'SYNCED', 'ERROR'])
-
-/**
- * Unsynced read progress table
- * Stores reading progress that hasn't been synced to the server yet
- */
-export const readProgress = sqliteTable('read_progress', {
-	id: integer('id').primaryKey({ autoIncrement: true }),
-	bookId: text('book_id')
-		.unique()
-		.notNull()
-		.references(() => downloadedFiles.id, { onDelete: 'cascade' }),
-	serverId: text('server_id').notNull(),
-	page: integer('page'),
-	epubProgress: text('epub_progress', { mode: 'json' }),
-	elapsedSeconds: integer('elapsed_seconds'),
-	/// the elapsed total at the time of the last successful push to the server.
-	/// the delta sent on next sync = elapsedSeconds - lastSyncedElapsedSeconds
-	///
-	/// example:
-	///   open book offline -> lastSyncedElapsedSeconds = 1500, elapsedSeconds = 1500
-	///   read for 5 minutes -> elapsedSeconds = 1800. lastSyncedElapsedSeconds still = 1500
-	///   eventual sync to online -> delta = 300 sent to server, lastSyncedElapsedSeconds updated to 1800
-	lastSyncedElapsedSeconds: integer('last_synced_elapsed_seconds'),
-	// A number between 0 and 1 representing progress through the book
-	percentage: text('percentage'),
-	lastModified: integer('last_modified', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
-})
-
-export type DownloadedFile = typeof downloadedFiles.$inferSelect
-export type NewDownloadedFile = typeof downloadedFiles.$inferInsert
-
-export type SeriesRef = typeof seriesRefs.$inferSelect
-export type NewSeriesRef = typeof seriesRefs.$inferInsert
-
-export type LibraryRef = typeof libraryRefs.$inferSelect
-export type NewLibraryRef = typeof libraryRefs.$inferInsert
-
-export type UnsyncedReadProgress = typeof readProgress.$inferSelect
-export type NewUnsyncedReadProgress = typeof readProgress.$inferInsert
+export const syncStatus = z.enum(['UNSYNCED', 'SYNCING', 'SYNCED', 'ERROR', 'CONFLICT'])
 
 export const epubProgress = z.object({
 	chapterTitle: z.string().default(''),
@@ -131,6 +89,56 @@ export const imageMeta = z.object({
 	),
 	thumbhash: z.string().nullish(),
 })
+export type ImageMeta = z.infer<typeof imageMeta>
+
+/**
+ * Unsynced read progress table
+ * Stores reading progress that hasn't been synced to the server yet
+ */
+export const readProgress = sqliteTable('read_progress', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	bookId: text('book_id')
+		.unique()
+		.notNull()
+		.references(() => downloadedFiles.id, { onDelete: 'cascade' }),
+	serverId: text('server_id').notNull(),
+	page: integer('page'),
+	epubProgress: text('epub_progress', { mode: 'json' }),
+	elapsedSeconds: integer('elapsed_seconds'),
+	/// the elapsed total at the time of the last successful push to the server.
+	/// the delta sent on next sync = elapsedSeconds - lastSyncedElapsedSeconds
+	///
+	/// example:
+	///   open book offline -> lastSyncedElapsedSeconds = 1500, elapsedSeconds = 1500
+	///   read for 5 minutes -> elapsedSeconds = 1800. lastSyncedElapsedSeconds still = 1500
+	///   eventual sync to online -> delta = 300 sent to server, lastSyncedElapsedSeconds updated to 1800
+	lastSyncedElapsedSeconds: integer('last_synced_elapsed_seconds'),
+	// A number between 0 and 1 representing progress through the book
+	percentage: text('percentage'),
+	lastModified: integer('last_modified', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
+	/// the server's updatedAt at the time of the last successful pull
+	lastPulledSessionUpdatedAt: integer('last_pulled_session_updated_at', { mode: 'timestamp' }),
+	/// set when the reading timer is reset while offline to inform remote server that the
+	/// elapsedSeconds should be reset to 0 for all sessions in current readthrough
+	pendingReset: integer('pending_reset', { mode: 'boolean' }).notNull().default(false),
+	/// the id of the session on the server that this local record was last synced from
+	lastSyncedSessionId: integer('last_synced_session_id'),
+})
+
+export type DownloadedFile = typeof downloadedFiles.$inferSelect
+export type NewDownloadedFile = typeof downloadedFiles.$inferInsert
+
+export type SeriesRef = typeof seriesRefs.$inferSelect
+export type NewSeriesRef = typeof seriesRefs.$inferInsert
+
+export type LibraryRef = typeof libraryRefs.$inferSelect
+export type NewLibraryRef = typeof libraryRefs.$inferInsert
+
+export type UnsyncedReadProgress = typeof readProgress.$inferSelect
+export type NewUnsyncedReadProgress = typeof readProgress.$inferInsert
 
 /**
  * Bookmarks table for offline reading

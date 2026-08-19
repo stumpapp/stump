@@ -12,6 +12,7 @@ const query = graphql(`
 			nodes {
 				id
 				readProgress {
+					sessionId
 					page
 					percentageCompleted
 					epubcfi
@@ -42,10 +43,12 @@ const query = graphql(`
 
 export type PullSyncResult = {
 	failedBookIds: string[]
+	conflictBookIds: string[]
 }
 
 /**
- * Pull the server progress for downloaded books for a single server
+ * Pull the server progress for downloaded books for a single server, syncing
+ * to local database
  *
  * @param serverId The ID of the server to attempt syncing progression to
  * @param api The *authenticated* instance for interacting with that server
@@ -60,7 +63,7 @@ export const executeSingleServerPullSync = async (
 		.where(eq(downloadedFiles.serverId, serverId))
 
 	if (downloadedBooks.length === 0) {
-		return { failedBookIds: [] }
+		return { failedBookIds: [], conflictBookIds: [] }
 	}
 
 	const downloadedBookIds = downloadedBooks.map((b) => b.id)
@@ -72,7 +75,11 @@ export const executeSingleServerPullSync = async (
 	})
 
 	if (serverMedia.length === 0) {
-		return { failedBookIds: [] }
+		console.warn(
+			'There exist local books originally from server which are no longer present on remote',
+			{ serverId, downloadedBookIds },
+		)
+		return { failedBookIds: [], conflictBookIds: [] }
 	}
 
 	const localRecords = await db
@@ -87,6 +94,7 @@ export const executeSingleServerPullSync = async (
 
 	const localProgressMap = new Map(localRecords.map((r) => [r.bookId, r]))
 	const failedBookIds: string[] = []
+	const conflictBookIds: string[] = []
 
 	for (const media of serverMedia) {
 		const localProgress = localProgressMap.get(media.id)
@@ -121,8 +129,17 @@ export const executeSingleServerPullSync = async (
 		const serverUpdatedAt = progress.updatedAt ? new Date(progress.updatedAt) : new Date(0)
 
 		if (localProgress && localProgress.syncStatus !== syncStatus.enum.SYNCED) {
-			// naive-ish last write wins
-			if (localUpdatedAt >= serverUpdatedAt) continue
+			const lastPulledAt = localProgress.lastPulledSessionUpdatedAt
+
+			// local behind remote = conflict (cannot push until resolved)
+			if (lastPulledAt && serverUpdatedAt > lastPulledAt) {
+				conflictBookIds.push(media.id)
+				await db
+					.update(readProgress)
+					.set({ syncStatus: syncStatus.enum.CONFLICT })
+					.where(eq(readProgress.bookId, media.id))
+				continue
+			}
 		}
 
 		// local already ahead or equal = skip (push handles it)
@@ -150,6 +167,9 @@ export const executeSingleServerPullSync = async (
 					: null,
 				syncStatus: syncStatus.enum.SYNCED,
 				lastModified: serverUpdatedAt,
+				lastPulledSessionUpdatedAt: serverUpdatedAt,
+				lastSyncedSessionId: progress.sessionId,
+				pendingReset: false,
 			}
 
 			await db.insert(readProgress).values(values).onConflictDoUpdate({
@@ -169,7 +189,7 @@ export const executeSingleServerPullSync = async (
 		}
 	}
 
-	return { failedBookIds }
+	return { failedBookIds, conflictBookIds }
 }
 
 /**

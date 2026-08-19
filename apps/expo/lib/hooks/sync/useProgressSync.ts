@@ -39,18 +39,22 @@ export function useProgressSync() {
 	)
 
 	const pullProgress = useCallback(
-		async ({ forServers, instances }: SyncParams = {}) => {
-			const resolvedInstances = instances ?? (await getInstances(forServers))
+		async ({ forServers, instances, ...params }: SyncParams = {}) => {
+			const resolvedInstances = instances ?? (await getInstances(forServers, params.suppressAlerts))
 			return executePullProgressSync(resolvedInstances)
 		},
 		[getInstances],
 	)
 
 	const syncProgress = useCallback(
-		async ({ forServers, instances }: SyncParams = {}) => {
+		async ({ forServers, instances, ...params }: SyncParams = {}) => {
 			const resolvedInstances = instances ?? (await getInstances(forServers))
 
-			const pullResults = await pullProgress({ forServers, instances: resolvedInstances })
+			const pullResults = await pullProgress({
+				forServers,
+				instances: resolvedInstances,
+				...params,
+			})
 
 			const ignoreBookIds = Object.values(pullResults).flatMap((r) => r.failedBookIds)
 
@@ -152,8 +156,13 @@ export function useSyncOnlineToOfflineProgress({
 		}
 	}, [record?.elapsedSeconds])
 
+	type RemoteSessionInfo = {
+		updatedAt?: Date | null
+		sessionId: number
+	}
+
 	const syncProgress = useCallback(
-		async (onlineProgress: MediaProgressInput) => {
+		async (onlineProgress: MediaProgressInput, remoteSession?: RemoteSessionInfo) => {
 			if (!isOfflineSyncable) return
 
 			const delta = match(onlineProgress)
@@ -211,12 +220,24 @@ export function useSyncOnlineToOfflineProgress({
 
 			// Note: I don't throw here because I intend for this to be a background best-effort sync
 			try {
+				const anchorUpdate = remoteSession?.updatedAt
+					? { lastPulledSessionUpdatedAt: remoteSession.updatedAt }
+					: {}
+				const sessionUpdate = remoteSession?.sessionId
+					? { lastSyncedSessionId: remoteSession.sessionId }
+					: {}
+				const syncedAt = remoteSession?.updatedAt ?? new Date()
 				await db
 					.insert(readProgress)
-					.values(values)
+					.values({ ...values, ...anchorUpdate, ...sessionUpdate })
 					.onConflictDoUpdate({
 						target: readProgress.bookId,
-						set: { ...values, lastModified: new Date() },
+						set: {
+							...values,
+							lastModified: syncedAt,
+							...anchorUpdate,
+							...sessionUpdate,
+						},
 					})
 			} catch (error) {
 				console.error('Failed to sync online progress to offline DB', {

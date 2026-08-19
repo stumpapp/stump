@@ -3,7 +3,7 @@ import { BookReadScreenQuery, ReadiumLocation, ReadiumLocator } from '@stump/gra
 import { ImageBasedBookPageRef, PageSetIndexes } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
-import { Timer } from '~/stores/reader'
+import { Timer } from '~/lib/hooks'
 
 import { OfflineCompatibleReader } from '../types'
 
@@ -55,6 +55,7 @@ export type IImageBasedReaderContext = {
 	currentPage?: number
 	onPageChanged?: (page: number) => void
 	timer: Timer
+	resetTimer: () => void
 	isOPDS?: boolean
 } & OfflineCompatibleReader
 

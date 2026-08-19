@@ -3015,6 +3015,7 @@
 			"page": "Page",
 			"pages": "Pages",
 			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageX": "Page {{current}}",
 			"password": "Password",
 			"progress": "Progress",
 			"publication": "Publication",
@@ -3024,6 +3025,7 @@
 			"readthrough": "Readthrough",
 			"readMore": "Read More",
 			"refresh": "Refresh",
+			"reset": "Reset",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
@@ -3115,7 +3117,9 @@
 				"seeProblems": "See Problems ({{problemCount}})",
 				"hideCurated": "Hide Curated",
 				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"attemptSync": "Attempt Sync",
+				"syncConflicts": "Sync Conflicts"
+
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
@@ -3155,6 +3159,33 @@
 				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
 			},
 			"syncFailed": "Failed to sync offline progress"
+		},
+		"syncConflicts": {
+			"title": "Sync Conflicts",
+			"remainingCount": "{{remainingCount}} Remaining",
+			"noConflicts": {
+				"title": "No Sync Conflicts",
+				"description": "All your local progress is in sync their servers"
+			},
+			"lastCommonSession": "Last common session",
+			"localSession": "Local Session",
+			"remoteSessionWithId": "Remote Session {{sessionId}}",
+			"noCommonSession": "No common reading history",
+			"noRemoteSessions": "No remote sessions",
+			"divergentProgress": {
+				"title": "Divergent Progress",
+				"description": "The last common session was modified on the server after your last sync"
+			},
+			"noCommonReadingHistory": {
+				"title": "No Common Reading History",
+				"description": "This book had no synced history when you started reading offline"
+			},
+			"acceptSource": {
+				"local": "Accept Local",
+				"remote": "Accept Remote",
+				"both": "Accept Both"
+			},
+			"pullError": "Failed to pull remote progress"
 		},
 		"search": {
 			"label": "Search This Server",
@@ -3227,7 +3258,14 @@
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
 				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
+				"incognitoReading": "Incognito Reading",
+				"maxPageViewingSeconds": {
+					"label": "Page Viewing Seconds Limit",
+					"errors": {
+						"minimumValue": "Must be at least 1 second",
+						"integer": "Must be an integer"
+					}
+				}
 			},
 			"stump": {
 				"label": "Stump",
@@ -3398,7 +3436,14 @@
 			},
 			"readingTimer": {
 				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
+				"resetTimer": "Reset Timer",
+				"confirmation": {
+					"message": "Are you sure you want to reset your reading time for '{{bookName}}'?\n\n{{action}}",
+					"action": {
+						"multi-session": "This will set every reading session in this readthrough to 0 seconds.",
+						"single-session": "This will set the reading time to 0 seconds."
+					}
+				}
 			},
 			"allSettings": "All Settings"
 		},

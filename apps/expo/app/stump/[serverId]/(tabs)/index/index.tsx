@@ -1,11 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useFocusEffect } from 'expo-router'
+import { Stack, useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 
 import { ContinueReading, OnDeck, RecentlyAddedBooks } from '~/components/activeServer/home'
 import RecentlyAddedSeriesHorizontal from '~/components/activeServer/home/RecentlyAddedSeriesHorizontal'
 import RefreshControl from '~/components/RefreshControl'
+import { Text } from '~/components/ui'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 export default function Screen() {
 	const [refreshing, setRefreshing] = useState(false)
@@ -32,18 +34,64 @@ export default function Screen() {
 		}, [onRefresh]),
 	)
 
+	const { activeServer } = useActiveServer()
+
+	// TODO: could not get this working :(
+	// const { sdk } = useSDK()
+
+	// const userAvatar = useUserStore((state) => state.user?.avatar)
+
+	// const iconProps: StackToolbarIconProps = userAvatar
+	// 	? {
+	// 			src: {
+	// 				uri: userAvatar.url,
+	// 				width: 32,
+	// 				height: 32,
+	// 				headers: {
+	// 					Authorization: sdk.authorizationHeader || '',
+	// 				},
+	// 			},
+	// 		}
+	// 	: {
+	// 			sf: 'gearshape.fill',
+	// 		}
+
+	const router = useRouter()
+
 	return (
-		<ScrollView
-			className="flex-1 bg-background"
-			refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-			contentInsetAdjustmentBehavior="always"
-		>
-			<View className="gap-4 pt-4 flex flex-1">
-				<ContinueReading />
-				<OnDeck />
-				<RecentlyAddedSeriesHorizontal />
-				<RecentlyAddedBooks />
-			</View>
-		</ScrollView>
+		<>
+			<Stack.Toolbar placement="right">
+				{/*<Stack.Toolbar.Button>
+					<Stack.Toolbar.Icon {...iconProps} />
+				</Stack.Toolbar.Button>*/}
+
+				<Stack.Toolbar.Menu icon="ellipsis">
+					<Stack.Toolbar.MenuAction icon="gearshape">Settings</Stack.Toolbar.MenuAction>
+
+					<Stack.Toolbar.Menu inline>
+						<Stack.Toolbar.MenuAction
+							icon="arrow.left.to.line"
+							// icon={require('./assets/reply.png')}
+							// onPress={() => Alert.alert('Reply')}
+						>
+							Exit
+						</Stack.Toolbar.MenuAction>
+					</Stack.Toolbar.Menu>
+				</Stack.Toolbar.Menu>
+			</Stack.Toolbar>
+
+			<ScrollView
+				className="flex-1 bg-background"
+				refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+				contentInsetAdjustmentBehavior="always"
+			>
+				<View className="gap-4 pt-4 flex flex-1">
+					<ContinueReading />
+					<OnDeck />
+					<RecentlyAddedSeriesHorizontal />
+					<RecentlyAddedBooks />
+				</View>
+			</ScrollView>
+		</>
 	)
 }

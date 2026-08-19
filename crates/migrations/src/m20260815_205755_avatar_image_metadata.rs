@@ -35,7 +35,7 @@ impl MigrationTrait for Migration {
 		conn.execute(Statement::from_sql_and_values(
 			conn.get_database_backend(),
 			r#"
-				UPDATE users SET avatar_updated_at = ?
+				UPDATE users SET avatar_updated_at = $1
 				WHERE avatar_path IS NOT NULL
 			"#,
 			vec![now.into()],

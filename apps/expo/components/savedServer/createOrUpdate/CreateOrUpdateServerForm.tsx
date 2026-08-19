@@ -53,6 +53,8 @@ export function CreateOrUpdateServerForm() {
 					onChangeText={(text) => form.setValue('url', text)}
 				/>
 
+				{/*TODO: re-add test url button*/}
+
 				<Pressable onPress={() => TrueSheet.present('advancedNetworkSettingsSheet')}>
 					{({ pressed }) => (
 						<Card.Row label="Advanced Options" style={pressed && { opacity: 0.7 }}>

@@ -35,7 +35,8 @@ export default function AddServerDialog() {
 	return (
 		<View>
 			<Pressable
-				onPress={() => ref.current?.present()}
+				// onPress={() => ref.current?.present()}
+				onPress={() => TrueSheet.present('createServerSheet')}
 				style={
 					IS_IOS_26_PLUS
 						? {
@@ -57,7 +58,7 @@ export default function AddServerDialog() {
 				)}
 			</Pressable>
 
-			<TrueSheet
+			{/*<TrueSheet
 				ref={ref}
 				detents={[1]}
 				backgroundColor={colors.background.DEFAULT}
@@ -73,7 +74,7 @@ export default function AddServerDialog() {
 				</ScrollView>
 			</TrueSheet>
 
-			<SheetBackDetection ref={ref} isOpen={isOpen} />
+			<SheetBackDetection ref={ref} isOpen={isOpen} />*/}
 		</View>
 	)
 }

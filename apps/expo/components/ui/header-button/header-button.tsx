@@ -2,6 +2,7 @@ import { X } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { useColors } from '~/lib/constants'
+import { cn } from '~/lib/utils'
 
 import { Button } from '../button'
 import { Icon } from '../icon'
@@ -12,12 +13,13 @@ export function HeaderButton({
 	onPress,
 	style,
 	android = { variant: 'default' },
+	className,
 }: HeaderButtonProps) {
 	const colors = useColors()
 
 	return (
 		<Button
-			className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+			className={cn('squircle p-1 tablet:p-2 h-[unset] w-[unset] rounded-full border', className)}
 			variant={android.variant === 'prominent' ? 'brand' : 'outline'}
 			size="icon"
 			style={style}

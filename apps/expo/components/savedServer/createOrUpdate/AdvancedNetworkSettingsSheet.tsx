@@ -1,19 +1,17 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { Check } from 'lucide-react-native'
 import { useRef, useState } from 'react'
-import { ScrollView } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
+import { Heading } from '~/components/ui'
+import { HeaderButton } from '~/components/ui/header-button/header-button'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 
-import { NetworkSettingsSheetContent } from './NetworkSettingsSheetContent'
+import { AdvancedNetworkSettingsSheetContent } from './AdvancedNetworkSettingsSheetContent'
 
-// there is a LOT of overlap between this and the advanced network settings sheet, and it is intentional.
-// frankly, i think the complexity of juggling inline-state vs form-state vs incremental saves etc etc
-// between the modalities is just not worth it, or at the very least the duplication will be easier to
-// maintain than figuring that shit out. so here we are
-
-export function NetworkSettingsSheet() {
+export function AdvancedNetworkSettingsSheet() {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 	const sheetRef = useRef<TrueSheet>(null)
@@ -22,7 +20,7 @@ export function NetworkSettingsSheet() {
 
 	return (
 		<TrueSheet
-			name="serverNetworkSettingsSheet"
+			name="advancedNetworkSettingsSheet"
 			ref={sheetRef}
 			detents={[1]}
 			dimmed={false}
@@ -36,9 +34,25 @@ export function NetworkSettingsSheet() {
 			insetAdjustment="automatic"
 			onDidPresent={() => setIsOpen(true)}
 			onDidDismiss={() => setIsOpen(false)}
+			// i fkcn hate not having grid in nativewind >:(
+			header={
+				<View className="px-4 pt-4 relative flex-row items-center">
+					<View className="inset-x-0 pt-4 absolute items-center">
+						<Heading className="font-semibold leading-6">Network Settings</Heading>
+					</View>
+
+					<View className="flex-1" />
+
+					<HeaderButton
+						ios={{ variant: 'glassProminent' }}
+						icon={{ ios: 'checkmark', android: Check }}
+						onPress={() => sheetRef.current?.dismiss()}
+					/>
+				</View>
+			}
 		>
 			<ScrollView className="p-6 flex-1" nestedScrollEnabled>
-				<NetworkSettingsSheetContent />
+				<AdvancedNetworkSettingsSheetContent />
 			</ScrollView>
 
 			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />

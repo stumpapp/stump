@@ -1,6 +1,7 @@
 import { clone, getColor, serialize, set } from 'colorjs.io/fn'
 import { CircleAlert, LucideIcon } from 'lucide-react-native'
 import React, { ComponentProps, ReactNode, useState } from 'react'
+import { TextInput, TextInputProps } from 'react-native'
 import { Easing, Platform, Pressable, View, ViewProps } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
@@ -101,6 +102,7 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.InputRow = InputRow
 Card.LongRow = LongRow
 Card.RowDivider = Divider
 
@@ -212,6 +214,38 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 					)}
 				</View>
 			)}
+		</BaseRowComponent>
+	)
+}
+
+// TODO: remove scuffed aspects later
+// TODO: make placeholder properly algined
+// TODO: error state
+type InputRowProps = TextInputProps & {
+	label?: string
+}
+function InputRow({ label, value, onChangeText, className, ...props }: InputRowProps) {
+	return (
+		<BaseRowComponent>
+			<View className="gap-x-4 2 flex-row items-center justify-center">
+				<View className="gap-y-2 shrink">
+					{label && <Text className="text-lg shrink">{label}</Text>}
+
+					<View
+						className={cn(
+							'squircle dark:border-white/5 dark:bg-white/5 border-black/5 bg-black/5 h-10 flex flex-row items-center rounded-full border',
+							{ 'h-[unset] min-h-[2.5rem]': props.multiline },
+						)}
+					>
+						<TextInput
+							value={value}
+							onChangeText={onChangeText}
+							className={cn('font-medium pl-3 w-full', className)}
+							{...props}
+						/>
+					</View>
+				</View>
+			</View>
 		</BaseRowComponent>
 	)
 }

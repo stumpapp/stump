@@ -29,8 +29,8 @@ export function CreateOrUpdateServerForm() {
 
 	return (
 		<View className="gap-8">
-			<Card label="Basic Info">
-				<Card.Row label="Kind">
+			<Card label={t(getKey('basicInfo'))}>
+				<Card.Row label={t(getKey('kind'))}>
 					<Picker
 						value={kind}
 						options={[
@@ -42,12 +42,12 @@ export function CreateOrUpdateServerForm() {
 					/>
 				</Card.Row>
 
-				<Card.InputRow label="Name" />
+				<Card.InputRow label={t('common.name')} />
 			</Card>
 
-			<Card label="Networking">
+			<Card label={t(getKey('networking'))}>
 				<Card.InputRow
-					label="Primary URL"
+					label={t(getKey('primaryUrl'))}
 					placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? `/opds/${kind === 'opds-legacy' ? 'v1.2' : 'v2.0'}/catalog` : ''}`}
 					value={url}
 					onChangeText={(text) => form.setValue('url', text)}
@@ -57,7 +57,7 @@ export function CreateOrUpdateServerForm() {
 
 				<Pressable onPress={() => TrueSheet.present('advancedNetworkSettingsSheet')}>
 					{({ pressed }) => (
-						<Card.Row label="Advanced Options" style={pressed && { opacity: 0.7 }}>
+						<Card.Row label={t(getKey('advancedOptions'))} style={pressed && { opacity: 0.7 }}>
 							<Icon as={ChevronRight} size={20} className="text-foreground-muted" />
 						</Card.Row>
 					)}
@@ -66,8 +66,8 @@ export function CreateOrUpdateServerForm() {
 				<AdvancedNetworkSettingsSheet />
 			</Card>
 
-			<Card label="Authentication">
-				<Card.Row label="Method">
+			<Card label={t(getKey('auth.section'))}>
+				<Card.Row label={t(getKey('auth.method'))}>
 					<Controller
 						control={form.control}
 						render={({ field: { onChange, value } }) => (
@@ -89,8 +89,8 @@ export function CreateOrUpdateServerForm() {
 				<AuthModeSection />
 			</Card>
 
-			<Card label="Optional Settings">
-				<Card.Row label="Default Server">
+			<Card label={t(getKey('optionalSettings'))}>
+				<Card.Row label={t(getKey('setAsDefaultServer'))}>
 					<Switch
 						checked={isDefault}
 						onCheckedChange={(checked) => form.setValue('defaultServer', checked)}

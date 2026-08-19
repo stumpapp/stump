@@ -2902,6 +2902,7 @@
 				"title": "Edit Server",
 				"subtitle": "Edit Server"
 			},
+			"basicInfo": "Basic Info",
 			"kind": "Kind",
 			"customHeaders": {
 				"label": "Custom Headers",
@@ -2909,7 +2910,8 @@
 				"invalidHeader": "Invalid header"
 			},
 			"auth": {
-				"label": "Auth",
+				"section": "Authentication",
+				"method": "Method",
 				"login": {
 					"label": "Login",
 					"description": "You will be prompted to login when accessing content as needed"
@@ -2926,13 +2928,33 @@
 			},
 			"serverNamePlaceholder": "My Server",
 			"catalogUrl": "Catalog URL",
+			"primaryUrl": "Primary URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
 			"checkConnection": "Check Connection",
+			"optionalSettings": "Optional Settings",
 			"setAsDefaultServer": "Set as Default Server",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
 				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+			},
+			"networking": "Networking",
+			"advancedOptions": "Advanced Options"
+		},
+		"serverNetworkSettings":{
+			"localProfile": "Local Profile",
+			"autoSwitchToLocal": {
+				"label": "Auto-switch to local profile",
+				"description": "Switch to the local profile when able"
+			},
+			"localUrl": "Local URL",
+			"wifiNetwork": {
+				"label": "Wifi Network",
+				"noAssociatedNetwork": "No Associated Wifi Network",
+				"notConnectedToWifi": "Not connected to Wifi, please connect to finish setting up the local profile",
+				"connectedTip": "If the current network is not listed, you might need to give Stump permission to access your location",
+				"addNetwork": "Add '{{ssid}}'",
+				"requestPermission": "Request Location Permission"
 			}
 		},
 		"bookActions": {

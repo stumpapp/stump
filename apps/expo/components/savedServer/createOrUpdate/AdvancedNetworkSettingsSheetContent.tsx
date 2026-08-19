@@ -6,6 +6,7 @@ import { toast } from 'sonner-native'
 import { AppSettingsRow } from '~/components/appSettings'
 import { Button, Card, Switch, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useWifiSsid } from '~/providers/WifiSsidProvider'
 
 import { CustomHeaders } from './CustomHeaders'
@@ -20,6 +21,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 		name: ['enableLocalProfile', 'localUrl', 'localSsid'],
 	})
 
+	const { t } = useTranslate()
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
 
 	const onChangeEnableLocalProfile = async (enabled: boolean) => {
@@ -36,22 +38,20 @@ export function AdvancedNetworkSettingsSheetContent() {
 		}
 	}
 
-	const fakeSsid = 'My Home Network'
-
 	return (
 		<View className="gap-8 flex-1">
 			<View className="gap-4">
-				<Card label="Local Profile">
+				<Card label={t(getKey('localProfile'))}>
 					<AppSettingsRow
 						icon={Route}
-						title="Auto-switch to local profile"
-						description="Switch to the local profile when able"
+						title={t(getKey('autoSwitchToLocal.label'))}
+						description={t(getKey('autoSwitchToLocal.description'))}
 					>
 						<Switch checked={enableLocalProfile} onCheckedChange={onChangeEnableLocalProfile} />
 					</AppSettingsRow>
 
 					<Card.InputRow
-						label="Local URL"
+						label={t(getKey('localUrl'))}
 						hitSlop={50}
 						selectionColor={colors.fill.brand.DEFAULT}
 						onChangeText={(text) => form.setValue('localUrl', text)}
@@ -68,16 +68,15 @@ export function AdvancedNetworkSettingsSheetContent() {
 
 			{enableLocalProfile && (
 				<View className="gap-4">
-					<Card label="Wifi Network">
+					<Card label={t(getKey('wifiNetwork.label'))}>
 						{!localSsid && (
 							<Card.Row
-								label="No Associated Wifi Network"
-								description={
-									connectedToWifi
-										? // TODO: too wordy?
-											'If the current network is not listed, you might need to give Stump permission to access your location'
-										: 'Once you connect to a network, you will be able to select it below to enable auto-switching'
-								}
+								label={t(getKey('wifiNetwork.noAssociatedNetwork'))}
+								description={t(
+									getKey(
+										connectedToWifi ? 'wifiNetwork.connectedTip' : 'wifiNetwork.noConnectedToWifi',
+									),
+								)}
 							/>
 						)}
 
@@ -90,6 +89,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 									onPress={async () => {}}
 									className="dark:border-white/5 border-black/5"
 								>
+									{/*TODO: sm else*/}
 									<Text>Disconnect</Text>
 								</Button>
 							</Card.Row>
@@ -98,13 +98,17 @@ export function AdvancedNetworkSettingsSheetContent() {
 
 					{ssid && !localSsid && (
 						<Button className="rounded-full">
-							<Text>Add &quot;{fakeSsid}&quot;</Text>
+							<Text>
+								{t(getKey('wifiNetwork.associateWithCurrentNetwork'), {
+									ssid,
+								})}
+							</Text>
 						</Button>
 					)}
 
 					{!ssid && !localSsid && permissionStatus !== 'granted' && (
 						<Button className="rounded-full" onPress={requestPermission} disabled={isLoading}>
-							<Text>Request Location Permission</Text>
+							<Text>{t(getKey('wifiNetwork.requestPermission'))}</Text>
 						</Button>
 					)}
 				</View>
@@ -114,3 +118,6 @@ export function AdvancedNetworkSettingsSheetContent() {
 		</View>
 	)
 }
+
+const LOCALE_KEY = 'serverNetworkSettings'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

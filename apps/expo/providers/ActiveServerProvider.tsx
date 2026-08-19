@@ -27,11 +27,13 @@ export function ActiveServerProvider({ children, activeServer }: ActiveServerPro
 	const [effectiveServerUrl, setEffectiveServerUrl] = useState<string | null>(null)
 
 	const localProfile = activeServer.localProfile
+	const isAutoSwitchEnabled = activeServer.autoSwitchToLocal && localProfile != null
 
 	const evaluateSsidAndSwitchUrl = useCallback(() => {
-		const shouldUseLocal = localProfile != null && ssid != null && localProfile.ssid === ssid
+		const shouldUseLocal =
+			isAutoSwitchEnabled && localProfile != null && ssid != null && localProfile.ssid === ssid
 		setEffectiveServerUrl(shouldUseLocal ? localProfile.url : activeServer.url)
-	}, [ssid, localProfile, activeServer.url])
+	}, [ssid, isAutoSwitchEnabled, localProfile, activeServer.url])
 
 	const debouncedEvaluateSsidAndSwitchUrl = useDebounce(evaluateSsidAndSwitchUrl, 500)
 

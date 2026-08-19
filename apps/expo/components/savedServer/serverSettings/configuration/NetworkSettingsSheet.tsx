@@ -20,7 +20,51 @@
 // - some kind of overview that shows:
 //    - current network (wifi, etc)
 //    - current url (local vs remote)
-// in part this is a bit streamyfin-pilled since that is the only prior art i have but is okie
-export function NetworkSettings() {
-	return null
+//
+
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { useRef, useState } from 'react'
+import { ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { SheetBackDetection } from '~/components/SheetBackDetection'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+
+import { NetworkSettingsSheetContent } from './NetworkSettingsSheetContent'
+
+export function NetworkSettingsSheet() {
+	const colors = useColors()
+	const insets = useSafeAreaInsets()
+	const sheetRef = useRef<TrueSheet>(null)
+
+	const [isOpen, setIsOpen] = useState(false)
+
+	return (
+		<TrueSheet
+			name="serverNetworkSettingsSheet"
+			ref={sheetRef}
+			detents={[1]}
+			dimmed={false}
+			grabber
+			scrollable
+			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
+			grabberOptions={{ color: colors.sheet.grabber }}
+			style={{
+				paddingBottom: insets.bottom,
+			}}
+			insetAdjustment="automatic"
+			// {...sheetProps}
+			// onDidPresent={() => setIsOpen(true)}
+			// onDidDismiss={(event) => {
+			// 	setIsOpen(false)
+			// 	sheetProps?.onDidDismiss?.(event)
+			// }}
+		>
+			<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+				<NetworkSettingsSheetContent />
+			</ScrollView>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+		</TrueSheet>
+	)
 }

@@ -1,4 +1,5 @@
-import Location, { PermissionStatus } from 'expo-location'
+import * as Location from 'expo-location'
+import { PermissionStatus } from 'expo-location'
 import type React from 'react'
 import {
 	createContext,

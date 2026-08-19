@@ -1,3 +1,4 @@
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useQueryClient } from '@tanstack/react-query'
 import { Stack, useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
@@ -6,6 +7,7 @@ import { ScrollView, View } from 'react-native'
 import { ContinueReading, OnDeck, RecentlyAddedBooks } from '~/components/activeServer/home'
 import RecentlyAddedSeriesHorizontal from '~/components/activeServer/home/RecentlyAddedSeriesHorizontal'
 import RefreshControl from '~/components/RefreshControl'
+import { ServerSettingsSheet } from '~/components/savedServer/serverSettings/ServerSettingsSheet'
 import { Text } from '~/components/ui'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
@@ -66,7 +68,12 @@ export default function Screen() {
 				</Stack.Toolbar.Button>*/}
 
 				<Stack.Toolbar.Menu icon="ellipsis">
-					<Stack.Toolbar.MenuAction icon="gearshape">Settings</Stack.Toolbar.MenuAction>
+					<Stack.Toolbar.MenuAction
+						icon="gearshape"
+						onPress={() => TrueSheet.present('serverSettingsSheet')}
+					>
+						Settings
+					</Stack.Toolbar.MenuAction>
 
 					<Stack.Toolbar.Menu inline>
 						<Stack.Toolbar.MenuAction
@@ -92,6 +99,8 @@ export default function Screen() {
 					<RecentlyAddedBooks />
 				</View>
 			</ScrollView>
+
+			<ServerSettingsSheet />
 		</>
 	)
 }

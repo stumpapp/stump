@@ -294,7 +294,12 @@ function BaseRowComponent({
 	)
 }
 
-function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundColor?: string }) {
+type GradientIconProps = {
+	icon: LucideIcon
+	backgroundColor?: string
+}
+
+export function GradientIcon({ icon, backgroundColor }: GradientIconProps) {
 	const { isDarkColorScheme } = useColorScheme()
 
 	const lightPlainColor = getColor(backgroundColor || '#404040')

@@ -121,11 +121,19 @@ type GlowProps = {
 	width: number
 	padding?: number
 	logoSize?: number
+	borderWidth?: number
 	// ^ all these will be used to position the gradient to give it that
 	// look of blooming outward from logo
 } & Props
 
-export function ServerLogoGlow({ server, height, width, padding = 16, logoSize = 32 }: GlowProps) {
+export function ServerLogoGlow({
+	server,
+	height,
+	width,
+	padding = 14,
+	logoSize = 32,
+	borderWidth = 1,
+}: GlowProps) {
 	// stump doesn't really support anything outside of stump or opds, so opds operates
 	// as the fallback here if a server cannot be identified as any "known" server.
 	// ideally though that list will grow to whatever folks use so people can have
@@ -146,8 +154,8 @@ export function ServerLogoGlow({ server, height, width, padding = 16, logoSize =
 		[server],
 	)
 
-	const logoCenterX = width - padding - logoSize / 2
-	const logoCenterY = padding + logoSize / 2
+	const logoCenterX = width - padding - logoSize / 2 - borderWidth
+	const logoCenterY = padding + logoSize / 2 + borderWidth
 	// ^ a little basic math so that we know where the bloom outward should start
 	const glowRadius = Math.max(width, height) * 1.15
 
@@ -157,8 +165,9 @@ export function ServerLogoGlow({ server, height, width, padding = 16, logoSize =
 		<Canvas
 			style={{
 				position: 'absolute',
-				top: 0,
-				left: 0,
+				// children of a view start after its border, so we offset by the border width to have the glow start under the border
+				top: -borderWidth,
+				left: -borderWidth,
 				width,
 				height,
 			}}

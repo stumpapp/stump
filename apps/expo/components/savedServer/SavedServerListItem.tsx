@@ -159,7 +159,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 				]}
 			>
 				<View className="px-4 py-4 tablet:py-5 squircle ios:rounded-[2rem] bg-background-surface h-36 border-black/5 dark:border-white/[0.07] flex w-full flex-1 overflow-hidden rounded-3xl border">
-					<ServerLogoGlow server={server} width={itemWidth} height={144} />
+					<ServerLogoGlow server={server} width={itemWidth} height={126} />
 
 					<View className="flex-1 flex-row items-start justify-between">
 						{/*TODO: pulsing dot, green = ping works + authed, yellow = ping works but 4xx err, red ping failed*/}

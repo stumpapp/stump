@@ -92,6 +92,8 @@ export default function Screen() {
 				refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="always"
 			>
+				<ServerSettingsSheet />
+
 				<View className="gap-4 pt-4 flex flex-1">
 					<ContinueReading />
 					<OnDeck />
@@ -99,8 +101,6 @@ export default function Screen() {
 					<RecentlyAddedBooks />
 				</View>
 			</ScrollView>
-
-			<ServerSettingsSheet />
 		</>
 	)
 }

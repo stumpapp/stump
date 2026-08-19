@@ -47,13 +47,20 @@ async function fetchStumpAvatar(serverId: string, api: Api): Promise<ServerAvata
 
 	if (!avatar) return null
 
-	const file = await downloadImage(serverId, avatar.url, {
-		headers: await api.getHeaders(), // auth is important ig
-	})
+	try {
+		const file = await downloadImage(serverId, avatar.url, {
+			headers: await api.getHeaders(), // auth is important ig
+		})
 
-	return {
-		uri: file.uri,
-		metadata: avatar.metadata,
+		return {
+			uri: file.uri,
+			metadata: avatar.metadata,
+		}
+	} catch (e) {
+		// if an avatar doesn't actually exist, e.g. it was deleted, the server will 404. downloadImage internally
+		// uses File.downloadFileAsync which will throw if it gets any non-2xx code
+		console.error('Failed to download avatar', e)
+		return null
 	}
 }
 

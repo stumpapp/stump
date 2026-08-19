@@ -1,11 +1,18 @@
-import { queryClient, SDKContext, StumpClientContextProvider } from '@stump/client'
+import {
+	parseGraphQLDateTime,
+	queryClient,
+	SDKContext,
+	StumpClientContextProvider,
+} from '@stump/client'
 import { UserPermission } from '@stump/graphql'
 import { Api, AuthUser, LoginResponse } from '@stump/sdk'
 import { isAxiosError } from 'axios'
 import { Redirect, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import getProperty from 'lodash/get'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
+import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import { ActiveServerContext, StumpServerContext } from '~/components/activeServer'
 import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import { ServerConnectFailed, ServerErrorBoundary } from '~/components/error'
@@ -145,6 +152,26 @@ export default function Screen() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[sdk, user],
 	)
+
+	const didSyncAvatar = useRef(false)
+	useEffect(() => {
+		if (!user || !sdk || !sdk.isAuthed || didSyncAvatar.current || !activeServer) return
+
+		const lastPulledAt = getProperty(activeServer.avatar, 'lastModified')
+		const avatarUpdatedAt = parseGraphQLDateTime(user.avatar.lastModified)
+
+		// no update stamp = no avatar (moving forward)
+		if (!avatarUpdatedAt) return
+
+		// pulled more recently than update = nothing to pull
+		if (!!lastPulledAt && lastPulledAt >= avatarUpdatedAt) return
+
+		const syncUserAvatar = async () => {
+			await pullServerAvatar(activeServer, sdk)
+			didSyncAvatar.current = true
+		}
+		syncUserAvatar()
+	}, [sdk, activeServer, user])
 
 	const onResetState = useCallback(() => {
 		isServerAccessible.current = true

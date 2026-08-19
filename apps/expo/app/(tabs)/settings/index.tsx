@@ -17,7 +17,6 @@ import {
 	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
-	MaskURLs,
 	MaxPageViewingSeconds,
 	PerformanceMonitor,
 	PreferMinimalReader,
@@ -29,7 +28,7 @@ import {
 	ThumbnailResizeMode,
 	TintListBackground,
 } from '~/components/appSettings/preferences'
-import { BookClubsEnabled, StumpEnabled } from '~/components/appSettings/stump'
+import { BookClubsEnabled } from '~/components/appSettings/stump'
 import { Card } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 
@@ -71,7 +70,6 @@ export default function Screen() {
 					label={t(getSectionLabelKey('stump'))}
 					description={t(getSectionKey('stump', 'description'))}
 				>
-					<StumpEnabled />
 					<AutoSyncLocalData />
 					<BookClubsEnabled />
 				</Card>
@@ -85,7 +83,6 @@ export default function Screen() {
 					{__DEV__ && <DeleteDatabase />}
 					<PerformanceMonitor />
 					<ReduceAnimations />
-					<MaskURLs />
 					<DisplayLanguageKeys />
 					<EnableDebugAnalytics />
 				</Card>

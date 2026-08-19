@@ -3,7 +3,7 @@ use sea_orm::{
 	EntityTrait, QuerySelect, QueryTrait,
 };
 
-use crate::entity::user::AuthUser;
+use crate::{entity::user::AuthUser, shared::image::ImageRef};
 
 pub fn condition_to_string(condition: &Condition) -> String {
 	Query::select()
@@ -25,7 +25,7 @@ pub fn get_default_user() -> AuthUser {
 		id: "42".to_string(),
 		username: "test".to_string(),
 		avatar_path: None,
-		avatar_url: None,
+		avatar: ImageRef::default(),
 		is_server_owner: true,
 		is_locked: false,
 		permissions: vec![],

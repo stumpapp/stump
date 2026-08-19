@@ -65,6 +65,7 @@ type Documents = {
     "\n\tquery SmartListsTabList {\n\t\tsmartLists {\n\t\t\tid\n\t\t\t...SmartListGridItem\n\t\t}\n\t}\n": typeof types.SmartListsTabListDocument,
     "\n\tquery PullServerAnnotations($id: ID!) {\n\t\tannotationsByMediaId(id: $id) {\n\t\t\tid\n\t\t\tannotationText\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\ttitle\n\t\t\t\ttype\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t\tpartialCfi\n\t\t\t\t}\n\t\t\t\ttext {\n\t\t\t\t\tafter\n\t\t\t\t\tbefore\n\t\t\t\t\thighlight\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PullServerAnnotationsDocument,
     "\n\tquery PullServerBookmarks($id: ID!) {\n\t\tbookmarksByMediaId(id: $id) {\n\t\t\tid\n\t\t\tepubcfi\n\t\t\tmediaId\n\t\t\tpreviewContent\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t\tpartialCfi\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PullServerBookmarksDocument,
+    "\n\tquery PullServerAvatar {\n\t\tme {\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t}\n\t\t\t\tlastModified\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PullServerAvatarDocument,
     "\n\tquery PullServerReadProgression($filter: MediaFilterInput!) {\n\t\tmedia(filter: $filter, pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\treadProgress {\n\t\t\t\t\tsessionId\n\t\t\t\t\tpage\n\t\t\t\t\tpercentageCompleted\n\t\t\t\t\tepubcfi\n\t\t\t\t\tupdatedAt\n\t\t\t\t\telapsedSeconds\n\t\t\t\t\tlocator {\n\t\t\t\t\t\tchapterTitle\n\t\t\t\t\t\thref\n\t\t\t\t\t\ttitle\n\t\t\t\t\t\ttype\n\t\t\t\t\t\tlocations {\n\t\t\t\t\t\t\tfragments\n\t\t\t\t\t\t\tprogression\n\t\t\t\t\t\t\tposition\n\t\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\t\tcssSelector\n\t\t\t\t\t\t\tpartialCfi\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\treadHistory {\n\t\t\t\t\tcompletedAt\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PullServerReadProgressionDocument,
     "\n\tmutation PushCreateAnnotation($input: CreateAnnotationInput!) {\n\t\tcreateAnnotation(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.PushCreateAnnotationDocument,
     "\n\tmutation PushUpdateAnnotation($input: UpdateAnnotationInput!) {\n\t\tupdateAnnotation(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.PushUpdateAnnotationDocument,
@@ -246,8 +247,8 @@ type Documents = {
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": typeof types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": typeof types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteApiKeyConfirmModalDocument,
-    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": typeof types.UploadUserAvatarDocument,
-    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": typeof types.DeleteUserAvatarDocument,
+    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UploadUserAvatarDocument,
+    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.DeleteUserAvatarDocument,
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": typeof types.UpdateUserProfileFormDocument,
     "\n\tquery NavigationArrangement {\n\t\tme {\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.NavigationArrangementDocument,
     "\n\tmutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {\n\t\tupdateNavigationArrangement(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.NavigationArrangementUpdateDocument,
@@ -373,6 +374,7 @@ const documents: Documents = {
     "\n\tquery SmartListsTabList {\n\t\tsmartLists {\n\t\t\tid\n\t\t\t...SmartListGridItem\n\t\t}\n\t}\n": types.SmartListsTabListDocument,
     "\n\tquery PullServerAnnotations($id: ID!) {\n\t\tannotationsByMediaId(id: $id) {\n\t\t\tid\n\t\t\tannotationText\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\ttitle\n\t\t\t\ttype\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t\tpartialCfi\n\t\t\t\t}\n\t\t\t\ttext {\n\t\t\t\t\tafter\n\t\t\t\t\tbefore\n\t\t\t\t\thighlight\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PullServerAnnotationsDocument,
     "\n\tquery PullServerBookmarks($id: ID!) {\n\t\tbookmarksByMediaId(id: $id) {\n\t\t\tid\n\t\t\tepubcfi\n\t\t\tmediaId\n\t\t\tpreviewContent\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t\tpartialCfi\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PullServerBookmarksDocument,
+    "\n\tquery PullServerAvatar {\n\t\tme {\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t}\n\t\t\t\tlastModified\n\t\t\t}\n\t\t}\n\t}\n": types.PullServerAvatarDocument,
     "\n\tquery PullServerReadProgression($filter: MediaFilterInput!) {\n\t\tmedia(filter: $filter, pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\treadProgress {\n\t\t\t\t\tsessionId\n\t\t\t\t\tpage\n\t\t\t\t\tpercentageCompleted\n\t\t\t\t\tepubcfi\n\t\t\t\t\tupdatedAt\n\t\t\t\t\telapsedSeconds\n\t\t\t\t\tlocator {\n\t\t\t\t\t\tchapterTitle\n\t\t\t\t\t\thref\n\t\t\t\t\t\ttitle\n\t\t\t\t\t\ttype\n\t\t\t\t\t\tlocations {\n\t\t\t\t\t\t\tfragments\n\t\t\t\t\t\t\tprogression\n\t\t\t\t\t\t\tposition\n\t\t\t\t\t\t\ttotalProgression\n\t\t\t\t\t\t\tcssSelector\n\t\t\t\t\t\t\tpartialCfi\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\treadHistory {\n\t\t\t\t\tcompletedAt\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PullServerReadProgressionDocument,
     "\n\tmutation PushCreateAnnotation($input: CreateAnnotationInput!) {\n\t\tcreateAnnotation(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.PushCreateAnnotationDocument,
     "\n\tmutation PushUpdateAnnotation($input: UpdateAnnotationInput!) {\n\t\tupdateAnnotation(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.PushUpdateAnnotationDocument,
@@ -554,8 +556,8 @@ const documents: Documents = {
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteApiKeyConfirmModalDocument,
-    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": types.UploadUserAvatarDocument,
-    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n": types.DeleteUserAvatarDocument,
+    "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.UploadUserAvatarDocument,
+    "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.DeleteUserAvatarDocument,
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t}\n\t}\n": types.UpdateUserProfileFormDocument,
     "\n\tquery NavigationArrangement {\n\t\tme {\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangementConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.NavigationArrangementDocument,
     "\n\tmutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {\n\t\tupdateNavigationArrangement(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.NavigationArrangementUpdateDocument,
@@ -831,6 +833,10 @@ export function graphql(source: "\n\tquery PullServerAnnotations($id: ID!) {\n\t
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery PullServerBookmarks($id: ID!) {\n\t\tbookmarksByMediaId(id: $id) {\n\t\t\tid\n\t\t\tepubcfi\n\t\t\tmediaId\n\t\t\tpreviewContent\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t\tpartialCfi\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').PullServerBookmarksDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery PullServerAvatar {\n\t\tme {\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t\tmetadata {\n\t\t\t\t\taverageColor\n\t\t\t\t}\n\t\t\t\tlastModified\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').PullServerAvatarDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1558,11 +1564,11 @@ export function graphql(source: "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n"): typeof import('./graphql').UploadUserAvatarDocument;
+export function graphql(source: "\n\tmutation UploadUserAvatar($file: Upload!) {\n\t\tuploadUserAvatar(upload: $file) {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UploadUserAvatarDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteUserAvatarDocument;
+export function graphql(source: "\n\tmutation DeleteUserAvatar {\n\t\tdeleteUserAvatar {\n\t\t\tid\n\t\t\tavatar {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteUserAvatarDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

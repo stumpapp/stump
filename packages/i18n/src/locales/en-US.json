@@ -2910,9 +2910,13 @@
 			},
 			"auth": {
 				"label": "Auth",
-				"default": {
+				"login": {
 					"label": "Login",
 					"description": "You will be prompted to login when accessing content as needed"
+				},
+				"none": {
+					"label": "None",
+					"description": "No authentication is required for this server or auth is provided through the URL"
 				},
 				"token": {
 					"label": "Token",
@@ -2926,7 +2930,6 @@
 			"didConnect": "Connected",
 			"checkConnection": "Check Connection",
 			"setAsDefaultServer": "Set as Default Server",
-			"enableOPDS": "Enable OPDS",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
 				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
@@ -3034,7 +3037,9 @@
 			"url": "URL",
 			"username": "Username",
 			"value": "Value",
-			"version": "Version"
+			"version": "Version",
+			"accessOpdsV2": "Access OPDS v2.0",
+			"accessOpdsV1": "Access OPDS v1.2"
 		},
 		"errors": {
 			"unknown": "Unknown error"
@@ -3327,7 +3332,6 @@
 				},
 				"performanceMonitor": "Performance Monitor",
 				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
 				"displayLanguageKeys": {
 					"label": "Display Language Keys",
 					"options": {

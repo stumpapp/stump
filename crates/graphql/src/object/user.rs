@@ -8,6 +8,7 @@ use models::{
 	},
 	shared::{
 		enums::{ReadingStatus, UserPermission},
+		image::ImageRef,
 		permission_set::PermissionSet,
 	},
 };
@@ -37,6 +38,9 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
+	#[graphql(
+		deprecation = "This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays."
+	)]
 	async fn avatar_url(&self, ctx: &Context<'_>) -> Result<Option<String>> {
 		let service = ctx.data::<ServiceContext>()?;
 
@@ -48,6 +52,30 @@ impl User {
 			"/api/v2/users/{}/avatar",
 			self.model.id
 		))))
+	}
+
+	/// a reference to the avatar image and its metadata for this user
+	async fn avatar(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		let dimensions = self
+			.model
+			.avatar_meta
+			.as_ref()
+			.and_then(|meta| meta.dimensions.as_ref())
+			.map(|dim| (dim.width, dim.height));
+		let last_modified = self.model.avatar_updated_at;
+
+		Ok(ImageRef {
+			url: service.cache_friendly_url(
+				format!("/api/v2/users/{}/avatar", self.model.id),
+				&last_modified,
+			),
+			height: dimensions.as_ref().map(|dim| dim.1),
+			width: dimensions.as_ref().map(|dim| dim.0),
+			metadata: self.model.avatar_meta.clone(),
+			last_modified,
+		})
 	}
 
 	#[graphql(

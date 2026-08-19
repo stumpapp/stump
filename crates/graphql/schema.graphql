@@ -930,6 +930,7 @@ type ImageRef {
 	height: Int
 	width: Int
 	metadata: ImageMetadata
+	lastModified: DateTime
 }
 
 "The resize options to use when generating an image"
@@ -3523,12 +3524,16 @@ type User {
 	username: String!
 	isServerOwner: Boolean!
 	avatarPath: String
+	avatarMeta: ImageMetadata
+	avatarUpdatedAt: DateTime
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
 	oidcEmail: String
-	avatarUrl: String
+	avatarUrl: String @deprecated(reason: "This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays.")
+	"a reference to the avatar image and its metadata for this user"
+	avatar: ImageRef!
 	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!

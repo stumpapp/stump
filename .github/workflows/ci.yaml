@@ -65,7 +65,7 @@ jobs:
           cargo dump-schema -- --check
 
       - name: Run tests
-        run: cargo test
+        run: cargo test && cargo test --features postgres-tests -p migrations
 
   check-coverage:
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"

@@ -996,6 +996,7 @@ export type ImageProcessorOptionsInput = {
 export type ImageRef = {
   __typename?: 'ImageRef';
   height?: Maybe<Scalars['Int']['output']>;
+  lastModified?: Maybe<Scalars['DateTime']['output']>;
   metadata?: Maybe<ImageMetadata>;
   url: Scalars['String']['output'];
   width?: Maybe<Scalars['Int']['output']>;
@@ -4741,7 +4742,12 @@ export type UploadSeriesInput = {
 export type User = {
   __typename?: 'User';
   ageRestriction?: Maybe<AgeRestriction>;
+  /** a reference to the avatar image and its metadata for this user */
+  avatar: ImageRef;
+  avatarMeta?: Maybe<ImageMetadata>;
   avatarPath?: Maybe<Scalars['String']['output']>;
+  avatarUpdatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** @deprecated This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays. */
   avatarUrl?: Maybe<Scalars['String']['output']>;
   continueReading: PaginatedMediaResponse;
   createdAt: Scalars['DateTime']['output'];
@@ -5341,6 +5347,11 @@ export type PullServerBookmarksQueryVariables = Exact<{
 
 
 export type PullServerBookmarksQuery = { __typename?: 'Query', bookmarksByMediaId: Array<{ __typename?: 'Bookmark', id: string, epubcfi?: string | null, mediaId: string, previewContent?: string | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null }> };
+
+export type PullServerAvatarQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PullServerAvatarQuery = { __typename?: 'Query', me: { __typename?: 'User', avatar: { __typename?: 'ImageRef', url: string, lastModified?: any | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null } | null } } };
 
 export type PullServerReadProgressionQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -6552,12 +6563,12 @@ export type UploadUserAvatarMutationVariables = Exact<{
 }>;
 
 
-export type UploadUserAvatarMutation = { __typename?: 'Mutation', uploadUserAvatar: { __typename?: 'User', id: string, avatarUrl?: string | null } };
+export type UploadUserAvatarMutation = { __typename?: 'Mutation', uploadUserAvatar: { __typename?: 'User', id: string, avatar: { __typename?: 'ImageRef', url: string } } };
 
 export type DeleteUserAvatarMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeleteUserAvatarMutation = { __typename?: 'Mutation', deleteUserAvatar: { __typename?: 'User', id: string, avatarUrl?: string | null } };
+export type DeleteUserAvatarMutation = { __typename?: 'Mutation', deleteUserAvatar: { __typename?: 'User', id: string, avatar: { __typename?: 'ImageRef', url: string } } };
 
 export type UpdateUserProfileFormMutationVariables = Exact<{
   input: UpdateUserInput;
@@ -9471,6 +9482,19 @@ export const PullServerBookmarksDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PullServerBookmarksQuery, PullServerBookmarksQueryVariables>;
+export const PullServerAvatarDocument = new TypedDocumentString(`
+    query PullServerAvatar {
+  me {
+    avatar {
+      url
+      metadata {
+        averageColor
+      }
+      lastModified
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PullServerAvatarQuery, PullServerAvatarQueryVariables>;
 export const PullServerReadProgressionDocument = new TypedDocumentString(`
     query PullServerReadProgression($filter: MediaFilterInput!) {
   media(filter: $filter, pagination: {none: {unpaginated: true}}) {
@@ -12828,7 +12852,9 @@ export const UploadUserAvatarDocument = new TypedDocumentString(`
     mutation UploadUserAvatar($file: Upload!) {
   uploadUserAvatar(upload: $file) {
     id
-    avatarUrl
+    avatar {
+      url
+    }
   }
 }
     `) as unknown as TypedDocumentString<UploadUserAvatarMutation, UploadUserAvatarMutationVariables>;
@@ -12836,7 +12862,9 @@ export const DeleteUserAvatarDocument = new TypedDocumentString(`
     mutation DeleteUserAvatar {
   deleteUserAvatar {
     id
-    avatarUrl
+    avatar {
+      url
+    }
   }
 }
     `) as unknown as TypedDocumentString<DeleteUserAvatarMutation, DeleteUserAvatarMutationVariables>;

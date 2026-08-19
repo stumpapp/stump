@@ -397,6 +397,7 @@ impl Library {
 			height: dimensions.map(|(_, height)| height),
 			width: dimensions.map(|(width, _)| width),
 			metadata: self.model.thumbnail_meta.clone(),
+			..Default::default()
 		})
 	}
 }

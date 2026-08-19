@@ -3285,7 +3285,6 @@
 				},
 				"performanceMonitor": "Leistungsüberwachung",
 				"reduceAnimations": "Animationen verringern",
-				"maskUrls": "URLs verstecken",
 				"displayLanguageKeys": {
 					"label": "Sprachschlüssel anzeigen",
 					"options": {

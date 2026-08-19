@@ -91,6 +91,14 @@ export const toRgbChannels = (color: ColorTypes) => {
 	return `${r} ${g} ${b}`
 }
 
+export const toRgba = (color: ColorTypes, alpha: number) => {
+	const hex = toHex(color)
+	const r = parseInt(hex.slice(1, 3), 16)
+	const g = parseInt(hex.slice(3, 5), 16)
+	const b = parseInt(hex.slice(5, 7), 16)
+	return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 export function reduceChroma(color: ColorTypes, chromaScale: number) {
 	const plainColor = getColor(color)
 	setColor(plainColor, { 'oklch.c': (c) => c * chromaScale })

@@ -75,7 +75,6 @@ export function CreateServerSheet() {
 					ref={sheetRef}
 					detents={[1]}
 					scrollable
-					scrollableOptions={{ keyboardScrollOffset: 16 }}
 					headerLabel={t('addOrEditServer.createServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{

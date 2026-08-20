@@ -31,6 +31,8 @@ export default function ScrollViewSheet({
 	headerLabel,
 	headerLeftButton,
 	headerRightButton,
+	onDidPresent,
+	onDidDismiss,
 	...props
 }: Props) {
 	const colors = useColors()
@@ -50,9 +52,12 @@ export default function ScrollViewSheet({
 			style={{ paddingBottom: insets.bottom }}
 			insetAdjustment="automatic"
 			header={
+				// i fkcn hate not having grid in nativewind >:(
 				<View className="px-4 pt-4 flex-row items-center justify-between">
 					{resolveHeaderButton(headerLeftButton, sheetRef)}
-					<Heading className="font-semibold leading-6">{headerLabel}</Heading>
+					<View className="inset-x-0 pt-4 absolute items-center">
+						<Heading className="font-semibold leading-6">{headerLabel}</Heading>
+					</View>
 					{resolveHeaderButton(headerRightButton, sheetRef)}
 				</View>
 			}
@@ -61,13 +66,19 @@ export default function ScrollViewSheet({
 				IS_IOS_26_PLUS ? { position: 'absolute', left: 0, right: 0, zIndex: 1 } : undefined
 			}
 			scrollableOptions={{ topScrollEdgeEffect: 'soft' }}
-			onDidPresent={() => setIsOpen(true)}
-			onDidDismiss={() => setIsOpen(false)}
+			onDidPresent={(e) => {
+				setIsOpen(true)
+				onDidPresent?.(e)
+			}}
+			onDidDismiss={(e) => {
+				setIsOpen(false)
+				onDidDismiss?.(e)
+			}}
 			{...props}
 		>
 			<ScrollView
 				className={cn(
-					'p-6 flex-1',
+					'p-6',
 					// the header is position: 'absolute' so we must manually offset
 					IS_IOS_26_PLUS && 'pt-20',
 				)}

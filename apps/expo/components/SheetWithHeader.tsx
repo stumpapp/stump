@@ -23,10 +23,9 @@ type HeaderProps = {
 
 type Props = TrueSheetProps & { ref?: RefObject<TrueSheet | null> } & HeaderProps
 
-// TODO: replace CreateAnnotationSheet and AnnotationSheetHeader with this stuff
-
-export default function ScrollViewSheet({
+export default function SheetWithHeader({
 	children,
+	scrollable,
 	ref,
 	headerLabel,
 	headerLeftButton,
@@ -42,11 +41,14 @@ export default function ScrollViewSheet({
 	const internalRef = useRef<TrueSheet>(null)
 	const sheetRef = ref ?? internalRef
 
+	const blurGradientHeader =
+		!!(headerLabel || headerLeftButton || headerRightButton) && IS_IOS_26_PLUS
+
 	return (
 		<TrueSheet
 			ref={sheetRef}
 			grabber
-			scrollable
+			scrollable={scrollable}
 			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 			grabberOptions={{ color: colors.sheet.grabber }}
 			style={{ paddingBottom: insets.bottom }}
@@ -63,7 +65,7 @@ export default function ScrollViewSheet({
 			}
 			headerStyle={
 				// for the blur gradient under the header
-				IS_IOS_26_PLUS ? { position: 'absolute', left: 0, right: 0, zIndex: 1 } : undefined
+				blurGradientHeader ? { position: 'absolute', left: 0, right: 0, zIndex: 1 } : undefined
 			}
 			scrollableOptions={{ topScrollEdgeEffect: 'soft' }}
 			onDidPresent={(e) => {
@@ -80,9 +82,9 @@ export default function ScrollViewSheet({
 				className={cn(
 					'p-6',
 					// the header is position: 'absolute' so we must manually offset
-					IS_IOS_26_PLUS && 'pt-20',
+					blurGradientHeader && 'pt-[5.25rem]',
 				)}
-				nestedScrollEnabled
+				scrollEnabled={scrollable}
 			>
 				{children}
 			</ScrollView>

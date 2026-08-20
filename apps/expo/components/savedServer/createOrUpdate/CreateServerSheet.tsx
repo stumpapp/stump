@@ -5,7 +5,7 @@ import { useCallback, useRef } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { Pressable } from 'react-native-gesture-handler'
 
-import ScrollViewSheet from '~/components/ScrollViewSheet'
+import SheetWithHeader from '~/components/SheetWithHeader'
 import { Icon } from '~/components/ui'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
@@ -70,10 +70,11 @@ export function CreateServerSheet() {
 			</Pressable>
 
 			<FormProvider {...form}>
-				<ScrollViewSheet
+				<SheetWithHeader
 					name="createServerSheet"
 					ref={sheetRef}
 					detents={[1]}
+					scrollable
 					headerLabel={t('addOrEditServer.createServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{
@@ -83,7 +84,7 @@ export function CreateServerSheet() {
 					}}
 				>
 					<CreateOrUpdateServerForm />
-				</ScrollViewSheet>
+				</SheetWithHeader>
 			</FormProvider>
 		</>
 	)

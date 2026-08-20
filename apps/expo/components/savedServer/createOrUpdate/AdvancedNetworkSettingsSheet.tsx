@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import ScrollViewSheet from '~/components/ScrollViewSheet'
+import SheetWithHeader from '~/components/SheetWithHeader'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 
 import { AdvancedNetworkSettingsSheetContent } from './AdvancedNetworkSettingsSheetContent'
@@ -13,7 +13,7 @@ export function AdvancedNetworkSettingsSheet() {
 	const sheetRef = useRef<TrueSheet>(null)
 
 	return (
-		<ScrollViewSheet
+		<SheetWithHeader
 			name="advancedNetworkSettingsSheet"
 			ref={sheetRef}
 			detents={[1]}
@@ -30,6 +30,6 @@ export function AdvancedNetworkSettingsSheet() {
 			headerRightButton={{ type: 'check', onPress: () => sheetRef.current?.dismiss() }}
 		>
 			<AdvancedNetworkSettingsSheetContent />
-		</ScrollViewSheet>
+		</SheetWithHeader>
 	)
 }

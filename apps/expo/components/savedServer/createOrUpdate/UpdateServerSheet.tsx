@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 
-import ScrollViewSheet from '~/components/ScrollViewSheet'
+import SheetWithHeader from '~/components/SheetWithHeader'
 import { useTranslate } from '~/lib/hooks'
 import { useSavedServers } from '~/stores'
 import { SavedServerWithConfig } from '~/stores/savedServer'
@@ -76,10 +76,11 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 	return (
 		<>
 			<FormProvider {...form}>
-				<ScrollViewSheet
+				<SheetWithHeader
 					name="updateServerSheet"
 					ref={sheetRef}
 					detents={[1]}
+					scrollable
 					headerLabel={t('addOrEditServer.updateServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{
@@ -92,7 +93,7 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 					onDidDismiss={onClose}
 				>
 					<CreateOrUpdateServerForm />
-				</ScrollViewSheet>
+				</SheetWithHeader>
 			</FormProvider>
 		</>
 	)

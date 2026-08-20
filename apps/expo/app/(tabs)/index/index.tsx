@@ -7,7 +7,7 @@ import { Alert, Linking, ScrollView, useWindowDimensions, View } from 'react-nat
 import EmptyState from '~/components/EmptyState'
 import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
 import { useOwlHeaderOffset } from '~/components/Owl'
-import EditServerDialog from '~/components/savedServer/EditServerDialog'
+import { UpdateServerSheet } from '~/components/savedServer/createOrUpdate/UpdateServerSheet'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { Button, Icon, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
@@ -165,10 +165,10 @@ export default function Screen() {
 			// layout to use toolbar api etc etc
 			ListHeaderComponent={
 				<>
-					<EditServerDialog
+					<UpdateServerSheet
 						editingServer={editingServer}
 						onClose={() => setEditingServer(null)}
-						onSubmit={onEdit}
+						// onSubmit={onEdit}
 					/>
 				</>
 			}

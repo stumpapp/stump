@@ -42,7 +42,12 @@ export function CreateOrUpdateServerForm() {
 					/>
 				</Card.Row>
 
-				<Card.InputRow label={t('common.name')} />
+				<Card.InputRow
+					label={t('common.name')}
+					placeholder={t(getKey('serverNamePlaceholder'))}
+					value={form.getValues('name')}
+					onChangeText={(text) => form.setValue('name', text)}
+				/>
 			</Card>
 
 			<Card label={t(getKey('networking'))}>

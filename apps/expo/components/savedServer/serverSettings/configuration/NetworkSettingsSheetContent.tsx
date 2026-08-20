@@ -1,4 +1,4 @@
-import { ArrowUpDown, RadioTower, Route, Router, Wifi } from 'lucide-react-native'
+import { ArrowUpDown, RadioTower, Route, Router } from 'lucide-react-native'
 import { useState } from 'react'
 import { TextInput, View } from 'react-native'
 import { toast } from 'sonner-native'
@@ -6,14 +6,14 @@ import { toast } from 'sonner-native'
 import { AppSettingsRow } from '~/components/appSettings'
 import { Button, Card, Switch, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { useServerSettingsContext } from '~/providers/ServerSettingsProvider'
 import { useWifiSsid } from '~/providers/WifiSsidProvider'
 
 export function NetworkSettingsSheetContent() {
+	const { t } = useTranslate()
 	const { activeServer, patchServer } = useServerSettingsContext()
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
-
-	console.log('NetworkSettingsSheetContent', { connectedToWifi, ssid, permissionStatus, isLoading })
 
 	const colors = useColors()
 
@@ -141,13 +141,22 @@ export function NetworkSettingsSheetContent() {
 					<Card label="Wifi Network">
 						{!activeServer.localProfile?.ssid && (
 							<Card.Row
-								label="No Associated Wifi Network"
-								description={
-									connectedToWifi
-										? // TODO: too wordy?
-											'If the current network is not listed, you might need to give Stump permission to access your location'
-										: 'Once you connect to a network, you will be able to select it below to enable auto-switching'
-								}
+								label={t(
+									getKey(
+										permissionStatus !== 'granted'
+											? 'wifiNetwork.permissionNotGranted.label'
+											: 'wifiNetwork.noAssociatedNetwork',
+									),
+								)}
+								description={t(
+									getKey(
+										permissionStatus !== 'granted'
+											? 'wifiNetwork.permissionNotGranted.description'
+											: connectedToWifi
+												? 'wifiNetwork.connectedTip'
+												: 'wifiNetwork.notConnectedToWifi',
+									),
+								)}
 							/>
 						)}
 
@@ -169,7 +178,17 @@ export function NetworkSettingsSheetContent() {
 
 					{fakeSsid && !activeServer.localProfile?.ssid && (
 						<Button className="rounded-full">
-							<Text>Add &quot;{fakeSsid}&quot;</Text>
+							<Text>
+								{t(getKey('wifiNetwork.addNetwork'), {
+									ssid: fakeSsid,
+								})}
+							</Text>
+						</Button>
+					)}
+
+					{!ssid && !activeServer.localProfile?.ssid && permissionStatus !== 'granted' && (
+						<Button className="rounded-full" onPress={requestPermission} disabled={isLoading}>
+							<Text>{t(getKey('wifiNetwork.requestPermission'))}</Text>
 						</Button>
 					)}
 				</View>
@@ -177,3 +196,6 @@ export function NetworkSettingsSheetContent() {
 		</View>
 	)
 }
+
+const LOCALE_KEY = 'serverNetworkSettings'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

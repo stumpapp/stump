@@ -2894,14 +2894,8 @@
 	},
 	"mobileApp": {
 		"addOrEditServer": {
-			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
-			},
-			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
-			},
+			"createServer": "Create Server",
+			"updateServer": "Update Server",
 			"basicInfo": "Basic Info",
 			"kind": "Kind",
 			"customHeaders": {
@@ -2951,9 +2945,13 @@
 			"wifiNetwork": {
 				"label": "Wifi Network",
 				"noAssociatedNetwork": "No Associated Wifi Network",
-				"notConnectedToWifi": "Not connected to Wifi, please connect to finish setting up the local profile",
+				"notConnectedToWifi": "You are not connected to wifi. Please connect to a local network to finish setting up the local profile",
 				"connectedTip": "If the current network is not listed, you might need to give Stump permission to access your location",
-				"addNetwork": "Add '{{ssid}}'",
+				"addNetwork": "Add \"{{ssid}}\"",
+				"permissionNotGranted": {
+					"label": "Permissions Not Granted",
+					"description": "You need to grant location permission to access the active wifi network"
+				},
 				"requestPermission": "Request Location Permission"
 			}
 		},

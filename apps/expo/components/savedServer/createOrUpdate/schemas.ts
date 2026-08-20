@@ -1,4 +1,12 @@
+import { match, P } from 'ts-pattern'
 import { z } from 'zod'
+
+import {
+	CreateServer,
+	NetworkProfile,
+	SavedServerWithConfig,
+	ServerConfig,
+} from '~/stores/savedServer'
 
 const LOCALE_BASE = 'addOrEditServer'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
@@ -63,3 +71,92 @@ export const defaultCreateData = {
 	basicUser: '',
 	basicPassword: '',
 } satisfies CreateOrUpdateServerData
+
+export function getUpdateServerDefaults(server?: SavedServerWithConfig | null) {
+	if (!server) return defaultCreateData
+
+	const authConfig = match(server.config?.auth)
+		.with({ bearer: P.string }, (config) => ({
+			authMode: 'token' as const,
+			token: config.bearer,
+			basicUser: '',
+			basicPassword: '',
+		}))
+		.with(
+			{
+				basic: P.shape({
+					username: P.string,
+					password: P.string,
+				}),
+			},
+			(config) => ({
+				authMode: 'basic' as const,
+				basicUser: config.basic.username,
+				basicPassword: config.basic.password,
+				token: '',
+			}),
+		)
+		.otherwise((config) => ({
+			authMode: config?.authless ? ('none' as const) : ('login' as const),
+			basicUser: '',
+			basicPassword: '',
+			token: '',
+		}))
+
+	return {
+		kind: server.kind,
+		name: server.name,
+		url: server.url,
+		defaultServer: server.defaultServer ?? false,
+		customHeaders: Object.entries(server.config?.customHeaders || {}).map(([key, value]) => ({
+			key,
+			value,
+		})),
+		enableLocalProfile: server.autoSwitchToLocal ?? false,
+		localSsid: server.localProfile?.ssid,
+		localUrl: server.localProfile?.url,
+		...authConfig,
+	} satisfies CreateOrUpdateServerData
+}
+
+export function intoCreateServer(data: CreateOrUpdateServerData) {
+	const authConfig = match(data.authMode)
+		.with('token', () => ({ bearer: data.token as string }))
+		.with('basic', () => ({
+			basic: { username: data.basicUser as string, password: data.basicPassword as string },
+		}))
+		.with('none', () => ({ authless: true }))
+		.otherwise(() => undefined)
+	const baseConfig = authConfig ? ({ auth: authConfig } satisfies ServerConfig) : undefined
+
+	const config =
+		!!data.customHeaders && data.customHeaders.length > 0
+			? {
+					...baseConfig,
+					customHeaders: data.customHeaders.reduce(
+						(acc, { key, value }) => ({
+							...acc,
+							[key]: value,
+						}),
+						{},
+					),
+				}
+			: baseConfig
+
+	const localProfile: NetworkProfile | undefined = data.localUrl
+		? {
+				url: data.localUrl,
+				ssid: data.localSsid || null,
+			}
+		: undefined
+
+	return {
+		kind: data.kind,
+		name: data.name,
+		url: data.url,
+		defaultServer: data.defaultServer,
+		localProfile,
+		autoSwitchToLocal: data.enableLocalProfile,
+		config,
+	} satisfies CreateServer
+}

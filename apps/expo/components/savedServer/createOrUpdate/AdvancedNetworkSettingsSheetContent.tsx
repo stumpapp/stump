@@ -71,10 +71,20 @@ export function AdvancedNetworkSettingsSheetContent() {
 					<Card label={t(getKey('wifiNetwork.label'))}>
 						{!localSsid && (
 							<Card.Row
-								label={t(getKey('wifiNetwork.noAssociatedNetwork'))}
+								label={t(
+									getKey(
+										permissionStatus !== 'granted'
+											? 'wifiNetwork.permissionNotGranted.label'
+											: 'wifiNetwork.noAssociatedNetwork',
+									),
+								)}
 								description={t(
 									getKey(
-										connectedToWifi ? 'wifiNetwork.connectedTip' : 'wifiNetwork.noConnectedToWifi',
+										permissionStatus !== 'granted'
+											? 'wifiNetwork.permissionNotGranted.description'
+											: connectedToWifi
+												? 'wifiNetwork.connectedTip'
+												: 'wifiNetwork.notConnectedToWifi',
 									),
 								)}
 							/>
@@ -99,7 +109,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 					{ssid && !localSsid && (
 						<Button className="rounded-full">
 							<Text>
-								{t(getKey('wifiNetwork.associateWithCurrentNetwork'), {
+								{t(getKey('wifiNetwork.addNetwork'), {
 									ssid,
 								})}
 							</Text>

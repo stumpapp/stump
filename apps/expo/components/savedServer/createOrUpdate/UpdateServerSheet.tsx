@@ -81,6 +81,7 @@ export function UpdateServerSheet({ editingServer, onClose }: Props) {
 					ref={sheetRef}
 					detents={[1]}
 					scrollable
+					scrollableOptions={{ keyboardScrollOffset: 16 }}
 					headerLabel={t('addOrEditServer.updateServer')}
 					headerLeftButton={{ type: 'dismiss' }}
 					headerRightButton={{

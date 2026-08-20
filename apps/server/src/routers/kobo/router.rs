@@ -1,7 +1,7 @@
 use crate::routers::kobo::sync::KoboSync;
 use axum::{
 	extract::{Path, Request, State},
-	http::{HeaderMap, HeaderValue},
+	http::{HeaderMap, HeaderValue, Method},
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
 	routing::get,
@@ -106,6 +106,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				get(stubbed_route_empty_success)
 					.post(stubbed_route_empty_success)
 					.put(stubbed_route_empty_success)
+					.patch(stubbed_route_empty_success)
 					.delete(stubbed_route_empty_success),
 			)
 			.layer(middleware::from_fn(authorize)) // Note the order!
@@ -116,7 +117,20 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	)
 }
 
-async fn stubbed_route_empty_success() -> APIResult<impl IntoResponse> {
+#[tracing::instrument(skip_all, fields(method = %method, path = %path), err)]
+async fn stubbed_route_empty_success(
+	method: Method,
+	Path(path): Path<String>,
+	headers: HeaderMap,
+) -> APIResult<impl IntoResponse> {
+	// i dont know what comes through here so do not want to log them
+	// outside local development
+	if cfg!(debug_assertions) {
+		tracing::debug!(?headers, "Kobo hit a stubbed route");
+	} else {
+		tracing::trace!("Kobo hit a stubbed route");
+	}
+
 	Ok(Json(json!({})))
 }
 

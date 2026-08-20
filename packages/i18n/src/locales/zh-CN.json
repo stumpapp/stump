@@ -72,6 +72,9 @@
 				"provider": {
 					"label": "提供方",
 					"allOption": "所有已启用的提供方"
+				},
+				"isbn": {
+					"label": "ISBN"
 				}
 			}
 		}
@@ -273,7 +276,8 @@
 			},
 			"path": {
 				"label": "路径",
-				"description": "您服务器上的书库路径"
+				"description": "您服务器上的书库路径",
+				"placeholder": "/path/to/library"
 			},
 			"description": {
 				"label": "描述",

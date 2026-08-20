@@ -1,5 +1,6 @@
 use crate::routers::kobo::sync::KoboSync;
 use axum::{
+	body::Bytes,
 	extract::{Path, Request, State},
 	http::{HeaderMap, HeaderValue, Method},
 	middleware::{self, Next},
@@ -120,13 +121,16 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 #[tracing::instrument(skip_all, fields(method = %method, path = %path), err)]
 async fn stubbed_route_empty_success(
 	method: Method,
-	Path(path): Path<String>,
+	// (api_key,*path), don't need api_key
+	Path((_, path)): Path<(String, String)>,
 	headers: HeaderMap,
+	body: Bytes,
 ) -> APIResult<impl IntoResponse> {
-	// i dont know what comes through here so do not want to log them
+	// i dont know what comes through here so do not want txo log them
 	// outside local development
 	if cfg!(debug_assertions) {
-		tracing::debug!(?headers, "Kobo hit a stubbed route");
+		let body_str = String::from_utf8_lossy(&body);
+		tracing::debug!(?headers, ?body_str, "Kobo hit a stubbed route");
 	} else {
 		tracing::trace!("Kobo hit a stubbed route");
 	}
@@ -262,6 +266,11 @@ async fn book_metadata(
 ) -> APIResult<Json<Vec<BookMetadata>>> {
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
+
+	// TODO: ive noticed that restoring the kobo api_endpoint doesn't remove books when syncing, and it doesn't fail to sync.
+	// i assume it would have returned 404s, however when i came back and tested a local server (so none of the synced books were present)
+	// the sync would fail with error message "Book not found". that makes me feel like perhaps we should not be hard-erroring
+	// if not found, just don't return it in the response?
 
 	let m = MediaWithMetadataAndReadingSessions::find_by_id_for_user(book_id, &user)
 		.into_model::<MediaWithMetadataAndReadingSessions>()

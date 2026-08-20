@@ -80,7 +80,7 @@ export default function MaxPageViewingSeconds() {
 							// on android the text is cut off without this
 							height: 50,
 							fontSize: 16,
-							color: draft.isValid && draft.isEmpty ? defaultTextColor : colors.fill.danger.DEFAULT,
+							color: draft.isValid || draft.isEmpty ? defaultTextColor : colors.fill.danger.DEFAULT,
 						}}
 						className="font-medium text-center"
 					/>

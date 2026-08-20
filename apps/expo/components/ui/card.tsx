@@ -225,6 +225,7 @@ type InputRowProps = TextInputProps & {
 	label?: string
 }
 function InputRow({ label, value, onChangeText, className, ...props }: InputRowProps) {
+	const colors = useColors()
 	return (
 		<BaseRowComponent>
 			<View className="gap-x-4 2 flex-row items-center justify-center">
@@ -233,8 +234,8 @@ function InputRow({ label, value, onChangeText, className, ...props }: InputRowP
 
 					<View
 						className={cn(
-							'squircle dark:border-white/5 dark:bg-white/5 border-black/5 bg-black/5 h-10 flex flex-row items-center rounded-full border',
-							{ 'h-[unset] min-h-[2.5rem]': props.multiline },
+							'squircle dark:border-white/5 dark:bg-white/5 border-black/5 bg-black/5 h-11 flex flex-row items-center rounded-full border',
+							{ 'h-[unset] min-h-[2.75rem]': props.multiline },
 						)}
 					>
 						<TextInput
@@ -242,6 +243,10 @@ function InputRow({ label, value, onChangeText, className, ...props }: InputRowP
 							onChangeText={onChangeText}
 							className={cn('font-medium pl-3 w-full', className)}
 							{...props}
+							style={{
+								color: colors.foreground.DEFAULT,
+								...props.style,
+							}}
 						/>
 					</View>
 				</View>

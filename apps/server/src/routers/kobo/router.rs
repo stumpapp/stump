@@ -186,20 +186,28 @@ async fn initialization(
 		base_url, api_key
 	);
 
+	let mut resources = stump_core::kobo::native_kobo_resources().clone();
+	if let Some(obj) = resources.as_object_mut() {
+		obj.insert(
+			"image_host".to_string(),
+			serde_json::Value::String(base_url),
+		);
+		obj.insert(
+			"image_url_template".to_string(),
+			serde_json::Value::String(template),
+		);
+		obj.insert(
+			"image_url_quality_template".to_string(),
+			serde_json::Value::String(quality_template),
+		);
+	}
+
 	let mut headers = HeaderMap::new();
 	// Note: i couldn't find reference to _why_ this is needed, but Komga includes the header. it should be
 	// harmless, as e30= is just a base64 of "{}"
 	headers.insert("x-kobo-apitoken", HeaderValue::from_static("e30="));
 
-	Ok((
-		headers,
-		Json(json![{
-			"Resources": {
-				"image_url_quality_template": quality_template,
-				"image_url_template": template,
-			}
-		}]),
-	))
+	Ok((headers, Json(json!({ "Resources": resources }))))
 }
 
 fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::Value> {

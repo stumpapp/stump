@@ -2915,6 +2915,14 @@
 				"token": {
 					"label": "Token",
 					"placeholder": "Raw Token"
+				},
+				"login": {
+					"label": "Anmeldung",
+					"description": "Du wirst bedarfsweise aufgefordert dich anzumelden, wenn du auf Inhalte zugreifst"
+				},
+				"none": {
+					"label": "Keine",
+					"description": "Keine Authentifizierung ist für diesen Server benötigt oder die Authentifizierung ist durch die URL bereitgestellt"
 				}
 			},
 			"serverNamePlaceholder": "Mein Server",
@@ -3029,7 +3037,11 @@
 			"downloads": "Downloads",
 			"name": "Name",
 			"url": "URL",
-			"version": "Version"
+			"version": "Version",
+			"pageX": "Seite {{current}}",
+			"reset": "Zurücksetzen",
+			"accessOpdsV2": "Zugriff auf OPDS v2.0",
+			"accessOpdsV1": "Zugriff auf OPDS v1.2"
 		},
 		"errors": {
 			"unknown": "Unbekannter Fehler"
@@ -3107,7 +3119,8 @@
 				"seeProblems": "Siehe Probleme ({{problemCount}})",
 				"hideCurated": "Kuratiert ausblenden",
 				"showCurated": "Kuratiert anzeigen",
-				"attemptSync": "Versuche Synchronisierung"
+				"attemptSync": "Versuche Synchronisierung",
+				"syncConflicts": "Synchronisierungskonflikte"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
@@ -3219,7 +3232,14 @@
 				"preferNativePdf": "Native PDF bevorzugen",
 				"preferMinimalReader": "Minimalen Leser bevorzugen",
 				"disableDismissGesture": "Deaktiviere Zurück-Geste",
-				"incognitoReading": "Inkognito lesen"
+				"incognitoReading": "Inkognito lesen",
+				"maxPageViewingSeconds": {
+					"label": "Seitenansicht-Sekunden-Limit",
+					"errors": {
+						"minimumValue": "Muss mindestens 1 Sekunde sein",
+						"integer": "Muss ein Integer sein"
+					}
+				}
 			},
 			"stump": {
 				"description": "Stump-Funktionen sind optional und können deaktiviert, wenn du diese nicht benötigst",
@@ -3390,7 +3410,14 @@
 			},
 			"readingTimer": {
 				"label": "Lesezeit",
-				"resetTimer": "Zeit Zurücksetzen"
+				"resetTimer": "Zeit Zurücksetzen",
+				"confirmation": {
+					"message": "Bist du dir sicher, dass du deine Lesezeit für '{{bookName}}' zurücksetzten möchtest?\n\n{{action}}",
+					"action": {
+						"multi-session": "Das wird alle Lesesitzungen, in dem Durchlesen, auf 0 Sekunden setzten.",
+						"single-session": "Das wird die Lesezeit auf 0 Sekunden setzen."
+					}
+				}
 			},
 			"allSettings": "Alle Einstellungen"
 		},
@@ -3545,6 +3572,33 @@
 			"readingNow": {
 				"nothingInProgress": "Nichts in Bearbeitung"
 			}
+		},
+		"syncConflicts": {
+			"title": "Synchronisierungskonflikte",
+			"remainingCount": "{{remainingCount}} Verbleibend",
+			"noConflicts": {
+				"title": "Keine Synchronisierungskonflikte",
+				"description": "Alle deine lokalen Fortschritte sind synchronisiert mit deren Servern"
+			},
+			"lastCommonSession": "Letzte gemeinsame Sitzung",
+			"localSession": "Lokale Sitzung",
+			"remoteSessionWithId": "Fernsitzung {{sessionId}}",
+			"noCommonSession": "Kein gemeinsamer Leseverlauf",
+			"noRemoteSessions": "Keine Fernsitzungen",
+			"divergentProgress": {
+				"title": "Unterschiedliche Fortschritte",
+				"description": "Die letzte gemeinsame Sitzung wurde auf dem Server nach deiner letzten Synchronisierung modifiziert"
+			},
+			"noCommonReadingHistory": {
+				"title": "Kein gemeinsamer Leseverlauf",
+				"description": "Dieses Buch hatte keinen synchronisierten Verlauf als du es offline angefangen hast zu lesen"
+			},
+			"acceptSource": {
+				"local": "Akzeptiere Lokal",
+				"remote": "Akzeptiere Fern",
+				"both": "Akzeptiere Beide"
+			},
+			"pullError": "Fehler bei der Abrufe des Fernfortschrittes"
 		}
 	}
 }

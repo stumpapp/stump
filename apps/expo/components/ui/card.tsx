@@ -221,16 +221,21 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 // TODO: remove scuffed aspects later
 // TODO: make placeholder properly algined
 // TODO: error state
+// TODO: consider actions more carefully, shoving a node was just a quick solution
 type InputRowProps = TextInputProps & {
 	label?: string
+	actions?: React.ReactNode
 }
-function InputRow({ label, value, onChangeText, className, ...props }: InputRowProps) {
+function InputRow({ label, actions, value, onChangeText, className, ...props }: InputRowProps) {
 	const colors = useColors()
 	return (
 		<BaseRowComponent>
 			<View className="gap-x-4 2 flex-row items-center justify-center">
 				<View className="gap-y-2 shrink">
-					{label && <Text className="text-lg shrink">{label}</Text>}
+					<View className="flex flex-row items-center justify-between">
+						{label && <Text className="text-lg shrink">{label}</Text>}
+						{actions && <View>{actions}</View>}
+					</View>
 
 					<View
 						className={cn(

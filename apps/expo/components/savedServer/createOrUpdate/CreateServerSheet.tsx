@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { Check, Plus, X } from 'lucide-react-native'
-import { useCallback, useRef, useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { FormProvider, useForm, useFormState } from 'react-hook-form'
 import { ScrollView, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -50,6 +50,17 @@ export function CreateServerSheet() {
 			),
 		),
 	})
+	const { errors } = useFormState({ control: form.control })
+	console.log(errors)
+
+	const localUrlError = errors.localUrl?.message
+	const localSsidError = errors.localSsid?.message
+	const advancedNetworkSettingsError = localUrlError || localSsidError
+	useEffect(() => {
+		if (advancedNetworkSettingsError) {
+			TrueSheet.present('advancedNetworkSettingsSheet')
+		}
+	}, [advancedNetworkSettingsError])
 
 	return (
 		<>

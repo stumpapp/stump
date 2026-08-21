@@ -1,10 +1,12 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { checkOPDSURL, checkUrl, formatApiURL } from '@stump/sdk'
 import { ChevronRight } from 'lucide-react-native'
+import { useCallback, useEffect, useState } from 'react'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { View } from 'react-native'
 import { Pressable } from 'react-native'
 
-import { Card, Icon, Switch } from '~/components/ui'
+import { Button, Card, Icon, Loader, Switch, Text } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import { useTranslate } from '~/lib/hooks'
 
@@ -22,10 +24,43 @@ export function CreateOrUpdateServerForm() {
 
 	const form = useFormContext<CreateOrUpdateServerData>()
 
-	const [kind, url, isDefault] = useWatch({
+	const [kind, url, isDefault, name] = useWatch({
 		control: form.control,
-		name: ['kind', 'url', 'defaultServer'],
+		name: ['kind', 'url', 'defaultServer', 'name'],
 	})
+
+	const [isCheckingConnection, setIsCheckingConnection] = useState(false)
+	const [didConnect, setDidConnect] = useState(false)
+
+	const checkConnection = useCallback(async () => {
+		setIsCheckingConnection(true)
+
+		// artificial delay for ✨aesthetic ✨
+		await new Promise((resolve) => setTimeout(resolve, 500)) // should give at least one loop of the loader (ish)
+
+		const isValid =
+			kind === 'stump' ? await checkUrl(formatApiURL(url, 'v2')) : await checkOPDSURL(url)
+
+		if (!isValid) {
+			form.setError('url', {
+				type: 'manual',
+				message: t(getKey('failedToConnect')),
+			})
+		} else {
+			form.clearErrors('url')
+			setDidConnect(true)
+		}
+		setIsCheckingConnection(false)
+	}, [kind, url, form, setDidConnect, t])
+
+	useEffect(() => {
+		if (didConnect) {
+			const timer = setTimeout(() => {
+				setDidConnect(false)
+			}, 1500)
+			return () => clearTimeout(timer)
+		}
+	}, [didConnect])
 
 	return (
 		<View className="gap-8">
@@ -45,7 +80,7 @@ export function CreateOrUpdateServerForm() {
 				<Card.InputRow
 					label={t('common.name')}
 					placeholder={t(getKey('serverNamePlaceholder'))}
-					value={form.getValues('name')}
+					value={name}
 					onChangeText={(text) => form.setValue('name', text)}
 				/>
 			</Card>
@@ -56,9 +91,30 @@ export function CreateOrUpdateServerForm() {
 					placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? `/opds/${kind === 'opds-legacy' ? 'v1.2' : 'v2.0'}/catalog` : ''}`}
 					value={url}
 					onChangeText={(text) => form.setValue('url', text)}
+					autoCapitalize="none"
+					actions={
+						// not overly fancy but fine for now
+						<Button
+							size="sm"
+							roundness="full"
+							variant={didConnect ? 'success' : 'outline'}
+							onPress={checkConnection}
+							disabled={!url || isCheckingConnection}
+						>
+							{isCheckingConnection && (
+								<View className="h-6 w-6 items-center justify-center">
+									<Loader />
+								</View>
+							)}
+							{!isCheckingConnection && didConnect && (
+								<Text className="text-base text-fill-success">{t(getKey('didConnect'))}</Text>
+							)}
+							{!isCheckingConnection && !didConnect && (
+								<Text className="text-base text-foreground-subtle">{t('common.test')}</Text>
+							)}
+						</Button>
+					}
 				/>
-
-				{/*TODO: re-add test url button*/}
 
 				<Pressable onPress={() => TrueSheet.present('advancedNetworkSettingsSheet')}>
 					{({ pressed }) => (

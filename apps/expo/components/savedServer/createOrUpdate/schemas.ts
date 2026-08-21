@@ -64,7 +64,7 @@ export const defaultCreateData = {
 	name: '',
 	url: '',
 	enableLocalProfile: false,
-	localUrl: '',
+	localUrl: null,
 	localSsid: '',
 	authMode: 'login',
 	token: '',

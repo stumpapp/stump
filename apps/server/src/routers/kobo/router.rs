@@ -126,7 +126,7 @@ async fn stubbed_route_empty_success(
 	headers: HeaderMap,
 	body: Bytes,
 ) -> APIResult<impl IntoResponse> {
-	// i dont know what comes through here so do not want txo log them
+	// i dont know what comes through here so do not want to log them
 	// outside local development
 	if cfg!(debug_assertions) {
 		let body_str = String::from_utf8_lossy(&body);
@@ -140,6 +140,7 @@ async fn stubbed_route_empty_success(
 
 /// A secondary authorization middleware to ensure that the user has access to the
 /// kobo sync endpoints. This is purely for convenience
+#[tracing::instrument(skip_all, err)]
 async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 	let ctx = req
 		.extensions()
@@ -152,6 +153,7 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 	Ok(next.run(req).await)
 }
 
+#[tracing::instrument(skip_all, err)]
 async fn initialization(
 	HostExtractor(host): HostExtractor,
 	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
@@ -202,6 +204,7 @@ fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::V
 	result
 }
 
+#[tracing::instrument(skip_all, err)]
 async fn library_sync(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -258,6 +261,7 @@ async fn library_sync(
 	})
 }
 
+#[tracing::instrument(skip_all, fields(book_id = %book_id), err)]
 async fn book_metadata(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -289,6 +293,7 @@ async fn book_metadata(
 	Ok(Json(vec![result]))
 }
 
+#[tracing::instrument(skip_all, fields(book_id = %book_id, width, height), err)]
 async fn book_thumbnail(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -320,6 +325,7 @@ async fn book_thumbnail(
 	Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 }
 
+#[tracing::instrument(skip_all, fields(book_id = %book_id), err)]
 async fn book_download(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,

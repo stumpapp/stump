@@ -5,7 +5,7 @@ use axum::{
 	http::{HeaderMap, HeaderValue, Method},
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
-	routing::get,
+	routing::{get, post},
 	Extension, Router,
 };
 use graphql::data::AuthContext;
@@ -100,6 +100,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				"/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg",
 				get(book_thumbnail)
 			)
+			.route("/v1/auth/device", post(auth_device))
 			.route("/v1/books/{book_id}/file/epub", get(book_download))
 			// The Kobo requests many routes that we don't implement.
 			.route(
@@ -116,6 +117,23 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				api_key_middleware,
 			)),
 	)
+}
+
+/// returns dummy tokens for the device, which apparently will be used for
+/// some of endpoints kobo will try to call here
+#[tracing::instrument(skip_all, err)]
+async fn auth_device(body: Bytes) -> APIResult<impl IntoResponse> {
+	let user_key = serde_json::from_slice::<serde_json::Value>(&body)
+		.ok()
+		.and_then(|v| v.get("UserKey").and_then(|k| k.as_str()).map(String::from))
+		.unwrap_or_default();
+
+	Ok(Json(json!({
+		"AccessToken": uuid::Uuid::new_v4().to_string(),
+		"RefreshToken": uuid::Uuid::new_v4().to_string(),
+		"TrackingId": uuid::Uuid::new_v4().to_string(),
+		"UserKey": user_key,
+	})))
 }
 
 #[tracing::instrument(skip_all, fields(method = %method, path = %path), err)]

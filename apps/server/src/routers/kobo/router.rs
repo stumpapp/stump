@@ -1,10 +1,11 @@
 use crate::routers::kobo::sync::KoboSync;
 use axum::{
+	body::Bytes,
 	extract::{Path, Request, State},
-	http::{HeaderMap, HeaderValue},
+	http::{HeaderMap, HeaderValue, Method},
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
-	routing::get,
+	routing::{get, post},
 	Extension, Router,
 };
 use graphql::data::AuthContext;
@@ -99,6 +100,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				"/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg",
 				get(book_thumbnail)
 			)
+			.route("/v1/auth/device", post(auth_device))
 			.route("/v1/books/{book_id}/file/epub", get(book_download))
 			// The Kobo requests many routes that we don't implement.
 			.route(
@@ -106,6 +108,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				get(stubbed_route_empty_success)
 					.post(stubbed_route_empty_success)
 					.put(stubbed_route_empty_success)
+					.patch(stubbed_route_empty_success)
 					.delete(stubbed_route_empty_success),
 			)
 			.layer(middleware::from_fn(authorize)) // Note the order!
@@ -116,12 +119,46 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	)
 }
 
-async fn stubbed_route_empty_success() -> APIResult<impl IntoResponse> {
+/// returns dummy tokens for the device, which apparently will be used for
+/// some of endpoints kobo will try to call here
+#[tracing::instrument(skip_all, err)]
+async fn auth_device(body: Bytes) -> APIResult<impl IntoResponse> {
+	let user_key = serde_json::from_slice::<serde_json::Value>(&body)
+		.ok()
+		.and_then(|v| v.get("UserKey").and_then(|k| k.as_str()).map(String::from))
+		.unwrap_or_default();
+
+	Ok(Json(json!({
+		"AccessToken": uuid::Uuid::new_v4().to_string(),
+		"RefreshToken": uuid::Uuid::new_v4().to_string(),
+		"TrackingId": uuid::Uuid::new_v4().to_string(),
+		"UserKey": user_key,
+	})))
+}
+
+#[tracing::instrument(skip_all, fields(method = %method, path = %path), err)]
+async fn stubbed_route_empty_success(
+	method: Method,
+	// (api_key,*path), don't need api_key
+	Path((_, path)): Path<(String, String)>,
+	headers: HeaderMap,
+	body: Bytes,
+) -> APIResult<impl IntoResponse> {
+	// i dont know what comes through here so do not want to log them
+	// outside local development
+	if cfg!(debug_assertions) {
+		let body_str = String::from_utf8_lossy(&body);
+		tracing::debug!(?headers, ?body_str, "Kobo hit a stubbed route");
+	} else {
+		tracing::trace!("Kobo hit a stubbed route");
+	}
+
 	Ok(Json(json!({})))
 }
 
 /// A secondary authorization middleware to ensure that the user has access to the
 /// kobo sync endpoints. This is purely for convenience
+#[tracing::instrument(skip_all, err)]
 async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 	let ctx = req
 		.extensions()
@@ -134,6 +171,7 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 	Ok(next.run(req).await)
 }
 
+#[tracing::instrument(skip_all, err)]
 async fn initialization(
 	HostExtractor(host): HostExtractor,
 	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
@@ -148,20 +186,28 @@ async fn initialization(
 		base_url, api_key
 	);
 
+	let mut resources = stump_core::kobo::native_kobo_resources().clone();
+	if let Some(obj) = resources.as_object_mut() {
+		obj.insert(
+			"image_host".to_string(),
+			serde_json::Value::String(base_url),
+		);
+		obj.insert(
+			"image_url_template".to_string(),
+			serde_json::Value::String(template),
+		);
+		obj.insert(
+			"image_url_quality_template".to_string(),
+			serde_json::Value::String(quality_template),
+		);
+	}
+
 	let mut headers = HeaderMap::new();
 	// Note: i couldn't find reference to _why_ this is needed, but Komga includes the header. it should be
 	// harmless, as e30= is just a base64 of "{}"
 	headers.insert("x-kobo-apitoken", HeaderValue::from_static("e30="));
 
-	Ok((
-		headers,
-		Json(json![{
-			"Resources": {
-				"image_url_quality_template": quality_template,
-				"image_url_template": template,
-			}
-		}]),
-	))
+	Ok((headers, Json(json!({ "Resources": resources }))))
 }
 
 fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::Value> {
@@ -184,6 +230,7 @@ fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::V
 	result
 }
 
+#[tracing::instrument(skip_all, err)]
 async fn library_sync(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -240,6 +287,7 @@ async fn library_sync(
 	})
 }
 
+#[tracing::instrument(skip_all, fields(book_id = %book_id), err)]
 async fn book_metadata(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -248,6 +296,11 @@ async fn book_metadata(
 ) -> APIResult<Json<Vec<BookMetadata>>> {
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
+
+	// TODO: ive noticed that restoring the kobo api_endpoint doesn't remove books when syncing, and it doesn't fail to sync.
+	// i assume it would have returned 404s, however when i came back and tested a local server (so none of the synced books were present)
+	// the sync would fail with error message "Book not found". that makes me feel like perhaps we should not be hard-erroring
+	// if not found, just don't return it in the response?
 
 	let m = MediaWithMetadataAndReadingSessions::find_by_id_for_user(book_id, &user)
 		.into_model::<MediaWithMetadataAndReadingSessions>()
@@ -266,6 +319,7 @@ async fn book_metadata(
 	Ok(Json(vec![result]))
 }
 
+#[tracing::instrument(skip_all, fields(book_id = %book_id, width, height), err)]
 async fn book_thumbnail(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -297,6 +351,7 @@ async fn book_thumbnail(
 	Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 }
 
+#[tracing::instrument(skip_all, fields(book_id = %book_id), err)]
 async fn book_download(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,

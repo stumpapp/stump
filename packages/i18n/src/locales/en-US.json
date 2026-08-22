@@ -3307,6 +3307,7 @@
 				"label": "Management",
 				"dataUsage": {
 					"label": "Data Usage",
+					"noServersAdded": "No Servers Added",
 					"nonStumpData": "Non-Stump Data",
 					"serversTotal": "Servers Total",
 					"totalFiles": "Total Files",

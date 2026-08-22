@@ -1,5 +1,5 @@
 import { clone, getColor, serialize, set } from 'colorjs.io/fn'
-import { CircleAlert, LucideIcon } from 'lucide-react-native'
+import { CircleAlert, LucideIcon, Slash } from 'lucide-react-native'
 import React, { ComponentProps, ReactNode, useState } from 'react'
 import { TextInput, TextInputProps } from 'react-native'
 import { Easing, Platform, Pressable, View, ViewProps } from 'react-native'
@@ -386,20 +386,27 @@ export function GradientIcon({ icon, backgroundColor }: GradientIconProps) {
 
 type ListEmptyMessageProps = {
 	icon?: LucideIcon
+	iconSlash?: boolean
 	message?: string
 }
 
-export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
+export const ListEmptyMessage = ({ icon, iconSlash, message }: ListEmptyMessageProps) => (
 	<View
 		className={cn(
-			'squircle h-24 gap-2 p-3 border-edge w-full items-center justify-center rounded-3xl border border-dashed',
+			'squircle h-24 gap-2 p-3 border-black/10 dark:border-white/20 w-full items-center justify-center rounded-3xl border border-dashed',
 			Platform.OS === 'android' && 'rounded-2xl',
 		)}
 	>
 		<View className="relative flex items-center justify-center">
-			<View className="squircle p-2 bg-background-surface flex items-center justify-center rounded-lg">
-				<Icon as={icon || CircleAlert} className="h-6 w-6 text-foreground-muted" />
-				{/* <Icon as={Slash} className="absolute h-6 w-6 transform text-foreground opacity-80" /> */}
+			<View className="squircle p-2 bg-black/5 dark:bg-white/10 flex items-center justify-center rounded-xl">
+				<Icon
+					as={icon || CircleAlert}
+					className="h-6 w-6 text-foreground-muted"
+					absoluteStrokeWidth
+				/>
+				{iconSlash && (
+					<Icon as={Slash} className="text-foreground-muted h-7 w-7 absolute" absoluteStrokeWidth />
+				)}
 			</View>
 		</View>
 

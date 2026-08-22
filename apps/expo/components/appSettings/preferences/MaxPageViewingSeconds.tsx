@@ -5,9 +5,8 @@ import { KeyboardController, useKeyboardHandler } from 'react-native-keyboard-co
 import { scheduleOnRN } from 'react-native-worklets'
 
 import { KeyboardDraftNumberToolbar, useDraftNumber } from '~/components/keyboard'
-import { COLORS, SETTINGS_COLORS, useColors } from '~/lib/constants'
+import { SETTINGS_COLORS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
-import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -15,7 +14,6 @@ import AppSettingsRow from '../AppSettingsRow'
 export default function MaxPageViewingSeconds() {
 	const { t } = useTranslate()
 	const colors = useColors()
-	const { isDarkColorScheme } = useColorScheme()
 
 	const patch = usePreferencesStore((state) => state.patch)
 	const maxPageViewingSeconds = usePreferencesStore((state) => state.maxPageViewingSeconds)
@@ -56,10 +54,6 @@ export default function MaxPageViewingSeconds() {
 		[],
 	)
 
-	const defaultTextColor = isDarkColorScheme
-		? COLORS.light.foreground.DEFAULT
-		: COLORS.light.foreground.muted
-
 	return (
 		<>
 			<AppSettingsRow
@@ -80,7 +74,10 @@ export default function MaxPageViewingSeconds() {
 							// on android the text is cut off without this
 							height: 50,
 							fontSize: 16,
-							color: draft.isValid || draft.isEmpty ? defaultTextColor : colors.fill.danger.DEFAULT,
+							color:
+								draft.isValid || draft.isEmpty
+									? colors.foreground.muted
+									: colors.fill.danger.DEFAULT,
 						}}
 						className="font-medium text-center"
 					/>

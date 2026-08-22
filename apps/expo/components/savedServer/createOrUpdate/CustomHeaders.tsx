@@ -1,8 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
-import { Alert, Pressable, View } from 'react-native'
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
-import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
+import { Alert, View } from 'react-native'
 
 import { Button, Card, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
@@ -58,42 +56,33 @@ export function CustomHeaders() {
 		)
 	}
 
-	// TODO: it's a lil janky, esp the swipeable part, but a lil jank is okay lol
 	return (
 		<View className="gap-4">
+			<Card label={t(getKey('customHeaders.label'))}>
+				{customHeaders?.map((header, index) => (
+					<Card.Row key={index} label={header.key} className="flex-wrap">
+						<View className="gap-3 flex-row items-center">
+							<Text className="text-lg text-foreground-muted">{header.value}</Text>
+							<Button
+								size="sm"
+								variant="destructive"
+								roundness="full"
+								onPress={() => onDeleteHeader(index)}
+								className="dark:border-white/5 border-black/5"
+							>
+								<Text>{t('common.delete')}</Text>
+							</Button>
+						</View>
+					</Card.Row>
+				))}
+			</Card>
+
 			<Card
-				label={t(getKey('customHeaders.label'))}
 				// TODO: prolly help text
 				// description={t(getKey('customHeaders.description'))}
+				className={cn(!customHeaders?.length && '-mt-4')}
 			>
-				{!!customHeaders?.length && (
-					<View className="squircle border-edge w-full overflow-hidden rounded-lg border">
-						{customHeaders.map((header, index) => (
-							<Swipeable
-								key={index}
-								friction={2}
-								rightThreshold={40}
-								renderRightActions={(prog, drag) =>
-									RenderHeaderAction(prog, drag, () => onDeleteHeader(index))
-								}
-							>
-								<View
-									className={cn(
-										'gap-2 p-3 tablet:p-4 w-full flex-row items-center justify-between',
-										{
-											'border-edge border-b': index !== (customHeaders?.length || 0) - 1,
-										},
-									)}
-								>
-									<Text>{header.key}</Text>
-									<Text className="text-foreground-muted">{header.value}</Text>
-								</View>
-							</Swipeable>
-						))}
-					</View>
-				)}
-
-				{isAddingHeader && (
+				{isAddingHeader ? (
 					<>
 						<Card.InputRow
 							label={t('common.name')}
@@ -120,40 +109,12 @@ export function CustomHeaders() {
 							</Button>
 						</Card.Row>
 					</>
+				) : (
+					<Button className="w-full" roundness="full" onPress={() => setIsAddingHeader(true)}>
+						<Text>{t(getKey('customHeaders.addHeader'))}</Text>
+					</Button>
 				)}
 			</Card>
-
-			{!isAddingHeader && (
-				<Button className="w-full" roundness="full" onPress={() => setIsAddingHeader(true)}>
-					<Text>{t(getKey('customHeaders.addHeader'))}</Text>
-				</Button>
-			)}
 		</View>
-	)
-}
-
-function RenderHeaderAction(
-	_: SharedValue<number>,
-	drag: SharedValue<number>,
-	onDelete: () => void,
-) {
-	const { t } = useTranslate()
-	const styleAnimation = useAnimatedStyle(() => {
-		return {
-			transform: [{ translateX: drag.value + 50 }],
-		}
-	})
-
-	return (
-		<Reanimated.View style={styleAnimation}>
-			<Pressable
-				className="w-14 bg-fill-danger h-full items-center justify-center"
-				onPress={onDelete}
-			>
-				{({ pressed }) => (
-					<Text className={cn({ 'opacity-80': pressed })}>{t('common.delete')}</Text>
-				)}
-			</Pressable>
-		</Reanimated.View>
 	)
 }

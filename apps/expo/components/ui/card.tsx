@@ -84,7 +84,7 @@ export function Card({
 		<View className={cn('gap-2', className)} {...props}>
 			{renderHeader()}
 
-			{count === 0 ? (
+			{count === 0 && listEmptyStyle ? (
 				<ListEmptyMessage {...listEmptyStyle} />
 			) : (
 				<CardBackground>{children}</CardBackground>

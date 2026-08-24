@@ -89,16 +89,15 @@ export default function UserTable() {
 		{ placeholderData: (prev) => prev },
 	)
 	const users = data?.users.nodes || []
+	const pageInfo = data?.users?.pageInfo
 
-	if (!!data?.users?.pageInfo && data.users.pageInfo.__typename !== 'OffsetPaginationInfo') {
+	if (!!pageInfo && pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error(
-			'Expected users query to return OffsetPaginationInfo, but got: ' +
-				data.users.pageInfo.__typename,
+			'Expected users query to return OffsetPaginationInfo, but got: ' + pageInfo.__typename,
 		)
 	}
 
-	const pageCount =
-		data?.users.pageInfo.__typename === 'OffsetPaginationInfo' ? data.users.pageInfo.totalPages : -1
+	const pageCount = pageInfo?.__typename === 'OffsetPaginationInfo' ? pageInfo.totalPages : -1
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 

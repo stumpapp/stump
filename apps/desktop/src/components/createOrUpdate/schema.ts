@@ -11,7 +11,7 @@ import { SavedServer } from '../../stores/savedServer'
  * @param forServer The existing server to edit, if editing
  */
 export const buildSchema = (
-	existingServers: SavedServer[],
+	existingServers: Omit<SavedServer, 'id'>[],
 	t: (key: string) => string,
 	forServer?: SavedServer,
 ) => {

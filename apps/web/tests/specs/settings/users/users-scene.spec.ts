@@ -3,6 +3,18 @@ import { UserPermission } from '@stump/graphql'
 import { expect, test } from '../../../fixtures'
 import { type CreatedEphemeralUser, createTestUser } from '../../../users/factory'
 
+// TODO: my gut reaction to https://github.com/stumpapp/stump/issues/1341
+// was that e2e tests would have caught this issue, and more generally have
+// been wanting to add more browser-specific e2e suites for better future
+// stability with stump. so this preamble to say, i think this was a valid
+// path to take overall but probably an overreaction to this specific bug.
+// this could have easily been caught with unit tests at the router/component
+// level to assert given X permission we render Y. so lol i think i might
+// convert this to unit tests, then add a suite for something that really lends
+// itself to e2e. i'll also need to add some guidance to contributing docs (or just
+// in the readme here?) to help folks know whether contributions need either (or both)
+// flavors of tests
+
 test.describe.serial('Settings / Users', () => {
 	let readUsers: CreatedEphemeralUser
 

@@ -1,6 +1,6 @@
 import { type Page, test as base } from '@playwright/test'
 
-import { authStatePath, type PersonaName } from '../personas'
+import { authStatePath, type PersonaName } from '../users/personas'
 
 type PersonaFixtures = {
 	[K in PersonaName as `${K}Page`]: Page
@@ -13,12 +13,6 @@ type PersonaFixtures = {
 export const test = base.extend<PersonaFixtures>({
 	adminPage: async ({ browser }, give) => {
 		const ctx = await browser.newContext({ storageState: authStatePath('admin') })
-		await give(await ctx.newPage())
-		await ctx.close()
-	},
-
-	moderatorPage: async ({ browser }, give) => {
-		const ctx = await browser.newContext({ storageState: authStatePath('moderator') })
 		await give(await ctx.newPage())
 		await ctx.close()
 	},

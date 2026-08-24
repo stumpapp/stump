@@ -16,6 +16,9 @@ export default defineConfig({
 		baseURL,
 		trace: 'on-first-retry',
 		screenshot: 'only-on-failure',
+		// TODO: couldn't get video to work locally for whatever reason but leaving because
+		// i do want it for failures (makes it so much easier to see!)
+		video: process.env.CI ? 'off' : 'retain-on-failure',
 	},
 	// note the ordering is important here, e.g., so setups are first
 	projects: [

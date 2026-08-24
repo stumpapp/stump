@@ -9,6 +9,7 @@
 		"build": "vite build",
 		"e2e": "playwright test",
 		"e2e:install": "playwright install --with-deps chromium",
+		"check-types": "tsc --noEmit --project tsconfig.test.json",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"clean": "rimraf node_modules"
 	},

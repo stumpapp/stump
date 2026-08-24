@@ -90,7 +90,7 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				icon: Users,
 				label: 'Users',
 				localeKey: 'server/users',
-				permissions: [UserPermission.ManageUsers],
+				permissions: [UserPermission.ReadUsers],
 				subItems: [
 					{
 						backlink: {
@@ -114,11 +114,15 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				],
 				to: '/settings/users',
 				prefetch: async () => {
-					await Promise.all([
-						prefetchUserStats(api, client),
-						prefetchUsersTable(api, client),
-						prefetchLoginActivity(api, client),
-					])
+					try {
+						await Promise.all([
+							prefetchUserStats(api, client),
+							prefetchUsersTable(api, client),
+							prefetchLoginActivity(api, client),
+						])
+					} catch {
+						//
+					}
 				},
 			},
 			{

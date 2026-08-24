@@ -20,6 +20,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 	return (
 		<div
 			data-tauri-drag-region
+			data-testid="error-fallback"
 			className="flex h-full w-full flex-col items-center justify-center overflow-hidden"
 		>
 			<img

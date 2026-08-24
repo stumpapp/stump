@@ -8,6 +8,7 @@
 		"start": "vite preview",
 		"build": "vite build",
 		"e2e": "playwright test",
+		"e2e:install": "playwright install --with-deps chromium",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"clean": "rimraf node_modules"
 	},
@@ -21,6 +22,7 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.62.1",
+		"@stump/graphql": "*",
 		"@tailwindcss/vite": "^4.2.2",
 		"@types/react": "^19.0.0",
 		"@types/react-dom": "^19.0.0",

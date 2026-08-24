@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import AccountDetails from '../AccountDetails'
 import { buildSchema, CreateOrUpdateUserSchema, ExistingUser, formDefaults } from '../schema'
 
-const onSubmit = jest.fn()
+const onSubmit = vi.fn()
 
 type SubjectProps = {
 	formState?: Partial<Pick<CreateOrUpdateUserSchema, 'username' | 'password'>>
@@ -37,7 +37,7 @@ const Subject = ({ formState, existingUsers = [] }: SubjectProps) => {
 
 describe('AccountDetails', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it('should render', () => {

@@ -9,8 +9,8 @@ import { useAppContext } from '@/context'
 import APIKeyInspector from '../APIKeyInspector'
 import { APIKey } from '../APIKeyTable'
 
-jest.mock('@/context', () => ({
-	useAppContext: jest.fn(),
+vi.mock('@/context', () => ({
+	useAppContext: vi.fn(),
 }))
 const useAppContextRet = {
 	user: {
@@ -23,10 +23,10 @@ const useAppContextRet = {
 	} as unknown as AuthUser,
 } as any
 
-jest.mock('@stump/i18n', () => ({
-	useLocaleContext: jest.fn(),
+vi.mock('@stump/i18n', () => ({
+	useLocaleContext: vi.fn(),
 }))
-const translate = jest.fn().mockImplementation((key: string) => key)
+const translate = vi.fn().mockImplementation((key: string) => key)
 
 const createKey = (overrides: Partial<APIKey> = {}): APIKey => ({
 	id: 1,
@@ -48,16 +48,16 @@ type SubjectProps = {
 const Subject = ({ apiKey }: SubjectProps) => {
 	return (
 		<MemoryRouter>
-			<APIKeyInspector apiKey={apiKey} onClose={jest.fn()} />
+			<APIKeyInspector apiKey={apiKey} onClose={vi.fn()} />
 		</MemoryRouter>
 	)
 }
 
 describe('APIKeyInspector', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
-		jest.mocked(useAppContext).mockReturnValue(useAppContextRet)
-		jest.mocked(useLocaleContext).mockReturnValue({ t: translate } as any)
+		vi.clearAllMocks()
+		vi.mocked(useAppContext).mockReturnValue(useAppContextRet)
+		vi.mocked(useLocaleContext).mockReturnValue({ t: translate } as any)
 	})
 
 	it('should render a key with explicit permissions properly', () => {
@@ -78,7 +78,7 @@ describe('APIKeyInspector', () => {
 	})
 
 	it('should render an implicit key properly', () => {
-		jest.mocked(useAppContext).mockReturnValue({
+		vi.mocked(useAppContext).mockReturnValue({
 			...useAppContextRet,
 			user: {
 				...useAppContextRet.user,
@@ -102,7 +102,7 @@ describe('APIKeyInspector', () => {
 	})
 
 	it('should render an unrestricted key properly', () => {
-		jest.mocked(useAppContext).mockReturnValue({
+		vi.mocked(useAppContext).mockReturnValue({
 			...useAppContextRet,
 			user: { ...useAppContextRet.user, isServerOwner: true },
 		})

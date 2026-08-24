@@ -17,14 +17,14 @@ const createSavedServer = (
 describe('CreateOrUpdateServerSchema', () => {
 	describe('validation', () => {
 		it('should not allow forbidden names', () => {
-			const schema = buildSchema([], jest.fn())
+			const schema = buildSchema([], vi.fn())
 			for (const name of FORBIDDEN_ENTITY_NAMES) {
 				expect(schema.safeParse(createSavedServer({ name })).success).toBe(false)
 			}
 		})
 
 		it('should not allow existing names', () => {
-			const schema = buildSchema([createSavedServer()], jest.fn())
+			const schema = buildSchema([createSavedServer()], vi.fn())
 			expect(
 				schema.safeParse(createSavedServer({ name: 'name', uri: 'https://newexample.com' }))
 					.success,
@@ -36,7 +36,7 @@ describe('CreateOrUpdateServerSchema', () => {
 		})
 
 		it('should not allow existing URIs', () => {
-			const schema = buildSchema([createSavedServer()], jest.fn())
+			const schema = buildSchema([createSavedServer()], vi.fn())
 			expect(
 				schema.safeParse(createSavedServer({ name: 'newName', uri: 'https://example.com' }))
 					.success,
@@ -49,12 +49,12 @@ describe('CreateOrUpdateServerSchema', () => {
 
 		describe('update', () => {
 			it('should allow the same name as itself', () => {
-				const schema = buildSchema([createSavedServer()], jest.fn(), createSavedServer())
+				const schema = buildSchema([createSavedServer()], vi.fn(), createSavedServer())
 				expect(schema.safeParse(createSavedServer({ name: 'name' })).success).toBe(true)
 			})
 
 			it('should allow the same URI as itself', () => {
-				const schema = buildSchema([createSavedServer()], jest.fn(), createSavedServer())
+				const schema = buildSchema([createSavedServer()], vi.fn(), createSavedServer())
 				expect(schema.safeParse(createSavedServer({ uri: 'https://example.com' })).success).toBe(
 					true,
 				)

@@ -6,21 +6,19 @@ import ReadingModeSelect from '../ReadingModeSelect'
 describe('ReadingModeSelect', () => {
 	const originalWarn = console.warn
 	beforeAll(() => {
-		console.warn = jest.fn()
+		console.warn = vi.fn()
 	})
 	afterAll(() => {
 		console.warn = originalWarn
 	})
 
 	it('should render', () => {
-		const { container } = render(
-			<ReadingModeSelect value={ReadingMode.Paged} onChange={jest.fn()} />,
-		)
+		const { container } = render(<ReadingModeSelect value={ReadingMode.Paged} onChange={vi.fn()} />)
 		expect(container).not.toBeEmptyDOMElement()
 	})
 
 	it('should not allow invalid reading modes', () => {
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		const { getByLabelText } = render(
 			<ReadingModeSelect value={ReadingMode.Paged} onChange={onChange} />,
 		)

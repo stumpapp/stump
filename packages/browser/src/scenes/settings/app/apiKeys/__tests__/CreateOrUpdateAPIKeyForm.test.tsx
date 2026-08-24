@@ -6,24 +6,24 @@ import { useAppContext } from '@/context'
 
 import { CreateOrUpdateAPIKeyFormValues, createSchema } from '../CreateOrUpdateAPIKeyForm'
 
-jest.mock('@/context', () => ({
-	useAppContext: jest.fn(),
+vi.mock('@/context', () => ({
+	useAppContext: vi.fn(),
 }))
 const useAppContextRet = {
-	checkPermission: jest.fn(),
+	checkPermission: vi.fn(),
 } as any
 
-jest.mock('@stump/i18n', () => ({
-	useLocaleContext: jest.fn(),
+vi.mock('@stump/i18n', () => ({
+	useLocaleContext: vi.fn(),
 }))
-const translate = jest.fn().mockImplementation((key: string) => key)
+const translate = vi.fn().mockImplementation((key: string) => key)
 
 describe('CreateOrUpdateAPIKeyForm', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 
-		jest.mocked(useAppContext).mockReturnValue(useAppContextRet)
-		jest.mocked(useLocaleContext).mockReturnValue({ t: translate } as any)
+		vi.mocked(useAppContext).mockReturnValue(useAppContextRet)
+		vi.mocked(useLocaleContext).mockReturnValue({ t: translate } as any)
 	})
 
 	describe('schema', () => {

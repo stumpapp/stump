@@ -2,7 +2,7 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"composite": true,
-		"types": ["vite/client", "node", "jest", "@testing-library/jest-dom"],
+		"types": ["vite/client", "node", "vitest/globals", "@testing-library/jest-dom"],
 		"skipLibCheck": true,
 		"allowImportingTsExtensions": true,
 		"jsx": "react-jsx",
@@ -25,30 +25,30 @@
 			"@/utils/*": ["./src/utils/*"],
 			"@/context": ["./src/context"],
 			"@/paths": ["./src/paths.ts"],
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
 		},
 		"resolveJsonModule": true,
 		"plugins": [
 			{
 				"name": "@0no-co/graphqlsp",
 				"schema": "../../crates/graphql/schema.graphql",
-				"shouldCheckForColocatedFragments": false
-			}
-		]
+				"shouldCheckForColocatedFragments": false,
+			},
+		],
 	},
 	"include": ["src", "src/**/*.json"],
 	"references": [
 		{
-			"path": "../sdk"
+			"path": "../sdk",
 		},
 		{
-			"path": "../client"
+			"path": "../client",
 		},
 		{
-			"path": "../components"
+			"path": "../components",
 		},
 		{
-			"path": "../graphql"
-		}
-	]
+			"path": "../graphql",
+		},
+	],
 }

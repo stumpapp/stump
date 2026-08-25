@@ -4,7 +4,12 @@ import { DownloadOptions, File } from 'expo-file-system'
 import getProperty from 'lodash/get'
 import { match, P } from 'ts-pattern'
 
-import { cacheDirectory, serverPath } from '~/lib/filesystem'
+import {
+	cacheDirectory,
+	ensureDirectoryExists,
+	serverDirectory,
+	serverPath,
+} from '~/lib/filesystem'
 import { createThumbnail } from '~/lib/widgets/utils'
 import {
 	isKnownServer,
@@ -152,6 +157,7 @@ export async function pullServerAvatar(server: SavedServer, api: Api) {
 	const avatar = await match(avatarData)
 		.with({ logo: P.string }, (s) => s)
 		.with({ uri: P.string }, async (data) => {
+			ensureDirectoryExists(serverDirectory(server.id))
 			const destination = new File(serverPath(server.id, 'avatar.png'))
 			await new File(data.uri).move(destination, { overwrite: true })
 			return (

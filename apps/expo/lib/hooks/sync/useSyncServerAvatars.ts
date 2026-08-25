@@ -23,45 +23,60 @@ export function useSyncServerAvatars() {
 		[savedServers],
 	)
 
-	useEffect(() => {
-		async function buildSyncableServers() {
-			const fullServers = (await Promise.all(serverIds.map(getFullServer))).filter((s) => s != null)
+	useEffect(
+		() => {
+			async function buildSyncableServers() {
+				const fullServers = (await Promise.all(serverIds.map(getFullServer))).filter(
+					(s) => s != null,
+				)
 
-			// if the server has an avatar set, we won't sync it until you re-enter server. i think this is fine,
-			// most likely folks won't be updating avatars all the time and the extra pings are not overly
-			// necessary imo
-			setAutoSyncableServers(
-				new Set(
-					fullServers
-						.filter(({ avatar, config }) => config?.auth != null && avatar == null)
-						.map(({ id }) => id),
-				),
-			)
-		}
+				// if the server has an avatar set, we won't sync it until you re-enter server. i think this is fine,
+				// most likely folks won't be updating avatars all the time and the extra pings are not overly
+				// necessary imo
+				setAutoSyncableServers(
+					new Set(
+						fullServers
+							.filter(({ avatar, config }) => config?.auth != null && avatar == null)
+							.map(({ id }) => id),
+					),
+				)
+			}
 
-		buildSyncableServers()
-	}, [serverIds, getFullServer])
+			buildSyncableServers()
+		},
+		// eslint-disable-next-line react-compiler/react-compiler
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[serverIds],
+	)
 
 	const lastSyncedSet = useRef(new Set())
 
 	const syncServerLogos = useCallback(
 		async (ids: string[]) => {
-			const instances = await getInstances(ids)
+			const instances = await getInstances(ids, true)
 			const params = []
 			for (const [serverId, instance] of Object.entries(instances)) {
 				const server = serverIdsToServer[serverId]
 				if (server) params.push({ server, api: instance })
 			}
 			await executePullServerLogos(params)
-			lastSyncedSet.current = new Set([...lastSyncedSet.current, ...ids])
 		},
 		[getInstances, serverIdsToServer],
 	)
 
-	useEffect(() => {
-		const unsyncedItems = autoSyncableServers.difference(lastSyncedSet.current)
-		if (unsyncedItems.size) {
-			syncServerLogos(Array.from(unsyncedItems))
-		}
-	}, [autoSyncableServers, syncServerLogos])
+	useEffect(
+		() => {
+			const unsyncedItems = autoSyncableServers.difference(lastSyncedSet.current)
+			if (unsyncedItems.size) {
+				const ids = Array.from(unsyncedItems)
+				// marking as synced before actually syncing because it seems to trigger a re-render
+				// mid-flight which causes the effect to re-fire to infinity
+				lastSyncedSet.current = new Set([...lastSyncedSet.current, ...ids])
+				syncServerLogos(ids)
+			}
+		},
+		// eslint-disable-next-line react-compiler/react-compiler
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[autoSyncableServers],
+	)
 }

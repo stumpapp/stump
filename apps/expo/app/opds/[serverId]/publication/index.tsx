@@ -12,6 +12,7 @@ import TImage from 'react-native-turbo-image'
 import {
 	DescriptionSection,
 	IdentifiersSheet,
+	OverviewBackground,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
@@ -223,142 +224,128 @@ export default function Screen() {
 		<>
 			{menuFragment}
 
-			<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
-				<View className="ios:pt-safe-offset-20 pt-safe ios:pb-24 pb-16 overflow-hidden">
-					<Animated.View
-						// -inset-24 is because when using a lot of blur, the sides get more transparent
-						// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
-						className="-inset-24 absolute opacity-70 dark:opacity-30"
-						style={parallaxStyle}
-					>
-						<TImage
-							source={{
-								uri: thumbnailURL || '',
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							style={{ width: '100%', height: '100%' }}
-							resizeMode="cover"
-							fadeDuration={2000}
-							// android only supports up to blur={25} which doesn't look good,
-							// but if we heavily downscale first, the following looks near identical to using
-							// original res with blur={40} on ios, which is what I originally settled on
-							resize={60}
-							blur={Platform.OS === 'ios' ? 7 : 16}
-						/>
-					</Animated.View>
+			<OverviewBackground
+				source={{
+					uri: thumbnailURL || '',
+					headers: {
+						...sdk.customHeaders,
+						Authorization: sdk.authorizationHeader || '',
+					},
+				}}
+				parallaxStyle={parallaxStyle}
+			/>
 
-					<View className="gap-8 px-4 tablet:px-6">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailURL || '',
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							size={{ height: 235 / thumbnailRatio, width: 235 }}
-							borderAndShadowStyle={{ shadowRadius: 5 }}
-						/>
+			<Animated.ScrollView
+				className="flex-1"
+				ref={animatedScrollRef}
+				contentInsetAdjustmentBehavior="automatic"
+			>
+				<View className="gap-8 px-4 tablet:px-6 ios:pb-24 pb-16">
+					<ThumbnailImage
+						source={{
+							uri: thumbnailURL || '',
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						size={{ height: 235 / thumbnailRatio, width: 235 }}
+						borderAndShadowStyle={{ shadowRadius: 5 }}
+					/>
 
-						<View className="gap-2">
-							<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
-								{title || 'Untitled'}
-							</Heading>
+					<View className="gap-2">
+						<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
+							{title || 'Untitled'}
+						</Heading>
 
-							{seriesText && (
-								<Text className="text-base text-foreground-muted text-center" numberOfLines={1}>
-									{seriesText}
-								</Text>
-							)}
-						</View>
+						{seriesText && (
+							<Text className="text-base text-foreground-muted text-center" numberOfLines={1}>
+								{seriesText}
+							</Text>
+						)}
+					</View>
 
-						<View className="gap-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
+					<View className="gap-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
+						<Button
+							variant="brand"
+							className="flex-1"
+							roundness="full"
+							onPress={() =>
+								router.push({
+									pathname: `/opds/[serverId]/publication/read`,
+									params: { url, serverId },
+								})
+							}
+							disabled={!canStream || !isSupportedStream}
+						>
+							<Text>Stream</Text>
+						</Button>
+						{!isDownloaded && (
 							<Button
-								variant="brand"
-								className="flex-1"
+								variant="secondary"
 								roundness="full"
-								onPress={() =>
-									router.push({
-										pathname: `/opds/[serverId]/publication/read`,
-										params: { url, serverId },
-									})
-								}
-								disabled={!canStream || !isSupportedStream}
+								disabled={!canDownload || isDownloading}
+								onPress={onDownloadBook}
+								className="gap-2 flex-row"
 							>
-								<Text>Stream</Text>
+								{isDownloading && (
+									<View className="animate-spin pointer-events-none">
+										<Icon className="h-5 w-5" as={Loader2} color={accentColor} />
+									</View>
+								)}
+								<Text>Download</Text>
 							</Button>
-							{!isDownloaded && (
-								<Button
-									variant="secondary"
-									roundness="full"
-									disabled={!canDownload || isDownloading}
-									onPress={onDownloadBook}
-									className="gap-2 flex-row"
-								>
-									{isDownloading && (
-										<View className="animate-spin pointer-events-none">
-											<Icon className="h-5 w-5" as={Loader2} color={accentColor} />
-										</View>
-									)}
-									<Text>Download</Text>
-								</Button>
-							)}
-						</View>
+						)}
+					</View>
 
-						{progression && existsSomeProgression && (
-							<Card>
-								<Card.StatGroup>
-									{progression.locator.locations?.position && (
-										<Card.Stat
-											label="Page"
-											value={progression.locator.locations.position || '1'}
-											suffix={
-												numberOfPages != null && numberOfPages > 0
-													? ` / ${numberOfPages}`
-													: undefined
-											}
-										/>
-									)}
-									{progression.locator.locations?.totalProgression != null && (
-										<Card.Stat
-											label="Completed"
-											value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
-										/>
-									)}
-									{renderModifiedStat(progression)}
-								</Card.StatGroup>
-							</Card>
+					{progression && existsSomeProgression && (
+						<Card>
+							<Card.StatGroup>
+								{progression.locator.locations?.position && (
+									<Card.Stat
+										label="Page"
+										value={progression.locator.locations.position || '1'}
+										suffix={
+											numberOfPages != null && numberOfPages > 0 ? ` / ${numberOfPages}` : undefined
+										}
+									/>
+								)}
+								{progression.locator.locations?.totalProgression != null && (
+									<Card.Stat
+										label="Completed"
+										value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
+									/>
+								)}
+								{renderModifiedStat(progression)}
+							</Card.StatGroup>
+						</Card>
+					)}
+
+					<View className="gap-2">
+						{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
+						{!canDownload && !isDownloaded && (
+							<View className="squircle ios:rounded-3xl p-3 bg-fill-warning-secondary rounded-2xl">
+								<Text>
+									{!downloadURL
+										? 'No download link available for this publication'
+										: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
+								</Text>
+							</View>
 						)}
 
-						<View className="gap-2">
-							{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
-							{!canDownload && !isDownloaded && (
-								<View className="squircle ios:rounded-3xl p-3 bg-fill-warning-secondary rounded-2xl">
-									<Text>
-										{!downloadURL
-											? 'No download link available for this publication'
-											: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
-									</Text>
-								</View>
-							)}
+						{!canStream && (
+							<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
+								<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+							</View>
+						)}
 
-							{!canStream && (
-								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
-									<Text>This publication lacks a defined reading order and cannot be streamed</Text>
-								</View>
-							)}
-
-							{!isSupportedStream && (
-								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
-									<Text>
-										This publication contains unsupported media types and cannot be streamed yet
-									</Text>
-								</View>
-							)}
-						</View>
+						{!isSupportedStream && (
+							<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
+								<Text>
+									This publication contains unsupported media types and cannot be streamed yet
+								</Text>
+							</View>
+						)}
 					</View>
 				</View>
 

@@ -41,7 +41,7 @@ export function useOverviewAnimations() {
 	return { animatedScrollRef, parallaxStyle }
 }
 
-// TODO: Change all other places that use useOverviewAnimations
+// TODO: Change the places that use useOverviewAnimations in sheets
 export function OverviewBackground({
 	parallaxStyle,
 	source,

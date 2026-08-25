@@ -7,7 +7,6 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
-import TImage from 'react-native-turbo-image'
 import { useShallow } from 'zustand/react/shallow'
 
 import BackLink from '~/components/BackLink'
@@ -15,6 +14,7 @@ import {
 	CurrentProgressCard,
 	DescriptionSection,
 	getPercentage,
+	OverviewBackground,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
@@ -133,88 +133,74 @@ export default function Screen() {
 	return (
 		<>
 			{menuFragment}
-			<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
-				<View className="ios:pt-safe-offset-20 pt-safe ios:pb-24 pb-16 overflow-hidden">
-					{thumbnailUri && (
-						<Animated.View
-							className="-inset-24 absolute opacity-70 dark:opacity-30"
-							style={parallaxStyle}
-						>
-							<TImage
-								source={{ uri: thumbnailUri }}
-								style={{ width: '100%', height: '100%' }}
-								resizeMode="cover"
-								fadeDuration={2000}
-								resize={60}
-								// android only supports up to blur={25} which doesn't look good,
-								// but if we heavily downscale first, the following looks near identical to using
-								// original res with blur={40} on ios, which is what I originally settled on
-								blur={Platform.OS === 'ios' ? 7 : 16}
-							/>
-						</Animated.View>
+
+			{thumbnailUri && (
+				<OverviewBackground source={{ uri: thumbnailUri }} parallaxStyle={parallaxStyle} />
+			)}
+
+			<Animated.ScrollView
+				className="flex-1"
+				ref={animatedScrollRef}
+				contentInsetAdjustmentBehavior="automatic"
+			>
+				<View className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16">
+					{Platform.OS === 'android' && (
+						<View className="pt-2 flex flex-row justify-between">
+							<BackLink iconClassName="mr-[unset]" />
+						</View>
 					)}
 
-					<View className="gap-6 px-4 tablet:px-6">
-						{Platform.OS === 'android' && (
-							<View className="pt-2 flex flex-row justify-between">
-								<BackLink iconClassName="mr-[unset]" />
-							</View>
-						)}
+					<ThumbnailImage
+						source={{
+							// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when undefined
+							uri: thumbnailUri,
+						}}
+						size={{ height: 235 / thumbnailRatio, width: 235 }}
+						placeholderData={thumbnailData}
+						borderAndShadowStyle={{ shadowRadius: 5 }}
+					/>
 
-						<ThumbnailImage
-							source={{
-								// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when undefined
-								uri: thumbnailUri,
-							}}
-							size={{ height: 235 / thumbnailRatio, width: 235 }}
-							placeholderData={thumbnailData}
-							borderAndShadowStyle={{ shadowRadius: 5 }}
-						/>
+					<View className="gap-1">
+						<Heading size="lg" className="leading-6 text-center">
+							{downloadedFile.bookName || t('common.unknownTitle')}
+						</Heading>
 
-						<View className="gap-1">
-							<Heading size="lg" className="leading-6 text-center">
-								{downloadedFile.bookName || t('common.unknownTitle')}
-							</Heading>
-
-							{seriesPosition != null ? (
+						{seriesPosition != null ? (
+							<Text className="text-base text-foreground-muted text-center">{seriesPosition}</Text>
+						) : (
+							downloadedFile.series && (
 								<Text className="text-base text-foreground-muted text-center">
-									{seriesPosition}
+									{downloadedFile.series.name}
 								</Text>
-							) : (
-								downloadedFile.series && (
-									<Text className="text-base text-foreground-muted text-center">
-										{downloadedFile.series.name}
-									</Text>
-								)
-							)}
-							{downloadedFile.library && (
-								<Text className="text-sm text-foreground-muted text-center" numberOfLines={1}>
-									{downloadedFile.library.name}
-								</Text>
-							)}
-						</View>
-
-						<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
-							<Button
-								className="flex-1"
-								roundness="full"
-								onPress={() => router.push(`/offline/${fileId}/read`)}
-								variant="brand"
-							>
-								{renderRead()}
-							</Button>
-						</View>
-
-						<CurrentProgressCard
-							hidden={!readProgressData}
-							showChapterTitle={!!epubProgressData}
-							chapterTitle={epubProgressData?.chapterTitle}
-							page={currentPage}
-							totalPages={pages}
-							percentage={progressPercentage}
-							readingTimeSeconds={readProgressData?.elapsedSeconds}
-						/>
+							)
+						)}
+						{downloadedFile.library && (
+							<Text className="text-sm text-foreground-muted text-center" numberOfLines={1}>
+								{downloadedFile.library.name}
+							</Text>
+						)}
 					</View>
+
+					<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
+						<Button
+							className="flex-1"
+							roundness="full"
+							onPress={() => router.push(`/offline/${fileId}/read`)}
+							variant="brand"
+						>
+							{renderRead()}
+						</Button>
+					</View>
+
+					<CurrentProgressCard
+						hidden={!readProgressData}
+						showChapterTitle={!!epubProgressData}
+						chapterTitle={epubProgressData?.chapterTitle}
+						page={currentPage}
+						totalPages={pages}
+						percentage={progressPercentage}
+						readingTimeSeconds={readProgressData?.elapsedSeconds}
+					/>
 				</View>
 
 				<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] gap-8 px-4 py-6 tablet:px-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">

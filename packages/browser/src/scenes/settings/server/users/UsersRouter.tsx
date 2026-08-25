@@ -6,7 +6,7 @@ import { useAppContext } from '@/context'
 
 import UpdateUserScene from './create-or-update/UpdateUserScene.tsx'
 
-const UserManagementScene = lazy(() => import('./UsersScene.tsx'))
+const UsersScene = lazy(() => import('./UsersScene.tsx'))
 const CreateUserScene = lazy(() => import('./create-or-update/CreateUserScene.tsx'))
 
 export default function UsersRouter() {
@@ -16,7 +16,7 @@ export default function UsersRouter() {
 
 	return (
 		<Routes>
-			<Route path="" element={<UserManagementScene />} />
+			<Route path="" element={<UsersScene />} />
 			{canManageUsers && <Route path="create" element={<CreateUserScene />} />}
 			{canManageUsers && <Route path=":id/manage" element={<UpdateUserScene />} />}
 		</Routes>

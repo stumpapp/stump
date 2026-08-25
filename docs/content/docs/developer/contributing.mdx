@@ -118,6 +118,67 @@ yarn storybook
 
 This will give you a good idea of what components are available and how they can be used.
 
+### Testing
+
+This is an area that I would like to improve and is very challenging to action on because testing can be quite the slog. There are a few different flavors of testing that exist today that provide a solid foundation but could use development to improve coverage and reliability.
+
+#### TypeScript unit tests (Vitest)
+
+The majority of the frontend packages/apps use [Vitest](https://vitest.dev/) for unit and component tests. Run them from each package:
+
+```bash
+yarn workspace @stump/browser test
+yarn workspace @stump/sdk test
+yarn workspace @stump/expo test
+```
+
+Or just run all of them at once:
+
+```bash
+yarn test
+```
+
+These tests are meant to be more isolated and focused on testing the logic of a single component or function. So if something requires 100s of lines of mocking code to set up or requires a running server, it is likely not a good candidate for this suite
+
+#### e2e tests (Playwright)
+
+Browser end-to-end tests live in `apps/web/tests/` and run against a live Stump server:
+
+```bash
+# one-time browser install
+yarn workspace @stump/web e2e:install
+# run tests (requires a running server on port 10801)
+yarn workspace @stump/web e2e
+```
+
+This suite uses two different types of test users:
+
+1. A "persona" that is meant to be more of a catch-all user for testing common flows
+2. An ephemeral user that is created to test a specific flow that doesn't require a persistent user at the start of a run
+
+Generally speaking what I would like to use this suite for is to test the full stack of Stump where unit tests aren't sufficient. Things like multi-step forms that change server state, flows that require coordinated frontend and backend validation, etc.
+
+#### Rust server integration tests
+
+`apps/server/tests/` contains integration tests that spin up a server instance and test
+the API:
+
+```bash
+cargo test --package stump_server --test api_tests
+```
+
+Anything that requires a running server and database to fully test is a good candidate for this suite. It uses a lot of `fake_data` to insert data into the in-memory database.
+
+#### Rust unit tests
+
+Unit tests for core logic live inline in the relevant crate using the standard conventions:
+
+```bash
+cargo test
+```
+
+Things like validation, pure functions, and other logic that can be tested without a running server are good candidates for this suite.
+
 ### Developer Resources
 
 Below is a list of resources that I've found helpful in developing Stump. I'll try to keep this list up to date as I find new resources.

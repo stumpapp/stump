@@ -4,8 +4,8 @@ use async_trait::async_trait;
 use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
-	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder,
-	QuerySelect,
+	prelude::*, sea_query::SimpleExpr, ActiveValue, Condition, FromQueryResult, JoinType,
+	QueryOrder, QuerySelect,
 };
 
 use crate::{
@@ -165,6 +165,10 @@ fn apply_library_hidden_filter(query: Select<Entity>, user: &AuthUser) -> Select
 }
 
 impl Entity {
+	pub fn epub_filter() -> SimpleExpr {
+		Column::Extension.like("epub")
+	}
+
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		let select = Entity::find().left_join(media_metadata::Entity);
 		let select = apply_series_metadata_join(select);

@@ -1,8 +1,8 @@
 use models::entity::{
-	age_restriction, api_key, kobo_sync_session, library, library_config,
-	library_exclusion, media, media_analysis, media_metadata, media_tag, reading_device,
-	reading_session, refresh_token, series, series_metadata, server_config, session, tag,
-	user, user_preferences,
+	age_restriction, api_key, kobo_sync_media, kobo_sync_session, library,
+	library_config, library_exclusion, media, media_analysis, media_metadata, media_tag,
+	reading_device, reading_progress_reset, reading_session, refresh_token, series,
+	series_metadata, server_config, session, tag, user, user_preferences,
 };
 use sea_orm::{ConnectionTrait, Database, DbBackend, DbConn, DbErr, Schema};
 pub async fn test_database() -> DbConn {
@@ -29,6 +29,7 @@ pub async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
 		schema.create_table_from_entity(series_metadata::Entity),
 		schema.create_table_from_entity(library_exclusion::Entity),
 		schema.create_table_from_entity(kobo_sync_session::Entity),
+		schema.create_table_from_entity(kobo_sync_media::Entity),
 		schema.create_table_from_entity(age_restriction::Entity),
 		schema.create_table_from_entity(user::Entity),
 		schema.create_table_from_entity(user_preferences::Entity),
@@ -36,6 +37,7 @@ pub async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
 		schema.create_table_from_entity(library_config::Entity),
 		schema.create_table_from_entity(reading_session::Entity),
 		schema.create_table_from_entity(reading_device::Entity),
+		schema.create_table_from_entity(reading_progress_reset::Entity),
 		schema.create_table_from_entity(tag::Entity),
 		schema.create_table_from_entity(media_tag::Entity),
 		schema.create_table_from_entity(server_config::Entity),

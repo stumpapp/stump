@@ -101,6 +101,7 @@ function BookReaderScene({ book }: Props) {
 
 	const page = search.get('page')
 	const isIncognito = search.get('incognito') === 'true'
+	const startFromBeginning = search.get('start') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
 	const lastSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
 	const pendingSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
@@ -158,6 +159,8 @@ function BookReaderScene({ book }: Props) {
 				paths.bookReader(book.id, {
 					epubcfi: book.readProgress?.epubcfi || null,
 					isEpub: true,
+					isIncognito,
+					startFromBeginning,
 				}),
 			)
 		} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
@@ -169,7 +172,16 @@ function BookReaderScene({ book }: Props) {
 				navigate(paths.bookReader(book.id, { page: book.pages }))
 			}
 		}
-	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader])
+	}, [
+		book,
+		initialPage,
+		readingMode,
+		navigate,
+		isStreaming,
+		animatedReader,
+		isIncognito,
+		startFromBeginning,
+	])
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (

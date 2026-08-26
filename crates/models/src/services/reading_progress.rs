@@ -1,14 +1,28 @@
+use std::collections::HashMap;
+
 use chrono::Utc;
 use sea_orm::{
-	prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait,
-	EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
+	prelude::{DateTimeWithTimeZone, Decimal},
+	sea_query::OnConflict,
+	ActiveModelTrait,
+	ActiveValue::Set,
+	ColumnTrait, ConnectionTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder,
+	QuerySelect,
 };
 
 use crate::{
-	domain::reading_progress::{calculate_logical_date, should_extend_session},
-	entity::{media, reading_session, user::AuthUser},
+	domain::reading_progress::{
+		calculate_logical_date, next_sync_timestamp, should_extend_session,
+	},
+	entity::{media, reading_progress_reset, reading_session, user::AuthUser},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
+
+#[derive(Debug)]
+pub struct ReadingProgressReset {
+	pub had_session: bool,
+	pub removed_sessions: u64,
+}
 
 /// normalized porgression info derived from a [`MediaProgressInput`]
 #[derive(Debug, Default)]
@@ -20,6 +34,7 @@ pub struct NormalizedProgression {
 	pub elapsed_seconds_delta: Option<i64>,
 	pub did_complete: bool,
 	pub device_id: Option<String>,
+	pub reported_at: Option<DateTimeWithTimeZone>,
 }
 
 impl NormalizedProgression {
@@ -39,6 +54,7 @@ impl NormalizedProgression {
 			active.status = Set(ReadingStatus::Reading);
 		}
 		active.elapsed_seconds = Set(Some(new_elapsed));
+		active.reported_at = Set(self.reported_at.to_owned());
 		if let Some(incoming) = &self.device_id {
 			let current = match &active.device_ids {
 				sea_orm::ActiveValue::Set(v) | sea_orm::ActiveValue::Unchanged(v) => {
@@ -77,12 +93,15 @@ pub async fn upsert_reading_session(
 	let latest = reading_session::Entity::find_latest_for_user_and_media(user, media_id)
 		.one(db)
 		.await?;
+	let was_reset =
+		is_reading_progress_reset(db, &user.id, media_id, latest.as_ref()).await?;
 
 	match latest {
 		// so long as the status is no dnf, progression within grace period will extend the existing session.
 		// this might re-open the session if it was previously marked as finished
 		Some(session)
-			if session.session_date == logical_today
+			if !was_reset
+				&& session.session_date == logical_today
 				&& should_extend_session(&session, grace_period) =>
 		{
 			let active = input.apply(session);
@@ -114,6 +133,7 @@ pub async fn upsert_reading_session(
 				device_ids: Set(input
 					.device_id
 					.map(|id| reading_session::DeviceIds(vec![id]))),
+				reported_at: Set(input.reported_at),
 				media_id: Set(media_id.to_string()),
 				user_id: Set(user.id.clone()),
 				..Default::default()
@@ -122,6 +142,221 @@ pub async fn upsert_reading_session(
 			.await
 		},
 	}
+}
+
+async fn mark_reading_progress_reset_at(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	media_id: &str,
+	reset_at: DateTimeWithTimeZone,
+	reported_at: Option<DateTimeWithTimeZone>,
+	reported_at_floor: Option<DateTimeWithTimeZone>,
+) -> Result<DateTimeWithTimeZone, sea_orm::DbErr> {
+	let effective_reported_at =
+		next_sync_timestamp(reported_at.unwrap_or(reset_at), reported_at_floor);
+	persist_reading_progress_resets(
+		db,
+		user_id,
+		reset_at,
+		&[(media_id.to_string(), effective_reported_at)],
+	)
+	.await?;
+
+	Ok(reset_at)
+}
+
+async fn persist_reading_progress_resets(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	reset_at: DateTimeWithTimeZone,
+	resets: &[(String, DateTimeWithTimeZone)],
+) -> Result<(), sea_orm::DbErr> {
+	if resets.is_empty() {
+		return Ok(());
+	}
+
+	let media_ids = resets
+		.iter()
+		.map(|(media_id, _)| media_id.clone())
+		.collect::<Vec<_>>();
+	let previous_by_media = reading_progress_reset::Entity::find()
+		.filter(reading_progress_reset::Column::UserId.eq(user_id))
+		.filter(reading_progress_reset::Column::MediaId.is_in(media_ids))
+		.all(db)
+		.await?
+		.into_iter()
+		.map(|reset| (reset.media_id, reset.reported_at.unwrap_or(reset.reset_at)))
+		.collect::<HashMap<_, _>>();
+
+	let models = resets.iter().map(|(media_id, reported_at)| {
+		let reported_at =
+			next_sync_timestamp(*reported_at, previous_by_media.get(media_id).cloned());
+		reading_progress_reset::ActiveModel {
+			user_id: Set(user_id.to_string()),
+			media_id: Set(media_id.clone()),
+			reset_at: Set(reset_at),
+			reported_at: Set(Some(reported_at)),
+		}
+	});
+
+	reading_progress_reset::Entity::insert_many(models)
+		.on_conflict(
+			OnConflict::columns([
+				reading_progress_reset::Column::UserId,
+				reading_progress_reset::Column::MediaId,
+			])
+			.update_columns([
+				reading_progress_reset::Column::ResetAt,
+				reading_progress_reset::Column::ReportedAt,
+			])
+			.to_owned(),
+		)
+		.exec(db)
+		.await?;
+
+	Ok(())
+}
+
+pub fn reading_session_sync_timestamp(
+	session: &reading_session::Model,
+) -> DateTimeWithTimeZone {
+	session
+		.reported_at
+		.unwrap_or(session.updated_at.unwrap_or(session.created_at))
+}
+
+/// Persists reset markers for several books with one insert/upsert statement.
+///
+/// Each timestamp is the outbound sync timestamp captured before the corresponding sessions were
+/// deleted.
+pub async fn mark_reading_progress_resets(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	reset_floors: &[(String, DateTimeWithTimeZone)],
+) -> Result<DateTimeWithTimeZone, sea_orm::DbErr> {
+	let reset_at: DateTimeWithTimeZone = Utc::now().into();
+	let resets = reset_floors
+		.iter()
+		.map(|(media_id, floor)| {
+			(
+				media_id.clone(),
+				next_sync_timestamp(reset_at, Some(*floor)),
+			)
+		})
+		.collect::<Vec<_>>();
+	persist_reading_progress_resets(db, user_id, reset_at, &resets).await?;
+	Ok(reset_at)
+}
+
+/// Records an explicit reset without deleting reading history.
+///
+/// The row is intentionally retained after later progress updates. Comparing its timestamp with
+/// the latest session makes concurrent reset/update requests resolve by last write without a
+/// race-prone delete.
+pub async fn mark_reading_progress_reset(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	media_id: &str,
+) -> Result<DateTimeWithTimeZone, sea_orm::DbErr> {
+	let latest = reading_session::Entity::find()
+		.filter(reading_session::Column::UserId.eq(user_id))
+		.filter(reading_session::Column::MediaId.eq(media_id))
+		.order_by_desc(reading_session::Column::ReportedAt)
+		.one(db)
+		.await?;
+	mark_reading_progress_reset_at(
+		db,
+		user_id,
+		media_id,
+		Utc::now().into(),
+		None,
+		latest.as_ref().map(reading_session_sync_timestamp),
+	)
+	.await
+}
+
+/// Clears the current readthrough and records a durable reset event.
+///
+/// Completed and abandoned sessions remain available as reading history. The reset marker is what
+/// lets integrations observe the state change after the active session rows have been deleted.
+async fn reset_reading_progress_inner(
+	db: &impl ConnectionTrait,
+	user: &AuthUser,
+	media_id: &str,
+	reported_at: Option<DateTimeWithTimeZone>,
+) -> Result<ReadingProgressReset, sea_orm::DbErr> {
+	let latest = reading_session::Entity::find_latest_for_user_and_media(user, media_id)
+		.one(db)
+		.await?;
+	let reported_at_floor = latest.as_ref().map(reading_session_sync_timestamp);
+
+	let removed_sessions = if let Some(session) = latest.as_ref() {
+		reading_session::Entity::delete_many()
+			.filter(reading_session::Column::UserId.eq(&user.id))
+			.filter(reading_session::Column::MediaId.eq(media_id))
+			.filter(
+				reading_session::Column::ReadthroughNumber.eq(session.readthrough_number),
+			)
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
+			.exec(db)
+			.await?
+			.rows_affected
+	} else {
+		0
+	};
+
+	mark_reading_progress_reset_at(
+		db,
+		&user.id,
+		media_id,
+		Utc::now().into(),
+		reported_at,
+		reported_at_floor,
+	)
+	.await?;
+
+	Ok(ReadingProgressReset {
+		had_session: latest.is_some(),
+		removed_sessions,
+	})
+}
+
+pub async fn reset_reading_progress_with_reported_at(
+	db: &impl ConnectionTrait,
+	user: &AuthUser,
+	media_id: &str,
+	reported_at: DateTimeWithTimeZone,
+) -> Result<ReadingProgressReset, sea_orm::DbErr> {
+	reset_reading_progress_inner(db, user, media_id, Some(reported_at)).await
+}
+
+pub async fn reset_reading_progress(
+	db: &impl ConnectionTrait,
+	user: &AuthUser,
+	media_id: &str,
+) -> Result<ReadingProgressReset, sea_orm::DbErr> {
+	reset_reading_progress_inner(db, user, media_id, None).await
+}
+
+/// Whether a reset is the most recent progression event for a book.
+pub async fn is_reading_progress_reset(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	media_id: &str,
+	latest_session: Option<&reading_session::Model>,
+) -> Result<bool, sea_orm::DbErr> {
+	let reset = reading_progress_reset::Entity::find_by_id((
+		user_id.to_string(),
+		media_id.to_string(),
+	))
+	.one(db)
+	.await?;
+
+	Ok(reset.is_some_and(|reset| {
+		latest_session.is_none_or(|session| {
+			reset.reset_at >= session.updated_at.unwrap_or(session.created_at)
+		})
+	}))
 }
 
 /// derives the readthrough number to assign to a new session for a given user+media pair

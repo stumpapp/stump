@@ -20,6 +20,7 @@ export default function EpubReaderScene() {
 
 	const lazyReader = search.get('stream') && search.get('stream') !== 'true'
 	const isIncognito = search.get('incognito') === 'true'
+	const startFromBeginning = search.get('start') === 'true'
 
 	const client = useQueryClient()
 	useEffect(() => {
@@ -34,10 +35,12 @@ export default function EpubReaderScene() {
 	}, [client, sdk.cacheKeys])
 
 	if (lazyReader) {
-		return <EpubJsReader id={id} isIncognito={isIncognito} />
+		return (
+			<EpubJsReader id={id} isIncognito={isIncognito} startFromBeginning={startFromBeginning} />
+		)
 	} else {
 		search.set('stream', 'true')
 		setSearch(search)
-		return <Navigate to={paths.bookReader(id, { isEpub: true })} />
+		return <Navigate to={paths.bookReader(id, { isEpub: true, isIncognito, startFromBeginning })} />
 	}
 }

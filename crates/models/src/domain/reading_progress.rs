@@ -1,10 +1,23 @@
 use chrono::{DateTime, Duration, NaiveDate, Utc};
-use sea_orm::sqlx::types::Decimal;
+use sea_orm::{prelude::DateTimeWithTimeZone, sqlx::types::Decimal};
 
 use crate::{entity::reading_session, shared::enums::ReadingStatus};
 
 pub fn calculate_logical_date(now: DateTime<Utc>, offset_hours: i32) -> NaiveDate {
 	(now - Duration::hours(offset_hours as i64)).date_naive()
+}
+
+/// Returns a timestamp strictly after `previous` when the candidate clock did not advance.
+pub fn next_sync_timestamp(
+	candidate: DateTimeWithTimeZone,
+	previous: Option<DateTimeWithTimeZone>,
+) -> DateTimeWithTimeZone {
+	match previous {
+		Some(previous) if candidate <= previous => previous
+			.checked_add_signed(Duration::microseconds(1))
+			.unwrap_or(previous),
+		_ => candidate,
+	}
 }
 
 /// returns true if `session` was updated within the last `grace_period_secs` seconds
@@ -100,6 +113,16 @@ mod tests {
 		);
 	}
 
+	#[test]
+	fn test_next_sync_timestamp_advances_past_a_future_clock() {
+		let future: DateTimeWithTimeZone =
+			Utc.with_ymd_and_hms(2030, 1, 1, 0, 0, 0).unwrap().into();
+		let now: DateTimeWithTimeZone =
+			Utc.with_ymd_and_hms(2026, 1, 1, 0, 0, 0).unwrap().into();
+
+		assert!(next_sync_timestamp(now, Some(future)) > future);
+	}
+
 	// TODO: move to central db testing helpers?
 	fn make_session(
 		did_complete: bool,
@@ -132,6 +155,7 @@ mod tests {
 			device_ids: None,
 			media_id: "m1".to_string(),
 			user_id: "u1".to_string(),
+			reported_at: None,
 			created_at: Utc::now().fixed_offset(),
 			updated_at,
 		}

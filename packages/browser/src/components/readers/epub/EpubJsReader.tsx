@@ -61,8 +61,29 @@ const saveCachedLocations = (id: string, locations: string[]) => {
 type EpubJsReaderProps = {
 	/** The ID of the associated media entity for this epub */
 	id: string
-	/** If true, starts progress at the start of the book, or the default location if set */
+	/** If true, does not save progress and starts at the beginning */
 	isIncognito: boolean
+	/** If true, ignores saved progress and starts at the beginning */
+	startFromBeginning: boolean
+}
+
+type EpubReadProgress = {
+	epubcfi?: string | null
+	percentageCompleted?: number | null
+}
+
+export const resolveInitialEpubCfi = (
+	readProgress: EpubReadProgress | null | undefined,
+	shouldResume: boolean,
+	cfiFromPercentage: (percentage: number) => string,
+) => {
+	if (!shouldResume || !readProgress) return undefined
+	if (readProgress.epubcfi) return readProgress.epubcfi
+
+	const savedProgress = Number(readProgress.percentageCompleted)
+	return readProgress.percentageCompleted != null && Number.isFinite(savedProgress)
+		? cfiFromPercentage(Math.min(1, Math.max(0, savedProgress)))
+		: undefined
 }
 
 /** Location information as it is structured internally in epubjs */
@@ -180,7 +201,7 @@ const injectFontStylesheet = (rendition: Rendition) => {
  * Note: At some point in the future, I will be prioritizing some sort of streamable
  * epub reader as an additional option.
  */
-export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
+export default function EpubJsReader({ id, isIncognito, startFromBeginning }: EpubJsReaderProps) {
 	const { sdk } = useSDK()
 	const { isDarkVariant } = useTheme()
 
@@ -529,8 +550,12 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 
 				setRendition(rendition_)
 
-				const targetCfi = ebook.media?.readProgress?.epubcfi
-				if (targetCfi && !isIncognito) {
+				const targetCfi = resolveInitialEpubCfi(
+					ebook.media?.readProgress,
+					!isIncognito && !startFromBeginning,
+					(percentage) => book.locations.cfiFromPercentage(percentage),
+				)
+				if (targetCfi) {
 					rendition_.display(targetCfi)
 				} else if (defaultLoc) {
 					rendition_.display(defaultLoc)
@@ -547,6 +572,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		readingMode,
 		handleLocationChange,
 		isIncognito,
+		startFromBeginning,
 		ebook,
 		generateLocations,
 	])

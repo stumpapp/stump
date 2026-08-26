@@ -5,6 +5,7 @@ import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { BookCardFragment, graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import {
+	BookMarked,
 	BookMinus,
 	BookOpen,
 	BookOpenCheck,
@@ -21,6 +22,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
+import useKoboSync from '@/components/book/useKoboSync'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 
@@ -80,14 +82,16 @@ export default function BookActionMenu({ book }: Props) {
 			toast.error('Failed to delete read history')
 		},
 	})
+	const { mutate: setKoboSync, isPending: isUpdatingKoboSync } = useKoboSync()
 
 	const actions = useMemo(
 		() => ({
 			completeBook,
 			deleteCurrentSession,
 			deleteReadHistory,
+			setKoboSync,
 		}),
-		[completeBook, deleteCurrentSession, deleteReadHistory],
+		[completeBook, deleteCurrentSession, deleteReadHistory, setKoboSync],
 	)
 
 	const progression = useMemo(
@@ -123,7 +127,11 @@ export default function BookActionMenu({ book }: Props) {
 		(incognito: boolean) => {
 			const { id, extension } = book
 			if (extension.match(EBOOK_EXTENSION)) {
-				return paths.bookReader(id, { isEpub: true, isIncognito: incognito || undefined })
+				return paths.bookReader(id, {
+					isEpub: true,
+					isIncognito: incognito || undefined,
+					startFromBeginning: true,
+				})
 			}
 			return paths.bookReader(id, { isIncognito: incognito || undefined, page: 1 })
 		},
@@ -205,6 +213,21 @@ export default function BookActionMenu({ book }: Props) {
 				},
 				{
 					items: [
+						...(book.extension.toLowerCase() === 'epub' &&
+						checkPermission(UserPermission.AccessKoboSync)
+							? [
+									{
+										label: book.isSelectedForKoboSync ? 'Remove from Kobo' : 'Sync to Kobo',
+										leftIcon: <BookMarked className="mr-2 h-4 w-4" />,
+										disabled: isUpdatingKoboSync,
+										onClick: () =>
+											actions.setKoboSync({
+												mediaIds: [book.id],
+												isSelected: !book.isSelectedForKoboSync,
+											}),
+									},
+								]
+							: []),
 						...(checkPermission(UserPermission.ManageLibrary) ||
 						checkPermission(UserPermission.EditThumbnails)
 							? [
@@ -239,6 +262,7 @@ export default function BookActionMenu({ book }: Props) {
 			actions,
 			continueReadingLink,
 			getReadFromBeginningLink,
+			isUpdatingKoboSync,
 		],
 	)
 

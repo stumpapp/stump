@@ -5,7 +5,10 @@ use crate::common::{
 };
 
 use graphql::input::media::{MediaProgressInput, PagedProgressInput};
-use models::{entity::reading_session, shared::enums::ReadingStatus};
+use models::{
+	entity::{reading_progress_reset, reading_session},
+	shared::enums::ReadingStatus,
+};
 use sea_orm::{prelude::*, QueryOrder};
 use tests::fake_data;
 
@@ -183,7 +186,7 @@ async fn test_finish_series_progress() {
 	assert_eq!(finished_sessions.len(), 5); // 1 for each book
 
 	let total_sessions = reading_session::Entity::find()
-		.filter(reading_session::Column::MediaId.is_in(ids))
+		.filter(reading_session::Column::MediaId.is_in(ids.clone()))
 		.all(conn)
 		.await
 		.expect("db error");
@@ -237,7 +240,7 @@ async fn test_clear_series_reading_history() {
 		.map(|pos| format!("black_science_{}", pos))
 		.collect::<Vec<_>>();
 	let total_sessions = reading_session::Entity::find()
-		.filter(reading_session::Column::MediaId.is_in(ids))
+		.filter(reading_session::Column::MediaId.is_in(ids.clone()))
 		.all(conn)
 		.await
 		.expect("db error");
@@ -247,6 +250,13 @@ async fn test_clear_series_reading_history() {
 	assert!(total_sessions
 		.iter()
 		.all(|session| session.status == ReadingStatus::Reading));
+
+	let reset_count = reading_progress_reset::Entity::find()
+		.filter(reading_progress_reset::Column::MediaId.is_in(ids))
+		.count(conn)
+		.await
+		.expect("db error");
+	assert_eq!(reset_count, 2);
 }
 
 #[tokio::test]

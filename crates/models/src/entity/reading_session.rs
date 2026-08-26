@@ -10,7 +10,8 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	entity::reading_device,
+	domain::reading_progress::next_sync_timestamp,
+	entity::{reading_device, reading_progress_reset},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
 };
@@ -75,6 +76,10 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 
+	/// Monotonic timestamp exposed to external reading clients.
+	#[graphql(skip)]
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
+	pub reported_at: Option<DateTimeWithTimeZone>,
 	pub created_at: DateTimeWithTimeZone,
 	pub updated_at: Option<DateTimeWithTimeZone>,
 }
@@ -262,11 +267,59 @@ impl Entity {
 
 #[async_trait]
 impl ActiveModelBehavior for ActiveModel {
-	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	async fn before_save<C>(mut self, db: &C, insert: bool) -> Result<Self, DbErr>
 	where
 		C: ConnectionTrait,
 	{
 		let now = Utc::now();
+		let explicitly_reported_at = match &self.reported_at {
+			ActiveValue::Set(Some(reported_at)) => Some(reported_at.to_owned()),
+			_ => None,
+		};
+		let user_id = match &self.user_id {
+			ActiveValue::Set(value) | ActiveValue::Unchanged(value) => {
+				Some(value.clone())
+			},
+			ActiveValue::NotSet => None,
+		};
+		let media_id = match &self.media_id {
+			ActiveValue::Set(value) | ActiveValue::Unchanged(value) => {
+				Some(value.clone())
+			},
+			ActiveValue::NotSet => None,
+		};
+
+		let candidate_reported_at =
+			explicitly_reported_at.unwrap_or_else(|| DateTimeWithTimeZone::from(now));
+		let mut previous_reported_at: Option<DateTimeWithTimeZone> = None;
+		if let (Some(user_id), Some(media_id)) = (user_id, media_id) {
+			let session_reported_at = Entity::find()
+				.filter(Column::UserId.eq(&user_id))
+				.filter(Column::MediaId.eq(&media_id))
+				.filter(Column::ReportedAt.is_not_null())
+				.order_by_desc(Column::ReportedAt)
+				.one(db)
+				.await?
+				.and_then(|session| session.reported_at);
+			let reset_reported_at =
+				reading_progress_reset::Entity::find_by_id((user_id, media_id))
+					.one(db)
+					.await?
+					.map(|reset| reset.reported_at.unwrap_or(reset.reset_at));
+
+			for previous in [session_reported_at, reset_reported_at]
+				.into_iter()
+				.flatten()
+			{
+				previous_reported_at = Some(
+					previous_reported_at
+						.map_or(previous, |current| current.max(previous)),
+				);
+			}
+		}
+		let effective_reported_at =
+			next_sync_timestamp(candidate_reported_at, previous_reported_at);
+
 		if insert {
 			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(now));
 			self.status = match self.status {
@@ -275,6 +328,7 @@ impl ActiveModelBehavior for ActiveModel {
 			};
 		}
 		self.updated_at = ActiveValue::Set(Some(DateTimeWithTimeZone::from(now)));
+		self.reported_at = ActiveValue::Set(Some(effective_reported_at));
 
 		Ok(self)
 	}

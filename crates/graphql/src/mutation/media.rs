@@ -1,14 +1,15 @@
 use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	entity::{favorite_media, library, library_config, media, series},
+	entity::{favorite_media, kobo_sync_media, library, library_config, media, series},
 	shared::enums::UserPermission,
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	IntoActiveModel, QuerySelect, Set,
+	IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
+use std::collections::{HashMap, HashSet};
 use stump_core::{
 	filesystem::{
 		image::{generate_book_thumbnail, GenerateThumbnailOptions},
@@ -26,6 +27,10 @@ use crate::{
 
 #[derive(Default)]
 pub struct MediaMutation;
+
+fn kobo_selection_changed(current: Option<bool>, is_selected: bool) -> bool {
+	current.unwrap_or(true) != is_selected
+}
 
 #[Object]
 impl MediaMutation {
@@ -154,6 +159,90 @@ impl MediaMutation {
 		Ok(model.into())
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessKoboSync)")]
+	async fn set_media_kobo_sync(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(validator(min_items = 1))] media_ids: Vec<ID>,
+		is_selected: bool,
+	) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let txn = conn.begin().await?;
+		let media_ids: HashSet<String> =
+			media_ids.into_iter().map(|id| id.to_string()).collect();
+
+		let visible_media_ids: HashSet<String> = media::Entity::find_for_user(user)
+			.select_only()
+			.column(media::Column::Id)
+			.filter(
+				media::Column::Id.is_in(media_ids.iter().cloned().collect::<Vec<_>>()),
+			)
+			.filter(media::Entity::epub_filter())
+			.filter(media::Column::DeletedAt.is_null())
+			.into_tuple()
+			.all(&txn)
+			.await?
+			.into_iter()
+			.collect();
+
+		if visible_media_ids.len() != media_ids.len() {
+			return Err("One or more EPUBs were not found".into());
+		}
+
+		let current_selections: HashMap<String, bool> = kobo_sync_media::Entity::find()
+			.filter(kobo_sync_media::Column::UserId.eq(user.id.clone()))
+			.filter(
+				kobo_sync_media::Column::MediaId
+					.is_in(media_ids.iter().cloned().collect::<Vec<_>>()),
+			)
+			.all(&txn)
+			.await?
+			.into_iter()
+			.map(|selection| (selection.media_id, selection.is_selected))
+			.collect();
+
+		let now = DateTimeWithTimeZone::from(Utc::now());
+		let changes = media_ids
+			.into_iter()
+			.filter(|media_id| {
+				kobo_selection_changed(
+					current_selections.get(media_id).copied(),
+					is_selected,
+				)
+			})
+			.map(|media_id| kobo_sync_media::ActiveModel {
+				user_id: Set(user.id.clone()),
+				media_id: Set(media_id),
+				is_selected: Set(is_selected),
+				updated_at: Set(now),
+			})
+			.collect::<Vec<_>>();
+
+		if changes.is_empty() {
+			txn.commit().await?;
+			return Ok(true);
+		}
+
+		kobo_sync_media::Entity::insert_many(changes)
+			.on_conflict(
+				OnConflict::columns([
+					kobo_sync_media::Column::UserId,
+					kobo_sync_media::Column::MediaId,
+				])
+				.update_columns([
+					kobo_sync_media::Column::IsSelected,
+					kobo_sync_media::Column::UpdatedAt,
+				])
+				.to_owned(),
+			)
+			.exec(&txn)
+			.await?;
+		txn.commit().await?;
+
+		Ok(true)
+	}
+
 	/// Update the thumbnail for a book. This will replace the existing thumbnail with the the one
 	/// associated with the provided input (book). If the book does not have a thumbnail, one
 	/// will be generated based on the library's thumbnail configuration.
@@ -221,5 +310,18 @@ impl MediaMutation {
 		tracing::debug!(path = ?path_buf, "Generated book thumbnail");
 
 		Ok(book.into())
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::kobo_selection_changed;
+
+	#[test]
+	fn kobo_selection_defaults_to_selected_and_only_records_changes() {
+		assert!(!kobo_selection_changed(None, true));
+		assert!(kobo_selection_changed(None, false));
+		assert!(!kobo_selection_changed(Some(false), false));
+		assert!(kobo_selection_changed(Some(false), true));
 	}
 }

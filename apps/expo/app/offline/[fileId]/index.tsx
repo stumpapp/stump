@@ -3,7 +3,7 @@ import { MediaMetadata } from '@stump/graphql'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
@@ -83,6 +83,7 @@ export default function Screen() {
 	const menuFragment = useOfflineBookMenu({ downloadedFile })
 
 	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
+	const [mainSectionHeight, setMainSectionHeight] = useState<number>()
 
 	if (!downloadedFile) return null
 
@@ -130,7 +131,11 @@ export default function Screen() {
 			{menuFragment}
 
 			{thumbnailUri && (
-				<OverviewBackground source={{ uri: thumbnailUri }} parallaxStyle={parallaxStyle} />
+				<OverviewBackground
+					source={{ uri: thumbnailUri }}
+					parallaxStyle={parallaxStyle}
+					mainSectionHeight={mainSectionHeight}
+				/>
 			)}
 
 			<Animated.ScrollView
@@ -138,7 +143,10 @@ export default function Screen() {
 				ref={animatedScrollRef}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16">
+				<View
+					className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16"
+					onLayout={(e) => setMainSectionHeight(e.nativeEvent.layout.height)}
+				>
 					{Platform.OS === 'android' && (
 						<View className="pt-2 flex flex-row justify-between">
 							<BackLink iconClassName="mr-[unset]" />

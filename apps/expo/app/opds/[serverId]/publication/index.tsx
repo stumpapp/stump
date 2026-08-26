@@ -3,7 +3,7 @@ import { useSDK } from '@stump/client'
 import { OPDSLink, resolveUrl } from '@stump/sdk'
 import { useNavigation, useRouter } from 'expo-router'
 import { Loader2 } from 'lucide-react-native'
-import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
@@ -204,6 +204,7 @@ export default function Screen() {
 		!!progression?.modified
 
 	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
+	const [mainSectionHeight, setMainSectionHeight] = useState<number>()
 
 	return (
 		<>
@@ -218,6 +219,7 @@ export default function Screen() {
 					},
 				}}
 				parallaxStyle={parallaxStyle}
+				mainSectionHeight={mainSectionHeight}
 			/>
 
 			<Animated.ScrollView
@@ -225,7 +227,10 @@ export default function Screen() {
 				ref={animatedScrollRef}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16">
+				<View
+					className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16"
+					onLayout={(e) => setMainSectionHeight(e.nativeEvent.layout.height)}
+				>
 					<ThumbnailImage
 						source={{
 							uri: thumbnailURL || '',

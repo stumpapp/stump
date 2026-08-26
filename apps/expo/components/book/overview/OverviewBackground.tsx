@@ -42,26 +42,41 @@ export function useOverviewAnimations() {
 }
 
 // TODO: Change the places that use useOverviewAnimations in sheets
+
+// Note: If inside the ScrollView there annoying issues with transformOrigin so instead we put
+// the background outside the ScrollView, but if we use the device height, on very wide screens
+//  the real white/black background will scroll into view under the background image,
+// so instead we measure the main section height on mount/layout change and use this.
+// This way when the details/metadata seconds is initially below the screen edge it scrolls fine.
 export function OverviewBackground({
 	parallaxStyle,
 	source,
+	mainSectionHeight,
 }: {
 	parallaxStyle: AnimatedStyle<ViewStyle>
 	source: TurboImageProps['source']
+	mainSectionHeight: number | undefined
 }) {
+	const headerHeight = useHeaderHeight()
+
 	return (
 		<Animated.View
-			// -top-24 is because when using a lot of blur, the sides get more transparent
-			// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
-			// https://github.com/duguyihou/react-native-turbo-image/issues/437
-			className="-top-24 left-0 right-0 bottom-0 absolute opacity-70 dark:opacity-30"
-			style={parallaxStyle}
+			className="absolute opacity-70 dark:opacity-30"
+			style={[
+				parallaxStyle,
+				{
+					// -80 is because when using a lot of blur, the sides get more transparent
+					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient,
+					// and this value is derived from guessing by eye
+					// https://github.com/duguyihou/react-native-turbo-image/issues/437
+					height: !mainSectionHeight ? undefined : mainSectionHeight + headerHeight + 80 * 2,
+					inset: -80,
+				},
+			]}
 		>
 			<TurboImage
 				source={source}
 				style={{ width: '100%', height: '100%' }}
-				// because we use uses "cover" and the image spans the whole screen rather than just the
-				// thumbnail+read+progress area, the image might not look great on very very tall or very very wide screens
 				resizeMode="cover"
 				fadeDuration={2000}
 				// android only supports up to blur={25} which doesn't look good,

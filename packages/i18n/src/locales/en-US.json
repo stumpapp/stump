@@ -3606,5 +3606,57 @@
 				"nothingInProgress": "Nothing in Progress"
 			}
 		}
+	},
+	"epubReader": {
+		"reading": "Reading",
+		"appearance": "Appearance",
+		"themeAndOptions": "Theme and options",
+		"locationManager": "Location manager",
+		"contents": "Contents",
+		"bookmarks": "Bookmarks",
+		"annotations": "Annotations",
+		"noBookmarks": "No bookmarks",
+		"bookmark": "Bookmark",
+		"noAnnotations": "No annotations",
+		"annotation": {
+			"addNote": "Add note",
+			"edit": "Edit annotation",
+			"note": "Note",
+			"optionalNote": "Add an optional note…",
+			"selectionActions": "Selection actions",
+			"highlight": "Highlight",
+			"disabledInIncognito": "Annotations are disabled in incognito mode",
+			"saveFailed": "Failed to save annotation",
+			"updateFailed": "Failed to update annotation",
+			"deleteFailed": "Failed to delete annotation"
+		},
+		"search": {
+			"placeholder": "Enter a query and press enter to search",
+			"failed": "Search failed. Please try again.",
+			"noResults": "No results found.",
+			"section": "Section {{position}}",
+			"loadingMore": "Loading more…",
+			"loadMore": "Load more results"
+		},
+		"controls": {
+			"columns": "Columns",
+			"auto": "Auto",
+			"columnCount_one": "{{count}} column",
+			"columnCount_other": "{{count}} columns",
+			"pageMargins": "Page margins",
+			"readingDirection": "Reading direction",
+			"leftToRight": "Left to right",
+			"rightToLeft": "Right to left",
+			"readingMode": "Reading mode",
+			"paged": "Paged",
+			"continuous": "Continuous",
+			"previousPage": "Previous page",
+			"nextPage": "Next page",
+			"toggleControls": "Toggle reader controls"
+		},
+		"errors": {
+			"openFailed": "Failed to open EPUB with Readium.",
+			"navigateFailed": "Failed to navigate to location"
+		}
 	}
 }

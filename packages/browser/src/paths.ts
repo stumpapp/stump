@@ -9,7 +9,6 @@ type BookReaderParams = {
 	page?: number
 	isEpub?: boolean
 	isPdf?: boolean
-	epubcfi?: string | null
 	isAnimated?: boolean
 	isStreaming?: boolean
 	isIncognito?: boolean
@@ -53,7 +52,7 @@ const pathsInternal = {
 	bookOverview: (id: string) => `/books/${id}`,
 	bookReader: (
 		id: string,
-		{ isEpub, isPdf, epubcfi, isAnimated, page, isStreaming, isIncognito }: BookReaderParams = {},
+		{ isEpub, isPdf, isAnimated, page, isStreaming, isIncognito }: BookReaderParams = {},
 	) => {
 		const baseUrl = pathsInternal.bookOverview(id)
 		const searchParams = new URLSearchParams()
@@ -62,8 +61,7 @@ const pathsInternal = {
 			searchParams.append('incognito', 'true')
 		}
 
-		if (isEpub || !!epubcfi) {
-			searchParams.append('stream', 'false')
+		if (isEpub) {
 			return `${baseUrl}/epub-reader?${searchParams.toString()}`
 		}
 

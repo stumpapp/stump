@@ -47,7 +47,6 @@ const normalizeLocations = (
 export function intoBookmarkRef(bookmark: StumpBookmark): BookmarkRef {
 	return {
 		id: bookmark.id,
-		epubcfi: bookmark.epubcfi,
 		href: bookmark.locator?.href ?? '',
 		chapterTitle: bookmark.locator?.chapterTitle ?? '',
 		locations: normalizeLocations(bookmark.locator?.locations),

@@ -335,7 +335,6 @@ type Bookmark {
 	id: String!
 	previewContent: String
 	locator: ReadiumLocator
-	epubcfi: String
 	page: Int
 	mediaId: String!
 	userId: String!
@@ -344,7 +343,7 @@ type Bookmark {
 
 input BookmarkInput {
 	mediaId: String!
-	locator: EpubProgressLocatorInput!
+	locator: ReadiumLocatorInput!
 	previewContent: String
 }
 
@@ -709,17 +708,12 @@ type Epub {
 }
 
 input EpubProgressInput {
-	locator: EpubProgressLocatorInput!
+	locator: ReadiumLocatorInput!
 	percentage: Decimal
 	isComplete: Boolean
 	elapsedSecondsDelta: Int
 	deviceId: String
 	resetElapsedSeconds: Boolean
-}
-
-input EpubProgressLocatorInput @oneOf {
-	readium: ReadiumLocatorInput
-	epubcfi: String
 }
 
 """
@@ -1991,8 +1985,6 @@ type Mutation {
 	createBookmark(input: BookmarkInput!): Bookmark!
 	"Delete a bookmark by ID, only if the user created it"
 	deleteBookmark(id: String!): Bookmark!
-	"Delete a bookmark by epubcfi"
-	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
 	"Create an annotation (highlight/note)"
 	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
 	"Update an annotation's note text"
@@ -2611,7 +2603,6 @@ type ReadingSession {
 	id: Int!
 	"the \"logical\" date of this session, based on user prefs and start time"
 	sessionDate: NaiveDate!
-	epubcfi: String @deprecated(reason: "future releases of Stump will remove support for this field")
 	startLocator: ReadiumLocator
 	endLocator: ReadiumLocator
 	startPage: Int
@@ -2763,7 +2754,6 @@ type ResumeReadingCursor {
 	page: Int
 	locator: ReadiumLocator
 	percentageCompleted: Decimal
-	epubcfi: String
 	"total reading time across all sessions in the current readthrough"
 	elapsedSeconds: Int!
 	"when the very first session in the current readthrough started"

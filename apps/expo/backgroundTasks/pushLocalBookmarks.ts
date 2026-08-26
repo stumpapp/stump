@@ -66,12 +66,10 @@ const handleCreateBookmark = async (api: Api, bookmark: Bookmark) => {
 		input: {
 			mediaId: bookmark.bookId,
 			locator: {
-				readium: {
-					chapterTitle: bookmark.chapterTitle ?? undefined,
-					href: bookmark.href,
-					locations: locations.success ? locations.data : undefined,
-					type: 'application/xhtml+xml',
-				},
+				chapterTitle: bookmark.chapterTitle ?? undefined,
+				href: bookmark.href,
+				locations: locations.success ? locations.data : undefined,
+				type: 'application/xhtml+xml',
 			},
 			previewContent: bookmark.previewContent ?? undefined,
 		},

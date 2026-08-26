@@ -12,7 +12,6 @@ pub struct ResumeReadingCursor {
 	pub page: Option<i32>,
 	pub locator: Option<ReadiumLocator>,
 	pub percentage_completed: Option<Decimal>,
-	pub epubcfi: Option<String>,
 	/// total reading time across all sessions in the current readthrough
 	pub elapsed_seconds: i64,
 	/// when the very first session in the current readthrough started

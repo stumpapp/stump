@@ -6,6 +6,7 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat } from 'date-fns'
 
 import paths from '@/paths'
+import { isEbookExtension } from '@/utils/readingProgress'
 
 import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'
@@ -50,15 +51,15 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	cell: ({
 		getValue,
 		row: {
-			original: { id, libraryConfig, readProgress },
+			original: { id, extension, libraryConfig, readProgress },
 		},
 	}) => (
 		<Link
 			to={
 				libraryConfig?.skipBookOverview
 					? paths.bookReader(id, {
-							epubcfi: readProgress?.epubcfi,
-							page: readProgress?.page ?? undefined,
+							isEpub: isEbookExtension(extension),
+							page: isEbookExtension(extension) ? undefined : (readProgress?.page ?? undefined),
 						})
 					: paths.bookOverview(id)
 			}

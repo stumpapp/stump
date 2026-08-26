@@ -1380,10 +1380,10 @@ async fn update_book_progression(
 		_ => {},
 	}
 
+	let locator = input.locator();
 	let progression = NormalizedProgression {
 		page,
-		locator: input.locator(),
-		epubcfi: None,
+		locator,
 		percentage,
 		elapsed_seconds_delta: None,
 		did_complete,

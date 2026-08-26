@@ -42,7 +42,6 @@ export function useBookmark() {
 						href: locator.href,
 						chapterTitle: locator.chapterTitle,
 						locations: locator.locations,
-						epubcfi: locator.locations?.partialCfi,
 						previewContent: locator.text?.highlight,
 						mediaId: book.id,
 						createdAt: new Date(),

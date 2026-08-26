@@ -5304,6 +5304,7 @@ version = "0.0.0"
 dependencies = [
  "async-graphql",
  "chrono",
+ "derive_builder",
  "filter-gen",
  "globset",
  "itertools 0.14.0",

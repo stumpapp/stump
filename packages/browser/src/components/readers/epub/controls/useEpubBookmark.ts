@@ -3,6 +3,7 @@ import { BookmarkInput, graphql } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 
 import { useEpubReaderContext } from '../context'
+import { locatorsRoughlyMatch } from '../readium/locator'
 
 const _createMutation = graphql(`
 	mutation CreateBookmark($input: BookmarkInput!) {
@@ -13,145 +14,108 @@ const _createMutation = graphql(`
 `)
 
 const _deleteMutation = graphql(`
-	mutation DeleteBookmarkByEpubcfi($epubcfi: String!) {
-		deleteBookmarkByEpubcfi(epubcfi: $epubcfi) {
+	mutation DeleteBookmark($id: String!) {
+		deleteBookmark(id: $id) {
 			__typename
 		}
 	}
 `)
 
-/**
- * A hook for creating and deleting bookmarks within an epub reader
- */
+/** Create and delete bookmarks for the Readium EPUB reader using locators. */
 export function useEpubBookmark() {
 	const {
 		readerMeta: {
 			bookEntity: { id: bookId },
 			bookMeta,
 		},
-		controls: { getCfiPreviewText },
+		controls: { getLocatorPreviewText },
 	} = useEpubReaderContext()
 
 	const chapterMeta = bookMeta?.chapter
-	const cfiRange = useMemo(
-		() => (chapterMeta?.cfiRange.filter(Boolean) ?? []) as string[],
-		[chapterMeta],
-	)
-	const isUnknownCfiRange = cfiRange.length === 0
-
+	const currentLocator = chapterMeta?.currentLocator
 	const existingBookmarks = useMemo(() => bookMeta?.bookmarks ?? {}, [bookMeta?.bookmarks])
-	const currentBookmark = useMemo(
-		() => existingBookmarks[cfiRange[0] ?? ''] ?? existingBookmarks[cfiRange[1] ?? ''],
-		[existingBookmarks, cfiRange],
-	)
 
-	/**
-	 * A callback to invalidate the parent query after a bookmark is created or deleted
-	 */
-	const onSuccess = useCallback(
-		() => queryClient.invalidateQueries({ queryKey: ['epubJsReader', bookId], exact: false }),
-		[bookId],
-	)
+	const currentBookmark = useMemo(() => {
+		if (!currentLocator?.href) return undefined
+		return Object.values(existingBookmarks).find(
+			(bookmark) =>
+				bookmark.locator &&
+				locatorsRoughlyMatch(
+					{
+						href: bookmark.locator.href,
+						locations: bookmark.locator.locations,
+					},
+					currentLocator,
+				),
+		)
+	}, [existingBookmarks, currentLocator])
+
+	const onSuccess = useCallback(() => {
+		queryClient.invalidateQueries({ queryKey: ['readiumWebReader', bookId], exact: false })
+	}, [bookId])
 
 	const { mutate: createMutation, isPending: isCreating } = useGraphQLMutation(_createMutation, {
-		onSuccess: () => {
-			onSuccess()
-		},
+		onSuccess,
 	})
-	/**
-	 * Create a payload for creating or deleting a bookmark based on the current
-	 * chapter's cfi range.
-	 */
-	const createPayload = useCallback(async () => {
-		const epubcfi = cfiRange[0] ?? cfiRange[1] ?? ''
-		const preview = await getCfiPreviewText(epubcfi)
-		const payload: BookmarkInput = {
+
+	const createPayload = useCallback((): BookmarkInput | null => {
+		if (!currentLocator?.href) return null
+
+		const preview = getLocatorPreviewText(currentLocator)
+		return {
 			locator: {
-				epubcfi,
+				chapterTitle: currentLocator.chapterTitle ?? currentLocator.title ?? '',
+				href: currentLocator.href,
+				title: currentLocator.title,
+				type: currentLocator.type || 'application/xhtml+xml',
+				locations: currentLocator.locations
+					? {
+							fragments: currentLocator.locations.fragments ?? undefined,
+							progression: currentLocator.locations.progression ?? undefined,
+							position: currentLocator.locations.position ?? undefined,
+							totalProgression: currentLocator.locations.totalProgression ?? undefined,
+						}
+					: undefined,
+				text: currentLocator.text ?? undefined,
 			},
 			mediaId: bookId,
-			previewContent: preview,
+			previewContent: preview ?? undefined,
 		}
+	}, [currentLocator, getLocatorPreviewText, bookId])
 
-		return payload
-	}, [cfiRange, getCfiPreviewText, bookId])
-
-	/**
-	 * Create a bookmark for a specific epubcfi. If no epubcfi payload is provided,
-	 * the current chapter's cfi range will be used.
-	 */
 	const createBookmark = useCallback(
-		async (payload?: BookmarkInput) => {
-			if (!createMutation) {
-				return
-			}
-
-			const resolvedPayload = payload ?? (await createPayload())
-			if (resolvedPayload.locator.epubcfi) {
-				createMutation({ input: resolvedPayload })
-			}
+		(payload?: BookmarkInput) => {
+			if (!createMutation) return
+			const resolvedPayload = payload ?? createPayload()
+			if (!resolvedPayload) return
+			createMutation({ input: resolvedPayload })
 		},
 		[createMutation, createPayload],
 	)
 
-	const { mutate: deleteMutation, isPending: isDeleting } = useGraphQLMutation(_deleteMutation)
+	const { mutate: deleteMutation, isPending: isDeleting } = useGraphQLMutation(_deleteMutation, {
+		onSuccess,
+	})
 
-	/**
-	 * Create a payload for creating or deleting a bookmark based on the current
-	 * chapter's cfi range
-	 */
-	const deletePayload = useCallback(() => {
-		if (currentBookmark?.epubcfi) {
-			return {
-				epubcfi: currentBookmark.epubcfi,
-			}
-		} else {
-			return null
+	const deleteBookmark = useCallback(() => {
+		if (currentBookmark?.id) {
+			deleteMutation({ id: currentBookmark.id })
 		}
-	}, [currentBookmark])
+	}, [deleteMutation, currentBookmark])
 
-	/**
-	 * Delete a bookmark for a specific epubcfi. If no epubcfi payload is provided,
-	 * the current chapter's cfi range will be used
-	 */
-	const deleteBookmark = useCallback(
-		(payload = deletePayload()) => {
-			if (payload?.epubcfi) {
-				deleteMutation(payload)
-			}
-		},
-		[deleteMutation, deletePayload],
-	)
-
-	const currentIsBookmarked = useMemo(() => !!currentBookmark, [currentBookmark])
-	const canBookmarkCurrent = useMemo(
-		() => !isUnknownCfiRange && !currentIsBookmarked,
-		[isUnknownCfiRange, currentIsBookmarked],
-	)
+	const currentIsBookmarked = !!currentBookmark
+	const canBookmarkCurrent = !!currentLocator?.href && !currentIsBookmarked
+	const isUnknownLocation = !currentLocator?.href
 
 	return {
-		/**
-		 * Whether or not the current chapter can be bookmarked
-		 */
 		canBookmarkCurrent,
 		createBookmark,
-		/**
-		 * Whether or not the current chapter is bookmarked
-		 */
 		currentIsBookmarked,
 		deleteBookmark,
-		/**
-		 * Whether or not a create bookmark mutation is currently in progress
-		 */
 		isCreating,
-		/**
-		 * Whether or not a delete bookmark mutation is currently in progress
-		 */
 		isDeleting,
-		/**
-		 * Whether or not the current chapter's cfi range is unknown. This is used
-		 * to determine whether or not to disable the bookmark button
-		 */
-		isUnknownCfiRange,
+		/** @deprecated Use isUnknownLocation — kept for BookmarkToggle compatibility */
+		isUnknownCfiRange: isUnknownLocation,
+		isUnknownLocation,
 	}
 }

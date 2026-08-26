@@ -16,6 +16,7 @@ import {
 	getPercentage,
 	OverviewBackground,
 	ProminentMetadataCard,
+	TitleSection,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
@@ -24,7 +25,7 @@ import { useOfflineBookMenu } from '~/components/localLibrary/OfflineBookMenu'
 import { useDownloadsState } from '~/components/localLibrary/store'
 import { getThumbnailPath } from '~/components/localLibrary/utils'
 import { MetadataBadgeSection } from '~/components/overview'
-import { Button, Heading, Text } from '~/components/ui'
+import { Button, Text } from '~/components/ui'
 import {
 	db,
 	downloadedFiles,
@@ -154,26 +155,11 @@ export default function Screen() {
 						borderAndShadowStyle={{ shadowRadius: 5 }}
 					/>
 
-					<View className="gap-1">
-						<Heading size="lg" className="leading-6 text-center">
-							{downloadedFile.bookName || t('common.unknownTitle')}
-						</Heading>
-
-						{seriesPosition != null ? (
-							<Text className="text-base text-foreground-muted text-center">{seriesPosition}</Text>
-						) : (
-							downloadedFile.series && (
-								<Text className="text-base text-foreground-muted text-center">
-									{downloadedFile.series.name}
-								</Text>
-							)
-						)}
-						{downloadedFile.library && (
-							<Text className="text-sm text-foreground-muted text-center" numberOfLines={1}>
-								{downloadedFile.library.name}
-							</Text>
-						)}
-					</View>
+					<TitleSection
+						title={downloadedFile.bookName}
+						series={seriesPosition ? seriesPosition : downloadedFile.series?.name}
+						library={downloadedFile.library?.name}
+					/>
 
 					<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 						<Button

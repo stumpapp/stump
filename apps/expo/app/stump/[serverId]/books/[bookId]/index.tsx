@@ -19,13 +19,14 @@ import {
 	LastFinishedCard,
 	OverviewBackground,
 	ProminentMetadataCard,
+	TitleSection,
 	useBookMenu,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
-import { Button, Heading, ListLabel, Text } from '~/components/ui'
+import { Button, ListLabel, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
@@ -291,7 +292,7 @@ export default function Screen() {
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="gap-8 px-4 tablet:px-6 ios:pb-24 pb-16">
+				<View className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16">
 					{Platform.OS === 'android' && book && (
 						<View className="pt-2 flex flex-row justify-between">
 							<BackLink iconClassName="mr-[unset]" />
@@ -318,15 +319,7 @@ export default function Screen() {
 						}
 					/>
 
-					<View className="gap-2">
-						<Heading size="lg" className="leading-6 text-center">
-							{book.resolvedName}
-						</Heading>
-
-						{seriesPosition != null && (
-							<Text className="text-base text-foreground-muted text-center">{seriesPosition}</Text>
-						)}
-					</View>
+					<TitleSection title={book.resolvedName} series={seriesPosition} />
 
 					<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 						<Button

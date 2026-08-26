@@ -185,6 +185,7 @@ export default function Screen() {
 	const stackFragment = useBookMenu(book)
 
 	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
+	const [mainSectionHeight, setMainSectionHeight] = useState<number>()
 
 	if (!book) return null
 
@@ -283,6 +284,7 @@ export default function Screen() {
 					},
 				}}
 				parallaxStyle={parallaxStyle}
+				mainSectionHeight={mainSectionHeight}
 			/>
 
 			<Animated.ScrollView
@@ -291,7 +293,10 @@ export default function Screen() {
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16">
+				<View
+					className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16"
+					onLayout={(e) => setMainSectionHeight(e.nativeEvent.layout.height)}
+				>
 					{Platform.OS === 'android' && book && (
 						<View className="pt-2 flex flex-row justify-between">
 							<BackLink iconClassName="mr-[unset]" />

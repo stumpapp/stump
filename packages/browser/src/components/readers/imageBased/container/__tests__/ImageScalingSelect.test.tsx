@@ -3,14 +3,14 @@ import { fireEvent, render, screen } from '@testing-library/react'
 
 import ImageScalingSelect from '../ImageScalingSelect'
 
-jest.mock('@/scenes/book/reader/useBookPreferences', () => ({
-	useBookPreferences: jest.fn(),
+vi.mock('@/scenes/book/reader/useBookPreferences', () => ({
+	useBookPreferences: vi.fn(),
 }))
 
 describe('ImageScalingSelect', () => {
 	const originalWarn = console.warn
 	beforeAll(() => {
-		console.warn = jest.fn()
+		console.warn = vi.fn()
 	})
 	afterAll(() => {
 		console.warn = originalWarn
@@ -18,13 +18,13 @@ describe('ImageScalingSelect', () => {
 
 	it('should render', () => {
 		expect(
-			render(<ImageScalingSelect value={ReadingImageScaleFit.Height} onChange={jest.fn()} />)
+			render(<ImageScalingSelect value={ReadingImageScaleFit.Height} onChange={vi.fn()} />)
 				.container,
 		).not.toBeEmptyDOMElement()
 	})
 
 	it('should change the image scaling properly', () => {
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		render(<ImageScalingSelect value={ReadingImageScaleFit.Height} onChange={onChange} />)
 
 		const validOptions = [
@@ -40,7 +40,7 @@ describe('ImageScalingSelect', () => {
 	})
 
 	it('should not allow invalid image scaling options', () => {
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		render(<ImageScalingSelect value={ReadingImageScaleFit.Height} onChange={onChange} />)
 		fireEvent.change(screen.getByLabelText('Image scaling'), { target: { value: 'invalid' } })
 		expect(onChange).not.toHaveBeenCalled()

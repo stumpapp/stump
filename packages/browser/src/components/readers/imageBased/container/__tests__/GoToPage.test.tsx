@@ -29,12 +29,12 @@ describe('GoToPage', () => {
 	const clickSubmit = () => fireEvent.click(screen.getByRole('button', { name: 'Go' }))
 
 	it('should render the trigger with the current position', () => {
-		render(<GoToPage currentPage={3} totalPages={42} onSubmit={jest.fn()} />)
+		render(<GoToPage currentPage={3} totalPages={42} onSubmit={vi.fn()} />)
 		expect(screen.getByText('3 of 42')).toBeInTheDocument()
 	})
 
 	it('associates the label with the input', () => {
-		render(<GoToPage currentPage={1} totalPages={42} onSubmit={jest.fn()} />)
+		render(<GoToPage currentPage={1} totalPages={42} onSubmit={vi.fn()} />)
 		openPopover()
 
 		/**
@@ -46,7 +46,7 @@ describe('GoToPage', () => {
 	})
 
 	it('submits the entered page when valid', () => {
-		const onSubmit = jest.fn()
+		const onSubmit = vi.fn()
 		render(<GoToPage currentPage={1} totalPages={42} onSubmit={onSubmit} />)
 		openPopover()
 
@@ -57,7 +57,7 @@ describe('GoToPage', () => {
 	})
 
 	it('clamps a too-large page down to the last page', () => {
-		const onSubmit = jest.fn()
+		const onSubmit = vi.fn()
 		render(<GoToPage currentPage={1} totalPages={42} onSubmit={onSubmit} />)
 		openPopover()
 
@@ -68,7 +68,7 @@ describe('GoToPage', () => {
 	})
 
 	it('clamps a too-small page up to 1', () => {
-		const onSubmit = jest.fn()
+		const onSubmit = vi.fn()
 		render(<GoToPage currentPage={5} totalPages={42} onSubmit={onSubmit} />)
 		openPopover()
 
@@ -79,7 +79,7 @@ describe('GoToPage', () => {
 	})
 
 	it('ignores non-numeric input', () => {
-		const onSubmit = jest.fn()
+		const onSubmit = vi.fn()
 		render(<GoToPage currentPage={5} totalPages={42} onSubmit={onSubmit} />)
 		openPopover()
 
@@ -90,7 +90,7 @@ describe('GoToPage', () => {
 	})
 
 	it('submits on Enter keypress', () => {
-		const onSubmit = jest.fn()
+		const onSubmit = vi.fn()
 		render(<GoToPage currentPage={1} totalPages={42} onSubmit={onSubmit} />)
 		openPopover()
 

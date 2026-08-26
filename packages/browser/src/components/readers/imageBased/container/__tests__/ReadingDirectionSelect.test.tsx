@@ -6,7 +6,7 @@ import ReadingDirectionSelect from '../ReadingDirectionSelect'
 describe('ReadingDirectionSelect', () => {
 	const originalWarn = console.warn
 	beforeAll(() => {
-		console.warn = jest.fn()
+		console.warn = vi.fn()
 	})
 	afterAll(() => {
 		console.warn = originalWarn
@@ -14,13 +14,13 @@ describe('ReadingDirectionSelect', () => {
 
 	it('should render', () => {
 		expect(
-			render(<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={jest.fn()} />)
+			render(<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={vi.fn()} />)
 				.container,
 		).not.toBeEmptyDOMElement()
 	})
 
 	it('should properly update the reading direction', () => {
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		const { getByLabelText } = render(
 			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
 		)
@@ -33,7 +33,7 @@ describe('ReadingDirectionSelect', () => {
 	})
 
 	it('should not allow invalid reading directions', () => {
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		const { getByLabelText } = render(
 			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
 		)

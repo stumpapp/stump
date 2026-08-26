@@ -33,7 +33,7 @@ export default function SettingsRouter() {
 
 	const apiKeys = checkPermission(UserPermission.AccessApiKeys)
 	const canManageServer = checkPermission(UserPermission.ManageServer)
-	const canManageUsers = checkPermission(UserPermission.ManageUsers)
+	const canReadUsers = checkPermission(UserPermission.ReadUsers)
 	const canManageEmail = checkPermission(UserPermission.EmailerManage)
 	const canReadProviders = checkPermission(UserPermission.MetadataProviderRead)
 	const canManageLibrary = checkPermission(UserPermission.ManageLibrary)
@@ -52,7 +52,7 @@ export default function SettingsRouter() {
 				{canManageServer && <Route path="server" element={<GeneralServerSettingsScene />} />}
 				{canManageServer && <Route path="logs" element={<ServerLogsScene />} />}
 				{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
-				{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
+				{canReadUsers && <Route path="users/*" element={<UsersRouter />} />}
 				{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
 				{canReadProviders && (
 					<Route path="metadata-integrations" element={<MetadataIntegrationsScene />} />

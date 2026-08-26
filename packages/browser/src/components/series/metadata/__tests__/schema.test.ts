@@ -261,7 +261,7 @@ describe('getEditorDefaultValues', () => {
 			volume: 0, // Invalid volume
 		} as any
 
-		const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+		const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 		const result = getEditorDefaultValues(invalidData)
 

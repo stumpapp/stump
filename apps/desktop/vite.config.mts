@@ -1,10 +1,14 @@
 import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import { resolve } from 'path'
+import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-plugin-tsconfig-paths'
 
 import { name, version } from './package.json'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 // TODO: move this to common/config?
 // https://vitejs.dev/config/
@@ -24,15 +28,7 @@ export default defineConfig({
 	define: {
 		pkgJson: { name, version },
 	},
-	plugins: [
-		tailwindcss(),
-		react({
-			babel: {
-				plugins: [['babel-plugin-react-compiler', {}]],
-			},
-		}),
-		tsconfigPaths(),
-	],
+	plugins: [tailwindcss(), react(), babel({ presets: [reactCompilerPreset()] }), tsconfigPaths()],
 	publicDir: '../../../packages/browser/public',
 	root: 'src',
 	server: {

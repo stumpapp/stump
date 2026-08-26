@@ -7,11 +7,11 @@ describe('createStumpFetch', () => {
 
 	afterEach(() => {
 		global.fetch = originalFetch
-		jest.restoreAllMocks()
+		vi.restoreAllMocks()
 	})
 
 	it('attaches Authorization and credentials include', async () => {
-		const fetchMock = jest.fn().mockResolvedValue(new Response('ok'))
+		const fetchMock = vi.fn().mockResolvedValue(new Response('ok'))
 		global.fetch = fetchMock as typeof fetch
 
 		const sdk = { authorizationHeader: 'Bearer test-token' } as Api
@@ -25,7 +25,7 @@ describe('createStumpFetch', () => {
 	})
 
 	it('does not overwrite an existing Authorization header', async () => {
-		const fetchMock = jest.fn().mockResolvedValue(new Response('ok'))
+		const fetchMock = vi.fn().mockResolvedValue(new Response('ok'))
 		global.fetch = fetchMock as typeof fetch
 
 		const sdk = { authorizationHeader: 'Bearer test-token' } as Api

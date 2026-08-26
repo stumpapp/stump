@@ -2,7 +2,7 @@ import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
 
 import { CreateOrUpdateEmailerSchema, createSchema } from '../schema'
 
-const translateFn = jest.fn()
+const translateFn = vi.fn()
 
 const validEmailer: CreateOrUpdateEmailerSchema = {
 	isPrimary: false,

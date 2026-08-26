@@ -5,7 +5,7 @@ import { EpubAPI } from '../epub-api'
 
 describe('EpubAPI.search', () => {
 	it('forwards query params and AbortSignal', async () => {
-		const get = jest.fn().mockResolvedValue({
+		const get = vi.fn().mockResolvedValue({
 			data: {
 				query: 'Alice',
 				results: [],
@@ -31,7 +31,7 @@ describe('EpubAPI.search', () => {
 
 		expect(response.query).toBe('Alice')
 		expect(get).toHaveBeenCalledTimes(1)
-		const [url, config] = get.mock.calls[0]
+		const [url, config] = get.mock.calls[0] ?? []
 		expect(url).toContain('/epub/book-1/search')
 		expect(url).toContain('q=Alice')
 		expect(url).toContain('limit=10')

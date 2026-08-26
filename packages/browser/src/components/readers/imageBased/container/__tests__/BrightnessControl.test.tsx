@@ -9,10 +9,10 @@ import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { IImageBaseReaderContext, useImageBaseReaderContext } from '../../context'
 import BrightnessControl from '../BrightnessControl'
 
-jest.mock('@/scenes/book/reader/useBookPreferences', () => ({
-	useBookPreferences: jest.fn(),
+vi.mock('@/scenes/book/reader/useBookPreferences', () => ({
+	useBookPreferences: vi.fn(),
 }))
-const setBookPreferences = jest.fn()
+const setBookPreferences = vi.fn()
 const createBookPreferences = (
 	overrides: DeepPartial<ReturnType<typeof useBookPreferences>> = {},
 ): ReturnType<typeof useBookPreferences> =>
@@ -24,9 +24,9 @@ const createBookPreferences = (
 		...overrides,
 	}) as ReturnType<typeof useBookPreferences>
 
-jest.mock('../../context', () => ({
-	...jest.requireActual('../../context'),
-	useImageBaseReaderContext: jest.fn(),
+vi.mock('../../context', async () => ({
+	...(await vi.importActual<typeof import('../../context')>('../../context')),
+	useImageBaseReaderContext: vi.fn(),
 }))
 
 const createReaderContext = (
@@ -38,17 +38,17 @@ const createReaderContext = (
 		...overrides,
 	}) as IImageBaseReaderContext
 
-window.HTMLElement.prototype.setPointerCapture = jest
+window.HTMLElement.prototype.setPointerCapture = vi
 	.fn()
 	.mockImplementation(() => setBookPreferences())
 
 // Note: This is a bit funky to test
 describe('BrightnessControl', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 
-		jest.mocked(useBookPreferences).mockReturnValue(createBookPreferences())
-		jest.mocked(useImageBaseReaderContext).mockReturnValue(createReaderContext())
+		vi.mocked(useBookPreferences).mockReturnValue(createBookPreferences())
+		vi.mocked(useImageBaseReaderContext).mockReturnValue(createReaderContext())
 	})
 
 	it('should render', () => {

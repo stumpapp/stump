@@ -14,6 +14,7 @@ import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceh
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
 import { usePaths } from '@/paths'
+import { isEbookReadProgress, readProgressPercent } from '@/utils/readingProgress'
 
 const IMAGE_WIDTH_MOBILE = 200
 const IMAGE_WIDTH_TABLET = 220
@@ -23,6 +24,7 @@ const ContinueReadingBookFragment = graphql(`
 		id
 		resolvedName
 		pages
+		extension
 		thumbnail {
 			url
 			metadata {
@@ -36,9 +38,11 @@ const ContinueReadingBookFragment = graphql(`
 		}
 		readProgress {
 			percentageCompleted
-			epubcfi
 			page
 			updatedAt
+			locator {
+				href
+			}
 		}
 	}
 `)
@@ -174,17 +178,8 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 
 	const progress = useMemo(() => {
 		if (!data.readProgress) return null
-
-		const { epubcfi, percentageCompleted, page } = data.readProgress
-		if (epubcfi && percentageCompleted) {
-			return Math.round(percentageCompleted * 100)
-		} else if (page) {
-			const percent = Math.round((page / data.pages) * 100)
-			return Math.min(Math.max(percent, 0), 100)
-		}
-
-		return null
-	}, [data.readProgress, data.pages])
+		return readProgressPercent(data.readProgress, data.pages, data.extension)
+	}, [data.readProgress, data.pages, data.extension])
 
 	const placeholderData: ThumbnailPlaceholderData | undefined = useMemo(() => {
 		const meta = data.thumbnail.metadata
@@ -196,7 +191,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 		}
 	}, [data.thumbnail.metadata])
 
-	const isEbookProgress = !!data.readProgress?.epubcfi
+	const isEbookProgress = isEbookReadProgress(data.readProgress, data.extension)
 	const pagesLeft = data.pages - (data.readProgress?.page || 0)
 	const progressPercent = progress ?? 0
 

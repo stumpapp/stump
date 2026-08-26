@@ -15,7 +15,6 @@ use crate::{
 pub struct NormalizedProgression {
 	pub page: Option<i32>,
 	pub locator: Option<ReadiumLocator>,
-	pub epubcfi: Option<String>,
 	pub percentage: Option<Decimal>,
 	pub elapsed_seconds_delta: Option<i64>,
 	pub did_complete: bool,
@@ -28,12 +27,22 @@ impl NormalizedProgression {
 		let new_elapsed = session.elapsed_seconds.unwrap_or(0)
 			+ self.elapsed_seconds_delta.unwrap_or(0).max(0);
 
+		let preserved_end_page = session.end_page;
+		let preserved_end_locator = session.end_locator.clone();
+		let preserved_end_percentage = session.end_percentage;
+
 		let mut active = session.into_active_model();
 
-		active.epubcfi = Set(self.epubcfi.clone());
-		active.end_page = Set(self.page);
-		active.end_locator = Set(self.locator.clone());
-		active.end_percentage = Set(self.percentage);
+		active.end_locator = Set(self.locator.clone().or(preserved_end_locator));
+
+		active.end_page = match self.page {
+			Some(page) => Set(Some(page)),
+			None => Set(preserved_end_page),
+		};
+		active.end_percentage = match self.percentage {
+			Some(percentage) => Set(Some(percentage)),
+			None => Set(preserved_end_percentage),
+		};
 		if self.did_complete {
 			active.status = Set(ReadingStatus::Finished);
 		} else {
@@ -101,7 +110,6 @@ pub async fn upsert_reading_session(
 
 			reading_session::ActiveModel {
 				session_date: Set(logical_today),
-				epubcfi: Set(input.epubcfi),
 				start_page: Set(input.page),
 				end_page: Set(input.page),
 				start_locator: Set(input.locator.clone()),

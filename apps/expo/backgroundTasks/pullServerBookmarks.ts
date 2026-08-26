@@ -9,7 +9,6 @@ const query = graphql(`
 	query PullServerBookmarks($id: ID!) {
 		bookmarksByMediaId(id: $id) {
 			id
-			epubcfi
 			mediaId
 			previewContent
 			locator {
@@ -84,7 +83,6 @@ const handleInsertServerBookmark = async (
 			serverBookmarkId: serverBookmark.id,
 			href: serverBookmark.locator?.href ?? '',
 			chapterTitle: serverBookmark.locator?.chapterTitle,
-			epubcfi: serverBookmark.epubcfi,
 			locations: serverBookmark.locator?.locations,
 			previewContent: serverBookmark.previewContent,
 			syncStatus: syncStatus.enum.SYNCED,

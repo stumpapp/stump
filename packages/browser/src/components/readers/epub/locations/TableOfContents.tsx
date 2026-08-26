@@ -9,20 +9,27 @@ type Props = {
 
 type ItemProps = {
 	item: EpubContent
+	level: number
 	handleSelect: (href: string) => void
 }
 
-function TableOfContentsItem({ item, handleSelect }: ItemProps) {
+function TableOfContentsItem({ item, level, handleSelect }: ItemProps) {
 	return (
 		<>
 			<button
 				className="px-1 py-1.5 justify-start text-left hover:bg-muted"
+				style={{ paddingLeft: 4 + level * 16 }}
 				onClick={() => handleSelect(item.content)}
 			>
 				<Text className="line-clamp-1">{item.label}</Text>
 			</button>
 			{item.children.map((childItem) => (
-				<TableOfContentsItem key={childItem.label} item={childItem} handleSelect={handleSelect} />
+				<TableOfContentsItem
+					key={childItem.label}
+					item={childItem}
+					level={level + 1}
+					handleSelect={handleSelect}
+				/>
 			))}
 		</>
 	)
@@ -46,7 +53,7 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 			aria-label="Table of Contents"
 		>
 			{toc?.map((item) => (
-				<TableOfContentsItem key={item.label} item={item} handleSelect={handleSelect} />
+				<TableOfContentsItem key={item.label} item={item} level={0} handleSelect={handleSelect} />
 			))}
 		</div>
 	)

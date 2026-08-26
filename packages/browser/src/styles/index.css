@@ -33,6 +33,12 @@ form {
 	@apply left-0 top-0 h-0.5 fixed z-50 w-full bg-brand-500;
 }
 
+.readium-navigator-iframe {
+	border: 0;
+	width: 100%;
+	height: 100%;
+}
+
 /* For Safari & Chrome only */
 ::-webkit-scrollbar {
 	width: 12px;

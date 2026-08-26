@@ -5,24 +5,9 @@ use models::{
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
 
-#[derive(Debug, Clone, OneofObject)]
-pub enum EpubProgressLocatorInput {
-	Readium(Box<ReadiumLocator>),
-	Epubcfi(String),
-}
-
-impl EpubProgressLocatorInput {
-	pub fn as_tuple(&self) -> (Option<String>, Option<ReadiumLocator>) {
-		match self {
-			EpubProgressLocatorInput::Epubcfi(cfi) => (Some(cfi.clone()), None),
-			EpubProgressLocatorInput::Readium(loc) => (None, Some((**loc).clone())),
-		}
-	}
-}
-
 #[derive(Debug, Clone, InputObject)]
 pub struct EpubProgressInput {
-	pub locator: EpubProgressLocatorInput,
+	pub locator: ReadiumLocator,
 	pub percentage: Option<Decimal>,
 	pub is_complete: Option<bool>,
 	pub elapsed_seconds_delta: Option<i64>,
@@ -62,20 +47,15 @@ impl MediaProgressInput {
 #[derive(InputObject)]
 pub struct BookmarkInput {
 	pub media_id: String,
-	pub locator: EpubProgressLocatorInput,
+	pub locator: ReadiumLocator,
 	pub preview_content: Option<String>,
 }
 
 impl BookmarkInput {
 	pub fn into_active_model(&self, user: &AuthUser) -> bookmark::ActiveModel {
-		let (epubcfi, locator) = match &self.locator {
-			EpubProgressLocatorInput::Epubcfi(cfi) => (Some(cfi.clone()), None),
-			EpubProgressLocatorInput::Readium(loc) => (None, Some(loc.clone())),
-		};
 		bookmark::ActiveModel {
 			id: Set(Uuid::new_v4().to_string()),
-			epubcfi: Set(epubcfi),
-			locator: Set(locator.as_deref().cloned()),
+			locator: Set(Some(self.locator.clone())),
 			preview_content: Set(self.preview_content.clone()),
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),

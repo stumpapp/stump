@@ -56,7 +56,6 @@ export const query = graphql(`
 			}
 			readProgress {
 				percentageCompleted
-				epubcfi
 				locator {
 					chapterTitle
 					href
@@ -116,7 +115,6 @@ export const query = graphql(`
 			ebook {
 				bookmarks {
 					id
-					epubcfi
 					mediaId
 					previewContent
 					locator {
@@ -189,7 +187,6 @@ const createBookmarkMutation = graphql(`
 	mutation CreateBookmarkMobile($input: BookmarkInput!) {
 		createBookmark(input: $input) {
 			id
-			epubcfi
 			previewContent
 			mediaId
 			locator {
@@ -336,11 +333,11 @@ export default function Screen() {
 			console.error('Failed to update read progress:', error)
 		},
 		onSuccess: (data, { input: onlineProgress }) => {
-			if (onlineProgress.epub?.locator?.readium) {
+			if (onlineProgress.epub?.locator) {
 				lastSyncedReadiumLocator.current = intoReadiumLocator({
-					...onlineProgress.epub.locator.readium,
-					chapterTitle: onlineProgress.epub.locator.readium.chapterTitle || '',
-					type: onlineProgress.epub.locator.readium.type || 'application/xhtml+xml',
+					...onlineProgress.epub.locator,
+					chapterTitle: onlineProgress.epub.locator.chapterTitle || '',
+					type: onlineProgress.epub.locator.type || 'application/xhtml+xml',
 				})
 			}
 			if (onlineProgress.paged?.page) {
@@ -384,14 +381,12 @@ export default function Screen() {
 				input: {
 					epub: {
 						locator: {
-							readium: {
-								chapterTitle: locator.chapterTitle,
-								href: locator.href,
-								locations: locator.locations,
-								text: locator.text,
-								title: locator.title,
-								type: locator.type || 'application/xhtml+xml',
-							},
+							chapterTitle: locator.chapterTitle,
+							href: locator.href,
+							locations: locator.locations,
+							text: locator.text,
+							title: locator.title,
+							type: locator.type || 'application/xhtml+xml',
 						},
 						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 						percentage,
@@ -412,14 +407,12 @@ export default function Screen() {
 				input: {
 					epub: {
 						locator: {
-							readium: {
-								chapterTitle: locator.chapterTitle,
-								href: locator.href,
-								locations: locator.locations,
-								text: locator.text,
-								title: locator.title,
-								type: locator.type || 'application/xhtml+xml',
-							},
+							chapterTitle: locator.chapterTitle,
+							href: locator.href,
+							locations: locator.locations,
+							text: locator.text,
+							title: locator.title,
+							type: locator.type || 'application/xhtml+xml',
 						},
 						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 						isComplete: true,
@@ -483,14 +476,12 @@ export default function Screen() {
 				input: {
 					mediaId: book.id,
 					locator: {
-						readium: {
-							chapterTitle: locator.chapterTitle,
-							href: locator.href,
-							locations: locator.locations,
-							text: locator.text,
-							title: locator.title,
-							type: locator.type || 'application/xhtml+xml',
-						},
+						chapterTitle: locator.chapterTitle,
+						href: locator.href,
+						locations: locator.locations,
+						text: locator.text,
+						title: locator.title,
+						type: locator.type || 'application/xhtml+xml',
 					},
 					previewContent,
 				},

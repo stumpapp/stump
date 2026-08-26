@@ -2,9 +2,7 @@ use crate::common::{
 	book::update_progress, series::setup_single_series_with_n_books, TestApp,
 };
 
-use graphql::input::media::{
-	EpubProgressInput, EpubProgressLocatorInput, MediaProgressInput, PagedProgressInput,
-};
+use graphql::input::media::{EpubProgressInput, MediaProgressInput, PagedProgressInput};
 use models::{
 	entity::{media, reading_session},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
@@ -423,13 +421,13 @@ async fn test_detect_finishing_session_for_ebook() {
 
 	let conn = app.conn();
 
-	fn locator(chapter: usize) -> EpubProgressLocatorInput {
-		EpubProgressLocatorInput::Readium(Box::new(ReadiumLocator {
+	fn locator(chapter: usize) -> ReadiumLocator {
+		ReadiumLocator {
 			chapter_title: format!("Chapter {chapter}"),
 			href: format!("chapter{chapter}.xhtml"),
 			r#type: "application/xhtml+xml".to_string(),
 			..Default::default()
-		}))
+		}
 	}
 
 	update_progress(

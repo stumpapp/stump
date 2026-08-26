@@ -9,16 +9,15 @@
 	"scripts": {
 		"check-types": "tsc -b tsconfig.json",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
-		"test": "jest"
+		"test": "vitest run"
 	},
 	"license": "MIT",
 	"devDependencies": {
-		"@babel/preset-typescript": "^7.24.7",
 		"@types/qs": "^6.9.14",
 		"fast-xml-parser": "^5.10.1",
-		"jest": "^30.3.0",
 		"ts-essentials": "^10.2.0",
-		"typescript": "^5.4.5"
+		"typescript": "^5.4.5",
+		"vitest": "^4.1.11"
 	},
 	"dependencies": {
 		"axios": "^1.16.1",

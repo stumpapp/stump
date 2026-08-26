@@ -74,7 +74,6 @@ const query = graphql(`
 			readProgress {
 				page
 				percentageCompleted
-				epubcfi
 				locator {
 					chapterTitle
 					locations {
@@ -230,9 +229,9 @@ export default function Screen() {
 		!coverArtists.length
 
 	const renderRead = () => {
-		const { page, percentageCompleted, epubcfi } = book.readProgress || {}
+		const { page, percentageCompleted } = book.readProgress || {}
 
-		if (page || percentageCompleted || !!epubcfi) {
+		if (page || percentageCompleted) {
 			return <Text>{t('common.continue')}</Text>
 		} else if (book.readHistory?.length) {
 			return <Text>{t('common.readAgain')}</Text>

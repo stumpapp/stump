@@ -4,7 +4,7 @@ describe('reader utils', () => {
 	describe('generatePageSets', () => {
 		const originalWarn = console.warn
 		beforeAll(() => {
-			console.warn = jest.fn()
+			console.warn = vi.fn()
 		})
 
 		afterAll(() => {

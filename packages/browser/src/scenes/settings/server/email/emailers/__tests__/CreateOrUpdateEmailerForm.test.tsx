@@ -9,9 +9,9 @@ import CreateOrUpdateEmailerForm from '../CreateOrUpdateEmailerForm'
 import { CreateOrUpdateEmailerSchema } from '../schema'
 
 // eslint-disable-next-line react/display-name
-jest.mock('../TestEmailerButton', () => () => <div>TestEmailerButton</div>)
+vi.mock('../TestEmailerButton', () => ({ default: () => <div>TestEmailerButton</div> }))
 
-jest.mock('@stump/i18n', () => ({
+vi.mock('@stump/i18n', () => ({
 	useLocaleContext: () => ({ t: (s: string) => s }),
 }))
 
@@ -57,7 +57,7 @@ const inputEmailer = async (overrides: Partial<CreateOrUpdateEmailerSchema> = {}
 	return user
 }
 
-const onSubmit = jest.fn()
+const onSubmit = vi.fn()
 
 type SubjectProps = Omit<Partial<ComponentProps<typeof CreateOrUpdateEmailerForm>>, 'onSubmit'>
 const Subject = ({ existingNames = [], ...props }: SubjectProps) => (
@@ -68,14 +68,14 @@ describe('CreateOrUpdateEmailerForm', () => {
 	// TODO: fix the select component emitting a warning about defaultValue vs value
 	const originalError = console.error.bind(console.error)
 	beforeAll(() => {
-		console.error = jest.fn()
+		console.error = vi.fn()
 	})
 	afterAll(() => {
 		console.error = originalError
 	})
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	test('renders properly', async () => {

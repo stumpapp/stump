@@ -149,19 +149,19 @@ export function useDetachedGraphQL<TResult, TVariables>(
 	return { error, ...rest } as UseQueryResult<TResult>
 }
 
-type UseGraphQLMutationOptions<TResult, TVariables> = Omit<
+type UseGraphQLMutationOptions<TResult, TVariables, TContext = unknown> = Omit<
 	UseMutationOptions<
 		TResult,
 		unknown,
 		TVariables extends Record<string, never> ? never : TVariables,
-		unknown
+		TContext
 	>,
 	'mutationFn'
 >
 
-export function useGraphQLMutation<TResult, TVariables>(
+export function useGraphQLMutation<TResult, TVariables, TContext = unknown>(
 	document: TypedDocumentString<TResult, TVariables>,
-	options: UseGraphQLMutationOptions<TResult, TVariables> = {},
+	options: UseGraphQLMutationOptions<TResult, TVariables, TContext> = {},
 ) {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -174,15 +174,14 @@ export function useGraphQLMutation<TResult, TVariables>(
 	const { error, ...rest } = useMutation({
 		...options,
 		mutationFn,
-		onError: (error, variables, context) => {
+		onError: (error, variables, onMutateResult, context) => {
 			handleError({
 				sdk,
 				error,
 				onUnauthenticatedResponse,
 				onConnectionWithServerChanged,
 			})
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			options?.onError?.(error, variables, noop, context as any)
+			options.onError?.(error, variables, onMutateResult, context)
 		},
 	})
 
@@ -190,7 +189,7 @@ export function useGraphQLMutation<TResult, TVariables>(
 		TResult,
 		unknown,
 		TVariables extends Record<string, never> ? never : TVariables,
-		unknown
+		TContext
 	>
 }
 

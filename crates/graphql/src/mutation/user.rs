@@ -194,6 +194,7 @@ impl UserMutation {
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageUsers)")]
+	#[tracing::instrument(skip(self, ctx, input), fields(username = ?input.username))]
 	async fn create_user(
 		&self,
 		ctx: &Context<'_>,
@@ -222,8 +223,8 @@ impl UserMutation {
 		let user_model = user
 			.save(&txn)
 			.await
-			.map_err(|e| {
-				tracing::error!("Failed to create user: {:?}", e);
+			.map_err(|error| {
+				tracing::error!(?error, "Failed to create user");
 				"Failed to create user"
 			})?
 			.try_into_model()?;
@@ -238,8 +239,8 @@ impl UserMutation {
 			}
 			.save(&txn)
 			.await
-			.map_err(|e| {
-				tracing::error!("Failed to create age restriction: {:?}", e);
+			.map_err(|error| {
+				tracing::error!(?error, "Failed to create age restriction");
 				"Failed to create age restriction"
 			})?;
 			tracing::trace!(?created_restriction, "Created age restriction");

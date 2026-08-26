@@ -1,6 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Database, Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
@@ -35,9 +35,10 @@ type Props = {
 
 export default function UserActionMenu({ user, onSelectForInspect, onSelectForDeletion }: Props) {
 	const { sdk } = useSDK()
-	const { isServerOwner, user: byUser } = useAppContext()
+	const { isServerOwner, user: byUser, checkPermission } = useAppContext()
 
 	const client = useQueryClient()
+	const canManageUsers = checkPermission(UserPermission.ManageUsers)
 
 	const { mutate: lockMutate } = useGraphQLMutation(lockMutation, {
 		onSuccess: async () => {
@@ -91,33 +92,37 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 					},
 				],
 			},
-			{
-				items: [
-					{
-						label: 'Edit',
-						disabled: isSelf,
-						leftIcon: <Pencil className="mr-2 h-4 w-4" />,
-						onClick: () => navigate(paths.updateUser(user.id)),
-					},
-					{
-						disabled: isSelf,
-						label: 'Delete',
-						isDestructive: true,
-						leftIcon: <Trash className="mr-2 h-4 w-4" />,
-						onClick: () => onSelectForDeletion(user),
-					},
-					{
-						disabled: isSelf || user.isServerOwner,
-						label: `${user.isLocked ? 'Unlock' : 'Lock'} account`,
-						leftIcon: user.isLocked ? (
-							<Unlock className="mr-2 h-4 w-4" />
-						) : (
-							<Lock className="mr-2 h-4 w-4" />
-						),
-						onClick: () => handleSetLockStatus(!user.isLocked),
-					},
-				],
-			},
+			...(canManageUsers
+				? [
+						{
+							items: [
+								{
+									label: 'Edit',
+									disabled: isSelf,
+									leftIcon: <Pencil className="mr-2 h-4 w-4" />,
+									onClick: () => navigate(paths.updateUser(user.id)),
+								} as const,
+								{
+									disabled: isSelf,
+									label: 'Delete',
+									isDestructive: true,
+									leftIcon: <Trash className="mr-2 h-4 w-4" />,
+									onClick: () => onSelectForDeletion(user),
+								} as const,
+								{
+									disabled: isSelf || user.isServerOwner,
+									label: `${user.isLocked ? 'Unlock' : 'Lock'} account`,
+									leftIcon: user.isLocked ? (
+										<Unlock className="mr-2 h-4 w-4" />
+									) : (
+										<Lock className="mr-2 h-4 w-4" />
+									),
+									onClick: () => handleSetLockStatus(!user.isLocked),
+								} as const,
+							],
+						},
+					]
+				: []),
 		],
 
 		[
@@ -128,6 +133,7 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 			handleClearUserSessions,
 			handleSetLockStatus,
 			onSelectForDeletion,
+			canManageUsers,
 		],
 	)
 

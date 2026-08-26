@@ -141,7 +141,7 @@
 		"drizzle-kit": "^0.31.5",
 		"tsx": "^4.20.5",
 		"typescript": "~5.9.2",
-		"vitest": "^3.0.0"
+		"vitest": "^4.1.11"
 	},
 	"private": true,
 	"expo": {

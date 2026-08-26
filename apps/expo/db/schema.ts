@@ -149,7 +149,6 @@ export const bookmarks = sqliteTable('bookmarks', {
 		.notNull()
 		.references(() => downloadedFiles.id, { onDelete: 'cascade' }),
 	serverId: text('server_id').notNull(),
-	epubcfi: text('epubcfi'),
 	href: text('href').notNull(),
 	chapterTitle: text('chapter_title'),
 	locations: text('locations', { mode: 'json' }),

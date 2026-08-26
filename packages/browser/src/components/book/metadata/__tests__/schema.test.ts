@@ -241,7 +241,7 @@ describe('getEditorDefaultValues', () => {
 			day: 50, // Invalid day
 		} as any
 
-		const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+		const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 		const result = getEditorDefaultValues(invalidData)
 

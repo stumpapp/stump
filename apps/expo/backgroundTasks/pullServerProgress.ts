@@ -15,7 +15,6 @@ const query = graphql(`
 					sessionId
 					page
 					percentageCompleted
-					epubcfi
 					updatedAt
 					elapsedSeconds
 					locator {

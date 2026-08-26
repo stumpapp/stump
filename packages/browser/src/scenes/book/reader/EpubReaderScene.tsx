@@ -1,13 +1,14 @@
 import { useSDK } from '@stump/client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 
-import EpubJsReader from '@/components/readers/epub/EpubJsReader'
+import { ReadiumWebReader } from '@/components/readers/epub/readium'
 
-import paths from '../../../paths'
-
-//! NOTE: Only the epub.js reader is supported for now :sob:
+/**
+ * EPUB reader scene — Readium streaming is the production reader.
+ * Legacy epub.js remains in-tree for now.
+ */
 export default function EpubReaderScene() {
 	const { sdk } = useSDK()
 	const { id } = useParams()
@@ -16,9 +17,7 @@ export default function EpubReaderScene() {
 		throw new Error('Media id is required')
 	}
 
-	const [search, setSearch] = useSearchParams()
-
-	const lazyReader = search.get('stream') && search.get('stream') !== 'true'
+	const [search] = useSearchParams()
 	const isIncognito = search.get('incognito') === 'true'
 
 	const client = useQueryClient()
@@ -33,11 +32,5 @@ export default function EpubReaderScene() {
 		}
 	}, [client, sdk.cacheKeys])
 
-	if (lazyReader) {
-		return <EpubJsReader id={id} isIncognito={isIncognito} />
-	} else {
-		search.set('stream', 'true')
-		setSearch(search)
-		return <Navigate to={paths.bookReader(id, { isEpub: true })} />
-	}
+	return <ReadiumWebReader id={id} isIncognito={isIncognito} />
 }

@@ -53,7 +53,6 @@ const fragment = graphql(`
 		}
 		pages
 		readProgress {
-			epubcfi
 			page
 			percentageCompleted
 			updatedAt

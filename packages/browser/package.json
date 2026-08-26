@@ -9,7 +9,7 @@
 		"check-types": "tsc -b tsconfig.json",
 		"lint": "eslint .",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
-		"test": "jest",
+		"test": "vitest run",
 		"clean": "rimraf node_modules"
 	},
 	"exports": {
@@ -21,6 +21,9 @@
 		"@dnd-kit/sortable": "^8.0.0",
 		"@hookform/resolvers": "^3.9.0",
 		"@panzoom/panzoom": "^4.6.0",
+		"@readium/navigator": "2.8.2",
+		"@readium/navigator-html-injectables": "2.6.3",
+		"@readium/shared": "2.4.0",
 		"@stump/client": "*",
 		"@stump/components": "*",
 		"@stump/i18n": "*",
@@ -34,7 +37,6 @@
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"colorjs.io": "^0.5.2",
-		"epubjs": "^0.3.93",
 		"framer-motion": "^10.18.0",
 		"i18next": "^26.0.1",
 		"immer": "^10.0.4",
@@ -83,17 +85,10 @@
 		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
-		"@babel/preset-env": "^7.25.4",
-		"@babel/preset-react": "^7.24.7",
-		"@babel/preset-typescript": "^7.24.7",
-		"@graphql-codegen/cli": "^5.0.5",
-		"@graphql-codegen/near-operation-file-preset": "^5.0.0",
-		"@simbathesailor/use-what-changed": "^2.0.0",
-		"@testing-library/jest-dom": "^6.5.0",
+		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.0.1",
 		"@testing-library/user-event": "^14.5.2",
 		"@types/is-valid-glob": "^1.0.3",
-		"@types/jest": "^30.0.0",
 		"@types/node": "^20.12.7",
 		"@types/nprogress": "^0.2.3",
 		"@types/pluralize": "^0.0.33",
@@ -102,12 +97,11 @@
 		"@types/react-helmet": "^6.1.11",
 		"@types/react-router-dom": "^5.3.3",
 		"@types/react-window": "^1.8.8",
-		"@vitejs/plugin-react": "^5.0.2",
+		"@vitejs/plugin-react": "^6.1.0",
 		"cross-fetch": "^4.0.0",
-		"jest": "^30.3.0",
-		"jest-environment-jsdom": "^30.4.1",
-		"ts-node": "^10.9.2",
+		"jsdom": "^26.0.0",
 		"typescript": "^5.4.5",
-		"vite": "^7.1.5"
+		"vite": "^8.2.2",
+		"vitest": "^4.1.11"
 	}
 }

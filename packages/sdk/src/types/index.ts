@@ -1,3 +1,4 @@
+export * from './epub'
 export * from './graphql'
 export * from './opds'
 export * from './opds-legacy'

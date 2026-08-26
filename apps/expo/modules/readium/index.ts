@@ -13,7 +13,6 @@ export { default as ReadiumView } from './src/ReadiumView'
 
 type StumpBookmark = {
 	id: string
-	epubcfi?: string | null
 	mediaId: string
 	previewContent?: string | null
 	locator?: {

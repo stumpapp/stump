@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { checkOPDSURL, checkUrl, formatApiURL } from '@stump/sdk'
 import { ChevronRight } from 'lucide-react-native'
 import { useCallback, useEffect, useState } from 'react'
-import { Controller, useFormContext, useWatch } from 'react-hook-form'
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { View } from 'react-native'
 import { Pressable } from 'react-native'
 
@@ -23,6 +23,7 @@ export function CreateOrUpdateServerForm() {
 	const { t } = useTranslate()
 
 	const form = useFormContext<CreateOrUpdateServerData>()
+	const { errors } = useFormState({ control: form.control })
 
 	const [kind, url, isDefault, name] = useWatch({
 		control: form.control,
@@ -81,7 +82,10 @@ export function CreateOrUpdateServerForm() {
 					label={t('common.name')}
 					placeholder={t(getKey('serverNamePlaceholder'))}
 					value={name}
-					onChangeText={(text) => form.setValue('name', text)}
+					onChangeText={(text) =>
+						form.setValue('name', text, { shouldValidate: !!errors.name?.message })
+					}
+					errorMessage={errors.name?.message}
 				/>
 			</Card>
 
@@ -90,7 +94,7 @@ export function CreateOrUpdateServerForm() {
 					label={t(getKey('primaryUrl'))}
 					placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? `/opds/${kind === 'opds-legacy' ? 'v1.2' : 'v2.0'}/catalog` : ''}`}
 					value={url}
-					onChangeText={(text) => form.setValue('url', text)}
+					onChangeText={(text) => form.setValue('url', text, { shouldValidate: !!errors.url })}
 					autoCapitalize="none"
 					actions={
 						// not overly fancy but fine for now
@@ -114,6 +118,7 @@ export function CreateOrUpdateServerForm() {
 							)}
 						</Button>
 					}
+					errorMessage={errors.url?.message}
 				/>
 
 				<Pressable onPress={() => TrueSheet.present('advancedNetworkSettingsSheet')}>

@@ -1,5 +1,5 @@
 import { Route } from 'lucide-react-native'
-import { useFormContext, useWatch } from 'react-hook-form'
+import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { View } from 'react-native'
 import { toast } from 'sonner-native'
 
@@ -21,6 +21,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 		name: ['enableLocalProfile', 'localUrl', 'localSsid'],
 	})
 
+	const { errors } = useFormState({ control: form.control })
 	const { t } = useTranslate()
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
 
@@ -54,7 +55,9 @@ export function AdvancedNetworkSettingsSheetContent() {
 						label={t(getKey('localUrl'))}
 						hitSlop={50}
 						selectionColor={colors.fill.brand.DEFAULT}
-						onChangeText={(text) => form.setValue('localUrl', text)}
+						onChangeText={(text) =>
+							form.setValue('localUrl', text, { shouldValidate: !!errors.localUrl?.message })
+						}
 						value={localUrl ?? ''}
 						style={{
 							fontSize: 16,
@@ -62,6 +65,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 						}}
 						className="font-medium pl-3 w-full text-start"
 						autoCapitalize="none"
+						errorMessage={errors.localUrl?.message}
 					/>
 				</Card>
 			</View>

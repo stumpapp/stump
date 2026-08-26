@@ -225,8 +225,21 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 type InputRowProps = TextInputProps & {
 	label?: string
 	actions?: React.ReactNode
+	errorMessage?: string
+	// i kept the isInvalid prop in case we want to show invalid without an error
+	isInvalid?: boolean
 }
-function InputRow({ label, actions, value, onChangeText, className, ...props }: InputRowProps) {
+
+function InputRow({
+	label,
+	actions,
+	value,
+	onChangeText,
+	className,
+	errorMessage,
+	isInvalid,
+	...props
+}: InputRowProps) {
 	const colors = useColors()
 	return (
 		<BaseRowComponent>
@@ -241,6 +254,11 @@ function InputRow({ label, actions, value, onChangeText, className, ...props }: 
 						className={cn(
 							'squircle dark:border-white/5 dark:bg-white/5 border-black/5 bg-black/5 h-11 flex flex-row items-center rounded-full border',
 							{ 'h-[unset] min-h-[2.75rem]': props.multiline },
+							{
+								// TODO: colors are wack, make better semantic tokens for form error colors
+								'bg-red-300/50 border-red-400/30 dark:bg-red-500/20 dark:border-red-600/30':
+									isInvalid || !!errorMessage,
+							},
 						)}
 					>
 						<TextInput
@@ -249,11 +267,20 @@ function InputRow({ label, actions, value, onChangeText, className, ...props }: 
 							className={cn('font-medium pl-3 w-full', className)}
 							{...props}
 							style={{
-								color: colors.foreground.DEFAULT,
+								color:
+									isInvalid || !!errorMessage
+										? colors.fill.danger.DEFAULT
+										: colors.foreground.DEFAULT,
 								...props.style,
 							}}
 						/>
 					</View>
+
+					{errorMessage && (
+						<Text size="sm" className="text-red-500 ml-1">
+							{errorMessage}
+						</Text>
+					)}
 				</View>
 			</View>
 		</BaseRowComponent>

@@ -26,9 +26,11 @@ export function CreateServerSheet() {
 	const { t } = useTranslate()
 	const { savedServers, createServer } = useSavedServers()
 
+	const didSuccessfullyCreate = useRef(false)
 	const onSubmit = useCallback(
 		async (data: CreateOrUpdateServerData) => {
 			await createServer(intoCreateServer(data))
+			didSuccessfullyCreate.current = true
 			sheetRef.current?.dismiss()
 		},
 		[createServer],
@@ -42,9 +44,10 @@ export function CreateServerSheet() {
 				t,
 			),
 		),
+		// doesn't work >:(
+		// reValidateMode: 'onChange',
 	})
 	const { errors } = useFormState({ control: form.control })
-	console.log(errors)
 
 	const localUrlError = errors.localUrl?.message
 	const localSsidError = errors.localSsid?.message
@@ -92,6 +95,9 @@ export function CreateServerSheet() {
 						type: 'check',
 						// eslint-disable-next-line react-hooks/refs
 						onPress: form.handleSubmit(onSubmit),
+					}}
+					onDidDismiss={() => {
+						if (!didSuccessfullyCreate.current) form.reset(defaultCreateData)
 					}}
 				>
 					<CreateOrUpdateServerForm />

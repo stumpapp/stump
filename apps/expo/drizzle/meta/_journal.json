@@ -50,6 +50,13 @@
       "when": 1785605176900,
       "tag": "0006_shiny_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1787718487886,
+      "tag": "0007_small_albert_cleary",
+      "breakpoints": true
     }
   ]
 }

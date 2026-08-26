@@ -224,6 +224,7 @@ impl OPDSProgressionInput {
 			// TODO(opds): Do we need these for progression?
 			css_selector: None,
 			partial_cfi: None,
+			kobo_span: None,
 		});
 
 		let text = self.locator.text.as_ref().map(|t| ReadiumText {

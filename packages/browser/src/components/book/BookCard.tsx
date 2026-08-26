@@ -19,6 +19,7 @@ export const BookCardFragment = graphql(`
 		id
 		resolvedName
 		extension
+		isSelectedForKoboSync
 		pages
 		size
 		status

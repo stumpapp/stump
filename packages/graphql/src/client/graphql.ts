@@ -1400,6 +1400,8 @@ export type Media = {
   id: Scalars['String']['output'];
   /** Whether the media is marked as a favorite by the current user */
   isFavorite: Scalars['Boolean']['output'];
+  /** Whether the current user has selected this EPUB for Kobo sync. */
+  isSelectedForKoboSync: Scalars['Boolean']['output'];
   /**
    * A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
    * books from the KoReader application so progress can be synced between the two applications
@@ -2135,6 +2137,7 @@ export type Mutation = {
   setLibraryMediaLockedFields: Scalars['Int']['output'];
   /** Bulk-set locked metadata fields for all series metadata in a library */
   setLibrarySeriesLockedFields: Scalars['Int']['output'];
+  setMediaKoboSync: Scalars['Boolean']['output'];
   /** Set the locked metadata fields for a media item */
   setMediaLockedFields: Media;
   /**
@@ -2745,6 +2748,12 @@ export type MutationSetLibraryMediaLockedFieldsArgs = {
 export type MutationSetLibrarySeriesLockedFieldsArgs = {
   libraryId: Scalars['ID']['input'];
   lockedFields: Array<MetadataField>;
+};
+
+
+export type MutationSetMediaKoboSyncArgs = {
+  isSelected: Scalars['Boolean']['input'];
+  mediaIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -3769,6 +3778,8 @@ export type ReadiumLocation = {
   __typename?: 'ReadiumLocation';
   cssSelector?: Maybe<Scalars['String']['output']>;
   fragments?: Maybe<Array<Scalars['String']['output']>>;
+  /** The sentence-level anchor injected into a KEPUB resource. */
+  koboSpan?: Maybe<Scalars['String']['output']>;
   partialCfi?: Maybe<Scalars['String']['output']>;
   position?: Maybe<Scalars['Int']['output']>;
   progression?: Maybe<Scalars['Decimal']['output']>;
@@ -3778,6 +3789,8 @@ export type ReadiumLocation = {
 export type ReadiumLocationInput = {
   cssSelector?: InputMaybe<Scalars['String']['input']>;
   fragments?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** The sentence-level anchor injected into a KEPUB resource. */
+  koboSpan?: InputMaybe<Scalars['String']['input']>;
   partialCfi?: InputMaybe<Scalars['String']['input']>;
   position?: InputMaybe<Scalars['Int']['input']>;
   progression?: InputMaybe<Scalars['Decimal']['input']>;
@@ -5517,7 +5530,7 @@ export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
-export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord', completedAt: any }>, libraryConfig: { __typename?: 'LibraryConfig', skipBookOverview: boolean } } & { ' $fragmentName'?: 'BookCardFragment' };
+export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, isSelectedForKoboSync: boolean, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ResumeReadingCursor', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'ReadthroughRecord', completedAt: any }>, libraryConfig: { __typename?: 'LibraryConfig', skipBookOverview: boolean } } & { ' $fragmentName'?: 'BookCardFragment' };
 
 export type BookSearchOverlayQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5565,6 +5578,14 @@ export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
     ) | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, readHistory: Array<{ __typename?: 'ReadthroughRecord', completedAt: any }> }
     & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment } }
   ) | null };
+
+export type SetMediaKoboSyncMutationVariables = Exact<{
+  mediaIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+  isSelected: Scalars['Boolean']['input'];
+}>;
+
+
+export type SetMediaKoboSyncMutation = { __typename?: 'Mutation', setMediaKoboSync: boolean };
 
 export type DeleteBookClubConfirmationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7448,6 +7469,7 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status
@@ -10024,6 +10046,7 @@ export const BookSearchOverlayDocument = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status
@@ -10143,6 +10166,7 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status
@@ -10219,6 +10243,11 @@ fragment BookFileInformation on Media {
   hash
   relativeLibraryPath
 }`) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>;
+export const SetMediaKoboSyncDocument = new TypedDocumentString(`
+    mutation SetMediaKoboSync($mediaIds: [ID!]!, $isSelected: Boolean!) {
+  setMediaKoboSync(mediaIds: $mediaIds, isSelected: $isSelected)
+}
+    `) as unknown as TypedDocumentString<SetMediaKoboSyncMutation, SetMediaKoboSyncMutationVariables>;
 export const DeleteBookClubConfirmationDocument = new TypedDocumentString(`
     mutation DeleteBookClubConfirmation($id: ID!) {
   deleteBookClub(id: $id) {
@@ -11216,6 +11245,7 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status
@@ -11637,6 +11667,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status
@@ -12008,6 +12039,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status
@@ -12416,6 +12448,7 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status
@@ -13361,6 +13394,7 @@ export const SmartListItemsDocument = new TypedDocumentString(`
   id
   resolvedName
   extension
+  isSelectedForKoboSync
   pages
   size
   status

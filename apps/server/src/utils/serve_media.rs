@@ -1,10 +1,12 @@
 //! Utilities for serving media files, thumbnails, etc.
 
+use std::path::Path;
+
 use axum::{
 	body::Body,
 	extract::Request,
 	http::{header, HeaderMap},
-	response::IntoResponse,
+	response::{IntoResponse, Response},
 };
 use graphql::data::AuthContext;
 use models::{
@@ -24,7 +26,20 @@ pub async fn serve_media_file(
 	headers: HeaderMap,
 	conn: &DatabaseConnection,
 	media_id: String,
-) -> APIResult<impl IntoResponse> {
+) -> APIResult<Response> {
+	let book = find_downloadable_media(&req, conn, media_id).await?;
+	let filename = Path::new(&book.path)
+		.file_name()
+		.and_then(|filename| filename.to_str());
+	serve_file_path(headers, &book.path, filename).await
+}
+
+/// Looks up media visible to the user after enforcing download permission.
+pub async fn find_downloadable_media(
+	req: &AuthContext,
+	conn: &DatabaseConnection,
+	media_id: String,
+) -> APIResult<media::Model> {
 	let user = req
 		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
 		.map_err(|_| {
@@ -32,23 +47,28 @@ pub async fn serve_media_file(
 			APIError::forbidden_discreet()
 		})?;
 
-	let book = media::Entity::find_for_user(&user)
+	media::Entity::find_for_user(&user)
 		.filter(media::Column::Id.eq(media_id))
-		.into_model::<media::MediaIdentSelect>()
 		.one(conn)
 		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+		.ok_or(APIError::NotFound("Book not found".to_string()))
+}
+
+/// Serves an authorized path while preserving request headers for range support.
+pub async fn serve_file_path(
+	headers: HeaderMap,
+	path: impl AsRef<Path>,
+	filename: Option<&str>,
+) -> APIResult<Response> {
+	let path = path.as_ref().to_path_buf();
 
 	// Note: I am reusing the original headers to support range requests
 	let mut serve_req = Request::new(Body::empty());
 	*serve_req.headers_mut() = headers;
 
-	match ServeFile::new(&book.path).try_call(serve_req).await {
+	match ServeFile::new(&path).try_call(serve_req).await {
 		Ok(mut response) => {
-			if let Some(filename) = std::path::Path::new(&book.path)
-				.file_name()
-				.and_then(|os_str| os_str.to_str())
-			{
+			if let Some(filename) = filename {
 				response.headers_mut().insert(
 					header::CONTENT_DISPOSITION,
 					format!("attachment; filename=\"{}\"", filename)
@@ -56,10 +76,10 @@ pub async fn serve_media_file(
 						.unwrap_or_else(|_| "attachment".parse().unwrap()),
 				);
 			}
-			Ok(response)
+			Ok(response.into_response())
 		},
 		Err(e) => {
-			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
+			tracing::error!(error = ?e, path = %path.display(), "Error serving media file");
 			Err(APIError::InternalServerError(format!(
 				"Failed to serve file: {}",
 				e

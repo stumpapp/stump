@@ -1330,6 +1330,8 @@ type Media {
 	ebook: Epub
 	"Whether the media is marked as a favorite by the current user"
 	isFavorite: Boolean!
+	"Whether the current user has selected this EPUB for Kobo sync."
+	isSelectedForKoboSync: Boolean!
 	"The tags associated with the media"
 	tags: [Tag!]!
 	"The series the media belongs to"
@@ -1870,6 +1872,7 @@ type Mutation {
 	convertMedia(id: ID!): Boolean!
 	deleteMedia(id: ID!): Media!
 	favoriteMedia(id: ID!, isFavorite: Boolean!): Media!
+	setMediaKoboSync(mediaIds: [ID!]!, isSelected: Boolean!): Boolean!
 	"""
 	Update the thumbnail for a book. This will replace the existing thumbnail with the the one
 	associated with the provided input (book). If the book does not have a thumbnail, one
@@ -2631,6 +2634,8 @@ type ReadiumLocation {
 	totalProgression: Decimal
 	cssSelector: String
 	partialCfi: String
+	"The sentence-level anchor injected into a KEPUB resource."
+	koboSpan: String
 }
 
 input ReadiumLocationInput {
@@ -2640,6 +2645,8 @@ input ReadiumLocationInput {
 	totalProgression: Decimal
 	cssSelector: String
 	partialCfi: String
+	"The sentence-level anchor injected into a KEPUB resource."
+	koboSpan: String
 }
 
 type ReadiumLocator {

@@ -55,7 +55,7 @@ tower-http = { version = "0.5.2", features = [
 ] }
 thiserror.workspace = true
 time = "0.3.36"
-tokio.workspace = true
+tokio = { workspace = true, features = ["fs", "process", "time"] }
 tokio-util = "0.7.10"
 tower = "0.4.13"
 tower-sessions = "0.14.0"

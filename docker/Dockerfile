@@ -35,6 +35,36 @@ RUN set -ex; \
     fi
 
 # ------------------------------------------------------------------------------
+# kepubify Stage
+# ------------------------------------------------------------------------------
+
+FROM debian:bookworm-slim AS kepubify
+
+ARG TARGETARCH
+ARG KEPUBIFY_VERSION=4.0.4
+
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+    apt-get update && apt-get install -y ca-certificates curl
+
+RUN set -ex; \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+        asset="kepubify-linux-64bit"; \
+        checksum="37d7628d26c5c906f607f24b36f781f306075e7073a6fe7820a751bb60431fc5"; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        asset="kepubify-linux-arm64"; \
+        checksum="5a15b8f6f6a96216c69330601bca29638cfee50f7bf48712795cff88ae2d03a3"; \
+    else \
+        echo "Unsupported architecture: $TARGETARCH"; \
+        exit 1; \
+    fi; \
+    curl -fsSL -o /kepubify "https://github.com/pgaskin/kepubify/releases/download/v${KEPUBIFY_VERSION}/${asset}"; \
+    echo "${checksum} /kepubify" | sha256sum -c -; \
+    chmod 755 /kepubify; \
+    /kepubify --version
+
+COPY docker/licenses/kepubify.txt /licenses/kepubify/LICENSE
+
+# ------------------------------------------------------------------------------
 # Frontend Build Stage
 # ------------------------------------------------------------------------------
 
@@ -116,6 +146,8 @@ RUN ln -s /busybox/env /usr/bin/env
 
 COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium
+COPY --from=kepubify /kepubify /usr/local/bin/kepubify
+COPY --from=kepubify /licenses/kepubify/LICENSE /licenses/kepubify/LICENSE
 COPY --from=frontend /app/build /app/client
 COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
 

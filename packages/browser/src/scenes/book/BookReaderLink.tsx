@@ -34,6 +34,7 @@ export default function BookReaderLink({ book }: Props) {
 			return paths.bookReader(id, {
 				epubcfi: isReadAgain ? undefined : epubcfi,
 				isEpub: true,
+				startFromBeginning: isReadAgain || undefined,
 			})
 		} else {
 			return paths.bookReader(id, { page: isReadAgain ? 1 : page || 1 })

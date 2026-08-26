@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(
 	Clone,
 	Debug,
+	Default,
 	SimpleObject,
 	InputObject,
 	Deserialize,
@@ -22,6 +23,8 @@ pub struct ReadiumLocation {
 	pub total_progression: Option<Decimal>,
 	pub css_selector: Option<String>,
 	pub partial_cfi: Option<String>,
+	/// The sentence-level anchor injected into a KEPUB resource.
+	pub kobo_span: Option<String>,
 }
 
 #[derive(

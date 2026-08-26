@@ -56,12 +56,36 @@ impl ActiveModelBehavior for ActiveModel {
 		C: ConnectionTrait,
 	{
 		if insert {
-			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+			if self.created_at.is_not_set() {
+				self.created_at =
+					ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+			}
 			if self.id.is_not_set() {
 				self.id = ActiveValue::Set(Uuid::new_v4().to_string());
 			}
 		}
 
 		Ok(self)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use sea_orm::{DatabaseBackend, MockDatabase, Set};
+
+	use super::*;
+
+	#[test]
+	fn preserves_an_explicit_sync_boundary() {
+		let conn = MockDatabase::new(DatabaseBackend::Sqlite).into_connection();
+		let boundary: DateTimeWithTimeZone = "2026-01-01T00:00:00Z".parse().unwrap();
+		let model = ActiveModel {
+			created_at: Set(boundary),
+			..Default::default()
+		};
+
+		let model = tokio_test::block_on(model.before_save(&conn, true)).unwrap();
+
+		assert_eq!(model.created_at.unwrap(), boundary);
 	}
 }

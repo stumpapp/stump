@@ -2,18 +2,20 @@
 title: Kobo Sync
 ---
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Step, Steps } from 'fumadocs-ui/components/steps'
 
 <Callout title="Permission required">
 	This functionality is gated behind the `ACCESS_KOBO_SYNC` and `ACCESS_API_KEYS` user permissions.
-	To learn more about permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
+	To learn more about permissions, see the [permissions](/docs/guides/access-control/permissions)
+	guide.
 </Callout>
 
 You can automatically sync books to your Kobo device with Stump.
 
 ## How it works
 
-You can configure your Kobo to retrieve books from Stump, rather than from the Kobo store.
+You can configure your Kobo to retrieve books from Stump while retaining access to the Kobo store.
+Stump serves local EPUBs as KEPUBs for faster page turns and forwards store requests to Kobo.
 
 ## Setup
 
@@ -27,12 +29,15 @@ To set up Kobo sync with Stump, you need to:
 Kobo sync is disabled by default. To enable it, you need to set the `ENABLE_KOBO_SYNC` environment variable to `true`, or directly set `enable_kobo_sync=true` in the `Stump.toml` configuration file.
 
 See the [configuration guide](/docs/guides/configuration/server-config) for more information.
+
 </Step>
 
 <Step>
 ### Create an API key for your Kobo
 
-<Callout title="Permission required">This step requires the `ACCESS_API_KEYS` user permissions.</Callout>
+<Callout title="Permission required">
+	This step requires the `ACCESS_API_KEYS` user permissions.
+</Callout>
 
 This API key will be stored in plaintext on the Kobo.
 
@@ -66,9 +71,20 @@ For example:
 ```ini
 api_endpoint=http://192.168.4.100:10801/kobo/98765432109876543210876543210987
 ```
+
 </Step>
 
 </Steps>
+
+## KEPUB conversion
+
+The Docker image includes [kepubify](https://github.com/pgaskin/kepubify). If you run a pre-built Stump binary directly, install `kepubify` on the server's `PATH`. Stump falls back to the original EPUB when the converter is unavailable.
+
+Converted books are cached in the Stump cache directory. These cached files preserve the locations used for reading-progress sync, so avoid deleting them while their books remain on a Kobo.
+
+## Book selection
+
+EPUBs are included by default. Use the Kobo checkbox in a library's book table or the Kobo item in a book's action menu to include or remove books for your account.
 
 ## Force sync
 
@@ -79,17 +95,10 @@ DELETE /api/v2/kobo/sync-sessions
 Authorization: Bearer <your-token>
 ```
 
-This deletes all stored sync sessions for your account, which should force a full re-sync the next time your Kobo connects.
+This deletes all stored sync sessions for your account. If the device is already on the Kobo Store phase of a sync, the next request finishes that phase; the following sync starts the full Stump re-sync.
 
 <Callout>
-	After calling this endpoint you may also need to trigger a fresh sync from the Kobo itself. If the device still skips the library sync step, you may need to restore `.kobo/Kobo/Kobo eReader.conf` back to defaults, trigger a sync, then edit it again to point to Stump and trigger another sync.
+	After calling this endpoint you may also need to trigger a fresh sync from the Kobo itself. If the
+	device still skips the library sync step, you may need to restore `.kobo/Kobo/Kobo eReader.conf`
+	back to defaults, trigger a sync, then edit it again to point to Stump and trigger another sync.
 </Callout>
-
-## Future improvements
-
-The current implementation is very basic. It does not support:
-
-- syncing read progress in either direction
-- converting EPUBs to KEPUBs: page turns take significantly longer with an EPUB
-- proxying to the Kobo store: if you point your device at Stump, you will not be able to sync books from the Kobo store
-- selecting which books should be synced to the Kobo: all EPUBs available to a user will be synced to the Kobo

@@ -1390,6 +1390,7 @@ async fn update_book_progression(
 		elapsed_seconds_delta: None,
 		did_complete,
 		device_id,
+		reported_at: None,
 	};
 
 	upsert_reading_session(conn, &user, &id, progression).await?;

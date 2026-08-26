@@ -1,6 +1,11 @@
+use std::collections::{HashMap, HashSet};
+
+use chrono::Utc;
+use futures_util::{stream, StreamExt};
 use models::entity::{
-	kobo_sync_session,
+	kobo_sync_media, kobo_sync_session,
 	media::{self},
+	reading_progress_reset, reading_session,
 	user::AuthUser,
 };
 use sea_orm::Set;
@@ -8,8 +13,14 @@ use sea_orm::Set;
 use sea_orm::prelude::*;
 use sea_orm::query::*;
 
-use crate::routers::kobo::sync_token::SyncToken;
-use stump_core::kobo::{entity::MediaWithMetadataAndReadingSessions, sync_types::*};
+use crate::routers::kobo::kepub;
+use crate::routers::kobo::sync_token::SyncState;
+use stump_core::{
+	config::StumpConfig,
+	kobo::{entity::MediaWithMetadataAndReadingSessions, sync_types::*},
+};
+
+const KEPUB_PREPARE_CONCURRENCY: usize = 4;
 
 pub struct KoboSync {
 	model: kobo_sync_session::Model,
@@ -81,21 +92,90 @@ impl KoboSync {
 		device_metadata: serde_json::Value,
 		previous_sync_at: Option<DateTimeWithTimeZone>,
 	) -> Result<Self, sea_orm::DbErr> {
-		let query = media::Entity::find_for_user(user)
-			.filter(media::Column::Extension.eq("epub"));
-
-		let query = match previous_sync_at {
-			// load things created or modified since the last sync session
-			Some(previous_sync_at) => query.filter(
-				sea_orm::Condition::any()
-					.add(media::Column::CreatedAt.gte(previous_sync_at))
-					.add(media::Column::ModifiedAt.gte(previous_sync_at)),
-			),
-			// we're starting from scratch, load absolutely everything
-			None => query,
+		// This cursor must precede every query below so a concurrent write is either
+		// included now or remains visible to the next incremental sync.
+		let sync_started_at: DateTimeWithTimeZone = Utc::now().into();
+		let visible_epubs = || {
+			media::Entity::find_for_user(user)
+				.filter(media::Entity::epub_filter())
+				.filter(media::Column::DeletedAt.is_null())
 		};
 
-		let media_ids = query.column(media::Column::Id).into_tuple().all(db).await?;
+		let media_ids = if let Some(previous_sync_at) = previous_sync_at {
+			let mut changed_ids: HashSet<String> = visible_epubs()
+				.filter(
+					Condition::any()
+						.add(media::Column::CreatedAt.gte(previous_sync_at))
+						.add(media::Column::ModifiedAt.gte(previous_sync_at)),
+				)
+				.select_only()
+				.column(media::Column::Id)
+				.into_tuple()
+				.all(db)
+				.await?
+				.into_iter()
+				.collect();
+
+			changed_ids.extend(
+				kobo_sync_media::Entity::find()
+					.filter(kobo_sync_media::Column::UserId.eq(&user.id))
+					.filter(kobo_sync_media::Column::UpdatedAt.gte(previous_sync_at))
+					.select_only()
+					.column(kobo_sync_media::Column::MediaId)
+					.into_tuple::<String>()
+					.all(db)
+					.await?,
+			);
+
+			changed_ids.extend(
+				reading_session::Entity::find()
+					.filter(reading_session::Column::UserId.eq(&user.id))
+					.filter(
+						Condition::any()
+							.add(reading_session::Column::CreatedAt.gte(previous_sync_at))
+							.add(
+								reading_session::Column::UpdatedAt.gte(previous_sync_at),
+							),
+					)
+					.select_only()
+					.column(reading_session::Column::MediaId)
+					.into_tuple::<String>()
+					.all(db)
+					.await?,
+			);
+
+			changed_ids.extend(
+				reading_progress_reset::Entity::find()
+					.filter(reading_progress_reset::Column::UserId.eq(&user.id))
+					.filter(reading_progress_reset::Column::ResetAt.gte(previous_sync_at))
+					.select_only()
+					.column(reading_progress_reset::Column::MediaId)
+					.into_tuple::<String>()
+					.all(db)
+					.await?,
+			);
+
+			if changed_ids.is_empty() {
+				vec![]
+			} else {
+				visible_epubs()
+					.filter(media::Column::Id.is_in(changed_ids))
+					.order_by_asc(media::Column::Id)
+					.select_only()
+					.column(media::Column::Id)
+					.into_tuple()
+					.all(db)
+					.await?
+			}
+		} else {
+			visible_epubs()
+				.order_by_asc(media::Column::Id)
+				.select_only()
+				.column(media::Column::Id)
+				.into_tuple()
+				.all(db)
+				.await?
+		};
 
 		let sync_session = kobo_sync_session::ActiveModel {
 			user_id: Set(user.id.clone()),
@@ -103,6 +183,7 @@ impl KoboSync {
 			device_id: Set(device_id.unwrap_or("").to_string()),
 			device_metadata: Set(device_metadata),
 			previous_sync_at: Set(previous_sync_at),
+			created_at: Set(sync_started_at),
 			..Default::default()
 		};
 		let sync_session = sync_session.insert(db).await?;
@@ -124,7 +205,7 @@ impl KoboSync {
 		user: &'a AuthUser,
 		device_id: Option<&str>,
 		device_metadata: serde_json::Value,
-		client_sync_token: Option<&SyncToken>,
+		client_sync_state: Option<&SyncState>,
 		limit: usize,
 	) -> Result<SyncPage<'a>, sea_orm::DbErr> {
 		// there are 3 possibilities here:
@@ -134,18 +215,15 @@ impl KoboSync {
 		//    -> we should begin a new session, syncing things that changed since the completed session.
 		// 3. the client provided an "Incomplete" sync token
 		//    -> we should continue the session referenced in the token.
-		let sync_id = client_sync_token.map(|token| match token {
-			SyncToken::IncompleteV1 { sync_id, .. }
-			| SyncToken::CompletedV1 { sync_id, .. } => sync_id.to_string(),
-		});
+		let sync_id = client_sync_state.map(|state| state.sync_id().to_string());
 
 		let prev_sync_session = match sync_id {
 			Some(ref sync_id) => KoboSync::find(db, user, sync_id).await,
 			None => None,
 		};
 
-		let (session, offset) = match (client_sync_token, prev_sync_session) {
-			(Some(SyncToken::IncompleteV1 { next_offset, .. }), Some(session)) => {
+		let (session, offset) = match (client_sync_state, prev_sync_session) {
+			(Some(SyncState::IncompleteV1 { next_offset, .. }), Some(session)) => {
 				// we're continuing an existing sync session
 				(session, *next_offset)
 			},
@@ -206,7 +284,7 @@ pub struct SyncPage<'a> {
 
 	/// a token representing the state of the current sync session.
 	/// this will be returned to the client, and the client will use it in its next sync request.
-	pub sync_token: SyncToken,
+	pub sync_state: SyncState,
 }
 
 impl<'a> SyncPage<'a> {
@@ -236,12 +314,13 @@ impl<'a> SyncPage<'a> {
 			media_ids: media_ids[start..next_offset].to_vec(),
 			should_continue,
 
-			sync_token: SyncToken::new(sync_id, !should_continue, next_offset),
+			sync_state: SyncState::new(sync_id, !should_continue, next_offset),
 		}
 	}
 
 	pub async fn sync_items(
 		&self,
+		config: &StumpConfig,
 		kobo_api_base_url: &str,
 	) -> Result<Vec<SyncItem>, DbErr> {
 		let items: Vec<MediaWithMetadataAndReadingSessions> =
@@ -249,32 +328,151 @@ impl<'a> SyncPage<'a> {
 				&self.media_ids,
 				self.user,
 			)
-			.filter(media::Column::Extension.eq("epub"))
+			.filter(media::Entity::epub_filter())
+			.filter(media::Column::DeletedAt.is_null())
 			.into_model::<MediaWithMetadataAndReadingSessions>()
 			.all(self.db)
 			.await?;
 
-		let sync_items: Vec<SyncItem> = items
-			.into_iter()
-			.map(|m| {
-				let book_url =
-					format!("{}/v1/books/{}/file/epub", kobo_api_base_url, m.media.id);
-
-				let created_since_last_sync = self
-					.previous_sync_at
-					.is_none_or(|ps| m.media.created_at >= ps);
-
-				if created_since_last_sync {
-					SyncItem::NewEntitlement(BookEntitlementContainer::from_media(
-						m, book_url,
-					))
-				} else {
-					SyncItem::ChangedProductMetadata(BookMetadata::from_media(
-						&m, book_url,
-					))
-				}
+		let mut selections: HashMap<String, kobo_sync_media::Model> =
+			kobo_sync_media::Entity::find()
+				.filter(kobo_sync_media::Column::UserId.eq(&self.user.id))
+				.filter(kobo_sync_media::Column::MediaId.is_in(&self.media_ids))
+				.all(self.db)
+				.await?
+				.into_iter()
+				.map(|selection| (selection.media_id.clone(), selection))
+				.collect();
+		let preparations = items
+			.iter()
+			.filter(|m| {
+				selections
+					.get(&m.media.id)
+					.is_none_or(|row| row.is_selected)
 			})
-			.collect();
+			.map(|m| async move {
+				let has_progress = m.reading_session.is_some()
+					|| m.finished_reading_session_count > 0
+					|| m.reading_progress_reset_at.is_some();
+				let download = kepub::prepare_download(config, &m.media)
+					.await
+					.map_err(|error| DbErr::Custom(error.to_string()))?;
+				let positions = if has_progress {
+					kepub::position_map(config, &download, &m.media.id).await
+				} else {
+					None
+				};
+				Ok::<_, DbErr>((m.media.id.clone(), (download.content, positions)))
+			})
+			.collect::<Vec<_>>();
+		let mut prepared: HashMap<String, (kepub::KoboContentInfo, Option<_>)> =
+			stream::iter(preparations)
+				.buffered(KEPUB_PREPARE_CONCURRENCY)
+				.collect::<Vec<_>>()
+				.await
+				.into_iter()
+				.collect::<Result<_, _>>()?;
+
+		let mut sync_items = Vec::new();
+		for m in items {
+			let selection = selections.remove(&m.media.id);
+			let is_selected = selection.as_ref().is_none_or(|row| row.is_selected);
+			let selection_changed = self.previous_sync_at.is_some_and(|previous| {
+				selection
+					.as_ref()
+					.is_some_and(|row| row.updated_at >= previous)
+			});
+			let created_since_last_sync = self
+				.previous_sync_at
+				.is_none_or(|previous| m.media.created_at >= previous);
+			let source_changed = self.previous_sync_at.is_some_and(|previous| {
+				m.media
+					.modified_at
+					.is_some_and(|modified| modified >= previous)
+			});
+			let progress_changed = self.previous_sync_at.is_some_and(|previous| {
+				m.reading_session.as_ref().is_some_and(|session| {
+					session.created_at >= previous
+						|| session
+							.updated_at
+							.is_some_and(|updated| updated >= previous)
+				}) || m
+					.reading_progress_reset_at
+					.is_some_and(|reset| reset >= previous)
+					|| m.finished_reading_session_last_completed_at
+						.is_some_and(|finished| finished >= previous)
+			});
+
+			if !is_selected && !created_since_last_sync && !selection_changed {
+				continue;
+			}
+
+			let book_url =
+				format!("{}/v1/books/{}/file/epub", kobo_api_base_url, m.media.id);
+			let has_progress = m.reading_session.is_some()
+				|| m.finished_reading_session_count > 0
+				|| m.reading_progress_reset_at.is_some();
+			let (content, positions) = if is_selected {
+				prepared
+					.remove(&m.media.id)
+					.expect("selected Kobo books are prepared above")
+			} else {
+				(kepub::content_info(config, &m.media).await, None)
+			};
+
+			let entitlement_changed = !created_since_last_sync
+				&& is_selected
+				&& (selection_changed || source_changed);
+			let progress_state = (is_selected
+				&& (progress_changed || (entitlement_changed && has_progress)))
+				.then(|| ReadingState::from_media(&m, positions.as_ref()));
+			let changed_metadata =
+				(is_selected && !created_since_last_sync && source_changed).then(|| {
+					let mut metadata = BookMetadata::from_media(&m, book_url.clone());
+					content.apply_to_metadata(&mut metadata);
+					metadata
+				});
+			let mut entitlement = BookEntitlementContainer::from_media_with_positions(
+				m,
+				book_url,
+				positions.as_ref(),
+			);
+			content.apply_to_entitlement(&mut entitlement);
+			if let Some(selection) = selection.as_ref() {
+				entitlement.book_entitlement.last_modified = entitlement
+					.book_entitlement
+					.last_modified
+					.max(selection.updated_at.to_utc());
+			}
+
+			if !is_selected {
+				entitlement.book_entitlement.is_removed = true;
+				entitlement.book_entitlement.status = "Inactive".to_string();
+				entitlement.book_entitlement.last_modified = selection
+					.expect("an unselected book has an explicit selection row")
+					.updated_at
+					.to_utc();
+				entitlement.reading_state = None;
+				sync_items.push(SyncItem::ChangedEntitlement(entitlement));
+				continue;
+			}
+
+			if created_since_last_sync {
+				sync_items.push(SyncItem::NewEntitlement(entitlement));
+			} else if entitlement_changed {
+				sync_items.push(SyncItem::ChangedEntitlement(entitlement));
+			}
+			if let Some(metadata) = changed_metadata {
+				sync_items.push(SyncItem::ChangedProductMetadata(metadata));
+			}
+
+			// Kobo ignores ReadingState nested in entitlement changes, so send both.
+			if let Some(reading_state) = progress_state {
+				sync_items.push(SyncItem::ChangedReadingState(ReadingStateContainer {
+					reading_state,
+				}));
+			}
+		}
 
 		tracing::debug!(
 			?self.offset,
@@ -289,18 +487,19 @@ impl<'a> SyncPage<'a> {
 
 #[cfg(test)]
 mod tests {
-	use chrono::Days;
-	use models::entity::{kobo_sync_session, user};
+	use chrono::{Days, Utc};
+	use models::entity::{kobo_sync_media, kobo_sync_session, user};
 	use sea_orm::prelude::DateTimeWithTimeZone;
 	use sea_orm::query::*;
-	use sea_orm::EntityTrait;
+	use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 	use tests::db::test_database;
 	use tests::fake_data;
 
 	use crate::routers::kobo::{
 		sync::{KoboSync, SyncPage},
-		sync_token::SyncToken,
+		sync_token::SyncState,
 	};
+	use stump_core::config::StumpConfig;
 	use stump_core::kobo::sync_types::SyncItem;
 
 	#[tokio::test]
@@ -401,11 +600,11 @@ mod tests {
 
 		assert_eq!(vec!["book-1", "book-2", "book-3"], first_page.media_ids);
 
-		let SyncToken::IncompleteV1 { next_offset, .. } = first_page.sync_token else {
+		let SyncState::IncompleteV1 { next_offset, .. } = &first_page.sync_state else {
 			panic!("expected an sync token with a next page")
 		};
 
-		assert_eq!(3, next_offset);
+		assert_eq!(3, *next_offset);
 		assert!(first_page.should_continue);
 
 		let second_page = KoboSync::next_page(
@@ -413,7 +612,7 @@ mod tests {
 			&user,
 			Some("kobo-1"),
 			serde_json::json!({}),
-			Some(&first_page.sync_token),
+			Some(&first_page.sync_state),
 			3,
 		)
 		.await
@@ -478,7 +677,7 @@ mod tests {
 			&user,
 			Some("kobo-1"),
 			serde_json::json!({}),
-			Some(&sync_page.sync_token),
+			Some(&sync_page.sync_state),
 			5,
 		)
 		.await
@@ -523,8 +722,9 @@ mod tests {
 			10,
 			Some(previous_sync_at),
 		);
+		let config = StumpConfig::debug();
 		let sync_items = sync_page
-			.sync_items("https://stump.example.org/")
+			.sync_items(&config, "https://stump.example.org/")
 			.await
 			.expect("failed to retrieve sync items");
 
@@ -536,7 +736,55 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn test_represent_changed_product_metadata() {
+	async fn test_full_sync_represents_deselection() {
+		let db = test_database().await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+		let series = fake_data::Series::default().insert(&db).await;
+		let book = fake_data::Media {
+			series_id: series.id,
+			id: Some("removed-book".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+		kobo_sync_media::ActiveModel {
+			user_id: Set(user.id.clone()),
+			media_id: Set(book.id.clone()),
+			is_selected: Set(false),
+			updated_at: Set(Utc::now().into()),
+		}
+		.insert(&db)
+		.await
+		.unwrap();
+
+		let page = SyncPage::new(
+			&db,
+			&user,
+			"sync_1234".to_string(),
+			std::slice::from_ref(&book.id),
+			0,
+			10,
+			None,
+		);
+		let items = page
+			.sync_items(&StumpConfig::debug(), "https://stump.example.org")
+			.await
+			.unwrap();
+
+		let SyncItem::ChangedEntitlement(entitlement) = &items[0] else {
+			panic!("expected a removed ChangedEntitlement")
+		};
+		assert!(entitlement.book_entitlement.is_removed);
+		assert_eq!(entitlement.book_entitlement.status, "Inactive");
+	}
+
+	#[tokio::test]
+	async fn test_represent_changed_entitlement() {
 		let db = test_database().await;
 
 		let user = fake_data::User::new("ishmael").insert(&db).await;
@@ -571,16 +819,93 @@ mod tests {
 			10,
 			Some(previous_sync_at),
 		);
+		let config = StumpConfig::debug();
 		let sync_items = sync_page
-			.sync_items("https://stump.example.org/")
+			.sync_items(&config, "https://stump.example.org/")
 			.await
 			.expect("failed to retrieve sync items");
 
-		let SyncItem::ChangedProductMetadata(ref ent) = sync_items[0] else {
-			panic!("expected a ChangedProductMetadata")
+		let SyncItem::ChangedEntitlement(ref ent) = sync_items[0] else {
+			panic!("expected a ChangedEntitlement")
 		};
 
-		assert_eq!(new_book.id, ent.entitlement_id);
+		assert_eq!(new_book.id, ent.book_entitlement.id);
+		let SyncItem::ChangedProductMetadata(ref metadata) = sync_items[1] else {
+			panic!("expected ChangedProductMetadata")
+		};
+		assert_eq!(new_book.id, metadata.entitlement_id);
+	}
+
+	#[tokio::test]
+	async fn test_progress_changes_emit_separate_sync_items() {
+		let db = test_database().await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+		let previous_sync_at: DateTimeWithTimeZone =
+			"2026-01-01T00:00:00Z".parse().unwrap();
+		let series = fake_data::Series::default().insert(&db).await;
+		let progress_only = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("progress-only".to_string()),
+			created_at: Some(previous_sync_at.checked_sub_days(Days::new(1)).unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+		let changed = fake_data::Media {
+			series_id: series.id,
+			id: Some("content-and-progress".to_string()),
+			created_at: Some(previous_sync_at.checked_sub_days(Days::new(1)).unwrap()),
+			modified_at: Some(previous_sync_at.checked_add_days(Days::new(1)).unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+		for media_id in [&progress_only.id, &changed.id] {
+			fake_data::ReadingSession {
+				media_id: media_id.clone(),
+				user_id: user.id.clone(),
+				created_at: Some(
+					previous_sync_at.checked_add_days(Days::new(1)).unwrap(),
+				),
+				..Default::default()
+			}
+			.insert(&db)
+			.await;
+		}
+
+		let page = SyncPage::new(
+			&db,
+			&user,
+			"sync_1234".to_string(),
+			&[progress_only.id, changed.id],
+			0,
+			10,
+			Some(previous_sync_at),
+		);
+		let items = page
+			.sync_items(&StumpConfig::debug(), "https://stump.example.org")
+			.await
+			.unwrap();
+
+		assert_eq!(
+			items
+				.iter()
+				.filter(|item| matches!(item, SyncItem::ChangedReadingState(_)))
+				.count(),
+			2
+		);
+		assert_eq!(
+			items
+				.iter()
+				.filter(|item| matches!(item, SyncItem::ChangedEntitlement(_)))
+				.count(),
+			1
+		);
 	}
 
 	#[tokio::test]
@@ -596,7 +921,7 @@ mod tests {
 		};
 
 		// do 5 successive syncs.
-		let mut sync_token: Option<SyncToken> = None;
+		let mut sync_state: Option<SyncState> = None;
 		let mut sync_ids = vec![];
 		for _ in 1..=5 {
 			let sync_page = KoboSync::next_page(
@@ -604,18 +929,18 @@ mod tests {
 				&user,
 				Some("kobo-1"),
 				serde_json::json!({}),
-				sync_token.as_ref(),
+				sync_state.as_ref(),
 				10,
 			)
 			.await
 			.expect("failed to initiate sync");
 
-			let SyncToken::CompletedV1 { ref sync_id, .. } = sync_page.sync_token else {
+			let SyncState::CompletedV1 { sync_id } = &sync_page.sync_state else {
 				panic!("expected an sync token without a next page")
 			};
 
 			sync_ids.push(sync_id.clone());
-			sync_token = Some(sync_page.sync_token);
+			sync_state = Some(sync_page.sync_state);
 		}
 
 		let sessions_in_db: Vec<String> = kobo_sync_session::Entity::find()
@@ -641,7 +966,7 @@ mod tests {
 			id: Some("don-quixote".to_string()),
 			name: Some("Don Quixote".to_string()),
 			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
-			extension: Some("epub".to_string()),
+			extension: Some("EPUB".to_string()),
 			..Default::default()
 		}
 		.insert(&db)

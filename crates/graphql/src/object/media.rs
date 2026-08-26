@@ -17,6 +17,7 @@ use crate::{
 	loader::{
 		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
 		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
+		media::{KoboSyncMediaLoaderKey, MediaLoader},
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
 			ReadingSessionLoader, ReadthroughRecordLoaderKey,
@@ -89,6 +90,24 @@ impl Media {
 			.await?;
 
 		Ok(is_favorite.unwrap_or(false))
+	}
+
+	/// Whether the current user has selected this EPUB for Kobo sync.
+	async fn is_selected_for_kobo_sync(&self, ctx: &Context<'_>) -> Result<bool> {
+		if !self.model.extension.eq_ignore_ascii_case("epub") {
+			return Ok(false);
+		}
+
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<MediaLoader>>()?;
+		let selection = loader
+			.load_one(KoboSyncMediaLoaderKey {
+				user_id: user.id.clone(),
+				media_id: self.model.id.clone(),
+			})
+			.await?;
+
+		Ok(selection.unwrap_or(true))
 	}
 
 	/// The tags associated with the media

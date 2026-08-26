@@ -9,6 +9,8 @@ use crate::{
 	config::state::AppState, errors::APIResult, middleware::auth::auth_middleware,
 };
 
+mod kepub;
+mod proxy;
 mod router;
 mod sync;
 mod sync_token;

@@ -455,7 +455,6 @@ const buildBook = (
 	const bookmarks = bookmarkRecords.map((b) => ({
 		__typename: 'Bookmark' as const,
 		id: String(b.id),
-		epubcfi: b.epubcfi,
 		mediaId: b.bookId,
 		previewContent: b.previewContent,
 		locator: {

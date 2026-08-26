@@ -1,0 +1,1 @@
+ALTER TABLE `bookmarks` DROP COLUMN `epubcfi`;

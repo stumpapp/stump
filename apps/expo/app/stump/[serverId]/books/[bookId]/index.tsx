@@ -12,18 +12,20 @@ import {
 	BookActionMenu,
 	CurrentProgressCard,
 	DescriptionSection,
+	DetailsCard,
 	DownloadButton,
 	getPercentage,
 	IdentifiersSheet,
 	LastFinishedCard,
 	OverviewBackground,
+	ProminentMetadataCard,
 	useBookMenu,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
-import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
+import { Button, Heading, ListLabel, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
@@ -268,12 +270,6 @@ export default function Screen() {
 		})
 	}
 
-	const showDetails =
-		formattedSize ||
-		book.extension ||
-		book.metadata?.language ||
-		(book.metadata?.ageRating && book.metadata.ageRating > 0)
-
 	return (
 		<>
 			{stackFragment}
@@ -354,11 +350,13 @@ export default function Screen() {
 					<CurrentProgressCard
 						hidden={!progression}
 						showChapterTitle={isEpub}
-						chapterTitle={chapterTitle}
-						page={currentPage}
-						totalPages={totalPages}
-						percentage={percentage}
-						readingTimeSeconds={progression?.elapsedSeconds}
+						progressData={{
+							chapterTitle: chapterTitle,
+							page: currentPage,
+							totalPages: totalPages,
+							percentage: percentage,
+							readingTimeSeconds: progression?.elapsedSeconds,
+						}}
 					/>
 
 					<LastFinishedCard
@@ -372,18 +370,15 @@ export default function Screen() {
 				<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] gap-8 px-4 py-6 tablet:px-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
 					{!!description && <DescriptionSection description={description} />}
 
-					<Card className={cn(!description && 'px-2')}>
-						<Card.StatGroup>
-							{!!publisher && <Card.Stat label={t('bookMetadata.publisher')} value={publisher} />}
-							{!!seriesVolume && (
-								<Card.Stat label={t('bookMetadata.volume')} value={seriesVolume} />
-							)}
-							{book.metadata?.year != null && book.metadata.year > 0 && (
-								<Card.Stat label={t('bookMetadata.year')} value={book.metadata.year} />
-							)}
-							<Card.Stat label={t('common.pages')} value={totalPages} />
-						</Card.StatGroup>
-					</Card>
+					<ProminentMetadataCard
+						className={cn(!description && 'px-2')}
+						metadata={{
+							publisher: publisher,
+							volume: seriesVolume,
+							year: book.metadata?.year,
+							pages: totalPages,
+						}}
+					/>
 
 					<MetadataBadgeSection
 						label={t('bookMetadata.genres')}
@@ -459,23 +454,14 @@ export default function Screen() {
 						</View>
 					)}
 
-					{showDetails && (
-						<Card label={t('common.details')}>
-							{book.extension && (
-								<Card.Row label={t('bookMetadata.format')} value={book.extension.toUpperCase()} />
-							)}
-							{!!formattedSize && <Card.Row label={t('bookMetadata.size')} value={formattedSize} />}
-							{book.metadata?.language && (
-								<Card.Row label={t('bookMetadata.language')} value={book.metadata.language} />
-							)}
-							{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
-								<Card.Row
-									label={t('bookMetadata.ageRating')}
-									value={`${book.metadata.ageRating}+`}
-								/>
-							)}
-						</Card>
-					)}
+					<DetailsCard
+						metadata={{
+							extension: book.extension,
+							size: formattedSize,
+							language: book.metadata?.language,
+							ageRating: book.metadata?.ageRating,
+						}}
+					/>
 
 					<IdentifiersSheet
 						identifiers={{

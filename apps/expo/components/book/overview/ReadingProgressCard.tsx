@@ -11,6 +11,10 @@ import { useDisplay, useTranslate } from '~/lib/hooks'
 export type CurrentProgressCardProps = {
 	hidden: boolean
 	showChapterTitle: boolean
+	progressData: ProgressData
+}
+
+type ProgressData = {
 	chapterTitle: string | undefined | null
 	page: number | undefined | null
 	totalPages: number | undefined | null
@@ -21,16 +25,14 @@ export type CurrentProgressCardProps = {
 export function CurrentProgressCard({
 	hidden,
 	showChapterTitle,
-	chapterTitle,
-	page,
-	totalPages,
-	percentage,
-	readingTimeSeconds,
+	progressData,
 }: CurrentProgressCardProps) {
 	const { isTablet } = useDisplay()
 	const { t, locale } = useTranslate()
 
 	if (hidden) return
+
+	const { chapterTitle, page, totalPages, percentage, readingTimeSeconds } = progressData
 
 	const readingTime = readingTimeSeconds
 		? isTablet

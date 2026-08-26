@@ -1,6 +1,5 @@
 import { formatBytes } from '@stump/client'
 import { MediaMetadata } from '@stump/graphql'
-import { intlFormat } from 'date-fns'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
@@ -13,8 +12,10 @@ import BackLink from '~/components/BackLink'
 import {
 	CurrentProgressCard,
 	DescriptionSection,
+	DetailsCard,
 	getPercentage,
 	OverviewBackground,
+	ProminentMetadataCard,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
@@ -23,7 +24,7 @@ import { useOfflineBookMenu } from '~/components/localLibrary/OfflineBookMenu'
 import { useDownloadsState } from '~/components/localLibrary/store'
 import { getThumbnailPath } from '~/components/localLibrary/utils'
 import { MetadataBadgeSection } from '~/components/overview'
-import { Button, Card, Heading, Text } from '~/components/ui'
+import { Button, Heading, Text } from '~/components/ui'
 import {
 	db,
 	downloadedFiles,
@@ -115,13 +116,6 @@ export default function Screen() {
 	const pages = downloadedFile.pages && downloadedFile.pages > 0 ? downloadedFile.pages : null
 	const progressPercentage = getPercentage({ readProgress: readProgressData, totalPages: pages })
 
-	const showDetails =
-		!!formattedSize ||
-		!!extension ||
-		!!metadata?.language ||
-		(!!metadata?.ageRating && metadata.ageRating > 0) ||
-		!!downloadedFile.downloadedAt
-
 	const renderRead = () => {
 		if (progressPercentage && progressPercentage > 0) {
 			return <Text>{t('common.continue')}</Text>
@@ -195,57 +189,38 @@ export default function Screen() {
 					<CurrentProgressCard
 						hidden={!readProgressData}
 						showChapterTitle={!!epubProgressData}
-						chapterTitle={epubProgressData?.chapterTitle}
-						page={currentPage}
-						totalPages={pages}
-						percentage={progressPercentage}
-						readingTimeSeconds={readProgressData?.elapsedSeconds}
+						progressData={{
+							chapterTitle: epubProgressData?.chapterTitle,
+							page: currentPage,
+							totalPages: pages,
+							percentage: progressPercentage,
+							readingTimeSeconds: readProgressData?.elapsedSeconds,
+						}}
 					/>
 				</View>
 
 				<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] gap-8 px-4 py-6 tablet:px-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
 					{!!description && <DescriptionSection description={description} />}
 
-					<Card className={cn(!description && 'px-2')}>
-						<Card.StatGroup>
-							{!!publisher && <Card.Stat label={t('bookMetadata.publisher')} value={publisher} />}
-							{!!seriesVolume && (
-								<Card.Stat label={t('bookMetadata.volume')} value={seriesVolume} />
-							)}
-							{year != null && year > 0 && (
-								<Card.Stat label={t('bookMetadata.year')} value={year} />
-							)}
-							{pages && <Card.Stat label={t('common.pages')} value={pages} />}
-						</Card.StatGroup>
-					</Card>
+					<ProminentMetadataCard
+						className={cn(!description && 'px-2')}
+						metadata={{ publisher: publisher, volume: seriesVolume, year: year, pages: pages }}
+					/>
 
 					<MetadataBadgeSection
 						label={t('bookMetadata.genres')}
 						items={genres.map((genre) => ({ label: genre }))}
 					/>
 
-					{showDetails && (
-						<Card label={t('common.details')}>
-							{extension && <Card.Row label={t('bookMetadata.format')} value={extension} />}
-							{!!formattedSize && <Card.Row label={t('bookMetadata.size')} value={formattedSize} />}
-							{metadata?.language && (
-								<Card.Row label={t('bookMetadata.language')} value={metadata.language} />
-							)}
-							{metadata?.ageRating != null && metadata.ageRating > 0 && (
-								<Card.Row label={t('bookMetadata.ageRating')} value={`${metadata.ageRating}+`} />
-							)}
-							{downloadedFile.downloadedAt && (
-								<Card.Row
-									label={t('bookMetadata.downloadedAt')}
-									value={intlFormat(new Date(downloadedFile.downloadedAt), {
-										month: 'long',
-										day: 'numeric',
-										year: 'numeric',
-									})}
-								/>
-							)}
-						</Card>
-					)}
+					<DetailsCard
+						metadata={{
+							extension: extension,
+							size: formattedSize,
+							language: metadata?.language,
+							ageRating: metadata?.ageRating,
+							downloadedAt: downloadedFile.downloadedAt,
+						}}
+					/>
 				</View>
 			</Animated.ScrollView>
 		</>

@@ -3008,7 +3008,8 @@
 			"links": "Links",
 			"year": "Year",
 			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"identifiers": "Identifiers",
+			"issue": "Issue"
 		},
 		"common": {
 			"book": "Book",

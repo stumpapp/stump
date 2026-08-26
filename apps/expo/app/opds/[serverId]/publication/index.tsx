@@ -1,7 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
-import { OPDSLink, OPDSProgression, resolveUrl } from '@stump/sdk'
-import { formatDistanceToNow, intlFormat } from 'date-fns'
+import { OPDSLink, resolveUrl } from '@stump/sdk'
 import { useNavigation, useRouter } from 'expo-router'
 import { Loader2 } from 'lucide-react-native'
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
@@ -10,8 +9,13 @@ import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 
 import {
+	CurrentProgressCard,
 	DescriptionSection,
+	DetailsCard,
 	IdentifiersSheet,
+	OverviewBackground,
+	ProminentMetadataCard,
+	TitleSection,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
@@ -19,7 +23,7 @@ import { CreditsSection, RelatedPublicationItem, useRelatedPublications } from '
 import FeedSelfURL from '~/components/opds/FeedSelfURL'
 import { usePublicationMenu } from '~/components/opds/PublicationMenu'
 import MetadataBadgeSection from '~/components/overview/MetadataBadgeSection'
-import { Button, Card, Heading, Icon, Text } from '~/components/ui'
+import { Button, Card, Icon, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { usePalette } from '~/lib/constants'
 import {
@@ -194,24 +198,6 @@ export default function Screen() {
 
 	const accentColor = usePalette('accent')
 
-	const renderModifiedStat = (progression: OPDSProgression) => {
-		if (!progression.modified) return null
-
-		const percentageCompleted = progression.locator.locations?.totalProgression
-		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
-
-		if (isCompleted) {
-			return <Card.Stat label="Completed" value={formatDistanceToNow(progression.modified)} />
-		} else {
-			return (
-				<Card.Stat
-					label="Last read"
-					value={formatDistanceToNow(progression.modified, { addSuffix: true })}
-				/>
-			)
-		}
-	}
-
 	const existsSomeProgression =
 		!!progression?.locator.locations?.position ||
 		!!progression?.locator.locations?.totalProgression ||
@@ -223,156 +209,122 @@ export default function Screen() {
 		<>
 			{menuFragment}
 
-			<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
-				<View className="ios:pt-safe-offset-20 pt-safe ios:pb-24 pb-16 overflow-hidden">
-					<Animated.View
-						// -inset-24 is because when using a lot of blur, the sides get more transparent
-						// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
-						className="-inset-24 absolute opacity-70 dark:opacity-30"
-						style={parallaxStyle}
-					>
-						<TImage
-							source={{
-								uri: thumbnailURL || '',
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							style={{ width: '100%', height: '100%' }}
-							resizeMode="cover"
-							fadeDuration={2000}
-							// android only supports up to blur={25} which doesn't look good,
-							// but if we heavily downscale first, the following looks near identical to using
-							// original res with blur={40} on ios, which is what I originally settled on
-							resize={60}
-							blur={Platform.OS === 'ios' ? 7 : 16}
-						/>
-					</Animated.View>
+			<OverviewBackground
+				source={{
+					uri: thumbnailURL || '',
+					headers: {
+						...sdk.customHeaders,
+						Authorization: sdk.authorizationHeader || '',
+					},
+				}}
+				parallaxStyle={parallaxStyle}
+			/>
 
-					<View className="gap-8 px-4 tablet:px-6">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailURL || '',
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							size={{ height: 235 / thumbnailRatio, width: 235 }}
-							borderAndShadowStyle={{ shadowRadius: 5 }}
-						/>
+			<Animated.ScrollView
+				className="flex-1"
+				ref={animatedScrollRef}
+				contentInsetAdjustmentBehavior="automatic"
+			>
+				<View className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16">
+					<ThumbnailImage
+						source={{
+							uri: thumbnailURL || '',
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						size={{ height: 235 / thumbnailRatio, width: 235 }}
+						borderAndShadowStyle={{ shadowRadius: 5 }}
+					/>
 
-						<View className="gap-2">
-							<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
-								{title || 'Untitled'}
-							</Heading>
+					<TitleSection title={title} subtitle={subtitle} series={seriesText} />
 
-							{seriesText && (
-								<Text className="text-base text-foreground-muted text-center" numberOfLines={1}>
-									{seriesText}
-								</Text>
-							)}
-						</View>
-
-						<View className="gap-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
+					<View className="gap-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
+						<Button
+							variant="brand"
+							className="flex-1"
+							roundness="full"
+							onPress={() =>
+								router.push({
+									pathname: `/opds/[serverId]/publication/read`,
+									params: { url, serverId },
+								})
+							}
+							disabled={!canStream || !isSupportedStream}
+						>
+							<Text>Stream</Text>
+						</Button>
+						{!isDownloaded && (
 							<Button
-								variant="brand"
-								className="flex-1"
+								variant="secondary"
 								roundness="full"
-								onPress={() =>
-									router.push({
-										pathname: `/opds/[serverId]/publication/read`,
-										params: { url, serverId },
-									})
-								}
-								disabled={!canStream || !isSupportedStream}
+								disabled={!canDownload || isDownloading}
+								onPress={onDownloadBook}
+								className="gap-2 flex-row"
 							>
-								<Text>Stream</Text>
+								{isDownloading && (
+									<View className="animate-spin pointer-events-none">
+										<Icon className="h-5 w-5" as={Loader2} color={accentColor} />
+									</View>
+								)}
+								<Text>Download</Text>
 							</Button>
-							{!isDownloaded && (
-								<Button
-									variant="secondary"
-									roundness="full"
-									disabled={!canDownload || isDownloading}
-									onPress={onDownloadBook}
-									className="gap-2 flex-row"
-								>
-									{isDownloading && (
-										<View className="animate-spin pointer-events-none">
-											<Icon className="h-5 w-5" as={Loader2} color={accentColor} />
-										</View>
-									)}
-									<Text>Download</Text>
-								</Button>
-							)}
-						</View>
-
-						{progression && existsSomeProgression && (
-							<Card>
-								<Card.StatGroup>
-									{progression.locator.locations?.position && (
-										<Card.Stat
-											label="Page"
-											value={progression.locator.locations.position || '1'}
-											suffix={
-												numberOfPages != null && numberOfPages > 0
-													? ` / ${numberOfPages}`
-													: undefined
-											}
-										/>
-									)}
-									{progression.locator.locations?.totalProgression != null && (
-										<Card.Stat
-											label="Completed"
-											value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
-										/>
-									)}
-									{renderModifiedStat(progression)}
-								</Card.StatGroup>
-							</Card>
 						)}
-
-						<View className="gap-2">
-							{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
-							{!canDownload && !isDownloaded && (
-								<View className="squircle ios:rounded-3xl p-3 bg-fill-warning-secondary rounded-2xl">
-									<Text>
-										{!downloadURL
-											? 'No download link available for this publication'
-											: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
-									</Text>
-								</View>
-							)}
-
-							{!canStream && (
-								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
-									<Text>This publication lacks a defined reading order and cannot be streamed</Text>
-								</View>
-							)}
-
-							{!isSupportedStream && (
-								<View className="squircle ios:rounded-3xl p-3 bg-fill-info-secondary rounded-2xl">
-									<Text>
-										This publication contains unsupported media types and cannot be streamed yet
-									</Text>
-								</View>
-							)}
-						</View>
 					</View>
+
+					<CurrentProgressCard
+						hidden={!(progression && existsSomeProgression)}
+						showChapterTitle={false}
+						progressData={{
+							chapterTitle: null,
+							page: progression?.locator.locations?.position,
+							totalPages: numberOfPages,
+							percentage: Math.round((progression?.locator.locations?.totalProgression ?? 0) * 100),
+							// TODO: pull from local db
+							readingTimeSeconds: null,
+							lastRead: progression?.modified,
+						}}
+					/>
+
+					<Card backgroundClassName="bg-fill-warning-secondary dark:bg-fill-warning-secondary">
+						{!canDownload && !isDownloaded && (
+							<Card.Row>
+								<Text>
+									{!downloadURL
+										? 'No download link available for this publication'
+										: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
+								</Text>
+							</Card.Row>
+						)}
+						{!canStream && (
+							<Card.Row>
+								<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+							</Card.Row>
+						)}
+						{!isSupportedStream && (
+							<Card.Row>
+								<Text>
+									This publication contains unsupported media types and cannot be streamed yet
+								</Text>
+							</Card.Row>
+						)}
+					</Card>
 				</View>
 
 				<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] gap-8 px-4 py-6 tablet:px-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
 					{!!description && <DescriptionSection description={description} />}
 
-					<Card className={cn(!description && 'px-2')}>
-						<Card.StatGroup>
-							{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
-							{volume != null && <Card.Stat label="Volume" value={volume} />}
-							{issue != null && <Card.Stat label="Issue" value={issue} />}
-							{!!numberOfPages && <Card.Stat label="Pages" value={numberOfPages} />}
-						</Card.StatGroup>
-					</Card>
+					<ProminentMetadataCard
+						className={cn(!description && 'px-2')}
+						metadata={{
+							publisher: publisher,
+							volume: volume,
+							year: published?.getFullYear(),
+							issue: issue,
+							pages: numberOfPages,
+						}}
+					/>
 
 					<MetadataBadgeSection
 						label="Subjects"
@@ -429,23 +381,14 @@ export default function Screen() {
 						</View>
 					)}
 
-					<Card label="Details">
-						{subtitle && <Card.LongRow label="Subtitle" value={subtitle} />}
-						{language && <Card.Row label="Language" value={language} />}
-						{readingDirection && <Card.Row label="Reading direction" value={readingDirection} />}
-						{modified && (
-							<Card.Row
-								label="Modified"
-								value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
-							/>
-						)}
-						{published && (
-							<Card.Row
-								label="Published"
-								value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
-							/>
-						)}
-					</Card>
+					<DetailsCard
+						metadata={{
+							language: language,
+							readingDirection: readingDirection,
+							published: published,
+							modified: modified,
+						}}
+					/>
 
 					{identifier && (
 						<IdentifiersSheet

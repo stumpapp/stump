@@ -30,6 +30,10 @@ type CardProps = ViewProps & {
 	 * Customise the icon and text to display when the list is empty
 	 */
 	listEmptyStyle?: ListEmptyMessageProps
+	/**
+	 * Use to customise the background colour
+	 */
+	backgroundClassName?: string
 }
 
 type RowProps = Omit<ViewProps, 'children'> & {
@@ -61,6 +65,7 @@ export function Card({
 	listEmptyStyle,
 	children,
 	className,
+	backgroundClassName,
 	...props
 }: CardProps) {
 	const count = React.Children.count(children)
@@ -87,7 +92,7 @@ export function Card({
 			{count === 0 && listEmptyStyle ? (
 				<ListEmptyMessage {...listEmptyStyle} />
 			) : (
-				<CardBackground>{children}</CardBackground>
+				<CardBackground className={backgroundClassName}>{children}</CardBackground>
 			)}
 
 			{description && (

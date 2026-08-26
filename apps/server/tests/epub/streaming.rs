@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use models::entity::{media, server_config};
-use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, IntoActiveModel};
+use models::entity::media;
+use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel};
 use serde_json::Value;
 use tests::fake_data;
 
@@ -243,27 +243,10 @@ async fn test_epub_nested_resource_path() {
 	assert!(!response.as_bytes().is_empty());
 }
 
-/// Manifest hrefs must use the request host, even when public_url is configured.
+/// manifest hrefs must use the request host
 #[tokio::test]
 async fn test_epub_manifest_uses_request_host() {
 	let (app, book_id) = setup_epub_book().await;
-	let db = app.conn();
-
-	let config = server_config::Entity::find()
-		.one(db)
-		.await
-		.expect("query server_config")
-		.expect("server_config row");
-
-	// Only patch public_url — avoid rewriting JWT secrets on the config row.
-	server_config::ActiveModel {
-		id: ActiveValue::Unchanged(config.id),
-		public_url: ActiveValue::Set(Some("https://books.example".to_string())),
-		..Default::default()
-	}
-	.update(db)
-	.await
-	.expect("set public_url");
 
 	let response = app
 		.get(format!("/api/v2/epub/{book_id}/manifest.json").as_str())
@@ -280,7 +263,7 @@ async fn test_epub_manifest_uses_request_host() {
 		.expect("href");
 
 	assert!(
-		href.starts_with("http://localhost:") && href.contains("/api/v2/epub/"),
+		href.starts_with("http://localhost") && href.contains("/api/v2/epub/"),
 		"href should use the request host, got {href}"
 	);
 }

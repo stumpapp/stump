@@ -5,10 +5,10 @@ import { MemoryRouter } from 'react-router-dom'
 import StumpWebClient from '../App'
 import { useUserStore } from '../stores'
 
-jest.mock('../styles/index.css', () => ({}))
-jest.mock('@stump/components/styles/overrides.css', () => ({}))
+vi.mock('../styles/index.css', () => ({}))
+vi.mock('@stump/components/styles/overrides.css', () => ({}))
 
-jest.mock('../AppRouter', () => ({
+vi.mock('../AppRouter', () => ({
 	AppRouter: () => {
 		throw new Error('Test error')
 	},
@@ -18,7 +18,7 @@ describe('StumpWebClient', () => {
 	const originalError = console.error
 
 	beforeAll(() => {
-		console.error = jest.fn()
+		console.error = vi.fn()
 	})
 
 	afterAll(() => {

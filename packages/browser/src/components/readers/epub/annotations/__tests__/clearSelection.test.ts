@@ -2,8 +2,8 @@ import { clearFramesSelection } from '../clearSelection'
 
 describe('clearFramesSelection', () => {
 	it('removes all ranges from every frame content window selection', () => {
-		const removeAllRanges = jest.fn()
-		const getSelection = jest.fn(() => ({ removeAllRanges }))
+		const removeAllRanges = vi.fn()
+		const getSelection = vi.fn(() => ({ removeAllRanges }))
 		const frameA = { iframe: { contentWindow: { getSelection } as unknown as Window } }
 		const frameB = { iframe: { contentWindow: { getSelection } as unknown as Window } }
 
@@ -14,7 +14,7 @@ describe('clearFramesSelection', () => {
 	})
 
 	it('skips frames with no iframe, no content window, or no active selection', () => {
-		const getSelection = jest.fn(() => null)
+		const getSelection = vi.fn(() => null)
 		expect(() =>
 			clearFramesSelection([
 				{ iframe: null },

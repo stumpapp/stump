@@ -107,7 +107,7 @@ describe('Api', () => {
 					concat: vi.fn().mockImplementation((obj: unknown) => obj),
 				} as unknown as AxiosRequestHeaders,
 			} as InternalAxiosRequestConfig
-			use.mock.calls[0][0](config)
+			use.mock.calls[0]?.[0]?.(config)
 			// The token should be set in the header
 			expect(config.headers.Authorization === 'Bearer give-me-access')
 		})

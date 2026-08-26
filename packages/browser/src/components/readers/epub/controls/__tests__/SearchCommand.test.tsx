@@ -8,8 +8,8 @@ import { EpubReaderControls, useEpubReaderContext } from '../../context'
 import { searchResultToReaderLocator } from '../../readium/locator'
 import SearchCommand from '../SearchCommand'
 
-jest.mock('@stump/i18n', () => ({
-	...jest.requireActual('@stump/i18n'),
+vi.mock('@stump/i18n', () => ({
+	...vi.importActual('@stump/i18n'),
 	useLocaleContext: () => ({
 		t: (key: string, options?: { position?: number }) => {
 			if (key === 'epubReader.search.placeholder') {
@@ -27,12 +27,12 @@ jest.mock('@stump/i18n', () => ({
 	}),
 }))
 
-jest.mock('../../context', () => ({
-	...jest.requireActual('../../context'),
-	useEpubReaderContext: jest.fn(),
+vi.mock('../../context', () => ({
+	...vi.importActual('../../context'),
+	useEpubReaderContext: vi.fn(),
 }))
 
-const mockedUseEpubReaderContext = jest.mocked(useEpubReaderContext)
+const mockedUseEpubReaderContext = vi.mocked(useEpubReaderContext)
 
 let resultId = 0
 function buildResult(
@@ -90,16 +90,16 @@ function mockControls(overrides: Partial<EpubReaderControls> = {}) {
 		controls: {
 			fullscreen: false,
 			visible: false,
-			setFullscreen: jest.fn(),
-			setVisible: jest.fn(),
-			onMouseEnterControls: jest.fn(),
-			onMouseLeaveControls: jest.fn(),
-			onLinkClick: jest.fn(),
-			onPaginateForward: jest.fn(),
-			onPaginateBackward: jest.fn(),
-			jumpToSection: jest.fn(),
-			onGoToLocator: jest.fn().mockResolvedValue(true),
-			getLocatorPreviewText: jest.fn(() => null),
+			setFullscreen: vi.fn(),
+			setVisible: vi.fn(),
+			onMouseEnterControls: vi.fn(),
+			onMouseLeaveControls: vi.fn(),
+			onLinkClick: vi.fn(),
+			onPaginateForward: vi.fn(),
+			onPaginateBackward: vi.fn(),
+			jumpToSection: vi.fn(),
+			onGoToLocator: vi.fn().mockResolvedValue(true),
+			getLocatorPreviewText: vi.fn(() => null),
 			...overrides,
 		},
 		readerMeta: {
@@ -120,7 +120,7 @@ function search(query: string) {
 
 describe('SearchCommand', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 		resultId = 0
 	})
 
@@ -131,8 +131,8 @@ describe('SearchCommand', () => {
 
 	it('navigates via onGoToLocator when a result is clicked', async () => {
 		const result = buildResult({ before: 'the ', highlight: 'quick', after: ' fox' })
-		const searchBook = jest.fn().mockResolvedValue(buildResponse([result]))
-		const onGoToLocator = jest.fn().mockResolvedValue(true)
+		const searchBook = vi.fn().mockResolvedValue(buildResponse([result]))
+		const onGoToLocator = vi.fn().mockResolvedValue(true)
 		mockControls({ searchBook, onGoToLocator })
 
 		render(<SearchCommand />)
@@ -153,7 +153,7 @@ describe('SearchCommand', () => {
 	it('appends results to the existing list when loading more via nextCursor', async () => {
 		const firstResult = buildResult({ highlight: 'alpha' })
 		const secondResult = buildResult({ highlight: 'beta' })
-		const searchBook = jest
+		const searchBook = vi
 			.fn()
 			.mockResolvedValueOnce(buildResponse([firstResult], { nextCursor: 'cursor-2' }))
 			.mockResolvedValueOnce(buildResponse([secondResult], { nextCursor: null }))
@@ -182,7 +182,7 @@ describe('SearchCommand', () => {
 	it('ignores a stale response superseded by a newer search', async () => {
 		const staleResponse = deferred<EpubSearchResponse>()
 		const freshResponse = deferred<EpubSearchResponse>()
-		const searchBook = jest
+		const searchBook = vi
 			.fn()
 			.mockReturnValueOnce(staleResponse.promise)
 			.mockReturnValueOnce(freshResponse.promise)
@@ -219,7 +219,7 @@ describe('SearchCommand', () => {
 			highlight: '$100.00',
 			after: ' — really?',
 		})
-		const searchBook = jest.fn().mockResolvedValue(buildResponse([result]))
+		const searchBook = vi.fn().mockResolvedValue(buildResponse([result]))
 		mockControls({ searchBook })
 
 		render(<SearchCommand />)
@@ -237,7 +237,7 @@ describe('SearchCommand', () => {
 	it('groups results by chapter title', async () => {
 		const chapterOneResult = buildResult({ chapterTitle: 'Chapter One', highlight: 'one' })
 		const chapterTwoResult = buildResult({ chapterTitle: 'Chapter Two', highlight: 'two' })
-		const searchBook = jest
+		const searchBook = vi
 			.fn()
 			.mockResolvedValue(buildResponse([chapterOneResult, chapterTwoResult]))
 		mockControls({ searchBook })

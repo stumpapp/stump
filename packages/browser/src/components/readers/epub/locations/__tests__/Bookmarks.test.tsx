@@ -4,17 +4,17 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { EpubReaderControls, useEpubReaderContext } from '../../context'
 import Bookmarks from '../Bookmarks'
 
-jest.mock('@stump/i18n', () => ({
-	...jest.requireActual('@stump/i18n'),
+vi.mock('@stump/i18n', () => ({
+	...vi.importActual('@stump/i18n'),
 	useLocaleContext: () => ({ t: (key: string) => key }),
 }))
 
-jest.mock('../../context', () => ({
-	...jest.requireActual('../../context'),
-	useEpubReaderContext: jest.fn(),
+vi.mock('../../context', () => ({
+	...vi.importActual('../../context'),
+	useEpubReaderContext: vi.fn(),
 }))
 
-const mockedUseEpubReaderContext = jest.mocked(useEpubReaderContext)
+const mockedUseEpubReaderContext = vi.mocked(useEpubReaderContext)
 
 function deferred<T>() {
 	let resolve!: (value: T) => void
@@ -50,17 +50,17 @@ function renderBookmarks(onGoToLocator: EpubReaderControls['onGoToLocator']) {
 		},
 	})
 
-	const onLocationChanged = jest.fn()
+	const onLocationChanged = vi.fn()
 	render(<Bookmarks onLocationChanged={onLocationChanged} />)
 	return { onLocationChanged }
 }
 
 describe('Bookmarks', () => {
-	beforeEach(() => jest.clearAllMocks())
+	beforeEach(() => vi.clearAllMocks())
 
 	it('closes only after Readium confirms navigation', async () => {
 		const navigation = deferred<boolean>()
-		const onGoToLocator = jest.fn(() => navigation.promise)
+		const onGoToLocator = vi.fn(() => navigation.promise)
 		const { onLocationChanged } = renderBookmarks(onGoToLocator)
 
 		fireEvent.click(screen.getByRole('button', { name: /chapter one/i }))
@@ -78,7 +78,7 @@ describe('Bookmarks', () => {
 	})
 
 	it('stays open when navigation fails', async () => {
-		const onGoToLocator = jest.fn().mockResolvedValue(false)
+		const onGoToLocator = vi.fn().mockResolvedValue(false)
 		const { onLocationChanged } = renderBookmarks(onGoToLocator)
 
 		fireEvent.click(screen.getByRole('button', { name: /chapter one/i }))

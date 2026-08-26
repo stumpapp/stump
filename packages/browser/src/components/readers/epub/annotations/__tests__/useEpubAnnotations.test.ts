@@ -1,22 +1,24 @@
 import { SDKContext, StumpClientContext } from '@stump/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { Procedure } from '@vitest/spy'
 import { createElement, type PropsWithChildren, useState } from 'react'
 import { toast } from 'sonner'
+import { Mock } from 'vitest'
 
 import type { ReaderLocator } from '../../context'
 import type { EpubAnnotation } from '../types'
 import { useEpubAnnotations } from '../useEpubAnnotations'
 
-jest.mock('sonner', () => ({
-	toast: { info: jest.fn(), error: jest.fn() },
+vi.mock('sonner', () => ({
+	toast: { info: vi.fn(), error: vi.fn() },
 }))
 
 // Hoisted so `renderHook` callbacks pass a referentially stable array — the hook syncs
 // local state from `initialAnnotations` by reference, matching how the real caller
 // (`ReadiumWebReader`) memoizes it from the GraphQL query result.
 const NO_INITIAL_ANNOTATIONS: EpubAnnotation[] = []
-let sdkExecute: jest.Mock
+let sdkExecute: Mock<Procedure>
 
 function createQueryWrapper(initialAnnotations: EpubAnnotation[]) {
 	return function QueryWrapper({ children }: PropsWithChildren) {
@@ -35,7 +37,7 @@ function createQueryWrapper(initialAnnotations: EpubAnnotation[]) {
 			{ value: {} },
 			createElement(
 				SDKContext.Provider,
-				{ value: { sdk: { execute: sdkExecute } as never, setSDK: jest.fn() } },
+				{ value: { sdk: { execute: sdkExecute } as never, setSDK: vi.fn() } },
 				createElement(QueryClientProvider, { client: queryClient }, children),
 			),
 		)
@@ -65,16 +67,16 @@ function buildAnnotation(overrides: Partial<EpubAnnotation> = {}): EpubAnnotatio
 }
 
 describe('useEpubAnnotations', () => {
-	let createAsync: jest.Mock
-	let updateAsync: jest.Mock
-	let deleteAsync: jest.Mock
+	let createAsync: Mock<Procedure>
+	let updateAsync: Mock<Procedure>
+	let deleteAsync: Mock<Procedure>
 
 	beforeEach(() => {
-		jest.clearAllMocks()
-		createAsync = jest.fn()
-		updateAsync = jest.fn()
-		deleteAsync = jest.fn()
-		sdkExecute = jest.fn((document: unknown) => {
+		vi.clearAllMocks()
+		createAsync = vi.fn()
+		updateAsync = vi.fn()
+		deleteAsync = vi.fn()
+		sdkExecute = vi.fn((document: unknown) => {
 			const source = String(document)
 			if (source.includes('mutation CreateEpubAnnotation')) {
 				return createAsync()

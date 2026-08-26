@@ -233,6 +233,7 @@ type InputRowProps = TextInputProps & {
 	errorMessage?: string
 	// i kept the isInvalid prop in case we want to show invalid without an error
 	isInvalid?: boolean
+	disabled?: boolean
 }
 
 function InputRow({
@@ -243,11 +244,12 @@ function InputRow({
 	className,
 	errorMessage,
 	isInvalid,
+	disabled,
 	...props
 }: InputRowProps) {
 	const colors = useColors()
 	return (
-		<BaseRowComponent>
+		<BaseRowComponent disabled={disabled}>
 			<View className="gap-x-4 2 flex-row items-center justify-center">
 				<View className="gap-y-2 shrink">
 					<View className="flex flex-row items-center justify-between">

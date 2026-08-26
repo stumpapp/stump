@@ -2949,6 +2949,16 @@
 				"description": "Switch to the local profile when able"
 			},
 			"localUrl": "Local URL",
+			"saveUrlChanges": "Save URL Changes",
+			"swapUrls": {
+				"label": "Swap URLs",
+				"swap": "Swap",
+				"confirmationText": "Are you sure you want to swap the remote and local URLs? This will take effect immediately",
+				"noLocalUrlSet": {
+					"title": "No local URL set",
+					"description": "You need to set a local URL before you can swap it to the remote URL"
+				}
+			},
 			"wifiNetwork": {
 				"label": "Wifi Network",
 				"noAssociatedNetwork": "No Associated Wifi Network",

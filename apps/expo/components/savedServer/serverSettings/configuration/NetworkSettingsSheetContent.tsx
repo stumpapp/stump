@@ -1,11 +1,11 @@
 import { ArrowUpDown, RadioTower, Route, Router } from 'lucide-react-native'
 import { useState } from 'react'
-import { TextInput, View } from 'react-native'
+import { Alert, View } from 'react-native'
 import { toast } from 'sonner-native'
+import { z } from 'zod'
 
 import { AppSettingsRow } from '~/components/appSettings'
 import { Button, Card, Switch, Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useServerSettingsContext } from '~/providers/ServerSettingsProvider'
 import { useWifiSsid } from '~/providers/WifiSsidProvider'
@@ -15,16 +15,8 @@ export function NetworkSettingsSheetContent() {
 	const { activeServer, patchServer } = useServerSettingsContext()
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
 
-	const colors = useColors()
-
 	const [localUrl, setLocalUrl] = useState(activeServer.localProfile?.url || '')
-	// TODO: i realized editing remote url here does kinda make sense, or at the very least it presents an awkward
-	// ui for people who did not onboard their server with network profiles in mind and want to change it. as it stands
-	// now, you'd have to:
-	// enter server -> settings -> network -> enable local -> configure local -> exit -> edit server -> change url
-	// not great. the other awkward point is that while in server changing the url for sdk instance might present
-	// problems (hunch, not tested obv).
-	const [remoteUrl, setRemoteUrl] = useState(activeServer.url)
+	const [localUrlError, setLocalUrlError] = useState<string | null>(null)
 
 	const isDifferentLocalUrl = localUrl != '' && localUrl != activeServer.localProfile?.url
 
@@ -41,12 +33,37 @@ export function NetworkSettingsSheetContent() {
 		}
 	}
 
-	const onChangeLocalUrl = () => {
+	const onSaveChangedUrl = () => {
 		const trimmedUrl = localUrl.trim()
-		// TODO: feedback
-		if (!trimmedUrl) return
-		// TODO: more thorough validation?
-		patchServer({ localProfile: { ...activeServer.localProfile, url: trimmedUrl } })
+		const urlSchema = z.string().url({ message: t('common.invalidUrl') })
+		const result = urlSchema.safeParse(trimmedUrl)
+		if (!result.success) {
+			setLocalUrlError(result.error.message)
+		} else {
+			setLocalUrlError(null)
+			patchServer({ localProfile: { ...activeServer.localProfile, url: result.data } })
+		}
+	}
+
+	const onChangeLocalUrl = (text: string) => {
+		setLocalUrl(text)
+		if (localUrlError && z.string().url().safeParse(text.trim()).success) {
+			setLocalUrlError(null)
+		}
+	}
+
+	const onSwapUrls = () => {
+		const currentLocalUrl = activeServer.localProfile?.url
+		if (!currentLocalUrl) {
+			toast.error(t('swapUrls.noLocalUrlSet.title'), {
+				description: t('swapUrls.noLocalUrlSet.description'),
+			})
+			return
+		}
+		patchServer({
+			url: currentLocalUrl,
+			localProfile: { ...activeServer.localProfile, url: activeServer.url },
+		})
 	}
 
 	const fakeSsid = 'My Home Network'
@@ -66,27 +83,46 @@ export function NetworkSettingsSheetContent() {
 
 				<AppSettingsRow
 					icon={ArrowUpDown}
-					title="Swap URLs"
+					title={t(getKey('swapUrls.label'))}
 					disabled={!activeServer.localProfile?.url}
 				>
 					<Button
 						size="sm"
 						variant="destructive"
 						roundness="full"
-						onPress={async () => {}}
+						onPress={() => {
+							Alert.prompt(
+								t(getKey('swapUrls.label')),
+								t(getKey('swapUrls.confirmationText')),
+								[
+									{
+										text: t('common.cancel'),
+										style: 'cancel',
+									},
+									{
+										text: t(getKey('swapUrls.swap')),
+										onPress: () => onSwapUrls(),
+										style: 'destructive',
+									},
+								],
+								// it is so silly to me that not providing `default` makes it a text input lol
+								// so 'default' does not seem to be the default, actually!
+								'default',
+							)
+						}}
 						className="dark:border-white/5 border-black/5"
 					>
-						<Text>Swap</Text>
+						<Text>{t(getKey('swapUrls.swap'))}</Text>
 					</Button>
 				</AppSettingsRow>
 			</Card>
 
 			<View className="gap-4">
-				<Card label="Local Profile">
+				<Card label={t(getKey('localProfile'))}>
 					<AppSettingsRow
 						icon={Route}
-						title="Auto-switch to local profile"
-						description="Switch to the local profile when able"
+						title={t(getKey('autoSwitchToLocal.label'))}
+						description={t(getKey('autoSwitchToLocal.description'))}
 					>
 						<Switch
 							checked={Boolean(activeServer.autoSwitchToLocal)}
@@ -94,51 +130,27 @@ export function NetworkSettingsSheetContent() {
 						/>
 					</AppSettingsRow>
 
-					{/*TODO: put remote url edit somewhere around here? looked kinda poopy double stacking inputs in this card*/}
-
-					{/*FIXME: i do not like this layout, better without icon ig*/}
-					<Card.Row disabled={!activeServer.autoSwitchToLocal}>
-						<View className="gap-x-4 2 flex-row items-center justify-center">
-							{/*<View className="gap-4 shrink-0 flex-row items-center justify-center">
-							<GradientIcon icon={Router} />
-						</View>*/}
-
-							<View className="gap-y-2 shrink">
-								<Text className="text-lg shrink">Local URL</Text>
-
-								<View className="squircle dark:border-white/5 dark:bg-white/5 border-black/5 bg-black/5 h-10 flex flex-row items-center rounded-full border">
-									<TextInput
-										hitSlop={50}
-										selectionColor={colors.fill.brand.DEFAULT}
-										onChangeText={setLocalUrl}
-										value={localUrl}
-										style={{
-											fontSize: 16,
-											color: isDifferentLocalUrl
-												? colors.foreground.DEFAULT
-												: colors.foreground.muted,
-										}}
-										className="font-medium pl-3 w-full text-start"
-										autoCapitalize="none"
-									/>
-								</View>
-							</View>
-						</View>
-					</Card.Row>
+					<Card.InputRow
+						disabled={!activeServer.autoSwitchToLocal}
+						label={t(getKey('localUrl'))}
+						value={localUrl}
+						onChangeText={onChangeLocalUrl}
+						errorMessage={localUrlError ?? undefined}
+					/>
 				</Card>
 
 				{/*TODO: i hate content shifts, leaving for now bc i don't think debounce is quite right
 				and an inline save button means less URL space*/}
 				{isDifferentLocalUrl && !!activeServer.autoSwitchToLocal && (
-					<Button className="rounded-full" onPress={onChangeLocalUrl}>
-						<Text>Save URL Changes</Text>
+					<Button className="rounded-full" onPress={onSaveChangedUrl}>
+						<Text>{t(getKey('saveUrlChanges'))}</Text>
 					</Button>
 				)}
 			</View>
 
 			{activeServer.autoSwitchToLocal && (
 				<View className="gap-4">
-					<Card label="Wifi Network">
+					<Card label={t(getKey('wifiNetwork.label'))}>
 						{!activeServer.localProfile?.ssid && (
 							<Card.Row
 								label={t(
@@ -176,7 +188,7 @@ export function NetworkSettingsSheetContent() {
 						)}
 					</Card>
 
-					{fakeSsid && !activeServer.localProfile?.ssid && (
+					{ssid && !activeServer.localProfile?.ssid && (
 						<Button className="rounded-full">
 							<Text>
 								{t(getKey('wifiNetwork.addNetwork'), {

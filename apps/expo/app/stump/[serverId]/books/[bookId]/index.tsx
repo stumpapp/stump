@@ -349,6 +349,7 @@ export default function Screen() {
 							totalPages: totalPages,
 							percentage: percentage,
 							readingTimeSeconds: progression?.elapsedSeconds,
+							lastRead: progression?.updatedAt,
 						}}
 					/>
 

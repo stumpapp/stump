@@ -181,6 +181,8 @@ export default function Screen() {
 							totalPages: pages,
 							percentage: progressPercentage,
 							readingTimeSeconds: readProgressData?.elapsedSeconds,
+							// TODO: This seems to take download time as initial last modified
+							lastRead: readProgressData?.lastModified,
 						}}
 					/>
 				</View>

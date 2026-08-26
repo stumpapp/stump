@@ -9,10 +9,13 @@ export type DetailsCardProps = {
 }
 
 type Metadata = {
-	extension: string | undefined | null
-	size: string | undefined | null
-	language: string | undefined | null
-	ageRating: number | undefined | null
+	extension?: string | undefined | null
+	size?: string | undefined | null
+	language?: string | undefined | null
+	ageRating?: number | undefined | null
+	readingDirection?: string | number | null
+	published?: Date | undefined | null
+	modified?: Date | undefined | null
 	downloadedAt?: Date | undefined | null
 }
 
@@ -24,7 +27,16 @@ export function DetailsCard({ hidden, metadata }: DetailsCardProps) {
 	const showDetails = hasMetadata(metadata)
 	if (!showDetails) return null
 
-	const { extension, size, language, ageRating, downloadedAt } = metadata
+	const {
+		extension,
+		size,
+		language,
+		ageRating,
+		readingDirection,
+		published,
+		downloadedAt,
+		modified,
+	} = metadata
 
 	return (
 		<Card label={t('common.details')}>
@@ -33,6 +45,19 @@ export function DetailsCard({ hidden, metadata }: DetailsCardProps) {
 			{language && <Card.Row label={t('bookMetadata.language')} value={language} />}
 			{ageRating != null && ageRating > 0 && (
 				<Card.Row label={t('bookMetadata.ageRating')} value={`${ageRating}+`} />
+			)}
+			{readingDirection && <Card.Row label="Reading direction" value={readingDirection} />}
+			{published && (
+				<Card.Row
+					label="Published"
+					value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
+				/>
+			)}
+			{modified && (
+				<Card.Row
+					label="Modified"
+					value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
+				/>
 			)}
 			{!!downloadedAt && (
 				<Card.Row

@@ -2,12 +2,12 @@ use std::{
 	collections::HashMap,
 	io::Cursor,
 	path::{Path, PathBuf},
-	sync::OnceLock,
+	sync::{Mutex, MutexGuard, OnceLock},
 };
 
 use models::shared::image_processor_options::SupportedImageFormat;
 use pdfium_render::prelude::{
-	PdfColor, PdfDocumentMetadataTagType, PdfRenderConfig, Pdfium,
+	PdfColor, PdfDocument, PdfDocumentMetadataTagType, PdfRenderConfig, Pdfium,
 };
 
 use crate::{
@@ -28,7 +28,11 @@ use crate::{
 	},
 };
 
-static PDFIUM: OnceLock<Result<Pdfium, FileError>> = OnceLock::new();
+/// alright so tldr; this is a temporary workaround (the mutex) until upstream fixes issues with
+/// the `thread_safe` feature that make it unsafe (lol).
+/// im subscribed to the following and will remove once able after resolved:
+/// - https://github.com/ajrcarey/pdfium-render/issues/262
+static PDFIUM: OnceLock<Result<Mutex<Pdfium>, FileError>> = OnceLock::new();
 
 pub struct PdfProcessor;
 
@@ -79,14 +83,20 @@ impl FileProcessor for PdfProcessor {
 		options: FileProcessorOptions,
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		let pdfium = Self::renderer(&config.pdfium_path)?;
-		let document = pdfium.load_pdf_from_file(path, None)?;
-		let pages = document.pages().len();
-
-		let metadata = if options.process_metadata {
-			Self::process_metadata_internal(path, &config.pdfium_path)?
-		} else {
-			None
+		// TODO: undo this once upstream fixes the issue outlined above
+		// this is scoped a bit more tightly than before since wrapping the singleton
+		// in a mutex. to extract metadata would mean attempting to obtain a lock on
+		// a locked mutex (which is bad)
+		let (pages, metadata) = {
+			let pdfium = Self::renderer(&config.pdfium_path)?;
+			let document = pdfium.load_pdf_from_file(path, None)?;
+			let pages = document.pages().len();
+			let metadata = if options.process_metadata {
+				Self::extract_metadata_from_open_document(&document)?
+			} else {
+				None
+			};
+			(pages, metadata)
 		};
 
 		let ProcessedFileHashes {
@@ -162,15 +172,10 @@ impl FileProcessor for PdfProcessor {
 }
 
 impl PdfProcessor {
-	/// Process the metadata of a PDF file using the specified config/env pdfium path.
-	pub fn process_metadata_internal(
-		path: &str,
-		pdfium_path: &Option<String>,
+	/// Extract metadata from a PDF file provided an already-open PdfDocument
+	fn extract_metadata_from_open_document(
+		document: &PdfDocument<'_>,
 	) -> Result<Option<ProcessedMediaMetadata>, FileError> {
-		let pdfium = Self::renderer(pdfium_path)?;
-		let document = pdfium.load_pdf_from_file(path, None)?;
-
-		// Extract metadata from PDFium document tags
 		let mut metadata_map: HashMap<String, Vec<String>> = HashMap::new();
 		for tag in document.metadata().iter() {
 			let value_ref = tag.value();
@@ -190,24 +195,38 @@ impl PdfProcessor {
 			metadata_map.entry(key).or_default().push(value);
 		}
 
-		let metadata = if metadata_map.is_empty() {
+		Ok(if metadata_map.is_empty() {
 			None
 		} else {
 			Some(ProcessedMediaMetadata::from(metadata_map))
-		};
-
-		Ok(metadata)
+		})
 	}
 
-	/// Returns the global pdfium singleton, initializing it on first call
+	/// Process the metadata of a PDF file using the specified config/env pdfium path.
+	pub fn process_metadata_internal(
+		path: &str,
+		pdfium_path: &Option<String>,
+	) -> Result<Option<ProcessedMediaMetadata>, FileError> {
+		let pdfium = Self::renderer(pdfium_path)?;
+		let document = pdfium.load_pdf_from_file(path, None)?;
+		Self::extract_metadata_from_open_document(&document)
+	}
+
+	// TODO: revert to returning a good ol &'static Pdfium once once upstream fixes
+	// the issue outlined above
+
+	/// Returns a mutex-guarded pdfium singleton, initializing it on first call
 	///
 	/// Note that a failed init is cached permanently and requires a restart the process to retry
 	/// initialization
 	///
 	/// See: https://github.com/ajrcarey/pdfium-render#thread-safety
-	pub fn renderer(pdfium_path: &Option<String>) -> Result<&'static Pdfium, FileError> {
+	pub fn renderer(
+		pdfium_path: &Option<String>,
+	) -> Result<MutexGuard<'static, Pdfium>, FileError> {
 		let result = PDFIUM.get_or_init(|| {
-			let  path = pdfium_path.clone().or_else(|| std::env::var("PDFIUM_PATH").ok());
+			let path =
+				pdfium_path.clone().or_else(|| std::env::var("PDFIUM_PATH").ok());
 
 			if let Some(path) = path {
 				tracing::info!(path, "Initializing PDFium from provided path");
@@ -220,11 +239,13 @@ impl PdfProcessor {
 						tracing::error!(?e, "Failed to bind to system PDFium library");
 						FileError::PdfConfigurationError
 					})?;
-				Ok(Pdfium::new(bindings))
+				Ok(Mutex::new(Pdfium::new(bindings)))
 			} else {
-				tracing::warn!("No PDFium path provided, will attempt to bind to system library");
+				tracing::warn!(
+					"No PDFium path provided, will attempt to bind to system library"
+				);
 				Pdfium::bind_to_system_library()
-					.map(Pdfium::new)
+					.map(|b| Mutex::new(Pdfium::new(b)))
 					.map_err(|e| {
 						tracing::error!(?e, "Failed to bind to system PDFium library");
 						FileError::PdfConfigurationError
@@ -234,7 +255,14 @@ impl PdfProcessor {
 
 		result
 			.as_ref()
-			.map_err(|_| FileError::PdfConfigurationError)
+			.map_err(|_| FileError::PdfConfigurationError)?
+			.lock()
+			.map_err(|_| {
+				tracing::error!(
+					"PDFium mutex is poisoned, you will need to restart the process to recover from this error"
+				);
+				FileError::PdfConfigurationError
+			})
 	}
 
 	/// Synchronous page rendering without caching (used internally)
@@ -530,9 +558,8 @@ impl PdfProcessor {
 			.collect();
 		pages_to_render.sort_by_key(|&page| (page - current_page).abs());
 
-		// there is some ambiguity around thread safety you can read about here: https://github.com/stumpapp/stump/pull/1209#discussion_r3359574540
-		// until proven otherwise, i am inclined to lean into pdfium-render's internal mechanisms
-		// for thread safety and avoid reinventing it here. as such, pages are processed sequentially.
+		// TODO: once the upstream issue is resolved revisit whether we can parallelize
+		// a bit instead of sequentially processing each page
 		for page in pages_to_render {
 			if let Ok(Some(_)) =
 				Self::get_cached_page(&pdf_path_owned, page, &config_owned).await

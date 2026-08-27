@@ -46,7 +46,7 @@ type OPDSFeedProviderProps = {
 
 export function OPDSLegacyFeedProvider({ children }: OPDSFeedProviderProps) {
 	const { sdk } = useSDK()
-	const { activeServer } = useActiveServer()
+	const { activeServer, effectiveServerUrl } = useActiveServer()
 	const { onUnauthenticatedResponse } = useClientContext()
 
 	const {
@@ -55,13 +55,13 @@ export function OPDSLegacyFeedProvider({ children }: OPDSFeedProviderProps) {
 		error,
 		refetch,
 	} = useQuery({
-		queryKey: [sdk.opds.keys.catalog, activeServer.id, activeServer.kind],
+		queryKey: [sdk.opds.keys.catalog, activeServer.id, activeServer.kind, effectiveServerUrl],
 		// stump servers are configured as just the root of the instance, but opds servers
 		// are configured the root of the opds feed, so we handle them a bit differently
 		queryFn: () =>
 			activeServer.kind === 'stump'
 				? sdk.opdsLegacy.catalog()
-				: sdk.opdsLegacy.feed(activeServer.url),
+				: sdk.opdsLegacy.feed(effectiveServerUrl),
 		enabled: !!activeServer,
 		throwOnError: false,
 	})
@@ -100,7 +100,7 @@ export function OPDSLegacyFeedProvider({ children }: OPDSFeedProviderProps) {
 			catalogMeta: catalog
 				? {
 						id: catalog.id,
-						url: getLegacySelfLinkURL(catalog, sdk.rootURL) ?? activeServer.url,
+						url: getLegacySelfLinkURL(catalog, sdk.rootURL) ?? effectiveServerUrl,
 						title: catalog.title,
 						author: catalog.author,
 					}
@@ -111,7 +111,7 @@ export function OPDSLegacyFeedProvider({ children }: OPDSFeedProviderProps) {
 			error: error ?? null,
 			refetch,
 		}),
-		[catalog, searchDocument, isCatalogLoading, error, refetch, activeServer.url, sdk.rootURL],
+		[catalog, searchDocument, isCatalogLoading, error, refetch, effectiveServerUrl, sdk.rootURL],
 	)
 
 	if (isCatalogLoading && !catalog) {

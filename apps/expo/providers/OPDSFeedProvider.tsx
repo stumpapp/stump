@@ -36,7 +36,7 @@ type OPDSFeedProviderProps = {
 
 export function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 	const { sdk } = useSDK()
-	const { activeServer } = useActiveServer()
+	const { activeServer, effectiveServerUrl } = useActiveServer()
 	const { onUnauthenticatedResponse } = useClientContext()
 
 	const {
@@ -45,15 +45,15 @@ export function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderPr
 		error,
 		refetch,
 	} = useQuery({
-		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
+		queryKey: [sdk.opds.keys.catalog, effectiveServerUrl, activeServer.kind],
 		queryFn: () => {
-			if (activeServer?.kind === 'stump') {
+			if (activeServer.kind === 'stump') {
 				return sdk.opds.catalog()
 			} else {
-				return sdk.opds.feed(activeServer?.url || '')
+				return sdk.opds.feed(effectiveServerUrl)
 			}
 		},
-		enabled: !!activeServer && !isAuthPending,
+		enabled: !isAuthPending,
 		throwOnError: false,
 	})
 

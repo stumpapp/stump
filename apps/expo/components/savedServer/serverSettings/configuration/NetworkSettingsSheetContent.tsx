@@ -8,9 +8,11 @@ import { AppSettingsRow } from '~/components/appSettings'
 import { Button, Card, Switch, Text } from '~/components/ui'
 import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
+import { formatServerUrl } from '~/lib/utils'
 import { useServerUrl } from '~/providers/ActiveServerProvider'
 import { useServerSettingsContext } from '~/providers/ServerSettingsProvider'
 import { useWifiSsid } from '~/providers/WifiSsidProvider'
+import { usePreferencesStore } from '~/stores'
 
 export function NetworkSettingsSheetContent() {
 	const { t } = useTranslate()
@@ -18,6 +20,7 @@ export function NetworkSettingsSheetContent() {
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
 
 	const effectiveServerUrl = useServerUrl()
+	const shouldMaskUrls = usePreferencesStore((store) => store.maskUrls)
 
 	const [localUrl, setLocalUrl] = useState(activeServer.localProfile?.url || '')
 	const [localUrlError, setLocalUrlError] = useState<string | null>(null)
@@ -29,8 +32,8 @@ export function NetworkSettingsSheetContent() {
 		if (enabled && permissionStatus !== 'granted') {
 			const granted = await requestPermission()
 			if (!granted) {
-				toast.error(t('permissionFailedToBeGranted.title'), {
-					description: t('permissionFailedToBeGranted.description'),
+				toast.error(t(getKey('wifiNetwork.permissionFailedToBeGranted.title')), {
+					description: t(getKey('wifiNetwork.permissionFailedToBeGranted.description')),
 				})
 				return
 			}
@@ -93,14 +96,6 @@ export function NetworkSettingsSheetContent() {
 		const isConnectedToLocalSsid = ssid != null && ssid === activeServer.localProfile.ssid
 		const didAutoSwitchCorrectly = effectiveServerUrl === activeServer.localProfile.url
 
-		console.log({
-			didAutoSwitchCorrectly,
-			effectiveServerUrl,
-			localProfileUrl: activeServer.localProfile.url,
-			isConnectedToLocalSsid,
-			ssid,
-		})
-
 		if (isConnectedToLocalSsid) {
 			return {
 				key: 'local',
@@ -113,7 +108,7 @@ export function NetworkSettingsSheetContent() {
 		}
 
 		return {
-			key: 'remote',
+			key: 'primary',
 			icon: RadioTower,
 			url: activeServer.url,
 			error: null,
@@ -123,13 +118,17 @@ export function NetworkSettingsSheetContent() {
 	return (
 		<View className="gap-8 flex-1">
 			<Card label="Current Server">
-				<AppSettingsRow icon={RadioTower} title="Remote URL">
-					<Text className="text-foreground-muted">{activeServer.url}</Text>
+				<AppSettingsRow icon={RadioTower} title={t(getKey('primaryUrl'))}>
+					<Text className="text-foreground-muted">
+						{formatServerUrl(activeServer.url, shouldMaskUrls)}
+					</Text>
 				</AppSettingsRow>
 
 				<AppSettingsRow icon={Router} title="Local URL">
 					<Text className="text-foreground-muted">
-						{activeServer.localProfile?.url ?? 'Not configured'}
+						{activeServer.localProfile?.url
+							? formatServerUrl(activeServer.localProfile.url, shouldMaskUrls)
+							: t('common.notConfigured')}
 					</Text>
 				</AppSettingsRow>
 
@@ -188,6 +187,8 @@ export function NetworkSettingsSheetContent() {
 						value={localUrl}
 						onChangeText={onChangeLocalUrl}
 						errorMessage={localUrlError ?? undefined}
+						secureTextEntry={shouldMaskUrls}
+						autoCapitalize="none"
 					/>
 				</Card>
 
@@ -271,7 +272,7 @@ export function NetworkSettingsSheetContent() {
 						</Button>
 					)}
 
-					{!ssid && !activeServer.localProfile?.ssid && permissionStatus !== 'granted' && (
+					{activeServer.autoSwitchToLocal && permissionStatus !== 'granted' && (
 						<Button className="rounded-full" onPress={requestPermission} disabled={isLoading}>
 							<Text>{t(getKey('wifiNetwork.requestPermission'))}</Text>
 						</Button>
@@ -287,7 +288,7 @@ export function NetworkSettingsSheetContent() {
 					<AppSettingsRow
 						icon={activeProfileData.icon}
 						iconBackgroundColor={activeProfileData.error ? SETTINGS_COLORS.destructive : undefined}
-						title={activeProfileData.url}
+						title={formatServerUrl(activeProfileData.url, shouldMaskUrls)}
 						description={t(getKey(`activeProfile.${activeProfileData.key}IsActive`))}
 					/>
 				</Card>

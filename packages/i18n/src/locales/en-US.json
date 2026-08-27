@@ -2721,6 +2721,7 @@
 		"remove": "Remove",
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
+		"notConfigured": "Not configured",
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
@@ -2946,10 +2947,11 @@
 			"activeProfile": {
 				"label": "Active Profile",
 				"localIsActive": "Local profile is active",
-				"remoteIsActive": "Remote profile is active",
+				"primaryIsActive": "Primary profile is active",
 				"autoSwitchToLocalDidNotWork": "The app was unable to switch to the active profile. Please check your network connection"
 			},
 			"localProfile": "Local Profile",
+			"primaryUrl": "Primary URL",
 			"autoSwitchToLocal": {
 				"label": "Auto-switch to local profile",
 				"description": "Switch to the local profile when able"
@@ -3397,7 +3399,8 @@
 				"debugAnalytics": {
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
-				}
+				},
+				"maskUrls": "Mask URLs"
 			},
 			"contactInfo": {
 				"label": "Contact",

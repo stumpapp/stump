@@ -30,8 +30,8 @@ export function AdvancedNetworkSettingsSheetContent() {
 		if (enabled && permissionStatus !== 'granted') {
 			const granted = await requestPermission()
 			if (!granted) {
-				toast.error('Location permissions denied', {
-					description: 'idk man',
+				toast.error(t(getKey('wifiNetwork.permissionFailedToBeGranted.title')), {
+					description: t(getKey('wifiNetwork.permissionFailedToBeGranted.description')),
 				})
 				form.setValue('enableLocalProfile', false)
 				return
@@ -100,11 +100,10 @@ export function AdvancedNetworkSettingsSheetContent() {
 									size="sm"
 									variant="destructive"
 									roundness="full"
-									onPress={async () => {}}
+									onPress={() => form.setValue('localSsid', null)}
 									className="dark:border-white/5 border-black/5"
 								>
-									{/*TODO: sm else*/}
-									<Text>Disconnect</Text>
+									<Text>{t(getKey('wifiNetwork.disconnectWifi.label'))}</Text>
 								</Button>
 							</Card.Row>
 						)}
@@ -120,7 +119,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 						</Button>
 					)}
 
-					{!ssid && !localSsid && permissionStatus !== 'granted' && (
+					{enableLocalProfile && permissionStatus !== 'granted' && (
 						<Button className="rounded-full" onPress={requestPermission} disabled={isLoading}>
 							<Text>{t(getKey('wifiNetwork.requestPermission'))}</Text>
 						</Button>

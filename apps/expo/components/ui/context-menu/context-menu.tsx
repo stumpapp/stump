@@ -1,3 +1,5 @@
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 import { usePortalHost } from '~/lib/PortalHostContext'
 import { cn } from '~/lib/utils'
 
@@ -8,11 +10,24 @@ import { ContextMenuProps } from './types'
 
 export function ContextMenu({ groups, disabled, children, onPress }: ContextMenuProps) {
 	const portalHost = usePortalHost()
+	const insets = useSafeAreaInsets()
+
+	const contentInsets = {
+		top: insets.top,
+		bottom: insets.bottom,
+		left: 12,
+		right: 12,
+	}
 
 	return (
-		<JSBase.ContextMenu>
+		<JSBase.ContextMenu relativeTo="trigger">
 			<JSBase.ContextMenuTrigger onPress={onPress}>{children}</JSBase.ContextMenuTrigger>
-			<JSBase.ContextMenuContent portalHost={portalHost}>
+			<JSBase.ContextMenuContent
+				portalHost={portalHost}
+				avoidCollisions
+				insets={contentInsets}
+				sideOffset={6}
+			>
 				{groups.map((group, groupIndex) => (
 					<JSBase.ContextMenuGroup key={groupIndex}>
 						{group.items.map((item, itemIndex) => (

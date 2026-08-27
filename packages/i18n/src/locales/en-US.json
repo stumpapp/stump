@@ -3658,5 +3658,33 @@
 			"openFailed": "Failed to open EPUB with Readium.",
 			"navigateFailed": "Failed to navigate to location"
 		}
+	},
+	"imageReader": {
+		"settings": {
+			"imageScaling": {
+				"label": "Image scaling",
+				"options": {
+					"auto": "Auto",
+					"height": "Height",
+					"width": "Width",
+					"original": "Original"
+				}
+			},
+			"readingDirection": {
+				"label": "Reading direction",
+				"options": {
+					"leftToRight": "Left to right",
+					"rightToLeft": "Right to left"
+				}
+			},
+			"readingMode": {
+				"label": "Flow",
+				"options": {
+					"verticalScroll": "Vertical scroll",
+					"horizontalScroll": "Horizontal scroll",
+					"paged": "Paged"
+				}
+			}
+		}
 	}
 }

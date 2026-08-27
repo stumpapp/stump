@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics'
 import { X } from 'lucide-react-native'
 import { View } from 'react-native'
 
@@ -23,7 +24,10 @@ export function HeaderButton({
 			variant={android.variant === 'prominent' ? 'brand' : 'outline'}
 			size="icon"
 			style={style}
-			onPress={onPress}
+			onPress={() => {
+				Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+				onPress?.()
+			}}
 		>
 			{({ pressed }) => (
 				<View

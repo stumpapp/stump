@@ -1,7 +1,8 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import * as Haptics from 'expo-haptics'
 import { Check, ChevronsUpDown, X } from 'lucide-react-native'
 import { useRef, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Platform, Pressable, ScrollView, View } from 'react-native'
 
 import { useColors, usePalette } from '~/lib/constants'
 import { cn } from '~/lib/utils'
@@ -28,10 +29,16 @@ export function PickerSheet<T extends string = string>({
 	const selectedOption = options.find((option) => option.value === value)
 
 	const openPicker = () => {
+		if (Platform.OS === 'android') {
+			Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+		}
 		sheetRef.current?.present()
 	}
 
 	const handleCancel = () => {
+		if (Platform.OS === 'android') {
+			Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+		}
 		sheetRef.current?.dismiss()
 	}
 

@@ -16,13 +16,13 @@ function RadioGroupItem({
 	return (
 		<RadioGroupPrimitive.Item
 			className={cn(
-				'squircle aspect-square h-6 w-6 shrink-0 items-center justify-center rounded-full border border-edge shadow-sm shadow-black/5 dark:bg-background-surface',
+				'squircle h-6 w-6 border-edge shadow-sm shadow-black/5 dark:bg-background-surface aspect-square shrink-0 items-center justify-center rounded-full border',
 				props.disabled && 'opacity-50',
 				className,
 			)}
 			{...props}
 		>
-			<RadioGroupPrimitive.Indicator className="squircle h-4 w-4 rounded-full bg-fill-brand" />
+			<RadioGroupPrimitive.Indicator className="squircle h-4 w-4 bg-fill-brand rounded-full" />
 		</RadioGroupPrimitive.Item>
 	)
 }

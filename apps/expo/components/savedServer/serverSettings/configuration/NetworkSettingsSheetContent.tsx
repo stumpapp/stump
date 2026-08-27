@@ -1,12 +1,14 @@
-import { ArrowUpDown, RadioTower, Route, Router } from 'lucide-react-native'
-import { useState } from 'react'
+import { ArrowUpDown, CircleAlert, RadioTower, Route, Router } from 'lucide-react-native'
+import { useMemo, useState } from 'react'
 import { Alert, View } from 'react-native'
 import { toast } from 'sonner-native'
 import { z } from 'zod'
 
 import { AppSettingsRow } from '~/components/appSettings'
 import { Button, Card, Switch, Text } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
+import { useServerUrl } from '~/providers/ActiveServerProvider'
 import { useServerSettingsContext } from '~/providers/ServerSettingsProvider'
 import { useWifiSsid } from '~/providers/WifiSsidProvider'
 
@@ -14,6 +16,8 @@ export function NetworkSettingsSheetContent() {
 	const { t } = useTranslate()
 	const { activeServer, patchServer } = useServerSettingsContext()
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
+
+	const effectiveServerUrl = useServerUrl()
 
 	const [localUrl, setLocalUrl] = useState(activeServer.localProfile?.url || '')
 	const [localUrlError, setLocalUrlError] = useState<string | null>(null)
@@ -25,8 +29,8 @@ export function NetworkSettingsSheetContent() {
 		if (enabled && permissionStatus !== 'granted') {
 			const granted = await requestPermission()
 			if (!granted) {
-				toast.error('Location permissions denied', {
-					description: 'idk man',
+				toast.error(t('permissionFailedToBeGranted.title'), {
+					description: t('permissionFailedToBeGranted.description'),
 				})
 				return
 			}
@@ -66,7 +70,55 @@ export function NetworkSettingsSheetContent() {
 		})
 	}
 
-	const fakeSsid = 'My Home Network'
+	const onDisconnectWifi = () => {
+		if (!activeServer.localProfile) return
+		patchServer({
+			localProfile: { ...activeServer.localProfile, ssid: null },
+		})
+	}
+
+	const onConnectWifi = (ssid: string) => {
+		if (!activeServer.localProfile) return
+		patchServer({
+			localProfile: { ...activeServer.localProfile, ssid },
+		})
+	}
+
+	// postfixed data so the name is a bit clearer, we always have a "profile" but this
+	// is just for display. if you have not configured local, then no point showing
+	// the "current" profile since it will always be the primary
+	const activeProfileData = useMemo(() => {
+		if (!activeServer.autoSwitchToLocal || !activeServer.localProfile) return null
+
+		const isConnectedToLocalSsid = ssid != null && ssid === activeServer.localProfile.ssid
+		const didAutoSwitchCorrectly = effectiveServerUrl === activeServer.localProfile.url
+
+		console.log({
+			didAutoSwitchCorrectly,
+			effectiveServerUrl,
+			localProfileUrl: activeServer.localProfile.url,
+			isConnectedToLocalSsid,
+			ssid,
+		})
+
+		if (isConnectedToLocalSsid) {
+			return {
+				key: 'local',
+				icon: didAutoSwitchCorrectly ? Router : CircleAlert,
+				url: activeServer.localProfile.url,
+				error: didAutoSwitchCorrectly
+					? null
+					: t(getKey('activeProfile.autoSwitchToLocalDidNotWork')),
+			}
+		}
+
+		return {
+			key: 'remote',
+			icon: RadioTower,
+			url: activeServer.url,
+			error: null,
+		}
+	}, [activeServer, ssid, t, effectiveServerUrl])
 
 	return (
 		<View className="gap-8 flex-1">
@@ -141,6 +193,7 @@ export function NetworkSettingsSheetContent() {
 
 				{/*TODO: i hate content shifts, leaving for now bc i don't think debounce is quite right
 				and an inline save button means less URL space*/}
+				{/*UGH or a thought, i can use a form and handle save at the sheet-level...*/}
 				{isDifferentLocalUrl && !!activeServer.autoSwitchToLocal && (
 					<Button className="rounded-full" onPress={onSaveChangedUrl}>
 						<Text>{t(getKey('saveUrlChanges'))}</Text>
@@ -172,27 +225,47 @@ export function NetworkSettingsSheetContent() {
 							/>
 						)}
 
-						{activeServer.localProfile?.ssid && (
+						{activeServer.localProfile?.ssid != null && (
 							<Card.Row label={activeServer.localProfile.ssid}>
 								<Button
 									size="sm"
 									variant="destructive"
 									roundness="full"
-									onPress={async () => {}}
+									onPress={() => {
+										Alert.prompt(
+											t(getKey('wifiNetwork.disconnectWifi.label')),
+											t(getKey('wifiNetwork.disconnectWifi.confirmationText'), {
+												ssid: activeServer.localProfile?.ssid,
+											}),
+											[
+												{
+													text: t('common.cancel'),
+													style: 'cancel',
+												},
+												{
+													text: t(getKey('wifiNetwork.disconnectWifi.label')),
+													onPress: () => onDisconnectWifi(),
+													style: 'destructive',
+												},
+											],
+											// it is so silly to me that not providing `default` makes it a text input lol
+											// so 'default' does not seem to be the default, actually!
+											'default',
+										)
+									}}
 									className="dark:border-white/5 border-black/5"
 								>
-									{/*TODO: too long of word? lol maybe just an x?*/}
-									<Text>Disconnect</Text>
+									<Text>{t(getKey('wifiNetwork.disconnectWifi.label'))}</Text>
 								</Button>
 							</Card.Row>
 						)}
 					</Card>
 
 					{ssid && !activeServer.localProfile?.ssid && (
-						<Button className="rounded-full">
+						<Button className="rounded-full" onPress={() => onConnectWifi(ssid)}>
 							<Text>
 								{t(getKey('wifiNetwork.addNetwork'), {
-									ssid: fakeSsid,
+									ssid,
 								})}
 							</Text>
 						</Button>
@@ -204,6 +277,20 @@ export function NetworkSettingsSheetContent() {
 						</Button>
 					)}
 				</View>
+			)}
+
+			{activeProfileData && (
+				<Card
+					label={t(getKey('activeProfile.label'))}
+					description={activeProfileData.error ?? undefined}
+				>
+					<AppSettingsRow
+						icon={activeProfileData.icon}
+						iconBackgroundColor={activeProfileData.error ? SETTINGS_COLORS.destructive : undefined}
+						title={activeProfileData.url}
+						description={t(getKey(`activeProfile.${activeProfileData.key}IsActive`))}
+					/>
+				</Card>
 			)}
 		</View>
 	)

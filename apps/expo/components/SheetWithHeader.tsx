@@ -1,10 +1,12 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
+import { PortalHost } from '@rn-primitives/portal'
 import { Check, X } from 'lucide-react-native'
 import { RefObject, useRef, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { PortalHostContext } from '~/lib/PortalHostContext'
 import { cn } from '~/lib/utils'
 
 import { SheetBackDetection } from './SheetBackDetection'
@@ -44,6 +46,8 @@ export default function SheetWithHeader({
 	const blurGradientHeader =
 		!!(headerLabel || headerLeftButton || headerRightButton) && IS_IOS_26_PLUS
 
+	// TODO: I added the portal host here because otherwise we cannot use e.g. a dropdown menu (like in Picker)
+	// on android but for some reason they are very much positioned incorrectly, too far below
 	return (
 		<TrueSheet
 			ref={sheetRef}
@@ -78,16 +82,19 @@ export default function SheetWithHeader({
 			}}
 			{...props}
 		>
-			<ScrollView
-				className={cn(
-					'p-6',
-					// the header is position: 'absolute' so we must manually offset
-					blurGradientHeader && 'pt-[5.25rem]',
-				)}
-				scrollEnabled={scrollable}
-			>
-				{children}
-			</ScrollView>
+			<PortalHostContext.Provider value={Platform.OS === 'android' ? props.name : undefined}>
+				<ScrollView
+					className={cn(
+						'p-6',
+						// the header is position: 'absolute' so we must manually offset
+						blurGradientHeader && 'pt-[5.25rem]',
+					)}
+					scrollEnabled={scrollable}
+				>
+					{children}
+				</ScrollView>
+				{Platform.OS === 'android' && <PortalHost name={props.name} />}
+			</PortalHostContext.Provider>
 
 			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</TrueSheet>

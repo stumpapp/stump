@@ -1,14 +1,14 @@
+import MoreVert from '@expo/material-symbols/more_vert.xml'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useQueryClient } from '@tanstack/react-query'
 import { Stack, useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Platform, ScrollView, View } from 'react-native'
 
 import { ContinueReading, OnDeck, RecentlyAddedBooks } from '~/components/activeServer/home'
 import RecentlyAddedSeriesHorizontal from '~/components/activeServer/home/RecentlyAddedSeriesHorizontal'
 import RefreshControl from '~/components/RefreshControl'
 import { ServerSettingsSheet } from '~/components/savedServer/serverSettings/ServerSettingsSheet'
-import { Text } from '~/components/ui'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 export default function Screen() {
@@ -67,7 +67,7 @@ export default function Screen() {
 					<Stack.Toolbar.Icon {...iconProps} />
 				</Stack.Toolbar.Button>*/}
 
-				<Stack.Toolbar.Menu icon="ellipsis">
+				<Stack.Toolbar.Menu icon={Platform.OS === 'ios' ? 'ellipsis' : MoreVert}>
 					<Stack.Toolbar.MenuAction
 						icon="gearshape"
 						onPress={() => TrueSheet.present('serverSettingsSheet')}

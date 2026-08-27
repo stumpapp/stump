@@ -7,6 +7,7 @@ import { useWifiSsid } from './WifiSsidProvider'
 
 export type IActiveServerContext = {
 	activeServer: SavedServer
+	effectiveServerUrl: string
 }
 
 export const ActiveServerContext = createContext<IActiveServerContext | undefined>(undefined)
@@ -15,18 +16,6 @@ type ActiveServerProviderProps = {
 	children: React.ReactNode
 	activeServer: SavedServer
 }
-
-// TODO: i don't love that the current methodolgy for dynamic urls is to
-// overwrite url in the provider, it kinda masks what is being done and isn't
-// immediately clear e.g. when inspecting the active server type. i can document
-// the url field in the type as such, but still don't love it. i'll sit on it.
-// ^ i think the solution here is to have remoteProfile/remoteUrl specifically that
-// defaults to url? at least that way during management we don't need to load the server
-// and be like "wait, context replaced url so the settings i am changing are nto even accurate"
-// OR leave activeServer as-is and instead of pulling url from it extend context to have an activeUrl?
-// the feels a bit safer, but then i have to clean up a lot of the code. maybe rename url -> primaryUrl/remove?
-// that would make a bunch of type errors to catch em all and be named more appropriately for something that
-// pivots between urls dynamically?
 
 export function ActiveServerProvider({ children, activeServer }: ActiveServerProviderProps) {
 	const { ssid, permissionStatus } = useWifiSsid()
@@ -57,10 +46,8 @@ export function ActiveServerProvider({ children, activeServer }: ActiveServerPro
 	return (
 		<ActiveServerContext.Provider
 			value={{
-				activeServer: {
-					...activeServer,
-					url: effectiveServerUrl ?? activeServer.url,
-				},
+				activeServer,
+				effectiveServerUrl: effectiveServerUrl ?? activeServer.url,
 			}}
 		>
 			{children}
@@ -74,6 +61,11 @@ export const useActiveServer = () => {
 		throw new Error('useActiveServer must be used within a ActiveServerProvider')
 	}
 	return context
+}
+
+export const useServerUrl = () => {
+	const { effectiveServerUrl } = useActiveServer()
+	return effectiveServerUrl
 }
 
 /**

@@ -53,9 +53,10 @@ function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	const { getServerToken, saveServerToken, deleteServerToken, getServerConfig } = useSavedServers()
-	const { activeServer } = useActiveServer()
+	const { activeServer, effectiveServerUrl } = useActiveServer()
 
-	const cachedInstance = useRef(useCacheStore((state) => state.sdks[activeServer.id]))
+	const serverId = activeServer.id
+	const cachedInstance = useRef(useCacheStore((state) => state.sdks[serverId]))
 	const addInstanceToCache = useCacheStore((state) => state.addSDK)
 	const removeInstanceFromCache = useCacheStore((state) => state.removeSDK)
 
@@ -75,16 +76,15 @@ function Screen() {
 		const configureSDK = async () => {
 			setIsInitiallyConnecting(false)
 
-			const { id, url } = activeServer
-			const storedToken = await getServerToken(id)
-			const serverConfig = await getServerConfig(id)
+			const storedToken = await getServerToken(serverId)
+			const serverConfig = await getServerConfig(serverId)
 
 			const authMethod = match(serverConfig?.auth)
 				.with({ bearer: P.string }, () => 'api-key' as const)
 				.otherwise(() => 'token' as const)
 
 			const instance = new Api({
-				baseURL: url,
+				baseURL: effectiveServerUrl,
 				authMethod,
 				customHeaders: serverConfig?.customHeaders,
 			})
@@ -97,7 +97,7 @@ function Screen() {
 					existingToken,
 					saveToken: async (token, forUser) => {
 						if (token) {
-							await saveServerToken(activeServer?.id || 'dev', token)
+							await saveServerToken(serverId, token)
 						}
 						setUser(forUser)
 					},
@@ -112,7 +112,7 @@ function Screen() {
 
 				setSDK(authedInstance || instance)
 				if (authedInstance) {
-					addInstanceToCache(activeServer.id, authedInstance)
+					addInstanceToCache(serverId, authedInstance)
 				}
 			} catch (error) {
 				const axiosError = isAxiosError(error) ? error : null
@@ -131,7 +131,8 @@ function Screen() {
 			configureSDK()
 		}
 	}, [
-		activeServer,
+		serverId,
+		effectiveServerUrl,
 		sdk,
 		getServerToken,
 		isAuthDialogOpen,
@@ -153,7 +154,7 @@ function Screen() {
 				} catch (error) {
 					if (isNetworkError(error)) {
 						isServerAccessible.current = false
-						removeInstanceFromCache(activeServer?.id || 'unknown')
+						removeInstanceFromCache(serverId || 'unknown')
 					}
 				}
 			}
@@ -162,12 +163,12 @@ function Screen() {
 		},
 		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[sdk, user],
+		[sdk, user, serverId],
 	)
 
 	const didSyncAvatar = useRef(false)
 	useEffect(() => {
-		if (!user || !sdk || !sdk.isAuthed || didSyncAvatar.current || !activeServer) return
+		if (!user || !sdk || !sdk.isAuthed || didSyncAvatar.current) return
 
 		const lastPulledAt = getProperty(activeServer.avatar, 'lastModified')
 		const avatarUpdatedAt = parseGraphQLDateTime(user.avatar.lastModified)
@@ -195,7 +196,6 @@ function Screen() {
 		setRetryCounter((k) => k + 1)
 	}, [])
 
-	const serverId = activeServer.id
 	/**
 	 * At a glace this is a little hard to parse, but what we're doing here is setting up an
 	 * effect to run each time this screen is focused which, on cleanup, resets the state if
@@ -216,22 +216,22 @@ function Screen() {
 
 	const handleAuthDialogClose = useCallback(
 		(loginResp?: LoginResponse) => {
-			if (loginResp && 'forUser' in loginResp && activeServer) {
+			if (loginResp && 'forUser' in loginResp) {
 				const { forUser, ...token } = loginResp
 				const instance = new Api({
-					baseURL: activeServer.url,
+					baseURL: effectiveServerUrl,
 					authMethod: 'token',
 				})
 				instance.tokens = token
 				setSDK(instance)
-				saveServerToken(activeServer?.id || 'dev', token)
+				saveServerToken(serverId || 'dev', token)
 				setUser(forUser)
-				addInstanceToCache(activeServer.id, instance)
+				addInstanceToCache(serverId, instance)
 			} else if (!loginResp && !sdk?.isAuthed) {
 				router.dismissAll()
 			}
 		},
-		[activeServer, router, saveServerToken, addInstanceToCache, sdk],
+		[serverId, effectiveServerUrl, router, saveServerToken, addInstanceToCache, sdk],
 	)
 
 	// TODO: attempt reauth automatically when able
@@ -239,26 +239,24 @@ function Screen() {
 	const onAuthError = useCallback(async () => {
 		// If the active server is using an API key, we can't re-auth automatically and
 		// so we should set an error state to bubble up to the boundary during render
-		if (activeServer) {
-			const serverConfig = await getServerConfig(activeServer.id)
-			if (serverConfig?.auth && 'bearer' in serverConfig.auth) {
-				setFatalError(
-					new Error(
-						'An auth-related error was encountered while using an API key. Please check that your key is still valid',
-					),
-				)
-				return
-			} else {
-				// Otherwise, just get rid of the token
-				await deleteServerToken(activeServer.id)
-			}
+		const serverConfig = await getServerConfig(serverId)
+		if (serverConfig?.auth && 'bearer' in serverConfig.auth) {
+			setFatalError(
+				new Error(
+					'An auth-related error was encountered while using an API key. Please check that your key is still valid',
+				),
+			)
+			return
+		} else {
+			// otherwise, just get rid of the token if it exists
+			await deleteServerToken(serverId)
 		}
 
 		// We need to retrigger the auth dialog, so we'll let the effect handle it
 		setIsAuthDialogOpen(false)
 		setSDK(null)
 		setUser(null)
-	}, [activeServer, deleteServerToken, getServerConfig])
+	}, [serverId, deleteServerToken, getServerConfig])
 
 	const onServerConnectionError = useCallback(
 		(connected: boolean) => {

@@ -2943,6 +2943,12 @@
 			"advancedOptions": "Advanced Options"
 		},
 		"serverNetworkSettings":{
+			"activeProfile": {
+				"label": "Active Profile",
+				"localIsActive": "Local profile is active",
+				"remoteIsActive": "Remote profile is active",
+				"autoSwitchToLocalDidNotWork": "The app was unable to switch to the active profile. Please check your network connection"
+			},
 			"localProfile": "Local Profile",
 			"autoSwitchToLocal": {
 				"label": "Auto-switch to local profile",
@@ -2969,7 +2975,15 @@
 					"label": "Permissions Not Granted",
 					"description": "You need to grant location permission to access the active wifi network"
 				},
-				"requestPermission": "Request Location Permission"
+				"permissionFailedToBeGranted":{
+					"title": "Location Permission Failed",
+					"description": "The app failed to get permissions to access your location. Please check your device settings and try again"
+				},
+				"requestPermission": "Request Location Permission",
+				"disconnectWifi": {
+					"label": "Disconnect",
+					"confirmationText": "Are you sure you want to remove the '{{ssid}}' network from the local profile?"
+				}
 			}
 		},
 		"bookActions": {

@@ -810,8 +810,14 @@
 		"buttons": {
 			"report": "反馈问题",
 			"copy": "复制错误详情",
-			"goHome": "返回首页"
-		}
+			"goHome": "返回首页",
+			"goHomeTitle": "返回主页",
+			"reportTitle": "在 GitHub 上将此错误报告为潜在错误",
+			"copyTitle": "将错误详细信息复制到剪贴板"
+		},
+		"criticalHeading": "发生严重错误",
+		"emptyMessage": "错误消息为空。",
+		"copiedDetails": "将错误详细信息复制到剪贴板"
 	},
 	"homeScene": {
 		"onDeck": {

@@ -43,11 +43,11 @@ export function useOverviewAnimations() {
 
 // TODO: Change the places that use useOverviewAnimations in sheets
 
-// Note: If inside the ScrollView there annoying issues with transformOrigin so instead we put
+// Note: If inside the ScrollView there are annoying issues with transformOrigin so instead we put
 // the background outside the ScrollView, but if we use the device height, on very wide screens
-//  the real white/black background will scroll into view under the background image,
+// the real white/black background will scroll into view under the background image,
 // so instead we measure the main section height on mount/layout change and use this.
-// This way when the details/metadata seconds is initially below the screen edge it scrolls fine.
+// This way when the details/metadata section is initially below the screen edge it scrolls fine.
 export function OverviewBackground({
 	parallaxStyle,
 	source,

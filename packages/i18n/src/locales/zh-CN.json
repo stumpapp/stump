@@ -817,7 +817,8 @@
 		},
 		"criticalHeading": "发生严重错误",
 		"emptyMessage": "错误消息为空。",
-		"copiedDetails": "将错误详细信息复制到剪贴板"
+		"copiedDetails": "将错误详细信息复制到剪贴板",
+		"imageAlt": "结构示意图加载失败"
 	},
 	"homeScene": {
 		"onDeck": {
@@ -2656,7 +2657,10 @@
 		"uploadImage": {
 			"emptyState": "图片预览将显示在这里",
 			"prompt": "拖放图片到此处或点击以选择",
-			"remove": "删除图像"
+			"remove": "删除图像",
+			"fileTooLarge": "文件大小超出限制",
+			"onlyOneFile": "只允许上传一个文件",
+			"noFile": "未选择文件"
 		}
 	},
 	"common": {
@@ -2670,7 +2674,8 @@
 		"deleteConfirmation": {
 			"title": "删除 {{type}}",
 			"description": "确定要删除此 {{type}} 吗？此操作不可撤销。",
-			"confirm": "删除 {{type}}"
+			"confirm": "删除 {{type}}",
+			"typeToConfirm": "输入 {{name}} 以确认："
 		},
 		"experimentalDisclaimer": {
 			"title": "该功能为实验性功能",
@@ -2910,7 +2915,15 @@
 					"label": "令牌",
 					"placeholder": "原始令牌"
 				},
-				"basic": "基本"
+				"basic": "基本",
+				"login": {
+					"description": "您在访问内容时，系统会根据需要提示您登录",
+					"label": "登录"
+				},
+				"none": {
+					"description": "此服务器无需身份验证，或可通过 URL 进行身份验证",
+					"label": "无"
+				}
 			},
 			"serverNamePlaceholder": "我的服务器",
 			"catalogUrl": "目录 URL",
@@ -3023,7 +3036,9 @@
 			"unknownTitle": "无标题",
 			"username": "用户名",
 			"value": "值",
-			"version": "版本"
+			"version": "版本",
+			"pageX": "第 {{current}} 页",
+			"reset": "重置"
 		},
 		"errors": {
 			"unknown": "未知错误"
@@ -3101,7 +3116,8 @@
 				"seeProblems": "查看问题 ({{problemCount}})",
 				"hideCurated": "隐藏精选",
 				"showCurated": "显示精选",
-				"attemptSync": "尝试同步"
+				"attemptSync": "尝试同步",
+				"syncConflicts": "同步冲突"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
@@ -3213,7 +3229,14 @@
 				"preferNativePdf": "优先使用原生 PDF",
 				"preferMinimalReader": "优先使用极简阅读器",
 				"disableDismissGesture": "禁用关闭手势",
-				"incognitoReading": "隐身阅读"
+				"incognitoReading": "隐身阅读",
+				"maxPageViewingSeconds": {
+					"label": "页面浏览秒数限制",
+					"errors": {
+						"minimumValue": "必须至少为 1 秒",
+						"integer": "必须是整数"
+					}
+				}
 			},
 			"stump": {
 				"label": "Stump 功能",
@@ -3383,7 +3406,14 @@
 			},
 			"readingTimer": {
 				"label": "阅读计时器",
-				"resetTimer": "重置计时器"
+				"resetTimer": "重置计时器",
+				"confirmation": {
+					"message": "您确定要重置“{{bookName}}”的阅读时间吗？\n\n{{action}}",
+					"action": {
+						"multi-session": "这将把本次阅读过程中的所有阅读时间设置为 0 秒。",
+						"single-session": "这将把读取时间设置为 0 秒。"
+					}
+				}
 			},
 			"allSettings": "全部设置"
 		},
@@ -3524,6 +3554,104 @@
 				"ASC": "最早优先",
 				"DESC": "最新优先"
 			}
+		},
+		"syncConflicts": {
+			"title": "同步冲突",
+			"remainingCount": "剩余 {{remainingCount}} 项",
+			"noConflicts": {
+				"title": "无同步冲突",
+				"description": "你本地的所有进度都会与他们的服务器同步"
+			},
+			"lastCommonSession": "上次共同会话",
+			"localSession": "本地会话",
+			"remoteSessionWithId": "远程会话 {{sessionId}}",
+			"noCommonSession": "没有共同的阅读历史",
+			"noRemoteSessions": "无远程会话",
+			"divergentProgress": {
+				"title": "分歧进展",
+				"description": "上次同步后，服务器上的最后一个公共会话已被修改"
+			},
+			"noCommonReadingHistory": {
+				"title": "没有共同的阅读历史",
+				"description": "这本书在你开始离线阅读时没有同步阅读历史记录"
+			},
+			"acceptSource": {
+				"local": "接受本地",
+				"remote": "接受远程",
+				"both": "接受两者"
+			},
+			"pullError": "无法拉取远程进度"
+		},
+		"widgets": {
+			"readingNow": {
+				"nothingInProgress": "暂无进度"
+			}
+		}
+	},
+	"thumbnailSelector": {
+		"actions": {
+			"confirmSelection": "确定"
+		},
+		"errors": {
+			"uploadFailed": "图片上传失败",
+			"updateFailed": "更新缩略图失败"
+		},
+		"title": "选择缩略图",
+		"descriptions": {
+			"chooseBookPage": "选择本书中的一页作为新缩略图",
+			"chooseSeriesBook": "选择系列中的一本"
+		}
+	},
+	"epubReader": {
+		"reading": "阅读",
+		"appearance": "外观",
+		"themeAndOptions": "主题和选项",
+		"locationManager": "位置管理",
+		"contents": "内容",
+		"bookmarks": "书签列表",
+		"annotations": "注释",
+		"noBookmarks": "无书签",
+		"bookmark": "书签",
+		"noAnnotations": "无注释",
+		"annotation": {
+			"addNote": "添加笔记",
+			"edit": "编辑注释",
+			"note": "笔记",
+			"optionalNote": "添加可选备注……",
+			"selectionActions": "选择操作",
+			"highlight": "高亮标注",
+			"disabledInIncognito": "在隐身模式下，注释功能将被禁用",
+			"saveFailed": "注释保存失败",
+			"updateFailed": "更新注释失败",
+			"deleteFailed": "删除注释失败"
+		},
+		"search": {
+			"placeholder": "输入查询内容并按回车键进行搜索",
+			"failed": "搜索失败，请重试。",
+			"noResults": "未找到结果。",
+			"section": "部分 {{position}}",
+			"loadingMore": "加载中…",
+			"loadMore": "加载更多结果"
+		},
+		"controls": {
+			"columns": "列",
+			"auto": "自动",
+			"columnCount_one": "{{count}} 列",
+			"columnCount_other": "{{count}} 列",
+			"pageMargins": "页面边距",
+			"readingDirection": "阅读方向",
+			"leftToRight": "从左到右",
+			"rightToLeft": "从右到左",
+			"readingMode": "阅读模式",
+			"paged": "分页",
+			"previousPage": "上一页",
+			"continuous": "连续",
+			"nextPage": "下一页",
+			"toggleControls": "切换阅读器控件"
+		},
+		"errors": {
+			"openFailed": "使用 Readium 打开 EPUB 文件失败。",
+			"navigateFailed": "导航至该位置失败"
 		}
 	}
 }

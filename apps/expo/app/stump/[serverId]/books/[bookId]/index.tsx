@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import BackLink from '~/components/BackLink'
 import { BookMetaLink, BooksAfterCursor } from '~/components/book'
@@ -250,6 +251,8 @@ export default function Screen() {
 	const percentage = getPercentage({ readProgress: progression, totalPages })
 	const readthroughNumber = book.readHistory.length
 
+	const insets = useSafeAreaInsets()
+
 	// Reminder: Whenever this page introduces a new clickable filter field, make sure to
 	// add a corresponding bit in the filter header and prolly metadata overview object
 	const onClickFilterField = (
@@ -298,7 +301,7 @@ export default function Screen() {
 					onLayout={(e) => setMainSectionHeight(e.nativeEvent.layout.height)}
 				>
 					{Platform.OS === 'android' && book && (
-						<View className="pt-2 flex flex-row justify-between">
+						<View className="pt-2 flex flex-row justify-between" style={{ paddingTop: insets.top }}>
 							<BackLink iconClassName="mr-[unset]" />
 
 							<BookActionMenu data={book} />

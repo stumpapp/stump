@@ -20,7 +20,11 @@ export function HeaderButton({
 
 	return (
 		<Button
-			className={cn('squircle p-1 tablet:p-2 h-[unset] w-[unset] rounded-full border', className)}
+			className={cn(
+				'squircle p-1 tablet:p-2 h-[unset] w-[unset] rounded-full border border-transparent',
+				{ 'border-edge': android.variant !== 'prominent' },
+				className,
+			)}
 			variant={android.variant === 'prominent' ? 'brand' : 'outline'}
 			size="icon"
 			style={style}

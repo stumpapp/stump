@@ -9,9 +9,11 @@ import { ContinueReading, OnDeck, RecentlyAddedBooks } from '~/components/active
 import RecentlyAddedSeriesHorizontal from '~/components/activeServer/home/RecentlyAddedSeriesHorizontal'
 import RefreshControl from '~/components/RefreshControl'
 import { ServerSettingsSheet } from '~/components/savedServer/serverSettings/ServerSettingsSheet'
-import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useTranslate } from '~/lib/hooks'
 
 export default function Screen() {
+	const { t } = useTranslate()
+
 	const [refreshing, setRefreshing] = useState(false)
 
 	const client = useQueryClient()
@@ -36,7 +38,7 @@ export default function Screen() {
 		}, [onRefresh]),
 	)
 
-	const { activeServer } = useActiveServer()
+	// const { activeServer } = useActiveServer()
 
 	// TODO: could not get this working :(
 	// const { sdk } = useSDK()
@@ -60,6 +62,10 @@ export default function Screen() {
 
 	const router = useRouter()
 
+	// TODO: as much as i really want to use the toolbar api for both platforms, it is just so fckn ugly
+	// on android and has 0 customization options. im being a bit dramatic, i mostly think that some
+	// roundness would go a long way, but i cannot control that. i will spend up to 2 hours patching,
+	// then i give up and will likely just use a js menu
 	return (
 		<>
 			<Stack.Toolbar placement="right">
@@ -72,16 +78,12 @@ export default function Screen() {
 						icon="gearshape"
 						onPress={() => TrueSheet.present('serverSettingsSheet')}
 					>
-						Settings
+						{t('common.settings')}
 					</Stack.Toolbar.MenuAction>
 
 					<Stack.Toolbar.Menu inline>
-						<Stack.Toolbar.MenuAction
-							icon="arrow.left.to.line"
-							// icon={require('./assets/reply.png')}
-							onPress={() => router.back()}
-						>
-							Exit
+						<Stack.Toolbar.MenuAction icon="arrow.left.to.line" onPress={() => router.back()}>
+							{t('common.exit')}
 						</Stack.Toolbar.MenuAction>
 					</Stack.Toolbar.Menu>
 				</Stack.Toolbar.Menu>

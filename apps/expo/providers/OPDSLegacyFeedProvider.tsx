@@ -62,7 +62,6 @@ export function OPDSLegacyFeedProvider({ children }: OPDSFeedProviderProps) {
 			activeServer.kind === 'stump'
 				? sdk.opdsLegacy.catalog()
 				: sdk.opdsLegacy.feed(effectiveServerUrl),
-		enabled: !!activeServer,
 		throwOnError: false,
 	})
 

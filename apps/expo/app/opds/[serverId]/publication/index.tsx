@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react-native'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
 import {
@@ -18,6 +19,7 @@ import {
 	TitleSection,
 	useOverviewAnimations,
 } from '~/components/book/overview'
+import { useResolvedHeaderHeight } from '~/components/header/useAnimatedHeader'
 import { ThumbnailImage } from '~/components/image'
 import { CreditsSection, RelatedPublicationItem, useRelatedPublications } from '~/components/opds'
 import FeedSelfURL from '~/components/opds/FeedSelfURL'
@@ -205,6 +207,8 @@ export default function Screen() {
 
 	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 	const [mainSectionHeight, setMainSectionHeight] = useState<number>()
+	const insets = useSafeAreaInsets()
+	const headerHeight = useResolvedHeaderHeight()
 
 	return (
 		<>
@@ -226,7 +230,12 @@ export default function Screen() {
 				className="flex-1"
 				ref={animatedScrollRef}
 				contentInsetAdjustmentBehavior="automatic"
+				style={{
+					marginBottom: Platform.OS === 'android' ? insets.bottom : undefined,
+				}}
 			>
+				{/*lol this is absurd!*/}
+				<View style={{ height: Platform.OS === 'android' ? headerHeight : 0 }} />
 				<View
 					className="gap-6 px-4 tablet:px-6 ios:pb-24 pb-16"
 					onLayout={(e) => setMainSectionHeight(e.nativeEvent.layout.height)}

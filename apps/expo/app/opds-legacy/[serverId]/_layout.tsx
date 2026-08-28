@@ -41,7 +41,7 @@ function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	const { getServerConfig } = useSavedServers()
-	const { activeServer } = useActiveServer()
+	const { activeServer, effectiveServerUrl } = useActiveServer()
 
 	const cachedInstance = useRef(useCacheStore((state) => state.sdks[`${activeServer.id}-opds`]))
 	const addInstanceToCache = useCacheStore((state) => state.addSDK)
@@ -51,16 +51,14 @@ function Screen() {
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
 
 	useEffect(() => {
-		if (!activeServer) return
-
 		const configureSDK = async () => {
-			const { id, url, kind } = activeServer
+			const { id, kind } = activeServer
 
 			const config = await getServerConfig(id)
 			const instance = await getOPDSInstance({
 				config,
 				serverKind: kind,
-				url,
+				url: effectiveServerUrl,
 			})
 			setSDK(instance)
 			addInstanceToCache(`${id}-opds`, instance)
@@ -69,7 +67,7 @@ function Screen() {
 		if (!sdk) {
 			configureSDK()
 		}
-	}, [activeServer, sdk, getServerConfig, addInstanceToCache])
+	}, [activeServer, effectiveServerUrl, sdk, getServerConfig, addInstanceToCache])
 
 	const onAuthError = useCallback(() => {
 		removeInstanceFromCache(`${activeServer.id}-opds`)

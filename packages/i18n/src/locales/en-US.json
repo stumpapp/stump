@@ -3065,6 +3065,7 @@
 			"name": "Name",
 			"none": "None",
 			"notAvailable": "Not Available",
+			"notConfigured": "Not configured",
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
-import { PortalHostContext } from '~/lib/PortalHostContext'
+import { PortalHostProvider } from '~/providers/PortalHostProvider'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { EpubReaderContext } from './context'
@@ -47,14 +47,11 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 					}
 				}}
 			>
-				<PortalHostContext.Provider
-					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}
-				>
+				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
 					<ScrollView className="p-6 flex-1" nestedScrollEnabled>
 						<ThemeSheetContent />
 					</ScrollView>
-					{Platform.OS === 'android' && <PortalHost name={SHEET_PORTAL_HOST} />}
-				</PortalHostContext.Provider>
+				</PortalHostProvider>
 			</TrueSheet>
 
 			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />

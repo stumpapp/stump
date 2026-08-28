@@ -1,13 +1,12 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
-import { PortalHost } from '@rn-primitives/portal'
 import { Check, X } from 'lucide-react-native'
 import { RefObject, useRef, useState } from 'react'
 import { Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
-import { PortalHostContext } from '~/lib/PortalHostContext'
 import { cn } from '~/lib/utils'
+import { PortalHostProvider } from '~/providers/PortalHostProvider'
 
 import { SheetBackDetection } from './SheetBackDetection'
 import { Heading } from './ui'
@@ -46,8 +45,6 @@ export default function SheetWithHeader({
 	const blurGradientHeader =
 		!!(headerLabel || headerLeftButton || headerRightButton) && IS_IOS_26_PLUS
 
-	// TODO: I added the portal host here because otherwise we cannot use e.g. a dropdown menu (like in Picker)
-	// on android but for some reason they are very much positioned incorrectly, too far below
 	return (
 		<TrueSheet
 			ref={sheetRef}
@@ -58,7 +55,7 @@ export default function SheetWithHeader({
 			style={{ paddingBottom: insets.bottom }}
 			insetAdjustment="automatic"
 			header={
-				// i fkcn hate not having grid in nativewind >:(
+				// i fckn hate not having grid in nativewind >:(
 				<View className="px-4 pt-4 flex-row items-center justify-between">
 					{resolveHeaderButton(headerLeftButton, sheetRef)}
 					<View className="inset-x-0 pt-4 absolute items-center">
@@ -82,7 +79,7 @@ export default function SheetWithHeader({
 			}}
 			{...props}
 		>
-			<PortalHostContext.Provider value={Platform.OS === 'android' ? props.name : undefined}>
+			<PortalHostProvider name={Platform.OS === 'android' ? props.name : undefined}>
 				<ScrollView
 					className={cn(
 						'p-6',
@@ -93,8 +90,7 @@ export default function SheetWithHeader({
 				>
 					{children}
 				</ScrollView>
-				{Platform.OS === 'android' && <PortalHost name={props.name} />}
-			</PortalHostContext.Provider>
+			</PortalHostProvider>
 
 			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</TrueSheet>

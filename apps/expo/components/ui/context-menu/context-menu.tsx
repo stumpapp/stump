@@ -1,7 +1,7 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { usePortalHost } from '~/lib/PortalHostContext'
 import { cn } from '~/lib/utils'
+import { usePortalHost } from '~/providers/PortalHostProvider'
 
 import { Icon } from '../icon'
 import { Text } from '../text'
@@ -23,10 +23,11 @@ export function ContextMenu({ groups, disabled, children, onPress }: ContextMenu
 		<JSBase.ContextMenu relativeTo="trigger">
 			<JSBase.ContextMenuTrigger onPress={onPress}>{children}</JSBase.ContextMenuTrigger>
 			<JSBase.ContextMenuContent
-				portalHost={portalHost}
+				portalHost={portalHost?.name}
 				avoidCollisions
 				insets={contentInsets}
 				sideOffset={6}
+				// ^ prolly not putting context menus in sheets so just keeping fixed offset for now
 			>
 				{groups.map((group, groupIndex) => (
 					<JSBase.ContextMenuGroup key={groupIndex}>

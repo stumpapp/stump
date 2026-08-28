@@ -153,7 +153,8 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Nombre a mostrar",
-					"description": "Un nombre opcional a mostrar para tu membresía en el club de libros. Si está configurado, toma precedencia sobre tu nombre de usuario"
+					"description": "Un nombre opcional a mostrar para tu membresía en el club de libros. Si está configurado, toma precedencia sobre tu nombre de usuario",
+					"placeholder": "Oromei"
 				},
 				"hideProgress": {
 					"label": "Ocultar progreso",
@@ -373,6 +374,9 @@
 					"description": "Redimensionar la vista en miniatura a un tamaño exacto en píxeles",
 					"width": {
 						"label": "Ancho"
+					},
+					"height": {
+						"label": "Alto"
 					}
 				},
 				"scaleDimension": {
@@ -386,7 +390,8 @@
 					},
 					"size": {
 						"label": "Tamaño"
-					}
+					},
+					"label": "Autoescalado"
 				},
 				"format": {
 					"label": "Formato de imagen",
@@ -589,7 +594,8 @@
 	"libraryHeader": {
 		"tabs": {
 			"books": "Libros",
-			"files": "Archivos"
+			"files": "Archivos",
+			"series": "Series"
 		}
 	},
 	"librarySettingsScene": {
@@ -602,7 +608,8 @@
 				"scanning": "Escaneando",
 				"thumbnails": "Vistas en miniatura",
 				"ignore-rules": "Ignorar reglas",
-				"label": "Opciones"
+				"label": "Opciones",
+				"general": "General"
 			},
 			"integrations": {
 				"label": "Integraciones",
@@ -613,7 +620,8 @@
 				"access-control": "Control de acceso",
 				"delete": "Borrado",
 				"label": "Zona de peligro"
-			}
+			},
+			"basics": "Básico"
 		},
 		"basics": {
 			"title": "Información básica",
@@ -632,23 +640,100 @@
 			"sections": {
 				"configureScan": {
 					"heading": "Configurar escaneo",
-					"description": "Un escaneo con opciones adicionales para un control más preciso"
+					"description": "Un escaneo con opciones adicionales para un control más preciso",
+					"form": {
+						"alert": "Estos sobreescribirán los ajustes correspondientes de la librería",
+						"options": {
+							"forceRebuild": {
+								"label": "Forzar reconstrucción",
+								"description": "Reconstruir todos los libros de la librería en el disco",
+								"alert": "Esto reconstruirá todos los libros de la librería en el disco desde cero, incluyendo metadatos y hashes"
+							},
+							"custom": {
+								"label": "Personalizado",
+								"description": "Personalizar la configuración del escaneo",
+								"validation": {
+									"noSelection": "Al menos una opción debe estar habilitada"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Reconstruir metadatos",
+								"description": "Reconstruir metadatos de los libros en la librería"
+							},
+							"regenHashes": {
+								"label": "Regenerar hashes",
+								"description": "Recrear hashes de los libros en la librería"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Escaneo por defecto",
+					"description": "Un escaneo estándar para indexar el nuevo contenido de tu librería"
+				},
+				"history": {
+					"heading": "Historial de escaneos",
+					"description": "El historial de todos los escaneos registrados para esta librería",
+					"empty": "No hay escaneos registrados para esta librería",
+					"runScan": "Escanear",
+					"inspect": "Ver detalles",
+					"inspector": {
+						"title": "Registro del escaneo",
+						"description": "Una vista detallada del registro de este escaneo",
+						"fields": {
+							"library": "Librería",
+							"date": "Fecha",
+							"config": "Configuración",
+							"jobOutput": "Resultado de la tarea",
+							"logs": "Registros"
+						},
+						"logsPresent": "Se conservaron los registros para esta tarea",
+						"seeLogs": "Ver registros"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Escaneado el",
+							"config": "Configuración"
+						},
+						"default": "Por defecto",
+						"custom": "Personalizado"
+					},
+					"clearHistory": "Borrar historial de escaneos"
 				}
 			}
 		},
 		"options/thumbnails": {
 			"sections": {
 				"management": {
-					"heading": "Management"
+					"heading": "Management",
+					"description": "Gestionar las miniaturas existentes de esta librería"
 				}
-			}
+			},
+			"title": "Miniaturas",
+			"description": "Ajustes y opciones de gestión para las miniaturas de esta librería"
 		},
 		"integrations/analysis": {
 			"sections": {
 				"analyzeBooks": {
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
+					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"heading": "Analizar libros",
+					"description": "Analizar los libros de esta librería para añadir metadatos adicionales a la base de datos, como las dimensiones de las páginas para libros basados en imágenes",
+					"disclaimerTitle": "Este proceso es intensivo en recursos",
+					"analyzeButton": "Analizar libros"
+				},
+				"missingFiles": {
+					"heading": "Archivos faltantes",
+					"description": "Archivos que son referenciados en la base de datos pero no pueden ser localizados en el disco",
+					"noMissingFiles": "No hay archivos faltantes en esta librería"
+				},
+				"duplicateFiles": {
+					"heading": "Archivos duplicados",
+					"description": "Archivos que están potencialmente duplicados en el disco",
+					"noDuplicateFiles": "No se detectaron archivos duplicados en esta librería"
 				}
-			}
+			},
+			"title": "Análisis",
+			"description": "Analizar los contenidos de esta librería para identificar problemas o mejoras potenciales"
 		},
 		"integrations/metadata": {
 			"title": "Metadatos",
@@ -667,7 +752,56 @@
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions"
+			"title": "Deletion Actions",
+			"description": "Eliminar permanentemente esta librería y todos sus contenidos o ciertos recursos",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Limpiar librería",
+					"description": "Remover todos los medios y series que no pueden localizarse en el disco",
+					"disclaimerTitle": "No se eliminará ningún archivo",
+					"disclaimer": "Aunque esta acción no eliminará ningún archivo, eliminará permanentemente todos los registros relacionados a los medios y series que carezcan estado",
+					"confirmation": {
+						"label": "Limpiar librería",
+						"text": "¿Estás seguro de querer limpiar esta librería?"
+					},
+					"emptyText": "No había nada para limpiar",
+					"missingEntitiesTable": {
+						"columns": {
+							"id": "ID",
+							"path": "Ruta",
+							"type": "Tipo"
+						},
+						"types": {
+							"BOOK": "Libro",
+							"SERIES": "Series",
+							"LIBRARY": "Librería"
+						},
+						"emptyHeading": "No falta nada en esta librería",
+						"emptySubtitle": "Todos los archivos referenciados en la base de datos fueron localizados en el disco"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Eliminar librería",
+					"description": [
+						"Eliminar permanentemente esta librería y todos sus contenidos.",
+						"Esta acción no se puede deshacer"
+					]
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Control de acceso",
+			"description": "Controla quien puede acceder al contenido de esta librería",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Excluir usuarios",
+					"description": "Prevenir que ciertos usuarios accedan a esta librería o sus contenidos",
+					"noUsersTitle": "No hay usuarios a excluir",
+					"noUsers": "No hay otros usuarios registrados a excluir de esta librería",
+					"updated": "Exclusiones actualizadas",
+					"failure": "Falló al actualizar exclusiones"
+				}
+			}
 		}
 	},
 	"errorScene": {
@@ -676,14 +810,42 @@
 		"buttons": {
 			"report": "Informar de un fallo",
 			"copy": "Copiar detalles del error",
-			"goHome": "Ir a la página de inicio"
-		}
+			"goHome": "Ir a la página de inicio",
+			"goHomeTitle": "Regresar a la página principal",
+			"reportTitle": "Reportar este error como un problema potencial en GitHub",
+			"copyTitle": "Copiar los detalles de este error a tu portapapeles"
+		},
+		"criticalHeading": "Ocurrió un error crítico",
+		"emptyMessage": "El mensaje de error estaba vacío.",
+		"copiedDetails": "Detalles del error copiados al portapapeles"
 	},
 	"homeScene": {
 		"recentlyAddedSeries": {
 			"emptyState": {
 				"heading": "No hay series para mostrar",
 				"message": "Cualquier serie que añadas a tus bibliotecas aparecerá aquí"
+			},
+			"title": "Series añadidas recientemente"
+		},
+		"onDeck": {
+			"title": "Tu siguiente lectura",
+			"emptyState": {
+				"heading": "No hay libros a mano",
+				"message": "Tus siguientes recomendaciónes de libros aparecerán aquí"
+			}
+		},
+		"continueReading": {
+			"title": "Continuar leyendo",
+			"emptyState": {
+				"heading": "Nada para mostrar",
+				"message": "Cualquier libro en progreso que inicies aparecerá aquí"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Libros añadidos recientemente",
+			"emptyState": {
+				"heading": "Nada para mostrar",
+				"message": "Cualquier libro reciente que añadas aparecerá aquí"
 			}
 		}
 	},
@@ -784,10 +946,75 @@
 						"source": {
 							"book": {
 								"attributes": {
-									"readingStatus": "Estado de lectura"
+									"readingStatus": "Estado de lectura",
+									"name": "Nombre del archivo",
+									"size": "Tamaño",
+									"extension": "Extensión",
+									"status": "Estado",
+									"path": "Ruta",
+									"pages": "Páginas",
+									"tags": "Etiquetas",
+									"createdAt": "Creado el",
+									"updatedAt": "Actualizado el"
+								},
+								"label": "Libro"
+							},
+							"label": "Fuente",
+							"back": "Atrás",
+							"book_meta": {
+								"attributes": {
+									"title": "Título",
+									"summary": "Resumen",
+									"notes": "Notas",
+									"writers": "Escritores",
+									"pencillers": "Dibujantes",
+									"inkers": "Entintadores",
+									"letterers": "Letristas",
+									"editors": "Editores",
+									"publisher": "Editoriales",
+									"colorists": "Coloristas",
+									"links": "Enlaces",
+									"characters": "Personajes",
+									"teams": "Equipos",
+									"genres": "Género",
+									"coverArtists": "Artistas de portada",
+									"ageRating": "Clasificación de edad",
+									"year": "Año",
+									"month": "Mes",
+									"day": "Día"
+								}
+							},
+							"series": {
+								"label": "Serie",
+								"attributes": {
+									"name": "Nombre",
+									"path": "Ruta"
+								}
+							},
+							"series_meta": {
+								"attributes": {
+									"title": "Título",
+									"summary": "Resumen",
+									"publisher": "Editorial",
+									"imprint": "Impresión",
+									"comicid": "ID del cómic",
+									"booktype": "Tipo de libro",
+									"status": "Estado",
+									"volume": "Volumen",
+									"metaType": "Tipo",
+									"ageRating": "Clasificación de edad",
+									"year": "Año de inicio"
+								}
+							},
+							"library": {
+								"label": "Librería",
+								"attributes": {
+									"name": "Nombre",
+									"path": "Ruta"
 								}
 							}
-						}
+						},
+						"placeholder": "Atributo"
 					},
 					"enumValue": {
 						"selectPlaceholder": "Seleccionar valor",
@@ -795,9 +1022,108 @@
 						"FINISHED": "Inactivas",
 						"NOT_STARTED": "Sin iniciar",
 						"ABANDONED": "Abandonado"
+					},
+					"emptyState": "Añade un grupo para iniciar",
+					"actions": {
+						"addFilter": "Añadir filtro",
+						"addGroup": "Añadir grupo",
+						"deleteFilter": "Eliminar filtro",
+						"deleteGroup": "Eliminar grupo"
+					},
+					"is": "es",
+					"basicValue": {
+						"placeholder": "Valor",
+						"date": "Fecha"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "Desde fecha",
+							"number": "Desde"
+						},
+						"to": {
+							"date": "A fecha",
+							"number": "A"
+						},
+						"inclusive": "Inclusive"
+					},
+					"listValue": {
+						"placeholder": "Añadir valores",
+						"emptyState": "No hay valores para mostrar"
+					}
+				},
+				"uiPerformance": "A esta característica le faltan optimizaciónes de rendimiento en la UI y puede ser lenta con filtros que produzcan sets de resultados grandes. Esto será mejorado en el futuro",
+				"rootJoiner": {
+					"and": {
+						"label": "Y",
+						"description": "Todos los grupos de filtros deben resultar ciertos para que un libro coincida"
+					},
+					"or": {
+						"label": "O",
+						"description": "Al menos un grupo de filtros debe resultar cierto para que un libro coincida"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "Y",
+						"description": "Todos deben resultar ciertos"
+					},
+					"or": {
+						"label": "O",
+						"description": "Al menos uno debe resultar cierto"
+					},
+					"not": {
+						"label": "NO",
+						"description": "Ninguno debe resultar cierto"
+					}
+				},
+				"grouping": {
+					"label": "Agrupar por",
+					"description": "Cómo deben agruparse los libros de esta lista inteligente",
+					"options": {
+						"by_books": {
+							"label": "Ninguno"
+						},
+						"by_series": {
+							"label": "Series"
+						},
+						"by_library": {
+							"label": "Librería"
+						}
+					}
+				}
+			},
+			"name": {
+				"label": "Nombre",
+				"placeholder": "Mi lista inteligente",
+				"description": "Debe ser único, pero se puede cambiar mas tarde"
+			},
+			"description": {
+				"label": "Descripción",
+				"placeholder": "Una lista muy inteligente",
+				"description": "Una descripción opcional de tu lista inteligente"
+			},
+			"visibility": {
+				"label": "Visibilidad",
+				"options": {
+					"public": {
+						"label": "Pública",
+						"description": "Accesible a todos los usuarios de este servidor"
+					},
+					"shared": {
+						"label": "Compartida",
+						"description": "Usuarios específicos pueden acceder a esta lista inteligente",
+						"createDisclaimer": "Puedes seleccionar con quien compartir esta lista después de crearla"
+					},
+					"private": {
+						"label": "Privada",
+						"description": "Solo tú puedes acceder a esta lista inteligente"
 					}
 				}
 			}
+		},
+		"validation": {
+			"nameTooShort": "El nombre debe tener al menos 2 caracteres",
+			"nameTaken": "No se puede usar ese nombre"
 		}
 	},
 	"userSmartListsScene": {
@@ -1950,6 +2276,79 @@
 			"readingNow": {
 				"nothingInProgress": "Nada en progreso"
 			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Clasificación de edad",
+			"characters": "Personajes",
+			"colorists": "Coloristas",
+			"coverArtists": "Artistas de portada",
+			"day": "Día",
+			"editors": "Editores",
+			"format": "Formato",
+			"identifierAmazon": "ID de Amazon",
+			"identifierCalibre": "ID de Calibre",
+			"identifierGoogle": "ID de Google",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "ASIN de Mobi",
+			"identifierUuid": "UUID del libro",
+			"genres": "Géneros",
+			"inkers": "Entintadores",
+			"language": "Idioma",
+			"letterers": "Letristas",
+			"links": "Enlaces",
+			"month": "Mes",
+			"notes": "Notas",
+			"number": "Número",
+			"pageCount": "Páginas",
+			"pencillers": "Dibujantes",
+			"publisher": "Editoriales",
+			"series": "Series",
+			"seriesGroup": "Grupo de la serie",
+			"storyArc": "Arco argumental",
+			"storyArcNumber": "Número del arco argumental",
+			"summary": "Resumen",
+			"teams": "Equipos",
+			"title": "Título",
+			"volume": "Volumen",
+			"writers": "Escritores",
+			"year": "Año",
+			"metaType": "Tipo",
+			"imprint": "Grabar",
+			"comicid": "ID del Cómic",
+			"booktype": "Tipo de libro",
+			"status": "Estado",
+			"totalIssues": "Números totales",
+			"comicImage": "Imágen del cómic",
+			"descriptionFormatted": "Descripción (con formato)"
+		},
+		"addFields": {
+			"description": "Añadir cada adición en su propia línea"
+		}
+	},
+	"createSmartListScene": {
+		"heading": "Crear lista inteligente",
+		"subtitle": "Creación de listas al vuelo basado en un set de filtros",
+		"form": {
+			"stepLabel": "Paso",
+			"steps": [
+				{
+					"label": "Básico",
+					"heading": "Información básica",
+					"description": "Los detalles de esta lista inteligente, incluyendo su nombre, descripción, y visibilidad"
+				},
+				{
+					"label": "Filtros",
+					"heading": "Filtros",
+					"description": "Los filtros a añadir a esta lista inteligente"
+				},
+				{
+					"label": "Revisar",
+					"heading": "Revisión",
+					"description": "Revisar los ajustes de tu lista inteligente antes de crearla"
+				}
+			]
 		}
 	}
 }

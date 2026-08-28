@@ -103,7 +103,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 									onPress={() => form.setValue('localSsid', null)}
 									className="dark:border-white/5 border-black/5"
 								>
-									<Text>{t(getKey('wifiNetwork.disconnectWifi.label'))}</Text>
+									<Text>{t(getKey('wifiNetwork.removeWifi.label'))}</Text>
 								</Button>
 							</Card.Row>
 						)}

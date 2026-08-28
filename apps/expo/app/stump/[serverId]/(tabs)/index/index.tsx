@@ -1,4 +1,4 @@
-import MoreVert from '@expo/material-symbols/more_vert.xml'
+import MoreHorizontal from '@expo/material-symbols/more_horiz.xml'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useQueryClient } from '@tanstack/react-query'
 import { Stack, useFocusEffect, useRouter } from 'expo-router'
@@ -67,7 +67,7 @@ export default function Screen() {
 					<Stack.Toolbar.Icon {...iconProps} />
 				</Stack.Toolbar.Button>*/}
 
-				<Stack.Toolbar.Menu icon={Platform.OS === 'ios' ? 'ellipsis' : MoreVert}>
+				<Stack.Toolbar.Menu icon={Platform.OS === 'ios' ? 'ellipsis' : MoreHorizontal}>
 					<Stack.Toolbar.MenuAction
 						icon="gearshape"
 						onPress={() => TrueSheet.present('serverSettingsSheet')}
@@ -79,7 +79,7 @@ export default function Screen() {
 						<Stack.Toolbar.MenuAction
 							icon="arrow.left.to.line"
 							// icon={require('./assets/reply.png')}
-							// onPress={() => Alert.alert('Reply')}
+							onPress={() => router.back()}
 						>
 							Exit
 						</Stack.Toolbar.MenuAction>

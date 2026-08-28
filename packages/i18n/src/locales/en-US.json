@@ -2982,8 +2982,8 @@
 					"description": "The app failed to get permissions to access your location. Please check your device settings and try again"
 				},
 				"requestPermission": "Request Location Permission",
-				"disconnectWifi": {
-					"label": "Disconnect",
+				"removeWifi": {
+					"label": "Remove",
 					"confirmationText": "Are you sure you want to remove the '{{ssid}}' network from the local profile?"
 				}
 			}

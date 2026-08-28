@@ -73,7 +73,7 @@ export function NetworkSettingsSheetContent() {
 		})
 	}
 
-	const onDisconnectWifi = () => {
+	const onRemoveWifi = () => {
 		if (!activeServer.localProfile) return
 		patchServer({
 			localProfile: { ...activeServer.localProfile, ssid: null },
@@ -234,8 +234,8 @@ export function NetworkSettingsSheetContent() {
 									roundness="full"
 									onPress={() => {
 										Alert.prompt(
-											t(getKey('wifiNetwork.disconnectWifi.label')),
-											t(getKey('wifiNetwork.disconnectWifi.confirmationText'), {
+											t(getKey('wifiNetwork.removeWifi.label')),
+											t(getKey('wifiNetwork.removeWifi.confirmationText'), {
 												ssid: activeServer.localProfile?.ssid,
 											}),
 											[
@@ -244,8 +244,8 @@ export function NetworkSettingsSheetContent() {
 													style: 'cancel',
 												},
 												{
-													text: t(getKey('wifiNetwork.disconnectWifi.label')),
-													onPress: () => onDisconnectWifi(),
+													text: t(getKey('wifiNetwork.removeWifi.label')),
+													onPress: () => onRemoveWifi(),
 													style: 'destructive',
 												},
 											],
@@ -256,7 +256,7 @@ export function NetworkSettingsSheetContent() {
 									}}
 									className="dark:border-white/5 border-black/5"
 								>
-									<Text>{t(getKey('wifiNetwork.disconnectWifi.label'))}</Text>
+									<Text>{t(getKey('wifiNetwork.removeWifi.label'))}</Text>
 								</Button>
 							</Card.Row>
 						)}

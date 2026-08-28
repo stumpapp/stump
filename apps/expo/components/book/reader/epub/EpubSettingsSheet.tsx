@@ -1,5 +1,4 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
-import { PortalHost } from '@rn-primitives/portal'
 import { useContext, useState } from 'react'
 import { Platform, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

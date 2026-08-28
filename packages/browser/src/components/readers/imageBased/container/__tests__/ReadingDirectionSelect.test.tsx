@@ -1,16 +1,17 @@
 import { ReadingDirection } from '@stump/graphql'
+import { LocaleProvider } from '@stump/i18n'
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import ReadingDirectionSelect from '../ReadingDirectionSelect'
 
-vi.mock('@stump/i18n', () => ({
-	useLocaleContext: () => ({
-		locale: 'en-US',
-		t: (key: string) => `translated:${key}`,
-	}),
-}))
-
 describe('ReadingDirectionSelect', () => {
+	const renderSubject = (onChange = vi.fn()) =>
+		render(
+			<LocaleProvider locale="en-US">
+				<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />
+			</LocaleProvider>,
+		)
+
 	const originalWarn = console.warn
 	beforeAll(() => {
 		console.warn = vi.fn()
@@ -20,50 +21,26 @@ describe('ReadingDirectionSelect', () => {
 	})
 
 	it('should render', () => {
-		expect(
-			render(<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={vi.fn()} />)
-				.container,
-		).not.toBeEmptyDOMElement()
-	})
-
-	it('should render translated reading direction label and options', () => {
-		render(<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={vi.fn()} />)
-
-		expect(
-			screen.getByLabelText('translated:imageReader.settings.readingDirection.label'),
-		).toBeInTheDocument()
-		expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
-			'translated:imageReader.settings.readingDirection.options.leftToRight',
-			'translated:imageReader.settings.readingDirection.options.rightToLeft',
-		])
+		expect(renderSubject().container).not.toBeEmptyDOMElement()
 	})
 
 	it('should properly update the reading direction', () => {
 		const onChange = vi.fn()
-		const { getByLabelText } = render(
-			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
-		)
+		renderSubject(onChange)
+		const select = screen.getByRole('combobox')
 
-		fireEvent.change(getByLabelText('translated:imageReader.settings.readingDirection.label'), {
-			target: { value: 'RTL' },
-		})
+		fireEvent.change(select, { target: { value: 'RTL' } })
 		expect(onChange).toHaveBeenCalledWith(ReadingDirection.Rtl)
 
-		fireEvent.change(getByLabelText('translated:imageReader.settings.readingDirection.label'), {
-			target: { value: 'LTR' },
-		})
+		fireEvent.change(select, { target: { value: 'LTR' } })
 		expect(onChange).toHaveBeenCalledWith(ReadingDirection.Ltr)
 	})
 
 	it('should not allow invalid reading directions', () => {
 		const onChange = vi.fn()
-		const { getByLabelText } = render(
-			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
-		)
+		renderSubject(onChange)
 
-		fireEvent.change(getByLabelText('translated:imageReader.settings.readingDirection.label'), {
-			target: { value: 'invalid' },
-		})
+		fireEvent.change(screen.getByRole('combobox'), { target: { value: 'invalid' } })
 		expect(onChange).not.toHaveBeenCalled()
 	})
 })

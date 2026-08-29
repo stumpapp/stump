@@ -50,24 +50,54 @@ index fee7cd8..62b0996 100644
          if (sharedProps.icon.type === 'sfSymbol') {
              item.icon = sharedProps.icon;
          }
+diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js
+index ff5f9fe..64cdbc0 100644
+--- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js
++++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js
+@@ -48,7 +48,7 @@ const NativeToolbarMenu = (props) => {
+     if (isNested) {
+         const trailingIcon = ((0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenuItem.TrailingIcon, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: arrowRightIcon, tint: tintColor, size: 24 }) }));
+         const leadingIcon = props.source ? ((0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenuItem.LeadingIcon, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: props.source, tint: sourceTint, size: 24 }) })) : null;
+-        return ((0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenuItem, { onClick: () => {
++        return ((0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, cornerRadius: props.cornerRadius, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenuItem, { onClick: () => {
+                             if (!props.disabled)
+                                 setExpanded(true);
+                         }, modifiers: [(0, modifiers_1.background)(backgroundColor)], enabled: !props.disabled, children: [leadingIcon, (0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenuItem.Text, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Text, { color: typeof props.tintColor === 'string'
+@@ -62,7 +62,7 @@ const NativeToolbarMenu = (props) => {
+         }
+         return null;
+     }
+-    return ((0, jsx_runtime_1.jsx)(AnimatedItemContainer_1.AnimatedItemContainer, { visible: !props.hidden, children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.IconButton, { onClick: () => setExpanded(true), enabled: !props.disabled, modifiers: [(0, modifiers_1.background)(backgroundColor)], children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: props.source, tint: sourceTint, size: 24, contentDescription: props.accessibilityLabel }) }) }), (0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Items, { children: (0, jsx_runtime_1.jsx)(ToolbarMenuCloseContext, { value: closeMenu, children: props.children }) })] }) }));
++    return ((0, jsx_runtime_1.jsx)(AnimatedItemContainer_1.AnimatedItemContainer, { visible: !props.hidden, children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, cornerRadius: props.cornerRadius, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.IconButton, { onClick: () => setExpanded(true), enabled: !props.disabled, modifiers: [(0, modifiers_1.background)(backgroundColor)], children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: props.source, tint: sourceTint, size: 24, contentDescription: props.accessibilityLabel }) }) }), (0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Items, { children: (0, jsx_runtime_1.jsx)(ToolbarMenuCloseContext, { value: closeMenu, children: props.children }) })] }) }));
+ };
+ exports.NativeToolbarMenu = NativeToolbarMenu;
+ /**
 diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
-index b9b9a81..e4e1012 100644
+index b9b9a81..f7ffeac 100644
 --- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
 +++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
-@@ -295,6 +295,13 @@ export interface StackToolbarMenuActionProps {
+@@ -161,6 +161,12 @@ export interface StackToolbarMenuProps {
+      * @platform ios
       */
-     subtitle?: string;
-     hidden?: boolean;
+     title?: string;
 +    /**
-+     * The name of an asset catalog image to use as the icon.
-+     * Use this instead of `icon` when your icon is an `.xcasset` custom symbol (not an SF Symbol).
++     * Corner radius in dp for the dropdown menu container. Defaults to the Material3 `MenuDefaults.shape` corner radius.
 +     *
-+     * @platform ios
++     * @platform android
 +     */
-+    xcassetName?: string;
- }
- export interface NativeToolbarMenuActionProps extends LinkMenuActionProps {
-     /** @platform android */
++    cornerRadius?: number;
+     /**
+      * @default 'plain'
+      *
+@@ -189,6 +195,8 @@ export interface NativeToolbarMenuProps {
+     hidesSharedBackground?: boolean;
+     icon?: SFSymbol;
+     xcassetName?: string;
++    /** @platform android */
++    cornerRadius?: number;
+     /**
+      * Image to display for the menu item.
+      */
 diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
 index 186be4b..da75656 100644
 --- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js

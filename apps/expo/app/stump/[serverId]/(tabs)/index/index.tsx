@@ -62,10 +62,6 @@ export default function Screen() {
 
 	const router = useRouter()
 
-	// TODO: as much as i really want to use the toolbar api for both platforms, it is just so fckn ugly
-	// on android and has 0 customization options. im being a bit dramatic, i mostly think that some
-	// roundness would go a long way, but i cannot control that. i will spend up to 2 hours patching,
-	// then i give up and will likely just use a js menu
 	return (
 		<>
 			<Stack.Toolbar placement="right">
@@ -73,7 +69,12 @@ export default function Screen() {
 					<Stack.Toolbar.Icon {...iconProps} />
 				</Stack.Toolbar.Button>*/}
 
-				<Stack.Toolbar.Menu icon={Platform.OS === 'ios' ? 'ellipsis' : MoreHorizontal}>
+				<Stack.Toolbar.Menu
+					icon={Platform.OS === 'ios' ? 'ellipsis' : MoreHorizontal}
+					// TODO: spend time looking at other dropdowns and get closer, this isn't quite right
+					// but don't have time rn
+					cornerRadius={12}
+				>
 					<Stack.Toolbar.MenuAction
 						icon="gearshape"
 						onPress={() => TrueSheet.present('serverSettingsSheet')}

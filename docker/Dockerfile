@@ -38,7 +38,7 @@ RUN set -ex; \
 # Frontend Build Stage
 # ------------------------------------------------------------------------------
 
-FROM node:22.14.0-alpine3.21 AS frontend
+FROM node:22.22.2-alpine3.21 AS frontend
 ARG TARGETARCH
 
 WORKDIR /app

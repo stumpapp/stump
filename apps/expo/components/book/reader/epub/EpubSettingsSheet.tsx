@@ -21,6 +21,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 	const [isOpen, setIsOpen] = useState(false)
+	const [touchingSlider, setTouchingSlider] = useState(false)
 
 	return (
 		<>
@@ -28,7 +29,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 				name="epubSettings"
 				ref={sheetRef}
 				detents={[0.65]}
-				dimmed={false}
+				dimmed={!touchingSlider}
 				grabber
 				scrollable
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
@@ -48,7 +49,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 			>
 				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
 					<ScrollView className="p-6 flex-1" nestedScrollEnabled>
-						<ThemeSheetContent />
+						<ThemeSheetContent setTouchingSlider={setTouchingSlider} />
 					</ScrollView>
 				</PortalHostProvider>
 			</TrueSheet>

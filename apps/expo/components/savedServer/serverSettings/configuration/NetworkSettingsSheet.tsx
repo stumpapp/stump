@@ -25,7 +25,6 @@ export function NetworkSettingsSheet() {
 			name="serverNetworkSettingsSheet"
 			ref={sheetRef}
 			detents={[1]}
-			dimmed={false}
 			grabber
 			scrollable
 			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}

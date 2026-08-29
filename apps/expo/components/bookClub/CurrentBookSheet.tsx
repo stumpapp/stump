@@ -77,7 +77,6 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				dimmed={false}
 				grabber
 				scrollable
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}

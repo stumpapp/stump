@@ -35,16 +35,7 @@ pub struct Model {
 	pub extension: String,
 	/// The number of pages in the media, if applicable. Will be -1 for certain media types
 	pub pages: i32,
-	/// The timestamp of the last time the media was updated. This will be set during creation, as well
-	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: Option<DateTimeWithTimeZone>,
-	/// The timestamp of the creation of the media
-	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: DateTimeWithTimeZone,
-	/// The timestamp of when the underlying file was last modified on disk. This will only be set if
-	/// a timestamp can be retrieved from the filesystem
-	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub modified_at: Option<DateTimeWithTimeZone>,
+	pub is_oneshot: bool,
 	/// A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
 	/// in aiding in the identification of duplicate media files
 	#[sea_orm(column_type = "Text", nullable)]
@@ -70,6 +61,16 @@ pub struct Model {
 	/// expected that all media will belong to a series
 	#[sea_orm(column_type = "Text", nullable)]
 	pub series_id: Option<String>,
+	/// The timestamp of the last time the media was updated. This will be set during creation, as well
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	pub updated_at: Option<DateTimeWithTimeZone>,
+	/// The timestamp of the creation of the media
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	pub created_at: DateTimeWithTimeZone,
+	/// The timestamp of when the underlying file was last modified on disk. This will only be set if
+	/// a timestamp can be retrieved from the filesystem
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
+	pub modified_at: Option<DateTimeWithTimeZone>,
 	/// The timestamp of when the media was **soft** deleted. This will act like a trash bin.
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<DateTimeWithTimeZone>,

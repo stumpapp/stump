@@ -51,6 +51,8 @@ pub struct Model {
 	pub ignore_rules: Option<IgnoreRules>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub library_id: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub oneshot_directory: Option<String>,
 }
 
 impl Model {

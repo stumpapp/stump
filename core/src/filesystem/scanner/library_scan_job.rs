@@ -53,6 +53,7 @@ use super::{
 pub enum LibraryScanTask {
 	Init(InitTaskInput),
 	WalkSeries(PathBuf),
+	WalkOneshotDirectory(PathBuf),
 	SeriesTask {
 		id: String,
 		path: String,
@@ -170,6 +171,7 @@ impl JobLifecycle for LibraryScanJob {
 			))?;
 		let is_collection_based = config.is_collection_based();
 		let ignore_rules = config.ignore_rules().build()?;
+		let oneshot_directory = config.oneshot_directory.clone();
 
 		self.config = Some(config);
 
@@ -212,6 +214,7 @@ impl JobLifecycle for LibraryScanJob {
 			library_is_missing,
 			ignored_directories,
 			seen_directories,
+			oneshot_dirs_to_visit,
 		} = walk_library(
 			&self.path,
 			WalkerCtx {
@@ -223,6 +226,7 @@ impl JobLifecycle for LibraryScanJob {
 				// so there is nothing to short-circuit
 				dir_mtimes: HashMap::new(),
 				series_id: None,
+				oneshot_directory,
 			},
 		)
 		.await?;
@@ -268,10 +272,16 @@ impl JobLifecycle for LibraryScanJob {
 			)
 			.collect::<Vec<LibraryScanTask>>();
 
+		let oneshots_to_visit = oneshot_dirs_to_visit
+			.into_iter()
+			.map(LibraryScanTask::WalkOneshotDirectory)
+			.collect::<Vec<LibraryScanTask>>();
+
 		let tasks = VecDeque::from(
 			[LibraryScanTask::Init(init_task_input)]
 				.into_iter()
 				.chain(series_to_visit)
+				.chain(oneshots_to_visit)
 				.collect::<Vec<LibraryScanTask>>(),
 		);
 
@@ -681,6 +691,7 @@ impl JobLifecycle for LibraryScanJob {
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
 						series_id: series_id.clone(),
+						oneshot_directory: None,
 					},
 				)
 				.await;
@@ -784,6 +795,7 @@ impl JobLifecycle for LibraryScanJob {
 				})
 				.collect();
 			},
+			LibraryScanTask::WalkOneshotDirectory(path_buf) => todo!("make me aaron"),
 			LibraryScanTask::SeriesTask {
 				id: series_id,
 				path: series_path,

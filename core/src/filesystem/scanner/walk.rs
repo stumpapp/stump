@@ -7,7 +7,10 @@ use std::{
 
 use globset::GlobSet;
 use itertools::{Either, Itertools};
-use models::entity::{media, series};
+use models::entity::{
+	media,
+	series::{self, SeriesIdentSelect},
+};
 use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
 use walkdir::{DirEntry, WalkDir};
 
@@ -36,6 +39,8 @@ pub struct WalkerCtx {
 	pub dir_mtimes: HashMap<String, u64>,
 	/// The series ID for this walk, if scoped to a specific series
 	pub series_id: Option<String>,
+	/// the directory for the library which oneshots are stored in, if any
+	pub oneshot_directory: Option<String>,
 }
 
 /// The output of walking a library
@@ -56,6 +61,8 @@ pub struct WalkedLibrary {
 	pub missing_series: Vec<PathBuf>,
 	/// Whether the library is missing from the filesystem
 	pub library_is_missing: bool,
+	/// the directories to scan for oneshots, only populated if the library has a oneshot directory
+	pub oneshot_dirs_to_visit: Vec<PathBuf>,
 }
 
 impl WalkedLibrary {
@@ -73,6 +80,7 @@ pub async fn walk_library(
 		db,
 		ignore_rules,
 		max_depth,
+		oneshot_directory,
 		..
 	}: WalkerCtx,
 ) -> CoreResult<WalkedLibrary> {
@@ -136,12 +144,32 @@ pub async fn walk_library(
 		.await
 		.map_err(|e| CoreError::InternalError(format!("Failed to walk library! {e}")))?;
 
+	let (oneshot_entries, regular_entries): (Vec<DirEntry>, Vec<DirEntry>) =
+		valid_entries.into_iter().partition(|entry| {
+			oneshot_directory
+				.as_deref()
+				.filter(|dir| !dir.is_empty())
+				.map(|dir| {
+					entry
+						.path()
+						.to_string_lossy()
+						.to_lowercase()
+						// TODO(oneshots): is contains okay? too tired to think through
+						// edge cases but need to revisit before merge
+						.contains(&dir.to_lowercase())
+				})
+				.unwrap_or(false)
+		});
+	let oneshot_dirs_to_visit: Vec<PathBuf> =
+		oneshot_entries.into_iter().map(|e| e.into_path()).collect();
+
 	let ignored_directories = ignored_entries.len() as u64;
-	let seen_directories = valid_entries.len() as u64 + ignored_directories;
+	let seen_directories = regular_entries.len() as u64 + ignored_directories;
 
 	tracing::debug!(
 		seen_directories,
 		ignored_entries = ignored_entries.len(),
+		oneshot_dirs = oneshot_dirs_to_visit.len(),
 		"Walk finished in {}ms",
 		walk_start.elapsed().as_millis()
 	);
@@ -162,7 +190,7 @@ pub async fn walk_library(
 			tracing::debug!(
 				"No existing series found in the database, all series are new"
 			);
-			let series_to_create = valid_entries
+			let series_to_create = regular_entries
 				.into_iter()
 				.map(|e| e.path().to_owned())
 				.collect::<Vec<PathBuf>>();
@@ -200,7 +228,7 @@ pub async fn walk_library(
 					})
 					.collect();
 
-				valid_entries
+				regular_entries
 					.iter()
 					.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
 					.map(|e| e.path().to_owned())
@@ -248,6 +276,7 @@ pub async fn walk_library(
 		series_to_visit,
 		missing_series,
 		library_is_missing,
+		oneshot_dirs_to_visit,
 	})
 }
 
@@ -295,6 +324,7 @@ pub async fn walk_series(
 		options,
 		dir_mtimes,
 		series_id,
+		..
 	}: WalkerCtx,
 ) -> CoreResult<WalkedSeries> {
 	if tokio::fs::metadata(path).await.is_err() {
@@ -529,4 +559,92 @@ pub async fn walk_series(
 		series_is_missing: false,
 		observed_dir_mtimes,
 	})
+}
+
+pub struct WalkedOneshots {
+	/// The total number of files seen during the walk
+	pub seen_files: u64,
+	/// The number of files that were either ignored via ignore rules or common ignore patterns
+	/// such as `.DS_Store`
+	pub ignored_files: u64,
+	//
+	// TODO: other fields, figure it out. oneshots are quite strange relative to other
+	// entities here so might not cleanly fit into same structures
+}
+
+pub async fn walk_oneshots(
+	path: &Path,
+	WalkerCtx {
+		db, ignore_rules, ..
+	}: WalkerCtx,
+) -> CoreResult<WalkedSeries> {
+	if tokio::fs::metadata(path).await.is_err() {
+		unimplemented!("err like series or library missing")
+	}
+
+	let dir_path = path.to_path_buf();
+	let file_paths = tokio::task::spawn_blocking(move || match dir_path.read_dir() {
+		Ok(read_dir) => read_dir
+			.map(|entry| entry.map(|e| e.path()))
+			.filter_map(Result::ok)
+			.filter(|file_path| {
+				!file_path.is_default_ignored() && !ignore_rules.is_match(file_path)
+			})
+			.collect::<Vec<PathBuf>>(),
+		Err(error) => {
+			tracing::error!(
+				?error,
+				path = ?dir_path,
+				"Failed to read oneshot directory"
+			);
+			Vec::new()
+		},
+	})
+	.await?;
+	// ^ originally i went the tokio::fs::read_dir route but there is not iterator impl
+	// so that was a hard pass
+
+	let path_strs = file_paths
+		.iter()
+		.map(|p| p.to_string_lossy().into_owned())
+		.collect::<Vec<String>>();
+
+	let existing_series = series::Entity::find()
+		.select_only()
+		.columns(SeriesIdentSelect::columns())
+		.filter(series::Column::Path.is_in(path_strs))
+		.into_model::<SeriesIdentSelect>()
+		.all(db.as_ref())
+		.await?
+		.into_iter()
+		.map(|s| (s.path, s.id))
+		.collect::<HashMap<String, String>>();
+
+	// TODO(chore): the other fns should be refactored follow this pattern since
+	// we are in async runtime here and PathBuf::exists is blocking
+	let mut missing_series = Vec::new();
+	for (path, id) in existing_series.iter() {
+		match tokio::fs::try_exists(PathBuf::from(path)).await {
+			Ok(exists) => {
+				if !exists {
+					missing_series.push((path.clone(), id.clone()));
+				}
+			},
+			Err(error) => {
+				tracing::error!(
+					?error,
+					path = ?path,
+					"Failed to check existence of oneshot series"
+				);
+			},
+		}
+	}
+
+	// what im thinking is sm along the lines of:
+	// for each file:
+	//  series = get series from map
+	//  if !series: create it (prolly need new logic, bc built from book)
+	//  return series tasks? (e.g., create/visit media)?
+
+	todo!()
 }

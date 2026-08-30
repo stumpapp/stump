@@ -17,7 +17,13 @@ use walkdir::{DirEntry, WalkDir};
 use crate::{
 	error::CoreError,
 	filesystem::{
-		scanner::{options::BookVisitOperation, utils::file_updated_since_scan},
+		scanner::{
+			options::BookVisitOperation,
+			utils::{
+				file_updated_since_scan, mtime_changed_since_scan,
+				safely_get_current_mtime,
+			},
+		},
 		PathUtils,
 	},
 	CoreResult,
@@ -572,10 +578,14 @@ pub struct WalkedOneshots {
 	// entities here so might not cleanly fit into same structures
 }
 
+// dir_mtimes, // TODO: check before walking?
 pub async fn walk_oneshots(
 	path: &Path,
 	WalkerCtx {
-		db, ignore_rules, ..
+		db,
+		ignore_rules,
+		options,
+		..
 	}: WalkerCtx,
 ) -> CoreResult<WalkedSeries> {
 	if tokio::fs::metadata(path).await.is_err() {
@@ -604,15 +614,10 @@ pub async fn walk_oneshots(
 	// ^ originally i went the tokio::fs::read_dir route but there is not iterator impl
 	// so that was a hard pass
 
-	let path_strs = file_paths
-		.iter()
-		.map(|p| p.to_string_lossy().into_owned())
-		.collect::<Vec<String>>();
-
-	let existing_series = series::Entity::find()
+	let existing_oneshots = series::Entity::find()
 		.select_only()
 		.columns(SeriesIdentSelect::columns())
-		.filter(series::Column::Path.is_in(path_strs))
+		.filter(series::Column::Path.starts_with(path.to_string_lossy().as_ref()))
 		.into_model::<SeriesIdentSelect>()
 		.all(db.as_ref())
 		.await?
@@ -620,14 +625,17 @@ pub async fn walk_oneshots(
 		.map(|s| (s.path, s.id))
 		.collect::<HashMap<String, String>>();
 
-	// TODO(chore): the other fns should be refactored follow this pattern since
-	// we are in async runtime here and PathBuf::exists is blocking
-	let mut missing_series = Vec::new();
-	for (path, id) in existing_series.iter() {
+	// this is a vec of (series_path,series_id) but will mark both series and
+	// book as missing, since the books are series
+	let mut missing_oneshots = Vec::new();
+
+	for (path, id) in existing_oneshots.iter() {
+		// TODO(chore): the other fns should be refactored follow this pattern since
+		// we are in async runtime here and PathBuf::exists is blocking
 		match tokio::fs::try_exists(PathBuf::from(path)).await {
 			Ok(exists) => {
 				if !exists {
-					missing_series.push((path.clone(), id.clone()));
+					missing_oneshots.push((path.clone(), id.clone()));
 				}
 			},
 			Err(error) => {
@@ -645,6 +653,66 @@ pub async fn walk_oneshots(
 	//  series = get series from map
 	//  if !series: create it (prolly need new logic, bc built from book)
 	//  return series tasks? (e.g., create/visit media)?
+
+	let (to_create, remaining_paths): (Vec<PathBuf>, Vec<PathBuf>) =
+		file_paths.into_iter().partition_map(|file_path: PathBuf| {
+			let file_path_str = file_path.to_string_lossy().to_string();
+			if existing_oneshots.contains_key(&file_path_str) {
+				Either::Right(file_path)
+			} else {
+				Either::Left(file_path)
+			}
+		});
+	// ^ to_create = series+media pair, remaining_paths = media check for visit (mtimes)
+
+	// TODO: selection to reduce query
+	let existing_books = media::Entity::find()
+		.filter(
+			media::Column::Path.is_in(
+				remaining_paths
+					.iter()
+					.map(|p| p.to_string_lossy().to_string())
+					.collect::<Vec<String>>(),
+			),
+		)
+		.all(db.as_ref())
+		.await?;
+
+	let existing_book_map = existing_books
+		.into_iter()
+		.map(|b| (b.path.clone(), b))
+		.collect::<HashMap<String, media::Model>>();
+
+	let mut visit_operations = Vec::new();
+
+	for book_path in remaining_paths.iter() {
+		let path_str = book_path.to_string_lossy().to_string();
+		let Some(existing_book) = existing_book_map.get(&path_str) else {
+			tracing::warn!(
+				?path_str,
+				"Book path was not found in existing book map, skipping"
+			);
+			// ^ this should realistically never happen
+			continue;
+		};
+		let current_mtime = safely_get_current_mtime(book_path).await;
+		let did_change = existing_book
+			.modified_at
+			.as_ref()
+			.map(|dt| mtime_changed_since_scan(current_mtime, dt))
+			.unwrap_or_default();
+
+		if did_change {
+			visit_operations.push((book_path.clone(), BookVisitOperation::Rebuild));
+		} else {
+			if let Some(operation) = options.book_operation() {
+				visit_operations.push((book_path.clone(), operation));
+			}
+		}
+	}
+
+	// note to self im finding myself forgetting often that these ops are kinda referring
+	// to the same thing, since the series are the books lol but ill get used to it
 
 	todo!()
 }

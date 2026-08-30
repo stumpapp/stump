@@ -2,7 +2,7 @@ use std::{
 	collections::{HashMap, HashSet, VecDeque},
 	path::{Path, PathBuf},
 	sync::Arc,
-	time::Instant,
+	time::{Instant, UNIX_EPOCH},
 };
 
 use chrono::{DateTime, Utc};
@@ -38,6 +38,14 @@ use super::{options::BookVisitResult, tag_cache::TagCache};
 
 const MAX_INSERT_CHUNK_SIZE: usize = 250;
 
+pub(crate) fn mtime_changed_since_scan(
+	mtime: u64,
+	last_modified_at: &DateTimeWithTimeZone,
+) -> bool {
+	let last_modified_at_secs = last_modified_at.timestamp() as u64;
+	mtime > last_modified_at_secs
+}
+
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
 	last_modified_at: &DateTimeWithTimeZone,
@@ -72,6 +80,21 @@ fn build_tag_link_rows(
 			..Default::default()
 		})
 		.collect()
+}
+
+pub(crate) async fn safely_get_current_mtime<T: AsRef<Path>>(path: T) -> u64 {
+	match tokio::fs::metadata(path).await {
+		Ok(metadata) => metadata
+			.modified()
+			.unwrap_or(UNIX_EPOCH)
+			.duration_since(UNIX_EPOCH)
+			.unwrap_or_default()
+			.as_secs(),
+		Err(error) => {
+			tracing::error!(?error, "Failed to get metadata for path");
+			0
+		},
+	}
 }
 
 pub(crate) async fn update_media(

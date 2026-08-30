@@ -1,5 +1,6 @@
 use crate::{
-	filesystem::series::metadata::ProcessedSeriesMetadata, CoreError, CoreResult,
+	filesystem::{series::metadata::ProcessedSeriesMetadata, FileParts, PathUtils},
+	CoreError, CoreResult,
 };
 use models::{
 	entity::{series, series_metadata},
@@ -57,5 +58,26 @@ impl SeriesBuilder {
 		let metadata = metadata.map(|m| m.into_active_model());
 
 		Ok(BuiltSeries { series, metadata })
+	}
+
+	pub fn build_oneshot(&self) -> CoreResult<BuiltSeries> {
+		let FileParts {
+			file_stem: name, ..
+		} = self.path.file_parts();
+
+		let series = series::ActiveModel {
+			path: Set(self.path.to_string_lossy().to_string()),
+			name: Set(name),
+			library_id: Set(Some(self.library_id.clone())),
+			is_oneshot: Set(true),
+			status: Set(FileStatus::Ready),
+			..Default::default()
+		};
+
+		Ok(BuiltSeries {
+			series,
+			// TODO: do we need to read media metadata for this?
+			metadata: None,
+		})
 	}
 }

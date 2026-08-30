@@ -1,5 +1,6 @@
 import { Label, NativeSelect } from '@stump/components'
 import { ReadingMode } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 type Props = {
@@ -8,6 +9,8 @@ type Props = {
 }
 
 export default function ReadingModeSelect({ value, onChange }: Props) {
+	const { t } = useLocaleContext()
+
 	/**
 	 * A change handler for the reading mode select, asserting that the value
 	 * is a valid {@link ReadingMode} before setting the reading mode in the book preferences.
@@ -25,14 +28,20 @@ export default function ReadingModeSelect({ value, onChange }: Props) {
 
 	return (
 		<div className="py-1.5">
-			<Label htmlFor="reading-mode">Flow</Label>
+			<Label htmlFor="reading-mode">{t('imageReader.settings.readingMode.label')}</Label>
 			<NativeSelect
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: 'Vertical scroll', value: 'CONTINUOUS_VERTICAL' },
-					{ label: 'Horizontal scroll', value: 'CONTINUOUS_HORIZONTAL' },
-					{ label: 'Paged', value: 'PAGED' },
+					{
+						label: t('imageReader.settings.readingMode.options.verticalScroll'),
+						value: 'CONTINUOUS_VERTICAL',
+					},
+					{
+						label: t('imageReader.settings.readingMode.options.horizontalScroll'),
+						value: 'CONTINUOUS_HORIZONTAL',
+					},
+					{ label: t('imageReader.settings.readingMode.options.paged'), value: 'PAGED' },
 				]}
 				value={value}
 				onChange={handleChange}

@@ -2670,7 +2670,24 @@
 		"uploadImage": {
 			"emptyState": "A preview of your image will appear here",
 			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"remove": "Remove image",
+			"fileTooLarge": "File too large",
+			"onlyOneFile": "Only one file is allowed",
+			"noFile": "No file was provided"
+		}
+	},
+	"thumbnailSelector": {
+		"title": "Select a thumbnail",
+		"descriptions": {
+			"chooseBookPage": "Choose a page from this book to use as the new thumbnail",
+			"chooseSeriesBook": "Select a book from the series"
+		},
+		"actions": {
+			"confirmSelection": "Confirm selection"
+		},
+		"errors": {
+			"uploadFailed": "Failed to upload image",
+			"updateFailed": "Failed to update thumbnail"
 		}
 	},
 	"common": {
@@ -3709,6 +3726,34 @@
 		"errors": {
 			"openFailed": "Failed to open EPUB with Readium.",
 			"navigateFailed": "Failed to navigate to location"
+		}
+	},
+	"imageReader": {
+		"settings": {
+			"imageScaling": {
+				"label": "Image scaling",
+				"options": {
+					"auto": "Auto",
+					"height": "Height",
+					"width": "Width",
+					"original": "Original"
+				}
+			},
+			"readingDirection": {
+				"label": "Reading direction",
+				"options": {
+					"leftToRight": "Left to right",
+					"rightToLeft": "Right to left"
+				}
+			},
+			"readingMode": {
+				"label": "Flow",
+				"options": {
+					"verticalScroll": "Vertical scroll",
+					"horizontalScroll": "Horizontal scroll",
+					"paged": "Paged"
+				}
+			}
 		}
 	}
 }

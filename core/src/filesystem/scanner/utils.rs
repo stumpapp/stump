@@ -7,9 +7,10 @@ use std::{
 
 use chrono::{DateTime, Utc};
 use futures::{future::BoxFuture, stream::FuturesUnordered, StreamExt};
+use globset::GlobSet;
 use models::{
 	entity::{library_config, media, media_metadata, media_tag, series, tag},
-	shared::enums::FileStatus,
+	shared::{enums::FileStatus, series_metadata},
 };
 use sea_orm::{
 	prelude::*,
@@ -27,6 +28,7 @@ use crate::{
 	event::CreatedMedia,
 	filesystem::{
 		media::{BuiltMedia, MediaBuilder},
+		oneshot::{build_oneshot, BuiltOneshot},
 		scanner::options::{BookVisitOperation, CustomVisitResult},
 		series::{BuiltSeries, SeriesBuilder},
 	},
@@ -38,7 +40,28 @@ use super::{options::BookVisitResult, tag_cache::TagCache};
 
 const MAX_INSERT_CHUNK_SIZE: usize = 250;
 
-pub(crate) fn mtime_changed_since_scan(
+pub(crate) fn build_ignore_rules(
+	config: &Option<library_config::Model>,
+) -> Result<GlobSet, JobError> {
+	let Some(ref config) = config else {
+		tracing::error!("Config is missing!");
+		return Err(JobError::TaskFailed(
+			"A critical error occurred while attempting to scan the library".to_string(),
+		));
+	};
+	match config.ignore_rules().build() {
+		Ok(rules) => Ok(rules),
+		Err(err) => {
+			tracing::error!(error = ?err, "Failed to build ignore rules");
+			return Err(JobError::TaskFailed(
+				"Failed to build ignore rules. Check that the rules are valid."
+					.to_string(),
+			));
+		},
+	}
+}
+
+pub(crate) fn mtime_newer_than_datetime(
 	mtime: u64,
 	last_modified_at: &DateTimeWithTimeZone,
 ) -> bool {
@@ -566,6 +589,130 @@ pub(crate) async fn safely_insert_series(
 	tracing::debug!(series_count = output.len(), "Inserted series into database");
 	Ok(output)
 }
+
+pub(crate) async fn safely_build_oneshots(
+	for_library: &str,
+	paths: Vec<PathBuf>,
+	library_config: library_config::Model,
+	config: Arc<StumpConfig>,
+	reporter: impl Fn(usize),
+) -> (Vec<BuiltOneshot>, Vec<JobExecuteLog>) {
+	let mut logs = vec![];
+	let mut built_oneshots = Vec::with_capacity(paths.len());
+
+	let concurrency = config.cpu_concurrency_limit();
+	let total = paths.len();
+	tracing::debug!(total, concurrency, "Processing oneshots");
+
+	let start = Instant::now();
+	let mut futures: BuiltEntityFutures<BuiltOneshot> = FuturesUnordered::new();
+	let mut cursor = 0usize;
+
+	for path in paths {
+		if futures.len() >= concurrency {
+			if let Some(result) = futures.next().await {
+				match result {
+					Ok(oneshot) => {
+						built_oneshots.push(oneshot);
+					},
+					Err((error, path)) => {
+						logs.push(
+							JobExecuteLog::error(format!(
+								"Failed to build series: {:?}",
+								error.to_string()
+							))
+							.with_ctx(format!("Path: {path:?}")),
+						);
+					},
+				}
+				reporter(cursor);
+				cursor += 1;
+			}
+		}
+
+		let for_library = for_library.to_string();
+		let library_config_cpy = library_config.clone();
+		let config_cpy = config.as_ref().clone();
+		futures.push(Box::pin(async move {
+			tracing::trace!(?path, "Starting oneshot build");
+			build_oneshot(&path, &for_library, library_config_cpy, config_cpy)
+				.await
+				.map_err(|e| (e, path.clone()))
+		}));
+	}
+
+	while let Some(result) = futures.next().await {
+		match result {
+			Ok(oneshot) => {
+				built_oneshots.push(oneshot);
+			},
+			Err((error, path)) => {
+				logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to build oneshot: {:?}",
+						error.to_string()
+					))
+					.with_ctx(format!("Path: {path:?}")),
+				);
+			},
+		}
+		reporter(cursor);
+		cursor += 1;
+	}
+
+	let success_count = built_oneshots.len();
+	let error_count = logs.len();
+	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Finished building batch of oneshots");
+
+	(built_oneshots, logs)
+}
+
+// TODO: rename the other `safely_insert`s lol at one point i must have refactored and not renamed, they return a result
+// and so aren't quite safe in the way i want to convey via naming
+async fn insert_oneshots(
+	oneshots: Vec<BuiltOneshot>,
+	conn: &DatabaseConnection,
+) -> Result<Vec<(series::Model, media::Model)>, JobError> {
+	let mut output = Vec::with_capacity(oneshots.len());
+
+	let txn = conn.begin().await?;
+
+	for BuiltOneshot {
+		series: BuiltSeries {
+			series,
+			metadata: series_metadata,
+		},
+		media: BuiltMedia {
+			media,
+			metadata: media_metadata,
+			tags,
+		},
+	} in oneshots
+	{
+		// ^ ugly formatting ew
+		let created_series = series.insert(&txn).await?;
+
+		if let Some(mut meta) = series_metadata {
+			meta.series_id = Set(created_series.id.clone());
+			if let Err(error) = meta.insert(&txn).await {
+				tracing::error!(?error, "Failed to insert series metadata");
+			}
+		}
+
+		// TODO: officially too tired for the day, but i def do not want to reimplement the insert media logic
+		// here again so refactor to some shareable fn and use here
+	}
+
+	txn.commit().await?;
+	tracing::debug!(series_count = output.len(), "Inserted series into database");
+
+	Ok(output)
+}
+
+// pub(crate) async fn build_and_insert_oneshots() {}
+// TODO: ^ do that, and should refactor the media one to call separate functions
+// and and also also (endless toil) this file is well over 1k now and needs to be split otherwise
+// i could just go insane
 
 // TODO(granular-scans): intake ScanOptions
 pub(crate) struct MediaBuildOperation {

@@ -9,6 +9,7 @@ mod hash;
 pub mod image;
 pub mod media;
 pub mod metadata;
+mod oneshot;
 pub mod scanner;
 pub mod series;
 
@@ -19,3 +20,8 @@ pub use directory_listing::{
 	DirectoryListingInput,
 };
 pub use error::FileError;
+
+// TODO(chore): its been a while since ive spent meaningful time in this crate and honestly
+// don't love how its organized after years of slowly-disorganized growth. obv very overall
+// unimportant, but would be nice to maybe rethink the structure and whether this can
+// actually just be its own self-contained crate(s)

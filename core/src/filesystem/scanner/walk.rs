@@ -20,7 +20,7 @@ use crate::{
 		scanner::{
 			options::BookVisitOperation,
 			utils::{
-				file_updated_since_scan, mtime_changed_since_scan,
+				file_updated_since_scan, mtime_newer_than_datetime,
 				safely_get_current_mtime,
 			},
 		},
@@ -168,6 +168,7 @@ pub async fn walk_library(
 		});
 	let oneshot_dirs_to_visit: Vec<PathBuf> =
 		oneshot_entries.into_iter().map(|e| e.into_path()).collect();
+	// TODO(oneshots): filter out based on mtime
 
 	let ignored_directories = ignored_entries.len() as u64;
 	let seen_directories = regular_entries.len() as u64 + ignored_directories;
@@ -573,12 +574,13 @@ pub struct WalkedOneshots {
 	/// The number of files that were either ignored via ignore rules or common ignore patterns
 	/// such as `.DS_Store`
 	pub ignored_files: u64,
-	//
-	// TODO: other fields, figure it out. oneshots are quite strange relative to other
-	// entities here so might not cleanly fit into same structures
+	/// The paths for series+book pairs that need to be created
+	pub to_create: Vec<PathBuf>,
+	/// The operations to perform on books that need to be visited
+	pub book_operations: Vec<(PathBuf, BookVisitOperation)>,
 }
 
-// dir_mtimes, // TODO: check before walking?
+// dir_mtimes, // TODO: check *before* walking?
 pub async fn walk_oneshots(
 	path: &Path,
 	WalkerCtx {
@@ -587,27 +589,32 @@ pub async fn walk_oneshots(
 		options,
 		..
 	}: WalkerCtx,
-) -> CoreResult<WalkedSeries> {
+) -> CoreResult<WalkedOneshots> {
 	if tokio::fs::metadata(path).await.is_err() {
 		unimplemented!("err like series or library missing")
 	}
 
 	let dir_path = path.to_path_buf();
-	let file_paths = tokio::task::spawn_blocking(move || match dir_path.read_dir() {
+	let (file_paths, ignored_files) = tokio::task::spawn_blocking(move || match dir_path
+		.read_dir()
+	{
 		Ok(read_dir) => read_dir
 			.map(|entry| entry.map(|e| e.path()))
 			.filter_map(Result::ok)
-			.filter(|file_path| {
-				!file_path.is_default_ignored() && !ignore_rules.is_match(file_path)
-			})
-			.collect::<Vec<PathBuf>>(),
+			.partition_map(|file_path| {
+				if file_path.is_default_ignored() || ignore_rules.is_match(&file_path) {
+					Either::Right(file_path)
+				} else {
+					Either::Left(file_path)
+				}
+			}),
 		Err(error) => {
 			tracing::error!(
 				?error,
 				path = ?dir_path,
 				"Failed to read oneshot directory"
 			);
-			Vec::new()
+			(Vec::new(), Vec::new())
 		},
 	})
 	.await?;
@@ -648,12 +655,6 @@ pub async fn walk_oneshots(
 		}
 	}
 
-	// what im thinking is sm along the lines of:
-	// for each file:
-	//  series = get series from map
-	//  if !series: create it (prolly need new logic, bc built from book)
-	//  return series tasks? (e.g., create/visit media)?
-
 	let (to_create, remaining_paths): (Vec<PathBuf>, Vec<PathBuf>) =
 		file_paths.into_iter().partition_map(|file_path: PathBuf| {
 			let file_path_str = file_path.to_string_lossy().to_string();
@@ -683,7 +684,7 @@ pub async fn walk_oneshots(
 		.map(|b| (b.path.clone(), b))
 		.collect::<HashMap<String, media::Model>>();
 
-	let mut visit_operations = Vec::new();
+	let mut book_operations = Vec::new();
 
 	for book_path in remaining_paths.iter() {
 		let path_str = book_path.to_string_lossy().to_string();
@@ -699,20 +700,21 @@ pub async fn walk_oneshots(
 		let did_change = existing_book
 			.modified_at
 			.as_ref()
-			.map(|dt| mtime_changed_since_scan(current_mtime, dt))
-			.unwrap_or_default();
+			.is_some_and(|dt| mtime_newer_than_datetime(current_mtime, dt));
 
 		if did_change {
-			visit_operations.push((book_path.clone(), BookVisitOperation::Rebuild));
+			book_operations.push((book_path.clone(), BookVisitOperation::Rebuild));
 		} else {
 			if let Some(operation) = options.book_operation() {
-				visit_operations.push((book_path.clone(), operation));
+				book_operations.push((book_path.clone(), operation));
 			}
 		}
 	}
 
-	// note to self im finding myself forgetting often that these ops are kinda referring
-	// to the same thing, since the series are the books lol but ill get used to it
-
-	todo!()
+	Ok(WalkedOneshots {
+		seen_files: (to_create.len() + book_operations.len()) as u64,
+		ignored_files: ignored_files.len() as u64,
+		to_create,
+		book_operations,
+	})
 }

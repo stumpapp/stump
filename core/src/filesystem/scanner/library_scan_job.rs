@@ -28,7 +28,10 @@ use crate::{
 			ThumbnailGenerationJobParams,
 		},
 		metadata::MetadataFetchJobParams,
-		scanner::utils::safely_insert_series,
+		scanner::{
+			utils::{build_ignore_rules, safely_build_oneshots, safely_insert_series},
+			walk::{walk_oneshots, WalkedOneshots},
+		},
 	},
 	job::{
 		error::JobError, stump_job::StumpJob, CoreJobOutput, JobContext, JobExecuteLog,
@@ -276,6 +279,7 @@ impl JobLifecycle for LibraryScanJob {
 			.into_iter()
 			.map(LibraryScanTask::WalkOneshotDirectory)
 			.collect::<Vec<LibraryScanTask>>();
+		// TODO: this shouldj ust be a single path lol right? no nesting?
 
 		let tasks = VecDeque::from(
 			[LibraryScanTask::Init(init_task_input)]
@@ -659,24 +663,7 @@ impl JobLifecycle for LibraryScanJob {
 					max_depth = Some(1);
 				}
 
-				let ignore_rules =
-					match self.config.as_ref().map(|c| c.ignore_rules().build()) {
-						Some(Ok(rules)) => rules,
-						Some(Err(err)) => {
-							tracing::error!(error = ?err, "Failed to build ignore rules");
-							return Err(JobError::TaskFailed(
-							"Failed to build ignore rules. Check that the rules are valid."
-								.to_string(),
-						));
-						},
-						_ => {
-							tracing::error!(?self.config, "Library config is missing?");
-							return Err(JobError::TaskFailed(
-							"A critical error occurred while attempting to scan the library"
-								.to_string(),
-						));
-						},
-					};
+				let ignore_rules = build_ignore_rules(&self.config)?;
 
 				let series_id = self.series_id_by_path.lock().ok().and_then(|map| {
 					map.get(&path_buf.to_string_lossy().to_string()).cloned()
@@ -795,7 +782,67 @@ impl JobLifecycle for LibraryScanJob {
 				})
 				.collect();
 			},
-			LibraryScanTask::WalkOneshotDirectory(path_buf) => todo!("make me aaron"),
+			LibraryScanTask::WalkOneshotDirectory(path_buf) => {
+				let library_config = self.config.clone().ok_or(JobError::TaskFailed(
+					"Library configuration is missing".to_string(),
+				))?;
+
+				let walk_result = walk_oneshots(
+					path_buf.as_path(),
+					WalkerCtx {
+						db: ctx.apalis_state.conn.clone(),
+						ignore_rules: build_ignore_rules(&self.config)?,
+						max_depth: None, // not needed
+						options: self.options,
+						dir_mtimes: (*self.dir_mtimes).clone(), // TODO: not needed? harmless to leave in ig
+						series_id: None,                        // not needed
+						oneshot_directory: None,                // not needed
+					},
+				)
+				.await;
+
+				let WalkedOneshots {
+					to_create,
+					seen_files,
+					ignored_files,
+					book_operations,
+				} = match walk_result {
+					Ok(result) => result,
+					Err(core_error) => {
+						tracing::error!(error = ?core_error, "Critical error during attempt to walk oneshot directory!");
+						// NOTE: I don't error here in order to collect and report on the error later on.
+						// This can perhaps be refactored later on so that the parent (Job struct) properly handles this instead, however for now this is fine.
+						return Ok(JobTaskOutput {
+                        output,
+                        logs: vec![JobExecuteLog::error(format!(
+                            "Critical error during attempt to walk oneshot directory: {:?}",
+                            core_error.to_string()
+                        ))],
+                        subtasks,
+                    });
+					},
+				};
+
+				output.total_files += seen_files + ignored_files;
+				output.ignored_files += ignored_files;
+
+				let (built_oneshots, oneshot_logs) = safely_build_oneshots(
+					&self.id,
+					to_create,
+					library_config,
+					Arc::clone(&ctx.apalis_state.config),
+					|position| {
+						ctx.report_progress(JobProgress::subtask_position(
+							position as i32,
+							book_operations.len() as i32,
+						))
+					},
+				)
+				.await;
+				logs.extend(oneshot_logs);
+
+				unimplemented!()
+			},
 			LibraryScanTask::SeriesTask {
 				id: series_id,
 				path: series_path,

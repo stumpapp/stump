@@ -1,4 +1,18 @@
-import { constructLegacySearchURL, constructSearchURL } from '../opdsUtils'
+import { constructLegacySearchURL, constructSearchURL } from '../search'
+
+// what a fckn annoying workaround. tldr; upgrading node introduced an issue where, at least from
+// my understanding, the usage of `typeof` is causing vitest to throw: `SyntaxError: Unexpected token 'typeof'`
+// there is an open issue for this but it is not resolved and no workaround was working for me:
+// https://github.com/react/react-native/issues/50052
+// so in the meantime, i just mocked the function from utils that search needs so that the import doesn't
+// blow up (since typeof is used a bit in utils)
+vi.mock('../utils', () => ({
+	hasLinkRel: vi.fn().mockImplementation((link, target) => {
+		const rel = link.rel
+		if (Array.isArray(rel)) return rel.includes(target)
+		return rel === target
+	}),
+}))
 
 describe('constructSearchURL', () => {
 	it('should return URL unchanged when no template section exists', () => {

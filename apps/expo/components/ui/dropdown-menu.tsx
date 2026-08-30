@@ -72,7 +72,7 @@ function DropdownMenuSubTrigger({
 					onPress?.(e)
 				}}
 				className={cn(
-					'squircle group px-2 py-2 sm:py-1.5 active:bg-background-overlay-hover flex flex-row items-center rounded-lg',
+					'squircle group px-4 py-2.5 sm:py-1.5 active:bg-background-overlay-hover flex flex-row items-center rounded-2xl',
 					open && 'bg-background-overlay-hover',
 					inset && 'pl-8',
 					className,
@@ -99,7 +99,7 @@ function DropdownMenuSubContent({
 		<NativeOnlyAnimatedView entering={FadeIn}>
 			<DropdownMenuPrimitive.SubContent
 				className={cn(
-					'squircle p-1 shadow-lg shadow-black/5 border-edge bg-background-overlay overflow-hidden rounded-md border',
+					'squircle p-1 shadow-lg shadow-black/5 border-edge bg-background-overlay overflow-hidden rounded-3xl border',
 					className,
 				)}
 				{...props}

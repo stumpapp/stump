@@ -39,14 +39,14 @@ export function Picker<T extends string = string>({
 				>
 					<Text
 						className={cn(
-							'text-lg tablet:text-xl font-normal text-foreground-muted',
+							'text-lg tablet:text-xl font-normal text-foreground',
 							!selectedOption && 'text-foreground-subtle',
 						)}
 					>
 						{selectedOption?.label ?? placeholder}
 					</Text>
 					<View>
-						<Icon as={ChevronsUpDown} size={16} className="text-foreground-subtle" />
+						<Icon as={ChevronsUpDown} size={16} className="text-foreground-muted" />
 					</View>
 				</Button>
 			</DropdownMenuTrigger>

@@ -4,7 +4,7 @@ import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 
@@ -512,7 +512,8 @@ export default function Footer() {
 				</View>
 			)}
 
-			<View className={cn('gap-2 px-3', { 'pb-1': Platform.OS === 'android' })}>
+			{/*not quite sure why on android we need the extra padding, we already safe bottom so*/}
+			<View className="gap-2 px-3 android:pb-3">
 				{(footerControls === 'images' || readingMode === ReadingMode.ContinuousVertical) && (
 					<Progress
 						className="h-1"

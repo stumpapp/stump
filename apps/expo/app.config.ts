@@ -15,6 +15,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		assetBundlePatterns: ['**/*'],
 		ios: {
 			supportsTablet: true,
+			entitlements: {
+				'com.apple.developer.networking.wifi-info': true,
+			},
 			bundleIdentifier: 'com.stumpapp.stump',
 			associatedDomains: ['webcredentials:www.stumpapp.dev'],
 			icon: {

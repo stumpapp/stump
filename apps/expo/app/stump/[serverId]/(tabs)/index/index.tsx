@@ -71,9 +71,7 @@ export default function Screen() {
 
 				<Stack.Toolbar.Menu
 					icon={Platform.OS === 'ios' ? 'ellipsis' : MoreHorizontal}
-					// TODO: spend time looking at other dropdowns and get closer, this isn't quite right
-					// but don't have time rn
-					cornerRadius={12}
+					cornerRadius={16}
 				>
 					<Stack.Toolbar.MenuAction
 						icon="gearshape"

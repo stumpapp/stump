@@ -677,18 +677,18 @@ async fn insert_oneshots(
 
 	let txn = conn.begin().await?;
 
-	for BuiltOneshot {
-		series: BuiltSeries {
-			series,
-			metadata: series_metadata,
-		},
-		media: BuiltMedia {
-			media,
-			metadata: media_metadata,
-			tags,
-		},
-	} in oneshots
-	{
+	for built_oneshot in oneshots {
+		let BuiltOneshot {
+			series: BuiltSeries {
+				series,
+				metadata: series_metadata,
+			},
+			media: BuiltMedia {
+				media,
+				metadata: media_metadata,
+				tags,
+			},
+		} = built_oneshot;
 		// ^ ugly formatting ew
 		let created_series = series.insert(&txn).await?;
 

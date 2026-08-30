@@ -2960,6 +2960,12 @@
 			"networking": "Networking",
 			"advancedOptions": "Advanced Options"
 		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "Configuration",
+				"networkSettings": "Network Settings"
+			}
+		},
 		"serverNetworkSettings":{
 			"activeProfile": {
 				"label": "Active Profile",

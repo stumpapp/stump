@@ -38,7 +38,7 @@ export function AuthModeSection() {
 							onBlur={onBlur}
 							onChangeText={onChange}
 							value={value}
-							// errorMessage={errors.basicUser?.message}
+							errorMessage={errors.basicUser?.message}
 						/>
 					)}
 					name="basicUser"
@@ -56,7 +56,7 @@ export function AuthModeSection() {
 							onBlur={onBlur}
 							onChangeText={onChange}
 							value={value}
-							// errorMessage={errors.basicPassword?.message}
+							errorMessage={errors.basicPassword?.message}
 						/>
 					)}
 					name="basicPassword"
@@ -76,7 +76,7 @@ export function AuthModeSection() {
 						onBlur={onBlur}
 						onChangeText={onChange}
 						value={value}
-						// errorMessage={errors.token?.message}
+						errorMessage={errors.token?.message}
 						secureTextEntry
 						multiline
 						numberOfLines={3}

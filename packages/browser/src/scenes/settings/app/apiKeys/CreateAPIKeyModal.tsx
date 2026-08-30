@@ -122,17 +122,22 @@ export default function CreateAPIKeyModal() {
 							</div>
 
 							<div className="gap-1 flex items-center">
-								<Button size="icon" onClick={() => setHideSecret((prev) => !prev)}>
+								<Button
+									size="icon"
+									className="size-7"
+									onClick={() => setHideSecret((prev) => !prev)}
+									variant="ghost"
+								>
 									<VisibilityIcon className="h-4 w-4 text-muted-foreground" />
 								</Button>
-								<Button size="icon" onClick={() => copy()}>
+								<Button size="icon" className="size-7" onClick={() => copy()} variant="ghost">
 									<CopyIcon className="h-4 w-4 text-muted-foreground" />
 								</Button>
 							</div>
 						</div>
 
 						<div className="p-3 text-sm rounded-lg bg-secondary text-foreground">
-							<span>
+							<span className="font-mono break-all">
 								<code>{hideSecret ? maskedSecret : apiSecret}</code>
 							</span>
 						</div>

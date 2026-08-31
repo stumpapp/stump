@@ -40,10 +40,20 @@ export function PortalHostProvider({ name, children }: PortalHostProviderProps) 
 
 	return (
 		<PortalHostContext.Provider value={{ name, sideOffset }}>
-			{children}
-
-			<View ref={portalRef} onLayout={onPortalLayout} style={{ flex: 1 }}>
-				<PortalHost name={name} />
+			<View style={{ flex: 1 }}>
+				{children}
+				<View
+					ref={portalRef}
+					onLayout={onPortalLayout}
+					style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+					// ^ this is important so the host does not actually take any layout space away
+					// from the children, which would, e.g., cause the sheet content to take up less
+					// space than it should
+					pointerEvents="box-none"
+					// ^ this makes sure the host does not block any touches
+				>
+					<PortalHost name={name} />
+				</View>
 			</View>
 		</PortalHostContext.Provider>
 	)

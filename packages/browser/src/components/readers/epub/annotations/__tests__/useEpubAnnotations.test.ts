@@ -71,6 +71,15 @@ describe('useEpubAnnotations', () => {
 	let updateAsync: Mock<Procedure>
 	let deleteAsync: Mock<Procedure>
 
+	const originalConsoleError = console.error
+	beforeAll(() => {
+		console.error = vi.fn()
+	})
+
+	afterAll(() => {
+		console.error = originalConsoleError
+	})
+
 	beforeEach(() => {
 		vi.clearAllMocks()
 		createAsync = vi.fn()

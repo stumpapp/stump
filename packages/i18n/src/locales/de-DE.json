@@ -105,7 +105,7 @@
 				}
 			}
 		},
-		"nextInSeries": "Weiter in der Serie"
+		"nextInSeries": "Weiter in der Reihe"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
@@ -307,8 +307,8 @@
 				"label": "Standard-Bibliotheksansicht",
 				"description": "Konfiguriere, welcher Reiter beim Öffnen dieser Bibliothek standardmäßig angezeigt wird",
 				"hideSeriesView": {
-					"label": "Serienreiter verbergen",
-					"description": "Verberge den Serienreiter in der Bibliotheksnavigation"
+					"label": "Reihenreiter verbergen",
+					"description": "Verberge den Reihenreiter in der Bibliotheksnavigation"
 				},
 				"skipBookOverview": {
 					"label": "Buchübersicht überspringen",
@@ -316,8 +316,8 @@
 				},
 				"options": {
 					"series": {
-						"label": "Serien",
-						"description": "Serienreiter standardmäßig anzeigen"
+						"label": "Reihe",
+						"description": "Zeige den Reihenreiter standardmäßig"
 					},
 					"books": {
 						"label": "Bücher",
@@ -488,11 +488,11 @@
 					"description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
 					"collectionPriority": {
 						"label": "Sammlungspriorität",
-						"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Serie"
+						"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Reihe"
 					},
 					"seriesPriority": {
-						"label": "Serienpriorität",
-						"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Serie"
+						"label": "Reihenpriorität",
+						"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Reihe"
 					}
 				}
 			}
@@ -573,16 +573,16 @@
 		"uploadModal": {
 			"title": {
 				"books": "Bücher hochladen",
-				"series": "Serie hochladen"
+				"series": "Reihe hochladen"
 			},
 			"description": {
 				"books": "Füge Bücher direkt zum aktuellen Pfad im Dateimanager hinzu",
-				"series": "Füge eine Serie direkt zum aktuellen Pfad im Dateimanager hinzu"
+				"series": "Füge eine Reihe direkt zum aktuellen Pfad im Dateimanager hinzu"
 			},
 			"seriesDisclaimer": [
 				"Es muss eine ",
 				"gezippte Datei",
-				"sein welche den Ordner enthält, der die Serie sein soll, die alle Bücher beinhaltet"
+				"sein, welche den Ordner enthält, der die Reihe sein soll, die alle Bücher beinhaltet"
 			],
 			"dropzone": {
 				"books": "Ziehe und lege Bücher hier ab",
@@ -595,7 +595,7 @@
 	"libraryHeader": {
 		"tabs": {
 			"books": "Bücher",
-			"series": "Serien",
+			"series": "Reihen",
 			"files": "Dateien"
 		}
 	},
@@ -772,9 +772,9 @@
 			"sections": {
 				"cleanLibrary": {
 					"heading": "Bibliothek bereinigen",
-					"description": "Entferne alle Medien und Serien, die nicht auf der Festplatte gefunden werden können",
+					"description": "Entferne alle Medien und Reihen, die nicht auf der Festplatte gefunden werden können",
 					"disclaimerTitle": "Keine Dateien werden gelöscht",
-					"disclaimer": "Diese Aktion löscht keine Dateien, aber es werden alle Datensätze in Bezug auf Medien und Serien die nicht gefunden werden konnten dauerhaft gelöscht",
+					"disclaimer": "Diese Aktion löscht keine Dateien, aber es werden alle Datensätze in Bezug auf Medien und Reihen die nicht gefunden werden konnten dauerhaft gelöscht",
 					"confirmation": {
 						"label": "Bibliothek bereinigen",
 						"text": "Bist du sicher, dass du diese Bibliothek bereinigen möchtest?"
@@ -788,7 +788,7 @@
 						},
 						"types": {
 							"BOOK": "Buch",
-							"SERIES": "Serien",
+							"SERIES": "Reihen",
 							"LIBRARY": "Bibliothek"
 						},
 						"emptyHeading": "Nichts fehlt für diese Bibliothek",
@@ -811,8 +811,15 @@
 		"buttons": {
 			"report": "Fehler melden",
 			"copy": "Fehlerdetails kopieren",
-			"goHome": "Zur Startseite"
-		}
+			"goHome": "Zur Startseite",
+			"goHomeTitle": "Gehe zurück zur Startseite",
+			"reportTitle": "Melde diesen Fehler als einen potenziellen Bug auf GitHub",
+			"copyTitle": "Kopiere die Fehlerdetails in deine Zwischenablage"
+		},
+		"criticalHeading": "Ein kritischer Fehler ist aufgetreten",
+		"emptyMessage": "Die Fehlermeldung war leer.",
+		"copiedDetails": "Fehlerdetails in die Zwischenablage kopiert",
+		"imageAlt": "Bauzeichnung"
 	},
 	"homeScene": {
 		"onDeck": {
@@ -830,10 +837,10 @@
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Kürzlich hinzugefügte Serien",
+			"title": "Kürzlich hinzugefügte Reihen",
 			"emptyState": {
-				"heading": "Keine Serien zur Ansicht vorhanden",
-				"message": "Alle Serien, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
+				"heading": "Keine Reihen zur Ansicht vorhanden",
+				"message": "Alle Reihen, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedBooks": {
@@ -857,13 +864,13 @@
 			"language": "Sprache",
 			"letterers": "Schriftsteller",
 			"month": "Monat",
-			"notes": "Anmerkungen",
+			"notes": "Notizen",
 			"number": "Nummer",
 			"pageCount": "Seiten",
 			"pencillers": "Zeichner",
 			"publisher": "Verlag",
-			"series": "Serien",
-			"seriesGroup": "Seriengruppe",
+			"series": "Reihen",
+			"seriesGroup": "Reihengruppe",
 			"storyArc": "Handlungsbogen",
 			"storyArcNumber": "Handlungsbogennummer",
 			"summary": "Zusammenfassung",
@@ -875,7 +882,7 @@
 			"metaType": "Typ",
 			"imprint": "Impressum",
 			"booktype": "Buchtyp",
-			"totalIssues": "Gesamtanzahl der Ausgaben",
+			"totalIssues": "Gesamtanzahl an Ausgaben",
 			"publicationRun": "Veröffentlichungslauf",
 			"comicImage": "Comicbild",
 			"descriptionFormatted": "Beschreibung (formatiert)",
@@ -967,7 +974,7 @@
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Weiterlesen",
-			"downloadSeries": "Serie herunterladen"
+			"downloadSeries": "Reihe herunterladen"
 		}
 	},
 	"seriesHeader": {
@@ -976,8 +983,8 @@
 			"files": "Dateien"
 		},
 		"actions": {
-			"markAsRead": "Serie als gelesen markieren",
-			"markAsUnread": "Serie als ungelesen markieren",
+			"markAsRead": "Reihe als gelesen markieren",
+			"markAsUnread": "Reihe als ungelesen markieren",
 			"goToLibrary": "Geh zur Bibliothek"
 		},
 		"errors": {
@@ -1052,7 +1059,7 @@
 							"label": "Keine"
 						},
 						"by_series": {
-							"label": "Serie"
+							"label": "Reihe"
 						},
 						"by_library": {
 							"label": "Bibliothek"
@@ -1093,7 +1100,7 @@
 								"attributes": {
 									"title": "Titel",
 									"summary": "Zusammenfassung",
-									"notes": "Anmerkungen",
+									"notes": "Notizen",
 									"writers": "Autoren",
 									"pencillers": "Zeichner",
 									"inkers": "Zeichner",
@@ -1113,14 +1120,14 @@
 								}
 							},
 							"series": {
-								"label": "Serie",
+								"label": "Reihe",
 								"attributes": {
 									"path": "Pfad",
 									"name": "Name"
 								}
 							},
 							"series_meta": {
-								"label": "Serienmetadaten",
+								"label": "Reihenmetadaten",
 								"attributes": {
 									"title": "Titel",
 									"summary": "Zusammenfassung",
@@ -1259,7 +1266,7 @@
 				"meta": {
 					"figures": {
 						"books": "Buch",
-						"series": "Serie",
+						"series": "Reihen",
 						"library": "Bibliothek"
 					},
 					"matches": "Treffer"
@@ -1486,7 +1493,7 @@
 			"description": "Passe das Aussehen und die Bedienung der Anwendung an",
 			"sections": {
 				"themeAndAppearance": {
-					"label": "Design und Erscheinung",
+					"label": "Design und Aussehen",
 					"description": "Die grundlegenden Erscheinungseinstellungen für Stump"
 				},
 				"interface": {
@@ -2517,7 +2524,7 @@
 					"trigger": "Tag erstellen",
 					"modal": {
 						"heading": "Erstelle einen neuen Tag",
-						"description": "Tags können Büchern, Serien und Bibliotheken zugewiesen werden",
+						"description": "Tags können Büchern, Reihen und Bibliotheken zugewiesen werden",
 						"name": {
 							"placeholder": "Tag-Name eingeben",
 							"label": "Name"
@@ -2549,8 +2556,8 @@
 		"backupHeading": "Job in Bearbeitung"
 	},
 	"libraryStats": {
-		"seriesCount": "Totale Anzahl Serien",
-		"bookCount": "Totale Anzahl Bücher",
+		"seriesCount": "Gesamtanzahl an Reihen",
+		"bookCount": "Gesamtanzahl an Bücher",
 		"diskUsage": "Speichernutzung"
 	},
 	"noLibraries": {
@@ -2599,7 +2606,7 @@
 			"settings": "Einstellungen",
 			"themeToggle": "Design wechseln",
 			"goForward": "Weiter",
-			"goBack": "Zurück",
+			"goBack": "Gehe Zurück",
 			"smartlists": "Intelligente Listen",
 			"noSmartlists": "Keine intelligenten Listen",
 			"createSmartlist": "Intelligente Liste erstellen",
@@ -2660,7 +2667,10 @@
 		"uploadImage": {
 			"emptyState": "Eine Vorschau des Bildes wird hier angezeigt",
 			"prompt": "Bild hier ablegen oder zum Auswählen klicken",
-			"remove": "Bild entfernen"
+			"remove": "Bild entfernen",
+			"fileTooLarge": "Datei zu groß",
+			"onlyOneFile": "Nur eine Datei ist erlaubt",
+			"noFile": "Keine Datei bereitgestellt"
 		}
 	},
 	"common": {
@@ -2700,7 +2710,7 @@
 		"logIn": "Anmelden",
 		"seeError": "Fehler anzeigen",
 		"remove": "Entfernen",
-		"goBack": "Gehe zurück",
+		"goBack": "Gehe Zurück",
 		"goToServers": "Gehe zu Servern",
 		"notReady": "Diese Funktion ist noch nicht bereit",
 		"notUsedYet": "Noch nicht verwendet",
@@ -3049,7 +3059,7 @@
 		"epubMenu": {
 			"tableOfContents": "Inhaltsverzeichnis",
 			"bookmarksAndAnnotations": "Lesezeichen & Anmerkungen",
-			"appearance": "Erscheinung"
+			"appearance": "Aussehen"
 		},
 		"formatSeriesPosition": {
 			"none": {
@@ -3064,7 +3074,7 @@
 				"positionWithTotal": "#{{position}} von {{total}} in {{seriesName}}",
 				"position": "#{{position}} in {{seriesName}}"
 			},
-			"unknownSeriesName": "Serie"
+			"unknownSeriesName": "Reihen"
 		},
 		"emptyState": {
 			"noStumpServers": "Keine Stump Server hinzugefügt",
@@ -3125,7 +3135,7 @@
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
 					"ADDED_AT": "Datum Hinzugefügt",
-					"SERIES": "Serien",
+					"SERIES": "Reihen",
 					"NAME": "Name"
 				},
 				"sortDirection": {
@@ -3261,8 +3271,8 @@
 				"dataUsage": {
 					"label": "Datennutzung",
 					"nonStumpData": "Nicht-Stump Daten",
-					"serversTotal": "Server insgesamt",
-					"totalFiles": "Dateien gesamt",
+					"serversTotal": "Gesamtanzahl an Server",
+					"totalFiles": "Gesamtanzahl an Dateien",
 					"totalSize": "Gesamtgröße",
 					"deleteDownloads": {
 						"label": "Downloads löschen",
@@ -3337,7 +3347,7 @@
 				"favorites": "Favoriten",
 				"files": "Dateien",
 				"libraries": "Bibliotheken",
-				"series": "Serien",
+				"series": "Reihen",
 				"smartLists": "Intelligente Listen"
 			},
 			"continueReading": {
@@ -3349,8 +3359,8 @@
 				"emptyText": "Keine Bücher im Deck"
 			},
 			"recentlyAddedSeries": {
-				"label": "Kürzlich hinzugefügte Serien",
-				"emptyText": "Keine kürzlich hinzugefügte Serien"
+				"label": "Kürzlich hinzugefügte Reihen",
+				"emptyText": "Keine kürzlich hinzugefügte Reihen"
 			},
 			"recentlyAddedBooks": {
 				"label": "Kürzlich hinzugefügte Bücher",
@@ -3368,7 +3378,7 @@
 			"readingMode": {
 				"label": "Fluss",
 				"options": {
-					"PAGED": "Geseitigt",
+					"PAGED": "Seitig",
 					"CONTINUOUS_HORIZONTAL": "Scrollen (Horizontal)",
 					"CONTINUOUS_VERTICAL": "Scrollen (Vertikal)"
 				}
@@ -3546,8 +3556,8 @@
 			"sortField": {
 				"ADDED_AT": "Datum Hinzugefügt",
 				"CREATED_AT": "Datum Hinzugefügt",
-				"NUMBER": "Serienposition",
-				"SERIES": "Serien",
+				"NUMBER": "Reihenposition",
+				"SERIES": "Reihen",
 				"YEAR": "Jahr Veröffentlicht",
 				"NAME": "Name"
 			},
@@ -3599,6 +3609,72 @@
 				"both": "Akzeptiere Beide"
 			},
 			"pullError": "Fehler bei der Abrufe des Fernfortschrittes"
+		}
+	},
+	"thumbnailSelector": {
+		"title": "Wähle ein Vorschaubild aus",
+		"descriptions": {
+			"chooseBookPage": "Wähle eine Seite dieses Buches, die als neues Vorschaubild genutzt werden soll",
+			"chooseSeriesBook": "Wähle ein Buch aus der Reihe aus"
+		},
+		"actions": {
+			"confirmSelection": "Auswahl bestätigen"
+		},
+		"errors": {
+			"uploadFailed": "Fehler beim Hochladen des Bildes",
+			"updateFailed": "Fehler beim Aktualisieren des Vorschaubildes"
+		}
+	},
+	"epubReader": {
+		"reading": "Lesen",
+		"appearance": "Aussehen",
+		"locationManager": "Standortmanager",
+		"contents": "Inhalte",
+		"bookmarks": "Lesezeichen",
+		"annotations": "Anmerkungen",
+		"noBookmarks": "Keine Lesezeichen",
+		"bookmark": "Lesezeichen",
+		"noAnnotations": "Keine Anmerkungen",
+		"annotation": {
+			"addNote": "Notiz hinzufügen",
+			"edit": "Anmerkung bearbeiten",
+			"note": "Notiz",
+			"optionalNote": "Füge eine optionale Notiz hinzu…",
+			"highlight": "Markierung",
+			"disabledInIncognito": "Anmerkungen sind im Inkognitomodus deaktiviert",
+			"selectionActions": "Auswahlaktionen",
+			"saveFailed": "Fehler beim Speichern der Anmerkung",
+			"updateFailed": "Fehler beim Aktualisieren der Anmerkung",
+			"deleteFailed": "Fehler mein Löschen der Anmerkung"
+		},
+		"themeAndOptions": "Design und Optionen",
+		"search": {
+			"placeholder": "Gebe eine Anfrage eine und drücke Enter um zu suchen",
+			"failed": "Suche fehlgeschlagen. Bitte versuche es erneut.",
+			"noResults": "Keine Ergebnisse gefunden.",
+			"section": "Sektion {{position}}",
+			"loadingMore": "Lade mehr…",
+			"loadMore": "Lade mehr Ergebnisse"
+		},
+		"controls": {
+			"columns": "Spalten",
+			"auto": "Auto",
+			"columnCount_one": "{{count}} Spalte",
+			"columnCount_other": "{{count}} Spalten",
+			"pageMargins": "Seitenrand",
+			"readingDirection": "Leserichtung",
+			"leftToRight": "Links nach rechts",
+			"rightToLeft": "Rechts nach links",
+			"readingMode": "Lesemodus",
+			"paged": "Seitig",
+			"continuous": "Durchgehend",
+			"previousPage": "Vorherige Seite",
+			"nextPage": "Nächste Seite",
+			"toggleControls": "Reader-Steuerung ein-/ausblenden"
+		},
+		"errors": {
+			"openFailed": "Fehler beim Öffnen des EPUB mit Readium.",
+			"navigateFailed": "Fehler beim Navigieren zur Position"
 		}
 	}
 }

@@ -29,7 +29,7 @@ use crate::{
 		},
 		metadata::MetadataFetchJobParams,
 		scanner::{
-			utils::{build_ignore_rules, safely_build_oneshots, safely_insert_series},
+			utils::{build_and_insert_oneshots, build_ignore_rules},
 			walk::{walk_oneshots, WalkedOneshots},
 		},
 	},
@@ -44,9 +44,10 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		handle_missing_media, handle_missing_series, handle_restored_media,
-		safely_build_and_insert_media, safely_build_series, visit_and_update_media,
-		MediaBuildOperation, MediaOperationOutput, MissingSeriesOutput,
+		build_and_insert_media, handle_missing_media, handle_missing_series,
+		handle_restored_media, insert_series, safely_build_series,
+		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
+		MissingSeriesOutput, OneshotOperationOutput,
 	},
 	walk_library, walk_series, ScanOptions, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
@@ -601,7 +602,7 @@ impl JobLifecycle for LibraryScanJob {
 							(idx + 1) as i32,
 							chunk_count as i32,
 						));
-						match safely_insert_series(chunk.to_vec(), ctx.conn()).await {
+						match insert_series(chunk.to_vec(), ctx.conn()).await {
 							Ok(created_series) => {
 								output.created_series += created_series.len() as u64;
 								if let Ok(mut map) = self.series_id_by_path.lock() {
@@ -826,22 +827,37 @@ impl JobLifecycle for LibraryScanJob {
 				output.total_files += seen_files + ignored_files;
 				output.ignored_files += ignored_files;
 
-				let (built_oneshots, oneshot_logs) = safely_build_oneshots(
-					&self.id,
-					to_create,
-					library_config,
-					Arc::clone(&ctx.apalis_state.config),
-					|position| {
-						ctx.report_progress(JobProgress::subtask_position(
-							position as i32,
-							book_operations.len() as i32,
-						))
-					},
-				)
-				.await;
-				logs.extend(oneshot_logs);
+				let OneshotOperationOutput {
+					created_series,
+					created_media,
+					logs: new_logs,
+				} = build_and_insert_oneshots(&self.id, to_create, library_config, ctx)
+					.await?;
 
-				unimplemented!()
+				output.created_series += created_series;
+				output.created_media += created_media;
+				logs.extend(new_logs);
+
+				if created_series > 0 {
+					ctx.emit_event(CoreEvent::CreatedManySeries(
+						event::CreatedManySeries {
+							count: created_series,
+							library_id: self.id.clone(),
+						},
+					));
+				}
+
+				subtasks = book_operations
+					.into_iter()
+					.map(|visit_params| LibraryScanTask::SeriesTask {
+						id: visit_params.series_id,
+						path: visit_params.path.to_string_lossy().to_string(), // same as book
+						task: SeriesScanTask::VisitMedia(vec![(
+							visit_params.path, // same as series
+							visit_params.operation,
+						)]),
+					})
+					.collect();
 			},
 			LibraryScanTask::SeriesTask {
 				id: series_id,
@@ -913,7 +929,7 @@ impl JobLifecycle for LibraryScanJob {
 						created_media,
 						logs: new_logs,
 						..
-					} = safely_build_and_insert_media(
+					} = build_and_insert_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
 							library_config: self.config.clone().ok_or(

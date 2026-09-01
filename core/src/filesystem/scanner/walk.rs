@@ -568,6 +568,16 @@ pub async fn walk_series(
 	})
 }
 
+pub struct OneshotVisitOperation {
+	/// The path to the oneshot media file, which of course is also the
+	/// path to the series
+	pub path: PathBuf,
+	/// The operation to perform on the oneshot media file
+	pub operation: BookVisitOperation,
+	/// The id of the series that the oneshot media file belongs to
+	pub series_id: String,
+}
+
 pub struct WalkedOneshots {
 	/// The total number of files seen during the walk
 	pub seen_files: u64,
@@ -577,7 +587,7 @@ pub struct WalkedOneshots {
 	/// The paths for series+book pairs that need to be created
 	pub to_create: Vec<PathBuf>,
 	/// The operations to perform on books that need to be visited
-	pub book_operations: Vec<(PathBuf, BookVisitOperation)>,
+	pub book_operations: Vec<OneshotVisitOperation>,
 }
 
 // dir_mtimes, // TODO: check *before* walking?
@@ -688,14 +698,21 @@ pub async fn walk_oneshots(
 
 	for book_path in remaining_paths.iter() {
 		let path_str = book_path.to_string_lossy().to_string();
-		let Some(existing_book) = existing_book_map.get(&path_str) else {
-			tracing::warn!(
-				?path_str,
-				"Book path was not found in existing book map, skipping"
-			);
-			// ^ this should realistically never happen
-			continue;
+
+		let (existing_book, series_id) = match existing_book_map.get(&path_str) {
+			Some(book) if let Some(series_id) = &book.series_id => {
+				(book, series_id.clone())
+			},
+			_ => {
+				tracing::warn!(
+                    ?path_str,
+                    "Book path was not found in existing book map or has no series_id, skipping"
+                );
+				// ^ this should realistically never happen
+				continue;
+			},
 		};
+
 		let current_mtime = safely_get_current_mtime(book_path).await;
 		let did_change = existing_book
 			.modified_at
@@ -703,10 +720,18 @@ pub async fn walk_oneshots(
 			.is_some_and(|dt| mtime_newer_than_datetime(current_mtime, dt));
 
 		if did_change {
-			book_operations.push((book_path.clone(), BookVisitOperation::Rebuild));
+			book_operations.push(OneshotVisitOperation {
+				path: book_path.clone(),
+				operation: BookVisitOperation::Rebuild,
+				series_id: series_id.clone(),
+			});
 		} else {
 			if let Some(operation) = options.book_operation() {
-				book_operations.push((book_path.clone(), operation));
+				book_operations.push(OneshotVisitOperation {
+					path: book_path.clone(),
+					operation,
+					series_id: series_id.clone(),
+				});
 			}
 		}
 	}

@@ -9,7 +9,6 @@ mod hash;
 pub mod image;
 pub mod media;
 pub mod metadata;
-mod oneshot;
 pub mod scanner;
 pub mod series;
 

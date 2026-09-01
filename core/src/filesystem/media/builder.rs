@@ -278,6 +278,7 @@ mod tests {
 			hide_series_view: false,
 			library_type: LibraryType::Mixed,
 			skip_book_overview: false,
+			oneshot_directory: None,
 		}
 	}
 }

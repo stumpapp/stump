@@ -28,7 +28,7 @@ use crate::{
 use super::{
 	options::BookVisitOperation,
 	utils::{
-		handle_missing_media, handle_restored_media, safely_build_and_insert_media,
+		build_and_insert_media, handle_missing_media, handle_restored_media,
 		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
 	},
 	walk_series, ScanOptions, WalkedSeries, WalkerCtx,
@@ -170,6 +170,7 @@ impl JobLifecycle for SeriesScanJob {
 				options: self.options,
 				dir_mtimes: HashMap::new(),
 				series_id: Some(self.id.clone()),
+				oneshot_directory: None, // not needed for series-level task
 			},
 		)
 		.await?;
@@ -330,7 +331,7 @@ impl JobLifecycle for SeriesScanJob {
 					created_media,
 					logs: new_logs,
 					..
-				} = safely_build_and_insert_media(
+				} = build_and_insert_media(
 					MediaBuildOperation {
 						series_id: self.id.clone(),
 						library_config: self.config.clone().ok_or(

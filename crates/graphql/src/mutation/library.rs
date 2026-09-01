@@ -1,4 +1,4 @@
-use async_graphql::{Context, Json, Object, Result, SimpleObject, ID};
+use async_graphql::{Context, Json, MaybeUndefined, Object, Result, SimpleObject, ID};
 use chrono::Utc;
 use itertools::chain;
 use metadata_integrations::MetadataField;
@@ -33,8 +33,14 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	error_message,
 	guard::PermissionGuard,
-	input::{library::CreateOrUpdateLibraryInput, thumbnail::UpdateThumbnailInput},
-	object::library::Library,
+	input::{
+		library::{
+			CreateOrUpdateLibraryInput, PatchLibraryConfigInput, PatchLibraryInput,
+		},
+		thumbnail::UpdateThumbnailInput,
+	},
+	mutation::tag::sync_tags,
+	object::{library::Library, library_config::LibraryConfig},
 	utils::db_statement,
 };
 
@@ -363,7 +369,10 @@ impl LibraryMutation {
 
 	/// Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
 	/// the library will be scanned immediately after updating.
-	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::EditLibrary)",
+		deprecation = "Use `patchLibrary` instead"
+	)]
 	async fn update_library(
 		&self,
 		ctx: &Context<'_>,
@@ -483,6 +492,186 @@ impl LibraryMutation {
 		}
 
 		Ok(Library::from(updated_library))
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	async fn patch_library(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: PatchLibraryInput,
+	) -> Result<Library> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (existing_library, existing_config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let Some(existing_config) = existing_config else {
+			return Err("Library is missing associated config!".into());
+		};
+
+		let original_path = existing_library.path.clone();
+		let enforcement_path = input
+			.path
+			.clone()
+			.unwrap_or_else(|| existing_library.path.clone());
+
+		enforce_valid_library_path(
+			core.conn.as_ref(),
+			&enforcement_path,
+			Some(&existing_library.path),
+		)
+		.await?;
+
+		let existing_tags = tag::Entity::find()
+			.filter(
+				tag::Column::Id.in_subquery(
+					Query::select()
+						.column(library_tag::Column::TagId)
+						.from(library_tag::Entity)
+						.and_where(
+							library_tag::Column::LibraryId
+								.eq(existing_library.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.all(core.conn.as_ref())
+			.await?;
+
+		let scan_after_update = input.scan_after_persist;
+
+		let (add_watcher, remove_watcher) =
+			match input.config.as_ref().map(|config| config.watch) {
+				Some(Some(watch)) => (
+					// previously wasn't but now is = add watcher
+					watch != existing_config.watch,
+					// previously was but now isn't = remove watcher
+					!watch && existing_config.watch,
+				),
+				_ => (false, false),
+			};
+
+		let updated_tags = match input.tags.clone() {
+			MaybeUndefined::Null => Some(vec![]),
+			MaybeUndefined::Value(tags) => Some(tags),
+			MaybeUndefined::Undefined => None, // no update
+		};
+
+		let txn = core.conn.as_ref().begin().await?;
+
+		let (library, config) = input.apply(existing_library, existing_config)?;
+
+		let updated_library = library.update(&txn).await?;
+		let _updated_config = config.update(&txn).await?;
+
+		if let Some(tags) = updated_tags {
+			let (to_connect, to_disconnect) =
+				sync_tags(&txn, &tags, &existing_tags).await?;
+
+			if !to_disconnect.is_empty() {
+				library_tag::Entity::delete_many()
+					.filter(library_tag::Column::TagId.is_in(to_disconnect).and(
+						library_tag::Column::LibraryId.eq(updated_library.id.clone()),
+					))
+					.exec(&txn)
+					.await?;
+			}
+
+			if !to_connect.is_empty() {
+				let library_id = updated_library.id.clone();
+				library_tag::Entity::insert_many(
+					to_connect
+						.into_iter()
+						.map(|tag_id| library_tag::ActiveModel {
+							library_id: Set(library_id.clone()),
+							tag_id: Set(tag_id),
+							..Default::default()
+						})
+						.collect::<Vec<library_tag::ActiveModel>>(),
+				)
+				.on_conflict_do_nothing()
+				.exec(&txn)
+				.await?;
+			}
+		}
+
+		txn.commit().await?;
+
+		if scan_after_update {
+			core.enqueue(StumpJob::library_scan(
+				updated_library.id.clone(),
+				updated_library.path.clone(),
+				None,
+			))
+			.await?;
+		}
+
+		if add_watcher {
+			core.library_watcher
+				.add_watcher(updated_library.path.clone().into())
+				.await?;
+		} else if remove_watcher {
+			core.library_watcher
+				// note the difference, we use original as to avoid juggling whether
+				// path was updated which changes how we would remove the watcher
+				.remove_watcher(original_path.into())
+				.await?;
+		}
+
+		Ok(Library::from(updated_library))
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	async fn patch_library_config(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: PatchLibraryConfigInput,
+	) -> Result<LibraryConfig> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (existing_library, existing_config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let Some(existing_config) = existing_config else {
+			return Err("Library is missing associated config!".into());
+		};
+
+		let (add_watcher, remove_watcher) = match input.watch {
+			Some(watch) => (
+				// previously wasn't but now is = add watcher
+				watch != existing_config.watch,
+				// previously was but now isn't = remove watcher
+				!watch && existing_config.watch,
+			),
+			_ => (false, false),
+		};
+
+		let config = input.apply_to_model(existing_config)?;
+		let updated_config = config.update(core.conn.as_ref()).await?;
+
+		if add_watcher {
+			core.library_watcher
+				.add_watcher(existing_library.path.clone().into())
+				.await?;
+		} else if remove_watcher {
+			core.library_watcher
+				.remove_watcher(existing_library.path.clone().into())
+				.await?;
+		}
+
+		Ok(LibraryConfig::from(updated_config))
 	}
 
 	/// Update the emoji for a library

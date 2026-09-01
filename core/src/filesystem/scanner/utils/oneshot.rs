@@ -320,11 +320,8 @@ pub(crate) async fn build_and_insert_oneshots(
 		logs: insert_logs,
 	} = insert_oneshots(built_oneshots, for_library, worker_ctx).await?;
 
-	let ordered_logs = build_logs
-		.into_iter()
-		.chain(insert_logs.into_iter())
-		.collect();
-	// ^ just prepending them basically so they are in roughly the right order of
+	let ordered_logs = build_logs.into_iter().chain(insert_logs).collect();
+	// ^ just appending insert_logs so they are in roughly the right order of
 	// build -> insert, but it isn't really important
 
 	Ok(OneshotOperationOutput {

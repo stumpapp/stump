@@ -69,7 +69,7 @@
 		"@storybook/addon-actions": "^7.6.17",
 		"@storybook/addon-essentials": "^7.6.17",
 		"@storybook/addon-interactions": "^7.6.17",
-		"@storybook/addon-links": "^7.6.17",
+		"@storybook/addon-links": "^10.5.10",
 		"@storybook/addon-postcss": "^2.0.0",
 		"@storybook/addons": "^7.6.17",
 		"@storybook/api": "^7.6.17",

@@ -126,7 +126,7 @@ impl LibraryConfigInput {
 			default_reading_mode: Set(default_reading_mode),
 			default_reading_image_scale_fit: Set(default_reading_image_scale_fit),
 			ignore_rules: Set(ignore_rules),
-			oneshot_directory: Set(oneshots_directory),
+			oneshots_directory: Set(oneshots_directory),
 			..Default::default()
 		}
 	}
@@ -320,8 +320,8 @@ impl PatchLibraryConfigInput {
 				.unwrap_or(Unchanged(model.default_reading_image_scale_fit)),
 			ignore_rules,
 			library_id: Unchanged(model.library_id),
-			oneshot_directory: match oneshots_directory {
-				MaybeUndefined::Undefined => Unchanged(model.oneshot_directory),
+			oneshots_directory: match oneshots_directory {
+				MaybeUndefined::Undefined => Unchanged(model.oneshots_directory),
 				MaybeUndefined::Null => Set(None),
 				MaybeUndefined::Value(directory) => Set(Some(directory)),
 			},

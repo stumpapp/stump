@@ -38,7 +38,9 @@ impl MigrationTrait for Migration {
 			.alter_table(
 				Table::alter()
 					.table(LibraryConfigs::Table)
-					.add_column(ColumnDef::new(LibraryConfigs::OneshotDirectory).string())
+					.add_column(
+						ColumnDef::new(LibraryConfigs::OneshotsDirectory).string(),
+					)
 					.to_owned(),
 			)
 			.await?;
@@ -69,7 +71,7 @@ impl MigrationTrait for Migration {
 			.alter_table(
 				Table::alter()
 					.table(LibraryConfigs::Table)
-					.drop_column(LibraryConfigs::OneshotDirectory)
+					.drop_column(LibraryConfigs::OneshotsDirectory)
 					.to_owned(),
 			)
 			.await?;
@@ -93,5 +95,5 @@ enum Series {
 #[derive(DeriveIden)]
 enum LibraryConfigs {
 	Table,
-	OneshotDirectory,
+	OneshotsDirectory,
 }

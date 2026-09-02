@@ -170,7 +170,7 @@ impl JobLifecycle for SeriesScanJob {
 				options: self.options,
 				dir_mtimes: HashMap::new(),
 				series_id: Some(self.id.clone()),
-				oneshot_directory: None, // not needed for series-level task
+				oneshots_directory: None, // not needed for series-level task
 			},
 		)
 		.await?;

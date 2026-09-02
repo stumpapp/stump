@@ -1089,6 +1089,7 @@ type LibraryConfig {
 	skipBookOverview: Boolean!
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
+	oneshotsDirectory: String
 	thumbnailConfig: ImageProcessorOptions
 	ignoreRules: [String!]
 }
@@ -1111,6 +1112,7 @@ input LibraryConfigInput {
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
 	ignoreRules: [String!]
+	oneshotsDirectory: String
 }
 
 input LibraryFilterInput {
@@ -1284,15 +1286,7 @@ type Media {
 	extension: String!
 	"The number of pages in the media, if applicable. Will be -1 for certain media types"
 	pages: Int!
-	"The timestamp of the last time the media was updated. This will be set during creation, as well"
-	updatedAt: DateTime
-	"The timestamp of the creation of the media"
-	createdAt: DateTime!
-	"""
-	The timestamp of when the underlying file was last modified on disk. This will only be set if
-	a timestamp can be retrieved from the filesystem
-	"""
-	modifiedAt: DateTime
+	isOneshot: Boolean!
 	"""
 	A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
 	in aiding in the identification of duplicate media files
@@ -1319,6 +1313,15 @@ type Media {
 	expected that all media will belong to a series
 	"""
 	seriesId: String
+	"The timestamp of the last time the media was updated. This will be set during creation, as well"
+	updatedAt: DateTime
+	"The timestamp of the creation of the media"
+	createdAt: DateTime!
+	"""
+	The timestamp of when the underlying file was last modified on disk. This will only be set if
+	a timestamp can be retrieved from the filesystem
+	"""
+	modifiedAt: DateTime
 	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
 	deletedAt: DateTime
 	metadata: MediaMetadata
@@ -1605,9 +1608,7 @@ enum MediaModelOrdering {
 	SIZE
 	EXTENSION
 	PAGES
-	UPDATED_AT
-	CREATED_AT
-	MODIFIED_AT
+	IS_ONESHOT
 	HASH
 	KOREADER_HASH
 	PATH
@@ -1615,6 +1616,9 @@ enum MediaModelOrdering {
 	THUMBNAIL_META
 	THUMBNAIL_PATH
 	SERIES_ID
+	UPDATED_AT
+	CREATED_AT
+	MODIFIED_AT
 	DELETED_AT
 }
 
@@ -1929,7 +1933,9 @@ type Mutation {
 	Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after updating.
 	"""
-	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library! @deprecated(reason: "Use `patchLibrary` instead")
+	patchLibrary(id: ID!, input: PatchLibraryInput!): Library!
+	patchLibraryConfig(id: ID!, input: PatchLibraryConfigInput!): LibraryConfig!
 	"Update the emoji for a library"
 	updateLibraryEmoji(id: ID!, emoji: String): Library!
 	"""
@@ -2387,6 +2393,37 @@ input PatchEmailDeviceInput {
 	name: String
 	email: String
 	forbidden: Boolean
+}
+
+input PatchLibraryConfigInput {
+	convertRarToZip: Boolean
+	hardDeleteConversions: Boolean
+	generateFileHashes: Boolean
+	generateKoreaderHashes: Boolean
+	processMetadata: Boolean
+	watch: Boolean
+	libraryPattern: LibraryPattern
+	libraryType: LibraryType
+	defaultLibraryViewMode: LibraryViewMode
+	hideSeriesView: Boolean
+	skipBookOverview: Boolean
+	thumbnailConfig: ImageProcessorOptionsInput
+	processThumbnailColorsEvenWithoutConfig: Boolean
+	defaultReadingDir: ReadingDirection
+	defaultReadingMode: ReadingMode
+	defaultReadingImageScaleFit: ReadingImageScaleFit
+	ignoreRules: [String!]
+	oneshotsDirectory: String
+}
+
+input PatchLibraryInput {
+	name: String
+	path: String
+	description: String
+	emoji: String
+	tags: [String!]
+	config: PatchLibraryConfigInput
+	scanAfterPersist: Boolean! = true
 }
 
 "A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields."
@@ -2874,14 +2911,15 @@ type Series {
 	id: String!
 	name: String!
 	description: String
-	createdAt: DateTime!
-	updatedAt: DateTime
-	deletedAt: DateTime
 	path: String!
 	status: FileStatus!
+	isOneshot: Boolean!
 	thumbnailMeta: ImageMetadata
 	thumbnailPath: String
 	libraryId: String
+	createdAt: DateTime!
+	updatedAt: DateTime
+	deletedAt: DateTime
 	metadata: SeriesMetadata
 	isFavorite: Boolean!
 	resolvedName: String!
@@ -3041,14 +3079,15 @@ enum SeriesModelOrdering {
 	ID
 	NAME
 	DESCRIPTION
-	CREATED_AT
-	UPDATED_AT
-	DELETED_AT
 	PATH
 	STATUS
+	IS_ONESHOT
 	THUMBNAIL_META
 	THUMBNAIL_PATH
 	LIBRARY_ID
+	CREATED_AT
+	UPDATED_AT
+	DELETED_AT
 }
 
 input SeriesOrderBy @oneOf {

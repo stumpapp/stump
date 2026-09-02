@@ -71,6 +71,7 @@ export const LibrarySettingsConfig = graphql(`
 			}
 			processThumbnailColorsEvenWithoutConfig
 			ignoreRules
+			oneshotsDirectory
 		}
 	}
 `)

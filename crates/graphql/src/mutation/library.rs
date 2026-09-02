@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use async_graphql::{Context, Json, MaybeUndefined, Object, Result, SimpleObject, ID};
 use chrono::Utc;
 use itertools::chain;
@@ -528,6 +530,10 @@ impl LibraryMutation {
 		)
 		.await?;
 
+		if let Some(ref config) = input.config {
+			soft_check_onshots_directory(config, &enforcement_path).await?;
+		}
+
 		let existing_tags = tag::Entity::find()
 			.filter(
 				tag::Column::Id.in_subquery(
@@ -647,6 +653,8 @@ impl LibraryMutation {
 		let Some(existing_config) = existing_config else {
 			return Err("Library is missing associated config!".into());
 		};
+
+		soft_check_onshots_directory(&input, &existing_library.path).await?;
 
 		let (add_watcher, remove_watcher) = match input.watch {
 			Some(watch) => (
@@ -1324,6 +1332,31 @@ async fn enforce_valid_library_path(
 
 	if parent_libraries_count > 0 {
 		return Err("Path is a child of another library on the filesystem".into());
+	}
+
+	Ok(())
+}
+
+async fn soft_check_onshots_directory(
+	config: &PatchLibraryConfigInput,
+	library_path: &str,
+) -> Result<()> {
+	let oneshots_directory_to_check = match &config.oneshots_directory {
+		MaybeUndefined::Value(oneshots_directory) => {
+			let joined_path = Path::new(&library_path).join(oneshots_directory);
+			Some(joined_path.to_string_lossy().to_string())
+		},
+		_ => None,
+	};
+
+	if let Some(oneshots_path) = oneshots_directory_to_check {
+		if !tokio::fs::try_exists(&oneshots_path).await? {
+			tracing::warn!(?oneshots_path, "Oneshots directory does not exist yet");
+		}
+		// ^ i opted not to error here, i figure it probably doesn't matter if it doesn't exist?
+		// like for folks that haven't created any yet, but want to configure the library. i
+		// can be swayed here if that isn't the preference, i won't use oneshots so have little
+		// personal stake in it
 	}
 
 	Ok(())

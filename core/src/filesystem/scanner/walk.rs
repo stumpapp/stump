@@ -45,8 +45,9 @@ pub struct WalkerCtx {
 	pub dir_mtimes: HashMap<String, u64>,
 	/// The series ID for this walk, if scoped to a specific series
 	pub series_id: Option<String>,
-	/// the directory for the library which oneshots are stored in, if any
-	pub oneshot_directory: Option<String>,
+	/// the directory for the library which oneshots are stored in, if any. this is
+	/// **relative** to the library path and, if set, not a fully qualified path
+	pub oneshots_directory: Option<String>,
 }
 
 /// The output of walking a library
@@ -86,7 +87,7 @@ pub async fn walk_library(
 		db,
 		ignore_rules,
 		max_depth,
-		oneshot_directory,
+		oneshots_directory,
 		..
 	}: WalkerCtx,
 ) -> CoreResult<WalkedLibrary> {
@@ -150,11 +151,18 @@ pub async fn walk_library(
 		.await
 		.map_err(|e| CoreError::InternalError(format!("Failed to walk library! {e}")))?;
 
+	let full_oneshots_directory = oneshots_directory
+		.as_deref()
+		.filter(|dir| !dir.is_empty())
+		.map(|dir| PathBuf::from(path).join(dir).to_string_lossy().to_string());
+
+	// note the ordering here, as it is important. oneshots are identified first so that
+	// we avoid entering the standard walk flows for them
+
 	let (oneshot_entries, regular_entries): (Vec<DirEntry>, Vec<DirEntry>) =
 		valid_entries.into_iter().partition(|entry| {
-			oneshot_directory
+			full_oneshots_directory
 				.as_deref()
-				.filter(|dir| !dir.is_empty())
 				.map(|dir| {
 					entry
 						.path()

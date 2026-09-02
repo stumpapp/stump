@@ -57,7 +57,7 @@ use super::{
 pub enum LibraryScanTask {
 	Init(InitTaskInput),
 	WalkSeries(PathBuf),
-	WalkOneshotDirectory(PathBuf),
+	WalkOneshotsDirectory(PathBuf),
 	SeriesTask {
 		id: String,
 		path: String,
@@ -175,7 +175,7 @@ impl JobLifecycle for LibraryScanJob {
 			))?;
 		let is_collection_based = config.is_collection_based();
 		let ignore_rules = config.ignore_rules().build()?;
-		let oneshot_directory = config.oneshot_directory.clone();
+		let oneshots_directory = config.oneshots_directory.clone();
 
 		self.config = Some(config);
 
@@ -230,7 +230,7 @@ impl JobLifecycle for LibraryScanJob {
 				// so there is nothing to short-circuit
 				dir_mtimes: HashMap::new(),
 				series_id: None,
-				oneshot_directory,
+				oneshots_directory,
 			},
 		)
 		.await?;
@@ -278,7 +278,7 @@ impl JobLifecycle for LibraryScanJob {
 
 		let oneshots_to_visit = oneshot_dirs_to_visit
 			.into_iter()
-			.map(LibraryScanTask::WalkOneshotDirectory)
+			.map(LibraryScanTask::WalkOneshotsDirectory)
 			.collect::<Vec<LibraryScanTask>>();
 		// TODO: this shouldj ust be a single path lol right? no nesting?
 
@@ -679,7 +679,7 @@ impl JobLifecycle for LibraryScanJob {
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
 						series_id: series_id.clone(),
-						oneshot_directory: None,
+						oneshots_directory: None,
 					},
 				)
 				.await;
@@ -783,7 +783,7 @@ impl JobLifecycle for LibraryScanJob {
 				})
 				.collect();
 			},
-			LibraryScanTask::WalkOneshotDirectory(path_buf) => {
+			LibraryScanTask::WalkOneshotsDirectory(path_buf) => {
 				let library_config = self.config.clone().ok_or(JobError::TaskFailed(
 					"Library configuration is missing".to_string(),
 				))?;
@@ -797,7 +797,7 @@ impl JobLifecycle for LibraryScanJob {
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(), // TODO: not needed? harmless to leave in ig
 						series_id: None,                        // not needed
-						oneshot_directory: None,                // not needed
+						oneshots_directory: None,               // not needed
 					},
 				)
 				.await;

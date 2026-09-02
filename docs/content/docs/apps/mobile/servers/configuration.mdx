@@ -1,11 +1,45 @@
 ---
 title: Configuration
-description: Adding, editing, and deleting servers in the mobile app
+description: The various configuration options for servers in the mobile app
 ---
 
 import { Step, Steps } from 'fumadocs-ui/components/steps'
 
-## Adding a Server
+This page will be split into two primary sections: overall server-specific features and configuration options, and then a more step-by-step guide for adding, editing, and deleting servers.
+
+## Networking
+
+There are two notable networking-related features in the app:
+
+1. The ability to configure custom headers for each server
+2. The ability to configure a local-network fallback URL for querying each server
+
+### Custom Headers
+
+This does not apply to all servers, but some servers may require custom headers to be sent with each request from the app. For example, Komga supports a `X-API-Key` header for its long-lived token-based authentication. In this case, you would configure the `X-API-Key` header with your Komga API key as the value so each request made to the Komga server from the app would be authenticated.
+
+### Local Network URL
+
+It is fairly common for servers to be behind some kind of reverse proxy or VPN for improved access when away from your home network. However, if you are on your home network you might not want to proxy all requests and instead just directly connect to your server.
+
+The app supports this by allowing you to configure a local network URL for each server. When the app detects that you are on your home network, it will use the local network URL instead of the primary URL for all requests.
+
+<Callout type="warn" title="Network Permissions and Privacy">
+    Stump **does not** collect any information about your location. The app will prompt your for permission to access information related to your network (name, connection status, etc) so it can determine if you are on your configured home network to manage the decision of which URL to use. That said, the permission you grant may have scary language, such as `Allow "Stump" to access your location`.
+
+    If you are using an Apple device, the exact entitlement is [`com.apple.developer.networking.wifi-info`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.wifi-info). I do not know why Apple has chosen to phrase it this way.
+
+</Callout>
+
+#### Allow Once vs Allow Always / While Using the App
+
+If you want the feature to work, you must at least allow the app to access your network information while using the app. If you choose to allow once, the app will not read your network information the next time you open the app, and therefore will be unable to determine if you are on the home network to do the URL switch.
+
+This prompt for permission will only appear when you go to configure a local network URL, and will not prompt you for permission until you decide to do so. In other words, if you do not want to use this feature, you will never be prompted for permission and the app will never attempt to read your network information.
+
+## Step-by-Step Guides
+
+### Adding a Server
 
 The process for adding a Stump server and an OPDS server is the same. The only difference is that an OPDS server requires a URL pointing to the root catalog for the feed
 
@@ -65,29 +99,25 @@ If you choose `Login` for auth, there will be no additional fields to fill in. I
 
 You may configure the following optional fields:
 
-- **Custom Headers**: Any custom headers you wish to send with each request
-
-You may enable/disable the following optional fields:
-
 - **Set as default server**: If enabled, the app will take you into this server when you open the app instead of the root screen
 
 </Step>
 
 <Step>
 
-#### Click `Add server`
+#### Click the top-right checkmark button to save the server
 
 </Step>
 
 </Steps>
 
-## Editing a Server
+### Editing a Server
 
 Force press on a server in the list to bring up a context menu. Select `Edit` to edit the server.
 
 The process for editing a server is the same as adding a server, so follow the same steps as above. The notable difference is that you may not name it the same as an existing server
 
-## Deleting a Server
+### Deleting a Server
 
 Force press on a server in the list to bring up a context menu. Select `Remove` to delete the server.
 

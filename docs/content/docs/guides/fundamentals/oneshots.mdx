@@ -1,0 +1,65 @@
+---
+title: One-Shots
+---
+
+import { File, Folder, Files } from 'fumadocs-ui/components/files'
+
+A one-shot is a series that contains a single book. Not all series only containing a single book are considered one-shots, though. If you want Stump to recognize and manage one-shots, it requires a specific library configuration.
+
+## How to Configure One-Shots
+
+<Callout title="One-Shot Library Configuration">
+	It is important to note that one-shot handling is optional per-library. So the instructions below
+	would need repeating for each library you want to enable one-shot handling for.
+</Callout>
+
+When creating a library, or when editing an existing one, enablement of one-shot features is determined by whether the `Oneshots directory` option is set. If it is set to a value, Stump will treat any book in that directory as a one-shot series. If it is not set, one-shots will not be recognized or managed by Stump for that library.
+
+### Choosing a One-Shot Directory
+
+This is entirely up to you, Stump supports arbitrary names for flexibility. A few things to keep in mind when choosing a directory name or structure:
+
+- It does not need to be named `_oneshots`, that is just a fairly-common convention
+- It **does** need to be a subdirectory of the library root, not a sibling or parent
+- You must only supply the relative path of the one-shots directory, not the full path
+- Nested books will not be ingested during a scan, so ensure you maintain a flat structure
+
+## Example Library Structure
+
+Let's take the following structure of a hypothetical `Indie` library as an example:
+
+<Files>
+    <Folder name="Indie" defaultOpen>
+        <Folder name="The Last Day of Rain (Claudia Matosa)">
+            <File name="Chapter 1.cbz" />
+            <File name="Chapter 2.cbz" />
+            <File name="Chapter 3.cbz" />
+            <File name="Chapter 4.cbz" />
+        </Folder>
+
+        <Folder name="_oneshots" defaultOpen>
+            <File name="Cry Wolf Girl (Ariel Slamet Ries).pdf" />
+            <File name="Skin Deep (Flo Woolley).pdf" />
+            <File name="The Chromatic Fantasy (H.A.).pdf" />
+
+            <Folder name="Nested Folder" defaultOpen>
+              <File name="This book will be ignored.cbz" />
+            </Folder>
+        </Folder>
+    </Folder>
+
+</Files>
+
+In this example, the one-shots directory is named `_oneshots` and is a direct subdirectory of the library root. Only 3 books are present at the top level of the `_oneshots` directory, and they will be recognized as one-shots. The nested folder will be ignored, and any books within it, at any level, will not be recognized as one-shots. The books in the `The Last Day of Rain (Claudia Matosa)` series will also not be recognized as one-shots, since they are not in the `_oneshots` directory, but will be treated as a normal series.
+
+When configuring my library, I would set the path to `/path/to/my/Indie` as the library root, and `_oneshots` as the one-shots directory. Stump will join those paths together internally during the scanning process as needed to index the one-shots (i.e., `/path/to/my/Indie/_oneshots`).
+
+## Notable One-Shot Behavior
+
+- When browsing a library's series, one-shot entries will link directly to the corresponding book, rather than a series overview page
+- When a library has one-shots enabled, a `One-shots` tab will become available in the web app's library view
+
+<Callout type="warn" title="Mobile App One-Shot Handling">
+	There is no special handling for one-shots in the mobile app yet, so they will appear as normal
+	series there. This may be addressed in a future release.
+</Callout>

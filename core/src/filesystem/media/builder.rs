@@ -40,6 +40,18 @@ pub struct BuiltMedia {
 	pub tags: Vec<String>,
 }
 
+impl BuiltMedia {
+	pub fn oneshot(self) -> Self {
+		Self {
+			media: media::ActiveModel {
+				is_oneshot: Set(true),
+				..self.media
+			},
+			..self
+		}
+	}
+}
+
 impl MediaBuilder {
 	pub fn new(
 		path: &Path,

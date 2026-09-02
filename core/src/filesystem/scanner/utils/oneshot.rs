@@ -72,8 +72,9 @@ fn build_oneshot_blocking<P: AsRef<Path>>(
 		metadata: None,
 	};
 
-	let media =
-		MediaBuilder::new(path, &id.to_string(), library_config, core_config).build()?;
+	let media = MediaBuilder::new(path, &id.to_string(), library_config, core_config)
+		.build()?
+		.oneshot();
 
 	Ok(BuiltOneshot { series, media })
 }

@@ -1089,6 +1089,10 @@ type LibraryConfig {
 	skipBookOverview: Boolean!
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
+	"""
+	the **relative path** to the directory where oneshots are stored,
+	relative to the library path. this is **not** a fully qualified path
+	"""
 	oneshotsDirectory: String
 	thumbnailConfig: ImageProcessorOptions
 	ignoreRules: [String!]
@@ -2526,7 +2530,7 @@ type Query {
 	numberOfLibraries: Int!
 	lastVisitedLibrary: Library
 	libraryMissingEntities(libraryId: ID!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMissingEntityResponse!
-	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, readingStatus: null, libraryType: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, readingStatus: null, libraryType: null, isOneshot: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	"Returns the available alphabet for all series in the server"
 	seriesAlphabet: JSONObject!
@@ -2925,6 +2929,7 @@ type Series {
 	resolvedName: String!
 	resolvedDescription: String
 	library: Library!
+	oneshotBook: Media
 	"Get media in this series"
 	media(take: Int = null, skip: Int = null): [Media!]!
 	mediaCount: Int!
@@ -2949,6 +2954,7 @@ input SeriesFilterInput {
 	libraryId: FieldFilterString = null
 	readingStatus: ComputedFilterReadingStatus = null
 	libraryType: ComputedFilterLibraryType = null
+	isOneshot: Boolean = null
 	metadata: SeriesMetadataFilterInput = null
 	library: LibraryFilterInput = null
 	_and: [SeriesFilterInput!] = null

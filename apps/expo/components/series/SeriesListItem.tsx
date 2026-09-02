@@ -38,6 +38,8 @@ type Props = {
 	onPress?: () => void
 }
 
+// TODO(oneshots): should this just lead to oneshotBook.id? for mobile feels like it warrants
+// a badge or something to indicate it is a oneshot?
 export default function SeriesListItem({ layout, series, onPress }: Props) {
 	const router = useRouter()
 	const {

@@ -34,6 +34,8 @@ pub struct SeriesFilterInput {
 	pub reading_status: Option<ConceptualFilter<ReadingStatus>>,
 	#[graphql(default)]
 	pub library_type: Option<ConceptualFilter<LibraryType>>,
+	#[graphql(default)]
+	pub is_oneshot: Option<bool>,
 
 	#[graphql(default)]
 	pub metadata: Option<SeriesMetadataFilterInput>,
@@ -270,6 +272,7 @@ impl SeriesFilterInput {
 				self.library_id
 					.map(|f| apply_string_filter(series::Column::LibraryId, f)),
 			)
+			.add_option(self.is_oneshot.map(|f| series::Column::IsOneshot.eq(f)))
 			.add_option(self.library_type.map(apply_library_type_filter))
 			.add_option(self.metadata.map(|f| f.into_filter()))
 			.add_option(self.library.map(|f| f.into_filter()))

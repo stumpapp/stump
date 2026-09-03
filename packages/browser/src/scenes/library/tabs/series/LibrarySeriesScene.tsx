@@ -188,13 +188,26 @@ export default function LibrarySeriesScene() {
 	const {
 		library: { id, name },
 	} = useLibraryContext()
+	const layoutKey = `library-${id}-series`
+	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
+		useSeriesLayout(
+			layoutKey,
+			useShallow((state) => ({
+				columns: state.columns,
+				layoutMode: state.layout,
+				persistedOrdering: state.ordering,
+				setColumns: state.setColumns,
+				setLayout: state.setLayout,
+				setPersistedOrdering: state.setOrdering,
+			})),
+		)
 	const {
 		filters: seriesFilters,
 		ordering,
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
-	} = useFilterScene()
+	} = useFilterScene({ persistedOrdering, setPersistedOrdering })
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const filters = seriesFilters as SeriesFilterInput
 	const orderBy = useSeriesURLOrderBy(ordering)
@@ -261,18 +274,6 @@ export default function LibrarySeriesScene() {
 		},
 		[prefetch, id, pageSize, orderBy, filters],
 	)
-	const layoutKey = `library-${id}-series`
-
-	const { layoutMode, setLayout, columns, setColumns } = useSeriesLayout(
-		layoutKey,
-		useShallow((state) => ({
-			columns: state.columns,
-			layoutMode: state.layout,
-			setColumns: state.setColumns,
-			setLayout: state.setLayout,
-		})),
-	)
-
 	const { sdk } = useSDK()
 	const { data, isLoading } = useGraphQL(
 		query,

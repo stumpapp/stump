@@ -279,7 +279,9 @@ impl ActiveModelBehavior for ActiveModel {
 			if self.status.is_not_set() {
 				self.status = ActiveValue::Set(FileStatus::Ready);
 			}
-
+			if self.is_oneshot.is_not_set() {
+				self.is_oneshot = ActiveValue::Set(false);
+			}
 			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
 		} else {
 			self.updated_at =

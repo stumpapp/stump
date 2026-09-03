@@ -26,7 +26,10 @@ pub async fn update_progress(app: &TestApp, book_id: &str, input: MediaProgressI
 			})),
 		)
 		.await;
-	assert!(result.get("data").is_some_and(|data| !data.is_null())); // i.e. it worked
+	assert!(
+		result.get("data").is_some_and(|data| !data.is_null()),
+		"expected data in response, got: {result:?}"
+	); // i.e. it worked
 }
 
 /// fudge the session updated_at to be outside the guard period where the server

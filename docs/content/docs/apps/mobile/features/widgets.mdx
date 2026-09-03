@@ -1,0 +1,59 @@
+---
+title: Widgets
+description: Learn about the widgets available in the mobile app
+---
+
+<Callout type="info">
+	Widgets are only available on iOS devices. The
+	[library](https://docs.expo.dev/versions/latest/sdk/widgets/) which drives this feature is not yet
+	available for Android devices, but it is planned for the future.
+</Callout>
+
+Stump has limited support for [widgets](https://support.apple.com/en-us/118610) on iOS devices. There are definitely some quirks with the current implementation, so be sure to read the behaviors and limitations for each supported widget type below.
+
+A few common behaviors to be aware of for all widgets:
+
+- All images are downloaded and resized for the widget, since it cannot request a configured server for images for various technical reasons
+- If an image is meant to be a book thumbnail, it will adhere to your configured thumbnail ratio settings
+- Not all widgets support all available sizes, nor will sizes render the same
+
+## Supported Widgets
+
+<Callout type="info">
+	"[Accessory](https://developer.apple.com/design/human-interface-guidelines/widgets/#Accessory-widgets)"
+	widgets are those which can be displayed on the lock screen. Any named widget in this section that
+	isn't an accessory will be available for the home screen only. Apple provides general guidance and
+	the ability to preview the different sizes
+	[here](https://developer.apple.com/design/human-interface-guidelines/widgets/#System-family-widgets).
+</Callout>
+
+### Reading Now
+
+A widget that shows up to 5 books that you are currently reading, sorted by the most recently read. Tapping on a book will open the app and take you to the book details page.
+
+A few behaviors to be aware of:
+
+- This widget is updated when entering any Stump server or the local library tab
+- Only the top 5 books will be considered for the widget, across all sources
+- If you have existing books in the widget, any update will cycle books in the widget and not necessarily overwrite them
+  - For example, let's say you have 3 books in the widget from offline reading and you then enter a server and the widget pulls the latest 5 books from that server. The widget will sort the current books with the new books and display the top 5 from that merged set
+
+The sizes also render a little differently:
+
+- Accessory rectangular: Shows 1 book very minimally, no images
+- Small: Shows 1 book
+- Medium: Shows up to 3 books
+- Large: Shows up to 5 books
+
+## Future Plans
+
+I'd like to add the following features in the future:
+
+- Book club widgets
+- Library list widgets
+- Statistics widgets, e.g. hours read, books read, etc.
+
+<Callout type="idea">
+	If you have ideas for other widgets you'd like to see, feel free to suggest it on
+	[GitHub](https://github.com/stumpapp/stump/issues/new/choose)
+</Callout>

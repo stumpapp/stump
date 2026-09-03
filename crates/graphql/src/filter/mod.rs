@@ -2,16 +2,21 @@ use async_graphql::{InputObject, InputType, OneofObject};
 use filter_gen::IntoFilter;
 use models::shared::enums::{FileStatus, LibraryType, ReadingStatus};
 use sea_orm::{
-	prelude::DateTimeWithTimeZone, sea_query::ConditionExpression, Condition, Value,
+	prelude::DateTimeWithTimeZone,
+	sea_query::{ConditionExpression, Expr as QExpr, Func},
+	Condition, Value,
 };
 use serde::{Deserialize, Serialize};
 
+pub mod keyword;
 pub mod library;
 pub mod log;
 pub mod media;
 pub mod media_metadata;
 pub mod series;
 pub mod series_metadata;
+
+use keyword::{like_contains, like_ends_with, like_starts_with};
 
 // TODO: This probably needs a rewrite to make it more compatible with async-graphql. The big issue is generics
 // with input objects. Look at and yoink from seaography for how they are doing things
@@ -50,7 +55,7 @@ pub(crate) fn apply_string_filter<C, T>(
 	filter: StringLikeFilter<T>,
 ) -> Condition
 where
-	C: sea_orm::ColumnTrait,
+	C: sea_orm::ColumnTrait + Copy,
 	T: InputType + Into<Value> + Into<String>,
 {
 	match filter {
@@ -60,24 +65,62 @@ where
 		StringLikeFilter::NoneOf(values) => {
 			Condition::all().add(column.is_not_in(values))
 		},
-		StringLikeFilter::Like(value) => Condition::all().add(column.like(value)),
-		StringLikeFilter::Contains(value) => Condition::all().add(column.contains(value)),
-		StringLikeFilter::Excludes(value) => Condition::all().add(column.not_like(value)),
+		// FIXME: a bunch of these string filters have different case sensitivity depending on sqlite vs pgsql,
+		// so to align them a bit i just lowercased the column and the value for all of them. honestly
+		// not ideal, i'd rather use the dedicated fns for each, but for now leaving
+		// like this
+		StringLikeFilter::Like(value) => {
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(format!("%{}%", v.to_lowercase())),
+			)
+		},
+		StringLikeFilter::Contains(value) => {
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(like_contains(&v)),
+			)
+		},
+		StringLikeFilter::Excludes(value) => {
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.not_like(like_contains(&v)),
+			)
+		},
 		StringLikeFilter::StartsWith(value) => {
-			Condition::all().add(column.starts_with(value))
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(like_starts_with(&v)),
+			)
 		},
 		StringLikeFilter::EndsWith(value) => {
-			Condition::all().add(column.ends_with(value))
+			let v: String = value.into();
+			Condition::all().add(
+				QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+					.like(like_ends_with(&v)),
+			)
 		},
 		StringLikeFilter::LikeAnyOf(values) => {
 			values.into_iter().fold(Condition::any(), |acc, value| {
-				acc.add(column.contains(value))
+				let v: String = value.into();
+				acc.add(
+					QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+						.like(like_contains(&v)),
+				)
 			})
 		},
 		StringLikeFilter::LikeNoneOf(values) => values
 			.into_iter()
 			.fold(Condition::any(), |acc, value| {
-				acc.add(column.contains(value))
+				let v: String = value.into();
+				acc.add(
+					QExpr::expr(Func::lower(QExpr::col(column.as_column_ref())))
+						.like(like_contains(&v)),
+				)
 			})
 			.not(),
 	}
@@ -186,7 +229,7 @@ mod tests {
 
 		assert_eq!(
 			sql,
-			r#"SELECT  FROM "media" WHERE "media"."name" LIKE '%test%' OR "media"."name" LIKE '%example%'"#
+			r#"SELECT  FROM "media" WHERE LOWER("media"."name") LIKE '%test%' ESCAPE '\' OR LOWER("media"."name") LIKE '%example%' ESCAPE '\'"#
 		);
 	}
 
@@ -203,7 +246,70 @@ mod tests {
 
 		assert_eq!(
 			sql,
-			r#"SELECT  FROM "media" WHERE NOT ("media"."name" LIKE '%test%' OR "media"."name" LIKE '%example%')"#
+			r#"SELECT  FROM "media" WHERE NOT (LOWER("media"."name") LIKE '%test%' ESCAPE '\' OR LOWER("media"."name") LIKE '%example%' ESCAPE '\')"#
+		);
+	}
+
+	#[test]
+	fn test_contains_escapes_wildcards_in_the_pattern() {
+		let sql = media::Entity::find()
+			.filter(apply_string_filter(
+				media::Column::Name,
+				StringLikeFilter::Contains("50%".to_string()),
+			))
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+
+		assert_eq!(
+			sql,
+			r#"SELECT  FROM "media" WHERE LOWER("media"."name") LIKE '%50\%%' ESCAPE '\'"#
+		);
+	}
+
+	#[test]
+	fn test_starts_and_ends_with_escape_wildcards() {
+		let starts = media::Entity::find()
+			.filter(apply_string_filter(
+				media::Column::Name,
+				StringLikeFilter::StartsWith("file_".to_string()),
+			))
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+		assert_eq!(
+			starts,
+			r#"SELECT  FROM "media" WHERE LOWER("media"."name") LIKE 'file\_%' ESCAPE '\'"#
+		);
+
+		let ends = media::Entity::find()
+			.filter(apply_string_filter(
+				media::Column::Name,
+				StringLikeFilter::EndsWith("_v1".to_string()),
+			))
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+		assert_eq!(
+			ends,
+			r#"SELECT  FROM "media" WHERE LOWER("media"."name") LIKE '%\_v1' ESCAPE '\'"#
+		);
+	}
+
+	#[test]
+	fn test_excludes_is_a_substring_negation() {
+		let sql = media::Entity::find()
+			.filter(apply_string_filter(
+				media::Column::Name,
+				StringLikeFilter::Excludes("annual".to_string()),
+			))
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+
+		assert_eq!(
+			sql,
+			r#"SELECT  FROM "media" WHERE LOWER("media"."name") NOT LIKE '%annual%' ESCAPE '\'"#
 		);
 	}
 }

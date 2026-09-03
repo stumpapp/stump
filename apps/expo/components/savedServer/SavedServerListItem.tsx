@@ -1,7 +1,8 @@
 import { queryClient } from '@stump/client'
 import { Api } from '@stump/sdk'
 import { useRouter } from 'expo-router'
-import { KeyRound, Sliders, SquareX, Trash } from 'lucide-react-native'
+import { KeyRound, Rss, Sliders, SquareX, Trash } from 'lucide-react-native'
+import { useMemo } from 'react'
 import { View } from 'react-native'
 import { match } from 'ts-pattern'
 
@@ -10,39 +11,26 @@ import { usePreferencesStore } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 import { SavedServer, useSavedServers } from '~/stores/savedServer'
 
+import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
+import { ServerLogo, ServerLogoGlow } from './ServerLogo'
 
 type Props = {
 	server: SavedServer
 	onEdit: () => void
 	onDelete: () => void
-	forceOPDS?: boolean
 }
 
-export default function SavedServerListItem({ server, onEdit, onDelete, forceOPDS }: Props) {
+export default function SavedServerListItem({ server, onEdit, onDelete }: Props) {
 	const { t } = useTranslate()
-
-	const maskURLs = usePreferencesStore((state) => state.maskURLs)
-
-	const formatURL = (url: string) => {
-		try {
-			const urlObj = new URL(url)
-			const host = urlObj.host
-			const domain = urlObj.hostname
-
-			return maskURLs
-				? `${urlObj.protocol}//${host.replace(domain, domain.replace(/./g, '*'))}`
-				: `${urlObj.protocol}//${host}`
-		} catch {
-			return maskURLs ? url.replace(/./g, '*') : url
-		}
-	}
 
 	const { deleteServerToken } = useSavedServers()
 
 	const deleteCachedSdk = useCacheStore((state) => state.removeSDK)
 	const cachedServerSdk = useCacheStore((state) => state.sdks[server.id] as Api | undefined)
+
+	const textCase = usePreferencesStore((state) => state.textCase)
 
 	const onClearCache = () => {
 		// We can assume no SDK means no cache
@@ -57,24 +45,63 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 	const router = useRouter()
 
 	const serverPath = match(server.kind)
-		.with('stump', () => (forceOPDS ? '/opds/[id]' : '/server/[id]'))
+		.with('stump', () => '/server/[id]')
 		.with('opds', () => '/opds/[id]')
 		.with('opds-legacy', () => '/opds-legacy/[id]')
 		.exhaustive()
 
+	const serverKind = useMemo(() => {
+		const kind = match(server.kind)
+			.with('stump', () => 'Stump')
+			.with('opds', () => 'OPDS v2.0')
+			.with('opds-legacy', () => 'OPDS v1.2')
+			.exhaustive()
+		// don't really bother with the other cases, opds is an acronym + the version shorthand
+		// so really the only one that would make sense is lowercase
+		return textCase === 'lowerCase' ? kind.toLowerCase() : kind
+	}, [server.kind, textCase])
+
+	const { itemWidth } = useGridItemSize()
+
+	const onPress = (overridePath?: string) => {
+		router.push({
+			// @ts-expect-error: It's fine
+			pathname: overridePath || serverPath,
+			params: {
+				id: server.id,
+			},
+		})
+	}
+
 	return (
-		<View className="w-full">
+		<View className="mx-auto flex-1" style={{ width: itemWidth }}>
 			<ContextMenu
-				onPress={() =>
-					router.push({
-						// @ts-expect-error: It's fine
-						pathname: serverPath,
-						params: {
-							id: server.id,
-						},
-					})
-				}
+				onPress={() => onPress()}
 				groups={[
+					...(server.kind === 'stump'
+						? [
+								{
+									items: [
+										{
+											label: t('common.accessOpdsV2'),
+											icon: {
+												ios: 'antenna.radiowaves.left.and.right',
+												android: Rss,
+											},
+											onPress: () => onPress('/opds/[id]'),
+										} as const,
+										{
+											label: t('common.accessOpdsV1'),
+											icon: {
+												ios: 'antenna.radiowaves.left.and.right',
+												android: Rss,
+											},
+											onPress: () => onPress('/opds-legacy/[id]'),
+										} as const,
+									],
+								},
+							]
+						: []),
 					{
 						items: [
 							{
@@ -94,7 +121,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 								onPress: onClearCache,
 								disabled: !cachedServerSdk,
 							},
-							...(server.kind === 'stump' && !forceOPDS
+							...(server.kind === 'stump'
 								? [
 										{
 											label: t('savedServerActions.discardTokens.label'),
@@ -107,13 +134,17 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 												await deleteServerToken(server.id)
 												const idsToDelete = [
 													server.id,
-													...(server.stumpOPDS ? [`${server.id}-opds`] : []),
+													...(server.kind === 'stump' ? [`${server.id}-opds`] : []),
 												]
 												idsToDelete.forEach((id) => deleteCachedSdk(id))
 											},
 										} as const,
 									]
 								: []),
+						],
+					},
+					{
+						items: [
 							{
 								label: t('common.delete'),
 								icon: {
@@ -127,10 +158,27 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 					},
 				]}
 			>
-				<View className="bg-background-muted squircle rounded-3xl px-4 py-3 w-full items-start border border-edge bg-background-surface">
-					<View className="gap-1 flex-1 items-start justify-center">
-						<Text className="text-lg">{server.name}</Text>
-						<Text className="flex-1 text-foreground-muted">{formatURL(server.url)}</Text>
+				<View className="px-4 py-4 tablet:py-5 squircle ios:rounded-[2rem] bg-background-surface h-36 border-black/5 dark:border-white/[0.07] flex w-full flex-1 overflow-hidden rounded-3xl border">
+					<ServerLogoGlow server={server} width={itemWidth} height={126} />
+
+					<View className="flex-1 flex-row items-start justify-between">
+						{/*TODO: pulsing dot, green = ping works + authed, yellow = ping works but 4xx err, red ping failed*/}
+						<Text
+							className="text-base font-medium"
+							numberOfLines={2}
+							style={{
+								maxWidth: itemWidth - 56, // breathing room for icon and text
+							}}
+						>
+							{server.name}
+						</Text>
+						<ServerLogo server={server} />
+					</View>
+
+					<View className="flex-row items-start justify-between">
+						<Text size="sm" className="text-foreground-muted">
+							{serverKind}
+						</Text>
 					</View>
 				</View>
 			</ContextMenu>

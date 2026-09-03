@@ -1,44 +1,46 @@
 import { ReadingDirection } from '@stump/graphql'
-import { fireEvent, render } from '@testing-library/react'
+import { LocaleProvider } from '@stump/i18n'
+import { fireEvent, render, screen } from '@testing-library/react'
 
 import ReadingDirectionSelect from '../ReadingDirectionSelect'
 
 describe('ReadingDirectionSelect', () => {
+	const renderSubject = (onChange = vi.fn()) =>
+		render(
+			<LocaleProvider locale="en-US">
+				<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />
+			</LocaleProvider>,
+		)
+
 	const originalWarn = console.warn
 	beforeAll(() => {
-		console.warn = jest.fn()
+		console.warn = vi.fn()
 	})
 	afterAll(() => {
 		console.warn = originalWarn
 	})
 
 	it('should render', () => {
-		expect(
-			render(<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={jest.fn()} />)
-				.container,
-		).not.toBeEmptyDOMElement()
+		expect(renderSubject().container).not.toBeEmptyDOMElement()
 	})
 
 	it('should properly update the reading direction', () => {
-		const onChange = jest.fn()
-		const { getByLabelText } = render(
-			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
-		)
+		const onChange = vi.fn()
+		renderSubject(onChange)
+		const select = screen.getByRole('combobox')
 
-		fireEvent.change(getByLabelText('Reading direction'), { target: { value: 'RTL' } })
+		fireEvent.change(select, { target: { value: 'RTL' } })
 		expect(onChange).toHaveBeenCalledWith(ReadingDirection.Rtl)
 
-		fireEvent.change(getByLabelText('Reading direction'), { target: { value: 'LTR' } })
+		fireEvent.change(select, { target: { value: 'LTR' } })
 		expect(onChange).toHaveBeenCalledWith(ReadingDirection.Ltr)
 	})
 
 	it('should not allow invalid reading directions', () => {
-		const onChange = jest.fn()
-		const { getByLabelText } = render(
-			<ReadingDirectionSelect direction={ReadingDirection.Ltr} onChange={onChange} />,
-		)
+		const onChange = vi.fn()
+		renderSubject(onChange)
 
-		fireEvent.change(getByLabelText('Reading direction'), { target: { value: 'invalid' } })
+		fireEvent.change(screen.getByRole('combobox'), { target: { value: 'invalid' } })
 		expect(onChange).not.toHaveBeenCalled()
 	})
 })

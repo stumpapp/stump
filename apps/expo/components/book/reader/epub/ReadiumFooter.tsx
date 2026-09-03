@@ -177,7 +177,7 @@ export default function ReadiumFooter() {
 								<Pressable
 									onPress={() => {
 										timer.pause()
-										setElapsedSeconds(timer.getCurrentTime() || 0)
+										setElapsedSeconds(timer.getTotalSeconds())
 										setShowMenu(true)
 										setShowControls(false)
 									}}

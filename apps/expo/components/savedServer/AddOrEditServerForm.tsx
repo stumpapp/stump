@@ -16,8 +16,8 @@ import { z } from 'zod'
 import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore, useSavedServers } from '~/stores'
-import { SavedServerWithConfig } from '~/stores/savedServer'
+import { useSavedServers } from '~/stores'
+import { SavedServerWithConfig, ServerConfig } from '~/stores/savedServer'
 
 import { DottedLine } from '../book/overview/DottedLine'
 import { Button, Heading, Input, Label, Loader, Switch, Text } from '../ui'
@@ -39,10 +39,10 @@ export default function AddOrEditServerForm({
 }: Props) {
 	const colors = useColors()
 	const { t } = useTranslate()
-	const { savedServers, stumpEnabled } = useSavedServers()
+	const { savedServers } = useSavedServers()
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
-		defaultValues: getDefaultValues(stumpEnabled, editingServer),
+		defaultValues: getDefaultValues(editingServer),
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
@@ -53,8 +53,6 @@ export default function AddOrEditServerForm({
 	const { errors } = useFormState({ control })
 
 	const headerSchema = createHeaderSchema(t)
-
-	const maskURLs = usePreferencesStore((state) => state.maskURLs)
 
 	const [didConnect, setDidConnect] = useState(false)
 	const [isCheckingConnection, setIsCheckingConnection] = useState(false)
@@ -124,7 +122,6 @@ export default function AddOrEditServerForm({
 	useEffect(() => {
 		if (kind !== 'stump') {
 			setValue('defaultServer', false)
-			setValue('stumpOPDS', false)
 		}
 	}, [setValue, kind])
 
@@ -137,16 +134,16 @@ export default function AddOrEditServerForm({
 		}
 	}, [didConnect])
 
-	const [defaultServer, stumpOPDS, authMode] = useWatch({
+	const [defaultServer, authMode] = useWatch({
 		control,
-		name: ['defaultServer', 'stumpOPDS', 'authMode'],
+		name: ['defaultServer', 'authMode'],
 	})
 
 	const renderAuthMode = () => {
-		if (authMode === 'default') {
+		if (authMode === 'login' || authMode === 'none') {
 			return (
-				<View className="squircle rounded-lg p-3 border border-dashed border-edge">
-					<Text className="text-foreground-muted">{t(getKey('auth.default.description'))}</Text>
+				<View className="squircle p-3 border-edge rounded-lg border border-dashed">
+					<Text className="text-foreground-muted">{t(getKey(`auth.${authMode}.description`))}</Text>
 				</View>
 			)
 		} else if (authMode === 'basic') {
@@ -216,8 +213,8 @@ export default function AddOrEditServerForm({
 
 	const formValues = useWatch({ control })
 	const isUpdateReady = useMemo(
-		() => !isEqual(getDefaultValues(stumpEnabled, editingServer), formValues),
-		[formValues, stumpEnabled, editingServer],
+		() => !isEqual(getDefaultValues(editingServer), formValues),
+		[formValues, editingServer],
 	)
 
 	const onURLFocused = useCallback(
@@ -342,7 +339,6 @@ export default function AddOrEditServerForm({
 						onChangeText={onChange}
 						value={value}
 						errorMessage={errors.url?.message}
-						secureTextEntry={maskURLs}
 						onFocus={onURLFocused}
 					/>
 				)}
@@ -358,7 +354,7 @@ export default function AddOrEditServerForm({
 						tintColor={didConnect ? colors.fill.success.secondary : undefined}
 						isInteractive={!!url}
 						// only affects android
-						className={cn('border border-edge bg-background-surface', {
+						className={cn('border-edge bg-background-surface border', {
 							'border-transparent bg-transparent': isCheckingConnection,
 							'bg-fill-success-secondary': didConnect,
 						})}
@@ -385,7 +381,7 @@ export default function AddOrEditServerForm({
 				</Text>
 
 				{formValues.customHeaders?.length && (
-					<View className="squircle rounded-lg w-full overflow-hidden border border-edge">
+					<View className="squircle border-edge w-full overflow-hidden rounded-lg border">
 						{formValues.customHeaders.map((header, index) => (
 							<Swipeable
 								key={index}
@@ -399,7 +395,7 @@ export default function AddOrEditServerForm({
 									className={cn(
 										'gap-2 p-3 tablet:p-4 w-full flex-row items-center justify-between',
 										{
-											'border-b border-edge': index !== (formValues.customHeaders?.length || 0) - 1,
+											'border-edge border-b': index !== (formValues.customHeaders?.length || 0) - 1,
 										},
 									)}
 								>
@@ -412,7 +408,7 @@ export default function AddOrEditServerForm({
 				)}
 
 				{isAddingHeader ? (
-					<View className="squircle gap-2 rounded-2xl p-3 border border-edge">
+					<View className="squircle gap-2 p-3 border-edge rounded-2xl border">
 						<Input
 							label={t('common.name')}
 							autoCorrect={false}
@@ -454,11 +450,12 @@ export default function AddOrEditServerForm({
 						<SegmentedPicker
 							value={value}
 							options={[
-								{ label: t(getKey('auth.default.label')), value: 'default' },
+								{ label: t(getKey('auth.none.label')), value: 'none' },
+								{ label: t(getKey('auth.login.label')), value: 'login' },
 								{ label: t(getKey('auth.basic')), value: 'basic' },
 								{ label: t(getKey('auth.token.label')), value: 'token' },
 							]}
-							onValueChange={(v) => onChange(v as 'default' | 'basic' | 'token')}
+							onValueChange={(v) => onChange(v)}
 						/>
 					)}
 					name="authMode"
@@ -487,27 +484,6 @@ export default function AddOrEditServerForm({
 						disabled={kind !== 'stump'}
 					/>
 				</View>
-
-				{kind === 'stump' && (
-					<View className="gap-6 w-full flex-row items-center justify-between">
-						<Label
-							nativeID="stumpOPDS"
-							onPress={() => {
-								form.setValue('stumpOPDS', !stumpOPDS)
-							}}
-							disabled={kind !== 'stump'}
-						>
-							{t(getKey('enableOPDS'))}
-						</Label>
-
-						<Switch
-							checked={stumpOPDS}
-							onCheckedChange={(value) => form.setValue('stumpOPDS', value)}
-							nativeID="stumpOPDS"
-							disabled={kind !== 'stump'}
-						/>
-					</View>
-				)}
 			</View>
 		</View>
 	)
@@ -528,7 +504,7 @@ function RenderHeaderAction(
 	return (
 		<Reanimated.View style={styleAnimation}>
 			<Pressable
-				className="w-14 h-full items-center justify-center bg-fill-danger"
+				className="w-14 bg-fill-danger h-full items-center justify-center"
 				onPress={onDelete}
 			>
 				{({ pressed }) => (
@@ -542,18 +518,17 @@ function RenderHeaderAction(
 const defaultValues = {
 	defaultServer: false,
 	kind: 'stump',
-	stumpOPDS: false,
 	name: '',
 	url: '',
-	authMode: 'default',
+	authMode: 'login',
 	token: '',
 	basicUser: '',
 	basicPassword: '',
 } as AddOrEditServerSchema
 
-const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWithConfig | null) => {
+const getDefaultValues = (editingServer?: SavedServerWithConfig | null) => {
 	if (!editingServer) {
-		return { ...defaultValues, kind: stumpEnabled ? 'stump' : 'opds' } as AddOrEditServerSchema
+		return { ...defaultValues, kind: 'stump' } as AddOrEditServerSchema
 	}
 
 	const configs = match(editingServer.config?.auth)
@@ -577,8 +552,8 @@ const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWith
 				token: '',
 			}),
 		)
-		.otherwise(() => ({
-			authMode: 'default',
+		.otherwise((config) => ({
+			authMode: config?.authless ? 'none' : 'login',
 			basicUser: '',
 			basicPassword: '',
 			token: '',
@@ -589,7 +564,6 @@ const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWith
 		name: editingServer.name,
 		url: editingServer.url,
 		defaultServer: editingServer.defaultServer ?? false,
-		stumpOPDS: editingServer.stumpOPDS,
 		customHeaders: Object.entries(editingServer.config?.customHeaders || {}).map(
 			([key, value]) => ({
 				key,
@@ -610,6 +584,18 @@ const createHeaderSchema = (t: (key: string) => string) =>
 			message: t(getKey('validations.cannotSetAuthorizationHeader')),
 		})
 
+export const authMode = z.union([
+	// i realized i needed a 'none' option for connections where auth is "not required"
+	// from the perspective of the api instance, e.g. some servers (including stump) support
+	// auth in the URL (like an api key part of the route path) and thus effectively there is
+	// no auth flow (at least from the perspective of this client). the reason this was important
+	// is because authless connections should still support some level of auto-sync (e.g., logos)
+	z.literal('none'),
+	z.literal('token'),
+	z.literal('basic'),
+	z.literal('login'),
+])
+
 const createSchema = (names: string[], t: (key: string) => string) =>
 	z.object({
 		name: z
@@ -624,10 +610,7 @@ const createSchema = (names: string[], t: (key: string) => string) =>
 			.union([z.literal('stump'), z.literal('opds'), z.literal('opds-legacy')])
 			.default('stump'),
 		defaultServer: z.boolean().default(false),
-		stumpOPDS: z.boolean().default(false),
-		authMode: z
-			.union([z.literal('token'), z.literal('basic'), z.literal('default')])
-			.default('default'),
+		authMode: authMode.default('login'),
 		token: z.string().optional(),
 		basicUser: z.string().optional(),
 		basicPassword: z.string().optional(),
@@ -636,21 +619,14 @@ const createSchema = (names: string[], t: (key: string) => string) =>
 export type AddOrEditServerSchema = z.infer<ReturnType<typeof createSchema>>
 
 export const transformFormData = (data: AddOrEditServerSchema) => {
-	const baseConfig =
-		data.authMode !== 'default'
-			? {
-					auth: data.token
-						? { bearer: data.token as string }
-						: data.basicUser
-							? {
-									basic: {
-										username: data.basicUser as string,
-										password: data.basicPassword as string,
-									},
-								}
-							: undefined,
-				}
-			: undefined
+	const authConfig = match(data.authMode)
+		.with('token', () => ({ bearer: data.token as string }))
+		.with('basic', () => ({
+			basic: { username: data.basicUser as string, password: data.basicPassword as string },
+		}))
+		.with('none', () => ({ authless: true }))
+		.otherwise(() => undefined)
+	const baseConfig = authConfig ? ({ auth: authConfig } satisfies ServerConfig) : undefined
 
 	const config =
 		!!data.customHeaders && data.customHeaders.length > 0
@@ -668,7 +644,6 @@ export const transformFormData = (data: AddOrEditServerSchema) => {
 
 	return {
 		...omit(data, ['authMode', 'token', 'basicUser', 'basicPassword', 'customHeaders']),
-		stumpOPDS: data.kind === 'stump' ? data.stumpOPDS : false,
 		config,
 	}
 }

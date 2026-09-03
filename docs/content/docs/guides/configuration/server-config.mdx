@@ -2,9 +2,9 @@
 title: Server Config
 ---
 
-
 <Callout type="info">
-Stump will use default options if you don't manually configure them. When following this guide, keep in mind you only need to provide values for things you wish to override
+	Stump will use default options if you don't manually configure them. When following this guide,
+	keep in mind you only need to provide values for things you wish to override
 </Callout>
 
 There are a number of configuration options that you can set to customize Stump's behavior. You will be setting these options in the `Stump.toml` file, located within your configured config directory, but you can also set them as environment variables.
@@ -19,9 +19,9 @@ Below are the available configuration options, loosely grouped by category. If y
 
 The OP address that the Stump server listens on.
 
-| Type    | Default Value | TOML Key |
-| ------- | ------------- | -------- |
-| String  | `0.0.0.0`     | `ip`   |
+| Type   | Default Value | TOML Key |
+| ------ | ------------- | -------- |
+| String | `0.0.0.0`     | `ip`     |
 
 ### STUMP_PORT
 
@@ -47,14 +47,6 @@ The directory the contains the web bundle for the web UI
 | ------ | ------------- | ------------ |
 | String | `./dist`      | `client_dir` |
 
-### STUMP_DB_PATH
-
-Overrides the path where Stump stores its database file. By default this path is same as parent directory of `STUMP_CONFIG_DIR`. If set the database would be put at `STUMP_DB_PATH/stump.db`.
-
-| Type   | Default Value | TOML Key  |
-| ------ | ------------- | --------- |
-| String |               | `db_path` |
-
 ### STUMP_ALLOWED_ORIGINS
 
 A **comma-delineated** list of allowed origins for the Stump API. If you're trying to access the API from a different domain, you'll need to add it to this list. By default, origins corresponding to the Tauri desktop application are allowed, and the host machine's IP address with the configured port is allowed for both HTTP and HTTPS.
@@ -76,6 +68,73 @@ Without this config enabled, Stump will ignore these headers entirely and rely o
 | Type    | Default Value | TOML Key              |
 | ------- | ------------- | --------------------- |
 | Boolean | `false`       | `trust_proxy_headers` |
+
+## Database
+
+See the [Database](/docs/guides/configuration/database) guide for more information on configuring the database.
+
+### STUMP_DB_PATH
+
+Overrides the path where Stump stores its database file. By default this path is same as parent directory of `STUMP_CONFIG_DIR`. If set the database would be put at `STUMP_DB_PATH/stump.db`.
+
+| Type   | Default Value | TOML Key  |
+| ------ | ------------- | --------- |
+| String |               | `db_path` |
+
+### STUMP_DATABASE_URL
+
+The database connection URL. Technically, this will work for either PostgreSQL or SQLite, but [STUMP_DB_PATH](#stump_db_path) is the preferred way to configure SQLite.
+
+| Type   | Default Value | TOML Key                  |
+| ------ | ------------- | ------------------------- |
+| String |               | Not configurable via TOML |
+
+### STUMP_DB_HOST
+
+The host of the database. This is only used when connecting to a PostgreSQL database, and not required if [STUMP_DATABASE_URL](#stump_database_url) is set.
+
+| Type   | Default Value | TOML Key                  |
+| ------ | ------------- | ------------------------- |
+| String |               | Not configurable via TOML |
+
+### STUMP_DB_PORT
+
+The port of the database. This is only used when connecting to a PostgreSQL database, and not required if [STUMP_DATABASE_URL](#stump_database_url) is set.
+
+| Type    | Default Value | TOML Key                  |
+| ------- | ------------- | ------------------------- |
+| Integer |               | Not configurable via TOML |
+
+### STUMP_DB_USER
+
+The username for the database. This is only used when connecting to a PostgreSQL database, and not required if [STUMP_DATABASE_URL](#stump_database_url) is set.
+
+| Type   | Default Value | TOML Key                  |
+| ------ | ------------- | ------------------------- |
+| String |               | Not configurable via TOML |
+
+### STUMP_DB_PASSWORD
+
+The password for the database. This is only used when connecting to a PostgreSQL database, and not required if [STUMP_DATABASE_URL](#stump_database_url) is set.
+
+| Type   | Default Value | TOML Key                  |
+| ------ | ------------- | ------------------------- |
+| String |               | Not configurable via TOML |
+
+### STUMP_DB_NAME
+
+The name of the database. This is only used when connecting to a PostgreSQL database, and not required if [STUMP_DATABASE_URL](#stump_database_url) is set.
+
+| Type   | Default Value | TOML Key                  |
+| ------ | ------------- | ------------------------- |
+| String |               | Not configurable via TOML |
+
+### STUMP_DB_TIMEOUT_SECS
+
+The timeout for both SQLite and PostgreSQL database connections, in seconds. It behaves differently for each database:
+
+- For SQLite, this is the timeout used for both acquiring and busy waiting for a database connection
+- For PostgreSQL, this is the timeout used for acquiring a database connection
 
 ## Logging
 
@@ -114,9 +173,9 @@ Controls whether logs are formatted in a human-friendly, pretty-printed style.
 
 Controls the computational cost used when hashing user passwords.
 
-| Type    | Default Value | TOML Key               |
-| ------- | ------------- | ---------------------- |
-| Integer | `12`          | `password_hash_cost`   |
+| Type    | Default Value | TOML Key             |
+| ------- | ------------- | -------------------- |
+| Integer | `12`          | `password_hash_cost` |
 
 ### SESSION_TTL
 
@@ -130,9 +189,9 @@ The time-to-live for session cookies. This is the amount of time that a session 
 
 The time (_in seconds_) between each session expiry cleanup check. The check will remove any expired sessions from the database.
 
-| Type    | Default Value | TOML Key                             |
-| ------- | ------------- | ------------------------------------ |
-| Integer | `60`          | `expired_session_cleanup_interval`   |
+| Type    | Default Value | TOML Key                           |
+| ------- | ------------- | ---------------------------------- |
+| Integer | `60`          | `expired_session_cleanup_interval` |
 
 ## OpenID Connect (OIDC)
 
@@ -148,15 +207,16 @@ enabled = true
 issuer_url = "https://example.com"
 # other OIDC config...
 ```
+
 </Callout>
 
 ### STUMP_OIDC_ENABLED
 
 Whether or not to enable OpenID Connect (OIDC) authentication. When enabled, users can sign in using an external identity provider. See the [OIDC](/docs/guides/access-control/oidc) guide for more information.
 
-| Type    | Default Value | TOML Key           |
-| ------- | ------------- | ------------------ |
-| Boolean | `false`       | `[oidc].enabled`   |
+| Type    | Default Value | TOML Key         |
+| ------- | ------------- | ---------------- |
+| Boolean | `false`       | `[oidc].enabled` |
 
 ### STUMP_OIDC_ISSUER_URL
 
@@ -164,9 +224,9 @@ The base URL of your OIDC provider. This should be the URL where the provider's 
 
 **Required when `STUMP_OIDC_ENABLED` is `true`.**
 
-| Type   | Default Value | TOML Key              |
-| ------ | ------------- | --------------------- |
-| String | N/A           | `[oidc].issuer_url`   |
+| Type   | Default Value | TOML Key            |
+| ------ | ------------- | ------------------- |
+| String | N/A           | `[oidc].issuer_url` |
 
 **Example:** `https://pocketid.stump.mycloud`
 
@@ -176,9 +236,9 @@ The client ID provided by your OIDC provider for the Stump application
 
 **Required when `STUMP_OIDC_ENABLED` is `true`.**
 
-| Type   | Default Value | TOML Key            |
-| ------ | ------------- | ------------------- |
-| String | N/A           | `[oidc].client_id`  |
+| Type   | Default Value | TOML Key           |
+| ------ | ------------- | ------------------ |
+| String | N/A           | `[oidc].client_id` |
 
 ### STUMP_OIDC_CLIENT_SECRET
 
@@ -186,25 +246,25 @@ The client secret provided by your OIDC provider for the Stump application
 
 **Required when `STUMP_OIDC_ENABLED` is `true`.**
 
-| Type   | Default Value | TOML Key                |
-| ------ | ------------- | ----------------------- |
-| String | N/A           | `[oidc].client_secret`  |
+| Type   | Default Value | TOML Key               |
+| ------ | ------------- | ---------------------- |
+| String | N/A           | `[oidc].client_secret` |
 
 ### STUMP_OIDC_SCOPES
 
 A **comma-separated** list of additional scopes to request from the OIDC provider
 
-| Type   | Default Value          | TOML Key         |
-| ------ | ---------------------- | ---------------- |
-| String | `openid,email,profile` | `[oidc].scopes`  |
+| Type   | Default Value          | TOML Key        |
+| ------ | ---------------------- | --------------- |
+| String | `openid,email,profile` | `[oidc].scopes` |
 
 ### STUMP_OIDC_ALLOW_REGISTRATION
 
 Whether or not to allow automatic user registration via OIDC on first login. When enabled, users who sign in with OIDC for the first time will have an account automatically created for them.
 
-| Type    | Default Value | TOML Key                      |
-| ------- | ------------- | ----------------------------- |
-| Boolean | `true`        | `[oidc].allow_registration`   |
+| Type    | Default Value | TOML Key                    |
+| ------- | ------------- | --------------------------- |
+| Boolean | `true`        | `[oidc].allow_registration` |
 
 ### STUMP_OIDC_DISABLE_LOCAL_AUTH
 
@@ -220,9 +280,9 @@ Whether or not to disable local username/password authentication when OIDC is en
 
 A **comma-separated** list of additional trusted audiences for ID token verification. This is required when using providers like Zitadel that inject extra values (e.g. the project ID) into the JWT `aud` claim. See the [OIDC](/docs/guides/access-control/oidc) guide for more information.
 
-| Type   | Default Value | TOML Key                  |
-| ------ | ------------- | ------------------------- |
-| String | N/A           | `[oidc].extra_audiences`  |
+| Type   | Default Value | TOML Key                 |
+| ------ | ------------- | ------------------------ |
+| String | N/A           | `[oidc].extra_audiences` |
 
 **Example:** `360960386461073457,another-audience`
 
@@ -248,9 +308,9 @@ Whether or not to enable the KoReader sync integration. This is a special integr
 
 Whether or not OPDS page access should automatically track reading progression. When disabled, accessing pages via OPDS won't update reading progress, which prevents inaccurate tracking when clients preload or cache multiple pages at once. This is particularly useful for OPDS clients that load more than one page at a time.
 
-| Type    | Default Value | TOML Key                   |
-| ------- | ------------- | -------------------------- |
-| Boolean | `false`       | `enable_opds_progression`  |
+| Type    | Default Value | TOML Key                  |
+| ------- | ------------- | ------------------------- |
+| Boolean | `false`       | `enable_opds_progression` |
 
 ## PDF Rendering
 
@@ -258,17 +318,17 @@ Whether or not OPDS page access should automatically track reading progression. 
 
 The path to the PDFium binary. This is only required if you want PDF support and you're running Stump outside of Docker, since the PDFium binary is included in the Docker image. You'll want to find and download the PDFium binary for your platform from [here](https://github.com/bblanchon/pdfium-binaries/releases), and then set this environment variable to the path of the binary.
 
-| Type   | Default Value                 | TOML Key       |
-| ------ | ----------------------------- | -------------- |
-| String | `/lib/libpdfium.so` in Docker | `pdfium_path`  |
+| Type   | Default Value                 | TOML Key      |
+| ------ | ----------------------------- | ------------- |
+| String | `/lib/libpdfium.so` in Docker | `pdfium_path` |
 
 ### STUMP_PDF_CACHE_PAGES
 
 Controls whether rendered PDF pages are cached.
 
-| Type    | Default Value | TOML Key           |
-| ------- | ------------- | ------------------ |
-| Boolean | `true`        | `pdf_cache_pages`  |
+| Type    | Default Value | TOML Key          |
+| ------- | ------------- | ----------------- |
+| Boolean | `true`        | `pdf_cache_pages` |
 
 ### STUMP_PDF_HIGH_QUALITY
 
@@ -290,25 +350,25 @@ Controls the maximum width or height (in pixels) for rendered PDF images.
 
 Controls how many pages before and after the current page should be pre-rendered.
 
-| Type    | Default Value | TOML Key               |
-| ------- | ------------- | ---------------------- |
-| Integer | `5`           | `pdf_prerender_range`  |
+| Type    | Default Value | TOML Key              |
+| ------- | ------------- | --------------------- |
+| Integer | `5`           | `pdf_prerender_range` |
 
 ### STUMP_PDF_RENDER_DPI
 
 Sets the DPI (dots per inch) used when rendering PDF pages. High values increases image clarity at the cost of memory usage and render time.
 
-| Type    | Default Value | TOML Key          |
-| ------- | ------------- | ----------------- |
-| Integer | `150`         | `pdf_render_dpi`  |
+| Type    | Default Value | TOML Key         |
+| ------- | ------------- | ---------------- |
+| Integer | `150`         | `pdf_render_dpi` |
 
 ### STUMP_PDF_RENDER_FORMAT
 
 Specifies the images format used when rendering PDF pages.
 
-| Type   | Default Value | TOML Key             |
-| ------ | ------------- | -------------------- |
-| String | `webp`        | `pdf_render_format`  |
+| Type   | Default Value | TOML Key            |
+| ------ | ------------- | ------------------- |
+| String | `webp`        | `pdf_render_format` |
 
 ## File Uploads
 
@@ -322,37 +382,37 @@ Specifies the images format used when rendering PDF pages.
 
 The maximum allowed size, in bytes, of files uploaded via the upload interface. This configuration variable will have no effect unless `ENABLE_UPLOAD` is `true`.
 
-| Type    | Default Value      | TOML Key                |
-| ------- | ------------------ | ----------------------- |
-| Integer | `20971520` (20 MB) | `max_file_upload_size`  |
+| Type    | Default Value      | TOML Key               |
+| ------- | ------------------ | ---------------------- |
+| Integer | `20971520` (20 MB) | `max_file_upload_size` |
 
 ### STUMP_MAX_IMAGE_UPLOAD_SIZE
 
 The maximum size, in bytes, for images uploaded as thumbnails for users, libraries, series, or media.
 
-| Type    | Default Value      | TOML Key                 |
-| ------- | ------------------ | ------------------------ |
-| Integer | `20971520` (20 MB) | `max_image_upload_size`  |
+| Type    | Default Value      | TOML Key                |
+| ------- | ------------------ | ----------------------- |
+| Integer | `20971520` (20 MB) | `max_image_upload_size` |
 
 ## Performance
 
 ### STUMP_PARALLELISM_MULTIPLIER
 
-A multiplier applied to the number of logical CPUs available to the process to derive concurrency limits for processing-heavy tasks (e.g., the scanner and thumbnail generator). 
+A multiplier applied to the number of logical CPUs available to the process to derive concurrency limits for processing-heavy tasks (e.g., the scanner and thumbnail generator).
 
 For example, a value of `2` on a 6-CPU machine yields a concurrency of `12`. Increasing this value may improve speeds at the cost of increased CPU usage, while decreasing it may reduce CPU usage at the cost of slower processing times. It depends on your host machine and workload.
 
-| Type    | Default Value | TOML Key                  |
-| ------- | ------------- | ------------------------- |
-| Integer | `2`           | `parallelism_multiplier`  |
+| Type    | Default Value | TOML Key                 |
+| ------- | ------------- | ------------------------ |
+| Integer | `2`           | `parallelism_multiplier` |
 
 ### STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
 
 The number of seconds after which a book can be re-completed.
 
-| Type    | Default Value   | TOML Key                               |
-| ------- | --------------- | -------------------------------------- |
-| Integer | `86400` (1 day) | `book_completion_dedup_timeout_secs`   |
+| Type    | Default Value   | TOML Key                             |
+| ------- | --------------- | ------------------------------------ |
+| Integer | `86400` (1 day) | `book_completion_dedup_timeout_secs` |
 
 ## Developer / Advanced
 

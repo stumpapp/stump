@@ -5,28 +5,14 @@ use models::{
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
 
-#[derive(Debug, Clone, OneofObject)]
-pub enum EpubProgressLocatorInput {
-	Readium(Box<ReadiumLocator>),
-	Epubcfi(String),
-}
-
-impl EpubProgressLocatorInput {
-	pub fn as_tuple(&self) -> (Option<String>, Option<ReadiumLocator>) {
-		match self {
-			EpubProgressLocatorInput::Epubcfi(cfi) => (Some(cfi.clone()), None),
-			EpubProgressLocatorInput::Readium(loc) => (None, Some((**loc).clone())),
-		}
-	}
-}
-
 #[derive(Debug, Clone, InputObject)]
 pub struct EpubProgressInput {
-	pub locator: EpubProgressLocatorInput,
+	pub locator: ReadiumLocator,
 	pub percentage: Option<Decimal>,
 	pub is_complete: Option<bool>,
 	pub elapsed_seconds_delta: Option<i64>,
 	pub device_id: Option<String>,
+	pub reset_elapsed_seconds: Option<bool>,
 }
 
 #[derive(Default, Debug, Clone, InputObject)]
@@ -34,6 +20,7 @@ pub struct PagedProgressInput {
 	pub page: i32,
 	pub elapsed_seconds_delta: Option<i64>,
 	pub device_id: Option<String>,
+	pub reset_elapsed_seconds: Option<bool>,
 }
 
 #[derive(Debug, Clone, OneofObject)]
@@ -42,23 +29,33 @@ pub enum MediaProgressInput {
 	Paged(PagedProgressInput),
 }
 
+impl MediaProgressInput {
+	/// whether applying the input should first reset the elapsed seconds for the media progress
+	pub fn reset_elapsed_seconds(&self) -> bool {
+		match self {
+			MediaProgressInput::Epub(epub_progress) => {
+				epub_progress.reset_elapsed_seconds
+			},
+			MediaProgressInput::Paged(paged_progress) => {
+				paged_progress.reset_elapsed_seconds
+			},
+		}
+		.unwrap_or(false)
+	}
+}
+
 #[derive(InputObject)]
 pub struct BookmarkInput {
 	pub media_id: String,
-	pub locator: EpubProgressLocatorInput,
+	pub locator: ReadiumLocator,
 	pub preview_content: Option<String>,
 }
 
 impl BookmarkInput {
 	pub fn into_active_model(&self, user: &AuthUser) -> bookmark::ActiveModel {
-		let (epubcfi, locator) = match &self.locator {
-			EpubProgressLocatorInput::Epubcfi(cfi) => (Some(cfi.clone()), None),
-			EpubProgressLocatorInput::Readium(loc) => (None, Some(loc.clone())),
-		};
 		bookmark::ActiveModel {
 			id: Set(Uuid::new_v4().to_string()),
-			epubcfi: Set(epubcfi),
-			locator: Set(locator.as_deref().cloned()),
+			locator: Set(Some(self.locator.clone())),
 			preview_content: Set(self.preview_content.clone()),
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),
@@ -191,6 +188,11 @@ pub struct MediaMetadataSearchInput {
 	pub author: Option<String>,
 	pub isbn: Option<String>,
 	pub year: Option<i32>,
+	/// The issue number (for comics/manga)
+	pub number: Option<f64>,
+	/// The volume ID to search within, which will swap to a more precise lookup if provided alongside
+	/// `number`
+	pub comic_vine_volume_id: Option<String>,
 	/// Restrict the search to this provider only. If omitted, all enabled providers
 	/// configured for the media's library type are searched.
 	pub provider: Option<MetadataProvider>,

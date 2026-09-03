@@ -135,7 +135,6 @@ export function useSyncOnlineToOfflineBookmarks({ bookId, serverId }: SyncOnline
 					serverBookmarkId,
 					href: locator.href,
 					chapterTitle: locator.chapterTitle,
-					epubcfi: locator.locations?.partialCfi,
 					locations: locator.locations,
 					previewContent,
 					syncStatus: syncStatus.enum.SYNCED,

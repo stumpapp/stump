@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { pullServerAvatar } from '~/backgroundTasks/pullServerLogo'
 import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
 import OPDSAuthDialog from '~/components/opds/OPDSAuthDialog'
 import { FullScreenLoader } from '~/components/ui'
@@ -36,7 +37,7 @@ function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 	} = useQuery({
 		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
 		queryFn: () => {
-			if (activeServer?.stumpOPDS) {
+			if (activeServer?.kind === 'stump') {
 				return sdk.opds.catalog()
 			} else {
 				return sdk.opds.feed(activeServer?.url || '')
@@ -52,6 +53,21 @@ function OPDSFeedProvider({ children, isAuthPending }: OPDSFeedProviderProps) {
 			onUnauthenticatedResponse?.(undefined, error.response?.data)
 		}
 	}, [error, isAuthPending, onUnauthenticatedResponse])
+
+	// it isn't overly ideal to sync until failure, but i think it's also largely
+	// fine. it's a tiny operation
+	const didSyncLogo = useRef(false)
+	useEffect(() => {
+		if (error || isAuthPending || didSyncLogo.current) return
+		if (activeServer.avatar) return
+
+		async function pullLogo() {
+			await pullServerAvatar(activeServer, sdk)
+			didSyncLogo.current = true
+		}
+
+		pullLogo()
+	}, [sdk, activeServer, error, isAuthPending])
 
 	const feedContextValue = useMemo(
 		() => ({

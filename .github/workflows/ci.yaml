@@ -19,8 +19,8 @@ jobs:
       rust-changed: ${{ steps.filter.outputs.rust == 'true' }}
       docs-changed: ${{ steps.filter.outputs.docs == 'true' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4
         id: filter
         with:
           filters: |
@@ -48,7 +48,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Setup rust
         uses: ./.github/actions/setup-rust
@@ -65,7 +65,7 @@ jobs:
           cargo dump-schema -- --check
 
       - name: Run tests
-        run: cargo test
+        run: cargo test && cargo test --features postgres-tests -p migrations
 
   check-coverage:
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"
@@ -74,7 +74,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Run coverage
         uses: ./.github/actions/coverage
@@ -89,7 +89,7 @@ jobs:
     runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Setup Node and Yarn
         uses: ./.github/actions/setup-yarn
@@ -108,7 +108,7 @@ jobs:
     runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Setup Node and Yarn
         uses: ./.github/actions/setup-yarn

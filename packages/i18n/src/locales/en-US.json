@@ -65,6 +65,13 @@
 				"year": {
 					"label": "Year"
 				},
+				"number": {
+					"label": "Issue number"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine volume ID",
+					"placeholder": "e.g., 129260"
+				},
 				"provider": {
 					"label": "Provider",
 					"allOption": "All enabled providers"
@@ -282,6 +289,20 @@
 			"tags": {
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
+			},
+			"libraryType": {
+				"label": "Library content",
+				"description": "The type of content present in this library",
+				"options": {
+					"COMIC": "Comics",
+					"MANGA": "Manga",
+					"BOOK": "Books",
+					"LIGHT_NOVEL": "Light Novels",
+					"MANHWA": "Manhwa",
+					"WEB_NOVEL": "Web Novels",
+					"WEBTOON": "Webtoons",
+					"MIXED": "Mixed"
+				}
 			},
 			"defaultLibraryView": {
 				"label": "Default library view",
@@ -789,11 +810,18 @@
 	},
 	"errorScene": {
 		"heading": "lol, oops",
+		"criticalHeading": "A critical error occurred",
+		"emptyMessage": "The error message was empty.",
+		"copiedDetails": "Copied error details to your clipboard",
+		"imageAlt": "Construction illustration",
 		"message": "An error occurred:",
 		"buttons": {
 			"report": "Report Bug",
 			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"goHome": "Go Home",
+			"goHomeTitle": "Go back to the homepage",
+			"reportTitle": "Report this error as a potential bug on GitHub",
+			"copyTitle": "Copy the error details to your clipboard"
 		}
 	},
 	"homeScene": {
@@ -2418,6 +2446,8 @@
 			"helmet": "Metadata integrations",
 			"title": "Metadata integrations",
 			"addProvider": "Add provider",
+			"createProviderError": "Failed to create provider",
+			"updateProviderError": "Failed to update provider",
 			"noProviders": "No providers configured yet. Add one to get started",
 			"providers": {
 				"title": "Providers",
@@ -2430,8 +2460,8 @@
 					"validationError": "The auto-validation failed for this token",
 					"validationRequestError": "The validation request failed",
 					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
+					"providerStatusError": "The provider responded with status {{status}}",
+					"providerError": "The provider responded with an error: {{message}}",
 					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {
@@ -2640,7 +2670,24 @@
 		"uploadImage": {
 			"emptyState": "A preview of your image will appear here",
 			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"remove": "Remove image",
+			"fileTooLarge": "File too large",
+			"onlyOneFile": "Only one file is allowed",
+			"noFile": "No file was provided"
+		}
+	},
+	"thumbnailSelector": {
+		"title": "Select a thumbnail",
+		"descriptions": {
+			"chooseBookPage": "Choose a page from this book to use as the new thumbnail",
+			"chooseSeriesBook": "Select a book from the series"
+		},
+		"actions": {
+			"confirmSelection": "Confirm selection"
+		},
+		"errors": {
+			"uploadFailed": "Failed to upload image",
+			"updateFailed": "Failed to update thumbnail"
 		}
 	},
 	"common": {
@@ -2887,9 +2934,13 @@
 			},
 			"auth": {
 				"label": "Auth",
-				"default": {
+				"login": {
 					"label": "Login",
 					"description": "You will be prompted to login when accessing content as needed"
+				},
+				"none": {
+					"label": "None",
+					"description": "No authentication is required for this server or auth is provided through the URL"
 				},
 				"token": {
 					"label": "Token",
@@ -2903,7 +2954,6 @@
 			"didConnect": "Connected",
 			"checkConnection": "Check Connection",
 			"setAsDefaultServer": "Set as Default Server",
-			"enableOPDS": "Enable OPDS",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
 				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
@@ -2989,6 +3039,7 @@
 			"page": "Page",
 			"pages": "Pages",
 			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageX": "Page {{current}}",
 			"password": "Password",
 			"progress": "Progress",
 			"publication": "Publication",
@@ -2998,6 +3049,7 @@
 			"readthrough": "Readthrough",
 			"readMore": "Read More",
 			"refresh": "Refresh",
+			"reset": "Reset",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
@@ -3009,7 +3061,9 @@
 			"url": "URL",
 			"username": "Username",
 			"value": "Value",
-			"version": "Version"
+			"version": "Version",
+			"accessOpdsV2": "Access OPDS v2.0",
+			"accessOpdsV1": "Access OPDS v1.2"
 		},
 		"errors": {
 			"unknown": "Unknown error"
@@ -3087,7 +3141,9 @@
 				"seeProblems": "See Problems ({{problemCount}})",
 				"hideCurated": "Hide Curated",
 				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"attemptSync": "Attempt Sync",
+				"syncConflicts": "Sync Conflicts"
+
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
@@ -3127,6 +3183,33 @@
 				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
 			},
 			"syncFailed": "Failed to sync offline progress"
+		},
+		"syncConflicts": {
+			"title": "Sync Conflicts",
+			"remainingCount": "{{remainingCount}} Remaining",
+			"noConflicts": {
+				"title": "No Sync Conflicts",
+				"description": "All your local progress is in sync their servers"
+			},
+			"lastCommonSession": "Last common session",
+			"localSession": "Local Session",
+			"remoteSessionWithId": "Remote Session {{sessionId}}",
+			"noCommonSession": "No common reading history",
+			"noRemoteSessions": "No remote sessions",
+			"divergentProgress": {
+				"title": "Divergent Progress",
+				"description": "The last common session was modified on the server after your last sync"
+			},
+			"noCommonReadingHistory": {
+				"title": "No Common Reading History",
+				"description": "This book had no synced history when you started reading offline"
+			},
+			"acceptSource": {
+				"local": "Accept Local",
+				"remote": "Accept Remote",
+				"both": "Accept Both"
+			},
+			"pullError": "Failed to pull remote progress"
 		},
 		"search": {
 			"label": "Search This Server",
@@ -3199,7 +3282,14 @@
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
 				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
+				"incognitoReading": "Incognito Reading",
+				"maxPageViewingSeconds": {
+					"label": "Page Viewing Seconds Limit",
+					"errors": {
+						"minimumValue": "Must be at least 1 second",
+						"integer": "Must be an integer"
+					}
+				}
 			},
 			"stump": {
 				"label": "Stump",
@@ -3266,7 +3356,6 @@
 				},
 				"performanceMonitor": "Performance Monitor",
 				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
 				"displayLanguageKeys": {
 					"label": "Display Language Keys",
 					"options": {
@@ -3371,7 +3460,14 @@
 			},
 			"readingTimer": {
 				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
+				"resetTimer": "Reset Timer",
+				"confirmation": {
+					"message": "Are you sure you want to reset your reading time for '{{bookName}}'?\n\n{{action}}",
+					"action": {
+						"multi-session": "This will set every reading session in this readthrough to 0 seconds.",
+						"single-session": "This will set the reading time to 0 seconds."
+					}
+				}
 			},
 			"allSettings": "All Settings"
 		},
@@ -3520,6 +3616,91 @@
 			"sortDirectionNumber": {
 				"ASC": "1 → 10",
 				"DESC": "10 → 1"
+			}
+		},
+		"widgets": {
+			"readingNow": {
+				"nothingInProgress": "Nothing in Progress"
+			}
+		}
+	},
+	"epubReader": {
+		"reading": "Reading",
+		"appearance": "Appearance",
+		"themeAndOptions": "Theme and options",
+		"locationManager": "Location manager",
+		"contents": "Contents",
+		"bookmarks": "Bookmarks",
+		"annotations": "Annotations",
+		"noBookmarks": "No bookmarks",
+		"bookmark": "Bookmark",
+		"noAnnotations": "No annotations",
+		"annotation": {
+			"addNote": "Add note",
+			"edit": "Edit annotation",
+			"note": "Note",
+			"optionalNote": "Add an optional note…",
+			"selectionActions": "Selection actions",
+			"highlight": "Highlight",
+			"disabledInIncognito": "Annotations are disabled in incognito mode",
+			"saveFailed": "Failed to save annotation",
+			"updateFailed": "Failed to update annotation",
+			"deleteFailed": "Failed to delete annotation"
+		},
+		"search": {
+			"placeholder": "Enter a query and press enter to search",
+			"failed": "Search failed. Please try again.",
+			"noResults": "No results found.",
+			"section": "Section {{position}}",
+			"loadingMore": "Loading more…",
+			"loadMore": "Load more results"
+		},
+		"controls": {
+			"columns": "Columns",
+			"auto": "Auto",
+			"columnCount_one": "{{count}} column",
+			"columnCount_other": "{{count}} columns",
+			"pageMargins": "Page margins",
+			"readingDirection": "Reading direction",
+			"leftToRight": "Left to right",
+			"rightToLeft": "Right to left",
+			"readingMode": "Reading mode",
+			"paged": "Paged",
+			"continuous": "Continuous",
+			"previousPage": "Previous page",
+			"nextPage": "Next page",
+			"toggleControls": "Toggle reader controls"
+		},
+		"errors": {
+			"openFailed": "Failed to open EPUB with Readium.",
+			"navigateFailed": "Failed to navigate to location"
+		}
+	},
+	"imageReader": {
+		"settings": {
+			"imageScaling": {
+				"label": "Image scaling",
+				"options": {
+					"auto": "Auto",
+					"height": "Height",
+					"width": "Width",
+					"original": "Original"
+				}
+			},
+			"readingDirection": {
+				"label": "Reading direction",
+				"options": {
+					"leftToRight": "Left to right",
+					"rightToLeft": "Right to left"
+				}
+			},
+			"readingMode": {
+				"label": "Flow",
+				"options": {
+					"verticalScroll": "Vertical scroll",
+					"horizontalScroll": "Horizontal scroll",
+					"paged": "Paged"
+				}
 			}
 		}
 	}

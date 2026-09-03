@@ -7,15 +7,16 @@
 		"skipLibCheck": true,
 		"emitDeclarationOnly": true,
 		"outDir": "dist",
+		"types": ["node", "vitest/globals"],
 		"paths": {
-			"@stump/graphql": ["../graphql/src/index.ts"]
-		}
+			"@stump/graphql": ["../graphql/src/index.ts"],
+		},
 	},
 	"include": ["src"],
 	"exclude": ["node_modules"],
 	"references": [
 		{
-			"path": "../graphql"
-		}
-	]
+			"path": "../graphql",
+		},
+	],
 }

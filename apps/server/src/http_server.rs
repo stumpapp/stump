@@ -57,8 +57,8 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
-	// Initialize the scheduler
-	core.init_scheduler()
+	let _scheduler = core
+		.init_scheduler()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 

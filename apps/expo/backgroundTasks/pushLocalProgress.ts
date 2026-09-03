@@ -1,3 +1,4 @@
+import { parseGraphQLDateTime } from '@stump/client'
 import { graphql, MediaProgressInput } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { and, eq, inArray, not } from 'drizzle-orm'
@@ -8,7 +9,8 @@ import { db, epubProgress, readProgress, syncStatus } from '~/db'
 const mutation = graphql(`
 	mutation PushLocalReadProgression($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
-			__typename
+			id
+			updatedAt
 		}
 	}
 `)
@@ -37,7 +39,13 @@ const executeSingleServerSync = async (
 		.where(
 			and(
 				eq(readProgress.serverId, serverId),
-				not(inArray(readProgress.syncStatus, [syncStatus.Enum.SYNCED, syncStatus.Enum.SYNCING])),
+				not(
+					inArray(readProgress.syncStatus, [
+						syncStatus.Enum.SYNCED,
+						syncStatus.Enum.SYNCING,
+						syncStatus.Enum.CONFLICT,
+					]),
+				),
 			),
 		)
 
@@ -67,10 +75,11 @@ const executeSingleServerSync = async (
 
 	let failureCount = 0
 
-	// Note: I didn't do a transaction here because each iteration involves an external API call
 	for (const record of progressRecords) {
 		try {
-			const elapsedDelta = (record.elapsedSeconds ?? 0) - (record.lastSyncedElapsedSeconds ?? 0)
+			const elapsedDelta = record.pendingReset
+				? (record.elapsedSeconds ?? 0)
+				: (record.elapsedSeconds ?? 0) - (record.lastSyncedElapsedSeconds ?? 0)
 
 			const payload: MediaProgressInput = match(epubProgress.safeParse(record.epubProgress).data)
 				.when(
@@ -78,12 +87,11 @@ const executeSingleServerSync = async (
 					(data) =>
 						({
 							epub: {
-								locator: {
-									readium: data,
-								},
+								locator: data,
 								elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
 								isComplete: record.percentage ? parseFloat(record.percentage) >= 1.0 : false,
 								percentage: record.percentage,
+								resetElapsedSeconds: record.pendingReset ?? false,
 							},
 						}) satisfies MediaProgressInput,
 				)
@@ -93,20 +101,27 @@ const executeSingleServerSync = async (
 							paged: {
 								page: record.page ?? 1,
 								elapsedSecondsDelta: elapsedDelta > 0 ? elapsedDelta : undefined,
+								resetElapsedSeconds: record.pendingReset ?? false,
 							},
 						}) satisfies MediaProgressInput,
 				)
 
-			await api.execute(mutation, {
+			const result = await api.execute(mutation, {
 				id: record.bookId,
 				input: payload,
 			})
+
+			const serverUpdatedAt = parseGraphQLDateTime(result.updateMediaProgress.updatedAt)
+			const serverSessionId = result.updateMediaProgress.id ?? undefined
 
 			await db
 				.update(readProgress)
 				.set({
 					syncStatus: syncStatus.Enum.SYNCED,
 					lastSyncedElapsedSeconds: record.elapsedSeconds,
+					pendingReset: false,
+					lastPulledSessionUpdatedAt: serverUpdatedAt,
+					...(serverSessionId ? { lastSyncedSessionId: serverSessionId } : {}),
 				})
 				.where(eq(readProgress.id, record.id))
 		} catch {

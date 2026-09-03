@@ -12,20 +12,23 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, DatabaseBackend, FromQueryResult, JoinType, QueryOrder, QuerySelect,
-	Statement,
+	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
 	guard::{PermissionGuard, ServerOwnerGuard},
-	object::media::Media,
+	object::{
+		media::Media,
+		reading_session::{ReadingSession, ReadingSessionConflictResolutionView},
+	},
 	order::MediaOrderBy,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
+	utils::db_statement,
 };
 
 #[derive(Default)]
@@ -112,21 +115,21 @@ impl MediaQuery {
 		Ok(count as i64)
 	}
 
-	// Note: This could be slightly inaccurate based on permissions, but it's close enough and I'm too lazy
-	// to write a more complex query right now.
+	// Note: this could be slightly inaccurate based on permissions, but it's close enough and I'm not
+	// motivated enough to write a more complex query right now
 	async fn media_disk_usage(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r"
-				SELECT
-					COALESCE(SUM(size), 0) as total_size
-				FROM
-					media
-				WHERE deleted_at IS NULL
-				",
+			SELECT
+				CAST(COALESCE(SUM(size), 0) AS BIGINT) as total_size
+			FROM
+				media
+			WHERE deleted_at IS NULL
+			",
 				[],
 			))
 			.await?;
@@ -269,8 +272,8 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
@@ -461,17 +464,16 @@ impl MediaQuery {
 			id: String,
 		}
 
-		let on_deck_media_ids =
-			OnDeckMediaId::find_by_statement(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
-				r#"
+		let on_deck_media_ids = OnDeckMediaId::find_by_statement(db_statement(
+			conn,
+			r#"
 				WITH
 				-- Find all series where the user has read at least one book
 				user_read_series AS (
 					SELECT DISTINCT m.series_id
 					FROM media m
 					JOIN reading_sessions rs ON rs.media_id = m.id
-					WHERE rs.user_id = ?
+					WHERE rs.user_id = $1
 					AND rs.status = 'FINISHED'
 					AND m.series_id IS NOT NULL
 				),
@@ -480,7 +482,7 @@ impl MediaQuery {
 				user_read_media AS (
 					SELECT DISTINCT media_id
 					FROM reading_sessions
-					WHERE user_id = ?
+					WHERE user_id = $1
 					AND status = 'FINISHED'
 				),
 
@@ -489,7 +491,7 @@ impl MediaQuery {
 					SELECT DISTINCT m.series_id
 					FROM media m
 					JOIN reading_sessions rs ON rs.media_id = m.id
-					WHERE rs.user_id = ?
+					WHERE rs.user_id = $1
 					AND m.series_id IS NOT NULL
 					AND rs.status = 'READING'
 					AND NOT EXISTS (
@@ -519,7 +521,7 @@ impl MediaQuery {
 						MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
 					FROM reading_sessions rs
 					JOIN media m ON m.id = rs.media_id
-					WHERE rs.user_id = ?
+					WHERE rs.user_id = $1
 					AND rs.status = 'FINISHED'
 					AND m.series_id IN (SELECT series_id FROM user_read_series)
 					GROUP BY m.series_id
@@ -558,20 +560,13 @@ impl MediaQuery {
 				ORDER BY
 					-- Most recently read series first
 					series_last_read_date DESC
-				LIMIT ?
-				OFFSET ?
+				LIMIT $2
+				OFFSET $3
 				"#,
-				[
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.clone().into(),
-					limit.into(),
-					offset.into(),
-				],
-			))
-			.all(conn)
-			.await?;
+			[user_id.clone().into(), limit.into(), offset.into()],
+		))
+		.all(conn)
+		.await?;
 
 		let media_ids: Vec<String> =
 			on_deck_media_ids.into_iter().map(|row| row.id).collect();
@@ -603,8 +598,8 @@ impl MediaQuery {
 			.collect();
 
 		let total_count = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r#"
 					-- Count total number of on deck items (for pagination)
 					WITH
@@ -613,7 +608,7 @@ impl MediaQuery {
 						SELECT DISTINCT m.series_id
 						FROM media m
 						JOIN reading_sessions rs ON rs.media_id = m.id
-						WHERE rs.user_id = ?
+						WHERE rs.user_id = $1
 						AND rs.status = 'FINISHED'
 						AND m.series_id IS NOT NULL
 					),
@@ -623,7 +618,7 @@ impl MediaQuery {
 						-- Media that user has finished
 						SELECT DISTINCT media_id
 						FROM reading_sessions
-						WHERE user_id = ?
+						WHERE user_id = $1
 						AND status = 'FINISHED'
 
 						UNION
@@ -631,7 +626,7 @@ impl MediaQuery {
 						-- Media that user is currently reading
 						SELECT DISTINCT rs.media_id
 						FROM reading_sessions rs
-						WHERE rs.user_id = ?
+						WHERE rs.user_id = $1
 						AND rs.status = 'READING'
 						AND NOT EXISTS (
 							SELECT 1
@@ -679,11 +674,7 @@ impl MediaQuery {
 					WHERE
 						book_rank = 1
 					"#,
-				[
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.into(),
-				],
+				[user_id.into()],
 			))
 			.await?
 			.ok_or_else(|| async_graphql::Error::new("Failed to get count"))?
@@ -803,6 +794,65 @@ impl MediaQuery {
 			.await?;
 
 		Ok(models.into_iter().map(Media::from).collect())
+	}
+
+	async fn reading_session_conflict_view(
+		&self,
+		ctx: &Context<'_>,
+		media_id: ID,
+		branched_session_id: Option<i32>,
+	) -> Result<ReadingSessionConflictResolutionView> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let media_id_str = media_id.as_str();
+
+		let ancestor_session = match branched_session_id {
+			Some(session_id) => {
+				reading_session::Entity::find_by_id(session_id)
+					.filter(reading_session::Column::UserId.eq(&user.id))
+					.filter(reading_session::Column::MediaId.eq(media_id_str))
+					.one(conn)
+					.await?
+			},
+			None => None,
+		};
+
+		let remote_sessions =
+			reading_session::Entity::find_for_user_and_media(user, media_id_str)
+				// find_for_user_and_media, you might guess, filters by user and media already. so we only need to filter by ancestor session
+				// when it exists, otherwise its just all sessions for the user and media
+				.apply_if(ancestor_session.clone(), |query, ancestor| {
+					query.filter(
+						Condition::any()
+							// any new sessions created after the ancestor
+							.add(
+								reading_session::Column::CreatedAt
+									.gt(ancestor.created_at),
+							)
+							// the ancestor itself was updated after its creation, should be included but it is a bit awkward
+							.add(
+								Condition::all()
+									.add(reading_session::Column::Id.eq(ancestor.id))
+									.add(
+										reading_session::Column::UpdatedAt
+											.gt(ancestor.created_at),
+									),
+							),
+					)
+				})
+				.order_by_asc(reading_session::Column::CreatedAt)
+				.order_by_asc(reading_session::Column::Id)
+				.all(conn)
+				.await?;
+
+		Ok(ReadingSessionConflictResolutionView {
+			ancestor_session: ancestor_session.map(ReadingSession::from),
+			remote_sessions: remote_sessions
+				.into_iter()
+				.map(ReadingSession::from)
+				.collect(),
+		})
 	}
 }
 

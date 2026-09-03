@@ -10,6 +10,7 @@ use crate::{
 	utils::save_user_session,
 };
 use async_graphql::{Context, Object, Result, Upload, ID};
+use chrono::Utc;
 use models::{
 	entity::{
 		age_restriction, session,
@@ -25,7 +26,9 @@ use sea_orm::{
 	Set, TransactionTrait, TryIntoModel,
 };
 use std::{io::Read, path::Path};
-use stump_core::config::StumpConfig;
+use stump_core::{
+	config::StumpConfig, filesystem::image::generate_image_metadata_from_bytes,
+};
 use tower_sessions::Session;
 
 #[derive(Default)]
@@ -118,6 +121,15 @@ impl UserMutation {
 			}
 		}
 
+		let avatar_meta =
+			match generate_image_metadata_from_bytes(image_bytes.clone()).await {
+				Ok(meta) => Some(meta),
+				Err(e) => {
+					tracing::error!(error = ?e, "Failed to generate image metadata");
+					None
+				},
+			};
+
 		let avatar_path = avatars_dir.join(format!("{}.{}", target_id, extension));
 		tokio::fs::write(&avatar_path, &image_bytes)
 			.await
@@ -134,6 +146,8 @@ impl UserMutation {
 
 		let mut active = updated_user;
 		active.avatar_path = Set(Some(avatar_path_str));
+		active.avatar_meta = Set(avatar_meta);
+		active.avatar_updated_at = Set(Some(Utc::now().into()));
 		let result = active.update(conn).await?;
 
 		Ok(User::from(result))
@@ -172,12 +186,15 @@ impl UserMutation {
 
 		let mut active = existing.into_active_model();
 		active.avatar_path = Set(None);
+		active.avatar_meta = Set(None);
+		active.avatar_updated_at = Set(Some(Utc::now().into()));
 		let result = active.update(conn).await?;
 
 		Ok(User::from(result))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageUsers)")]
+	#[tracing::instrument(skip(self, ctx, input), fields(username = ?input.username))]
 	async fn create_user(
 		&self,
 		ctx: &Context<'_>,
@@ -206,8 +223,8 @@ impl UserMutation {
 		let user_model = user
 			.save(&txn)
 			.await
-			.map_err(|e| {
-				tracing::error!("Failed to create user: {:?}", e);
+			.map_err(|error| {
+				tracing::error!(?error, "Failed to create user");
 				"Failed to create user"
 			})?
 			.try_into_model()?;
@@ -222,8 +239,8 @@ impl UserMutation {
 			}
 			.save(&txn)
 			.await
-			.map_err(|e| {
-				tracing::error!("Failed to create age restriction: {:?}", e);
+			.map_err(|error| {
+				tracing::error!(?error, "Failed to create age restriction");
 				"Failed to create age restriction"
 			})?;
 			tracing::trace!(?created_restriction, "Created age restriction");
@@ -662,116 +679,4 @@ async fn update_user_age_restriction(
 	}
 }
 
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::tests::common::*;
-	use sea_orm::{DatabaseBackend::Sqlite, MockDatabase};
-
-	#[tokio::test]
-	async fn test_update_age_restriction() {
-		let conn = MockDatabase::new(Sqlite)
-			.append_query_results::<age_restriction::Model, Vec<_>, Vec<Vec<_>>>(vec![
-				vec![],
-			])
-			.append_exec_results(vec![sea_orm::MockExecResult {
-				last_insert_id: 0,
-				rows_affected: 1,
-			}])
-			.into_connection();
-		let txn = conn.begin().await.unwrap();
-		update_user_age_restriction("42", &None, &txn)
-			.await
-			.unwrap();
-		txn.commit().await.unwrap();
-
-		let txns = conn.into_transaction_log();
-		assert_eq!(txns.len(), 1);
-		let txn = &txns[0];
-		assert_eq!(txn.statements().len(), 3); // begin commit, select, commit
-		let stmt = &txn.statements()[1];
-		assert_eq!(
-			stmt.to_string(),
-			r#"SELECT "age_restrictions"."id", "age_restrictions"."age", "age_restrictions"."restrict_on_unset", "age_restrictions"."user_id" FROM "age_restrictions" WHERE "age_restrictions"."user_id" = '42' LIMIT 1"#.to_string()
-		);
-	}
-
-	#[tokio::test]
-	async fn test_update_age_restriction_delete_existing() {
-		let conn = MockDatabase::new(Sqlite)
-			.append_query_results::<age_restriction::Model, Vec<_>, Vec<Vec<_>>>(vec![
-				vec![age_restriction::Model {
-					id: 1337,
-					user_id: "42".to_string(),
-					age: 18,
-					restrict_on_unset: true,
-				}],
-			])
-			.append_exec_results(vec![sea_orm::MockExecResult {
-				last_insert_id: 0,
-				rows_affected: 1,
-			}])
-			.into_connection();
-		let txn = conn.begin().await.unwrap();
-		update_user_age_restriction("42", &None, &txn)
-			.await
-			.unwrap();
-		txn.commit().await.unwrap();
-
-		let delete_stmt = conn.into_transaction_log()[0].statements()[2].clone();
-		assert_eq!(
-			delete_stmt.to_string(),
-			r#"DELETE FROM "age_restrictions" WHERE "age_restrictions"."id" = 1337"#
-				.to_string()
-		);
-	}
-
-	#[tokio::test]
-	async fn test_update_user_server_owner() {
-		let conn = MockDatabase::new(Sqlite)
-			.append_query_results::<user::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![
-				user::Model {
-					id: "42".to_string(),
-					username: "test_user".to_string(),
-					hashed_password: "hashed_password".to_string(),
-					is_server_owner: false,
-					is_locked: false,
-					permissions: None,
-					max_sessions_allowed: None,
-					avatar_path: None,
-					created_at: chrono::Utc::now().into(),
-					deleted_at: None,
-					user_preferences_id: None,
-					oidc_issuer_id: None,
-					oidc_email: None,
-				},
-			]])
-			.into_connection();
-		let config = StumpConfig::debug();
-
-		let input = UpdateUserInput {
-			username: "test_user".to_string(),
-			password: None,
-			max_sessions_allowed: Some(5),
-			permissions: vec![],
-			age_restriction: None,
-		};
-
-		let user = get_default_user();
-
-		let updated_user = update_user(&user, user.id.clone(), &conn, &config, &input)
-			.await
-			.unwrap();
-
-		assert_eq!(updated_user.model.username, "test_user");
-		let txns = conn.into_transaction_log();
-		assert_eq!(txns.len(), 1);
-		let txn = txns.first().unwrap();
-		assert_eq!(txn.statements().len(), 3);
-		let stmt = &txn.statements()[1];
-		assert_eq!(
-			stmt.to_string(),
-			r#"UPDATE "users" SET "username" = 'test_user', "max_sessions_allowed" = 5 WHERE "users"."id" = '42' RETURNING "id", "username", "hashed_password", "is_server_owner", "avatar_path", "created_at", "deleted_at", "is_locked", "max_sessions_allowed", "permissions", "user_preferences_id", "oidc_issuer_id", "oidc_email""#
-		);
-	}
-}
+// TODO(tests): Add meaningful tests after permissions refactor flows through

@@ -48,11 +48,14 @@ impl MigrationTrait for Migration {
 					)
 					.col(
 						ColumnDef::new(ScheduledJobs::CreatedAt)
-							.timestamp()
+							.timestamp_with_time_zone()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
-					.col(ColumnDef::new(ScheduledJobs::LastRunAt).timestamp())
+					.col(
+						ColumnDef::new(ScheduledJobs::LastRunAt)
+							.timestamp_with_time_zone(),
+					)
 					.to_owned(),
 			)
 			.await?;

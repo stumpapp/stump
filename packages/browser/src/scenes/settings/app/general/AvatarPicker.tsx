@@ -27,7 +27,9 @@ const uploadMutation = graphql(`
 	mutation UploadUserAvatar($file: Upload!) {
 		uploadUserAvatar(upload: $file) {
 			id
-			avatarUrl
+			avatar {
+				url
+			}
 		}
 	}
 `)
@@ -36,7 +38,9 @@ const deleteMutation = graphql(`
 	mutation DeleteUserAvatar {
 		deleteUserAvatar {
 			id
-			avatarUrl
+			avatar {
+				url
+			}
 		}
 	}
 `)
@@ -128,7 +132,7 @@ export default function AvatarPicker() {
 		}
 	}, [isModalOpen])
 
-	const imageUrl = user?.avatarUrl
+	const imageUrl = user?.avatar?.url
 
 	return (
 		<>
@@ -140,9 +144,9 @@ export default function AvatarPicker() {
 						<Dialog.Close onClick={off} />
 					</Dialog.Header>
 
-					<div className="gap-y-4 py-2 scrollbar-hide flex h-[300px] flex-col">
+					<div className="gap-y-4 py-2 h-75 scrollbar-hide flex flex-col">
 						<div className="flex items-center justify-center">
-							<div className={cx('relative h-[100px]', { 'h-[100px]': filePreview })}>
+							<div className={cx('h-25 relative', { 'h-25': filePreview })}>
 								{filePreview && (
 									<>
 										<div className="top-0 right-0 absolute flex items-center justify-center">
@@ -159,12 +163,12 @@ export default function AvatarPicker() {
 											</IconButton>
 										</div>
 										<div className="flex h-full items-center justify-center overflow-hidden rounded-full">
-											<img src={filePreview} className="h-full object-scale-down" />
+											<img src={filePreview} className="h-full w-full object-scale-down" />
 										</div>
 									</>
 								)}
 								{!filePreview && (
-									<div className="flex h-[100px] w-[100px] rounded-full border border-border" />
+									<div className="h-25 w-25 flex rounded-full border border-border" />
 								)}
 							</div>
 						</div>

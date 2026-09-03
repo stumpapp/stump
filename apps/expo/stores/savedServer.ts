@@ -18,8 +18,8 @@ export type SavedServer = {
 	name: string
 	url: string
 	kind: ServerKind
-	stumpOPDS?: boolean
 	defaultServer?: boolean
+	avatar?: ServerAvatar | null
 }
 
 export type SavedServerWithConfig = SavedServer & {
@@ -37,6 +37,9 @@ const auth = z
 				password: z.string(), // Encrypted with expo-secure-store, so should be OK
 			}),
 		}),
+		z.object({
+			authless: z.boolean().refine((val) => !!val),
+		}),
 	])
 	.optional()
 
@@ -52,6 +55,31 @@ const managedToken = z.object({
 	expiresAt: z.string(),
 })
 export type ManagedToken = z.infer<typeof managedToken>
+
+export const knownServer = z.enum(['codex', 'kavita', 'komga', 'stump', 'opds'])
+export type KnownServer = z.infer<typeof knownServer>
+export const isKnownServer = (server: string): server is KnownServer => {
+	return knownServer.options.includes(server as KnownServer)
+}
+
+export const serverAvatar = z.union([
+	z.object({
+		uri: z.string(),
+		metadata: z
+			.object({
+				averageColor: z.string().nullish(),
+				// i removed the colors array for now, i think things look good
+				// using average color, but is easy enough to pull more colors
+				// down the road as needed
+			})
+			.nullish(),
+		lastModified: z.coerce.date().nullish(),
+	}),
+	z.object({
+		logo: knownServer,
+	}),
+])
+export type ServerAvatar = z.infer<typeof serverAvatar>
 
 const SAVED_TOKEN_PREFIX = 'stump-mobile-saved-tokens-' as const
 const SAVED_CONFIG_PREFIX = 'stump-mobile-saved-configs-' as const
@@ -171,23 +199,13 @@ export const saveServerToken = async (id: ServerID, token: ManagedToken) => {
  * An RPC-like hook for interacting with saved servers and their encrypted tokens/configs.
  */
 export const useSavedServers = () => {
-	const {
-		servers,
-		addServer,
-		editServer,
-		removeServer,
-		setDefaultServer,
-		showStumpServers,
-		setShowStumpServers,
-	} = useSavedServerStore(
+	const { servers, addServer, editServer, removeServer, setDefaultServer } = useSavedServerStore(
 		useShallow((state) => ({
 			servers: state.servers,
 			addServer: state.addServer,
 			editServer: state.editServer,
 			removeServer: state.removeServer,
 			setDefaultServer: state.setDefaultServer,
-			showStumpServers: state.showStumpServers,
-			setShowStumpServers: state.setShowStumpServers,
 		})),
 	)
 
@@ -316,27 +334,8 @@ export const useSavedServers = () => {
 		queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(id) })
 	}
 
-	/**
-	 * Set whether or not to show stump servers in the list of saved servers
-	 */
-	const setStumpEnabled = useCallback(
-		(enabled: boolean) => {
-			const defaultServer = servers.find((server) => server.defaultServer)
-			if (!enabled && defaultServer?.kind === 'stump') {
-				// If we're disabling stump servers, and the default server is a stump server, we need to unset it
-				setDefaultServer()
-			}
-			setShowStumpServers(enabled)
-		},
-		[servers, setDefaultServer, setShowStumpServers],
-	)
-
 	return {
-		savedServers: showStumpServers
-			? servers
-			: servers.filter((server) => server.kind !== 'stump' || server.stumpOPDS),
-		stumpEnabled: showStumpServers,
-		setStumpEnabled,
+		savedServers: servers,
 		createServer,
 		updateServer,
 		deleteServer,

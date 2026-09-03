@@ -2,6 +2,7 @@ import './styles/index.css'
 import '@stump/components/styles/overrides.css'
 
 import { SDKProvider, StumpClientContextProvider, StumpClientProps } from '@stump/client'
+import { type AllowedLocale, LocaleProvider } from '@stump/i18n'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -16,10 +17,15 @@ import { useApplyTheme } from './hooks'
 import { useAppStore, useDebugStore, useUserStore } from './stores'
 
 export default function StumpWebClient(props: StumpClientProps) {
+	const locale = useUserStore((store) => store.userPreferences?.locale)
+	const resolvedLocale = (locale as AllowedLocale) || 'en-US'
+
 	return (
-		<ErrorBoundary FallbackComponent={ErrorFallback}>
-			<RouterContainer {...props} />
-		</ErrorBoundary>
+		<LocaleProvider locale={resolvedLocale}>
+			<ErrorBoundary FallbackComponent={ErrorFallback}>
+				<RouterContainer {...props} />
+			</ErrorBoundary>
+		</LocaleProvider>
 	)
 }
 

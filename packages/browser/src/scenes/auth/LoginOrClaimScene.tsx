@@ -191,7 +191,12 @@ export default function LoginOrClaimScene() {
 									{...form.register('password')}
 								/>
 
-								<Button type="submit" isLoading={isLoggingIn || isRegistering} className="mt-2">
+								<Button
+									data-testid="loginOrRegisterButton"
+									type="submit"
+									isLoading={isLoggingIn || isRegistering}
+									className="mt-2"
+								>
 									{isClaimed
 										? t('authScene.form.buttons.login')
 										: t('authScene.form.buttons.createAccount')}

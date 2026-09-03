@@ -1,7 +1,7 @@
 use async_graphql::{Result, SimpleObject};
-use sea_orm::{
-	prelude::*, DatabaseBackend, DatabaseConnection, FromQueryResult, Statement,
-};
+use sea_orm::{prelude::*, DatabaseConnection, FromQueryResult};
+
+use crate::utils::db_statement;
 
 // eventually i see more stats living in here, e.g.:
 // - https://github.com/stumpapp/stump/issues/559
@@ -35,8 +35,8 @@ impl LibraryStats {
 		for_all_users: bool,
 	) -> Result<Self> {
 		let result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r"
 				WITH library_media AS (
 					SELECT media.id, media.size
@@ -47,7 +47,7 @@ impl LibraryStats {
 				base_counts AS (
 					SELECT
 						COUNT(*) AS book_count,
-						IFNULL(SUM(size), 0) AS total_bytes,
+						COALESCE(CAST(SUM(size) AS BIGINT), 0) AS total_bytes,
 						(SELECT COUNT(*) FROM series WHERE ($1 IS NULL OR series.library_id = $1)) AS series_count
 					FROM library_media
 				),
@@ -71,13 +71,13 @@ impl LibraryStats {
 								AND rs2.media_id = frs.media_id
 								AND rs2.readthrough_number = frs.readthrough_number
 								AND (
-									IFNULL(rs2.updated_at, rs2.created_at) > IFNULL(frs.updated_at, frs.created_at)
+									COALESCE(rs2.updated_at, rs2.created_at) > COALESCE(frs.updated_at, frs.created_at)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at > frs.created_at
 									)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at = frs.created_at
 										AND rs2.id > frs.id
 									)
@@ -89,7 +89,7 @@ impl LibraryStats {
 						frs.media_id,
 						frs.user_id,
 						frs.readthrough_number,
-						IFNULL(SUM(frs.elapsed_seconds), 0) AS readthrough_elapsed_seconds
+						COALESCE(CAST(SUM(frs.elapsed_seconds) AS BIGINT), 0) AS readthrough_elapsed_seconds
 					FROM filtered_sessions frs
 					GROUP BY frs.media_id, frs.user_id, frs.readthrough_number
 				),
@@ -98,7 +98,7 @@ impl LibraryStats {
 						lrs.media_id,
 						MAX(CASE WHEN lrs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
 						MAX(CASE WHEN lrs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
-						IFNULL(SUM(rte.readthrough_elapsed_seconds), 0) AS readthrough_elapsed_seconds
+						COALESCE(CAST(SUM(rte.readthrough_elapsed_seconds) AS BIGINT), 0) AS readthrough_elapsed_seconds
 					FROM latest_readthrough_sessions lrs
 					INNER JOIN readthrough_elapsed rte
 						ON rte.media_id = lrs.media_id
@@ -110,7 +110,7 @@ impl LibraryStats {
 					SELECT
 						COUNT(CASE WHEN has_finished = 1 THEN media_id END) AS completed_books,
 						COUNT(CASE WHEN has_reading = 1 THEN media_id END) AS in_progress_books,
-						IFNULL(SUM(readthrough_elapsed_seconds), 0) AS total_reading_time_seconds
+						COALESCE(CAST(SUM(readthrough_elapsed_seconds) AS BIGINT), 0) AS total_reading_time_seconds
 					FROM readthrough_stats
 				)
 				SELECT
@@ -151,13 +151,13 @@ impl SeriesStats {
 		for_all_users: bool,
 	) -> Result<Self> {
 		let result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r"
 				WITH base_counts AS (
 					SELECT
 						COUNT(*) AS book_count,
-						IFNULL(SUM(media.size), 0) AS total_bytes
+						COALESCE(CAST(SUM(media.size) AS BIGINT), 0) AS total_bytes
 					FROM media
 					WHERE media.series_id = $1
 				),
@@ -181,13 +181,13 @@ impl SeriesStats {
 								AND rs2.media_id = frs.media_id
 								AND rs2.readthrough_number = frs.readthrough_number
 								AND (
-									IFNULL(rs2.updated_at, rs2.created_at) > IFNULL(frs.updated_at, frs.created_at)
+									COALESCE(rs2.updated_at, rs2.created_at) > COALESCE(frs.updated_at, frs.created_at)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at > frs.created_at
 									)
 									OR (
-										IFNULL(rs2.updated_at, rs2.created_at) = IFNULL(frs.updated_at, frs.created_at)
+										COALESCE(rs2.updated_at, rs2.created_at) = COALESCE(frs.updated_at, frs.created_at)
 										AND rs2.created_at = frs.created_at
 										AND rs2.id > frs.id
 									)
@@ -199,7 +199,7 @@ impl SeriesStats {
 						frs.media_id,
 						frs.user_id,
 						frs.readthrough_number,
-						IFNULL(SUM(frs.elapsed_seconds), 0) AS readthrough_elapsed_seconds
+						COALESCE(CAST(SUM(frs.elapsed_seconds) AS BIGINT), 0) AS readthrough_elapsed_seconds
 					FROM filtered_sessions frs
 					GROUP BY frs.media_id, frs.user_id, frs.readthrough_number
 				),
@@ -208,7 +208,7 @@ impl SeriesStats {
 						lrs.media_id,
 						MAX(CASE WHEN lrs.status = 'FINISHED' THEN 1 ELSE 0 END) AS has_finished,
 						MAX(CASE WHEN lrs.status = 'READING' THEN 1 ELSE 0 END) AS has_reading,
-						IFNULL(SUM(rte.readthrough_elapsed_seconds), 0) AS readthrough_elapsed_seconds
+						COALESCE(CAST(SUM(rte.readthrough_elapsed_seconds) AS BIGINT), 0) AS readthrough_elapsed_seconds
 					FROM latest_readthrough_sessions lrs
 					INNER JOIN readthrough_elapsed rte
 						ON rte.media_id = lrs.media_id
@@ -220,7 +220,7 @@ impl SeriesStats {
 					SELECT
 						COUNT(CASE WHEN has_finished = 1 THEN media_id END) AS completed_books,
 						COUNT(CASE WHEN has_reading = 1 THEN media_id END) AS in_progress_books,
-						IFNULL(SUM(readthrough_elapsed_seconds), 0) AS total_reading_time_seconds
+						COALESCE(CAST(SUM(readthrough_elapsed_seconds) AS BIGINT), 0) AS total_reading_time_seconds
 					FROM readthrough_stats
 				)
 				SELECT

@@ -3,7 +3,7 @@ title: Contributing
 description: Information about contributing to Stump
 ---
 
-If you're interested in supporting Stump's development, and you know how to code, follow the steps outlined in the [developer guide](#developer-guide) for information about setting up your development environment. If you want to improve Stump's language support, visit the Crowdin project page [here](https://crowdin.com/project/stump).
+If you're interested in supporting Stump's development, and you know how to code, follow the steps outlined in the [developer guide](#developer-guide) for information about setting up your development environment. If you want to improve Stump's language support, visit the Weblate project page [here](https://hosted.weblate.org/engage/stump/).
 
 ## Developer Guide
 
@@ -49,6 +49,33 @@ Or `cargo` for the server:
 cargo run --package stump_server --bin stump_server
 ```
 
+#### Database
+
+Stump uses SQLite by default and no database setup is required to get started. PostgreSQL is also experimentally supported. A quick command to get a local instance up for development could be (assuming you have Docker installed):
+
+```bash
+docker run -d \
+  --name stump-postgres-dev \
+  -e POSTGRES_USER=stump \
+  -e POSTGRES_PASSWORD=stump \
+  -e POSTGRES_DB=stump \
+  -p 5432:5432 \
+  postgres:16-alpine
+```
+
+Then run the server with the `STUMP_DATABASE_URL` env var pointing at it:
+
+```bash
+STUMP_DATABASE_URL=postgresql://stump:stump@localhost:5432/stump \
+cargo run --package stump_server --bin stump_server
+```
+
+When you're done:
+
+```bash
+docker rm -f stump-postgres-dev
+```
+
 #### GraphQL
 
 If you plan to update or add any GraphQL queries or mutations, you'll likely want to keep a process running to watch for changes and automatically generate the TypeScript types. You can do this by running the following in the `packages/graphql` directory:
@@ -67,8 +94,7 @@ If you aren't sure what to work on, I recommend taking a look at some of the ope
 
 In general, some good places to start might be:
 
-- Translations, so Stump is accessible to as many people as possible
-  - You can translate through [Crowdin](https://crowdin.com/project/stump) or help find/fix areas of the app that need better translation coverage
+- Translations via [Weblate](https://hosted.weblate.org/engage/stump/), so Stump is accessible to as many people as possible
 - Writing comprehensive tests
 - Improving the UI/UX, even small changes can go a long way
 - CI pipelines, automated release processes, and other devops-related efforts
@@ -92,6 +118,67 @@ yarn storybook
 
 This will give you a good idea of what components are available and how they can be used.
 
+### Testing
+
+This is an area that I would like to improve and is very challenging to action on because testing can be quite the slog. There are a few different flavors of testing that exist today that provide a solid foundation but could use development to improve coverage and reliability.
+
+#### TypeScript unit tests (Vitest)
+
+The majority of the frontend packages/apps use [Vitest](https://vitest.dev/) for unit and component tests. Run them from each package:
+
+```bash
+yarn workspace @stump/browser test
+yarn workspace @stump/sdk test
+yarn workspace @stump/expo test
+```
+
+Or just run all of them at once:
+
+```bash
+yarn test
+```
+
+These tests are meant to be more isolated and focused on testing the logic of a single component or function. So if something requires 100s of lines of mocking code to set up or requires a running server, it is likely not a good candidate for this suite
+
+#### e2e tests (Playwright)
+
+Browser end-to-end tests live in `apps/web/tests/` and run against a live Stump server:
+
+```bash
+# one-time browser install
+yarn workspace @stump/web e2e:install
+# run tests (requires a running server on port 10801)
+yarn workspace @stump/web e2e
+```
+
+This suite uses two different types of test users:
+
+1. A "persona" that is meant to be more of a catch-all user for testing common flows
+2. An ephemeral user that is created to test a specific flow that doesn't require a persistent user at the start of a run
+
+Generally speaking what I would like to use this suite for is to test the full stack of Stump where unit tests aren't sufficient. Things like multi-step forms that change server state, flows that require coordinated frontend and backend validation, etc.
+
+#### Rust server integration tests
+
+`apps/server/tests/` contains integration tests that spin up a server instance and test
+the API:
+
+```bash
+cargo test --package stump_server --test api_tests
+```
+
+Anything that requires a running server and database to fully test is a good candidate for this suite. It uses a lot of `fake_data` to insert data into the in-memory database.
+
+#### Rust unit tests
+
+Unit tests for core logic live inline in the relevant crate using the standard conventions:
+
+```bash
+cargo test
+```
+
+Things like validation, pure functions, and other logic that can be tested without a running server are good candidates for this suite.
+
 ### Developer Resources
 
 Below is a list of resources that I've found helpful in developing Stump. I'll try to keep this list up to date as I find new resources.
@@ -107,7 +194,7 @@ Below is a list of resources that I've found helpful in developing Stump. I'll t
 
 ## Translations
 
-If you'd like to help translate Stump into other languages, you can do so [here](https://crowdin.com/project/stump). You can do as little or as much as you'd like at a time! If you don't see your language listed, please open an issue on GitHub.
+If you'd like to help translate Stump into other languages, you can do so [here](https://hosted.weblate.org/engage/stump/). You can do as little or as much as you'd like at a time! If you don't see your language listed, please open an issue on GitHub.
 
 ## Financial Contributions
 

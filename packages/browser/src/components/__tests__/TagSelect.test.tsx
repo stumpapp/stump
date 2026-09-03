@@ -6,28 +6,28 @@ import userEvent from '@testing-library/user-event'
 
 import TagSelect, { TagOption } from '../TagSelect'
 
-jest.mock('@stump/client', () => ({
-	useSDK: jest.fn(),
-	useSuspenseGraphQL: jest.fn(),
+vi.mock('@stump/client', () => ({
+	useSDK: vi.fn(),
+	useSuspenseGraphQL: vi.fn(),
 }))
 
-const mockCacheKey = jest.fn().mockReturnValue(['tags'])
+const mockCacheKey = vi.fn().mockReturnValue(['tags'])
 const mockSdk = { cacheKey: mockCacheKey } as any
 
 const createTags = (names: string[]) => names.map((name, i) => ({ id: i + 1, name }))
 
 describe('TagSelect', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
-		jest.mocked(useSDK).mockReturnValue({ sdk: mockSdk } as any)
+		vi.clearAllMocks()
+		vi.mocked(useSDK).mockReturnValue({ sdk: mockSdk } as any)
 	})
 
 	it('should sort options alphabetically', async () => {
-		jest.mocked(useSuspenseGraphQL).mockReturnValue({
+		vi.mocked(useSuspenseGraphQL).mockReturnValue({
 			data: { tags: createTags(['Kiwi', 'Apple', 'Mango']) },
 		} as any)
 
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		render(<TagSelect onChange={onChange} />)
 
 		// Open the combobox
@@ -39,7 +39,7 @@ describe('TagSelect', () => {
 	})
 
 	it('should sort selected tags alphabetically in display', () => {
-		jest.mocked(useSuspenseGraphQL).mockReturnValue({
+		vi.mocked(useSuspenseGraphQL).mockReturnValue({
 			data: { tags: createTags(['Kiwi', 'Apple', 'Mango']) },
 		} as any)
 
@@ -47,7 +47,7 @@ describe('TagSelect', () => {
 			{ label: 'Kiwi', value: 'kiwi' },
 			{ label: 'Apple', value: 'apple' },
 		]
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		render(<TagSelect selected={selected} onChange={onChange} />)
 
 		const trigger = screen.getByRole('combobox')
@@ -55,11 +55,11 @@ describe('TagSelect', () => {
 	})
 
 	it('should sort newly created tags into the correct position', async () => {
-		jest.mocked(useSuspenseGraphQL).mockReturnValue({
+		vi.mocked(useSuspenseGraphQL).mockReturnValue({
 			data: { tags: createTags(['Cherry', 'Apple']) },
 		} as any)
 
-		const onChange = jest.fn()
+		const onChange = vi.fn()
 		const selected: TagOption[] = [
 			{ label: 'Apple', value: 'apple' },
 			{ label: 'Cherry', value: 'cherry' },

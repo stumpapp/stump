@@ -216,7 +216,7 @@ function sentenceCase(obj: RecursiveResource): ResourceKey {
 		let isFirstMatch = true
 		return obj.replace(/\{\{.*?\}\}|\S+/g, (match) => {
 			let result
-			if (match.startsWith('{{')) {
+			if (match.includes('{{') && match.includes('}}')) {
 				result = match
 			} else if (preservedWords.has(match)) {
 				result = match

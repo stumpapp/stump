@@ -42,36 +42,6 @@
 			"subtitleEditing": "Kütüphanenizde yaptığınız değişikliklerin önizlemesi aşağıda gösterilecektir"
 		}
 	},
-	"bookManagementScene": {
-		"metadataSearch": {
-			"heading": "Search metadata",
-			"description": "Search an external provider for this book and choose a match to apply",
-			"openButton": "Search Metadata",
-			"searchButton": "Search",
-			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
-			"noResults": "No matches were found for this search",
-			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
-			"searchFailed": "Failed to search metadata providers",
-			"form": {
-				"title": {
-					"label": "Title"
-				},
-				"author": {
-					"label": "Author"
-				},
-				"isbn": {
-					"label": "ISBN"
-				},
-				"year": {
-					"label": "Year"
-				},
-				"provider": {
-					"label": "Provider",
-					"allOption": "All enabled providers"
-				}
-			}
-		}
-	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "Dosya Bilgisi",
@@ -146,7 +116,6 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Görünen Ad",
-					"placeholder": "oromei",
 					"description": "Kitap kulübündeki üyeliğiniz için isteğe bağlı bir görünen ad. Bu alan doldurulursa, kullanıcı adınızın yerine bu ad kullanılır"
 				},
 				"hideProgress": {
@@ -226,8 +195,7 @@
 		},
 		"members": {
 			"title": "Üyeler",
-			"description": "Bu kitap klübünün üyelerini yönetin",
-			"sections": {}
+			"description": "Bu kitap klübünün üyelerini yönetin"
 		},
 		"roles": {
 			"title": "Roller",
@@ -289,10 +257,6 @@
 				"hideSeriesView": {
 					"label": "Seriler sekmesini gizle",
 					"description": "Kütüphane gezinme menüsünden seriler sekmesini gizle"
-				},
-				"skipBookOverview": {
-					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
 				},
 				"options": {
 					"series": {
@@ -483,10 +447,6 @@
 				"update": "Güncellemeden sonra tara"
 			},
 			"description": "Veritabanınızı doldurmak için kütüphane dosyalarını tarayın"
-		},
-		"errors": {
-			"failedToUpdate": "Failed to update library",
-			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
@@ -525,7 +485,6 @@
 					"generateThumbnails": "Küçük resimler oluştur",
 					"processThumbnailColors": "Küçük resim renklerini işle",
 					"mode": "Mod",
-					"format": "Format",
 					"quality": "Kalite",
 					"name": "İsim",
 					"path": "Yol",
@@ -572,32 +531,12 @@
 			"addedFiles": "Eklenen dosyalar"
 		}
 	},
-	"libraryHeader": {
-		"tabs": {
-			"books": "Books",
-			"series": "Series",
-			"files": "Files"
-		}
-	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Kütüphanenizi buradan yönetin. Bu ayarlarla ilgili bilgilerinizi tazelemek isterseniz,",
 		"subtitleLink": "ilgili belgelere göz atın",
 		"sidebar": {
 			"basics": "Temeller",
-			"configuration": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"label": "Configuration"
-			},
-			"integrations": {
-				"label": "Integrations",
-				"analysis": "Analysis",
-				"metadata": "Metadata"
-			},
 			"danger-zone": {
 				"access-control": "Erişim Kontrolü",
 				"delete": "Silme",
@@ -689,48 +628,7 @@
 			"sections": {
 				"management": {
 					"heading": "Management",
-					"description": "Bu kütüphane için mevcut küçük resimleri yönet",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
-				}
-			}
-		},
-		"integrations/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
-			"sections": {
-				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
-				},
-				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
-				},
-				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
-				}
-			}
-		},
-		"integrations/metadata": {
-			"title": "Metadata",
-			"description": "Manage and review metadata matches for this library",
-			"sections": {
-				"fetchMetadata": {
-					"heading": "Fetch metadata",
-					"description": "Fetch metadata for the media in this library",
-					"noProviders": {
-						"title": "There are no metadata providers available",
-						"description": "You can configure metadata providers in the metadata integration settings"
-					},
-					"fetchButton": "Start background fetch",
-					"fetchError": "Failed to start metadata fetch"
+					"description": "Bu kütüphane için mevcut küçük resimleri yönet"
 				}
 			}
 		},
@@ -761,21 +659,7 @@
 						"label": "Kütüphaneyi temizle",
 						"text": "Kütüphaneyi temizlemek istediğinizdem emin misiniz?"
 					},
-					"emptyText": "Temizlenecek bir şey yoktu",
-					"missingEntitiesTable": {
-						"columns": {
-							"id": "ID",
-							"path": "Path",
-							"type": "Type"
-						},
-						"types": {
-							"BOOK": "Book",
-							"SERIES": "Series",
-							"LIBRARY": "Library"
-						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
-					}
+					"emptyText": "Temizlenecek bir şey yoktu"
 				},
 				"deleteLibrary": {
 					"heading": "Kütüphaneyi sil",
@@ -834,12 +718,6 @@
 			"coverArtists": "Kapak sanatçıları",
 			"day": "Gün",
 			"editors": "Editörler",
-			"format": "Format",
-			"identifierAmazon": "Amazon ID",
-			"identifierCalibre": "Calibre ID",
-			"identifierGoogle": "Google ID",
-			"identifierIsbn": "ISBN",
-			"identifierMobiAsin": "Mobi ASIN",
 			"identifierUuid": "Kitap UUID",
 			"genres": "Türler",
 			"inkers": "Mürekkepleyenler",
@@ -877,93 +755,10 @@
 			"description": "Her bir girişi ayrı bir satıra yazın"
 		}
 	},
-	"metadataMatching": {
-		"section": {
-			"heading": "Pending matches",
-			"description": "Review metadata matches fetched from external providers"
-		},
-		"confidenceBadge": {
-			"label": "confidence"
-		},
-		"includeField": "Include this field",
-		"excludeField": "Exclude this field",
-		"fieldLocked": "This field is locked",
-		"reviewDialog": {
-			"previewEditor": {
-				"noCandidates": "No candidates available for this record",
-				"noComparableFields": "No comparable fields found",
-				"headers": {
-					"field": "Field",
-					"current": "Current",
-					"external": "External",
-					"resolved": "Resolved"
-				},
-				"toolbar": {
-					"candidatePosition": "Candidate {{position}} of {{total}}",
-					"provider": "Provider"
-				}
-			},
-			"footer": {
-				"accept": "Accept",
-				"reject": "Reject",
-				"strategies": {
-					"FILL_GAPS": "Fill gaps",
-					"PREFER_EXTERNAL": "Prefer external",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
-					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
-				}
-			},
-			"fieldAction": {
-				"keepCurrent": "Keep current",
-				"takeExternal": "Take external",
-				"mergeLists": "Merge lists",
-				"editManually": "Edit manually",
-				"lockField": "Lock field",
-				"unlockField": "Unlock field",
-				"reset": "Reset",
-				"undoManualEdit": "Undo manual edit"
-			}
-		},
-		"matchesTable": {
-			"columns": {
-				"entityName": "Name",
-				"entityType": "Type",
-				"candidateCount": "Candidates",
-				"topConfidence": "Top Confidence",
-				"addedAt": "Fetched"
-			},
-			"acceptAll": {
-				"label": "Accept all",
-				"failed": "Failed to accept all matches",
-				"success": "All pending matches accepted"
-			},
-			"rejectAll": {
-				"label": "Reject all",
-				"failed": "Failed to reject all matches",
-				"success": "All pending matches rejected"
-			},
-			"startReview": "Start review",
-			"nothingToReview": "No pending metadata matches to review"
-		}
-	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Okumaya Devam Et",
 			"downloadSeries": "Serileri İndir"
-		}
-	},
-	"seriesHeader": {
-		"tabs": {
-			"books": "Books",
-			"files": "Files"
-		},
-		"actions": {
-			"markAsRead": "Mark series as read",
-			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
-		},
-		"errors": {
-			"failedToUpdateCompletion": "Failed to update book completion status"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1049,9 +844,7 @@
 						"deleteFilter": "Filtreyi sil",
 						"deleteGroup": "Grubu sil"
 					},
-					"is": "is",
 					"fieldSelect": {
-						"placeholder": "Attribute",
 						"source": {
 							"label": "Kaynak",
 							"back": "Geri",
@@ -1066,12 +859,10 @@
 									"pages": "Sayfalar",
 									"tags": "Etiketler",
 									"createdAt": "Oluşturulma tarihi",
-									"updatedAt": "Güncellenme tarihi",
-									"readingStatus": "Reading status"
+									"updatedAt": "Güncellenme tarihi"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
 								"attributes": {
 									"title": "Başlık",
 									"summary": "Özet",
@@ -1087,11 +878,7 @@
 									"characters": "Karakterler",
 									"teams": "Takımlar",
 									"genres": "Tür",
-									"coverArtists": "Kapak sanatçıları",
-									"ageRating": "Age rating",
-									"year": "Year",
-									"month": "Month",
-									"day": "Day"
+									"coverArtists": "Kapak sanatçıları"
 								}
 							},
 							"series": {
@@ -1102,7 +889,6 @@
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
 								"attributes": {
 									"title": "Başlık",
 									"summary": "Özet",
@@ -1113,8 +899,7 @@
 									"status": "Durum",
 									"volume": "Cilt",
 									"metaType": "Tür",
-									"ageRating": "Yaş sınırı",
-									"year": "Start year"
+									"ageRating": "Yaş sınırı"
 								}
 							},
 							"library": {
@@ -1144,13 +929,6 @@
 					"listValue": {
 						"placeholder": "Değerleri ekle",
 						"emptyState": "Gösterilecek değer yok"
-					},
-					"enumValue": {
-						"selectPlaceholder": "Select value",
-						"READING": "Reading",
-						"FINISHED": "Finished",
-						"NOT_STARTED": "Not started",
-						"ABANDONED": "Abandoned"
 					}
 				}
 			}
@@ -1226,17 +1004,10 @@
 	},
 	"userSmartListsScene": {
 		"heading": "Akıllı listeler",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
 		"buttons": {
 			"createSmartList": "Akıllı liste oluştur"
 		},
 		"list": {
-			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
-			},
 			"card": {
 				"meta": {
 					"figures": {
@@ -1312,26 +1083,11 @@
 			"settings": "Ayarlar"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Akıllı liste bulunamadı",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
-		},
-		"header": {
-			"backLink": "Lists"
+			"smartListNotFound": "Akıllı liste bulunamadı"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
 			"actionHeader": {
-				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
-				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
 					"rawData": {
 						"heading": "Ham filtre verisi",
 						"description": "Stump filtreleri bu şekilde işleyecek"
@@ -1405,9 +1161,7 @@
 				"jobs": "Görevler",
 				"access": "Erişim",
 				"email": "E-posta",
-				"metadata": "Metadata",
 				"notifications": "Bildirimler",
-				"tags": "Tags",
 				"label": "Yönetim"
 			}
 		},
@@ -1424,151 +1178,22 @@
 					"labels": {
 						"username": "Kullanıcı Adı",
 						"password": "Parola",
-						"activeChangesPrompt": "Kaydedilmemiş değişiklikleriniz var",
-						"uselessForm": {
-							"title": "You lack permissions to change these settings",
-							"description": "Contact your administrator if you want to make changes to these settings"
-						},
-						"insufficientPermission": "You do not have permission to change this"
+						"activeChangesPrompt": "Kaydedilmemiş değişiklikleriniz var"
 					},
 					"errors": {
 						"updateFailed": "Profilinizi güncellerken bir sunucu hatası oluştu. Lütfen tekrar deneyin."
-					},
-					"avatarPicker": {
-						"label": "Avatar",
-						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
-						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
-						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
-					},
-					"buttons": {
-						"confirm": "Save Changes"
 					}
-				},
-				"locale": {
-					"localeSelector": {
-						"label": "Language"
-					},
-					"heading": "Language and locale",
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
 				}
 			}
 		},
 		"app/preferences": {
 			"helmet": "Appearance",
 			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
 			"sections": {
-				"themeAndAppearance": {
-					"label": "Theme and appearance",
-					"description": "The basic look and feel options for Stump"
-				},
-				"interface": {
-					"title": "Interface",
-					"description": "Primary UI surfaces and interaction elements"
-				},
-				"thumbnails": {
-					"title": "Thumbnails",
-					"description": "Display options for thumbnail images"
-				},
-				"themeSelect": {
-					"label": "Theme",
-					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
-					],
-					"options": {
-						"system": "System",
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
-						"midnight": "Midnight",
-						"matrix": "Matrix"
-					}
-				},
-				"gradientToggle": {
-					"label": "Enable gradients",
-					"description": "Some themes optionally support gradients for a more dynamic look"
-				},
 				"fontSelect": {
-					"label": "Yazı Tipi",
-					"description": "Customize the font used in the application"
-				},
-				"interfaceRoundness": {
-					"label": "Interface roundness",
-					"description": "How rounded the corners are for UI elements",
-					"options": {
-						"none": "None",
-						"normal": "Normal",
-						"rounded": "Rounded",
-						"pill": "Pill"
-					}
-				},
-				"thumbnailPreview": {
-					"label": "Preview",
-					"description": "This is how thumbnails will look with the current settings"
-				},
-				"thumbnailRatioSelect": {
-					"label": "Thumbnail Ratio",
-					"description": "The aspect ratio to use for thumbnails",
-					"defaultSuffix": "Default"
-				},
-				"thumbnailPlaceholder": {
-					"label": "Thumbnail placeholder",
-					"description": "The style to use for thumbnail placeholders",
-					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
-						"thumbhash": "Thumbhash"
-					}
-				},
-				"thumbnailRoundness": {
-					"label": "Thumbnail roundness",
-					"description": "How rounded the corners of thumbnail images should be",
-					"options": {
-						"none": "None",
-						"normal": "Normal",
-						"rounded": "Rounded",
-						"large": "Large"
-					}
-				},
-				"navigation": {
-					"title": "Navigation",
-					"description": "Customize the navigation elements of the app"
-				},
-				"layoutAndArrangement": {
-					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
-				},
-				"primaryNavigation": {
-					"label": "Primary navigation",
-					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
-					},
-					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
-				},
-				"doubleSidebar": {
-					"label": "Settings sidebar",
-					"description": "Enables sidebar navigation for the settings pages"
+					"label": "Yazı Tipi"
 				},
 				"replacePrimarySidebar": {
-					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
 					"tooltips": {
 						"doubleSidebar": "Bu ayarın kullanılabilmesi için ayarlar kenar çubuğunun etkinleştirilmesi gerekir",
 						"topbar": "Ana gezinme yöntemi üst çubuk olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
@@ -1576,7 +1201,6 @@
 				},
 				"navigationArrangement": {
 					"label": "Gezinme düzeni",
-					"description": "Rearrange or tweak the navigation items in your primary navigation",
 					"isLocked": "Düzenleme kilitli",
 					"lock": "Düzenlemeyi kilitle",
 					"unlock": "Düzenleme kilidini aç",
@@ -1610,30 +1234,11 @@
 				"maxWidthPreference": {
 					"label": "Ayarlanmış genişlik",
 					"description": "Stump, görüntü alanına bir maksimum genişlik uygular. Bu ayar, bu sınırı değiştirmenize veya kaldırmanıza olanak tanır",
-					"tooltip": "Ana gezinme yöntemi kenar çubuğu olarak ayarlandığında bu ayar şu anda desteklenmemektedir",
-					"options": {
-						"noLimit": "No limit"
-					}
-				},
-				"displayAndSpacing": {
-					"label": "Display and spacing",
-					"description": "Preferences related to the presentation of content and information"
+					"tooltip": "Ana gezinme yöntemi kenar çubuğu olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
 				},
 				"additionalPreferences": {
 					"label": "Diğer tercihler",
 					"description": "Bu ek ayarlarla Stump'ın görünümünü ve davranışını özelleştirin"
-				},
-				"contentBrowsing": {
-					"label": "Content browsing",
-					"description": "Preferences that affect browsing and navigating content lists"
-				},
-				"motionAndAnimation": {
-					"label": "Motion and animation",
-					"description": "Visual presentation and movement preferences"
-				},
-				"activityAndStatus": {
-					"label": "Activity and status",
-					"description": "Indicators, overlays, or functionality related to background activity"
 				},
 				"hideScrollbarToggle": {
 					"label": "Kaydırma çubuğunu gizle",
@@ -1662,14 +1267,6 @@
 				"enableJobOverlayToggle": {
 					"label": "Görev katmanı",
 					"description": "Görev yürütülürken ekran üzerinde bir katman göster"
-				},
-				"dayResetHourOffset": {
-					"label": "Reading day reset offset",
-					"description": "Shift when a reading day resets, in hours from midnight"
-				},
-				"readingSessionGracePeriod": {
-					"label": "Reading session grace period",
-					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
 				}
 			}
 		},
@@ -1679,115 +1276,11 @@
 			"description": "Oluşturduğunuz Stump API anahtarlarını yönetin",
 			"shared": {
 				"fields": {
-					"name": "İsim",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
-				}
-			},
-			"sections": {
-				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
-					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
-					}
-				},
-				"createKey": {
-					"modal": {
-						"trigger": "Create API key",
-						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
-						},
-						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
-						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
-					}
-				},
-				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
-					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
-					},
-					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
-					},
-					"noExpiration": "No expiration set"
-				}
-			}
-		},
-		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default preferences for reading. Some of these are local-only to your current device",
-			"sections": {
-				"universal": {
-					"sections": {
-						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
-						}
-					}
-				},
-				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
-					"sections": {
-						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
-						},
-						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
-						}
-					}
-				},
-				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
-					"sections": {
-						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
-						},
-						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
-						},
-						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
-						}
-					}
-				},
-				"data": {
-					"sections": {
-						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
-						}
-					}
+					"name": "İsim"
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
 			"description": "Stump masaüstü uygulamasıyla ilgili ayarlar",
 			"sections": {
 				"configuredServers": {
@@ -1813,9 +1306,7 @@
 								"placeholder": "Sunucum"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "Stump sunucusunun URL'si",
-								"placeholder": "https://stump.example.com"
+								"description": "Stump sunucusunun URL'si"
 							}
 						}
 					},
@@ -1847,8 +1338,7 @@
 							"title": "Bu sunucuya geç",
 							"description": "Bu işlem, mevcut sunucunuzdaki oturumunuzu kapatacak",
 							"confirm": "Sunucuya geç",
-							"server": "Sunucu",
-							"uri": "URL"
+							"server": "Sunucu"
 						}
 					},
 					"resetConfiguration": {
@@ -1896,184 +1386,17 @@
 		},
 		"server/general": {
 			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
-			"sections": {
-				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
-				},
-				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
-					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
-						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
-						}
-					},
-					"nonStableChannel": {
-						"title": "You are running a non-stable build of Stump",
-						"description": [
-							"It looks like you are running the",
-							"build channel"
-						]
-					}
-				},
-				"helpfulLinks": {
-					"title": "Helpful links",
-					"description": "Links to resources that may be helpful for managing your Stump server instance",
-					"links": {
-						"documentation": "Documentation",
-						"changelog": "Changelog"
-					}
-				},
-				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
-				},
-				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
-					"dropzone": "Drop an image or click to select",
-					"input": {
-						"label": "Emoji name",
-						"placeholder": "e.g. party_parrot"
-					},
-					"deleteModal": {
-						"title": "Delete emoji",
-						"description": "Are you sure you want to delete this emoji?"
-					},
-					"noCustomEmojis": "No custom emojis have been added yet",
-					"invalidName": "Please enter a valid name for your emoji",
-					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
-					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
-					"deleteError": "Failed to delete emoji"
-				}
-			}
-		},
-		"server/logs": {
-			"helmet": "Logs",
-			"title": "Logs",
-			"description": "The logs generated by your Stump server instance",
-			"sections": {
-				"persistedLogs": {
-					"title": "Persisted logs",
-					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
-					"table": {
-						"columns": {
-							"level": "Level",
-							"message": "Message",
-							"timestamp": "Timestamp"
-						},
-						"emptyHeading": "No logs to display",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
-					},
-					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
-					}
-				},
-				"liveLogs": {
-					"title": "Live logs feed",
-					"description": "Streamed directly from your Stump server instance in real-time"
-				}
-			}
+			"title": "General settings"
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
 			"sections": {
 				"scheduling": {
 					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
-					"restartRequiredTitle": "Restart required",
-					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
-					"deleteScheduledJob": {
-						"title": "Delete scheduled job",
-						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-						"confirm": "Delete"
-					},
-					"dialog": {
-						"titleCreate": "New scheduled job",
-						"titleEdit": "Edit scheduled job",
-						"cancel": "Cancel",
-						"create": "Create",
-						"saveChanges": "Save changes"
-					},
-					"fields": {
-						"name": {
-							"label": "Name",
-							"placeholder": "e.g. \"Daily library scan\""
-						},
-						"schedule": {
-							"label": "Cron schedule",
-							"description": "A cron expression to define the frequency",
-							"placeholder": "0 0 0 * * *"
-						},
-						"schedulePreset": {
-							"label": "Preset",
-							"custom": "Custom",
-							"everySixHours": "Every 6 hours",
-							"everyTwelveHours": "Every 12 hours",
-							"dailyAtMidnight": "Daily at midnight",
-							"weeklySunday": "Weekly (Sunday)",
-							"monthlyFirst": "Monthly (1st)"
-						},
-						"kind": {
-							"label": "Job type",
-							"libraryScan": "Library Scan",
-							"metadataRetry": "Metadata Retry"
-						},
-						"libraryIds": {
-							"label": "Libraries to scan",
-							"description": "Leave empty to scan all libraries"
-						},
-						"statuses": {
-							"label": "Statuses to retry",
-							"description": "Which metadata fetch statuses should be retried",
-							"rateLimited": "Rate Limited",
-							"failed": "Failed"
-						},
-						"enabled": "Enabled"
-					},
-					"row": {
-						"enabled": "Enabled",
-						"disabled": "Disabled",
-						"allLibraries": "All libraries",
-						"rateLimited": "rate limited",
-						"lastRun": "Last run at {{date}}",
-						"edit": "Edit",
-						"delete": "Delete"
-					},
-					"toasts": {
-						"createSuccess": "Scheduled job created",
-						"createError": "Failed to create scheduled job",
-						"updateSuccess": "Scheduled job updated",
-						"updateError": "Failed to update scheduled job",
-						"deleteSuccess": "Scheduled job deleted",
-						"deleteError": "Failed to delete scheduled job"
-					},
-					"errors": {
-						"invalidCron": "Schedule must be a valid cron expression"
-					}
+					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
 					"table": {
 						"columns": {
-							"name": "Type",
-							"description": "Description",
 							"status": "Durum",
 							"createdAt": "Başlangıç Tarihi",
 							"elapsed": "Geçen süre",
@@ -2117,7 +1440,6 @@
 					"ageRestriction": {
 						"label": "Yaş kısıtlaması",
 						"description": "Kullanıcının, belirlenen yaş sınırının üzerindeki içeriğe erişmesini engeller",
-						"placeholder": "13",
 						"enforceUnset": {
 							"label": "Derecelendirilmemiş olanları kısıtla",
 							"description": "Etkinleştirildiğinde, yaş derecelendirmesi bulunmayan içeriklere erişim kısıtlanır"
@@ -2130,17 +1452,6 @@
 					}
 				},
 				"permissions": {
-					"groups": {
-						"accountManagement": "Account",
-						"featureAccess": "Feature access",
-						"fileManagement": "Files",
-						"emailers": "Emailers",
-						"emailing": "Emailing",
-						"libraryManagement": "Library management",
-						"userManagement": "User management",
-						"serverManagement": "Server management",
-						"metadataManagement": "Metadata management"
-					},
 					"heading": "İzinler",
 					"subtitle": [
 						"Bu kullanıcıya vermek istediğiniz izinleri seçin. Her bir iznin ne işe yaradığı hakkında daha fazla bilgi için",
@@ -2183,1343 +1494,31 @@
 							"description": "Kullanıcının sunucuya dosya yüklemesine izin verir"
 						}
 					},
-					"emailer": {
-						"label": "Emailers",
-						"read": {
-							"label": "Access emailers",
-							"description": "Allows the user to view the configured emailers"
-						},
-						"create": {
-							"label": "Create emailers",
-							"description": "Allows the user to create new emailers"
-						},
-						"manage": {
-							"label": "Manage emailers",
-							"description": "Allows the user to manage existing emailers"
-						}
-					},
-					"email": {
-						"label": "Emailing",
-						"send": {
-							"label": "Send emails",
-							"description": "Allows the user to send emails from the server to any configured aliases"
-						},
-						"arbitrary_send": {
-							"label": "Send arbitrary emails",
-							"description": "Allows the user to send emails from the server to any email address"
-						}
-					},
-					"library": {
-						"label": "Library Management",
-						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
-						},
-						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
-						},
-						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
-						},
-						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
-						},
-						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
-						}
-					},
-					"server": {
-						"label": "Server Management",
-						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
-						}
-					},
 					"user": {
-						"label": "User Management",
-						"read": {
-							"label": "Read users",
-							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
-						},
 						"manage": {
-							"label": "Manage users",
 							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
 						"read": {
-							"label": "Access smart list feature",
 							"description": "Allows the user to access smart lists features"
 						}
 					}
-				},
-				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
-				},
-				"createSubmitButton": "Create user",
-				"updateSubmitButton": "Update user"
-			},
-			"loginActivity": {
-				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
 				}
 			}
-		},
-		"server/email": {
-			"helmet": "Email settings",
-			"title": "Email",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
-			"sections": {
-				"emailers": {
-					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
-					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
-						"sendHistory": {
-							"heading": "Send history",
-							"description": "A record of emails sent from this emailer",
-							"table": {
-								"columns": {
-									"to": "To",
-									"subject": "Subject",
-									"status": "Status",
-									"createdAt": "Sent at"
-								}
-							},
-							"emptyHeading": "No history",
-							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
-						}
-					}
-				},
-				"devices": {
-					"title": "Email devices",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
-					"addDevice": "Add device alias",
-					"addOrUpdateDevice": {
-						"title": {
-							"create": "Create device alias",
-							"update": "Update device alias"
-						},
-						"name": {
-							"label": "Name",
-							"description": "A friendly name to uniquely identify this device alias"
-						},
-						"email": {
-							"label": "Email",
-							"description": "The email address this alias will be associated with"
-						},
-						"forbidden": {
-							"label": "Forbidden",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
-						},
-						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
-						}
-					},
-					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
-					}
-				}
-			},
-			"createOrUpdateForm": {
-				"name": {
-					"label": "Name",
-					"description": "A friendly name to uniquely identify this emailer"
-				},
-				"smtpSettings": {
-					"heading": "SMTP settings",
-					"description": "The SMTP-specific settings for this emailer"
-				},
-				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
-				},
-				"smtpHost": {
-					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
-				},
-				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
-				},
-				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
-				},
-				"username": {
-					"label": "Username",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
-				},
-				"password": {
-					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
-				},
-				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
-				},
-				"senderDisplayName": {
-					"label": "Sender display name",
-					"description": "The name that will be displayed to recipients"
-				},
-				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
-				},
-				"additionalSettings": {
-					"heading": "Additional settings",
-					"description": "Additional settings for the emailer"
-				},
-				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
-				},
-				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
-				},
-				"testEmailer": {
-					"button": "Send test email",
-					"recipientLabel": "Test recipient",
-					"recipientDescription": "An email address to send the test email to",
-					"success": "Test email sent successfully",
-					"error": {
-						"title": "Failed to send test email",
-						"description": "Check your SMTP settings and try again"
-					}
-				}
-			},
-			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
-			},
-			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
-			}
-		},
-		"server/metadataIntegrations": {
-			"helmet": "Metadata integrations",
-			"title": "Metadata integrations",
-			"addProvider": "Add provider",
-			"noProviders": "No providers configured yet. Add one to get started",
-			"providers": {
-				"title": "Providers",
-				"description": "Configure external metadata providers to fetch and enrich your library data"
-			},
-			"providerForm": {
-				"apiToken": {
-					"label": "API token",
-					"description": "The API token for authenticating with this provider",
-					"validationError": "The auto-validation failed for this token",
-					"validationRequestError": "The validation request failed",
-					"validationRequestErrorUnknown": "An unknown error occurred during validation",
-					"hardcoverStatusError": "Hardcover API responded with status {{status}}",
-					"hardcoverValidationError": "Hardcover API responded with an error: {{message}}",
-					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
-				},
-				"apiTokenExpiresAt": {
-					"label": "API token expiration",
-					"description": "The date when the API token will expire (optional)"
-				},
-				"enableProvider": {
-					"label": "Enable provider",
-					"description": "It will be used for fetching if enabled"
-				},
-				"autoApplyConfig": {
-					"enabled": {
-						"label": "Enable auto-apply",
-						"description": "Skip manual approval and apply likely matches"
-					},
-					"threshold": {
-						"label": "Confidence threshold",
-						"description": "Minimum confidence score (0-1) to auto-apply a match",
-						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
-					},
-					"strategy": {
-						"label": "Merge strategy",
-						"options": {
-							"FILL_GAPS": "Accept missing fields",
-							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
-							"PREFER_EXTERNAL": "Prefer external data"
-						}
-					}
-				}
-			},
-			"providerEnabled": "This provider is enabled",
-			"providerDisabled": "This provider is disabled",
-			"providerTokenExpiresSoon": "This provider's token will expire soon",
-			"autoApplyOn": "Auto-apply on",
-			"autoApplyOff": "Auto-apply off",
-			"editDialog": {
-				"tooltip": "Edit provider"
-			},
-			"deleteDialog": {
-				"title": "Delete provider",
-				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
-			}
-		},
-		"server/tags": {
-			"helmet": "Tag management",
-			"title": "Tags",
-			"description": "Create and manage tags for organizing your content",
-			"sections": {
-				"table": {
-					"title": "Tags",
-					"description": "All tags available on this server",
-					"empty": {
-						"title": "No tags",
-						"action": "Create your first tag to get started"
-					},
-					"columns": {
-						"name": "Name"
-					},
-					"actionMenu": {
-						"rename": "Rename"
-					}
-				},
-				"createTag": {
-					"trigger": "Create tag",
-					"modal": {
-						"heading": "Create new tag",
-						"description": "Tags can be assigned to books, series, and libraries",
-						"name": {
-							"label": "Name",
-							"placeholder": "Enter tag name"
-						},
-						"submit": "Create"
-					}
-				},
-				"renameTag": {
-					"modal": {
-						"heading": "Rename tag",
-						"description": "Change the name of this tag across all assigned items",
-						"name": {
-							"label": "Name",
-							"placeholder": "Enter new tag name"
-						},
-						"submit": "Rename"
-					}
-				},
-				"deleteTag": {
-					"title": "Delete tag",
-					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
-					"confirm": "Delete"
-				}
-			}
-		}
-	},
-	"jobOverlay": {
-		"backupHeading": "Job in Progress"
-	},
-	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
-	},
-	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
-		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
-		},
-		"links": {
-			"create": "Create library",
-			"settings": "Go to settings"
-		}
-	},
-	"pagination": {
-		"buttons": {
-			"next": "Next",
-			"previous": "Previous"
-		},
-		"popover": {
-			"heading": "Go to page",
-			"buttons": {
-				"confirm": "Go",
-				"cancel": "Cancel"
-			}
-		}
-	},
-	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
-		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
-		"buttons": {
-			"home": "Home",
-			"libraries": "Libraries",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
-			"settings": "Settings",
-			"themeToggle": "Toggle Theme",
-			"goForward": "Go Forward",
-			"goBack": "Go Back",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list",
-			"seeAll": "See all"
-		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
-			"fileExplorer": "Files",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
-		},
-		"versionInformation": {
-			"heading": "Version Information",
-			"semVer": "Semantic Version",
-			"commitHash": "Commit Hash",
-			"buildDate": "Build Date"
+			"manageLibrary": "Manage"
 		}
-	},
-	"search": {
-		"placeholder": "Search"
-	},
-	"serverSOS": {
-		"heading": "Server Unavailable",
-		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
-		},
-		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
-		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
-	},
-	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
-		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
-		]
-	},
-	"slidingList": {
-		"empty": "No items to display",
-		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
-		}
-	},
-	"tagSelect": {
-		"placeholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
-		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
-		},
-		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
-		}
-	},
-	"common": {
-		"add": "Add",
-		"andXMoreTrailing": "...and {{count}} more",
-		"cancel": "Cancel",
-		"clear": "Clear",
-		"confirm": "Confirm",
-		"created": "Created",
-		"delete": "Delete",
-		"deleteConfirmation": {
-			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
-			"confirm": "Delete {{type}}",
-			"typeToConfirm": "Type {{name}} to confirm:"
-		},
-		"experimentalDisclaimer": {
-			"title": "This feature is experimental",
-			"description": "It might be missing features, have bugs, or not work at all. Use at your own discretion and report any issues you encounter"
-		},
-		"enter": "Enter",
-		"save": "Save",
-		"send": "Send",
-		"saveChanges": "Save changes",
-		"noChanges": "No changes",
-		"create": "Create",
-		"edit": "Edit",
-		"info": "Info",
-		"infoSheetStats": {
-			"series": "Series",
-			"inProgress": "In Progress",
-			"completedBooks": "Completed",
-			"readingTime": "Reading Time",
-			"size": "Size"
-		},
-		"update": "Update",
-		"upload": "Upload",
-		"uploading": "Uploading",
-		"uploadingEllipsis": "Uploading...",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"upNext": "Up next",
-		"unknown": "Unknown",
-		"lastUpdated": "Last updated",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"remove": "Remove",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready",
-		"notUsedYet": "Not used yet",
-		"never": "Never",
-		"scan": "Scan",
-		"somethingWentWrong": "Something went wrong",
-		"back": "Back",
-		"continue": "Continue",
-		"book": "Book",
-		"series": "Series",
-		"fileUpload": {
-			"someRejected": "Some files were rejected. Please check the file types and try again",
-			"tooManyFiles": "You have selected too many files",
-			"noValidFiles": "No valid files were selected"
-		},
-		"unknownError": "An unknown error occurred"
-	},
-	"userPermissions": {
-		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
-		},
-		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
-		},
-		"ACCESS_KOREADER_SYNC": {
-			"label": "KoReader sync",
-			"description": "Allows the user to access the KoReader sync integration"
-		},
-		"ACCESS_KOBO_SYNC": {
-			"label": "Kobo sync",
-			"description": "Allows the user to access the Kobo sync integration"
-		},
-		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
-			"description": "Allows the user to access smart list features, including creating and managing smart lists"
-		},
-		"CHANGE_PASSWORD": {
-			"label": "Change password",
-			"description": "Allows the user to change their own password"
-		},
-		"CHANGE_USERNAME": {
-			"label": "Change username",
-			"description": "Allows the user to change their own username"
-		},
-		"CHANGE_AVATAR": {
-			"label": "Change avatar",
-			"description": "Allows the user to change their own avatar"
-		},
-		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
-			"description": "Allows the user to create new book clubs"
-		},
-		"CREATE_LIBRARY": {
-			"label": "Create libraries",
-			"description": "Allows the user to create new libraries"
-		},
-		"CREATE_NOTIFIER": {
-			"label": "Create notifiers",
-			"description": "Allows the user to create new notification systems"
-		},
-		"DELETE_LIBRARY": {
-			"label": "Delete libraries",
-			"description": "Allows the user to delete existing libraries"
-		},
-		"DELETE_NOTIFIER": {
-			"label": "Delete notifiers",
-			"description": "Allows the user to delete notification systems"
-		},
-		"DOWNLOAD_FILE": {
-			"label": "Download files",
-			"description": "Allows the user to download files from the server"
-		},
-		"EDIT_LIBRARY": {
-			"label": "Edit libraries",
-			"description": "Allows the user to modify existing libraries"
-		},
-		"EMAILER_CREATE": {
-			"label": "Create emailer",
-			"description": "Allows the user to create email configuration"
-		},
-		"EMAILER_MANAGE": {
-			"label": "Manage emailer",
-			"description": "Allows the user to manage email configuration and settings"
-		},
-		"EMAILER_READ": {
-			"label": "Read emailer",
-			"description": "Allows the user to view email configuration"
-		},
-		"EMAIL_ARBITRARY_SEND": {
-			"label": "Send arbitrary emails",
-			"description": "Allows the user to send custom emails to any address"
-		},
-		"EMAIL_SEND": {
-			"label": "Send emails",
-			"description": "Allows the user to send emails through the system"
-		},
-		"FILE_EXPLORER": {
-			"label": "File explorer",
-			"description": "Allows the user to browse and explore the server filesystem"
-		},
-		"MANAGE_LIBRARY": {
-			"label": "Manage libraries",
-			"description": "Allows the user to manage library settings and configuration"
-		},
-		"MANAGE_NOTIFIER": {
-			"label": "Manage notifiers",
-			"description": "Allows the user to manage notification system settings"
-		},
-		"MANAGE_SERVER": {
-			"label": "Manage server",
-			"description": "Allows the user to manage server configuration and settings"
-		},
-		"MANAGE_USERS": {
-			"label": "Manage users",
-			"description": "Allows the user to create, edit, and delete user accounts"
-		},
-		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
-		},
-		"READ_NOTIFIER": {
-			"label": "Read notifiers",
-			"description": "Allows the user to view notification system configuration"
-		},
-		"READ_PERSISTED_LOGS": {
-			"label": "Read persisted logs",
-			"description": "Allows the user to view stored system logs"
-		},
-		"READ_SYSTEM_LOGS": {
-			"label": "Read system logs",
-			"description": "Allows the user to view real-time system logs"
-		},
-		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
-		},
-		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
-			"description": "Allows the user to trigger library scans to discover new content"
-		},
-		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
-		},
-		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
-		},
-		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
-		},
-		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
-		},
-		"EDIT_THUMBNAILS": {
-			"label": "Edit thumbnails",
-			"description": "Allows the user to edit thumbnails for books and series"
-		},
-		"METADATA_PROVIDER_READ": {
-			"label": "Read metadata providers",
-			"description": "Allows the user to view configured external metadata providers"
-		},
-		"METADATA_PROVIDER_MANAGE": {
-			"label": "Manage metadata providers",
-			"description": "Allows the user to configure external metadata providers"
-		},
-		"METADATA_FETCH_RECORD_READ": {
-			"label": "Read metadata matches",
-			"description": "Allows the user to view metadata fetch results awaiting review"
-		},
-		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "Manage metadata matches",
-			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
-		}
+		"label": "Edit thumbnail"
 	},
 	"mobileApp": {
-		"addOrEditServer": {
-			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
-			},
-			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
-			},
-			"kind": "Kind",
-			"customHeaders": {
-				"label": "Custom Headers",
-				"addHeader": "Add header",
-				"invalidHeader": "Invalid header"
-			},
-			"auth": {
-				"label": "Auth",
-				"default": {
-					"label": "Login",
-					"description": "You will be prompted to login when accessing content as needed"
-				},
-				"token": {
-					"label": "Token",
-					"placeholder": "Raw Token"
-				},
-				"basic": "Basic"
-			},
-			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
-			"failedToConnect": "Failed to connect to server",
-			"didConnect": "Connected",
-			"checkConnection": "Check Connection",
-			"setAsDefaultServer": "Set as Default Server",
-			"enableOPDS": "Enable OPDS",
-			"validation": {
-				"nameAlreadyExists": "Name already exists",
-				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
-			}
-		},
-		"bookActions": {
-			"markAsRead": {
-				"label": "Mark as Read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
-				"failure": "Failed to mark book as read"
-			},
-			"clearProgress": {
-				"label": "Clear Progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
-				"failure": "Failed to delete current progress"
-			},
-			"deleteReadHistory": {
-				"label": "Delete Read History",
-				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
-				"failure": "Failed to delete read history"
-			},
-			"deleteBook": {
-				"label": "Delete Book",
-				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
-			},
-			"deleteDownload": {
-				"label": "Delete Download",
-				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
-			},
-			"goToLibrary": "Go to Library",
-			"goToSeries": "Go to Series",
-			"seeDetails": "See Details"
-		},
-		"bookMetadata": {
-			"ageRating": "Age Rating",
-			"downloadedAt": "Downloaded",
-			"characters": "Characters",
-			"format": "Format",
-			"genres": "Genres",
-			"language": "Language",
-			"publisher": "Publisher",
-			"size": "Size",
-			"volume": "Volume",
-			"writers": "Writers",
-			"colorists": "Colorists",
-			"inkers": "Inkers",
-			"letterers": "Letterers",
-			"coverArtists": "Cover Artists",
-			"links": "Links",
-			"year": "Year",
-			"identifier": "Identifier",
-			"identifiers": "Identifiers"
-		},
-		"common": {
-			"book": "Book",
-			"cancel": "Cancel",
-			"chapter": "Chapter",
-			"clear": "Clear",
-			"completed": "Completed",
-			"confirm": "Confirm",
-			"continue": "Continue",
-			"content": "Content",
-			"details": "Details",
-			"delete": "Delete",
-			"dismiss": "Dismiss",
-			"download": "Download",
-			"downloads": "Downloads",
-			"done": "Done",
-			"edit": "Edit",
-			"enabled": "Enabled",
-			"enable": "Enable",
-			"error": "Error",
-			"favorite": "Favorite",
-			"finished": "Finished",
-			"grid": "Grid",
-			"list": "List",
-			"lastCompleted": "Last Completed",
-			"name": "Name",
-			"none": "None",
-			"notAvailable": "Not Available",
-			"options": "Options",
-			"page": "Page",
-			"pages": "Pages",
-			"pageXOfY": "Page {{current}} of {{total}}",
-			"password": "Password",
-			"progress": "Progress",
-			"publication": "Publication",
-			"read": "Read",
-			"readAgain": "Read Again",
-			"readTime": "Reading Time",
-			"readthrough": "Readthrough",
-			"readMore": "Read More",
-			"refresh": "Refresh",
-			"save": "Save",
-			"select": "Select",
-			"settings": "Settings",
-			"servers": "Servers",
-			"thisBook": "this book",
-			"thisServer": "this server",
-			"unknown": "Unknown",
-			"unknownTitle": "Untitled",
-			"url": "URL",
-			"username": "Username",
-			"value": "Value",
-			"version": "Version"
-		},
-		"errors": {
-			"unknown": "Unknown error"
-		},
-		"epubMenu": {
-			"tableOfContents": "Table of Contents",
-			"bookmarksAndAnnotations": "Bookmarks & Annotations",
-			"appearance": "Appearance"
-		},
-		"formatSeriesPosition": {
-			"none": {
-				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
-				"position": "{{position}} in {{seriesName}}"
-			},
-			"book": {
-				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
-				"position": "Book {{position}} in {{seriesName}}"
-			},
-			"hashtag": {
-				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
-				"position": "#{{position}} in {{seriesName}}"
-			},
-			"unknownSeriesName": "series"
-		},
-		"emptyState": {
-			"noStumpServers": "No Stump servers added",
-			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No Servers Configured",
-			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation",
-			"noSmartLists": {
-				"label": "No lists returned",
-				"description": "Once created they will appear here"
-			}
-		},
-		"tabs": {
-			"servers": "Servers",
-			"localLibrary": "Library",
-			"settings": "Settings",
-			"home": "Home",
-			"browse": "Browse",
-			"clubs": "Clubs",
-			"search": "Search"
-		},
-		"localLibrary": {
-			"title": "Local Library",
-			"emptyState": {
-				"all": {
-					"title": "Nothing to Read Yet",
-					"description": "Once you have books for offline reading, they will appear here"
-				},
-				"imported": {
-					"title": "No Imported Books",
-					"description": "Import books to read them offline"
-				},
-				"server": {
-					"title": "No Downloaded Books",
-					"description": "Download books from your library to read them offline"
-				}
-			},
-			"downloadQueue": {
-				"downloading": "Downloading",
-				"failed": "Failed",
-				"nothingDownloading": "Nothing is being downloaded",
-				"noActiveDownloads": "No active downloads",
-				"noFailedDownloads": "No failed downloads",
-				"downloadStarting": "Starting..."
-			},
-			"downloadsHeaderMenu": {
-				"deleteAllDownloads": {
-					"label": "Delete Books",
-					"confirmation": "Are you sure you want to delete your local library?",
-					"disclaimer": "This action cannot be undone."
-				},
-				"seeProblems": "See Problems ({{problemCount}})",
-				"hideCurated": "Hide Curated",
-				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
-			},
-			"downloadsHeaderSortMenu": {
-				"sortBy": {
-					"NAME": "Name",
-					"ADDED_AT": "Date Added",
-					"SERIES": "Series"
-				},
-				"sortDirection": {
-					"ASC": "Ascending",
-					"DESC": "Descending"
-				},
-				"sortDirectionText": {
-					"ASC": "A → Z",
-					"DESC": "Z → A"
-				},
-				"sortDirectionDate": {
-					"ASC": "Oldest First",
-					"DESC": "Newest First"
-				},
-				"sourceFilter": {
-					"all": "All Books",
-					"server": "Downloaded",
-					"imported": "Imported"
-				}
-			},
-			"downloadProblemsSheet": {
-				"title": "Failed Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"retryAll": "Retry All",
-				"dismissAll": "Dismiss All"
-			}
-		},
-		"progressSync": {
-			"skippedSync": {
-				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
-				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
-				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
-			},
-			"syncFailed": "Failed to sync offline progress"
-		},
-		"search": {
-			"label": "Search This Server",
-			"description": "Find specific content on this server",
-			"placeholder": "Search"
-		},
-		"settings": {
-			"preferences": {
-				"label": "Preferences",
-				"appTheme": {
-					"label": "Theme",
-					"options": {
-						"light": "Light",
-						"dark": "Dark"
-					}
-				},
-				"appPrimaryColor": {
-					"label": "Accent",
-					"options": {
-						"chromaScale": "Chroma Scale",
-						"hues": {
-							"red": "Red",
-							"orange": "Orange",
-							"amber": "Amber",
-							"yellow": "Yellow",
-							"lime": "Lime",
-							"green": "Green",
-							"emerald": "Emerald",
-							"teal": "Teal",
-							"cyan": "Cyan",
-							"sky": "Sky",
-							"blue": "Blue",
-							"indigo": "Indigo",
-							"violet": "Violet",
-							"purple": "Purple",
-							"fuchsia": "Fuchsia",
-							"pink": "Pink",
-							"rose": "Rose",
-							"slate": "Slate",
-							"gray": "Gray",
-							"zinc": "Zinc",
-							"neutral": "Neutral",
-							"stone": "Stone"
-						}
-					}
-				},
-				"appLanguage": "Language",
-				"defaultServer": "Default Server",
-				"thumbnailRatio": "Thumbnail Ratio",
-				"thumbnailPlaceholder": {
-					"label": "Thumbnail Placeholder",
-					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average Color",
-						"colorful": "Colorful",
-						"thumbhash": "Thumbhash"
-					}
-				},
-				"thumbnailResizeMode": {
-					"label": "Thumbnail Resize",
-					"options": {
-						"cover": "Cover",
-						"stretch": "Stretch",
-						"fit": "Fit"
-					}
-				}
-			},
-			"reading": {
-				"label": "Reading",
-				"preferNativePdf": "Prefer Native PDF",
-				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
-			},
-			"stump": {
-				"label": "Stump",
-				"description": "Stump features are optional and can be turned off if you do not need them",
-				"bookClubsEnabled": "Book Club Features"
-			},
-			"autoSyncLocalData": "Auto-Sync Local Data",
-			"textCase": {
-				"label": "Text Case",
-				"options": {
-					"lowerCase": "Lowercase",
-					"sentenceCase": "Sentence Case",
-					"titleCase": "Title Case"
-				}
-			},
-			"tintListBackground": "Tint List Backgrounds",
-			"management": {
-				"label": "Management",
-				"dataUsage": {
-					"label": "Data Usage",
-					"nonStumpData": "Non-Stump Data",
-					"serversTotal": "Servers Total",
-					"totalFiles": "Total Files",
-					"totalSize": "Total Size",
-					"deleteDownloads": {
-						"label": "Delete Downloads",
-						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
-						"deleteFailed": {
-							"title": "Deletion Failed",
-							"description": "There was an error deleting all downloads from {{serverName}}"
-						}
-					},
-					"noDownloads": "No downloaded files for this server",
-					"storedPreferences": {
-						"label": "Stored Preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc"
-					},
-					"clearPreferences": "Clear Preferences"
-				}
-			},
-			"debug": {
-				"label": "Debug",
-				"clearCache": {
-					"label": "Clear Cache",
-					"memory": {
-						"button": "Memory",
-						"success": "Memory Cache Cleared"
-					},
-					"disk": {
-						"button": "Disk",
-						"success": "Disk Cache Cleared"
-					}
-				},
-				"deleteDatabase": {
-					"label": "Delete Database",
-					"success": {
-						"title": "Database Deleted",
-						"description": "Please restart the app"
-					},
-					"error": {
-						"title": "Deletion Failed",
-						"description": "There was an error deleting the database"
-					}
-				},
-				"performanceMonitor": "Performance Monitor",
-				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
-				"displayLanguageKeys": {
-					"label": "Display Language Keys",
-					"options": {
-						"none": "None",
-						"abbreviated": "Abbreviated",
-						"full": "Full"
-					}
-				},
-				"debugAnalytics": {
-					"label": "Debug Analytics",
-					"description": "Send additional debug-related events to help troubleshoot issues"
-				}
-			},
-			"contactInfo": {
-				"label": "Contact",
-				"email": "Email",
-				"discord": "Discord",
-				"github": "GitHub"
-			},
-			"supportInfo": {
-				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
-			}
-		},
-		"stumpServer": {
-			"browse": {
-				"books": "Books",
-				"favorites": "Favorites",
-				"files": "Files",
-				"libraries": "Libraries",
-				"series": "Series",
-				"smartLists": "Smart Lists"
-			},
-			"continueReading": {
-				"label": "Continue Reading",
-				"emptyText": "No books in progress"
-			},
-			"onDeck": {
-				"label": "Your Next Read",
-				"emptyText": "No books on deck"
-			},
-			"recentlyAddedSeries": {
-				"label": "Recently Added Series",
-				"emptyText": "No recently added series"
-			},
-			"recentlyAddedBooks": {
-				"label": "Recently Added Books",
-				"emptyText": "No recently added books"
-			}
-		},
 		"readerSettings": {
-			"title": "Reader Settings",
-			"overrideGlobalSettings": "Override Global Settings",
-			"sections": {
-				"mode": "Mode",
-				"imageOptions": "Image Options",
-				"controls": "Controls"
-			},
-			"readingMode": {
-				"label": "Flow",
-				"options": {
-					"PAGED": "Paged",
-					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
-					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
-				}
-			},
-			"readingDirection": {
-				"label": "Direction",
-				"options": {
-					"RTL": "Right to left",
-					"LTR": "Left to right"
-				}
-			},
-			"doublePageBehavior": {
-				"label": "Double Paged",
-				"options": {
-					"always": "Always",
-					"auto": "Auto",
-					"off": "Off"
-				}
-			},
-			"separateSecondPage": "Separate Second Page",
-			"imageScaling": {
-				"label": "Scaling",
-				"options": {
-					"AUTO": "Auto",
-					"HEIGHT": "Fit Height",
-					"WIDTH": "Fit Width",
-					"NONE": "None"
-				}
-			},
-			"allowDownscaling": "Downscaling",
-			"tapSidesToNavigate": "Tap Sides to Navigate",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
-			"footerControls": {
-				"label": "Footer",
-				"options": {
-					"images": "Image Gallery",
-					"slider": "Slider"
-				}
-			},
-			"readingTimer": {
-				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
-			},
-			"allSettings": "All Settings"
-		},
-		"tableOfContents": {
-			"goToPageX": "Go to page {{pageNumber}}",
-			"goToPagePlaceholder": "Go to page...",
-			"errors": {
-				"pageDoesNotExist": "Page {{page}} does not exist",
-				"invalidPage": "'{{page}}' is not a page number"
-			},
-			"showCurrentChapter": "Show Current Chapter"
-		},
-		"annotationsSheet": {
-			"tabs": {
-				"all": "All",
-				"bookmarks": "Bookmarks",
-				"highlights": "Highlights",
-				"notes": "Notes"
-			}
-		},
-		"epubSettings": {
-			"title": "Epub Reader Settings",
-			"typeface": {
-				"label": "Typeface",
-				"options": {
-					"system": "System",
-					"opendyslexic": "OpenDyslexic",
-					"literata": "Literata",
-					"atkinsonHyperlegible": "Atkinson Hyperlegible",
-					"charisSIL": "Charis SIL",
-					"bitter": "Bitter"
-				}
-			},
-			"fontSize": "Font Size",
-			"fontWeight": {
-				"label": "Font Weight",
-				"options": {
-					"light": "Light",
-					"normal": "Normal",
-					"medium": "Medium",
-					"bold": "Bold"
-				}
-			},
-			"textNormalization": "Text Normalization",
-			"verticalText": "Vertical Text",
-			"readingDirection": {
-				"label": "Reading Direction",
-				"options": {
-					"rtl": "Right to left",
-					"ltr": "Left to right"
-				}
-			},
-			"columns": {
-				"label": "Columns",
-				"options": {
-					"auto": "Auto",
-					"single": "Single",
-					"double": "Double"
-				}
-			},
-			"pageMargins": "Page Margins",
-			"imageFilter": {
-				"label": "Image Filter",
-				"options": {
-					"none": "None",
-					"darken": "Darken",
-					"invert": "Invert"
-				}
-			},
-			"publisherStyles": "Publisher Styles",
-			"volumeButtonsNavigate": "Volume Buttons Navigate",
-			"textAlignment": {
-				"label": "Text Alignment",
-				"options": {
-					"start": "Start",
-					"left": "Left",
-					"center": "Center",
-					"right": "Right",
-					"justify": "Justify"
-				}
-			},
-			"typeScale": "Type Scale",
-			"lineHeight": "Line Height",
-			"paragraphIndent": "Paragraph Indent",
-			"paragraphSpacing": "Paragraph Spacing",
-			"wordSpacing": "Word Spacing",
-			"letterSpacing": "Letter Spacing",
-			"hyphens": "Hyphens",
-			"ligatures": "Ligatures",
-			"customizeTheme": {
-				"placeholder": "Theme name",
-				"background": "Background",
-				"text": "Text",
-				"highlight": "Highlight",
-				"premadeThemes": "Premade themes"
-			}
-		},
-		"libraryType": {
-			"BOOK": "Books",
-			"COMIC": "Comics",
-			"LIGHT_NOVEL": "Light Novels",
-			"MANGA": "Manga",
-			"MANHWA": "Manhwa",
-			"MIXED": "Mixed",
-			"WEBTOON": "Webtoons",
-			"WEB_NOVEL": "Web Novels"
-		},
-		"savedServerActions": {
-			"clearCache": "Clear Cache",
-			"discardTokens": {
-				"label": "Discard Tokens",
-				"description": "Affects login tokens only"
-			},
-			"deleteServer": {
-				"title": "Delete Server",
-				"confirmation": "Are you sure you want to delete {{serverName}}?"
-			}
-		},
-		"filtering": {
-			"notStarted": "Not Started",
-			"currentlyReading": "Currently Reading",
-			"finished": "Finished"
-		},
-		"sorting": {
-			"labelEllipsis": "Sort By...",
-			"sortField": {
-				"NAME": "Name",
-				"ADDED_AT": "Date Added",
-				"CREATED_AT": "Date Added",
-				"NUMBER": "Series Position",
-				"SERIES": "Series",
-				"YEAR": "Year Published"
-			},
-			"sortDirection": {
-				"ASC": "Ascending",
-				"DESC": "Descending"
-			},
-			"sortDirectionString": {
-				"ASC": "A → Z",
-				"DESC": "Z → A"
-			},
-			"sortDirectionDate": {
-				"ASC": "Oldest First",
-				"DESC": "Newest First"
-			},
-			"sortDirectionNumber": {
-				"ASC": "1 → 10",
-				"DESC": "10 → 1"
-			}
+			"title": "Reader Settings"
 		}
 	}
 }

@@ -2,9 +2,7 @@ use crate::common::{
 	book::update_progress, series::setup_single_series_with_n_books, TestApp,
 };
 
-use graphql::input::media::{
-	EpubProgressInput, EpubProgressLocatorInput, MediaProgressInput, PagedProgressInput,
-};
+use graphql::input::media::{EpubProgressInput, MediaProgressInput, PagedProgressInput};
 use models::{
 	entity::{media, reading_session},
 	shared::{enums::ReadingStatus, readium::ReadiumLocator},
@@ -423,13 +421,13 @@ async fn test_detect_finishing_session_for_ebook() {
 
 	let conn = app.conn();
 
-	fn locator(chapter: usize) -> EpubProgressLocatorInput {
-		EpubProgressLocatorInput::Readium(Box::new(ReadiumLocator {
+	fn locator(chapter: usize) -> ReadiumLocator {
+		ReadiumLocator {
 			chapter_title: format!("Chapter {chapter}"),
 			href: format!("chapter{chapter}.xhtml"),
 			r#type: "application/xhtml+xml".to_string(),
 			..Default::default()
-		}))
+		}
 	}
 
 	update_progress(
@@ -441,6 +439,7 @@ async fn test_detect_finishing_session_for_ebook() {
 			is_complete: Some(false),
 			elapsed_seconds_delta: Some(300),
 			device_id: None,
+			reset_elapsed_seconds: Some(false),
 		})),
 	)
 	.await;
@@ -464,6 +463,7 @@ async fn test_detect_finishing_session_for_ebook() {
 			is_complete: Some(true),
 			elapsed_seconds_delta: Some(300),
 			device_id: None,
+			reset_elapsed_seconds: Some(false),
 		})),
 	)
 	.await;

@@ -4,11 +4,15 @@ import { Platform } from 'react-native'
 import { AddServerDialog } from '~/components/savedServer'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
+import { useSyncServerAvatars } from '~/lib/hooks/sync'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
 	const { t } = useTranslate()
+
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
+
+	useSyncServerAvatars()
 
 	// TODO(android): this looks shit on android, idky the header is so short
 	return (

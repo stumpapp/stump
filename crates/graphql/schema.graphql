@@ -335,7 +335,6 @@ type Bookmark {
 	id: String!
 	previewContent: String
 	locator: ReadiumLocator
-	epubcfi: String
 	page: Int
 	mediaId: String!
 	userId: String!
@@ -344,7 +343,7 @@ type Bookmark {
 
 input BookmarkInput {
 	mediaId: String!
-	locator: EpubProgressLocatorInput!
+	locator: ReadiumLocatorInput!
 	previewContent: String
 }
 
@@ -709,16 +708,12 @@ type Epub {
 }
 
 input EpubProgressInput {
-	locator: EpubProgressLocatorInput!
+	locator: ReadiumLocatorInput!
 	percentage: Decimal
 	isComplete: Boolean
 	elapsedSecondsDelta: Int
 	deviceId: String
-}
-
-input EpubProgressLocatorInput @oneOf {
-	readium: ReadiumLocatorInput
-	epubcfi: String
+	resetElapsedSeconds: Boolean
 }
 
 """
@@ -929,6 +924,7 @@ type ImageRef {
 	height: Int
 	width: Int
 	metadata: ImageMetadata
+	lastModified: DateTime
 }
 
 "The resize options to use when generating an image"
@@ -1588,6 +1584,13 @@ input MediaMetadataSearchInput {
 	author: String
 	isbn: String
 	year: Int
+	"The issue number (for comics/manga)"
+	number: Float
+	"""
+	The volume ID to search within, which will swap to a more precise lookup if provided alongside
+	`number`
+	"""
+	comicVineVolumeId: String
 	"""
 	Restrict the search to this provider only. If omitted, all enabled providers
 	configured for the media's library type are searched.
@@ -1764,6 +1767,8 @@ input MetadataFieldOverride {
 enum MetadataProvider {
 	"Hardcover (https://hardcover.app)"
 	HARDCOVER
+	"ComicVine (https://comicvine.gamespot.com/api/)"
+	COMIC_VINE
 }
 
 type MetadataProviderConfigModel {
@@ -1980,8 +1985,6 @@ type Mutation {
 	createBookmark(input: BookmarkInput!): Bookmark!
 	"Delete a bookmark by ID, only if the user created it"
 	deleteBookmark(id: String!): Bookmark!
-	"Delete a bookmark by epubcfi"
-	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
 	"Create an annotation (highlight/note)"
 	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
 	"Update an annotation's note text"
@@ -2083,6 +2086,8 @@ type Mutation {
 	createMetadataProvider(input: CreateMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	updateMetadataProvider(id: Int!, input: PatchMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	deleteMetadataProvider(id: Int!): MetadataProviderConfigModel!
+	"Validate the provided API token by making a test request using a client instance"
+	validateProviderConfig(config: ValidateMetadataProviderConfigInput!): ProviderCredentialVerification!
 	"Accept the top-ranked candidate for all pending metadata matches"
 	acceptAllPendingMatches(strategy: MergeStrategy, excludeFields: [MetadataField!]): Int!
 	"Reject all pending metadata matches, setting their status to NoMatch"
@@ -2124,8 +2129,18 @@ type Mutation {
 	"Rename a custom emoji"
 	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
 	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingSession!
+	"""
+	a more focused version of `update_media_progress` that splices the history so that
+	any sessions after the ancestor_session_id are deleted in favor of the input
+	provided. this should be called when resolving local vs remote progress conflicts, where
+	the user has chosen to keep their local progress and discard the remote progress beyond
+	the ancestor session (i.e., the last session that both local and remote progress share)
+	"""
+	acceptLocalProgress(id: ID!, ancestorSessionId: Int, input: MediaProgressInput!): ReadingSession!
 	"trashes current readthrough, if there is one"
 	clearMediaProgress(id: ID!): Boolean!
+	"resets the elapsed seconds for all reading sessions in the current readthrough, if there is one"
+	resetElapsedSeconds(id: ID!): Boolean!
 	"""
 	marks current readthrough as complete:
 	- if no current readthrough, creates one
@@ -2283,6 +2298,7 @@ input PagedProgressInput {
 	page: Int!
 	elapsedSecondsDelta: Int
 	deviceId: String
+	resetElapsedSeconds: Boolean
 }
 
 type PaginatedAuthorResponse {
@@ -2397,6 +2413,12 @@ type PlaceholderGenerationOutput {
 	generatedMetadata: Int!
 }
 
+type ProviderCredentialVerification {
+	responseStatus: Int!
+	isValid: Boolean!
+	error: String
+}
+
 enum PublicationStatus {
 	ONGOING
 	COMPLETED
@@ -2458,6 +2480,7 @@ type Query {
 	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
+	readingSessionConflictView(mediaId: ID!, branchedSessionId: Int): ReadingSessionConflictResolutionView!
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
@@ -2580,7 +2603,6 @@ type ReadingSession {
 	id: Int!
 	"the \"logical\" date of this session, based on user prefs and start time"
 	sessionDate: NaiveDate!
-	epubcfi: String @deprecated(reason: "future releases of Stump will remove support for this field")
 	startLocator: ReadiumLocator
 	endLocator: ReadiumLocator
 	startPage: Int
@@ -2604,6 +2626,23 @@ type ReadingSession {
 	createdAt: DateTime!
 	updatedAt: DateTime
 	deviceIds: [String!]!
+}
+
+"""
+a view through which a client can resolve conflicts relative to a local ancestor session
+and any number of remote sessions which were created afterwards
+"""
+type ReadingSessionConflictResolutionView {
+	"""
+	the last session which was known to be in sync with the local client. it's possible there is no ancestor session, e.g. if
+	the book was downloaded on the client before any reading sessions were created on the server
+	"""
+	ancestorSession: ReadingSession
+	"""
+	all sessions created/updated on **this server** (remote) after the ancestor session, ordered
+	by created_at ascending
+	"""
+	remoteSessions: [ReadingSession!]!
 }
 
 """
@@ -2710,10 +2749,11 @@ with the highest `readthrough_number`
 """
 type ResumeReadingCursor {
 	readthroughNumber: Int!
+	"the id of the session this cursor is derived from"
+	sessionId: Int!
 	page: Int
 	locator: ReadiumLocator
 	percentageCompleted: Decimal
-	epubcfi: String
 	"total reading time across all sessions in the current readthrough"
 	elapsedSeconds: Int!
 	"when the very first session in the current readthrough started"
@@ -3226,6 +3266,7 @@ type StumpConfig {
 	colorfulLogs: Boolean!
 	"An optional custom path for the database."
 	dbPath: String
+	dbTimeoutSecs: Int!
 	"The client directory."
 	clientDir: String!
 	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
@@ -3473,12 +3514,16 @@ type User {
 	username: String!
 	isServerOwner: Boolean!
 	avatarPath: String
+	avatarMeta: ImageMetadata
+	avatarUpdatedAt: DateTime
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
 	oidcEmail: String
-	avatarUrl: String
+	avatarUrl: String @deprecated(reason: "This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays.")
+	"a reference to the avatar image and its metadata for this user"
+	avatar: ImageRef!
 	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
@@ -3635,6 +3680,13 @@ type UserPreferences {
 	userId: String
 	homeArrangement: Arrangement!
 	navigationArrangement: Arrangement!
+}
+
+input ValidateMetadataProviderConfigInput {
+	"The provider type"
+	providerType: MetadataProvider!
+	"The API token for authenticating with the provider"
+	apiToken: String!
 }
 
 "Marks an element of a GraphQL schema as no longer supported."

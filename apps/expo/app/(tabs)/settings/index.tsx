@@ -1,5 +1,5 @@
 import { Platform, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
 import { ContactInformation, SupportInformation } from '~/components/appSettings'
 import { AppDataUsageLink } from '~/components/appSettings/management'
@@ -17,7 +17,7 @@ import {
 	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
-	MaskURLs,
+	MaxPageViewingSeconds,
 	PerformanceMonitor,
 	PreferMinimalReader,
 	PreferNativePdf,
@@ -28,7 +28,7 @@ import {
 	ThumbnailResizeMode,
 	TintListBackground,
 } from '~/components/appSettings/preferences'
-import { BookClubsEnabled, StumpEnabled } from '~/components/appSettings/stump'
+import { BookClubsEnabled } from '~/components/appSettings/stump'
 import { Card } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 
@@ -36,7 +36,13 @@ export default function Screen() {
 	const { t } = useTranslate()
 
 	return (
-		<ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
+		<KeyboardAwareScrollView
+			className="flex-1 bg-background"
+			contentInsetAdjustmentBehavior="automatic"
+			// this is for MaxPageViewingSeconds:
+			// gap between keyboard and KeyboardDraftNumberToolbar + KeyboardDraftNumberToolbar height + gap to TextInput
+			bottomOffset={7 + 49 + 10}
+		>
 			<View className="gap-8 p-4 tablet:p-6 flex-1 bg-background">
 				<Card label={t(getSectionLabelKey('preferences'))}>
 					<AppTheme />
@@ -54,6 +60,7 @@ export default function Screen() {
 					<PreferNativePdf />
 					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
+					<MaxPageViewingSeconds />
 					<GlobalIncognito />
 					<ImageReaderSettings />
 					<EpubSettings />
@@ -63,7 +70,6 @@ export default function Screen() {
 					label={t(getSectionLabelKey('stump'))}
 					description={t(getSectionKey('stump', 'description'))}
 				>
-					<StumpEnabled />
 					<AutoSyncLocalData />
 					<BookClubsEnabled />
 				</Card>
@@ -77,7 +83,6 @@ export default function Screen() {
 					{__DEV__ && <DeleteDatabase />}
 					<PerformanceMonitor />
 					<ReduceAnimations />
-					<MaskURLs />
 					<DisplayLanguageKeys />
 					<EnableDebugAnalytics />
 				</Card>
@@ -86,7 +91,7 @@ export default function Screen() {
 
 				<SupportInformation />
 			</View>
-		</ScrollView>
+		</KeyboardAwareScrollView>
 	)
 }
 

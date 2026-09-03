@@ -19,7 +19,6 @@ import { useActiveServer } from '~/components/activeServer'
 import { db, downloadedFiles } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
-import { deleteBookTimer } from '~/stores/reader'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -106,11 +105,6 @@ export default function BookMenu({ data }: Props) {
 	})
 
 	const onSuccess = async () => {
-		// see https://github.com/stumpapp/stump/issues/1254
-		// for now every action here using onSuccess will clear the timer
-		// however this NEEDS to be removed if that changes
-		deleteBookTimer(book.id)
-
 		await Promise.all([
 			client.refetchQueries({ queryKey: ['bookById', book.id], exact: false }),
 			client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),
@@ -118,6 +112,13 @@ export default function BookMenu({ data }: Props) {
 			client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
 			client.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
 			client.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+			// TODO: would be better to have a little bit smarter cache invalidation here,
+			// im casting a wide net because i don't want to have to figure out where i am
+			// in the router (e.g., did i come from books? a series? etc)
+			client.invalidateQueries({ queryKey: ['seriesById', book.series.id], exact: false }), // stats
+			client.invalidateQueries({ queryKey: ['seriesBooks', book.series.id], exact: false }),
+			client.invalidateQueries({ queryKey: ['booksStats', serverID], exact: false }), // stats
+			client.invalidateQueries({ queryKey: ['books', serverID], exact: false }), // server books
 		])
 	}
 

@@ -9,6 +9,7 @@ use stump_core::{
 	error::CoreError,
 	filesystem::{
 		image::{ProcessorError, ThumbnailGenerateError},
+		media::EpubSearchError,
 		FileError,
 	},
 	opds::v2_0::OPDSV2Error,
@@ -107,6 +108,8 @@ pub enum APIError {
 	AccountLocked,
 	#[error("{0}")]
 	BadRequest(String),
+	#[error("Request cancelled")]
+	CancelledRequest,
 	#[error("{0}")]
 	NotFound(String),
 	#[error("{0}")]
@@ -157,6 +160,9 @@ impl APIError {
 		match self {
 			APIError::AccountLocked => StatusCode::FORBIDDEN,
 			APIError::BadRequest(_) => StatusCode::BAD_REQUEST,
+			APIError::CancelledRequest => {
+				StatusCode::from_u16(499).expect("499 is a valid HTTP status code")
+			},
 			APIError::NotFound(_) => StatusCode::NOT_FOUND,
 			APIError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
 			APIError::Unauthorized => StatusCode::UNAUTHORIZED,
@@ -275,6 +281,18 @@ impl From<FileError> for APIError {
 	}
 }
 
+impl From<EpubSearchError> for APIError {
+	fn from(error: EpubSearchError) -> Self {
+		match error {
+			EpubSearchError::InvalidQueryLength { .. }
+			| EpubSearchError::InvalidCursor
+			| EpubSearchError::InvalidLimit { .. } => APIError::BadRequest(error.to_string()),
+			EpubSearchError::Cancelled => APIError::CancelledRequest,
+			EpubSearchError::File(error) => APIError::from(error),
+		}
+	}
+}
+
 impl From<ProcessorError> for APIError {
 	fn from(error: ProcessorError) -> APIError {
 		match error {
@@ -324,7 +342,9 @@ impl IntoResponse for APIErrorResponse {
 
 		let mut builder = Response::builder()
 			.status(self.status)
-			.header("Content-Type", "application/json");
+			.header("Content-Type", "application/json")
+			// do not cache error responses
+			.header("Cache-Control", "no-store");
 
 		// if the status is 401, we want to encourage the client to delete their
 		// session cookie

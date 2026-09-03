@@ -1,6 +1,8 @@
 import { useSDK } from '@stump/client'
 import { OPDSProgressionInput } from '@stump/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import * as Application from 'expo-application'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
@@ -12,8 +14,10 @@ import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { hashFromURL, useResolveURL } from '~/components/opds/utils'
+import { db, readProgress } from '~/db'
+import { useReadingTimer } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
-import { useBookPreferences, useBookTimer } from '~/stores/reader'
+import { useBookPreferences } from '~/stores/reader'
 
 import { usePublicationContext } from './context'
 
@@ -71,10 +75,17 @@ export default function Screen() {
 	)
 
 	const {
+		data: [record],
+	} = useLiveQuery(db.select().from(readProgress).where(eq(readProgress.bookId, id)).limit(1), [id])
+
+	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
 
-	const timer = useBookTimer(id, { enabled: trackElapsedTime })
+	const timer = useReadingTimer({
+		databaseSeconds: record?.elapsedSeconds,
+		enabled: trackElapsedTime,
+	})
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
@@ -103,13 +114,66 @@ export default function Screen() {
 	const queryClient = useQueryClient()
 	const lastPageRef = useRef<number | null>(null)
 
+	const { mutate: resetElapsedSeconds } = useMutation({
+		retry: (attempts) => attempts < 3,
+		onError: (error) => {
+			console.error('Failed to reset reading time:', error)
+		},
+		mutationFn: async ({ bookId, serverId }: { bookId: string; serverId: string }) => {
+			await db
+				.insert(readProgress)
+				.values({
+					bookId,
+					elapsedSeconds: 0,
+					lastModified: new Date(),
+					serverId,
+				})
+				.onConflictDoUpdate({
+					target: readProgress.bookId,
+					set: {
+						elapsedSeconds: 0,
+						lastModified: new Date(),
+					},
+				})
+		},
+	})
+
 	const { mutate: updateProgression } = useMutation({
 		retry: (attempts) => attempts < 3,
 		onError: (error) => {
 			console.error('Failed to update OPDS progression:', error)
 		},
-		mutationFn: async ({ url, input }: { url: string; input: OPDSProgressionInput }) => {
-			return sdk.opds.updateProgression(url, input)
+		mutationFn: async ({
+			url,
+			input,
+			bookId,
+			serverId,
+		}: {
+			url: string
+			input: OPDSProgressionInput
+			bookId: string
+			serverId: string
+		}) => {
+			sdk.opds.updateProgression(url, input)
+
+			const totalSeconds = timer.getTotalSeconds()
+			await db
+				.insert(readProgress)
+				.values({
+					bookId: bookId,
+					serverId: serverId,
+					elapsedSeconds: totalSeconds,
+					page: input.locator.locations?.position,
+					lastModified: new Date(),
+				})
+				.onConflictDoUpdate({
+					target: readProgress.bookId,
+					set: {
+						elapsedSeconds: totalSeconds,
+						page: input.locator.locations?.position,
+						lastModified: new Date(),
+					},
+				})
 		},
 	})
 
@@ -118,6 +182,8 @@ export default function Screen() {
 			if (!progressionURL || !deviceId) {
 				return
 			}
+
+			timer.popDeltaSeconds()
 
 			const progression = readingOrder?.length
 				? Math.round((page / readingOrder.length) * 100) / 100
@@ -144,10 +210,15 @@ export default function Screen() {
 				},
 			}
 
-			updateProgression({ url: progressionURL, input })
+			updateProgression({ url: progressionURL, input, bookId: id, serverId })
 		},
-		[progressionURL, deviceId, readingOrder, updateProgression],
+		[progressionURL, deviceId, readingOrder, updateProgression, timer, id, serverId],
 	)
+
+	const resetTimer = useCallback(() => {
+		resetElapsedSeconds({ bookId: id, serverId: serverId })
+		timer.clearTotalSeconds()
+	}, [id, serverId, resetElapsedSeconds, timer])
 
 	useFocusEffect(
 		useCallback(() => {
@@ -205,6 +276,7 @@ export default function Screen() {
 			pageURL={(page: number) => getPageURL(readingOrder![page - 1]?.href || '')}
 			requestHeaders={requestHeaders}
 			timer={timer}
+			resetTimer={resetTimer}
 			onPageChanged={progressionURL ? onPageChanged : undefined}
 			isOPDS
 		/>

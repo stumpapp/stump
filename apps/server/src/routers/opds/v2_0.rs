@@ -22,7 +22,7 @@ use models::{
 };
 use sea_orm::{
 	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, Order, QueryOrder,
-	QueryTrait,
+	QueryTrait, TransactionTrait,
 };
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
@@ -1371,28 +1371,29 @@ async fn update_book_progression(
 	};
 
 	match page {
-		Some(p) if book.pages > -1 => {
-			if p < 1 || p > book.pages {
-				return Err(APIError::BadRequest(format!(
-					"Page {} is out of bounds (1-{})",
-					p, book.pages
-				)));
-			}
+		Some(p) if book.pages > -1 && (p < 1 || p > book.pages) => {
+			return Err(APIError::BadRequest(format!(
+				"Page {} is out of bounds (1-{})",
+				p, book.pages
+			)));
 		},
 		_ => {},
 	}
 
+	let locator = input.locator();
 	let progression = NormalizedProgression {
 		page,
-		locator: input.locator(),
-		epubcfi: None,
+		locator,
 		percentage,
 		elapsed_seconds_delta: None,
 		did_complete,
 		device_id,
+		reset_elapsed_seconds: false,
 	};
 
-	upsert_reading_session(conn, &user, &id, progression).await?;
+	let txn = conn.begin().await?;
+	upsert_reading_session(&txn, &user, &id, progression).await?;
+	txn.commit().await?;
 
 	Ok(axum::http::StatusCode::NO_CONTENT)
 }

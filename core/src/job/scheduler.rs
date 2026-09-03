@@ -12,6 +12,7 @@ use crate::job::stump_job::StumpJob;
 use crate::{CoreError, CoreResult, Ctx};
 
 /// A scheduler that loads cron-based jobs and spawns them accordingly
+#[must_use = "dropping the JobScheduler aborts all scheduled job loops"]
 pub struct JobScheduler {
 	handles: Vec<tokio::task::JoinHandle<()>>,
 }

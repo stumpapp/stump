@@ -116,7 +116,7 @@
 			},
 			"description": {
 				"label": "Descripción",
-				"placeholder": "Un club de fans de 'Nuestra bandera significa muerte'. Leemos ficción pirata  a nuestro antojo",
+				"placeholder": "Un club de fans de 'Nuestra bandera significa muerte'. Leemos ficción de piratas a nuestro antojo",
 				"description": "Una breve descripción opcional de tu club de libros"
 			},
 			"is_private": {
@@ -153,7 +153,8 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Nombre a mostrar",
-					"description": "Un nombre opcional a mostrar para tu membresía en el club de libros. Si está configurado, toma precedencia sobre tu nombre de usuario"
+					"description": "Un nombre opcional a mostrar para tu membresía en el club de libros. Si está configurado, toma precedencia sobre tu nombre de usuario",
+					"placeholder": "Oromei"
 				},
 				"hideProgress": {
 					"label": "Ocultar progreso",
@@ -373,6 +374,9 @@
 					"description": "Redimensionar la vista en miniatura a un tamaño exacto en píxeles",
 					"width": {
 						"label": "Ancho"
+					},
+					"height": {
+						"label": "Alto"
 					}
 				},
 				"scaleDimension": {
@@ -386,7 +390,8 @@
 					},
 					"size": {
 						"label": "Tamaño"
-					}
+					},
+					"label": "Autoescalado"
 				},
 				"format": {
 					"label": "Formato de imagen",
@@ -589,7 +594,8 @@
 	"libraryHeader": {
 		"tabs": {
 			"books": "Libros",
-			"files": "Archivos"
+			"files": "Archivos",
+			"series": "Series"
 		}
 	},
 	"librarySettingsScene": {
@@ -602,7 +608,8 @@
 				"scanning": "Escaneando",
 				"thumbnails": "Vistas en miniatura",
 				"ignore-rules": "Ignorar reglas",
-				"label": "Opciones"
+				"label": "Opciones",
+				"general": "General"
 			},
 			"integrations": {
 				"label": "Integraciones",
@@ -613,7 +620,8 @@
 				"access-control": "Control de acceso",
 				"delete": "Borrado",
 				"label": "Zona de peligro"
-			}
+			},
+			"basics": "Básico"
 		},
 		"basics": {
 			"title": "Información básica",
@@ -632,23 +640,100 @@
 			"sections": {
 				"configureScan": {
 					"heading": "Configurar escaneo",
-					"description": "Un escaneo con opciones adicionales para un control más preciso"
+					"description": "Un escaneo con opciones adicionales para un control más preciso",
+					"form": {
+						"alert": "Estos sobreescribirán los ajustes correspondientes de la librería",
+						"options": {
+							"forceRebuild": {
+								"label": "Forzar reconstrucción",
+								"description": "Reconstruir todos los libros de la librería en el disco",
+								"alert": "Esto reconstruirá todos los libros de la librería en el disco desde cero, incluyendo metadatos y hashes"
+							},
+							"custom": {
+								"label": "Personalizado",
+								"description": "Personalizar la configuración del escaneo",
+								"validation": {
+									"noSelection": "Al menos una opción debe estar habilitada"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Reconstruir metadatos",
+								"description": "Reconstruir metadatos de los libros en la librería"
+							},
+							"regenHashes": {
+								"label": "Regenerar hashes",
+								"description": "Recrear hashes de los libros en la librería"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Escaneo por defecto",
+					"description": "Un escaneo estándar para indexar el nuevo contenido de tu librería"
+				},
+				"history": {
+					"heading": "Historial de escaneos",
+					"description": "El historial de todos los escaneos registrados para esta librería",
+					"empty": "No hay escaneos registrados para esta librería",
+					"runScan": "Escanear",
+					"inspect": "Ver detalles",
+					"inspector": {
+						"title": "Registro del escaneo",
+						"description": "Una vista detallada del registro de este escaneo",
+						"fields": {
+							"library": "Librería",
+							"date": "Fecha",
+							"config": "Configuración",
+							"jobOutput": "Resultado de la tarea",
+							"logs": "Registros"
+						},
+						"logsPresent": "Se conservaron los registros para esta tarea",
+						"seeLogs": "Ver registros"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Escaneado el",
+							"config": "Configuración"
+						},
+						"default": "Por defecto",
+						"custom": "Personalizado"
+					},
+					"clearHistory": "Borrar historial de escaneos"
 				}
 			}
 		},
 		"options/thumbnails": {
 			"sections": {
 				"management": {
-					"heading": "Management"
+					"heading": "Management",
+					"description": "Gestionar las miniaturas existentes de esta librería"
 				}
-			}
+			},
+			"title": "Miniaturas",
+			"description": "Ajustes y opciones de gestión para las miniaturas de esta librería"
 		},
 		"integrations/analysis": {
 			"sections": {
 				"analyzeBooks": {
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
+					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"heading": "Analizar libros",
+					"description": "Analizar los libros de esta librería para añadir metadatos adicionales a la base de datos, como las dimensiones de las páginas para libros basados en imágenes",
+					"disclaimerTitle": "Este proceso es intensivo en recursos",
+					"analyzeButton": "Analizar libros"
+				},
+				"missingFiles": {
+					"heading": "Archivos faltantes",
+					"description": "Archivos que son referenciados en la base de datos pero no pueden ser localizados en el disco",
+					"noMissingFiles": "No hay archivos faltantes en esta librería"
+				},
+				"duplicateFiles": {
+					"heading": "Archivos duplicados",
+					"description": "Archivos que están potencialmente duplicados en el disco",
+					"noDuplicateFiles": "No se detectaron archivos duplicados en esta librería"
 				}
-			}
+			},
+			"title": "Análisis",
+			"description": "Analizar los contenidos de esta librería para identificar problemas o mejoras potenciales"
 		},
 		"integrations/metadata": {
 			"title": "Metadatos",
@@ -667,7 +752,56 @@
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions"
+			"title": "Deletion Actions",
+			"description": "Eliminar permanentemente esta librería y todos sus contenidos o ciertos recursos",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Limpiar librería",
+					"description": "Remover todos los medios y series que no pueden localizarse en el disco",
+					"disclaimerTitle": "No se eliminará ningún archivo",
+					"disclaimer": "Aunque esta acción no eliminará ningún archivo, eliminará permanentemente todos los registros relacionados a los medios y series que carezcan estado",
+					"confirmation": {
+						"label": "Limpiar librería",
+						"text": "¿Estás seguro de querer limpiar esta librería?"
+					},
+					"emptyText": "No había nada para limpiar",
+					"missingEntitiesTable": {
+						"columns": {
+							"id": "ID",
+							"path": "Ruta",
+							"type": "Tipo"
+						},
+						"types": {
+							"BOOK": "Libro",
+							"SERIES": "Series",
+							"LIBRARY": "Librería"
+						},
+						"emptyHeading": "No falta nada en esta librería",
+						"emptySubtitle": "Todos los archivos referenciados en la base de datos fueron localizados en el disco"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "Eliminar librería",
+					"description": [
+						"Eliminar permanentemente esta librería y todos sus contenidos.",
+						"Esta acción no se puede deshacer"
+					]
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Control de acceso",
+			"description": "Controla quien puede acceder al contenido de esta librería",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Excluir usuarios",
+					"description": "Prevenir que ciertos usuarios accedan a esta librería o sus contenidos",
+					"noUsersTitle": "No hay usuarios a excluir",
+					"noUsers": "No hay otros usuarios registrados a excluir de esta librería",
+					"updated": "Exclusiones actualizadas",
+					"failure": "Falló al actualizar exclusiones"
+				}
+			}
 		}
 	},
 	"errorScene": {
@@ -676,14 +810,42 @@
 		"buttons": {
 			"report": "Informar de un fallo",
 			"copy": "Copiar detalles del error",
-			"goHome": "Ir a la página de inicio"
-		}
+			"goHome": "Ir a la página de inicio",
+			"goHomeTitle": "Regresar a la página principal",
+			"reportTitle": "Reportar este error como un problema potencial en GitHub",
+			"copyTitle": "Copiar los detalles de este error a tu portapapeles"
+		},
+		"criticalHeading": "Ocurrió un error crítico",
+		"emptyMessage": "El mensaje de error estaba vacío.",
+		"copiedDetails": "Detalles del error copiados al portapapeles"
 	},
 	"homeScene": {
 		"recentlyAddedSeries": {
 			"emptyState": {
 				"heading": "No hay series para mostrar",
 				"message": "Cualquier serie que añadas a tus bibliotecas aparecerá aquí"
+			},
+			"title": "Series añadidas recientemente"
+		},
+		"onDeck": {
+			"title": "Tu siguiente lectura",
+			"emptyState": {
+				"heading": "No hay libros a mano",
+				"message": "Tus siguientes recomendaciónes de libros aparecerán aquí"
+			}
+		},
+		"continueReading": {
+			"title": "Continuar leyendo",
+			"emptyState": {
+				"heading": "Nada para mostrar",
+				"message": "Cualquier libro en progreso que inicies aparecerá aquí"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Libros añadidos recientemente",
+			"emptyState": {
+				"heading": "Nada para mostrar",
+				"message": "Cualquier libro reciente que añadas aparecerá aquí"
 			}
 		}
 	},
@@ -784,10 +946,75 @@
 						"source": {
 							"book": {
 								"attributes": {
-									"readingStatus": "Estado de lectura"
+									"readingStatus": "Estado de lectura",
+									"name": "Nombre del archivo",
+									"size": "Tamaño",
+									"extension": "Extensión",
+									"status": "Estado",
+									"path": "Ruta",
+									"pages": "Páginas",
+									"tags": "Etiquetas",
+									"createdAt": "Creado el",
+									"updatedAt": "Actualizado el"
+								},
+								"label": "Libro"
+							},
+							"label": "Fuente",
+							"back": "Atrás",
+							"book_meta": {
+								"attributes": {
+									"title": "Título",
+									"summary": "Resumen",
+									"notes": "Notas",
+									"writers": "Escritores",
+									"pencillers": "Dibujantes",
+									"inkers": "Entintadores",
+									"letterers": "Letristas",
+									"editors": "Editores",
+									"publisher": "Editoriales",
+									"colorists": "Coloristas",
+									"links": "Enlaces",
+									"characters": "Personajes",
+									"teams": "Equipos",
+									"genres": "Género",
+									"coverArtists": "Artistas de portada",
+									"ageRating": "Clasificación de edad",
+									"year": "Año",
+									"month": "Mes",
+									"day": "Día"
+								}
+							},
+							"series": {
+								"label": "Serie",
+								"attributes": {
+									"name": "Nombre",
+									"path": "Ruta"
+								}
+							},
+							"series_meta": {
+								"attributes": {
+									"title": "Título",
+									"summary": "Resumen",
+									"publisher": "Editorial",
+									"imprint": "Impresión",
+									"comicid": "ID del cómic",
+									"booktype": "Tipo de libro",
+									"status": "Estado",
+									"volume": "Volumen",
+									"metaType": "Tipo",
+									"ageRating": "Clasificación de edad",
+									"year": "Año de inicio"
+								}
+							},
+							"library": {
+								"label": "Librería",
+								"attributes": {
+									"name": "Nombre",
+									"path": "Ruta"
 								}
 							}
-						}
+						},
+						"placeholder": "Atributo"
 					},
 					"enumValue": {
 						"selectPlaceholder": "Seleccionar valor",
@@ -795,9 +1022,108 @@
 						"FINISHED": "Inactivas",
 						"NOT_STARTED": "Sin iniciar",
 						"ABANDONED": "Abandonado"
+					},
+					"emptyState": "Añade un grupo para iniciar",
+					"actions": {
+						"addFilter": "Añadir filtro",
+						"addGroup": "Añadir grupo",
+						"deleteFilter": "Eliminar filtro",
+						"deleteGroup": "Eliminar grupo"
+					},
+					"is": "es",
+					"basicValue": {
+						"placeholder": "Valor",
+						"date": "Fecha"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "Desde fecha",
+							"number": "Desde"
+						},
+						"to": {
+							"date": "A fecha",
+							"number": "A"
+						},
+						"inclusive": "Inclusive"
+					},
+					"listValue": {
+						"placeholder": "Añadir valores",
+						"emptyState": "No hay valores para mostrar"
+					}
+				},
+				"uiPerformance": "A esta característica le faltan optimizaciónes de rendimiento en la UI y puede ser lenta con filtros que produzcan sets de resultados grandes. Esto será mejorado en el futuro",
+				"rootJoiner": {
+					"and": {
+						"label": "Y",
+						"description": "Todos los grupos de filtros deben resultar ciertos para que un libro coincida"
+					},
+					"or": {
+						"label": "O",
+						"description": "Al menos un grupo de filtros debe resultar cierto para que un libro coincida"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "Y",
+						"description": "Todos deben resultar ciertos"
+					},
+					"or": {
+						"label": "O",
+						"description": "Al menos uno debe resultar cierto"
+					},
+					"not": {
+						"label": "NO",
+						"description": "Ninguno debe resultar cierto"
+					}
+				},
+				"grouping": {
+					"label": "Agrupar por",
+					"description": "Cómo deben agruparse los libros de esta lista inteligente",
+					"options": {
+						"by_books": {
+							"label": "Ninguno"
+						},
+						"by_series": {
+							"label": "Series"
+						},
+						"by_library": {
+							"label": "Librería"
+						}
+					}
+				}
+			},
+			"name": {
+				"label": "Nombre",
+				"placeholder": "Mi lista inteligente",
+				"description": "Debe ser único, pero se puede cambiar mas tarde"
+			},
+			"description": {
+				"label": "Descripción",
+				"placeholder": "Una lista muy inteligente",
+				"description": "Una descripción opcional de tu lista inteligente"
+			},
+			"visibility": {
+				"label": "Visibilidad",
+				"options": {
+					"public": {
+						"label": "Pública",
+						"description": "Accesible a todos los usuarios de este servidor"
+					},
+					"shared": {
+						"label": "Compartida",
+						"description": "Usuarios específicos pueden acceder a esta lista inteligente",
+						"createDisclaimer": "Puedes seleccionar con quien compartir esta lista después de crearla"
+					},
+					"private": {
+						"label": "Privada",
+						"description": "Solo tú puedes acceder a esta lista inteligente"
 					}
 				}
 			}
+		},
+		"validation": {
+			"nameTooShort": "El nombre debe tener al menos 2 caracteres",
+			"nameTaken": "No se puede usar ese nombre"
 		}
 	},
 	"userSmartListsScene": {
@@ -889,6 +1215,11 @@
 								"description": "El nombre actualizado para esta vista, si se desea"
 							}
 						}
+					},
+					"deleteSelected": "Eliminar vista",
+					"deleteModal": {
+						"title": "Eliminar vista",
+						"description": "¿Estás seguro de querer eliminar esta vista?"
 					}
 				}
 			}
@@ -900,7 +1231,8 @@
 			"server": "Servidor",
 			"jobs": "Trabajos y Configuración",
 			"users": "Gestión de Usuarios",
-			"desktop": "Escritorio"
+			"desktop": "Escritorio",
+			"general": "General"
 		},
 		"sidebar": {
 			"management": {
@@ -912,7 +1244,16 @@
 				"email": "Correo electrónico",
 				"metadata": "Metadatos",
 				"notifications": "Notificaciones",
-				"label": "Servidor"
+				"label": "Servidor",
+				"tags": "Etiquetas"
+			},
+			"personal": {
+				"account": "Cuenta",
+				"appearance": "Preferencias",
+				"api keys": "Llaves API",
+				"reader": "Lector",
+				"desktop": "Escritorio",
+				"label": "Personal"
 			}
 		},
 		"app/account": {
@@ -940,6 +1281,17 @@
 					},
 					"buttons": {
 						"confirm": "Guardar cambios"
+					},
+					"avatarPicker": {
+						"label": "Avatar",
+						"heading": "Cargar avatar",
+						"subtitle": "Puedes cargar cualquier imagen para usar como tu avatar para las funciones sociales en Stump",
+						"dropzone": "Arrastra una imagen o has click para seleccionar",
+						"changeImage": "Cambiar imagen",
+						"removeImage": "Remover imagen",
+						"removeSelection": "Remover imagen cargada",
+						"uploadFailed": "Falló al cargar avatar",
+						"removeFailed": "Falló al remover el avatar"
 					}
 				},
 				"locale": {
@@ -973,8 +1325,19 @@
 					"options": {
 						"light": "Claro",
 						"dark": "Oscuro",
-						"bronze": "Claro Bronce"
-					}
+						"bronze": "Claro Bronce",
+						"system": "Sistema",
+						"ocean": "Océano",
+						"autumn": "Otoño",
+						"cosmic": "Cósmico",
+						"pumpkin": "Calabaza",
+						"midnight": "Medianoche",
+						"matrix": "Matrix"
+					},
+					"description": [
+						"Si estás interesado en crear tu propio tema personalizado, revisa la",
+						"documentación"
+					]
 				},
 				"interfaceRoundness": {
 					"label": "Redondeo de la interfaz",
@@ -982,7 +1345,8 @@
 					"options": {
 						"none": "Ninguno",
 						"rounded": "Redondeado",
-						"pill": "Píldora"
+						"pill": "Píldora",
+						"normal": "Normal"
 					}
 				},
 				"thumbnailPreview": {
@@ -990,7 +1354,9 @@
 					"description": "Así se verán las miniaturas con los ajustes actuales"
 				},
 				"thumbnailRatioSelect": {
-					"defaultSuffix": "Por defecto"
+					"defaultSuffix": "Por defecto",
+					"label": "Ratio de las miniaturas",
+					"description": "La relación de aspecto de las miniaturas"
 				},
 				"thumbnailRoundness": {
 					"label": "Redondez de las miniaturas",
@@ -998,7 +1364,8 @@
 					"options": {
 						"none": "Ninguno",
 						"rounded": "Redondeado",
-						"large": "Grande"
+						"large": "Grande",
+						"normal": "Normal"
 					}
 				},
 				"navigation": {
@@ -1006,18 +1373,48 @@
 					"description": "Personalizar los elementos de navegación de la aplicación"
 				},
 				"doubleSidebar": {
-					"description": "Habilita la navegación lateral para las páginas de configuración"
+					"description": "Habilita la navegación lateral para las páginas de configuración",
+					"label": "Ajustes en la barra lateral"
 				},
 				"replacePrimarySidebar": {
-					"description": "Cualquier instancia de una barra lateral secundaria reemplazará a la primaria en lugar de apilarlas"
+					"description": "Cualquier instancia de una barra lateral secundaria reemplazará a la primaria en lugar de apilarlas",
+					"label": "Reemplazar la barra principal",
+					"tooltips": {
+						"doubleSidebar": "Este ajuste requiere que la barra lateral esté habilitada",
+						"topbar": "Este ajuste actualmente no está soportado cuando la barra superior es la navegación primaria"
+					}
 				},
 				"navigationArrangement": {
-					"description": "Reorganizar o ajustar los elementos de navegación de tu navegación principal"
+					"description": "Reorganizar o ajustar los elementos de navegación de tu navegación principal",
+					"label": "Arreglo de la navegación",
+					"isLocked": "El arreglo está bloqueado",
+					"lock": "Bloquear arreglo",
+					"unlock": "Desbloquear arreglo",
+					"options": {
+						"HOME": "Inicio",
+						"EXPLORE": "Explorar",
+						"LIBRARIES": "Librerías",
+						"BOOK_CLUBS": "Clubs de libros",
+						"SMART_LISTS": "Listas inteligentes"
+					},
+					"entityOptions": {
+						"createAction": {
+							"label": "Mostrar crear acción",
+							"help": "Mostrar el crear acción en la navegación"
+						},
+						"linkToAll": {
+							"label": "Enlace a mostrar todos",
+							"help": "Un enlace a una página dedicada a mostrar todos los items de este tipo"
+						}
+					}
 				},
 				"maxWidthPreference": {
 					"options": {
 						"noLimit": "Ilimitado"
-					}
+					},
+					"label": "Ancho ajustado",
+					"description": "Stump aplica un ancho máximo a la ventana. Este ajuste te permite ajustar o remover este límite",
+					"tooltip": "Este ajuste actualmente no está soportado cuando la barra lateral es la navegación primaria"
 				},
 				"displayAndSpacing": {
 					"label": "Visualización y espaciado",
@@ -1042,6 +1439,82 @@
 				"readingSessionGracePeriod": {
 					"label": "Período de gracia de sesión de lectura",
 					"description": "Si no se detecta ninguna actividad dentro de este periodo de tiempo, en segundos, la próxima actualización iniciará una nueva sesión"
+				},
+				"themeAndAppearance": {
+					"label": "Tema y apariencia",
+					"description": "Las opciones de apariencia y sensación básicas de Stump"
+				},
+				"gradientToggle": {
+					"label": "Habilitar gradientes",
+					"description": "Algunos temas soportan gradientes de forma opcional para un look más dinámico"
+				},
+				"fontSelect": {
+					"label": "Fuente",
+					"description": "Personaliza la fuente usada en la aplicación"
+				},
+				"thumbnailPlaceholder": {
+					"label": "Miniaturas provisorias",
+					"description": "El estilo a usar en las miniaturas provisorias",
+					"options": {
+						"grayscale": "Escala de grises",
+						"averageColor": "Color promedio",
+						"colorful": "Colorido",
+						"thumbhash": "Hash"
+					}
+				},
+				"layoutAndArrangement": {
+					"label": "Disposición y arreglo",
+					"description": "Personaliza el cómo Sump muestra información y organiza su contenido"
+				},
+				"primaryNavigation": {
+					"label": "Navegación primaria",
+					"description": "Elige entre una barra lateral simple o una barra de navegación superior",
+					"options": {
+						"sidebar": "Lateral",
+						"topbar": "Superior"
+					},
+					"disclaimer": "* Ajustes para las opciones no seleccionadas serán deshabilidadas u ocultas"
+				},
+				"displaySpacing": {
+					"label": "Espaciado de visualización",
+					"description": "Ajusta el espaciado general entre elementos en la aplicación",
+					"options": {
+						"default": "Por defecto",
+						"compact": "Compacto"
+					},
+					"disclaimer": "* El modo de visualización compacto no está implementado aún"
+				},
+				"additionalPreferences": {
+					"label": "Preferencias adicionales",
+					"description": "Personaliza la apariencia y el comportamiento de Stump con estos ajustes adicionales"
+				},
+				"hideScrollbarToggle": {
+					"label": "Ocultar barra de desplazamiento",
+					"description": "Algunas páginas simplemente se ven mejor sin una barra de desplazamiento, este ajuste la ocultará cuando sea posible hacerlo",
+					"tooltips": {
+						"enabled": "Este ajuste ocultará la barra de desplazamiento en algunas páginas",
+						"disabled": "Este ajuste mostrará la barra de desplazamiento en algunas páginas"
+					}
+				},
+				"enableAlphabetFiltering": {
+					"label": "Filtrado alfabético",
+					"description": "Muestra un filtrado alfabético cuando sea aplicable"
+				},
+				"enableFancyAnimations": {
+					"label": "Animaciones elegantes",
+					"description": "Un opt-in general para usar animaciones más elegantes en la aplicación"
+				},
+				"queryIndicatorToggle": {
+					"label": "Indicador de petición en segundo plano",
+					"description": "Mostrar un indicador de carga cuando una petición está corriendo en segundo plano"
+				},
+				"liveRefetchToggle": {
+					"label": "Autorepetir peticiones",
+					"description": "Repetir peticiones al vuelo para hidratar la interfaz con nuevos datos mientras estos van llegando. Esto puede ser intensivo en recursos"
+				},
+				"enableJobOverlayToggle": {
+					"label": "Superposición de tareas",
+					"description": "Mostrar una superposición flotante cuando una tarea se está ejecutando"
 				}
 			}
 		},
@@ -1052,7 +1525,52 @@
 			"sections": {
 				"imageBasedBooks": {
 					"label": "Libros basados en imágenes",
-					"description": "Cómics, mangas y otros libros basados en imágenes"
+					"description": "Cómics, mangas y otros libros basados en imágenes",
+					"sections": {
+						"preloadAheadCount": {
+							"label": "Precargar hacia delante",
+							"description": "El número de páginas a cargar delante de la actual"
+						},
+						"preloadBehindCount": {
+							"label": "Precargar hacia atrás",
+							"description": "El número de páginas a precargar detrás de la actual"
+						}
+					}
+				},
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Dirección de lectura",
+							"description": "La dirección en que el lector progresará por las páginas"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Lector de Ebooks",
+					"description": "Ajustes por defecto para libros basados en texto",
+					"sections": {
+						"fontSize": {
+							"label": "Tamaño de la fuente",
+							"description": "El tamaño de la fuente usada en el lector"
+						},
+						"fontFamily": {
+							"label": "Familia de la fuente",
+							"description": "La fuente usada en el lector"
+						},
+						"lineHeight": {
+							"label": "Altura de la línea",
+							"description": "La altura de las líneas en el lector"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Limpiar preferencias",
+							"description": "Reiniciar todos los ajustes individuales de libros que sobreescriban los ajustes por defecto",
+							"button": "Limpiar preferencias"
+						}
+					}
 				}
 			}
 		},
@@ -1074,6 +1592,93 @@
 							"description": "This will remove all securely-stored access tokens for your servers",
 							"confirm": "Clear authentication"
 						}
+					},
+					"label": "Servidores configurados",
+					"description": "La lista de servidores de Stump a los que puedes conectarte",
+					"getStarted": "Añade un servidor para empezar",
+					"unreachableServer": {
+						"tooltip": "Servidor inaccesible"
+					},
+					"activeServer": {
+						"tooltip": "Servidor actual"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "Ya existe un servidor con este nombre",
+							"nameForbidden": "Este nombre está reservado",
+							"urlExists": "Ya existe un servidor con esta URL"
+						},
+						"fields": {
+							"name": {
+								"label": "Nombre",
+								"description": "Un nombre fácil para identificar este servidor",
+								"placeholder": "Mi servidor"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "la URL del servidor de Stump",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "Añadir servidor",
+						"title": "Añadir un nuevo servidor",
+						"description": "Añadir un nuevo servidor de Stump a la aplicación de escritorio",
+						"confirm": "Añadir servidor"
+					},
+					"editServer": {
+						"tooltip": "Editar servidor",
+						"title": "Editar servidor",
+						"description": "Editar los detalles de este servidor",
+						"confirm": "Guardar cambios"
+					},
+					"deleteServer": {
+						"tooltip": "Eliminar servidor",
+						"confirmation": {
+							"title": "Eliminar este servidor",
+							"description": "Esto eliminará el servidor de la aplicación de escritorio",
+							"disclaimerActiveServer": "Este servidor está activo actualmente. Tu sesión cerrará",
+							"disclaimerLastServer": "Este es el último servidor configurado. Tu sesión se cerrará y tendrás que configurar cualquier servidor en el proceso de inicialización",
+							"confirm": "Eliminar servidor"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "Cambiar al servidor",
+						"confirmation": {
+							"title": "Cambiar a este servidor",
+							"description": "Esto cerraŕa tu sesión en el servidor actual",
+							"confirm": "Cambiar al servidor",
+							"server": "Servidor",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "Eliminar todos los servidores",
+						"description": [
+							"Eliminar todos los servidores configurados en la aplicación de escritorio",
+							"Esta acción no se puede deshacer"
+						],
+						"confirmation": {
+							"trigger": "Eliminar todos los servidores",
+							"title": "Eliminar todos los servidores",
+							"description": "Eliminar todos los servidores configurados en la aplicación de escritorio",
+							"disclaimer": "Tu sesión se cerrará y tendrás que configurar cualquier servidor en el proceso de inicialización",
+							"confirm": "Eliminar todos los servidores"
+						}
+					}
+				},
+				"optionalFeatures": {
+					"label": "Funciones opcionales",
+					"description": "Gestiona las funciones opcionales únicas a la aplicación de escritorio",
+					"bundledServer": {
+						"label": "Servidor local",
+						"description": "Ejecuta el servidor local en segundo plano mientras la aplicación de escritorio se ejecuta (requiere reiniciar)"
+					},
+					"discordPresence": {
+						"label": "Precencia en Discord",
+						"description": "Muestra tu actividad en Stump en Discord usando la Rich Presence de Discord",
+						"reconnect": "Reconectar a Discord"
 					}
 				}
 			}
@@ -1094,12 +1699,50 @@
 							"semver": "Versión",
 							"commitHash": "Commit exacto",
 							"date": "Fecha de compilación"
-						}
+						},
+						"label": "Build",
+						"description": "Detalles de esta versión y compilación"
+					},
+					"nonStableChannel": {
+						"title": "Estás ejecutando una compilación no estable de Stump",
+						"description": [
+							"Parece que estás ejecutando",
+							"canal de distribución"
+						]
 					}
 				},
 				"serverPublicUrl": {
 					"label": "URL pública",
 					"description": "La URL desde la que tu servidor es accesible fuera de tu red, si procede. Esto habilitará los enlaces de invitación y otras características"
+				},
+				"helpfulLinks": {
+					"title": "Enlaces útiles",
+					"description": "Enlaces a recursos que pueden ayudarte a gestionar tu instancia del servidor de Stump",
+					"links": {
+						"documentation": "Documentación",
+						"changelog": "Registro de cambios"
+					}
+				},
+				"customEmojis": {
+					"title": "Emojis personalizados",
+					"description": "Carga y gestiona un emoji personalizado para tu servidor",
+					"dropzone": "Suelta una imagen o has click para seleccionar",
+					"input": {
+						"label": "Nombre del emoji",
+						"placeholder": "ej. loro_fiesta"
+					},
+					"deleteModal": {
+						"title": "Eliminar emoji",
+						"description": "¿Estás seguro de querer eliminar este emoji?"
+					},
+					"noCustomEmojis": "No se ha añadido ningún emoji personalizado aún",
+					"invalidName": "Por favor, ingresa un nombre válido para tu emoji",
+					"uploadError": "Falló al cargar emoji",
+					"uploadSuccess": "Emoji cargado",
+					"renameSuccess": "Emoji renombrado",
+					"renameError": "Falló al renombrar emoji",
+					"deleteSuccess": "Emoji eliminado",
+					"deleteError": "Falló al eliminar emoji"
 				}
 			}
 		},
@@ -1115,7 +1758,8 @@
 							"message": "Mensaje"
 						},
 						"emptyHeading": "No hay registros para mostrar"
-					}
+					},
+					"title": "Registros guardados"
 				}
 			}
 		},
@@ -1381,6 +2025,62 @@
 			"deleteDialog": {
 				"title": "Eliminar Proveedor",
 				"description": "¿Seguro de que quieres eliminar \"{{providerName}}\"? Esta acción no se puede deshacer"
+			}
+		},
+		"app/apiKeys": {
+			"helmet": "Llaves API",
+			"title": "Llaves API",
+			"description": "Gestiona las llaves API que has generado en Stump",
+			"shared": {
+				"fields": {
+					"name": "Nombre",
+					"expiration": "Expiración",
+					"last_used": "Usado por última vez",
+					"created": "Creado",
+					"permissions": "Permisos",
+					"inherited": "Heredado",
+					"explicit": "Explícito"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "Llave API",
+					"description": "Una vista detallada de esta llave",
+					"unrestrictedKey": {
+						"heading": "Llave no restringida",
+						"description": "Ya que tu eres el dueño del servidor, esta llave tiene acceso total si se configura con permisos heredados. Por favor se cuidadoso."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "Crear llave API",
+						"heading": {
+							"creating": "Crear llave API",
+							"created": "Llave creada"
+						},
+						"description": {
+							"creating": "Las llaves API son credenciales de larga duración que pueden usarse para autentificarse en la API",
+							"created": "Tu nueva llave API fue creada. Guarda el secreto en algún lugar seguro, ya que no se mostrará otra vez"
+						},
+						"inheritDisclaimer": "Esta llave API heredará todos tus permisos, es decir que podrá hacer todo lo que tú puedes. Por favor se cuidadoso con este ajuste",
+						"createdKey": "Llave creada",
+						"savedConfirm": "Guardé mi llave",
+						"submit": "Llave creada"
+					}
+				},
+				"table": {
+					"title": "Tus llaves",
+					"description": "Estas son las llaves API que has creado",
+					"actionMenu": {
+						"inspect": "Inspeccionar",
+						"delete": "Eliminar"
+					},
+					"empty": {
+						"title": "No has creado ningúna llave aún",
+						"action": "Crea una llave API para empezar"
+					},
+					"noExpiration": "Expiración no establecida"
+				}
 			}
 		}
 	},
@@ -1949,6 +2649,180 @@
 		"widgets": {
 			"readingNow": {
 				"nothingInProgress": "Nada en progreso"
+			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Clasificación de edad",
+			"characters": "Personajes",
+			"colorists": "Coloristas",
+			"coverArtists": "Artistas de portada",
+			"day": "Día",
+			"editors": "Editores",
+			"format": "Formato",
+			"identifierAmazon": "ID de Amazon",
+			"identifierCalibre": "ID de Calibre",
+			"identifierGoogle": "ID de Google",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "ASIN de Mobi",
+			"identifierUuid": "UUID del libro",
+			"genres": "Géneros",
+			"inkers": "Entintadores",
+			"language": "Idioma",
+			"letterers": "Letristas",
+			"links": "Enlaces",
+			"month": "Mes",
+			"notes": "Notas",
+			"number": "Número",
+			"pageCount": "Páginas",
+			"pencillers": "Dibujantes",
+			"publisher": "Editoriales",
+			"series": "Series",
+			"seriesGroup": "Grupo de la serie",
+			"storyArc": "Arco argumental",
+			"storyArcNumber": "Número del arco argumental",
+			"summary": "Resumen",
+			"teams": "Equipos",
+			"title": "Título",
+			"volume": "Volumen",
+			"writers": "Escritores",
+			"year": "Año",
+			"metaType": "Tipo",
+			"imprint": "Grabar",
+			"comicid": "ID del Cómic",
+			"booktype": "Tipo de libro",
+			"status": "Estado",
+			"totalIssues": "Números totales",
+			"comicImage": "Imágen del cómic",
+			"descriptionFormatted": "Descripción (con formato)"
+		},
+		"addFields": {
+			"description": "Añadir cada adición en su propia línea"
+		}
+	},
+	"createSmartListScene": {
+		"heading": "Crear lista inteligente",
+		"subtitle": "Creación de listas al vuelo basado en un set de filtros",
+		"form": {
+			"stepLabel": "Paso",
+			"steps": [
+				{
+					"label": "Básico",
+					"heading": "Información básica",
+					"description": "Los detalles de esta lista inteligente, incluyendo su nombre, descripción, y visibilidad"
+				},
+				{
+					"label": "Filtros",
+					"heading": "Filtros",
+					"description": "Los filtros a añadir a esta lista inteligente"
+				},
+				{
+					"label": "Revisar",
+					"heading": "Revisión",
+					"description": "Revisar los ajustes de tu lista inteligente antes de crearla"
+				}
+			],
+			"review": {
+				"yes": "Si",
+				"no": "No",
+				"none": "Ninguno",
+				"labels": {
+					"name": "Nombre",
+					"description": "Descripción",
+					"visibility": "Visibilidad",
+					"grouping": "Agrupar por"
+				}
+			},
+			"buttons": {
+				"confirm": "Crear lista"
+			}
+		}
+	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "La fecha de expiración debe estar en el futuro"
+		},
+		"fields": {
+			"name": {
+				"label": "Nombre",
+				"placeholder": "Sinconrización con Koreader"
+			},
+			"expiration": {
+				"label": "Expiración",
+				"placeholder": "Nunca"
+			},
+			"expiresAt": {
+				"label": "Expira el",
+				"placeholder": "Nunca"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Heredar permisos",
+					"description": "Los mismos permisos que tu cuenta"
+				},
+				"explicit": {
+					"label": "Permisos explícitos",
+					"description": "Elige los permisos que esta llave debería tener"
+				}
+			}
+		},
+		"inheritDisclaimer": "Esta llave API heredará todos tus permisos, lo que significa que podrá hacer todo lo que tú puedes. Se cuidadoso con este ajuste"
+	},
+	"smartListSettingsScene": {
+		"sidebar": {
+			"basics": "Básicos",
+			"configuration": {
+				"label": "Configuración",
+				"access": "Acceso",
+				"filters": "Filtros"
+			},
+			"danger-zone": {
+				"delete": "Eliminación",
+				"label": "Zona de peligro"
+			}
+		},
+		"basics": {
+			"title": "Información básica",
+			"description": "Los detalles de esta lista inteligente, incluyendo su nombre y descripción"
+		},
+		"access": {
+			"title": "Acceso",
+			"description": "Controla quien puede acceder a esta lista inteligente",
+			"sections": {
+				"visibility": {
+					"confirmation": {
+						"public": "Esto hará la lista visible para todos",
+						"private": "Esto cambiará la lista para ser privada, ocultándola de cualquiera que haya tenido acceso antes",
+						"shared": "Necesitarás compartir la lista con usuarios específicos para darles acceso",
+						"fallback": "¿Estás seguro de querer cambiar la visibilidad de esta lista?"
+					}
+				},
+				"accessManager": {
+					"disclaimer": "Compartir no está listo aún. ¡Por favor, regresa mas tarde!"
+				}
+			}
+		},
+		"filters": {
+			"title": "Constructor de filtros",
+			"description": "Gestiona los filtros que construirán esta lista inteligente"
+		},
+		"danger-zone/delete": {
+			"title": "Acciones de eliminación",
+			"description": "Eliminar permanentemente esta lista y todos sus contenidos o ciertos recursos",
+			"sections": {
+				"deleteList": {
+					"heading": "Eliminar lista",
+					"description": [
+						"Eliminar permanentemente esta lista y todos sus contenidos.",
+						"Esta acción no se puede deshacer"
+					],
+					"confirmation": {
+						"title": "Eliminar lista",
+						"description": "¿Estás seguro de querer eliminar esta lista inteligente?",
+						"confirm": "Eliminar lista"
+					}
+				}
 			}
 		}
 	}

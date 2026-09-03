@@ -6,6 +6,7 @@ import {
 	graphql,
 	useFragment,
 } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -59,6 +60,7 @@ type Props = {
 
 export default function BookThumbnailSelector({ fragment }: Props) {
 	const book = useFragment(BookThumbnailSelectorFragment, fragment)
+	const { t } = useLocaleContext()
 
 	const [isOpen, setIsOpen] = useState(false)
 	const [page, setPage] = useState<number>()
@@ -109,10 +111,10 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload image')
+				toast.error(t('thumbnailSelector.errors.uploadFailed'))
 			}
 		},
-		[book.id, uploadThumbnail],
+		[book.id, t, uploadThumbnail],
 	)
 
 	const handleConfirm = useCallback(async () => {
@@ -123,9 +125,9 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update thumbnail')
+			toast.error(t('thumbnailSelector.errors.updateFailed'))
 		}
-	}, [patchThumbnail, page, book.id])
+	}, [patchThumbnail, page, book.id, t])
 
 	return (
 		<div className="relative">
@@ -147,9 +149,9 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 				</Dialog.Trigger>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
-						<Dialog.Title>Select a thumbnail</Dialog.Title>
+						<Dialog.Title>{t('thumbnailSelector.title')}</Dialog.Title>
 						<Dialog.Description>
-							Choose a page from this book to use as the new thumbnail
+							{t('thumbnailSelector.descriptions.chooseBookPage')}
 						</Dialog.Description>
 						<Dialog.Close onClick={() => setIsOpen(false)} />
 					</Dialog.Header>
@@ -163,14 +165,14 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							Cancel
+							{t('common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
-							Confirm selection
+							{t('thumbnailSelector.actions.confirmSelection')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

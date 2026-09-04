@@ -1,6 +1,7 @@
+import { LocaleProvider } from '@stump/i18n'
 import { fireEvent, render, screen } from '@testing-library/react'
 
-import GoToPage, { clampPage } from '../GoToPage'
+import GoToPage, { clampPage, GoToPageProps } from '../GoToPage'
 
 describe('clampPage', () => {
 	it('returns the value when already in range', () => {
@@ -22,6 +23,23 @@ describe('clampPage', () => {
 })
 
 describe('GoToPage', () => {
+	const renderSubject = ({
+		currentPage = 1,
+		totalPages = 42,
+		onSubmit = vi.fn(),
+		...props
+	}: Partial<GoToPageProps> = {}) =>
+		render(
+			<LocaleProvider locale="en-US">
+				<GoToPage
+					currentPage={currentPage}
+					totalPages={totalPages}
+					onSubmit={onSubmit}
+					{...props}
+				/>
+			</LocaleProvider>,
+		)
+
 	const openPopover = () => {
 		fireEvent.click(screen.getByRole('button', { name: 'Go to page' }))
 	}
@@ -29,12 +47,12 @@ describe('GoToPage', () => {
 	const clickSubmit = () => fireEvent.click(screen.getByRole('button', { name: 'Go' }))
 
 	it('should render the trigger with the current position', () => {
-		render(<GoToPage currentPage={3} totalPages={42} onSubmit={vi.fn()} />)
+		renderSubject({ currentPage: 3 })
 		expect(screen.getByText('3 of 42')).toBeInTheDocument()
 	})
 
 	it('associates the label with the input', () => {
-		render(<GoToPage currentPage={1} totalPages={42} onSubmit={vi.fn()} />)
+		renderSubject()
 		openPopover()
 
 		/**
@@ -47,7 +65,7 @@ describe('GoToPage', () => {
 
 	it('submits the entered page when valid', () => {
 		const onSubmit = vi.fn()
-		render(<GoToPage currentPage={1} totalPages={42} onSubmit={onSubmit} />)
+		renderSubject({ onSubmit })
 		openPopover()
 
 		fireEvent.change(getInput(), { target: { value: '7' } })
@@ -58,7 +76,7 @@ describe('GoToPage', () => {
 
 	it('clamps a too-large page down to the last page', () => {
 		const onSubmit = vi.fn()
-		render(<GoToPage currentPage={1} totalPages={42} onSubmit={onSubmit} />)
+		renderSubject({ onSubmit })
 		openPopover()
 
 		fireEvent.change(getInput(), { target: { value: '99999' } })
@@ -69,7 +87,7 @@ describe('GoToPage', () => {
 
 	it('clamps a too-small page up to 1', () => {
 		const onSubmit = vi.fn()
-		render(<GoToPage currentPage={5} totalPages={42} onSubmit={onSubmit} />)
+		renderSubject({ currentPage: 5, onSubmit })
 		openPopover()
 
 		fireEvent.change(getInput(), { target: { value: '0' } })
@@ -80,7 +98,7 @@ describe('GoToPage', () => {
 
 	it('ignores non-numeric input', () => {
 		const onSubmit = vi.fn()
-		render(<GoToPage currentPage={5} totalPages={42} onSubmit={onSubmit} />)
+		renderSubject({ currentPage: 5, onSubmit })
 		openPopover()
 
 		fireEvent.change(getInput(), { target: { value: '' } })
@@ -91,7 +109,7 @@ describe('GoToPage', () => {
 
 	it('submits on Enter keypress', () => {
 		const onSubmit = vi.fn()
-		render(<GoToPage currentPage={1} totalPages={42} onSubmit={onSubmit} />)
+		renderSubject({ onSubmit })
 		openPopover()
 
 		const input = getInput()
@@ -99,5 +117,13 @@ describe('GoToPage', () => {
 		fireEvent.keyDown(input, { key: 'Enter' })
 
 		expect(onSubmit).toHaveBeenCalledWith(12)
+	})
+
+	it('honors custom copy overrides', () => {
+		renderSubject({ label: 'Jump to page', submitLabel: 'Jump', triggerLabel: 'Page 3' })
+
+		fireEvent.click(screen.getByRole('button', { name: 'Jump to page' }))
+		expect(screen.getByText('Page 3')).toBeInTheDocument()
+		expect(screen.getByRole('button', { name: 'Jump' })).toBeInTheDocument()
 	})
 })

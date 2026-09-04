@@ -2,7 +2,7 @@
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { formatHumanDuration, useLocaleContext } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
@@ -17,6 +17,7 @@ import GoToPage from './GoToPage'
 const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()
@@ -43,11 +44,14 @@ export default function ReaderFooter() {
 	// reused as the "go to page" trigger text in paged mode.
 	const pageRangeLabel = useMemo(
 		() =>
-			`${[...currentSet]
-				.map((idx) => idx + 1)
-				.sort((a, b) => a - b)
-				.join('-')} of ${book.pages}`,
-		[currentSet, book.pages],
+			t('imageReader.footer.pageOf', {
+				current: [...currentSet]
+					.map((idx) => idx + 1)
+					.sort((a, b) => a - b)
+					.join('-'),
+				total: book.pages,
+			}),
+		[currentSet, book.pages, t],
 	)
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
@@ -189,7 +193,9 @@ export default function ReaderFooter() {
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
+						<Text className="text-sm text-[#898d94]">
+							{t('imageReader.footer.readingTime', { time: formattedReadTime })}
+						</Text>
 					)}
 
 					{/* In paged mode, the position indicator doubles as a "go to page" trigger for

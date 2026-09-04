@@ -33,26 +33,14 @@ class WifiSsidModule : Module() {
         "connectedToWifi" to connectedToWifi,
       )
     }
-
-    Function("getSSIDSync") {
-      val (ssid, connectedToWifi) = readWifi()
-      mapOf(
-        "ssid" to ssid,
-        "connectedToWifi" to connectedToWifi,
-      )
-    }
-
-    Function("openLocationSettings") {
-      openLocationSettings()
-    }
   }
 
   /**
    * Returns the current Wi-Fi SSID (or null when it can't be read) and whether
-   * the device is connected to a Wi-Fi network. When the device is connected but
-   * the SSID is null, the OS is withholding the network name — on Android this
-   * typically means device Location services are off (the SSID is treated as
-   * location-sensitive).
+   * the device is connected to a Wi-Fi network
+   *
+   * Note: When this is `true` and the `ssid` is null, the OS may be withholding
+   * the network name. On Android this happens when location services are off
    */
   private fun readWifi(): Pair<String?, Boolean> {
     val androidContext = context.applicationContext
@@ -73,10 +61,8 @@ class WifiSsidModule : Module() {
         Log.e(TAG, "Error reading Wi-Fi via ConnectivityManager", e)
       }
     } else {
-      // Pre-Q (API 26–28): NetworkCapabilities/transportInfo aren't available, so
-      // detect a Wi-Fi connection via the legacy active-network API. Without this,
-      // connectedToWifi stays false on Android 8/9 even when connected, so the
-      // "connected but SSID hidden" state never surfaces there.
+      // NetworkCapabilities/transportInfo aren't available, so detect a Wi-Fi connection
+      // via the legacy active-network API. This is allegedly a problem for Android 8/9
       try {
         val cm = androidContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
         @Suppress("DEPRECATION")
@@ -97,17 +83,6 @@ class WifiSsidModule : Module() {
     }
 
     return Pair(ssid, connectedToWifi)
-  }
-
-  private fun openLocationSettings() {
-    try {
-      val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      }
-      context.applicationContext.startActivity(intent)
-    } catch (e: Exception) {
-      Log.e(TAG, "Unable to open Location settings", e)
-    }
   }
 
   private fun hasFineLocationPermission(): Boolean =

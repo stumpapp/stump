@@ -57,26 +57,6 @@ public class WifiSsidModule: Module {
             }
             return result
         }
-
-        Function("getSSIDSync") { () -> [String: Any] in
-            self.startPathMonitorIfNeeded()
-            let ssid = self.getSSIDViaCNCopy()
-            var result: [String: Any] = ["connectedToWifi": self.isOnWifi]
-            if let ssid = ssid {
-                result["ssid"] = ssid
-            } else {
-                result["ssid"] = NSNull()
-            }
-            return result
-        }
-
-        Function("openLocationSettings") {
-            DispatchQueue.main.async {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
-            }
-        }
     }
 
     private func resolveSSID() async -> String? {

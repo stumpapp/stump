@@ -17,6 +17,7 @@ pub mod fs_utils;
 pub mod job;
 pub mod kobo;
 pub mod opds;
+pub mod scan;
 pub mod utils;
 
 use config::logging::STUMP_SHADOW_TEXT;

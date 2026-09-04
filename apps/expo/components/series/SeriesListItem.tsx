@@ -2,7 +2,8 @@ import { FragmentType, graphql, InterfaceLayout, useFragment } from '@stump/grap
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { useActiveServer } from '../activeServer'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+
 import GridImageItem from '../listLayout/grid/GridImageItem'
 import { ListRowItem } from '../listLayout/list'
 import { Text } from '../ui'
@@ -50,7 +51,7 @@ export default function SeriesListItem({ layout, series, onPress }: Props) {
 	const sharedProps = {
 		uri: data.thumbnail.url,
 		title: data.resolvedName,
-		onPress: onPress ?? (() => router.navigate(`/server/${serverID}/series/${data.id}`)),
+		onPress: onPress ?? (() => router.navigate(`/stump/${serverID}/series/${data.id}`)),
 		placeholderData: data.thumbnail.metadata,
 		originalDimensions:
 			data.thumbnail.width && data.thumbnail.height

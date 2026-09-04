@@ -58,7 +58,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 		router.replace(
 			{
 				// @ts-expect-error: It is fine, expects string literal with [id]
-				pathname: `/server/${serverId}/books/${book.id}`,
+				pathname: `/stump/${serverId}/books/${book.id}`,
 			},
 			{
 				withAnchor: true,
@@ -130,7 +130,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 						width: size + 16,
 					}}
 				>
-					<Button className="bg-white flex-1 border border-edge opacity-80" onPress={onReadNext}>
+					<Button className="bg-white border-edge flex-1 border opacity-80" onPress={onReadNext}>
 						<Text className="text-black">Read Next</Text>
 					</Button>
 				</View>

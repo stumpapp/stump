@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
 import { COLORS } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { Text } from '../ui'
 import SeriesStackedThumbnails from './SeriesStackedThumbnails'
 
@@ -68,7 +68,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	// TODO(oneshots): should this just lead to oneshotBook.id? for mobile feels like it warrants
 	// a badge or something to indicate it is a oneshot?
 	return (
-		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>
+		<Pressable onPress={() => router.push(`/stump/${serverID}/series/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<SeriesStackedThumbnails width={160} thumbnailData={thumbnailData} />

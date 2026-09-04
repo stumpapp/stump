@@ -3,13 +3,13 @@ import { OPDSPublication, resolveUrl } from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
+import { getPublicationThumbnailURL, hasLinkRel } from '~/lib/opds/utils'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
-import { getPublicationThumbnailURL, hasLinkRel } from './utils'
 
 type Props = {
 	item: OPDSPublication
@@ -18,7 +18,7 @@ type Props = {
 export function RelatedPublicationItem({ item }: Props) {
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const router = useRouter()
 
@@ -36,9 +36,9 @@ export function RelatedPublicationItem({ item }: Props) {
 		<Pressable
 			onPress={() =>
 				router.push({
-					pathname: '/opds/[id]/publication',
+					pathname: '/opds/[serverId]/publication',
 					params: {
-						id: serverID,
+						serverId,
 						url: resolvedPublicationURL,
 					},
 				})

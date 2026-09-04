@@ -5,9 +5,9 @@ import { useCallback } from 'react'
 import { Image, Platform, Pressable, View } from 'react-native'
 
 import { useColorScheme } from '~/lib/useColorScheme'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { Text } from '../ui'
 import { useFileExplorerAssets } from './FileExplorerAssetsContext'
@@ -24,7 +24,7 @@ export default function FileExplorerGridItem({ file }: Props) {
 	const iconSource = getIconSource(file, colorScheme, assets)
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 
 	const router = useRouter()
@@ -36,17 +36,17 @@ export default function FileExplorerGridItem({ file }: Props) {
 	const onSelect = useCallback(() => {
 		if (file.isDirectory) {
 			router.push({
-				pathname: `/server/[id]/files/[path]`,
+				pathname: `/stump/[serverId]/files/[path]`,
 				params: {
-					id: serverID,
+					serverId,
 					path: file.path,
 					friendlyName,
 				},
 			})
 		} else if (file.media) {
-			router.push(`/server/${serverID}/books/${file.media.id}`)
+			router.push(`/stump/${serverId}/books/${file.media.id}`)
 		}
-	}, [file, router, serverID, friendlyName])
+	}, [file, router, serverId, friendlyName])
 
 	return (
 		<Pressable onPress={onSelect}>

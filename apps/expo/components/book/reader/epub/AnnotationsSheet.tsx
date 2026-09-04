@@ -1,12 +1,11 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { PortalHost } from '@rn-primitives/portal'
 import { useState } from 'react'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { useColors } from '~/lib/constants'
-import { PortalHostContext } from '~/lib/PortalHostContext'
+import { PortalHostProvider } from '~/providers/PortalHostProvider'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import AnnotationsSheetContent from './AnnotationsSheetContent'
@@ -43,12 +42,9 @@ export default function AnnotationsSheet() {
 					timer.resume()
 				}}
 			>
-				<PortalHostContext.Provider
-					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}
-				>
+				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
 					<AnnotationsSheetContent />
-					{Platform.OS === 'android' && <PortalHost name={SHEET_PORTAL_HOST} />}
-				</PortalHostContext.Provider>
+				</PortalHostProvider>
 			</TrueSheet>
 
 			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />

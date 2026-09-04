@@ -5,8 +5,8 @@ import { View } from 'react-native'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useListItemSize } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { ListLabel } from '../ui'
 import HorizontalBookListItem from './HorizontalBookListItem'
 

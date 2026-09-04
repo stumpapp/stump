@@ -11,16 +11,16 @@ import { Download, Info, Radio, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
 import { Image, Platform, Pressable, View } from 'react-native'
 
-import { getLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
+import { getLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
+import { useResolveURL } from '../../lib/opds/utils'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
-import { useResolveURL } from '../opds/utils'
 import { Icon, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
 import { OPDSLegacyEntryItemSheet } from './OPDSLegacyEntryItemSheet'
@@ -34,12 +34,12 @@ export default function OPDSEntry({ entry }: Props) {
 	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { itemWidth, thumbnailWidth, paddingHorizontal } = useLegacyOPDSEntrySize()
-	const { downloadBook, deleteBook } = useOPDSDownload({ serverId: serverID })
+	const { downloadBook, deleteBook } = useOPDSDownload({ serverId: serverId })
 
-	const isDownloaded = useIsLegacyOPDSEntryDownloaded(entry.id, serverID)
+	const isDownloaded = useIsLegacyOPDSEntryDownloaded(entry.id, serverId)
 	const sheetRef = useRef<TrueSheet>(null)
 
 	const assets = useFileExplorerAssets()
@@ -54,8 +54,8 @@ export default function OPDSEntry({ entry }: Props) {
 	const thumbnailUrl = entry.links.find(
 		(link) => link.rel === 'http://opds-spec.org/image/thumbnail',
 	)?.href
-	const streamingContext = getLegacyStreamingContextValue(entry, sdk?.rootURL)
-	const isStreamable = !!streamingContext
+	const streamingData = getLegacyStreamingData(entry, sdk?.rootURL)
+	const isStreamable = !!streamingData
 
 	const friendlyName = entry.title
 
@@ -64,23 +64,23 @@ export default function OPDSEntry({ entry }: Props) {
 
 	const onPress = () => {
 		const toUrl = navigateUrl || subsectionUrl
-		if (streamingContext) {
+		if (streamingData) {
 			router.push({
-				pathname: `/opds-legacy/[id]/read`,
+				pathname: `/opds-legacy/[serverId]/read`,
 				params: {
-					id: serverID,
+					serverId,
 					entryId: entry.id,
 					entryTitle: entry.title,
 					entryContent: entry.content,
-					streamingURL: streamingContext.streamingURL,
-					pageCount: streamingContext.pageCount.toString(),
+					streamingURL: streamingData.streamingURL,
+					pageCount: streamingData.pageCount.toString(),
 				},
 			})
 		} else if (toUrl) {
 			router.push({
-				pathname: `/opds-legacy/[id]/feed/[url]`,
+				pathname: `/opds-legacy/[serverId]/feed/[url]`,
 				params: {
-					id: serverID,
+					serverId,
 					url: toUrl,
 				},
 			})
@@ -179,8 +179,8 @@ export default function OPDSEntry({ entry }: Props) {
 				<Pressable onPress={onPress}>
 					{({ pressed }) => (
 						<View
-							className={cn('items-center gap-1', {
-								'flex-row gap-4': layout === 'list',
+							className={cn('gap-1 items-center', {
+								'gap-4 flex-row': layout === 'list',
 							})}
 							style={{
 								opacity: pressed ? 0.75 : 1,
@@ -205,7 +205,7 @@ export default function OPDSEntry({ entry }: Props) {
 								})}
 
 							{thumbnailUrl && (
-								<View className="relative my-2">
+								<View className="my-2 relative">
 									<ThumbnailImage
 										source={{
 											uri: resolveUrl(thumbnailUrl),
@@ -221,13 +221,13 @@ export default function OPDSEntry({ entry }: Props) {
 									/>
 
 									{isStreamable && (
-										<View className="squircle absolute left-1 top-1 rounded-full bg-black/70 p-2">
+										<View className="squircle left-1 top-1 bg-black/70 p-2 absolute rounded-full">
 											<Icon as={Radio} color="white" className="h-5 w-5" />
 										</View>
 									)}
 
 									{isDownloaded && (
-										<View className="squircle absolute bottom-1 left-1 rounded-full bg-black/70 p-2">
+										<View className="squircle bottom-1 left-1 bg-black/70 p-2 absolute rounded-full">
 											<Download color="white" className="h-5 w-5" />
 										</View>
 									)}
@@ -250,8 +250,8 @@ export default function OPDSEntry({ entry }: Props) {
 									{friendlyName}
 								</Text>
 
-								{layout === 'list' && streamingContext?.pageCount != null && (
-									<Text className="text-foreground-muted">{streamingContext.pageCount} pages</Text>
+								{layout === 'list' && streamingData?.pageCount != null && (
+									<Text className="text-foreground-muted">{streamingData.pageCount} pages</Text>
 								)}
 							</View>
 						</View>

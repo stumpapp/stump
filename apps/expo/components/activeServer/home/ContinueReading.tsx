@@ -12,8 +12,8 @@ import {
 	useReadingNowWidgetSync,
 	WidgetSyncBook,
 } from '~/lib/hooks/widgetSync/useReadingNowWidgetSync'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
 
 const query = graphql(`

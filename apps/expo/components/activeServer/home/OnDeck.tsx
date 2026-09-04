@@ -8,8 +8,7 @@ import { OnDeckBookItem } from '~/components/book'
 import { OnDeckBookItemFragmentType } from '~/components/book/OnDeckBookItem'
 import { Heading, Text } from '~/components/ui'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
-
-import { useActiveServer } from '../context'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query OnDeckBooks($pagination: Pagination) {

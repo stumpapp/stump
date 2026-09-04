@@ -8,8 +8,8 @@ import { Platform, Pressable, View } from 'react-native'
 
 import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { CollectionStackedThumbnails } from '../image/collection-image'
 import { Icon, Text } from '../ui'
 
@@ -93,7 +93,7 @@ export default function SmartListGridItem({ smartList, getLayoutNumber }: Props)
 	const data = useFragment(fragment, smartList)
 
 	const title = data.name
-	const href: Href = `/server/${serverID}/smart-lists/${data.id}`
+	const href: Href = `/stump/${serverID}/smart-lists/${data.id}`
 
 	const thumbnailData = data.books.map((b) => b.thumbnail)
 

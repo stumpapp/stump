@@ -7,12 +7,12 @@ import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { getPublicationThumbnailURL, hasLinkRel } from '~/lib/opds/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { GridImageItem } from '../listLayout/grid'
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import RefreshControl from '../RefreshControl'
-import { getPublicationThumbnailURL, hasLinkRel } from './utils'
 
 type Props = {
 	publications: OPDSPublication[]
@@ -32,7 +32,7 @@ export default function PublicationFeed({
 	ListHeaderComponent,
 }: Props) {
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { sdk } = useSDK()
 	const router = useRouter()
@@ -59,9 +59,9 @@ export default function PublicationFeed({
 						title={publication.metadata.title}
 						onPress={() =>
 							router.navigate({
-								pathname: '/opds/[id]/publication',
+								pathname: '/opds/[serverId]/publication',
 								params: {
-									id: serverID,
+									serverId,
 									url: selfURL ? resolveUrl(selfURL, sdk.rootURL) : undefined,
 								},
 							})
@@ -70,7 +70,7 @@ export default function PublicationFeed({
 				</View>
 			)
 		},
-		[serverID, sdk.rootURL, router],
+		[serverId, sdk.rootURL, router],
 	)
 
 	if (!publications.length) return null

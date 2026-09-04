@@ -8,7 +8,16 @@ import {
 	OPDSLegacyOpenSearchDoc,
 	openSearchDoc,
 } from '../types/opds-legacy'
-import { resolveUrl, toUrlParams, urlWithParams } from './utils'
+import { createRouteURLHandler, resolveUrl, toUrlParams, urlWithParams } from './utils'
+
+/**
+ * The root route for the OPDS v2 API
+ */
+const OPDS_V2_ROUTE = '/opds/v1.2'
+/**
+ * A helper function to format the URL for OPDS v2 API routes with optional query parameters
+ */
+export const opdsURL = createRouteURLHandler(OPDS_V2_ROUTE)
 
 type OPDSPageQuery = {
 	page: number
@@ -28,9 +37,7 @@ export class OPDSLegacyAPI extends APIBase {
 	}
 
 	async catalog(): Promise<OPDSLegacyFeed> {
-		const { data: xmlData } = await this.axios.get(this.api.rootURL, {
-			baseURL: undefined,
-		})
+		const { data: xmlData } = await this.axios.get(opdsURL('/catalog'), this.config)
 		const data = this.xmlParser.parse(xmlData)
 		if (typeof data !== 'object' || data?.feed == null) {
 			throw new Error('Invalid OPDS feed format')

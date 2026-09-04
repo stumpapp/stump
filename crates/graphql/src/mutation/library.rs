@@ -419,7 +419,17 @@ impl LibraryMutation {
 			.await?;
 
 		let scan_after_update = input.scan_after_persist;
-		let add_watcher = input.config.as_ref().is_some_and(|config| config.watch);
+		let (add_watcher, remove_watcher) =
+			match input.config.as_ref().map(|config| config.watch) {
+				Some(watch) => (
+					// previously wasn't but now is = add watcher
+					watch != existing_config.watch,
+					// previously was but now isn't = remove watcher
+					!watch && existing_config.watch,
+				),
+				_ => (false, false),
+			};
+
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -484,13 +494,21 @@ impl LibraryMutation {
 		}
 
 		if add_watcher {
-			core.library_watcher
+			if let Err(error) = core
+				.library_watcher
 				.add_watcher(updated_library.path.clone().into())
-				.await?;
-		} else {
-			core.library_watcher
+				.await
+			{
+				tracing::error!(?error, "Failed to add watcher for library");
+			}
+		} else if remove_watcher {
+			if let Err(error) = core
+				.library_watcher
 				.remove_watcher(existing_library.path.clone().into())
-				.await?;
+				.await
+			{
+				tracing::error!(?error, "Failed to remove watcher for library");
+			}
 		}
 
 		Ok(Library::from(updated_library))
@@ -619,15 +637,23 @@ impl LibraryMutation {
 		}
 
 		if add_watcher {
-			core.library_watcher
+			if let Err(error) = core
+				.library_watcher
 				.add_watcher(updated_library.path.clone().into())
-				.await?;
+				.await
+			{
+				tracing::error!(?error, "Failed to add watcher for library");
+			}
 		} else if remove_watcher {
-			core.library_watcher
+			if let Err(error) = core
+				.library_watcher
 				// note the difference, we use original as to avoid juggling whether
 				// path was updated which changes how we would remove the watcher
 				.remove_watcher(original_path.into())
-				.await?;
+				.await
+			{
+				tracing::error!(?error, "Failed to remove watcher for library");
+			}
 		}
 
 		Ok(Library::from(updated_library))

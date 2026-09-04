@@ -116,7 +116,7 @@ export default function LibrarySettingsRouter() {
 			})
 		},
 		onError: (error) => {
-			toast.error(t('createOrUpdateLibrary.errors.failedToUpdate'), {
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToUpdate'), {
 				description: extractErrorMessage(error),
 			})
 		},
@@ -124,7 +124,7 @@ export default function LibrarySettingsRouter() {
 
 	const { mutate: scan } = useGraphQLMutation(scanMutation, {
 		onError: (error) => {
-			toast.error(t('createOrUpdateLibrary.errors.failedToScan'), {
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToScan'), {
 				description: extractErrorMessage(error),
 			})
 		},

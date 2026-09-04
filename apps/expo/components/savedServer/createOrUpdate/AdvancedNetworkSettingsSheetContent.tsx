@@ -1,13 +1,16 @@
 import { Route } from 'lucide-react-native'
+import { useState } from 'react'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { View } from 'react-native'
 import { toast } from 'sonner-native'
 
 import { AppSettingsRow } from '~/components/appSettings'
+import { ShowOrHideButton } from '~/components/ShowOrHideButton'
 import { Button, Card, Switch, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useWifiSsid } from '~/providers/WifiSsidProvider'
+import { usePreferencesStore } from '~/stores'
 
 import { CustomHeaders } from './CustomHeaders'
 import { CreateOrUpdateServerData } from './schemas'
@@ -24,6 +27,9 @@ export function AdvancedNetworkSettingsSheetContent() {
 	const { errors } = useFormState({ control: form.control })
 	const { t } = useTranslate()
 	const { connectedToWifi, ssid, permissionStatus, isLoading, requestPermission } = useWifiSsid()
+
+	const hideUrls = usePreferencesStore((state) => state.maskUrls)
+	const [overrideHideUrls, setOverrideHideUrls] = useState(false)
 
 	const onChangeEnableLocalProfile = async (enabled: boolean) => {
 		form.setValue('enableLocalProfile', enabled)
@@ -66,6 +72,12 @@ export function AdvancedNetworkSettingsSheetContent() {
 						className="font-medium pl-3 w-full text-start"
 						autoCapitalize="none"
 						errorMessage={errors.localUrl?.message}
+						secureTextEntry={hideUrls && !overrideHideUrls}
+						actions={
+							hideUrls ? (
+								<ShowOrHideButton show={overrideHideUrls} setShow={setOverrideHideUrls} />
+							) : undefined
+						}
 					/>
 				</Card>
 			</View>

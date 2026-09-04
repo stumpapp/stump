@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form'
 
+import { ShowOrHideButton } from '~/components/ShowOrHideButton'
 import { Card, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 
@@ -17,6 +19,12 @@ export function AuthModeSection() {
 		name: 'authMode',
 	})
 	const { errors } = useFormState({ control })
+
+	const [showCredentials, setShowCredentials] = useState(false)
+
+	useEffect(() => {
+		setShowCredentials(false)
+	}, [authMode])
 
 	if (authMode === 'login' || authMode === 'none') {
 		return (
@@ -52,11 +60,12 @@ export function AuthModeSection() {
 							autoCorrect={false}
 							autoCapitalize="none"
 							placeholder="*************"
-							secureTextEntry
+							secureTextEntry={!showCredentials}
 							onBlur={onBlur}
 							onChangeText={onChange}
 							value={value}
 							errorMessage={errors.basicPassword?.message}
+							actions={<ShowOrHideButton show={showCredentials} setShow={setShowCredentials} />}
 						/>
 					)}
 					name="basicPassword"
@@ -77,9 +86,9 @@ export function AuthModeSection() {
 						onChangeText={onChange}
 						value={value}
 						errorMessage={errors.token?.message}
-						secureTextEntry
-						multiline
-						numberOfLines={3}
+						// TIL you cannot have a multiline input with secureTextEntry
+						secureTextEntry={!showCredentials}
+						actions={<ShowOrHideButton show={showCredentials} setShow={setShowCredentials} />}
 					/>
 				)}
 				name="token"

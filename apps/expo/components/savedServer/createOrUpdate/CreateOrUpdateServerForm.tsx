@@ -6,9 +6,11 @@ import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-f
 import { View } from 'react-native'
 import { Pressable } from 'react-native'
 
+import { ShowOrHideButton } from '~/components/ShowOrHideButton'
 import { Button, Card, Icon, Loader, Switch, Text } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import { useTranslate } from '~/lib/hooks'
+import { usePreferencesStore } from '~/stores'
 
 import { AdvancedNetworkSettingsSheet } from './AdvancedNetworkSettingsSheet'
 import { AuthModeSection } from './AuthModeSection'
@@ -29,6 +31,9 @@ export function CreateOrUpdateServerForm() {
 		control: form.control,
 		name: ['kind', 'url', 'defaultServer', 'name'],
 	})
+
+	const hideUrls = usePreferencesStore((state) => state.maskUrls)
+	const [overrideHideUrls, setOverrideHideUrls] = useState(false)
 
 	const [isCheckingConnection, setIsCheckingConnection] = useState(false)
 	const [didConnect, setDidConnect] = useState(false)
@@ -96,27 +101,33 @@ export function CreateOrUpdateServerForm() {
 					value={url}
 					onChangeText={(text) => form.setValue('url', text, { shouldValidate: !!errors.url })}
 					autoCapitalize="none"
+					secureTextEntry={hideUrls && !overrideHideUrls}
 					actions={
-						// not overly fancy but fine for now
-						<Button
-							size="sm"
-							roundness="full"
-							variant={didConnect ? 'success' : 'outline'}
-							onPress={checkConnection}
-							disabled={!url || isCheckingConnection}
-						>
-							{isCheckingConnection && (
-								<View className="h-6 w-6 items-center justify-center">
-									<Loader />
-								</View>
+						<View className="gap-2 flex-row items-center">
+							<Button
+								size="sm"
+								roundness="full"
+								variant={didConnect ? 'success' : 'outline'}
+								onPress={checkConnection}
+								disabled={!url || isCheckingConnection}
+							>
+								{isCheckingConnection && (
+									<View className="h-6 w-6 items-center justify-center">
+										<Loader />
+									</View>
+								)}
+								{!isCheckingConnection && didConnect && (
+									<Text className="text-base text-fill-success">{t(getKey('didConnect'))}</Text>
+								)}
+								{!isCheckingConnection && !didConnect && (
+									<Text className="text-base text-foreground-subtle">{t('common.test')}</Text>
+								)}
+							</Button>
+
+							{hideUrls && (
+								<ShowOrHideButton show={overrideHideUrls} setShow={setOverrideHideUrls} />
 							)}
-							{!isCheckingConnection && didConnect && (
-								<Text className="text-base text-fill-success">{t(getKey('didConnect'))}</Text>
-							)}
-							{!isCheckingConnection && !didConnect && (
-								<Text className="text-base text-foreground-subtle">{t('common.test')}</Text>
-							)}
-						</Button>
+						</View>
 					}
 					errorMessage={errors.url?.message}
 				/>

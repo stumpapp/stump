@@ -3677,6 +3677,18 @@
 		}
 	},
 	"imageReader": {
+		"footer": {
+			"readingTime": "Reading time: {{time}}",
+			"pageOf": "{{current}} of {{total}}"
+		},
+		"goToPage": {
+			"label": "Go to page",
+			"submit": "Go"
+		},
+		"nextInSeries": {
+			"title": "Next Up:",
+			"read": "Read"
+		},
 		"settings": {
 			"imageScaling": {
 				"label": "Image scaling",

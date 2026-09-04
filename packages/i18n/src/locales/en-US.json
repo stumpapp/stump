@@ -854,6 +854,34 @@
 			}
 		}
 	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "Age Rating",
+			"anyAge": {
+				"label": "Any age",
+				"description": "No age rating filter will be applied"
+			},
+			"custom": {
+				"label": "Aged N and up",
+				"description": {
+					"media": "Only media with an age rating of N or lower will be shown, where N is the number you enter below",
+					"series": "Only series with an age rating of N or lower will be shown, where N is the number you enter below"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "Extension",
+			"any": "Any"
+		},
+		"readStatusSelect": {
+			"label": "Read Status",
+			"options": {
+				"completed": "Completed",
+				"reading": "Reading",
+				"unread": "Unread"
+			}
+		}
+	},
 	"metadataEditor": {
 		"labels": {
 			"ageRating": "Age rating",

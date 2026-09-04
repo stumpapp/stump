@@ -3692,6 +3692,27 @@
 			"reset": "Reset Timer"
 		},
 		"settings": {
+			"readerSettings": {
+				"sections": {
+					"mode": "Mode",
+					"imageOptions": "Image Options",
+					"preferences": "Preferences"
+				},
+				"preferences": {
+					"separateSecondPage": "Separate second page",
+					"panZoomWithoutCtrl": "Pan and zoom without Ctrl / Cmd",
+					"tapSidesToNavigate": "Tap sides to navigate",
+					"readingTimer": "Reading timer"
+				}
+			},
+			"doublePageBehavior": {
+				"label": "Double Paged",
+				"options": {
+					"auto": "Auto",
+					"always": "Always",
+					"off": "Off"
+				}
+			},
 			"imageScaling": {
 				"label": "Image scaling",
 				"options": {

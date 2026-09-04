@@ -16,6 +16,7 @@ pub mod filesystem;
 pub mod fs_utils;
 pub mod job;
 pub mod kobo;
+pub mod media;
 pub mod opds;
 pub mod scan;
 pub mod utils;

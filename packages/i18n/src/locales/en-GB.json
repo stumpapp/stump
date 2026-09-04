@@ -2271,7 +2271,7 @@
 							"pink": "Pink",
 							"rose": "Rose",
 							"slate": "Slate",
-							"gray": "Gray",
+							"gray": "Grey",
 							"zinc": "Zinc",
 							"neutral": "Neutral",
 							"stone": "Stone"
@@ -2421,7 +2421,7 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Image Reader Settings",
 			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "Mode",

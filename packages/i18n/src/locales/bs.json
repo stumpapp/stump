@@ -1,25 +1,25 @@
 {
 	"underConstruction": {
-		"heading": "",
-		"message": "",
-		"homeLink": "",
-		"githubLink": ""
+		"heading": "Ovo je nezgodno",
+		"message": "Naišli ste na stranicu koja je još u izradi. Rado bismo vam je pokazali, ali još nije sasvim spremna.",
+		"homeLink": "Povratak na početnu",
+		"githubLink": "Pogledajte prijavu na GitHubu"
 	},
 	"authScene": {
-		"claimHeading": "",
-		"claimText": "",
+		"claimHeading": "Postavite svoj server",
+		"claimText": "Ovaj Stump server još nije postavljen. Pomoću obrasca u nastavku kreirajte svoj račun. Nakon toga imat ćete puni pristup svim funkcijama servera.",
 		"form": {
 			"validation": {
-				"missingUsername": "",
-				"missingPassword": "",
-				"usernameAlreadyExists": ""
+				"missingUsername": "Korisničko ime je obavezno",
+				"missingPassword": "Lozinka je obavezna",
+				"usernameAlreadyExists": "Ovo korisničko ime je već zauzeto"
 			},
 			"labels": {
-				"username": "",
-				"password": ""
+				"username": "Korisničko ime",
+				"password": "Lozinka"
 			},
 			"buttons": {
-				"createAccount": "",
+				"createAccount": "Kreirajte račun",
 				"login": "",
 				"loginWithOidc": "",
 				"createAccountWithOidc": ""

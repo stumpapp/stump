@@ -3,6 +3,7 @@ use std::{collections::HashMap, path::Path};
 use crate::{fs_utils::ContentType, media::processor::error::MediaProcessorError};
 
 pub mod error;
+mod zip;
 
 /// A struct representing the options for processing a media file. This is a subset of [`LibraryConfig`]
 /// and is used to pass options to the [`MediaProcessor`] implementations.

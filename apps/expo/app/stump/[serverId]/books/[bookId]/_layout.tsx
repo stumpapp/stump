@@ -26,22 +26,6 @@ export default function Screen() {
 					headerLeft: () => <BackLink />,
 				}}
 			/>
-
-			<Stack.Screen
-				name="ebook-settings"
-				options={{
-					presentation: 'formSheet',
-					headerShown: false,
-				}}
-			/>
-
-			<Stack.Screen
-				name="ebook-locations-modal"
-				options={{
-					presentation: 'formSheet',
-					headerShown: false,
-				}}
-			/>
 		</Stack>
 	)
 }

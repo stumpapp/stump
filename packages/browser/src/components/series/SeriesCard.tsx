@@ -1,4 +1,3 @@
-import { useSDK } from '@stump/client'
 import { Text } from '@stump/components'
 import { FileStatus } from '@stump/graphql'
 import { useCallback } from 'react'
@@ -16,6 +15,7 @@ export interface SeriesCardData {
 	mediaCount: number
 	percentageCompleted: number
 	status: FileStatus
+	thumbnail: { url: string }
 }
 
 export type SeriesCardProps = {
@@ -25,8 +25,6 @@ export type SeriesCardProps = {
 }
 
 export default function SeriesCard({ data, fullWidth, variant = 'default' }: SeriesCardProps) {
-	const { sdk } = useSDK()
-
 	const isCoverOnly = variant === 'cover'
 
 	const prefetchSeries = usePrefetchSeries()
@@ -81,7 +79,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 		<EntityCard
 			title={data.resolvedName}
 			href={paths.seriesOverview(data.id)}
-			imageUrl={sdk.series.thumbnailURL(data.id)}
+			imageUrl={data.thumbnail.url}
 			progress={getProgress()}
 			subtitle={getSubtitle()}
 			onMouseEnter={prefetch}

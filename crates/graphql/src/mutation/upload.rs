@@ -11,11 +11,11 @@ use models::{
 	entity::{library, library_config, media, series},
 	shared::enums::UserPermission,
 };
-use sea_orm::{prelude::*, sea_query::Query};
+use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set};
 use stump_core::filesystem::{
 	image::{
-		place_thumbnail, remove_thumbnails, PlaceholderGenerationJobConfig,
-		PlaceholderGenerationJobScope,
+		bump_media_thumbnail_fallbacks, bump_series_thumbnail_fallbacks, place_thumbnail,
+		remove_thumbnails, PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 	},
 	ContentType,
 };
@@ -222,14 +222,9 @@ impl UploadMutation {
 
 		tracing::debug!(?path_buf, "Placed library thumbnail");
 
-		library::Entity::update_many()
-			.col_expr(
-				library::Column::ThumbnailPath,
-				Expr::value(Some(path_buf.to_string_lossy().to_string())),
-			)
-			.filter(library::Column::Id.eq(library.id.clone()))
-			.exec(core.conn.as_ref())
-			.await?;
+		let mut active = library.into_active_model();
+		active.thumbnail_path = Set(Some(path_buf.to_string_lossy().to_string()));
+		let library = active.update(core.conn.as_ref()).await?;
 
 		let config = config.ok_or("Library config not found")?;
 
@@ -277,9 +272,8 @@ impl UploadMutation {
 	) -> Result<Series> {
 		let AuthContext { user, .. } = ctx.data()?;
 		let core = ctx.data::<CoreContext>()?;
-		let _conn = core.conn.as_ref();
 
-		let series = series::ModelWithMetadata::find_for_user(user)
+		let mut series = series::ModelWithMetadata::find_for_user(user)
 			.filter(series::Column::Id.eq(id.to_string()))
 			.into_model::<series::ModelWithMetadata>()
 			.one(core.conn.as_ref())
@@ -322,14 +316,14 @@ impl UploadMutation {
 
 		tracing::debug!(?path_buf, "Placed series thumbnail");
 
-		series::Entity::update_many()
-			.col_expr(
-				series::Column::ThumbnailPath,
-				Expr::value(Some(path_buf.to_string_lossy().to_string())),
-			)
-			.filter(series::Column::Id.eq(series.series.id.clone()))
-			.exec(core.conn.as_ref())
-			.await?;
+		let mut active = series.series.clone().into_active_model();
+		active.thumbnail_path = Set(Some(path_buf.to_string_lossy().to_string()));
+		series.series = active.update(core.conn.as_ref()).await?;
+		bump_series_thumbnail_fallbacks(
+			core.conn.as_ref(),
+			std::slice::from_ref(&series.series.id),
+		)
+		.await?;
 
 		let config = library_config::Entity::find()
 			.filter(
@@ -385,7 +379,7 @@ impl UploadMutation {
 		let AuthContext { user, .. } = ctx.data()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		let book = media::ModelWithMetadata::find_for_user(user)
+		let mut book = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::Id.eq(id.to_string()))
 			.into_model::<media::ModelWithMetadata>()
 			.one(core.conn.as_ref())
@@ -432,14 +426,14 @@ impl UploadMutation {
 
 		tracing::debug!(?path_buf, "Placed book thumbnail");
 
-		media::Entity::update_many()
-			.col_expr(
-				media::Column::ThumbnailPath,
-				Expr::value(Some(path_buf.to_string_lossy().to_string())),
-			)
-			.filter(media::Column::Id.eq(book.media.id.clone()))
-			.exec(core.conn.as_ref())
-			.await?;
+		let mut active = book.media.clone().into_active_model();
+		active.thumbnail_path = Set(Some(path_buf.to_string_lossy().to_string()));
+		book.media = active.update(core.conn.as_ref()).await?;
+		bump_media_thumbnail_fallbacks(
+			core.conn.as_ref(),
+			book.media.series_id.as_deref(),
+		)
+		.await?;
 
 		let config = library_config::Entity::find()
 			.filter(
@@ -504,7 +498,7 @@ impl UploadMutation {
 		let AuthContext { user, .. } = ctx.data()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		let series = series::ModelWithMetadata::find_for_user(user)
+		let mut series = series::ModelWithMetadata::find_for_user(user)
 			.filter(series::Column::Id.eq(id.to_string()))
 			.into_model::<series::ModelWithMetadata>()
 			.one(core.conn.as_ref())
@@ -533,14 +527,14 @@ impl UploadMutation {
 
 		tracing::debug!(?path_buf, "Placed series thumbnail from base64");
 
-		series::Entity::update_many()
-			.col_expr(
-				series::Column::ThumbnailPath,
-				Expr::value(Some(path_buf.to_string_lossy().to_string())),
-			)
-			.filter(series::Column::Id.eq(series.series.id.clone()))
-			.exec(core.conn.as_ref())
-			.await?;
+		let mut active = series.series.clone().into_active_model();
+		active.thumbnail_path = Set(Some(path_buf.to_string_lossy().to_string()));
+		series.series = active.update(core.conn.as_ref()).await?;
+		bump_series_thumbnail_fallbacks(
+			core.conn.as_ref(),
+			std::slice::from_ref(&series.series.id),
+		)
+		.await?;
 
 		let config = library_config::Entity::find()
 			.filter(
@@ -599,7 +593,7 @@ impl UploadMutation {
 		let AuthContext { user, .. } = ctx.data()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		let book = media::ModelWithMetadata::find_for_user(user)
+		let mut book = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::Id.eq(id.to_string()))
 			.into_model::<media::ModelWithMetadata>()
 			.one(core.conn.as_ref())
@@ -627,14 +621,14 @@ impl UploadMutation {
 
 		tracing::debug!(?path_buf, "Placed book thumbnail from base64");
 
-		media::Entity::update_many()
-			.col_expr(
-				media::Column::ThumbnailPath,
-				Expr::value(Some(path_buf.to_string_lossy().to_string())),
-			)
-			.filter(media::Column::Id.eq(book.media.id.clone()))
-			.exec(core.conn.as_ref())
-			.await?;
+		let mut active = book.media.clone().into_active_model();
+		active.thumbnail_path = Set(Some(path_buf.to_string_lossy().to_string()));
+		book.media = active.update(core.conn.as_ref()).await?;
+		bump_media_thumbnail_fallbacks(
+			core.conn.as_ref(),
+			book.media.series_id.as_deref(),
+		)
+		.await?;
 
 		let config = library_config::Entity::find()
 			.filter(

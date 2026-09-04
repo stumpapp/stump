@@ -383,6 +383,7 @@ impl Library {
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
+		let last_modified = self.model.updated_at;
 
 		let dimensions = self
 			.model
@@ -392,12 +393,14 @@ impl Library {
 			.map(|dim| (dim.width, dim.height));
 
 		Ok(ImageRef {
-			url: service
-				.format_url(format!("/api/v2/library/{}/thumbnail", self.model.id)),
+			url: service.cache_friendly_url(
+				format!("/api/v2/library/{}/thumbnail", self.model.id),
+				&last_modified,
+			),
 			height: dimensions.map(|(_, height)| height),
 			width: dimensions.map(|(width, _)| width),
 			metadata: self.model.thumbnail_meta.clone(),
-			..Default::default()
+			last_modified,
 		})
 	}
 }

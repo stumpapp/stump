@@ -10,7 +10,8 @@ use sea_orm::{prelude::*, QuerySelect, QueryTrait};
 use crate::{
 	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
 	filesystem::image::thumbnail::generate::{
-		safely_generate_batch, GenerateImageSource, GenerateThumbnailOptions,
+		bump_series_thumbnail_fallbacks, safely_generate_batch, GenerateImageSource,
+		GenerateThumbnailOptions, ThumbnailTarget,
 	},
 	job::{
 		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
@@ -307,7 +308,8 @@ impl JobLifecycle for ThumbnailGenerationJob {
 						image_options: self.options.clone(),
 						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
-						filename: None, // Each book will use its ID as the filename
+						is_custom: false,
+						target: ThumbnailTarget::Media,
 					},
 					|position| {
 						ctx.report_progress(JobProgress::subtask_position(
@@ -321,6 +323,7 @@ impl JobLifecycle for ThumbnailGenerationJob {
 				logs.extend(sub_logs);
 			},
 			ThumbnailGenerationTask::Series(series_ids) => {
+				let fallback_series_ids = series_ids.clone();
 				let series = series::Entity::find()
 					.select_only()
 					.columns(series::SeriesThumbSelect::columns())
@@ -348,7 +351,8 @@ impl JobLifecycle for ThumbnailGenerationJob {
 						image_options: self.options.clone(),
 						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
-						filename: None, // Each series will use its ID as the filename
+						is_custom: false,
+						target: ThumbnailTarget::Media,
 					},
 					|position| {
 						ctx.report_progress(JobProgress::subtask_position(
@@ -358,6 +362,11 @@ impl JobLifecycle for ThumbnailGenerationJob {
 					},
 				)
 				.await;
+				if sub_output.generated_thumbnails > 0 {
+					bump_series_thumbnail_fallbacks(ctx.conn(), &fallback_series_ids)
+						.await
+						.map_err(|e| JobError::TaskFailed(e.to_string()))?;
+				}
 				output.update(sub_output);
 				logs.extend(sub_logs);
 			},
@@ -389,7 +398,8 @@ impl JobLifecycle for ThumbnailGenerationJob {
 						image_options: self.options.clone(),
 						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
-						filename: None, // Each library will use its ID as the filename
+						is_custom: false,
+						target: ThumbnailTarget::Media,
 					},
 					|position| {
 						ctx.report_progress(JobProgress::subtask_position(

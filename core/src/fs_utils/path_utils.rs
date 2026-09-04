@@ -156,47 +156,4 @@ impl PathUtils for Path {
 
 		is_accepted_cover_name(&file_stem)
 	}
-
-	// TODO(reorg): move out of path_utils, into scanner, asyncify
-	fn dir_has_media(&self, ignore_rules: &GlobSet) -> bool {
-		if !self.is_dir() {
-			return false;
-		}
-
-		let read_result = std::fs::read_dir(self);
-
-		match read_result {
-			Ok(items) => items
-				.filter_map(Result::ok)
-				.filter(|item| item.path() != self)
-				.any(|f| {
-					let path = f.path();
-					!path.is_default_ignored() && !ignore_rules.is_match(path)
-				}),
-			Err(e) => {
-				tracing::error!(
-					error = ?e,
-					path = ?self,
-					"Failed to read directory"
-				);
-				false
-			},
-		}
-	}
-
-	// TODO(reorg): move out of path_utils, into scanner, asyncify
-	fn dir_has_media_deep(&self, ignore_rules: &GlobSet) -> bool {
-		if !self.is_dir() {
-			return false;
-		}
-
-		WalkDir::new(self)
-			.into_iter()
-			.filter_map(Result::ok)
-			.filter(|item| item.path() != self)
-			.any(|f| {
-				let path = f.path();
-				!path.is_default_ignored() && !ignore_rules.is_match(path)
-			})
-	}
 }

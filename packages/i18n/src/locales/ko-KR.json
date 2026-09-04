@@ -2,26 +2,60 @@
 	"authScene": {
 		"form": {
 			"labels": {
-				"password": "암호"
+				"password": "암호",
+				"username": "사용자 이름"
 			},
 			"buttons": {
 				"createAccount": "계정 생성",
-				"login": "로그인"
+				"login": "로그인",
+				"createAccountWithOidc": "OIDC로 계정 생성",
+				"loginWithOidc": "OIDC로 로그인"
+			},
+			"validation": {
+				"missingUsername": "사용자 이름을 입력하세요",
+				"usernameAlreadyExists": "이미 사용 중인 사용자 이름입니다",
+				"missingPassword": "암호를 입력하세요"
 			}
 		},
 		"toasts": {
 			"loggingIn": "로그인 중...",
-			"loggedIn": "다시 오신 것을 환영합니다!"
-		}
+			"loggedIn": "다시 오신 것을 환영합니다!",
+			"registering": "계정을 생성하는 중...",
+			"registered": "계정이 생성되었습니다!",
+			"loggedInFirstTime": "환영합니다!",
+			"loginFailed": "로그인하지 못했습니다. 다시 시도하세요",
+			"registrationFailed": "계정을 생성하지 못했습니다. 다시 시도하세요"
+		},
+		"claimHeading": "서버 초기화",
+		"claimText": "이 Stump 서버는 아직 초기화되지 않았습니다. 아래 양식을 사용하여 계정을 생성하세요. 계정을 생성하면 서버의 모든 기능을 사용할 수 있습니다."
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"labels": {
 				"fileSize": "파일 크기",
 				"fileType": "파일 형식",
-				"fileLocation": "파일 위치"
+				"fileLocation": "파일 위치",
+				"fileChecksum": "체크섬"
+			},
+			"heading": "파일 정보"
+		},
+		"emailBook": {
+			"heading": "책을 이메일로 보내기",
+			"description": "이 책을 기기 또는 이메일 주소로 보냅니다",
+			"form": {
+				"email": {
+					"label": "이메일",
+					"placeholder": "이메일 주소",
+					"description": "책을 보낼 이메일 주소입니다. 각 주소를 입력한 뒤 ‘추가’를 클릭하여 확정하세요"
+				},
+				"devices": {
+					"label": "기기",
+					"placeholder": "기기 선택",
+					"noFilterMatch": "필터와 일치하는 기기가 없습니다"
+				}
 			}
-		}
+		},
+		"nextInSeries": "시리즈의 다음 책"
 	},
 	"createLibraryScene": {
 		"heading": "Create New Library"
@@ -286,7 +320,7 @@
 						"confirmation": {
 							"trigger": "Clear authentication",
 							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
+							"description": "저장된 모든 토큰을 삭제하시겠습니까?",
 							"confirm": "Clear authentication"
 						}
 					}
@@ -321,7 +355,7 @@
 					},
 					"smartlist": {
 						"read": {
-							"description": "Allows the user to access smart lists features"
+							"description": "사용자가 스마트 목록 기능에 접근할 수 있도록 허용합니다. 세부 권한은 아직 구현되지 않았으므로,\n자신의 목록을 읽고 만들고 수정할 수 있는 권한도 포함됩니다"
 						}
 					}
 				}
@@ -353,6 +387,64 @@
 		},
 		"readerSettings": {
 			"title": "Reader Settings"
+		}
+	},
+	"underConstruction": {
+		"homeLink": "홈으로 이동",
+		"message": "아직 개발 중인 페이지입니다. 보여드리고 싶지만 아직 준비가 끝나지 않았습니다.",
+		"heading": "아직 준비 중입니다",
+		"githubLink": "GitHub 이슈 보기"
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"subtitleEditing": "라이브러리 변경 사항의 미리보기가 아래에 표시됩니다",
+			"heading": "라이브러리 설정",
+			"subtitleCreating": "새 라이브러리의 미리보기가 아래에 표시됩니다"
+		}
+	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"searchButton": "검색",
+			"noProviders": "이 라이브러리 유형에 사용하도록 설정된 메타데이터 제공자가 없습니다. 먼저 서버 설정에서 제공자를 구성하세요.",
+			"heading": "메타데이터 검색",
+			"openButton": "메타데이터 검색",
+			"description": "외부 제공자에서 이 책의 메타데이터를 검색하고 적용할 항목을 선택하세요",
+			"noResults": "이 검색과 일치하는 결과가 없습니다",
+			"searchFailed": "메타데이터 제공자 검색에 실패했습니다",
+			"form": {
+				"title": {
+					"label": "제목"
+				},
+				"author": {
+					"label": "저자"
+				},
+				"year": {
+					"label": "연도"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"number": {
+					"label": "이슈 번호"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine 볼륨 ID",
+					"placeholder": "예: 129260"
+				},
+				"provider": {
+					"label": "제공자",
+					"allOption": "활성화된 모든 제공자"
+				}
+			},
+			"partialResults": "제공자의 요청 제한으로 일부 결과를 불러오지 못했습니다. 다시 검색하면 더 많은 결과가 표시될 수 있습니다."
+		}
+	},
+	"createOrUpdateBookClubForm": {
+		"fields": {
+			"name": {
+				"label": "이름",
+				"placeholder": "나의 북클럽"
+			}
 		}
 	}
 }

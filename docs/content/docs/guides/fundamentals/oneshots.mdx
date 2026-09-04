@@ -63,3 +63,10 @@ When configuring my library, I would set the path to `/path/to/my/Indie` as the 
 	There is no special handling for one-shots in the mobile app yet, so they will appear as normal
 	series there. This may be addressed in a future release.
 </Callout>
+
+### Changing the One-Shots Directory
+
+If you change the one-shots directory for a library that already has one-shots, there are a few things to keep in mind:
+
+- Stump assumes that by the time you change the directory, the books in the old one-shots directory have been moved to the new one-shots directory. If they have not, a scan of the library will likely result in a non-one-shot series being created for the books in the old one-shots directory
+- Similarly, if you remove the one-shots directory entirely, effectively disabling one-shot handling for that library, any books that were previously recognized as one-shots will be grouped into a new non-one-shot series

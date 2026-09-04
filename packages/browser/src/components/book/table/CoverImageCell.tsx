@@ -1,4 +1,3 @@
-import { useSDK } from '@stump/client'
 import { Book } from 'lucide-react'
 import { useState } from 'react'
 
@@ -6,12 +5,11 @@ import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks/usePreferences'
 
 type Props = {
-	id: string
+	url: string
 	title?: string
 }
 
-export default function CoverImageCell({ id, title }: Props) {
-	const { sdk } = useSDK()
+export default function CoverImageCell({ url, title }: Props) {
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -20,7 +18,7 @@ export default function CoverImageCell({ id, title }: Props) {
 	const loadImage = () => {
 		const image = new Image()
 		return new Promise((resolve, reject) => {
-			image.src = sdk.media.thumbnailURL(id)
+			image.src = url
 			image.onload = () => resolve(image)
 			image.onerror = (e) => {
 				console.error('Image failed to load:', e)
@@ -57,7 +55,7 @@ export default function CoverImageCell({ id, title }: Props) {
 				title={title}
 				className="h-14 w-auto rounded-md object-cover p-px"
 				style={{ aspectRatio: thumbnailRatio }}
-				src={sdk.media.thumbnailURL(id)}
+				src={url}
 				onError={() => setShowFallback(true)}
 			/>
 		</div>

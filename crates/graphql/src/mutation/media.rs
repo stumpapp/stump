@@ -11,7 +11,7 @@ use sea_orm::{
 };
 use stump_core::{
 	filesystem::{
-		image::{generate_book_thumbnail, GenerateThumbnailOptions},
+		image::{generate_book_thumbnail, GenerateThumbnailOptions, ThumbnailTarget},
 		media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 	},
 	job::stump_job::StumpJob,
@@ -214,11 +214,18 @@ impl MediaMutation {
 				image_options,
 				core_config: core.config.as_ref().clone(),
 				force_regen: true,
-				filename: Some(id.to_string()),
+				is_custom: true,
+				target: ThumbnailTarget::Media,
 			},
 		)
 		.await?;
 		tracing::debug!(path = ?path_buf, "Generated book thumbnail");
+
+		let book = media::ModelWithMetadata::find_by_id_for_user(id.to_string(), user)
+			.into_model::<media::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Book not found")?;
 
 		Ok(book.into())
 	}

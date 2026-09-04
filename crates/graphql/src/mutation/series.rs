@@ -10,7 +10,7 @@ use sea_orm::{
 	ActiveValue::Set,
 };
 use stump_core::filesystem::{
-	image::{generate_book_thumbnail, GenerateThumbnailOptions},
+	image::{generate_book_thumbnail, GenerateThumbnailOptions, ThumbnailTarget},
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 };
 use stump_core::job::stump_job::StumpJob;
@@ -163,11 +163,18 @@ impl SeriesMutation {
 				image_options,
 				core_config: core.config.as_ref().clone(),
 				force_regen: true,
-				filename: Some(id.to_string()),
+				is_custom: true,
+				target: ThumbnailTarget::Series(id.to_string()),
 			},
 		)
 		.await?;
 		tracing::debug!(path = ?path_buf, "Generated series thumbnail");
+
+		let series = series::ModelWithMetadata::find_by_id_for_user(id.to_string(), user)
+			.into_model::<series::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Series not found")?;
 
 		Ok(series.into())
 	}

@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 import { match, P } from 'ts-pattern'
 import { useShallow } from 'zustand/react/shallow'
 
+import { invalidateThumbnailQueries } from '@/utils/query'
+
 const subscription = graphql(`
 	subscription UseCoreEvent {
 		readEvents {
@@ -173,6 +175,11 @@ const handleJobOutput = async (
 	{ output }: Extract<UseCoreEventSubscription['readEvents'], { __typename: 'JobOutput' }>,
 	{ client, sdk }: Omit<EventHandlerParams, 'store' | 'liveRefetch'>,
 ) => {
+	if (output.__typename === 'ThumbnailGenerationOutput') {
+		await invalidateThumbnailQueries(client)
+		return
+	}
+
 	const affectedBooks = match(output)
 		.with(
 			{ __typename: P.union('LibraryScanOutput', 'SeriesScanOutput') },
@@ -187,16 +194,21 @@ const handleJobOutput = async (
 		)
 		.with({ __typename: 'SeriesScanOutput' }, () => affectedBooks)
 		.otherwise(() => 0)
-
 	const keys = [
 		sdk.cacheKeys.scanHistory,
 		sdk.cacheKeys.getStats,
 		'missingEntities', // TODO: Put behind key?
-		...(affectedBooks > 0 ? [sdk.cacheKeys.recentlyAddedMedia, sdk.cacheKeys.media] : []),
-		...(affectedSeries > 0 ? [sdk.cacheKeys.recentlyAddedSeries, sdk.cacheKeys.series] : []),
+		...(affectedBooks > 0 ? [sdk.cacheKeys.media] : []),
+		...(affectedSeries > 0 ? [sdk.cacheKeys.series] : []),
 	] as string[]
 
-	await client.invalidateQueries({
-		predicate: ({ queryKey: [rootKey] }) => typeof rootKey === 'string' && keys.includes(rootKey),
-	})
+	const invalidations = [
+		client.invalidateQueries({
+			predicate: ({ queryKey: [rootKey] }) => typeof rootKey === 'string' && keys.includes(rootKey),
+		}),
+	]
+	if (affectedBooks > 0 || affectedSeries > 0) {
+		invalidations.push(invalidateThumbnailQueries(client))
+	}
+	await Promise.all(invalidations)
 }

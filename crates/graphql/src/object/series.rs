@@ -314,6 +314,7 @@ impl Series {
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
+		let last_modified = self.model.updated_at;
 
 		let dimensions = self
 			.model
@@ -323,12 +324,14 @@ impl Series {
 			.map(|dim| (dim.width, dim.height));
 
 		Ok(ImageRef {
-			url: service
-				.format_url(format!("/api/v2/series/{}/thumbnail", self.model.id)),
+			url: service.cache_friendly_url(
+				format!("/api/v2/series/{}/thumbnail", self.model.id),
+				&last_modified,
+			),
 			height: dimensions.as_ref().map(|dim| dim.1),
 			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.thumbnail_meta.clone(),
-			..Default::default()
+			last_modified,
 		})
 	}
 

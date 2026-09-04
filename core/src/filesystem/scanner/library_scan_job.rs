@@ -24,8 +24,8 @@ use crate::{
 	event::{self, CreatedOrUpdatedManyMedia},
 	filesystem::{
 		image::{
-			PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
-			ThumbnailGenerationJobParams,
+			bump_media_thumbnail_fallbacks, PlaceholderGenerationJobConfig,
+			PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
 		},
 		metadata::MetadataFetchJobParams,
 		scanner::utils::safely_insert_series,
@@ -39,6 +39,7 @@ use crate::{
 };
 
 use super::{
+	options::BookVisitOperation,
 	series_scan_job::SeriesScanTask,
 	utils::{
 		handle_missing_media, handle_missing_series, handle_restored_media,
@@ -100,6 +101,24 @@ impl LibraryScanJob {
 			pending_dir_mtimes: Arc::new(Mutex::new(vec![])),
 			series_id_by_path: Arc::new(Mutex::new(HashMap::new())),
 		}
+	}
+
+	async fn bump_thumbnail_fallbacks(
+		&self,
+		ctx: &JobContext,
+		series_id: &str,
+		changed_media: u64,
+	) -> Result<(), JobError> {
+		if changed_media > 0
+			&& self
+				.config
+				.as_ref()
+				.is_some_and(|config| config.thumbnail_config.is_none())
+		{
+			bump_media_thumbnail_fallbacks(ctx.conn(), Some(series_id)).await?;
+		}
+
+		Ok(())
 	}
 }
 
@@ -311,7 +330,10 @@ impl JobLifecycle for LibraryScanJob {
 				tracing::trace!("Thumbnail generation job should be enqueued");
 				let params = ThumbnailGenerationJobParams::books_in_library(
 					self.id.clone(),
-					false,
+					matches!(
+						self.options.book_operation(),
+						Some(BookVisitOperation::Rebuild)
+					),
 				);
 				if let Err(e) = ctx
 					.enqueue(StumpJob::thumbnail_generation(options, params))
@@ -803,6 +825,8 @@ impl JobLifecycle for LibraryScanJob {
 						logs: new_logs,
 						..
 					} = handle_restored_media(ctx, &series_id, ids).await;
+					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
+						.await?;
 
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
@@ -829,6 +853,8 @@ impl JobLifecycle for LibraryScanJob {
 						logs: new_logs,
 						..
 					} = handle_missing_media(ctx, &series_id, paths).await;
+					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
+						.await?;
 
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
@@ -867,6 +893,8 @@ impl JobLifecycle for LibraryScanJob {
 						paths,
 					)
 					.await?;
+					self.bump_thumbnail_fallbacks(ctx, &series_id, created_media)
+						.await?;
 
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
@@ -904,6 +932,8 @@ impl JobLifecycle for LibraryScanJob {
 						params,
 					)
 					.await?;
+					self.bump_thumbnail_fallbacks(ctx, &series_id, updated_media)
+						.await?;
 
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {

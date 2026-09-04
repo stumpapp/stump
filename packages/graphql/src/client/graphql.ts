@@ -5885,6 +5885,15 @@ export type SmartListNavigationItemQueryVariables = Exact<{ [key: string]: never
 
 export type SmartListNavigationItemQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
 
+export type NavigationEntityLibraryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  isSeries: Scalars['Boolean']['input'];
+  isBook: Scalars['Boolean']['input'];
+}>;
+
+
+export type NavigationEntityLibraryQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', libraryId?: string | null } | null, mediaById?: { __typename?: 'Media', libraryId: string } | null };
+
 export type CreateEpubAnnotationMutationVariables = Exact<{
   input: CreateAnnotationInput;
 }>;
@@ -11211,6 +11220,16 @@ export const SmartListNavigationItemDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SmartListNavigationItemQuery, SmartListNavigationItemQueryVariables>;
+export const NavigationEntityLibraryDocument = new TypedDocumentString(`
+    query NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {
+  seriesById(id: $id) @include(if: $isSeries) {
+    libraryId
+  }
+  mediaById(id: $id) @include(if: $isBook) {
+    libraryId
+  }
+}
+    `) as unknown as TypedDocumentString<NavigationEntityLibraryQuery, NavigationEntityLibraryQueryVariables>;
 export const CreateEpubAnnotationDocument = new TypedDocumentString(`
     mutation CreateEpubAnnotation($input: CreateAnnotationInput!) {
   createAnnotation(input: $input) {

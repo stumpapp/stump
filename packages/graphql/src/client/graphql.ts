@@ -1183,6 +1183,11 @@ export type LibraryConfig = {
   libraryId?: Maybe<Scalars['String']['output']>;
   libraryPattern: LibraryPattern;
   libraryType: LibraryType;
+  /**
+   * the **relative path** to the directory where oneshots are stored,
+   * relative to the library path. this is **not** a fully qualified path
+   */
+  oneshotsDirectory?: Maybe<Scalars['String']['output']>;
   processMetadata: Scalars['Boolean']['output'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['output'];
   skipBookOverview: Scalars['Boolean']['output'];
@@ -1203,6 +1208,7 @@ export type LibraryConfigInput = {
   ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
   libraryPattern: LibraryPattern;
   libraryType: LibraryType;
+  oneshotsDirectory?: InputMaybe<Scalars['String']['input']>;
   processMetadata: Scalars['Boolean']['input'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['input'];
   skipBookOverview: Scalars['Boolean']['input'];
@@ -1397,6 +1403,7 @@ export type Media = {
   id: Scalars['String']['output'];
   /** Whether the media is marked as a favorite by the current user */
   isFavorite: Scalars['Boolean']['output'];
+  isOneshot: Scalars['Boolean']['output'];
   /**
    * A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
    * books from the KoReader application so progress can be synced between the two applications
@@ -1720,6 +1727,7 @@ export enum MediaModelOrdering {
   Extension = 'EXTENSION',
   Hash = 'HASH',
   Id = 'ID',
+  IsOneshot = 'IS_ONESHOT',
   KoreaderHash = 'KOREADER_HASH',
   ModifiedAt = 'MODIFIED_AT',
   Name = 'NAME',
@@ -2111,6 +2119,8 @@ export type Mutation = {
   /** Lock or unlock a discussion (Moderator+) */
   lockDiscussion: Scalars['Boolean']['output'];
   patchEmailDevice: RegisteredEmailDevice;
+  patchLibrary: Library;
+  patchLibraryConfig: LibraryConfig;
   /** Pin or unpin a message (Moderator+) */
   pinMessage: Scalars['Boolean']['output'];
   processLibraryThumbnails: Scalars['Boolean']['output'];
@@ -2186,6 +2196,7 @@ export type Mutation = {
   /**
    * Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
    * the library will be scanned immediately after updating.
+   * @deprecated Use `patchLibrary` instead
    */
   updateLibrary: Library;
   /** Update the emoji for a library */
@@ -2664,6 +2675,18 @@ export type MutationLockDiscussionArgs = {
 export type MutationPatchEmailDeviceArgs = {
   id: Scalars['Int']['input'];
   input: PatchEmailDeviceInput;
+};
+
+
+export type MutationPatchLibraryArgs = {
+  id: Scalars['ID']['input'];
+  input: PatchLibraryInput;
+};
+
+
+export type MutationPatchLibraryConfigArgs = {
+  id: Scalars['ID']['input'];
+  input: PatchLibraryConfigInput;
 };
 
 
@@ -3274,6 +3297,37 @@ export type PatchEmailDeviceInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   forbidden?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PatchLibraryConfigInput = {
+  convertRarToZip?: InputMaybe<Scalars['Boolean']['input']>;
+  defaultLibraryViewMode?: InputMaybe<LibraryViewMode>;
+  defaultReadingDir?: InputMaybe<ReadingDirection>;
+  defaultReadingImageScaleFit?: InputMaybe<ReadingImageScaleFit>;
+  defaultReadingMode?: InputMaybe<ReadingMode>;
+  generateFileHashes?: InputMaybe<Scalars['Boolean']['input']>;
+  generateKoreaderHashes?: InputMaybe<Scalars['Boolean']['input']>;
+  hardDeleteConversions?: InputMaybe<Scalars['Boolean']['input']>;
+  hideSeriesView?: InputMaybe<Scalars['Boolean']['input']>;
+  ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
+  libraryPattern?: InputMaybe<LibraryPattern>;
+  libraryType?: InputMaybe<LibraryType>;
+  oneshotsDirectory?: InputMaybe<Scalars['String']['input']>;
+  processMetadata?: InputMaybe<Scalars['Boolean']['input']>;
+  processThumbnailColorsEvenWithoutConfig?: InputMaybe<Scalars['Boolean']['input']>;
+  skipBookOverview?: InputMaybe<Scalars['Boolean']['input']>;
+  thumbnailConfig?: InputMaybe<ImageProcessorOptionsInput>;
+  watch?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type PatchLibraryInput = {
+  config?: InputMaybe<PatchLibraryConfigInput>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  emoji?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  path?: InputMaybe<Scalars['String']['input']>;
+  scanAfterPersist?: Scalars['Boolean']['input'];
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields. */
@@ -4049,6 +4103,7 @@ export type Series = {
   id: Scalars['String']['output'];
   isComplete: Scalars['Boolean']['output'];
   isFavorite: Scalars['Boolean']['output'];
+  isOneshot: Scalars['Boolean']['output'];
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
   /** Get media in this series */
@@ -4057,6 +4112,7 @@ export type Series = {
   mediaCount: Scalars['Int']['output'];
   metadata?: Maybe<SeriesMetadata>;
   name: Scalars['String']['output'];
+  oneshotBook?: Maybe<Media>;
   path: Scalars['String']['output'];
   percentageCompleted: Scalars['Float']['output'];
   readCount: Scalars['Int']['output'];
@@ -4098,6 +4154,7 @@ export type SeriesFilterInput = {
   _and?: InputMaybe<Array<SeriesFilterInput>>;
   _not?: InputMaybe<Array<SeriesFilterInput>>;
   _or?: InputMaybe<Array<SeriesFilterInput>>;
+  isOneshot?: InputMaybe<Scalars['Boolean']['input']>;
   library?: InputMaybe<LibraryFilterInput>;
   libraryId?: InputMaybe<FieldFilterString>;
   libraryType?: InputMaybe<ComputedFilterLibraryType>;
@@ -4232,6 +4289,7 @@ export enum SeriesModelOrdering {
   DeletedAt = 'DELETED_AT',
   Description = 'DESCRIPTION',
   Id = 'ID',
+  IsOneshot = 'IS_ONESHOT',
   LibraryId = 'LIBRARY_ID',
   Name = 'NAME',
   Path = 'PATH',
@@ -6254,7 +6312,7 @@ export type RecentlyAddedSeriesQueryVariables = Exact<{
 }>;
 
 
-export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, createdAt: any, media: Array<{ __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, createdAt: any, oneshotBook?: { __typename?: 'Media', id: string } | null, media: Array<{ __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type LibraryLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6262,7 +6320,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -6292,7 +6350,7 @@ export type LibrarySeriesQueryVariables = Exact<{
 }>;
 
 
-export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, media: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, media: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, oneshotBook?: { __typename?: 'Media', id: string } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type LibrarySeriesGridQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -6302,7 +6360,7 @@ export type LibrarySeriesGridQueryVariables = Exact<{
 
 export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, skipBookOverview: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, libraryType: LibraryType, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'FitWithinResize' } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, skipBookOverview: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, libraryType: LibraryType, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, oneshotsDirectory?: string | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'FitWithinResize' } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7979,6 +8037,7 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     }
     processThumbnailColorsEvenWithoutConfig
     ignoreRules
+    oneshotsDirectory
   }
 }
     `, {"fragmentName":"LibrarySettingsConfig"}) as unknown as TypedDocumentString<LibrarySettingsConfigFragment, unknown>;
@@ -12203,6 +12262,9 @@ export const RecentlyAddedSeriesDocument = new TypedDocumentString(`
       percentageCompleted
       status
       createdAt
+      oneshotBook {
+        id
+      }
       media(take: 2, skip: 1) {
         id
         resolvedName
@@ -12276,6 +12338,9 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
       hideSeriesView
     }
     ...LibrarySettingsConfig
+    config {
+      oneshotsDirectory
+    }
   }
 }
     fragment LibrarySettingsConfig on Library {
@@ -12317,6 +12382,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     }
     processThumbnailColorsEvenWithoutConfig
     ignoreRules
+    oneshotsDirectory
   }
 }`) as unknown as TypedDocumentString<LibraryLayoutQuery, LibraryLayoutQueryVariables>;
 export const VisitLibraryDocument = new TypedDocumentString(`
@@ -12427,6 +12493,9 @@ export const LibrarySeriesDocument = new TypedDocumentString(`
             thumbhash
           }
         }
+      }
+      oneshotBook {
+        id
       }
       thumbnail {
         url

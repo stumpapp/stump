@@ -281,6 +281,11 @@
 				"description": "The path to the library as it exists on your server",
 				"placeholder": "/path/to/library"
 			},
+			"oneshotsDirectory": {
+				"label": "Oneshots directory",
+				"description": "The name of the directory where oneshots are stored, relative to the library path. If empty, oneshots will not be processed",
+				"placeholder": "_oneshots"
+			},
 			"description": {
 				"label": "Description",
 				"description": "A short description of your library",
@@ -597,6 +602,7 @@
 		"tabs": {
 			"books": "Books",
 			"series": "Series",
+			"oneshots": "One-shots",
 			"files": "Files"
 		}
 	},

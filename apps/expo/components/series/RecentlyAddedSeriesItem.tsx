@@ -65,15 +65,17 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 
 	const thumbnailData = [data.thumbnail, ...data.media.map((m) => m.thumbnail)]
 
+	// TODO(oneshots): should this just lead to oneshotBook.id? for mobile feels like it warrants
+	// a badge or something to indicate it is a oneshot?
 	return (
 		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<SeriesStackedThumbnails width={160} thumbnailData={thumbnailData} />
 
-					<View className="absolute top-0 z-20 w-full px-2.5 py-2">
+					<View className="top-0 px-2.5 py-2 absolute z-20 w-full">
 						<Text
-							className="flex-1 flex-wrap text-xl font-bold"
+							className="text-xl font-bold flex-1 flex-wrap"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,
@@ -86,7 +88,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 							{data.resolvedName}
 						</Text>
 						<Text
-							className="flex-1 flex-wrap font-medium tablet:text-base"
+							className="font-medium tablet:text-base flex-1 flex-wrap"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,

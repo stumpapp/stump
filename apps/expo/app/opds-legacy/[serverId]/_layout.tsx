@@ -6,7 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ServerErrorBoundary } from '~/components/error'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { getOPDSInstance } from '~/lib/sdk/auth'
-import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
+import {
+	ActiveServerProvider,
+	useActiveServer,
+	useUrlSwitch,
+} from '~/providers/ActiveServerProvider'
 import { OPDSLegacyFeedProvider } from '~/providers/OPDSLegacyFeedProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
@@ -49,6 +53,8 @@ function Screen() {
 
 	// eslint-disable-next-line react-hooks/refs
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
+
+	useUrlSwitch({ url: effectiveServerUrl, setSDK })
 
 	useEffect(() => {
 		const configureSDK = async () => {

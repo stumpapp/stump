@@ -1,4 +1,15 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { queryClient } from '@stump/client'
+import { Api } from '@stump/sdk'
+import {
+	createContext,
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 import { useDebounce } from 'rooks'
 
 import { SavedServer } from '~/stores/savedServer'
@@ -18,12 +29,15 @@ type ActiveServerProviderProps = {
 }
 
 export function ActiveServerProvider({ children, activeServer }: ActiveServerProviderProps) {
-	const { ssid, permissionStatus } = useWifiSsid()
-
-	const [effectiveServerUrl, setEffectiveServerUrl] = useState<string | null>(null)
+	const { ssid, permissionStatus, isLoading } = useWifiSsid()
 
 	const localProfile = activeServer.localProfile
 	const isAutoSwitchEnabled = activeServer.autoSwitchToLocal && localProfile != null
+
+	const [effectiveServerUrl, setEffectiveServerUrl] = useState<string | null>(
+		// if auto-switch is disabled there is no point in waiting for ssid eval
+		isAutoSwitchEnabled ? null : activeServer.url,
+	)
 
 	const evaluateSsidAndSwitchUrl = useCallback(() => {
 		const shouldUseLocal =
@@ -33,21 +47,48 @@ export function ActiveServerProvider({ children, activeServer }: ActiveServerPro
 
 	const debouncedEvaluateSsidAndSwitchUrl = useDebounce(evaluateSsidAndSwitchUrl, 500)
 
+	const hasEvaluatedOnce = useRef(false)
 	const lastSsid = useRef<string | null>(null)
+
 	useEffect(() => {
-		if (permissionStatus !== 'granted') return
-		if (ssid === lastSsid.current) return
+		if (!isAutoSwitchEnabled || isLoading) return
+
+		// if enabled but lacking permission, no point evaluating
+		if (permissionStatus !== 'granted') {
+			setEffectiveServerUrl(activeServer.url)
+			return
+		}
+
+		// no change since last eval = no subsequent eval
+		if (hasEvaluatedOnce.current && ssid === lastSsid.current) return
 
 		lastSsid.current = ssid
-		debouncedEvaluateSsidAndSwitchUrl()
-		// TODO: need localProfile?.url in deps? im sussed by it potentially not handling config change well
-	}, [permissionStatus, ssid, debouncedEvaluateSsidAndSwitchUrl])
+
+		if (!hasEvaluatedOnce.current) {
+			hasEvaluatedOnce.current = true
+			evaluateSsidAndSwitchUrl() // no debounce on first eval, switch asap
+		} else {
+			debouncedEvaluateSsidAndSwitchUrl()
+		}
+	}, [
+		isAutoSwitchEnabled,
+		isLoading,
+		permissionStatus,
+		ssid,
+		evaluateSsidAndSwitchUrl,
+		debouncedEvaluateSsidAndSwitchUrl,
+		activeServer.url,
+	])
+
+	if (effectiveServerUrl === null) {
+		return null
+	}
 
 	return (
 		<ActiveServerContext.Provider
 			value={{
 				activeServer,
-				effectiveServerUrl: effectiveServerUrl ?? activeServer.url,
+				effectiveServerUrl,
 			}}
 		>
 			{children}
@@ -73,3 +114,27 @@ export const useServerUrl = () => {
  * Pretty much just used for features that persist across servers (e.g., downloads)
  */
 export const useActiveServerSafe = () => useContext(ActiveServerContext)
+
+type UseUrlSwitchParams = {
+	url: string
+	setSDK: Dispatch<SetStateAction<Api | null>>
+}
+
+/**
+ * watches `url` for changes after the initial render and, when it changes,
+ * cancels any active react-query requests and calls `sdk.switchUrl` so the
+ * existing instance is re-pointed at the new url
+ */
+export function useUrlSwitch({ url, setSDK }: UseUrlSwitchParams) {
+	const previousUrl = useRef(url)
+
+	useEffect(() => {
+		if (previousUrl.current === url) return
+		previousUrl.current = url
+		queryClient.cancelQueries()
+		setSDK((curr) => {
+			curr?.switchUrl(url)
+			return curr
+		})
+	}, [url, setSDK])
+}

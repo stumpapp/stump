@@ -1,0 +1,75 @@
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useDebounce } from 'rooks'
+
+import { SavedServer } from '~/stores/savedServer'
+
+import { useWifiSsid } from './WifiSsidProvider'
+
+export type IActiveServerContext = {
+	activeServer: SavedServer
+	effectiveServerUrl: string
+}
+
+export const ActiveServerContext = createContext<IActiveServerContext | undefined>(undefined)
+
+type ActiveServerProviderProps = {
+	children: React.ReactNode
+	activeServer: SavedServer
+}
+
+export function ActiveServerProvider({ children, activeServer }: ActiveServerProviderProps) {
+	const { ssid, permissionStatus } = useWifiSsid()
+
+	const [effectiveServerUrl, setEffectiveServerUrl] = useState<string | null>(null)
+
+	const localProfile = activeServer.localProfile
+	const isAutoSwitchEnabled = activeServer.autoSwitchToLocal && localProfile != null
+
+	const evaluateSsidAndSwitchUrl = useCallback(() => {
+		const shouldUseLocal =
+			isAutoSwitchEnabled && localProfile != null && ssid != null && localProfile.ssid === ssid
+		setEffectiveServerUrl(shouldUseLocal ? localProfile.url : activeServer.url)
+	}, [ssid, isAutoSwitchEnabled, localProfile, activeServer.url])
+
+	const debouncedEvaluateSsidAndSwitchUrl = useDebounce(evaluateSsidAndSwitchUrl, 500)
+
+	const lastSsid = useRef<string | null>(null)
+	useEffect(() => {
+		if (permissionStatus !== 'granted') return
+		if (ssid === lastSsid.current) return
+
+		lastSsid.current = ssid
+		debouncedEvaluateSsidAndSwitchUrl()
+		// TODO: need localProfile?.url in deps? im sussed by it potentially not handling config change well
+	}, [permissionStatus, ssid, debouncedEvaluateSsidAndSwitchUrl])
+
+	return (
+		<ActiveServerContext.Provider
+			value={{
+				activeServer,
+				effectiveServerUrl: effectiveServerUrl ?? activeServer.url,
+			}}
+		>
+			{children}
+		</ActiveServerContext.Provider>
+	)
+}
+
+export const useActiveServer = () => {
+	const context = useContext(ActiveServerContext)
+	if (!context) {
+		throw new Error('useActiveServer must be used within a ActiveServerProvider')
+	}
+	return context
+}
+
+export const useServerUrl = () => {
+	const { effectiveServerUrl } = useActiveServer()
+	return effectiveServerUrl
+}
+
+/**
+ * Safe variant of useActiveServer that returns undefined if there's no active server
+ * Pretty much just used for features that persist across servers (e.g., downloads)
+ */
+export const useActiveServerSafe = () => useContext(ActiveServerContext)

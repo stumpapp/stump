@@ -7,10 +7,10 @@ import { toast } from 'sonner-native'
 
 import { executePullAnnotationsSync } from '~/backgroundTasks/pullServerAnnotations'
 import { executePushAnnotationsSync } from '~/backgroundTasks/pushLocalAnnotations'
-import { useActiveServer } from '~/components/activeServer'
 import { annotations, db, downloadedFiles, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
 import { ReadiumLocator } from '~/modules/readium'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { PushSyncParams, SyncParams } from './types'
 import { useServerInstances } from './utils'

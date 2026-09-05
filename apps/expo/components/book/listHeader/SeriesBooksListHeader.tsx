@@ -5,10 +5,10 @@ import { DownloadCloud, Info, ScanLine } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Alert } from 'react-native'
 
-import { useStumpServer } from '~/components/activeServer'
 import { useEntityListHeader } from '~/components/filter/EntityListHeader'
 import { ActionDef } from '~/components/filter/types'
 import { MiniEntityStatCards } from '~/components/stats'
+import { useStumpServer } from '~/providers/StumpServerProvider'
 
 import { useBooksFilterMenu } from './BooksFilterMenu'
 import { useSeriesBooksSortAndDisplayMenu } from './SeriesBooksSortAndDisplayMenu'

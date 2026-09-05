@@ -5,7 +5,7 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
-import { useDownload } from '~/lib/hooks'
+import { Timer, useDownload } from '~/lib/hooks'
 import {
 	intoPDFReadiumLocator,
 	PDFBookLoadedEvent,
@@ -18,7 +18,7 @@ import {
 import { useVolumeListener } from '~/modules/volumeListener'
 import { useReaderStore } from '~/stores'
 import { usePdfStore } from '~/stores/pdf'
-import { Timer, useBookPreferences } from '~/stores/reader'
+import { useBookPreferences } from '~/stores/reader'
 
 import { ReaderBookRef } from '../image/context'
 import { ControlsBackdrop } from '../shared'
@@ -189,6 +189,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				setLocalUri(null)
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)
@@ -197,6 +198,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		() => {
 			store.storeBook(book)
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.id],
 	)

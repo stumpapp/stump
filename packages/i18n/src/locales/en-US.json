@@ -281,6 +281,11 @@
 				"description": "The path to the library as it exists on your server",
 				"placeholder": "/path/to/library"
 			},
+			"oneshotsDirectory": {
+				"label": "Oneshots directory",
+				"description": "The name of the directory where oneshots are stored, relative to the library path. If empty, oneshots will not be processed",
+				"placeholder": "_oneshots"
+			},
 			"description": {
 				"label": "Description",
 				"description": "A short description of your library",
@@ -597,6 +602,7 @@
 		"tabs": {
 			"books": "Books",
 			"series": "Series",
+			"oneshots": "One-shots",
 			"files": "Files"
 		}
 	},
@@ -2738,6 +2744,7 @@
 		"remove": "Remove",
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
+		"notConfigured": "Not configured",
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
@@ -2918,14 +2925,9 @@
 	},
 	"mobileApp": {
 		"addOrEditServer": {
-			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
-			},
-			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
-			},
+			"createServer": "Create Server",
+			"updateServer": "Update Server",
+			"basicInfo": "Basic Info",
 			"kind": "Kind",
 			"customHeaders": {
 				"label": "Custom Headers",
@@ -2933,7 +2935,8 @@
 				"invalidHeader": "Invalid header"
 			},
 			"auth": {
-				"label": "Auth",
+				"section": "Authentication",
+				"method": "Method",
 				"login": {
 					"label": "Login",
 					"description": "You will be prompted to login when accessing content as needed"
@@ -2950,13 +2953,68 @@
 			},
 			"serverNamePlaceholder": "My Server",
 			"catalogUrl": "Catalog URL",
+			"primaryUrl": "Primary URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
 			"checkConnection": "Check Connection",
+			"optionalSettings": "Optional Settings",
 			"setAsDefaultServer": "Set as Default Server",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
 				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+			},
+			"networking": "Networking",
+			"advancedOptions": "Advanced Options"
+		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "Configuration",
+				"networkSettings": "Network Settings"
+			}
+		},
+		"serverNetworkSettings":{
+			"activeProfile": {
+				"label": "Active Profile",
+				"localIsActive": "Local profile is active",
+				"primaryIsActive": "Primary profile is active",
+				"autoSwitchToLocalDidNotWork": "The app was unable to switch to the active profile. Please check your network connection"
+			},
+			"localProfile": "Local Profile",
+			"primaryUrl": "Primary URL",
+			"autoSwitchToLocal": {
+				"label": "Auto-switch to local profile",
+				"description": "Switch to the local profile when able"
+			},
+			"localUrl": "Local URL",
+			"saveUrlChanges": "Save URL Changes",
+			"swapUrls": {
+				"label": "Swap URLs",
+				"swap": "Swap",
+				"confirmationText": "Are you sure you want to swap the remote and local URLs? This will take effect immediately",
+				"noLocalUrlSet": {
+					"title": "No local URL set",
+					"description": "You need to set a local URL before you can swap it to the remote URL"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Wifi Network",
+				"noAssociatedNetwork": "No Associated Wifi Network",
+				"notConnectedToWifi": "You are not connected to wifi. Please connect to a local network to finish setting up the local profile",
+				"connectedTip": "If the current network is not listed, you might need to give Stump permission to access your location",
+				"addNetwork": "Add \"{{ssid}}\"",
+				"permissionNotGranted": {
+					"label": "Permissions Not Granted",
+					"description": "You need to grant location permission to access the active wifi network"
+				},
+				"permissionFailedToBeGranted":{
+					"title": "Location Permission Failed",
+					"description": "The app failed to get permissions to access your location. Please check your device settings and try again"
+				},
+				"requestPermission": "Request Location Permission",
+				"removeWifi": {
+					"label": "Remove",
+					"confirmationText": "Are you sure you want to remove the '{{ssid}}' network from the local profile?"
+				}
 			}
 		},
 		"bookActions": {
@@ -3005,7 +3063,8 @@
 			"links": "Links",
 			"year": "Year",
 			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"identifiers": "Identifiers",
+			"issue": "Issue"
 		},
 		"common": {
 			"book": "Book",
@@ -3027,6 +3086,7 @@
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
+			"exit": "Exit",
 			"favorite": "Favorite",
 			"finished": "Finished",
 			"grid": "Grid",
@@ -3035,6 +3095,7 @@
 			"name": "Name",
 			"none": "None",
 			"notAvailable": "Not Available",
+			"notConfigured": "Not configured",
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",
@@ -3054,6 +3115,7 @@
 			"select": "Select",
 			"settings": "Settings",
 			"servers": "Servers",
+			"test": "Test",
 			"thisBook": "this book",
 			"thisServer": "this server",
 			"unknown": "Unknown",
@@ -3310,6 +3372,7 @@
 				"label": "Management",
 				"dataUsage": {
 					"label": "Data Usage",
+					"noServersAdded": "No Servers Added",
 					"nonStumpData": "Non-Stump Data",
 					"serversTotal": "Servers Total",
 					"totalFiles": "Total Files",
@@ -3367,7 +3430,8 @@
 				"debugAnalytics": {
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
-				}
+				},
+				"maskUrls": "Mask URLs"
 			},
 			"contactInfo": {
 				"label": "Contact",

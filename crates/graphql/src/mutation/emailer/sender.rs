@@ -422,6 +422,7 @@ mod tests {
 			deleted_at: None,
 			thumbnail_meta: None,
 			thumbnail_path: None,
+			is_oneshot: false,
 		}
 	}
 

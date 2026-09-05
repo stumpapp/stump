@@ -48,6 +48,7 @@ const LibrarySeriesCard = memo(function LibrarySeriesCard({ data }: Props) {
 					isMissing={data.status === 'MISSING'}
 					width={width}
 					thumbnailData={thumbnailData}
+					oneshotBookId={data.oneshotBook?.id}
 				/>
 			)}
 		</div>

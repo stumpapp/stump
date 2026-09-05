@@ -1,0 +1,211 @@
+import { useSDK } from '@stump/client'
+import { eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
+import { useKeepAwake } from 'expo-keep-awake'
+import * as NavigationBar from 'expo-navigation-bar'
+import { useLocalSearchParams } from 'expo-router'
+import { useCallback, useEffect, useMemo } from 'react'
+
+import { ImageBasedReader } from '~/components/book/reader'
+import { ImageReaderBookRef } from '~/components/book/reader/image/context'
+import { db, downloadedFiles, readProgress, syncStatus } from '~/db'
+import { useReadingTimer } from '~/lib/hooks'
+import { useResolveURL } from '~/lib/opds/utils'
+import { OPDSLegacyStreamingData } from '~/lib/opdsLegacy/streaming'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useReaderStore } from '~/stores'
+import { useBookPreferences } from '~/stores/reader'
+
+type Params = Omit<OPDSLegacyStreamingData, 'pageCount' | 'serverLastRead'> & {
+	pageCount: string // conform to Route params, reqs being a string
+	serverLastRead?: string
+}
+
+export default function Screen() {
+	useKeepAwake()
+
+	const params = useLocalSearchParams<Params>()
+
+	const contextValue = useMemo(
+		() => ({
+			...params,
+			pageCount: getValidNumber(params.pageCount),
+			serverLastRead: getPositiveNumber(params.serverLastRead),
+		}),
+		[params],
+	)
+
+	const { sdk } = useSDK()
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
+	const {
+		data: [record],
+		updatedAt,
+	} = useLiveQuery(
+		db
+			.select()
+			.from(downloadedFiles)
+			.where(eq(downloadedFiles.id, params.entryId))
+			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
+			.limit(1),
+		[params.entryId],
+	)
+	const isLoadingRecord = updatedAt == null
+
+	const resolveUrl = useResolveURL()
+
+	/**
+	 * Get the streaming URL for a specific page
+	 *
+	 * @param pageNumber 1-based page
+	 * @returns streaming URL for the page
+	 * @throws Error if the streaming URL format is unsupported or the URL is not valid
+	 */
+	const getStreamURLForPage = useCallback(
+		(pageNumber: number) => {
+			const streamingURL = resolveUrl(contextValue.streamingURL)
+
+			const urlObj = new URL(streamingURL)
+			const zeroBasedParam =
+				urlObj.searchParams.get('zero_based') || urlObj.searchParams.get('zeroBased')
+			const isZeroBased = zeroBasedParam === 'true'
+			const actualPageNumber = isZeroBased ? pageNumber - 1 : pageNumber
+
+			if (streamingURL.includes('{pageNumber}')) {
+				return streamingURL.replace('{pageNumber}', actualPageNumber.toString())
+			} else {
+				throw new Error('Unsupported streaming URL format')
+			}
+		},
+		[resolveUrl, contextValue.streamingURL],
+	)
+
+	const book = useMemo(
+		() =>
+			({
+				id: contextValue.entryId,
+				name: contextValue.entryTitle,
+				pages: contextValue.pageCount,
+				nextInSeries: { nodes: [] },
+				thumbnail: {
+					url: getStreamURLForPage(1),
+				},
+				extension: 'unknown',
+			}) satisfies ImageReaderBookRef,
+		[contextValue, getStreamURLForPage],
+	)
+
+	const {
+		preferences: { trackElapsedTime },
+	} = useBookPreferences({ book })
+
+	const initialPage = contextValue.serverLastRead ?? 1
+
+	const timer = useReadingTimer({
+		databaseSeconds: record?.read_progress?.elapsedSeconds,
+		enabled: trackElapsedTime,
+	})
+
+	const onPageChanged = useCallback(
+		async (pageNumber: number) => {
+			if (isLoadingRecord || !record) return
+			timer.popDeltaSeconds()
+			const totalSeconds = timer.getTotalSeconds()
+
+			return db
+				.insert(readProgress)
+				.values({
+					bookId: record.downloaded_files.id,
+					serverId: record.downloaded_files.serverId,
+					page: pageNumber,
+					elapsedSeconds: totalSeconds,
+					lastModified: new Date(),
+				})
+				.onConflictDoUpdate({
+					target: readProgress.bookId,
+					set: {
+						page: pageNumber,
+						elapsedSeconds: totalSeconds,
+						lastModified: new Date(),
+						syncStatus: syncStatus.enum.UNSYNCED,
+					},
+				})
+		},
+		[isLoadingRecord, record, timer],
+	)
+
+	const resetTimer = useCallback(() => {
+		db.insert(readProgress)
+			.values({
+				bookId: book.id,
+				elapsedSeconds: 0,
+				lastModified: new Date(),
+				serverId,
+			})
+			.onConflictDoUpdate({
+				target: readProgress.bookId,
+				set: {
+					elapsedSeconds: 0,
+					lastModified: new Date(),
+				},
+			})
+		timer.clearTotalSeconds()
+	}, [book.id, serverId, timer])
+
+	const setIsReading = useReaderStore((state) => state.setIsReading)
+	const setShowControls = useReaderStore((state) => state.setShowControls)
+
+	useEffect(() => {
+		setIsReading(true)
+		return () => {
+			setIsReading(false)
+		}
+	}, [setIsReading])
+
+	useEffect(() => {
+		return () => {
+			setShowControls(false)
+		}
+	}, [setShowControls])
+
+	const requestHeaders = useCallback(
+		() => ({
+			...sdk.customHeaders,
+			Authorization: sdk.authorizationHeader || '',
+		}),
+		[sdk],
+	)
+
+	useEffect(() => {
+		NavigationBar.setVisibilityAsync('hidden')
+		return () => {
+			NavigationBar.setVisibilityAsync('visible')
+		}
+	}, [])
+
+	return (
+		<ImageBasedReader
+			serverId={serverId}
+			initialPage={initialPage}
+			book={book}
+			pageURL={getStreamURLForPage}
+			requestHeaders={requestHeaders}
+			timer={timer}
+			resetTimer={resetTimer}
+			onPageChanged={onPageChanged}
+			isOPDS
+		/>
+	)
+}
+
+const getValidNumber = (value: string) => {
+	const parsed = parseInt(value, 10)
+	return isNaN(parsed) ? -1 : parsed
+}
+
+const getPositiveNumber = (value: string | undefined): number | undefined => {
+	if (value == null) return undefined
+	const parsed = parseInt(value, 10)
+	return isNaN(parsed) || parsed <= 0 ? undefined : parsed
+}

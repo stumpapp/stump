@@ -19,4 +19,5 @@ export type HeaderButtonProps = {
 	onPress?: () => void
 	disabled?: boolean
 	style?: StyleProp<ViewStyle>
+	className?: string
 }

@@ -17,6 +17,14 @@ use crate::{
 pub mod error;
 mod zip;
 
+/// A struct representing the dimensions and content type of a single analyzed page
+#[derive(Debug, Clone)]
+pub struct AnalyzedPage {
+	pub width: u32,
+	pub height: u32,
+	pub content_type: ContentType,
+}
+
 /// A struct representing the options for processing a media file. This is a subset of [`LibraryConfig`]
 /// and is used to pass options to the [`MediaProcessor`] implementations.
 #[derive(Debug, Default, Clone, Copy)]
@@ -103,13 +111,13 @@ pub trait MediaProcessor {
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, MediaProcessorError>;
 
-	// Analyze a page to get its dimensions and content type. This is optimized to read
-	// only the minimum bytes necessary to determine the image dimensions
-	// fn analyze_page(
-	// 	&self,
-	// 	path: &str,
-	// 	page: i32,
-	// ) -> Result<AnalyzedPage, MediaProcessorError>;
+	/// Analyze a page to get its dimensions and content type. This is optimized to read
+	/// only the minimum bytes necessary to determine the image dimensions from its header.
+	fn analyze_page(
+		&self,
+		path: &Path,
+		page: i32,
+	) -> Result<AnalyzedPage, MediaProcessorError>;
 }
 
 async fn get_processor(path: &Path) -> Result<impl MediaProcessor, MediaProcessorError> {
@@ -220,6 +228,16 @@ pub async fn get_content_type_for_page(
 		.get(&page)
 		.cloned()
 		.unwrap_or(ContentType::UNKNOWN))
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn analyze_page(
+	path: impl AsRef<Path>,
+	page: i32,
+) -> Result<AnalyzedPage, MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = get_processor(&path).await?;
+	spawn_blocking(move || processor.analyze_page(&path, page)).await?
 }
 
 #[cfg(test)]

@@ -66,13 +66,13 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 			>
-				<Animated.ScrollView
-					className="p-6 flex-1"
-					contentContainerStyle={{ alignItems: 'flex-start' }}
-					nestedScrollEnabled
-					style={animatedScrollViewStyle}
-				>
-					<PortalHostProvider name={Platform.OS === 'android' ? 'imageReaderSettings' : undefined}>
+				<PortalHostProvider name={Platform.OS === 'android' ? 'imageReaderSettings' : undefined}>
+					<Animated.ScrollView
+						className="p-6 flex-1"
+						contentContainerStyle={{ alignItems: 'flex-start' }}
+						nestedScrollEnabled
+						style={animatedScrollViewStyle}
+					>
 						<View className="gap-8 w-full flex-1">
 							<View className="flex flex-row items-center justify-between">
 								<Heading size="lg">{t('common.settings')}</Heading>
@@ -103,8 +103,8 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 									: {})}
 							/>
 						</View>
-					</PortalHostProvider>
-				</Animated.ScrollView>
+					</Animated.ScrollView>
+				</PortalHostProvider>
 			</TrueSheet>
 
 			<SheetBackDetection ref={ref} isOpen={isOpen} />

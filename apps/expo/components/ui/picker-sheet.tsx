@@ -48,8 +48,8 @@ export function PickerSheet<T extends string = string>({
 				<View className={cn('gap-2 flex-row items-center justify-between', className)}>
 					<Text
 						className={cn(
-							'text-lg font-normal text-foreground-muted',
-							!selectedOption && 'text-foreground-subtle',
+							'text-lg font-normal text-foreground',
+							!selectedOption && 'text-foreground-muted',
 						)}
 					>
 						{selectedOption?.label ?? placeholder}

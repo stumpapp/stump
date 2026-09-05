@@ -5,7 +5,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import OPDSAuthDialog from '~/components/opds/OPDSAuthDialog'
 import { getOPDSInstance } from '~/lib/sdk/auth'
-import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
+import {
+	ActiveServerProvider,
+	useActiveServer,
+	useUrlSwitch,
+} from '~/providers/ActiveServerProvider'
 import { OPDSFeedProvider } from '~/providers/OPDSFeedProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
@@ -35,7 +39,7 @@ function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	const { getServerConfig } = useSavedServers()
-	const { activeServer } = useActiveServer()
+	const { activeServer, effectiveServerUrl } = useActiveServer()
 
 	const cachedInstance = useRef(useCacheStore((state) => state.sdks[`${activeServer.id}-opds`]))
 	const addInstanceToCache = useCacheStore((state) => state.addSDK)
@@ -45,15 +49,17 @@ function Screen() {
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
 	const [pendingAuthDoc, setPendingAuthDoc] = useState<OPDSAuthenticationDocument | null>(null)
 
+	useUrlSwitch({ url: effectiveServerUrl, setSDK })
+
 	useEffect(() => {
 		const configureSDK = async () => {
-			const { id, url, kind } = activeServer
+			const { id, kind } = activeServer
 
 			const config = await getServerConfig(id)
 			const instance = await getOPDSInstance({
 				config,
 				serverKind: kind,
-				url,
+				url: effectiveServerUrl,
 			})
 			setSDK(instance)
 			addInstanceToCache(`${id}-opds`, instance)
@@ -62,7 +68,7 @@ function Screen() {
 		if (!sdk) {
 			configureSDK()
 		}
-	}, [activeServer, sdk, getServerConfig, addInstanceToCache])
+	}, [activeServer, effectiveServerUrl, sdk, getServerConfig, addInstanceToCache])
 
 	const onAuthError = useCallback(
 		(_: string | undefined, data: unknown) => {

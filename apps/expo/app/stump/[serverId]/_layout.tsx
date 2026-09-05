@@ -16,7 +16,11 @@ import { ServerConnectFailed, ServerErrorBoundary } from '~/components/error'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import { FullScreenLoader } from '~/components/ui'
 import { authSDKInstance } from '~/lib/sdk/auth'
-import { ActiveServerProvider, useActiveServer } from '~/providers/ActiveServerProvider'
+import {
+	ActiveServerProvider,
+	useActiveServer,
+	useUrlSwitch,
+} from '~/providers/ActiveServerProvider'
 import { StumpServerProvider } from '~/providers/StumpServerProvider'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
@@ -69,6 +73,8 @@ function Screen() {
 	const [fatalError, setFatalError] = useState<Error | null>(null)
 
 	const isServerAccessible = useRef(true)
+
+	useUrlSwitch({ url: effectiveServerUrl, setSDK })
 
 	useEffect(() => {
 		if (isAutoAuthenticating || !isServerAccessible.current) return

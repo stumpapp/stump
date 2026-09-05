@@ -18,6 +18,10 @@ export type UseWifiSSIDReturn = {
 	connectedToWifi: boolean
 	permissionStatus: PermissionStatus
 	requestPermission: () => Promise<boolean>
+	/**
+	 * will be `true` during the initial permission check **and** the first ssid fetch, so
+	 * consumers know whether to wait before acting on ssid value
+	 */
 	isLoading: boolean
 }
 
@@ -67,10 +71,15 @@ export function WifiSsidProvider({ children }: Props): React.ReactElement {
 				const { status } = await Location.getForegroundPermissionsAsync()
 				if (cancelled) return
 				setPermissionStatus(status)
+				if (status !== PermissionStatus.GRANTED) {
+					setIsLoading(false)
+				}
 			} catch {
-				if (!cancelled) setPermissionStatus(PermissionStatus.UNDETERMINED)
+				if (!cancelled) {
+					setPermissionStatus(PermissionStatus.UNDETERMINED)
+					setIsLoading(false)
+				}
 			}
-			if (!cancelled) setIsLoading(false)
 		}
 
 		initialize()
@@ -82,9 +91,26 @@ export function WifiSsidProvider({ children }: Props): React.ReactElement {
 	// fetch the ssid immediately, then poll, whenever permission is granted
 	useEffect(() => {
 		if (permissionStatus !== PermissionStatus.GRANTED) return
-		fetchSSID()
+
+		let cancelled = false
+
+		const doInitialFetch = async () => {
+			try {
+				await fetchSSID()
+			} catch (error) {
+				console.error('initial SSID fetch failed:', error)
+			} finally {
+				if (!cancelled) setIsLoading(false)
+			}
+		}
+
+		doInitialFetch()
 		const interval = setInterval(fetchSSID, POLL_INTERVAL_MS)
-		return () => clearInterval(interval)
+
+		return () => {
+			cancelled = true
+			clearInterval(interval)
+		}
 	}, [permissionStatus, fetchSSID])
 
 	const value = useMemo(

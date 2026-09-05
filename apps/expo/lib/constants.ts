@@ -114,6 +114,7 @@ export const STAT_COLORS = Object.fromEntries(
 ) as { [K in keyof typeof STAT_HUES]: StatColorPalette }
 
 // TODO: android-specific tab bar color
+// TODO: i need to adjust the semantic tokens, e.g. fill.danger
 
 const light = {
 	background: {

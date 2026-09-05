@@ -1,6 +1,6 @@
 {
 	"name": "@stump/monorepo",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "SEE README.md",
@@ -34,7 +34,8 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn expo dev\"",
 		"format": "lerna run format --stream --parallel",
 		"release": "node scripts/release/bump-version.mjs",
-		"clean": "lerna run clean"
+		"clean": "lerna run clean",
+		"graphql": "lerna run --scope @stump/graphql"
 	},
 	"devDependencies": {
 		"@0no-co/graphqlsp": "^1.15.4",

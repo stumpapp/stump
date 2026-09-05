@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics'
 import { Minus, Plus } from 'lucide-react-native'
 import { useCallback } from 'react'
 import { Pressable, PressableProps, View } from 'react-native'
+import { Platform } from 'react-native'
 
 import { cn } from '~/lib/utils'
 
@@ -19,6 +20,14 @@ type StepperProps = {
 	formatValue?: (value: number) => string
 	className?: string
 	accessibilityLabel?: string
+}
+
+const performHaptics = () => {
+	if (Platform.OS === 'android') {
+		Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+	} else {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+	}
 }
 
 export function Stepper({
@@ -39,14 +48,14 @@ export function Stepper({
 	const handleDecrement = useCallback(() => {
 		if (!canDecrement) return
 		const newValue = Math.max(min, value - step)
-		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+		performHaptics()
 		onChange(newValue)
 	}, [canDecrement, min, value, step, onChange])
 
 	const handleIncrement = useCallback(() => {
 		if (!canIncrement) return
 		const newValue = Math.min(max, value + step)
-		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+		performHaptics()
 		onChange(newValue)
 	}, [canIncrement, max, value, step, onChange])
 
@@ -54,7 +63,7 @@ export function Stepper({
 
 	return (
 		<View
-			className={cn('flex-row items-center justify-between gap-2', className)}
+			className={cn('gap-2 flex-row items-center justify-between', className)}
 			accessibilityLabel={accessibilityLabel}
 			accessibilityRole="adjustable"
 			accessibilityValue={{

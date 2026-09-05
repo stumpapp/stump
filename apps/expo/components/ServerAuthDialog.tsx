@@ -12,9 +12,9 @@ import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
 import { startOidcLogin } from '~/lib/sdk/auth'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useUserStore } from '~/stores'
 
-import { useActiveServer } from './activeServer'
 import { Button, Input, Text } from './ui'
 import { Icon } from './ui/icon'
 

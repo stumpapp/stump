@@ -1,16 +1,14 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { Alert, ScrollView, View } from 'react-native'
+import { Alert, View } from 'react-native'
 
-import { SheetBackDetection } from '~/components/SheetBackDetection'
+import SheetWithHeader from '~/components/SheetWithHeader'
 import { Button, Text } from '~/components/ui'
-import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
-import { cn } from '~/lib/utils'
+import { useColors } from '~/lib/constants'
 import { Decoration } from '~/modules/readium'
 
 import AnnotatedText from './AnnotatedText'
 import AnnotationInput from './AnnotationInput'
-import AnnotationSheetHeader from './AnnotationSheetHeader'
 
 export type UpdateAnnotationSheetRef = {
 	open: (decoration: Decoration) => void
@@ -28,8 +26,6 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 		const [decoration, setDecoration] = useState<Decoration | null>(null)
 		const [annotation, setAnnotation] = useState('')
 		const [isDirty, setIsDirty] = useState(false)
-		const [isOpen, setIsOpen] = useState(false)
-		const [naturalDetent, setNaturalDetent] = useState<number>(0)
 
 		const colors = useColors()
 
@@ -69,70 +65,43 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 		}, [decoration, onDelete])
 
 		const handleDismiss = useCallback(() => {
-			setIsOpen(false)
 			if (isDirty && decoration && annotation !== (decoration.annotationText ?? '')) {
 				onAnnotationChange(decoration.id, annotation.trim() || undefined)
 			}
 			setDecoration(null)
 			setIsDirty(false)
-			setNaturalDetent(0)
 		}, [isDirty, decoration, annotation, onAnnotationChange])
 
 		const highlightedText = decoration?.locator?.text?.highlight
 
 		return (
-			<>
-				<TrueSheet
-					ref={sheetRef}
-					detents={['auto']}
-					grabber
-					backgroundColor={colors.sheet.background}
-					grabberOptions={{
-						color: colors.sheet.grabber,
-					}}
-					onDidPresent={(e) => {
-						setIsOpen(true)
-						setNaturalDetent(e.nativeEvent.detent)
-					}}
-					onDidDismiss={handleDismiss}
-					header={
-						<AnnotationSheetHeader
-							title="Edit Annotation"
-							onClose={() => sheetRef.current?.dismiss()}
-							onPrimaryAction={handleSaveAnnotation}
-						/>
-					}
-					scrollable={naturalDetent >= 1}
-					headerStyle={
-						IS_IOS_26_PLUS ? { position: 'absolute', left: 0, right: 0, zIndex: 1 } : undefined
-					}
-					scrollableOptions={{ topScrollEdgeEffect: 'soft' }}
-				>
-					<ScrollView
-						className={cn('p-4', IS_IOS_26_PLUS && 'pt-20')}
-						scrollEnabled={naturalDetent >= 1}
-					>
-						<View className="gap-4">
-							{highlightedText && <AnnotatedText text={highlightedText} />}
+			<SheetWithHeader
+				ref={sheetRef}
+				detents={[0.5, 1]}
+				scrollable
+				backgroundColor={colors.sheet.background}
+				onDidDismiss={handleDismiss}
+				headerLabel="Edit Annotation"
+				headerLeftButton={{ type: 'dismiss' }}
+				headerRightButton={{ type: 'check', onPress: handleSaveAnnotation }}
+			>
+				<View className="gap-4">
+					{highlightedText && <AnnotatedText text={highlightedText} />}
 
-							<AnnotationInput
-								value={annotation}
-								onChangeText={(text) => {
-									setAnnotation(text)
-									setIsDirty(true)
-								}}
-							/>
+					<AnnotationInput
+						value={annotation}
+						onChangeText={(text) => {
+							setAnnotation(text)
+							setIsDirty(true)
+						}}
+					/>
 
-							{/* TODO: Probably look better as joined button with primary action, however too lazy for that now */}
-							<Button variant="destructive" onPress={handleDelete} roundness="full">
-								<Text>Delete</Text>
-							</Button>
-						</View>
-					</ScrollView>
-				</TrueSheet>
-
-				<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
-			</>
+					{/* TODO: Probably look better as joined button with primary action, however too lazy for that now */}
+					<Button variant="destructive" onPress={handleDelete} roundness="full">
+						<Text>Delete</Text>
+					</Button>
+				</View>
+			</SheetWithHeader>
 		)
 	},
 )

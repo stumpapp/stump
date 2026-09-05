@@ -8,8 +8,8 @@ import { easeGradient } from 'react-native-easing-gradient'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { COLORS } from '~/lib/constants'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
@@ -90,7 +90,7 @@ function OnDeckBookItem({ book }: Props) {
 	)
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<ThumbnailImage

@@ -194,6 +194,7 @@ export const buildSchema = (
 					return
 				}
 			}),
+		oneshotsDirectory: z.string().nullish(), // will be relative to path, if provided
 		processMetadata: z.boolean().default(true),
 		scanAfterPersist: z.boolean().default(true),
 		tags: z
@@ -234,6 +235,7 @@ export const formDefaults = (
 	libraryType: library?.config.libraryType || LibraryType.Mixed,
 	name: library?.name || '',
 	path: library?.path || '',
+	oneshotsDirectory: library?.config.oneshotsDirectory || null,
 	processMetadata: library?.config.processMetadata ?? true,
 	scanAfterPersist: true,
 	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),

@@ -108,7 +108,7 @@ export default function ReadiumFooter() {
 				</Pressable>
 			)}
 
-			<View className="inset-x-safe mt-2 h-12 items-center justify-center">
+			<View className="mx-safe-or-6 mt-2 h-12 items-center justify-center">
 				<View
 					className="bottom-16 right-4 gap-2 w-80 absolute z-40 flex-col items-end"
 					pointerEvents={showMenu ? 'auto' : 'none'}
@@ -164,7 +164,7 @@ export default function ReadiumFooter() {
 					<Animated.View
 						entering={ENTERING_ANIMATION}
 						exiting={EXITING_ANIMATION}
-						className="right-6 absolute z-30"
+						className="right-0 absolute z-30"
 						style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
 					>
 						<Animated.View style={menuButtonStyle} className="inset-0 absolute">

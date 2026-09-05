@@ -71,10 +71,12 @@ export const LibrarySettingsConfig = graphql(`
 			}
 			processThumbnailColorsEvenWithoutConfig
 			ignoreRules
+			oneshotsDirectory
 		}
 	}
 `)
 
+// TODO(chore): swap to patchLibrary instead, i am too unmotivated for that chore right now
 const editMutation = graphql(`
 	mutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {
 		updateLibrary(id: $id, input: $input) {
@@ -114,7 +116,7 @@ export default function LibrarySettingsRouter() {
 			})
 		},
 		onError: (error) => {
-			toast.error(t('createOrUpdateLibrary.errors.failedToUpdate'), {
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToUpdate'), {
 				description: extractErrorMessage(error),
 			})
 		},
@@ -122,7 +124,7 @@ export default function LibrarySettingsRouter() {
 
 	const { mutate: scan } = useGraphQLMutation(scanMutation, {
 		onError: (error) => {
-			toast.error(t('createOrUpdateLibrary.errors.failedToScan'), {
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToScan'), {
 				description: extractErrorMessage(error),
 			})
 		},
@@ -136,8 +138,7 @@ export default function LibrarySettingsRouter() {
 	const canScan = checkPermission(UserPermission.ScanLibrary)
 	const canAccessMetadata = checkPermission(UserPermission.MetadataFetchRecordRead)
 
-	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
-	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
+	// TODO(chore): swap to patchLibrary instead, i am too unmotivated for that chore right now
 	/**
 	 * A pseudo-patch function which will update the library, mixing what is present in the cache
 	 * with the updates provided.

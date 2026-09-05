@@ -7,16 +7,16 @@ import { Alert, Linking, ScrollView, useWindowDimensions, View } from 'react-nat
 import EmptyState from '~/components/EmptyState'
 import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
 import { useOwlHeaderOffset } from '~/components/Owl'
-import EditServerDialog from '~/components/savedServer/EditServerDialog'
+import { UpdateServerSheet } from '~/components/savedServer/createOrUpdate/UpdateServerSheet'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { Button, Icon, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 import { useSavedServers } from '~/stores'
-import { CreateServer, SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
+import { SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 export default function Screen() {
 	const { t } = useTranslate()
-	const { savedServers, updateServer, deleteServer, getServerConfig } = useSavedServers()
+	const { savedServers, deleteServer, getServerConfig } = useSavedServers()
 	const router = useRouter()
 	const { width } = useWindowDimensions()
 
@@ -38,8 +38,8 @@ export default function Screen() {
 			if (defaultServer) {
 				router.push({
 					// @ts-expect-error: string path
-					pathname: defaultServer.kind === 'stump' ? '/server/[id]' : '/opds/[id]',
-					params: { id: defaultServer.id },
+					pathname: defaultServer.kind === 'stump' ? '/stump/[serverId]' : '/opds/[serverId]',
+					params: { serverId: defaultServer.id },
 				})
 			}
 		},
@@ -89,17 +89,6 @@ export default function Screen() {
 			setEditingServer({ ...server, config })
 		},
 		[getServerConfig],
-	)
-
-	const onEdit = useCallback(
-		async (server: CreateServer) => {
-			if (editingServer) {
-				setEditingServer(null)
-				// not overly ideal, but otherwise edit will undo the avatar
-				await updateServer(editingServer.id, { ...server, avatar: editingServer.avatar })
-			}
-		},
-		[setEditingServer, updateServer, editingServer],
 	)
 
 	const isCleanSlate = savedServers.length === 0
@@ -165,11 +154,7 @@ export default function Screen() {
 			// layout to use toolbar api etc etc
 			ListHeaderComponent={
 				<>
-					<EditServerDialog
-						editingServer={editingServer}
-						onClose={() => setEditingServer(null)}
-						onSubmit={onEdit}
-					/>
+					<UpdateServerSheet editingServer={editingServer} onClose={() => setEditingServer(null)} />
 				</>
 			}
 		/>

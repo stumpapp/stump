@@ -2,10 +2,10 @@ import { Bookmark, BookmarkX, Clock, Trash } from 'lucide-react-native'
 import { Pressable, ScrollView, View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useActiveServer } from '~/components/activeServer'
 import { Icon, ListLabel, Text } from '~/components/ui'
 import { ContextMenu } from '~/components/ui/context-menu/context-menu'
 import { useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useCuratedSearch, useSearchStore } from '~/stores/search'
 
 import { Divider } from '../Divider'
@@ -37,7 +37,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 	if (!hasFavorites && !hasHistory) {
 		return (
 			<View className="px-4 pt-20 flex-1 items-center justify-center">
-				<Text size="lg" className="text-center text-foreground-muted">
+				<Text size="lg" className="text-foreground-muted text-center">
 					Your favorites and recent searches will appear here
 				</Text>
 			</View>

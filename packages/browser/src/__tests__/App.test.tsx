@@ -38,9 +38,7 @@ describe('StumpWebClient', () => {
 			</MemoryRouter>,
 		)
 
-		expect(
-			await screen.findByRole('heading', { name: 'A critical error occurred' }),
-		).toBeInTheDocument()
-		expect(screen.getByRole('link', { name: 'Fehler melden' })).toBeInTheDocument()
+		expect(screen.queryByTestId('criticalErrorHeading')).toBeInTheDocument()
+		expect(screen.queryByRole('link', { name: 'Fehler melden' })).toBeInTheDocument()
 	})
 })

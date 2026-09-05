@@ -70,6 +70,9 @@ const query = graphql(`
 						}
 					}
 				}
+				oneshotBook {
+					id
+				}
 				thumbnail {
 					url
 					metadata {
@@ -184,11 +187,19 @@ function getQueryKey(
 	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 
-export default function LibrarySeriesScene() {
+type LibrarySeriesSceneProps = {
+	fixedFilters?: SeriesFilterInput[]
+	layoutKeyPostfix?: string
+}
+
+export default function LibrarySeriesScene({
+	fixedFilters,
+	layoutKeyPostfix,
+}: LibrarySeriesSceneProps) {
 	const {
 		library: { id, name },
 	} = useLibraryContext()
-	const layoutKey = `library-${id}-series`
+	const layoutKey = `library-${id}-series${layoutKeyPostfix ? `-${layoutKeyPostfix}` : ''}`
 	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
 		useSeriesLayout(
 			layoutKey,
@@ -250,8 +261,9 @@ export default function LibrarySeriesScene() {
 						},
 					]
 				: []),
+			...(fixedFilters || []),
 		],
-		[filters, startsWith],
+		[fixedFilters, filters, startsWith],
 	)
 	const prefetch = usePrefetchLibrarySeries()
 
@@ -268,11 +280,12 @@ export default function LibrarySeriesScene() {
 							{ metadata: { title: { startsWith: letter } } },
 						],
 					},
+					...(fixedFilters || []),
 				],
 				orderBy,
 			})
 		},
-		[prefetch, id, pageSize, orderBy, filters],
+		[prefetch, id, pageSize, orderBy, filters, fixedFilters],
 	)
 	const { sdk } = useSDK()
 	const { data, isLoading } = useGraphQL(

@@ -4,12 +4,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Info, ScanLine } from 'lucide-react-native'
 import { useMemo } from 'react'
 
-import { useStumpServer } from '~/components/activeServer'
 import { useEntityListHeader } from '~/components/filter/EntityListHeader'
 import { ActionDef } from '~/components/filter/types'
 import { useSeriesFilterMenu } from '~/components/series/listHeader/SeriesFilterMenu'
 import { useSeriesSortAndDisplayMenu } from '~/components/series/listHeader/SeriesSortAndDisplayMenu'
 import { MiniEntityStatCards } from '~/components/stats'
+import { useStumpServer } from '~/providers/StumpServerProvider'
 
 const scanMutation = graphql(`
 	mutation LibrarySeriesListHeaderScanLibrary($id: ID!) {

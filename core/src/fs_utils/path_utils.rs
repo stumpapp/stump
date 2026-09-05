@@ -1,7 +1,5 @@
 use std::{ffi::OsStr, path::Path};
 
-use globset::GlobSet;
-
 use crate::fs_utils::ContentType;
 
 pub trait IsImage {
@@ -39,22 +37,7 @@ pub trait PathUtils {
 	/// Returns true if the file is an image.
 	fn is_supported(&self) -> bool;
 	/// Returns true if the file is an image.
-	fn is_img(&self) -> bool;
-	/// Returns true if the file is a thumbnail image. This calls the `is_img` function
-	/// from the same trait, and then checks if the file name is one of the following:
-	/// - cover
-	/// - thumbnail
-	/// - folder
-	///
-	/// These will *potentially* be reserved filenames in the future... Not sure
-	/// if this functionality will be kept.
-	fn is_thumbnail_img(&self) -> bool;
-	/// Returns true if the directory has any media files in it. This is a shallow
-	/// check, and will not check subdirectories.
-	fn dir_has_media(&self, ignore_rules: &GlobSet) -> bool;
-	/// Returns true if the directory has any media files in it. This is a deep
-	/// check, and will check *all* subdirectories.
-	fn dir_has_media_deep(&self, ignore_rules: &GlobSet) -> bool;
+	fn is_image(&self) -> bool;
 }
 
 impl PathUtils for Path {
@@ -142,18 +125,7 @@ impl PathUtils for Path {
 	}
 
 	/// Returns true if the file is an image. This is a naive check based on the extension.
-	fn is_img(&self) -> bool {
+	fn is_image(&self) -> bool {
 		self.naive_content_type().is_image()
-	}
-
-	// TODO(reorg): move out of path_utils, into image?
-	fn is_thumbnail_img(&self) -> bool {
-		if !self.is_img() {
-			return false;
-		}
-
-		let FileParts { file_stem, .. } = self.file_parts();
-
-		is_accepted_cover_name(&file_stem)
 	}
 }

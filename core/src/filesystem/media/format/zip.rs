@@ -137,7 +137,7 @@ impl FileProcessor for ZipProcessor {
 		} = Self::generate_hashes(path, options)?;
 
 		for i in 0..archive.len() {
-			let mut file = archive.by_index(i)?;
+			let mut file = archuive.by_index(i)?;
 
 			if file.is_dir() {
 				trace!("Skipping directory");

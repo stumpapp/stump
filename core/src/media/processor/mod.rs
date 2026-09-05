@@ -112,9 +112,7 @@ pub trait MediaProcessor {
 	// ) -> Result<AnalyzedPage, MediaProcessorError>;
 }
 
-async fn determine_processor(
-	path: &Path,
-) -> Result<impl MediaProcessor, MediaProcessorError> {
+async fn get_processor(path: &Path) -> Result<impl MediaProcessor, MediaProcessorError> {
 	let mime = ContentType::from_path_async(path).await.mime_type();
 	let FileParts { extension, .. } = path.file_parts();
 
@@ -158,7 +156,7 @@ pub async fn process_file(
 	config: &StumpConfig,
 ) -> Result<ProcessedMediaFile, MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
-	let processor = determine_processor(&path).await?;
+	let processor = get_processor(&path).await?;
 	spawn_blocking(move || processor.process(&path, options)).await?
 }
 
@@ -167,7 +165,7 @@ pub async fn process_metadata(
 	path: impl AsRef<Path>,
 ) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
-	let processor = determine_processor(&path).await?;
+	let processor = get_processor(&path).await?;
 	spawn_blocking(move || processor.process_metadata(&path)).await?
 }
 
@@ -177,7 +175,7 @@ pub async fn generate_hashes(
 	options: MediaProcessorOptions,
 ) -> Result<GeneratedFileHashes, MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
-	let processor = determine_processor(&path).await?;
+	let processor = get_processor(&path).await?;
 	spawn_blocking(move || processor.generate_hashes(&path, options)).await?
 }
 
@@ -187,14 +185,14 @@ pub async fn get_page(
 	page: i32,
 ) -> Result<(ContentType, Vec<u8>), MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
-	let processor = determine_processor(&path).await?;
+	let processor = get_processor(&path).await?;
 	spawn_blocking(move || processor.get_page(&path, page)).await?
 }
 
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn get_page_count(path: impl AsRef<Path>) -> Result<i32, MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
-	let processor = determine_processor(&path).await?;
+	let processor = get_processor(&path).await?;
 	spawn_blocking(move || processor.get_page_count(&path)).await?
 }
 
@@ -204,7 +202,7 @@ pub async fn get_content_types_for_pages(
 	pages: Vec<i32>,
 ) -> Result<HashMap<i32, ContentType>, MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
-	let processor = determine_processor(&path).await?;
+	let processor = get_processor(&path).await?;
 	spawn_blocking(move || processor.get_page_content_types(&path, pages)).await?
 }
 
@@ -214,7 +212,7 @@ pub async fn get_content_type_for_page(
 	page: i32,
 ) -> Result<ContentType, MediaProcessorError> {
 	let path = path.as_ref().to_path_buf();
-	let processor = determine_processor(&path).await?;
+	let processor = get_processor(&path).await?;
 	let content_types =
 		spawn_blocking(move || processor.get_page_content_types(&path, vec![page]))
 			.await??;
@@ -222,4 +220,23 @@ pub async fn get_content_type_for_page(
 		.get(&page)
 		.cloned()
 		.unwrap_or(ContentType::UNKNOWN))
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	// TODO: other tests, lots of the get_processor tests from before are
+	// not applicable anymore since i removed the enum and made the trait
+	// use self
+
+	#[tokio::test]
+	async fn test_get_processor_unsupported() {
+		let path = Path::new("/fake/path/to/file.txt");
+		let error = match get_processor(path).await {
+			Ok(_) => panic!("Expected error, got Ok"), // MediaProcessor does not impl Debug, so no unwrap_err() >:(
+			Err(e) => e,
+		};
+		assert!(matches!(error, MediaProcessorError::UnsupportedFile(_)));
+	}
 }

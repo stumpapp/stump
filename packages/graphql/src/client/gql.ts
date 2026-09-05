@@ -154,6 +154,7 @@ type Documents = {
     "\n\tquery BookClubNavigationItem {\n\t\tbookClubs {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\temoji\n\t\t}\n\t}\n": typeof types.BookClubNavigationItemDocument,
     "\n\tquery LibraryNavigationItem {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryNavigationItemDocument,
     "\n\tquery SmartListNavigationItem {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.SmartListNavigationItemDocument,
+    "\n\tquery NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {\n\t\tseriesById(id: $id) @include(if: $isSeries) {\n\t\t\tlibraryId\n\t\t}\n\t\tmediaById(id: $id) @include(if: $isBook) {\n\t\t\tlibraryId\n\t\t}\n\t}\n": typeof types.NavigationEntityLibraryDocument,
     "\n\tmutation CreateEpubAnnotation($input: CreateAnnotationInput!) {\n\t\tcreateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tmediaId\n\t\t\tuserId\n\t\t\tannotationText\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\ttitle\n\t\t\t\ttype\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t}\n\t\t\t\ttext {\n\t\t\t\t\tafter\n\t\t\t\t\tbefore\n\t\t\t\t\thighlight\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.CreateEpubAnnotationDocument,
     "\n\tmutation UpdateEpubAnnotation($input: UpdateAnnotationInput!) {\n\t\tupdateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tannotationText\n\t\t\tupdatedAt\n\t\t}\n\t}\n": typeof types.UpdateEpubAnnotationDocument,
     "\n\tmutation DeleteEpubAnnotation($id: String!) {\n\t\tdeleteAnnotation(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteEpubAnnotationDocument,
@@ -466,6 +467,7 @@ const documents: Documents = {
     "\n\tquery BookClubNavigationItem {\n\t\tbookClubs {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\temoji\n\t\t}\n\t}\n": types.BookClubNavigationItemDocument,
     "\n\tquery LibraryNavigationItem {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryNavigationItemDocument,
     "\n\tquery SmartListNavigationItem {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.SmartListNavigationItemDocument,
+    "\n\tquery NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {\n\t\tseriesById(id: $id) @include(if: $isSeries) {\n\t\t\tlibraryId\n\t\t}\n\t\tmediaById(id: $id) @include(if: $isBook) {\n\t\t\tlibraryId\n\t\t}\n\t}\n": types.NavigationEntityLibraryDocument,
     "\n\tmutation CreateEpubAnnotation($input: CreateAnnotationInput!) {\n\t\tcreateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tmediaId\n\t\t\tuserId\n\t\t\tannotationText\n\t\t\tcreatedAt\n\t\t\tupdatedAt\n\t\t\tlocator {\n\t\t\t\tchapterTitle\n\t\t\t\thref\n\t\t\t\ttitle\n\t\t\t\ttype\n\t\t\t\tlocations {\n\t\t\t\t\tfragments\n\t\t\t\t\tprogression\n\t\t\t\t\tposition\n\t\t\t\t\ttotalProgression\n\t\t\t\t\tcssSelector\n\t\t\t\t}\n\t\t\t\ttext {\n\t\t\t\t\tafter\n\t\t\t\t\tbefore\n\t\t\t\t\thighlight\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.CreateEpubAnnotationDocument,
     "\n\tmutation UpdateEpubAnnotation($input: UpdateAnnotationInput!) {\n\t\tupdateAnnotation(input: $input) {\n\t\t\tid\n\t\t\tannotationText\n\t\t\tupdatedAt\n\t\t}\n\t}\n": types.UpdateEpubAnnotationDocument,
     "\n\tmutation DeleteEpubAnnotation($id: String!) {\n\t\tdeleteAnnotation(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteEpubAnnotationDocument,
@@ -1195,6 +1197,10 @@ export function graphql(source: "\n\tquery LibraryNavigationItem {\n\t\tlibrarie
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery SmartListNavigationItem {\n\t\tsmartLists {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').SmartListNavigationItemDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {\n\t\tseriesById(id: $id) @include(if: $isSeries) {\n\t\t\tlibraryId\n\t\t}\n\t\tmediaById(id: $id) @include(if: $isBook) {\n\t\t\tlibraryId\n\t\t}\n\t}\n"): typeof import('./graphql').NavigationEntityLibraryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

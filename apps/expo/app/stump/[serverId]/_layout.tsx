@@ -70,6 +70,20 @@ function Screen() {
 
 	const isServerAccessible = useRef(true)
 
+	const previousUrl = useRef(effectiveServerUrl)
+
+	useEffect(() => {
+		if (previousUrl.current !== effectiveServerUrl) {
+			console.log('switching url', { previousUrl: previousUrl.current, effectiveServerUrl })
+			setSDK((curr) => {
+				curr?.switchUrl(effectiveServerUrl)
+				return curr
+			})
+		} else {
+			console.log('url did not change', { previousUrl: previousUrl.current, effectiveServerUrl })
+		}
+	}, [effectiveServerUrl])
+
 	useEffect(() => {
 		if (isAutoAuthenticating || !isServerAccessible.current) return
 

@@ -126,6 +126,22 @@ export class Api {
 		this.axiosInstance = instance
 	}
 
+	switchUrl(url: string) {
+		this.baseURL = url
+		const instance = axios.create({
+			baseURL: this.serviceURL,
+			withCredentials: this.configuration.authMethod === 'session',
+		})
+		instance.interceptors.request.use(async (config) => {
+			config.headers = config.headers.concat(await this.getHeaders())
+			if (this._basicAuth) {
+				config.auth = this._basicAuth
+			}
+			return config
+		})
+		this.axiosInstance = instance
+	}
+
 	get isAuthless(): boolean {
 		return this.config.authMethod === 'none'
 	}

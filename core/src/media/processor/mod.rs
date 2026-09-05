@@ -1,6 +1,18 @@
-use std::{collections::HashMap, path::Path};
+use std::{
+	collections::HashMap,
+	path::{Path, PathBuf},
+};
 
-use crate::{fs_utils::ContentType, media::processor::error::MediaProcessorError};
+use tokio::task::spawn_blocking;
+
+use crate::{
+	config::StumpConfig,
+	fs_utils::{ContentType, FileParts, PathUtils},
+	media::{
+		metadata::ProcessedMediaMetadata,
+		processor::{error::MediaProcessorError, zip::ZipProcessor},
+	},
+};
 
 pub mod error;
 mod zip;
@@ -28,6 +40,17 @@ pub struct GeneratedFileHashes {
 	pub koreader: Option<String>,
 }
 
+/// Struct representing a processed file. This is the output of the `process` function
+/// on a `FileProcessor` implementation.
+#[derive(Debug)]
+pub struct ProcessedMediaFile {
+	pub path: PathBuf,
+	pub hash: Option<String>,
+	pub koreader_hash: Option<String>,
+	pub metadata: Option<ProcessedMediaMetadata>,
+	pub pages: i32,
+}
+
 /// A trait that defines the methods required for processing media files. Every
 /// supported content type should implement this trait.
 ///
@@ -37,34 +60,34 @@ pub struct GeneratedFileHashes {
 /// directly unless you wrap them in a blocking thread
 pub trait MediaProcessor {
 	/// Generate a Stump-specific hash of the file, used for deduplication efforts
-	fn generate_stump_hash(path: &Path) -> Result<String, MediaProcessorError>;
+	fn generate_stump_hash(&self, path: &Path) -> Result<String, MediaProcessorError>;
 
 	/// Generate both a Stump hash and a KoReader hash of the file, depending on
 	/// the options provided
 	fn generate_hashes(
+		&self,
 		path: &Path,
 		options: MediaProcessorOptions,
 	) -> Result<GeneratedFileHashes, MediaProcessorError>;
 
 	/// Process the metadata of a file, if any
 	fn process_metadata(
+		&self,
 		path: &Path,
-		// TODO: sort that out
-		// ) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError>;
-	) -> Result<Option<()>, MediaProcessorError>;
+	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError>;
 
 	/// Process a media file at the given path, with the provided options
 	fn process(
+		&self,
 		path: &Path,
 		options: MediaProcessorOptions,
-	) -> Result<(), MediaProcessorError>;
+	) -> Result<ProcessedMediaFile, MediaProcessorError>;
 
 	/// Get the bytes of a page within a media file, assuming the file is an indexed format
 	/// like a PDF or CBZ
 	fn get_page(
 		path: &Path,
 		page: i32,
-		// config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), MediaProcessorError>;
 
 	/// Get the number of pages in a media file, assuming the file is an indexed format
@@ -87,55 +110,71 @@ pub trait MediaProcessor {
 	// ) -> Result<AnalyzedPage, MediaProcessorError>;
 }
 
-// pub trait FileProcessor {
-// 	/// Get the sample size for a file. This is used for generating a hash of the file.
-// 	fn get_sample_size(path: &str) -> Result<u64, FileError>;
+async fn determine_processor(
+	path: &Path,
+) -> Result<impl MediaProcessor, MediaProcessorError> {
+	let mime = ContentType::from_path_async(path).await.mime_type();
+	let FileParts { extension, .. } = path.file_parts();
 
-// 	/// Generate a hash of the file. In most cases, the hash is generated from select pages
-// 	/// of the file, rather than the entire file. This is to prevent the hash from changing
-// 	/// when the metadata of the file changes.
-// 	fn generate_stump_hash(path: &str) -> Option<String>;
+	tracing::debug!(
+		?path,
+		?mime,
+		?extension,
+		"Determining processor type for entry"
+	);
 
-// 	/// Generate both hashes for a file, depending on the options provided.
-// 	fn generate_hashes(
-// 		path: &str,
-// 		options: FileProcessorOptions,
-// 	) -> Result<ProcessedFileHashes, FileError>;
+	match (mime.as_str(), extension.to_lowercase().as_str()) {
+		("application/zip" | "application/vnd.comicbook+zip", ext) if ext != "epub" => {
+			Ok(ZipProcessor)
+		},
+		("application/vnd.rar" | "application/vnd.comicbook-rar", _) => {
+			// Ok(ProcessorType::Rar)
+			todo!()
+		},
+		("application/epub+zip", _) => {
+			todo!()
+			// Ok(ProcessorType::Epub)
+		},
+		("application/zip", "epub") => {
+			todo!()
+			// Ok(ProcessorType::Epub)
+		},
+		("application/pdf", _) => {
+			todo!()
+			// Ok(ProcessorType::Pdf)},
+		},
+		_ => Err(MediaProcessorError::UnsupportedFile(
+			path.display().to_string(),
+		)),
+	}
+}
 
-// 	/// Process a file. Should gather the basic metadata and information required for
-// 	/// processing the file.
-// 	fn process(
-// 		path: &str,
-// 		options: FileProcessorOptions,
-// 		config: &StumpConfig,
-// 	) -> Result<ProcessedFile, FileError>;
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn process_file(
+	path: impl AsRef<Path>,
+	options: MediaProcessorOptions,
+	config: &StumpConfig,
+) -> Result<ProcessedMediaFile, MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = determine_processor(&path).await?;
+	spawn_blocking(move || processor.process(&path, options)).await?
+}
 
-// 	/// Process the metadata of a file. This should gather the metadata of the file
-// 	/// without processing the entire file.
-// 	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError>;
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn process_metadata(
+	path: impl AsRef<Path>,
+) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = determine_processor(&path).await?;
+	spawn_blocking(move || processor.process_metadata(&path)).await?
+}
 
-// 	/// Get the bytes of a page of the file.
-// 	fn get_page(
-// 		path: &str,
-// 		page: i32,
-// 		config: &StumpConfig,
-// 	) -> Result<(ContentType, Vec<u8>), FileError>;
-
-// 	/// Get the number of pages in the file.
-// 	fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError>;
-
-// 	/// Get the content types of a list of pages of the file. This should determine content
-// 	/// types by actually testing the bytes for each page.
-// 	fn get_page_content_types(
-// 		path: &str,
-// 		pages: Vec<i32>,
-// 	) -> Result<HashMap<i32, ContentType>, FileError>;
-
-// 	/// Analyze a page to get its dimensions and content type. This is optimized to read
-// 	/// only the minimum bytes necessary to determine the image dimensions
-// 	fn analyze_page(
-// 		path: &str,
-// 		page: i32,
-// 		config: &StumpConfig,
-// 	) -> Result<AnalyzedPage, FileError>;
-// }
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn generate_hashes(
+	path: impl AsRef<Path>,
+	options: MediaProcessorOptions,
+) -> Result<GeneratedFileHashes, MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = determine_processor(&path).await?;
+	spawn_blocking(move || processor.generate_hashes(&path, options)).await?
+}

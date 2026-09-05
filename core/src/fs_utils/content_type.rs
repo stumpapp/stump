@@ -2,6 +2,7 @@ use models::shared::image_processor_options::SupportedImageFormat;
 use serde::Serialize;
 use std::path::Path;
 use strum::{Display, EnumString};
+use tokio::task::spawn_blocking;
 
 use crate::CoreError;
 
@@ -62,6 +63,14 @@ fn infer_mime(path: &Path) -> Option<String> {
 			None
 		},
 	}
+}
+
+async fn infer_async_mime(path: &Path) -> Option<String> {
+	let path = path.to_path_buf();
+	spawn_blocking(move || infer_mime(&path))
+		.await
+		.ok()
+		.flatten()
 }
 
 impl ContentType {
@@ -196,6 +205,20 @@ impl ContentType {
 	/// ```
 	pub fn from_path(path: &Path) -> ContentType {
 		infer_mime(path)
+			.map(|mime| mime.parse().unwrap_or_default())
+			.unwrap_or_else(|| {
+				ContentType::from_extension(
+					path.extension()
+						.unwrap_or_default()
+						.to_str()
+						.unwrap_or_default(),
+				)
+			})
+	}
+
+	pub async fn from_path_async(path: &Path) -> ContentType {
+		infer_async_mime(path)
+			.await
 			.map(|mime| mime.parse().unwrap_or_default())
 			.unwrap_or_else(|| {
 				ContentType::from_extension(

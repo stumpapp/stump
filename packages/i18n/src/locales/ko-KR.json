@@ -58,46 +58,366 @@
 		"nextInSeries": "시리즈의 다음 책"
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library"
+		"heading": "라이브러리 만들기",
+		"subtitle": "라이브러리는 책을 묶어서 관리하는 데 사용합니다. 사용 방법을 다시 확인하려면",
+		"subtitleLink": "관련 문서를 참고하세요",
+		"form": {
+			"stepLabel": "단계",
+			"steps": [
+				{
+					"label": "기본 정보",
+					"heading": "기본 정보",
+					"description": "이름, 경로, 설명 등 이 라이브러리의 기본 정보입니다"
+				},
+				{
+					"label": "스캔",
+					"heading": "스캔",
+					"description": "Stump가 이 라이브러리를 스캔하는 방식에 관한 설정입니다"
+				},
+				{
+					"label": "썸네일",
+					"heading": "썸네일",
+					"description": "이 라이브러리의 썸네일 생성 여부와 생성 방식을 설정합니다"
+				},
+				{
+					"label": "검토",
+					"heading": "검토",
+					"description": "라이브러리를 만들기 전에 설정을 확인하세요"
+				}
+			],
+			"review": {
+				"yes": "예",
+				"no": "아니요",
+				"none": "없음",
+				"labels": {
+					"generateThumbnails": "썸네일 생성",
+					"processThumbnailColors": "썸네일 색상 처리",
+					"mode": "방식",
+					"format": "형식",
+					"quality": "품질",
+					"name": "이름",
+					"path": "경로",
+					"description": "설명",
+					"tags": "태그",
+					"pattern": "구성 방식",
+					"ignoreRules": "제외 규칙",
+					"convertRar": "RAR/CBR 변환",
+					"deleteConversions": "변환 후 원본 파일 삭제",
+					"watch": "디렉터리 변경 감지",
+					"processMetadata": "메타데이터 처리",
+					"generateFileHashes": "파일 해시 생성",
+					"generateKoreaderHashes": "KOReader 해시 생성",
+					"scaleEvenlyByFactor": "일정 비율로 조절",
+					"exact": "지정 크기",
+					"scaleDimension": "크기 지정"
+				}
+			},
+			"buttons": {
+				"confirm": "라이브러리 만들기"
+			}
+		}
 	},
 	"librarySettingsScene": {
-		"heading": "Manage Library",
+		"heading": "설정",
 		"sidebar": {
 			"configuration": {
-				"label": "Options"
+				"label": "설정",
+				"general": "일반",
+				"reading": "읽기",
+				"scanning": "스캔",
+				"thumbnails": "썸네일",
+				"ignore-rules": "제외 규칙"
+			},
+			"basics": "기본 정보",
+			"integrations": {
+				"label": "연동",
+				"analysis": "분석",
+				"metadata": "메타데이터"
+			},
+			"danger-zone": {
+				"access-control": "접근 제어",
+				"delete": "삭제",
+				"label": "주의가 필요한 설정"
 			}
 		},
 		"options/thumbnails": {
 			"sections": {
 				"management": {
-					"heading": "Management"
+					"heading": "썸네일 관리",
+					"description": "이 라이브러리의 기존 썸네일을 관리합니다"
 				}
-			}
+			},
+			"title": "썸네일",
+			"description": "이 라이브러리의 썸네일 설정 및 관리 옵션입니다"
 		},
 		"integrations/analysis": {
 			"sections": {
 				"analyzeBooks": {
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable"
+					"disclaimer": "완료까지 시간이 걸릴 수 있습니다. 추후 더 세부적으로 설정할 수 있도록 개선할 예정입니다",
+					"heading": "책 분석",
+					"description": "이 라이브러리의 책을 분석하여 이미지로 구성된 책의 페이지 크기 같은 추가 메타데이터를 데이터베이스에 저장합니다",
+					"disclaimerTitle": "이 작업은 시스템 자원을 많이 사용합니다",
+					"analyzeButton": "책 분석"
+				},
+				"missingFiles": {
+					"heading": "누락된 파일",
+					"description": "데이터베이스에 등록되어 있지만 디스크에서 찾을 수 없는 파일입니다",
+					"noMissingFiles": "이 라이브러리에 누락된 파일이 없습니다"
+				},
+				"duplicateFiles": {
+					"heading": "중복 파일",
+					"description": "디스크에 중복으로 존재할 가능성이 있는 파일입니다",
+					"noDuplicateFiles": "이 라이브러리에서 중복 파일이 발견되지 않았습니다"
+				}
+			},
+			"title": "분석",
+			"description": "라이브러리의 콘텐츠를 분석하여 잠재적인 문제나 개선할 부분을 찾습니다"
+		},
+		"danger-zone/delete": {
+			"title": "삭제",
+			"description": "이 라이브러리와 모든 콘텐츠 또는 특정 리소스를 영구적으로 삭제합니다",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "라이브러리 정리",
+					"description": "디스크에서 찾을 수 없는 모든 미디어와 시리즈를 제거합니다",
+					"disclaimerTitle": "파일은 삭제되지 않습니다",
+					"disclaimer": "파일은 삭제하지 않지만, 누락 상태인 미디어와 시리즈에 관한 모든 기록을 영구적으로 삭제합니다",
+					"confirmation": {
+						"label": "라이브러리 정리",
+						"text": "이 라이브러리를 정리하시겠습니까?"
+					},
+					"emptyText": "정리할 항목이 없습니다",
+					"missingEntitiesTable": {
+						"columns": {
+							"id": "ID",
+							"path": "경로",
+							"type": "유형"
+						},
+						"types": {
+							"BOOK": "책",
+							"SERIES": "시리즈",
+							"LIBRARY": "라이브러리"
+						},
+						"emptyHeading": "이 라이브러리에 누락된 항목이 없습니다",
+						"emptySubtitle": "데이터베이스에 등록된 모든 파일을 디스크에서 찾았습니다"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "라이브러리 삭제",
+					"description": [
+						"이 라이브러리와 모든 콘텐츠를 영구적으로 삭제합니다.",
+						"이 작업은 되돌릴 수 없습니다"
+					]
 				}
 			}
 		},
-		"danger-zone/delete": {
-			"title": "Deletion Actions"
+		"subtitle": "여기에서 라이브러리를 관리합니다. 설정에 대한 설명이 필요하면",
+		"subtitleLink": "관련 문서를 참고하세요",
+		"basics": {
+			"title": "기본 정보",
+			"description": "이름, 경로, 설명 등 이 라이브러리의 기본 정보입니다",
+			"form": {
+				"submit": "라이브러리 수정"
+			}
+		},
+		"options/reading": {
+			"title": "읽기",
+			"description": "이 라이브러리의 책에 적용할 기본 뷰어 설정입니다. 각 책에서 이 설정을 개별적으로 변경할 수 있습니다"
+		},
+		"options/scanning": {
+			"title": "스캔",
+			"description": "Stump가 이 라이브러리를 스캔하는 방식에 관한 설정입니다",
+			"sections": {
+				"configureScan": {
+					"heading": "스캔 설정",
+					"description": "추가 옵션으로 더 세밀하게 제어할 수 있는 스캔입니다",
+					"form": {
+						"alert": "이 옵션은 해당하는 라이브러리 전체 설정보다 우선 적용됩니다",
+						"options": {
+							"forceRebuild": {
+								"label": "강제로 다시 처리",
+								"description": "디스크에 있는 라이브러리의 모든 책을 다시 처리합니다",
+								"alert": "메타데이터와 해시를 포함하여 라이브러리의 모든 책을 처음부터 다시 처리합니다"
+							},
+							"custom": {
+								"label": "사용자 지정",
+								"description": "스캔 설정을 사용자화합니다",
+								"validation": {
+									"noSelection": "하나 이상의 옵션을 활성화해야 합니다"
+								}
+							},
+							"rebuildMeta": {
+								"label": "메타데이터 재생성",
+								"description": "라이브러리에 있는 책의 메타데이터를 다시 생성합니다"
+							},
+							"regenHashes": {
+								"label": "해시 재생성",
+								"description": "라이브러리에 있는 책의 해시를 다시 생성합니다"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "기본 스캔",
+					"description": "라이브러리의 새 콘텐츠를 색인화하는 일반 스캔입니다"
+				},
+				"history": {
+					"heading": "스캔 기록",
+					"description": "이 라이브러리에 기록된 모든 스캔 내역입니다",
+					"empty": "이 라이브러리의 스캔 기록이 없습니다",
+					"runScan": "스캔 실행",
+					"inspect": "자세히 보기",
+					"inspector": {
+						"title": "스캔 기록",
+						"description": "이 스캔 기록의 상세 정보입니다",
+						"fields": {
+							"library": "라이브러리",
+							"date": "날짜",
+							"config": "설정",
+							"jobOutput": "작업 결과",
+							"logs": "로그"
+						},
+						"logsPresent": "이 작업의 로그가 저장되어 있습니다",
+						"seeLogs": "로그 보기"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "스캔 시각",
+							"config": "설정"
+						},
+						"default": "기본값",
+						"custom": "사용자 지정"
+					},
+					"clearHistory": "스캔 기록 삭제"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "메타데이터",
+			"description": "이 라이브러리의 메타데이터 매칭 결과를 관리하고 검토합니다",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "메타데이터 가져오기",
+					"description": "이 라이브러리의 미디어에 대한 메타데이터를 가져옵니다",
+					"noProviders": {
+						"title": "사용 가능한 메타데이터 제공자가 없습니다",
+						"description": "메타데이터 연동 설정에서 제공자를 구성할 수 있습니다"
+					},
+					"fetchButton": "백그라운드에서 가져오기 시작",
+					"fetchError": "메타데이터 가져오기를 시작하지 못했습니다"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "접근 제어",
+			"description": "이 라이브러리의 콘텐츠에 접근할 수 있는 사용자를 관리합니다",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "사용자 제외",
+					"description": "특정 사용자가 이 라이브러리나 콘텐츠에 접근하지 못하도록 합니다",
+					"noUsersTitle": "제외할 사용자가 없습니다",
+					"noUsers": "이 라이브러리에서 제외할 다른 등록 사용자가 없습니다",
+					"updated": "제외 설정을 수정했습니다",
+					"failure": "제외 설정을 수정하지 못했습니다"
+				}
+			}
 		}
 	},
 	"userSmartListScene": {
 		"itemsScene": {
 			"actionHeader": {
 				"viewManager": {
-					"updateSelected": "Update selected"
+					"updateSelected": "보기 수정",
+					"deleteSelected": "보기 삭제",
+					"create": "새 보기 만들기",
+					"modal": {
+						"heading": {
+							"create": "보기 만들기",
+							"update": "보기 수정"
+						},
+						"description": {
+							"create": "이 스마트 목록의 새 보기를 만듭니다",
+							"update": "보기를 수정합니다"
+						},
+						"createForm": {
+							"name": {
+								"label": "이름",
+								"placeholder": "나의 보기",
+								"description": "이 보기를 다른 보기와 구별할 수 있는 이름입니다"
+							}
+						},
+						"updateForm": {
+							"name": {
+								"label": "이름",
+								"placeholder": "나의 보기",
+								"description": "원하는 경우 이 보기의 새 이름을 입력합니다"
+							}
+						}
+					},
+					"deleteModal": {
+						"title": "보기 삭제",
+						"description": "이 보기를 삭제하시겠습니까?"
+					}
+				},
+				"viewSelector": {
+					"customView": "사용자 지정 보기",
+					"defaultView": "기본 보기",
+					"noViewsSaved": "저장된 보기가 없습니다",
+					"selectView": "저장된 보기 선택"
+				},
+				"filterDrawer": {
+					"heading": "스마트 목록 필터",
+					"description": "현재 보기 세션에 적용할 필터를 변경합니다",
+					"rawData": {
+						"heading": "원본 필터 데이터",
+						"description": "Stump는 이 데이터를 기준으로 필터를 처리합니다"
+					},
+					"buttons": {
+						"save": "저장",
+						"cancel": "취소"
+					}
+				},
+				"search": {
+					"placeholder": "빠른 필터"
 				}
-			}
+			},
+			"smartListNotFound": "스마트 목록을 찾을 수 없습니다"
+		},
+		"navigation": {
+			"items": "항목",
+			"settings": "설정"
+		},
+		"layout": {
+			"missingIdError": "이 화면에는 URL의 ID가 필요합니다",
+			"smartListNotFound": "스마트 목록을 찾을 수 없습니다",
+			"viewCreateError": "보기를 만들지 못했습니다",
+			"viewSaveError": "보기를 저장하지 못했습니다"
+		},
+		"header": {
+			"backLink": "목록"
 		}
 	},
 	"settingsScene": {
 		"sidebar": {
 			"management": {
-				"general": "General"
+				"general": "서버",
+				"logs": "로그",
+				"users": "사용자",
+				"jobs": "작업",
+				"access": "접근",
+				"email": "이메일",
+				"metadata": "메타데이터",
+				"notifications": "알림",
+				"tags": "태그",
+				"label": "관리"
+			},
+			"personal": {
+				"account": "계정",
+				"appearance": "환경설정",
+				"api keys": "API 키",
+				"reader": "뷰어",
+				"desktop": "데스크톱",
+				"label": "개인 설정"
 			}
 		},
 		"app/preferences": {
@@ -121,7 +441,7 @@
 					"label": "테마",
 					"description": [
 						"직접 커스텀 테마를 만들고 싶다면",
-						"문서"
+						"문서를 참고하세요"
 					],
 					"options": {
 						"system": "시스템",
@@ -131,7 +451,9 @@
 						"ocean": "오션",
 						"autumn": "어텀",
 						"cosmic": "코스믹",
-						"pumpkin": "펌킨"
+						"pumpkin": "펌킨",
+						"midnight": "미드나이트",
+						"matrix": "매트릭스"
 					}
 				},
 				"gradientToggle": {
@@ -167,7 +489,8 @@
 					"options": {
 						"grayscale": "회색조",
 						"averageColor": "평균 색상",
-						"colorful": "컬러풀"
+						"colorful": "컬러풀",
+						"thumbhash": "ThumbHash"
 					}
 				},
 				"thumbnailRoundness": {
@@ -312,81 +635,1789 @@
 			"sections": {
 				"configuredServers": {
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "토큰 삭제",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"API 키를 포함하여 서버용으로 안전하게 저장된 모든 토큰을 제거합니다",
+							"각 서버에서 다시 인증하거나 서버를 다시 설정해야 합니다"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
+							"trigger": "토큰 삭제",
+							"title": "토큰 삭제",
 							"description": "저장된 모든 토큰을 삭제하시겠습니까?",
-							"confirm": "Clear authentication"
+							"confirm": "토큰 삭제"
+						}
+					},
+					"label": "등록된 서버",
+					"description": "연결할 수 있는 Stump 서버 목록입니다",
+					"getStarted": "서버를 추가하여 시작하세요",
+					"unreachableServer": {
+						"tooltip": "서버에 연결할 수 없습니다"
+					},
+					"activeServer": {
+						"tooltip": "현재 서버"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "이 이름의 서버가 이미 있습니다",
+							"nameForbidden": "예약된 이름입니다",
+							"urlExists": "이 URL의 서버가 이미 있습니다"
+						},
+						"fields": {
+							"name": {
+								"label": "이름",
+								"description": "이 서버를 쉽게 알아볼 수 있는 이름입니다",
+								"placeholder": "나의 서버"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "Stump 서버의 URL입니다",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "서버 추가",
+						"title": "새 서버 추가",
+						"description": "데스크톱 앱에 새 Stump 서버를 추가합니다",
+						"confirm": "서버 추가"
+					},
+					"editServer": {
+						"tooltip": "서버 수정",
+						"title": "서버 수정",
+						"description": "이 서버의 정보를 수정합니다",
+						"confirm": "변경 사항 저장"
+					},
+					"deleteServer": {
+						"tooltip": "서버 삭제",
+						"confirmation": {
+							"title": "이 서버 삭제",
+							"description": "데스크톱 앱에서 이 서버를 제거합니다",
+							"disclaimerActiveServer": "현재 사용 중인 서버입니다. 로그아웃됩니다",
+							"disclaimerLastServer": "마지막으로 남은 등록 서버입니다. 로그아웃되며, 초기 설정 과정에서 서버를 다시 등록해야 합니다",
+							"confirm": "서버 삭제"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "서버 전환",
+						"confirmation": {
+							"title": "이 서버로 전환",
+							"description": "현재 서버에서 로그아웃됩니다",
+							"confirm": "서버 전환",
+							"server": "서버",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "모든 서버 삭제",
+						"description": [
+							"데스크톱 앱에서 등록된 모든 서버를 삭제합니다",
+							"이 작업은 되돌릴 수 없습니다"
+						],
+						"confirmation": {
+							"trigger": "모든 서버 삭제",
+							"title": "모든 서버 삭제",
+							"description": "데스크톱 앱에서 모든 서버를 제거합니다",
+							"disclaimer": "로그아웃되며, 초기 설정 과정에서 서버를 다시 등록해야 합니다",
+							"confirm": "모든 서버 삭제"
 						}
 					}
+				},
+				"optionalFeatures": {
+					"label": "선택 기능",
+					"description": "데스크톱 앱 전용 선택 기능을 관리합니다",
+					"bundledServer": {
+						"label": "내장 서버",
+						"description": "데스크톱 앱이 실행되는 동안 내장 서버를 백그라운드에서 실행합니다(재시작 필요)"
+					},
+					"discordPresence": {
+						"label": "Discord 활동 상태",
+						"description": "Discord Rich Presence를 통해 Stump 활동을 Discord에 표시합니다",
+						"reconnect": "Discord에 다시 연결"
+					}
 				}
-			}
+			},
+			"helmet": "데스크톱 설정",
+			"title": "데스크톱 설정",
+			"description": "Stump 데스크톱 앱에 관한 설정입니다"
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings"
+			"helmet": "서버 설정",
+			"title": "서버 설정",
+			"description": "Stump 서버의 일반 설정입니다",
+			"sections": {
+				"updateAvailable": {
+					"message": "서버가 최신 상태가 아닙니다. 최신 버전으로 업데이트하세요!"
+				},
+				"serverInfo": {
+					"title": "서버 정보",
+					"description": "Stump 서버의 기본 정보입니다",
+					"build": {
+						"label": "빌드",
+						"description": "버전과 빌드의 상세 정보입니다",
+						"version": {
+							"semver": "버전",
+							"commitHash": "정확한 커밋",
+							"date": "빌드 날짜"
+						}
+					},
+					"nonStableChannel": {
+						"title": "Stump의 안정 버전이 아닌 빌드를 사용 중입니다",
+						"description": [
+							"현재 사용 중인 빌드는",
+							"채널의 빌드입니다"
+						]
+					}
+				},
+				"helpfulLinks": {
+					"title": "유용한 링크",
+					"description": "Stump 서버 관리에 도움이 되는 자료의 링크입니다",
+					"links": {
+						"documentation": "문서",
+						"changelog": "변경 내역"
+					}
+				},
+				"serverPublicUrl": {
+					"label": "외부 접속 URL",
+					"description": "네트워크 외부에서 서버에 접근할 수 있는 경우 해당 URL을 입력합니다. 초대 링크 등의 기능에 사용됩니다"
+				},
+				"customEmojis": {
+					"title": "사용자 지정 이모지",
+					"description": "서버에서 사용할 사용자 지정 이미지 이모지를 업로드하고 관리합니다",
+					"dropzone": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
+					"input": {
+						"label": "이모지 이름",
+						"placeholder": "예: party_parrot"
+					},
+					"deleteModal": {
+						"title": "이모지 삭제",
+						"description": "이 이모지를 삭제하시겠습니까?"
+					},
+					"noCustomEmojis": "아직 추가한 사용자 지정 이모지가 없습니다",
+					"invalidName": "올바른 이모지 이름을 입력하세요",
+					"uploadError": "이모지를 업로드하지 못했습니다",
+					"uploadSuccess": "이모지를 업로드했습니다",
+					"renameSuccess": "이모지 이름을 변경했습니다",
+					"renameError": "이모지 이름을 변경하지 못했습니다",
+					"deleteSuccess": "이모지를 삭제했습니다",
+					"deleteError": "이모지를 삭제하지 못했습니다"
+				}
+			}
 		},
 		"server/jobs": {
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "예약 작업",
+					"description": "일부 작업은 정해진 일정에 따라 자동으로 실행되도록 설정할 수 있습니다",
+					"restartRequiredTitle": "재시작 필요",
+					"restartRequired": "이 설정의 변경 사항은 서버를 재시작한 후 적용됩니다",
+					"newScheduledJob": "새 예약 작업",
+					"deleteScheduledJob": {
+						"title": "예약 작업 삭제",
+						"description": "\"{{name}}\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+						"confirm": "삭제"
+					},
+					"dialog": {
+						"titleCreate": "새 예약 작업",
+						"titleEdit": "예약 작업 수정",
+						"cancel": "취소",
+						"create": "생성",
+						"saveChanges": "변경 사항 저장"
+					},
+					"fields": {
+						"name": {
+							"label": "이름",
+							"placeholder": "예: \"매일 라이브러리 스캔\""
+						},
+						"schedule": {
+							"label": "Cron 일정",
+							"description": "실행 주기를 지정하는 cron 표현식입니다",
+							"placeholder": "0 0 0 * * *"
+						},
+						"schedulePreset": {
+							"label": "사전 설정",
+							"custom": "사용자 지정",
+							"everySixHours": "6시간마다",
+							"everyTwelveHours": "12시간마다",
+							"dailyAtMidnight": "매일 자정",
+							"weeklySunday": "매주 일요일",
+							"monthlyFirst": "매월 1일"
+						},
+						"kind": {
+							"label": "작업 유형",
+							"libraryScan": "라이브러리 스캔",
+							"metadataRetry": "메타데이터 재시도"
+						},
+						"libraryIds": {
+							"label": "스캔할 라이브러리",
+							"description": "비워 두면 모든 라이브러리를 스캔합니다"
+						},
+						"statuses": {
+							"label": "재시도할 상태",
+							"description": "다시 시도할 메타데이터 가져오기 상태를 선택합니다",
+							"rateLimited": "요청 제한",
+							"failed": "실패"
+						},
+						"enabled": "활성화"
+					},
+					"row": {
+						"enabled": "활성화",
+						"disabled": "비활성화",
+						"allLibraries": "모든 라이브러리",
+						"rateLimited": "요청 제한",
+						"lastRun": "마지막 실행: {{date}}",
+						"edit": "수정",
+						"delete": "삭제"
+					},
+					"toasts": {
+						"createSuccess": "예약 작업을 생성했습니다",
+						"createError": "예약 작업을 생성하지 못했습니다",
+						"updateSuccess": "예약 작업을 수정했습니다",
+						"updateError": "예약 작업을 수정하지 못했습니다",
+						"deleteSuccess": "예약 작업을 삭제했습니다",
+						"deleteError": "예약 작업을 삭제하지 못했습니다"
+					},
+					"errors": {
+						"invalidCron": "올바른 cron 표현식으로 일정을 입력해야 합니다"
+					}
+				},
+				"history": {
+					"title": "기록",
+					"description": "Stump 서버에서 실행한 작업의 기록입니다",
+					"table": {
+						"columns": {
+							"name": "유형",
+							"description": "설명",
+							"status": "상태",
+							"createdAt": "시작 시각",
+							"elapsed": "경과 시간",
+							"tasks": "세부 작업"
+						},
+						"emptyHeading": "표시할 작업이 없습니다",
+						"emptySubtitle": "작업이 없으면 작업 기록도 없죠",
+						"deleteAllMessage": "작업 기록과 통계는 언제든 데이터베이스에서 삭제할 수 있습니다. 이 작업은 되돌릴 수 없습니다"
+					},
+					"deleteJobHistory": {
+						"title": "작업 기록 삭제",
+						"description": "데이터베이스의 모든 작업 기록을 영구적으로 삭제합니다",
+						"confirmText": "모든 작업 기록을 삭제하시겠습니까?",
+						"confirm": "삭제",
+						"emptyState": "지울 작업이 없습니다"
+					}
 				}
-			}
+			},
+			"helmet": "작업",
+			"title": "작업",
+			"description": "Stump 서버에서 실행하는 백그라운드 작업입니다"
 		},
 		"server/users": {
 			"createOrUpdateForm": {
 				"permissions": {
 					"file": {
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "파일 탐색기",
+							"description": "여러 파일 탐색기를 사용할 수 있습니다.\n이 기능을 허용하면 콘텐츠 접근 제한을 보장할 수 없습니다"
+						},
+						"label": "파일 관리",
+						"download": {
+							"label": "파일 다운로드",
+							"description": "서버에서 파일을 다운로드할 수 있습니다"
+						},
+						"upload": {
+							"label": "파일 업로드",
+							"description": "서버에 파일을 업로드할 수 있습니다"
 						}
 					},
 					"user": {
 						"manage": {
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "서버의 다른 사용자를 관리할 수 있습니다.\n조회, 생성 및 수정 권한도 포함됩니다",
+							"label": "사용자 관리"
+						},
+						"label": "사용자 관리",
+						"read": {
+							"label": "사용자 조회",
+							"description": "서버의 다른 사용자를 조회할 수 있습니다. 라이브러리 접근에서 사용자를 제외하는 기능 등 일부 기능에 필요합니다"
 						}
 					},
 					"smartlist": {
 						"read": {
-							"description": "사용자가 스마트 목록 기능에 접근할 수 있도록 허용합니다. 세부 권한은 아직 구현되지 않았으므로,\n자신의 목록을 읽고 만들고 수정할 수 있는 권한도 포함됩니다"
+							"description": "사용자가 스마트 목록 기능에 접근할 수 있도록 허용합니다. 세부 권한은 아직 구현되지 않았으므로,\n자신의 목록을 읽고 만들고 수정할 수 있는 권한도 포함됩니다",
+							"label": "스마트 목록 기능 접근"
+						},
+						"label": "스마트 목록"
+					},
+					"groups": {
+						"accountManagement": "계정",
+						"featureAccess": "기능 접근",
+						"fileManagement": "파일",
+						"emailers": "이메일 발신 설정",
+						"emailing": "이메일 전송",
+						"libraryManagement": "라이브러리 관리",
+						"userManagement": "사용자 관리",
+						"serverManagement": "서버 관리",
+						"metadataManagement": "메타데이터 관리"
+					},
+					"heading": "권한",
+					"subtitle": [
+						"이 사용자에게 부여할 권한을 선택합니다. 각 권한에 대한 자세한 내용은",
+						"문서를 참고하세요"
+					],
+					"bookclub": {
+						"label": "북클럽",
+						"read": {
+							"label": "북클럽 기능 접근",
+							"description": "북클럽 조회와 가입을 포함한 북클럽 기능에 접근할 수 있습니다"
+						},
+						"create": {
+							"label": "북클럽 생성",
+							"description": "새 북클럽을 만들 수 있습니다"
+						}
+					},
+					"feature": {
+						"label": "선택 기능",
+						"api_keys": {
+							"label": "API 키",
+							"description": "본인의 API 키를 관리할 수 있습니다"
+						},
+						"koreader_sync": {
+							"label": "KOReader 동기화",
+							"description": "KOReader 동기화 연동 기능을 사용할 수 있습니다"
+						}
+					},
+					"emailer": {
+						"label": "이메일 발신 설정",
+						"read": {
+							"label": "이메일 발신 설정 조회",
+							"description": "등록된 이메일 발신 설정을 볼 수 있습니다"
+						},
+						"create": {
+							"label": "이메일 발신 설정 생성",
+							"description": "새 이메일 발신 설정을 만들 수 있습니다"
+						},
+						"manage": {
+							"label": "이메일 발신 설정 관리",
+							"description": "기존 이메일 발신 설정을 관리할 수 있습니다"
+						}
+					},
+					"email": {
+						"label": "이메일 전송",
+						"send": {
+							"label": "이메일 보내기",
+							"description": "서버에서 등록된 별칭으로 이메일을 보낼 수 있습니다"
+						},
+						"arbitrary_send": {
+							"label": "임의의 주소로 이메일 보내기",
+							"description": "서버에서 모든 이메일 주소로 이메일을 보낼 수 있습니다"
+						}
+					},
+					"library": {
+						"label": "라이브러리 관리",
+						"create": {
+							"label": "라이브러리 생성",
+							"description": "새 라이브러리를 만들 수 있습니다.\n수정 및 스캔 권한도 포함됩니다"
+						},
+						"scan": {
+							"label": "라이브러리 스캔",
+							"description": "기존 라이브러리의 스캔을 시작할 수 있습니다"
+						},
+						"edit": {
+							"label": "라이브러리 수정",
+							"description": "기존 라이브러리의 기본 정보를 수정할 수 있습니다"
+						},
+						"manage": {
+							"label": "라이브러리 관리",
+							"description": "기존 라이브러리의 고급 설정을 관리할 수 있습니다.\n수정 및 스캔 권한도 포함됩니다"
+						},
+						"delete": {
+							"label": "라이브러리 삭제",
+							"description": "기존 라이브러리를 삭제할 수 있습니다.\n수정, 관리 및 스캔 권한도 포함됩니다"
+						}
+					},
+					"server": {
+						"label": "서버 관리",
+						"manage": {
+							"label": "서버 관리",
+							"description": "서버를 관리할 수 있습니다.\n다른 권한도 *다수* 포함됩니다"
 						}
 					}
+				},
+				"accessControl": {
+					"heading": "접근 제어 및 제한",
+					"subtitle": [
+						"이 사용자에게 적용할 제한을 설정합니다. 접근 제어에 대한 자세한 내용은",
+						"문서를 참고하세요"
+					],
+					"ageRestriction": {
+						"label": "연령 제한",
+						"description": "지정한 연령 등급을 초과하는 콘텐츠에 접근하지 못하도록 합니다",
+						"placeholder": "13",
+						"enforceUnset": {
+							"label": "등급 없는 콘텐츠도 제한",
+							"description": "활성화하면 연령 등급이 없는 콘텐츠에도 접근할 수 없습니다"
+						}
+					},
+					"tagRestriction": {
+						"label": "태그 제한",
+						"description": "선택한 태그가 있는 콘텐츠에 접근하지 못하도록 합니다",
+						"placeholder": "성인, 잔혹"
+					}
+				},
+				"validation": {
+					"ageRestrictionTooLow": "연령 제한은 0 미만일 수 없습니다",
+					"missingUsername": "사용자 이름을 입력하세요",
+					"missingPassword": "암호를 입력하세요",
+					"usernameAlreadyExists": "이미 사용 중인 사용자 이름입니다"
+				},
+				"createSubmitButton": "사용자 생성",
+				"updateSubmitButton": "사용자 수정"
+			},
+			"helmet": "사용자 관리",
+			"title": "사용자",
+			"description": "이 서버의 사용자를 관리합니다",
+			"createUser": {
+				"helmet": "사용자 생성",
+				"title": "사용자 생성",
+				"description": "이 서버에 새 사용자를 생성합니다"
+			},
+			"updateUser": {
+				"helmet": "사용자 수정",
+				"title": "사용자 수정",
+				"description": "이 사용자의 정보를 수정합니다"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "활동 기록 삭제",
+					"description": "데이터베이스의 모든 로그인 활동 기록을 영구적으로 삭제합니다",
+					"confirm": "삭제"
+				}
+			}
+		},
+		"navigation": {
+			"general": "일반",
+			"logs": "로그",
+			"server": "서버",
+			"jobs": "작업 및 설정",
+			"users": "사용자 관리",
+			"desktop": "데스크톱"
+		},
+		"app/account": {
+			"helmet": "계정 설정",
+			"title": "계정 설정",
+			"description": "계정에 관한 설정입니다",
+			"sections": {
+				"account": {
+					"validation": {
+						"invalidUrl": "올바른 URL을 입력하세요",
+						"missingUsername": "사용자 이름을 입력하세요"
+					},
+					"labels": {
+						"username": "사용자 이름",
+						"password": "암호",
+						"activeChangesPrompt": "저장하지 않은 변경 사항이 있습니다",
+						"uselessForm": {
+							"title": "이 설정을 변경할 권한이 없습니다",
+							"description": "이 설정을 변경하려면 관리자에게 문의하세요"
+						},
+						"insufficientPermission": "이 항목을 변경할 권한이 없습니다"
+					},
+					"errors": {
+						"updateFailed": "프로필을 수정하는 동안 서버 오류가 발생했습니다. 다시 시도하세요."
+					},
+					"avatarPicker": {
+						"label": "프로필 이미지",
+						"heading": "프로필 이미지 업로드",
+						"subtitle": "Stump의 소셜 기능에서 프로필 이미지로 사용할 이미지를 업로드할 수 있습니다",
+						"dropzone": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
+						"changeImage": "이미지 변경",
+						"removeImage": "이미지 제거",
+						"removeSelection": "업로드한 이미지 제거",
+						"uploadFailed": "프로필 이미지를 업로드하지 못했습니다",
+						"removeFailed": "프로필 이미지를 제거하지 못했습니다"
+					},
+					"buttons": {
+						"confirm": "변경 사항 저장"
+					}
+				},
+				"locale": {
+					"localeSelector": {
+						"label": "언어"
+					},
+					"heading": "언어 및 지역",
+					"subtitle": [
+						"Stump는 여러 언어와 지역 설정을 지원합니다. 아래에서 원하는 설정을 선택하세요. 가능하다면",
+						"Stump 번역",
+						"개선에 참여해 주세요!"
+					]
+				}
+			}
+		},
+		"app/apiKeys": {
+			"helmet": "API 키",
+			"title": "API 키",
+			"description": "생성한 Stump API 키를 관리합니다",
+			"shared": {
+				"fields": {
+					"name": "이름",
+					"expiration": "만료",
+					"last_used": "마지막 사용",
+					"created": "생성 시각",
+					"permissions": "권한",
+					"inherited": "상속",
+					"explicit": "직접 지정"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "API 키",
+					"description": "이 키의 상세 정보입니다",
+					"unrestrictedKey": {
+						"heading": "제한 없는 키",
+						"description": "서버 소유자의 키이므로 권한을 상속하도록 설정하면 제한 없이 접근할 수 있습니다. 신중하게 사용하세요."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "API 키 만들기",
+						"heading": {
+							"creating": "API 키 만들기",
+							"created": "생성한 키"
+						},
+						"description": {
+							"creating": "API 키는 API 인증에 사용할 수 있는 장기 인증 정보입니다",
+							"created": "새 API 키를 생성했습니다. 비밀 키는 다시 표시되지 않으므로 안전한 곳에 저장하세요"
+						},
+						"inheritDisclaimer": "이 API 키는 본인의 모든 권한을 상속하므로, 본인이 할 수 있는 모든 작업을 수행할 수 있습니다. 신중하게 설정하세요",
+						"createdKey": "생성한 키",
+						"savedConfirm": "키를 저장했습니다",
+						"submit": "키 만들기"
+					}
+				},
+				"table": {
+					"title": "내 키",
+					"description": "본인이 생성한 API 키입니다",
+					"actionMenu": {
+						"inspect": "자세히 보기",
+						"delete": "삭제"
+					},
+					"empty": {
+						"title": "아직 생성한 키가 없습니다",
+						"action": "API 키를 만들어 시작하세요"
+					},
+					"noExpiration": "만료 설정 없음"
+				}
+			}
+		},
+		"app/reader": {
+			"helmet": "뷰어 설정",
+			"title": "뷰어 설정",
+			"description": "기본 읽기 환경설정입니다. 일부 설정은 현재 기기에만 적용됩니다",
+			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "읽기 방향",
+							"description": "뷰어에서 페이지를 넘기는 방향입니다"
+						}
+					}
+				},
+				"imageBasedBooks": {
+					"label": "이미지로 구성된 책",
+					"description": "코믹스, 일본 만화 등 이미지로 구성된 책입니다",
+					"sections": {
+						"preloadAheadCount": {
+							"label": "다음 페이지 미리 불러오기 수",
+							"description": "현재 페이지 다음으로 미리 불러올 페이지 수입니다"
+						},
+						"preloadBehindCount": {
+							"label": "이전 페이지 미리 불러오기 수",
+							"description": "현재 페이지 이전으로 미리 불러올 페이지 수입니다"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "전자책 뷰어",
+					"description": "텍스트로 구성된 책의 기본 설정입니다",
+					"sections": {
+						"fontSize": {
+							"label": "글자 크기",
+							"description": "뷰어에서 사용할 글자의 크기입니다"
+						},
+						"fontFamily": {
+							"label": "글꼴",
+							"description": "뷰어에서 사용할 글꼴입니다"
+						},
+						"lineHeight": {
+							"label": "줄 높이",
+							"description": "뷰어에서 사용할 줄의 높이입니다"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "환경설정 초기화",
+							"description": "기본 설정을 개별적으로 변경한 모든 책의 설정을 초기화합니다",
+							"button": "환경설정 초기화"
+						}
+					}
+				}
+			}
+		},
+		"server/logs": {
+			"helmet": "로그",
+			"title": "로그",
+			"description": "Stump 서버에서 생성한 로그입니다",
+			"sections": {
+				"persistedLogs": {
+					"title": "저장된 로그",
+					"description": "데이터베이스에 수동으로 저장한 로그이며, 일반적으로 특정 작업이나 이벤트와 관련되어 있습니다",
+					"table": {
+						"columns": {
+							"level": "수준",
+							"message": "메시지",
+							"timestamp": "시각"
+						},
+						"emptyHeading": "표시할 로그가 없습니다",
+						"emptySubtitle": "서버가 아주 정상적이거나, 아주 비정상적일 수도 있습니다"
+					},
+					"deleteLogs": {
+						"title": "로그 삭제",
+						"description": "데이터베이스에 저장된 모든 로그를 영구적으로 삭제합니다",
+						"disclaimer": "이 작업은 되돌릴 수 없습니다",
+						"confirm": "로그 삭제"
+					}
+				},
+				"liveLogs": {
+					"title": "실시간 로그",
+					"description": "Stump 서버에서 실시간으로 전송하는 로그입니다"
+				}
+			}
+		},
+		"server/email": {
+			"helmet": "이메일 설정",
+			"title": "이메일",
+			"description": "Stump 서버의 SMTP 이메일 발신 설정입니다",
+			"sections": {
+				"emailers": {
+					"title": "SMTP 발신 설정",
+					"description": "Stump 서버에서 이메일을 보내도록 구성한 클라이언트입니다",
+					"singleInstanceDisclaimer": "Stump는 백엔드에서 여러 SMTP 설정을 지원하지만, UI에서는 하나만 구성할 수 있습니다. 추후 개선할 예정입니다",
+					"list": {
+						"emptyHeading": "등록된 SMTP 발신 설정이 없습니다",
+						"primaryEmailer": "기본 발신 설정",
+						"sendHistory": {
+							"heading": "전송 기록",
+							"description": "이 발신 설정으로 보낸 이메일 기록입니다",
+							"table": {
+								"columns": {
+									"to": "받는 사람",
+									"subject": "제목",
+									"status": "상태",
+									"createdAt": "전송 시각"
+								}
+							},
+							"emptyHeading": "기록이 없습니다",
+							"emptySubtitle": "이 발신 설정의 기록이 비어 있습니다. 아직 사용하지 않았거나 기록을 지운 상태입니다"
+						}
+					}
+				},
+				"devices": {
+					"title": "이메일 수신 기기",
+					"description": "Stump 서버에서 보내는 이메일을 받도록 등록한 기기 별칭입니다",
+					"addDevice": "기기 별칭 추가",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "기기 별칭 만들기",
+							"update": "기기 별칭 수정"
+						},
+						"name": {
+							"label": "이름",
+							"description": "이 기기 별칭을 다른 별칭과 구별할 수 있는 이름입니다"
+						},
+						"email": {
+							"label": "이메일",
+							"description": "이 별칭과 연결할 이메일 주소입니다"
+						},
+						"forbidden": {
+							"label": "전송 금지",
+							"description": "활성화하면 어떤 사용자도 이 별칭과 연결된 주소로 이메일을 보낼 수 없습니다"
+						},
+						"submit": {
+							"create": "기기 별칭 만들기",
+							"update": "기기 별칭 수정"
+						}
+					},
+					"table": {
+						"emptyHeading": "등록된 기기가 없습니다",
+						"emptySubtitle": "나중에 사용할 새 기기 별칭을 만드세요"
+					}
+				}
+			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "이름",
+					"description": "이 발신 설정을 다른 설정과 구별할 수 있는 이름입니다"
+				},
+				"smtpSettings": {
+					"heading": "SMTP 설정",
+					"description": "이 발신 설정의 SMTP 관련 설정입니다"
+				},
+				"smtpProvider": {
+					"label": "SMTP 제공자 사전 설정",
+					"description": "SMTP 서버 제공자입니다. 일반적인 설정 일부를 미리 채우는 데 사용하며, 모든 제공자를 지원하지는 않습니다"
+				},
+				"smtpHost": {
+					"label": "SMTP 호스트",
+					"description": "SMTP 서버의 호스트 이름입니다"
+				},
+				"smtpPort": {
+					"label": "SMTP 포트",
+					"description": "SMTP 서버의 포트입니다"
+				},
+				"tlsEnabled": {
+					"label": "TLS 활성화",
+					"description": "활성화하면 SMTP 서버와의 연결을 암호화합니다"
+				},
+				"username": {
+					"label": "사용자 이름",
+					"description": "SMTP 서버 인증에 사용할 사용자 이름입니다. 일반적으로 이메일 주소를 사용합니다"
+				},
+				"password": {
+					"label": "암호",
+					"description": "SMTP 서버 인증에 사용할 암호입니다. Gmail을 사용하는 경우 앱 비밀번호를 생성해야 할 수 있습니다"
+				},
+				"senderSettings": {
+					"heading": "발신자 설정",
+					"description": "이메일 발신자에 관한 설정입니다"
+				},
+				"senderDisplayName": {
+					"label": "발신자 표시 이름",
+					"description": "수신자에게 표시할 이름입니다"
+				},
+				"senderEmail": {
+					"label": "발신자 이메일 주소",
+					"description": "수신자에게 표시할 이메일 주소입니다"
+				},
+				"additionalSettings": {
+					"heading": "추가 설정",
+					"description": "이메일 발신을 위한 추가 설정입니다"
+				},
+				"maxAttachmentSize": {
+					"label": "최대 첨부 파일 크기",
+					"description": "첨부 파일의 최대 크기입니다. 단위는 바이트입니다"
+				},
+				"submit": {
+					"create": "이메일 발신 설정 만들기",
+					"update": "이메일 발신 설정 수정"
+				},
+				"testEmailer": {
+					"button": "테스트 이메일 보내기",
+					"recipientLabel": "테스트 수신자",
+					"recipientDescription": "테스트 이메일을 보낼 주소입니다",
+					"success": "테스트 이메일을 보냈습니다",
+					"error": {
+						"title": "테스트 이메일을 보내지 못했습니다",
+						"description": "SMTP 설정을 확인하고 다시 시도하세요"
+					}
+				}
+			},
+			"createEmailer": {
+				"helmet": "이메일 발신 설정 만들기",
+				"title": "이메일 발신 설정 만들기",
+				"description": "Stump 서버의 새 SMTP 발신 설정을 만듭니다"
+			},
+			"updateEmailer": {
+				"helmet": "이메일 발신 설정 수정",
+				"title": "이메일 발신 설정 수정",
+				"description": "이 SMTP 발신 설정의 정보를 수정합니다"
+			}
+		},
+		"server/metadataIntegrations": {
+			"helmet": "메타데이터 연동",
+			"title": "메타데이터 연동",
+			"addProvider": "제공자 추가",
+			"createProviderError": "제공자를 생성하지 못했습니다",
+			"updateProviderError": "제공자를 수정하지 못했습니다",
+			"noProviders": "아직 등록된 제공자가 없습니다. 제공자를 추가하여 시작하세요",
+			"providers": {
+				"title": "제공자",
+				"description": "라이브러리 데이터를 가져오고 보완할 외부 메타데이터 제공자를 설정합니다"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "API 토큰",
+					"description": "이 제공자의 인증에 사용할 API 토큰입니다",
+					"validationError": "이 토큰의 자동 검증에 실패했습니다",
+					"validationRequestError": "검증 요청에 실패했습니다",
+					"validationRequestErrorUnknown": "검증 중 알 수 없는 오류가 발생했습니다",
+					"providerStatusError": "제공자가 상태 코드 {{status}}을(를) 반환했습니다",
+					"providerError": "제공자가 오류를 반환했습니다: {{message}}",
+					"noBearerPrefixRequired": "API 토큰에서 'Bearer ' 접두사를 제거하세요"
+				},
+				"apiTokenExpiresAt": {
+					"label": "API 토큰 만료",
+					"description": "API 토큰의 만료 날짜입니다(선택 사항)"
+				},
+				"enableProvider": {
+					"label": "제공자 활성화",
+					"description": "활성화하면 데이터를 가져오는 데 이 제공자를 사용합니다"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "자동 적용 활성화",
+						"description": "직접 승인하지 않고 일치 가능성이 높은 결과를 적용합니다"
+					},
+					"threshold": {
+						"label": "신뢰도 기준값",
+						"description": "매칭 결과를 자동 적용할 최소 신뢰도 점수입니다(0~1)",
+						"disclaimer": "계산된 신뢰도 점수는 추정치이므로 항상 정확하지는 않을 수 있습니다"
+					},
+					"strategy": {
+						"label": "병합 방식",
+						"options": {
+							"FILL_GAPS": "빈 필드 채우기",
+							"FILL_AND_MERGE_LISTS": "빈 필드 채우기 및 목록 병합",
+							"PREFER_EXTERNAL": "외부 데이터 우선"
+						}
+					}
+				}
+			},
+			"providerEnabled": "활성화된 제공자입니다",
+			"providerDisabled": "비활성화된 제공자입니다",
+			"providerTokenExpiresSoon": "이 제공자의 토큰이 곧 만료됩니다",
+			"autoApplyOn": "자동 적용 켜짐",
+			"autoApplyOff": "자동 적용 꺼짐",
+			"editDialog": {
+				"tooltip": "제공자 수정"
+			},
+			"deleteDialog": {
+				"title": "제공자 삭제",
+				"description": "{{providerName}}을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+			}
+		},
+		"server/tags": {
+			"helmet": "태그 관리",
+			"title": "태그",
+			"description": "콘텐츠를 정리할 태그를 만들고 관리합니다",
+			"sections": {
+				"table": {
+					"title": "태그",
+					"description": "이 서버에서 사용할 수 있는 모든 태그입니다",
+					"empty": {
+						"title": "태그가 없습니다",
+						"action": "첫 태그를 만들어 시작하세요"
+					},
+					"columns": {
+						"name": "이름"
+					},
+					"actionMenu": {
+						"rename": "이름 변경"
+					}
+				},
+				"createTag": {
+					"trigger": "태그 만들기",
+					"modal": {
+						"heading": "새 태그 만들기",
+						"description": "태그는 책, 시리즈, 라이브러리에 지정할 수 있습니다",
+						"name": {
+							"label": "이름",
+							"placeholder": "태그 이름을 입력하세요"
+						},
+						"submit": "생성"
+					}
+				},
+				"renameTag": {
+					"modal": {
+						"heading": "태그 이름 변경",
+						"description": "이 태그가 지정된 모든 항목에서 태그 이름을 변경합니다",
+						"name": {
+							"label": "이름",
+							"placeholder": "새 태그 이름을 입력하세요"
+						},
+						"submit": "이름 변경"
+					}
+				},
+				"deleteTag": {
+					"title": "태그 삭제",
+					"description": "모든 책, 시리즈, 라이브러리에서 이 태그를 제거합니다. 이 작업은 되돌릴 수 없습니다.",
+					"confirm": "삭제"
 				}
 			}
 		}
 	},
 	"sidebar": {
 		"libraryOptions": {
-			"manageLibrary": "Manage"
+			"manageLibrary": "설정",
+			"scanLibrary": "스캔",
+			"fileExplorer": "파일",
+			"deleteLibrary": "삭제"
+		},
+		"buttons": {
+			"home": "홈",
+			"libraries": "라이브러리",
+			"books": "탐색",
+			"bookClubs": "북클럽",
+			"createLibrary": "라이브러리 만들기",
+			"noLibraries": "라이브러리가 없습니다",
+			"createBookClub": "북클럽 만들기",
+			"noBookClubs": "북클럽이 없습니다",
+			"settings": "설정",
+			"themeToggle": "테마 전환",
+			"goForward": "앞으로 이동",
+			"goBack": "뒤로 이동",
+			"smartlists": "스마트 목록",
+			"noSmartlists": "스마트 목록이 없습니다",
+			"createSmartlist": "스마트 목록 만들기",
+			"seeAll": "모두 보기"
+		},
+		"versionInformation": {
+			"heading": "버전 정보",
+			"semVer": "시맨틱 버전",
+			"commitHash": "커밋 해시",
+			"buildDate": "빌드 날짜"
 		}
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail"
+		"label": "썸네일 선택",
+		"options": {
+			"selectFromBooks": "책에서 선택",
+			"uploadImage": "이미지 업로드"
+		},
+		"uploadImage": {
+			"emptyState": "이미지 미리보기가 여기에 표시됩니다",
+			"prompt": "여기에 이미지를 끌어다 놓거나 클릭하여 선택하세요",
+			"remove": "이미지 제거",
+			"fileTooLarge": "파일이 너무 큽니다",
+			"onlyOneFile": "파일은 하나만 선택할 수 있습니다",
+			"noFile": "선택한 파일이 없습니다"
+		}
 	},
 	"common": {
-		"unknownError": "알 수 없는 오류가 발생했습니다"
+		"unknownError": "알 수 없는 오류가 발생했습니다",
+		"add": "추가",
+		"andXMoreTrailing": "...외 {{count}}개",
+		"cancel": "취소",
+		"clear": "지우기",
+		"confirm": "확인",
+		"created": "생성됨",
+		"delete": "삭제",
+		"deleteConfirmation": {
+			"title": "{{type}} 삭제",
+			"description": "이 {{type}}을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+			"confirm": "{{type}} 삭제",
+			"typeToConfirm": "확인하려면 {{name}}을(를) 입력하세요:"
+		},
+		"experimentalDisclaimer": {
+			"title": "실험적인 기능입니다",
+			"description": "일부 기능이 없거나 버그가 있을 수 있으며, 전혀 작동하지 않을 수도 있습니다. 이를 고려하여 사용하고 문제가 발생하면 알려주세요"
+		},
+		"enter": "입력",
+		"save": "저장",
+		"send": "보내기",
+		"saveChanges": "변경 사항 저장",
+		"noChanges": "변경 사항 없음",
+		"create": "생성",
+		"edit": "수정",
+		"info": "정보",
+		"infoSheetStats": {
+			"series": "시리즈",
+			"inProgress": "읽는 중",
+			"completedBooks": "완독",
+			"readingTime": "독서 시간",
+			"size": "크기"
+		},
+		"update": "수정",
+		"upload": "업로드",
+		"uploading": "업로드 중",
+		"uploadingEllipsis": "업로드 중...",
+		"unimplemented": "아직 구현되지 않은 기능입니다! 나중에 다시 확인해 주세요",
+		"upNext": "다음 항목",
+		"unknown": "알 수 없음",
+		"lastUpdated": "마지막 수정",
+		"limitedFunctionality": "아직 완전히 구현되지 않아 일부 기능이 없습니다. 나중에 다시 확인해 주세요",
+		"logIn": "로그인",
+		"login": "로그인",
+		"seeError": "오류 보기",
+		"remove": "제거",
+		"goBack": "뒤로 이동",
+		"goToServers": "서버 목록으로 이동",
+		"notReady": "아직 준비되지 않은 기능입니다",
+		"notUsedYet": "아직 사용하지 않음",
+		"never": "없음",
+		"scan": "스캔",
+		"somethingWentWrong": "문제가 발생했습니다",
+		"back": "뒤로",
+		"continue": "계속",
+		"book": "책",
+		"series": "시리즈",
+		"fileUpload": {
+			"someRejected": "일부 파일을 업로드할 수 없습니다. 파일 형식을 확인하고 다시 시도하세요",
+			"tooManyFiles": "선택한 파일이 너무 많습니다",
+			"noValidFiles": "선택한 파일 중 유효한 파일이 없습니다"
+		},
+		"notConfigured": "설정되지 않음"
 	},
 	"mobileApp": {
 		"bookActions": {
 			"markAsRead": {
-				"failure": "책을 읽음으로 표시하지 못했습니다"
+				"failure": "책을 읽음으로 표시하지 못했습니다",
+				"label": "읽음으로 표시",
+				"confirmation": "{{bookTitle}}을(를) 읽음으로 표시하시겠습니까?"
 			},
 			"clearProgress": {
-				"failure": "현재 진행률을 삭제하지 못했습니다"
+				"failure": "현재 진행률을 삭제하지 못했습니다",
+				"label": "독서 진행률 지우기",
+				"confirmation": "{{bookTitle}}의 독서 진행률을 지우시겠습니까?"
 			},
 			"deleteReadHistory": {
-				"failure": "읽기 기록을 삭제하지 못했습니다"
-			}
+				"failure": "읽기 기록을 삭제하지 못했습니다",
+				"label": "독서 기록 삭제",
+				"confirmation": "{{bookTitle}}의 독서 기록을 삭제하시겠습니까?"
+			},
+			"deleteBook": {
+				"label": "책 삭제",
+				"confirmation": "{{bookTitle}}을(를) 삭제하시겠습니까?"
+			},
+			"deleteDownload": {
+				"label": "다운로드한 파일 삭제",
+				"confirmation": "{{bookTitle}}의 다운로드한 파일을 삭제하시겠습니까?"
+			},
+			"goToLibrary": "라이브러리로 이동",
+			"goToSeries": "시리즈로 이동",
+			"seeDetails": "자세히 보기"
 		},
 		"readerSettings": {
-			"title": "Reader Settings"
+			"title": "이미지 뷰어 설정",
+			"overrideGlobalSettings": "이 책에 별도 설정 적용",
+			"sections": {
+				"mode": "방식",
+				"imageOptions": "이미지 옵션",
+				"controls": "조작"
+			},
+			"readingMode": {
+				"label": "페이지 이동 방식",
+				"options": {
+					"PAGED": "페이지 단위",
+					"CONTINUOUS_HORIZONTAL": "가로 스크롤",
+					"CONTINUOUS_VERTICAL": "세로 스크롤"
+				}
+			},
+			"readingDirection": {
+				"label": "방향",
+				"options": {
+					"RTL": "오른쪽에서 왼쪽으로",
+					"LTR": "왼쪽에서 오른쪽으로"
+				}
+			},
+			"doublePageBehavior": {
+				"label": "두 페이지 보기",
+				"options": {
+					"always": "항상",
+					"auto": "자동",
+					"off": "끄기"
+				}
+			},
+			"separateSecondPage": "두 번째 페이지 따로 보기",
+			"imageScaling": {
+				"label": "크기 조절",
+				"options": {
+					"AUTO": "자동",
+					"HEIGHT": "높이에 맞추기",
+					"WIDTH": "너비에 맞추기",
+					"NONE": "없음"
+				}
+			},
+			"allowDownscaling": "축소 허용",
+			"tapSidesToNavigate": "양쪽 가장자리를 탭하여 이동",
+			"volumeButtonsNavigate": "음량 버튼으로 이동",
+			"footerControls": {
+				"label": "하단 조작부",
+				"options": {
+					"images": "이미지 갤러리",
+					"slider": "슬라이더"
+				}
+			},
+			"readingTimer": {
+				"label": "독서 타이머",
+				"resetTimer": "타이머 초기화",
+				"confirmation": {
+					"message": "'{{bookName}}'의 독서 시간을 초기화하시겠습니까?\n\n{{action}}",
+					"action": {
+						"multi-session": "이 독서 회차의 모든 독서 세션을 0초로 설정합니다.",
+						"single-session": "독서 시간을 0초로 설정합니다."
+					}
+				}
+			},
+			"allSettings": "모든 설정"
+		},
+		"addOrEditServer": {
+			"kind": "유형",
+			"customHeaders": {
+				"label": "사용자 지정 헤더",
+				"addHeader": "헤더 추가",
+				"invalidHeader": "올바르지 않은 헤더입니다"
+			},
+			"auth": {
+				"token": {
+					"label": "토큰",
+					"placeholder": "토큰 값"
+				},
+				"basic": "Basic 인증",
+				"login": {
+					"label": "로그인",
+					"description": "콘텐츠에 접근할 때 필요한 경우 로그인 안내가 표시됩니다"
+				},
+				"none": {
+					"label": "없음",
+					"description": "인증이 필요하지 않은 서버이거나 URL을 통해 인증 정보가 제공됩니다"
+				},
+				"section": "인증",
+				"method": "방식"
+			},
+			"serverNamePlaceholder": "나의 서버",
+			"catalogUrl": "카탈로그 URL",
+			"failedToConnect": "서버에 연결하지 못했습니다",
+			"didConnect": "연결됨",
+			"checkConnection": "연결 확인",
+			"setAsDefaultServer": "기본 서버로 설정",
+			"validation": {
+				"nameAlreadyExists": "이미 존재하는 이름입니다",
+				"cannotSetAuthorizationHeader": "Authorization 헤더는 설정할 수 없습니다"
+			},
+			"createServer": "서버 추가",
+			"updateServer": "서버 수정",
+			"basicInfo": "기본 정보",
+			"primaryUrl": "기본 URL",
+			"optionalSettings": "선택 설정",
+			"networking": "네트워크",
+			"advancedOptions": "고급 옵션"
+		},
+		"bookMetadata": {
+			"ageRating": "연령 등급",
+			"downloadedAt": "다운로드 시각",
+			"characters": "등장인물",
+			"format": "형식",
+			"genres": "장르",
+			"language": "언어",
+			"publisher": "출판사",
+			"size": "크기",
+			"volume": "권",
+			"writers": "글 작가",
+			"colorists": "채색 담당",
+			"inkers": "펜선 담당",
+			"letterers": "레터링 담당",
+			"coverArtists": "표지 작가",
+			"links": "링크",
+			"year": "연도",
+			"identifier": "식별자",
+			"identifiers": "식별자",
+			"issue": "호"
+		},
+		"common": {
+			"book": "책",
+			"cancel": "취소",
+			"chapter": "장",
+			"clear": "지우기",
+			"completed": "완료",
+			"confirm": "확인",
+			"continue": "계속",
+			"content": "콘텐츠",
+			"details": "상세 정보",
+			"delete": "삭제",
+			"dismiss": "닫기",
+			"download": "다운로드",
+			"downloaded": "다운로드됨",
+			"downloads": "다운로드",
+			"done": "완료",
+			"edit": "수정",
+			"enabled": "활성화됨",
+			"enable": "활성화",
+			"error": "오류",
+			"favorite": "즐겨찾기",
+			"finished": "완료",
+			"grid": "격자",
+			"list": "목록",
+			"lastCompleted": "마지막 완독",
+			"name": "이름",
+			"none": "없음",
+			"notAvailable": "사용 불가",
+			"options": "옵션",
+			"page": "페이지",
+			"pages": "페이지",
+			"pageXOfY": "전체 {{total}}페이지 중 {{current}}페이지",
+			"password": "암호",
+			"progress": "진행률",
+			"publication": "발행 정보",
+			"read": "읽기",
+			"readAgain": "다시 읽기",
+			"readTime": "독서 시간",
+			"readthrough": "독서 회차",
+			"readMore": "더 보기",
+			"refresh": "새로고침",
+			"save": "저장",
+			"select": "선택",
+			"settings": "설정",
+			"servers": "서버",
+			"thisBook": "이 책",
+			"thisServer": "이 서버",
+			"unknown": "알 수 없음",
+			"unknownTitle": "제목 없음",
+			"url": "URL",
+			"username": "사용자 이름",
+			"value": "값",
+			"version": "버전",
+			"pageX": "{{current}}페이지",
+			"reset": "초기화",
+			"accessOpdsV2": "OPDS v2.0 접근",
+			"accessOpdsV1": "OPDS v1.2 접근",
+			"exit": "나가기",
+			"notConfigured": "설정되지 않음",
+			"test": "테스트"
+		},
+		"errors": {
+			"unknown": "알 수 없는 오류"
+		},
+		"epubMenu": {
+			"tableOfContents": "목차",
+			"bookmarksAndAnnotations": "책갈피 및 주석",
+			"appearance": "화면 모양"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{seriesName}}: 전체 {{total}}개 중 {{position}}번째",
+				"position": "{{seriesName}}: {{position}}번째"
+			},
+			"book": {
+				"positionWithTotal": "{{seriesName}}: 전체 {{total}}권 중 {{position}}권",
+				"position": "{{seriesName}}: {{position}}권"
+			},
+			"hashtag": {
+				"positionWithTotal": "{{seriesName}}: 전체 {{total}}개 중 #{{position}}",
+				"position": "{{seriesName}}: #{{position}}"
+			},
+			"unknownSeriesName": "시리즈"
+		},
+		"emptyState": {
+			"noStumpServers": "추가한 Stump 서버가 없습니다",
+			"noOPDSServers": "추가한 OPDS 서버가 없습니다",
+			"noServers": "등록된 서버가 없습니다",
+			"cta": "책 컬렉션에 접근하려면 먼저 서버를 추가하세요",
+			"seeDocumentation": "문서 보기",
+			"noSmartLists": {
+				"label": "조회된 목록이 없습니다",
+				"description": "목록을 만들면 여기에 표시됩니다"
+			}
+		},
+		"tabs": {
+			"servers": "서버",
+			"localLibrary": "라이브러리",
+			"settings": "설정",
+			"home": "홈",
+			"browse": "둘러보기",
+			"clubs": "북클럽",
+			"search": "검색"
+		},
+		"localLibrary": {
+			"title": "로컬 라이브러리",
+			"emptyState": {
+				"all": {
+					"title": "아직 읽을 책이 없습니다",
+					"description": "오프라인으로 읽을 책을 준비하면 여기에 표시됩니다"
+				},
+				"imported": {
+					"title": "가져온 책이 없습니다",
+					"description": "책을 가져와 오프라인으로 읽으세요"
+				},
+				"server": {
+					"title": "다운로드한 책이 없습니다",
+					"description": "라이브러리에서 책을 다운로드하여 오프라인으로 읽으세요"
+				}
+			},
+			"downloadQueue": {
+				"downloading": "다운로드 중",
+				"failed": "실패",
+				"nothingDownloading": "다운로드 중인 항목이 없습니다",
+				"noActiveDownloads": "진행 중인 다운로드가 없습니다",
+				"noFailedDownloads": "실패한 다운로드가 없습니다",
+				"downloadStarting": "시작하는 중..."
+			},
+			"downloadsHeaderMenu": {
+				"deleteAllDownloads": {
+					"label": "책 삭제",
+					"confirmation": "로컬 라이브러리를 삭제하시겠습니까?",
+					"disclaimer": "이 작업은 되돌릴 수 없습니다."
+				},
+				"seeProblems": "문제 보기({{problemCount}}개)",
+				"hideCurated": "계속 읽기 영역 숨기기",
+				"showCurated": "계속 읽기 영역 표시",
+				"attemptSync": "동기화 시도",
+				"syncConflicts": "동기화 충돌"
+			},
+			"downloadsHeaderSortMenu": {
+				"sortBy": {
+					"NAME": "이름",
+					"ADDED_AT": "추가 날짜",
+					"SERIES": "시리즈"
+				},
+				"sortDirection": {
+					"ASC": "오름차순",
+					"DESC": "내림차순"
+				},
+				"sortDirectionText": {
+					"ASC": "A → Z",
+					"DESC": "Z → A"
+				},
+				"sortDirectionDate": {
+					"ASC": "오래된 순",
+					"DESC": "최신순"
+				},
+				"sourceFilter": {
+					"all": "모든 책",
+					"server": "다운로드한 책",
+					"imported": "가져온 책"
+				}
+			},
+			"downloadProblemsSheet": {
+				"title": "실패한 다운로드",
+				"noFailedDownloads": "실패한 다운로드가 없습니다",
+				"retryAll": "모두 재시도",
+				"dismissAll": "모두 닫기"
+			}
+		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "서버 {{skippedCount}}개의 동기화를 건너뛰었습니다",
+				"skippedMultipleServers": "서버 {{skippedCount}}개의 동기화를 건너뛰었습니다",
+				"explanation": "일부 서버는 인증 정보를 자동으로 갱신할 수 없는 인증 방식을 사용합니다"
+			},
+			"syncFailed": "오프라인 독서 진행률을 동기화하지 못했습니다"
+		},
+		"search": {
+			"label": "이 서버 검색",
+			"description": "이 서버에서 원하는 콘텐츠를 찾습니다",
+			"placeholder": "검색"
+		},
+		"settings": {
+			"preferences": {
+				"label": "환경설정",
+				"appTheme": {
+					"label": "테마",
+					"options": {
+						"light": "라이트",
+						"dark": "다크"
+					}
+				},
+				"appPrimaryColor": {
+					"label": "강조색",
+					"options": {
+						"chromaScale": "채도 배율",
+						"hues": {
+							"red": "빨강",
+							"orange": "주황",
+							"amber": "호박색",
+							"yellow": "노랑",
+							"lime": "라임색",
+							"green": "초록",
+							"emerald": "에메랄드색",
+							"teal": "청록색",
+							"cyan": "시안색",
+							"sky": "하늘색",
+							"blue": "파랑",
+							"indigo": "남색",
+							"violet": "청보라",
+							"purple": "보라",
+							"fuchsia": "자홍색",
+							"pink": "분홍",
+							"rose": "장미색",
+							"slate": "슬레이트",
+							"gray": "회색",
+							"zinc": "징크",
+							"neutral": "뉴트럴",
+							"stone": "스톤"
+						}
+					}
+				},
+				"appLanguage": "언어",
+				"defaultServer": "기본 서버",
+				"thumbnailRatio": "썸네일 비율",
+				"thumbnailPlaceholder": {
+					"label": "썸네일 플레이스홀더",
+					"options": {
+						"grayscale": "회색조",
+						"averageColor": "평균 색상",
+						"colorful": "컬러풀",
+						"thumbhash": "ThumbHash"
+					}
+				},
+				"thumbnailResizeMode": {
+					"label": "썸네일 크기 조절",
+					"options": {
+						"cover": "채우기",
+						"stretch": "늘이기",
+						"fit": "맞추기"
+					}
+				}
+			},
+			"reading": {
+				"label": "읽기",
+				"preferNativePdf": "기본 PDF 뷰어 우선 사용",
+				"preferMinimalReader": "간소화된 뷰어 우선 사용",
+				"disableDismissGesture": "닫기 제스처 비활성화",
+				"incognitoReading": "시크릿 읽기",
+				"maxPageViewingSeconds": {
+					"label": "페이지당 기록할 최대 독서 시간(초)",
+					"errors": {
+						"minimumValue": "1초 이상이어야 합니다",
+						"integer": "정수여야 합니다"
+					}
+				}
+			},
+			"stump": {
+				"label": "Stump",
+				"description": "Stump 기능은 선택 사항이며, 필요하지 않으면 끌 수 있습니다",
+				"bookClubsEnabled": "북클럽 기능"
+			},
+			"autoSyncLocalData": "로컬 데이터 자동 동기화",
+			"textCase": {
+				"label": "대소문자 표시",
+				"options": {
+					"lowerCase": "소문자",
+					"sentenceCase": "문장 첫 글자 대문자",
+					"titleCase": "각 단어 첫 글자 대문자"
+				}
+			},
+			"tintListBackground": "목록 배경에 색상 적용",
+			"management": {
+				"label": "관리",
+				"dataUsage": {
+					"label": "저장 공간 사용량",
+					"nonStumpData": "Stump 외 데이터",
+					"serversTotal": "서버 합계",
+					"totalFiles": "전체 파일 수",
+					"totalSize": "전체 크기",
+					"deleteDownloads": {
+						"label": "다운로드한 파일 삭제",
+						"confirmation": "{{serverName}}에서 다운로드한 모든 파일을 삭제하시겠습니까?",
+						"deleteFailed": {
+							"title": "삭제 실패",
+							"description": "{{serverName}}에서 다운로드한 모든 파일을 삭제하는 중 오류가 발생했습니다"
+						}
+					},
+					"noDownloads": "이 서버에서 다운로드한 파일이 없습니다",
+					"storedPreferences": {
+						"label": "저장된 환경설정",
+						"description": "책별 환경설정, 독서 타이머 등의 데이터입니다"
+					},
+					"clearPreferences": "환경설정 지우기",
+					"noServersAdded": "추가한 서버가 없습니다"
+				}
+			},
+			"debug": {
+				"label": "디버그",
+				"clearCache": {
+					"label": "캐시 지우기",
+					"memory": {
+						"button": "메모리",
+						"success": "메모리 캐시를 지웠습니다"
+					},
+					"disk": {
+						"button": "디스크",
+						"success": "디스크 캐시를 지웠습니다"
+					}
+				},
+				"deleteDatabase": {
+					"label": "데이터베이스 삭제",
+					"success": {
+						"title": "데이터베이스를 삭제했습니다",
+						"description": "앱을 다시 시작하세요"
+					},
+					"error": {
+						"title": "삭제 실패",
+						"description": "데이터베이스를 삭제하는 중 오류가 발생했습니다"
+					}
+				},
+				"performanceMonitor": "성능 모니터",
+				"reduceAnimations": "애니메이션 줄이기",
+				"displayLanguageKeys": {
+					"label": "번역 키 표시",
+					"options": {
+						"none": "없음",
+						"abbreviated": "축약형",
+						"full": "전체"
+					}
+				},
+				"debugAnalytics": {
+					"label": "디버그 분석",
+					"description": "문제 해결에 도움이 되도록 디버그 관련 이벤트를 추가로 전송합니다"
+				},
+				"maskUrls": "URL 가리기"
+			},
+			"contactInfo": {
+				"label": "연락처",
+				"email": "이메일",
+				"discord": "Discord",
+				"github": "GitHub"
+			},
+			"supportInfo": {
+				"buildInformation": "빌드 정보",
+				"version": "버전: {{version}}",
+				"suuportIdentifier": "지원 식별자: {{supportID}}"
+			}
+		},
+		"stumpServer": {
+			"browse": {
+				"books": "책",
+				"favorites": "즐겨찾기",
+				"files": "파일",
+				"libraries": "라이브러리",
+				"series": "시리즈",
+				"smartLists": "스마트 목록"
+			},
+			"continueReading": {
+				"label": "계속 읽기",
+				"emptyText": "읽고 있는 책이 없습니다"
+			},
+			"onDeck": {
+				"label": "다음에 읽을 책",
+				"emptyText": "다음에 읽을 책이 없습니다"
+			},
+			"recentlyAddedSeries": {
+				"label": "최근 추가한 시리즈",
+				"emptyText": "최근 추가한 시리즈가 없습니다"
+			},
+			"recentlyAddedBooks": {
+				"label": "최근 추가한 책",
+				"emptyText": "최근 추가한 책이 없습니다"
+			}
+		},
+		"tableOfContents": {
+			"goToPageX": "{{pageNumber}}페이지로 이동",
+			"goToPagePlaceholder": "페이지로 이동...",
+			"errors": {
+				"pageDoesNotExist": "{{page}}페이지가 없습니다",
+				"invalidPage": "'{{page}}'은(는) 페이지 번호가 아닙니다"
+			},
+			"showCurrentChapter": "현재 장 표시"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "전체",
+				"bookmarks": "책갈피",
+				"highlights": "하이라이트",
+				"notes": "메모"
+			}
+		},
+		"epubSettings": {
+			"title": "EPUB 뷰어 설정",
+			"typeface": {
+				"label": "글꼴",
+				"options": {
+					"system": "시스템",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
+			"fontSize": "글자 크기",
+			"fontWeight": {
+				"label": "글자 굵기",
+				"options": {
+					"light": "가늘게",
+					"normal": "보통",
+					"medium": "중간",
+					"bold": "굵게"
+				}
+			},
+			"textNormalization": "텍스트 정규화",
+			"verticalText": "세로쓰기",
+			"readingDirection": {
+				"label": "읽기 방향",
+				"options": {
+					"rtl": "오른쪽에서 왼쪽으로",
+					"ltr": "왼쪽에서 오른쪽으로"
+				}
+			},
+			"columns": {
+				"label": "단 수",
+				"options": {
+					"auto": "자동",
+					"single": "한 단",
+					"double": "두 단"
+				}
+			},
+			"pageMargins": "페이지 여백",
+			"imageFilter": {
+				"label": "이미지 필터",
+				"options": {
+					"none": "없음",
+					"darken": "어둡게",
+					"invert": "색상 반전"
+				}
+			},
+			"publisherStyles": "출판사 서식",
+			"volumeButtonsNavigate": "음량 버튼으로 이동",
+			"textAlignment": {
+				"label": "텍스트 정렬",
+				"options": {
+					"start": "읽기 방향의 시작 쪽",
+					"left": "왼쪽",
+					"center": "가운데",
+					"right": "오른쪽",
+					"justify": "양쪽 맞춤"
+				}
+			},
+			"typeScale": "글자 크기 비율",
+			"lineHeight": "줄 높이",
+			"paragraphIndent": "문단 들여쓰기",
+			"paragraphSpacing": "문단 간격",
+			"wordSpacing": "단어 간격",
+			"letterSpacing": "글자 간격",
+			"hyphens": "하이픈으로 단어 나누기",
+			"ligatures": "합자",
+			"customizeTheme": {
+				"placeholder": "테마 이름",
+				"background": "배경",
+				"text": "텍스트",
+				"highlight": "하이라이트",
+				"premadeThemes": "기본 제공 테마"
+			}
+		},
+		"libraryType": {
+			"BOOK": "책",
+			"COMIC": "코믹스",
+			"LIGHT_NOVEL": "라이트 노벨",
+			"MANGA": "일본 만화",
+			"MANHWA": "한국 만화",
+			"MIXED": "혼합",
+			"WEBTOON": "웹툰",
+			"WEB_NOVEL": "웹소설"
+		},
+		"savedServerActions": {
+			"clearCache": "캐시 지우기",
+			"discardTokens": {
+				"label": "토큰 삭제",
+				"description": "로그인 토큰에만 적용됩니다"
+			},
+			"deleteServer": {
+				"title": "서버 삭제",
+				"confirmation": "{{serverName}}을(를) 삭제하시겠습니까?"
+			}
+		},
+		"filtering": {
+			"notStarted": "읽기 전",
+			"currentlyReading": "읽는 중",
+			"finished": "완독"
+		},
+		"sorting": {
+			"labelEllipsis": "정렬 기준...",
+			"sortField": {
+				"NAME": "이름",
+				"ADDED_AT": "추가 날짜",
+				"CREATED_AT": "추가 날짜",
+				"NUMBER": "시리즈 내 순서",
+				"SERIES": "시리즈",
+				"YEAR": "발행 연도"
+			},
+			"sortDirection": {
+				"ASC": "오름차순",
+				"DESC": "내림차순"
+			},
+			"sortDirectionString": {
+				"ASC": "A → Z",
+				"DESC": "Z → A"
+			},
+			"sortDirectionDate": {
+				"ASC": "오래된 순",
+				"DESC": "최신순"
+			},
+			"sortDirectionNumber": {
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
+			}
+		},
+		"widgets": {
+			"readingNow": {
+				"nothingInProgress": "읽고 있는 책이 없습니다"
+			}
+		},
+		"syncConflicts": {
+			"title": "동기화 충돌",
+			"remainingCount": "{{remainingCount}}개 남음",
+			"noConflicts": {
+				"title": "동기화 충돌이 없습니다",
+				"description": "모든 로컬 독서 진행률이 각 서버와 동기화되어 있습니다"
+			},
+			"lastCommonSession": "마지막으로 일치한 독서 세션",
+			"localSession": "로컬 세션",
+			"remoteSessionWithId": "서버 세션 {{sessionId}}",
+			"noCommonSession": "공통 독서 기록이 없습니다",
+			"noRemoteSessions": "서버 세션이 없습니다",
+			"divergentProgress": {
+				"title": "독서 진행률 불일치",
+				"description": "마지막 동기화 이후 서버에서 마지막 공통 세션이 수정되었습니다"
+			},
+			"noCommonReadingHistory": {
+				"title": "공통 독서 기록 없음",
+				"description": "오프라인으로 읽기 시작했을 때 이 책에는 동기화된 기록이 없었습니다"
+			},
+			"acceptSource": {
+				"local": "로컬 기록 적용",
+				"remote": "서버 기록 적용",
+				"both": "두 기록 모두 적용"
+			},
+			"pullError": "서버의 독서 진행률을 가져오지 못했습니다"
+		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "설정",
+				"networkSettings": "네트워크 설정"
+			}
+		},
+		"serverNetworkSettings": {
+			"activeProfile": {
+				"label": "사용 중인 프로필",
+				"localIsActive": "로컬 프로필을 사용 중입니다",
+				"primaryIsActive": "기본 프로필을 사용 중입니다",
+				"autoSwitchToLocalDidNotWork": "앱에서 활성 프로필로 전환하지 못했습니다. 네트워크 연결을 확인하세요"
+			},
+			"localProfile": "로컬 프로필",
+			"primaryUrl": "기본 URL",
+			"autoSwitchToLocal": {
+				"label": "로컬 프로필로 자동 전환",
+				"description": "가능한 경우 로컬 프로필로 전환합니다"
+			},
+			"localUrl": "로컬 URL",
+			"saveUrlChanges": "URL 변경 사항 저장",
+			"swapUrls": {
+				"label": "URL 맞바꾸기",
+				"swap": "맞바꾸기",
+				"confirmationText": "원격 URL과 로컬 URL을 맞바꾸시겠습니까? 즉시 적용됩니다",
+				"noLocalUrlSet": {
+					"title": "설정된 로컬 URL이 없습니다",
+					"description": "로컬 URL을 원격 URL과 맞바꾸려면 먼저 로컬 URL을 설정해야 합니다"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Wi-Fi 네트워크",
+				"noAssociatedNetwork": "연결해 둔 Wi-Fi 네트워크가 없습니다",
+				"notConnectedToWifi": "Wi-Fi에 연결되어 있지 않습니다. 로컬 프로필 설정을 완료하려면 로컬 네트워크에 연결하세요",
+				"connectedTip": "현재 네트워크가 목록에 없다면 Stump에 위치 접근 권한을 부여해야 할 수 있습니다",
+				"addNetwork": "\"{{ssid}}\" 추가",
+				"permissionNotGranted": {
+					"label": "권한이 부여되지 않았습니다",
+					"description": "현재 Wi-Fi 네트워크에 접근하려면 위치 권한을 부여해야 합니다"
+				},
+				"permissionFailedToBeGranted": {
+					"title": "위치 권한 요청 실패",
+					"description": "앱이 위치 접근 권한을 얻지 못했습니다. 기기 설정을 확인하고 다시 시도하세요"
+				},
+				"requestPermission": "위치 권한 요청",
+				"removeWifi": {
+					"label": "제거",
+					"confirmationText": "로컬 프로필에서 '{{ssid}}' 네트워크를 제거하시겠습니까?"
+				}
+			}
 		}
 	},
 	"underConstruction": {
@@ -443,7 +2474,1313 @@
 		"fields": {
 			"name": {
 				"label": "이름",
-				"placeholder": "나의 북클럽"
+				"placeholder": "나의 북클럽",
+				"description": "북클럽의 이름입니다"
+			},
+			"description": {
+				"label": "설명",
+				"placeholder": "'Our Flag Means Death' 팬클럽입니다. 해적 소설을 마음껏 읽습니다",
+				"description": "북클럽에 대한 간단한 설명입니다. 입력하지 않아도 됩니다"
+			},
+			"is_private": {
+				"label": "비공개 북클럽",
+				"description": "활성화하면 초대한 사용자만 북클럽에 가입할 수 있습니다"
+			},
+			"member_role_spec": {
+				"heading": "역할 이름 설정",
+				"subtitle": [
+					"북클럽의 역할 이름을 원하는 대로 정할 수 있습니다. 자세한 내용은",
+					"문서를 참고하세요"
+				],
+				"member": {
+					"label": "회원",
+					"placeholder": "회원",
+					"description": "북클럽의 기본 역할에 사용할 이름입니다"
+				},
+				"moderator": {
+					"label": "운영자",
+					"placeholder": "운영자",
+					"description": "북클럽의 운영자 역할에 사용할 이름입니다"
+				},
+				"admin": {
+					"label": "관리자",
+					"placeholder": "관리자",
+					"description": "북클럽의 관리자 역할에 사용할 이름입니다"
+				},
+				"creator": {
+					"label": "개설자",
+					"placeholder": "개설자",
+					"description": "북클럽 개설자 역할에 사용할 이름입니다. 바로 여러분의 역할입니다!"
+				}
+			},
+			"membershipOptions": {
+				"displayName": {
+					"label": "표시 이름",
+					"placeholder": "예: oromei",
+					"description": "북클럽에서 사용할 표시 이름입니다. 입력하면 사용자 이름 대신 표시됩니다"
+				},
+				"hideProgress": {
+					"label": "독서 진행률 숨기기",
+					"description": "활성화하면 다른 북클럽 회원에게 독서 진행률이 표시되지 않습니다"
+				}
+			}
+		},
+		"validation": {
+			"missingName": "이름을 입력하세요",
+			"alreadyTaken": "이름은 이미 사용 중입니다"
+		}
+	},
+	"createBookClubScene": {
+		"heading": "새 북클럽 만들기",
+		"subtitle": "초대한 사람만 가입할 수 있는 비공개 북클럽을 만들거나, 서버의 누구나 가입할 수 있도록 공개할 수 있습니다",
+		"form": {
+			"stepLabel": "단계",
+			"steps": [
+				{
+					"label": "기본 정보",
+					"heading": "기본 정보",
+					"description": "이름과 설명 등 북클럽의 기본 정보입니다"
+				},
+				{
+					"label": "역할",
+					"heading": "역할",
+					"description": "북클럽의 역할을 원하는 대로 설정합니다"
+				},
+				{
+					"label": "회원 설정",
+					"heading": "회원 환경설정",
+					"description": "북클럽의 추가 옵션입니다"
+				},
+				{
+					"label": "검토",
+					"heading": "검토",
+					"description": "북클럽을 만들기 전에 설정을 확인하세요"
+				}
+			],
+			"review": {
+				"yes": "예",
+				"no": "아니요",
+				"none": "없음",
+				"labels": {
+					"name": "이름",
+					"description": "설명"
+				}
+			},
+			"submit": "북클럽 만들기"
+		}
+	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "기본 정보",
+			"members": {
+				"members": "회원",
+				"roles": "역할",
+				"label": "회원 설정"
+			},
+			"scheduling": {
+				"scheduler": "일정 관리",
+				"options": "옵션",
+				"label": "일정"
+			},
+			"danger-zone": {
+				"delete": "삭제",
+				"label": "주의가 필요한 설정"
+			}
+		},
+		"basics": {
+			"title": "기본 정보",
+			"description": "이름과 설명 등 이 북클럽의 기본 정보입니다",
+			"form": {
+				"submit": "북클럽 수정"
+			}
+		},
+		"members": {
+			"title": "회원",
+			"description": "이 북클럽의 회원을 관리합니다"
+		},
+		"roles": {
+			"title": "역할",
+			"description": "이 북클럽의 역할을 원하는 대로 설정합니다",
+			"sections": {
+				"roleMappings": {
+					"heading": "현재 역할 이름",
+					"description": "이 북클럽에서 현재 사용하는 역할 이름입니다"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "일정 관리",
+			"description": "이 북클럽의 독서 일정을 만들고 관리합니다"
+		},
+		"scheduling/options": {
+			"title": "옵션",
+			"description": "이 북클럽의 일정에 관한 추가 옵션입니다"
+		},
+		"danger-zone/delete": {
+			"title": "삭제 작업",
+			"description": "이 북클럽과 모든 콘텐츠 또는 특정 리소스를 영구적으로 삭제합니다",
+			"sections": {
+				"deleteClub": {
+					"heading": "북클럽 삭제",
+					"description": [
+						"이 북클럽과 모든 콘텐츠를 영구적으로 삭제합니다.",
+						"이 작업은 되돌릴 수 없습니다"
+					],
+					"trigger": "북클럽 삭제"
+				}
+			}
+		}
+	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "이름",
+				"description": "라이브러리를 쉽게 알아볼 수 있는 이름입니다",
+				"placeholder": "나의 라이브러리"
+			},
+			"path": {
+				"label": "경로",
+				"description": "서버에 있는 라이브러리의 실제 경로입니다",
+				"placeholder": "/path/to/library"
+			},
+			"description": {
+				"label": "설명",
+				"description": "라이브러리에 대한 간단한 설명입니다",
+				"placeholder": "내가 좋아하는 책을 모아 둔 라이브러리"
+			},
+			"tags": {
+				"label": "태그",
+				"description": "라이브러리를 분류하거나 접근 규칙을 적용하는 데 사용합니다"
+			},
+			"libraryType": {
+				"label": "라이브러리 콘텐츠",
+				"description": "이 라이브러리에 있는 콘텐츠의 유형입니다",
+				"options": {
+					"COMIC": "코믹스",
+					"MANGA": "일본 만화",
+					"BOOK": "책",
+					"LIGHT_NOVEL": "라이트 노벨",
+					"MANHWA": "한국 만화",
+					"WEB_NOVEL": "웹소설",
+					"WEBTOON": "웹툰",
+					"MIXED": "혼합"
+				}
+			},
+			"defaultLibraryView": {
+				"label": "라이브러리 기본 보기",
+				"description": "이 라이브러리를 열 때 기본으로 표시할 탭을 설정합니다",
+				"hideSeriesView": {
+					"label": "시리즈 탭 숨기기",
+					"description": "라이브러리 탐색 메뉴에서 시리즈 탭을 숨깁니다"
+				},
+				"skipBookOverview": {
+					"label": "책 개요 건너뛰기",
+					"description": "이 라이브러리에서 책을 선택하면 바로 뷰어를 엽니다"
+				},
+				"options": {
+					"series": {
+						"label": "시리즈",
+						"description": "시리즈 탭을 기본으로 표시합니다"
+					},
+					"books": {
+						"label": "책",
+						"description": "책 탭을 기본으로 표시합니다"
+					}
+				}
+			},
+			"readingSettings": {
+				"section": {
+					"heading": "읽기 설정",
+					"description": "책에 적용할 기본 뷰어 설정입니다"
+				},
+				"imageScaling": {
+					"label": "이미지 크기 조절",
+					"description": "이미지 뷰어에서 페이지에 맞춰 이미지 크기를 조절하는 방식입니다"
+				},
+				"readingMode": {
+					"label": "기본 뷰어",
+					"description": "이미지로 구성된 책에 사용할 기본 뷰어입니다"
+				},
+				"readingDirection": {
+					"label": "읽기 방향",
+					"description": "뷰어에서 페이지를 넘기는 방향입니다"
+				}
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "썸네일 설정",
+						"update": "생성"
+					},
+					"description": "책의 썸네일을 생성하여 라이브러리 탐색 시 로딩 시간을 줄입니다",
+					"disabled": "썸네일 생성을 비활성화하면 추가 설정이 필요하지 않습니다"
+				},
+				"enableSwitch": {
+					"label": "활성화",
+					"description": "이 라이브러리의 썸네일 이미지를 생성합니다"
+				},
+				"resizeMethod": {
+					"label": "크기 조절 방식",
+					"options": {
+						"scaleEvenlyByFactor": "일정 비율로 조절",
+						"exact": "지정 크기",
+						"scaleDimension": "비율 유지 자동 조절",
+						"none": "없음"
+					}
+				},
+				"scaleEvenlyByFactor": {
+					"description": "원본 크기에 지정한 배율을 적용합니다. 예를 들어 0.65를 입력하면 원본 크기의 65%인 썸네일을 생성합니다",
+					"factor": {
+						"label": "배율"
+					}
+				},
+				"exact": {
+					"description": "썸네일을 픽셀 단위로 지정한 크기로 조절합니다",
+					"width": {
+						"label": "너비"
+					},
+					"height": {
+						"label": "높이"
+					}
+				},
+				"scaleDimension": {
+					"label": "비율 유지 자동 조절",
+					"description": "썸네일의 너비 또는 높이를 지정하면 원본의 가로세로 비율을 유지하도록 나머지를 자동으로 조절합니다",
+					"dimension": {
+						"label": "기준 치수",
+						"options": {
+							"width": "너비",
+							"height": "높이"
+						}
+					},
+					"size": {
+						"label": "크기"
+					}
+				},
+				"format": {
+					"label": "이미지 형식",
+					"description": "생성할 썸네일 이미지의 형식입니다"
+				},
+				"quality": {
+					"label": "품질",
+					"description": "생성할 썸네일 이미지의 품질입니다. 1에서 100 사이의 값을 사용합니다"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "제외 규칙",
+					"description": "스캔할 때 특정 파일이나 디렉터리를 제외할 glob 패턴을 지정합니다"
+				},
+				"noRules": "설정된 제외 규칙이 없습니다",
+				"save": "변경 사항 저장",
+				"addRule": {
+					"label": "새 규칙",
+					"description": "파일이나 디렉터리를 제외할 glob 패턴입니다",
+					"addButton": "규칙 추가",
+					"ignoreParents": {
+						"title": "모든 상위 디렉터리 제외",
+						"label": "상위 디렉터리 제외"
+					},
+					"ignoreSubdirs": {
+						"title": "모든 하위 디렉터리 제외",
+						"label": "하위 디렉터리 제외"
+					}
+				},
+				"invalidGlob": "올바르지 않은 glob 패턴입니다",
+				"duplicateGlob": "기존 규칙과 중복됩니다",
+				"lockConfig": {
+					"lock": "설정 잠금",
+					"unlock": "설정 잠금 해제"
+				},
+				"editRule": "규칙 수정",
+				"deleteRule": "규칙 삭제",
+				"cancelEdit": "수정 취소",
+				"confirmEdit": "수정 확인"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "파일 변환",
+					"description": "Stump는 일부 파일 형식을 호환성이 더 높은 형식으로 변환할 수 있습니다"
+				},
+				"rarToZip": {
+					"label": "RAR을 ZIP으로 변환",
+					"description": "스캔할 때 RAR/CBR 파일을 ZIP/CBZ 파일로 변환합니다"
+				},
+				"deleteRarAfter": {
+					"label": "변환 후 RAR 삭제",
+					"description": "변환 후 원본 RAR/CBR 파일을 삭제합니다. 이 작업은 되돌릴 수 없습니다"
+				}
+			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "선택적 처리",
+					"description": "필요에 따라 활성화할 수 있는 스캐너 처리 기능입니다",
+					"disclaimer": "이 기능은 파일을 추가로 읽으므로 스캔 속도가 느려질 수 있습니다"
+				},
+				"processMetadata": {
+					"label": "메타데이터 처리",
+					"description": "라이브러리 파일에서 메타데이터를 추출하고 결과를 데이터베이스에 저장합니다"
+				},
+				"watch": {
+					"label": "변경 감지",
+					"description": "라이브러리 디렉터리의 변경 사항을 감지하고 데이터베이스에 반영합니다"
+				},
+				"generateFileHashes": {
+					"label": "파일 해시 생성",
+					"description": "중복 파일을 찾기 위해 라이브러리의 각 파일에 대한 해시를 생성합니다"
+				},
+				"koreaderHashes": {
+					"label": "KOReader 호환 해시",
+					"description": "KOReader를 사용하는 경우 해당 형식의 해시를 추가로 생성합니다"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "구성 방식",
+					"description": "라이브러리의 폴더 구성에 가장 가까운 방식을 선택합니다",
+					"docs": [
+						"어떤 항목을 선택할지 모르겠다면",
+						"도움말",
+						"링크를 클릭하여 자세히 알아보세요.",
+						"이 설정은 나중에 변경할 수 없습니다"
+					],
+					"disabled": "이 설정은 변경할 수 없습니다"
+				},
+				"options": {
+					"label": "라이브러리 구성 방식",
+					"description": "Stump가 라이브러리를 구성하는 방식을 결정하는 설정입니다",
+					"collectionPriority": {
+						"label": "컬렉션 우선",
+						"description": "라이브러리 루트 바로 아래의 각 폴더를 하나의 시리즈로 취급합니다"
+					},
+					"seriesPriority": {
+						"label": "시리즈 우선",
+						"description": "깊이에 관계없이 모든 하위 폴더를 각각 하나의 시리즈로 취급합니다"
+					}
+				}
+			},
+			"oneshotsDirectory": {
+				"label": "단독 도서 디렉터리",
+				"description": "단독 도서를 저장할 디렉터리 이름입니다. 라이브러리 경로를 기준으로 하며, 비워 두면 단독 도서를 처리하지 않습니다",
+				"placeholder": "_oneshots"
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "생성 후 스캔",
+				"update": "수정 후 스캔"
+			},
+			"description": "라이브러리 파일을 색인화하여 데이터베이스에 등록합니다"
+		},
+		"errors": {
+			"failedToUpdate": "라이브러리를 수정하지 못했습니다",
+			"failedToScan": "라이브러리를 스캔하지 못했습니다"
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "책 업로드",
+				"series": "시리즈 업로드"
+			},
+			"description": {
+				"books": "파일 탐색기의 현재 경로에 책을 바로 추가합니다",
+				"series": "파일 탐색기의 현재 경로에 시리즈를 바로 추가합니다"
+			},
+			"seriesDisclaimer": [
+				"시리즈 폴더와 그 안의 모든 책을 포함한 ",
+				"ZIP 압축 파일",
+				"형식으로 업로드해야 합니다"
+			],
+			"dropzone": {
+				"books": "여기에 책을 끌어다 놓으세요",
+				"series": "여기에 ZIP 파일을 끌어다 놓으세요",
+				"alt": "또는 클릭하여 컴퓨터에서 업로드할 책을 찾으세요"
+			},
+			"addedFiles": "추가한 파일"
+		}
+	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "책",
+			"series": "시리즈",
+			"files": "파일",
+			"oneshots": "단독 도서"
+		}
+	},
+	"errorScene": {
+		"heading": "이런, 문제가 생겼네요",
+		"message": "오류가 발생했습니다:",
+		"buttons": {
+			"report": "버그 신고",
+			"copy": "오류 정보 복사",
+			"goHome": "홈으로 이동",
+			"goHomeTitle": "홈페이지로 돌아가기",
+			"reportTitle": "이 오류를 잠재적인 버그로 GitHub에 신고",
+			"copyTitle": "오류 정보를 클립보드에 복사"
+		},
+		"criticalHeading": "심각한 오류가 발생했습니다",
+		"emptyMessage": "오류 메시지가 비어 있습니다.",
+		"copiedDetails": "오류 정보를 클립보드에 복사했습니다",
+		"imageAlt": "공사 중 안내 그림"
+	},
+	"homeScene": {
+		"onDeck": {
+			"title": "다음에 읽을 책",
+			"emptyState": {
+				"heading": "다음에 읽을 책이 없습니다",
+				"message": "다음에 읽을 추천 도서가 여기에 표시됩니다"
+			}
+		},
+		"continueReading": {
+			"title": "계속 읽기",
+			"emptyState": {
+				"heading": "표시할 항목이 없습니다",
+				"message": "읽기 시작한 책이 여기에 표시됩니다"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "최근 추가한 시리즈",
+			"emptyState": {
+				"heading": "표시할 시리즈가 없습니다",
+				"message": "라이브러리에 추가한 시리즈가 여기에 표시됩니다"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "최근 추가한 책",
+			"emptyState": {
+				"heading": "표시할 항목이 없습니다",
+				"message": "최근 추가한 책이 여기에 표시됩니다"
+			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "연령 등급",
+			"characters": "등장인물",
+			"colorists": "채색 담당",
+			"coverArtists": "표지 작가",
+			"day": "일",
+			"editors": "편집자",
+			"format": "형식",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"identifierUuid": "책 UUID",
+			"genres": "장르",
+			"inkers": "펜선 담당",
+			"language": "언어",
+			"letterers": "레터링 담당",
+			"links": "링크",
+			"month": "월",
+			"notes": "메모",
+			"number": "번호",
+			"pageCount": "페이지 수",
+			"pencillers": "밑그림 작가",
+			"publisher": "출판사",
+			"series": "시리즈",
+			"seriesGroup": "시리즈 그룹",
+			"storyArc": "스토리 아크",
+			"storyArcNumber": "스토리 아크 번호",
+			"summary": "줄거리",
+			"teams": "팀",
+			"title": "제목",
+			"titleSort": "정렬용 제목",
+			"volume": "권",
+			"writers": "글 작가",
+			"year": "연도",
+			"metaType": "유형",
+			"imprint": "출판 브랜드",
+			"comicid": "만화 ID",
+			"booktype": "책 유형",
+			"status": "상태",
+			"totalIssues": "총 발행 호수",
+			"publicationRun": "발행 기간",
+			"comicImage": "만화 이미지",
+			"descriptionFormatted": "설명(서식 포함)"
+		},
+		"addFields": {
+			"description": "추가할 항목을 한 줄에 하나씩 입력하세요"
+		}
+	},
+	"metadataMatching": {
+		"section": {
+			"heading": "검토 대기 중인 매칭 결과",
+			"description": "외부 제공자에서 가져온 메타데이터 매칭 결과를 검토합니다"
+		},
+		"confidenceBadge": {
+			"label": "신뢰도"
+		},
+		"includeField": "이 필드 포함",
+		"excludeField": "이 필드 제외",
+		"fieldLocked": "잠긴 필드입니다",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "이 기록에 사용할 수 있는 후보가 없습니다",
+				"noComparableFields": "비교할 수 있는 필드가 없습니다",
+				"headers": {
+					"field": "필드",
+					"current": "현재 값",
+					"external": "외부 값",
+					"resolved": "적용할 값"
+				},
+				"toolbar": {
+					"candidatePosition": "전체 {{total}}개 중 후보 {{position}}",
+					"provider": "제공자"
+				}
+			},
+			"footer": {
+				"accept": "수락",
+				"reject": "거부",
+				"strategies": {
+					"FILL_GAPS": "빈 필드 채우기",
+					"PREFER_EXTERNAL": "외부 값 우선",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "외부 값 우선 및 목록 병합",
+					"FILL_AND_MERGE_LISTS": "빈 필드 채우기 및 목록 병합"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "현재 값 유지",
+				"takeExternal": "외부 값 사용",
+				"mergeLists": "목록 병합",
+				"editManually": "직접 수정",
+				"lockField": "필드 잠금",
+				"unlockField": "필드 잠금 해제",
+				"reset": "초기화",
+				"undoManualEdit": "직접 수정한 내용 되돌리기"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "이름",
+				"entityType": "유형",
+				"candidateCount": "후보 수",
+				"topConfidence": "최고 신뢰도",
+				"addedAt": "가져온 시각"
+			},
+			"acceptAll": {
+				"label": "모두 수락",
+				"failed": "모든 매칭 결과를 수락하지 못했습니다",
+				"success": "대기 중인 매칭 결과를 모두 수락했습니다"
+			},
+			"rejectAll": {
+				"label": "모두 거부",
+				"failed": "모든 매칭 결과를 거부하지 못했습니다",
+				"success": "대기 중인 매칭 결과를 모두 거부했습니다"
+			},
+			"startReview": "검토 시작",
+			"nothingToReview": "검토할 메타데이터 매칭 결과가 없습니다"
+		}
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "계속 읽기",
+			"downloadSeries": "시리즈 다운로드"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "책",
+			"files": "파일"
+		},
+		"actions": {
+			"markAsRead": "시리즈를 읽음으로 표시",
+			"markAsUnread": "시리즈를 읽지 않음으로 표시",
+			"goToLibrary": "라이브러리로 이동"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "책의 완독 상태를 변경하지 못했습니다"
+		}
+	},
+	"createOrUpdateSmartListForm": {
+		"validation": {
+			"nameTooShort": "이름은 2자 이상이어야 합니다",
+			"nameTaken": "사용할 수 없는 이름입니다"
+		},
+		"fields": {
+			"name": {
+				"label": "이름",
+				"placeholder": "나의 스마트 목록",
+				"description": "다른 목록과 이름이 달라야 하며, 나중에 변경할 수 있습니다"
+			},
+			"description": {
+				"label": "설명",
+				"placeholder": "아주 똑똑한 목록",
+				"description": "스마트 목록에 대한 설명입니다. 입력하지 않아도 됩니다"
+			},
+			"visibility": {
+				"label": "공개 범위",
+				"options": {
+					"public": {
+						"label": "공개",
+						"description": "서버의 모든 사용자가 접근할 수 있습니다"
+					},
+					"shared": {
+						"label": "공유",
+						"description": "특정 사용자만 이 스마트 목록에 접근할 수 있습니다",
+						"createDisclaimer": "목록을 만든 후 공유할 사용자를 선택할 수 있습니다"
+					},
+					"private": {
+						"label": "비공개",
+						"description": "본인만 이 스마트 목록에 접근할 수 있습니다"
+					}
+				}
+			},
+			"queryBuilder": {
+				"uiPerformance": "이 기능의 UI는 아직 성능 최적화가 되어 있지 않아, 결과가 많이 나오는 필터에서는 느려질 수 있습니다. 추후 개선할 예정입니다",
+				"rootJoiner": {
+					"and": {
+						"label": "AND",
+						"description": "모든 필터 그룹을 충족하는 책이 선택됩니다"
+					},
+					"or": {
+						"label": "OR",
+						"description": "하나 이상의 필터 그룹을 충족하는 책이 선택됩니다"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "AND",
+						"description": "모든 조건을 충족해야 합니다"
+					},
+					"or": {
+						"label": "OR",
+						"description": "하나 이상의 조건을 충족해야 합니다"
+					},
+					"not": {
+						"label": "NOT"
+					}
+				},
+				"grouping": {
+					"label": "그룹화 기준",
+					"description": "이 스마트 목록의 책을 묶는 방식입니다",
+					"options": {
+						"by_books": {
+							"label": "없음"
+						},
+						"by_series": {
+							"label": "시리즈"
+						},
+						"by_library": {
+							"label": "라이브러리"
+						}
+					}
+				},
+				"filters": {
+					"emptyState": "그룹을 추가하여 시작하세요",
+					"actions": {
+						"addFilter": "필터 추가",
+						"addGroup": "그룹 추가",
+						"deleteFilter": "필터 삭제",
+						"deleteGroup": "그룹 삭제"
+					},
+					"is": "조건",
+					"fieldSelect": {
+						"placeholder": "속성",
+						"source": {
+							"label": "대상",
+							"back": "뒤로",
+							"book": {
+								"label": "책",
+								"attributes": {
+									"name": "파일 이름",
+									"size": "크기",
+									"extension": "확장자",
+									"status": "상태",
+									"path": "경로",
+									"pages": "페이지 수",
+									"tags": "태그",
+									"createdAt": "생성 시각",
+									"updatedAt": "수정 시각",
+									"readingStatus": "독서 상태"
+								}
+							},
+							"book_meta": {
+								"label": "책 메타데이터",
+								"attributes": {
+									"title": "제목",
+									"summary": "줄거리",
+									"notes": "메모",
+									"writers": "글 작가",
+									"pencillers": "밑그림 작가",
+									"inkers": "펜선 담당",
+									"letterers": "레터링 담당",
+									"editors": "편집자",
+									"publisher": "출판사",
+									"colorists": "채색 담당",
+									"links": "링크",
+									"characters": "등장인물",
+									"teams": "팀",
+									"genres": "장르",
+									"coverArtists": "표지 작가",
+									"ageRating": "연령 등급",
+									"year": "연도",
+									"month": "월",
+									"day": "일"
+								}
+							},
+							"series": {
+								"label": "시리즈",
+								"attributes": {
+									"name": "이름",
+									"path": "경로"
+								}
+							},
+							"series_meta": {
+								"label": "시리즈 메타데이터",
+								"attributes": {
+									"title": "제목",
+									"summary": "줄거리",
+									"publisher": "출판사",
+									"imprint": "출판 브랜드",
+									"comicid": "만화 ID",
+									"booktype": "책 유형",
+									"status": "상태",
+									"volume": "권",
+									"metaType": "유형",
+									"ageRating": "연령 등급",
+									"year": "시작 연도"
+								}
+							},
+							"library": {
+								"label": "라이브러리",
+								"attributes": {
+									"name": "이름",
+									"path": "경로"
+								}
+							}
+						}
+					},
+					"basicValue": {
+						"placeholder": "값",
+						"date": "날짜"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "시작 날짜",
+							"number": "시작값"
+						},
+						"to": {
+							"date": "종료 날짜",
+							"number": "끝값"
+						},
+						"inclusive": "경곗값 포함"
+					},
+					"listValue": {
+						"placeholder": "값 추가",
+						"emptyState": "표시할 값이 없습니다"
+					},
+					"enumValue": {
+						"selectPlaceholder": "값 선택",
+						"READING": "읽는 중",
+						"FINISHED": "완독",
+						"NOT_STARTED": "읽기 전",
+						"ABANDONED": "읽기 중단"
+					}
+				}
+			}
+		}
+	},
+	"createSmartListScene": {
+		"heading": "스마트 목록 만들기",
+		"subtitle": "필터 조건에 맞는 목록을 그때그때 구성합니다",
+		"form": {
+			"stepLabel": "단계",
+			"steps": [
+				{
+					"label": "기본 정보",
+					"heading": "기본 정보",
+					"description": "이름, 설명, 공개 범위 등 이 스마트 목록의 기본 정보입니다"
+				},
+				{
+					"label": "필터",
+					"heading": "필터",
+					"description": "이 스마트 목록에 적용할 필터입니다"
+				},
+				{
+					"label": "검토",
+					"heading": "검토",
+					"description": "스마트 목록을 만들기 전에 설정을 확인하세요"
+				}
+			],
+			"review": {
+				"yes": "예",
+				"no": "아니요",
+				"none": "없음",
+				"labels": {
+					"name": "이름",
+					"description": "설명",
+					"visibility": "공개 범위",
+					"grouping": "그룹화 기준"
+				}
+			},
+			"buttons": {
+				"confirm": "목록 만들기"
+			}
+		}
+	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "만료 날짜는 미래의 날짜여야 합니다"
+		},
+		"fields": {
+			"name": {
+				"label": "이름",
+				"placeholder": "KOReader 동기화"
+			},
+			"expiration": {
+				"label": "만료",
+				"placeholder": "만료 없음"
+			},
+			"expiresAt": {
+				"label": "만료 시각",
+				"placeholder": "만료 없음"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "권한 상속",
+					"description": "본인 계정과 동일한 권한을 사용합니다"
+				},
+				"explicit": {
+					"label": "권한 직접 지정",
+					"description": "이 키에 부여할 권한을 선택합니다"
+				}
+			}
+		},
+		"inheritDisclaimer": "이 API 키는 본인의 모든 권한을 상속하므로, 본인이 할 수 있는 모든 작업을 수행할 수 있습니다. 신중하게 설정하세요"
+	},
+	"userSmartListsScene": {
+		"heading": "스마트 목록",
+		"subtitle": "자주 사용하는 검색과 필터를 저장하여 쉽게 이용합니다",
+		"searchPlaceholder": "스마트 목록 필터링",
+		"buttons": {
+			"createSmartList": "스마트 목록 만들기"
+		},
+		"list": {
+			"emptyState": {
+				"heading": "표시할 스마트 목록이 없습니다",
+				"noListsMessage": "스마트 목록을 만들어 시작하세요",
+				"noMatchesMessage": "검색어를 바꿔 보세요"
+			},
+			"card": {
+				"meta": {
+					"figures": {
+						"books": "책",
+						"series": "시리즈",
+						"library": "라이브러리"
+					},
+					"matches": "일치 항목"
+				}
+			}
+		}
+	},
+	"smartListSettingsScene": {
+		"sidebar": {
+			"basics": "기본 정보",
+			"configuration": {
+				"label": "설정",
+				"access": "접근",
+				"filters": "필터"
+			},
+			"danger-zone": {
+				"delete": "삭제",
+				"label": "주의가 필요한 설정"
+			}
+		},
+		"basics": {
+			"title": "기본 정보",
+			"description": "이름과 설명 등 이 스마트 목록의 기본 정보입니다"
+		},
+		"access": {
+			"title": "접근",
+			"description": "이 스마트 목록에 접근할 수 있는 사용자를 관리합니다",
+			"sections": {
+				"visibility": {
+					"confirmation": {
+						"public": "이 목록을 모든 사람이 볼 수 있도록 공개합니다",
+						"private": "목록을 비공개로 변경하여, 이전에 접근할 수 있었던 사용자에게도 숨깁니다",
+						"shared": "사용자에게 접근 권한을 부여하려면 해당 사용자와 목록을 공유해야 합니다",
+						"fallback": "이 목록의 공개 범위를 변경하시겠습니까?"
+					}
+				},
+				"accessManager": {
+					"disclaimer": "공유 기능은 아직 준비 중입니다. 나중에 다시 확인해 주세요!"
+				}
+			}
+		},
+		"filters": {
+			"title": "필터 구성",
+			"description": "이 스마트 목록을 구성하는 필터를 관리합니다"
+		},
+		"danger-zone/delete": {
+			"title": "삭제 작업",
+			"description": "이 스마트 목록과 모든 콘텐츠 또는 특정 리소스를 영구적으로 삭제합니다",
+			"sections": {
+				"deleteList": {
+					"heading": "목록 삭제",
+					"description": [
+						"이 스마트 목록과 모든 콘텐츠를 영구적으로 삭제합니다.",
+						"이 작업은 되돌릴 수 없습니다"
+					],
+					"confirmation": {
+						"title": "목록 삭제",
+						"description": "이 스마트 목록을 삭제하시겠습니까?",
+						"confirm": "목록 삭제"
+					}
+				}
+			}
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "작업 진행 중"
+	},
+	"libraryStats": {
+		"seriesCount": "전체 시리즈 수",
+		"bookCount": "전체 책 수",
+		"diskUsage": "디스크 사용량"
+	},
+	"noLibraries": {
+		"heading": "표시할 항목이 없습니다",
+		"messagePrefix": "아직 없는 항목은 볼 수 없어요",
+		"message": {
+			"create": "라이브러리를 만들어 시작하세요",
+			"wait": "라이브러리를 만들면 여기에 표시됩니다"
+		},
+		"links": {
+			"create": "라이브러리 만들기",
+			"settings": "설정으로 이동"
+		}
+	},
+	"pagination": {
+		"buttons": {
+			"next": "다음",
+			"previous": "이전"
+		},
+		"popover": {
+			"heading": "페이지로 이동",
+			"buttons": {
+				"confirm": "이동",
+				"cancel": "취소"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "로그아웃",
+		"message": "로그아웃하시겠습니까?",
+		"buttons": {
+			"cancel": "취소",
+			"signOut": "로그아웃"
+		}
+	},
+	"search": {
+		"placeholder": "검색"
+	},
+	"serverSOS": {
+		"heading": "서버를 사용할 수 없습니다",
+		"desktop": {
+			"message": "네트워크 오류가 발생하여 현재 Stump 서버를 사용할 수 없는 것으로 보입니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요.\n서버 URL이 바뀌었다면 아래 양식에서 수정할 수 있습니다"
+		},
+		"web": {
+			"message": "네트워크 오류가 발생하여 현재 Stump 서버를 사용할 수 없는 것으로 보입니다. 서버가 실행 중이며 이 기기에서 접근할 수 있는지 확인하세요"
+		},
+		"reconnected": "서버에 다시 연결했습니다! 이동하는 중...",
+		"reconnectionFailed": "문제가 발생했습니다!"
+	},
+	"serverStatusOverlay": {
+		"heading": "서버가 연결되어 있지 않습니다",
+		"message": [
+			"인터넷 연결을 확인하세요",
+			"서버 URL 변경",
+			"링크를 클릭하세요"
+		]
+	},
+	"slidingList": {
+		"empty": "표시할 항목이 없습니다",
+		"buttons": {
+			"next": "다음으로 이동",
+			"previous": "이전으로 이동"
+		}
+	},
+	"tagSelect": {
+		"placeholder": "태그 선택 또는 만들기",
+		"placeholderNoTags": "사용할 수 있는 태그가 없습니다"
+	},
+	"userPermissions": {
+		"ACCESS_API_KEYS": {
+			"label": "API 키",
+			"description": "본인의 API 키를 관리할 수 있습니다"
+		},
+		"ACCESS_BOOK_CLUB": {
+			"label": "북클럽",
+			"description": "북클럽 조회와 가입을 포함한 북클럽 기능에 접근할 수 있습니다"
+		},
+		"ACCESS_KOREADER_SYNC": {
+			"label": "KOReader 동기화",
+			"description": "KOReader 동기화 연동 기능을 사용할 수 있습니다"
+		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Kobo 동기화",
+			"description": "Kobo 동기화 연동 기능을 사용할 수 있습니다"
+		},
+		"ACCESS_SMART_LIST": {
+			"label": "스마트 목록",
+			"description": "스마트 목록 생성과 관리를 포함한 스마트 목록 기능에 접근할 수 있습니다"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "암호 변경",
+			"description": "본인의 암호를 변경할 수 있습니다"
+		},
+		"CHANGE_USERNAME": {
+			"label": "사용자 이름 변경",
+			"description": "본인의 사용자 이름을 변경할 수 있습니다"
+		},
+		"CHANGE_AVATAR": {
+			"label": "프로필 이미지 변경",
+			"description": "본인의 프로필 이미지를 변경할 수 있습니다"
+		},
+		"CREATE_BOOK_CLUB": {
+			"label": "북클럽 생성",
+			"description": "새 북클럽을 만들 수 있습니다"
+		},
+		"CREATE_LIBRARY": {
+			"label": "라이브러리 생성",
+			"description": "새 라이브러리를 만들 수 있습니다"
+		},
+		"CREATE_NOTIFIER": {
+			"label": "알림 시스템 생성",
+			"description": "새 알림 시스템을 만들 수 있습니다"
+		},
+		"DELETE_LIBRARY": {
+			"label": "라이브러리 삭제",
+			"description": "기존 라이브러리를 삭제할 수 있습니다"
+		},
+		"DELETE_NOTIFIER": {
+			"label": "알림 시스템 삭제",
+			"description": "알림 시스템을 삭제할 수 있습니다"
+		},
+		"DOWNLOAD_FILE": {
+			"label": "파일 다운로드",
+			"description": "서버에서 파일을 다운로드할 수 있습니다"
+		},
+		"EDIT_LIBRARY": {
+			"label": "라이브러리 수정",
+			"description": "기존 라이브러리를 수정할 수 있습니다"
+		},
+		"EMAILER_CREATE": {
+			"label": "이메일 발신 설정 생성",
+			"description": "이메일 발신 설정을 만들 수 있습니다"
+		},
+		"EMAILER_MANAGE": {
+			"label": "이메일 발신 설정 관리",
+			"description": "이메일 발신 구성과 설정을 관리할 수 있습니다"
+		},
+		"EMAILER_READ": {
+			"label": "이메일 발신 설정 조회",
+			"description": "이메일 발신 설정을 볼 수 있습니다"
+		},
+		"EMAIL_ARBITRARY_SEND": {
+			"label": "임의의 주소로 이메일 보내기",
+			"description": "모든 주소로 사용자 지정 이메일을 보낼 수 있습니다"
+		},
+		"EMAIL_SEND": {
+			"label": "이메일 보내기",
+			"description": "시스템을 통해 이메일을 보낼 수 있습니다"
+		},
+		"FILE_EXPLORER": {
+			"label": "파일 탐색기",
+			"description": "서버의 파일 시스템을 탐색할 수 있습니다"
+		},
+		"MANAGE_LIBRARY": {
+			"label": "라이브러리 관리",
+			"description": "라이브러리 설정과 구성을 관리할 수 있습니다"
+		},
+		"MANAGE_NOTIFIER": {
+			"label": "알림 시스템 관리",
+			"description": "알림 시스템 설정을 관리할 수 있습니다"
+		},
+		"MANAGE_SERVER": {
+			"label": "서버 관리",
+			"description": "서버 구성과 설정을 관리할 수 있습니다"
+		},
+		"MANAGE_USERS": {
+			"label": "사용자 관리",
+			"description": "사용자 계정을 생성, 수정, 삭제할 수 있습니다"
+		},
+		"READ_JOBS": {
+			"label": "작업 조회",
+			"description": "시스템 작업과 상태를 볼 수 있습니다"
+		},
+		"READ_NOTIFIER": {
+			"label": "알림 시스템 조회",
+			"description": "알림 시스템 구성을 볼 수 있습니다"
+		},
+		"READ_PERSISTED_LOGS": {
+			"label": "저장된 로그 조회",
+			"description": "저장된 시스템 로그를 볼 수 있습니다"
+		},
+		"READ_SYSTEM_LOGS": {
+			"label": "시스템 로그 조회",
+			"description": "실시간 시스템 로그를 볼 수 있습니다"
+		},
+		"READ_USERS": {
+			"label": "사용자 조회",
+			"description": "사용자 계정 정보를 볼 수 있습니다"
+		},
+		"SCAN_LIBRARY": {
+			"label": "라이브러리 스캔",
+			"description": "새 콘텐츠를 찾기 위한 라이브러리 스캔을 시작할 수 있습니다"
+		},
+		"UPLOAD_FILE": {
+			"label": "파일 업로드",
+			"description": "서버에 파일을 업로드할 수 있습니다"
+		},
+		"MANAGE_JOBS": {
+			"label": "작업 관리",
+			"description": "대기열에 있는 모든 작업을 관리할 수 있습니다"
+		},
+		"EDIT_METADATA": {
+			"label": "메타데이터 수정",
+			"description": "책과 시리즈의 메타데이터를 수정할 수 있습니다"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "메타데이터를 원본 파일에 저장",
+			"description": "메타데이터 변경 사항을 원본 파일에 저장할 수 있습니다"
+		},
+		"EDIT_THUMBNAILS": {
+			"label": "썸네일 수정",
+			"description": "책과 시리즈의 썸네일을 수정할 수 있습니다"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "메타데이터 제공자 조회",
+			"description": "등록된 외부 메타데이터 제공자를 볼 수 있습니다"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "메타데이터 제공자 관리",
+			"description": "외부 메타데이터 제공자를 설정할 수 있습니다"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "메타데이터 매칭 결과 조회",
+			"description": "검토를 기다리는 메타데이터 가져오기 결과를 볼 수 있습니다"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "메타데이터 매칭 결과 관리",
+			"description": "외부 제공자에서 책을 검색하고 매칭 후보를 수락하거나 거부할 수 있습니다"
+		}
+	},
+	"thumbnailSelector": {
+		"title": "썸네일 선택",
+		"descriptions": {
+			"chooseBookPage": "새 썸네일로 사용할 페이지를 이 책에서 선택하세요",
+			"chooseSeriesBook": "시리즈에서 책을 선택하세요"
+		},
+		"actions": {
+			"confirmSelection": "선택 확인"
+		},
+		"errors": {
+			"uploadFailed": "이미지를 업로드하지 못했습니다",
+			"updateFailed": "썸네일을 수정하지 못했습니다"
+		}
+	},
+	"epubReader": {
+		"reading": "읽기",
+		"appearance": "화면 모양",
+		"themeAndOptions": "테마 및 옵션",
+		"locationManager": "읽기 위치 관리",
+		"contents": "목차",
+		"bookmarks": "책갈피",
+		"annotations": "주석",
+		"noBookmarks": "책갈피가 없습니다",
+		"bookmark": "책갈피",
+		"noAnnotations": "주석이 없습니다",
+		"annotation": {
+			"addNote": "메모 추가",
+			"edit": "주석 수정",
+			"note": "메모",
+			"optionalNote": "메모를 추가하세요(선택 사항)…",
+			"selectionActions": "선택 영역 작업",
+			"highlight": "하이라이트",
+			"disabledInIncognito": "시크릿 모드에서는 주석을 사용할 수 없습니다",
+			"saveFailed": "주석을 저장하지 못했습니다",
+			"updateFailed": "주석을 수정하지 못했습니다",
+			"deleteFailed": "주석을 삭제하지 못했습니다"
+		},
+		"search": {
+			"placeholder": "검색어를 입력하고 Enter를 누르세요",
+			"failed": "검색에 실패했습니다. 다시 시도하세요.",
+			"noResults": "검색 결과가 없습니다.",
+			"section": "{{position}}번째 구역",
+			"loadingMore": "더 불러오는 중…",
+			"loadMore": "검색 결과 더 불러오기"
+		},
+		"controls": {
+			"columns": "단 수",
+			"auto": "자동",
+			"columnCount_one": "{{count}}단",
+			"columnCount_other": "{{count}}단",
+			"pageMargins": "페이지 여백",
+			"readingDirection": "읽기 방향",
+			"leftToRight": "왼쪽에서 오른쪽으로",
+			"rightToLeft": "오른쪽에서 왼쪽으로",
+			"readingMode": "읽기 방식",
+			"paged": "페이지 단위",
+			"continuous": "연속",
+			"previousPage": "이전 페이지",
+			"nextPage": "다음 페이지",
+			"toggleControls": "뷰어 조작부 표시 전환"
+		},
+		"errors": {
+			"openFailed": "Readium으로 EPUB을 열지 못했습니다.",
+			"navigateFailed": "해당 위치로 이동하지 못했습니다"
+		}
+	},
+	"imageReader": {
+		"settings": {
+			"readerSettings": {
+				"sections": {
+					"mode": "방식",
+					"imageOptions": "이미지 옵션",
+					"preferences": "환경설정"
+				},
+				"preferences": {
+					"separateSecondPage": "두 번째 페이지 따로 보기",
+					"panZoomWithoutCtrl": "Ctrl / Cmd 없이 이동 및 확대·축소",
+					"tapSidesToNavigate": "양쪽 가장자리를 탭하여 이동",
+					"readingTimer": "독서 타이머"
+				}
+			},
+			"imageScaling": {
+				"label": "이미지 크기 조절",
+				"options": {
+					"auto": "자동",
+					"height": "높이에 맞추기",
+					"width": "너비에 맞추기",
+					"original": "원본 크기"
+				}
+			},
+			"readingDirection": {
+				"label": "읽기 방향",
+				"options": {
+					"leftToRight": "왼쪽에서 오른쪽으로",
+					"rightToLeft": "오른쪽에서 왼쪽으로"
+				}
+			},
+			"readingMode": {
+				"label": "페이지 이동 방식",
+				"options": {
+					"verticalScroll": "세로 스크롤",
+					"horizontalScroll": "가로 스크롤",
+					"paged": "페이지 단위"
+				}
+			},
+			"doublePageBehavior": {
+				"label": "두 페이지 보기",
+				"options": {
+					"auto": "자동",
+					"always": "항상",
+					"off": "끄기"
+				}
 			}
 		}
 	}

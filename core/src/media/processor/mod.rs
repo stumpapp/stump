@@ -36,9 +36,6 @@ pub struct GeneratedFileHashes {
 /// Stump, however, are async. So it is important that you do not use these processors
 /// directly unless you wrap them in a blocking thread
 pub trait MediaProcessor {
-	/// Take a sample of the file to be used for generating a hash
-	fn sample(path: &Path) -> Result<Vec<u8>, MediaProcessorError>;
-
 	/// Generate a Stump-specific hash of the file, used for deduplication efforts
 	fn generate_stump_hash(path: &Path) -> Result<String, MediaProcessorError>;
 
@@ -65,19 +62,19 @@ pub trait MediaProcessor {
 	/// Get the bytes of a page within a media file, assuming the file is an indexed format
 	/// like a PDF or CBZ
 	fn get_page(
-		path: &str,
+		path: &Path,
 		page: i32,
 		// config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), MediaProcessorError>;
 
 	/// Get the number of pages in a media file, assuming the file is an indexed format
 	/// like a PDF or CBZ
-	fn get_page_count(path: &str) -> Result<i32, MediaProcessorError>;
+	fn get_page_count(path: &Path) -> Result<i32, MediaProcessorError>;
 
 	/// Get the content types of a list of pages of the file. This should determine content
 	/// types by actually testing the bytes for each page.
 	fn get_page_content_types(
-		path: &str,
+		path: &Path,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, MediaProcessorError>;
 

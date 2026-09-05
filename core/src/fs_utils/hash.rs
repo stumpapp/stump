@@ -1,7 +1,10 @@
 use data_encoding::HEXLOWER;
 use ring::digest::{Context, SHA256};
-use std::io::{self, Read, Seek};
-use tracing::debug;
+use std::{
+	fs::File,
+	io::{self, Read, Seek},
+	path::Path,
+};
 
 #[cfg(target_family = "unix")]
 use std::os::unix::prelude::FileExt;
@@ -30,8 +33,9 @@ fn read(file: &std::fs::File, offset: u64, size: u64) -> Result<Vec<u8>, io::Err
 	Ok(buffer)
 }
 
-pub fn generate(path: &str, bytes: u64) -> Result<String, io::Error> {
-	let file = std::fs::File::open(path)?;
+#[tracing::instrument(fields(path = %path.as_ref().display()))]
+pub fn generate<P: AsRef<Path>>(path: P, bytes: u64) -> Result<String, io::Error> {
+	let file = File::open(path)?;
 
 	let mut ring_context = Context::new(&SHA256);
 
@@ -55,7 +59,7 @@ pub fn generate(path: &str, bytes: u64) -> Result<String, io::Error> {
 
 	let encoded_digest = HEXLOWER.encode(digest.as_ref());
 
-	debug!("Generated checksum: {:?}", encoded_digest);
+	tracing::debug!("Generated hash: {:?}", encoded_digest);
 
 	Ok(encoded_digest)
 }

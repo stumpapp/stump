@@ -86,17 +86,19 @@ pub trait MediaProcessor {
 	/// Get the bytes of a page within a media file, assuming the file is an indexed format
 	/// like a PDF or CBZ
 	fn get_page(
+		&self,
 		path: &Path,
 		page: i32,
 	) -> Result<(ContentType, Vec<u8>), MediaProcessorError>;
 
 	/// Get the number of pages in a media file, assuming the file is an indexed format
 	/// like a PDF or CBZ
-	fn get_page_count(path: &Path) -> Result<i32, MediaProcessorError>;
+	fn get_page_count(&self, path: &Path) -> Result<i32, MediaProcessorError>;
 
 	/// Get the content types of a list of pages of the file. This should determine content
 	/// types by actually testing the bytes for each page.
 	fn get_page_content_types(
+		&self,
 		path: &Path,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, MediaProcessorError>;
@@ -104,9 +106,9 @@ pub trait MediaProcessor {
 	// Analyze a page to get its dimensions and content type. This is optimized to read
 	// only the minimum bytes necessary to determine the image dimensions
 	// fn analyze_page(
+	// 	&self,
 	// 	path: &str,
 	// 	page: i32,
-	// 	// config: &StumpConfig,
 	// ) -> Result<AnalyzedPage, MediaProcessorError>;
 }
 
@@ -177,4 +179,47 @@ pub async fn generate_hashes(
 	let path = path.as_ref().to_path_buf();
 	let processor = determine_processor(&path).await?;
 	spawn_blocking(move || processor.generate_hashes(&path, options)).await?
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn get_page(
+	path: impl AsRef<Path>,
+	page: i32,
+) -> Result<(ContentType, Vec<u8>), MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = determine_processor(&path).await?;
+	spawn_blocking(move || processor.get_page(&path, page)).await?
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn get_page_count(path: impl AsRef<Path>) -> Result<i32, MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = determine_processor(&path).await?;
+	spawn_blocking(move || processor.get_page_count(&path)).await?
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn get_content_types_for_pages(
+	path: impl AsRef<Path>,
+	pages: Vec<i32>,
+) -> Result<HashMap<i32, ContentType>, MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = determine_processor(&path).await?;
+	spawn_blocking(move || processor.get_page_content_types(&path, pages)).await?
+}
+
+#[tracing::instrument(err, fields(path = %path.as_ref().display()))]
+pub async fn get_content_type_for_page(
+	path: impl AsRef<Path>,
+	page: i32,
+) -> Result<ContentType, MediaProcessorError> {
+	let path = path.as_ref().to_path_buf();
+	let processor = determine_processor(&path).await?;
+	let content_types =
+		spawn_blocking(move || processor.get_page_content_types(&path, vec![page]))
+			.await??;
+	Ok(content_types
+		.get(&page)
+		.cloned()
+		.unwrap_or(ContentType::UNKNOWN))
 }

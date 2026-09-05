@@ -18,7 +18,7 @@ use crate::{
 			error::MediaProcessorError, GeneratedFileHashes, MediaProcessor,
 			MediaProcessorOptions, ProcessedMediaFile,
 		},
-		utils::metadata_from_buf,
+		utils::{metadata_from_buf, sort_file_names},
 	},
 };
 
@@ -142,7 +142,7 @@ impl MediaProcessor for ZipProcessor {
 			let path = path_buf.as_path();
 
 			if path.is_hidden_file() {
-				tracing::trace!(path = ?path, "Skipping hidden file");
+				tracing::trace!(file_path = ?path, "Skipping hidden file");
 				continue;
 			}
 
@@ -173,21 +173,139 @@ impl MediaProcessor for ZipProcessor {
 	}
 
 	fn get_page(
+		&self,
 		path: &Path,
 		page: i32,
-		// config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), MediaProcessorError> {
-		todo!()
+		let zip_file = File::open(path)?;
+
+		let mut archive = zip::ZipArchive::new(&zip_file)?;
+		let file_names_archive = archive.clone();
+
+		if archive.is_empty() {
+			return Err(MediaProcessorError::ArchiveEmpty);
+		}
+
+		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+		sort_file_names(&mut file_names);
+
+		let mut images_seen = 0;
+		for name in file_names {
+			let mut file = archive.by_name(name)?;
+
+			if file.is_dir() {
+				continue;
+			}
+
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let path = path_buf.as_path();
+
+			if path.is_hidden_file() {
+				tracing::trace!(zip_entry = ?path_buf, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = path.naive_content_type();
+			if images_seen + 1 == page && content_type.is_image() {
+				let contents = {
+					let mut contents = Vec::new();
+					file.read_to_end(&mut contents)?;
+					contents
+				};
+				tracing::trace!(?name, size = contents.len(), "Found targeted zip entry");
+				return Ok((content_type, contents));
+			} else if content_type.is_image() {
+				images_seen += 1;
+			}
+		}
+
+		tracing::error!("Failed to find valid image in zip file");
+
+		Err(MediaProcessorError::PageNotFound)
 	}
 
-	fn get_page_count(path: &Path) -> Result<i32, MediaProcessorError> {
-		todo!()
+	fn get_page_count(&self, path: &Path) -> Result<i32, MediaProcessorError> {
+		let zip_file = File::open(path)?;
+
+		let mut archive = ZipArchive::new(&zip_file)?;
+		let file_names_archive = archive.clone();
+
+		if archive.is_empty() {
+			return Err(MediaProcessorError::ArchiveEmpty);
+		}
+
+		let mut pages = 0;
+		let file_names = file_names_archive.file_names().collect::<Vec<_>>();
+		for name in file_names {
+			let file = archive.by_name(name)?;
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let content_type = path_buf.as_path().naive_content_type();
+			let is_hidden = path_buf.as_path().is_hidden_file();
+
+			if content_type.is_image() && !is_hidden {
+				pages += 1;
+			}
+		}
+
+		Ok(pages)
 	}
 
 	fn get_page_content_types(
+		&self,
 		path: &Path,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, MediaProcessorError> {
-		todo!()
+		let zip_file = File::open(path)?;
+		let mut archive = ZipArchive::new(&zip_file)?;
+
+		if archive.is_empty() {
+			return Err(MediaProcessorError::ArchiveEmpty);
+		}
+
+		let file_names_archive = archive.clone();
+		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+		sort_file_names(&mut file_names);
+
+		let mut content_types = HashMap::new();
+
+		let mut pages_found = 0;
+		for name in file_names {
+			let file = archive.by_name(name)?;
+			if file.is_dir() {
+				continue;
+			}
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let path = path_buf.as_path();
+
+			if path.is_hidden_file() {
+				tracing::trace!(zip_entry = ?path_buf, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = path.naive_content_type();
+			let is_page_in_target = pages.contains(&(pages_found + 1));
+
+			if is_page_in_target && content_type.is_image() {
+				tracing::trace!(?name, ?content_type, "found a targeted zip entry");
+				content_types.insert(pages_found + 1, content_type);
+				pages_found += 1;
+			}
+
+			// If we've found all the pages we need, we can stop
+			if pages_found == pages.len() as i32 {
+				break;
+			}
+		}
+
+		Ok(content_types)
 	}
 }

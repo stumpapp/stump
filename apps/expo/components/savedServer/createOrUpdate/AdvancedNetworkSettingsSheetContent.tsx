@@ -122,7 +122,7 @@ export function AdvancedNetworkSettingsSheetContent() {
 					</Card>
 
 					{ssid && !localSsid && (
-						<Button className="rounded-full">
+						<Button className="rounded-full" onPress={() => form.setValue('localSsid', ssid)}>
 							<Text>
 								{t(getKey('wifiNetwork.addNetwork'), {
 									ssid,

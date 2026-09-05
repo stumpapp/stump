@@ -15,8 +15,8 @@ use crate::{
 	media::{
 		metadata::ProcessedMediaMetadata,
 		processor::{
-			error::MediaProcessorError, GeneratedFileHashes, MediaProcessor,
-			MediaProcessorOptions, ProcessedMediaFile,
+			error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes,
+			MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
 		},
 		utils::{metadata_from_buf, sort_file_names},
 	},
@@ -307,5 +307,70 @@ impl MediaProcessor for ZipProcessor {
 		}
 
 		Ok(content_types)
+	}
+
+	fn analyze_page(
+		&self,
+		path: &Path,
+		page: i32,
+	) -> Result<AnalyzedPage, MediaProcessorError> {
+		let zip_file = File::open(path)?;
+		let mut archive = ZipArchive::new(&zip_file)?;
+		let file_names_archive = archive.clone();
+
+		if archive.is_empty() {
+			return Err(MediaProcessorError::ArchiveEmpty);
+		}
+
+		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+		sort_file_names(&mut file_names);
+
+		// imagesize only needs the first few KB to read dimensions from headers, taking
+		// extra as a precaution. 64kb should be plenty
+		const MAX_HEADER_BYTES: usize = 64 * 1024;
+
+		let mut images_seen = 0;
+		for name in file_names {
+			let file = archive.by_name(name)?;
+
+			if file.is_dir() {
+				continue;
+			}
+
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let entry_path = path_buf.as_path();
+
+			if entry_path.is_hidden_file() {
+				tracing::trace!(zip_entry = ?path_buf, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = entry_path.naive_content_type();
+
+			if images_seen + 1 == page && content_type.is_image() {
+				tracing::trace!(
+					?name,
+					?content_type,
+					"Found targeted zip entry for analysis"
+				);
+				let mut buf = Vec::with_capacity(MAX_HEADER_BYTES);
+				file.take(MAX_HEADER_BYTES as u64).read_to_end(&mut buf)?;
+
+				let size = imagesize::blob_size(&buf)?;
+
+				return Ok(AnalyzedPage {
+					width: size.width as u32,
+					height: size.height as u32,
+					content_type,
+				});
+			} else if content_type.is_image() {
+				images_seen += 1;
+			}
+		}
+
+		Err(MediaProcessorError::PageNotFound)
 	}
 }

@@ -140,7 +140,7 @@
 		"@types/react": "^19.0.10",
 		"better-sqlite3": "^13.0.3",
 		"drizzle-kit": "^0.31.5",
-		"tsx": "^4.20.5",
+		"tsx": "^4.23.12",
 		"typescript": "~5.9.2",
 		"vitest": "^4.1.11"
 	},

@@ -41,18 +41,24 @@ export default function ReaderDefaultSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<NewCard label="Universal" description="Settings which apply to all types of books">
+				<NewCard
+					label={t(getSectionKey('universal.label'))}
+					description={t(getSectionKey('universal.description'))}
+				>
 					<DefaultReadingDirection />
 
-					{/* TODO: not sure these belong here? idk they are reading preferences. 
-						im being a bit pedantic but this should be renamed `reading` preferences and 
+					{/* TODO: not sure these belong here? idk they are reading preferences.
+						im being a bit pedantic but this should be renamed `reading` preferences and
 						not specifically reader, geared towards readers and not generally reading experience
 					*/}
 					<DayResetHourOffsetPreference />
 					<ReadingSessionGracePeriodPreference />
 				</NewCard>
 
-				<NewCard label="Formats" description="Configure reader default settings independently">
+				<NewCard
+					label={t(getSectionKey('formats.label'))}
+					description={t(getSectionKey('formats.description'))}
+				>
 					<NewCard.Row
 						label={t(getSectionKey('imageBasedBooks.label'))}
 						description={t(getSectionKey('imageBasedBooks.description'))}
@@ -68,7 +74,7 @@ export default function ReaderDefaultSettingsScene() {
 							size="lg"
 							contentClassName="overflow-y-scroll"
 						>
-							<div className="gap-4 px-4 pb-4 flex flex-col">
+							<div className="gap-8 pb-16 md:gap-12 px-4 flex flex-col">
 								<ReaderSettings />
 								<PreloadPagesSection />
 							</div>

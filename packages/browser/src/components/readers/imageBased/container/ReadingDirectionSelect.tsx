@@ -27,8 +27,7 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 	)
 
 	return (
-		<div className="py-1.5">
-			<Label htmlFor="reading-direction">{t('imageReader.settings.readingDirection.label')}</Label>
+		<div>
 			<NativeSelect
 				id="reading-direction"
 				size="sm"

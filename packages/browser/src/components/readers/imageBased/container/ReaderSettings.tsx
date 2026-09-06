@@ -1,5 +1,5 @@
 import { BookPreferences, DEFAULT_BOOK_PREFERENCES } from '@stump/client'
-import { Label, RawSwitch } from '@stump/components'
+import { Label, NewCard, RawSwitch } from '@stump/components'
 import { ReadingMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import omit from 'lodash/omit'
@@ -12,6 +12,9 @@ import DoubleSpreadBehavior from './DoubleSpreadBehavior'
 import ImageScalingSelect from './ImageScalingSelect'
 import ReadingDirectionSelect from './ReadingDirectionSelect'
 import ReadingModeSelect from './ReadingModeSelect'
+
+const getSettingsKey = (key: string) => `imageReader.settings.${key}`
+const getSectionKey = (key: string) => `imageReader.settings.readerSettings.sections.${key}`
 
 type Props = {
 	forBook?: string
@@ -102,6 +105,63 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			}
 		},
 		[forBook, store],
+	)
+
+	return (
+		<div className="gap-8 flex flex-col" key={forBook}>
+			<NewCard label={t(getSectionKey('mode'))}>
+				<NewCard.Row label={t(getSettingsKey('mode'))} className="flex-row items-center">
+					<ReadingModeSelect
+						value={activeSettings.readingMode || DEFAULT_BOOK_PREFERENCES.readingMode}
+						onChange={onChangeReadingMode}
+					/>
+				</NewCard.Row>
+
+				<NewCard.Row
+					label={t(getSettingsKey('readingMode.label'))}
+					className="flex-row items-center"
+				>
+					<ReadingDirectionSelect
+						direction={activeSettings.readingDirection || DEFAULT_BOOK_PREFERENCES.readingDirection}
+						onChange={(direction) => onPreferenceChange({ readingDirection: direction })}
+					/>
+				</NewCard.Row>
+			</NewCard>
+
+			<NewCard label={t(getSectionKey('imageOptions'))}>
+				<NewCard.Row
+					label={t(getSettingsKey('doublePageBehavior.label'))}
+					className="flex-row items-center"
+				>
+					<DoubleSpreadBehavior
+						behavior={
+							activeSettings.doublePageBehavior || DEFAULT_BOOK_PREFERENCES.doublePageBehavior
+						}
+						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
+					/>
+				</NewCard.Row>
+
+				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.separateSecondPage'))}>
+					<RawSwitch
+						checked={activeSettings.secondPageSeparate}
+						onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
+					/>
+				</NewCard.Row>
+
+				<NewCard.Row label={t(getSettingsKey('imageScaling.label'))}>
+					<ImageScalingSelect
+						value={activeSettings.imageScaling?.scaleToFit}
+						onChange={(value) =>
+							onPreferenceChange({
+								imageScaling: {
+									scaleToFit: value,
+								},
+							})
+						}
+					/>
+				</NewCard.Row>
+			</NewCard>
+		</div>
 	)
 
 	return (

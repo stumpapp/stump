@@ -22,10 +22,7 @@ export default function DoubleSpreadBehavior({ behavior, onChange }: Props) {
 	)
 
 	return (
-		<div className="py-1.5">
-			<Label htmlFor="double-spread-behavior">
-				{t('imageReader.settings.doublePageBehavior.label')}
-			</Label>
+		<div>
 			<NativeSelect
 				id="double-spread-behavior"
 				size="sm"

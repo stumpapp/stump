@@ -1764,12 +1764,18 @@
 			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
+					"label": "Universal",
+					"description": "Settings which apply to all types of books",
 					"sections": {
 						"readingDirection": {
 							"label": "Reading direction",
 							"description": "The direction in which the reader will progress through pages"
 						}
 					}
+				},
+				"formats": {
+					"label": "Formats",
+					"description": "Configure reader default settings independently"
 				},
 				"imageBasedBooks": {
 					"label": "Image-based books",

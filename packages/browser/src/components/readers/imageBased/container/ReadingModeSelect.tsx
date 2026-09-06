@@ -27,8 +27,7 @@ export default function ReadingModeSelect({ value, onChange }: Props) {
 	)
 
 	return (
-		<div className="py-1.5">
-			<Label htmlFor="reading-mode">{t('imageReader.settings.readingMode.label')}</Label>
+		<div>
 			<NativeSelect
 				id="reading-mode"
 				size="sm"

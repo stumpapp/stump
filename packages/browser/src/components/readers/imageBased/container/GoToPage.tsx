@@ -1,4 +1,5 @@
 import { Button, Input, Label, Popover } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ChangeEvent, KeyboardEvent, useState } from 'react'
 
 export type GoToPageProps = {
@@ -16,14 +17,11 @@ export type GoToPageProps = {
 	 */
 	onSubmit: (page: number) => void
 	/**
-	 * Label for the input. Passed in so this component stays presentation-agnostic and
-	 * trivially testable. Defaults to English to match the rest of the (currently
-	 * unlocalized) image reader; can be swapped for a t(...) string once the reader is
-	 * localized as a whole.
+	 * Optional label override for the input.
 	 */
 	label?: string
 	/**
-	 * Text for the submit button. See `label` re: localization
+	 * Optional text override for the submit button.
 	 */
 	submitLabel?: string
 	/**
@@ -48,12 +46,21 @@ export default function GoToPage({
 	currentPage,
 	totalPages,
 	onSubmit,
-	label = 'Go to page',
-	submitLabel = 'Go',
+	label,
+	submitLabel,
 	triggerLabel,
 }: GoToPageProps) {
+	const { t } = useLocaleContext()
 	const [open, setOpen] = useState(false)
 	const [value, setValue] = useState(() => String(currentPage))
+	const resolvedLabel = label ?? t('imageReader.goToPage.label')
+	const resolvedSubmitLabel = submitLabel ?? t('imageReader.goToPage.submit')
+	const resolvedTriggerLabel =
+		triggerLabel ??
+		t('imageReader.footer.pageOf', {
+			current: currentPage,
+			total: totalPages,
+		})
 
 	const handleOpenChange = (next: boolean) => {
 		/**
@@ -96,16 +103,16 @@ export default function GoToPage({
 				<button
 					type="button"
 					className="text-sm text-gray-450 underline-offset-2 hover:underline"
-					aria-label={label}
+					aria-label={resolvedLabel}
 				>
-					{triggerLabel ?? `${currentPage} of ${totalPages}`}
+					{resolvedTriggerLabel}
 				</button>
 			</Popover.Trigger>
 
 			<Popover.Content size="sm" className="gap-2 p-3 flex flex-col">
 				{/* The label sits atop input/button group so it doesn't throw off the
 				    alignment of row below. */}
-				<Label htmlFor="go-to-page-input">{label}</Label>
+				<Label htmlFor="go-to-page-input">{resolvedLabel}</Label>
 				<div className="gap-2 flex items-center">
 					<Input
 						id="go-to-page-input"
@@ -119,7 +126,7 @@ export default function GoToPage({
 						autoFocus
 					/>
 					<Button size="sm" onClick={handleSubmit}>
-						{submitLabel}
+						{resolvedSubmitLabel}
 					</Button>
 				</div>
 			</Popover.Content>

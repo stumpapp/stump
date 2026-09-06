@@ -27,7 +27,9 @@ The app supports this by allowing you to configure a local network URL for each 
 <Callout type="warn" title="Network Permissions and Privacy">
     Stump **does not** collect any information about your location. The app will prompt your for permission to access information related to your network (name, connection status, etc) so it can determine if you are on your configured home network to manage the decision of which URL to use. That said, the permission you grant may have scary language, such as `Allow "Stump" to access your location`.
 
-    If you are using an Apple device, the exact entitlement is [`com.apple.developer.networking.wifi-info`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.wifi-info). I do not know why Apple has chosen to phrase it this way.
+    If you are using an Apple device, the exact entitlement is [`com.apple.developer.networking.wifi-info`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.wifi-info). If you have granted permission and still do not see your wifi network in the app, ensure you have "Precise Location" enabled for the app, as that is seemingly required as well. I do not know why Apple has chosen to operate this way.
+
+    If you are using an Android device, you'll need to enable location services for the app to read your network information. Similarly, Android requires the [`ACCESS_FINE_LOCATION`](https://developer.android.com/reference/android/Manifest.permission#ACCESS_FINE_LOCATION) permission to read the wifi network information.
 
 </Callout>
 

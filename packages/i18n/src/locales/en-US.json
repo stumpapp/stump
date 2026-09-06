@@ -1940,21 +1940,24 @@
 				"serverInfo": {
 					"title": "Server information",
 					"description": "Basic details about your Stump server instance",
-					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
-						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
-						}
-					},
+					"version": "Verison",
+					"exactCommit": "Exact commit",
+					"build": "Build",
 					"nonStableChannel": {
 						"title": "You are running a non-stable build of Stump",
 						"description": [
 							"It looks like you are running the",
 							"build channel"
 						]
+					}
+				},
+				"serverConfig": {
+					"label": "Server configuration",
+					"description": "A subset of configuration options available for management here",
+					"publicUrl": {
+						"label": "Public URL",
+						"description": "The URL that your server is accessible from outside your network",
+						"updateFailed": "Failed to update the URL"
 					}
 				},
 				"helpfulLinks": {
@@ -1965,13 +1968,9 @@
 						"changelog": "Changelog"
 					}
 				},
-				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
-				},
 				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
+					"title": "Emojis",
+					"description": "See and manage custom image emojis for your server",
 					"dropzone": "Drop an image or click to select",
 					"input": {
 						"label": "Emoji name",

@@ -11,15 +11,16 @@ import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 
 import HelpfulLinks from './HelpfulLinks'
+import { ServerConfiguration } from './ServerConfiguration'
 import ServerEmojisSection from './ServerEmojisSection'
 import ServerInfoSection from './ServerInfoSection'
-import ServerPublicURL from './ServerPublicURL'
 import ServerStats from './ServerStats'
 
 export default function GeneralServerSettingsScene() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 
+	// TODO: make this a toast?
 	const { updateAvailable } = useCheckForServerUpdate()
 	const { uploadConfig } = useUploadConfig({ enabled: checkPermission(UserPermission.UploadFile) })
 
@@ -44,9 +45,9 @@ export default function GeneralServerSettingsScene() {
 						</Alert>
 					)}
 
+					<ServerConfiguration />
+
 					<ServerInfoSection />
-					<ServerPublicURL />
-					{uploadConfig?.enabled && <ServerEmojisSection />}
 
 					<HelpfulLinks />
 				</div>

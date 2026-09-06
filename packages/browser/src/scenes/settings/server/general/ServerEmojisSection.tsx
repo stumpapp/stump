@@ -1,5 +1,14 @@
 import { useGraphQLMutation, useGraphQLUploadMutation, useSuspenseGraphQL } from '@stump/client'
-import { Button, cn, ConfirmationModal, Heading, Input, ScrollArea, Text } from '@stump/components'
+import {
+	Button,
+	cn,
+	ConfirmationModal,
+	Heading,
+	Input,
+	NewCard,
+	ScrollArea,
+	Text,
+} from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { ImagePlus, Pencil, Trash2 } from 'lucide-react'
@@ -48,6 +57,9 @@ const deleteMutation = graphql(`
 	}
 `)
 
+// TODO: fold into server config section, button to open dialog to manage emojis
+// TODO: disable upload if not enabled, but retain ui to delete existing resources
+// (e.g., if upload temp enabled, uploaded stuff, disabled, come back)
 export default function ServerEmojisSection() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
@@ -235,6 +247,15 @@ export default function ServerEmojisSection() {
 	}, [previewUrl])
 
 	const isDropzoneFocused = isDragActive || isFileDialogActive
+
+	// TODO: wire it up to a dialog etc etc
+	return (
+		<>
+			<NewCard.Row label={t(getKey('title'))} description={t(getKey('description'))}>
+				<Button variant="outline">{t('common.edit')}</Button>
+			</NewCard.Row>
+		</>
+	)
 
 	return (
 		<div className="gap-4 flex flex-col">

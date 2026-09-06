@@ -4,9 +4,8 @@ import {
 	AlertDescription,
 	AlertTitle,
 	cn,
-	Heading,
-	Label,
 	Link,
+	NewCard,
 	Text,
 	TEXT_VARIANTS,
 } from '@stump/components'
@@ -39,14 +38,62 @@ export default function ServerInfoSection() {
 		[version],
 	)
 
+	// TODO: a changelog query in a dialog would be nice to have
 	return (
 		<div className="gap-4 flex flex-col">
-			<div>
-				<Heading size="sm">{t('settingsScene.server/general.sections.serverInfo.title')}</Heading>
-				<Text size="sm" variant="muted" className="mt-1">
-					{t('settingsScene.server/general.sections.serverInfo.description')}
-				</Text>
-			</div>
+			<NewCard
+				label={t('settingsScene.server/general.sections.serverInfo.title')}
+				description={t('settingsScene.server/general.sections.serverInfo.description')}
+			>
+				<NewCard.Row label={t('settingsScene.server/general.sections.serverInfo.version')}>
+					<Link
+						href={versionUrl}
+						target="__blank"
+						rel="noopener noreferrer"
+						className={cn(
+							'space-x-2 text-sm flex items-center hover:underline',
+							TEXT_VARIANTS.muted,
+						)}
+						underline={false}
+					>
+						<span>v{version?.semver}</span>
+					</Link>
+				</NewCard.Row>
+
+				<NewCard.Row label={t('settingsScene.server/general.sections.serverInfo.build')}>
+					<Text size="sm" variant="muted">
+						{buildChannel
+							? toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)
+							: t('common.unknown')}
+					</Text>
+				</NewCard.Row>
+
+				<NewCard.Row label={t('settingsScene.server/general.sections.serverInfo.exactCommit')}>
+					<Link
+						href={commitUrl}
+						target="__blank"
+						rel="noopener noreferrer"
+						className={cn(
+							'space-x-2 text-sm flex items-center hover:underline',
+							TEXT_VARIANTS.muted,
+						)}
+						underline={false}
+					>
+						<span>{version?.rev}</span>
+						{version?.compileTime && (
+							<span>
+								(
+								{intlFormat(new Date(version.compileTime), {
+									month: 'long',
+									day: 'numeric',
+									year: 'numeric',
+								})}
+								)
+							</span>
+						)}
+					</Link>
+				</NewCard.Row>
+			</NewCard>
 
 			{buildChannel && buildChannel !== 'stable' && (
 				<Alert variant="info">
@@ -63,68 +110,6 @@ export default function ServerInfoSection() {
 					</AlertDescription>
 				</Alert>
 			)}
-
-			<div className="gap-12 md:gap-8 flex flex-row flex-wrap">
-				{version && (
-					<div>
-						<Label>Semantic version</Label>
-						<Link
-							href={versionUrl}
-							target="__blank"
-							rel="noopener noreferrer"
-							className={cn(
-								'space-x-2 text-sm flex items-center hover:underline',
-								TEXT_VARIANTS.muted,
-							)}
-							underline={false}
-						>
-							<span>v{version.semver}</span>
-						</Link>
-					</div>
-				)}
-
-				{buildChannel && (
-					<div>
-						<Label>Build channel</Label>
-						<Text size="sm" variant="muted">
-							{toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)}
-						</Text>
-					</div>
-				)}
-
-				{version && (
-					<div>
-						<Label>Exact commit</Label>
-						<Link
-							href={commitUrl}
-							target="__blank"
-							rel="noopener noreferrer"
-							className={cn(
-								'space-x-2 text-sm flex items-center hover:underline',
-								TEXT_VARIANTS.muted,
-							)}
-							underline={false}
-						>
-							<span>{version.rev}</span>
-						</Link>
-					</div>
-				)}
-
-				{version && (
-					<div>
-						<Label>Build date</Label>
-						<Text size="sm" variant="muted">
-							{intlFormat(new Date(version.compileTime), {
-								month: 'long',
-								day: 'numeric',
-								year: 'numeric',
-								hour: 'numeric',
-								minute: '2-digit',
-							})}
-						</Text>
-					</div>
-				)}
-			</div>
 		</div>
 	)
 }

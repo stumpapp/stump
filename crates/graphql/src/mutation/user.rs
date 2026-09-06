@@ -3,8 +3,8 @@ use crate::{
 	error_message::FORBIDDEN_ACTION,
 	guard::{OptionalFeature, OptionalFeatureGuard, PermissionGuard, ServerOwnerGuard},
 	input::user::{
-		AgeRestrictionInput, CreateUserInput, NavigationArrangementInput,
-		UpdateUserInput, UpdateUserPreferencesInput,
+		AgeRestrictionInput, CreateUserInput, HomeArrangementInput,
+		NavigationArrangementInput, UpdateUserInput, UpdateUserPreferencesInput,
 	},
 	object::{user::User, user_preferences::UserPreferences},
 	utils::save_user_session,
@@ -18,7 +18,9 @@ use models::{
 		user_login_activity, user_preferences,
 	},
 	shared::{
-		arrangement::Arrangement, enums::UserPermission, permission_set::PermissionSet,
+		arrangement::{Arrangement, HomeArrangement},
+		enums::UserPermission,
+		permission_set::PermissionSet,
 	},
 };
 use sea_orm::{
@@ -439,6 +441,29 @@ impl UserMutation {
 		let updated_user = active_model.update(conn).await?;
 
 		Ok(User::from(updated_user))
+	}
+
+	/// Replace the authenticated user's home sections without a lock/unlock workflow.
+	async fn update_home_arrangement(
+		&self,
+		ctx: &Context<'_>,
+		input: HomeArrangementInput,
+	) -> Result<HomeArrangement> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let arrangement = HomeArrangement::new(input.sections)?;
+
+		let preferences = user_preferences::Entity::find()
+			.filter(user_preferences::Column::UserId.eq(&user.id))
+			.one(conn)
+			.await?
+			.ok_or("User preferences not found")?;
+
+		let mut active_model = preferences.into_active_model();
+		active_model.home_arrangement = Set(Some(arrangement.clone().into()));
+		active_model.update(conn).await?;
+
+		Ok(arrangement)
 	}
 
 	async fn update_navigation_arrangement_lock(

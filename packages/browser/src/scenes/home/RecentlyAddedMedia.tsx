@@ -60,7 +60,7 @@ export const usePrefetchRecentlyAddedMedia = () => {
 	const { sdk } = useSDK()
 	const client = useQueryClient()
 	return useCallback(() => {
-		client.prefetchInfiniteQuery({
+		return client.prefetchInfiniteQuery({
 			queryKey: ['recentlyAddedMedia'],
 			initialPageParam: {
 				cursor: {

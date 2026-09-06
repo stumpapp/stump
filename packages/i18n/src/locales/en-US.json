@@ -858,7 +858,9 @@
 				"heading": "Nothing to show",
 				"message": "Any recent books you add will show up here"
 			}
-		}
+		},
+		"allSectionsHidden": "All home sections are hidden.",
+		"customizeHome": "Customize your home page"
 	},
 	"metadataEditor": {
 		"labels": {
@@ -1704,6 +1706,19 @@
 				"readingSessionGracePeriod": {
 					"label": "Reading session grace period",
 					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+				},
+				"homeArrangement": {
+					"title": "Home page",
+					"description": "Choose which sections appear on your home page and their order.",
+					"label": "Home sections",
+					"hint": "Drag sections or use the arrow buttons to reorder them. Changes apply to your account after saving.",
+					"reorder": "Reorder {{section}}",
+					"moveUp": "Move {{section}} up",
+					"moveDown": "Move {{section}} down",
+					"reset": "Restore defaults",
+					"saving": "Saving…",
+					"saveFailed": "Could not save your home page. Your changes are still here; please try again.",
+					"unsupported": "This home configuration contains sections that this editor does not support."
 				}
 			}
 		},

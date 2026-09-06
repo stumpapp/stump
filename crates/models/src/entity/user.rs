@@ -106,7 +106,8 @@ impl FromQueryResult for AuthUser {
 			.map(|p| user_preferences::Model {
 				home_arrangement: p
 					.home_arrangement
-					.or_else(user_preferences::Model::default_home_arrangement),
+					.or_else(user_preferences::Model::default_home_arrangement)
+					.map(|arrangement| arrangement.with_missing_home_sections()),
 				navigation_arrangement: p
 					.navigation_arrangement
 					.or_else(user_preferences::Model::default_navigation_arrangement),

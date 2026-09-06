@@ -22,6 +22,7 @@ impl UserPreferences {
 			.home_arrangement
 			.clone()
 			.unwrap_or(Arrangement::default_home())
+			.with_missing_home_sections()
 	}
 
 	async fn navigation_arrangement(&self) -> Arrangement {

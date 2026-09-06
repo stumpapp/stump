@@ -72,11 +72,12 @@ type Arrangement {
 	sections: [ArrangementSection!]!
 }
 
-union ArrangementConfig = SystemArrangementConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+union ArrangementConfig = SystemArrangementConfig | InProgressBooks | OnDeckBooks | RecentlyAdded | CustomArrangementConfig
 
 input ArrangementConfigInput @oneOf {
 	system: SystemArrangementConfigInput
 	inProgressBooks: InProgressBooksInput
+	onDeckBooks: OnDeckBooksInput
 	recentlyAdded: RecentlyAddedInput
 	custom: FilterableArrangementEntityLinkInput
 }
@@ -868,6 +869,18 @@ input FitWithinResizeInput {
 	width: Int!
 	"The maximum height (in pixels) of the resulting image"
 	height: Int!
+}
+
+"""
+The home mutation contract deliberately contains only sections. The existing
+Arrangement query and storage shape are retained for backwards compatibility.
+"""
+type HomeArrangement {
+	sections: [ArrangementSection!]!
+}
+
+input HomeArrangementInput {
+	sections: [ArrangementSectionInput!]!
 }
 
 type ImageColor {
@@ -2065,6 +2078,8 @@ type Mutation {
 	deleteUser(id: ID!, hardDelete: Boolean): User!
 	deleteUserSessions(id: ID!): Int!
 	updateUserLockStatus(id: ID!, lock: Boolean!): User!
+	"Replace the authenticated user's home sections without a lock/unlock workflow."
+	updateHomeArrangement(input: HomeArrangementInput!): HomeArrangement!
 	updateNavigationArrangementLock(locked: Boolean!): Arrangement!
 	updateNavigationArrangement(input: NavigationArrangementInput!): Arrangement!
 	createEmailer(input: EmailerInput!): Emailer!
@@ -2281,6 +2296,16 @@ type OffsetPaginationInfo {
 	pageOffset: Int!
 	"Whether or not the page is zero-indexed."
 	zeroBased: Boolean!
+}
+
+type OnDeckBooks {
+	name: String
+	links: [FilterableArrangementEntityLink!]!
+}
+
+input OnDeckBooksInput {
+	name: String
+	links: [FilterableArrangementEntityLink!]! = []
 }
 
 enum OrderDirection {

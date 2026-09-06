@@ -117,13 +117,14 @@ export type Arrangement = {
   sections: Array<ArrangementSection>;
 };
 
-export type ArrangementConfig = CustomArrangementConfig | InProgressBooks | RecentlyAdded | SystemArrangementConfig;
+export type ArrangementConfig = CustomArrangementConfig | InProgressBooks | OnDeckBooks | RecentlyAdded | SystemArrangementConfig;
 
 export type ArrangementConfigInput =
-  { custom: FilterableArrangementEntityLinkInput; inProgressBooks?: never; recentlyAdded?: never; system?: never; }
-  |  { custom?: never; inProgressBooks: InProgressBooksInput; recentlyAdded?: never; system?: never; }
-  |  { custom?: never; inProgressBooks?: never; recentlyAdded: RecentlyAddedInput; system?: never; }
-  |  { custom?: never; inProgressBooks?: never; recentlyAdded?: never; system: SystemArrangementConfigInput; };
+  { custom: FilterableArrangementEntityLinkInput; inProgressBooks?: never; onDeckBooks?: never; recentlyAdded?: never; system?: never; }
+  |  { custom?: never; inProgressBooks: InProgressBooksInput; onDeckBooks?: never; recentlyAdded?: never; system?: never; }
+  |  { custom?: never; inProgressBooks?: never; onDeckBooks: OnDeckBooksInput; recentlyAdded?: never; system?: never; }
+  |  { custom?: never; inProgressBooks?: never; onDeckBooks?: never; recentlyAdded: RecentlyAddedInput; system?: never; }
+  |  { custom?: never; inProgressBooks?: never; onDeckBooks?: never; recentlyAdded?: never; system: SystemArrangementConfigInput; };
 
 export type ArrangementSection = {
   __typename?: 'ArrangementSection';
@@ -933,6 +934,19 @@ export type FitWithinResizeInput = {
   height: Scalars['Int']['input'];
   /** The maximum width (in pixels) of the resulting image */
   width: Scalars['Int']['input'];
+};
+
+/**
+ * The home mutation contract deliberately contains only sections. The existing
+ * Arrangement query and storage shape are retained for backwards compatibility.
+ */
+export type HomeArrangement = {
+  __typename?: 'HomeArrangement';
+  sections: Array<ArrangementSection>;
+};
+
+export type HomeArrangementInput = {
+  sections: Array<ArrangementSectionInput>;
 };
 
 export type ImageColor = {
@@ -2193,6 +2207,8 @@ export type Mutation = {
   updateCustomEmoji: CustomEmoji;
   updateEmailDevice: RegisteredEmailDevice;
   updateEmailer: Emailer;
+  /** Replace the authenticated user's home sections without a lock/unlock workflow. */
+  updateHomeArrangement: HomeArrangement;
   /**
    * Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
    * the library will be scanned immediately after updating.
@@ -2877,6 +2893,11 @@ export type MutationUpdateEmailerArgs = {
 };
 
 
+export type MutationUpdateHomeArrangementArgs = {
+  input: HomeArrangementInput;
+};
+
+
 export type MutationUpdateLibraryArgs = {
   id: Scalars['ID']['input'];
   input: CreateOrUpdateLibraryInput;
@@ -3171,6 +3192,17 @@ export type OffsetPaginationInfo = {
   totalPages: Scalars['Int']['output'];
   /** Whether or not the page is zero-indexed. */
   zeroBased: Scalars['Boolean']['output'];
+};
+
+export type OnDeckBooks = {
+  __typename?: 'OnDeckBooks';
+  links: Array<FilterableArrangementEntityLink>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type OnDeckBooksInput = {
+  links?: Array<FilterableArrangementEntityLink>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum OrderDirection {
@@ -5891,7 +5923,7 @@ export type SetSeriesLockedFieldsMutation = { __typename?: 'Mutation', setSeries
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
+export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'OnDeckBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
 export type BookClubSideBarSectionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5926,7 +5958,7 @@ export type SmartListSideBarSectionQuery = { __typename?: 'Query', smartLists: A
 export type TopNavigationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
+export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'OnDeckBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
 export type BookClubNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6323,6 +6355,18 @@ export type RecentlyAddedSeriesQueryVariables = Exact<{
 
 export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, createdAt: any, oneshotBook?: { __typename?: 'Media', id: string } | null, media: Array<{ __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type HomeArrangementPreferencesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HomeArrangementPreferencesQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', homeArrangement: { __typename?: 'Arrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } } } };
+
+export type UpdateHomeArrangementMutationVariables = Exact<{
+  input: HomeArrangementInput;
+}>;
+
+
+export type UpdateHomeArrangementMutation = { __typename?: 'Mutation', updateHomeArrangement: { __typename?: 'HomeArrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } };
+
 export type LibraryLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -6653,7 +6697,7 @@ export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateVie
 export type NavigationArrangementQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NavigationArrangementQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
+export type NavigationArrangementQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'OnDeckBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
 export type NavigationArrangementUpdateMutationVariables = Exact<{
   input: NavigationArrangementInput;
@@ -12322,6 +12366,60 @@ export const RecentlyAddedSeriesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<RecentlyAddedSeriesQuery, RecentlyAddedSeriesQueryVariables>;
+export const HomeArrangementPreferencesDocument = new TypedDocumentString(`
+    query HomeArrangementPreferences {
+  me {
+    preferences {
+      homeArrangement {
+        sections {
+          visible
+          config {
+            __typename
+            ... on InProgressBooks {
+              name
+              links
+            }
+            ... on OnDeckBooks {
+              name
+              links
+            }
+            ... on RecentlyAdded {
+              entity
+              name
+              links
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<HomeArrangementPreferencesQuery, HomeArrangementPreferencesQueryVariables>;
+export const UpdateHomeArrangementDocument = new TypedDocumentString(`
+    mutation UpdateHomeArrangement($input: HomeArrangementInput!) {
+  updateHomeArrangement(input: $input) {
+    sections {
+      visible
+      config {
+        __typename
+        ... on InProgressBooks {
+          name
+          links
+        }
+        ... on OnDeckBooks {
+          name
+          links
+        }
+        ... on RecentlyAdded {
+          entity
+          name
+          links
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateHomeArrangementMutation, UpdateHomeArrangementMutationVariables>;
 export const LibraryLayoutDocument = new TypedDocumentString(`
     query LibraryLayout($id: ID!) {
   libraryById(id: $id) {

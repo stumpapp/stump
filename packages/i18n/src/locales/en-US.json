@@ -3741,6 +3741,20 @@
 		}
 	},
 	"imageReader": {
+		"header": {
+			"goToMediaOverview": "Go to media overview"
+		},
+		"settingsDialog": {
+			"scopes": {
+				"book": "Book",
+				"global": "Global"
+			}
+		},
+		"timerMenu": {
+			"start": "Start Timer",
+			"stop": "Stop Timer",
+			"reset": "Reset Timer"
+		},
 		"settings": {
 			"readerSettings": {
 				"sections": {

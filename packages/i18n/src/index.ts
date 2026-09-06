@@ -12,6 +12,7 @@ export { default as LocaleProvider } from './LocaleProvider'
 export type { AllowedLocale }
 
 export const localeNames: Record<AllowedLocale, string> = {
+	bs: 'Bosanski',
 	'af-ZA': 'Afrikaans',
 	'ar-SA': 'العربية',
 	'ca-ES': 'Català',

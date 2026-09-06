@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next'
 import {
 	afZA,
 	arSA,
+	bs,
 	caES,
 	csCZ,
 	daDK,
@@ -37,6 +38,7 @@ import {
 } from './locales'
 
 export const LOCALES = [
+	'bs',
 	'af-ZA',
 	'ar-SA',
 	'ca-ES',
@@ -74,6 +76,9 @@ export const LOCALES = [
 export type AllowedLocale = (typeof LOCALES)[number]
 
 export const resources: Resource = {
+	bs: {
+		bs: bs,
+	},
 	'af-ZA': {
 		'af-ZA': afZA,
 	},

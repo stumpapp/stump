@@ -5,6 +5,7 @@ import type { AllowedLocale } from './config'
 
 // Note: lazy loading as to not bloat initial bundle with all the locales
 const dateFnsLocaleLoaders: Record<AllowedLocale, () => Promise<Locale>> = {
+	bs: () => import('date-fns/locale/bs').then((m) => m.bs),
 	'af-ZA': () => import('date-fns/locale/af').then((m) => m.af),
 	'ar-SA': () => import('date-fns/locale/ar-SA').then((m) => m.arSA),
 	'ca-ES': () => import('date-fns/locale/ca').then((m) => m.ca),
@@ -56,6 +57,7 @@ function findClosestLocale(locale: string): AllowedLocale {
 
 	const languageFallbacks: Record<string, AllowedLocale> = {
 		af: 'af-ZA',
+		bs: 'bs',
 		ar: 'ar-SA',
 		ca: 'ca-ES',
 		cs: 'cs-CZ',
@@ -227,6 +229,7 @@ export function formatNarrowDuration(
 }
 
 const LOCALE_NARROW_UNITS = {
+	bs: { h: ' h', m: ' min', s: ' s' },
 	'af-ZA': { h: ' u.', m: ' min.', s: ' s.' },
 	'ar-SA': { h: ' س', m: ' د', s: ' ث' },
 	'ca-ES': { h: ' h', m: ' min', s: ' s' },

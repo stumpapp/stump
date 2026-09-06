@@ -91,6 +91,23 @@ impl Series {
 		Ok(Library::from(model))
 	}
 
+	async fn oneshot_book(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
+		if !self.model.is_oneshot {
+			return Ok(None);
+		}
+
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find()
+			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
+			.filter(media::Column::IsOneshot.eq(true))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?;
+
+		Ok(model.map(Media::from))
+	}
+
 	// TODO(perf): We probably could put this behind a dataloader if used frequently
 	/// Get media in this series
 	async fn media(

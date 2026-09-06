@@ -74,6 +74,14 @@ export class Api {
 	private _shouldFormatURL = true
 
 	/**
+	 * An abort controller for the current axios instance. Aborted (and replaced)
+	 * by `switchUrl` so that any active requests against an old base URL
+	 * are cancelled immediately, otherwise you'll hit network errors (after
+	 * an annoyingly long timeout)
+	 */
+	private _abortController: AbortController = new AbortController()
+
+	/**
 	 * Create a new instance of the API
 	 * @param baseURL The base URL to the Stump server
 	 */
@@ -120,6 +128,36 @@ export class Api {
 			config.headers = config.headers.concat(await this.getHeaders())
 			if (this._basicAuth) {
 				config.auth = this._basicAuth
+			}
+			// only manage our own signal if caller has not supplied one
+			if (!config.signal) {
+				config.signal = this._abortController.signal
+			}
+			return config
+		})
+		this.axiosInstance = instance
+	}
+
+	/**
+	 * Switch the base URL for the API instance. Internally this will cancel any active requests and reconstruct
+	 * the axios instance
+	 */
+	switchUrl(url: string) {
+		this._abortController.abort()
+		this._abortController = new AbortController()
+
+		this.baseURL = url
+		const instance = axios.create({
+			baseURL: this.serviceURL,
+			withCredentials: this.configuration.authMethod === 'session',
+		})
+		instance.interceptors.request.use(async (config) => {
+			config.headers = config.headers.concat(await this.getHeaders())
+			if (this._basicAuth) {
+				config.auth = this._basicAuth
+			}
+			if (!config.signal) {
+				config.signal = this._abortController.signal
 			}
 			return config
 		})

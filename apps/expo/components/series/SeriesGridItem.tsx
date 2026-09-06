@@ -2,7 +2,8 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { useActiveServer } from '../activeServer'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+
 import GridImageItem from '../listLayout/grid/GridImageItem'
 
 const fragment = graphql(`
@@ -47,7 +48,7 @@ export default function SeriesGridItem({ series, onPress }: Props) {
 			<GridImageItem
 				uri={data.thumbnail.url}
 				title={data.resolvedName}
-				onPress={onPress ?? (() => router.navigate(`/server/${serverID}/series/${data.id}`))}
+				onPress={onPress ?? (() => router.navigate(`/stump/${serverID}/series/${data.id}`))}
 				placeholderData={data.thumbnail.metadata}
 				originalDimensions={
 					data.thumbnail.width && data.thumbnail.height

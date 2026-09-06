@@ -1,6 +1,7 @@
 import { Host, Toggle as IosSwitch } from '@expo/ui/swift-ui'
 import { disabled, fixedSize, tint } from '@expo/ui/swift-ui/modifiers'
 import * as SwitchPrimitives from '@rn-primitives/switch'
+import * as Haptics from 'expo-haptics'
 import * as React from 'react'
 import { Platform } from 'react-native'
 import Animated, {
@@ -120,6 +121,12 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 						className,
 					)}
 					{...props}
+					onPress={(e) => {
+						props.onPress?.(e)
+						Haptics.performAndroidHapticsAsync(
+							props.checked ? Haptics.AndroidHaptics.Toggle_Off : Haptics.AndroidHaptics.Toggle_On,
+						)
+					}}
 					ref={ref}
 				>
 					<Animated.View style={animatedThumbStyle}>

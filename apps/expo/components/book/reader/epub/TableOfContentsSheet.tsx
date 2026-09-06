@@ -1,5 +1,4 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { PortalHost } from '@rn-primitives/portal'
 import { useState } from 'react'
 import { Platform } from 'react-native'
 import { KeyboardController } from 'react-native-keyboard-controller'
@@ -8,7 +7,7 @@ import { KeyboardDraftNumberToolbar, useDraftNumber } from '~/components/keyboar
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
-import { PortalHostContext } from '~/lib/PortalHostContext'
+import { PortalHostProvider } from '~/providers/PortalHostProvider'
 import { useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
@@ -78,12 +77,9 @@ export default function TableOfContentsSheet() {
 					/>
 				}
 			>
-				<PortalHostContext.Provider
-					value={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}
-				>
+				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
 					<TableOfContentsSheetContent isOpen={isOpen} goToPage={goToPage} />
-					{Platform.OS === 'android' && <PortalHost name={SHEET_PORTAL_HOST} />}
-				</PortalHostContext.Provider>
+				</PortalHostProvider>
 			</TrueSheet>
 
 			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />

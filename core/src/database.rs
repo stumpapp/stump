@@ -19,6 +19,7 @@ pub const FORCE_RESET_KEY: &str = "FORCE_DB_RESET";
 /// A slightly lower max number of binding params for SQL queries, I believe
 /// the default is 999
 pub const SQLITE_BIND_LIMIT: usize = 900;
+// TODO: expose fn that intakes conn to determine if sqlite v postgres and return diff values
 
 fn resolve_database_url(config: &StumpConfig) -> String {
 	// A full DATABASE_URL takes highest precedence (works for both postgres:// and sqlite://)

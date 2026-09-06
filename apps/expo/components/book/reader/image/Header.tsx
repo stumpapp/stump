@@ -4,11 +4,11 @@ import { Alert, Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useActiveServerSafe } from '~/components/activeServer'
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
 import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
 import { useReaderAnimations } from '../shared/readerAnimations'

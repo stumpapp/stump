@@ -6,9 +6,9 @@ import pluralize from 'pluralize'
 import { Pressable, View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
@@ -67,7 +67,7 @@ export default function BookSearchItem({ book }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}
+			onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}
 			style={{
 				width: width * 0.75,
 			}}

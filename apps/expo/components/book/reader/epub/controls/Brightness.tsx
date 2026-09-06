@@ -9,8 +9,12 @@ import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useAppState } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 
+type BrightnessProps = {
+	setTouchingSlider: React.Dispatch<React.SetStateAction<boolean>>
+}
+
 // TODO: Fancy and scale on focus/drag
-export default function Brightness() {
+export default function Brightness({ setTouchingSlider }: BrightnessProps) {
 	const colors = useColors()
 	const { isDarkColorScheme } = useColorScheme()
 
@@ -62,6 +66,8 @@ export default function Brightness() {
 						setBrightness(value)
 						ExpoBrightness.setSystemBrightnessAsync(value)
 					}}
+					onTouchStart={() => setTouchingSlider(true)}
+					onTouchEnd={() => setTouchingSlider(false)}
 				/>
 			</View>
 			<Icon as={Sun} className="h-6 w-6 text-foreground-muted shrink-0" />

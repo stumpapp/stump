@@ -1,6 +1,7 @@
 import { clone, getColor, serialize, set } from 'colorjs.io/fn'
-import { CircleAlert, LucideIcon } from 'lucide-react-native'
+import { CircleAlert, LucideIcon, Slash } from 'lucide-react-native'
 import React, { ComponentProps, ReactNode, useState } from 'react'
+import { TextInput, TextInputProps } from 'react-native'
 import { Easing, Platform, Pressable, View, ViewProps } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
@@ -29,6 +30,10 @@ type CardProps = ViewProps & {
 	 * Customise the icon and text to display when the list is empty
 	 */
 	listEmptyStyle?: ListEmptyMessageProps
+	/**
+	 * Use to customise the background colour
+	 */
+	backgroundClassName?: string
 }
 
 type RowProps = Omit<ViewProps, 'children'> & {
@@ -60,6 +65,7 @@ export function Card({
 	listEmptyStyle,
 	children,
 	className,
+	backgroundClassName,
 	...props
 }: CardProps) {
 	const count = React.Children.count(children)
@@ -83,10 +89,10 @@ export function Card({
 		<View className={cn('gap-2', className)} {...props}>
 			{renderHeader()}
 
-			{count === 0 ? (
+			{count === 0 && listEmptyStyle ? (
 				<ListEmptyMessage {...listEmptyStyle} />
 			) : (
-				<CardBackground>{children}</CardBackground>
+				<CardBackground className={backgroundClassName}>{children}</CardBackground>
 			)}
 
 			{description && (
@@ -101,6 +107,7 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.InputRow = InputRow
 Card.LongRow = LongRow
 Card.RowDivider = Divider
 
@@ -216,6 +223,77 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 	)
 }
 
+// TODO: remove scuffed aspects later
+// TODO: make placeholder properly algined
+// TODO: error state
+// TODO: consider actions more carefully, shoving a node was just a quick solution
+type InputRowProps = TextInputProps & {
+	label?: string
+	actions?: React.ReactNode
+	errorMessage?: string
+	// i kept the isInvalid prop in case we want to show invalid without an error
+	isInvalid?: boolean
+	disabled?: boolean
+}
+
+function InputRow({
+	label,
+	actions,
+	value,
+	onChangeText,
+	className,
+	errorMessage,
+	isInvalid,
+	disabled,
+	...props
+}: InputRowProps) {
+	const colors = useColors()
+	return (
+		<BaseRowComponent disabled={disabled}>
+			<View className="gap-x-4 2 flex-row items-center justify-center">
+				<View className="gap-y-2 shrink">
+					<View className="flex flex-row items-center justify-between">
+						{label && <Text className="text-lg shrink">{label}</Text>}
+						{actions && <View>{actions}</View>}
+					</View>
+
+					<View
+						className={cn(
+							'squircle dark:border-white/5 dark:bg-white/5 border-black/5 bg-black/5 h-11 flex flex-row items-center rounded-full border',
+							{ 'h-[unset] min-h-[2.75rem]': props.multiline },
+							{
+								// TODO: colors are wack, make better semantic tokens for form error colors
+								'bg-red-300/50 border-red-400/30 dark:bg-red-500/20 dark:border-red-600/30':
+									isInvalid || !!errorMessage,
+							},
+						)}
+					>
+						<TextInput
+							value={value}
+							onChangeText={onChangeText}
+							className={cn('font-medium pl-3 w-full', className)}
+							{...props}
+							style={{
+								color:
+									isInvalid || !!errorMessage
+										? colors.fill.danger.DEFAULT
+										: colors.foreground.DEFAULT,
+								...props.style,
+							}}
+						/>
+					</View>
+
+					{errorMessage && (
+						<Text size="sm" className="text-red-500 ml-1">
+							{errorMessage}
+						</Text>
+					)}
+				</View>
+			</View>
+		</BaseRowComponent>
+	)
+}
+
 // MARK: Internal components
 
 function CardBackground({ className, ...props }: ViewProps) {
@@ -294,7 +372,12 @@ function BaseRowComponent({
 	)
 }
 
-function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundColor?: string }) {
+type GradientIconProps = {
+	icon: LucideIcon
+	backgroundColor?: string
+}
+
+export function GradientIcon({ icon, backgroundColor }: GradientIconProps) {
 	const { isDarkColorScheme } = useColorScheme()
 
 	const lightPlainColor = getColor(backgroundColor || '#404040')
@@ -337,20 +420,27 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 
 type ListEmptyMessageProps = {
 	icon?: LucideIcon
+	iconSlash?: boolean
 	message?: string
 }
 
-export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
+export const ListEmptyMessage = ({ icon, iconSlash, message }: ListEmptyMessageProps) => (
 	<View
 		className={cn(
-			'squircle h-24 gap-2 p-3 border-edge w-full items-center justify-center rounded-3xl border border-dashed',
+			'squircle h-24 gap-2 p-3 border-black/10 dark:border-white/20 w-full items-center justify-center rounded-3xl border border-dashed',
 			Platform.OS === 'android' && 'rounded-2xl',
 		)}
 	>
 		<View className="relative flex items-center justify-center">
-			<View className="squircle p-2 bg-background-surface flex items-center justify-center rounded-lg">
-				<Icon as={icon || CircleAlert} className="h-6 w-6 text-foreground-muted" />
-				{/* <Icon as={Slash} className="absolute h-6 w-6 transform text-foreground opacity-80" /> */}
+			<View className="squircle p-2 bg-black/5 dark:bg-white/10 flex items-center justify-center rounded-xl">
+				<Icon
+					as={icon || CircleAlert}
+					className="h-6 w-6 text-foreground-muted"
+					absoluteStrokeWidth
+				/>
+				{iconSlash && (
+					<Icon as={Slash} className="text-foreground-muted h-7 w-7 absolute" absoluteStrokeWidth />
+				)}
 			</View>
 		</View>
 

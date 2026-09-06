@@ -1,0 +1,130 @@
+import { UserPermission } from '@stump/graphql'
+import { useRouter } from 'expo-router'
+import {
+	BookCopy,
+	BookText,
+	ChevronRight,
+	FolderTree,
+	Heart,
+	LibraryBig,
+	Rows3,
+} from 'lucide-react-native'
+import { Fragment } from 'react'
+import { Platform, Pressable, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+
+import { Divider } from '~/components/Divider'
+import { RecentlyAddedSeries } from '~/components/series'
+import { Heading, Text } from '~/components/ui'
+import { Icon } from '~/components/ui/icon'
+import { useTranslate } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
+import { useStumpServer } from '~/providers/StumpServerProvider'
+
+export default function Screen() {
+	const {
+		checkPermission,
+		activeServer: { id: serverId },
+	} = useStumpServer()
+	const { t } = useTranslate()
+
+	const items = [
+		{
+			id: 'books',
+			title: t('stumpServer.browse.books'),
+			icon: BookText,
+			to: '/stump/[serverId]/books',
+		},
+		{
+			id: 'favorites',
+			title: t('stumpServer.browse.favorites'),
+			to: '/stump/[serverId]/favorites',
+			icon: Heart,
+		},
+		{
+			id: 'files',
+			title: t('stumpServer.browse.files'),
+			to: '/stump/[serverId]/files',
+			icon: FolderTree,
+			permission: UserPermission.FileExplorer,
+		},
+		{
+			id: 'libraries',
+			title: t('stumpServer.browse.libraries'),
+			to: '/stump/[serverId]/libraries',
+			icon: LibraryBig,
+		},
+		{
+			id: 'series',
+			title: t('stumpServer.browse.series'),
+			icon: BookCopy,
+			to: '/stump/[serverId]/series',
+		},
+
+		{
+			id: 'smart-lists',
+			title: t('stumpServer.browse.smartLists'),
+			icon: Rows3,
+			permission: UserPermission.AccessSmartList,
+			to: '/stump/[serverId]/smart-lists',
+		},
+	]
+
+	const router = useRouter()
+
+	const visibleItems = items.filter((item) => !item.permission || checkPermission(item.permission))
+
+	return (
+		<SafeAreaView
+			style={{ flex: 1 }}
+			className="bg-background"
+			edges={Platform.OS === 'android' ? [] : []}
+		>
+			<RecentlyAddedSeries
+				header={
+					<View className="gap-5 flex">
+						<View>
+							{visibleItems.map((item, idx) => (
+								<Fragment key={item.id}>
+									<Pressable
+										// @ts-expect-error: String path
+										onPress={() => router.push({ pathname: item.to, params: { serverId } })}
+									>
+										{({ pressed }) => (
+											<View
+												className={cn('px-4 tablet:py-1 flex-row items-center justify-between', {
+													'opacity-60': pressed,
+												})}
+											>
+												<View
+													className={cn('gap-4 py-4 flex flex-row items-center', {
+														'pt-1': idx === 0,
+													})}
+												>
+													<Icon as={item.icon} className="h-6 w-6" />
+													<Text className="text-lg">{item.title}</Text>
+												</View>
+												<View className={cn('py-4', { 'pt-1': idx === 0 })}>
+													<Icon
+														as={ChevronRight}
+														className="h-6 w-6 text-foreground-muted opacity-70"
+													/>
+												</View>
+											</View>
+										)}
+									</Pressable>
+
+									<Divider hasIcon />
+								</Fragment>
+							))}
+						</View>
+
+						<Heading size="xl" className="px-4">
+							{t('stumpServer.recentlyAddedSeries.label')}
+						</Heading>
+					</View>
+				}
+			/>
+		</SafeAreaView>
+	)
+}

@@ -15,6 +15,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		assetBundlePatterns: ['**/*'],
 		ios: {
 			supportsTablet: true,
+			entitlements: {
+				'com.apple.developer.networking.wifi-info': true,
+			},
 			bundleIdentifier: 'com.stumpapp.stump',
 			associatedDomains: ['webcredentials:www.stumpapp.dev'],
 			icon: {
@@ -83,9 +86,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 		},
-		androidNavigationBar: {
-			visible: 'immersive',
-		},
+		// TODO(android): this was removed at some point in expo, i think
+		// expo-navigation-bar is the route forward but do not have time
+		// to sort it out
+		// androidNavigationBar: {
+		// 	visible: 'immersive',
+		// },
 		web: {
 			bundler: 'metro',
 			output: 'static',
@@ -127,6 +133,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 			['expo-localization'],
+			[
+				'expo-location',
+				{
+					locationWhenInUsePermission:
+						'Allow $(PRODUCT_NAME) to use your location in order to determine your Wi-Fi SSID for local server access.',
+				},
+			],
 			['./plugins/withGradle.ts'],
 			['./plugins/withNetworkSecurityConfig.ts'],
 			[

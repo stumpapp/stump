@@ -40,6 +40,18 @@ pub struct BuiltMedia {
 	pub tags: Vec<String>,
 }
 
+impl BuiltMedia {
+	pub fn oneshot(self) -> Self {
+		Self {
+			media: media::ActiveModel {
+				is_oneshot: Set(true),
+				..self.media
+			},
+			..self
+		}
+	}
+}
+
 impl MediaBuilder {
 	pub fn new(
 		path: &Path,
@@ -278,6 +290,7 @@ mod tests {
 			hide_series_view: false,
 			library_type: LibraryType::Mixed,
 			skip_book_overview: false,
+			oneshots_directory: None,
 		}
 	}
 }

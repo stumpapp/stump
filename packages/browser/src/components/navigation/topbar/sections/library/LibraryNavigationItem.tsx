@@ -8,6 +8,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { LastVisitedLibrary } from '@/components/library'
 import { EntityOptionProps } from '@/components/navigation/types'
+import useCurrentLibraryId from '@/components/navigation/useCurrentLibraryId'
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 
@@ -39,6 +40,7 @@ export default function LibraryNavigationItem({
 	} = useSuspenseGraphQL(query, sdk.cacheKey('libraries'))
 
 	const location = useLocation()
+	const currentLibraryId = useCurrentLibraryId()
 
 	const { checkPermission } = useAppContext()
 
@@ -77,7 +79,7 @@ export default function LibraryNavigationItem({
 							<div key={library.id} className="w-full">
 								<TopBarLinkListItem
 									to={paths.librarySeries(library.id)}
-									isActive={location.pathname.startsWith(paths.librarySeries(library.id))}
+									isActive={currentLibraryId === library.id}
 									className="h-9"
 								>
 									{library.emoji ? (

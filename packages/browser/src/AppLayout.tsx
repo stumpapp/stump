@@ -54,6 +54,7 @@ export function AppLayout() {
 	const jobOverlayEnabled = storeUser?.preferences?.enableJobOverlay ?? true
 	const showJobOverlay = jobOverlayEnabled && !location.pathname.match(/\/settings\/jobs/)
 
+	// eslint-disable-next-line react-hooks/refs
 	const isRefSet = !!mainRef.current
 	/**
 	 * An effect to initialize the overlay scrollbars

@@ -10,9 +10,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
 import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { useOverviewAnimations } from '../book/overview'
 import { ThumbnailImage } from '../image'
 import { SheetBackDetection } from '../SheetBackDetection'
@@ -66,7 +66,7 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 		if (book.url) {
 			Linking.openURL(book.url)
 		} else if (book.entity?.id) {
-			router.navigate(`/server/${serverId}/books/${book.entity.id}`)
+			router.navigate(`/stump/${serverId}/books/${book.entity.id}`)
 		}
 	}
 
@@ -77,7 +77,6 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				dimmed={false}
 				grabber
 				scrollable
 				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}

@@ -34,6 +34,7 @@ import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { refreshWidgetFromCache } from '~/lib/widgets/readingNow/readingNowWidgetSync'
 import { useEnsureWidgetAssetsWritten } from '~/lib/widgets/utils'
+import { WifiSsidProvider } from '~/providers/WifiSsidProvider'
 import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useHideSystemBars, useReaderStore } from '~/stores/reader'
@@ -202,93 +203,95 @@ export default function RootLayout() {
 	// least to say, this was really annoying to sus out
 	return (
 		<SafeAreaProvider>
-			<LocaleProvider locale={locale}>
-				<GestureHandlerRootView style={{ flex: 1 }}>
-					<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-						<View className="flex-1" style={accentVars}>
-							{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
-							<KeyboardProvider>
-								<SystemBars
-									style={isDarkBackground ? 'light' : 'dark'}
-									hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
-								/>
+			<WifiSsidProvider>
+				<LocaleProvider locale={locale}>
+					<GestureHandlerRootView style={{ flex: 1 }}>
+						<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+							<View className="flex-1" style={accentVars}>
+								{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
+								<KeyboardProvider>
+									<SystemBars
+										style={isDarkBackground ? 'light' : 'dark'}
+										hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+									/>
 
-								<Stack
-									screenOptions={{
-										animation: animationEnabled ? 'default' : 'none',
-										contentStyle: {
-											backgroundColor: colors.background.DEFAULT,
+									<Stack
+										screenOptions={{
+											animation: animationEnabled ? 'default' : 'none',
+											contentStyle: {
+												backgroundColor: colors.background.DEFAULT,
+											},
+										}}
+									>
+										<Stack.Screen
+											name="(tabs)"
+											options={{
+												headerShown: false,
+												title: '',
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
+
+										<Stack.Screen
+											name="stump/[serverId]"
+											options={{
+												headerShown: false,
+												title: '',
+												animation: animationEnabled ? 'default' : 'none',
+												autoHideHomeIndicator: hideNavigationBar,
+												contentStyle: {
+													backgroundColor: colors.background.DEFAULT,
+												},
+											}}
+										/>
+										<Stack.Screen
+											name="opds/[serverId]"
+											options={{
+												headerShown: false,
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
+										<Stack.Screen
+											name="opds-legacy/[serverId]"
+											options={{
+												headerShown: false,
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
+
+										<Stack.Screen
+											name="offline"
+											options={{
+												headerShown: false,
+												title: '',
+												animation: animationEnabled ? 'default' : 'none',
+												autoHideHomeIndicator: hideNavigationBar,
+												contentStyle: {
+													backgroundColor: colors.background.DEFAULT,
+												},
+											}}
+										/>
+									</Stack>
+									<FloatingQueueButton />
+									<PortalHost />
+								</KeyboardProvider>
+
+								<Toaster
+									position="bottom-center"
+									styles={{
+										title: {
+											fontSize: 18,
+										},
+										description: {
+											fontSize: 16,
 										},
 									}}
-								>
-									<Stack.Screen
-										name="(tabs)"
-										options={{
-											headerShown: false,
-											title: '',
-											animation: animationEnabled ? 'default' : 'none',
-										}}
-									/>
-
-									<Stack.Screen
-										name="server/[id]"
-										options={{
-											headerShown: false,
-											title: '',
-											animation: animationEnabled ? 'default' : 'none',
-											autoHideHomeIndicator: hideNavigationBar,
-											contentStyle: {
-												backgroundColor: colors.background.DEFAULT,
-											},
-										}}
-									/>
-									<Stack.Screen
-										name="opds/[id]"
-										options={{
-											headerShown: false,
-											animation: animationEnabled ? 'default' : 'none',
-										}}
-									/>
-									<Stack.Screen
-										name="opds-legacy/[id]"
-										options={{
-											headerShown: false,
-											animation: animationEnabled ? 'default' : 'none',
-										}}
-									/>
-
-									<Stack.Screen
-										name="offline"
-										options={{
-											headerShown: false,
-											title: '',
-											animation: animationEnabled ? 'default' : 'none',
-											autoHideHomeIndicator: hideNavigationBar,
-											contentStyle: {
-												backgroundColor: colors.background.DEFAULT,
-											},
-										}}
-									/>
-								</Stack>
-								<FloatingQueueButton />
-								<PortalHost />
-							</KeyboardProvider>
-
-							<Toaster
-								position="bottom-center"
-								styles={{
-									title: {
-										fontSize: 18,
-									},
-									description: {
-										fontSize: 16,
-									},
-								}}
-							/>
-						</View>
-					</ThemeProvider>
-				</GestureHandlerRootView>
-			</LocaleProvider>
+								/>
+							</View>
+						</ThemeProvider>
+					</GestureHandlerRootView>
+				</LocaleProvider>
+			</WifiSsidProvider>
 		</SafeAreaProvider>
 	)
 }

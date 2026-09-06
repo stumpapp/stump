@@ -20,250 +20,250 @@
 			},
 			"buttons": {
 				"createAccount": "Kreirajte račun",
-				"login": "",
-				"loginWithOidc": "",
-				"createAccountWithOidc": ""
+				"login": "Prijavite se",
+				"loginWithOidc": "Prijavite se putem OIDC-a",
+				"createAccountWithOidc": "Kreirajte račun putem OIDC-a"
 			}
 		},
 		"toasts": {
-			"loggingIn": "",
-			"loggedIn": "",
-			"loggedInFirstTime": "",
-			"registering": "",
-			"registered": "",
-			"loginFailed": "",
-			"registrationFailed": ""
+			"loggingIn": "Prijavljivanje...",
+			"loggedIn": "Dobro došli nazad!",
+			"loggedInFirstTime": "Dobro došli!",
+			"registering": "Kreiranje računa...",
+			"registered": "Račun je kreiran!",
+			"loginFailed": "Prijava nije uspjela. Pokušajte ponovo",
+			"registrationFailed": "Kreiranje računa nije uspjelo. Pokušajte ponovo"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "",
-			"subtitleCreating": "",
-			"subtitleEditing": ""
+			"heading": "Konfiguracija biblioteke",
+			"subtitleCreating": "Pretpregled vaše nove biblioteke bit će prikazan u nastavku",
+			"subtitleEditing": "Pretpregled izmjena vaše biblioteke bit će prikazan u nastavku"
 		}
 	},
 	"bookManagementScene": {
 		"metadataSearch": {
-			"heading": "",
-			"description": "",
-			"openButton": "",
-			"searchButton": "",
-			"noProviders": "",
-			"noResults": "",
-			"partialResults": "",
-			"searchFailed": "",
+			"heading": "Pretražite metapodatke",
+			"description": "Potražite knjigu kod vanjskog pružatelja metapodataka i odaberite odgovarajući rezultat",
+			"openButton": "Pretražite metapodatke",
+			"searchButton": "Pretražite",
+			"noProviders": "Za ovu vrstu biblioteke nema konfiguriranih i omogućenih pružatelja metapodataka. Prvo konfigurirajte jednog u postavkama servera.",
+			"noResults": "Nisu pronađeni rezultati za ovu pretragu",
+			"partialResults": "Neki rezultati nisu mogli biti učitani od pružatelja, vjerovatno zbog ograničenja broja zahtjeva. Pokušajte ponovo pretražiti kako biste dobili više rezultata.",
+			"searchFailed": "Pretraživanje pružatelja metapodataka nije uspjelo",
 			"form": {
 				"title": {
-					"label": ""
+					"label": "Naslov"
 				},
 				"author": {
-					"label": ""
+					"label": "Autor"
 				},
 				"isbn": {
-					"label": ""
+					"label": "ISBN"
 				},
 				"year": {
-					"label": ""
+					"label": "Godina"
 				},
 				"number": {
-					"label": ""
+					"label": "Broj izdanja"
 				},
 				"comicVineVolumeId": {
-					"label": "",
-					"placeholder": ""
+					"label": "ID ComicVine serijala",
+					"placeholder": "npr., 129260"
 				},
 				"provider": {
-					"label": "",
-					"allOption": ""
+					"label": "Pružatelj",
+					"allOption": "Svi omogućeni pružatelji"
 				}
 			}
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "",
+			"heading": "Informacije o datoteci",
 			"labels": {
-				"fileSize": "",
-				"fileType": "",
-				"fileLocation": "",
-				"fileChecksum": ""
+				"fileSize": "Veličina datoteke",
+				"fileType": "Vrsta datoteke",
+				"fileLocation": "Lokacija datoteke",
+				"fileChecksum": "Kontrolna suma"
 			}
 		},
 		"emailBook": {
-			"heading": "",
-			"description": "",
+			"heading": "Pošaljite knjigu e-poštom",
+			"description": "Pošaljite ovu knjigu na uređaj ili adresu e-pošte",
 			"form": {
 				"email": {
-					"label": "",
-					"placeholder": "",
-					"description": ""
+					"label": "E-pošta",
+					"placeholder": "Adresa e-pošte",
+					"description": "Adresa e-pošte na koju želite poslati knjigu. Kliknite Dodaj da biste potvrdili svaki unos"
 				},
 				"devices": {
-					"label": "",
-					"placeholder": "",
-					"noFilterMatch": ""
+					"label": "Uređaji",
+					"placeholder": "Odaberite uređaje",
+					"noFilterMatch": "Nijedan uređaj ne odgovara filteru"
 				}
 			}
 		},
-		"nextInSeries": ""
+		"nextInSeries": "Sljedeće u serijalu"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "",
-				"placeholder": "",
-				"description": ""
+				"label": "Naziv",
+				"placeholder": "Moj čitalački klub",
+				"description": "Naziv vašeg čitalačkog kluba"
 			},
 			"description": {
-				"label": "",
-				"placeholder": "",
-				"description": ""
+				"label": "Opis",
+				"placeholder": "Klub obožavatelja serije ‘Our Flag Means Death’. Čitamo gusarsku fikciju do mile volje",
+				"description": "Neobavezan kratak opis vašeg čitalačkog kluba"
 			},
 			"is_private": {
-				"label": "",
-				"description": ""
+				"label": "Privatni klub",
+				"description": "Ako je omogućeno, samo korisnici koje pozovete moći će se pridružiti vašem čitalačkom klubu"
 			},
 			"member_role_spec": {
-				"heading": "",
+				"heading": "Prilagođeno mapiranje uloga",
 				"subtitle": [
-					"",
-					""
+					"Ako želite, možete odrediti prilagođene nazive uloga u svom čitalačkom klubu. Više informacija potražite u",
+					"dokumentaciju"
 				],
 				"member": {
-					"label": "",
-					"placeholder": "",
-					"description": ""
+					"label": "Član",
+					"placeholder": "Član",
+					"description": "Naziv zadane uloge u vašem čitalačkom klubu"
 				},
 				"moderator": {
-					"label": "",
-					"placeholder": "",
-					"description": ""
+					"label": "Moderator",
+					"placeholder": "Moderator",
+					"description": "Naziv moderatorske uloge u vašem čitalačkom klubu"
 				},
 				"admin": {
-					"label": "",
-					"placeholder": "",
-					"description": ""
+					"label": "Administrator",
+					"placeholder": "Administrator",
+					"description": "Naziv administratorske uloge u vašem čitalačkom klubu"
 				},
 				"creator": {
-					"label": "",
-					"placeholder": "",
-					"description": ""
+					"label": "Osnivač",
+					"placeholder": "Osnivač",
+					"description": "Naziv uloge osnivača vašeg čitalačkog kluba. To ste vi!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "",
-					"placeholder": "",
-					"description": ""
+					"label": "Ime za prikaz",
+					"placeholder": "oromei",
+					"description": "Neobavezno ime za prikaz vašeg članstva u čitalačkom klubu. Ako ga postavite, imat će prednost nad vašim korisničkim imenom"
 				},
 				"hideProgress": {
-					"label": "",
-					"description": ""
+					"label": "Sakrij napredak",
+					"description": "Ako je omogućeno, vaš napredak u čitanju bit će skriven od ostalih članova čitalačkog kluba"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "",
-			"alreadyTaken": ""
+			"missingName": "Naziv je obavezan",
+			"alreadyTaken": "je već zauzet"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "",
-		"subtitle": "",
+		"heading": "Kreirajte novi čitalački klub",
+		"subtitle": "Možete kreirati privatni čitalački klub za odabrane članove ili ga učiniti javnim kako bi mu se mogao pridružiti bilo ko na serveru",
 		"form": {
-			"stepLabel": "",
+			"stepLabel": "Korak",
 			"steps": [
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Osnovno",
+					"heading": "Osnovne informacije",
+					"description": "Podaci o klubu, uključujući njegov naziv i opis"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Uloge",
+					"heading": "Uloge",
+					"description": "Prilagodite uloge u svom čitalačkom klubu"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Članstvo",
+					"heading": "Postavke članstva",
+					"description": "Dodatne opcije za vaš čitalački klub"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Pregled",
+					"heading": "Pregled",
+					"description": "Pregledajte postavke kluba prije nego što ga kreirate"
 				}
 			],
 			"review": {
-				"yes": "",
-				"no": "",
-				"none": "",
+				"yes": "Da",
+				"no": "Ne",
+				"none": "Nema",
 				"labels": {
-					"name": "",
-					"description": ""
+					"name": "Naziv",
+					"description": "Opis"
 				}
 			},
-			"submit": ""
+			"submit": "Kreirajte čitalački klub"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "",
+			"basics": "Osnovno",
 			"members": {
-				"members": "",
-				"roles": "",
-				"label": ""
+				"members": "Članovi",
+				"roles": "Uloge",
+				"label": "Članstvo"
 			},
 			"scheduling": {
-				"scheduler": "",
-				"options": "",
-				"label": ""
+				"scheduler": "Planer",
+				"options": "Opcije",
+				"label": "Planiranje"
 			},
 			"danger-zone": {
-				"delete": "",
-				"label": ""
+				"delete": "Brisanje",
+				"label": "Opasna zona"
 			}
 		},
 		"basics": {
-			"title": "",
-			"description": "",
+			"title": "Osnovne informacije",
+			"description": "Podaci o ovom čitalačkom klubu, uključujući njegov naziv i opis",
 			"form": {
-				"submit": ""
+				"submit": "Ažurirajte klub"
 			}
 		},
 		"members": {
-			"title": "",
-			"description": ""
+			"title": "Članovi",
+			"description": "Upravljajte članovima ovog čitalačkog kluba"
 		},
 		"roles": {
-			"title": "",
-			"description": "",
+			"title": "Uloge",
+			"description": "Prilagodite uloge u ovom čitalačkom klubu",
 			"sections": {
 				"roleMappings": {
-					"heading": "",
-					"description": ""
+					"heading": "Postojeća mapiranja uloga",
+					"description": "Trenutna mapiranja uloga za ovaj čitalački klub"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "",
-			"description": ""
+			"title": "Planer",
+			"description": "Kreirajte planirana čitanja za ovaj čitalački klub i upravljajte njima"
 		},
 		"scheduling/options": {
-			"title": "",
-			"description": ""
+			"title": "Opcije",
+			"description": "Dodatne opcije planiranja za ovaj čitalački klub"
 		},
 		"danger-zone/delete": {
-			"title": "",
-			"description": "",
+			"title": "Radnje brisanja",
+			"description": "Trajno izbrišite ovaj čitalački klub i sav njegov sadržaj ili određene resurse",
 			"sections": {
 				"deleteClub": {
-					"heading": "",
+					"heading": "Izbrišite klub",
 					"description": [
-						"",
-						""
+						"Trajno izbrišite ovaj čitalački klub i sav njegov sadržaj.",
+						"Ova radnja se ne može poništiti"
 					],
-					"trigger": ""
+					"trigger": "Izbrišite klub"
 				}
 			}
 		}
@@ -271,1061 +271,1061 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "",
-				"description": "",
-				"placeholder": ""
+				"label": "Naziv",
+				"description": "Prepoznatljiv naziv vaše biblioteke",
+				"placeholder": "Moja biblioteka"
 			},
 			"path": {
-				"label": "",
-				"description": "",
-				"placeholder": ""
+				"label": "Putanja",
+				"description": "Putanja do biblioteke na vašem serveru",
+				"placeholder": "/putanja/do/biblioteke"
 			},
 			"description": {
-				"label": "",
-				"description": "",
-				"placeholder": ""
+				"label": "Opis",
+				"description": "Kratak opis vaše biblioteke",
+				"placeholder": "Biblioteka svih mojih omiljenih knjiga"
 			},
 			"tags": {
-				"label": "",
-				"description": ""
+				"label": "Oznake",
+				"description": "Koriste se za kategorizaciju biblioteke ili primjenu pravila pristupa"
 			},
 			"libraryType": {
-				"label": "",
-				"description": "",
+				"label": "Sadržaj biblioteke",
+				"description": "Vrsta sadržaja prisutnog u ovoj biblioteci",
 				"options": {
-					"COMIC": "",
-					"MANGA": "",
-					"BOOK": "",
-					"LIGHT_NOVEL": "",
-					"MANHWA": "",
-					"WEB_NOVEL": "",
-					"WEBTOON": "",
-					"MIXED": ""
+					"COMIC": "Stripovi",
+					"MANGA": "Manga",
+					"BOOK": "Knjige",
+					"LIGHT_NOVEL": "Light novele",
+					"MANHWA": "Manhwa",
+					"WEB_NOVEL": "Web-romani",
+					"WEBTOON": "Webtoonovi",
+					"MIXED": "Mješovito"
 				}
 			},
 			"defaultLibraryView": {
-				"label": "",
-				"description": "",
+				"label": "Zadani prikaz biblioteke",
+				"description": "Odredite koja se kartica zadano prikazuje pri otvaranju ove biblioteke",
 				"hideSeriesView": {
-					"label": "",
-					"description": ""
+					"label": "Sakrijte karticu serijala",
+					"description": "Sakrijte karticu serijala iz navigacije biblioteke"
 				},
 				"skipBookOverview": {
-					"label": "",
-					"description": ""
+					"label": "Preskočite pregled knjige",
+					"description": "Otvorite čitač direktno pri odabiru knjige iz ove biblioteke"
 				},
 				"options": {
 					"series": {
-						"label": "",
-						"description": ""
+						"label": "Serijali",
+						"description": "Zadano prikažite karticu serijala"
 					},
 					"books": {
-						"label": "",
-						"description": ""
+						"label": "Knjige",
+						"description": "Zadano prikažite karticu knjiga"
 					}
 				}
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "",
-					"description": ""
+					"heading": "Postavke čitanja",
+					"description": "Zadane postavke čitača za knjige"
 				},
 				"imageScaling": {
-					"label": "",
-					"description": ""
+					"label": "Skaliranje slike",
+					"description": "Način na koji čitač slika prilagođava veličinu slika stranici"
 				},
 				"readingMode": {
-					"label": "",
-					"description": ""
+					"label": "Zadani čitač",
+					"description": "Zadani čitač za knjige zasnovane na slikama"
 				},
 				"readingDirection": {
-					"label": "",
-					"description": ""
+					"label": "Smjer čitanja",
+					"description": "Smjer kojim čitač napreduje kroz stranice"
 				}
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "",
-						"update": ""
+						"create": "Konfiguracija minijatura",
+						"update": "Generiranje"
 					},
-					"description": "",
-					"disabled": ""
+					"description": "Generiranjem minijatura za knjige ubrzajte učitavanje pri pregledavanju biblioteke",
+					"disabled": "Nije potrebna dodatna konfiguracija kada je generiranje minijatura onemogućeno"
 				},
 				"enableSwitch": {
-					"label": "",
-					"description": ""
+					"label": "Omogućeno",
+					"description": "Generirajte minijature za ovu biblioteku"
 				},
 				"resizeMethod": {
-					"label": "",
+					"label": "Način promjene veličine",
 					"options": {
-						"scaleEvenlyByFactor": "",
-						"exact": "",
-						"scaleDimension": "",
-						"none": ""
+						"scaleEvenlyByFactor": "Ravnomjerno skaliranje",
+						"exact": "Tačna veličina",
+						"scaleDimension": "Automatsko skaliranje",
+						"none": "Nema"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "",
+					"description": "Skalirajte minijaturu faktorom izvorne veličine. Na primjer, 0,65 daje minijaturu veličine 65% izvornika",
 					"factor": {
-						"label": ""
+						"label": "Faktor skaliranja"
 					}
 				},
 				"exact": {
-					"description": "",
+					"description": "Promijenite veličinu minijature na tačne dimenzije u pikselima",
 					"width": {
-						"label": ""
+						"label": "Širina"
 					},
 					"height": {
-						"label": ""
+						"label": "Visina"
 					}
 				},
 				"scaleDimension": {
-					"label": "",
-					"description": "",
+					"label": "Automatsko skaliranje",
+					"description": "Postavite širinu ili visinu minijature, a druga dimenzija će se automatski skalirati radi očuvanja izvornog omjera stranica",
 					"dimension": {
-						"label": "",
+						"label": "Dimenzija",
 						"options": {
-							"width": "",
-							"height": ""
+							"width": "Širina",
+							"height": "Visina"
 						}
 					},
 					"size": {
-						"label": ""
+						"label": "Veličina"
 					}
 				},
 				"format": {
-					"label": "",
-					"description": ""
+					"label": "Format slike",
+					"description": "Format generiranih minijatura"
 				},
 				"quality": {
-					"label": "",
-					"description": ""
+					"label": "Kvalitet",
+					"description": "Kvalitet generiranih minijatura, od 1 do 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "",
-					"description": ""
+					"heading": "Pravila izuzimanja",
+					"description": "Definirajte glob obrasce za izuzimanje određenih datoteka ili direktorija tokom skeniranja"
 				},
-				"noRules": "",
-				"save": "",
+				"noRules": "Nisu konfigurirana pravila izuzimanja",
+				"save": "Spremite promjene",
 				"addRule": {
-					"label": "",
-					"description": "",
-					"addButton": "",
+					"label": "Novo pravilo",
+					"description": "Glob obrazac za izuzimanje datoteka ili direktorija",
+					"addButton": "Dodajte pravilo",
 					"ignoreParents": {
-						"title": "",
-						"label": ""
+						"title": "Izuzmite sve nadređene direktorije",
+						"label": "Izuzmite nadređene direktorije"
 					},
 					"ignoreSubdirs": {
-						"title": "",
-						"label": ""
+						"title": "Izuzmite sve poddirektorije",
+						"label": "Izuzmite poddirektorije"
 					}
 				},
-				"invalidGlob": "",
-				"duplicateGlob": "",
+				"invalidGlob": "Nevažeći glob obrazac",
+				"duplicateGlob": "Duplikat postojećeg pravila",
 				"lockConfig": {
-					"lock": "",
-					"unlock": ""
+					"lock": "Zaključajte konfiguraciju",
+					"unlock": "Otključajte konfiguraciju"
 				},
-				"editRule": "",
-				"deleteRule": "",
-				"cancelEdit": "",
-				"confirmEdit": ""
+				"editRule": "Uredite pravilo",
+				"deleteRule": "Izbrišite pravilo",
+				"cancelEdit": "Otkažite uređivanje",
+				"confirmEdit": "Potvrdite uređivanje"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "",
-					"description": ""
+					"heading": "Pretvaranje datoteka",
+					"description": "Stump može pretvoriti određene formate datoteka u kompatibilnije formate"
 				},
 				"rarToZip": {
-					"label": "",
-					"description": ""
+					"label": "Pretvorite RAR u ZIP",
+					"description": "Pretvorite RAR/CBR datoteke u ZIP/CBZ tokom skeniranja"
 				},
 				"deleteRarAfter": {
-					"label": "",
-					"description": ""
+					"label": "Izbrišite RAR nakon pretvaranja",
+					"description": "Izbrišite izvornu RAR/CBR datoteku nakon pretvaranja. Ova radnja je nepovratna"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "",
-					"description": "",
-					"disclaimer": ""
+					"heading": "Opcionalna obrada",
+					"description": "Opcionalne funkcije obrade za skener",
+					"disclaimer": "Ove funkcije zahtijevaju dodatna čitanja datoteka, što može usporiti skeniranje"
 				},
 				"processMetadata": {
-					"label": "",
-					"description": ""
+					"label": "Obradite metapodatke",
+					"description": "Izdvojite sve metapodatke iz datoteka biblioteke i spremite rezultate u bazu podataka"
 				},
 				"watch": {
-					"label": "",
-					"description": ""
+					"label": "Praćenje",
+					"description": "Pratite promjene u direktoriju biblioteke i u skladu s njima ažurirajte bazu podataka"
 				},
 				"generateFileHashes": {
-					"label": "",
-					"description": ""
+					"label": "Generirajte heševe datoteka",
+					"description": "Generirajte heš za svaku datoteku u biblioteci radi otkrivanja duplikata"
 				},
 				"koreaderHashes": {
-					"label": "",
-					"description": ""
+					"label": "Heševi kompatibilni s KoReaderom",
+					"description": "Ako koristite KoReader, generirajte dodatne heševe u formatu koji očekuje"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "",
-					"description": "",
+					"heading": "Organizacija",
+					"description": "Odredite koji obrazac najviše odgovara organizaciji vaše biblioteke",
 					"docs": [
-						"",
-						"",
-						"",
-						""
+						"Niste sigurni šta odabrati? Kliknite",
+						"ovdje",
+						"za više informacija.",
+						"Ovu postavku kasnije ne možete promijeniti"
 					],
-					"disabled": ""
+					"disabled": "Ovu postavku ne možete promijeniti"
 				},
 				"options": {
-					"label": "",
-					"description": "",
+					"label": "Obrazac biblioteke",
+					"description": "Postavka koja određuje kako će Stump organizirati vašu biblioteku",
 					"collectionPriority": {
-						"label": "",
-						"description": ""
+						"label": "Prioritet kolekcije",
+						"description": "Svaka mapa na najvišem nivou korijena biblioteke predstavlja jedan serijal"
 					},
 					"seriesPriority": {
-						"label": "",
-						"description": ""
+						"label": "Prioritet serijala",
+						"description": "Svaka mapa na bilo kojem nivou rekurzivno predstavlja jedan serijal"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "",
-				"update": ""
+				"create": "Skenirajte nakon kreiranja",
+				"update": "Skenirajte nakon ažuriranja"
 			},
-			"description": ""
+			"description": "Indeksirajte datoteke biblioteke kako biste popunili bazu podataka"
 		},
 		"errors": {
-			"failedToUpdate": "",
-			"failedToScan": ""
+			"failedToUpdate": "Ažuriranje biblioteke nije uspjelo",
+			"failedToScan": "Skeniranje biblioteke nije uspjelo"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "",
-		"subtitle": "",
-		"subtitleLink": "",
+		"heading": "Kreirajte biblioteku",
+		"subtitle": "Biblioteke služe za grupiranje knjiga. Ako se želite podsjetiti kako funkcioniraju, pogledajte",
+		"subtitleLink": "odgovarajuću dokumentaciju",
 		"form": {
-			"stepLabel": "",
+			"stepLabel": "Korak",
 			"steps": [
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Osnovno",
+					"heading": "Osnovne informacije",
+					"description": "Podaci o ovoj biblioteci, uključujući njen naziv, putanju i opis"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Skeniranje",
+					"heading": "Skeniranje",
+					"description": "Postavke načina na koji Stump skenira ovu biblioteku"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Minijature",
+					"heading": "Minijature",
+					"description": "Opcije koje određuju hoće li i kako Stump generirati minijature za ovu biblioteku"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Pregled",
+					"heading": "Pregled",
+					"description": "Pregledajte postavke biblioteke prije nego što je kreirate"
 				}
 			],
 			"review": {
-				"yes": "",
-				"no": "",
-				"none": "",
+				"yes": "Da",
+				"no": "Ne",
+				"none": "Nema",
 				"labels": {
-					"generateThumbnails": "",
-					"processThumbnailColors": "",
-					"mode": "",
-					"format": "",
-					"quality": "",
-					"name": "",
-					"path": "",
-					"description": "",
-					"tags": "",
-					"pattern": "",
-					"ignoreRules": "",
-					"convertRar": "",
-					"deleteConversions": "",
-					"watch": "",
-					"processMetadata": "",
-					"generateFileHashes": "",
-					"generateKoreaderHashes": "",
-					"scaleEvenlyByFactor": "",
-					"exact": "",
-					"scaleDimension": ""
+					"generateThumbnails": "Generirajte minijature",
+					"processThumbnailColors": "Obradite boje minijatura",
+					"mode": "Način",
+					"format": "Format",
+					"quality": "Kvalitet",
+					"name": "Naziv",
+					"path": "Putanja",
+					"description": "Opis",
+					"tags": "Oznake",
+					"pattern": "Obrazac",
+					"ignoreRules": "Pravila izuzimanja",
+					"convertRar": "Pretvorite RAR/CBR",
+					"deleteConversions": "Izbrišite pretvorene datoteke",
+					"watch": "Praćenje promjena u direktoriju",
+					"processMetadata": "Obradite metapodatke",
+					"generateFileHashes": "Generirajte heševe datoteka",
+					"generateKoreaderHashes": "Generirajte KoReader heševe",
+					"scaleEvenlyByFactor": "Ravnomjerno skaliranje",
+					"exact": "Tačna veličina",
+					"scaleDimension": "Izričito zadana veličina"
 				}
 			},
 			"buttons": {
-				"confirm": ""
+				"confirm": "Kreirajte biblioteku"
 			}
 		}
 	},
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "",
-				"series": ""
+				"books": "Učitajte knjige",
+				"series": "Učitajte serijal"
 			},
 			"description": {
-				"books": "",
-				"series": ""
+				"books": "Dodajte knjige direktno na trenutnu putanju u pregledniku datoteka",
+				"series": "Dodajte serijal direktno na trenutnu putanju u pregledniku datoteka"
 			},
 			"seriesDisclaimer": [
-				"",
-				"",
-				""
+				"Mora biti ",
+				"komprimirana ZIP datoteka",
+				"koja sadrži mapu koja predstavlja serijal i sve knjige u njoj"
 			],
 			"dropzone": {
-				"books": "",
-				"series": "",
-				"alt": ""
+				"books": "Povucite i ispustite knjige ovdje",
+				"series": "Povucite i ispustite ZIP datoteku ovdje",
+				"alt": "Ili kliknite da biste na računaru odabrali knjige za učitavanje"
 			},
-			"addedFiles": ""
+			"addedFiles": "Dodane datoteke"
 		}
 	},
 	"libraryHeader": {
 		"tabs": {
-			"books": "",
-			"series": "",
-			"files": ""
+			"books": "Knjige",
+			"series": "Serijali",
+			"files": "Datoteke"
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "",
-		"subtitle": "",
-		"subtitleLink": "",
+		"heading": "Postavke",
+		"subtitle": "Upravljajte bibliotekom ovdje. Ako se želite podsjetiti na ove postavke, pogledajte",
+		"subtitleLink": "odgovarajuću dokumentaciju",
 		"sidebar": {
-			"basics": "",
+			"basics": "Osnovno",
 			"configuration": {
-				"general": "",
-				"reading": "",
-				"scanning": "",
-				"thumbnails": "",
-				"ignore-rules": "",
-				"label": ""
+				"general": "Općenito",
+				"reading": "Čitanje",
+				"scanning": "Skeniranje",
+				"thumbnails": "Minijature",
+				"ignore-rules": "Pravila izuzimanja",
+				"label": "Konfiguracija"
 			},
 			"integrations": {
-				"label": "",
-				"analysis": "",
-				"metadata": ""
+				"label": "Integracije",
+				"analysis": "Analiza",
+				"metadata": "Metapodaci"
 			},
 			"danger-zone": {
-				"access-control": "",
-				"delete": "",
-				"label": ""
+				"access-control": "Kontrola pristupa",
+				"delete": "Brisanje",
+				"label": "Opasna zona"
 			}
 		},
 		"basics": {
-			"title": "",
-			"description": "",
+			"title": "Osnovne informacije",
+			"description": "Podaci o ovoj biblioteci, uključujući njen naziv, putanju i opis",
 			"form": {
-				"submit": ""
+				"submit": "Ažurirajte biblioteku"
 			}
 		},
 		"options/reading": {
-			"title": "",
-			"description": ""
+			"title": "Čitanje",
+			"description": "Zadane postavke čitača za knjige u ovoj biblioteci. Te postavke možete zasebno promijeniti za svaku knjigu"
 		},
 		"options/scanning": {
-			"title": "",
-			"description": "",
+			"title": "Skeniranje",
+			"description": "Postavke načina na koji Stump skenira ovu biblioteku",
 			"sections": {
 				"configureScan": {
-					"heading": "",
-					"description": "",
+					"heading": "Konfigurirajte skeniranje",
+					"description": "Skeniranje s dodatnim opcijama za precizniju kontrolu",
 					"form": {
-						"alert": "",
+						"alert": "Ove će postavke zamijeniti odgovarajuće postavke cijele biblioteke",
 						"options": {
 							"forceRebuild": {
-								"label": "",
-								"description": "",
-								"alert": ""
+								"label": "Prisili ponovnu izgradnju",
+								"description": "Ponovo izgradite svaku knjigu u biblioteci na disku",
+								"alert": "Ovo će ponovo izgraditi svaku knjigu u biblioteci od početka, uključujući metapodatke i sažetke"
 							},
 							"custom": {
-								"label": "",
-								"description": "",
+								"label": "Prilagođeno",
+								"description": "Prilagodite konfiguraciju skeniranja",
 								"validation": {
-									"noSelection": ""
+									"noSelection": "Najmanje jedna opcija mora biti omogućena"
 								}
 							},
 							"rebuildMeta": {
-								"label": "",
-								"description": ""
+								"label": "Ponovo izgradite metapodatke",
+								"description": "Ponovo izgradite metapodatke knjiga u biblioteci"
 							},
 							"regenHashes": {
-								"label": "",
-								"description": ""
+								"label": "Ponovo generirajte heševe",
+								"description": "Ponovo kreirajte heševe knjiga u biblioteci"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "",
-					"description": ""
+					"heading": "Zadano skeniranje",
+					"description": "Standardno skeniranje koje indeksira novi sadržaj biblioteke"
 				},
 				"history": {
-					"heading": "",
-					"description": "",
-					"empty": "",
-					"runScan": "",
-					"inspect": "",
+					"heading": "Historija skeniranja",
+					"description": "Historija svih skeniranja zabilježenih za ovu biblioteku",
+					"empty": "Za ovu biblioteku nema zabilježenih skeniranja",
+					"runScan": "Pokrenite skeniranje",
+					"inspect": "Pogledajte detalje",
 					"inspector": {
-						"title": "",
-						"description": "",
+						"title": "Zapis skeniranja",
+						"description": "Detaljan prikaz ovog zapisa skeniranja",
 						"fields": {
-							"library": "",
-							"date": "",
-							"config": "",
-							"jobOutput": "",
-							"logs": ""
+							"library": "Biblioteka",
+							"date": "Datum",
+							"config": "Konfiguracija",
+							"jobOutput": "Izlaz zadatka",
+							"logs": "Zapisnici"
 						},
-						"logsPresent": "",
-						"seeLogs": ""
+						"logsPresent": "Zapisnici su sačuvani za ovaj zadatak",
+						"seeLogs": "Pogledajte zapisnike"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "",
-							"config": ""
+							"timestamp": "Vrijeme skeniranja",
+							"config": "Konfiguracija"
 						},
-						"default": "",
-						"custom": ""
+						"default": "Zadano",
+						"custom": "Prilagođeno"
 					},
-					"clearHistory": ""
+					"clearHistory": "Izbrišite historiju skeniranja"
 				}
 			}
 		},
 		"options/thumbnails": {
-			"title": "",
-			"description": "",
+			"title": "Minijature",
+			"description": "Postavke i opcije upravljanja minijaturama u ovoj biblioteci",
 			"sections": {
 				"management": {
-					"heading": "",
-					"description": ""
+					"heading": "Upravljajte minijaturama",
+					"description": "Upravljajte postojećim minijaturama ove biblioteke"
 				}
 			}
 		},
 		"integrations/analysis": {
-			"title": "",
-			"description": "",
+			"title": "Analiza",
+			"description": "Analizirajte sadržaj ove biblioteke radi prepoznavanja mogućih problema ili poboljšanja",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "",
-					"description": "",
-					"disclaimerTitle": "",
-					"disclaimer": "",
-					"analyzeButton": ""
+					"heading": "Analizirajte knjige",
+					"description": "Analizirajte knjige u ovoj biblioteci i dodajte metapodatke u bazu podataka, poput dimenzija stranica za knjige zasnovane na slikama",
+					"disclaimerTitle": "Ovaj proces zahtijeva mnogo resursa",
+					"disclaimer": "Završetak može potrajati. U budućnosti će biti dostupno više mogućnosti podešavanja",
+					"analyzeButton": "Analizirajte knjige"
 				},
 				"missingFiles": {
-					"heading": "",
-					"description": "",
-					"noMissingFiles": ""
+					"heading": "Datoteke koje nedostaju",
+					"description": "Datoteke navedene u bazi podataka koje nije moguće pronaći na disku",
+					"noMissingFiles": "U ovoj biblioteci nema datoteka koje nedostaju"
 				},
 				"duplicateFiles": {
-					"heading": "",
-					"description": "",
-					"noDuplicateFiles": ""
+					"heading": "Duplicirane datoteke",
+					"description": "Datoteke koje bi mogle biti duplicirane na disku",
+					"noDuplicateFiles": "Za ovu biblioteku nisu otkrivene duplicirane datoteke"
 				}
 			}
 		},
 		"integrations/metadata": {
-			"title": "",
-			"description": "",
+			"title": "Metapodaci",
+			"description": "Upravljajte podudaranjima metapodataka ove biblioteke i pregledajte ih",
 			"sections": {
 				"fetchMetadata": {
-					"heading": "",
-					"description": "",
+					"heading": "Dohvatite metapodatke",
+					"description": "Dohvatite metapodatke za medije u ovoj biblioteci",
 					"noProviders": {
-						"title": "",
-						"description": ""
+						"title": "Nema dostupnih pružatelja metapodataka",
+						"description": "Pružatelje metapodataka možete konfigurirati u postavkama integracije metapodataka"
 					},
-					"fetchButton": "",
-					"fetchError": ""
+					"fetchButton": "Pokrenite dohvaćanje u pozadini",
+					"fetchError": "Pokretanje dohvaćanja metapodataka nije uspjelo"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "",
-			"description": "",
+			"title": "Kontrola pristupa",
+			"description": "Odredite ko može pristupiti sadržaju ove biblioteke",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "",
-					"description": "",
-					"noUsersTitle": "",
-					"noUsers": "",
-					"updated": "",
-					"failure": ""
+					"heading": "Isključite korisnike",
+					"description": "Spriječite određene korisnike da pristupe ovoj biblioteci ili njenom sadržaju",
+					"noUsersTitle": "Nema korisnika za izuzimanje",
+					"noUsers": "Nema drugih registriranih korisnika kojima možete uskratiti pristup ovoj biblioteci",
+					"updated": "Isključenja su ažurirana",
+					"failure": "Ažuriranje isključenja nije uspjelo"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "",
-			"description": "",
+			"title": "Brisanje",
+			"description": "Trajno izbrišite ovu biblioteku i sav njen sadržaj ili određene resurse",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "",
-					"description": "",
-					"disclaimerTitle": "",
-					"disclaimer": "",
+					"heading": "Očistite biblioteku",
+					"description": "Uklonite sve medije i serijale koje nije moguće pronaći na disku",
+					"disclaimerTitle": "Nijedna datoteka neće biti izbrisana",
+					"disclaimer": "Iako ova radnja neće izbrisati nijednu datoteku, trajno će izbrisati sve zapise povezane s medijima i serijalima koji su označeni kao nedostajući",
 					"confirmation": {
-						"label": "",
-						"text": ""
+						"label": "Očistite biblioteku",
+						"text": "Jeste li sigurni da želite očistiti ovu biblioteku?"
 					},
-					"emptyText": "",
+					"emptyText": "Nije bilo ničega za čišćenje",
 					"missingEntitiesTable": {
 						"columns": {
-							"id": "",
-							"path": "",
-							"type": ""
+							"id": "ID",
+							"path": "Putanja",
+							"type": "Vrsta"
 						},
 						"types": {
-							"BOOK": "",
-							"SERIES": "",
-							"LIBRARY": ""
+							"BOOK": "Knjiga",
+							"SERIES": "Serijal",
+							"LIBRARY": "Biblioteka"
 						},
-						"emptyHeading": "",
-						"emptySubtitle": ""
+						"emptyHeading": "U ovoj biblioteci ništa ne nedostaje",
+						"emptySubtitle": "Sve datoteke navedene u bazi podataka pronađene su na disku"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "",
+					"heading": "Izbrišite biblioteku",
 					"description": [
-						"",
-						""
+						"Trajno izbrišite ovu biblioteku i sav njen sadržaj.",
+						"Ova radnja se ne može poništiti"
 					]
 				}
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "",
-		"criticalHeading": "",
-		"emptyMessage": "",
-		"copiedDetails": "",
-		"imageAlt": "",
-		"message": "",
+		"heading": "lol, upsić",
+		"criticalHeading": "Došlo je do kritične greške",
+		"emptyMessage": "Poruka o grešci bila je prazna.",
+		"copiedDetails": "Detalji greške kopirani su u međuspremnik",
+		"imageAlt": "Ilustracija radova u toku",
+		"message": "Došlo je do greške:",
 		"buttons": {
-			"report": "",
-			"copy": "",
-			"goHome": "",
-			"goHomeTitle": "",
-			"reportTitle": "",
-			"copyTitle": ""
+			"report": "Prijavite grešku",
+			"copy": "Kopirajte detalje greške",
+			"goHome": "Povratak na početnu",
+			"goHomeTitle": "Vratite se na početnu stranicu",
+			"reportTitle": "Prijavite ovu grešku kao moguću programsku grešku na GitHubu",
+			"copyTitle": "Kopirajte detalje greške u međuspremnik"
 		}
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "",
+			"title": "Vaše sljedeće štivo",
 			"emptyState": {
-				"heading": "",
-				"message": ""
+				"heading": "Nema knjiga na redu",
+				"message": "Ovdje će se prikazati sljedeće preporučene knjige"
 			}
 		},
 		"continueReading": {
-			"title": "",
+			"title": "Nastavite čitati",
 			"emptyState": {
-				"heading": "",
-				"message": ""
+				"heading": "Nema sadržaja za prikaz",
+				"message": "Ovdje će se prikazati sve knjige koje počnete čitati"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "",
+			"title": "Nedavno dodani serijali",
 			"emptyState": {
-				"heading": "",
-				"message": ""
+				"heading": "Nema serijala za prikaz",
+				"message": "Ovdje će se prikazati svi serijali koje dodate u svoje biblioteke"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "",
+			"title": "Nedavno dodane knjige",
 			"emptyState": {
-				"heading": "",
-				"message": ""
+				"heading": "Nema sadržaja za prikaz",
+				"message": "Ovdje će se prikazati sve nedavno dodane knjige"
 			}
 		}
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "",
-			"characters": "",
-			"colorists": "",
-			"coverArtists": "",
-			"day": "",
-			"editors": "",
-			"format": "",
-			"identifierAmazon": "",
-			"identifierCalibre": "",
-			"identifierGoogle": "",
-			"identifierIsbn": "",
-			"identifierMobiAsin": "",
-			"identifierUuid": "",
-			"genres": "",
-			"inkers": "",
-			"language": "",
-			"letterers": "",
-			"links": "",
-			"month": "",
-			"notes": "",
-			"number": "",
-			"pageCount": "",
-			"pencillers": "",
-			"publisher": "",
-			"series": "",
-			"seriesGroup": "",
-			"storyArc": "",
-			"storyArcNumber": "",
-			"summary": "",
-			"teams": "",
-			"title": "",
-			"titleSort": "",
-			"volume": "",
-			"writers": "",
-			"year": "",
-			"metaType": "",
-			"imprint": "",
-			"comicid": "",
-			"booktype": "",
-			"status": "",
-			"totalIssues": "",
-			"publicationRun": "",
-			"comicImage": "",
-			"descriptionFormatted": ""
+			"ageRating": "Dobna oznaka",
+			"characters": "Likovi",
+			"colorists": "Koloristi",
+			"coverArtists": "Autori naslovnice",
+			"day": "Dan",
+			"editors": "Urednici",
+			"format": "Format",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"identifierUuid": "UUID knjige",
+			"genres": "Žanrovi",
+			"inkers": "Tušeri",
+			"language": "Jezik",
+			"letterers": "Urednici teksta",
+			"links": "Veze",
+			"month": "Mjesec",
+			"notes": "Bilješke",
+			"number": "Broj",
+			"pageCount": "Stranice",
+			"pencillers": "Crtači olovkom",
+			"publisher": "Izdavač",
+			"series": "Serijal",
+			"seriesGroup": "Grupa serijala",
+			"storyArc": "Narativni luk",
+			"storyArcNumber": "Broj narativnog luka",
+			"summary": "Sažetak",
+			"teams": "Timovi",
+			"title": "Naslov",
+			"titleSort": "Naslov za sortiranje",
+			"volume": "Svezak",
+			"writers": "Pisci",
+			"year": "Godina",
+			"metaType": "Vrsta",
+			"imprint": "Izdavačka marka",
+			"comicid": "ID stripa",
+			"booktype": "Vrsta knjige",
+			"status": "Status",
+			"totalIssues": "Ukupan broj izdanja",
+			"publicationRun": "Period objavljivanja",
+			"comicImage": "Slika stripa",
+			"descriptionFormatted": "Opis (formatiran)"
 		},
 		"addFields": {
-			"description": ""
+			"description": "Svaki unos dodajte u zaseban red"
 		}
 	},
 	"metadataMatching": {
 		"section": {
-			"heading": "",
-			"description": ""
+			"heading": "Podudaranja na čekanju",
+			"description": "Pregledajte podudaranja metapodataka dohvaćena od vanjskih pružatelja"
 		},
 		"confidenceBadge": {
-			"label": ""
+			"label": "pouzdanost"
 		},
-		"includeField": "",
-		"excludeField": "",
-		"fieldLocked": "",
+		"includeField": "Uključite ovo polje",
+		"excludeField": "Isključite ovo polje",
+		"fieldLocked": "Ovo polje je zaključano",
 		"reviewDialog": {
 			"previewEditor": {
-				"noCandidates": "",
-				"noComparableFields": "",
+				"noCandidates": "Nema dostupnih kandidata za ovaj zapis",
+				"noComparableFields": "Nisu pronađena usporediva polja",
 				"headers": {
-					"field": "",
-					"current": "",
-					"external": "",
-					"resolved": ""
+					"field": "Polje",
+					"current": "Trenutno",
+					"external": "Vanjsko",
+					"resolved": "Razriješeno"
 				},
 				"toolbar": {
-					"candidatePosition": "",
-					"provider": ""
+					"candidatePosition": "Kandidat {{position}} od {{total}}",
+					"provider": "Pružatelj"
 				}
 			},
 			"footer": {
-				"accept": "",
-				"reject": "",
+				"accept": "Prihvatite",
+				"reject": "Odbijte",
 				"strategies": {
-					"FILL_GAPS": "",
-					"PREFER_EXTERNAL": "",
-					"PREFER_EXTERNAL_AND_MERGE_LISTS": "",
-					"FILL_AND_MERGE_LISTS": ""
+					"FILL_GAPS": "Popunite praznine",
+					"PREFER_EXTERNAL": "Preferirajte vanjsko",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferirajte vanjsko i spojite popise",
+					"FILL_AND_MERGE_LISTS": "Popunite i spojite popise"
 				}
 			},
 			"fieldAction": {
-				"keepCurrent": "",
-				"takeExternal": "",
-				"mergeLists": "",
-				"editManually": "",
-				"lockField": "",
-				"unlockField": "",
-				"reset": "",
-				"undoManualEdit": ""
+				"keepCurrent": "Zadržite trenutno",
+				"takeExternal": "Preuzmite vanjsko",
+				"mergeLists": "Spojite popise",
+				"editManually": "Uredite ručno",
+				"lockField": "Zaključajte polje",
+				"unlockField": "Otključajte polje",
+				"reset": "Poništite",
+				"undoManualEdit": "Poništite ručno uređivanje"
 			}
 		},
 		"matchesTable": {
 			"columns": {
-				"entityName": "",
-				"entityType": "",
-				"candidateCount": "",
-				"topConfidence": "",
-				"addedAt": ""
+				"entityName": "Naziv",
+				"entityType": "Vrsta",
+				"candidateCount": "Kandidati",
+				"topConfidence": "Najveća pouzdanost",
+				"addedAt": "Dohvaćeno"
 			},
 			"acceptAll": {
-				"label": "",
-				"failed": "",
-				"success": ""
+				"label": "Prihvatite sve",
+				"failed": "Prihvatanje svih podudaranja nije uspjelo",
+				"success": "Sva podudaranja na čekanju su prihvaćena"
 			},
 			"rejectAll": {
-				"label": "",
-				"failed": "",
-				"success": ""
+				"label": "Odbijte sve",
+				"failed": "Odbijanje svih podudaranja nije uspjelo",
+				"success": "Sva podudaranja na čekanju su odbijena"
 			},
-			"startReview": "",
-			"nothingToReview": ""
+			"startReview": "Započnite pregled",
+			"nothingToReview": "Nema podudaranja metapodataka na čekanju za pregled"
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "",
-			"downloadSeries": ""
+			"continueReading": "Nastavite čitati",
+			"downloadSeries": "Preuzmite serijal"
 		}
 	},
 	"seriesHeader": {
 		"tabs": {
-			"books": "",
-			"files": ""
+			"books": "Knjige",
+			"files": "Datoteke"
 		},
 		"actions": {
-			"markAsRead": "",
-			"markAsUnread": "",
-			"goToLibrary": ""
+			"markAsRead": "Označite serijal kao pročitan",
+			"markAsUnread": "Označite serijal kao nepročitan",
+			"goToLibrary": "Idite u biblioteku"
 		},
 		"errors": {
-			"failedToUpdateCompletion": ""
+			"failedToUpdateCompletion": "Ažuriranje statusa pročitanosti knjige nije uspjelo"
 		}
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "",
-			"nameTaken": ""
+			"nameTooShort": "Naziv mora imati najmanje 2 znaka",
+			"nameTaken": "Ovaj naziv nije moguće koristiti"
 		},
 		"fields": {
 			"name": {
-				"label": "",
-				"placeholder": "",
-				"description": ""
+				"label": "Naziv",
+				"placeholder": "Moja pametna lista",
+				"description": "Mora biti jedinstven, ali se kasnije može promijeniti"
 			},
 			"description": {
-				"label": "",
-				"placeholder": "",
-				"description": ""
+				"label": "Opis",
+				"placeholder": "Veoma inteligentna lista",
+				"description": "Neobavezan opis vaše pametne liste"
 			},
 			"visibility": {
-				"label": "",
+				"label": "Vidljivost",
 				"options": {
 					"public": {
-						"label": "",
-						"description": ""
+						"label": "Javno",
+						"description": "Dostupno svim korisnicima na serveru"
 					},
 					"shared": {
-						"label": "",
-						"description": "",
-						"createDisclaimer": ""
+						"label": "Dijeljeno",
+						"description": "Određeni korisnici mogu pristupiti ovoj pametnoj listi",
+						"createDisclaimer": "Nakon kreiranja možete odabrati s kim će se ova lista dijeliti"
 					},
 					"private": {
-						"label": "",
-						"description": ""
+						"label": "Privatno",
+						"description": "Samo vi možete pristupiti ovoj pametnoj listi"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "",
+				"uiPerformance": "Ovoj funkciji nedostaju optimizacije performansi korisničkog interfejsa pa može biti spora s filterima koji daju veliki broj rezultata. To će biti poboljšano u budućnosti",
 				"rootJoiner": {
 					"and": {
-						"label": "",
-						"description": ""
+						"label": "I",
+						"description": "Sve grupe filtera moraju biti tačne da bi knjiga odgovarala"
 					},
 					"or": {
-						"label": "",
-						"description": ""
+						"label": "ILI",
+						"description": "Najmanje jedna grupa filtera mora biti tačna da bi knjiga odgovarala"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "",
-						"description": ""
+						"label": "I",
+						"description": "Svi uvjeti moraju biti tačni"
 					},
 					"or": {
-						"label": "",
-						"description": ""
+						"label": "ILI",
+						"description": "Najmanje jedan uvjet mora biti tačan"
 					},
 					"not": {
-						"label": "",
-						"description": ""
+						"label": "NE",
+						"description": "Nijedan uvjet ne smije biti tačan"
 					}
 				},
 				"grouping": {
-					"label": "",
-					"description": "",
+					"label": "Grupirajte prema",
+					"description": "Način grupiranja knjiga u ovoj pametnoj listi",
 					"options": {
 						"by_books": {
-							"label": ""
+							"label": "Bez grupiranja"
 						},
 						"by_series": {
-							"label": ""
+							"label": "Serijal"
 						},
 						"by_library": {
-							"label": ""
+							"label": "Biblioteka"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "",
+					"emptyState": "Dodajte grupu da biste započeli",
 					"actions": {
-						"addFilter": "",
-						"addGroup": "",
-						"deleteFilter": "",
-						"deleteGroup": ""
+						"addFilter": "Dodajte filter",
+						"addGroup": "Dodajte grupu",
+						"deleteFilter": "Izbrišite filter",
+						"deleteGroup": "Izbrišite grupu"
 					},
-					"is": "",
+					"is": "je",
 					"fieldSelect": {
-						"placeholder": "",
+						"placeholder": "Atribut",
 						"source": {
-							"label": "",
-							"back": "",
+							"label": "Izvor",
+							"back": "Nazad",
 							"book": {
-								"label": "",
+								"label": "Knjiga",
 								"attributes": {
-									"name": "",
-									"size": "",
-									"extension": "",
-									"status": "",
-									"path": "",
-									"pages": "",
-									"tags": "",
-									"createdAt": "",
-									"updatedAt": "",
-									"readingStatus": ""
+									"name": "Naziv datoteke",
+									"size": "Veličina",
+									"extension": "Ekstenzija",
+									"status": "Status",
+									"path": "Putanja",
+									"pages": "Stranice",
+									"tags": "Oznake",
+									"createdAt": "Kreirano",
+									"updatedAt": "Ažurirano",
+									"readingStatus": "Status čitanja"
 								}
 							},
 							"book_meta": {
-								"label": "",
+								"label": "Metapodaci knjige",
 								"attributes": {
-									"title": "",
-									"summary": "",
-									"notes": "",
-									"writers": "",
-									"pencillers": "",
-									"inkers": "",
-									"letterers": "",
-									"editors": "",
-									"publisher": "",
-									"colorists": "",
-									"links": "",
-									"characters": "",
-									"teams": "",
-									"genres": "",
-									"coverArtists": "",
-									"ageRating": "",
-									"year": "",
-									"month": "",
-									"day": ""
+									"title": "Naslov",
+									"summary": "Sažetak",
+									"notes": "Bilješke",
+									"writers": "Pisci",
+									"pencillers": "Crtači olovkom",
+									"inkers": "Tušeri",
+									"letterers": "Urednici teksta",
+									"editors": "Urednici",
+									"publisher": "Izdavač",
+									"colorists": "Kolorist",
+									"links": "Veze",
+									"characters": "Likovi",
+									"teams": "Timovi",
+									"genres": "Žanr",
+									"coverArtists": "Autori naslovnice",
+									"ageRating": "Dobna oznaka",
+									"year": "Godina",
+									"month": "Mjesec",
+									"day": "Dan"
 								}
 							},
 							"series": {
-								"label": "",
+								"label": "Serijal",
 								"attributes": {
-									"name": "",
-									"path": ""
+									"name": "Naziv",
+									"path": "Putanja"
 								}
 							},
 							"series_meta": {
-								"label": "",
+								"label": "Metapodaci serijala",
 								"attributes": {
-									"title": "",
-									"summary": "",
-									"publisher": "",
-									"imprint": "",
-									"comicid": "",
-									"booktype": "",
-									"status": "",
-									"volume": "",
-									"metaType": "",
-									"ageRating": "",
-									"year": ""
+									"title": "Naslov",
+									"summary": "Sažetak",
+									"publisher": "Izdavač",
+									"imprint": "Izdavačka marka",
+									"comicid": "ID stripa",
+									"booktype": "Vrsta knjige",
+									"status": "Status",
+									"volume": "Svezak",
+									"metaType": "Vrsta",
+									"ageRating": "Dobna oznaka",
+									"year": "Početna godina"
 								}
 							},
 							"library": {
-								"label": "",
+								"label": "Biblioteka",
 								"attributes": {
-									"name": "",
-									"path": ""
+									"name": "Naziv",
+									"path": "Putanja"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "",
-						"date": ""
+						"placeholder": "Vrijednost",
+						"date": "Datum"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "",
-							"number": ""
+							"date": "Od datuma",
+							"number": "Od"
 						},
 						"to": {
-							"date": "",
-							"number": ""
+							"date": "Do datuma",
+							"number": "Do"
 						},
-						"inclusive": ""
+						"inclusive": "Uključivo"
 					},
 					"listValue": {
-						"placeholder": "",
-						"emptyState": ""
+						"placeholder": "Dodajte vrijednosti",
+						"emptyState": "Nema vrijednosti za prikaz"
 					},
 					"enumValue": {
-						"selectPlaceholder": "",
-						"READING": "",
-						"FINISHED": "",
-						"NOT_STARTED": "",
-						"ABANDONED": ""
+						"selectPlaceholder": "Odaberite vrijednost",
+						"READING": "U čitanju",
+						"FINISHED": "Završeno",
+						"NOT_STARTED": "Nije započeto",
+						"ABANDONED": "Napušteno"
 					}
 				}
 			}
 		}
 	},
 	"createSmartListScene": {
-		"heading": "",
-		"subtitle": "",
+		"heading": "Kreirajte pametnu listu",
+		"subtitle": "Dinamičko kreiranje liste na osnovu skupa filtera",
 		"form": {
-			"stepLabel": "",
+			"stepLabel": "Korak",
 			"steps": [
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Osnovno",
+					"heading": "Osnovne informacije",
+					"description": "Podaci o ovoj pametnoj listi, uključujući njen naziv, opis i vidljivost"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Filteri",
+					"heading": "Filteri",
+					"description": "Filteri koji će se primijeniti na ovu pametnu listu"
 				},
 				{
-					"label": "",
-					"heading": "",
-					"description": ""
+					"label": "Pregled",
+					"heading": "Pregled",
+					"description": "Pregledajte postavke pametne liste prije nego što je kreirate"
 				}
 			],
 			"review": {
-				"yes": "",
-				"no": "",
-				"none": "",
+				"yes": "Da",
+				"no": "Ne",
+				"none": "Nema",
 				"labels": {
-					"name": "",
-					"description": "",
-					"visibility": "",
-					"grouping": ""
+					"name": "Naziv",
+					"description": "Opis",
+					"visibility": "Vidljivost",
+					"grouping": "Grupirajte prema"
 				}
 			},
 			"buttons": {
-				"confirm": ""
+				"confirm": "Kreirajte listu"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": ""
+			"futureDate": "Datum isteka mora biti u budućnosti"
 		},
 		"fields": {
 			"name": {
-				"label": "",
-				"placeholder": ""
+				"label": "Naziv",
+				"placeholder": "KoReader sinhronizacija"
 			},
 			"expiration": {
-				"label": "",
-				"placeholder": ""
+				"label": "Istek",
+				"placeholder": "Nikada"
 			},
 			"expiresAt": {
-				"label": "",
-				"placeholder": ""
+				"label": "Ističe",
+				"placeholder": "Nikada"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "",
-					"description": ""
+					"label": "Naslijedite dozvole",
+					"description": "Iste dozvole kao vaš račun"
 				},
 				"explicit": {
-					"label": "",
-					"description": ""
+					"label": "Izričite dozvole",
+					"description": "Odaberite dozvole koje ovaj ključ treba imati"
 				}
 			}
 		},
-		"inheritDisclaimer": ""
+		"inheritDisclaimer": "Ovaj API ključ naslijedit će sve vaše dozvole, što znači da može učiniti sve što možete i vi. Budite oprezni s ovom postavkom"
 	},
 	"userSmartListsScene": {
-		"heading": "",
-		"subtitle": "",
-		"searchPlaceholder": "",
+		"heading": "Pametne liste",
+		"subtitle": "Vaše omiljene pretrage i filteri spremljeni za jednostavan pristup",
+		"searchPlaceholder": "Filtrirajte pametne liste",
 		"buttons": {
-			"createSmartList": ""
+			"createSmartList": "Kreirajte pametnu listu"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "",
-				"noListsMessage": "",
-				"noMatchesMessage": ""
+				"heading": "Nema pametnih lista za prikaz",
+				"noListsMessage": "Kreirajte pametnu listu da biste započeli",
+				"noMatchesMessage": "Pokušajte promijeniti upit za pretragu"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "",
-						"series": "",
-						"library": ""
+						"books": "knjiga",
+						"series": "serijal",
+						"library": "biblioteka"
 					},
-					"matches": ""
+					"matches": "Podudaranja"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "",
+			"basics": "Osnovno",
 			"configuration": {
-				"label": "",
-				"access": "",
-				"filters": ""
+				"label": "Konfiguracija",
+				"access": "Pristup",
+				"filters": "Filteri"
 			},
 			"danger-zone": {
-				"delete": "",
-				"label": ""
+				"delete": "Brisanje",
+				"label": "Opasna zona"
 			}
 		},
 		"basics": {
-			"title": "",
-			"description": ""
+			"title": "Osnovne informacije",
+			"description": "Podaci o ovoj pametnoj listi, uključujući njen naziv i opis"
 		},
 		"access": {
-			"title": "",
-			"description": "",
+			"title": "Pristup",
+			"description": "Odredite ko može pristupiti ovoj pametnoj listi",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "",
-						"private": "",
-						"shared": "",
-						"fallback": ""
+						"public": "Ovo će listu učiniti vidljivom svima",
+						"private": "Ovo će listu učiniti privatnom i sakriti je od svih koji su joj ranije imali pristup",
+						"shared": "Listu morate podijeliti s određenim korisnicima kako biste im omogućili pristup",
+						"fallback": "Jeste li sigurni da želite promijeniti vidljivost ove liste?"
 					}
 				},
 				"accessManager": {
-					"disclaimer": ""
+					"disclaimer": "Dijeljenje još nije spremno. Provjerite ponovo kasnije!"
 				}
 			}
 		},
 		"filters": {
-			"title": "",
-			"description": ""
+			"title": "Alat za izradu filtera",
+			"description": "Upravljajte filterima koji oblikuju ovu pametnu listu"
 		},
 		"danger-zone/delete": {
-			"title": "",
-			"description": "",
+			"title": "Radnje brisanja",
+			"description": "Trajno izbrišite ovu pametnu listu i sav njen sadržaj ili određene resurse",
 			"sections": {
 				"deleteList": {
-					"heading": "",
+					"heading": "Izbrišite listu",
 					"description": [
-						"",
-						""
+						"Trajno izbrišite ovu pametnu listu i sav njen sadržaj.",
+						"Ova radnja se ne može poništiti"
 					],
 					"confirmation": {
-						"title": "",
-						"description": "",
-						"confirm": ""
+						"title": "Izbrišite listu",
+						"description": "Jeste li sigurni da želite izbrisati ovu pametnu listu?",
+						"confirm": "Izbrišite listu"
 					}
 				}
 			}
@@ -1333,73 +1333,73 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "",
-			"settings": ""
+			"items": "Stavke",
+			"settings": "Postavke"
 		},
 		"layout": {
-			"missingIdError": "",
-			"smartListNotFound": "",
-			"viewCreateError": "",
-			"viewSaveError": ""
+			"missingIdError": "Ovaj prikaz zahtijeva ID u URL-u",
+			"smartListNotFound": "Pametna lista nije pronađena",
+			"viewCreateError": "Kreiranje prikaza nije uspjelo",
+			"viewSaveError": "Spremanje prikaza nije uspjelo"
 		},
 		"header": {
-			"backLink": ""
+			"backLink": "Liste"
 		},
 		"itemsScene": {
-			"smartListNotFound": "",
+			"smartListNotFound": "Pametna lista nije pronađena",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "",
-					"defaultView": "",
-					"noViewsSaved": "",
-					"selectView": ""
+					"customView": "Prilagođeni prikaz",
+					"defaultView": "Zadani prikaz",
+					"noViewsSaved": "Nema spremljenih prikaza",
+					"selectView": "Odaberite spremljeni prikaz"
 				},
 				"filterDrawer": {
-					"heading": "",
-					"description": "",
+					"heading": "Filteri pametne liste",
+					"description": "Promijenite filtere za ovu sesiju pregleda",
 					"rawData": {
-						"heading": "",
-						"description": ""
+						"heading": "Neobrađeni podaci filtera",
+						"description": "Ovako će Stump obraditi filtere"
 					},
 					"buttons": {
-						"save": "",
-						"cancel": ""
+						"save": "Spremite",
+						"cancel": "Otkažite"
 					}
 				},
 				"search": {
-					"placeholder": ""
+					"placeholder": "Brzi filtar"
 				},
 				"viewManager": {
-					"updateSelected": "",
-					"deleteSelected": "",
-					"create": "",
+					"updateSelected": "Ažurirajte prikaz",
+					"deleteSelected": "Izbrišite prikaz",
+					"create": "Kreirajte novi prikaz",
 					"modal": {
 						"heading": {
-							"create": "",
-							"update": ""
+							"create": "Kreirajte prikaz",
+							"update": "Ažurirajte prikaz"
 						},
 						"description": {
-							"create": "",
-							"update": ""
+							"create": "Kreirajte novi prikaz za ovu pametnu listu",
+							"update": "Ažurirajte prikaz"
 						},
 						"createForm": {
 							"name": {
-								"label": "",
-								"placeholder": "",
-								"description": ""
+								"label": "Naziv",
+								"placeholder": "Moj prikaz",
+								"description": "Prepoznatljiv naziv koji jedinstveno identificira ovaj prikaz"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "",
-								"placeholder": "",
-								"description": ""
+								"label": "Naziv",
+								"placeholder": "Moj prikaz",
+								"description": "Ažurirani naziv ovog prikaza, ako ga želite promijeniti"
 							}
 						}
 					},
 					"deleteModal": {
-						"title": "",
-						"description": ""
+						"title": "Izbrišite prikaz",
+						"description": "Jeste li sigurni da želite izbrisati ovaj prikaz?"
 					}
 				}
 			}
@@ -1407,2296 +1407,2317 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "",
-			"logs": "",
-			"server": "",
-			"jobs": "",
-			"users": "",
-			"desktop": ""
+			"general": "Općenito",
+			"logs": "Zapisnici",
+			"server": "Server",
+			"jobs": "Zadaci i konfiguracija",
+			"users": "Upravljanje korisnicima",
+			"desktop": "Radna površina"
 		},
 		"sidebar": {
 			"personal": {
-				"account": "",
-				"appearance": "",
-				"api keys": "",
-				"reader": "",
-				"desktop": "",
-				"label": ""
+				"account": "Račun",
+				"appearance": "Postavke",
+				"api keys": "API ključevi",
+				"reader": "Čitač",
+				"desktop": "Radna površina",
+				"label": "Lično"
 			},
 			"management": {
-				"general": "",
-				"logs": "",
-				"users": "",
-				"jobs": "",
-				"access": "",
-				"email": "",
-				"metadata": "",
-				"notifications": "",
-				"tags": "",
-				"label": ""
+				"general": "Server",
+				"logs": "Zapisnici",
+				"users": "Korisnici",
+				"jobs": "Zadaci",
+				"access": "Pristup",
+				"email": "E-pošta",
+				"metadata": "Metapodaci",
+				"notifications": "Obavijesti",
+				"tags": "Oznake",
+				"label": "Upravljanje"
 			}
 		},
 		"app/account": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Postavke računa",
+			"title": "Postavke računa",
+			"description": "Postavke povezane s vašim računom",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "",
-						"missingUsername": ""
+						"invalidUrl": "Unesite važeći URL",
+						"missingUsername": "Korisničko ime je obavezno"
 					},
 					"labels": {
-						"username": "",
-						"password": "",
-						"activeChangesPrompt": "",
+						"username": "Korisničko ime",
+						"password": "Lozinka",
+						"activeChangesPrompt": "Imate nespremljene promjene",
 						"uselessForm": {
-							"title": "",
-							"description": ""
+							"title": "Nemate dozvolu za promjenu ovih postavki",
+							"description": "Obratite se administratoru ako želite promijeniti ove postavke"
 						},
-						"insufficientPermission": ""
+						"insufficientPermission": "Nemate dozvolu za ovu promjenu"
 					},
 					"errors": {
-						"updateFailed": ""
+						"updateFailed": "Došlo je do greške servera pri ažuriranju profila. Pokušajte ponovo."
 					},
 					"avatarPicker": {
-						"label": "",
-						"heading": "",
-						"subtitle": "",
-						"dropzone": "",
-						"changeImage": "",
-						"removeImage": "",
-						"removeSelection": "",
-						"uploadFailed": "",
-						"removeFailed": ""
+						"label": "Avatar",
+						"heading": "Učitajte avatar",
+						"subtitle": "Možete učitati bilo koju sliku i koristiti je kao avatar za društvene funkcije u Stumpu",
+						"dropzone": "Ispustite sliku ili kliknite da biste je odabrali",
+						"changeImage": "Promijenite sliku",
+						"removeImage": "Uklonite sliku",
+						"removeSelection": "Uklonite učitanu sliku",
+						"uploadFailed": "Učitavanje avatara nije uspjelo",
+						"removeFailed": "Uklanjanje avatara nije uspjelo"
 					},
 					"buttons": {
-						"confirm": ""
+						"confirm": "Spremite promjene"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": ""
+						"label": "Jezik"
 					},
-					"heading": "",
+					"heading": "Jezik i lokalne postavke",
 					"subtitle": [
-						"",
-						"",
-						""
+						"Stump podržava više jezika i lokalnih postavki. Postavite željene opcije u nastavku. Razmislite o tome da pomognete poboljšati kvalitet",
+						"Stumpovih prijevoda",
+						"ako ste u mogućnosti!"
 					]
 				}
 			}
 		},
 		"app/preferences": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Postavke",
+			"title": "Postavke",
+			"description": "Prilagodite izgled i dojam aplikacije",
 			"sections": {
 				"themeAndAppearance": {
-					"label": "",
-					"description": ""
+					"label": "Tema i izgled",
+					"description": "Osnovne opcije izgleda Stumpa"
 				},
 				"interface": {
-					"title": "",
-					"description": ""
+					"title": "Interfejs",
+					"description": "Glavne površine korisničkog interfejsa i elementi interakcije"
 				},
 				"thumbnails": {
-					"title": "",
-					"description": ""
+					"title": "Minijature",
+					"description": "Opcije prikaza minijatura"
 				},
 				"themeSelect": {
-					"label": "",
+					"label": "Tema",
 					"description": [
-						"",
-						""
+						"Ako želite kreirati vlastitu temu, pogledajte",
+						"dokumentaciju"
 					],
 					"options": {
-						"system": "",
-						"light": "",
-						"dark": "",
-						"bronze": "",
-						"ocean": "",
-						"autumn": "",
-						"cosmic": "",
-						"pumpkin": "",
-						"midnight": "",
-						"matrix": ""
+						"system": "Sistemska",
+						"light": "Svijetla",
+						"dark": "Tamna",
+						"bronze": "Svijetla bronza",
+						"ocean": "Okean",
+						"autumn": "Jesen",
+						"cosmic": "Svemirska",
+						"pumpkin": "Bundeva",
+						"midnight": "Ponoć",
+						"matrix": "Matrix"
 					}
 				},
 				"gradientToggle": {
-					"label": "",
-					"description": ""
+					"label": "Omogućite gradijente",
+					"description": "Neke teme opcionalno podržavaju gradijente za dinamičniji izgled"
 				},
 				"fontSelect": {
-					"label": "",
-					"description": ""
+					"label": "Font",
+					"description": "Prilagodite font koji se koristi u aplikaciji"
 				},
 				"interfaceRoundness": {
-					"label": "",
-					"description": "",
+					"label": "Zaobljenost interfejsa",
+					"description": "Stepen zaobljenosti uglova elemenata korisničkog interfejsa",
 					"options": {
-						"none": "",
-						"normal": "",
-						"rounded": "",
-						"pill": ""
+						"none": "Bez zaobljenja",
+						"normal": "Normalno",
+						"rounded": "Zaobljeno",
+						"pill": "Kapsula"
 					}
 				},
 				"thumbnailPreview": {
-					"label": "",
-					"description": ""
+					"label": "Pretpregled",
+					"description": "Ovako će minijature izgledati s trenutnim postavkama"
 				},
 				"thumbnailRatioSelect": {
-					"label": "",
-					"description": "",
-					"defaultSuffix": ""
+					"label": "Omjer minijature",
+					"description": "Omjer stranica koji će se koristiti za minijature",
+					"defaultSuffix": "Zadano"
 				},
 				"thumbnailPlaceholder": {
-					"label": "",
-					"description": "",
+					"label": "Zamjenska minijatura",
+					"description": "Stil koji se koristi za zamjenske minijature",
 					"options": {
-						"grayscale": "",
-						"averageColor": "",
-						"colorful": "",
-						"thumbhash": ""
+						"grayscale": "Sivi tonovi",
+						"averageColor": "Prosječna boja",
+						"colorful": "Šareno",
+						"thumbhash": "ThumbHash"
 					}
 				},
 				"thumbnailRoundness": {
-					"label": "",
-					"description": "",
+					"label": "Zaobljenost minijatura",
+					"description": "Stepen zaobljenosti uglova minijatura",
 					"options": {
-						"none": "",
-						"normal": "",
-						"rounded": "",
-						"large": ""
+						"none": "Bez zaobljenja",
+						"normal": "Normalno",
+						"rounded": "Zaobljeno",
+						"large": "Veliko"
 					}
 				},
 				"navigation": {
-					"title": "",
-					"description": ""
+					"title": "Navigacija",
+					"description": "Prilagodite navigacijske elemente aplikacije"
 				},
 				"layoutAndArrangement": {
-					"label": "",
-					"description": ""
+					"label": "Raspored i organizacija",
+					"description": "Prilagodite način na koji Stump prikazuje informacije i organizira sadržaj"
 				},
 				"primaryNavigation": {
-					"label": "",
-					"description": "",
+					"label": "Primarna navigacija",
+					"description": "Odaberite minimalnu bočnu traku ili navigaciju na gornjoj traci",
 					"options": {
-						"sidebar": "",
-						"topbar": ""
+						"sidebar": "Bočna traka",
+						"topbar": "Gornja traka"
 					},
-					"disclaimer": ""
+					"disclaimer": "* Postavke neodabrane opcije bit će onemogućene ili skrivene"
 				},
 				"doubleSidebar": {
-					"label": "",
-					"description": ""
+					"label": "Bočna traka postavki",
+					"description": "Omogućava navigaciju bočnom trakom na stranicama postavki"
 				},
 				"replacePrimarySidebar": {
-					"label": "",
-					"description": "",
+					"label": "Zamijenite primarnu bočnu traku",
+					"description": "Svaka sekundarna bočna traka zamijenit će primarnu umjesto da se prikaže uz nju",
 					"tooltips": {
-						"doubleSidebar": "",
-						"topbar": ""
+						"doubleSidebar": "Ova postavka zahtijeva omogućenu bočnu traku postavki",
+						"topbar": "Ova postavka trenutno nije podržana kada je primarna navigacija postavljena na gornju traku"
 					}
 				},
 				"navigationArrangement": {
-					"label": "",
-					"description": "",
-					"isLocked": "",
-					"lock": "",
-					"unlock": "",
+					"label": "Raspored navigacije",
+					"description": "Promijenite raspored ili prilagodite stavke primarne navigacije",
+					"isLocked": "Raspored je zaključan",
+					"lock": "Zaključajte raspored",
+					"unlock": "Otključajte raspored",
 					"options": {
-						"HOME": "",
-						"EXPLORE": "",
-						"LIBRARIES": "",
-						"BOOK_CLUBS": "",
-						"SMART_LISTS": ""
+						"HOME": "Početna",
+						"EXPLORE": "Istražite",
+						"LIBRARIES": "Biblioteke",
+						"BOOK_CLUBS": "Čitalački klubovi",
+						"SMART_LISTS": "Pametne liste"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "",
-							"help": ""
+							"label": "Prikažite radnju kreiranja",
+							"help": "Prikažite radnju kreiranja u navigaciji"
 						},
 						"linkToAll": {
-							"label": "",
-							"help": ""
+							"label": "Veza „Prikaži sve“",
+							"help": "Veza na stranicu namijenjenu prikazu svih stavki ove vrste"
 						}
 					}
 				},
 				"displaySpacing": {
-					"label": "",
-					"description": "",
+					"label": "Razmak prikaza",
+					"description": "Prilagođava ukupni razmak između elemenata u cijeloj aplikaciji",
 					"options": {
-						"default": "",
-						"compact": ""
+						"default": "Zadano",
+						"compact": "Kompaktno"
 					},
-					"disclaimer": ""
+					"disclaimer": "* Kompaktni način prikaza još nije implementiran"
 				},
 				"maxWidthPreference": {
-					"label": "",
-					"description": "",
-					"tooltip": "",
+					"label": "Prilagođena širina",
+					"description": "Stump primjenjuje maksimalnu širinu prikaza. Ova postavka omogućava prilagođavanje ili uklanjanje tog ograničenja",
+					"tooltip": "Ova postavka trenutno nije podržana kada je primarna navigacija postavljena na bočnu traku",
 					"options": {
-						"noLimit": ""
+						"noLimit": "Bez ograničenja"
 					}
 				},
 				"displayAndSpacing": {
-					"label": "",
-					"description": ""
+					"label": "Prikaz i razmak",
+					"description": "Postavke povezane s prikazom sadržaja i informacija"
 				},
 				"additionalPreferences": {
-					"label": "",
-					"description": ""
+					"label": "Dodatne postavke",
+					"description": "Prilagodite izgled i ponašanje Stumpa ovim dodatnim postavkama"
 				},
 				"contentBrowsing": {
-					"label": "",
-					"description": ""
+					"label": "Pregledavanje sadržaja",
+					"description": "Postavke koje utječu na pregledavanje i navigaciju kroz liste sadržaja"
 				},
 				"motionAndAnimation": {
-					"label": "",
-					"description": ""
+					"label": "Kretanje i animacija",
+					"description": "Postavke vizuelnog prikaza i kretanja"
 				},
 				"activityAndStatus": {
-					"label": "",
-					"description": ""
+					"label": "Aktivnost i status",
+					"description": "Indikatori, prekrivajući elementi ili funkcije povezane s pozadinskom aktivnošću"
 				},
 				"hideScrollbarToggle": {
-					"label": "",
-					"description": "",
+					"label": "Sakrijte kliznu traku",
+					"description": "Neke stranice izgledaju bolje bez klizne trake. Ova postavka će je sakriti kada je moguće",
 					"tooltips": {
-						"enabled": "",
-						"disabled": ""
+						"enabled": "Ova postavka će sakriti kliznu traku na nekim stranicama",
+						"disabled": "Ova postavka će prikazati kliznu traku na nekim stranicama"
 					}
 				},
 				"enableAlphabetFiltering": {
-					"label": "",
-					"description": ""
+					"label": "Abecedno filtriranje",
+					"description": "Prikažite abecedni filter kada je primjenjivo"
 				},
 				"enableFancyAnimations": {
-					"label": "",
-					"description": ""
+					"label": "Napredne animacije",
+					"description": "Opća opcija za uključivanje naprednijih animacija u cijeloj aplikaciji"
 				},
 				"queryIndicatorToggle": {
-					"label": "",
-					"description": ""
+					"label": "Indikator pozadinskog dohvaćanja",
+					"description": "Prikažite indikator učitavanja kad god se upit izvršava u pozadini"
 				},
 				"liveRefetchToggle": {
-					"label": "",
-					"description": ""
+					"label": "Dohvaćanje uživo",
+					"description": "Ponovo dohvaćajte upite u hodu kako bi se korisnički interfejs osvježavao novim podacima čim stignu. To može zahtijevati mnogo resursa"
 				},
 				"enableJobOverlayToggle": {
-					"label": "",
-					"description": ""
+					"label": "Prekrivajući prikaz zadatka",
+					"description": "Prikažite plutajući prekrivajući element dok je zadatak u toku"
 				},
 				"dayResetHourOffset": {
-					"label": "",
-					"description": ""
+					"label": "Pomak početka dana čitanja",
+					"description": "Pomaknite vrijeme početka novog dana čitanja za određeni broj sati od ponoći"
 				},
 				"readingSessionGracePeriod": {
-					"label": "",
-					"description": ""
+					"label": "Period mirovanja sesije čitanja",
+					"description": "Ako se unutar ovog perioda, izraženog u sekundama, ne otkrije aktivnost, sljedeće ažuriranje pokrenut će novu sesiju"
 				}
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "API ključevi",
+			"title": "API ključevi",
+			"description": "Upravljajte generiranim Stump API ključevima",
 			"shared": {
 				"fields": {
-					"name": "",
-					"expiration": "",
-					"last_used": "",
-					"created": "",
-					"permissions": "",
-					"inherited": "",
-					"explicit": ""
+					"name": "Naziv",
+					"expiration": "Istek",
+					"last_used": "Posljednja upotreba",
+					"created": "Kreirano",
+					"permissions": "Dozvole",
+					"inherited": "Naslijeđene",
+					"explicit": "Izričite"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "",
-					"description": "",
+					"heading": "API ključ",
+					"description": "Detaljan prikaz ovog ključa",
 					"unrestrictedKey": {
-						"heading": "",
-						"description": ""
+						"heading": "Neograničeni ključ",
+						"description": "Budući da ste vlasnik servera, ovaj ključ ima neograničen pristup kada je postavljen da nasljeđuje dozvole. Budite oprezni."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "",
+						"trigger": "Kreirajte API ključ",
 						"heading": {
-							"creating": "",
-							"created": ""
+							"creating": "Kreirajte API ključ",
+							"created": "Kreirani ključ"
 						},
 						"description": {
-							"creating": "",
-							"created": ""
+							"creating": "API ključevi su dugotrajni podaci za autentifikaciju koji se mogu koristiti za prijavu putem API-ja",
+							"created": "Vaš novi API ključ je kreiran. Spremite tajnu na sigurno mjesto jer se neće ponovo prikazati"
 						},
-						"inheritDisclaimer": "",
-						"createdKey": "",
-						"savedConfirm": "",
-						"submit": ""
+						"inheritDisclaimer": "Ovaj API ključ naslijedit će sve vaše dozvole, što znači da može učiniti sve što možete i vi. Budite oprezni s ovom postavkom",
+						"createdKey": "Kreirani ključ",
+						"savedConfirm": "Spremio sam svoj ključ",
+						"submit": "Kreirajte ključ"
 					}
 				},
 				"table": {
-					"title": "",
-					"description": "",
+					"title": "Vaši ključevi",
+					"description": "Ovo su API ključevi koje ste kreirali",
 					"actionMenu": {
-						"inspect": "",
-						"delete": ""
+						"inspect": "Pregledajte",
+						"delete": "Izbrišite"
 					},
 					"empty": {
-						"title": "",
-						"action": ""
+						"title": "Još niste kreirali nijedan ključ",
+						"action": "Kreirajte API ključ da biste započeli"
 					},
-					"noExpiration": ""
+					"noExpiration": "Datum isteka nije postavljen"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Postavke čitača",
+			"title": "Postavke čitača",
+			"description": "Zadane postavke čitanja. Neke se primjenjuju samo na trenutni uređaj",
 			"sections": {
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "",
-							"description": ""
+							"label": "Smjer čitanja",
+							"description": "Smjer kojim čitač napreduje kroz stranice"
 						}
 					}
 				},
 				"imageBasedBooks": {
-					"label": "",
-					"description": "",
+					"label": "Knjige zasnovane na slikama",
+					"description": "Stripovi, manga i druge knjige zasnovane na slikama",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "",
-							"description": ""
+							"label": "Broj stranica za učitavanje unaprijed",
+							"description": "Broj stranica nakon trenutne stranice koje treba unaprijed učitati"
 						},
 						"preloadBehindCount": {
-							"label": "",
-							"description": ""
+							"label": "Broj stranica za učitavanje unazad",
+							"description": "Broj stranica prije trenutne stranice koje treba unaprijed učitati"
 						}
 					}
 				},
 				"textBasedBooks": {
-					"label": "",
-					"description": "",
+					"label": "Čitač e-knjiga",
+					"description": "Zadane postavke za tekstualne knjige",
 					"sections": {
 						"fontSize": {
-							"label": "",
-							"description": ""
+							"label": "Veličina fonta",
+							"description": "Veličina fonta u čitaču"
 						},
 						"fontFamily": {
-							"label": "",
-							"description": ""
+							"label": "Vrsta fonta",
+							"description": "Font koji se koristi u čitaču"
 						},
 						"lineHeight": {
-							"label": "",
-							"description": ""
+							"label": "Visina reda",
+							"description": "Visina redova u čitaču"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "",
-							"description": "",
-							"button": ""
+							"label": "Obrišite postavke",
+							"description": "Vratite sve pojedinačne postavke knjiga koje zamjenjuju zadane vrijednosti",
+							"button": "Obrišite postavke"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Postavke desktop aplikacije",
+			"title": "Postavke desktop aplikacije",
+			"description": "Postavke povezane s desktop aplikacijom Stump",
 			"sections": {
 				"configuredServers": {
-					"label": "",
-					"description": "",
-					"getStarted": "",
+					"label": "Konfigurirani serveri",
+					"description": "Spisak Stump servera na koje se možete povezati",
+					"getStarted": "Dodajte server da biste započeli",
 					"unreachableServer": {
-						"tooltip": ""
+						"tooltip": "Server nije dostupan"
 					},
 					"activeServer": {
-						"tooltip": ""
+						"tooltip": "Trenutni server"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "",
-							"nameForbidden": "",
-							"urlExists": ""
+							"nameExists": "Server s ovim nazivom već postoji",
+							"nameForbidden": "Ovaj naziv je rezerviran",
+							"urlExists": "Server s ovim URL-om već postoji"
 						},
 						"fields": {
 							"name": {
-								"label": "",
-								"description": "",
-								"placeholder": ""
+								"label": "Naziv",
+								"description": "Prepoznatljiv naziv za identifikaciju ovog servera",
+								"placeholder": "Moj server"
 							},
 							"uri": {
-								"label": "",
-								"description": "",
-								"placeholder": ""
+								"label": "URI",
+								"description": "URL Stump servera",
+								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "",
-						"title": "",
-						"description": "",
-						"confirm": ""
+						"trigger": "Dodajte server",
+						"title": "Dodajte novi server",
+						"description": "Dodajte novi Stump server u desktop aplikaciju",
+						"confirm": "Dodajte server"
 					},
 					"editServer": {
-						"tooltip": "",
-						"title": "",
-						"description": "",
-						"confirm": ""
+						"tooltip": "Uredite server",
+						"title": "Uredite server",
+						"description": "Uredite podatke o ovom serveru",
+						"confirm": "Spremite promjene"
 					},
 					"deleteServer": {
-						"tooltip": "",
+						"tooltip": "Izbrišite server",
 						"confirmation": {
-							"title": "",
-							"description": "",
-							"disclaimerActiveServer": "",
-							"disclaimerLastServer": "",
-							"confirm": ""
+							"title": "Izbrišite ovaj server",
+							"description": "Ovim ćete ukloniti server iz desktop aplikacije",
+							"disclaimerActiveServer": "Ovaj server je trenutno aktivan. Bit ćete odjavljeni",
+							"disclaimerLastServer": "Ovo je posljednji konfigurirani server. Bit ćete odjavljeni i morat ćete ponovo konfigurirati servere tokom postupka inicijalizacije",
+							"confirm": "Izbrišite server"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "",
+						"tooltip": "Prebacite se na server",
 						"confirmation": {
-							"title": "",
-							"description": "",
-							"confirm": "",
-							"server": "",
-							"uri": ""
+							"title": "Prebacite se na ovaj server",
+							"description": "Ovim ćete se odjaviti s trenutnog servera",
+							"confirm": "Prebacite se na server",
+							"server": "Server",
+							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "",
+						"label": "Izbrišite sve servere",
 						"description": [
-							"",
-							""
+							"Izbrišite sve konfigurirane servere iz desktop aplikacije",
+							"Ova radnja se ne može poništiti"
 						],
 						"confirmation": {
-							"trigger": "",
-							"title": "",
-							"description": "",
-							"disclaimer": "",
-							"confirm": ""
+							"trigger": "Izbrišite sve servere",
+							"title": "Izbrišite sve servere",
+							"description": "Ovim ćete ukloniti sve servere iz desktop aplikacije",
+							"disclaimer": "Bit ćete odjavljeni i morat ćete ponovo konfigurirati servere tokom postupka inicijalizacije",
+							"confirm": "Izbrišite sve servere"
 						}
 					},
 					"resetTokens": {
-						"label": "",
+						"label": "Izbrišite tokene",
 						"description": [
-							"",
-							""
+							"Uklonite sve sigurno pohranjene tokene za svoje servere, uključujući API ključeve",
+							"Morat ćete ponovo izvršiti autentifikaciju i/ili konfigurirati svaki server"
 						],
 						"confirmation": {
-							"trigger": "",
-							"title": "",
-							"description": "",
-							"confirm": ""
+							"trigger": "Izbrišite tokene",
+							"title": "Izbrišite tokene",
+							"description": "Jeste li sigurni da želite izbrisati sve pohranjene tokene?",
+							"confirm": "Izbrišite tokene"
 						}
 					}
 				},
 				"optionalFeatures": {
-					"label": "",
-					"description": "",
+					"label": "Opcionalne funkcije",
+					"description": "Upravljajte opcionalnim funkcijama dostupnim samo u desktop aplikaciji",
 					"bundledServer": {
-						"label": "",
-						"description": ""
+						"label": "Ugrađeni server",
+						"description": "Pokrećite ugrađeni server u pozadini dok je desktop aplikacija pokrenuta (zahtijeva ponovno pokretanje)"
 					},
 					"discordPresence": {
-						"label": "",
-						"description": "",
-						"reconnect": ""
+						"label": "Prisutnost na Discordu",
+						"description": "Prikažite svoju aktivnost u Stumpu na Discordu koristeći Discord Rich Presence",
+						"reconnect": "Ponovo se povežite s Discordom"
 					}
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Postavke servera",
+			"title": "Postavke servera",
+			"description": "Opće postavke povezane s vašom instancom Stump servera",
 			"sections": {
 				"updateAvailable": {
-					"message": ""
+					"message": "Vaš server nije ažuriran. Ažurirajte ga na najnoviju verziju!"
 				},
 				"serverInfo": {
-					"title": "",
-					"description": "",
+					"title": "Informacije o serveru",
+					"description": "Osnovni podaci o vašoj instanci Stump servera",
 					"build": {
-						"label": "",
-						"description": "",
+						"label": "Kompilacija",
+						"description": "Pojedinosti o verziji i kompilaciji",
 						"version": {
-							"semver": "",
-							"commitHash": "",
-							"date": ""
+							"semver": "Verzija",
+							"commitHash": "Tačan commit",
+							"date": "Datum kompilacije"
 						}
 					},
 					"nonStableChannel": {
-						"title": "",
+						"title": "Koristite nestabilnu verziju Stumpa",
 						"description": [
-							"",
-							""
+							"Izgleda da koristite izdanje iz",
+							"kanala"
 						]
 					}
 				},
 				"helpfulLinks": {
-					"title": "",
-					"description": "",
+					"title": "Korisne poveznice",
+					"description": "Poveznice na resurse koji mogu pomoći pri upravljanju vašom instancom Stump servera",
 					"links": {
-						"documentation": "",
-						"changelog": ""
+						"documentation": "Dokumentacija",
+						"changelog": "Dnevnik promjena"
 					}
 				},
 				"serverPublicUrl": {
-					"label": "",
-					"description": ""
+					"label": "Javni URL",
+					"description": "URL putem kojeg je vaš server dostupan izvan vaše mreže, ako je primjenjivo. Ovo će omogućiti poveznice za pozivanje i druge funkcije"
 				},
 				"customEmojis": {
-					"title": "",
-					"description": "",
-					"dropzone": "",
+					"title": "Prilagođeni emojiji",
+					"description": "Učitajte prilagođene slikovne emojije i upravljajte njima na svom serveru",
+					"dropzone": "Ispustite sliku ili kliknite da biste je odabrali",
 					"input": {
-						"label": "",
-						"placeholder": ""
+						"label": "Naziv emojija",
+						"placeholder": "npr. party_parrot"
 					},
 					"deleteModal": {
-						"title": "",
-						"description": ""
+						"title": "Izbrišite emoji",
+						"description": "Jeste li sigurni da želite izbrisati ovaj emoji?"
 					},
-					"noCustomEmojis": "",
-					"invalidName": "",
-					"uploadError": "",
-					"uploadSuccess": "",
-					"renameSuccess": "",
-					"renameError": "",
-					"deleteSuccess": "",
-					"deleteError": ""
+					"noCustomEmojis": "Još nije dodan nijedan prilagođeni emoji",
+					"invalidName": "Unesite važeći naziv za emoji",
+					"uploadError": "Učitavanje emojija nije uspjelo",
+					"uploadSuccess": "Emoji je učitan",
+					"renameSuccess": "Emoji je preimenovan",
+					"renameError": "Preimenovanje emojija nije uspjelo",
+					"deleteSuccess": "Emoji je izbrisan",
+					"deleteError": "Brisanje emojija nije uspjelo"
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Logovi",
+			"title": "Logovi",
+			"description": "Logovi koje je generirala vaša instanca Stump servera",
 			"sections": {
 				"persistedLogs": {
-					"title": "",
-					"description": "",
+					"title": "Trajno pohranjeni logovi",
+					"description": "Ovi logovi su ručno trajno pohranjeni u bazu podataka i obično su povezani s određenim zadatkom ili događajem",
 					"table": {
 						"columns": {
-							"level": "",
-							"message": "",
-							"timestamp": ""
+							"level": "Nivo",
+							"message": "Poruka",
+							"timestamp": "Vremenska oznaka"
 						},
-						"emptyHeading": "",
-						"emptySubtitle": ""
+						"emptyHeading": "Nema logova za prikaz",
+						"emptySubtitle": "Vaš server je ili odlično ili mu nema spasa"
 					},
 					"deleteLogs": {
-						"title": "",
-						"description": "",
-						"disclaimer": "",
-						"confirm": ""
+						"title": "Izbrišite logove",
+						"description": "Trajno izbrišite sve pohranjene logove iz baze podataka",
+						"disclaimer": "Ova radnja se ne može poništiti",
+						"confirm": "Izbrišite logove"
 					}
 				},
 				"liveLogs": {
-					"title": "",
-					"description": ""
+					"title": "Prijenos logova uživo",
+					"description": "Prenosi se direktno s vaše instance Stump servera u stvarnom vremenu"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Zadaci",
+			"title": "Zadaci",
+			"description": "Pozadinski zadaci koji se izvršavaju na vašoj instanci Stump servera",
 			"sections": {
 				"scheduling": {
-					"title": "",
-					"description": "",
-					"restartRequiredTitle": "",
-					"restartRequired": "",
-					"newScheduledJob": "",
+					"title": "Zakazani zadaci",
+					"description": "Neki zadaci mogu se konfigurirati tako da se automatski izvršavaju prema rasporedu",
+					"restartRequiredTitle": "Potrebno je ponovno pokretanje",
+					"restartRequired": "Promjene ove konfiguracije stupit će na snagu nakon ponovnog pokretanja servera",
+					"newScheduledJob": "Novi zakazani zadatak",
 					"deleteScheduledJob": {
-						"title": "",
-						"description": "",
-						"confirm": ""
+						"title": "Izbrišite zakazani zadatak",
+						"description": "Jeste li sigurni da želite izbrisati „{{name}}“? Ova radnja se ne može poništiti.",
+						"confirm": "Izbrišite"
 					},
 					"dialog": {
-						"titleCreate": "",
-						"titleEdit": "",
-						"cancel": "",
-						"create": "",
-						"saveChanges": ""
+						"titleCreate": "Novi zakazani zadatak",
+						"titleEdit": "Uredite zakazani zadatak",
+						"cancel": "Otkažite",
+						"create": "Kreirajte",
+						"saveChanges": "Spremite promjene"
 					},
 					"fields": {
 						"name": {
-							"label": "",
-							"placeholder": ""
+							"label": "Naziv",
+							"placeholder": "npr. „Dnevno skeniranje biblioteke“"
 						},
 						"schedule": {
-							"label": "",
-							"description": "",
-							"placeholder": ""
+							"label": "Cron raspored",
+							"description": "Cron izraz kojim se definira učestalost",
+							"placeholder": "0 0 0 * * *"
 						},
 						"schedulePreset": {
-							"label": "",
-							"custom": "",
-							"everySixHours": "",
-							"everyTwelveHours": "",
-							"dailyAtMidnight": "",
-							"weeklySunday": "",
-							"monthlyFirst": ""
+							"label": "Predložak",
+							"custom": "Prilagođeno",
+							"everySixHours": "Svakih 6 sati",
+							"everyTwelveHours": "Svakih 12 sati",
+							"dailyAtMidnight": "Svakog dana u ponoć",
+							"weeklySunday": "Sedmično (nedjeljom)",
+							"monthlyFirst": "Mjesečno (prvog dana)"
 						},
 						"kind": {
-							"label": "",
-							"libraryScan": "",
-							"metadataRetry": ""
+							"label": "Vrsta zadatka",
+							"libraryScan": "Skeniranje biblioteke",
+							"metadataRetry": "Ponovni pokušaj preuzimanja metapodataka"
 						},
 						"libraryIds": {
-							"label": "",
-							"description": ""
+							"label": "Biblioteke za skeniranje",
+							"description": "Ostavite prazno da biste skenirali sve biblioteke"
 						},
 						"statuses": {
-							"label": "",
-							"description": "",
-							"rateLimited": "",
-							"failed": ""
+							"label": "Statusi za ponovni pokušaj",
+							"description": "Statusi preuzimanja metapodataka za koje treba ponoviti pokušaj",
+							"rateLimited": "Ograničen broj zahtjeva",
+							"failed": "Neuspjelo"
 						},
-						"enabled": ""
+						"enabled": "Omogućeno"
 					},
 					"row": {
-						"enabled": "",
-						"disabled": "",
-						"allLibraries": "",
-						"rateLimited": "",
-						"lastRun": "",
-						"edit": "",
-						"delete": ""
+						"enabled": "Omogućeno",
+						"disabled": "Onemogućeno",
+						"allLibraries": "Sve biblioteke",
+						"rateLimited": "ograničen broj zahtjeva",
+						"lastRun": "Posljednje izvršavanje: {{date}}",
+						"edit": "Uredite",
+						"delete": "Izbrišite"
 					},
 					"toasts": {
-						"createSuccess": "",
-						"createError": "",
-						"updateSuccess": "",
-						"updateError": "",
-						"deleteSuccess": "",
-						"deleteError": ""
+						"createSuccess": "Zakazani zadatak je kreiran",
+						"createError": "Kreiranje zakazanog zadatka nije uspjelo",
+						"updateSuccess": "Zakazani zadatak je ažuriran",
+						"updateError": "Ažuriranje zakazanog zadatka nije uspjelo",
+						"deleteSuccess": "Zakazani zadatak je izbrisan",
+						"deleteError": "Brisanje zakazanog zadatka nije uspjelo"
 					},
 					"errors": {
-						"invalidCron": ""
+						"invalidCron": "Raspored mora biti važeći cron izraz"
 					}
 				},
 				"history": {
-					"title": "",
-					"description": "",
+					"title": "Historija",
+					"description": "Evidencija zadataka izvršenih na vašoj instanci Stump servera",
 					"table": {
 						"columns": {
-							"name": "",
-							"description": "",
-							"status": "",
-							"createdAt": "",
-							"elapsed": "",
-							"tasks": ""
+							"name": "Vrsta",
+							"description": "Opis",
+							"status": "Status",
+							"createdAt": "Vrijeme početka",
+							"elapsed": "Trajanje",
+							"tasks": "Zadaci"
 						},
-						"emptyHeading": "",
-						"emptySubtitle": "",
-						"deleteAllMessage": ""
+						"emptyHeading": "Nema zadataka za prikaz",
+						"emptySubtitle": "Ne možete imati zadatak ako nemate zadatak",
+						"deleteAllMessage": "Historija i statistika zadataka mogu se u bilo kojem trenutku izbrisati iz baze podataka. Ova radnja se ne može poništiti"
 					},
 					"deleteJobHistory": {
-						"title": "",
-						"description": "",
-						"confirmText": "",
-						"confirm": "",
-						"emptyState": ""
+						"title": "Izbrišite historiju zadataka",
+						"description": "Trajno izbrišite cjelokupnu historiju zadataka iz baze podataka",
+						"confirmText": "Jeste li sigurni da želite izbrisati cjelokupnu historiju zadataka?",
+						"confirm": "Izbrišite",
+						"emptyState": "Nema zadataka za brisanje"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Upravljanje korisnicima",
+			"title": "Korisnici",
+			"description": "Upravljajte korisnicima na ovom serveru",
 			"createUser": {
-				"helmet": "",
-				"title": "",
-				"description": ""
+				"helmet": "Kreirajte korisnika",
+				"title": "Kreirajte korisnika",
+				"description": "Kreirajte novog korisnika na ovom serveru"
 			},
 			"updateUser": {
-				"helmet": "",
-				"title": "",
-				"description": ""
+				"helmet": "Ažurirajte korisnika",
+				"title": "Ažurirajte korisnika",
+				"description": "Ažurirajte podatke o ovom korisniku"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "",
+					"heading": "Kontrola pristupa i ograničenja",
 					"subtitle": [
-						"",
-						""
+						"Konfigurirajte ograničenja koja želite primijeniti na ovog korisnika. Za više informacija o kontroli pristupa pogledajte",
+						"dokumentaciju"
 					],
 					"ageRestriction": {
-						"label": "",
-						"description": "",
-						"placeholder": "",
+						"label": "Dobno ograničenje",
+						"description": "Ograničava korisniku pristup sadržaju s dobnom oznakom iznad postavljenog praga",
+						"placeholder": "13",
 						"enforceUnset": {
-							"label": "",
-							"description": ""
+							"label": "Primijenite i kada dobna oznaka nije postavljena",
+							"description": "Ako je omogućeno, korisnicima će biti ograničen pristup sadržaju za koji nije dostupna dobna oznaka"
 						}
 					},
 					"tagRestriction": {
-						"label": "",
-						"description": "",
-						"placeholder": ""
+						"label": "Ograničenja oznaka",
+						"description": "Ograničava korisniku pristup sadržaju s odabranim oznakama",
+						"placeholder": "Za odrasle, Eksplicitno nasilje"
 					}
 				},
 				"permissions": {
 					"groups": {
-						"accountManagement": "",
-						"featureAccess": "",
-						"fileManagement": "",
-						"emailers": "",
-						"emailing": "",
-						"libraryManagement": "",
-						"userManagement": "",
-						"serverManagement": "",
-						"metadataManagement": ""
+						"accountManagement": "Račun",
+						"featureAccess": "Pristup funkcijama",
+						"fileManagement": "Datoteke",
+						"emailers": "Serveri e-pošte",
+						"emailing": "Slanje e-pošte",
+						"libraryManagement": "Upravljanje bibliotekama",
+						"userManagement": "Upravljanje korisnicima",
+						"serverManagement": "Upravljanje serverom",
+						"metadataManagement": "Upravljanje metapodacima"
 					},
-					"heading": "",
+					"heading": "Dozvole",
 					"subtitle": [
-						"",
-						""
+						"Odaberite dozvole koje želite dodijeliti ovom korisniku. Za više informacija o svakoj dozvoli pogledajte",
+						"dokumentaciju"
 					],
 					"bookclub": {
-						"label": "",
+						"label": "Čitalački klubovi",
 						"read": {
-							"label": "",
-							"description": ""
+							"label": "Pristup funkcijama čitalačkih klubova",
+							"description": "Omogućava korisniku pristup funkcijama čitalačkih klubova, uključujući pregledanje i pridruživanje klubovima"
 						},
 						"create": {
-							"label": "",
-							"description": ""
+							"label": "Kreiranje čitalačkih klubova",
+							"description": "Omogućava korisniku kreiranje novih čitalačkih klubova"
 						}
 					},
 					"feature": {
-						"label": "",
+						"label": "Uključivanje dodatnih funkcija",
 						"api_keys": {
-							"label": "",
-							"description": ""
+							"label": "API ključevi",
+							"description": "Omogućava korisniku upravljanje vlastitim API ključevima"
 						},
 						"koreader_sync": {
-							"label": "",
-							"description": ""
+							"label": "KoReader sinhronizacija",
+							"description": "Omogućava korisniku pristup integraciji za KoReader sinhronizaciju"
 						}
 					},
 					"file": {
-						"label": "",
+						"label": "Upravljanje datotekama",
 						"explorer": {
-							"label": "",
-							"description": ""
+							"label": "Preglednik datoteka",
+							"description": "Omogućava korisniku pristup različitim preglednicima datoteka.\nOgraničenje sadržaja ne može se zajamčiti kada je ova funkcija odobrena"
 						},
 						"download": {
-							"label": "",
-							"description": ""
+							"label": "Preuzimanje datoteka",
+							"description": "Omogućava korisniku preuzimanje datoteka sa servera"
 						},
 						"upload": {
-							"label": "",
-							"description": ""
+							"label": "Učitavanje datoteka",
+							"description": "Omogućava korisniku učitavanje datoteka na server"
 						}
 					},
 					"emailer": {
-						"label": "",
+						"label": "Serveri e-pošte",
 						"read": {
-							"label": "",
-							"description": ""
+							"label": "Pristup serverima e-pošte",
+							"description": "Omogućava korisniku pregled konfiguriranih servera e-pošte"
 						},
 						"create": {
-							"label": "",
-							"description": ""
+							"label": "Dodavanje servera e-pošte",
+							"description": "Omogućava korisniku dodavanje novih servera e-pošte"
 						},
 						"manage": {
-							"label": "",
-							"description": ""
+							"label": "Upravljanje serverima e-pošte",
+							"description": "Omogućava korisniku upravljanje postojećim serverima e-pošte"
 						}
 					},
 					"email": {
-						"label": "",
+						"label": "Slanje e-pošte",
 						"send": {
-							"label": "",
-							"description": ""
+							"label": "Slanje e-poruka",
+							"description": "Omogućava korisniku slanje e-poruka sa servera na sve konfigurirane aliase"
 						},
 						"arbitrary_send": {
-							"label": "",
-							"description": ""
+							"label": "Slanje e-pošte na proizvoljne adrese",
+							"description": "Omogućava korisniku slanje e-poruka sa servera na bilo koju adresu e-pošte"
 						}
 					},
 					"library": {
-						"label": "",
+						"label": "Upravljanje bibliotekama",
 						"create": {
-							"label": "",
-							"description": ""
+							"label": "Kreiranje biblioteka",
+							"description": "Omogućava korisniku kreiranje novih biblioteka.\nUključuje dozvole za uređivanje i skeniranje"
 						},
 						"scan": {
-							"label": "",
-							"description": ""
+							"label": "Skeniranje biblioteka",
+							"description": "Omogućava korisniku pokretanje skeniranja postojećih biblioteka"
 						},
 						"edit": {
-							"label": "",
-							"description": ""
+							"label": "Uređivanje biblioteka",
+							"description": "Omogućava korisniku uređivanje osnovnih podataka postojećih biblioteka"
 						},
 						"manage": {
-							"label": "",
-							"description": ""
+							"label": "Upravljanje bibliotekama",
+							"description": "Omogućava korisniku upravljanje naprednim postavkama postojećih biblioteka.\nUključuje dozvole za uređivanje i skeniranje"
 						},
 						"delete": {
-							"label": "",
-							"description": ""
+							"label": "Brisanje biblioteka",
+							"description": "Omogućava korisniku brisanje postojećih biblioteka.\nUključuje dozvole za uređivanje, upravljanje i skeniranje"
 						}
 					},
 					"server": {
-						"label": "",
+						"label": "Upravljanje serverom",
 						"manage": {
-							"label": "",
-							"description": ""
+							"label": "Upravljanje serverom",
+							"description": "Omogućava korisniku upravljanje serverom.\nUključuje *mnoge* druge dozvole"
 						}
 					},
 					"user": {
-						"label": "",
+						"label": "Upravljanje korisnicima",
 						"read": {
-							"label": "",
-							"description": ""
+							"label": "Pregled korisnika",
+							"description": "Omogućava korisniku pretraživanje drugih korisnika na serveru. Ovo je potrebno za neke druge funkcije, npr. izuzimanje korisnika iz pristupa biblioteci"
 						},
 						"manage": {
-							"label": "",
-							"description": ""
+							"label": "Upravljanje korisnicima",
+							"description": "Omogućava korisniku upravljanje drugim korisnicima na serveru.\nUključuje dozvole za pregled, kreiranje i ažuriranje"
 						}
 					},
 					"smartlist": {
-						"label": "",
+						"label": "Pametne liste",
 						"read": {
-							"label": "",
-							"description": ""
+							"label": "Pristup funkciji pametnih lista",
+							"description": "Omogućava korisniku pristup funkcijama pametnih lista. Detaljne dozvole još nisu implementirane, pa ovo\nuključuje dozvole za pregled, kreiranje i ažuriranje vlastitih lista"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "",
-					"missingUsername": "",
-					"missingPassword": "",
-					"usernameAlreadyExists": ""
+					"ageRestrictionTooLow": "Dobno ograničenje ne može biti manje od 0",
+					"missingUsername": "Korisničko ime je obavezno",
+					"missingPassword": "Lozinka je obavezna",
+					"usernameAlreadyExists": "Korisničko ime već postoji"
 				},
-				"createSubmitButton": "",
-				"updateSubmitButton": ""
+				"createSubmitButton": "Kreirajte korisnika",
+				"updateSubmitButton": "Ažurirajte korisnika"
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "",
-					"description": "",
-					"confirm": ""
+					"title": "Izbrišite aktivnost",
+					"description": "Svi zapisi aktivnosti prijavljivanja bit će trajno izbrisani iz baze podataka",
+					"confirm": "Izbrišite"
 				}
 			}
 		},
 		"server/email": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Postavke e-pošte",
+			"title": "E-pošta",
+			"description": "Postavke za konfiguriranje SMTP servera za vašu instancu Stump servera",
 			"sections": {
 				"emailers": {
-					"title": "",
-					"description": "",
-					"singleInstanceDisclaimer": "",
+					"title": "SMTP serveri",
+					"description": "Serveri e-pošte koje ste podesili za slanje poruka sa svog Stump servera",
+					"singleInstanceDisclaimer": "Iako Stump u pozadini podržava više SMTP konfiguracija, u korisničkom sučelju može se konfigurirati samo jedna. Ovo će biti poboljšano u budućnosti",
 					"list": {
-						"emptyHeading": "",
-						"primaryEmailer": "",
+						"emptyHeading": "Nema konfiguriranih SMTP servera",
+						"primaryEmailer": "Primarni server e-pošte",
 						"sendHistory": {
-							"heading": "",
-							"description": "",
+							"heading": "Historija slanja",
+							"description": "Evidencija e-poruka poslanih putem ovog servera e-pošte",
 							"table": {
 								"columns": {
-									"to": "",
-									"subject": "",
-									"status": "",
-									"createdAt": ""
+									"to": "Primatelj",
+									"subject": "Predmet",
+									"status": "Status",
+									"createdAt": "Vrijeme slanja"
 								}
 							},
-							"emptyHeading": "",
-							"emptySubtitle": ""
+							"emptyHeading": "Nema historije",
+							"emptySubtitle": "Historija slanja putem ovog servera e-pošte je prazna. Server nije korišten ili je historija obrisana"
 						}
 					}
 				},
 				"devices": {
-					"title": "",
-					"description": "",
-					"addDevice": "",
+					"title": "Uređaji za e-poštu",
+					"description": "Aliasi uređaja koje ste konfigurirali za primanje e-poruka iz svoje instance Stump servera",
+					"addDevice": "Dodajte alias uređaja",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "",
-							"update": ""
+							"create": "Kreirajte alias uređaja",
+							"update": "Ažurirajte alias uređaja"
 						},
 						"name": {
-							"label": "",
-							"description": ""
+							"label": "Naziv",
+							"description": "Prepoznatljiv naziv za jedinstvenu identifikaciju ovog aliasa uređaja"
 						},
 						"email": {
-							"label": "",
-							"description": ""
+							"label": "E-pošta",
+							"description": "Adresa e-pošte s kojom će ovaj alias biti povezan"
 						},
 						"forbidden": {
-							"label": "",
-							"description": ""
+							"label": "Zabranjeno",
+							"description": "Kada je omogućeno, nijedan korisnik ne može slati e-poruke na adresu povezanu s ovim aliasom"
 						},
 						"submit": {
-							"create": "",
-							"update": ""
+							"create": "Kreirajte alias uređaja",
+							"update": "Ažurirajte alias uređaja"
 						}
 					},
 					"table": {
-						"emptyHeading": "",
-						"emptySubtitle": ""
+						"emptyHeading": "Nema registriranih uređaja",
+						"emptySubtitle": "Kreirajte novi alias uređaja za buduću upotrebu"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "",
-					"description": ""
+					"label": "Naziv",
+					"description": "Prepoznatljiv naziv koji jedinstveno identificira ovaj server e-pošte"
 				},
 				"smtpSettings": {
-					"heading": "",
-					"description": ""
+					"heading": "SMTP postavke",
+					"description": "SMTP postavke za ovaj server e-pošte"
 				},
 				"smtpProvider": {
-					"label": "",
-					"description": ""
+					"label": "Predložak postavki SMTP servisa",
+					"description": "Servis koji pruža SMTP server. Odabirom se automatski popunjavaju neke uobičajene postavke. Nisu obuhvaćeni svi servisi"
 				},
 				"smtpHost": {
-					"label": "",
-					"description": ""
+					"label": "SMTP host",
+					"description": "Naziv hosta SMTP servera"
 				},
 				"smtpPort": {
-					"label": "",
-					"description": ""
+					"label": "SMTP port",
+					"description": "Port SMTP servera"
 				},
 				"tlsEnabled": {
-					"label": "",
-					"description": ""
+					"label": "TLS je omogućen",
+					"description": "Ako je omogućeno, veza sa SMTP serverom bit će šifrirana"
 				},
 				"username": {
-					"label": "",
-					"description": ""
+					"label": "Korisničko ime",
+					"description": "Korisničko ime za autentifikaciju na SMTP serveru. To je obično adresa e-pošte"
 				},
 				"password": {
-					"label": "",
-					"description": ""
+					"label": "Lozinka",
+					"description": "Lozinka za autentifikaciju na SMTP serveru. Ako koristite Gmail, možda ćete morati generirati lozinku za aplikaciju"
 				},
 				"senderSettings": {
-					"heading": "",
-					"description": ""
+					"heading": "Postavke pošiljatelja",
+					"description": "Postavke pošiljatelja e-poruke"
 				},
 				"senderDisplayName": {
-					"label": "",
-					"description": ""
+					"label": "Prikazani naziv pošiljatelja",
+					"description": "Naziv koji će biti prikazan primateljima"
 				},
 				"senderEmail": {
-					"label": "",
-					"description": ""
+					"label": "Adresa e-pošte pošiljatelja",
+					"description": "Adresa e-pošte koja će biti prikazana primateljima"
 				},
 				"additionalSettings": {
-					"heading": "",
-					"description": ""
+					"heading": "Dodatne postavke",
+					"description": "Dodatne postavke za server e-pošte"
 				},
 				"maxAttachmentSize": {
-					"label": "",
-					"description": ""
+					"label": "Najveća veličina priloga",
+					"description": "Najveća dopuštena veličina priloga u bajtovima"
 				},
 				"submit": {
-					"create": "",
-					"update": ""
+					"create": "Dodajte server e-pošte",
+					"update": "Ažurirajte server e-pošte"
 				},
 				"testEmailer": {
-					"button": "",
-					"recipientLabel": "",
-					"recipientDescription": "",
-					"success": "",
+					"button": "Pošaljite testnu e-poruku",
+					"recipientLabel": "Primatelj testne poruke",
+					"recipientDescription": "Adresa e-pošte na koju će se poslati testna poruka",
+					"success": "Testna e-poruka je uspješno poslana",
 					"error": {
-						"title": "",
-						"description": ""
+						"title": "Slanje testne e-poruke nije uspjelo",
+						"description": "Provjerite SMTP postavke i pokušajte ponovo"
 					}
 				}
 			},
 			"createEmailer": {
-				"helmet": "",
-				"title": "",
-				"description": ""
+				"helmet": "Dodajte server e-pošte",
+				"title": "Dodajte server e-pošte",
+				"description": "Dodajte novi SMTP server za svoju instancu Stump servera"
 			},
 			"updateEmailer": {
-				"helmet": "",
-				"title": "",
-				"description": ""
+				"helmet": "Ažurirajte server e-pošte",
+				"title": "Ažurirajte server e-pošte",
+				"description": "Ažurirajte podatke ovog SMTP servera"
 			}
 		},
 		"server/metadataIntegrations": {
-			"helmet": "",
-			"title": "",
-			"addProvider": "",
-			"createProviderError": "",
-			"updateProviderError": "",
-			"noProviders": "",
+			"helmet": "Integracije metapodataka",
+			"title": "Integracije metapodataka",
+			"addProvider": "Dodajte pružatelja",
+			"createProviderError": "Kreiranje pružatelja nije uspjelo",
+			"updateProviderError": "Ažuriranje pružatelja nije uspjelo",
+			"noProviders": "Još nema konfiguriranih pružatelja. Dodajte jednog da biste započeli",
 			"providers": {
-				"title": "",
-				"description": ""
+				"title": "Pružatelji",
+				"description": "Konfigurirajte vanjske pružatelje metapodataka za dohvaćanje i obogaćivanje podataka vaše biblioteke"
 			},
 			"providerForm": {
 				"apiToken": {
-					"label": "",
-					"description": "",
-					"validationError": "",
-					"validationRequestError": "",
-					"validationRequestErrorUnknown": "",
-					"providerStatusError": "",
-					"providerError": "",
-					"noBearerPrefixRequired": ""
+					"label": "API token",
+					"description": "API token za autentifikaciju kod ovog pružatelja",
+					"validationError": "Automatska validacija ovog tokena nije uspjela",
+					"validationRequestError": "Zahtjev za validaciju nije uspio",
+					"validationRequestErrorUnknown": "Tokom validacije došlo je do nepoznate greške",
+					"providerStatusError": "Pružatelj je odgovorio statusom {{status}}",
+					"providerError": "Pružatelj je odgovorio greškom: {{message}}",
+					"noBearerPrefixRequired": "Uklonite prefiks „Bearer “ iz API tokena"
 				},
 				"apiTokenExpiresAt": {
-					"label": "",
-					"description": ""
+					"label": "Istek API tokena",
+					"description": "Datum isteka API tokena (opcionalno)"
 				},
 				"enableProvider": {
-					"label": "",
-					"description": ""
+					"label": "Omogućite pružatelja",
+					"description": "Ako je omogućeno, koristit će se za dohvaćanje"
 				},
 				"autoApplyConfig": {
 					"enabled": {
-						"label": "",
-						"description": ""
+						"label": "Omogućite automatsku primjenu",
+						"description": "Preskočite ručno odobrenje i primijenite vjerovatna podudaranja"
 					},
 					"threshold": {
-						"label": "",
-						"description": "",
-						"disclaimer": ""
+						"label": "Prag pouzdanosti",
+						"description": "Najniža ocjena pouzdanosti (0–1) za automatsku primjenu podudaranja",
+						"disclaimer": "Izračunata ocjena pouzdanosti predstavlja najbolju moguću procjenu i možda neće uvijek biti tačna"
 					},
 					"strategy": {
-						"label": "",
+						"label": "Strategija spajanja",
 						"options": {
-							"FILL_GAPS": "",
-							"FILL_AND_MERGE_LISTS": "",
-							"PREFER_EXTERNAL": ""
+							"FILL_GAPS": "Prihvati polja koja nedostaju",
+							"FILL_AND_MERGE_LISTS": "Prihvati polja koja nedostaju i spoji liste",
+							"PREFER_EXTERNAL": "Daj prednost vanjskim podacima"
 						}
 					}
 				}
 			},
-			"providerEnabled": "",
-			"providerDisabled": "",
-			"providerTokenExpiresSoon": "",
-			"autoApplyOn": "",
-			"autoApplyOff": "",
+			"providerEnabled": "Ovaj pružatelj je omogućen",
+			"providerDisabled": "Ovaj pružatelj je onemogućen",
+			"providerTokenExpiresSoon": "Token ovog pružatelja uskoro ističe",
+			"autoApplyOn": "Automatska primjena je uključena",
+			"autoApplyOff": "Automatska primjena je isključena",
 			"editDialog": {
-				"tooltip": ""
+				"tooltip": "Uredite pružatelja"
 			},
 			"deleteDialog": {
-				"title": "",
-				"description": ""
+				"title": "Izbrišite pružatelja",
+				"description": "Jeste li sigurni da želite izbrisati {{providerName}}? Ova radnja se ne može poništiti."
 			}
 		},
 		"server/tags": {
-			"helmet": "",
-			"title": "",
-			"description": "",
+			"helmet": "Upravljanje oznakama",
+			"title": "Oznake",
+			"description": "Kreirajte oznake za organiziranje sadržaja i upravljajte njima",
 			"sections": {
 				"table": {
-					"title": "",
-					"description": "",
+					"title": "Oznake",
+					"description": "Sve oznake dostupne na ovom serveru",
 					"empty": {
-						"title": "",
-						"action": ""
+						"title": "Nema oznaka",
+						"action": "Kreirajte prvu oznaku da biste započeli"
 					},
 					"columns": {
-						"name": ""
+						"name": "Naziv"
 					},
 					"actionMenu": {
-						"rename": ""
+						"rename": "Preimenujte"
 					}
 				},
 				"createTag": {
-					"trigger": "",
+					"trigger": "Kreirajte oznaku",
 					"modal": {
-						"heading": "",
-						"description": "",
+						"heading": "Kreirajte novu oznaku",
+						"description": "Oznake se mogu dodijeliti knjigama, serijalima i bibliotekama",
 						"name": {
-							"label": "",
-							"placeholder": ""
+							"label": "Naziv",
+							"placeholder": "Unesite naziv oznake"
 						},
-						"submit": ""
+						"submit": "Kreirajte"
 					}
 				},
 				"renameTag": {
 					"modal": {
-						"heading": "",
-						"description": "",
+						"heading": "Preimenujte oznaku",
+						"description": "Promijenite naziv ove oznake na svim stavkama kojima je dodijeljena",
 						"name": {
-							"label": "",
-							"placeholder": ""
+							"label": "Naziv",
+							"placeholder": "Unesite novi naziv oznake"
 						},
-						"submit": ""
+						"submit": "Preimenujte"
 					}
 				},
 				"deleteTag": {
-					"title": "",
-					"description": "",
-					"confirm": ""
+					"title": "Izbrišite oznaku",
+					"description": "Ova oznaka bit će uklonjena iz svih knjiga, serijala i biblioteka. Ova radnja se ne može poništiti.",
+					"confirm": "Izbrišite"
 				}
 			}
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": ""
+		"backupHeading": "Zadatak je u toku"
 	},
 	"libraryStats": {
-		"seriesCount": "",
-		"bookCount": "",
-		"diskUsage": ""
+		"seriesCount": "Ukupno serijala",
+		"bookCount": "Ukupno knjiga",
+		"diskUsage": "Zauzeće diska"
 	},
 	"noLibraries": {
-		"heading": "",
-		"messagePrefix": "",
+		"heading": "Ovdje nema ničega",
+		"messagePrefix": "Ne možete vidjeti ono što nemate",
 		"message": {
-			"create": "",
-			"wait": ""
+			"create": "Kreirajte biblioteku da biste započeli",
+			"wait": "Kada biblioteke budu kreirane, bit će prikazane ovdje"
 		},
 		"links": {
-			"create": "",
-			"settings": ""
+			"create": "Kreirajte biblioteku",
+			"settings": "Idite na postavke"
 		}
 	},
 	"pagination": {
 		"buttons": {
-			"next": "",
-			"previous": ""
+			"next": "Sljedeća",
+			"previous": "Prethodna"
 		},
 		"popover": {
-			"heading": "",
+			"heading": "Idite na stranicu",
 			"buttons": {
-				"confirm": "",
-				"cancel": ""
+				"confirm": "Idi",
+				"cancel": "Otkažite"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "",
-		"message": "",
+		"title": "Odjava",
+		"message": "Jeste li sigurni da se želite odjaviti?",
 		"buttons": {
-			"cancel": "",
-			"signOut": ""
+			"cancel": "Otkažite",
+			"signOut": "Odjavite se"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "",
-			"libraries": "",
-			"books": "",
-			"bookClubs": "",
-			"createLibrary": "",
-			"noLibraries": "",
-			"createBookClub": "",
-			"noBookClubs": "",
-			"settings": "",
-			"themeToggle": "",
-			"goForward": "",
-			"goBack": "",
-			"smartlists": "",
-			"noSmartlists": "",
-			"createSmartlist": "",
-			"seeAll": ""
+			"home": "Početna",
+			"libraries": "Biblioteke",
+			"books": "Istražite",
+			"bookClubs": "Čitalački klubovi",
+			"createLibrary": "Kreirajte biblioteku",
+			"noLibraries": "Nema biblioteka",
+			"createBookClub": "Kreirajte čitalački klub",
+			"noBookClubs": "Nema čitalačkih klubova",
+			"settings": "Postavke",
+			"themeToggle": "Promijenite temu",
+			"goForward": "Naprijed",
+			"goBack": "Nazad",
+			"smartlists": "Pametne liste",
+			"noSmartlists": "Nema pametnih lista",
+			"createSmartlist": "Kreirajte pametnu listu",
+			"seeAll": "Prikažite sve"
 		},
 		"libraryOptions": {
-			"scanLibrary": "",
-			"fileExplorer": "",
-			"manageLibrary": "",
-			"deleteLibrary": ""
+			"scanLibrary": "Skenirajte",
+			"fileExplorer": "Datoteke",
+			"manageLibrary": "Postavke",
+			"deleteLibrary": "Izbrišite"
 		},
 		"versionInformation": {
-			"heading": "",
-			"semVer": "",
-			"commitHash": "",
-			"buildDate": ""
+			"heading": "Informacije o verziji",
+			"semVer": "Semantička verzija",
+			"commitHash": "Heš commita",
+			"buildDate": "Datum kompilacije"
 		}
 	},
 	"search": {
-		"placeholder": ""
+		"placeholder": "Pretražite"
 	},
 	"serverSOS": {
-		"heading": "",
+		"heading": "Server nije dostupan",
 		"desktop": {
-			"message": ""
+			"message": "Došlo je do mrežne greške koja ukazuje na to da vaš Stump server trenutno nije dostupan. Provjerite je li pokrenut i dostupan s ovog uređaja.\nAko se URL vašeg servera promijenio, možete ga ažurirati pomoću obrasca u nastavku"
 		},
 		"web": {
-			"message": ""
+			"message": "Došlo je do mrežne greške koja ukazuje na to da vaš Stump server trenutno nije dostupan. Provjerite je li pokrenut i dostupan s ovog uređaja"
 		},
-		"reconnected": "",
-		"reconnectionFailed": ""
+		"reconnected": "Veza sa serverom ponovo je uspostavljena! Preusmjeravanje...",
+		"reconnectionFailed": "Došlo je do greške!"
 	},
 	"serverStatusOverlay": {
-		"heading": "",
+		"heading": "Nema veze sa serverom",
 		"message": [
-			"",
-			"",
-			""
+			"Provjerite internetsku vezu",
+			"Kliknite ovdje",
+			"da biste promijenili URL servera"
 		]
 	},
 	"slidingList": {
-		"empty": "",
+		"empty": "Nema stavki za prikaz",
 		"buttons": {
-			"next": "",
-			"previous": ""
+			"next": "Pomaknite unaprijed",
+			"previous": "Pomaknite unazad"
 		}
 	},
 	"tagSelect": {
-		"placeholder": "",
-		"placeholderNoTags": ""
+		"placeholder": "Odaberite ili kreirajte oznaku",
+		"placeholderNoTags": "Nema dostupnih oznaka"
 	},
 	"thumbnailDropdown": {
-		"label": "",
+		"label": "Odaberite sličicu",
 		"options": {
-			"selectFromBooks": "",
-			"uploadImage": ""
+			"selectFromBooks": "Odaberite iz knjiga",
+			"uploadImage": "Učitajte sliku"
 		},
 		"uploadImage": {
-			"emptyState": "",
-			"prompt": "",
-			"remove": "",
-			"fileTooLarge": "",
-			"onlyOneFile": "",
-			"noFile": ""
+			"emptyState": "Ovdje će se prikazati pretpregled vaše slike",
+			"prompt": "Ispustite sliku ovdje ili kliknite da biste je odabrali",
+			"remove": "Uklonite sliku",
+			"fileTooLarge": "Datoteka je prevelika",
+			"onlyOneFile": "Dopuštena je samo jedna datoteka",
+			"noFile": "Nije dostavljena nijedna datoteka"
 		}
 	},
 	"thumbnailSelector": {
-		"title": "",
+		"title": "Odaberite sličicu",
 		"descriptions": {
-			"chooseBookPage": "",
-			"chooseSeriesBook": ""
+			"chooseBookPage": "Odaberite stranicu iz ove knjige kao novu sličicu",
+			"chooseSeriesBook": "Odaberite knjigu iz serijala"
 		},
 		"actions": {
-			"confirmSelection": ""
+			"confirmSelection": "Potvrdite odabir"
 		},
 		"errors": {
-			"uploadFailed": "",
-			"updateFailed": ""
+			"uploadFailed": "Učitavanje slike nije uspjelo",
+			"updateFailed": "Ažuriranje sličice nije uspjelo"
 		}
 	},
 	"common": {
-		"add": "",
-		"andXMoreTrailing": "",
-		"cancel": "",
-		"clear": "",
-		"confirm": "",
-		"created": "",
-		"delete": "",
+		"add": "Dodajte",
+		"andXMoreTrailing": "...i još {{count}}",
+		"cancel": "Otkažite",
+		"clear": "Očistite",
+		"confirm": "Potvrdite",
+		"created": "Kreirano",
+		"delete": "Izbrišite",
 		"deleteConfirmation": {
-			"title": "",
-			"description": "",
-			"confirm": "",
-			"typeToConfirm": ""
+			"title": "Izbrišite {{type}}",
+			"description": "Jeste li sigurni da želite izbrisati: {{type}}? Ova radnja se ne može poništiti.",
+			"confirm": "Izbrišite {{type}}",
+			"typeToConfirm": "Upišite {{name}} za potvrdu:"
 		},
 		"experimentalDisclaimer": {
-			"title": "",
-			"description": ""
+			"title": "Ova funkcija je eksperimentalna",
+			"description": "Možda joj nedostaju funkcije, može sadržavati greške ili uopće ne raditi. Koristite je prema vlastitom nahođenju i prijavite sve probleme na koje naiđete"
 		},
-		"enter": "",
-		"save": "",
-		"send": "",
-		"saveChanges": "",
-		"noChanges": "",
-		"create": "",
-		"edit": "",
-		"info": "",
+		"enter": "Unesite",
+		"save": "Spremite",
+		"send": "Pošaljite",
+		"saveChanges": "Spremite promjene",
+		"noChanges": "Nema promjena",
+		"create": "Kreirajte",
+		"edit": "Uredite",
+		"info": "Informacije",
 		"infoSheetStats": {
-			"series": "",
-			"inProgress": "",
-			"completedBooks": "",
-			"readingTime": "",
-			"size": ""
+			"series": "Serijali",
+			"inProgress": "U toku",
+			"completedBooks": "Završeno",
+			"readingTime": "Vrijeme čitanja",
+			"size": "Veličina"
 		},
-		"update": "",
-		"upload": "",
-		"uploading": "",
-		"uploadingEllipsis": "",
-		"unimplemented": "",
-		"upNext": "",
-		"unknown": "",
-		"lastUpdated": "",
-		"limitedFunctionality": "",
-		"logIn": "",
-		"login": "",
-		"seeError": "",
-		"remove": "",
-		"goBack": "",
-		"goToServers": "",
-		"notReady": "",
-		"notUsedYet": "",
-		"never": "",
-		"scan": "",
-		"somethingWentWrong": "",
-		"back": "",
-		"continue": "",
-		"book": "",
-		"series": "",
+		"update": "Ažurirajte",
+		"upload": "Učitajte",
+		"uploading": "Učitavanje",
+		"uploadingEllipsis": "Učitavanje...",
+		"unimplemented": "Ova funkcionalnost još nije implementirana! Provjerite ponovo kasnije",
+		"upNext": "Sljedeće",
+		"unknown": "Nepoznato",
+		"lastUpdated": "Posljednje ažuriranje",
+		"limitedFunctionality": "Ovo još nije u potpunosti implementirano i nedostaju neke funkcije. Provjerite ponovo kasnije",
+		"logIn": "Prijava",
+		"login": "Prijavite se",
+		"seeError": "Prikažite grešku",
+		"remove": "Uklonite",
+		"goBack": "Vratite se",
+		"goToServers": "Idite na servere",
+		"notReady": "Ova funkcija nije spremna",
+		"notUsedYet": "Još nije korišteno",
+		"never": "Nikada",
+		"scan": "Skenirajte",
+		"somethingWentWrong": "Došlo je do greške",
+		"back": "Nazad",
+		"continue": "Nastavite",
+		"book": "Knjiga",
+		"series": "Serijal",
 		"fileUpload": {
-			"someRejected": "",
-			"tooManyFiles": "",
-			"noValidFiles": ""
+			"someRejected": "Neke datoteke su odbijene. Provjerite vrste datoteka i pokušajte ponovo",
+			"tooManyFiles": "Odabrali ste previše datoteka",
+			"noValidFiles": "Nije odabrana nijedna važeća datoteka"
 		},
-		"unknownError": ""
+		"unknownError": "Došlo je do nepoznate greške"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "",
-			"description": ""
+			"label": "API ključevi",
+			"description": "Omogućava korisniku upravljanje vlastitim API ključevima"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "",
-			"description": ""
+			"label": "Čitalački klubovi",
+			"description": "Omogućava korisniku pristup funkcijama čitalačkih klubova, uključujući pregledanje i pridruživanje klubovima"
 		},
 		"ACCESS_KOREADER_SYNC": {
-			"label": "",
-			"description": ""
+			"label": "KoReader sinhronizacija",
+			"description": "Omogućava korisniku pristup integraciji za KoReader sinhronizaciju"
 		},
 		"ACCESS_KOBO_SYNC": {
-			"label": "",
-			"description": ""
+			"label": "Kobo sinhronizacija",
+			"description": "Omogućava korisniku pristup integraciji za Kobo sinhronizaciju"
 		},
 		"ACCESS_SMART_LIST": {
-			"label": "",
-			"description": ""
+			"label": "Pametne liste",
+			"description": "Omogućava korisniku pristup funkcijama pametnih lista, uključujući kreiranje pametnih lista i upravljanje njima"
 		},
 		"CHANGE_PASSWORD": {
-			"label": "",
-			"description": ""
+			"label": "Promjena lozinke",
+			"description": "Omogućava korisniku promjenu vlastite lozinke"
 		},
 		"CHANGE_USERNAME": {
-			"label": "",
-			"description": ""
+			"label": "Promjena korisničkog imena",
+			"description": "Omogućava korisniku promjenu vlastitog korisničkog imena"
 		},
 		"CHANGE_AVATAR": {
-			"label": "",
-			"description": ""
+			"label": "Promjena avatara",
+			"description": "Omogućava korisniku promjenu vlastitog avatara"
 		},
 		"CREATE_BOOK_CLUB": {
-			"label": "",
-			"description": ""
+			"label": "Kreiranje čitalačkih klubova",
+			"description": "Omogućava korisniku kreiranje novih čitalačkih klubova"
 		},
 		"CREATE_LIBRARY": {
-			"label": "",
-			"description": ""
+			"label": "Kreiranje biblioteka",
+			"description": "Omogućava korisniku kreiranje novih biblioteka"
 		},
 		"CREATE_NOTIFIER": {
-			"label": "",
-			"description": ""
+			"label": "Kreiranje sistema obavještavanja",
+			"description": "Omogućava korisniku kreiranje novih sistema obavještavanja"
 		},
 		"DELETE_LIBRARY": {
-			"label": "",
-			"description": ""
+			"label": "Brisanje biblioteka",
+			"description": "Omogućava korisniku brisanje postojećih biblioteka"
 		},
 		"DELETE_NOTIFIER": {
-			"label": "",
-			"description": ""
+			"label": "Brisanje sistema obavještavanja",
+			"description": "Omogućava korisniku brisanje sistema obavještavanja"
 		},
 		"DOWNLOAD_FILE": {
-			"label": "",
-			"description": ""
+			"label": "Preuzimanje datoteka",
+			"description": "Omogućava korisniku preuzimanje datoteka sa servera"
 		},
 		"EDIT_LIBRARY": {
-			"label": "",
-			"description": ""
+			"label": "Uređivanje biblioteka",
+			"description": "Omogućava korisniku izmjenu postojećih biblioteka"
 		},
 		"EMAILER_CREATE": {
-			"label": "",
-			"description": ""
+			"label": "Dodavanje servera e-pošte",
+			"description": "Omogućava korisniku kreiranje konfiguracije e-pošte"
 		},
 		"EMAILER_MANAGE": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje serverom e-pošte",
+			"description": "Omogućava korisniku upravljanje konfiguracijom i postavkama e-pošte"
 		},
 		"EMAILER_READ": {
-			"label": "",
-			"description": ""
+			"label": "Pregled servera e-pošte",
+			"description": "Omogućava korisniku pregled konfiguracije e-pošte"
 		},
 		"EMAIL_ARBITRARY_SEND": {
-			"label": "",
-			"description": ""
+			"label": "Slanje e-pošte na proizvoljne adrese",
+			"description": "Omogućava korisniku slanje prilagođenih e-poruka na bilo koju adresu"
 		},
 		"EMAIL_SEND": {
-			"label": "",
-			"description": ""
+			"label": "Slanje e-poruka",
+			"description": "Omogućava korisniku slanje e-poruka putem sistema"
 		},
 		"FILE_EXPLORER": {
-			"label": "",
-			"description": ""
+			"label": "Preglednik datoteka",
+			"description": "Omogućava korisniku pregledavanje sistema datoteka servera"
 		},
 		"MANAGE_LIBRARY": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje bibliotekama",
+			"description": "Omogućava korisniku upravljanje postavkama i konfiguracijom biblioteka"
 		},
 		"MANAGE_NOTIFIER": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje sistemima obavještavanja",
+			"description": "Omogućava korisniku upravljanje postavkama sistema obavještavanja"
 		},
 		"MANAGE_SERVER": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje serverom",
+			"description": "Omogućava korisniku upravljanje konfiguracijom i postavkama servera"
 		},
 		"MANAGE_USERS": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje korisnicima",
+			"description": "Omogućava korisniku kreiranje, uređivanje i brisanje korisničkih računa"
 		},
 		"READ_JOBS": {
-			"label": "",
-			"description": ""
+			"label": "Pregled zadataka",
+			"description": "Omogućava korisniku pregled sistemskih zadataka i njihovog statusa"
 		},
 		"READ_NOTIFIER": {
-			"label": "",
-			"description": ""
+			"label": "Pregled sistema obavještavanja",
+			"description": "Omogućava korisniku pregled konfiguracije sistema obavještavanja"
 		},
 		"READ_PERSISTED_LOGS": {
-			"label": "",
-			"description": ""
+			"label": "Pregled trajno pohranjenih logova",
+			"description": "Omogućava korisniku pregled pohranjenih sistemskih logova"
 		},
 		"READ_SYSTEM_LOGS": {
-			"label": "",
-			"description": ""
+			"label": "Pregled sistemskih logova",
+			"description": "Omogućava korisniku pregled sistemskih logova u stvarnom vremenu"
 		},
 		"READ_USERS": {
-			"label": "",
-			"description": ""
+			"label": "Pregled korisnika",
+			"description": "Omogućava korisniku pregled podataka o korisničkim računima"
 		},
 		"SCAN_LIBRARY": {
-			"label": "",
-			"description": ""
+			"label": "Skeniranje biblioteka",
+			"description": "Omogućava korisniku pokretanje skeniranja biblioteka radi pronalaženja novog sadržaja"
 		},
 		"UPLOAD_FILE": {
-			"label": "",
-			"description": ""
+			"label": "Učitavanje datoteka",
+			"description": "Omogućava korisniku učitavanje datoteka na server"
 		},
 		"MANAGE_JOBS": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje zadacima",
+			"description": "Omogućava korisniku upravljanje svim zadacima u redu čekanja"
 		},
 		"EDIT_METADATA": {
-			"label": "",
-			"description": ""
+			"label": "Uređivanje metapodataka",
+			"description": "Omogućava korisniku uređivanje metapodataka knjiga i serijala"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "",
-			"description": ""
+			"label": "Upisivanje metapodataka u izvorne datoteke",
+			"description": "Omogućava korisniku upisivanje promjena metapodataka u izvorne datoteke"
 		},
 		"EDIT_THUMBNAILS": {
-			"label": "",
-			"description": ""
+			"label": "Uređivanje sličica",
+			"description": "Omogućava korisniku uređivanje sličica knjiga i serijala"
 		},
 		"METADATA_PROVIDER_READ": {
-			"label": "",
-			"description": ""
+			"label": "Pregled pružatelja metapodataka",
+			"description": "Omogućava korisniku pregled konfiguriranih vanjskih pružatelja metapodataka"
 		},
 		"METADATA_PROVIDER_MANAGE": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje pružateljima metapodataka",
+			"description": "Omogućava korisniku konfiguriranje vanjskih pružatelja metapodataka"
 		},
 		"METADATA_FETCH_RECORD_READ": {
-			"label": "",
-			"description": ""
+			"label": "Pregled podudaranja metapodataka",
+			"description": "Omogućava korisniku pregled rezultata dohvaćanja metapodataka koji čekaju provjeru"
 		},
 		"METADATA_FETCH_RECORD_MANAGE": {
-			"label": "",
-			"description": ""
+			"label": "Upravljanje podudaranjima metapodataka",
+			"description": "Omogućava korisniku pretraživanje vanjskih pružatelja za knjigu te prihvatanje ili odbijanje mogućih podudaranja"
 		}
 	},
 	"mobileApp": {
 		"addOrEditServer": {
 			"addServer": {
-				"title": "",
-				"subtitle": ""
+				"title": "Dodajte server",
+				"subtitle": "Konfigurirajte novi server za pristup svom sadržaju"
 			},
 			"editServer": {
-				"title": "",
-				"subtitle": ""
+				"title": "Uredite server",
+				"subtitle": "Uredite server"
 			},
-			"kind": "",
+			"kind": "Vrsta",
 			"customHeaders": {
-				"label": "",
-				"addHeader": "",
-				"invalidHeader": ""
+				"label": "Prilagođena zaglavlja",
+				"addHeader": "Dodajte zaglavlje",
+				"invalidHeader": "Nevažeće zaglavlje"
 			},
 			"auth": {
-				"label": "",
+				"label": "Autentifikacija",
 				"login": {
-					"label": "",
-					"description": ""
+					"label": "Prijava",
+					"description": "Po potrebi će se od vas zatražiti prijava pri pristupu sadržaju"
 				},
 				"none": {
-					"label": "",
-					"description": ""
+					"label": "Bez autentifikacije",
+					"description": "Ovaj server ne zahtijeva autentifikaciju ili se ona pruža putem URL-a"
 				},
 				"token": {
-					"label": "",
-					"placeholder": ""
+					"label": "Token",
+					"placeholder": "Sirovi token"
 				},
-				"basic": ""
+				"basic": "Osnovna"
 			},
-			"serverNamePlaceholder": "",
-			"catalogUrl": "",
-			"failedToConnect": "",
-			"didConnect": "",
-			"checkConnection": "",
-			"setAsDefaultServer": "",
+			"serverNamePlaceholder": "Moj server",
+			"catalogUrl": "URL kataloga",
+			"failedToConnect": "Povezivanje sa serverom nije uspjelo",
+			"didConnect": "Povezano",
+			"checkConnection": "Provjerite vezu",
+			"setAsDefaultServer": "Postavite kao zadani server",
 			"validation": {
-				"nameAlreadyExists": "",
-				"cannotSetAuthorizationHeader": ""
+				"nameAlreadyExists": "Naziv već postoji",
+				"cannotSetAuthorizationHeader": "Nije moguće postaviti zaglavlje Authorization"
 			}
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "",
-				"confirmation": "",
-				"failure": ""
+				"label": "Označite kao pročitano",
+				"confirmation": "Jeste li sigurni da želite označiti {{bookTitle}} kao pročitano?",
+				"failure": "Označavanje knjige kao pročitane nije uspjelo"
 			},
 			"clearProgress": {
-				"label": "",
-				"confirmation": "",
-				"failure": ""
+				"label": "Izbrišite napredak",
+				"confirmation": "Jeste li sigurni da želite izbrisati svoj napredak za {{bookTitle}}?",
+				"failure": "Brisanje trenutnog napretka nije uspjelo"
 			},
 			"deleteReadHistory": {
-				"label": "",
-				"confirmation": "",
-				"failure": ""
+				"label": "Izbrišite historiju čitanja",
+				"confirmation": "Jeste li sigurni da želite izbrisati historiju čitanja za {{bookTitle}}?",
+				"failure": "Brisanje historije čitanja nije uspjelo"
 			},
 			"deleteBook": {
-				"label": "",
-				"confirmation": ""
+				"label": "Izbrišite knjigu",
+				"confirmation": "Jeste li sigurni da želite izbrisati {{bookTitle}}?"
 			},
 			"deleteDownload": {
-				"label": "",
-				"confirmation": ""
+				"label": "Izbrišite preuzetu datoteku",
+				"confirmation": "Jeste li sigurni da želite izbrisati preuzetu datoteku za {{bookTitle}}?"
 			},
-			"goToLibrary": "",
-			"goToSeries": "",
-			"seeDetails": ""
+			"goToLibrary": "Idite u biblioteku",
+			"goToSeries": "Idite na serijal",
+			"seeDetails": "Prikažite detalje"
 		},
 		"bookMetadata": {
-			"ageRating": "",
-			"downloadedAt": "",
-			"characters": "",
-			"format": "",
-			"genres": "",
-			"language": "",
-			"publisher": "",
-			"size": "",
-			"volume": "",
-			"writers": "",
-			"colorists": "",
-			"inkers": "",
-			"letterers": "",
-			"coverArtists": "",
-			"links": "",
-			"year": "",
-			"identifier": "",
-			"identifiers": ""
+			"ageRating": "Dobna oznaka",
+			"downloadedAt": "Preuzeto",
+			"characters": "Likovi",
+			"format": "Format",
+			"genres": "Žanrovi",
+			"language": "Jezik",
+			"publisher": "Izdavač",
+			"size": "Veličina",
+			"volume": "Svezak",
+			"writers": "Pisci",
+			"colorists": "Koloristi",
+			"inkers": "Tušeri",
+			"letterers": "Urednici teksta",
+			"coverArtists": "Autori naslovnice",
+			"links": "Poveznice",
+			"year": "Godina",
+			"identifier": "Identifikator",
+			"identifiers": "Identifikatori"
 		},
 		"common": {
-			"book": "",
-			"cancel": "",
-			"chapter": "",
-			"clear": "",
-			"completed": "",
-			"confirm": "",
-			"continue": "",
-			"content": "",
-			"details": "",
-			"delete": "",
-			"dismiss": "",
-			"download": "",
-			"downloaded": "",
-			"downloads": "",
-			"done": "",
-			"edit": "",
-			"enabled": "",
-			"enable": "",
-			"error": "",
-			"favorite": "",
-			"finished": "",
-			"grid": "",
-			"list": "",
-			"lastCompleted": "",
-			"name": "",
-			"none": "",
-			"notAvailable": "",
-			"options": "",
-			"page": "",
-			"pages": "",
-			"pageXOfY": "",
-			"pageX": "",
-			"password": "",
-			"progress": "",
-			"publication": "",
-			"read": "",
-			"readAgain": "",
-			"readTime": "",
-			"readthrough": "",
-			"readMore": "",
-			"refresh": "",
-			"reset": "",
-			"save": "",
-			"select": "",
-			"settings": "",
-			"servers": "",
-			"thisBook": "",
-			"thisServer": "",
-			"unknown": "",
-			"unknownTitle": "",
-			"url": "",
-			"username": "",
-			"value": "",
-			"version": "",
-			"accessOpdsV2": "",
-			"accessOpdsV1": ""
+			"book": "Knjiga",
+			"cancel": "Otkažite",
+			"chapter": "Poglavlje",
+			"clear": "Očistite",
+			"completed": "Završeno",
+			"confirm": "Potvrdite",
+			"continue": "Nastavite",
+			"content": "Sadržaj",
+			"details": "Detalji",
+			"delete": "Izbrišite",
+			"dismiss": "Zatvorite",
+			"download": "Preuzmite",
+			"downloaded": "Preuzeto",
+			"downloads": "Preuzimanja",
+			"done": "Gotovo",
+			"edit": "Uredite",
+			"enabled": "Omogućeno",
+			"enable": "Omogućite",
+			"error": "Greška",
+			"favorite": "Omiljeno",
+			"finished": "Završeno",
+			"grid": "Mreža",
+			"list": "Lista",
+			"lastCompleted": "Posljednje završeno",
+			"name": "Naziv",
+			"none": "Nijedno",
+			"notAvailable": "Nije dostupno",
+			"options": "Opcije",
+			"page": "Stranica",
+			"pages": "Stranice",
+			"pageXOfY": "Stranica {{current}} od {{total}}",
+			"pageX": "Stranica {{current}}",
+			"password": "Lozinka",
+			"progress": "Napredak",
+			"publication": "Publikacija",
+			"read": "Čitajte",
+			"readAgain": "Čitajte ponovo",
+			"readTime": "Vrijeme čitanja",
+			"readthrough": "Čitanje",
+			"readMore": "Pročitajte više",
+			"refresh": "Osvježite",
+			"reset": "Poništite",
+			"save": "Spremite",
+			"select": "Odaberite",
+			"settings": "Postavke",
+			"servers": "Serveri",
+			"thisBook": "ovu knjigu",
+			"thisServer": "ovaj server",
+			"unknown": "Nepoznato",
+			"unknownTitle": "Bez naslova",
+			"url": "URL",
+			"username": "Korisničko ime",
+			"value": "Vrijednost",
+			"version": "Verzija",
+			"accessOpdsV2": "Pristup OPDS-u v2.0",
+			"accessOpdsV1": "Pristup OPDS-u v1.2"
 		},
 		"errors": {
-			"unknown": ""
+			"unknown": "Nepoznata greška"
 		},
 		"epubMenu": {
-			"tableOfContents": "",
-			"bookmarksAndAnnotations": "",
-			"appearance": ""
+			"tableOfContents": "Sadržaj",
+			"bookmarksAndAnnotations": "Knjižne oznake i bilješke",
+			"appearance": "Izgled"
 		},
 		"formatSeriesPosition": {
 			"none": {
-				"positionWithTotal": "",
-				"position": ""
+				"positionWithTotal": "{{position}} od {{total}} u serijalu {{seriesName}}",
+				"position": "{{position}} u serijalu {{seriesName}}"
 			},
 			"book": {
-				"positionWithTotal": "",
-				"position": ""
+				"positionWithTotal": "Knjiga {{position}} od {{total}} u serijalu {{seriesName}}",
+				"position": "Knjiga {{position}} u serijalu {{seriesName}}"
 			},
 			"hashtag": {
-				"positionWithTotal": "",
-				"position": ""
+				"positionWithTotal": "#{{position}} od {{total}} u serijalu {{seriesName}}",
+				"position": "#{{position}} u serijalu {{seriesName}}"
 			},
-			"unknownSeriesName": ""
+			"unknownSeriesName": "nepoznatog naziva"
 		},
 		"emptyState": {
-			"noStumpServers": "",
-			"noOPDSServers": "",
-			"noServers": "",
-			"cta": "",
-			"seeDocumentation": "",
+			"noStumpServers": "Nije dodan nijedan Stump server",
+			"noOPDSServers": "Nije dodan nijedan OPDS server",
+			"noServers": "Nema konfiguriranih servera",
+			"cta": "Započnite dodavanjem servera za pristup svojim zbirkama knjiga",
+			"seeDocumentation": "Pogledajte dokumentaciju",
 			"noSmartLists": {
-				"label": "",
-				"description": ""
+				"label": "Nema pronađenih lista",
+				"description": "Kada budu kreirane, prikazat će se ovdje"
 			}
 		},
 		"tabs": {
-			"servers": "",
-			"localLibrary": "",
-			"settings": "",
-			"home": "",
-			"browse": "",
-			"clubs": "",
-			"search": ""
+			"servers": "Serveri",
+			"localLibrary": "Biblioteka",
+			"settings": "Postavke",
+			"home": "Početna",
+			"browse": "Pregled",
+			"clubs": "Klubovi",
+			"search": "Pretraga"
 		},
 		"localLibrary": {
-			"title": "",
+			"title": "Lokalna biblioteka",
 			"emptyState": {
 				"all": {
-					"title": "",
-					"description": ""
+					"title": "Još nema ničega za čitanje",
+					"description": "Kada budete imali knjige za čitanje van mreže, prikazat će se ovdje"
 				},
 				"imported": {
-					"title": "",
-					"description": ""
+					"title": "Nema uvezenih knjiga",
+					"description": "Uvezite knjige da biste ih čitali van mreže"
 				},
 				"server": {
-					"title": "",
-					"description": ""
+					"title": "Nema preuzetih knjiga",
+					"description": "Preuzmite knjige iz svoje biblioteke da biste ih čitali van mreže"
 				}
 			},
 			"downloadQueue": {
-				"downloading": "",
-				"failed": "",
-				"nothingDownloading": "",
-				"noActiveDownloads": "",
-				"noFailedDownloads": "",
-				"downloadStarting": ""
+				"downloading": "Preuzimanje",
+				"failed": "Neuspjelo",
+				"nothingDownloading": "Ništa se ne preuzima",
+				"noActiveDownloads": "Nema aktivnih preuzimanja",
+				"noFailedDownloads": "Nema neuspjelih preuzimanja",
+				"downloadStarting": "Pokretanje..."
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "",
-					"confirmation": "",
-					"disclaimer": ""
+					"label": "Izbrišite knjige",
+					"confirmation": "Jeste li sigurni da želite izbrisati svoju lokalnu biblioteku?",
+					"disclaimer": "Ova radnja se ne može poništiti."
 				},
-				"seeProblems": "",
-				"hideCurated": "",
-				"showCurated": "",
-				"attemptSync": "",
-				"syncConflicts": ""
+				"seeProblems": "Prikažite probleme ({{problemCount}})",
+				"hideCurated": "Sakrijte izdvojeno",
+				"showCurated": "Prikažite izdvojeno",
+				"attemptSync": "Pokušajte sinhronizaciju",
+				"syncConflicts": "Konflikti sinhronizacije"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
-					"NAME": "",
-					"ADDED_AT": "",
-					"SERIES": ""
+					"NAME": "Naziv",
+					"ADDED_AT": "Datum dodavanja",
+					"SERIES": "Serijal"
 				},
 				"sortDirection": {
-					"ASC": "",
-					"DESC": ""
+					"ASC": "Uzlazno",
+					"DESC": "Silazno"
 				},
 				"sortDirectionText": {
-					"ASC": "",
-					"DESC": ""
+					"ASC": "A → Z",
+					"DESC": "Z → A"
 				},
 				"sortDirectionDate": {
-					"ASC": "",
-					"DESC": ""
+					"ASC": "Prvo najstarije",
+					"DESC": "Prvo najnovije"
 				},
 				"sourceFilter": {
-					"all": "",
-					"server": "",
-					"imported": ""
+					"all": "Sve knjige",
+					"server": "Preuzete",
+					"imported": "Uvezene"
 				}
 			},
 			"downloadProblemsSheet": {
-				"title": "",
-				"noFailedDownloads": "",
-				"retryAll": "",
-				"dismissAll": ""
+				"title": "Neuspjela preuzimanja",
+				"noFailedDownloads": "Nema neuspjelih preuzimanja",
+				"retryAll": "Pokušajte sve ponovo",
+				"dismissAll": "Odbacite sve"
 			}
 		},
 		"progressSync": {
 			"skippedSync": {
-				"skippedOneServer": "",
-				"skippedMultipleServers": "",
-				"explanation": ""
+				"skippedOneServer": "Sinhronizacija je preskočena za {{skippedCount}} server",
+				"skippedMultipleServers": "Sinhronizacija je preskočena za {{skippedCount}} servera",
+				"explanation": "Neki serveri koriste metode autentifikacije koje se ne mogu automatski osvježiti"
 			},
-			"syncFailed": ""
+			"syncFailed": "Sinhronizacija napretka van mreže nije uspjela"
 		},
 		"syncConflicts": {
-			"title": "",
-			"remainingCount": "",
+			"title": "Konflikti sinhronizacije",
+			"remainingCount": "Preostalo: {{remainingCount}}",
 			"noConflicts": {
-				"title": "",
-				"description": ""
+				"title": "Nema konflikata sinhronizacije",
+				"description": "Sav vaš lokalni napredak sinhroniziran je sa serverima"
 			},
-			"lastCommonSession": "",
-			"localSession": "",
-			"remoteSessionWithId": "",
-			"noCommonSession": "",
-			"noRemoteSessions": "",
+			"lastCommonSession": "Posljednja zajednička sesija",
+			"localSession": "Lokalna sesija",
+			"remoteSessionWithId": "Udaljena sesija {{sessionId}}",
+			"noCommonSession": "Nema zajedničke historije čitanja",
+			"noRemoteSessions": "Nema udaljenih sesija",
 			"divergentProgress": {
-				"title": "",
-				"description": ""
+				"title": "Neusklađen napredak u čitanju",
+				"description": "Posljednja zajednička sesija izmijenjena je na serveru nakon vaše posljednje sinhronizacije"
 			},
 			"noCommonReadingHistory": {
-				"title": "",
-				"description": ""
+				"title": "Nema zajedničke historije čitanja",
+				"description": "Ova knjiga nije imala sinhroniziranu historiju kada ste je počeli čitati van mreže"
 			},
 			"acceptSource": {
-				"local": "",
-				"remote": "",
-				"both": ""
+				"local": "Prihvatite lokalno",
+				"remote": "Prihvatite udaljeno",
+				"both": "Prihvatite oboje"
 			},
-			"pullError": ""
+			"pullError": "Preuzimanje udaljenog napretka nije uspjelo"
 		},
 		"search": {
-			"label": "",
-			"description": "",
-			"placeholder": ""
+			"label": "Pretražite ovaj server",
+			"description": "Pronađite određeni sadržaj na ovom serveru",
+			"placeholder": "Pretražite"
 		},
 		"settings": {
 			"preferences": {
-				"label": "",
+				"label": "Postavke",
 				"appTheme": {
-					"label": "",
+					"label": "Tema",
 					"options": {
-						"light": "",
-						"dark": ""
+						"light": "Svijetla",
+						"dark": "Tamna"
 					}
 				},
 				"appPrimaryColor": {
-					"label": "",
+					"label": "Akcentna boja",
 					"options": {
-						"chromaScale": "",
+						"chromaScale": "Intenzitet boje",
 						"hues": {
-							"red": "",
-							"orange": "",
-							"amber": "",
-							"yellow": "",
-							"lime": "",
-							"green": "",
-							"emerald": "",
-							"teal": "",
-							"cyan": "",
-							"sky": "",
-							"blue": "",
-							"indigo": "",
-							"violet": "",
-							"purple": "",
-							"fuchsia": "",
-							"pink": "",
-							"rose": "",
-							"slate": "",
-							"gray": "",
-							"zinc": "",
-							"neutral": "",
-							"stone": ""
+							"red": "Crvena",
+							"orange": "Narandžasta",
+							"amber": "Jantarna",
+							"yellow": "Žuta",
+							"lime": "Limeta zelena",
+							"green": "Zelena",
+							"emerald": "Smaragdna",
+							"teal": "Plavozelena",
+							"cyan": "Cijan",
+							"sky": "Nebeskoplava",
+							"blue": "Plava",
+							"indigo": "Indigo",
+							"violet": "Ljubičasta",
+							"purple": "Purpurna",
+							"fuchsia": "Fuksija",
+							"pink": "Ružičasta",
+							"rose": "Ružina",
+							"slate": "Škriljasta",
+							"gray": "Siva",
+							"zinc": "Cink",
+							"neutral": "Neutralna",
+							"stone": "Kamena"
 						}
 					}
 				},
-				"appLanguage": "",
-				"defaultServer": "",
-				"thumbnailRatio": "",
+				"appLanguage": "Jezik",
+				"defaultServer": "Zadani server",
+				"thumbnailRatio": "Omjer sličice",
 				"thumbnailPlaceholder": {
-					"label": "",
+					"label": "Zamjenska sličica",
 					"options": {
-						"grayscale": "",
-						"averageColor": "",
-						"colorful": "",
-						"thumbhash": ""
+						"grayscale": "Nijanse sive",
+						"averageColor": "Prosječna boja",
+						"colorful": "Šareno",
+						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailResizeMode": {
-					"label": "",
+					"label": "Promjena veličine sličice",
 					"options": {
-						"cover": "",
-						"stretch": "",
-						"fit": ""
+						"cover": "Ispuni",
+						"stretch": "Razvuci",
+						"fit": "Uklopi"
 					}
 				}
 			},
 			"reading": {
-				"label": "",
-				"preferNativePdf": "",
-				"preferMinimalReader": "",
-				"disableDismissGesture": "",
-				"incognitoReading": "",
+				"label": "Čitanje",
+				"preferNativePdf": "Dajte prednost nativnom PDF čitaču",
+				"preferMinimalReader": "Dajte prednost minimalističkom čitaču",
+				"disableDismissGesture": "Onemogućite gestu zatvaranja",
+				"incognitoReading": "Inkognito čitanje",
 				"maxPageViewingSeconds": {
-					"label": "",
+					"label": "Ograničenje vremena prikaza stranice u sekundama",
 					"errors": {
-						"minimumValue": "",
-						"integer": ""
+						"minimumValue": "Mora biti najmanje 1 sekunda",
+						"integer": "Mora biti cijeli broj"
 					}
 				}
 			},
 			"stump": {
-				"label": "",
-				"description": "",
-				"bookClubsEnabled": ""
+				"label": "Stump",
+				"description": "Funkcije Stumpa su opcionalne i možete ih isključiti ako vam nisu potrebne",
+				"bookClubsEnabled": "Funkcije čitalačkih klubova"
 			},
-			"autoSyncLocalData": "",
+			"autoSyncLocalData": "Automatska sinhronizacija lokalnih podataka",
 			"textCase": {
-				"label": "",
+				"label": "Velika i mala slova",
 				"options": {
-					"lowerCase": "",
-					"sentenceCase": "",
-					"titleCase": ""
+					"lowerCase": "Mala slova",
+					"sentenceCase": "Rečenični oblik",
+					"titleCase": "Naslovni oblik"
 				}
 			},
-			"tintListBackground": "",
+			"tintListBackground": "Obojite pozadine lista",
 			"management": {
-				"label": "",
+				"label": "Upravljanje",
 				"dataUsage": {
-					"label": "",
-					"nonStumpData": "",
-					"serversTotal": "",
-					"totalFiles": "",
-					"totalSize": "",
+					"label": "Upotreba podataka",
+					"nonStumpData": "Podaci izvan Stumpa",
+					"serversTotal": "Ukupno na serverima",
+					"totalFiles": "Ukupno datoteka",
+					"totalSize": "Ukupna veličina",
 					"deleteDownloads": {
-						"label": "",
-						"confirmation": "",
+						"label": "Izbrišite preuzimanja",
+						"confirmation": "Jeste li sigurni da želite izbrisati sva preuzimanja sa servera {{serverName}}?",
 						"deleteFailed": {
-							"title": "",
-							"description": ""
+							"title": "Brisanje nije uspjelo",
+							"description": "Došlo je do greške pri brisanju svih preuzimanja sa servera {{serverName}}"
 						}
 					},
-					"noDownloads": "",
+					"noDownloads": "Nema preuzetih datoteka za ovaj server",
 					"storedPreferences": {
-						"label": "",
-						"description": ""
+						"label": "Pohranjene postavke",
+						"description": "Razni podaci poput postavki knjiga, mjerača vremena čitanja i slično"
 					},
-					"clearPreferences": ""
+					"clearPreferences": "Izbrišite postavke"
 				}
 			},
 			"debug": {
-				"label": "",
+				"label": "Otklanjanje grešaka",
 				"clearCache": {
-					"label": "",
+					"label": "Očistite predmemoriju",
 					"memory": {
-						"button": "",
-						"success": ""
+						"button": "Memorija",
+						"success": "Predmemorija u memoriji je očišćena"
 					},
 					"disk": {
-						"button": "",
-						"success": ""
+						"button": "Disk",
+						"success": "Predmemorija na disku je očišćena"
 					}
 				},
 				"deleteDatabase": {
-					"label": "",
+					"label": "Izbrišite bazu podataka",
 					"success": {
-						"title": "",
-						"description": ""
+						"title": "Baza podataka je izbrisana",
+						"description": "Ponovo pokrenite aplikaciju"
 					},
 					"error": {
-						"title": "",
-						"description": ""
+						"title": "Brisanje nije uspjelo",
+						"description": "Došlo je do greške pri brisanju baze podataka"
 					}
 				},
-				"performanceMonitor": "",
-				"reduceAnimations": "",
+				"performanceMonitor": "Praćenje performansi",
+				"reduceAnimations": "Smanjite animacije",
 				"displayLanguageKeys": {
-					"label": "",
+					"label": "Prikažite ključeve prijevoda",
 					"options": {
-						"none": "",
-						"abbreviated": "",
-						"full": ""
+						"none": "Nijedan",
+						"abbreviated": "Skraćeno",
+						"full": "Potpuno"
 					}
 				},
 				"debugAnalytics": {
-					"label": "",
-					"description": ""
+					"label": "Dijagnostička analitika",
+					"description": "Šaljite dodatne dijagnostičke događaje radi lakšeg otklanjanja problema"
 				}
 			},
 			"contactInfo": {
-				"label": "",
-				"email": "",
-				"discord": "",
-				"github": ""
+				"label": "Kontakt",
+				"email": "E-pošta",
+				"discord": "Discord",
+				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "",
-				"version": "",
-				"suuportIdentifier": ""
+				"buildInformation": "Informacije o kompilaciji",
+				"version": "Verzija: {{version}}",
+				"suuportIdentifier": "Identifikator podrške: {{supportID}}"
 			}
 		},
 		"stumpServer": {
 			"browse": {
-				"books": "",
-				"favorites": "",
-				"files": "",
-				"libraries": "",
-				"series": "",
-				"smartLists": ""
+				"books": "Knjige",
+				"favorites": "Omiljeno",
+				"files": "Datoteke",
+				"libraries": "Biblioteke",
+				"series": "Serijali",
+				"smartLists": "Pametne liste"
 			},
 			"continueReading": {
-				"label": "",
-				"emptyText": ""
+				"label": "Nastavite čitati",
+				"emptyText": "Nema započetih knjiga"
 			},
 			"onDeck": {
-				"label": "",
-				"emptyText": ""
+				"label": "Vaše sljedeće štivo",
+				"emptyText": "Nema knjiga spremnih za čitanje"
 			},
 			"recentlyAddedSeries": {
-				"label": "",
-				"emptyText": ""
+				"label": "Nedavno dodani serijali",
+				"emptyText": "Nema nedavno dodanih serijala"
 			},
 			"recentlyAddedBooks": {
-				"label": "",
-				"emptyText": ""
+				"label": "Nedavno dodane knjige",
+				"emptyText": "Nema nedavno dodanih knjiga"
 			}
 		},
 		"readerSettings": {
-			"title": "",
-			"overrideGlobalSettings": "",
+			"title": "Postavke čitača slika",
+			"overrideGlobalSettings": "Zanemarite globalne postavke",
 			"sections": {
-				"mode": "",
-				"imageOptions": "",
-				"controls": ""
+				"mode": "Način rada",
+				"imageOptions": "Opcije slike",
+				"controls": "Kontrole"
 			},
 			"readingMode": {
-				"label": "",
+				"label": "Tok",
 				"options": {
-					"PAGED": "",
-					"CONTINUOUS_HORIZONTAL": "",
-					"CONTINUOUS_VERTICAL": ""
+					"PAGED": "Po stranicama",
+					"CONTINUOUS_HORIZONTAL": "Pomicanje (vodoravno)",
+					"CONTINUOUS_VERTICAL": "Pomicanje (okomito)"
 				}
 			},
 			"readingDirection": {
-				"label": "",
+				"label": "Smjer",
 				"options": {
-					"RTL": "",
-					"LTR": ""
+					"RTL": "Zdesna nalijevo",
+					"LTR": "Slijeva nadesno"
 				}
 			},
 			"doublePageBehavior": {
-				"label": "",
+				"label": "Dvije stranice",
 				"options": {
-					"always": "",
-					"auto": "",
-					"off": ""
+					"always": "Uvijek",
+					"auto": "Automatski",
+					"off": "Isključeno"
 				}
 			},
-			"separateSecondPage": "",
+			"separateSecondPage": "Odvojite drugu stranicu",
 			"imageScaling": {
-				"label": "",
+				"label": "Prilagođavanje veličine",
 				"options": {
-					"AUTO": "",
-					"HEIGHT": "",
-					"WIDTH": "",
-					"NONE": ""
+					"AUTO": "Automatski",
+					"HEIGHT": "Prilagodi visini",
+					"WIDTH": "Prilagodi širini",
+					"NONE": "Bez prilagođavanja"
 				}
 			},
-			"allowDownscaling": "",
-			"tapSidesToNavigate": "",
-			"volumeButtonsNavigate": "",
+			"allowDownscaling": "Smanjivanje",
+			"tapSidesToNavigate": "Dodirnite rubove za navigaciju",
+			"volumeButtonsNavigate": "Navigacija tipkama za glasnoću",
 			"footerControls": {
-				"label": "",
+				"label": "Podnožje",
 				"options": {
-					"images": "",
-					"slider": ""
+					"images": "Galerija slika",
+					"slider": "Klizač"
 				}
 			},
 			"readingTimer": {
-				"label": "",
-				"resetTimer": "",
+				"label": "Mjerač vremena čitanja",
+				"resetTimer": "Poništite mjerač",
 				"confirmation": {
-					"message": "",
+					"message": "Jeste li sigurni da želite poništiti vrijeme čitanja za „{{bookName}}“?\n\n{{action}}",
 					"action": {
-						"multi-session": "",
-						"single-session": ""
+						"multi-session": "Ovo će postaviti trajanje svake sesije u ovom čitanju na 0 sekundi.",
+						"single-session": "Ovo će postaviti vrijeme čitanja na 0 sekundi."
 					}
 				}
 			},
-			"allSettings": ""
+			"allSettings": "Sve postavke"
 		},
 		"tableOfContents": {
-			"goToPageX": "",
-			"goToPagePlaceholder": "",
+			"goToPageX": "Idite na stranicu {{pageNumber}}",
+			"goToPagePlaceholder": "Idite na stranicu...",
 			"errors": {
-				"pageDoesNotExist": "",
-				"invalidPage": ""
+				"pageDoesNotExist": "Stranica {{page}} ne postoji",
+				"invalidPage": "„{{page}}“ nije broj stranice"
 			},
-			"showCurrentChapter": ""
+			"showCurrentChapter": "Prikažite trenutno poglavlje"
 		},
 		"annotationsSheet": {
 			"tabs": {
-				"all": "",
-				"bookmarks": "",
-				"highlights": "",
-				"notes": ""
+				"all": "Sve",
+				"bookmarks": "Knjižne oznake",
+				"highlights": "Istaknuto",
+				"notes": "Bilješke"
 			}
 		},
 		"epubSettings": {
-			"title": "",
+			"title": "Postavke EPUB čitača",
 			"typeface": {
-				"label": "",
+				"label": "Vrsta fonta",
 				"options": {
-					"system": "",
-					"opendyslexic": "",
-					"literata": "",
-					"atkinsonHyperlegible": "",
-					"charisSIL": "",
-					"bitter": ""
+					"system": "Sistemski",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
 				}
 			},
-			"fontSize": "",
+			"fontSize": "Veličina fonta",
 			"fontWeight": {
-				"label": "",
+				"label": "Debljina fonta",
 				"options": {
-					"light": "",
-					"normal": "",
-					"medium": "",
-					"bold": ""
+					"light": "Tanko",
+					"normal": "Normalno",
+					"medium": "Srednje",
+					"bold": "Podebljano"
 				}
 			},
-			"textNormalization": "",
-			"verticalText": "",
+			"textNormalization": "Normalizacija teksta",
+			"verticalText": "Okomiti tekst",
 			"readingDirection": {
-				"label": "",
+				"label": "Smjer čitanja",
 				"options": {
-					"rtl": "",
-					"ltr": ""
+					"rtl": "Zdesna nalijevo",
+					"ltr": "Slijeva nadesno"
 				}
 			},
 			"columns": {
-				"label": "",
+				"label": "Kolone",
 				"options": {
-					"auto": "",
-					"single": "",
-					"double": ""
+					"auto": "Automatski",
+					"single": "Jedna",
+					"double": "Dvije"
 				}
 			},
-			"pageMargins": "",
+			"pageMargins": "Margine stranice",
 			"imageFilter": {
-				"label": "",
+				"label": "Filtar slike",
 				"options": {
-					"none": "",
-					"darken": "",
-					"invert": ""
+					"none": "Bez filtra",
+					"darken": "Zatamni",
+					"invert": "Obrni boje"
 				}
 			},
-			"publisherStyles": "",
-			"volumeButtonsNavigate": "",
+			"publisherStyles": "Stilovi izdavača",
+			"volumeButtonsNavigate": "Navigacija tipkama za glasnoću",
 			"textAlignment": {
-				"label": "",
+				"label": "Poravnanje teksta",
 				"options": {
-					"start": "",
-					"left": "",
-					"center": "",
-					"right": "",
-					"justify": ""
+					"start": "Početak",
+					"left": "Lijevo",
+					"center": "Sredina",
+					"right": "Desno",
+					"justify": "Obostrano"
 				}
 			},
-			"typeScale": "",
-			"lineHeight": "",
-			"paragraphIndent": "",
-			"paragraphSpacing": "",
-			"wordSpacing": "",
-			"letterSpacing": "",
-			"hyphens": "",
-			"ligatures": "",
+			"typeScale": "Skaliranje teksta",
+			"lineHeight": "Visina reda",
+			"paragraphIndent": "Uvlačenje odlomka",
+			"paragraphSpacing": "Razmak između odlomaka",
+			"wordSpacing": "Razmak između riječi",
+			"letterSpacing": "Razmak između slova",
+			"hyphens": "Rastavljanje riječi",
+			"ligatures": "Ligature",
 			"customizeTheme": {
-				"placeholder": "",
-				"background": "",
-				"text": "",
-				"highlight": "",
-				"premadeThemes": ""
+				"placeholder": "Naziv teme",
+				"background": "Pozadina",
+				"text": "Tekst",
+				"highlight": "Isticanje",
+				"premadeThemes": "Gotove teme"
 			}
 		},
 		"libraryType": {
-			"BOOK": "",
-			"COMIC": "",
-			"LIGHT_NOVEL": "",
-			"MANGA": "",
-			"MANHWA": "",
-			"MIXED": "",
-			"WEBTOON": "",
-			"WEB_NOVEL": ""
+			"BOOK": "Knjige",
+			"COMIC": "Stripovi",
+			"LIGHT_NOVEL": "Light novele",
+			"MANGA": "Manga",
+			"MANHWA": "Manhwa",
+			"MIXED": "Mješovito",
+			"WEBTOON": "Webtoonovi",
+			"WEB_NOVEL": "Web novele"
 		},
 		"savedServerActions": {
-			"clearCache": "",
+			"clearCache": "Očistite predmemoriju",
 			"discardTokens": {
-				"label": "",
-				"description": ""
+				"label": "Odbacite tokene",
+				"description": "Utječe samo na tokene za prijavu"
 			},
 			"deleteServer": {
-				"title": "",
-				"confirmation": ""
+				"title": "Izbrišite server",
+				"confirmation": "Jeste li sigurni da želite izbrisati {{serverName}}?"
 			}
 		},
 		"filtering": {
-			"notStarted": "",
-			"currentlyReading": "",
-			"finished": ""
+			"notStarted": "Nije započeto",
+			"currentlyReading": "Trenutno čitate",
+			"finished": "Završeno"
 		},
 		"sorting": {
-			"labelEllipsis": "",
+			"labelEllipsis": "Sortiraj po...",
 			"sortField": {
-				"NAME": "",
-				"ADDED_AT": "",
-				"CREATED_AT": "",
-				"NUMBER": "",
-				"SERIES": "",
-				"YEAR": ""
+				"NAME": "Naziv",
+				"ADDED_AT": "Datum dodavanja",
+				"CREATED_AT": "Datum dodavanja",
+				"NUMBER": "Položaj u serijalu",
+				"SERIES": "Serijal",
+				"YEAR": "Godina izdanja"
 			},
 			"sortDirection": {
-				"ASC": "",
-				"DESC": ""
+				"ASC": "Uzlazno",
+				"DESC": "Silazno"
 			},
 			"sortDirectionString": {
-				"ASC": "",
-				"DESC": ""
+				"ASC": "A → Z",
+				"DESC": "Z → A"
 			},
 			"sortDirectionDate": {
-				"ASC": "",
-				"DESC": ""
+				"ASC": "Prvo najstarije",
+				"DESC": "Prvo najnovije"
 			},
 			"sortDirectionNumber": {
-				"ASC": "",
-				"DESC": ""
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
 			}
 		},
 		"widgets": {
 			"readingNow": {
-				"nothingInProgress": ""
+				"nothingInProgress": "Ništa nije započeto"
 			}
 		}
 	},
 	"epubReader": {
-		"reading": "",
-		"appearance": "",
-		"themeAndOptions": "",
-		"locationManager": "",
-		"contents": "",
-		"bookmarks": "",
-		"annotations": "",
-		"noBookmarks": "",
-		"bookmark": "",
-		"noAnnotations": "",
+		"reading": "Čitanje",
+		"appearance": "Izgled",
+		"themeAndOptions": "Tema i opcije",
+		"locationManager": "Upravljanje lokacijom",
+		"contents": "Sadržaj",
+		"bookmarks": "Knjižna oznaka",
+		"annotations": "Bilješke",
+		"noBookmarks": "Nema knjižnih oznaka",
+		"bookmark": "Oznaka stranice",
+		"noAnnotations": "Nema bilješki",
 		"annotation": {
-			"addNote": "",
-			"edit": "",
-			"note": "",
-			"optionalNote": "",
-			"selectionActions": "",
-			"highlight": "",
-			"disabledInIncognito": "",
-			"saveFailed": "",
-			"updateFailed": "",
-			"deleteFailed": ""
+			"addNote": "Dodajte bilješku",
+			"edit": "Uredite bilješku",
+			"note": "Bilješka",
+			"optionalNote": "Dodajte opcionalnu bilješku…",
+			"selectionActions": "Radnje odabira",
+			"highlight": "Istaknite",
+			"disabledInIncognito": "Bilješke su onemogućene u inkognito načinu rada",
+			"saveFailed": "Spremanje bilješke nije uspjelo",
+			"updateFailed": "Ažuriranje bilješke nije uspjelo",
+			"deleteFailed": "Brisanje bilješke nije uspjelo"
 		},
 		"search": {
-			"placeholder": "",
-			"failed": "",
-			"noResults": "",
-			"section": "",
-			"loadingMore": "",
-			"loadMore": ""
+			"placeholder": "Unesite upit i pritisnite Enter za pretragu",
+			"failed": "Pretraga nije uspjela. Pokušajte ponovo.",
+			"noResults": "Nema pronađenih rezultata.",
+			"section": "Odjeljak {{position}}",
+			"loadingMore": "Učitavanje dodatnih rezultata…",
+			"loadMore": "Učitajte više rezultata"
 		},
 		"controls": {
-			"columns": "",
-			"auto": "",
-			"columnCount_one": "",
-			"columnCount_other": "",
-			"pageMargins": "",
-			"readingDirection": "",
-			"leftToRight": "",
-			"rightToLeft": "",
-			"readingMode": "",
-			"paged": "",
-			"continuous": "",
-			"previousPage": "",
-			"nextPage": "",
-			"toggleControls": ""
+			"columns": "Kolone",
+			"auto": "Automatski",
+			"columnCount_one": "{{count}} kolona",
+			"columnCount_other": "{{count}} kolona",
+			"pageMargins": "Margine stranice",
+			"readingDirection": "Smjer čitanja",
+			"leftToRight": "Slijeva nadesno",
+			"rightToLeft": "Zdesna nalijevo",
+			"readingMode": "Način čitanja",
+			"paged": "Po stranicama",
+			"continuous": "Neprekidno",
+			"previousPage": "Prethodna stranica",
+			"nextPage": "Sljedeća stranica",
+			"toggleControls": "Prikažite ili sakrijte kontrole čitača"
 		},
 		"errors": {
-			"openFailed": "",
-			"navigateFailed": ""
+			"openFailed": "Otvaranje EPUB-a pomoću Readiuma nije uspjelo.",
+			"navigateFailed": "Prelazak na lokaciju nije uspio"
 		}
 	},
 	"imageReader": {
 		"settings": {
 			"imageScaling": {
-				"label": "",
+				"label": "Prilagođavanje veličine slike",
 				"options": {
-					"auto": "",
-					"height": "",
-					"width": "",
-					"original": ""
+					"auto": "Automatski",
+					"height": "Visina",
+					"width": "Širina",
+					"original": "Izvorno"
 				}
 			},
 			"readingDirection": {
-				"label": "",
+				"label": "Smjer čitanja",
 				"options": {
-					"leftToRight": "",
-					"rightToLeft": ""
+					"leftToRight": "Slijeva nadesno",
+					"rightToLeft": "Zdesna nalijevo"
 				}
 			},
 			"readingMode": {
-				"label": "",
+				"label": "Tok",
 				"options": {
-					"verticalScroll": "",
-					"horizontalScroll": "",
-					"paged": ""
+					"verticalScroll": "Okomito pomicanje",
+					"horizontalScroll": "Vodoravno pomicanje",
+					"paged": "Po stranicama"
 				}
+			},
+			"readerSettings": {
+				"sections": {
+					"imageOptions": "Opcije slike",
+					"mode": "Način rada",
+					"preferences": "Postavke"
+				},
+				"preferences": {
+					"separateSecondPage": "Odvojite drugu stranicu",
+					"readingTimer": "Mjerač vremena čitanja",
+					"tapSidesToNavigate": "Dodirnite rubove za navigaciju",
+					"panZoomWithoutCtrl": "Pomicanje i zumiranje bez tipke Ctrl / Cmd"
+				}
+			},
+			"doublePageBehavior": {
+				"options": {
+					"always": "Uvijek",
+					"off": "Isključeno",
+					"auto": "Automatski"
+				},
+				"label": "Dvije stranice"
 			}
 		}
 	}

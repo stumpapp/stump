@@ -5,6 +5,7 @@ import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 
+import { DEFAULT_SERIES_ORDER_BY } from '@/components/filters/useFilterScene'
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
 
@@ -33,6 +34,7 @@ export default function LibraryHeader() {
 
 	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
 	const hideSeriesView = config?.hideSeriesView ?? false
+	const showOneshots = !!config?.oneshotsDirectory
 
 	const formattedSize = stats?.totalBytes ? formatBytesSeparate(stats.totalBytes) : null
 	const formattedTime = stats?.totalReadingTimeSeconds
@@ -47,6 +49,20 @@ export default function LibraryHeader() {
 						label: t('libraryHeader.tabs.series'),
 						onHover: () => prefetchSeries(id),
 						to: 'series',
+					},
+				]
+			: []),
+		...(showOneshots
+			? [
+					{
+						isActive: !!location.pathname.match(/\/libraries\/[^/]+\/oneshots(\/.*)?$/),
+						label: t('libraryHeader.tabs.oneshots'),
+						onHover: () =>
+							prefetchSeries(id, {
+								filter: [{ isOneshot: true }],
+								orderBy: DEFAULT_SERIES_ORDER_BY,
+							}),
+						to: 'oneshots',
 					},
 				]
 			: []),

@@ -163,7 +163,7 @@
 						"confirmation": {
 							"trigger": "Clear authentication",
 							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
+							"description": "Tem certeza de que deseja apagar todos os tokens armazenados?",
 							"confirm": "Clear authentication"
 						}
 					}
@@ -198,7 +198,7 @@
 					},
 					"smartlist": {
 						"read": {
-							"description": "Allows the user to access smart lists features"
+							"description": "Permite ao usuário acessar os recursos de listas inteligentes. Como as permissões detalhadas ainda não foram implementadas, esta função inclui permissões para ler, criar e atualizar suas próprias listas."
 						}
 					}
 				}

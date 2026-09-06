@@ -3773,7 +3773,8 @@
 				"sections": {
 					"mode": "Mode",
 					"imageOptions": "Image Options",
-					"preferences": "Preferences"
+					"preferences": "Preferences",
+					"controls": "Controls"
 				},
 				"preferences": {
 					"separateSecondPage": "Separate second page",

@@ -1,5 +1,5 @@
 import { DoublePageBehavior, isDoublePageBehavior } from '@stump/client'
-import { Label, NativeSelect } from '@stump/components'
+import { NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback } from 'react'
 

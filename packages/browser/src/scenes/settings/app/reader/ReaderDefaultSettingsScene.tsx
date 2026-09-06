@@ -13,7 +13,6 @@ import DefaultFontFamily from './DefaultFontFamily'
 import DefaultFontSize from './DefaultFontSize'
 import DefaultLineHeight from './DefaultLineHeight'
 import DefaultReadingDirection from './DefaultReadingDirection'
-import PreloadPagesSection from './PreloadPagesSection'
 
 // TODO: this page is a big ol' wip for now, and so didn't bother adding localization changes
 // yet to avoid issues down the road and/or wasting people's time translating.
@@ -76,7 +75,6 @@ export default function ReaderDefaultSettingsScene() {
 						>
 							<div className="gap-8 pb-16 md:gap-12 px-4 flex flex-col">
 								<ReaderSettings />
-								<PreloadPagesSection />
 							</div>
 						</Sheet>
 					</NewCard.Row>

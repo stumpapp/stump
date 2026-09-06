@@ -10,11 +10,12 @@ use crate::{
 	fs_utils::{ContentType, FileParts, PathUtils},
 	media::{
 		metadata::ProcessedMediaMetadata,
-		processor::{error::MediaProcessorError, zip::ZipProcessor},
+		processor::{error::MediaProcessorError, rar::RarProcessor, zip::ZipProcessor},
 	},
 };
 
 pub mod error;
+mod rar;
 mod zip;
 
 /// A struct representing the dimensions and content type of a single analyzed page
@@ -27,7 +28,7 @@ pub struct AnalyzedPage {
 
 /// A struct representing the options for processing a media file. This is a subset of [`LibraryConfig`]
 /// and is used to pass options to the [`MediaProcessor`] implementations.
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone)]
 pub struct MediaProcessorOptions {
 	/// Whether to convert RAR files to ZIP files after processing
 	pub convert_rar_to_zip: bool,
@@ -39,6 +40,9 @@ pub struct MediaProcessorOptions {
 	pub process_metadata: bool,
 	/// Whether to generate a hash for the file that is compatible with KOReader
 	pub generate_koreader_hashes: bool,
+	/// The directory to use whenever a temporary file is needed, e.g. when converting
+	/// a RAR file to a ZIP
+	pub cache_directory: PathBuf,
 }
 // TODO: ^ take more from stump config?
 
@@ -120,7 +124,9 @@ pub trait MediaProcessor {
 	) -> Result<AnalyzedPage, MediaProcessorError>;
 }
 
-async fn get_processor(path: &Path) -> Result<impl MediaProcessor, MediaProcessorError> {
+async fn get_processor(
+	path: &Path,
+) -> Result<Box<dyn MediaProcessor + Send>, MediaProcessorError> {
 	let mime = ContentType::from_path_async(path).await.mime_type();
 	let FileParts { extension, .. } = path.file_parts();
 
@@ -133,11 +139,10 @@ async fn get_processor(path: &Path) -> Result<impl MediaProcessor, MediaProcesso
 
 	match (mime.as_str(), extension.to_lowercase().as_str()) {
 		("application/zip" | "application/vnd.comicbook+zip", ext) if ext != "epub" => {
-			Ok(ZipProcessor)
+			Ok(Box::new(ZipProcessor))
 		},
 		("application/vnd.rar" | "application/vnd.comicbook-rar", _) => {
-			// Ok(ProcessorType::Rar)
-			todo!()
+			Ok(Box::new(RarProcessor))
 		},
 		("application/epub+zip", _) => {
 			todo!()

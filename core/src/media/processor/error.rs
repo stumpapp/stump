@@ -4,14 +4,20 @@ pub enum MediaProcessorError {
 	ArchiveEmpty,
 	#[error("A blocking task panicked or was canceled: {0}")]
 	BlockingTask(#[from] tokio::task::JoinError),
+	#[error("The media file was not found")]
+	FileNotFound,
 	#[error("An IO error occurred: {0}")]
 	Io(#[from] std::io::Error),
 	#[error("Failed to read image size: {0}")]
 	ImageSize(#[from] imagesize::ImageError),
 	#[error("The page requested was not found in the media file")]
 	PageNotFound,
+	#[error("An unrar error occurred: {0}")]
+	Unrar(#[from] unrar::error::UnrarError),
 	#[error("This file type is not supported: {0}")]
 	UnsupportedFile(String),
+	#[error("A UTF-8 encoding error occurred: {0}")]
+	Utf8(#[from] std::str::Utf8Error),
 	#[error("A zip error occurred: {0}")]
 	Zip(#[from] zip::result::ZipError),
 }

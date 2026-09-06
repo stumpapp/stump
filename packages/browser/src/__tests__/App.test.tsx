@@ -39,6 +39,6 @@ describe('StumpWebClient', () => {
 		)
 
 		expect(screen.queryByTestId('criticalErrorHeading')).toBeInTheDocument()
-		expect(screen.queryByRole('link', { name: 'Fehler melden' })).toBeInTheDocument()
+		expect(await screen.findByRole('link', { name: 'Fehler melden' })).toBeInTheDocument()
 	})
 })

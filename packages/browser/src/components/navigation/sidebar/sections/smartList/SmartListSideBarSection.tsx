@@ -5,7 +5,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
 
 import { usePaths } from '@/paths'
-import { usePrefetchSmartList } from '@/scenes/smartList'
+import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'

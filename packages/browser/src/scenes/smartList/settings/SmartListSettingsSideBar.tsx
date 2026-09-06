@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey } from '@/hooks/useRouteGroups'
 import paths from '@/paths'
-import { SideBarLinkButton } from '@/scenes/settings'
+import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
 import { useSmartListContext } from '../context'
 import { createRouteGroups } from './routes'

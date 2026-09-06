@@ -1,7 +1,6 @@
-import { PREFETCH_STALE_TIME, useGraphQL, useSDK } from '@stump/client'
+import { useGraphQL, useSDK } from '@stump/client'
 import { usePrevious } from '@stump/components'
-import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
+import { InterfaceLayout, MediaFilterInput } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { useShallow } from 'zustand/react/shallow'
@@ -9,7 +8,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
 import { defaultBookColumnSort } from '@/components/book/table'
-import { DynamicCardGrid } from '@/components/container'
+import DynamicCardGrid from '@/components/container/DynamicCardGrid'
 import {
 	FilterContext,
 	FilterHeader,
@@ -19,11 +18,9 @@ import {
 	useFilterScene,
 } from '@/components/filters'
 import {
-	DEFAULT_MEDIA_ORDER_BY,
 	useMediaURLOrderBy,
 	useSearchMediaFilter,
 	useURLKeywordSearch,
-	useURLPageParams,
 } from '@/components/filters/useFilterScene'
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { SeriesBooksAlphabet } from '@/components/series'
@@ -34,88 +31,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
 
 import { useSeriesContext } from '../../context'
-
-const query = graphql(`
-	query SeriesBooksScene(
-		$filter: MediaFilterInput!
-		$orderBy: [MediaOrderBy!]!
-		$pagination: Pagination!
-	) {
-		media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
-			nodes {
-				id
-				...BookCard
-				...BookMetadata
-			}
-			pageInfo {
-				__typename
-				... on OffsetPaginationInfo {
-					currentPage
-					totalPages
-					pageSize
-					pageOffset
-					zeroBased
-				}
-			}
-		}
-	}
-`)
-
-export type UsePrefetchSeriesBooksParams = {
-	page?: number
-	pageSize?: number
-	filter: MediaFilterInput[]
-	orderBy: MediaOrderBy[]
-}
-
-export const usePrefetchSeriesBooks = () => {
-	const { sdk } = useSDK()
-	const { pageSize } = useURLPageParams()
-	const { search } = useURLKeywordSearch()
-	const searchFilter = useSearchMediaFilter(search)
-
-	const client = useQueryClient()
-
-	const prefetch = useCallback(
-		(
-			id: string,
-			params: UsePrefetchSeriesBooksParams = { filter: [], orderBy: DEFAULT_MEDIA_ORDER_BY },
-		) => {
-			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
-			return client.prefetchQuery({
-				queryKey: getQueryKey(
-					sdk.cacheKeys.seriesBooks,
-					id,
-					pageParams.page,
-					pageParams.pageSize,
-					search,
-					params.filter,
-					params.orderBy,
-				),
-				queryFn: async () => {
-					const response = await sdk.execute(query, {
-						filter: {
-							seriesId: { eq: id },
-							_and: params.filter,
-							_or: searchFilter,
-						},
-						orderBy: params.orderBy,
-						pagination: {
-							offset: {
-								...pageParams,
-							},
-						},
-					})
-					return response
-				},
-				staleTime: PREFETCH_STALE_TIME,
-			})
-		},
-		[client, search, searchFilter, pageSize, sdk],
-	)
-
-	return prefetch
-}
+import { getQueryKey, query, usePrefetchSeriesBooks } from './queries'
 
 export default function SeriesBooksSceneContainer() {
 	return (
@@ -123,18 +39,6 @@ export default function SeriesBooksSceneContainer() {
 			<SeriesBooksScene />
 		</Suspense>
 	)
-}
-
-function getQueryKey(
-	cacheKey: string,
-	libraryId: string,
-	page: number,
-	pageSize: number,
-	search: string | undefined,
-	filters: MediaFilterInput[] | undefined,
-	orderBy: MediaOrderBy[] | undefined,
-): (string | object | number | MediaFilterInput[] | MediaOrderBy[] | undefined)[] {
-	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 
 function SeriesBooksScene() {

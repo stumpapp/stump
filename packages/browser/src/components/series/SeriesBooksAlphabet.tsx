@@ -3,7 +3,7 @@ import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense } from 'react'
 
-import { useSeriesContext } from '@/scenes/series'
+import { useSeriesContext } from '@/scenes/series/context'
 
 import { Alphabet } from '../filters'
 

@@ -498,7 +498,8 @@
 			},
 			"oneshotsDirectory": {
 				"label": "Einzelband-Ordner",
-				"description": "Der Name des Ordners, in welchem Einzelbänder"
+				"description": "Der Name des Ordners, in welchem Einzelbänder",
+				"placeholder": "_oneshots"
 			}
 		},
 		"scan": {
@@ -600,7 +601,8 @@
 		"tabs": {
 			"books": "Bücher",
 			"series": "Reihen",
-			"files": "Dateien"
+			"files": "Dateien",
+			"oneshots": "Einzelbänder"
 		}
 	},
 	"librarySettingsScene": {
@@ -2739,7 +2741,8 @@
 		},
 		"enter": "Enter",
 		"info": "Info",
-		"login": "Anmeldung"
+		"login": "Anmeldung",
+		"notConfigured": "Nicht konfiguriert"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2937,7 +2940,9 @@
 				"none": {
 					"label": "Keine",
 					"description": "Keine Authentifizierung ist für diesen Server benötigt oder die Authentifizierung ist durch die URL bereitgestellt"
-				}
+				},
+				"section": "Authentifizierung",
+				"method": "Methode"
 			},
 			"serverNamePlaceholder": "Mein Server",
 			"catalogUrl": "Katalog URL",
@@ -2949,7 +2954,14 @@
 			"validation": {
 				"nameAlreadyExists": "Name ist bereits vorhanden",
 				"cannotSetAuthorizationHeader": "Authorisierungsheader kann nicht gesetzt werden"
-			}
+			},
+			"createServer": "Server erstellen",
+			"updateServer": "Server aktualisieren",
+			"basicInfo": "Grundlegende Information",
+			"primaryUrl": "Primäre URL",
+			"optionalSettings": "Optionale Einstellungen",
+			"networking": "Vernetzung",
+			"advancedOptions": "Erweiterte Einstellungen"
 		},
 		"bookActions": {
 			"markAsRead": {
@@ -3613,6 +3625,41 @@
 				"both": "Akzeptiere Beide"
 			},
 			"pullError": "Fehler bei der Abrufe des Fernfortschrittes"
+		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "Konfiguration",
+				"networkSettings": "Netzwerkeinstellungen"
+			}
+		},
+		"serverNetworkSettings": {
+			"activeProfile": {
+				"label": "Aktive Profile",
+				"localIsActive": "Lokales Profil ist aktiv",
+				"primaryIsActive": "Primäres Profil ist aktiv",
+				"autoSwitchToLocalDidNotWork": "The App war nicht erfolgreich bei dem Wechsel zu dem aktiven Profil. Bitte überprüfe deine Netzwerkverbindung"
+			},
+			"localProfile": "Lokales Profil",
+			"primaryUrl": "Primäre URL",
+			"autoSwitchToLocal": {
+				"label": "Wechsel automatisch zu dem lokalen Profil",
+				"description": "Wechsel zu dem lokalen Profil, wenn möglich"
+			},
+			"localUrl": "Lokale URL",
+			"saveUrlChanges": "Speicher die URL Änderungen",
+			"swapUrls": {
+				"label": "Wechsel die URLs",
+				"swap": "Wechsel",
+				"confirmationText": "Bist du sicher, dass du die fern und lokale URL wechseln möchtest? Dies tritt sofort in Kraft",
+				"noLocalUrlSet": {
+					"title": "Keine lokale URL angegeben",
+					"description": "Du musst eine lokale URL setzen, bevor du diese zu der fern URL wechsel kannst"
+				}
+			},
+			"wifiNetwork": {
+				"label": "WLAN Netzwerk",
+				"noAssociatedNetwork": "Kein zugehöriges WLAN-Netzwerk"
+			}
 		}
 	},
 	"thumbnailSelector": {
@@ -3705,6 +3752,13 @@
 					"verticalScroll": "Vertikales Scrollen",
 					"horizontalScroll": "Horizontales Scrollen",
 					"paged": "Seitig"
+				}
+			},
+			"doublePageBehavior": {
+				"options": {
+					"auto": "Auto",
+					"always": "Immer",
+					"off": "Aus"
 				}
 			}
 		}

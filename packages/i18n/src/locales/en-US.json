@@ -1483,16 +1483,11 @@
 						"confirm": "Save Changes"
 					}
 				},
-				"locale": {
-					"localeSelector": {
-						"label": "Language"
-					},
-					"heading": "Language and locale",
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
+				"language": {
+					"label": "Language",
+					"contributeIfAble": "Please consider contributing to Stump's translations if you're able to!",
+					"contribute": "Contiribute",
+					"noThanks": "No thanks"
 				}
 			}
 		},

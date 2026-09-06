@@ -64,7 +64,9 @@ function Screen() {
 	const addInstanceToCache = useCacheStore((state) => state.addSDK)
 	const removeInstanceFromCache = useCacheStore((state) => state.removeSDK)
 
+	// eslint-disable-next-line react-hooks/refs
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
+	// eslint-disable-next-line react-hooks/refs
 	const [isInitiallyConnecting, setIsInitiallyConnecting] = useState(() => !cachedInstance.current)
 	const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false)
 	const [retryCounter, setRetryCounter] = useState(0)
@@ -286,6 +288,7 @@ function Screen() {
 		throw fatalError
 	}
 
+	// eslint-disable-next-line react-hooks/refs
 	if (!isServerAccessible.current) {
 		return <ServerConnectFailed onRetry={onResetState} />
 	}

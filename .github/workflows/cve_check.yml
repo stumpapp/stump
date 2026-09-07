@@ -1,6 +1,9 @@
 name: CVE Check
 
 on:
+  push:
+    paths:
+      - .github/workflows/cve_check.yml
   schedule:
     - cron: '0 0 * * 1'
   workflow_dispatch:
@@ -28,11 +31,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # prevent non-zero exit from killing the job
+          set +e
           AUDIT_OUTPUT=$(yarn audit --groups dependencies 2>&1)
           AUDIT_EXIT_CODE=$?
+          set -e
 
           # yarn audit exits 0 when no vulnerabilities are found
-          if [ "$AUDIT_EXIT_CODE" -ne 0 ]; then
+          if [ "$AUDIT_EXIT_CODE" -ne 0 ] && [ "${{ github.event_name }}" != "push" ]; then
             printf '```\n%s\n```\n' "$AUDIT_OUTPUT" > issue-body.txt
             gh issue create \
               --title "[CVE] Vulnerable dependencies detected — $(date -u +%Y-%m-%d)" \

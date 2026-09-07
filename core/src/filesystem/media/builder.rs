@@ -18,10 +18,9 @@ use crate::{
 	CoreResult,
 };
 
-use super::{
-	generate_hashes, metadata::ProcessedMediaMetadata, process_metadata,
-	ProcessedFileHashes,
-};
+use super::metadata::ProcessedMediaMetadata;
+
+// TODO(reorg): handle this next i think
 
 pub struct MediaBuilder {
 	path: PathBuf,

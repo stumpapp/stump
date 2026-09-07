@@ -4,6 +4,10 @@ pub enum MediaProcessorError {
 	ArchiveEmpty,
 	#[error("A blocking task panicked or was canceled: {0}")]
 	BlockingTask(#[from] tokio::task::JoinError),
+	#[error("Failed to read epub document: {0}")]
+	EpubDoc(#[from] epub::doc::DocError),
+	#[error("Failed to read epub file: {0}")]
+	EpubRead(String),
 	#[error("The media file was not found")]
 	FileNotFound,
 	#[error("The media file is too small to process")]

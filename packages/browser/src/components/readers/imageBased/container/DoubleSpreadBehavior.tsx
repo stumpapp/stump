@@ -25,6 +25,7 @@ export default function DoubleSpreadBehavior({ behavior, onChange }: Props) {
 		<div>
 			<NativeSelect
 				id="double-spread-behavior"
+				aria-label={t('imageReader.settings.doublePageBehavior.label')}
 				size="sm"
 				options={[
 					{

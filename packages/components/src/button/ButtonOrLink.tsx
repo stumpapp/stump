@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { cn } from '../utils'
 import { Button, ButtonProps, buttonVariants } from './Button'

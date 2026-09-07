@@ -10,7 +10,7 @@ import {
 } from '@stump/graphql'
 import { toObjectParams, toUrlParams } from '@stump/sdk'
 import { useCallback, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import { FilterInput, IFilterContext, Ordering, OrderingField } from './context'

@@ -1,7 +1,7 @@
 import { UserPermission } from '@stump/graphql'
 import { render, screen } from '@testing-library/react'
 import { Suspense } from 'react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 
 import { type IAppContext, useAppContext } from '@/context'
 import { useAppStore } from '@/stores/app.ts'

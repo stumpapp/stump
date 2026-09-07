@@ -1,7 +1,7 @@
 import { cn, Label, NavigationMenu } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Cog } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { usePreferences } from '@/hooks'
 import paths from '@/paths'

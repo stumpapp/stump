@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 
 /**
  * A hook to get and set the current page from the URL. This is useful for pagination.

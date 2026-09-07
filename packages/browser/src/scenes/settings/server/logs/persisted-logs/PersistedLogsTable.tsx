@@ -7,7 +7,7 @@ import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import { intlFormat, isBefore } from 'date-fns'
 import { CircleSlash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 
 import { Table } from '@/components/table'
 

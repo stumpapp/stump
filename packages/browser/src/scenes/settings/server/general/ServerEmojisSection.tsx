@@ -249,13 +249,13 @@ export default function ServerEmojisSection() {
 	return (
 		<>
 			<Dialog>
-				<Dialog.Trigger asChild>
-					<NewCard.Row label={t(getKey('title'))} description={t(getKey('description'))}>
+				<NewCard.Row label={t(getKey('title'))} description={t(getKey('description'))}>
+					<Dialog.Trigger asChild>
 						<Button size="sm" variant="outline">
 							{t('common.edit')}
 						</Button>
-					</NewCard.Row>
-				</Dialog.Trigger>
+					</Dialog.Trigger>
+				</NewCard.Row>
 
 				<Dialog.Content size="xl">
 					<Dialog.Header>

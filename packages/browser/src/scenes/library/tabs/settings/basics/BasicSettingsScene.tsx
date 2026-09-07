@@ -48,15 +48,16 @@ export default function BasicSettingsScene() {
 	})
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
-	const [path, name, description, tags, libraryType] = useWatch({
+	const [path, name, description, tags, libraryType, oneshotsDirectory] = useWatch({
 		control: form.control,
-		name: ['path', 'name', 'description', 'tags', 'libraryType'],
+		name: ['path', 'name', 'description', 'tags', 'libraryType', 'oneshotsDirectory'],
 	})
 
 	const hasChanges = useMemo(() => {
 		const currentTagSet = new Set(tags?.map(({ label }) => label) || [])
 		const libraryTagSet = new Set(library?.tags?.map(({ name }) => name) || [])
 		const differentLibraryType = library?.config?.libraryType !== libraryType
+		const existingOneshotsDirectory = library?.config?.oneshotsDirectory || null
 
 		return (
 			library?.path !== normalizePath(path) ||
@@ -64,9 +65,10 @@ export default function BasicSettingsScene() {
 			library?.description !== description ||
 			[...currentTagSet].some((tag) => !libraryTagSet.has(tag)) ||
 			[...libraryTagSet].some((tag) => !currentTagSet.has(tag)) ||
-			differentLibraryType
+			differentLibraryType ||
+			existingOneshotsDirectory !== oneshotsDirectory
 		)
-	}, [library, path, name, description, tags, libraryType])
+	}, [library, path, name, description, tags, libraryType, oneshotsDirectory])
 
 	const handleSubmit = useCallback(
 		(values: CreateOrUpdateLibrarySchema) => {

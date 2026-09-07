@@ -8,7 +8,6 @@ import { ComponentProps } from 'react'
 import CreateOrUpdateEmailerForm from '../CreateOrUpdateEmailerForm'
 import { CreateOrUpdateEmailerSchema } from '../schema'
 
-// eslint-disable-next-line react/display-name
 vi.mock('../TestEmailerButton', () => ({ default: () => <div>TestEmailerButton</div> }))
 
 vi.mock('@stump/i18n', () => ({

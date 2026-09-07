@@ -23,7 +23,7 @@ export default function Calendar({
 				cell: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
 				day: cn(
 					buttonVariants({ size: 'sm', variant: 'ghost' }),
-					'h-8 w-8 p-0 font-normal aria-selected:opacity-100 focus:ring-ring',
+					'h-8 w-8 p-0 font-normal focus:ring-ring aria-selected:opacity-100',
 				),
 				day_disabled: 'text-muted-foreground opacity-50',
 				day_hidden: 'invisible',
@@ -39,7 +39,7 @@ export default function Calendar({
 				nav: 'space-x-1 flex items-center',
 				nav_button: cn(
 					buttonVariants({ variant: 'outline' }),
-					'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 focus:ring-ring',
+					'h-7 w-7 p-0 bg-transparent opacity-50 hover:opacity-100 focus:ring-ring',
 				),
 				nav_button_next: 'absolute right-1',
 				nav_button_previous: 'absolute left-1',

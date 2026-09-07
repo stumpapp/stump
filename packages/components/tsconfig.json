@@ -9,7 +9,7 @@
 		"jsx": "react-jsx",
 		"esModuleInterop": true,
 		"module": "es2022",
-		"moduleResolution": "Node"
+		"moduleResolution": "Bundler"
 	},
 	"include": ["src", "tailwind.config.ts", "tailwind/**/*"]
 }

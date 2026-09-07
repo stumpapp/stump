@@ -2138,6 +2138,12 @@
 			"helmet": "User management",
 			"title": "Users",
 			"description": "Manage the users on this server",
+			"userStats": {
+				"users": "Users",
+				"booksCompleted": "Books completed",
+				"booksInProgress": "Books in progress",
+				"topReader": "Top reader"
+			},
 			"createUser": {
 				"helmet": "Create user",
 				"title": "Create user",
@@ -2761,6 +2767,10 @@
 		"back": "Back",
 		"continue": "Continue",
 		"book": "Book",
+		"book_one": "Book",
+		"book_other": "Books",
+		"xBooks_one": "{{count}} Book",
+		"xBooks_other": "{{count}} Books",
 		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
@@ -3076,6 +3086,10 @@
 		},
 		"common": {
 			"book": "Book",
+			"book_one": "Book",
+			"book_other": "Books",
+			"xBooks_one": "{{count}} Book",
+			"xBooks_other": "{{count}} Books",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",

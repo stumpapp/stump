@@ -565,6 +565,7 @@ impl EpubProcessor {
 		file: &[u8],
 		buf: &mut Vec<u8>,
 	) -> Option<(String, Vec<u8>)> {
+		buf.clear();
 		let mut reader = quick_xml::Reader::from_reader(std::io::Cursor::new(file));
 
 		loop {

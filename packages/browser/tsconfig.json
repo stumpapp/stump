@@ -7,7 +7,7 @@
 		"allowImportingTsExtensions": true,
 		"jsx": "react-jsx",
 		"module": "ES2022",
-		"moduleResolution": "Node",
+		"moduleResolution": "Bundler",
 		"emitDeclarationOnly": true,
 		"outDir": "dist",
 		"paths": {

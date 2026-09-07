@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 
 import { AppLayout } from './AppLayout.tsx'
 import { RouterProvider } from './context/RouterContext.tsx'

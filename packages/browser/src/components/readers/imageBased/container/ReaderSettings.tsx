@@ -4,7 +4,7 @@ import { ReadingMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import omit from 'lodash/omit'
 import { useCallback, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 
 import { useReaderStore } from '@/stores'
 

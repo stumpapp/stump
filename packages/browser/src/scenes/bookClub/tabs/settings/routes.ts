@@ -2,68 +2,68 @@ import { CalendarCheck, NotebookTabs, PackageX, Sliders, Tag, Users } from 'luci
 
 import { RouteGroup } from '@/hooks/useRouteGroups'
 
-export const routeGroups: RouteGroup[] = [
+export const createRouteGroups = (slug: string): RouteGroup[] => [
 	{
-		defaultRoute: 'settings/basics',
+		defaultRoute: `/clubs/${slug}/settings/basics`,
 		items: [
 			{
 				icon: NotebookTabs,
 				label: 'Basics',
 				localeKey: 'basics',
 				// permission: 'bookclub:manage',
-				to: 'settings/basics',
+				to: `/clubs/${slug}/settings/basics`,
 			},
 		],
 	},
 	{
-		defaultRoute: 'members',
+		defaultRoute: `/clubs/${slug}/settings/members`,
 		items: [
 			{
 				icon: Users,
 				label: 'Members',
 				localeKey: 'members',
 				// permission: 'bookclub:manage',
-				to: 'settings/members',
+				to: `/clubs/${slug}/settings/members`,
 			},
 			{
 				icon: Tag,
 				label: 'Roles',
 				localeKey: 'roles',
 				// permission: 'bookclub:manage',
-				to: 'settings/roles',
+				to: `/clubs/${slug}/settings/roles`,
 			},
 		],
 		label: 'Members',
 	},
 	{
-		defaultRoute: 'settings/scheduling',
+		defaultRoute: `/clubs/${slug}/settings/scheduler`,
 		items: [
 			{
 				icon: CalendarCheck,
 				label: 'Scheduler',
 				localeKey: 'scheduling/scheduler',
 				// permission: 'bookclub:manage',
-				to: 'settings/scheduler',
+				to: `/clubs/${slug}/settings/scheduler`,
 			},
 			{
 				icon: Sliders,
 				label: 'Options',
 				localeKey: 'scheduling/options',
 				// permission: 'bookclub:manage',
-				to: 'settings/scheduler-options',
+				to: `/clubs/${slug}/settings/scheduler-options`,
 			},
 		],
 		label: 'Scheduling',
 	},
 	{
-		defaultRoute: 'settings/danger',
+		defaultRoute: `/clubs/${slug}/settings/delete`,
 		items: [
 			{
 				icon: PackageX,
 				label: 'Delete',
 				localeKey: 'danger-zone/delete',
 				// permission: 'bookclub:manage',
-				to: 'settings/delete',
+				to: `/clubs/${slug}/settings/delete`,
 			},
 		],
 		label: 'Danger Zone',

@@ -303,8 +303,8 @@ impl EpubProcessor {
 				// highest ranked cover is a top level "cover.png"
 				// next highest ranked cover is any file starting with "cover"
 				// next highest ranked cover is any file ending with "cover"
+				// next highest ranked cover is any file containing "cover"
 				// TODO: add more other fallbacks
-				//  - parse the first html file and look for the first image
 				//  - check for images that have a ratio between [1.4, 1.6]
 				let path_str = path.to_string_lossy().to_lowercase();
 				let extension = path
@@ -332,7 +332,7 @@ impl EpubProcessor {
 				}
 			})
 			// ignore images that do no contain cover in their name
-			.filter(|&(wheight, _)| wheight > 0)
+			.filter(|&(weight, _)| weight > 0)
 			.max_by_key(|(weight, _)| *weight)
 			.map(|(_, id)| id.to_string())
 	}
@@ -361,6 +361,11 @@ impl EpubProcessor {
 		tracing::debug!(
 			"Explicit cover image could not be found, falling back to searching for best match..."
 		);
+
+		if let Some((mime, buf)) = Self::get_cover_by_reading_order(epub_file) {
+			return Ok((ContentType::from(mime.as_str()), buf));
+		}
+
 		let resources_map: HashMap<String, (PathBuf, String)> = epub_file
 			.resources
 			.iter()
@@ -372,10 +377,6 @@ impl EpubProcessor {
 			if let Some((buf, mime)) = epub_file.get_resource(id.as_str()) {
 				return Ok((ContentType::from(mime.as_str()), buf));
 			}
-		}
-
-		if let Some((mime, buf)) = Self::get_cover_by_reading_order(epub_file) {
-			return Ok((ContentType::from(mime.as_str()), buf));
 		}
 
 		let id = Self::get_cover_id_by_resource_alphabetically(&resources_map);
@@ -391,14 +392,14 @@ impl EpubProcessor {
 	}
 
 	/// Returns the cover image for the epub file. If a cover image cannot be extracted via the
-	/// metadata, it will go through two rounds of fallback methods:
+	/// metadata, it will go through four rounds of fallback methods:
 	///
 	/// 1. Attempt to find a resource with the default ID of "cover"
-	/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
+	/// 2. Find the first image in the book by reading order.
+	/// 3. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
 	///    results based on how likely they are to be the cover. For example, if the cover is named
 	///    "cover.jpg", it's probably the cover. The entry with the highest weight, if any, will be
 	///    returned.
-	/// 3. Find the first image in the book by reading order.
 	/// 4. Find the image with the alphabetically sorted first name.
 	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = EpubDoc::new(path).map_err(|e| {
@@ -578,29 +579,15 @@ impl EpubProcessor {
 						.flatten()
 						.and_then(|a| String::from_utf8(a.value.to_vec()).ok())
 						.filter(|a| {
-							["png", "jpg", "jpeg"]
-								.iter()
-								.any(|file_ending| a.ends_with(file_ending))
+							["png", "jpg", "jpeg"].iter().any(|file_ending| {
+								a.to_lowercase().ends_with(file_ending)
+							})
 						}) {
 						// Assamble full path to access resource.
-						//
-						// Manually normalize the path
-						//
-						// TODO: Replace with normalize_lexically
-						// https://doc.rust-lang.org/std/path/struct.Path.html#method.normalize_lexically
-						let path = dir_path.join(img_path);
-						let mut new_path = PathBuf::new();
-						for c in path.components() {
-							match c {
-								std::path::Component::ParentDir => {
-									new_path.pop();
-								},
-								std::path::Component::Normal(os_str) => {
-									new_path.push(os_str)
-								},
-								_ => (),
-							}
-						}
+						let new_path = normalize_resource_path(
+							PathBuf::from(img_path),
+							&dir_path.to_string_lossy(),
+						);
 
 						// access resource directly because it is hard to get the resource id from a path
 						if let Some(media_type) =
@@ -615,6 +602,7 @@ impl EpubProcessor {
 				},
 				_ => (),
 			}
+			buf.clear();
 		}
 	}
 }
@@ -828,6 +816,8 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 		adjusted_path = PathBuf::from(root).join(adjusted_path);
 	}
 
+	// TODO: Replace with normalize_lexically
+	// https://doc.rust-lang.org/std/path/struct.Path.html#method.normalize_lexically
 	let mut normalized = PathBuf::new();
 	for component in adjusted_path.components() {
 		match component {
@@ -852,6 +842,53 @@ mod tests {
 	use crate::filesystem::media::tests::get_test_epub_path;
 
 	#[test]
+	fn test_get_cover_from_xhtml_svg_cover() {
+		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests")
+			.join("data")
+			.join("book.epub");
+
+		let mut epub = EpubDoc::new(epub_path).unwrap();
+
+		// this test file references the cover image inside a svg
+		assert_eq!(EpubProcessor::get_cover_by_reading_order(&mut epub), None);
+	}
+
+	#[test]
+	fn test_get_cover_from_xhtml_img_cover() {
+		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests")
+			.join("data")
+			.join("book_image_cover.epub");
+
+		let mut epub = EpubDoc::new(epub_path).unwrap();
+
+		assert!(
+			EpubProcessor::get_cover_by_reading_order(&mut epub)
+				== epub
+					.get_resource("id-3324512750020140212")
+					.map(|(data, mime)| (mime, data))
+		);
+	}
+
+	#[test]
+	fn test_get_cover_from_xhtml_img_cover_last_chapter() {
+		let epub_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests")
+			.join("data")
+			.join("book_image_cover_last_chapter.epub");
+
+		let mut epub = EpubDoc::new(epub_path).unwrap();
+
+		assert!(
+			EpubProcessor::get_cover_by_reading_order(&mut epub)
+				== epub
+					.get_resource("id-3324512750020140212")
+					.map(|(data, mime)| (mime, data))
+		);
+	}
+
+	#[test]
 	fn test_get_cover_first_sorted_image() {
 		let resources = HashMap::from([
 			(
@@ -869,6 +906,10 @@ mod tests {
 		]);
 		assert_eq!(
 			EpubProcessor::get_cover_id_by_resource_name(&resources),
+			None
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_id_by_resource_alphabetically(&resources),
 			Some("id4".to_string())
 		);
 	}

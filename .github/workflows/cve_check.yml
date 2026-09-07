@@ -38,10 +38,14 @@ jobs:
           set -e
 
           # yarn audit exits 0 when no vulnerabilities are found
-          if [ "$AUDIT_EXIT_CODE" -ne 0 ] && [ "${{ github.event_name }}" != "push" ]; then
-            printf '```\n%s\n```\n' "$AUDIT_OUTPUT" > issue-body.txt
-            gh issue create \
-              --title "[CVE] Vulnerable dependencies detected — $(date -u +%Y-%m-%d)" \
-              --body-file issue-body.txt \
-              --label "security"
+          if [ "$AUDIT_EXIT_CODE" -ne 0 ]; then
+            if [ "${{ github.event_name }}" = "push" ]; then
+              echo "$AUDIT_OUTPUT"
+            else
+              printf '```\n%s\n```\n' "$AUDIT_OUTPUT" > issue-body.txt
+              gh issue create \
+                --title "[CVE] Vulnerable dependencies detected — $(date -u +%Y-%m-%d)" \
+                --body-file issue-body.txt \
+                --label "security"
+            fi
           fi

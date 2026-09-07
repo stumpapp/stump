@@ -7,7 +7,7 @@ use std::{
 
 use futures::StreamExt;
 use models::{
-	entity::{library_config, media, media_metadata, series},
+	entity::{library_config, media, media_metadata, series, series_metadata},
 	shared::enums::FileStatus,
 };
 use sea_orm::{prelude::*, ActiveValue, Set, TransactionTrait};
@@ -59,22 +59,29 @@ fn build_oneshot_blocking<P: AsRef<Path>>(
 	let series = series::ActiveModel {
 		id: Set(id.to_string()),
 		path: Set(path.to_string_lossy().to_string()),
-		name: Set(name),
+		name: Set(name.clone()),
 		library_id: Set(Some(library_id.to_string())),
 		is_oneshot: Set(true),
 		status: Set(FileStatus::Ready),
 		..Default::default()
 	};
 
-	let series = BuiltSeries {
-		series,
-		// TODO: do we need to read media metadata for this?
-		metadata: None,
-	};
-
 	let media = MediaBuilder::new(path, &id.to_string(), library_config, core_config)
 		.build()?
 		.oneshot();
+
+	let metadata = match media.metadata.as_ref().map(|m| m.title.clone()) {
+		// ^ note: as_ref() impl for ActiveValue allegedly can panic if the value is not set,
+		// so just went a little more verbose here with a clone and match
+		Some(Set(Some(title))) => Some(series_metadata::ActiveModel {
+			series_id: Set(id.to_string()),
+			title: Set(Some(title)),
+			..Default::default()
+		}),
+		_ => None,
+	};
+
+	let series = BuiltSeries { series, metadata };
 
 	Ok(BuiltOneshot { series, media })
 }

@@ -1,5 +1,6 @@
 import { Preformatted, Sheet, usePrevious } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 
 const fragment = graphql(`
 	fragment JobDataInspector on CoreJobOutput {
@@ -38,7 +39,11 @@ type Props = {
 	onClose: () => void
 }
 
+// TODO: pull in logs from this job, bumps complexity a bit but worth i think (even tho there is a see logs btn)
+
 export default function JobDataInspector({ data, onClose }: Props) {
+	const { t } = useLocaleContext()
+
 	const inlineData = useFragment(fragment, data)
 	const fallback = usePrevious(data)
 	const displayedData = inlineData || fallback
@@ -47,10 +52,14 @@ export default function JobDataInspector({ data, onClose }: Props) {
 		<Sheet
 			open={!!data}
 			onClose={onClose}
-			title="Job data"
-			description="The final output of the job after it had completed"
+			title={t(getKey('title'))}
+			description={t(getKey('description'))}
 		>
-			<Preformatted title="Raw JSON" content={displayedData} />
+			<div className="px-4">
+				<Preformatted content={displayedData} />
+			</div>
 		</Sheet>
 	)
 }
+
+const getKey = (key: string) => `settingsScene.server/jobs.sections.history.dataInspector.${key}`

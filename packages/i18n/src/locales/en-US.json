@@ -2033,7 +2033,7 @@
 					"description": "Some jobs can be configured to automatically run on a schedule",
 					"restartRequiredTitle": "Restart required",
 					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
+					"createScheduledJob": "Create scheduled job",
 					"deleteScheduledJob": {
 						"title": "Delete scheduled job",
 						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
@@ -2118,6 +2118,10 @@
 						"emptyHeading": "There are no jobs to display",
 						"emptySubtitle": "You can't have a job if you don't have a job",
 						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
+					},
+					"dataInspector": {
+							"title": "Job data",
+							"description": "The raw output of this job and any associated logs"
 					},
 					"deleteJobHistory": {
 						"title": "Delete job history",

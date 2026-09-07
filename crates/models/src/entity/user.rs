@@ -104,13 +104,10 @@ impl FromQueryResult for AuthUser {
 				None
 			})
 			.map(|p| user_preferences::Model {
-				home_arrangement: p
-					.home_arrangement
-					.or_else(user_preferences::Model::default_home_arrangement)
-					.map(|arrangement| arrangement.with_missing_home_sections()),
-				navigation_arrangement: p
-					.navigation_arrangement
-					.or_else(user_preferences::Model::default_navigation_arrangement),
+				home_arrangement: Some(serde_json::json!(p.resolved_home_arrangement())),
+				navigation_arrangement: Some(serde_json::json!(
+					p.resolved_navigation_arrangement()
+				)),
 				..p
 			});
 

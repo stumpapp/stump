@@ -24,7 +24,6 @@ export const homeArrangementQuery = graphql(`
 							}
 							... on OnDeckBooks {
 								name
-								links
 							}
 							... on RecentlyAdded {
 								entity
@@ -52,7 +51,6 @@ const updateMutation = graphql(`
 					}
 					... on OnDeckBooks {
 						name
-						links
 					}
 					... on RecentlyAdded {
 						entity
@@ -75,6 +73,31 @@ export const HOME_SECTION_IDS = [
 ] as const
 export type HomeSectionId = (typeof HOME_SECTION_IDS)[number]
 
+export function defaultHomeSections(): HomeSection[] {
+	return [
+		{ visible: true, config: { __typename: 'InProgressBooks', name: null, links: [] } },
+		{ visible: true, config: { __typename: 'OnDeckBooks', name: null } },
+		{
+			visible: true,
+			config: {
+				__typename: 'RecentlyAdded',
+				entity: FilterableArrangementEntity.Books,
+				name: null,
+				links: [],
+			},
+		},
+		{
+			visible: true,
+			config: {
+				__typename: 'RecentlyAdded',
+				entity: FilterableArrangementEntity.Series,
+				name: null,
+				links: [],
+			},
+		},
+	]
+}
+
 export function getHomeSectionId(section: HomeSection): HomeSectionId | undefined {
 	const { config } = section
 	switch (config.__typename) {
@@ -94,7 +117,7 @@ export function toHomeSectionInput({ config, visible }: HomeSection): Arrangemen
 		case 'InProgressBooks':
 			return { visible, config: { inProgressBooks: { name: config.name, links: config.links } } }
 		case 'OnDeckBooks':
-			return { visible, config: { onDeckBooks: { name: config.name, links: config.links } } }
+			return { visible, config: { onDeckBooks: { name: config.name } } }
 		case 'RecentlyAdded':
 			return {
 				visible,

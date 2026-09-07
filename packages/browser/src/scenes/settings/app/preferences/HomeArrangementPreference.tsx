@@ -15,12 +15,14 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Button, NewCard, RawSwitch, Sheet, Text } from '@stump/components'
+import { Button, cn, IconButton, NewCard, Sheet, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ArrowDown, ArrowUp, GripVertical } from 'lucide-react'
-import { FormEvent, useId, useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
+import { FormEvent, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import {
+	defaultHomeSections,
 	getHomeSectionId,
 	HOME_SECTION_IDS,
 	HomeSection,
@@ -81,16 +83,28 @@ export function HomeArrangementForm({ sections, onSave, onCancel }: FormProps) {
 	const { t } = useLocaleContext()
 	const [draft, setDraft] = useState(sections)
 	const [saving, setSaving] = useState(false)
-	const [failed, setFailed] = useState(false)
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
 		useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
 	)
 	const ids = draft.map(getHomeSectionId)
-	// Keep an unsupported saved configuration intact instead of silently dropping it.
+	// The server normalizes configurations; Reset also recovers stale client data.
 	const supported =
 		ids.length === HOME_SECTION_IDS.length &&
 		HOME_SECTION_IDS.every((id) => ids.filter((value) => value === id).length === 1)
+
+	useEffect(() => {
+		const id = 'home-arrangement-configuration'
+		if (!supported) {
+			toast.error(t(`${BASE}.unsupported`), {
+				id,
+				description: t(`${BASE}.unsupportedDescription`),
+			})
+		}
+		return () => {
+			toast.dismiss(id)
+		}
+	}, [supported, t])
 
 	const move = (from: number, to: number) => {
 		if (saving || from < 0 || to < 0 || from >= draft.length || to >= draft.length) return
@@ -107,63 +121,72 @@ export function HomeArrangementForm({ sections, onSave, onCancel }: FormProps) {
 		event.preventDefault()
 		if (saving || !supported) return
 		setSaving(true)
-		setFailed(false)
 		try {
 			await onSave(draft)
-		} catch {
-			setFailed(true)
+		} catch (error) {
+			toast.error(t(`${BASE}.saveFailed`), {
+				description: error instanceof Error ? error.message : undefined,
+			})
 		} finally {
 			setSaving(false)
 		}
 	}
-	const reset = () =>
-		setDraft(
-			HOME_SECTION_IDS.flatMap((id) => {
-				const section = draft.find((item) => getHomeSectionId(item) === id)
-				return section ? [{ ...section, visible: true }] : []
-			}),
-		)
+	const reset = () => setDraft(defaultHomeSections())
 
 	return (
-		<form onSubmit={save} className="space-y-4 px-4 pb-4">
-			{!supported && <Text role="alert">{t(`${BASE}.unsupported`)}</Text>}
-			{supported && (
-				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-					<SortableContext
-						items={ids.filter((id) => id !== undefined)}
-						strategy={verticalListSortingStrategy}
-					>
-						<ol aria-label={t(`${BASE}.label`)} className="space-y-2">
-							{draft.map((section, index) => (
-								<HomeArrangementItem
-									key={getHomeSectionId(section)}
-									section={section}
-									disabled={saving}
-									first={index === 0}
-									last={index === draft.length - 1}
-									onMove={(offset) => move(index, index + offset)}
-									onVisibilityChange={(visible) =>
-										setDraft((current) =>
-											current.map((item, i) => (i === index ? { ...item, visible } : item)),
-										)
-									}
-								/>
-							))}
-						</ol>
-					</SortableContext>
-				</DndContext>
-			)}
-			{failed && <Text role="alert">{t(`${BASE}.saveFailed`)}</Text>}
-			<div className="gap-2 flex flex-wrap justify-end">
-				<Button variant="ghost" disabled={saving || !supported} onClick={reset}>
-					{t(`${BASE}.reset`)}
-				</Button>
-				<Button variant="outline" disabled={saving} onClick={onCancel}>
-					{t('common.cancel')}
-				</Button>
-				<Button type="submit" disabled={saving || !supported}>
-					{t(saving ? `${BASE}.saving` : 'common.save')}
-				</Button>
+		<form onSubmit={save} className="px-4 pb-4">
+			<div className="flex w-full flex-col overflow-hidden rounded-xl border border-border">
+				<header className="px-4 py-0.5 flex items-center justify-between bg-muted/50">
+					<Button size="sm" variant="ghost" disabled={saving} onClick={reset}>
+						{t(`${BASE}.reset`)}
+					</Button>
+					<div className="gap-1 flex items-center">
+						<Button size="sm" variant="ghost" disabled={saving} onClick={onCancel}>
+							{t('common.cancel')}
+						</Button>
+						<Button
+							size="sm"
+							variant="ghost"
+							type="submit"
+							disabled={saving || !supported}
+							aria-busy={saving}
+						>
+							{t('common.save')}
+						</Button>
+					</div>
+				</header>
+				{supported ? (
+					<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+						<SortableContext
+							items={ids.filter((id) => id !== undefined)}
+							strategy={verticalListSortingStrategy}
+						>
+							<ol
+								aria-label={t(`${BASE}.label`)}
+								className="gap-2 px-4 py-3.5 flex w-full flex-col"
+							>
+								{draft.map((section, index) => (
+									<HomeArrangementItem
+										key={getHomeSectionId(section)}
+										section={section}
+										disabled={saving}
+										onVisibilityChange={() =>
+											setDraft((current) =>
+												current.map((item, i) =>
+													i === index ? { ...item, visible: !item.visible } : item,
+												),
+											)
+										}
+									/>
+								))}
+							</ol>
+						</SortableContext>
+					</DndContext>
+				) : (
+					<Text className="px-4 py-3.5" variant="muted">
+						{t(`${BASE}.unsupportedDescription`)}
+					</Text>
+				)}
 			</div>
 		</form>
 	)
@@ -172,69 +195,66 @@ export function HomeArrangementForm({ sections, onSave, onCancel }: FormProps) {
 type ItemProps = {
 	section: HomeSection
 	disabled: boolean
-	first: boolean
-	last: boolean
-	onMove: (offset: number) => void
-	onVisibilityChange: (visible: boolean) => void
+	onVisibilityChange: () => void
 }
 
-function HomeArrangementItem({
-	section,
-	disabled,
-	first,
-	last,
-	onMove,
-	onVisibilityChange,
-}: ItemProps) {
+function HomeArrangementItem({ section, disabled, onVisibilityChange }: ItemProps) {
 	const { t } = useLocaleContext()
 	const id = getHomeSectionId(section)!
 	const label = t(`homeScene.${id}.title`)
-	const labelId = useId()
-	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id, disabled })
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		setActivatorNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
+		id,
+		disabled,
+		transition: { duration: 250, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' },
+	})
+	const VisibilityIcon = section.visible ? Eye : EyeOff
+
 	return (
 		<li
 			ref={setNodeRef}
 			style={{ transform: CSS.Transform.toString(transform), transition }}
-			className="gap-2 p-3 flex items-center rounded-lg bg-secondary/80"
+			className={cn('flex items-center rounded-md bg-secondary/80', {
+				'bg-secondary/40': !section.visible,
+			})}
 		>
-			<Button
+			<button
+				ref={setActivatorNodeRef}
 				{...attributes}
 				{...listeners}
-				variant="ghost"
-				size="icon"
+				type="button"
 				disabled={disabled}
 				aria-label={t(`${BASE}.reorder`, { section: label })}
-				className="cursor-grab touch-none"
+				className={cn(
+					'py-4 pl-4 min-w-0 flex-1 cursor-grab touch-none rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring',
+					{
+						'opacity-60': !section.visible,
+						'cursor-grabbing': isDragging,
+						'cursor-not-allowed': disabled,
+					},
+				)}
 			>
-				<GripVertical aria-hidden="true" />
-			</Button>
-			<span id={labelId} className="text-sm flex-1">
-				{label}
-			</span>
-			<Button
-				variant="ghost"
-				size="icon"
-				disabled={disabled || first}
-				aria-label={t(`${BASE}.moveUp`, { section: label })}
-				onClick={() => onMove(-1)}
-			>
-				<ArrowUp aria-hidden="true" />
-			</Button>
-			<Button
-				variant="ghost"
-				size="icon"
-				disabled={disabled || last}
-				aria-label={t(`${BASE}.moveDown`, { section: label })}
-				onClick={() => onMove(1)}
-			>
-				<ArrowDown aria-hidden="true" />
-			</Button>
-			<RawSwitch
-				checked={section.visible}
-				disabled={disabled}
-				onCheckedChange={onVisibilityChange}
-				aria-labelledby={labelId}
-			/>
+				<Text size="sm">{label}</Text>
+			</button>
+			<div className="pr-4 flex items-center">
+				<IconButton
+					size="xs"
+					variant="ghost"
+					disabled={disabled}
+					onClick={onVisibilityChange}
+					aria-label={label}
+					aria-pressed={section.visible}
+				>
+					<VisibilityIcon aria-hidden="true" className="h-4 w-4" />
+				</IconButton>
+			</div>
 		</li>
 	)
 }

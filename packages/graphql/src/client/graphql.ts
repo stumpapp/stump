@@ -936,10 +936,7 @@ export type FitWithinResizeInput = {
   width: Scalars['Int']['input'];
 };
 
-/**
- * The home mutation contract deliberately contains only sections. The existing
- * Arrangement query and storage shape are retained for backwards compatibility.
- */
+/** The sections displayed on a user's home page. */
 export type HomeArrangement = {
   __typename?: 'HomeArrangement';
   sections: Array<ArrangementSection>;
@@ -2207,7 +2204,7 @@ export type Mutation = {
   updateCustomEmoji: CustomEmoji;
   updateEmailDevice: RegisteredEmailDevice;
   updateEmailer: Emailer;
-  /** Replace the authenticated user's home sections without a lock/unlock workflow. */
+  /** Replace the authenticated user's home sections */
   updateHomeArrangement: HomeArrangement;
   /**
    * Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
@@ -3196,12 +3193,10 @@ export type OffsetPaginationInfo = {
 
 export type OnDeckBooks = {
   __typename?: 'OnDeckBooks';
-  links: Array<FilterableArrangementEntityLink>;
   name?: Maybe<Scalars['String']['output']>;
 };
 
 export type OnDeckBooksInput = {
-  links?: Array<FilterableArrangementEntityLink>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -6358,14 +6353,14 @@ export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeri
 export type HomeArrangementPreferencesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomeArrangementPreferencesQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', homeArrangement: { __typename?: 'Arrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } } } };
+export type HomeArrangementPreferencesQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', homeArrangement: { __typename?: 'Arrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } } } };
 
 export type UpdateHomeArrangementMutationVariables = Exact<{
   input: HomeArrangementInput;
 }>;
 
 
-export type UpdateHomeArrangementMutation = { __typename?: 'Mutation', updateHomeArrangement: { __typename?: 'HomeArrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } };
+export type UpdateHomeArrangementMutation = { __typename?: 'Mutation', updateHomeArrangement: { __typename?: 'HomeArrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } };
 
 export type LibraryLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12381,7 +12376,6 @@ export const HomeArrangementPreferencesDocument = new TypedDocumentString(`
             }
             ... on OnDeckBooks {
               name
-              links
             }
             ... on RecentlyAdded {
               entity
@@ -12408,7 +12402,6 @@ export const UpdateHomeArrangementDocument = new TypedDocumentString(`
         }
         ... on OnDeckBooks {
           name
-          links
         }
         ... on RecentlyAdded {
           entity

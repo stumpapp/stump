@@ -871,10 +871,7 @@ input FitWithinResizeInput {
 	height: Int!
 }
 
-"""
-The home mutation contract deliberately contains only sections. The existing
-Arrangement query and storage shape are retained for backwards compatibility.
-"""
+"The sections displayed on a user's home page."
 type HomeArrangement {
 	sections: [ArrangementSection!]!
 }
@@ -2078,7 +2075,7 @@ type Mutation {
 	deleteUser(id: ID!, hardDelete: Boolean): User!
 	deleteUserSessions(id: ID!): Int!
 	updateUserLockStatus(id: ID!, lock: Boolean!): User!
-	"Replace the authenticated user's home sections without a lock/unlock workflow."
+	"Replace the authenticated user's home sections"
 	updateHomeArrangement(input: HomeArrangementInput!): HomeArrangement!
 	updateNavigationArrangementLock(locked: Boolean!): Arrangement!
 	updateNavigationArrangement(input: NavigationArrangementInput!): Arrangement!
@@ -2300,12 +2297,10 @@ type OffsetPaginationInfo {
 
 type OnDeckBooks {
 	name: String
-	links: [FilterableArrangementEntityLink!]!
 }
 
 input OnDeckBooksInput {
 	name: String
-	links: [FilterableArrangementEntityLink!]! = []
 }
 
 enum OrderDirection {

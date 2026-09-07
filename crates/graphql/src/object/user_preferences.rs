@@ -18,17 +18,10 @@ impl From<user_preferences::Model> for UserPreferences {
 #[ComplexObject]
 impl UserPreferences {
 	async fn home_arrangement(&self) -> Arrangement {
-		self.model
-			.home_arrangement
-			.clone()
-			.unwrap_or(Arrangement::default_home())
-			.with_missing_home_sections()
+		self.model.resolved_home_arrangement()
 	}
 
 	async fn navigation_arrangement(&self) -> Arrangement {
-		self.model
-			.navigation_arrangement
-			.clone()
-			.unwrap_or(Arrangement::default_navigation())
+		self.model.resolved_navigation_arrangement()
 	}
 }

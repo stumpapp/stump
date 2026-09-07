@@ -1709,16 +1709,14 @@
 				},
 				"homeArrangement": {
 					"title": "Home page",
-					"description": "Choose which sections appear on your home page and their order.",
+					"description": "Adjust the sections on your home page",
 					"label": "Home sections",
-					"hint": "Drag sections or use the arrow buttons to reorder them. Changes apply to your account after saving.",
+					"hint": "Drag and rearrange sections or hide them entirely",
 					"reorder": "Reorder {{section}}",
-					"moveUp": "Move {{section}} up",
-					"moveDown": "Move {{section}} down",
-					"reset": "Restore defaults",
-					"saving": "Saving…",
-					"saveFailed": "Could not save your home page. Your changes are still here; please try again.",
-					"unsupported": "This home configuration contains sections that this editor does not support."
+					"reset": "Reset",
+					"saveFailed": "Failed to save your changes",
+					"unsupported": "Invalid configuration",
+					"unsupportedDescription": "Please reset to defaults and try again"
 				}
 			}
 		},

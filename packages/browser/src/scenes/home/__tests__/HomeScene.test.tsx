@@ -41,7 +41,7 @@ vi.mock('../NoLibraries', () => ({ default: () => <p>No libraries</p> }))
 
 const original: HomeSection[] = [
 	{ visible: true, config: { __typename: 'InProgressBooks', name: null, links: [] } },
-	{ visible: true, config: { __typename: 'OnDeckBooks', name: null, links: [] } },
+	{ visible: true, config: { __typename: 'OnDeckBooks', name: null } },
 	{
 		visible: true,
 		config: {
@@ -147,7 +147,7 @@ describe('HomeScene arrangement', () => {
 		)
 		await screen.findByText('Books section')
 		await user.click(await screen.findByRole('button', { name: 'Edit' }))
-		await user.click(screen.getByRole('switch', { name: 'Recently added books' }))
+		await user.click(screen.getByRole('button', { name: 'Recently added books' }))
 		await user.click(screen.getByRole('button', { name: 'Save' }))
 		await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
 		expect(screen.getAllByRole('heading', { level: 2 }).map((node) => node.textContent)).toEqual([

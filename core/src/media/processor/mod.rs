@@ -3,6 +3,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
+use models::entity::library_config;
 use tokio::task::spawn_blocking;
 
 use crate::{
@@ -11,12 +12,13 @@ use crate::{
 	media::{
 		metadata::ProcessedMediaMetadata,
 		processor::{
-			error::MediaProcessorError, pdf::PdfProcessor, rar::RarProcessor,
-			zip::ZipProcessor,
+			epub::EpubProcessor, error::MediaProcessorError, pdf::PdfProcessor,
+			rar::RarProcessor, zip::ZipProcessor,
 		},
 	},
 };
 
+mod epub;
 pub mod error;
 mod pdf;
 mod rar;
@@ -48,7 +50,22 @@ pub struct MediaProcessorOptions {
 	/// a RAR file to a ZIP
 	pub cache_directory: PathBuf,
 }
-// TODO: ^ take more from stump config?
+
+impl MediaProcessorOptions {
+	pub fn new(
+		library_config: &library_config::Model,
+		core_config: &StumpConfig,
+	) -> Self {
+		Self {
+			convert_rar_to_zip: library_config.convert_rar_to_zip,
+			delete_conversion_source: library_config.hard_delete_conversions,
+			generate_file_hashes: library_config.generate_file_hashes,
+			process_metadata: library_config.process_metadata,
+			generate_koreader_hashes: library_config.generate_koreader_hashes,
+			cache_directory: core_config.get_cache_dir(),
+		}
+	}
+}
 
 #[derive(Debug, Clone, Default)]
 pub struct GeneratedFileHashes {
@@ -149,14 +166,8 @@ async fn get_processor(
 		("application/vnd.rar" | "application/vnd.comicbook-rar", _) => {
 			Ok(Box::new(RarProcessor))
 		},
-		("application/epub+zip", _) => {
-			todo!()
-			// Ok(ProcessorType::Epub)
-		},
-		("application/zip", "epub") => {
-			todo!()
-			// Ok(ProcessorType::Epub)
-		},
+		("application/epub+zip", _) => Ok(Box::new(EpubProcessor)),
+		("application/zip", "epub") => Ok(Box::new(EpubProcessor)),
 		("application/pdf", _) => Ok(Box::new(PdfProcessor::new(config.clone()))),
 		_ => Err(MediaProcessorError::UnsupportedFile(
 			path.display().to_string(),

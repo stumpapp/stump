@@ -252,7 +252,9 @@ export default function ServerEmojisSection() {
 	return (
 		<>
 			<NewCard.Row label={t(getKey('title'))} description={t(getKey('description'))}>
-				<Button variant="outline">{t('common.edit')}</Button>
+				<Button size="sm" variant="outline">
+					{t('common.edit')}
+				</Button>
 			</NewCard.Row>
 		</>
 	)

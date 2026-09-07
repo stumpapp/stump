@@ -1949,6 +1949,11 @@
 							"It looks like you are running the",
 							"build channel"
 						]
+					},
+					"debugInfo": {
+						"label": "Debug information",
+						"description": "Copy and paste when reporting issues on GitHub",
+						"copyDebugInfoFailed": "Failed to copy debug information"
 					}
 				},
 				"serverConfig": {
@@ -2702,6 +2707,7 @@
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"copy": "Copy",
 		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {

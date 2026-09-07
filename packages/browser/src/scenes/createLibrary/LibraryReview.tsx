@@ -112,6 +112,13 @@ export default function LibraryReview() {
 				</div>
 
 				<div>
+					<Label>{t(getLabelKey('oneshotsDirectory'))}</Label>
+					<Text variant="muted" size="sm">
+						{state.oneshotsDirectory}
+					</Text>
+				</div>
+
+				<div>
 					<Label>{t(getLabelKey('description'))}</Label>
 					<Text variant="muted" size="sm">
 						{state.description || 'None'}

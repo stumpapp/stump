@@ -555,6 +555,7 @@
 					"quality": "Quality",
 					"name": "Name",
 					"path": "Path",
+					"oneshotsDirectory": "Oneshots directory",
 					"description": "Description",
 					"tags": "Tags",
 					"pattern": "Pattern",
@@ -602,7 +603,7 @@
 		"tabs": {
 			"books": "Books",
 			"series": "Series",
-			"oneshots": "One-shots",
+			"oneshots": "Oneshots",
 			"files": "Files"
 		}
 	},

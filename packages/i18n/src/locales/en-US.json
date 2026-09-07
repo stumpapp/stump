@@ -1956,6 +1956,10 @@
 						"copyDebugInfoFailed": "Failed to copy debug information"
 					}
 				},
+				"changelog": {
+					"label": "Changelog",
+					"description": "See what has changed in the latest versions of Stump"
+				},
 				"serverConfig": {
 					"label": "Server configuration",
 					"description": "A subset of configuration options available for management here",
@@ -2762,6 +2766,7 @@
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
+		"open": "Open",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
 		"back": "Back",
@@ -2771,13 +2776,15 @@
 		"book_other": "Books",
 		"xBooks_one": "{{count}} Book",
 		"xBooks_other": "{{count}} Books",
+		"seeMore": "See more",
 		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "An unknown error occurred",
+		"view": "View"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -3146,6 +3153,7 @@
 			"username": "Username",
 			"value": "Value",
 			"version": "Version",
+			"view": "View",
 			"accessOpdsV2": "Access OPDS v2.0",
 			"accessOpdsV1": "Access OPDS v1.2"
 		},

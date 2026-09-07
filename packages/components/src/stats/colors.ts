@@ -8,4 +8,5 @@ export const STAT_COLORS = {
 	series: { primary: '#a855f7', secondary: '#f3e8ff' },
 	readingTime: { primary: '#f43f5e', secondary: '#ffe4e6' },
 	size: { primary: '#64748b', secondary: '#f1f5f9' },
+	system: { primary: '#475569', secondary: '#f1f5f9' },
 } satisfies Record<string, StatColorPalette>

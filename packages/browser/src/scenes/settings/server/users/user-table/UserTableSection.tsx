@@ -20,7 +20,7 @@ export default function UserTableSection() {
 				</div>
 				{checkPermission(UserPermission.ManageUsers) && (
 					<div className="gap-2 flex items-end">
-						<ButtonOrLink href="create" variant="secondary" size="sm">
+						<ButtonOrLink href="create" variant="secondary">
 							Create user
 						</ButtonOrLink>
 					</div>

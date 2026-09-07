@@ -1,5 +1,5 @@
 import { DoublePageBehavior, isDoublePageBehavior } from '@stump/client'
-import { Label, NativeSelect } from '@stump/components'
+import { NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback } from 'react'
 
@@ -22,12 +22,10 @@ export default function DoubleSpreadBehavior({ behavior, onChange }: Props) {
 	)
 
 	return (
-		<div className="py-1.5">
-			<Label htmlFor="double-spread-behavior">
-				{t('imageReader.settings.doublePageBehavior.label')}
-			</Label>
+		<div>
 			<NativeSelect
 				id="double-spread-behavior"
+				aria-label={t('imageReader.settings.doublePageBehavior.label')}
 				size="sm"
 				options={[
 					{

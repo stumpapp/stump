@@ -1,9 +1,10 @@
 import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
-import { Button, Input } from '@stump/components'
+import { Input } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useDebouncedValue } from 'rooks'
 import { toast } from 'sonner'
 
 const mutation = graphql(`
@@ -34,7 +35,6 @@ export default function ServerPublicURL() {
 
 	const { mutate: updatePublicUrl } = useGraphQLMutation(mutation, {
 		onSuccess: (data) => {
-			toast.success('Public URL updated successfully')
 			client.setQueryData(['serverConfig', 'publicUrl'], {
 				serverConfig: {
 					publicUrl: data.updatePublicUrl.publicUrl,
@@ -42,33 +42,28 @@ export default function ServerPublicURL() {
 			})
 		},
 		onError: (error) => {
-			toast.error('Failed to update public URL', {
-				description: error instanceof Error ? error.message : 'An unknown error occurred',
+			toast.error(t(getKey('updateFailed')), {
+				description: error instanceof Error ? error.message : t('common.unknownError'),
 			})
 		},
 	})
+	const [debouncedValue] = useDebouncedValue(publicUrl, 1000)
 
-	const isDifferent = (serverConfig.publicUrl || '') !== publicUrl
+	useEffect(() => {
+		if (debouncedValue !== serverConfig.publicUrl) {
+			updatePublicUrl({ publicUrl: debouncedValue })
+		}
+	}, [debouncedValue, serverConfig.publicUrl, updatePublicUrl])
 
 	return (
-		<div className="gap-4 flex items-start">
-			<Input
-				label={t(getKey('label'))}
-				description={t(getKey('description'))}
-				placeholder="https://my-stump-instance.cloud"
-				value={publicUrl}
-				onChange={(e) => setPublicUrl(e.target.value)}
-				containerClassName="md:max-w-sm max-w-[unset]"
-			/>
-
-			{isDifferent && (
-				<Button className="mt-6.5 shrink" onClick={() => updatePublicUrl({ publicUrl })}>
-					{t('common.save')}
-				</Button>
-			)}
-		</div>
+		<Input
+			placeholder="https://my-stump-instance.cloud"
+			value={publicUrl}
+			onChange={(e) => setPublicUrl(e.target.value)}
+			containerClassName="md:max-w-sm max-w-[unset]"
+		/>
 	)
 }
 
-const LOCALE_BASE = 'settingsScene.server/general.sections.serverPublicUrl'
+const LOCALE_BASE = 'settingsScene.server/general.sections.serverConfig.publicUrl'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

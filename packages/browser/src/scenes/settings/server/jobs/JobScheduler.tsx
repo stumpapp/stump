@@ -4,7 +4,7 @@ import { graphql, ScheduledJobsQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
-import { AlertCircleIcon, Plus } from 'lucide-react'
+import { AlertCircleIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -112,8 +112,7 @@ export default function JobScheduler() {
 
 			<div>
 				<Button variant="secondary" onClick={openCreate}>
-					<Plus className="mr-1.5 h-4 w-4" />
-					{t(getKey('newScheduledJob'))}
+					{t(getKey('createScheduledJob'))}
 				</Button>
 			</div>
 

@@ -1,10 +1,12 @@
 import { useSuspenseGraphQL } from '@stump/client'
-import { Statistic } from '@stump/components'
+import { STAT_COLORS, StatCard, StatCardProps } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
-import pluralize from 'pluralize'
 import { useMemo } from 'react'
+
+import { useTheme } from '@/hooks/useTheme'
 
 const query = graphql(`
 	query UserStats {
@@ -29,42 +31,52 @@ export const prefetchUserStats = async (sdk: Api, client: QueryClient) =>
 	})
 
 export default function UsersStats() {
+	const { t } = useLocaleContext()
+	const { isDarkVariant } = useTheme()
 	const { data } = useSuspenseGraphQL(query, ['userStats'])
 
 	const [powerReader] = useMemo(() => data.topReaders, [data.topReaders])
 
+	const stats: StatCardProps[] = [
+		{
+			label: 'Users',
+			value: data.userCount,
+			colors: STAT_COLORS.system,
+			countUp: true,
+		},
+		{
+			label: 'Books completed',
+			value: data.finishedReadingSessionCount,
+			colors: STAT_COLORS.completed,
+			countUp: true,
+		},
+		{
+			label: 'Books in progress',
+			value: data.activeReadingSessionCount,
+			colors: STAT_COLORS.inProgress,
+			countUp: true,
+		},
+		...(powerReader
+			? [
+					{
+						label: t(getKey('topReader')),
+						value: powerReader.username,
+						suffix: t('common.xBooks', {
+							count: powerReader.finishedReadingSessionsCount,
+						}),
+						colors: STAT_COLORS.system,
+					},
+				]
+			: []),
+	]
+
 	return (
-		<div
-			data-testid="users-stats"
-			className="gap-4 pb-8 scrollbar-hide flex items-center divide-x divide-border/60 overflow-x-scroll"
-		>
-			<Statistic className="pr-5 md:pr-10 shrink-0">
-				<Statistic.Label>Users</Statistic.Label>
-				<Statistic.CountUpNumber value={data.userCount} />
-			</Statistic>
-
-			<Statistic className="px-5 md:px-10 shrink-0">
-				<Statistic.Label>Books completed</Statistic.Label>
-				<Statistic.CountUpNumber value={data.finishedReadingSessionCount} />
-			</Statistic>
-
-			<Statistic className="px-5 md:px-10 shrink-0">
-				<Statistic.Label>Books in progress</Statistic.Label>
-				<Statistic.CountUpNumber value={data.activeReadingSessionCount} />
-			</Statistic>
-
-			{!!powerReader && (
-				<Statistic className="pl-5 md:pl-10 shrink-0">
-					<Statistic.Label>Power Reader</Statistic.Label>
-					<Statistic.StringValue>
-						{powerReader.username}{' '}
-						<span className="text-sm font-normal">
-							({powerReader.finishedReadingSessionsCount}{' '}
-							{pluralize('book', powerReader.finishedReadingSessionsCount)})
-						</span>
-					</Statistic.StringValue>
-				</Statistic>
-			)}
+		<div data-testid="users-stats" className="gap-2 sm:grid-cols-4 grid grid-cols-2">
+			{stats.map((stat, index) => (
+				<StatCard key={index} {...stat} isDark={isDarkVariant} />
+			))}
 		</div>
 	)
 }
+
+const getKey = (key: string) => `settingsScene.server/users.userStats.${key}`

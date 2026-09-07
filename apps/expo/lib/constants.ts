@@ -349,6 +349,9 @@ export function usePalette<T extends Record<string, ShadeConfig>>(
 ): Record<keyof T, string>
 export function usePalette(config: CommonConfig): string
 
+// TODO(web): i would love to bring basically this same thing to web. what i REALLY want is to be able to
+// just use the expo app for web, but in the absence of that i suppose id be nice to pick an accent color
+
 export function usePalette(config?: ShadeConfig | CommonConfig | Record<string, ShadeConfig>) {
 	const accentHue = usePreferencesStore((state) => state.accentHue)
 	const accentChromaScale = usePreferencesStore((state) => state.accentChromaScale)

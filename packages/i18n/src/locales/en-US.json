@@ -555,6 +555,7 @@
 					"quality": "Quality",
 					"name": "Name",
 					"path": "Path",
+					"oneshotsDirectory": "Oneshots directory",
 					"description": "Description",
 					"tags": "Tags",
 					"pattern": "Pattern",
@@ -602,7 +603,7 @@
 		"tabs": {
 			"books": "Books",
 			"series": "Series",
-			"oneshots": "One-shots",
+			"oneshots": "Oneshots",
 			"files": "Files"
 		}
 	},
@@ -2748,6 +2749,7 @@
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
+		"none":"None",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
 		"back": "Back",

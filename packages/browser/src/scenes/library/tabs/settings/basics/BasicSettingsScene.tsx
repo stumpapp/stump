@@ -76,6 +76,7 @@ export default function BasicSettingsScene() {
 				config: {
 					thumbnailConfig: intoThumbnailConfig(values.thumbnailConfig),
 					libraryType: values.libraryType,
+					oneshotsDirectory: values.oneshotsDirectory,
 				},
 				description: values.description,
 				name: values.name,

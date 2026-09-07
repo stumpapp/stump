@@ -8,7 +8,8 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { BookCard, BookTable } from '@/components/book'
 import { defaultBookColumnSort } from '@/components/book/table'
-import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
+import DynamicCardGrid from '@/components/container/DynamicCardGrid'
+import { GridSizeSlider } from '@/components/container/GridSizeSlider'
 import {
 	FilterHeader,
 	URLFilterContainer,

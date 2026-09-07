@@ -11,8 +11,8 @@ import { useAppContext } from '@/context'
 
 import { useLibraryContext } from './context'
 import { LibraryOverviewSheet } from './LibraryOverviewSheet'
-import { usePrefetchLibraryBooks } from './tabs/books/LibraryBooksScene'
-import { usePrefetchLibrarySeries } from './tabs/series/LibrarySeriesScene'
+import { usePrefetchLibraryBooks } from './tabs/books/queries'
+import { usePrefetchLibrarySeries } from './tabs/series/queries'
 
 export default function LibraryHeader() {
 	const location = useLocation()

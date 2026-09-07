@@ -114,14 +114,14 @@ export default function LibraryReview() {
 				<div>
 					<Label>{t(getLabelKey('oneshotsDirectory'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.oneshotsDirectory}
+						{state.oneshotsDirectory || t('common.none')}
 					</Text>
 				</div>
 
 				<div>
 					<Label>{t(getLabelKey('description'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.description || 'None'}
+						{state.description || t('common.none')}
 					</Text>
 				</div>
 

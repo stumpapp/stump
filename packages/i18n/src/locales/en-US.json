@@ -1988,10 +1988,7 @@
 					"noCustomEmojis": "No custom emojis have been added yet",
 					"invalidName": "Please enter a valid name for your emoji",
 					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
 					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
 					"deleteError": "Failed to delete emoji"
 				}
 			}

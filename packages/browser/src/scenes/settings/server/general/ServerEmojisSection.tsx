@@ -3,7 +3,7 @@ import {
 	Button,
 	cn,
 	ConfirmationModal,
-	Heading,
+	Dialog,
 	Input,
 	NewCard,
 	ScrollArea,
@@ -179,7 +179,6 @@ export default function ServerEmojisSection() {
 				},
 				upload: selectedFile,
 			})
-			toast.success(t(getKey('uploadSuccess')))
 			clearSelection()
 		} catch (error) {
 			console.error(error)
@@ -213,11 +212,10 @@ export default function ServerEmojisSection() {
 				id: String(renamingId),
 				input: { name },
 			})
-			toast.success(t('customEmojis.renameSuccess'))
 			cancelRename()
 		} catch (error) {
 			console.error(error)
-			toast.error(t('customEmojis.renameError'), {
+			toast.error(t(getKey('renameError')), {
 				description: error instanceof Error ? error.message : undefined,
 			})
 		}
@@ -228,11 +226,10 @@ export default function ServerEmojisSection() {
 
 		try {
 			await deleteEmoji({ id: String(deletingEmoji.id) })
-			toast.success(t('customEmojis.deleteSuccess'))
 			setDeletingEmoji(null)
 		} catch (error) {
 			console.error(error)
-			toast.error(t('customEmojis.deleteError'), {
+			toast.error(t(getKey('deleteError')), {
 				description: error instanceof Error ? error.message : undefined,
 			})
 		}
@@ -251,140 +248,150 @@ export default function ServerEmojisSection() {
 	// TODO: wire it up to a dialog etc etc
 	return (
 		<>
-			<NewCard.Row label={t(getKey('title'))} description={t(getKey('description'))}>
-				<Button size="sm" variant="outline">
-					{t('common.edit')}
-				</Button>
-			</NewCard.Row>
-		</>
-	)
+			<Dialog>
+				<Dialog.Trigger asChild>
+					<NewCard.Row label={t(getKey('title'))} description={t(getKey('description'))}>
+						<Button size="sm" variant="outline">
+							{t('common.edit')}
+						</Button>
+					</NewCard.Row>
+				</Dialog.Trigger>
 
-	return (
-		<div className="gap-4 flex flex-col">
-			<div>
-				<Heading size="sm">{t(getKey('title'))}</Heading>
-				<Text size="sm" variant="muted" className="mt-1">
-					{t(getKey('description'))}
-				</Text>
-			</div>
+				<Dialog.Content size="xl">
+					<Dialog.Header>
+						<Dialog.Title>{t(getKey('title'))}</Dialog.Title>
+						<Dialog.Description>{t(getKey('description'))}</Dialog.Description>
+					</Dialog.Header>
 
-			{canManageEmojis && (
-				<div className="p-3 rounded-lg border border-border">
-					<div
-						{...getRootProps()}
-						className={cn(
-							'gap-2 p-4 flex cursor-pointer items-center justify-center rounded-md border border-dashed border-border ring-2 ring-transparent ring-offset-2 ring-offset-background',
-							{ 'ring-ring': isDropzoneFocused },
-						)}
-					>
-						<input {...getInputProps()} />
-						<ImagePlus className="h-4 w-4 text-muted-foreground" />
-						<Text size="sm" variant="muted">
-							{t(getKey('dropzone'))}
-						</Text>
-					</div>
-
-					<div className="mt-3 gap-3 flex flex-row items-end">
-						<div className="h-10 w-10 flex items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
-							{previewUrl && (
-								<img
-									src={previewUrl}
-									alt={emojiName || 'emoji preview'}
-									className="h-full w-full object-cover"
-								/>
-							)}
-						</div>
-
-						<div className="flex-1">
-							<Input
-								label={t(getKey('input.label'))}
-								placeholder={t(getKey('input.placeholder'))}
-								value={emojiName}
-								onChange={(event) => setEmojiName(event.target.value)}
-							/>
-						</div>
-
-						<div className="gap-2 flex items-center">
-							<Button disabled={!selectedFile || isUploading} onClick={clearSelection}>
-								{t('common.cancel')}
-							</Button>
-							<Button
-								disabled={!selectedFile || !emojiName.trim() || isUploading}
-								onClick={handleUpload}
+					{canManageEmojis && (
+						<div className="p-3 rounded-lg border border-border">
+							<div
+								{...getRootProps()}
+								className={cn(
+									'gap-2 p-4 flex cursor-pointer items-center justify-center rounded-md border border-dashed border-border ring-2 ring-transparent ring-offset-2 ring-offset-background',
+									{ 'ring-ring': isDropzoneFocused },
+								)}
 							>
-								{isUploading ? t('common.uploadingEllipsis') : t('common.upload')}
-							</Button>
-						</div>
-					</div>
-				</div>
-			)}
+								<input {...getInputProps()} />
+								<ImagePlus className="h-4 w-4 text-muted-foreground" />
+								<Text size="sm" variant="muted">
+									{t(getKey('dropzone'))}
+								</Text>
+							</div>
 
-			<div className="rounded-lg border border-border">
-				{emojis.length === 0 && (
-					<div className="p-4">
-						<Text size="sm" variant="muted">
-							{t(getKey('noCustomEmojis'))}
-						</Text>
-					</div>
-				)}
-
-				{emojis.length > 0 && (
-					<ScrollArea className={cn({ 'h-96': emojis.length > 8 })}>
-						<div className="divide-y divide-border">
-							{emojis.map((emoji) => (
-								<div key={emoji.id} className="gap-3 p-3 flex items-center">
-									<img src={emoji.url} alt={emoji.name} className="h-8 w-8 rounded object-cover" />
-
-									{renamingId === emoji.id ? (
-										<div className="gap-2 flex flex-1 items-center">
-											<Input
-												value={renameValue}
-												onChange={(event) => setRenameValue(event.target.value)}
-												placeholder="emoji_name"
-											/>
-											<Button size="sm" disabled={isRenaming} onClick={confirmRename}>
-												{t('common.save')}
-											</Button>
-											<Button size="sm" onClick={cancelRename}>
-												{t('common.cancel')}
-											</Button>
-										</div>
-									) : (
-										<>
-											<div className="p-0.5 rounded-lg bg-muted">
-												<Text size="sm" className="font-mono">
-													:{emoji.name}:
-												</Text>
-											</div>
-
-											<div className="flex-1" />
-
-											{canManageEmojis && (
-												<div className="gap-1 flex items-center">
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => startRename(emoji.id, emoji.name)}
-													>
-														<Pencil className="h-3.5 w-3.5" />
-													</Button>
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => setDeletingEmoji({ id: emoji.id, name: emoji.name })}
-													>
-														<Trash2 className="text-foreground-destructive h-3.5 w-3.5" />
-													</Button>
-												</div>
-											)}
-										</>
+							<div className="mt-3 gap-3 flex flex-row items-end">
+								<div className="h-10 w-10 flex items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+									{previewUrl && (
+										<img
+											src={previewUrl}
+											alt={emojiName || 'emoji preview'}
+											className="h-full w-full object-cover"
+										/>
 									)}
 								</div>
-							))}
+
+								<div className="flex-1">
+									<Input
+										label={t(getKey('input.label'))}
+										placeholder={t(getKey('input.placeholder'))}
+										value={emojiName}
+										onChange={(event) => setEmojiName(event.target.value)}
+									/>
+								</div>
+
+								<div className="gap-2 flex items-center">
+									<Button
+										disabled={!selectedFile || isUploading}
+										onClick={clearSelection}
+										size="sm"
+										variant="outline"
+									>
+										{t('common.cancel')}
+									</Button>
+									<Button
+										disabled={!selectedFile || !emojiName.trim() || isUploading}
+										onClick={handleUpload}
+										size="sm"
+									>
+										{isUploading ? t('common.uploadingEllipsis') : t('common.upload')}
+									</Button>
+								</div>
+							</div>
 						</div>
-					</ScrollArea>
-				)}
-			</div>
+					)}
+
+					<div className="rounded-lg border border-border">
+						{emojis.length === 0 && (
+							<div className="p-4">
+								<Text size="sm" variant="muted">
+									{t(getKey('noCustomEmojis'))}
+								</Text>
+							</div>
+						)}
+
+						{emojis.length > 0 && (
+							<ScrollArea className={cn({ 'h-96': emojis.length > 8 })}>
+								<div className="divide-y divide-border">
+									{emojis.map((emoji) => (
+										<div key={emoji.id} className="gap-3 p-3 flex items-center">
+											<img
+												src={emoji.url}
+												alt={emoji.name}
+												className="h-8 w-8 rounded object-cover"
+											/>
+
+											{renamingId === emoji.id ? (
+												<div className="gap-2 flex flex-1 items-center">
+													<Input
+														value={renameValue}
+														onChange={(event) => setRenameValue(event.target.value)}
+														placeholder="emoji_name"
+													/>
+													<Button size="sm" onClick={cancelRename} variant="outline">
+														{t('common.cancel')}
+													</Button>
+													<Button size="sm" disabled={isRenaming} onClick={confirmRename}>
+														{t('common.save')}
+													</Button>
+												</div>
+											) : (
+												<>
+													<div className="p-0.5 rounded-lg bg-muted">
+														<Text size="sm" className="font-mono">
+															:{emoji.name}:
+														</Text>
+													</div>
+
+													<div className="flex-1" />
+
+													{canManageEmojis && (
+														<div className="gap-1 flex items-center">
+															<Button
+																variant="ghost"
+																size="icon"
+																onClick={() => startRename(emoji.id, emoji.name)}
+															>
+																<Pencil className="h-3.5 w-3.5" />
+															</Button>
+															<Button
+																variant="ghost"
+																size="icon"
+																onClick={() => setDeletingEmoji({ id: emoji.id, name: emoji.name })}
+															>
+																<Trash2 className="text-foreground-destructive h-3.5 w-3.5" />
+															</Button>
+														</div>
+													)}
+												</>
+											)}
+										</div>
+									))}
+								</div>
+							</ScrollArea>
+						)}
+					</div>
+				</Dialog.Content>
+			</Dialog>
 
 			<ConfirmationModal
 				title={t(getKey('deleteModal.title'))}
@@ -397,7 +404,7 @@ export default function ServerEmojisSection() {
 				confirmIsLoading={isDeleting}
 				trigger={null}
 			/>
-		</div>
+		</>
 	)
 }
 

@@ -272,16 +272,15 @@ impl EpubProcessor {
 	fn get_cover_id_by_resource_alphabetically(
 		resources: &HashMap<String, (PathBuf, String)>,
 	) -> Option<String> {
-		let mut sorted = resources
+		resources
 			.iter()
 			.filter(|(_, (_, mime))| {
 				ACCEPTED_EPUB_COVER_MIMES
 					.iter()
 					.any(|accepted_mime| accepted_mime == mime)
 			})
-			.collect::<Vec<_>>();
-		sorted.sort_by(|(a, _), (b, _)| a.cmp(b));
-		sorted.first().map(|(id, _)| id.to_string())
+			.min_by_key(|(id, _)| *id)
+			.map(|(id, _)| id.to_string())
 	}
 
 	fn get_cover_id_by_resource_name(

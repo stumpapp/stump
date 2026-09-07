@@ -1,4 +1,4 @@
-import { Label, NativeSelect } from '@stump/components'
+import { NativeSelect } from '@stump/components'
 import { ReadingImageScaleFit } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'

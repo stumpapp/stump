@@ -9,6 +9,7 @@ type Props = {
 }
 
 // TODO: do more than just json dump
+
 export default function InspectUserSlideOver({ user, onClose }: Props) {
 	return (
 		<Sheet
@@ -17,7 +18,9 @@ export default function InspectUserSlideOver({ user, onClose }: Props) {
 			title="Inspect user"
 			description="Inspect a user's information and configuration"
 		>
-			<Preformatted title="Raw JSON" content={user} />
+			<div className="px-4 gap-y-8 flex flex-col">
+				<Preformatted title="JSON" content={user} />
+			</div>
 		</Sheet>
 	)
 }

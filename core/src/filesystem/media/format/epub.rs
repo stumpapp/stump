@@ -332,7 +332,8 @@ impl EpubProcessor {
 			})
 			// ignore images that do no contain cover in their name
 			.filter(|&(weight, _)| weight > 0)
-			.max_by_key(|(weight, _)| *weight)
+			// use id as a tiebreaker
+			.max_by_key(|&(weight, id)| (weight, id))
 			.map(|(_, id)| id.to_string())
 	}
 
@@ -941,6 +942,10 @@ mod tests {
 			EpubProcessor::get_cover_id_by_resource_name(&resources),
 			Some("id1".to_string())
 		);
+		assert_eq!(
+			EpubProcessor::get_cover_id_by_resource_alphabetically(&resources),
+			Some("id1".to_string())
+		);
 	}
 
 	#[test]
@@ -959,6 +964,10 @@ mod tests {
 			EpubProcessor::get_cover_id_by_resource_name(&resources),
 			Some("id1".to_string())
 		);
+		assert_eq!(
+			EpubProcessor::get_cover_id_by_resource_alphabetically(&resources),
+			Some("id1".to_string())
+		);
 	}
 
 	#[test]
@@ -975,6 +984,10 @@ mod tests {
 		]);
 		assert_eq!(
 			EpubProcessor::get_cover_id_by_resource_name(&resources),
+			Some("id1".to_string())
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_id_by_resource_alphabetically(&resources),
 			Some("id1".to_string())
 		);
 	}
@@ -1001,6 +1014,10 @@ mod tests {
 			EpubProcessor::get_cover_id_by_resource_name(&resources),
 			Some("id1".to_string())
 		);
+		assert_eq!(
+			EpubProcessor::get_cover_id_by_resource_alphabetically(&resources),
+			Some("id1".to_string())
+		);
 	}
 
 	#[test]
@@ -1016,6 +1033,10 @@ mod tests {
 		);
 		assert_eq!(
 			EpubProcessor::get_cover_id_by_resource_name(&resources),
+			Some("id1".to_string())
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_id_by_resource_alphabetically(&resources),
 			Some("id1".to_string())
 		);
 	}
@@ -1040,6 +1061,10 @@ mod tests {
 		);
 		assert_eq!(
 			EpubProcessor::get_cover_id_by_resource_name(&resources),
+			Some("id1".to_string())
+		);
+		assert_eq!(
+			EpubProcessor::get_cover_id_by_resource_alphabetically(&resources),
 			Some("id1".to_string())
 		);
 	}

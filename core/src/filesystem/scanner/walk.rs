@@ -151,32 +151,24 @@ pub async fn walk_library(
 		.await
 		.map_err(|e| CoreError::InternalError(format!("Failed to walk library! {e}")))?;
 
-	let full_oneshots_directory = oneshots_directory
-		.as_deref()
-		.filter(|dir| !dir.is_empty())
-		.map(|dir| PathBuf::from(path).join(dir).to_string_lossy().to_string());
+	let oneshots_dir_name = oneshots_directory.as_deref().filter(|dir| !dir.is_empty());
 
 	// note the ordering here, as it is important. oneshots are identified first so that
 	// we avoid entering the standard walk flows for them
 
 	let (oneshot_entries, regular_entries): (Vec<DirEntry>, Vec<DirEntry>) =
 		valid_entries.into_iter().partition(|entry| {
-			full_oneshots_directory
-				.as_deref()
-				.map(|dir| {
-					entry
-						.path()
-						.to_string_lossy()
-						.to_lowercase()
-						// TODO(oneshots): is contains okay? too tired to think through
-						// edge cases but need to revisit before merge
-						.contains(&dir.to_lowercase())
-				})
-				.unwrap_or(false)
+			let Some(oneshots_dir_name) = oneshots_dir_name else {
+				return false;
+			};
+			let entry_name = entry.path().file_name().map(|name| name.to_string_lossy());
+			entry_name.is_some_and(|name| name.eq_ignore_ascii_case(oneshots_dir_name))
+			// ^ we match the name and not a full path because the oneshots_directory just refers
+			// to the name at any level in the tree. e.g. so `<lib>/_oneshots` and `<lib>/Series A/_oneshots`
+			// would both valid oneshot directories
 		});
 	let oneshot_dirs_to_visit: Vec<PathBuf> =
 		oneshot_entries.into_iter().map(|e| e.into_path()).collect();
-	// TODO(oneshots): filter out based on mtime
 
 	let ignored_directories = ignored_entries.len() as u64;
 	let seen_directories = regular_entries.len() as u64 + ignored_directories;

@@ -280,7 +280,6 @@ impl JobLifecycle for LibraryScanJob {
 			.into_iter()
 			.map(LibraryScanTask::WalkOneshotsDirectory)
 			.collect::<Vec<LibraryScanTask>>();
-		// TODO: this shouldj ust be a single path lol right? no nesting?
 
 		let tasks = VecDeque::from(
 			[LibraryScanTask::Init(init_task_input)]

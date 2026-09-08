@@ -6901,6 +6901,13 @@ type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'Thumbn
 
 export type JobDataInspectorFragment = JobDataInspector_AnalyzeMediaOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_MetadataFetchJobOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
 
+export type JobDataInspectorLogsQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type JobDataInspectorLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, level: LogLevel, message: string, timestamp: any }> } };
+
 export type ScheduledJobsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -13447,6 +13454,18 @@ export const JobActionMenuDeleteLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<JobActionMenuDeleteLogsMutation, JobActionMenuDeleteLogsMutationVariables>;
+export const JobDataInspectorLogsDocument = new TypedDocumentString(`
+    query JobDataInspectorLogs($id: String!) {
+  logs(filter: {jobId: {eq: $id}}, pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      level
+      message
+      timestamp
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobDataInspectorLogsQuery, JobDataInspectorLogsQueryVariables>;
 export const ScheduledJobsDocument = new TypedDocumentString(`
     query ScheduledJobs {
   libraries(pagination: {none: {unpaginated: true}}) {

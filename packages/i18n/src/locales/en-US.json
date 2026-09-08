@@ -555,6 +555,7 @@
 					"quality": "Quality",
 					"name": "Name",
 					"path": "Path",
+					"oneshotsDirectory": "Oneshots directory",
 					"description": "Description",
 					"tags": "Tags",
 					"pattern": "Pattern",
@@ -602,7 +603,7 @@
 		"tabs": {
 			"books": "Books",
 			"series": "Series",
-			"oneshots": "One-shots",
+			"oneshots": "Oneshots",
 			"files": "Files"
 		}
 	},
@@ -1485,16 +1486,11 @@
 						"confirm": "Save Changes"
 					}
 				},
-				"locale": {
-					"localeSelector": {
-						"label": "Language"
-					},
-					"heading": "Language and locale",
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
+				"language": {
+					"label": "Language",
+					"contributeIfAble": "Please consider contributing to Stump's translations if you're able to!",
+					"contribute": "Contiribute",
+					"noThanks": "No thanks"
 				}
 			}
 		},
@@ -1782,12 +1778,18 @@
 			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
+					"label": "Universal",
+					"description": "Settings which apply to all types of books",
 					"sections": {
 						"readingDirection": {
 							"label": "Reading direction",
 							"description": "The direction in which the reader will progress through pages"
 						}
 					}
+				},
+				"formats": {
+					"label": "Formats",
+					"description": "Configure reader default settings independently"
 				},
 				"imageBasedBooks": {
 					"label": "Image-based books",
@@ -1952,21 +1954,33 @@
 				"serverInfo": {
 					"title": "Server information",
 					"description": "Basic details about your Stump server instance",
-					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
-						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
-						}
-					},
+					"version": "Verison",
+					"exactCommit": "Exact commit",
+					"build": "Build",
 					"nonStableChannel": {
 						"title": "You are running a non-stable build of Stump",
 						"description": [
 							"It looks like you are running the",
 							"build channel"
 						]
+					},
+					"debugInfo": {
+						"label": "Debug information",
+						"description": "Copy and paste when reporting issues on GitHub",
+						"copyDebugInfoFailed": "Failed to copy debug information"
+					}
+				},
+				"changelog": {
+					"label": "Changelog",
+					"description": "See what has changed in the latest versions of Stump"
+				},
+				"serverConfig": {
+					"label": "Server configuration",
+					"description": "A subset of configuration options available for management here",
+					"publicUrl": {
+						"label": "Public URL",
+						"description": "The URL that your server is accessible from outside your network",
+						"updateFailed": "Failed to update the URL"
 					}
 				},
 				"helpfulLinks": {
@@ -1977,13 +1991,9 @@
 						"changelog": "Changelog"
 					}
 				},
-				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
-				},
 				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
+					"title": "Emojis",
+					"description": "See and manage custom image emojis for your server",
 					"dropzone": "Drop an image or click to select",
 					"input": {
 						"label": "Emoji name",
@@ -1996,10 +2006,7 @@
 					"noCustomEmojis": "No custom emojis have been added yet",
 					"invalidName": "Please enter a valid name for your emoji",
 					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
 					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
 					"deleteError": "Failed to delete emoji"
 				}
 			}
@@ -2044,7 +2051,7 @@
 					"description": "Some jobs can be configured to automatically run on a schedule",
 					"restartRequiredTitle": "Restart required",
 					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
+					"createScheduledJob": "Create scheduled job",
 					"deleteScheduledJob": {
 						"title": "Delete scheduled job",
 						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
@@ -2130,6 +2137,11 @@
 						"emptySubtitle": "You can't have a job if you don't have a job",
 						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
 					},
+					"inspector": {
+							"title": "Job details",
+							"description": "The raw output of this job and any associated logs",
+							"associatedLogs": "Associated logs"
+					},
 					"deleteJobHistory": {
 						"title": "Delete job history",
 						"description": "Permanently delete all job history from the database",
@@ -2144,6 +2156,12 @@
 			"helmet": "User management",
 			"title": "Users",
 			"description": "Manage the users on this server",
+			"userStats": {
+				"users": "Users",
+				"booksCompleted": "Books completed",
+				"booksInProgress": "Books in progress",
+				"topReader": "Top reader"
+			},
 			"createUser": {
 				"helmet": "Create user",
 				"title": "Create user",
@@ -2715,6 +2733,7 @@
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"copy": "Copy",
 		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
@@ -2761,18 +2780,26 @@
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
+		"open": "Open",
+		"none":"None",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
 		"back": "Back",
 		"continue": "Continue",
 		"book": "Book",
+		"book_one": "Book",
+		"book_other": "Books",
+		"xBooks_one": "{{count}} Book",
+		"xBooks_other": "{{count}} Books",
+		"seeMore": "See more",
 		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "An unknown error occurred",
+		"view": "View"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -3081,6 +3108,10 @@
 		},
 		"common": {
 			"book": "Book",
+			"book_one": "Book",
+			"book_other": "Books",
+			"xBooks_one": "{{count}} Book",
+			"xBooks_other": "{{count}} Books",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",
@@ -3137,6 +3168,7 @@
 			"username": "Username",
 			"value": "Value",
 			"version": "Version",
+			"view": "View",
 			"accessOpdsV2": "Access OPDS v2.0",
 			"accessOpdsV1": "Access OPDS v1.2"
 		},
@@ -3768,12 +3800,25 @@
 			"stop": "Stop Timer",
 			"reset": "Reset Timer"
 		},
+		"footer": {
+			"readingTime": "Reading time: {{time}}",
+			"pageOf": "{{current}} of {{total}}"
+		},
+		"goToPage": {
+			"label": "Go to page",
+			"submit": "Go"
+		},
+		"nextInSeries": {
+			"title": "Next Up:",
+			"read": "Read"
+		},
 		"settings": {
 			"readerSettings": {
 				"sections": {
 					"mode": "Mode",
 					"imageOptions": "Image Options",
-					"preferences": "Preferences"
+					"preferences": "Preferences",
+					"controls": "Controls"
 				},
 				"preferences": {
 					"separateSecondPage": "Separate second page",

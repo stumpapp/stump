@@ -7,6 +7,10 @@ import { ContentContainer, SceneContainer } from '@/components/container'
 import APIKeyTable from './APIKeyTable'
 import CreateAPIKeyModal from './CreateAPIKeyModal'
 
+// TODO(management): expose UI for admins with permission for managing other users'
+// keys to see and delete them. perhaps this is not necessary if you just lock the
+// user account, but might be nice? i guess the todo is to consdier it lol
+
 export default function APIKeySettingsScene() {
 	const { t } = useLocaleContext()
 

@@ -1,7 +1,6 @@
 import { cn, NavigationMenu } from '@stump/components'
 import { PropsWithChildren } from 'react'
-import { To } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, To } from 'react-router'
 
 type Props = {
 	to: string | To

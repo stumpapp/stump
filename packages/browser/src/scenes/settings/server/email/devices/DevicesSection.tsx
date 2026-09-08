@@ -29,7 +29,6 @@ export default function DevicesSection() {
 					<Button
 						className="shrink-0"
 						variant="secondary"
-						size="sm"
 						onClick={() => setIsCreatingDevice(true)}
 					>
 						{t('settingsScene.server/email.sections.devices.addDevice')}

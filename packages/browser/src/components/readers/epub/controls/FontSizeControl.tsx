@@ -2,7 +2,6 @@ import { cx, IconButton, Label, Text, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
-import { usePressAndHold } from '@/hooks/usePressAndHold'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
@@ -34,9 +33,6 @@ export default function FontSizeControl() {
 		})
 	}, [])
 
-	const { bindButton: bindMinus, isHolding: isHoldingMinus } = usePressAndHold()
-	const { bindButton: bindPlus, isHolding: isHoldingPlus } = usePressAndHold()
-
 	/**
 	 * Used to preview the font size as it will be displayed in the reader. The max
 	 * font size for the preview is 50px. However, there is no limit to the font size
@@ -49,12 +45,10 @@ export default function FontSizeControl() {
 			<Label>Font size</Label>
 			<div className="gap-x-2 flex items-center">
 				<IconButton
-					{...bindMinus({
-						callback: () => incrementFontSize(-1),
-					})}
+					aria-label="Decrease font size"
+					onClick={() => incrementFontSize(-1)}
 					variant="ghost"
 					size="xs"
-					className={isHoldingMinus ? 'bg-accent select-none' : ''}
 				>
 					<Minus className="h-4 w-4" />
 				</IconButton>
@@ -65,12 +59,10 @@ export default function FontSizeControl() {
 					{localFontSize}px
 				</span>
 				<IconButton
-					{...bindPlus({
-						callback: () => incrementFontSize(+1),
-					})}
+					aria-label="Increase font size"
+					onClick={() => incrementFontSize(+1)}
 					variant="ghost"
 					size="xs"
-					className={isHoldingPlus ? 'bg-accent select-none' : ''}
 				>
 					<Plus className="h-4 w-4" />
 				</IconButton>

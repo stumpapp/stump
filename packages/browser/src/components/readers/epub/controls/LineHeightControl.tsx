@@ -2,7 +2,6 @@ import { cx, IconButton, Label, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
-import { usePressAndHold } from '@/hooks/usePressAndHold'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useEpubReaderContext } from '../context'
@@ -35,20 +34,15 @@ export default function LineHeightControl() {
 		})
 	}, [])
 
-	const { bindButton: bindMinus, isHolding: isHoldingMinus } = usePressAndHold()
-	const { bindButton: bindPlus, isHolding: isHoldingPlus } = usePressAndHold()
-
 	return (
 		<div className="gap-y-2.5 flex flex-col">
 			<Label>Line height</Label>
 			<div className="gap-x-2 flex items-center">
 				<IconButton
-					{...bindMinus({
-						callback: () => incrementLineHeight(-0.1),
-					})}
+					aria-label="Decrease line height"
+					onClick={() => incrementLineHeight(-0.1)}
 					variant="ghost"
 					size="xs"
-					className={isHoldingMinus ? 'bg-accent select-none' : ''}
 				>
 					<Minus className="h-4 w-4" />
 				</IconButton>
@@ -56,12 +50,10 @@ export default function LineHeightControl() {
 					{localLineHeight.toFixed(1)}
 				</span>
 				<IconButton
-					{...bindPlus({
-						callback: () => incrementLineHeight(+0.1),
-					})}
+					aria-label="Increase line height"
+					onClick={() => incrementLineHeight(+0.1)}
 					variant="ghost"
 					size="xs"
-					className={isHoldingPlus ? 'bg-accent select-none' : ''}
 				>
 					<Plus className="h-4 w-4" />
 				</IconButton>

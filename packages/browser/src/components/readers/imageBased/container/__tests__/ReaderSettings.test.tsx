@@ -1,6 +1,6 @@
 import { LocaleProvider } from '@stump/i18n'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 import ReaderSettings from '../ReaderSettings'
 
@@ -13,6 +13,7 @@ const readerState = vi.hoisted(() => ({
 		doublePageBehavior: 'off',
 		imageScaling: { scaleToFit: 'HEIGHT' },
 		panzoomWithoutCtrl: false,
+		preload: { ahead: 5, behind: 3 },
 		readingDirection: 'LTR',
 		readingMode: 'PAGED',
 		secondPageSeparate: false,
@@ -24,6 +25,8 @@ const readerState = vi.hoisted(() => ({
 vi.mock('@/stores', () => ({
 	useReaderStore: (selector: (state: typeof readerState) => unknown) => selector(readerState),
 }))
+
+// TODO: add more meaningful tests
 
 describe('ReaderSettings', () => {
 	it('renders localized stable settings copy', () => {

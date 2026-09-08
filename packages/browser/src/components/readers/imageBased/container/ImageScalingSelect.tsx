@@ -1,4 +1,4 @@
-import { Label, NativeSelect } from '@stump/components'
+import { NativeSelect } from '@stump/components'
 import { ReadingImageScaleFit } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
@@ -28,8 +28,7 @@ export default function ImageScalingSelect({ value, onChange }: Props) {
 	)
 
 	return (
-		<div className="py-1.5">
-			<Label htmlFor="image-scaling-fit">{t('imageReader.settings.imageScaling.label')}</Label>
+		<div>
 			<NativeSelect
 				id="image-scaling-fit"
 				size="sm"

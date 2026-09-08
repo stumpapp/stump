@@ -54,9 +54,7 @@ export default function CreateTagModal() {
 	return (
 		<Dialog open={isOpen} onOpenChange={isPending ? undefined : setIsOpen}>
 			<Dialog.Trigger asChild>
-				<Button size="sm" variant="secondary">
-					{t(getKey('trigger'))}
-				</Button>
+				<Button variant="secondary">{t(getKey('trigger'))}</Button>
 			</Dialog.Trigger>
 
 			<Dialog.Content size="sm">

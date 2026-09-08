@@ -10,7 +10,7 @@ import { usePaths } from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
 
 import { useLibraryContext } from '../../context'
-import { routeGroups } from './routes'
+import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsSidebar() {
 	const location = useLocation()
@@ -23,7 +23,7 @@ export default function LibrarySettingsSidebar() {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
-	const { groups } = useRouteGroups({ routeGroups })
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id) })
 
 	return (
 		<div
@@ -42,6 +42,7 @@ export default function LibrarySettingsSidebar() {
 				<div className="space-x-2 flex items-center">
 					<ButtonOrLink
 						href={paths.libraryBooks(library.id)}
+						replace
 						variant="ghost"
 						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 						size="sm"

@@ -495,6 +495,11 @@
 						"description": "Svaka mapa na bilo kojem nivou rekurzivno predstavlja jedan serijal"
 					}
 				}
+			},
+			"oneshotsDirectory": {
+				"placeholder": "_oneshots",
+				"label": "Direktorij samostalnih izdanja",
+				"description": "Naziv direktorija u kojem se čuvaju samostalna izdanja, relativno u odnosu na putanju biblioteke. Ako je polje prazno, samostalna izdanja se neće obrađivati"
 			}
 		},
 		"scan": {
@@ -596,7 +601,8 @@
 		"tabs": {
 			"books": "Knjige",
 			"series": "Serijali",
-			"files": "Datoteke"
+			"files": "Datoteke",
+			"oneshots": "Samostalna izdanja"
 		}
 	},
 	"librarySettingsScene": {
@@ -2749,7 +2755,8 @@
 			"tooManyFiles": "Odabrali ste previše datoteka",
 			"noValidFiles": "Nije odabrana nijedna važeća datoteka"
 		},
-		"unknownError": "Došlo je do nepoznate greške"
+		"unknownError": "Došlo je do nepoznate greške",
+		"notConfigured": "Nije podešeno"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2943,7 +2950,9 @@
 					"label": "Token",
 					"placeholder": "Sirovi token"
 				},
-				"basic": "Osnovna"
+				"basic": "Osnovna",
+				"section": "Autentifikacija",
+				"method": "Metoda"
 			},
 			"serverNamePlaceholder": "Moj server",
 			"catalogUrl": "URL kataloga",
@@ -2954,7 +2963,14 @@
 			"validation": {
 				"nameAlreadyExists": "Naziv već postoji",
 				"cannotSetAuthorizationHeader": "Nije moguće postaviti zaglavlje Authorization"
-			}
+			},
+			"createServer": "Kreirajte server",
+			"updateServer": "Ažurirajte server",
+			"basicInfo": "Osnovne informacije",
+			"primaryUrl": "Primarni URL",
+			"optionalSettings": "Opcionalne postavke",
+			"networking": "Mreža",
+			"advancedOptions": "Napredne opcije"
 		},
 		"bookActions": {
 			"markAsRead": {
@@ -3002,7 +3018,8 @@
 			"links": "Poveznice",
 			"year": "Godina",
 			"identifier": "Identifikator",
-			"identifiers": "Identifikatori"
+			"identifiers": "Identifikatori",
+			"issue": "Broj"
 		},
 		"common": {
 			"book": "Knjiga",
@@ -3060,7 +3077,10 @@
 			"value": "Vrijednost",
 			"version": "Verzija",
 			"accessOpdsV2": "Pristup OPDS-u v2.0",
-			"accessOpdsV1": "Pristup OPDS-u v1.2"
+			"accessOpdsV1": "Pristup OPDS-u v1.2",
+			"exit": "Izađite",
+			"notConfigured": "Nije podešeno",
+			"test": "Testirajte"
 		},
 		"errors": {
 			"unknown": "Nepoznata greška"
@@ -3323,7 +3343,8 @@
 						"label": "Pohranjene postavke",
 						"description": "Razni podaci poput postavki knjiga, mjerača vremena čitanja i slično"
 					},
-					"clearPreferences": "Izbrišite postavke"
+					"clearPreferences": "Izbrišite postavke",
+					"noServersAdded": "Nema dodanih servera"
 				}
 			},
 			"debug": {
@@ -3363,7 +3384,8 @@
 				"debugAnalytics": {
 					"label": "Dijagnostička analitika",
 					"description": "Šaljite dodatne dijagnostičke događaje radi lakšeg otklanjanja problema"
-				}
+				},
+				"maskUrls": "Prikrijte URL-ove"
 			},
 			"contactInfo": {
 				"label": "Kontakt",
@@ -3618,6 +3640,57 @@
 			"readingNow": {
 				"nothingInProgress": "Ništa nije započeto"
 			}
+		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "Konfiguracija",
+				"networkSettings": "Mrežne postavke"
+			}
+		},
+		"serverNetworkSettings": {
+			"activeProfile": {
+				"label": "Aktivni profil",
+				"localIsActive": "Lokalni profil je aktivan",
+				"primaryIsActive": "Primarni profil je aktivan",
+				"autoSwitchToLocalDidNotWork": "Aplikacija nije uspjela preći na aktivni profil. Provjerite mrežnu vezu"
+			},
+			"localProfile": "Lokalni profil",
+			"primaryUrl": "Primarni URL",
+			"autoSwitchToLocal": {
+				"label": "Automatski pređite na lokalni profil",
+				"description": "Pređite na lokalni profil kada je to moguće"
+			},
+			"localUrl": "Lokalni URL",
+			"saveUrlChanges": "Spremite promjene URL-ova",
+			"swapUrls": {
+				"label": "Zamijenite URL-ove",
+				"swap": "Zamijenite",
+				"confirmationText": "Jeste li sigurni da želite zamijeniti udaljeni i lokalni URL? Promjena će odmah stupiti na snagu",
+				"noLocalUrlSet": {
+					"title": "Lokalni URL nije postavljen",
+					"description": "Morate postaviti lokalni URL prije nego što ga možete zamijeniti s udaljenim URL-om"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Wi-Fi mreža",
+				"noAssociatedNetwork": "Nema pridružene Wi-Fi mreže",
+				"notConnectedToWifi": "Niste povezani na Wi-Fi. Povežite se na lokalnu mrežu kako biste završili podešavanje lokalnog profila",
+				"connectedTip": "Ako trenutna mreža nije na listi, možda trebate dozvoliti Stumpu pristup vašoj lokaciji",
+				"addNetwork": "Dodajte \"{{ssid}}\"",
+				"permissionNotGranted": {
+					"label": "Dozvole nisu odobrene",
+					"description": "Morate odobriti pristup lokaciji za pristup aktivnoj Wi-Fi mreži"
+				},
+				"permissionFailedToBeGranted": {
+					"title": "Odobravanje pristupa lokaciji nije uspjelo",
+					"description": "Aplikacija nije uspjela dobiti dozvolu za pristup vašoj lokaciji. Provjerite postavke uređaja i pokušajte ponovo"
+				},
+				"requestPermission": "Zatražite dozvolu za pristup lokaciji",
+				"removeWifi": {
+					"label": "Uklonite",
+					"confirmationText": "Jeste li sigurni da želite ukloniti mrežu '{{ssid}}' iz lokalnog profila?"
+				}
+			}
 		}
 	},
 	"epubReader": {
@@ -3655,6 +3728,7 @@
 			"columns": "Kolone",
 			"auto": "Automatski",
 			"columnCount_one": "{{count}} kolona",
+			"columnCount_few": "{{count}} kolone",
 			"columnCount_other": "{{count}} kolona",
 			"pageMargins": "Margine stranice",
 			"readingDirection": "Smjer čitanja",
@@ -3719,6 +3793,20 @@
 				},
 				"label": "Dvije stranice"
 			}
+		},
+		"header": {
+			"goToMediaOverview": "Idite na pregled medija"
+		},
+		"settingsDialog": {
+			"scopes": {
+				"book": "Knjiga",
+				"global": "Globalno"
+			}
+		},
+		"timerMenu": {
+			"start": "Pokrenite mjerač vremena",
+			"stop": "Zaustavite mjerač vremena",
+			"reset": "Resetujte mjerač vremena"
 		}
 	}
 }

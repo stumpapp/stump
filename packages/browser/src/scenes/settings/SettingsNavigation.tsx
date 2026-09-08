@@ -1,7 +1,7 @@
 import { Label, NativeSelect, Tabs } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 
 import { useNavigate, useRouterContext } from '@/context'
 import { useAppStore } from '@/stores'

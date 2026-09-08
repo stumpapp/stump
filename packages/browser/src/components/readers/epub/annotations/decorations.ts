@@ -2,6 +2,7 @@ import { type Decoration, DecorationStyleType } from '@readium/navigator'
 import { Locator, LocatorLocations, LocatorText } from '@readium/shared'
 
 import type { ReaderLocator } from '../context'
+import { hrefsMatch } from '../readium/locator'
 import type { EpubAnnotation } from './types'
 import { DEFAULT_HIGHLIGHT_TINT } from './types'
 
@@ -11,8 +12,9 @@ import { DEFAULT_HIGHLIGHT_TINT } from './types'
 export function annotationToDecoration(
 	annotation: EpubAnnotation,
 	tint: string = DEFAULT_HIGHLIGHT_TINT,
+	positions: Locator[] = [],
 ): Decoration | null {
-	const toolkit = readerLocatorToToolkit(annotation.locator)
+	const toolkit = readerLocatorToToolkit(annotation.locator, positions)
 	if (!toolkit) return null
 
 	return {
@@ -32,16 +34,27 @@ export function annotationToDecoration(
 export function annotationsToDecorations(
 	annotations: EpubAnnotation[],
 	tint: string = DEFAULT_HIGHLIGHT_TINT,
+	positions: Locator[] = [],
 ): Decoration[] {
 	return annotations
-		.map((annotation) => annotationToDecoration(annotation, tint))
+		.map((annotation) => annotationToDecoration(annotation, tint, positions))
 		.filter((d): d is Decoration => d != null)
 }
 
-export function readerLocatorToToolkit(locator: ReaderLocator): Locator | null {
+export function readerLocatorToToolkit(
+	locator: ReaderLocator,
+	positions: Locator[] = [],
+): Locator | null {
 	if (!locator.href) return null
+
+	let href = locator.href
+	if (positions.length > 0) {
+		const match = positions.find((p) => hrefsMatch(p.href, href))
+		if (match) href = match.href
+	}
+
 	return new Locator({
-		href: locator.href,
+		href,
 		type: locator.type || 'application/xhtml+xml',
 		title: locator.title ?? locator.chapterTitle ?? undefined,
 		locations: new LocatorLocations({

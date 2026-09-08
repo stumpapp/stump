@@ -20,9 +20,9 @@ When creating a library, or when editing an existing one, enablement of one-shot
 This is entirely up to you, Stump supports arbitrary names for flexibility. A few things to keep in mind when choosing a directory name or structure:
 
 - It does not need to be named `_oneshots`, that is just a fairly-common convention
-- It **does** need to be a subdirectory of the library root, not a sibling or parent
-- You must only supply the relative path of the one-shots directory, not the full path
-- Nested books will not be ingested during a scan, so ensure you maintain a flat structure
+- It should be a directory name, not a path to a directory
+- At any level of a library, if a directory exists with the configured name then it will be treated as a oneshots directory
+- Nested books will not be ingested during a scan unless their direct parent is a oneshots directory
 
 ## Example Library Structure
 
@@ -45,14 +45,34 @@ Let's take the following structure of a hypothetical `Indie` library as an examp
             <Folder name="Nested Folder" defaultOpen>
               <File name="This book will be ignored.cbz" />
             </Folder>
+
+            <Folder name="_oneshots" defaultOpen>
+              <File name="This book will not be ignored.cbz" />
+            </Folder>
         </Folder>
     </Folder>
 
 </Files>
 
-In this example, the one-shots directory is named `_oneshots` and is a direct subdirectory of the library root. Only 3 books are present at the top level of the `_oneshots` directory, and they will be recognized as one-shots. The nested folder will be ignored, and any books within it, at any level, will not be recognized as one-shots. The books in the `The Last Day of Rain (Claudia Matosa)` series will also not be recognized as one-shots, since they are not in the `_oneshots` directory, but will be treated as a normal series.
+In this example, the one-shots directory is named `_oneshots` and is a direct subdirectory of the library root. There is also a nested `_oneshots` directory, which will be accounted for.
 
-When configuring my library, I would set the path to `/path/to/my/Indie` as the library root, and `_oneshots` as the one-shots directory. Stump will join those paths together internally during the scanning process as needed to index the one-shots (i.e., `/path/to/my/Indie/_oneshots`).
+Stump will recognize the three books in the top-level `_oneshots` directory as one-shots, will ignore the `Nested Folder` and any books within it, and will also recognize the book in the nested `_oneshots` directory as a one-shot. The books in the `The Last Day of Rain (Claudia Matosa)` series will also not be recognized as one-shots, since they are not in the `_oneshots` directory, but will be treated as a normal series. To visualize this for how Stump will treat the library, it would look something like:
+
+```shell
+/path/to/my/Indie
+├── The Last Day of Rain (Claudia Matosa)
+│   ├── Chapter 1.cbz
+│   ├── Chapter 2.cbz
+│   ├── Chapter 3.cbz
+│   └── Chapter 4.cbz
+└── _oneshots
+    ├── Cry Wolf Girl (Ariel Slamet Ries).pdf
+    ├── Skin Deep (Flo Woolley).pdf
+    ├── The Chromatic Fantasy (H.A.).pdf
+    └── This book will not be ignored.cbz
+```
+
+When configuring this library, I would set the path to `/path/to/my/Indie` as the library root, and `_oneshots` as the one-shots directory. Stump will check any subdirectory of the library root for a directory named `_oneshots`, and will combine all books in those directories into one-shot series.
 
 ## Notable One-Shot Behavior
 
@@ -70,3 +90,19 @@ If you change the one-shots directory for a library that already has one-shots, 
 
 - Stump assumes that by the time you change the directory, the books in the old one-shots directory have been moved to the new one-shots directory. If they have not, a scan of the library will likely result in a non-one-shot series being created for the books in the old one-shots directory
 - Similarly, if you remove the one-shots directory entirely, effectively disabling one-shot handling for that library, any books that were previously recognized as one-shots will be grouped into a new non-one-shot series
+
+### Enabling One-Shots on an Existing Library
+
+<Callout type="warn" title="Best-Effort Migration">
+	If you add or change the oneshots directory configuration on a library that was previously scanned
+	without it, Stump attempts to migrate them as a **best-effort**. It is not guaranteed to work, and
+	may result in duplicate entries.
+</Callout>
+
+If you enable oneshots on an existing library that has books/series which would be recognized as one-shots, Stump will attempt to migrate them. The migration process is as follows:
+
+1. The scanner will recognize existing series and books which match the updated oneshots configuration and track them for migration
+2. Each book in the list of aforementioned series will be updated to be an individual oneshot series
+3. The now-migrated non-oneshot series will be deleted
+
+If you disable oneshots on a library that previously had them enabled, the migration process is exactly inverted. Each one-shot series will have its single book moved into a new non-oneshot series, and the one-shot series will be deleted.

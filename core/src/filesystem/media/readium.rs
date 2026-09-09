@@ -15,6 +15,19 @@ pub struct ReadiumManifestGenerator {
 	base_url: String,
 }
 
+struct SpineItemMetadata {
+	package_path: String,
+	media_type: String,
+	title: Option<String>,
+	position_count: usize,
+}
+
+/// The size of each "page" for positions generation
+/// See the following:
+/// - https://wiki.mobileread.com/wiki/Adobe_Digital_Editions#Page_numbers
+/// - https://github.com/readium/architecture/issues/123
+const PAGE_LENGTH: usize = 1024;
+
 impl ReadiumManifestGenerator {
 	pub fn new(epub_path: impl Into<String>, base_url: impl Into<String>) -> Self {
 		Self {
@@ -43,39 +56,98 @@ impl ReadiumManifestGenerator {
 			.map_err(|error| FileError::EpubReadError(error.to_string()))
 	}
 
+	/// take the spine items and convert them into an itermediate representation
+	/// to support generating positions
+	fn generate_spine_metadata(
+		&self,
+		epub: &mut EpubDoc<BufReader<File>>,
+	) -> Result<Vec<SpineItemMetadata>, FileError> {
+		let resource_metas = epub
+			.spine
+			.clone()
+			.into_iter()
+			.filter(|item| item.linear)
+			.filter_map(|item| {
+				let resource = epub.resources.get(&item.idref)?;
+				let package_path = resource.path.to_string_lossy().to_string();
+				let media_type = resource.mime.clone();
+
+				let title = epub
+					.toc
+					.iter()
+					.find(|nav| {
+						let content = nav.content.to_string_lossy();
+						content.contains(package_path.as_str())
+							|| content.contains(&item.idref)
+					})
+					.map(|nav| nav.label.clone());
+
+				let compressed_size = epub
+					.get_resource_compressed_size(&item.idref)
+					.unwrap_or(PAGE_LENGTH as u64) as usize;
+				let position_count =
+					(compressed_size as f64 / PAGE_LENGTH as f64).ceil() as usize;
+				let position_count = position_count.max(1);
+
+				Some(SpineItemMetadata {
+					package_path,
+					media_type,
+					title,
+					position_count,
+				})
+			})
+			.collect();
+
+		Ok(resource_metas)
+	}
+
 	/// Generate a positions list for the EPUB
 	pub fn generate_positions(&self) -> Result<RWPMPositions, FileError> {
-		let items = self.enumerate_spine_for_positions()?;
-		let positions: Result<Vec<RWPMPosition>, FileError> = items
-			.into_iter()
-			.map(|item| {
+		let mut epub = EpubDoc::new(&self.epub_path)
+			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
+
+		let spine_items = self.generate_spine_metadata(&mut epub)?;
+		let total_positions: usize = spine_items.iter().map(|r| r.position_count).sum();
+		if total_positions == 0 {
+			return Ok(RWPMPositions::default());
+		}
+
+		let mut positions: Vec<RWPMPosition> = Vec::with_capacity(total_positions);
+		let mut book_position: usize = 1; // 1-based, book-wide
+
+		for meta in spine_items {
+			let href = self.resource_url(&meta.package_path);
+			for i in 0..meta.position_count {
+				let progression = i as f64 / meta.position_count as f64;
+				let total_progression =
+					(book_position - 1) as f64 / total_positions as f64;
+
 				let locations = RWPMPositionLocationsBuilder::default()
-					.position(item.position)
-					.progression(0.0)
-					.total_progression(item.total_progression)
-					.build()
-					.map_err(|error| FileError::EpubReadError(error.to_string()))?;
+					.position(book_position as u32)
+					.progression(progression)
+					.total_progression(total_progression)
+					.build()?;
 
 				let mut builder = RWPMPositionBuilder::default();
 				builder
-					.href(self.resource_url(&item.package_path))
-					.media_type(item.media_type)
+					.href(href.clone())
+					.media_type(meta.media_type.clone())
 					.locations(locations);
-				if let Some(title) = item.title {
-					builder.title(title);
+				if i == 0 {
+					if let Some(ref title) = meta.title {
+						builder.title(title.clone());
+					}
 				}
-				builder
-					.build()
-					.map_err(|error| FileError::EpubReadError(error.to_string()))
-			})
-			.collect();
-		let positions = positions?;
+				positions.push(builder.build()?);
 
-		RWPMPositionsBuilder::default()
+				book_position += 1;
+			}
+		}
+
+		Ok(RWPMPositionsBuilder::default()
 			.total(positions.len() as u32)
 			.positions(positions)
-			.build()
-			.map_err(|error| FileError::EpubReadError(error.to_string()))
+			.build()?)
 	}
 
 	fn extract_metadata(

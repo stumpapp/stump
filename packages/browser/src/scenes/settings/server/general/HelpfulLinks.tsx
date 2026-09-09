@@ -1,53 +1,43 @@
-import { cn, Heading, Link, Text, TEXT_VARIANTS } from '@stump/components'
+import { ButtonOrLink, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { ExternalLink } from 'lucide-react'
+
+import { ChangelogDialog } from './ChangelogDialog'
 
 export default function HelpfulLinks() {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="gap-4 flex flex-col">
-			<div>
-				<Heading size="sm">{t('settingsScene.server/general.sections.helpfulLinks.title')}</Heading>
-				<Text size="sm" variant="muted" className="mt-1">
-					{t('settingsScene.server/general.sections.helpfulLinks.description')}
-				</Text>
-			</div>
+		<NewCard label={t('settingsScene.server/general.sections.helpfulLinks.title')}>
+			<ChangelogDialog />
 
-			<div className="gap-12 md:gap-8 flex flex-row flex-wrap">
-				<Link
+			<NewCard.Row
+				label={t('settingsScene.server/general.sections.helpfulLinks.links.documentation')}
+			>
+				<ButtonOrLink
 					href="https://www.stumpapp.dev/guides"
 					target="__blank"
 					rel="noopener noreferrer"
-					className={cn('space-x-2 text-sm flex items-center hover:underline', TEXT_VARIANTS.label)}
-					underline={false}
+					size="sm"
+					variant="outline"
 				>
-					<span>{t('settingsScene.server/general.sections.helpfulLinks.links.documentation')}</span>
-					<ExternalLink className="h-3 w-3 text-muted-foreground" />
-				</Link>
+					{t('common.open')}
+					<ExternalLink className="ml-1 h-3 w-3 text-muted-foreground" />
+				</ButtonOrLink>
+			</NewCard.Row>
 
-				<Link
+			<NewCard.Row label="GitHub">
+				<ButtonOrLink
 					href="https://github.com/stumpapp/stump"
 					target="__blank"
 					rel="noopener noreferrer"
-					className={cn('space-x-2 text-sm flex items-center hover:underline', TEXT_VARIANTS.label)}
-					underline={false}
+					size="sm"
+					variant="outline"
 				>
-					<span>GitHub</span>
-					<ExternalLink className="h-3 w-3 text-muted-foreground" />
-				</Link>
-
-				<Link
-					href="https://github.com/stumpapp/stump/blob/main/.github/CHANGELOG.md"
-					target="__blank"
-					rel="noopener noreferrer"
-					className={cn('space-x-2 text-sm flex items-center hover:underline', TEXT_VARIANTS.label)}
-					underline={false}
-				>
-					<span>{t('settingsScene.server/general.sections.helpfulLinks.links.changelog')}</span>
-					<ExternalLink className="h-3 w-3 text-muted-foreground" />
-				</Link>
-			</div>
-		</div>
+					{t('common.open')}
+					<ExternalLink className="ml-1 h-3 w-3 text-muted-foreground" />
+				</ButtonOrLink>
+			</NewCard.Row>
+		</NewCard>
 	)
 }

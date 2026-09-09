@@ -7,7 +7,7 @@ import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'
 import { useErrorBoundary } from 'react-error-boundary'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 import { useMediaMatch, useWindowSize } from 'rooks'
 import { toast } from 'sonner'
 
@@ -54,6 +54,7 @@ export function AppLayout() {
 	const jobOverlayEnabled = storeUser?.preferences?.enableJobOverlay ?? true
 	const showJobOverlay = jobOverlayEnabled && !location.pathname.match(/\/settings\/jobs/)
 
+	// eslint-disable-next-line react-hooks/refs
 	const isRefSet = !!mainRef.current
 	/**
 	 * An effect to initialize the overlay scrollbars

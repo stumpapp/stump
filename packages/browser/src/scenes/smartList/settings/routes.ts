@@ -3,48 +3,48 @@ import { Bolt, NotebookTabs, PackageX, Shield } from 'lucide-react'
 
 import { RouteGroup } from '@/hooks/useRouteGroups'
 
-export const createRouteGroups = (role: AccessRole): RouteGroup[] => [
+export const createRouteGroups = (id: string, role: AccessRole): RouteGroup[] => [
 	{
-		defaultRoute: 'settings/basics',
+		defaultRoute: `/smart-lists/${id}/settings/basics`,
 		items: [
 			{
 				customPermission: () => role === AccessRole.CoCreator,
 				icon: NotebookTabs,
 				label: 'Basics',
 				localeKey: 'basics',
-				to: 'settings/basics',
+				to: `/smart-lists/${id}/settings/basics`,
 			},
 		],
 	},
 	{
-		defaultRoute: 'members',
+		defaultRoute: `/smart-lists/${id}/settings/access`,
 		items: [
 			{
 				customPermission: () => role === AccessRole.CoCreator,
 				icon: Shield,
 				label: 'Access',
 				localeKey: 'access',
-				to: 'settings/access',
+				to: `/smart-lists/${id}/settings/access`,
 			},
 			{
 				customPermission: () => role === AccessRole.CoCreator,
 				icon: Bolt,
 				label: 'Filters',
 				localeKey: 'filters',
-				to: 'settings/filters',
+				to: `/smart-lists/${id}/settings/filters`,
 			},
 		],
 		label: 'Configuration',
 	},
 	{
-		defaultRoute: 'settings/danger',
+		defaultRoute: `/smart-lists/${id}/settings/delete`,
 		items: [
 			{
 				icon: PackageX,
 				label: 'Delete',
 				localeKey: 'danger-zone/delete',
 				// permission: 'bookclub:manage',
-				to: 'settings/delete',
+				to: `/smart-lists/${id}/settings/delete`,
 			},
 		],
 		label: 'Danger Zone',

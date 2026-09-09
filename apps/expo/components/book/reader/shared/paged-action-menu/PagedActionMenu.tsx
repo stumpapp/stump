@@ -107,7 +107,7 @@ export function PagedActionMenu({
 						<DropdownMenuSubTrigger className="text-foreground">
 							<Text className="text-lg">{t('readerSettings.readingMode.label')}</Text>
 						</DropdownMenuSubTrigger>
-						<DropdownMenuSubContent>
+						<DropdownMenuSubContent className="mt-1">
 							<DropdownMenuRadioGroup
 								value={readingMode}
 								onValueChange={(value) => {
@@ -153,7 +153,7 @@ export function PagedActionMenu({
 					<Icon
 						as={readingDirection === ReadingDirection.Ltr ? SquareArrowRight : SquareArrowLeft}
 						size={20}
-						className="ml-auto text-foreground-muted"
+						className="text-foreground-muted ml-auto"
 					/>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -162,7 +162,7 @@ export function PagedActionMenu({
 					<DropdownMenuSubTrigger className="text-foreground">
 						<Text className="text-lg">{t('readerSettings.readingTimer.label')}</Text>
 					</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent>
+					<DropdownMenuSubContent className="mt-1">
 						<DropdownMenuItem
 							className="text-foreground"
 							onPress={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
@@ -185,6 +185,7 @@ export function PagedActionMenu({
 								className="text-foreground"
 								disabled={!trackElapsedTime || !onResetTimer}
 								onPress={onResetTimer}
+								variant="destructive"
 							>
 								<Text className="text-lg">{t('readerSettings.readingTimer.resetTimer')}</Text>
 							</DropdownMenuItem>
@@ -198,7 +199,7 @@ export function PagedActionMenu({
 
 						<DropdownMenuItem className="text-foreground" onPress={onShowSettings}>
 							<Text className="text-lg">{t('readerSettings.allSettings')}</Text>
-							<Icon as={Settings2} size={20} className="ml-auto text-foreground-muted" />
+							<Icon as={Settings2} size={20} className="text-foreground-muted ml-auto" />
 						</DropdownMenuItem>
 					</>
 				)}

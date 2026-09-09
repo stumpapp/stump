@@ -10,3 +10,16 @@ export type Any = any
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
+
+export function formatServerUrl(url: string, shouldMask: boolean) {
+	if (!shouldMask) return url
+	try {
+		const urlObj = new URL(url)
+		const host = urlObj.host
+		const domain = urlObj.hostname
+
+		return `${urlObj.protocol}//${host.replace(domain, domain.replace(/./g, '*'))}`
+	} catch {
+		return url.replace(/./g, '*')
+	}
+}

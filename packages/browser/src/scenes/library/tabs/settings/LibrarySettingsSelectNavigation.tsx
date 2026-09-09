@@ -5,14 +5,16 @@ import { useLocation, useNavigate } from 'react-router'
 
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 
-import { routeGroups } from './routes'
+import { useLibraryContext } from '../../context'
+import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsSelectNavigation() {
 	const navigate = useNavigate()
 	const location = useLocation()
 
+	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
-	const { groups } = useRouteGroups({ routeGroups })
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id) })
 
 	/**
 	 * The active group based on the current location

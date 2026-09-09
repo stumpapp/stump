@@ -519,35 +519,3 @@ class DownloadQueueManager {
 export const getDownloadQueueManager = DownloadQueueManager.getInstance.bind(DownloadQueueManager)
 
 export { DownloadQueueManager }
-
-function extractSizeFromHeaders(headers: Record<string, string>): number | undefined {
-	const raw = headers['Content-Length'] ?? headers['content-length']
-	if (!raw) return undefined
-	const size = Number(raw)
-	return isNaN(size) ? undefined : size
-}
-
-async function determineFileSize(
-	headers: Record<string, string>,
-	lookupUri?: string,
-): Promise<number | undefined> {
-	const sizeFromHeaders = extractSizeFromHeaders(headers)
-	if (sizeFromHeaders != undefined) {
-		return sizeFromHeaders
-	}
-
-	console.warn('could not determine file size from headers, looking up manually', {
-		headers: headers,
-		lookupUri,
-	})
-
-	if (lookupUri) {
-		const info = await FileSystem.getInfoAsync(lookupUri)
-		// an annoying type union, size only present if exists: true lol
-		if (info.exists && info.size) {
-			return info.size
-		}
-	}
-
-	return undefined
-}

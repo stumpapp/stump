@@ -122,11 +122,19 @@ export default function NavigationArrangementItem({
 							size="xs"
 							disabled={disabled}
 							onClick={() => setShowConfiguration(!showConfiguration)}
+							variant="ghost"
+							className="border border-transparent hover:border-border"
 						>
 							<Bolt className="h-4 w-4" />
 						</IconButton>
 					)}
-					<IconButton size="xs" disabled={disabled} onClick={onChangeVisibility}>
+					<IconButton
+						size="xs"
+						disabled={disabled}
+						onClick={onChangeVisibility}
+						variant="ghost"
+						className="border border-transparent hover:border-border"
+					>
 						<VisibilityIcon className="h-4 w-4" />
 					</IconButton>
 				</div>

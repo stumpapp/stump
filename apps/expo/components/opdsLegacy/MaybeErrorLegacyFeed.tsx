@@ -13,6 +13,9 @@ type Props = {
 	error?: unknown | null
 	onRetry?: () => void
 }
+
+// FIXME: this looks poop(!) on android its almost funny
+
 export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 	const router = useRouter()
 
@@ -30,9 +33,9 @@ export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 				: 'There was an error fetching this feed.'
 
 	return (
-		<SafeAreaView className="flex-1 items-center justify-center bg-background p-4">
-			<View className="w-full flex-1 items-center justify-between gap-8">
-				<View className="flex-1 items-center justify-center gap-8">
+		<SafeAreaView className="p-4 flex-1 items-center justify-center bg-background">
+			<View className="gap-8 w-full flex-1 items-center justify-between">
+				<View className="gap-8 flex-1 items-center justify-center">
 					<Owl owl="error" />
 
 					<View className="gap-2 px-4 tablet:max-w-lg">
@@ -48,7 +51,7 @@ export default function MaybeErrorLegacyFeed({ error, onRetry }: Props) {
 					</View>
 				</View>
 
-				<View className="w-full gap-3">
+				<View className="gap-3 w-full">
 					<Button
 						className="rounded-full"
 						size="lg"

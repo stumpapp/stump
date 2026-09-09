@@ -7,7 +7,6 @@ import {
 	Dialog,
 	DropdownMenu,
 	IconButton,
-	Label,
 	Text,
 	useBoolean,
 } from '@stump/components'
@@ -197,8 +196,12 @@ export default function AvatarPicker() {
 			</Dialog>
 
 			<div className="gap-2.5 flex flex-col self-center">
-				<Label>{t(getKey('label'))}</Label>
-				<span className="relative">
+				<span
+					className="relative"
+					// i personally kinda don't like the label on this visually but moved to
+					// aria to not break accessibility
+					aria-label={t(getKey('avatar'))}
+				>
 					<Avatar
 						className="h-40 w-40 text-2xl!"
 						src={imageUrl || undefined}
@@ -211,7 +214,11 @@ export default function AvatarPicker() {
 							align="start"
 							contentWrapperClassName="w-18"
 							trigger={
-								<Button size="xs" className="px-2 py-1.5 border border-border">
+								<Button
+									size="xs"
+									className="px-2 py-1.5 border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+									variant="secondary"
+								>
 									<Edit className="mr-2 h-3 w-3" />
 									{t('common.edit')}
 								</Button>

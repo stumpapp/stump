@@ -3,7 +3,8 @@ import { graphql } from '@stump/graphql'
 import groupBy from 'lodash/groupBy'
 import { useCallback, useMemo } from 'react'
 
-import { useActiveServer } from '../activeServer'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+
 import emojis from './data.json'
 import { Emoji } from './types'
 

@@ -9,7 +9,7 @@ import {
 import { BookReaderSceneQuery, graphql, ReadingMode } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
 import paths from '@/paths'

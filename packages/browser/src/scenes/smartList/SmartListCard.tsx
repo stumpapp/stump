@@ -3,7 +3,7 @@ import { FragmentType, graphql, SmartListFilterGroupInput, useFragment } from '@
 import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import paths from '@/paths'
 

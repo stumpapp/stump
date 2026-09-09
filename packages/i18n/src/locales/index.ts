@@ -1,5 +1,6 @@
 export { default as afZA } from './af-ZA.json'
 export { default as arSA } from './ar-SA.json'
+export { default as bs } from './bs.json'
 export { default as caES } from './ca-ES.json'
 export { default as csCZ } from './cs-CZ.json'
 export { default as daDK } from './da-DK.json'

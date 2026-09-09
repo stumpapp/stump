@@ -93,12 +93,7 @@ export function CreateProviderDialog() {
 
 	return (
 		<>
-			<Button
-				className="shrink-0"
-				variant="secondary"
-				size="sm"
-				onClick={() => setIsDialogOpen(true)}
-			>
+			<Button className="shrink-0" variant="secondary" onClick={() => setIsDialogOpen(true)}>
 				{t('settingsScene.server/metadataIntegrations.addProvider')}
 			</Button>
 

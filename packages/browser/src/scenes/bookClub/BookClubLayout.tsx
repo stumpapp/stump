@@ -16,7 +16,7 @@ import { noop } from '@/utils/misc'
 import BookClubHeader from './BookClubHeader'
 import BookClubNavigation from './BookClubNavigation'
 import { BookClubSettingsSideBar } from './tabs/settings'
-import { routeGroups } from './tabs/settings/routes'
+import { createRouteGroups } from './tabs/settings/routes'
 
 // TODO(book-clubs): This query needs a complete rewrite
 const query = graphql(`
@@ -123,7 +123,10 @@ export default function BookClubLayout() {
 
 	const renderHeader = () =>
 		isSettings ? (
-			<GenericSettingsHeader localeBase="bookClubSettingsScene" routeGroups={routeGroups} />
+			<GenericSettingsHeader
+				localeBase="bookClubSettingsScene"
+				routeGroups={createRouteGroups(slug ?? '')}
+			/>
 		) : (
 			<>
 				<BookClubHeader />

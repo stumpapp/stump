@@ -1,0 +1,9 @@
+this patch primarily adds a cornerRadius prop to the dropdown menu which will apply to the menu container, and there are a few things to note that i absolutely cannot forget:
+
+- the change itself was extremely easy for once, what tripped me up for a few hours was understanding that the publication.repository block in the expo-module.config.json was causing my changes to be completely "ignored," or really just not compiled. tldr; it makes expo to use the pre-built aar instead of compiling from source. this will not be part of the upstream patch, but specific to it being a local patch
+- initially i thought to use modifiers but it would not have been passed to the actual menu
+- while i do plan to explore using the native dropdown more, i primarily needed to patch expo-ui in order for expo-router's stack toolbar menu (which renders the dropdown). that was transpiled js + some type def changes
+
+the upstream pr is https://github.com/expo/expo/pull/49515. hopefully it is accepted. i sill need to create one for the _other_ feature patched into expo-router (xcasset shit) but another time ig!
+
+plz future self don't forget to clean up this file at the end of this journey <3

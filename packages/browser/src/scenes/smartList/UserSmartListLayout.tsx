@@ -86,7 +86,7 @@ export default function UserSmartListLayout() {
 		isSettings ? (
 			<GenericSettingsHeader
 				localeBase="smartListSettingsScene"
-				routeGroups={createRouteGroups(viewerRole)}
+				routeGroups={createRouteGroups(list?.id ?? '', viewerRole)}
 			/>
 		) : (
 			<UserSmartListHeader />

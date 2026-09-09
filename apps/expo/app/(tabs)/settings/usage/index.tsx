@@ -64,33 +64,35 @@ export default function Screen() {
 					</Card>
 
 					<View className="gap-4 flex-1">
-						{savedServers.length > 0 && (
-							<Card
-								label={t('common.servers')}
-								listEmptyStyle={{ icon: Server, message: 'No servers added' }}
-							>
-								{savedServers.map((server) => (
-									<Pressable
-										key={server.id}
-										onPress={() =>
-											router.push({
-												pathname: '/(tabs)/settings/usage/[id]',
-												params: { id: server.id },
-											})
-										}
-									>
-										<Card.Row label={server.name}>
-											<View className="gap-2 flex flex-row items-center">
-												<Text className="text-foreground-muted">
-													{formatBytes(serverToUsage[server.id])}
-												</Text>
-												<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted" />
-											</View>
-										</Card.Row>
-									</Pressable>
-								))}
-							</Card>
-						)}
+						<Card
+							label={t('common.servers')}
+							listEmptyStyle={{
+								icon: Server,
+								iconSlash: true,
+								message: t(getKey('noServersAdded')),
+							}}
+						>
+							{savedServers.map((server) => (
+								<Pressable
+									key={server.id}
+									onPress={() =>
+										router.push({
+											pathname: '/(tabs)/settings/usage/[id]',
+											params: { id: server.id },
+										})
+									}
+								>
+									<Card.Row label={server.name}>
+										<View className="gap-2 flex flex-row items-center">
+											<Text className="text-foreground-muted">
+												{formatBytes(serverToUsage[server.id])}
+											</Text>
+											<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted" />
+										</View>
+									</Card.Row>
+								</Pressable>
+							))}
+						</Card>
 					</View>
 				</View>
 			</ScrollView>

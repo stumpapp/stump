@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
 import { useTranslate } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import GridImageItem from '../listLayout/grid/GridImageItem'
 import { ListRowItem } from '../listLayout/list'
 import { Text } from '../ui'
@@ -66,7 +66,7 @@ export default function BookListItem({ layout, book, onPress }: Props) {
 	const sharedProps = {
 		uri: data.thumbnail.url,
 		title: data.resolvedName,
-		onPress: onPress ?? (() => router.navigate(`/server/${serverID}/books/${data.id}`)),
+		onPress: onPress ?? (() => router.navigate(`/stump/${serverID}/books/${data.id}`)),
 		placeholderData: data.thumbnail.metadata,
 		originalDimensions:
 			data.thumbnail.width && data.thumbnail.height

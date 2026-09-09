@@ -51,6 +51,10 @@ pub struct Model {
 	pub ignore_rules: Option<IgnoreRules>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub library_id: Option<String>,
+	/// the **relative path** to the directory where oneshots are stored,
+	/// relative to the library path. this is **not** a fully qualified path
+	#[sea_orm(column_type = "Text", nullable)]
+	pub oneshots_directory: Option<String>,
 }
 
 impl Model {

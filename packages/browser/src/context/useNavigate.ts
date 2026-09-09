@@ -1,4 +1,4 @@
-import { NavigateOptions, useNavigate as useReactRouterNavigate } from 'react-router-dom'
+import { NavigateOptions, useNavigate as useReactRouterNavigate } from 'react-router'
 
 import { useRouterContext } from './RouterContext'
 

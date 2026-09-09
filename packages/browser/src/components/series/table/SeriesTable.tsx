@@ -6,10 +6,9 @@ import { orderingToTableSort, tableSortToOrdering, useFilterContext } from '@/co
 import { EntityTable, EntityTableProps } from '@/components/table'
 import { useSeriesLayout } from '@/stores/layout'
 
-import { SeriesCardData } from '../SeriesCard'
-import { defaultColumns } from './columns'
+import { defaultColumns, SeriesTableData } from './columns'
 
-type Props = Omit<EntityTableProps<SeriesCardData>, 'columns' | 'options'> & {
+type Props = Omit<EntityTableProps<SeriesTableData>, 'columns' | 'options'> & {
 	layoutKey?: string
 }
 

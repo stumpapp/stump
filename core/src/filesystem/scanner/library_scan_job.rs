@@ -28,7 +28,10 @@ use crate::{
 			ThumbnailGenerationJobParams,
 		},
 		metadata::MetadataFetchJobParams,
-		scanner::utils::safely_insert_series,
+		scanner::{
+			utils::{build_and_insert_oneshots, build_ignore_rules},
+			walk::{walk_oneshots, WalkedOneshots},
+		},
 	},
 	job::{
 		error::JobError, stump_job::StumpJob, CoreJobOutput, JobContext, JobExecuteLog,
@@ -41,9 +44,10 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		handle_missing_media, handle_missing_series, handle_restored_media,
-		safely_build_and_insert_media, safely_build_series, visit_and_update_media,
-		MediaBuildOperation, MediaOperationOutput, MissingSeriesOutput,
+		build_and_insert_media, handle_missing_media, handle_missing_series,
+		handle_restored_media, insert_series, safely_build_series,
+		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
+		MissingSeriesOutput, OneshotOperationOutput,
 	},
 	walk_library, walk_series, ScanOptions, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
@@ -53,6 +57,7 @@ use super::{
 pub enum LibraryScanTask {
 	Init(InitTaskInput),
 	WalkSeries(PathBuf),
+	WalkOneshotsDirectory(PathBuf),
 	SeriesTask {
 		id: String,
 		path: String,
@@ -170,6 +175,7 @@ impl JobLifecycle for LibraryScanJob {
 			))?;
 		let is_collection_based = config.is_collection_based();
 		let ignore_rules = config.ignore_rules().build()?;
+		let oneshots_directory = config.oneshots_directory.clone();
 
 		self.config = Some(config);
 
@@ -212,6 +218,7 @@ impl JobLifecycle for LibraryScanJob {
 			library_is_missing,
 			ignored_directories,
 			seen_directories,
+			oneshot_dirs_to_visit,
 		} = walk_library(
 			&self.path,
 			WalkerCtx {
@@ -223,6 +230,7 @@ impl JobLifecycle for LibraryScanJob {
 				// so there is nothing to short-circuit
 				dir_mtimes: HashMap::new(),
 				series_id: None,
+				oneshots_directory,
 			},
 		)
 		.await?;
@@ -268,10 +276,17 @@ impl JobLifecycle for LibraryScanJob {
 			)
 			.collect::<Vec<LibraryScanTask>>();
 
+		let oneshots_to_visit = oneshot_dirs_to_visit
+			.into_iter()
+			.map(LibraryScanTask::WalkOneshotsDirectory)
+			.collect::<Vec<LibraryScanTask>>();
+		// TODO: this shouldj ust be a single path lol right? no nesting?
+
 		let tasks = VecDeque::from(
 			[LibraryScanTask::Init(init_task_input)]
 				.into_iter()
 				.chain(series_to_visit)
+				.chain(oneshots_to_visit)
 				.collect::<Vec<LibraryScanTask>>(),
 		);
 
@@ -587,7 +602,7 @@ impl JobLifecycle for LibraryScanJob {
 							(idx + 1) as i32,
 							chunk_count as i32,
 						));
-						match safely_insert_series(chunk.to_vec(), ctx.conn()).await {
+						match insert_series(chunk.to_vec(), ctx.conn()).await {
 							Ok(created_series) => {
 								output.created_series += created_series.len() as u64;
 								if let Ok(mut map) = self.series_id_by_path.lock() {
@@ -649,24 +664,7 @@ impl JobLifecycle for LibraryScanJob {
 					max_depth = Some(1);
 				}
 
-				let ignore_rules =
-					match self.config.as_ref().map(|c| c.ignore_rules().build()) {
-						Some(Ok(rules)) => rules,
-						Some(Err(err)) => {
-							tracing::error!(error = ?err, "Failed to build ignore rules");
-							return Err(JobError::TaskFailed(
-							"Failed to build ignore rules. Check that the rules are valid."
-								.to_string(),
-						));
-						},
-						_ => {
-							tracing::error!(?self.config, "Library config is missing?");
-							return Err(JobError::TaskFailed(
-							"A critical error occurred while attempting to scan the library"
-								.to_string(),
-						));
-						},
-					};
+				let ignore_rules = build_ignore_rules(&self.config)?;
 
 				let series_id = self.series_id_by_path.lock().ok().and_then(|map| {
 					map.get(&path_buf.to_string_lossy().to_string()).cloned()
@@ -681,6 +679,7 @@ impl JobLifecycle for LibraryScanJob {
 						options: self.options,
 						dir_mtimes: (*self.dir_mtimes).clone(),
 						series_id: series_id.clone(),
+						oneshots_directory: None,
 					},
 				)
 				.await;
@@ -784,6 +783,82 @@ impl JobLifecycle for LibraryScanJob {
 				})
 				.collect();
 			},
+			LibraryScanTask::WalkOneshotsDirectory(path_buf) => {
+				let library_config = self.config.clone().ok_or(JobError::TaskFailed(
+					"Library configuration is missing".to_string(),
+				))?;
+
+				let walk_result = walk_oneshots(
+					path_buf.as_path(),
+					WalkerCtx {
+						db: ctx.apalis_state.conn.clone(),
+						ignore_rules: build_ignore_rules(&self.config)?,
+						max_depth: None, // not needed
+						options: self.options,
+						dir_mtimes: (*self.dir_mtimes).clone(), // TODO: not needed? harmless to leave in ig
+						series_id: None,                        // not needed
+						oneshots_directory: None,               // not needed
+					},
+				)
+				.await;
+
+				let WalkedOneshots {
+					to_create,
+					seen_files,
+					ignored_files,
+					book_operations,
+				} = match walk_result {
+					Ok(result) => result,
+					Err(core_error) => {
+						tracing::error!(error = ?core_error, "Critical error during attempt to walk oneshot directory!");
+						// NOTE: I don't error here in order to collect and report on the error later on.
+						// This can perhaps be refactored later on so that the parent (Job struct) properly handles this instead, however for now this is fine.
+						return Ok(JobTaskOutput {
+                        output,
+                        logs: vec![JobExecuteLog::error(format!(
+                            "Critical error during attempt to walk oneshot directory: {:?}",
+                            core_error.to_string()
+                        ))],
+                        subtasks,
+                    });
+					},
+				};
+
+				output.total_files += seen_files + ignored_files;
+				output.ignored_files += ignored_files;
+
+				let OneshotOperationOutput {
+					created_series,
+					created_media,
+					logs: new_logs,
+				} = build_and_insert_oneshots(&self.id, to_create, library_config, ctx)
+					.await?;
+
+				output.created_series += created_series;
+				output.created_media += created_media;
+				logs.extend(new_logs);
+
+				if created_series > 0 {
+					ctx.emit_event(CoreEvent::CreatedManySeries(
+						event::CreatedManySeries {
+							count: created_series,
+							library_id: self.id.clone(),
+						},
+					));
+				}
+
+				subtasks = book_operations
+					.into_iter()
+					.map(|visit_params| LibraryScanTask::SeriesTask {
+						id: visit_params.series_id,
+						path: visit_params.path.to_string_lossy().to_string(), // same as book
+						task: SeriesScanTask::VisitMedia(vec![(
+							visit_params.path, // same as series
+							visit_params.operation,
+						)]),
+					})
+					.collect();
+			},
 			LibraryScanTask::SeriesTask {
 				id: series_id,
 				path: series_path,
@@ -854,7 +929,7 @@ impl JobLifecycle for LibraryScanJob {
 						created_media,
 						logs: new_logs,
 						..
-					} = safely_build_and_insert_media(
+					} = build_and_insert_media(
 						MediaBuildOperation {
 							series_id: series_id.clone(),
 							library_config: self.config.clone().ok_or(

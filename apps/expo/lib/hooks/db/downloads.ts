@@ -8,7 +8,6 @@ import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner-native'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useActiveServerSafe } from '~/components/activeServer'
 import { useDownloadsState } from '~/components/localLibrary/store'
 import { db, downloadedFiles, downloadQueue, DownloadRepository, readProgress } from '~/db'
 import {
@@ -18,6 +17,7 @@ import {
 } from '~/lib/downloadQueue'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
 import { LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 import { useSavedServerStore } from '~/stores/savedServer'
 
 import { useTranslate } from '../useTranslate'

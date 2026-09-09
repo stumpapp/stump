@@ -370,6 +370,7 @@ mod tests {
 				size: 2000,
 				thumbnail_meta: None,
 				thumbnail_path: None,
+				is_oneshot: false,
 			},
 			metadata: Some(media_metadata::Model {
 				media_id: Some("1".to_string()),

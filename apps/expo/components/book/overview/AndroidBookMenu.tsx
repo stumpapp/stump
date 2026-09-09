@@ -63,7 +63,7 @@ export default function AndroidBookMenu({
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button className="squircle h-8 w-8 rounded-full p-0" variant="ghost" size="icon">
+				<Button className="squircle h-8 w-8 p-0 rounded-full" variant="ghost" size="icon">
 					<View>
 						<Icon as={Ellipsis} size={20} className="text-foreground" />
 					</View>
@@ -73,7 +73,7 @@ export default function AndroidBookMenu({
 			<DropdownMenuContent
 				insets={contentInsets}
 				sideOffset={2}
-				className="w-3/5 tablet:w-64"
+				className="tablet:w-64 w-3/5"
 				align="end"
 			>
 				<DropdownMenuItem onPress={favoriteBook}>
@@ -81,7 +81,7 @@ export default function AndroidBookMenu({
 					<Icon
 						as={Heart}
 						size={20}
-						className={cn('ml-auto text-foreground-muted', {
+						className={cn('text-foreground-muted ml-auto', {
 							'fill-fill-danger text-fill-danger-secondary': isFavorite,
 						})}
 					/>
@@ -93,7 +93,7 @@ export default function AndroidBookMenu({
 						<Fragment>
 							<DropdownMenuItem onPress={completeBook}>
 								<Text className="text-lg">Mark as Read</Text>
-								<Icon as={BookCheck} size={20} className={cn('ml-auto text-foreground-muted')} />
+								<Icon as={BookCheck} size={20} className={cn('text-foreground-muted ml-auto')} />
 							</DropdownMenuItem>
 							{(isReading || isPreviouslyCompleted) && <DropdownMenuSeparator />}
 						</Fragment>
@@ -103,7 +103,7 @@ export default function AndroidBookMenu({
 						<Fragment>
 							<DropdownMenuItem onPress={deleteCurrentSession}>
 								<Text className="text-lg">Clear Progress</Text>
-								<Icon as={CircleMinus} size={20} className={cn('ml-auto text-foreground-muted')} />
+								<Icon as={CircleMinus} size={20} className={cn('text-foreground-muted ml-auto')} />
 							</DropdownMenuItem>
 							{isPreviouslyCompleted && <DropdownMenuSeparator />}
 						</Fragment>
@@ -112,7 +112,7 @@ export default function AndroidBookMenu({
 					{isPreviouslyCompleted && (
 						<DropdownMenuItem onPress={deleteReadHistory}>
 							<Text className="text-lg">Delete Read History</Text>
-							<Icon as={CopyMinus} size={20} className={cn('ml-auto text-foreground-muted')} />
+							<Icon as={CopyMinus} size={20} className={cn('text-foreground-muted ml-auto')} />
 						</DropdownMenuItem>
 					)}
 				</DropdownMenuGroup>
@@ -123,7 +123,7 @@ export default function AndroidBookMenu({
 						onPress={() =>
 							router.push({
 								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/server/${book.id}/libraries/${book.library.id}`,
+								pathname: `/stump/${book.id}/libraries/${book.library.id}`,
 							})
 						}
 					>
@@ -131,7 +131,7 @@ export default function AndroidBookMenu({
 							<Text className="text-lg">Go to Library</Text>
 							<Text className="text-sm text-foreground-muted">{book.library.name}</Text>
 						</View>
-						<Icon as={ArrowUpRight} size={20} className={cn('ml-auto text-foreground-muted')} />
+						<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
 					</DropdownMenuItem>
 
 					<DropdownMenuSeparator />
@@ -140,7 +140,7 @@ export default function AndroidBookMenu({
 						onPress={() =>
 							router.push({
 								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/server/${book.id}/series/${book.series.id}`,
+								pathname: `/stump/${book.id}/series/${book.series.id}`,
 							})
 						}
 					>
@@ -148,7 +148,7 @@ export default function AndroidBookMenu({
 							<Text className="text-lg">Go to Series</Text>
 							<Text className="text-sm text-foreground-muted">{book.series.resolvedName}</Text>
 						</View>
-						<Icon as={ArrowUpRight} size={20} className={cn('ml-auto text-foreground-muted')} />
+						<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 
@@ -157,7 +157,7 @@ export default function AndroidBookMenu({
 						<DropdownMenuSeparator variant="group" />
 						<DropdownMenuItem onPress={deleteBookDownload}>
 							<Text className="text-lg text-fill-danger">Delete Download</Text>
-							<Icon as={Trash} size={20} className={cn('ml-auto text-fill-danger')} />
+							<Icon as={Trash} size={20} className={cn('text-fill-danger ml-auto')} />
 						</DropdownMenuItem>
 					</>
 				)}

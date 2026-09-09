@@ -5,9 +5,9 @@ import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 import { useBookClubContext } from './context'
@@ -71,11 +71,11 @@ export function PastBookGridItem({ data }: Props) {
 	return (
 		<Pressable
 			onPress={() =>
-				router.navigate(`/server/${serverID}/clubs/${clubId}/archive/past-book/${book.id}`)
+				router.navigate(`/stump/${serverID}/clubs/${clubId}/archive/past-book/${book.id}`)
 			}
 		>
 			{({ pressed }) => (
-				<View className={cn('flex-1 items-center gap-2 pb-4', { 'opacity-80': pressed })}>
+				<View className={cn('gap-2 pb-4 flex-1 items-center', { 'opacity-80': pressed })}>
 					<ThumbnailImage
 						source={{
 							uri: thumbnailUrl || '',

@@ -274,6 +274,7 @@ export function useFilterScene({
 const MEDIA_METADATA_ORDER_FIELDS: string[] = [
 	MediaMetadataModelOrdering.Number,
 	MediaMetadataModelOrdering.Volume,
+	MediaMetadataModelOrdering.Year,
 ]
 
 export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {

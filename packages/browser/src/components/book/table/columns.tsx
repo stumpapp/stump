@@ -152,6 +152,7 @@ const publishedColumn = columnHelper.accessor(
 			</Text>
 		),
 		enableGlobalFilter: true,
+		// TODO(sorting): Consider better null/empty handling (e.g., placing nulls last or excluding them when sorting)
 		enableSorting: true,
 		header: () => (
 			<Text size="sm" variant="secondary">

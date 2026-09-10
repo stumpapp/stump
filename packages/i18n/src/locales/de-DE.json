@@ -566,7 +566,8 @@
 					"scaleDimension": "Explizite Größe",
 					"format": "Format",
 					"name": "Name",
-					"tags": "Tags"
+					"tags": "Tags",
+					"oneshotsDirectory": "Einzelbänder-Ordner"
 				}
 			},
 			"buttons": {
@@ -1490,6 +1491,12 @@
 						"Stump-Übersetzungen",
 						"zu verbessern, wenn du dazu in der Lage bist!"
 					]
+				},
+				"language": {
+					"label": "Sprache",
+					"contributeIfAble": "Bitte überleg dir, zu Stumps Übersetzungen beizutragen, wenn du dazu in der Lage sind!",
+					"contribute": "Beitragen",
+					"noThanks": "Nein Danke"
 				}
 			}
 		},
@@ -1771,7 +1778,9 @@
 							"label": "Leserichtung",
 							"description": "Die Richtung, in der der Reader durch die Seiten blättert"
 						}
-					}
+					},
+					"label": "Universal",
+					"description": "Einstellungen, welche zu allen Buchtypen angewendet werden"
 				},
 				"imageBasedBooks": {
 					"label": "Bildbasierte Bücher",
@@ -1813,6 +1822,9 @@
 							"button": "Präferenzen löschen"
 						}
 					}
+				},
+				"formats": {
+					"label": "Formate"
 				}
 			}
 		},
@@ -1966,7 +1978,7 @@
 					"description": "Die URL, über die von außen auf den Server zugegriffen werden kann, sofern verfügbar. Dies aktiviert Einladungslinks und andere Funktionen"
 				},
 				"customEmojis": {
-					"title": "Benutzerdefinierte Emojis",
+					"title": "Emojis",
 					"description": "Verwalte und lade benutzerdefinierte Bild-Emojis für deinen Server hoch",
 					"dropzone": "Ein Bild hier ablegen oder zum Auswählen klicken",
 					"input": {
@@ -3301,7 +3313,7 @@
 					"noDownloads": "Keine heruntergeladenen Dateien für diesen Server",
 					"storedPreferences": {
 						"label": "Gespeicherte Präferenzen",
-						"description": "Sonstige Daten wie Buchpräferenzen, Lesezeiten, etc"
+						"description": "Sonstige Daten wie Buchpräferenzen, Lesetimer, etc"
 					},
 					"clearPreferences": "Präferenzen löschen"
 				}
@@ -3435,8 +3447,8 @@
 				"label": "Fußzeile"
 			},
 			"readingTimer": {
-				"label": "Lesezeit",
-				"resetTimer": "Zeit Zurücksetzen",
+				"label": "Lese-TImer",
+				"resetTimer": "Timer Zurücksetzen",
 				"confirmation": {
 					"message": "Bist du dir sicher, dass du deine Lesezeit für '{{bookName}}' zurücksetzten möchtest?\n\n{{action}}",
 					"action": {
@@ -3759,7 +3771,41 @@
 					"auto": "Auto",
 					"always": "Immer",
 					"off": "Aus"
+				},
+				"label": "Zweiseitig"
+			},
+			"readerSettings": {
+				"preferences": {
+					"readingTimer": "Lese-Timer"
 				}
+			}
+		}
+	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "Altersfreigabe",
+			"anyAge": {
+				"label": "Jedes Alter",
+				"description": "Keine Altersfreigabe wird angewandt"
+			},
+			"custom": {
+				"label": "Ab N Jahren",
+				"description": {
+					"media": "Nur Medien mit einer Altersfreigabe von N oder niedriger werden angezeigt, wobei N die Zahl ist, die du unten eingibst",
+					"series": "Nur Reihen mit einer Altersfreigabe von N oder niedriger werden angezeigt, wobei N die Zahl ist, die du unten eingibst"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "Erweiterung",
+			"any": "Alle"
+		},
+		"readStatusSelect": {
+			"label": "Lesestatus",
+			"options": {
+				"completed": "Beendet",
+				"reading": "Am Lesen",
+				"unread": "Ungelesen"
 			}
 		}
 	}

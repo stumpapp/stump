@@ -22,7 +22,7 @@ pub struct ResumeReadingCursor {
 	pub elapsed_seconds: i64,
 	/// when the very first session in the current readthrough started
 	pub started_at: Option<DateTimeWithTimeZone>,
-	// the last time the latest session in the current readthrough was updated
+	/// the last time the latest session in the current readthrough was updated
 	pub updated_at: Option<DateTimeWithTimeZone>,
 	#[graphql(skip)]
 	pub media_id: String,
@@ -64,7 +64,7 @@ impl ResumeReadingCursor {
 			return Ok(None);
 		};
 
-		// the base_url (second param) is only used for href contruction, which we do not care
+		// the base_url is only used for href contruction, which we do not care
 		// about here, and so the empty string is fine
 		let generator = ReadiumManifestGenerator::new(&book.path, "");
 		let positions = spawn_blocking(move || generator.generate_positions())
@@ -76,8 +76,7 @@ impl ResumeReadingCursor {
 		let page = positions
 			.positions
 			.iter()
-			.filter(|p| p.locations.total_progression <= total_progression)
-			.next_back()
+			.rfind(|p| p.locations.total_progression <= total_progression)
 			.map(|p| p.locations.position as i32);
 
 		Ok(page)

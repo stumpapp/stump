@@ -157,14 +157,15 @@ function BookReaderScene({ book }: Props) {
 				paths.bookReader(book.id, {
 					isEpub: true,
 				}),
+				{ replace: true },
 			)
 		} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
-			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }))
+			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }), { replace: true })
 		} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 			if (!initialPage && readingMode === ReadingMode.Paged && !animatedReader) {
-				navigate(paths.bookReader(book.id, { page: 1 }))
+				navigate(paths.bookReader(book.id, { page: 1 }), { replace: true })
 			} else if (!!initialPage && initialPage > book.pages) {
-				navigate(paths.bookReader(book.id, { page: book.pages }))
+				navigate(paths.bookReader(book.id, { page: book.pages }), { replace: true })
 			}
 		}
 	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader])

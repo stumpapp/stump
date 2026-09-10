@@ -75,6 +75,7 @@ impl OrderBy<media::Entity, MediaOrderBy> for MediaOrderBy {
 					let field = media_metadata::Column::from_str(
 						&order_by.field.to_string().to_snake_case(),
 					)?;
+					// TODO(order-by): Better null handling (e.g. NULLS LAST or option to exclude unpopulated metadata fields when sorting)
 					query = query.order_by(field, order);
 				},
 			}

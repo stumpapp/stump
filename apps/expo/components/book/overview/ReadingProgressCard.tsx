@@ -68,9 +68,6 @@ export function CurrentProgressCard({
 			<Card.StatGroup>
 				<Card.Stat
 					label={t('common.page')}
-					// FIXME: this won't always be accurate for epubs when switching between devices
-					// of different screen sizes. in order to get a more accurate page number, it would
-					// need to be computed on the device itself before render
 					value={page ?? '??'}
 					suffix={totalPages ? ` / ${totalPages}` : undefined}
 				/>

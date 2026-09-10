@@ -89,7 +89,7 @@ export default function ContinuousScrollReader({
 		const hasPageURL = !!search.get('page')
 		if (hasPageURL) {
 			search.delete('page')
-			setSearch(search)
+			setSearch(search, { replace: true })
 		}
 	}, [search, setSearch])
 

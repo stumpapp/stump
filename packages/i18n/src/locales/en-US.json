@@ -1515,7 +1515,7 @@
 				"language": {
 					"label": "Language",
 					"contributeIfAble": "Please consider contributing to Stump's translations if you're able to!",
-					"contribute": "Contiribute",
+					"contribute": "Contribute",
 					"noThanks": "No thanks"
 				}
 			}

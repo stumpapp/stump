@@ -52,7 +52,7 @@ export default function HomeArrangementPreference() {
 					title={t(`${BASE}.title`)}
 					description={t(`${BASE}.hint`)}
 					trigger={
-						<Button size="sm" variant="outline">
+						<Button size="sm" variant="ghost">
 							{t('common.edit')}
 						</Button>
 					}

@@ -4,8 +4,10 @@ import {
 	FilterableArrangementEntity,
 	graphql,
 	HomeArrangementPreferencesQuery,
+	UpdateHomeArrangementMutation,
+	UpdateHomeArrangementMutationVariables,
 } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
+import { UseMutationResult, useQueryClient, UseSuspenseQueryResult } from '@tanstack/react-query'
 
 import { useUserStore } from '@/stores'
 
@@ -20,7 +22,6 @@ export const homeArrangementQuery = graphql(`
 							__typename
 							... on InProgressBooks {
 								name
-								links
 							}
 							... on OnDeckBooks {
 								name
@@ -28,7 +29,6 @@ export const homeArrangementQuery = graphql(`
 							... on RecentlyAdded {
 								entity
 								name
-								links
 							}
 						}
 					}
@@ -47,7 +47,6 @@ const updateMutation = graphql(`
 					__typename
 					... on InProgressBooks {
 						name
-						links
 					}
 					... on OnDeckBooks {
 						name
@@ -55,7 +54,6 @@ const updateMutation = graphql(`
 					... on RecentlyAdded {
 						entity
 						name
-						links
 					}
 				}
 			}
@@ -75,7 +73,7 @@ export type HomeSectionId = (typeof HOME_SECTION_IDS)[number]
 
 export function defaultHomeSections(): HomeSection[] {
 	return [
-		{ visible: true, config: { __typename: 'InProgressBooks', name: null, links: [] } },
+		{ visible: true, config: { __typename: 'InProgressBooks', name: null } },
 		{ visible: true, config: { __typename: 'OnDeckBooks', name: null } },
 		{
 			visible: true,
@@ -83,7 +81,6 @@ export function defaultHomeSections(): HomeSection[] {
 				__typename: 'RecentlyAdded',
 				entity: FilterableArrangementEntity.Books,
 				name: null,
-				links: [],
 			},
 		},
 		{
@@ -92,7 +89,6 @@ export function defaultHomeSections(): HomeSection[] {
 				__typename: 'RecentlyAdded',
 				entity: FilterableArrangementEntity.Series,
 				name: null,
-				links: [],
 			},
 		},
 	]
@@ -115,14 +111,14 @@ export function getHomeSectionId(section: HomeSection): HomeSectionId | undefine
 export function toHomeSectionInput({ config, visible }: HomeSection): ArrangementSectionInput {
 	switch (config.__typename) {
 		case 'InProgressBooks':
-			return { visible, config: { inProgressBooks: { name: config.name, links: config.links } } }
+			return { visible, config: { inProgressBooks: { name: config.name } } }
 		case 'OnDeckBooks':
 			return { visible, config: { onDeckBooks: { name: config.name } } }
 		case 'RecentlyAdded':
 			return {
 				visible,
 				config: {
-					recentlyAdded: { entity: config.entity, name: config.name, links: config.links },
+					recentlyAdded: { entity: config.entity, name: config.name },
 				},
 			}
 		default:
@@ -136,11 +132,15 @@ export function useHomeArrangementKey() {
 	return sdk.cacheKey('homeArrangement', [userId])
 }
 
-export function useHomeArrangement() {
+export function useHomeArrangement(): UseSuspenseQueryResult<HomeArrangementPreferencesQuery> {
 	return useSuspenseGraphQL(homeArrangementQuery, useHomeArrangementKey())
 }
 
-export function useUpdateHomeArrangement() {
+export function useUpdateHomeArrangement(): UseMutationResult<
+	UpdateHomeArrangementMutation,
+	unknown,
+	UpdateHomeArrangementMutationVariables
+> {
 	const client = useQueryClient()
 	const queryKey = useHomeArrangementKey()
 	return useGraphQLMutation(updateMutation, {

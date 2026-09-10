@@ -950,12 +950,10 @@ input ImageResizeMethodInput @oneOf {
 
 type InProgressBooks {
 	name: String
-	links: [FilterableArrangementEntityLink!]!
 }
 
 input InProgressBooksInput {
 	name: String
-	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type InheritPermissionStruct {
@@ -2787,13 +2785,11 @@ type ReadthroughRecord {
 type RecentlyAdded {
 	entity: FilterableArrangementEntity!
 	name: String
-	links: [FilterableArrangementEntityLink!]!
 }
 
 input RecentlyAddedInput {
 	entity: FilterableArrangementEntity!
 	name: String
-	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type RegisteredEmailDevice {

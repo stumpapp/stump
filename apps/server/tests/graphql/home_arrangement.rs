@@ -94,6 +94,11 @@ async fn home_sections_are_normalized_on_save() {
 		])
 	);
 	assert_eq!(read_sections(&app).await, saved);
+}
+
+#[tokio::test]
+async fn empty_home_input_hides_all_sections() {
+	let app = TestApp::new_with_default_user().await;
 	let hidden = update(&app, json!([])).await;
 	assert_eq!(hidden.as_array().unwrap().len(), 4);
 	assert!(hidden
@@ -129,8 +134,34 @@ async fn stored_home_sections_are_normalized_on_read() {
 async fn unreadable_home_config_uses_defaults_until_the_next_save() {
 	let app = TestApp::new_with_default_user().await;
 	let defaults = read_sections(&app).await;
-	store_config(&app, json!({"sections": [{"config": {"type": "Unknown"}}]})).await;
+	store_config(
+		&app,
+		json!({"locked": false, "sections": [
+			{"visible": true, "config": {"type": "Unknown"}}
+		]}),
+	)
+	.await;
 	assert_eq!(read_sections(&app).await, defaults);
+	let stored = user_preferences::Entity::find()
+		.one(app.conn())
+		.await
+		.unwrap()
+		.unwrap();
+	assert_eq!(
+		stored.home_arrangement.as_ref().unwrap()["sections"][0]["config"]["type"],
+		"Unknown"
+	);
 	let saved = update(&app, sections()).await;
 	assert_eq!(read_sections(&app).await, saved);
+	let stored = user_preferences::Entity::find()
+		.one(app.conn())
+		.await
+		.unwrap()
+		.unwrap();
+	let repaired: models::shared::arrangement::Arrangement =
+		serde_json::from_value(stored.home_arrangement.unwrap()).unwrap();
+	assert_eq!(
+		serde_json::to_value(&repaired).unwrap()["sections"][0]["config"]["entity"],
+		"SERIES"
+	);
 }

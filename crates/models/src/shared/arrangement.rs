@@ -144,8 +144,6 @@ pub struct CustomArrangementConfig {
 pub struct InProgressBooks {
 	name: Option<String>,
 	// filter: Option<Json<serde_json::Value>>,
-	#[graphql(default)]
-	links: Vec<FilterableArrangementEntityLink>,
 }
 
 #[derive(
@@ -164,8 +162,6 @@ pub struct RecentlyAdded {
 	entity: FilterableArrangementEntity,
 	name: Option<String>,
 	// filter: Option<Json<serde_json::Value>>,
-	#[graphql(default)]
-	links: Vec<FilterableArrangementEntityLink>,
 }
 
 #[derive(

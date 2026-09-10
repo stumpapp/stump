@@ -1020,12 +1020,10 @@ export type ImageResizeMethodInput =
 
 export type InProgressBooks = {
   __typename?: 'InProgressBooks';
-  links: Array<FilterableArrangementEntityLink>;
   name?: Maybe<Scalars['String']['output']>;
 };
 
 export type InProgressBooksInput = {
-  links?: Array<FilterableArrangementEntityLink>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -3972,13 +3970,11 @@ export type ReadthroughRecord = {
 export type RecentlyAdded = {
   __typename?: 'RecentlyAdded';
   entity: FilterableArrangementEntity;
-  links: Array<FilterableArrangementEntityLink>;
   name?: Maybe<Scalars['String']['output']>;
 };
 
 export type RecentlyAddedInput = {
   entity: FilterableArrangementEntity;
-  links?: Array<FilterableArrangementEntityLink>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -6353,14 +6349,14 @@ export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeri
 export type HomeArrangementPreferencesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomeArrangementPreferencesQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', homeArrangement: { __typename?: 'Arrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } } } };
+export type HomeArrangementPreferencesQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', homeArrangement: { __typename?: 'Arrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null } | { __typename: 'OnDeckBooks', name?: string | null } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null } | { __typename: 'SystemArrangementConfig' } }> } } } };
 
 export type UpdateHomeArrangementMutationVariables = Exact<{
   input: HomeArrangementInput;
 }>;
 
 
-export type UpdateHomeArrangementMutation = { __typename?: 'Mutation', updateHomeArrangement: { __typename?: 'HomeArrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'OnDeckBooks', name?: string | null } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null, links: Array<FilterableArrangementEntityLink> } | { __typename: 'SystemArrangementConfig' } }> } };
+export type UpdateHomeArrangementMutation = { __typename?: 'Mutation', updateHomeArrangement: { __typename?: 'HomeArrangement', sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks', name?: string | null } | { __typename: 'OnDeckBooks', name?: string | null } | { __typename: 'RecentlyAdded', entity: FilterableArrangementEntity, name?: string | null } | { __typename: 'SystemArrangementConfig' } }> } };
 
 export type LibraryLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12379,7 +12375,6 @@ export const HomeArrangementPreferencesDocument = new TypedDocumentString(`
             __typename
             ... on InProgressBooks {
               name
-              links
             }
             ... on OnDeckBooks {
               name
@@ -12387,7 +12382,6 @@ export const HomeArrangementPreferencesDocument = new TypedDocumentString(`
             ... on RecentlyAdded {
               entity
               name
-              links
             }
           }
         }
@@ -12405,7 +12399,6 @@ export const UpdateHomeArrangementDocument = new TypedDocumentString(`
         __typename
         ... on InProgressBooks {
           name
-          links
         }
         ... on OnDeckBooks {
           name
@@ -12413,7 +12406,6 @@ export const UpdateHomeArrangementDocument = new TypedDocumentString(`
         ... on RecentlyAdded {
           entity
           name
-          links
         }
       }
     }

@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PropsWithChildren, Suspense } from 'react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 import HomeArrangementPreference from '@/scenes/settings/app/preferences/HomeArrangementPreference'
 
@@ -40,7 +40,7 @@ vi.mock('../RecentlyAddedSeries', () => ({
 vi.mock('../NoLibraries', () => ({ default: () => <p>No libraries</p> }))
 
 const original: HomeSection[] = [
-	{ visible: true, config: { __typename: 'InProgressBooks', name: null, links: [] } },
+	{ visible: true, config: { __typename: 'InProgressBooks', name: null } },
 	{ visible: true, config: { __typename: 'OnDeckBooks', name: null } },
 	{
 		visible: true,
@@ -48,7 +48,6 @@ const original: HomeSection[] = [
 			__typename: 'RecentlyAdded',
 			entity: FilterableArrangementEntity.Books,
 			name: null,
-			links: [],
 		},
 	},
 	{
@@ -57,7 +56,6 @@ const original: HomeSection[] = [
 			__typename: 'RecentlyAdded',
 			entity: FilterableArrangementEntity.Series,
 			name: null,
-			links: [],
 		},
 	},
 ]

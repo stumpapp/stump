@@ -11,7 +11,7 @@ import { getHomeSectionId, HomeSection, toHomeSectionInput } from '@/scenes/home
 import { HomeArrangementForm } from '../HomeArrangementPreference'
 
 const initialSections: HomeSection[] = [
-	{ visible: true, config: { __typename: 'InProgressBooks', name: null, links: [] } },
+	{ visible: true, config: { __typename: 'InProgressBooks', name: null } },
 	{ visible: true, config: { __typename: 'OnDeckBooks', name: null } },
 	{
 		visible: true,
@@ -19,7 +19,6 @@ const initialSections: HomeSection[] = [
 			__typename: 'RecentlyAdded',
 			entity: FilterableArrangementEntity.Books,
 			name: null,
-			links: [],
 		},
 	},
 	{
@@ -28,7 +27,6 @@ const initialSections: HomeSection[] = [
 			__typename: 'RecentlyAdded',
 			entity: FilterableArrangementEntity.Series,
 			name: null,
-			links: [],
 		},
 	},
 ]
@@ -99,7 +97,7 @@ describe('HomeArrangementForm', () => {
 		expect(saved[3]!.visible).toBe(false)
 		expect(saved.map(toHomeSectionInput)[3]).toEqual({
 			visible: false,
-			config: { recentlyAdded: { entity: 'BOOKS', name: null, links: [] } },
+			config: { recentlyAdded: { entity: 'BOOKS', name: null } },
 		})
 	})
 

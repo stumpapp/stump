@@ -1969,7 +1969,7 @@
 				"serverInfo": {
 					"title": "Server information",
 					"description": "Basic details about your Stump server instance",
-					"version": "Verison",
+					"version": "Version",
 					"exactCommit": "Exact commit",
 					"build": "Build",
 					"nonStableChannel": {

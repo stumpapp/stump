@@ -14,7 +14,7 @@ If you have a security issue to report that would be inappropriate or potentiall
 
 ## Supported Versions
 
-Generally speaking, I try to only officially support the latest release. It isn't feasible for me to support multiple versions of Stump at a time, especially when considering the complex verison matrix between the server and client apps.
+Generally speaking, I try to only officially support the latest release. It isn't feasible for me to support multiple versions of Stump at a time, especially when considering the complex version matrix between the server and client apps.
 
 I will provide support for older versions if a patch can be easily backported, but I won't make any promises. If you are running an older version of Stump, please try to update to the latest version to ensure you have the latest security patches and features.
 

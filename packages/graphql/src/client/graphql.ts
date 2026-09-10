@@ -4146,6 +4146,8 @@ export type Series = {
   isComplete: Scalars['Boolean']['output'];
   isFavorite: Scalars['Boolean']['output'];
   isOneshot: Scalars['Boolean']['output'];
+  /** The most recent datetime that any book in the series was read */
+  lastReadAt?: Maybe<Scalars['DateTime']['output']>;
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
   /** Get media in this series */
@@ -5016,6 +5018,24 @@ export type UserPreferences = {
   thumbnailRatio: Scalars['Float']['output'];
   thumbnailRoundness: InterfaceRoundness;
   userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type UserSeriesState = {
+  __typename?: 'UserSeriesState';
+  createdAt: Scalars['DateTime']['output'];
+  /**
+   * when set, the books in the series will be excluded from on-deck recommentations
+   * if the timestamp is after the ingestion time into stump
+   */
+  droppedAt?: Maybe<Scalars['DateTime']['output']>;
+  seriesId: Scalars['String']['output'];
+  /**
+   * the date at which the last readthrough was dropped, so that we can
+   * revert back to "first book beyond highest position ever read" logic for
+   * the recommendations query instead of "next book in current re-read"
+   */
+  stoppedReadthroughAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type ValidateMetadataProviderConfigInput = {

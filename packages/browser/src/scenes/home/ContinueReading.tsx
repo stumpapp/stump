@@ -77,7 +77,7 @@ export const usePrefetchContinueReading = () => {
 	const { sdk } = useSDK()
 	const client = useQueryClient()
 	return useCallback(() => {
-		client.prefetchInfiniteQuery({
+		return client.prefetchInfiniteQuery({
 			queryKey: sdk.cacheKey('inProgress'),
 			initialPageParam: {
 				offset: {

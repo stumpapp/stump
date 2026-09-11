@@ -72,11 +72,12 @@ type Arrangement {
 	sections: [ArrangementSection!]!
 }
 
-union ArrangementConfig = SystemArrangementConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+union ArrangementConfig = SystemArrangementConfig | InProgressBooks | OnDeckBooks | RecentlyAdded | CustomArrangementConfig
 
 input ArrangementConfigInput @oneOf {
 	system: SystemArrangementConfigInput
 	inProgressBooks: InProgressBooksInput
+	onDeckBooks: OnDeckBooksInput
 	recentlyAdded: RecentlyAddedInput
 	custom: FilterableArrangementEntityLinkInput
 }
@@ -870,6 +871,15 @@ input FitWithinResizeInput {
 	height: Int!
 }
 
+"The sections displayed on a user's home page."
+type HomeArrangement {
+	sections: [ArrangementSection!]!
+}
+
+input HomeArrangementInput {
+	sections: [ArrangementSectionInput!]!
+}
+
 type ImageColor {
 	color: String!
 	percentage: Decimal!
@@ -940,12 +950,10 @@ input ImageResizeMethodInput @oneOf {
 
 type InProgressBooks {
 	name: String
-	links: [FilterableArrangementEntityLink!]!
 }
 
 input InProgressBooksInput {
 	name: String
-	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type InheritPermissionStruct {
@@ -2065,6 +2073,8 @@ type Mutation {
 	deleteUser(id: ID!, hardDelete: Boolean): User!
 	deleteUserSessions(id: ID!): Int!
 	updateUserLockStatus(id: ID!, lock: Boolean!): User!
+	"Replace the authenticated user's home sections"
+	updateHomeArrangement(input: HomeArrangementInput!): HomeArrangement!
 	updateNavigationArrangementLock(locked: Boolean!): Arrangement!
 	updateNavigationArrangement(input: NavigationArrangementInput!): Arrangement!
 	createEmailer(input: EmailerInput!): Emailer!
@@ -2281,6 +2291,14 @@ type OffsetPaginationInfo {
 	pageOffset: Int!
 	"Whether or not the page is zero-indexed."
 	zeroBased: Boolean!
+}
+
+type OnDeckBooks {
+	name: String
+}
+
+input OnDeckBooksInput {
+	name: String
 }
 
 enum OrderDirection {
@@ -2767,13 +2785,11 @@ type ReadthroughRecord {
 type RecentlyAdded {
 	entity: FilterableArrangementEntity!
 	name: String
-	links: [FilterableArrangementEntityLink!]!
 }
 
 input RecentlyAddedInput {
 	entity: FilterableArrangementEntity!
 	name: String
-	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type RegisteredEmailDevice {

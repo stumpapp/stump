@@ -3,7 +3,7 @@ use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue
 use serde::{Deserialize, Serialize};
 
 use crate::shared::{
-	arrangement::Arrangement,
+	arrangement::{Arrangement, HomeArrangement},
 	enums::{
 		InterfaceLayout, InterfaceRoundness, SupportedFont, ThumbnailPlaceholderStyle,
 	},
@@ -53,11 +53,11 @@ pub struct Model {
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
 	#[serde(default = "Model::default_navigation_arrangement")]
-	pub navigation_arrangement: Option<Arrangement>,
+	pub navigation_arrangement: Option<Json>,
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
 	#[serde(default = "Model::default_home_arrangement")]
-	pub home_arrangement: Option<Arrangement>,
+	pub home_arrangement: Option<Json>,
 
 	pub enable_reading_journal: bool,
 	/// hour offset from midnight at which a new "logical day" begins for reading sessions
@@ -82,12 +82,30 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl Model {
-	pub fn default_navigation_arrangement() -> Option<Arrangement> {
-		Some(Arrangement::default_navigation())
+	// Keep JSON decoding at the field boundary so an invalid arrangement does not
+	// prevent the rest of the user's preferences from being loaded.
+	pub fn resolved_home_arrangement(&self) -> Arrangement {
+		let arrangement = self
+			.home_arrangement
+			.clone()
+			.and_then(|value| serde_json::from_value::<Arrangement>(value).ok())
+			.unwrap_or_else(Arrangement::default_home);
+		HomeArrangement::new(arrangement.sections).into()
 	}
 
-	pub fn default_home_arrangement() -> Option<Arrangement> {
-		Some(Arrangement::default_home())
+	pub fn resolved_navigation_arrangement(&self) -> Arrangement {
+		self.navigation_arrangement
+			.clone()
+			.and_then(|value| serde_json::from_value(value).ok())
+			.unwrap_or_else(Arrangement::default_navigation)
+	}
+
+	pub fn default_navigation_arrangement() -> Option<Json> {
+		Some(serde_json::json!(Arrangement::default_navigation()))
+	}
+
+	pub fn default_home_arrangement() -> Option<Json> {
+		Some(serde_json::json!(Arrangement::default_home()))
 	}
 }
 

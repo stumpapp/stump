@@ -3,8 +3,8 @@ use crate::{
 	error_message::FORBIDDEN_ACTION,
 	guard::{OptionalFeature, OptionalFeatureGuard, PermissionGuard, ServerOwnerGuard},
 	input::user::{
-		AgeRestrictionInput, CreateUserInput, NavigationArrangementInput,
-		UpdateUserInput, UpdateUserPreferencesInput,
+		AgeRestrictionInput, CreateUserInput, HomeArrangementInput,
+		NavigationArrangementInput, UpdateUserInput, UpdateUserPreferencesInput,
 	},
 	object::{user::User, user_preferences::UserPreferences},
 	utils::save_user_session,
@@ -18,7 +18,9 @@ use models::{
 		user_login_activity, user_preferences,
 	},
 	shared::{
-		arrangement::Arrangement, enums::UserPermission, permission_set::PermissionSet,
+		arrangement::{Arrangement, HomeArrangement},
+		enums::UserPermission,
+		permission_set::PermissionSet,
 	},
 };
 use sea_orm::{
@@ -441,6 +443,31 @@ impl UserMutation {
 		Ok(User::from(updated_user))
 	}
 
+	/// Replace the authenticated user's home sections
+	async fn update_home_arrangement(
+		&self,
+		ctx: &Context<'_>,
+		input: HomeArrangementInput,
+	) -> Result<HomeArrangement> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let arrangement = HomeArrangement::new(input.sections);
+
+		let preferences = user_preferences::Entity::find()
+			.filter(user_preferences::Column::UserId.eq(&user.id))
+			.one(conn)
+			.await?
+			.ok_or("User preferences not found")?;
+
+		let mut active_model = preferences.into_active_model();
+		active_model.home_arrangement = Set(Some(serde_json::to_value(
+			Arrangement::from(arrangement.clone()),
+		)?));
+		active_model.update(conn).await?;
+
+		Ok(arrangement)
+	}
+
 	async fn update_navigation_arrangement_lock(
 		&self,
 		ctx: &Context<'_>,
@@ -455,19 +482,14 @@ impl UserMutation {
 			.await?
 			.ok_or("User preferences not found")?;
 
-		let updated_arrangement = match preferences.navigation_arrangement {
-			Some(ref arrangement) => Arrangement {
-				locked,
-				..arrangement.clone()
-			},
-			None => Arrangement {
-				locked,
-				..Arrangement::default_navigation()
-			},
+		let updated_arrangement = Arrangement {
+			locked,
+			..preferences.resolved_navigation_arrangement()
 		};
 
 		let mut active_model = preferences.into_active_model();
-		active_model.navigation_arrangement = Set(Some(updated_arrangement.clone()));
+		active_model.navigation_arrangement =
+			Set(Some(serde_json::to_value(&updated_arrangement)?));
 		active_model.update(conn).await?;
 
 		Ok(updated_arrangement)
@@ -487,10 +509,7 @@ impl UserMutation {
 			.await?
 			.ok_or("User preferences not found")?;
 
-		let arrangement = preferences
-			.navigation_arrangement
-			.clone()
-			.unwrap_or_else(Arrangement::default_navigation);
+		let arrangement = preferences.resolved_navigation_arrangement();
 
 		if arrangement.locked {
 			return Err("Navigation arrangement is locked".into());
@@ -502,7 +521,8 @@ impl UserMutation {
 		};
 
 		let mut active_model = preferences.into_active_model();
-		active_model.navigation_arrangement = Set(Some(updated_arrangement.clone()));
+		active_model.navigation_arrangement =
+			Set(Some(serde_json::to_value(&updated_arrangement)?));
 
 		active_model.update(conn).await?;
 

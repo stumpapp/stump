@@ -91,7 +91,7 @@ export function toolkitLocatorToInput(
 	const locations = locator.locations
 	return {
 		chapterTitle: chapterTitle ?? locator.title ?? '',
-		href: locator.href,
+		href: packagePathFromHref(locator.href),
 		title: locator.title,
 		type: locator.type || 'application/xhtml+xml',
 		locations: {

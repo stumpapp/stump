@@ -1,5 +1,9 @@
 use std::io;
 
+use models::shared::readium::{
+	RWPMPositionBuilderError, RWPMPositionLocationsBuilderError,
+	RWPMPositionsBuilderError,
+};
 use thiserror::Error;
 use unrar::error::UnrarError;
 use zip::result::ZipError;
@@ -65,5 +69,25 @@ impl From<FileError> for CoreError {
 			FileError::UnknownError(err) => CoreError::Unknown(err),
 			_ => CoreError::InternalError(error.to_string()),
 		}
+	}
+}
+
+// lol don't do this long term, accepting for now but fix in my reorganization branch <3
+
+impl From<RWPMPositionLocationsBuilderError> for FileError {
+	fn from(error: RWPMPositionLocationsBuilderError) -> Self {
+		FileError::EpubReadError(error.to_string())
+	}
+}
+
+impl From<RWPMPositionBuilderError> for FileError {
+	fn from(error: RWPMPositionBuilderError) -> Self {
+		FileError::EpubReadError(error.to_string())
+	}
+}
+
+impl From<RWPMPositionsBuilderError> for FileError {
+	fn from(error: RWPMPositionsBuilderError) -> Self {
+		FileError::EpubReadError(error.to_string())
 	}
 }

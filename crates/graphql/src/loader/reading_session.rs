@@ -100,6 +100,7 @@ impl Loader<ResumeReadingCursorLoaderKey> for ReadingSessionLoader {
 							elapsed_seconds: total_elapsed,
 							started_at,
 							updated_at: s.updated_at,
+							media_id: key.media_id.clone(),
 						},
 					);
 				},

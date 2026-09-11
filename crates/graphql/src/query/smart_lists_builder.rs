@@ -163,7 +163,9 @@ pub fn build_filters(
 		let mut condition = match filter_group.joiner {
 			SmartListGroupJoiner::And => Condition::all(),
 			SmartListGroupJoiner::Or => Condition::any(),
-			SmartListGroupJoiner::Not => Condition::all().not(),
+			// semantically this is meant to be "non in group are true" and therefore
+			// uses `any` instead of `all`, otherwise it is a simple negate
+			SmartListGroupJoiner::Not => Condition::any().not(),
 		};
 		for filter in &filter_group.groups {
 			condition = match filter {
@@ -258,6 +260,9 @@ fn add_sessions_join(
 
 	query
 }
+
+// TODO(tests): i hate these sql string tests, thanks to the newer fake_data test crate i think
+// we should just instead actually kick off queries against real data and assert a few fundamentals
 
 #[cfg(test)]
 mod tests {

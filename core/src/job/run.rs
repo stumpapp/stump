@@ -10,12 +10,12 @@ use crate::{
 		image::{PlaceholderGenerationJob, ThumbnailGenerationJob},
 		media::analysis::AnalyzeMediaJob,
 		metadata::MetadataFetchJob,
-		scanner::{LibraryScanJob, SeriesScanJob},
 	},
 	job::{
 		error::JobError, stump_job::StumpJob, ApalisWorkerState, CoreJobOutput,
 		JobContext, JobLifecycle, JobOutputExt, JobProgress, WorkingState,
 	},
+	scan::{library::LibraryScanJob, series::SeriesScanJob},
 	CoreEvent,
 };
 

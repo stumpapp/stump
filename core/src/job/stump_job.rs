@@ -1,10 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::filesystem::{
-	image::{PlaceholderGenerationJobConfig, ThumbnailGenerationJobParams},
-	media::analysis::AnalysisJobConfig,
-	metadata::MetadataFetchJobParams,
-	scanner::ScanOptions,
+use crate::{
+	filesystem::{
+		image::{PlaceholderGenerationJobConfig, ThumbnailGenerationJobParams},
+		media::analysis::AnalysisJobConfig,
+		metadata::MetadataFetchJobParams,
+	},
+	scan::options::ScanOptions,
 };
 
 use models::shared::image_processor_options::ImageProcessorOptions;

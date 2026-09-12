@@ -11,7 +11,10 @@ use uuid::Uuid;
 use crate::{
 	config::StumpConfig,
 	fs_utils::{FileParts, PathUtils},
-	media::processor::{process_file, MediaProcessorOptions},
+	media::processor::{
+		generate_hashes, process_metadata, GeneratedFileHashes, MediaProcessorOptions,
+	},
+	media::{metadata::ProcessedMediaMetadata, processor::process_file},
 	CoreResult,
 };
 
@@ -74,6 +77,7 @@ pub async fn prepare_draft(
 		.unwrap_or_else(|| Uuid::new_v4().to_string());
 
 	let pages = processed.pages;
+	// TODO(metadata): we should consider locked metadata fields and only overwrite unlocked fields
 	let (resolved_metadata, resolved_tags) = processed
 		.metadata
 		.map(|mut metadata| {
@@ -97,11 +101,7 @@ pub async fn prepare_draft(
 		})
 		.unwrap_or_default();
 
-	let created_at = existing
-		.map(|e| e.media.created_at)
-		.unwrap_or_else(|| chrono::Utc::now().into());
-
-	let media = media::ActiveModel {
+	let active_model = media::ActiveModel {
 		id: Set(id),
 		name: Set(file_stem),
 		size: Set(size),
@@ -113,8 +113,18 @@ pub async fn prepare_draft(
 		series_id: Set(Some(series_id.to_string())),
 		modified_at: Set(last_modified_at),
 		status: Set(FileStatus::Ready),
-		created_at: Set(created_at),
+		created_at: Set(chrono::Utc::now().into()),
 		..Default::default()
+	};
+
+	let media = match existing {
+		Some(e) => media::ActiveModel {
+			id: Set(e.media.id.clone()),
+			created_at: Set(e.media.created_at),
+			is_oneshot: Set(e.media.is_oneshot),
+			..active_model
+		},
+		None => active_model,
 	};
 
 	Ok(MediaDraft {
@@ -122,4 +132,20 @@ pub async fn prepare_draft(
 		metadata: resolved_metadata,
 		tags: resolved_tags,
 	})
+}
+
+pub async fn regen_hashes(
+	path: &Path,
+	library_config: &library_config::Model,
+	config: &StumpConfig,
+) -> CoreResult<GeneratedFileHashes> {
+	let options = MediaProcessorOptions::new(library_config, config);
+	Ok(generate_hashes(path, options, config).await?)
+}
+
+pub async fn regen_meta(
+	path: &Path,
+	config: &StumpConfig,
+) -> CoreResult<Option<ProcessedMediaMetadata>> {
+	Ok(process_metadata(path, config).await?)
 }

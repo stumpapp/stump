@@ -3,11 +3,13 @@ use std::fmt::Debug;
 use async_graphql::Union;
 use serde::{de, Deserialize, Serialize};
 
-use crate::filesystem::{
-	image::{PlaceholderGenerationOutput, ThumbnailGenerationOutput},
-	media::analysis::AnalyzeMediaOutput,
-	metadata::MetadataFetchJobOutput,
-	scanner::{LibraryScanOutput, SeriesScanOutput},
+use crate::{
+	filesystem::{
+		image::{PlaceholderGenerationOutput, ThumbnailGenerationOutput},
+		media::analysis::AnalyzeMediaOutput,
+		metadata::MetadataFetchJobOutput,
+	},
+	scan::{library::LibraryScanOutput, series::SeriesScanOutput},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Union)]

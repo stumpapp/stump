@@ -1,19 +1,14 @@
 pub mod analysis;
-mod builder;
 mod epub_search;
-mod metadata;
 pub mod readium;
-mod utils;
 
-pub(crate) use builder::{BuiltMedia, MediaBuilder};
 pub use epub_search::{
 	search_epub, EpubSearchCursor, EpubSearchError, EpubSearchOptions,
 	EpubSearchResponse, EPUB_SEARCH_DEFAULT_LIMIT, EPUB_SEARCH_MAX_LIMIT,
 };
-pub use metadata::*;
 pub use readium::ReadiumManifestGenerator;
-pub use utils::is_accepted_cover_name;
 
+// TODO(reorg): move this? prolly the test crate
 #[cfg(test)]
 pub(crate) mod tests {
 	use std::{fs, path::PathBuf};

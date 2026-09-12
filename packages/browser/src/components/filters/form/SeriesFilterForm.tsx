@@ -42,7 +42,7 @@ export default function SeriesFilterForm() {
 		() =>
 			({
 				metadata: {
-					ageRating: filters?.metadata?.ageRating?.gte ?? null,
+					ageRating: filters?.metadata?.ageRating?.lte ?? null,
 					metaType: filters?.metadata?.metaType?.likeAnyOf ?? [],
 					status: filters?.metadata?.status?.likeAnyOf ?? [],
 				},
@@ -93,7 +93,7 @@ const intoGraphql = (values: SeriesFilterFormSchema) =>
 		metadata: {
 			ageRating: values.metadata?.ageRating
 				? {
-						gte: values.metadata.ageRating,
+						lte: values.metadata.ageRating,
 					}
 				: undefined,
 			metaType: values.metadata?.metaType

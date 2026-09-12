@@ -163,7 +163,9 @@ pub fn build_filters(
 		let mut condition = match filter_group.joiner {
 			SmartListGroupJoiner::And => Condition::all(),
 			SmartListGroupJoiner::Or => Condition::any(),
-			SmartListGroupJoiner::Not => Condition::all().not(),
+			// semantically this is meant to be "none in group are true" and therefore
+			// uses `any` instead of `all`, otherwise it is a simple negate
+			SmartListGroupJoiner::Not => Condition::any().not(),
 		};
 		for filter in &filter_group.groups {
 			condition = match filter {
@@ -259,15 +261,20 @@ fn add_sessions_join(
 	query
 }
 
+// TODO(tests): i hate these sql string tests, thanks to the newer fake_data test crate i think
+// we should just instead actually kick off queries against real data and assert a few fundamentals
+
 #[cfg(test)]
 mod tests {
 	use super::*;
 	use crate::{
 		filter::{
-			library::LibraryFilterInput, media::MediaFilterInput, StringLikeFilter,
+			library::LibraryFilterInput, media::MediaFilterInput, NumericFilter,
+			StringLikeFilter,
 		},
 		tests::common::get_default_user,
 	};
+	use ::tests::{db::test_database, fake_data};
 	use pretty_assertions::assert_eq;
 	use sea_orm::{
 		sea_query::{Query, SqliteQueryBuilder},
@@ -278,6 +285,90 @@ mod tests {
 		Query::select()
 			.cond_where(condition.clone())
 			.to_string(SqliteQueryBuilder)
+	}
+
+	#[tokio::test]
+	async fn test_media_group_filter_not_is_none_are_true() {
+		let db = test_database().await;
+		let auth_user = fake_data::User::default().auth_user(&db).await;
+
+		let filters: Vec<SmartListFilterGroupInput> = vec![SmartListFilterGroupInput {
+			joiner: SmartListGroupJoiner::Not,
+			groups: vec![
+				SmartListFilterInput::Media(MediaFilterInput {
+					name: Some(StringLikeFilter::Eq("stinky book".to_string())),
+					..Default::default()
+				}),
+				SmartListFilterInput::Media(MediaFilterInput {
+					name: Some(StringLikeFilter::Eq("another stinky book".to_string())),
+					..Default::default()
+				}),
+				SmartListFilterInput::Media(MediaFilterInput {
+					size: Some(NumericFilter::Eq(100)),
+					..Default::default()
+				}),
+			],
+		}];
+
+		let series = fake_data::Series::default().insert(&db).await;
+
+		let stinky_book = fake_data::Media {
+			name: Some("stinky book".to_string()),
+			series_id: series.id.clone(),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let another_stinky_book = fake_data::Media {
+			name: Some("another stinky book".to_string()),
+			series_id: series.id.clone(),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let okay_name_but_stinky_size = fake_data::Media {
+			name: Some("okay name but stinky size".to_string()),
+			size: Some(100),
+			series_id: series.id.clone(),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let totally_okay_will_return_book = fake_data::Media {
+			name: Some("totally okay will return book".to_string()),
+			series_id: series.id.clone(),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let should_exclude_ids = vec![
+			stinky_book.id,
+			another_stinky_book.id,
+			okay_name_but_stinky_size.id,
+		];
+
+		let query = build_books_query(
+			&auth_user,
+			smart_list::SmartListJoiner::And,
+			&filters,
+			None,
+		);
+
+		let results = query
+			.into_model::<media::ModelWithMetadata>()
+			.all(&db)
+			.await
+			.expect("should exec query");
+
+		assert_eq!(results.len(), 1);
+		assert!(!results
+			.iter()
+			.any(|book| should_exclude_ids.contains(&book.media.id)));
+		assert_eq!(results[0].media.id, totally_okay_will_return_book.id);
 	}
 
 	#[test]
@@ -293,23 +384,8 @@ mod tests {
 		let filters: Vec<SmartListFilterGroupInput> = vec![SmartListFilterGroupInput {
 			joiner: SmartListGroupJoiner::And,
 			groups: vec![SmartListFilterInput::Media(MediaFilterInput {
-				id: None,
 				name: Some(StringLikeFilter::Eq("Test".to_string())),
-				_and: None,
-				created_at: None,
-				extension: None,
-				metadata: None,
-				_not: None,
-				_or: None,
-				pages: None,
-				path: None,
-				reading_status: None,
-				series: None,
-				series_id: None,
-				size: None,
-				status: None,
-				tags: None,
-				updated_at: None,
+				..Default::default()
 			})],
 		}];
 		let condition = build_filters(smart_list::SmartListJoiner::And, &filters);
@@ -323,34 +399,15 @@ mod tests {
 			SmartListFilterGroupInput {
 				joiner: SmartListGroupJoiner::Not,
 				groups: vec![SmartListFilterInput::Media(MediaFilterInput {
-					id: None,
 					name: Some(StringLikeFilter::Eq("Book".to_string())),
-					_and: None,
-					created_at: None,
-					extension: None,
-					metadata: None,
-					_not: None,
-					_or: None,
-					pages: None,
-					path: None,
-					reading_status: None,
-					series: None,
-					series_id: None,
-					size: None,
-					status: None,
-					tags: None,
-					updated_at: None,
+					..Default::default()
 				})],
 			},
 			SmartListFilterGroupInput {
 				joiner: SmartListGroupJoiner::Or,
 				groups: vec![SmartListFilterInput::Library(LibraryFilterInput {
-					id: None,
 					name: Some(StringLikeFilter::Eq("Test".to_string())),
-					path: None,
-					_and: None,
-					_not: None,
-					_or: None,
+					..Default::default()
 				})],
 			},
 		];
@@ -368,34 +425,15 @@ mod tests {
 			SmartListFilterGroupInput {
 				joiner: SmartListGroupJoiner::Or,
 				groups: vec![SmartListFilterInput::Media(MediaFilterInput {
-					id: None,
 					name: Some(StringLikeFilter::Eq("Book".to_string())),
-					_and: None,
-					created_at: None,
-					extension: None,
-					metadata: None,
-					_not: None,
-					_or: None,
-					pages: None,
-					path: None,
-					reading_status: None,
-					series: None,
-					series_id: None,
-					size: None,
-					status: None,
-					tags: None,
-					updated_at: None,
+					..Default::default()
 				})],
 			},
 			SmartListFilterGroupInput {
 				joiner: SmartListGroupJoiner::Or,
 				groups: vec![SmartListFilterInput::Library(LibraryFilterInput {
-					id: None,
 					name: Some(StringLikeFilter::Eq("Test".to_string())),
-					path: None,
-					_and: None,
-					_not: None,
-					_or: None,
+					..Default::default()
 				})],
 			},
 		];

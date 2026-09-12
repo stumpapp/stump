@@ -83,7 +83,7 @@ export default function MediaFilterForm() {
 
 	const defaultValue = useMemo(() => {
 		const flattenMetadata = {
-			age_rating: (filters?.metadata as MediaMetadataFilterInput)?.ageRating?.eq ?? null,
+			age_rating: (filters?.metadata as MediaMetadataFilterInput)?.ageRating?.lte ?? null,
 			character: (filters?.metadata as MediaMetadataFilterInput)?.characters?.likeAnyOf ?? [],
 			colorist: (filters?.metadata as MediaMetadataFilterInput)?.colorists?.likeAnyOf ?? [],
 			editor: (filters?.metadata as MediaMetadataFilterInput)?.editors?.likeAnyOf ?? [],

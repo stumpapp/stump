@@ -13,12 +13,12 @@ use pdfium_render::prelude::{
 
 use crate::{
 	config::StumpConfig,
-	filesystem::image::into_image_format,
 	fs_utils::{
 		archive::create_zip_archive,
 		hash::{self, generate_koreader_hash},
 		ContentType, FileParts, PathUtils,
 	},
+	image::into_image_format,
 	media::{
 		metadata::ProcessedMediaMetadata,
 		processor::{

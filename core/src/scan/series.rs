@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	event,
-	filesystem::image::{
+	image::{
 		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 		ThumbnailGenerationJobParams,
 	},

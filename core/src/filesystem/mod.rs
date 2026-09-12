@@ -5,7 +5,6 @@ mod common;
 mod content_type;
 pub(crate) mod error;
 mod hash;
-pub mod image;
 pub mod media;
 pub mod metadata;
 pub mod scanner;

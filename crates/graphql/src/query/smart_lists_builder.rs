@@ -163,7 +163,7 @@ pub fn build_filters(
 		let mut condition = match filter_group.joiner {
 			SmartListGroupJoiner::And => Condition::all(),
 			SmartListGroupJoiner::Or => Condition::any(),
-			// semantically this is meant to be "non in group are true" and therefore
+			// semantically this is meant to be "none in group are true" and therefore
 			// uses `any` instead of `all`, otherwise it is a simple negate
 			SmartListGroupJoiner::Not => Condition::any().not(),
 		};

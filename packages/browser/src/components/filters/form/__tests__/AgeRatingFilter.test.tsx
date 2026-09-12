@@ -38,7 +38,7 @@ describe('AgeRatingFilter', () => {
 			),
 		).toBeInTheDocument()
 
-		await user.click(screen.getByRole('radio', { name: /Aged N and up/ }))
+		await user.click(screen.getByRole('radio', { name: /Aged N and below/ }))
 		expect(screen.getByTestId('age-rating-value')).toHaveTextContent('8')
 
 		await user.click(screen.getByRole('radio', { name: /Any age/ }))

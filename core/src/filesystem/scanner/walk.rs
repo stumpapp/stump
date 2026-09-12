@@ -1,5 +1,5 @@
 use std::{
-	collections::HashMap,
+	collections::{HashMap, HashSet},
 	path::{Path, PathBuf},
 	sync::Arc,
 	time::UNIX_EPOCH,
@@ -20,8 +20,9 @@ use crate::{
 		scanner::{
 			options::BookVisitOperation,
 			utils::{
+				collect_pending_oneshot_conversions, collect_previous_oneshot_entries,
 				file_updated_since_scan, mtime_newer_than_datetime,
-				safely_get_current_mtime,
+				safely_get_current_mtime, PendingOneshotConversion, PreviousOneshotEntry,
 			},
 		},
 		PathUtils,
@@ -151,32 +152,24 @@ pub async fn walk_library(
 		.await
 		.map_err(|e| CoreError::InternalError(format!("Failed to walk library! {e}")))?;
 
-	let full_oneshots_directory = oneshots_directory
-		.as_deref()
-		.filter(|dir| !dir.is_empty())
-		.map(|dir| PathBuf::from(path).join(dir).to_string_lossy().to_string());
+	let oneshots_dir_name = oneshots_directory.as_deref().filter(|dir| !dir.is_empty());
 
 	// note the ordering here, as it is important. oneshots are identified first so that
 	// we avoid entering the standard walk flows for them
 
 	let (oneshot_entries, regular_entries): (Vec<DirEntry>, Vec<DirEntry>) =
 		valid_entries.into_iter().partition(|entry| {
-			full_oneshots_directory
-				.as_deref()
-				.map(|dir| {
-					entry
-						.path()
-						.to_string_lossy()
-						.to_lowercase()
-						// TODO(oneshots): is contains okay? too tired to think through
-						// edge cases but need to revisit before merge
-						.contains(&dir.to_lowercase())
-				})
-				.unwrap_or(false)
+			let Some(oneshots_dir_name) = oneshots_dir_name else {
+				return false;
+			};
+			let entry_name = entry.path().file_name().map(|name| name.to_string_lossy());
+			entry_name.is_some_and(|name| name.eq_ignore_ascii_case(oneshots_dir_name))
+			// ^ we match the name and not a full path because the oneshots_directory just refers
+			// to the name at any level in the tree. e.g. so `<lib>/_oneshots` and `<lib>/Series A/_oneshots`
+			// would both valid oneshot directories
 		});
 	let oneshot_dirs_to_visit: Vec<PathBuf> =
 		oneshot_entries.into_iter().map(|e| e.into_path()).collect();
-	// TODO(oneshots): filter out based on mtime
 
 	let ignored_directories = ignored_entries.len() as u64;
 	let seen_directories = regular_entries.len() as u64 + ignored_directories;
@@ -319,6 +312,9 @@ pub struct WalkedSeries {
 	/// The *changed* mtimes observed for every directory during the walk. If a value was observed but
 	/// unchanged, it will not be included in this map
 	pub observed_dir_mtimes: HashMap<String, u64>,
+	/// A list of entries which were oneshots but after a config change are no longer considered
+	/// oneshots (i.e., the oneshots_directory changed)
+	pub previous_oneshot_entries: Vec<PreviousOneshotEntry>,
 }
 
 impl WalkedSeries {
@@ -330,6 +326,8 @@ impl WalkedSeries {
 	}
 }
 
+/// Walks a series directory and returns the media that need to be created, visited, or marked as missing.
+/// This walker should **never** process a oneshot series, as those are handled by a separate walker.
 pub async fn walk_series(
 	path: &Path,
 	WalkerCtx {
@@ -483,17 +481,36 @@ pub async fn walk_series(
 		.map(|m| (m.path.clone(), m.clone()))
 		.collect::<HashMap<String, _>>();
 
-	let (media_to_create, remaining_entries): (Vec<PathBuf>, Vec<DirEntry>) =
-		valid_entries.into_iter().partition_map(|entry: DirEntry| {
-			let entry_path = entry.path();
-			let entry_path_str = entry_path.to_string_lossy().to_string();
+	let previous_oneshot_entries = collect_previous_oneshot_entries(
+		valid_entries
+			.iter()
+			.map(|e| e.path().to_string_lossy().to_string())
+			.collect::<Vec<_>>(),
+		db.as_ref(),
+	)
+	.await?;
 
-			if existing_media_map.contains_key(entry_path_str.as_str()) {
-				Either::Right(entry)
-			} else {
-				Either::Left(entry_path.to_path_buf())
-			}
-		});
+	let previous_oneshot_paths = previous_oneshot_entries
+		.iter()
+		.map(|d| d.book_path.to_string_lossy().to_string())
+		.collect::<HashSet<String>>();
+
+	let (media_to_create, remaining_entries): (Vec<PathBuf>, Vec<DirEntry>) =
+		valid_entries
+			.into_iter()
+			.filter(|entry| {
+				!previous_oneshot_paths.contains(entry.path().to_string_lossy().as_ref())
+			})
+			.partition_map(|entry: DirEntry| {
+				let entry_path = entry.path();
+				let entry_path_str = entry_path.to_string_lossy().to_string();
+
+				if existing_media_map.contains_key(entry_path_str.as_str()) {
+					Either::Right(entry)
+				} else {
+					Either::Left(entry_path.to_path_buf())
+				}
+			});
 
 	let book_visit_operations = remaining_entries
 		.into_iter()
@@ -573,6 +590,7 @@ pub async fn walk_series(
 		missing_media,
 		series_is_missing: false,
 		observed_dir_mtimes,
+		previous_oneshot_entries,
 	})
 }
 
@@ -596,9 +614,11 @@ pub struct WalkedOneshots {
 	pub to_create: Vec<PathBuf>,
 	/// The operations to perform on books that need to be visited
 	pub book_operations: Vec<OneshotVisitOperation>,
+	/// Existing normal series which need to be converted to a oneshot. This should only happen
+	/// when the oneshots configuration is added or changed
+	pub pending_oneshot_conversions: Vec<PendingOneshotConversion>,
 }
 
-// dir_mtimes, // TODO: check *before* walking?
 pub async fn walk_oneshots(
 	path: &Path,
 	WalkerCtx {
@@ -639,16 +659,46 @@ pub async fn walk_oneshots(
 	// ^ originally i went the tokio::fs::read_dir route but there is not iterator impl
 	// so that was a hard pass
 
+	let oneshots_dir_str = path.to_string_lossy().to_string();
+
+	let pending_oneshot_conversion_ids = series::Entity::find()
+		.select_only()
+		.column(series::Column::Id)
+		.filter(
+			series::Column::Path
+				.starts_with(&oneshots_dir_str)
+				.and(series::Column::IsOneshot.eq(false)),
+		)
+		.into_tuple::<String>()
+		.all(db.as_ref())
+		.await?;
+	// ^ load the series which exist under the oneshots directory but were not created as oneshots,
+	// we will pass them along to the handler to update them accordingly
+
 	let existing_oneshots = series::Entity::find()
 		.select_only()
-		.columns(SeriesIdentSelect::columns())
-		.filter(series::Column::Path.starts_with(path.to_string_lossy().as_ref()))
+		.columns(vec![series::Column::Id, series::Column::Path])
+		.filter(
+			series::Column::Path
+				.starts_with(&oneshots_dir_str)
+				.and(series::Column::IsOneshot.eq(true)),
+		)
 		.into_model::<SeriesIdentSelect>()
 		.all(db.as_ref())
 		.await?
 		.into_iter()
 		.map(|s| (s.path, s.id))
 		.collect::<HashMap<String, String>>();
+
+	let pending_oneshot_conversions =
+		collect_pending_oneshot_conversions(pending_oneshot_conversion_ids, db.as_ref())
+			.await?;
+
+	let pending_oneshot_media_paths: HashSet<String> = pending_oneshot_conversions
+		.iter()
+		.flat_map(|ls| ls.media.iter().map(|m| m.path.clone()))
+		.collect();
+	// ^ the media at these paths will be flipped to is_oneshot = true and series_id reassigned
 
 	// this is a vec of (series_path,series_id) but will mark both series and
 	// book as missing, since the books are series
@@ -673,8 +723,12 @@ pub async fn walk_oneshots(
 		}
 	}
 
-	let (to_create, remaining_paths): (Vec<PathBuf>, Vec<PathBuf>) =
-		file_paths.into_iter().partition_map(|file_path: PathBuf| {
+	let (to_create, remaining_paths): (Vec<PathBuf>, Vec<PathBuf>) = file_paths
+		.into_iter()
+		// we filter these out because their media records already exist and will just have
+		// their series reassigned via convert_to_oneshot_series
+		.filter(|fp| !pending_oneshot_media_paths.contains(fp.to_string_lossy().as_ref()))
+		.partition_map(|file_path: PathBuf| {
 			let file_path_str = file_path.to_string_lossy().to_string();
 			if existing_oneshots.contains_key(&file_path_str) {
 				Either::Right(file_path)
@@ -749,5 +803,6 @@ pub async fn walk_oneshots(
 		ignored_files: ignored_files.len() as u64,
 		to_create,
 		book_operations,
+		pending_oneshot_conversions,
 	})
 }

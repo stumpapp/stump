@@ -20,7 +20,7 @@ pub(crate) use media::{
 	build_and_insert_media, handle_missing_media, handle_restored_media,
 	visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
 };
-pub(crate) use oneshot::{build_and_insert_oneshots, OneshotOperationOutput};
+pub(crate) use oneshot::*;
 pub(crate) use series::{
 	handle_missing_series, insert_series, safely_build_series, MissingSeriesOutput,
 };

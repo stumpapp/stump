@@ -1,6 +1,7 @@
 use std::{env, time::Duration};
 
 use migrations::{Migrator, MigratorTrait};
+use schematic::{Config, ConfigLoader};
 use sea_orm::sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sea_orm::{
 	self, ConnectionTrait, DatabaseBackend, DatabaseConnection, FromQueryResult,
@@ -9,10 +10,7 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-use crate::{
-	config::{env_keys, StumpConfig},
-	CoreError,
-};
+use crate::{config::StumpConfig, CoreError};
 
 pub const FORCE_RESET_KEY: &str = "FORCE_DB_RESET";
 
@@ -21,28 +19,45 @@ pub const FORCE_RESET_KEY: &str = "FORCE_DB_RESET";
 pub const SQLITE_BIND_LIMIT: usize = 900;
 // TODO: expose fn that intakes conn to determine if sqlite v postgres and return diff values
 
+const DB_URL_KEY: &str = "STUMP_DB_URL";
+
+#[derive(Config)]
+#[config(env_prefix = "STUMP_DB_")]
+struct ConnectionConfig {
+	#[setting(default = "localhost")]
+	pub host: String,
+	#[setting(default = 5432)]
+	pub port: u16,
+	#[setting(default = "stump")]
+	pub name: String,
+	#[setting(default = "stump")]
+	pub user: String,
+	pub password: String,
+	// ^ no default so the load fails if unset
+}
+
+impl ConnectionConfig {
+	pub fn to_database_url(&self) -> String {
+		// Percent-encode the password so special characters don't break the URL
+		let encoded_password = urlencoding::encode(&self.password);
+		format!(
+			"postgresql://{}:{encoded_password}@{}:{}/{}",
+			self.user, self.host, self.port, self.name
+		)
+	}
+}
+
 fn resolve_database_url(config: &StumpConfig) -> String {
-	// A full DATABASE_URL takes highest precedence (works for both postgres:// and sqlite://)
-	if let Ok(url) = env::var(env_keys::DATABASE_URL_KEY) {
+	// A full url takes highest precedence (and works for both postgres:// and sqlite://)
+	if let Ok(url) = env::var(DB_URL_KEY) {
 		return url;
 	}
 
-	// A DB_PASSWORD env var signals PostgreSQL; compose the URL from individual components
-	if let Ok(password) = env::var(env_keys::DB_PASSWORD_KEY) {
-		let host =
-			env::var(env_keys::DB_HOST_KEY).unwrap_or_else(|_| "localhost".to_string());
-		let port = env::var(env_keys::DB_PORT_KEY).unwrap_or_else(|_| "5432".to_string());
-		let name =
-			env::var(env_keys::DB_NAME_KEY).unwrap_or_else(|_| "stump".to_string());
-		let user =
-			env::var(env_keys::DB_USER_KEY).unwrap_or_else(|_| "stump".to_string());
-		// Percent-encode the password so special characters don't break the URL
-		let encoded_password = urlencoding::encode(&password);
-		return format!("postgresql://{user}:{encoded_password}@{host}:{port}/{name}");
+	if let Ok(loaded) = ConfigLoader::<ConnectionConfig>::new().load() {
+		return loaded.config.to_database_url();
 	}
 
-	// Fall back to SQLite
-	let config_dir = config.get_config_dir();
+	let config_dir = config.config_directory();
 	if let Some(path) = config.db_path.clone() {
 		format!("sqlite://{path}/stump.db?mode=rwc")
 	} else if cfg!(debug_assertions) {

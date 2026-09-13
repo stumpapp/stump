@@ -431,7 +431,7 @@ impl FileConverter for RarProcessor {
 			..
 		} = path_buf.as_path().file_parts();
 
-		let cache_dir = config.get_cache_dir();
+		let cache_dir = config.cache_directory();
 		// stem as to not get double extensions like .cbr.cbz, see
 		// https://github.com/stumpapp/stump/issues/1284
 		let unpacked_path = cache_dir.join(&file_stem);

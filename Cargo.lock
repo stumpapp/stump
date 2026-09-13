@@ -9321,20 +9321,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "stump-config-gen"
-version = "0.1.7"
-dependencies = [
- "itertools 0.14.0",
- "proc-macro2",
- "quote",
- "serde",
- "syn 2.0.106",
- "temp-env",
- "thiserror 2.0.20",
- "toml 0.9.7",
-]
-
-[[package]]
 name = "stump_core"
 version = "0.1.7"
 dependencies = [
@@ -9386,7 +9372,6 @@ dependencies = [
  "serde_json",
  "serde_with",
  "simple_crypt",
- "stump-config-gen",
  "temp-env",
  "tempfile",
  "tests",

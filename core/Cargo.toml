@@ -40,7 +40,6 @@ serde-xml-rs = "0.6.0" # Support for XML serialization/deserialization
 serde_json.workspace = true
 serde_with.workspace = true
 simple_crypt.workspace = true
-stump-config-gen = { path = "../crates/macros/stump-config-gen"}
 schematic = { version = "0.20", default-features = false, features = ["config", "env", "toml"] }
 tokio.workspace = true
 toml.workspace = true

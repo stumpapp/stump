@@ -3975,11 +3975,17 @@ export type ResumeReadingCursor = {
   locator?: Maybe<ReadiumLocator>;
   page?: Maybe<Scalars['Int']['output']>;
   percentageCompleted?: Maybe<Scalars['Decimal']['output']>;
+  /**
+   * A page number computed from the current locator's `total_progression` relative
+   * to the computed positions list for the book.
+   */
+  positionAwarePage?: Maybe<Scalars['Int']['output']>;
   readthroughNumber: Scalars['Int']['output'];
   /** the id of the session this cursor is derived from */
   sessionId: Scalars['Int']['output'];
   /** when the very first session in the current readthrough started */
   startedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time the latest session in the current readthrough was updated */
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 

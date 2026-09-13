@@ -267,6 +267,13 @@ impl From<Model> for MediaIdentSelect {
 }
 
 #[derive(Debug, FromQueryResult)]
+pub struct MediaIdentWithSeriesId {
+	pub id: String,
+	pub path: String,
+	pub series_id: String,
+}
+
+#[derive(Debug, FromQueryResult)]
 pub struct MediaThumbSelect {
 	pub id: String,
 	pub path: String,

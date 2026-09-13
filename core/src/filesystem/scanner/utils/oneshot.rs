@@ -484,14 +484,13 @@ pub(crate) async fn convert_to_oneshot_series(
 			.one(&txn)
 			.await?;
 
-		let series_metadata = match media_metadata.and_then(|m| m.title) {
-			Some(title) => Some(series_metadata::ActiveModel {
+		let series_metadata = media_metadata.and_then(|m| m.title).map(|title| {
+			series_metadata::ActiveModel {
 				series_id: Set(new_series_id.clone()),
 				title: Set(Some(title)),
 				..Default::default()
-			}),
-			_ => None,
-		};
+			}
+		});
 
 		let new_series = series::ActiveModel {
 			id: Set(new_series_id.clone()),

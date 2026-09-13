@@ -32,8 +32,10 @@ struct ConnectionConfig {
 	pub name: String,
 	#[setting(default = "stump")]
 	pub user: String,
+	#[setting(validate = schematic::validate::min_length(1))]
 	pub password: String,
-	// ^ no default so the load fails if unset
+	// ^ schematic uses default impl if missing by default, which is honestly kinda
+	// annoying. so instead ive added a basic validation rule
 }
 
 impl ConnectionConfig {

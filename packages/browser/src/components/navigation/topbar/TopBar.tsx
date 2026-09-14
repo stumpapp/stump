@@ -15,7 +15,7 @@ import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home'
 
 import {
@@ -51,6 +51,7 @@ const query = graphql(`
 `)
 
 export default function TopNavigation() {
+	const paths = usePaths()
 	const location = useLocation()
 
 	const [ref, size] = useDimensionsRef()

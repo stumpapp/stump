@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import paths from '../../paths'
+import { usePaths } from '../../paths'
 
 const mutation = graphql(`
 	mutation DeleteBookClubConfirmation($id: ID!) {
@@ -22,6 +22,7 @@ type Props = {
 }
 
 export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigger }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 
 	const { mutate: deleteClub, isPending } = useGraphQLMutation(mutation, {

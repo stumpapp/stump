@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { useEmailerSettingsContext } from './context'
 import { CreateOrUpdateEmailerForm, CreateOrUpdateEmailerSchema } from './emailers'
@@ -41,6 +41,7 @@ const mutation = graphql(`
 `)
 
 export default function EditEmailerScene() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const client = useQueryClient()
 

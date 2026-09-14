@@ -7,7 +7,7 @@ import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { prefetchJobLogs } from './JobDataInspector'
 import { PersistedJob } from './JobTable'
@@ -38,6 +38,7 @@ type Props = {
 }
 
 export default function JobActionMenu({ job, onInspect }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const client = useQueryClient()
 

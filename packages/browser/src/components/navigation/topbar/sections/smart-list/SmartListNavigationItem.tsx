@@ -7,7 +7,7 @@ import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { usePrefetchSmartList } from '@/scenes/smartList'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
@@ -27,6 +27,7 @@ export default function SmartListNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: { smartLists: lists },

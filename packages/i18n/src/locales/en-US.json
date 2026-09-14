@@ -1855,7 +1855,7 @@
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
+					"label": "Servers",
 					"description": "The list of Stump servers you can connect to",
 					"getStarted": "Add a server to get started",
 					"unreachableServer": {

@@ -62,9 +62,13 @@ export default function SmartListSideBarSection({
 	}
 
 	return (
-		<Accordion type="single" collapsible className="py-2 w-full" defaultValue="smartlists">
+		<Accordion type="single" collapsible className="py-1 w-full" defaultValue="smartlists">
 			<Accordion.Item value="smartlists" className="border-none">
-				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
+				<Accordion.Trigger
+					noUnderline
+					asLabel
+					className="px-1 py-1 text-sm font-medium tracking-wide text-muted-foreground"
+				>
 					{t('sidebar.buttons.smartlists')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
@@ -77,9 +81,7 @@ export default function SmartListSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="ml-2 space-y-1 pl-1 border-l border-l-sidebar-border">
-						{renderLists()}
-					</div>
+					<div className="gap-y-1">{renderLists()}</div>
 					{links.includes(FilterableArrangementEntityLink.Create) && (
 						<SideBarButtonLink
 							to={paths.smartListCreate()}

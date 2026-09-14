@@ -3,9 +3,10 @@ import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useAppContext } from '../../context'
-import paths from '../../paths'
+import { usePaths } from '../../paths'
 
 export default function NoLibraries() {
+	const paths = usePaths()
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 

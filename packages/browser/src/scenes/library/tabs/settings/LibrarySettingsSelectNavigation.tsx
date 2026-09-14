@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
+import { useRouterContext } from '@/context/RouterContext'
 
 import { useLibraryContext } from '../../context'
 import { createRouteGroups } from './routes'
@@ -14,7 +15,8 @@ export default function LibrarySettingsSelectNavigation() {
 
 	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
-	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id) })
+	const { basePath } = useRouterContext()
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id, basePath) })
 
 	/**
 	 * The active group based on the current location

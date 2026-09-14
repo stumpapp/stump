@@ -5,6 +5,7 @@ import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { useRouterContext } from '@/context/RouterContext'
 
 import { useLibraryContext } from '../../context'
 import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
@@ -18,6 +19,7 @@ export default function LibrarySettingsHeader() {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx, enableDoubleSidebar },
 	} = usePreferences()
 	const { t } = useLocaleContext()
+	const { basePath } = useRouterContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'
@@ -28,10 +30,10 @@ export default function LibrarySettingsHeader() {
 	 */
 	const activeRouteGroup = useMemo(
 		() =>
-			createRouteGroups(library.id)
+			createRouteGroups(library.id, basePath)
 				.flatMap((group) => group.items)
 				.find((page) => location.pathname.endsWith(page.to)),
-		[location.pathname, library.id],
+		[location.pathname, library.id, basePath],
 	)
 
 	/**

@@ -3,9 +3,9 @@ import '@stump/components/styles/overrides.css'
 
 import { ErrorFallback } from '@stump/browser/components/ErrorFallback'
 import { Toaster } from '@stump/browser/components/Toaster'
-import { useAppStore } from '@stump/browser/stores'
+import { useAppStore, useUserStore } from '@stump/browser/stores'
 import { DesktopAppContext, useDesktopAppContext } from '@stump/client'
-import { LocaleProvider } from '@stump/i18n'
+import { type AllowedLocale, LocaleProvider } from '@stump/i18n'
 import { QueryClient, QueryClientContext } from '@tanstack/react-query'
 import { Store } from '@tauri-apps/plugin-store'
 import { useEffect, useState } from 'react'
@@ -36,6 +36,8 @@ function App() {
 	const [mounted, setMounted] = useState(false)
 
 	const setPlatform = useAppStore((state) => state.setPlatform)
+	const locale = useUserStore((state) => state.userPreferences?.locale)
+	const resolvedLocale = (locale as AllowedLocale) || 'en-US'
 
 	/**
 	 * An effect to initialize the application, setting the platform and base URL
@@ -65,32 +67,32 @@ function App() {
 
 	return (
 		<BrowserRouter>
-			<Toaster />
-			<div className="flex h-full flex-col">
-				<AppTitleBar />
-				<div className="flex-1 overflow-hidden">
-					<Routes>
-						<Route
-							path="/"
-							element={
-								<QueryClientContext.Provider value={localClient}>
-									<LocaleProvider>
+			<LocaleProvider locale={resolvedLocale}>
+				<Toaster />
+				<div className="flex h-full flex-col">
+					<AppTitleBar />
+					<div className="flex-1 overflow-hidden">
+						<Routes>
+							<Route
+								path="/"
+								element={
+									<QueryClientContext.Provider value={localClient}>
 										<Home />
-									</LocaleProvider>
-								</QueryClientContext.Provider>
-							}
-						/>
-						<Route
-							path="server/:serverId/*"
-							element={
-								<ErrorBoundary FallbackComponent={ErrorFallback}>
-									<SavedServerEntry tauriRPC={tauriRPC} />
-								</ErrorBoundary>
-							}
-						/>
-					</Routes>
+									</QueryClientContext.Provider>
+								}
+							/>
+							<Route
+								path="server/:serverId/*"
+								element={
+									<ErrorBoundary FallbackComponent={ErrorFallback}>
+										<SavedServerEntry tauriRPC={tauriRPC} />
+									</ErrorBoundary>
+								}
+							/>
+						</Routes>
+					</div>
 				</div>
-			</div>
+			</LocaleProvider>
 		</BrowserRouter>
 	)
 }

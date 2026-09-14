@@ -12,7 +12,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { useBookPreferences } from './useBookPreferences'
 
@@ -53,6 +53,7 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 `)
 
 export default function BookReaderSceneContainer() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 
 	const { id } = useParams()
@@ -93,6 +94,7 @@ type Props = {
 }
 
 function BookReaderScene({ book }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const [search] = useSearchParams()
 

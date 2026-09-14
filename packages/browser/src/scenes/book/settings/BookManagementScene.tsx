@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router'
 import { SceneContainer } from '@/components/container'
 import { MatchReviewDialog } from '@/components/metadata/metadataMatching'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import BookMetadataSearch from './BookMetadataSearch'
 import BookTagEditor from './BookTagEditor'
@@ -44,6 +44,7 @@ const analyzeMutation = graphql(`
 `)
 
 export default function BookManagementScene() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const { t } = useLocaleContext()
 

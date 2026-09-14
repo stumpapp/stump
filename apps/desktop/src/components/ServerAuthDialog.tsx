@@ -145,7 +145,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 					/>
 
 					<Dialog.Footer>
-						<Button type="submit" disabled={isLoggingIn} variant="primary">
+						<Button type="submit" disabled={isLoggingIn}>
 							{isLoggingIn ? t('authScene.toasts.loggingIn') : t('authScene.form.buttons.login')}
 						</Button>
 						<Button type="button" variant="outline" onClick={() => onClose()}>
@@ -158,10 +158,10 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 					<div className="mt-4">
 						<div className="my-4 relative">
 							<div className="inset-0 absolute flex items-center">
-								<div className="w-full border-t border-edge" />
+								<div className="w-full border-t border-border" />
 							</div>
 							<div className="text-xs relative flex justify-center uppercase">
-								<span className="px-2 bg-background text-foreground-muted">Or</span>
+								<span className="px-2 text-foreground-muted bg-background">Or</span>
 							</div>
 						</div>
 

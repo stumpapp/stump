@@ -96,9 +96,13 @@ export default function LibrarySideBarSection({
 	}
 
 	return (
-		<Accordion type="single" collapsible className="py-2 w-full" defaultValue="libraries">
+		<Accordion type="single" collapsible className="py-1 w-full" defaultValue="libraries">
 			<Accordion.Item value="libraries" className="border-none">
-				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
+				<Accordion.Trigger
+					noUnderline
+					asLabel
+					className="px-1 py-1 text-sm font-medium tracking-wide text-muted-foreground"
+				>
 					{t('sidebar.buttons.libraries')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
@@ -111,9 +115,7 @@ export default function LibrarySideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="ml-2 space-y-1 pl-1 border-l border-l-sidebar-border">
-						{renderLibraries()}
-					</div>
+					<div className="gap-y-1">{renderLibraries()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.libraryCreate()}

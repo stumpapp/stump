@@ -55,7 +55,7 @@ export default function AppTitleBar() {
 	return (
 		<div
 			data-tauri-drag-region
-			className="h-9 bg-background-surface z-100 flex w-full shrink-0 items-center border-b border-border select-none"
+			className="h-8.5 bg-background-surface z-100 flex w-full shrink-0 items-center border-b border-border select-none"
 			style={isMacOS ? { paddingLeft: MACOS_TRAFFIC_LIGHT_PADDING } : undefined}
 		>
 			<div className="gap-0.5 pl-1 flex items-center">

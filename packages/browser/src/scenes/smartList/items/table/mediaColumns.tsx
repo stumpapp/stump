@@ -2,9 +2,10 @@ import { Link, Text } from '@stump/components'
 import { Media } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
+import { CellContext } from '@tanstack/react-table'
 import { format, intlFormat, isValid } from 'date-fns'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import BookLinksCell from './BookLinksCell'
 import CoverImageCell from './CoverImageCell'
@@ -23,20 +24,25 @@ const coverColumn = columnHelper.display({
 	size: 80,
 })
 
-const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
-	cell: ({
-		getValue,
-		row: {
-			original: { id },
-		},
-	}) => (
+function NameColumnCell({
+	getValue,
+	row: {
+		original: { id },
+	},
+}: CellContext<Media, string>) {
+	const paths = usePaths()
+	return (
 		<Link
 			to={paths.bookOverview(id)}
 			className="text-sm line-clamp-2 no-underline hover:opacity-90"
 		>
 			{getValue()}
 		</Link>
-	),
+	)
+}
+
+const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
+	cell: (ctx) => <NameColumnCell {...ctx} />,
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (

@@ -3881,7 +3881,7 @@
 				"description": "Keine Altersfreigabe wird angewandt"
 			},
 			"custom": {
-				"label": "Ab N Jahren",
+				"label": "Alter N und jünger",
 				"description": {
 					"media": "Nur Medien mit einer Altersfreigabe von N oder niedriger werden angezeigt, wobei N die Zahl ist, die du unten eingibst",
 					"series": "Nur Reihen mit einer Altersfreigabe von N oder niedriger werden angezeigt, wobei N die Zahl ist, die du unten eingibst"

@@ -1,6 +1,6 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
-import { useQueryClient } from '@tanstack/react-query'
+import { BookOverviewSceneQuery, graphql } from '@stump/graphql'
+import { useQueryClient, UseSuspenseQueryResult } from '@tanstack/react-query'
 
 const query = graphql(`
 	query BookOverviewScene($id: ID!) {
@@ -49,7 +49,7 @@ export const usePrefetchBook = () => {
 		})
 }
 
-export const useBookOverview = (id: string) => {
+export const useBookOverview = (id: string): UseSuspenseQueryResult<BookOverviewSceneQuery> => {
 	const { sdk } = useSDK()
 	return useSuspenseGraphQL(query, sdk.cacheKey('bookOverview', [id]), {
 		id,

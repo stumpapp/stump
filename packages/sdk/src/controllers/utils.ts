@@ -19,8 +19,15 @@ export const resolveUrl = (url: string, baseUrl?: string): string => {
 
 	try {
 		// Note: URL encodes the template strings we rely on for OPDS searches, e.g.
-		// `{?query}` becomes `%7B%3Fquery%7D`, so we decode the final URL before returning
-		return decodeURIComponent(new URL(url, baseUrl).toString())
+		// `{?query}` becomes `%7B%3Fquery%7D`. We selectively decode only those characters
+		// rather than using decodeURIComponent on the full URL, which would also decode
+		// things like %27 (apostrophe) that must stay encoded for iOS routing
+		// ^ see https://github.com/stumpapp/stump/issues/1107
+		return new URL(url, baseUrl)
+			.toString()
+			.replace(/%7B/gi, '{')
+			.replace(/%7D/gi, '}')
+			.replace(/%3F/gi, '?')
 	} catch {
 		if (url.startsWith('/')) {
 			const match = baseUrl.match(/^(https?:\/\/[^/]+)/)

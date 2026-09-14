@@ -3,6 +3,7 @@ import {
 	Easing,
 	FadeIn,
 	FadeOut,
+	Keyframe,
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
@@ -46,3 +47,14 @@ const FADE_EASING = Easing.inOut(Easing.quad)
 export const FADE_TIMING_CONFIG = { duration: DURATION, easing: FADE_EASING }
 export const FADE_IN = FadeIn.duration(DURATION).easing(FADE_EASING)
 export const FADE_OUT = FadeOut.duration(DURATION).easing(FADE_EASING)
+
+// GlassView doesn't like zero opacity https://github.com/expo/expo/issues/41024
+export const ENTERING_ANIMATION = new Keyframe({
+	from: { opacity: 0.02 },
+	to: { opacity: 1, easing: FADE_EASING },
+}).duration(DURATION)
+
+export const EXITING_ANIMATION = new Keyframe({
+	from: { opacity: 1 },
+	to: { opacity: 0.02, easing: FADE_EASING },
+}).duration(DURATION)

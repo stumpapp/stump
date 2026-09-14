@@ -1,10 +1,12 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { GlassView } from 'expo-glass-effect'
-import { Fragment, useRef } from 'react'
-import { Platform, Pressable, ScrollView, View } from 'react-native'
+import { Fragment, useRef, useState } from 'react'
+import { Pressable, ScrollView, View } from 'react-native'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Card, Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { useColors, usePalette } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { DottedLine } from './DottedLine'
 
@@ -24,13 +26,17 @@ type Props = {
 }
 
 export default function IdentifiersSheet({ identifiers }: Props) {
+	const { t } = useTranslate()
+
 	const sheetRef = useRef<TrueSheet | null>(null)
+	const [isOpen, setIsOpen] = useState(false)
 
 	const colors = useColors()
+	const textColor = usePalette('muted')
 
 	return (
 		<Fragment>
-			<View className="mt-2 flex-row items-center gap-1">
+			<View className="mt-2 gap-1 flex-row items-center">
 				<DottedLine />
 				<Pressable onPress={() => sheetRef.current?.present()}>
 					<GlassView
@@ -40,11 +46,8 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 						className="bg-background-surface"
 					>
 						<View className="px-4 py-2">
-							<Text
-								className="text-base font-semibold"
-								style={{ color: colors.fill.brand.DEFAULT }}
-							>
-								Identifiers
+							<Text className="text-base font-semibold" style={{ color: textColor }}>
+								{t('bookMetadata.identifiers')}
 							</Text>
 						</View>
 					</GlassView>
@@ -54,17 +57,19 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 
 			<TrueSheet
 				ref={sheetRef}
-				detents={Platform.OS === 'android' ? [0.4, 1] : ['auto']}
+				detents={[0.5, 1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
-				<ScrollView className="flex-1 gap-2 px-4 py-6">
-					<Card label="Identifiers">
+				<ScrollView className="gap-2 px-4 py-6 flex-1">
+					<Card label={t('bookMetadata.identifiers')}>
 						{identifiers.stumpId && <Card.Row label="Stump" value={identifiers.stumpId} />}
 						{identifiers.identifier && (
-							<Card.Row label="Identifier" value={identifiers.identifier} />
+							<Card.Row label={t('bookMetadata.identifier')} value={identifiers.identifier} />
 						)}
 						{identifiers.amazon && <Card.Row label="Amazon" value={identifiers.amazon} />}
 						{identifiers.calibre && <Card.Row label="Calibre" value={identifiers.calibre} />}
@@ -75,6 +80,8 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 					</Card>
 				</ScrollView>
 			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</Fragment>
 	)
 }

@@ -12,16 +12,12 @@ export const Default: Story = {
 	render: () => <Input label="default" />,
 }
 
-export const Ghost: Story = {
-	render: () => <Input variant="ghost" label="ghost" />,
+export const Compact: Story = {
+	render: () => <Input size="sm" label="compact" />,
 }
 
-export const Underline: Story = {
-	render: () => <Input variant="underline" label="underline" />,
-}
-
-export const UnderlineInvalid: Story = {
-	render: () => <Input isInvalid label="underline" variant="underline" />,
+export const DefaultInvalid: Story = {
+	render: () => <Input isInvalid label="default invalid" />,
 }
 
 export const WithDescription: Story = {
@@ -33,11 +29,11 @@ export const WithDescriptionInvalid: Story = {
 }
 
 export const Primary: Story = {
-	render: () => <Input variant="primary" label="primary" />,
+	render: () => <Input label="primary" />,
 }
 
 export const PrimaryInvalid: Story = {
-	render: () => <Input isInvalid variant="primary" label="primary" />,
+	render: () => <Input isInvalid label="primary" />,
 }
 
 export default StoryMeta

@@ -139,13 +139,26 @@ function getQueryKey(
 
 function SeriesBooksScene() {
 	const { series } = useSeriesContext()
+	const layoutKey = `library-${series.library.id}-seriesBooks`
+	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
+		useBooksLayout(
+			layoutKey,
+			useShallow((state) => ({
+				columns: state.columns,
+				layoutMode: state.layout,
+				persistedOrdering: state.ordering,
+				setColumns: state.setColumns,
+				setLayout: state.setLayout,
+				setPersistedOrdering: state.setOrdering,
+			})),
+		)
 	const {
 		filters: mediaFilters,
 		ordering,
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
-	} = useFilterScene()
+	} = useFilterScene({ persistedOrdering, setPersistedOrdering })
 	const filters = mediaFilters as MediaFilterInput
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const orderBy = useMediaURLOrderBy(ordering)
@@ -172,20 +185,10 @@ function SeriesBooksScene() {
 	)
 
 	const prefetch = usePrefetchSeriesBooks()
-	const layoutKey = `library-${series.library.id}-seriesBooks`
 
 	const {
 		preferences: { enableAlphabetSelect },
 	} = usePreferences()
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout(
-		layoutKey,
-		useShallow((state) => ({
-			columns: state.columns,
-			layoutMode: state.layout,
-			setColumns: state.setColumns,
-			setLayout: state.setLayout,
-		})),
-	)
 
 	const resolvedFilters = useMemo(
 		() => [

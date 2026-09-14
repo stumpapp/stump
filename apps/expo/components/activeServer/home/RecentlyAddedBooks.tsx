@@ -4,20 +4,19 @@ import { graphql } from '@stump/graphql'
 import { memo, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
-import { BookListItem } from '~/components/book'
-import { BookListItemFragmentType } from '~/components/book/BookListItem'
+import { HorizontalBookListItem } from '~/components/book'
+import { HorizontalBookListItemFragmentType } from '~/components/book/HorizontalBookListItem'
 import { Heading, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { useListItemSize } from '~/lib/hooks'
-
-import { useActiveServer } from '../context'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query RecentlyAddedBooks($pagination: Pagination) {
 		recentlyAddedMedia(pagination: $pagination) {
 			nodes {
 				id
-				...BookListItem
+				...HorizontalBookListItem
 			}
 			pageInfo {
 				__typename
@@ -35,6 +34,7 @@ function RecentlyAddedBooks() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { t } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['recentlyAddedBooks', serverID],
@@ -54,7 +54,9 @@ function RecentlyAddedBooks() {
 	}, [hasNextPage, fetchNextPage])
 
 	const renderItem = useCallback(
-		({ item }: { item: BookListItemFragmentType }) => <BookListItem book={item} />,
+		({ item }: { item: HorizontalBookListItemFragmentType }) => (
+			<HorizontalBookListItem book={item} />
+		),
 		[],
 	)
 
@@ -63,7 +65,7 @@ function RecentlyAddedBooks() {
 	return (
 		<View className="flex">
 			<Heading size="xl" className="px-4">
-				Recently Added Books
+				{t('stumpServer.recentlyAddedBooks.label')}
 			</Heading>
 
 			<FlashList
@@ -76,7 +78,11 @@ function RecentlyAddedBooks() {
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				showsHorizontalScrollIndicator={false}
 				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
-				ListEmptyComponent={<Text className="text-foreground-muted">No books recently added</Text>}
+				ListEmptyComponent={
+					<Text className="text-foreground-muted">
+						{t('stumpServer.recentlyAddedBooks.emptyText)')}
+					</Text>
+				}
 			/>
 		</View>
 	)

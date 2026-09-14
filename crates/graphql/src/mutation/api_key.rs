@@ -14,7 +14,7 @@ pub struct APIKeyMutation;
 
 #[Object]
 impl APIKeyMutation {
-	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessApiKeys)")]
 	async fn create_api_key(
 		&self,
 		ctx: &Context<'_>,
@@ -35,7 +35,7 @@ impl APIKeyMutation {
 		})
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessApiKeys)")]
 	async fn update_api_key(
 		&self,
 		ctx: &Context<'_>,
@@ -61,7 +61,7 @@ impl APIKeyMutation {
 		Ok(APIKey::from(result))
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessApiKeys)")]
 	async fn delete_api_key(&self, ctx: &Context<'_>, id: i32) -> Result<APIKey> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;

@@ -15,8 +15,6 @@ pub struct Model {
 	pub preview_content: Option<String>,
 	#[sea_orm(column_type = "Json", nullable)]
 	pub locator: Option<ReadiumLocator>,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub epubcfi: Option<String>,
 	pub page: Option<i32>,
 	#[sea_orm(column_type = "Text")]
 	pub media_id: String,
@@ -66,6 +64,7 @@ impl Entity {
 		Entity::find()
 			.filter(Column::UserId.eq(&user.id))
 			.filter(Column::MediaId.eq(media_id))
+			.filter(Column::Locator.is_not_null())
 	}
 }
 

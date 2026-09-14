@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { Card, Switch } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
 import DoublePageSelect from './DoublePageSelect'
@@ -19,6 +20,8 @@ type Props = {
 // TODO(android): Use non-native dropdown for all of these
 
 export default function ReaderSettings({ forBook, forServer }: Props) {
+	const { t } = useTranslate()
+
 	const bookSettingsMap = useReaderStore((state) => state.bookSettings)
 	const globalSettings = useReaderStore((state) => state.globalSettings)
 	const addBookSettings = useReaderStore((state) => state.addBookSettings)
@@ -66,9 +69,9 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 	const allowDownscaling = activeSettings.allowDownscaling ?? true
 
 	return (
-		<View className="flex-1 gap-8">
-			<Card label="Mode">
-				<Card.Row label="Flow">
+		<View className="gap-8 flex-1">
+			<Card label={t('readerSettings.sections.mode')}>
+				<Card.Row label={t('readerSettings.readingMode.label')}>
 					<ReadingModeSelect
 						mode={activeSettings.readingMode}
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
@@ -76,7 +79,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				</Card.Row>
 
 				<Card.Row
-					label="Direction"
+					label={t('readerSettings.readingDirection.label')}
 					disabled={activeSettings.readingMode === ReadingMode.ContinuousVertical}
 				>
 					<ReadingDirectionSelect
@@ -86,8 +89,8 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				</Card.Row>
 			</Card>
 
-			<Card label="Image Options">
-				<Card.Row label="Double Paged">
+			<Card label={t('readerSettings.sections.imageOptions')}>
+				<Card.Row label={t('readerSettings.doublePageBehavior.label')}>
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
@@ -95,7 +98,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				</Card.Row>
 
 				<Card.Row
-					label="Separate Second Page"
+					label={t('readerSettings.separateSecondPage')}
 					disabled={activeSettings.doublePageBehavior === 'off'}
 				>
 					<Switch
@@ -106,28 +109,23 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 					/>
 				</Card.Row>
 
-				<Card.Row label="Scaling">
+				<Card.Row label={t('readerSettings.imageScaling.label')}>
 					<ImageScalingSelect
 						behavior={activeSettings.imageScaling.scaleToFit}
 						onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
 					/>
 				</Card.Row>
 
-				<Card.Row label="Downscaling">
+				<Card.Row label={t('readerSettings.allowDownscaling')}>
 					<Switch
 						checked={allowDownscaling}
 						onCheckedChange={(value) => onPreferenceChange({ allowDownscaling: value })}
 					/>
 				</Card.Row>
-
-				{/* TODO: https://docs.expo.dev/versions/latest/sdk/media-library/ */}
-				<Card.Row label="Panel Downloads" disabled>
-					<Switch checked={false} onCheckedChange={() => {}} />
-				</Card.Row>
 			</Card>
 
-			<Card label="Navigation">
-				<Card.Row label="Tap Sides to Navigate">
+			<Card label={t('readerSettings.sections.controls')}>
+				<Card.Row label={t('readerSettings.tapSidesToNavigate')}>
 					<Switch
 						variant="brand"
 						checked={activeSettings.tapSidesToNavigate ?? true}
@@ -135,7 +133,15 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 					/>
 				</Card.Row>
 
-				<Card.Row label="Bottom Controls">
+				<Card.Row label={t('readerSettings.volumeButtonsNavigate')}>
+					<Switch
+						variant="brand"
+						checked={activeSettings.volumeButtonsNavigate}
+						onCheckedChange={(checked) => onPreferenceChange({ volumeButtonsNavigate: checked })}
+					/>
+				</Card.Row>
+
+				<Card.Row label={t('readerSettings.footerControls.label')}>
 					<FooterControlsSelect
 						variant={activeSettings.footerControls || 'images'}
 						onChange={(variant) => onPreferenceChange({ footerControls: variant })}

@@ -1,10 +1,11 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { Fragment, useRef } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { Platform, Pressable, ScrollView } from 'react-native'
 
 import { Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+
+import { SheetBackDetection } from '../SheetBackDetection'
 
 type Props = {
 	value: string
@@ -14,7 +15,8 @@ export default function FeedSubtitle({ value }: Props) {
 	const ref = useRef<TrueSheet | null>(null)
 
 	const colors = useColors()
-	const { isDarkColorScheme } = useColorScheme()
+
+	const [isOpen, setIsOpen] = useState(false)
 
 	return (
 		<Fragment>
@@ -30,13 +32,17 @@ export default function FeedSubtitle({ value }: Props) {
 				detents={Platform.OS === 'android' ? [0.4, 1] : ['auto']}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-				grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.background.DEFAULT}
+				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
-				<ScrollView className="flex-1 p-6">
+				<ScrollView className="p-6 flex-1">
 					<Text className="text-foreground">{value}</Text>
 				</ScrollView>
 			</TrueSheet>
+
+			<SheetBackDetection ref={ref} isOpen={isOpen} />
 		</Fragment>
 	)
 }

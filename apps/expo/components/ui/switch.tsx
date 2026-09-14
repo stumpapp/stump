@@ -1,6 +1,7 @@
-import { Host, Switch as IosSwitch } from '@expo/ui/swift-ui'
-import { disabled, fixedSize } from '@expo/ui/swift-ui/modifiers'
+import { Host, Toggle as IosSwitch } from '@expo/ui/swift-ui'
+import { disabled, fixedSize, tint } from '@expo/ui/swift-ui/modifiers'
 import * as SwitchPrimitives from '@rn-primitives/switch'
+import * as Haptics from 'expo-haptics'
 import * as React from 'react'
 import { Platform } from 'react-native'
 import Animated, {
@@ -10,9 +11,9 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated'
 
+import { usePalette } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 const RGB_COLORS = {
 	monochrome: {
@@ -66,13 +67,13 @@ type Props = {
 const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 	({ className, variant = 'brand', size = 'default', ...props }, ref) => {
 		const { colorScheme } = useColorScheme()
-		const accentColor = usePreferencesStore((state) => state.accentColor)
+		const tintColor = usePalette('accent')
 		const xValue = SIZES[size]?.translateX || SIZES.default.translateX
 		const translateX = useDerivedValue(() => (props.checked ? xValue : 0))
 		const defaultColors = RGB_COLORS[variant][colorScheme]
 		const colors = {
 			...defaultColors,
-			primary: accentColor || defaultColors.primary,
+			primary: tintColor || defaultColors.primary,
 		}
 		const animatedRootStyle = useAnimatedStyle(() => {
 			return {
@@ -88,20 +89,20 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 		}))
 		const resolvedSize = SIZES[size] || SIZES.default
 
+		// https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/toggle/
 		if (Platform.OS === 'ios') {
 			return (
-				<Host matchContents>
+				<Host matchContents ignoreSafeArea="all">
 					<IosSwitch
-						value={props.checked}
-						onValueChange={(checked) => {
+						isOn={props.checked}
+						onIsOnChange={(checked) => {
 							props.onCheckedChange?.(checked)
 						}}
-						color={colors.primary}
-						variant="switch"
 						modifiers={[
 							// Note: disabled(false) shows disabled styles lol
 							...(props.disabled ? [disabled(true)] : []),
 							fixedSize({ horizontal: true, vertical: true }),
+							tint(colors.primary),
 						]}
 					/>
 				</Host>
@@ -120,12 +121,18 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 						className,
 					)}
 					{...props}
+					onPress={(e) => {
+						props.onPress?.(e)
+						Haptics.performAndroidHapticsAsync(
+							props.checked ? Haptics.AndroidHaptics.Toggle_Off : Haptics.AndroidHaptics.Toggle_On,
+						)
+					}}
 					ref={ref}
 				>
 					<Animated.View style={animatedThumbStyle}>
 						<SwitchPrimitives.Thumb
 							className={cn(
-								'squircle rounded-full bg-background shadow-md shadow-foreground/25',
+								'squircle shadow-md rounded-full bg-background shadow-foreground/25',
 								resolvedSize.thumb,
 								{
 									'bg-white': variant === 'brand',

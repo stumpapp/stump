@@ -1,13 +1,15 @@
-import { Host, Picker } from '@expo/ui/swift-ui'
+import { Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui'
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useState } from 'react'
 import { Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useColors } from '~/lib/constants'
-import { useDownloadQueue } from '~/lib/hooks'
+import { useDownloadQueue, useTranslate } from '~/lib/hooks'
 
 import Owl from '../Owl'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Card, Tabs } from '../ui'
 import { Text } from '../ui/text'
 import DownloadQueueItem from './DownloadQueueItem'
@@ -26,6 +28,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 
 	const [tab, setTab] = useState<'HEALTHY' | 'FAILED'>('HEALTHY')
 
+	const { t } = useTranslate()
 	const { pendingItems, activeItems, failedItems, cancel, retry, dismiss } = useDownloadQueue()
 
 	const activeAndPendingItems = [...activeItems, ...pendingItems]
@@ -61,98 +64,130 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 
 	const isTotalEmptyState = activeAndPendingItems.length === 0 && failedItems.length === 0
 
+	const [isOpen, setIsOpen] = useState(false)
+
+	const onDismissInternal = () => {
+		setIsOpen(false)
+		onDismiss?.()
+	}
+
 	return (
-		<TrueSheet
-			ref={ref}
-			detents={[0.65, 1]}
-			cornerRadius={24}
-			grabber
-			scrollable
-			backgroundColor={colors.sheet.background}
-			grabberOptions={{
-				color: colors.sheet.grabber,
-			}}
-			style={{
-				paddingBottom: insets.bottom + 16,
-			}}
-			onDidDismiss={onDismiss}
-			insetAdjustment="automatic"
-			header={
-				<View className="gap-4 px-6 pt-8">
-					<View className="w-full pb-2">
-						{Platform.select({
-							ios: (
-								<View className="w-full">
-									<Host matchContents style={{ width: 'auto' }}>
-										<Picker
-											options={['Downloading', 'Failed']}
-											selectedIndex={tab === 'HEALTHY' ? 0 : 1}
-											onOptionSelected={({ nativeEvent: { index } }) => {
-												setTab(index === 0 ? 'HEALTHY' : 'FAILED')
-											}}
-											variant="segmented"
-										/>
-									</Host>
-								</View>
-							),
-							android: (
-								<Tabs value={tab} onValueChange={(value) => setTab(value as 'HEALTHY' | 'FAILED')}>
-									<Tabs.List className="flex-row">
-										<Tabs.Trigger value="HEALTHY">
-											<Text>Downloading</Text>
-										</Tabs.Trigger>
+		<>
+			<TrueSheet
+				ref={ref}
+				detents={[0.65, 1]}
+				grabber
+				scrollable
+				backgroundColor={colors.sheet.background}
+				grabberOptions={{
+					color: colors.sheet.grabber,
+				}}
+				style={{
+					paddingBottom: insets.bottom + 16,
+				}}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={onDismissInternal}
+				insetAdjustment="automatic"
+				header={
+					<View className="gap-4 px-6 pt-8">
+						<View className="pb-2 w-full">
+							{Platform.select({
+								ios: (
+									<View className="w-full">
+										<Host matchContents style={{ width: 'auto' }}>
+											<Picker
+												selection={tab}
+												modifiers={[pickerStyle('segmented')]}
+												onSelectionChange={(selection) => {
+													setTab(selection === 'HEALTHY' ? 'HEALTHY' : 'FAILED')
+												}}
+											>
+												<SwiftText modifiers={[tag('HEALTHY')]}>
+													{t('localLibrary.downloadQueue.downloading')}
+												</SwiftText>
+												<SwiftText modifiers={[tag('FAILED')]}>
+													{t('localLibrary.downloadQueue.failed')}
+												</SwiftText>
+											</Picker>
+										</Host>
+									</View>
+								),
+								android: (
+									<Tabs
+										value={tab}
+										onValueChange={(value) => setTab(value as 'HEALTHY' | 'FAILED')}
+									>
+										<Tabs.List className="flex-row">
+											<Tabs.Trigger value="HEALTHY">
+												<Text>{t('localLibrary.downloadQueue.downloading')}</Text>
+											</Tabs.Trigger>
 
-										<Tabs.Trigger value="FAILED">
-											<Text>Failed</Text>
-										</Tabs.Trigger>
-									</Tabs.List>
-								</Tabs>
-							),
-						})}
+											<Tabs.Trigger value="FAILED">
+												<Text>{t('localLibrary.downloadQueue.failed')}</Text>
+											</Tabs.Trigger>
+										</Tabs.List>
+									</Tabs>
+								),
+							})}
+						</View>
 					</View>
-				</View>
-			}
-		>
-			<ScrollView className="flex-1 p-6" nestedScrollEnabled>
-				<View className="gap-y-6">
-					{isTotalEmptyState && (
-						<View className="items-center justify-center gap-4 py-8">
-							<Owl owl="empty" />
-							<Text className="text-lg text-foreground-muted">Nothing is being downloaded</Text>
-						</View>
-					)}
+				}
+			>
+				<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+					<View className="gap-y-6">
+						{isTotalEmptyState && (
+							<View className="gap-4 py-8 items-center justify-center">
+								<Owl owl="empty" />
+								<Text className="text-lg text-foreground-muted">
+									{t('localLibrary.downloadQueue.nothingDownloading')}
+								</Text>
+							</View>
+						)}
 
-					{activeAndPendingItems.length > 0 && tab === 'HEALTHY' && (
-						<Card className="gap-0">
-							{activeAndPendingItems.map((item) => (
-								<DownloadQueueItem key={item.id} item={item} onCancel={cancel} />
-							))}
-						</Card>
-					)}
+						{activeAndPendingItems.length > 0 && tab === 'HEALTHY' && (
+							<Card className="gap-0">
+								{activeAndPendingItems.map((item) => (
+									<DownloadQueueItem key={item.id} item={item} onCancel={cancel} />
+								))}
+							</Card>
+						)}
 
-					{activeAndPendingItems.length === 0 && tab === 'HEALTHY' && !isTotalEmptyState && (
-						<View className="items-center justify-center gap-4 py-8">
-							<Owl owl="empty" />
-							<Text className="text-lg text-foreground-muted">No active downloads</Text>
-						</View>
-					)}
+						{activeAndPendingItems.length === 0 && tab === 'HEALTHY' && !isTotalEmptyState && (
+							<View className="gap-4 py-8 items-center justify-center">
+								<Owl owl="empty" />
+								<Text className="text-lg text-foreground-muted">
+									{t('localLibrary.downloadQueue.noActiveDownloads')}
+								</Text>
+							</View>
+						)}
 
-					{failedItems.length > 0 && tab === 'FAILED' && (
-						<Card>
-							{failedItems.map((item) => (
-								<FailedDownloadItem key={item.id} item={item} onRetry={retry} onDismiss={dismiss} />
-							))}
-						</Card>
-					)}
+						{failedItems.length > 0 && tab === 'FAILED' && (
+							<Card>
+								{failedItems.map((item) => (
+									<FailedDownloadItem
+										key={item.id}
+										item={item}
+										onRetry={retry}
+										onDismiss={dismiss}
+									/>
+								))}
+							</Card>
+						)}
 
-					{failedItems.length === 0 && tab === 'FAILED' && !isTotalEmptyState && (
-						<View className="items-center justify-center gap-4 py-8">
-							<Owl owl="empty" />
-							<Text className="text-lg text-foreground-muted">No failed downloads</Text>
-						</View>
-					)}
-				</View>
-			</ScrollView>
-		</TrueSheet>
+						{failedItems.length === 0 && tab === 'FAILED' && !isTotalEmptyState && (
+							<View className="gap-4 py-8 items-center justify-center">
+								<Owl owl="empty" />
+								<Text className="text-lg text-foreground-muted">
+									{t('localLibrary.downloadQueue.noFailedDownloads')}
+								</Text>
+							</View>
+						)}
+					</View>
+				</ScrollView>
+			</TrueSheet>
+
+			{/*@ts-expect-error: should be fine*/}
+			{ref && <SheetBackDetection ref={ref} isOpen={isOpen} />}
+		</>
 	)
 })

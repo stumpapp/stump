@@ -50,6 +50,15 @@ impl ImageProcessorOptionsExt for ImageProcessorOptions {
 					return Err(ProcessorError::InvalidSizedImage);
 				}
 			},
+			Some(ImageResizeMethod::FitWithin(dimensions)) => {
+				let invalid_height = dimensions.height < 1;
+				let invalid_width = dimensions.width < 1;
+
+				if invalid_height || invalid_width {
+					tracing::error!(?dimensions, "Invalid dimensions");
+					return Err(ProcessorError::InvalidSizedImage);
+				}
+			},
 		}
 
 		Ok(())
@@ -119,13 +128,27 @@ pub fn resized_dimensions(
 				(height, width)
 			},
 		},
+		ImageResizeMethod::FitWithin(config) => {
+			if current_height <= config.height && current_width <= config.width {
+				(current_height, current_width)
+			} else {
+				let height_scale_factor = config.height as f32 / current_height as f32;
+				let width_scale_factor = config.width as f32 / current_width as f32;
+				let factor = height_scale_factor.min(width_scale_factor);
+
+				(
+					(current_height as f32 * factor) as u32,
+					(current_width as f32 * factor) as u32,
+				)
+			}
+		},
 	}
 }
 
 #[cfg(test)]
 mod tests {
 	use models::shared::image_processor_options::{
-		ExactDimensionResize, ScaleEvenlyByFactor,
+		ExactDimensionResize, FitWithinResize, ScaleEvenlyByFactor,
 	};
 	use rust_decimal::Decimal;
 
@@ -156,6 +179,48 @@ mod tests {
 		);
 		assert_eq!(height, 50);
 		assert_eq!(width, 50);
+	}
+
+	#[test]
+	fn test_resized_dimensions_fit_within_tall() {
+		let (height, width) = resized_dimensions(
+			100,
+			50,
+			ImageResizeMethod::FitWithin(FitWithinResize {
+				height: 50,
+				width: 50,
+			}),
+		);
+		assert_eq!(height, 50);
+		assert_eq!(width, 25);
+	}
+
+	#[test]
+	fn test_resized_dimensions_fit_within_wide() {
+		let (height, width) = resized_dimensions(
+			50,
+			100,
+			ImageResizeMethod::FitWithin(FitWithinResize {
+				height: 50,
+				width: 50,
+			}),
+		);
+		assert_eq!(height, 25);
+		assert_eq!(width, 50);
+	}
+
+	#[test]
+	fn test_resized_dimensions_fit_within_unnecessary() {
+		let (height, width) = resized_dimensions(
+			25,
+			25,
+			ImageResizeMethod::FitWithin(FitWithinResize {
+				height: 50,
+				width: 50,
+			}),
+		);
+		assert_eq!(height, 25);
+		assert_eq!(width, 25);
 	}
 
 	#[test]

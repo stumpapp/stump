@@ -8,9 +8,11 @@ import {
 	Brush,
 	KeyRound,
 	Mail,
+	PackageSearch,
 	PcCase,
 	ScrollText,
 	Server,
+	Tag,
 	UserCircle,
 	Users,
 } from 'lucide-react'
@@ -88,7 +90,7 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				icon: Users,
 				label: 'Users',
 				localeKey: 'server/users',
-				permissions: [UserPermission.ManageUsers],
+				permissions: [UserPermission.ReadUsers],
 				subItems: [
 					{
 						backlink: {
@@ -112,11 +114,15 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				],
 				to: '/settings/users',
 				prefetch: async () => {
-					await Promise.all([
-						prefetchUserStats(api, client),
-						prefetchUsersTable(api, client),
-						prefetchLoginActivity(api, client),
-					])
+					try {
+						await Promise.all([
+							prefetchUserStats(api, client),
+							prefetchUsersTable(api, client),
+							prefetchLoginActivity(api, client),
+						])
+					} catch {
+						//
+					}
 				},
 			},
 			{
@@ -148,12 +154,26 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				to: '/settings/email',
 			},
 			{
+				icon: PackageSearch,
+				label: 'Metadata',
+				localeKey: 'server/metadataIntegrations',
+				permissions: [UserPermission.MetadataProviderRead],
+				to: '/settings/metadata-integrations',
+			},
+			{
 				disabled: true,
 				icon: Bell,
 				label: 'Notifications',
 				localeKey: 'server/notifications',
 				permissions: [UserPermission.ReadNotifier],
 				to: '/settings/notifications',
+			},
+			{
+				icon: Tag,
+				label: 'Tags',
+				localeKey: 'server/tags',
+				permissions: [UserPermission.ManageLibrary],
+				to: '/settings/tags',
 			},
 		],
 		label: 'Management',

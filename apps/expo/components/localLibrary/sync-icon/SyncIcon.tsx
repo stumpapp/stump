@@ -18,6 +18,7 @@ export function SyncIcon({ status, size = 20 }: SyncIconProps) {
 }
 
 const ICONS: Record<SyncIconProps['status'], typeof CloudAlert> = {
+	CONFLICT: CloudAlert,
 	ERROR: CloudAlert,
 	SYNCED: CloudCheck,
 	SYNCING: RefreshCw,

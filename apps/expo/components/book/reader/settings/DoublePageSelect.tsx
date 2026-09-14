@@ -1,10 +1,5 @@
-import { ChevronsUpDown } from 'lucide-react-native'
-import { useState } from 'react'
-import { View } from 'react-native'
-import * as DropdownMenu from 'zeego/dropdown-menu'
-
-import { Icon, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
+import { Picker } from '~/components/ui/picker/picker'
+import { useTranslate } from '~/lib/hooks'
 import { DoublePageBehavior } from '~/stores/reader'
 
 type Props = {
@@ -13,48 +8,20 @@ type Props = {
 }
 
 export default function DoublePageSelect({ behavior, onChange }: Props) {
-	const [isOpen, setIsOpen] = useState(false)
+	const { t } = useTranslate()
 
 	return (
-		<DropdownMenu.Root onOpenChange={setIsOpen}>
-			<DropdownMenu.Trigger>
-				<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
-					<Text>{BEHAVIOR_TEXT[behavior]}</Text>
-					<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
-				</View>
-			</DropdownMenu.Trigger>
-
-			<DropdownMenu.Content>
-				<DropdownMenu.CheckboxItem
-					key="auto"
-					value={behavior === 'auto'}
-					onValueChange={() => onChange('auto')}
-				>
-					<DropdownMenu.ItemTitle>Auto</DropdownMenu.ItemTitle>
-				</DropdownMenu.CheckboxItem>
-
-				<DropdownMenu.CheckboxItem
-					key="always"
-					value={behavior === 'always'}
-					onValueChange={() => onChange('always')}
-				>
-					<DropdownMenu.ItemTitle>Always</DropdownMenu.ItemTitle>
-				</DropdownMenu.CheckboxItem>
-
-				<DropdownMenu.CheckboxItem
-					key="off"
-					value={behavior === 'off'}
-					onValueChange={() => onChange('off')}
-				>
-					<DropdownMenu.ItemTitle>Off</DropdownMenu.ItemTitle>
-				</DropdownMenu.CheckboxItem>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+		<Picker
+			options={[
+				{ label: t(getKey('auto')), value: 'auto' },
+				{ label: t(getKey('always')), value: 'always' },
+				{ label: t(getKey('off')), value: 'off' },
+			]}
+			value={behavior}
+			onValueChange={onChange}
+		/>
 	)
 }
 
-const BEHAVIOR_TEXT: Record<DoublePageBehavior, string> = {
-	always: 'Always',
-	auto: 'Auto',
-	off: 'Off',
-}
+const LOCALE_BASE = 'readerSettings.doublePageBehavior'
+const getKey = (key: DoublePageBehavior) => `${LOCALE_BASE}.options.${key}`

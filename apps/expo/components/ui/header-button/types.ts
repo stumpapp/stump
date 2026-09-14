@@ -1,8 +1,4 @@
-import {
-	ButtonProps as IosButtonProps,
-	ButtonRole,
-	ButtonVariant as IosButtonVariant,
-} from '@expo/ui/swift-ui'
+import { ButtonProps as IosButtonProps, ButtonRole } from '@expo/ui/swift-ui'
 import { LucideIcon } from 'lucide-react-native'
 import { StyleProp, ViewStyle } from 'react-native'
 
@@ -14,7 +10,7 @@ export type HeaderButtonProps = {
 		size?: number
 	}
 	ios?: {
-		variant?: IosButtonVariant
+		variant?: 'glass' | 'glassProminent' | 'default'
 	}
 	android?: {
 		variant?: 'default' | 'prominent'
@@ -23,4 +19,5 @@ export type HeaderButtonProps = {
 	onPress?: () => void
 	disabled?: boolean
 	style?: StyleProp<ViewStyle>
+	className?: string
 }

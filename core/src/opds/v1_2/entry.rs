@@ -190,10 +190,10 @@ impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
 		let FileParts { file_name, .. } = path_buf.file_parts();
 		let file_name_encoded = encode(&file_name);
 
-		let (current_page, last_read_at) = self
-			.data
-			.reading_session
-			.map_or((None, None), |session| (session.page, session.updated_at));
+		let (current_page, last_read_at) =
+			self.data.reading_session.map_or((None, None), |session| {
+				(session.end_page, session.updated_at)
+			});
 
 		let target_pages = if let Some(page) = current_page {
 			vec![1, page]
@@ -372,8 +372,8 @@ mod tests {
 				<author>
 					<name>Harold McGee</name>
 				</author>
-				<link type="image/png" 
-							rel="http://opds-spec.org/image"     
+				<link type="image/png"
+							rel="http://opds-spec.org/image"
 							href="/covers/4561.lrg.png" />
 				<link type="image/gif"
 							rel="http://opds-spec.org/image/thumbnail"

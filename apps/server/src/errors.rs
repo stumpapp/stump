@@ -9,9 +9,9 @@ use stump_core::{
 	error::CoreError,
 	filesystem::{
 		image::{ProcessorError, ThumbnailGenerateError},
+		media::EpubSearchError,
 		FileError,
 	},
-	job::error::JobManagerError,
 	opds::v2_0::OPDSV2Error,
 	CoreEvent,
 };
@@ -108,6 +108,8 @@ pub enum APIError {
 	AccountLocked,
 	#[error("{0}")]
 	BadRequest(String),
+	#[error("Request cancelled")]
+	CancelledRequest,
 	#[error("{0}")]
 	NotFound(String),
 	#[error("{0}")]
@@ -136,6 +138,8 @@ pub enum APIError {
 	DbError(#[from] sea_orm::error::DbErr),
 	#[error("OIDC is not enabled")]
 	OIDCNotEnabled,
+	#[error("OIDC provider is not initialized")]
+	OIDCNotInitialized,
 	#[error("The provided OIDC configuration is invalid or missing required fields")]
 	OIDCConfigurationInvalid,
 	#[error("{0}")]
@@ -156,6 +160,9 @@ impl APIError {
 		match self {
 			APIError::AccountLocked => StatusCode::FORBIDDEN,
 			APIError::BadRequest(_) => StatusCode::BAD_REQUEST,
+			APIError::CancelledRequest => {
+				StatusCode::from_u16(499).expect("499 is a valid HTTP status code")
+			},
 			APIError::NotFound(_) => StatusCode::NOT_FOUND,
 			APIError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
 			APIError::Unauthorized => StatusCode::UNAUTHORIZED,
@@ -238,12 +245,6 @@ impl From<CoreError> for APIError {
 	}
 }
 
-impl From<JobManagerError> for APIError {
-	fn from(error: JobManagerError) -> Self {
-		APIError::InternalServerError(error.to_string())
-	}
-}
-
 impl From<AuthError> for APIError {
 	fn from(error: AuthError) -> APIError {
 		match error {
@@ -277,6 +278,18 @@ impl From<mpsc::error::SendError<CoreEvent>> for APIError {
 impl From<FileError> for APIError {
 	fn from(error: FileError) -> APIError {
 		APIError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<EpubSearchError> for APIError {
+	fn from(error: EpubSearchError) -> Self {
+		match error {
+			EpubSearchError::InvalidQueryLength { .. }
+			| EpubSearchError::InvalidCursor
+			| EpubSearchError::InvalidLimit { .. } => APIError::BadRequest(error.to_string()),
+			EpubSearchError::Cancelled => APIError::CancelledRequest,
+			EpubSearchError::File(error) => APIError::from(error),
+		}
 	}
 }
 
@@ -329,7 +342,9 @@ impl IntoResponse for APIErrorResponse {
 
 		let mut builder = Response::builder()
 			.status(self.status)
-			.header("Content-Type", "application/json");
+			.header("Content-Type", "application/json")
+			// do not cache error responses
+			.header("Cache-Control", "no-store");
 
 		// if the status is 401, we want to encourage the client to delete their
 		// session cookie

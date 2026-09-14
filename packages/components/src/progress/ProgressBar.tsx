@@ -9,14 +9,14 @@ type ProgressBarColorVariants = 'default' | 'primary' | 'primary-dark'
 type ColorVariant = Record<ProgressBarColorVariants, string>
 
 export const PROGRESS_BAR_COLOR_VARIANTS: ColorVariant = {
-	default: 'bg-background-surface',
-	primary: 'bg-fill-brand-secondary',
-	'primary-dark': 'bg-brand-200 dark:bg-brand-250',
+	default: 'bg-muted',
+	primary: 'bg-primary/20',
+	'primary-dark': 'bg-primary/30',
 }
 export const PROGRESS_BAR_INDICATOR_COLOR_VARIANTS: ColorVariant = {
 	default: 'bg-foreground',
-	primary: 'bg-fill-brand/70',
-	'primary-dark': 'bg-brand-600 dark:bg-brand-500',
+	primary: 'bg-primary/80',
+	'primary-dark': 'bg-primary',
 }
 
 const progressVariants = cva('relative overflow-hidden', {

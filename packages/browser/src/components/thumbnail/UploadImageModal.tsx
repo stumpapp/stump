@@ -20,21 +20,30 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const [filePreview, setFilePreview] = useState<string | null>(null)
 
-	const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
-		if (fileRejections.length > 0) {
-			console.error(fileRejections)
-			const firstError = fileRejections[0]?.errors[0]
-			const isTooLarge = firstError?.code === 'file-too-large'
-			toast.error(isTooLarge ? 'File too large (20MB max)' : firstError?.message || 'Unknown error')
-		} else if (acceptedFiles.length > 1 || !acceptedFiles.length) {
-			toast.error(acceptedFiles.length ? 'Only 1 file allowed' : 'No files provided')
-		} else if (acceptedFiles[0]) {
-			const file = acceptedFiles[0]
+	const onDrop = useCallback(
+		(acceptedFiles: File[], fileRejections: FileRejection[]) => {
+			if (fileRejections.length > 0) {
+				console.error(fileRejections)
+				const firstError = fileRejections[0]?.errors[0]
+				const isTooLarge = firstError?.code === 'file-too-large'
+				toast.error(
+					isTooLarge
+						? t(withLocaleKey('fileTooLarge'))
+						: firstError?.message || t('common.unknownError'),
+				)
+			} else if (acceptedFiles.length > 1 || !acceptedFiles.length) {
+				toast.error(
+					acceptedFiles.length ? t(withLocaleKey('onlyOneFile')) : t(withLocaleKey('noFile')),
+				)
+			} else if (acceptedFiles[0]) {
+				const file = acceptedFiles[0]
 
-			setSelectedFile(file)
-			setFilePreview(URL.createObjectURL(file))
-		}
-	}, [])
+				setSelectedFile(file)
+				setFilePreview(URL.createObjectURL(file))
+			}
+		},
+		[t],
+	)
 
 	const { getRootProps, getInputProps } = useDropzone({
 		accept: {
@@ -51,7 +60,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				await onUploadImage(selectedFile)
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload image')
+				toast.error(t('thumbnailSelector.errors.uploadFailed'))
 			}
 		}
 	}
@@ -107,7 +116,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 
 					<div
 						{...getRootProps()}
-						className="p-4 flex shrink-0 grow flex-col items-center justify-center border border-dashed border-edge"
+						className="p-4 flex shrink-0 grow flex-col items-center justify-center border border-dashed border-border"
 					>
 						<input {...getInputProps()} />
 						<Text variant="muted">{t(withLocaleKey('prompt'))}</Text>
@@ -115,11 +124,11 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				</div>
 
 				<Dialog.Footer>
-					<Button variant="default" onClick={onClose}>
-						Cancel
+					<Button variant="outline" onClick={onClose}>
+						{t('common.cancel')}
 					</Button>
-					<Button variant="primary" onClick={handleConfirm} disabled={!selectedFile}>
-						Confirm selection
+					<Button onClick={handleConfirm} disabled={!selectedFile}>
+						{t('thumbnailSelector.actions.confirmSelection')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

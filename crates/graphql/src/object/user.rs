@@ -3,12 +3,16 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use chrono::{DateTime, FixedOffset, Utc};
 use models::{
 	entity::{
-		age_restriction, finished_reading_session, session, user, user_login_activity,
+		age_restriction, reading_session, session, user, user_login_activity,
 		user_preferences,
 	},
-	shared::{enums::UserPermission, permission_set::PermissionSet},
+	shared::{
+		enums::{ReadingStatus, UserPermission},
+		image::ImageRef,
+		permission_set::PermissionSet,
+	},
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{prelude::*, ActiveValue, QueryOrder};
 
 use crate::{
 	data::{CoreContext, ServiceContext},
@@ -34,6 +38,9 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
+	#[graphql(
+		deprecation = "This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays."
+	)]
 	async fn avatar_url(&self, ctx: &Context<'_>) -> Result<Option<String>> {
 		let service = ctx.data::<ServiceContext>()?;
 
@@ -45,6 +52,30 @@ impl User {
 			"/api/v2/users/{}/avatar",
 			self.model.id
 		))))
+	}
+
+	/// a reference to the avatar image and its metadata for this user
+	async fn avatar(&self, ctx: &Context<'_>) -> Result<ImageRef> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		let dimensions = self
+			.model
+			.avatar_meta
+			.as_ref()
+			.and_then(|meta| meta.dimensions.as_ref())
+			.map(|dim| (dim.width, dim.height));
+		let last_modified = self.model.avatar_updated_at;
+
+		Ok(ImageRef {
+			url: service.cache_friendly_url(
+				format!("/api/v2/users/{}/avatar", self.model.id),
+				&last_modified,
+			),
+			height: dimensions.as_ref().map(|dim| dim.1),
+			width: dimensions.as_ref().map(|dim| dim.0),
+			metadata: self.model.avatar_meta.clone(),
+			last_modified,
+		})
 	}
 
 	#[graphql(
@@ -86,11 +117,32 @@ impl User {
 	async fn preferences(&self, ctx: &Context<'_>) -> Result<UserPreferences> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let preferences = user_preferences::Entity::find()
+		let preferences = match user_preferences::Entity::find()
 			.filter(user_preferences::Column::UserId.eq(&self.model.id))
 			.one(conn)
 			.await?
-			.ok_or("User preferences not found")?;
+		{
+			Some(prefs) => prefs,
+			None => {
+				// this is a bit of an edge case, originally cropping up after an oidc account migration where the cli command
+				// did not remap the preferences back to the user. this manifested in an error after login, effectively bricking the
+				// account. obv not ideal, so while i don't expect this to be common id rather just recreate in this scenario and
+				// let the user reconfig their preferences. worst case is a dangling preferences record
+				// see https://discord.com/channels/972593831172272148/1490415985524609264/1491118111401705494
+				tracing::warn!(
+					user = self.model.username,
+					"Failed to load preferences for user. Recreating with defaults..."
+				);
+				let new_preferences = user_preferences::ActiveModel {
+					user_id: ActiveValue::Set(Some(self.model.id.clone())),
+					..Default::default()
+				}
+				.insert(conn)
+				.await?;
+
+				new_preferences
+			},
+		};
 
 		Ok(preferences.into())
 	}
@@ -136,8 +188,9 @@ impl User {
 	async fn finished_reading_sessions_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = finished_reading_session::Entity::find()
-			.filter(finished_reading_session::Column::UserId.eq(&self.model.id))
+		let count = reading_session::Entity::find()
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+			.filter(reading_session::Column::UserId.eq(&self.model.id))
 			.count(conn)
 			.await?;
 

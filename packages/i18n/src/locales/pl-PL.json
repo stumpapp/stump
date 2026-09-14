@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Inicjalizuj serwer",
-		"claimText": "Ten serwer Stump nie został zainicjalizowany. Użyj formularza poniżej aby stworzyć konto. Gdy będzie już ono stworzone, uzyskasz pełen dostęp do wszystkich funkcji serwera.",
+		"claimText": "Ten serwer Stump nie został zainicjowany. Użyj formularza poniżej, aby stworzyć konto. Gdy będzie już ono stworzone, uzyskasz pełen dostęp do wszystkich funkcji serwera.",
 		"form": {
 			"validation": {
 				"missingUsername": "Nazwa użytkownika jest wymagana",
@@ -40,6 +40,33 @@
 			"heading": "Konfiguracja biblioteki",
 			"subtitleCreating": "Podgląd nowej biblioteki zostanie ukazany poniżej",
 			"subtitleEditing": "Podgląd zmian w bibliotece zostanie ukazany poniżej"
+		}
+	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Szukaj metadanych",
+			"description": "Wyszukaj książkę u zewnętrznego dostawcy i wybierz dopasowanie do zastosowania",
+			"openButton": "Szukaj metadanych",
+			"searchButton": "Szukaj",
+			"noProviders": "Brak skonfigurowanych i włączonych dostawców metadanych dla tego typu biblioteki. Skonfiguruj go najpierw w ustawieniach.",
+			"noResults": "Nie znaleziono dopasowań dla tego wyszukiwania",
+			"partialResults": "Niektóre wyniki, najprawdopodobniej ze względu na ograniczenie ilości żądań u dostawcy, nie mogły zostać załadowane. Spróbuj wyszukać ponownie, aby zobaczyć, czy nie pojawi się ich więcej.",
+			"searchFailed": "Nie udało się wyszukać wyników u dostawców metadanych",
+			"form": {
+				"title": {
+					"label": "Tytuł"
+				},
+				"author": {
+					"label": "Autor"
+				},
+				"year": {
+					"label": "Rok"
+				},
+				"provider": {
+					"label": "Dostawca",
+					"allOption": "Wszyscy aktywni dostawcy"
+				}
+			}
 		}
 	},
 	"bookOverviewScene": {
@@ -98,8 +125,6 @@
 					"description": "Nazwa domyślnej roli dla Twojego klubu książki"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
 					"description": "Nazwa roli moderatora dla Twojego klubu książki"
 				},
 				"admin": {
@@ -116,7 +141,6 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Nazwa wyświetlana",
-					"placeholder": "oromei",
 					"description": "Opcjonalna wyświetlana nazwa dla Twojego członkostwa w klubie książki. Ustawiona ma pierwszeństwo przed Twoją nazwą użytkownika"
 				},
 				"hideProgress": {
@@ -196,8 +220,7 @@
 		},
 		"members": {
 			"title": "Członkowie",
-			"description": "Zarządzaj członkami tego klubu książki",
-			"sections": {}
+			"description": "Zarządzaj członkami tego klubu książki"
 		},
 		"roles": {
 			"title": "Role",
@@ -309,9 +332,9 @@
 				"resizeMethod": {
 					"label": "Metoda skalowania",
 					"options": {
-						"scaleEvenlyByFactor": "Skalowane równomiernie",
+						"scaleEvenlyByFactor": "Skalowanie równomierne",
 						"exact": "Dokładny wymiar",
-						"scaleDimension": "Skalowane automatycznie",
+						"scaleDimension": "Skalowanie automatyczne",
 						"none": "Żadne"
 					}
 				},
@@ -331,7 +354,7 @@
 					}
 				},
 				"scaleDimension": {
-					"label": "Skalowane automatycznie",
+					"label": "Skalowanie automatyczne",
 					"description": "Ustaw szerokość lub wysokość miniatury, a druga wartość zostanie wyskalowana automatycznie tak, aby zachować oryginalny współczynnik kształtu",
 					"dimension": {
 						"label": "Wymiar",
@@ -366,11 +389,11 @@
 					"addButton": "Dodaj regułę",
 					"ignoreParents": {
 						"title": "Pomijaj wszystkie katalogi nadrzędne",
-						"label": "Wzorce pomijania"
+						"label": "Ignoruj nadrzędne"
 					},
 					"ignoreSubdirs": {
-						"title": "Pomijaj wszystkie podkatalogi",
-						"label": "Pomijaj podkatalogi"
+						"title": "Ignoruj wszystkie podkatalogi",
+						"label": "Ignoruj podrzędne"
 					}
 				},
 				"invalidGlob": "Nieprawidłowy wzorzec",
@@ -453,6 +476,10 @@
 				"update": "Skanuj po aktualizacjach"
 			},
 			"description": "Indeksuj pliki biblioteki, aby wypełnić bazę danych"
+		},
+		"errors": {
+			"failedToUpdate": "Aktualizacja biblioteki nie powiodła się",
+			"failedToScan": "Skanowanie biblioteki nie powiodło się"
 		}
 	},
 	"createLibraryScene": {
@@ -491,7 +518,6 @@
 					"generateThumbnails": "Generuj miniaturki",
 					"processThumbnailColors": "Przetwarzaj kolory miniatur",
 					"mode": "Tryb",
-					"format": "Format",
 					"quality": "Jakość",
 					"name": "Nazwa",
 					"path": "Ścieżka",
@@ -505,7 +531,7 @@
 					"processMetadata": "Przetwarzaj metadane",
 					"generateFileHashes": "Generuj skróty plików",
 					"generateKoreaderHashes": "Generuj skróty KoReader",
-					"scaleEvenlyByFactor": "Skalowane równomiernie",
+					"scaleEvenlyByFactor": "Skalowanie równomierne",
 					"exact": "Dokładny wymiar",
 					"scaleDimension": "O stałych wymiarach"
 				}
@@ -538,20 +564,31 @@
 			"addedFiles": "Dodaj pliki"
 		}
 	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Książki",
+			"series": "Serie",
+			"files": "Pliki"
+		}
+	},
 	"librarySettingsScene": {
 		"heading": "Ustawienia",
 		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
 		"subtitleLink": "stosowną dokumentację",
 		"sidebar": {
 			"basics": "Podstawowe",
-			"options": {
+			"configuration": {
 				"general": "Ogólne",
 				"reading": "Czytanie",
 				"scanning": "Skanowanie",
 				"thumbnails": "Miniatury",
 				"ignore-rules": "Reguły pomijania",
-				"analysis": "Analiza",
 				"label": "Ustawienia"
+			},
+			"integrations": {
+				"label": "Integracje",
+				"analysis": "Analiza",
+				"metadata": "Metadane"
 			},
 			"danger-zone": {
 				"access-control": "Kontrola dostępu",
@@ -644,13 +681,11 @@
 			"sections": {
 				"management": {
 					"heading": "Zarządzanie",
-					"description": "Zarządzaj istniejącymi miniaturami tej biblioteki",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
+					"description": "Zarządzaj istniejącymi miniaturami tej biblioteki"
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "Analiza",
 			"description": "Analizuj zawartość tej biblioteki w celu zidentyfikowania potencjalnych problemów lub ulepszeń",
 			"sections": {
@@ -670,6 +705,22 @@
 					"heading": "Powielone pliki",
 					"description": "Potencjalnie powielone na dysku pliki",
 					"noDuplicateFiles": "W tej bibliotece nie ma powielonych plików"
+				}
+			}
+		},
+		"integrations/metadata": {
+			"title": "Metadane",
+			"description": "Zarządzaj i przeglądaj metadane dopasowane do tej biblioteki",
+			"sections": {
+				"fetchMetadata": {
+					"heading": "Pobierz metadane",
+					"description": "Pobierz metadane dla mediów w tej bibliotece",
+					"noProviders": {
+						"title": "Brak dostępnych dostawców metadanych",
+						"description": "Możesz skonfigurować dostawców metadanych w ustawieniach integracji metadanych"
+					},
+					"fetchButton": "Rozpocznij pobieranie w tle",
+					"fetchError": "Nie można uruchomić pobierania metadanych"
 				}
 			}
 		},
@@ -703,7 +754,6 @@
 					"emptyText": "Nie było nic do wyczyszczenia",
 					"missingEntitiesTable": {
 						"columns": {
-							"id": "ID",
 							"path": "Ścieżka",
 							"type": "Typ"
 						},
@@ -773,11 +823,9 @@
 			"coverArtists": "Twórca okładki",
 			"day": "Dzień",
 			"editors": "Edytorzy",
-			"format": "Format",
 			"identifierAmazon": "Identyfikator Amazon",
 			"identifierCalibre": "Identyfikator Calibre",
 			"identifierGoogle": "Identyfikator Google",
-			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "ASIN Mobi",
 			"identifierUuid": "UUID książki",
 			"genres": "Gatunki",
@@ -806,7 +854,6 @@
 			"imprint": "Nadruk",
 			"comicid": "Identyfikator komiksu",
 			"booktype": "Typ książki",
-			"status": "Status",
 			"totalIssues": "Łącznie wydań",
 			"publicationRun": "Okres publikacji",
 			"comicImage": "Grafika komiksu",
@@ -816,10 +863,93 @@
 			"description": "Dodaj każdy dodatkowy element w osobnej linii"
 		}
 	},
+	"metadataMatching": {
+		"section": {
+			"heading": "Oczekujące dopasowania",
+			"description": "Przeglądaj dopasowane metadane od zewnętrznych dostawców"
+		},
+		"confidenceBadge": {
+			"label": "pewność"
+		},
+		"includeField": "Uwzględnij to pole",
+		"excludeField": "Wyklucz to pole",
+		"fieldLocked": "To pole jest zablokowane",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "Brak kandydatów dla tego rekordu",
+				"noComparableFields": "Nie znaleziono porównywalnych pól",
+				"headers": {
+					"field": "Pole",
+					"current": "Bieżące",
+					"external": "Zewnętrzne",
+					"resolved": "Rozwiązane"
+				},
+				"toolbar": {
+					"candidatePosition": "Kandydat {{position}} z {{total}}",
+					"provider": "Dostawca"
+				}
+			},
+			"footer": {
+				"accept": "Akceptuj",
+				"reject": "Odrzuć",
+				"strategies": {
+					"FILL_GAPS": "Wypełnij luki",
+					"PREFER_EXTERNAL": "Preferuj zewnętrzne",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Preferuj zewnętrzne i scal listy",
+					"FILL_AND_MERGE_LISTS": "Wypełnij i scal listy"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "Zachowaj bieżące",
+				"takeExternal": "Wybier zewnętrzne",
+				"mergeLists": "Scal listy",
+				"editManually": "Edytuj ręcznie",
+				"lockField": "Zablokuj pole",
+				"unlockField": "Odblokuj pole",
+				"reset": "Resetuj",
+				"undoManualEdit": "Cofnij ręczną zmianę"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "Nazwa",
+				"entityType": "Typ",
+				"candidateCount": "Kandydaci",
+				"topConfidence": "Największa pewność",
+				"addedAt": "Pobrano o"
+			},
+			"acceptAll": {
+				"label": "Zaakceptuj wszystkie",
+				"failed": "Nie udało się zaakceptować wszystkich dopasowań",
+				"success": "Wszystkie oczekujące dopasowania zostały zaakceptowane"
+			},
+			"rejectAll": {
+				"label": "Odrzuć wszystkie",
+				"failed": "Nie udało się odrzucić wszystkich dopasowań",
+				"success": "Wszystkie oczekujące dopasowania zostały odrzucone"
+			},
+			"startReview": "Rozpocznij przegląd",
+			"nothingToReview": "Brak oczekujących dopasowań metadanych do przejrzenia"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Kontynuuj czytanie",
 			"downloadSeries": "Pobierz serię"
+		}
+	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Książki",
+			"files": "Pliki"
+		},
+		"actions": {
+			"markAsRead": "Oznacz serię jako przeczytaną",
+			"markAsUnread": "Oznacz serię jako nieprzeczytaną",
+			"goToLibrary": "Przejdź do biblioteki"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Nie udało się zaktualizować stanu ukończenia książki"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -846,12 +976,12 @@
 						"description": "Dostępna dla wszystkich użytkowników na serwerze"
 					},
 					"shared": {
-						"label": "Współdzielone",
+						"label": "Współdzielona",
 						"description": "Określeni użytkownicy mogą uzyskać dostęp do tej inteligentnej listy",
 						"createDisclaimer": "Możesz wybrać, z kim ta lista jest udostępniona po jej utworzeniu"
 					},
 					"private": {
-						"label": "Prywatne",
+						"label": "Prywatna",
 						"description": "Tylko Ty możesz uzyskać dostęp do tej inteligentnej listy"
 					}
 				}
@@ -917,12 +1047,12 @@
 									"name": "Nazwa pliku",
 									"size": "Rozmiar",
 									"extension": "Rozszerzenie",
-									"status": "Status",
 									"path": "Ścieżka",
 									"pages": "Strony",
 									"tags": "Etykiety",
 									"createdAt": "Utworzono",
-									"updatedAt": "Zaktualizowano"
+									"updatedAt": "Zaktualizowano",
+									"readingStatus": "Status czytania"
 								}
 							},
 							"book_meta": {
@@ -965,7 +1095,6 @@
 									"imprint": "Nadruk",
 									"comicid": "Identyfikator komiksu",
 									"booktype": "Typ książki",
-									"status": "Status",
 									"volume": "Tom",
 									"metaType": "Typ",
 									"ageRating": "Klasyfikacja wiekowa",
@@ -999,6 +1128,13 @@
 					"listValue": {
 						"placeholder": "Dodaj wartości",
 						"emptyState": "Brak wartości do wyświetlenia"
+					},
+					"enumValue": {
+						"selectPlaceholder": "Wybierz wartość",
+						"READING": "Czytane",
+						"FINISHED": "Ukończone",
+						"NOT_STARTED": "Nierozpoczęte",
+						"ABANDONED": "Porzucone"
 					}
 				}
 			}
@@ -1253,7 +1389,9 @@
 				"jobs": "Zadania",
 				"access": "Dostęp",
 				"email": "Adres e-mail",
+				"metadata": "Metadane",
 				"notifications": "Powiadomienia",
+				"tags": "Etykiety",
 				"label": "Zarządzanie"
 			}
 		},
@@ -1270,7 +1408,12 @@
 					"labels": {
 						"username": "Nazwa użytkownika",
 						"password": "Hasło",
-						"activeChangesPrompt": "Masz niezapisane zmiany"
+						"activeChangesPrompt": "Masz niezapisane zmiany",
+						"uselessForm": {
+							"title": "Nie masz uprawnień do zmiany tych ustawień",
+							"description": "Skontaktuj się z administratorem, aby wprowadzić zmiany w tych ustawieniach"
+						},
+						"insufficientPermission": "Nie masz uprawnień do tej zmiany"
 					},
 					"errors": {
 						"updateFailed": "Podczas aktualizacji profilu wystąpił błąd serwera. Spróbuj ponownie."
@@ -1296,9 +1439,9 @@
 					},
 					"heading": "Język i ustawienia regionalne",
 					"subtitle": [
-						"Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Proszę rozważ pomoc w poprawie jakości",
+						"Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Jeśli jesteś w stanie, proszę rozważ pomoc w poprawie jakości",
 						"tłumaczeń Stump",
-						"jeśli jesteś w stanie!"
+						"!"
 					]
 				}
 			}
@@ -1312,6 +1455,14 @@
 					"label": "Motyw i wygląd",
 					"description": "Podstawowe opcje wyglądu Stump"
 				},
+				"interface": {
+					"title": "Interfejs",
+					"description": "Podstawowe powierzchnie interfejsu i elementy interakcji"
+				},
+				"thumbnails": {
+					"title": "Miniatury",
+					"description": "Opcje wyświetlania miniatur obrazów"
+				},
 				"themeSelect": {
 					"label": "Motyw",
 					"description": [
@@ -1319,15 +1470,13 @@
 						"dokumentację"
 					],
 					"options": {
-						"system": "System",
 						"light": "Jasny",
 						"dark": "Ciemny",
 						"bronze": "Jasnobrązowy",
-						"ocean": "Ocean",
 						"autumn": "Jesień",
 						"cosmic": "Kosmiczny",
 						"pumpkin": "Dynia",
-						"matrix": "Matrix"
+						"midnight": "Północ"
 					}
 				},
 				"gradientToggle": {
@@ -1338,9 +1487,24 @@
 					"label": "Czcionka",
 					"description": "Dostosuj czcionkę używaną w aplikacji"
 				},
+				"interfaceRoundness": {
+					"label": "Zaokrąglenie interfejsu",
+					"description": "Jak bardzo zaokrąglone będą narożniki elementów interfejsu",
+					"options": {
+						"none": "W ogóle",
+						"normal": "Normalnie",
+						"rounded": "Zaokrąglone",
+						"pill": "Pastylka"
+					}
+				},
+				"thumbnailPreview": {
+					"label": "Podgląd",
+					"description": "Tak będą wyglądały miniatury z bieżącymi ustawieniami"
+				},
 				"thumbnailRatioSelect": {
 					"label": "Współczynnik miniatur",
-					"description": "Współczynnik proporcji używany dla miniatur"
+					"description": "Współczynnik proporcji używany dla miniatur",
+					"defaultSuffix": "Domyślne"
 				},
 				"thumbnailPlaceholder": {
 					"label": "Miniatury zastępcze",
@@ -1348,9 +1512,22 @@
 					"options": {
 						"grayscale": "Odcienie szarości",
 						"averageColor": "Średnie wartości kolorów",
-						"colorful": "Kolorowe",
-						"thumbhash": "Thumbhash"
+						"colorful": "Kolorowe"
 					}
+				},
+				"thumbnailRoundness": {
+					"label": "Zaokrąglenie miniatury",
+					"description": "Jak bardzo zaokrąglone powinny być narożniki miniatur",
+					"options": {
+						"none": "W ogóle",
+						"normal": "Normalnie",
+						"rounded": "Zaokrąglone",
+						"large": "Duże"
+					}
+				},
+				"navigation": {
+					"title": "Nawigacja",
+					"description": "Dostosuj elementy nawigacyjne aplikacji"
 				},
 				"layoutAndArrangement": {
 					"label": "Układ i aranżacja",
@@ -1367,7 +1544,7 @@
 				},
 				"doubleSidebar": {
 					"label": "Panel boczny ustawień",
-					"description": "Włącza nawigację na panelu bocznym dla stron ustawień. Jeśli często używasz mniejszego ekranu, możesz chcieć to wyłączyć."
+					"description": "Umożliwia nawigację z użyciem paska bocznego dla stron ustawień"
 				},
 				"replacePrimarySidebar": {
 					"label": "Zastąp główny panel boczny",
@@ -1379,10 +1556,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Układ nawigacji",
-					"description": {
-						"sidebar": "Uporządkuj i dostosuj elementy nawigacji na pasku bocznym",
-						"topbar": "Uporządkuj i dostosuj elementy nawigacji na górnym pasku"
-					},
+					"description": "Zmień kolejność lub dostosuj elementy nawigacyjne w głównej nawigacji",
 					"isLocked": "Układ jest zablokowany",
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",
@@ -1416,19 +1590,30 @@
 				"maxWidthPreference": {
 					"label": "Dostosowana szerokość",
 					"description": "Stump stosuje maksymalną szerokość widoku. To ustawienie pozwala dostosować lub usunąć ten limit",
-					"tooltip": "To ustawienie nie jest obecnie obsługiwane, jeśli główna nawigacja ustawiona jest jako panel boczny"
+					"tooltip": "To ustawienie nie jest obecnie obsługiwane, jeśli główna nawigacja ustawiona jest jako panel boczny",
+					"options": {
+						"noLimit": "Bez limitu"
+					}
+				},
+				"displayAndSpacing": {
+					"label": "Rozstaw i widok",
+					"description": "Ustawienia powiązane z prezentacją treści i informacji"
 				},
 				"additionalPreferences": {
 					"label": "Dodatkowe ustawienia",
 					"description": "Dostosuj wygląd i zachowanie Stump za pomocą tych dodatkowych ustawień"
 				},
-				"showThumbnailsInHeader": {
-					"label": "Pokazuj miniatury w nagłówkach",
-					"description": "Jeśli chcesz widzieć częściej miniatury, to ustawienie pokaże je w większej ilości miejsc",
-					"tooltips": {
-						"enabled": "To ustawienie pokaże miniatury w większej ilości miejsc",
-						"disabled": "To ustawienie nie pokaże miniatur w większej ilości miejsc"
-					}
+				"contentBrowsing": {
+					"label": "Przeglądanie treści",
+					"description": "Ustawienia mające wpływ na przeglądanie i nawigację list treści"
+				},
+				"motionAndAnimation": {
+					"label": "Ruch i animacja",
+					"description": "Ustawienia prezentacji wizualnej i ruchu"
+				},
+				"activityAndStatus": {
+					"label": "Aktywność i status",
+					"description": "Wskaźniki, nakładki lub funkcjonalności związane z aktywnością w tle"
 				},
 				"hideScrollbarToggle": {
 					"label": "Ukrywaj pasek przewijania",
@@ -1457,6 +1642,14 @@
 				"enableJobOverlayToggle": {
 					"label": "Nakładka zadań",
 					"description": "Pokaż pływającą nakładkę, gdy wykonywane jest zadanie"
+				},
+				"dayResetHourOffset": {
+					"label": "Przesunięcie resetu dnia czytania",
+					"description": "Przesuń czas, w jakim resetuje się dzień czytania, w godzinach od północy"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Okres karencji sesji czytania",
+					"description": "W przypadku braku aktywności w tym przedziale czasowym, w sekundach, następna aktualizacja rozpocznie nową sesję"
 				}
 			}
 		},
@@ -1519,7 +1712,7 @@
 		"app/reader": {
 			"helmet": "Ustawienia czytnika",
 			"title": "Ustawienia czytnika",
-			"description": "Domyślne opcje dla czytników Stump. Są one powiązane jedynie z bieżącym urządzeniem",
+			"description": "Domyślne opcje do czytania. Niektóre z nich przechowywane są tylko lokalnie na bieżącym urządzeniu",
 			"sections": {
 				"universal": {
 					"sections": {
@@ -1600,9 +1793,7 @@
 								"placeholder": "Mój serwer"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "Adres serwera Stump",
-								"placeholder": "https://stump.example.com"
+								"description": "Adres serwera Stump"
 							}
 						}
 					},
@@ -1635,7 +1826,7 @@
 							"description": "Spowoduje to wylogowanie z bieżącego serwera",
 							"confirm": "Przełącz na serwer",
 							"server": "Serwer",
-							"uri": "Adres URL"
+							"uri": "Odnośnik"
 						}
 					},
 					"resetConfiguration": {
@@ -1780,32 +1971,77 @@
 			"description": "Zadania w tle, które działają na Twojej instancji serwera Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Harmonogram",
+					"title": "Zaplanowane zadania",
 					"description": "Niektóre zadania można skonfigurować tak, aby uruchomiały się według harmonogramu. Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
-					"disclaimer": "Harmonogram zadań jest bardzo podstawowy i zostanie ulepszony w przyszłości. Przekaż nam swoją opinię lub sugestię!",
-					"createOrUpdateConfig": {
-						"fields": {
-							"intervalSecs": {
-								"label": "Ineterwał",
-								"description": "Jak często zadanie powinno być uruchamiane (w sekundach)",
-								"placeholder": "np. \"86400\" to raz dziennie"
-							},
-							"intervalPreset": {
-								"label": "Predefiniowane",
-								"options": {
-									"everySixHours": "Co 6 godzin",
-									"everyTwelveHours": "Co 12 godzin",
-									"oncePerDay": "Raz na dzień",
-									"oncePerWeek": "Raz w tygodniu",
-									"oncePerMonth": "Raz w miesiącu"
-								}
-							},
-							"includedLibraryIds": {
-								"label": "Uwzględnione biblioteki",
-								"description": "Wybierz, które biblioteki są zawarte"
-							}
+					"restartRequiredTitle": "Wymagane ponowne uruchomienie",
+					"restartRequired": "Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
+					"newScheduledJob": "Nowe zaplanowane zadanie",
+					"deleteScheduledJob": {
+						"title": "Usuń zaplanowane zadanie",
+						"description": "Czy na pewno chcesz usunąć \"{{name}}\"? Tej czynności nie można cofnąć.",
+						"confirm": "Usuń"
+					},
+					"dialog": {
+						"titleCreate": "Nowe zaplanowane zadanie",
+						"titleEdit": "Edytuj zaplanowane zadanie",
+						"cancel": "Anuluj",
+						"create": "Utwórz",
+						"saveChanges": "Zapisz zmiany"
+					},
+					"fields": {
+						"name": {
+							"label": "Nazwa",
+							"placeholder": "np. \"Codzienne skanowanie biblioteki\""
 						},
-						"restartRequired": "Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera"
+						"schedule": {
+							"label": "Harmonogram cron",
+							"description": "Wyrażenie cron definiujące częstotliwość"
+						},
+						"schedulePreset": {
+							"label": "Predefiniowane",
+							"custom": "Niestandardowe",
+							"everySixHours": "Co 6 godzin",
+							"everyTwelveHours": "Co 12 godzin",
+							"dailyAtMidnight": "Codziennie o północy",
+							"weeklySunday": "Tygodniowo (w niedzielę)",
+							"monthlyFirst": "Miesięcznie (pierwszego)"
+						},
+						"kind": {
+							"label": "Rodzaj zadania",
+							"libraryScan": "Skanowanie biblioteki",
+							"metadataRetry": "Ponowienie metadanych"
+						},
+						"libraryIds": {
+							"label": "Biblioteki do zeskanowania",
+							"description": "Pozostaw puste, aby zeskanować wszystkie biblioteki"
+						},
+						"statuses": {
+							"label": "Statusy do ponawiania próby",
+							"description": "Które statusy pobierania metadanych powinny być ponowione",
+							"rateLimited": "Ograniczenie czasowe",
+							"failed": "Niepowodzenie"
+						},
+						"enabled": "Aktywne"
+					},
+					"row": {
+						"enabled": "Aktywne",
+						"disabled": "Nieaktywne",
+						"allLibraries": "Wszystkie biblioteki",
+						"rateLimited": "ograniczony czasowo",
+						"lastRun": "Ostatnio uruchomione o {{date}}",
+						"edit": "Edytuj",
+						"delete": "Usuń"
+					},
+					"toasts": {
+						"createSuccess": "Zaplanowane zadanie zostało utworzone",
+						"createError": "Nie udało się utworzyć zaplanowanego zadania",
+						"updateSuccess": "Zaplanowane zadanie zostało zaktualizowane",
+						"updateError": "Nie udało się zaktualizować zaplanowanego zadania",
+						"deleteSuccess": "Zaplanowane zadanie zostało usunięte",
+						"deleteError": "Nie udało się usunąć zaplanowanego zadania"
+					},
+					"errors": {
+						"invalidCron": "Harmonogram musi być poprawnym wyrażeniem cron"
 					}
 				},
 				"history": {
@@ -1815,7 +2051,6 @@
 						"columns": {
 							"name": "Rodzaj",
 							"description": "Opis",
-							"status": "Status",
 							"createdAt": "Rozpoczęto o",
 							"elapsed": "Upłynęło",
 							"tasks": "Zadania"
@@ -1837,7 +2072,7 @@
 		"server/users": {
 			"helmet": "Zarządzanie użytkownikami",
 			"title": "Użytkownicy",
-			"description": "Zarządzanie użytkownikami na tym serwerze",
+			"description": "Zarządzaj użytkownikami na tym serwerze",
 			"createUser": {
 				"helmet": "Dodaj użytkownika",
 				"title": "Dodaj użytkownika",
@@ -1852,16 +2087,15 @@
 				"accessControl": {
 					"heading": "Kontrola i ograniczenia dostępu",
 					"subtitle": [
-						"Skonfiguruj wszelkie ograniczenia, które chcesz zastosować do tego użytkownika. Aby uzyskać więcej informacji o kontroli dostępu, zobacz",
+						"Skonfiguruj wszelkie ograniczenia, które chcesz zastosować dla tego użytkownika. Aby uzyskać więcej informacji o kontroli dostępu, zobacz",
 						"dokumentację"
 					],
 					"ageRestriction": {
 						"label": "Ograniczenie wiekowe",
 						"description": "Ogranicza użytkownikowi dostęp do treści powyżej ustalonego progu wiekowego",
-						"placeholder": "13",
 						"enforceUnset": {
 							"label": "Wymuś na nieokreślonych",
-							"description": "Jeśli opcja jest włączona, użytkownicy będą ograniczeni do dostępu do treści bez dostępnych ocen wiekowych"
+							"description": "Jeśli opcja ta jest włączona, użytkownik nie będzie miał dostępu do treści bez ocen wiekowych"
 						}
 					},
 					"tagRestriction": {
@@ -1871,6 +2105,17 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "Konto",
+						"featureAccess": "Dostęp do funkcji",
+						"fileManagement": "Pliki",
+						"emailers": "Wysyłka",
+						"emailing": "Wysyłka poczty elektronicznej",
+						"libraryManagement": "Zarządzanie bibliotekami",
+						"userManagement": "Zarządzanie użytkownikami",
+						"serverManagement": "Zarządzanie serwerem",
+						"metadataManagement": "Zarządzanie metadanymi"
+					},
 					"heading": "Uprawnienia",
 					"subtitle": [
 						"Wybierz uprawnienia, które chcesz przyznać temu użytkownikowi. Aby uzyskać więcej informacji na temat tego, co robią poszczególne uprawnienia, zobacz",
@@ -1931,7 +2176,7 @@
 					"email": {
 						"label": "Wysyłka poczty elektronicznej",
 						"send": {
-							"label": "Wysyłaj wiadomości poczty elektronicznej",
+							"label": "Wysyłanie wiadomości poczty elektronicznej",
 							"description": "Pozwala użytkownikowi wysyłać wiadomości e-mail z serwera na którykolwiek ze skonfigurowanych aliasów"
 						},
 						"arbitrary_send": {
@@ -2024,7 +2269,6 @@
 								"columns": {
 									"to": "Do",
 									"subject": "Temat",
-									"status": "Status",
 									"createdAt": "Wysłane o"
 								}
 							},
@@ -2142,6 +2386,114 @@
 				"helmet": "Aktualizuj wysyłkę",
 				"title": "Aktualizuj wysyłkę",
 				"description": "Aktualizuj detale tej wysyłki SMTP"
+			}
+		},
+		"server/metadataIntegrations": {
+			"helmet": "Integracja metadanych",
+			"title": "Integracja metadanych",
+			"addProvider": "Dodaj dostawcę",
+			"noProviders": "Brak skonfigurowanych dostawców. Dodaj jednego, aby rozpocząć",
+			"providers": {
+				"title": "Dostawcy",
+				"description": "Skonfiguruj zewnętrznych dostawców metadanych, aby pobierać i wzbogacać dane bibliotek"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "Token API",
+					"description": "Token API do uwierzytelniania z tym dostawcą",
+					"validationError": "Automatyczna walidacja dla tego tokenu zakończyła się niepowodzeniem",
+					"validationRequestError": "Żądanie walidacji zakończyło się niepowodzeniem",
+					"validationRequestErrorUnknown": "Żądanie walidacji napotkało na nieznany błąd",
+					"noBearerPrefixRequired": "Usuń przedrostek 'Bearer ' z tokenu API"
+				},
+				"apiTokenExpiresAt": {
+					"label": "Ważność tokenu",
+					"description": "Data wygaśnięcia tokenu API (opcjonalnie)"
+				},
+				"enableProvider": {
+					"label": "Włącz dostawcę",
+					"description": "Włączony będzie używany do pobierania"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "Włącz automatyczne zastosowanie",
+						"description": "Pomiń ręczną akceptację i zastosuj prawdopodobne dopasowania"
+					},
+					"threshold": {
+						"label": "Próg pewności",
+						"description": "Minimalna punktacja pewności (0-1) do automatycznego zastosowania dopasowania",
+						"disclaimer": "Obliczona punktacja pewności jest najlepszym oszacowaniem, niekoniecznie zawsze dokładnym"
+					},
+					"strategy": {
+						"label": "Strategia scalania",
+						"options": {
+							"FILL_GAPS": "Akceptuj brakujące pola",
+							"FILL_AND_MERGE_LISTS": "Akceptuj brakujące pola i scalaj listy",
+							"PREFER_EXTERNAL": "Preferuj dane zewnętrzne"
+						}
+					}
+				}
+			},
+			"providerEnabled": "Ten dostawca jest włączony",
+			"providerDisabled": "Ten dostawca jest wyłączony",
+			"providerTokenExpiresSoon": "Token tego dostawcy wkrótce wygaśnie",
+			"autoApplyOn": "Automatyczne zastosowanie włączone",
+			"autoApplyOff": "Automatyczne zastosowanie wyłączone",
+			"editDialog": {
+				"tooltip": "Edytuj dostawcę"
+			},
+			"deleteDialog": {
+				"title": "Usuń dostawcę",
+				"description": "Czy na pewno chcesz usunąć {{providerName}}? Tej czynności nie można cofnąć."
+			}
+		},
+		"server/tags": {
+			"helmet": "Zarządzanie etykietami",
+			"title": "Etykiety",
+			"description": "Utwórz i zarządzaj etykietami w celu organizacji treści",
+			"sections": {
+				"table": {
+					"title": "Etykiety",
+					"description": "Wszystkie etykiety dostępne na tym serwerze",
+					"empty": {
+						"title": "Brak etykiet",
+						"action": "Utwórz swoją pierwszą etykietę, aby rozpocząć"
+					},
+					"columns": {
+						"name": "Nazwa"
+					},
+					"actionMenu": {
+						"rename": "Zmień nazwę"
+					}
+				},
+				"createTag": {
+					"trigger": "Utwórz etykietę",
+					"modal": {
+						"heading": "Utwórz nową etykietę",
+						"description": "Etykiety mogą być przypisywane do książek, serii lub bibliotek",
+						"name": {
+							"label": "Nazwa",
+							"placeholder": "Wprowadź nazwę etykiety"
+						},
+						"submit": "Utwórz"
+					}
+				},
+				"renameTag": {
+					"modal": {
+						"heading": "Zmień nazwę etykiety",
+						"description": "Zmień nazwę tej etykiety we wszystkich przypisanych pozycjach",
+						"name": {
+							"label": "Nazwa",
+							"placeholder": "Wprowadź nową nazwę etykiety"
+						},
+						"submit": "Zmień nazwę"
+					}
+				},
+				"deleteTag": {
+					"title": "Usuń etykietę",
+					"description": "Etykieta zostanie usunięta ze wszystkich książek, serii i bibliotek. Operacji tej nie można cofnąć.",
+					"confirm": "Usuń"
+				}
 			}
 		}
 	},
@@ -2265,22 +2617,44 @@
 	},
 	"common": {
 		"add": "Dodaj",
+		"andXMoreTrailing": "...i jeszcze {{count}}",
 		"cancel": "Anuluj",
 		"clear": "Wyczyść",
 		"confirm": "Potwierdź",
+		"created": "Utworzono",
 		"delete": "Usuń",
-		"enter": "Enter",
+		"deleteConfirmation": {
+			"title": "Usuń {{type}}",
+			"description": "Czy na pewno chcesz usunąć {{type}}? Tej czynności nie można cofnąć.",
+			"confirm": "Usuń {{type}}",
+			"typeToConfirm": "Wprowadź {{name}} aby potwierdzić:"
+		},
+		"experimentalDisclaimer": {
+			"title": "Ta funkcja jest eksperymentalna",
+			"description": "Może brakować funkcjonalności, posiadać błędy lub w ogóle nie działać. Uzywaj według własnego uznania i zgłoś wszelkie błędy, które napotkasz"
+		},
 		"save": "Zapisz",
 		"send": "Wyślij",
 		"saveChanges": "Zapisz zmiany",
 		"noChanges": "Brak zmian",
 		"create": "Utwórz",
 		"edit": "Edytuj",
+		"info": "Informacje",
+		"infoSheetStats": {
+			"series": "Serie",
+			"inProgress": "W trakcie",
+			"completedBooks": "Ukończone",
+			"readingTime": "Czas czytania",
+			"size": "Rozmiar"
+		},
 		"update": "Aktualizuj",
 		"upload": "Prześlij",
 		"uploading": "Przesyłanie",
 		"uploadingEllipsis": "Przesyłanie...",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
+		"upNext": "Następne w kolejce",
+		"unknown": "Nieznane",
+		"lastUpdated": "Ostatnio aktualizowane",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
 		"login": "Nazwa użytkownika",
@@ -2293,11 +2667,16 @@
 		"never": "Nigdy",
 		"scan": "Skanuj",
 		"somethingWentWrong": "Coś poszło nie tak",
+		"back": "Powrót",
+		"continue": "Kontynuuj",
+		"book": "Książka",
+		"series": "Seria",
 		"fileUpload": {
 			"someRejected": "Niektóre pliki zostały odrzucone. Sprawdź typy plików i spróbuj ponownie",
 			"tooManyFiles": "Wybrano zbyt dużą ilość plików",
 			"noValidFiles": "Nie wybrano żadnych poprawnych plików"
-		}
+		},
+		"unknownError": "Wystąpił nieznany błąd"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2312,9 +2691,25 @@
 			"label": "Synchronizacja KoReader",
 			"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją KoReader"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Synchronizacja Kobo",
+			"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją Kobo"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "Inteligentne listy",
 			"description": "Pozwala użytkownikowi na dostęp do funkcji inteligentnych list, w tym do tworzenia i zarządzania nimi"
+		},
+		"CHANGE_PASSWORD": {
+			"label": "Zmiana hasła",
+			"description": "Pozwala użytkownikowi na zmianę własnego hasła"
+		},
+		"CHANGE_USERNAME": {
+			"label": "Zmiana nazwy użytkownika",
+			"description": "Pozwala użytkownikowi na zmianę własnej nazwy użytkownika"
+		},
+		"CHANGE_AVATAR": {
+			"label": "Zmiana awatara",
+			"description": "Pozwala użytkownikowi na zmianę własnego awatara"
 		},
 		"CREATE_BOOK_CLUB": {
 			"label": "Tworzenie klubów książki",
@@ -2361,15 +2756,15 @@
 			"description": "Pozwala użytkownikowi na wysyłanie niestandardowych wiadomości e-mail na dowolny adres"
 		},
 		"EMAIL_SEND": {
-			"label": "Wysyłaj wiadomości poczty elektronicznej",
+			"label": "Wysyłanie wiadomości poczty elektronicznej",
 			"description": "Pozwala użytkownikowi na wysyłanie wiadomości e-mail przez system"
 		},
 		"FILE_EXPLORER": {
-			"label": "Przeglądarka plików",
+			"label": "Przeglądanie plików",
 			"description": "Pozwala użytkownikowi na przeglądanie i eksploracje systemu plików serwera"
 		},
 		"MANAGE_LIBRARY": {
-			"label": "Zarządzaj bibliotekami",
+			"label": "Zarządzanie bibliotekami",
 			"description": "Pozwala użytkownikowi na zarządzanie ustawieniami biblioteki i konfiguracją"
 		},
 		"MANAGE_NOTIFIER": {
@@ -2413,11 +2808,11 @@
 			"description": "Pozwala użytkownikowi na przesyłanie plików na serwer"
 		},
 		"MANAGE_JOBS": {
-			"label": "Zarządzaj zadaniami",
+			"label": "Zarządzanie zadaniami",
 			"description": "Pozwala użytkownikowi na zarządzanie dowolnym zadaniem w kolejce"
 		},
 		"EDIT_METADATA": {
-			"label": "Edycja metadanych",
+			"label": "Edytowanie metadanych",
 			"description": "Pozwala użytkownikowi na edycję metadanych książek i serii"
 		},
 		"WRITE_BACK_METADATA": {
@@ -2427,6 +2822,646 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edycja miniatur",
 			"description": "Pozwala użytkownikowi na edycję miniatur książek i serii"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Przeglądanie dostawcami metadanych",
+			"description": "Pozwala użytkownikowi na wyświetlanie skonfigurowanych zewnętrznych dostawców metadanych"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Zarządzanie dostawcami metadanych",
+			"description": "Pozwala użytkownikowi na konfigurowanie zewnętrznych dostawców metadanych"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Przeglądanie dopasowań metadanych",
+			"description": "Pozwala użytkownikowi na przeglądanie oczekujących na recenzję wyników dopasowania metadanych"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Zarządzanie dopasowaniami metadanych",
+			"description": "Pozwala użytkownikowi na szukanie za książką u zewnętrznych dostawców i akceptację lub odrzucenie oczekujących dopasowań"
+		}
+	},
+	"mobileApp": {
+		"addOrEditServer": {
+			"addServer": {
+				"title": "Dodaj serwer",
+				"subtitle": "Skonfiguruj nowy serwer, aby uzyskać dostęp do swojej zawartości"
+			},
+			"editServer": {
+				"title": "Edytuj serwer",
+				"subtitle": "Edytuj serwer"
+			},
+			"kind": "Wariant",
+			"customHeaders": {
+				"label": "Niestandardowe nagłówki",
+				"addHeader": "Dodaj nagłówek",
+				"invalidHeader": "Nieprawidłowy nagłówek"
+			},
+			"auth": {
+				"label": "Autoryzacja",
+				"default": {
+					"label": "Logowanie",
+					"description": "Zostaniesz poproszony w razie potrzeby o zalogowanie się podczas dostępu do zawartości"
+				},
+				"token": {
+					"placeholder": "Nieprzetworzony token"
+				},
+				"basic": "Podstawowe"
+			},
+			"serverNamePlaceholder": "Mój serwer",
+			"catalogUrl": "Odnośnik do katalogu",
+			"failedToConnect": "Połączenie z serwerem nie powiodło się",
+			"didConnect": "Połączono",
+			"checkConnection": "Sprawdź połączenie",
+			"setAsDefaultServer": "Ustaw jako domyślny serwer",
+			"enableOPDS": "Włącz OPDS",
+			"validation": {
+				"nameAlreadyExists": "Podana nazwa jest już używana",
+				"cannotSetAuthorizationHeader": "Nie można ustawić nagłówka uwierzytelnienia"
+			}
+		},
+		"bookActions": {
+			"markAsRead": {
+				"label": "Oznacz jako przeczytane",
+				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?",
+				"failure": "Nie udało się oznaczyć książki jako przeczytanej"
+			},
+			"clearProgress": {
+				"label": "Wyczyść postęp",
+				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?",
+				"failure": "Nie udało się usunąć bieżącego postępu"
+			},
+			"deleteReadHistory": {
+				"label": "Usuń historię czytania",
+				"confirmation": "Czy na pewno chcesz usunąć historię czytania dla {{bookTitle}}?",
+				"failure": "Nie udało się usunąć historii odczytu"
+			},
+			"deleteBook": {
+				"label": "Usuń książkę",
+				"confirmation": "Czy na pewno chcesz usunąć {{bookTitle}}?"
+			},
+			"deleteDownload": {
+				"label": "Usuń pobrane",
+				"confirmation": "Czy na pewno chcesz usunąć pobrany plik dla {{bookTitle}}?"
+			},
+			"goToLibrary": "Przejdź do biblioteki",
+			"goToSeries": "Przejdź do serii",
+			"seeDetails": "Zobacz szczegóły"
+		},
+		"bookMetadata": {
+			"ageRating": "Klasyfikacja wiekowa",
+			"downloadedAt": "Pobrane",
+			"characters": "Postacie",
+			"genres": "Gatunki",
+			"language": "Język",
+			"publisher": "Wydawca",
+			"size": "Rozmiar",
+			"volume": "Tom",
+			"writers": "Pisarze",
+			"colorists": "Koloryści",
+			"inkers": "Kreślarze",
+			"letterers": "Kaligrafiści",
+			"coverArtists": "Twórcy okładki",
+			"links": "Odnośniki",
+			"year": "Rok",
+			"identifier": "Identyfikator",
+			"identifiers": "Identyfikatory"
+		},
+		"common": {
+			"book": "Książka",
+			"cancel": "Anuluj",
+			"chapter": "Rozdział",
+			"clear": "Wyczyść",
+			"completed": "Ukończone",
+			"confirm": "Potwierdź",
+			"continue": "Kontynuuj",
+			"content": "Zawartość",
+			"details": "Szczegóły",
+			"delete": "Usuń",
+			"dismiss": "Odrzuć",
+			"download": "Pobierz",
+			"downloads": "Pobrane",
+			"done": "Zakończone",
+			"edit": "Edytuj",
+			"enabled": "Aktywne",
+			"enable": "Aktywuj",
+			"error": "Błąd",
+			"favorite": "Ulubione",
+			"finished": "Ukończone",
+			"grid": "Siatka",
+			"list": "Lista",
+			"lastCompleted": "Ostatnio ukończone",
+			"name": "Nazwa",
+			"none": "Brak",
+			"notAvailable": "Niedostępne",
+			"options": "Ustawienia",
+			"page": "Strona",
+			"pages": "Strony",
+			"pageXOfY": "Strona {{current}} z {{total}}",
+			"password": "Hasło",
+			"progress": "Postęp",
+			"publication": "Publikacja",
+			"read": "Czytaj",
+			"readAgain": "Czytaj ponownie",
+			"readTime": "Czas czytania",
+			"readthrough": "Przeczytanie",
+			"readMore": "Dowiedz się więcej",
+			"refresh": "Odśwież",
+			"save": "Zapisz",
+			"select": "Zaznacz",
+			"settings": "Ustawienia",
+			"servers": "Serwery",
+			"thisBook": "ta książka",
+			"thisServer": "ten serwer",
+			"unknown": "Nieznany",
+			"unknownTitle": "Bez tytułu",
+			"url": "Odnośnik",
+			"username": "Nazwa użytkownika",
+			"value": "Wartość",
+			"version": "Wersja"
+		},
+		"errors": {
+			"unknown": "Nieznany błąd"
+		},
+		"epubMenu": {
+			"tableOfContents": "Spis treści",
+			"bookmarksAndAnnotations": "Zakładki i adnotacje",
+			"appearance": "Wygląd"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} z {{total}} w {{seriesName}}",
+				"position": "{{position}} w {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "{{position}} książka z {{total}} w {{seriesName}}",
+				"position": "{{position}} książka w {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} z {{total}} w {{seriesName}}",
+				"position": "#{{position}} w {{seriesName}}"
+			},
+			"unknownSeriesName": "seria"
+		},
+		"emptyState": {
+			"noStumpServers": "Nie dodano żadnych serwerów Stump",
+			"noOPDSServers": "Nie dodano żadnych serwerów OPDS",
+			"noServers": "Brak skonfigurowanych serwerów",
+			"cta": "Zacznij od dodania serwera, aby uzyskać do swojej kolekcji książek",
+			"seeDocumentation": "Zobacz dokumentację",
+			"noSmartLists": {
+				"label": "Nie zwrócono żadnych list",
+				"description": "Po utworzeniu pojawią się tutaj"
+			}
+		},
+		"tabs": {
+			"servers": "Serwery",
+			"localLibrary": "Biblioteka",
+			"settings": "Ustawienia",
+			"home": "Strona główna",
+			"browse": "Przeglądaj",
+			"clubs": "Kluby",
+			"search": "Szukaj"
+		},
+		"localLibrary": {
+			"title": "Biblioteka lokalna",
+			"emptyState": {
+				"all": {
+					"title": "Brak pozycji do czytania",
+					"description": "Tutaj pojawią się pobrane książki"
+				},
+				"imported": {
+					"title": "Brak zaimportowanych książek",
+					"description": "Zaimportuj książki, aby przeczytać je offline"
+				},
+				"server": {
+					"title": "Brak pobranych książek",
+					"description": "Pobierz książki z biblioteki, aby odczytać je w trybie offline"
+				}
+			},
+			"downloadQueue": {
+				"downloading": "Pobieranie",
+				"failed": "Niepowodzenie",
+				"nothingDownloading": "Nic nie jest pobierane",
+				"noActiveDownloads": "Brak aktywnych pobrań",
+				"noFailedDownloads": "Brak nieudanych pobrań",
+				"downloadStarting": "Rozpoczynanie..."
+			},
+			"downloadsHeaderMenu": {
+				"deleteAllDownloads": {
+					"label": "Usuń książki",
+					"confirmation": "Czy na pewno chcesz usunąć lokalną bibliotekę?",
+					"disclaimer": "Tej czynności nie można cofnąć."
+				},
+				"seeProblems": "Zobacz problemy ({{problemCount}})",
+				"hideCurated": "Ukryj wyselekcjonowane",
+				"showCurated": "Pokaż wyselekcjonowane",
+				"attemptSync": "Spróbuj zsynchronizować"
+			},
+			"downloadsHeaderSortMenu": {
+				"sortBy": {
+					"NAME": "Nazwa",
+					"ADDED_AT": "Data dodania",
+					"SERIES": "Seria"
+				},
+				"sortDirection": {
+					"ASC": "Rosnąco",
+					"DESC": "Malejąco"
+				},
+				"sortDirectionDate": {
+					"ASC": "Najpierw najstarsze",
+					"DESC": "Najpierw najnowsze"
+				},
+				"sourceFilter": {
+					"all": "Wszystkie książki",
+					"server": "Pobrane",
+					"imported": "Zaimportowane"
+				}
+			},
+			"downloadProblemsSheet": {
+				"title": "Nieudane pobierania",
+				"noFailedDownloads": "Brak nieudanych pobrań",
+				"retryAll": "Ponów wszystkie",
+				"dismissAll": "Odrzucić wszystkie"
+			}
+		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Synchronizacja pominięta dla serwera {{skippedCount}}",
+				"skippedMultipleServers": "Synchronizacja pominięta dla serwerów {{skippedCount}}",
+				"explanation": "Niektóre serwery używają metod uwierzytelniania, których nie można automatycznie odświeżyć"
+			},
+			"syncFailed": "Synchronizacja postępu offline nie powiodła się"
+		},
+		"search": {
+			"label": "Przeszukaj ten serwer",
+			"description": "Szukaj konkretnej zawartości na tym serwerze",
+			"placeholder": "Szukaj"
+		},
+		"settings": {
+			"preferences": {
+				"label": "Preferencje",
+				"appTheme": {
+					"label": "Motyw",
+					"options": {
+						"light": "Jasny",
+						"dark": "Ciemny"
+					}
+				},
+				"appPrimaryColor": {
+					"label": "Akcent",
+					"options": {
+						"chromaScale": "Skala nasycenia",
+						"hues": {
+							"red": "Czerwony",
+							"orange": "Pomarańczowy",
+							"amber": "Bursztynowy",
+							"yellow": "Żółty",
+							"lime": "Limonkowy",
+							"green": "Zielony",
+							"emerald": "Szmaragdowy",
+							"teal": "Turkusowy",
+							"cyan": "Błękitny",
+							"sky": "Niebo",
+							"blue": "Niebieski",
+							"indigo": "Indygo",
+							"violet": "Fioletowy",
+							"purple": "Purpurowy",
+							"fuchsia": "Fuksja",
+							"pink": "Różowy",
+							"rose": "Różany",
+							"slate": "Łupek",
+							"gray": "Szary",
+							"zinc": "Cynk",
+							"neutral": "Neutralny",
+							"stone": "Kamień"
+						}
+					}
+				},
+				"appLanguage": "Język",
+				"defaultServer": "Domyślny serwer",
+				"thumbnailRatio": "Współczynnik miniatur",
+				"thumbnailPlaceholder": {
+					"label": "Miniatury zastępcze",
+					"options": {
+						"grayscale": "Odcienie szarości",
+						"averageColor": "Średnie wartości kolorów",
+						"colorful": "Kolorowe"
+					}
+				},
+				"thumbnailResizeMode": {
+					"label": "Skalowanie miniatur",
+					"options": {
+						"cover": "Okładka",
+						"stretch": "Rozciągnij",
+						"fit": "Dopasuj"
+					}
+				}
+			},
+			"reading": {
+				"label": "Czytane",
+				"preferNativePdf": "Preferuj natywny PDF",
+				"preferMinimalReader": "Preferuj minimalny czytnik",
+				"disableDismissGesture": "Wyłącz gest odrzucania",
+				"incognitoReading": "Czytanie w trybie prywatnym"
+			},
+			"stump": {
+				"description": "Funkcje Stump są opcjonalne i, jeśli ich nie potrzebujesz, możesz je wyłączyć",
+				"bookClubsEnabled": "Funkcje klubu książki"
+			},
+			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
+			"textCase": {
+				"label": "Kapitalizacja tekstu",
+				"options": {
+					"lowerCase": "małe litery",
+					"sentenceCase": "Jak w zdaniu",
+					"titleCase": "Jak w Tytule"
+				}
+			},
+			"tintListBackground": "Zabarw tła list",
+			"management": {
+				"label": "Zarządzanie",
+				"dataUsage": {
+					"label": "Wykorzystanie danych",
+					"nonStumpData": "Dane inne niż Stump",
+					"serversTotal": "Łącznie z serwerów",
+					"totalFiles": "Łącznie plików",
+					"totalSize": "Łączny rozmiar",
+					"deleteDownloads": {
+						"label": "Usuń pobrane",
+						"confirmation": "Czy na pewno chcesz usunąć wszystkie pobrania z {{serverName}}?",
+						"deleteFailed": {
+							"title": "Usunięcie nie powiodło się",
+							"description": "Wystąpił błąd podczas usuwania wszystkich pobrań z {{serverName}}"
+						}
+					},
+					"noDownloads": "Brak pobranych plików z tego serwera",
+					"storedPreferences": {
+						"label": "Zapisane preferencje",
+						"description": "Różne dane, takie jak preferencje książek, czasy odczytu, itp."
+					},
+					"clearPreferences": "Wyczyść preferencje"
+				}
+			},
+			"debug": {
+				"label": "Debugowanie",
+				"clearCache": {
+					"label": "Wyczyść pamięć podręczną",
+					"memory": {
+						"button": "Pamięć",
+						"success": "Wyczyszczono pamięć podręczną w pamięci"
+					},
+					"disk": {
+						"button": "Dysk",
+						"success": "Wyczyszczono pamięć podręczną na dysku"
+					}
+				},
+				"deleteDatabase": {
+					"label": "Usuń bazę danych",
+					"success": {
+						"title": "Usunięto bazę danych",
+						"description": "Proszę uruchom aplikację ponownie"
+					},
+					"error": {
+						"title": "Usunięcie nie powiodło się",
+						"description": "Wystąpił błąd podczas usuwania bazy danych"
+					}
+				},
+				"performanceMonitor": "Monitor wydajności",
+				"reduceAnimations": "Ogranicz animacje",
+				"displayLanguageKeys": {
+					"label": "Wyświetl klucze językowe",
+					"options": {
+						"none": "Brak",
+						"abbreviated": "Skrócone",
+						"full": "Pełne"
+					}
+				},
+				"debugAnalytics": {
+					"label": "Analityka debugowania",
+					"description": "Wyślij dodatkowe zdarzenia związane z debugowaniem, aby pomóc w rozwiązywaniu problemów"
+				}
+			},
+			"contactInfo": {
+				"label": "Kontakt",
+				"email": "Wiadomość e-mail"
+			},
+			"supportInfo": {
+				"buildInformation": "Informacje o kompilacji",
+				"version": "Wersja: {{version}}",
+				"suuportIdentifier": "Identyfikator wsparcia: {{supportID}}"
+			}
+		},
+		"stumpServer": {
+			"browse": {
+				"books": "Książki",
+				"favorites": "Ulubione",
+				"files": "Pliki",
+				"libraries": "Biblioteki",
+				"series": "Serie",
+				"smartLists": "Inteligentne listy"
+			},
+			"continueReading": {
+				"label": "Wznów czytanie",
+				"emptyText": "Brak książek w toku"
+			},
+			"onDeck": {
+				"label": "Twoja następna pozycja do przeczytania",
+				"emptyText": "Brak książek na pokładzie"
+			},
+			"recentlyAddedSeries": {
+				"label": "Ostatnio dodane serie",
+				"emptyText": "Brak ostatnio dodanych serii"
+			},
+			"recentlyAddedBooks": {
+				"label": "Ostatnio dodane książki",
+				"emptyText": "Brak ostatnio dodanych książek"
+			}
+		},
+		"readerSettings": {
+			"title": "Ustawienia czytnika",
+			"overrideGlobalSettings": "Nadpisz ustawienia globalne",
+			"sections": {
+				"mode": "Tryb",
+				"imageOptions": "Ustawienia obrazów",
+				"controls": "Sterowanie"
+			},
+			"readingMode": {
+				"label": "Tryb czytania",
+				"options": {
+					"PAGED": "Strony",
+					"CONTINUOUS_HORIZONTAL": "Przewijanie (poziome)",
+					"CONTINUOUS_VERTICAL": "Przewijanie (pionowe)"
+				}
+			},
+			"readingDirection": {
+				"label": "Kierunek",
+				"options": {
+					"RTL": "Od prawej do lewej",
+					"LTR": "Od lewej do prawej"
+				}
+			},
+			"doublePageBehavior": {
+				"label": "Podwójna strona",
+				"options": {
+					"always": "Zawsze",
+					"auto": "Automatycznie",
+					"off": "Wyłączone"
+				}
+			},
+			"separateSecondPage": "Oddziel drugą stronę",
+			"imageScaling": {
+				"label": "Skalowanie",
+				"options": {
+					"AUTO": "Automatyczne",
+					"HEIGHT": "Dopasuj wysokość",
+					"WIDTH": "Dopasuj szerokość",
+					"NONE": "Brak"
+				}
+			},
+			"allowDownscaling": "Skalowanie zmniejszające",
+			"tapSidesToNavigate": "Dotknij boki, aby nawigować",
+			"volumeButtonsNavigate": "Nawigacja przyciskami głośności",
+			"footerControls": {
+				"label": "Stopka",
+				"options": {
+					"images": "Galeria obrazów",
+					"slider": "Suwak"
+				}
+			},
+			"readingTimer": {
+				"label": "Czasomierz",
+				"resetTimer": "Resetuj czasomierz"
+			},
+			"allSettings": "Wszystkie ustawienia"
+		},
+		"tableOfContents": {
+			"goToPageX": "Przejdź do strony {{pageNumber}}",
+			"goToPagePlaceholder": "Przejdź do strony...",
+			"errors": {
+				"pageDoesNotExist": "Strona {{page}} nie istnieje",
+				"invalidPage": "'{{page}}' nie jest numerem strony"
+			},
+			"showCurrentChapter": "Pokaż bieżący rozdział"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "Wszystkie",
+				"bookmarks": "Zakładki",
+				"highlights": "Wyróżnione",
+				"notes": "Notatki"
+			}
+		},
+		"epubSettings": {
+			"title": "Ustawienia czytnika Epub",
+			"typeface": {
+				"label": "Krój czcionki"
+			},
+			"fontSize": "Rozmiar czcionki",
+			"fontWeight": {
+				"label": "Grubość czcionki",
+				"options": {
+					"light": "Lekka",
+					"normal": "Normalna",
+					"medium": "Średnia",
+					"bold": "Gruba"
+				}
+			},
+			"textNormalization": "Normalizacja tekstu",
+			"verticalText": "Tekst pionowy",
+			"readingDirection": {
+				"label": "Kierunek czytania",
+				"options": {
+					"rtl": "Od prawej do lewej",
+					"ltr": "Od lewej do prawej"
+				}
+			},
+			"columns": {
+				"label": "Kolumny",
+				"options": {
+					"auto": "Automatycznie",
+					"single": "Pojedyncze",
+					"double": "Podwójne"
+				}
+			},
+			"pageMargins": "Marginesy strony",
+			"imageFilter": {
+				"label": "Filtr obrazu",
+				"options": {
+					"none": "Żaden",
+					"darken": "Przyciemnij",
+					"invert": "Odwróć"
+				}
+			},
+			"publisherStyles": "Style wydawcy",
+			"volumeButtonsNavigate": "Nawigacja przyciskami głośności",
+			"textAlignment": {
+				"label": "Wyrównanie tekstu",
+				"options": {
+					"start": "Do początku",
+					"left": "Do lewej",
+					"center": "Do środka",
+					"right": "Do prawej",
+					"justify": "Wyjustuj"
+				}
+			},
+			"typeScale": "Skalowanie typu",
+			"lineHeight": "Wysokość linii",
+			"paragraphIndent": "Wcięcie akapitu",
+			"paragraphSpacing": "Odstęp między akapitami",
+			"wordSpacing": "Odstępy między wyrazami",
+			"letterSpacing": "Odległość między literami",
+			"hyphens": "Myślniki",
+			"ligatures": "Ligatury",
+			"customizeTheme": {
+				"placeholder": "Nazwa motywu",
+				"background": "Tło",
+				"text": "Tekst",
+				"highlight": "Zaznaczenie",
+				"premadeThemes": "Wstępnie przygotowane motywy"
+			}
+		},
+		"libraryType": {
+			"BOOK": "Książki",
+			"COMIC": "Komiksy",
+			"LIGHT_NOVEL": "Light Novel",
+			"MIXED": "Mieszane",
+			"WEBTOON": "Webtoon",
+			"WEB_NOVEL": "Web Novel"
+		},
+		"savedServerActions": {
+			"clearCache": "Wyczyść pamięć podręczną",
+			"discardTokens": {
+				"label": "Wyczyść tokeny",
+				"description": "Dotyczy tylko tokenów logowania"
+			},
+			"deleteServer": {
+				"title": "Usuń serwer",
+				"confirmation": "Czy na pewno chcesz usunąć {{serverName}}?"
+			}
+		},
+		"filtering": {
+			"notStarted": "Nierozpoczęte",
+			"currentlyReading": "Aktualnie czytane",
+			"finished": "Ukończone"
+		},
+		"sorting": {
+			"labelEllipsis": "Sortuj według...",
+			"sortField": {
+				"NAME": "Nazwy",
+				"ADDED_AT": "Daty dodania",
+				"CREATED_AT": "Daty dodania",
+				"NUMBER": "Pozycji serii",
+				"SERIES": "Serii",
+				"YEAR": "Roku wydania"
+			},
+			"sortDirection": {
+				"ASC": "Rosnąco",
+				"DESC": "Malejąco"
+			},
+			"sortDirectionDate": {
+				"ASC": "Najpierw najstarsze",
+				"DESC": "Najpierw najnowsze"
+			}
 		}
 	}
 }

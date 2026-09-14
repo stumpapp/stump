@@ -2,7 +2,7 @@ import { BookImageScaling } from '@stump/client'
 import { cn, usePrevious } from '@stump/components'
 import { ReadingImageScaleFit } from '@stump/graphql'
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 
@@ -30,10 +30,6 @@ type Props = {
 	 */
 	getPageUrl(page: number): string
 	/**
-	 * A callback to report the progress of the current page. If undefined, no progress will be reported.
-	 */
-	onProgressUpdate?(page: number): void
-	/**
 	 * A callback to report when the page has changed. If undefined, no callback will be called.
 	 */
 	onPageChanged?(page: number): void
@@ -51,7 +47,6 @@ export default function ContinuousScrollReader({
 	initialPage,
 	getPageUrl,
 	orientation,
-	onProgressUpdate,
 	onPageChanged,
 }: Props) {
 	const [search, setSearch] = useSearchParams()
@@ -80,10 +75,9 @@ export default function ContinuousScrollReader({
 	useEffect(() => {
 		const page = currentIndex + 1
 		if (pageDidChange) {
-			onProgressUpdate?.(page)
 			onPageChanged?.(page)
 		}
-	}, [currentIndex, onProgressUpdate, onPageChanged, pageDidChange])
+	}, [currentIndex, onPageChanged, pageDidChange])
 
 	const containerStyle = useCallback(
 		({ height, width }: { height: number; width: number }) =>
@@ -95,7 +89,7 @@ export default function ContinuousScrollReader({
 		const hasPageURL = !!search.get('page')
 		if (hasPageURL) {
 			search.delete('page')
-			setSearch(search)
+			setSearch(search, { replace: true })
 		}
 	}, [search, setSearch])
 

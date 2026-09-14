@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -18,13 +18,18 @@ export default function EnableAlphabetFiltering() {
 	}, [enableAlphabetSelect, update])
 
 	return (
-		<WideSwitch
-			formId="enableAlphabetSelect"
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={enableAlphabetSelect}
-			onCheckedChange={handleChange}
-		/>
+			onClick={handleChange}
+			className="flex-row items-center justify-between"
+		>
+			<RawSwitch
+				id="enableAlphabetSelect"
+				checked={enableAlphabetSelect}
+				onCheckedChange={handleChange}
+			/>
+		</NewCard.Row>
 	)
 }
 

@@ -4,11 +4,14 @@ import { AllowedLocale } from './config'
 
 export type LocaleContextProps = {
 	locale: AllowedLocale
-	t: (key: string) => string
+	t: (key: string, options?: Record<string, unknown>) => string
 }
 
-export const getDefaultLocale = () => {
-	return 'navigator' in globalThis ? (navigator?.language as AllowedLocale) : 'en-US'
+export const getDefaultLocale = (defaultValue: AllowedLocale = 'en-US') => {
+	return (
+		('navigator' in globalThis ? (navigator?.language as AllowedLocale) : defaultValue) ||
+		defaultValue
+	)
 }
 
 export const LocaleContext = createContext<LocaleContextProps>({

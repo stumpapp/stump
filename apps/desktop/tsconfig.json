@@ -1,7 +1,7 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"types": ["vite/client"],
+		"types": ["vite/client", "vitest/globals"],
 		"jsx": "preserve",
 		"module": "es2022",
 		"moduleResolution": "Node",

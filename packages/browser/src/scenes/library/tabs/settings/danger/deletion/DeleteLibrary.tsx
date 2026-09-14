@@ -8,7 +8,7 @@ import { useLibraryManagement } from '../../context'
 
 export default function DeleteLibrary() {
 	const {
-		library: { id },
+		library: { id, name },
 	} = useLibraryManagement()
 	const { t } = useLocaleContext()
 
@@ -26,15 +26,15 @@ export default function DeleteLibrary() {
 			<DeleteLibraryConfirmation
 				isOpen={showConfirmation}
 				libraryId={id}
+				libraryName={name}
 				onClose={() => setShowConfirmation(false)}
 				trigger={
 					<div>
 						<Button
 							type="button"
-							variant="danger"
+							variant="destructive"
 							onClick={() => setShowConfirmation(true)}
 							className="shrink-0"
-							size="md"
 						>
 							Delete library
 						</Button>

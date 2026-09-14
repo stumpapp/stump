@@ -1,14 +1,19 @@
+use std::net::IpAddr;
+
 use axum::{
 	extract::{FromRef, FromRequestParts},
-	http::{request::Parts, HeaderMap},
+	http::{request::Parts, Extensions, HeaderMap},
 };
 use axum_extra::extract::Host;
+
 use reqwest::header::FORWARDED;
 use stump_core::opds::v2_0::link::OPDSLinkFinalizer;
 
-use crate::{config::state::AppState, errors::APIError};
+use crate::{config::state::AppState, errors::APIError, http_server::StumpRequestInfo};
 
 const X_FORWARDED_PROTO_HEADER_KEY: &str = "X-Forwarded-Proto";
+const X_REAL_IP: &str = "X-Real-IP";
+const X_FORWARDED_FOR: &str = "X-Forwarded-For";
 
 #[derive(Debug, Clone)]
 pub struct HostDetails {
@@ -28,6 +33,15 @@ impl Default for HostDetails {
 impl HostDetails {
 	pub fn url(&self) -> String {
 		format!("{}://{}", self.scheme, self.host)
+	}
+
+	/// Join an origin with an application path without duplicate boundary slashes.
+	pub fn url_for_path(&self, path: &str) -> String {
+		format!(
+			"{}/{}",
+			self.url().trim_end_matches('/'),
+			path.trim_start_matches('/')
+		)
 	}
 }
 
@@ -54,33 +68,46 @@ where
 		let host = Host::from_request_parts(parts, state)
 			.await
 			.map_err(|_| APIError::BadRequest("Invalid host".to_string()))?;
-		let scheme = parse_scheme(parts).unwrap_or_else(|| {
+		let app_state = AppState::from_ref(state);
+		let trust_proxy_headers = app_state.config.trust_proxy_headers;
+
+		let scheme = parse_scheme(parts, trust_proxy_headers).unwrap_or_else(|| {
 			tracing::warn!(?host, "No scheme found in request, defaulting to http");
 			"http".to_string()
 		});
 
-		Ok(HostExtractor(HostDetails {
-			host: host.0,
-			scheme,
-		}))
+		let via_proxy = trust_proxy_headers
+			&& (parts.headers.contains_key(X_FORWARDED_PROTO_HEADER_KEY)
+				|| parts.headers.contains_key(FORWARDED));
+		let host = resolve_host(host.0, &scheme, app_state.config.port, via_proxy);
+
+		Ok(HostExtractor(HostDetails { host, scheme }))
 	}
 }
 
-fn parse_scheme(parts: &mut Parts) -> Option<String> {
-	if let Some(scheme) = parse_forwarded(&parts.headers) {
-		return Some(scheme.to_string());
-	}
+fn parse_scheme(parts: &mut Parts, trust_proxy_headers: bool) -> Option<String> {
+	if trust_proxy_headers {
+		if let Some(scheme) = parse_forwarded(&parts.headers) {
+			return Some(scheme.to_string());
+		}
 
-	// X-Forwarded-Proto
-	if let Some(scheme) = parts
-		.headers
-		.get(X_FORWARDED_PROTO_HEADER_KEY)
-		.and_then(|scheme| scheme.to_str().ok())
+		if let Some(scheme) = parts
+			.headers
+			.get(X_FORWARDED_PROTO_HEADER_KEY)
+			.and_then(|scheme| scheme.to_str().ok())
+		{
+			return Some(scheme.to_string());
+		}
+	} else if parts.headers.contains_key(X_FORWARDED_PROTO_HEADER_KEY)
+		|| parts.headers.contains_key(FORWARDED)
 	{
-		return Some(scheme.to_string());
+		tracing::warn!(
+			x_forwarded_proto_header = ?parts.headers.get(X_FORWARDED_PROTO_HEADER_KEY),
+			forwarded_header = ?parts.headers.get(FORWARDED),
+			"Proxy scheme headers present but trust_proxy_headers is false, ignoring scheme from headers"
+		);
 	}
 
-	// From parts of an HTTP/2 request
 	if let Some(scheme) = parts.uri.scheme_str() {
 		return Some(scheme.to_string());
 	}
@@ -92,7 +119,6 @@ fn parse_forwarded(headers: &HeaderMap) -> Option<&str> {
 	// if there are multiple `Forwarded` `HeaderMap::get` will return the first one
 	let forwarded_values = headers.get(FORWARDED)?.to_str().ok()?;
 
-	// get the first set of values
 	let first_value = forwarded_values.split(',').next()?;
 
 	// find the value of the `proto` field
@@ -104,4 +130,255 @@ fn parse_forwarded(headers: &HeaderMap) -> Option<&str> {
 	})
 }
 
-// TODO(281): Add tests for HostExtractor
+/// resolves the ideal host to use for URL generation based on the incoming request and server config,
+/// appending a port manually when:
+/// - the incoming `Host` header doesn't include a port (e.g., from Kobo devices,
+///   see https://github.com/stumpapp/stump/issues/1228)
+/// - the connection is direct (not via a trusted reverse proxy, which should handle port mapping on its own)
+/// - the configured port is not the default for the scheme (80 for http, 443 for https)
+fn resolve_host(host: String, scheme: &str, port: u16, via_proxy: bool) -> String {
+	// if already contains a port or is pulled from proxy header, return as-is
+	if host.contains(':') || via_proxy {
+		return host;
+	}
+
+	let is_ip_address = host.parse::<std::net::IpAddr>().is_ok();
+
+	// is a bit naive but feels safe
+	let is_default =
+		(scheme == "http" && port == 80) || (scheme == "https" && port == 443);
+
+	if !is_default && is_ip_address {
+		format!("{}:{}", host, port)
+	} else {
+		host
+	}
+}
+
+/// Extracts the client IP from headers in the following priority order:
+///
+/// 1. X-Real-IP - Non-standard (at least not on mozilla) but common I think
+/// 2. X-Forwarded-For - https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
+///
+/// If neither header is present, falls back to direct connection info
+#[derive(Debug, Clone)]
+pub struct ClientIp(pub IpAddr);
+
+impl<S> FromRequestParts<S> for ClientIp
+where
+	AppState: FromRef<S>,
+	S: Send + Sync,
+{
+	type Rejection = std::convert::Infallible;
+
+	async fn from_request_parts(
+		parts: &mut Parts,
+		state: &S,
+	) -> Result<Self, Self::Rejection> {
+		let app_state = AppState::from_ref(state);
+		let trust_proxy_headers = app_state.config.trust_proxy_headers;
+
+		let ip = extract_client_ip(&parts.headers, &parts.extensions, trust_proxy_headers)
+			.unwrap_or_else(|| {
+				tracing::warn!("No client IP found in headers or connection info, defaulting to localhost");
+				"127.0.0.1".parse().unwrap()
+			});
+		Ok(ClientIp(ip))
+	}
+}
+
+fn extract_client_ip(
+	headers: &HeaderMap,
+	extensions: &Extensions,
+	trust_proxy_headers: bool,
+) -> Option<IpAddr> {
+	if trust_proxy_headers {
+		if let Some(ip) = headers
+			.get(X_REAL_IP)
+			.and_then(|h| h.to_str().ok())
+			.and_then(|s| s.trim().parse::<IpAddr>().ok())
+		{
+			tracing::trace!(?ip, "Found client IP in X-Real-IP header");
+			return Some(ip);
+		}
+
+		if let Some(ip) = headers
+			.get(X_FORWARDED_FOR)
+			.and_then(|h| h.to_str().ok())
+			.and_then(|s| {
+				s.split(',')
+					.next()
+					.map(|s| s.trim())
+					.and_then(|s| s.parse::<IpAddr>().ok())
+			}) {
+			tracing::trace!(?ip, "Found client IP in X-Forwarded-For header");
+			return Some(ip);
+		}
+	} else if headers.contains_key(X_REAL_IP) || headers.contains_key(X_FORWARDED_FOR) {
+		tracing::warn!(
+			x_real_header = ?headers.get(X_REAL_IP),
+			x_forwarded_for_header = ?headers.get(X_FORWARDED_FOR),
+			"Proxy headers present but trust_proxy_headers is false, ignoring client IP from headers"
+		);
+	}
+
+	if let Some(info) = extensions.get::<StumpRequestInfo>() {
+		tracing::trace!(
+			ip = ?info.ip_addr,
+			"Using direct connection IP"
+		);
+		return Some(info.ip_addr);
+	}
+
+	None
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use axum::http::HeaderValue;
+
+	#[test]
+	fn test_extract_client_ip_from_x_real_ip() {
+		let mut headers = HeaderMap::new();
+		headers.insert(X_REAL_IP, HeaderValue::from_static("203.0.113.42"));
+
+		let extensions = Extensions::new();
+		let ip = extract_client_ip(&headers, &extensions, true);
+
+		assert_eq!(ip, Some("203.0.113.42".parse().unwrap()));
+	}
+
+	#[test]
+	fn test_extract_client_ip_from_x_forwarded_for() {
+		let mut headers = HeaderMap::new();
+		headers.insert(
+			X_FORWARDED_FOR,
+			HeaderValue::from_static("203.0.113.42, 198.51.100.1, 192.0.2.1"),
+		);
+
+		let extensions = Extensions::new();
+		let ip = extract_client_ip(&headers, &extensions, true);
+
+		assert_eq!(ip, Some("203.0.113.42".parse().unwrap())); // should be the first one
+	}
+
+	#[test]
+	fn test_extract_client_ip_priority_x_real_ip_over_x_forwarded_for() {
+		let mut headers = HeaderMap::new();
+		headers.insert(X_REAL_IP, HeaderValue::from_static("203.0.113.42"));
+		headers.insert(X_FORWARDED_FOR, HeaderValue::from_static("198.51.100.1"));
+
+		let extensions = Extensions::new();
+		let ip = extract_client_ip(&headers, &extensions, true);
+
+		assert_eq!(ip, Some("203.0.113.42".parse().unwrap())); // real
+	}
+
+	#[test]
+	fn test_extract_client_ip_fallback_to_connection_info() {
+		let headers = HeaderMap::new();
+		let mut extensions = Extensions::new();
+		extensions.insert(StumpRequestInfo {
+			ip_addr: "192.0.2.1".parse().unwrap(),
+		});
+
+		let ip = extract_client_ip(&headers, &extensions, true);
+
+		assert_eq!(ip, Some("192.0.2.1".parse().unwrap()));
+	}
+
+	#[test]
+	fn test_extract_client_ip_no_headers_no_extensions() {
+		let headers = HeaderMap::new();
+		let extensions = Extensions::new();
+
+		let ip = extract_client_ip(&headers, &extensions, true);
+
+		assert_eq!(ip, None);
+	}
+
+	#[test]
+	fn test_no_extract_proxy_headers_when_trust_proxy_headers_false() {
+		let mut headers = HeaderMap::new();
+		headers.insert(X_REAL_IP, HeaderValue::from_static("203.0.113.42"));
+		headers.insert(X_FORWARDED_FOR, HeaderValue::from_static("198.51.100.1"));
+
+		let mut extensions = Extensions::new();
+		extensions.insert(StumpRequestInfo {
+			ip_addr: "192.0.2.1".parse().unwrap(),
+		});
+		let ip = extract_client_ip(&headers, &extensions, false);
+
+		assert_eq!(ip, Some("192.0.2.1".parse().unwrap())); // connect info used, not headers
+	}
+
+	#[test]
+	fn test_append_port_direct_non_standard() {
+		let result = resolve_host("192.168.0.62".to_string(), "http", 10801, false);
+		assert_eq!(result, "192.168.0.62:10801");
+	}
+
+	#[test]
+	fn test_append_port_direct_https_non_standard() {
+		let result = resolve_host("192.168.0.62".to_string(), "https", 10801, false);
+		assert_eq!(result, "192.168.0.62:10801");
+	}
+
+	#[test]
+	fn test_no_append_port_http_default() {
+		let result = resolve_host("192.168.0.62".to_string(), "http", 80, false);
+		assert_eq!(result, "192.168.0.62");
+	}
+
+	#[test]
+	fn test_no_append_port_https_default() {
+		let result = resolve_host("myserver.com".to_string(), "https", 443, false);
+		assert_eq!(result, "myserver.com");
+	}
+
+	#[test]
+	fn test_no_append_port_already_has_port() {
+		let result = resolve_host("192.168.0.62:10801".to_string(), "http", 10801, false);
+		assert_eq!(result, "192.168.0.62:10801");
+	}
+
+	#[test]
+	fn test_no_append_port_via_proxy() {
+		// e.g., reverse proxy myserver.com:443 -> internal:10801
+		// assuming host header is myserver.com
+		let result = resolve_host("myserver.com".to_string(), "https", 10801, true);
+		assert_eq!(result, "myserver.com");
+	}
+
+	#[test]
+	fn test_no_append_port_via_proxy_non_standard_public_port() {
+		let result = resolve_host("myserver.com:8443".to_string(), "https", 10801, true);
+		assert_eq!(result, "myserver.com:8443");
+	}
+
+	#[test]
+	fn test_no_append_port_domain_non_standard() {
+		let result = resolve_host("stump.example.com".to_string(), "https", 10801, false);
+		assert_eq!(result, "stump.example.com");
+	}
+
+	#[test]
+	fn test_no_append_port_domain_with_subdomain() {
+		let result =
+			resolve_host("my.stump.example.com".to_string(), "https", 10801, false);
+		assert_eq!(result, "my.stump.example.com");
+	}
+
+	#[test]
+	fn test_append_port_ipv4_non_standard() {
+		let result = resolve_host("192.168.1.100".to_string(), "https", 10801, false);
+		assert_eq!(result, "192.168.1.100:10801");
+	}
+
+	#[test]
+	fn test_no_append_port_ipv4_default() {
+		let result = resolve_host("192.168.1.100".to_string(), "https", 443, false);
+		assert_eq!(result, "192.168.1.100");
+	}
+}

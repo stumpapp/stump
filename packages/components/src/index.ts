@@ -18,11 +18,26 @@ export {
 	type IconButtonProps,
 } from './button'
 export { Calendar, DatePicker } from './calendar'
-export { Card, CardGrid, type CardProps, HoverCard, type HoverCardProps } from './card'
+export {
+	Card,
+	CardGrid,
+	type CardProps,
+	HoverCard,
+	type HoverCardProps,
+	NewCard,
+	type NewCardProps,
+	type NewCardRowProps,
+} from './card'
 export { Command, type CommandProps } from './command'
-export { Divider, Spacer, type SpacerProps, SplitContainer } from './container'
+export { Divider, Spacer, type SpacerProps } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
-export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
+export {
+	ConfirmationModal,
+	type ConfirmationModalProps,
+	Dialog,
+	TypeToConfirmModal,
+	type TypeToConfirmModalProps,
+} from './dialog'
 export { Drawer } from './drawer'
 export { Dropdown, DropdownMenu, type DropdownMenuProps } from './dropdown'
 export { EmojiPicker } from './emoji'
@@ -33,6 +48,7 @@ export {
 	CheckBox,
 	type CheckBoxProps,
 	Input,
+	InputGroup,
 	PasswordInput,
 	RawSwitch,
 	RawTextArea,
@@ -54,6 +70,13 @@ export { ScrollArea, ScrollBar } from './scroll-area'
 export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
 export { Sheet, SheetPrimitive } from './sheet'
 export { Slider } from './slider'
+export {
+	MiniStatCard,
+	STAT_COLORS,
+	StatCard,
+	type StatCardProps,
+	type StatColorPalette,
+} from './stats'
 export { Tabs } from './tabs'
 export {
 	Heading,

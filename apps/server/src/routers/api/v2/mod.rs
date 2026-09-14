@@ -9,6 +9,8 @@ mod user;
 
 use axum::{
 	extract::State,
+	http::StatusCode,
+	response::IntoResponse,
 	routing::{get, post},
 	Json, Router,
 };
@@ -16,6 +18,7 @@ use models::entity;
 use reqwest::header::USER_AGENT;
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 use crate::{
 	config::state::AppState,
@@ -33,6 +36,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(library::mount(app_state.clone()))
 		.merge(user::mount(app_state))
 		.route("/claim", get(claim))
+		.route("/health", get(health))
 		.route("/ping", get(ping))
 		.route("/version", post(version))
 		.route("/check-for-update", get(check_for_updates))
@@ -126,4 +130,43 @@ async fn check_for_updates() -> APIResult<Json<UpdateCheck>> {
 			))),
 		}
 	}
+}
+
+async fn health(State(ctx): State<AppState>) -> impl IntoResponse {
+	let ok_status = json!({"status": "ok"});
+
+	let (db_ready, db_data) = match ctx.conn.ping().await {
+		Ok(_) => (true, ok_status.clone()),
+		Err(e) => (false, json!({"status": "error", "message": e.to_string()})),
+	};
+
+	let (spa_available, spa_data) =
+		match tokio::fs::metadata(&ctx.config.client_dir).await {
+			Ok(metadata) if metadata.is_dir() => (true, ok_status),
+			Ok(_) => (
+				false,
+				json!({"status": "error", "message": "The client directory is malformed or missing"}),
+			),
+			Err(e) => (false, json!({"status": "error", "message": e.to_string()})),
+		};
+
+	let status_code = if [db_ready, spa_available].iter().all(|&ready| ready) {
+		StatusCode::OK
+	} else {
+		StatusCode::SERVICE_UNAVAILABLE
+	};
+	let payload = json!({
+		"status": if status_code == StatusCode::OK { "ok" } else { "error" },
+		"dependencies": {
+			"database": db_data,
+			"spa": spa_data
+		}
+	});
+
+	// ^ the above structure is pretty overkill for two dependencies, but this is how
+	// i've done it in the past (at least when i don't need background periodic checks or
+	// checks against external deps) and will make it easier to add more down the
+	// road if needed
+
+	(status_code, Json(payload))
 }

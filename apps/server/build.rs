@@ -2,6 +2,9 @@ use chrono::prelude::{DateTime, Utc};
 use std::{process::Command, time::SystemTime};
 
 fn main() {
+	println!("cargo:rerun-if-env-changed=GIT_REV");
+	println!("cargo:rerun-if-env-changed=BUILD_CHANNEL");
+
 	let system_time = SystemTime::now();
 	let date_time: DateTime<Utc> = system_time.into();
 	let compiled_at = format!("{}", date_time.format("%+"));

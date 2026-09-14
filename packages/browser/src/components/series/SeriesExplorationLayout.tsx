@@ -20,8 +20,7 @@ export default function SeriesExplorationLayout() {
 				<IconButton
 					variant="ghost"
 					size="xs"
-					className="hover:bg-background-surface-hover"
-					pressEffect={false}
+					className="hover:bg-accent"
 					onClick={() => setLayout(InterfaceLayout.Grid)}
 					disabled={layout === InterfaceLayout.Grid}
 				>
@@ -33,8 +32,7 @@ export default function SeriesExplorationLayout() {
 				<IconButton
 					variant="ghost"
 					size="xs"
-					className="hover:bg-background-surface-hover"
-					pressEffect={false}
+					className="hover:bg-accent"
 					onClick={() => setLayout(InterfaceLayout.Table)}
 					disabled={layout === InterfaceLayout.Table}
 				>

@@ -86,20 +86,20 @@ export default function ServerConnectionErrorScene() {
 				<div className="max-w-sm gap-6 sm:max-w-md md:max-w-xl mx-auto flex h-full w-full flex-col items-start justify-center">
 					<div className="text-left">
 						<h1 className="text-4xl font-semibold text-foreground">{t('serverSOS.heading')}</h1>
-						<p className="mt-1.5 text-base text-foreground-subtle">{t(localeKey)}</p>
+						<p className="mt-1.5 text-base text-foreground">{t(localeKey)}</p>
 					</div>
 
 					{isDesktop && (
 						<button
-							className="group p-4 hover:border-opacity-70 flex w-full items-center justify-between border-l border-edge transition-colors duration-100 hover:border-edge-strong hover:bg-background-surface/50"
+							className="group p-4 hover:border-opacity-70 flex w-full items-center justify-between border-l border-border transition-colors duration-100 hover:border-border hover:bg-muted/50"
 							type="button"
 							onClick={() => setShowServers(true)}
 						>
-							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+							<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
 								{t('common.goToServers')}
 							</span>
 
-							<ArrowRight className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+							<ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
 						</button>
 					)}
 				</div>
@@ -114,13 +114,13 @@ export default function ServerConnectionErrorScene() {
 					<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-start gap-6 sm:max-w-md md:max-w-xl">
 						<ConfiguredServersList />
 						<button
-							className="group flex w-full items-center space-x-4 border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+							className="group flex w-full items-center space-x-4 border-l border-border p-4 transition-colors duration-100 hover:border-border hover:border-opacity-70 hover:bg-muted/50"
 							type="button"
 							onClick={() => setShowServers(false)}
 						>
-							<ArrowLeft className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+							<ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
 
-							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+							<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
 								{t('common.seeError')}
 							</span>
 						</button>

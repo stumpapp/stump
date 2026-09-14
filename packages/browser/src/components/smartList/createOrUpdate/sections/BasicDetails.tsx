@@ -14,7 +14,6 @@ export default function BasicDetails() {
 	return (
 		<div className="gap-y-6 flex flex-col">
 			<Input
-				variant="primary"
 				label={t(getKey('name.label'))}
 				description={t(getKey('name.description'))}
 				placeholder={t(getKey('name.placeholder'))}
@@ -27,7 +26,6 @@ export default function BasicDetails() {
 				label={t(getKey('description.label'))}
 				description={t(getKey('description.description'))}
 				placeholder={t(getKey('description.placeholder'))}
-				variant="primary"
 				className="md:w-3/5"
 				{...form.register('description')}
 			/>

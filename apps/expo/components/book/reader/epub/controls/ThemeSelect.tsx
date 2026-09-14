@@ -5,7 +5,7 @@ import * as ContextMenu from 'zeego/context-menu'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Icon } from '~/components/ui/icon'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { EPUBReaderThemeConfig } from '~/modules/readium'
@@ -33,7 +33,7 @@ export default function ThemeSelect() {
 			horizontal
 			showsHorizontalScrollIndicator={false}
 			// The sheet has p-6 (21px), so we remove 1px to look like the scroll is going under the ios 26+ sheet border
-			className={cn('-mx-6 -my-16', IS_IOS_24_PLUS && '-mx-[20px]')}
+			className={cn('-mx-6 -my-16', IS_IOS_26_PLUS && '-mx-[20px]')}
 			// Context menu (long press) has a massive shadow on ios so we need a lot of padding to not have it be cut off
 			contentContainerClassName="px-8 py-16 gap-2"
 		>
@@ -142,7 +142,7 @@ const NewThemeButton = () => {
 	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
 	return (
 		<Pressable onPress={() => openCustomizeTheme({ mode: 'create' })}>
-			<View className="squircle aspect-[6/5] w-24 items-center justify-center rounded-3xl border-2 border-dashed border-black/60 dark:border-white/60">
+			<View className="squircle w-24 rounded-3xl border-black/60 dark:border-white/60 aspect-[6/5] items-center justify-center border-2 border-dashed">
 				<Icon as={Plus} size={24} className="text-black/60 dark:text-white/60" />
 			</View>
 		</Pressable>

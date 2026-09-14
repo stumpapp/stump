@@ -29,9 +29,9 @@ export default function ViewManagerDropdown() {
 				<Dropdown.Trigger asChild>
 					<Button
 						disabled={!workingView}
-						className="h-10 divide-opacity-30 px-0 py-0 shrink-0 bg-background-surface/50 hover:bg-background-surface/80 data-[state=open]:bg-background-surface"
+						className="h-10 divide-opacity-30 px-0 py-0 shrink-0 bg-muted/50 hover:bg-muted/80 data-[state=open]:bg-muted"
 					>
-						<div className="inline-flex h-full items-center divide-x divide-edge">
+						<div className="inline-flex h-full items-center divide-x divide-border">
 							<span className="px-3 py-2 flex h-full items-center">{t('common.save')}</span>
 							<span className="px-1 py-2 flex h-full items-center">
 								<ChevronDown className="h-4 w-4" />

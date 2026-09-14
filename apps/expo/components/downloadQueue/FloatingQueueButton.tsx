@@ -52,7 +52,7 @@ export function FloatingQueueButton() {
 					// Note: I put it on the left because of how iOS collapse works, it just looked funky in the center or on the right above a search
 					// so left was where I landed. Ofc, this looks terrible when in home stack lol so it will be centered there
 					className={cn(
-						'squircle absolute left-6 z-50 flex-row items-center gap-2.5 rounded-full px-4 py-3 shadow active:opacity-90',
+						'squircle left-6 gap-2.5 px-4 py-3 shadow absolute z-50 flex-row items-center rounded-full active:opacity-90',
 						{
 							'left-[unset] self-center': isCentered,
 						},
@@ -65,7 +65,7 @@ export function FloatingQueueButton() {
 					]}
 				>
 					<Icon as={Download} size={20} className="text-white" />
-					<View className="squircle min-w-[20px] items-center justify-center rounded-full bg-white/20 px-2 py-0.5">
+					<View className="squircle bg-white/20 px-2 py-0.5 min-w-[20px] items-center justify-center rounded-full">
 						<Text className="text font-bold text-white">{activeQueueCount}</Text>
 					</View>
 				</Pressable>
@@ -82,8 +82,8 @@ const FIXED_TAB_PATHS: Href[] = [
 	'/index',
 	'/library',
 	'/settings',
-	'/settings/reader',
 ]
+
 const DYNAMIC_TAB_PATHS = [
 	/^\/server\/[^/]+\/?$/,
 	/^\/server\/[^/]+\/(index|browse)\/?$/,

@@ -1,22 +1,23 @@
 import '~/global.css'
 
-import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
 import * as Sentry from '@sentry/react-native'
-import { initDateFnsLocale } from '@stump/i18n'
-import { getColor, to } from 'colorjs.io/fn'
+import { initDateFnsLocale, LocaleProvider } from '@stump/i18n'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import * as Localization from 'expo-localization'
 import { Stack, useNavigationContainerRef } from 'expo-router'
+import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from 'expo-router/react-navigation'
 import * as SplashScreen from 'expo-splash-screen'
 import LottieView from 'lottie-react-native'
+import { vars } from 'nativewind'
 import * as React from 'react'
 import { AppState, Platform, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Toaster } from 'sonner-native'
+import { setLocaleDetector } from 'to-words'
 import { useShallow } from 'zustand/react/shallow'
 
 import darkSplash from '~/assets/splash/dark.json'
@@ -27,10 +28,13 @@ import { db } from '~/db'
 import migrations from '~/drizzle/migrations'
 import { reactNavigationIntegration } from '~/index'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
-import { NAV_THEME, useColors } from '~/lib/constants'
+import { NAV_THEME, Shade, toRgbChannels, useColors, usePalette } from '~/lib/constants'
 import { getDownloadQueueManager } from '~/lib/downloadQueue'
 import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { refreshWidgetFromCache } from '~/lib/widgets/readingNow/readingNowWidgetSync'
+import { useEnsureWidgetAssetsWritten } from '~/lib/widgets/utils'
+import { WifiSsidProvider } from '~/providers/WifiSsidProvider'
 import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useHideSystemBars, useReaderStore } from '~/stores/reader'
@@ -75,18 +79,29 @@ export default function RootLayout() {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 
+	const palette = usePalette()
+
+	const accentVars = React.useMemo(() => {
+		const shades: Shade[] = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+		return vars(
+			Object.fromEntries(
+				shades.map((shade) => [`--accent-${shade}`, toRgbChannels(palette[shade])]),
+			),
+		)
+	}, [palette])
+
 	useFileImportListener()
 
-	const { performanceMonitor, animationEnabled, disableDismissGesture } = usePreferencesStore(
+	const { performanceMonitor, animationEnabled, locale } = usePreferencesStore(
 		useShallow((state) => ({
 			animationEnabled: !state.reduceAnimations,
 			performanceMonitor: state.performanceMonitor,
-			disableDismissGesture: state.disableDismissGesture,
+			locale: state.locale,
 		})),
 	)
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
-	const { colors: epubThemeColors } = useEpubTheme()
+	const { isDarkEpubTheme } = useEpubTheme()
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -95,6 +110,7 @@ export default function RootLayout() {
 		const preferredLocale = usePreferencesStore.getState().locale
 		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
 		initDateFnsLocale(preferredLocale ?? deviceLocale)
+		setLocaleDetector(() => preferredLocale ?? deviceLocale)
 		setAndroidNavigationBar(colorScheme)
 		setIsColorSchemeLoaded(true)
 		hasMounted.current = true
@@ -115,6 +131,15 @@ export default function RootLayout() {
 			Sentry.captureException(error)
 		}
 	}, [error])
+
+	React.useEffect(() => {
+		const subscription = AppState.addEventListener('change', (status) => {
+			if (status === 'active') {
+				refreshWidgetFromCache()
+			}
+		})
+		return () => subscription.remove()
+	}, [])
 
 	React.useEffect(() => {
 		const subscription = AppState.addEventListener('memoryWarning', (status) => {
@@ -139,18 +164,7 @@ export default function RootLayout() {
 		})
 	}, [success])
 
-	let isDarkEpubTheme: boolean = isDarkColorScheme
-	if (epubThemeColors?.background && isReadingEbook) {
-		const backgroundColor = getColor(epubThemeColors?.background)
-		const foregroundColor = getColor(epubThemeColors?.foreground)
-
-		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
-		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
-
-		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
-		// to look much better for edge cases near the boundry
-		isDarkEpubTheme = foregroundLightness > backgroundLightness
-	}
+	useEnsureWidgetAssetsWritten()
 
 	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
 
@@ -182,94 +196,103 @@ export default function RootLayout() {
 		)
 	}
 
+	// note: not exactly sure why i needed to wrap in a SafeAreaProvider _here_, putting in index.js was a big
+	// no-no (broke all styles) but here it feels like it is a layer below where it should. regardless,
+	// this seemed to be necessary after upgrading to sdk 56 because the safe area inset classes were not being applied
+	// without it: https://www.nativewind.dev/docs/tailwind/new-concepts/safe-area-insets#usage-native
+	// least to say, this was really annoying to sus out
 	return (
-		<GestureHandlerRootView style={{ flex: 1 }}>
-			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-				{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
-				<KeyboardProvider>
-					<SystemBars
-						style={isDarkBackground ? 'light' : 'dark'}
-						hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
-					/>
-					<Stack
-						// https://github.com/expo/expo/issues/15244 ?
-						// screenOptions={{
-						// 	statusBarHidden: shouldHideStatusBar,
-						// }}
-						screenOptions={{
-							animation: animationEnabled ? 'default' : 'none',
-							contentStyle: {
-								backgroundColor: colors.background.DEFAULT,
-							},
-						}}
-					>
-						<Stack.Screen
-							name="(tabs)"
-							options={{
-								headerShown: false,
-								title: '',
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-						<Stack.Screen
-							name="server/[id]"
-							options={{
-								headerShown: false,
-								title: '',
-								animation: animationEnabled ? 'default' : 'none',
-								autoHideHomeIndicator: hideNavigationBar,
-								contentStyle: {
-									backgroundColor: colors.background.DEFAULT,
-								},
-							}}
-						/>
-						<Stack.Screen
-							name="opds/[id]"
-							options={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-						<Stack.Screen
-							name="opds-legacy/[id]"
-							options={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
+		<SafeAreaProvider>
+			<WifiSsidProvider>
+				<LocaleProvider locale={locale}>
+					<GestureHandlerRootView style={{ flex: 1 }}>
+						<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+							<View className="flex-1" style={accentVars}>
+								{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
+								<KeyboardProvider>
+									<SystemBars
+										style={isDarkBackground ? 'light' : 'dark'}
+										hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+									/>
 
-						<Stack.Screen
-							name="offline"
-							options={{
-								headerShown: false,
-								title: '',
-								animation: animationEnabled ? 'default' : 'none',
-								autoHideHomeIndicator: hideNavigationBar,
-								presentation:
-									disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
-								contentStyle: {
-									backgroundColor: colors.background.DEFAULT,
-								},
-							}}
-						/>
-					</Stack>
-					<FloatingQueueButton />
-					<PortalHost />
-				</KeyboardProvider>
+									<Stack
+										screenOptions={{
+											animation: animationEnabled ? 'default' : 'none',
+											contentStyle: {
+												backgroundColor: colors.background.DEFAULT,
+											},
+										}}
+									>
+										<Stack.Screen
+											name="(tabs)"
+											options={{
+												headerShown: false,
+												title: '',
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
 
-				<Toaster
-					position="bottom-center"
-					styles={{
-						title: {
-							fontSize: 18,
-						},
-						description: {
-							fontSize: 16,
-						},
-					}}
-				/>
-			</ThemeProvider>
-		</GestureHandlerRootView>
+										<Stack.Screen
+											name="stump/[serverId]"
+											options={{
+												headerShown: false,
+												title: '',
+												animation: animationEnabled ? 'default' : 'none',
+												autoHideHomeIndicator: hideNavigationBar,
+												contentStyle: {
+													backgroundColor: colors.background.DEFAULT,
+												},
+											}}
+										/>
+										<Stack.Screen
+											name="opds/[serverId]"
+											options={{
+												headerShown: false,
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
+										<Stack.Screen
+											name="opds-legacy/[serverId]"
+											options={{
+												headerShown: false,
+												animation: animationEnabled ? 'default' : 'none',
+											}}
+										/>
+
+										<Stack.Screen
+											name="offline"
+											options={{
+												headerShown: false,
+												title: '',
+												animation: animationEnabled ? 'default' : 'none',
+												autoHideHomeIndicator: hideNavigationBar,
+												contentStyle: {
+													backgroundColor: colors.background.DEFAULT,
+												},
+											}}
+										/>
+									</Stack>
+									<FloatingQueueButton />
+									<PortalHost />
+								</KeyboardProvider>
+
+								<Toaster
+									position="bottom-center"
+									styles={{
+										title: {
+											fontSize: 18,
+										},
+										description: {
+											fontSize: 16,
+										},
+									}}
+								/>
+							</View>
+						</ThemeProvider>
+					</GestureHandlerRootView>
+				</LocaleProvider>
+			</WifiSsidProvider>
+		</SafeAreaProvider>
 	)
 }
 

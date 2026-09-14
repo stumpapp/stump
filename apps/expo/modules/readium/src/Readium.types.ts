@@ -75,8 +75,6 @@ export type OnPageChangeEventPayload = {
 	totalPages: number
 	progress: number
 	chapterTitle?: string
-	// FIXME: Uh oh: https://github.com/readium/swift-toolkit/issues/467#issuecomment-2263479610
-	// epubcfi?: string
 	rawLocation: ReadiumLocator
 }
 
@@ -198,7 +196,6 @@ export type ReadiumViewProps = {
 } & EPUBReaderConfig
 
 export interface EPUBLocation {
-	epubcfi: string
 	href?: string
 	created: Date
 	title?: string

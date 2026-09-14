@@ -1,5 +1,4 @@
 export { default as ProminentThumbnailImage } from './ProminentThumbnailImage'
-export { SeriesStackedThumbnails } from './SeriesStackedThumbnails'
 export { ThumbnailEntityCard } from './ThumbnailEntityCard'
 export type {
 	BorderAndShadowStyle,

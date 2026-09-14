@@ -135,18 +135,42 @@ impl ContentType {
 	/// assert_eq!(content_type, ContentType::PNG);
 	/// ```
 	pub fn from_bytes_with_fallback(bytes: &[u8], extension: &str) -> ContentType {
-		infer_mime_from_bytes(bytes)
-			.map(|mime| ContentType::from(mime.as_str()))
-			.unwrap_or_else(|| {
-				// NOTE: I am logging at warn level because inference from bytes is a little more
-				// accurate, so if it fails it may be indicative of a problem.
+		let from_bytes =
+			infer_mime_from_bytes(bytes).map(|mime| ContentType::from(mime.as_str()));
+		let from_ext = ContentType::from_extension(extension);
+
+		match (from_bytes, from_ext) {
+			// if the ext is more semantically correct (e.g., ebooks are zips but should be identified more specifically)
+			// then we prefer that over the byte detection.
+			(Some(bytes_ct), ext_ct)
+				if ext_ct != ContentType::UNKNOWN && ext_ct.is_subtype_of(bytes_ct) =>
+			{
+				tracing::trace!(
+					?bytes_ct,
+					?ext_ct,
+					?extension,
+					"Extension provides more specific type than byte detection, using extension"
+				);
+				ext_ct
+			},
+			(Some(bytes_ct), _) => bytes_ct,
+			(None, ext_ct) if ext_ct != ContentType::UNKNOWN => {
 				tracing::warn!(
 					?bytes,
 					?extension,
-					"failed to infer content type, falling back to extension"
+					"Failed to infer content type from bytes, falling back to extension"
 				);
-				ContentType::from_extension(extension)
-			})
+				ext_ct
+			},
+			_ => {
+				tracing::warn!(
+					?bytes,
+					?extension,
+					"Failed to infer content type from both bytes and extension"
+				);
+				ContentType::UNKNOWN
+			},
+		}
 	}
 
 	/// Infer the MIME type of a [Path] using the [infer] crate. If the MIME type cannot be inferred,
@@ -245,6 +269,17 @@ impl ContentType {
 	/// ```
 	pub fn is_zip(&self) -> bool {
 		self == &ContentType::ZIP || self == &ContentType::COMIC_ZIP
+	}
+
+	/// Returns true if `self` is a more specific variant of the given `parent` type,
+	/// e.g. an EPUB or CBZ file are both ZIP files
+	pub fn is_subtype_of(self, parent: ContentType) -> bool {
+		matches!(
+			(self, parent),
+			(ContentType::EPUB_ZIP, ContentType::ZIP)
+				| (ContentType::COMIC_ZIP, ContentType::ZIP)
+				| (ContentType::COMIC_RAR, ContentType::RAR)
+		)
 	}
 
 	/// Returns true if the content type is a RAR archive.

@@ -265,24 +265,35 @@ impl OPDSPublication {
 		Ok(publication)
 	}
 
+	// TODO: we should pull from media analysis first
 	async fn images_for_book(
 		book: &OPDSPublicationEntity,
 		finalizer: &OPDSLinkFinalizer,
 	) -> CoreResult<Vec<OPDSImageLink>> {
-		Ok(vec![OPDSImageLinkBuilder::default()
-			.base_link(
-				OPDSBaseLinkBuilder::default()
-					.href(finalizer.format_link(format!(
-						"/opds/v2.0/books/{}/thumbnail",
-						book.media.id
-					)))
-					._type(OPDSLinkType::from(
-						get_content_type_for_page(&book.media.path, 1).await?,
-					))
-					.build()?
-					.with_auth(finalizer.format_link(AUTH_ROUTE)),
-			)
-			.build()?])
+		let first_page_content_type =
+			get_content_type_for_page(&book.media.path, 1).await;
+
+		match first_page_content_type {
+			Err(error) => {
+				tracing::error!(
+					?error,
+					"Failed to get content type for book page, skipping image links"
+				);
+				Ok(vec![])
+			},
+			Ok(content_type) => Ok(vec![OPDSImageLinkBuilder::default()
+				.base_link(
+					OPDSBaseLinkBuilder::default()
+						.href(finalizer.format_link(format!(
+							"/opds/v2.0/books/{}/thumbnail",
+							book.media.id
+						)))
+						._type(OPDSLinkType::from(content_type))
+						.build()?
+						.with_auth(finalizer.format_link(AUTH_ROUTE)),
+				)
+				.build()?]),
+		}
 	}
 
 	fn links_for_book(
@@ -359,6 +370,7 @@ mod tests {
 				size: 2000,
 				thumbnail_meta: None,
 				thumbnail_path: None,
+				is_oneshot: false,
 			},
 			metadata: Some(media_metadata::Model {
 				media_id: Some("1".to_string()),
@@ -386,7 +398,7 @@ mod tests {
 				.belongs_to(OPDSEntryBelongsTo::Series(
 					OPDSEntryBelongsToEntityBuilder::default()
 						.name("Test Series".to_string())
-						.position(Some(1))
+						.position(Some(1.0_f64))
 						.build()
 						.expect("Failed to build belongs_to"),
 				))
@@ -402,7 +414,7 @@ mod tests {
 		let json = serde_json::to_string(&publication).unwrap();
 		assert_eq!(
 			json,
-			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"publisher":"Test Publisher"}}"#
+			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1.0}},"publisher":"Test Publisher"}}"#
 		);
 	}
 
@@ -423,12 +435,12 @@ mod tests {
 		let position_results = vec![
 			BTreeMap::from([
 				("id".to_string(), Value::from("1")),
-				("position".to_string(), Value::from(1i64)),
+				("position".to_string(), Value::from(1.0f64)),
 			])
 			.into_mock_row(),
 			BTreeMap::from([
 				("id".to_string(), Value::from("2")),
-				("position".to_string(), Value::from(2i64)),
+				("position".to_string(), Value::from(2.0f64)),
 			])
 			.into_mock_row(),
 		];
@@ -465,7 +477,7 @@ mod tests {
 
 		let position_results = vec![BTreeMap::from([
 			("id".to_string(), Value::from("1")),
-			("position".to_string(), Value::from(1i64)),
+			("position".to_string(), Value::from(1.0f64)),
 		])
 		.into_mock_row()];
 

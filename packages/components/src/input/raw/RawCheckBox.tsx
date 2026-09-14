@@ -7,7 +7,7 @@ import React from 'react'
 import { cn } from '../../utils'
 
 export const RAW_CHECKBOX_BASE_CLASSES =
-	'shrink-0 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50  focus:ring-offset-background'
+	'peer relative shrink-0 border border-border bg-background text-foreground transition-shadow outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground aria-invalid:border-field-error-border aria-invalid:ring-[3px] aria-invalid:ring-field-error-ring aria-invalid:data-[state=checked]:border-primary dark:bg-input/30'
 export const RAW_CHECKBOX_SIZE_VARIANTS = {
 	default: 'h-4 w-4',
 	lg: 'h-6 w-6',
@@ -15,24 +15,18 @@ export const RAW_CHECKBOX_SIZE_VARIANTS = {
 	sm: 'h-3 w-3',
 }
 export const RAW_CHECKBOX_ROUND_VARIANTS = {
-	default: 'rounded-sm',
+	default: 'rounded-[6px]',
 	lg: 'rounded-md',
 	none: 'rounded-none',
-}
-export const RAW_CHECKBOX_VARIANTS = {
-	default: 'focus:ring-gray-400  dark:text-gray-50 dark:focus:ring-gray-400',
-	primary: 'focus:ring-edge-brand text-foreground-brand',
 }
 export const checkboxVariants = cva(RAW_CHECKBOX_BASE_CLASSES, {
 	defaultVariants: {
 		rounded: 'default',
 		size: 'default',
-		variant: 'default',
 	},
 	variants: {
 		rounded: RAW_CHECKBOX_ROUND_VARIANTS,
 		size: RAW_CHECKBOX_SIZE_VARIANTS,
-		variant: RAW_CHECKBOX_VARIANTS,
 	},
 })
 
@@ -41,15 +35,24 @@ export type RawCheckBoxProps = VariantProps<typeof checkboxVariants> &
 	ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 
 export const RawCheckBox = React.forwardRef<RawCheckBoxRef, RawCheckBoxProps>(
-	({ className, variant, size, rounded, ...props }, ref) => (
+	({ className, size, rounded, ...props }, ref) => (
 		<CheckboxPrimitive.Root
 			ref={ref}
-			className={cn(checkboxVariants({ className, rounded, size, variant }))}
+			className={cn(checkboxVariants({ className, rounded, size }))}
 			{...props}
 			data-testid={props.id}
 		>
-			<CheckboxPrimitive.Indicator className={cn('flex items-center justify-center')}>
-				<Check className={cn(RAW_CHECKBOX_SIZE_VARIANTS[size || 'default'], 'font-medium')} />
+			<CheckboxPrimitive.Indicator
+				className={cn('grid place-content-center text-current transition-none')}
+			>
+				<Check
+					className={cn('font-medium text-current', {
+						'size-3.5': (size || 'default') === 'default',
+						'size-3': size === 'sm',
+						'size-4': size === 'md',
+						'size-5': size === 'lg',
+					})}
+				/>
 			</CheckboxPrimitive.Indicator>
 		</CheckboxPrimitive.Root>
 	),

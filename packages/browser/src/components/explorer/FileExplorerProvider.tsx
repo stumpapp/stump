@@ -82,6 +82,7 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 				goBack,
 				goForward,
 				layout,
+				navigateToPath: setPath,
 				onSelect: handleSelect,
 				refetch,
 				rootPath,
@@ -91,7 +92,7 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 				...ctx,
 			}}
 		>
-			<div className="flex h-full flex-1 flex-col">
+			<div className="min-h-0 flex flex-1 flex-col">
 				<FileExplorerHeader />
 				<div
 					className="flex-1"

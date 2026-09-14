@@ -1,5 +1,5 @@
 use axum::{
-	extract::{ConnectInfo, Query, Request, State},
+	extract::{Query, Request, State},
 	http::{Response, StatusCode},
 	middleware,
 	response::IntoResponse,
@@ -9,10 +9,13 @@ use axum::{
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use graphql::data::{AuthContext, ServiceContext};
-use models::entity::{
-	session,
-	user::{self, AuthUser, LoginUser},
-	user_login_activity, user_preferences,
+use models::{
+	entity::{
+		session,
+		user::{self, AuthUser, LoginUser},
+		user_login_activity, user_preferences,
+	},
+	shared::image::ImageRef,
 };
 use reqwest::header;
 use sea_orm::{prelude::*, IntoActiveModel, TransactionTrait};
@@ -31,8 +34,7 @@ use crate::{
 		state::AppState,
 	},
 	errors::{APIError, APIResult},
-	http_server::StumpRequestInfo,
-	middleware::{auth::auth_middleware, host::HostExtractor},
+	middleware::{auth::auth_middleware, ClientIp, HostExtractor},
 	utils::{default_true, fetch_session_user, hash_password, verify_password},
 };
 
@@ -40,6 +42,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
+			// TODO(chore): I really need to just deprecate this route, it gives me way too much headache
+			// to have to have a two different public-facing users and mixing (de)serialization
+			// btw gql and rest
 			.route(
 				"/me",
 				get(viewer).layer(middleware::from_fn_with_state(
@@ -127,12 +132,12 @@ async fn handle_login_attempt(
 	conn: &DatabaseConnection,
 	for_user: &user::LoginUser,
 	user_agent: UserAgent,
-	request_info: StumpRequestInfo,
+	client_ip: std::net::IpAddr,
 	success: bool,
 ) -> APIResult<user_login_activity::Model> {
 	let active_model = user_login_activity::ActiveModel {
 		user_id: Set(for_user.id.clone()),
-		ip_address: Set(request_info.ip_addr.to_string()),
+		ip_address: Set(client_ip.to_string()),
 		user_agent: Set(user_agent.to_string()),
 		timestamp: Set(Utc::now().into()),
 		authentication_successful: Set(success),
@@ -169,10 +174,13 @@ async fn handle_remove_earliest_session(
 }
 
 fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
-	if user.avatar_path.is_some() {
-		user.avatar_url =
-			Some(service.format_url(format!("/api/v2/users/{}/avatar", user.id)));
-	}
+	user.avatar = ImageRef {
+		url: service.cache_friendly_url(
+			format!("/api/v2/users/{}/avatar", user.id),
+			&user.avatar.last_modified,
+		),
+		..user.avatar
+	};
 	user
 }
 
@@ -195,7 +203,7 @@ pub enum LoginResponse {
 /// user object from the session.
 async fn login(
 	TypedHeader(user_agent): TypedHeader<UserAgent>,
-	ConnectInfo(request_info): ConnectInfo<StumpRequestInfo>,
+	ClientIp(client_ip): ClientIp,
 	session: Session,
 	State(state): State<AppState>,
 	HostExtractor(details): HostExtractor,
@@ -298,7 +306,7 @@ async fn login(
 		state.conn.as_ref(),
 		&user,
 		user_agent,
-		request_info,
+		client_ip,
 		provided_valid_credentials,
 	)
 	.await;
@@ -466,7 +474,7 @@ async fn refresh_token(
 
 	if auth_header.starts_with("Bearer ") {
 		let token = auth_header.trim_start_matches("Bearer ").to_string();
-		let jti = extract_jti_from_refresh_token(&token)?;
+		let jti = extract_jti_from_refresh_token(&token, state.conn.as_ref()).await?;
 		let jwt_pair = exchange_refresh_token(&jti, state).await?;
 		return Ok(Json(jwt_pair));
 	}

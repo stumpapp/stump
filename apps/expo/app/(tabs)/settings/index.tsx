@@ -1,5 +1,5 @@
 import { Platform, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
 import { ContactInformation, SupportInformation } from '~/components/appSettings'
 import { AppDataUsageLink } from '~/components/appSettings/management'
@@ -11,61 +11,81 @@ import {
 	DefaultServer,
 	DeleteDatabase,
 	DisableDismissGesture,
+	DisplayLanguageKeys,
 	EnableDebugAnalytics,
+	EpubSettings,
+	GlobalIncognito,
 	ImageCacheActions,
-	MaskURLs,
+	ImageReaderSettings,
+	MaskUrls,
+	MaxPageViewingSeconds,
 	PerformanceMonitor,
 	PreferMinimalReader,
 	PreferNativePdf,
-	ReaderSettingsLink,
 	ReduceAnimations,
+	TextCasePreference,
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
 	ThumbnailResizeMode,
+	TintListBackground,
 } from '~/components/appSettings/preferences'
-import { BookClubsEnabled, StumpEnabled } from '~/components/appSettings/stump'
+import { BookClubsEnabled } from '~/components/appSettings/stump'
 import { Card } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 export default function Screen() {
+	const { t } = useTranslate()
+
 	return (
-		<ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
-			<View className="flex-1 gap-8 bg-background p-4 tablet:p-6">
-				<Card label="Preferences">
+		<KeyboardAwareScrollView
+			className="flex-1 bg-background"
+			contentInsetAdjustmentBehavior="automatic"
+			// this is for MaxPageViewingSeconds:
+			// gap between keyboard and KeyboardDraftNumberToolbar + KeyboardDraftNumberToolbar height + gap to TextInput
+			bottomOffset={7 + 49 + 10}
+		>
+			<View className="gap-8 p-4 tablet:p-6 flex-1 bg-background">
+				<Card label={t(getSectionLabelKey('preferences'))}>
 					<AppTheme />
 					<AppPrimaryColor />
 					<AppLanguage />
+					<TextCasePreference />
 					<DefaultServer />
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />
 					<ThumbnailResizeMode />
+					<TintListBackground />
 				</Card>
 
-				<Card label="Reading">
+				<Card label={t(getSectionLabelKey('reading'))}>
 					<PreferNativePdf />
 					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
-					<ReaderSettingsLink />
+					<MaxPageViewingSeconds />
+					<GlobalIncognito />
+					<ImageReaderSettings />
+					<EpubSettings />
 				</Card>
 
 				<Card
-					label="Stump"
-					description="Stump features are optional, you can completely turn them off if you just want OPDS support"
+					label={t(getSectionLabelKey('stump'))}
+					description={t(getSectionKey('stump', 'description'))}
 				>
-					<StumpEnabled />
 					<AutoSyncLocalData />
 					<BookClubsEnabled />
 				</Card>
 
-				<Card label="Management">
+				<Card label={t(getSectionLabelKey('management'))}>
 					<AppDataUsageLink />
 				</Card>
 
-				<Card label="Debug">
+				<Card label={t(getSectionLabelKey('debug'))}>
 					<ImageCacheActions />
 					{__DEV__ && <DeleteDatabase />}
 					<PerformanceMonitor />
 					<ReduceAnimations />
-					<MaskURLs />
+					<MaskUrls />
+					<DisplayLanguageKeys />
 					<EnableDebugAnalytics />
 				</Card>
 
@@ -73,6 +93,9 @@ export default function Screen() {
 
 				<SupportInformation />
 			</View>
-		</ScrollView>
+		</KeyboardAwareScrollView>
 	)
 }
+
+const getSectionKey = (section: string, key: string) => `settings.${section}.${key}`
+const getSectionLabelKey = (section: string) => `${getSectionKey(section, 'label')}`

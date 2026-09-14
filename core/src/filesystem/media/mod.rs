@@ -1,15 +1,22 @@
 pub mod analysis;
 mod builder;
+mod epub_search;
 mod format;
 mod metadata;
 mod process;
+pub mod readium;
 mod utils;
 
 pub use crate::filesystem::media::epub::EpubProcessor;
 pub(crate) use builder::{BuiltMedia, MediaBuilder};
+pub use epub_search::{
+	search_epub, EpubSearchCursor, EpubSearchError, EpubSearchOptions,
+	EpubSearchResponse, EPUB_SEARCH_DEFAULT_LIMIT, EPUB_SEARCH_MAX_LIMIT,
+};
 pub use format::*;
 pub use metadata::*;
 pub use process::*;
+pub use readium::ReadiumManifestGenerator;
 pub use utils::is_accepted_cover_name;
 
 #[cfg(test)]

@@ -73,7 +73,6 @@ export default function DiscordPresenceSwitch() {
 					id="discord_presence_switch"
 					checked={isChecked}
 					onClick={toggleDiscordPresence}
-					variant="primary"
 				/>
 			</div>
 		</div>

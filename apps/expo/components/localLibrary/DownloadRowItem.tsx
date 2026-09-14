@@ -1,23 +1,21 @@
-import { Host, Image } from '@expo/ui/swift-ui'
-import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { formatBytes } from '@stump/client'
 import { useRouter } from 'expo-router'
-import { BookOpenCheck, CheckCircle2, CircleMinus, Info, Trash } from 'lucide-react-native'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { SymbolView } from 'expo-symbols'
+import medium from 'expo-symbols/androidWeights/medium'
+import { CheckCircle2, Trash } from 'lucide-react-native'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Alert, Platform, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
 
 import { epubProgress, imageMeta, syncStatus } from '~/db'
-import { useColors } from '~/lib/constants'
-import { formatBytes } from '~/lib/format'
-import { useDownload } from '~/lib/hooks'
+import { usePalette } from '~/lib/constants'
+import { useDownload, useTranslate } from '~/lib/hooks'
 import { useSelectionStore } from '~/stores/selection'
 
 import { ThumbnailImage } from '../image'
 import { Heading, Progress, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
-import { Icon } from '../ui/icon'
-import { DownloadedBookDetailsSheet } from './DownloadedBookDetailsSheet'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
 import { useDownloadRowItemSize } from './useDownloadRowItemSize'
@@ -29,9 +27,10 @@ type Props = {
 
 export default function DownloadRowItem({ downloadedFile }: Props) {
 	const router = useRouter()
-	const sheetRef = useRef<TrueSheet>(null)
 
-	const { deleteBook, markAsComplete, clearProgress } = useDownload({
+	const { t } = useTranslate()
+
+	const { deleteBook } = useDownload({
 		serverId: downloadedFile.serverId,
 	})
 
@@ -49,9 +48,11 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const totalPages = downloadedFile.pages
 	const size = downloadedFile.size ? formatBytes(downloadedFile.size) : null
 
-	const colors = useColors()
-
 	const { width, height } = useDownloadRowItemSize()
+	const { backgroundColor, iconColor } = usePalette({
+		iconColor: { light: 400, dark: 700 },
+		backgroundColor: { light: 150, dark: 950, chromaScale: 0.6 },
+	})
 
 	const selectionStore = useSelectionStore(
 		useShallow((state) => ({
@@ -62,100 +63,88 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		})),
 	)
 
-	const onSelectItem = (id: string) => selectionStore.toggleSelection(id)
+	const onSelectItem = useCallback(
+		(id: string) => selectionStore.toggleSelection(id),
+		[selectionStore],
+	)
 
-	const iconOpacity = useSharedValue(1)
-	const overlayOpacity = useSharedValue(0)
+	const scale = useSharedValue(1)
+	const opacity = useSharedValue(1)
+	const bgOpacity = useSharedValue(0)
+	const bgScale = useSharedValue(0)
 
 	useEffect(() => {
-		iconOpacity.value = withTiming(selectionStore.isSelected ? 0.6 : 1, { duration: 200 })
-		overlayOpacity.value = withTiming(selectionStore.isSelected ? 1 : 0, { duration: 150 })
-	}, [selectionStore.isSelected, iconOpacity, overlayOpacity])
+		// three different modes (selected, not selected, and not in selection mode)
+		if (selectionStore.isSelectionMode) {
+			if (selectionStore.isSelected) {
+				scale.value = withTiming(0.95, { duration: 250 })
+				opacity.value = withTiming(1, { duration: 250 })
+				bgOpacity.value = withTiming(1, { duration: 250 })
+				bgScale.value = withTiming(1, { duration: 250 })
+			} else {
+				scale.value = withTiming(0.9, { duration: 250 })
+				opacity.value = withTiming(0.5, { duration: 250 })
+				bgOpacity.value = withTiming(0, { duration: 250 })
+				bgScale.value = withTiming(0.85, { duration: 250 })
+			}
+		} else {
+			scale.value = withTiming(1, { duration: 250 })
+			opacity.value = withTiming(1, { duration: 250 })
+			bgOpacity.value = withTiming(0, { duration: 250 })
+			bgScale.value = withTiming(1, { duration: 250 })
+		}
+	}, [selectionStore, scale, opacity, bgOpacity, bgScale])
 
-	const syncIconStyle = useAnimatedStyle(() => ({
-		opacity: iconOpacity.value,
-	}))
-	const overlayStyle = useAnimatedStyle(() => ({
-		backgroundColor: colors.foreground.brand + '33',
-		borderColor: colors.foreground.brand,
-		opacity: overlayOpacity.value,
-	}))
+	const itemStyle = useAnimatedStyle(() => {
+		return {
+			transform: [{ scale: scale.value }],
+			opacity: opacity.value,
+		}
+	})
+
+	const backgroundStyle = useAnimatedStyle(() => {
+		return {
+			opacity: bgOpacity.value,
+			transform: [{ scale: bgScale.value }],
+		}
+	})
+
+	const overlayStyle = useAnimatedStyle(() => {
+		return {
+			opacity: bgOpacity.value,
+			transform: [{ scale: bgScale.value }],
+		}
+	})
 
 	const onPress = useCallback(
 		() =>
 			selectionStore.isSelectionMode
 				? onSelectItem(downloadedFile.id)
-				: router.navigate(`/offline/${downloadedFile.id}/read`),
+				: router.navigate(`/offline/${downloadedFile.id}`),
 		[router, downloadedFile.id, selectionStore, onSelectItem],
 	)
-
-	const progression = useMemo(() => {
-		if (!readProgress) {
-			return { isCompleted: false, hasProgress: false }
-		}
-
-		if (totalPages != null && currentPage != null && totalPages > 0 && currentPage >= totalPages) {
-			return { isCompleted: true, hasProgress: true }
-		}
-
-		if (readProgress.percentage) {
-			const parsed = parseFloat(readProgress.percentage)
-			if (!isNaN(parsed) && parsed >= 0.99) {
-				return { isCompleted: true, hasProgress: true }
-			}
-		}
-
-		return { isCompleted: false, hasProgress: true }
-	}, [readProgress, currentPage, totalPages])
 
 	const handleSelect = useCallback(() => {
 		selectionStore.setIsSelecting(true)
 		onSelectItem(downloadedFile.id)
 	}, [selectionStore, downloadedFile.id, onSelectItem])
 
-	const handleMarkAsComplete = useCallback(() => {
-		Alert.alert(
-			'Mark as Read',
-			`Are you sure you want to mark ${downloadedFile.bookName ? `'${downloadedFile.bookName}'` : 'this book'} as read?`,
-			[
-				{ text: 'Cancel', style: 'cancel' },
-				{
-					text: 'Mark as Read',
-					onPress: () => markAsComplete(downloadedFile.id, downloadedFile.pages),
-				},
-			],
-		)
-	}, [markAsComplete, downloadedFile.id, downloadedFile.pages, downloadedFile.bookName])
-
-	const handleClearProgress = useCallback(() => {
-		Alert.alert(
-			'Clear Progress',
-			`Are you sure you want to clear your current reading of ${downloadedFile.bookName ? `'${downloadedFile.bookName}'` : 'this book'}?`,
-			[
-				{ text: 'Cancel', style: 'cancel' },
-				{
-					text: 'Clear',
-					style: 'destructive',
-					onPress: () => clearProgress(downloadedFile.id),
-				},
-			],
-		)
-	}, [clearProgress, downloadedFile.id, downloadedFile.bookName])
-
 	const handleDelete = useCallback(() => {
 		Alert.alert(
-			'Delete Book',
-			`Are you sure you want to delete '${downloadedFile.bookName ? `'${downloadedFile.bookName}'` : 'this book'}'?`,
+			t('bookActions.deleteBook.label'),
+			t('bookActions.deleteBook.confirmation', {
+				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
+			}),
 			[
-				{ text: 'Cancel', style: 'cancel' },
+				{ text: t('common.cancel'), style: 'cancel' },
 				{
-					text: 'Delete',
+					text: t('common.delete'),
 					style: 'destructive',
 					onPress: () => deleteBook(downloadedFile.id),
 				},
 			],
 		)
-	}, [deleteBook, downloadedFile.id, downloadedFile.bookName])
+	}, [deleteBook, downloadedFile.id, downloadedFile.bookName, t])
 
 	const getProgress = () => {
 		if (!readProgress) {
@@ -188,15 +177,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					{
 						items: [
 							{
-								label: 'See Details',
-								icon: {
-									ios: 'info.circle',
-									android: Info,
-								},
-								onPress: () => sheetRef.current?.present(),
-							},
-							{
-								label: 'Select',
+								label: t('common.select'),
 								icon: {
 									ios: 'checkmark.circle',
 									android: CheckCircle2,
@@ -207,36 +188,8 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					},
 					{
 						items: [
-							...(!progression.isCompleted
-								? [
-										{
-											label: 'Mark as Read',
-											icon: {
-												ios: 'book.closed',
-												android: BookOpenCheck,
-											},
-											onPress: handleMarkAsComplete,
-										} as const,
-									]
-								: []),
-							...(progression.hasProgress
-								? [
-										{
-											label: 'Clear Progress',
-											icon: {
-												ios: 'minus.circle',
-												android: CircleMinus,
-											},
-											onPress: handleClearProgress,
-										} as const,
-									]
-								: []),
-						],
-					},
-					{
-						items: [
 							{
-								label: 'Delete Book',
+								label: t('bookActions.deleteBook.label'),
 								icon: {
 									ios: 'trash',
 									android: Trash,
@@ -248,7 +201,12 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					},
 				]}
 			>
-				<View className="relative mx-4 flex-row gap-4" style={{ height }}>
+				<Animated.View
+					className="squircle left-3 right-3 -top-1 -bottom-1 absolute rounded-3xl"
+					style={[backgroundStyle, { backgroundColor: backgroundColor }]}
+				/>
+
+				<Animated.View className="mx-4 gap-4 relative flex-row" style={[{ height }, itemStyle]}>
 					{/* TODO: Use file icons when no thumbnail is available? */}
 					<ThumbnailImage
 						source={{
@@ -260,23 +218,23 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						placeholderData={thumbnailData}
 					/>
 
-					<View className="flex-1 justify-center gap-2 py-1.5">
-						<View className="flex-row justify-between gap-2">
+					<View className="gap-2 py-1.5 flex-1 justify-center">
+						<View className="gap-2 flex-row justify-between">
 							<Heading numberOfLines={2} className="shrink">
-								{downloadedFile.bookName || 'Untitled'}
+								{downloadedFile.bookName || t('common.unknownTitle')}
 							</Heading>
 
 							{status && (
-								<Animated.View className="mt-1 shrink-0" style={syncIconStyle}>
+								<Animated.View className="mt-1 shrink-0">
 									<SyncIcon status={status} />
 								</Animated.View>
 							)}
 						</View>
 
-						<View className="flex-row items-center gap-2">
+						<View className="gap-2 flex-row items-center">
 							{currentPage && (
-								<View className="squircle flex-row items-end rounded-full bg-background-surface-secondary px-2.5 py-0.5">
-									<Text size="sm">{`Page ${currentPage}`}</Text>
+								<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
+									<Text size="sm">{`${t('common.page')} ${currentPage}`}</Text>
 									<Text
 										size="xs"
 										className="pb-0.5 text-foreground-muted"
@@ -285,7 +243,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							)}
 
 							{size && (
-								<View className="squircle rounded-full bg-background-surface-secondary px-2.5 py-0.5">
+								<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 rounded-full">
 									<Text size="sm" className="text-foreground-muted">
 										{size}
 									</Text>
@@ -294,39 +252,60 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						</View>
 
 						{readProgress && (
-							<View className="flex-row items-center gap-3">
+							<View className="gap-3 flex-row items-center">
 								<Progress
-									className="h-1 shrink bg-background-surface-secondary"
+									className="shrink"
+									trackClassName="bg-black/5 dark:bg-white/10"
 									value={getProgress()}
 									style={{ height: 6, borderRadius: 3 }}
 								/>
 
-								<Text size="sm" className="shrink-0 text-foreground-muted">
+								<Text size="sm" className="text-foreground-muted shrink-0">
 									{(getProgress() || 0).toFixed(0)}%
 								</Text>
 							</View>
 						)}
 					</View>
+				</Animated.View>
 
-					<Animated.View
-						className="squircle absolute inset-0 z-10 -m-1 rounded-lg border-2"
-						style={overlayStyle}
-					>
-						<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>
-					</Animated.View>
-				</View>
+				<Animated.View
+					// absolute and symmetrical so it translates from the same origin as the background style, plus move the icon up and left
+					className="left-2 right-2 -top-2.5 -bottom-2.5 absolute"
+					style={overlayStyle}
+				>
+					<CheckIcon color={iconColor} />
+				</Animated.View>
 			</ContextMenu>
-
-			<DownloadedBookDetailsSheet ref={sheetRef} downloadedFile={downloadedFile} />
 		</>
 	)
 }
 
-const CheckIcon = Platform.select({
-	ios: (
-		<Host matchContents>
-			<Image systemName="checkmark.circle.fill" size={32} />
-		</Host>
-	),
-	android: <Icon as={CheckCircle2} size={32} className="text-fill-brand shadow" />,
-})
+function CheckIcon({ color }: { color: string }) {
+	return Platform.select({
+		ios: (
+			<SymbolView
+				name="checkmark.circle.fill"
+				weight="medium"
+				size={30}
+				type="palette"
+				colors={['white', color]}
+			/>
+		),
+		android: (
+			<View
+				className="squircle h-7 w-7 items-center justify-center rounded-full"
+				style={{ backgroundColor: color }}
+			>
+				<SymbolView
+					name={{ android: 'check' }}
+					// @ts-expect-error ios should not be required
+					weight={{ android: medium }}
+					size={18}
+					tintColor={'white'}
+					// this makes it line up with ios, because the ios icon has some kind of padding, because of course it does
+					style={{ inset: 3 }}
+				/>
+			</View>
+		),
+	})
+}

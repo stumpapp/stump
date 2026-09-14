@@ -1,11 +1,13 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { GlassView } from 'expo-glass-effect'
-import { Fragment, useRef } from 'react'
-import { Platform, Pressable, ScrollView, View } from 'react-native'
+import { Fragment, useRef, useState } from 'react'
+import { Pressable, ScrollView, View } from 'react-native'
 import { stripHtml } from 'string-strip-html'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Markdown, Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { useColors, usePalette } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { DottedLine } from './DottedLine'
 
@@ -14,11 +16,16 @@ type Props = {
 }
 
 export default function DescriptionSection({ description }: Props) {
+	const { t } = useTranslate()
+
 	const sheetRef = useRef<TrueSheet | null>(null)
 
 	const colors = useColors()
+	const textColor = usePalette('muted')
 
 	const strippedDescription = stripHtml(description).result
+
+	const [isOpen, setIsOpen] = useState(false)
 
 	return (
 		<Fragment>
@@ -27,7 +34,7 @@ export default function DescriptionSection({ description }: Props) {
 					{strippedDescription}
 				</Text>
 
-				<View className="flex-row items-center gap-1">
+				<View className="gap-1 flex-row items-center">
 					<DottedLine />
 					<Pressable onPress={() => sheetRef.current?.present()}>
 						<GlassView
@@ -37,11 +44,8 @@ export default function DescriptionSection({ description }: Props) {
 							className="bg-background-surface"
 						>
 							<View className="px-4 py-2">
-								<Text
-									className="text-base font-semibold"
-									style={{ color: colors.fill.brand.DEFAULT }}
-								>
-									Read more
+								<Text className="text-base font-semibold" style={{ color: textColor }}>
+									{t('common.readMore')}
 								</Text>
 							</View>
 						</GlassView>
@@ -52,16 +56,20 @@ export default function DescriptionSection({ description }: Props) {
 
 			<TrueSheet
 				ref={sheetRef}
-				detents={Platform.OS === 'android' ? [0.5, 1] : ['auto']}
+				detents={[0.5, 1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
-				<ScrollView className="flex-1 p-6">
+				<ScrollView className="p-6 flex-1">
 					<Markdown>{strippedDescription}</Markdown>
 				</ScrollView>
 			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</Fragment>
 	)
 }

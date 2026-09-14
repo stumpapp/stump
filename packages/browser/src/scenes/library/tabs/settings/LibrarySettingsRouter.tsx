@@ -1,5 +1,12 @@
 import { useGraphQLMutation } from '@stump/client'
-import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
+import {
+	CreateOrUpdateLibraryInput,
+	extractErrorMessage,
+	graphql,
+	useFragment,
+	UserPermission,
+} from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
@@ -17,7 +24,8 @@ import { transformConfigForMutation } from './utils'
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
 const ScannerBehaviorScene = lazy(() => import('./options/scanner'))
-const LibraryAnalysisScene = lazy(() => import('./options/analysis'))
+const LibraryAnalysisScene = lazy(() => import('./integrations/analysis'))
+const LibraryMetadataScene = lazy(() => import('./integrations/metadata'))
 const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults'))
 
 const AccessControlScene = lazy(() => import('./danger/accessControl'))
@@ -40,6 +48,7 @@ export const LibrarySettingsConfig = graphql(`
 			processMetadata
 			watch
 			libraryPattern
+			libraryType
 			thumbnailConfig {
 				__typename
 				resizeMethod {
@@ -62,10 +71,12 @@ export const LibrarySettingsConfig = graphql(`
 			}
 			processThumbnailColorsEvenWithoutConfig
 			ignoreRules
+			oneshotsDirectory
 		}
 	}
 `)
 
+// TODO(chore): swap to patchLibrary instead, i am too unmotivated for that chore right now
 const editMutation = graphql(`
 	mutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {
 		updateLibrary(id: $id, input: $input) {
@@ -82,6 +93,7 @@ const scanMutation = graphql(`
 
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
+	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 	const { library } = useLibraryContext()
 	const { config } = useFragment(LibrarySettingsConfig, library)
@@ -103,13 +115,17 @@ export default function LibrarySettingsRouter() {
 					),
 			})
 		},
+		onError: (error) => {
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToUpdate'), {
+				description: extractErrorMessage(error),
+			})
+		},
 	})
 
 	const { mutate: scan } = useGraphQLMutation(scanMutation, {
 		onError: (error) => {
-			console.error('Failed to scan library', error)
-			toast.error('Failed to scan library', {
-				description: 'Please check the logs for more details',
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToScan'), {
+				description: extractErrorMessage(error),
 			})
 		},
 	})
@@ -120,9 +136,9 @@ export default function LibrarySettingsRouter() {
 	)
 
 	const canScan = checkPermission(UserPermission.ScanLibrary)
+	const canAccessMetadata = checkPermission(UserPermission.MetadataFetchRecordRead)
 
-	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
-	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
+	// TODO(chore): swap to patchLibrary instead, i am too unmotivated for that chore right now
 	/**
 	 * A pseudo-patch function which will update the library, mixing what is present in the cache
 	 * with the updates provided.
@@ -168,6 +184,7 @@ export default function LibrarySettingsRouter() {
 					<Route path="scanning" element={<ScannerBehaviorScene />} />
 					<Route path="thumbnails" element={<ThumbnailSettingsScene />} />
 					<Route path="analysis" element={<LibraryAnalysisScene />} />
+					{canAccessMetadata && <Route path="metadata" element={<LibraryMetadataScene />} />}
 
 					<Route path="" element={<Navigate to="access-control" replace />} />
 					<Route path="access-control" element={<AccessControlScene />} />

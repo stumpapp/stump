@@ -55,6 +55,21 @@ pub struct ScaleEvenlyByFactor {
 
 impl Eq for ScaleEvenlyByFactor {}
 
+/// A resize option which will resize the image to fit within the given dimensions,
+/// maintaining the aspect ratio.
+///
+/// If the image already fits within the dimensions, it will not be scaled up.
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, SimpleObject, InputObject,
+)]
+#[graphql(input_name = "FitWithinResizeInput")]
+pub struct FitWithinResize {
+	/// The maximum width (in pixels) of the resulting image
+	pub width: u32,
+	/// The maximum height (in pixels) of the resulting image
+	pub height: u32,
+}
+
 /// The resize options to use when generating an image
 #[derive(
 	Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Union, OneofObject,
@@ -65,6 +80,7 @@ pub enum ImageResizeMethod {
 	Exact(ExactDimensionResize),
 	ScaleEvenlyByFactor(ScaleEvenlyByFactor),
 	ScaleDimension(ScaledDimensionResize),
+	FitWithin(FitWithinResize),
 }
 
 // TODO(images): Support JpegXl and Avif

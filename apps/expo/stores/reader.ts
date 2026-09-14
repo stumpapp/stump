@@ -1,13 +1,13 @@
 import { BookPreferences as IBookPreferences } from '@stump/client'
 import { ReadingDirection, ReadingImageScaleFit, ReadingMode } from '@stump/graphql'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useActiveServerSafe } from '~/components/activeServer'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { ColumnCount, ImageFilter, TextAlignment } from '~/modules/readium'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 
 import { ZustandMMKVStorage } from './store'
 
@@ -15,18 +15,14 @@ export type DoublePageBehavior = 'auto' | 'always' | 'off'
 
 export type FooterControls = 'images' | 'slider'
 
-export type CachePolicy = 'none' | 'disk' | 'memory' | 'memory-disk'
-export const isCachePolicy = (value: string): value is CachePolicy =>
-	['none', 'disk', 'memory', 'memory-disk'].includes(value)
-
 export type BookPreferences = IBookPreferences & {
 	serverID?: string
 	incognito?: boolean
 	preferSmallImages?: boolean
 	allowDownscaling: boolean
-	cachePolicy: CachePolicy
 	doublePageBehavior: DoublePageBehavior
 	tapSidesToNavigate: boolean
+	volumeButtonsNavigate: boolean
 	footerControls: FooterControls
 	trackElapsedTime: boolean
 	// Everything below here is epub-specific
@@ -47,8 +43,6 @@ export type BookPreferences = IBookPreferences & {
 	textNormalization?: boolean
 }
 export type GlobalSettings = Omit<BookPreferences, 'serverID'>
-
-type ElapsedSeconds = number
 
 type BookCacheData = {
 	dimensions: Record<number, { width: number; height: number; ratio: number }>
@@ -72,8 +66,8 @@ export type ReaderStore = {
 	bookCache: Record<string, BookCacheData>
 	setBookCache: (id: string, data: BookCacheData) => void
 
-	bookTimers: Record<string, ElapsedSeconds>
-	setBookTimer: (id: string, timer: ElapsedSeconds) => void
+	bookOverrides: Record<string, boolean>
+	setBookOverride: (id: string, override: boolean) => void
 
 	showControls: boolean
 	setShowControls: (show: boolean) => void
@@ -89,12 +83,12 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	imageScaling: {
 		scaleToFit: ReadingImageScaleFit.Auto,
 	},
-	doublePageBehavior: 'off',
+	doublePageBehavior: 'auto',
 	secondPageSeparate: false,
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,
+	volumeButtonsNavigate: false,
 	allowDownscaling: false,
-	cachePolicy: 'memory-disk',
 	footerControls: 'images',
 	allowPublisherStyles: true,
 	pageMargins: 1.0,
@@ -110,19 +104,38 @@ export const useReaderStore = create<ReaderStore>()(
 				isReading: false,
 				setIsReading: (reading) => set({ isReading: reading }),
 				globalSettings: DEFAULT_BOOK_PREFERENCES,
-				setGlobalSettings: (updates: Partial<GlobalSettings>) =>
-					set({ globalSettings: { ...get().globalSettings, ...updates } }),
+				setGlobalSettings: (updates: Partial<GlobalSettings>) => {
+					// NOTE: i added this timeout to fix a weird crash that happens in very specific circumstances
+					// when updating globalSettings from within a native callback (e.g. zeego + truesheet).
+					// i honestly don't fully understand why this fixed it, it was a shot in the dark to try
+					// and see if defering the update until after interactions would help, and once added i did
+					// not observe the error. the crash was reported in testflight, so no issue to link to, but
+					// i confirmed it on both platforms. super weird:
+					// - go into paged reader for book where you have not messed with settings (will not work otherwise)
+					// - open action menu and if:
+					//   1. clicking shortcut to toggle direction, works FINE
+					//   2. click into settings -> change direction -> crash with red herring nativation context error
+					// - go back into book, change settings -> it's fine
+					// - go into new book (new non-messed with book), go into settings first, change settings -> crash
+					// an onlooker is probably thinking "well why not timeout more colocated to the actual update in reader settigns?"
+					// i did, and for whatever reason (even though logically identical) it did not work. so, unforunately, the timeout
+					// is here for now
+					setTimeout(() => set({ globalSettings: { ...get().globalSettings, ...updates } }))
+				},
 
 				bookSettings: {},
 				addBookSettings: (id, preferences) =>
 					set({ bookSettings: { ...get().bookSettings, [id]: preferences } }),
-				setBookSettings: (id, updates) =>
+				setBookSettings: (id, updates) => {
+					const bookPreferences = get().bookSettings?.[id]
 					set({
 						bookSettings: {
 							...get().bookSettings,
-							[id]: { ...get().bookSettings[id], ...updates },
+							...(bookPreferences ? { [id]: { ...bookPreferences, ...updates } } : {}),
 						},
-					}),
+					})
+				},
+
 				bookCache: {},
 				setBookCache: (id, data) => {
 					set({
@@ -140,9 +153,10 @@ export const useReaderStore = create<ReaderStore>()(
 							),
 						),
 					}),
-				bookTimers: {},
-				setBookTimer: (id, elapsedSeconds) =>
-					set({ bookTimers: { ...get().bookTimers, [id]: elapsedSeconds } }),
+
+				bookOverrides: {},
+				setBookOverride: (id, override) =>
+					set({ bookOverrides: { ...get().bookOverrides, [id]: override } }),
 
 				showControls: false,
 				setShowControls: (show) => set({ showControls: show }),
@@ -175,11 +189,13 @@ export const useBookPreferences = ({ book, ...params }: Params) => {
 
 	const bookSettingsMap = useReaderStore((state) => state.bookSettings)
 	const globalSettings = useReaderStore((state) => state.globalSettings)
+	const bookOverrides = useReaderStore((state) => state.bookOverrides)
 	const addBookSettings = useReaderStore((state) => state.addBookSettings)
 	const setBookSettingsFn = useReaderStore((state) => state.setBookSettings)
 	const setGlobalSettings = useReaderStore((state) => state.setGlobalSettings)
 
 	const bookSettings = useMemo(() => bookSettingsMap[book.id], [bookSettingsMap, book.id])
+	const overrideGlobalSettings = useMemo(() => bookOverrides[book.id], [bookOverrides, book.id])
 
 	const setBookPreferences = useCallback(
 		(updates: Partial<BookPreferences>) => {
@@ -198,81 +214,13 @@ export const useBookPreferences = ({ book, ...params }: Params) => {
 
 	return {
 		globalSettings,
+		overrideGlobalSettings,
 		preferences: {
 			...globalSettings,
-			...(bookSettings || globalSettings),
+			...(overrideGlobalSettings && bookSettings ? bookSettings : {}),
 		},
 		setBookPreferences,
 		updateGlobalSettings: setGlobalSettings,
-	}
-}
-
-type UseBookTimerParams = {
-	initial?: number | null
-	enabled?: boolean
-}
-
-export const useBookReadTime = (
-	id: string,
-	{ initial }: Omit<UseBookTimerParams, 'enabled'> = {},
-) => {
-	const bookTimers = useReaderStore((state) => state.bookTimers)
-	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
-	return bookTimer || initial || 0
-}
-
-const defaultParams: UseBookTimerParams = {
-	initial: 0,
-	enabled: true,
-}
-
-export const useBookTimer = (id: string, params: UseBookTimerParams = defaultParams) => {
-	const [initial] = useState(() => params.initial)
-
-	const bookTimers = useReaderStore((state) => state.bookTimers)
-	const bookTimer = useMemo(() => bookTimers[id] || 0, [bookTimers, id])
-	const setBookTimer = useReaderStore((state) => state.setBookTimer)
-
-	const resolvedTimer = useMemo(
-		() => (!!initial && initial > bookTimer ? initial : bookTimer),
-		[initial, bookTimer],
-	)
-
-	const resolvedTimerRef = useRef(resolvedTimer)
-	// eslint-disable-next-line react-hooks/purity
-	const startDateRef = useRef(Date.now())
-	const [isRunning, setIsRunning] = useState(true)
-
-	resolvedTimerRef.current = resolvedTimer
-
-	const pauseTimer = useCallback(() => {
-		if (!isRunning) return
-		const elapsed = Math.trunc((Date.now() - startDateRef.current) / 1000)
-		setBookTimer(id, resolvedTimerRef.current + elapsed)
-		setIsRunning(false)
-	}, [id, isRunning, setBookTimer])
-
-	const resumeTimer = useCallback(() => {
-		if (!params.enabled || isRunning) return
-		startDateRef.current = Date.now()
-		setIsRunning(true)
-	}, [params.enabled, isRunning])
-
-	const resetTimer = useCallback(() => {
-		startDateRef.current = Date.now()
-		setBookTimer(id, 0)
-	}, [id, setBookTimer])
-
-	useEffect(() => {
-		if (!params.enabled) pauseTimer()
-	}, [params.enabled, pauseTimer])
-
-	return {
-		totalSeconds: resolvedTimer,
-		pause: pauseTimer,
-		resume: resumeTimer,
-		reset: resetTimer,
-		isRunning: isRunning,
 	}
 }
 

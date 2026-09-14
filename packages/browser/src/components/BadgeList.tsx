@@ -39,14 +39,14 @@ export default function BadgeList({ children, className, maxItems = 20 }: Props)
 
 			{overflows && (
 				<div className="mt-1.5 relative flex w-full items-center">
-					<div className="flex-1 border-t border-dashed border-edge" />
+					<div className="flex-1 border-t border-dashed border-border" />
 					<button
 						onClick={toggle}
-						className="px-3 py-0.5 text-xs font-medium cursor-pointer rounded-full border border-dashed border-edge bg-background text-foreground-muted transition-colors hover:bg-background-surface hover:text-foreground"
+						className="px-3 py-0.5 text-xs font-medium cursor-pointer rounded-full border border-dashed border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 					>
 						{expanded ? 'See less' : `See ${items.length - maxItems} more`}
 					</button>
-					<div className="flex-1 border-t border-dashed border-edge" />
+					<div className="flex-1 border-t border-dashed border-border" />
 				</div>
 			)}
 		</div>

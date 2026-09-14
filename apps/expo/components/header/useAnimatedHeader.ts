@@ -1,4 +1,4 @@
-import { useHeaderHeight } from '@react-navigation/elements'
+import { useHeaderHeight } from 'expo-router/react-navigation'
 import { Easing, Platform } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import {

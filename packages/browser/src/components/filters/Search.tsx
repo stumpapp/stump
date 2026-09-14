@@ -90,8 +90,8 @@ export default function Search({
 			onKeyDown={expanded ? undefined : (e) => e.key === 'Enter' && handleExpand()}
 			title={isDisabled ? "This functionality isn't available right now" : undefined}
 			className={cn(
-				'h-8 gap-2 rounded-xl text-sm ease-in-out relative flex shrink-0 cursor-pointer items-center overflow-hidden border border-edge-subtle bg-transparent transition-all duration-300',
-				'text-foreground-muted hover:bg-background-surface hover:text-foreground',
+				'h-8 gap-2 text-sm ease-in-out relative flex shrink-0 cursor-pointer items-center overflow-hidden rounded-md border border-border bg-transparent transition-all duration-300',
+				'text-muted-foreground hover:bg-muted/30 hover:text-foreground',
 				'disabled:cursor-not-allowed disabled:opacity-50',
 				expanded ? 'sm:w-2/5 w-full cursor-text' : 'w-32',
 			)}
@@ -107,7 +107,7 @@ export default function Search({
 					onBlur={handleBlur}
 					placeholder={placeholder || 'Search'}
 					disabled={isDisabled}
-					className="pr-8 text-sm h-full w-full bg-transparent text-foreground-subtle outline-none placeholder:text-foreground-muted"
+					className="pr-8 text-sm h-full w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
 				/>
 			) : (
 				<span className="pr-2.5 text-sm whitespace-nowrap select-none">Search</span>

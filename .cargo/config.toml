@@ -4,6 +4,8 @@ doc-tests = "cargo test --doc -- --show-output"
 build-server = "build --package stump_server --bin stump_server --release --"
 codegen = "run --package codegen --bin codegen"
 dump-schema = "run --package graphql --bin graphql-gen"
+migrate = "run --manifest-path ./crates/migrations/Cargo.toml --bin migrate --"
+rollback = "run --manifest-path ./crates/migrations/Cargo.toml --bin migrate -- down -n 1"
 
 [target.x86_64-apple-darwin]
 rustflags = [

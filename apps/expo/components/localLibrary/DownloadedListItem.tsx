@@ -24,7 +24,7 @@ export default function DownloadedListItem({ book }: Props) {
 	const { width, height } = useListItemSize()
 
 	return (
-		<Pressable onPress={() => router.navigate(`/offline/${book.id}/read`)}>
+		<Pressable onPress={() => router.navigate(`/offline/${book.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<ThumbnailImage

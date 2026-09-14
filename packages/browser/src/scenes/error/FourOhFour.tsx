@@ -10,9 +10,7 @@ export default function FourOhFour() {
 				<h1 className="text-5xl font-semibold text-foreground">404</h1>
 				<Text size="lg">The page you are looking for does not seem to exist!</Text>
 				<div className="mt-6 gap-2 flex items-center">
-					<ButtonOrLink variant="primary" href="/">
-						Go home
-					</ButtonOrLink>
+					<ButtonOrLink href="/">Go home</ButtonOrLink>
 					<ButtonOrLink
 						variant="outline"
 						href="https://github.com/stumpapp/stump/issues"

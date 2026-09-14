@@ -1,5 +1,5 @@
 import pluginJs from '@eslint/js'
-import prettierPlugin from 'eslint-plugin-prettier/recommended'
+import eslintConfigPrettier from 'eslint-config-prettier'
 import pluginReact from 'eslint-plugin-react'
 import reactCompiler from 'eslint-plugin-react-compiler'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
@@ -10,7 +10,14 @@ import tseslint from 'typescript-eslint'
 
 export default [
 	{
-		ignores: ['**/dist/*', '**/dev-dist/**', '**/target/**', '**/.next/**', '**/.vercel/**', '**/emoji/data.json'],
+		ignores: [
+			'**/dist/*',
+			'**/dev-dist/**',
+			'**/target/**',
+			'**/.next/**',
+			'**/.vercel/**',
+			'**/emoji/data.json',
+		],
 	},
 	{
 		files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
@@ -32,12 +39,6 @@ export default [
 			'simple-import-sort/exports': 'error',
 			'sort-imports': 'off',
 			semi: 0,
-			'prettier/prettier': [
-				'error',
-				{
-					semi: false,
-				},
-			],
 			...pluginReactHooks.configs.recommended.rules,
 			'react-hooks/set-state-in-effect': 'off',
 			'react-compiler/react-compiler': 'error',
@@ -47,7 +48,7 @@ export default [
 	{ languageOptions: { globals: globals.browser } },
 	pluginJs.configs.recommended,
 	...tseslint.configs.recommended,
-	prettierPlugin,
+	eslintConfigPrettier,
 	pluginReact.configs.flat.recommended,
 	pluginReact.configs.flat['jsx-runtime'],
 	{
@@ -61,6 +62,13 @@ export default [
 		files: ['**/*.config.js'],
 		rules: {
 			'@typescript-eslint/no-require-imports': 'off',
+		},
+	},
+	{
+		files: ['scripts/**/*.{js,ts,mjs}'],
+		rules: {
+			'@typescript-eslint/no-require-imports': 'off',
+			'no-console': 'off',
 		},
 	},
 ]

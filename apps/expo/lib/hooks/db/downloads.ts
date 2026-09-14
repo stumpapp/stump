@@ -1,13 +1,13 @@
 import * as Sentry from '@sentry/react-native'
+import { extractErrorMessage } from '@stump/graphql'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import * as FileSystem from 'expo-file-system/legacy'
+import { File } from 'expo-file-system'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner-native'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useActiveServerSafe } from '~/components/activeServer'
 import { useDownloadsState } from '~/components/localLibrary/store'
 import { db, downloadedFiles, downloadQueue, DownloadRepository, readProgress } from '~/db'
 import {
@@ -17,8 +17,10 @@ import {
 } from '~/lib/downloadQueue'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
 import { LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 import { useSavedServerStore } from '~/stores/savedServer'
 
+import { useTranslate } from '../useTranslate'
 import { type EnqueueBookParams, useDownloadQueue } from './downloadQueue'
 
 const downloadKeys = {
@@ -66,6 +68,7 @@ export type UseDownloadParams = {
 }
 
 export function useDownload({ serverId }: UseDownloadParams = {}) {
+	const { t } = useTranslate()
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
@@ -98,9 +101,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 			const fileUri = `${booksDirectory(effectiveServerId)}/${file.filename}`
 			try {
-				const info = await FileSystem.getInfoAsync(fileUri)
-				if (info.exists) {
-					await FileSystem.deleteAsync(fileUri)
+				const fsFile = new File(fileUri)
+				if (fsFile.exists) {
+					fsFile.delete()
 				}
 			} catch (e) {
 				Sentry.withScope((scope) => {
@@ -114,9 +117,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 			const thumbnailPath = bookThumbnailPath(effectiveServerId, bookId)
 			try {
-				const thumbInfo = await FileSystem.getInfoAsync(thumbnailPath)
-				if (thumbInfo.exists) {
-					await FileSystem.deleteAsync(thumbnailPath)
+				const thumb = new File(thumbnailPath)
+				if (thumb.exists) {
+					thumb.delete()
 				}
 			} catch (e) {
 				Sentry.withScope((scope) => {
@@ -154,9 +157,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 				const fileUri = `${booksDirectory(effectiveServerId)}/${file.filename}`
 				try {
-					const info = await FileSystem.getInfoAsync(fileUri)
-					if (info.exists) {
-						await FileSystem.deleteAsync(fileUri)
+					const fsFile = new File(fileUri)
+					if (fsFile.exists) {
+						fsFile.delete()
 					}
 				} catch (e) {
 					Sentry.withScope((scope) => {
@@ -170,9 +173,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 				const thumbnailPath = bookThumbnailPath(effectiveServerId, bookID)
 				try {
-					const thumbInfo = await FileSystem.getInfoAsync(thumbnailPath)
-					if (thumbInfo.exists) {
-						await FileSystem.deleteAsync(thumbnailPath)
+					const thumb = new File(thumbnailPath)
+					if (thumb.exists) {
+						thumb.delete()
 					}
 				} catch (e) {
 					Sentry.withScope((scope) => {
@@ -230,11 +233,11 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 			}
 
 			try {
-				const existingProgress = await db
+				const [existingProgress] = await db
 					.select()
 					.from(readProgress)
 					.where(eq(readProgress.bookId, bookId))
-					.get()
+					.limit(1)
 
 				if (existingProgress) {
 					await db
@@ -252,17 +255,24 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 						percentage: '1.0',
 						page: totalPages ?? undefined,
 						lastModified: new Date(),
+						// did not set elapsedSeconds here since realistically it
+						// shouldn't matter in this if branch. if you dont have a
+						// session you wont have a timer
 					})
 				}
 
 				queryClient.invalidateQueries({ queryKey: downloadKeys.server(effectiveServerId) })
 			} catch (error) {
 				Sentry.captureException(error)
-				toast.error('Failed to mark as complete')
+				toast.error(
+					t('bookActions.markAsRead.failure', {
+						description: extractErrorMessage(error, t('common.unknownError')),
+					}),
+				)
 				throw error
 			}
 		},
-		[serverID, queryClient],
+		[serverID, queryClient, t],
 	)
 
 	const clearProgress = useCallback(
@@ -277,11 +287,15 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 				queryClient.invalidateQueries({ queryKey: downloadKeys.server(effectiveServerId) })
 			} catch (error) {
 				Sentry.captureException(error)
-				toast.error('Failed to clear progress')
+				toast.error(
+					t('bookActions.clearProgress.failure', {
+						description: extractErrorMessage(error, t('common.unknownError')),
+					}),
+				)
 				throw error
 			}
 		},
-		[serverID, queryClient],
+		[serverID, queryClient, t],
 	)
 
 	const downloadImmediate = useCallback(

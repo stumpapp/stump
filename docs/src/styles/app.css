@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/black.css';
+@import 'fumadocs-ui/css/preset.css';
+
+html {
+	scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+	margin-right: 0px !important;
+	--removed-body-scroll-bar-size: 0px !important;
+}
+
+:root {
+	--color-fd-primary: #c48259;
+	--spacing-fd-container: 1000px;
+}
+
+.dark {
+	--color-fd-primary: #c48259;
+}
+
+.bg-grid-lines-xl {
+	background-position: -30px -30px;
+	background-size: 60px 60px;
+	background-image:
+		linear-gradient(to right, #8884 1px, transparent 1px),
+		linear-gradient(to bottom, #8884 1px, transparent 1px);
+}
+
+.bg-dot-matrix-xl {
+	background-size: 24px 24px;
+	background-image: radial-gradient(circle, #8883 1px, transparent 1px);
+}
+
+/*i couldn't quite get this right, i'll try another time. trying to get a little convex on the matrix*/
+.bg-dot-matrix-xl::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-size: 24px 24px;
+	background-image: radial-gradient(circle, #8889 1.5px, transparent 1.5px);
+	mask-image: radial-gradient(ellipse 40% 30% at center, black, transparent);
+	-webkit-mask-image: radial-gradient(ellipse 40% 35% at center, black, transparent);
+}

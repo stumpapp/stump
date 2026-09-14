@@ -1,6 +1,8 @@
-import { SupportedFont } from '@stump/graphql'
+import { InterfaceRoundness, SupportedFont } from '@stump/graphql'
 import { useEffect } from 'react'
 import { useMediaMatch } from 'rooks'
+
+import { DARK_THEMES } from './useTheme'
 
 /**
  * The parameters for the `useApplyTheme` hook
@@ -11,18 +13,32 @@ type Params = {
 	 */
 	appTheme?: string
 	/**
+	 * The UI roundness to apply to radii (buttons, inputs, cards, etc)
+	 */
+	interfaceRoundness?: InterfaceRoundness
+	/**
+	 * The roundness to apply to thumbnail images
+	 */
+	thumbnailRoundness?: InterfaceRoundness
+	/**
 	 * The font to apply to the app
 	 */
 	appFont?: SupportedFont
 }
 
+// TODO(refactor): atp just pull in preferences inside the hook
 /**
  * A hook that applies the provided theme values to the app whenever they change
  *
  * @param appTheme The theme to apply to the app, applied to the `html` element
  * @param appFont The font to apply to the app, applied to the `body` element
  */
-export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Params) {
+export function useApplyTheme({
+	appTheme,
+	appFont = SupportedFont.Inter,
+	interfaceRoundness = InterfaceRoundness.Normal,
+	thumbnailRoundness = InterfaceRoundness.Normal,
+}: Params) {
 	const prefersDark = useMediaMatch('(prefers-color-scheme: dark)')
 
 	/**
@@ -31,21 +47,67 @@ export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Param
 	 */
 	useEffect(() => {
 		const html = document.querySelector('html')
-		// Note: the html root currently will only ever have a theme class applied, so we don't need
-		// to worry about removing other classes. If this changes, we'll need to update this logic and likely
-		// prefix the theme class with `theme-` to avoid conflicts
-		const htmlClasses = Array.from(html?.classList ?? [])
+		if (!html) return
 
 		let resolvedTheme = appTheme?.toLowerCase() || 'system'
 		if (resolvedTheme === 'system') {
 			resolvedTheme = prefersDark ? 'dark' : 'light'
 		}
-		// Only change the theme if we actually need to (i.e. the theme on the html is diff)
-		if (!htmlClasses.length || htmlClasses.some((c) => c !== resolvedTheme)) {
-			html?.classList.remove(...htmlClasses)
-			html?.classList.add(resolvedTheme)
+
+		html.classList.remove(...THEME_CLASSES)
+		html.classList.add(resolvedTheme)
+
+		const isDarkTheme =
+			DARK_THEMES.includes(resolvedTheme) || (resolvedTheme === 'system' && prefersDark)
+
+		// https://github.com/darkreader/darkreader/discussions/15128
+		if (isDarkTheme) {
+			let meta = document.querySelector('meta[name="color-scheme"]')
+			if (!meta) {
+				meta = document.createElement('meta')
+				// @ts-expect-error: this is a valid attribute
+				meta.name = 'color-scheme'
+				// @ts-expect-error: this is a valid attribute
+				meta.content = 'dark'
+				document.head.appendChild(meta)
+			}
+		} else {
+			// if we're switching to a light theme, we need to remove it so dark reader can mess with the colors
+			// i imagine folks running dark reader won't hit this since why would they switch to light lol but
+			// figure this is "correct" so
+			const meta = document.querySelector('meta[name="color-scheme"]')
+			if (meta) {
+				document.head.removeChild(meta)
+			}
 		}
 	}, [appTheme, prefersDark])
+
+	/**
+	 * The effect responsible for applying global roundness
+	 */
+	useEffect(() => {
+		const html = document.querySelector('html')
+		if (!html) return
+
+		html.classList.remove(...ROUNDNESS_CLASSES)
+		html.classList.add(
+			ROUNDNESS_TO_CLASS[interfaceRoundness] ?? ROUNDNESS_TO_CLASS[InterfaceRoundness.Normal],
+		)
+	}, [interfaceRoundness])
+
+	/**
+	 * The effect responsible for applying thumbnail roundness
+	 */
+	useEffect(() => {
+		const html = document.querySelector('html')
+		if (!html) return
+
+		html.classList.remove(...THUMBNAIL_ROUNDNESS_CLASSES)
+		html.classList.add(
+			THUMBNAIL_ROUNDNESS_TO_CLASS[thumbnailRoundness] ??
+				THUMBNAIL_ROUNDNESS_TO_CLASS[InterfaceRoundness.Normal],
+		)
+	}, [thumbnailRoundness])
 
 	/**
 	 * The effect responsible for applying the font to the app. If the `appFont` is not provided,
@@ -65,3 +127,37 @@ export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Param
 		}
 	}, [appFont])
 }
+
+const ROUNDNESS_TO_CLASS: Record<InterfaceRoundness, string> = {
+	[InterfaceRoundness.None]: 'radius-none',
+	[InterfaceRoundness.Normal]: 'radius-normal',
+	[InterfaceRoundness.Rounded]: 'radius-rounded',
+	[InterfaceRoundness.Pill]: 'radius-pill',
+}
+
+const ROUNDNESS_CLASSES = ['radius-none', 'radius-normal', 'radius-rounded', 'radius-pill']
+
+const THUMBNAIL_ROUNDNESS_TO_CLASS: Record<InterfaceRoundness, string> = {
+	[InterfaceRoundness.None]: 'thumbnail-radius-none',
+	[InterfaceRoundness.Normal]: 'thumbnail-radius-normal',
+	[InterfaceRoundness.Rounded]: 'thumbnail-radius-rounded',
+	[InterfaceRoundness.Pill]: 'thumbnail-radius-pill',
+}
+
+const THUMBNAIL_ROUNDNESS_CLASSES = [
+	'thumbnail-radius-none',
+	'thumbnail-radius-normal',
+	'thumbnail-radius-rounded',
+	'thumbnail-radius-pill',
+]
+
+const THEME_CLASSES = [
+	'light',
+	'dark',
+	'bronze',
+	'ocean',
+	'autumn',
+	'cosmic',
+	'pumpkin',
+	'midnight',
+]

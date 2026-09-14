@@ -6,12 +6,14 @@ import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
+import { useLibraryContext } from '../../context'
 import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
 import { LibraryPatternDisplay } from './options/scanner'
-import { routeGroups } from './routes'
+import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsHeader() {
 	const location = useLocation()
+	const { library } = useLibraryContext()
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx, enableDoubleSidebar },
 	} = usePreferences()
@@ -26,10 +28,10 @@ export default function LibrarySettingsHeader() {
 	 */
 	const activeRouteGroup = useMemo(
 		() =>
-			routeGroups
+			createRouteGroups(library.id)
 				.flatMap((group) => group.items)
 				.find((page) => location.pathname.endsWith(page.to)),
-		[location.pathname],
+		[location.pathname, library.id],
 	)
 
 	/**
@@ -57,10 +59,9 @@ export default function LibrarySettingsHeader() {
 	return (
 		<header
 			className={cn(
-				'gap-4 p-4 lg:flex-row lg:gap-0 flex w-full flex-col items-start justify-between border-b border-b-edge',
+				'gap-4 p-4 lg:flex-row lg:gap-0 flex w-full flex-col items-start justify-between',
 				{
-					// Note: We make the border transparent because the width constraint when using a top bar
-					'mx-auto border-b-transparent': preferTopBar && !!layoutMaxWidthPx,
+					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					'pl-52': displayingSideBar,
 				},
 			)}

@@ -7,14 +7,14 @@ use sea_orm::{
 };
 
 use crate::{
+	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
 	filesystem::image::thumbnail::generate::{
 		safely_generate_placeholder_batch, GenerateImageSource,
 	},
 	job::{
-		error::JobError, JobExt, JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx,
-		WorkingState, WrappedJob,
+		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkingState,
 	},
-	utils::chain_optional_iter,
 };
 
 // Note: Type aliasing for clarity
@@ -87,14 +87,10 @@ impl PlaceholderGenerationJob {
 	pub fn new(config: PlaceholderGenerationJobConfig) -> PlaceholderGenerationJob {
 		PlaceholderGenerationJob { config }
 	}
-
-	pub fn wrapped(self) -> Box<WrappedJob<Self>> {
-		WrappedJob::new(self)
-	}
 }
 
 #[async_trait::async_trait]
-impl JobExt for PlaceholderGenerationJob {
+impl JobLifecycle for PlaceholderGenerationJob {
 	const NAME: &'static str = "placeholder_generation";
 
 	type Output = PlaceholderGenerationOutput;
@@ -109,7 +105,7 @@ impl JobExt for PlaceholderGenerationJob {
 
 	async fn init(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let init_config = match &self.config.scope {
 			PlaceholderGenerationJobScope::BooksInLibrary(id) => {
@@ -119,7 +115,7 @@ impl JobExt for PlaceholderGenerationJob {
 					.inner_join(series::Entity)
 					.filter(series::Column::LibraryId.eq(id))
 					.into_model::<media::MediaThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 				let media_ids = books.iter().map(|m| m.id.clone()).collect::<Vec<_>>();
@@ -131,14 +127,18 @@ impl JobExt for PlaceholderGenerationJob {
 					.into_iter()
 					.collect::<Vec<_>>();
 
-				let series = series::Entity::find()
-					.select_only()
-					.columns(series::SeriesThumbSelect::columns())
-					.filter(series::Column::Id.is_in(series_ids.clone()))
-					.into_model::<series::SeriesThumbSelect>()
-					.all(ctx.conn.as_ref())
-					.await
-					.map_err(|e| JobError::InitFailed(e.to_string()))?;
+				let mut series = Vec::with_capacity(series_ids.len());
+				for chunk in series_ids.chunks(SQLITE_BIND_LIMIT) {
+					let batch = series::Entity::find()
+						.select_only()
+						.columns(series::SeriesThumbSelect::columns())
+						.filter(series::Column::Id.is_in(chunk.to_vec()))
+						.into_model::<series::SeriesThumbSelect>()
+						.all(ctx.conn())
+						.await
+						.map_err(|e| JobError::InitFailed(e.to_string()))?;
+					series.extend(batch);
+				}
 
 				let library_ids = series
 					.iter()
@@ -159,7 +159,7 @@ impl JobExt for PlaceholderGenerationJob {
 					.columns(media::MediaThumbSelect::columns())
 					.filter(media::Column::SeriesId.eq(id))
 					.into_model::<media::MediaIdentSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
@@ -196,30 +196,29 @@ impl JobExt for PlaceholderGenerationJob {
 
 		tracing::trace!(?init_config, scope = ?self.config.scope, "Determined initial config");
 
-		let tasks = chain_optional_iter(
-			[],
-			[
-				(!init_config.media_ids.is_empty())
-					.then_some(PlaceholderGenerationTask::Media(init_config.media_ids)),
-				(!init_config.series_ids.is_empty())
-					.then_some(PlaceholderGenerationTask::Series(init_config.series_ids)),
-				(!init_config.library_ids.is_empty()).then_some(
-					PlaceholderGenerationTask::Library(init_config.library_ids),
-				),
-			],
-		);
+		let tasks: Vec<PlaceholderGenerationTask> =
+			chunk_vec_into(init_config.media_ids, PlaceholderGenerationTask::Media)
+				.into_iter()
+				.chain(chunk_vec_into(
+					init_config.series_ids,
+					PlaceholderGenerationTask::Series,
+				))
+				.chain(chunk_vec_into(
+					init_config.library_ids,
+					PlaceholderGenerationTask::Library,
+				))
+				.collect();
 
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),
 			tasks: tasks.into(),
-			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
 	async fn execute_task(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		match task {
@@ -235,16 +234,15 @@ impl JobExt for PlaceholderGenerationJob {
 						|query, f| query.filter(f),
 					)
 					.into_model::<media::MediaThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = media.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Extracting thumbnail placeholder colors",
-					1,
-					task_count,
+				ctx.report_progress(JobProgress::msg(
+					"Generating thumbnail placeholder colors",
 				));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				Ok(safely_generate_placeholder_batch(
 					media.into_iter().map(GenerateImageSource::Book).collect(),
@@ -265,16 +263,15 @@ impl JobExt for PlaceholderGenerationJob {
 					.columns(series::SeriesThumbSelect::columns())
 					.filter(series::Column::Id.is_in(series_ids))
 					.into_model::<series::SeriesThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = series.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating series placeholder metadata",
-					1,
-					task_count,
+				ctx.report_progress(JobProgress::msg(
+					"Generating series placeholder colors",
 				));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				Ok(safely_generate_placeholder_batch(
 					series
@@ -298,16 +295,15 @@ impl JobExt for PlaceholderGenerationJob {
 					.columns(library::LibraryThumbSelect::columns())
 					.filter(library::Column::Id.is_in(library_ids))
 					.into_model::<library::LibraryThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = libraries.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating library placeholder metadata",
-					1,
-					task_count,
+				ctx.report_progress(JobProgress::msg(
+					"Generating library placeholder colors",
 				));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				Ok(safely_generate_placeholder_batch(
 					libraries

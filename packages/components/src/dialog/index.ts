@@ -8,3 +8,4 @@ export {
 	type DialogProps,
 	DialogTitle,
 } from './primitives'
+export { TypeToConfirmModal, type TypeToConfirmModalProps } from './TypeToConfirmModal'

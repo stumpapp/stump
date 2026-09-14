@@ -30,8 +30,8 @@ itertools.workspace = true
 jsonwebtoken = "9.3.0"
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
 local-ip-address = "0.6.2"
-once_cell.workspace = true
-openidconnect = "4.0.1"
+openidconnect = { version = "4.0.1", default-features = false }
+oauth2-reqwest = { version = "0.1.0-alpha.3" }
 prefixed-api-key = { workspace = true}
 rand = { workspace = true }
 reqwest.workspace = true
@@ -43,12 +43,15 @@ serde-untagged = "0.1.2"
 serde_with.workspace = true
 sha2 = "0.10"
 stump_core = { path = "../../core" }
+apalis.workspace = true
+apalis-cron.workspace = true
 tempfile = "3.13.0"
 tower-http = { version = "0.5.2", features = [
   "fs",
   "cors",
   "set-header",
-  "trace"
+  "trace",
+  "compression-full"
 ] }
 thiserror.workspace = true
 time = "0.3.36"
@@ -65,6 +68,7 @@ zip.workspace = true
 axum-test = "17.2.0"
 maplit.workspace = true
 tokio = { workspace = true, features = ["full", "test-util"] }
+tests = { path = "../../crates/tests" }
 
 [build-dependencies]
 chrono.workspace = true

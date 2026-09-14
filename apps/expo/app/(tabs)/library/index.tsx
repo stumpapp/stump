@@ -1,23 +1,27 @@
 import { FlashList } from '@shopify/flash-list'
 import { asc, desc, eq, inArray, ne } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
+import { Stack } from 'expo-router'
 import { useFocusEffect } from 'expo-router'
 import groupBy from 'lodash/groupBy'
 import { useCallback, useEffect, useMemo } from 'react'
-import { View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Platform, View } from 'react-native'
 import { match } from 'ts-pattern'
 import { useShallow } from 'zustand/react/shallow'
 
+import { DownloadProblemsSheet } from '~/components/downloadQueue'
 import {
 	CuratedDownloadsHeader,
 	DownloadRowItem,
 	intoDownloadedFile,
 	NoDownloadsOnDevice,
+	useLocalLibraryMenu,
 } from '~/components/localLibrary'
 import { useDownloadsState } from '~/components/localLibrary/store'
+import { SyncConflictsSheet } from '~/components/localLibrary/syncConflicts'
 import { Text } from '~/components/ui'
 import { db, downloadedFiles, libraryRefs, readProgress, seriesRefs } from '~/db'
+import { useTranslate } from '~/lib/hooks'
 import { LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
 import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
@@ -61,8 +65,6 @@ export default function Screen() {
 		[id, sortConfig, sourceFilter],
 	)
 
-	const showCuratedDownloads = usePreferencesStore((state) => state.showCuratedDownloads)
-	const isSelecting = useSelectionStore((state) => state.isSelecting)
 	const resetSelection = useSelectionStore((state) => state.resetSelection)
 
 	useFocusEffect(
@@ -124,7 +126,7 @@ export default function Screen() {
 	const customSelectionActions = useMemo(
 		() => ({
 			deleteSelection: async (ids: string[]) => {
-				await db.delete(downloadedFiles).where(inArray(downloadedFiles.id, ids)).run()
+				db.delete(downloadedFiles).where(inArray(downloadedFiles.id, ids)).run()
 				// Trigger re-fetch
 				increment()
 			},
@@ -151,14 +153,6 @@ export default function Screen() {
 	// TODO: Selection mode to delete multiple at once
 	// TODO: Search downloads
 
-	if (!data || data.length === 0) {
-		return (
-			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-				<NoDownloadsOnDevice source={sourceFilter} />
-			</SafeAreaView>
-		)
-	}
-
 	return (
 		<FlashList
 			data={artificiallyGroupedData}
@@ -168,13 +162,40 @@ export default function Screen() {
 				paddingVertical: 16,
 			}}
 			contentInsetAdjustmentBehavior="always"
-			ItemSeparatorComponent={() => <View className="h-6" />}
+			ItemSeparatorComponent={() => <View className="h-4" />}
 			ListHeaderComponent={
-				showCuratedDownloads && !isSelecting ? <CuratedDownloadsHeader /> : undefined
+				<>
+					<ListHeaderComponent isEmptyState={data?.length === 0} />
+					<DownloadProblemsSheet />
+					<SyncConflictsSheet />
+				</>
 			}
+			ListEmptyComponent={<NoDownloadsOnDevice source={sourceFilter} />}
 			stickyHeaderIndices={stickyHeaderIndices}
 			getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
 			maintainVisibleContentPosition={{ disabled: true }}
 		/>
+	)
+}
+
+const ListHeaderComponent = ({ isEmptyState }: { isEmptyState: boolean }) => {
+	const { t } = useTranslate()
+
+	const menuFragment = useLocalLibraryMenu()
+
+	const isSelecting = useSelectionStore((state) => state.isSelecting)
+	const showCuratedDownloads = usePreferencesStore((state) => state.showCuratedDownloads)
+
+	const shouldShowCurated = showCuratedDownloads && !isSelecting && !isEmptyState
+
+	return (
+		<>
+			{Platform.OS === 'ios' && (
+				<Stack.Screen.Title large>{t('localLibrary.title')}</Stack.Screen.Title>
+			)}
+			{menuFragment}
+
+			{shouldShowCurated && <CuratedDownloadsHeader />}
+		</>
 	)
 }

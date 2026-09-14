@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -20,14 +20,19 @@ export default function HideScrollbarToggle() {
 	}, [enableHideScrollbar, update])
 
 	return (
-		<WideSwitch
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={enableHideScrollbar}
-			onCheckedChange={handleToggle}
-			formId="enableHideScrollbar"
+			onClick={handleToggle}
+			className="flex-row items-center justify-between"
 			title={enableHideScrollbar ? t(getKey('tooltips.enabled')) : t(getKey('tooltips.disabled'))}
-		/>
+		>
+			<RawSwitch
+				id="enableHideScrollbar"
+				checked={enableHideScrollbar}
+				onCheckedChange={handleToggle}
+			/>
+		</NewCard.Row>
 	)
 }
 

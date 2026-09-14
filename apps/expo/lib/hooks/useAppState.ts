@@ -14,7 +14,7 @@ type Params = {
  * @returns one of 'active', 'background', 'inactive', or 'unknown'
  */
 export const useAppState = ({ onStateChanged }: Params) => {
-	const callbackRef = useRef<typeof onStateChanged>()
+	const callbackRef = useRef<typeof onStateChanged>(undefined)
 	useEffect(() => {
 		callbackRef.current = onStateChanged
 	}, [onStateChanged])
@@ -41,5 +41,6 @@ export const useAppState = ({ onStateChanged }: Params) => {
 		}
 	}, [onStateChanged])
 
+	// eslint-disable-next-line react-hooks/refs
 	return appState.current
 }

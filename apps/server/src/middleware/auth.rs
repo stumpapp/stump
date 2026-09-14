@@ -18,6 +18,7 @@ use models::{
 	shared::{
 		api_key::{APIKeyPermissions, API_KEY_PREFIX},
 		enums::UserPermission,
+		image::ImageRef,
 	},
 };
 use prefixed_api_key::{PrefixedApiKey, PrefixedApiKeyController};
@@ -51,10 +52,13 @@ use super::host::HostExtractor;
 pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
 fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
-	if user.avatar_path.is_some() {
-		user.avatar_url =
-			Some(service.format_url(format!("/api/v2/users/{}/avatar", user.id)));
-	}
+	user.avatar = ImageRef {
+		url: service.cache_friendly_url(
+			format!("/api/v2/users/{}/avatar", user.id),
+			&user.avatar.last_modified,
+		),
+		..user.avatar
+	};
 	user
 }
 
@@ -121,11 +125,9 @@ pub async fn auth_middleware(
 	}
 
 	let is_opds = request_uri.starts_with("/opds");
-	let is_swagger = request_uri.starts_with("/swagger-ui");
-
 	let is_playground_request =
 		request_uri.starts_with("/api/graphql") && *req.method() == Method::GET;
-	let is_playground_allowed = ctx.config.enable_swagger || cfg!(debug_assertions);
+	let is_playground_allowed = ctx.config.enable_playground || cfg!(debug_assertions);
 	let is_playground = is_playground_request && is_playground_allowed;
 
 	let Some(auth_header) = auth_header else {
@@ -143,9 +145,6 @@ pub async fn auth_middleware(
 			return Err(
 				OPDSBasicAuth::new(opds_version, host_details.url()).into_response()
 			);
-		} else if is_swagger {
-			// Sign in via React app and then redirect to server-side swagger-ui
-			return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
 		} else if is_playground {
 			// Sign in via React app and then redirect to server-side playground
 			return Err(Redirect::to("/auth?redirect=%2Fapi%2Fgraphql").into_response());
@@ -192,10 +191,11 @@ impl APIKeyPath {
 }
 
 /// A middleware to authenticate a user by an API key in a *very* specific way. This middleware
-/// assumes that a fully qualified API key is provided in the path. This is used for two features today:
+/// assumes that a fully qualified API key is provided in the path. This is used for three features today:
 ///
 /// 1. An alternative for bearer token on the OPDS v1.2 API
 /// 2. A way to authenticate users for the KoReader sync API
+/// 3. A way to authenticate users for the Kobo sync API
 ///
 /// This isn't necessary for OPDS v2.0 as it has a more robust authentication mechanism. The koreader
 /// frontend app will send an md5 hash of whatever password you provide. Stump does not use the same
@@ -264,7 +264,7 @@ pub async fn validate_api_key(
 	// Note: we check as a precaution. If a user had the permission revoked, that logic should also
 	// clean up keys.
 	let can_use_key =
-		user.is_server_owner || user.permissions.contains(&UserPermission::AccessAPIKeys);
+		user.is_server_owner || user.permissions.contains(&UserPermission::AccessApiKeys);
 
 	if !can_use_key || !controller.check_hash(&pak, &api_key.long_token_hash) {
 		tracing::error!(?can_use_key, "API key validation failed!");
@@ -314,7 +314,7 @@ async fn handle_bearer_auth(
 		_ => (),
 	};
 
-	let user_id = extract_user_from_jwt(&token)?;
+	let user_id = extract_user_from_jwt(&token, conn).await?;
 
 	let fetched_user = user::LoginUser::find()
 		.filter(user::Column::Id.eq(user_id.clone()))

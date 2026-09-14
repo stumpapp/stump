@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native'
+import { parseGraphQLDateTime } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { eq, inArray } from 'drizzle-orm'
@@ -11,9 +12,9 @@ const query = graphql(`
 			nodes {
 				id
 				readProgress {
+					sessionId
 					page
 					percentageCompleted
-					epubcfi
 					updatedAt
 					elapsedSeconds
 					locator {
@@ -41,10 +42,12 @@ const query = graphql(`
 
 export type PullSyncResult = {
 	failedBookIds: string[]
+	conflictBookIds: string[]
 }
 
 /**
- * Pull the server progress for downloaded books for a single server
+ * Pull the server progress for downloaded books for a single server, syncing
+ * to local database
  *
  * @param serverId The ID of the server to attempt syncing progression to
  * @param api The *authenticated* instance for interacting with that server
@@ -57,10 +60,9 @@ export const executeSingleServerPullSync = async (
 		.select({ id: downloadedFiles.id })
 		.from(downloadedFiles)
 		.where(eq(downloadedFiles.serverId, serverId))
-		.all()
 
 	if (downloadedBooks.length === 0) {
-		return { failedBookIds: [] }
+		return { failedBookIds: [], conflictBookIds: [] }
 	}
 
 	const downloadedBookIds = downloadedBooks.map((b) => b.id)
@@ -72,7 +74,11 @@ export const executeSingleServerPullSync = async (
 	})
 
 	if (serverMedia.length === 0) {
-		return { failedBookIds: [] }
+		console.warn(
+			'There exist local books originally from server which are no longer present on remote',
+			{ serverId, downloadedBookIds },
+		)
+		return { failedBookIds: [], conflictBookIds: [] }
 	}
 
 	const localRecords = await db
@@ -84,10 +90,10 @@ export const executeSingleServerPullSync = async (
 				serverMedia.map((m) => m.id),
 			),
 		)
-		.all()
 
 	const localProgressMap = new Map(localRecords.map((r) => [r.bookId, r]))
 	const failedBookIds: string[] = []
+	const conflictBookIds: string[] = []
 
 	for (const media of serverMedia) {
 		const localProgress = localProgressMap.get(media.id)
@@ -98,11 +104,11 @@ export const executeSingleServerPullSync = async (
 			const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0
 			return dateB - dateA // Descending order
 		})
-		const serverCompletedAt = sortedReadHistory.at(0)?.completedAt
+		const serverCompletedAt = parseGraphQLDateTime(sortedReadHistory.at(0)?.completedAt)
 
 		if (serverCompletedAt && serverCompletedAt > localUpdatedAt) {
 			try {
-				await db.delete(readProgress).where(eq(readProgress.bookId, media.id)).run()
+				await db.delete(readProgress).where(eq(readProgress.bookId, media.id))
 			} catch (error) {
 				// Note: A failure to delete local progress is not a failure to pull progress,
 				// so we log it but don't add to failedBookIds
@@ -115,13 +121,27 @@ export const executeSingleServerPullSync = async (
 			continue
 		}
 
-		// No progress = skip (nothing to pull)
+		// no progress = skip (nothing to pull)
 		const progress = media.readProgress
 		if (!progress) continue
 
 		const serverUpdatedAt = progress.updatedAt ? new Date(progress.updatedAt) : new Date(0)
 
-		// Local already ahead = skip (need to push)
+		if (localProgress && localProgress.syncStatus !== syncStatus.enum.SYNCED) {
+			const lastPulledAt = localProgress.lastPulledSessionUpdatedAt
+
+			// local behind remote = conflict (cannot push until resolved)
+			if (lastPulledAt && serverUpdatedAt > lastPulledAt) {
+				conflictBookIds.push(media.id)
+				await db
+					.update(readProgress)
+					.set({ syncStatus: syncStatus.enum.CONFLICT })
+					.where(eq(readProgress.bookId, media.id))
+				continue
+			}
+		}
+
+		// local already ahead or equal = skip (push handles it)
 		if (localUpdatedAt >= serverUpdatedAt) continue
 
 		try {
@@ -135,6 +155,7 @@ export const executeSingleServerPullSync = async (
 				serverId,
 				page: progress.page,
 				elapsedSeconds: progress.elapsedSeconds,
+				lastSyncedElapsedSeconds: progress.elapsedSeconds,
 				percentage,
 				epubProgress: isEpub
 					? epubProgress.safeParse({
@@ -145,16 +166,15 @@ export const executeSingleServerPullSync = async (
 					: null,
 				syncStatus: syncStatus.enum.SYNCED,
 				lastModified: serverUpdatedAt,
+				lastPulledSessionUpdatedAt: serverUpdatedAt,
+				lastSyncedSessionId: progress.sessionId,
+				pendingReset: false,
 			}
 
-			await db
-				.insert(readProgress)
-				.values(values)
-				.onConflictDoUpdate({
-					target: readProgress.bookId,
-					set: values,
-				})
-				.run()
+			await db.insert(readProgress).values(values).onConflictDoUpdate({
+				target: readProgress.bookId,
+				set: values,
+			})
 		} catch (error) {
 			// Fail to pull means we can't reliably push later, so mark as failed
 			console.error('Failed to pull server progress for book', {
@@ -168,7 +188,7 @@ export const executeSingleServerPullSync = async (
 		}
 	}
 
-	return { failedBookIds }
+	return { failedBookIds, conflictBookIds }
 }
 
 /**

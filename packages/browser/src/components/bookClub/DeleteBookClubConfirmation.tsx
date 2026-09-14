@@ -40,7 +40,7 @@ export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigge
 			title="Delete book club"
 			description="Are you sure you want to delete this club? This action cannot be undone."
 			confirmText="Delete club"
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={onClose}
 			onConfirm={() => deleteClub({ id })}

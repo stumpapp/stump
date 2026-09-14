@@ -6,14 +6,15 @@ import { Eye, EyeOff } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Pressable, ScrollView, View } from 'react-native'
+import TurboImage from 'react-native-turbo-image'
+import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
 import { startOidcLogin } from '~/lib/sdk/auth'
-import { useColorScheme } from '~/lib/useColorScheme'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useUserStore } from '~/stores'
 
-import { useActiveServer } from './activeServer'
 import { Button, Input, Text } from './ui'
 import { Icon } from './ui/icon'
 
@@ -32,12 +33,12 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	})
 
 	const ref = useRef<TrueSheet>(null)
+	const hasBeenPresentedRef = useRef(false)
 
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 	const [isOidcLoading, setIsOidcLoading] = useState(false)
 	const hasAuthSucceeded = useRef(false)
 
-	const { isDarkColorScheme } = useColorScheme()
 	const colors = useColors()
 
 	const {
@@ -50,9 +51,10 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 
 	useEffect(() => {
 		if (isOpen) {
+			hasBeenPresentedRef.current = true
 			hasAuthSucceeded.current = false
 			ref.current?.present()
-		} else {
+		} else if (hasBeenPresentedRef.current) {
 			ref.current?.dismiss()
 		}
 	}, [isOpen])
@@ -109,19 +111,21 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	return (
 		<TrueSheet
 			ref={ref}
-			detents={['auto']}
+			detents={['auto', 1]}
 			backgroundColor={colors.background.DEFAULT}
 			grabber
-			grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
+			grabberOptions={{ color: colors.sheet.grabber }}
 			onDidDismiss={handleDismiss}
+			scrollable={false}
 		>
 			<ScrollView className="p-6">
-				<View className="flex-1 items-start gap-4">
-					<View>
-						<Text className="text-2xl font-bold leading-6">Login</Text>
-						<Text className="text-base text-foreground-muted">
-							You need to login to access this server
-						</Text>
+				<View className="gap-4 items-start">
+					<View className="w-full items-center justify-center">
+						<TurboImage
+							className="self-center"
+							source={{ uri: urlJoin(activeServer.url, '/favicon.ico') }}
+							style={{ width: 100, height: 100 }}
+						/>
 					</View>
 
 					<Controller
@@ -152,7 +156,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							required: true,
 						}}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<View className="w-full gap-1.5">
+							<View className="gap-1.5 w-full">
 								<Text className="text-base font-medium text-foreground-muted">Password</Text>
 								<View className="relative flex-row items-center">
 									<Input
@@ -165,11 +169,11 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 										onBlur={onBlur}
 										onChangeText={onChange}
 										value={value}
-										className="flex-1 pr-12"
+										className="pr-12 flex-1"
 									/>
 									<Pressable
 										onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-										className="absolute right-3 h-8 w-8 items-center justify-center"
+										className="right-3 h-8 w-8 absolute items-center justify-center"
 									>
 										<Icon
 											as={isPasswordVisible ? EyeOff : Eye}
@@ -186,33 +190,37 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						name="password"
 					/>
 
-					<Button
-						onPress={handleSubmit(onSubmit)}
-						className="mt-4 w-full"
-						disabled={isLoggingIn}
-						variant="brand"
-					>
-						<Text>Login</Text>
-					</Button>
+					<View className="gap-4 w-full">
+						<Button
+							onPress={handleSubmit(onSubmit)}
+							className="mt-4 w-full"
+							roundness="full"
+							disabled={isLoggingIn}
+							variant="brand"
+						>
+							<Text>Login</Text>
+						</Button>
 
-					{oidcConfig?.enabled && (
-						<View className="w-full pb-4">
-							<View className="my-3 flex-row items-center">
-								<View className="flex-1 border-t border-edge" />
-								<Text className="mx-2 text-sm text-foreground-muted">Or</Text>
-								<View className="flex-1 border-t border-edge" />
-							</View>
+						{oidcConfig?.enabled && (
+							<>
+								<View className="flex-row items-center">
+									<View className="border-edge flex-1 border-t" />
+									<Text className="mx-2 text-sm text-foreground-muted">Or</Text>
+									<View className="border-edge flex-1 border-t" />
+								</View>
 
-							<Button
-								onPress={handleOidcLogin}
-								className="mt-4 w-full"
-								disabled={isOidcLoading || isLoggingIn}
-								variant="secondary"
-							>
-								<Text>Login with OIDC</Text>
-							</Button>
-						</View>
-					)}
+								<Button
+									onPress={handleOidcLogin}
+									className="w-full"
+									disabled={isOidcLoading || isLoggingIn}
+									roundness="full"
+									variant="secondary"
+								>
+									<Text>Login with OIDC</Text>
+								</Button>
+							</>
+						)}
+					</View>
 				</View>
 			</ScrollView>
 		</TrueSheet>

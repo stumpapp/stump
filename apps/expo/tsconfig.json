@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
+		"types": ["vitest/globals"],
 		"baseUrl": ".",
 		"resolveJsonModule": true,
 		"paths": {
@@ -12,14 +13,16 @@
 			"@stump/client": ["../../packages/client/src/index.ts"],
 			"@stump/client/*": ["../../packages/client/src/*"],
 			"@stump/graphql": ["../../packages/graphql/src/index.ts"],
-			"@stump/graphql/*": ["../../packages/graphql/src/*"]
+			"@stump/graphql/*": ["../../packages/graphql/src/*"],
+			"@stump/i18n": ["../../packages/i18n/src/index.ts"],
+			"@stump/i18n/*": ["../../packages/i18n/src/*"],
 		},
 		"plugins": [
 			{
 				"name": "@0no-co/graphqlsp",
-				"schema": "../../crates/graphql/schema.graphql"
-			}
-		]
+				"schema": "../../crates/graphql/schema.graphql",
+			},
+		],
 	},
-	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"]
+	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"],
 }

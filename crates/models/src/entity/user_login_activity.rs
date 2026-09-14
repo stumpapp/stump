@@ -1,6 +1,10 @@
 use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
+// TODO(security): Add the following fields:
+// - failure_reason
+// - ip_source_method (e.g., the header pulled if applicable)
+// - authentication_method (oidc, api_key, pass, etc)
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "user_login_activity")]
 #[graphql(name = "UserLoginActivityModel")]

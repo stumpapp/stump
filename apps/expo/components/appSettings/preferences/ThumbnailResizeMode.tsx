@@ -2,11 +2,14 @@ import { Maximize } from 'lucide-react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
+import { SETTINGS_COLORS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function ThumbnailResizeMode() {
+	const { t } = useTranslate()
 	const { thumbnailResizeMode, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			thumbnailResizeMode: state.thumbnailResizeMode,
@@ -15,11 +18,15 @@ export default function ThumbnailResizeMode() {
 	)
 
 	return (
-		<AppSettingsRow icon={Maximize} title="Thumbnail Resize">
+		<AppSettingsRow
+			icon={Maximize}
+			iconBackgroundColor={SETTINGS_COLORS.minorVisuals}
+			title={t(getKey('label'))}
+		>
 			<Picker
 				value={thumbnailResizeMode || 'cover'}
 				options={(['cover', 'stretch', 'fit'] as const).map((value) => ({
-					label: getLabel(value),
+					label: t(getKey(`options.${value}`)),
 					value,
 				}))}
 				onValueChange={(value) => patch({ thumbnailResizeMode: value })}
@@ -28,12 +35,5 @@ export default function ThumbnailResizeMode() {
 	)
 }
 
-const LABELS = {
-	cover: 'Cover',
-	stretch: 'Stretch',
-	fit: 'Fit',
-}
-
-const getLabel = (key: keyof typeof LABELS) => {
-	return LABELS[key] || 'Cover'
-}
+const LOCALE_BASE = 'settings.preferences.thumbnailResizeMode'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

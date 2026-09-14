@@ -4,6 +4,9 @@ import { Button } from '../button'
 import { PickSelect } from '../utils'
 import { Dialog } from './primitives'
 
+// TODO: this doing too much. refactor according to:
+// https://ui.shadcn.com/docs/components/base/alert-dialog#destructive
+
 type ButtonVariant = PickSelect<React.ComponentProps<typeof Button>, 'variant'>
 export type ConfirmationModalProps = {
 	isOpen?: boolean
@@ -13,6 +16,7 @@ export type ConfirmationModalProps = {
 	children?: React.ReactNode
 	confirmText?: string
 	confirmIsLoading?: boolean
+	confirmDisabled?: boolean
 	cancelText?: string
 	closeIcon?: boolean
 	triggerVariant?: ButtonVariant
@@ -32,10 +36,11 @@ export function ConfirmationModal({
 	confirmText,
 	cancelText,
 	confirmIsLoading,
+	confirmDisabled,
 	closeIcon = true,
 	triggerVariant,
-	confirmVariant = 'primary',
-	cancelVariant,
+	confirmVariant = 'default',
+	cancelVariant = 'outline',
 	formId,
 	onConfirm,
 	onClose,
@@ -77,6 +82,7 @@ export function ConfirmationModal({
 						form={formId}
 						variant={confirmVariant}
 						onClick={onConfirm}
+						disabled={confirmDisabled}
 						isLoading={confirmIsLoading}
 					>
 						{confirmText || 'Confirm'}

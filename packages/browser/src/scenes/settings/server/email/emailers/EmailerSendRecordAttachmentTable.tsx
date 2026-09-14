@@ -1,3 +1,4 @@
+import { formatBytes } from '@stump/client'
 import { cn, Text } from '@stump/components'
 import {
 	createColumnHelper,
@@ -11,7 +12,6 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { getTableModels, SortIcon } from '@/components/table'
 import { usePreferences } from '@/hooks'
-import { formatBytes } from '@/utils/format'
 
 import { EmailerSendRecord } from './EmailerSendHistoryTable'
 
@@ -84,7 +84,7 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 
 						<tbody>
 							{rows.map((row) => (
-								<tr key={row.id} className="odd:bg-background-surface">
+								<tr key={row.id} className="odd:bg-muted">
 									{row.getVisibleCells().map((cell) => (
 										<td
 											className="pl-1.5 pr-1.5 first:pl-4 last:pr-4"

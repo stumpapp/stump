@@ -3,13 +3,13 @@ import { OPDSMetadata } from '@stump/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import * as FileSystem from 'expo-file-system/legacy'
+import { File } from 'expo-file-system'
 import { useEffect, useMemo } from 'react'
 
-import { useActiveServerSafe } from '~/components/activeServer'
-import { getPublicationId } from '~/components/opds/utils'
+import { getPublicationId } from '~/lib/opds/utils'
 import { db, downloadedFiles, downloadQueue, DownloadRepository } from '~/db'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 
 import { useDownloadQueue } from './downloadQueue'
 
@@ -141,9 +141,9 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 
 			const fileUri = `${booksDirectory(serverID)}/${file.filename}`
 			try {
-				const info = await FileSystem.getInfoAsync(fileUri)
-				if (info.exists) {
-					await FileSystem.deleteAsync(fileUri)
+				const fsFile = new File(fileUri)
+				if (fsFile.exists) {
+					fsFile.delete()
 				}
 			} catch (e) {
 				Sentry.withScope((scope) => {
@@ -157,9 +157,9 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 
 			const thumbnailPath = bookThumbnailPath(serverID, bookID)
 			try {
-				const thumbInfo = await FileSystem.getInfoAsync(thumbnailPath)
-				if (thumbInfo.exists) {
-					await FileSystem.deleteAsync(thumbnailPath)
+				const thumb = new File(thumbnailPath)
+				if (thumb.exists) {
+					thumb.delete()
 				}
 			} catch (e) {
 				Sentry.withScope((scope) => {

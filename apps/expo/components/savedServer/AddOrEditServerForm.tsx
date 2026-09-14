@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkOPDSURL, checkUrl, formatApiURL } from '@stump/sdk'
+import { GlassView } from 'expo-glass-effect'
 import isEqual from 'lodash/isEqual'
 import omit from 'lodash/omit'
+import { Check, X } from 'lucide-react-native'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
 import { Alert, FocusEvent, Platform, Pressable, View } from 'react-native'
@@ -11,11 +13,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
+import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore, useSavedServers } from '~/stores'
-import { SavedServerWithConfig } from '~/stores/savedServer'
+import { useSavedServers } from '~/stores'
+import { SavedServerWithConfig, ServerConfig } from '~/stores/savedServer'
 
-import { Button, Heading, Input, Label, Switch, Tabs, Text } from '../ui'
+import { DottedLine } from '../book/overview/DottedLine'
+import { Button, Heading, Input, Label, Loader, Switch, Text } from '../ui'
+import { HeaderButton } from '../ui/header-button/header-button'
+import { SegmentedPicker } from '../ui/segmented-picker/segmented-picker'
 
 type Props = {
 	editingServer?: SavedServerWithConfig | null
@@ -30,21 +37,25 @@ export default function AddOrEditServerForm({
 	onClose,
 	onInputFocused,
 }: Props) {
-	const { savedServers, stumpEnabled } = useSavedServers()
+	const colors = useColors()
+	const { t } = useTranslate()
+	const { savedServers } = useSavedServers()
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
-		defaultValues: getDefaultValues(stumpEnabled, editingServer),
+		defaultValues: getDefaultValues(editingServer),
 		resolver: zodResolver(
 			createSchema(
 				savedServers.map(({ name }) => name).filter((name) => name !== editingServer?.name),
+				t,
 			),
 		),
 	})
 	const { errors } = useFormState({ control })
 
-	const maskURLs = usePreferencesStore((state) => state.maskURLs)
+	const headerSchema = createHeaderSchema(t)
 
 	const [didConnect, setDidConnect] = useState(false)
+	const [isCheckingConnection, setIsCheckingConnection] = useState(false)
 
 	const [kind, url] = useWatch({ control, name: ['kind', 'url'] })
 
@@ -58,18 +69,24 @@ export default function AddOrEditServerForm({
 	const broadKind = useMemo(() => (kind === 'stump' ? 'stump' : 'opds'), [kind])
 
 	const checkConnection = useCallback(async () => {
+		setIsCheckingConnection(true)
+
+		// artificial delay for ✨aesthetic ✨
+		await new Promise((resolve) => setTimeout(resolve, 500)) // should give at least one loop of the loader (ish)
+
 		const isValid =
 			kind === 'stump' ? await checkUrl(formatApiURL(url, 'v2')) : await checkOPDSURL(url)
 		if (!isValid) {
 			form.setError('url', {
 				type: 'manual',
-				message: 'Failed to connect to server',
+				message: t(getKey('failedToConnect')),
 			})
 		} else {
 			form.clearErrors('url')
 			setDidConnect(true)
 		}
-	}, [kind, url, form, setDidConnect])
+		setIsCheckingConnection(false)
+	}, [kind, url, form, setDidConnect, t])
 
 	const [isAddingHeader, setIsAddingHeader] = useState(false)
 
@@ -88,9 +105,12 @@ export default function AddOrEditServerForm({
 			setIsAddingHeader(false)
 		} else {
 			console.error(result.error.errors)
-			Alert.alert('Error', result.error.errors[0]?.message || 'Invalid header')
+			Alert.alert(
+				t('common.error'),
+				result.error.errors[0]?.message || t(getKey('customHeaders.invalidHeader')),
+			)
 		}
-	}, [newHeaderKey, newHeaderValue, form])
+	}, [newHeaderKey, newHeaderValue, form, t, headerSchema])
 
 	const onCancelAddHeader = () => {
 		setNewHeaderKey('')
@@ -102,7 +122,6 @@ export default function AddOrEditServerForm({
 	useEffect(() => {
 		if (kind !== 'stump') {
 			setValue('defaultServer', false)
-			setValue('stumpOPDS', false)
 		}
 	}, [setValue, kind])
 
@@ -115,18 +134,16 @@ export default function AddOrEditServerForm({
 		}
 	}, [didConnect])
 
-	const [defaultServer, stumpOPDS, authMode] = useWatch({
+	const [defaultServer, authMode] = useWatch({
 		control,
-		name: ['defaultServer', 'stumpOPDS', 'authMode'],
+		name: ['defaultServer', 'authMode'],
 	})
 
 	const renderAuthMode = () => {
-		if (authMode === 'default') {
+		if (authMode === 'login' || authMode === 'none') {
 			return (
-				<View className="squircle rounded-lg border border-dashed border-edge p-3">
-					<Text className="text-foreground-muted">
-						You will be prompted to login when accessing content as needed
-					</Text>
+				<View className="squircle p-3 border-edge rounded-lg border border-dashed">
+					<Text className="text-foreground-muted">{t(getKey(`auth.${authMode}.description`))}</Text>
 				</View>
 			)
 		} else if (authMode === 'basic') {
@@ -136,7 +153,7 @@ export default function AddOrEditServerForm({
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
 							<Input
-								label="Username"
+								label={t('common.username')}
 								autoCorrect={false}
 								autoCapitalize="none"
 								placeholder="oromei"
@@ -154,7 +171,7 @@ export default function AddOrEditServerForm({
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
 							<Input
-								label="Password"
+								label={t('common.password')}
 								autoCorrect={false}
 								autoCapitalize="none"
 								placeholder="*************"
@@ -179,7 +196,7 @@ export default function AddOrEditServerForm({
 							label="Token"
 							autoCorrect={false}
 							autoCapitalize="none"
-							placeholder="Bearer token"
+							placeholder={t(getKey('auth.token.placeholder'))}
 							onBlur={onBlur}
 							onChangeText={onChange}
 							value={value}
@@ -196,8 +213,8 @@ export default function AddOrEditServerForm({
 
 	const formValues = useWatch({ control })
 	const isUpdateReady = useMemo(
-		() => !isEqual(getDefaultValues(stumpEnabled, editingServer), formValues),
-		[formValues, stumpEnabled, editingServer],
+		() => !isEqual(getDefaultValues(editingServer), formValues),
+		[formValues, editingServer],
 	)
 
 	const onURLFocused = useCallback(
@@ -222,77 +239,68 @@ export default function AddOrEditServerForm({
 
 	const insets = useSafeAreaInsets()
 
+	// TODO: imperative handle for the form so we can put the header buttons in the containing sheet, utilizing
+	// `header` properly so it doesn't hide when scrolled
 	return (
 		<View
-			className="w-full gap-4"
+			className="gap-5 w-full"
 			style={{ paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom }}
 		>
-			<View className="flex-row items-center justify-between pb-2">
-				<Pressable onPress={onClose}>
-					<Text className="text-foreground-muted">Cancel</Text>
-				</Pressable>
+			<View className="pb-2 flex-row items-center justify-between">
+				<HeaderButton
+					ios={{ variant: 'glass' }}
+					icon={{ ios: 'xmark', android: X }}
+					onPress={onClose}
+				/>
 
-				<Button
-					size="sm"
-					variant="brand"
+				<HeaderButton
+					ios={{ variant: 'glassProminent' }}
+					android={{ variant: 'prominent' }}
 					onPress={handleSubmit(onSubmit)}
 					disabled={editingServer ? !isUpdateReady : false}
-				>
-					<Text>Save</Text>
-				</Button>
+					icon={{ ios: 'checkmark', android: Check }}
+				/>
 			</View>
 
 			<View>
 				<Heading size="lg" className="font-bold leading-6">
-					{editingServer ? 'Edit Server' : 'Add Server'}
+					{editingServer ? t(getKey('editServer.title')) : t(getKey('addServer.title'))}
 				</Heading>
 				<Text className="text-foreground-muted">
-					{editingServer
-						? 'Make changes to the server configuration'
-						: 'Configure a new server to access your content'}
+					{t(getKey(editingServer ? 'editServer.subtitle' : 'addServer.subtitle'))}
 				</Text>
 			</View>
 
 			<View className="w-full flex-row items-center justify-between">
-				<Text className="text-base font-medium text-foreground-muted">Kind</Text>
+				<Text className="text-base font-medium text-foreground-muted">{t(getKey('kind'))}</Text>
 
-				<Tabs
+				<SegmentedPicker
 					value={broadKind}
+					options={[
+						{ label: 'Stump', value: 'stump' },
+						{ label: 'OPDS', value: 'opds' },
+					]}
 					onValueChange={(v) => form.setValue('kind', v as 'stump' | 'opds' | 'opds-legacy')}
-				>
-					<Tabs.List className="flex-row">
-						<Tabs.Trigger value="stump">
-							<Text>Stump</Text>
-						</Tabs.Trigger>
-
-						<Tabs.Trigger value="opds">
-							<Text>OPDS</Text>
-						</Tabs.Trigger>
-					</Tabs.List>
-				</Tabs>
+				/>
 			</View>
 
 			{broadKind === 'opds' && (
 				<View className="w-full flex-row items-center justify-between">
-					<Text className="text-base font-medium text-foreground-muted">OPDS Version</Text>
+					<Text className="text-base font-medium text-foreground-muted">
+						OPDS {t('common.version')}
+					</Text>
 
-					<Tabs
+					<SegmentedPicker
 						value={opdsVersion}
+						options={[
+							{ label: 'v1.2', value: 'v1' },
+							{ label: 'v2.0', value: 'v2' },
+						]}
 						onValueChange={(v) => {
 							setOpdsVersion(v as 'v1' | 'v2')
 							form.setValue('kind', v === 'v1' ? 'opds-legacy' : 'opds')
 						}}
-					>
-						<Tabs.List className="flex-row">
-							<Tabs.Trigger value="v1">
-								<Text>v1.2</Text>
-							</Tabs.Trigger>
-
-							<Tabs.Trigger value="v2">
-								<Text>v2.0</Text>
-							</Tabs.Trigger>
-						</Tabs.List>
-					</Tabs>
+					/>
 				</View>
 			)}
 
@@ -303,10 +311,10 @@ export default function AddOrEditServerForm({
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
 					<Input
-						label="Name"
+						label={t('common.name')}
 						autoCorrect={false}
 						autoCapitalize="none"
-						placeholder="My Server"
+						placeholder={t(getKey('serverNamePlaceholder'))}
 						onBlur={onBlur}
 						onChangeText={onChange}
 						value={value}
@@ -323,7 +331,7 @@ export default function AddOrEditServerForm({
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
 					<Input
-						label={kind === 'stump' ? 'URL' : 'Catalog URL'}
+						label={t(kind === 'stump' ? 'common.url' : getKey('catalogUrl'))}
 						autoCorrect={false}
 						autoCapitalize="none"
 						placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? `/opds/${opdsVersion === 'v1' ? 'v1.2' : 'v2.0'}/catalog` : ''}`}
@@ -331,33 +339,49 @@ export default function AddOrEditServerForm({
 						onChangeText={onChange}
 						value={value}
 						errorMessage={errors.url?.message}
-						secureTextEntry={maskURLs}
 						onFocus={onURLFocused}
 					/>
 				)}
 				name="url"
 			/>
 
-			<View className="flex-row justify-end">
-				<Button
-					variant="outline"
-					size="sm"
-					className={cn('squircle rounded-lg bg-background-surface', {
-						'opacity-70': !url,
-						'bg-fill-success-secondary': didConnect,
-					})}
-					disabled={!url}
-					onPress={checkConnection}
-				>
-					<Text>{didConnect ? 'Connected' : 'Check connection'}</Text>
-				</Button>
+			<View className="gap-1 my-2 flex-row items-center">
+				<DottedLine />
+				<Pressable disabled={!url} onPress={checkConnection}>
+					<GlassView
+						glassEffectStyle="regular"
+						style={{ borderRadius: 999, opacity: !url ? 0.65 : 1 }}
+						tintColor={didConnect ? colors.fill.success.secondary : undefined}
+						isInteractive={!!url}
+						// only affects android
+						className={cn('border-edge bg-background-surface border', {
+							'border-transparent bg-transparent': isCheckingConnection,
+							'bg-fill-success-secondary': didConnect,
+						})}
+					>
+						<View className="px-4 py-2">
+							{isCheckingConnection ? (
+								<View className="h-6 w-6 items-center justify-center">
+									<Loader />
+								</View>
+							) : (
+								<Text className="text-base font-semibold">
+									{t(getKey(didConnect ? 'didConnect' : 'checkConnection'))}
+								</Text>
+							)}
+						</View>
+					</GlassView>
+				</Pressable>
+				<DottedLine inverted />
 			</View>
 
-			<View className="w-full gap-2">
-				<Text className="text-base font-medium text-foreground-muted">Custom Headers</Text>
+			<View className="gap-2 w-full">
+				<Text className="text-base font-medium text-foreground-muted">
+					{t(getKey('customHeaders.label'))}
+				</Text>
 
 				{formValues.customHeaders?.length && (
-					<View className="squircle w-full overflow-hidden rounded-lg border border-edge">
+					<View className="squircle border-edge w-full overflow-hidden rounded-lg border">
 						{formValues.customHeaders.map((header, index) => (
 							<Swipeable
 								key={index}
@@ -369,9 +393,9 @@ export default function AddOrEditServerForm({
 							>
 								<View
 									className={cn(
-										'w-full flex-row items-center justify-between gap-2 p-3 tablet:p-4',
+										'gap-2 p-3 tablet:p-4 w-full flex-row items-center justify-between',
 										{
-											'border-b border-edge': index !== (formValues.customHeaders?.length || 0) - 1,
+											'border-edge border-b': index !== (formValues.customHeaders?.length || 0) - 1,
 										},
 									)}
 								>
@@ -384,58 +408,55 @@ export default function AddOrEditServerForm({
 				)}
 
 				{isAddingHeader ? (
-					<View className="squircle gap-2 rounded-2xl border border-edge p-3">
+					<View className="squircle gap-2 p-3 border-edge rounded-2xl border">
 						<Input
-							label="Key"
+							label={t('common.name')}
 							autoCorrect={false}
 							autoCapitalize="none"
-							placeholder="Key"
+							placeholder="X-Biz-Baz"
 							onChangeText={setNewHeaderKey}
 						/>
 						<Input
-							label="Value"
+							label={t('common.value')}
 							autoCorrect={false}
 							autoCapitalize="none"
-							placeholder="Value"
+							placeholder={t('common.value').toLowerCase()}
 							onChangeText={setNewHeaderValue}
 						/>
-						<View className="flex-row justify-end gap-4">
-							<Button variant="outline" size="sm" onPress={onCancelAddHeader}>
-								<Text>Cancel</Text>
+						<View className="gap-4 flex-row justify-end">
+							<Button variant="outline" size="sm" roundness="full" onPress={onCancelAddHeader}>
+								<Text>{t('common.cancel')}</Text>
 							</Button>
-							<Button variant="brand" size="sm" onPress={addNewHeader}>
-								<Text>Save</Text>
+							<Button variant="brand" size="sm" roundness="full" onPress={addNewHeader}>
+								<Text>{t('common.save')}</Text>
 							</Button>
 						</View>
 					</View>
 				) : (
-					<Button roundness="xl" variant="outline" onPress={() => setIsAddingHeader(true)}>
-						<Text>Add header</Text>
+					<Button roundness="full" variant="outline" onPress={() => setIsAddingHeader(true)}>
+						<Text>{t(getKey('customHeaders.addHeader'))}</Text>
 					</Button>
 				)}
 			</View>
 
 			<View className="w-full flex-row items-center justify-between">
-				<Text className="text-base font-medium text-foreground-muted">Auth</Text>
+				<Text className="text-base font-medium text-foreground-muted">
+					{t(getKey('auth.label'))}
+				</Text>
 
 				<Controller
 					control={control}
 					render={({ field: { onChange, value } }) => (
-						<Tabs value={value} onValueChange={onChange}>
-							<Tabs.List className="flex-row">
-								<Tabs.Trigger value="default">
-									<Text>Login</Text>
-								</Tabs.Trigger>
-
-								<Tabs.Trigger value="basic">
-									<Text>Basic</Text>
-								</Tabs.Trigger>
-
-								<Tabs.Trigger value="token">
-									<Text>Token</Text>
-								</Tabs.Trigger>
-							</Tabs.List>
-						</Tabs>
+						<SegmentedPicker
+							value={value}
+							options={[
+								{ label: t(getKey('auth.none.label')), value: 'none' },
+								{ label: t(getKey('auth.login.label')), value: 'login' },
+								{ label: t(getKey('auth.basic')), value: 'basic' },
+								{ label: t(getKey('auth.token.label')), value: 'token' },
+							]}
+							onValueChange={(v) => onChange(v)}
+						/>
 					)}
 					name="authMode"
 				/>
@@ -443,9 +464,9 @@ export default function AddOrEditServerForm({
 
 			{renderAuthMode()}
 
-			<View className="w-full gap-6">
-				<Text className="text-base font-medium text-foreground-muted">Options</Text>
-				<View className="w-full flex-row items-center justify-between gap-6">
+			<View className="gap-6 w-full">
+				<Text className="text-base font-medium text-foreground-muted">{t('common.options')}</Text>
+				<View className="gap-6 w-full flex-row items-center justify-between">
 					<Label
 						nativeID="defaultServer"
 						onPress={() => {
@@ -453,7 +474,7 @@ export default function AddOrEditServerForm({
 						}}
 						disabled={kind !== 'stump'}
 					>
-						Set as default server
+						{t(getKey('setAsDefaultServer'))}
 					</Label>
 
 					<Switch
@@ -463,27 +484,6 @@ export default function AddOrEditServerForm({
 						disabled={kind !== 'stump'}
 					/>
 				</View>
-
-				{kind === 'stump' && (
-					<View className="w-full flex-row items-center justify-between gap-6">
-						<Label
-							nativeID="stumpOPDS"
-							onPress={() => {
-								form.setValue('stumpOPDS', !stumpOPDS)
-							}}
-							disabled={kind !== 'stump'}
-						>
-							Enable OPDS
-						</Label>
-
-						<Switch
-							checked={stumpOPDS}
-							onCheckedChange={(value) => form.setValue('stumpOPDS', value)}
-							nativeID="stumpOPDS"
-							disabled={kind !== 'stump'}
-						/>
-					</View>
-				)}
 			</View>
 		</View>
 	)
@@ -494,6 +494,7 @@ function RenderHeaderAction(
 	drag: SharedValue<number>,
 	onDelete: () => void,
 ) {
+	const { t } = useTranslate()
 	const styleAnimation = useAnimatedStyle(() => {
 		return {
 			transform: [{ translateX: drag.value + 50 }],
@@ -503,10 +504,12 @@ function RenderHeaderAction(
 	return (
 		<Reanimated.View style={styleAnimation}>
 			<Pressable
-				className="h-full w-14 items-center justify-center bg-fill-danger"
+				className="w-14 bg-fill-danger h-full items-center justify-center"
 				onPress={onDelete}
 			>
-				{({ pressed }) => <Text className={cn({ 'opacity-80': pressed })}>Delete</Text>}
+				{({ pressed }) => (
+					<Text className={cn({ 'opacity-80': pressed })}>{t('common.delete')}</Text>
+				)}
 			</Pressable>
 		</Reanimated.View>
 	)
@@ -515,18 +518,17 @@ function RenderHeaderAction(
 const defaultValues = {
 	defaultServer: false,
 	kind: 'stump',
-	stumpOPDS: false,
 	name: '',
 	url: '',
-	authMode: 'default',
+	authMode: 'login',
 	token: '',
 	basicUser: '',
 	basicPassword: '',
 } as AddOrEditServerSchema
 
-const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWithConfig | null) => {
+const getDefaultValues = (editingServer?: SavedServerWithConfig | null) => {
 	if (!editingServer) {
-		return { ...defaultValues, kind: stumpEnabled ? 'stump' : 'opds' } as AddOrEditServerSchema
+		return { ...defaultValues, kind: 'stump' } as AddOrEditServerSchema
 	}
 
 	const configs = match(editingServer.config?.auth)
@@ -550,8 +552,8 @@ const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWith
 				token: '',
 			}),
 		)
-		.otherwise(() => ({
-			authMode: 'default',
+		.otherwise((config) => ({
+			authMode: config?.authless ? 'none' : 'login',
 			basicUser: '',
 			basicPassword: '',
 			token: '',
@@ -562,7 +564,6 @@ const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWith
 		name: editingServer.name,
 		url: editingServer.url,
 		defaultServer: editingServer.defaultServer ?? false,
-		stumpOPDS: editingServer.stumpOPDS,
 		customHeaders: Object.entries(editingServer.config?.customHeaders || {}).map(
 			([key, value]) => ({
 				key,
@@ -573,56 +574,59 @@ const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWith
 	} as AddOrEditServerSchema
 }
 
-const headerSchema = z
-	.object({
-		key: z.string().nonempty(),
-		value: z.string().nonempty(),
-	})
-	.refine((value) => value.key.toLowerCase() !== 'authorization', {
-		message: 'Cannot set Authorization header',
-	})
+const createHeaderSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			key: z.string().nonempty(),
+			value: z.string().nonempty(),
+		})
+		.refine((value) => value.key.toLowerCase() !== 'authorization', {
+			message: t(getKey('validations.cannotSetAuthorizationHeader')),
+		})
 
-const createSchema = (names: string[]) =>
+export const authMode = z.union([
+	// i realized i needed a 'none' option for connections where auth is "not required"
+	// from the perspective of the api instance, e.g. some servers (including stump) support
+	// auth in the URL (like an api key part of the route path) and thus effectively there is
+	// no auth flow (at least from the perspective of this client). the reason this was important
+	// is because authless connections should still support some level of auto-sync (e.g., logos)
+	z.literal('none'),
+	z.literal('token'),
+	z.literal('basic'),
+	z.literal('login'),
+])
+
+const createSchema = (names: string[], t: (key: string) => string) =>
 	z.object({
 		name: z
 			.string()
 			.nonempty()
 			.min(1)
 			.refine((value) => !names.includes(value), {
-				message: 'Name already exists',
+				message: t(getKey('validations.nameAlreadyExists')),
 			}),
 		url: z.string().url(),
 		kind: z
 			.union([z.literal('stump'), z.literal('opds'), z.literal('opds-legacy')])
 			.default('stump'),
 		defaultServer: z.boolean().default(false),
-		stumpOPDS: z.boolean().default(false),
-		authMode: z
-			.union([z.literal('token'), z.literal('basic'), z.literal('default')])
-			.default('default'),
+		authMode: authMode.default('login'),
 		token: z.string().optional(),
 		basicUser: z.string().optional(),
 		basicPassword: z.string().optional(),
-		customHeaders: z.array(headerSchema).optional(),
+		customHeaders: z.array(createHeaderSchema(t)).optional(),
 	})
 export type AddOrEditServerSchema = z.infer<ReturnType<typeof createSchema>>
 
 export const transformFormData = (data: AddOrEditServerSchema) => {
-	const baseConfig =
-		data.authMode !== 'default'
-			? {
-					auth: data.token
-						? { bearer: data.token as string }
-						: data.basicUser
-							? {
-									basic: {
-										username: data.basicUser as string,
-										password: data.basicPassword as string,
-									},
-								}
-							: undefined,
-				}
-			: undefined
+	const authConfig = match(data.authMode)
+		.with('token', () => ({ bearer: data.token as string }))
+		.with('basic', () => ({
+			basic: { username: data.basicUser as string, password: data.basicPassword as string },
+		}))
+		.with('none', () => ({ authless: true }))
+		.otherwise(() => undefined)
+	const baseConfig = authConfig ? ({ auth: authConfig } satisfies ServerConfig) : undefined
 
 	const config =
 		!!data.customHeaders && data.customHeaders.length > 0
@@ -640,7 +644,9 @@ export const transformFormData = (data: AddOrEditServerSchema) => {
 
 	return {
 		...omit(data, ['authMode', 'token', 'basicUser', 'basicPassword', 'customHeaders']),
-		stumpOPDS: data.kind === 'stump' ? data.stumpOPDS : false,
 		config,
 	}
 }
+
+const LOCALE_BASE = 'addOrEditServer'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

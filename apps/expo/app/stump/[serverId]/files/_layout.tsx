@@ -1,0 +1,63 @@
+import { Stack } from 'expo-router'
+import { Platform, View } from 'react-native'
+
+import BackLink from '~/components/BackLink'
+import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
+import { usePreferencesStore } from '~/stores'
+
+export default function Screen() {
+	const { t } = useTranslate()
+	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
+
+	return (
+		<FileExplorerAssetsProvider>
+			<Stack
+				screenOptions={{
+					headerShown: false,
+					animation: animationEnabled ? 'default' : 'none',
+				}}
+			>
+				<Stack.Screen
+					name="index"
+					options={{
+						headerShown: true,
+						headerTitle: t('stumpServer.browse.files'),
+						headerLeft:
+							Platform.OS === 'android'
+								? undefined
+								: () => (
+										<View
+											style={{
+												width: 35,
+												height: 35,
+												justifyContent: 'center',
+												alignItems: 'center',
+											}}
+										>
+											<BackLink />
+										</View>
+									),
+						headerTransparent: Platform.OS === 'ios',
+						headerLargeTitleStyle: {
+							fontSize: 24,
+						},
+						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
+					}}
+				/>
+
+				<Stack.Screen
+					name="[path]"
+					options={{
+						headerShown: true,
+						headerTitle: '',
+						headerTransparent: Platform.OS === 'ios',
+						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
+					}}
+					dangerouslySingular
+				/>
+			</Stack>
+		</FileExplorerAssetsProvider>
+	)
+}

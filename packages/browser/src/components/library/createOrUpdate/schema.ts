@@ -1,9 +1,9 @@
-import { PickSelect } from '@stump/components'
 import {
 	CreateLibrarySceneExistingLibrariesQuery,
 	LibraryConfigInput,
 	LibraryPattern,
 	LibrarySettingsConfigFragment,
+	LibraryType,
 	LibraryViewMode,
 	ReadingDirection,
 	ReadingImageScaleFit,
@@ -136,6 +136,7 @@ export const buildSchema = (
 			)
 			.default([]),
 		libraryPattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
+		libraryType: z.nativeEnum(LibraryType).default(LibraryType.Mixed),
 		defaultLibraryViewMode: z.string().refine(isLibraryViewMode).default('SERIES'),
 		hideSeriesView: z.boolean().default(false),
 		skipBookOverview: z.boolean().default(false),
@@ -193,6 +194,7 @@ export const buildSchema = (
 					return
 				}
 			}),
+		oneshotsDirectory: z.string().nullish(), // will be relative to path, if provided
 		processMetadata: z.boolean().default(true),
 		scanAfterPersist: z.boolean().default(true),
 		tags: z
@@ -230,8 +232,10 @@ export const formDefaults = (
 	watch: library?.config.watch ?? true,
 	ignoreRules: toFormIgnoreRules(library?.config.ignoreRules || []),
 	libraryPattern: library?.config.libraryPattern || LibraryPattern.SeriesBased,
+	libraryType: library?.config.libraryType || LibraryType.Mixed,
 	name: library?.name || '',
 	path: library?.path || '',
+	oneshotsDirectory: library?.config.oneshotsDirectory || null,
 	processMetadata: library?.config.processMetadata ?? true,
 	scanAfterPersist: true,
 	tags: library?.tags?.map((t) => ({ label: t.name, value: t.name.toLowerCase() })),
@@ -250,7 +254,8 @@ export const intoThumbnailConfig = (
 	const converted = match(config.resizeMethod)
 		.with({ mode: 'scaleEvenlyByFactor' }, ({ factor }) => {
 			return {
-				...config,
+				format: config.format,
+				quality: config.quality,
 				resizeMethod: {
 					scaleEvenlyByFactor: {
 						factor,
@@ -260,7 +265,8 @@ export const intoThumbnailConfig = (
 		})
 		.with({ mode: 'scaleDimension' }, ({ dimension, size }) => {
 			return {
-				...config,
+				format: config.format,
+				quality: config.quality,
 				resizeMethod: {
 					scaleDimension: {
 						dimension: dimension as ScaledDimensionResize['dimension'],
@@ -271,7 +277,8 @@ export const intoThumbnailConfig = (
 		})
 		.with({ mode: 'exact' }, ({ height, width }) => {
 			return {
-				...config,
+				format: config.format,
+				quality: config.quality,
 				resizeMethod: {
 					exact: {
 						height,
@@ -280,7 +287,13 @@ export const intoThumbnailConfig = (
 				},
 			}
 		})
-		.otherwise(() => null)
+		.otherwise(() => {
+			return {
+				format: config.format,
+				quality: config.quality,
+				resizeMethod: null,
+			}
+		})
 
 	return omit(converted, 'enabled')
 }
@@ -342,23 +355,4 @@ export const intoFormThumbnailConfig = (
 	console.warn('Unknown thumbnail resize method:', config.resizeMethod)
 
 	return baseConfig
-}
-
-/**
- * A function to ensure that the thumbnail config is valid before returning it
- */
-export const ensureValidThumbnailConfig = (
-	config: PickSelect<CreateOrUpdateLibrarySchema, 'thumbnailConfig'>,
-) => {
-	const { enabled, resizeMethod } = config
-	if (!enabled || !resizeMethod) {
-		return null
-	}
-
-	const parseResult = thumbnailConfig.safeParse(intoThumbnailConfig(config))
-	if (!parseResult.success) {
-		console.warn('Invalid thumbnail config:', parseResult.error.format())
-		return null
-	}
-	return parseResult.data
 }

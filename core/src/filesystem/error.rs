@@ -1,5 +1,9 @@
 use std::io;
 
+use models::shared::readium::{
+	RWPMPositionBuilderError, RWPMPositionLocationsBuilderError,
+	RWPMPositionsBuilderError,
+};
 use thiserror::Error;
 use unrar::error::UnrarError;
 use zip::result::ZipError;
@@ -23,8 +27,6 @@ pub enum FileError {
 	#[error("Could not find an image")]
 	NoImageError,
 	#[error("{0}")]
-	PdfError(#[from] pdf::error::PdfError),
-	#[error("{0}")]
 	PdfRendererError(#[from] pdfium_render::prelude::PdfiumError),
 	#[error("Stump is not properly configured to render PDFs")]
 	PdfConfigurationError,
@@ -42,6 +44,8 @@ pub enum FileError {
 	RarReadError,
 	#[error("Error reading RAR byte content")]
 	RarByteReadError(#[from] std::str::Utf8Error),
+	#[error("RAR archive is empty")]
+	RarEmpty,
 	#[error("Unsupported file type: {0}")]
 	UnsupportedFileType(String),
 	#[error("{0}")]
@@ -52,6 +56,8 @@ pub enum FileError {
 	DirectoryReadError,
 	#[error("Incorrect image processor for requested format")]
 	IncorrectProcessorError,
+	#[error("File not found on disk")]
+	NotFound,
 	#[error("An unknown error occurred: {0}")]
 	UnknownError(String),
 }
@@ -63,5 +69,25 @@ impl From<FileError> for CoreError {
 			FileError::UnknownError(err) => CoreError::Unknown(err),
 			_ => CoreError::InternalError(error.to_string()),
 		}
+	}
+}
+
+// lol don't do this long term, accepting for now but fix in my reorganization branch <3
+
+impl From<RWPMPositionLocationsBuilderError> for FileError {
+	fn from(error: RWPMPositionLocationsBuilderError) -> Self {
+		FileError::EpubReadError(error.to_string())
+	}
+}
+
+impl From<RWPMPositionBuilderError> for FileError {
+	fn from(error: RWPMPositionBuilderError) -> Self {
+		FileError::EpubReadError(error.to_string())
+	}
+}
+
+impl From<RWPMPositionsBuilderError> for FileError {
+	fn from(error: RWPMPositionsBuilderError) -> Self {
+		FileError::EpubReadError(error.to_string())
 	}
 }

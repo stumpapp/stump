@@ -35,10 +35,9 @@ export function ActionMenu({ icon, groups, disabled: isDisabled }: ActionMenuPro
 									systemImage={typeof item.icon === 'string' ? item.icon : item.icon.ios}
 									onPress={item.onPress}
 									role={item.role}
-									disabled={item.disabled}
-								>
-									{item.label}
-								</Button>
+									label={item.label}
+									modifiers={[disabled(item.disabled)]}
+								/>
 							))}
 
 							{groupIndex < groups.length - 1 && <Divider />}

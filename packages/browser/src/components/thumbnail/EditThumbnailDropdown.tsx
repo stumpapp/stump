@@ -36,7 +36,7 @@ export default function EditThumbnailDropdown({ label, onChooseSelector, onUploa
 				align="start"
 				contentWrapperClassName="w-18"
 				trigger={
-					<Button size="md" className="border border-edge">
+					<Button className="border border-border">
 						{label || t(withLocaleKey('label'))}
 						<ChevronDown className="ml-2 h-4 w-4" />
 					</Button>

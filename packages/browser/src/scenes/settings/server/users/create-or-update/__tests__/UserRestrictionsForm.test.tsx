@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { buildSchema, CreateOrUpdateUserSchema, ExistingUser, formDefaults } from '../schema'
 import UserRestrictionsForm from '../UserRestrictionsForm'
 
-const onSubmit = jest.fn()
+const onSubmit = vi.fn()
 
 type SubjectProps = {
 	user?: Partial<ExistingUser>
@@ -36,7 +36,7 @@ const Subject = ({ user }: SubjectProps = {}) => {
 
 describe('UserRestrictionsForm', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it('should render', () => {

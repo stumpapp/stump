@@ -1,10 +1,11 @@
+import { useSDKSafe } from '@stump/client'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
-import { useDownload } from '~/lib/hooks'
+import { Timer, useDownload } from '~/lib/hooks'
 import {
 	intoPDFReadiumLocator,
 	PDFBookLoadedEvent,
@@ -14,6 +15,7 @@ import {
 	PDFViewRef,
 	ReadiumLocator,
 } from '~/modules/readium'
+import { useVolumeListener } from '~/modules/volumeListener'
 import { useReaderStore } from '~/stores'
 import { usePdfStore } from '~/stores/pdf'
 import { useBookPreferences } from '~/stores/reader'
@@ -43,9 +45,9 @@ type Props = {
 	 */
 	offlineUri?: string
 	/**
-	 * A callback to reset the reading timer
+	 * The active book's timer
 	 */
-	resetTimer?: () => void
+	timer: Timer
 } & OfflineCompatibleReader
 
 // TODO(expo-pdf): Long term, consider just using a library like https://github.com/wonday/react-native-pdf
@@ -57,7 +59,7 @@ type Props = {
 // - settings sheet, a chunk of existing settings do not apply to PDF
 
 export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: Props) {
-	const { downloadBook } = useDownload({ serverId: ctx.serverId })
+	const { downloadImmediate } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
 	const [isDownloading, setIsDownloading] = useState(false)
@@ -72,6 +74,14 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
+
+	useEffect(() => {
+		if (controlsVisible) {
+			ctx.timer.pause()
+		} else {
+			ctx.timer.resume()
+		}
+	}, [controlsVisible, ctx.timer])
 
 	const { preferences: bookPreferences } = useBookPreferences({ book, serverId: ctx.serverId })
 
@@ -123,6 +133,12 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		[],
 	)
 
+	useVolumeListener({
+		enabled: bookPreferences.volumeButtonsNavigate,
+		onVolumeUp: () => navigator.goForward(),
+		onVolumeDown: () => navigator.goBackward(),
+	})
+
 	const store = usePdfStore(
 		useShallow((store) => ({
 			storeBook: store.storeBook,
@@ -133,13 +149,16 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		})),
 	)
 
+	const sdkCtx = useSDKSafe()
+
 	useEffect(() => {
-		if (localUri) return
+		if (localUri || !sdkCtx) return
 
 		async function download() {
 			setIsDownloading(true)
-			const result = await downloadBook({
+			const result = await downloadImmediate({
 				...book,
+				url: sdkCtx!.sdk.media.downloadURL(book.id),
 				bookName: book.name,
 				libraryId: book.library?.id,
 				libraryName: book.library?.name,
@@ -157,7 +176,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		}
 
 		download().finally(() => setIsDownloading(false))
-	}, [localUri, book, downloadBook, store])
+	}, [localUri, book, downloadImmediate, store, sdkCtx])
 
 	useEffect(
 		() => {
@@ -170,6 +189,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				setLocalUri(null)
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)
@@ -178,6 +198,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		() => {
 			store.storeBook(book)
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.id],
 	)

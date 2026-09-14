@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+        <dc:identifier opf:scheme="calibre" id="calibre_id">17</dc:identifier>
+        <dc:identifier opf:scheme="uuid" id="uuid_id">c29b5d04-4046-4508-a722-f1dc9b2158ad</dc:identifier>
+        <dc:title>Heated Rivalry</dc:title>
+        <dc:creator opf:file-as="Reid, Rachel" opf:role="aut">Rachel Reid</dc:creator>
+        <dc:contributor opf:file-as="calibre" opf:role="bkp">calibre (8.7.0) [https://calibre-ebook.com]</dc:contributor>
+        <dc:date>2026-03-06T17:33:05+00:00</dc:date>
+        <dc:description>&lt;div&gt;
+&lt;p&gt;Pro hockey star Shane Hollander isn't just crazy talented, he's got a spotless reputation. Hockey is his life. Now that he's captain of the Montreal Voyageurs, he won't let anything jeopardize that, especially the sexy Russian whose hard body keeps him awake at night.&lt;br&gt;&lt;br&gt;Boston Bears captain Ilya Rozanov is everything Shane's not. The self-proclaimed king of the ice, he's as cocky as he is talented. No one can beat him - except Shane. They've made a career on their legendary rivalry, but when the skates come off, the heat between them is undeniable. When Ilya realizes he wants more than a few secret hookups, he knows he must walk away. The risk is too great.&lt;br&gt;&lt;br&gt;As their attraction intensifies, they struggle to keep their relationship out of the public eye. If the truth comes out, it could ruin them both. But when their need for each other rivals their ambition on the ice, secrecy is no longer an option...&lt;/p&gt;&lt;/div&gt;</dc:description>
+        <dc:publisher>Carina Press</dc:publisher>
+        <dc:identifier opf:scheme="GOOGLE">4re5EQAAQBAJ</dc:identifier>
+        <dc:identifier opf:scheme="ISBN">9789062229352</dc:identifier>
+        <dc:language>eng</dc:language>
+        <dc:subject>New Adult</dc:subject>
+        <dc:subject>Romance</dc:subject>
+        <dc:subject>Fiction</dc:subject>
+        <dc:subject>Gay</dc:subject>
+        <dc:subject>Lgbtq+</dc:subject>
+        <meta name="calibre:series" content="Game Changers"/>
+        <meta name="calibre:series_index" content="2"/>
+        <meta name="calibre:title_sort" content="Heated Rivalry"/>
+    </metadata>
+    <guide>
+        <reference type="cover" title="Cover" href="cover.jpg"/>
+    </guide>
+</package>

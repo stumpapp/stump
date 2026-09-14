@@ -1,20 +1,14 @@
 use std::fmt::Debug;
 
-use async_graphql::{SimpleObject, Union};
+use async_graphql::Union;
 use serde::{de, Deserialize, Serialize};
 
 use crate::filesystem::{
 	image::{PlaceholderGenerationOutput, ThumbnailGenerationOutput},
+	media::analysis::AnalyzeMediaOutput,
+	metadata::MetadataFetchJobOutput,
 	scanner::{LibraryScanOutput, SeriesScanOutput},
 };
-
-// TODO: There are a couple jobs defined in the server, which obviously presents a problem with
-// this type. For now, I'll do some type gymnastics to make it work, but it's not ideal and
-// should be fixed. In the meantime, this type represents a generic object
-#[derive(Debug, Clone, Serialize, Deserialize, SimpleObject)]
-pub struct ExternalJobOutput {
-	pub val: serde_json::Value,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Union)]
 #[serde(untagged, rename_all = "camelCase")]
@@ -23,7 +17,8 @@ pub enum CoreJobOutput {
 	SeriesScan(SeriesScanOutput),
 	ThumbnailGeneration(ThumbnailGenerationOutput),
 	PlaceholderGeneration(PlaceholderGenerationOutput),
-	External(ExternalJobOutput),
+	MetadataFetch(MetadataFetchJobOutput),
+	AnalyzeMedia(AnalyzeMediaOutput),
 }
 
 /// A trait to extend the output type for a job with a common interface. Job output starts

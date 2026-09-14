@@ -5,6 +5,7 @@ use models::{
 	entity::user::AuthUser,
 	shared::{enums::UserPermission, permission_set::user_has_all_permissions},
 };
+use sea_orm::entity::prelude::DateTimeWithTimeZone;
 use stump_core::Ctx;
 
 use crate::error_message;
@@ -44,6 +45,22 @@ impl ServiceContext {
 		} else {
 			format!("{}/{}", self.url(), url)
 		}
+	}
+
+	pub fn cache_friendly_url<A: AsRef<str>>(
+		&self,
+		path: A,
+		timestamp: &Option<DateTimeWithTimeZone>,
+	) -> String {
+		let base_url = self.format_url(path);
+
+		let Some(datetime) = timestamp else {
+			return base_url;
+		};
+
+		let ready_for_params = base_url.trim_end_matches("/");
+
+		format!("{ready_for_params}?last_modified={}", datetime.to_rfc3339())
 	}
 }
 

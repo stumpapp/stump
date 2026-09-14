@@ -44,7 +44,7 @@ export default function ConfiguredServer({
 	return (
 		<div
 			className={cn('group p-4 flex items-center justify-between', {
-				'hover:bg-background-surface-hover/10': isReachable,
+				'hover:bg-accent/10': isReachable,
 			})}
 		>
 			<div

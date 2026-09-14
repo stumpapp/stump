@@ -1,31 +1,7 @@
-import { cx, Label, NativeSelect, Text } from '@stump/components'
+import { cx, NativeSelect, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
-
-const OPTIONS = [
-	{ label: 'No limit', value: 0 },
-	{
-		label: '1152px',
-		value: 1152,
-	},
-	{
-		label: '1280px',
-		value: 1280,
-	},
-	{
-		label: '1440px',
-		value: 1440,
-	},
-	{
-		label: '1600px',
-		value: 1600,
-	},
-	{
-		label: '1920px',
-		value: 1920,
-	},
-]
 
 export default function MaxWidthPreference() {
 	const { t } = useLocaleContext()
@@ -33,6 +9,15 @@ export default function MaxWidthPreference() {
 		preferences: { layoutMaxWidthPx, primaryNavigationMode },
 		update,
 	} = usePreferences()
+
+	const options = [
+		{ label: t(getKey('options.noLimit')), value: 0 },
+		{ label: '1152px', value: 1152 },
+		{ label: '1280px', value: 1280 },
+		{ label: '1440px', value: 1440 },
+		{ label: '1600px', value: 1600 },
+		{ label: '1920px', value: 1920 },
+	]
 
 	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const value = e.target.value
@@ -43,40 +28,33 @@ export default function MaxWidthPreference() {
 
 		// TODO: support custom
 		const parsed = parseInt(value)
-		if (!isNaN(parsed) && OPTIONS.some((opt) => opt.value === parsed)) {
+		if (!isNaN(parsed) && options.some((opt) => opt.value === parsed)) {
 			return update({ layoutMaxWidthPx: parsed })
 		}
 
 		return null
 	}
 
+	const isSidebarMode = primaryNavigationMode === 'SIDEBAR'
+
 	return (
-		<div
-			className="gap-y-1.5 md:max-w-md flex flex-col"
-			title={
-				primaryNavigationMode === 'SIDEBAR'
-					? // TODO: support it
-						t(getKey('tooltip'))
-					: undefined
-			}
+		<NewCard.Row
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
+			className={cx({ 'opacity-50': isSidebarMode })}
 		>
-			<Label className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
-				{t(getKey('label'))}
-			</Label>
-			<NativeSelect
-				value={layoutMaxWidthPx || undefined}
-				options={OPTIONS}
-				onChange={handleChange}
-				disabled={primaryNavigationMode === 'SIDEBAR'}
-			/>
-			<Text
-				size="xs"
-				variant="muted"
-				className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}
+			<div
+				className="max-w-xs lg:w-56 w-full"
+				title={isSidebarMode ? t(getKey('tooltip')) : undefined}
 			>
-				{t(getKey('description'))}
-			</Text>
-		</div>
+				<NativeSelect
+					value={layoutMaxWidthPx || undefined}
+					options={options}
+					onChange={handleChange}
+					disabled={isSidebarMode}
+				/>
+			</div>
+		</NewCard.Row>
 	)
 }
 

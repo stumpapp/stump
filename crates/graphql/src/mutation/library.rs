@@ -1,12 +1,15 @@
-use async_graphql::{Context, Json, Object, Result, SimpleObject, ID};
+use std::path::Path;
+
+use async_graphql::{Context, Json, MaybeUndefined, Object, Result, SimpleObject, ID};
 use chrono::Utc;
 use itertools::chain;
+use metadata_integrations::MetadataField;
 use models::{
 	entity::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
 		library_config, library_exclusion, library_scan_record, library_tag, media,
-		media_metadata, series, series_metadata, tag, user,
+		media_metadata, metadata_provider_config, series, series_metadata, tag, user,
 	},
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
@@ -18,21 +21,29 @@ use sea_orm::{
 use stump_core::filesystem::{
 	image::{
 		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
-		ImageProcessorOptionsExt, PlaceholderGenerationJob,
-		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
-		ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+		ImageProcessorOptionsExt, PlaceholderGenerationJobConfig,
+		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
 	},
-	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
-	scanner::{LibraryScanJob, ScanOptions},
+	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
+	metadata::{MetadataFetchJobParams, MetadataFetchScope},
+	scanner::ScanOptions,
 };
+use stump_core::job::stump_job::StumpJob;
 use tokio::fs;
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	error_message,
 	guard::PermissionGuard,
-	input::{library::CreateOrUpdateLibraryInput, thumbnail::UpdateThumbnailInput},
-	object::library::Library,
+	input::{
+		library::{
+			CreateOrUpdateLibraryInput, PatchLibraryConfigInput, PatchLibraryInput,
+		},
+		thumbnail::UpdateThumbnailInput,
+	},
+	mutation::tag::sync_tags,
+	object::{library::Library, library_config::LibraryConfig},
+	utils::db_statement,
 };
 
 #[derive(Default, SimpleObject)]
@@ -65,13 +76,11 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		core.enqueue_job(
-			AnalyzeMediaJob::new(AnalysisJobConfig {
-				force_reanalysis,
-				scope: MediaAnalysisJobScope::Library(model.id),
-			})
-			.wrapped(),
-		)?;
+		core.enqueue(StumpJob::analyze_media(AnalysisJobConfig {
+			force_reanalysis,
+			scope: MediaAnalysisJobScope::Library(model.id),
+		}))
+		.await?;
 
 		Ok(true)
 	}
@@ -243,66 +252,34 @@ impl LibraryMutation {
 		.await?;
 
 		if let Some(tags) = tags {
-			let existing_tags = tag::Entity::find()
-				.filter(tag::Column::Name.is_in(tags.clone()))
-				.all(&txn)
+			let (to_connect, _) = super::tag::sync_tags(&txn, &tags, &[]).await?;
+
+			if !to_connect.is_empty() {
+				library_tag::Entity::insert_many(
+					to_connect
+						.into_iter()
+						.map(|tag_id| library_tag::ActiveModel {
+							library_id: Set(created_library.id.clone()),
+							tag_id: Set(tag_id),
+							..Default::default()
+						})
+						.collect::<Vec<library_tag::ActiveModel>>(),
+				)
+				.on_conflict_do_nothing()
+				.exec(&txn)
 				.await?;
-
-			tracing::trace!(existing_tags = existing_tags.len(), "Found existing tags");
-
-			let tags_to_create = tags
-				.iter()
-				.filter(|tag| !existing_tags.iter().any(|t| t.name == **tag))
-				.map(|tag| tag::ActiveModel {
-					name: Set(tag.clone()),
-					..Default::default()
-				})
-				.collect::<Vec<_>>();
-
-			tracing::trace!(
-				tags_to_create = tags_to_create.len(),
-				"Found tags to create"
-			);
-
-			let created_tags = if !tags_to_create.is_empty() {
-				tag::Entity::insert_many(tags_to_create)
-					.exec_with_returning_many(&txn)
-					.await?
-			} else {
-				vec![]
-			};
-
-			let to_link = existing_tags
-				.iter()
-				.chain(created_tags.iter())
-				.map(|tag| tag.id)
-				.collect::<Vec<_>>();
-
-			library_tag::Entity::insert_many(
-				to_link
-					.into_iter()
-					.map(|tag_id| library_tag::ActiveModel {
-						library_id: Set(created_library.id.clone()),
-						tag_id: Set(tag_id),
-						..Default::default()
-					})
-					.collect::<Vec<library_tag::ActiveModel>>(),
-			)
-			.on_conflict_do_nothing()
-			.exec(&txn)
-			.await?;
-		} else {
-			tracing::debug!("No tags provided, skipping tag creation");
+			}
 		}
 
 		txn.commit().await?;
 
 		if scan_after_creation {
-			core.enqueue_job(LibraryScanJob::new(
+			core.enqueue(StumpJob::library_scan(
 				created_library.id.clone(),
 				created_library.path.clone(),
 				None,
-			))?;
+			))
+			.await?;
 		}
 
 		if add_watcher {
@@ -394,7 +371,10 @@ impl LibraryMutation {
 
 	/// Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
 	/// the library will be scanned immediately after updating.
-	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::EditLibrary)",
+		deprecation = "Use `patchLibrary` instead"
+	)]
 	async fn update_library(
 		&self,
 		ctx: &Context<'_>,
@@ -439,7 +419,17 @@ impl LibraryMutation {
 			.await?;
 
 		let scan_after_update = input.scan_after_persist;
-		let add_watcher = input.config.as_ref().is_some_and(|config| config.watch);
+		let (add_watcher, remove_watcher) =
+			match input.config.as_ref().map(|config| config.watch) {
+				Some(watch) => (
+					// previously wasn't but now is = add watcher
+					watch != existing_config.watch,
+					// previously was but now isn't = remove watcher
+					!watch && existing_config.watch,
+				),
+				_ => (false, false),
+			};
+
 		let tags = input.tags.take();
 
 		let txn = core.conn.as_ref().begin().await?;
@@ -461,114 +451,261 @@ impl LibraryMutation {
 		.update(&txn)
 		.await?;
 
-		match tags {
-			Some(tags) if tags.is_empty() && existing_tags.is_empty() => {
-				tracing::debug!("No change in tags, skipping tag update");
-			},
-			Some(tags) => {
-				let tags_not_in_existing = tags
-					.iter()
-					.filter(|tag| !existing_tags.iter().any(|t| t.name == **tag))
-					.collect::<Vec<_>>();
+		if let Some(tags) = tags {
+			let (to_connect, to_disconnect) =
+				super::tag::sync_tags(&txn, &tags, &existing_tags).await?;
 
-				let tags_to_add_which_already_exist = tag::Entity::find()
-					.filter(tag::Column::Name.is_in(tags_not_in_existing.clone()))
-					.all(&txn)
+			if !to_disconnect.is_empty() {
+				library_tag::Entity::delete_many()
+					.filter(library_tag::Column::TagId.is_in(to_disconnect).and(
+						library_tag::Column::LibraryId.eq(updated_library.id.clone()),
+					))
+					.exec(&txn)
 					.await?;
+			}
 
-				let tags_to_create = tags_not_in_existing
-					.iter()
-					.filter(|tag| {
-						!tags_to_add_which_already_exist
-							.iter()
-							.any(|t| t.name == ***tag)
-					})
-					.map(|tag| tag::ActiveModel {
-						name: Set(tag.to_string()),
-						..Default::default()
-					})
-					.collect::<Vec<_>>();
-
-				tracing::trace!(
-					to_create = tags_to_create.len(),
-					to_link = tags_to_add_which_already_exist.len(),
-					"Creating and linking tags to library",
-				);
-
-				let created_tags = if !tags_to_create.is_empty() {
-					tag::Entity::insert_many(tags_to_create)
-						.exec_with_returning_many(&txn)
-						.await?
-				} else {
-					vec![]
-				};
-
-				let tags_to_connect = tags_to_add_which_already_exist
-					.iter()
-					.chain(created_tags.iter())
-					.map(|tag| tag.id)
-					.collect::<Vec<_>>();
-
-				let tags_to_disconnect = existing_tags
-					.iter()
-					.filter(|tag| !tags.iter().any(|t| t == &tag.name))
-					.map(|tag| tag.id)
-					.collect::<Vec<_>>();
-
-				if !tags_to_disconnect.is_empty() {
-					let affected_rows = library_tag::Entity::delete_many()
-						.filter(library_tag::Column::Id.is_in(tags_to_disconnect).and(
-							library_tag::Column::LibraryId.eq(updated_library.id.clone()),
-						))
-						.exec(&txn)
-						.await?
-						.rows_affected;
-					tracing::debug!(affected_rows, "Deleted tags from library");
-				}
-
-				if !tags_to_connect.is_empty() {
-					let library_id = updated_library.id.clone();
-					let to_link = tags_to_connect
+			if !to_connect.is_empty() {
+				let library_id = updated_library.id.clone();
+				library_tag::Entity::insert_many(
+					to_connect
 						.into_iter()
 						.map(|tag_id| library_tag::ActiveModel {
 							library_id: Set(library_id.clone()),
 							tag_id: Set(tag_id),
 							..Default::default()
 						})
-						.collect::<Vec<library_tag::ActiveModel>>();
-
-					library_tag::Entity::insert_many(to_link)
-						.on_conflict_do_nothing()
-						.exec(&txn)
-						.await?;
-				}
-			},
-			_ => {
-				tracing::warn!("No tags provided, skipping tag update");
-			},
-		};
+						.collect::<Vec<library_tag::ActiveModel>>(),
+				)
+				.on_conflict_do_nothing()
+				.exec(&txn)
+				.await?;
+			}
+		}
 
 		txn.commit().await?;
 
 		if scan_after_update {
-			core.enqueue_job(LibraryScanJob::new(
+			core.enqueue(StumpJob::library_scan(
 				updated_library.id.clone(),
 				updated_library.path.clone(),
 				None,
-			))?;
+			))
+			.await?;
 		}
 
 		if add_watcher {
-			core.library_watcher
+			if let Err(error) = core
+				.library_watcher
 				.add_watcher(updated_library.path.clone().into())
+				.await
+			{
+				tracing::error!(?error, "Failed to add watcher for library");
+			}
+		} else if remove_watcher {
+			if let Err(error) = core
+				.library_watcher
+				.remove_watcher(existing_library.path.clone().into())
+				.await
+			{
+				tracing::error!(?error, "Failed to remove watcher for library");
+			}
+		}
+
+		Ok(Library::from(updated_library))
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	async fn patch_library(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: PatchLibraryInput,
+	) -> Result<Library> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (existing_library, existing_config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let Some(existing_config) = existing_config else {
+			return Err("Library is missing associated config!".into());
+		};
+
+		let original_path = existing_library.path.clone();
+		let enforcement_path = input
+			.path
+			.clone()
+			.unwrap_or_else(|| existing_library.path.clone());
+
+		enforce_valid_library_path(
+			core.conn.as_ref(),
+			&enforcement_path,
+			Some(&existing_library.path),
+		)
+		.await?;
+
+		if let Some(ref config) = input.config {
+			soft_check_onshots_directory(config, &enforcement_path).await?;
+		}
+
+		let existing_tags = tag::Entity::find()
+			.filter(
+				tag::Column::Id.in_subquery(
+					Query::select()
+						.column(library_tag::Column::TagId)
+						.from(library_tag::Entity)
+						.and_where(
+							library_tag::Column::LibraryId
+								.eq(existing_library.id.clone()),
+						)
+						.to_owned(),
+				),
+			)
+			.all(core.conn.as_ref())
+			.await?;
+
+		let scan_after_update = input.scan_after_persist;
+
+		let (add_watcher, remove_watcher) =
+			match input.config.as_ref().map(|config| config.watch) {
+				Some(Some(watch)) => (
+					// previously wasn't but now is = add watcher
+					watch != existing_config.watch,
+					// previously was but now isn't = remove watcher
+					!watch && existing_config.watch,
+				),
+				_ => (false, false),
+			};
+
+		let updated_tags = match input.tags.clone() {
+			MaybeUndefined::Null => Some(vec![]),
+			MaybeUndefined::Value(tags) => Some(tags),
+			MaybeUndefined::Undefined => None, // no update
+		};
+
+		let txn = core.conn.as_ref().begin().await?;
+
+		let (library, config) = input.apply(existing_library, existing_config)?;
+
+		let updated_library = library.update(&txn).await?;
+		let _updated_config = config.update(&txn).await?;
+
+		if let Some(tags) = updated_tags {
+			let (to_connect, to_disconnect) =
+				sync_tags(&txn, &tags, &existing_tags).await?;
+
+			if !to_disconnect.is_empty() {
+				library_tag::Entity::delete_many()
+					.filter(library_tag::Column::TagId.is_in(to_disconnect).and(
+						library_tag::Column::LibraryId.eq(updated_library.id.clone()),
+					))
+					.exec(&txn)
+					.await?;
+			}
+
+			if !to_connect.is_empty() {
+				let library_id = updated_library.id.clone();
+				library_tag::Entity::insert_many(
+					to_connect
+						.into_iter()
+						.map(|tag_id| library_tag::ActiveModel {
+							library_id: Set(library_id.clone()),
+							tag_id: Set(tag_id),
+							..Default::default()
+						})
+						.collect::<Vec<library_tag::ActiveModel>>(),
+				)
+				.on_conflict_do_nothing()
+				.exec(&txn)
 				.await?;
-		} else {
+			}
+		}
+
+		txn.commit().await?;
+
+		if scan_after_update {
+			core.enqueue(StumpJob::library_scan(
+				updated_library.id.clone(),
+				updated_library.path.clone(),
+				None,
+			))
+			.await?;
+		}
+
+		if add_watcher {
+			if let Err(error) = core
+				.library_watcher
+				.add_watcher(updated_library.path.clone().into())
+				.await
+			{
+				tracing::error!(?error, "Failed to add watcher for library");
+			}
+		} else if remove_watcher {
+			if let Err(error) = core
+				.library_watcher
+				// note the difference, we use original as to avoid juggling whether
+				// path was updated which changes how we would remove the watcher
+				.remove_watcher(original_path.into())
+				.await
+			{
+				tracing::error!(?error, "Failed to remove watcher for library");
+			}
+		}
+
+		Ok(Library::from(updated_library))
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	async fn patch_library_config(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: PatchLibraryConfigInput,
+	) -> Result<LibraryConfig> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (existing_library, existing_config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let Some(existing_config) = existing_config else {
+			return Err("Library is missing associated config!".into());
+		};
+
+		soft_check_onshots_directory(&input, &existing_library.path).await?;
+
+		let (add_watcher, remove_watcher) = match input.watch {
+			Some(watch) => (
+				// previously wasn't but now is = add watcher
+				watch != existing_config.watch,
+				// previously was but now isn't = remove watcher
+				!watch && existing_config.watch,
+			),
+			_ => (false, false),
+		};
+
+		let config = input.apply_to_model(existing_config)?;
+		let updated_config = config.update(core.conn.as_ref()).await?;
+
+		if add_watcher {
+			core.library_watcher
+				.add_watcher(existing_library.path.clone().into())
+				.await?;
+		} else if remove_watcher {
 			core.library_watcher
 				.remove_watcher(existing_library.path.clone().into())
 				.await?;
 		}
 
-		Ok(Library::from(updated_library))
+		Ok(LibraryConfig::from(updated_config))
 	}
 
 	/// Update the emoji for a library
@@ -812,12 +949,16 @@ impl LibraryMutation {
 			.ok_or("Library not found")?;
 		let config = config.ok_or("Library config not found")?;
 
-		let job_config = ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::books_in_library(library.id, force_regenerate),
-		);
-
-		if let Err(error) = core.enqueue_job(job_config) {
+		if let Err(error) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::books_in_library(
+					library.id,
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?error, "Failed to enqueue thumbnail generation job");
 			return Err(error.into());
 		}
@@ -841,13 +982,17 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let jobs_config = PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig {
-			scope: PlaceholderGenerationJobScope::BooksInLibrary(library.id.clone()),
-			force_regenerate,
-		})
-		.wrapped();
-
-		if let Err(error) = core.enqueue_job(jobs_config) {
+		if let Err(error) = core
+			.enqueue(StumpJob::placeholder_generation(
+				PlaceholderGenerationJobConfig {
+					scope: PlaceholderGenerationJobScope::BooksInLibrary(
+						library.id.clone(),
+					),
+					force_regenerate,
+				},
+			))
+			.await
+		{
 			tracing::error!(?error, "Failed to enqueue placeholder generation job");
 			return Err(error.into());
 		}
@@ -906,6 +1051,163 @@ impl LibraryMutation {
 		Ok(true)
 	}
 
+	/// Start a job which will search external metadata providers
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
+	#[tracing::instrument(skip(self, ctx))]
+	async fn fetch_library_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_refetch: bool,
+	) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let (library, config) = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let library_type = config.ok_or("Library config not found")?.library_type;
+
+		let has_relevant_provider = metadata_provider_config::Entity::find()
+			.filter(metadata_provider_config::Column::Enabled.eq(true))
+			.all(core.conn.as_ref())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			.any(|config| library_type.has_provider_overlap(&config.provider_type));
+
+		if !has_relevant_provider {
+			tracing::debug!(
+				?library_type,
+				"No compatible metadata providers for this library type"
+			);
+			return Ok(false);
+		}
+
+		core.enqueue(StumpJob::metadata_fetch(MetadataFetchJobParams {
+			force_refetch,
+			scope: MetadataFetchScope::MediaInLibrary(library.id),
+		}))
+		.await?;
+		tracing::debug!("Enqueued library metadata fetch job");
+
+		Ok(true)
+	}
+
+	/// Bulk-set locked metadata fields for all series metadata in a library
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_library_series_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		library_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(library_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+		let library_id_str = library.id.clone();
+
+		let series_ids: Vec<String> = series::Entity::find()
+			.filter(series::Column::LibraryId.eq(&library_id_str))
+			.select_only()
+			.column(series::Column::Id)
+			.into_tuple()
+			.all(conn)
+			.await?;
+
+		if series_ids.is_empty() {
+			return Ok(0);
+		}
+
+		let result = series_metadata::Entity::update_many()
+			.col_expr(
+				series_metadata::Column::LockedFields,
+				sea_orm::sea_query::Expr::value(locked_json.to_string()),
+			)
+			.filter(series_metadata::Column::SeriesId.is_in(series_ids))
+			.exec(conn)
+			.await?;
+
+		tracing::debug!(
+			library_id = ?library_id_str,
+			?locked_fields,
+			updated = result.rows_affected,
+			"Set locked fields for series metadata in library"
+		);
+
+		Ok(result.rows_affected)
+	}
+
+	/// Bulk-set locked metadata fields for all media metadata in a library
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_library_media_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		library_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(library_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+		let library_id_str = library.id.clone();
+
+		let media_ids: Vec<String> = media::Entity::find()
+			.filter(
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::LibraryId.eq(&library_id_str))
+						.to_owned(),
+				),
+			)
+			.select_only()
+			.column(media::Column::Id)
+			.into_tuple()
+			.all(conn)
+			.await?;
+
+		if media_ids.is_empty() {
+			return Ok(0);
+		}
+
+		let result = media_metadata::Entity::update_many()
+			.col_expr(
+				media_metadata::Column::LockedFields,
+				sea_orm::sea_query::Expr::value(locked_json.to_string()),
+			)
+			.filter(media_metadata::Column::MediaId.is_in(media_ids))
+			.exec(conn)
+			.await?;
+
+		tracing::debug!(
+			library_id = ?library_id_str,
+			?locked_fields,
+			updated = result.rows_affected,
+			"Set locked fields for media metadata in library"
+		);
+
+		Ok(result.rows_affected)
+	}
+
 	/// Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	/// and update the database accordingly.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
@@ -925,11 +1227,12 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		core.enqueue_job(LibraryScanJob::new(
+		core.enqueue(StumpJob::library_scan(
 			library.id,
 			library.path,
 			options.map(|o| o.0),
-		))?;
+		))
+		.await?;
 		tracing::debug!("Enqueued library scan job");
 
 		Ok(true)
@@ -1032,18 +1335,54 @@ async fn enforce_valid_library_path(
 
 	// example: new_path = "/data/books/fiction", existing_library = "/data/books"
 	// check if new_path matches the pattern "/data/books/_%".
-	let values: [sea_orm::Value; 1] = [path.into()];
-	let mut parent_query = library::Entity::find()
-		.filter(Expr::cust_with_values("? LIKE path || '/_%'", values));
+	let (parent_sql, parent_values): (String, Vec<sea_orm::Value>) = if let Some(ep) =
+		existing_path
+	{
+		(
+				r#"SELECT COUNT(*) AS count FROM libraries WHERE $1 LIKE "path" || '/_%' AND "path" != $2"#.to_string(),
+				vec![path.into(), ep.into()],
+			)
+	} else {
+		(
+			r#"SELECT COUNT(*) AS count FROM libraries WHERE $1 LIKE "path" || '/_%'"#
+				.to_string(),
+			vec![path.into()],
+		)
+	};
 
-	if let Some(existing_path) = existing_path {
-		parent_query = parent_query.filter(library::Column::Path.ne(existing_path));
-	}
-
-	let parent_libraries_count = parent_query.count(conn).await?;
+	let parent_libraries_count: i64 = conn
+		.query_one(db_statement(conn, parent_sql, parent_values))
+		.await?
+		.ok_or("Failed to count parent libraries")?
+		.try_get("", "count")?;
 
 	if parent_libraries_count > 0 {
 		return Err("Path is a child of another library on the filesystem".into());
+	}
+
+	Ok(())
+}
+
+async fn soft_check_onshots_directory(
+	config: &PatchLibraryConfigInput,
+	library_path: &str,
+) -> Result<()> {
+	let oneshots_directory_to_check = match &config.oneshots_directory {
+		MaybeUndefined::Value(oneshots_directory) => {
+			let joined_path = Path::new(&library_path).join(oneshots_directory);
+			Some(joined_path.to_string_lossy().to_string())
+		},
+		_ => None,
+	};
+
+	if let Some(oneshots_path) = oneshots_directory_to_check {
+		if !tokio::fs::try_exists(&oneshots_path).await? {
+			tracing::warn!(?oneshots_path, "Oneshots directory does not exist yet");
+		}
+		// ^ i opted not to error here, i figure it probably doesn't matter if it doesn't exist?
+		// like for folks that haven't created any yet, but want to configure the library. i
+		// can be swayed here if that isn't the preference, i won't use oneshots so have little
+		// personal stake in it
 	}
 
 	Ok(())

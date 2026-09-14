@@ -173,7 +173,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 				)}
 
 				<div className="mt-6 md:max-w-sm flex w-full">
-					<Button type="submit" className="md:max-w-sm w-full" variant="primary">
+					<Button type="submit" className="md:max-w-sm w-full">
 						{t(
 							isCreating
 								? 'settingsScene.server/users.createOrUpdateForm.createSubmitButton'

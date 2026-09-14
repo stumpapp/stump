@@ -62,11 +62,7 @@ const fetchDeletedAnnotations = async (serverId: string) =>
 const markSyncStatus = async (ids: number | number[], status: SyncStatus) => {
 	const idArray = Array.isArray(ids) ? ids : [ids]
 	if (idArray.length === 0) return
-	await db
-		.update(annotations)
-		.set({ syncStatus: status })
-		.where(inArray(annotations.id, idArray))
-		.run()
+	await db.update(annotations).set({ syncStatus: status }).where(inArray(annotations.id, idArray))
 }
 
 const handleCreateAnnotation = async (api: Api, annotation: Annotation) => {
@@ -91,7 +87,6 @@ const handleCreateAnnotation = async (api: Api, annotation: Annotation) => {
 		.update(annotations)
 		.set({ serverAnnotationId: result.createAnnotation.id })
 		.where(eq(annotations.id, annotation.id))
-		.run()
 }
 
 const handleUpdateAnnotation = async (api: Api, annotation: Annotation) => {
@@ -107,8 +102,10 @@ const handleDeleteAnnotation = async (api: Api, annotation: Annotation) => {
 	await api.execute(deleteMutation, {
 		id: annotation.serverAnnotationId!,
 	})
-	await db.delete(annotations).where(eq(annotations.id, annotation.id)).run()
+	await db.delete(annotations).where(eq(annotations.id, annotation.id))
 }
+
+// TODO(sync): return failed syncs to report on them
 
 export const executeSingleServerAnnotationPushSync = async (
 	serverId: string,

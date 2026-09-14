@@ -21,7 +21,7 @@ export default function Logout({ trigger }: Props) {
 			title="Sign out"
 			description="Are you sure you want sign out?"
 			confirmText="Sign out"
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={isOpen}
 			onClose={off}
 			onConfirm={handleLogout}
@@ -31,7 +31,8 @@ export default function Logout({ trigger }: Props) {
 						trigger(on)
 					) : (
 						<IconButton
-							className="hover:text-foreground-500 text-foreground-subtle"
+							variant="ghost"
+							className="text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
 							onClick={on}
 							aria-label="Sign Out"
 						>

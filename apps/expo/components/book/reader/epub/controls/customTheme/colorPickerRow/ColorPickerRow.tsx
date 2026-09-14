@@ -3,9 +3,9 @@ import { useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import ColorPicker, { HueSlider, Panel1 } from 'reanimated-color-picker'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Button, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 
 type Props = {
 	label: string
@@ -16,8 +16,9 @@ type Props = {
 export function ColorPickerRow({ label, value, onChange }: Props) {
 	const sheetRef = useRef<TrueSheet>(null)
 	const [tempColor, setTempColor] = useState(value)
-	const { colorScheme } = useColorScheme()
 	const colors = useColors()
+
+	const [isOpen, setIsOpen] = useState(false)
 
 	const openPicker = () => {
 		setTempColor(value)
@@ -35,11 +36,11 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 
 	return (
 		<>
-			<View className="flex-row items-center justify-between py-2">
+			<View className="py-2 flex-row items-center justify-between">
 				<Text className="text-lg">{label}</Text>
 				<Pressable onPress={openPicker}>
 					<View
-						className="h-8 w-8 rounded-full border-2 border-edge"
+						className="h-8 w-8 border-edge rounded-full border-2"
 						style={{ backgroundColor: value }}
 					/>
 				</Pressable>
@@ -48,19 +49,18 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 			<TrueSheet
 				ref={sheetRef}
 				detents={[0.5]}
-				cornerRadius={24}
 				grabber
 				// Note: Complex and conflicting gesture handling if not disabled,
 				// I tried a nested gesture handler but a bit yucky. For now Android can
 				// just tap the buttons to dismiss
 				dismissible={false}
-				backgroundColor={colors.background.DEFAULT}
-				grabberOptions={{
-					color: colorScheme === 'dark' ? '#333' : '#ccc',
-				}}
+				backgroundColor={colors.sheet.background}
+				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
 				<View className="gap-4 p-4 pb-8">
-					<Text className="text-center text-lg font-medium">{label}</Text>
+					<Text className="text-lg font-medium text-center">{label}</Text>
 
 					<ColorPicker value={tempColor} onCompleteJS={(result) => setTempColor(result.hex)}>
 						<View className="pb-4">
@@ -73,7 +73,7 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 						</View>
 					</ColorPicker>
 
-					<View className="mt-4 flex-row gap-4">
+					<View className="mt-4 gap-4 flex-row">
 						<Button variant="outline" className="flex-1" onPress={handleCancel}>
 							<Text>Cancel</Text>
 						</Button>
@@ -83,6 +83,8 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 					</View>
 				</View>
 			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</>
 	)
 }

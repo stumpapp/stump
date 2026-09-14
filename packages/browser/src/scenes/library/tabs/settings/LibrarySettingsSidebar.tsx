@@ -11,7 +11,7 @@ import { SideBarLinkButton } from '@/scenes/settings'
 import { useAppStore } from '@/stores'
 
 import { useLibraryContext } from '../../context'
-import { routeGroups } from './routes'
+import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsSidebar() {
 	const location = useLocation()
@@ -24,18 +24,18 @@ export default function LibrarySettingsSidebar() {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
-	const { groups } = useRouteGroups({ routeGroups })
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id) })
 	const platform = useAppStore((store) => store.platform)
 
 	return (
 		<div
 			className={cn(
-				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-edge bg-background text-foreground-subtle',
+				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-border bg-background text-foreground',
 				primaryNavigationMode === 'TOPBAR'
 					? 'top-12 fixed z-50 h-screen border-x'
 					: 'top-0 fixed z-50 h-screen border-r',
 				{
-					'from-background-gradient-from to-background-gradient-to bg-linear-to-l':
+					'bg-linear-to-l from-background-gradient-from to-background-gradient-to':
 						shouldUseGradient,
 				},
 				{
@@ -47,8 +47,9 @@ export default function LibrarySettingsSidebar() {
 				<div className="space-x-2 flex items-center">
 					<ButtonOrLink
 						href={paths.libraryBooks(library.id)}
+						replace
 						variant="ghost"
-						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
+						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 						size="sm"
 					>
 						<ArrowLeft className="h-4 w-4 transform" />
@@ -103,7 +104,7 @@ export default function LibrarySettingsSidebar() {
 						<IconButton
 							title="Go home"
 							variant="ghost"
-							className="p-1.5 border border-transparent text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
+							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 							onClick={() => navigate(paths.home())}
 						>
 							<Home className="h-4 w-4 -scale-x-[1] transform" />

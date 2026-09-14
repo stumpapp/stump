@@ -35,21 +35,21 @@ use gen_partial_config::gen_partial_stump_config;
 ///
 /// This attribute indicates that a field of the input will be a required parameter of the
 /// `new` function constructed by the macro. Using `required_by_new` will override any
-/// `default_value` set, using the `new` function parameter's value instead.
+/// `default_value` set, instead using the `new` function parameter's value.
 ///
 /// ### `#[env_key(Expr)]`
 ///
 /// This attribute indicates the environment variable from which the field it is applied to
 /// is derived using the `with_environment` function. Inputs can be a `str` value or `const`
-/// (or, indeed, any expression). Variables without this annotation will not be included in
-/// the `with_environment` function at all.
+/// (or any expression). Variables without this annotation will not be included in the
+/// `with_environment` function at all.
 ///
 /// ### `#[validator(Fn)]`
 ///
 /// This attribute optionally allows a validation function to be defined which will run before  
 /// any value of type `T` is written to the struct when running `with_environment` or
 /// `with_config_file`. The function must have the signature `Fn(T) -> bool`, with a `true`
-/// result causing the variable to be written, and a `false` result causing it not to be written.
+/// result causing the variable to be written and a `false` result causing it not to be written.
 ///
 /// ### `#[config_file_location(Expr)]`
 ///

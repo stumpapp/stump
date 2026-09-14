@@ -3,11 +3,14 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function PreferMinimalReader() {
+	const { t } = useTranslate()
 	const { preferMinimalReader, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			preferMinimalReader: state.preferMinimalReader,
@@ -18,7 +21,8 @@ export default function PreferMinimalReader() {
 	return (
 		<AppSettingsRow
 			icon={Spotlight}
-			title="Prefer Minimal Reader"
+			iconBackgroundColor={SETTINGS_COLORS.minorVisuals}
+			title={t('settings.reading.preferMinimalReader')}
 			onPress={() => patch({ preferMinimalReader: !preferMinimalReader })}
 		>
 			<View className="gap-2 flex flex-row items-center">

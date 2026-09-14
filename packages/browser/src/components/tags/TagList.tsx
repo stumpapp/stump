@@ -1,47 +1,26 @@
 import { Tag } from '@stump/graphql'
 
-import TagComponent from './Tag'
+import BadgeList from '@/components/BadgeList'
 
-export const DEBUG_TAGS: Tag[] = [
-	{
-		id: 1,
-		name: 'Action',
-	},
-	{
-		id: 2,
-		name: 'Adventure',
-	},
-	{
-		id: 3,
-		name: 'Comedy',
-	},
-	{
-		id: 4,
-		name: 'Drama',
-	},
-]
+import TagComponent from './Tag'
 
 type Props = {
 	tags: Tag[] | null
-	baseUrl?: string
+	buildHref?: (tag: Tag) => string
 }
 
-export default function TagList({ tags, baseUrl }: Props) {
-	if (!tags && !import.meta.env.DEV) {
+export default function TagList({ tags, buildHref }: Props) {
+	if (!tags?.length) {
 		return null
 	}
 
 	return (
-		<div className="space-x-2 flex flex-row">
-			{(tags ?? DEBUG_TAGS)
+		<BadgeList>
+			{tags
 				.filter((tag) => !!tag.name)
 				.map((tag) => (
-					<TagComponent
-						key={tag.id}
-						tag={tag}
-						{...(baseUrl ? { href: `${baseUrl}?tags[]=${tag.name}` } : {})}
-					/>
+					<TagComponent key={tag.id} tag={tag} {...(buildHref ? { href: buildHref(tag) } : {})} />
 				))}
-		</div>
+		</BadgeList>
 	)
 }

@@ -37,7 +37,6 @@ export default function MaxSessionsAllowed() {
 	return (
 		<Input
 			id="maxSessionsAllowed"
-			variant="primary"
 			label="Max sessions allowed"
 			description="The maximum number of valid sessions allowed at a time. If a user tries to log in once this limit is reached, the oldest session will be invalidated."
 			type="number"

@@ -10,7 +10,6 @@ import { usePreferences } from '@/hooks'
 
 import { SeriesContext } from './context'
 import SeriesHeader from './SeriesHeader'
-import SeriesNavigation from './SeriesNavigation'
 
 const query = graphql(`
 	query SeriesLayout($id: ID!) {
@@ -23,10 +22,6 @@ const query = graphql(`
 			}
 			resolvedName
 			resolvedDescription
-			tags {
-				id
-				name
-			}
 			stats {
 				bookCount
 				completedBooks
@@ -34,18 +29,9 @@ const query = graphql(`
 				totalBytes
 				totalReadingTimeSeconds
 			}
-			metadata {
-				status
-				publisher
-				year
-				genres
-				booktype
-				volume
-				totalIssues
-				writers
-				summary
-				descriptionFormatted
-				links
+			tags {
+				id
+				name
 			}
 			thumbnail {
 				url
@@ -58,6 +44,8 @@ const query = graphql(`
 					}
 				}
 			}
+			createdAt
+			updatedAt
 		}
 	}
 `)
@@ -98,11 +86,11 @@ export default function SeriesLayout() {
 
 	if (!series) return null
 
+	// TODO: conditional render header, conform to library layout patterns (e.g., settings header + settings sidebar, etc)
 	return (
 		<SeriesContext.Provider value={{ series }}>
 			<div className="relative flex flex-1 flex-col">
 				<SeriesHeader />
-				<SeriesNavigation />
 
 				<SceneContainer
 					className={cn('gap-4 p-0 md:pb-0 relative flex flex-1 flex-col', {

@@ -1,10 +1,15 @@
 use crate::{
 	data::CoreContext,
 	loader::{
-		favorite::FavoritesLoader, library::LibraryLoader,
-		library_config::LibraryConfigLoader, log::JobAssociatedLogLoader,
-		media::MediaLoader, media_analysis::MediaAnalysisLoader,
-		reading_session::ReadingSessionLoader, series::SeriesLoader,
+		author::{AuthorMediaLoader, MetadataSeriesMediaLoader},
+		favorite::FavoritesLoader,
+		library::LibraryLoader,
+		library_config::LibraryConfigLoader,
+		log::JobAssociatedLogLoader,
+		media::MediaLoader,
+		media_analysis::MediaAnalysisLoader,
+		reading_session::ReadingSessionLoader,
+		series::SeriesLoader,
 		series_count::SeriesCountLoader,
 		series_finished_count::SeriesFinishedCountLoader,
 	},
@@ -43,6 +48,14 @@ pub fn add_data_loaders<
 	conn: Arc<DatabaseConnection>,
 ) -> SchemaBuilder<QueryType, MutationType, SubscriptionType> {
 	schema
+		.data(DataLoader::new(
+			AuthorMediaLoader::new(conn.clone()),
+			tokio::spawn,
+		))
+		.data(DataLoader::new(
+			MetadataSeriesMediaLoader::new(conn.clone()),
+			tokio::spawn,
+		))
 		.data(DataLoader::new(
 			JobAssociatedLogLoader::new(conn.clone()),
 			tokio::spawn,

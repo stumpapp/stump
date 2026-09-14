@@ -1,25 +1,21 @@
-import { Fragment, useState } from 'react'
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { Fragment } from 'react'
 
 import { ControlsBackdrop } from '../shared'
 import Footer from './Footer'
 import Header from './Header'
-import ImageReaderGlobalSettingsDialog from './ImageReaderGlobalSettingsDialog'
+import ImageReaderSettingsSheet from './ImageReaderSettingsSheet'
 
 // TODO: support setting custom gradient colors
 
 export default function ControlsOverlay() {
-	const [showGlobalSettings, setShowGlobalSettings] = useState(false)
-
 	return (
 		<Fragment>
-			<Header onShowGlobalSettings={() => setShowGlobalSettings(true)} />
+			<Header onShowGlobalSettings={() => TrueSheet.present('imageReaderSettings')} />
 
 			<ControlsBackdrop />
 
-			<ImageReaderGlobalSettingsDialog
-				isOpen={showGlobalSettings}
-				onClose={() => setShowGlobalSettings(false)}
-			/>
+			<ImageReaderSettingsSheet />
 
 			<Footer />
 		</Fragment>

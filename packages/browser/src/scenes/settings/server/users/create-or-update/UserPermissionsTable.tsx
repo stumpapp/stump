@@ -46,7 +46,7 @@ export default function UserPermissionsTable() {
 
 	const handleGroupClick = useCallback(
 		(groupId: string) => {
-			const groupPermissions = groups.find((group) => group.name === groupId)?.permissions ?? []
+			const groupPermissions = groups.find((group) => group.groupKey === groupId)?.permissions ?? []
 			const allSelected = groupPermissions.every((p) => selectedPermissions.includes(p))
 			const newSelected = allSelected
 				? selectedPermissions.filter((p) => !groupPermissions.includes(p))
@@ -59,11 +59,16 @@ export default function UserPermissionsTable() {
 	const tableData: TableRow[] = useMemo(
 		() =>
 			groups.flatMap((group) => [
-				{ type: 'group', name: group.name, id: group.name, permissions: group.permissions },
+				{
+					type: 'group',
+					groupKey: group.groupKey || '',
+					id: group.groupKey || '',
+					permissions: group.permissions,
+				},
 				...group.permissions.map((permission) => ({
 					type: 'permission' as const,
 					permission,
-					groupId: group.name,
+					groupId: group.groupKey || '',
 					label: t(getPermissionKey(permission, 'label')),
 					description: t(getPermissionKey(permission, 'description')),
 				})),
@@ -104,7 +109,7 @@ export default function UserPermissionsTable() {
 					{renderDescription()}
 				</Text>
 			</div>
-			<div className="h-96 rounded-lg overflow-auto border border-edge">
+			<div className="h-96 overflow-auto rounded-lg border border-border">
 				<table className="w-full">
 					<tbody>
 						{table.getRowModel().rows.map((row) => {
@@ -113,29 +118,24 @@ export default function UserPermissionsTable() {
 
 							if (isGroup) {
 								const groupData = row.original as Extract<TableRow, { type: 'group' }>
+								const groupName = t(getLocaleKey(`groups.${groupData.groupKey}`))
 
 								return (
 									<tr
 										key={row.id}
-										className="top-0 backdrop-blur-sm sticky z-10 border-b border-edge bg-background"
+										className="top-0 backdrop-blur-sm sticky z-10 border-b border-border bg-background"
 									>
-										<td className="px-4 py-3 font-semibold bg-background-surface/50 text-foreground">
-											{groupData.name}
+										<td className="px-4 py-3 font-semibold bg-muted/50 text-foreground">
+											{groupName}
 										</td>
-										<td className="px-4 py-3 bg-background-surface/50">
-											{/* <input
-											type="checkbox"
-											className="h-4 w-4 rounded border-edge text-blue-600 focus:ring-blue-500"
-											readOnly
-										/> */}
+										<td className="px-4 py-3 bg-muted/50">
 											<CheckBox
 												id={groupData.id}
-												variant="primary"
 												name={groupData.id}
 												checked={groupData.permissions.every(
 													(p) => selectedPermissions?.includes(p) ?? false,
 												)}
-												onClick={() => handleGroupClick(groupData.name)}
+												onClick={() => handleGroupClick(groupData.groupKey)}
 											/>
 										</td>
 									</tr>
@@ -148,7 +148,7 @@ export default function UserPermissionsTable() {
 								return (
 									<tr
 										key={row.id}
-										className="hover:bg-muted/50 border-b border-edge transition-colors"
+										className="border-b border-border transition-colors hover:bg-muted/50"
 									>
 										<td className="px-4 py-3 pl-8 text-sm">
 											<Text>{permissionData.label}</Text>
@@ -159,7 +159,6 @@ export default function UserPermissionsTable() {
 										<td className="px-4 py-3">
 											<CheckBox
 												id={permissionData.permission}
-												variant="primary"
 												name={permissionData.permission}
 												checked={selectedPermissions?.includes(permissionData.permission) ?? false}
 												onClick={() => handlePermissionClick(permissionData.permission)}
@@ -179,7 +178,7 @@ export default function UserPermissionsTable() {
 }
 
 type TableRow =
-	| { type: 'group'; name: string; id: string; permissions: UserPermission[] }
+	| { type: 'group'; groupKey: string; id: string; permissions: UserPermission[] }
 	| {
 			type: 'permission'
 			permission: UserPermission
@@ -196,16 +195,25 @@ const getPermissionKey = (permission: UserPermission, key: string) =>
 
 const groups = [
 	{
-		name: 'Feature Access',
+		groupKey: 'accountManagement',
+		permissions: [
+			UserPermission.ChangePassword,
+			UserPermission.ChangeUsername,
+			UserPermission.ChangeAvatar,
+		],
+	},
+	{
+		groupKey: 'featureAccess',
 		permissions: [
 			UserPermission.AccessApiKeys,
 			UserPermission.AccessBookClub,
 			UserPermission.AccessKoreaderSync,
+			UserPermission.AccessKoboSync,
 			UserPermission.AccessSmartList,
 		],
 	},
 	{
-		name: 'File Management',
+		groupKey: 'fileManagement',
 		permissions: [
 			UserPermission.DownloadFile,
 			UserPermission.FileExplorer,
@@ -213,7 +221,7 @@ const groups = [
 		],
 	},
 	{
-		name: 'Emailers',
+		groupKey: 'emailers',
 		permissions: [
 			UserPermission.EmailerRead,
 			UserPermission.EmailerCreate,
@@ -221,11 +229,11 @@ const groups = [
 		],
 	},
 	{
-		name: 'Emailing',
+		groupKey: 'emailing',
 		permissions: [UserPermission.EmailSend, UserPermission.EmailArbitrarySend],
 	},
 	{
-		name: 'Library Management',
+		groupKey: 'libraryManagement',
 		permissions: [
 			UserPermission.CreateLibrary,
 			UserPermission.EditLibrary,
@@ -238,11 +246,20 @@ const groups = [
 		],
 	},
 	{
-		name: 'User Management',
+		groupKey: 'userManagement',
 		permissions: [UserPermission.ReadUsers, UserPermission.ManageUsers],
 	},
 	{
-		name: 'Server Management',
+		groupKey: 'metadataManagement',
+		permissions: [
+			UserPermission.MetadataProviderRead,
+			UserPermission.MetadataProviderManage,
+			UserPermission.MetadataFetchRecordRead,
+			UserPermission.MetadataFetchRecordManage,
+		],
+	},
+	{
+		groupKey: 'serverManagement',
 		permissions: [
 			UserPermission.ReadJobs,
 			UserPermission.ManageJobs,
@@ -262,7 +279,7 @@ const columns = [
 		cell: ({ row }) => {
 			const data = row.original
 			if (data.type === 'group') {
-				return data.name
+				return data.groupKey
 			}
 			return data.label
 		},
@@ -284,6 +301,7 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.EmailerManage]: [UserPermission.EmailerCreate, UserPermission.EmailerRead],
 	[UserPermission.AccessApiKeys]: [],
 	[UserPermission.AccessKoreaderSync]: [],
+	[UserPermission.AccessKoboSync]: [],
 	[UserPermission.AccessSmartList]: [],
 	[UserPermission.DownloadFile]: [],
 	[UserPermission.FileExplorer]: [],
@@ -316,4 +334,11 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.EditMetadata]: [],
 	[UserPermission.WriteBackMetadata]: [UserPermission.EditMetadata],
 	[UserPermission.EditThumbnails]: [],
+	[UserPermission.MetadataProviderRead]: [],
+	[UserPermission.MetadataProviderManage]: [UserPermission.MetadataProviderRead],
+	[UserPermission.MetadataFetchRecordRead]: [UserPermission.MetadataProviderRead],
+	[UserPermission.MetadataFetchRecordManage]: [UserPermission.MetadataFetchRecordRead],
+	[UserPermission.ChangePassword]: [],
+	[UserPermission.ChangeUsername]: [],
+	[UserPermission.ChangeAvatar]: [],
 }

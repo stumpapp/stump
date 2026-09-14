@@ -1,24 +1,18 @@
+import type { LayoutOrdering, LayoutOrderingField } from '@stump/client'
 import {
 	LibraryFilterInput,
-	LibraryModelOrdering,
 	MediaFilterInput,
-	MediaModelOrdering,
 	OffsetPagination,
-	OrderDirection,
 	SeriesFilterInput,
-	SeriesModelOrdering,
 } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
 import { noop } from '../../utils/misc'
 
-export type OrderingField = MediaModelOrdering | SeriesModelOrdering | LibraryModelOrdering
+export type OrderingField = LayoutOrderingField
 export type FilterInput = MediaFilterInput | SeriesFilterInput | LibraryFilterInput
 
-export type Ordering = {
-	direction?: OrderDirection
-	orderBy?: OrderingField
-}
+export type Ordering = LayoutOrdering
 
 export type IFilterContext = {
 	filters: FilterInput

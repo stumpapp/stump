@@ -53,7 +53,7 @@ export default function BookOverviewScene() {
 
 				<div className="gap-4 flex h-full w-full flex-col">
 					<div className="gap-3 tablet:mb-2 flex flex-col items-center tablet:flex-row tablet:items-start">
-						<div className="max-w-sm gap-3 sm:max-w-[200px] flex w-full shrink-0 flex-col items-center">
+						<div className="max-w-sm gap-3 sm:max-w-50 flex w-full shrink-0 flex-col items-center">
 							<ProminentThumbnailImage
 								src={fragmentData.thumbnail.url}
 								alt={media.resolvedName}

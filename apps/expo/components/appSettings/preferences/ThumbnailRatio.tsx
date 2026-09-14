@@ -2,11 +2,14 @@ import { Ruler } from 'lucide-react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
+import { SETTINGS_COLORS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function ThumbnailRatio() {
+	const { t } = useTranslate()
 	const { thumbnailRatio, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			thumbnailRatio: state.thumbnailRatio,
@@ -27,7 +30,11 @@ export default function ThumbnailRatio() {
 	const thumbnailRatioName = ratioToStringMap[thumbnailRatio]
 
 	return (
-		<AppSettingsRow icon={Ruler} title="Thumbnail Ratio">
+		<AppSettingsRow
+			icon={Ruler}
+			iconBackgroundColor={SETTINGS_COLORS.minorVisuals}
+			title={t('settings.preferences.thumbnailRatio')}
+		>
 			<Picker
 				value={thumbnailRatioName || '1 : 1.5'}
 				options={[
@@ -36,7 +43,7 @@ export default function ThumbnailRatio() {
 						value: '1 : 1.6',
 					},
 					{
-						label: '1 : 1.5 (Default)',
+						label: '1 : 1.5',
 						value: '1 : 1.5',
 					},
 					{

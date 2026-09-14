@@ -261,7 +261,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 			<TableHeaderActions />
 
 			<div
-				className="top-0 sticky z-30 flex w-full border-b border-edge bg-background-surface"
+				className="top-0 sticky z-30 flex w-full border-b border-border bg-muted"
 				style={{ height: HEADER_HEIGHT }}
 			>
 				{groupTable.getHeaderGroups().map((headerGroup) => (
@@ -273,7 +273,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 									key={header.id}
 									// TODO: Fix the hitbox for sorting, not the entire header just the content
 									className={cn(
-										'px-4 py-2 text-sm font-medium flex w-full items-center bg-background-surface text-foreground-subtle last:justify-end',
+										'px-4 py-2 text-sm font-medium flex w-full items-center bg-muted text-foreground last:justify-end',
 										{
 											'gap-x-2 cursor-pointer select-none': isSortable,
 										},
@@ -295,7 +295,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 
 			{activeStickyGroupIndex !== -1 && !isGroupHeaderVisible && (
 				<div
-					className="sticky z-20 flex w-full border-b border-edge bg-background-surface"
+					className="sticky z-20 flex w-full border-b border-border bg-muted"
 					style={{
 						height: GROUP_ROW_HEIGHT,
 						top: HEADER_HEIGHT,
@@ -315,7 +315,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 
 			{activeStickyGroupIndex !== -1 && !isBookHeaderVisible && (
 				<div
-					className="sticky z-10 flex w-full border-b border-edge bg-background"
+					className="sticky z-10 flex w-full border-b border-border bg-background"
 					style={{
 						height: BOOK_HEADER_HEIGHT,
 						top: HEADER_HEIGHT + GROUP_ROW_HEIGHT,
@@ -333,7 +333,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 										<div
 											key={header.id}
 											className={cn(
-												'px-4 py-2 text-xs flex items-center overflow-hidden text-foreground-muted',
+												'px-4 py-2 text-xs flex items-center overflow-hidden text-muted-foreground',
 												{
 													'gap-x-2 cursor-pointer select-none': isSortable,
 												},
@@ -376,8 +376,8 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 							<div
 								key={virtualItem.key}
 								ref={rowVirtualizer.measureElement}
-								className={cn('z-20 flex w-full border-b border-edge', {
-									'sticky bg-background-surface': item.row.getIsExpanded(),
+								className={cn('z-20 flex w-full border-b border-border', {
+									'sticky bg-muted': item.row.getIsExpanded(),
 								})}
 								data-index={virtualItem.index}
 								style={{
@@ -402,7 +402,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 							<div
 								key={virtualItem.key}
 								ref={rowVirtualizer.measureElement}
-								className="sticky z-10 flex w-full border-b border-edge bg-background"
+								className="sticky z-10 flex w-full border-b border-border bg-background"
 								data-index={virtualItem.index}
 								style={{
 									height: BOOK_HEADER_HEIGHT,
@@ -417,7 +417,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 												<div
 													key={header.id}
 													className={cn(
-														'px-4 py-2 text-xs flex items-center overflow-hidden text-foreground-muted',
+														'px-4 py-2 text-xs flex items-center overflow-hidden text-muted-foreground',
 														{
 															'gap-x-2 cursor-pointer select-none': isSortable,
 														},

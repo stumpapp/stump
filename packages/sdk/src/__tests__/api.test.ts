@@ -2,12 +2,13 @@ import axios, { AxiosRequestHeaders, InternalAxiosRequestConfig } from 'axios'
 
 import { Api } from '../api'
 
-jest.mock('axios', () => ({
-	...jest.requireActual('axios'),
-	create: jest.fn(),
+vi.mock('axios', () => ({
+	default: {
+		create: vi.fn(),
+	},
 }))
 
-const use = jest.fn()
+const use = vi.fn()
 const axiosInstance = {
 	interceptors: {
 		request: {
@@ -24,9 +25,9 @@ const getJwtPair = (fakeToken: string) => ({
 
 describe('Api', () => {
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 
-		jest.mocked(axios.create).mockReturnValue(axiosInstance)
+		vi.mocked(axios.create).mockReturnValue(axiosInstance)
 	})
 
 	describe('getters and setters', () => {
@@ -103,10 +104,10 @@ describe('Api', () => {
 			api.tokens = getJwtPair('give-me-access')
 			const config = {
 				headers: {
-					concat: jest.fn().mockImplementation((obj: unknown) => obj),
+					concat: vi.fn().mockImplementation((obj: unknown) => obj),
 				} as unknown as AxiosRequestHeaders,
 			} as InternalAxiosRequestConfig
-			use.mock.calls[0][0](config)
+			use.mock.calls[0]?.[0]?.(config)
 			// The token should be set in the header
 			expect(config.headers.Authorization === 'Bearer give-me-access')
 		})

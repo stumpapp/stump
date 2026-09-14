@@ -1,5 +1,5 @@
 import { Ellipsis } from 'lucide-react-native'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -28,6 +28,8 @@ export function ActionMenu({ icon, groups, androidProps, disabled }: ActionMenuP
 		right: 4,
 	}
 
+	const [isOpen, setIsOpen] = useState(false)
+
 	const renderGroup = (group: ActionMenuProps['groups'][number], groupIndex: number) => {
 		return (
 			<Fragment key={`action-menu-group-${groupIndex}-items-${group.items.length}`}>
@@ -39,8 +41,15 @@ export function ActionMenu({ icon, groups, androidProps, disabled }: ActionMenuP
 							onPress={item.onPress}
 							className="flex-row items-center"
 							disabled={item.disabled}
+							variant={item.role === 'destructive' ? 'destructive' : 'default'}
 						>
-							<Icon as={item.icon.android} size={16} className="mr-2 text-foreground" />
+							<Icon
+								as={item.icon.android}
+								size={16}
+								className={cn('mr-2 text-foreground', {
+									'text-fill-danger': item.role === 'destructive',
+								})}
+							/>
 							<Text className="text-lg">{item.label}</Text>
 						</DropdownMenuItem>
 					))}
@@ -50,19 +59,35 @@ export function ActionMenu({ icon, groups, androidProps, disabled }: ActionMenuP
 	}
 
 	return (
-		<DropdownMenu>
+		<DropdownMenu onOpenChange={setIsOpen}>
 			<DropdownMenuTrigger asChild disabled={disabled}>
-				<Button className="squircle h-8 w-8 rounded-full p-0" variant="ghost" size="icon">
-					<View>
-						<Icon as={TriggerIcon} size={20} className="text-foreground" />
-					</View>
+				<Button className="squircle rounded-full" variant="ghost" size="icon">
+					{({ pressed }) => (
+						<View
+							className={cn(
+								'squircle p-2 items-center justify-center rounded-full border border-transparent bg-transparent transition-colors duration-200',
+								{
+									'bg-black/10 dark:bg-white/5 border-edge': isOpen,
+								},
+							)}
+						>
+							<Icon
+								as={TriggerIcon}
+								size={20}
+								className="text-foreground"
+								style={{
+									opacity: pressed ? 0.7 : 1,
+								}}
+							/>
+						</View>
+					)}
 				</Button>
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent
 				insets={contentInsets}
 				sideOffset={androidProps?.sideOffset ?? 2}
-				className={cn('w-3/5 tablet:w-64', androidProps?.className)}
+				className={cn('tablet:w-64 w-3/5', androidProps?.className)}
 				align={androidProps?.align || 'end'}
 			>
 				{groups.map((group, index) => renderGroup(group, index))}

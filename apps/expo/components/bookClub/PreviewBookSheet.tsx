@@ -7,7 +7,7 @@ import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
 import { useOverviewAnimations } from '../book/overview'
@@ -51,6 +51,9 @@ type Props = {
 	onConfirmAddBook: () => void
 }
 
+// note: i did not add the SheetBackDetection here since it is a child sheet and i was unsure
+// if i might break it with multiple listeners. i am too lazy to test but once book club is actually
+// a non-experimental feature i will actually check etc
 export const PreviewBookSheet = forwardRef<PreviewBookSheetRef, Props>(
 	({ bookId, onConfirmAddBook }, ref) => {
 		const sheetRef = useRef<TrueSheet>(null)
@@ -83,11 +86,9 @@ export const PreviewBookSheet = forwardRef<PreviewBookSheetRef, Props>(
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				dimmed={false}
-				cornerRadius={24}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
@@ -118,11 +119,11 @@ function BookContent({ book, onConfirmAddBook }: BookContentProps) {
 
 	return (
 		<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
-			<View className="ios:pt-safe-offset-20 pt-safe overflow-hidden pb-8">
+			<View className="ios:pt-safe-offset-20 pt-safe pb-8 overflow-hidden">
 				<Animated.View
 					// -inset-24 is because when using a lot of blur, the sides get more transparent
 					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
-					className="absolute -inset-24 opacity-70 dark:opacity-30"
+					className="-inset-24 absolute opacity-70 dark:opacity-30"
 					style={parallaxStyle}
 				>
 					<TImage
@@ -136,7 +137,6 @@ function BookContent({ book, onConfirmAddBook }: BookContentProps) {
 						style={{ width: '100%', height: '100%' }}
 						resizeMode="cover"
 						fadeDuration={2000}
-						{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
 						// android only supports up to blur={25} which doesn't look good,
 						// but if we heavily downscale first, the following looks near identical to using
 						// original res with blur={40} on ios, which is what I originally settled on
@@ -160,14 +160,14 @@ function BookContent({ book, onConfirmAddBook }: BookContentProps) {
 					/>
 
 					<View className="gap-2">
-						<Heading size="lg" className="text-center leading-6">
+						<Heading size="lg" className="leading-6 text-center">
 							{book.resolvedName}
 						</Heading>
 
 						{/* TODO: Tags? Genres? */}
 					</View>
 
-					<View className="flex w-full flex-row items-center gap-x-2 tablet:max-w-sm tablet:self-center">
+					<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 						<Button variant="brand" className="flex-1" roundness="full" onPress={onConfirmAddBook}>
 							<Text>Add to Club</Text>
 						</Button>

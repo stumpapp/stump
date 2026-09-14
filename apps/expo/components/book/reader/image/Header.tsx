@@ -1,16 +1,14 @@
-import { ReadingDirection } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
-import { useCallback } from 'react'
-import { Platform, View } from 'react-native'
+import { Alert, Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
-import { COLORS } from '~/lib/constants'
-import { useReaderStore } from '~/stores'
-import { useBookPreferences } from '~/stores/reader'
+import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
 import { useReaderAnimations } from '../shared/readerAnimations'
@@ -21,29 +19,36 @@ type Props = {
 }
 
 export default function Header({ onShowGlobalSettings }: Props) {
-	const { book, resetTimer, serverId } = useImageBasedReader()
-	const {
-		preferences: { readingDirection },
-		setBookPreferences,
-	} = useBookPreferences({ book, serverId })
+	const { t } = useTranslate()
 
-	// TODO: I think global incognito makes sense but isn't exposed very well right now
-	const incognito = useReaderStore((state) => state.globalSettings.incognito)
+	const { book, resetTimer, serverId } = useImageBasedReader()
+	const activeServerCtx = useActiveServerSafe()
+
 	const insets = useSafeAreaInsets()
 	const { secondaryStyle } = useReaderAnimations()
 
-	const onChangeReadingDirection = useCallback(() => {
-		setBookPreferences({
-			readingDirection:
-				readingDirection === ReadingDirection.Ltr ? ReadingDirection.Rtl : ReadingDirection.Ltr,
-		})
-	}, [readingDirection, setBookPreferences])
-
 	const router = useRouter()
+
+	const confirmResetTimer = () => {
+		Alert.alert(
+			t('readerSettings.readingTimer.resetTimer'),
+			t('readerSettings.readingTimer.confirmation.message', {
+				bookName: book.name,
+				action:
+					activeServerCtx?.activeServer.kind === 'stump'
+						? t('readerSettings.readingTimer.confirmation.action.multi-session')
+						: t('readerSettings.readingTimer.confirmation.action.single-session'),
+			}),
+			[
+				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: t('common.reset'), style: 'destructive', onPress: resetTimer },
+			],
+		)
+	}
 
 	return (
 		<Animated.View
-			className="inset-x-safe absolute z-20 gap-2 px-2"
+			className="inset-x-safe gap-2 px-2 absolute z-20"
 			style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
 		>
 			<View className="relative flex-row items-center justify-between">
@@ -51,7 +56,10 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					icon={{
 						android: X,
 						ios: 'xmark',
-						color: Platform.OS === 'android' ? COLORS.dark.foreground.DEFAULT : 'primary',
+						color:
+							Platform.OS === 'android' || !IS_IOS_26_PLUS
+								? COLORS.dark.foreground.DEFAULT
+								: 'primary',
 					}}
 					onPress={() => router.back()}
 					ios={{ variant: 'glass' }}
@@ -68,11 +76,9 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				/>
 
 				<PagedActionMenu
-					incognito={incognito}
 					book={book}
 					serverId={serverId}
-					onResetTimer={resetTimer}
-					onChangeReadingDirection={onChangeReadingDirection}
+					onResetTimer={confirmResetTimer}
 					onShowSettings={onShowGlobalSettings}
 				/>
 			</View>

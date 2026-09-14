@@ -1,11 +1,12 @@
+import { formatBytes } from '@stump/client'
 import { Badge, Link, Text } from '@stump/components'
-import { FragmentType, Media, MediaModelOrdering } from '@stump/graphql'
+import { FragmentType, Media, MediaMetadataModelOrdering, MediaModelOrdering } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat } from 'date-fns'
 
 import paths from '@/paths'
-import { formatBytes } from '@/utils/format'
+import { isEbookExtension } from '@/utils/readingProgress'
 
 import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'
@@ -50,15 +51,15 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	cell: ({
 		getValue,
 		row: {
-			original: { id, libraryConfig, readProgress },
+			original: { id, extension, libraryConfig, readProgress },
 		},
 	}) => (
 		<Link
 			to={
 				libraryConfig?.skipBookOverview
 					? paths.bookReader(id, {
-							epubcfi: readProgress?.epubcfi,
-							page: readProgress?.page ?? undefined,
+							isEpub: isEbookExtension(extension),
+							page: isEbookExtension(extension) ? undefined : (readProgress?.page ?? undefined),
 						})
 					: paths.bookOverview(id)
 			}
@@ -151,14 +152,14 @@ const publishedColumn = columnHelper.accessor(
 			</Text>
 		),
 		enableGlobalFilter: true,
-		// TODO(relation-ordering): Support order by relation
-		enableSorting: false,
+		// TODO(sorting): Consider better null/empty handling (e.g., placing nulls last or excluding them when sorting)
+		enableSorting: true,
 		header: () => (
 			<Text size="sm" variant="secondary">
 				Published
 			</Text>
 		),
-		id: 'published',
+		id: MediaMetadataModelOrdering.Year,
 	},
 )
 

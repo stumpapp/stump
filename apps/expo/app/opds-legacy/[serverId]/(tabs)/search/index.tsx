@@ -1,0 +1,91 @@
+import { useNavigation, useRouter } from 'expo-router'
+import debounce from 'lodash/debounce'
+import { useCallback, useLayoutEffect, useState } from 'react'
+import { NativeSyntheticEvent, Platform, TextInputChangeEventData, View } from 'react-native'
+
+import Owl from '~/components/Owl'
+import { SearchHistoryAndFavorites } from '~/components/search/SearchHistoryAndFavorites'
+import { Text } from '~/components/ui'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useOPDSLegacyFeedContext } from '~/providers/OPDSLegacyFeedProvider'
+import { useSearchStore } from '~/stores/search'
+
+export default function Screen() {
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
+	const { searchDoc } = useOPDSLegacyFeedContext()
+
+	const trackSearch = useSearchStore((store) => store.trackSearch)
+
+	const navigation = useNavigation()
+	const router = useRouter()
+	const colors = useColors()
+
+	const [searchQuery, setSearchQuery] = useState('')
+	const [isInputFocused, setIsInputFocused] = useState(false)
+
+	const onSearchChange = useCallback((query: string) => {
+		setSearchQuery(query)
+	}, [])
+	const setQuery = debounce(onSearchChange, 200)
+
+	const navigateToQuery = useCallback(
+		(query: string) => {
+			trackSearch(query, serverId)
+			router.push({
+				pathname: `/opds-legacy/[serverId]/search/[query]`,
+				params: { serverId, query },
+			})
+		},
+		[serverId, router, trackSearch],
+	)
+
+	const onSearch = useCallback(() => {
+		if (!searchQuery || !searchDoc) return
+		navigateToQuery(searchQuery)
+	}, [searchQuery, searchDoc, navigateToQuery])
+
+	useLayoutEffect(() => {
+		navigation.setOptions({
+			headerShown: true,
+			headerTransparent: Platform.OS === 'ios',
+			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
+			headerSearchBarOptions: {
+				placeholder: 'Search',
+				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
+					setQuery(e.nativeEvent.text),
+				shouldShowHintSearchIcon: true,
+				onSearchButtonPress: () => onSearch(),
+				onFocus: () => setIsInputFocused(true),
+				onBlur: () => setIsInputFocused(false),
+				onCancelButtonPress: () => setIsInputFocused(false),
+				headerIconColor: colors.foreground.subtle,
+				hintTextColor: colors.foreground.muted,
+				tintColor: colors.fill.danger.DEFAULT,
+				textColor: colors.foreground.DEFAULT,
+			},
+		})
+	}, [navigation, setQuery, onSearch, colors])
+
+	if (!isInputFocused) {
+		return (
+			<View className="gap-4 p-4 tablet:p-7 flex-1 items-center justify-center bg-background">
+				<Owl owl="search" />
+
+				<View className="gap-2 px-4 tablet:max-w-lg">
+					<Text size="xl" className="font-semibold leading-tight text-center">
+						Search the feed
+					</Text>
+
+					<Text size="lg" className="text-foreground-muted text-center">
+						Enter a search query to find content in this OPDS feed
+					</Text>
+				</View>
+			</View>
+		)
+	}
+
+	return <SearchHistoryAndFavorites onSelect={navigateToQuery} />
+}

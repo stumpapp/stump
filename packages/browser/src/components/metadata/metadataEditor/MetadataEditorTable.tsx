@@ -1,0 +1,191 @@
+import { Card, cn } from '@stump/components'
+import {
+	ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	RowData,
+	useReactTable,
+} from '@tanstack/react-table'
+import { useCallback, useLayoutEffect, useRef } from 'react'
+import { useWindowSize } from 'rooks'
+
+import { getCommonPinningStyles } from '../../table/Table'
+import { calculateOptimalColumnWidth, calculateTableSizing } from './utils'
+
+type Props<Item> = {
+	columns: ColumnDef<Item>[]
+	items: Item[]
+	showMissing: boolean
+}
+
+// FIXME: This looks not great on mobile. It might be better to just have a separate, read-only
+// table rendered on mobile which looks more like the mobile app
+
+export default function MetadataEditorTable<Item extends RowData>({
+	columns,
+	items,
+	showMissing,
+}: Props<Item>) {
+	const table = useReactTable({
+		columns,
+		data: items,
+		getCoreRowModel: getCoreRowModel(),
+		columnResizeMode: 'onChange',
+		state: {
+			expanded: {
+				missing: showMissing,
+			},
+			columnPinning: {
+				right: ['actions'],
+			},
+		},
+		defaultColumn: {
+			size: 120,
+		},
+	})
+
+	const windowDimensions = useWindowSize()
+	const tableContainerRef = useRef<HTMLDivElement>(null)
+	const tableRef = useRef<HTMLTableElement>(null)
+
+	useLayoutEffect(() => {
+		if (!tableContainerRef.current) return
+		const resizeObserver = new ResizeObserver((entries) => {
+			const entry = entries[0]
+			if (entry) {
+				const initialColumnSizing = calculateTableSizing(
+					table.getFlatHeaders(),
+					entry.contentRect.width,
+				)
+				table.setColumnSizing(initialColumnSizing)
+			}
+		})
+		resizeObserver.observe(tableContainerRef.current)
+		return () => {
+			resizeObserver.disconnect()
+		}
+	}, [table, windowDimensions.innerWidth])
+
+	const ensureResizeFillsSpace = useCallback(
+		(headerId: string, adjustedWidth: number) => {
+			if (tableContainerRef.current === null) {
+				table.setColumnSizing((prev) => ({
+					...prev,
+					[headerId]: adjustedWidth,
+				}))
+			} else {
+				const adjustedHeaders = table.getFlatHeaders().map((header) => {
+					if (header.id === headerId) {
+						return {
+							...header,
+							size: adjustedWidth,
+						}
+					}
+					return header
+				})
+				const adjustedSize = calculateTableSizing(
+					adjustedHeaders,
+					tableContainerRef.current.clientWidth,
+				)
+				table.setColumnSizing(adjustedSize)
+			}
+		},
+		[table],
+	)
+
+	const { rows } = table.getRowModel()
+
+	return (
+		<Card
+			className="overflow-hidden rounded-xl border-border bg-background"
+			ref={tableContainerRef}
+			style={{
+				direction: table.options.columnResizeDirection,
+				width: '100%',
+			}}
+		>
+			<table
+				// Note: stay full-width when JS sizing goes stale (e.g. right after save).
+				className="w-full divide-y divide-border"
+				style={{
+					minWidth: table.getCenterTotalSize(),
+				}}
+				ref={tableRef}
+			>
+				<thead>
+					<tr className="relative flex w-full">
+						{table.getFlatHeaders().map((header) => (
+							<th
+								key={header.id}
+								{...{
+									colSpan: header.colSpan,
+									style: {
+										width: header.getSize(),
+										...getCommonPinningStyles(header.column),
+									},
+								}}
+								className={cn(
+									'min-h-10 relative bg-card/70',
+									// Fill leftover space so the row spans the table when sizes run short.
+									{ grow: header.column.columnDef.meta?.isGrow },
+								)}
+							>
+								{flexRender(header.column.columnDef.header, header.getContext())}
+
+								{header.column.getCanResize() && (
+									<div
+										onMouseDown={header.getResizeHandler()}
+										onTouchStart={header.getResizeHandler()}
+										onDoubleClick={() => {
+											const optimalWidth = calculateOptimalColumnWidth(header.column.id)
+											ensureResizeFillsSpace(header.column.id, optimalWidth)
+										}}
+										className={cn(
+											'top-0 absolute -right-px z-50 h-full w-px cursor-col-resize touch-none opacity-0 transition-opacity duration-75 hover:opacity-50',
+											{
+												'opacity-100': header.column.getIsResizing(),
+											},
+											{
+												'bg-foreground': !header.column.getIsResizing(),
+											},
+										)}
+									/>
+								)}
+							</th>
+						))}
+					</tr>
+				</thead>
+
+				<tbody className="divide-y divide-border">
+					{rows.map((row) => (
+						<tr key={row.id} className="group/row flex w-full">
+							{row.getVisibleCells().map((cell) => (
+								<td
+									className={cn(
+										'py-2 pl-1.5 pr-1.5 first:pl-4 last:pl-0 last:pr-0 first:border-r first:border-border',
+										{ grow: cell.column.columnDef.meta?.isGrow },
+									)}
+									key={cell.id}
+									style={{
+										width: cell.column.getSize(),
+										...getCommonPinningStyles(cell.column),
+									}}
+								>
+									{flexRender(cell.column.columnDef.cell, cell.getContext())}
+								</td>
+							))}
+						</tr>
+					))}
+
+					{!rows.length && (
+						<tr className="flex w-full">
+							<td colSpan={columns.length} className="flex-1">
+								<div className="h-32 flex w-full items-center justify-center">No Metadata</div>
+							</td>
+						</tr>
+					)}
+				</tbody>
+			</table>
+		</Card>
+	)
+}

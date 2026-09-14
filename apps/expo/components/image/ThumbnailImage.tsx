@@ -66,14 +66,13 @@ export const ThumbnailImage = ({
 	// So we must not make it a child of BorderAndShadow, and must use inset: -0.1 and manually round the corners
 	const gradientElement = gradient?.colors && (
 		<LinearGradient
-			colors={gradient.colors}
-			locations={gradient.locations}
 			style={{
 				position: 'absolute',
 				zIndex: 20,
 				inset: Platform.OS === 'android' ? -0.1 : 0,
 				borderRadius: Platform.OS === 'android' ? borderRadius : undefined,
 			}}
+			{...gradient}
 		/>
 	)
 
@@ -111,11 +110,6 @@ export const ThumbnailImage = ({
 						resize={size.width * 1.5}
 						fadeDuration={800}
 						resizeMode={effectiveResizeMode}
-						// This is a weird workaround:
-						// Using the indicator prop hides the built in grey placeholder on ios (what we want)
-						// but will force show a circular loading indicator on all platforms, so we make it transparent.
-						// Android doesn't support transparent (and doesn't have built in placeholders) so we do nothing.
-						{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
 						{...props}
 					/>
 				</View>

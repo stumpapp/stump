@@ -2,10 +2,15 @@ import { type AllowedLocale, initDateFnsLocale, isLocale, localeNames } from '@s
 import * as Localization from 'expo-localization'
 import { Languages } from 'lucide-react-native'
 import { useMemo } from 'react'
+import { Platform } from 'react-native'
+import { setLocaleDetector } from 'to-words'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
 import { PickerOption } from '~/components/ui/picker/types'
+import { PickerSheet } from '~/components/ui/picker-sheet'
+import { SETTINGS_COLORS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -18,6 +23,7 @@ const localeOptions: PickerOption<AllowedLocale>[] = Object.entries(localeNames)
 )
 
 export default function AppLanguage() {
+	const { t } = useTranslate()
 	const { locale, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			locale: state.locale,
@@ -36,16 +42,32 @@ export default function AppLanguage() {
 		if (isLocale(value)) {
 			patch({ locale: value })
 			initDateFnsLocale(value)
+			setLocaleDetector(() => value)
 		}
 	}
 
 	return (
-		<AppSettingsRow icon={Languages} title="Language">
-			<Picker<AllowedLocale>
-				value={currentLocale}
-				options={localeOptions}
-				onValueChange={handleChange}
-			/>
+		<AppSettingsRow
+			icon={Languages}
+			iconBackgroundColor={SETTINGS_COLORS.interactive}
+			title={t('settings.preferences.appLanguage')}
+		>
+			{Platform.select({
+				ios: (
+					<Picker<AllowedLocale>
+						value={currentLocale}
+						options={localeOptions}
+						onValueChange={handleChange}
+					/>
+				),
+				android: (
+					<PickerSheet<AllowedLocale>
+						value={currentLocale}
+						options={localeOptions}
+						onValueChange={handleChange}
+					/>
+				),
+			})}
 		</AppSettingsRow>
 	)
 }

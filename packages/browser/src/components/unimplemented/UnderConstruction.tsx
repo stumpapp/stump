@@ -35,7 +35,7 @@ export default function UnderConstruction({ issue }: Props) {
 							{t(getKey('githubLink'))}
 						</ButtonOrLink>
 					)}
-					<ButtonOrLink href={paths.home()} variant="primary" className="mt-4">
+					<ButtonOrLink href={paths.home()} className="mt-4">
 						{t(getKey('homeLink'))}
 					</ButtonOrLink>
 				</div>

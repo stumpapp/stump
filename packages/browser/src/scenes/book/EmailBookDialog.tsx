@@ -117,7 +117,6 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 							<Badge
 								key={index}
 								size="sm"
-								variant="default"
 								onClick={() => setEmails((curr) => curr.filter((e) => e !== email))}
 							>
 								{email}
@@ -130,7 +129,6 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 							label={t(getFormKey('email.label'))}
 							description={t(getFormKey('email.description'))}
 							fullWidth
-							variant="primary"
 							value={currentEmail}
 							onChange={(e) => setCurrentEmail(e.target.value)}
 						/>
@@ -182,10 +180,10 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 				</div>
 
 				<Dialog.Footer>
-					<Button onClick={onClose} disabled={isSending}>
+					<Button variant="outline" onClick={onClose} disabled={isSending}>
 						Cancel
 					</Button>
-					<Button variant="primary" onClick={handleSend} disabled={isSending} isLoading={isSending}>
+					<Button onClick={handleSend} disabled={isSending} isLoading={isSending}>
 						Confirm
 					</Button>
 				</Dialog.Footer>

@@ -47,7 +47,7 @@ export default function UserBookClubsScene() {
 						<p
 							className={cx(
 								{ 'bg-yellow-50 text-yellow-800 ring-yellow-600/20': !isActive },
-								'mt-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset',
+								'mt-0.5 px-1.5 py-0.5 text-xs font-medium rounded-md whitespace-nowrap ring-1 ring-inset',
 							)}
 						>
 							{isActive ? 'Active' : 'Inactive'}

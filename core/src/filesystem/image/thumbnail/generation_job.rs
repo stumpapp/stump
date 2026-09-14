@@ -8,14 +8,14 @@ use models::{
 use sea_orm::{prelude::*, QuerySelect, QueryTrait};
 
 use crate::{
+	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
 	filesystem::image::thumbnail::generate::{
 		safely_generate_batch, GenerateImageSource, GenerateThumbnailOptions,
 	},
 	job::{
-		error::JobError, JobExt, JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx,
-		WorkingState, WrappedJob,
+		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkingState,
 	},
-	utils::chain_optional_iter,
 };
 
 // Note: I am type aliasing for the sake of clarity in what the provided Strings represent
@@ -122,13 +122,13 @@ impl ThumbnailGenerationJob {
 	pub fn new(
 		options: ImageProcessorOptions,
 		params: ThumbnailGenerationJobParams,
-	) -> Box<WrappedJob<Self>> {
-		WrappedJob::new(Self { options, params })
+	) -> Self {
+		Self { options, params }
 	}
 }
 
 #[async_trait::async_trait]
-impl JobExt for ThumbnailGenerationJob {
+impl JobLifecycle for ThumbnailGenerationJob {
 	const NAME: &'static str = "thumbnail_generation";
 
 	type Output = ThumbnailGenerationOutput;
@@ -162,7 +162,7 @@ impl JobExt for ThumbnailGenerationJob {
 
 	async fn init(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		// If we aren't force regenerating thumbnails, we don't need to process books
 		// that already have their thumbnails set in the database
@@ -178,7 +178,7 @@ impl JobExt for ThumbnailGenerationJob {
 					.filter(series::Column::LibraryId.eq(id))
 					.apply_if(truthy_thumb_filter, |query, f| query.filter(f))
 					.into_model::<media::MediaThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 				let media_ids = books.iter().map(|m| m.id.clone()).collect::<Vec<_>>();
@@ -190,14 +190,18 @@ impl JobExt for ThumbnailGenerationJob {
 					.into_iter()
 					.collect::<Vec<_>>();
 
-				let series = series::Entity::find()
-					.select_only()
-					.columns(series::SeriesThumbSelect::columns())
-					.filter(series::Column::Id.is_in(series_ids.clone()))
-					.into_model::<series::SeriesThumbSelect>()
-					.all(ctx.conn.as_ref())
-					.await
-					.map_err(|e| JobError::InitFailed(e.to_string()))?;
+				let mut series = Vec::with_capacity(series_ids.len());
+				for chunk in series_ids.chunks(SQLITE_BIND_LIMIT) {
+					let batch = series::Entity::find()
+						.select_only()
+						.columns(series::SeriesThumbSelect::columns())
+						.filter(series::Column::Id.is_in(chunk.to_vec()))
+						.into_model::<series::SeriesThumbSelect>()
+						.all(ctx.conn())
+						.await
+						.map_err(|e| JobError::InitFailed(e.to_string()))?;
+					series.extend(batch);
+				}
 
 				let library_ids = series
 					.iter()
@@ -219,7 +223,7 @@ impl JobExt for ThumbnailGenerationJob {
 					.filter(media::Column::SeriesId.eq(id))
 					.apply_if(truthy_thumb_filter, |query, f| query.filter(f))
 					.into_model::<media::MediaIdentSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
@@ -250,30 +254,29 @@ impl JobExt for ThumbnailGenerationJob {
 			},
 		};
 
-		let tasks = chain_optional_iter(
-			[],
-			[
-				(!init_params.media_ids.is_empty()).then_some(
-					ThumbnailGenerationTask::Media(init_params.media_ids.clone()),
-				),
-				(!init_params.series_ids.is_empty())
-					.then_some(ThumbnailGenerationTask::Series(init_params.series_ids)),
-				(!init_params.library_ids.is_empty())
-					.then_some(ThumbnailGenerationTask::Library(init_params.library_ids)),
-			],
-		);
+		let tasks: Vec<ThumbnailGenerationTask> =
+			chunk_vec_into(init_params.media_ids, ThumbnailGenerationTask::Media)
+				.into_iter()
+				.chain(chunk_vec_into(
+					init_params.series_ids,
+					ThumbnailGenerationTask::Series,
+				))
+				.chain(chunk_vec_into(
+					init_params.library_ids,
+					ThumbnailGenerationTask::Library,
+				))
+				.collect();
 
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),
 			tasks: tasks.into(),
-			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
 	async fn execute_task(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut output = Self::Output::default();
@@ -286,16 +289,13 @@ impl JobExt for ThumbnailGenerationJob {
 					.columns(media::MediaThumbSelect::columns())
 					.filter(media::Column::Id.is_in(media_ids))
 					.into_model::<media::MediaThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = media.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating book thumbnails",
-					1,
-					task_count,
-				));
+				ctx.report_progress(JobProgress::msg("Generating book thumbnails"));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 				let JobTaskOutput {
 					output: sub_output,
 					logs: sub_logs,
@@ -305,7 +305,7 @@ impl JobExt for ThumbnailGenerationJob {
 					ctx,
 					GenerateThumbnailOptions {
 						image_options: self.options.clone(),
-						core_config: ctx.config.as_ref().clone(),
+						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
 						filename: None, // Each book will use its ID as the filename
 					},
@@ -326,16 +326,13 @@ impl JobExt for ThumbnailGenerationJob {
 					.columns(series::SeriesThumbSelect::columns())
 					.filter(series::Column::Id.is_in(series_ids))
 					.into_model::<series::SeriesThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = series.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating series thumbnails",
-					1,
-					task_count,
-				));
+				ctx.report_progress(JobProgress::msg("Generating series thumbnails"));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				let JobTaskOutput {
 					output: sub_output,
@@ -349,7 +346,7 @@ impl JobExt for ThumbnailGenerationJob {
 					ctx,
 					GenerateThumbnailOptions {
 						image_options: self.options.clone(),
-						core_config: ctx.config.as_ref().clone(),
+						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
 						filename: None, // Each series will use its ID as the filename
 					},
@@ -370,16 +367,13 @@ impl JobExt for ThumbnailGenerationJob {
 					.columns(library::LibraryThumbSelect::columns())
 					.filter(library::Column::Id.is_in(library_ids))
 					.into_model::<library::LibraryThumbSelect>()
-					.all(ctx.conn.as_ref())
+					.all(ctx.conn())
 					.await
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
 				let task_count = libraries.len() as i32;
-				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating library thumbnails",
-					1,
-					task_count,
-				));
+				ctx.report_progress(JobProgress::msg("Generating library thumbnails"));
+				ctx.report_progress(JobProgress::subtask_position(0, task_count));
 
 				let JobTaskOutput {
 					output: sub_output,
@@ -393,7 +387,7 @@ impl JobExt for ThumbnailGenerationJob {
 					ctx,
 					GenerateThumbnailOptions {
 						image_options: self.options.clone(),
-						core_config: ctx.config.as_ref().clone(),
+						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
 						filename: None, // Each library will use its ID as the filename
 					},

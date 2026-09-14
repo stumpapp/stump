@@ -1,0 +1,28 @@
+- [ ] reconsider stats, showing effectively the same thing for both series and books is fine for now but i think it can be better.
+    - [ ] completedSeries for server/[id]/series/index.tsx?
+    - [ ] does time matter for series search? feels less relevant than for library/books (at-a-glance for lib vs more specific for total time)
+- [ ] formalize patch into pr for expo
+- [ ] figure out why flash-list > 2.1.0 breaks on android with so many issues
+    - it looks to be https://github.com/Shopify/flash-list/issues/2250, but i don't have time to validate anymore today
+    so am deferring until another time
+- [ ] actually setup linting for the app
+- [ ] reorganize components/ a bit, i think we can nest it a bit more like:
+    ```
+    components/
+        stumpServer/
+            bookClub/
+            home/
+            fileExplorer/
+            ... etc
+        opds/
+        opdsLegacy/
+        ... all the shared shit
+    ```
+- [ ] stop using [id] in path for expo router, use something less likely to conflict with other nested routes:
+    - e.g., (opds|opds-legacy|server)/[serverId], libraries/[libraryId], etc
+    - it's really things like server/[id]/series/[id] that are the problem, nested ids
+- [x] ^ rename server stack to stump, just kinda makes more sense
+- [x] more ephemeral context (or context without need for custom provider) can stay in context/ but others prolly in providers/
+      i kinda dig that pattern after seeing it in streamyfin
+- [ ] do not forget to localize all the new shit im doing
+- [ ] rephrase auth help directionally at user, e.g. "I do not need to provide any authentication or..."

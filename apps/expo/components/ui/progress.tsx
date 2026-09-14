@@ -1,5 +1,7 @@
 import * as ProgressPrimitive from '@rn-primitives/progress'
+import { BlurView, BlurViewProps } from 'expo-blur'
 import * as React from 'react'
+import { View } from 'react-native'
 import Animated, {
 	Extrapolation,
 	interpolate,
@@ -12,22 +14,37 @@ import { cn } from '~/lib/utils'
 
 type Props = {
 	indicatorClassName?: string
+	trackClassName?: string
 	inverted?: boolean
+	blurProps?: BlurViewProps
 } & ProgressPrimitive.RootProps
 
 const Progress = React.forwardRef<ProgressPrimitive.RootRef, Props>(
-	({ className, value, indicatorClassName, inverted, ...props }, ref) => {
+	(
+		{ className, value, indicatorClassName, trackClassName, inverted, blurProps, ...props },
+		ref,
+	) => {
 		return (
 			<ProgressPrimitive.Root
 				ref={ref}
 				className={cn(
-					'squircle relative h-4 w-full overflow-hidden rounded-full bg-background-surface',
+					'squircle h-4 relative w-full overflow-hidden rounded-full',
 					{ 'rotate-180 transform': inverted },
 					className,
 				)}
 				{...props}
 			>
-				<Indicator value={value} className={indicatorClassName} />
+				{blurProps ? (
+					<BlurView {...blurProps}>
+						<View className={cn('bg-background-surface-secondary', trackClassName)}>
+							<Indicator value={value} className={indicatorClassName} />
+						</View>
+					</BlurView>
+				) : (
+					<View className={cn('bg-background-surface-secondary', trackClassName)}>
+						<Indicator value={value} className={indicatorClassName} />
+					</View>
+				)}
 			</ProgressPrimitive.Root>
 		)
 	},

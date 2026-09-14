@@ -1,0 +1,17 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
+		"jsx": "preserve",
+		"module": "esnext",
+		"moduleResolution": "Node",
+		"composite": false,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"types": ["node"],
+		"paths": {
+			"@stump/graphql": ["../../packages/graphql/src/index.ts"],
+		},
+	},
+	"include": ["tests/**/*", "playwright.config.ts"],
+}

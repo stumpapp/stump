@@ -1,7 +1,10 @@
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, FixedOffset, Utc};
-use models::entity::{library_config, media, media_metadata};
+use models::{
+	entity::{library_config, media, media_metadata},
+	shared::enums::FileStatus,
+};
 use sea_orm::Set;
 use uuid::Uuid;
 
@@ -31,17 +34,20 @@ pub struct MediaBuilder {
 pub struct BuiltMedia {
 	pub media: media::ActiveModel,
 	pub metadata: Option<media_metadata::ActiveModel>,
+	/// Tag names extracted from the file's metadata (e.g. ComicInfo.xml `<Tags>`).
+	/// Applied additively to `media_tags` during create/update so user-assigned tags
+	/// are never removed by a rescan.
+	pub tags: Vec<String>,
 }
 
 impl BuiltMedia {
-	#[tracing::instrument(skip(self))]
-	pub fn path(&self) -> Option<String> {
-		match self.media.path.clone().into_value() {
-			Some(path) => Some(path.to_string()),
-			_ => {
-				tracing::warn!(result = ?self, "Failed to get path from constructed media");
-				None
+	pub fn oneshot(self) -> Self {
+		Self {
+			media: media::ActiveModel {
+				is_oneshot: Set(true),
+				..self.media
 			},
+			..self
 		}
 	}
 }
@@ -72,6 +78,7 @@ impl MediaBuilder {
 				media_id: Set(Some(media.media.id.clone())),
 				..meta
 			}),
+			tags: generated.tags,
 		})
 	}
 
@@ -104,25 +111,29 @@ impl MediaBuilder {
 
 		let id = Uuid::new_v4().to_string();
 		let pages = processed_entry.pages;
-		let mut resolved_metadata = None;
+		let (resolved_metadata, resolved_tags) = processed_entry
+			.metadata
+			.map(|mut metadata| {
+				let conflicting_page_counts =
+					metadata.page_count.is_some_and(|count| count != pages);
+				if conflicting_page_counts {
+					tracing::warn!(
+						?pages,
+						?metadata.page_count,
+						"Page count in metadata does not match actual page count!"
+					);
+					metadata.page_count = Some(pages);
+				}
 
-		if let Some(mut metadata) = processed_entry.metadata {
-			let conflicting_page_counts =
-				metadata.page_count.is_some_and(|count| count != pages);
-			if conflicting_page_counts {
-				tracing::warn!(
-					?pages,
-					?metadata.page_count,
-					"Page count in metadata does not match actual page count!"
-				);
-				metadata.page_count = Some(pages);
-			}
+				let tags = metadata.tags.take().unwrap_or_default();
 
-			resolved_metadata = Some(media_metadata::ActiveModel {
-				media_id: Set(Some(id.clone())),
-				..metadata.into_active_model()
-			});
-		}
+				let active = media_metadata::ActiveModel {
+					media_id: Set(Some(id.clone())),
+					..metadata.into_active_model()
+				};
+				(Some(active), tags)
+			})
+			.unwrap_or_default();
 
 		let media = media::ActiveModel {
 			id: Set(id),
@@ -135,12 +146,15 @@ impl MediaBuilder {
 			path: Set(path_str),
 			series_id: Set(Some(self.series_id)),
 			modified_at: Set(last_modified_at),
+			status: Set(FileStatus::Ready),
+			created_at: Set(chrono::Utc::now().into()),
 			..Default::default()
 		};
 
 		Ok(BuiltMedia {
 			media,
 			metadata: resolved_metadata,
+			tags: resolved_tags,
 		})
 	}
 
@@ -170,8 +184,8 @@ impl MediaBuilder {
 #[cfg(test)]
 mod tests {
 	use models::shared::enums::{
-		LibraryPattern, LibraryViewMode, ReadingDirection, ReadingImageScaleFit,
-		ReadingMode,
+		LibraryPattern, LibraryType, LibraryViewMode, ReadingDirection,
+		ReadingImageScaleFit, ReadingMode,
 	};
 	use sea_orm::ActiveValue;
 
@@ -216,6 +230,10 @@ mod tests {
 
 	#[test]
 	fn test_build_media_pdf() {
+		if crate::filesystem::media::format::pdf::PdfProcessor::renderer(&None).is_err() {
+			eprintln!("Skipping test: PDFium is not configured or available.");
+			return;
+		}
 		let media = build_media_test_helper(get_test_pdf_path());
 		assert!(media.is_ok());
 		let media = media.unwrap().media;
@@ -270,7 +288,9 @@ mod tests {
 			watch: false,
 			default_library_view_mode: LibraryViewMode::Series,
 			hide_series_view: false,
+			library_type: LibraryType::Mixed,
 			skip_book_overview: false,
+			oneshots_directory: None,
 		}
 	}
 }

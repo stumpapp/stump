@@ -5,6 +5,13 @@ use strum::{Display, EnumString};
 
 // TODO: Consider not using screaming case?
 
+/// The role of an author in relation to a work or series
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Enum)]
+pub enum AuthorRole {
+	Primary,
+	CoAuthor,
+}
+
 /// The different roles a user may have for a role-based access control system scoped
 /// to a specific entity
 #[derive(
@@ -162,6 +169,35 @@ pub enum InterfaceLayout {
 	Table,
 }
 
+/// The roundness of certain UI elements in the client interface, such as cards, buttons, inputs, etc
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	Enum,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum InterfaceRoundness {
+	None,
+	#[default]
+	Normal,
+	Rounded,
+	Pill,
+}
+
 /// The style of placeholder to use for thumbnails while they are loading
 #[derive(
 	Eq,
@@ -250,6 +286,9 @@ impl JobStatus {
 	}
 }
 
+// TODO: rename these terrible things:
+// - FirstFolderOnly?
+// - FolderPerSeries?
 /// The different patterns a library may be organized by
 #[derive(
 	Eq,
@@ -303,6 +342,39 @@ pub enum LibraryViewMode {
 	Books,
 }
 
+/// The type of content a library contains
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LibraryType {
+	Comic,
+	Manga,
+	Book,
+	LightNovel,
+	Manhwa,
+	#[default]
+	Mixed,
+	WebNovel,
+	Webtoon,
+}
+
 #[derive(
 	Eq,
 	Copy,
@@ -332,6 +404,95 @@ pub enum LogLevel {
 	#[default]
 	Info,
 	Debug,
+}
+
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum MetadataFetchStatus {
+	AwaitingReview,
+	#[default]
+	NotStarted,
+	InProgress,
+	Fetched,
+	Matched,
+	NoMatch,
+	Failed,
+	RateLimited,
+}
+
+/// The supported external metadata providers
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	EnumString,
+	Display,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+pub enum MetadataProvider {
+	/// Hardcover (https://hardcover.app)
+	Hardcover,
+	/// ComicVine (https://comicvine.gamespot.com/api/)
+	ComicVine,
+}
+
+impl MetadataProvider {
+	/// Returns the library types that this provider has meaningful coverage for
+	pub fn supported_library_types(&self) -> &'static [LibraryType] {
+		match self {
+			// TODO: Determine the exact coverage of Hardcover
+			Self::Hardcover => &[
+				LibraryType::Book,
+				LibraryType::Manga,
+				LibraryType::LightNovel,
+			],
+			Self::ComicVine => &[LibraryType::Comic],
+		}
+	}
+}
+
+impl LibraryType {
+	pub fn has_provider_overlap(&self, provider: &MetadataProvider) -> bool {
+		match self {
+			Self::Mixed => true,
+			other => provider.supported_library_types().contains(other),
+		}
+	}
 }
 
 /// An enum representing the different types of metadata resets that can occur,
@@ -395,6 +556,8 @@ pub enum ReadingDirection {
 	Rtl,
 }
 
+/// the different reading statuses a book can be categorized as based on a user's
+/// reading sessions
 #[derive(
 	Eq,
 	Copy,
@@ -417,10 +580,15 @@ pub enum ReadingDirection {
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReadingStatus {
+	/// there is an active reading session for this book. it may or may not have been completed in
+	/// the past, this is strictly about the presence of an active session
 	#[default]
 	Reading,
+	/// there is at least one completed readthrough for this book
 	Finished,
+	/// a user actively started reading a book but decided not to finish it (i.e., dnf-ing a book)
 	Abandoned,
+	/// no sessions have been recorded for this book
 	NotStarted,
 }
 
@@ -553,14 +721,22 @@ pub enum SupportedFont {
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserPermission {
 	/// Grant access to read/create their own API keys
-	AccessAPIKeys,
+	AccessApiKeys,
 	/// Grant access to the koreader sync feature
 	AccessKoreaderSync,
+	/// Grant access to the kobo sync feature
+	AccessKoboSync,
 	///TODO: Expand permissions for bookclub + smartlist
 	/// Grant access to the book club feature
 	AccessBookClub,
 	/// Grant access to create a book club (access book club)
 	CreateBookClub,
+	/// Grant user access to change **their own** password
+	ChangePassword,
+	/// Grant user access to change **their own** username
+	ChangeUsername,
+	/// Grant user access to change **their own** avatar
+	ChangeAvatar,
 	/// Grant access to read any emailers in the system
 	EmailerRead,
 	/// Grant access to create an emailer
@@ -617,10 +793,50 @@ pub enum UserPermission {
 	ReadJobs,
 	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
 	ManageJobs,
+	/// Grant access to read metadata fetch statuses
+	MetadataFetchRecordRead,
+	/// Grant access to manage metadata fetch statuses (accept matches, etc)
+	MetadataFetchRecordManage,
+	/// Grant access to read metadata provider configurations
+	MetadataProviderRead,
+	/// Grant access to manage metadata provider configurations (create, update, delete)
+	MetadataProviderManage,
 	/// Grant access to read application-level logs, e.g. job logs
 	ReadPersistedLogs,
 	/// Grant access to read system logs
 	ReadSystemLogs,
 	/// Grant access to manage the server. This is effectively a step below server owner
 	ManageServer,
+}
+
+/// The kind of a scheduled job, aligned with the config variants
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	EnumString,
+	Display,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ScheduledJobKind {
+	/// Scan one or more libraries on a cron schedule
+	#[default]
+	LibraryScan,
+	/// Retry fetching metadata for records that were rate-limited or failed
+	MetadataRetry,
 }

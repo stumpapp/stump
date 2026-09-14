@@ -3,6 +3,8 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
 import { Picker } from '~/components/ui/picker/picker'
+import { SETTINGS_COLORS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -10,6 +12,7 @@ import AppSettingsRow from '../AppSettingsRow'
 // TODO(android): Use non-native dropdown
 
 export default function ThumbnailPlaceholder() {
+	const { t } = useTranslate()
 	const { thumbnailPlaceholder, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			thumbnailPlaceholder: state.thumbnailPlaceholder,
@@ -18,24 +21,28 @@ export default function ThumbnailPlaceholder() {
 	)
 
 	return (
-		<AppSettingsRow icon={Palette} title="Thumbnail Placeholder">
+		<AppSettingsRow
+			icon={Palette}
+			iconBackgroundColor={SETTINGS_COLORS.minorVisuals}
+			title={t(getKey('label'))}
+		>
 			<Picker<ThumbnailPlaceholderType>
 				value={thumbnailPlaceholder}
 				options={[
 					{
-						label: 'Grayscale',
+						label: t(getKey('options.grayscale')),
 						value: 'grayscale',
 					},
 					{
-						label: 'Average Color',
+						label: t(getKey('options.averageColor')),
 						value: 'averageColor',
 					},
 					{
-						label: 'Colorful',
+						label: t(getKey('options.colorful')),
 						value: 'colorful',
 					},
 					{
-						label: 'Thumbhash',
+						label: t(getKey('options.thumbhash')),
 						value: 'thumbhash',
 					},
 				]}
@@ -44,3 +51,6 @@ export default function ThumbnailPlaceholder() {
 		</AppSettingsRow>
 	)
 }
+
+const LOCALE_BASE = 'settings.preferences.thumbnailPlaceholder'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

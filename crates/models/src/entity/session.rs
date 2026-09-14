@@ -1,4 +1,5 @@
-use sea_orm::entity::prelude::*;
+use chrono::Utc;
+use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "sessions")]
@@ -31,4 +32,16 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert {
+			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+		}
+
+		Ok(self)
+	}
+}

@@ -1,14 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { queryClient, useLoginOrRegister, useOidcConfig, useSDK } from '@stump/client'
-import { Alert, AlertDescription, Button, cx, Form, Heading, Input } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	Button,
+	Form,
+	Heading,
+	Input,
+	PasswordInput,
+} from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { motion, Variants } from 'framer-motion'
-import { ArrowRight, ShieldAlert } from 'lucide-react'
+import { ArrowRight, Cake, ShieldAlert } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -43,7 +51,7 @@ export default function LoginOrClaimScene() {
 				queryKey: [sdk.auth.keys.me],
 				exact: false,
 			})
-			if (redirect.includes('/swagger') || redirect.includes('/api')) {
+			if (redirect.includes('/api')) {
 				// eslint-disable-next-line react-compiler/react-compiler
 				window.location.href = redirect
 			} else {
@@ -97,26 +105,6 @@ export default function LoginOrClaimScene() {
 		window.location.href = authorizeUrl
 	}, [sdk.auth])
 
-	const renderHeader = () => {
-		if (isClaimed) {
-			return (
-				<div className="gap-4 px-2 flex shrink-0 items-center justify-center">
-					<img src="/assets/favicon.png" width="80" height="80" />
-					<Heading variant="gradient" size="3xl" className="font-bold">
-						Stump
-					</Heading>
-				</div>
-			)
-		} else {
-			return (
-				<div className="sm:max-w-md md:max-w-lg text-left">
-					<h1 className="text-4xl font-semibold text-foreground">{t('authScene.claimHeading')}</h1>
-					<p className="mt-1.5 text-base text-foreground-subtle">{t('authScene.claimText')}</p>
-				</div>
-			)
-		}
-	}
-
 	const renderError = () => {
 		if (!loginError) return null
 
@@ -145,28 +133,36 @@ export default function LoginOrClaimScene() {
 		<div className="flex h-full w-full items-center bg-background">
 			<motion.div
 				// @ts-expect-error: It's fine
-				className="w-screen shrink-0"
+				className="px-6 sm:px-0 w-screen shrink-0"
 				animate={showServers ? 'appearOut' : 'appearIn'}
 				variants={variants}
 			>
 				<div className="gap-8 p-4 flex h-full w-full flex-col items-center justify-center bg-background">
-					{renderHeader()}
+					<div className="gap-4 px-2 flex shrink-0 items-center justify-center">
+						<img src="/assets/favicon.png" width="80" height="80" />
+						<Heading variant="gradient" size="3xl" className="font-bold">
+							Stump
+						</Heading>
+					</div>
+
+					{!isClaimed && (
+						<div>
+							<Alert className="sm:w-90" variant="info">
+								<Cake />
+								<AlertTitle className="text-base">{t('authScene.claimHeading')}</AlertTitle>
+								<AlertDescription className="text-sm">{t('authScene.claimText')}</AlertDescription>
+							</Alert>
+						</div>
+					)}
+
 					{renderError()}
 
-					<Form
-						form={form}
-						onSubmit={handleSubmit}
-						className={cx(
-							{ 'sm:max-w-md md:max-w-lg w-full': !isClaimed },
-							{ 'min-w-[20rem]': isClaimed },
-						)}
-					>
+					<Form form={form} onSubmit={handleSubmit} className="sm:min-w-80 sm:w-[unset] w-full">
 						{!oidcConfig.disableLocalAuth && (
 							<>
 								<Input
 									id="username"
 									label={t('authScene.form.labels.username')}
-									variant="primary"
 									autoComplete="username"
 									autoCapitalize="off"
 									autoFocus
@@ -174,10 +170,9 @@ export default function LoginOrClaimScene() {
 									{...form.register('username')}
 								/>
 
-								<Input
+								<PasswordInput
 									id="password"
 									label={t('authScene.form.labels.password')}
-									variant="primary"
 									type="password"
 									autoComplete="current-password"
 									fullWidth
@@ -185,9 +180,8 @@ export default function LoginOrClaimScene() {
 								/>
 
 								<Button
-									size="md"
+									data-testid="loginOrRegisterButton"
 									type="submit"
-									variant={isClaimed ? 'primary' : 'secondary'}
 									isLoading={isLoggingIn || isRegistering}
 									className="mt-2"
 								>
@@ -201,18 +195,17 @@ export default function LoginOrClaimScene() {
 						{oidcConfig.enabled && (
 							<>
 								{!oidcConfig.disableLocalAuth && (
-									<div className="my-4 relative">
+									<div className="my-1.5 relative">
 										<div className="inset-0 absolute flex items-center">
-											<div className="w-full border-t border-edge" />
+											<div className="w-full border-t border-border" />
 										</div>
 										<div className="text-xs relative flex justify-center uppercase">
-											<span className="px-2 bg-background text-foreground-muted">Or</span>
+											<span className="px-2 bg-background text-muted-foreground">Or</span>
 										</div>
 									</div>
 								)}
 
 								<Button
-									size="md"
 									type="button"
 									variant="outline"
 									onClick={handleOidcLogin}
@@ -227,15 +220,15 @@ export default function LoginOrClaimScene() {
 
 						{isDesktop && (
 							<button
-								className="group p-4 hover:border-opacity-70 flex w-full items-center justify-between border-l border-edge transition-colors duration-100 hover:border-edge-strong hover:bg-background-surface/50"
+								className="group p-4 hover:border-opacity-70 flex w-full items-center justify-between border-l border-border transition-colors duration-100 hover:border-border hover:bg-muted/50"
 								type="button"
 								onClick={() => setShowServers(true)}
 							>
-								<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
+								<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
 									{t('common.goToServers')}
 								</span>
 
-								<ArrowRight className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
+								<ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
 							</button>
 						)}
 					</Form>

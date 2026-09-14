@@ -1,23 +1,24 @@
-import { Button, ContextMenu, Divider, Host } from '@expo/ui/swift-ui'
 import { useGraphQLMutation } from '@stump/client'
-import { BookByIdQuery, FragmentType, graphql, useFragment } from '@stump/graphql'
+import {
+	BookByIdQuery,
+	extractErrorMessage,
+	FragmentType,
+	graphql,
+	Media,
+	useFragment,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { useRouter } from 'expo-router'
-import { Ellipsis } from 'lucide-react-native'
-import { useCallback, useState } from 'react'
-import { Alert, Platform, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
-import * as DropdownMenu from 'zeego/dropdown-menu'
+import { Stack, useNavigation, useRouter } from 'expo-router'
+import { useCallback, useLayoutEffect } from 'react'
+import { Alert, Platform } from 'react-native'
+import { toast } from 'sonner-native'
 
-import { useActiveServer } from '~/components/activeServer'
-import { Icon } from '~/components/ui'
 import { db, downloadedFiles } from '~/db'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
-import { useDownload } from '~/lib/hooks'
+import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
-import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -44,26 +45,20 @@ const fragment = graphql(`
 `)
 
 const completedMutation = graphql(`
-	mutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
-		markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
-			completedAt
-		}
+	mutation BookMenuComplete($id: ID!) {
+		finishMediaProgress(id: $id)
 	}
 `)
 
 const deleteMutation = graphql(`
 	mutation BookMenuDeleteSession($id: ID!) {
-		deleteMediaProgress(id: $id) {
-			__typename
-		}
+		clearMediaProgress(id: $id)
 	}
 `)
 
 const deleteHistoryMutation = graphql(`
 	mutation BookMenuDeleteHistory($id: ID!) {
-		deleteMediaReadHistory(id: $id) {
-			__typename
-		}
+		deleteMediaReadingHistory(id: $id)
 	}
 `)
 
@@ -75,6 +70,7 @@ export default function BookMenu({ data }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { t } = useTranslate()
 	const client = useQueryClient()
 	const book = useFragment(fragment, data)
 
@@ -95,17 +91,9 @@ export default function BookMenu({ data }: Props) {
 
 	const onFavoriteChanged = useCallback(
 		(isFavorite: boolean) => {
-			client.setQueryData(['bookById', book.id], (oldData: BookByIdQuery | undefined) => {
-				if (!oldData) return
-
-				return {
-					...oldData,
-					mediaById: {
-						...oldData.mediaById,
-						isFavorite,
-					},
-				}
-			})
+			client.setQueryData(['bookById', book.id], (oldData: BookByIdQuery | undefined) =>
+				patchQueryData(oldData, { isFavorite }),
+			)
 		},
 		[client, book.id],
 	)
@@ -116,72 +104,109 @@ export default function BookMenu({ data }: Props) {
 		isFavorite: book.isFavorite,
 	})
 
-	const onSuccess = useCallback(
-		() =>
-			Promise.all([
-				client.refetchQueries({ queryKey: ['bookById', book.id] }),
-				client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),
-				client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
-				client.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
-				client.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
-			]),
-		[client, book.id],
-	)
+	const onSuccess = async () => {
+		await Promise.all([
+			client.refetchQueries({ queryKey: ['bookById', book.id], exact: false }),
+			client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),
+			client.invalidateQueries({ queryKey: ['readBook'], exact: false }),
+			client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
+			client.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
+			client.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+			// TODO: would be better to have a little bit smarter cache invalidation here,
+			// im casting a wide net because i don't want to have to figure out where i am
+			// in the router (e.g., did i come from books? a series? etc)
+			client.invalidateQueries({ queryKey: ['seriesById', book.series.id], exact: false }), // stats
+			client.invalidateQueries({ queryKey: ['seriesBooks', book.series.id], exact: false }),
+			client.invalidateQueries({ queryKey: ['booksStats', serverID], exact: false }), // stats
+			client.invalidateQueries({ queryKey: ['books', serverID], exact: false }), // server books
+		])
+	}
+
+	const onError = (title: string, error: unknown) => {
+		toast.error(title, {
+			description: extractErrorMessage(error, t('common.unknownError')),
+		})
+	}
 
 	const { mutate: completeBook } = useGraphQLMutation(completedMutation, {
 		onSuccess,
-		onError: (error) => {
-			console.error(error)
-			// toast.error('Failed to update book completion status')
-		},
+		onError: (error) => onError(t('bookActions.markAsRead.failure'), error),
 	})
 	const { mutate: deleteCurrentSession } = useGraphQLMutation(deleteMutation, {
 		onSuccess,
-		onError: (error) => {
-			console.error(error)
-			// toast.error('Failed to delete current session')
-		},
+		onError: (error) => onError(t('bookActions.clearProgress.failure'), error),
 	})
 	const { mutate: deleteReadHistory } = useGraphQLMutation(deleteHistoryMutation, {
 		onSuccess,
-		onError: (error) => {
-			console.error(error)
-			// toast.error('Failed to delete read history')
-		},
+		onError: (error) => onError(t('bookActions.deleteReadHistory.failure'), error),
 	})
 
-	const confirmMarkAsRead = useCallback(() => {
-		Alert.alert('Mark as Read', `Are you sure you want to mark '${book.resolvedName}' as read?`, [
-			{ text: 'Cancel', style: 'cancel' },
-			{ text: 'Mark as Read', onPress: () => completeBook({ id: book.id, isComplete: true }) },
-		])
-	}, [completeBook, book.id, book.resolvedName])
-
-	const confirmClearProgress = useCallback(() => {
+	const confirmMarkAsRead = () => {
 		Alert.alert(
-			'Clear Progress',
-			`Are you sure you want to clear your current reading of '${book.resolvedName}'?`,
+			t('bookActions.markAsRead.label'),
+			t('bookActions.markAsRead.confirmation', {
+				bookTitle: book.resolvedName,
+			}),
 			[
-				{ text: 'Cancel', style: 'cancel' },
+				{ text: t('common.cancel'), style: 'cancel' },
 				{
-					text: 'Clear',
+					text: t('bookActions.markAsRead.label'),
+					onPress: () => completeBook({ id: book.id }),
+				},
+			],
+		)
+	}
+
+	const confirmClearProgress = () => {
+		Alert.alert(
+			t('bookActions.clearProgress.label'),
+			t('bookActions.clearProgress.confirmation', {
+				bookTitle: book.resolvedName,
+			}),
+			[
+				{ text: t('common.cancel'), style: 'cancel' },
+				{
+					text: t('common.clear'),
 					style: 'destructive',
 					onPress: () => deleteCurrentSession({ id: book.id }),
 				},
 			],
 		)
-	}, [deleteCurrentSession, book.id, book.resolvedName])
+	}
 
-	const confirmDeleteReadHistory = useCallback(() => {
+	const confirmDeleteReadHistory = () => {
 		Alert.alert(
-			'Delete Read History',
-			`Are you sure you want to delete your read history for '${book.resolvedName}'?`,
+			t('bookActions.deleteReadHistory.label'),
+			t('bookActions.deleteReadHistory.confirmation', {
+				bookTitle: book.resolvedName,
+			}),
 			[
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: 'Delete', style: 'destructive', onPress: () => deleteReadHistory({ id: book.id }) },
+				{ text: t('common.cancel'), style: 'cancel' },
+				{
+					text: t('bookActions.deleteReadHistory.label'),
+					style: 'destructive',
+					onPress: () => deleteReadHistory({ id: book.id }),
+				},
 			],
 		)
-	}, [deleteReadHistory, book.id, book.resolvedName])
+	}
+
+	const confirmDeleteDownload = () => {
+		Alert.alert(
+			t('bookActions.deleteDownload.label'),
+			t('bookActions.deleteDownload.confirmation', {
+				bookTitle: book.resolvedName,
+			}),
+			[
+				{ text: t('common.cancel'), style: 'cancel' },
+				{
+					text: t('common.delete'),
+					style: 'destructive',
+					onPress: () => deleteBook(),
+				},
+			],
+		)
+	}
 
 	const isReading = !!book.readProgress
 	const isPreviouslyCompleted = !!book.readHistory?.length
@@ -189,10 +214,8 @@ export default function BookMenu({ data }: Props) {
 
 	const router = useRouter()
 
-	const [isOpen, setIsOpen] = useState(false)
-
-	if (Platform.OS === 'android') {
-		return (
+	return Platform.select({
+		android: (
 			<AndroidBookMenu
 				book={book}
 				isFavorite={isFavorite}
@@ -203,192 +226,103 @@ export default function BookMenu({ data }: Props) {
 				deleteCurrentSession={confirmClearProgress}
 				deleteReadHistory={confirmDeleteReadHistory}
 			/>
-		)
-	}
-
-	// TODO: Once I figure out how to do the subtitles with expo/ui, I can remove zeego
-	if (IS_IOS_24_PLUS) {
-		return (
-			<Host matchContents>
-				<ContextMenu>
-					<ContextMenu.Trigger>
-						<View
-							accessibilityLabel="options"
-							style={{
-								height: 35,
-								width: 35,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-						>
-							<Icon as={Ellipsis} size={24} className="text-foreground" />
-						</View>
-					</ContextMenu.Trigger>
-					<ContextMenu.Items>
-						<Button
-							systemImage={isFavorite ? 'heart.fill' : 'heart'}
-							onPress={() => favoriteBook()}
-						>
-							{isFavorite ? 'Unfavorite' : 'Favorite'}
-						</Button>
-
-						<Divider />
-
-						{(isUntouched || isReading) && (
-							<Button systemImage="book.closed" onPress={confirmMarkAsRead}>
-								Mark as Read
-							</Button>
-						)}
-
-						{isReading && (
-							<Button systemImage="minus.circle" onPress={confirmClearProgress}>
-								Clear Progress
-							</Button>
-						)}
-
-						{isPreviouslyCompleted && (
-							<Button
-								systemImage="rectangle.stack.badge.minus"
-								role="destructive"
-								onPress={confirmDeleteReadHistory}
+		),
+		ios: (
+			<>
+				<Stack.Toolbar placement="right">
+					<Stack.Toolbar.Menu icon="ellipsis">
+						<Stack.Toolbar.Menu inline>
+							<Stack.Toolbar.MenuAction
+								icon={isFavorite ? 'heart.fill' : 'heart'}
+								onPress={() => favoriteBook()}
 							>
-								Delete Read History
-							</Button>
-						)}
+								{isFavorite ? 'Unfavorite' : 'Favorite'}
+							</Stack.Toolbar.MenuAction>
+						</Stack.Toolbar.Menu>
 
-						<Divider />
+						<Stack.Toolbar.Menu inline>
+							{(isUntouched || isReading) && (
+								<Stack.Toolbar.MenuAction icon="book.closed" onPress={confirmMarkAsRead}>
+									{t('bookActions.markAsRead.label')}
+								</Stack.Toolbar.MenuAction>
+							)}
 
-						<Button
-							systemImage="arrow.up.right"
-							onPress={() =>
-								router.push({
-									// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-									pathname: `/server/${book.id}/libraries/${book.library.id}`,
-								})
-							}
+							{isReading && (
+								<Stack.Toolbar.MenuAction icon="minus.circle" onPress={confirmClearProgress}>
+									{t('bookActions.clearProgress.label')}
+								</Stack.Toolbar.MenuAction>
+							)}
+
+							{isPreviouslyCompleted && (
+								<Stack.Toolbar.MenuAction
+									icon="rectangle.stack.badge.minus"
+									onPress={confirmDeleteReadHistory}
+								>
+									{t('bookActions.deleteReadHistory.label')}
+								</Stack.Toolbar.MenuAction>
+							)}
+						</Stack.Toolbar.Menu>
+
+						<Stack.Toolbar.MenuAction
+							icon="arrow.up.right"
+							onPress={() => router.push(`/stump/${book.id}/libraries/${book.library.id}`)}
+							subtitle={book.library.name}
 						>
-							{/* TODO: Expo UI doesn't seem to support anything but strings as children, which means the subtitle is not available :( */}
-							{`Go to Library \n${book.library.name}`}
-						</Button>
+							{t('bookActions.goToLibrary')}
+						</Stack.Toolbar.MenuAction>
 
-						<Button
-							systemImage="arrow.up.right"
-							onPress={() =>
-								router.push({
-									// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-									pathname: `/server/${book.id}/series/${book.series.id}`,
-								})
-							}
+						<Stack.Toolbar.MenuAction
+							icon="arrow.up.right"
+							onPress={() => router.push(`/stump/${book.id}/series/${book.series.id}`)}
+							subtitle={book.series.resolvedName}
 						>
-							{/* TODO: Expo UI doesn't seem to support anything but strings as children, which means the subtitle is not available :( */}
-							{`Go to Series \n${book.series.resolvedName}`}
-						</Button>
+							{t('bookActions.goToSeries')}
+						</Stack.Toolbar.MenuAction>
 
 						{isDownloaded && (
-							<>
-								<Divider />
-
-								<Button systemImage="trash" role="destructive" onPress={() => deleteBook()}>
-									Delete Download
-								</Button>
-							</>
+							<Stack.Toolbar.Menu inline>
+								<Stack.Toolbar.MenuAction
+									icon="trash"
+									onPress={() => confirmDeleteDownload()}
+									destructive
+								>
+									{t('bookActions.deleteDownload.label')}
+								</Stack.Toolbar.MenuAction>
+							</Stack.Toolbar.Menu>
 						)}
-					</ContextMenu.Items>
-				</ContextMenu>
-			</Host>
-		)
+					</Stack.Toolbar.Menu>
+				</Stack.Toolbar>
+			</>
+		),
+		default: null,
+	})
+}
+
+export function useBookMenu(book?: FragmentType<typeof fragment> | null) {
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		if (book && Platform.OS === 'android') {
+			navigation.setOptions({
+				headerRight: () => <BookMenu data={book} />,
+			})
+		}
+	}, [navigation, book])
+
+	if (Platform.OS === 'ios' && book) {
+		return <BookMenu data={book} />
 	}
 
-	// https://docs.expo.dev/versions/latest/sdk/symbols/
-	// https://github.com/nandorojo/zeego/issues/90
-	return (
-		<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
-			<DropdownMenu.Trigger>
-				<Pressable onPress={() => setIsOpen((prev) => !prev)}>
-					{({ pressed }) => (
-						<View className={cn(pressed && 'opacity-70')}>
-							<Ellipsis size={20} className="text-foreground" />
-						</View>
-					)}
-				</Pressable>
-			</DropdownMenu.Trigger>
+	return null
+}
 
-			<DropdownMenu.Content>
-				<DropdownMenu.Item key="isFavorite" onSelect={() => favoriteBook()}>
-					<DropdownMenu.ItemIndicator />
-					<DropdownMenu.ItemTitle>{isFavorite ? 'Unfavorite' : 'Favorite'}</DropdownMenu.ItemTitle>
-					<DropdownMenu.ItemIcon
-						ios={{ name: isFavorite ? 'heart.fill' : 'heart' }}
-						androidIconName="favorite"
-					/>
-				</DropdownMenu.Item>
+const patchQueryData = (oldData: BookByIdQuery | undefined, changes: Partial<Media>) => {
+	if (!oldData) return
 
-				<DropdownMenu.Group>
-					{(isUntouched || isReading) && (
-						<DropdownMenu.Item key="markAsRead" onSelect={confirmMarkAsRead}>
-							<DropdownMenu.ItemIndicator />
-							<DropdownMenu.ItemTitle>Mark as Read</DropdownMenu.ItemTitle>
-							<DropdownMenu.ItemIcon ios={{ name: 'book.closed' }} />
-						</DropdownMenu.Item>
-					)}
-
-					{isReading && (
-						<DropdownMenu.Item key="clearProgress" onSelect={confirmClearProgress}>
-							<DropdownMenu.ItemIndicator />
-							<DropdownMenu.ItemTitle>Clear Progress</DropdownMenu.ItemTitle>
-							<DropdownMenu.ItemIcon ios={{ name: 'minus.circle' }} />
-						</DropdownMenu.Item>
-					)}
-
-					{isPreviouslyCompleted && (
-						<DropdownMenu.Item key="deleteHistory" onSelect={confirmDeleteReadHistory}>
-							<DropdownMenu.ItemIndicator />
-							<DropdownMenu.ItemTitle>Delete Read History</DropdownMenu.ItemTitle>
-							<DropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.minus' }} />
-						</DropdownMenu.Item>
-					)}
-				</DropdownMenu.Group>
-
-				<DropdownMenu.Group>
-					<DropdownMenu.Item
-						key="library"
-						onSelect={() =>
-							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/server/${book.id}/libraries/${book.library.id}`,
-							})
-						}
-					>
-						<DropdownMenu.ItemIndicator />
-						<DropdownMenu.ItemTitle>Go to Library</DropdownMenu.ItemTitle>
-						<DropdownMenu.ItemSubtitle>{book.library.name}</DropdownMenu.ItemSubtitle>
-						<DropdownMenu.ItemIcon ios={{ name: 'arrow.up.right' }} />
-					</DropdownMenu.Item>
-
-					<DropdownMenu.Item
-						key="series"
-						onSelect={() =>
-							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/server/${book.id}/series/${book.series.id}`,
-							})
-						}
-					>
-						<DropdownMenu.ItemIndicator />
-						<DropdownMenu.ItemTitle>Go to Series</DropdownMenu.ItemTitle>
-						<DropdownMenu.ItemSubtitle>{book.series.resolvedName}</DropdownMenu.ItemSubtitle>
-						<DropdownMenu.ItemIcon ios={{ name: 'arrow.up.right' }} />
-					</DropdownMenu.Item>
-				</DropdownMenu.Group>
-
-				{isDownloaded && (
-					<DropdownMenu.Item key="deleteDownload" onSelect={() => deleteBook()}>
-						<DropdownMenu.ItemIndicator />
-						<DropdownMenu.ItemTitle>Delete Download</DropdownMenu.ItemTitle>
-						<DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
-					</DropdownMenu.Item>
-				)}
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
-	)
+	return {
+		...oldData,
+		mediaById: {
+			...oldData.mediaById,
+			...changes,
+		},
+	}
 }

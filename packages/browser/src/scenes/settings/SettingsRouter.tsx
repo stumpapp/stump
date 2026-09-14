@@ -1,8 +1,9 @@
 import { UserPermission } from '@stump/graphql'
-import { lazy, useMemo } from 'react'
+import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { usePaths } from '@/paths'
 import { useAppStore } from '@/stores/app.ts'
 
 import EmailSettingsRouter from './server/email/EmailSettingsRouter.tsx'
@@ -18,35 +19,31 @@ const APIKeySettingsScene = lazy(() => import('./app/apiKeys'))
 const GeneralServerSettingsScene = lazy(
 	() => import('./server/general/GeneralServerSettingsScene.tsx'),
 )
+const MetadataIntegrationsScene = lazy(() => import('./server/metadataIntegrations/index.ts'))
 const ServerLogsScene = lazy(() => import('./server/logs/ServerLogsScene.tsx'))
 const JobSettingsScene = lazy(() => import('./server/jobs/JobSettingsScene.tsx'))
+const TagSettingsScene = lazy(() => import('./server/tags'))
 
 /**
  * The main router for the settings scene(s). Mostly just a collection of nested routers
  */
 export default function SettingsRouter() {
 	const { checkPermission } = useAppContext()
+	const paths = usePaths()
 
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
-	const apiKeys = checkPermission(UserPermission.AccessApiKeys)
 
-	const canManageServer = useMemo(
-		() => checkPermission(UserPermission.ManageServer),
-		[checkPermission],
-	)
-	const canManageUsers = useMemo(
-		() => checkPermission(UserPermission.ManageUsers),
-		[checkPermission],
-	)
-	const canManageEmail = useMemo(
-		() => checkPermission(UserPermission.EmailerManage),
-		[checkPermission],
-	)
+	const apiKeys = checkPermission(UserPermission.AccessApiKeys)
+	const canManageServer = checkPermission(UserPermission.ManageServer)
+	const canReadUsers = checkPermission(UserPermission.ReadUsers)
+	const canManageEmail = checkPermission(UserPermission.EmailerManage)
+	const canReadProviders = checkPermission(UserPermission.MetadataProviderRead)
+	const canManageLibrary = checkPermission(UserPermission.ManageLibrary)
 
 	return (
 		<Routes>
 			<Route element={<SettingsLayout />}>
-				<Route path="" element={<Navigate to="app/account" replace />} />
+				<Route path="" element={<Navigate to={paths.settings('account')} replace />} />
 
 				<Route path="account" element={<GeneralSettingsScene />} />
 				<Route path="preferences" element={<AppearanceSettingsScene />} />
@@ -57,10 +54,14 @@ export default function SettingsRouter() {
 				{canManageServer && <Route path="server" element={<GeneralServerSettingsScene />} />}
 				{canManageServer && <Route path="logs" element={<ServerLogsScene />} />}
 				{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
-				{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
+				{canReadUsers && <Route path="users/*" element={<UsersRouter />} />}
 				{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
+				{canReadProviders && (
+					<Route path="metadata-integrations" element={<MetadataIntegrationsScene />} />
+				)}
+				{canManageLibrary && <Route path="tags" element={<TagSettingsScene />} />}
 
-				<Route path="*" element={<Navigate to="account" replace />} />
+				<Route path="*" element={<Navigate to={paths.settings('account')} replace />} />
 			</Route>
 		</Routes>
 	)

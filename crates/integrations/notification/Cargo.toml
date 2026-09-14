@@ -1,0 +1,14 @@
+[package]
+name = "integrations"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+async-trait = { workspace = true }
+lettre = { workspace = true }
+reqwest = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

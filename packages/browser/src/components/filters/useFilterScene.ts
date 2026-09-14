@@ -1,5 +1,6 @@
 import {
 	MediaFilterInput,
+	MediaMetadataModelOrdering,
 	MediaModelOrdering,
 	MediaOrderBy,
 	OrderDirection,
@@ -9,12 +10,16 @@ import {
 } from '@stump/graphql'
 import { toObjectParams, toUrlParams } from '@stump/sdk'
 import { useCallback, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import { FilterInput, IFilterContext, Ordering, OrderingField } from './context'
 
 type Return = IFilterContext
+type UseFilterSceneOptions = {
+	persistedOrdering?: Ordering
+	setPersistedOrdering?: (ordering: Ordering) => void
+}
 
 export const DEFAULT_SERIES_ORDER_BY: SeriesOrderBy[] = [
 	{ series: { field: SeriesModelOrdering.Name, direction: OrderDirection.Asc } },
@@ -137,7 +142,10 @@ export function useSearchSeriesFilter(search: string | undefined): SeriesFilterI
 	}, [search])
 }
 
-export function useFilterScene(): Return {
+export function useFilterScene({
+	persistedOrdering,
+	setPersistedOrdering,
+}: UseFilterSceneOptions = {}): Return {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [search, setSearch] = useState<string | undefined>(undefined)
 
@@ -157,13 +165,12 @@ export function useFilterScene(): Return {
 	/**
 	 * An object representation of the ordering params
 	 */
-	const ordering = useMemo(
-		() => ({
-			orderBy: searchParams.get('orderBy') as OrderingField,
-			direction: searchParams.get('direction') as OrderDirection,
-		}),
-		[searchParams],
-	)
+	const ordering = useMemo(() => {
+		const orderBy = searchParams.get('orderBy') as OrderingField | null
+		const direction = searchParams.get('direction') as OrderDirection | null
+
+		return orderBy && direction ? { orderBy, direction } : (persistedOrdering ?? {})
+	}, [searchParams, persistedOrdering])
 
 	/**
 	 * An object representation of the pagination params
@@ -180,6 +187,7 @@ export function useFilterScene(): Return {
 
 	const setOrdering = useCallback(
 		(newOrdering: Ordering) => {
+			setPersistedOrdering?.(newOrdering)
 			setSearchParams(
 				toUrlParams(
 					{
@@ -192,7 +200,7 @@ export function useFilterScene(): Return {
 				),
 			)
 		},
-		[setSearchParams, pagination, filters],
+		[setSearchParams, pagination, filters, setPersistedOrdering],
 	)
 
 	const setPage = useCallback(
@@ -263,11 +271,28 @@ export function useFilterScene(): Return {
 	}
 }
 
+const MEDIA_METADATA_ORDER_FIELDS: string[] = [
+	MediaMetadataModelOrdering.Number,
+	MediaMetadataModelOrdering.Volume,
+	MediaMetadataModelOrdering.Year,
+]
+
 export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
 	return useMemo(() => {
 		// check for undefined values
 		if (!ordering || !ordering.orderBy || !ordering.direction) {
 			return DEFAULT_MEDIA_ORDER_BY
+		}
+
+		if (MEDIA_METADATA_ORDER_FIELDS.includes(ordering.orderBy)) {
+			return [
+				{
+					metadata: {
+						field: ordering.orderBy as MediaMetadataModelOrdering,
+						direction: ordering.direction as OrderDirection,
+					},
+				},
+			] as MediaOrderBy[]
 		}
 
 		return [

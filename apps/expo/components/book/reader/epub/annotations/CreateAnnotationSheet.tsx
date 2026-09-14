@@ -1,12 +1,13 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { TextInput, View } from 'react-native'
+import { View } from 'react-native'
 
-import { Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import SheetWithHeader from '~/components/SheetWithHeader'
+import { useColors } from '~/lib/constants'
 import { ReadiumLocator } from '~/modules/readium'
 
-import AnnotationSheetHeader from './AnnotationSheetHeader'
+import AnnotatedText from './AnnotatedText'
+import AnnotationInput from './AnnotationInput'
 
 export type CreateAnnotationSheetRef = {
 	open: (locator: ReadiumLocator, selectedText: string) => void
@@ -25,6 +26,9 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 		const [selectedText, setSelectedText] = useState('')
 		const [annotation, setAnnotation] = useState('')
 
+		// TODO: use computed scoped mini-themes to prevent light colours with dark epub theme (and vice versa):
+		//   - Use dark mode colours (i.e. black background, white text, etc.) with dark epub theme?
+		//   - Or derive from epub theme colours and replace accent colour with something else?
 		const colors = useColors()
 
 		useImperativeHandle(ref, () => ({
@@ -52,51 +56,23 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 			onDismiss?.()
 		}, [onDismiss])
 
-		// TODO: Make look better for iOS sheet, either adjust colors or remove glass
 		return (
-			<TrueSheet
+			<SheetWithHeader
 				ref={sheetRef}
-				detents={['auto', 1]}
-				cornerRadius={24}
-				grabber
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-				grabberOptions={{
-					color: colors.sheet.grabber,
-				}}
+				detents={[0.5, 1]}
+				scrollable
+				backgroundColor={colors.sheet.background}
 				onDidDismiss={handleDismiss}
-				header={
-					<AnnotationSheetHeader
-						title="New Annotation"
-						onClose={() => sheetRef.current?.dismiss()}
-						onPrimaryAction={handleCreate}
-					/>
-				}
+				headerLabel="New Annotation"
+				headerLeftButton={{ type: 'dismiss' }}
+				headerRightButton={{ type: 'check', onPress: handleCreate }}
 			>
-				<View className="gap-4 p-4">
-					{selectedText && (
-						<View className="rounded-lg bg-background-surface p-3">
-							<Text className="italic text-foreground-muted" numberOfLines={3}>
-								&ldquo;{selectedText}&rdquo;
-							</Text>
-						</View>
-					)}
+				<View className="gap-4">
+					{selectedText && <AnnotatedText text={selectedText} />}
 
-					<View className="gap-2">
-						<Text className="text-foreground-muted">Note</Text>
-						<TextInput
-							value={annotation}
-							onChangeText={setAnnotation}
-							placeholder="Enter your notes..."
-							placeholderTextColor={colors.foreground.muted}
-							multiline
-							numberOfLines={3}
-							className="min-h-[80px] rounded-lg border border-edge bg-background-surface p-3 text-foreground"
-							textAlignVertical="top"
-							autoFocus
-						/>
-					</View>
+					<AnnotationInput value={annotation} onChangeText={setAnnotation} />
 				</View>
-			</TrueSheet>
+			</SheetWithHeader>
 		)
 	},
 )

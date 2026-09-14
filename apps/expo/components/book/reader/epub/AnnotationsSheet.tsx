@@ -1,0 +1,53 @@
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { useState } from 'react'
+import { Platform } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { SheetBackDetection } from '~/components/SheetBackDetection'
+import { useColors } from '~/lib/constants'
+import { PortalHostProvider } from '~/providers/PortalHostProvider'
+import { useEpubSheetStore } from '~/stores/epubSheet'
+
+import AnnotationsSheetContent from './AnnotationsSheetContent'
+import { useEpubReaderContext } from './context'
+
+const SHEET_PORTAL_HOST = 'annotations-sheet'
+
+export default function AnnotationsSheet() {
+	const sheetRef = useEpubSheetStore((state) => state.annotationsSheetRef)
+	const { timer } = useEpubReaderContext()
+
+	const colors = useColors()
+	const insets = useSafeAreaInsets()
+
+	const [isOpen, setIsOpen] = useState(false)
+
+	return (
+		<>
+			<TrueSheet
+				ref={sheetRef}
+				detents={[1]}
+				scrollable
+				grabber
+				backgroundColor={colors.sheet.background}
+				grabberOptions={{ color: colors.sheet.grabber }}
+				style={{
+					paddingBottom: insets.bottom,
+					flex: 1,
+				}}
+				insetAdjustment="automatic"
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => {
+					setIsOpen(false)
+					timer.resume()
+				}}
+			>
+				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
+					<AnnotationsSheetContent />
+				</PortalHostProvider>
+			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+		</>
+	)
+}

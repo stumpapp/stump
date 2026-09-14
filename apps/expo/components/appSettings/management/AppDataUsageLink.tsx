@@ -1,16 +1,19 @@
+import { formatBytes } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { ChevronRight, HardDrive } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Icon, Text } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { getAppUsage } from '~/lib/filesystem'
-import { formatBytes } from '~/lib/format'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function AppDataUsageLink() {
+	const { t } = useTranslate()
 	const { data } = useQuery({
 		queryKey: ['app-usage'],
 		queryFn: getAppUsage,
@@ -25,7 +28,8 @@ export default function AppDataUsageLink() {
 	return (
 		<AppSettingsRow
 			icon={HardDrive}
-			title="Data usage"
+			iconBackgroundColor={SETTINGS_COLORS.data}
+			title={t('settings.management.dataUsage.label')}
 			isLink
 			onPress={() =>
 				router.push({
@@ -33,7 +37,7 @@ export default function AppDataUsageLink() {
 				})
 			}
 		>
-			<View className={cn('flex flex-row items-center gap-2')}>
+			<View className={cn('gap-2 flex flex-row items-center')}>
 				<Text className="text-foreground-muted">{formattedSize}</Text>
 				<Icon as={ChevronRight} size={20} className="text-foreground-muted" />
 			</View>

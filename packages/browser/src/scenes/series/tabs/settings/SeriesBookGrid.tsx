@@ -154,7 +154,7 @@ const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
 									<EntityImage
 										key={book.id}
 										src={imageUrl}
-										className="rounded-lg h-auto object-cover"
+										className="h-auto rounded-lg object-cover"
 										style={{
 											width: `${getWidth() - 8}px`,
 											aspectRatio: thumbnailRatio,

@@ -1,4 +1,4 @@
-import { ComboBox, Label, Text } from '@stump/components'
+import { ComboBox, NewCard } from '@stump/components'
 import { SupportedFont } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
@@ -42,20 +42,16 @@ export default function FontSelect() {
 	)
 
 	return (
-		<div className="gap-y-1.5 md:max-w-md flex flex-col">
-			<Label htmlFor="extension" className="mb-1.5">
-				{t(`${localeKey}.label`)}
-			</Label>
+		<NewCard.Row label={t(`${localeKey}.label`)} description={t(`${localeKey}.description`)}>
 			<ComboBox
 				value={appFont || SupportedFont.Inter}
 				options={SUPPORTED_FONT_OPTIONS}
 				onChange={changeFont}
-				size="full"
+				size="sm"
+				triggerClassName="w-52 max-w-full border-border bg-card text-foreground hover:bg-muted/40 data-[state=open]:bg-card"
+				wrapperClassName="w-52 rounded-md border border-border bg-card text-card-foreground shadow-md"
 			/>
-			<Text variant="muted" size="xs">
-				{t(`${localeKey}.description`)}
-			</Text>
-		</div>
+		</NewCard.Row>
 	)
 }
 

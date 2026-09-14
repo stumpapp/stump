@@ -1,15 +1,15 @@
 import { useSDK } from '@stump/client'
+import { formatBytesSeparate } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
 import { COLORS } from '~/lib/constants'
-import { formatBytesSeparate } from '~/lib/format'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Progress, Text } from '../ui'
 import { useSmartListItemsSize } from './useSmartListItemsSize'
@@ -131,10 +131,10 @@ export default function SmartListBookItem({ book }: Props) {
 			: undefined
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}>
 			<View
-				className={cn('relative items-center gap-2', {
-					'flex-row gap-4': layout === 'list',
+				className={cn('gap-2 relative items-center', {
+					'gap-4 flex-row': layout === 'list',
 				})}
 				style={{
 					paddingHorizontal,
@@ -161,9 +161,9 @@ export default function SmartListBookItem({ book }: Props) {
 					/>
 
 					{data.readProgress && layout === 'grid' && (
-						<View className="absolute bottom-4 z-10 w-full gap-1 px-4">
+						<View className="bottom-4 gap-1 px-4 absolute z-10 w-full">
 							<Text
-								className="flex-wrap text-base tablet:text-lg"
+								className="text-base tablet:text-lg flex-wrap"
 								style={{
 									color: COLORS.dark.foreground.subtle,
 									opacity: 0.9,
@@ -173,7 +173,7 @@ export default function SmartListBookItem({ book }: Props) {
 							</Text>
 
 							<Progress
-								className="h-1 bg-[#898d94]"
+								className="bg-white/40"
 								indicatorClassName="bg-[#f5f3ef]"
 								value={getProgress()}
 								style={{ height: 6, borderRadius: 3 }}
@@ -203,14 +203,14 @@ export default function SmartListBookItem({ book }: Props) {
 					{layout === 'list' && <Text className="text-foreground-muted">{renderSubtitle()}</Text>}
 
 					{data.readProgress && layout === 'list' && (
-						<View className="flex-row items-center gap-4 pt-4">
+						<View className="gap-4 pt-4 flex-row items-center">
 							<Progress
-								className="h-1 shrink bg-background-surface-secondary"
+								className="shrink"
 								value={getProgress()}
 								style={{ height: 6, borderRadius: 3 }}
 							/>
 
-							<Text className="shrink-0 text-foreground-muted">
+							<Text className="text-foreground-muted shrink-0">
 								{(getProgress() || 0).toFixed(0)}%
 							</Text>
 						</View>

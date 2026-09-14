@@ -119,10 +119,10 @@ const List = ({ bookId, pages, width, selectedPage, onSelectPage, scrollElement 
 										key={pageNumber}
 										src={imageUrl}
 										className={cx(
-											'rounded-md h-auto object-cover transition-colors duration-100',
+											'h-auto rounded-md object-cover transition-colors duration-100',
 											pageNumber === selectedPage
-												? 'ring-2 ring-edge-brand'
-												: 'ring-1 ring-edge hover:ring-edge-brand',
+												? 'ring-2 ring-ring'
+												: 'ring-1 ring-ring hover:ring-ring',
 										)}
 										style={{
 											width: `${getWidth() - 8}px`,

@@ -1,0 +1,37 @@
+---
+title: Database
+description: Learn about the database configurations supported by Stump
+---
+
+Stump supports both [SQLite](https://sqlite.org/) and [PostgreSQL](https://www.postgresql.org/) databases. The main difference being that SQLite is a file-based (and the default) option, while PostgreSQL is a server-based option which requires additional setup.
+
+## SQLite
+
+A SQLite database is the default option for Stump. If you do not specify a configuration, Stump will create a SQLite database file in your config directory (e.g., `~/.stump/stump.db`).
+
+You can override this by manually specifying a path to a SQLite database file using either the `STUMP_DATABASE_PATH` or `STUMP_DATABASE_URL` environment variables.
+
+## PostgreSQL
+
+<Callout title="Experimental Support" type="warn">
+	Support for PostgreSQL is very new and may not be fully stable. If you encounter any issues,
+	please report them on GitHub
+</Callout>
+
+If you want to use PostgreSQL, you will need to ensure you have a PostgreSQL server running and accessible to Stump. Once you have that, you have two mechanisms for pointing Stump to your database:
+
+1. A fully-qualified connection string (e.g. `postgresql://user:password@host:port/database`)
+
+   This is a single value set to the `STUMP_DATABASE_URL` environment variable. It is convenient, and more similar to how you would connect to a SQLite database, however less secure as it exposes your database credentials in plaintext
+
+2. Individual environment variables for each component of the connection string:
+
+   | Environment Variable | Description                   |
+   | -------------------- | ----------------------------- |
+   | `STUMP_DB_USER`      | The username for the database |
+   | `STUMP_DB_PASSWORD`  | The password for the database |
+   | `STUMP_DB_HOST`      | The host of the database      |
+   | `STUMP_DB_PORT`      | The port of the database      |
+   | `STUMP_DB_NAME`      | The name of the database      |
+
+   This is a more secure option, as it would allow you to use your preferred flavor of secret management to store your database credentials (e.g., docker + compose secrets, etc.).

@@ -13,22 +13,14 @@ type Props = {
 	idx: number
 }
 
-type EnumOption = {
-	value: string
-	label: string
-	devOnly?: boolean
-}
-
-const CONCEPTUAL_FIELD_OPTIONS: Record<string, EnumOption[]> = {
+const CONCEPTUAL_FIELD_OPTIONS: Record<string, string[]> = {
 	readingStatus: [
-		{ value: ReadingStatus.Reading, label: 'Reading' },
-		{ value: ReadingStatus.Finished, label: 'Finished' },
-		{ value: ReadingStatus.NotStarted, label: 'Not Started' },
-		{ value: ReadingStatus.Abandoned, label: 'Abandoned', devOnly: true },
+		ReadingStatus.Reading,
+		ReadingStatus.Finished,
+		ReadingStatus.NotStarted,
+		ReadingStatus.Abandoned,
 	],
 }
-
-const isDev = import.meta.env.DEV
 
 export default function EnumValue({ idx }: Props) {
 	const { t } = useLocaleContext()
@@ -49,8 +41,8 @@ export default function EnumValue({ idx }: Props) {
 
 	const options = useMemo(() => {
 		const fieldOptions = CONCEPTUAL_FIELD_OPTIONS[fieldDef.field] || []
-		return fieldOptions.filter((opt) => !opt.devOnly || isDev)
-	}, [fieldDef.field])
+		return fieldOptions.map((opt) => ({ label: t(getKey(opt)), value: opt }))
+	}, [fieldDef.field, t])
 
 	const isMultiSelect = useMemo(() => {
 		const op = fieldDef.operation

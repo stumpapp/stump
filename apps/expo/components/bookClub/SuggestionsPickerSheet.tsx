@@ -8,14 +8,15 @@ import {
 	SuggestionsPickerSheetQuery,
 } from '@stump/graphql'
 import { BookOpen } from 'lucide-react-native'
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 
 import ListEmpty from '../ListEmpty'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Icon, SheetHeader, Text } from '../ui'
 import { useBookClubContext } from './context'
 
@@ -92,32 +93,39 @@ export const SuggestionsPickerSheet = forwardRef<SuggestionsPickerSheetRef, Prop
 
 		const suggestions = data?.bookClubSuggestions ?? []
 
+		const [isOpen, setIsOpen] = useState(false)
+
 		return (
-			<TrueSheet
-				ref={sheetRef}
-				detents={[1]}
-				cornerRadius={24}
-				grabber
-				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
-				grabberOptions={{ color: colors.sheet.grabber }}
-				style={{ paddingBottom: insets.bottom }}
-				insetAdjustment="automatic"
-				header={
-					<SheetHeader title="Member suggestions" onClose={() => sheetRef.current?.dismiss()} />
-				}
-			>
-				<FlashList
-					data={suggestions}
-					renderItem={({ item }) => (
-						<SuggestionRow suggestion={item} onSelect={() => handleSelectSuggestion(item)} />
-					)}
-					contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 16 }}
-					contentInsetAdjustmentBehavior="automatic"
-					ListEmptyComponent={<ListEmpty message="No pending suggestions from members yet" />}
-					ItemSeparatorComponent={() => <View className="h-2" />}
-				/>
-			</TrueSheet>
+			<>
+				<TrueSheet
+					ref={sheetRef}
+					detents={[1]}
+					grabber
+					scrollable
+					backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
+					grabberOptions={{ color: colors.sheet.grabber }}
+					style={{ paddingBottom: insets.bottom }}
+					insetAdjustment="automatic"
+					header={
+						<SheetHeader title="Member suggestions" onClose={() => sheetRef.current?.dismiss()} />
+					}
+					onDidPresent={() => setIsOpen(true)}
+					onDidDismiss={() => setIsOpen(false)}
+				>
+					<FlashList
+						data={suggestions}
+						renderItem={({ item }) => (
+							<SuggestionRow suggestion={item} onSelect={() => handleSelectSuggestion(item)} />
+						)}
+						contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 16 }}
+						contentInsetAdjustmentBehavior="automatic"
+						ListEmptyComponent={<ListEmpty message="No pending suggestions from members yet" />}
+						ItemSeparatorComponent={() => <View className="h-2" />}
+					/>
+				</TrueSheet>
+
+				<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+			</>
 		)
 	},
 )
@@ -135,12 +143,12 @@ function SuggestionRow({ suggestion, onSelect }: SuggestionRowProps) {
 
 	return (
 		<Pressable onPress={onSelect}>
-			<View className="flex-row items-center gap-3 rounded-2xl bg-black/5 p-3 active:opacity-80 dark:bg-white/10">
-				<View className="dark:bg-white/15 h-12 w-9 items-center justify-center rounded-md bg-black/10">
+			<View className="gap-3 rounded-2xl bg-black/5 p-3 dark:bg-white/10 flex-row items-center active:opacity-80">
+				<View className="dark:bg-white/15 h-12 w-9 rounded-md bg-black/10 items-center justify-center">
 					<Icon as={BookOpen} size={16} className="text-foreground-muted" />
 				</View>
 
-				<View className="flex-1 gap-0.5">
+				<View className="gap-0.5 flex-1">
 					<Text className="text-base font-medium" numberOfLines={1}>
 						{suggestion.title || 'Untitled'}
 					</Text>
@@ -154,7 +162,7 @@ function SuggestionRow({ suggestion, onSelect }: SuggestionRowProps) {
 
 				{suggestion.notes && (
 					<Text
-						className="max-w-[120px] text-right text-xs italic text-foreground-muted"
+						className="text-xs max-w-[120px] text-right text-foreground-muted italic"
 						numberOfLines={2}
 					>
 						&ldquo;{suggestion.notes}&rdquo;

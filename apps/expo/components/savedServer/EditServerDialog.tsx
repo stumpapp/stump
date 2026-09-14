@@ -1,11 +1,11 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 import { CreateServer, SavedServerWithConfig } from '~/stores/savedServer'
 
+import { SheetBackDetection } from '../SheetBackDetection'
 import AddOrEditServerForm, {
 	AddOrEditServerSchema,
 	transformFormData,
@@ -18,10 +18,11 @@ type Props = {
 }
 
 export default function EditServerDialog({ editingServer, onClose, onSubmit }: Props) {
-	const { isDarkColorScheme } = useColorScheme()
 	const colors = useColors()
 
 	const ref = useRef<TrueSheet>(null)
+	const hasBeenPresentedRef = useRef(false)
+	const [isOpen, setIsOpen] = useState(false)
 
 	const handleSubmit = useCallback(
 		(data: AddOrEditServerSchema) => {
@@ -32,30 +33,39 @@ export default function EditServerDialog({ editingServer, onClose, onSubmit }: P
 
 	useEffect(() => {
 		if (editingServer) {
+			hasBeenPresentedRef.current = true
 			ref.current?.present()
-		} else {
+		} else if (hasBeenPresentedRef.current) {
 			ref.current?.dismiss()
 		}
 	}, [editingServer])
 
 	return (
-		<TrueSheet
-			ref={ref}
-			detents={[1]}
-			backgroundColor={colors.background.DEFAULT}
-			scrollable
-			scrollableOptions={{ keyboardScrollOffset: 8 }}
-			grabber
-			grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
-			onDidDismiss={onClose}
-		>
-			<ScrollView className="p-6">
-				<AddOrEditServerForm
-					editingServer={editingServer || undefined}
-					onSubmit={handleSubmit}
-					onClose={() => ref.current?.dismiss()}
-				/>
-			</ScrollView>
-		</TrueSheet>
+		<>
+			<TrueSheet
+				ref={ref}
+				detents={[1]}
+				backgroundColor={colors.background.DEFAULT}
+				scrollable
+				scrollableOptions={{ keyboardScrollOffset: 8 }}
+				grabber
+				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => {
+					setIsOpen(false)
+					onClose()
+				}}
+			>
+				<ScrollView className="p-6">
+					<AddOrEditServerForm
+						editingServer={editingServer || undefined}
+						onSubmit={handleSubmit}
+						onClose={() => ref.current?.dismiss()}
+					/>
+				</ScrollView>
+			</TrueSheet>
+
+			<SheetBackDetection ref={ref} isOpen={isOpen} />
+		</>
 	)
 }

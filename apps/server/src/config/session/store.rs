@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::entity::session;
 use sea_orm::{prelude::*, DatabaseConnection, Set};
-use stump_core::{config::StumpConfig, Ctx};
+use stump_core::config::StumpConfig;
 use time::OffsetDateTime;
 use tokio::time::MissedTickBehavior;
 use tower_sessions::{
@@ -13,7 +13,7 @@ use tower_sessions::{
 	SessionStore,
 };
 
-use super::{SessionCleanupJob, SESSION_USER_KEY};
+use super::SESSION_USER_KEY;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
@@ -53,19 +53,15 @@ impl StumpSessionStore {
 		Self { conn, config }
 	}
 
-	pub async fn continuously_delete_expired(
-		self,
-		period: tokio::time::Duration,
-		ctx: Arc<Ctx>,
-	) {
+	pub async fn continuously_delete_expired(self, period: tokio::time::Duration) {
 		let mut interval = tokio::time::interval(period);
 		interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
 		loop {
-			interval.tick().await; // The first tick completes immediately
-			if let Err(error) = ctx.enqueue_job(SessionCleanupJob::new()) {
-				tracing::error!(error = ?error, "Failed to dispatch session cleanup job");
+			interval.tick().await;
+			if let Err(error) = self.delete_expired().await {
+				tracing::error!(?error, "Failed to delete expired sessions");
 			} else {
-				tracing::trace!("Dispatched session cleanup job");
+				tracing::trace!("Deleted expired sessions");
 			}
 			tracing::trace!("Waiting for next session cleanup interval...");
 		}

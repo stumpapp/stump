@@ -3,7 +3,7 @@ import { X } from 'lucide-react-native'
 import { Pressable, View } from 'react-native'
 
 import { downloadQueueMetadata } from '~/db'
-import { useDownloadQueue } from '~/lib/hooks'
+import { useDownloadQueue, useTranslate } from '~/lib/hooks'
 
 import { Card, Icon, Progress, Text } from '../ui'
 
@@ -13,16 +13,22 @@ type Props = {
 }
 
 export default function DownloadQueueItem({ item, onCancel }: Props) {
+	const { t } = useTranslate()
+
 	const renderProgress = () => {
 		if (item.status === 'downloading' && item.progress) {
 			return (
 				<>
-					<Progress value={item.progress.percentage} className="h-2 flex-1" />
+					<Progress
+						value={item.progress.percentage}
+						trackClassName="bg-background-surface"
+						className="h-2 flex-1"
+					/>
 					<Text className="text-xs text-foreground-muted">{item.progress.percentage}%</Text>
 				</>
 			)
 		} else if (item.status === 'downloading') {
-			return <Text className="text-xs text-foreground-muted">Starting...</Text>
+			return <Text className="text-xs text-foreground-muted">{t(getKey('downloadStarting'))}</Text>
 		} else {
 			return (
 				<Text className="text-xs text-foreground-muted">
@@ -34,19 +40,22 @@ export default function DownloadQueueItem({ item, onCancel }: Props) {
 
 	return (
 		<Card.Row>
-			<View className="flex-1 gap-1">
+			<View className="gap-1 flex-1">
 				<Text className="font-medium" numberOfLines={1}>
 					{downloadQueueMetadata.safeParse(item.metadata).data?.bookName || item.filename}
 				</Text>
-				<View className="flex-row items-center gap-2">{renderProgress()}</View>
+				<View className="gap-2 flex-row items-center">{renderProgress()}</View>
 			</View>
 
 			<Pressable
 				onPress={() => onCancel(item.id)}
-				className="rounded-full bg-white/75 p-2 active:opacity-70 dark:bg-black/40"
+				className="bg-white/75 p-2 dark:bg-black/40 rounded-full active:opacity-70"
 			>
 				<Icon as={X} size={16} className="text-foreground-muted" />
 			</Pressable>
 		</Card.Row>
 	)
 }
+
+const LOCALE_BASE = 'localLibrary.downloadQueue'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

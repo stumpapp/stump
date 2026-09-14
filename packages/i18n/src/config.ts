@@ -1,9 +1,10 @@
-import i18n from 'i18next'
+import i18n, { Resource, ResourceKey } from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
 import {
 	afZA,
 	arSA,
+	bs,
 	caES,
 	csCZ,
 	daDK,
@@ -12,6 +13,7 @@ import {
 	enGB,
 	enUS,
 	esES,
+	faIR,
 	fiFI,
 	frFR,
 	heIL,
@@ -35,7 +37,48 @@ import {
 	zhTW,
 } from './locales'
 
-export const resources = {
+export const LOCALES = [
+	'bs',
+	'af-ZA',
+	'ar-SA',
+	'ca-ES',
+	'cs-CZ',
+	'da-DK',
+	'de-DE',
+	'el-GR',
+	'en-GB',
+	'en-US',
+	'es-ES',
+	'fa-IR',
+	'fi-FI',
+	'fr-FR',
+	'he-IL',
+	'hu-HU',
+	'it-IT',
+	'ja-JP',
+	'ko-KR',
+	'nl-NL',
+	'no-NO',
+	'pl-PL',
+	'pt-BR',
+	'pt-PT',
+	'ro-RO',
+	'ru-RU',
+	'sr-SP',
+	'sv-SE',
+	'tr-TR',
+	'uk-UA',
+	'vi-VN',
+	'zh-CN',
+	'zh-TW',
+] as const
+
+export type AllowedLocale = (typeof LOCALES)[number]
+
+export const resources: Resource = {
+	bs: {
+		bs: bs,
+	},
 	'af-ZA': {
 		'af-ZA': afZA,
 	},
@@ -59,12 +102,17 @@ export const resources = {
 	},
 	'en-GB': {
 		'en-GB': enGB,
+		sentenceCase: sentenceCase(enGB),
 	},
 	'en-US': {
 		'en-US': enUS,
+		sentenceCase: sentenceCase(enUS),
 	},
 	'es-ES': {
 		'es-ES': esES,
+	},
+	'fa-IR': {
+		'fa-IR': faIR,
 	},
 	'fi-FI': {
 		'fi-FI': fiFI,
@@ -129,9 +177,21 @@ export const resources = {
 	'zh-TW': {
 		'zh-TW': zhTW,
 	},
-} as const
-export type AllowedLocale = keyof typeof resources
+}
+
 export type Translation = (typeof resources)['en-US']['en-US']
+
+i18n.use(initReactI18next).init({
+	fallbackLng: 'en-US',
+	fallbackNS: 'en-US',
+	interpolation: {
+		escapeValue: false, // not needed for react as it escapes by default
+	},
+	parseMissingKeyHandler,
+	resources,
+})
+
+export { i18n }
 
 function parseMissingKeyHandler(missingKey: string) {
 	try {
@@ -152,13 +212,37 @@ function parseMissingKeyHandler(missingKey: string) {
 	}
 }
 
-i18n.use(initReactI18next).init({
-	fallbackLng: 'en-US',
-	interpolation: {
-		escapeValue: false, // not needed for react as it escapes by default
-	},
-	parseMissingKeyHandler,
-	resources,
-})
+type RecursiveResource = string | RecursiveResource[] | { [key: string]: RecursiveResource }
 
-export { i18n }
+function sentenceCase(obj: RecursiveResource): ResourceKey {
+	const preservedWords = new Set(['Stump', 'OPDS', 'URL', 'URLs', 'PDF'])
+
+	if (typeof obj === 'string') {
+		let isFirstMatch = true
+		return obj.replace(/\{\{.*?\}\}|\S+/g, (match) => {
+			let result
+			if (match.includes('{{') && match.includes('}}')) {
+				result = match
+			} else if (preservedWords.has(match)) {
+				result = match
+			} else if (isFirstMatch === true) {
+				result = match
+			} else {
+				result = match.toLowerCase()
+			}
+
+			isFirstMatch = false
+			return result
+		})
+	}
+
+	if (Array.isArray(obj)) {
+		return obj.map(sentenceCase)
+	}
+
+	if (typeof obj === 'object' && obj !== null) {
+		return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, sentenceCase(value)]))
+	}
+
+	return obj
+}

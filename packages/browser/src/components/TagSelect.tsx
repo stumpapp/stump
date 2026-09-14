@@ -31,19 +31,30 @@ export default function TagSelect({ label, description, selected = [], onChange 
 	} = useSuspenseGraphQL(query, sdk.cacheKey('tags'))
 
 	const [options, setOptions] = useState<TagOption[]>(
-		tags.map((tag) => ({ label: tag.name, value: tag.name.toLowerCase() })),
+		tags
+			.map((tag) => ({ label: tag.name, value: tag.name.toLowerCase() }))
+			.sort((a, b) => a.label.localeCompare(b.label)),
 	)
 
 	useEffect(() => {
 		setOptions((curr) =>
-			tags.map((tag) => {
-				const exists = curr.find((option) => option.label === tag.name)
-				if (!exists) {
-					return { label: tag.name, value: tag.name.toLowerCase() }
-				}
-				return exists
-			}),
+			tags
+				.map((tag) => {
+					const exists = curr.find((option) => option.label === tag.name)
+					if (!exists) {
+						return { label: tag.name, value: tag.name.toLowerCase() }
+					}
+					return exists
+				})
+				.sort((a, b) => a.label.localeCompare(b.label)),
 		)
+
+		// Remove any selected tags that no longer exist
+		const tagNames = new Set(tags.map((tag) => tag.name.toLowerCase()))
+		const filtered = selected.filter((s) => tagNames.has(s.value))
+		if (filtered.length !== selected.length) {
+			onChange(filtered.length > 0 ? filtered : undefined)
+		}
 	}, [tags])
 
 	const handleChange = useCallback(
@@ -63,12 +74,14 @@ export default function TagSelect({ label, description, selected = [], onChange 
 
 	return (
 		<ComboBox
-			label={label || 'Tags'}
+			label={label ?? 'Tags'}
 			description={description}
 			options={options}
-			value={selected.map(({ value }) => value)}
+			value={[...selected].sort((a, b) => a.label.localeCompare(b.label)).map(({ value }) => value)}
 			onChange={handleChange}
-			onAddOption={(option) => setOptions((curr) => [...curr, option])}
+			onAddOption={(option) =>
+				setOptions((curr) => [...curr, option].sort((a, b) => a.label.localeCompare(b.label)))
+			}
 			isMultiSelect
 			filterable
 		/>

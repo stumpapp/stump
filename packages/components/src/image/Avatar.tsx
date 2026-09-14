@@ -70,10 +70,10 @@ export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 					asChild
 					className={cn(
 						{
-							'bg-fill-brand': fallbackColor === 'brand',
+							'bg-primary': fallbackColor === 'brand',
 						},
 						{
-							'bg-background-surface': fallbackColor === 'gray',
+							'bg-muted': fallbackColor === 'gray',
 						},
 						roundedClassName,
 						fallbackWrapperClassName,

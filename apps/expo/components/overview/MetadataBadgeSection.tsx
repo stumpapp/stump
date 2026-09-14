@@ -42,7 +42,7 @@ export default function MetadataBadgeSection({ label, items, singleRowThreshold 
 			>
 				<View className="gap-2">
 					{rows.map((row, rowIndex) => (
-						<View key={rowIndex} className="flex-row gap-2">
+						<View key={rowIndex} className="gap-2 flex-row">
 							{row.map((item, itemIndex) => (
 								<Pressable
 									key={`${item.label}-${itemIndex}`}

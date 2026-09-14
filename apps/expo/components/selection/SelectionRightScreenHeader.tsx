@@ -1,4 +1,5 @@
 import { Host, Image } from '@expo/ui/swift-ui'
+import { Stack } from 'expo-router'
 import { CheckCircle2, Share, Trash } from 'lucide-react-native'
 import pluralize from 'pluralize'
 import { useCallback, useMemo } from 'react'
@@ -35,6 +36,89 @@ export default function SelectionRightScreenHeader() {
 			],
 		)
 	}, [currentSelection.size, onDeleteSelection])
+
+	return Platform.select({
+		ios: (
+			<>
+				<Stack.Toolbar placement="right">
+					<Stack.Toolbar.Button onPress={onStopSelection} icon="checkmark.circle.fill" />
+
+					<Stack.Toolbar.Menu icon="ellipsis">
+						<Stack.Toolbar.Menu inline>
+							<Stack.Toolbar.MenuAction icon="square.and.arrow.up" onPress={() => {}} disabled>
+								Share
+							</Stack.Toolbar.MenuAction>
+						</Stack.Toolbar.Menu>
+
+						<Stack.Toolbar.Menu inline>
+							<Stack.Toolbar.MenuAction
+								icon="trash"
+								onPress={confirmDeleteSelection}
+								destructive
+								disabled={!deleteAction}
+							>
+								Delete
+							</Stack.Toolbar.MenuAction>
+						</Stack.Toolbar.Menu>
+					</Stack.Toolbar.Menu>
+				</Stack.Toolbar>
+			</>
+		),
+		android: (
+			<View
+				style={{
+					flexDirection: 'row',
+					gap: 10,
+					alignItems: 'center',
+				}}
+			>
+				<View
+					accessibilityLabel="options"
+					style={{
+						height: 35,
+						width: 35,
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<Pressable onPress={onStopSelection}>{CheckIcon}</Pressable>
+				</View>
+
+				<ActionMenu
+					disabled={currentSelection.size === 0}
+					groups={[
+						{
+							items: [
+								{
+									label: 'Share',
+									icon: {
+										ios: 'square.and.arrow.up',
+										android: Share,
+									},
+									onPress: () => {},
+									disabled: true,
+								},
+							],
+						},
+						{
+							items: [
+								{
+									label: 'Delete',
+									icon: {
+										ios: 'trash',
+										android: Trash,
+									},
+									onPress: confirmDeleteSelection,
+									role: 'destructive',
+									disabled: !deleteAction,
+								},
+							],
+						},
+					]}
+				/>
+			</View>
+		),
+	})
 
 	return (
 		<View

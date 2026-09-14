@@ -1,28 +1,26 @@
+import { FlashList } from '@shopify/flash-list'
 import { useRouter } from 'expo-router'
-import partition from 'lodash/partition'
-import { ExternalLink, Rss, Server } from 'lucide-react-native'
-import { Fragment, useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, useWindowDimensions, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { ExternalLink } from 'lucide-react-native'
+import { useCallback, useEffect, useState } from 'react'
+import { Alert, Linking, ScrollView, useWindowDimensions, View } from 'react-native'
 
 import EmptyState from '~/components/EmptyState'
+import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
 import { useOwlHeaderOffset } from '~/components/Owl'
-import EditServerDialog from '~/components/savedServer/EditServerDialog'
+import { UpdateServerSheet } from '~/components/savedServer/createOrUpdate/UpdateServerSheet'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
-import { Button, Icon, ListEmptyMessage, ListLabel, Text } from '~/components/ui'
+import { Button, Icon, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useSavedServers } from '~/stores'
-import { CreateServer, SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
+import { SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 export default function Screen() {
-	const { savedServers, stumpEnabled, updateServer, deleteServer, getServerConfig } =
-		useSavedServers()
+	const { t } = useTranslate()
+	const { savedServers, deleteServer, getServerConfig } = useSavedServers()
 	const router = useRouter()
 	const { width } = useWindowDimensions()
 
-	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
 	const [editingServer, setEditingServer] = useState<SavedServerWithConfig | null>(null)
-
-	const allOPDSServers = [...stumpServers.filter((server) => server.stumpOPDS), ...opdsServers]
 
 	const defaultServer = savedServers.find((server) => server.defaultServer)
 
@@ -40,8 +38,8 @@ export default function Screen() {
 			if (defaultServer) {
 				router.push({
 					// @ts-expect-error: string path
-					pathname: defaultServer.kind === 'stump' ? '/server/[id]' : '/opds/[id]',
-					params: { id: defaultServer.id },
+					pathname: defaultServer.kind === 'stump' ? '/stump/[serverId]' : '/opds/[serverId]',
+					params: { serverId: defaultServer.id },
 				})
 			}
 		},
@@ -67,16 +65,22 @@ export default function Screen() {
 
 	const handleDeleteServer = useCallback(
 		(server: SavedServer) => {
-			const message = server.stumpOPDS
-				? `This server is registered for both Stump and OPDS. Deleting it will remove both entries.\n\nAre you sure you want to delete '${server.name}'?`
-				: `Are you sure you want to delete '${server.name}'?`
-
-			Alert.alert('Delete Server', message, [
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: 'Delete', style: 'destructive', onPress: () => deleteServer(server.id) },
-			])
+			Alert.alert(
+				t('savedServerActions.deleteServer.title'),
+				t('savedServerActions.deleteServer.confirmation', {
+					serverName: `'${server.name}'`,
+				}),
+				[
+					{ text: t('common.cancel'), style: 'cancel' },
+					{
+						text: t('common.delete'),
+						style: 'destructive',
+						onPress: () => deleteServer(server.id),
+					},
+				],
+			)
 		},
-		[deleteServer],
+		[deleteServer, t],
 	)
 
 	const onSelectForEdit = useCallback(
@@ -87,31 +91,21 @@ export default function Screen() {
 		[getServerConfig],
 	)
 
-	const onEdit = useCallback(
-		async (server: CreateServer) => {
-			if (editingServer) {
-				setEditingServer(null)
-				await updateServer(editingServer.id, server)
-			}
-		},
-		[setEditingServer, updateServer, editingServer],
-	)
-
-	const isCleanSlate = stumpServers.length === 0 && opdsServers.length === 0
+	const isCleanSlate = savedServers.length === 0
 	const emptyContainerStyle = useOwlHeaderOffset()
 
-	return (
-		<Fragment>
-			<EditServerDialog
-				editingServer={editingServer}
-				onClose={() => setEditingServer(null)}
-				onSubmit={onEdit}
-			/>
+	const { numColumns, paddingHorizontal } = useGridItemSize()
 
-			{isCleanSlate && (
+	if (isCleanSlate) {
+		return (
+			<ScrollView
+				key={`${width}-${savedServers.length}`}
+				className="flex-1 bg-background"
+				contentInsetAdjustmentBehavior="automatic"
+			>
 				<EmptyState
-					title="Nothing to show yet"
-					message="Get started by adding a server to access book collections"
+					title={t('emptyState.noServers')}
+					message={t('emptyState.cta')}
 					actions={
 						<>
 							<Button
@@ -119,68 +113,50 @@ export default function Screen() {
 								size="lg"
 								roundness="full"
 								className="relative"
-								onPress={() => Linking.openURL('https://www.stumpapp.dev/guides/mobile/app')}
+								onPress={() => Linking.openURL('https://www.stumpapp.dev/docs/apps/mobile')}
 							>
-								<Text>See Documentation</Text>
+								<Text>{t('emptyState.seeDocumentation')}</Text>
 
 								<Icon
 									as={ExternalLink}
 									size={16}
-									className="absolute right-4 transform text-foreground"
+									className="right-4 absolute transform text-foreground"
 								/>
 							</Button>
 						</>
 					}
 					containerStyle={emptyContainerStyle}
 				/>
+			</ScrollView>
+		)
+	}
+
+	// TODO: refresh could re-pull avatars?
+	return (
+		<FlashList
+			data={savedServers}
+			renderItem={({ item: server }) => (
+				<SavedServerListItem
+					key={server.id}
+					server={server}
+					onEdit={() => onSelectForEdit(server)}
+					onDelete={() => handleDeleteServer(server)}
+				/>
 			)}
-
-			{!isCleanSlate && (
-				<ScrollView
-					key={`${width}-${allOPDSServers.length}-${stumpServers.length}-${stumpEnabled}`}
-					className="flex-1 bg-background"
-					contentInsetAdjustmentBehavior="automatic"
-				>
-					<View className="flex-1 items-start justify-start gap-5 bg-background p-4 tablet:p-6">
-						{stumpEnabled && (
-							<View className="flex w-full items-start gap-2">
-								<ListLabel className="px-2">Stump</ListLabel>
-
-								{!stumpServers.length && (
-									<ListEmptyMessage icon={Server} message="No Stump servers added" />
-								)}
-
-								{stumpServers.map((server) => (
-									<SavedServerListItem
-										key={server.id}
-										server={server}
-										onEdit={() => onSelectForEdit(server)}
-										onDelete={() => handleDeleteServer(server)}
-									/>
-								))}
-							</View>
-						)}
-
-						<View className="flex w-full items-start gap-2">
-							<ListLabel className="px-2">OPDS</ListLabel>
-
-							{!allOPDSServers.length && (
-								<ListEmptyMessage icon={Rss} message="No OPDS feeds added" />
-							)}
-
-							{allOPDSServers.map((server) => (
-								<SavedServerListItem
-									key={server.id}
-									server={server}
-									forceOPDS
-									onEdit={() => onSelectForEdit(server)}
-									onDelete={() => handleDeleteServer(server)}
-								/>
-							))}
-						</View>
-					</View>
-				</ScrollView>
-			)}
-		</Fragment>
+			contentInsetAdjustmentBehavior="automatic"
+			numColumns={numColumns}
+			contentContainerStyle={{
+				paddingVertical: 16,
+				paddingHorizontal,
+			}}
+			ItemSeparatorComponent={() => <View className="h-4" />}
+			// TODO: it would probably be nice to add filters/sorting etc, would need to restructure
+			// layout to use toolbar api etc etc
+			ListHeaderComponent={
+				<>
+					<UpdateServerSheet editingServer={editingServer} onClose={() => setEditingServer(null)} />
+				</>
+			}
+		/>
 	)
 }

@@ -1,7 +1,7 @@
 use async_graphql::{SimpleObject, Union};
 use serde::{Deserialize, Serialize};
 
-use crate::job::{CoreJobOutput, JobUpdate, WorkerSend, WorkerSendExt};
+use crate::job::{CoreJobOutput, JobUpdate};
 
 #[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
 pub struct JobStarted {
@@ -53,10 +53,4 @@ pub enum CoreEvent {
 	CreatedMedia(CreatedMedia),
 	CreatedManySeries(CreatedManySeries),
 	CreatedOrUpdatedManyMedia(CreatedOrUpdatedManyMedia),
-}
-
-impl WorkerSendExt for CoreEvent {
-	fn into_worker_send(self) -> WorkerSend {
-		WorkerSend::Event(self)
-	}
 }

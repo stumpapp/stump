@@ -3,7 +3,7 @@ use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue
 use serde::{Deserialize, Serialize};
 
 use crate::shared::{
-	arrangement::Arrangement,
+	arrangement::{Arrangement, HomeArrangement},
 	enums::{
 		InterfaceLayout, InterfaceRoundness, SupportedFont, ThumbnailPlaceholderStyle,
 	},
@@ -82,6 +82,14 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl Model {
+	pub fn resolved_home_arrangement(&self) -> Arrangement {
+		let arrangement = self
+			.home_arrangement
+			.clone()
+			.unwrap_or_else(Arrangement::default_home);
+		HomeArrangement::new(arrangement.sections).into()
+	}
+
 	pub fn default_navigation_arrangement() -> Option<Arrangement> {
 		Some(Arrangement::default_navigation())
 	}

@@ -10,7 +10,7 @@ import { QueryClient, QueryClientContext } from '@tanstack/react-query'
 import { Store } from '@tauri-apps/plugin-store'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router'
 
 import AppTitleBar from './components/AppTitleBar'
 import Home from './Home'
@@ -65,6 +65,7 @@ function App() {
 
 	return (
 		<BrowserRouter>
+			<Toaster />
 			<div className="flex h-full flex-col">
 				<AppTitleBar />
 				<div className="flex-1 overflow-hidden">
@@ -76,7 +77,6 @@ function App() {
 									<LocaleProvider>
 										<Home />
 									</LocaleProvider>
-									<Toaster />
 								</QueryClientContext.Provider>
 							}
 						/>

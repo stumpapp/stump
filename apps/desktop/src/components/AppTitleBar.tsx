@@ -3,7 +3,7 @@ import { IconButton, ToolTip } from '@stump/components'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { ChevronLeft, ChevronRight, Minus, Settings, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useMatch, useNavigate } from 'react-router-dom'
+import { useMatch, useNavigate } from 'react-router'
 
 const MACOS_TRAFFIC_LIGHT_PADDING = 76
 
@@ -55,7 +55,7 @@ export default function AppTitleBar() {
 	return (
 		<div
 			data-tauri-drag-region
-			className="h-9 z-100 flex w-full shrink-0 items-center border-b border-edge-subtle bg-background-surface select-none"
+			className="h-9 bg-background-surface z-100 flex w-full shrink-0 items-center border-b border-border select-none"
 			style={isMacOS ? { paddingLeft: MACOS_TRAFFIC_LIGHT_PADDING } : undefined}
 		>
 			<div className="gap-0.5 pl-1 flex items-center">

@@ -7797,15 +7797,15 @@
   resolved "https://registry.yarnpkg.com/@tanstack/virtual-file-routes/-/virtual-file-routes-1.161.7.tgz#41464f430fc9b25228fc546eed5f5b07f53af1c5"
   integrity sha512-olW33+Cn+bsCsZKPwEGhlkqS6w3M2slFv11JIobdnCFKMLG97oAI2kWKdx5/zsywTL8flpnoIgaZZPlQTFYhdQ==
 
-"@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.8.0":
-  version "2.9.1"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.9.1.tgz#e539bfa437e53864fd5e7ed0f28e8217fbc74de1"
-  integrity sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw==
-
-"@tauri-apps/api@^2.10.1":
+"@tauri-apps/api@2.11.1", "@tauri-apps/api@^2.11.0":
   version "2.11.1"
   resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.11.1.tgz#cd6b13fc26403ca095a02e39ecdbec8048d2872d"
   integrity sha512-M2FPuYND2m+wh5hfW9ZpSdxMPdEJovPBWwoHJmwUpysTYNHaOkVFN419m/K0LIgjb/7KU2vBgsUepJWugQCvAA==
+
+"@tauri-apps/api@^2.8.0":
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.9.1.tgz#e539bfa437e53864fd5e7ed0f28e8217fbc74de1"
+  integrity sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw==
 
 "@tauri-apps/cli-darwin-arm64@2.11.4":
   version "2.11.4"
@@ -7862,7 +7862,7 @@
   resolved "https://registry.yarnpkg.com/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.11.4.tgz#31917e255214731b31a0fb847279be71fe3e05d8"
   integrity sha512-+vDiqBIU5dMISg/wNvX3sF+ZHfgJGJ5T0AcO+EHNXV9GGAG+P5fzodlDXD3QdKCRgZxMoCm5PPvj3BqLNjBthw==
 
-"@tauri-apps/cli@^2.10.1":
+"@tauri-apps/cli@2.11.4":
   version "2.11.4"
   resolved "https://registry.yarnpkg.com/@tauri-apps/cli/-/cli-2.11.4.tgz#eafeb0d3a7bd364d27014843fb0a84d9c972e626"
   integrity sha512-R8xGtMpwyetawSqm9kYOuMmEqkhUbvcUy8n0aNXIxollKBLESUu5f4Fx+64hgASYm1H+jSWq6jCW6zqTnH6hqQ==
@@ -7879,19 +7879,19 @@
     "@tauri-apps/cli-win32-ia32-msvc" "2.11.4"
     "@tauri-apps/cli-win32-x64-msvc" "2.11.4"
 
-"@tauri-apps/plugin-os@=2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-os/-/plugin-os-2.0.0.tgz#b174dc0e89dc1bf353b2a9c45cb17e12b014ebd2"
-  integrity sha512-M7hG/nNyQYTJxVG/UhTKhp9mpXriwWzrs9mqDreB8mIgqA3ek5nHLdwRZJWhkKjZrnDT4v9CpA9BhYeplTlAiA==
+"@tauri-apps/plugin-os@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-os/-/plugin-os-2.3.2.tgz#de916a82d8d955bba59a2ffdba7f7aaa29397246"
+  integrity sha512-n+nXWeuSeF9wcEsSPmRnBEGrRgOy6jjkSU+UVCOV8YUGKb2erhDOxis7IqRXiRVHhY8XMKks00BJ0OAdkpf6+A==
   dependencies:
-    "@tauri-apps/api" "^2.0.0"
+    "@tauri-apps/api" "^2.8.0"
 
-"@tauri-apps/plugin-store@=2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-store/-/plugin-store-2.0.0.tgz#7563bff85795bc501ac606dab0c329760ef28134"
-  integrity sha512-l4xsbxAXrKGdBdYNNswrLfcRv3v1kOatdycOcVPYW+jKwkznCr1HEOrPXkPhXsZLSLyYmNXpgfOmdSZNmcykDg==
+"@tauri-apps/plugin-store@2.4.4":
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-store/-/plugin-store-2.4.4.tgz#af8b530428a585ac1f1187acf4d7987474cda209"
+  integrity sha512-oxSMaj/QpVfJcBMYX5aOQV94fWvga0MwQMfD6TLlbK2dh+ShPWAzefd8HWXhvOKjPRJdGVAkW7ZGO76JzzjaDA==
   dependencies:
-    "@tauri-apps/api" "^2.0.0"
+    "@tauri-apps/api" "^2.11.0"
 
 "@tauri-apps/plugin-store@^2.0.0":
   version "2.4.1"

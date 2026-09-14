@@ -4,7 +4,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { checkUrl, formatApiURL } from '@stump/sdk'
 import { useQueries } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import AddServerModal from './components/AddServerModal'

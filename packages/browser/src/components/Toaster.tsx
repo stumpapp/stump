@@ -1,9 +1,18 @@
+import { useMemo } from 'react'
+import { useMediaMatch } from 'rooks'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
-import { useTheme } from '@/hooks'
+import { DARK_THEMES } from '@/hooks/useTheme'
+import { useUserStore } from '@/stores'
 
 const Toaster = ({ ...props }: ToasterProps) => {
-	const { isDarkVariant } = useTheme()
+	const appTheme = useUserStore((state) => state.userPreferences?.appTheme)
+	const prefersDark = useMediaMatch('(prefers-color-scheme: dark)')
+
+	const isDarkVariant = useMemo(() => {
+		const darkThemes = [...DARK_THEMES, ...(prefersDark ? ['system'] : [])]
+		return darkThemes.includes(appTheme || 'light')
+	}, [appTheme, prefersDark])
 
 	return (
 		<Sonner

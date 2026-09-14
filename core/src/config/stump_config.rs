@@ -168,6 +168,7 @@ pub struct StumpConfig {
 
 	/// OIDC authentication configuration
 	#[setting(nested)]
+	#[graphql(skip)]
 	pub oidc: Option<OidcConfig>,
 
 	/// Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)

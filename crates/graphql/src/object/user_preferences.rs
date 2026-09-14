@@ -22,6 +22,9 @@ impl UserPreferences {
 	}
 
 	async fn navigation_arrangement(&self) -> Arrangement {
-		self.model.resolved_navigation_arrangement()
+		self.model
+			.navigation_arrangement
+			.clone()
+			.unwrap_or_else(Arrangement::default_navigation)
 	}
 }

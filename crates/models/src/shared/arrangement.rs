@@ -1,5 +1,10 @@
 use async_graphql::{Enum, InputObject, Json, OneofObject, SimpleObject, Union};
-use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter, FromJsonQueryResult};
+use sea_orm::{
+	prelude::*,
+	sea_query::{ArrayType, Nullable, ValueType, ValueTypeErr},
+	ColIdx, DeriveActiveEnum, EnumIter, QueryResult, TryGetError, TryGetableFromJson,
+	Value,
+};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
@@ -251,12 +256,55 @@ impl From<HomeArrangement> for Arrangement {
 	}
 }
 
-#[derive(
-	Debug, Clone, SimpleObject, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult,
-)]
+#[derive(Debug, Clone, SimpleObject, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Arrangement {
 	pub locked: bool,
 	pub sections: Vec<ArrangementSection>,
+}
+
+impl TryGetableFromJson for Arrangement {
+	fn try_get_from_json<I: ColIdx>(
+		res: &QueryResult,
+		idx: I,
+	) -> Result<Self, TryGetError> {
+		let json = res.try_get_by_nullable::<serde_json::Value, _>(idx)?;
+		// Treat unreadable stored configurations as absent, so each caller can use
+		// its home or navigation default without losing the other preferences.
+		serde_json::from_value(json).map_err(|_| TryGetError::Null(format!("{idx:?}")))
+	}
+}
+
+impl From<Arrangement> for Value {
+	fn from(arrangement: Arrangement) -> Self {
+		serde_json::to_value(arrangement)
+			.expect("Failed to serialize Arrangement")
+			.into()
+	}
+}
+
+impl ValueType for Arrangement {
+	fn try_from(value: Value) -> Result<Self, ValueTypeErr> {
+		serde_json::from_value(<serde_json::Value as ValueType>::try_from(value)?)
+			.map_err(|_| ValueTypeErr)
+	}
+
+	fn type_name() -> String {
+		stringify!(Arrangement).to_owned()
+	}
+
+	fn array_type() -> ArrayType {
+		ArrayType::Json
+	}
+
+	fn column_type() -> ColumnType {
+		ColumnType::Json
+	}
+}
+
+impl Nullable for Arrangement {
+	fn null() -> Value {
+		Value::Json(None)
+	}
 }
 
 impl Arrangement {
@@ -337,6 +385,54 @@ impl Arrangement {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use sea_orm::{ConnectionTrait, Database, DatabaseBackend, Statement, TryGetable};
+
+	#[test]
+	fn stored_arrangements_decode_without_losing_valid_values() {
+		tokio_test::block_on(async {
+			let db = Database::connect("sqlite::memory:").await.unwrap();
+			let home = Arrangement::default_home();
+			let navigation = Arrangement::default_navigation();
+			let cases = [
+				(home.clone().into(), Some(home)),
+				(navigation.clone().into(), Some(navigation)),
+				(<Arrangement as Nullable>::null(), None),
+				(serde_json::json!(null).into(), None),
+				(serde_json::json!({"sections": []}).into(), None),
+				(
+					serde_json::json!({"locked": false, "sections": [
+						{"config": {"type": "Unknown"}}
+					]})
+					.into(),
+					None,
+				),
+			];
+			for (value, expected) in cases {
+				let row = db
+					.query_one(Statement::from_sql_and_values(
+						DatabaseBackend::Sqlite,
+						"SELECT ? AS arrangement",
+						[value],
+					))
+					.await
+					.unwrap()
+					.unwrap();
+				assert_eq!(
+					row.try_get::<Option<Arrangement>>("", "arrangement")
+						.unwrap(),
+					expected
+				);
+				assert_eq!(
+					row.try_get_by_index::<Option<Arrangement>>(0).unwrap(),
+					expected
+				);
+				assert!(matches!(
+					Arrangement::try_get_by(&row, "missing_column"),
+					Err(TryGetError::DbErr(_))
+				));
+			}
+		});
+	}
 
 	#[test]
 	fn home_arrangement_round_trip_preserves_sections() {

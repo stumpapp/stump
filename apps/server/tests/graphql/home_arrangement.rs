@@ -1,6 +1,8 @@
 use crate::common::TestApp;
 use models::entity::user_preferences;
-use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel, Set};
+use sea_orm::{
+	sea_query::Expr, ActiveModelTrait, EntityTrait, IntoActiveModel, QuerySelect, Set,
+};
 use serde_json::{json, Value};
 
 const QUERY: &str = r#"
@@ -46,14 +48,25 @@ async fn read_sections(app: &TestApp) -> Value {
 }
 
 async fn store_config(app: &TestApp, value: Value) {
-	let preferences = user_preferences::Entity::find()
+	user_preferences::Entity::update_many()
+		.col_expr(
+			user_preferences::Column::HomeArrangement,
+			Expr::value(value),
+		)
+		.exec(app.conn())
+		.await
+		.unwrap();
+}
+
+async fn stored_config(app: &TestApp) -> Value {
+	user_preferences::Entity::find()
+		.select_only()
+		.column(user_preferences::Column::HomeArrangement)
+		.into_tuple::<Value>()
 		.one(app.conn())
 		.await
 		.unwrap()
-		.unwrap();
-	let mut model = preferences.into_active_model();
-	model.home_arrangement = Set(Some(value));
-	model.update(app.conn()).await.unwrap();
+		.unwrap()
 }
 
 #[tokio::test]
@@ -134,6 +147,14 @@ async fn stored_home_sections_are_normalized_on_read() {
 async fn unreadable_home_config_uses_defaults_until_the_next_save() {
 	let app = TestApp::new_with_default_user().await;
 	let defaults = read_sections(&app).await;
+	let mut preferences = user_preferences::Entity::find()
+		.one(app.conn())
+		.await
+		.unwrap()
+		.unwrap()
+		.into_active_model();
+	preferences.locale = Set("fr".into());
+	preferences.update(app.conn()).await.unwrap();
 	store_config(
 		&app,
 		json!({"locked": false, "sections": [
@@ -142,13 +163,19 @@ async fn unreadable_home_config_uses_defaults_until_the_next_save() {
 	)
 	.await;
 	assert_eq!(read_sections(&app).await, defaults);
+	let response = app
+		.execute_gql("query { me { preferences { locale } } }", None)
+		.await;
+	assert!(response.get("errors").is_none(), "{response}");
+	assert_eq!(response["data"]["me"]["preferences"]["locale"], "fr");
 	let stored = user_preferences::Entity::find()
 		.one(app.conn())
 		.await
 		.unwrap()
 		.unwrap();
+	assert!(stored.home_arrangement.is_none());
 	assert_eq!(
-		stored.home_arrangement.as_ref().unwrap()["sections"][0]["config"]["type"],
+		stored_config(&app).await["sections"][0]["config"]["type"],
 		"Unknown"
 	);
 	let saved = update(&app, sections()).await;
@@ -158,10 +185,72 @@ async fn unreadable_home_config_uses_defaults_until_the_next_save() {
 		.await
 		.unwrap()
 		.unwrap();
-	let repaired: models::shared::arrangement::Arrangement =
-		serde_json::from_value(stored.home_arrangement.unwrap()).unwrap();
+	let repaired = stored.home_arrangement.unwrap();
 	assert_eq!(
 		serde_json::to_value(&repaired).unwrap()["sections"][0]["config"]["entity"],
 		"SERIES"
+	);
+}
+
+#[tokio::test]
+async fn unreadable_navigation_uses_its_own_defaults_and_can_be_saved() {
+	let app = TestApp::new_with_default_user().await;
+	let query = "query { me { preferences { navigationArrangement { locked sections { visible } } } } }";
+	let defaults = app.execute_gql(query, None).await;
+	assert!(defaults.get("errors").is_none(), "{defaults}");
+	let saved_home = update(&app, sections()).await;
+	let invalid = json!({"locked": true, "sections": [{"config": {"type": "Unknown"}}]});
+	user_preferences::Entity::update_many()
+		.col_expr(
+			user_preferences::Column::NavigationArrangement,
+			Expr::value(invalid.clone()),
+		)
+		.exec(app.conn())
+		.await
+		.unwrap();
+	assert_eq!(app.execute_gql(query, None).await, defaults);
+	assert_eq!(read_sections(&app).await, saved_home);
+	let stored = user_preferences::Entity::find()
+		.select_only()
+		.column(user_preferences::Column::NavigationArrangement)
+		.into_tuple::<Value>()
+		.one(app.conn())
+		.await
+		.unwrap()
+		.unwrap();
+	assert_eq!(stored, invalid);
+
+	let unlocked = app
+		.execute_gql(
+			"mutation { updateNavigationArrangementLock(locked: false) { locked sections { visible } } }",
+			None,
+		)
+		.await;
+	assert!(unlocked.get("errors").is_none(), "{unlocked}");
+	let mut expected =
+		defaults["data"]["me"]["preferences"]["navigationArrangement"].clone();
+	expected["locked"] = json!(false);
+	assert_eq!(
+		unlocked["data"]["updateNavigationArrangementLock"],
+		expected
+	);
+
+	let saved = app
+		.execute_gql(
+			r#"mutation { updateNavigationArrangement(input: {sections: [
+                {visible: false, config: {system: {variant: EXPLORE}}}
+            ]}) { locked sections { visible } } }"#,
+			None,
+		)
+		.await;
+	assert!(saved.get("errors").is_none(), "{saved}");
+	assert_eq!(
+		saved["data"]["updateNavigationArrangement"],
+		json!({"locked": false, "sections": [{"visible": false}]})
+	);
+	assert_eq!(
+		app.execute_gql(query, None).await["data"]["me"]["preferences"]
+			["navigationArrangement"],
+		saved["data"]["updateNavigationArrangement"]
 	);
 }

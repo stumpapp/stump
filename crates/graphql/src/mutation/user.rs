@@ -460,9 +460,7 @@ impl UserMutation {
 			.ok_or("User preferences not found")?;
 
 		let mut active_model = preferences.into_active_model();
-		active_model.home_arrangement = Set(Some(serde_json::to_value(
-			Arrangement::from(arrangement.clone()),
-		)?));
+		active_model.home_arrangement = Set(Some(arrangement.clone().into()));
 		active_model.update(conn).await?;
 
 		Ok(arrangement)
@@ -484,12 +482,14 @@ impl UserMutation {
 
 		let updated_arrangement = Arrangement {
 			locked,
-			..preferences.resolved_navigation_arrangement()
+			..preferences
+				.navigation_arrangement
+				.clone()
+				.unwrap_or_else(Arrangement::default_navigation)
 		};
 
 		let mut active_model = preferences.into_active_model();
-		active_model.navigation_arrangement =
-			Set(Some(serde_json::to_value(&updated_arrangement)?));
+		active_model.navigation_arrangement = Set(Some(updated_arrangement.clone()));
 		active_model.update(conn).await?;
 
 		Ok(updated_arrangement)
@@ -509,7 +509,10 @@ impl UserMutation {
 			.await?
 			.ok_or("User preferences not found")?;
 
-		let arrangement = preferences.resolved_navigation_arrangement();
+		let arrangement = preferences
+			.navigation_arrangement
+			.clone()
+			.unwrap_or_else(Arrangement::default_navigation);
 
 		if arrangement.locked {
 			return Err("Navigation arrangement is locked".into());
@@ -521,8 +524,7 @@ impl UserMutation {
 		};
 
 		let mut active_model = preferences.into_active_model();
-		active_model.navigation_arrangement =
-			Set(Some(serde_json::to_value(&updated_arrangement)?));
+		active_model.navigation_arrangement = Set(Some(updated_arrangement.clone()));
 
 		active_model.update(conn).await?;
 

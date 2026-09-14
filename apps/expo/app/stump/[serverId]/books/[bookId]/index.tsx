@@ -180,6 +180,7 @@ export default function Screen() {
 		})
 	}, [downloadBook, book])
 
+	const insets = useSafeAreaInsets()
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
@@ -250,8 +251,6 @@ export default function Screen() {
 	const totalPages = book.metadata?.pageCount || book.pages
 	const percentage = getPercentage({ readProgress: progression, totalPages })
 	const readthroughNumber = book.readHistory.length
-
-	const insets = useSafeAreaInsets()
 
 	// Reminder: Whenever this page introduces a new clickable filter field, make sure to
 	// add a corresponding bit in the filter header and prolly metadata overview object

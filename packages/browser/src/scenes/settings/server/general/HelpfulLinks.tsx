@@ -15,7 +15,7 @@ export default function HelpfulLinks() {
 				label={t('settingsScene.server/general.sections.helpfulLinks.links.documentation')}
 			>
 				<ButtonOrLink
-					href="https://www.stumpapp.dev/guides"
+					href="https://www.stumpapp.dev/docs"
 					target="__blank"
 					rel="noopener noreferrer"
 					size="sm"

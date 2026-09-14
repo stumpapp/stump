@@ -2815,7 +2815,13 @@ type ResumeReadingCursor {
 	elapsedSeconds: Int!
 	"when the very first session in the current readthrough started"
 	startedAt: DateTime
+	"the last time the latest session in the current readthrough was updated"
 	updatedAt: DateTime
+	"""
+	A page number computed from the current locator's `total_progression` relative
+	to the computed positions list for the book.
+	"""
+	positionAwarePage: Int
 }
 
 input SaveSmartListInput {

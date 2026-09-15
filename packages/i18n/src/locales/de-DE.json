@@ -566,7 +566,8 @@
 					"scaleDimension": "Explizite Größe",
 					"format": "Format",
 					"name": "Name",
-					"tags": "Tags"
+					"tags": "Tags",
+					"oneshotsDirectory": "Einzelbänder-Ordner"
 				}
 			},
 			"buttons": {
@@ -1490,6 +1491,12 @@
 						"Stump-Übersetzungen",
 						"zu verbessern, wenn du dazu in der Lage bist!"
 					]
+				},
+				"language": {
+					"label": "Sprache",
+					"contributeIfAble": "Bitte überleg dir, zu Stumps Übersetzungen beizutragen, wenn du dazu in der Lage sind!",
+					"contribute": "Beitragen",
+					"noThanks": "Nein Danke"
 				}
 			}
 		},
@@ -1771,7 +1778,9 @@
 							"label": "Leserichtung",
 							"description": "Die Richtung, in der der Reader durch die Seiten blättert"
 						}
-					}
+					},
+					"label": "Universal",
+					"description": "Einstellungen, welche zu allen Buchtypen angewendet werden"
 				},
 				"imageBasedBooks": {
 					"label": "Bildbasierte Bücher",
@@ -1813,6 +1822,10 @@
 							"button": "Präferenzen löschen"
 						}
 					}
+				},
+				"formats": {
+					"label": "Formate",
+					"description": "Konfiguriere die Standardeinstellungen des Readers unabhängig"
 				}
 			}
 		},
@@ -1936,21 +1949,20 @@
 				"serverInfo": {
 					"title": "Serverinformation",
 					"description": "Grundlegende Informationen über deine Stump Serverinstanz",
-					"build": {
-						"description": "Versions- und Build-Details",
-						"version": {
-							"commitHash": "Exakter Commit",
-							"date": "Build-Datum",
-							"semver": "Version"
-						},
-						"label": "Buid"
-					},
+					"build": "Build",
 					"nonStableChannel": {
 						"title": "Du führst eine instabile Version von Stump aus",
 						"description": [
 							"Es scheint als ob, du den",
 							"Build Channel ausführst"
 						]
+					},
+					"version": "Version",
+					"exactCommit": "Exakter Commit",
+					"debugInfo": {
+						"label": "Debug Informationen",
+						"description": "Kopieren und einfügen, wenn Sie Probleme auf GitHub melden",
+						"copyDebugInfoFailed": "Fehler beim Kopieren der Debug Informationen"
 					}
 				},
 				"helpfulLinks": {
@@ -1966,8 +1978,8 @@
 					"description": "Die URL, über die von außen auf den Server zugegriffen werden kann, sofern verfügbar. Dies aktiviert Einladungslinks und andere Funktionen"
 				},
 				"customEmojis": {
-					"title": "Benutzerdefinierte Emojis",
-					"description": "Verwalte und lade benutzerdefinierte Bild-Emojis für deinen Server hoch",
+					"title": "Emojis",
+					"description": "Schaue und Verwalte benutzerdefinierte Bild-Emojis für deinen Server",
 					"dropzone": "Ein Bild hier ablegen oder zum Auswählen klicken",
 					"input": {
 						"label": "Emoji-Name",
@@ -1985,6 +1997,19 @@
 					"renameError": "Emoji konnte nicht umbenannt werden",
 					"deleteSuccess": "Emoji gelöscht",
 					"deleteError": "Emoji konnte nicht gelöscht werden"
+				},
+				"serverConfig": {
+					"publicUrl": {
+						"description": "Die URL, über die dein Server von außerhalb deines Netzwerkes zugänglich ist",
+						"updateFailed": "Fehler beim Aktualisieren der URL",
+						"label": "Öffentliche URL"
+					},
+					"label": "Server-Konfiguration",
+					"description": "Eine Auswahl der hier für die Verwaltung verfügbaren Konfigurationsoptionen"
+				},
+				"changelog": {
+					"label": "Änderungsprotokoll",
+					"description": "Sehe, was sich in den neuesten Versionen von Stump geändert hat"
 				}
 			}
 		},
@@ -2094,7 +2119,8 @@
 					},
 					"errors": {
 						"invalidCron": "Zeitplan muss ein gültiger Cron-Ausdruck sein"
-					}
+					},
+					"createScheduledJob": "Geplanten Job erstellen"
 				},
 				"history": {
 					"title": "Verlauf",
@@ -2118,6 +2144,11 @@
 						"confirmText": "Bist du dir sicher, dass du den ganzen Jobverlauf löschen möchtest?",
 						"confirm": "Löschen",
 						"emptyState": "Keine Jobs zum Löschen"
+					},
+					"inspector": {
+						"title": "Job Details",
+						"description": "Der Rohausgabe dieses Jobs und aller assoziierter Protokolle",
+						"associatedLogs": "Assoziierte Protokolle"
 					}
 				}
 			},
@@ -2304,6 +2335,12 @@
 					"description": "Alle Aufzeichnungen der Anmeldungsaktivitäten werden dauerhaft von der Datenbank gelöscht",
 					"confirm": "Löschen"
 				}
+			},
+			"userStats": {
+				"users": "Nutzer",
+				"booksCompleted": "Abgeschlossene Bücher",
+				"booksInProgress": "Angefangene Bücher",
+				"topReader": "Top Leser"
 			}
 		},
 		"server/email": {
@@ -2700,7 +2737,7 @@
 		"infoSheetStats": {
 			"series": "Serien",
 			"inProgress": "In Fortschritt",
-			"completedBooks": "Beendet",
+			"completedBooks": "Abgeschlossen",
 			"readingTime": "Lesezeit",
 			"size": "Größe"
 		},
@@ -2742,7 +2779,14 @@
 		"enter": "Enter",
 		"info": "Info",
 		"login": "Anmeldung",
-		"notConfigured": "Nicht konfiguriert"
+		"notConfigured": "Nicht konfiguriert",
+		"copy": "Kopieren",
+		"open": "Öffnen",
+		"none": "Keine",
+		"xBooks_one": "{{count}} Buch",
+		"xBooks_other": "{{count}} Bücher",
+		"seeMore": "Mehr dazu",
+		"view": "Sehen"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -3009,7 +3053,8 @@
 			"identifiers": "Identifikatoren",
 			"format": "Format",
 			"genres": "Genres",
-			"links": "Links"
+			"links": "Links",
+			"issue": "Problem"
 		},
 		"common": {
 			"book": "Buch",
@@ -3032,7 +3077,7 @@
 			"finished": "Beendet",
 			"grid": "Raster",
 			"list": "Liste",
-			"lastCompleted": "Zuletzt beendet",
+			"lastCompleted": "Zuletzt abgeschlossen",
 			"none": "Keine",
 			"notAvailable": "Nicht verfügbar",
 			"options": "Optionen",
@@ -3067,7 +3112,13 @@
 			"pageX": "Seite {{current}}",
 			"reset": "Zurücksetzen",
 			"accessOpdsV2": "Zugriff auf OPDS v2.0",
-			"accessOpdsV1": "Zugriff auf OPDS v1.2"
+			"accessOpdsV1": "Zugriff auf OPDS v1.2",
+			"xBooks_one": "{{count}} Buch",
+			"xBooks_other": "{{count}} Bücher",
+			"exit": "Beenden",
+			"notConfigured": "Nicht konfiguriert",
+			"test": "Test",
+			"view": "Anschauen"
 		},
 		"errors": {
 			"unknown": "Unbekannter Fehler"
@@ -3301,9 +3352,10 @@
 					"noDownloads": "Keine heruntergeladenen Dateien für diesen Server",
 					"storedPreferences": {
 						"label": "Gespeicherte Präferenzen",
-						"description": "Sonstige Daten wie Buchpräferenzen, Lesezeiten, etc"
+						"description": "Sonstige Daten wie Buchpräferenzen, Lesetimer, etc"
 					},
-					"clearPreferences": "Präferenzen löschen"
+					"clearPreferences": "Präferenzen löschen",
+					"noServersAdded": "Keine Server hinzugefügt"
 				}
 			},
 			"debug": {
@@ -3343,7 +3395,8 @@
 					"label": "Debug-Analysen",
 					"description": "Sende zusätzliche Debug-bezogene Ereignisse, um bei der Fehlerbehebung zu helfen"
 				},
-				"label": "Debug"
+				"label": "Debug",
+				"maskUrls": "URLs verstecken"
 			},
 			"contactInfo": {
 				"label": "Kontakt",
@@ -3435,8 +3488,8 @@
 				"label": "Fußzeile"
 			},
 			"readingTimer": {
-				"label": "Lesezeit",
-				"resetTimer": "Zeit Zurücksetzen",
+				"label": "Lese-TImer",
+				"resetTimer": "Timer Zurücksetzen",
 				"confirmation": {
 					"message": "Bist du dir sicher, dass du deine Lesezeit für '{{bookName}}' zurücksetzten möchtest?\n\n{{action}}",
 					"action": {
@@ -3658,7 +3711,23 @@
 			},
 			"wifiNetwork": {
 				"label": "WLAN Netzwerk",
-				"noAssociatedNetwork": "Kein zugehöriges WLAN-Netzwerk"
+				"noAssociatedNetwork": "Kein zugehöriges WLAN-Netzwerk",
+				"notConnectedToWifi": "Du bist nicht mit einem WLAN verbunden. Bitte verbinde zu einem lokalen Netzwerk, um die Einrichtung des lokalen Profils zu beenden",
+				"connectedTip": "Falls das momentane Netzwerk nicht aufgeführt ist, musst du möglicher Stump de Berechtigung zum Standort geben",
+				"addNetwork": "Füge \"{{ssid}}\" hinzu",
+				"permissionNotGranted": {
+					"label": "Berechtigung nicht erteilt",
+					"description": "Du musst die Standort-Berechtigung erteilen, um auf das aktive WLAN Netzwerk zuzugreifen"
+				},
+				"permissionFailedToBeGranted": {
+					"title": "Standort-Berechtigung fehlgeschlagen",
+					"description": "Die App konnte keine Berechtigung für den Zugriff auf deinen Standort erhalten. Bitte überprüfen Sie die Einstellungen deines Geräts und versuche es erneut"
+				},
+				"removeWifi": {
+					"label": "Entfernen",
+					"confirmationText": "Bist du dir sicher, dass du das '{{ssid}}' Netzwerk von diesem lokalen Profil entfernen möchtest?"
+				},
+				"requestPermission": "Beantrage Standort-Berechtigung"
 			}
 		}
 	},
@@ -3759,7 +3828,76 @@
 					"auto": "Auto",
 					"always": "Immer",
 					"off": "Aus"
+				},
+				"label": "Zweiseitig"
+			},
+			"readerSettings": {
+				"preferences": {
+					"readingTimer": "Lese-Timer",
+					"separateSecondPage": "Separate zweite Seite",
+					"panZoomWithoutCtrl": "Schwenken und Zoomen ohne Strg/Cmd",
+					"tapSidesToNavigate": "Tippe die Seiten zum Navigieren"
+				},
+				"sections": {
+					"mode": "Modus",
+					"imageOptions": "Bildoptionen",
+					"preferences": "Präferenzen",
+					"controls": "Steuerung"
 				}
+			}
+		},
+		"settingsDialog": {
+			"scopes": {
+				"book": "Buch",
+				"global": "Global"
+			}
+		},
+		"timerMenu": {
+			"start": "Starte Timer",
+			"stop": "Stoppe Timer",
+			"reset": "Setze Timer zurück"
+		},
+		"footer": {
+			"readingTime": "Lesezeit: {{time}}",
+			"pageOf": "{{current}} von {{total}}"
+		},
+		"goToPage": {
+			"label": "Gehe zu Seite",
+			"submit": "Gehe"
+		},
+		"nextInSeries": {
+			"title": "Als Nächstes:",
+			"read": "Lese"
+		},
+		"header": {
+			"goToMediaOverview": "Gehe zur Medienübersicht"
+		}
+	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "Altersfreigabe",
+			"anyAge": {
+				"label": "Jedes Alter",
+				"description": "Keine Altersfreigabe wird angewandt"
+			},
+			"custom": {
+				"label": "Alter N und jünger",
+				"description": {
+					"media": "Nur Medien mit einer Altersfreigabe von N oder niedriger werden angezeigt, wobei N die Zahl ist, die du unten eingibst",
+					"series": "Nur Reihen mit einer Altersfreigabe von N oder niedriger werden angezeigt, wobei N die Zahl ist, die du unten eingibst"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "Erweiterung",
+			"any": "Alle"
+		},
+		"readStatusSelect": {
+			"label": "Lesestatus",
+			"options": {
+				"completed": "Abgeschlossen",
+				"reading": "Am Lesen",
+				"unread": "Ungelesen"
 			}
 		}
 	}

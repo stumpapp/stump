@@ -233,8 +233,7 @@
 		},
 		"members": {
 			"title": "Members",
-			"description": "Manage the members of this book club",
-			"sections": {}
+			"description": "Manage the members of this book club"
 		},
 		"roles": {
 			"title": "Roles",
@@ -717,9 +716,7 @@
 			"sections": {
 				"management": {
 					"heading": "Manage thumbnails",
-					"description": "Manage the existing thumbnails for this library",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
+					"description": "Manage the existing thumbnails for this library"
 				}
 			}
 		},
@@ -2153,9 +2150,9 @@
 						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
 					},
 					"inspector": {
-							"title": "Job details",
-							"description": "The raw output of this job and any associated logs",
-							"associatedLogs": "Associated logs"
+						"title": "Job details",
+						"description": "The raw output of this job and any associated logs",
+						"associatedLogs": "Associated logs"
 					},
 					"deleteJobHistory": {
 						"title": "Delete job history",
@@ -2796,7 +2793,7 @@
 		"notUsedYet": "Not used yet",
 		"never": "Never",
 		"open": "Open",
-		"none":"None",
+		"none": "None",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
 		"back": "Back",
@@ -3027,7 +3024,7 @@
 				"networkSettings": "Network Settings"
 			}
 		},
-		"serverNetworkSettings":{
+		"serverNetworkSettings": {
 			"activeProfile": {
 				"label": "Active Profile",
 				"localIsActive": "Local profile is active",
@@ -3061,7 +3058,7 @@
 					"label": "Permissions Not Granted",
 					"description": "You need to grant location permission to access the active wifi network"
 				},
-				"permissionFailedToBeGranted":{
+				"permissionFailedToBeGranted": {
 					"title": "Location Permission Failed",
 					"description": "The app failed to get permissions to access your location. Please check your device settings and try again"
 				},
@@ -3265,7 +3262,6 @@
 				"showCurated": "Show Curated",
 				"attemptSync": "Attempt Sync",
 				"syncConflicts": "Sync Conflicts"
-
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {

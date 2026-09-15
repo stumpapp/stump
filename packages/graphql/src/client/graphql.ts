@@ -4496,73 +4496,56 @@ export type SpineItem = {
   properties?: Maybe<Scalars['String']['output']>;
 };
 
-/**
- * Represents the configuration of a Stump application. This struct is generated at startup
- * using a TOML file, environment variables, or both and is input when creating a `StumpCore`
- * instance.
- *
- * Example:
- * ```
- * use stump_core::{config::{self, StumpConfig}, StumpCore};
- *
- * #[tokio::main]
- * async fn main() {
- * /// Get config dir from environment variables.
- * let config_dir = config::bootstrap_config_dir();
- *
- * // Create a StumpConfig using the config file and environment variables.
- * let config = StumpConfig::new(config_dir)
- * // Load Stump.toml file (if any)
- * .with_config_file().unwrap()
- * // Overlay environment variables
- * .with_environment().unwrap();
- *
- * // Ensure that config directory exists and write Stump.toml.
- * config.write_config_dir().unwrap();
- * // Create an instance of the stump core.
- * let core = StumpCore::new(config).await;
- * }
- * ```
- */
 export type StumpConfig = {
   __typename?: 'StumpConfig';
+  /** The time in seconds that an access token will be valid for */
   accessTokenTtl: Scalars['Int']['output'];
-  /** A list of origins for CORS. */
+  /** A comma-separated list of origins for CORS */
   allowedOrigins: Array<Scalars['String']['output']>;
-  /** The client directory. */
+  /**
+   * The directory where the web app bundle lives, which the server will serve as
+   * static files
+   */
   clientDir: Scalars['String']['output'];
-  /** Whether or not to include ANSI color codes in log files. */
+  /** Whether or not to include ANSI color codes in log files */
   colorfulLogs: Scalars['Boolean']['output'];
-  /** The configuration root for the Stump application, contains thumbnails, cache, and logs. */
+  /** The configuration root for the Stump application */
   configDir: Scalars['String']['output'];
-  /** An optional custom path for the database. */
+  /** An optional custom path for the database. If set, this assumes SQLite. */
   dbPath?: Maybe<Scalars['String']['output']>;
+  /** The timeout in seconds for database connections */
   dbTimeoutSecs: Scalars['Int']['output'];
-  /** Indicates if the Kobo sync feature should be enabled. */
+  /** Indicates if the Kobo sync feature should be enabled */
   enableKoboSync: Scalars['Boolean']['output'];
-  /** Indicates if the KoReader sync feature should be enabled. */
+  /** Indicates if the KoReader sync feature should be enabled */
   enableKoreaderSync: Scalars['Boolean']['output'];
   /**
    * Indicates if OPDS page access should automatically track reading progression.
    * When disabled, clients loading/preloading pages won't trigger progress updates.
    */
   enableOpdsProgression: Scalars['Boolean']['output'];
-  /** Indicates if the GraphQL playground should be enabled. */
-  enablePlayground: Scalars['Boolean']['output'];
-  /** Whether or not the server will allow users with the appropriate permissions to upload books and series. */
-  enableUpload: Scalars['Boolean']['output'];
-  /** The interval at which automatic deleted session cleanup is performed. */
-  expiredSessionCleanupInterval: Scalars['Int']['output'];
-  /** The IP address on which to listen on (default: "0.0.0.0"). */
-  ip: Scalars['String']['output'];
-  /** The directory where the applicaiton logs will be stored */
-  logDir?: Maybe<Scalars['String']['output']>;
-  /** The maximum size, in bytes, of files that can be uploaded to be included in libraries. */
-  maxFileUploadSize: Scalars['Int']['output'];
   /**
-   * The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
-   * libraries, series, or media.
+   * Indicates if the GraphQL playground should be enabled. If true, the server
+   * will allow GET requests to the GraphQL endpoint and serve the playground UI
    */
+  enablePlayground: Scalars['Boolean']['output'];
+  /**
+   * Whether or not the server will allow users with the appropriate permissions
+   * to upload books, series, or other valid uploadable content
+   */
+  enableUpload: Scalars['Boolean']['output'];
+  /** The interval in seconds at which expired sessions will be cleaned up */
+  expiredSessionCleanupInterval: Scalars['Int']['output'];
+  /** The IP address on which to listen on (default: "0.0.0.0") */
+  ip: Scalars['String']['output'];
+  /**
+   * The directory where the applicaiton logs will be stored. If unspecified,
+   * logs will be stored in the config_dir
+   */
+  logDir?: Maybe<Scalars['String']['output']>;
+  /** The maximum size in bytes of a file upload */
+  maxFileUploadSize: Scalars['Int']['output'];
+  /** The maximum size in bytes of an image upload */
   maxImageUploadSize: Scalars['Int']['output'];
   /**
    * A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
@@ -4571,32 +4554,34 @@ export type StumpConfig = {
   parallelismMultiplier: Scalars['Int']['output'];
   /** Password hash cost */
   passwordHashCost: Scalars['Int']['output'];
-  /** Whether to enable disk caching for rendered PDF pages. */
+  /** Whether to enable disk caching for rendered PDF pages */
   pdfCachePages: Scalars['Boolean']['output'];
-  /** Whether to enable high-quality rendering with smoothing (slower but better quality). */
+  /** Whether to enable high-quality rendering with smoothing (slower but better quality) */
   pdfHighQuality: Scalars['Boolean']['output'];
-  /** The maximum width or height dimension for rendered PDF pages. */
+  /** The maximum width or height dimension for rendered PDF pages */
   pdfMaxDimension: Scalars['Int']['output'];
-  /** Number of pages to pre-render before and after the current page. */
+  /** Number of pages to pre-render before and after the current page */
   pdfPrerenderRange: Scalars['Int']['output'];
-  /** The DPI (dots per inch) to use when rendering PDF pages as images. */
+  /** The DPI (dots per inch) to use when rendering PDF pages as images */
   pdfRenderDpi: Scalars['Int']['output'];
-  /** The image format to use for rendered PDF pages (webp, png, jpeg). */
+  /** The image format to use for rendered PDF pages (webp, png, jpeg) */
   pdfRenderFormat: Scalars['String']['output'];
-  /** Path to the PDFium binary for PDF support. */
+  /** Path to the PDFium binary for enabling PDF support */
   pdfiumPath?: Maybe<Scalars['String']['output']>;
-  /** The port from which to serve the application (default: 10801). */
+  /** The port from which to serve the application (default: 10801) */
   port: Scalars['Int']['output'];
-  /** Whether or not to pretty print logs. */
+  /** Whether or not to pretty print logs */
   prettyLogs: Scalars['Boolean']['output'];
-  /** The "release" | "debug" profile with which the application is running. */
-  profile: Scalars['String']['output'];
+  /** The time in seconds that a refresh token will be valid for */
   refreshTokenTtl: Scalars['Int']['output'];
-  /** The time in seconds that a login session will be valid for. */
+  /** The time in seconds that a login session will be valid for */
   sessionTtl: Scalars['Int']['output'];
   /** Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For) */
   trustProxyHeaders: Scalars['Boolean']['output'];
-  /** The verbosity with which system logs are visible (default: 1). */
+  /**
+   * The verbosity with which system logs are visible (default: 1)
+   * 0 = none at all, 1 = info, 2 = debug, 3 = trace
+   */
   verbosity: Scalars['Int']['output'];
 };
 

@@ -206,7 +206,7 @@ impl UploadMutation {
 		// user testing I'd like to see if this becomes a problem. We'll see!
 		match remove_thumbnails(
 			std::slice::from_ref(&library.id),
-			&core.config.get_thumbnails_dir(),
+			&core.config.thumbnails_directory(),
 		)
 		.await
 		{
@@ -305,7 +305,7 @@ impl UploadMutation {
 		// user testing I'd like to see if this becomes a problem. We'll see!
 		match remove_thumbnails(
 			std::slice::from_ref(&series.series.id),
-			&core.config.get_thumbnails_dir(),
+			&core.config.thumbnails_directory(),
 		)
 		.await
 		{
@@ -416,7 +416,7 @@ impl UploadMutation {
 		// user testing I'd like to see if this becomes a problem. We'll see!
 		let removal_result = remove_thumbnails(
 			std::slice::from_ref(&book.media.id),
-			&core.config.get_thumbnails_dir(),
+			&core.config.thumbnails_directory(),
 		)
 		.await;
 		match removal_result {
@@ -516,7 +516,7 @@ impl UploadMutation {
 
 		match remove_thumbnails(
 			std::slice::from_ref(&series.series.id),
-			&core.config.get_thumbnails_dir(),
+			&core.config.thumbnails_directory(),
 		)
 		.await
 		{
@@ -611,7 +611,7 @@ impl UploadMutation {
 
 		let removal_result = remove_thumbnails(
 			std::slice::from_ref(&book.media.id),
-			&core.config.get_thumbnails_dir(),
+			&core.config.thumbnails_directory(),
 		)
 		.await;
 		match removal_result {

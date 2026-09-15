@@ -58,7 +58,7 @@ async fn get_oidc_config(
 	let (enabled, allow_registration, disable_local_auth) =
 		if let Some(oidc) = &config.oidc {
 			(
-				oidc.is_configured(),
+				oidc.is_valid(),
 				oidc.allow_registration,
 				oidc.disable_local_auth,
 			)
@@ -106,7 +106,7 @@ async fn authorize(
 	let oidc_config = config
 		.oidc
 		.as_ref()
-		.filter(|c| c.is_configured())
+		.filter(|c| c.is_valid())
 		.ok_or_else(|| APIError::BadRequest("OIDC is not configured".to_string()))?;
 
 	if !oidc_config.enabled {
@@ -135,7 +135,7 @@ async fn authorize(
 	let pkce_challenge_code = pkce_challenge.as_str().to_owned();
 	let redirect_to = get_oidc_authorize_url(
 		&client,
-		&oidc_config.get_scopes(),
+		&oidc_config.scopes,
 		&state_value,
 		Some(pkce_challenge),
 	);
@@ -194,7 +194,7 @@ async fn callback(
 	let oidc_config = config
 		.oidc
 		.as_ref()
-		.filter(|c| c.is_configured())
+		.filter(|c| c.is_valid())
 		.ok_or_else(|| APIError::BadRequest("OIDC is not configured".to_string()))?;
 
 	if !oidc_config.enabled {
@@ -210,7 +210,7 @@ async fn callback(
 		oidc_provider.create_client(&base_url)?,
 	);
 
-	let extra_audiences = oidc_config.get_extra_audiences();
+	let extra_audiences = oidc_config.extra_audiences.clone();
 	let pkce_verifier = (!oidc_state.pkce_verifier.is_empty())
 		.then(|| openidconnect::PkceCodeVerifier::new(oidc_state.pkce_verifier));
 
@@ -299,7 +299,7 @@ async fn callback(
 				Ok((bytes, ext)) => {
 					let dest_path = ctx
 						.config
-						.get_avatars_dir()
+						.avatars_directory()
 						.join(format!("{}.{}", user.id, ext));
 
 					let avatar_meta =

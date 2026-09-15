@@ -62,7 +62,7 @@ impl MediaProcessorOptions {
 			generate_file_hashes: library_config.generate_file_hashes,
 			process_metadata: library_config.process_metadata,
 			generate_koreader_hashes: library_config.generate_koreader_hashes,
-			cache_directory: core_config.get_cache_dir(),
+			cache_directory: core_config.cache_directory(),
 		}
 	}
 }

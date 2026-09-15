@@ -36,7 +36,7 @@ impl MediaProcessor for RarProcessor {
 			if sample_size / threshold > 4 {
 				sample_size = threshold;
 			} else {
-				sample_size = sample_size / 2;
+				sample_size /= 2;
 			}
 		}
 

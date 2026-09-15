@@ -110,7 +110,7 @@ impl UserMutation {
 			.read_to_end(&mut image_bytes)
 			.map_err(|e| format!("Failed to read upload: {e}"))?;
 
-		let avatars_dir = core.config.get_avatars_dir();
+		let avatars_dir = core.config.avatars_directory();
 		if let Ok(mut entries) = tokio::fs::read_dir(&avatars_dir).await {
 			let prefix = format!("{}.", target_id);
 			while let Ok(Some(entry)) = entries.next_entry().await {

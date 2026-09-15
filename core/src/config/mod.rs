@@ -4,9 +4,8 @@ mod stump_config;
 
 use std::env;
 
-pub use oidc_config::OidcConfig;
-use stump_config::env_keys::{CONFIG_DIR_KEY, IN_DOCKER_KEY};
-pub use stump_config::{defaults, env_keys, StumpConfig};
+pub use oidc_config::*;
+pub use stump_config::*;
 
 /// Gets the default config directory located at `~/.stump` where `~` is the
 /// user's home directory.
@@ -37,15 +36,13 @@ pub fn bootstrap_config_dir() -> String {
 			}
 		},
 		// Environment variable not set
-		Err(e) => {
+		Err(error) => {
 			let default_dir = get_default_config_dir();
 			tracing::error!(
-				"Error {} retrieving {} - falling back to {}",
-				e,
-				CONFIG_DIR_KEY,
-				default_dir
+				?error,
+				?default_dir,
+				"Error retrieving {CONFIG_DIR_KEY}, falling back to default",
 			);
-
 			default_dir
 		},
 	}

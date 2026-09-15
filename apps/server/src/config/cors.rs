@@ -34,9 +34,8 @@ fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValu
 }
 
 pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
-	let is_debug = config.is_debug();
+	let is_debug = cfg!(debug_assertions);
 
-	// Create CORS layer
 	let mut cors_layer = CorsLayer::new();
 	cors_layer = cors_layer
 		.allow_methods([

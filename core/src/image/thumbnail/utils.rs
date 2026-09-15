@@ -46,7 +46,7 @@ pub async fn place_thumbnail(
 	bytes: &[u8],
 	config: &StumpConfig,
 ) -> Result<PathBuf, ImageProcessorError> {
-	let thumbnail_path = config.get_thumbnails_dir().join(format!("{id}.{ext}"));
+	let thumbnail_path = config.thumbnails_directory().join(format!("{id}.{ext}"));
 	fs::write(&thumbnail_path, bytes).await?;
 	Ok(thumbnail_path)
 }

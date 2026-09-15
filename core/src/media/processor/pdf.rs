@@ -450,7 +450,7 @@ pub fn convert_to_zip(
 	} = path.file_parts();
 	let parent = path.parent().unwrap_or_else(|| Path::new("/"));
 
-	let cache_dir = config.get_cache_dir();
+	let cache_dir = config.cache_directory();
 	let unpacked_path = cache_dir.join(&file_stem);
 
 	std::fs::create_dir_all(&unpacked_path)?;
@@ -533,7 +533,7 @@ async fn get_cached_page(
 
 	let cache_key = generate_cache_key(pdf_path, page, config)?;
 	let output_format = config.get_pdf_render_format();
-	let cache_file = config.get_pdf_cache_dir().join(format!(
+	let cache_file = config.pdf_cache_directory().join(format!(
 		"{}.{}",
 		cache_key,
 		output_format.extension()
@@ -568,7 +568,7 @@ async fn cache_page(
 	}
 
 	let cache_key = generate_cache_key(pdf_path, page, config)?;
-	let cache_dir = config.get_pdf_cache_dir();
+	let cache_dir = config.pdf_cache_directory();
 
 	if !cache_dir.exists() {
 		if let Err(e) = tokio::fs::create_dir_all(&cache_dir).await {
@@ -860,7 +860,7 @@ mod tests {
 		// Now check if page 2 was successfully cached (poll to prevent timing flakiness under load)
 		let cache_key = generate_cache_key(path, 2, &config).unwrap();
 		let output_format = config.get_pdf_render_format();
-		let cache_file = config.get_pdf_cache_dir().join(format!(
+		let cache_file = config.pdf_cache_directory().join(format!(
 			"{}.{}",
 			cache_key,
 			output_format.extension()

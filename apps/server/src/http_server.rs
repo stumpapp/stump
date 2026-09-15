@@ -67,7 +67,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
 	let oidc_provider: Option<Arc<OidcProvider>> = {
-		if let Some(oidc_config) = config.oidc.as_ref().filter(|c| c.is_configured()) {
+		if let Some(oidc_config) = config.oidc.as_ref().filter(|c| c.is_valid()) {
 			let state = OidcProvider::new(oidc_config).await.map_err(|e| {
 				tracing::error!(?e, "OIDC client initialization failed");
 				ServerError::ServerStartError(format!("OIDC client init failed: {e:?}"))

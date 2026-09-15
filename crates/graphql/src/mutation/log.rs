@@ -36,7 +36,7 @@ impl LogMutation {
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn delete_log_file(&self, ctx: &Context<'_>) -> Result<bool> {
-		let log_file_path = ctx.data::<CoreContext>()?.config.get_log_file();
+		let log_file_path = ctx.data::<CoreContext>()?.config.log_file();
 		File::create(log_file_path.as_path())?;
 		Ok(true)
 	}

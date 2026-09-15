@@ -149,11 +149,11 @@ impl ReadiumManifestGenerator {
 			}
 		}
 
-		Ok(RWPMPositionsBuilder::default()
+		RWPMPositionsBuilder::default()
 			.total(positions.len() as u32)
 			.positions(positions)
 			.build()
-			.map_err(|e| ReadiumError::Builder(e.to_string()))?)
+			.map_err(|e| ReadiumError::Builder(e.to_string()))
 	}
 
 	fn extract_metadata(

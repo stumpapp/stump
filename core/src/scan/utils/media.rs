@@ -240,7 +240,6 @@ async fn build_book(
 		existing_book.as_ref(),
 	)
 	.await
-	.map_err(Into::into)
 }
 
 struct BookVisitCtx {
@@ -265,7 +264,6 @@ async fn execute_book_visit(
 			prepare_draft(&path, &series_id, library_config, config, Some(&book))
 				.await
 				.map(|b| BookVisitResult::Built(Box::new(b)))
-				.map_err(Into::into)
 		},
 		(BookVisitOperation::Custom(custom), Some(book)) => {
 			let mut result = CustomVisitResult {
@@ -292,8 +290,7 @@ async fn execute_book_visit(
 		// since media creation is handled in a separate flow than visit
 		(_, None) => prepare_draft(&path, &series_id, library_config, config, None)
 			.await
-			.map(|b| BookVisitResult::Built(Box::new(b)))
-			.map_err(Into::into),
+			.map(|b| BookVisitResult::Built(Box::new(b))),
 	}
 }
 

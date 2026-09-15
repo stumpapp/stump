@@ -112,7 +112,7 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let thumbnails_dir = core.config.get_thumbnails_dir();
+		let thumbnails_dir = core.config.thumbnails_directory();
 
 		let txn = core.conn.as_ref().begin().await?;
 
@@ -1045,7 +1045,7 @@ impl LibraryMutation {
 		)
 		.collect::<Vec<_>>();
 
-		let thumbnails_dir = core.config.get_thumbnails_dir();
+		let thumbnails_dir = core.config.thumbnails_directory();
 		if let Err(error) = remove_thumbnails(&ids, &thumbnails_dir).await {
 			tracing::error!(?error, "Failed to remove library thumbnails");
 			return Err(error.into());

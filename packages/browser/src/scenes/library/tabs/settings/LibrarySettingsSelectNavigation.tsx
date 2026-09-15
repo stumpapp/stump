@@ -3,8 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
-import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useRouterContext } from '@/context/RouterContext'
+import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 
 import { useLibraryContext } from '../../context'
 import { createRouteGroups } from './routes'

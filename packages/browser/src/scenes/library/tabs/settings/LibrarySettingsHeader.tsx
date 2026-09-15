@@ -4,8 +4,8 @@ import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
-import { usePreferences } from '@/hooks/usePreferences'
 import { useRouterContext } from '@/context/RouterContext'
+import { usePreferences } from '@/hooks/usePreferences'
 
 import { useLibraryContext } from '../../context'
 import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'

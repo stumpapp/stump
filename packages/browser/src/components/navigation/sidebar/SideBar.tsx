@@ -18,7 +18,6 @@ import { useAppContext, useRouterContext } from '@/context'
 import { useTheme } from '@/hooks'
 import { usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home'
-import { useAppStore } from '@/stores'
 
 import UserMenu from '../../UserMenu'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
@@ -55,7 +54,6 @@ type Props = {
 
 export default function SideBar({ asChild, hidden }: Props) {
 	const location = useLocation()
-	const platform = useAppStore((store) => store.platform)
 
 	const paths = usePaths()
 

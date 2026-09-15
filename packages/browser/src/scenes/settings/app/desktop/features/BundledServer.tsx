@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -14,12 +14,9 @@ export default function BundledServer() {
 	)
 
 	return (
-		<WideSwitch
-			label={t(getKey('label'))}
-			description={t(getKey('description'))}
-			checked={runBundledServer}
-			onCheckedChange={handleChange}
-		/>
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<RawSwitch checked={runBundledServer} onCheckedChange={handleChange} />
+		</NewCard.Row>
 	)
 }
 

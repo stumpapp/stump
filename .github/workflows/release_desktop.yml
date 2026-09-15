@@ -1,15 +1,14 @@
 name: Release desktop
 
-# Manual release with input version number
 on:
   workflow_dispatch:
-    # inputs:
-    #   version:
-    #     description: Enter the release version (e.g., 0.1.0)
-    #     required: true
-  pull_request:
-    branches:
-      - nightly
+    inputs:
+      version:
+        description: Enter the app version (e.g., 0.1.0)
+        required: true
+  # pull_request:
+  #   branches:
+  #     - nightly
 
 jobs:
   # This job builds the common webapp HTML/JS/CSS used for all platforms

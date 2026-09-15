@@ -22,12 +22,10 @@ use serde::{Deserialize, Serialize};
 use crate::{
 	database::SQLITE_BIND_LIMIT,
 	event::{self, CreatedOrUpdatedManyMedia},
-	filesystem::{
-		image::{
-			PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
-			ThumbnailGenerationJobParams,
-		},
-		metadata::MetadataFetchJobParams,
+	filesystem::metadata::MetadataFetchJobParams,
+	image::thumbnail::{
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
+		ThumbnailGenerationJobParams,
 	},
 	job::{
 		error::JobError, stump_job::StumpJob, CoreJobOutput, JobContext, JobExecuteLog,
@@ -42,7 +40,12 @@ use crate::{
 				build_and_insert_media, handle_missing_media, handle_restored_media,
 				visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
 			},
-			oneshot::{build_and_insert_oneshots, OneshotOperationOutput},
+			oneshot::{
+				build_and_insert_oneshots,
+				convert_previous_oneshot_entries_to_series_media,
+				convert_to_oneshot_series, OneshotOperationOutput,
+				PendingOneshotConversion, SeriesConversionOutput,
+			},
 			series::{
 				handle_missing_series, insert_series, safely_build_series,
 				MissingSeriesOutput,
@@ -285,7 +288,6 @@ impl JobLifecycle for LibraryScanJob {
 			.into_iter()
 			.map(LibraryScanTask::WalkOneshotsDirectory)
 			.collect::<Vec<LibraryScanTask>>();
-		// TODO: this shouldj ust be a single path lol right? no nesting?
 
 		let tasks = VecDeque::from(
 			[LibraryScanTask::Init(init_task_input)]
@@ -699,6 +701,7 @@ impl JobLifecycle for LibraryScanJob {
 					ignored_files,
 					skipped_files,
 					observed_dir_mtimes,
+					previous_oneshot_entries,
 				} = match walk_result {
 					Ok(walked_series) => walked_series,
 					Err(core_error) => {
@@ -767,6 +770,26 @@ impl JobLifecycle for LibraryScanJob {
                     ));
 				};
 
+				if !previous_oneshot_entries.is_empty() {
+					ctx.report_progress(JobProgress::msg(
+						"Converting oneshots to series media",
+					));
+					let SeriesConversionOutput {
+						updated_media,
+						deleted_series,
+						logs: conversion_logs,
+					} = convert_previous_oneshot_entries_to_series_media(
+						&series_id,
+						previous_oneshot_entries,
+						ctx.conn(),
+					)
+					.await?;
+					output.updated_media += updated_media;
+					output.updated_series += deleted_series;
+					// ^ not _strictly_ update but think it is largely acceptable
+					logs.extend(conversion_logs);
+				}
+
 				subtasks = chain_optional_iter(
 					[],
 					[
@@ -800,9 +823,9 @@ impl JobLifecycle for LibraryScanJob {
 						ignore_rules: build_ignore_rules(&self.config)?,
 						max_depth: None, // not needed
 						options: self.options,
-						dir_mtimes: (*self.dir_mtimes).clone(), // TODO: not needed? harmless to leave in ig
-						series_id: None,                        // not needed
-						oneshots_directory: None,               // not needed
+						dir_mtimes: (*self.dir_mtimes).clone(),
+						series_id: None,          // not needed
+						oneshots_directory: None, // not needed
 					},
 				)
 				.await;
@@ -812,6 +835,7 @@ impl JobLifecycle for LibraryScanJob {
 					seen_files,
 					ignored_files,
 					book_operations,
+					pending_oneshot_conversions,
 				} = match walk_result {
 					Ok(result) => result,
 					Err(core_error) => {
@@ -850,6 +874,33 @@ impl JobLifecycle for LibraryScanJob {
 							library_id: self.id.clone(),
 						},
 					));
+				}
+
+				if !pending_oneshot_conversions.is_empty() {
+					ctx.report_progress(JobProgress::msg(
+						"Converting series to oneshots",
+					));
+					for PendingOneshotConversion {
+						series_id: old_id,
+						media,
+					} in pending_oneshot_conversions
+					{
+						let OneshotOperationOutput {
+							created_series: converted,
+							logs: convert_logs,
+							..
+						} = convert_to_oneshot_series(&old_id, media, &self.id, ctx).await?;
+						output.created_series += converted;
+						logs.extend(convert_logs);
+						if converted > 0 {
+							ctx.emit_event(CoreEvent::CreatedManySeries(
+								event::CreatedManySeries {
+									count: converted,
+									library_id: self.id.clone(),
+								},
+							));
+						}
+					}
 				}
 
 				subtasks = book_operations

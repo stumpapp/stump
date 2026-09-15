@@ -2,7 +2,7 @@
 title: OpenID Connect (OIDC)
 ---
 
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 
 Stump supports OpenID Connect (OIDC) authentication, allowing users to sign in using external identity providers like Authelia, Keycloak, PocketID, and others.
 
@@ -119,7 +119,11 @@ services:
 OIDC can be configured using either environment variables or the TOML configuration file. See [server configuration](/docs/guides/configuration/server-config) for more details.
 
 <Callout type="info">
-	**Running behind a reverse proxy?** You might need to set `STUMP_TRUST_PROXY_HEADERS=true` (or `trust_proxy_headers = true` in `Stump.toml`). Without it, Stump ignores forwarded headers and may generate incorrect URLs (like the OIDC redirect callbacks). See [`STUMP_TRUST_PROXY_HEADERS`](/docs/guides/configuration/server-config#stump_trust_proxy_headers) for details.
+	**Running behind a reverse proxy?** You might need to set `STUMP_TRUST_PROXY_HEADERS=true` (or
+	`trust_proxy_headers = true` in `Stump.toml`). Without it, Stump ignores forwarded headers and may
+	generate incorrect URLs (like the OIDC redirect callbacks). See
+	[`STUMP_TRUST_PROXY_HEADERS`](/docs/guides/configuration/server-config#stump_trust_proxy_headers)
+	for details.
 </Callout>
 
 <Callout type="warning">
@@ -186,7 +190,7 @@ enabled = true
 issuer_url = "https://auth.example.com/application/o/stump/"
 client_id = "stump-client-id"
 client_secret = "super-secret-value"
-scopes = "openid,email,profile"
+scopes = ["openid", "email", "profile"]
 allow_registration = true
 disable_local_auth = false
 ```

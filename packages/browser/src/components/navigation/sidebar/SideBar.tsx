@@ -168,7 +168,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 				<Spacer />
 
-				{isAtLeastMedium && platform === 'browser' && <SideBarFooter />}
+				{isAtLeastMedium && <SideBarFooter />}
 			</>
 		)
 	}

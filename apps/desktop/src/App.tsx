@@ -1,10 +1,13 @@
 import '@stump/browser/styles/index.css'
 import '@stump/components/styles/overrides.css'
+import 'overlayscrollbars/overlayscrollbars.css'
 
 import { ErrorFallback } from '@stump/browser/components/ErrorFallback'
 import { Toaster } from '@stump/browser/components/Toaster'
+import { useApplyTheme } from '@stump/browser/hooks'
 import { useAppStore, useUserStore } from '@stump/browser/stores'
 import { DesktopAppContext, useDesktopAppContext } from '@stump/client'
+import { InterfaceRoundness } from '@stump/graphql'
 import { type AllowedLocale, LocaleProvider } from '@stump/i18n'
 import { QueryClient, QueryClientContext } from '@tanstack/react-query'
 import { Store } from '@tauri-apps/plugin-store'
@@ -36,8 +39,16 @@ function App() {
 	const [mounted, setMounted] = useState(false)
 
 	const setPlatform = useAppStore((state) => state.setPlatform)
-	const locale = useUserStore((state) => state.userPreferences?.locale)
+	const userPreferences = useUserStore((state) => state.userPreferences)
+	const locale = userPreferences?.locale
 	const resolvedLocale = (locale as AllowedLocale) || 'en-US'
+
+	useApplyTheme({
+		appFont: userPreferences?.appFont,
+		appTheme: userPreferences?.appTheme,
+		interfaceRoundness: userPreferences?.interfaceRoundness ?? InterfaceRoundness.Normal,
+		thumbnailRoundness: userPreferences?.thumbnailRoundness ?? InterfaceRoundness.Normal,
+	})
 
 	/**
 	 * An effect to initialize the application, setting the platform and base URL

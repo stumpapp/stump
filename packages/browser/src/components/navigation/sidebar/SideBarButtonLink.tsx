@@ -24,7 +24,7 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group h-8 px-3 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+				'group h-8 px-2 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
 				{
 					'justify-center border border-dashed border-border bg-input/30 hover:bg-input/60 hover:text-foreground':
 						variant === 'action',

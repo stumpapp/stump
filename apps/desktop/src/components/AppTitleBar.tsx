@@ -1,7 +1,7 @@
 import { useAppStore } from '@stump/browser/stores'
-import { IconButton, ToolTip } from '@stump/components'
+import { Button, IconButton, ToolTip } from '@stump/components'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { ChevronLeft, ChevronRight, Minus, Settings, Square, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Minus, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 
@@ -46,11 +46,11 @@ export default function AppTitleBar() {
 	const handleNavigateBack = () => navigate(-1)
 	const handleNavigateForward = () => navigate(1)
 
-	const handleSettings = () => {
-		if (serverId) {
-			navigate(`/server/${serverId}/settings`)
-		}
-	}
+	// const handleSettings = () => {
+	// 	if (serverId) {
+	// 		navigate(`/server/${serverId}/settings`)
+	// 	}
+	// }
 
 	return (
 		<div
@@ -62,15 +62,20 @@ export default function AppTitleBar() {
 				{isInServerContext && (
 					<>
 						<ToolTip content="Navigate back" size="xs">
-							<IconButton variant="ghost" size="sm" onClick={handleNavigateBack}>
+							<Button variant="ghost" size="icon" onClick={handleNavigateBack} className="size-7">
 								<ChevronLeft size="0.75rem" />
-							</IconButton>
+							</Button>
 						</ToolTip>
 
 						<ToolTip content="Navigate forward" size="xs">
-							<IconButton variant="ghost" size="sm" onClick={handleNavigateForward}>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={handleNavigateForward}
+								className="size-7"
+							>
 								<ChevronRight size="0.75rem" />
-							</IconButton>
+							</Button>
 						</ToolTip>
 					</>
 				)}
@@ -79,13 +84,13 @@ export default function AppTitleBar() {
 			<div data-tauri-drag-region className="flex-1" />
 
 			<div className="px-2 flex items-center">
-				{isInServerContext && (
+				{/*{isInServerContext && (
 					<ToolTip content="Server settings" size="xs" side="left">
 						<IconButton variant="ghost" size="sm" onClick={handleSettings}>
 							<Settings size="0.75rem" />
 						</IconButton>
 					</ToolTip>
-				)}
+				)}*/}
 
 				{!isMacOS && (
 					<div className="ml-2 flex items-center">

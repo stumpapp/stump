@@ -1,5 +1,5 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Accordion, Text } from '@stump/components'
+import { Accordion } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
@@ -9,6 +9,7 @@ import { usePrefetchSmartList } from '@/scenes/smartList'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
+import { SectionEmptyMessage } from '../SectionEmptyMessage'
 
 const query = graphql(`
 	query SmartListSideBarSection {
@@ -39,11 +40,7 @@ export default function SmartListSideBarSection({
 
 	const renderLists = () => {
 		if (!lists || !lists.length) {
-			return (
-				<Text className="px-1 py-2 select-none" variant="muted" size="sm">
-					{t('sidebar.buttons.noSmartlists')}
-				</Text>
-			)
+			return <SectionEmptyMessage message={t('sidebar.buttons.noSmartlists')} />
 		}
 
 		return lists.map(({ id, name }) => {
@@ -71,7 +68,7 @@ export default function SmartListSideBarSection({
 				>
 					{t('sidebar.buttons.smartlists')}
 				</Accordion.Trigger>
-				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
+				<Accordion.Content containerClassName="flex flex-col space-y-1.5">
 					{links.includes(FilterableArrangementEntityLink.ShowAll) && (
 						<SideBarButtonLink
 							to={paths.smartLists()}
@@ -81,7 +78,7 @@ export default function SmartListSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="gap-y-1">{renderLists()}</div>
+					<div className="space-y-1">{renderLists()}</div>
 					{links.includes(FilterableArrangementEntityLink.Create) && (
 						<SideBarButtonLink
 							to={paths.smartListCreate()}

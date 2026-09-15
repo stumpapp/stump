@@ -39,7 +39,7 @@ export default function SettingsSideBar() {
 						shouldUseGradient,
 				},
 				{
-					'top-10': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
+					'top-8.5': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
 				},
 			)}
 		>
@@ -55,7 +55,7 @@ export default function SettingsSideBar() {
 
 						return (
 							<div key={groupLabel}>
-								{groupLabel && <Label>{groupLabel}</Label>}
+								{groupLabel && <Label className="text-muted-foreground">{groupLabel}</Label>}
 
 								<ul className="gap-y-0.5 pt-2 text-sm flex flex-col">
 									{items.map(({ to, icon, label, disabled, prefetch }) => {

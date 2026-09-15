@@ -1,5 +1,5 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Accordion, Text } from '@stump/components'
+import { Accordion } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Club } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useAppContext } from '@/context'
 import paths from '@/paths'
 
 import SideBarButtonLink from '../../SideBarButtonLink'
+import { SectionEmptyMessage } from '../SectionEmptyMessage'
 import BookClubEmoji from './BookClubEmoji'
 
 const query = graphql(`
@@ -49,11 +50,7 @@ export default function BookClubSideBarSection({
 
 	const renderBookClubs = () => {
 		if (!bookClubs || !bookClubs.length) {
-			return (
-				<Text className="px-1 py-2 select-none" variant="muted" size="sm">
-					{t('sidebar.buttons.noBookClubs')}
-				</Text>
-			)
+			return <SectionEmptyMessage message={t('sidebar.buttons.noBookClubs')} />
 		}
 
 		return bookClubs.map((bookClub) => {
@@ -100,7 +97,7 @@ export default function BookClubSideBarSection({
 				>
 					{t('sidebar.buttons.bookClubs')}
 				</Accordion.Trigger>
-				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
+				<Accordion.Content containerClassName="flex flex-col space-y-1.5">
 					{showLinkToAll && (
 						<SideBarButtonLink
 							to={paths.bookClubs()}
@@ -110,7 +107,7 @@ export default function BookClubSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="gap-y-1">{renderBookClubs()}</div>
+					<div className="space-y-1">{renderBookClubs()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.bookClubCreate()}

@@ -18,8 +18,8 @@ use crate::{
 		ThumbnailGenerationJobParams,
 	},
 	job::{
-		error::JobError, stump_job::StumpJob, CoreJobOutput, JobContext, JobLifecycle,
-		JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
+		error::JobError, CoreJobOutput, JobContext, JobLifecycle, JobOutputExt,
+		JobProgress, JobTaskOutput, StumpJob, WorkingState,
 	},
 	scan::{
 		options::{BookVisitOperation, ScanOptions},

@@ -1,9 +1,44 @@
 use std::path::{Path, PathBuf};
 
+use models::shared::image_processor_options::SupportedImageFormat;
 use tokio::fs;
 use tracing::{error, trace};
 
-use crate::{config::StumpConfig, image::error::ImageProcessorError};
+use crate::{
+	config::StumpConfig, fs_utils::ContentType, image::error::ImageProcessorError,
+};
+
+/// Reads an already-saved thumbnail from an arbitrary path (e.g. a custom uploaded thumbnail).
+pub async fn get_saved_thumbnail(
+	path: &Path,
+) -> Result<(ContentType, Vec<u8>), ImageProcessorError> {
+	let bytes = tokio::fs::read(path).await?;
+	let content_type = ContentType::from_path(path);
+	Ok((content_type, bytes))
+}
+
+/// Finds an existing generated thumbnail in the thumbnails directory by entity ID.
+/// Returns `None` if no thumbnail for that ID is found.
+pub async fn get_thumbnail(
+	thumbnails_dir: PathBuf,
+	id: &str,
+	_format: Option<SupportedImageFormat>,
+) -> Result<Option<(ContentType, Vec<u8>)>, ImageProcessorError> {
+	let mut read_dir = tokio::fs::read_dir(&thumbnails_dir).await?;
+	while let Some(entry) = read_dir.next_entry().await? {
+		let path = entry.path();
+		if path
+			.file_name()
+			.and_then(|f| f.to_str())
+			.is_some_and(|n| n.starts_with(id))
+		{
+			let bytes = tokio::fs::read(&path).await?;
+			let content_type = ContentType::from_path(&path);
+			return Ok(Some((content_type, bytes)));
+		}
+	}
+	Ok(None)
+}
 
 pub async fn place_thumbnail(
 	id: &str,

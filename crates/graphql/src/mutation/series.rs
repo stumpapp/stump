@@ -9,11 +9,11 @@ use sea_orm::{
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
 };
-use stump_core::filesystem::{
-	image::{generate_book_thumbnail, GenerateThumbnailOptions},
+use stump_core::{
+	image::thumbnail::{generate_book_thumbnail, GenerateThumbnailOptions},
+	job::StumpJob,
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 };
-use stump_core::job::stump_job::StumpJob;
 
 use crate::{
 	data::{AuthContext, CoreContext},

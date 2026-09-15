@@ -1,4 +1,5 @@
-use crate::{filesystem::FileError, utils::serde::age_rating_deserializer};
+use crate::metadata::error::MetadataError;
+use crate::utils::serde::age_rating_deserializer;
 use models::{
 	entity::series_metadata,
 	shared::series_metadata::{CollectedItem, CollectedItems},
@@ -54,7 +55,7 @@ pub struct ProcessedSeriesMetadata {
 impl ProcessedSeriesMetadata {
 	pub fn from_series_root(
 		path: &Path,
-	) -> Result<Option<ProcessedSeriesMetadata>, FileError> {
+	) -> Result<Option<ProcessedSeriesMetadata>, MetadataError> {
 		let series_json_path = path.join("series.json");
 
 		if series_json_path.exists() {
@@ -104,7 +105,7 @@ pub struct SeriesJson {
 }
 
 impl SeriesJson {
-	pub fn from_file(path: &Path) -> Result<SeriesJson, FileError> {
+	pub fn from_file(path: &Path) -> Result<SeriesJson, MetadataError> {
 		let file = File::open(path)?;
 		let reader = BufReader::new(file);
 		let series_json: SeriesJson = serde_json::from_reader(reader)?;

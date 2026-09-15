@@ -27,7 +27,7 @@ use sea_orm::{
 };
 use std::{io::Read, path::Path};
 use stump_core::{
-	config::StumpConfig, filesystem::image::generate_image_metadata_from_bytes,
+	config::StumpConfig, image::thumbnail::generate_image_metadata_from_bytes,
 };
 use tower_sessions::Session;
 
@@ -79,7 +79,7 @@ impl UserMutation {
 			.content_type
 			.clone()
 			.as_deref()
-			.map(stump_core::filesystem::ContentType::from)
+			.and_then(|s| s.parse::<stump_core::fs_utils::ContentType>().ok())
 			.ok_or("Could not verify content type of uploaded file")?;
 
 		if !content_type.is_image() {

@@ -18,10 +18,8 @@ use sea_orm::{ActiveValue::Set, DatabaseConnection};
 use stump_core::{
 	config::StumpConfig,
 	database::connect_at,
-	filesystem::scanner::LibraryScanJob,
-	job::{
-		stump_job::StumpJob, ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt,
-	},
+	job::{ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt, StumpJob},
+	scan::library::LibraryScanJob,
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
 use tokio::{runtime::Builder, sync::broadcast};

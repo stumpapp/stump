@@ -19,8 +19,8 @@ use tokio::task::spawn_blocking;
 use crate::{
 	config::StumpConfig,
 	error::{CoreError, CoreResult},
-	filesystem::series::{BuiltSeries, SeriesBuilder},
 	job::{error::JobError, JobExecuteLog},
+	media::series::{BuiltSeries, SeriesBuilder},
 	scan::utils::BuiltEntityFutures,
 };
 

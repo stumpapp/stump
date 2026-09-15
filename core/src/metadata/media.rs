@@ -10,7 +10,7 @@ use crate::utils::serde::{
 	parse_age_restriction, string_list_deserializer,
 };
 
-use super::utils::parse_pdf_date;
+use crate::metadata::utils::parse_pdf_date;
 
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase

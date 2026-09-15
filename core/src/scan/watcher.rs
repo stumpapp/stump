@@ -1,4 +1,4 @@
-use crate::{job::stump_job::StumpJob, CoreError, CoreResult};
+use crate::{job::StumpJob, CoreError, CoreResult};
 use apalis::prelude::MemoryStorage;
 use async_trait::async_trait;
 use models::entity::{library, library_config};

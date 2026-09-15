@@ -18,10 +18,8 @@ use thiserror::Error;
 use tokio_util::sync::CancellationToken;
 use zip::ZipArchive;
 
-use crate::filesystem::{
-	error::FileError,
-	media::readium::{enumerate_spine_for_positions_at, rwpm_resource_url},
-};
+use super::error::ReadiumError;
+use crate::readium::generator::{enumerate_spine_for_positions_at, rwpm_resource_url};
 
 pub const EPUB_SEARCH_MIN_QUERY_LEN: usize = 2;
 pub const EPUB_SEARCH_MAX_QUERY_LEN: usize = 128;
@@ -45,7 +43,7 @@ pub enum EpubSearchError {
 	#[error("search cancelled")]
 	Cancelled,
 	#[error(transparent)]
-	File(#[from] FileError),
+	File(#[from] ReadiumError),
 }
 
 #[derive(Debug, Clone)]
@@ -201,16 +199,16 @@ pub fn search_epub(
 	}
 
 	let mut epub =
-		EpubDoc::new(epub_path).map_err(|e| FileError::EpubOpenError(e.to_string()))?;
+		EpubDoc::new(epub_path).map_err(|e| ReadiumError::EpubOpen(e.to_string()))?;
 	// `enumerate_spine_for_positions_at` intentionally skips unreadable entries. Search
 	// cursors, however, use OPF spine indices, so retain the unfiltered length and map
 	// parseable metadata back to that coordinate system.
 	let raw_spine_len = epub.get_num_chapters();
 	let spine_meta = enumerate_spine_for_positions_at(&mut epub)?;
 
-	let zip_file = File::open(epub_path).map_err(FileError::from)?;
+	let zip_file = File::open(epub_path).map_err(ReadiumError::from)?;
 	let mut archive =
-		ZipArchive::new(BufReader::new(zip_file)).map_err(FileError::from)?;
+		ZipArchive::new(BufReader::new(zip_file)).map_err(ReadiumError::from)?;
 	let zip_indices = build_zip_entry_indices(&mut archive)?;
 	let spine_meta_by_index: HashMap<usize, _> = spine_meta
 		.iter()
@@ -467,7 +465,7 @@ fn build_zip_entry_indices<R: Read + std::io::Seek>(
 	for index in 0..archive.len() {
 		let name = archive
 			.by_index(index)
-			.map_err(FileError::from)?
+			.map_err(ReadiumError::from)?
 			.name()
 			.to_string();
 		// ZIP names are authoritative; first-wins matches `ZipArchive::by_name`'s
@@ -497,19 +495,19 @@ fn read_zip_entry_bounded<R: Read + std::io::Seek>(
 	expected_size: usize,
 	cancel: &CancellationToken,
 ) -> Result<Vec<u8>, EpubSearchError> {
-	let mut file = archive.by_index(index).map_err(FileError::from)?;
+	let mut file = archive.by_index(index).map_err(ReadiumError::from)?;
 	let mut buf = Vec::with_capacity(expected_size.min(EPUB_SEARCH_MAX_ITEM_BYTES));
 	let mut chunk = [0u8; EPUB_SEARCH_READ_CHUNK_SIZE];
 	loop {
 		if cancel.is_cancelled() {
 			return Err(EpubSearchError::Cancelled);
 		}
-		let n = file.read(&mut chunk).map_err(FileError::from)?;
+		let n = file.read(&mut chunk).map_err(ReadiumError::from)?;
 		if n == 0 {
 			break;
 		}
 		if buf.len() + n > expected_size.max(EPUB_SEARCH_MAX_ITEM_BYTES) {
-			return Err(FileError::EpubReadError(
+			return Err(ReadiumError::EpubRead(
 				"spine item exceeded declared size while reading".to_string(),
 			)
 			.into());
@@ -788,7 +786,7 @@ fn snap_right(text: &str, from: usize, to: usize) -> String {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::media::tests::get_test_epub_path;
+	use ::tests::fixtures::get_test_epub_path;
 
 	#[test]
 	fn extract_skips_script_and_style() {

@@ -1,11 +1,11 @@
 use std::path::Path;
 
 use crate::{
-	filesystem::media::analysis::analyze::{safely_analyze_book, MediaForProcessing},
 	job::{
 		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkingState,
 	},
+	media::analysis::analyze::{safely_analyze_book, MediaForProcessing},
 };
 use async_graphql::SimpleObject;
 use models::entity::{media, media_analysis, media_metadata, series};

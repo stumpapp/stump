@@ -26,10 +26,10 @@ use crate::{
 	database::SQLITE_BIND_LIMIT,
 	error::{CoreError, CoreResult},
 	event::CreatedMedia,
-	filesystem::series::BuiltSeries,
 	fs_utils::{FileParts, PathUtils},
 	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
 	media::prepare::{prepare_draft, MediaDraft},
+	media::series::BuiltSeries,
 	scan::{
 		tag_cache::TagCache,
 		utils::{media::insert_media_in_txn, BuiltEntityFutures, MAX_INSERT_CHUNK_SIZE},

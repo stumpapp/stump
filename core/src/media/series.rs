@@ -1,6 +1,4 @@
-use crate::{
-	filesystem::series::metadata::ProcessedSeriesMetadata, CoreError, CoreResult,
-};
+use crate::{metadata::series::ProcessedSeriesMetadata, CoreError, CoreResult};
 use models::{
 	entity::{series, series_metadata},
 	shared::enums::FileStatus,
@@ -42,7 +40,8 @@ impl SeriesBuilder {
 				.ok_or(CoreError::InternalError(
 					"Could not convert series path to string".to_string(),
 				))?;
-		let metadata = ProcessedSeriesMetadata::from_series_root(path)?;
+		let metadata = ProcessedSeriesMetadata::from_series_root(path)
+			.map_err(|e| CoreError::InternalError(e.to_string()))?;
 
 		tracing::debug!(file_name, path_str, ?metadata, "Parsed series information");
 

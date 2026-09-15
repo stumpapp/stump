@@ -1,6 +1,6 @@
-pub(crate) mod library;
-pub(crate) mod options;
-pub(crate) mod series;
+pub mod library;
+pub mod options;
+pub mod series;
 mod tag_cache;
 pub(crate) mod utils;
 mod walk;

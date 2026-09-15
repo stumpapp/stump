@@ -7,7 +7,7 @@ use models::shared::readium::{
 	RWPMPositionsBuilder, RWPManifest, RWPManifestBuilder,
 };
 
-use crate::filesystem::error::FileError;
+use super::error::ReadiumError;
 
 /// A utility struct for generating Readium Web Publication Manifests
 pub struct ReadiumManifestGenerator {
@@ -36,9 +36,9 @@ impl ReadiumManifestGenerator {
 		}
 	}
 
-	pub fn generate_manifest(&self) -> Result<RWPManifest, FileError> {
+	pub fn generate_manifest(&self) -> Result<RWPManifest, ReadiumError> {
 		let mut epub = EpubDoc::new(&self.epub_path)
-			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
+			.map_err(|e| ReadiumError::EpubOpen(e.to_string()))?;
 
 		let metadata = self.extract_metadata(&epub)?;
 		let links = self.generate_links()?;
@@ -53,7 +53,7 @@ impl ReadiumManifestGenerator {
 			.resources(resources)
 			.toc(toc)
 			.build()
-			.map_err(|error| FileError::EpubReadError(error.to_string()))
+			.map_err(|error| ReadiumError::EpubRead(error.to_string()))
 	}
 
 	/// take the spine items and convert them into an itermediate representation
@@ -61,7 +61,7 @@ impl ReadiumManifestGenerator {
 	fn generate_spine_metadata(
 		&self,
 		epub: &mut EpubDoc<BufReader<File>>,
-	) -> Result<Vec<SpineItemMetadata>, FileError> {
+	) -> Result<Vec<SpineItemMetadata>, ReadiumError> {
 		let resource_metas = epub
 			.spine
 			.clone()
@@ -102,9 +102,9 @@ impl ReadiumManifestGenerator {
 	}
 
 	/// Generate a positions list for the EPUB
-	pub fn generate_positions(&self) -> Result<RWPMPositions, FileError> {
+	pub fn generate_positions(&self) -> Result<RWPMPositions, ReadiumError> {
 		let mut epub = EpubDoc::new(&self.epub_path)
-			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
+			.map_err(|e| ReadiumError::EpubOpen(e.to_string()))?;
 
 		let spine_items = self.generate_spine_metadata(&mut epub)?;
 		let total_positions: usize = spine_items.iter().map(|r| r.position_count).sum();
@@ -126,7 +126,8 @@ impl ReadiumManifestGenerator {
 					.position(book_position as u32)
 					.progression(progression)
 					.total_progression(total_progression)
-					.build()?;
+					.build()
+					.map_err(|e| ReadiumError::Builder(e.to_string()))?;
 
 				let mut builder = RWPMPositionBuilder::default();
 				builder
@@ -138,7 +139,11 @@ impl ReadiumManifestGenerator {
 						builder.title(title.clone());
 					}
 				}
-				positions.push(builder.build()?);
+				positions.push(
+					builder
+						.build()
+						.map_err(|e| ReadiumError::Builder(e.to_string()))?,
+				);
 
 				book_position += 1;
 			}
@@ -147,13 +152,14 @@ impl ReadiumManifestGenerator {
 		Ok(RWPMPositionsBuilder::default()
 			.total(positions.len() as u32)
 			.positions(positions)
-			.build()?)
+			.build()
+			.map_err(|e| ReadiumError::Builder(e.to_string()))?)
 	}
 
 	fn extract_metadata(
 		&self,
 		epub: &EpubDoc<BufReader<File>>,
-	) -> Result<RWPMMetadata, FileError> {
+	) -> Result<RWPMMetadata, ReadiumError> {
 		let get_first = |key: &str| -> Option<String> {
 			epub.metadata
 				.iter()
@@ -201,24 +207,24 @@ impl ReadiumManifestGenerator {
 		}
 		builder
 			.build()
-			.map_err(|error| FileError::EpubReadError(error.to_string()))
+			.map_err(|error| ReadiumError::EpubRead(error.to_string()))
 	}
 
-	fn generate_links(&self) -> Result<Vec<RWPMLink>, FileError> {
+	fn generate_links(&self) -> Result<Vec<RWPMLink>, ReadiumError> {
 		[
 			RWPMLinkBuilder::default()
 				.href(format!("{}/manifest.json", self.base_url))
 				.media_type("application/webpub+json")
 				.rel(vec!["self".to_string()])
 				.build()
-				.map_err(|error| FileError::EpubReadError(error.to_string())),
+				.map_err(|error| ReadiumError::EpubRead(error.to_string())),
 			// Required by @readium/shared Publication.positionsFromManifest() —
 			// media type is how the client discovers the list (not rel alone).
 			RWPMLinkBuilder::default()
 				.href(format!("{}/positions.json", self.base_url))
 				.media_type("application/vnd.readium.position-list+json")
 				.build()
-				.map_err(|error| FileError::EpubReadError(error.to_string())),
+				.map_err(|error| ReadiumError::EpubRead(error.to_string())),
 		]
 		.into_iter()
 		.collect()
@@ -227,7 +233,7 @@ impl ReadiumManifestGenerator {
 	fn generate_reading_order(
 		&self,
 		epub: &mut EpubDoc<BufReader<File>>,
-	) -> Result<Vec<RWPMLink>, FileError> {
+	) -> Result<Vec<RWPMLink>, ReadiumError> {
 		let mut reading_order = Vec::new();
 
 		for (i, spine_item) in epub.spine.clone().iter().enumerate() {
@@ -255,7 +261,7 @@ impl ReadiumManifestGenerator {
 				reading_order.push(
 					builder
 						.build()
-						.map_err(|error| FileError::EpubReadError(error.to_string()))?,
+						.map_err(|error| ReadiumError::EpubRead(error.to_string()))?,
 				);
 			} else {
 				tracing::warn!(
@@ -272,7 +278,7 @@ impl ReadiumManifestGenerator {
 	fn generate_resources(
 		&self,
 		epub: &EpubDoc<BufReader<File>>,
-	) -> Result<Vec<RWPMLink>, FileError> {
+	) -> Result<Vec<RWPMLink>, ReadiumError> {
 		let spine_idrefs: std::collections::HashSet<_> =
 			epub.spine.iter().map(|item| item.idref.as_str()).collect();
 
@@ -285,7 +291,7 @@ impl ReadiumManifestGenerator {
 					.href(self.resource_url(&href))
 					.media_type(resource.mime.clone())
 					.build()
-					.map_err(|error| FileError::EpubReadError(error.to_string()))
+					.map_err(|error| ReadiumError::EpubRead(error.to_string()))
 			})
 			.collect()
 	}
@@ -293,14 +299,14 @@ impl ReadiumManifestGenerator {
 	fn generate_toc(
 		&self,
 		epub: &EpubDoc<BufReader<File>>,
-	) -> Result<Vec<RWPMLink>, FileError> {
+	) -> Result<Vec<RWPMLink>, ReadiumError> {
 		epub.toc
 			.iter()
 			.map(|nav| self.nav_point_to_link(nav))
 			.collect()
 	}
 
-	fn nav_point_to_link(&self, nav: &NavPoint) -> Result<RWPMLink, FileError> {
+	fn nav_point_to_link(&self, nav: &NavPoint) -> Result<RWPMLink, ReadiumError> {
 		let href = nav.content.to_string_lossy().to_string();
 		let children = nav
 			.children
@@ -313,7 +319,7 @@ impl ReadiumManifestGenerator {
 			.title(&nav.label)
 			.children(children)
 			.build()
-			.map_err(|error| FileError::EpubReadError(error.to_string()))
+			.map_err(|error| ReadiumError::EpubRead(error.to_string()))
 	}
 
 	/// Build an absolute RWPM resource URL for a package-relative path.
@@ -325,9 +331,9 @@ impl ReadiumManifestGenerator {
 	/// used by both `positions.json` and whole-book search locators.
 	pub fn enumerate_spine_for_positions(
 		&self,
-	) -> Result<Vec<SpinePositionMeta>, FileError> {
+	) -> Result<Vec<SpinePositionMeta>, ReadiumError> {
 		let mut epub = EpubDoc::new(&self.epub_path)
-			.map_err(|e| FileError::EpubOpenError(e.to_string()))?;
+			.map_err(|e| ReadiumError::EpubOpen(e.to_string()))?;
 		enumerate_spine_for_positions_at(&mut epub)
 	}
 }
@@ -369,13 +375,13 @@ pub struct SpinePositionMeta {
 /// Enumerate spine metadata from an already-open `EpubDoc`.
 pub fn enumerate_spine_for_positions_at(
 	epub: &mut EpubDoc<BufReader<File>>,
-) -> Result<Vec<SpinePositionMeta>, FileError> {
+) -> Result<Vec<SpinePositionMeta>, ReadiumError> {
 	enumerate_spine_position_meta(epub)
 }
 
 fn enumerate_spine_position_meta(
 	epub: &mut EpubDoc<BufReader<File>>,
-) -> Result<Vec<SpinePositionMeta>, FileError> {
+) -> Result<Vec<SpinePositionMeta>, ReadiumError> {
 	let num_pages = epub.get_num_chapters();
 
 	struct RawItem {
@@ -462,7 +468,7 @@ fn enumerate_spine_position_meta(
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::media::tests::get_test_epub_path;
+	use ::tests::fixtures::get_test_epub_path;
 	use models::shared::readium::RWPM_CONTEXT;
 
 	#[test]

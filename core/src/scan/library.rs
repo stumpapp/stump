@@ -22,15 +22,15 @@ use serde::{Deserialize, Serialize};
 use crate::{
 	database::SQLITE_BIND_LIMIT,
 	event::{self, CreatedOrUpdatedManyMedia},
-	filesystem::metadata::MetadataFetchJobParams,
 	image::thumbnail::{
 		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 		ThumbnailGenerationJobParams,
 	},
 	job::{
-		error::JobError, stump_job::StumpJob, CoreJobOutput, JobContext, JobExecuteLog,
-		JobLifecycle, JobOutputExt, JobProgress, JobTaskOutput, WorkingState,
+		error::JobError, CoreJobOutput, JobContext, JobExecuteLog, JobLifecycle,
+		JobOutputExt, JobProgress, JobTaskOutput, StumpJob, WorkingState,
 	},
+	metadata::provider::MetadataFetchJobParams,
 	scan::{
 		options::ScanOptions,
 		series::SeriesScanTask,

@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::media::{
-	metadata::ProcessedMediaMetadata, prepare::MediaDraft, processor::GeneratedFileHashes,
+use crate::{
+	media::{prepare::MediaDraft, processor::GeneratedFileHashes},
+	metadata::media::ProcessedMediaMetadata,
 };
 
 #[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq)]

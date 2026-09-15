@@ -14,15 +14,11 @@ use crate::{
 		hash::{self, generate_koreader_hash, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
 		ContentType, FileParts, PathUtils,
 	},
-	media::{
-		metadata::ProcessedMediaMetadata,
-		processor::{
-			error::MediaProcessorError, zip::ZipProcessor, AnalyzedPage,
-			GeneratedFileHashes, MediaProcessor, MediaProcessorOptions,
-			ProcessedMediaFile,
-		},
-		utils::metadata_from_buf,
+	media::processor::{
+		error::MediaProcessorError, zip::ZipProcessor, AnalyzedPage, GeneratedFileHashes,
+		MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
 	},
+	metadata::{utils::metadata_from_buf, ProcessedMediaMetadata},
 };
 
 pub struct RarProcessor;
@@ -405,4 +401,112 @@ fn validate_converted_zip(zip_path: &Path) -> Result<(), MediaProcessorError> {
 	// conversions. see https://github.com/stumpapp/stump/issues/1284
 
 	Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::media::fixtures::{
+		get_test_complex_rar_path, get_test_rar_file_data, get_test_rar_path,
+	};
+
+	use std::fs;
+
+	#[test]
+	fn test_process() {
+		// Create temporary directory and place a copy of our mock book.rar in it
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		let temp_rar_file_path = tempdir
+			.path()
+			.join("test_process.rar")
+			.to_string_lossy()
+			.to_string();
+		fs::write(&temp_rar_file_path, get_test_rar_file_data())
+			.expect("Failed to write temporary test_process.rar");
+
+		// We can test deletion since it's a temporary file
+		let processed_file = RarProcessor.process(
+			Path::new(&temp_rar_file_path),
+			MediaProcessorOptions {
+				convert_rar_to_zip: true,
+				delete_conversion_source: true,
+				..Default::default()
+			},
+		);
+
+		assert!(
+			processed_file.is_ok(),
+			"Failed to process RAR: {:?}",
+			processed_file.err()
+		);
+		assert!(!Path::new(&temp_rar_file_path).exists());
+	}
+
+	#[test]
+	fn test_rar_to_zip() {
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		let temp_cbr_path = tempdir
+			.path()
+			.join("test_rar_to_zip.cbr")
+			.to_string_lossy()
+			.to_string();
+		fs::write(&temp_cbr_path, get_test_rar_file_data())
+			.expect("failed to write temporary test_rar_to_zip.cbr");
+
+		let options = MediaProcessorOptions {
+			delete_conversion_source: true,
+			..Default::default()
+		};
+		let cbz_result = convert_to_zip(Path::new(&temp_cbr_path), options);
+		assert!(
+			cbz_result.is_ok(),
+			"conversion failed: {:?}",
+			cbz_result.err()
+		);
+		let cbz_path = cbz_result.unwrap();
+
+		assert!(
+			!Path::new(&temp_cbr_path).exists(),
+			"original should be deleted"
+		);
+		assert!(
+			cbz_path.extension().is_some_and(|ext| ext == "cbz"),
+			"should convert to .cbz, got: {:?}",
+			cbz_path.extension()
+		);
+		// https://github.com/stumpapp/stump/issues/1284
+		assert!(
+			!cbz_path.to_string_lossy().contains(".cbr.cbz"),
+			"should not have double extension .cbr.cbz"
+		);
+
+		let cbz_file = fs::File::open(&cbz_path).expect("failed to open CBZ");
+		let cbz_archive =
+			zip::ZipArchive::new(cbz_file).expect("failed to read CBZ archive");
+		assert!(cbz_archive.len() > 0, "should contain at least one entry");
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_rar_path();
+		let content_types =
+			RarProcessor.get_page_content_types(Path::new(&path), vec![1]);
+		assert!(content_types.is_ok());
+	}
+
+	#[test]
+	fn test_rar_with_complex_file_tree() {
+		let path = get_test_complex_rar_path();
+		let processed_file = RarProcessor
+			.process(
+				Path::new(&path),
+				MediaProcessorOptions {
+					process_metadata: true,
+					..Default::default()
+				},
+			)
+			.expect("Failed to process RAR file");
+		// See https://github.com/stumpapp/stump/issues/641
+		assert!(processed_file.metadata.is_some());
+	}
 }

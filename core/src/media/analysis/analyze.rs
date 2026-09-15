@@ -1,9 +1,9 @@
 use crate::{
-	filesystem::media::{
-		analysis::job::{AnalyzeMediaJob, AnalyzeMediaOutput},
-		analyze_page, AnalyzedPage,
-	},
 	job::{error::JobError, JobContext, JobExecuteLog, JobProgress, JobTaskOutput},
+	media::{
+		analysis::job::{AnalyzeMediaJob, AnalyzeMediaOutput},
+		processor::{analyze_page, AnalyzedPage},
+	},
 };
 
 use std::sync::{
@@ -80,9 +80,9 @@ async fn analyze_book_page(
 		content_type,
 		height,
 		width,
-	} = tokio::task::spawn_blocking(move || analyze_page(&path_owned, page, &config_owned))
+	} = analyze_page(&path_owned, page, &config_owned)
 		.await
-		.map_err(|e| JobError::Unknown(e.to_string()))??;
+		.map_err(|e| JobError::Unknown(e.to_string()))?;
 
 	let dimensions = PageDimension { height, width };
 

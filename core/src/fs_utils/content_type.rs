@@ -45,6 +45,7 @@ pub enum ContentType {
 	#[strum(serialize = "text/plain")]
 	TXT,
 	#[default]
+	#[strum(serialize = "unknown")]
 	UNKNOWN,
 }
 

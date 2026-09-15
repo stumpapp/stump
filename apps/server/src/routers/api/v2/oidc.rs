@@ -13,7 +13,7 @@ use sea_orm::{
 	IntoActiveModel, PaginatorTrait, QueryFilter, Set, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
-use stump_core::filesystem::image::generate_image_metadata_from_bytes;
+use stump_core::image::thumbnail::generate_image_metadata_from_bytes;
 use tower_sessions::Session;
 
 use openidconnect::PkceCodeChallenge;

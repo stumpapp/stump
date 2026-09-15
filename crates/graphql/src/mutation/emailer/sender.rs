@@ -10,7 +10,7 @@ use email::{
 };
 use sea_orm::{prelude::*, IntoActiveModel, NotSet, Set};
 use stump_core::{
-	filesystem::{ContentType, FileParts, PathUtils},
+	fs_utils::{ContentType, FileParts, PathUtils},
 	utils::encryption::decrypt_string,
 };
 

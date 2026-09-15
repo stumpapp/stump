@@ -18,7 +18,8 @@ use models::{
 use sea_orm::{prelude::*, QueryOrder};
 use stump_core::{
 	config::StumpConfig,
-	filesystem::{get_saved_thumbnail, get_thumbnail, ContentType},
+	fs_utils::ContentType,
+	image::thumbnail::{get_saved_thumbnail, get_thumbnail},
 };
 
 use super::series::get_series_thumbnail;

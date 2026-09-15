@@ -9,20 +9,20 @@ use tokio::task::spawn_blocking;
 use crate::{
 	config::StumpConfig,
 	fs_utils::{ContentType, FileParts, PathUtils},
-	media::{
-		metadata::ProcessedMediaMetadata,
-		processor::{
-			epub::EpubProcessor, error::MediaProcessorError, pdf::PdfProcessor,
-			rar::RarProcessor, zip::ZipProcessor,
-		},
+	media::processor::{
+		error::MediaProcessorError, pdf::PdfProcessor, rar::RarProcessor,
+		zip::ZipProcessor,
 	},
+	metadata::ProcessedMediaMetadata,
 };
 
-mod epub;
+pub mod epub;
 pub mod error;
 mod pdf;
 mod rar;
 mod zip;
+
+pub use epub::{get_cover, get_resource_by_path, EpubProcessor};
 
 /// A struct representing the dimensions and content type of a single analyzed page
 #[derive(Debug, Clone)]

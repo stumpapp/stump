@@ -13,13 +13,13 @@ use crate::{
 		ContentType, FileParts, PathUtils,
 	},
 	media::{
-		metadata::ProcessedMediaMetadata,
 		processor::{
 			error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes,
 			MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
 		},
-		utils::{metadata_from_buf, sort_file_names},
+		utils::sort_file_names,
 	},
+	metadata::{utils::metadata_from_buf, ProcessedMediaMetadata},
 };
 
 pub struct ZipProcessor;
@@ -372,5 +372,113 @@ impl MediaProcessor for ZipProcessor {
 		}
 
 		Err(MediaProcessorError::PageNotFound)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::media::fixtures::{
+		get_nested_macos_compressed_cbz_path, get_test_cbz_path,
+		get_test_complex_zip_path, get_test_zip_path,
+	};
+
+	#[test]
+	fn test_process() {
+		let path = get_test_zip_path();
+		let processed_file =
+			ZipProcessor.process(Path::new(&path), MediaProcessorOptions::default());
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_process_cbz() {
+		let path = get_test_cbz_path();
+		let processed_file =
+			ZipProcessor.process(Path::new(&path), MediaProcessorOptions::default());
+		assert!(processed_file.is_ok());
+	}
+
+	#[test]
+	fn test_process_nested_cbz() {
+		let path = get_nested_macos_compressed_cbz_path();
+		let processed_file = ZipProcessor
+			.process(Path::new(&path), MediaProcessorOptions::default())
+			.expect("Failed to process nested cbz");
+		assert_eq!(processed_file.pages, 3);
+	}
+
+	#[test]
+	fn test_get_page_cbz() {
+		// Note: This doesn't work with the other test book, because it has no pages.
+		let path = get_test_cbz_path();
+		let page = ZipProcessor.get_page(Path::new(&path), 1);
+		assert!(page.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_nested_cbz() {
+		let path = get_nested_macos_compressed_cbz_path();
+		let (content_type, buf) = ZipProcessor
+			.get_page(Path::new(&path), 1)
+			.expect("Failed to get page");
+		assert_eq!(content_type.mime_type(), "image/jpeg");
+		// Note: this is known and expected to be 96623 bytes.
+		assert_eq!(buf.len(), 96623);
+	}
+
+	#[test]
+	fn test_get_page_content_types() {
+		let path = get_test_zip_path();
+		let content_types =
+			ZipProcessor.get_page_content_types(Path::new(&path), vec![1]);
+		assert!(content_types.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types_cbz() {
+		let path = get_test_cbz_path();
+		let content_types =
+			ZipProcessor.get_page_content_types(Path::new(&path), vec![1, 2, 3, 4, 5]);
+		assert!(content_types.is_ok());
+	}
+
+	#[test]
+	fn test_get_page_content_types_nested_cbz() {
+		let path = get_nested_macos_compressed_cbz_path();
+		let content_types = ZipProcessor
+			.get_page_content_types(Path::new(&path), vec![1, 2, 3])
+			.expect("Failed to get page content types");
+		assert_eq!(content_types.len(), 3);
+		assert!(content_types
+			.values()
+			.all(|ct| ct.mime_type() == "image/jpeg"));
+	}
+
+	#[test]
+	fn test_zip_with_complex_file_tree() {
+		let path = get_test_complex_zip_path();
+		let processed_file = ZipProcessor
+			.process(
+				Path::new(&path),
+				MediaProcessorOptions {
+					process_metadata: true,
+					..Default::default()
+				},
+			)
+			.expect("Failed to process ZIP file");
+		// See https://github.com/stumpapp/stump/issues/641
+		assert!(processed_file.metadata.is_some());
+	}
+
+	#[test]
+	fn test_analyze_page() {
+		let path = get_test_cbz_path();
+		let analyzed_page = ZipProcessor
+			.analyze_page(Path::new(&path), 1)
+			.expect("Failed to analyze page");
+		assert_eq!(analyzed_page.width, 480);
+		assert_eq!(analyzed_page.height, 726);
+		assert_eq!(analyzed_page.content_type.mime_type(), "image/jpeg");
 	}
 }

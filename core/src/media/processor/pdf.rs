@@ -19,13 +19,11 @@ use crate::{
 		ContentType, FileParts, PathUtils,
 	},
 	image::into_image_format,
-	media::{
-		metadata::ProcessedMediaMetadata,
-		processor::{
-			error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes,
-			MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
-		},
+	media::processor::{
+		error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes, MediaProcessor,
+		MediaProcessorOptions, ProcessedMediaFile,
 	},
+	metadata::ProcessedMediaMetadata,
 };
 
 /// alright so tldr; this is a temporary workaround (the mutex) until upstream fixes issues with
@@ -378,6 +376,8 @@ pub async fn get_page_async(
 	Ok(result)
 }
 
+// TODO: part of the reorg and realized this was never actually used, use it or remove it
+#[allow(dead_code)]
 pub fn convert_to_zip(
 	path: &Path,
 	delete_source: bool,
@@ -699,7 +699,7 @@ async fn prerender_adjacent_pages(
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::media::tests::get_test_pdf_path;
+	use crate::media::fixtures::get_test_pdf_path;
 
 	#[test]
 	fn test_process() {

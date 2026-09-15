@@ -839,7 +839,7 @@ pub(crate) async fn visit_and_update_media(
 mod tests {
 	use super::*;
 
-	use crate::media::metadata::ProcessedMediaMetadata;
+	use crate::metadata::ProcessedMediaMetadata;
 	use ::tests::{db::test_database, fake_data};
 
 	// regression test for https://github.com/stumpapp/stump/issues/1407

@@ -17,13 +17,11 @@ use crate::{
 		hash::{self, generate_koreader_hash},
 		ContentType,
 	},
-	media::{
-		metadata::ProcessedMediaMetadata,
-		processor::{
-			error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes,
-			MediaProcessor, MediaProcessorOptions, ProcessedMediaFile,
-		},
+	media::processor::{
+		error::MediaProcessorError, AnalyzedPage, GeneratedFileHashes, MediaProcessor,
+		MediaProcessorOptions, ProcessedMediaFile,
 	},
+	metadata::ProcessedMediaMetadata,
 };
 
 /// A file processor for EPUB files
@@ -820,7 +818,7 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::media::tests::get_test_epub_path;
+	use crate::media::fixtures::get_test_epub_path;
 
 	#[test]
 	fn test_get_cover_from_xhtml_svg_cover() {

@@ -11,10 +11,7 @@ use uuid::Uuid;
 use crate::{
 	config::StumpConfig,
 	fs_utils::{FileParts, PathUtils},
-	media::processor::{
-		generate_hashes, process_metadata, GeneratedFileHashes, MediaProcessorOptions,
-	},
-	media::{metadata::ProcessedMediaMetadata, processor::process_file},
+	media::processor::{process_file, MediaProcessorOptions},
 	CoreResult,
 };
 
@@ -132,20 +129,4 @@ pub async fn prepare_draft(
 		metadata: resolved_metadata,
 		tags: resolved_tags,
 	})
-}
-
-pub async fn regen_hashes(
-	path: &Path,
-	library_config: &library_config::Model,
-	config: &StumpConfig,
-) -> CoreResult<GeneratedFileHashes> {
-	let options = MediaProcessorOptions::new(library_config, config);
-	Ok(generate_hashes(path, options, config).await?)
-}
-
-pub async fn regen_meta(
-	path: &Path,
-	config: &StumpConfig,
-) -> CoreResult<Option<ProcessedMediaMetadata>> {
-	Ok(process_metadata(path, config).await?)
 }

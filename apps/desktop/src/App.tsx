@@ -57,7 +57,7 @@ function App() {
 		async function init() {
 			try {
 				await tauriRPC.initCredentialStore(servers.map((s) => s.id))
-				const platform = await getNativePlatform()
+				const platform = getNativePlatform()
 				setPlatform(platform)
 			} catch (error) {
 				console.error('Critical failure! Unable to initialize the application', error)

@@ -15,8 +15,8 @@ export default function RouteLoadingIndicator() {
 		// i am being lazy and just mutating the css variable here
 		if (platform !== 'browser') {
 			const root = document.documentElement
-			// h-9 -> 36px + 1px border
-			root.style.setProperty('--nprogress-bar-top', '37px')
+			// h-8.5 -> 34px + 1px border
+			root.style.setProperty('--nprogress-bar-top', '35px')
 		} else {
 			const root = document.documentElement
 			root.style.setProperty('--nprogress-bar-top', '0px')

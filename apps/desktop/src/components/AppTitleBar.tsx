@@ -7,6 +7,13 @@ import { useMatch, useNavigate } from 'react-router'
 
 const MACOS_TRAFFIC_LIGHT_PADDING = 76
 
+// TODO: i kinda don't love this, i'd rather have a more seamless bar without a border
+// but that is more invasive of a change (e.g., each screen would need to have some
+// grab point sticky to top). only so much time and so much stump to work all around
+// so we'll see when i get to it
+// i also kinda don't love the nav buttons, but same as above easier to leave it for now
+// and consider more meaningfully later
+
 export default function AppTitleBar() {
 	const navigate = useNavigate()
 	const platform = useAppStore((store) => store.platform)
@@ -46,12 +53,6 @@ export default function AppTitleBar() {
 	const handleNavigateBack = () => navigate(-1)
 	const handleNavigateForward = () => navigate(1)
 
-	// const handleSettings = () => {
-	// 	if (serverId) {
-	// 		navigate(`/server/${serverId}/settings`)
-	// 	}
-	// }
-
 	return (
 		<div
 			data-tauri-drag-region
@@ -84,14 +85,6 @@ export default function AppTitleBar() {
 			<div data-tauri-drag-region className="flex-1" />
 
 			<div className="px-2 flex items-center">
-				{/*{isInServerContext && (
-					<ToolTip content="Server settings" size="xs" side="left">
-						<IconButton variant="ghost" size="sm" onClick={handleSettings}>
-							<Settings size="0.75rem" />
-						</IconButton>
-					</ToolTip>
-				)}*/}
-
 				{!isMacOS && (
 					<div className="ml-2 flex items-center">
 						<IconButton variant="ghost" size="sm" title="Minimize" onClick={handleMinimize}>

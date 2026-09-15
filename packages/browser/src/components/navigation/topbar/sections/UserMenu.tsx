@@ -5,13 +5,14 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { useUserStore } from '@/stores'
 
 import TopBarButtonItem from '../TopBarButtonItem'
 import TopBarLinkListItem from '../TopBarLinkListItem'
 
 export default function UserMenu() {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const { user } = useAppContext()
 

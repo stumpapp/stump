@@ -1,4 +1,4 @@
-import { Button, Label, RawSwitch, Text, ToolTip } from '@stump/components'
+import { Button, NewCard, RawSwitch, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
@@ -48,16 +48,7 @@ export default function DiscordPresenceSwitch() {
 	const isChecked = userPreferences?.enableDiscordPresence ?? false
 
 	return (
-		<div className="flex items-center justify-between">
-			<div className="gap-2 flex grow flex-col text-left">
-				<Label htmlFor="discord_presence_switch">{t(getKey('label'))}</Label>
-				<Text size="xs" variant="muted">
-					{t(getKey('description'))}
-				</Text>
-			</div>
-
-			<div className="w-6" />
-
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
 			<div className="gap-3 flex items-center">
 				<ToolTip
 					content={t(getKey('reconnect'))}
@@ -75,7 +66,7 @@ export default function DiscordPresenceSwitch() {
 					onClick={toggleDiscordPresence}
 				/>
 			</div>
-		</div>
+		</NewCard.Row>
 	)
 }
 

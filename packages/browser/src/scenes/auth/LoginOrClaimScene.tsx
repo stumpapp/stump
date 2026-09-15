@@ -130,7 +130,7 @@ export default function LoginOrClaimScene() {
 	}
 
 	return (
-		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
+		<div className="flex h-full w-full items-center bg-background">
 			<motion.div
 				// @ts-expect-error: It's fine
 				className="px-6 sm:px-0 w-screen shrink-0"

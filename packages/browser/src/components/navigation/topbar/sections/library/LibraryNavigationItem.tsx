@@ -10,7 +10,7 @@ import { LastVisitedLibrary } from '@/components/library'
 import { EntityOptionProps } from '@/components/navigation/types'
 import useCurrentLibraryId from '@/components/navigation/useCurrentLibraryId'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
@@ -32,6 +32,7 @@ export default function LibraryNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: {

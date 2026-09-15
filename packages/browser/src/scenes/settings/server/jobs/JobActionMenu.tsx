@@ -148,7 +148,7 @@ export default function JobActionMenu({ job, onInspect }: Props) {
 					]
 				: []),
 		],
-		[isCancelable, isDeletable, hasLogs, jobId, navigate, onInspect, handleAction],
+		[isCancelable, isDeletable, hasLogs, jobId, navigate, onInspect, handleAction, paths],
 	)
 
 	const onTriggerPressed = () => {

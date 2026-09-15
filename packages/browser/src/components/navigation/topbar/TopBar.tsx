@@ -130,7 +130,7 @@ export default function TopNavigation() {
 					</Suspense>
 				))
 				.otherwise(() => null),
-		[t, location.pathname, size, prefetchHome],
+		[t, location.pathname, size, prefetchHome, paths],
 	)
 
 	const sections = useMemo(

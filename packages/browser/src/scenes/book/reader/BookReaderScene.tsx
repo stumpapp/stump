@@ -68,7 +68,7 @@ export default function BookReaderSceneContainer() {
 		if (!media) {
 			navigate(paths.notFound(), { replace: true })
 		}
-	}, [media, navigate])
+	}, [media, navigate, paths])
 
 	if (!media) {
 		return null
@@ -170,7 +170,7 @@ function BookReaderScene({ book }: Props) {
 				navigate(paths.bookReader(book.id, { page: book.pages }), { replace: true })
 			}
 		}
-	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader])
+	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader, paths])
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (

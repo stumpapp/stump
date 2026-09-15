@@ -79,7 +79,7 @@ export default function BookManagementScene() {
 				to: paths.bookOverview(book.id),
 			},
 		]
-	}, [book])
+	}, [book, paths])
 
 	const handleAnalyze = useCallback(() => {
 		if (id != null) {
@@ -91,7 +91,7 @@ export default function BookManagementScene() {
 		if (!book) {
 			navigate(paths.notFound())
 		}
-	}, [book, navigate])
+	}, [book, navigate, paths])
 
 	if (!book) {
 		return null

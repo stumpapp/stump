@@ -70,7 +70,7 @@ export default function UpdateUserScene() {
 			console.warn('Attempted to update self, redirecting to settings page. This is not allowed.')
 			navigate(paths.settings(), { replace: true })
 		}
-	}, [user, me, navigate])
+	}, [user, me, navigate, paths])
 
 	if (user?.id === me.id) {
 		return null

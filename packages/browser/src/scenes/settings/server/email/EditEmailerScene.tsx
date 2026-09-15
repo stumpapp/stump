@@ -77,7 +77,7 @@ export default function EditEmailerScene() {
 		} else if (!canEditEmailer) {
 			navigate('..', { replace: true })
 		}
-	}, [id, emailer, navigate, canEditEmailer])
+	}, [id, emailer, navigate, canEditEmailer, paths])
 
 	const onSubmit = useCallback(
 		({ name, isPrimary, ...config }: CreateOrUpdateEmailerSchema) => {

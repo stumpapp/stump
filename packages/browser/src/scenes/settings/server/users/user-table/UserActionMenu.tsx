@@ -135,6 +135,7 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 			handleSetLockStatus,
 			onSelectForDeletion,
 			canManageUsers,
+			paths,
 		],
 	)
 

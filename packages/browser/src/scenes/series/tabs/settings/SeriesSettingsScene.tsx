@@ -71,7 +71,7 @@ export default function SeriesSettingsScene() {
 		if (!seriesById) {
 			navigate(paths.notFound())
 		}
-	}, [seriesById, navigate])
+	}, [seriesById, navigate, paths])
 
 	if (!seriesById) {
 		return null

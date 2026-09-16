@@ -1,7 +1,7 @@
 import { UserPermission } from '@stump/graphql'
 import { render, screen } from '@testing-library/react'
 import { Suspense } from 'react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Outlet, Route, Routes } from 'react-router'
 
 import { type IAppContext, useAppContext } from '@/context'
 import { useAppStore } from '@/stores/app.ts'
@@ -13,10 +13,9 @@ vi.mock('@/stores/app.ts', () => ({ useAppStore: vi.fn() }))
 
 // this layout pulls in many heavy deps that i dont want to bother
 // implementing mocks for, nor do i think it would even be useful
-vi.mock('../SettingsLayout.tsx', async () => {
-	const { Outlet } = await import('react-router')
-	return { default: () => <Outlet /> }
-})
+vi.mock('../SettingsLayout.tsx', () => ({
+	default: () => <Outlet />,
+}))
 
 vi.mock('../server/users/UsersRouter.tsx', () => ({
 	default: () => <div data-testid="users-router" />,

@@ -4,7 +4,7 @@ import { View } from 'react-native'
 
 import MetadataBadgeSection from '~/components/overview/MetadataBadgeSection'
 
-import { extractCredits, OPDSMetadataLinkableItem } from './utils'
+import { extractCredits, OPDSMetadataLinkableItem } from '../../lib/opds/utils'
 
 type Props = {
 	metadata: OPDSMetadata | null | undefined

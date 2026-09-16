@@ -81,7 +81,7 @@ Overrides the path where Stump stores its database file. By default this path is
 | ------ | ------------- | --------- |
 | String |               | `db_path` |
 
-### STUMP_DATABASE_URL
+### STUMP_DB_URL
 
 The database connection URL. Technically, this will work for either PostgreSQL or SQLite, but [STUMP_DB_PATH](#stump_db_path) is the preferred way to configure SQLite.
 
@@ -169,7 +169,7 @@ Controls whether logs are formatted in a human-friendly, pretty-printed style.
 
 ## Authentication & Sessions
 
-### HASH_COST
+### STUMP_PASSWORD_HASH_COST
 
 Controls the computational cost used when hashing user passwords.
 
@@ -177,7 +177,7 @@ Controls the computational cost used when hashing user passwords.
 | ------- | ------------- | -------------------- |
 | Integer | `12`          | `password_hash_cost` |
 
-### SESSION_TTL
+### STUMP_SESSION_TTL
 
 The time-to-live for session cookies. This is the amount of time that a session cookie will be valid for _in seconds_. The default value is `259200`, or 3 days. You can set this to a different value if you want sessions to expire sooner or later, depending on your needs.
 
@@ -185,7 +185,7 @@ The time-to-live for session cookies. This is the amount of time that a session 
 | ------- | ------------- | ------------- |
 | Integer | `259200`      | `session_ttl` |
 
-### SESSION_EXPIRY_CLEANUP_INTERVAL
+### STUMP_EXPIRED_SESSION_CLEANUP_INTERVAL
 
 The time (_in seconds_) between each session expiry cleanup check. The check will remove any expired sessions from the database.
 
@@ -288,7 +288,7 @@ A **comma-separated** list of additional trusted audiences for ID token verifica
 
 ## Integrations
 
-### ENABLE_KOBO_SYNC
+### STUMP_ENABLE_KOBO_SYNC
 
 Whether or not to enable the Kobo sync integration. To learn more about this integration, visit the [Kobo](/docs/guides/integrations/kobo) guide.
 
@@ -296,7 +296,7 @@ Whether or not to enable the Kobo sync integration. To learn more about this int
 | ------- | ------------- | ------------------ |
 | Boolean | `false`       | `enable_kobo_sync` |
 
-### ENABLE_KOREADER_SYNC
+### STUMP_ENABLE_KOREADER_SYNC
 
 Whether or not to enable the KoReader sync integration. This is a special integration that allows KoReader to sync with Stump. To learn more about this integration, visit the [KoReader](/docs/guides/integrations/koreader) guide.
 
@@ -304,7 +304,7 @@ Whether or not to enable the KoReader sync integration. This is a special integr
 | ------- | ------------- | ---------------------- |
 | Boolean | `false`       | `enable_koreader_sync` |
 
-### ENABLE_OPDS_PROGRESSION
+### STUMP_ENABLE_OPDS_PROGRESSION
 
 Whether or not OPDS page access should automatically track reading progression. When disabled, accessing pages via OPDS won't update reading progress, which prevents inaccurate tracking when clients preload or cache multiple pages at once. This is particularly useful for OPDS clients that load more than one page at a time.
 
@@ -314,7 +314,7 @@ Whether or not OPDS page access should automatically track reading progression. 
 
 ## PDF Rendering
 
-### PDFIUM_PATH
+### STUMP_PDFIUM_PATH
 
 The path to the PDFium binary. This is only required if you want PDF support and you're running Stump outside of Docker, since the PDFium binary is included in the Docker image. You'll want to find and download the PDFium binary for your platform from [here](https://github.com/bblanchon/pdfium-binaries/releases), and then set this environment variable to the path of the binary.
 
@@ -406,14 +406,6 @@ For example, a value of `2` on a 6-CPU machine yields a concurrency of `12`. Inc
 | ------- | ------------- | ------------------------ |
 | Integer | `2`           | `parallelism_multiplier` |
 
-### STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
-
-The number of seconds after which a book can be re-completed.
-
-| Type    | Default Value   | TOML Key                             |
-| ------- | --------------- | ------------------------------------ |
-| Integer | `86400` (1 day) | `book_completion_dedup_timeout_secs` |
-
 ## Developer / Advanced
 
 ### STUMP_ENABLE_PLAYGROUND
@@ -423,19 +415,3 @@ Whether or not to enable the GraphQL playground. The playground is an interactiv
 | Type    | Default Value | TOML Key            |
 | ------- | ------------- | ------------------- |
 | Boolean | `false`       | `enable_playground` |
-
-### API_VERSION
-
-The version of the Stump API to use. This should really be left alone and **not** manually set.
-
-| Type    | Default Value | TOML Key      |
-| ------- | ------------- | ------------- |
-| Integer | `1`           | `api_version` |
-
-### STUMP_PROFILE
-
-The profile to use when running Stump. This should really be left alone and **not** manually set.
-
-| Type   | Default Value | TOML Key  |
-| ------ | ------------- | --------- |
-| String | `release`     | `profile` |

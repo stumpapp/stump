@@ -1089,6 +1089,11 @@ type LibraryConfig {
 	skipBookOverview: Boolean!
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
+	"""
+	the **relative path** to the directory where oneshots are stored,
+	relative to the library path. this is **not** a fully qualified path
+	"""
+	oneshotsDirectory: String
 	thumbnailConfig: ImageProcessorOptions
 	ignoreRules: [String!]
 }
@@ -1111,6 +1116,7 @@ input LibraryConfigInput {
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
 	ignoreRules: [String!]
+	oneshotsDirectory: String
 }
 
 input LibraryFilterInput {
@@ -1284,15 +1290,7 @@ type Media {
 	extension: String!
 	"The number of pages in the media, if applicable. Will be -1 for certain media types"
 	pages: Int!
-	"The timestamp of the last time the media was updated. This will be set during creation, as well"
-	updatedAt: DateTime
-	"The timestamp of the creation of the media"
-	createdAt: DateTime!
-	"""
-	The timestamp of when the underlying file was last modified on disk. This will only be set if
-	a timestamp can be retrieved from the filesystem
-	"""
-	modifiedAt: DateTime
+	isOneshot: Boolean!
 	"""
 	A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
 	in aiding in the identification of duplicate media files
@@ -1319,6 +1317,15 @@ type Media {
 	expected that all media will belong to a series
 	"""
 	seriesId: String
+	"The timestamp of the last time the media was updated. This will be set during creation, as well"
+	updatedAt: DateTime
+	"The timestamp of the creation of the media"
+	createdAt: DateTime!
+	"""
+	The timestamp of when the underlying file was last modified on disk. This will only be set if
+	a timestamp can be retrieved from the filesystem
+	"""
+	modifiedAt: DateTime
 	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
 	deletedAt: DateTime
 	metadata: MediaMetadata
@@ -1605,9 +1612,7 @@ enum MediaModelOrdering {
 	SIZE
 	EXTENSION
 	PAGES
-	UPDATED_AT
-	CREATED_AT
-	MODIFIED_AT
+	IS_ONESHOT
 	HASH
 	KOREADER_HASH
 	PATH
@@ -1615,6 +1620,9 @@ enum MediaModelOrdering {
 	THUMBNAIL_META
 	THUMBNAIL_PATH
 	SERIES_ID
+	UPDATED_AT
+	CREATED_AT
+	MODIFIED_AT
 	DELETED_AT
 }
 
@@ -1929,7 +1937,9 @@ type Mutation {
 	Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after updating.
 	"""
-	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library! @deprecated(reason: "Use `patchLibrary` instead")
+	patchLibrary(id: ID!, input: PatchLibraryInput!): Library!
+	patchLibraryConfig(id: ID!, input: PatchLibraryConfigInput!): LibraryConfig!
 	"Update the emoji for a library"
 	updateLibraryEmoji(id: ID!, emoji: String): Library!
 	"""
@@ -2389,6 +2399,37 @@ input PatchEmailDeviceInput {
 	forbidden: Boolean
 }
 
+input PatchLibraryConfigInput {
+	convertRarToZip: Boolean
+	hardDeleteConversions: Boolean
+	generateFileHashes: Boolean
+	generateKoreaderHashes: Boolean
+	processMetadata: Boolean
+	watch: Boolean
+	libraryPattern: LibraryPattern
+	libraryType: LibraryType
+	defaultLibraryViewMode: LibraryViewMode
+	hideSeriesView: Boolean
+	skipBookOverview: Boolean
+	thumbnailConfig: ImageProcessorOptionsInput
+	processThumbnailColorsEvenWithoutConfig: Boolean
+	defaultReadingDir: ReadingDirection
+	defaultReadingMode: ReadingMode
+	defaultReadingImageScaleFit: ReadingImageScaleFit
+	ignoreRules: [String!]
+	oneshotsDirectory: String
+}
+
+input PatchLibraryInput {
+	name: String
+	path: String
+	description: String
+	emoji: String
+	tags: [String!]
+	config: PatchLibraryConfigInput
+	scanAfterPersist: Boolean! = true
+}
+
 "A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields."
 input PatchMetadataProviderConfigInput {
 	"The API token for authenticating with the provider"
@@ -2489,7 +2530,7 @@ type Query {
 	numberOfLibraries: Int!
 	lastVisitedLibrary: Library
 	libraryMissingEntities(libraryId: ID!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMissingEntityResponse!
-	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, readingStatus: null, libraryType: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, readingStatus: null, libraryType: null, isOneshot: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	"Returns the available alphabet for all series in the server"
 	seriesAlphabet: JSONObject!
@@ -2758,7 +2799,13 @@ type ResumeReadingCursor {
 	elapsedSeconds: Int!
 	"when the very first session in the current readthrough started"
 	startedAt: DateTime
+	"the last time the latest session in the current readthrough was updated"
 	updatedAt: DateTime
+	"""
+	A page number computed from the current locator's `total_progression` relative
+	to the computed positions list for the book.
+	"""
+	positionAwarePage: Int
 }
 
 input SaveSmartListInput {
@@ -2874,19 +2921,21 @@ type Series {
 	id: String!
 	name: String!
 	description: String
-	createdAt: DateTime!
-	updatedAt: DateTime
-	deletedAt: DateTime
 	path: String!
 	status: FileStatus!
+	isOneshot: Boolean!
 	thumbnailMeta: ImageMetadata
 	thumbnailPath: String
 	libraryId: String
+	createdAt: DateTime!
+	updatedAt: DateTime
+	deletedAt: DateTime
 	metadata: SeriesMetadata
 	isFavorite: Boolean!
 	resolvedName: String!
 	resolvedDescription: String
 	library: Library!
+	oneshotBook: Media
 	"Get media in this series"
 	media(take: Int = null, skip: Int = null): [Media!]!
 	mediaCount: Int!
@@ -2911,6 +2960,7 @@ input SeriesFilterInput {
 	libraryId: FieldFilterString = null
 	readingStatus: ComputedFilterReadingStatus = null
 	libraryType: ComputedFilterLibraryType = null
+	isOneshot: Boolean = null
 	metadata: SeriesMetadataFilterInput = null
 	library: LibraryFilterInput = null
 	_and: [SeriesFilterInput!] = null
@@ -3041,14 +3091,15 @@ enum SeriesModelOrdering {
 	ID
 	NAME
 	DESCRIPTION
-	CREATED_AT
-	UPDATED_AT
-	DELETED_AT
 	PATH
 	STATUS
+	IS_ONESHOT
 	THUMBNAIL_META
 	THUMBNAIL_PATH
 	LIBRARY_ID
+	CREATED_AT
+	UPDATED_AT
+	DELETED_AT
 }
 
 input SeriesOrderBy @oneOf {
@@ -3221,65 +3272,48 @@ type SpineItem {
 	linear: Boolean!
 }
 
-"""
-Represents the configuration of a Stump application. This struct is generated at startup
-using a TOML file, environment variables, or both and is input when creating a `StumpCore`
-instance.
-
-Example:
-```
-use stump_core::{config::{self, StumpConfig}, StumpCore};
-
-#[tokio::main]
-async fn main() {
-/// Get config dir from environment variables.
-let config_dir = config::bootstrap_config_dir();
-
-// Create a StumpConfig using the config file and environment variables.
-let config = StumpConfig::new(config_dir)
-// Load Stump.toml file (if any)
-.with_config_file().unwrap()
-// Overlay environment variables
-.with_environment().unwrap();
-
-// Ensure that config directory exists and write Stump.toml.
-config.write_config_dir().unwrap();
-// Create an instance of the stump core.
-let core = StumpCore::new(config).await;
-}
-```
-"""
 type StumpConfig {
-	"The \"release\" | \"debug\" profile with which the application is running."
-	profile: String!
-	"The IP address on which to listen on (default: \"0.0.0.0\")."
+	"The IP address on which to listen on (default: \"0.0.0.0\")"
 	ip: String!
-	"The port from which to serve the application (default: 10801)."
+	"The port from which to serve the application (default: 10801)"
 	port: Int!
-	"The verbosity with which system logs are visible (default: 1)."
+	"""
+	The verbosity with which system logs are visible (default: 1)
+	0 = none at all, 1 = info, 2 = debug, 3 = trace
+	"""
 	verbosity: Int!
-	"Whether or not to pretty print logs."
+	"Whether or not to pretty print logs"
 	prettyLogs: Boolean!
-	"The directory where the applicaiton logs will be stored"
-	logDir: String
-	"Whether or not to include ANSI color codes in log files."
+	"Whether or not to include ANSI color codes in log files"
 	colorfulLogs: Boolean!
-	"An optional custom path for the database."
+	"""
+	The directory where the applicaiton logs will be stored. If unspecified,
+	logs will be stored in the config_dir
+	"""
+	logDir: String
+	"An optional custom path for the database. If set, this assumes SQLite."
 	dbPath: String
+	"The timeout in seconds for database connections"
 	dbTimeoutSecs: Int!
-	"The client directory."
+	"""
+	The directory where the web app bundle lives, which the server will serve as
+	static files
+	"""
 	clientDir: String!
-	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
+	"The configuration root for the Stump application"
 	configDir: String!
-	"A list of origins for CORS."
+	"A comma-separated list of origins for CORS"
 	allowedOrigins: [String!]!
-	"Path to the PDFium binary for PDF support."
+	"Path to the PDFium binary for enabling PDF support"
 	pdfiumPath: String
-	"Indicates if the GraphQL playground should be enabled."
+	"""
+	Indicates if the GraphQL playground should be enabled. If true, the server
+	will allow GET requests to the GraphQL endpoint and serve the playground UI
+	"""
 	enablePlayground: Boolean!
-	"Indicates if the KoReader sync feature should be enabled."
+	"Indicates if the KoReader sync feature should be enabled"
 	enableKoreaderSync: Boolean!
-	"Indicates if the Kobo sync feature should be enabled."
+	"Indicates if the Kobo sync feature should be enabled"
 	enableKoboSync: Boolean!
 	"""
 	Indicates if OPDS page access should automatically track reading progression.
@@ -3288,37 +3322,39 @@ type StumpConfig {
 	enableOpdsProgression: Boolean!
 	"Password hash cost"
 	passwordHashCost: Int!
-	"The time in seconds that a login session will be valid for."
+	"The time in seconds that a login session will be valid for"
 	sessionTtl: Int!
+	"The time in seconds that an access token will be valid for"
 	accessTokenTtl: Int!
+	"The time in seconds that a refresh token will be valid for"
 	refreshTokenTtl: Int!
-	"The interval at which automatic deleted session cleanup is performed."
+	"The interval in seconds at which expired sessions will be cleaned up"
 	expiredSessionCleanupInterval: Int!
 	"""
 	A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
 	limit. Increasing can speed things up but will increase resource usage
 	"""
 	parallelismMultiplier: Int!
-	"""
-	The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
-	libraries, series, or media.
-	"""
+	"The maximum size in bytes of an image upload"
 	maxImageUploadSize: Int!
-	"Whether or not the server will allow users with the appropriate permissions to upload books and series."
+	"""
+	Whether or not the server will allow users with the appropriate permissions
+	to upload books, series, or other valid uploadable content
+	"""
 	enableUpload: Boolean!
-	"The maximum size, in bytes, of files that can be uploaded to be included in libraries."
+	"The maximum size in bytes of a file upload"
 	maxFileUploadSize: Int!
-	"The DPI (dots per inch) to use when rendering PDF pages as images."
+	"The DPI (dots per inch) to use when rendering PDF pages as images"
 	pdfRenderDpi: Int!
-	"The maximum width or height dimension for rendered PDF pages."
+	"The maximum width or height dimension for rendered PDF pages"
 	pdfMaxDimension: Int!
-	"The image format to use for rendered PDF pages (webp, png, jpeg)."
+	"The image format to use for rendered PDF pages (webp, png, jpeg)"
 	pdfRenderFormat: String!
-	"Whether to enable disk caching for rendered PDF pages."
+	"Whether to enable disk caching for rendered PDF pages"
 	pdfCachePages: Boolean!
-	"Number of pages to pre-render before and after the current page."
+	"Number of pages to pre-render before and after the current page"
 	pdfPrerenderRange: Int!
-	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
+	"Whether to enable high-quality rendering with smoothing (slower but better quality)"
 	pdfHighQuality: Boolean!
 	"Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)"
 	trustProxyHeaders: Boolean!

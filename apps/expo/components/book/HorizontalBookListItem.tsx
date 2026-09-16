@@ -5,8 +5,8 @@ import { memo } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { useListItemSize } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
@@ -50,7 +50,7 @@ function HorizontalBookListItem({ book }: Props) {
 	const { url: uri, metadata: placeholderData, ...originalDimensions } = data.thumbnail
 
 	return (
-		<Pressable onPress={() => router.push(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.push(`/stump/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<ThumbnailImage

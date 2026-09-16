@@ -1,6 +1,6 @@
 import { cn, Spacer, Text } from '@stump/components'
 import { ArrowLeft } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 

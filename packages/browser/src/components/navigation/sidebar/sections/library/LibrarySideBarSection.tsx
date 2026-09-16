@@ -11,6 +11,7 @@ import { usePaths } from '@/paths'
 import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series/LibrarySeriesScene'
 
 import { EntityOptionProps } from '../../../types'
+import useCurrentLibraryId from '../../../useCurrentLibraryId'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import LibraryEmoji from './LibraryEmoji'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
@@ -49,8 +50,7 @@ export default function LibrarySideBarSection({
 	const { checkPermission } = useAppContext()
 
 	const prefetchSeries = usePrefetchLibrarySeries()
-
-	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
+	const currentLibraryId = useCurrentLibraryId()
 
 	const canCreateLibrary = useMemo(
 		() => checkPermission(UserPermission.CreateLibrary),
@@ -82,7 +82,7 @@ export default function LibrarySideBarSection({
 				<SideBarButtonLink
 					key={library.id}
 					to={paths.librarySeries(library.id)}
-					isActive={isCurrentLibrary(library.id)}
+					isActive={currentLibraryId === library.id}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
 					rightContent={<LibraryOptionsMenu library={library} />}

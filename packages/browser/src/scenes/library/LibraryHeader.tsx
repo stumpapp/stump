@@ -5,8 +5,10 @@ import { BookCheck, BookOpen, Clock, HardDrive, Layers } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 
+import { DEFAULT_SERIES_ORDER_BY } from '@/components/filters/useFilterScene'
 import { EntityHeader } from '@/components/sharedLayout'
 import { useAppContext } from '@/context'
+import { usePaths } from '@/paths'
 
 import { useLibraryContext } from './context'
 import { LibraryOverviewSheet } from './LibraryOverviewSheet'
@@ -23,6 +25,8 @@ export default function LibraryHeader() {
 
 	const [isOverviewSheetOpen, setIsOverviewSheetOpen] = useState(false)
 
+	const paths = usePaths()
+
 	const prefetchSeries = usePrefetchLibrarySeries()
 	const prefetchBooks = usePrefetchLibraryBooks()
 	const prefetchFiles = usePrefetchFiles()
@@ -33,6 +37,7 @@ export default function LibraryHeader() {
 
 	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
 	const hideSeriesView = config?.hideSeriesView ?? false
+	const showOneshots = !!config?.oneshotsDirectory
 
 	const formattedSize = stats?.totalBytes ? formatBytesSeparate(stats.totalBytes) : null
 	const formattedTime = stats?.totalReadingTimeSeconds
@@ -46,7 +51,21 @@ export default function LibraryHeader() {
 						isActive: !!location.pathname.match(/\/libraries\/[^/]+\/?(series)?$/),
 						label: t('libraryHeader.tabs.series'),
 						onHover: () => prefetchSeries(id),
-						to: 'series',
+						to: paths.librarySeries(id),
+					},
+				]
+			: []),
+		...(showOneshots
+			? [
+					{
+						isActive: !!location.pathname.match(/\/libraries\/[^/]+\/oneshots(\/.*)?$/),
+						label: t('libraryHeader.tabs.oneshots'),
+						onHover: () =>
+							prefetchSeries(id, {
+								filter: [{ isOneshot: true }],
+								orderBy: DEFAULT_SERIES_ORDER_BY,
+							}),
+						to: paths.libraryOneshots(id),
 					},
 				]
 			: []),
@@ -54,7 +73,7 @@ export default function LibraryHeader() {
 			isActive: !!location.pathname.match(/\/libraries\/[^/]+\/books(\/.*)?$/),
 			label: t('libraryHeader.tabs.books'),
 			onHover: () => prefetchBooks(id),
-			to: 'books',
+			to: paths.libraryBooks(id),
 		},
 		...(canAccessFiles
 			? [
@@ -62,7 +81,7 @@ export default function LibraryHeader() {
 						isActive: !!location.pathname.match(/\/libraries\/[^/]+\/files(\/.*)?$/),
 						label: t('libraryHeader.tabs.files'),
 						onHover: () => handlePrefetchFiles(),
-						to: 'files',
+						to: paths.libraryFileExplorer(id),
 					},
 				]
 			: []),
@@ -119,7 +138,7 @@ export default function LibraryHeader() {
 				name={name}
 				tabs={tabs}
 				stats={resolvedStats}
-				settingsLink="settings"
+				settingsLink={paths.libraryManage(id)}
 				onInfoClick={() => setIsOverviewSheetOpen(true)}
 			/>
 

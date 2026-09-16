@@ -3,8 +3,8 @@ import { queryClient, useLoginOrRegister, useOidcConfig, useSDK } from '@stump/c
 import {
 	Alert,
 	AlertDescription,
+	AlertTitle,
 	Button,
-	cx,
 	Form,
 	Heading,
 	Input,
@@ -13,11 +13,10 @@ import {
 import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { motion, Variants } from 'framer-motion'
-import { ArrowRight, ShieldAlert } from 'lucide-react'
+import { ArrowRight, Cake, ShieldAlert } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -52,7 +51,7 @@ export default function LoginOrClaimScene() {
 				queryKey: [sdk.auth.keys.me],
 				exact: false,
 			})
-			if (redirect.includes('/swagger') || redirect.includes('/api')) {
+			if (redirect.includes('/api')) {
 				// eslint-disable-next-line react-compiler/react-compiler
 				window.location.href = redirect
 			} else {
@@ -106,26 +105,6 @@ export default function LoginOrClaimScene() {
 		window.location.href = authorizeUrl
 	}, [sdk.auth])
 
-	const renderHeader = () => {
-		if (isClaimed) {
-			return (
-				<div className="gap-4 px-2 flex shrink-0 items-center justify-center">
-					<img src="/assets/favicon.png" width="80" height="80" />
-					<Heading variant="gradient" size="3xl" className="font-bold">
-						Stump
-					</Heading>
-				</div>
-			)
-		} else {
-			return (
-				<div className="sm:max-w-md md:max-w-lg text-left">
-					<h1 className="text-4xl font-semibold text-foreground">{t('authScene.claimHeading')}</h1>
-					<p className="mt-1.5 text-base text-foreground">{t('authScene.claimText')}</p>
-				</div>
-			)
-		}
-	}
-
 	const renderError = () => {
 		if (!loginError) return null
 
@@ -154,22 +133,31 @@ export default function LoginOrClaimScene() {
 		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
 			<motion.div
 				// @ts-expect-error: It's fine
-				className="w-screen shrink-0"
+				className="px-6 sm:px-0 w-screen shrink-0"
 				animate={showServers ? 'appearOut' : 'appearIn'}
 				variants={variants}
 			>
 				<div className="gap-8 p-4 flex h-full w-full flex-col items-center justify-center bg-background">
-					{renderHeader()}
+					<div className="gap-4 px-2 flex shrink-0 items-center justify-center">
+						<img src="/assets/favicon.png" width="80" height="80" />
+						<Heading variant="gradient" size="3xl" className="font-bold">
+							Stump
+						</Heading>
+					</div>
+
+					{!isClaimed && (
+						<div>
+							<Alert className="sm:w-90" variant="info">
+								<Cake />
+								<AlertTitle className="text-base">{t('authScene.claimHeading')}</AlertTitle>
+								<AlertDescription className="text-sm">{t('authScene.claimText')}</AlertDescription>
+							</Alert>
+						</div>
+					)}
+
 					{renderError()}
 
-					<Form
-						form={form}
-						onSubmit={handleSubmit}
-						className={cx(
-							{ 'sm:max-w-md md:max-w-lg w-full': !isClaimed },
-							{ 'min-w-[20rem]': isClaimed },
-						)}
-					>
+					<Form form={form} onSubmit={handleSubmit} className="sm:min-w-80 sm:w-[unset] w-full">
 						{!oidcConfig.disableLocalAuth && (
 							<>
 								<Input

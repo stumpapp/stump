@@ -17,6 +17,7 @@ import {
 	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
+	MaskUrls,
 	MaxPageViewingSeconds,
 	PerformanceMonitor,
 	PreferMinimalReader,
@@ -83,6 +84,7 @@ export default function Screen() {
 					{__DEV__ && <DeleteDatabase />}
 					<PerformanceMonitor />
 					<ReduceAnimations />
+					<MaskUrls />
 					<DisplayLanguageKeys />
 					<EnableDebugAnalytics />
 				</Card>

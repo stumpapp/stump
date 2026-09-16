@@ -9,7 +9,7 @@ Stump supports both [SQLite](https://sqlite.org/) and [PostgreSQL](https://www.p
 
 A SQLite database is the default option for Stump. If you do not specify a configuration, Stump will create a SQLite database file in your config directory (e.g., `~/.stump/stump.db`).
 
-You can override this by manually specifying a path to a SQLite database file using either the `STUMP_DATABASE_PATH` or `STUMP_DATABASE_URL` environment variables.
+You can override this by manually specifying a path to a SQLite database file using either the `STUMP_DB_PATH` or `STUMP_DB_URL` environment variables.
 
 ## PostgreSQL
 
@@ -22,7 +22,7 @@ If you want to use PostgreSQL, you will need to ensure you have a PostgreSQL ser
 
 1. A fully-qualified connection string (e.g. `postgresql://user:password@host:port/database`)
 
-   This is a single value set to the `STUMP_DATABASE_URL` environment variable. It is convenient, and more similar to how you would connect to a SQLite database, however less secure as it exposes your database credentials in plaintext
+   This is a single value set to the `STUMP_DB_URL` environment variable. It is convenient, and more similar to how you would connect to a SQLite database, however less secure as it exposes your database credentials in plaintext
 
 2. Individual environment variables for each component of the connection string:
 

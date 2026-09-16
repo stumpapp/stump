@@ -129,13 +129,25 @@ function getQueryKey(
 
 function BookSearchScene() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
+	const { layoutMode, setLayout, columns, setColumns, persistedOrdering, setPersistedOrdering } =
+		useBooksLayout(
+			'global',
+			useShallow((state) => ({
+				columns: state.columns,
+				layoutMode: state.layout,
+				persistedOrdering: state.ordering,
+				setColumns: state.setColumns,
+				setLayout: state.setLayout,
+				setPersistedOrdering: state.setOrdering,
+			})),
+		)
 	const {
 		filters: mediaFilters,
 		ordering,
 		pagination: { page, pageSize: pageSizeMaybeUndefined },
 		setPage,
 		...rest
-	} = useFilterScene()
+	} = useFilterScene({ persistedOrdering, setPersistedOrdering })
 	const filters = mediaFilters as MediaFilterInput
 	const { search } = useURLKeywordSearch()
 	const searchFilter = useSearchMediaFilter(search)
@@ -155,16 +167,6 @@ function BookSearchScene() {
 			setPage(1)
 		},
 		[setPage],
-	)
-
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout(
-		'global',
-		useShallow((state) => ({
-			columns: state.columns,
-			layoutMode: state.layout,
-			setColumns: state.setColumns,
-			setLayout: state.setLayout,
-		})),
 	)
 
 	const {

@@ -23,7 +23,7 @@ pub enum BookVisitOperation {
 
 /// The result of a custom visit operation. This stores the generated bits of a book that
 /// were targeted by the visit operation.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct CustomVisitResult {
 	/// The ID of the book that was visited
 	pub id: String,
@@ -33,6 +33,7 @@ pub struct CustomVisitResult {
 	pub hashes: Option<ProcessedFileHashes>,
 }
 
+#[derive(Clone)]
 pub enum BookVisitResult {
 	Built(Box<BuiltMedia>),
 	Custom(CustomVisitResult),

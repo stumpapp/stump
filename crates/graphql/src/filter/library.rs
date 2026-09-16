@@ -8,7 +8,7 @@ use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 // TODO: Support filter by tags (requires join logic)
 
 #[skip_serializing_none]
-#[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
+#[derive(InputObject, Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LibraryFilterInput {
 	#[graphql(default)]

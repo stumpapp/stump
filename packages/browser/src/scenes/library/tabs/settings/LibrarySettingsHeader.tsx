@@ -6,12 +6,14 @@ import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
+import { useLibraryContext } from '../../context'
 import LibrarySettingsSelectNavigation from './LibrarySettingsSelectNavigation'
 import { LibraryPatternDisplay } from './options/scanner'
-import { routeGroups } from './routes'
+import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsHeader() {
 	const location = useLocation()
+	const { library } = useLibraryContext()
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx, enableDoubleSidebar },
 	} = usePreferences()
@@ -26,10 +28,10 @@ export default function LibrarySettingsHeader() {
 	 */
 	const activeRouteGroup = useMemo(
 		() =>
-			routeGroups
+			createRouteGroups(library.id)
 				.flatMap((group) => group.items)
 				.find((page) => location.pathname.endsWith(page.to)),
-		[location.pathname],
+		[location.pathname, library.id],
 	)
 
 	/**

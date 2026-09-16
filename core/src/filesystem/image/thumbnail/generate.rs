@@ -151,7 +151,7 @@ fn do_generate_book_thumbnail(
 	let ext = options.format.extension();
 
 	let thumbnail_path = config
-		.get_thumbnails_dir()
+		.thumbnails_directory()
 		.join(format!("{}.{ext}", file_name));
 
 	let thumbnail_buffer = match options.format {
@@ -185,7 +185,7 @@ async fn generate_book_thumbnail(
 		.as_ref()
 		.map(PathBuf::from)
 		.unwrap_or_else(|| {
-			core_config.get_thumbnails_dir().join(format!(
+			core_config.thumbnails_directory().join(format!(
 				"{}.{}",
 				file_name,
 				image_options.format.extension()
@@ -345,7 +345,7 @@ where
 
 	let dest_path = ctx
 		.config()
-		.get_thumbnails_dir()
+		.thumbnails_directory()
 		.join(format!("{}.generated.{}", entity_id, ext));
 
 	fs::copy(&source_path, &dest_path).await?;

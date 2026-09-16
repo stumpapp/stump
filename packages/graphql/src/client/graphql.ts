@@ -1183,6 +1183,11 @@ export type LibraryConfig = {
   libraryId?: Maybe<Scalars['String']['output']>;
   libraryPattern: LibraryPattern;
   libraryType: LibraryType;
+  /**
+   * the **relative path** to the directory where oneshots are stored,
+   * relative to the library path. this is **not** a fully qualified path
+   */
+  oneshotsDirectory?: Maybe<Scalars['String']['output']>;
   processMetadata: Scalars['Boolean']['output'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['output'];
   skipBookOverview: Scalars['Boolean']['output'];
@@ -1203,6 +1208,7 @@ export type LibraryConfigInput = {
   ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
   libraryPattern: LibraryPattern;
   libraryType: LibraryType;
+  oneshotsDirectory?: InputMaybe<Scalars['String']['input']>;
   processMetadata: Scalars['Boolean']['input'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['input'];
   skipBookOverview: Scalars['Boolean']['input'];
@@ -1397,6 +1403,7 @@ export type Media = {
   id: Scalars['String']['output'];
   /** Whether the media is marked as a favorite by the current user */
   isFavorite: Scalars['Boolean']['output'];
+  isOneshot: Scalars['Boolean']['output'];
   /**
    * A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
    * books from the KoReader application so progress can be synced between the two applications
@@ -1720,6 +1727,7 @@ export enum MediaModelOrdering {
   Extension = 'EXTENSION',
   Hash = 'HASH',
   Id = 'ID',
+  IsOneshot = 'IS_ONESHOT',
   KoreaderHash = 'KOREADER_HASH',
   ModifiedAt = 'MODIFIED_AT',
   Name = 'NAME',
@@ -2111,6 +2119,8 @@ export type Mutation = {
   /** Lock or unlock a discussion (Moderator+) */
   lockDiscussion: Scalars['Boolean']['output'];
   patchEmailDevice: RegisteredEmailDevice;
+  patchLibrary: Library;
+  patchLibraryConfig: LibraryConfig;
   /** Pin or unpin a message (Moderator+) */
   pinMessage: Scalars['Boolean']['output'];
   processLibraryThumbnails: Scalars['Boolean']['output'];
@@ -2186,6 +2196,7 @@ export type Mutation = {
   /**
    * Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
    * the library will be scanned immediately after updating.
+   * @deprecated Use `patchLibrary` instead
    */
   updateLibrary: Library;
   /** Update the emoji for a library */
@@ -2664,6 +2675,18 @@ export type MutationLockDiscussionArgs = {
 export type MutationPatchEmailDeviceArgs = {
   id: Scalars['Int']['input'];
   input: PatchEmailDeviceInput;
+};
+
+
+export type MutationPatchLibraryArgs = {
+  id: Scalars['ID']['input'];
+  input: PatchLibraryInput;
+};
+
+
+export type MutationPatchLibraryConfigArgs = {
+  id: Scalars['ID']['input'];
+  input: PatchLibraryConfigInput;
 };
 
 
@@ -3274,6 +3297,37 @@ export type PatchEmailDeviceInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   forbidden?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PatchLibraryConfigInput = {
+  convertRarToZip?: InputMaybe<Scalars['Boolean']['input']>;
+  defaultLibraryViewMode?: InputMaybe<LibraryViewMode>;
+  defaultReadingDir?: InputMaybe<ReadingDirection>;
+  defaultReadingImageScaleFit?: InputMaybe<ReadingImageScaleFit>;
+  defaultReadingMode?: InputMaybe<ReadingMode>;
+  generateFileHashes?: InputMaybe<Scalars['Boolean']['input']>;
+  generateKoreaderHashes?: InputMaybe<Scalars['Boolean']['input']>;
+  hardDeleteConversions?: InputMaybe<Scalars['Boolean']['input']>;
+  hideSeriesView?: InputMaybe<Scalars['Boolean']['input']>;
+  ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
+  libraryPattern?: InputMaybe<LibraryPattern>;
+  libraryType?: InputMaybe<LibraryType>;
+  oneshotsDirectory?: InputMaybe<Scalars['String']['input']>;
+  processMetadata?: InputMaybe<Scalars['Boolean']['input']>;
+  processThumbnailColorsEvenWithoutConfig?: InputMaybe<Scalars['Boolean']['input']>;
+  skipBookOverview?: InputMaybe<Scalars['Boolean']['input']>;
+  thumbnailConfig?: InputMaybe<ImageProcessorOptionsInput>;
+  watch?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type PatchLibraryInput = {
+  config?: InputMaybe<PatchLibraryConfigInput>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  emoji?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  path?: InputMaybe<Scalars['String']['input']>;
+  scanAfterPersist?: Scalars['Boolean']['input'];
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields. */
@@ -3921,11 +3975,17 @@ export type ResumeReadingCursor = {
   locator?: Maybe<ReadiumLocator>;
   page?: Maybe<Scalars['Int']['output']>;
   percentageCompleted?: Maybe<Scalars['Decimal']['output']>;
+  /**
+   * A page number computed from the current locator's `total_progression` relative
+   * to the computed positions list for the book.
+   */
+  positionAwarePage?: Maybe<Scalars['Int']['output']>;
   readthroughNumber: Scalars['Int']['output'];
   /** the id of the session this cursor is derived from */
   sessionId: Scalars['Int']['output'];
   /** when the very first session in the current readthrough started */
   startedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time the latest session in the current readthrough was updated */
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -4049,6 +4109,7 @@ export type Series = {
   id: Scalars['String']['output'];
   isComplete: Scalars['Boolean']['output'];
   isFavorite: Scalars['Boolean']['output'];
+  isOneshot: Scalars['Boolean']['output'];
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
   /** Get media in this series */
@@ -4057,6 +4118,7 @@ export type Series = {
   mediaCount: Scalars['Int']['output'];
   metadata?: Maybe<SeriesMetadata>;
   name: Scalars['String']['output'];
+  oneshotBook?: Maybe<Media>;
   path: Scalars['String']['output'];
   percentageCompleted: Scalars['Float']['output'];
   readCount: Scalars['Int']['output'];
@@ -4098,6 +4160,7 @@ export type SeriesFilterInput = {
   _and?: InputMaybe<Array<SeriesFilterInput>>;
   _not?: InputMaybe<Array<SeriesFilterInput>>;
   _or?: InputMaybe<Array<SeriesFilterInput>>;
+  isOneshot?: InputMaybe<Scalars['Boolean']['input']>;
   library?: InputMaybe<LibraryFilterInput>;
   libraryId?: InputMaybe<FieldFilterString>;
   libraryType?: InputMaybe<ComputedFilterLibraryType>;
@@ -4232,6 +4295,7 @@ export enum SeriesModelOrdering {
   DeletedAt = 'DELETED_AT',
   Description = 'DESCRIPTION',
   Id = 'ID',
+  IsOneshot = 'IS_ONESHOT',
   LibraryId = 'LIBRARY_ID',
   Name = 'NAME',
   Path = 'PATH',
@@ -4432,73 +4496,56 @@ export type SpineItem = {
   properties?: Maybe<Scalars['String']['output']>;
 };
 
-/**
- * Represents the configuration of a Stump application. This struct is generated at startup
- * using a TOML file, environment variables, or both and is input when creating a `StumpCore`
- * instance.
- *
- * Example:
- * ```
- * use stump_core::{config::{self, StumpConfig}, StumpCore};
- *
- * #[tokio::main]
- * async fn main() {
- * /// Get config dir from environment variables.
- * let config_dir = config::bootstrap_config_dir();
- *
- * // Create a StumpConfig using the config file and environment variables.
- * let config = StumpConfig::new(config_dir)
- * // Load Stump.toml file (if any)
- * .with_config_file().unwrap()
- * // Overlay environment variables
- * .with_environment().unwrap();
- *
- * // Ensure that config directory exists and write Stump.toml.
- * config.write_config_dir().unwrap();
- * // Create an instance of the stump core.
- * let core = StumpCore::new(config).await;
- * }
- * ```
- */
 export type StumpConfig = {
   __typename?: 'StumpConfig';
+  /** The time in seconds that an access token will be valid for */
   accessTokenTtl: Scalars['Int']['output'];
-  /** A list of origins for CORS. */
+  /** A comma-separated list of origins for CORS */
   allowedOrigins: Array<Scalars['String']['output']>;
-  /** The client directory. */
+  /**
+   * The directory where the web app bundle lives, which the server will serve as
+   * static files
+   */
   clientDir: Scalars['String']['output'];
-  /** Whether or not to include ANSI color codes in log files. */
+  /** Whether or not to include ANSI color codes in log files */
   colorfulLogs: Scalars['Boolean']['output'];
-  /** The configuration root for the Stump application, contains thumbnails, cache, and logs. */
+  /** The configuration root for the Stump application */
   configDir: Scalars['String']['output'];
-  /** An optional custom path for the database. */
+  /** An optional custom path for the database. If set, this assumes SQLite. */
   dbPath?: Maybe<Scalars['String']['output']>;
+  /** The timeout in seconds for database connections */
   dbTimeoutSecs: Scalars['Int']['output'];
-  /** Indicates if the Kobo sync feature should be enabled. */
+  /** Indicates if the Kobo sync feature should be enabled */
   enableKoboSync: Scalars['Boolean']['output'];
-  /** Indicates if the KoReader sync feature should be enabled. */
+  /** Indicates if the KoReader sync feature should be enabled */
   enableKoreaderSync: Scalars['Boolean']['output'];
   /**
    * Indicates if OPDS page access should automatically track reading progression.
    * When disabled, clients loading/preloading pages won't trigger progress updates.
    */
   enableOpdsProgression: Scalars['Boolean']['output'];
-  /** Indicates if the GraphQL playground should be enabled. */
-  enablePlayground: Scalars['Boolean']['output'];
-  /** Whether or not the server will allow users with the appropriate permissions to upload books and series. */
-  enableUpload: Scalars['Boolean']['output'];
-  /** The interval at which automatic deleted session cleanup is performed. */
-  expiredSessionCleanupInterval: Scalars['Int']['output'];
-  /** The IP address on which to listen on (default: "0.0.0.0"). */
-  ip: Scalars['String']['output'];
-  /** The directory where the applicaiton logs will be stored */
-  logDir?: Maybe<Scalars['String']['output']>;
-  /** The maximum size, in bytes, of files that can be uploaded to be included in libraries. */
-  maxFileUploadSize: Scalars['Int']['output'];
   /**
-   * The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
-   * libraries, series, or media.
+   * Indicates if the GraphQL playground should be enabled. If true, the server
+   * will allow GET requests to the GraphQL endpoint and serve the playground UI
    */
+  enablePlayground: Scalars['Boolean']['output'];
+  /**
+   * Whether or not the server will allow users with the appropriate permissions
+   * to upload books, series, or other valid uploadable content
+   */
+  enableUpload: Scalars['Boolean']['output'];
+  /** The interval in seconds at which expired sessions will be cleaned up */
+  expiredSessionCleanupInterval: Scalars['Int']['output'];
+  /** The IP address on which to listen on (default: "0.0.0.0") */
+  ip: Scalars['String']['output'];
+  /**
+   * The directory where the applicaiton logs will be stored. If unspecified,
+   * logs will be stored in the config_dir
+   */
+  logDir?: Maybe<Scalars['String']['output']>;
+  /** The maximum size in bytes of a file upload */
+  maxFileUploadSize: Scalars['Int']['output'];
+  /** The maximum size in bytes of an image upload */
   maxImageUploadSize: Scalars['Int']['output'];
   /**
    * A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
@@ -4507,32 +4554,34 @@ export type StumpConfig = {
   parallelismMultiplier: Scalars['Int']['output'];
   /** Password hash cost */
   passwordHashCost: Scalars['Int']['output'];
-  /** Whether to enable disk caching for rendered PDF pages. */
+  /** Whether to enable disk caching for rendered PDF pages */
   pdfCachePages: Scalars['Boolean']['output'];
-  /** Whether to enable high-quality rendering with smoothing (slower but better quality). */
+  /** Whether to enable high-quality rendering with smoothing (slower but better quality) */
   pdfHighQuality: Scalars['Boolean']['output'];
-  /** The maximum width or height dimension for rendered PDF pages. */
+  /** The maximum width or height dimension for rendered PDF pages */
   pdfMaxDimension: Scalars['Int']['output'];
-  /** Number of pages to pre-render before and after the current page. */
+  /** Number of pages to pre-render before and after the current page */
   pdfPrerenderRange: Scalars['Int']['output'];
-  /** The DPI (dots per inch) to use when rendering PDF pages as images. */
+  /** The DPI (dots per inch) to use when rendering PDF pages as images */
   pdfRenderDpi: Scalars['Int']['output'];
-  /** The image format to use for rendered PDF pages (webp, png, jpeg). */
+  /** The image format to use for rendered PDF pages (webp, png, jpeg) */
   pdfRenderFormat: Scalars['String']['output'];
-  /** Path to the PDFium binary for PDF support. */
+  /** Path to the PDFium binary for enabling PDF support */
   pdfiumPath?: Maybe<Scalars['String']['output']>;
-  /** The port from which to serve the application (default: 10801). */
+  /** The port from which to serve the application (default: 10801) */
   port: Scalars['Int']['output'];
-  /** Whether or not to pretty print logs. */
+  /** Whether or not to pretty print logs */
   prettyLogs: Scalars['Boolean']['output'];
-  /** The "release" | "debug" profile with which the application is running. */
-  profile: Scalars['String']['output'];
+  /** The time in seconds that a refresh token will be valid for */
   refreshTokenTtl: Scalars['Int']['output'];
-  /** The time in seconds that a login session will be valid for. */
+  /** The time in seconds that a login session will be valid for */
   sessionTtl: Scalars['Int']['output'];
   /** Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For) */
   trustProxyHeaders: Scalars['Boolean']['output'];
-  /** The verbosity with which system logs are visible (default: 1). */
+  /**
+   * The verbosity with which system logs are visible (default: 1)
+   * 0 = none at all, 1 = info, 2 = debug, 3 = trace
+   */
   verbosity: Scalars['Int']['output'];
 };
 
@@ -5885,6 +5934,15 @@ export type SmartListNavigationItemQueryVariables = Exact<{ [key: string]: never
 
 export type SmartListNavigationItemQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
 
+export type NavigationEntityLibraryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  isSeries: Scalars['Boolean']['input'];
+  isBook: Scalars['Boolean']['input'];
+}>;
+
+
+export type NavigationEntityLibraryQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', libraryId?: string | null } | null, mediaById?: { __typename?: 'Media', libraryId: string } | null };
+
 export type CreateEpubAnnotationMutationVariables = Exact<{
   input: CreateAnnotationInput;
 }>;
@@ -6254,7 +6312,7 @@ export type RecentlyAddedSeriesQueryVariables = Exact<{
 }>;
 
 
-export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, createdAt: any, media: Array<{ __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+export type RecentlyAddedSeriesQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, createdAt: any, oneshotBook?: { __typename?: 'Media', id: string } | null, media: Array<{ __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
 export type LibraryLayoutQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6262,7 +6320,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -6292,7 +6350,7 @@ export type LibrarySeriesQueryVariables = Exact<{
 }>;
 
 
-export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, media: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, media: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, oneshotBook?: { __typename?: 'Media', id: string } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type LibrarySeriesGridQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -6302,7 +6360,7 @@ export type LibrarySeriesGridQueryVariables = Exact<{
 
 export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, skipBookOverview: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, libraryType: LibraryType, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'FitWithinResize' } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, skipBookOverview: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, libraryType: LibraryType, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, oneshotsDirectory?: string | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'FitWithinResize' } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6794,6 +6852,13 @@ type JobDataInspector_SeriesScanOutput_Fragment = { __typename: 'SeriesScanOutpu
 type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'ThumbnailGenerationOutput', visitedFiles: number, skippedFiles: number, generatedThumbnails: number, removedThumbnails: number } & { ' $fragmentName'?: 'JobDataInspector_ThumbnailGenerationOutput_Fragment' };
 
 export type JobDataInspectorFragment = JobDataInspector_AnalyzeMediaOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_MetadataFetchJobOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
+
+export type JobDataInspectorLogsQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type JobDataInspectorLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, level: LogLevel, message: string, timestamp: any }> } };
 
 export type ScheduledJobsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7979,6 +8044,7 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     }
     processThumbnailColorsEvenWithoutConfig
     ignoreRules
+    oneshotsDirectory
   }
 }
     `, {"fragmentName":"LibrarySettingsConfig"}) as unknown as TypedDocumentString<LibrarySettingsConfigFragment, unknown>;
@@ -11211,6 +11277,16 @@ export const SmartListNavigationItemDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SmartListNavigationItemQuery, SmartListNavigationItemQueryVariables>;
+export const NavigationEntityLibraryDocument = new TypedDocumentString(`
+    query NavigationEntityLibrary($id: ID!, $isSeries: Boolean!, $isBook: Boolean!) {
+  seriesById(id: $id) @include(if: $isSeries) {
+    libraryId
+  }
+  mediaById(id: $id) @include(if: $isBook) {
+    libraryId
+  }
+}
+    `) as unknown as TypedDocumentString<NavigationEntityLibraryQuery, NavigationEntityLibraryQueryVariables>;
 export const CreateEpubAnnotationDocument = new TypedDocumentString(`
     mutation CreateEpubAnnotation($input: CreateAnnotationInput!) {
   createAnnotation(input: $input) {
@@ -12203,6 +12279,9 @@ export const RecentlyAddedSeriesDocument = new TypedDocumentString(`
       percentageCompleted
       status
       createdAt
+      oneshotBook {
+        id
+      }
       media(take: 2, skip: 1) {
         id
         resolvedName
@@ -12276,6 +12355,9 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
       hideSeriesView
     }
     ...LibrarySettingsConfig
+    config {
+      oneshotsDirectory
+    }
   }
 }
     fragment LibrarySettingsConfig on Library {
@@ -12317,6 +12399,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     }
     processThumbnailColorsEvenWithoutConfig
     ignoreRules
+    oneshotsDirectory
   }
 }`) as unknown as TypedDocumentString<LibraryLayoutQuery, LibraryLayoutQueryVariables>;
 export const VisitLibraryDocument = new TypedDocumentString(`
@@ -12427,6 +12510,9 @@ export const LibrarySeriesDocument = new TypedDocumentString(`
             thumbhash
           }
         }
+      }
+      oneshotBook {
+        id
       }
       thumbnail {
         url
@@ -13268,6 +13354,18 @@ export const JobActionMenuDeleteLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<JobActionMenuDeleteLogsMutation, JobActionMenuDeleteLogsMutationVariables>;
+export const JobDataInspectorLogsDocument = new TypedDocumentString(`
+    query JobDataInspectorLogs($id: String!) {
+  logs(filter: {jobId: {eq: $id}}, pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      level
+      message
+      timestamp
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<JobDataInspectorLogsQuery, JobDataInspectorLogsQueryVariables>;
 export const ScheduledJobsDocument = new TypedDocumentString(`
     query ScheduledJobs {
   libraries(pagination: {none: {unpaginated: true}}) {

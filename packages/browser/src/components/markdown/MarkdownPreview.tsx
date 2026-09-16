@@ -30,13 +30,15 @@ export default function MarkdownPreview({ children, className }: Props) {
 				h4: ({ ref: _, ...props }) => <Heading {...props} size="xs" />,
 				h5: ({ ref: _, ...props }) => <Text {...props} className="font-medium" />,
 				p: ({ ref: _, node: __, ...props }) => <Text {...props} />,
+				ul: ({ ref: _, ...props }) => <ul {...props} className="my-2 pl-6 list-disc" />,
+				ol: ({ ref: _, ...props }) => <ol {...props} className="my-2 pl-6 list-decimal" />,
+				li: ({ ref: _, ...props }) => <li {...props} className="my-1" />,
 				table: Table,
 				thead: Thead,
 				tbody: Tbody,
 				tr: Tr,
 				td: Td,
 				th: Th,
-
 				// @ts-expect-error: this is a custom component
 				spoiler: Spoiler,
 				'youtube-video': YouTubeVideo,

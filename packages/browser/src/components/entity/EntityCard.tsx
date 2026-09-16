@@ -1,7 +1,7 @@
 import { cn, ProgressBar, Text } from '@stump/components'
 import { Book } from 'lucide-react'
 import { type ComponentPropsWithoutRef, useState } from 'react'
-import { To } from 'react-router-dom'
+import { To } from 'react-router'
 
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'

@@ -17,7 +17,7 @@ impl LogSubscription {
 		let mut log_file_path = None;
 		if let Ok(ctx) = ctx.data::<CoreContext>() {
 			let config = ctx.config.as_ref();
-			log_file_path = Some(config.get_log_file());
+			log_file_path = Some(config.log_file());
 		}
 
 		async_stream::stream! {

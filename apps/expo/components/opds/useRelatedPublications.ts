@@ -2,7 +2,7 @@ import { useSDK } from '@stump/client'
 import { OPDSEntryBelongsTo, OPDSFeed, OPDSPublication } from '@stump/sdk'
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
-import { getBelongsToPosition, hasLinkRel } from './utils'
+import { getBelongsToPosition, hasLinkRel } from '~/lib/opds/utils'
 
 type UseRelatedPublicationsParams = {
 	seriesUrl?: string | null

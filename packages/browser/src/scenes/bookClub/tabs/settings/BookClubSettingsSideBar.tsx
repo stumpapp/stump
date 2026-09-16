@@ -6,21 +6,22 @@ import { useLocation, useNavigate } from 'react-router'
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
-import paths from '@/paths'
+import paths, { usePaths } from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
 
-import { routeGroups } from './routes'
+import { createRouteGroups } from './routes'
 
 export default function BookClubSettingsSideBar() {
 	const location = useLocation()
 	const navigate = useNavigate()
+	const routerPaths = usePaths()
 
 	const { bookClub } = useBookClubContext()
 	const { t } = useLocaleContext()
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
-	const { groups } = useRouteGroups({ routeGroups })
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(bookClub.slug) })
 
 	return (
 		<div
@@ -34,7 +35,8 @@ export default function BookClubSettingsSideBar() {
 			<div className="gap-4 flex h-full grow flex-col">
 				<div className="space-x-2 flex items-center">
 					<ButtonOrLink
-						href="."
+						href={routerPaths.bookClub(bookClub.slug)}
+						replace
 						variant="ghost"
 						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 						size="sm"

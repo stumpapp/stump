@@ -51,7 +51,7 @@ pub(crate) async fn get_library_thumbnail(
 	}
 
 	let generated_thumb =
-		get_thumbnail(config.get_thumbnails_dir(), &library.id, image_format).await?;
+		get_thumbnail(config.thumbnails_directory(), &library.id, image_format).await?;
 
 	match (generated_thumb, first_series) {
 		(Some(result), _) => Ok(result),

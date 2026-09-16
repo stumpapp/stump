@@ -9,9 +9,9 @@ import { match, P } from 'ts-pattern'
 
 import { executePullProgressSync } from '~/backgroundTasks/pullServerProgress'
 import { executePushProgressSync } from '~/backgroundTasks/pushLocalProgress'
-import { useActiveServer } from '~/components/activeServer'
 import { db, epubProgress, readProgress, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { useTranslate } from '../useTranslate'
 import { PushSyncParams, SyncParams } from './types'

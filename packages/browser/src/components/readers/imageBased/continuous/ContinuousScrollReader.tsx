@@ -2,7 +2,7 @@ import { BookImageScaling } from '@stump/client'
 import { cn, usePrevious } from '@stump/components'
 import { ReadingImageScaleFit } from '@stump/graphql'
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 
@@ -89,7 +89,7 @@ export default function ContinuousScrollReader({
 		const hasPageURL = !!search.get('page')
 		if (hasPageURL) {
 			search.delete('page')
-			setSearch(search)
+			setSearch(search, { replace: true })
 		}
 	}, [search, setSearch])
 

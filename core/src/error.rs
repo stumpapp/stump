@@ -57,6 +57,8 @@ pub enum CoreError {
 	UnImplemented(String),
 	#[error("An object failed to (de)serialize: {0}")]
 	SerdeFailure(#[from] serde_json::Error),
+	#[error("Failed to join tokio task: {0}")]
+	TokioTaskFailed(#[from] tokio::task::JoinError),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }

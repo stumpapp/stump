@@ -24,9 +24,9 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group h-9 px-3 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+				'group h-8 px-2 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
 				{
-					'justify-center border border-dashed border-sidebar-border text-sidebar-foreground/90 hover:border-sidebar-border hover:bg-sidebar-accent/35 hover:text-sidebar-accent-foreground':
+					'justify-center border border-dashed border-border bg-input/30 hover:bg-input/60 hover:text-foreground':
 						variant === 'action',
 				},
 				{
@@ -34,7 +34,7 @@ export default function SideBarButtonLink({
 						isActive,
 				},
 				{
-					'bg-sidebar-accent': isActive && variant === 'action',
+					'bg-sidebar-accent/40 hover:bg-sidebar-accent/40': isActive && variant === 'action',
 				},
 				className,
 			)}

@@ -5,7 +5,7 @@ import pluralize from 'pluralize'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 // TODO(book-clubs): This query needs a complete rewrite
 const query = graphql(`
@@ -30,6 +30,7 @@ type Club = UserBookClubsSceneQuery['bookClubs'][number]
  * A scene that displays all the book clubs the user is a member of
  */
 export default function UserBookClubsScene() {
+	const paths = usePaths()
 	const {
 		data: { bookClubs },
 	} = useSuspenseGraphQL(query, ['bookClubs'])

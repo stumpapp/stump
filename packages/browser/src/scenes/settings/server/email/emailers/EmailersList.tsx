@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { useEmailerSettingsContext } from '../context'
 import EmailerListItem from './EmailerListItem'
@@ -19,6 +19,7 @@ const query = graphql(`
 `)
 
 export default function EmailersList() {
+	const paths = usePaths()
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { canCreateEmailer } = useEmailerSettingsContext()

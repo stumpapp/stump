@@ -3,7 +3,7 @@ import { Link } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { Suspense } from 'react'
 
-import paths from '../../paths'
+import { usePaths } from '../../paths'
 const query = graphql(`
 	query SeriesLibrayLink($id: ID!) {
 		libraryById(id: $id) {
@@ -17,6 +17,7 @@ type Props = {
 	id: string
 }
 export default function SeriesLibraryLink({ id }: Props) {
+	const paths = usePaths()
 	const {
 		data: { libraryById: library },
 	} = useSuspenseGraphQL(query, ['libraryOverview', id], {

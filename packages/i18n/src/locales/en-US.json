@@ -1855,7 +1855,7 @@
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
+					"label": "Servers",
 					"description": "The list of Stump servers you can connect to",
 					"getStarted": "Add a server to get started",
 					"unreachableServer": {
@@ -1945,15 +1945,18 @@
 				},
 				"optionalFeatures": {
 					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
 					"bundledServer": {
 						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"description": "Run the bundled server in the background while the desktop application is running"
 					},
 					"discordPresence": {
 						"label": "Discord Presence",
 						"description": "Display your Stump activity in Discord using Discord Rich Presence",
 						"reconnect": "Reconnect to Discord"
+					},
+					"restartRequired": {
+						"title": "Restart required",
+						"description": "Changes were made that require a restart of the app to take effect"
 					}
 				}
 			}

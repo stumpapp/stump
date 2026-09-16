@@ -8,7 +8,7 @@ import { AlertCircle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 type Props = {
 	id: string
@@ -26,6 +26,7 @@ const mutation = graphql(`
 `)
 
 export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const client = useQueryClient()
 	const { sdk } = useSDK()

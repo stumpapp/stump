@@ -257,7 +257,8 @@ async fn setup_test(
 	.await?;
 
 	let config_dir = format!("{}/benches/config", env!("CARGO_MANIFEST_DIR"));
-	let config = StumpConfig::new(config_dir);
+	let config =
+		StumpConfig::load(PathBuf::from(config_dir)).expect("Failed to load config");
 	let job_storage = MemoryStorage::new();
 	let job_ctx = Arc::new(ApalisWorkerState::new(
 		Arc::new(conn),

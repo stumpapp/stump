@@ -2,11 +2,12 @@
 title: Kobo Sync
 ---
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Step, Steps } from 'fumadocs-ui/components/steps'
 
 <Callout title="Permission required">
 	This functionality is gated behind the `ACCESS_KOBO_SYNC` and `ACCESS_API_KEYS` user permissions.
-	To learn more about permissions, see the [permissions](/docs/guides/access-control/permissions) guide.
+	To learn more about permissions, see the [permissions](/docs/guides/access-control/permissions)
+	guide.
 </Callout>
 
 You can automatically sync books to your Kobo device with Stump.
@@ -24,15 +25,18 @@ To set up Kobo sync with Stump, you need to:
 <Step>
 ### Enable the Kobo routes on your Stump instance
 
-Kobo sync is disabled by default. To enable it, you need to set the `ENABLE_KOBO_SYNC` environment variable to `true`, or directly set `enable_kobo_sync=true` in the `Stump.toml` configuration file.
+Kobo sync is disabled by default. To enable it, you need to set the `STUMP_ENABLE_KOBO_SYNC` environment variable to `true`, or directly set `enable_kobo_sync=true` in the `Stump.toml` configuration file.
 
 See the [configuration guide](/docs/guides/configuration/server-config) for more information.
+
 </Step>
 
 <Step>
 ### Create an API key for your Kobo
 
-<Callout title="Permission required">This step requires the `ACCESS_API_KEYS` user permissions.</Callout>
+<Callout title="Permission required">
+	This step requires the `ACCESS_API_KEYS` user permissions.
+</Callout>
 
 This API key will be stored in plaintext on the Kobo.
 
@@ -66,6 +70,7 @@ For example:
 ```ini
 api_endpoint=http://192.168.4.100:10801/kobo/98765432109876543210876543210987
 ```
+
 </Step>
 
 </Steps>
@@ -82,7 +87,9 @@ Authorization: Bearer <your-token>
 This deletes all stored sync sessions for your account, which should force a full re-sync the next time your Kobo connects.
 
 <Callout>
-	After calling this endpoint you may also need to trigger a fresh sync from the Kobo itself. If the device still skips the library sync step, you may need to restore `.kobo/Kobo/Kobo eReader.conf` back to defaults, trigger a sync, then edit it again to point to Stump and trigger another sync.
+	After calling this endpoint you may also need to trigger a fresh sync from the Kobo itself. If the
+	device still skips the library sync step, you may need to restore `.kobo/Kobo/Kobo eReader.conf`
+	back to defaults, trigger a sync, then edit it again to point to Stump and trigger another sync.
 </Callout>
 
 ## Future improvements

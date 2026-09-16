@@ -18,9 +18,9 @@ use sea_orm::{
 };
 use stump_core::filesystem::{
 	image::{
-		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
-		ImageProcessorOptionsExt, PlaceholderGenerationJobConfig,
-		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams, ThumbnailTarget,
+		generate_thumbnail_from_book, remove_thumbnails, ImageProcessorOptionsExt,
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
+		ThumbnailGenerationJobParams,
 	},
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 	metadata::{MetadataFetchJobParams, MetadataFetchScope},
@@ -548,18 +548,27 @@ impl LibraryMutation {
 			.unwrap_or_default()
 			.with_page(page);
 
-		let (_, path_buf, _) = generate_book_thumbnail(
-			&book.into(),
-			core.conn.as_ref(),
-			GenerateThumbnailOptions {
-				image_options,
-				core_config: core.config.as_ref().clone(),
-				force_regen: true,
-				is_custom: true,
-				target: ThumbnailTarget::Library(id.to_string()),
-			},
+		let (_, path_buf, metadata) = generate_thumbnail_from_book(
+			&book.path,
+			id.as_str(),
+			core.config.as_ref(),
+			image_options,
 		)
 		.await?;
+		library::Entity::update_many()
+			.filter(library::Column::Id.eq(id.to_string()))
+			.col_expr(
+				library::Column::ThumbnailPath,
+				Expr::value(Some(path_buf.to_string_lossy().to_string())),
+			)
+			.col_expr(library::Column::ThumbnailMeta, Expr::value(metadata))
+			.col_expr(
+				library::Column::UpdatedAt,
+				Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
+			)
+			.exec(core.conn.as_ref())
+			.await?;
+
 		tracing::debug!(path = ?path_buf, "Generated library thumbnail");
 
 		let library = library::Entity::find_for_user(user)

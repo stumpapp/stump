@@ -39,20 +39,22 @@ export const AuthImage = forwardRef<HTMLImageElement, Props>(({ token, src, ...p
 	useEffect(() => {
 		let active = true
 
-		if (token && src) {
-			fetchImage(src)
-				.then((data) => {
-					if (active) {
-						setLoadedImage({ src, token, url: URL.createObjectURL(data) })
-					}
-				})
-				.catch((error) => {
-					if (active) {
-						setLoadedImage({ src, token, url: src })
-						console.error('Failed to load authenticated image:', error)
-					}
-				})
+		const loadImage = async () => {
+			if (!token || !src) return
+
+			try {
+				const data = await fetchImage(src)
+				if (active) {
+					setLoadedImage({ src, token, url: URL.createObjectURL(data) })
+				}
+			} catch (error) {
+				if (active) {
+					setLoadedImage({ src, token, url: src })
+					console.error('Failed to load authenticated image:', error)
+				}
+			}
 		}
+		void loadImage()
 
 		return () => {
 			active = false

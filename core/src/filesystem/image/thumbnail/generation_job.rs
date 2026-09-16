@@ -11,7 +11,7 @@ use crate::{
 	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
 	filesystem::image::thumbnail::generate::{
 		bump_series_thumbnail_fallbacks, safely_generate_batch, GenerateImageSource,
-		GenerateThumbnailOptions, ThumbnailTarget,
+		GenerateThumbnailOptions,
 	},
 	job::{
 		error::JobError, JobContext, JobLifecycle, JobOutputExt, JobProgress,
@@ -308,8 +308,6 @@ impl JobLifecycle for ThumbnailGenerationJob {
 						image_options: self.options.clone(),
 						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
-						is_custom: false,
-						target: ThumbnailTarget::Media,
 					},
 					|position| {
 						ctx.report_progress(JobProgress::subtask_position(
@@ -351,8 +349,6 @@ impl JobLifecycle for ThumbnailGenerationJob {
 						image_options: self.options.clone(),
 						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
-						is_custom: false,
-						target: ThumbnailTarget::Media,
 					},
 					|position| {
 						ctx.report_progress(JobProgress::subtask_position(
@@ -398,8 +394,6 @@ impl JobLifecycle for ThumbnailGenerationJob {
 						image_options: self.options.clone(),
 						core_config: ctx.config().clone(),
 						force_regen: self.params.force_regenerate,
-						is_custom: false,
-						target: ThumbnailTarget::Media,
 					},
 					|position| {
 						ctx.report_progress(JobProgress::subtask_position(

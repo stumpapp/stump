@@ -1,10 +1,10 @@
 import { cn, Label, NavigationMenu } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Cog } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { usePreferences } from '@/hooks'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { useSettingsRoutes } from '@/scenes/settings/useSettingsRoutes'
 import { useAppStore } from '@/stores'
 
@@ -12,6 +12,7 @@ import TopBarLinkListItem from '../../TopBarLinkListItem'
 import TopBarNavLink from '../../TopBarNavLink'
 
 export default function SettingsNavigationItem() {
+	const paths = usePaths()
 	const { t } = useLocaleContext()
 	const {
 		preferences: { enableDoubleSidebar },

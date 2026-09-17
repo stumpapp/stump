@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router'
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 
@@ -38,6 +38,7 @@ const query = graphql(`
 `)
 
 export default function UpdateUserScene() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 
 	const { id } = useParams<{ id: string }>()
@@ -69,7 +70,7 @@ export default function UpdateUserScene() {
 			console.warn('Attempted to update self, redirecting to settings page. This is not allowed.')
 			navigate(paths.settings(), { replace: true })
 		}
-	}, [user, me, navigate])
+	}, [user, me, navigate, paths])
 
 	if (user?.id === me.id) {
 		return null

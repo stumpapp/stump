@@ -3,14 +3,14 @@ import { cn, cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/componen
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { CircleSlash2, Library, LibrarySquare } from 'lucide-react'
 import { Suspense, useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { LastVisitedLibrary } from '@/components/library'
 import { EntityOptionProps } from '@/components/navigation/types'
 import useCurrentLibraryId from '@/components/navigation/useCurrentLibraryId'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
@@ -32,6 +32,7 @@ export default function LibraryNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: {

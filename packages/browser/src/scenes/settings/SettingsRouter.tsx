@@ -3,6 +3,7 @@ import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { usePaths } from '@/paths'
 import { useAppStore } from '@/stores/app.ts'
 
 import EmailSettingsRouter from './server/email/EmailSettingsRouter.tsx'
@@ -28,6 +29,7 @@ const TagSettingsScene = lazy(() => import('./server/tags'))
  */
 export default function SettingsRouter() {
 	const { checkPermission } = useAppContext()
+	const paths = usePaths()
 
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
 
@@ -41,7 +43,7 @@ export default function SettingsRouter() {
 	return (
 		<Routes>
 			<Route element={<SettingsLayout />}>
-				<Route path="" element={<Navigate to="app/account" replace />} />
+				<Route path="" element={<Navigate to={paths.settings('account')} replace />} />
 
 				<Route path="account" element={<GeneralSettingsScene />} />
 				<Route path="preferences" element={<AppearanceSettingsScene />} />
@@ -59,7 +61,7 @@ export default function SettingsRouter() {
 				)}
 				{canManageLibrary && <Route path="tags" element={<TagSettingsScene />} />}
 
-				<Route path="*" element={<Navigate to="account" replace />} />
+				<Route path="*" element={<Navigate to={paths.settings('account')} replace />} />
 			</Route>
 		</Routes>
 	)

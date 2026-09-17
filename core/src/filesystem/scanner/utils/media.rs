@@ -482,11 +482,18 @@ pub(crate) async fn handle_book_visit_operation(
 					media_id: Set(Some(custom.id.clone())),
 					..meta.into_active_model()
 				};
-				let updated_meta = active_model.update(&txn).await?;
+				let upserted_meta = media_metadata::Entity::insert(active_model)
+					.on_conflict(
+						OnConflict::new()
+							.update_columns(media_metadata::Column::iter())
+							.to_owned(),
+					)
+					.exec_with_returning(&txn)
+					.await?;
 				ensure_tags_linked(&txn, &custom.id, &tags).await?;
 				txn.commit().await?;
 
-				tracing::trace!(?updated_meta, "Metadata upserted");
+				tracing::trace!(?upserted_meta, "Metadata upserted");
 			}
 
 			if let Some(hashes) = custom.hashes {
@@ -825,4 +832,92 @@ pub(crate) async fn visit_and_update_media(
 	tracing::debug!(elapsed = ?start.elapsed(), success_count, error_count, "Updated books in database");
 
 	Ok(output)
+}
+
+// TODO: i added a single test for asserting fix for https://github.com/stumpapp/stump/issues/1407
+// but really this entire thing needs some semblance of testing. the scanner itself is difficult to
+// test, but in the reorganization branch things are more split and testing is way more
+// approachable
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	use crate::filesystem::media::ProcessedMediaMetadata;
+	use ::tests::{db::test_database, fake_data};
+
+	// regression test for https://github.com/stumpapp/stump/issues/1407
+	// can confirm by changing the upsert to active_model.update(&txn).await?
+	#[tokio::test]
+	async fn test_handle_book_visit_operation_no_panic_upsert_metadata() {
+		let db = test_database().await;
+
+		let library = fake_data::Library::default().insert(&db).await;
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let original_visit = BookVisitResult::Custom(CustomVisitResult {
+			id: media.id.clone(),
+			meta: Some(Box::new(ProcessedMediaMetadata {
+				title: Some("original title".to_string()),
+				summary: Some("original summary".to_string()),
+				..Default::default()
+			})),
+			hashes: None,
+		});
+
+		handle_book_visit_operation(&db, original_visit)
+			.await
+			.expect("first upsert should not fail");
+
+		let row = media_metadata::Entity::find()
+			.filter(media_metadata::Column::MediaId.eq(media.id.clone()))
+			.one(&db)
+			.await
+			.expect("query failed")
+			.expect("metadata row should exist");
+		assert_eq!(row.title, Some("original title".to_string()));
+
+		let subsequent_visit = BookVisitResult::Custom(CustomVisitResult {
+			id: media.id.clone(),
+			meta: Some(Box::new(ProcessedMediaMetadata {
+				title: Some("updated title".to_string()),
+				summary: Some("updated summary".to_string()),
+				..Default::default()
+			})),
+			hashes: None,
+		});
+
+		handle_book_visit_operation(&db, subsequent_visit)
+			.await
+			.expect("second upsert should not fail");
+
+		let row = media_metadata::Entity::find()
+			.filter(media_metadata::Column::MediaId.eq(media.id.clone()))
+			.one(&db)
+			.await
+			.expect("query failed")
+			.expect("metadata row should exist");
+		assert_eq!(row.title, Some("updated title".to_string()));
+
+		let total_metadata_records = media_metadata::Entity::find()
+			.filter(media_metadata::Column::MediaId.eq(media.id.clone()))
+			.count(&db)
+			.await
+			.expect("count query failed");
+		assert!(
+			total_metadata_records == 1,
+			"there should only be one metadata record for the media"
+		);
+		// ^ i.e., it should have entered the on_conflict upsert path
+	}
 }

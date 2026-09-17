@@ -6,7 +6,7 @@ import { Sparkles } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { useEmailerSettingsContext } from '../context'
 import EmailerActionMenu from './EmailerActionMenu'
@@ -42,6 +42,7 @@ type Props = {
 }
 
 export default function EmailerListItem({ fragment }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const emailer = useFragment(EmailerListItemFragment, fragment)
 

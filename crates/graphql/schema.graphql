@@ -2799,7 +2799,13 @@ type ResumeReadingCursor {
 	elapsedSeconds: Int!
 	"when the very first session in the current readthrough started"
 	startedAt: DateTime
+	"the last time the latest session in the current readthrough was updated"
 	updatedAt: DateTime
+	"""
+	A page number computed from the current locator's `total_progression` relative
+	to the computed positions list for the book.
+	"""
+	positionAwarePage: Int
 }
 
 input SaveSmartListInput {
@@ -3266,65 +3272,48 @@ type SpineItem {
 	linear: Boolean!
 }
 
-"""
-Represents the configuration of a Stump application. This struct is generated at startup
-using a TOML file, environment variables, or both and is input when creating a `StumpCore`
-instance.
-
-Example:
-```
-use stump_core::{config::{self, StumpConfig}, StumpCore};
-
-#[tokio::main]
-async fn main() {
-/// Get config dir from environment variables.
-let config_dir = config::bootstrap_config_dir();
-
-// Create a StumpConfig using the config file and environment variables.
-let config = StumpConfig::new(config_dir)
-// Load Stump.toml file (if any)
-.with_config_file().unwrap()
-// Overlay environment variables
-.with_environment().unwrap();
-
-// Ensure that config directory exists and write Stump.toml.
-config.write_config_dir().unwrap();
-// Create an instance of the stump core.
-let core = StumpCore::new(config).await;
-}
-```
-"""
 type StumpConfig {
-	"The \"release\" | \"debug\" profile with which the application is running."
-	profile: String!
-	"The IP address on which to listen on (default: \"0.0.0.0\")."
+	"The IP address on which to listen on (default: \"0.0.0.0\")"
 	ip: String!
-	"The port from which to serve the application (default: 10801)."
+	"The port from which to serve the application (default: 10801)"
 	port: Int!
-	"The verbosity with which system logs are visible (default: 1)."
+	"""
+	The verbosity with which system logs are visible (default: 1)
+	0 = none at all, 1 = info, 2 = debug, 3 = trace
+	"""
 	verbosity: Int!
-	"Whether or not to pretty print logs."
+	"Whether or not to pretty print logs"
 	prettyLogs: Boolean!
-	"The directory where the applicaiton logs will be stored"
-	logDir: String
-	"Whether or not to include ANSI color codes in log files."
+	"Whether or not to include ANSI color codes in log files"
 	colorfulLogs: Boolean!
-	"An optional custom path for the database."
+	"""
+	The directory where the applicaiton logs will be stored. If unspecified,
+	logs will be stored in the config_dir
+	"""
+	logDir: String
+	"An optional custom path for the database. If set, this assumes SQLite."
 	dbPath: String
+	"The timeout in seconds for database connections"
 	dbTimeoutSecs: Int!
-	"The client directory."
+	"""
+	The directory where the web app bundle lives, which the server will serve as
+	static files
+	"""
 	clientDir: String!
-	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
+	"The configuration root for the Stump application"
 	configDir: String!
-	"A list of origins for CORS."
+	"A comma-separated list of origins for CORS"
 	allowedOrigins: [String!]!
-	"Path to the PDFium binary for PDF support."
+	"Path to the PDFium binary for enabling PDF support"
 	pdfiumPath: String
-	"Indicates if the GraphQL playground should be enabled."
+	"""
+	Indicates if the GraphQL playground should be enabled. If true, the server
+	will allow GET requests to the GraphQL endpoint and serve the playground UI
+	"""
 	enablePlayground: Boolean!
-	"Indicates if the KoReader sync feature should be enabled."
+	"Indicates if the KoReader sync feature should be enabled"
 	enableKoreaderSync: Boolean!
-	"Indicates if the Kobo sync feature should be enabled."
+	"Indicates if the Kobo sync feature should be enabled"
 	enableKoboSync: Boolean!
 	"""
 	Indicates if OPDS page access should automatically track reading progression.
@@ -3333,37 +3322,39 @@ type StumpConfig {
 	enableOpdsProgression: Boolean!
 	"Password hash cost"
 	passwordHashCost: Int!
-	"The time in seconds that a login session will be valid for."
+	"The time in seconds that a login session will be valid for"
 	sessionTtl: Int!
+	"The time in seconds that an access token will be valid for"
 	accessTokenTtl: Int!
+	"The time in seconds that a refresh token will be valid for"
 	refreshTokenTtl: Int!
-	"The interval at which automatic deleted session cleanup is performed."
+	"The interval in seconds at which expired sessions will be cleaned up"
 	expiredSessionCleanupInterval: Int!
 	"""
 	A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
 	limit. Increasing can speed things up but will increase resource usage
 	"""
 	parallelismMultiplier: Int!
-	"""
-	The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
-	libraries, series, or media.
-	"""
+	"The maximum size in bytes of an image upload"
 	maxImageUploadSize: Int!
-	"Whether or not the server will allow users with the appropriate permissions to upload books and series."
+	"""
+	Whether or not the server will allow users with the appropriate permissions
+	to upload books, series, or other valid uploadable content
+	"""
 	enableUpload: Boolean!
-	"The maximum size, in bytes, of files that can be uploaded to be included in libraries."
+	"The maximum size in bytes of a file upload"
 	maxFileUploadSize: Int!
-	"The DPI (dots per inch) to use when rendering PDF pages as images."
+	"The DPI (dots per inch) to use when rendering PDF pages as images"
 	pdfRenderDpi: Int!
-	"The maximum width or height dimension for rendered PDF pages."
+	"The maximum width or height dimension for rendered PDF pages"
 	pdfMaxDimension: Int!
-	"The image format to use for rendered PDF pages (webp, png, jpeg)."
+	"The image format to use for rendered PDF pages (webp, png, jpeg)"
 	pdfRenderFormat: String!
-	"Whether to enable disk caching for rendered PDF pages."
+	"Whether to enable disk caching for rendered PDF pages"
 	pdfCachePages: Boolean!
-	"Number of pages to pre-render before and after the current page."
+	"Number of pages to pre-render before and after the current page"
 	pdfPrerenderRange: Int!
-	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
+	"Whether to enable high-quality rendering with smoothing (slower but better quality)"
 	pdfHighQuality: Boolean!
 	"Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)"
 	trustProxyHeaders: Boolean!

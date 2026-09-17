@@ -29,39 +29,41 @@ export function calculateTableSizing<DataType>(
 	let totalAvailableWidth = totalWidth
 	let totalIsGrow = 0
 
+	// Note: key by resolved column id, def ids are undefined for accessor columns.
+	// Keep this pure, mutated sizes are lost when defs are recreated after save.
+	const baseSizes = new Map<string, number | undefined>()
+
 	columns.forEach((header) => {
 		const column = header.column.columnDef
-		if (column.size == null) {
+		let size = column.size
+		if (size == null) {
 			if (!column.meta?.isGrow) {
-				let calculatedSize = 100
 				if (column?.meta?.widthPercentage) {
-					calculatedSize = column.meta.widthPercentage * totalWidth * 0.01
+					size = column.meta.widthPercentage * totalWidth * 0.01
 				} else {
-					calculatedSize = totalWidth / columns.length
+					size = totalWidth / columns.length
 				}
-
-				const size = getSize(calculatedSize, column.maxSize, column.minSize)
-
-				column.size = size
+				size = getSize(size, column.maxSize, column.minSize)
 			}
 		}
 
 		if (column.meta?.isGrow) totalIsGrow += 1
-		else totalAvailableWidth -= getSize(column.size, column.maxSize, column.minSize)
+		else totalAvailableWidth -= getSize(size, column.maxSize, column.minSize)
+
+		baseSizes.set(header.column.id, size)
 	})
 
 	const sizing: Record<string, number> = {}
 
 	columns.forEach((header) => {
 		const column = header.column.columnDef
+		const id = header.column.id
 		if (column.meta?.isGrow) {
-			let calculatedSize = 100
-			calculatedSize = Math.floor(totalAvailableWidth / totalIsGrow)
-			const size = getSize(calculatedSize, column.maxSize, column.minSize)
-			column.size = size
+			const calculatedSize = Math.floor(totalAvailableWidth / totalIsGrow)
+			sizing[id] = getSize(calculatedSize, column.maxSize, column.minSize)
+		} else {
+			sizing[id] = Number(baseSizes.get(id))
 		}
-
-		sizing[`${column.id}`] = Number(column.size)
 	})
 
 	return sizing

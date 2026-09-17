@@ -25,32 +25,51 @@ const alertVariants = cva(
 type DismissableProps = {
 	id: string
 	dismissible: true
+	showX?: boolean
 }
 
 type NormalProps = {
 	id?: never
 	dismissible?: false
+	showX?: boolean
 }
 
 type Props = (DismissableProps | NormalProps) & VariantProps<typeof alertVariants>
+
+const keyPrefix = 'stump-alert-dismissed'
+
+function getKey(id: string) {
+	return `${keyPrefix}-${id}`
+}
+
+export function alertIsDismissed(id: string) {
+	const storedValue = localStorage.getItem(getKey(id))
+	return storedValue === 'true'
+}
+
+export function dismissAlert(id: string) {
+	localStorage.setItem(getKey(id), 'true')
+}
 
 function Alert({
 	className,
 	variant,
 	dismissible,
+	showX = Boolean(dismissible),
 	id,
 	children,
 	...props
 }: React.ComponentProps<'div'> & Props) {
 	const [isVisible, setIsVisible] = React.useState(() => {
 		if (!dismissible) return true
-		const storedValue = localStorage.getItem(`stump-alert-dismissed-${id}`)
-		return !storedValue || storedValue === 'true'
+		return !alertIsDismissed(id)
 	})
 
 	const onDismiss = () => {
 		setIsVisible(false)
-		localStorage.setItem(`stump-alert-dismissed-${id}`, 'true')
+		if (dismissible && id) {
+			dismissAlert(id)
+		}
 	}
 
 	if (!isVisible) return null
@@ -70,7 +89,7 @@ function Alert({
 		>
 			{children}
 
-			{dismissible && (
+			{dismissible && showX && (
 				<button
 					aria-label="Dismiss this alert"
 					className="right-2 top-2 absolute opacity-50 outline-none group-hover:opacity-80 hover:opacity-100"

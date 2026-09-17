@@ -87,7 +87,6 @@ export default function EmojiPicker({
 						{renderTrigger()}
 					</Dropdown.Trigger>
 					<Dropdown.Content align="start">
-						<Dropdown.Label className="text-xs">Emoji options</Dropdown.Label>
 						<Dropdown.Item disabled={disabled} onClick={() => setIsOpen(true)}>
 							Change
 						</Dropdown.Item>

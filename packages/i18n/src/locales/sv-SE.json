@@ -79,7 +79,8 @@
 			},
 			"description": {
 				"label": "Beskrivning",
-				"description": "En valfri, kort beskrivning av din bokklubb"
+				"description": "En valfri, kort beskrivning av din bokklubb",
+				"placeholder": "En 'Vår flagga innebär död' fanklubb. Vi läser pirathistorier med hjärtans lust"
 			},
 			"is_private": {
 				"label": "Privat klubb",
@@ -97,7 +98,9 @@
 					"description": "Namnet på standardrollen i din bokklubb"
 				},
 				"moderator": {
-					"description": "Namnet på moderatorrollen i din bokklubb"
+					"description": "Namnet på moderatorrollen i din bokklubb",
+					"label": "Moderator",
+					"placeholder": "Moderator"
 				},
 				"admin": {
 					"label": "Administratör",
@@ -162,7 +165,8 @@
 				}
 			},
 			"submit": "Skapa bokklubb"
-		}
+		},
+		"subtitle": "Du kan skapa en privat bokklubb för några få utvalda, eller göra den offentlig så att vem som helst kan gå med"
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
@@ -2264,6 +2268,39 @@
 			"labelEllipsis": "Sortera efter…",
 			"sortField": {
 				"SERIES": "Serier"
+			}
+		}
+	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"noProviders": "Ingen leverantör av metadata är konfigurerad för denna typ av bibliotek. Konfigurera en i serverinställningar först.",
+			"noResults": "Sökningen gav inga träffar",
+			"partialResults": "Vissa resultat kunde inte laddas från källan, sannolikt på grund av begränsad takt. Försök att söka igen för att se om fler dyker upp.",
+			"searchFailed": "Sökning av metadatakällor misslyckades",
+			"form": {
+				"title": {
+					"label": "Titel"
+				},
+				"author": {
+					"label": "Upphovsman"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "År"
+				},
+				"number": {
+					"label": "Utfärdandenummer"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine volym-ID",
+					"placeholder": "t.ex. 129260"
+				},
+				"provider": {
+					"label": "Leverantör",
+					"allOption": "Alla aktiva leverantörer"
+				}
 			}
 		}
 	}

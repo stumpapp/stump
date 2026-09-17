@@ -288,7 +288,7 @@ export default function BookActionMenu({ book }: Props) {
 					align="end"
 					contentWrapperClassName="w-48"
 					trigger={
-						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0">
+						<Button variant="outline" size="icon" className="shrink-0">
 							<EllipsisVertical className="h-4 w-4" />
 						</Button>
 					}

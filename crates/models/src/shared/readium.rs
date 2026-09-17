@@ -108,7 +108,7 @@ pub struct RWPMPositionLocations {
 }
 
 /// A Readium positions list.
-#[derive(Serialize, Builder)]
+#[derive(Serialize, Default, Builder)]
 #[builder(setter(into, strip_option))]
 #[serde(rename_all = "camelCase")]
 pub struct RWPMPositions {

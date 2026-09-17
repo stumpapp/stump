@@ -7,7 +7,7 @@ import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'
 import { useErrorBoundary } from 'react-error-boundary'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 import { useMediaMatch, useWindowSize } from 'rooks'
 import { toast } from 'sonner'
 

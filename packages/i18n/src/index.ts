@@ -27,7 +27,7 @@ export const localeNames: Record<AllowedLocale, string> = {
 	'fi-FI': 'Suomi',
 	'fr-FR': 'Français',
 	'he-IL': 'עברית',
-	'hu-HU': 'Hungarian',
+	'hu-HU': 'Magyar',
 	'it-IT': 'Italiano',
 	'ja-JP': '日本語',
 	'ko-KR': '한국어',

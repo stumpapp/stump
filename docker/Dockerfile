@@ -103,7 +103,7 @@ LABEL org.opencontainers.image.title="Stump" \
     org.opencontainers.image.description="A free and open source comics, manga and digital book server with OPDS support" \
     org.opencontainers.image.source="https://github.com/stumpapp/stump" \
     org.opencontainers.image.url="https://stumpapp.dev" \
-    org.opencontainers.image.documentation="https://stumpapp.dev/guides" \
+    org.opencontainers.image.documentation="https://stumpapp.dev/docs" \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.vendor="stumpapp"
 

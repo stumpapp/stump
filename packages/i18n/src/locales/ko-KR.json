@@ -3717,7 +3717,6 @@
 		"controls": {
 			"columns": "단 수",
 			"auto": "자동",
-			"columnCount_one": "{{count}}단",
 			"columnCount_other": "{{count}}단",
 			"pageMargins": "페이지 여백",
 			"readingDirection": "읽기 방향",

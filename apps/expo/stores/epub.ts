@@ -282,20 +282,34 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	isCurrentLocationBookmarked: () => {
 		const state = get()
 		if (!state.locator) return false
-		return state.bookmarks.some(
-			(b) =>
-				trimFragmentFromHref(b.href) === trimFragmentFromHref(state.locator!.href) &&
-				b.locations?.progression === state.locator!.locations?.progression,
-		)
+		const currentHref = trimFragmentFromHref(state.locator.href)
+		const currentProg = state.locator.locations?.progression ?? null
+		return state.bookmarks.some((b) => {
+			if (trimFragmentFromHref(b.href) !== currentHref) return false
+			const bookmarkProg = b.locations?.progression ?? null
+			if (currentProg != null && bookmarkProg != null) {
+				// i added a small tolerance for precision issues, but honestly this is
+				// fragile as fuck. i'd really like to figure this out properly, but
+				// this should marginally help with some issues i've seen between web vs mobile
+				// and rendering bookmarks >:'(
+				return Math.abs(currentProg - bookmarkProg) < 0.01
+			}
+			return currentProg === bookmarkProg
+		})
 	},
 	getCurrentLocationBookmark: () => {
 		const state = get()
 		if (!state.locator) return undefined
-		return state.bookmarks.find(
-			(b) =>
-				trimFragmentFromHref(b.href) === trimFragmentFromHref(state.locator!.href) &&
-				b.locations?.progression === state.locator!.locations?.progression,
-		)
+		const currentHref = trimFragmentFromHref(state.locator.href)
+		const currentProg = state.locator.locations?.progression ?? null
+		return state.bookmarks.find((b) => {
+			if (trimFragmentFromHref(b.href) !== currentHref) return false
+			const bookmarkProg = b.locations?.progression ?? null
+			if (currentProg != null && bookmarkProg != null) {
+				return Math.abs(currentProg - bookmarkProg) < 0.01
+			}
+			return currentProg === bookmarkProg
+		})
 	},
 
 	annotations: [],

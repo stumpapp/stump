@@ -1,6 +1,6 @@
 import type { UserPreferences } from '@stump/graphql'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 import StumpWebClient from '../App'
 import { useUserStore } from '../stores'

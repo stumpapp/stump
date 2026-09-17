@@ -30,7 +30,7 @@ pub struct LogDeleteOutput {
 
 impl LogFileInfo {
 	pub async fn try_from(config: &StumpConfig) -> Result<Self> {
-		let log_file_path = config.get_log_file();
+		let log_file_path = config.log_file();
 		let metadata = tokio::fs::metadata(log_file_path.clone()).await?;
 		let system_time = metadata.modified()?;
 		let datetime: DateTime<Utc> = system_time.into();
@@ -57,7 +57,8 @@ mod tests {
 		let mut file = File::create(&log_file_path).unwrap();
 		writeln!(file, "Hello, world!").unwrap();
 
-		let config = StumpConfig::new(dir.path().to_string_lossy().to_string());
+		let config = StumpConfig::load(dir.path().to_string_lossy().to_string())
+			.expect("Failed to load config");
 		let log_file_info = LogFileInfo::try_from(&config).await.unwrap();
 
 		assert_eq!(

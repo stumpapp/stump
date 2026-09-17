@@ -19,6 +19,7 @@ use crate::{
 	config::StumpConfig,
 	image::{
 		error::ImageProcessorError,
+		is_generated_thumbnail,
 		process::ImageProcessor,
 		processor::{GenericImageProcessor, WebpProcessor},
 		thumbnail::placeholder::{
@@ -38,8 +39,6 @@ pub enum ThumbnailGenerateError {
 	WriteFailed(#[from] std::io::Error),
 	#[error("{0}")]
 	ProcessorError(#[from] ImageProcessorError),
-	#[error("Did not receive thumbnail generation result")]
-	ResultNeverReceived,
 	#[error("A candidate source for thumbnail generation could not be found")]
 	NothingToGenerate,
 	#[error("Source thumbnail is missing an extension")]
@@ -58,12 +57,6 @@ pub struct GenerateThumbnailOptions {
 	pub image_options: ImageProcessorOptions,
 	pub core_config: StumpConfig,
 	pub force_regen: bool,
-}
-
-fn is_generated_thumbnail(path: &Path) -> bool {
-	path.file_stem()
-		.and_then(|stem| stem.to_str())
-		.is_some_and(|stem| stem.ends_with(".generated"))
 }
 
 pub async fn bump_media_thumbnail_fallbacks<C>(

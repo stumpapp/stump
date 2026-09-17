@@ -8,6 +8,12 @@ use crate::{
 	config::StumpConfig, fs_utils::ContentType, image::error::ImageProcessorError,
 };
 
+pub fn is_generated_thumbnail(path: &Path) -> bool {
+	path.file_stem()
+		.and_then(|stem| stem.to_str())
+		.is_some_and(|stem| stem.ends_with(".generated"))
+}
+
 /// Reads an already-saved thumbnail from an arbitrary path (e.g. a custom uploaded thumbnail).
 pub async fn get_saved_thumbnail(
 	path: &Path,

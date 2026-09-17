@@ -856,6 +856,11 @@
 				"heading": "Nothing to show",
 				"message": "Any recent books you add will show up here"
 			}
+		},
+		"allSectionsHidden": {
+			"label": "There is nothing to show",
+			"description": "You hid everything, I hope you like empty space",
+			"customizeHome": "Customize your home page"
 		}
 	},
 	"mediaFilterForm": {
@@ -1725,6 +1730,17 @@
 				"readingSessionGracePeriod": {
 					"label": "Reading session grace period",
 					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+				},
+				"homeArrangement": {
+					"title": "Home page",
+					"description": "Adjust the sections on your home page",
+					"label": "Home sections",
+					"hint": "Drag and rearrange sections or hide them entirely",
+					"reorder": "Reorder {{section}}",
+					"reset": "Reset",
+					"saveFailed": "Failed to save your changes",
+					"unsupported": "Invalid configuration",
+					"unsupportedDescription": "Please reset to defaults and try again"
 				}
 			}
 		},

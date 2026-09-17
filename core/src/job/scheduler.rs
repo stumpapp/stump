@@ -7,8 +7,8 @@ use models::entity::{library, metadata_fetch_record, scheduled_job};
 use models::shared::enums::{MetadataFetchStatus, ScheduledJobKind};
 use sea_orm::{prelude::*, EntityTrait, QueryFilter};
 
-use crate::filesystem::metadata::MetadataFetchJobParams;
-use crate::job::stump_job::StumpJob;
+use crate::job::StumpJob;
+use crate::metadata::provider::MetadataFetchJobParams;
 use crate::{CoreError, CoreResult, Ctx};
 
 /// A scheduler that loads cron-based jobs and spawns them accordingly

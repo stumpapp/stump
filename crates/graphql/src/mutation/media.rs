@@ -10,11 +10,9 @@ use sea_orm::{
 	IntoActiveModel, QuerySelect, Set,
 };
 use stump_core::{
-	filesystem::{
-		image::{bump_media_thumbnail_fallbacks, generate_thumbnail_from_book},
-		media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
-	},
-	job::stump_job::StumpJob,
+	image::{bump_media_thumbnail_fallbacks, generate_thumbnail_from_book},
+	job::StumpJob,
+	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 };
 
 use crate::{

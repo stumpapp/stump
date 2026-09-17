@@ -12,10 +12,15 @@ mod context;
 pub mod database;
 pub mod error;
 mod event;
-pub mod filesystem;
+pub mod fs_utils;
+pub mod image;
 pub mod job;
 pub mod kobo;
+pub mod media;
+pub mod metadata;
 pub mod opds;
+pub mod readium;
+pub mod scan;
 pub mod utils;
 
 use config::logging::STUMP_SHADOW_TEXT;

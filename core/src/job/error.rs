@@ -1,7 +1,9 @@
 use models::error::EntityError;
 use sea_orm;
 
-use crate::{filesystem::error::FileError, CoreError};
+use crate::{
+	media::processor::error::MediaProcessorError, metadata::MetadataError, CoreError,
+};
 
 #[derive(Debug, thiserror::Error)]
 pub enum JobError {
@@ -17,8 +19,10 @@ pub enum JobError {
 	TaskFailed(String),
 	#[error("A query error occurred: {0}")]
 	DbError(#[from] sea_orm::error::DbErr),
-	#[error("A file error occurred: {0}")]
-	FileError(#[from] FileError),
+	#[error("A media processor error occurred: {0}")]
+	MediaProcessor(#[from] MediaProcessorError),
+	#[error("A metadata error occurred: {0}")]
+	Metadata(#[from] MetadataError),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }

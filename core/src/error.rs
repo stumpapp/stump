@@ -3,6 +3,8 @@ use std::io;
 use derive_builder::UninitializedFieldError;
 use thiserror::Error;
 
+use crate::media::processor::error::MediaProcessorError;
+
 pub type CoreResult<T> = Result<T, CoreError>;
 
 #[derive(Error, Debug)]
@@ -65,6 +67,12 @@ pub enum CoreError {
 
 impl From<chrono::ParseError> for CoreError {
 	fn from(error: chrono::ParseError) -> Self {
+		Self::InternalError(error.to_string())
+	}
+}
+
+impl From<MediaProcessorError> for CoreError {
+	fn from(error: MediaProcessorError) -> Self {
 		Self::InternalError(error.to_string())
 	}
 }

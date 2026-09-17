@@ -18,17 +18,17 @@ use sea_orm::{
 	sea_query::{Expr, OnConflict, Query},
 	Condition, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
-use stump_core::filesystem::{
+use stump_core::{
 	image::{
 		generate_thumbnail_from_book, remove_thumbnails, ImageProcessorOptionsExt,
 		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 		ThumbnailGenerationJobParams,
 	},
+	job::StumpJob,
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
-	metadata::{MetadataFetchJobParams, MetadataFetchScope},
-	scanner::ScanOptions,
+	metadata::provider::{MetadataFetchJobParams, MetadataFetchScope},
+	scan::options::ScanOptions,
 };
-use stump_core::job::stump_job::StumpJob;
 use tokio::fs;
 
 use crate::{

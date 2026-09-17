@@ -12,14 +12,14 @@ use models::{
 	shared::enums::UserPermission,
 };
 use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set};
-use stump_core::filesystem::{
+use stump_core::{
+	fs_utils::ContentType,
 	image::{
 		bump_media_thumbnail_fallbacks, bump_series_thumbnail_fallbacks, place_thumbnail,
 		remove_thumbnails, PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
 	},
-	ContentType,
+	job::StumpJob,
 };
-use stump_core::job::stump_job::StumpJob;
 use tokio::fs;
 use zip::{read::ZipFile, ZipArchive};
 
@@ -702,7 +702,7 @@ fn enforce_valid_content_type(value: &UploadValue) -> Result<()> {
 		.content_type
 		.clone()
 		.as_deref()
-		.map(ContentType::from)
+		.and_then(|s| s.parse::<ContentType>().ok())
 		.ok_or("Could not verify content of file".to_string())?;
 
 	if !content_type.is_image() {

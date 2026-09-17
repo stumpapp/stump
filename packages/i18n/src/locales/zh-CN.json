@@ -3645,7 +3645,6 @@
 		"controls": {
 			"columns": "列",
 			"auto": "自动",
-			"columnCount_one": "{{count}} 列",
 			"columnCount_other": "{{count}} 列",
 			"pageMargins": "页面边距",
 			"readingDirection": "阅读方向",

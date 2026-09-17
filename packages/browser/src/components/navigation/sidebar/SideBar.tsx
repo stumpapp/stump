@@ -17,7 +17,7 @@ import { match } from 'ts-pattern'
 import { useAppContext, useRouterContext } from '@/context'
 import { useTheme } from '@/hooks'
 import { usePaths } from '@/paths'
-import { usePrefetchHomeScene } from '@/scenes/home'
+import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
 import UserMenu from '../../UserMenu'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'

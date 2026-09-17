@@ -5,7 +5,7 @@ import { useLocation } from 'react-router'
 
 import { usePreferences } from '@/hooks'
 import { usePaths } from '@/paths'
-import { useSettingsRoutes } from '@/scenes/settings'
+import { useSettingsRoutes } from '@/scenes/settings/useSettingsRoutes'
 import { useAppStore } from '@/stores'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'

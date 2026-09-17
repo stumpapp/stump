@@ -16,7 +16,7 @@ import { usePaths } from '@/paths'
 import CompleteSeriesConfirmation from './CompleteSeriesConfirmation'
 import { useSeriesContext } from './context'
 import { SeriesOverviewSheet } from './SeriesOverviewSheet'
-import { usePrefetchSeriesBooks } from './tabs/books/SeriesBooksScene'
+import { usePrefetchSeriesBooks } from './tabs/books/queries'
 
 const completeSeriesMutation = graphql(`
 	mutation SeriesActionComplete($id: ID!) {

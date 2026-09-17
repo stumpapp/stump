@@ -8,7 +8,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 import { usePaths } from '@/paths'
-import { usePrefetchSmartList } from '@/scenes/smartList'
+import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 

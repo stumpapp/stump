@@ -40,7 +40,9 @@ function MetadataBadgeListCell({ values }: { values?: string[] | null }) {
 }
 
 const coverColumn = columnHelper.display({
-	cell: ({ row: { original: book } }) => <CoverImageCell id={book.id} title={book.resolvedName} />,
+	cell: ({ row: { original: book } }) => (
+		<CoverImageCell url={book.thumbnail.url} title={book.resolvedName} />
+	),
 	enableGlobalFilter: true,
 	header: () => null,
 	id: 'cover',

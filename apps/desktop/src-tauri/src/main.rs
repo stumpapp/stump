@@ -52,10 +52,33 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 	Ok(())
 }
 
-// TODO(titlebar): https://v2.tauri.app/plugin/window-customization/#macos-transparent-titlebar-with-custom-window-background-color
-// See also https://github.com/tauri-apps/tauri/issues/2663
-
 // TODO(system-tray): https://v2.tauri.app/plugin/system-tray/
+
+fn create_main_window(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+	use tauri::{WebviewUrl, WebviewWindowBuilder};
+
+	let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+		.title("Stump")
+		.inner_size(1200.0, 700.0)
+		.min_inner_size(600.0, 400.0)
+		.resizable(true)
+		.center();
+
+	#[cfg(target_os = "macos")]
+	let win_builder = {
+		use tauri::TitleBarStyle;
+		win_builder
+			.hidden_title(true)
+			.title_bar_style(TitleBarStyle::Overlay)
+	};
+
+	#[cfg(not(target_os = "macos"))]
+	let win_builder = win_builder.decorations(false);
+
+	win_builder.build()?;
+
+	Ok(())
+}
 
 fn main() {
 	let app_state = AppState::new().expect("Failed to initialize application state");
@@ -64,7 +87,10 @@ fn main() {
 		.plugin(tauri_plugin_shell::init())
 		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_store::Builder::default().build())
-		.setup(setup_app)
+		.setup(|app| {
+			create_main_window(app)?;
+			setup_app(app)
+		})
 		.manage(Arc::new(Mutex::new(app_state)))
 		.invoke_handler(tauri::generate_handler![
 			set_use_discord_connection,

@@ -8,7 +8,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
@@ -29,6 +29,7 @@ export default function BookClubNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: { bookClubs },

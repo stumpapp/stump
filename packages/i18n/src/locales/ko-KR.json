@@ -109,7 +109,8 @@
 					"generateKoreaderHashes": "KOReader 해시 생성",
 					"scaleEvenlyByFactor": "일정 비율로 조절",
 					"exact": "지정 크기",
-					"scaleDimension": "크기 지정"
+					"scaleDimension": "크기 지정",
+					"oneshotsDirectory": "단독 도서 폴더"
 				}
 			},
 			"buttons": {
@@ -751,21 +752,20 @@
 				"serverInfo": {
 					"title": "서버 정보",
 					"description": "Stump 서버의 기본 정보입니다",
-					"build": {
-						"label": "빌드",
-						"description": "버전과 빌드의 상세 정보입니다",
-						"version": {
-							"semver": "버전",
-							"commitHash": "정확한 커밋",
-							"date": "빌드 날짜"
-						}
-					},
+					"build": "빌드",
 					"nonStableChannel": {
 						"title": "Stump의 안정 버전이 아닌 빌드를 사용 중입니다",
 						"description": [
 							"현재 사용 중인 빌드는",
 							"채널의 빌드입니다"
 						]
+					},
+					"version": "버전",
+					"exactCommit": "커밋 해시",
+					"debugInfo": {
+						"label": "디버그 정보",
+						"description": "GitHub에 문제를 보고할 때 복사하여 붙여 넣으세요",
+						"copyDebugInfoFailed": "디버그 정보를 복사하지 못했습니다"
 					}
 				},
 				"helpfulLinks": {
@@ -781,8 +781,8 @@
 					"description": "네트워크 외부에서 서버에 접근할 수 있는 경우 해당 URL을 입력합니다. 초대 링크 등의 기능에 사용됩니다"
 				},
 				"customEmojis": {
-					"title": "사용자 지정 이모지",
-					"description": "서버에서 사용할 사용자 지정 이미지 이모지를 업로드하고 관리합니다",
+					"title": "이모지",
+					"description": "서버의 사용자 지정 이미지 이모지를 확인하고 관리합니다",
 					"dropzone": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
 					"input": {
 						"label": "이모지 이름",
@@ -800,6 +800,19 @@
 					"renameError": "이모지 이름을 변경하지 못했습니다",
 					"deleteSuccess": "이모지를 삭제했습니다",
 					"deleteError": "이모지를 삭제하지 못했습니다"
+				},
+				"changelog": {
+					"label": "변경 내역",
+					"description": "Stump의 최신 버전에서 달라진 내용을 확인합니다"
+				},
+				"serverConfig": {
+					"label": "서버 설정",
+					"description": "일부 서버 설정을 여기에서 관리할 수 있습니다",
+					"publicUrl": {
+						"label": "공개 URL",
+						"description": "외부 네트워크에서 서버에 접속할 때 사용하는 URL입니다",
+						"updateFailed": "URL을 변경하지 못했습니다"
+					}
 				}
 			}
 		},
@@ -878,7 +891,8 @@
 					},
 					"errors": {
 						"invalidCron": "올바른 cron 표현식으로 일정을 입력해야 합니다"
-					}
+					},
+					"createScheduledJob": "예약 작업 만들기"
 				},
 				"history": {
 					"title": "기록",
@@ -902,6 +916,11 @@
 						"confirmText": "모든 작업 기록을 삭제하시겠습니까?",
 						"confirm": "삭제",
 						"emptyState": "지울 작업이 없습니다"
+					},
+					"inspector": {
+						"title": "작업 상세 정보",
+						"description": "이 작업의 원본 출력과 관련 로그입니다",
+						"associatedLogs": "관련 로그"
 					}
 				}
 			},
@@ -1089,6 +1108,12 @@
 					"description": "데이터베이스의 모든 로그인 활동 기록을 영구적으로 삭제합니다",
 					"confirm": "삭제"
 				}
+			},
+			"userStats": {
+				"users": "사용자",
+				"booksCompleted": "완독한 도서",
+				"booksInProgress": "읽고 있는 도서",
+				"topReader": "최다 독서 사용자"
 			}
 		},
 		"navigation": {
@@ -1147,6 +1172,12 @@
 						"Stump 번역",
 						"개선에 참여해 주세요!"
 					]
+				},
+				"language": {
+					"label": "언어",
+					"contributeIfAble": "가능하다면 Stump 번역에 참여해 주세요!",
+					"contribute": "번역 참여하기",
+					"noThanks": "괜찮습니다"
 				}
 			}
 		},
@@ -1217,7 +1248,9 @@
 							"label": "읽기 방향",
 							"description": "뷰어에서 페이지를 넘기는 방향입니다"
 						}
-					}
+					},
+					"label": "공통",
+					"description": "모든 도서 형식에 적용되는 설정입니다"
 				},
 				"imageBasedBooks": {
 					"label": "이미지로 구성된 책",
@@ -1259,6 +1292,10 @@
 							"button": "환경설정 초기화"
 						}
 					}
+				},
+				"formats": {
+					"label": "형식별 설정",
+					"description": "형식별로 리더의 기본 설정을 지정합니다"
 				}
 			}
 		},
@@ -1654,7 +1691,13 @@
 			"tooManyFiles": "선택한 파일이 너무 많습니다",
 			"noValidFiles": "선택한 파일 중 유효한 파일이 없습니다"
 		},
-		"notConfigured": "설정되지 않음"
+		"notConfigured": "설정되지 않음",
+		"none": "없음",
+		"copy": "복사",
+		"open": "열기",
+		"xBooks_other": "도서 {{count}}권",
+		"seeMore": "더 보기",
+		"view": "보기"
 	},
 	"mobileApp": {
 		"bookActions": {
@@ -1871,7 +1914,9 @@
 			"accessOpdsV1": "OPDS v1.2 접근",
 			"exit": "나가기",
 			"notConfigured": "설정되지 않음",
-			"test": "테스트"
+			"test": "테스트",
+			"xBooks_other": "도서 {{count}}권",
+			"view": "보기"
 		},
 		"errors": {
 			"unknown": "알 수 없는 오류"
@@ -3740,7 +3785,8 @@
 				"sections": {
 					"mode": "방식",
 					"imageOptions": "이미지 옵션",
-					"preferences": "환경설정"
+					"preferences": "환경설정",
+					"controls": "조작"
 				},
 				"preferences": {
 					"separateSecondPage": "두 번째 페이지 따로 보기",
@@ -3780,6 +3826,59 @@
 					"always": "항상",
 					"off": "끄기"
 				}
+			}
+		},
+		"header": {
+			"goToMediaOverview": "도서 상세 정보로 이동"
+		},
+		"settingsDialog": {
+			"scopes": {
+				"book": "이 도서",
+				"global": "전체 도서"
+			}
+		},
+		"timerMenu": {
+			"start": "타이머 시작",
+			"stop": "타이머 중지",
+			"reset": "타이머 초기화"
+		},
+		"footer": {
+			"readingTime": "독서 시간: {{time}}",
+			"pageOf": "전체 {{total}}페이지 중 {{current}}페이지"
+		},
+		"goToPage": {
+			"label": "페이지로 이동",
+			"submit": "이동"
+		},
+		"nextInSeries": {
+			"title": "다음 도서:",
+			"read": "읽기"
+		}
+	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "연령 등급",
+			"anyAge": {
+				"label": "모든 연령",
+				"description": "연령 등급으로 필터링하지 않습니다"
+			},
+			"custom": {
+				"label": "N세 이상",
+				"description": {
+					"media": "아래에 입력한 나이 이하의 연령 등급이 지정된 도서만 표시합니다"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "확장자",
+			"any": "모두"
+		},
+		"readStatusSelect": {
+			"label": "읽기 상태",
+			"options": {
+				"completed": "완독",
+				"reading": "읽는 중",
+				"unread": "읽지 않음"
 			}
 		}
 	}

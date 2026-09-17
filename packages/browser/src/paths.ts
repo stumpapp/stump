@@ -104,7 +104,7 @@ const pathsInternal = {
 		if (page !== undefined) {
 			return `/libraries/${id}/series?page=${page}`
 		}
-		return `/libraries/${id}`
+		return `/libraries/${id}/series`
 	},
 	notFound: () => '/404',
 	notifications: () => '/notifications',

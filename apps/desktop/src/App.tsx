@@ -1,17 +1,21 @@
 import '@stump/browser/styles/index.css'
 import '@stump/components/styles/overrides.css'
+import 'overlayscrollbars/overlayscrollbars.css'
 
 import { ErrorFallback } from '@stump/browser/components/ErrorFallback'
 import { Toaster } from '@stump/browser/components/Toaster'
-import { useAppStore } from '@stump/browser/stores'
+import { useApplyTheme } from '@stump/browser/hooks'
+import { useAppStore, useUserStore } from '@stump/browser/stores'
 import { DesktopAppContext, useDesktopAppContext } from '@stump/client'
-import { LocaleProvider } from '@stump/i18n'
+import { InterfaceRoundness } from '@stump/graphql'
+import { type AllowedLocale, LocaleProvider } from '@stump/i18n'
 import { QueryClient, QueryClientContext } from '@tanstack/react-query'
-import { createStore, Store } from '@tauri-apps/plugin-store'
+import { Store } from '@tauri-apps/plugin-store'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router'
 
+import AppTitleBar from './components/AppTitleBar'
 import Home from './Home'
 import SavedServerEntry from './SavedServerEntry'
 import { useSavedServerStore } from './stores/savedServer'
@@ -35,6 +39,16 @@ function App() {
 	const [mounted, setMounted] = useState(false)
 
 	const setPlatform = useAppStore((state) => state.setPlatform)
+	const userPreferences = useUserStore((state) => state.userPreferences)
+	const locale = userPreferences?.locale
+	const resolvedLocale = (locale as AllowedLocale) || 'en-US'
+
+	useApplyTheme({
+		appFont: userPreferences?.appFont,
+		appTheme: userPreferences?.appTheme,
+		interfaceRoundness: userPreferences?.interfaceRoundness ?? InterfaceRoundness.Normal,
+		thumbnailRoundness: userPreferences?.thumbnailRoundness ?? InterfaceRoundness.Normal,
+	})
 
 	/**
 	 * An effect to initialize the application, setting the platform and base URL
@@ -43,7 +57,7 @@ function App() {
 		async function init() {
 			try {
 				await tauriRPC.initCredentialStore(servers.map((s) => s.id))
-				const platform = await getNativePlatform()
+				const platform = getNativePlatform()
 				setPlatform(platform)
 			} catch (error) {
 				console.error('Critical failure! Unable to initialize the application', error)
@@ -64,37 +78,43 @@ function App() {
 
 	return (
 		<BrowserRouter>
-			<Routes>
-				<Route
-					path="/"
-					element={
-						<QueryClientContext.Provider value={localClient}>
-							<LocaleProvider>
-								<Home />
-							</LocaleProvider>
-							<Toaster />
-						</QueryClientContext.Provider>
-					}
-				/>
-				<Route
-					path="server/:serverId/*"
-					element={
-						<ErrorBoundary FallbackComponent={ErrorFallback}>
-							<SavedServerEntry tauriRPC={tauriRPC} />
-						</ErrorBoundary>
-					}
-				/>
-			</Routes>
+			<LocaleProvider locale={resolvedLocale}>
+				<Toaster />
+				<div className="flex h-full flex-col">
+					<AppTitleBar />
+					<div className="flex-1 overflow-hidden">
+						<Routes>
+							<Route
+								path="/"
+								element={
+									<QueryClientContext.Provider value={localClient}>
+										<Home />
+									</QueryClientContext.Provider>
+								}
+							/>
+							<Route
+								path="server/:serverId/*"
+								element={
+									<ErrorBoundary FallbackComponent={ErrorFallback}>
+										<SavedServerEntry tauriRPC={tauriRPC} />
+									</ErrorBoundary>
+								}
+							/>
+						</Routes>
+					</div>
+				</div>
+			</LocaleProvider>
 		</BrowserRouter>
 	)
 }
 
 export default function AppEntry() {
-	const [store, setStore] = useState<Store>()
+	const [store, setStore] = useState<Store | undefined>()
 
 	useEffect(() => {
 		const init = async () => {
-			setStore(await createStore('settings.json'))
+			const loadedStore = await Store.load('settings.json')
+			setStore(loadedStore)
 		}
 
 		if (!store) {

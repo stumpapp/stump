@@ -16,7 +16,7 @@ export const BUTTON_VARIANTS = {
 	secondary:
 		'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
 	ghost:
-		'hover:bg-muted/80 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground',
+		'hover:bg-muted/80 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground text-foreground',
 	destructive:
 		'bg-destructive/15 text-destructive hover:bg-destructive/25 focus-visible:border-field-error-border focus-visible:ring-field-error-ring',
 	link: 'text-primary underline-offset-4 hover:underline',

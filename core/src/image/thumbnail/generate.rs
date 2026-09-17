@@ -1,5 +1,6 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use chrono::Utc;
 use futures::{stream::FuturesUnordered, StreamExt};
 use models::{
 	entity::{library, media, series},
@@ -9,8 +10,8 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, EntityTrait, Order, QueryFilter, QueryOrder,
-	QuerySelect,
+	prelude::*, sea_query::Query, ConnectionTrait, EntityTrait, Order, QueryFilter,
+	QueryOrder, QuerySelect,
 };
 use tokio::{fs, task::spawn_blocking};
 
@@ -39,8 +40,6 @@ pub enum ThumbnailGenerateError {
 	ProcessorError(#[from] ImageProcessorError),
 	#[error("Did not receive thumbnail generation result")]
 	ResultNeverReceived,
-	#[error("Failed to update media entity")]
-	UpdateFailed,
 	#[error("A candidate source for thumbnail generation could not be found")]
 	NothingToGenerate,
 	#[error("Source thumbnail is missing an extension")]
@@ -59,7 +58,78 @@ pub struct GenerateThumbnailOptions {
 	pub image_options: ImageProcessorOptions,
 	pub core_config: StumpConfig,
 	pub force_regen: bool,
-	pub filename: Option<String>,
+}
+
+fn is_generated_thumbnail(path: &Path) -> bool {
+	path.file_stem()
+		.and_then(|stem| stem.to_str())
+		.is_some_and(|stem| stem.ends_with(".generated"))
+}
+
+pub async fn bump_media_thumbnail_fallbacks<C>(
+	conn: &C,
+	series_id: Option<&str>,
+) -> Result<(), DbErr>
+where
+	C: ConnectionTrait,
+{
+	let Some(series_id) = series_id else {
+		return Ok(());
+	};
+	let updated_at = Some(DateTimeWithTimeZone::from(Utc::now()));
+
+	series::Entity::update_many()
+		.filter(series::Column::Id.eq(series_id))
+		.col_expr(series::Column::UpdatedAt, Expr::value(updated_at))
+		.exec(conn)
+		.await?;
+
+	library::Entity::update_many()
+		.filter(
+			library::Column::Id.in_subquery(
+				Query::select()
+					.column(series::Column::LibraryId)
+					.from(series::Entity)
+					.and_where(series::Column::Id.eq(series_id))
+					.to_owned(),
+			),
+		)
+		.col_expr(library::Column::UpdatedAt, Expr::value(updated_at))
+		.exec(conn)
+		.await?;
+
+	Ok(())
+}
+
+pub async fn bump_series_thumbnail_fallbacks<C>(
+	conn: &C,
+	series_ids: &[String],
+) -> Result<(), DbErr>
+where
+	C: ConnectionTrait,
+{
+	if series_ids.is_empty() {
+		return Ok(());
+	}
+
+	library::Entity::update_many()
+		.filter(
+			library::Column::Id.in_subquery(
+				Query::select()
+					.column(series::Column::LibraryId)
+					.from(series::Entity)
+					.and_where(series::Column::Id.is_in(series_ids.iter().cloned()))
+					.to_owned(),
+			),
+		)
+		.col_expr(
+			library::Column::UpdatedAt,
+			Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
+		)
+		.exec(conn)
+		.await?;
+
+	Ok(())
 }
 
 /// A type alias for whether a thumbnail was generated or not during the generation process. This is
@@ -70,7 +140,7 @@ pub type DidGenerate = bool;
 pub type GenerateOutput = (Vec<u8>, PathBuf, DidGenerate);
 
 /// The main function for generating a thumbnail for a book. This should be called from within the
-/// scope of a blocking task in the [`generate_book_thumbnail`] function.
+/// scope of a blocking task in the [`generate_thumbnail_from_book`] function.
 fn do_generate_book_thumbnail(
 	page_data: Vec<u8>,
 	file_name: &str,
@@ -96,37 +166,38 @@ fn do_generate_book_thumbnail(
 
 /// Generate a thumbnail for a book, returning the thumbnail data, the path to the thumbnail file,
 /// and a boolean indicating whether the thumbnail was generated or not. If the thumbnail already
-/// exists and `force_regen` is false, the function will return the existing thumbnail data.
+/// exists and `force_regen` is false, or the thumbnail was explicitly selected or uploaded,
+/// the function will return the existing thumbnail data.
 #[tracing::instrument(skip_all)]
-pub async fn generate_book_thumbnail(
+async fn generate_book_thumbnail(
 	book: &media::MediaThumbSelect,
 	conn: &DatabaseConnection,
 	GenerateThumbnailOptions {
 		image_options,
 		core_config,
 		force_regen,
-		filename,
 	}: GenerateThumbnailOptions,
 ) -> Result<GenerateOutput, ThumbnailGenerateError> {
-	let book_path = book.path.clone();
-	let file_name = filename.unwrap_or_else(|| book.id.clone());
-
-	let file_path = if let Some(stored_path) = &book.thumbnail_path {
-		PathBuf::from(stored_path.clone())
-	} else {
-		core_config.thumbnails_directory().join(format!(
-			"{}.{}",
-			file_name,
-			image_options.format.extension()
-		))
-	};
+	let file_name = format!("{}.generated", book.id);
+	let file_path = book
+		.thumbnail_path
+		.as_ref()
+		.map(PathBuf::from)
+		.unwrap_or_else(|| {
+			core_config.thumbnails_directory().join(format!(
+				"{}.{}",
+				file_name,
+				image_options.format.extension()
+			))
+		});
+	let preserve_existing = !force_regen || !is_generated_thumbnail(&file_path);
 
 	if let Err(e) = fs::metadata(&file_path).await {
 		// A `NotFound` error is expected here, but anything else is unexpected
 		if e.kind() != std::io::ErrorKind::NotFound {
 			tracing::error!(error = ?e, "IO error while checking for file existence?");
 		}
-	} else if !force_regen {
+	} else if preserve_existing {
 		match fs::read(&file_path).await {
 			Ok(thumbnail) => return Ok((thumbnail, PathBuf::from(&file_path), false)),
 			Err(e) => {
@@ -138,17 +209,50 @@ pub async fn generate_book_thumbnail(
 		}
 	}
 
+	let (thumbnail, thumbnail_path, thumbnail_metadata) =
+		generate_thumbnail_from_book(&book.path, &file_name, &core_config, image_options)
+			.await?;
+
+	media::Entity::update_many()
+		.filter(media::Column::Id.eq(&book.id))
+		.col_expr(
+			media::Column::ThumbnailPath,
+			Expr::value(Some(thumbnail_path.to_string_lossy().to_string())),
+		)
+		.col_expr(
+			media::Column::ThumbnailMeta,
+			Expr::value(thumbnail_metadata),
+		)
+		.col_expr(
+			media::Column::UpdatedAt,
+			Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
+		)
+		.exec(conn)
+		.await?;
+
+	Ok((thumbnail, thumbnail_path, true))
+}
+
+/// Generate and write an image from a book page. The caller chooses the filename and
+/// persists the returned path and metadata on the entity whose thumbnail is changing.
+#[tracing::instrument(skip_all)]
+pub async fn generate_thumbnail_from_book(
+	book_path: &str,
+	file_name: &str,
+	core_config: &StumpConfig,
+	image_options: ImageProcessorOptions,
+) -> Result<(Vec<u8>, PathBuf, Option<ImageMetadata>), ThumbnailGenerateError> {
 	let page = image_options.page.unwrap_or(1);
-	let (_, page_data) = get_page(&book_path, page, &core_config)
+	let (_, page_data) = get_page(book_path, page, core_config)
 		.await
 		.map_err(|e| ThumbnailGenerateError::ImagePullFailed(e.to_string()))?;
 
-	let file_name_clone = file_name.clone();
+	let file_name_owned = file_name.to_owned();
 	let core_config_clone = core_config.clone();
 	let generate_result = spawn_blocking(move || {
 		do_generate_book_thumbnail(
 			page_data,
-			&file_name_clone,
+			&file_name_owned,
 			&core_config_clone,
 			image_options,
 		)
@@ -156,7 +260,7 @@ pub async fn generate_book_thumbnail(
 	.await
 	.map_err(|e| ThumbnailGenerateError::Unknown(e.to_string()))??;
 
-	let (thumbnail, thumbnail_path, did_generate) = generate_result;
+	let (thumbnail, thumbnail_path, _) = generate_result;
 	fs::write(&thumbnail_path, &thumbnail).await?;
 
 	let thumbnail_metadata =
@@ -168,26 +272,7 @@ pub async fn generate_book_thumbnail(
 			},
 		};
 
-	let update_result = media::Entity::update_many()
-		.filter(media::Column::Id.eq(book.id.clone()))
-		.col_expr(
-			media::Column::ThumbnailPath,
-			Expr::value(Some(thumbnail_path.to_string_lossy().to_string())),
-		)
-		.col_expr(
-			media::Column::ThumbnailMeta,
-			Expr::value(thumbnail_metadata),
-		)
-		.exec(conn)
-		.await;
-
-	match update_result {
-		Ok(_) => Ok((thumbnail, thumbnail_path, did_generate)),
-		Err(e) => {
-			tracing::error!(error = ?e, "Failed to update media entity with thumbnail info");
-			Err(ThumbnailGenerateError::UpdateFailed)
-		},
-	}
+	Ok((thumbnail, thumbnail_path, thumbnail_metadata))
 }
 
 /// Copy a book's thumbnail to a target entity (series or library) and update the database.
@@ -240,7 +325,7 @@ where
 	let dest_path = ctx
 		.config()
 		.thumbnails_directory()
-		.join(format!("{}.{}", entity_id, ext));
+		.join(format!("{}.generated.{}", entity_id, ext));
 
 	fs::copy(&source_path, &dest_path).await?;
 	tracing::debug!(
@@ -277,25 +362,30 @@ async fn generate_series_thumbnail(
 	ctx: &JobContext,
 	options: GenerateThumbnailOptions,
 ) -> Result<GenerateOutput, ThumbnailGenerateError> {
-	if let (false, Some(thumbnail_path)) = (options.force_regen, &series.thumbnail_path) {
-		match fs::metadata(thumbnail_path).await {
-			Ok(_) => {
-				tracing::debug!(
-					series_id = %series.id,
-					?thumbnail_path,
-					"Thumbnail already exists, skipping generation"
-				);
-				let thumbnail_data = fs::read(thumbnail_path).await?;
-				return Ok((thumbnail_data, PathBuf::from(thumbnail_path), false));
-			},
-			Err(error) => {
-				tracing::debug!(
-					?error,
-					series_id = %series.id,
-					?thumbnail_path,
-					"Thumbnail path exists in DB but file may be missing, regenerating"
-				);
-			},
+	if let Some(thumbnail_path) = &series.thumbnail_path {
+		let preserve_existing =
+			!options.force_regen || !is_generated_thumbnail(Path::new(thumbnail_path));
+
+		if preserve_existing {
+			match fs::metadata(thumbnail_path).await {
+				Ok(_) => {
+					tracing::debug!(
+						series_id = %series.id,
+						?thumbnail_path,
+						"Thumbnail already exists, skipping generation"
+					);
+					let thumbnail_data = fs::read(thumbnail_path).await?;
+					return Ok((thumbnail_data, PathBuf::from(thumbnail_path), false));
+				},
+				Err(error) => {
+					tracing::debug!(
+						?error,
+						series_id = %series.id,
+						?thumbnail_path,
+						"Thumbnail path exists in DB but file may be missing, regenerating"
+					);
+				},
+			}
 		}
 	}
 
@@ -329,6 +419,10 @@ async fn generate_series_thumbnail(
 					series::Column::ThumbnailMeta,
 					Expr::value(thumbnail_metadata),
 				)
+				.col_expr(
+					series::Column::UpdatedAt,
+					Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
+				)
 		},
 	)
 	.await
@@ -340,26 +434,30 @@ async fn generate_library_thumbnail(
 	ctx: &JobContext,
 	options: GenerateThumbnailOptions,
 ) -> Result<GenerateOutput, ThumbnailGenerateError> {
-	if let (false, Some(thumbnail_path)) = (options.force_regen, &library.thumbnail_path)
-	{
-		match fs::metadata(thumbnail_path).await {
-			Ok(_) => {
-				tracing::debug!(
-					library_id = %library.id,
-					?thumbnail_path,
-					"Thumbnail already exists, skipping generation"
-				);
-				let thumbnail_data = fs::read(thumbnail_path).await?;
-				return Ok((thumbnail_data, PathBuf::from(thumbnail_path), false));
-			},
-			Err(error) => {
-				tracing::debug!(
-					?error,
-					library_id = %library.id,
-					?thumbnail_path,
-					"Thumbnail path exists in DB but file may be missing, regenerating"
-				);
-			},
+	if let Some(thumbnail_path) = &library.thumbnail_path {
+		let preserve_existing =
+			!options.force_regen || !is_generated_thumbnail(Path::new(thumbnail_path));
+
+		if preserve_existing {
+			match fs::metadata(thumbnail_path).await {
+				Ok(_) => {
+					tracing::debug!(
+						library_id = %library.id,
+						?thumbnail_path,
+						"Thumbnail already exists, skipping generation"
+					);
+					let thumbnail_data = fs::read(thumbnail_path).await?;
+					return Ok((thumbnail_data, PathBuf::from(thumbnail_path), false));
+				},
+				Err(error) => {
+					tracing::debug!(
+						?error,
+						library_id = %library.id,
+						?thumbnail_path,
+						"Thumbnail path exists in DB but file may be missing, regenerating"
+					);
+				},
+			}
 		}
 	}
 
@@ -394,6 +492,10 @@ async fn generate_library_thumbnail(
 				.col_expr(
 					library::Column::ThumbnailMeta,
 					Expr::value(thumbnail_metadata),
+				)
+				.col_expr(
+					library::Column::UpdatedAt,
+					Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
 				)
 		},
 	)

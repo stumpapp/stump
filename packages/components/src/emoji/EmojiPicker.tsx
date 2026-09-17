@@ -1,5 +1,4 @@
-import Picker from '@emoji-mart/react'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 
 import { IconButton } from '../button'
 import { Dropdown } from '../dropdown'
@@ -23,6 +22,9 @@ type Props = {
 	onEmojiSelect: (emoji?: Emoji) => void
 	onLoadError?: (error: Error) => void
 } & Pick<React.ComponentProps<typeof Popover.Content>, 'align'>
+
+const LazyEmojiMartPicker = lazy(() => import('./EmojiMartPicker'))
+
 export default function EmojiPicker({
 	value,
 	disabled,
@@ -50,10 +52,10 @@ export default function EmojiPicker({
 			}
 		}
 
-		if (!data) {
+		if (isOpen && !data) {
 			getEmojis()
 		}
-	}, [onLoadError, data])
+	}, [onLoadError, data, isOpen])
 
 	const handleEmojiSelect = (emoji: Emoji) => {
 		onEmojiSelect(emoji)
@@ -85,7 +87,6 @@ export default function EmojiPicker({
 						{renderTrigger()}
 					</Dropdown.Trigger>
 					<Dropdown.Content align="start">
-						<Dropdown.Label className="text-xs">Emoji options</Dropdown.Label>
 						<Dropdown.Item disabled={disabled} onClick={() => setIsOpen(true)}>
 							Change
 						</Dropdown.Item>
@@ -105,7 +106,11 @@ export default function EmojiPicker({
 						className="p-0 border-none! bg-transparent! shadow-none!"
 						{...contentProps}
 					>
-						<Picker data={data} onEmojiSelect={handleEmojiSelect} />
+						<Suspense
+							fallback={<div className="p-2 text-xs text-muted-foreground">Loading...</div>}
+						>
+							<LazyEmojiMartPicker data={data} onEmojiSelect={handleEmojiSelect} />
+						</Suspense>
 					</Popover.Content>
 				</Popover>
 			)}

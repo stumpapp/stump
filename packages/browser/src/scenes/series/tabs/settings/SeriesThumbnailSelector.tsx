@@ -1,17 +1,14 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { Button, Dialog, PickSelect } from '@stump/components'
-import {
-	FragmentType,
-	graphql,
-	SeriesThumbnailSelectorUpdateMutation,
-	useFragment,
-} from '@stump/graphql'
+import { Button, Dialog } from '@stump/components'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 import BookPageGrid from '../../../book/settings/BookPageGrid'
 import SeriesBookGrid, { SelectedBook } from './SeriesBookGrid'
@@ -47,8 +44,6 @@ const uploadMutation = graphql(`
 	}
 `)
 
-type OnSuccessData = PickSelect<SeriesThumbnailSelectorUpdateMutation, 'updateSeriesThumbnail'>
-
 type Props = {
 	fragment: FragmentType<typeof SeriesThumbnailSelectorFragment>
 }
@@ -66,34 +61,21 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 	const { t } = useLocaleContext()
 
 	const { sdk } = useSDK()
+	const queryClient = useQueryClient()
 	const [selectedBook, setSelectedBook] = useState<SelectedBook>()
 	const [page, setPage] = useState<number>()
 	const [isOpen, setIsOpen] = useState(false)
 
-	const onSuccess = useCallback(
-		({ thumbnail: { url } }: OnSuccessData) =>
-			sdk.axios.get(url, {
-				headers: {
-					'Cache-Control': 'no-cache',
-					Pragma: 'no-cache',
-					Expires: '0',
-				},
-			}),
-		[sdk],
-	)
+	const onSuccess = useCallback(() => invalidateThumbnailQueries(queryClient), [queryClient])
 
 	const { mutateAsync: patchThumbnail, isPending: isPatchingThumbnail } = useGraphQLMutation(
 		updateMutation,
-		{
-			onSuccess: (data) => onSuccess(data.updateSeriesThumbnail),
-		},
+		{ onSuccess },
 	)
 
 	const { mutateAsync: uploadThumbnail, isPending: isUploadingThumbnail } = useGraphQLMutation(
 		uploadMutation,
-		{
-			onSuccess: (data) => onSuccess(data.uploadSeriesThumbnail),
-		},
+		{ onSuccess },
 	)
 
 	const handleOpenChange = (nowOpen: boolean) => {

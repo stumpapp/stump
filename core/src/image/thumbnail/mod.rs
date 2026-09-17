@@ -5,7 +5,8 @@ mod placeholder_job;
 mod utils;
 
 pub use generate::{
-	generate_book_thumbnail, GenerateThumbnailOptions, ThumbnailGenerateError,
+	bump_media_thumbnail_fallbacks, bump_series_thumbnail_fallbacks,
+	generate_thumbnail_from_book, GenerateThumbnailOptions, ThumbnailGenerateError,
 };
 pub use generation_job::{
 	ThumbnailGenerationJob, ThumbnailGenerationJobParams, ThumbnailGenerationJobScope,

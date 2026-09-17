@@ -10,7 +10,7 @@ use sea_orm::{
 	IntoActiveModel, QuerySelect, Set,
 };
 use stump_core::{
-	image::thumbnail::{generate_book_thumbnail, GenerateThumbnailOptions},
+	image::{bump_media_thumbnail_fallbacks, generate_thumbnail_from_book},
 	job::StumpJob,
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 };
@@ -205,18 +205,40 @@ impl MediaMutation {
 			.unwrap_or_default()
 			.with_page(page);
 
-		let (_, path_buf, _) = generate_book_thumbnail(
-			&book.media.clone().into(),
-			core.conn.as_ref(),
-			GenerateThumbnailOptions {
-				image_options,
-				core_config: core.config.as_ref().clone(),
-				force_regen: true,
-				filename: Some(id.to_string()),
-			},
+		let (_, path_buf, metadata) = generate_thumbnail_from_book(
+			&book.media.path,
+			id.as_str(),
+			core.config.as_ref(),
+			image_options,
 		)
 		.await?;
+		media::Entity::update_many()
+			.filter(media::Column::Id.eq(id.to_string()))
+			.col_expr(
+				media::Column::ThumbnailPath,
+				Expr::value(Some(path_buf.to_string_lossy().to_string())),
+			)
+			.col_expr(media::Column::ThumbnailMeta, Expr::value(metadata))
+			.col_expr(
+				media::Column::UpdatedAt,
+				Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
+			)
+			.exec(core.conn.as_ref())
+			.await?;
+
+		bump_media_thumbnail_fallbacks(
+			core.conn.as_ref(),
+			book.media.series_id.as_deref(),
+		)
+		.await?;
+
 		tracing::debug!(path = ?path_buf, "Generated book thumbnail");
+
+		let book = media::ModelWithMetadata::find_by_id_for_user(id.to_string(), user)
+			.into_model::<media::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Book not found")?;
 
 		Ok(book.into())
 	}

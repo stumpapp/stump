@@ -1,17 +1,14 @@
 import { useGraphQLMutation, useGraphQLUploadMutation, useSDK } from '@stump/client'
-import { Button, Dialog, PickSelect } from '@stump/components'
-import {
-	BookThumbnailSelectorUpdateMutation,
-	FragmentType,
-	graphql,
-	useFragment,
-} from '@stump/graphql'
+import { Button, Dialog } from '@stump/components'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 import BookPageGrid from './BookPageGrid'
 
@@ -52,8 +49,6 @@ const uploadMutation = graphql(`
 	}
 `)
 
-type OnSuccessData = PickSelect<BookThumbnailSelectorUpdateMutation, 'updateMediaThumbnail'>
-
 type Props = {
 	fragment: FragmentType<typeof BookThumbnailSelectorFragment>
 }
@@ -66,29 +61,18 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 	const [page, setPage] = useState<number>()
 
 	const { sdk } = useSDK()
+	const queryClient = useQueryClient()
 
-	const onSuccess = useCallback(
-		({ thumbnail }: OnSuccessData) =>
-			sdk.axios.get(thumbnail.url, {
-				headers: {
-					'Cache-Control': 'no-cache',
-					Pragma: 'no-cache',
-					Expires: '0',
-				},
-			}),
-		[sdk],
-	)
+	const onSuccess = useCallback(() => invalidateThumbnailQueries(queryClient), [queryClient])
 
 	const { mutateAsync: patchThumbnail, isPending: isPatchingThumbnail } = useGraphQLMutation(
 		updateMutation,
-		{
-			onSuccess: (data) => onSuccess(data.updateMediaThumbnail),
-		},
+		{ onSuccess },
 	)
 
 	const { mutateAsync: uploadThumbnail, isPending: isUploadingThumbnail } =
 		useGraphQLUploadMutation(uploadMutation, {
-			onSuccess: (data) => onSuccess(data.uploadMediaThumbnail),
+			onSuccess,
 		})
 
 	const handleOpenChange = (nowOpen: boolean) => {
@@ -108,6 +92,7 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 		async (file: File) => {
 			try {
 				await uploadThumbnail({ id: book.id, file })
+				setPage(undefined)
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
@@ -122,6 +107,7 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 
 		try {
 			await patchThumbnail({ id: book.id, input: { page } })
+			setPage(undefined)
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)

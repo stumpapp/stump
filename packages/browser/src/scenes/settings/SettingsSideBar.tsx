@@ -38,6 +38,9 @@ export default function SettingsSideBar() {
 					'bg-linear-to-l from-background-gradient-from to-background-gradient-to':
 						shouldUseGradient,
 				},
+				{
+					'top-8.5': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
+				},
 			)}
 		>
 			<div className="gap-4 flex h-full grow flex-col">
@@ -52,7 +55,7 @@ export default function SettingsSideBar() {
 
 						return (
 							<div key={groupLabel}>
-								{groupLabel && <Label>{groupLabel}</Label>}
+								{groupLabel && <Label className="text-muted-foreground">{groupLabel}</Label>}
 
 								<ul className="gap-y-0.5 pt-2 text-sm flex flex-col">
 									{items.map(({ to, icon, label, disabled, prefetch }) => {

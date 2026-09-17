@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 const mutation = graphql(`
 	mutation DeleteLibrary($id: ID!) {
@@ -37,6 +37,7 @@ export default function DeleteLibraryConfirmation({
 	onClose,
 	trigger,
 }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const client = useQueryClient()
 	const { t } = useLocaleContext()

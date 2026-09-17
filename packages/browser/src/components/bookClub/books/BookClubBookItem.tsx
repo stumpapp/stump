@@ -7,7 +7,7 @@ import { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
 import { EntityImage } from '@/components/entity'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { useBookClubContext } from '../context'
 
@@ -38,6 +38,7 @@ type Props = {
 	data: FragmentType<typeof fragment>
 }
 export default function BookClubBookItem({ data }: Props) {
+	const paths = usePaths()
 	const book = useFragment(fragment, data)
 
 	const { bookClub } = useBookClubContext()

@@ -80,7 +80,7 @@ where
 
 	series::Entity::update_many()
 		.filter(series::Column::Id.eq(series_id))
-		.col_expr(series::Column::UpdatedAt, Expr::value(updated_at.clone()))
+		.col_expr(series::Column::UpdatedAt, Expr::value(updated_at))
 		.exec(conn)
 		.await?;
 

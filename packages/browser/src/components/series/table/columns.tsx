@@ -14,6 +14,9 @@ export type SeriesTableData = {
 	percentageCompleted: number
 	status: FileStatus
 	oneshotBookId?: string
+	thumbnail: {
+		url: string
+	}
 }
 
 const columnHelper = createColumnHelper<SeriesTableData>()

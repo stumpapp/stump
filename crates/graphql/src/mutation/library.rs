@@ -1080,7 +1080,7 @@ impl LibraryMutation {
 				library::Column::ThumbnailMeta,
 				Expr::value(None::<models::shared::image::ImageMetadata>),
 			)
-			.col_expr(library::Column::UpdatedAt, Expr::value(updated_at.clone()))
+			.col_expr(library::Column::UpdatedAt, Expr::value(updated_at))
 			.exec(&txn)
 			.await?;
 
@@ -1091,7 +1091,7 @@ impl LibraryMutation {
 				series::Column::ThumbnailMeta,
 				Expr::value(None::<models::shared::image::ImageMetadata>),
 			)
-			.col_expr(series::Column::UpdatedAt, Expr::value(updated_at.clone()))
+			.col_expr(series::Column::UpdatedAt, Expr::value(updated_at))
 			.exec(&txn)
 			.await?;
 

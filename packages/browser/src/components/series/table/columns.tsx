@@ -1,9 +1,9 @@
 import { Link, Text } from '@stump/components'
 import { FileStatus, SeriesModelOrdering } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
+import { CellContext, ColumnDef, createColumnHelper } from '@tanstack/react-table'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import CoverImageCell from './CoverImageCell'
 
@@ -14,6 +14,9 @@ export type SeriesTableData = {
 	percentageCompleted: number
 	status: FileStatus
 	oneshotBookId?: string
+	thumbnail: {
+		url: string
+	}
 }
 
 const columnHelper = createColumnHelper<SeriesTableData>()
@@ -21,9 +24,9 @@ const columnHelper = createColumnHelper<SeriesTableData>()
 const coverColumn = columnHelper.display({
 	cell: ({
 		row: {
-			original: { id, resolvedName },
+			original: { resolvedName, thumbnail },
 		},
-	}) => <CoverImageCell id={id} title={resolvedName} />,
+	}) => <CoverImageCell url={thumbnail.url} title={resolvedName} />,
 	enableGlobalFilter: true,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -34,20 +37,25 @@ const coverColumn = columnHelper.display({
 	size: 0,
 })
 
-const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
-	cell: ({
-		getValue,
-		row: {
-			original: { id },
-		},
-	}) => (
+function NameColumnCell({
+	getValue,
+	row: {
+		original: { id },
+	},
+}: CellContext<SeriesTableData, string>) {
+	const paths = usePaths()
+	return (
 		<Link
 			to={paths.seriesOverview(id)}
 			className="text-sm line-clamp-2 no-underline hover:opacity-90"
 		>
 			{getValue()}
 		</Link>
-	),
+	)
+}
+
+const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
+	cell: (ctx) => <NameColumnCell {...ctx} />,
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (

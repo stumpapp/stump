@@ -15,14 +15,14 @@ use models::{
 };
 use sea_orm::{
 	prelude::*,
-	sea_query::{OnConflict, Query},
+	sea_query::{Expr, OnConflict, Query},
 	Condition, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
 use stump_core::filesystem::{
 	image::{
-		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
-		ImageProcessorOptionsExt, PlaceholderGenerationJobConfig,
-		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
+		generate_thumbnail_from_book, remove_thumbnails, ImageProcessorOptionsExt,
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
+		ThumbnailGenerationJobParams,
 	},
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 	metadata::{MetadataFetchJobParams, MetadataFetchScope},
@@ -109,7 +109,7 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let thumbnails_dir = core.config.get_thumbnails_dir();
+		let thumbnails_dir = core.config.thumbnails_directory();
 
 		let txn = core.conn.as_ref().begin().await?;
 
@@ -746,7 +746,7 @@ impl LibraryMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
-		let (library, config) = library::Entity::find_for_user(user)
+		let (_library, config) = library::Entity::find_for_user(user)
 			.filter(library::Column::Id.eq(id.to_string()))
 			.find_also_related(library_config::Entity)
 			.one(core.conn.as_ref())
@@ -771,18 +771,34 @@ impl LibraryMutation {
 			.unwrap_or_default()
 			.with_page(page);
 
-		let (_, path_buf, _) = generate_book_thumbnail(
-			&book.into(),
-			core.conn.as_ref(),
-			GenerateThumbnailOptions {
-				image_options,
-				core_config: core.config.as_ref().clone(),
-				force_regen: true,
-				filename: Some(id.to_string()),
-			},
+		let (_, path_buf, metadata) = generate_thumbnail_from_book(
+			&book.path,
+			id.as_str(),
+			core.config.as_ref(),
+			image_options,
 		)
 		.await?;
+		library::Entity::update_many()
+			.filter(library::Column::Id.eq(id.to_string()))
+			.col_expr(
+				library::Column::ThumbnailPath,
+				Expr::value(Some(path_buf.to_string_lossy().to_string())),
+			)
+			.col_expr(library::Column::ThumbnailMeta, Expr::value(metadata))
+			.col_expr(
+				library::Column::UpdatedAt,
+				Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
+			)
+			.exec(core.conn.as_ref())
+			.await?;
+
 		tracing::debug!(path = ?path_buf, "Generated library thumbnail");
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
 
 		Ok(library.into())
 	}
@@ -1013,9 +1029,10 @@ impl LibraryMutation {
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library not found")?;
+		let library_id = library.id;
 
-		let series = series::Entity::find_for_user(user)
-			.filter(series::Column::LibraryId.eq(library.id.clone()))
+		let series = series::Entity::find()
+			.filter(series::Column::LibraryId.eq(library_id.clone()))
 			.select_only()
 			.columns(series::SeriesIdentSelect::columns())
 			.into_model::<series::SeriesIdentSelect>()
@@ -1024,8 +1041,13 @@ impl LibraryMutation {
 
 		let books = media::Entity::find()
 			.filter(
-				media::Column::SeriesId
-					.is_in(series.iter().map(|s| s.id.clone()).collect::<Vec<_>>()),
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::LibraryId.eq(library_id.clone()))
+						.to_owned(),
+				),
 			)
 			.select_only()
 			.columns(media::MediaIdentSelect::columns())
@@ -1034,7 +1056,7 @@ impl LibraryMutation {
 			.await?;
 
 		let ids = chain(
-			[library.id],
+			[library_id.clone()],
 			series
 				.iter()
 				.map(|s| s.id.clone())
@@ -1042,11 +1064,57 @@ impl LibraryMutation {
 		)
 		.collect::<Vec<_>>();
 
-		let thumbnails_dir = core.config.get_thumbnails_dir();
+		let thumbnails_dir = core.config.thumbnails_directory();
 		if let Err(error) = remove_thumbnails(&ids, &thumbnails_dir).await {
 			tracing::error!(?error, "Failed to remove library thumbnails");
 			return Err(error.into());
 		}
+
+		let updated_at = Some(DateTimeWithTimeZone::from(Utc::now()));
+		let txn = core.conn.as_ref().begin().await?;
+
+		library::Entity::update_many()
+			.filter(library::Column::Id.eq(library_id.clone()))
+			.col_expr(library::Column::ThumbnailPath, Expr::value(None::<String>))
+			.col_expr(
+				library::Column::ThumbnailMeta,
+				Expr::value(None::<models::shared::image::ImageMetadata>),
+			)
+			.col_expr(library::Column::UpdatedAt, Expr::value(updated_at))
+			.exec(&txn)
+			.await?;
+
+		series::Entity::update_many()
+			.filter(series::Column::LibraryId.eq(library_id.clone()))
+			.col_expr(series::Column::ThumbnailPath, Expr::value(None::<String>))
+			.col_expr(
+				series::Column::ThumbnailMeta,
+				Expr::value(None::<models::shared::image::ImageMetadata>),
+			)
+			.col_expr(series::Column::UpdatedAt, Expr::value(updated_at))
+			.exec(&txn)
+			.await?;
+
+		media::Entity::update_many()
+			.filter(
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::LibraryId.eq(library_id))
+						.to_owned(),
+				),
+			)
+			.col_expr(media::Column::ThumbnailPath, Expr::value(None::<String>))
+			.col_expr(
+				media::Column::ThumbnailMeta,
+				Expr::value(None::<models::shared::image::ImageMetadata>),
+			)
+			.col_expr(media::Column::UpdatedAt, Expr::value(updated_at))
+			.exec(&txn)
+			.await?;
+
+		txn.commit().await?;
 
 		Ok(true)
 	}

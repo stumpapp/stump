@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
 import { ContentContainer } from '@/components/container'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import AccountDetails from './AccountDetails'
 import MaxSessionsAllowed from './MaxSessionsAllowed'
@@ -53,6 +53,7 @@ type Props = {
 // TODO(design): stepped form from bookclub feature branch
 
 export default function CreateOrUpdateUserForm({ user, existingUsernames }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const navigate = useNavigate()
 

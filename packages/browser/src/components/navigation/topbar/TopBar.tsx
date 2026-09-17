@@ -15,8 +15,8 @@ import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
-import paths from '@/paths'
-import { usePrefetchHomeScene } from '@/scenes/home'
+import { usePaths } from '@/paths'
+import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
 import {
 	BookClubNavigationItem,
@@ -51,6 +51,7 @@ const query = graphql(`
 `)
 
 export default function TopNavigation() {
+	const paths = usePaths()
 	const location = useLocation()
 
 	const [ref, size] = useDimensionsRef()
@@ -129,7 +130,7 @@ export default function TopNavigation() {
 					</Suspense>
 				))
 				.otherwise(() => null),
-		[t, location.pathname, size, prefetchHome],
+		[t, location.pathname, size, prefetchHome, paths],
 	)
 
 	const sections = useMemo(

@@ -3,11 +3,13 @@ import { useLocaleContext } from '@stump/i18n'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 
+import { useRouterContext } from '@/context/RouterContext'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
-import { SideBarLinkButton } from '@/scenes/settings'
+import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
+import { useAppStore } from '@/stores'
 
 import { useLibraryContext } from '../../context'
 import { createRouteGroups } from './routes'
@@ -19,11 +21,13 @@ export default function LibrarySettingsSidebar() {
 
 	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
+	const { basePath } = useRouterContext()
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
-	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id) })
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id, basePath) })
+	const platform = useAppStore((store) => store.platform)
 
 	return (
 		<div
@@ -35,6 +39,9 @@ export default function LibrarySettingsSidebar() {
 				{
 					'bg-linear-to-l from-background-gradient-from to-background-gradient-to':
 						shouldUseGradient,
+				},
+				{
+					'top-10': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
 				},
 			)}
 		>

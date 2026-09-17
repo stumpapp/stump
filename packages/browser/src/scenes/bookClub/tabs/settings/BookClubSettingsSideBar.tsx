@@ -7,7 +7,7 @@ import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import paths, { usePaths } from '@/paths'
-import { SideBarLinkButton } from '@/scenes/settings'
+import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
 import { createRouteGroups } from './routes'
 

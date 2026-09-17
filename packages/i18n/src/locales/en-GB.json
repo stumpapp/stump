@@ -385,6 +385,11 @@
 					"label": "KoReader-compatible hashes",
 					"description": "If using KoReader, generate additional hashes in the format it expects"
 				}
+			},
+			"oneshotsDirectory": {
+				"label": "Oneshots directory",
+				"description": "The name of the directory where oneshots are stored, relative to the library path. If empty, oneshots will not be processed",
+				"placeholder": "_oneshots"
 			}
 		},
 		"scan": {
@@ -422,7 +427,8 @@
 					"generateKoreaderHashes": "Generate KoReader hashes",
 					"scaleEvenlyByFactor": "Evenly Scale",
 					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"scaleDimension": "Explicitly Sized",
+					"oneshotsDirectory": "Oneshots directory"
 				},
 				"yes": "Yes",
 				"no": "No",
@@ -1007,6 +1013,12 @@
 					"buttons": {
 						"confirm": "Save Changes"
 					}
+				},
+				"language": {
+					"label": "Language",
+					"contributeIfAble": "Please consider contributing to Stump's translations if you're able to!",
+					"noThanks": "No thanks",
+					"contribute": "Contribute"
 				}
 			},
 			"helmet": "Account settings",
@@ -1464,7 +1476,8 @@
 					},
 					"errors": {
 						"invalidCron": "Schedule must be a valid cron expression"
-					}
+					},
+					"createScheduledJob": "Create scheduled job"
 				},
 				"history": {
 					"title": "History",
@@ -1488,6 +1501,11 @@
 						"confirmText": "Are you sure you want to delete all job history?",
 						"confirm": "Delete",
 						"emptyState": "No jobs to clear"
+					},
+					"inspector": {
+						"title": "Job details",
+						"description": "The raw output of this job and any associated logs",
+						"associatedLogs": "Associated logs"
 					}
 				}
 			},
@@ -1599,7 +1617,9 @@
 							"label": "Reading direction",
 							"description": "The direction in which the reader will progress through pages"
 						}
-					}
+					},
+					"label": "Universal",
+					"description": "Settings which apply to all types of books"
 				},
 				"imageBasedBooks": {
 					"label": "Image-based books",
@@ -1641,6 +1661,10 @@
 							"button": "Clear preferences"
 						}
 					}
+				},
+				"formats": {
+					"label": "Formats",
+					"description": "Configure reader default settings independently"
 				}
 			}
 		},
@@ -1655,22 +1679,21 @@
 				"serverInfo": {
 					"title": "Server information",
 					"description": "Basic details about your Stump server instance",
-					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
-						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
-						}
-					},
+					"build": "Build",
 					"nonStableChannel": {
 						"title": "You are running a non-stable build of Stump",
 						"description": [
 							"It looks like you are running the",
 							"build channel"
 						]
-					}
+					},
+					"exactCommit": "Exact commit",
+					"debugInfo": {
+						"label": "Debug information",
+						"description": "Copy and paste when reporting issues on GitHub",
+						"copyDebugInfoFailed": "Failed to copy debug information"
+					},
+					"version": "Version"
 				},
 				"helpfulLinks": {
 					"title": "Helpful links",
@@ -1685,8 +1708,8 @@
 					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				},
 				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
+					"title": "Emojis",
+					"description": "See and manage custom image emojis for your server",
 					"dropzone": "Drop an image or click to select",
 					"input": {
 						"label": "Emoji name",
@@ -1704,6 +1727,19 @@
 					"renameError": "Failed to rename emoji",
 					"deleteSuccess": "Emoji deleted",
 					"deleteError": "Failed to delete emoji"
+				},
+				"changelog": {
+					"label": "Changelog",
+					"description": "See what has changed in the latest versions of Stump"
+				},
+				"serverConfig": {
+					"label": "Server configuration",
+					"description": "A subset of configuration options available for management here",
+					"publicUrl": {
+						"label": "Public URL",
+						"description": "The URL that your server is accessible from outside your network",
+						"updateFailed": "Failed to update the URL"
+					}
 				}
 			}
 		},
@@ -1917,6 +1953,12 @@
 					"description": "All records of login activity will be permanently deleted from the database",
 					"confirm": "Delete"
 				}
+			},
+			"userStats": {
+				"users": "Users",
+				"booksCompleted": "Books completed",
+				"booksInProgress": "Books in progress",
+				"topReader": "Top reader"
 			}
 		},
 		"server/email": {
@@ -2139,7 +2181,9 @@
 					"label": "Token",
 					"placeholder": "Raw Token"
 				},
-				"basic": "Basic"
+				"basic": "Basic",
+				"section": "Authentication",
+				"method": "Method"
 			},
 			"serverNamePlaceholder": "My Server",
 			"failedToConnect": "Failed to connect to server",
@@ -2149,7 +2193,14 @@
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
 				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
-			}
+			},
+			"createServer": "Create Server",
+			"updateServer": "Update Server",
+			"basicInfo": "Basic Info",
+			"primaryUrl": "Primary URL",
+			"optionalSettings": "Optional Settings",
+			"networking": "Networking",
+			"advancedOptions": "Advanced Options"
 		},
 		"bookMetadata": {
 			"colorists": "Colourists",
@@ -2169,7 +2220,8 @@
 			"links": "Links",
 			"year": "Year",
 			"identifier": "Identifier",
-			"identifiers": "Identifiers"
+			"identifiers": "Identifiers",
+			"issue": "Issue"
 		},
 		"common": {
 			"favorite": "Favourite",
@@ -2227,7 +2279,13 @@
 			"value": "Value",
 			"version": "Version",
 			"accessOpdsV2": "Access OPDS v2.0",
-			"accessOpdsV1": "Access OPDS v1.2"
+			"accessOpdsV1": "Access OPDS v1.2",
+			"xBooks_one": "{{count}} Book",
+			"xBooks_other": "{{count}} Books",
+			"exit": "Exit",
+			"notConfigured": "Not configured",
+			"test": "Test",
+			"view": "View"
 		},
 		"settings": {
 			"preferences": {
@@ -2340,7 +2398,8 @@
 						"label": "Stored Preferences",
 						"description": "Miscellaneous data like book preferences, reading timers, etc"
 					},
-					"clearPreferences": "Clear Preferences"
+					"clearPreferences": "Clear Preferences",
+					"noServersAdded": "No Servers Added"
 				}
 			},
 			"debug": {
@@ -2380,7 +2439,8 @@
 				"debugAnalytics": {
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
-				}
+				},
+				"maskUrls": "Mask URLs"
 			},
 			"contactInfo": {
 				"label": "Contact",
@@ -2813,6 +2873,57 @@
 			"readingNow": {
 				"nothingInProgress": "Nothing in Progress"
 			}
+		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "Configuration",
+				"networkSettings": "Network Settings"
+			}
+		},
+		"serverNetworkSettings": {
+			"activeProfile": {
+				"label": "Active Profile",
+				"localIsActive": "Local profile is active",
+				"primaryIsActive": "Primary profile is active",
+				"autoSwitchToLocalDidNotWork": "The app was unable to switch to the active profile. Please check your network connection"
+			},
+			"localProfile": "Local Profile",
+			"primaryUrl": "Primary URL",
+			"autoSwitchToLocal": {
+				"label": "Auto-switch to local profile",
+				"description": "Switch to the local profile when able"
+			},
+			"localUrl": "Local URL",
+			"saveUrlChanges": "Save URL Changes",
+			"swapUrls": {
+				"label": "Swap URLs",
+				"swap": "Swap",
+				"confirmationText": "Are you sure you want to swap the remote and local URLs? This will take effect immediately",
+				"noLocalUrlSet": {
+					"title": "No local URL set",
+					"description": "You need to set a local URL before you can swap it to the remote URL"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Wifi Network",
+				"noAssociatedNetwork": "No Associated Wifi Network",
+				"notConnectedToWifi": "You are not connected to wifi. Please connect to a local network to finish setting up the local profile",
+				"connectedTip": "If the current network is not listed, you might need to give Stump permission to access your location",
+				"addNetwork": "Add \"{{ssid}}\"",
+				"permissionNotGranted": {
+					"label": "Permissions Not Granted",
+					"description": "You need to grant location permission to access the active wifi network"
+				},
+				"permissionFailedToBeGranted": {
+					"title": "Location Permission Failed",
+					"description": "The app failed to get permissions to access your location. Please check your device settings and try again"
+				},
+				"requestPermission": "Request Location Permission",
+				"removeWifi": {
+					"label": "Remove",
+					"confirmationText": "Are you sure you want to remove the '{{ssid}}' network from the local profile?"
+				}
+			}
 		}
 	},
 	"underConstruction": {
@@ -2952,7 +3063,8 @@
 		"tabs": {
 			"books": "Books",
 			"series": "Series",
-			"files": "Files"
+			"files": "Files",
+			"oneshots": "Oneshots"
 		}
 	},
 	"errorScene": {
@@ -3456,7 +3568,15 @@
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
 		},
-		"unknownError": "An unknown error occurred"
+		"unknownError": "An unknown error occurred",
+		"xBooks_one": "{{count}} Book",
+		"xBooks_other": "{{count}} Books",
+		"copy": "Copy",
+		"notConfigured": "Not configured",
+		"open": "Open",
+		"none": "None",
+		"seeMore": "See more",
+		"view": "View"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -3697,7 +3817,55 @@
 					"horizontalScroll": "Horizontal scroll",
 					"paged": "Paged"
 				}
+			},
+			"readerSettings": {
+				"sections": {
+					"mode": "Mode",
+					"imageOptions": "Image Options",
+					"preferences": "Preferences",
+					"controls": "Controls"
+				},
+				"preferences": {
+					"separateSecondPage": "Separate second page",
+					"panZoomWithoutCtrl": "Pan and zoom without Ctrl / Cmd",
+					"tapSidesToNavigate": "Tap sides to navigate",
+					"readingTimer": "Reading timer"
+				}
+			},
+			"doublePageBehavior": {
+				"label": "Double Paged",
+				"options": {
+					"auto": "Auto",
+					"always": "Always",
+					"off": "Off"
+				}
 			}
+		},
+		"header": {
+			"goToMediaOverview": "Go to media overview"
+		},
+		"settingsDialog": {
+			"scopes": {
+				"book": "Book",
+				"global": "Global"
+			}
+		},
+		"timerMenu": {
+			"start": "Start Timer",
+			"stop": "Stop Timer",
+			"reset": "Reset Timer"
+		},
+		"footer": {
+			"readingTime": "Reading time: {{time}}",
+			"pageOf": "{{current}} of {{total}}"
+		},
+		"goToPage": {
+			"label": "Go to page",
+			"submit": "Go"
+		},
+		"nextInSeries": {
+			"title": "Next Up:",
+			"read": "Read"
 		}
 	}
 }

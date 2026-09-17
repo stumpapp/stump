@@ -21,6 +21,7 @@ const prefetch = vi.hoisted(() => ({
 	books: vi.fn(),
 	series: vi.fn(),
 }))
+
 vi.mock('../ContinueReading', () => ({
 	default: () => <h2>Reading section</h2>,
 	usePrefetchContinueReading: () => prefetch.reading,
@@ -118,12 +119,11 @@ describe('HomeScene arrangement', () => {
 	it('offers a recovery link when all sections are hidden', async () => {
 		const { Wrapper } = setup(original.map((section) => ({ ...section, visible: false })))
 		render(<HomeScene />, { wrapper: Wrapper })
-		expect(await screen.findByText('All home sections are hidden.')).toBeInTheDocument()
-		expect(screen.getByRole('link', { name: 'Customize your home page' })).toHaveAttribute(
+		await waitFor(() => expect(screen.queryByTestId('customize-home-button')).toBeInTheDocument())
+		expect(screen.queryByTestId('customize-home-button')).toHaveAttribute(
 			'href',
 			'/settings/preferences',
 		)
-		expect(screen.queryByRole('heading')).not.toBeInTheDocument()
 	})
 
 	it('keeps the no-library experience', async () => {

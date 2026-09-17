@@ -18,7 +18,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { Button, cn, IconButton, NewCard, Sheet, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Eye, EyeOff } from 'lucide-react'
-import { FormEvent, useEffect, useState } from 'react'
+import { SubmitEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import {
@@ -52,7 +52,7 @@ export default function HomeArrangementPreference() {
 					title={t(`${BASE}.title`)}
 					description={t(`${BASE}.hint`)}
 					trigger={
-						<Button size="sm" variant="ghost">
+						<Button size="sm" variant="outline">
 							{t('common.edit')}
 						</Button>
 					}
@@ -60,7 +60,6 @@ export default function HomeArrangementPreference() {
 					{open && (
 						<HomeArrangementForm
 							sections={data.me.preferences.homeArrangement.sections}
-							onCancel={() => setOpen(false)}
 							onSave={async (sections) => {
 								await mutateAsync({ input: { sections: sections.map(toHomeSectionInput) } })
 								setOpen(false)
@@ -76,10 +75,9 @@ export default function HomeArrangementPreference() {
 type FormProps = {
 	sections: HomeSection[]
 	onSave: (sections: HomeSection[]) => Promise<unknown>
-	onCancel: () => void
 }
 
-export function HomeArrangementForm({ sections, onSave, onCancel }: FormProps) {
+export function HomeArrangementForm({ sections, onSave }: FormProps) {
 	const { t } = useLocaleContext()
 	const [draft, setDraft] = useState(sections)
 	const [saving, setSaving] = useState(false)
@@ -110,6 +108,7 @@ export function HomeArrangementForm({ sections, onSave, onCancel }: FormProps) {
 		if (saving || from < 0 || to < 0 || from >= draft.length || to >= draft.length) return
 		setDraft((current) => arrayMove(current, from, to))
 	}
+
 	const onDragEnd = ({ active, over }: DragEndEvent) => {
 		if (over && active.id !== over.id)
 			move(
@@ -117,7 +116,7 @@ export function HomeArrangementForm({ sections, onSave, onCancel }: FormProps) {
 				ids.indexOf(over.id as (typeof ids)[number]),
 			)
 	}
-	const save = async (event: FormEvent) => {
+	const save = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		if (saving || !supported) return
 		setSaving(true)
@@ -131,25 +130,25 @@ export function HomeArrangementForm({ sections, onSave, onCancel }: FormProps) {
 			setSaving(false)
 		}
 	}
+
 	const reset = () => setDraft(defaultHomeSections())
 
 	return (
 		<form onSubmit={save} className="px-4 pb-4">
 			<div className="flex w-full flex-col overflow-hidden rounded-xl border border-border">
-				<header className="px-4 py-0.5 flex items-center justify-between bg-muted/50">
-					<Button size="sm" variant="ghost" disabled={saving} onClick={reset}>
+				<header className="px-4 py-1 flex items-center justify-between bg-muted/50">
+					<Button size="sm" variant="ghost" disabled={saving} onClick={reset} className="h-7">
 						{t(`${BASE}.reset`)}
 					</Button>
+
 					<div className="gap-1 flex items-center">
-						<Button size="sm" variant="ghost" disabled={saving} onClick={onCancel}>
-							{t('common.cancel')}
-						</Button>
 						<Button
 							size="sm"
-							variant="ghost"
+							variant="outline"
 							type="submit"
 							disabled={saving || !supported}
 							aria-busy={saving}
+							className="h-7"
 						>
 							{t('common.save')}
 						</Button>

@@ -1,12 +1,12 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Text } from '@stump/components'
+import { ButtonOrLink } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
-import { Link } from '@/context'
+import { OwlEmptyState } from '@/components/Owl'
 import { usePaths } from '@/paths'
 
 import {
@@ -99,7 +99,7 @@ export default function HomeScene() {
 	}
 
 	return (
-		<SceneContainer className="gap-6 flex flex-col">
+		<SceneContainer className="gap-6 flex flex-1 flex-col">
 			{helmet}
 
 			{sections.map((section) => {
@@ -108,13 +108,17 @@ export default function HomeScene() {
 				const Component = components[id]
 				return <Component key={id} />
 			})}
+
 			{!sections.some((section) => section.visible && getHomeSectionId(section)) && (
-				<div className="space-y-2 py-6">
-					<Text>{t('homeScene.allSectionsHidden')}</Text>
-					<Link to={paths.settings('preferences')} className="text-primary underline">
-						{t('homeScene.customizeHome')}
-					</Link>
-				</div>
+				<OwlEmptyState
+					title={t('homeScene.allSectionsHidden.label')}
+					description={t('homeScene.allSectionsHidden.description')}
+					actions={
+						<ButtonOrLink href={paths.settings('preferences')} data-testid="customize-home-button">
+							{t('homeScene.allSectionsHidden.customizeHome')}
+						</ButtonOrLink>
+					}
+				/>
 			)}
 			<div className="pb-5 sm:pb-0" />
 		</SceneContainer>

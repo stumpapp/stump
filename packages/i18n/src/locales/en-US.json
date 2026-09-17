@@ -860,8 +860,11 @@
 				"message": "Any recent books you add will show up here"
 			}
 		},
-		"allSectionsHidden": "All home sections are hidden.",
-		"customizeHome": "Customize your home page"
+		"allSectionsHidden": {
+			"label": "There is nothing to show",
+			"description": "You hid everything, I hope you like empty space",
+			"customizeHome": "Customize your home page"
+		}
 	},
 	"mediaFilterForm": {
 		"ageRatingFilter": {

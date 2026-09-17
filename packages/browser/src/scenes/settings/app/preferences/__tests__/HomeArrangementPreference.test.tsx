@@ -33,17 +33,12 @@ const initialSections: HomeSection[] = [
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), dismiss: vi.fn() } }))
 
-function renderForm(
-	onSave = vi.fn().mockResolvedValue(undefined),
-	sections = initialSections,
-	onCancel = vi.fn(),
-) {
+function renderForm(onSave = vi.fn().mockResolvedValue(undefined), sections = initialSections) {
 	return {
 		onSave,
-		onCancel,
 		...render(
 			<LocaleProvider locale="en-US">
-				<HomeArrangementForm sections={sections} onSave={onSave} onCancel={onCancel} />
+				<HomeArrangementForm sections={sections} onSave={onSave} />
 			</LocaleProvider>,
 		),
 	}
@@ -156,15 +151,6 @@ describe('HomeArrangementForm', () => {
 		resolve()
 		await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
 		expect(onSave).toHaveBeenCalledTimes(1)
-	})
-
-	it('cancels without saving', async () => {
-		const user = userEvent.setup()
-		const { onSave, onCancel } = renderForm()
-		await user.click(screen.getByRole('button', { name: 'Recently added series' }))
-		await user.click(screen.getByRole('button', { name: 'Cancel' }))
-		expect(onCancel).toHaveBeenCalledOnce()
-		expect(onSave).not.toHaveBeenCalled()
 	})
 
 	it('can hide every section', async () => {

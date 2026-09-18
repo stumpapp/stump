@@ -18,9 +18,19 @@ CHANGELOG.md
 /src-tauri/capabilities/*.json
 /src-tauri/gen/*.json
 
-apps/expo/assets/*.json
 
 packages/graphql/src/client/*.ts
 
+# expo non-ts files etc
+apps/expo/assets/**/*.json
 apps/expo/drizzle/*
 apps/expo/components/emoji/data.json
+apps/expo/android/*
+apps/expo/ios/*
+apps/expo/modules/**/android/*
+apps/expo/modules/**/ios/*
+
+# build artifacts ios/android
+*.aab
+*.apk
+*.ipa

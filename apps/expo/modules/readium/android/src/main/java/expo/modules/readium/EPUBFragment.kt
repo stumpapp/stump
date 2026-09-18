@@ -293,14 +293,28 @@ class EPUBFragment(
                         backgroundColor =
                             org.readium.r2.navigator.preferences
                                 .Color(listener.props!!.background),
+                        columnCount = listener.props!!.columnCount,
                         fontFamily = listener.props!!.fontFamily,
                         fontSize = listener.props!!.fontSize,
+                        fontWeight = listener.props!!.fontWeight,
+                        hyphens = listener.props!!.hyphens,
+                        imageFilter = listener.props!!.imageFilter,
+                        letterSpacing = listener.props!!.letterSpacing,
+                        ligatures = listener.props!!.ligatures,
                         lineHeight = listener.props!!.lineHeight,
-//                paragraphSpacing = listener.props!!.paragraphSpacing,
-//                textAlign = listener.props!!.textAlign,
+                        pageMargins = listener.props!!.pageMargins,
+                        paragraphIndent = listener.props!!.paragraphIndent,
+                        paragraphSpacing = listener.props!!.paragraphSpacing,
+                        publisherStyles = listener.props!!.publisherStyles,
+                        readingProgression = listener.props!!.readingProgression,
+                        textAlign = listener.props!!.textAlign,
                         textColor =
                             org.readium.r2.navigator.preferences
                                 .Color(listener.props!!.foreground),
+                        textNormalization = listener.props!!.textNormalization,
+                        typeScale = listener.props!!.typeScale,
+                        verticalText = listener.props!!.verticalText,
+                        wordSpacing = listener.props!!.wordSpacing,
                     ),
             )
 

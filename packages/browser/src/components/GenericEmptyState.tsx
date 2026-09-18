@@ -18,12 +18,12 @@ export default function GenericEmptyState({
 	return (
 		<div
 			className={cn(
-				'gap-2 flex min-h-[150px] flex-col items-center justify-center',
+				'gap-2 min-h-37.5 flex flex-col items-center justify-center',
 				{ 'md:items-start md:justify-start': leftAlign },
 				containerClassName,
 			)}
 		>
-			<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
+			<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted-foreground" />
 			<div className={cn('text-center', { 'md:text-left': leftAlign }, contentClassName)}>
 				<Heading size="sm">{title}</Heading>
 				{subtitle && (

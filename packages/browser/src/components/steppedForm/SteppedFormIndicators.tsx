@@ -22,7 +22,7 @@ export default function SteppedFormIndicators() {
 							isComplete={isComplete}
 							currentStep={currentStep}
 						/>
-						{step < stepsBeforeReview && <div className="h-0.5 w-12 bg-edge" />}
+						{step < stepsBeforeReview && <div className="h-0.5 w-12 bg-border" />}
 					</div>
 				)
 			})}
@@ -58,13 +58,13 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 	const renderIcon = () => {
 		if (isComplete) {
 			return (
-				<div className="h-4 w-4 text-white flex items-center justify-center rounded-full bg-fill-brand">
+				<div className="h-4 w-4 text-white flex items-center justify-center rounded-full bg-primary">
 					<Check className="h-3 w-3" />
 				</div>
 			)
 		} else {
 			return (
-				<div className="h-4 w-4 text-xs flex items-center justify-center rounded-full border border-edge-brand/70 text-foreground-muted">
+				<div className="h-4 w-4 text-xs flex items-center justify-center rounded-full border border-primary/70 text-muted-foreground">
 					{step}
 				</div>
 			)
@@ -84,8 +84,8 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 
 	return (
 		<button
-			className={cn('space-x-2 px-2.5 py-1.5 flex items-center rounded-full border border-edge', {
-				'border-edge-brand': currentStep === step,
+			className={cn('space-x-2 px-2.5 py-1.5 flex items-center rounded-full border border-border', {
+				'border-primary': currentStep === step,
 			})}
 			onClick={handleClick}
 			type="button"

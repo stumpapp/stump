@@ -13,7 +13,6 @@ export { default as ReadiumView } from './src/ReadiumView'
 
 type StumpBookmark = {
 	id: string
-	epubcfi?: string | null
 	mediaId: string
 	previewContent?: string | null
 	locator?: {
@@ -47,7 +46,6 @@ const normalizeLocations = (
 export function intoBookmarkRef(bookmark: StumpBookmark): BookmarkRef {
 	return {
 		id: bookmark.id,
-		epubcfi: bookmark.epubcfi,
 		href: bookmark.locator?.href ?? '',
 		chapterTitle: bookmark.locator?.chapterTitle ?? '',
 		locations: normalizeLocations(bookmark.locator?.locations),
@@ -112,21 +110,4 @@ export function intoPDFReadiumLocator(page: number): PDFLocator {
 		href: 'publication.pdf',
 		type: 'application/pdf',
 	}
-}
-
-export function isLastReadiumLocator(
-	locator: ReadiumLocator,
-	positions: ReadiumLocator[],
-): boolean {
-	if (positions.length === 0) return false
-	const totalPositions = positions.length
-	const totalProgression = locator.locations?.totalProgression
-	const position = locator.locations?.position
-
-	return (
-		position != null &&
-		totalProgression != null &&
-		position >= totalPositions &&
-		totalProgression >= 0.95
-	)
 }

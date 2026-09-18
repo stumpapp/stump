@@ -1,17 +1,18 @@
 import { useAppStore } from '@stump/browser/stores'
-import { Card, cn, Heading, Text } from '@stump/components'
+import { cn, NewCard, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { checkUrl, formatApiURL } from '@stump/sdk'
 import { useQueries } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import AddServerModal from './components/AddServerModal'
 import ConfiguredServer from './components/ConfiguredServer'
 import DeleteServerConfirmation from './components/DeleteServerConfirmation'
+import EditServerModal from './components/EditServerModal'
 import RemoveAllTokensSection from './components/RemoveAllTokensSection'
-import { SavedServer, useSavedServers } from './stores/savedServer'
+import { CreateServer, SavedServer, useSavedServers } from './stores/savedServer'
 
 const PING_HEALTHY_INTERVAL_MS = 10_000
 const PING_UNHEALTHY_INTERVAL_MS = 2000
@@ -23,12 +24,13 @@ type PingResult = {
 
 export default function Home() {
 	const { t } = useLocaleContext()
-	const { savedServers, createServer, deleteServer, deleteServerToken } = useSavedServers()
+	const { savedServers, createServer, updateServer, deleteServer, deleteServerToken } =
+		useSavedServers()
 
 	const setBaseUrl = useAppStore((store) => store.setBaseUrl)
 	const navigate = useNavigate()
 
-	const [, setEditingServer] = useState<SavedServer | null>(null)
+	const [editingServer, setEditingServer] = useState<SavedServer | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
 
 	const statusResults = useQueries({
@@ -40,7 +42,6 @@ export default function Home() {
 					status: await checkUrl(formatApiURL(server.url, 'v2')),
 				}) as PingResult,
 			queryKey: ['ping', server.url, server.name],
-			// refetchInterval: (query: Query<unknown, Error, unknown, readonly unknown[]>) => number | false | undefined
 			refetchInterval: (result?: PingResult) => {
 				if (!result) return false
 				return result.status ? PING_HEALTHY_INTERVAL_MS : PING_UNHEALTHY_INTERVAL_MS
@@ -77,6 +78,21 @@ export default function Home() {
 		}
 	}, [deletingServer, deleteServer])
 
+	const onEditServer = useCallback(
+		async (updates: CreateServer) => {
+			if (editingServer) {
+				try {
+					await updateServer(editingServer.id, updates)
+					setEditingServer(null)
+				} catch (error) {
+					console.error('Error updating server:', error)
+					toast.error('Error updating server')
+				}
+			}
+		},
+		[editingServer, updateServer],
+	)
+
 	const onClearTokens = useCallback(async () => {
 		try {
 			await Promise.all(savedServers.map((server) => deleteServerToken(server.id)))
@@ -94,6 +110,7 @@ export default function Home() {
 		[navigate, setBaseUrl],
 	)
 
+	// TODO: better empty state
 	return (
 		<>
 			<DeleteServerConfirmation
@@ -102,55 +119,46 @@ export default function Home() {
 				onConfirm={onDeleteServer}
 				isLastServer={savedServers.length === 1}
 			/>
-			<div
-				data-tauri-drag-region
-				className="py-6 flex h-screen w-screen items-center bg-background"
-			>
-				<div className="max-w-sm gap-6 sm:max-w-md md:max-w-xl mx-auto flex h-full w-full flex-col justify-center">
-					<div className="gap-y-6 flex flex-col">
-						<div className="flex items-end justify-between">
-							<div>
-								<Heading size="sm">{t(getKey('label'))}</Heading>
-								<Text variant="muted" size="sm">
-									{t(getKey('description'))}
-								</Text>
-							</div>
 
-							<AddServerModal existingServers={savedServers} onCreateServer={createServer} />
-						</div>
+			<EditServerModal
+				editingServer={editingServer}
+				existingServers={savedServers}
+				onEditServer={onEditServer}
+				onCancel={() => setEditingServer(null)}
+			/>
 
-						{!savedServers.length && (
-							<div className="rounded-lg p-4 border border-dashed border-edge-subtle text-foreground-muted select-none">
-								{t(getKey('getStarted'))}
-							</div>
-						)}
+			<div className="p-6 gap-3 lg:gap-4 flex flex-col">
+				<div className="px-2 gap-4 flex flex-row items-center justify-between">
+					<Text className="font-semibold shrink-0 text-foreground">{t(getKey('label'))}</Text>
+					<AddServerModal existingServers={savedServers} onCreateServer={createServer} />
+				</div>
 
-						{savedServers.length > 0 && (
-							<Card className="flex flex-col divide-y divide-edge bg-background-surface">
-								{savedServers.map((server) => (
-									<ConfiguredServer
-										key={`configured-server-${server.name}_${server.url}`}
-										server={server}
-										isActive={false}
-										onEdit={() => setEditingServer(server)}
-										onDelete={() => setDeletingServer(server)}
-										onSwitch={() => onSwitchToServer(server)}
-										isReachable={serverStatuses[server.name]}
-									/>
-								))}
-							</Card>
-						)}
+				{!savedServers.length && (
+					<NewCard>
+						<p className="px-4 py-8 text-sm text-center text-muted-foreground select-none">
+							{t(getKey('getStarted'))}
+						</p>
+					</NewCard>
+				)}
 
-						<div
-							className={cn('gap-y-6 flex flex-col', {
-								'pointer-events-none opacity-50': savedServers.length === 0,
-							})}
-						>
-							<RemoveAllTokensSection onConfirmClear={onClearTokens} />
-							{/* <RemoveAllTokensSection onConfirmClear={onClearTokens} />
-				<ResetConfiguredServersSection onConfirmReset={onDeleteAllServers} /> */}
-						</div>
-					</div>
+				{savedServers.map((server) => (
+					<ConfiguredServer
+						key={`configured-server-${server.name}_${server.url}`}
+						server={server}
+						isActive={false}
+						onEdit={() => setEditingServer(server)}
+						onDelete={() => setDeletingServer(server)}
+						onSwitch={() => onSwitchToServer(server)}
+						isReachable={serverStatuses[server.name]}
+					/>
+				))}
+
+				<div
+					className={cn('gap-y-6 flex flex-col', {
+						'pointer-events-none opacity-50': savedServers.length === 0,
+					})}
+				>
+					<RemoveAllTokensSection onConfirmClear={onClearTokens} />
 				</div>
 			</div>
 		</>

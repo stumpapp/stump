@@ -1,6 +1,8 @@
 import { BookReaderSceneQuery } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
+import { Timer } from '@/stores/reader'
+
 export type ImageReaderBookRef = NonNullable<BookReaderSceneQuery['mediaById']>
 
 export type NextInSeriesBookRef = {
@@ -48,9 +50,9 @@ export type IImageBaseReaderContext = {
 	 */
 	pageSets: number[][]
 	/**
-	 * A function to reset the read timer
+	 * The active book's timer
 	 */
-	resetTimer: () => void
+	timer: Timer
 
 	toggleToolbar: () => void
 }

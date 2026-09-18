@@ -1,4 +1,5 @@
 import * as ContextMenuPrimitive from '@rn-primitives/context-menu'
+import * as Haptics from 'expo-haptics'
 import { Check, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react-native'
 import * as React from 'react'
 import {
@@ -19,7 +20,20 @@ import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
 
 const ContextMenu = ContextMenuPrimitive.Root
-const ContextMenuTrigger = ContextMenuPrimitive.Trigger
+function ContextMenuTrigger({
+	onLongPress,
+	...props
+}: React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Trigger>) {
+	return (
+		<ContextMenuPrimitive.Trigger
+			onLongPress={(e) => {
+				Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Long_Press)
+				onLongPress?.(e)
+			}}
+			{...props}
+		/>
+	)
+}
 const ContextMenuGroup = ContextMenuPrimitive.Group
 const ContextMenuSub = ContextMenuPrimitive.Sub
 const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup
@@ -29,6 +43,7 @@ function ContextMenuSubTrigger({
 	inset,
 	children,
 	iconClassName,
+	onPress,
 	...props
 }: ContextMenuPrimitive.SubTriggerProps &
 	React.RefAttributes<ContextMenuPrimitive.SubTriggerRef> & {
@@ -46,8 +61,12 @@ function ContextMenuSubTrigger({
 			)}
 		>
 			<ContextMenuPrimitive.SubTrigger
+				onPress={(e) => {
+					Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+					onPress?.(e)
+				}}
 				className={cn(
-					'group flex flex-row items-center rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'group px-2 py-2 active:bg-background-surface sm:py-1.5 flex flex-row items-center rounded-lg',
 					open && cn('bg-accent', Platform.select({ native: 'mb-1' })),
 					inset && 'pl-8',
 					className,
@@ -69,7 +88,7 @@ function ContextMenuSubContent({
 		<NativeOnlyAnimatedView entering={FadeIn}>
 			<ContextMenuPrimitive.SubContent
 				className={cn(
-					'squircle overflow-hidden rounded-2xl border border-edge bg-background p-1 shadow-lg shadow-black/5',
+					'squircle border-edge p-1 shadow-lg shadow-black/5 overflow-hidden rounded-2xl border bg-background',
 					className,
 				)}
 				{...props}
@@ -110,7 +129,7 @@ function ContextMenuContent({
 						<TextClassContext.Provider value="text-foreground">
 							<ContextMenuPrimitive.Content
 								className={cn(
-									'squircle min-w-[12rem] overflow-hidden rounded-2xl border border-edge bg-background p-3 shadow-lg shadow-black/5',
+									'squircle border-edge p-3 shadow-lg shadow-black/5 min-w-[12rem] overflow-hidden rounded-2xl border bg-background',
 									className,
 								)}
 								{...props}
@@ -127,6 +146,7 @@ function ContextMenuItem({
 	className,
 	inset,
 	variant,
+	onPress,
 	...props
 }: ContextMenuPrimitive.ItemProps &
 	React.RefAttributes<ContextMenuPrimitive.ItemRef> & {
@@ -137,13 +157,17 @@ function ContextMenuItem({
 	return (
 		<TextClassContext.Provider
 			value={cn(
-				'select-none text-lg text-foreground group-active:text-foreground',
+				'text-lg text-foreground select-none group-active:text-foreground',
 				variant === 'destructive' && 'text-fill-danger group-active:text-fill-danger',
 			)}
 		>
 			<ContextMenuPrimitive.Item
+				onPress={(e) => {
+					Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+					onPress?.(e)
+				}}
 				className={cn(
-					'squircle group relative flex flex-row items-center gap-4 rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'squircle group gap-4 px-2 py-2 active:bg-background-surface sm:py-1.5 relative flex flex-row items-center rounded-lg',
 					variant === 'destructive' && 'active:bg-fill-danger-secondary',
 					props.disabled && 'opacity-50',
 					inset && 'pl-8',
@@ -158,6 +182,7 @@ function ContextMenuItem({
 function ContextMenuCheckboxItem({
 	className,
 	children,
+	onPress,
 	...props
 }: ContextMenuPrimitive.CheckboxItemProps &
 	React.RefAttributes<ContextMenuPrimitive.CheckboxItemRef> & {
@@ -166,14 +191,18 @@ function ContextMenuCheckboxItem({
 	return (
 		<TextClassContext.Provider value="text-lg text-foreground select-none group-active:text-accent-foreground">
 			<ContextMenuPrimitive.CheckboxItem
+				onPress={(e) => {
+					Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+					onPress?.(e)
+				}}
 				className={cn(
-					'active:bg-accent group relative flex flex-row items-center gap-2 rounded-md py-2 pl-8 pr-2 sm:py-1.5',
+					'group gap-2 py-2 pl-8 pr-2 sm:py-1.5 relative flex flex-row items-center rounded-md active:bg-accent',
 					props.disabled && 'opacity-50',
 					className,
 				)}
 				{...props}
 			>
-				<View className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+				<View className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 					<ContextMenuPrimitive.ItemIndicator>
 						<Icon
 							as={Check}
@@ -193,6 +222,7 @@ function ContextMenuCheckboxItem({
 function ContextMenuRadioItem({
 	className,
 	children,
+	onPress,
 	...props
 }: ContextMenuPrimitive.RadioItemProps &
 	React.RefAttributes<ContextMenuPrimitive.RadioItemRef> & {
@@ -201,14 +231,18 @@ function ContextMenuRadioItem({
 	return (
 		<TextClassContext.Provider value="text-lg text-foreground select-none group-active:text-foreground">
 			<ContextMenuPrimitive.RadioItem
+				onPress={(e) => {
+					Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
+					onPress?.(e)
+				}}
 				className={cn(
-					'group relative flex flex-row items-center gap-2 rounded-md py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'group gap-2 py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5 relative flex flex-row items-center rounded-md',
 					props.disabled && 'opacity-50',
 					className,
 				)}
 				{...props}
 			>
-				<View className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+				<View className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 					<ContextMenuPrimitive.ItemIndicator>
 						<View className="h-2 w-2 rounded-full bg-foreground" />
 					</ContextMenuPrimitive.ItemIndicator>
@@ -231,7 +265,7 @@ function ContextMenuLabel({
 	return (
 		<ContextMenuPrimitive.Label
 			className={cn(
-				'px-2 py-2 text-lg font-medium text-foreground sm:py-1.5',
+				'px-2 py-2 text-lg font-medium sm:py-1.5 text-foreground',
 				inset && 'pl-8',
 				className,
 			)}
@@ -246,7 +280,7 @@ function ContextMenuSeparator({
 }: ContextMenuPrimitive.SeparatorProps & React.RefAttributes<ContextMenuPrimitive.SeparatorRef>) {
 	return (
 		<ContextMenuPrimitive.Separator
-			className={cn('-mx-1 my-1 h-px bg-edge', className)}
+			className={cn('-mx-1 my-1 bg-edge h-px', className)}
 			{...props}
 		/>
 	)
@@ -255,7 +289,7 @@ function ContextMenuSeparator({
 function ContextMenuShortcut({ className, ...props }: TextProps & React.RefAttributes<Text>) {
 	return (
 		<Text
-			className={cn('ml-auto text-xs tracking-widest text-foreground-muted', className)}
+			className={cn('text-xs tracking-widest text-foreground-muted ml-auto', className)}
 			{...props}
 		/>
 	)

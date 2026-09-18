@@ -1,16 +1,14 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { Button, Dialog, PickSelect } from '@stump/components'
-import {
-	FragmentType,
-	graphql,
-	SeriesThumbnailSelectorUpdateMutation,
-	useFragment,
-} from '@stump/graphql'
+import { Button, Dialog } from '@stump/components'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 import BookPageGrid from '../../../book/settings/BookPageGrid'
 import SeriesBookGrid, { SelectedBook } from './SeriesBookGrid'
@@ -46,8 +44,6 @@ const uploadMutation = graphql(`
 	}
 `)
 
-type OnSuccessData = PickSelect<SeriesThumbnailSelectorUpdateMutation, 'updateSeriesThumbnail'>
-
 type Props = {
 	fragment: FragmentType<typeof SeriesThumbnailSelectorFragment>
 }
@@ -62,36 +58,24 @@ type Props = {
 
 export default function SeriesThumbnailSelector({ fragment }: Props) {
 	const series = useFragment(SeriesThumbnailSelectorFragment, fragment)
+	const { t } = useLocaleContext()
 
 	const { sdk } = useSDK()
+	const queryClient = useQueryClient()
 	const [selectedBook, setSelectedBook] = useState<SelectedBook>()
 	const [page, setPage] = useState<number>()
 	const [isOpen, setIsOpen] = useState(false)
 
-	const onSuccess = useCallback(
-		({ thumbnail: { url } }: OnSuccessData) =>
-			sdk.axios.get(url, {
-				headers: {
-					'Cache-Control': 'no-cache',
-					Pragma: 'no-cache',
-					Expires: '0',
-				},
-			}),
-		[sdk],
-	)
+	const onSuccess = useCallback(() => invalidateThumbnailQueries(queryClient), [queryClient])
 
 	const { mutateAsync: patchThumbnail, isPending: isPatchingThumbnail } = useGraphQLMutation(
 		updateMutation,
-		{
-			onSuccess: (data) => onSuccess(data.updateSeriesThumbnail),
-		},
+		{ onSuccess },
 	)
 
 	const { mutateAsync: uploadThumbnail, isPending: isUploadingThumbnail } = useGraphQLMutation(
 		uploadMutation,
-		{
-			onSuccess: (data) => onSuccess(data.uploadSeriesThumbnail),
-		},
+		{ onSuccess },
 	)
 
 	const handleOpenChange = (nowOpen: boolean) => {
@@ -114,10 +98,10 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload image')
+				toast.error(t('thumbnailSelector.errors.uploadFailed'))
 			}
 		},
-		[series.id, uploadThumbnail],
+		[series.id, t, uploadThumbnail],
 	)
 
 	const handleConfirm = useCallback(async () => {
@@ -128,9 +112,9 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update thumbnail')
+			toast.error(t('thumbnailSelector.errors.updateFailed'))
 		}
-	}, [patchThumbnail, page, selectedBook, series.id])
+	}, [patchThumbnail, page, selectedBook, series.id, t])
 
 	const renderContent = () => {
 		if (selectedBook) {
@@ -176,11 +160,11 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 				</Dialog.Trigger>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
-						<Dialog.Title>Select a thumbnail</Dialog.Title>
+						<Dialog.Title>{t('thumbnailSelector.title')}</Dialog.Title>
 						<Dialog.Description>
 							{selectedBook
-								? 'Choose a page from this book to use as the new thumbnail'
-								: 'Select a book from the series'}
+								? t('thumbnailSelector.descriptions.chooseBookPage')
+								: t('thumbnailSelector.descriptions.chooseSeriesBook')}
 
 							{selectedBook && (
 								<span
@@ -190,7 +174,7 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 										setPage(undefined)
 									}}
 								>
-									Go back
+									{t('common.goBack')}
 								</span>
 							)}
 						</Dialog.Description>
@@ -200,16 +184,15 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 					<Suspense>{renderContent()}</Suspense>
 
 					<Dialog.Footer>
-						<Button variant="default" onClick={handleCancel}>
-							Cancel
+						<Button variant="outline" onClick={handleCancel}>
+							{t('common.cancel')}
 						</Button>
 						<Button
-							variant="primary"
 							onClick={handleConfirm}
 							disabled={!selectedBook || !page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
-							Confirm selection
+							{t('thumbnailSelector.actions.confirmSelection')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

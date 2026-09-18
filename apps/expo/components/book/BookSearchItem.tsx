@@ -1,14 +1,14 @@
 import { useSDK } from '@stump/client'
+import { formatBytes } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import pluralize from 'pluralize'
 import { Pressable, View } from 'react-native'
 
-import { formatBytes } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
@@ -67,12 +67,12 @@ export default function BookSearchItem({ book }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}
+			onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}
 			style={{
 				width: width * 0.75,
 			}}
 		>
-			<View className="flex-row items-start gap-4 px-6 py-2 tablet:px-10">
+			<View className="gap-4 px-6 py-2 tablet:px-10 flex-row items-start">
 				<ThumbnailImage
 					source={{
 						uri,
@@ -90,7 +90,7 @@ export default function BookSearchItem({ book }: Props) {
 					}
 				/>
 
-				<View className="flex flex-1 flex-col gap-1">
+				<View className="gap-1 flex flex-1 flex-col">
 					<Text>{data.resolvedName}</Text>
 
 					<Text className="text-foreground-muted">

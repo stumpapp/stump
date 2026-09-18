@@ -1,6 +1,6 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, AlertTitle } from '@stump/components'
-import { CreateOrUpdateLibraryInput, graphql, LibraryType } from '@stump/graphql'
+import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { AlertCircle } from 'lucide-react'
@@ -15,7 +15,7 @@ import {
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
 
@@ -40,6 +40,7 @@ const mutation = graphql(`
 `)
 
 export default function CreateLibraryScene() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const { sdk } = useSDK()
 	const client = useQueryClient()
@@ -86,7 +87,6 @@ export default function CreateLibraryScene() {
 				config: {
 					...config,
 					ignoreRules: ignoreRules.map(({ glob }) => glob),
-					libraryType: LibraryType.Mixed,
 					thumbnailConfig: intoThumbnailConfig(thumbnailConfig),
 				} as CreateOrUpdateLibraryInput['config'],
 				description,
@@ -121,7 +121,7 @@ export default function CreateLibraryScene() {
 					stepsBeforeReview: 3,
 				}}
 			>
-				<SteppedFormSceneHeader />
+				<SteppedFormSceneHeader subtitleLink="https://stumpapp.dev/docs/guides/fundamentals/libraries#supported-patterns" />
 
 				<SceneContainer>
 					<div className="gap-12 flex flex-col">

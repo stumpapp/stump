@@ -5,18 +5,17 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{
-		finished_reading_session, library, media, reading_session, series, series_tag,
-		tag,
-	},
+	entity::{library, media, media_metadata, reading_session, series, series_tag, tag},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
+		enums::ReadingStatus,
 		image::ImageRef,
 	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, Condition, DatabaseBackend, FromQueryResult, JoinType,
-	QueryOrder, QuerySelect, QueryTrait, Statement,
+	prelude::*,
+	sea_query::{Expr, Query},
+	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
@@ -26,7 +25,8 @@ use crate::{
 		series_count::SeriesCountLoader,
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
 	},
-	object::series_metadata::SeriesMetadata,
+	object::{series_metadata::SeriesMetadata, stats::SeriesStats},
+	utils::db_statement,
 };
 
 use super::{library::Library, media::Media, tag::Tag};
@@ -91,6 +91,23 @@ impl Series {
 		Ok(Library::from(model))
 	}
 
+	async fn oneshot_book(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
+		if !self.model.is_oneshot {
+			return Ok(None);
+		}
+
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find()
+			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
+			.filter(media::Column::IsOneshot.eq(true))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?;
+
+		Ok(model.map(Media::from))
+	}
+
 	// TODO(perf): We probably could put this behind a dataloader if used frequently
 	/// Get media in this series
 	async fn media(
@@ -127,8 +144,8 @@ impl Series {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
@@ -167,6 +184,8 @@ impl Series {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let user_id = user.id.clone();
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
+		let latest_only = Expr::expr(Expr::exists(newer_exists)).not();
 
 		let name_cmp = if let Some(id) = cursor {
 			let media = media::Entity::find_for_user(user)
@@ -183,16 +202,14 @@ impl Series {
 		};
 
 		let query = media::ModelWithMetadata::find_for_user(user)
-			.left_join(reading_session::Entity)
 			.join_rev(
 				JoinType::LeftJoin,
-				finished_reading_session::Entity::belongs_to(media::Entity)
-					.from(finished_reading_session::Column::MediaId)
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
 					.to(media::Column::Id)
 					.on_condition(move |_left, _right| {
-						Condition::all().add(
-							finished_reading_session::Column::UserId.eq(user_id.clone()),
-						)
+						Condition::all()
+							.add(reading_session::Column::UserId.eq(user_id.clone()))
 					})
 					.into(),
 			)
@@ -200,30 +217,20 @@ impl Series {
 			// We only want to consider media that the user hasn't started or is in progress
 			.filter(
 				Condition::any()
+					// not started
 					.add(reading_session::Column::Id.is_null())
+					// in progress (latest is reading + no newer sessions)
 					.add(
 						Condition::all()
-							.add(reading_session::Column::UserId.eq(&user.id))
 							.add(
-								Condition::any()
-									.add(reading_session::Column::Epubcfi.is_not_null())
-									.add(
-										reading_session::Column::PercentageCompleted
-											.lt(1.0),
-									)
-									.add(
-										Condition::all()
-											.add(
-												reading_session::Column::Page
-													.is_not_null(),
-											)
-											.add(reading_session::Column::Page.gt(0)),
-									),
-							),
+								reading_session::Column::Status
+									.eq(ReadingStatus::Reading),
+							)
+							.add(latest_only.clone()),
 					),
 			)
-			// If the book is finshed, we don't even want to consider it
-			.filter(finished_reading_session::Column::Id.is_null());
+			.group_by(media::Column::Id)
+			.group_by(media_metadata::Column::Id); // pgsql requires addtl grouping
 
 		let books = if let Some(name) = name_cmp {
 			let mut cursor = query.cursor_by(media::Column::Name);
@@ -250,6 +257,22 @@ impl Series {
 
 		Ok(finished_count >= media_count)
 	}
+
+	// TODO: support this for series
+	// async fn last_completed_at(
+	// 	&self,
+	// 	ctx: &Context<'_>,
+	// ) -> Result<Option<chrono::DateTime<chrono::Utc>>> {
+	// 	let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+	// 	let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+	// 	// i think we need a loader for this, but that does:
+	// 	// get the media_count, finished_count, and the most recent finished_at all in one go
+	// 	// the tricky part here is that it doesn't account for rereads well, so if i complete
+	// 	// a series and then reread a random book in the middle months later, it would
+	// 	// update the last_completed_at to the most recent reread completion
+	// 	// this requires more thought, but leaving here as a reminder
+	// }
 
 	async fn percentage_completed(&self, ctx: &Context<'_>) -> Result<f32> {
 		let (media_count, finished_count) =
@@ -308,6 +331,7 @@ impl Series {
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
+		let last_modified = self.model.updated_at;
 
 		let dimensions = self
 			.model
@@ -317,11 +341,14 @@ impl Series {
 			.map(|dim| (dim.width, dim.height));
 
 		Ok(ImageRef {
-			url: service
-				.format_url(format!("/api/v2/series/{}/thumbnail", self.model.id)),
+			url: service.cache_friendly_url(
+				format!("/api/v2/series/{}/thumbnail", self.model.id),
+				&last_modified,
+			),
 			height: dimensions.as_ref().map(|dim| dim.1),
 			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.thumbnail_meta.clone(),
+			last_modified,
 		})
 	}
 
@@ -333,51 +360,15 @@ impl Series {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
-				r"
-				WITH base_counts AS (
-					SELECT
-						COUNT(*) AS book_count,
-						IFNULL(SUM(media.size), 0) AS total_bytes
-					FROM media
-					WHERE media.series_id = $1
-				),
-				finished_stats AS (
-					SELECT
-						COUNT(DISTINCT frs.media_id) AS completed_books,
-						IFNULL(SUM(frs.elapsed_seconds), 0) AS finished_reading_time
-					FROM finished_reading_sessions frs
-					WHERE frs.media_id IN (SELECT id FROM media WHERE series_id = $1)
-						AND ($2 IS TRUE OR frs.user_id = $3)
-				),
-				active_stats AS (
-					SELECT
-						COUNT(DISTINCT rs.media_id) AS in_progress_books,
-						IFNULL(SUM(rs.elapsed_seconds), 0) AS active_reading_time
-					FROM reading_sessions rs
-					WHERE rs.media_id IN (SELECT id FROM media WHERE series_id = $1)
-						AND ($2 IS TRUE OR rs.user_id = $3)
-				)
-				SELECT
-					base_counts.book_count,
-					base_counts.total_bytes,
-					finished_stats.completed_books,
-					active_stats.in_progress_books,
-					(finished_stats.finished_reading_time + active_stats.active_reading_time) AS total_reading_time_seconds
-				FROM base_counts, finished_stats, active_stats;
-				",
-				[
-					self.model.id.clone().into(),
-					all_users.unwrap_or(false).into(),
-					user.id.clone().into(),
-				],
-			))
-			.await?
-			.ok_or("Series stats failed to be calculated")?;
+		let stats = SeriesStats::fetch(
+			conn,
+			self.model.id.clone(),
+			user.id.clone(),
+			all_users.unwrap_or(false),
+		)
+		.await?;
 
-		Ok(SeriesStats::from_query_result(&result, "")?)
+		Ok(stats)
 	}
 }
 
@@ -398,17 +389,3 @@ async fn get_series_progress(ctx: &Context<'_>, series_id: String) -> Result<(i6
 
 	Ok((media_count, finished_count))
 }
-
-// Note: SQLx does not support u64 :'(
-// See https://github.com/launchbadge/sqlx/issues/499
-#[derive(Debug, FromQueryResult, SimpleObject)]
-pub struct SeriesStats {
-	book_count: i64,
-	total_bytes: i64,
-	completed_books: i64,
-	in_progress_books: i64,
-	total_reading_time_seconds: i64,
-}
-
-#[cfg(test)]
-mod tests {}

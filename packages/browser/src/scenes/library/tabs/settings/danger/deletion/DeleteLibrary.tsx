@@ -32,10 +32,9 @@ export default function DeleteLibrary() {
 					<div>
 						<Button
 							type="button"
-							variant="danger"
+							variant="destructive"
 							onClick={() => setShowConfirmation(true)}
 							className="shrink-0"
-							size="md"
 						>
 							Delete library
 						</Button>

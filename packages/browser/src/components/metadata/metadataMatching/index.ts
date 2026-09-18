@@ -1,3 +1,4 @@
+export { pendingMatchRecordFragment } from './fragments'
 export { default as PendingMatchesSection } from './PendingMatchesSection'
 export { ConfidenceBadge } from './reviewDialog/ConfidenceBadge'
 export { FieldValue } from './reviewDialog/FieldValue'

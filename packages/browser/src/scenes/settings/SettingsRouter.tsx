@@ -3,6 +3,7 @@ import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { usePaths } from '@/paths'
 import { useAppStore } from '@/stores/app.ts'
 
 import EmailSettingsRouter from './server/email/EmailSettingsRouter.tsx'
@@ -28,12 +29,13 @@ const TagSettingsScene = lazy(() => import('./server/tags'))
  */
 export default function SettingsRouter() {
 	const { checkPermission } = useAppContext()
+	const paths = usePaths()
 
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
 
 	const apiKeys = checkPermission(UserPermission.AccessApiKeys)
 	const canManageServer = checkPermission(UserPermission.ManageServer)
-	const canManageUsers = checkPermission(UserPermission.ManageUsers)
+	const canReadUsers = checkPermission(UserPermission.ReadUsers)
 	const canManageEmail = checkPermission(UserPermission.EmailerManage)
 	const canReadProviders = checkPermission(UserPermission.MetadataProviderRead)
 	const canManageLibrary = checkPermission(UserPermission.ManageLibrary)
@@ -41,7 +43,7 @@ export default function SettingsRouter() {
 	return (
 		<Routes>
 			<Route element={<SettingsLayout />}>
-				<Route path="" element={<Navigate to="app/account" replace />} />
+				<Route path="" element={<Navigate to={paths.settings('account')} replace />} />
 
 				<Route path="account" element={<GeneralSettingsScene />} />
 				<Route path="preferences" element={<AppearanceSettingsScene />} />
@@ -52,14 +54,14 @@ export default function SettingsRouter() {
 				{canManageServer && <Route path="server" element={<GeneralServerSettingsScene />} />}
 				{canManageServer && <Route path="logs" element={<ServerLogsScene />} />}
 				{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
-				{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
+				{canReadUsers && <Route path="users/*" element={<UsersRouter />} />}
 				{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
 				{canReadProviders && (
 					<Route path="metadata-integrations" element={<MetadataIntegrationsScene />} />
 				)}
 				{canManageLibrary && <Route path="tags" element={<TagSettingsScene />} />}
 
-				<Route path="*" element={<Navigate to="account" replace />} />
+				<Route path="*" element={<Navigate to={paths.settings('account')} replace />} />
 			</Route>
 		</Routes>
 	)

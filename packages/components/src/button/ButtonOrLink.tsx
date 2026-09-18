@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { cn } from '../utils'
 import { Button, ButtonProps, buttonVariants } from './Button'
@@ -7,6 +7,7 @@ type BaseProps = React.ComponentProps<'button'> & React.ComponentProps<'a'> & Bu
 export type ButtonOrLinkProps = {
 	// TODO: this is a bit of a hack
 	forceAnchor?: boolean
+	replace?: boolean
 } & BaseProps
 
 export function ButtonOrLink({
@@ -16,7 +17,7 @@ export function ButtonOrLink({
 	rounded,
 	pressEffect = false,
 	forceAnchor = false,
-	newYork,
+	replace,
 	...props
 }: ButtonOrLinkProps) {
 	const isLink = typeof props.href !== 'undefined'
@@ -26,6 +27,7 @@ export function ButtonOrLink({
 	const location = isLink
 		? {
 				[isExternal ? 'href' : 'to']: props.href as string,
+				...(replace && !isExternal ? { replace } : {}),
 			}
 		: {}
 	const buttonOnlyProps = isLink
@@ -38,8 +40,8 @@ export function ButtonOrLink({
 			className={
 				isLink
 					? cn(
-							buttonVariants({ className, newYork, rounded, size, variant }),
-							'focus:ring-edge-brand dark:focus:ring-edge-brand',
+							buttonVariants({ className, rounded, size, variant }),
+							'focus:ring-ring',
 							{
 								'cursor-not-allowed bg-background opacity-50': props.disabled,
 							},

@@ -37,5 +37,17 @@ describe('resolveUrl', () => {
 				'http://example.com/search?query=test',
 			)
 		})
+
+		it('should preserve OPDS search template characters', () => {
+			expect(resolveUrl('/search{?query}', 'http://example.com')).toBe(
+				'http://example.com/search{?query}',
+			)
+		})
+
+		it('should keep percent-encoded apostrophes encoded', () => {
+			expect(resolveUrl('/opds/books/O%27Rourke', 'http://example.com')).toBe(
+				'http://example.com/opds/books/O%27Rourke',
+			)
+		})
 	})
 })

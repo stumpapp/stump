@@ -137,7 +137,7 @@ export default function ThumbnailConfigForm() {
 				{!enabled && (
 					<div key="no-thumbnail-config">
 						<Card className="gap-y-4 p-6 flex flex-col items-center border-dashed">
-							<span className="p-1 rounded-full border border-fill-brand-secondary bg-fill-brand">
+							<span className="p-1 rounded-full border border-primary/30 bg-primary">
 								<Check className="text-foreground" />
 							</span>
 							<Text size="sm" variant="muted">
@@ -177,8 +177,6 @@ export default function ThumbnailConfigForm() {
 								<div className="gap-2 flex flex-col">
 									<Label>{t(getKey('scaleEvenlyByFactor.factor.label'))}</Label>
 									<Input
-										contrast
-										variant="primary"
 										placeholder="0.65"
 										{...form.register('thumbnailConfig.resizeMethod.factor', {
 											valueAsNumber: true,
@@ -196,8 +194,6 @@ export default function ThumbnailConfigForm() {
 									{t(getKey('exact.description'))}
 								</Text>
 								<Input
-									contrast
-									variant="primary"
 									label={t(getKey('exact.width.label'))}
 									placeholder="200"
 									{...form.register('thumbnailConfig.resizeMethod.width', {
@@ -207,8 +203,6 @@ export default function ThumbnailConfigForm() {
 									errorMessage={configErrors?.resizeMethod?.width?.message}
 								/>
 								<Input
-									contrast
-									variant="primary"
 									label={t(getKey('exact.height.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.height', {
@@ -245,8 +239,6 @@ export default function ThumbnailConfigForm() {
 								</div>
 
 								<Input
-									contrast
-									variant="primary"
 									label={t(getKey('scaleDimension.size.label'))}
 									placeholder="350"
 									{...form.register('thumbnailConfig.resizeMethod.size', {
@@ -282,8 +274,6 @@ export default function ThumbnailConfigForm() {
 						</div>
 
 						<Input
-							contrast
-							variant="primary"
 							label={t(getKey('quality.label'))}
 							disabled={!enabled}
 							descriptionProps={{ className: 'text-xs' }}
@@ -309,7 +299,6 @@ export default function ThumbnailConfigForm() {
 							// title={isDifferent ? undefined : t('common.noChanges')}
 							type="submit"
 							// disabled={!isDifferent}
-							variant="primary"
 						>
 							{t('common.saveChanges')}
 						</Button>

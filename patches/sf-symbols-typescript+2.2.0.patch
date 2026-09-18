@@ -1,0 +1,37 @@
+diff --git a/node_modules/sf-symbols-typescript/dist/index.d.ts b/node_modules/sf-symbols-typescript/dist/index.d.ts
+index 48f7337..dac499e 100644
+--- a/node_modules/sf-symbols-typescript/dist/index.d.ts
++++ b/node_modules/sf-symbols-typescript/dist/index.d.ts
+@@ -5,6 +5,17 @@
+  */
+ export interface Overrides {}
+ 
++/**
++ * Augment this interface to add custom SF Symbol names to the SFSymbol type.
++ *
++ * declare module 'sf-symbols-typescript' {
++ *   interface CustomSymbols {
++ *     'my.custom.symbol': true
++ *   }
++ * }
++ */
++export interface CustomSymbols {}
++
+ /**
+  * @name SF Symbols 1.0
+  * @description These symbols are available on the following platforms:
+@@ -9423,7 +9434,7 @@ export type SFSymbols7_0 =
+   | 'xmark.circle.badge.airplane'
+   | 'xmark.circle.badge.airplane.fill'
+ 
+-export type SFSymbol =
++type ResolvedSFSymbol =
+   Overrides extends { SFSymbolsVersion: '1.0' } ? SFSymbols1_0 :
+   Overrides extends { SFSymbolsVersion: '1.1' } ? SFSymbols1_1 :
+   Overrides extends { SFSymbolsVersion: '2.0' } ? SFSymbols2_0 :
+@@ -9447,3 +9458,5 @@ export type SFSymbol =
+   Overrides extends { SFSymbolsVersion: '6.4' } ? SFSymbols6_4 :
+   Overrides extends { SFSymbolsVersion: '7.0' } ? SFSymbols7_0 :
+   SFSymbols7_0
++
++export type SFSymbol = ResolvedSFSymbol | keyof CustomSymbols

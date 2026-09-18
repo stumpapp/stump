@@ -4,6 +4,8 @@ export type ImageBasedBookPageRef = {
 	ratio: number
 }
 
+export type PageSetIndexes = [number, number] | [number]
+
 export type GeneratePageSetsParams = {
 	imageSizes: Record<number, ImageBasedBookPageRef>
 	pages: number
@@ -14,20 +16,17 @@ export const generatePageSets = ({
 	imageSizes,
 	pages,
 	secondPageSeparate = false,
-}: GeneratePageSetsParams): number[][] => {
-	const sets: number[][] = []
-
+}: GeneratePageSetsParams): PageSetIndexes[] => {
 	if (Object.keys(imageSizes).length === 0) {
 		return Array.from({ length: pages }, (_, i) => [i])
 	}
 
-	const landscapePages = Object.keys(imageSizes).reduce(
-		(acc, key) => {
+	const landscapePages = Object.entries(imageSizes).reduce(
+		(acc, [key, dimensions]) => {
 			const idx = parseInt(key)
 			if (isNaN(idx)) return acc
-			if (!imageSizes[idx]) return acc
 
-			const { width, height, ratio } = imageSizes[idx]
+			const { width, height, ratio } = dimensions
 
 			const computedRatio = width / height
 			if (computedRatio !== ratio) {
@@ -40,58 +39,35 @@ export const generatePageSets = ({
 				)
 			}
 
-			acc[idx] = imageSizes[idx].ratio >= 1
+			acc[idx] = ratio >= 1
 			return acc
 		},
 		{} as Record<number, boolean>,
 	)
 
-	// A user reported that the current implementation can lead to duplicate sets. I've
-	// tried really hard to reproduce this, but haven't found a scenario where it
-	// happens. To be safe, I've added this visitedSet to ensure we don't add any
-	// indexes to a set that has already been added
-	const visitedSet = new Set<number>()
-
-	let currentSet: number[] = []
-	for (let i = 0; i < pages; i++) {
-		if (secondPageSeparate && i === 1) {
-			sets.push([1])
-			visitedSet.add(1)
-			continue
-		}
-		if (visitedSet.has(i)) {
-			continue // Skip already processed pages
-		}
-
-		visitedSet.add(i)
-
-		// If a page is landscape, we only ever want to show it by itself
-		// If a page is portrait, we will only show it by itself if the next page is also portrait
-
+	const pageSets: PageSetIndexes[] = []
+	let i = 0
+	while (i < pages) {
+		const isFirst = i === 0
+		const separateSecond = i === 1 && secondPageSeparate
 		const isLandscape = landscapePages[i]
 		const isLast = i === pages - 1
+		// these next two conditions are because: if we are looking to pair page `i` with the next page `i+1`
+		// but the next page is separate, the current page has nothing to pair with, thus has to be separate too
 		const nextIsLandscape = landscapePages[i + 1]
 		const nextIsLast = i + 1 === pages - 1
 
-		if (isLandscape || i === 0) {
-			currentSet.push(i)
-			sets.push(currentSet)
-			currentSet = []
-		} else {
-			currentSet.push(i)
+		const keepPageSeparate =
+			isFirst || separateSecond || isLandscape || isLast || nextIsLandscape || nextIsLast
 
-			// The logic behind the following condition is:
-			// 1. The last page is always its own set, so we push the current set when either the current
-			//		page is the last page or the next page is last.
-			// 2. If the next page is landscape, we also push the current set to ensure that the landscape page
-			//		is not included in the current set.
-			// 3. If the current set has exactly two pages, we push it because the set is complete
-			if (isLast || nextIsLast || nextIsLandscape || currentSet.length === 2) {
-				sets.push(currentSet)
-				currentSet = []
-			}
+		if (keepPageSeparate) {
+			pageSets.push([i])
+			i++
+		} else {
+			pageSets.push([i, i + 1])
+			i += 2
 		}
 	}
 
-	return sets.filter((set) => set.length > 0)
+	return pageSets
 }

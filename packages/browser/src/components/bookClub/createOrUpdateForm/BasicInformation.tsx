@@ -23,7 +23,6 @@ export default function BasicBookClubInformation() {
 	return (
 		<div className="gap-6 flex grow flex-col">
 			<Input
-				variant="primary"
 				label={t(getKey('name.label'))}
 				description={t(getKey('name.description'))}
 				placeholder={t(getKey('name.placeholder'))}
@@ -36,7 +35,6 @@ export default function BasicBookClubInformation() {
 
 			<TextArea
 				className="flex"
-				variant="primary"
 				label={t(getKey('description.label'))}
 				description={t(getKey('description.description'))}
 				placeholder={t(getKey('description.placeholder'))}
@@ -46,7 +44,6 @@ export default function BasicBookClubInformation() {
 
 			<CheckBox
 				id="is_private"
-				variant="primary"
 				label={t(getKey('is_private.label'))}
 				description={t(getKey('is_private.description'))}
 				checked={isPrivate}

@@ -1,4 +1,5 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
+import { EBOOK_EXTENSION, PDF_EXTENSION } from '@stump/client'
 import { Button, ButtonOrLink, DropdownMenu } from '@stump/components'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { BookCardFragment, graphql, UserPermission } from '@stump/graphql'
@@ -22,32 +23,26 @@ import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
-import { EBOOK_EXTENSION, PDF_EXTENSION } from '@/utils/patterns'
+import { isEbookExtension, isEbookReadProgress } from '@/utils/readingProgress'
 
 import DeleteHistoryConfirmation from './DeleteHistoryConfirmation'
 import EmailBookDialog from './EmailBookDialog'
 
 const completedMutation = graphql(`
-	mutation BookActionMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
-		markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
-			completedAt
-		}
+	mutation BookActionMenuComplete($id: ID!) {
+		finishMediaProgress(id: $id)
 	}
 `)
 
 const deleteMutation = graphql(`
 	mutation BookActionMenuDeleteSession($id: ID!) {
-		deleteMediaProgress(id: $id) {
-			__typename
-		}
+		clearMediaProgress(id: $id)
 	}
 `)
 
 const deleteHistoryMutation = graphql(`
 	mutation BookActionMenuDeleteHistory($id: ID!) {
-		deleteMediaReadHistory(id: $id) {
-			__typename
-		}
+		deleteMediaReadingHistory(id: $id)
 	}
 `)
 
@@ -116,10 +111,14 @@ export default function BookActionMenu({ book }: Props) {
 
 	const continueReadingLink = useMemo(() => {
 		if (!book.readProgress) return undefined
-		const { page, epubcfi } = book.readProgress
-		if (epubcfi) {
-			return paths.bookReader(book.id, { epubcfi, isEpub: true })
-		} else if (!!page && page > 0) {
+		const { page } = book.readProgress
+		if (
+			isEbookExtension(book.extension) ||
+			isEbookReadProgress(book.readProgress, book.extension)
+		) {
+			return paths.bookReader(book.id, { isEpub: true })
+		}
+		if (page && page > 0) {
 			return paths.bookReader(book.id, { page })
 		}
 		return undefined
@@ -180,7 +179,7 @@ export default function BookActionMenu({ book }: Props) {
 										label: 'Mark as read',
 										leftIcon: <BookOpenCheck className="mr-2 h-4 w-4" />,
 										onClick: () => {
-											actions.completeBook({ isComplete: true, id: book.id, page: book.pages })
+											actions.completeBook({ id: book.id })
 										},
 									},
 								]
@@ -275,11 +274,10 @@ export default function BookActionMenu({ book }: Props) {
 			<div className="gap-1 flex w-full items-center">
 				{canDownload && (
 					<ButtonOrLink
-						className="w-full"
+						className="w-full shrink"
 						variant="outline"
 						onClick={() => downloadRef.current?.click()}
 						title="Download"
-						rounded="lg"
 					>
 						<Download className="mr-2 h-4 w-4" />
 						Download
@@ -290,7 +288,7 @@ export default function BookActionMenu({ book }: Props) {
 					align="end"
 					contentWrapperClassName="w-48"
 					trigger={
-						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0" rounded="lg">
+						<Button variant="outline" size="icon" className="shrink-0">
 							<EllipsisVertical className="h-4 w-4" />
 						</Button>
 					}

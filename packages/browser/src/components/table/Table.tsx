@@ -145,7 +145,7 @@ export default function Table<T, V>({
 	const tableRows = table.getRowModel().rows
 
 	return (
-		<div className="space-y-2 flex flex-col">
+		<div className="flex flex-col">
 			<div className="relative" ref={rootRef} data-overlayscrollbars-initialize>
 				<div
 					className={cn('divide block max-w-full overflow-x-scroll overflow-y-hidden', {
@@ -154,7 +154,7 @@ export default function Table<T, V>({
 					ref={viewportRef}
 				>
 					<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
-						<thead className="border-b border-edge text-left">
+						<thead className="border-b border-border text-left">
 							{table.getHeaderGroups().map((headerGroup) => (
 								<tr key={headerGroup.id}>
 									{headerGroup.headers.map((header) => {
@@ -162,7 +162,7 @@ export default function Table<T, V>({
 											<th
 												key={header.id}
 												colSpan={header.colSpan}
-												className="py-2.5 first:pl-2.5 bg-background-surface/50"
+												className="py-2.5 first:pl-2.5 bg-muted/50"
 												style={{
 													...getCommonPinningStyles(header.column),
 												}}
@@ -191,7 +191,7 @@ export default function Table<T, V>({
 								</tr>
 							))}
 						</thead>
-						<tbody className="divide-y divide-edge">
+						<tbody className="divide-y divide-border">
 							{tableRows.map((row) => {
 								return (
 									<tr key={row.id}>
@@ -222,7 +222,7 @@ export default function Table<T, V>({
 				</div>
 			</div>
 
-			<div className="h-10 px-2 flex items-center justify-between border-t border-edge">
+			<div className="h-10 px-2 flex items-center justify-between border-t border-border">
 				<div className="gap-4 flex items-center">
 					<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
 						{tableRows.length > 0 ? (
@@ -282,9 +282,9 @@ function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
 	return (
 		<span className="ml-1.5 shrink-0">
 			{direction === 'asc' ? (
-				<ArrowUp className="h-3 w-3 text-foreground-muted" />
+				<ArrowUp className="h-3 w-3 text-muted-foreground" />
 			) : (
-				<ArrowDown className="h-3 w-3 text-foreground-muted" />
+				<ArrowDown className="h-3 w-3 text-muted-foreground" />
 			)}
 		</span>
 	)

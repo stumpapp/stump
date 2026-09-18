@@ -40,7 +40,7 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 				<Text className="text-lg">{label}</Text>
 				<Pressable onPress={openPicker}>
 					<View
-						className="h-8 w-8 rounded-full border-2 border-edge"
+						className="h-8 w-8 border-edge rounded-full border-2"
 						style={{ backgroundColor: value }}
 					/>
 				</Pressable>
@@ -54,7 +54,7 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 				// I tried a nested gesture handler but a bit yucky. For now Android can
 				// just tap the buttons to dismiss
 				dismissible={false}
-				backgroundColor={colors.background.DEFAULT}
+				backgroundColor={colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}

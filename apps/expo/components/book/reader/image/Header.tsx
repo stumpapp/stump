@@ -1,12 +1,14 @@
 import { useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
-import { Platform, View } from 'react-native'
+import { Alert, Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
-import { COLORS } from '~/lib/constants'
+import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
 import { useReaderAnimations } from '../shared/readerAnimations'
@@ -17,12 +19,32 @@ type Props = {
 }
 
 export default function Header({ onShowGlobalSettings }: Props) {
+	const { t } = useTranslate()
+
 	const { book, resetTimer, serverId } = useImageBasedReader()
+	const activeServerCtx = useActiveServerSafe()
 
 	const insets = useSafeAreaInsets()
 	const { secondaryStyle } = useReaderAnimations()
 
 	const router = useRouter()
+
+	const confirmResetTimer = () => {
+		Alert.alert(
+			t('readerSettings.readingTimer.resetTimer'),
+			t('readerSettings.readingTimer.confirmation.message', {
+				bookName: book.name,
+				action:
+					activeServerCtx?.activeServer.kind === 'stump'
+						? t('readerSettings.readingTimer.confirmation.action.multi-session')
+						: t('readerSettings.readingTimer.confirmation.action.single-session'),
+			}),
+			[
+				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: t('common.reset'), style: 'destructive', onPress: resetTimer },
+			],
+		)
+	}
 
 	return (
 		<Animated.View
@@ -34,7 +56,10 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					icon={{
 						android: X,
 						ios: 'xmark',
-						color: Platform.OS === 'android' ? COLORS.dark.foreground.DEFAULT : 'primary',
+						color:
+							Platform.OS === 'android' || !IS_IOS_26_PLUS
+								? COLORS.dark.foreground.DEFAULT
+								: 'primary',
 					}}
 					onPress={() => router.back()}
 					ios={{ variant: 'glass' }}
@@ -53,7 +78,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				<PagedActionMenu
 					book={book}
 					serverId={serverId}
-					onResetTimer={resetTimer}
+					onResetTimer={confirmResetTimer}
 					onShowSettings={onShowGlobalSettings}
 				/>
 			</View>

@@ -7,7 +7,6 @@ import {
 	Dialog,
 	DropdownMenu,
 	IconButton,
-	Label,
 	Text,
 	useBoolean,
 } from '@stump/components'
@@ -27,7 +26,9 @@ const uploadMutation = graphql(`
 	mutation UploadUserAvatar($file: Upload!) {
 		uploadUserAvatar(upload: $file) {
 			id
-			avatarUrl
+			avatar {
+				url
+			}
 		}
 	}
 `)
@@ -36,7 +37,9 @@ const deleteMutation = graphql(`
 	mutation DeleteUserAvatar {
 		deleteUserAvatar {
 			id
-			avatarUrl
+			avatar {
+				url
+			}
 		}
 	}
 `)
@@ -128,7 +131,7 @@ export default function AvatarPicker() {
 		}
 	}, [isModalOpen])
 
-	const imageUrl = user?.avatarUrl
+	const imageUrl = user?.avatar?.url
 
 	return (
 		<>
@@ -140,9 +143,9 @@ export default function AvatarPicker() {
 						<Dialog.Close onClick={off} />
 					</Dialog.Header>
 
-					<div className="gap-y-4 py-2 scrollbar-hide flex h-[300px] flex-col">
+					<div className="gap-y-4 py-2 h-75 scrollbar-hide flex flex-col">
 						<div className="flex items-center justify-center">
-							<div className={cx('relative h-[100px]', { 'h-[100px]': filePreview })}>
+							<div className={cx('h-25 relative', { 'h-25': filePreview })}>
 								{filePreview && (
 									<>
 										<div className="top-0 right-0 absolute flex items-center justify-center">
@@ -159,12 +162,12 @@ export default function AvatarPicker() {
 											</IconButton>
 										</div>
 										<div className="flex h-full items-center justify-center overflow-hidden rounded-full">
-											<img src={filePreview} className="h-full object-scale-down" />
+											<img src={filePreview} className="h-full w-full object-scale-down" />
 										</div>
 									</>
 								)}
 								{!filePreview && (
-									<div className="flex h-[100px] w-[100px] rounded-full border border-edge" />
+									<div className="h-25 w-25 flex rounded-full border border-border" />
 								)}
 							</div>
 						</div>
@@ -172,8 +175,8 @@ export default function AvatarPicker() {
 						<div
 							{...getRootProps()}
 							className={cn(
-								'gap-2 rounded-md p-4 flex h-full cursor-pointer items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background',
-								{ 'ring-edge-brand': isDropzoneFocused },
+								'gap-2 p-4 flex h-full cursor-pointer items-center justify-center rounded-md border border-dashed border-border ring-2 ring-transparent ring-offset-2 ring-offset-background',
+								{ 'ring-ring': isDropzoneFocused },
 							)}
 						>
 							<input {...getInputProps()} />
@@ -182,8 +185,10 @@ export default function AvatarPicker() {
 					</div>
 
 					<Dialog.Footer>
-						<Button onClick={off}>{t('common.cancel')}</Button>
-						<Button variant="primary" onClick={handleConfirm} disabled={!selectedFile}>
+						<Button variant="outline" onClick={off}>
+							{t('common.cancel')}
+						</Button>
+						<Button onClick={handleConfirm} disabled={!selectedFile}>
 							{t('common.upload')}
 						</Button>
 					</Dialog.Footer>
@@ -191,8 +196,12 @@ export default function AvatarPicker() {
 			</Dialog>
 
 			<div className="gap-2.5 flex flex-col self-center">
-				<Label>{t(getKey('label'))}</Label>
-				<span className="relative">
+				<span
+					className="relative"
+					// i personally kinda don't like the label on this visually but moved to
+					// aria to not break accessibility
+					aria-label={t(getKey('avatar'))}
+				>
 					<Avatar
 						className="h-40 w-40 text-2xl!"
 						src={imageUrl || undefined}
@@ -205,7 +214,11 @@ export default function AvatarPicker() {
 							align="start"
 							contentWrapperClassName="w-18"
 							trigger={
-								<Button variant="subtle-dark" size="xs" className="px-2 py-1.5 border border-edge">
+								<Button
+									size="xs"
+									className="px-2 py-1.5 border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+									variant="secondary"
+								>
 									<Edit className="mr-2 h-3 w-3" />
 									{t('common.edit')}
 								</Button>

@@ -1,18 +1,21 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { formatBytesSeparate } from '@stump/client'
 import { graphql, SeriesOverviewSheetQuery } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
+import { BookCheck, BookOpen, Clock, HardDrive, Library } from 'lucide-react-native'
 import { forwardRef, useState } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { formatBytesSeparate } from '~/lib/format'
+import { IS_IOS_26_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
 
+import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import { MetadataBadgeSection } from '../overview'
 import { SheetBackDetection } from '../SheetBackDetection'
+import { StatCard, StatCardProps } from '../stats'
 import { Card, Heading, Text } from '../ui'
 
 const query = graphql(`
@@ -95,10 +98,10 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 		<>
 			<TrueSheet
 				ref={ref}
-				detents={['auto', 1]}
+				detents={[0.5, 1]}
 				grabber
 				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{
 					color: colors.sheet.grabber,
 				}}
@@ -125,7 +128,48 @@ type SheetContentProps = {
 
 function SheetContent({ series: { stats, metadata, resolvedName, tags } }: SheetContentProps) {
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
-	const formattedTime = formatHumanDuration(stats.totalReadingTimeSeconds, { significantUnits: 1 })
+	const formattedTime = formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
+
+	const { itemWidth } = useGridItemSize({
+		horizontalGap: 7, // gap-2 on grid = 7px
+		padding: 42, // p-6 on sheet = 21px * 2 sides = 42px
+	})
+
+	const seriesStats = [
+		{
+			label: 'In Progress',
+			value: stats.inProgressBooks,
+			icon: BookOpen,
+			colors: STAT_COLORS.inProgress,
+		},
+		{
+			label: 'Completed',
+			value: stats.completedBooks,
+			suffix: `/ ${stats.bookCount}`,
+			icon: BookCheck,
+			colors: STAT_COLORS.completed,
+		},
+		{
+			label: 'Books',
+			value: stats.bookCount,
+			icon: Library,
+			colors: STAT_COLORS.books,
+		},
+		{
+			label: 'Reading Time',
+			value: formattedTime ? formattedTime.value : '??',
+			suffix: formattedTime ? formattedTime.unit : undefined,
+			icon: Clock,
+			colors: STAT_COLORS.readingTime,
+		},
+		{
+			label: 'Size',
+			value: formattedSize ? formattedSize.value : 'Unknown',
+			suffix: formattedSize ? formattedSize.unit : '',
+			icon: HardDrive,
+			colors: STAT_COLORS.size,
+		},
+	] satisfies StatCardProps[]
 
 	const hasPublicationInfo =
 		metadata?.publisher ||
@@ -142,9 +186,9 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 	const hasAbout = metadata?.summary || metadata?.descriptionFormatted
 
 	return (
-		<ScrollView className="px-4 py-6 flex-1" nestedScrollEnabled>
-			<View className="gap-6">
-				<View className="px-2">
+		<ScrollView className="p-6 flex-1" nestedScrollEnabled>
+			<View className="gap-8">
+				<View>
 					<Heading size="2xl" numberOfLines={3}>
 						{resolvedName}
 					</Heading>
@@ -160,23 +204,11 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 					)}
 				</View>
 
-				<Card label="Stats">
-					<Card.StatGroup>
-						<Card.Stat label="In Progress" value={stats.inProgressBooks} />
-						<Card.Stat
-							label="Completed"
-							value={stats.completedBooks}
-							suffix={` / ${stats.bookCount}`}
-						/>
-						<Card.Stat label="Books" value={stats.bookCount} />
-						<Card.Stat label="Reading Time" value={formattedTime} />
-						<Card.Stat
-							label="Size"
-							value={formattedSize?.value || 'Unknown'}
-							suffix={formattedSize?.unit && ` ${formattedSize?.unit}`}
-						/>
-					</Card.StatGroup>
-				</Card>
+				<View className="gap-2 flex-row flex-wrap justify-center">
+					{seriesStats.map((stat, index) => (
+						<StatCard key={index} {...stat} style={{ width: itemWidth }} />
+					))}
+				</View>
 
 				{hasAbout && (
 					<Card label="About" className="px-6">

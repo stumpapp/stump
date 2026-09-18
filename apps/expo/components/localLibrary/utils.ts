@@ -3,7 +3,9 @@ import StumpStreamer from '~/modules/streamer'
 
 import { DownloadedFile } from './types'
 
-export const getThumbnailPath = (downloadedFile: DownloadedFile): string | null => {
+type MinimalDownloadedFile = Pick<DownloadedFile, 'id' | 'serverId' | 'thumbnailPath'>
+
+export const getThumbnailPath = (downloadedFile: MinimalDownloadedFile): string | null => {
 	return downloadedFile.thumbnailPath
 		? `file://${toAbsolutePath(downloadedFile.thumbnailPath)}`
 		: StumpStreamer.getThumbnailPath(

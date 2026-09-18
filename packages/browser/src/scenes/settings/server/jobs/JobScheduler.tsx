@@ -4,7 +4,7 @@ import { graphql, ScheduledJobsQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
-import { AlertCircleIcon, Plus } from 'lucide-react'
+import { AlertCircleIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -111,9 +111,8 @@ export default function JobScheduler() {
 			)}
 
 			<div>
-				<Button variant="secondary" size="sm" onClick={openCreate}>
-					<Plus className="mr-1.5 h-4 w-4" />
-					{t(getKey('newScheduledJob'))}
+				<Button variant="secondary" onClick={openCreate}>
+					{t(getKey('createScheduledJob'))}
 				</Button>
 			</div>
 
@@ -130,7 +129,7 @@ export default function JobScheduler() {
 				title={t(getKey('deleteScheduledJob.title'))}
 				description={`${t(getKey('deleteScheduledJob.description')).replace('{{name}}', deleting?.name ?? '')}`}
 				confirmText={t(getKey('deleteScheduledJob.confirm'))}
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				onConfirm={() => deleting && doDelete({ id: deleting.id })}
 				onClose={() => setDeleting(null)}
 			/>

@@ -8,19 +8,18 @@ use models::{
 		ordering::OrderBy,
 	},
 };
-use sea_orm::{
-	prelude::*, DatabaseBackend, FromQueryResult, QueryOrder, QuerySelect, Statement,
-};
+use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	filter::{series::SeriesFilterInput, IntoFilter},
+	filter::series::SeriesFilterInput,
 	object::series::Series,
 	order::SeriesOrderBy,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
+	utils::db_statement,
 };
 
 #[derive(Default)]
@@ -41,7 +40,7 @@ impl SeriesQuery {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let conditions = filter.into_filter();
+		let conditions = filter.into_filter_with_user(&user.id);
 		let query = SeriesOrderBy::add_order_by(
 			&order_by,
 			series::ModelWithMetadata::find_for_user(user).filter(conditions),
@@ -132,8 +131,8 @@ impl SeriesQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(series_metadata.title, series.name), 1, 1) AS letter,

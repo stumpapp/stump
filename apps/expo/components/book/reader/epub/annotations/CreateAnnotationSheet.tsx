@@ -1,13 +1,13 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { TextInput, View } from 'react-native'
+import { View } from 'react-native'
 
-import { SheetBackDetection } from '~/components/SheetBackDetection'
-import { Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import SheetWithHeader from '~/components/SheetWithHeader'
+import { useColors } from '~/lib/constants'
 import { ReadiumLocator } from '~/modules/readium'
 
-import AnnotationSheetHeader from './AnnotationSheetHeader'
+import AnnotatedText from './AnnotatedText'
+import AnnotationInput from './AnnotationInput'
 
 export type CreateAnnotationSheetRef = {
 	open: (locator: ReadiumLocator, selectedText: string) => void
@@ -25,8 +25,10 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 		const [locator, setLocator] = useState<ReadiumLocator | null>(null)
 		const [selectedText, setSelectedText] = useState('')
 		const [annotation, setAnnotation] = useState('')
-		const [isOpen, setIsOpen] = useState(false)
 
+		// TODO: use computed scoped mini-themes to prevent light colours with dark epub theme (and vice versa):
+		//   - Use dark mode colours (i.e. black background, white text, etc.) with dark epub theme?
+		//   - Or derive from epub theme colours and replace accent colour with something else?
 		const colors = useColors()
 
 		useImperativeHandle(ref, () => ({
@@ -48,62 +50,29 @@ const CreateAnnotationSheet = forwardRef<CreateAnnotationSheetRef, Props>(
 		}, [locator, annotation, onCreateAnnotation])
 
 		const handleDismiss = useCallback(() => {
-			setIsOpen(false)
 			setLocator(null)
 			setSelectedText('')
 			setAnnotation('')
 			onDismiss?.()
 		}, [onDismiss])
 
-		// TODO: Make look better for iOS sheet, either adjust colors or remove glass
 		return (
-			<>
-				<TrueSheet
-					ref={sheetRef}
-					detents={['auto', 1]}
-					grabber
-					backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-					grabberOptions={{
-						color: colors.sheet.grabber,
-					}}
-					onDidPresent={() => setIsOpen(true)}
-					onDidDismiss={handleDismiss}
-					header={
-						<AnnotationSheetHeader
-							title="New Annotation"
-							onClose={() => sheetRef.current?.dismiss()}
-							onPrimaryAction={handleCreate}
-						/>
-					}
-				>
-					<View className="gap-4 p-4">
-						{selectedText && (
-							<View className="rounded-lg p-3 bg-background-surface">
-								<Text className="text-foreground-muted italic" numberOfLines={3}>
-									&ldquo;{selectedText}&rdquo;
-								</Text>
-							</View>
-						)}
+			<SheetWithHeader
+				ref={sheetRef}
+				detents={[0.5, 1]}
+				scrollable
+				backgroundColor={colors.sheet.background}
+				onDidDismiss={handleDismiss}
+				headerLabel="New Annotation"
+				headerLeftButton={{ type: 'dismiss' }}
+				headerRightButton={{ type: 'check', onPress: handleCreate }}
+			>
+				<View className="gap-4">
+					{selectedText && <AnnotatedText text={selectedText} />}
 
-						<View className="gap-2">
-							<Text className="text-foreground-muted">Note</Text>
-							<TextInput
-								value={annotation}
-								onChangeText={setAnnotation}
-								placeholder="Enter your notes..."
-								placeholderTextColor={colors.foreground.muted}
-								multiline
-								numberOfLines={3}
-								className="rounded-lg p-3 min-h-[80px] border border-edge bg-background-surface text-foreground"
-								textAlignVertical="top"
-								autoFocus
-							/>
-						</View>
-					</View>
-				</TrueSheet>
-
-				<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
-			</>
+					<AnnotationInput value={annotation} onChangeText={setAnnotation} />
+				</View>
+			</SheetWithHeader>
 		)
 	},
 )

@@ -1,12 +1,13 @@
 use models::{
-	entity::{
-		finished_reading_session, media, media_metadata, reading_session, user::AuthUser,
-	},
+	entity::{media, media_metadata, reading_session, user::AuthUser},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional},
+	shared::enums::ReadingStatus,
 };
 use rust_decimal::prelude::ToPrimitive;
 use sea_orm::{
-	prelude::*, sea_query::IntoCondition, FromQueryResult, JoinType, QuerySelect, Select,
+	prelude::*,
+	sea_query::{Condition, Expr, Query, SimpleExpr, SubQueryStatement},
+	FromQueryResult, JoinType, QuerySelect, Select,
 };
 
 use crate::kobo::sync_types::*;
@@ -14,9 +15,10 @@ use chrono::Utc;
 
 #[derive(Debug, Clone, FromQueryResult)]
 pub struct ReadingSession {
-	pub started_at: DateTimeWithTimeZone,
+	pub created_at: DateTimeWithTimeZone,
 	pub updated_at: Option<DateTimeWithTimeZone>,
-	pub percentage_completed: Option<Decimal>,
+	pub end_percentage: Option<Decimal>,
+	pub status: ReadingStatus,
 }
 
 #[derive(Debug, Clone)]
@@ -38,56 +40,110 @@ fn apply_reading_session_joins(
 	// we're using a custom `ReadingSession` struct to insulate us from changes to
 	// `reading_session`: if the entity requires columns that aren't selected here, then
 	// `parse_query_to_model_optional` will silently return None.
+	let user_id = user.id.clone();
+
+	// IN (select max(created_at) where user_id=user.id AND media_id=media.id
+	let latest_subq = Query::select()
+		.expr(
+			Expr::col((reading_session::Entity, reading_session::Column::CreatedAt))
+				.max(),
+		)
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id.clone()))
+		// where media_id = media.id
+		.and_where(
+			Expr::col((reading_session::Entity, reading_session::Column::MediaId))
+				.equals((media::Entity, media::Column::Id)),
+		)
+		.to_owned();
+
+	let completed_count_subq = Query::select()
+		.expr(Expr::col((reading_session::Entity, reading_session::Column::Id)).count())
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id.clone()))
+		.and_where(
+			Expr::col((reading_session::Entity, reading_session::Column::MediaId))
+				.equals((media::Entity, media::Column::Id)),
+		)
+		.and_where(reading_session::Column::Status.eq(ReadingStatus::Finished))
+		.to_owned();
+
+	let last_completed_subq = Query::select()
+		.expr(
+			Expr::col((reading_session::Entity, reading_session::Column::UpdatedAt))
+				.max(),
+		)
+		.from(reading_session::Entity)
+		.and_where(reading_session::Column::UserId.eq(user_id.clone()))
+		.and_where(
+			Expr::col((reading_session::Entity, reading_session::Column::MediaId))
+				.equals((media::Entity, media::Column::Id)),
+		)
+		.and_where(reading_session::Column::Status.eq(ReadingStatus::Finished))
+		.to_owned();
+
 	query
-		.column_as(reading_session::Column::Id, "reading_sessionsid")
 		.column_as(
-			reading_session::Column::StartedAt,
-			"reading_sessionsstarted_at",
+			Expr::col((reading_session::Entity, reading_session::Column::Id)),
+			"reading_sessionsid",
 		)
 		.column_as(
-			reading_session::Column::UpdatedAt,
+			Expr::col((reading_session::Entity, reading_session::Column::CreatedAt)),
+			"reading_sessionscreated_at",
+		)
+		.column_as(
+			Expr::col((reading_session::Entity, reading_session::Column::UpdatedAt)),
 			"reading_sessionsupdated_at",
 		)
 		.column_as(
-			reading_session::Column::PercentageCompleted,
-			"reading_sessionspercentage_completed",
-		)
-		// LEFT JOIN reading_sessions on media.id = reading_sessions.media_id
-		//  AND reading_sessions.user_id = $user_id
-		.join(
-			JoinType::LeftJoin,
-			media::Relation::ReadingSession.def().on_condition({
-				let user_id = user.id.clone();
-				move |_left, right| {
-					Expr::col((right, reading_session::Column::UserId))
-						.eq(user_id.clone())
-						.into_condition()
-				}
-			}),
+			Expr::col((
+				reading_session::Entity,
+				reading_session::Column::EndPercentage,
+			)),
+			"reading_sessionsend_percentage",
 		)
 		.column_as(
-			finished_reading_session::Column::Id.count(),
+			Expr::col((reading_session::Entity, reading_session::Column::Status)),
+			"reading_sessionsstatus",
+		)
+		// LEFT JOIN reading_sessions on media.id = reading_sessions.media_id
+		//  AND reading_sessions.user_id = $user_id AND reading_sessions.created_at IN (latest_subq)
+		.join_rev(
+			JoinType::LeftJoin,
+			reading_session::Entity::belongs_to(media::Entity)
+				.from(reading_session::Column::MediaId)
+				.to(media::Column::Id)
+				.on_condition({
+					let user_id = user_id.clone();
+					let latest_subq = latest_subq.clone();
+					move |_left, _right| {
+						Condition::all()
+							.add(reading_session::Column::UserId.eq(user_id.clone()))
+							.add(
+								Expr::col((
+									reading_session::Entity,
+									reading_session::Column::CreatedAt,
+								))
+								.in_subquery(latest_subq.clone()),
+							)
+					}
+				})
+				.into(),
+		)
+		.column_as(
+			SimpleExpr::SubQuery(
+				None,
+				Box::new(SubQueryStatement::SelectStatement(completed_count_subq)),
+			),
 			"finished_reading_session_count",
 		)
 		.column_as(
-			finished_reading_session::Column::CompletedAt.max(),
+			SimpleExpr::SubQuery(
+				None,
+				Box::new(SubQueryStatement::SelectStatement(last_completed_subq)),
+			),
 			"finished_reading_session_last_completed_at",
 		)
-		// LEFT JOIN finished_reading_sessions on media.id = finished_reading_sessions.media_id
-		//  AND finished_reading_sessions.user_id = $user_id
-		.join(
-			JoinType::LeftJoin,
-			media::Relation::FinishedReadingSession.def().on_condition({
-				let user_id = user.id.clone();
-				move |_left, right| {
-					Expr::col((right, finished_reading_session::Column::UserId))
-						.eq(user_id.clone())
-						.into_condition()
-				}
-			}),
-		)
-		// we need this to avoid having one result row per finished reading session.
-		// i'm skeptical that this will work with non-sqlite backends!
 		.group_by(media::Column::Id)
 }
 
@@ -276,9 +332,9 @@ impl ReadingState {
 	}
 
 	pub fn from_active_reading_session(media_id: String, rs: &ReadingSession) -> Self {
-		let updated_or_started_at = rs.updated_at.unwrap_or(rs.started_at).to_utc();
+		let updated_or_started_at = rs.updated_at.unwrap_or(rs.created_at).to_utc();
 		let percent_complete = rs
-			.percentage_completed
+			.end_percentage
 			.and_then(|pc| pc.to_f32().map(|pc| pc * 100.0));
 
 		ReadingState {
@@ -312,16 +368,37 @@ impl BookEntitlementContainer {
 			m.reading_session.as_ref(),
 			m.finished_reading_session_last_completed_at,
 		) {
+			// latest session was abandoned but there is a prior completion
+			(Some(rs), Some(last_completed_at))
+				if rs.status == ReadingStatus::Abandoned =>
+			{
+				ReadingState::finished(media_id.to_string(), last_completed_at)
+			},
+			// TODO(kobo): determine whether this is ideal outcome. if a book was abandoned, it wasn't
+			// really `unread` but think for now this is acceptable.
+			(Some(rs), None) if rs.status == ReadingStatus::Abandoned => {
+				ReadingState::unread(media_id.to_string())
+			},
+			// latest session is completed
+			(Some(rs), _) if rs.status == ReadingStatus::Finished => {
+				ReadingState::finished(
+					media_id.to_string(),
+					m.finished_reading_session_last_completed_at
+						.unwrap_or_else(|| chrono::Utc::now().into()),
+				)
+			},
+			// latest session is in-progress
 			(Some(active_reading_session), _) => {
 				ReadingState::from_active_reading_session(
 					media_id.to_string(),
 					active_reading_session,
 				)
 			},
+			// no active session but has a past completion
 			(_, Some(last_completed_at)) => {
 				ReadingState::finished(media_id.to_string(), last_completed_at)
 			},
-			(_, _) => ReadingState::unread(media_id.to_string()),
+			_ => ReadingState::unread(media_id.to_string()),
 		};
 
 		BookEntitlementContainer {
@@ -438,7 +515,8 @@ mod tests {
 		fake_data::ReadingSession {
 			media_id: media.id.clone(),
 			user_id: user.id.clone(),
-			percentage_completed: 0.5,
+			end_percentage: 0.5,
+			..Default::default()
 		}
 		.insert(&db)
 		.await;
@@ -456,6 +534,214 @@ mod tests {
 		assert_eq!(Some(50.0), bookmark.progress_percent);
 		assert_eq!(Some(50.0), bookmark.content_source_progress_percent);
 		assert_eq!(None, bookmark.location);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_abandoned_no_prior_completion() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// abandoned without ever having finished it
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 0.4,
+			status: models::shared::enums::ReadingStatus::Abandoned,
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		// TODO(kobo): see above re: whether abandoned + no prior complete = unread is ideal
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::ReadyToRead, reading_state.status_info.status);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_abandoned_after_prior_completion() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// first readthrough was completed, then the re-read was abandoned
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-26T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 0.3,
+			status: models::shared::enums::ReadingStatus::Abandoned,
+			created_at: Some("2026-05-27T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		// non-dnf should always take precendence over dnf if newer
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::Finished, reading_state.status_info.status);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_rereading() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		// first readthrough is complete
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-26T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		// second readthrough is in-progress
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 0.35,
+			status: models::shared::enums::ReadingStatus::Reading,
+			created_at: Some("2026-05-27T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		// the re-read in-progress should take precedence
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::Reading, reading_state.status_info.status);
+
+		let bookmark = reading_state.current_bookmark;
+		assert_eq!(Some(35.0), bookmark.progress_percent);
+		assert_eq!(Some(35.0), bookmark.content_source_progress_percent);
+		assert_eq!(None, bookmark.location);
+	}
+
+	#[tokio::test]
+	async fn test_reading_state_finished_multiple_readthroughs() {
+		let db = test_database().await;
+
+		let user = fake_data::User::default().insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let series = fake_data::Series::default().insert(&db).await;
+		let media = fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-26T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::ReadingSession {
+			media_id: media.id.clone(),
+			user_id: user.id.clone(),
+			end_percentage: 1.0,
+			status: models::shared::enums::ReadingStatus::Finished,
+			created_at: Some("2026-05-27T00:00:00Z".parse().unwrap()),
+		}
+		.insert(&db)
+		.await;
+
+		let m = load_media(&db, &user, media.id).await;
+
+		assert_eq!(2, m.finished_reading_session_count);
+
+		let entitlement =
+			BookEntitlementContainer::from_media(m, "https://example.org/".to_string());
+
+		let reading_state = entitlement.reading_state.unwrap();
+		assert_eq!(Status::Finished, reading_state.status_info.status);
 	}
 
 	#[tokio::test]
@@ -482,12 +768,9 @@ mod tests {
 
 		// this book has a single finished reading session
 
-		fake_data::FinishedReadingSession {
-			media_id: media.id.clone(),
-			user_id: user.id.clone(),
-		}
-		.insert(&db)
-		.await;
+		fake_data::ReadingSession::completed(media.id.clone(), user.id.clone())
+			.insert(&db)
+			.await;
 
 		let m = load_media(&db, &user, media.id).await;
 

@@ -3,6 +3,8 @@ use std::io;
 use derive_builder::UninitializedFieldError;
 use thiserror::Error;
 
+use crate::media::processor::error::MediaProcessorError;
+
 pub type CoreResult<T> = Result<T, CoreError>;
 
 #[derive(Error, Debug)]
@@ -15,6 +17,8 @@ pub enum CoreError {
 	EntityBuilderError(#[from] UninitializedFieldError),
 	#[error("Encryption key must be set")]
 	EncryptionKeyNotSet,
+	#[error("JWT secrets must be set")]
+	JwtSecretsNotSet,
 	#[error("Failed to encrypt: {0}")]
 	EncryptionFailed(String),
 	#[error("Failed to decrypt: {0}")]
@@ -57,12 +61,20 @@ pub enum CoreError {
 	UnImplemented(String),
 	#[error("An object failed to (de)serialize: {0}")]
 	SerdeFailure(#[from] serde_json::Error),
+	#[error("Failed to join tokio task: {0}")]
+	TokioTaskFailed(#[from] tokio::task::JoinError),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }
 
 impl From<chrono::ParseError> for CoreError {
 	fn from(error: chrono::ParseError) -> Self {
+		Self::InternalError(error.to_string())
+	}
+}
+
+impl From<MediaProcessorError> for CoreError {
+	fn from(error: MediaProcessorError) -> Self {
 		Self::InternalError(error.to_string())
 	}
 }

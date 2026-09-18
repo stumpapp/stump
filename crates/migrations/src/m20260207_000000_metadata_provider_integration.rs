@@ -35,16 +35,19 @@ impl MigrationTrait for Migration {
 					)
 					.col(
 						ColumnDef::new(MetadataProviderConfigs::ApiTokenExpiresAt)
-							.timestamp(),
+							.timestamp_with_time_zone(),
 					)
 					.col(ColumnDef::new(MetadataProviderConfigs::AutoApplyConfig).json())
 					.col(
 						ColumnDef::new(MetadataProviderConfigs::CreatedAt)
-							.timestamp()
+							.timestamp_with_time_zone()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
-					.col(ColumnDef::new(MetadataProviderConfigs::UpdatedAt).timestamp())
+					.col(
+						ColumnDef::new(MetadataProviderConfigs::UpdatedAt)
+							.timestamp_with_time_zone(),
+					)
 					.to_owned(),
 			)
 			.await?;
@@ -76,11 +79,14 @@ impl MigrationTrait for Migration {
 					)
 					.col(
 						ColumnDef::new(MetadataFetchRecords::AddedAt)
-							.timestamp()
+							.timestamp_with_time_zone()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
-					.col(ColumnDef::new(MetadataFetchRecords::UpdatedAt).timestamp())
+					.col(
+						ColumnDef::new(MetadataFetchRecords::UpdatedAt)
+							.timestamp_with_time_zone(),
+					)
 					.foreign_key(
 						ForeignKey::create()
 							.name("fk_metadata_fetch_records_media_id")

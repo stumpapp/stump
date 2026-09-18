@@ -7,7 +7,7 @@ use models::{
 	shared::enums::{MetadataFetchStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set, TransactionTrait};
-use stump_core::filesystem::metadata::ProviderClientCache;
+use stump_core::metadata::provider::ProviderClientCache;
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -142,16 +142,9 @@ impl SeriesMetadataMutation {
 		let encryption_key = core_ctx.get_encryption_key().await?;
 		let provider_cache = ProviderClientCache::new(encryption_key);
 
-		let search_name = model
-			.metadata
-			.as_ref()
-			.and_then(|m| m.title.clone())
-			.unwrap_or_else(|| model.series.name.clone());
-
-		let candidates = stump_core::filesystem::metadata::fetch_series_metadata(
+		let candidates = stump_core::metadata::provider::fetch_series_metadata(
 			conn,
-			&model.series.id,
-			&search_name,
+			model,
 			&provider_cache,
 		)
 		.await?;
@@ -198,7 +191,7 @@ impl SeriesMetadataMutation {
 			.get(candidate_index as usize)
 			.ok_or("Candidate index out of bounds")?;
 
-		stump_core::filesystem::metadata::apply_series_match(
+		stump_core::metadata::provider::apply_series_match(
 			conn,
 			series_id.as_ref(),
 			candidate,

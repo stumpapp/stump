@@ -19,7 +19,7 @@ export default function DeleteDatabase() {
 		<AppSettingsRow
 			icon={Database}
 			iconBackgroundColor={SETTINGS_COLORS.destructive}
-			title="Delete Database"
+			title={t(getKey('label'))}
 		>
 			<Button
 				size="sm"
@@ -35,7 +35,7 @@ export default function DeleteDatabase() {
 					}
 				}}
 			>
-				<Text>Delete</Text>
+				<Text>{t('common.delete')}</Text>
 			</Button>
 		</AppSettingsRow>
 	)

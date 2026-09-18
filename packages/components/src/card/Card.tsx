@@ -10,7 +10,10 @@ export const Card = React.forwardRef<ElementRef<'div'>, CardProps>(
 		return (
 			<div
 				ref={ref}
-				className={cn('rounded-md border border-edge text-foreground', className)}
+				className={cn(
+					'group/card rounded-lg bg-card text-card-foreground ring-1 ring-foreground/10',
+					className,
+				)}
 				{...props}
 			/>
 		)

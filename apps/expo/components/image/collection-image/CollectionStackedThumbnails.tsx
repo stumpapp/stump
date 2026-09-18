@@ -1,7 +1,6 @@
 import { useSDK } from '@stump/client'
 import { ImageRef } from '@stump/graphql'
 import {
-	clone,
 	ColorSpace,
 	darken,
 	getColor,
@@ -10,17 +9,15 @@ import {
 	OKLab,
 	PlainColorObject,
 	serialize,
-	set,
 	sRGB,
 	steps,
 } from 'colorjs.io/fn'
 import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
-import { useShallow } from 'zustand/react/shallow'
 
 import { BorderAndShadow } from '~/components/BorderAndShadow'
-import { useColors } from '~/lib/constants'
+import { usePalette } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
@@ -39,28 +36,13 @@ type Props = {
 
 export default function CollectionStackedThumbnails({ thumbnailData, layoutNumber }: Props) {
 	const { sdk } = useSDK()
-	const colors = useColors()
 	const { itemWidth: cardWidth } = useCollectionItemSize()
-	const { thumbnailRatio, accentColor } = usePreferencesStore(
-		useShallow((state) => ({
-			thumbnailRatio: state.thumbnailRatio,
-			accentColor: state.accentColor,
-		})),
-	)
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const { isDarkColorScheme } = useColorScheme()
 
 	const baseThumbnailWidth = cardWidth * 0.282
 	const baseThumbnailHeight = baseThumbnailWidth / thumbnailRatio
 	const cardHeight = baseThumbnailHeight
-
-	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
-		colorStops: {
-			0.4: { color: 'transparent' },
-			1: { color: 'rgba(0 0 0 / 0.8)' },
-		},
-		extraColorStopsPerTransition: 16,
-		easing: Easing.bezier(0.42, 0, 1, 1),
-	})
 
 	const renderThumbnails = () => {
 		if (layoutNumber === undefined) return null
@@ -81,7 +63,7 @@ export default function CollectionStackedThumbnails({ thumbnailData, layoutNumbe
 			return (
 				<View
 					key={index}
-					className="absolute bottom-0"
+					className="bottom-0 absolute"
 					style={{
 						zIndex: config.zIndex,
 						left: leftOffset,
@@ -125,6 +107,11 @@ export default function CollectionStackedThumbnails({ thumbnailData, layoutNumbe
 		usableColors = [avgColors.at(0)!, avgColors.at(-1)!]
 	}
 
+	const palette = usePalette({
+		start: { light: 300, dark: 950, chromaScale: 0.8 },
+		end: { light: 200, dark: 900, chromaScale: 0.5 },
+	})
+
 	let backgroundGradient: string[] | undefined
 	if (usableColors) {
 		const plainColors: PlainColorObject[] = usableColors.map((c) => getColor(c))
@@ -146,18 +133,8 @@ export default function CollectionStackedThumbnails({ thumbnailData, layoutNumbe
 			})
 			backgroundGradient.push(...interpolation)
 		}
-	} else if (accentColor) {
-		// Take the hue of the accentColor and give it the same chroma and lightness as colors.thumbnail.stack.library
-		const darkerColor = getColor(accentColor)
-		const lighterColor = clone(darkerColor)
-
-		backgroundGradient = [darkerColor, lighterColor].map((c, index) => {
-			set(c, {
-				'oklch.l': isDarkColorScheme ? (index === 0 ? 0.26 : 0.38) : index === 0 ? 0.68 : 0.8,
-				'oklch.c': 0.04,
-			})
-			return serialize(c, { format: 'hex' })
-		})
+	} else {
+		backgroundGradient = [palette.start, palette.end]
 	}
 
 	return (
@@ -170,14 +147,10 @@ export default function CollectionStackedThumbnails({ thumbnailData, layoutNumbe
 				shadowRadius: 2,
 			}}
 		>
-			<LinearGradient
-				colors={gradientColors}
-				locations={gradientLocations}
-				style={{ position: 'absolute', zIndex: 60, inset: 0 }}
-			/>
+			<LinearGradient {...GRADIENT} style={{ position: 'absolute', zIndex: 60, inset: 0 }} />
 
 			<LinearGradient
-				colors={backgroundGradient || colors.thumbnail.stack.library}
+				colors={backgroundGradient}
 				useAngle={true}
 				angle={75}
 				style={{ position: 'absolute', zIndex: 5, inset: 0 }}
@@ -194,3 +167,12 @@ export default function CollectionStackedThumbnails({ thumbnailData, layoutNumbe
 		</BorderAndShadow>
 	)
 }
+
+const GRADIENT = easeGradient({
+	colorStops: {
+		0.4: { color: 'transparent' },
+		1: { color: 'rgba(0 0 0 / 0.8)' },
+	},
+	extraColorStopsPerTransition: 16,
+	easing: Easing.bezier(0.42, 0, 1, 1),
+})

@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -18,13 +18,18 @@ export default function LiveRefetchToggle() {
 	}, [enableLiveRefetch, update])
 
 	return (
-		<WideSwitch
-			formId="enableLiveRefetch"
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={enableLiveRefetch}
-			onCheckedChange={handleChange}
-		/>
+			onClick={handleChange}
+			className="flex-row items-center justify-between"
+		>
+			<RawSwitch
+				id="enableLiveRefetch"
+				checked={enableLiveRefetch}
+				onCheckedChange={handleChange}
+			/>
+		</NewCard.Row>
 	)
 }
 

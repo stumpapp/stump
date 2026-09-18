@@ -19,14 +19,16 @@ export default function DownloadQueueItem({ item, onCancel }: Props) {
 		if (item.status === 'downloading' && item.progress) {
 			return (
 				<>
-					<Progress value={item.progress.percentage} className="h-2 flex-1" />
+					<Progress
+						value={item.progress.percentage}
+						trackClassName="bg-background-surface"
+						className="h-2 flex-1"
+					/>
 					<Text className="text-xs text-foreground-muted">{item.progress.percentage}%</Text>
 				</>
 			)
 		} else if (item.status === 'downloading') {
-			return (
-				<Text className="text-xs text-foreground-muted">{t('downloadQueue.downloadStarting')}</Text>
-			)
+			return <Text className="text-xs text-foreground-muted">{t(getKey('downloadStarting'))}</Text>
 		} else {
 			return (
 				<Text className="text-xs text-foreground-muted">
@@ -54,3 +56,6 @@ export default function DownloadQueueItem({ item, onCancel }: Props) {
 		</Card.Row>
 	)
 }
+
+const LOCALE_BASE = 'localLibrary.downloadQueue'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

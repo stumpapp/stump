@@ -1,7 +1,6 @@
 import { cn, NavigationMenu, navigationMenuTriggerStyle } from '@stump/components'
 import { PropsWithChildren } from 'react'
-import { To } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, To } from 'react-router'
 
 type Props = {
 	to: string | To
@@ -23,9 +22,12 @@ export default function TopBarNavLink({
 				<NavigationMenu.Link
 					className={cn(
 						navigationMenuTriggerStyle({
-							className: cn('bg-sidebar text-foreground-subtle hover:bg-sidebar-surface-hover', {
-								'bg-sidebar-surface': isActive,
-							}),
+							className: cn(
+								'bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+								{
+									'bg-sidebar-accent text-sidebar-accent-foreground': isActive,
+								},
+							),
 						}),
 						className,
 					)}

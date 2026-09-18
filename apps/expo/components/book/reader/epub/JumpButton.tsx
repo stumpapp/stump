@@ -2,24 +2,16 @@ import { Host, Image } from '@expo/ui/swift-ui'
 import { GlassView } from 'expo-glass-effect'
 import { Redo2, Undo2 } from 'lucide-react-native'
 import { Platform, Pressable, View } from 'react-native'
-import Animated, { Easing, Keyframe } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
+import { cn } from '~/lib/utils'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
+import { ENTERING_ANIMATION, EXITING_ANIMATION } from '../shared'
 import { useEpubReaderContext } from './context'
-
-// GlassView doesn't like zero opacity https://github.com/expo/expo/issues/41024
-const enteringAnimation = new Keyframe({
-	from: { opacity: 0.02 },
-	to: { opacity: 1, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
-
-const exitingAnimation = new Keyframe({
-	from: { opacity: 1 },
-	to: { opacity: 0.02, easing: Easing.inOut(Easing.quad) },
-}).duration(350)
 
 export default function JumpButton() {
 	const { readerRef } = useEpubReaderContext()
@@ -57,18 +49,16 @@ export default function JumpButton() {
 	// - The timing of the controls exiting often interferes a little, I am ignoring that because I think in part
 	//   it has been an annoyance only _because_ I am testing the button explicitly.
 	return (
-		<View className="absolute left-4">
-			<Animated.View entering={enteringAnimation} exiting={exitingAnimation}>
+		<View className="left-4 absolute">
+			<Animated.View entering={ENTERING_ANIMATION} exiting={EXITING_ANIMATION}>
 				<Pressable onPress={handlePress}>
 					<GlassView
-						glassEffectStyle="regular"
 						style={{ borderRadius: 999 }}
 						isInteractive
-						// this is for android only, but ios ignores it so it's fine
 						// TODO: use theme color
-						className="bg-background-surface"
+						className={cn(!IS_IOS_26_PLUS && 'bg-background-surface')}
 					>
-						<View className="flex-row items-center gap-2 px-4 py-2">
+						<View className="gap-2 px-4 py-2 flex-row items-center">
 							{Platform.select({
 								ios: (
 									<Host matchContents>

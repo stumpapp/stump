@@ -5,7 +5,7 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
-import { useDownload } from '~/lib/hooks'
+import { Timer, useDownload } from '~/lib/hooks'
 import {
 	intoPDFReadiumLocator,
 	PDFBookLoadedEvent,
@@ -15,6 +15,7 @@ import {
 	PDFViewRef,
 	ReadiumLocator,
 } from '~/modules/readium'
+import { useVolumeListener } from '~/modules/volumeListener'
 import { useReaderStore } from '~/stores'
 import { usePdfStore } from '~/stores/pdf'
 import { useBookPreferences } from '~/stores/reader'
@@ -44,9 +45,9 @@ type Props = {
 	 */
 	offlineUri?: string
 	/**
-	 * A callback to reset the reading timer
+	 * The active book's timer
 	 */
-	resetTimer?: () => void
+	timer: Timer
 } & OfflineCompatibleReader
 
 // TODO(expo-pdf): Long term, consider just using a library like https://github.com/wonday/react-native-pdf
@@ -73,6 +74,14 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
+
+	useEffect(() => {
+		if (controlsVisible) {
+			ctx.timer.pause()
+		} else {
+			ctx.timer.resume()
+		}
+	}, [controlsVisible, ctx.timer])
 
 	const { preferences: bookPreferences } = useBookPreferences({ book, serverId: ctx.serverId })
 
@@ -124,6 +133,12 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		[],
 	)
 
+	useVolumeListener({
+		enabled: bookPreferences.volumeButtonsNavigate,
+		onVolumeUp: () => navigator.goForward(),
+		onVolumeDown: () => navigator.goBackward(),
+	})
+
 	const store = usePdfStore(
 		useShallow((store) => ({
 			storeBook: store.storeBook,
@@ -174,6 +189,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				setLocalUri(null)
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)
@@ -182,6 +198,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		() => {
 			store.storeBook(book)
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.id],
 	)

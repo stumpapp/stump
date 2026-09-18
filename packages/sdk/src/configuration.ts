@@ -1,7 +1,7 @@
 import { ApiVersion } from './api'
 import { DEFAULT_SOCKET_TIMEOUT } from './socket'
 
-export type AuthenticationMethod = 'token' | 'session' | 'api-key' | 'basic'
+export type AuthenticationMethod = 'token' | 'session' | 'api-key' | 'basic' | 'none'
 
 export class Configuration {
 	apiVersion: ApiVersion = 'v2'

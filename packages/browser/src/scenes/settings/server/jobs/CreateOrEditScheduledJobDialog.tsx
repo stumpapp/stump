@@ -10,7 +10,13 @@ import {
 	Label,
 	NativeSelect,
 } from '@stump/components'
-import { FragmentType, graphql, MetadataFetchStatus, useFragment } from '@stump/graphql'
+import {
+	extractErrorMessage,
+	FragmentType,
+	graphql,
+	MetadataFetchStatus,
+	useFragment,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
@@ -20,11 +26,11 @@ import { scheduledJobRowFragment } from './ScheduledJobRow'
 import {
 	buildScheduledJobInput,
 	CRON_PRESETS,
+	getScheduledJobSchema,
 	KIND_OPTIONS,
 	LibraryOption,
 	parseScheduledJobConfig,
 	RETRYABLE_STATUSES,
-	scheduledJobFormSchema,
 	ScheduledJobFormValues,
 } from './utils'
 
@@ -88,7 +94,7 @@ export function CreateOrEditScheduledJobDialog({
 
 	const form = useForm<ScheduledJobFormValues>({
 		defaultValues,
-		resolver: zodResolver(scheduledJobFormSchema),
+		resolver: zodResolver(getScheduledJobSchema(t)),
 	})
 
 	const [watchKind, schedule, libraryIds, statuses, enabled] = useWatch({
@@ -113,7 +119,9 @@ export function CreateOrEditScheduledJobDialog({
 	const { mutate: create, isPending: isCreating } = useGraphQLMutation(createMutation, {
 		onError: (error) => {
 			console.error(error)
-			toast.error(t(getKey('toasts.createError')))
+			toast.error(t(getKey('toasts.createError')), {
+				description: extractErrorMessage(error),
+			})
 		},
 		onSuccess: () => {
 			toast.success(t(getKey('toasts.createSuccess')))
@@ -125,7 +133,9 @@ export function CreateOrEditScheduledJobDialog({
 	const { mutate: update, isPending: isUpdating } = useGraphQLMutation(updateMutation, {
 		onError: (error) => {
 			console.error(error)
-			toast.error(t(getKey('toasts.updateError')))
+			toast.error(t(getKey('toasts.updateError')), {
+				description: extractErrorMessage(error),
+			})
 		},
 		onSuccess: () => {
 			toast.success(t(getKey('toasts.updateSuccess')))
@@ -169,7 +179,6 @@ export function CreateOrEditScheduledJobDialog({
 				<Form id={formId} form={form} onSubmit={handleSubmit}>
 					<div className="gap-4 flex flex-col">
 						<Input
-							variant="primary"
 							label={t(getKey('fields.name.label'))}
 							placeholder={t(getKey('fields.name.placeholder'))}
 							errorMessage={formErrors.name?.message}
@@ -178,7 +187,6 @@ export function CreateOrEditScheduledJobDialog({
 
 						<div className="gap-2 md:flex-row md:items-end flex flex-col">
 							<Input
-								variant="primary"
 								label={t(getKey('fields.schedule.label'))}
 								description={t(getKey('fields.schedule.description'))}
 								descriptionPosition="top"
@@ -187,7 +195,7 @@ export function CreateOrEditScheduledJobDialog({
 								errorMessage={formErrors.schedule?.message}
 								{...form.register('schedule')}
 							/>
-							<div className="flex-shrink-0">
+							<div className="shrink-0">
 								<NativeSelect
 									value={cronPreset}
 									options={CRON_PRESETS.map((p) => ({
@@ -257,7 +265,6 @@ export function CreateOrEditScheduledJobDialog({
 							label={t(getKey('fields.enabled'))}
 							checked={enabled}
 							onClick={() => form.setValue('enabled', !enabled)}
-							rounded="lg"
 						/>
 					</div>
 				</Form>
@@ -266,7 +273,7 @@ export function CreateOrEditScheduledJobDialog({
 					<Button variant="outline" onClick={onClose} disabled={isBusy}>
 						{t(getKey('dialog.cancel'))}
 					</Button>
-					<Button type="submit" form={formId} variant="primary" disabled={isBusy}>
+					<Button type="submit" form={formId} disabled={isBusy}>
 						{t(getKey(`dialog.${isEditing ? 'saveChanges' : 'create'}`))}
 					</Button>
 				</Dialog.Footer>

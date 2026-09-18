@@ -1,13 +1,19 @@
-import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import {
+	ARCHIVE_EXTENSION,
+	EBOOK_EXTENSION,
+	PDF_EXTENSION,
+	useGraphQLMutation,
+	useSDK,
+	useSuspenseGraphQL,
+} from '@stump/client'
 import { BookReaderSceneQuery, graphql, ReadingMode } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useEffect, useMemo } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
-import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../../utils/patterns'
 import { useBookPreferences } from './useBookPreferences'
 
 export const BOOK_READER_SCENE_QUERY = graphql(`
@@ -19,7 +25,6 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 			extension
 			readProgress {
 				percentageCompleted
-				epubcfi
 				page
 				elapsedSeconds
 			}
@@ -48,6 +53,7 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 `)
 
 export default function BookReaderSceneContainer() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 
 	const { id } = useParams()
@@ -62,7 +68,7 @@ export default function BookReaderSceneContainer() {
 		if (!media) {
 			navigate(paths.notFound(), { replace: true })
 		}
-	}, [media, navigate])
+	}, [media, navigate, paths])
 
 	if (!media) {
 		return null
@@ -88,6 +94,7 @@ type Props = {
 }
 
 function BookReaderScene({ book }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const [search] = useSearchParams()
 
@@ -96,10 +103,15 @@ function BookReaderScene({ book }: Props) {
 	const page = search.get('page')
 	const isIncognito = search.get('incognito') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
+	const lastSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
+	const pendingSyncedElapsedRef = useRef(book?.readProgress?.elapsedSeconds ?? 0)
 
 	const { mutate } = useGraphQLMutation(mutation, {
 		onError: (err) => {
 			console.error(err)
+		},
+		onSuccess: () => {
+			lastSyncedElapsedRef.current = pendingSyncedElapsedRef.current
 		},
 	})
 	const updateProgress = useCallback(
@@ -107,12 +119,16 @@ function BookReaderScene({ book }: Props) {
 			if (!book) return
 			if (isIncognito) return
 			if (book.readProgress?.page === page) return
+
+			const delta = Math.max(0, elapsedSeconds - lastSyncedElapsedRef.current)
+			pendingSyncedElapsedRef.current = elapsedSeconds
+
 			mutate({
 				id: book.id,
 				input: {
 					paged: {
 						page,
-						elapsedSeconds,
+						elapsedSecondsDelta: delta > 0 ? delta : undefined,
 					},
 				},
 			})
@@ -135,41 +151,26 @@ function BookReaderScene({ book }: Props) {
 		}
 	}, [sdk, client])
 
-	/**
-	 * An effect to update the read progress whenever the page changes in the URL
-	 */
-	useEffect(() => {
-		if (isIncognito) return
-
-		const parsedPage = parseInt(page || '', 10)
-		if (!parsedPage || isNaN(parsedPage) || !book) return
-
-		const maxPage = book.pages
-		if (parsedPage <= 0 || parsedPage > maxPage) return
-
-		updateProgress(parsedPage, book.readProgress?.elapsedSeconds || 0)
-	}, [page, updateProgress, book, isIncognito])
-
 	const initialPage = useMemo(() => (page ? parseInt(page, 10) : undefined), [page])
 
 	useEffect(() => {
 		if (book.extension.match(EBOOK_EXTENSION)) {
 			navigate(
 				paths.bookReader(book.id, {
-					epubcfi: book.readProgress?.epubcfi || null,
 					isEpub: true,
 				}),
+				{ replace: true },
 			)
 		} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
-			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }))
+			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }), { replace: true })
 		} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 			if (!initialPage && readingMode === ReadingMode.Paged && !animatedReader) {
-				navigate(paths.bookReader(book.id, { page: 1 }))
+				navigate(paths.bookReader(book.id, { page: 1 }), { replace: true })
 			} else if (!!initialPage && initialPage > book.pages) {
-				navigate(paths.bookReader(book.id, { page: book.pages }))
+				navigate(paths.bookReader(book.id, { page: book.pages }), { replace: true })
 			}
 		}
-	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader])
+	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader, paths])
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (

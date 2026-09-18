@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -18,13 +18,14 @@ export default function GradientToggle() {
 	}, [enableGradients, update])
 
 	return (
-		<WideSwitch
-			formId="enableGradients"
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={enableGradients}
-			onCheckedChange={handleChange}
-		/>
+			onClick={handleChange}
+			className="flex-row items-center justify-between"
+		>
+			<RawSwitch id="enableGradients" checked={enableGradients} onCheckedChange={handleChange} />
+		</NewCard.Row>
 	)
 }
 

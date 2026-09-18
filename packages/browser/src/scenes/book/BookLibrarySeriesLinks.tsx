@@ -2,7 +2,7 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Link, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 
-import paths from '../../paths'
+import { usePaths } from '../../paths'
 
 const seriesQuery = graphql(`
 	query BookLibrarySeriesLinks($id: ID!) {
@@ -22,6 +22,7 @@ type Props = {
 }
 
 export default function BookLibrarySeriesLinks({ seriesId }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: { seriesById: series },
@@ -35,18 +36,18 @@ export default function BookLibrarySeriesLinks({ seriesId }: Props) {
 		<div className="gap-1.5 flex items-center">
 			{library && (
 				<Link to={paths.librarySeries(library.id)} underline={false}>
-					<Badge variant="default" size="xs" rounded="full" className="cursor-pointer">
+					<Badge size="sm" rounded="full" className="cursor-pointer">
 						{library.name}
 					</Badge>
 				</Link>
 			)}
 			{series && (
 				<>
-					<Text size="xs" variant="muted">
+					<Text size="sm" variant="muted">
 						/
 					</Text>
 					<Link to={paths.seriesOverview(series.id)} underline={false}>
-						<Badge variant="primary" size="xs" rounded="full" className="cursor-pointer">
+						<Badge variant="primary" size="sm" rounded="full" className="cursor-pointer">
 							{series.resolvedName}
 						</Badge>
 					</Link>

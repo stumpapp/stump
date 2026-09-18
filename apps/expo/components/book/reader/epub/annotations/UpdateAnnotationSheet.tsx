@@ -1,13 +1,14 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { Alert, TextInput, View } from 'react-native'
+import { Alert, View } from 'react-native'
 
-import { SheetBackDetection } from '~/components/SheetBackDetection'
+import SheetWithHeader from '~/components/SheetWithHeader'
 import { Button, Text } from '~/components/ui'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { useColors } from '~/lib/constants'
 import { Decoration } from '~/modules/readium'
 
-import AnnotationSheetHeader from './AnnotationSheetHeader'
+import AnnotatedText from './AnnotatedText'
+import AnnotationInput from './AnnotationInput'
 
 export type UpdateAnnotationSheetRef = {
 	open: (decoration: Decoration) => void
@@ -25,7 +26,6 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 		const [decoration, setDecoration] = useState<Decoration | null>(null)
 		const [annotation, setAnnotation] = useState('')
 		const [isDirty, setIsDirty] = useState(false)
-		const [isOpen, setIsOpen] = useState(false)
 
 		const colors = useColors()
 
@@ -65,7 +65,6 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 		}, [decoration, onDelete])
 
 		const handleDismiss = useCallback(() => {
-			setIsOpen(false)
 			if (isDirty && decoration && annotation !== (decoration.annotationText ?? '')) {
 				onAnnotationChange(decoration.id, annotation.trim() || undefined)
 			}
@@ -75,62 +74,34 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 
 		const highlightedText = decoration?.locator?.text?.highlight
 
-		// TODO: Make look better for iOS sheet, either adjust colors or remove glass
 		return (
-			<>
-				<TrueSheet
-					ref={sheetRef}
-					detents={['auto', 1]}
-					grabber
-					backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-					grabberOptions={{
-						color: colors.sheet.grabber,
-					}}
-					onDidPresent={() => setIsOpen(true)}
-					onDidDismiss={handleDismiss}
-					header={
-						<AnnotationSheetHeader
-							title="Edit Annotation"
-							onClose={() => sheetRef.current?.dismiss()}
-							onPrimaryAction={handleSaveAnnotation}
-						/>
-					}
-				>
-					<View className="gap-4 p-4">
-						{highlightedText && (
-							<View className="rounded-lg p-3 bg-background-surface">
-								<Text className="text-foreground-muted italic" numberOfLines={3}>
-									&ldquo;{highlightedText}&rdquo;
-								</Text>
-							</View>
-						)}
+			<SheetWithHeader
+				ref={sheetRef}
+				detents={[0.5, 1]}
+				scrollable
+				backgroundColor={colors.sheet.background}
+				onDidDismiss={handleDismiss}
+				headerLabel="Edit Annotation"
+				headerLeftButton={{ type: 'dismiss' }}
+				headerRightButton={{ type: 'check', onPress: handleSaveAnnotation }}
+			>
+				<View className="gap-4">
+					{highlightedText && <AnnotatedText text={highlightedText} />}
 
-						<View className="gap-2">
-							<Text className="text-foreground-muted">Note</Text>
-							<TextInput
-								value={annotation}
-								onChangeText={(text) => {
-									setAnnotation(text)
-									setIsDirty(true)
-								}}
-								placeholder="Enter your notes..."
-								placeholderTextColor={colors.foreground.muted}
-								multiline
-								numberOfLines={3}
-								className="rounded-lg p-3 min-h-[80px] border border-edge bg-background-surface text-foreground"
-								textAlignVertical="top"
-							/>
-						</View>
+					<AnnotationInput
+						value={annotation}
+						onChangeText={(text) => {
+							setAnnotation(text)
+							setIsDirty(true)
+						}}
+					/>
 
-						{/* TODO: Probably look better as joined button with primary action, however too lazy for that now */}
-						<Button variant="destructive" onPress={handleDelete} roundness="full">
-							<Text className="text-white">Delete</Text>
-						</Button>
-					</View>
-				</TrueSheet>
-
-				<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
-			</>
+					{/* TODO: Probably look better as joined button with primary action, however too lazy for that now */}
+					<Button variant="destructive" onPress={handleDelete} roundness="full">
+						<Text>Delete</Text>
+					</Button>
+				</View>
+			</SheetWithHeader>
 		)
 	},
 )

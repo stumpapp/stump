@@ -57,7 +57,7 @@ export const getCommonDefaults = () => ({
 
 export const getPatchDefaults = (
 	provider: ExistingProviderCardFragment,
-): PatchProviderConfigSchema => ({
+): PatchProviderConfigSchema & { providerType: MetadataProvider } => ({
 	enabled: provider.enabled,
 	apiToken: null,
 	apiTokenExpiresAt: provider.apiTokenExpiresAt,
@@ -67,4 +67,6 @@ export const getPatchDefaults = (
 		strategy: provider.autoApplyConfig?.strategy ?? MergeStrategy.FillGaps,
 		excludeFields: provider.autoApplyConfig?.excludeFields ?? [],
 	},
+	// Note: A bit lazy but adding here to inform the form the provider type and skip context etc
+	providerType: provider.providerType,
 })

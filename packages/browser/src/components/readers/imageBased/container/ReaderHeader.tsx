@@ -1,10 +1,12 @@
-import { Link, Text } from '@stump/components'
+import { cn, Link, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Fullscreen, Shrink } from 'lucide-react'
 import { useFullscreen } from 'rooks'
 
 import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useAppStore } from '@/stores'
 
 import { useImageBaseReaderContext } from '../context'
 import ControlButton from './ControlButton'
@@ -12,11 +14,14 @@ import SettingsDialog from './SettingsDialog'
 import TimerMenu from './TimerMenu'
 
 export default function ReaderHeader() {
+	const { t } = useLocaleContext()
 	const { book } = useImageBaseReaderContext()
 	const {
 		settings: { showToolBar },
 	} = useBookPreferences({ book })
 	const paths = usePaths()
+
+	const platform = useAppStore((store) => store.platform)
 
 	const { id, resolvedName } = book
 
@@ -27,7 +32,9 @@ export default function ReaderHeader() {
 	return (
 		<motion.nav
 			// @ts-expect-error: It does have className?
-			className="left-0 top-0 h-12 px-4 fixed z-100 flex w-full items-center text-foreground"
+			className={cn('left-0 top-0 h-12 px-4 fixed z-100 flex w-full items-center text-foreground', {
+				'top-9': platform !== 'browser',
+			})}
 			initial={false}
 			animate={showToolBar ? 'visible' : 'hidden'}
 			variants={transition}
@@ -36,17 +43,17 @@ export default function ReaderHeader() {
 			<div className="flex w-full items-center justify-between">
 				<div className="space-x-4 flex items-center">
 					<Link
-						className="flex items-center text-foreground-on-black hover:text-foreground-on-black/80"
-						title="Go to media overview"
+						className="flex items-center text-foreground hover:text-foreground/80"
+						title={t('imageReader.header.goToMediaOverview')}
 						to={paths.bookOverview(id)}
 					>
 						<ArrowLeft size={'1.25rem'} />
 					</Link>
 				</div>
 
-				<Text className="text-foreground-on-black">{resolvedName}</Text>
+				<Text className="text-foreground">{resolvedName}</Text>
 
-				<div className="space-x-2 flex items-center">
+				<div className="space-x-1.5 flex items-center">
 					{isFullscreenAvailable && (
 						<ControlButton onClick={toggleFullscreen}>
 							<FullScreenIcon className="h-4 w-4" />

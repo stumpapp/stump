@@ -135,7 +135,7 @@ export function FieldActionMenu({ field, disabled, onEditManually }: Props) {
 					size="xs"
 				>
 					{isLocked ? (
-						<Lock className="h-3.5 w-3.5 text-foreground-muted" />
+						<Lock className="h-3.5 w-3.5 text-muted-foreground" />
 					) : (
 						<ChevronDown
 							className={cn('h-3.5 w-3.5', {

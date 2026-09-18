@@ -2,8 +2,9 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
-import { useActiveServer } from '../activeServer'
-import GridImageItem from '../grid/GridImageItem'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+
+import GridImageItem from '../listLayout/grid/GridImageItem'
 
 const fragment = graphql(`
 	fragment SeriesGridItem on Series {
@@ -22,6 +23,7 @@ const fragment = graphql(`
 			height
 			width
 		}
+		isComplete
 	}
 `)
 
@@ -40,18 +42,20 @@ export default function SeriesGridItem({ series, onPress }: Props) {
 	} = useActiveServer()
 	const data = useFragment(fragment, series)
 
+	// TODO: a different color when series is ongoing and/or num issues on stump finished < total from meta?
 	return (
 		<View className="w-full items-center">
 			<GridImageItem
 				uri={data.thumbnail.url}
 				title={data.resolvedName}
-				onPress={onPress ?? (() => router.navigate(`/server/${serverID}/series/${data.id}`))}
+				onPress={onPress ?? (() => router.navigate(`/stump/${serverID}/series/${data.id}`))}
 				placeholderData={data.thumbnail.metadata}
 				originalDimensions={
 					data.thumbnail.width && data.thumbnail.height
 						? { width: data.thumbnail.width, height: data.thumbnail.height }
 						: null
 				}
+				percentageCompleted={data.isComplete ? 100 : undefined}
 			/>
 		</View>
 	)

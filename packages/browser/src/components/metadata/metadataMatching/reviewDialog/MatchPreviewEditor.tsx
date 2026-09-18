@@ -70,14 +70,14 @@ export function MatchPreviewEditor() {
 		<>
 			<CandidateToolbar />
 			<div
-				className={cn('rounded-xl p-4 overflow-y-auto bg-edge/25', {
+				className={cn('p-4 overflow-y-auto rounded-xl bg-border/25', {
 					'scrollbar-hide': enableHideScrollbar,
 				})}
 				ref={scrollRef}
 				data-overlayscrollbars-initialize
 			>
 				<Card className="overflow-hidden">
-					<div className="py-2.5 pl-2.5 grid grid-cols-[140px_1fr_1fr_40px_1fr_32px] items-center border-b border-edge bg-background-surface/50">
+					<div className="py-2.5 pl-2.5 grid grid-cols-[140px_1fr_1fr_40px_1fr_32px] items-center border-b border-border bg-muted/50">
 						<Heading className="text-sm font-medium">{t(getKey('headers.field'))}</Heading>
 						<Heading className="text-sm font-medium">{t(getKey('headers.current'))}</Heading>
 						<Heading className="text-sm font-medium">{t(getKey('headers.external'))}</Heading>
@@ -86,7 +86,7 @@ export function MatchPreviewEditor() {
 						<div />
 					</div>
 
-					<div className="divide-y divide-edge">
+					<div className="divide-y divide-border">
 						{fieldComparisons.map((comparison) => (
 							<MatchFieldRow key={comparison.field} comparison={comparison} />
 						))}

@@ -7,11 +7,10 @@ use axum::{
 use cli::CliError;
 use stump_core::{
 	error::CoreError,
-	filesystem::{
-		image::{ProcessorError, ThumbnailGenerateError},
-		FileError,
-	},
+	image::{thumbnail::ThumbnailGenerateError, ImageProcessorError},
+	media::processor::error::MediaProcessorError,
 	opds::v2_0::OPDSV2Error,
+	readium::{EpubSearchError, ReadiumError},
 	CoreEvent,
 };
 use tokio::sync::mpsc;
@@ -107,6 +106,8 @@ pub enum APIError {
 	AccountLocked,
 	#[error("{0}")]
 	BadRequest(String),
+	#[error("Request cancelled")]
+	CancelledRequest,
 	#[error("{0}")]
 	NotFound(String),
 	#[error("{0}")]
@@ -135,6 +136,8 @@ pub enum APIError {
 	DbError(#[from] sea_orm::error::DbErr),
 	#[error("OIDC is not enabled")]
 	OIDCNotEnabled,
+	#[error("OIDC provider is not initialized")]
+	OIDCNotInitialized,
 	#[error("The provided OIDC configuration is invalid or missing required fields")]
 	OIDCConfigurationInvalid,
 	#[error("{0}")]
@@ -155,6 +158,9 @@ impl APIError {
 		match self {
 			APIError::AccountLocked => StatusCode::FORBIDDEN,
 			APIError::BadRequest(_) => StatusCode::BAD_REQUEST,
+			APIError::CancelledRequest => {
+				StatusCode::from_u16(499).expect("499 is a valid HTTP status code")
+			},
 			APIError::NotFound(_) => StatusCode::NOT_FOUND,
 			APIError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
 			APIError::Unauthorized => StatusCode::UNAUTHORIZED,
@@ -199,9 +205,51 @@ impl From<reqwest::Error> for APIError {
 	}
 }
 
-impl From<ThumbnailGenerateError> for APIError {
-	fn from(value: ThumbnailGenerateError) -> Self {
-		APIError::InternalServerError(value.to_string())
+impl From<EpubSearchError> for APIError {
+	fn from(error: EpubSearchError) -> Self {
+		match error {
+			EpubSearchError::InvalidQueryLength { .. }
+			| EpubSearchError::InvalidCursor
+			| EpubSearchError::InvalidLimit { .. } => APIError::BadRequest(error.to_string()),
+			EpubSearchError::Cancelled => APIError::CancelledRequest,
+			EpubSearchError::File(error) => {
+				APIError::InternalServerError(error.to_string())
+			},
+		}
+	}
+}
+
+impl From<ImageProcessorError> for APIError {
+	fn from(error: ImageProcessorError) -> APIError {
+		match error {
+			ImageProcessorError::InvalidQuality => {
+				APIError::BadRequest(error.to_string())
+			},
+			ImageProcessorError::InvalidSizedImage => {
+				APIError::BadRequest(error.to_string())
+			},
+			ImageProcessorError::InvalidConfiguration(ref err) => {
+				APIError::BadRequest(err.to_string())
+			},
+			_ => APIError::InternalServerError(error.to_string()),
+		}
+	}
+}
+
+impl From<MediaProcessorError> for APIError {
+	fn from(error: MediaProcessorError) -> APIError {
+		match error {
+			MediaProcessorError::PageNotFound | MediaProcessorError::FileNotFound => {
+				APIError::NotFound(error.to_string())
+			},
+			_ => APIError::InternalServerError(error.to_string()),
+		}
+	}
+}
+
+impl From<ReadiumError> for APIError {
+	fn from(error: ReadiumError) -> APIError {
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
@@ -267,22 +315,9 @@ impl From<mpsc::error::SendError<CoreEvent>> for APIError {
 	}
 }
 
-impl From<FileError> for APIError {
-	fn from(error: FileError) -> APIError {
-		APIError::InternalServerError(error.to_string())
-	}
-}
-
-impl From<ProcessorError> for APIError {
-	fn from(error: ProcessorError) -> APIError {
-		match error {
-			ProcessorError::InvalidQuality => APIError::BadRequest(error.to_string()),
-			ProcessorError::InvalidSizedImage => APIError::BadRequest(error.to_string()),
-			ProcessorError::InvalidConfiguration(err) => {
-				APIError::BadRequest(err.to_string())
-			},
-			_ => APIError::InternalServerError(error.to_string()),
-		}
+impl From<ThumbnailGenerateError> for APIError {
+	fn from(value: ThumbnailGenerateError) -> Self {
+		APIError::InternalServerError(value.to_string())
 	}
 }
 
@@ -322,7 +357,9 @@ impl IntoResponse for APIErrorResponse {
 
 		let mut builder = Response::builder()
 			.status(self.status)
-			.header("Content-Type", "application/json");
+			.header("Content-Type", "application/json")
+			// do not cache error responses
+			.header("Cache-Control", "no-store");
 
 		// if the status is 401, we want to encourage the client to delete their
 		// session cookie

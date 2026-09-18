@@ -1,0 +1,75 @@
+---
+title: Account
+description: Commands for managing user accounts
+---
+
+## Listing Accounts
+
+You can print a basic list of all user accounts by running:
+
+```bash copy
+./stump account list
+```
+
+Add the `--locked` flag to filter the list by locked status:
+
+```bash copy
+./stump account list --locked true
+```
+
+## Account locking
+
+A locked user will be unable to log in to their account until it is unlocked. This will also affect any active sessions, JWTs, or API keys.
+
+### Lock
+
+To lock a user account, run:
+
+```bash copy
+./stump account lock --username <username>
+```
+
+### Unlocking
+
+To unlock a user account, run:
+
+```bash copy
+./stump account unlock --username <username>
+```
+
+## Password Reset
+
+To reset a user's password, run:
+
+```bash copy
+./stump account reset-password --username <username>
+```
+
+You will be prompted to enter a new password, with a confirmation prompt to ensure you entered it correctly. The password will be hashed and salted and stored in the database to replace the existing one.
+
+<Callout>
+	The CLI only contains user-management commands at this time. If you have any ideas for new
+	commands or features, please create a [feature
+	request](https://github.com/stumpapp/stump/issues/new/choose) on GitHub
+</Callout>
+
+## Local to OIDC Account Migration
+
+To migrate an existing local user account to an OIDC account, run:
+
+```bash copy
+./stump account migrate-oidc --username <local-username> --oidc-email <oidc-email>
+```
+
+This will do the following, assuming both accounts exist:
+
+- Relink all data (read history, preferences, etc.) from the local account to the OIDC account
+- Update the OIDC account to have the permissions of the local account
+- Delete the local account
+- Reassign the local account's username to the OIDC account
+
+<Callout type="warning">
+	Both the local account and the OIDC account must already exist. The OIDC account should not have
+	any existing data, as it will be overwritten. Use this command with caution, as it cannot be
+	undone
+</Callout>

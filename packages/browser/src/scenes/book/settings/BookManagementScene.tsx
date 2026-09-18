@@ -1,14 +1,17 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { Construction } from 'lucide-react'
-import { Suspense, useCallback, useEffect, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
+import { MatchReviewDialog } from '@/components/metadata/metadataMatching'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
+import BookMetadataSearch from './BookMetadataSearch'
 import BookTagEditor from './BookTagEditor'
 import BookThumbnailSelector from './BookThumbnailSelector'
 
@@ -41,7 +44,9 @@ const analyzeMutation = graphql(`
 `)
 
 export default function BookManagementScene() {
+	const paths = usePaths()
 	const navigate = useNavigate()
+	const { t } = useLocaleContext()
 
 	const { checkPermission } = useAppContext()
 
@@ -55,6 +60,8 @@ export default function BookManagementScene() {
 	})
 
 	const { data, mutate: analyze, isPending } = useGraphQLMutation(analyzeMutation)
+
+	const [isSearchingMetadata, setIsSearchingMetadata] = useState(false)
 
 	const breadcrumbs = useMemo(() => {
 		if (!book) return []
@@ -72,7 +79,7 @@ export default function BookManagementScene() {
 				to: paths.bookOverview(book.id),
 			},
 		]
-	}, [book])
+	}, [book, paths])
 
 	const handleAnalyze = useCallback(() => {
 		if (id != null) {
@@ -84,7 +91,7 @@ export default function BookManagementScene() {
 		if (!book) {
 			navigate(paths.notFound())
 		}
-	}, [book, navigate])
+	}, [book, navigate, paths])
 
 	if (!book) {
 		return null
@@ -123,14 +130,38 @@ export default function BookManagementScene() {
 						<div>
 							<Button
 								title={data ? 'Analysis already in progress' : 'Analyze this book'}
-								size="md"
-								variant="primary"
+								size="default"
 								onClick={handleAnalyze}
 								disabled={!!data || isPending}
 							>
 								Analyze Media
 							</Button>
 						</div>
+					</div>
+				)}
+
+				{checkPermission(UserPermission.MetadataFetchRecordManage) && (
+					<div className="gap-y-2 flex flex-col">
+						<div>
+							<Heading size="sm">{t(getKey('heading'))}</Heading>
+							<Text size="sm" variant="muted">
+								{t(getKey('description'))}
+							</Text>
+						</div>
+
+						<div>
+							<Button size="default" onClick={() => setIsSearchingMetadata(true)}>
+								{t(getKey('openButton'))}
+							</Button>
+						</div>
+
+						<BookMetadataSearch
+							mediaId={book.id}
+							initialTitle={book.resolvedName}
+							isOpen={isSearchingMetadata}
+							onClose={() => setIsSearchingMetadata(false)}
+						/>
+						<MatchReviewDialog />
 					</div>
 				)}
 
@@ -156,3 +187,6 @@ export default function BookManagementScene() {
 		</SceneContainer>
 	)
 }
+
+const LOCALE_KEY = 'bookManagementScene.metadataSearch'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

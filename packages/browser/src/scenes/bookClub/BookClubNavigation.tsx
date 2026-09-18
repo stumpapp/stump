@@ -59,7 +59,7 @@ export default function BookClubNavigation() {
 	}
 
 	return (
-		<div className="top-0 md:relative md:top-[unset] md:z-[unset] sticky z-10 w-full border-b border-edge bg-background">
+		<div className="top-0 md:relative md:top-[unset] md:z-[unset] sticky z-10 w-full border-b border-border bg-background">
 			<nav
 				className={cn(
 					'gap-x-6 px-3 md:overflow-x-hidden -mb-px scrollbar-hide flex overflow-x-scroll',
@@ -75,8 +75,8 @@ export default function BookClubNavigation() {
 						key={tab.to}
 						underline={false}
 						className={cx('px-1 py-3 text-sm font-medium border-b-2 whitespace-nowrap', {
-							'text-brand border-edge-brand': tab.isActive,
-							'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
+							'text-brand border-primary': tab.isActive,
+							'border-transparent text-muted-foreground hover:border-border': !tab.isActive,
 						})}
 					>
 						{tab.label}

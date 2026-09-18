@@ -23,7 +23,7 @@ export function WideSwitch({
 				<Text
 					size="sm"
 					variant="label"
-					className={cn({ 'cursor-not-allowed text-foreground-muted select-none': disabled })}
+					className={cn({ 'cursor-not-allowed text-muted-foreground select-none': disabled })}
 				>
 					{label}
 				</Text>
@@ -31,7 +31,7 @@ export function WideSwitch({
 					size="sm"
 					variant="muted"
 					className={cn('max-w-[80%]', {
-						'cursor-not-allowed text-foreground-muted select-none': disabled,
+						'cursor-not-allowed text-muted-foreground select-none': disabled,
 					})}
 				>
 					{description}
@@ -40,7 +40,7 @@ export function WideSwitch({
 
 			<div className="w-6" />
 
-			<RawSwitch id={formId} primaryRing variant="primary" disabled={disabled} {...props} />
+			<RawSwitch id={formId} disabled={disabled} {...props} />
 		</label>
 	)
 }

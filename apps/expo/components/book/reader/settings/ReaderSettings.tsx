@@ -133,6 +133,14 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 					/>
 				</Card.Row>
 
+				<Card.Row label={t('readerSettings.volumeButtonsNavigate')}>
+					<Switch
+						variant="brand"
+						checked={activeSettings.volumeButtonsNavigate}
+						onCheckedChange={(checked) => onPreferenceChange({ volumeButtonsNavigate: checked })}
+					/>
+				</Card.Row>
+
 				<Card.Row label={t('readerSettings.footerControls.label')}>
 					<FooterControlsSelect
 						variant={activeSettings.footerControls || 'images'}

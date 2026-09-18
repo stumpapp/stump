@@ -4,7 +4,7 @@ import { useSDK } from '@stump/client'
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Image, Pressable, View } from 'react-native'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 
 import { Input, SheetHeader, Text } from '../ui'
@@ -261,7 +261,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 			ref={sheetRef}
 			detents={[1]}
 			grabber
-			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+			backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 			grabberOptions={{ color: colors.sheet.grabber }}
 			header={<SheetHeader title="Emojis" onClose={dismissSheet} />}
 			scrollable

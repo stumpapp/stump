@@ -13,7 +13,7 @@ export type MatchReviewState = {
 	fieldOverrides: Map<MetadataField, FieldOverride>
 	lockedFields: Map<MetadataField, boolean>
 
-	open: (records: MatchRecord[], startIndex?: number) => void
+	open: (records: MatchRecord[], startIndex?: number, strategy?: MergeStrategy) => void
 	close: () => void
 	nextRecord: () => void
 	prevRecord: () => void
@@ -39,13 +39,14 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 	fieldOverrides: new Map(),
 	lockedFields: new Map(),
 
-	open: (records, startIndex = 0) =>
+	open: (records, startIndex = 0, strategy = MergeStrategy.FillGaps) =>
 		set({
 			isOpen: true,
 			records,
 			currentRecordIndex: Math.min(startIndex, records.length - 1),
 			currentCandidateIndex: 0,
 			excludedFields: new Set(),
+			strategy,
 			fieldOverrides: new Map(),
 			lockedFields: new Map(),
 		}),

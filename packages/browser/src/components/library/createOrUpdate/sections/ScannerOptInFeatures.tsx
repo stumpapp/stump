@@ -97,7 +97,6 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 
 			<CheckBox
 				id="processMetadata"
-				variant="primary"
 				label={t(getKey('processMetadata.label'))}
 				description={t(getKey('processMetadata.description'))}
 				checked={processMetadata}
@@ -107,7 +106,6 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 
 			<CheckBox
 				id="watch"
-				variant="primary"
 				label={t(getKey('watch.label'))}
 				description={t(getKey('watch.description'))}
 				checked={watch}
@@ -117,7 +115,6 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 
 			<CheckBox
 				id="generateFileHashes"
-				variant="primary"
 				label={t(getKey('generateFileHashes.label'))}
 				description={t(getKey('generateFileHashes.description'))}
 				checked={generateFileHashes}
@@ -127,7 +124,6 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 
 			<CheckBox
 				id="generateKoreaderHashes"
-				variant="primary"
 				label={t(getKey('koreaderHashes.label'))}
 				description={t(getKey('koreaderHashes.description'))}
 				checked={koreaderHashes}

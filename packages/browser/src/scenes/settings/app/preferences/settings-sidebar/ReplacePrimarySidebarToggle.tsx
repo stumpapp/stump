@@ -1,4 +1,4 @@
-import { WideSwitch } from '@stump/components'
+import { NewCard, RawSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
@@ -20,13 +20,12 @@ export default function ReplacePrimarySidebarToggle() {
 	}, [enableReplacePrimarySidebar, update])
 
 	return (
-		<WideSwitch
+		<NewCard.Row
 			label={t(getKey('label'))}
 			description={t(getKey('description'))}
-			checked={enableReplacePrimarySidebar}
 			disabled={!enableDoubleSidebar || primaryNavigationMode !== 'SIDEBAR'}
-			onCheckedChange={handleToggle}
-			formId="enableReplacePrimarySidebar"
+			onClick={handleToggle}
+			className="flex-row items-center justify-between"
 			title={
 				!enableDoubleSidebar
 					? t(getKey('tooltips.doubleSidebar'))
@@ -34,7 +33,14 @@ export default function ReplacePrimarySidebarToggle() {
 						? t(getKey('tooltips.topbar'))
 						: undefined
 			}
-		/>
+		>
+			<RawSwitch
+				id="enableReplacePrimarySidebar"
+				checked={enableReplacePrimarySidebar}
+				disabled={!enableDoubleSidebar || primaryNavigationMode !== 'SIDEBAR'}
+				onCheckedChange={handleToggle}
+			/>
+		</NewCard.Row>
 	)
 }
 

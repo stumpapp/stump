@@ -70,7 +70,6 @@ export default function CreateOrAddToScheduleForm() {
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
 			<Input
-				variant="primary"
 				label="Books to add"
 				type="number"
 				value={books.length}

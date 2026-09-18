@@ -1,0 +1,77 @@
+---
+title: Progress Sync
+description: Learn about how you can sync your reading progression across devices
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps'
+
+The mobile app supports progression sync for **Stump servers only**.
+
+<Callout type="info">
+	In the future this may be expanded to support OPDS v2 servers that implement the progression
+	specification. OPDS v1.2 servers will not be supported due to limitations in the specification.
+</Callout>
+
+The app will (bidirectionally) automatically sync your reading progression in a couple of scenarios:
+
+- When entering a server with offline books that have progression (sync from device to server)
+- When exiting an online reader (sync from server to device)
+
+These allow you to more seamlessly switch between offline and online reading without losing your place. You can disable automatic syncing in settings if you prefer to manually sync your progression.
+
+You can manually sync by selecting the `Attempt Sync` option from the action menu in the local library tab. This will attempt to sync all books downloaded from supported servers that have offline progression.
+
+## How it Works
+
+Whether automatic or manual, the sync process will attempt to sync progression through the following steps:
+
+<Steps>
+
+<Step>
+### Pull progression from the server
+
+To ensure that the local device has the most up-to-date progression, the app will first attempt to pull progression from the server.
+
+</Step>
+
+<Step>
+    ### Resolve progression conflicts
+
+The app will adhere to a somewhat naive last-write-wins approach to resolving progression conflicts. If the server has a more recent progression than the local device, the server's progression will be used. If the local device has a more recent progression than the server, the local device's progression will be used.
+
+The app tracks any books which a pull failed, and will ignore those books in the subsequent push step.
+
+    <Callout type="warn">
+    This will be improved in the future so that the mobile app does not auto-resolve all conflicts and allows you to choose which progression branch to keep
+    </Callout>
+
+</Step>
+
+<Step>
+### Push progression to the server
+
+Once the app has resolved conflicts, it will then push that updated progression to the server.
+
+</Step>
+
+</Steps>
+
+## Limitations
+
+Progression sync is only supported for Stump servers. There are some other limitations to be aware of:
+
+### Authentication
+
+`Basic` and `Token` authentication are fully supported for auto-sync of progression. The `Login` authentication method is partially supported: if there are non-expired auth tokens available in the cache then sync will work as expected, and in the absence of valid and non-expired auth tokens, sync will be skipped for that server.
+
+The solution would be to prompt for login credentials when attempting to sync with a server of this auth configuration, however that is not currently implemented.
+
+### Conflict Resolution
+
+As mentioned in the [How it Works](#how-it-works) section, the app currently uses a naive last-write-wins approach to resolving progression conflicts. This will be improved in the future so that the mobile app does not auto-resolve all conflicts and allows you to choose which progression branch to keep.
+
+### Web-and-Mobile Sync
+
+The web app does not currently support Readium locators, and as such may not be able to properly sync progression for all formats with the mobile app. This will be addressed soon, a contributor has already submitted a PR to add Readium locator support to the web app.
+
+This issue does not affect any image-based formats (e.g., CBZ, CBR, PDF) since they do not use Readium locators for progression tracking.

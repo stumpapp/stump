@@ -1,7 +1,7 @@
 import { ButtonOrLink, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { SceneContainer } from '../container'
 
@@ -9,6 +9,7 @@ type Props = {
 	issue?: number
 }
 export default function UnderConstruction({ issue }: Props) {
+	const paths = usePaths()
 	const { t } = useLocaleContext()
 
 	return (
@@ -35,7 +36,7 @@ export default function UnderConstruction({ issue }: Props) {
 							{t(getKey('githubLink'))}
 						</ButtonOrLink>
 					)}
-					<ButtonOrLink href={paths.home()} variant="primary" className="mt-4">
+					<ButtonOrLink href={paths.home()} className="mt-4">
 						{t(getKey('homeLink'))}
 					</ButtonOrLink>
 				</div>

@@ -1,4 +1,3 @@
-import { useSDK } from '@stump/client'
 import { Book } from 'lucide-react'
 import { useState } from 'react'
 
@@ -6,11 +5,10 @@ import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks/usePreferences'
 
 type Props = {
-	id: string
+	url: string
 	title?: string
 }
-export default function CoverImageCell({ id, title }: Props) {
-	const { sdk } = useSDK()
+export default function CoverImageCell({ url, title }: Props) {
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -19,7 +17,7 @@ export default function CoverImageCell({ id, title }: Props) {
 	const loadImage = () => {
 		const image = new Image()
 		return new Promise((resolve, reject) => {
-			image.src = sdk.media.thumbnailURL(id)
+			image.src = url
 			image.onload = () => resolve(image)
 			image.onerror = (e) => {
 				console.error('Image failed to load:', e)
@@ -41,11 +39,11 @@ export default function CoverImageCell({ id, title }: Props) {
 		return (
 			<div
 				title={`${title} (Image failed to load)`}
-				className="h-20 rounded-sm shadow-sm flex w-auto items-center justify-center border-[0.5px] border-edge bg-sidebar"
+				className="h-20 shadow-sm flex w-auto items-center justify-center rounded-sm border-[0.5px] border-border bg-sidebar"
 				style={{ aspectRatio: thumbnailRatio }}
 				onClick={attemptReload}
 			>
-				<Book className="h-8 w-8 text-foreground-muted" />
+				<Book className="h-8 w-8 text-muted-foreground" />
 			</div>
 		)
 	}
@@ -53,9 +51,9 @@ export default function CoverImageCell({ id, title }: Props) {
 	return (
 		<EntityImage
 			title={title}
-			className="h-20 rounded-sm w-auto object-cover"
+			className="h-20 w-auto rounded-sm object-cover"
 			style={{ aspectRatio: thumbnailRatio }}
-			src={sdk.media.thumbnailURL(id)}
+			src={url}
 			onError={() => setShowFallback(true)}
 		/>
 	)

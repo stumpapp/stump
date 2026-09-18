@@ -29,7 +29,7 @@ impl MigrationTrait for Migration {
 					.col(ColumnDef::new(Bookmarks::UserId).text().not_null())
 					.col(
 						ColumnDef::new(Bookmarks::CreatedAt)
-							.timestamp()
+							.timestamp_with_time_zone()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)

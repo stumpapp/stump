@@ -107,3 +107,11 @@ pub enum MetadataFetchRecordId {
 	Series(String),
 	Media(String),
 }
+
+#[derive(InputObject)]
+pub struct ValidateMetadataProviderConfigInput {
+	/// The provider type
+	pub provider_type: MetadataProvider,
+	/// The API token for authenticating with the provider
+	pub api_token: String,
+}

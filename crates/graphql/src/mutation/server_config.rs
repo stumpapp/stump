@@ -6,6 +6,9 @@ use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
 #[derive(Default)]
 pub struct ServerConfigMutation;
 
+// TODO: add hook into refreshing JWT secrets, so that if somehow they were compromised we have a friendly way for
+// folks to rotate em. it's stored in db so if compromised i think you have bigger problems, but still
+
 #[Object]
 impl ServerConfigMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]

@@ -100,24 +100,24 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 				})}
 			>
 				<div className="px-4 py-2" data-testid="lib-meta">
-					<Label className="text-foreground-muted">{t(getFieldKey('library'))}</Label>
+					<Label className="text-muted-foreground">{t(getFieldKey('library'))}</Label>
 					{record ? (
 						<Text size="sm">{name}</Text>
 					) : (
-						<div className="h-6 w-32 animate-pulse rounded-md bg-background-surface-hover" />
+						<div className="h-6 w-32 animate-pulse rounded-md bg-accent" />
 					)}
 				</div>
 
 				<div className="px-4 py-2" data-testid="name-meta">
-					<Label className="text-foreground-muted">{t(getFieldKey('date'))}</Label>
+					<Label className="text-muted-foreground">{t(getFieldKey('date'))}</Label>
 					<Text size="sm">{scannedAtFormatted}</Text>
 				</div>
 
 				{displayedData?.options?.config && (
 					<div className="gap-y-3 px-4 py-2 flex flex-col">
-						<Label className="text-foreground-muted">{t(getFieldKey('config'))}</Label>
-						<div className="rounded-xl p-4 bg-background-surface">
-							<pre className="text-xs text-foreground-muted">
+						<Label className="text-muted-foreground">{t(getFieldKey('config'))}</Label>
+						<div className="p-4 rounded-xl bg-muted">
+							<pre className="text-xs text-muted-foreground">
 								{JSON.stringify(displayedData.options.config, null, 2)}
 							</pre>
 						</div>
@@ -126,9 +126,9 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 
 				{associatedJob?.outputData && (
 					<div className="gap-y-3 px-4 py-2 flex flex-col">
-						<Label className="text-foreground-muted">{t(getFieldKey('jobOutput'))}</Label>
-						<div className="rounded-xl p-4 bg-background-surface">
-							<pre className="text-xs text-foreground-muted">
+						<Label className="text-muted-foreground">{t(getFieldKey('jobOutput'))}</Label>
+						<div className="p-4 rounded-xl bg-muted">
+							<pre className="text-xs text-muted-foreground">
 								{JSON.stringify(associatedJob.outputData, null, 2)}
 							</pre>
 						</div>
@@ -137,10 +137,10 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 
 				{!!associatedJob?.logs?.length && (
 					<div className="gap-y-3 px-4 py-2 flex flex-col">
-						<Label className="text-foreground-muted">{t(getFieldKey('logs'))}</Label>
+						<Label className="text-muted-foreground">{t(getFieldKey('logs'))}</Label>
 
 						<Alert variant="warning" className="p-2">
-							<AlertDescription className="text-sm text-foreground-subtle">
+							<AlertDescription className="text-sm text-foreground">
 								{t(getKey('logsPresent'))} ({associatedJob.logs.length})
 							</AlertDescription>
 						</Alert>

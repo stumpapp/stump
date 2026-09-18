@@ -12,10 +12,15 @@ mod context;
 pub mod database;
 pub mod error;
 mod event;
-pub mod filesystem;
+pub mod fs_utils;
+pub mod image;
 pub mod job;
 pub mod kobo;
+pub mod media;
+pub mod metadata;
 pub mod opds;
+pub mod readium;
+pub mod scan;
 pub mod utils;
 
 use config::logging::STUMP_SHADOW_TEXT;
@@ -41,6 +46,8 @@ use crate::database::JournalMode;
 type JournalModeChanged = bool;
 /// A type alias strictly for explicitness in the return type of `init_encryption`.
 type EncryptionKeySet = bool;
+/// A type alias strictly for explicitness in the return type of `init_jwt_secrets`.
+type JwtSecretsInitialized = bool;
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump
 /// applications. It is responsible for managing incoming tasks ([`InternalCoreTask`]),
@@ -69,6 +76,11 @@ pub struct StumpCore {
 }
 
 impl StumpCore {
+	/// Creates a [StumpCore] from an existing [Ctx]
+	pub fn from_ctx(ctx: Ctx) -> StumpCore {
+		StumpCore { ctx }
+	}
+
 	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`std::sync::Arc`].
 	pub async fn new(config: StumpConfig) -> StumpCore {
 		let core_ctx = Ctx::new(config).await;
@@ -87,19 +99,12 @@ impl StumpCore {
 	///
 	/// Returns the configuration variables in a `StumpConfig` struct.
 	pub fn init_config(config_dir: String) -> CoreResult<StumpConfig> {
-		let mut config = StumpConfig::new(config_dir)
-			// Load config file (if any)
-			.with_config_file()?
-			// Overlay environment variables
-			.with_environment()?;
+		let config = StumpConfig::load(config_dir)?;
 
-		// TODO: I couldn't get this fully working inside the macro but would like to revisit
-		if let Some(env_oidc) = config::OidcConfig::from_env() {
-			config.oidc = Some(env_oidc);
+		if let Err(error) = config.write_config() {
+			eprintln!("Failed to write Stump.toml: {error}");
+			// ^ config init before tracing init
 		}
-
-		// Write ensure that config directory exists and write Stump.toml
-		config.write_config_dir()?;
 
 		Ok(config)
 	}
@@ -177,6 +182,48 @@ impl StumpCore {
 		}
 	}
 
+	/// Initializes the JWT secrets into the database
+	#[tracing::instrument(skip(self), err)]
+	pub async fn init_jwt_secrets(&self) -> Result<JwtSecretsInitialized, CoreError> {
+		let conn = self.ctx.conn.as_ref();
+
+		let jwt_secrets_set = server_config::Entity::find()
+			.select_only()
+			.select_column(server_config::Column::JwtAccessSecret)
+			.select_column(server_config::Column::JwtRefreshSecret)
+			.into_model::<server_config::JwtSecretsSelect>()
+			.one(conn)
+			.await?
+			.is_some_and(|config| {
+				config.jwt_access_secret.is_some() && config.jwt_refresh_secret.is_some()
+			});
+		tracing::trace!(jwt_secrets_set, "JWT secrets set");
+
+		if jwt_secrets_set {
+			Ok(false)
+		} else {
+			let jwt_access_secret = utils::encryption::create_encryption_key()?;
+			let jwt_refresh_secret = utils::encryption::create_encryption_key()?;
+			let affected_rows = server_config::Entity::update_many()
+				.col_expr(
+					server_config::Column::JwtAccessSecret,
+					Expr::value(Some(jwt_access_secret)),
+				)
+				.col_expr(
+					server_config::Column::JwtRefreshSecret,
+					Expr::value(Some(jwt_refresh_secret)),
+				)
+				.exec(conn)
+				.await?
+				.rows_affected;
+			tracing::trace!(affected_rows, "Updated JWT secrets");
+			if affected_rows > 1 {
+				tracing::warn!("More than one JWT secrets row was updated? This is definitely not expected");
+			}
+			Ok(affected_rows > 0)
+		}
+	}
+
 	// TODO(sea-orm): I don't think this is actually needed anymore!
 	/// Initializes the journal mode for the database. This will only set the journal mode to WAL
 	/// provided a few conditions are met:
@@ -185,6 +232,11 @@ impl StumpCore {
 	/// 2. The journal mode is not already set to WAL
 	pub async fn init_journal_mode(&self) -> Result<JournalModeChanged, CoreError> {
 		let conn = self.ctx.conn.as_ref();
+
+		if conn.get_database_backend() != DatabaseBackend::Sqlite {
+			tracing::trace!("Not using SQLite, skipping journal mode initialization");
+			return Ok(false);
+		}
 
 		let wal_mode_setup_completed = server_config::Entity::find()
 			.filter(server_config::Column::InitialWalSetupComplete.eq(true))
@@ -239,10 +291,10 @@ impl StumpCore {
 		}
 	}
 
-	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
+	pub async fn init_scheduler(&self) -> Result<JobScheduler, CoreError> {
 		let ctx = self.ctx.arced();
 		let scheduler = JobScheduler::init(ctx).await?;
-		Ok(Arc::new(scheduler))
+		Ok(scheduler)
 	}
 
 	pub async fn init_library_watcher(&self) -> CoreResult<()> {

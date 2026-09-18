@@ -122,21 +122,18 @@ impl FieldMerger {
 			return None;
 		}
 
-		let external_val = match external {
-			Some(v) => v,
-			None => return None, // Nothing from external, leave as-is
-		};
+		let external = external.as_ref()?;
 
 		match self.strategy {
 			MergeStrategy::FillGaps | MergeStrategy::FillAndMergeLists => {
 				if existing.is_none() {
-					Some(Some(external_val.clone()))
+					Some(Some(external.clone()))
 				} else {
 					None
 				}
 			},
 			MergeStrategy::PreferExternal
-			| MergeStrategy::PreferExternalAndMergeLists => Some(Some(external_val.clone())),
+			| MergeStrategy::PreferExternalAndMergeLists => Some(Some(external.clone())),
 		}
 	}
 
@@ -154,16 +151,13 @@ impl FieldMerger {
 			return None;
 		}
 
-		let external_val = match external {
-			Some(v) => v,
-			None => return None,
-		};
+		let external = external.as_ref()?;
 
 		match self.strategy {
 			// For required fields that already have a value, FillGaps does nothing
 			MergeStrategy::FillGaps | MergeStrategy::FillAndMergeLists => None,
 			MergeStrategy::PreferExternal
-			| MergeStrategy::PreferExternalAndMergeLists => Some(external_val.clone()),
+			| MergeStrategy::PreferExternalAndMergeLists => Some(external.clone()),
 		}
 	}
 

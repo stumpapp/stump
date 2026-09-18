@@ -1,8 +1,8 @@
 /* eslint-disable react-compiler/react-compiler */
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
-import { ReadingDirection } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { formatHumanDuration, useLocaleContext } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
@@ -10,21 +10,21 @@ import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuo
 import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-import { useBookReadTime } from '@/stores/reader'
 
 import { useImageBaseReaderContext } from '../context'
+import GoToPage from './GoToPage'
 
 const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
-	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets } =
+	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
-		bookPreferences: { readingDirection, trackElapsedTime },
+		bookPreferences: { readingMode, readingDirection, trackElapsedTime },
 	} = useBookPreferences({ book })
-	const elapsedSeconds = useBookReadTime(book.id)
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
@@ -38,6 +38,20 @@ export default function ReaderFooter() {
 	const currentSet = useMemo(
 		() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
 		[currentPage, pageSets],
+	)
+
+	// The position label, e.g. "4-5 of 42". Shown as plain text in continuous modes and
+	// reused as the "go to page" trigger text in paged mode.
+	const pageRangeLabel = useMemo(
+		() =>
+			t('imageReader.footer.pageOf', {
+				current: [...currentSet]
+					.map((idx) => idx + 1)
+					.sort((a, b) => a - b)
+					.join('-'),
+				total: book.pages,
+			}),
+		[currentSet, book.pages, t],
 	)
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
@@ -54,6 +68,7 @@ export default function ReaderFooter() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showToolBar, currentPageSetIdx])
 
+	const elapsedSeconds = timer.getCurrentTime()
 	const formattedReadTime = formatHumanDuration(elapsedSeconds)
 
 	const renderItem = useCallback(
@@ -95,8 +110,8 @@ export default function ReaderFooter() {
 				<div className="flex flex-col justify-end" style={containerSize}>
 					<div
 						className={cn(
-							'rounded-lg shadow-xl flex cursor-pointer overflow-hidden border-2 border-transparent transition duration-300 hover:border-edge-brand',
-							{ 'rounded-[10px] border-edge-brand': isCurrentSet },
+							'shadow-xl flex cursor-pointer overflow-hidden rounded-lg border-2 border-transparent transition duration-300 hover:border-primary',
+							{ 'rounded-[10px] border-primary': isCurrentSet },
 						)}
 						style={{
 							...pageSetSize,
@@ -138,29 +153,31 @@ export default function ReaderFooter() {
 			// @ts-expect-error: It does have className?
 			className="bottom-0 left-0 gap-2 text-white shadow-lg fixed z-100 flex w-full flex-col justify-end overflow-hidden"
 		>
-			<Virtuoso
-				ref={virtuosoRef}
-				style={{
-					height:
-						(100 / thumbnailRatio) * SIZE_MODIFIER + // item height (all items have the same fixed height)
-						12 + // scrollbar vertical height
-						10 + // translateY padding
-						8, // add some vertical padding between the scrollbar and items
-				}}
-				horizontalDirection
-				data={pageSets}
-				components={{
-					Item,
-					Scroller,
-				}}
-				itemContent={renderItem}
-				overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
-				initialTopMostItemIndex={
-					readingDirection === ReadingDirection.Rtl
-						? pageSets.length - currentPageSetIdx
-						: currentPageSetIdx
-				}
-			/>
+			{readingMode === ReadingMode.Paged && (
+				<Virtuoso
+					ref={virtuosoRef}
+					style={{
+						height:
+							(100 / thumbnailRatio) * SIZE_MODIFIER + // item height (all items have the same fixed height)
+							12 + // scrollbar vertical height
+							10 + // translateY padding
+							8, // add some vertical padding between the scrollbar and items
+					}}
+					horizontalDirection
+					data={pageSets}
+					components={{
+						Item,
+						Scroller,
+					}}
+					itemContent={renderItem}
+					overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
+					initialTopMostItemIndex={
+						readingDirection === ReadingDirection.Rtl
+							? pageSets.length - currentPageSetIdx
+							: currentPageSetIdx
+					}
+				/>
+			)}
 
 			<div className="gap-2 px-4 pb-4 flex w-full flex-col">
 				<ProgressBar
@@ -169,24 +186,31 @@ export default function ReaderFooter() {
 					max={book.pages}
 					className="bg-[#0c0c0c]"
 					indicatorClassName="bg-[#898d94]"
-					inverted={readingDirection === ReadingDirection.Rtl}
+					inverted={readingDirection === ReadingDirection.Rtl && readingMode === ReadingMode.Paged}
 				/>
 
 				<div
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
+						<Text className="text-sm text-[#898d94]">
+							{t('imageReader.footer.readingTime', { time: formattedReadTime })}
+						</Text>
 					)}
 
-					<Text className="text-sm text-[#898d94]">
-						{[...currentSet]
-							.map((idx) => idx + 1)
-							.sort((a, b) => a - b)
-							.join('-')}
-						{' of '}
-						{book.pages}
-					</Text>
+					{/* In paged mode, the position indicator doubles as a "go to page" trigger for
+					    quick recovery. Continuous modes keep the plain text since their page
+					    change path doesn't sync to the URL the same way. */}
+					{readingMode === ReadingMode.Paged ? (
+						<GoToPage
+							currentPage={currentPage}
+							totalPages={book.pages}
+							onSubmit={setCurrentPage}
+							triggerLabel={pageRangeLabel}
+						/>
+					) : (
+						<Text className="text-sm text-[#898d94]">{pageRangeLabel}</Text>
+					)}
 				</div>
 			</div>
 		</motion.nav>

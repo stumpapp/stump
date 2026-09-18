@@ -1,6 +1,7 @@
 import { Zoomable, ZoomableRef } from '@likashefqet/react-native-image-zoom'
 import { FlashList, useMappingHelper } from '@shopify/flash-list'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { PageSetIndexes } from '@stump/sdk'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NativeScrollEvent, NativeSyntheticEvent, useWindowDimensions, View } from 'react-native'
@@ -15,17 +16,10 @@ import { Success } from 'react-native-turbo-image'
 
 import { TurboImage } from '~/components/image'
 import { useDisplay, usePrevious } from '~/lib/hooks'
-import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
-
-type ImageDimension = {
-	height: number
-	width: number
-	ratio: number
-}
 
 // TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
 // scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
@@ -46,15 +40,8 @@ type Props = {
  * A reader for books that are image-based, where each page should be displayed as an image
  */
 export default function ImageBasedReader({ initialPage, onPastEndReached }: Props) {
-	const {
-		book,
-		imageSizes = {},
-		onPageChanged,
-		pageSets,
-		currentPage,
-		flashListRef,
-		serverId,
-	} = useImageBasedReader()
+	const { book, onPageChanged, pageSets, currentPage, flashListRef, serverId } =
+		useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito, readingDirection, doublePageBehavior },
 	} = useBookPreferences({ book, serverId })
@@ -134,9 +121,8 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 				keyExtractor={(item) => item.toString()}
 				renderItem={({ item, index }) => (
 					<PageSet
-						index={index}
-						indexes={item as [number, number]}
-						sizes={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
+						flashListIndex={index}
+						pageIndexes={item}
 						maxWidth={width}
 						maxHeight={height}
 						onPastEndReached={onPastEndReached}
@@ -179,9 +165,8 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 }
 
 type PageSetProps = {
-	index: number
-	indexes: [number, number]
-	sizes: ImageDimension[]
+	flashListIndex: number
+	pageIndexes: PageSetIndexes
 	maxWidth: number
 	maxHeight: number
 	onPastEndReached?: () => void
@@ -190,9 +175,8 @@ type PageSetProps = {
 
 const PageSet = React.memo(
 	({
-		index,
-		indexes,
-		sizes,
+		flashListIndex,
+		pageIndexes: unresolvedPageIndexes,
 		maxWidth,
 		maxHeight,
 		onPastEndReached,
@@ -203,7 +187,7 @@ const PageSet = React.memo(
 			pageURL,
 			flashListRef,
 			pageSets,
-			imageSizes,
+			imageSizes = {},
 			setImageSizes,
 			requestHeaders,
 			serverId,
@@ -222,6 +206,9 @@ const PageSet = React.memo(
 
 		const zoomableRef = useRef<ZoomableRef>(null)
 
+		const isRtl = readingDirection === ReadingDirection.Rtl
+		const pageIndexes = isRtl ? [...unresolvedPageIndexes].reverse() : unresolvedPageIndexes
+
 		useEffect(() => {
 			zoomableRef.current?.reset()
 		}, [zoomResetCounter])
@@ -235,7 +222,7 @@ const PageSet = React.memo(
 				if (isLeft) modifier = readingDirection === ReadingDirection.Rtl ? 1 : -1
 				if (isRight) modifier = readingDirection === ReadingDirection.Rtl ? -1 : 1
 
-				const nextIndex = index + modifier
+				const nextIndex = flashListIndex + modifier
 				if (nextIndex >= 0 && nextIndex < pageSets.length) {
 					flashListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
 				}
@@ -246,7 +233,7 @@ const PageSet = React.memo(
 			},
 			[
 				maxWidth,
-				index,
+				flashListIndex,
 				flashListRef,
 				tapThresholdRatio,
 				readingDirection,
@@ -264,7 +251,9 @@ const PageSet = React.memo(
 					return
 				}
 
-				const didNavigate = onCheckForNavigationTaps(event.x)
+				// event.absoluteX vs event.x bc event.x is the coordinate on the image not the screen. so
+				// if e.g. zoomed in, event.x could be in the middle of the image but the user actually an edge
+				const didNavigate = onCheckForNavigationTaps(event.absoluteX)
 				if (didNavigate) {
 					zoomableRef.current?.reset()
 				} else {
@@ -274,32 +263,28 @@ const PageSet = React.memo(
 			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate, readingMode],
 		)
 
-		const imageRatio = imageSizes?.[index]?.ratio
-
 		const onImageLoaded = useCallback(
-			(event: NativeSyntheticEvent<Success>, idxIdx: number) => {
+			(event: NativeSyntheticEvent<Success>, pageIndex: number) => {
 				const { height, width } = event.nativeEvent
 				if (!height || !width) return
 				const ratio = width / height
 
-				const pageSize = sizes[idxIdx]
-				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
-				if (isDifferent) {
-					setImageSizes((prev) => {
-						const actualIdx = indexes[idxIdx]
-						if (actualIdx == null) return prev
-						prev[actualIdx] = { height, width, ratio }
-						return prev
-					})
-				}
+				setImageSizes((prev) => {
+					const prevSize = prev[pageIndex]
+					const isDifferent =
+						prevSize?.height !== height || prevSize?.width !== width || prevSize?.ratio !== ratio
+
+					if (isDifferent) {
+						return { ...prev, [pageIndex]: { height, width, ratio } }
+					}
+					return prev
+				})
 			},
-			[setImageSizes, sizes, indexes],
+			[setImageSizes],
 		)
 
-		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
-
-		const isRtl = readingDirection === ReadingDirection.Rtl
-		const directionRespectingIndexes = isRtl ? [...indexes].reverse() : indexes
+		const imageRatios = pageIndexes.map((pageIndex) => imageSizes?.[pageIndex]?.ratio)
+		const roughPageRenderWidth = pageIndexes.length > 1 ? maxWidth / 2 : maxWidth
 
 		return (
 			<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
@@ -321,25 +306,25 @@ const PageSet = React.memo(
 					}}
 				>
 					<View
-						className={cn('relative flex-row items-center justify-center', {
-							'gap-0 mx-auto': indexes.length > 1,
-						})}
+						className="relative flex-row items-center justify-center"
 						style={{
 							height:
 								// For the paged reader, this container takes the whole height so we can center vertically,
 								// but for the vertical reader we only want it to take the image height
-								imageRatio && readingMode === ReadingMode.ContinuousVertical
-									? maxWidth / imageRatio
+								readingMode === ReadingMode.ContinuousVertical && imageRatios[0]
+									? maxWidth / imageRatios[0]
 									: maxHeight,
 							width: maxWidth,
 						}}
 					>
-						{directionRespectingIndexes.map((pageIdx, i) => {
+						{pageIndexes.map((pageIndex, i) => {
+							const imageRatio = imageRatios[i]
+
 							return (
 								<TurboImage
-									key={getMappingKey(pageIdx, i)}
+									key={getMappingKey(pageIndex, i)}
 									source={{
-										uri: pageURL(pageIdx + 1),
+										uri: pageURL(pageIndex + 1),
 										headers: {
 											...requestHeaders?.(),
 											[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
@@ -347,12 +332,12 @@ const PageSet = React.memo(
 									}}
 									style={{
 										height: '100%',
-										maxWidth: indexes.length > 1 ? '50%' : '100%',
+										maxWidth: pageIndexes.length > 1 ? '50%' : '100%',
 										aspectRatio: imageRatio,
 									}}
 									resizeMode="contain"
 									resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
-									onSuccess={(event) => onImageLoaded(event, i)}
+									onSuccess={(event) => onImageLoaded(event, pageIndex)}
 								/>
 							)
 						})}

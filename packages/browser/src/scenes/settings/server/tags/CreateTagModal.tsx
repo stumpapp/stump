@@ -54,9 +54,7 @@ export default function CreateTagModal() {
 	return (
 		<Dialog open={isOpen} onOpenChange={isPending ? undefined : setIsOpen}>
 			<Dialog.Trigger asChild>
-				<Button size="sm" variant="secondary">
-					{t(getKey('trigger'))}
-				</Button>
+				<Button variant="secondary">{t(getKey('trigger'))}</Button>
 			</Dialog.Trigger>
 
 			<Dialog.Content size="sm">
@@ -81,16 +79,11 @@ export default function CreateTagModal() {
 				</form>
 
 				<Dialog.Footer>
-					<Button disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
+					<Button variant="outline" disabled={isPending} onClick={() => setIsOpen(false)} size="sm">
 						{t('common.cancel')}
 					</Button>
 
-					<Button
-						disabled={isPending || !name.trim()}
-						variant="primary"
-						size="sm"
-						onClick={handleCreate}
-					>
+					<Button disabled={isPending || !name.trim()} size="sm" onClick={handleCreate}>
 						{t(getKey('modal.submit'))}
 					</Button>
 				</Dialog.Footer>

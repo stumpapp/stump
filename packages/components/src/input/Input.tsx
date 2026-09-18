@@ -6,7 +6,6 @@ import { Text } from '../text'
 import { cn } from '../utils'
 import { RawInput, RawInputProps } from './raw'
 
-// TODO: size prop
 export type InputProps = {
 	/** The label for the input. */
 	label?: string
@@ -18,16 +17,14 @@ export type InputProps = {
 	descriptionPosition?: 'top' | 'bottom'
 	/** The optional props for the description. */
 	descriptionProps?: Omit<ComponentPropsWithoutRef<typeof Text>, 'children'>
-	/** The optional variant for the input. */
+	/** Whether the input should take up the full container width. */
 	fullWidth?: boolean
+	/** The optional invalid state. */
+	isInvalid?: boolean
 	/** The optional error message to display. */
 	errorMessage?: string
 	/** The optional class name for the container. */
 	containerClassName?: string
-	/** An optional right icon to display inset the input */
-	leftDecoration?: React.ReactNode
-	/** An optional right icon to display inset the input */
-	rightDecoration?: React.ReactNode
 } & RawInputProps
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -39,34 +36,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 			labelProps,
 			descriptionProps,
 			fullWidth,
+			isInvalid,
 			containerClassName,
-			leftDecoration,
-			rightDecoration,
 			errorMessage,
 			className,
 			...props
 		},
 		ref,
 	) => {
-		const renderLeftDecoration = () => {
-			if (leftDecoration) {
-				return (
-					<div className="inset-y-0 left-0 pl-3 absolute flex items-center">{leftDecoration}</div>
-				)
-			}
-
-			return null
-		}
-
-		const renderRightDecoration = () => {
-			if (rightDecoration) {
-				return (
-					<div className="inset-y-0 right-0 pr-3 absolute flex items-center">{rightDecoration}</div>
-				)
-			}
-
-			return null
-		}
+		const resolvedInvalid = isInvalid ?? !!errorMessage
 
 		const renderDescription = () => {
 			if (description) {
@@ -127,27 +105,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						)}
 					>
 						{label}
-						{props.required && <span className="text-red-400"> *</span>}
+						{props.required && <span className="text-destructive"> *</span>}
 					</Label>
 				)}
 
 				{topDescription && renderDescription()}
 
 				<div className="relative w-full">
-					{renderLeftDecoration()}
 					<RawInput
 						{...props}
 						ref={ref}
-						isInvalid={!!errorMessage || props.isInvalid}
-						className={cn(
-							{
-								'pl-10': !!leftDecoration,
-							},
-							className,
-						)}
+						aria-invalid={resolvedInvalid}
+						className={className}
 						data-testid={props.id}
 					/>
-					{renderRightDecoration()}
 				</div>
 
 				{renderBottom()}

@@ -4,8 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Archive, Hash, Lock, MessageCircle } from 'lucide-react-native'
 import { Platform, Pressable, View } from 'react-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import { Icon, Text } from '~/components/ui'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const fragment = graphql(`
 	fragment DiscussionListItem on BookClubDiscussion {
@@ -34,27 +34,27 @@ export default function DiscussionListItem({ data }: Props) {
 
 	return (
 		<Pressable
-			onPress={() => router.push(`/server/${serverID}/clubs/${clubId}/discussion/${discussion.id}`)}
-			className="flex-row items-center justify-between p-3"
+			onPress={() => router.push(`/stump/${serverID}/clubs/${clubId}/discussion/${discussion.id}`)}
+			className="p-3 flex-row items-center justify-between"
 		>
-			<View className="flex flex-1 flex-row items-center gap-2">
-				<View className="squircle flex h-8 w-8 items-center justify-center rounded-xl bg-white/75 dark:bg-black/40">
+			<View className="gap-2 flex flex-1 flex-row items-center">
+				<View className="squircle h-8 w-8 bg-white/75 dark:bg-black/40 flex items-center justify-center rounded-xl">
 					{discussion.emoji ? (
 						<Text className="text-base">{discussion.emoji}</Text>
 					) : (
 						<Icon as={Hash} className="h-5 w-5 text-foreground-muted" />
 					)}
 				</View>
-				<Text className="flex-1 font-medium" numberOfLines={1}>
+				<Text className="font-medium flex-1" numberOfLines={1}>
 					{discussion.displayName}
 				</Text>
 			</View>
 
-			<View className="flex-row items-center gap-4 opacity-70">
+			<View className="gap-4 flex-row items-center opacity-70">
 				{discussion.isLocked && <View>{LockIcon}</View>}
 				{discussion.isArchived && <View>{ArchiveIcon}</View>}
 
-				<View className="flex-row items-center gap-1">
+				<View className="gap-1 flex-row items-center">
 					{MessageIcon}
 					<Text className="text-sm text-foreground">{discussion.messageCount}</Text>
 				</View>

@@ -102,7 +102,7 @@ export default function CleanLibrary() {
 					title={t(getKey('confirmation.label'))}
 					description={t(getKey('confirmation.text'))}
 					confirmText={t(getKey('confirmation.label'))}
-					confirmVariant="danger"
+					confirmVariant="destructive"
 					isOpen={showConfirmation}
 					onClose={() => setShowConfirmation(false)}
 					onConfirm={handleClean}
@@ -112,11 +112,10 @@ export default function CleanLibrary() {
 							<Button
 								type="button"
 								onClick={() => setShowConfirmation(true)}
-								className="flex-shrink-0"
-								size="md"
+								className="shrink-0"
 								disabled={isNoneMissingState || isPending}
 								isLoading={isPending}
-								variant="danger"
+								variant="destructive"
 							>
 								{t(getKey('confirmation.label'))}
 							</Button>

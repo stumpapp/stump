@@ -3,8 +3,8 @@ import * as React from 'react'
 import { ActivityIndicator, Pressable } from 'react-native'
 
 import { TextClassContext } from '~/components/ui/text'
+import { usePalette } from '~/lib/constants'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 // TODO: Use native buttons where applicable, once expo ui stabilizes
 
@@ -13,8 +13,9 @@ const buttonVariants = cva('group flex items-center justify-center squircle roun
 		variant: {
 			brand: 'bg-fill-brand active:opacity-90',
 			default: 'bg-background-surface active:opacity-90',
-			destructive: 'border border-edge bg-background active:bg-background-surface',
+			destructive: 'border border-edge bg-black/5 dark:bg-white/10 active:opacity-80',
 			outline: 'border border-edge bg-background active:bg-background-surface',
+			success: 'bg-fill-success-secondary active:opacity-90',
 			secondary: 'bg-background-inverse',
 			ghost: 'active:bg-accent',
 		},
@@ -48,6 +49,7 @@ const buttonTextVariants = cva('text-base font-medium text-foreground', {
 			outline: '',
 			secondary: 'text-foreground-on-inverse',
 			ghost: 'text-foreground',
+			success: 'text-fill-success-seondary',
 		},
 		size: {
 			default: '',
@@ -68,7 +70,9 @@ type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
 
 const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
 	({ className, variant, size, style, roundness, ...props }, ref) => {
-		const accentColor = usePreferencesStore((state) => state.accentColor)
+		// Note: It may or may not be better to have non-book overview buttons
+		// as the full accent color rather than this slightly muted accent colour
+		const accentColor = usePalette('muted')
 		const isBrand = variant === 'brand' || !variant
 
 		return (

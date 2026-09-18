@@ -7,10 +7,7 @@ use models::{
 	shared::{analysis::MediaAnalysisData, image::ImageRef},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{
-	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QuerySelect,
-	Statement,
-};
+use sea_orm::{prelude::*, sea_query::Query, FromQueryResult, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -19,22 +16,20 @@ use crate::{
 		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
-			ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
-			ReadingSessionLoader,
+			ReadingSessionLoader, ReadthroughRecordLoaderKey,
+			ResumeReadingCursorLoaderKey,
 		},
 		series::SeriesLoader,
 	},
 	object::epub::Epub,
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
+	utils::db_statement,
 };
 
 use super::{
-	library::Library,
-	library_config::LibraryConfig,
-	media_metadata::MediaMetadata,
-	reading_session::{ActiveReadingSession, FinishedReadingSession},
-	series::Series,
-	tag::Tag,
+	library::Library, library_config::LibraryConfig, media_metadata::MediaMetadata,
+	readthrough_record::ReadthroughRecord, resume_reading_cursor::ResumeReadingCursor,
+	series::Series, tag::Tag,
 };
 
 #[derive(Debug, Clone, SimpleObject)]
@@ -192,6 +187,7 @@ impl Media {
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 		let loader = ctx.data::<DataLoader<MediaAnalysisLoader>>()?;
+		let last_modified = self.model.updated_at;
 
 		let dimensions = match self
 			.model
@@ -211,10 +207,14 @@ impl Media {
 		};
 
 		Ok(ImageRef {
-			url: service.format_url(format!("/api/v2/media/{}/thumbnail", self.model.id)),
+			url: service.cache_friendly_url(
+				format!("/api/v2/media/{}/thumbnail", self.model.id),
+				&last_modified,
+			),
 			height: dimensions.as_ref().map(|dim| dim.1),
 			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.thumbnail_meta.clone(),
+			last_modified,
 		})
 	}
 
@@ -228,16 +228,15 @@ impl Media {
 			.to_string()
 	}
 
-	// TODO(graphql): Create object to query for device used (e.g., KoReader device ID)
 	async fn read_progress(
 		&self,
 		ctx: &Context<'_>,
-	) -> Result<Option<ActiveReadingSession>> {
+	) -> Result<Option<ResumeReadingCursor>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
 		let progress = loader
-			.load_one(ActiveReadingSessionLoaderKey {
+			.load_one(ResumeReadingCursorLoaderKey {
 				user_id: user.id.clone(),
 				media_id: self.model.id.clone(),
 			})
@@ -247,15 +246,12 @@ impl Media {
 	}
 
 	// TODO(graphql): Create object to query for device used (e.g., KoReader device ID)
-	async fn read_history(
-		&self,
-		ctx: &Context<'_>,
-	) -> Result<Vec<FinishedReadingSession>> {
+	async fn read_history(&self, ctx: &Context<'_>) -> Result<Vec<ReadthroughRecord>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<ReadingSessionLoader>>()?;
 
 		let history = loader
-			.load_one(FinishedReadingSessionLoaderKey {
+			.load_one(ReadthroughRecordLoaderKey {
 				user_id: user.id.clone(),
 				media_id: self.model.id.clone(),
 			})
@@ -265,38 +261,38 @@ impl Media {
 		Ok(history)
 	}
 
-	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i32>> {
+	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i64>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		if let Some(position) = self.metadata.as_ref().and_then(|m| m.model.number) {
 			if position.fract().is_zero() {
-				return Ok(Some(position.to_i32().unwrap_or(0)));
+				return Ok(Some(position.to_i64().unwrap_or(0)));
 			}
 		}
 
 		#[derive(Debug, FromQueryResult)]
 		struct PositionResult {
-			position: i32,
+			position: i64,
 		}
 
 		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
-		let position = PositionResult::find_by_statement(Statement::from_sql_and_values(
-			DatabaseBackend::Sqlite,
+		let position = PositionResult::find_by_statement(db_statement(
+			conn,
 			r#"
             SELECT position
             FROM (
-                SELECT 
+                SELECT
                     id,
                     ROW_NUMBER() OVER (
-                        PARTITION BY series_id 
+                        PARTITION BY series_id
                         ORDER BY name
                     ) as position
                 FROM media
-                WHERE series_id = ?
+                WHERE series_id = $1
                 AND deleted_at IS NULL
             ) ranked
-            WHERE id = ?
+            WHERE id = $2
             "#,
 			[series_id.into(), self.model.id.clone().into()],
 		))

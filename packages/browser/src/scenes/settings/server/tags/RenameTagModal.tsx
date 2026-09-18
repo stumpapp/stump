@@ -77,13 +77,12 @@ export default function RenameTagModal({ tag, onClose }: Props) {
 				</form>
 
 				<Dialog.Footer>
-					<Button disabled={isPending} onClick={onClose} size="sm">
+					<Button variant="outline" disabled={isPending} onClick={onClose} size="sm">
 						{t('common.cancel')}
 					</Button>
 
 					<Button
 						disabled={isPending || !name.trim() || name.trim() === tag?.name}
-						variant="primary"
 						size="sm"
 						onClick={handleRename}
 					>

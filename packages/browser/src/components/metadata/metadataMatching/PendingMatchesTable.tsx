@@ -15,106 +15,10 @@ import { toast } from 'sonner'
 
 import Table from '@/components/table/Table'
 
+import { pendingMatchRecordFragment } from './fragments'
 import { ConfidenceBadge } from './reviewDialog/ConfidenceBadge'
 import { MatchRecord } from './types'
 import { useMatchReviewStore } from './useMatchReviewStore'
-
-// TODO: a CHONKER fragment, should prolly break it up
-
-const fragment = graphql(`
-	fragment PendingMatchRecord on MetadataFetchRecord {
-		id
-		status
-		mediaId
-		seriesId
-		matchCandidates {
-			provider
-			externalId
-			metadata {
-				__typename
-				... on ExternalMediaMetadata {
-					title
-					seriesName
-					seriesExternalId
-					summary
-					pageCount
-					number
-					day
-					month
-					year
-					genres
-					tags
-					isbn
-					isbn13
-					writers
-					artists
-					colorists
-					letterers
-					coverArtists
-				}
-				... on ExternalSeriesMetadata {
-					seriesTitle: title
-					alternativeTitles
-					summary
-					volumeCount
-					coverUrl
-					status
-					year
-					endYear
-					genres
-					tags
-					authors
-					ageRating
-					publisher
-				}
-			}
-			confidence
-			confidenceFactors {
-				factor
-				weight
-				matched
-			}
-		}
-		addedAt
-		updatedAt
-		media {
-			id
-			resolvedName
-			metadata {
-				title
-				summary
-				genres
-				writers
-				colorists
-				letterers
-				coverArtists
-				publisher
-				year
-				month
-				day
-				pageCount
-				identifierIsbn
-				lockedFields
-			}
-		}
-		series {
-			id
-			resolvedName
-			metadata {
-				title
-				summary
-				genres
-				writers
-				publisher
-				year
-				status
-				ageRating
-				volume
-				lockedFields
-			}
-		}
-	}
-`)
 
 const pendingMatchesQuery = graphql(`
 	query PendingMetadataMatches {
@@ -172,7 +76,7 @@ export function PendingMatchesTable() {
 	const { t } = useLocaleContext()
 	const { data } = useSuspenseGraphQL(pendingMatchesQuery, ['pendingMetadataMatches'])
 
-	const records = useFragment(fragment, data.pendingMetadataMatches)
+	const records = useFragment(pendingMatchRecordFragment, data.pendingMetadataMatches)
 	const open = useMatchReviewStore((s) => s.open)
 	const client = useQueryClient()
 
@@ -254,7 +158,7 @@ export function PendingMatchesTable() {
 
 	if (rows.length === 0) {
 		return (
-			<div className="rounded-lg p-8 flex flex-col items-center justify-center border border-dashed border-edge">
+			<div className="p-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-border">
 				<Text size="sm" variant="muted">
 					{t(getKey('nothingToReview'))}
 				</Text>
@@ -274,7 +178,7 @@ export function PendingMatchesTable() {
 					{t(getKey('acceptAll.label'))}
 				</Button>
 				<Button
-					variant="danger"
+					variant="destructive"
 					size="sm"
 					disabled={isRejectingAll}
 					onClick={() => rejectAll(undefined as never)}
@@ -284,7 +188,7 @@ export function PendingMatchesTable() {
 
 				<div className="flex-1" />
 
-				<Button variant="primary" size="sm" onClick={handleReviewAll}>
+				<Button size="sm" onClick={handleReviewAll}>
 					{t(getKey('startReview'))}
 				</Button>
 			</div>
@@ -329,11 +233,7 @@ const createColumns = (
 			size: 300,
 		}),
 		columnHelper.accessor('entityType', {
-			cell: ({ getValue }) => (
-				<Badge variant="default" size="xs">
-					{getValue()}
-				</Badge>
-			),
+			cell: ({ getValue }) => <Badge size="xs">{getValue()}</Badge>,
 			header: translate(getKey('columns.entityType')),
 			size: 80,
 		}),

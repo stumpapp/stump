@@ -33,7 +33,6 @@ export default function DefaultFontSize() {
 				onChange={onValueChange}
 				type="number"
 				min={0}
-				variant="primary"
 			/>
 		</div>
 	)

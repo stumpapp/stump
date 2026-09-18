@@ -1,11 +1,18 @@
 import { AllowedLocale } from './config'
 
 export { LocaleContext, type LocaleContextProps, useLocaleContext } from './context'
-export { formatElapsedDuration, formatHumanDuration, initDateFnsLocale } from './dateFnsLocale'
+export {
+	formatElapsedDuration,
+	formatHumanDuration,
+	formatHumanDurationSeparate,
+	formatNarrowDuration,
+	initDateFnsLocale,
+} from './dateFnsLocale'
 export { default as LocaleProvider } from './LocaleProvider'
 export type { AllowedLocale }
 
 export const localeNames: Record<AllowedLocale, string> = {
+	bs: 'Bosanski',
 	'af-ZA': 'Afrikaans',
 	'ar-SA': 'العربية',
 	'ca-ES': 'Català',
@@ -20,7 +27,7 @@ export const localeNames: Record<AllowedLocale, string> = {
 	'fi-FI': 'Suomi',
 	'fr-FR': 'Français',
 	'he-IL': 'עברית',
-	'hu-HU': 'Hungarian',
+	'hu-HU': 'Magyar',
 	'it-IT': 'Italiano',
 	'ja-JP': '日本語',
 	'ko-KR': '한국어',

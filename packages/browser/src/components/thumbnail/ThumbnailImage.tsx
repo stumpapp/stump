@@ -147,7 +147,7 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 			onError?.()
 		}
 
-		const imageClasses = cn('absolute inset-0 z-15 h-full w-full object-cover', imageClassName)
+		const imageClasses = cn('inset-0 absolute z-15 h-full w-full object-cover', imageClassName)
 
 		const imageStyle = { borderRadius: computedStyles.borderRadius }
 

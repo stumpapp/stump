@@ -41,7 +41,7 @@ export default function TextCell<Field extends string>({
 
 				<ToolTip content="Reset field">
 					<Button
-						variant="danger"
+						variant="destructive"
 						size="icon"
 						className="h-4 w-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
 						aria-label="Reset field"

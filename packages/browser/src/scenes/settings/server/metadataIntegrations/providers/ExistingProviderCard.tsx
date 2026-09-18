@@ -52,24 +52,24 @@ export function ExistingProviderCard({ data }: Props) {
 
 					{expiresSoon && (
 						<ToolTip content={t(getKey('providerTokenExpiresSoon'))} align="end" size="xs">
-							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-fill-danger/10 bg-fill-danger-secondary">
-								<BadgeAlert className="text-primary h-4 w-4" strokeWidth={1} />
+							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-destructive/10 bg-destructive/15">
+								<BadgeAlert className="h-4 w-4 text-primary" strokeWidth={1} />
 							</div>
 						</ToolTip>
 					)}
 
 					{provider.enabled && (
 						<ToolTip content={t(getKey('providerEnabled'))} align="end" size="xs">
-							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-fill-success/10 bg-fill-success-secondary">
-								<BadgeCheck className="text-primary h-4 w-4" strokeWidth={1} />
+							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-success/10 bg-success/15">
+								<BadgeCheck className="h-4 w-4 text-primary" strokeWidth={1} />
 							</div>
 						</ToolTip>
 					)}
 
 					{!provider.enabled && (
 						<ToolTip content={t(getKey('providerDisabled'))} align="end" size="xs">
-							<div className="h-7 w-7 flex items-center justify-center rounded-full border border-fill-info/10 bg-fill-info-secondary">
-								<BadgeX className="text-primary h-4 w-4" strokeWidth={1} />
+							<div className="h-7 w-7 border-sky-500/10 bg-sky-500/15 flex items-center justify-center rounded-full border">
+								<BadgeX className="h-4 w-4 text-primary" strokeWidth={1} />
 							</div>
 						</ToolTip>
 					)}

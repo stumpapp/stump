@@ -3,12 +3,12 @@ import { cn, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2, FileStack, List } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
-import paths from '@/paths'
-import { usePrefetchSmartList } from '@/scenes/smartList'
+import { usePaths } from '@/paths'
+import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
@@ -27,6 +27,7 @@ export default function SmartListNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: { smartLists: lists },
@@ -42,7 +43,7 @@ export default function SmartListNavigationItem({
 			return (
 				<div className="px-2 flex w-full flex-1 items-center justify-start">
 					<div className="gap-y-2 flex flex-col items-start">
-						<CircleSlash2 className="h-7 w-7 text-foreground-muted" />
+						<CircleSlash2 className="h-7 w-7 text-muted-foreground" />
 						<div className="text-left">
 							<Label>{t('sidebar.buttons.noSmartlists')}</Label>
 							<Text size="sm" variant="muted">
@@ -81,16 +82,16 @@ export default function SmartListNavigationItem({
 
 	return (
 		<NavigationMenu.Item>
-			<NavigationMenu.Trigger className="bg-sidebar text-foreground-subtle hover:bg-sidebar-surface-hover">
+			<NavigationMenu.Trigger className="bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
 				<List className="mr-2 h-4 w-4" />
 				{t('sidebar.buttons.smartlists')}
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
 				<div
 					style={{ width }}
-					className={cn('gap-3 p-2 flex min-h-[150px] min-w-[300px] flex-col', {
-						'md:w-[400px] lg:w-[500px]': !width,
-						'md:w-[300px] lg:w-[350px]': !width && !lists?.length,
+					className={cn('gap-3 p-2 min-h-37.5 min-w-75 flex flex-col', {
+						'md:w-100 lg:w-125': !width,
+						'md:w-75 lg:w-87.5': !width && !lists?.length,
 					})}
 				>
 					<div className="gap-y-2 flex w-full flex-1 flex-col">
@@ -103,7 +104,7 @@ export default function SmartListNavigationItem({
 								<TopBarLinkListItem
 									to={paths.smartListCreate()}
 									isActive={location.pathname.startsWith(paths.smartListCreate())}
-									className="p-1 justify-center self-end border border-dashed border-edge-subtle"
+									className="p-1 justify-center self-end border border-dashed border-sidebar-border"
 								>
 									<span className="text-sm font-medium line-clamp-1">
 										{t('sidebar.buttons.createSmartlist')}
@@ -115,7 +116,7 @@ export default function SmartListNavigationItem({
 								<TopBarLinkListItem
 									to={paths.smartLists()}
 									isActive={location.pathname.startsWith(paths.smartLists())}
-									className="p-1 justify-center self-end border border-dashed border-edge-subtle"
+									className="p-1 justify-center self-end border border-dashed border-sidebar-border"
 								>
 									<span className="text-sm font-medium line-clamp-1">
 										{t('sidebar.buttons.seeAll')}

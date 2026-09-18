@@ -9,7 +9,7 @@ type Props = {
 export const SmartListTableItem = ({ row, style }: Props) => {
 	return (
 		<div
-			className="flex w-full border-b border-edge bg-background hover:bg-background-surface/50"
+			className="flex w-full border-b border-border bg-background hover:bg-muted/50"
 			style={style}
 		>
 			{row.getVisibleCells().map((cell) => (

@@ -8,21 +8,6 @@ enum AccessRole {
 	CO_CREATOR
 }
 
-type ActiveReadingSession {
-	id: Int!
-	page: Int
-	percentageCompleted: Decimal
-	locator: ReadiumLocator
-	epubcfi: String
-	koreaderProgress: String
-	startedAt: DateTime!
-	updatedAt: DateTime
-	mediaId: String!
-	userId: String!
-	deviceId: String
-	elapsedSeconds: Int
-}
-
 input AddBookToClubInput {
 	book: BookClubBookInput!
 }
@@ -87,11 +72,12 @@ type Arrangement {
 	sections: [ArrangementSection!]!
 }
 
-union ArrangementConfig = SystemArrangementConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+union ArrangementConfig = SystemArrangementConfig | InProgressBooks | OnDeckBooks | RecentlyAdded | CustomArrangementConfig
 
 input ArrangementConfigInput @oneOf {
 	system: SystemArrangementConfigInput
 	inProgressBooks: InProgressBooksInput
+	onDeckBooks: OnDeckBooksInput
 	recentlyAdded: RecentlyAddedInput
 	custom: FilterableArrangementEntityLinkInput
 }
@@ -350,7 +336,6 @@ type Bookmark {
 	id: String!
 	previewContent: String
 	locator: ReadiumLocator
-	epubcfi: String
 	page: Int
 	mediaId: String!
 	userId: String!
@@ -359,7 +344,7 @@ type Bookmark {
 
 input BookmarkInput {
 	mediaId: String!
-	locator: EpubProgressLocatorInput!
+	locator: ReadiumLocatorInput!
 	previewContent: String
 }
 
@@ -397,6 +382,13 @@ input CollectedItemInput {
 	issueid: String
 	"Listing of issue numbers present pertaining to related comicid in collection"
 	issues: String
+}
+
+input ComputedFilterLibraryType @oneOf {
+	is: LibraryType
+	isNot: LibraryType
+	isAnyOf: [LibraryType!]
+	isNoneOf: [LibraryType!]
 }
 
 input ComputedFilterReadingStatus @oneOf {
@@ -717,15 +709,12 @@ type Epub {
 }
 
 input EpubProgressInput {
-	locator: EpubProgressLocatorInput!
+	locator: ReadiumLocatorInput!
 	percentage: Decimal
 	isComplete: Boolean
-	elapsedSeconds: Int
-}
-
-input EpubProgressLocatorInput @oneOf {
-	readium: ReadiumLocatorInput
-	epubcfi: String
+	elapsedSecondsDelta: Int
+	deviceId: String
+	resetElapsedSeconds: Boolean
 }
 
 """
@@ -856,26 +845,6 @@ input FilterableArrangementEntityLinkInput {
 	links: [FilterableArrangementEntityLink!]! = []
 }
 
-type FinishedReadingSession {
-	id: Int!
-	startedAt: DateTime!
-	completedAt: DateTime!
-	mediaId: String!
-	userId: String!
-	deviceId: String
-	elapsedSeconds: Int
-}
-
-type FinishedReadingSessionModel {
-	id: Int!
-	startedAt: DateTime!
-	completedAt: DateTime!
-	mediaId: String!
-	userId: String!
-	deviceId: String
-	elapsedSeconds: Int
-}
-
 """
 A resize option which will resize the image to fit within the given dimensions,
 maintaining the aspect ratio.
@@ -900,6 +869,15 @@ input FitWithinResizeInput {
 	width: Int!
 	"The maximum height (in pixels) of the resulting image"
 	height: Int!
+}
+
+"The sections displayed on a user's home page."
+type HomeArrangement {
+	sections: [ArrangementSection!]!
+}
+
+input HomeArrangementInput {
+	sections: [ArrangementSectionInput!]!
 }
 
 type ImageColor {
@@ -956,6 +934,7 @@ type ImageRef {
 	height: Int
 	width: Int
 	metadata: ImageMetadata
+	lastModified: DateTime
 }
 
 "The resize options to use when generating an image"
@@ -971,12 +950,10 @@ input ImageResizeMethodInput @oneOf {
 
 type InProgressBooks {
 	name: String
-	links: [FilterableArrangementEntityLink!]!
 }
 
 input InProgressBooksInput {
 	name: String
-	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type InheritPermissionStruct {
@@ -994,6 +971,14 @@ for a collection of items
 enum InterfaceLayout {
 	GRID
 	TABLE
+}
+
+"The roundness of certain UI elements in the client interface, such as cards, buttons, inputs, etc"
+enum InterfaceRoundness {
+	NONE
+	NORMAL
+	ROUNDED
+	PILL
 }
 
 "A scalar that can represent any JSON value."
@@ -1039,8 +1024,10 @@ type JobUpdate {
 	id: String!
 	"The status of the job"
 	status: JobStatus
-	"The message to display"
+	"The primary message to display, e.g. \"Scanning series\""
 	message: String
+	"An optional secondary message providing additional detail, e.g. a path or item name"
+	subtitle: String
 	"The current task being worked on"
 	completedTasks: Int
 	"""
@@ -1110,6 +1097,11 @@ type LibraryConfig {
 	skipBookOverview: Boolean!
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
+	"""
+	the **relative path** to the directory where oneshots are stored,
+	relative to the library path. this is **not** a fully qualified path
+	"""
+	oneshotsDirectory: String
 	thumbnailConfig: ImageProcessorOptions
 	ignoreRules: [String!]
 }
@@ -1132,6 +1124,7 @@ input LibraryConfigInput {
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
 	ignoreRules: [String!]
+	oneshotsDirectory: String
 }
 
 input LibraryFilterInput {
@@ -1305,15 +1298,7 @@ type Media {
 	extension: String!
 	"The number of pages in the media, if applicable. Will be -1 for certain media types"
 	pages: Int!
-	"The timestamp of the last time the media was updated. This will be set during creation, as well"
-	updatedAt: DateTime
-	"The timestamp of the creation of the media"
-	createdAt: DateTime!
-	"""
-	The timestamp of when the underlying file was last modified on disk. This will only be set if
-	a timestamp can be retrieved from the filesystem
-	"""
-	modifiedAt: DateTime
+	isOneshot: Boolean!
 	"""
 	A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
 	in aiding in the identification of duplicate media files
@@ -1340,6 +1325,15 @@ type Media {
 	expected that all media will belong to a series
 	"""
 	seriesId: String
+	"The timestamp of the last time the media was updated. This will be set during creation, as well"
+	updatedAt: DateTime
+	"The timestamp of the creation of the media"
+	createdAt: DateTime!
+	"""
+	The timestamp of when the underlying file was last modified on disk. This will only be set if
+	a timestamp can be retrieved from the filesystem
+	"""
+	modifiedAt: DateTime
 	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
 	deletedAt: DateTime
 	metadata: MediaMetadata
@@ -1365,8 +1359,8 @@ type Media {
 	metatadata, if available, and fallback to the name derived from the file name
 	"""
 	resolvedName: String!
-	readProgress: ActiveReadingSession
-	readHistory: [FinishedReadingSession!]!
+	readProgress: ResumeReadingCursor
+	readHistory: [ReadthroughRecord!]!
 	seriesPosition: Int
 	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -1418,6 +1412,7 @@ input MediaFilterInput {
 	readingStatus: ComputedFilterReadingStatus = null
 	metadata: MediaMetadataFilterInput = null
 	series: SeriesFilterInput = null
+	tags: FieldFilterString = null
 	_and: [MediaFilterInput!] = null
 	_not: [MediaFilterInput!] = null
 	_or: [MediaFilterInput!] = null
@@ -1594,15 +1589,38 @@ type MediaMetadataOverview {
 	series: [String!]!
 }
 
+"""
+A manual override for searching metadata providers for a single media item. When
+provided, the caller's fields take precedence over whatever is already stored on the
+media, and the search is restricted to a single provider if one is given.
+"""
+input MediaMetadataSearchInput {
+	title: String
+	author: String
+	isbn: String
+	year: Int
+	"The issue number (for comics/manga)"
+	number: Float
+	"""
+	The volume ID to search within, which will swap to a more precise lookup if provided alongside
+	`number`
+	"""
+	comicVineVolumeId: String
+	"""
+	Restrict the search to this provider only. If omitted, all enabled providers
+	configured for the media's library type are searched.
+	"""
+	provider: MetadataProvider
+	limit: Int
+}
+
 enum MediaModelOrdering {
 	ID
 	NAME
 	SIZE
 	EXTENSION
 	PAGES
-	UPDATED_AT
-	CREATED_AT
-	MODIFIED_AT
+	IS_ONESHOT
 	HASH
 	KOREADER_HASH
 	PATH
@@ -1610,6 +1628,9 @@ enum MediaModelOrdering {
 	THUMBNAIL_META
 	THUMBNAIL_PATH
 	SERIES_ID
+	UPDATED_AT
+	CREATED_AT
+	MODIFIED_AT
 	DELETED_AT
 }
 
@@ -1662,6 +1683,12 @@ type MetadataFetchRecord {
 	status: MetadataFetchStatus!
 	mediaId: String
 	seriesId: String
+	"""
+	The total number of raw hits reported by provider searches, across all
+	providers searched. Compare against `match_candidates.len()` to detect when
+	hits were dropped (e.g. a per-hit detail fetch failed after the initial search).
+	"""
+	rawHits: Int!
 	addedAt: DateTime!
 	updatedAt: DateTime
 	matchCandidates: [MatchCandidate!]!
@@ -1756,6 +1783,8 @@ input MetadataFieldOverride {
 enum MetadataProvider {
 	"Hardcover (https://hardcover.app)"
 	HARDCOVER
+	"ComicVine (https://comicvine.gamespot.com/api/)"
+	COMIC_VINE
 }
 
 type MetadataProviderConfigModel {
@@ -1868,17 +1897,15 @@ type Mutation {
 	will be generated based on the library's thumbnail configuration.
 	"""
 	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
-	deleteMediaProgress(id: ID!): Media!
-	"""
-	Deletes all of a user's reading history for a specific media item. This cannot be undone, so
-	use with caution.
-	"""
-	deleteMediaReadHistory(id: ID!): Media!
-	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingProgressOutput!
-	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
 	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
-	"Search external metadata providers for a media item and return match candidates"
-	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
+	"""
+	Search external metadata providers for a media item and return the resulting fetch
+	record with its match candidates. When `search` is provided, the caller's fields
+	take precedence over the media's stored metadata, the search can be restricted to a
+	single provider, and auto-apply is skipped so the caller can review candidates before
+	anything is written.
+	"""
+	fetchMediaMetadata(id: ID!, search: MediaMetadataSearchInput): MetadataFetchRecord!
 	"Accept a match candidate and apply it to media metadata"
 	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
 	"Reject the current match candidates for a media item"
@@ -1918,7 +1945,9 @@ type Mutation {
 	Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after updating.
 	"""
-	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library! @deprecated(reason: "Use `patchLibrary` instead")
+	patchLibrary(id: ID!, input: PatchLibraryInput!): Library!
+	patchLibraryConfig(id: ID!, input: PatchLibraryConfigInput!): LibraryConfig!
 	"Update the emoji for a library"
 	updateLibraryEmoji(id: ID!, emoji: String): Library!
 	"""
@@ -1969,20 +1998,11 @@ type Mutation {
 	will be generated based on the library's thumbnail configuration.
 	"""
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
-	"""
-	Toggle the completion status of a series. If the series is marked as completed, all books
-	in the series will also be marked as completed, and vice versa for marking as not completed.
-	This is considered a dangerous operation since it can modify all your read progression related
-	to a single series all at once. Please use with caution.
-	"""
-	toggleSeriesCompletion(id: ID!, isCompleted: Boolean!): Series!
 	scanSeries(id: ID!): Boolean!
 	"Create a bookmark for a user"
 	createBookmark(input: BookmarkInput!): Bookmark!
 	"Delete a bookmark by ID, only if the user created it"
 	deleteBookmark(id: String!): Bookmark!
-	"Delete a bookmark by epubcfi"
-	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
 	"Create an annotation (highlight/note)"
 	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
 	"Update an annotation's note text"
@@ -2053,6 +2073,8 @@ type Mutation {
 	deleteUser(id: ID!, hardDelete: Boolean): User!
 	deleteUserSessions(id: ID!): Int!
 	updateUserLockStatus(id: ID!, lock: Boolean!): User!
+	"Replace the authenticated user's home sections"
+	updateHomeArrangement(input: HomeArrangementInput!): HomeArrangement!
 	updateNavigationArrangementLock(locked: Boolean!): Arrangement!
 	updateNavigationArrangement(input: NavigationArrangementInput!): Arrangement!
 	createEmailer(input: EmailerInput!): Emailer!
@@ -2084,6 +2106,8 @@ type Mutation {
 	createMetadataProvider(input: CreateMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	updateMetadataProvider(id: Int!, input: PatchMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	deleteMetadataProvider(id: Int!): MetadataProviderConfigModel!
+	"Validate the provided API token by making a test request using a client instance"
+	validateProviderConfig(config: ValidateMetadataProviderConfigInput!): ProviderCredentialVerification!
 	"Accept the top-ranked candidate for all pending metadata matches"
 	acceptAllPendingMatches(strategy: MergeStrategy, excludeFields: [MetadataField!]): Int!
 	"Reject all pending metadata matches, setting their status to NoMatch"
@@ -2124,7 +2148,46 @@ type Mutation {
 	deleteCustomEmoji(id: ID!): Boolean!
 	"Rename a custom emoji"
 	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
+	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingSession!
+	"""
+	a more focused version of `update_media_progress` that splices the history so that
+	any sessions after the ancestor_session_id are deleted in favor of the input
+	provided. this should be called when resolving local vs remote progress conflicts, where
+	the user has chosen to keep their local progress and discard the remote progress beyond
+	the ancestor session (i.e., the last session that both local and remote progress share)
+	"""
+	acceptLocalProgress(id: ID!, ancestorSessionId: Int, input: MediaProgressInput!): ReadingSession!
+	"trashes current readthrough, if there is one"
+	clearMediaProgress(id: ID!): Boolean!
+	"resets the elapsed seconds for all reading sessions in the current readthrough, if there is one"
+	resetElapsedSeconds(id: ID!): Boolean!
+	"""
+	marks current readthrough as complete:
+	- if no current readthrough, creates one
+	- if `dnf` is true, it will mark the readthrough as such
+	"""
+	finishMediaProgress(id: ID!, dnf: Boolean = null): Boolean!
+	"trashes all completed readthroughs for the media"
+	deleteMediaReadingHistory(id: ID!): Int!
+	"marks all books in the series as finished"
+	finishSeriesProgress(id: ID!): Int!
+	"""
+	trashes all completed readthroughs for all books in this series, preserving any active
+	readthroughs
+	"""
+	clearSeriesReadingHistory(id: ID!): Int!
 }
+
+"""
+ISO 8601 calendar date without timezone.
+Format: %Y-%m-%d
+
+# Examples
+
+* `1994-11-13`
+* `2000-02-24`
+"""
+scalar NaiveDate
 
 input NavigationArrangementInput {
 	sections: [ArrangementSectionInput!]!
@@ -2230,6 +2293,14 @@ type OffsetPaginationInfo {
 	zeroBased: Boolean!
 }
 
+type OnDeckBooks {
+	name: String
+}
+
+input OnDeckBooksInput {
+	name: String
+}
+
 enum OrderDirection {
 	ASC
 	DESC
@@ -2253,7 +2324,9 @@ type PageDimension {
 
 input PagedProgressInput {
 	page: Int!
-	elapsedSeconds: Int
+	elapsedSecondsDelta: Int
+	deviceId: String
+	resetElapsedSeconds: Boolean
 }
 
 type PaginatedAuthorResponse {
@@ -2344,6 +2417,37 @@ input PatchEmailDeviceInput {
 	forbidden: Boolean
 }
 
+input PatchLibraryConfigInput {
+	convertRarToZip: Boolean
+	hardDeleteConversions: Boolean
+	generateFileHashes: Boolean
+	generateKoreaderHashes: Boolean
+	processMetadata: Boolean
+	watch: Boolean
+	libraryPattern: LibraryPattern
+	libraryType: LibraryType
+	defaultLibraryViewMode: LibraryViewMode
+	hideSeriesView: Boolean
+	skipBookOverview: Boolean
+	thumbnailConfig: ImageProcessorOptionsInput
+	processThumbnailColorsEvenWithoutConfig: Boolean
+	defaultReadingDir: ReadingDirection
+	defaultReadingMode: ReadingMode
+	defaultReadingImageScaleFit: ReadingImageScaleFit
+	ignoreRules: [String!]
+	oneshotsDirectory: String
+}
+
+input PatchLibraryInput {
+	name: String
+	path: String
+	description: String
+	emoji: String
+	tags: [String!]
+	config: PatchLibraryConfigInput
+	scanAfterPersist: Boolean! = true
+}
+
 "A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields."
 input PatchMetadataProviderConfigInput {
 	"The API token for authenticating with the provider"
@@ -2366,6 +2470,12 @@ type PlaceholderGenerationOutput {
 	skippedEntities: Int!
 	"The number of placeholder metadata entries that were generated"
 	generatedMetadata: Int!
+}
+
+type ProviderCredentialVerification {
+	responseStatus: Int!
+	isValid: Boolean!
+	error: String
 }
 
 enum PublicationStatus {
@@ -2420,7 +2530,7 @@ type Query {
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!
 	mediaDiskUsage: Int!
-	media(filter: MediaFilterInput! = {id: null, name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput! = {id: null, name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, tags: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	"Returns the available alphabet for all media in the server"
@@ -2429,14 +2539,16 @@ type Query {
 	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
+	readingSessionConflictView(mediaId: ID!, branchedSessionId: Int): ReadingSessionConflictResolutionView!
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
 	librariesAlphabet: JSONObject!
+	librariesStats: LibraryStats!
 	numberOfLibraries: Int!
 	lastVisitedLibrary: Library
 	libraryMissingEntities(libraryId: ID!, pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMissingEntityResponse!
-	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, readingStatus: null, libraryType: null, isOneshot: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	"Returns the available alphabet for all series in the server"
 	seriesAlphabet: JSONObject!
@@ -2546,12 +2658,67 @@ enum ReadingMode {
 	CONTINUOUS_HORIZONTAL
 }
 
-union ReadingProgressOutput = ActiveReadingSession | FinishedReadingSession
+type ReadingSession {
+	id: Int!
+	"the \"logical\" date of this session, based on user prefs and start time"
+	sessionDate: NaiveDate!
+	startLocator: ReadiumLocator
+	endLocator: ReadiumLocator
+	startPage: Int
+	endPage: Int
+	startPercentage: Decimal
+	endPercentage: Decimal
+	koreaderProgress: String
+	"accumulated reading time for this session, updated via deltas (not overwritten)"
+	elapsedSeconds: Int
+	"which read-through of this book this session belongs to (1-indexed)"
+	readthroughNumber: Int!
+	"""
+	the status of this session. this might feel confusing when considering that sessions will
+	remain in place even after completion/dnf, but the idea is that the status represents the
+	state of the session when it was last updated
+	"""
+	status: ReadingStatus!
+	notes: String
+	mediaId: String!
+	userId: String!
+	createdAt: DateTime!
+	updatedAt: DateTime
+	deviceIds: [String!]!
+}
 
+"""
+a view through which a client can resolve conflicts relative to a local ancestor session
+and any number of remote sessions which were created afterwards
+"""
+type ReadingSessionConflictResolutionView {
+	"""
+	the last session which was known to be in sync with the local client. it's possible there is no ancestor session, e.g. if
+	the book was downloaded on the client before any reading sessions were created on the server
+	"""
+	ancestorSession: ReadingSession
+	"""
+	all sessions created/updated on **this server** (remote) after the ancestor session, ordered
+	by created_at ascending
+	"""
+	remoteSessions: [ReadingSession!]!
+}
+
+"""
+the different reading statuses a book can be categorized as based on a user's
+reading sessions
+"""
 enum ReadingStatus {
+	"""
+	there is an active reading session for this book. it may or may not have been completed in
+	the past, this is strictly about the presence of an active session
+	"""
 	READING
+	"there is at least one completed readthrough for this book"
 	FINISHED
+	"a user actively started reading a book but decided not to finish it (i.e., dnf-ing a book)"
 	ABANDONED
+	"no sessions have been recorded for this book"
 	NOT_STARTED
 }
 
@@ -2603,16 +2770,26 @@ input ReadiumTextInput {
 	highlight: String
 }
 
+"""
+a completed readthrough of a book, aggregated across all sessions that
+share the same `readthrough_number`
+"""
+type ReadthroughRecord {
+	readthroughNumber: Int!
+	startedAt: DateTime!
+	completedAt: DateTime!
+	elapsedSeconds: Int!
+	dnf: Boolean!
+}
+
 type RecentlyAdded {
 	entity: FilterableArrangementEntity!
 	name: String
-	links: [FilterableArrangementEntityLink!]!
 }
 
 input RecentlyAddedInput {
 	entity: FilterableArrangementEntity!
 	name: String
-	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type RegisteredEmailDevice {
@@ -2621,6 +2798,30 @@ type RegisteredEmailDevice {
 	email: String!
 	forbidden: Boolean!
 	sendHistory: [EmailerSendRecord!]!
+}
+
+"""
+the current reading position for a book, derived from the latest session
+with the highest `readthrough_number`
+"""
+type ResumeReadingCursor {
+	readthroughNumber: Int!
+	"the id of the session this cursor is derived from"
+	sessionId: Int!
+	page: Int
+	locator: ReadiumLocator
+	percentageCompleted: Decimal
+	"total reading time across all sessions in the current readthrough"
+	elapsedSeconds: Int!
+	"when the very first session in the current readthrough started"
+	startedAt: DateTime
+	"the last time the latest session in the current readthrough was updated"
+	updatedAt: DateTime
+	"""
+	A page number computed from the current locator's `total_progression` relative
+	to the computed positions list for the book.
+	"""
+	positionAwarePage: Int
 }
 
 input SaveSmartListInput {
@@ -2736,19 +2937,21 @@ type Series {
 	id: String!
 	name: String!
 	description: String
-	createdAt: DateTime!
-	updatedAt: DateTime
-	deletedAt: DateTime
 	path: String!
 	status: FileStatus!
+	isOneshot: Boolean!
 	thumbnailMeta: ImageMetadata
 	thumbnailPath: String
 	libraryId: String
+	createdAt: DateTime!
+	updatedAt: DateTime
+	deletedAt: DateTime
 	metadata: SeriesMetadata
 	isFavorite: Boolean!
 	resolvedName: String!
 	resolvedDescription: String
 	library: Library!
+	oneshotBook: Media
 	"Get media in this series"
 	media(take: Int = null, skip: Int = null): [Media!]!
 	mediaCount: Int!
@@ -2771,6 +2974,9 @@ input SeriesFilterInput {
 	name: FieldFilterString = null
 	path: FieldFilterString = null
 	libraryId: FieldFilterString = null
+	readingStatus: ComputedFilterReadingStatus = null
+	libraryType: ComputedFilterLibraryType = null
+	isOneshot: Boolean = null
 	metadata: SeriesMetadataFilterInput = null
 	library: LibraryFilterInput = null
 	_and: [SeriesFilterInput!] = null
@@ -2901,14 +3107,15 @@ enum SeriesModelOrdering {
 	ID
 	NAME
 	DESCRIPTION
-	CREATED_AT
-	UPDATED_AT
-	DELETED_AT
 	PATH
 	STATUS
+	IS_ONESHOT
 	THUMBNAIL_META
 	THUMBNAIL_PATH
 	LIBRARY_ID
+	CREATED_AT
+	UPDATED_AT
+	DELETED_AT
 }
 
 input SeriesOrderBy @oneOf {
@@ -3081,62 +3288,48 @@ type SpineItem {
 	linear: Boolean!
 }
 
-"""
-Represents the configuration of a Stump application. This struct is generated at startup
-using a TOML file, environment variables, or both and is input when creating a `StumpCore`
-instance.
-
-Example:
-```
-use stump_core::{config::{self, StumpConfig}, StumpCore};
-
-#[tokio::main]
-async fn main() {
-/// Get config dir from environment variables.
-let config_dir = config::bootstrap_config_dir();
-
-// Create a StumpConfig using the config file and environment variables.
-let config = StumpConfig::new(config_dir)
-// Load Stump.toml file (if any)
-.with_config_file().unwrap()
-// Overlay environment variables
-.with_environment().unwrap();
-
-// Ensure that config directory exists and write Stump.toml.
-config.write_config_dir().unwrap();
-// Create an instance of the stump core.
-let core = StumpCore::new(config).await;
-}
-```
-"""
 type StumpConfig {
-	"The \"release\" | \"debug\" profile with which the application is running."
-	profile: String!
-	"The port from which to serve the application (default: 10801)."
+	"The IP address on which to listen on (default: \"0.0.0.0\")"
+	ip: String!
+	"The port from which to serve the application (default: 10801)"
 	port: Int!
-	"The verbosity with which system logs are visible (default: 1)."
+	"""
+	The verbosity with which system logs are visible (default: 1)
+	0 = none at all, 1 = info, 2 = debug, 3 = trace
+	"""
 	verbosity: Int!
-	"Whether or not to pretty print logs."
+	"Whether or not to pretty print logs"
 	prettyLogs: Boolean!
-	"The directory where the applicaiton logs will be stored"
-	logDir: String
-	"Whether or not to include ANSI color codes in log files."
+	"Whether or not to include ANSI color codes in log files"
 	colorfulLogs: Boolean!
-	"An optional custom path for the database."
+	"""
+	The directory where the applicaiton logs will be stored. If unspecified,
+	logs will be stored in the config_dir
+	"""
+	logDir: String
+	"An optional custom path for the database. If set, this assumes SQLite."
 	dbPath: String
-	"The client directory."
+	"The timeout in seconds for database connections"
+	dbTimeoutSecs: Int!
+	"""
+	The directory where the web app bundle lives, which the server will serve as
+	static files
+	"""
 	clientDir: String!
-	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
+	"The configuration root for the Stump application"
 	configDir: String!
-	"A list of origins for CORS."
+	"A comma-separated list of origins for CORS"
 	allowedOrigins: [String!]!
-	"Path to the PDFium binary for PDF support."
+	"Path to the PDFium binary for enabling PDF support"
 	pdfiumPath: String
-	"Indicates if the Swagger UI should be disabled."
-	enableSwagger: Boolean!
-	"Indicates if the KoReader sync feature should be enabled."
+	"""
+	Indicates if the GraphQL playground should be enabled. If true, the server
+	will allow GET requests to the GraphQL endpoint and serve the playground UI
+	"""
+	enablePlayground: Boolean!
+	"Indicates if the KoReader sync feature should be enabled"
 	enableKoreaderSync: Boolean!
-	"Indicates if the Kobo sync feature should be enabled."
+	"Indicates if the Kobo sync feature should be enabled"
 	enableKoboSync: Boolean!
 	"""
 	Indicates if OPDS page access should automatically track reading progression.
@@ -3145,48 +3338,40 @@ type StumpConfig {
 	enableOpdsProgression: Boolean!
 	"Password hash cost"
 	passwordHashCost: Int!
-	"The time in seconds that a login session will be valid for."
+	"The time in seconds that a login session will be valid for"
 	sessionTtl: Int!
+	"The time in seconds that an access token will be valid for"
 	accessTokenTtl: Int!
+	"The time in seconds that a refresh token will be valid for"
 	refreshTokenTtl: Int!
-	"The interval at which automatic deleted session cleanup is performed."
+	"The interval in seconds at which expired sessions will be cleaned up"
 	expiredSessionCleanupInterval: Int!
 	"""
-	The maximum number of concurrent files which may be processed by a scanner. This is used
-	to limit/increase the number of files that are processed at once. This may be useful for those
-	with high or low performance systems to configure to their needs.
+	A multiplier applied to the number of logical CPUs to derive the default scanner concurrency
+	limit. Increasing can speed things up but will increase resource usage
 	"""
-	maxScannerConcurrency: Int!
-	"""
-	The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
-	to limit/increase the number of images that are processed at once. Image generation can be
-	resource intensive, so this may be useful for those with high or low performance systems to
-	configure to their needs.
-	"""
-	maxThumbnailConcurrency: Int!
-	"""
-	The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
-	libraries, series, or media.
-	"""
+	parallelismMultiplier: Int!
+	"The maximum size in bytes of an image upload"
 	maxImageUploadSize: Int!
-	"Whether or not the server will allow users with the appropriate permissions to upload books and series."
+	"""
+	Whether or not the server will allow users with the appropriate permissions
+	to upload books, series, or other valid uploadable content
+	"""
 	enableUpload: Boolean!
-	"The maximum size, in bytes, of files that can be uploaded to be included in libraries."
+	"The maximum size in bytes of a file upload"
 	maxFileUploadSize: Int!
-	"The DPI (dots per inch) to use when rendering PDF pages as images."
+	"The DPI (dots per inch) to use when rendering PDF pages as images"
 	pdfRenderDpi: Int!
-	"The maximum width or height dimension for rendered PDF pages."
+	"The maximum width or height dimension for rendered PDF pages"
 	pdfMaxDimension: Int!
-	"The image format to use for rendered PDF pages (webp, png, jpeg)."
+	"The image format to use for rendered PDF pages (webp, png, jpeg)"
 	pdfRenderFormat: String!
-	"Whether to enable disk caching for rendered PDF pages."
+	"Whether to enable disk caching for rendered PDF pages"
 	pdfCachePages: Boolean!
-	"Number of pages to pre-render before and after the current page."
+	"Number of pages to pre-render before and after the current page"
 	pdfPrerenderRange: Int!
-	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
+	"Whether to enable high-quality rendering with smoothing (slower but better quality)"
 	pdfHighQuality: Boolean!
-	"The number of seconds after which a book can be re-completed"
-	bookCompletionDedupTimeoutSecs: Int!
 	"Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)"
 	trustProxyHeaders: Boolean!
 }
@@ -3330,6 +3515,8 @@ input UpdateUserInput {
 input UpdateUserPreferencesInput {
 	locale: String!
 	preferredLayoutMode: InterfaceLayout!
+	interfaceRoundness: InterfaceRoundness!
+	thumbnailRoundness: InterfaceRoundness!
 	primaryNavigationMode: String!
 	layoutMaxWidthPx: Int
 	appTheme: String!
@@ -3345,10 +3532,12 @@ input UpdateUserPreferencesInput {
 	enableJobOverlay: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
-	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableAlphabetSelect: Boolean!
+	enableReadingJournal: Boolean!
+	dayResetHourOffset: Int!
+	readingSessionGracePeriodSecs: Int!
 }
 
 "A multipart file upload"
@@ -3377,12 +3566,16 @@ type User {
 	username: String!
 	isServerOwner: Boolean!
 	avatarPath: String
+	avatarMeta: ImageMetadata
+	avatarUpdatedAt: DateTime
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
 	oidcEmail: String
-	avatarUrl: String
+	avatarUrl: String @deprecated(reason: "This will be deprecated in a future release which refactors the auth RESTful API. Until then, it stays.")
+	"a reference to the avatar image and its metadata for this user"
+	avatar: ImageRef!
 	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
@@ -3522,16 +3715,34 @@ type UserPreferences {
 	enableHideScrollbar: Boolean!
 	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
-	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
 	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
+	interfaceRoundness: InterfaceRoundness!
+	thumbnailRoundness: InterfaceRoundness!
+	enableReadingJournal: Boolean!
+	"""
+	hour offset from midnight at which a new "logical day" begins for reading sessions
+	0 = midnight, 2 = 2am, etc
+	"""
+	dayResetHourOffset: Int!
+	"seconds of inactivity after which the current reading session is considered ended"
+	readingSessionGracePeriodSecs: Int!
 	userId: String
 	homeArrangement: Arrangement!
 	navigationArrangement: Arrangement!
 }
 
+input ValidateMetadataProviderConfigInput {
+	"The provider type"
+	providerType: MetadataProvider!
+	"The API token for authenticating with the provider"
+	apiToken: String!
+}
+
+"Marks an element of a GraphQL schema as no longer supported."
+directive @deprecated(reason: String = "No longer supported") on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | ENUM_VALUE
 "Directs the executor to include this field or fragment only when the `if` argument is true."
 directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
 "Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)"

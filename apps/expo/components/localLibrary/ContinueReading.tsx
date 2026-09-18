@@ -6,12 +6,17 @@ import { View } from 'react-native'
 
 import { db, downloadedFiles, libraryRefs, readProgress, seriesRefs } from '~/db'
 import { useListItemSize } from '~/lib/hooks'
+import {
+	useReadingNowWidgetSync,
+	WidgetSyncBook,
+} from '~/lib/hooks/widgetSync/useReadingNowWidgetSync'
 
 import { Heading } from '../ui'
 import DownloadedListItem from './DownloadedListItem'
 import ReadingNow from './ReadingNow'
 import { useDownloadsState } from './store'
 import { intoDownloadedFile } from './types'
+import { getThumbnailPath } from './utils'
 
 export default function ContinueReading() {
 	// Note: This is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
@@ -40,6 +45,31 @@ export default function ContinueReading() {
 
 	// Take the first 5 books as "currently reading"
 	const activeBooks = useMemo(() => data?.slice(0, 5) || [], [data])
+
+	const widgetSyncBooks = useMemo(
+		() =>
+			activeBooks.map(
+				(book) =>
+					({
+						id: book.downloaded_files.id,
+						resolvedName: book.downloaded_files.bookName || book.downloaded_files.filename,
+						thumbnail: {
+							url: getThumbnailPath(book.downloaded_files) || '',
+						},
+						readProgress: book.read_progress
+							? {
+									percentageCompleted: book.read_progress.percentage?.toString() || null,
+									updatedAt: book.read_progress.lastModified?.toISOString() || null,
+								}
+							: undefined,
+						isReadingOffline: true,
+						serverId: book.downloaded_files.serverId,
+					}) satisfies WidgetSyncBook,
+			),
+		[activeBooks],
+	)
+
+	useReadingNowWidgetSync(widgetSyncBooks)
 
 	const leftOffBooks = useMemo(
 		() =>

@@ -6,7 +6,7 @@ use axum::{
 };
 use models::entity::custom_emoji;
 use sea_orm::{prelude::*, ColumnTrait};
-use stump_core::filesystem::ContentType;
+use stump_core::fs_utils::ContentType;
 
 use crate::{
 	config::state::AppState,
@@ -34,7 +34,7 @@ async fn get_emoji_handler(
 			APIError::NotFound(format!("Custom emoji '{}' not found", emoji_code))
 		})?;
 
-	let emojis_dir = ctx.config.get_emojis_dir();
+	let emojis_dir = ctx.config.emojis_directory();
 	let file_path = std::path::Path::new(&emojis_dir)
 		.join(format!("{}.{}", emoji.id, emoji.file_extension));
 

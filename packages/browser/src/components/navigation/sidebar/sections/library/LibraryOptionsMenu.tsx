@@ -1,5 +1,5 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { DropdownMenu } from '@stump/components'
+import { DropdownMenu, IconButton } from '@stump/components'
 import { graphql, LibrarySideBarSectionQuery, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
@@ -80,9 +80,13 @@ export default function LibraryOptionsMenu({ library }: Props) {
 			<DropdownMenu
 				modal={isMobile}
 				trigger={
-					<button className="p-1 text-foreground-muted/50 outline-none hover:text-foreground-muted focus:ring-0 focus:ring-offset-0 data-[state=open]:text-foreground-muted">
+					<IconButton
+						variant="ghost"
+						size="sm"
+						className="h-7 w-7 rounded-md text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+					>
 						<MoreHorizontal className="h-4 w-4 shrink-0" />
-					</button>
+					</IconButton>
 				}
 				groups={[
 					{
@@ -129,6 +133,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 															e.stopPropagation()
 															setIsDeleting(true)
 														},
+														isDestructive: true,
 													},
 												]
 											: []),

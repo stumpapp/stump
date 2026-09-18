@@ -4,9 +4,8 @@ import { useRef } from 'react'
 import { Platform } from 'react-native'
 import { useStore } from 'zustand'
 
-import { DownloadsHeaderSortMenu } from '~/components/localLibrary'
 import { SelectionLeftScreenHeader } from '~/components/selection'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 import { createSelectionStore, SelectionContext } from '~/stores/selection'
@@ -38,13 +37,12 @@ export default function Screen() {
 						headerShown: true,
 						headerTransparent: Platform.OS === 'ios',
 						headerLargeTitle: true,
-						headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 						animation: animationEnabled ? 'default' : 'none',
 						headerLargeTitleStyle: {
 							fontSize: 30,
 						},
-						headerLeft: () =>
-							isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />,
+						headerLeft: () => (isSelecting ? <SelectionLeftScreenHeader /> : null),
 					}}
 				/>
 			</QueryClientProvider>

@@ -29,7 +29,7 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 
 	return (
 		<div>
-			<Button variant="danger" disabled={isDisabled} onClick={() => setShowConfirmation(true)}>
+			<Button variant="destructive" disabled={isDisabled} onClick={() => setShowConfirmation(true)}>
 				Delete metadata
 			</Button>
 
@@ -37,7 +37,7 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 				title="Delete metadata"
 				description="Select the impact for the deletion"
 				isOpen={showConfirmation}
-				confirmVariant="danger"
+				confirmVariant="destructive"
 				confirmText="Delete"
 				onConfirm={() => {
 					onConfirmReset(impact)
@@ -49,15 +49,14 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 				<RadioGroup
 					value={impact}
 					onValueChange={handleChange}
-					className="divide gap-0 space-y-0 rounded-xl divide-y divide-edge overflow-hidden border border-edge"
+					className="divide gap-0 space-y-0 divide-y divide-border overflow-hidden rounded-xl border border-border"
 				>
 					<RadioGroup.CardItem
 						label="Series"
 						value="SERIES"
 						description="Remove only this series' metadata"
-						className={cn('rounded-b-none border-0 bg-background hover:bg-background-surface/50', {
-							'bg-background-surface/70 hover:bg-background-surface/70':
-								impact === MetadataResetImpact.Series,
+						className={cn('rounded-b-none border-0 bg-background hover:bg-muted/50', {
+							'bg-muted/70 hover:bg-muted/70': impact === MetadataResetImpact.Series,
 						})}
 					/>
 
@@ -65,9 +64,8 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 						label="Books"
 						value="BOOKS"
 						description="Remove all the metadata for books in this series "
-						className={cn('rounded-t-none border-0 bg-background hover:bg-background-surface/50', {
-							'bg-background-surface/70 hover:bg-background-surface/70':
-								impact === MetadataResetImpact.Books,
+						className={cn('rounded-t-none border-0 bg-background hover:bg-muted/50', {
+							'bg-muted/70 hover:bg-muted/70': impact === MetadataResetImpact.Books,
 						})}
 					/>
 
@@ -75,9 +73,8 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 						label="Everything"
 						value="EVERYTHING"
 						description="Remove all the metadata for everything related to this series"
-						className={cn('rounded-t-none border-0 bg-background hover:bg-background-surface/50', {
-							'bg-background-surface/70 hover:bg-background-surface/70':
-								impact === MetadataResetImpact.Everything,
+						className={cn('rounded-t-none border-0 bg-background hover:bg-muted/50', {
+							'bg-muted/70 hover:bg-muted/70': impact === MetadataResetImpact.Everything,
 						})}
 					/>
 				</RadioGroup>

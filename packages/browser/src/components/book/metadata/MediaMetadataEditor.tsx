@@ -128,7 +128,6 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 					<div className="pl-4 font-bold leading-6 flex h-full items-center text-foreground/90">
 						<Label className="flex items-center">
 							<CheckBox
-								variant="primary"
 								checked={table.getIsSomeRowsExpanded()}
 								onClick={() => setShowMissing((prev) => !prev)}
 							/>

@@ -1,7 +1,6 @@
 import { cn, NavigationMenu } from '@stump/components'
 import { PropsWithChildren } from 'react'
-import { To } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, To } from 'react-router'
 
 type Props = {
 	to: string | To
@@ -23,9 +22,9 @@ export default function TopBarLinkListItem({
 			<Link
 				to={to}
 				className={cn(
-					'rounded-md px-3 py-2 flex w-full items-center leading-none text-foreground-subtle no-underline transition-colors outline-none select-none hover:bg-sidebar-surface-hover focus:bg-sidebar-surface',
-					{ 'pointer-events-none text-foreground-muted': isDisabled },
-					{ 'bg-sidebar-surface': isActive },
+					'px-3 py-2 flex w-full items-center rounded-md leading-none text-sidebar-foreground no-underline transition-colors outline-none select-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground',
+					{ 'pointer-events-none text-muted-foreground': isDisabled },
+					{ 'bg-sidebar-accent text-sidebar-accent-foreground': isActive },
 					className,
 				)}
 				{...props}

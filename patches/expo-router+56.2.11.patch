@@ -1,0 +1,123 @@
+diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
+index fee7cd8..62b0996 100644
+--- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
++++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/index.js
+@@ -138,6 +138,7 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
+         return undefined;
+     }
+     const sharedProps = (0, shared_1.convertStackHeaderSharedPropsToRNSharedHeaderItem)(props);
++    const xcassetName = (0, shared_1.extractXcassetName)(props);
+     const actions = react_1.Children.toArray(props.children).filter((child) => (0, children_1.isChildOfType)(child, exports.StackToolbarMenuAction) || (0, children_1.isChildOfType)(child, exports.StackToolbarMenu));
+     const item = {
+         type: 'submenu',
+@@ -162,7 +163,10 @@ function convertStackToolbarSubmenuMenuPropsToRNHeaderItem(props) {
+         item.destructive = props.destructive;
+     }
+     // TODO: Add elementSize to react-native-screens
+-    if (sharedProps.icon) {
++    if (xcassetName) {
++        item.icon = { type: 'xcasset', name: xcassetName };
++    }
++    else if (sharedProps.icon) {
+         if (sharedProps.icon.type === 'sfSymbol') {
+             item.icon = sharedProps.icon;
+         }
+@@ -206,12 +210,13 @@ const StackToolbarMenuAction = (props) => {
+     // TODO(@ubax): Handle image loading using useImage in a follow-up PR.
+     const icon = typeof props.icon === 'string' ? props.icon : undefined;
+     const source = typeof props.icon !== 'string' ? props.icon : undefined;
+-    return ((0, jsx_runtime_1.jsx)(native_1.NativeToolbarMenuAction, { ...props, icon: icon, source: source, image: props.image, imageRenderingMode: props.iconRenderingMode }));
++    return ((0, jsx_runtime_1.jsx)(native_1.NativeToolbarMenuAction, { ...props, icon: icon, source: source, xcassetName: props.xcassetName, image: props.image, imageRenderingMode: props.iconRenderingMode }));
+ };
+ exports.StackToolbarMenuAction = StackToolbarMenuAction;
+ function convertStackToolbarMenuActionPropsToRNHeaderItem(props) {
+-    const { children, isOn, unstable_keepPresented, icon, ...rest } = props;
++    const { children, isOn, unstable_keepPresented, icon, xcassetName, ...rest } = props;
+     const sharedProps = (0, shared_1.convertStackHeaderSharedPropsToRNSharedHeaderItem)(props);
++    const derivedXcassetName = xcassetName ?? (0, shared_1.extractXcassetName)(props);
+     const item = {
+         ...rest,
+         description: props.subtitle,
+@@ -223,7 +228,10 @@ function convertStackToolbarMenuActionPropsToRNHeaderItem(props) {
+     if (unstable_keepPresented !== undefined) {
+         item.keepsMenuPresented = unstable_keepPresented;
+     }
+-    if (sharedProps.icon) {
++    if (derivedXcassetName) {
++        item.icon = { type: 'xcasset', name: derivedXcassetName };
++    }
++    else if (sharedProps.icon) {
+         if (sharedProps.icon.type === 'sfSymbol') {
+             item.icon = sharedProps.icon;
+         }
+diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js
+index ff5f9fe..64cdbc0 100644
+--- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js
++++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/native.android.js
+@@ -48,7 +48,7 @@ const NativeToolbarMenu = (props) => {
+     if (isNested) {
+         const trailingIcon = ((0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenuItem.TrailingIcon, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: arrowRightIcon, tint: tintColor, size: 24 }) }));
+         const leadingIcon = props.source ? ((0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenuItem.LeadingIcon, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: props.source, tint: sourceTint, size: 24 }) })) : null;
+-        return ((0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenuItem, { onClick: () => {
++        return ((0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, cornerRadius: props.cornerRadius, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenuItem, { onClick: () => {
+                             if (!props.disabled)
+                                 setExpanded(true);
+                         }, modifiers: [(0, modifiers_1.background)(backgroundColor)], enabled: !props.disabled, children: [leadingIcon, (0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenuItem.Text, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Text, { color: typeof props.tintColor === 'string'
+@@ -62,7 +62,7 @@ const NativeToolbarMenu = (props) => {
+         }
+         return null;
+     }
+-    return ((0, jsx_runtime_1.jsx)(AnimatedItemContainer_1.AnimatedItemContainer, { visible: !props.hidden, children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.IconButton, { onClick: () => setExpanded(true), enabled: !props.disabled, modifiers: [(0, modifiers_1.background)(backgroundColor)], children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: props.source, tint: sourceTint, size: 24, contentDescription: props.accessibilityLabel }) }) }), (0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Items, { children: (0, jsx_runtime_1.jsx)(ToolbarMenuCloseContext, { value: closeMenu, children: props.children }) })] }) }));
++    return ((0, jsx_runtime_1.jsx)(AnimatedItemContainer_1.AnimatedItemContainer, { visible: !props.hidden, children: (0, jsx_runtime_1.jsxs)(jetpack_compose_1.DropdownMenu, { expanded: expanded, onDismissRequest: () => setExpanded(false), color: backgroundColor, cornerRadius: props.cornerRadius, children: [(0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Trigger, { children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.IconButton, { onClick: () => setExpanded(true), enabled: !props.disabled, modifiers: [(0, modifiers_1.background)(backgroundColor)], children: (0, jsx_runtime_1.jsx)(jetpack_compose_1.Icon, { source: props.source, tint: sourceTint, size: 24, contentDescription: props.accessibilityLabel }) }) }), (0, jsx_runtime_1.jsx)(jetpack_compose_1.DropdownMenu.Items, { children: (0, jsx_runtime_1.jsx)(ToolbarMenuCloseContext, { value: closeMenu, children: props.children }) })] }) }));
+ };
+ exports.NativeToolbarMenu = NativeToolbarMenu;
+ /**
+diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
+index b9b9a81..f7ffeac 100644
+--- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
++++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/StackToolbarMenu/types.d.ts
+@@ -161,6 +161,12 @@ export interface StackToolbarMenuProps {
+      * @platform ios
+      */
+     title?: string;
++    /**
++     * Corner radius in dp for the dropdown menu container. Defaults to the Material3 `MenuDefaults.shape` corner radius.
++     *
++     * @platform android
++     */
++    cornerRadius?: number;
+     /**
+      * @default 'plain'
+      *
+@@ -189,6 +195,8 @@ export interface NativeToolbarMenuProps {
+     hidesSharedBackground?: boolean;
+     icon?: SFSymbol;
+     xcassetName?: string;
++    /** @platform android */
++    cornerRadius?: number;
+     /**
+      * Image to display for the menu item.
+      */
+diff --git a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js b/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
+index 186be4b..da75656 100644
+--- a/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
++++ b/node_modules/expo-router/build/layouts/stack-utils/toolbar/shared.js
+@@ -56,15 +56,14 @@ function convertStackHeaderSharedPropsToRNSharedHeaderItem(props, isBottomPlacem
+             return undefined;
+         }
+         // Bottom placement xcasset uses native xcasset type
+-        if ('xcasset' in iconComponentProps && isBottomPlacement) {
++        if ('xcasset' in iconComponentProps) {
+             return {
+                 type: 'xcasset',
+                 name: iconComponentProps.xcasset,
+             };
+         }
+-        // Unified image path for src and xcasset (non-bottom)
+-        if ('src' in iconComponentProps || 'xcasset' in iconComponentProps) {
+-            const source = 'src' in iconComponentProps ? iconComponentProps.src : { uri: iconComponentProps.xcasset };
++        if ('src' in iconComponentProps) {
++            const source = iconComponentProps.src;
+             const explicitRenderingMode = 'renderingMode' in iconComponentProps ? iconComponentProps.renderingMode : undefined;
+             const effectiveRenderingMode = explicitRenderingMode ??
+                 props.iconRenderingMode ??

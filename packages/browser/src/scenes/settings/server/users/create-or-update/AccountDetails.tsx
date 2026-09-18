@@ -1,4 +1,4 @@
-import { Button, IconButton, Input } from '@stump/components'
+import { Button, Input, InputGroup, Label, Text } from '@stump/components'
 import { Eye, EyeOff, Shield } from 'lucide-react'
 import { useState } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
@@ -15,7 +15,6 @@ export default function AccountDetails() {
 		<div className="gap-4 pb-4 pt-1 md:max-w-md flex flex-col">
 			<Input
 				id="username"
-				variant="primary"
 				fullWidth
 				label="Username"
 				placeholder="Username"
@@ -23,29 +22,41 @@ export default function AccountDetails() {
 				errorMessage={errors.username?.message}
 				{...form.register('username')}
 			/>
-			<Input
-				id="password"
-				variant="primary"
-				fullWidth
-				label="Password"
-				placeholder="Password"
-				errorMessage={errors.password?.message}
-				type={passwordVisible ? 'text' : 'password'}
-				autoComplete="off"
-				rightDecoration={
-					<IconButton
-						type="button"
-						variant="ghost"
-						size="xs"
-						onClick={() => setPasswordVisible(!passwordVisible)}
-						className="text-foreground-muted"
-						data-testid="togglePasswordVisibility"
-					>
-						{passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-					</IconButton>
-				}
-				{...form.register('password')}
-			/>
+
+			<div className="gap-2 grid w-full items-center">
+				<Label htmlFor="password">Password</Label>
+
+				<InputGroup>
+					<InputGroup.Input
+						id="password"
+						data-testid="password"
+						placeholder="Password"
+						type={passwordVisible ? 'text' : 'password'}
+						autoComplete="off"
+						aria-invalid={!!errors.password?.message}
+						{...form.register('password')}
+					/>
+
+					<InputGroup.Addon align="inline-end">
+						<InputGroup.Button
+							type="button"
+							variant="ghost"
+							size="icon-xs"
+							onClick={() => setPasswordVisible(!passwordVisible)}
+							className="text-muted-foreground"
+							data-testid="togglePasswordVisibility"
+						>
+							{passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+						</InputGroup.Button>
+					</InputGroup.Addon>
+				</InputGroup>
+
+				{errors.password?.message && (
+					<Text variant="danger" size="xs" className="break-all">
+						{errors.password.message}
+					</Text>
+				)}
+			</div>
 
 			<div className="gap-1 flex items-center">
 				<Button

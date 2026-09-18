@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{NaiveDate, NaiveTime, Utc};
 use derive_builder::Builder;
 use models::entity::media_metadata;
 use serde::{Deserialize, Serialize};
@@ -100,9 +100,11 @@ pub struct OPDSWebPubMetadata {
 	pub language: Option<String>,
 	pub number: Option<rust_decimal::Decimal>,
 	pub age_rating: Option<i32>,
-	pub year: Option<i32>,
-	pub month: Option<i32>,
-	pub day: Option<i32>,
+	/// RFC 3339 formatted publication date. Derived from the year/month/day fields in the
+	/// underlying metadata model.
+	///
+	/// See https://readium.org/webpub-manifest/schema/metadata.schema.json
+	pub published: Option<String>,
 	pub volume: Option<i32>,
 }
 
@@ -132,12 +134,29 @@ impl OPDSWebPubMetadata {
 			language: model.language,
 			number: model.number,
 			age_rating: model.age_rating,
-			year: model.year,
-			month: model.month,
-			day: model.day,
+			published: build_published_date(model.year, model.month, model.day),
 			volume: model.volume,
 		})
 	}
+}
+
+// TODO: i early return if year or month is missing, and default day to 1. this felt
+// reasonable to me but i should check what folks would prefer
+
+/// Constructs a date string from separate year/month/day components
+/// See https://readium.org/webpub-manifest/schema/metadata.schema.json
+fn build_published_date(
+	year: Option<i32>,
+	month: Option<i32>,
+	day: Option<i32>,
+) -> Option<String> {
+	let year = year?;
+	let month = month?;
+	let day = day.unwrap_or(1); // i figure this one doesn't matter much
+
+	NaiveDate::from_ymd_opt(year, month as u32, day as u32)
+		// we don't have time info so just min it out
+		.map(|d| d.and_time(NaiveTime::MIN).and_utc().to_rfc3339())
 }
 
 /// Pagination-specific metadata fields for an OPDS collection
@@ -166,10 +185,10 @@ pub struct OPDSPaginationMetadata {
 pub struct OPDSEntryBelongsToEntity {
 	/// The name of the entity the entry belongs to
 	name: String,
-	/// The position of the entry within the entity, **1-indexed**.
-	///
-	/// For example, if the entry is the first book in a series, this field would be `1`.
-	position: Option<i64>,
+	/// The position of the entry within the entity. The determination of this is as follows:
+	/// - metadata.number takes precendence when present
+	/// - otherwise determined by ranking media in series alphabetically by name
+	position: Option<f64>,
 	/// A list of links to the entity, if available. This **should** include a link to the entity itself
 	/// within the catalog.
 	#[builder(default)]
@@ -249,7 +268,7 @@ mod tests {
 			description: Some(String::from("A cool book")),
 			belongs_to: Some(OPDSEntryBelongsTo::Series(OPDSEntryBelongsToEntity {
 				name: String::from("Test Series"),
-				position: Some(1),
+				position: Some(1f64),
 				links: vec![],
 			})),
 			pagination: Some(OPDSPaginationMetadata {
@@ -266,7 +285,7 @@ mod tests {
 		let json = serde_json::to_string(&metadata).unwrap();
 		assert_eq!(
 			json,
-			r#"{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"numberOfItems":10,"itemsPerPage":5,"currentPage":1,"publisher":"Test Publisher"}"#
+			r#"{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1.0}},"numberOfItems":10,"itemsPerPage":5,"currentPage":1,"publisher":"Test Publisher"}"#
 		);
 	}
 

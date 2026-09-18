@@ -175,6 +175,7 @@ pub struct StatusInfo {
 	pub times_started_reading: u32,
 }
 
+// TODO: support dnf?
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum Status {
 	ReadyToRead,

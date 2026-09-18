@@ -26,7 +26,6 @@ export function useLocalBookmarkMutations({ bookId, serverId }: UseLocalBookmark
 					serverId,
 					href: locator.href,
 					chapterTitle: locator.chapterTitle,
-					epubcfi: locator.locations?.partialCfi,
 					locations: locator.locations,
 					previewContent,
 					syncStatus: syncStatus.enum.UNSYNCED,

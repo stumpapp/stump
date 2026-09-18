@@ -7,7 +7,7 @@ import { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
 import { EntityImage } from '@/components/entity'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { useBookClubContext } from '../context'
 
@@ -38,6 +38,7 @@ type Props = {
 	data: FragmentType<typeof fragment>
 }
 export default function BookClubBookItem({ data }: Props) {
+	const paths = usePaths()
 	const book = useFragment(fragment, data)
 
 	const { bookClub } = useBookClubContext()
@@ -113,8 +114,8 @@ export default function BookClubBookItem({ data }: Props) {
 		const image = details?.imageUrl ? (
 			<ImageComponent src={details.imageUrl} className="rounded-md object-cover" />
 		) : (
-			<div className="rounded-md flex h-full w-full items-center justify-center border border-edge/80 bg-background-surface/50">
-				<Book className="h-10 w-10 text-foreground-muted" />
+			<div className="flex h-full w-full items-center justify-center rounded-md border border-border/80 bg-muted/50">
+				<Book className="h-10 w-10 text-muted-foreground" />
 			</div>
 		)
 		const link = details?.url
@@ -143,7 +144,7 @@ export default function BookClubBookItem({ data }: Props) {
 
 	return (
 		<li className="ml-4">
-			<div className="-left-1.5 mt-1.5 h-3 w-3 absolute rounded-full border border-edge bg-background-surface"></div>
+			<div className="-left-1.5 mt-1.5 h-3 w-3 absolute rounded-full border border-border bg-muted"></div>
 
 			<div className="flex items-start justify-between">
 				<Text variant="muted" className="mb-1" size="sm">
@@ -157,15 +158,15 @@ export default function BookClubBookItem({ data }: Props) {
 
 				{!isCurrent && (
 					<div
-						className={cx('rounded-md p-3 flex items-center justify-between', {
-							'bg-background-surface': !isCurrent,
-							'bg-fill-brand-secondary': isCurrent,
+						className={cx('p-3 flex items-center justify-between rounded-md', {
+							'bg-muted': !isCurrent,
+							'bg-primary/15': isCurrent,
 						})}
 					>
 						<span
 							className={cx(
-								{ 'text-sm text-foreground-muted': !isCurrent },
-								{ 'text-sm text-fill-brand': isCurrent },
+								{ 'text-sm text-muted-foreground': !isCurrent },
+								{ 'text-sm text-primary': isCurrent },
 							)}
 						>
 							{daysInfo.end

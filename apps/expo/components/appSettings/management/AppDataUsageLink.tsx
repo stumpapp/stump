@@ -1,3 +1,4 @@
+import { formatBytes } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { ChevronRight, HardDrive } from 'lucide-react-native'
@@ -6,7 +7,6 @@ import { View } from 'react-native'
 import { Icon, Text } from '~/components/ui'
 import { SETTINGS_COLORS } from '~/lib/constants'
 import { getAppUsage } from '~/lib/filesystem'
-import { formatBytes } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 

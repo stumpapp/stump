@@ -10,9 +10,9 @@ public struct PDFProps {
     var locator: Locator?
     var initialLocator: Locator?
     var url: String?
-    var background: Color?
+    var background: ReadiumNavigator.Color?
     var pageSpacing: Double?
-    var scrollAxis: Axis?
+    var scrollAxis: ReadiumNavigator.Axis?
     var scroll: Bool?
     var readingProgression: ReadiumNavigator.ReadingProgression?
     var spread: Spread?
@@ -22,9 +22,9 @@ public struct FinalizedPDFProps {
     var bookId: String
     var locator: Locator?
     var url: String
-    var background: Color
+    var background: ReadiumNavigator.Color
     var pageSpacing: Double
-    var scrollAxis: Axis
+    var scrollAxis: ReadiumNavigator.Axis
     var scroll: Bool
     var readingProgression: ReadiumNavigator.ReadingProgression
     var spread: Spread
@@ -134,11 +134,13 @@ public class PDFView: ExpoView {
             bookId: bookId,
             locator: pendingProps.locator ?? pendingProps.initialLocator ?? oldProps?.locator,
             url: url,
-            background: pendingProps.background ?? oldProps?.background ?? Color(hex: "#000000")!,
+            background: pendingProps.background ?? oldProps?.background ?? ReadiumNavigator.Color(
+                hex: "#000000")!,
             pageSpacing: pendingProps.pageSpacing ?? oldProps?.pageSpacing ?? 0.0,
             scrollAxis: pendingProps.scrollAxis ?? oldProps?.scrollAxis ?? .vertical,
             scroll: pendingProps.scroll ?? oldProps?.scroll ?? true,
-            readingProgression: pendingProps.readingProgression ?? oldProps?.readingProgression ?? .ltr,
+            readingProgression: pendingProps.readingProgression ?? oldProps?.readingProgression
+                ?? .ltr,
             spread: pendingProps.spread ?? oldProps?.spread ?? .auto
         )
 
@@ -163,12 +165,10 @@ public class PDFView: ExpoView {
 
     private func preferencesChanged(oldProps: FinalizedPDFProps?) -> Bool {
         guard let oldProps = oldProps, let props = props else { return false }
-        return props.background != oldProps.background ||
-            props.pageSpacing != oldProps.pageSpacing ||
-            props.scrollAxis != oldProps.scrollAxis ||
-            props.scroll != oldProps.scroll ||
-            props.readingProgression != oldProps.readingProgression ||
-            props.spread != oldProps.spread
+        return props.background != oldProps.background || props.pageSpacing != oldProps.pageSpacing
+            || props.scrollAxis != oldProps.scrollAxis || props.scroll != oldProps.scroll
+            || props.readingProgression != oldProps.readingProgression
+            || props.spread != oldProps.spread
     }
 
     private func loadPublication() async {
@@ -182,7 +182,9 @@ public class PDFView: ExpoView {
                     publicationUrl = try await downloadPDF(from: url)
                 }
 
-                let publication = try await BookService.instance.openPublication(for: props.bookId, at: publicationUrl)
+                let publication = try await BookService.instance.openPublication(
+                    for: props.bookId, at: publicationUrl
+                )
 
                 try Task.checkCancellation()
 
@@ -259,8 +261,10 @@ public class PDFView: ExpoView {
                         "success": true,
                         "bookMetadata": [
                             "title": publication.metadata.title ?? "",
-                            "author": publication.metadata.authors.map { $0.name }.joined(separator: ", "),
-                            "publisher": publication.metadata.publishers.map { $0.name }.joined(separator: ", "),
+                            "author": publication.metadata.authors.map { $0.name }.joined(
+                                separator: ", "),
+                            "publisher": publication.metadata.publishers.map { $0.name }.joined(
+                                separator: ", "),
                             "identifier": publication.metadata.identifier ?? "",
                             "language": publication.metadata.languages.first ?? "en",
                             "totalPages": totalPages,
@@ -304,13 +308,14 @@ public class PDFView: ExpoView {
             return
         }
 
-        onLocatorChange(makeJSON([
-            "href": currentLocator.href.string,
-            "title": encodeIfNotNil(currentLocator.title),
-            "locations": encodeIfNotEmpty(currentLocator.locations.json),
-            "text": encodeIfNotEmpty(currentLocator.text.json),
-            "type": encodeIfNotEmpty(currentLocator.mediaType.string),
-        ]))
+        onLocatorChange(
+            makeJSON([
+                "href": currentLocator.href.string,
+                "title": encodeIfNotNil(currentLocator.title),
+                "locations": encodeIfNotEmpty(currentLocator.locations.json),
+                "text": encodeIfNotEmpty(currentLocator.text.json),
+                "type": encodeIfNotEmpty(currentLocator.mediaType.string),
+            ]))
 
         if let pageNumber = currentLocator.locations.position {
             onPageChange([

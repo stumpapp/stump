@@ -2,32 +2,33 @@ use std::collections::HashMap;
 
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::{
-		finished_reading_session, media, media_metadata, reading_session, user::AuthUser,
-	},
+	entity::{media, media_metadata, reading_session, user::AuthUser},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
-		enums::UserPermission,
+		enums::{ReadingStatus, UserPermission},
 		ordering::OrderBy,
 	},
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, DatabaseBackend, FromQueryResult, JoinType, QueryOrder, QuerySelect,
-	Statement,
+	Condition, FromQueryResult, JoinType, QueryOrder, QuerySelect, QueryTrait,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
 	guard::{PermissionGuard, ServerOwnerGuard},
-	object::media::Media,
+	object::{
+		media::Media,
+		reading_session::{ReadingSession, ReadingSessionConflictResolutionView},
+	},
 	order::MediaOrderBy,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
+	utils::db_statement,
 };
 
 #[derive(Default)]
@@ -50,7 +51,6 @@ pub fn add_sessions_join_for_filter(
 
 	if should_join_sessions {
 		let user_id = user.id.clone();
-		let user_id_cpy = user_id.clone();
 		query
 			.join_rev(
 				JoinType::LeftJoin,
@@ -60,19 +60,6 @@ pub fn add_sessions_join_for_filter(
 					.on_condition(move |_left, _right| {
 						Condition::all()
 							.add(reading_session::Column::UserId.eq(user_id.clone()))
-					})
-					.into(),
-			)
-			.join_rev(
-				JoinType::LeftJoin,
-				finished_reading_session::Entity::belongs_to(media::Entity)
-					.from(finished_reading_session::Column::MediaId)
-					.to(media::Column::Id)
-					.on_condition(move |_left, _right| {
-						Condition::all().add(
-							finished_reading_session::Column::UserId
-								.eq(user_id_cpy.clone()),
-						)
 					})
 					.into(),
 			)
@@ -103,7 +90,10 @@ impl MediaQuery {
 	async fn finished_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = finished_reading_session::Entity::find().count(conn).await?;
+		let count = reading_session::Entity::find()
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+			.count(conn)
+			.await?;
 
 		Ok(count as i64)
 	}
@@ -115,26 +105,31 @@ impl MediaQuery {
 	async fn active_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let count = reading_session::Entity::find().count(conn).await?;
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
+		let count = reading_session::Entity::find()
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Reading))
+			.filter(Expr::expr(Expr::exists(newer_exists)).not())
+			.count(conn)
+			.await?;
 
 		Ok(count as i64)
 	}
 
-	// Note: This could be slightly inaccurate based on permissions, but it's close enough and I'm too lazy
-	// to write a more complex query right now.
+	// Note: this could be slightly inaccurate based on permissions, but it's close enough and I'm not
+	// motivated enough to write a more complex query right now
 	async fn media_disk_usage(&self, ctx: &Context<'_>) -> Result<i64> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r"
-				SELECT 
-					COALESCE(SUM(size), 0) as total_size
-				FROM 
-					media
-				WHERE deleted_at IS NULL
-				",
+			SELECT
+				CAST(COALESCE(SUM(size), 0) AS BIGINT) as total_size
+			FROM
+				media
+			WHERE deleted_at IS NULL
+			",
 				[],
 			))
 			.await?;
@@ -277,8 +272,8 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_result = conn
-			.query_all(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_all(db_statement(
+				conn,
 				r"
 				SELECT
 					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
@@ -318,6 +313,8 @@ impl MediaQuery {
 
 		let user_id = user.id.clone();
 
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
+
 		let query = media::Entity::apply_for_user(user, media::Entity::find())
 			.select_also(reading_session::Entity)
 			.filter(media::Column::DeletedAt.is_null())
@@ -329,6 +326,12 @@ impl MediaQuery {
 					.on_condition(move |_left, _right| {
 						Condition::all()
 							.add(reading_session::Column::UserId.eq(user_id.clone()))
+							.add(
+								reading_session::Column::Status
+									.eq(ReadingStatus::Reading),
+							)
+							// for each session row, ensure there does not exist a newer session for the same user+media
+							.add(Expr::expr(Expr::exists(newer_exists.clone())).not())
 					})
 					.into(),
 			)
@@ -399,7 +402,7 @@ impl MediaQuery {
 				let count = query.clone().count(conn).await?;
 
 				let models = query
-					.find_also_related(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.offset(info.offset())
 					.limit(info.limit())
 					.all(conn)
@@ -418,7 +421,7 @@ impl MediaQuery {
 			},
 			Pagination::None(_) => {
 				let models = query
-					.find_also_related(media_metadata::Entity)
+					.select_also(media_metadata::Entity)
 					.all(conn)
 					.await?
 					.into_iter()
@@ -461,91 +464,109 @@ impl MediaQuery {
 			id: String,
 		}
 
-		let on_deck_media_ids =
-			OnDeckMediaId::find_by_statement(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
-				r#"
-				WITH 
+		let on_deck_media_ids = OnDeckMediaId::find_by_statement(db_statement(
+			conn,
+			r#"
+				WITH
 				-- Find all series where the user has read at least one book
 				user_read_series AS (
-					SELECT DISTINCT m.series_id 
+					SELECT DISTINCT m.series_id
 					FROM media m
-					JOIN finished_reading_sessions frs ON frs.media_id = m.id
-					WHERE frs.user_id = ?
+					JOIN reading_sessions rs ON rs.media_id = m.id
+					WHERE rs.user_id = $1
+					AND rs.status = 'FINISHED'
 					AND m.series_id IS NOT NULL
 				),
 
-				-- Find all media IDs that user has read or is currently reading
-				user_read_or_reading_media AS (
-					SELECT media_id 
-					FROM finished_reading_sessions
-					WHERE user_id = ?
-					
-					UNION
-					
-					SELECT media_id 
+				-- Find all media IDs that user has read
+				user_read_media AS (
+					SELECT DISTINCT media_id
 					FROM reading_sessions
-					WHERE user_id = ?
+					WHERE user_id = $1
+					AND status = 'FINISHED'
+				),
+
+				-- We do not want books from series with active reading sessions
+				user_active_series AS (
+					SELECT DISTINCT m.series_id
+					FROM media m
+					JOIN reading_sessions rs ON rs.media_id = m.id
+					WHERE rs.user_id = $1
+					AND m.series_id IS NOT NULL
+					AND rs.status = 'READING'
+					AND NOT EXISTS (
+						SELECT 1
+						FROM reading_sessions rs2
+						WHERE rs2.user_id = rs.user_id
+						AND rs2.media_id = rs.media_id
+						AND (
+							rs2.updated_at > rs.updated_at
+							OR (
+								rs2.updated_at = rs.updated_at
+								AND rs2.created_at > rs.created_at
+							)
+							OR (
+								rs2.updated_at = rs.updated_at
+								AND rs2.created_at = rs.created_at
+								AND rs2.id > rs.id
+							)
+						)
+					)
 				),
 
 				-- For each series, get last read date for sorting priority
 				series_last_read AS (
-					SELECT 
+					SELECT
 						m.series_id,
-						MAX(frs.completed_at) as last_read_date
-					FROM finished_reading_sessions frs
-					JOIN media m ON m.id = frs.media_id
-					WHERE frs.user_id = ?
+						MAX(COALESCE(rs.updated_at, rs.created_at)) as last_read_date
+					FROM reading_sessions rs
+					JOIN media m ON m.id = rs.media_id
+					WHERE rs.user_id = $1
+					AND rs.status = 'FINISHED'
 					AND m.series_id IN (SELECT series_id FROM user_read_series)
 					GROUP BY m.series_id
 				),
 
 				-- Find the first unread book for each series
 				next_in_series AS (
-					SELECT 
-						m.id, 
+					SELECT
+						m.id,
 						m.name,
 						m.series_id,
 						ROW_NUMBER() OVER(
-							PARTITION BY m.series_id 
+							PARTITION BY m.series_id
 							ORDER BY m.name
 						) as book_rank,
 						COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
-					FROM 
+					FROM
 						media m
 					LEFT JOIN
 						series_last_read srl ON srl.series_id = m.series_id
-					WHERE 
+					WHERE
 						m.series_id IN (SELECT series_id FROM user_read_series)
+						AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
 						-- Exclude media that user has read or is currently reading
-						AND m.id NOT IN (SELECT media_id FROM user_read_or_reading_media)
+						AND m.id NOT IN (SELECT media_id FROM user_read_media)
 						AND m.deleted_at IS NULL
 				)
 
 				-- Get only the first book for each series
-				SELECT 
+				SELECT
 					id
-				FROM 
+				FROM
 					next_in_series
-				WHERE 
+				WHERE
 					book_rank = 1
 				ORDER BY
 					-- Most recently read series first
 					series_last_read_date DESC
-				LIMIT ?
-				OFFSET ?
+				LIMIT $2
+				OFFSET $3
 				"#,
-				[
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.clone().into(),
-					limit.into(),
-					offset.into(),
-				],
-			))
-			.all(conn)
-			.await?;
+			[user_id.clone().into(), limit.into(), offset.into()],
+		))
+		.all(conn)
+		.await?;
 
 		let media_ids: Vec<String> =
 			on_deck_media_ids.into_iter().map(|row| row.id).collect();
@@ -577,46 +598,67 @@ impl MediaQuery {
 			.collect();
 
 		let total_count = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
+			.query_one(db_statement(
+				conn,
 				r#"
 					-- Count total number of on deck items (for pagination)
-					WITH 
+					WITH
 					-- Find all series where the user has read at least one book
 					user_read_series AS (
-						SELECT DISTINCT m.series_id 
+						SELECT DISTINCT m.series_id
 						FROM media m
-						JOIN finished_reading_sessions frs ON frs.media_id = m.id
-						WHERE frs.user_id = ?
+						JOIN reading_sessions rs ON rs.media_id = m.id
+						WHERE rs.user_id = $1
+						AND rs.status = 'FINISHED'
 						AND m.series_id IS NOT NULL
 					),
 
 					-- Find all media IDs that user has read or is currently reading
 					user_read_or_reading_media AS (
 						-- Media that user has finished
-						SELECT media_id 
-						FROM finished_reading_sessions
-						WHERE user_id = ?
-						
-						UNION
-						
-						-- Media that user is currently reading
-						SELECT media_id 
+						SELECT DISTINCT media_id
 						FROM reading_sessions
-						WHERE user_id = ?
+						WHERE user_id = $1
+						AND status = 'FINISHED'
+
+						UNION
+
+						-- Media that user is currently reading
+						SELECT DISTINCT rs.media_id
+						FROM reading_sessions rs
+						WHERE rs.user_id = $1
+						AND rs.status = 'READING'
+						AND NOT EXISTS (
+							SELECT 1
+							FROM reading_sessions rs2
+							WHERE rs2.user_id = rs.user_id
+							AND rs2.media_id = rs.media_id
+							AND (
+								rs2.updated_at > rs.updated_at
+								OR (
+									rs2.updated_at = rs.updated_at
+									AND rs2.created_at > rs.created_at
+								)
+								OR (
+									rs2.updated_at = rs.updated_at
+									AND rs2.created_at = rs.created_at
+									AND rs2.id > rs.id
+								)
+							)
+						)
 					),
 
 					-- Find the first unread book for each series
 					next_in_series AS (
-						SELECT 
-							m.id, 
+						SELECT
+							m.id,
 							ROW_NUMBER() OVER(
-								PARTITION BY m.series_id 
+								PARTITION BY m.series_id
 								ORDER BY m.name
 							) as book_rank
-						FROM 
+						FROM
 							media m
-						WHERE 
+						WHERE
 							m.series_id IN (SELECT series_id FROM user_read_series)
 							-- Exclude media that user has read or is currently reading
 							AND m.id NOT IN (SELECT media_id FROM user_read_or_reading_media)
@@ -625,18 +667,14 @@ impl MediaQuery {
 					)
 
 					-- Count only the first book for each series
-					SELECT 
+					SELECT
 						COUNT(*) as count
-					FROM 
+					FROM
 						next_in_series
-					WHERE 
+					WHERE
 						book_rank = 1
 					"#,
-				[
-					user_id.clone().into(),
-					user_id.clone().into(),
-					user_id.into(),
-				],
+				[user_id.into()],
 			))
 			.await?
 			.ok_or_else(|| async_graphql::Error::new("Failed to get count"))?
@@ -756,6 +794,65 @@ impl MediaQuery {
 			.await?;
 
 		Ok(models.into_iter().map(Media::from).collect())
+	}
+
+	async fn reading_session_conflict_view(
+		&self,
+		ctx: &Context<'_>,
+		media_id: ID,
+		branched_session_id: Option<i32>,
+	) -> Result<ReadingSessionConflictResolutionView> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let media_id_str = media_id.as_str();
+
+		let ancestor_session = match branched_session_id {
+			Some(session_id) => {
+				reading_session::Entity::find_by_id(session_id)
+					.filter(reading_session::Column::UserId.eq(&user.id))
+					.filter(reading_session::Column::MediaId.eq(media_id_str))
+					.one(conn)
+					.await?
+			},
+			None => None,
+		};
+
+		let remote_sessions =
+			reading_session::Entity::find_for_user_and_media(user, media_id_str)
+				// find_for_user_and_media, you might guess, filters by user and media already. so we only need to filter by ancestor session
+				// when it exists, otherwise its just all sessions for the user and media
+				.apply_if(ancestor_session.clone(), |query, ancestor| {
+					query.filter(
+						Condition::any()
+							// any new sessions created after the ancestor
+							.add(
+								reading_session::Column::CreatedAt
+									.gt(ancestor.created_at),
+							)
+							// the ancestor itself was updated after its creation, should be included but it is a bit awkward
+							.add(
+								Condition::all()
+									.add(reading_session::Column::Id.eq(ancestor.id))
+									.add(
+										reading_session::Column::UpdatedAt
+											.gt(ancestor.created_at),
+									),
+							),
+					)
+				})
+				.order_by_asc(reading_session::Column::CreatedAt)
+				.order_by_asc(reading_session::Column::Id)
+				.all(conn)
+				.await?;
+
+		Ok(ReadingSessionConflictResolutionView {
+			ancestor_session: ancestor_session.map(ReadingSession::from),
+			remote_sessions: remote_sessions
+				.into_iter()
+				.map(ReadingSession::from)
+				.collect(),
+		})
 	}
 }
 

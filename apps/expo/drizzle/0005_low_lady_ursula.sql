@@ -1,0 +1,1 @@
+ALTER TABLE `read_progress` ADD `last_synced_elapsed_seconds` integer;

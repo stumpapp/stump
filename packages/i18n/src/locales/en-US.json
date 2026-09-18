@@ -42,6 +42,43 @@
 			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
+	"bookManagementScene": {
+		"metadataSearch": {
+			"heading": "Search metadata",
+			"description": "Search an external provider for this book and choose a match to apply",
+			"openButton": "Search Metadata",
+			"searchButton": "Search",
+			"noProviders": "No enabled metadata providers are configured for this library type. Configure one in server settings first.",
+			"noResults": "No matches were found for this search",
+			"partialResults": "Some results could not be loaded from the provider, likely due to rate limiting. Try searching again to see if more turn up.",
+			"searchFailed": "Failed to search metadata providers",
+			"form": {
+				"title": {
+					"label": "Title"
+				},
+				"author": {
+					"label": "Author"
+				},
+				"isbn": {
+					"label": "ISBN"
+				},
+				"year": {
+					"label": "Year"
+				},
+				"number": {
+					"label": "Issue number"
+				},
+				"comicVineVolumeId": {
+					"label": "ComicVine volume ID",
+					"placeholder": "e.g., 129260"
+				},
+				"provider": {
+					"label": "Provider",
+					"allOption": "All enabled providers"
+				}
+			}
+		}
+	},
 	"bookOverviewScene": {
 		"fileInformation": {
 			"heading": "File Information",
@@ -196,8 +233,7 @@
 		},
 		"members": {
 			"title": "Members",
-			"description": "Manage the members of this book club",
-			"sections": {}
+			"description": "Manage the members of this book club"
 		},
 		"roles": {
 			"title": "Roles",
@@ -244,6 +280,11 @@
 				"description": "The path to the library as it exists on your server",
 				"placeholder": "/path/to/library"
 			},
+			"oneshotsDirectory": {
+				"label": "Oneshots directory",
+				"description": "The name of the directory where oneshots are stored, relative to the library path. If empty, oneshots will not be processed",
+				"placeholder": "_oneshots"
+			},
 			"description": {
 				"label": "Description",
 				"description": "A short description of your library",
@@ -252,6 +293,20 @@
 			"tags": {
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
+			},
+			"libraryType": {
+				"label": "Library content",
+				"description": "The type of content present in this library",
+				"options": {
+					"COMIC": "Comics",
+					"MANGA": "Manga",
+					"BOOK": "Books",
+					"LIGHT_NOVEL": "Light Novels",
+					"MANHWA": "Manhwa",
+					"WEB_NOVEL": "Web Novels",
+					"WEBTOON": "Webtoons",
+					"MIXED": "Mixed"
+				}
 			},
 			"defaultLibraryView": {
 				"label": "Default library view",
@@ -453,6 +508,10 @@
 				"update": "Scan after updates"
 			},
 			"description": "Index the library files to populate your database"
+		},
+		"errors": {
+			"failedToUpdate": "Failed to update library",
+			"failedToScan": "Failed to scan library"
 		}
 	},
 	"createLibraryScene": {
@@ -495,6 +554,7 @@
 					"quality": "Quality",
 					"name": "Name",
 					"path": "Path",
+					"oneshotsDirectory": "Oneshots directory",
 					"description": "Description",
 					"tags": "Tags",
 					"pattern": "Pattern",
@@ -536,6 +596,14 @@
 				"alt": "Or click to browse your computer for books to upload"
 			},
 			"addedFiles": "Added files"
+		}
+	},
+	"libraryHeader": {
+		"tabs": {
+			"books": "Books",
+			"series": "Series",
+			"oneshots": "Oneshots",
+			"files": "Files"
 		}
 	},
 	"librarySettingsScene": {
@@ -648,9 +716,7 @@
 			"sections": {
 				"management": {
 					"heading": "Manage thumbnails",
-					"description": "Manage the existing thumbnails for this library",
-					"thumbnailSelector": {},
-					"deleteThumbnails": {}
+					"description": "Manage the existing thumbnails for this library"
 				}
 			}
 		},
@@ -748,11 +814,18 @@
 	},
 	"errorScene": {
 		"heading": "lol, oops",
+		"criticalHeading": "A critical error occurred",
+		"emptyMessage": "The error message was empty.",
+		"copiedDetails": "Copied error details to your clipboard",
+		"imageAlt": "Construction illustration",
 		"message": "An error occurred:",
 		"buttons": {
 			"report": "Report Bug",
 			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"goHome": "Go Home",
+			"goHomeTitle": "Go back to the homepage",
+			"reportTitle": "Report this error as a potential bug on GitHub",
+			"copyTitle": "Copy the error details to your clipboard"
 		}
 	},
 	"homeScene": {
@@ -782,6 +855,39 @@
 			"emptyState": {
 				"heading": "Nothing to show",
 				"message": "Any recent books you add will show up here"
+			}
+		},
+		"allSectionsHidden": {
+			"label": "There is nothing to show",
+			"description": "You hid everything, I hope you like empty space",
+			"customizeHome": "Customize your home page"
+		}
+	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "Age Rating",
+			"anyAge": {
+				"label": "Any age",
+				"description": "No age rating filter will be applied"
+			},
+			"custom": {
+				"label": "Aged N and below",
+				"description": {
+					"media": "Only media with an age rating of N or lower will be shown, where N is the number you enter below",
+					"series": "Only series with an age rating of N or lower will be shown, where N is the number you enter below"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "Extension",
+			"any": "Any"
+		},
+		"readStatusSelect": {
+			"label": "Read Status",
+			"options": {
+				"completed": "Completed",
+				"reading": "Reading",
+				"unread": "Unread"
 			}
 		}
 	},
@@ -911,6 +1017,20 @@
 			"downloadSeries": "Download Series"
 		}
 	},
+	"seriesHeader": {
+		"tabs": {
+			"books": "Books",
+			"files": "Files"
+		},
+		"actions": {
+			"markAsRead": "Mark series as read",
+			"markAsUnread": "Mark series as unread",
+			"goToLibrary": "Go to library"
+		},
+		"errors": {
+			"failedToUpdateCompletion": "Failed to update book completion status"
+		}
+	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
 			"nameTooShort": "Name must be at least 2 characters",
@@ -1011,7 +1131,8 @@
 									"pages": "Pages",
 									"tags": "Tags",
 									"createdAt": "Created at",
-									"updatedAt": "Updated at"
+									"updatedAt": "Updated at",
+									"readingStatus": "Reading status"
 								}
 							},
 							"book_meta": {
@@ -1088,6 +1209,13 @@
 					"listValue": {
 						"placeholder": "Add values",
 						"emptyState": "No values to display"
+					},
+					"enumValue": {
+						"selectPlaceholder": "Select value",
+						"READING": "Reading",
+						"FINISHED": "Finished",
+						"NOT_STARTED": "Not started",
+						"ABANDONED": "Abandoned"
 					}
 				}
 			}
@@ -1386,16 +1514,11 @@
 						"confirm": "Save Changes"
 					}
 				},
-				"locale": {
-					"localeSelector": {
-						"label": "Language"
-					},
-					"heading": "Language and locale",
-					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
-					]
+				"language": {
+					"label": "Language",
+					"contributeIfAble": "Please consider contributing to Stump's translations if you're able to!",
+					"contribute": "Contribute",
+					"noThanks": "No thanks"
 				}
 			}
 		},
@@ -1407,6 +1530,14 @@
 				"themeAndAppearance": {
 					"label": "Theme and appearance",
 					"description": "The basic look and feel options for Stump"
+				},
+				"interface": {
+					"title": "Interface",
+					"description": "Primary UI surfaces and interaction elements"
+				},
+				"thumbnails": {
+					"title": "Thumbnails",
+					"description": "Display options for thumbnail images"
 				},
 				"themeSelect": {
 					"label": "Theme",
@@ -1435,6 +1566,20 @@
 					"label": "Font",
 					"description": "Customize the font used in the application"
 				},
+				"interfaceRoundness": {
+					"label": "Interface roundness",
+					"description": "How rounded the corners are for UI elements",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"pill": "Pill"
+					}
+				},
+				"thumbnailPreview": {
+					"label": "Preview",
+					"description": "This is how thumbnails will look with the current settings"
+				},
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
 					"description": "The aspect ratio to use for thumbnails",
@@ -1449,6 +1594,20 @@
 						"colorful": "Colorful",
 						"thumbhash": "Thumbhash"
 					}
+				},
+				"thumbnailRoundness": {
+					"label": "Thumbnail roundness",
+					"description": "How rounded the corners of thumbnail images should be",
+					"options": {
+						"none": "None",
+						"normal": "Normal",
+						"rounded": "Rounded",
+						"large": "Large"
+					}
+				},
+				"navigation": {
+					"title": "Navigation",
+					"description": "Customize the navigation elements of the app"
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
@@ -1465,11 +1624,11 @@
 				},
 				"doubleSidebar": {
 					"label": "Settings sidebar",
-					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+					"description": "Enables sidebar navigation for the settings pages"
 				},
 				"replacePrimarySidebar": {
 					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of stacking them",
 					"tooltips": {
 						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
 						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
@@ -1477,10 +1636,7 @@
 				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
-					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
-					},
+					"description": "Rearrange or tweak the navigation items in your primary navigation",
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
@@ -1519,17 +1675,25 @@
 						"noLimit": "No limit"
 					}
 				},
+				"displayAndSpacing": {
+					"label": "Display and spacing",
+					"description": "Preferences related to the presentation of content and information"
+				},
 				"additionalPreferences": {
 					"label": "Additional preferences",
 					"description": "Customize the appearance and behavior of Stump with these additional settings"
 				},
-				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
-					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
-					}
+				"contentBrowsing": {
+					"label": "Content browsing",
+					"description": "Preferences that affect browsing and navigating content lists"
+				},
+				"motionAndAnimation": {
+					"label": "Motion and animation",
+					"description": "Visual presentation and movement preferences"
+				},
+				"activityAndStatus": {
+					"label": "Activity and status",
+					"description": "Indicators, overlays, or functionality related to background activity"
 				},
 				"hideScrollbarToggle": {
 					"label": "Hide scrollbar",
@@ -1558,6 +1722,25 @@
 				"enableJobOverlayToggle": {
 					"label": "Job overlay",
 					"description": "Show a floating overlay while a job is running"
+				},
+				"dayResetHourOffset": {
+					"label": "Reading day reset offset",
+					"description": "Shift when a reading day resets, in hours from midnight"
+				},
+				"readingSessionGracePeriod": {
+					"label": "Reading session grace period",
+					"description": "If no activity is detected within this time frame, in seconds, the next update will start a new session"
+				},
+				"homeArrangement": {
+					"title": "Home page",
+					"description": "Adjust the sections on your home page",
+					"label": "Home sections",
+					"hint": "Drag and rearrange sections or hide them entirely",
+					"reorder": "Reorder {{section}}",
+					"reset": "Reset",
+					"saveFailed": "Failed to save your changes",
+					"unsupported": "Invalid configuration",
+					"unsupportedDescription": "Please reset to defaults and try again"
 				}
 			}
 		},
@@ -1620,15 +1803,21 @@
 		"app/reader": {
 			"helmet": "Reader settings",
 			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"description": "Default preferences for reading. Some of these are local-only to your current device",
 			"sections": {
 				"universal": {
+					"label": "Universal",
+					"description": "Settings which apply to all types of books",
 					"sections": {
 						"readingDirection": {
 							"label": "Reading direction",
 							"description": "The direction in which the reader will progress through pages"
 						}
 					}
+				},
+				"formats": {
+					"label": "Formats",
+					"description": "Configure reader default settings independently"
 				},
 				"imageBasedBooks": {
 					"label": "Image-based books",
@@ -1679,7 +1868,7 @@
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
+					"label": "Servers",
 					"description": "The list of Stump servers you can connect to",
 					"getStarted": "Add a server to get started",
 					"unreachableServer": {
@@ -1769,15 +1958,18 @@
 				},
 				"optionalFeatures": {
 					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
 					"bundledServer": {
 						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"description": "Run the bundled server in the background while the desktop application is running"
 					},
 					"discordPresence": {
 						"label": "Discord Presence",
 						"description": "Display your Stump activity in Discord using Discord Rich Presence",
 						"reconnect": "Reconnect to Discord"
+					},
+					"restartRequired": {
+						"title": "Restart required",
+						"description": "Changes were made that require a restart of the app to take effect"
 					}
 				}
 			}
@@ -1793,21 +1985,33 @@
 				"serverInfo": {
 					"title": "Server information",
 					"description": "Basic details about your Stump server instance",
-					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
-						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
-						}
-					},
+					"version": "Version",
+					"exactCommit": "Exact commit",
+					"build": "Build",
 					"nonStableChannel": {
 						"title": "You are running a non-stable build of Stump",
 						"description": [
 							"It looks like you are running the",
 							"build channel"
 						]
+					},
+					"debugInfo": {
+						"label": "Debug information",
+						"description": "Copy and paste when reporting issues on GitHub",
+						"copyDebugInfoFailed": "Failed to copy debug information"
+					}
+				},
+				"changelog": {
+					"label": "Changelog",
+					"description": "See what has changed in the latest versions of Stump"
+				},
+				"serverConfig": {
+					"label": "Server configuration",
+					"description": "A subset of configuration options available for management here",
+					"publicUrl": {
+						"label": "Public URL",
+						"description": "The URL that your server is accessible from outside your network",
+						"updateFailed": "Failed to update the URL"
 					}
 				},
 				"helpfulLinks": {
@@ -1818,13 +2022,9 @@
 						"changelog": "Changelog"
 					}
 				},
-				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
-				},
 				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
+					"title": "Emojis",
+					"description": "See and manage custom image emojis for your server",
 					"dropzone": "Drop an image or click to select",
 					"input": {
 						"label": "Emoji name",
@@ -1837,10 +2037,7 @@
 					"noCustomEmojis": "No custom emojis have been added yet",
 					"invalidName": "Please enter a valid name for your emoji",
 					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
 					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
 					"deleteError": "Failed to delete emoji"
 				}
 			}
@@ -1885,7 +2082,7 @@
 					"description": "Some jobs can be configured to automatically run on a schedule",
 					"restartRequiredTitle": "Restart required",
 					"restartRequired": "Changes to this configuration will take effect after a server restart",
-					"newScheduledJob": "New scheduled job",
+					"createScheduledJob": "Create scheduled job",
 					"deleteScheduledJob": {
 						"title": "Delete scheduled job",
 						"description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
@@ -1950,6 +2147,9 @@
 						"updateError": "Failed to update scheduled job",
 						"deleteSuccess": "Scheduled job deleted",
 						"deleteError": "Failed to delete scheduled job"
+					},
+					"errors": {
+						"invalidCron": "Schedule must be a valid cron expression"
 					}
 				},
 				"history": {
@@ -1968,6 +2168,11 @@
 						"emptySubtitle": "You can't have a job if you don't have a job",
 						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
 					},
+					"inspector": {
+						"title": "Job details",
+						"description": "The raw output of this job and any associated logs",
+						"associatedLogs": "Associated logs"
+					},
 					"deleteJobHistory": {
 						"title": "Delete job history",
 						"description": "Permanently delete all job history from the database",
@@ -1982,6 +2187,12 @@
 			"helmet": "User management",
 			"title": "Users",
 			"description": "Manage the users on this server",
+			"userStats": {
+				"users": "Users",
+				"booksCompleted": "Books completed",
+				"booksInProgress": "Books in progress",
+				"topReader": "Top reader"
+			},
 			"createUser": {
 				"helmet": "Create user",
 				"title": "Create user",
@@ -2023,7 +2234,8 @@
 						"emailing": "Emailing",
 						"libraryManagement": "Library management",
 						"userManagement": "User management",
-						"serverManagement": "Server management"
+						"serverManagement": "Server management",
+						"metadataManagement": "Metadata management"
 					},
 					"heading": "Permissions",
 					"subtitle": [
@@ -2302,6 +2514,8 @@
 			"helmet": "Metadata integrations",
 			"title": "Metadata integrations",
 			"addProvider": "Add provider",
+			"createProviderError": "Failed to create provider",
+			"updateProviderError": "Failed to update provider",
 			"noProviders": "No providers configured yet. Add one to get started",
 			"providers": {
 				"title": "Providers",
@@ -2310,7 +2524,13 @@
 			"providerForm": {
 				"apiToken": {
 					"label": "API token",
-					"description": "The API token for authenticating with this provider"
+					"description": "The API token for authenticating with this provider",
+					"validationError": "The auto-validation failed for this token",
+					"validationRequestError": "The validation request failed",
+					"validationRequestErrorUnknown": "An unknown error occurred during validation",
+					"providerStatusError": "The provider responded with status {{status}}",
+					"providerError": "The provider responded with an error: {{message}}",
+					"noBearerPrefixRequired": "Remove the 'Bearer ' prefix from the API token"
 				},
 				"apiTokenExpiresAt": {
 					"label": "API token expiration",
@@ -2518,14 +2738,34 @@
 		"uploadImage": {
 			"emptyState": "A preview of your image will appear here",
 			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"remove": "Remove image",
+			"fileTooLarge": "File too large",
+			"onlyOneFile": "Only one file is allowed",
+			"noFile": "No file was provided"
+		}
+	},
+	"thumbnailSelector": {
+		"title": "Select a thumbnail",
+		"descriptions": {
+			"chooseBookPage": "Choose a page from this book to use as the new thumbnail",
+			"chooseSeriesBook": "Select a book from the series"
+		},
+		"actions": {
+			"confirmSelection": "Confirm selection"
+		},
+		"errors": {
+			"uploadFailed": "Failed to upload image",
+			"updateFailed": "Failed to update thumbnail"
 		}
 	},
 	"common": {
 		"add": "Add",
+		"andXMoreTrailing": "...and {{count}} more",
 		"cancel": "Cancel",
 		"clear": "Clear",
 		"confirm": "Confirm",
+		"copy": "Copy",
+		"created": "Created",
 		"delete": "Delete",
 		"deleteConfirmation": {
 			"title": "Delete {{type}}",
@@ -2544,11 +2784,22 @@
 		"noChanges": "No changes",
 		"create": "Create",
 		"edit": "Edit",
+		"info": "Info",
+		"infoSheetStats": {
+			"series": "Series",
+			"inProgress": "In Progress",
+			"completedBooks": "Completed",
+			"readingTime": "Reading Time",
+			"size": "Size"
+		},
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
 		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"upNext": "Up next",
+		"unknown": "Unknown",
+		"lastUpdated": "Last updated",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",
@@ -2556,20 +2807,30 @@
 		"remove": "Remove",
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
+		"notConfigured": "Not configured",
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
+		"open": "Open",
+		"none": "None",
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
 		"back": "Back",
 		"continue": "Continue",
 		"book": "Book",
+		"book_one": "Book",
+		"book_other": "Books",
+		"xBooks_one": "{{count}} Book",
+		"xBooks_other": "{{count}} Books",
+		"seeMore": "See more",
 		"series": "Series",
 		"fileUpload": {
 			"someRejected": "Some files were rejected. Please check the file types and try again",
 			"tooManyFiles": "You have selected too many files",
 			"noValidFiles": "No valid files were selected"
-		}
+		},
+		"unknownError": "An unknown error occurred",
+		"view": "View"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2715,18 +2976,29 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edit thumbnails",
 			"description": "Allows the user to edit thumbnails for books and series"
+		},
+		"METADATA_PROVIDER_READ": {
+			"label": "Read metadata providers",
+			"description": "Allows the user to view configured external metadata providers"
+		},
+		"METADATA_PROVIDER_MANAGE": {
+			"label": "Manage metadata providers",
+			"description": "Allows the user to configure external metadata providers"
+		},
+		"METADATA_FETCH_RECORD_READ": {
+			"label": "Read metadata matches",
+			"description": "Allows the user to view metadata fetch results awaiting review"
+		},
+		"METADATA_FETCH_RECORD_MANAGE": {
+			"label": "Manage metadata matches",
+			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
 		}
 	},
 	"mobileApp": {
 		"addOrEditServer": {
-			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
-			},
-			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
-			},
+			"createServer": "Create Server",
+			"updateServer": "Update Server",
+			"basicInfo": "Basic Info",
 			"kind": "Kind",
 			"customHeaders": {
 				"label": "Custom Headers",
@@ -2734,80 +3006,191 @@
 				"invalidHeader": "Invalid header"
 			},
 			"auth": {
-				"label": "Auth",
-				"default": {
+				"section": "Authentication",
+				"method": "Method",
+				"login": {
 					"label": "Login",
 					"description": "You will be prompted to login when accessing content as needed"
 				},
+				"none": {
+					"label": "None",
+					"description": "No authentication is required for this server or auth is provided through the URL"
+				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw token"
+					"placeholder": "Raw Token"
 				},
 				"basic": "Basic"
 			},
 			"serverNamePlaceholder": "My Server",
 			"catalogUrl": "Catalog URL",
+			"primaryUrl": "Primary URL",
 			"failedToConnect": "Failed to connect to server",
 			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
-			"enableOPDS": "Enable OPDS",
+			"checkConnection": "Check Connection",
+			"optionalSettings": "Optional Settings",
+			"setAsDefaultServer": "Set as Default Server",
 			"validation": {
 				"nameAlreadyExists": "Name already exists",
 				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+			},
+			"networking": "Networking",
+			"advancedOptions": "Advanced Options"
+		},
+		"serverSettingsSheet": {
+			"configuration": {
+				"label": "Configuration",
+				"networkSettings": "Network Settings"
+			}
+		},
+		"serverNetworkSettings": {
+			"activeProfile": {
+				"label": "Active Profile",
+				"localIsActive": "Local profile is active",
+				"primaryIsActive": "Primary profile is active",
+				"autoSwitchToLocalDidNotWork": "The app was unable to switch to the active profile. Please check your network connection"
+			},
+			"localProfile": "Local Profile",
+			"primaryUrl": "Primary URL",
+			"autoSwitchToLocal": {
+				"label": "Auto-switch to local profile",
+				"description": "Switch to the local profile when able"
+			},
+			"localUrl": "Local URL",
+			"saveUrlChanges": "Save URL Changes",
+			"swapUrls": {
+				"label": "Swap URLs",
+				"swap": "Swap",
+				"confirmationText": "Are you sure you want to swap the remote and local URLs? This will take effect immediately",
+				"noLocalUrlSet": {
+					"title": "No local URL set",
+					"description": "You need to set a local URL before you can swap it to the remote URL"
+				}
+			},
+			"wifiNetwork": {
+				"label": "Wifi Network",
+				"noAssociatedNetwork": "No Associated Wifi Network",
+				"notConnectedToWifi": "You are not connected to wifi. Please connect to a local network to finish setting up the local profile",
+				"connectedTip": "If the current network is not listed, you might need to give Stump permission to access your location",
+				"addNetwork": "Add \"{{ssid}}\"",
+				"permissionNotGranted": {
+					"label": "Permissions Not Granted",
+					"description": "You need to grant location permission to access the active wifi network"
+				},
+				"permissionFailedToBeGranted": {
+					"title": "Location Permission Failed",
+					"description": "The app failed to get permissions to access your location. Please check your device settings and try again"
+				},
+				"requestPermission": "Request Location Permission",
+				"removeWifi": {
+					"label": "Remove",
+					"confirmationText": "Are you sure you want to remove the '{{ssid}}' network from the local profile?"
+				}
 			}
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"label": "Mark as Read",
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?",
+				"failure": "Failed to mark book as read"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"label": "Clear Progress",
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?",
+				"failure": "Failed to delete current progress"
+			},
+			"deleteReadHistory": {
+				"label": "Delete Read History",
+				"confirmation": "Are you sure you want to delete your read history for {{bookTitle}}?",
+				"failure": "Failed to delete read history"
 			},
 			"deleteBook": {
-				"label": "Delete book",
+				"label": "Delete Book",
 				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
 			},
+			"deleteDownload": {
+				"label": "Delete Download",
+				"confirmation": "Are you sure you want to delete the downloaded file for {{bookTitle}}?"
+			},
+			"goToLibrary": "Go to Library",
+			"goToSeries": "Go to Series",
 			"seeDetails": "See Details"
 		},
 		"bookMetadata": {
 			"ageRating": "Age Rating",
 			"downloadedAt": "Downloaded",
+			"characters": "Characters",
 			"format": "Format",
 			"genres": "Genres",
 			"language": "Language",
 			"publisher": "Publisher",
 			"size": "Size",
 			"volume": "Volume",
-			"year": "Year"
+			"writers": "Writers",
+			"colorists": "Colorists",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"coverArtists": "Cover Artists",
+			"links": "Links",
+			"year": "Year",
+			"identifier": "Identifier",
+			"identifiers": "Identifiers",
+			"issue": "Issue"
 		},
 		"common": {
+			"book": "Book",
+			"book_one": "Book",
+			"book_other": "Books",
+			"xBooks_one": "{{count}} Book",
+			"xBooks_other": "{{count}} Books",
 			"cancel": "Cancel",
 			"chapter": "Chapter",
 			"clear": "Clear",
+			"completed": "Completed",
 			"confirm": "Confirm",
+			"continue": "Continue",
+			"content": "Content",
 			"details": "Details",
 			"delete": "Delete",
+			"dismiss": "Dismiss",
+			"download": "Download",
+			"downloaded": "Downloaded",
 			"downloads": "Downloads",
+			"done": "Done",
 			"edit": "Edit",
 			"enabled": "Enabled",
 			"enable": "Enable",
 			"error": "Error",
+			"exit": "Exit",
+			"favorite": "Favorite",
+			"finished": "Finished",
+			"grid": "Grid",
+			"list": "List",
+			"lastCompleted": "Last Completed",
 			"name": "Name",
 			"none": "None",
+			"notAvailable": "Not Available",
+			"notConfigured": "Not configured",
 			"options": "Options",
 			"page": "Page",
 			"pages": "Pages",
+			"pageXOfY": "Page {{current}} of {{total}}",
+			"pageX": "Page {{current}}",
 			"password": "Password",
 			"progress": "Progress",
-			"readTime": "Read time",
-			"readMore": "Read more",
+			"publication": "Publication",
+			"read": "Read",
+			"readAgain": "Read Again",
+			"readTime": "Reading Time",
+			"readthrough": "Readthrough",
+			"readMore": "Read More",
+			"refresh": "Refresh",
+			"reset": "Reset",
 			"save": "Save",
 			"select": "Select",
 			"settings": "Settings",
 			"servers": "Servers",
+			"test": "Test",
 			"thisBook": "this book",
 			"thisServer": "this server",
 			"unknown": "Unknown",
@@ -2815,33 +3198,67 @@
 			"url": "URL",
 			"username": "Username",
 			"value": "Value",
-			"version": "Version"
+			"version": "Version",
+			"view": "View",
+			"accessOpdsV2": "Access OPDS v2.0",
+			"accessOpdsV1": "Access OPDS v1.2"
+		},
+		"errors": {
+			"unknown": "Unknown error"
+		},
+		"epubMenu": {
+			"tableOfContents": "Table of Contents",
+			"bookmarksAndAnnotations": "Bookmarks & Annotations",
+			"appearance": "Appearance"
+		},
+		"formatSeriesPosition": {
+			"none": {
+				"positionWithTotal": "{{position}} of {{total}} in {{seriesName}}",
+				"position": "{{position}} in {{seriesName}}"
+			},
+			"book": {
+				"positionWithTotal": "Book {{position}} of {{total}} in {{seriesName}}",
+				"position": "Book {{position}} in {{seriesName}}"
+			},
+			"hashtag": {
+				"positionWithTotal": "#{{position}} of {{total}} in {{seriesName}}",
+				"position": "#{{position}} in {{seriesName}}"
+			},
+			"unknownSeriesName": "series"
 		},
 		"emptyState": {
 			"noStumpServers": "No Stump servers added",
 			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
+			"noServers": "No Servers Configured",
 			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"seeDocumentation": "See Documentation",
+			"noSmartLists": {
+				"label": "No lists returned",
+				"description": "Once created they will appear here"
+			}
 		},
 		"tabs": {
 			"servers": "Servers",
 			"localLibrary": "Library",
-			"settings": "Settings"
+			"settings": "Settings",
+			"home": "Home",
+			"browse": "Browse",
+			"clubs": "Clubs",
+			"search": "Search"
 		},
 		"localLibrary": {
 			"title": "Local Library",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
+					"title": "Nothing to Read Yet",
 					"description": "Once you have books for offline reading, they will appear here"
 				},
 				"imported": {
-					"title": "No imported books",
+					"title": "No Imported Books",
 					"description": "Import books to read them offline"
 				},
 				"server": {
-					"title": "No downloaded books",
+					"title": "No Downloaded Books",
 					"description": "Download books from your library to read them offline"
 				}
 			},
@@ -2862,7 +3279,8 @@
 				"seeProblems": "See Problems ({{problemCount}})",
 				"hideCurated": "Hide Curated",
 				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"attemptSync": "Attempt Sync",
+				"syncConflicts": "Sync Conflicts"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
@@ -2895,6 +3313,46 @@
 				"dismissAll": "Dismiss All"
 			}
 		},
+		"progressSync": {
+			"skippedSync": {
+				"skippedOneServer": "Sync skipped for {{skippedCount}} server",
+				"skippedMultipleServers": "Sync skipped for {{skippedCount}} servers",
+				"explanation": "Some servers use authentication methods that cannot be automatically refreshed"
+			},
+			"syncFailed": "Failed to sync offline progress"
+		},
+		"syncConflicts": {
+			"title": "Sync Conflicts",
+			"remainingCount": "{{remainingCount}} Remaining",
+			"noConflicts": {
+				"title": "No Sync Conflicts",
+				"description": "All your local progress is in sync their servers"
+			},
+			"lastCommonSession": "Last common session",
+			"localSession": "Local Session",
+			"remoteSessionWithId": "Remote Session {{sessionId}}",
+			"noCommonSession": "No common reading history",
+			"noRemoteSessions": "No remote sessions",
+			"divergentProgress": {
+				"title": "Divergent Progress",
+				"description": "The last common session was modified on the server after your last sync"
+			},
+			"noCommonReadingHistory": {
+				"title": "No Common Reading History",
+				"description": "This book had no synced history when you started reading offline"
+			},
+			"acceptSource": {
+				"local": "Accept Local",
+				"remote": "Accept Remote",
+				"both": "Accept Both"
+			},
+			"pullError": "Failed to pull remote progress"
+		},
+		"search": {
+			"label": "Search This Server",
+			"description": "Find specific content on this server",
+			"placeholder": "Search"
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferences",
@@ -2905,7 +3363,36 @@
 						"dark": "Dark"
 					}
 				},
-				"appPrimaryColor": "Accent",
+				"appPrimaryColor": {
+					"label": "Accent",
+					"options": {
+						"chromaScale": "Chroma Scale",
+						"hues": {
+							"red": "Red",
+							"orange": "Orange",
+							"amber": "Amber",
+							"yellow": "Yellow",
+							"lime": "Lime",
+							"green": "Green",
+							"emerald": "Emerald",
+							"teal": "Teal",
+							"cyan": "Cyan",
+							"sky": "Sky",
+							"blue": "Blue",
+							"indigo": "Indigo",
+							"violet": "Violet",
+							"purple": "Purple",
+							"fuchsia": "Fuchsia",
+							"pink": "Pink",
+							"rose": "Rose",
+							"slate": "Slate",
+							"gray": "Gray",
+							"zinc": "Zinc",
+							"neutral": "Neutral",
+							"stone": "Stone"
+						}
+					}
+				},
 				"appLanguage": "Language",
 				"defaultServer": "Default Server",
 				"thumbnailRatio": "Thumbnail Ratio",
@@ -2913,7 +3400,7 @@
 					"label": "Thumbnail Placeholder",
 					"options": {
 						"grayscale": "Grayscale",
-						"averageColor": "Average color",
+						"averageColor": "Average Color",
 						"colorful": "Colorful",
 						"thumbhash": "Thumbhash"
 					}
@@ -2932,7 +3419,14 @@
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
 				"disableDismissGesture": "Disable Dismiss Gesture",
-				"incognitoReading": "Incognito Reading"
+				"incognitoReading": "Incognito Reading",
+				"maxPageViewingSeconds": {
+					"label": "Page Viewing Seconds Limit",
+					"errors": {
+						"minimumValue": "Must be at least 1 second",
+						"integer": "Must be an integer"
+					}
+				}
 			},
 			"stump": {
 				"label": "Stump",
@@ -2940,14 +3434,24 @@
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
+			"textCase": {
+				"label": "Text Case",
+				"options": {
+					"lowerCase": "Lowercase",
+					"sentenceCase": "Sentence Case",
+					"titleCase": "Title Case"
+				}
+			},
+			"tintListBackground": "Tint List Backgrounds",
 			"management": {
 				"label": "Management",
 				"dataUsage": {
 					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"noServersAdded": "No Servers Added",
+					"nonStumpData": "Non-Stump Data",
+					"serversTotal": "Servers Total",
+					"totalFiles": "Total Files",
+					"totalSize": "Total Size",
 					"deleteDownloads": {
 						"label": "Delete Downloads",
 						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
@@ -2958,7 +3462,7 @@
 					},
 					"noDownloads": "No downloaded files for this server",
 					"storedPreferences": {
-						"label": "Stored preferences",
+						"label": "Stored Preferences",
 						"description": "Miscellaneous data like book preferences, reading timers, etc"
 					},
 					"clearPreferences": "Clear Preferences"
@@ -2970,27 +3474,26 @@
 					"label": "Clear Cache",
 					"memory": {
 						"button": "Memory",
-						"success": "Memory cache cleared"
+						"success": "Memory Cache Cleared"
 					},
 					"disk": {
 						"button": "Disk",
-						"success": "Disk cache cleared"
+						"success": "Disk Cache Cleared"
 					}
 				},
 				"deleteDatabase": {
 					"label": "Delete Database",
 					"success": {
-						"title": "Database deleted",
+						"title": "Database Deleted",
 						"description": "Please restart the app"
 					},
 					"error": {
-						"title": "Deletion failed",
+						"title": "Deletion Failed",
 						"description": "There was an error deleting the database"
 					}
 				},
 				"performanceMonitor": "Performance Monitor",
 				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
 				"displayLanguageKeys": {
 					"label": "Display Language Keys",
 					"options": {
@@ -3002,7 +3505,8 @@
 				"debugAnalytics": {
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
-				}
+				},
+				"maskUrls": "Mask URLs"
 			},
 			"contactInfo": {
 				"label": "Contact",
@@ -3016,9 +3520,35 @@
 				"suuportIdentifier": "Support Identifier: {{supportID}}"
 			}
 		},
+		"stumpServer": {
+			"browse": {
+				"books": "Books",
+				"favorites": "Favorites",
+				"files": "Files",
+				"libraries": "Libraries",
+				"series": "Series",
+				"smartLists": "Smart Lists"
+			},
+			"continueReading": {
+				"label": "Continue Reading",
+				"emptyText": "No books in progress"
+			},
+			"onDeck": {
+				"label": "Your Next Read",
+				"emptyText": "No books on deck"
+			},
+			"recentlyAddedSeries": {
+				"label": "Recently Added Series",
+				"emptyText": "No recently added series"
+			},
+			"recentlyAddedBooks": {
+				"label": "Recently Added Books",
+				"emptyText": "No recently added books"
+			}
+		},
 		"readerSettings": {
 			"title": "Image Reader Settings",
-			"overrideGlobalSettings": "Override global settings",
+			"overrideGlobalSettings": "Override Global Settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -3059,6 +3589,7 @@
 			},
 			"allowDownscaling": "Downscaling",
 			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
@@ -3068,13 +3599,47 @@
 			},
 			"readingTimer": {
 				"label": "Reading Timer",
-				"resetTimer": "Reset Timer"
+				"resetTimer": "Reset Timer",
+				"confirmation": {
+					"message": "Are you sure you want to reset your reading time for '{{bookName}}'?\n\n{{action}}",
+					"action": {
+						"multi-session": "This will set every reading session in this readthrough to 0 seconds.",
+						"single-session": "This will set the reading time to 0 seconds."
+					}
+				}
 			},
 			"allSettings": "All Settings"
 		},
+		"tableOfContents": {
+			"goToPageX": "Go to page {{pageNumber}}",
+			"goToPagePlaceholder": "Go to page...",
+			"errors": {
+				"pageDoesNotExist": "Page {{page}} does not exist",
+				"invalidPage": "'{{page}}' is not a page number"
+			},
+			"showCurrentChapter": "Show Current Chapter"
+		},
+		"annotationsSheet": {
+			"tabs": {
+				"all": "All",
+				"bookmarks": "Bookmarks",
+				"highlights": "Highlights",
+				"notes": "Notes"
+			}
+		},
 		"epubSettings": {
 			"title": "Epub Reader Settings",
-			"typeface": "Typeface",
+			"typeface": {
+				"label": "Typeface",
+				"options": {
+					"system": "System",
+					"opendyslexic": "OpenDyslexic",
+					"literata": "Literata",
+					"atkinsonHyperlegible": "Atkinson Hyperlegible",
+					"charisSIL": "Charis SIL",
+					"bitter": "Bitter"
+				}
+			},
 			"fontSize": "Font Size",
 			"fontWeight": {
 				"label": "Font Weight",
@@ -3112,6 +3677,7 @@
 				}
 			},
 			"publisherStyles": "Publisher Styles",
+			"volumeButtonsNavigate": "Volume Buttons Navigate",
 			"textAlignment": {
 				"label": "Text Alignment",
 				"options": {
@@ -3138,6 +3704,16 @@
 				"premadeThemes": "Premade themes"
 			}
 		},
+		"libraryType": {
+			"BOOK": "Books",
+			"COMIC": "Comics",
+			"LIGHT_NOVEL": "Light Novels",
+			"MANGA": "Manga",
+			"MANHWA": "Manhwa",
+			"MIXED": "Mixed",
+			"WEBTOON": "Webtoons",
+			"WEB_NOVEL": "Web Novels"
+		},
 		"savedServerActions": {
 			"clearCache": "Clear Cache",
 			"discardTokens": {
@@ -3147,6 +3723,171 @@
 			"deleteServer": {
 				"title": "Delete Server",
 				"confirmation": "Are you sure you want to delete {{serverName}}?"
+			}
+		},
+		"filtering": {
+			"notStarted": "Not Started",
+			"currentlyReading": "Currently Reading",
+			"finished": "Finished"
+		},
+		"sorting": {
+			"labelEllipsis": "Sort By...",
+			"sortField": {
+				"NAME": "Name",
+				"ADDED_AT": "Date Added",
+				"CREATED_AT": "Date Added",
+				"NUMBER": "Series Position",
+				"SERIES": "Series",
+				"YEAR": "Year Published"
+			},
+			"sortDirection": {
+				"ASC": "Ascending",
+				"DESC": "Descending"
+			},
+			"sortDirectionString": {
+				"ASC": "A → Z",
+				"DESC": "Z → A"
+			},
+			"sortDirectionDate": {
+				"ASC": "Oldest First",
+				"DESC": "Newest First"
+			},
+			"sortDirectionNumber": {
+				"ASC": "1 → 10",
+				"DESC": "10 → 1"
+			}
+		},
+		"widgets": {
+			"readingNow": {
+				"nothingInProgress": "Nothing in Progress"
+			}
+		}
+	},
+	"epubReader": {
+		"reading": "Reading",
+		"appearance": "Appearance",
+		"themeAndOptions": "Theme and options",
+		"locationManager": "Location manager",
+		"contents": "Contents",
+		"bookmarks": "Bookmarks",
+		"annotations": "Annotations",
+		"noBookmarks": "No bookmarks",
+		"bookmark": "Bookmark",
+		"noAnnotations": "No annotations",
+		"annotation": {
+			"addNote": "Add note",
+			"edit": "Edit annotation",
+			"note": "Note",
+			"optionalNote": "Add an optional note…",
+			"selectionActions": "Selection actions",
+			"highlight": "Highlight",
+			"disabledInIncognito": "Annotations are disabled in incognito mode",
+			"saveFailed": "Failed to save annotation",
+			"updateFailed": "Failed to update annotation",
+			"deleteFailed": "Failed to delete annotation"
+		},
+		"search": {
+			"placeholder": "Enter a query and press enter to search",
+			"failed": "Search failed. Please try again.",
+			"noResults": "No results found.",
+			"section": "Section {{position}}",
+			"loadingMore": "Loading more…",
+			"loadMore": "Load more results"
+		},
+		"controls": {
+			"columns": "Columns",
+			"auto": "Auto",
+			"columnCount_one": "{{count}} column",
+			"columnCount_other": "{{count}} columns",
+			"pageMargins": "Page margins",
+			"readingDirection": "Reading direction",
+			"leftToRight": "Left to right",
+			"rightToLeft": "Right to left",
+			"readingMode": "Reading mode",
+			"paged": "Paged",
+			"continuous": "Continuous",
+			"previousPage": "Previous page",
+			"nextPage": "Next page",
+			"toggleControls": "Toggle reader controls"
+		},
+		"errors": {
+			"openFailed": "Failed to open EPUB with Readium.",
+			"navigateFailed": "Failed to navigate to location"
+		}
+	},
+	"imageReader": {
+		"header": {
+			"goToMediaOverview": "Go to media overview"
+		},
+		"settingsDialog": {
+			"scopes": {
+				"book": "Book",
+				"global": "Global"
+			}
+		},
+		"timerMenu": {
+			"start": "Start Timer",
+			"stop": "Stop Timer",
+			"reset": "Reset Timer"
+		},
+		"footer": {
+			"readingTime": "Reading time: {{time}}",
+			"pageOf": "{{current}} of {{total}}"
+		},
+		"goToPage": {
+			"label": "Go to page",
+			"submit": "Go"
+		},
+		"nextInSeries": {
+			"title": "Next Up:",
+			"read": "Read"
+		},
+		"settings": {
+			"readerSettings": {
+				"sections": {
+					"mode": "Mode",
+					"imageOptions": "Image Options",
+					"preferences": "Preferences",
+					"controls": "Controls"
+				},
+				"preferences": {
+					"separateSecondPage": "Separate second page",
+					"panZoomWithoutCtrl": "Pan and zoom without Ctrl / Cmd",
+					"tapSidesToNavigate": "Tap sides to navigate",
+					"readingTimer": "Reading timer"
+				}
+			},
+			"doublePageBehavior": {
+				"label": "Double Paged",
+				"options": {
+					"auto": "Auto",
+					"always": "Always",
+					"off": "Off"
+				}
+			},
+			"imageScaling": {
+				"label": "Image scaling",
+				"options": {
+					"auto": "Auto",
+					"height": "Height",
+					"width": "Width",
+					"original": "Original"
+				}
+			},
+			"readingDirection": {
+				"label": "Reading direction",
+				"options": {
+					"leftToRight": "Left to right",
+					"rightToLeft": "Right to left"
+				}
+			},
+			"readingMode": {
+				"label": "Flow",
+				"options": {
+					"verticalScroll": "Vertical scroll",
+					"horizontalScroll": "Horizontal scroll",
+					"paged": "Paged"
+				}
 			}
 		}
 	}

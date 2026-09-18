@@ -38,7 +38,7 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 							<Tabs.Trigger
 								value="and"
 								asChild
-								className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
+								className="w-8 px-1 text-xs min-w-[unset] rounded-lg"
 								onClick={() => form.setValue('filters.joiner', 'and')}
 							>
 								<Text className="cursor-pointer truncate">{t(getKey('rootJoiner.and.label'))}</Text>
@@ -47,7 +47,7 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 							<Tabs.Trigger
 								value="or"
 								asChild
-								className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
+								className="w-8 px-1 text-xs min-w-[unset] rounded-lg"
 								onClick={() => form.setValue('filters.joiner', 'or')}
 							>
 								<Text className={cx('truncate', { 'cursor-pointer': true })}>
@@ -63,12 +63,15 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 				</div>
 
 				<div
-					className={cn('ml-4 space-y-8 px-2 pt-4 relative flex flex-col border-l border-l-edge', {
-						'pointer-events-none': disabled,
-					})}
+					className={cn(
+						'ml-4 space-y-8 px-2 pt-4 relative flex flex-col border-l border-l-border',
+						{
+							'pointer-events-none': disabled,
+						},
+					)}
 				>
 					{groups.length === 0 && (
-						<div className="ml-4 max-w-sm rounded-lg p-4 flex items-center justify-center border border-dashed border-edge">
+						<div className="ml-4 max-w-sm p-4 flex items-center justify-center rounded-lg border border-dashed border-border">
 							<Text variant="muted">{t(getKey('filters.emptyState'))}</Text>
 						</div>
 					)}

@@ -1,5 +1,5 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Accordion, Text } from '@stump/components'
+import { Accordion } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Club } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useAppContext } from '@/context'
 import paths from '@/paths'
 
 import SideBarButtonLink from '../../SideBarButtonLink'
+import { SectionEmptyMessage } from '../SectionEmptyMessage'
 import BookClubEmoji from './BookClubEmoji'
 
 const query = graphql(`
@@ -49,11 +50,7 @@ export default function BookClubSideBarSection({
 
 	const renderBookClubs = () => {
 		if (!bookClubs || !bookClubs.length) {
-			return (
-				<Text className="px-1 py-2 select-none" variant="muted" size="sm">
-					{t('sidebar.buttons.noBookClubs')}
-				</Text>
-			)
+			return <SectionEmptyMessage message={t('sidebar.buttons.noBookClubs')} />
 		}
 
 		return bookClubs.map((bookClub) => {
@@ -91,12 +88,16 @@ export default function BookClubSideBarSection({
 	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
 
 	return (
-		<Accordion type="single" collapsible className="py-2 w-full" defaultValue="bookClubs">
+		<Accordion type="single" collapsible className="py-1 w-full" defaultValue="bookClubs">
 			<Accordion.Item value="bookClubs" className="border-none">
-				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
+				<Accordion.Trigger
+					noUnderline
+					asLabel
+					className="px-1 py-1 text-sm font-medium tracking-wide text-muted-foreground"
+				>
 					{t('sidebar.buttons.bookClubs')}
 				</Accordion.Trigger>
-				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
+				<Accordion.Content containerClassName="flex flex-col space-y-1.5">
 					{showLinkToAll && (
 						<SideBarButtonLink
 							to={paths.bookClubs()}
@@ -106,7 +107,7 @@ export default function BookClubSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="ml-2 space-y-1 pl-1 border-l border-l-edge">{renderBookClubs()}</div>
+					<div className="space-y-1">{renderBookClubs()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.bookClubCreate()}

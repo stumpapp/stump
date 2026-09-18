@@ -25,8 +25,8 @@ import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.extensions.toMap
-import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.ReadingProgression
 import org.readium.r2.shared.publication.services.positions
 import java.net.URL
@@ -41,7 +41,7 @@ data class PDFProps(
     var scrollAxis: String? = null,
     var scroll: Boolean? = null,
     var readingProgression: ReadingProgression? = null,
-    var spread: org.readium.r2.navigator.preferences.Spread? = null
+    var spread: org.readium.r2.navigator.preferences.Spread? = null,
 )
 
 data class FinalizedPDFProps(
@@ -53,13 +53,16 @@ data class FinalizedPDFProps(
     val scrollAxis: String,
     val scroll: Boolean,
     val readingProgression: ReadingProgression,
-    val spread: org.readium.r2.navigator.preferences.Spread
+    val spread: org.readium.r2.navigator.preferences.Spread,
 )
 
 @SuppressLint("ViewConstructor", "ResourceType")
-class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appContext),
-    DecorableNavigator.Listener, PdfNavigatorFragment.Listener {
-
+class PDFView(
+    context: Context,
+    appContext: AppContext,
+) : ExpoView(context, appContext),
+    DecorableNavigator.Listener,
+    PdfNavigatorFragment.Listener {
     // Required for proper layout! Forces Expo to
     // use the Android layout system for this view,
     // rather than React Native's. Without this,
@@ -67,9 +70,15 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
     // incorrectly
     override val shouldUseAndroidLayout = true
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+    override fun onLayout(
+        changed: Boolean,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
         super.onLayout(changed, left, top, right, bottom)
-        Log.d("PDFView", "onLayout: changed=$changed, dimensions=${right-left}x${bottom-top}")
+        Log.d("PDFView", "onLayout: changed=$changed, dimensions=${right - left}x${bottom - top}")
     }
 
     var bookService: BookService? = null
@@ -87,18 +96,21 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
     val pendingProps = PDFProps()
     var props: FinalizedPDFProps? = null
 
-    private val placeholderView = TextView(context).apply {
-        layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = android.view.Gravity.CENTER
-        }
+    private val placeholderView =
+        TextView(context).apply {
+            layoutParams =
+                FrameLayout
+                    .LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                    ).apply {
+                        gravity = android.view.Gravity.CENTER
+                    }
 //        TODO: Spinner
-        text = "Loading PDF..."
-        textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextColor(Color.BLACK)
-    }
+            text = "Loading PDF..."
+            textAlignment = View.TEXT_ALIGNMENT_CENTER
+            setTextColor(Color.BLACK)
+        }
 
     private var coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var locatorCollectionJob: Job? = null
@@ -109,20 +121,24 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
         val bookId = pendingProps.bookId ?: return
         val url = pendingProps.url ?: return
 
-        props = FinalizedPDFProps(
-            bookId = bookId,
-            locator = pendingProps.locator ?: pendingProps.initialLocator ?: oldProps?.locator,
-            url = url,
-            background = pendingProps.background
-                ?: oldProps?.background ?: Color.parseColor("#000000"),
-            pageSpacing = pendingProps.pageSpacing ?: oldProps?.pageSpacing ?: 0.0,
-            scrollAxis = pendingProps.scrollAxis ?: oldProps?.scrollAxis ?: "vertical",
-            scroll = pendingProps.scroll ?: oldProps?.scroll ?: true,
-            readingProgression = pendingProps.readingProgression 
-                ?: oldProps?.readingProgression ?: ReadingProgression.LTR,
-            spread = pendingProps.spread 
-                ?: oldProps?.spread ?: org.readium.r2.navigator.preferences.Spread.AUTO
-        )
+        props =
+            FinalizedPDFProps(
+                bookId = bookId,
+                locator = pendingProps.locator ?: pendingProps.initialLocator ?: oldProps?.locator,
+                url = url,
+                background =
+                    pendingProps.background
+                        ?: oldProps?.background ?: Color.parseColor("#000000"),
+                pageSpacing = pendingProps.pageSpacing ?: oldProps?.pageSpacing ?: 0.0,
+                scrollAxis = pendingProps.scrollAxis ?: oldProps?.scrollAxis ?: "vertical",
+                scroll = pendingProps.scroll ?: oldProps?.scroll ?: true,
+                readingProgression =
+                    pendingProps.readingProgression
+                        ?: oldProps?.readingProgression ?: ReadingProgression.LTR,
+                spread =
+                    pendingProps.spread
+                        ?: oldProps?.spread ?: org.readium.r2.navigator.preferences.Spread.AUTO,
+            )
 
         // If book ID or URL changed, reload the publication
         if (props!!.bookId != oldProps?.bookId || props!!.url != oldProps?.url) {
@@ -135,13 +151,14 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
         }
 
         // Check if any preferences changed
-        val prefsChanged = oldProps != null && (
-            props!!.pageSpacing != oldProps.pageSpacing ||
-            props!!.scrollAxis != oldProps.scrollAxis ||
-            props!!.scroll != oldProps.scroll ||
-            props!!.readingProgression != oldProps.readingProgression ||
-            props!!.spread != oldProps.spread
-        )
+        val prefsChanged =
+            oldProps != null && (
+                props!!.pageSpacing != oldProps.pageSpacing ||
+                    props!!.scrollAxis != oldProps.scrollAxis ||
+                    props!!.scroll != oldProps.scroll ||
+                    props!!.readingProgression != oldProps.readingProgression ||
+                    props!!.spread != oldProps.spread
+            )
 
         if (prefsChanged) {
             destroyNavigator()
@@ -159,9 +176,9 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
 
     private suspend fun loadPublication() {
         val props = props ?: return
-        
+
         Log.d("PDFView", "Loading publication from: ${props.url}")
-        
+
         withContext(Dispatchers.Main) {
             addView(placeholderView)
         }
@@ -169,7 +186,7 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
         try {
             val url = URL(props.url)
             bookService?.openPublication(props.bookId, url)
-            
+
             withContext(Dispatchers.Main) {
                 initializeNavigator()
                 removeView(placeholderView)
@@ -182,18 +199,19 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
                     mapOf(
                         "errorDescription" to (e.message ?: "Unknown error"),
                         "failureReason" to "Failed to load PDF",
-                        "recoverySuggestion" to "Check the URL and try again"
-                    )
+                        "recoverySuggestion" to "Check the URL and try again",
+                    ),
                 )
             }
         }
     }
 
     fun initializeNavigator() {
-        val publication = bookService?.getPublication(props!!.bookId) ?: run {
-            Log.e("PDFView", "Publication not found for bookId: ${props!!.bookId}")
-            return
-        }
+        val publication =
+            bookService?.getPublication(props!!.bookId) ?: run {
+                Log.e("PDFView", "Publication not found for bookId: ${props!!.bookId}")
+                return
+            }
 
         Log.d("PDFView", "Publication loaded successfully: ${publication.metadata.title}")
 
@@ -206,38 +224,43 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
         }
 
         val listener = this
-        pdfFragment = PDFFragment(
-            publication,
-            props!!,
-            listener
-        )
+        pdfFragment =
+            PDFFragment(
+                publication,
+                props!!,
+                listener,
+            )
 
         Log.d("PDFView", "Adding PDFFragment to activity FragmentManager")
         activity.supportFragmentManager.commitNow {
             setReorderingAllowed(true)
             add(pdfFragment!!, fragmentTag)
         }
-        
-        addView(pdfFragment!!.view, FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        ))
-        
+
+        addView(
+            pdfFragment!!.view,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+
         post {
-            val fragment = pdfFragment ?: run {
-                Log.e("PDFView", "[POST] pdfFragment is null!?")
-                return@post
-            }
-            
+            val fragment =
+                pdfFragment ?: run {
+                    Log.e("PDFView", "[POST] pdfFragment is null!?")
+                    return@post
+                }
+
             navigator = fragment.navigator
-            
+
             if (navigator == null) {
                 Log.e("PDFView", "[POST] Navigator is null!?")
                 return@post
             }
-            
+
             setupNavigatorListeners(publication)
-            
+
             // Navigate to initial locator if provided
             props?.locator?.let { locator ->
                 go(locator)
@@ -247,18 +270,19 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
 
     private fun setupNavigatorListeners(publication: Publication) {
         navigator?.addInputListener(TapInputListener())
-        
-        locatorCollectionJob = coroutineScope.launch {
-            try {
-                navigator?.currentLocator?.collect { locator ->
-                    if (isAttachedToWindow) {
-                        emitCurrentLocator(locator)
+
+        locatorCollectionJob =
+            coroutineScope.launch {
+                try {
+                    navigator?.currentLocator?.collect { locator ->
+                        if (isAttachedToWindow) {
+                            emitCurrentLocator(locator)
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("PDFView", "Error collecting locator", e)
                 }
-            } catch (e: Exception) {
-                Log.e("PDFView", "Error collecting locator", e)
             }
-        }
 
         coroutineScope.launch {
             try {
@@ -273,25 +297,26 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
 
     fun destroyNavigator() {
         Log.d("PDFView", "destroyNavigator called")
-        
-        val fragment = this.pdfFragment ?: run {
-            Log.d("PDFView", "Navigator already destroyed")
-            return
-        }
-        
+
+        val fragment =
+            this.pdfFragment ?: run {
+                Log.d("PDFView", "Navigator already destroyed")
+                return
+            }
+
         this.navigator = null
         this.pdfFragment = null
-        
+
         locatorCollectionJob?.cancel()
         locatorCollectionJob = null
-        
+
         // Remove the fragment's view from PDFView
         try {
             removeView(fragment.view)
         } catch (e: Exception) {
             Log.e("PDFView", "Error removing fragment view", e)
         }
-        
+
         val activity: FragmentActivity? = appContext.currentActivity as? FragmentActivity
         if (activity == null || activity.isDestroyed || activity.isFinishing) {
             Log.w("PDFView", "Cannot remove fragment: activity is gone")
@@ -305,7 +330,7 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
                 Log.e("PDFView", "Failed to remove fragment: ${e.message}")
             }
         }
-        
+
         val bookId = props?.bookId
         if (bookId != null) {
             bookService?.closePublication(bookId)
@@ -315,32 +340,33 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
     @OptIn(InternalReadiumApi::class)
     private fun emitCurrentLocator(locator: Locator) {
         onLocatorChange(locator.toJSON().toMap())
-        
+
         val pageIndex = locator.locations.position ?: 1
         onPageChange(
             mapOf(
                 "page" to pageIndex,
-                "progression" to (locator.locations.progression ?: 0.0)
-            )
+                "progression" to (locator.locations.progression ?: 0.0),
+            ),
         )
     }
 
     private suspend fun emitBookLoaded(publication: Publication) {
         val positions = publication.positions()
         val totalPages = positions.size
-        
+
         onBookLoaded(
             mapOf(
                 "success" to true,
-                "bookMetadata" to mapOf(
-                    "title" to (publication.metadata.title ?: ""),
-                    "author" to publication.metadata.authors.joinToString(", ") { it.name.toString() },
-                    "publisher" to publication.metadata.publishers.joinToString(", ") { it.name.toString() },
-                    "identifier" to (publication.metadata.identifier ?: ""),
-                    "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
-                    "totalPages" to totalPages
-                )
-            )
+                "bookMetadata" to
+                    mapOf(
+                        "title" to (publication.metadata.title ?: ""),
+                        "author" to publication.metadata.authors.joinToString(", ") { it.name.toString() },
+                        "publisher" to publication.metadata.publishers.joinToString(", ") { it.name.toString() },
+                        "identifier" to (publication.metadata.identifier ?: ""),
+                        "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
+                        "totalPages" to totalPages,
+                    ),
+            ),
         )
     }
 
@@ -358,13 +384,13 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
             try {
                 val publication = bookService?.getPublication(props!!.bookId) ?: return@launch
                 val positions = publication.positions()
-                
+
                 // Ensure page is within bounds
                 if (page <= 0 || page > positions.size) {
                     Log.e("PDFView", "Invalid page number: $page")
                     return@launch
                 }
-                
+
                 val locator = positions[page - 1]
                 navigator?.go(locator, animated = true)
             } catch (e: Exception) {
@@ -396,16 +422,12 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
     }
 
     // TODO: Support decoration events
-    override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
-        return false
-    }
+    override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean = false
 
     /**
      * Input listener to handle tap events for navigation
      */
     private inner class TapInputListener : InputListener {
-        override fun onTap(event: TapEvent): Boolean {
-            return handleTap(event.point)
-        }
+        override fun onTap(event: TapEvent): Boolean = handleTap(event.point)
     }
 }

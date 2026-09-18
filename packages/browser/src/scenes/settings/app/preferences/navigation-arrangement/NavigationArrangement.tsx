@@ -14,7 +14,7 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Button, Card, cn, Label, Text, ToolTip } from '@stump/components'
+import { Button, cn, NewCard, Sheet } from '@stump/components'
 import {
 	ArrangementSectionInput,
 	FilterableArrangementEntityLink,
@@ -30,7 +30,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
-import { usePreferences } from '@/hooks'
 
 import NavigationArrangementItem from './NavigationArrangementItem'
 
@@ -73,13 +72,19 @@ const lockMutation = graphql(`
 	}
 `)
 
-export default function NavigationArrangement() {
+export default function NavigationArrangementRow() {
+	const { t } = useLocaleContext()
+	return (
+		<NewCard.Row label={t(getKey('label'))} description={t(getKey('description'))}>
+			<NavigationArrangementSheet />
+		</NewCard.Row>
+	)
+}
+
+export function NavigationArrangementSheet() {
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
-	const {
-		preferences: { primaryNavigationMode },
-	} = usePreferences()
 	const {
 		data: {
 			me: {
@@ -201,16 +206,14 @@ export default function NavigationArrangement() {
 		const help = locked ? t(getKey('unlock')) : t(getKey('lock'))
 
 		return (
-			<ToolTip content={help} align="end" size="sm">
-				<Button
-					size="icon"
-					aria-label={help}
-					onClick={() => updateLockStatus({ locked: !locked })}
-					variant="ghost"
-				>
-					<Icon className="h-4 w-4 text-foreground-muted" />
-				</Button>
-			</ToolTip>
+			<Button
+				size="icon"
+				aria-label={help}
+				onClick={() => updateLockStatus({ locked: !locked })}
+				variant="ghost"
+			>
+				<Icon className="h-4 w-4 text-muted-foreground" />
+			</Button>
 		)
 	}
 
@@ -239,31 +242,38 @@ export default function NavigationArrangement() {
 	}, [sections, onChangeVisibility, onChangeLinks, checkPermission])
 
 	return (
-		<div className="space-y-4 flex w-full flex-col">
-			<div className="flex items-center justify-between">
-				<div>
-					<Label>{t(getKey('label'))}</Label>
-					<Text size="sm" variant="muted" className="mt-1.5">
-						{t(getKey(`description.${primaryNavigationMode?.toLowerCase() || 'sidebar'}`))}
-					</Text>
+		<Sheet
+			title={t(getKey('label'))}
+			description={t(getKey('description'))}
+			trigger={
+				<Button size="sm" variant="outline">
+					{t('common.edit')}
+				</Button>
+			}
+		>
+			<div className="px-4">
+				<div className="flex w-full flex-col overflow-hidden rounded-xl border border-border">
+					<header className="px-4 py-0.5 flex items-center justify-end bg-muted/50">
+						{renderLockedButton()}
+					</header>
+					<div
+						className={cn('gap-2 px-4 py-3.5 flex w-full flex-col', {
+							'pointer-events-none cursor-not-allowed opacity-60 select-none': locked,
+						})}
+					>
+						<DndContext
+							sensors={sensors}
+							collisionDetection={closestCenter}
+							onDragEnd={handleDragEnd}
+						>
+							<SortableContext items={identifiers} strategy={verticalListSortingStrategy}>
+								{renderSections()}
+							</SortableContext>
+						</DndContext>
+					</div>
 				</div>
-
-				{renderLockedButton()}
 			</div>
-
-			<Card
-				className={cn('space-y-4 p-4 md:max-w-xl relative flex flex-col bg-background-surface', {
-					'cursor-not-allowed opacity-60 select-none': locked,
-				})}
-				title={locked ? t(getKey('isLocked')) : undefined}
-			>
-				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-					<SortableContext items={identifiers} strategy={verticalListSortingStrategy}>
-						{renderSections()}
-					</SortableContext>
-				</DndContext>
-			</Card>
-		</div>
+		</Sheet>
 	)
 }
 

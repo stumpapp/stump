@@ -2,6 +2,9 @@ use reqwest_middleware::ClientWithMiddleware;
 
 use crate::RateLimiter;
 
+// there is https://github.com/AmanoTeam/rust-anilist but it looks to be unmaintained so not using it
+// it is mit though so yay
+
 pub struct AnilistClient {
 	client: ClientWithMiddleware,
 	api_token: Option<String>,

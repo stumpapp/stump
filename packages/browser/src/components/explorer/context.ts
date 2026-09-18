@@ -23,6 +23,7 @@ export type IExplorerContext = {
 	canGoForward: boolean
 	goForward: () => void
 	goBack: () => void
+	navigateToPath: (path: string) => void
 	refetch: () => Promise<unknown>
 	uploadConfig?: UploadConfig
 	libraryID: string

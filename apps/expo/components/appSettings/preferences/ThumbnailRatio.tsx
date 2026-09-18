@@ -43,7 +43,7 @@ export default function ThumbnailRatio() {
 						value: '1 : 1.6',
 					},
 					{
-						label: '1 : 1.5 (Default)',
+						label: '1 : 1.5',
 						value: '1 : 1.5',
 					},
 					{

@@ -1,6 +1,7 @@
+import { getThumbnailTintColor } from '@stump/client'
+import { formatBytes } from '@stump/client'
 import { cn, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { getColor, serialize, set } from 'colorjs.io/fn'
 import pluralize from 'pluralize'
 import { memo, useCallback, useMemo } from 'react'
 
@@ -9,7 +10,7 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
-import { formatBytes } from '@/utils/format'
+import { isEbookExtension, isEbookReadProgress, readProgressPercent } from '@/utils/readingProgress'
 
 import { ThumbnailImage } from '../thumbnail/ThumbnailImage'
 import { usePrefetchBook } from './useBookOverview'
@@ -37,9 +38,11 @@ export const BookCardFragment = graphql(`
 		}
 		readProgress {
 			percentageCompleted
-			epubcfi
 			page
 			updatedAt
+			locator {
+				href
+			}
 		}
 		readHistory {
 			__typename
@@ -85,12 +88,9 @@ const BookCard = memo(function BookCard({
 		if (!data.readProgress && !data.readHistory) {
 			return null
 		} else if (data.readProgress) {
-			const { epubcfi, percentageCompleted, page } = data.readProgress
-			if (epubcfi && percentageCompleted) {
-				return Math.round(percentageCompleted * 100)
-			} else if (page) {
-				const percent = Math.round((page / data.pages) * 100)
-				return Math.min(Math.max(percent, 0), 100)
+			const percent = readProgressPercent(data.readProgress, data.pages, data.extension)
+			if (percent != null) {
+				return percent
 			}
 		} else if (data.readHistory?.length) {
 			return 100
@@ -118,21 +118,23 @@ const BookCard = memo(function BookCard({
 
 		return readingLink || shouldSkipOverview
 			? paths.bookReader(data.id, {
-					epubcfi: data.readProgress?.epubcfi,
-					page: data.readProgress?.page ?? undefined,
+					isEpub: isEbookExtension(data.extension),
+					page: isEbookExtension(data.extension)
+						? undefined
+						: (data.readProgress?.page ?? undefined),
 				})
 			: paths.bookOverview(data.id)
-	}, [readingLink, data.id, onSelect, data.readProgress, data.libraryConfig, paths])
+	}, [readingLink, data.id, data.extension, onSelect, data.readProgress, data.libraryConfig, paths])
 
 	const isMissing = data.status === 'MISSING'
-	const isEbookProgress = !!data.readProgress?.epubcfi
+	const isEbookProgress = isEbookReadProgress(data.readProgress, data.extension)
 	const pagesLeft = data.pages - (data.readProgress?.page || 0)
 	const progressPercent = progress ?? 0
 
 	const renderSubtitle = () => {
 		if (isMissing) {
 			return (
-				<Text size="xs" className="text-amber-500 uppercase">
+				<Text size="xs" className="text-warning uppercase">
 					File Missing
 				</Text>
 			)
@@ -174,12 +176,7 @@ const BookCard = memo(function BookCard({
 	const thumbnailAverageColor = placeholderData?.averageColor
 	const backgroundColor = useMemo(() => {
 		if (thumbnailAverageColor) {
-			const color = getColor(thumbnailAverageColor)
-			set(color, {
-				'oklch.l': isDarkVariant ? 0.35 : 0.9,
-				'oklch.c': 0.04,
-			})
-			return serialize(color, { format: 'hex' })
+			return getThumbnailTintColor(thumbnailAverageColor, { dark: isDarkVariant })
 		}
 		return (
 			getThemeColor('thumbnail.stack.series') ??
@@ -195,14 +192,14 @@ const BookCard = memo(function BookCard({
 			onMouseEnter={prefetch}
 			className={cn(
 				'group gap-1 relative flex flex-col',
-				'rounded-lg p-1 border border-transparent transition-colors duration-100',
+				'p-1 rounded-lg border border-transparent transition-colors duration-100',
 				'focus-visible:outline-none',
 				fullWidth ? 'w-full' : 'w-40 sm:w-[10.666rem] md:w-48 shrink-0',
 			)}
 		>
 			<div
 				className={cn(
-					'-inset-0.5 rounded-lg absolute -z-10',
+					'-inset-0.5 absolute -z-10 rounded-thumbnail',
 					'scale-95 opacity-0 duration-100',
 					'group-hover:scale-100 group-hover:opacity-100',
 					'group-focus-visible:scale-100 group-focus-visible:opacity-100',
@@ -218,7 +215,6 @@ const BookCard = memo(function BookCard({
 					placeholderData={placeholderData}
 					lazy
 					borderAndShadowStyle={{
-						borderRadius: 8,
 						shadowColor: 'rgba(0, 0, 0, 0.15)',
 						shadowRadius: 2,
 					}}

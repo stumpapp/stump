@@ -2,7 +2,7 @@ import { Badge, Button, cn } from '@stump/components'
 import { Minus } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import AddFieldsDialog from '../AddFieldsDialog'
 import { useMetadataEditorContext } from '../context'
@@ -72,7 +72,7 @@ export default function BadgeListCell<Field extends string>({
 					<div className="group relative">
 						{badge}
 						<Button
-							variant="danger"
+							variant="destructive"
 							size="icon"
 							className="-right-2 -top-2 h-4 w-4 absolute z-10 opacity-0 transition-opacity group-hover:opacity-100"
 							aria-label="Remove item"

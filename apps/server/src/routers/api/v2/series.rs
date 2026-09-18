@@ -12,7 +12,8 @@ use models::{
 use sea_orm::{prelude::*, sea_query::Query, QueryOrder};
 use stump_core::{
 	config::StumpConfig,
-	filesystem::{get_saved_thumbnail, get_thumbnail, ContentType},
+	fs_utils::ContentType,
+	image::thumbnail::{get_saved_thumbnail, get_thumbnail},
 };
 
 use crate::{
@@ -51,7 +52,7 @@ pub(crate) async fn get_series_thumbnail(
 	}
 
 	let generated_thumb =
-		get_thumbnail(config.get_thumbnails_dir(), &series.id, image_format).await?;
+		get_thumbnail(config.thumbnails_directory(), &series.id, image_format).await?;
 
 	match (generated_thumb, first_book) {
 		(Some(result), _) => Ok(result),

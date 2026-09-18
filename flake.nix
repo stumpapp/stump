@@ -38,7 +38,7 @@
           git
 
           # node
-          (nodePackages.yarn.override { withNode = false; })
+          (yarn.override { withNode = false; })
           nodejs_22
 
           # rust

@@ -7,9 +7,8 @@ import { View } from 'react-native'
 import { RecentlyAddedSeriesItem } from '~/components/series'
 import { IRecentlyAddedSeriesItemFragment } from '~/components/series/RecentlyAddedSeriesItem'
 import { Heading, Text } from '~/components/ui'
-import { useListItemSize } from '~/lib/hooks'
-
-import { useActiveServer } from '../context'
+import { useListItemSize, useTranslate } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 const query = graphql(`
 	query RecentlyAddedSeriesHorizontal($pagination: Pagination) {
@@ -34,6 +33,7 @@ function RecentlyAddedSeriesHorizontal() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { t } = useTranslate()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['recentlyAddedSeries', serverID, 'horizontal'],
@@ -64,7 +64,7 @@ function RecentlyAddedSeriesHorizontal() {
 	return (
 		<View className="flex">
 			<Heading size="xl" className="px-4">
-				Recently Added Series
+				{t('stumpServer.recentlyAddedSeries.label')}
 			</Heading>
 
 			<FlashList
@@ -77,7 +77,11 @@ function RecentlyAddedSeriesHorizontal() {
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}
-				ListEmptyComponent={<Text className="text-foreground-muted">No series recently added</Text>}
+				ListEmptyComponent={
+					<Text className="text-foreground-muted">
+						{t('stumpServer.recentlyAddedSeries.emptyText')}
+					</Text>
+				}
 			/>
 		</View>
 	)

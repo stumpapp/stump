@@ -3,7 +3,7 @@ import { useNavigation } from 'expo-router'
 import { useLayoutEffect, useMemo } from 'react'
 import { Platform } from 'react-native'
 
-import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { IS_IOS_26_PLUS } from '~/lib/constants'
 
 export function useFeedTitle(feed?: OPDSFeed | null) {
 	const title = useMemo(() => (feed ? feed.metadata.title || 'OPDS Feed' : null), [feed])
@@ -18,7 +18,7 @@ export function useFeedTitle(feed?: OPDSFeed | null) {
 				fontSize: 30,
 			},
 			headerLargeTitle: Platform.OS === 'ios',
-			headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+			headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 		})
 	}, [navigation, title])
 }

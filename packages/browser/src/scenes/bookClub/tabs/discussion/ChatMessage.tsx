@@ -3,7 +3,7 @@
 // import dayjs from 'dayjs'
 // import { MessageCircle, ThumbsUp } from 'lucide-react'
 // import pluralize from 'pluralize'
-// import { Link } from 'react-router-dom'
+// import { Link } from 'react-router'
 
 // import { useBookClubContext } from '@/components/bookClub'
 // import Markdown from '@/components/markdown/MarkdownPreview'
@@ -50,7 +50,7 @@
 // 	// 				<IconButton variant="ghost" size="sm" className="flex items-center gap-2">
 // 	// 					<ThumbsUp
 // 	// 						className={cx('h-4 w-4', {
-// 	// 							'text-foreground-brand': isLikedByViewer,
+// 	// 							'text-primary': isLikedByViewer,
 // 	// 						})}
 // 	// 					/>
 // 	// 				</IconButton>

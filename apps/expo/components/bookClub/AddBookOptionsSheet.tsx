@@ -6,7 +6,7 @@ import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
 import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 
 import { Icon, Text } from '../ui'
 import { AddBookSheet, type AddBookSheetRef, usePrefetchAddBookSheet } from './AddBookSheet'
@@ -65,7 +65,7 @@ export const AddBookOptionsSheet = forwardRef<AddBookOptionsSheetRef, Props>(
 				ref={sheetRef}
 				detents={['auto']}
 				grabber
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={prefetchAddBookSheet}
 			>

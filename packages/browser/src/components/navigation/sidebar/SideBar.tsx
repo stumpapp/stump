@@ -17,11 +17,9 @@ import { match } from 'ts-pattern'
 import { useAppContext, useRouterContext } from '@/context'
 import { useTheme } from '@/hooks'
 import { usePaths } from '@/paths'
-import { usePrefetchHomeScene } from '@/scenes/home'
-import { useAppStore } from '@/stores'
+import { usePrefetchHomeScene } from '@/scenes/home/HomeScene'
 
 import UserMenu from '../../UserMenu'
-import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
@@ -56,7 +54,6 @@ type Props = {
 
 export default function SideBar({ asChild, hidden }: Props) {
 	const location = useLocation()
-	const platform = useAppStore((store) => store.platform)
 
 	const paths = usePaths()
 
@@ -74,22 +71,8 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const { checkPermission } = useAppContext()
 	const { shouldUseGradient } = useTheme()
 
-	const isBrowser = platform === 'browser'
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 	const isMobile = useMediaMatch('(max-width: 768px)')
-
-	const renderHeader = () => {
-		if (!isBrowser && isAtLeastMedium) {
-			return (
-				<header className="gap-1 flex w-full justify-between">
-					<UserMenu />
-					<NavigationButtons />
-				</header>
-			)
-		}
-
-		return null
-	}
 
 	const checkSectionPermission = useCallback(
 		(variant: SystemArrangement) => {
@@ -156,11 +139,10 @@ export default function SideBar({ asChild, hidden }: Props) {
 				.map(({ config }) =>
 					match(config)
 						.with({ __typename: 'SystemArrangementConfig' }, (config) => {
-							const child = renderSystemSection(config)
 							if (!checkSectionPermission(config.variant)) {
 								return null
 							}
-							return child
+							return renderSystemSection(config)
 						})
 						.otherwise(() => null),
 				)
@@ -171,13 +153,17 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const renderContent = () => {
 		return (
 			<>
-				{renderHeader()}
-
-				<div className="gap-2 p-1 scrollbar-hide flex max-h-full grow flex-col overflow-y-auto">
-					{isAtLeastMedium && isBrowser && <UserMenu />}
+				<div className="gap-1 scrollbar-hide flex max-h-full grow flex-col overflow-y-auto">
+					{isAtLeastMedium && (
+						<div>
+							<UserMenu />
+							<div className="h-1" />
+						</div>
+					)}
 
 					{sections}
 				</div>
+
 				<Spacer />
 
 				{isAtLeastMedium && <SideBarFooter />}
@@ -206,9 +192,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 		>
 			<div
 				className={cn(
-					'w-56 gap-4 px-2 py-4 relative z-10 flex h-full shrink-0 flex-col border-r border-edge bg-sidebar',
+					'w-56 gap-2 px-2 py-2 relative z-10 flex h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar',
 					{
-						'from-sidebar-gradient-from to-sidebar-gradient-to bg-linear-to-tr': shouldUseGradient,
+						'bg-linear-to-tr from-sidebar-gradient-from to-sidebar-gradient-to': shouldUseGradient,
 					},
 				)}
 			>

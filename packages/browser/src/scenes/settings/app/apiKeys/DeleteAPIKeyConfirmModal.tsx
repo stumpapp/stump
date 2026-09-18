@@ -47,7 +47,7 @@ export default function DeleteAPIKeyConfirmModal({ apiKey, onClose }: Props) {
 			title="Delete API key"
 			description="Anything using this key will immediately lose authentication"
 			confirmText="Delete key"
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			isOpen={!!apiKey}
 			onClose={onClose}
 			onConfirm={handleConfirm}

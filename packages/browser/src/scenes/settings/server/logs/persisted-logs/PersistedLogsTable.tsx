@@ -7,7 +7,7 @@ import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import { intlFormat, isBefore } from 'date-fns'
 import { CircleSlash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 
 import { Table } from '@/components/table'
 
@@ -99,10 +99,10 @@ export default function PersistedLogsTable() {
 	}
 
 	return (
-		<Card>
+		<Card className="overflow-hidden">
 			<Table
 				sortable
-				columns={baseColumns}
+				columns={columns}
 				options={{
 					manualPagination: true,
 					manualSorting: true,
@@ -118,8 +118,8 @@ export default function PersistedLogsTable() {
 				fullWidth
 				emptyRenderer={() =>
 					isLoading ? null : (
-						<div className="gap-2 flex min-h-[150px] flex-col items-center justify-center">
-							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
+						<div className="gap-2 min-h-37.5 flex flex-col items-center justify-center">
+							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted-foreground" />
 							<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 							<Text size="sm" variant="muted">
 								{t(`${LOCALE_BASE}.emptySubtitle`)}
@@ -128,6 +128,7 @@ export default function PersistedLogsTable() {
 					)
 				}
 				isZeroBasedPagination
+				cellClassName="bg-background"
 			/>
 		</Card>
 	)
@@ -136,7 +137,7 @@ export default function PersistedLogsTable() {
 const LOCALE_BASE = 'settingsScene.server/logs.sections.persistedLogs.table'
 
 const columnHelper = createColumnHelper<PersistedLog>()
-const baseColumns = [
+export const columns = [
 	columnHelper.accessor('timestamp', {
 		id: LogModelOrdering.Timestamp,
 		cell: ({

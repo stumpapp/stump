@@ -1,6 +1,6 @@
 import { cn } from '@stump/components'
 import { ComponentProps } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 // TODO: tooltips, but currently they don't work with links...
 type Props = {
@@ -24,17 +24,17 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group rounded-md px-2 text-sm inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start transition-all duration-150 hover:bg-sidebar-surface-hover',
+				'group h-8 px-2 text-sm inline-flex w-full shrink-0 items-center justify-start rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
 				{
-					'justify-center border border-dashed border-edge-subtle text-foreground/90 hover:bg-sidebar-surface hover:text-foreground':
+					'justify-center border border-dashed border-border bg-input/30 hover:bg-input/60 hover:text-foreground':
 						variant === 'action',
 				},
-				{ 'text-foreground': variant !== 'action' },
 				{
-					'bg-sidebar-surface hover:bg-sidebar-surface-hover': isActive,
+					'font-medium bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent':
+						isActive,
 				},
 				{
-					'bg-sidebar-surface-hover': isActive && variant === 'action',
+					'bg-sidebar-accent/40 hover:bg-sidebar-accent/40': isActive && variant === 'action',
 				},
 				className,
 			)}

@@ -1,6 +1,6 @@
 [package]
 name = "filter-gen"
-version = "0.1.2"
+version.workspace = true
 description = "A procedural macro for generating SeaORM filters"
 edition = "2021"
 

@@ -6,26 +6,27 @@ import { useLocation, useNavigate } from 'react-router'
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
-import paths from '@/paths'
-import { SideBarLinkButton } from '@/scenes/settings'
+import paths, { usePaths } from '@/paths'
+import SideBarLinkButton from '@/scenes/settings/SettingsSideBarLink'
 
-import { routeGroups } from './routes'
+import { createRouteGroups } from './routes'
 
 export default function BookClubSettingsSideBar() {
 	const location = useLocation()
 	const navigate = useNavigate()
+	const routerPaths = usePaths()
 
 	const { bookClub } = useBookClubContext()
 	const { t } = useLocaleContext()
 	const {
 		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
-	const { groups } = useRouteGroups({ routeGroups })
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(bookClub.slug) })
 
 	return (
 		<div
 			className={cn(
-				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-edge bg-background text-foreground-subtle',
+				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-border bg-background text-foreground',
 				primaryNavigationMode === 'TOPBAR'
 					? 'top-12 fixed z-50 h-screen border-r'
 					: 'top-0 fixed z-50 h-screen border-r',
@@ -34,9 +35,10 @@ export default function BookClubSettingsSideBar() {
 			<div className="gap-4 flex h-full grow flex-col">
 				<div className="space-x-2 flex items-center">
 					<ButtonOrLink
-						href="."
+						href={routerPaths.bookClub(bookClub.slug)}
+						replace
 						variant="ghost"
-						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
+						className="p-1 h-[unset] w-[unset] shrink-0 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 						size="sm"
 					>
 						<ArrowLeft className="h-4 w-4 transform" />
@@ -90,7 +92,7 @@ export default function BookClubSettingsSideBar() {
 							title="Go home"
 							variant="ghost"
 							size="icon"
-							className="p-1.5 border border-transparent text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
+							className="p-1.5 border border-transparent text-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
 							onClick={() => navigate(paths.home())}
 						>
 							<Home className="h-4 w-4 -scale-x-[1] transform" />

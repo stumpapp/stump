@@ -52,21 +52,21 @@ export function FieldSelector({ idx }: Props) {
 						className="flex items-center justify-between"
 					>
 						{t(getSourceKey('book', 'label'))}
-						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
+						<ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
 					</Command.Item>
 					<Command.Item
 						onSelect={() => setSource('book_meta')}
 						className="flex items-center justify-between"
 					>
 						{t(getSourceKey('book_meta', 'label'))}
-						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
+						<ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
 					</Command.Item>
 					<Command.Item
 						onSelect={() => setSource('series')}
 						className="flex items-center justify-between"
 					>
 						{t(getSourceKey('series', 'label'))}
-						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
+						<ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
 					</Command.Item>
 
 					<Command.Item
@@ -74,7 +74,7 @@ export function FieldSelector({ idx }: Props) {
 						className="flex items-center justify-between"
 					>
 						{t(getSourceKey('series_meta', 'label'))}
-						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
+						<ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
 					</Command.Item>
 
 					<Command.Item
@@ -82,7 +82,7 @@ export function FieldSelector({ idx }: Props) {
 						className="flex items-center justify-between"
 					>
 						{t(getSourceKey('library', 'label'))}
-						<ArrowRight className="ml-2 h-4 w-4 text-foreground-muted" />
+						<ArrowRight className="ml-2 h-4 w-4 text-muted-foreground" />
 					</Command.Item>
 				</>
 			)
@@ -117,12 +117,12 @@ export function FieldSelector({ idx }: Props) {
 					className="space-x-2 text-sm flex w-full items-center"
 					onClick={() => setSource(null)}
 				>
-					<ArrowLeft className="ml-2 h-4 w-4 text-foreground-muted" />
-					<span className="text-foreground-muted">{t(getKey('source.back'))}</span>
+					<ArrowLeft className="ml-2 h-4 w-4 text-muted-foreground" />
+					<span className="text-muted-foreground">{t(getKey('source.back'))}</span>
 				</button>
 			)
 		} else {
-			return <span className="text-foreground-muted">{t(getKey('source.label'))}</span>
+			return <span className="text-muted-foreground">{t(getKey('source.label'))}</span>
 		}
 	}
 
@@ -134,7 +134,7 @@ export function FieldSelector({ idx }: Props) {
 					`${source}.${fieldDef.field}`
 				: fieldDef.field
 		} else {
-			return <span className="text-foreground-muted">{t(getKey('placeholder'))}</span>
+			return <span className="text-muted-foreground">{t(getKey('placeholder'))}</span>
 		}
 	}
 
@@ -145,7 +145,7 @@ export function FieldSelector({ idx }: Props) {
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="h-[unset] justify-between truncate border-edge-subtle text-foreground-subtle outline-none hover:bg-background-surface data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-edge-brand data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background"
+					className="justify-between truncate border-border text-foreground outline-none hover:bg-muted data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background"
 				>
 					{renderSelected()}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

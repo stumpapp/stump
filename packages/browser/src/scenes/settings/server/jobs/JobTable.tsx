@@ -13,7 +13,7 @@ import { Table } from '@/components/table'
 import { useAppContext } from '@/context'
 
 import JobActionMenu from './JobActionMenu.tsx'
-import JobDataInspector, { JobDataInspectorFragment } from './JobDataInspector.tsx'
+import JobDataInspector from './JobDataInspector.tsx'
 import RunningJobElapsedTime from './RunningJobElapsedTime.tsx'
 
 const LOCALE_BASE = 'settingsScene.server/jobs.sections.history.table'
@@ -139,7 +139,7 @@ export default function JobTable() {
 		})
 	}, [dbJobs, storeJobs])
 
-	const [inspectingData, setInspectingData] = useState<JobDataInspectorFragment | null>()
+	const [inspectingJob, setInspectingJob] = useState<PersistedJob | null>()
 
 	const columns = useMemo<ColumnDef<PersistedJob>[]>(
 		() =>
@@ -237,7 +237,7 @@ export default function JobTable() {
 				columnHelper.display({
 					cell: ({ row }) =>
 						canManageJobs ? (
-							<JobActionMenu job={row.original} onInspectData={setInspectingData} />
+							<JobActionMenu job={row.original} onInspect={() => setInspectingJob(row.original)} />
 						) : null,
 					id: 'actions',
 					size: 28,
@@ -249,8 +249,8 @@ export default function JobTable() {
 	const EmptyState = useCallback(
 		() =>
 			isRefetching ? null : (
-				<div className="gap-2 flex min-h-[150px] flex-col items-center justify-center">
-					<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
+				<div className="gap-2 min-h-37.5 flex flex-col items-center justify-center">
+					<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted-foreground" />
 					<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 					<Text size="sm" variant="muted">
 						{t(`${LOCALE_BASE}.emptySubtitle`)}
@@ -261,7 +261,7 @@ export default function JobTable() {
 	)
 
 	return (
-		<Card>
+		<Card className="overflow-hidden">
 			<Table
 				sortable
 				columns={columns}
@@ -283,7 +283,7 @@ export default function JobTable() {
 				onPrefetchPage={prefetchPage}
 			/>
 
-			<JobDataInspector data={inspectingData} onClose={() => setInspectingData(null)} />
+			<JobDataInspector job={inspectingJob} onClose={() => setInspectingJob(null)} />
 		</Card>
 	)
 }

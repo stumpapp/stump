@@ -3,10 +3,14 @@ use crate::{
 	guard::PermissionGuard,
 	input::metadata_provider::{
 		CreateMetadataProviderConfigInput, PatchMetadataProviderConfigInput,
+		ValidateMetadataProviderConfigInput,
 	},
 };
 use async_graphql::{Context, Object, Result};
-use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField};
+use metadata_integrations::{
+	create_provider, MatchCandidate, MergeStrategy, MetadataField,
+	ProviderCredentialVerification,
+};
 use models::{
 	entity::{metadata_fetch_record, metadata_provider_config},
 	shared::enums::{MetadataFetchStatus, UserPermission},
@@ -78,6 +82,18 @@ impl MetadataProviderMutation {
 		Ok(model)
 	}
 
+	/// Validate the provided API token by making a test request using a client instance
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataProviderManage)")]
+	async fn validate_provider_config(
+		&self,
+		config: ValidateMetadataProviderConfigInput,
+	) -> Result<ProviderCredentialVerification> {
+		let client =
+			create_provider(&config.provider_type.to_string(), config.api_token)?;
+		let verification = client.verify_credentials().await?;
+		Ok(verification)
+	}
+
 	/// Accept the top-ranked candidate for all pending metadata matches
 	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn accept_all_pending_matches(
@@ -113,7 +129,7 @@ impl MetadataProviderMutation {
 			};
 
 			let result = if record.media_id.is_some() {
-				stump_core::filesystem::metadata::apply_media_match(
+				stump_core::metadata::provider::apply_media_match(
 					&tx,
 					record.media_id.as_deref().unwrap(),
 					candidate,
@@ -123,7 +139,7 @@ impl MetadataProviderMutation {
 				)
 				.await
 			} else if record.series_id.is_some() {
-				stump_core::filesystem::metadata::apply_series_match(
+				stump_core::metadata::provider::apply_series_match(
 					&tx,
 					record.series_id.as_deref().unwrap(),
 					candidate,

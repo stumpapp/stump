@@ -1,7 +1,5 @@
-import { LocaleProvider } from '@stump/i18n'
-import { type AllowedLocale } from '@stump/i18n'
 import { lazy } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 
 import { AppLayout } from './AppLayout.tsx'
 import { RouterProvider } from './context/RouterContext.tsx'
@@ -11,7 +9,7 @@ import { LibraryRouter } from './scenes/library'
 import { SeriesRouter } from './scenes/series'
 import { SettingsRouter } from './scenes/settings'
 import { SmartListRouter } from './scenes/smartList'
-import { useAppStore, useUserStore } from './stores'
+import { useAppStore } from './stores'
 
 const HomeScene = lazy(() => import('./scenes/home'))
 const FourOhFour = lazy(() => import('./scenes/error/FourOhFour.tsx'))
@@ -25,7 +23,6 @@ type AppRouterProps = {
 }
 
 export function AppRouter({ basePath }: AppRouterProps = {}) {
-	const locale = useUserStore((store) => store.userPreferences?.locale)
 	const baseUrl = useAppStore((state) => state.baseUrl)
 
 	if (!baseUrl) {
@@ -33,24 +30,22 @@ export function AppRouter({ basePath }: AppRouterProps = {}) {
 	}
 
 	return (
-		<LocaleProvider locale={(locale as AllowedLocale) || 'en-US'}>
-			<RouterProvider basePath={basePath}>
-				<Routes>
-					<Route path="/" element={<AppLayout />}>
-						<Route path="" element={<HomeScene />} />
-						<Route path="libraries/*" element={<LibraryRouter />} />
-						<Route path="series/*" element={<SeriesRouter />} />
-						<Route path="books/*" element={<BookRouter />} />
-						<Route path="clubs/*" element={<BookClubRouter />} />
-						<Route path="/smart-lists/*" element={<SmartListRouter />} />
-						<Route path="settings/*" element={<SettingsRouter />} />
-					</Route>
+		<RouterProvider basePath={basePath}>
+			<Routes>
+				<Route path="/" element={<AppLayout />}>
+					<Route path="" element={<HomeScene />} />
+					<Route path="libraries/*" element={<LibraryRouter />} />
+					<Route path="series/*" element={<SeriesRouter />} />
+					<Route path="books/*" element={<BookRouter />} />
+					<Route path="clubs/*" element={<BookClubRouter />} />
+					<Route path="/smart-lists/*" element={<SmartListRouter />} />
+					<Route path="settings/*" element={<SettingsRouter />} />
+				</Route>
 
-					<Route path="/auth" element={<LoginOrClaimScene />} />
-					<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
-					<Route path="*" element={<FourOhFour />} />
-				</Routes>
-			</RouterProvider>
-		</LocaleProvider>
+				<Route path="/auth" element={<LoginOrClaimScene />} />
+				<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
+				<Route path="*" element={<FourOhFour />} />
+			</Routes>
+		</RouterProvider>
 	)
 }

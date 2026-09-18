@@ -16,13 +16,13 @@ public struct Props {
     var locator: Locator?
     var initialLocator: Locator?
     var url: String?
-    var foreground: Color?
-    var background: Color?
+    var foreground: ReadiumNavigator.Color?
+    var background: ReadiumNavigator.Color?
     var fontFamily: FontFamily?
     var lineHeight: Double?
     var fontSize: Double?
     var fontWeight: Double?
-    var textAlign: TextAlignment?
+    var textAlign: ReadiumNavigator.TextAlignment?
     var publisherStyles: Bool?
     var imageFilter: ImageFilter?
     var pageMargins: Double?
@@ -44,13 +44,13 @@ public struct FinalizedProps {
     var bookId: String
     var locator: Locator?
     var url: String
-    var foreground: Color
-    var background: Color
+    var foreground: ReadiumNavigator.Color
+    var background: ReadiumNavigator.Color
     var fontFamily: FontFamily
     var lineHeight: Double
     var fontSize: Double
     var fontWeight: Double?
-    var textAlign: TextAlignment
+    var textAlign: ReadiumNavigator.TextAlignment
     var publisherStyles: Bool = true
     var imageFilter: ImageFilter?
     var pageMargins: Double?
@@ -94,6 +94,7 @@ public class EPUBView: ExpoView {
 
     private var changingResource = false
     private var isInitialized = false
+    private var totalPositions: Int = 0
 
     private let highlightDecorationGroup = "highlights"
     private var decorationObserverRegistered = false
@@ -192,13 +193,17 @@ public class EPUBView: ExpoView {
             bookId: bookId,
             locator: pendingProps.locator ?? pendingProps.initialLocator ?? oldProps?.locator,
             url: url,
-            foreground: pendingProps.foreground ?? oldProps?.foreground ?? Color(hex: "#111111")!,
-            background: pendingProps.background ?? oldProps?.background ?? Color(hex: "#FFFFFF")!,
-            fontFamily: pendingProps.fontFamily ?? oldProps?.fontFamily ?? FontFamily(rawValue: "systemFont"),
+            foreground: pendingProps.foreground ?? oldProps?.foreground ?? ReadiumNavigator.Color(
+                hex: "#111111")!,
+            background: pendingProps.background ?? oldProps?.background ?? ReadiumNavigator.Color(
+                hex: "#FFFFFF")!,
+            fontFamily: pendingProps.fontFamily ?? oldProps?.fontFamily
+                ?? FontFamily(rawValue: "systemFont"),
             lineHeight: pendingProps.lineHeight ?? oldProps?.lineHeight ?? 1.4,
             fontSize: pendingProps.fontSize ?? oldProps?.fontSize ?? 1.0,
             fontWeight: pendingProps.fontWeight ?? oldProps?.fontWeight,
-            textAlign: pendingProps.textAlign ?? oldProps?.textAlign ?? TextAlignment.justify,
+            textAlign: pendingProps.textAlign ?? oldProps?.textAlign
+                ?? ReadiumNavigator.TextAlignment.justify,
             publisherStyles: pendingProps.publisherStyles ?? oldProps?.publisherStyles ?? true,
             imageFilter: pendingProps.imageFilter ?? oldProps?.imageFilter,
             pageMargins: pendingProps.pageMargins ?? oldProps?.pageMargins,
@@ -253,10 +258,10 @@ public class EPUBView: ExpoView {
                     publicationUrl = try await downloadEPUB(from: url)
                 }
 
-                // Open the publication
-                let publication = try await BookService.instance.openPublication(for: props.bookId, at: publicationUrl)
+                let publication = try await BookService.instance.openPublication(
+                    for: props.bookId, at: publicationUrl
+                )
 
-                // Check if task was cancelled before proceeding
                 try Task.checkCancellation()
 
                 await MainActor.run { [weak self] in
@@ -301,7 +306,9 @@ public class EPUBView: ExpoView {
                 fontFamily: FontFamily(rawValue: "OpenDyslexic"),
                 fontFaces: [
                     CSSFontFace(
-                        file: resources.appendingPath("OpenDyslexic-Regular.otf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "OpenDyslexic-Regular.otf", isDirectory: false
+                        ),
                         style: .normal, weight: .standard(.normal)
                     ),
                     CSSFontFace(
@@ -309,11 +316,15 @@ public class EPUBView: ExpoView {
                         style: .normal, weight: .standard(.bold)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("OpenDyslexic-Italic.otf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "OpenDyslexic-Italic.otf", isDirectory: false
+                        ),
                         style: .italic, weight: .standard(.normal)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("OpenDyslexic-Bold-Italic.otf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "OpenDyslexic-Bold-Italic.otf", isDirectory: false
+                        ),
                         style: .italic, weight: .standard(.bold)
                     ),
                 ]
@@ -323,11 +334,15 @@ public class EPUBView: ExpoView {
                 fontFamily: FontFamily(rawValue: "Literata"),
                 fontFaces: [
                     CSSFontFace(
-                        file: resources.appendingPath("Literata-VariableFont_opsz,wght.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Literata-VariableFont_opsz,wght.ttf", isDirectory: false
+                        ),
                         style: .normal, weight: .variable(200 ... 900)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("Literata-Italic-VariableFont_opsz,wght.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Literata-Italic-VariableFont_opsz,wght.ttf", isDirectory: false
+                        ),
                         style: .italic, weight: .variable(200 ... 900)
                     ),
                 ]
@@ -337,19 +352,27 @@ public class EPUBView: ExpoView {
                 fontFamily: FontFamily(rawValue: "Atkinson-Hyperlegible"),
                 fontFaces: [
                     CSSFontFace(
-                        file: resources.appendingPath("Atkinson-Hyperlegible-Regular.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Atkinson-Hyperlegible-Regular.ttf", isDirectory: false
+                        ),
                         style: .normal, weight: .standard(.normal)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("Atkinson-Hyperlegible-Bold.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Atkinson-Hyperlegible-Bold.ttf", isDirectory: false
+                        ),
                         style: .normal, weight: .standard(.bold)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("Atkinson-Hyperlegible-Italic.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Atkinson-Hyperlegible-Italic.ttf", isDirectory: false
+                        ),
                         style: .italic, weight: .standard(.normal)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("Atkinson-Hyperlegible-BoldItalic.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Atkinson-Hyperlegible-BoldItalic.ttf", isDirectory: false
+                        ),
                         style: .italic, weight: .standard(.bold)
                     ),
                 ]
@@ -371,7 +394,9 @@ public class EPUBView: ExpoView {
                         style: .italic, weight: .standard(.normal)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("CharisSIL-BoldItalic.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "CharisSIL-BoldItalic.ttf", isDirectory: false
+                        ),
                         style: .italic, weight: .standard(.bold)
                     ),
                 ]
@@ -381,11 +406,15 @@ public class EPUBView: ExpoView {
                 fontFamily: FontFamily(rawValue: "Bitter"),
                 fontFaces: [
                     CSSFontFace(
-                        file: resources.appendingPath("Bitter-VariableFont_wght.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Bitter-VariableFont_wght.ttf", isDirectory: false
+                        ),
                         style: .normal, weight: .variable(100 ... 900)
                     ),
                     CSSFontFace(
-                        file: resources.appendingPath("Bitter-Italic-VariableFont_wght.ttf", isDirectory: false),
+                        file: resources.appendingPath(
+                            "Bitter-Italic-VariableFont_wght.ttf", isDirectory: false
+                        ),
                         style: .italic, weight: .variable(100 ... 900)
                     ),
                 ]
@@ -468,6 +497,7 @@ public class EPUBView: ExpoView {
 
                 let positionsResult = await publication.positions()
                 let totalPages = (try? positionsResult.get().count) ?? 0
+                self.totalPositions = totalPages
 
                 let tocResult = await publication.tableOfContents()
                 let tocLinks = (try? tocResult.get()) ?? []
@@ -481,8 +511,10 @@ public class EPUBView: ExpoView {
                         "success": true,
                         "bookMetadata": [
                             "title": publication.metadata.title ?? "",
-                            "author": publication.metadata.authors.map { $0.name }.joined(separator: ", "),
-                            "publisher": publication.metadata.publishers.map { $0.name }.joined(separator: ", "),
+                            "author": publication.metadata.authors.map { $0.name }.joined(
+                                separator: ", "),
+                            "publisher": publication.metadata.publishers.map { $0.name }.joined(
+                                separator: ", "),
                             "identifier": publication.metadata.identifier ?? "",
                             "language": publication.metadata.languages.first ?? "en",
                             "totalPages": totalPages,
@@ -513,6 +545,7 @@ public class EPUBView: ExpoView {
         navigator?.view.removeFromSuperview()
         navigator = nil
         isInitialized = false
+        totalPositions = 0
 
         // Remove publication from cache
         if let bookId = props?.bookId {
@@ -520,7 +553,7 @@ public class EPUBView: ExpoView {
         }
     }
 
-    private func convertLinksToToc(_ links: [Link]) -> [[String: Any]] {
+    private func convertLinksToToc(_ links: [ReadiumShared.Link]) -> [[String: Any]] {
         return links.enumerated().map { index, link in
             var item: [String: Any] = [
                 "label": link.title ?? "",
@@ -543,14 +576,15 @@ public class EPUBView: ExpoView {
             return
         }
 
-        onLocatorChange(makeJSON([
-            "chapterTitle": currentLocator.title ?? "",
-            "href": currentLocator.href.string,
-            "title": encodeIfNotNil(currentLocator.title),
-            "locations": encodeIfNotEmpty(currentLocator.locations.json),
-            "text": encodeIfNotEmpty(currentLocator.text.json),
-            "type": encodeIfNotEmpty(currentLocator.mediaType.string),
-        ]))
+        onLocatorChange(
+            makeJSON([
+                "chapterTitle": currentLocator.title ?? "",
+                "href": currentLocator.href.string,
+                "title": encodeIfNotNil(currentLocator.title),
+                "locations": encodeIfNotEmpty(currentLocator.locations.json),
+                "text": encodeIfNotEmpty(currentLocator.text.json),
+                "type": encodeIfNotEmpty(currentLocator.mediaType.string),
+            ]))
     }
 
     func emitLayoutChange() {
@@ -582,8 +616,10 @@ public class EPUBView: ExpoView {
                 self?.onLayoutChange([
                     "bookMetadata": [
                         "title": publication.metadata.title ?? "",
-                        "author": publication.metadata.authors.map { $0.name }.joined(separator: ", "),
-                        "publisher": publication.metadata.publishers.map { $0.name }.joined(separator: ", "),
+                        "author": publication.metadata.authors.map { $0.name }.joined(
+                            separator: ", "),
+                        "publisher": publication.metadata.publishers.map { $0.name }.joined(
+                            separator: ", "),
                         "identifier": publication.metadata.identifier ?? "",
                         "language": publication.metadata.languages.first ?? "en",
                         "totalPages": totalPages,
@@ -614,23 +650,7 @@ public class EPUBView: ExpoView {
         let task = Task { [weak self] in
             guard let self = self else { return }
             guard let navigator = self.navigator else { return }
-            let didMove = await navigator.goForward(options: NavigatorGoOptions(animated: true))
-            if !didMove {
-                await MainActor.run {
-                    guard let currentLocator = navigator.currentLocation
-                    else {
-                        return
-                    }
-                    self.onReachedEnd(makeJSON([
-                        "chapterTitle": currentLocator.title ?? "",
-                        "href": currentLocator.href.string,
-                        "title": encodeIfNotNil(currentLocator.title),
-                        "locations": encodeIfNotEmpty(currentLocator.locations.json),
-                        "text": encodeIfNotEmpty(currentLocator.text.json),
-                        "type": encodeIfNotEmpty(currentLocator.mediaType.string),
-                    ]))
-                }
-            }
+            _ = await navigator.goForward(options: NavigatorGoOptions(animated: true))
         }
         navigationTasks.append(task)
         navigationTasks.removeAll { $0.isCancelled }
@@ -707,11 +727,14 @@ public class EPUBView: ExpoView {
     }
 
     private func showHighlightContextMenu(at rect: CGRect?, decorationId: String) {
-        let editAction = UIAction(title: "Edit Note", image: UIImage(systemName: "pencil")) { [weak self] _ in
+        let editAction = UIAction(title: "Edit Note", image: UIImage(systemName: "pencil")) {
+            [weak self] _ in
             self?.onEditHighlight(["decorationId": decorationId])
         }
 
-        let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+        let deleteAction = UIAction(
+            title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive
+        ) { [weak self] _ in
             self?.onDeleteHighlight(["decorationId": decorationId])
         }
 
@@ -721,7 +744,8 @@ public class EPUBView: ExpoView {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
-            let sourceRect = rect ?? CGRect(x: self.bounds.midX, y: self.bounds.midY, width: 1, height: 1)
+            let sourceRect =
+                rect ?? CGRect(x: self.bounds.midX, y: self.bounds.midY, width: 1, height: 1)
 
             let interaction = UIContextMenuInteraction(delegate: self)
             self.addInteraction(interaction)
@@ -741,7 +765,9 @@ public class EPUBView: ExpoView {
             let editMenuInteraction = UIEditMenuInteraction(delegate: self)
             self.addInteraction(editMenuInteraction)
 
-            let config = UIEditMenuConfiguration(identifier: "highlightMenu", sourcePoint: CGPoint(x: rect.midX, y: rect.minY))
+            let config = UIEditMenuConfiguration(
+                identifier: "highlightMenu", sourcePoint: CGPoint(x: rect.midX, y: rect.minY)
+            )
             editMenuInteraction.presentEditMenu(with: config)
         } else {
             onAnnotationTap([
@@ -807,9 +833,27 @@ extension EPUBView: EPUBNavigatorDelegate {
         return .zero
     }
 
-    public func navigator(_: Navigator, locationDidChange _: Locator) {
+    public func navigator(_: Navigator, locationDidChange locator: Locator) {
         changingResource = false
         emitCurrentLocator()
+
+        // position is 1-indexed and equals totalPositions on the last page
+        //
+        // TODO: next release of readium (3.9.0?) will have the changes from
+        // github.com/readium/swift-toolkit/issues/775 which we could then swap back to
+        // sm like locator.locations.totalProgression >= 1.0 since EPUBViewportAndLocationCalculator
+        // would guarantee 1.0 at the end. honestly though im hopeful this is fine as-is
+        if let position = locator.locations.position, totalPositions > 0, position >= totalPositions {
+            onReachedEnd(
+                makeJSON([
+                    "chapterTitle": locator.title ?? "",
+                    "href": locator.href.string,
+                    "title": encodeIfNotNil(locator.title),
+                    "locations": encodeIfNotEmpty(locator.locations.json),
+                    "text": encodeIfNotEmpty(locator.text.json),
+                    "type": encodeIfNotEmpty(locator.mediaType.string),
+                ]))
+        }
     }
 
     public func navigator(_: Navigator, presentError error: NavigatorError) {
@@ -820,7 +864,9 @@ extension EPUBView: EPUBNavigatorDelegate {
         ])
     }
 
-    public func navigator(_: any SelectableNavigator, shouldShowMenuForSelection _: Selection) -> Bool {
+    public func navigator(_: any SelectableNavigator, shouldShowMenuForSelection _: Selection)
+        -> Bool
+    {
         return true // use native
     }
 
@@ -920,27 +966,37 @@ extension EPUBView {
 
 @available(iOS 16.0, *)
 extension EPUBView: UIEditMenuInteractionDelegate {
-    public func editMenuInteraction(_: UIEditMenuInteraction, menuFor _: UIEditMenuConfiguration, suggestedActions _: [UIMenuElement]) -> UIMenu? {
+    public func editMenuInteraction(
+        _: UIEditMenuInteraction, menuFor _: UIEditMenuConfiguration,
+        suggestedActions _: [UIMenuElement]
+    ) -> UIMenu? {
         guard let highlightId = tappedHighlightId else { return nil }
 
-        let editAction = UIAction(title: "Edit Note", image: UIImage(systemName: "pencil")) { [weak self] _ in
+        let editAction = UIAction(title: "Edit Note", image: UIImage(systemName: "pencil")) {
+            [weak self] _ in
             self?.onEditHighlight(["decorationId": highlightId])
         }
 
-        let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+        let deleteAction = UIAction(
+            title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive
+        ) { [weak self] _ in
             self?.onDeleteHighlight(["decorationId": highlightId])
         }
 
         return UIMenu(children: [editAction, deleteAction])
     }
 
-    public func editMenuInteraction(_: UIEditMenuInteraction, targetRectFor _: UIEditMenuConfiguration) -> CGRect {
+    public func editMenuInteraction(
+        _: UIEditMenuInteraction, targetRectFor _: UIEditMenuConfiguration
+    ) -> CGRect {
         return pendingMenuSourceRect ?? CGRect(x: bounds.midX, y: bounds.midY, width: 1, height: 1)
     }
 }
 
 extension EPUBView: UIContextMenuInteractionDelegate {
-    public func contextMenuInteraction(_: UIContextMenuInteraction, configurationForMenuAtLocation _: CGPoint) -> UIContextMenuConfiguration? {
+    public func contextMenuInteraction(
+        _: UIContextMenuInteraction, configurationForMenuAtLocation _: CGPoint
+    ) -> UIContextMenuConfiguration? {
         return nil
     }
 }

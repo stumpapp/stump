@@ -2,11 +2,12 @@ import './styles/index.css'
 import '@stump/components/styles/overrides.css'
 
 import { SDKProvider, StumpClientContextProvider, StumpClientProps } from '@stump/client'
+import { type AllowedLocale, LocaleProvider } from '@stump/i18n'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Helmet } from 'react-helmet'
-import { createSearchParams, useLocation, useNavigate } from 'react-router-dom'
+import { createSearchParams, useLocation, useNavigate } from 'react-router'
 
 import { ErrorFallback } from '@/components/ErrorFallback'
 
@@ -16,10 +17,15 @@ import { useApplyTheme } from './hooks'
 import { useAppStore, useDebugStore, useUserStore } from './stores'
 
 export default function StumpWebClient(props: StumpClientProps) {
+	const locale = useUserStore((store) => store.userPreferences?.locale)
+	const resolvedLocale = (locale as AllowedLocale) || 'en-US'
+
 	return (
-		<ErrorBoundary FallbackComponent={ErrorFallback}>
-			<RouterContainer {...props} />
-		</ErrorBoundary>
+		<LocaleProvider locale={resolvedLocale}>
+			<ErrorBoundary FallbackComponent={ErrorFallback}>
+				<RouterContainer {...props} />
+			</ErrorBoundary>
+		</LocaleProvider>
 	)
 }
 
@@ -51,7 +57,12 @@ const RouterContainer = (props: StumpClientProps) => {
 		setPlatform(props.platform)
 	}, [props.platform, setPlatform])
 
-	useApplyTheme({ appFont: userPreferences?.appFont, appTheme: userPreferences?.appTheme })
+	useApplyTheme({
+		appFont: userPreferences?.appFont,
+		appTheme: userPreferences?.appTheme,
+		interfaceRoundness: userPreferences?.interfaceRoundness,
+		thumbnailRoundness: userPreferences?.thumbnailRoundness,
+	})
 
 	const { setUseDiscordPresence, setDiscordPresence } = props.tauriRPC ?? {}
 	const discordPresenceEnabled = userPreferences?.enableDiscordPresence ?? false

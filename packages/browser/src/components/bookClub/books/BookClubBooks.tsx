@@ -6,7 +6,7 @@ import { useMediaMatch, useToggle } from 'rooks'
 
 import { useBookClubContext } from '@/components/bookClub'
 import GenericEmptyState from '@/components/GenericEmptyState'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import BookClubBookItem from './BookClubBookItem'
 
@@ -27,6 +27,7 @@ const query = graphql(`
 `)
 
 export default function BookClubBooks() {
+	const paths = usePaths()
 	const { bookClub, viewerCanManage } = useBookClubContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -60,7 +61,7 @@ export default function BookClubBooks() {
 		return (
 			<div className="px-0 md:px-4 h-full w-full">
 				<ol
-					className={cn('space-y-4 relative flex h-full flex-col border-l border-edge', {
+					className={cn('space-y-4 relative flex h-full flex-col border-l border-border', {
 						'pb-2': showPastBooks,
 					})}
 				>
@@ -68,7 +69,7 @@ export default function BookClubBooks() {
 
 					<div className="ml-3">
 						<button
-							className="rounded-sm p-1 outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+							className="p-1 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
 							type="button"
 							onClick={togglePastBooks}
 						>

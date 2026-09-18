@@ -10,6 +10,8 @@ updates:
       - 'dependencies'
     versioning-strategy: increase
     target-branch: 'nightly'
+    cooldown:
+      default-days: 3
 
   - package-ecosystem: 'cargo'
     directory: '/'
@@ -19,6 +21,8 @@ updates:
     labels:
       - 'dependencies'
     target-branch: 'nightly'
+    cooldown:
+      default-days: 3
 
   - package-ecosystem: 'github-actions'
     directory: '/'
@@ -28,3 +32,5 @@ updates:
     labels:
       - 'dependencies'
     target-branch: 'nightly'
+    cooldown:
+      default-days: 3

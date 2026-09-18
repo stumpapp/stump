@@ -35,16 +35,7 @@ pub struct Model {
 	pub extension: String,
 	/// The number of pages in the media, if applicable. Will be -1 for certain media types
 	pub pages: i32,
-	/// The timestamp of the last time the media was updated. This will be set during creation, as well
-	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: Option<DateTimeWithTimeZone>,
-	/// The timestamp of the creation of the media
-	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub created_at: DateTimeWithTimeZone,
-	/// The timestamp of when the underlying file was last modified on disk. This will only be set if
-	/// a timestamp can be retrieved from the filesystem
-	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub modified_at: Option<DateTimeWithTimeZone>,
+	pub is_oneshot: bool,
 	/// A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
 	/// in aiding in the identification of duplicate media files
 	#[sea_orm(column_type = "Text", nullable)]
@@ -70,6 +61,16 @@ pub struct Model {
 	/// expected that all media will belong to a series
 	#[sea_orm(column_type = "Text", nullable)]
 	pub series_id: Option<String>,
+	/// The timestamp of the last time the media was updated. This will be set during creation, as well
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	pub updated_at: Option<DateTimeWithTimeZone>,
+	/// The timestamp of the creation of the media
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	pub created_at: DateTimeWithTimeZone,
+	/// The timestamp of when the underlying file was last modified on disk. This will only be set if
+	/// a timestamp can be retrieved from the filesystem
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
+	pub modified_at: Option<DateTimeWithTimeZone>,
 	/// The timestamp of when the media was **soft** deleted. This will act like a trash bin.
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<DateTimeWithTimeZone>,
@@ -173,6 +174,7 @@ impl Entity {
 	}
 
 	pub fn apply_for_user(user: &AuthUser, select: Select<Entity>) -> Select<Entity> {
+		let select = select.left_join(media_metadata::Entity);
 		let select = apply_series_metadata_join(select);
 		let select = apply_library_hidden_filter(select, user);
 		apply_age_restriction_filter(select, user.age_restriction.clone())
@@ -265,6 +267,13 @@ impl From<Model> for MediaIdentSelect {
 }
 
 #[derive(Debug, FromQueryResult)]
+pub struct MediaIdentWithSeriesId {
+	pub id: String,
+	pub path: String,
+	pub series_id: String,
+}
+
+#[derive(Debug, FromQueryResult)]
 pub struct MediaThumbSelect {
 	pub id: String,
 	pub path: String,
@@ -322,8 +331,6 @@ pub enum Relation {
 	BookClubMemberFavoriteBook,
 	#[sea_orm(has_many = "super::bookmark::Entity")]
 	Bookmark,
-	#[sea_orm(has_many = "super::finished_reading_session::Entity")]
-	FinishedReadingSession,
 	#[sea_orm(has_many = "super::media_annotation::Entity")]
 	MediaAnnotation,
 	#[sea_orm(has_one = "super::media_metadata::Entity")]
@@ -371,12 +378,6 @@ impl Related<super::book_club_member_favorite_book::Entity> for Entity {
 impl Related<super::bookmark::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Bookmark.def()
-	}
-}
-
-impl Related<super::finished_reading_session::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::FinishedReadingSession.def()
 	}
 }
 
@@ -446,6 +447,9 @@ impl ActiveModelBehavior for ActiveModel {
 			}
 			if self.status.is_not_set() {
 				self.status = ActiveValue::Set(FileStatus::Ready);
+			}
+			if self.is_oneshot.is_not_set() {
+				self.is_oneshot = ActiveValue::Set(false);
 			}
 			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
 		} else {
@@ -564,5 +568,24 @@ mod tests {
             r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
             r#"WHERE "media"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
             );
+	}
+
+	#[test]
+	fn test_apply_for_user_age_restrict() {
+		let mut user = get_default_user();
+		user.age_restriction = Some(age_restriction::Model {
+			id: 1,
+			age: 18,
+			restrict_on_unset: true,
+			user_id: user.id.clone(),
+		});
+		let select = Entity::apply_for_user(&user, Entity::find());
+		let stmt_str = select_no_cols_to_string(select);
+		assert_eq!(
+            stmt_str,
+            r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" "#.to_string() +
+            r#"WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"# +
+            r#" AND (("media_metadata"."age_rating" IS NULL AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18) OR ("media_metadata"."age_rating" IS NOT NULL AND "media_metadata"."age_rating" <= 18))"#
+        );
 	}
 }

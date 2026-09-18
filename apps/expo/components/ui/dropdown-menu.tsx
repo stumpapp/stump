@@ -1,5 +1,6 @@
 import * as DropdownMenuPrimitive from '@rn-primitives/dropdown-menu'
-import { Check, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react-native'
+import * as Haptics from 'expo-haptics'
+import { Check, ChevronDown, ChevronUp } from 'lucide-react-native'
 import * as React from 'react'
 import {
 	Platform,
@@ -23,7 +24,20 @@ import { cn } from '~/lib/utils'
 
 const DropdownMenu = DropdownMenuPrimitive.Root
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+function DropdownMenuTrigger({
+	onPress,
+	...props
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>) {
+	return (
+		<DropdownMenuPrimitive.Trigger
+			onPress={(e) => {
+				Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+				onPress?.(e)
+			}}
+			{...props}
+		/>
+	)
+}
 
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
@@ -38,6 +52,7 @@ function DropdownMenuSubTrigger({
 	inset,
 	children,
 	iconClassName,
+	onPress,
 	...props
 }: DropdownMenuPrimitive.SubTriggerProps &
 	React.RefAttributes<DropdownMenuPrimitive.SubTriggerRef> & {
@@ -46,15 +61,19 @@ function DropdownMenuSubTrigger({
 		inset?: boolean
 	}) {
 	const { open } = DropdownMenuPrimitive.useSubContext()
-	const icon = Platform.OS === 'web' ? ChevronRight : open ? ChevronUp : ChevronDown
+	const icon = open ? ChevronUp : ChevronDown
 	return (
 		<TextClassContext.Provider
 			value={cn('select-none group-active:text-foreground', open && 'text-foreground')}
 		>
 			<DropdownMenuPrimitive.SubTrigger
+				onPress={(e) => {
+					Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+					onPress?.(e)
+				}}
 				className={cn(
-					'squircle group rounded-lg px-2 py-2 sm:py-1.5 flex flex-row items-center active:bg-background-surface',
-					open && 'bg-background-surface',
+					'squircle group px-4 py-2.5 sm:py-1.5 active:bg-background-overlay-hover flex flex-row items-center rounded-2xl',
+					open && 'bg-background-overlay-hover',
 					inset && 'pl-8',
 					className,
 				)}
@@ -80,7 +99,7 @@ function DropdownMenuSubContent({
 		<NativeOnlyAnimatedView entering={FadeIn}>
 			<DropdownMenuPrimitive.SubContent
 				className={cn(
-					'squircle rounded-md p-1 shadow-lg shadow-black/5 overflow-hidden border border-edge bg-background',
+					'squircle p-1 shadow-lg shadow-black/5 border-edge bg-background-overlay overflow-hidden rounded-3xl border',
 					className,
 				)}
 				{...props}
@@ -121,7 +140,7 @@ function DropdownMenuContent({
 						<TextClassContext.Provider value="text-foreground-subtle">
 							<DropdownMenuPrimitive.Content
 								className={cn(
-									'squircle rounded-2xl shadow-lg shadow-black/5 p-2 min-w-[8rem] overflow-hidden border border-edge bg-background',
+									'squircle shadow-lg shadow-black/10 p-2 border-edge bg-background-overlay min-w-[8rem] overflow-hidden rounded-3xl border',
 									className,
 								)}
 								{...props}
@@ -138,6 +157,7 @@ function DropdownMenuItem({
 	className,
 	inset,
 	variant,
+	onPress,
 	...props
 }: DropdownMenuPrimitive.ItemProps &
 	React.RefAttributes<DropdownMenuPrimitive.ItemRef> & {
@@ -148,13 +168,17 @@ function DropdownMenuItem({
 	return (
 		<TextClassContext.Provider
 			value={cn(
-				'select-none text-base text-foreground group-active:text-foreground',
+				'text-base text-foreground select-none',
 				variant === 'destructive' && 'text-fill-danger group-active:text-fill-danger',
 			)}
 		>
 			<DropdownMenuPrimitive.Item
+				onPress={(e) => {
+					Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+					onPress?.(e)
+				}}
 				className={cn(
-					'squircle group gap-2 rounded-lg px-2 py-2 sm:py-1.5 relative flex flex-row items-center active:bg-background-surface',
+					'squircle group gap-2 px-4 py-2.5 active:bg-background-overlay-hover relative flex flex-row items-center rounded-2xl',
 					variant === 'destructive' && 'active:bg-fill-danger-secondary',
 					props.disabled && 'opacity-50',
 					inset && 'pl-8',
@@ -166,33 +190,41 @@ function DropdownMenuItem({
 	)
 }
 
+// TODO: it would be nice to get this to behave like iOS where the left space for the check is not reserved
+// if none in the group are checked
 function DropdownMenuCheckboxItem({
 	className,
 	children,
+	variant = 'default',
+	onPress,
 	...props
 }: DropdownMenuPrimitive.CheckboxItemProps &
 	React.RefAttributes<DropdownMenuPrimitive.CheckboxItemRef> & {
 		children?: React.ReactNode
+		variant?: 'default' | 'destructive'
 	}) {
 	return (
-		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
+		<TextClassContext.Provider
+			value={cn(
+				'text-base text-foreground select-none group-active:text-accent-foreground',
+				variant === 'destructive' && 'text-fill-danger group-active:text-fill-danger',
+			)}
+		>
 			<DropdownMenuPrimitive.CheckboxItem
+				onPress={(e) => {
+					Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+					onPress?.(e)
+				}}
 				className={cn(
-					'squircle group gap-2 rounded-lg py-2 pl-8 pr-2 sm:py-1.5 relative flex flex-row items-center active:bg-background-surface',
+					'squircle group gap-2 py-2.5 pl-8 pr-2 active:bg-background-overlay-hover relative flex flex-row items-center rounded-2xl',
 					props.disabled && 'opacity-50',
 					className,
 				)}
 				{...props}
 			>
-				<View className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
+				<View className="left-2 h-4 w-4 absolute flex items-center justify-center">
 					<DropdownMenuPrimitive.ItemIndicator>
-						<Icon
-							as={Check}
-							className={cn(
-								'size-4 text-foreground',
-								Platform.select({ web: 'pointer-events-none' }),
-							)}
-						/>
+						<Icon as={Check} className="h-5 w-5 text-foreground-muted" />
 					</DropdownMenuPrimitive.ItemIndicator>
 				</View>
 				<>{children}</>
@@ -204,6 +236,7 @@ function DropdownMenuCheckboxItem({
 function DropdownMenuRadioItem({
 	className,
 	children,
+	onPress,
 	...props
 }: DropdownMenuPrimitive.RadioItemProps &
 	React.RefAttributes<DropdownMenuPrimitive.RadioItemRef> & {
@@ -212,8 +245,12 @@ function DropdownMenuRadioItem({
 	return (
 		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
 			<DropdownMenuPrimitive.RadioItem
+				onPress={(e) => {
+					Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+					onPress?.(e)
+				}}
 				className={cn(
-					'squircle group gap-2 rounded-lg py-2 pl-8 pr-2 sm:py-1.5 relative flex flex-row items-center active:bg-background-surface',
+					'squircle group gap-2 py-2 pl-8 pr-2 sm:py-1.5 active:bg-background-overlay-hover relative flex flex-row items-center rounded-2xl',
 					props.disabled && 'opacity-50',
 					className,
 				)}
@@ -221,7 +258,7 @@ function DropdownMenuRadioItem({
 			>
 				<View className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 					<DropdownMenuPrimitive.ItemIndicator>
-						<Icon as={Check} className={cn('h-5 w-5 font-medium text-foreground')} />
+						<Icon as={Check} className={cn('h-5 w-5 font-medium text-foreground-muted')} />
 					</DropdownMenuPrimitive.ItemIndicator>
 				</View>
 				<>{children}</>
@@ -260,7 +297,7 @@ function DropdownMenuSeparator({ className, variant = 'item', ...props }: Separa
 	return (
 		<DropdownMenuPrimitive.Separator
 			className={cn(
-				'-mx-1 my-1 h-px bg-edge opacity-80',
+				'-mx-1 my-1 bg-edge h-px opacity-80',
 				{ 'h-0.5': variant === 'group' },
 				className,
 			)}
@@ -272,7 +309,7 @@ function DropdownMenuSeparator({ className, variant = 'item', ...props }: Separa
 function DropdownMenuShortcut({ className, ...props }: TextProps & React.RefAttributes<Text>) {
 	return (
 		<Text
-			className={cn('text-xs tracking-widest ml-auto text-foreground-muted', className)}
+			className={cn('text-xs tracking-widest text-foreground-muted ml-auto', className)}
 			{...props}
 		/>
 	)

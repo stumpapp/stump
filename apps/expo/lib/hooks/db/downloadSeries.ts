@@ -3,7 +3,7 @@ import { graphql } from '@stump/graphql'
 import { useCallback } from 'react'
 import { toast } from 'sonner-native'
 
-import { useActiveServer } from '~/components/activeServer'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { useDownloadQueue } from './downloadQueue'
 

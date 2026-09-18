@@ -1,3 +1,4 @@
+import { formatBytes } from '@stump/client'
 import { Badge, Heading, Link, Statistic, Text } from '@stump/components'
 import { BookCardFragment, BookOverviewSceneQuery, Tag } from '@stump/graphql'
 import { ExternalLink } from 'lucide-react'
@@ -6,8 +7,7 @@ import { Suspense } from 'react'
 import BadgeList from '@/components/BadgeList'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
-import paths from '@/paths'
-import { formatBytes } from '@/utils/format'
+import { usePaths } from '@/paths'
 
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 
@@ -18,6 +18,7 @@ type Props = {
 }
 
 export default function BookOverviewSceneHeader({ media, book, completedAt }: Props) {
+	const paths = usePaths()
 	const metadata = media.metadata
 	const tags = media.tags as Tag[] | undefined
 	const pages = media.pages ?? 0
@@ -69,18 +70,10 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 
 			{hasMetadataBadges && (
 				<div className="gap-2 flex flex-wrap items-center">
-					{metadata?.publisher && (
-						<Badge variant="default" size="xs" rounded="full">
-							{metadata.publisher}
-						</Badge>
-					)}
-					{metadata?.language && (
-						<Badge variant="default" size="xs" rounded="full">
-							{metadata.language}
-						</Badge>
-					)}
+					{metadata?.publisher && <Badge rounded="full">{metadata.publisher}</Badge>}
+					{metadata?.language && <Badge rounded="full">{metadata.language}</Badge>}
 					{metadata?.ageRating && metadata.ageRating > 0 && (
-						<Badge variant="warning" size="xs" rounded="full">
+						<Badge variant="warning" rounded="full">
 							Age {metadata.ageRating}+
 						</Badge>
 					)}
@@ -120,7 +113,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 								})}
 								underline={false}
 							>
-								<Badge variant="secondary" size="xs" rounded="full" className="cursor-pointer">
+								<Badge variant="secondary" rounded="full" className="cursor-pointer">
 									{genre}
 								</Badge>
 							</Link>
@@ -143,7 +136,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 								})}
 								underline={false}
 							>
-								<Badge variant="secondary" size="xs" rounded="full" className="cursor-pointer">
+								<Badge variant="secondary" rounded="full" className="cursor-pointer">
 									{writer}
 								</Badge>
 							</Link>
@@ -157,7 +150,10 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 					<Text size="xs" variant="muted">
 						Tags
 					</Text>
-					<TagList tags={tags} baseUrl={paths.bookSearch()} />
+					<TagList
+						tags={tags}
+						buildHref={(tag) => paths.bookSearchWithFilter({ tags: { anyOf: [tag.name] } })}
+					/>
 				</div>
 			)}
 
@@ -178,7 +174,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 								}
 								return (
 									<Link key={link} href={link} underline={false}>
-										<Badge variant="default" size="xs" rounded="full" className="cursor-pointer">
+										<Badge rounded="full" className="cursor-pointer">
 											<span>{label}</span>
 											<ExternalLink className="ml-1 h-3 w-3 opacity-90" />
 										</Badge>

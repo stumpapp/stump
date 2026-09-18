@@ -4,6 +4,7 @@ import { Button, ConfirmationModal, Dialog, Form, ToolTip } from '@stump/compone
 import { ExistingProviderCardFragment, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
+import omit from 'lodash/omit'
 import { Cog } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -73,7 +74,7 @@ export function EditProviderDialog({ provider }: Props) {
 	const handleSubmit = (data: PatchProviderConfigSchema) => {
 		editProvider({
 			id: provider.id,
-			input: data,
+			input: omit(data, 'providerType'),
 		})
 	}
 
@@ -87,9 +88,10 @@ export function EditProviderDialog({ provider }: Props) {
 				<Button
 					onClick={() => setIsEditDialogOpen(true)}
 					size="icon"
-					className="h-7 w-7 p-0 rounded-full border border-edge bg-background-surface"
+					className="h-7 w-7 p-0 rounded-full! border border-border bg-muted"
+					variant="ghost"
 				>
-					<Cog className="text-primary h-4 w-4" strokeWidth={1} />
+					<Cog className="h-4 w-4 text-primary" strokeWidth={1} />
 				</Button>
 			</ToolTip>
 
@@ -106,7 +108,7 @@ export function EditProviderDialog({ provider }: Props) {
 
 					<Dialog.Footer>
 						<Button
-							variant="danger"
+							variant="destructive"
 							onClick={() => setIsDeleteDialogOpen(true)}
 							disabled={isPending}
 						>
@@ -115,12 +117,11 @@ export function EditProviderDialog({ provider }: Props) {
 
 						<div className="flex-1" />
 
-						<Button variant="default" onClick={handleClose} disabled={isPending}>
+						<Button variant="outline" onClick={handleClose} disabled={isPending}>
 							{t('common.cancel')}
 						</Button>
 
 						<Button
-							variant="primary"
 							type="submit"
 							form="edit-provider-form"
 							disabled={isPending}

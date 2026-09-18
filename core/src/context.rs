@@ -9,8 +9,8 @@ use crate::{
 	config::StumpConfig,
 	database,
 	event::CoreEvent,
-	filesystem::scanner::LibraryWatcher,
-	job::{state::ApalisWorkerState, stump_job::StumpJob},
+	job::{context::ApalisWorkerState, StumpJob},
+	scan::watcher::LibraryWatcher,
 	CoreError, CoreResult,
 };
 
@@ -54,6 +54,33 @@ impl Ctx {
 		);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
+		let job_storage = MemoryStorage::<StumpJob>::new();
+		let apalis_state = Arc::new(ApalisWorkerState::new(
+			conn.clone(),
+			config.clone(),
+			event_channel.0.clone(),
+			job_storage.clone(),
+		));
+		let library_watcher =
+			Arc::new(LibraryWatcher::new(conn.clone(), job_storage.clone()));
+
+		Ctx {
+			config,
+			conn,
+			event_channel,
+			library_watcher,
+			apalis_state,
+			job_storage,
+		}
+	}
+
+	// TODO(testing): see if i can merge w mock_sea or rm/refactor some bits
+
+	/// Creates a [Ctx] instance for testing **only**
+	pub fn for_testing(conn: DatabaseConnection) -> Ctx {
+		let config = Arc::new(StumpConfig::debug());
+		let conn = Arc::new(conn);
+		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 		let job_storage = MemoryStorage::<StumpJob>::new();
 		let apalis_state = Arc::new(ApalisWorkerState::new(
 			conn.clone(),

@@ -1,3 +1,4 @@
+import { getColor, to } from 'colorjs.io/fn'
 import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
@@ -141,7 +142,7 @@ export type IEpubLocationStore = {
 	// So, before a jump is pushed the pusher will compute that so when it renders it doesn't flash
 	// the incorrect direction
 	jumpStack: JumpEntry[]
-	pushJump: (locator: ReadiumLocator, direction: 'back' | 'forward') => void
+	pushJump: (newLocator: ReadiumLocator) => void
 	popJump: () => JumpEntry | undefined
 	clearJumpStack: () => void
 
@@ -175,12 +176,32 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	positions: [],
 
 	jumpStack: [],
-	pushJump: (locator, direction) => {
+	pushJump: (newLocator) => {
+		const { locator } = get()
+
+		// If jumping to higher position, return direction should be 'back'
+		// If jumping to lower position, return direction should be 'forward'
+		const currentPosition = locator?.locations?.position
+		const currentChapterProgression = locator?.locations?.progression
+		const targetPosition = newLocator.locations?.position
+		const targetChapterProgression = newLocator.locations?.progression
+
+		let direction: 'back' | 'forward'
+		if (currentPosition === targetPosition) {
+			if (!currentChapterProgression || !targetChapterProgression) return
+			direction = targetChapterProgression > currentChapterProgression ? 'back' : 'forward'
+		} else {
+			if (!currentPosition || !targetPosition) return
+			direction = targetPosition > currentPosition ? 'back' : 'forward'
+		}
+
 		const { jumpStack } = get()
 
 		if (jumpStackTimerId) {
 			clearTimeout(jumpStackTimerId)
 		}
+
+		if (!locator) return
 
 		const entry: JumpEntry = { locator, direction }
 		const newStack = [entry, ...jumpStack].slice(0, JUMP_STACK_MAX_SIZE)
@@ -261,20 +282,34 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	isCurrentLocationBookmarked: () => {
 		const state = get()
 		if (!state.locator) return false
-		return state.bookmarks.some(
-			(b) =>
-				trimFragmentFromHref(b.href) === trimFragmentFromHref(state.locator!.href) &&
-				b.locations?.progression === state.locator!.locations?.progression,
-		)
+		const currentHref = trimFragmentFromHref(state.locator.href)
+		const currentProg = state.locator.locations?.progression ?? null
+		return state.bookmarks.some((b) => {
+			if (trimFragmentFromHref(b.href) !== currentHref) return false
+			const bookmarkProg = b.locations?.progression ?? null
+			if (currentProg != null && bookmarkProg != null) {
+				// i added a small tolerance for precision issues, but honestly this is
+				// fragile as fuck. i'd really like to figure this out properly, but
+				// this should marginally help with some issues i've seen between web vs mobile
+				// and rendering bookmarks >:'(
+				return Math.abs(currentProg - bookmarkProg) < 0.01
+			}
+			return currentProg === bookmarkProg
+		})
 	},
 	getCurrentLocationBookmark: () => {
 		const state = get()
 		if (!state.locator) return undefined
-		return state.bookmarks.find(
-			(b) =>
-				trimFragmentFromHref(b.href) === trimFragmentFromHref(state.locator!.href) &&
-				b.locations?.progression === state.locator!.locations?.progression,
-		)
+		const currentHref = trimFragmentFromHref(state.locator.href)
+		const currentProg = state.locator.locations?.progression ?? null
+		return state.bookmarks.find((b) => {
+			if (trimFragmentFromHref(b.href) !== currentHref) return false
+			const bookmarkProg = b.locations?.progression ?? null
+			if (currentProg != null && bookmarkProg != null) {
+				return Math.abs(currentProg - bookmarkProg) < 0.01
+			}
+			return currentProg === bookmarkProg
+		})
 	},
 
 	annotations: [],
@@ -310,6 +345,7 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			bookmarks: [],
 			annotations: [],
 			jumpStack: [],
+			positions: [],
 		})
 	},
 }))
@@ -404,7 +440,7 @@ export const resolveThemeName = (
 }
 
 export const useEpubTheme = () => {
-	const { colorScheme } = useColorScheme()
+	const { colorScheme, isDarkColorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore(
 		useShallow((store) => ({
 			themes: store.themes,
@@ -412,10 +448,25 @@ export const useEpubTheme = () => {
 		})),
 	)
 
-	return useMemo(
+	const theme = useMemo(
 		() => resolveTheme(themes, selectedTheme || '', colorScheme),
 		[themes, selectedTheme, colorScheme],
 	)
+
+	let isDarkEpubTheme: boolean = isDarkColorScheme
+	if (theme.colors?.background) {
+		const backgroundColor = getColor(theme.colors?.background)
+		const foregroundColor = getColor(theme.colors?.foreground)
+
+		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
+		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
+
+		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
+		// to look much better for edge cases near the boundry
+		isDarkEpubTheme = foregroundLightness > backgroundLightness
+	}
+
+	return { ...theme, isDarkEpubTheme }
 }
 
 export type SupportedMobileFont =

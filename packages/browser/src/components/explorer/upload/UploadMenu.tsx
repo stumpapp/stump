@@ -1,7 +1,7 @@
 import { Dropdown, IconButton, ToolTip } from '@stump/components'
 import { BookPlus, FolderPlus, Upload } from 'lucide-react'
 
-import { useSeriesContextSafe } from '@/scenes/series'
+import { useSeriesContextSafe } from '@/scenes/series/context'
 
 type Props = {
 	onSelect: (type: 'books' | 'series') => void
@@ -14,13 +14,7 @@ export default function UploadMenu({ onSelect }: Props) {
 		<Dropdown modal={false}>
 			<ToolTip content="Upload" side="left" size="sm">
 				<Dropdown.Trigger asChild>
-					<IconButton
-						variant="ghost"
-						size="xs"
-						className="hover:bg-background-surface-hover"
-						pressEffect={false}
-						disabled={false}
-					>
+					<IconButton variant="ghost" size="xs" className="hover:bg-accent" disabled={false}>
 						<Upload className="h-4 w-4" />
 					</IconButton>
 				</Dropdown.Trigger>

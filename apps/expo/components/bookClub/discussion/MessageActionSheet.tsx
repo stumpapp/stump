@@ -6,7 +6,7 @@ import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { Divider } from '~/components/Divider'
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_26_PLUS, useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 import { EmojiPickerSheet, type EmojiPickerSheetRef } from '../../emoji/EmojiPickerSheet'
@@ -101,7 +101,7 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 				ref={sheetRef}
 				detents={['auto']}
 				grabber
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				backgroundColor={IS_IOS_26_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 			>
 				<View className="pb-8 pt-2">

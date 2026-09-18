@@ -1,15 +1,15 @@
 import { clone, getColor, serialize, set } from 'colorjs.io/fn'
-import { CircleAlert, LucideIcon } from 'lucide-react-native'
+import { CircleAlert, LucideIcon, Slash } from 'lucide-react-native'
 import React, { ComponentProps, ReactNode, useState } from 'react'
+import { TextInput, TextInputProps } from 'react-native'
 import { Easing, Platform, Pressable, View, ViewProps } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 
 import { Icon, Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
+import { useColors, usePalette } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 // MARK: Types
 
@@ -30,6 +30,10 @@ type CardProps = ViewProps & {
 	 * Customise the icon and text to display when the list is empty
 	 */
 	listEmptyStyle?: ListEmptyMessageProps
+	/**
+	 * Use to customise the background colour
+	 */
+	backgroundClassName?: string
 }
 
 type RowProps = Omit<ViewProps, 'children'> & {
@@ -61,6 +65,7 @@ export function Card({
 	listEmptyStyle,
 	children,
 	className,
+	backgroundClassName,
 	...props
 }: CardProps) {
 	const count = React.Children.count(children)
@@ -84,10 +89,10 @@ export function Card({
 		<View className={cn('gap-2', className)} {...props}>
 			{renderHeader()}
 
-			{count === 0 ? (
+			{count === 0 && listEmptyStyle ? (
 				<ListEmptyMessage {...listEmptyStyle} />
 			) : (
-				<CardBackground>{children}</CardBackground>
+				<CardBackground className={backgroundClassName}>{children}</CardBackground>
 			)}
 
 			{description && (
@@ -102,6 +107,7 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.InputRow = InputRow
 Card.LongRow = LongRow
 Card.RowDivider = Divider
 
@@ -131,13 +137,13 @@ function StatGroup({ children, className }: StatGroupProps) {
 function Stat({ label, value, suffix }: StatProps) {
 	return (
 		<View className="items-center justify-center">
-			<Text className="mb-1 font-medium text-center text-foreground-muted">{label}</Text>
+			<Text className="mb-1 font-medium text-foreground-muted text-center">{label}</Text>
 			<View className="gap-0 flex-row items-end">
 				<Text size="xl" className="font-semibold text-center">
 					{value}
 				</Text>
 				{suffix != null && (
-					<Text size="xs" className="py-1 text-center text-foreground-muted">
+					<Text size="xs" className="py-1 text-foreground-muted text-center">
 						{suffix}
 					</Text>
 				)}
@@ -150,7 +156,7 @@ function Row({ value, children, ...props }: RowProps) {
 	return (
 		<BaseRowComponent {...props}>
 			{value != undefined && (
-				<Text className="text-lg flex-1 text-right text-foreground-muted">{value}</Text>
+				<Text className="text-lg text-foreground-muted flex-1 text-right">{value}</Text>
 			)}
 			{children}
 		</BaseRowComponent>
@@ -160,7 +166,7 @@ function Row({ value, children, ...props }: RowProps) {
 function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 	const colors = useColors()
 	const { isDarkColorScheme } = useColorScheme()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
+	const accentColor = usePalette('accent')
 
 	const [expanded, setExpanded] = useState(false)
 	const [isExpandable, setIsExpandable] = useState(false)
@@ -217,6 +223,77 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 	)
 }
 
+// TODO: remove scuffed aspects later
+// TODO: make placeholder properly algined
+// TODO: error state
+// TODO: consider actions more carefully, shoving a node was just a quick solution
+type InputRowProps = TextInputProps & {
+	label?: string
+	actions?: React.ReactNode
+	errorMessage?: string
+	// i kept the isInvalid prop in case we want to show invalid without an error
+	isInvalid?: boolean
+	disabled?: boolean
+}
+
+function InputRow({
+	label,
+	actions,
+	value,
+	onChangeText,
+	className,
+	errorMessage,
+	isInvalid,
+	disabled,
+	...props
+}: InputRowProps) {
+	const colors = useColors()
+	return (
+		<BaseRowComponent disabled={disabled}>
+			<View className="gap-x-4 2 flex-row items-center justify-center">
+				<View className="gap-y-2 shrink">
+					<View className="flex flex-row items-center justify-between">
+						{label && <Text className="text-lg shrink">{label}</Text>}
+						{actions && <View>{actions}</View>}
+					</View>
+
+					<View
+						className={cn(
+							'squircle dark:border-white/5 dark:bg-white/5 border-black/5 bg-black/5 h-11 flex flex-row items-center rounded-full border',
+							{ 'h-[unset] min-h-[2.75rem]': props.multiline },
+							{
+								// TODO: colors are wack, make better semantic tokens for form error colors
+								'bg-red-300/50 border-red-400/30 dark:bg-red-500/20 dark:border-red-600/30':
+									isInvalid || !!errorMessage,
+							},
+						)}
+					>
+						<TextInput
+							value={value}
+							onChangeText={onChangeText}
+							className={cn('font-medium pl-3 w-full', className)}
+							{...props}
+							style={{
+								color:
+									isInvalid || !!errorMessage
+										? colors.fill.danger.DEFAULT
+										: colors.foreground.DEFAULT,
+								...props.style,
+							}}
+						/>
+					</View>
+
+					{errorMessage && (
+						<Text size="sm" className="text-red-500 ml-1">
+							{errorMessage}
+						</Text>
+					)}
+				</View>
+			</View>
+		</BaseRowComponent>
+	)
+}
+
 // MARK: Internal components
 
 function CardBackground({ className, ...props }: ViewProps) {
@@ -224,7 +301,7 @@ function CardBackground({ className, ...props }: ViewProps) {
 		<View
 			className={cn(
 				// We hide the overflow so that the first divider gets hidden
-				'squircle ios:rounded-[2rem] rounded-3xl bg-black/5 dark:bg-white/10 flex overflow-hidden',
+				'squircle ios:rounded-[2rem] bg-black/5 dark:bg-white/10 flex overflow-hidden rounded-3xl',
 				className,
 			)}
 			{...props}
@@ -295,7 +372,12 @@ function BaseRowComponent({
 	)
 }
 
-function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundColor?: string }) {
+type GradientIconProps = {
+	icon: LucideIcon
+	backgroundColor?: string
+}
+
+export function GradientIcon({ icon, backgroundColor }: GradientIconProps) {
 	const { isDarkColorScheme } = useColorScheme()
 
 	const lightPlainColor = getColor(backgroundColor || '#404040')
@@ -321,7 +403,7 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 	})
 
 	return (
-		<View className="squircle h-8 w-8 rounded-xl flex shrink-0 items-center justify-center">
+		<View className="squircle h-8 w-8 flex shrink-0 items-center justify-center rounded-xl">
 			<LinearGradient
 				{...gradient}
 				useAngle
@@ -329,7 +411,7 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 				style={{ position: 'absolute', inset: 0 }}
 			/>
 			<Icon as={icon} size={18} strokeWidth={1.8} absoluteStrokeWidth color="white" />
-			<View className="inset-0 rounded-xl dark:border-white/10 border-white/30 squircle absolute border-[0.75px]" />
+			<View className="inset-0 dark:border-white/10 border-white/30 squircle absolute rounded-xl border-[0.75px]" />
 		</View>
 	)
 }
@@ -338,20 +420,27 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 
 type ListEmptyMessageProps = {
 	icon?: LucideIcon
+	iconSlash?: boolean
 	message?: string
 }
 
-export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
+export const ListEmptyMessage = ({ icon, iconSlash, message }: ListEmptyMessageProps) => (
 	<View
 		className={cn(
-			'squircle h-24 gap-2 rounded-3xl p-3 w-full items-center justify-center border border-dashed border-edge',
+			'squircle h-24 gap-2 p-3 border-black/10 dark:border-white/20 w-full items-center justify-center rounded-3xl border border-dashed',
 			Platform.OS === 'android' && 'rounded-2xl',
 		)}
 	>
 		<View className="relative flex items-center justify-center">
-			<View className="squircle rounded-lg p-2 flex items-center justify-center bg-background-surface">
-				<Icon as={icon || CircleAlert} className="h-6 w-6 text-foreground-muted" />
-				{/* <Icon as={Slash} className="absolute h-6 w-6 transform text-foreground opacity-80" /> */}
+			<View className="squircle p-2 bg-black/5 dark:bg-white/10 flex items-center justify-center rounded-xl">
+				<Icon
+					as={icon || CircleAlert}
+					className="h-6 w-6 text-foreground-muted"
+					absoluteStrokeWidth
+				/>
+				{iconSlash && (
+					<Icon as={Slash} className="text-foreground-muted h-7 w-7 absolute" absoluteStrokeWidth />
+				)}
 			</View>
 		</View>
 

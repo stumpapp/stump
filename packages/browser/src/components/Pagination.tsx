@@ -34,9 +34,9 @@ function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: Pagination
 			>
 				<div
 					className={cx(
-						'pt-4 text-xs font-medium md:text-sm inline-flex items-center border-t-2 border-transparent hover:border-edge-subtle',
-						!isDisabled && 'text-foreground-subtle',
-						isDisabled && 'pointer-events-none cursor-not-allowed text-foreground-muted',
+						'pt-4 text-xs font-medium md:text-sm inline-flex items-center border-t-2 border-transparent hover:border-border',
+						!isDisabled && 'text-foreground',
+						isDisabled && 'pointer-events-none cursor-not-allowed text-muted-foreground',
 						{ 'pl-0 pr-1': kind === 'previous' },
 						{ 'pl-1 pr-0': kind === 'next' },
 					)}
@@ -47,7 +47,7 @@ function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: Pagination
 							'h-4 w-4 md:h-5 md:w-5',
 							kind === 'previous' ? 'mr-3' : 'ml-3',
 							// TODO: dark different color?? idk, doesn't look THAT bad
-							isDisabled ? 'text-foreground-muted' : 'text-foreground-subtle',
+							isDisabled ? 'text-muted-foreground' : 'text-foreground',
 						)}
 						aria-hidden="true"
 					/>
@@ -71,12 +71,12 @@ function PaginationLink({ value, onClick, isActive, onMouseEnter }: PaginationLi
 			onClick={onClick}
 			onMouseEnter={onMouseEnter}
 			className={cn(
-				'px-4 pt-4 text-xs font-medium md:text-sm inline-flex cursor-pointer items-center border-t-2 text-foreground-muted',
+				'px-4 pt-4 text-xs font-medium md:text-sm inline-flex cursor-pointer items-center border-t-2 text-muted-foreground',
 				{
-					'text-brand border-edge-brand hover:border-edge-brand': isActive,
+					'text-brand border-primary hover:border-primary': isActive,
 				},
 				{
-					'border-transparent text-foreground-muted hover:border-edge-subtle': !isActive,
+					'border-transparent text-muted-foreground hover:border-border': !isActive,
 				},
 			)}
 		>
@@ -131,7 +131,7 @@ export default function Pagination({
 	return (
 		<nav className="w-full">
 			<div
-				className={cx('w-full border-t border-edge-subtle', {
+				className={cx('w-full border-t border-border', {
 					'mt-7': position === 'bottom',
 				})}
 			>
@@ -166,7 +166,7 @@ export default function Pagination({
 									onPageChange={handleEllipsisNavigate}
 									trigger={
 										<div className="-mt-1">
-											<button className="px-4 pt-4 text-xs font-medium md:text-sm flex items-center border-t-2 border-transparent text-foreground-muted hover:border-edge-subtle focus:outline-none">
+											<button className="px-4 pt-4 text-xs font-medium md:text-sm flex items-center border-t-2 border-transparent text-muted-foreground hover:border-border focus:outline-none">
 												<MoreHorizontal className="h-4 w-4" />
 											</button>
 										</div>

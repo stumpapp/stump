@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation } from '@stump/client'
 import { Button, Dialog, Form } from '@stump/components'
-import { graphql, MergeStrategy, MetadataProvider } from '@stump/graphql'
+import { extractErrorMessage, graphql, MergeStrategy, MetadataProvider } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { PROVIDER_LABELS, PROVIDERS } from './constants'
 import ProviderForm from './ProviderForm'
@@ -58,6 +59,12 @@ export function CreateProviderDialog() {
 			})
 			handleClose()
 		},
+		onError: (error) => {
+			const message = extractErrorMessage(error)
+			toast.error(t('settingsScene.server/metadataIntegrations.createProviderError'), {
+				description: message,
+			})
+		},
 	})
 
 	const handleClose = () => {
@@ -86,17 +93,12 @@ export function CreateProviderDialog() {
 
 	return (
 		<>
-			<Button
-				className="shrink-0"
-				variant="secondary"
-				size="sm"
-				onClick={() => setIsDialogOpen(true)}
-			>
+			<Button className="shrink-0" variant="secondary" onClick={() => setIsDialogOpen(true)}>
 				{t('settingsScene.server/metadataIntegrations.addProvider')}
 			</Button>
 
 			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<Dialog.Content size="md">
+				<Dialog.Content size="md" className="max-h-full overflow-y-auto">
 					<Dialog.Header>
 						<Dialog.Title>{dialogTitle}</Dialog.Title>
 						<Dialog.Close onClick={handleClose} />
@@ -119,13 +121,12 @@ export function CreateProviderDialog() {
 					</Form>
 
 					<Dialog.Footer>
-						<Button variant="default" onClick={onSecondaryButtonClick} disabled={isPending}>
+						<Button onClick={onSecondaryButtonClick} disabled={isPending} variant="outline">
 							{step === 1 ? t('common.back') : t('common.cancel')}
 						</Button>
 
 						{step === 0 && !!selectedProvider && (
 							<Button
-								variant="primary"
 								type="button"
 								disabled={isPending}
 								isLoading={isPending}
@@ -137,7 +138,6 @@ export function CreateProviderDialog() {
 
 						{step === 1 && (
 							<Button
-								variant="primary"
 								type="submit"
 								form="create-provider-form"
 								disabled={isPending}

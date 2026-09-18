@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { ExplorerContext, ExplorerLayout, IExplorerContext } from './context'
 import FileExplorer from './FileExplorer'
@@ -16,6 +16,7 @@ type Props = Pick<IExplorerContext, 'libraryID' | 'rootPath' | 'uploadConfig'>
 // TODO: refactor to match other explore scenes, e.g. sticky header + fixed footer + window scrolling
 
 export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const { sdk } = useSDK()
 
@@ -82,6 +83,7 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 				goBack,
 				goForward,
 				layout,
+				navigateToPath: setPath,
 				onSelect: handleSelect,
 				refetch,
 				rootPath,
@@ -91,7 +93,7 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 				...ctx,
 			}}
 		>
-			<div className="flex h-full flex-1 flex-col">
+			<div className="min-h-0 flex flex-1 flex-col">
 				<FileExplorerHeader />
 				<div
 					className="flex-1"

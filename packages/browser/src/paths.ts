@@ -9,7 +9,6 @@ type BookReaderParams = {
 	page?: number
 	isEpub?: boolean
 	isPdf?: boolean
-	epubcfi?: string | null
 	isAnimated?: boolean
 	isStreaming?: boolean
 	isIncognito?: boolean
@@ -53,7 +52,7 @@ const pathsInternal = {
 	bookOverview: (id: string) => `/books/${id}`,
 	bookReader: (
 		id: string,
-		{ isEpub, isPdf, epubcfi, isAnimated, page, isStreaming, isIncognito }: BookReaderParams = {},
+		{ isEpub, isPdf, isAnimated, page, isStreaming, isIncognito }: BookReaderParams = {},
 	) => {
 		const baseUrl = pathsInternal.bookOverview(id)
 		const searchParams = new URLSearchParams()
@@ -62,8 +61,7 @@ const pathsInternal = {
 			searchParams.append('incognito', 'true')
 		}
 
-		if (isEpub || !!epubcfi) {
-			searchParams.append('stream', 'false')
+		if (isEpub) {
 			return `${baseUrl}/epub-reader?${searchParams.toString()}`
 		}
 
@@ -88,7 +86,7 @@ const pathsInternal = {
 	},
 	createEmailer: () => pathsInternal.settings('email/new'),
 	docs: (topic?: DocTopic, section?: string) =>
-		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
+		`https://www.stumpapp.dev/docs/guides/${topic || ''}${section ? `#${section}` : ''}`,
 	editEmailer: (id: number) => pathsInternal.settings('email') + `/${id}/edit`,
 	home: () => '/',
 	libraries: () => '/libraries',
@@ -101,14 +99,16 @@ const pathsInternal = {
 	libraryCreate: () => '/libraries/create',
 	libraryFileExplorer: (id: string) => `/libraries/${id}/files`,
 	libraryManage: (id: string) => `/libraries/${id}/settings`,
+	libraryOneshots: (id: string) => `/libraries/${id}/oneshots`,
 	librarySeries: (id: string, page?: number) => {
 		if (page !== undefined) {
 			return `/libraries/${id}/series?page=${page}`
 		}
-		return `/libraries/${id}`
+		return `/libraries/${id}/series`
 	},
 	notFound: () => '/404',
 	notifications: () => '/notifications',
+	seriesFileExplorer: (id: string) => `/series/${id}/files`,
 	seriesManagement: (id: string) => `/series/${id}/manage`,
 	seriesOverview: (id: string, page?: number) => {
 		if (page != undefined) {
@@ -116,10 +116,13 @@ const pathsInternal = {
 		}
 		return `/series/${id}/books`
 	},
+	seriesSettings: (id: string) => `/series/${id}/settings`,
 	serverLogs: (jobId?: string) =>
 		pathsInternal.settings('logs') + (jobId ? `?job_id=${jobId}` : ''),
 	settings: (subpath: SettingsPage = 'account') => `/settings/${subpath || ''}`,
 	smartList: (id: string) => `/smart-lists/${id}`,
+	smartListItems: (id: string) => `/smart-lists/${id}/items`,
+	smartListSettings: (id: string) => `/smart-lists/${id}/settings`,
 	smartListCreate: () => '/smart-lists/create',
 	smartLists: () => '/smart-lists',
 	updateUser: (id: string) => `${pathsInternal.settings('users')}/${id}/manage`,
@@ -163,16 +166,21 @@ export function usePaths() {
 		libraryCreate: () => `${basePath}${pathsInternal.libraryCreate()}`,
 		libraryFileExplorer: (id: string) => `${basePath}${pathsInternal.libraryFileExplorer(id)}`,
 		libraryManage: (id: string) => `${basePath}${pathsInternal.libraryManage(id)}`,
+		libraryOneshots: (id: string) => `${basePath}${pathsInternal.libraryOneshots(id)}`,
 		librarySeries: (id: string, page?: number) =>
 			`${basePath}${pathsInternal.librarySeries(id, page)}`,
 		notFound: () => `${basePath}${pathsInternal.notFound()}`,
 		notifications: () => `${basePath}${pathsInternal.notifications()}`,
+		seriesFileExplorer: (id: string) => `${basePath}${pathsInternal.seriesFileExplorer(id)}`,
 		seriesManagement: (id: string) => `${basePath}${pathsInternal.seriesManagement(id)}`,
 		seriesOverview: (id: string, page?: number) =>
 			`${basePath}${pathsInternal.seriesOverview(id, page)}`,
+		seriesSettings: (id: string) => `${basePath}${pathsInternal.seriesSettings(id)}`,
 		serverLogs: (jobId?: string) => `${basePath}${pathsInternal.serverLogs(jobId)}`,
 		settings: (subpath?: SettingsPage) => `${basePath}${pathsInternal.settings(subpath)}`,
 		smartList: (id: string) => `${basePath}${pathsInternal.smartList(id)}`,
+		smartListItems: (id: string) => `${basePath}${pathsInternal.smartListItems(id)}`,
+		smartListSettings: (id: string) => `${basePath}${pathsInternal.smartListSettings(id)}`,
 		smartListCreate: () => `${basePath}${pathsInternal.smartListCreate()}`,
 		smartLists: () => `${basePath}${pathsInternal.smartLists()}`,
 		updateUser: (id: string) => `${basePath}${pathsInternal.updateUser(id)}`,

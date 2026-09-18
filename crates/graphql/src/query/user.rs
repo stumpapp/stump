@@ -1,7 +1,7 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::finished_reading_session, entity::user, entity::user_login_activity,
-	shared::enums::UserPermission,
+	entity::{reading_session, user, user_login_activity},
+	shared::enums::{ReadingStatus, UserPermission},
 };
 use sea_orm::{
 	prelude::*,
@@ -58,13 +58,13 @@ impl UserQuery {
 	) -> Result<Vec<User>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let limit = take.unwrap_or(10).max(1);
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
 		let users_with_counts = user::Entity::find()
-			.left_join(finished_reading_session::Entity)
-			.column_as(
-				finished_reading_session::Column::Id.count(),
-				"session_count",
-			)
+			.left_join(reading_session::Entity)
+			.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+			.filter(Expr::expr(Expr::exists(newer_exists)).not())
+			.column_as(reading_session::Column::Id.count(), "session_count")
 			.group_by(user::Column::Id)
 			.order_by_desc(Expr::col(Alias::new("session_count")))
 			.limit(limit as u64)

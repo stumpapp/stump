@@ -1,4 +1,4 @@
-import { Button, Input, TextArea } from '@stump/components'
+import { Input, InputGroup, Label, Text, TextArea } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useAppContext } from '@/context'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
+import LibraryTypeSelect from './LibraryType'
 
 const LOCALE_KEY = 'createOrUpdateLibraryForm'
 const getKey = (key: string) => `${LOCALE_KEY}.fields.${key}`
@@ -35,7 +36,6 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 		<div className="gap-6 flex grow flex-col">
 			<div className="gap-y-6 md:flex-row md:gap-x-6 md:gap-y-6 flex flex-col flex-wrap">
 				<Input
-					variant="primary"
 					label={t(getKey('name.label'))}
 					description={t(getKey('name.description'))}
 					placeholder={t(getKey('name.placeholder'))}
@@ -46,28 +46,60 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					{...form.register('name')}
 				/>
 
+				<div className="gap-2 md:max-w-sm grid w-full max-w-full items-center">
+					<Label htmlFor="path">
+						{t(getKey('path.label'))}
+						{isCreatingLibrary && <span className="text-destructive"> *</span>}
+					</Label>
+
+					<InputGroup>
+						<InputGroup.Input
+							id="path"
+							placeholder={t(getKey('path.placeholder'))}
+							required={isCreatingLibrary}
+							aria-invalid={!!errors.path?.message}
+							{...form.register('path')}
+						/>
+
+						{checkPermission(UserPermission.FileExplorer) && (
+							<InputGroup.Addon align="inline-end">
+								<InputGroup.Button
+									type="button"
+									variant="ghost"
+									size="icon-xs"
+									onClick={() => onSetShowDirectoryPicker(true)}
+								>
+									<Folder className="h-4 w-4 text-muted-foreground" />
+								</InputGroup.Button>
+							</InputGroup.Addon>
+						)}
+					</InputGroup>
+
+					{errors.path?.message && (
+						<Text variant="danger" size="xs" className="break-all">
+							{errors.path.message}
+						</Text>
+					)}
+
+					{!errors.path?.message && (
+						<Text variant="muted" size="sm">
+							{t(getKey('path.description'))}
+						</Text>
+					)}
+				</div>
+
 				<Input
-					variant="primary"
-					label={t(getKey('path.label'))}
-					description={t(getKey('path.description'))}
-					placeholder={t(getKey('path.placeholder'))}
-					containerClassName="max-w-full md:max-w-sm"
-					rightDecoration={
-						checkPermission(UserPermission.FileExplorer) && (
-							<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
-								<Folder className="h-4 w-4 text-foreground-muted" />
-							</Button>
-						)
-					}
-					required={isCreatingLibrary}
-					errorMessage={errors.path?.message}
-					{...form.register('path')}
+					label={t(getKey('oneshotsDirectory.label'))}
+					id="oneshotsDirectory"
+					placeholder={t(getKey('oneshotsDirectory.placeholder'))}
+					errorMessage={errors.oneshotsDirectory?.message}
+					description={t(getKey('oneshotsDirectory.description'))}
+					{...form.register('oneshotsDirectory')}
 				/>
 			</div>
 
 			<TextArea
 				className="flex"
-				variant="primary"
 				label={t(getKey('description.label'))}
 				description={t(getKey('description.description'))}
 				placeholder={t(getKey('description.placeholder'))}
@@ -83,6 +115,10 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					onChange={(value) => form.setValue('tags', value)}
 				/>
 			</Suspense>
+
+			<div className="flex">
+				<LibraryTypeSelect />
+			</div>
 		</div>
 	)
 }

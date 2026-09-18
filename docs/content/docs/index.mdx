@@ -1,0 +1,46 @@
+---
+title: Overview
+---
+
+## What is Stump?
+
+Stump is an open source, self hostable, media server for digital books (ebooks, comic books, manga, etc). It is designed to be _easy to use_ and _easy to deploy_.
+
+The short on how it works:
+
+- Install and run Stump on a computer or NAS (Network Attached Storage).
+- Configure your libraries
+- Read your media using the web interface or any compatible client
+
+Stump **is not** a tool used for fetching or downloading any kind of media. It is a tool used to host and access **your own media**. Think of it like a personal Netflix for comic books/manga/etc that lives on a computer in your home.
+
+## Motivations
+
+There are some really solid, self-hostable, OPDS media servers out there. I started out using [Komga](https://komga.org) and started developing Stump because I thought it would be cool to learn what goes into making something like Komga myself. I chose Rust to get more experience with the language.
+
+When I started, I had a few goals in mind:
+
+- Small footprint and low resource usage
+- Efficiency and performance, even on less powerful hardware (e.g., Raspberry Pi)
+  - Personally, I don't need it to be the fastest out there. I mostly care about not _noticing_, if that makes sense 
+- Intuitive, pretty, and easy to use interface
+- Wide format support (e.g., PDF, EPUB, CBZ/CBR)
+
+Stump has grown [quite a bit since then](https://www.star-history.com/?repos=stumpapp%2Fstump&type=date&logscale=&legend=bottom-right) and there are a lot of surfaces to it now to juggle in my spare time. A lot of the decisions made are a combination of my own personal needs and community feedback. So if you have any ideas or suggestions, please don't hesitate to share them by opening an issue.
+
+## Compatibility
+
+Stump should work on all major browsers and operating systems. Generally speaking, 1GB of RAM and disk space is enough. Stump also runs well on low-powered ARM-based single board computers, such as a Raspberry Pi.
+
+## Roadmap
+
+If you're interested in tracking the active or planned development of features, you can take a look at [GitHub issues](https://github.com/stumpapp/stump/issues).
+
+## Similar Projects
+
+There are a number of other projects that are similar to Stump. It certainly isn't the first or only digital book media server out there. If Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, I encourage you to check out these other great open source projects:
+
+- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
+- [Codex](https://github.com/ajslater/codex)
+- [Kavita](https://github.com/Kareadita/Kavita)
+- [Komga](https://github.com/gotson/komga)

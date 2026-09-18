@@ -126,7 +126,14 @@ export const getOPDSInstance = async ({ config, serverKind, url }: GetOPDSParams
 			api.staticToken = token
 			return api
 		})
-		.otherwise(() => new Api({ baseURL: url, authMethod: 'basic', shouldFormatURL }))
+		.otherwise(
+			(config) =>
+				new Api({
+					baseURL: url,
+					authMethod: config?.authless ? 'none' : 'basic',
+					shouldFormatURL,
+				}),
+		)
 
 	const customHeaders = {
 		...config?.customHeaders,
@@ -172,6 +179,7 @@ export const getInstanceForServer = async (
 	const storedToken = await getServerToken(server.id)
 	const authMethod = match(server.config?.auth)
 		.with({ bearer: P.string }, () => 'api-key' as const)
+		.with({ authless: true }, () => 'none' as const)
 		.otherwise(() => 'token' as const)
 
 	const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
@@ -183,6 +191,11 @@ export const getInstanceForServer = async (
 			authMethod,
 			customHeaders: server.config?.customHeaders,
 		})
+
+	if (instance.isAuthless) {
+		onCacheInstance?.(server.id, instance)
+		return instance
+	}
 
 	instance.tokens = storedToken || undefined
 	const existingToken = await instance.getOrRefreshTokens()
@@ -217,12 +230,7 @@ export const getInstancesForServers = async (
 ): Promise<Record<string, Api>> => {
 	const [compatibleServers, incompatibleServers] = partition(
 		servers,
-		(server) =>
-			server.kind === 'stump' &&
-			match(server.config?.auth)
-				.with({ basic: P.shape({ username: P.string, password: P.string }) }, () => true)
-				.with({ bearer: P.string }, () => true)
-				.otherwise(() => false),
+		(server) => server.kind === 'stump',
 	)
 
 	if (compatibleServers.length === 0) {

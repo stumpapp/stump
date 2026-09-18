@@ -1,5 +1,12 @@
 import { useGraphQLMutation } from '@stump/client'
-import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
+import {
+	CreateOrUpdateLibraryInput,
+	extractErrorMessage,
+	graphql,
+	useFragment,
+	UserPermission,
+} from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
@@ -41,6 +48,7 @@ export const LibrarySettingsConfig = graphql(`
 			processMetadata
 			watch
 			libraryPattern
+			libraryType
 			thumbnailConfig {
 				__typename
 				resizeMethod {
@@ -63,10 +71,12 @@ export const LibrarySettingsConfig = graphql(`
 			}
 			processThumbnailColorsEvenWithoutConfig
 			ignoreRules
+			oneshotsDirectory
 		}
 	}
 `)
 
+// TODO(chore): swap to patchLibrary instead, i am too unmotivated for that chore right now
 const editMutation = graphql(`
 	mutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {
 		updateLibrary(id: $id, input: $input) {
@@ -83,6 +93,7 @@ const scanMutation = graphql(`
 
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
+	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 	const { library } = useLibraryContext()
 	const { config } = useFragment(LibrarySettingsConfig, library)
@@ -104,13 +115,17 @@ export default function LibrarySettingsRouter() {
 					),
 			})
 		},
+		onError: (error) => {
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToUpdate'), {
+				description: extractErrorMessage(error),
+			})
+		},
 	})
 
 	const { mutate: scan } = useGraphQLMutation(scanMutation, {
 		onError: (error) => {
-			console.error('Failed to scan library', error)
-			toast.error('Failed to scan library', {
-				description: 'Please check the logs for more details',
+			toast.error(t('createOrUpdateLibraryForm.errors.failedToScan'), {
+				description: extractErrorMessage(error),
 			})
 		},
 	})
@@ -123,8 +138,7 @@ export default function LibrarySettingsRouter() {
 	const canScan = checkPermission(UserPermission.ScanLibrary)
 	const canAccessMetadata = checkPermission(UserPermission.MetadataFetchRecordRead)
 
-	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
-	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
+	// TODO(chore): swap to patchLibrary instead, i am too unmotivated for that chore right now
 	/**
 	 * A pseudo-patch function which will update the library, mixing what is present in the cache
 	 * with the updates provided.

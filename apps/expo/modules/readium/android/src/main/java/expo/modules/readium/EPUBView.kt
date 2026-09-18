@@ -193,7 +193,7 @@ class EPUBView(
                 fontFamily =
                     pendingProps.fontFamily
                         ?: oldProps?.fontFamily ?: FontFamily("Literata"),
-                lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
+                lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.5,
                 fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
                 fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
                 readingProgression =

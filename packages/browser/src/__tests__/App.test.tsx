@@ -1,6 +1,6 @@
 import type { UserPreferences } from '@stump/graphql'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 import StumpWebClient from '../App'
 import { useUserStore } from '../stores'
@@ -38,9 +38,7 @@ describe('StumpWebClient', () => {
 			</MemoryRouter>,
 		)
 
-		expect(
-			await screen.findByRole('heading', { name: 'A critical error occurred' }),
-		).toBeInTheDocument()
-		expect(screen.getByRole('link', { name: 'Fehler melden' })).toBeInTheDocument()
+		expect(screen.queryByTestId('criticalErrorHeading')).toBeInTheDocument()
+		expect(await screen.findByRole('link', { name: 'Fehler melden' })).toBeInTheDocument()
 	})
 })

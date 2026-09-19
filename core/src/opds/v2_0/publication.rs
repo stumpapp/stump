@@ -10,9 +10,9 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::{
-	filesystem::{media::get_content_type_for_page, ContentType},
-	opds::v2_0::metadata::OPDSEntryBelongsToEntityBuilder,
-	CoreError, CoreResult,
+	config::StumpConfig, fs_utils::ContentType,
+	media::processor::get_content_type_for_page,
+	opds::v2_0::metadata::OPDSEntryBelongsToEntityBuilder, CoreError, CoreResult,
 };
 
 use super::{
@@ -192,7 +192,7 @@ impl OPDSPublication {
 			let content_type = content_types
 				.get(idx)
 				.cloned()
-				.map(|s| ContentType::from(s.as_str()))
+				.map(|s| s.parse::<ContentType>().unwrap_or(ContentType::UNKNOWN))
 				.map(OPDSLinkType::from)
 				.unwrap_or(OPDSLinkType::ImageJpeg);
 
@@ -271,7 +271,7 @@ impl OPDSPublication {
 		finalizer: &OPDSLinkFinalizer,
 	) -> CoreResult<Vec<OPDSImageLink>> {
 		let first_page_content_type =
-			get_content_type_for_page(&book.media.path, 1).await;
+			get_content_type_for_page(&book.media.path, 1, &StumpConfig::debug()).await;
 
 		match first_page_content_type {
 			Err(error) => {
@@ -334,6 +334,7 @@ impl OPDSPublication {
 mod tests {
 	use std::collections::BTreeMap;
 
+	use ::tests::fixtures::get_test_epub_path;
 	use chrono::Utc;
 	use models::{
 		entity::{media, media_analysis, media_metadata},
@@ -344,9 +345,8 @@ mod tests {
 	};
 	use sea_orm::{DatabaseBackend::Sqlite, IntoMockRow, MockDatabase, Value};
 
-	use crate::{
-		filesystem::media::tests::get_test_epub_path,
-		opds::v2_0::{entity::OPDSSeries, metadata::OPDSEntryBelongsToEntityBuilder},
+	use crate::opds::v2_0::{
+		entity::OPDSSeries, metadata::OPDSEntryBelongsToEntityBuilder,
 	};
 
 	use super::*;
@@ -370,6 +370,7 @@ mod tests {
 				size: 2000,
 				thumbnail_meta: None,
 				thumbnail_path: None,
+				is_oneshot: false,
 			},
 			metadata: Some(media_metadata::Model {
 				media_id: Some("1".to_string()),

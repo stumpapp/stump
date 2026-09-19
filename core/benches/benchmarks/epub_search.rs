@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use criterion::{criterion_group, Criterion};
-use stump_core::filesystem::media::{search_epub, EpubSearchOptions};
+use stump_core::readium::{search_epub, EpubSearchOptions};
 use tokio_util::sync::CancellationToken;
 
 fn fixture_epub() -> String {

@@ -29,18 +29,7 @@
 	"plugins": {},
 	"app": {
 		"withGlobalTauri": true,
-		"windows": [
-			{
-				"fullscreen": false,
-				"height": 700,
-				"resizable": true,
-				"title": "Stump",
-				"width": 1200,
-				"decorations": true,
-				"transparent": false,
-				"center": true
-			}
-		],
+		"windows": [],
 		"security": {
 			"csp": null
 		}

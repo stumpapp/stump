@@ -4,8 +4,8 @@ import { graphql } from '@stump/graphql'
 import { useCallback } from 'react'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { useGridItemSize } from '../listLayout/grid/useGridItemSize'
 import SeriesGridItem from './SeriesGridItem'
 

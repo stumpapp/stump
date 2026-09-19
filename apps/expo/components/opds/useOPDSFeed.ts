@@ -3,7 +3,7 @@ import { OPDSFeed, OPDSNavigationLink, OPDSPublication } from '@stump/sdk'
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
-import { hasLinkRel } from './utils'
+import { hasLinkRel } from '../../lib/opds/utils'
 
 export type PaginationTarget = 'publications' | 'navigation' | null
 

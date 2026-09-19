@@ -11,6 +11,15 @@ vi.mock('sonner', () => ({
 }))
 
 describe('UploadImageModal', () => {
+	const originalConsoleError = console.error
+	beforeAll(() => {
+		console.error = vi.fn()
+	})
+
+	afterAll(() => {
+		console.error = originalConsoleError
+	})
+
 	beforeEach(() => {
 		vi.clearAllMocks()
 	})

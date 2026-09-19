@@ -45,9 +45,9 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 	const router = useRouter()
 
 	const serverPath = match(server.kind)
-		.with('stump', () => '/server/[id]')
-		.with('opds', () => '/opds/[id]')
-		.with('opds-legacy', () => '/opds-legacy/[id]')
+		.with('stump', () => '/stump/[serverId]')
+		.with('opds', () => '/opds/[serverId]')
+		.with('opds-legacy', () => '/opds-legacy/[serverId]')
 		.exhaustive()
 
 	const serverKind = useMemo(() => {
@@ -68,7 +68,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 			// @ts-expect-error: It's fine
 			pathname: overridePath || serverPath,
 			params: {
-				id: server.id,
+				serverId: server.id,
 			},
 		})
 	}
@@ -88,7 +88,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 												ios: 'antenna.radiowaves.left.and.right',
 												android: Rss,
 											},
-											onPress: () => onPress('/opds/[id]'),
+											onPress: () => onPress('/opds/[serverId]'),
 										} as const,
 										{
 											label: t('common.accessOpdsV1'),
@@ -96,7 +96,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete }: Props)
 												ios: 'antenna.radiowaves.left.and.right',
 												android: Rss,
 											},
-											onPress: () => onPress('/opds-legacy/[id]'),
+											onPress: () => onPress('/opds-legacy/[serverId]'),
 										} as const,
 									],
 								},

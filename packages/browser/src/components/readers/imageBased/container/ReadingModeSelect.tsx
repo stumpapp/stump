@@ -1,4 +1,4 @@
-import { Label, NativeSelect } from '@stump/components'
+import { NativeSelect } from '@stump/components'
 import { ReadingMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
@@ -27,8 +27,7 @@ export default function ReadingModeSelect({ value, onChange }: Props) {
 	)
 
 	return (
-		<div className="py-1.5">
-			<Label htmlFor="reading-mode">{t('imageReader.settings.readingMode.label')}</Label>
+		<div>
 			<NativeSelect
 				id="reading-mode"
 				size="sm"

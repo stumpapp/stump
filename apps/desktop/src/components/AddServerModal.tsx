@@ -32,7 +32,7 @@ export default function AddServerModal({ existingServers, onCreateServer }: Prop
 			confirmText={t(getKey('confirm'))}
 			formId={CREATE_OR_UPDATE_SERVER_FORM_ID}
 			trigger={
-				<Button size="sm" variant="primary" onClick={() => setIsCreatingServer(true)}>
+				<Button size="sm" onClick={() => setIsCreatingServer(true)}>
 					{t(getKey('trigger'))}
 				</Button>
 			}

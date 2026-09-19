@@ -1,7 +1,7 @@
 import { parseGraphQLDecimal } from '@stump/client'
 import { BookByIdQuery } from '@stump/graphql'
 import { formatHumanDuration, formatNarrowDuration } from '@stump/i18n'
-import { formatDistanceToNowStrict } from 'date-fns'
+import { formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns'
 import { toOrdinal } from 'to-words'
 
 import { DownloadedFile } from '~/components/localLibrary/types'
@@ -11,32 +11,52 @@ import { useDisplay, useTranslate } from '~/lib/hooks'
 export type CurrentProgressCardProps = {
 	hidden: boolean
 	showChapterTitle: boolean
+	progressData: ProgressData
+}
+
+type ProgressData = {
 	chapterTitle: string | undefined | null
 	page: number | undefined | null
 	totalPages: number | undefined | null
 	percentage: number | undefined | null
 	readingTimeSeconds: number | undefined | null
+	lastRead: Date | undefined | null
 }
 
 export function CurrentProgressCard({
 	hidden,
 	showChapterTitle,
-	chapterTitle,
-	page,
-	totalPages,
-	percentage,
-	readingTimeSeconds,
+	progressData,
 }: CurrentProgressCardProps) {
 	const { isTablet } = useDisplay()
 	const { t, locale } = useTranslate()
 
 	if (hidden) return
 
-	const readingTime = readingTimeSeconds
-		? isTablet
-			? formatHumanDuration(readingTimeSeconds)
-			: formatNarrowDuration(readingTimeSeconds, { locale })
-		: t('common.unknown')
+	const { chapterTitle, page, totalPages, percentage, readingTimeSeconds, lastRead } = progressData
+
+	const readingTimeString = readingTimeSeconds
+		? formatNarrowDuration(readingTimeSeconds, { locale })
+		: undefined
+
+	const lastReadString = lastRead ? formatDistanceToNow(lastRead, { addSuffix: true }) : undefined
+
+	const readTimeStat = {
+		label: t('common.readTime'),
+		value: readingTimeString ?? t('common.unknown'),
+	}
+
+	const lastReadStat = {
+		label: 'Last Read',
+		value: lastReadString ?? t('common.unknown'),
+	}
+
+	const timeStats = []
+	if (isTablet) {
+		timeStats.push(readTimeStat, lastReadStat)
+	} else {
+		timeStats.push(readingTimeString ? readTimeStat : lastReadStat)
+	}
 
 	return (
 		<Card>
@@ -52,7 +72,9 @@ export function CurrentProgressCard({
 					suffix={totalPages ? ` / ${totalPages}` : undefined}
 				/>
 				<Card.Stat label={t('common.completed')} value={percentage} suffix={'%'} />
-				<Card.Stat label={t('common.readTime')} value={readingTime} />
+				{timeStats.map((stat, index) => (
+					<Card.Stat key={index} {...stat} />
+				))}
 			</Card.StatGroup>
 		</Card>
 	)

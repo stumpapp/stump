@@ -3,12 +3,12 @@ import { cn, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2, Club } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
@@ -29,6 +29,7 @@ export default function BookClubNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: { bookClubs },

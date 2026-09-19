@@ -9,7 +9,7 @@ export function useCopyToClipboard(data: string, duration = 2000) {
 	const [, copyToClipboard] = useClipboard()
 
 	const copy = useCallback(async () => {
-		await copyToClipboard(data)
+		copyToClipboard(data)
 		setCopied(true)
 		timeoutRef.current = setTimeout(() => setCopied(false), duration)
 	}, [data, duration, copyToClipboard])

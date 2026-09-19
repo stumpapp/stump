@@ -15,6 +15,7 @@ const buttonVariants = cva('group flex items-center justify-center squircle roun
 			default: 'bg-background-surface active:opacity-90',
 			destructive: 'border border-edge bg-black/5 dark:bg-white/10 active:opacity-80',
 			outline: 'border border-edge bg-background active:bg-background-surface',
+			success: 'bg-fill-success-secondary active:opacity-90',
 			secondary: 'bg-background-inverse',
 			ghost: 'active:bg-accent',
 		},
@@ -48,6 +49,7 @@ const buttonTextVariants = cva('text-base font-medium text-foreground', {
 			outline: '',
 			secondary: 'text-foreground-on-inverse',
 			ghost: 'text-foreground',
+			success: 'text-fill-success-seondary',
 		},
 		size: {
 			default: '',

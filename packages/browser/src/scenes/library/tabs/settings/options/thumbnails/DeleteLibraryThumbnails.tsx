@@ -9,9 +9,12 @@ import {
 	Text,
 } from '@stump/components'
 import { graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 import { useLibraryManagement } from '../../context'
 
@@ -22,6 +25,7 @@ const mutation = graphql(`
 `)
 
 export default function DeleteLibraryThumbnails() {
+	const queryClient = useQueryClient()
 	const {
 		library: { id },
 	} = useLibraryManagement()
@@ -35,6 +39,7 @@ export default function DeleteLibraryThumbnails() {
 	const handleDeleteThumbnails = useCallback(async () => {
 		try {
 			await deleteThumbnails({ id })
+			await invalidateThumbnailQueries(queryClient)
 			toast.success('Library thumbnails deleted')
 		} catch (error) {
 			console.error(error)
@@ -45,7 +50,7 @@ export default function DeleteLibraryThumbnails() {
 				toast.error(fallbackMessage)
 			}
 		}
-	}, [id, deleteThumbnails])
+	}, [id, deleteThumbnails, queryClient])
 
 	return (
 		<>

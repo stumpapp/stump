@@ -2,7 +2,7 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Link, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 
-import paths from '../../paths'
+import { usePaths } from '../../paths'
 
 const seriesQuery = graphql(`
 	query BookLibrarySeriesLinks($id: ID!) {
@@ -22,6 +22,7 @@ type Props = {
 }
 
 export default function BookLibrarySeriesLinks({ seriesId }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: { seriesById: series },

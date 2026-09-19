@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
-import { AddServerDialog } from '~/components/savedServer'
+import { CreateServerSheet } from '~/components/savedServer/createOrUpdate/CreateServerSheet'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useSyncServerAvatars } from '~/lib/hooks/sync'
@@ -24,7 +24,7 @@ export default function Screen() {
 				headerLargeTitle: true,
 				headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 				animation: animationEnabled ? 'default' : 'none',
-				headerRight: () => <AddServerDialog />,
+				headerRight: () => <CreateServerSheet />,
 			}}
 		/>
 	)

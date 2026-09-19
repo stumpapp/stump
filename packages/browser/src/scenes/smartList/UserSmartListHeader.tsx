@@ -1,7 +1,9 @@
 import { useLocaleContext } from '@stump/i18n'
 import { Book, Layers, Library } from 'lucide-react'
+import { useLocation } from 'react-router'
 
 import { EntityHeader } from '@/components/sharedLayout'
+import { usePaths } from '@/paths'
 
 import { useSmartListContext } from './context'
 import { usePrefetchSmartList } from './graphql'
@@ -11,6 +13,8 @@ const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function UserSmartListHeader() {
 	const { t } = useLocaleContext()
+	const location = useLocation()
+	const paths = usePaths()
 	const {
 		list: { id, name },
 		meta,
@@ -22,7 +26,7 @@ export default function UserSmartListHeader() {
 			isActive: !!location.pathname.match(/\/smart-lists\/[^/]+(\/items)?$/),
 			label: t(withLocaleKey('items')),
 			onHover: () => prefetch({ id }),
-			to: 'items',
+			to: paths.smartListItems(id),
 		},
 	]
 
@@ -46,5 +50,12 @@ export default function UserSmartListHeader() {
 			]
 		: undefined
 
-	return <EntityHeader name={name} tabs={tabs} stats={resolvedStats} settingsLink="settings" />
+	return (
+		<EntityHeader
+			name={name}
+			tabs={tabs}
+			stats={resolvedStats}
+			settingsLink={paths.smartListSettings(id)}
+		/>
+	)
 }

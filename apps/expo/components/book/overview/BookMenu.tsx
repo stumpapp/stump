@@ -15,10 +15,10 @@ import { useCallback, useLayoutEffect } from 'react'
 import { Alert, Platform } from 'react-native'
 import { toast } from 'sonner-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import { db, downloadedFiles } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -265,7 +265,7 @@ export default function BookMenu({ data }: Props) {
 
 						<Stack.Toolbar.MenuAction
 							icon="arrow.up.right"
-							onPress={() => router.push(`/server/${book.id}/libraries/${book.library.id}`)}
+							onPress={() => router.push(`/stump/${book.id}/libraries/${book.library.id}`)}
 							subtitle={book.library.name}
 						>
 							{t('bookActions.goToLibrary')}
@@ -273,7 +273,7 @@ export default function BookMenu({ data }: Props) {
 
 						<Stack.Toolbar.MenuAction
 							icon="arrow.up.right"
-							onPress={() => router.push(`/server/${book.id}/series/${book.series.id}`)}
+							onPress={() => router.push(`/stump/${book.id}/series/${book.series.id}`)}
 							subtitle={book.series.resolvedName}
 						>
 							{t('bookActions.goToSeries')}

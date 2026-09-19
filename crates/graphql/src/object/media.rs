@@ -187,6 +187,7 @@ impl Media {
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 		let loader = ctx.data::<DataLoader<MediaAnalysisLoader>>()?;
+		let last_modified = self.model.updated_at;
 
 		let dimensions = match self
 			.model
@@ -206,11 +207,14 @@ impl Media {
 		};
 
 		Ok(ImageRef {
-			url: service.format_url(format!("/api/v2/media/{}/thumbnail", self.model.id)),
+			url: service.cache_friendly_url(
+				format!("/api/v2/media/{}/thumbnail", self.model.id),
+				&last_modified,
+			),
 			height: dimensions.as_ref().map(|dim| dim.1),
 			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.thumbnail_meta.clone(),
-			..Default::default()
+			last_modified,
 		})
 	}
 

@@ -1,5 +1,5 @@
 import { Heading } from '@stump/components'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import MobileSheet from './MobileSheet'
 

@@ -5,9 +5,9 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useActiveServerSafe } from '~/components/activeServer'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { ColumnCount, ImageFilter, TextAlignment } from '~/modules/readium'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 
 import { ZustandMMKVStorage } from './store'
 

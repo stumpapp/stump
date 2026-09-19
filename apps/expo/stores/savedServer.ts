@@ -13,10 +13,25 @@ import { ZustandMMKVStorage } from './store'
 type ServerID = string
 export type ServerKind = 'stump' | 'opds' | 'opds-legacy'
 
+export type NetworkProfile = {
+	ssid?: string | null
+	url: string
+}
+
+// TODO: i don't love that the current methodolgy for dynamic urls is to
+// overwrite url in the provider, it kinda masks what is being done and isn't
+// immediately clear e.g. when inspecting this type. i can document the url
+// field here as such, but still don't love that. i'll sit on it.
+// ^ i think the solution here is to have remoteProfile/remoteUrl specifically that
+// defaults to url? at least that way during management we don't need to load the server
+// and be like "wait, context replaced url so the settings i am changing are nto even accurate"
+
 export type SavedServer = {
 	id: ServerID
 	name: string
 	url: string
+	localProfile?: NetworkProfile
+	autoSwitchToLocal?: boolean
 	kind: ServerKind
 	defaultServer?: boolean
 	avatar?: ServerAvatar | null

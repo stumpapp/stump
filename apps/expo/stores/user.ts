@@ -39,6 +39,7 @@ type MobilePreferencesStore = {
 	opdsLayout: ListLayout
 	smartListLayout: ListLayout
 	bookClubsEnabled: boolean
+	maskUrls: boolean
 	// Note: Will push more analytics to aide in debug efforts
 	enableDebugAnalytics: boolean
 	preferMinimalReader: boolean
@@ -73,6 +74,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			disableDismissGesture: false,
 			autoSyncLocalData: true,
 			thumbnailResizeMode: 'cover',
+			maskUrls: false,
 			// Note: I default to undefined so the localization library can determine a default
 			locale: undefined,
 			opdsLayout: 'grid',

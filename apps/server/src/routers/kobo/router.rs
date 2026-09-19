@@ -18,10 +18,8 @@ use models::shared::{
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
 use stump_core::{
-	filesystem::{
-		image::{GenericImageProcessor, ImageProcessor},
-		ContentType,
-	},
+	fs_utils::ContentType,
+	image::{GenericImageProcessor, ImageProcessor},
 	kobo::entity::MediaWithMetadataAndReadingSessions,
 };
 

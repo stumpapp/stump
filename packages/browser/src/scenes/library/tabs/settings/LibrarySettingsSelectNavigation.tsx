@@ -3,16 +3,20 @@ import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
+import { useRouterContext } from '@/context/RouterContext'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 
-import { routeGroups } from './routes'
+import { useLibraryContext } from '../../context'
+import { createRouteGroups } from './routes'
 
 export default function LibrarySettingsSelectNavigation() {
 	const navigate = useNavigate()
 	const location = useLocation()
 
+	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
-	const { groups } = useRouteGroups({ routeGroups })
+	const { basePath } = useRouterContext()
+	const { groups } = useRouteGroups({ routeGroups: createRouteGroups(library.id, basePath) })
 
 	/**
 	 * The active group based on the current location

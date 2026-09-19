@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router'
 import { SceneContainer } from '@/components/container'
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { intoAPI, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
 import CreateSmartListForm from './CreateSmartListForm'
@@ -24,6 +24,7 @@ const mutation = graphql(`
 `)
 
 export default function CreateSmartListScene() {
+	const paths = usePaths()
 	const client = useQueryClient()
 	const { sdk } = useSDK()
 	const navigate = useNavigate()

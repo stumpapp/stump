@@ -1,10 +1,10 @@
 import { cn, Spacer, Text } from '@stump/components'
 import { ArrowLeft } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import paths from '../../../paths'
+import { usePaths } from '../../../paths'
 import { useEpubReaderContext } from './context'
 import {
 	BookmarkToggle,
@@ -17,6 +17,7 @@ import {
 import { LocationManager } from './locations'
 
 export default function EpubReaderHeader() {
+	const paths = usePaths()
 	const {
 		readerMeta: { bookEntity },
 		controls: { searchBook },

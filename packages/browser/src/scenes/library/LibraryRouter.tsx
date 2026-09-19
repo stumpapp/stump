@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
 
+import { useLibraryContext } from './context.ts'
 import LibraryDefaultRedirect from './LibraryDefaultRedirect.tsx'
 import LibraryLayout from './LibraryLayout.tsx'
 import LibraryAdminLayout from './tabs/settings/LibraryAdminLayout.tsx'
@@ -30,6 +31,7 @@ export default function LibraryRouter() {
 				<Route path="" element={<LibraryDefaultRedirect />} />
 				<Route path="series" element={<LibrarySeriesScene />} />
 				<Route path="books" element={<LibraryBooksScene />} />
+				<Route path="oneshots" element={<OneshotsRoute />} />
 				{canAccessExplorer && <Route path="files" element={<LibraryExplorerScene />} />}
 
 				<Route element={<LibraryAdminLayout />}>
@@ -44,4 +46,14 @@ export default function LibraryRouter() {
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>
 	)
+}
+
+// separate because the route is only present when the library has oneshots configured, and
+// the context isn't added until the layout
+function OneshotsRoute() {
+	const { library } = useLibraryContext()
+	if (!library.config.oneshotsDirectory) return <Navigate to="series" replace />
+	// i absolutely did not want to create a near identical clone of this with just oneshots filtered,
+	// so extended it instead. a bit awkward but not end of the world
+	return <LibrarySeriesScene fixedFilters={[{ isOneshot: true }]} layoutKeyPostfix="oneshots" />
 }

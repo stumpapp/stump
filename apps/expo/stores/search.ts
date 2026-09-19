@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useActiveServer } from '~/components/activeServer'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { ZustandMMKVStorage } from './store'
 

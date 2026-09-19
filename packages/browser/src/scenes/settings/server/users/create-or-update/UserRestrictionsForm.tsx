@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { CreateOrUpdateUserSchema } from './schema'
 
@@ -12,6 +12,7 @@ const getLocaleKey = (path: string) => `${LOCAL_BASE}.${path}`
 const getAgeRestrictionKey = (path: string) => `${getLocaleKey('ageRestriction')}.${path}`
 
 export default function UserRestrictionsForm() {
+	const paths = usePaths()
 	const { t } = useLocaleContext()
 
 	const form = useFormContext<CreateOrUpdateUserSchema>()

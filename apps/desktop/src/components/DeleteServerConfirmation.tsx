@@ -44,7 +44,7 @@ export default function DeleteServerConfirmation({
 			isOpen={isOpen}
 			onClose={onClose}
 			onConfirm={onConfirm}
-			confirmVariant="danger"
+			confirmVariant="destructive"
 			trigger={null}
 			size="md"
 		>

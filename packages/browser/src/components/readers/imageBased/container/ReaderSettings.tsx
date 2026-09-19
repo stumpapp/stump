@@ -1,9 +1,10 @@
 import { BookPreferences, DEFAULT_BOOK_PREFERENCES } from '@stump/client'
-import { Label, RawSwitch } from '@stump/components'
+import { Input, NewCard, RawSwitch } from '@stump/components'
 import { ReadingMode } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import omit from 'lodash/omit'
 import { useCallback, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 
 import { useReaderStore } from '@/stores'
 
@@ -12,12 +13,19 @@ import ImageScalingSelect from './ImageScalingSelect'
 import ReadingDirectionSelect from './ReadingDirectionSelect'
 import ReadingModeSelect from './ReadingModeSelect'
 
+// locale org is a bit fucked after years of changes but it's fine lol
+const getSettingsKey = (key: string) => `imageReader.settings.${key}`
+const getSectionKey = (key: string) => `imageReader.settings.readerSettings.sections.${key}`
+const getSettingsSceneKey = (key: string) =>
+	`settingsScene.app/reader.sections.imageBasedBooks.sections.${key}`
+
 type Props = {
 	forBook?: string
 	currentPage?: number
 }
 
 export default function ReaderSettings({ forBook, currentPage }: Props) {
+	const { t } = useLocaleContext()
 	const [search, setSearch] = useSearchParams()
 
 	const store = useReaderStore((state) => state)
@@ -102,93 +110,142 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 		[forBook, store],
 	)
 
+	const createNumberChangeHandler =
+		(updater: (n: number) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+			const value = e.target.value
+
+			if (!value) {
+				return updater(0)
+			}
+
+			const parsed = parseInt(value)
+			if (!isNaN(parsed) && parsed >= 0) {
+				return updater(parsed)
+			}
+		}
+
 	return (
-		<div className="gap-4 flex flex-col" key={forBook}>
-			<div>
-				<Label className="text-xs font-medium text-muted-foreground uppercase">Mode</Label>
+		<div className="gap-8 flex flex-col" key={forBook}>
+			<NewCard label={t(getSectionKey('mode'))}>
+				<NewCard.Row
+					label={t(getSettingsKey('readingMode.label'))}
+					className="flex-row items-center"
+				>
+					<ReadingModeSelect
+						value={activeSettings.readingMode || DEFAULT_BOOK_PREFERENCES.readingMode}
+						onChange={onChangeReadingMode}
+					/>
+				</NewCard.Row>
 
-				<ReadingModeSelect
-					value={activeSettings.readingMode || DEFAULT_BOOK_PREFERENCES.readingMode}
-					onChange={onChangeReadingMode}
-				/>
+				<NewCard.Row
+					label={t(getSettingsKey('readingDirection.label'))}
+					className="flex-row items-center"
+				>
+					<ReadingDirectionSelect
+						direction={activeSettings.readingDirection || DEFAULT_BOOK_PREFERENCES.readingDirection}
+						onChange={(direction) => onPreferenceChange({ readingDirection: direction })}
+					/>
+				</NewCard.Row>
+			</NewCard>
 
-				<ReadingDirectionSelect
-					direction={activeSettings.readingDirection || DEFAULT_BOOK_PREFERENCES.readingDirection}
-					onChange={(direction) => onPreferenceChange({ readingDirection: direction })}
-				/>
-			</div>
+			<NewCard label={t(getSectionKey('imageOptions'))}>
+				<NewCard.Row
+					label={t(getSettingsKey('doublePageBehavior.label'))}
+					className="flex-row items-center"
+				>
+					<DoubleSpreadBehavior
+						behavior={
+							activeSettings.doublePageBehavior || DEFAULT_BOOK_PREFERENCES.doublePageBehavior
+						}
+						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
+					/>
+				</NewCard.Row>
 
-			<div>
-				<Label className="text-xs font-medium text-muted-foreground uppercase">Image Options</Label>
+				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.separateSecondPage'))}>
+					<RawSwitch
+						checked={activeSettings.secondPageSeparate}
+						onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
+					/>
+				</NewCard.Row>
 
-				<DoubleSpreadBehavior
-					behavior={
-						activeSettings.doublePageBehavior || DEFAULT_BOOK_PREFERENCES.doublePageBehavior
-					}
-					onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
-				/>
+				<NewCard.Row label={t(getSettingsKey('imageScaling.label'))}>
+					<ImageScalingSelect
+						value={activeSettings.imageScaling?.scaleToFit}
+						onChange={(value) =>
+							onPreferenceChange({
+								imageScaling: {
+									scaleToFit: value,
+								},
+							})
+						}
+					/>
+				</NewCard.Row>
+			</NewCard>
 
-				<ImageScalingSelect
-					value={activeSettings.imageScaling?.scaleToFit}
-					onChange={(value) =>
-						onPreferenceChange({
-							imageScaling: {
-								scaleToFit: value,
-							},
-						})
-					}
-				/>
-			</div>
+			<NewCard label={t(getSectionKey('controls'))}>
+				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.panZoomWithoutCtrl'))}>
+					<RawSwitch
+						checked={activeSettings.panzoomWithoutCtrl}
+						onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
+					/>
+				</NewCard.Row>
 
-			<div>
-				<Label className="text-xs font-medium text-muted-foreground uppercase">Preferences</Label>
-				<div className="gap-3 pt-2 flex flex-col">
-					<Label className="px-1 flex items-center justify-between">
-						<span>Separate second page</span>
+				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.tapSidesToNavigate'))}>
+					<RawSwitch
+						checked={activeSettings.tapSidesToNavigate}
+						onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
+					/>
+				</NewCard.Row>
+			</NewCard>
+
+			<NewCard label={t(getSectionKey('preferences'))}>
+				<NewCard.Row label={t(getSettingsKey('readerSettings.preferences.readingTimer'))}>
+					<RawSwitch
+						checked={activeSettings.trackElapsedTime}
+						onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
+					/>
+				</NewCard.Row>
+
+				<NewCard.Row
+					label={t(getSettingsSceneKey('preloadAheadCount.label'))}
+					description={t(getSettingsSceneKey('preloadAheadCount.description'))}
+				>
+					<Input
+						containerClassName="w-32"
+						value={store.settings.preload.ahead}
+						onChange={createNumberChangeHandler((n) =>
+							store.setSettings({ preload: { ahead: n, behind: store.settings.preload.behind } }),
+						)}
+						type="number"
+						min={0}
+					/>
+				</NewCard.Row>
+
+				<NewCard.Row
+					label={t(getSettingsSceneKey('preloadBehindCount.label'))}
+					description={t(getSettingsSceneKey('preloadBehindCount.description'))}
+				>
+					<Input
+						containerClassName="w-32"
+						value={store.settings.preload.behind}
+						onChange={createNumberChangeHandler((n) =>
+							store.setSettings({ preload: { ahead: store.settings.preload.ahead, behind: n } }),
+						)}
+						type="number"
+						min={0}
+					/>
+				</NewCard.Row>
+
+				{/* TODO: Once UX for settings is settled remove this */}
+				{!forBook && (
+					<NewCard.Row label="Experimental animated reader">
 						<RawSwitch
-							checked={activeSettings.secondPageSeparate}
-							onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
+							checked={store.settings.animatedReader || false}
+							onCheckedChange={(checked) => onChangeExperimentalReader(checked)}
 						/>
-					</Label>
-
-					<Label className="px-1 flex items-center justify-between">
-						<span>Pan and zoom without Ctrl / Cmd</span>
-						<RawSwitch
-							checked={activeSettings.panzoomWithoutCtrl}
-							onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
-						/>
-					</Label>
-
-					<Label className="px-1 flex items-center justify-between">
-						<span>Tap sides to navigate</span>
-						<RawSwitch
-							checked={activeSettings.tapSidesToNavigate}
-							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
-						/>
-					</Label>
-
-					<Label className="px-1 flex items-center justify-between">
-						<span>Reading timer</span>
-						<RawSwitch
-							checked={activeSettings.trackElapsedTime}
-							onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
-						/>
-					</Label>
-
-					{/* TODO: Once UX for settings is settled remove this */}
-					{!forBook && (
-						<div>
-							<Label className="p-3 flex items-center justify-between rounded-lg border border-dashed border-primary/40 bg-primary/15">
-								<span>Experimental animated reader</span>
-								<RawSwitch
-									checked={store.settings.animatedReader || false}
-									onCheckedChange={(checked) => onChangeExperimentalReader(checked)}
-								/>
-							</Label>
-						</div>
-					)}
-				</div>
-			</div>
+					</NewCard.Row>
+				)}
+			</NewCard>
 		</div>
 	)
 }

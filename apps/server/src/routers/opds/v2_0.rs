@@ -27,7 +27,7 @@ use sea_orm::{
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::{
-	filesystem::media::get_page_async,
+	media::processor::get_page,
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
@@ -1264,7 +1264,7 @@ async fn get_book_page(
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
 	let (content_type, image_buffer) =
-		get_page_async(PathBuf::from(book.path), page, &ctx.config).await?;
+		get_page(PathBuf::from(book.path), page, &ctx.config).await?;
 
 	Ok(ImageResponse::new(content_type, image_buffer))
 }

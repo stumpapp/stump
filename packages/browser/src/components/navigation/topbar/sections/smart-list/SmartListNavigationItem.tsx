@@ -3,12 +3,12 @@ import { cn, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2, FileStack, List } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { EntityOptionProps } from '@/components/navigation/types'
-import paths from '@/paths'
-import { usePrefetchSmartList } from '@/scenes/smartList'
+import { usePaths } from '@/paths'
+import { usePrefetchSmartList } from '@/scenes/smartList/graphql'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
@@ -27,6 +27,7 @@ export default function SmartListNavigationItem({
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
+	const paths = usePaths()
 	const { sdk } = useSDK()
 	const {
 		data: { smartLists: lists },

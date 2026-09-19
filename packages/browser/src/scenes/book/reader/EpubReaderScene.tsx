@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router'
 
 import { ReadiumWebReader } from '@/components/readers/epub/readium'
 

@@ -7,8 +7,8 @@ import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { Icon } from '../ui'
 
 type Props = {

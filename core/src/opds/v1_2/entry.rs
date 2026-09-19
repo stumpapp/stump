@@ -10,9 +10,10 @@ use models::entity::{library, series};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
+use crate::config::StumpConfig;
 use crate::error::CoreResult;
-use crate::filesystem::media::get_content_types_for_pages;
-use crate::filesystem::{ContentType, FileParts, PathUtils};
+use crate::fs_utils::{ContentType, FileParts, PathUtils};
+use crate::media::processor::get_content_types_for_pages;
 use crate::opds::v1_2::link::OpdsStreamLink;
 use crate::opds::v2_0::entity::OPDSPublicationEntity;
 
@@ -109,8 +110,9 @@ impl OpdsEntry {
 	}
 }
 
+#[async_trait::async_trait]
 pub trait IntoOPDSEntry {
-	fn into_opds_entry(self) -> OpdsEntry;
+	async fn into_opds_entry(self) -> OpdsEntry;
 }
 
 pub struct OPDSEntryBuilder<T> {
@@ -132,8 +134,9 @@ impl<T> OPDSEntryBuilder<T> {
 	}
 }
 
+#[async_trait::async_trait]
 impl IntoOPDSEntry for OPDSEntryBuilder<library::Model> {
-	fn into_opds_entry(self) -> OpdsEntry {
+	async fn into_opds_entry(self) -> OpdsEntry {
 		let mut links = Vec::new();
 
 		let nav_link = OpdsLink::new(
@@ -157,8 +160,9 @@ impl IntoOPDSEntry for OPDSEntryBuilder<library::Model> {
 	}
 }
 
+#[async_trait::async_trait]
 impl IntoOPDSEntry for OPDSEntryBuilder<series::Model> {
-	fn into_opds_entry(self) -> OpdsEntry {
+	async fn into_opds_entry(self) -> OpdsEntry {
 		let mut links = Vec::new();
 
 		let nav_link = OpdsLink::new(
@@ -182,8 +186,9 @@ impl IntoOPDSEntry for OPDSEntryBuilder<series::Model> {
 	}
 }
 
+#[async_trait::async_trait]
 impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
-	fn into_opds_entry(self) -> OpdsEntry {
+	async fn into_opds_entry(self) -> OpdsEntry {
 		let base_url = self.format_url(&format!("books/{}", self.data.media.id));
 
 		let path_buf = PathBuf::from(self.data.media.path.as_str());
@@ -201,12 +206,18 @@ impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
 			vec![1]
 		};
 
-		let page_content_types =
-			get_content_types_for_pages(&self.data.media.path, target_pages)
-				.unwrap_or_else(|error| {
-					tracing::error!(error = ?error, "Failed to get content types for pages");
-					HashMap::default()
-				});
+		let page_content_types = get_content_types_for_pages(
+			&self.data.media.path,
+			target_pages,
+			// this debug() should be fine, config is required only for general processor
+			// interfaces but shouldn't be needed for this one
+			&StumpConfig::debug(),
+		)
+		.await
+		.unwrap_or_else(|error| {
+			tracing::error!(error = ?error, "Failed to get content types for pages");
+			HashMap::default()
+		});
 		tracing::trace!(?page_content_types, "Got page content types");
 
 		let thumbnail_link_type = page_content_types
@@ -409,17 +420,17 @@ mod tests {
 		}
 	}
 
-	#[test]
-	fn test_builder_url_format_with_api_key() {
+	#[tokio::test]
+	async fn test_builder_url_format_with_api_key() {
 		let builder = OPDSEntryBuilder::new(library(), Some("api_key".to_string()));
-		let entry = builder.into_opds_entry();
+		let entry = builder.into_opds_entry().await;
 		assert_eq!(entry.links[0].href, "/opds/api_key/v1.2/libraries/123");
 	}
 
-	#[test]
-	fn test_builder_url_format_without_api_key() {
+	#[tokio::test]
+	async fn test_builder_url_format_without_api_key() {
 		let builder = OPDSEntryBuilder::new(library(), None);
-		let entry = builder.into_opds_entry();
+		let entry = builder.into_opds_entry().await;
 		assert_eq!(entry.links[0].href, "/opds/v1.2/libraries/123");
 	}
 }

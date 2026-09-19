@@ -13,7 +13,7 @@ import { Table } from '@/components/table'
 import { useAppContext } from '@/context'
 
 import JobActionMenu from './JobActionMenu.tsx'
-import JobDataInspector, { JobDataInspectorFragment } from './JobDataInspector.tsx'
+import JobDataInspector from './JobDataInspector.tsx'
 import RunningJobElapsedTime from './RunningJobElapsedTime.tsx'
 
 const LOCALE_BASE = 'settingsScene.server/jobs.sections.history.table'
@@ -139,7 +139,7 @@ export default function JobTable() {
 		})
 	}, [dbJobs, storeJobs])
 
-	const [inspectingData, setInspectingData] = useState<JobDataInspectorFragment | null>()
+	const [inspectingJob, setInspectingJob] = useState<PersistedJob | null>()
 
 	const columns = useMemo<ColumnDef<PersistedJob>[]>(
 		() =>
@@ -237,7 +237,7 @@ export default function JobTable() {
 				columnHelper.display({
 					cell: ({ row }) =>
 						canManageJobs ? (
-							<JobActionMenu job={row.original} onInspectData={setInspectingData} />
+							<JobActionMenu job={row.original} onInspect={() => setInspectingJob(row.original)} />
 						) : null,
 					id: 'actions',
 					size: 28,
@@ -283,7 +283,7 @@ export default function JobTable() {
 				onPrefetchPage={prefetchPage}
 			/>
 
-			<JobDataInspector data={inspectingData} onClose={() => setInspectingData(null)} />
+			<JobDataInspector job={inspectingJob} onClose={() => setInspectingJob(null)} />
 		</Card>
 	)
 }

@@ -7,6 +7,10 @@ import { persist } from 'zustand/middleware'
 
 import { useTauriRPC } from '../utils'
 
+// TODO: there are a LOT of common aspects between this and expo, but enough
+// deviation that ANNOYINGLY sharing isn't as easy as i'd like. i think there is
+// a future here where it can be shared, but for now it will kinda be a dupe
+
 export type SavedServer = {
 	id: string
 	name: string

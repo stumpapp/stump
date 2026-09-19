@@ -1,70 +1,72 @@
-use std::env;
-
 use async_graphql::SimpleObject;
-use serde::{Deserialize, Serialize};
+use schematic::Config;
+use serde::Serialize;
 
-use super::env_keys::*;
-
-const REQUIRED_SCOPES: &str = "email";
-
-/// Configuration for OpenID Connect (OIDC) authentication
-#[derive(Clone, Serialize, Deserialize, PartialEq, SimpleObject)]
-#[graphql(name = "OidcConfig")]
+// see https://moonrepo.github.io/schematic/config/struct/env.html#nested-prefixes, tldr;
+// child structs require their own env_prefix
+/// OIDC authentication configuration
+#[derive(Config, Serialize, Clone, PartialEq, SimpleObject)]
+#[config(env_prefix = "STUMP_OIDC_")]
 pub struct OidcConfig {
 	/// Whether to enable OIDC authentication
-	#[serde(default)]
+	#[setting(default = true)]
+	// ^ default = true because if this struct is present without `enabled` set
+	// we assume first boot
 	pub enabled: bool,
+
 	/// The OIDC provider client ID
-	#[serde(default)]
 	pub client_id: String,
-	/// The OIDC provider issuer URL (e.g., https://accounts.google.com)
-	#[serde(default)]
+
+	/// The OIDC provider issuer URL (e.g., https://accounts.provider.com)
 	pub issuer_url: String,
+
 	/// The client secret
-	#[serde(default)]
-	#[graphql(skip)]
 	pub client_secret: String,
+
 	/// Additional scopes to request (comma-separated)
-	/// Default: "openid,email,profile"
-	#[serde(default = "default_oidc_scopes")]
-	pub scopes: String,
+	/// Defaults to "openid,email,profile"
+	#[setting(
+		default = vec!["openid".to_string(), "email".to_string(), "profile".to_string()],
+		parse_env = schematic::env::split_comma
+	)]
+	pub scopes: Vec<String>,
+
 	/// Allow automatic user registration via OIDC
-	#[serde(default = "default_true")]
+	#[setting(default = true)]
 	pub allow_registration: bool,
+
 	/// Disable local password authentication when OIDC is enabled
-	#[serde(default)]
+	#[setting(default = false)]
 	pub disable_local_auth: bool,
-	/// Additional trusted audiences for ID token verification
-	#[serde(default)]
+
+	/// Additional trusted audiences for ID token verification (comma-separated in env)
+	#[setting(
+		default = vec![],
+		env = "STUMP_OIDC_EXTRA_AUDIENCES",
+		parse_env = schematic::env::split_comma
+	)]
 	pub extra_audiences: Vec<String>,
+
 	/// Path to a CA certificate file (PEM-encoded) to trust when connecting to the OIDC issuer
-	#[serde(default)]
-	#[graphql(skip)]
 	pub ca_cert_file: Option<String>,
 }
 
-impl Default for OidcConfig {
-	fn default() -> Self {
-		Self {
-			enabled: false,
-			client_id: String::new(),
-			issuer_url: String::new(),
-			client_secret: String::new(),
-			scopes: default_oidc_scopes(),
-			allow_registration: true,
-			disable_local_auth: false,
-			extra_audiences: Vec::new(),
-			ca_cert_file: None,
+impl OidcConfig {
+	pub fn is_valid(&self) -> bool {
+		let is_configured_properly = self.enabled
+			&& !self.client_id.is_empty()
+			&& !self.issuer_url.is_empty()
+			&& !self.client_secret.is_empty();
+		if !is_configured_properly && self.enabled {
+			tracing::warn!(
+				client_id = ?self.client_id,
+				issuer_url = ?self.issuer_url,
+				client_secret_set = !self.client_secret.is_empty(),
+				"OIDC is enabled but not properly configured (client_id, issuer_url, and client_secret are required)"
+			);
 		}
+		is_configured_properly
 	}
-}
-
-fn default_oidc_scopes() -> String {
-	"openid,email,profile".to_string()
-}
-
-fn default_true() -> bool {
-	true
 }
 
 impl std::fmt::Debug for OidcConfig {
@@ -83,122 +85,12 @@ impl std::fmt::Debug for OidcConfig {
 	}
 }
 
-impl OidcConfig {
-	/// Load OIDC configuration from environment variables
-	/// Returns None if OIDC is not enabled or not properly configured
-	pub fn from_env() -> Option<Self> {
-		let enabled = env::var(OIDC_ENABLED_KEY)
-			.ok()
-			.and_then(|v| v.parse::<bool>().ok())
-			.unwrap_or(false);
-
-		if !enabled {
-			return None;
-		}
-
-		let client_id = env::var(OIDC_CLIENT_ID_KEY).unwrap_or_default();
-		let issuer_url = env::var(OIDC_ISSUER_URL_KEY).unwrap_or_default();
-		let client_secret = env::var(OIDC_CLIENT_SECRET_KEY).unwrap_or_default();
-
-		if client_id.is_empty() || issuer_url.is_empty() || client_secret.is_empty() {
-			tracing::warn!(
-				"OIDC is enabled but missing required configuration (client_id, issuer_url, or client_secret)"
-			);
-			return None;
-		}
-
-		let scopes = env::var(OIDC_SCOPES_KEY).unwrap_or_else(|_| default_oidc_scopes());
-
-		let mut scopes_set: Vec<String> = scopes
-			.split(',')
-			.map(|s| s.trim().to_string())
-			.filter(|s| !s.is_empty())
-			.collect();
-		// Ensure required scopes are included
-		for required_scope in REQUIRED_SCOPES.split(',') {
-			if !scopes_set.contains(&required_scope.to_string()) {
-				scopes_set.push(required_scope.to_string());
-			}
-		}
-		let scopes = scopes_set.join(",");
-
-		let allow_registration = env::var(OIDC_ALLOW_REGISTRATION_KEY)
-			.ok()
-			.and_then(|v| v.parse::<bool>().ok())
-			.unwrap_or(true);
-		let disable_local_auth = env::var(OIDC_DISABLE_LOCAL_AUTH_KEY)
-			.ok()
-			.and_then(|v| v.parse::<bool>().ok())
-			.unwrap_or(false);
-
-		let extra_audiences = env::var(OIDC_EXTRA_AUDIENCES_KEY)
-			.ok()
-			.map(|v| {
-				v.split(',')
-					.map(|s| s.trim().to_string())
-					.filter(|s| !s.is_empty())
-					.collect()
-			})
-			.unwrap_or_default();
-
-		let ca_cert_file = env::var(OIDC_CA_CERT_FILE_KEY)
-			.ok()
-			.filter(|v| !v.is_empty());
-		if let Some(ref ca_cert_file_specified) = ca_cert_file {
-			tracing::info!("OIDC certificate specified as {}", ca_cert_file_specified);
-		}
-
-		Some(Self {
-			enabled,
-			client_id,
-			issuer_url,
-			client_secret,
-			scopes,
-			allow_registration,
-			disable_local_auth,
-			extra_audiences,
-			ca_cert_file,
-		})
-	}
-
-	/// Check if OIDC is *properly* configured
-	pub fn is_configured(&self) -> bool {
-		let is_configured_properly = self.enabled
-			&& !self.client_id.is_empty()
-			&& !self.issuer_url.is_empty()
-			&& !self.client_secret.is_empty();
-		if !is_configured_properly && self.enabled {
-			tracing::warn!(
-				client_id = ?self.client_id,
-				issuer_url = ?self.issuer_url,
-				client_secret_set = !self.client_secret.is_empty(),
-				"OIDC is enabled but not properly configured (client_id, issuer_url, and client_secret are required)"
-			);
-		}
-		is_configured_properly
-	}
-
-	/// Get the scopes to use when requesting OIDC tokens
-	pub fn get_scopes(&self) -> Vec<String> {
-		self.scopes
-			.split(',')
-			.map(|s| s.trim().to_string())
-			.filter(|s| !s.is_empty())
-			.collect()
-	}
-
-	/// Get the extra trusted audiences for ID token verification, if any
-	pub fn get_extra_audiences(&self) -> Vec<String> {
-		self.extra_audiences.clone()
-	}
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
 
 	#[test]
-	fn test_oidc_config_validation() {
+	fn test_oidc_config_is_valid() {
 		let config = OidcConfig {
 			enabled: true,
 			client_id: "test-client".to_string(),
@@ -207,7 +99,7 @@ mod tests {
 			..Default::default()
 		};
 
-		assert!(config.is_configured());
+		assert!(config.is_valid());
 
 		let invalid_config = OidcConfig {
 			enabled: true,
@@ -216,18 +108,6 @@ mod tests {
 			..Default::default()
 		};
 
-		assert!(!invalid_config.is_configured());
-	}
-
-	#[test]
-	fn test_oidc_scopes_parsing() {
-		let config = OidcConfig {
-			scopes: "openid,email,profile".to_string(),
-			..Default::default()
-		};
-
-		let scopes = config.get_scopes();
-		assert_eq!(scopes.len(), 3);
-		assert_eq!(scopes, vec!["openid", "email", "profile"]);
+		assert!(!invalid_config.is_valid());
 	}
 }

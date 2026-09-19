@@ -1,6 +1,7 @@
 import '@/__mocks__/pointerCapture'
 import '@/__mocks__/resizeObserver'
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import SeriesThumbnailSelector from '../SeriesThumbnailSelector'
@@ -49,11 +50,13 @@ vi.mock('../SeriesBookGrid', () => ({
 describe('SeriesThumbnailSelector', () => {
 	it('renders localized selector content after opening the dialog', () => {
 		render(
-			<SeriesThumbnailSelector
-				fragment={
-					{ id: 'series-1', thumbnail: { url: 'https://example.com/thumbnail.jpg' } } as any
-				}
-			/>,
+			<QueryClientProvider client={new QueryClient()}>
+				<SeriesThumbnailSelector
+					fragment={
+						{ id: 'series-1', thumbnail: { url: 'https://example.com/thumbnail.jpg' } } as any
+					}
+				/>
+			</QueryClientProvider>,
 		)
 
 		fireEvent.click(screen.getByRole('button', { name: 'Choose thumbnail' }))

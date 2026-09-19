@@ -1,3 +1,24 @@
+<a name="0.1.9"></a>
+## 0.1.9 (2026-09-19)
+
+### Added
+
+- ✨ Support &#x60;a&#x60;/&#x60;d&#x60; page turning in image reader ([#1425](https://github.com/stumpapp/stump/issues/1425)) [[5fddf1b](https://github.com/stumpapp/stump/commit/5fddf1bbf52635b86278d05d5bf5c6bb1bc13086)]
+
+### Fixed
+
+- 🐛 Fix ReadMore description flicker/re-render on expand ([#1419](https://github.com/stumpapp/stump/issues/1419)) [[4a5b53f](https://github.com/stumpapp/stump/commit/4a5b53f1ecc806dff6853ad15592bbe6b753b442)]
+- 🐛 (expo,android) Use sheet store and fix preferences lifecycle in native module ([#1426](https://github.com/stumpapp/stump/issues/1426)) [[cf34160](https://github.com/stumpapp/stump/commit/cf341607f52ec16fa467e9b32327686620f1cbb9)]
+
+### Security
+
+- 🔒 Fix security audit findings [[3d58542](https://github.com/stumpapp/stump/commit/3d5854228d8f314f36ed6aeb9a4714cc4c30ed50)]
+
+### Miscellaneous
+
+- 🔀 Merge remote-tracking branch &#x27;origin/main&#x27; into nightly [[17d834e](https://github.com/stumpapp/stump/commit/17d834e77317ba2ed7de3bd93d0fb527ef57d821)]
+
+
 <a name="0.1.8"></a>
 ## 0.1.8 (2026-09-17)
 

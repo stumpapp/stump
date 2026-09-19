@@ -26,14 +26,14 @@ export default function MessageReplyPreview({ replyTo }: Props) {
 
 	// Note: Copying this border from discord was a LOT of pixel peeping, I'm sure there is a better way
 	return (
-		<View className="flex-row px-4 pb-0.5 pt-1.5">
+		<View className="px-4 pb-0.5 pt-1.5 flex-row">
 			{/* 16px row pad + 16px avatar center - 2px stroke + 4px extra for spacing and line shenanigans */}
 			<View className="h-6 pl-[34px]" />
 			<View className="flex-1">
-				<View className="relative flex-row items-center gap-1.5">
+				<View className="gap-1.5 relative flex-row items-center">
 					<View
 						pointerEvents="none"
-						className="absolute -left-6 top-2 h-4 w-6 rounded-tl-lg border-l border-t border-edge"
+						className="-left-6 top-2 h-4 w-6 border-edge absolute rounded-tl-lg border-t border-l"
 					/>
 
 					<Avatar className="ml-1 h-4 w-4" alt={replyName}>
@@ -45,14 +45,14 @@ export default function MessageReplyPreview({ replyTo }: Props) {
 							/>
 						)}
 						<AvatarFallback>
-							<Text className="text-[9px] font-medium">{getSenderInitials(replyTo.member)}</Text>
+							<Text className="font-medium text-[9px]">{getSenderInitials(replyTo.member)}</Text>
 						</AvatarFallback>
 					</Avatar>
 
 					<Text size="xs" className="font-medium text-foreground-muted" numberOfLines={1}>
 						{replyName}
 					</Text>
-					<Text size="xs" className="flex-1 text-foreground-muted" numberOfLines={1}>
+					<Text size="xs" className="text-foreground-muted flex-1" numberOfLines={1}>
 						{replyTo.content}
 					</Text>
 				</View>

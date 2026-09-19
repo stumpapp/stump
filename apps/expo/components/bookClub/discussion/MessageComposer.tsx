@@ -67,7 +67,7 @@ export default function MessageComposer({
 	if (isLocked) {
 		return (
 			<View
-				className="flex-row items-center justify-center gap-2 border-t border-edge bg-background px-4 py-3"
+				className="gap-2 border-edge px-4 py-3 flex-row items-center justify-center border-t bg-background"
 				style={{ paddingBottom: keyboardVisible ? 12 : bottom + 12 }}
 			>
 				<Icon as={Lock} className="h-4 w-4 text-foreground-muted" />
@@ -81,7 +81,7 @@ export default function MessageComposer({
 	return (
 		<View>
 			{replyingTo && (
-				<View className="flex-row items-center gap-2 border-t border-edge bg-background-surface/50 px-4 py-2">
+				<View className="gap-2 border-edge bg-background-surface/50 px-4 py-2 flex-row items-center border-t">
 					<View className="flex-1">
 						<Text size="xs" className="font-medium">
 							Replying to{' '}
@@ -97,12 +97,12 @@ export default function MessageComposer({
 				</View>
 			)}
 			<View
-				className="flex-row items-end gap-2 border-t border-edge bg-background px-4 py-2"
+				className="gap-2 border-edge px-4 py-2 flex-row items-end border-t bg-background"
 				style={{ paddingBottom: bottomPadding }}
 			>
 				<TextInput
 					ref={inputRef}
-					className="native:text-base squircle max-h-[120px] min-h-[40px] flex-1 rounded-2xl border border-edge bg-background-surface px-3 py-2 text-foreground"
+					className="native:text-base squircle border-edge bg-background-surface px-3 py-2 max-h-[120px] min-h-[40px] flex-1 rounded-2xl border text-foreground"
 					placeholder={placeholder}
 					placeholderTextColor="#999"
 					value={text}
@@ -116,7 +116,7 @@ export default function MessageComposer({
 				<Pressable
 					onPress={handleSend}
 					disabled={!text.trim() || isSending}
-					className="mb-1 flex h-9 w-9 items-center justify-center rounded-full bg-background-surface"
+					className="mb-1 h-9 w-9 bg-background-surface flex items-center justify-center rounded-full"
 					style={
 						!isSending && text.trim() ? { backgroundColor: colors.fill.brand.DEFAULT } : undefined
 					}

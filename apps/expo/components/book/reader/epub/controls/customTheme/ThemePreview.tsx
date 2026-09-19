@@ -12,7 +12,7 @@ type ThemePreviewProps = ViewProps & {
 export const ThemePreview = ({ name, theme, className, style, ...props }: ThemePreviewProps) => (
 	<View
 		className={cn(
-			'squircle w-24 rounded-3xl shadow aspect-[6/5] items-center justify-center',
+			'squircle w-24 shadow aspect-[6/5] items-center justify-center rounded-3xl',
 			'border-black/10 dark:border-white/10 border',
 			className,
 		)}

@@ -212,7 +212,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 			<Pressable
 				key={isUnicodeEmoji ? emoji.unified : `custom:${emoji.id}`}
 				onPress={handlePress}
-				className="rounded-xl items-center justify-center"
+				className="items-center justify-center rounded-xl"
 				style={{
 					width: itemSize,
 					height: itemSize,

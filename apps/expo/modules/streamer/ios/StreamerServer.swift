@@ -1,7 +1,7 @@
 import Foundation
+import os.log
 import ReadiumGCDWebServer
 import ZIPFoundation
-import os.log
 
 /// Errors that can occur during streaming operations
 enum StreamerError: LocalizedError {
@@ -15,19 +15,19 @@ enum StreamerError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .serverStartFailed(let reason):
+        case let .serverStartFailed(reason):
             return "Failed to start streaming server: \(reason)"
-        case .archiveNotFound(let path):
+        case let .archiveNotFound(path):
             return "Archive not found at path: \(path)"
-        case .archiveOpenFailed(let path, let error):
+        case let .archiveOpenFailed(path, error):
             return "Failed to open archive at \(path): \(error.localizedDescription)"
-        case .pageNotFound(let pageNumber):
+        case let .pageNotFound(pageNumber):
             return "Page \(pageNumber) not found in archive"
-        case .pageExtractionFailed(let pageNumber, let error):
+        case let .pageExtractionFailed(pageNumber, error):
             return "Failed to extract page \(pageNumber): \(error.localizedDescription)"
-        case .invalidArchiveFormat(let path):
+        case let .invalidArchiveFormat(path):
             return "Invalid archive format: \(path)"
-        case .cacheDirectoryCreationFailed(let error):
+        case let .cacheDirectoryCreationFailed(error):
             return "Failed to create cache directory: \(error.localizedDescription)"
         }
     }
@@ -41,14 +41,14 @@ struct BookConfig {
 
     /// Cached list of image files in the archive (naturally sorted)
     let imageFiles: [Entry]
-    
+
     init(bookId: String, filePath: String, cacheDir: String) throws {
         self.bookId = bookId
         self.filePath = filePath
         self.cacheDir = cacheDir
-        
+
         let archive = try ZipArchive(path: filePath)
-        self.imageFiles = archive.getImageFiles()
+        imageFiles = archive.getImageFiles()
     }
 }
 
@@ -110,12 +110,12 @@ class StreamerServer {
         let options: [String: Any] = [
             ReadiumGCDWebServerOption_Port: port,
             ReadiumGCDWebServerOption_BindToLocalhost: true,
-            ReadiumGCDWebServerOption_AutomaticallySuspendInBackground: false
+            ReadiumGCDWebServerOption_AutomaticallySuspendInBackground: false,
         ]
 
         do {
             try server.start(options: options)
-            self.webServer = server
+            webServer = server
             self.port = server.port
             logger.info("Started on port \(server.port)")
             return server.port
@@ -151,7 +151,7 @@ class StreamerServer {
         try createCacheDirectoryIfNeeded(at: cacheDir)
 
         let config = try BookConfig(bookId: bookId, filePath: filePath, cacheDir: cacheDir)
-        
+
         books[bookId] = config
         logger.debug("Registered book \(bookId) with \(config.imageFiles.count) pages")
     }
@@ -191,7 +191,7 @@ class StreamerServer {
     func getPageCount(bookId: String) -> Int? {
         booksLock.lock()
         defer { booksLock.unlock() }
-        
+
         return books[bookId]?.imageFiles.count
     }
 
@@ -199,12 +199,13 @@ class StreamerServer {
 
     /// Handle a page request
     private func handlePageRequest(request: ReadiumGCDWebServerRequest, completionBlock: @escaping ReadiumGCDWebServerCompletionBlock) {
-        let path = request.path.components(separatedBy: "/").filter({ !$0.isEmpty })
-        
+        let path = request.path.components(separatedBy: "/").filter { !$0.isEmpty }
+
         guard path.count >= 4,
               path[0] == "books",
               path[2] == "pages",
-              let pageNumber = Int(path[3]) else {
+              let pageNumber = Int(path[3])
+        else {
             completionBlock(ReadiumGCDWebServerErrorResponse(statusCode: 400))
             return
         }
@@ -221,7 +222,8 @@ class StreamerServer {
         booksLock.unlock()
 
         if let cachedPagePath = getCachedPagePath(config: config, page: pageNumber),
-           FileManager.default.fileExists(atPath: cachedPagePath) {
+           FileManager.default.fileExists(atPath: cachedPagePath)
+        {
             serveCachedPage(path: cachedPagePath, completionBlock: completionBlock)
             return
         }
@@ -246,7 +248,7 @@ class StreamerServer {
         // Use cached image files list
         let imageFiles = config.imageFiles
 
-        guard page > 0 && page <= imageFiles.count else {
+        guard page > 0, page <= imageFiles.count else {
             throw StreamerError.pageNotFound(page)
         }
 
@@ -259,7 +261,7 @@ class StreamerServer {
         guard let cachedPath = getCachedPagePath(config: config, page: page, originalFilename: entry.path) else {
             throw StreamerError.invalidArchiveFormat("Could not determine file extension for page \(page)")
         }
-        
+
         try data.write(to: URL(fileURLWithPath: cachedPath))
 
         let contentType = getContentType(for: entry.path)
@@ -306,12 +308,12 @@ class StreamerServer {
             guard !ext.isEmpty else { return nil }
             return (config.cacheDir as NSString).appendingPathComponent("\(page).\(ext)")
         } else {
-            guard page > 0 && page <= config.imageFiles.count else { return nil }
-            
+            guard page > 0, page <= config.imageFiles.count else { return nil }
+
             let entry = config.imageFiles[page - 1]
             let ext = (entry.path as NSString).pathExtension
             guard !ext.isEmpty else { return nil }
-            
+
             return (config.cacheDir as NSString).appendingPathComponent("\(page).\(ext)")
         }
     }

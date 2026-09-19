@@ -10,7 +10,7 @@ type Props = {
 
 export default function ListEmpty({ title, message, actions }: Props) {
 	return (
-		<View className="flex-1 py-4">
+		<View className="py-4 flex-1">
 			<EmptyState title={title} message={message} actions={actions} extraActionGap />
 		</View>
 	)

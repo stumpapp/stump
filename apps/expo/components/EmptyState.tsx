@@ -21,13 +21,13 @@ export default function EmptyState({
 	containerStyle,
 }: Props) {
 	return (
-		<View className="h-full flex-1 items-center justify-between gap-6 p-4" style={containerStyle}>
-			<View className="flex-1 items-center justify-center gap-6">
+		<View className="gap-6 p-4 h-full flex-1 items-center justify-between" style={containerStyle}>
+			<View className="gap-6 flex-1 items-center justify-center">
 				<Owl owl="empty" />
 
 				<View className="gap-2 px-4 tablet:max-w-lg">
 					{title && (
-						<Heading size="lg" className="text-center font-semibold leading-tight">
+						<Heading size="lg" className="font-semibold leading-tight text-center">
 							{title}
 						</Heading>
 					)}
@@ -39,7 +39,7 @@ export default function EmptyState({
 
 			{actions && (
 				<View
-					className={cn('w-full gap-3', {
+					className={cn('gap-3 w-full', {
 						'mt-12': extraActionGap,
 					})}
 				>

@@ -195,7 +195,7 @@ class ReadiumModule : Module() {
                     view.pendingProps.fontSize = prop / 16.0 // Normalize to scale
                 }
 
-                Prop("lineHeight") { view: EPUBView, prop: Double ->
+                Prop("lineHeight") { view: EPUBView, prop: Double? ->
                     view.pendingProps.lineHeight = prop
                 }
 

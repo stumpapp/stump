@@ -5,7 +5,6 @@ import { count, eq, not } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { extensionFromMime, getAcquisitionLink, getPublicationId } from '~/lib/opds/utils'
 import { db } from '~/db'
 import { downloadQueue, downloadQueueStatus } from '~/db/schema'
 import {
@@ -14,6 +13,7 @@ import {
 	type DownloadQueueMetadata,
 	getDownloadQueueManager,
 } from '~/lib/downloadQueue'
+import { extensionFromMime, getAcquisitionLink, getPublicationId } from '~/lib/opds/utils'
 import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 
 const downloadQueueKeys = {

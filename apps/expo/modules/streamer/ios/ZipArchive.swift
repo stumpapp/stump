@@ -12,7 +12,7 @@ class ZipArchive {
     init(path: String) throws {
         self.path = path
         do {
-            self.archive = try Archive(url: URL(fileURLWithPath: path), accessMode: .read)
+            archive = try Archive(url: URL(fileURLWithPath: path), accessMode: .read)
         } catch {
             throw StreamerError.archiveOpenFailed(path, error as NSError)
         }
@@ -29,7 +29,8 @@ class ZipArchive {
             // Skip directories and non-image files
             guard entry.type == .file,
                   Self.imageExtensions.contains(ext),
-                  !isHiddenFile(filename) else {
+                  !isHiddenFile(filename)
+            else {
                 continue
             }
 

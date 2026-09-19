@@ -16,13 +16,13 @@ export default function Unimplemented({ message = DEFAULT_TEXT }: Props) {
 
 	return (
 		<View
-			className="h-full flex-1 items-center justify-center gap-8 p-4"
+			className="gap-8 p-4 h-full flex-1 items-center justify-center"
 			style={emptyContainerStyle}
 		>
 			<Owl owl="construction" />
 
 			<View className="gap-2 px-4 tablet:max-w-lg">
-				<Heading size="xl" className="text-center font-semibold leading-tight">
+				<Heading size="xl" className="font-semibold leading-tight text-center">
 					Coming Soon!
 				</Heading>
 
@@ -31,7 +31,7 @@ export default function Unimplemented({ message = DEFAULT_TEXT }: Props) {
 				</Text>
 			</View>
 
-			<View className="w-full gap-3">
+			<View className="gap-3 w-full">
 				<Button variant="secondary" size="lg" roundness="full" onPress={() => router.back()}>
 					<Text>Okay</Text>
 				</Button>

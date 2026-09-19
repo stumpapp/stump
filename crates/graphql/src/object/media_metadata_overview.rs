@@ -1,7 +1,7 @@
-use crate::data::CoreContext;
+use crate::data::{AuthContext, CoreContext};
 use async_graphql::{Context, Object, Result};
-use models::entity::{media, media_metadata};
-use sea_orm::{prelude::*, DatabaseConnection, QuerySelect, Select};
+use models::entity::{media, media_metadata, user::AuthUser};
+use sea_orm::{prelude::*, DatabaseConnection, QuerySelect, QueryTrait, Select};
 use std::collections::BTreeSet;
 
 static VALUE_SEPERATOR: char = ',';
@@ -21,8 +21,19 @@ fn list_str_to_vec(list: String) -> Vec<String> {
 fn get_base_query(
 	column: media_metadata::Column,
 	series_id: Option<String>,
+	user: Option<&AuthUser>,
 ) -> Select<media_metadata::Entity> {
 	let query = media_metadata::Entity::find_for_column(column);
+
+	let query = if let Some(user) = user {
+		let visible_media_ids = media::Entity::find_for_user(user)
+			.select_only()
+			.column(media::Column::Id)
+			.into_query();
+		query.filter(media_metadata::Column::MediaId.in_subquery(visible_media_ids))
+	} else {
+		query
+	};
 
 	if let Some(series_id) = series_id {
 		query
@@ -40,8 +51,11 @@ fn get_base_query(
 }
 
 macro_rules! get_unique_values_inner {
-	($column:ident, $conn:ident, $series_id:ident) => {{
-		let query = get_base_query(media_metadata::Column::$column, $series_id);
+	($column:ident, $conn:ident, $series_id:ident) => {
+		get_unique_values_inner!($column, $conn, $series_id, None)
+	};
+	($column:ident, $conn:ident, $series_id:ident, $user:expr) => {{
+		let query = get_base_query(media_metadata::Column::$column, $series_id, $user);
 		let values: Vec<String> = query.into_tuple().all($conn).await?;
 		Ok(make_unique(values.into_iter().flat_map(list_str_to_vec)))
 	}};
@@ -55,58 +69,67 @@ pub struct MediaMetadataOverview {
 #[Object]
 impl MediaMetadataOverview {
 	async fn genres(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Genres, conn, series_id)
+		get_unique_values_inner!(Genres, conn, series_id, Some(user))
 	}
 
 	async fn writers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Writers, conn, series_id)
+		get_unique_values_inner!(Writers, conn, series_id, Some(user))
 	}
 
 	async fn pencillers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Pencillers, conn, series_id)
+		get_unique_values_inner!(Pencillers, conn, series_id, Some(user))
 	}
 
 	async fn inkers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Inkers, conn, series_id)
+		get_unique_values_inner!(Inkers, conn, series_id, Some(user))
 	}
 
 	async fn colorists(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Colorists, conn, series_id)
+		get_unique_values_inner!(Colorists, conn, series_id, Some(user))
 	}
 
 	async fn letterers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Letterers, conn, series_id)
+		get_unique_values_inner!(Letterers, conn, series_id, Some(user))
 	}
 
 	async fn cover_artists(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(CoverArtists, conn, series_id)
+		get_unique_values_inner!(CoverArtists, conn, series_id, Some(user))
 	}
 
 	async fn editors(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Editors, conn, series_id)
+		get_unique_values_inner!(Editors, conn, series_id, Some(user))
 	}
 
 	async fn publishers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
 		let values: Vec<String> =
-			get_base_query(media_metadata::Column::Publisher, series_id)
+			get_base_query(media_metadata::Column::Publisher, series_id, Some(user))
 				.into_tuple()
 				.all(conn)
 				.await?;
@@ -114,21 +137,24 @@ impl MediaMetadataOverview {
 	}
 
 	async fn characters(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Characters, conn, series_id)
+		get_unique_values_inner!(Characters, conn, series_id, Some(user))
 	}
 
 	async fn teams(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Teams, conn, series_id)
+		get_unique_values_inner!(Teams, conn, series_id, Some(user))
 	}
 
 	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Series, conn, series_id)
+		get_unique_values_inner!(Series, conn, series_id, Some(user))
 	}
 }
 
@@ -146,7 +172,7 @@ mod tests {
 	#[test]
 	fn get_base_query_test() {
 		let series_id = Some("test_series".to_string());
-		let query = get_base_query(media_metadata::Column::Genres, series_id);
+		let query = get_base_query(media_metadata::Column::Genres, series_id, None);
 		assert_eq!(
 			query.to_owned().into_query().to_string(SqliteQueryBuilder),
 			r#"SELECT DISTINCT "media_metadata"."genres" FROM "media_metadata" "#

@@ -15,6 +15,7 @@ use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect, QueryTrait};
 
 use crate::{
 	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
 	object::{library::Library, missing_entity::MissingEntity, stats::LibraryStats},
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -22,6 +23,7 @@ use crate::{
 	},
 	utils::db_statement,
 };
+use models::shared::enums::UserPermission;
 
 #[derive(Default)]
 pub struct LibraryQuery;
@@ -200,6 +202,7 @@ impl LibraryQuery {
 		Ok(last_visited)
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn library_missing_entities(
 		&self,
 		ctx: &Context<'_>,

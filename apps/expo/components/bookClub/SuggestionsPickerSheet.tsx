@@ -143,8 +143,8 @@ function SuggestionRow({ suggestion, onSelect }: SuggestionRowProps) {
 
 	return (
 		<Pressable onPress={onSelect}>
-			<View className="gap-3 rounded-2xl bg-black/5 p-3 dark:bg-white/10 flex-row items-center active:opacity-80">
-				<View className="dark:bg-white/15 h-12 w-9 rounded-md bg-black/10 items-center justify-center">
+			<View className="gap-3 bg-black/5 p-3 dark:bg-white/10 flex-row items-center rounded-2xl active:opacity-80">
+				<View className="dark:bg-white/15 h-12 w-9 bg-black/10 items-center justify-center rounded-md">
 					<Icon as={BookOpen} size={16} className="text-foreground-muted" />
 				</View>
 
@@ -162,7 +162,7 @@ function SuggestionRow({ suggestion, onSelect }: SuggestionRowProps) {
 
 				{suggestion.notes && (
 					<Text
-						className="text-xs max-w-[120px] text-right text-foreground-muted italic"
+						className="text-xs text-foreground-muted max-w-[120px] text-right italic"
 						numberOfLines={2}
 					>
 						&ldquo;{suggestion.notes}&rdquo;

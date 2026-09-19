@@ -68,7 +68,7 @@ export const usePrefetchRecentlyAddedSeries = () => {
 	const { sdk } = useSDK()
 	const client = useQueryClient()
 	return useCallback(() => {
-		client.prefetchInfiniteQuery({
+		return client.prefetchInfiniteQuery({
 			queryKey: ['recentlyAddedSeries2'],
 			initialPageParam: {
 				cursor: {

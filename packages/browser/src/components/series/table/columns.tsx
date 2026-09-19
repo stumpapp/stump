@@ -14,6 +14,9 @@ export type SeriesTableData = {
 	percentageCompleted: number
 	status: FileStatus
 	oneshotBookId?: string
+	thumbnail: {
+		url: string
+	}
 }
 
 const columnHelper = createColumnHelper<SeriesTableData>()
@@ -21,9 +24,9 @@ const columnHelper = createColumnHelper<SeriesTableData>()
 const coverColumn = columnHelper.display({
 	cell: ({
 		row: {
-			original: { id, resolvedName },
+			original: { resolvedName, thumbnail },
 		},
-	}) => <CoverImageCell id={id} title={resolvedName} />,
+	}) => <CoverImageCell url={thumbnail.url} title={resolvedName} />,
 	enableGlobalFilter: true,
 	header: () => (
 		<Text size="sm" variant="secondary">

@@ -12,11 +12,11 @@ use sea_orm::{
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
 };
-use stump_core::filesystem::{
-	image::{generate_book_thumbnail, GenerateThumbnailOptions},
+use stump_core::{
+	image::{bump_series_thumbnail_fallbacks, generate_thumbnail_from_book},
+	job::StumpJob,
 	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 };
-use stump_core::job::stump_job::StumpJob;
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -159,18 +159,37 @@ impl SeriesMutation {
 			.unwrap_or_default()
 			.with_page(page);
 
-		let (_, path_buf, _) = generate_book_thumbnail(
-			&book.clone().into(),
-			core.conn.as_ref(),
-			GenerateThumbnailOptions {
-				image_options,
-				core_config: core.config.as_ref().clone(),
-				force_regen: true,
-				filename: Some(id.to_string()),
-			},
+		let (_, path_buf, metadata) = generate_thumbnail_from_book(
+			&book.path,
+			id.as_str(),
+			core.config.as_ref(),
+			image_options,
 		)
 		.await?;
+		series::Entity::update_many()
+			.filter(series::Column::Id.eq(id.to_string()))
+			.col_expr(
+				series::Column::ThumbnailPath,
+				Expr::value(Some(path_buf.to_string_lossy().to_string())),
+			)
+			.col_expr(series::Column::ThumbnailMeta, Expr::value(metadata))
+			.col_expr(
+				series::Column::UpdatedAt,
+				Expr::value(Some(DateTimeWithTimeZone::from(Utc::now()))),
+			)
+			.exec(core.conn.as_ref())
+			.await?;
+
+		bump_series_thumbnail_fallbacks(core.conn.as_ref(), std::slice::from_ref(&id))
+			.await?;
+
 		tracing::debug!(path = ?path_buf, "Generated series thumbnail");
+
+		let series = series::ModelWithMetadata::find_by_id_for_user(id.to_string(), user)
+			.into_model::<series::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Series not found")?;
 
 		Ok(series.into())
 	}

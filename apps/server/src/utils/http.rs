@@ -2,7 +2,7 @@ use axum::{
 	http::{header, HeaderValue},
 	response::{IntoResponse, Response},
 };
-use stump_core::filesystem::ContentType;
+use stump_core::fs_utils::ContentType;
 use tracing::error;
 
 /// [`ImageResponse`] is a thin wrapper struct to return an image correctly in Axum.
@@ -137,7 +137,7 @@ pub async fn download_image(url: &str) -> Result<(Vec<u8>, String), String> {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use stump_core::filesystem::ContentType;
+	use stump_core::fs_utils::ContentType;
 
 	#[test]
 	fn test_buffer_response() {

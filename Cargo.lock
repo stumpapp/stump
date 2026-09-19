@@ -9231,6 +9231,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "simple_crypt",
+ "strum 0.27.2",
  "temp-env",
  "tempfile",
  "tests",

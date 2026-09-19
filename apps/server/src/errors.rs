@@ -7,12 +7,10 @@ use axum::{
 use cli::CliError;
 use stump_core::{
 	error::CoreError,
-	filesystem::{
-		image::{ProcessorError, ThumbnailGenerateError},
-		media::EpubSearchError,
-		FileError,
-	},
+	image::{thumbnail::ThumbnailGenerateError, ImageProcessorError},
+	media::processor::error::MediaProcessorError,
 	opds::v2_0::OPDSV2Error,
+	readium::{EpubSearchError, ReadiumError},
 	CoreEvent,
 };
 use tokio::sync::mpsc;
@@ -207,9 +205,51 @@ impl From<reqwest::Error> for APIError {
 	}
 }
 
-impl From<ThumbnailGenerateError> for APIError {
-	fn from(value: ThumbnailGenerateError) -> Self {
-		APIError::InternalServerError(value.to_string())
+impl From<EpubSearchError> for APIError {
+	fn from(error: EpubSearchError) -> Self {
+		match error {
+			EpubSearchError::InvalidQueryLength { .. }
+			| EpubSearchError::InvalidCursor
+			| EpubSearchError::InvalidLimit { .. } => APIError::BadRequest(error.to_string()),
+			EpubSearchError::Cancelled => APIError::CancelledRequest,
+			EpubSearchError::File(error) => {
+				APIError::InternalServerError(error.to_string())
+			},
+		}
+	}
+}
+
+impl From<ImageProcessorError> for APIError {
+	fn from(error: ImageProcessorError) -> APIError {
+		match error {
+			ImageProcessorError::InvalidQuality => {
+				APIError::BadRequest(error.to_string())
+			},
+			ImageProcessorError::InvalidSizedImage => {
+				APIError::BadRequest(error.to_string())
+			},
+			ImageProcessorError::InvalidConfiguration(ref err) => {
+				APIError::BadRequest(err.to_string())
+			},
+			_ => APIError::InternalServerError(error.to_string()),
+		}
+	}
+}
+
+impl From<MediaProcessorError> for APIError {
+	fn from(error: MediaProcessorError) -> APIError {
+		match error {
+			MediaProcessorError::PageNotFound | MediaProcessorError::FileNotFound => {
+				APIError::NotFound(error.to_string())
+			},
+			_ => APIError::InternalServerError(error.to_string()),
+		}
+	}
+}
+
+impl From<ReadiumError> for APIError {
+	fn from(error: ReadiumError) -> APIError {
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
@@ -275,34 +315,9 @@ impl From<mpsc::error::SendError<CoreEvent>> for APIError {
 	}
 }
 
-impl From<FileError> for APIError {
-	fn from(error: FileError) -> APIError {
-		APIError::InternalServerError(error.to_string())
-	}
-}
-
-impl From<EpubSearchError> for APIError {
-	fn from(error: EpubSearchError) -> Self {
-		match error {
-			EpubSearchError::InvalidQueryLength { .. }
-			| EpubSearchError::InvalidCursor
-			| EpubSearchError::InvalidLimit { .. } => APIError::BadRequest(error.to_string()),
-			EpubSearchError::Cancelled => APIError::CancelledRequest,
-			EpubSearchError::File(error) => APIError::from(error),
-		}
-	}
-}
-
-impl From<ProcessorError> for APIError {
-	fn from(error: ProcessorError) -> APIError {
-		match error {
-			ProcessorError::InvalidQuality => APIError::BadRequest(error.to_string()),
-			ProcessorError::InvalidSizedImage => APIError::BadRequest(error.to_string()),
-			ProcessorError::InvalidConfiguration(err) => {
-				APIError::BadRequest(err.to_string())
-			},
-			_ => APIError::InternalServerError(error.to_string()),
-		}
+impl From<ThumbnailGenerateError> for APIError {
+	fn from(value: ThumbnailGenerateError) -> Self {
+		APIError::InternalServerError(value.to_string())
 	}
 }
 

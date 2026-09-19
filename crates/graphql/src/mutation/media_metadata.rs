@@ -14,7 +14,7 @@ use models::{
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
 use std::collections::HashMap;
-use stump_core::filesystem::metadata::ProviderClientCache;
+use stump_core::metadata::provider::ProviderClientCache;
 
 #[derive(Default)]
 pub struct MediaMetadataMutation;
@@ -124,7 +124,7 @@ impl MediaMetadataMutation {
 		let provider_filter = search.as_ref().and_then(|s| s.provider);
 		let skip_auto_apply = search.is_some();
 
-		stump_core::filesystem::metadata::fetch_media_metadata(
+		stump_core::metadata::provider::fetch_media_metadata(
 			conn,
 			&model.media.id,
 			SearchQuery {
@@ -190,7 +190,7 @@ impl MediaMetadataMutation {
 			.get(candidate_index as usize)
 			.ok_or("Candidate index out of bounds")?;
 
-		stump_core::filesystem::metadata::apply_media_match(
+		stump_core::metadata::provider::apply_media_match(
 			conn,
 			media_id.as_ref(),
 			candidate,

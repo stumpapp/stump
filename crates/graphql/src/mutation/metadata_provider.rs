@@ -129,7 +129,7 @@ impl MetadataProviderMutation {
 			};
 
 			let result = if record.media_id.is_some() {
-				stump_core::filesystem::metadata::apply_media_match(
+				stump_core::metadata::provider::apply_media_match(
 					&tx,
 					record.media_id.as_deref().unwrap(),
 					candidate,
@@ -139,7 +139,7 @@ impl MetadataProviderMutation {
 				)
 				.await
 			} else if record.series_id.is_some() {
-				stump_core::filesystem::metadata::apply_series_match(
+				stump_core::metadata::provider::apply_series_match(
 					&tx,
 					record.series_id.as_deref().unwrap(),
 					candidate,

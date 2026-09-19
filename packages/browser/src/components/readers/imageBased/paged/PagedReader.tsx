@@ -262,9 +262,11 @@ function PagedReader({ currentPage, onPageChange }: PagedReaderProps) {
 			const targetKey = hotkey.keys?.at(0)
 			switch (targetKey) {
 				case 'right':
+				case 'd':
 					handleRightwardPageChange()
 					break
 				case 'left':
+				case 'a':
 					handleLeftwardPageChange()
 					break
 				case 'space':
@@ -286,7 +288,7 @@ function PagedReader({ currentPage, onPageChange }: PagedReaderProps) {
 	/**
 	 * Register the hotkeys for the reader component
 	 */
-	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
+	useHotkeys('right, left, a, d, space, escape', (_, handler) => hotKeyHandler(handler))
 
 	return (
 		<div className="relative m-auto flex w-screen justify-center">

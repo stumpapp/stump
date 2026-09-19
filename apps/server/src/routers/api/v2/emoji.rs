@@ -6,7 +6,7 @@ use axum::{
 };
 use models::entity::custom_emoji;
 use sea_orm::{prelude::*, ColumnTrait};
-use stump_core::filesystem::ContentType;
+use stump_core::fs_utils::ContentType;
 
 use crate::{
 	config::state::AppState,

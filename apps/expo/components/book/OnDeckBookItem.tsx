@@ -1,17 +1,20 @@
 import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { memo } from 'react'
-import { Easing, Pressable, View } from 'react-native'
+import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { COLORS } from '~/lib/constants'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
+import { useSeriesStateMenu } from '~/lib/hooks/useSeriesStateActions'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
+import { ContextMenu } from '../ui/context-menu/context-menu'
 
 const fragment = graphql(`
 	fragment OnDeckBookItem on Media {
@@ -40,6 +43,7 @@ const fragment = graphql(`
 			metadata {
 				totalIssues
 			}
+			...SeriesReadingState
 		}
 	}
 `)
@@ -62,6 +66,7 @@ function OnDeckBookItem({ book }: Props) {
 	const { height, width } = useListItemSize()
 
 	const router = useRouter()
+	const client = useQueryClient()
 
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
@@ -89,8 +94,21 @@ function OnDeckBookItem({ book }: Props) {
 		},
 	)
 
+	const seriesStateActions = useSeriesStateMenu({
+		fragment: data.series,
+		onSuccess: () => client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
+	})
+
 	return (
-		<Pressable onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}>
+		<ContextMenu
+			onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}
+			groups={[
+				{
+					// @ts-expect-error: it is fine, just use sf for ios
+					items: seriesStateActions,
+				},
+			]}
+		>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<ThumbnailImage
@@ -144,7 +162,7 @@ function OnDeckBookItem({ book }: Props) {
 					</View>
 				</View>
 			)}
-		</Pressable>
+		</ContextMenu>
 	)
 }
 

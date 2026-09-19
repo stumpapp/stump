@@ -37,12 +37,7 @@ const query = graphql(`
 			}
 			libraryId
 			readingStatus
-			currentReadthrough
-			lastReadAt
-			userSeriesState {
-				stoppedReadthroughAt
-				droppedAt
-			}
+			...SeriesReadingState
 		}
 	}
 `)
@@ -193,10 +188,8 @@ export default function Screen() {
 							seriesId={id}
 							layoutKey={layoutKey}
 							stats={series.stats}
-							seriesState={series.userSeriesState ?? null}
-							lastReadAt={series.lastReadAt}
-							currentReadthrough={series.currentReadthrough}
 							additionalActions={actions}
+							fragment={series}
 						/>
 					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}

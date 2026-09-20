@@ -1,4 +1,4 @@
-import { Badge, Button, cn } from '@stump/components'
+import { Badge, cn } from '@stump/components'
 import { Minus } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -57,7 +57,7 @@ export default function BadgeListCell<Field extends string>({
 			const url = itemUrl?.(index)
 			const badge = (
 				<Badge
-					key={value}
+					key={`${value}-${index}`}
 					onClick={canEdit ? undefined : () => onItemClick?.(index)}
 					className={cn({
 						'cursor-pointer': (onItemClick || !!url) && !canEdit,
@@ -69,18 +69,17 @@ export default function BadgeListCell<Field extends string>({
 
 			if (canEdit) {
 				return (
-					<div className="group relative">
-						{badge}
-						<Button
-							variant="destructive"
-							size="icon"
-							className="-right-2 -top-2 h-4 w-4 absolute z-10 opacity-0 transition-opacity group-hover:opacity-100"
-							aria-label="Remove item"
+					<Badge key={`${value}-${index}`} className="pr-1">
+						{value}
+						<button
+							type="button"
+							aria-label={`Remove ${value}`}
 							onClick={() => onRemove(index)}
+							className="h-4 w-4 inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full opacity-70 hover:opacity-100"
 						>
 							<Minus className="h-3 w-3" />
-						</Button>
-					</div>
+						</button>
+					</Badge>
 				)
 			}
 
@@ -91,7 +90,7 @@ export default function BadgeListCell<Field extends string>({
 					: { to: url }
 				return (
 					// @ts-expect-error: TS doesn't understand I did this correctly lol
-					<Component {...props} key={`${value}-link-wrapper`}>
+					<Component {...props} key={`${value}-${index}-link-wrapper`}>
 						{badge}
 					</Component>
 				)
@@ -104,7 +103,7 @@ export default function BadgeListCell<Field extends string>({
 	const data = canEdit ? valuesFromForm : values
 
 	return (
-		<div className="gap-1 flex h-full flex-wrap items-center">
+		<div className="gap-1.5 flex h-full flex-wrap items-center">
 			{data?.map(renderBadge)}
 
 			{canEdit && <AddFieldsDialog binding={binding} onSave={onAppendValues} />}

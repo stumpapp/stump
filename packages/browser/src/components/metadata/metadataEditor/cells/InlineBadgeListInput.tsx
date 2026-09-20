@@ -1,4 +1,4 @@
-import { Badge, Button, cn } from '@stump/components'
+import { Badge, cn } from '@stump/components'
 import { Minus } from 'lucide-react'
 
 import AddFieldsDialog from '../AddFieldsDialog'
@@ -21,23 +21,22 @@ export default function InlineBadgeListInput({ values, onChange, className, bind
 
 	const renderBadge = (value: string, index: number) => {
 		return (
-			<div key={`${value}-${index}`} className="group relative">
-				<Badge>{value}</Badge>
-				<Button
-					variant="destructive"
-					size="icon"
-					className="-right-2 -top-2 h-4 w-4 absolute z-10 opacity-0 transition-opacity group-hover:opacity-100"
-					aria-label="Remove item"
+			<Badge key={`${value}-${index}`} className="pr-1">
+				{value}
+				<button
+					type="button"
+					aria-label={`Remove ${value}`}
 					onClick={() => onRemove(index)}
+					className="h-4 w-4 inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full opacity-70 hover:opacity-100"
 				>
 					<Minus className="h-3 w-3" />
-				</Button>
-			</div>
+				</button>
+			</Badge>
 		)
 	}
 
 	return (
-		<div className={cn('gap-1 flex h-full flex-wrap items-center', className)}>
+		<div className={cn('gap-1.5 flex h-full flex-wrap items-center', className)}>
 			{values.map(renderBadge)}
 			<AddFieldsDialog binding={binding} onSave={onAppendValues} />
 		</div>

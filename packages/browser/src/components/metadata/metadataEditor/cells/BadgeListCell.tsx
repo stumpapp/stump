@@ -1,4 +1,5 @@
 import { Badge, cn, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Minus } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -21,6 +22,7 @@ export default function BadgeListCell<Field extends string>({
 	itemUrl,
 }: Props<Field>) {
 	const form = useFormContext()
+	const { t } = useLocaleContext()
 
 	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 
@@ -71,10 +73,10 @@ export default function BadgeListCell<Field extends string>({
 				return (
 					<Badge key={`${value}-${index}`} className="pr-1">
 						{value}
-						<ToolTip content="Remove item">
+						<ToolTip content={t('metadataEditor.actions.removeItem')}>
 							<button
 								type="button"
-								aria-label="Remove item"
+								aria-label={t('metadataEditor.actions.removeItem')}
 								onClick={() => onRemove(index)}
 								className="h-4 w-4 inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full opacity-70 hover:opacity-100"
 							>
@@ -99,7 +101,7 @@ export default function BadgeListCell<Field extends string>({
 			}
 			return badge
 		},
-		[itemUrl, onItemClick, canEdit, onRemove],
+		[itemUrl, onItemClick, canEdit, onRemove, t],
 	)
 
 	const data = canEdit ? valuesFromForm : values

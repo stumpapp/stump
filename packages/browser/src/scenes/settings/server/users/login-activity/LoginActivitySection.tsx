@@ -7,7 +7,7 @@ import LoginActivityTable from './LoginActivityTable'
 // TODO(i8n): add key/values
 export default function LoginActivitySection() {
 	return (
-		<div className="gap-y-4 flex flex-col">
+		<div data-testid="login-activity-section" className="gap-y-4 flex flex-col">
 			<div className="flex items-end justify-between">
 				<div>
 					<Heading size="sm">Authentication history</Heading>

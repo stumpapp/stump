@@ -1,28 +1,41 @@
 import { Bookmark } from '@stump/graphql'
+import type { EpubSearchResponse } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 
 import { noop } from '../../../utils/misc'
+import type { EpubAnnotation } from './annotations/types'
+
+export type { EpubSearchResponse, EpubSearchResult } from '@stump/sdk'
+
+export type ReaderLocator = {
+	href: string
+	type: string
+	title?: string
+	chapterTitle?: string
+	locations?: {
+		fragments?: string[] | null
+		progression?: number | null
+		position?: number | null
+		totalProgression?: number | null
+		cssSelector?: string | null
+	} | null
+	text?: {
+		after?: string | null
+		before?: string | null
+		highlight?: string | null
+	} | null
+}
 
 export type EpubReaderChapterMeta = {
-	/** The chapter's title. */
 	name?: string
-	/** The chapter's position in the book. */
 	position?: number
-	/** The chapter's index in the spine */
 	sectionSpineIndex?: number
-	/** The chapter's total number of pages. */
-	totalPages?: number
-	/**
-	 * The chapter's current page. If the viewport is large enough, two pages will
-	 * be displayed, so this will be an array of two numbers.
-	 */
-	currentPage?: [number | undefined, number | undefined]
-	/**
-	 * The visible cfi strings for the first and last visible pages.
-	 */
-	cfiRange: [string | undefined, string | undefined]
+	totalProgression?: number
+	locatorPosition?: number
+	totalPositions?: number
+	currentLocator?: ReaderLocator | null
 }
 
 export interface EpubContent {
@@ -35,8 +48,8 @@ export interface EpubContent {
 export type EpubReaderBookMeta = {
 	chapter: EpubReaderChapterMeta
 	toc: EpubContent[]
-	sectionLengths: { [key: number]: number }
 	bookmarks: Record<string, Bookmark>
+	annotations: EpubAnnotation[]
 }
 
 export type EpubReaderMeta = {
@@ -56,19 +69,14 @@ export type EpubReaderControls = {
 	onPaginateForward: () => void
 	onPaginateBackward: () => void
 	jumpToSection: (section: number) => void
-	getCfiPreviewText: (cfi: string) => Promise<string | null>
-	searchEntireBook: (query: string) => Promise<SpineSearchResult[]>
-	onGoToCfi: (cfi: string) => void
-}
-
-export type SpineSearchResult = {
-	results: SearchResult[]
-	spineIndex: number
-}
-
-export type SearchResult = {
-	cfi: string
-	excerpt: string
+	canGoForward?: boolean
+	canGoBackward?: boolean
+	onGoToLocator: (locator: ReaderLocator) => Promise<boolean>
+	getLocatorPreviewText: (locator: ReaderLocator) => string | null
+	searchBook?: (
+		query: string,
+		opts?: { cursor?: string; signal?: AbortSignal },
+	) => Promise<EpubSearchResponse>
 }
 
 export type EpubReaderContextProps = {
@@ -79,15 +87,14 @@ export type EpubReaderContextProps = {
 export const EpubReaderContext = createContext<EpubReaderContextProps>({
 	controls: {
 		fullscreen: false,
-		getCfiPreviewText: async () => null,
-		onGoToCfi: noop,
+		getLocatorPreviewText: () => null,
+		onGoToLocator: async () => false,
 		onLinkClick: noop,
 		onMouseEnterControls: noop,
 		onMouseLeaveControls: noop,
 		onPaginateBackward: noop,
 		onPaginateForward: noop,
 		jumpToSection: noop,
-		searchEntireBook: async () => [],
 		setFullscreen: noop,
 		setVisible: noop,
 		visible: false,

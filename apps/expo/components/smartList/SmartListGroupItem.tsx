@@ -24,7 +24,7 @@ export default function SmartListGroupItem({ title, isCollapsed, onToggleCollaps
 
 	return (
 		<Pressable onPress={onToggleCollapse}>
-			<View className="flex-row items-center justify-between px-4 py-1">
+			<View className="px-4 py-1 flex-row items-center justify-between">
 				<Text className="text-xl font-medium tracking-wide">{title}</Text>
 
 				<Animated.View style={animatedStyle}>

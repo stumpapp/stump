@@ -18,10 +18,8 @@ use sea_orm::{ActiveValue::Set, DatabaseConnection};
 use stump_core::{
 	config::StumpConfig,
 	database::connect_at,
-	filesystem::scanner::LibraryScanJob,
-	job::{
-		stump_job::StumpJob, ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt,
-	},
+	job::{ApalisWorkerState, JobContext, JobLifecycle, JobOutputExt, StumpJob},
+	scan::library::LibraryScanJob,
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
 use tokio::{runtime::Builder, sync::broadcast};
@@ -257,7 +255,8 @@ async fn setup_test(
 	.await?;
 
 	let config_dir = format!("{}/benches/config", env!("CARGO_MANIFEST_DIR"));
-	let config = StumpConfig::new(config_dir);
+	let config =
+		StumpConfig::load(PathBuf::from(config_dir)).expect("Failed to load config");
 	let job_storage = MemoryStorage::new();
 	let job_ctx = Arc::new(ApalisWorkerState::new(
 		Arc::new(conn),

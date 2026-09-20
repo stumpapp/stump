@@ -105,14 +105,15 @@ export default function MetadataEditorTable<Item extends RowData>({
 			}}
 		>
 			<table
-				className="w-fit divide-y divide-border"
+				// Note: stay full-width when JS sizing goes stale (e.g. right after save).
+				className="w-full divide-y divide-border"
 				style={{
-					width: table.getCenterTotalSize(),
+					minWidth: table.getCenterTotalSize(),
 				}}
 				ref={tableRef}
 			>
 				<thead>
-					<tr className="relative flex">
+					<tr className="relative flex w-full">
 						{table.getFlatHeaders().map((header) => (
 							<th
 								key={header.id}
@@ -123,7 +124,11 @@ export default function MetadataEditorTable<Item extends RowData>({
 										...getCommonPinningStyles(header.column),
 									},
 								}}
-								className="min-h-10 relative bg-card/70"
+								className={cn(
+									'min-h-10 relative bg-card/70',
+									// Fill leftover space so the row spans the table when sizes run short.
+									{ grow: header.column.columnDef.meta?.isGrow },
+								)}
 							>
 								{flexRender(header.column.columnDef.header, header.getContext())}
 
@@ -153,10 +158,13 @@ export default function MetadataEditorTable<Item extends RowData>({
 
 				<tbody className="divide-y divide-border">
 					{rows.map((row) => (
-						<tr key={row.id} className="group/row flex w-fit">
+						<tr key={row.id} className="group/row flex w-full">
 							{row.getVisibleCells().map((cell) => (
 								<td
-									className="py-2 pl-1.5 pr-1.5 first:pl-4 last:pl-0 last:pr-0 first:border-r first:border-border"
+									className={cn(
+										'py-2 pl-1.5 pr-1.5 first:pl-4 last:pl-0 last:pr-0 first:border-r first:border-border',
+										{ grow: cell.column.columnDef.meta?.isGrow },
+									)}
 									key={cell.id}
 									style={{
 										width: cell.column.getSize(),
@@ -170,9 +178,9 @@ export default function MetadataEditorTable<Item extends RowData>({
 					))}
 
 					{!rows.length && (
-						<tr>
-							<td colSpan={2}>
-								<div className="h-32 flex items-center justify-center">No Metadata</div>
+						<tr className="flex w-full">
+							<td colSpan={columns.length} className="flex-1">
+								<div className="h-32 flex w-full items-center justify-center">No Metadata</div>
 							</td>
 						</tr>
 					)}

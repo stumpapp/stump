@@ -1,16 +1,14 @@
 import { useGraphQLMutation, useGraphQLUploadMutation, useSDK } from '@stump/client'
-import { Button, Dialog, PickSelect } from '@stump/components'
-import {
-	BookThumbnailSelectorUpdateMutation,
-	FragmentType,
-	graphql,
-	useFragment,
-} from '@stump/graphql'
+import { Button, Dialog } from '@stump/components'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
+import { invalidateThumbnailQueries } from '@/utils/query'
 
 import BookPageGrid from './BookPageGrid'
 
@@ -51,42 +49,30 @@ const uploadMutation = graphql(`
 	}
 `)
 
-type OnSuccessData = PickSelect<BookThumbnailSelectorUpdateMutation, 'updateMediaThumbnail'>
-
 type Props = {
 	fragment: FragmentType<typeof BookThumbnailSelectorFragment>
 }
 
 export default function BookThumbnailSelector({ fragment }: Props) {
 	const book = useFragment(BookThumbnailSelectorFragment, fragment)
+	const { t } = useLocaleContext()
 
 	const [isOpen, setIsOpen] = useState(false)
 	const [page, setPage] = useState<number>()
 
 	const { sdk } = useSDK()
+	const queryClient = useQueryClient()
 
-	const onSuccess = useCallback(
-		({ thumbnail }: OnSuccessData) =>
-			sdk.axios.get(thumbnail.url, {
-				headers: {
-					'Cache-Control': 'no-cache',
-					Pragma: 'no-cache',
-					Expires: '0',
-				},
-			}),
-		[sdk],
-	)
+	const onSuccess = useCallback(() => invalidateThumbnailQueries(queryClient), [queryClient])
 
 	const { mutateAsync: patchThumbnail, isPending: isPatchingThumbnail } = useGraphQLMutation(
 		updateMutation,
-		{
-			onSuccess: (data) => onSuccess(data.updateMediaThumbnail),
-		},
+		{ onSuccess },
 	)
 
 	const { mutateAsync: uploadThumbnail, isPending: isUploadingThumbnail } =
 		useGraphQLUploadMutation(uploadMutation, {
-			onSuccess: (data) => onSuccess(data.uploadMediaThumbnail),
+			onSuccess,
 		})
 
 	const handleOpenChange = (nowOpen: boolean) => {
@@ -106,13 +92,14 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 		async (file: File) => {
 			try {
 				await uploadThumbnail({ id: book.id, file })
+				setPage(undefined)
 				setIsOpen(false)
 			} catch (error) {
 				console.error(error)
-				toast.error('Failed to upload image')
+				toast.error(t('thumbnailSelector.errors.uploadFailed'))
 			}
 		},
-		[book.id, uploadThumbnail],
+		[book.id, t, uploadThumbnail],
 	)
 
 	const handleConfirm = useCallback(async () => {
@@ -120,12 +107,13 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 
 		try {
 			await patchThumbnail({ id: book.id, input: { page } })
+			setPage(undefined)
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to update thumbnail')
+			toast.error(t('thumbnailSelector.errors.updateFailed'))
 		}
-	}, [patchThumbnail, page, book.id])
+	}, [patchThumbnail, page, book.id, t])
 
 	return (
 		<div className="relative">
@@ -147,9 +135,9 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 				</Dialog.Trigger>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
-						<Dialog.Title>Select a thumbnail</Dialog.Title>
+						<Dialog.Title>{t('thumbnailSelector.title')}</Dialog.Title>
 						<Dialog.Description>
-							Choose a page from this book to use as the new thumbnail
+							{t('thumbnailSelector.descriptions.chooseBookPage')}
 						</Dialog.Description>
 						<Dialog.Close onClick={() => setIsOpen(false)} />
 					</Dialog.Header>
@@ -163,14 +151,14 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 
 					<Dialog.Footer>
 						<Button variant="outline" onClick={handleCancel}>
-							Cancel
+							{t('common.cancel')}
 						</Button>
 						<Button
 							onClick={handleConfirm}
 							disabled={!page}
 							isLoading={isPatchingThumbnail || isUploadingThumbnail}
 						>
-							Confirm selection
+							{t('thumbnailSelector.actions.confirmSelection')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>

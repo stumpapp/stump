@@ -58,7 +58,7 @@ export const toAbsolutePath = (storedPath: string): string => {
 	return urlJoin(docDir, path)
 }
 
-const serverDirectory = (serverID: string) => urlJoin(baseDirectory, serverID)
+export const serverDirectory = (serverID: string) => urlJoin(baseDirectory, serverID)
 
 export const serverPath = (serverID: string, path: string) =>
 	urlJoin(serverDirectory(serverID), path)

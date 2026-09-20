@@ -7,6 +7,7 @@
 		"skipLibCheck": true,
 		"emitDeclarationOnly": true,
 		"outDir": "dist",
+		"types": ["node", "vitest/globals"],
 		"paths": {
 			"@stump/graphql": ["../graphql/src/index.ts"]
 		}

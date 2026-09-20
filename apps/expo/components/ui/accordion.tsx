@@ -41,7 +41,7 @@ function AccordionItem({
 	return (
 		<AccordionPrimitive.Item
 			className={cn(
-				'border-border border-b',
+				'border-b border-border',
 				Platform.select({ web: 'last:border-b-0' }),
 				className,
 			)}
@@ -83,15 +83,15 @@ function AccordionTrigger({
 
 	return (
 		<TextClassContext.Provider
-			value={cn('text-left text-sm font-medium', Platform.select({ web: 'group-hover:underline' }))}
+			value={cn('text-sm font-medium text-left', Platform.select({ web: 'group-hover:underline' }))}
 		>
 			<AccordionPrimitive.Header>
 				<AccordionPrimitive.Trigger {...props} asChild>
 					<Trigger
 						className={cn(
-							'flex-row items-start justify-between gap-4 rounded-md py-4 disabled:opacity-50',
+							'gap-4 py-4 flex-row items-start justify-between rounded-md disabled:opacity-50',
 							Platform.select({
-								web: 'focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 outline-none transition-all hover:underline focus-visible:ring-[3px] disabled:pointer-events-none [&[data-state=open]>svg]:rotate-180',
+								web: 'flex flex-1 transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none [&[data-state=open]>svg]:rotate-180',
 							}),
 							className,
 						)}
@@ -102,9 +102,9 @@ function AccordionTrigger({
 								as={ChevronDown}
 								size={16}
 								className={cn(
-									'shrink-0 text-foreground-muted',
+									'text-foreground-muted shrink-0',
 									Platform.select({
-										web: 'pointer-events-none translate-y-0.5 transition-transform duration-200',
+										web: 'translate-y-0.5 pointer-events-none transition-transform duration-200',
 									}),
 								)}
 							/>

@@ -8,8 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import RefreshControl from '../RefreshControl'
 import { Card, Text } from '../ui'
 import { Icon } from '../ui/icon'
@@ -36,7 +36,7 @@ export default function NavigationFeed({
 	const router = useRouter()
 	const { sdk } = useSDK()
 	const {
-		activeServer: { id: serverID },
+		activeServer: { id: serverId },
 	} = useActiveServer()
 
 	const onEndReached = () => {
@@ -50,14 +50,14 @@ export default function NavigationFeed({
 			<Pressable
 				onPress={() =>
 					router.push({
-						pathname: '/opds/[id]/feed/[url]',
-						params: { id: serverID, url: resolveUrl(item.href, sdk.rootURL) },
+						pathname: '/opds/[serverId]/feed/[url]',
+						params: { serverId, url: resolveUrl(item.href, sdk.rootURL) },
 					})
 				}
 			>
 				{({ pressed }) => (
 					<Card.Row label={item.title} style={pressed && { opacity: 0.6 }} renderDivider={false}>
-						<Icon as={ChevronRight} className="h-5 w-5 shrink-0 text-foreground-muted" />
+						<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted shrink-0" />
 					</Card.Row>
 				)}
 			</Pressable>

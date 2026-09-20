@@ -12,4 +12,7 @@ export type PushSyncParams = {
 	instances?: Record<string, Api>
 }
 
-export type SyncParams = Omit<PushSyncParams, 'ignoreBookIds'>
+export type SyncParams = Omit<PushSyncParams, 'ignoreBookIds'> & {
+	// TODO(chore): think about this a bit more, added it for quickness
+	suppressAlerts?: boolean
+}

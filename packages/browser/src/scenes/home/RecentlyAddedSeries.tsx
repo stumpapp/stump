@@ -22,6 +22,9 @@ const query = graphql(`
 				percentageCompleted
 				status
 				createdAt
+				oneshotBook {
+					id
+				}
 				media(take: 2, skip: 1) {
 					id
 					resolvedName
@@ -65,7 +68,7 @@ export const usePrefetchRecentlyAddedSeries = () => {
 	const { sdk } = useSDK()
 	const client = useQueryClient()
 	return useCallback(() => {
-		client.prefetchInfiniteQuery({
+		return client.prefetchInfiniteQuery({
 			queryKey: ['recentlyAddedSeries2'],
 			initialPageParam: {
 				cursor: {
@@ -140,6 +143,7 @@ function RecentlyAddedSeries() {
 					isMissing={series.status === 'MISSING'}
 					width={cardWidth}
 					thumbnailData={[series.thumbnail, ...series.media.map((m) => m.thumbnail)]}
+					oneshotBookId={series.oneshotBook?.id}
 				/>
 			)}
 			cardHeight={cardHeight}

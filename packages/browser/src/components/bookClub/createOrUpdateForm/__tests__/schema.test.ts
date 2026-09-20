@@ -2,7 +2,7 @@ import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
 
 import { buildSchema, type CreateOrUpdateBookClubSchema, defaultMemberSpec } from '../schema'
 
-const translateFn = jest.fn((key: string) => key)
+const translateFn = vi.fn((key: string) => key)
 
 const existingClubs = [
 	{

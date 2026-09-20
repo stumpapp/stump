@@ -110,7 +110,7 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 					<ThemePreview
 						name={name}
 						theme={config}
-						className={cn(isActive && 'border-2 border-edge-brand dark:border-edge-brand')}
+						className={cn(isActive && 'border-edge-brand dark:border-edge-brand border-2')}
 					/>
 				</Pressable>
 			</ContextMenu.Trigger>
@@ -142,7 +142,7 @@ const NewThemeButton = () => {
 	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
 	return (
 		<Pressable onPress={() => openCustomizeTheme({ mode: 'create' })}>
-			<View className="squircle w-24 rounded-3xl border-black/60 dark:border-white/60 aspect-[6/5] items-center justify-center border-2 border-dashed">
+			<View className="squircle w-24 border-black/60 dark:border-white/60 aspect-[6/5] items-center justify-center rounded-3xl border-2 border-dashed">
 				<Icon as={Plus} size={24} className="text-black/60 dark:text-white/60" />
 			</View>
 		</Pressable>

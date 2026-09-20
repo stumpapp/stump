@@ -9,10 +9,10 @@ import {
 import { BookReaderSceneQuery, graphql, ReadingMode } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { useBookPreferences } from './useBookPreferences'
 
@@ -25,7 +25,6 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 			extension
 			readProgress {
 				percentageCompleted
-				epubcfi
 				page
 				elapsedSeconds
 			}
@@ -54,6 +53,7 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 `)
 
 export default function BookReaderSceneContainer() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 
 	const { id } = useParams()
@@ -68,7 +68,7 @@ export default function BookReaderSceneContainer() {
 		if (!media) {
 			navigate(paths.notFound(), { replace: true })
 		}
-	}, [media, navigate])
+	}, [media, navigate, paths])
 
 	if (!media) {
 		return null
@@ -94,6 +94,7 @@ type Props = {
 }
 
 function BookReaderScene({ book }: Props) {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const [search] = useSearchParams()
 
@@ -156,20 +157,20 @@ function BookReaderScene({ book }: Props) {
 		if (book.extension.match(EBOOK_EXTENSION)) {
 			navigate(
 				paths.bookReader(book.id, {
-					epubcfi: book.readProgress?.epubcfi || null,
 					isEpub: true,
 				}),
+				{ replace: true },
 			)
 		} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
-			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }))
+			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }), { replace: true })
 		} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 			if (!initialPage && readingMode === ReadingMode.Paged && !animatedReader) {
-				navigate(paths.bookReader(book.id, { page: 1 }))
+				navigate(paths.bookReader(book.id, { page: 1 }), { replace: true })
 			} else if (!!initialPage && initialPage > book.pages) {
-				navigate(paths.bookReader(book.id, { page: book.pages }))
+				navigate(paths.bookReader(book.id, { page: book.pages }), { replace: true })
 			}
 		}
-	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader])
+	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader, paths])
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (

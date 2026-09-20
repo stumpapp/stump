@@ -6,7 +6,7 @@ use axum::{
 };
 use models::entity::user;
 use sea_orm::{prelude::*, ColumnTrait, QuerySelect};
-use stump_core::filesystem::ContentType;
+use stump_core::fs_utils::ContentType;
 
 use crate::{
 	config::state::AppState,

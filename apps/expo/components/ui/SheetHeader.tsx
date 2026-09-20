@@ -23,7 +23,7 @@ export function SheetHeader({
 	submitIcon = { ios: 'checkmark', android: Check },
 }: SheetHeaderProps) {
 	return (
-		<View className="flex-row items-center justify-between px-2 pt-4">
+		<View className="px-2 pt-4 flex-row items-center justify-between">
 			{onClose ? (
 				<HeaderButton onPress={onClose} icon={closeIcon} ios={{ variant: 'glass' }} />
 			) : (

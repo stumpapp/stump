@@ -22,8 +22,6 @@ export type TextCase = 'lowerCase' | 'sentenceCase' | 'titleCase'
 
 type MobilePreferencesStore = {
 	showTabLabels: boolean
-	maskURLs: boolean
-	setMaskURLs: (mask: boolean) => void
 	storeLastRead: boolean
 	reduceAnimations: boolean
 	allowDownscaling: boolean
@@ -41,12 +39,14 @@ type MobilePreferencesStore = {
 	opdsLayout: ListLayout
 	smartListLayout: ListLayout
 	bookClubsEnabled: boolean
+	maskUrls: boolean
 	// Note: Will push more analytics to aide in debug efforts
 	enableDebugAnalytics: boolean
 	preferMinimalReader: boolean
 	displayLanguageKeys: DisplayLanguageKeysType
 	tintListBackground: boolean
 	textCase: TextCase
+	maxPageViewingSeconds: number
 	/**
 	 * Patch the store with new values.
 	 */
@@ -61,8 +61,6 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 	persist(
 		(set) => ({
 			showTabLabels: true,
-			maskURLs: false,
-			setMaskURLs: (mask) => set({ maskURLs: mask }),
 			storeLastRead: false,
 			reduceAnimations: false,
 			allowDownscaling: true,
@@ -76,6 +74,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			disableDismissGesture: false,
 			autoSyncLocalData: true,
 			thumbnailResizeMode: 'cover',
+			maskUrls: false,
 			// Note: I default to undefined so the localization library can determine a default
 			locale: undefined,
 			opdsLayout: 'grid',
@@ -86,6 +85,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			displayLanguageKeys: 'none',
 			textCase: Platform.OS === 'android' ? 'sentenceCase' : 'titleCase',
 			tintListBackground: false,
+			maxPageViewingSeconds: 600,
 			patch: (data) => set(data),
 		}),
 		{

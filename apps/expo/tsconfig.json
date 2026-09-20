@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
+		"types": ["vitest/globals"],
 		"baseUrl": ".",
 		"resolveJsonModule": true,
 		"paths": {

@@ -2,7 +2,7 @@
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { formatHumanDuration, useLocaleContext } from '@stump/i18n'
 import { motion } from 'framer-motion'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
@@ -12,10 +12,12 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
+import GoToPage from './GoToPage'
 
 const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
+	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets, timer } =
 		useImageBaseReaderContext()
@@ -36,6 +38,20 @@ export default function ReaderFooter() {
 	const currentSet = useMemo(
 		() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
 		[currentPage, pageSets],
+	)
+
+	// The position label, e.g. "4-5 of 42". Shown as plain text in continuous modes and
+	// reused as the "go to page" trigger text in paged mode.
+	const pageRangeLabel = useMemo(
+		() =>
+			t('imageReader.footer.pageOf', {
+				current: [...currentSet]
+					.map((idx) => idx + 1)
+					.sort((a, b) => a - b)
+					.join('-'),
+				total: book.pages,
+			}),
+		[currentSet, book.pages, t],
 	)
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
@@ -177,17 +193,24 @@ export default function ReaderFooter() {
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
+						<Text className="text-sm text-[#898d94]">
+							{t('imageReader.footer.readingTime', { time: formattedReadTime })}
+						</Text>
 					)}
 
-					<Text className="text-sm text-[#898d94]">
-						{[...currentSet]
-							.map((idx) => idx + 1)
-							.sort((a, b) => a - b)
-							.join('-')}
-						{' of '}
-						{book.pages}
-					</Text>
+					{/* In paged mode, the position indicator doubles as a "go to page" trigger for
+					    quick recovery. Continuous modes keep the plain text since their page
+					    change path doesn't sync to the URL the same way. */}
+					{readingMode === ReadingMode.Paged ? (
+						<GoToPage
+							currentPage={currentPage}
+							totalPages={book.pages}
+							onSubmit={setCurrentPage}
+							triggerLabel={pageRangeLabel}
+						/>
+					) : (
+						<Text className="text-sm text-[#898d94]">{pageRangeLabel}</Text>
+					)}
 				</div>
 			</div>
 		</motion.nav>

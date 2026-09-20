@@ -16,7 +16,7 @@ import { usePaths } from '@/paths'
 import CompleteSeriesConfirmation from './CompleteSeriesConfirmation'
 import { useSeriesContext } from './context'
 import { SeriesOverviewSheet } from './SeriesOverviewSheet'
-import { usePrefetchSeriesBooks } from './tabs/books/SeriesBooksScene'
+import { usePrefetchSeriesBooks } from './tabs/books/queries'
 
 const completeSeriesMutation = graphql(`
 	mutation SeriesActionComplete($id: ID!) {
@@ -99,7 +99,7 @@ export default function SeriesHeader() {
 			isActive: !!location.pathname.match(/\/series\/[^/]+\/books(\/.*)?$/),
 			label: t('seriesHeader.tabs.books'),
 			onHover: () => prefetchSeriesBooks(id),
-			to: 'books',
+			to: paths.seriesOverview(id),
 		},
 		...(canAccessFiles
 			? [
@@ -111,7 +111,7 @@ export default function SeriesHeader() {
 								path,
 								fetchConfig: checkPermission(UserPermission.UploadFile),
 							}),
-						to: 'files',
+						to: paths.seriesFileExplorer(id),
 					},
 				]
 			: []),
@@ -169,7 +169,7 @@ export default function SeriesHeader() {
 				tabs={tabs}
 				actions={actions}
 				stats={resolvedStats}
-				settingsLink="settings"
+				settingsLink={paths.seriesSettings(id)}
 				onInfoClick={() => setIsOverviewSheetOpen(true)}
 			/>
 

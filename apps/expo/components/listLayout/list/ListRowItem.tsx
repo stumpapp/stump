@@ -75,7 +75,7 @@ export function ListRowItem({
 									style={{ height: 6, borderRadius: 3 }}
 								/>
 
-								<Text size="sm" className="shrink-0 text-foreground-muted">
+								<Text size="sm" className="text-foreground-muted shrink-0">
 									{percentageCompleted.toFixed(0)}%
 								</Text>
 							</View>
@@ -87,7 +87,7 @@ export function ListRowItem({
 								<Text
 									size="sm"
 									// pl-1 adjusted by eye for the infoItems, could be off
-									className="pl-1 shrink-0 text-foreground-muted"
+									className="pl-1 text-foreground-muted shrink-0"
 								>
 									{latestCompletionDate
 										? `${t('common.lastCompleted')} ${intlFormat(latestCompletionDate, {
@@ -112,7 +112,7 @@ export function ListRowItem({
 
 									<Icon
 										as={Check}
-										className="m-1 top-[0.7] text-foreground-muted"
+										className="m-1 text-foreground-muted top-[0.7]"
 										size={16}
 										strokeWidth={2.2}
 									/>

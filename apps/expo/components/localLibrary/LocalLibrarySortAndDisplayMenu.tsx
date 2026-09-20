@@ -1,9 +1,12 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { count, eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Stack } from 'expo-router'
 import {
 	ALargeSmall,
 	AlertCircle,
 	CheckCircle,
+	CircleAlert,
 	Clock,
 	Ellipsis,
 	LibraryBig,
@@ -26,6 +29,7 @@ import {
 	Icon,
 	Text,
 } from '~/components/ui'
+import { db, downloadedFiles, readProgress } from '~/db'
 import {
 	useDownload,
 	useDownloadsCount,
@@ -39,6 +43,7 @@ import { useSelectionStore } from '~/stores/selection'
 
 import { DOWNLOAD_PROBLEMS_SHEET_NAME } from '../downloadQueue'
 import { DownloadSortOption, useDownloadsState } from './store'
+import { SYNC_CONFLICTS_SHEET_NAME } from './syncConflicts'
 
 export function useLocalLibrarySortAndDisplayMenu() {
 	const { t } = useTranslate()
@@ -59,6 +64,17 @@ export function useLocalLibrarySortAndDisplayMenu() {
 
 	const downloadsCount = useDownloadsCount()
 	const failedDownloadsCount = useFailedDownloadsCount()
+
+	const {
+		data: [conflictCountData],
+	} = useLiveQuery(
+		db
+			.select({ count: count() })
+			.from(downloadedFiles)
+			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
+			.where(eq(readProgress.syncStatus, 'CONFLICT')),
+	)
+	const syncConflictsCount = conflictCountData?.count ?? 0
 
 	const handleSortSelection = useCallback(
 		(option: DownloadSortOption) => {
@@ -95,6 +111,20 @@ export function useLocalLibrarySortAndDisplayMenu() {
 				{ text: t('common.delete'), style: 'destructive', onPress: onDeleteAllDownloads },
 			],
 		)
+	}
+
+	const onAttemptSync = async () => {
+		const {
+			progress: { pullResults },
+		} = await syncAll()
+		refetchDownloads()
+		const conflictsCount = Object.values(pullResults).reduce(
+			(acc, result) => acc + result.conflictBookIds.length,
+			0,
+		)
+		if (conflictsCount > 0) {
+			TrueSheet.present(SYNC_CONFLICTS_SHEET_NAME)
+		}
 	}
 
 	return Platform.select({
@@ -136,13 +166,20 @@ export function useLocalLibrarySortAndDisplayMenu() {
 					</Stack.Toolbar.MenuAction>
 					<Stack.Toolbar.MenuAction
 						icon="arrow.trianglehead.2.clockwise.rotate.90"
-						onPress={async () => {
-							await syncAll()
-							refetchDownloads()
-						}}
+						onPress={onAttemptSync}
 					>
 						{t(getActionsKey('attemptSync'))}
 					</Stack.Toolbar.MenuAction>
+
+					{syncConflictsCount > 0 && (
+						<Stack.Toolbar.MenuAction
+							icon="exclamationmark.circle"
+							onPress={() => TrueSheet.present(SYNC_CONFLICTS_SHEET_NAME)}
+						>
+							{t(getActionsKey('syncConflicts'))}
+						</Stack.Toolbar.MenuAction>
+					)}
+
 					<Stack.Toolbar.MenuAction
 						icon="sparkles.rectangle.stack"
 						onPress={() => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled)}
@@ -177,13 +214,11 @@ export function useLocalLibrarySortAndDisplayMenu() {
 				sortConfig={sortConfig}
 				downloadsCount={downloadsCount}
 				failedDownloadsCount={failedDownloadsCount}
+				syncConflictsCount={syncConflictsCount}
 				isCuratedDownloadsEnabled={isCuratedDownloadsEnabled}
 				onSortSelection={handleSortSelection}
 				onSelect={() => setIsSelecting(true)}
-				onSync={async () => {
-					await syncAll()
-					refetchDownloads()
-				}}
+				onSync={onAttemptSync}
 				onToggleCurated={() => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled)}
 				onSeeProblems={() => TrueSheet.present(DOWNLOAD_PROBLEMS_SHEET_NAME)}
 				onDeleteAll={confirmDeleteAllDownloads}
@@ -197,6 +232,7 @@ type AndroidMenuProps = {
 	sortConfig: { option: DownloadSortOption; direction: 'ASC' | 'DESC' }
 	downloadsCount: number
 	failedDownloadsCount: number
+	syncConflictsCount: number
 	isCuratedDownloadsEnabled: boolean
 	onSortSelection: (option: DownloadSortOption) => void
 	onSelect: () => void
@@ -210,6 +246,7 @@ function AndroidSortAndActionsMenu({
 	sortConfig,
 	downloadsCount,
 	failedDownloadsCount,
+	syncConflictsCount,
 	isCuratedDownloadsEnabled,
 	onSortSelection,
 	onSelect,
@@ -346,6 +383,20 @@ function AndroidSortAndActionsMenu({
 						</View>
 					</View>
 				</DropdownMenuItem>
+
+				{syncConflictsCount > 0 && (
+					<DropdownMenuItem
+						onPress={() => TrueSheet.present(SYNC_CONFLICTS_SHEET_NAME)}
+						className="text-foreground"
+					>
+						<View className="gap-4 flex w-full flex-row items-center justify-between">
+							<View className="gap-4 flex flex-row items-center">
+								<Icon as={CircleAlert} size={20} className="text-foreground-muted ml-auto" />
+								<Text className="text-lg">{t(getActionsKey('syncConflicts'))}</Text>
+							</View>
+						</View>
+					</DropdownMenuItem>
+				)}
 
 				<DropdownMenuItem onPress={onToggleCurated} className="text-foreground">
 					<View className="gap-4 flex w-full flex-row items-center justify-between">

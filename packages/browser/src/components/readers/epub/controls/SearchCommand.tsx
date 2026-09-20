@@ -1,49 +1,165 @@
-import { cn, Command, Text } from '@stump/components'
-import { Search } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { cn, Command } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
+import type { EpubSearchResult } from '@stump/sdk'
+import { Loader2, Search } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Spinner from '@/components/Spinner'
 
-import { SpineSearchResult, useEpubReaderContext } from '../context'
+import { useEpubReaderContext } from '../context'
+import { searchResultToReaderLocator } from '../readium/locator'
 import ControlButton from './ControlButton'
 
-export default function SearchCommand() {
-	const {
-		readerMeta,
-		controls: { searchEntireBook, onGoToCfi },
-	} = useEpubReaderContext()
-	const { toc } = readerMeta.bookMeta || {}
+type ResultGroup = {
+	heading: string
+	items: EpubSearchResult[]
+}
 
-	const [isSearching, setIsSearching] = useState(false)
-	const [results, setResults] = useState<SpineSearchResult[]>()
+/**
+ * Groups server search results by chapter title (falling back to the locator title, then
+ * spine position), preserving the order in which each group first appears.
+ */
+export function groupByChapter(
+	results: EpubSearchResult[],
+	sectionLabel = (position: number) => `Section ${position}`,
+): ResultGroup[] {
+	const order: string[] = []
+	const groups = new Map<string, EpubSearchResult[]>()
+
+	for (const result of results) {
+		const heading =
+			result.locator.chapterTitle?.trim() ||
+			result.locator.title?.trim() ||
+			sectionLabel(result.spineIndex + 1)
+
+		const existing = groups.get(heading)
+		if (existing) {
+			existing.push(result)
+		} else {
+			groups.set(heading, [result])
+			order.push(heading)
+		}
+	}
+
+	return order.map((heading) => ({ heading, items: groups.get(heading) ?? [] }))
+}
+
+export default function SearchCommand() {
+	const { t } = useLocaleContext()
+	const {
+		controls: { searchBook, onGoToLocator },
+	} = useEpubReaderContext()
 
 	const [query, setQuery] = useState('')
 	const [open, setOpen] = useState(false)
 
-	/**
-	 * A callback to search the entire book for the given query. This will
-	 * return an array of arrays, where each array is a group of results
-	 * from a single spine item.
-	 */
-	const doSearch = useCallback(async () => {
-		if (!query) return
+	const [isSearching, setIsSearching] = useState(false)
+	const [isLoadingMore, setIsLoadingMore] = useState(false)
+	const [error, setError] = useState<string | null>(null)
+	const [hasSearched, setHasSearched] = useState(false)
 
-		setIsSearching(true)
-		const results = await searchEntireBook(query)
-		setResults(results)
-		setIsSearching(false)
-	}, [searchEntireBook, query])
+	const [serverResults, setServerResults] = useState<EpubSearchResult[]>([])
+	const [nextCursor, setNextCursor] = useState<string | undefined>(undefined)
 
-	/**
-	 * A callback to go to a specific CFI in the book.
-	 */
-	const handleGoToCfi = useCallback(
-		(cfi: string) => {
-			onGoToCfi(cfi)
-			setOpen(false)
+	// Guards against a slow, superseded request overwriting the results of a newer one.
+	const requestIdRef = useRef(0)
+	const abortControllerRef = useRef<AbortController | null>(null)
+
+	const abortInFlightRequest = useCallback(() => {
+		abortControllerRef.current?.abort()
+		abortControllerRef.current = null
+	}, [])
+
+	const resetResults = useCallback(() => {
+		setServerResults([])
+		setNextCursor(undefined)
+		setHasSearched(false)
+		setError(null)
+	}, [])
+
+	const runServerSearch = useCallback(
+		async (searchQuery: string, opts?: { cursor?: string }) => {
+			if (!searchBook) return
+
+			abortInFlightRequest()
+			const controller = new AbortController()
+			abortControllerRef.current = controller
+			const requestId = ++requestIdRef.current
+
+			const isLoadMore = !!opts?.cursor
+			if (isLoadMore) {
+				setIsLoadingMore(true)
+			} else {
+				setIsSearching(true)
+				setError(null)
+			}
+
+			try {
+				const response = await searchBook(searchQuery, {
+					cursor: opts?.cursor,
+					signal: controller.signal,
+				})
+				// A newer request has since started — ignore this now-stale response.
+				if (requestId !== requestIdRef.current) return
+
+				setServerResults((prev) => (isLoadMore ? [...prev, ...response.results] : response.results))
+				setNextCursor(response.nextCursor ?? undefined)
+				setHasSearched(true)
+			} catch (err) {
+				if (controller.signal.aborted || requestId !== requestIdRef.current) return
+				console.error('[SearchCommand] search failed', err)
+				setError(t('epubReader.search.failed'))
+			} finally {
+				if (requestId === requestIdRef.current) {
+					setIsSearching(false)
+					setIsLoadingMore(false)
+				}
+			}
 		},
-		[onGoToCfi],
+		[searchBook, abortInFlightRequest, t],
 	)
+
+	const doSearch = useCallback(() => {
+		const trimmed = query.trim()
+		if (!trimmed) return
+		void runServerSearch(trimmed)
+	}, [query, runServerSearch])
+
+	const loadMore = useCallback(() => {
+		const trimmed = query.trim()
+		if (!trimmed || !nextCursor || isLoadingMore) return
+		void runServerSearch(trimmed, { cursor: nextCursor })
+	}, [query, nextCursor, isLoadingMore, runServerSearch])
+
+	const handleGoToResult = useCallback(
+		async (result: EpubSearchResult) => {
+			const navigated = await onGoToLocator(searchResultToReaderLocator(result))
+			if (navigated) {
+				setOpen(false)
+			}
+		},
+		[onGoToLocator],
+	)
+
+	// Abort any in-flight request and drop stale results once the query is cleared.
+	useEffect(() => {
+		if (!query.trim()) {
+			abortInFlightRequest()
+			resetResults()
+		}
+	}, [query, abortInFlightRequest, resetResults])
+
+	// Abort on close so a response for a closed dialog never lands.
+	useEffect(() => {
+		if (!open) {
+			abortInFlightRequest()
+		}
+	}, [open, abortInFlightRequest])
+
+	// Abort on unmount.
+	useEffect(() => {
+		return () => abortInFlightRequest()
+	}, [abortInFlightRequest])
 
 	/**
 	 * An effect to handle keyboard shortcuts for opening and closing the search dialog.
@@ -59,6 +175,8 @@ export default function SearchCommand() {
 			} else if (e.key === 'Escape') {
 				setOpen(false)
 			} else if (e.key === 'Enter' && open) {
+				// The search input handles Enter itself; skip to avoid double submits.
+				if ((e.target as HTMLElement | null)?.tagName === 'INPUT') return
 				doSearch()
 			}
 		}
@@ -67,61 +185,10 @@ export default function SearchCommand() {
 		return () => document.removeEventListener('keydown', onKeyDown)
 	}, [open, doSearch])
 
-	useEffect(() => {
-		if (!query.length) {
-			setResults(undefined)
-		}
-	}, [query])
-
-	const getSpineTitle = useCallback(
-		(idx: number) => {
-			const adjustedIdx = idx - 1
-			let item = toc?.at(adjustedIdx)
-			if (item?.play_order !== adjustedIdx) {
-				item = toc?.find((i) => i.play_order === adjustedIdx)
-			}
-
-			return item?.label || `Spine item ${idx}`
-		},
-		[toc],
+	const serverGroups = useMemo(
+		() => groupByChapter(serverResults, (position) => t('epubReader.search.section', { position })),
+		[serverResults, t],
 	)
-
-	const renderResults = () => {
-		if (!results) {
-			return null
-		} else if (!results.length) {
-			return <Command.Empty>No results found.</Command.Empty>
-		} else {
-			return results.map(({ spineIndex, results }, idx) => (
-				<Command.Group key={`group-${idx}`} heading={getSpineTitle(spineIndex)}>
-					{results.map((result) => (
-						<Command.Item
-							key={result.cfi}
-							onDoubleClick={() => handleGoToCfi(result.cfi)}
-							className="space-y-1 flex flex-col"
-						>
-							<p className="w-full">
-								{result.excerpt.split(new RegExp(`(${query})`, 'gi')).map((part, idx) => {
-									if (part.toLowerCase() === query.toLowerCase()) {
-										return (
-											<span key={idx} className="bg-yellow-400 text-gray-900">
-												{part}
-											</span>
-										)
-									} else {
-										return part
-									}
-								})}
-							</p>
-							<Text size="xs" variant="muted" className="w-full" title={result.cfi}>
-								{result.cfi.slice(0, 12)}...{result.cfi.slice(-12)}
-							</Text>
-						</Command.Item>
-					))}
-				</Command.Group>
-			))
-		}
-	}
 
 	const renderContent = () => {
 		if (isSearching) {
@@ -130,11 +197,57 @@ export default function SearchCommand() {
 					<Spinner />
 				</div>
 			)
-		} else if (results) {
-			return renderResults()
-		} else {
-			return null
 		}
+		if (!hasSearched) return null
+		if (error) return <Command.Empty>{error}</Command.Empty>
+		if (!serverResults.length)
+			return <Command.Empty>{t('epubReader.search.noResults')}</Command.Empty>
+
+		return (
+			<>
+				{serverGroups.map((group) => (
+					<Command.Group key={group.heading} heading={group.heading}>
+						{group.items.map((result, idx) => (
+							<Command.Item
+								key={`${result.locator.href}:${result.locator.locations.position}:${idx}`}
+								value={`${result.locator.href}:${result.locator.locations.position}:${idx}`}
+								onSelect={() => void handleGoToResult(result)}
+								className="space-y-1 flex flex-col"
+							>
+								<p className="w-full">
+									{result.locator.text.before}
+									<span className="bg-yellow-400 text-gray-900">
+										{result.locator.text.highlight}
+									</span>
+									{result.locator.text.after}
+								</p>
+							</Command.Item>
+						))}
+					</Command.Group>
+				))}
+				{nextCursor && (
+					<Command.Item
+						value="__load-more__"
+						disabled={isLoadingMore}
+						onSelect={loadMore}
+						className="justify-center text-center text-muted-foreground"
+					>
+						{isLoadingMore ? (
+							<span className="gap-x-2 flex items-center">
+								<Loader2 className="h-3 w-3 animate-spin" />
+								{t('epubReader.search.loadingMore')}
+							</span>
+						) : (
+							t('epubReader.search.loadMore')
+						)}
+					</Command.Item>
+				)}
+			</>
+		)
+	}
+
+	if (!searchBook) {
+		return null
 	}
 
 	return (
@@ -146,12 +259,19 @@ export default function SearchCommand() {
 				<div className="px-4 flex items-center border-b border-b-border">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
 					<input
-						placeholder="Enter a basic query to search for"
+						placeholder={t('epubReader.search.placeholder')}
 						className={cn(
 							'h-11 py-3 text-sm flex w-full rounded-md bg-transparent text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
 						)}
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								e.preventDefault()
+								e.stopPropagation()
+								doSearch()
+							}
+						}}
 					/>
 				</div>
 

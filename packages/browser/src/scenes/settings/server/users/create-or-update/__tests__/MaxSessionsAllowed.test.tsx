@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import MaxSessionsAllowed from '../MaxSessionsAllowed'
 import { buildSchema, CreateOrUpdateUserSchema, formDefaults } from '../schema'
 
-const onSubmit = jest.fn()
+const onSubmit = vi.fn()
 
 type SubjectProps = {
 	formState?: Partial<Pick<CreateOrUpdateUserSchema, 'maxSessionsAllowed'>>
@@ -31,14 +31,14 @@ describe('MaxSessionsAllowed', () => {
 	// TODO: fix the warning about uncontrolled input
 	const originalError = console.error
 	beforeAll(() => {
-		console.error = jest.fn()
+		console.error = vi.fn()
 	})
 	afterAll(() => {
 		console.error = originalError
 	})
 
 	beforeEach(() => {
-		jest.clearAllMocks()
+		vi.clearAllMocks()
 	})
 
 	it('should render', () => {

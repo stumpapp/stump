@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use async_graphql::{Context, Object, Result};
-use models::entity::{media, media_metadata, series};
+use models::entity::{media, media_metadata, series, user::AuthUser};
 use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 
 use crate::{
-	data::CoreContext,
+	data::{AuthContext, CoreContext},
 	object::author::{Author, AuthorSeries},
 	pagination::{
 		OffsetPaginationInfo, PaginatedResponse, Pagination, PaginationValidator,
@@ -30,23 +30,19 @@ fn series_in_library_subquery(library_id: String) -> sea_orm::sea_query::SelectS
 		.to_owned()
 }
 
-/// Fetches all unique author names from the database, optionally scoped to a library.
+/// Fetches all unique author names from the database, optionally scoped to a library,
+/// and scoped to whatever the given user is allowed to see.
+///
 /// Returns a HashMap with lowercase name as key and original casing as value.
 async fn fetch_all_authors(
 	conn: &DatabaseConnection,
 	library_id: Option<String>,
+	auth_user: &AuthUser,
 ) -> Result<HashMap<String, String>> {
-	let mut query = media_metadata::Entity::find()
+	let mut query = media::Entity::find_for_user(auth_user)
 		.select_only()
 		.column(media_metadata::Column::Writers)
 		.distinct()
-		.join_rev(
-			sea_orm::JoinType::InnerJoin,
-			media::Entity::belongs_to(media_metadata::Entity)
-				.from(media::Column::Id)
-				.to(media_metadata::Column::MediaId)
-				.into(),
-		)
 		.filter(media_metadata::Column::Writers.is_not_null());
 
 	if let Some(lib_id) = library_id {
@@ -82,9 +78,10 @@ impl AuthorQuery {
 		#[graphql(desc = "Optional library ID to scope the author search")]
 		library_id: Option<String>,
 	) -> Result<Option<Author>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let authors = fetch_all_authors(conn, library_id.clone()).await?;
+		let authors = fetch_all_authors(conn, library_id.clone(), user).await?;
 		let search_key = name.to_lowercase();
 
 		Ok(authors.get(&search_key).map(|original_name| Author {
@@ -106,9 +103,10 @@ impl AuthorQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Author>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let all_authors = fetch_all_authors(conn, library_id.clone()).await?;
+		let all_authors = fetch_all_authors(conn, library_id.clone(), user).await?;
 
 		let filtered: Vec<String> = if let Some(ref search_term) = search {
 			let search_lower = search_term.to_lowercase();
@@ -178,19 +176,13 @@ impl AuthorQuery {
 		#[graphql(desc = "Optional library ID to scope the series search")]
 		library_id: Option<String>,
 	) -> Result<Option<AuthorSeries>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let mut query = media_metadata::Entity::find()
+		let mut query = media::Entity::find_for_user(user)
 			.select_only()
 			.column(media_metadata::Column::Series)
 			.distinct()
-			.join_rev(
-				sea_orm::JoinType::InnerJoin,
-				media::Entity::belongs_to(media_metadata::Entity)
-					.from(media::Column::Id)
-					.to(media_metadata::Column::MediaId)
-					.into(),
-			)
 			.filter(media_metadata::Column::Series.is_not_null());
 
 		if let Some(ref lib_id) = library_id {

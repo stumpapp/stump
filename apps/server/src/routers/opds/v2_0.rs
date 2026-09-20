@@ -22,12 +22,12 @@ use models::{
 };
 use sea_orm::{
 	prelude::*, sea_query::Expr, ActiveValue::Set, Condition, Order, QueryOrder,
-	QueryTrait,
+	QueryTrait, TransactionTrait,
 };
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::{
-	filesystem::media::get_page_async,
+	media::processor::get_page,
 	opds::v2_0::{
 		authentication::{
 			OPDSAuthenticationDocument, OPDSAuthenticationDocumentBuilder,
@@ -1264,7 +1264,7 @@ async fn get_book_page(
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
 	let (content_type, image_buffer) =
-		get_page_async(PathBuf::from(book.path), page, &ctx.config).await?;
+		get_page(PathBuf::from(book.path), page, &ctx.config).await?;
 
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
@@ -1380,17 +1380,20 @@ async fn update_book_progression(
 		_ => {},
 	}
 
+	let locator = input.locator();
 	let progression = NormalizedProgression {
 		page,
-		locator: input.locator(),
-		epubcfi: None,
+		locator,
 		percentage,
 		elapsed_seconds_delta: None,
 		did_complete,
 		device_id,
+		reset_elapsed_seconds: false,
 	};
 
-	upsert_reading_session(conn, &user, &id, progression).await?;
+	let txn = conn.begin().await?;
+	upsert_reading_session(&txn, &user, &id, progression).await?;
+	txn.commit().await?;
 
 	Ok(axum::http::StatusCode::NO_CONTENT)
 }

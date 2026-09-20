@@ -12,7 +12,7 @@ const Avatar = React.forwardRef<AvatarPrimitive.RootRef, AvatarPrimitive.RootPro
 		<AvatarPrimitiveRoot
 			ref={ref}
 			className={cn(
-				'squircle relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full',
+				'squircle h-10 w-10 relative flex shrink-0 overflow-hidden rounded-full',
 				className,
 			)}
 			{...props}
@@ -37,7 +37,7 @@ const AvatarFallback = React.forwardRef<AvatarPrimitive.FallbackRef, AvatarPrimi
 		<AvatarPrimitiveFallback
 			ref={ref}
 			className={cn(
-				'bg-muted squircle flex h-full w-full items-center justify-center rounded-full',
+				'squircle flex h-full w-full items-center justify-center rounded-full bg-muted',
 				className,
 			)}
 			{...props}

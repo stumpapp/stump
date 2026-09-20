@@ -8,7 +8,6 @@ import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner-native'
 import { useShallow } from 'zustand/react/shallow'
 
-import { useActiveServerSafe } from '~/components/activeServer'
 import { useDownloadsState } from '~/components/localLibrary/store'
 import { db, downloadedFiles, downloadQueue, DownloadRepository, readProgress } from '~/db'
 import {
@@ -18,7 +17,7 @@ import {
 } from '~/lib/downloadQueue'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
 import { LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
-import { deleteBookTimer } from '~/stores/reader'
+import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
 import { useSavedServerStore } from '~/stores/savedServer'
 
 import { useTranslate } from '../useTranslate'
@@ -139,9 +138,6 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 			if (!effectiveServerId) return
 			queryClient.invalidateQueries({ queryKey: downloadKeys.server(effectiveServerId) })
 			queryClient.invalidateQueries({ queryKey: downloadKeys.book(bookId, effectiveServerId) })
-			// if we finished the book, remove the timer so next read
-			// is fresh. see https://github.com/stumpapp/stump/issues/1254
-			deleteBookTimer(bookId)
 		},
 	})
 
@@ -252,9 +248,6 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 							lastModified: new Date(),
 						})
 						.where(eq(readProgress.bookId, bookId))
-					// if we finished the book, remove the timer so next read
-					// is fresh. see https://github.com/stumpapp/stump/issues/1254
-					deleteBookTimer(bookId)
 				} else {
 					await db.insert(readProgress).values({
 						bookId,
@@ -291,9 +284,6 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 
 			try {
 				await db.delete(readProgress).where(eq(readProgress.bookId, bookId))
-				// if we finished the book, remove the timer so next read
-				// is fresh. see https://github.com/stumpapp/stump/issues/1254
-				deleteBookTimer(bookId)
 				queryClient.invalidateQueries({ queryKey: downloadKeys.server(effectiveServerId) })
 			} catch (error) {
 				Sentry.captureException(error)

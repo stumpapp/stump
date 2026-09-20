@@ -33,7 +33,7 @@ export function PdfReaderFooter() {
 
 	return (
 		<Animated.View
-			className="insets-x-safe bottom-safe absolute z-20 h-12 flex-row items-center justify-center gap-2 px-2"
+			className="insets-x-safe bottom-safe h-12 gap-2 px-2 absolute z-20 flex-row items-center justify-center"
 			style={secondaryStyle}
 		>
 			<Text

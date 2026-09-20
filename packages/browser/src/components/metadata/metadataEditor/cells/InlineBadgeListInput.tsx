@@ -1,4 +1,4 @@
-import { Badge, cn } from '@stump/components'
+import { Badge, cn, ToolTip } from '@stump/components'
 import { Minus } from 'lucide-react'
 
 import AddFieldsDialog from '../AddFieldsDialog'
@@ -23,14 +23,16 @@ export default function InlineBadgeListInput({ values, onChange, className, bind
 		return (
 			<Badge key={`${value}-${index}`} className="pr-1">
 				{value}
-				<button
-					type="button"
-					aria-label={`Remove ${value}`}
-					onClick={() => onRemove(index)}
-					className="h-4 w-4 inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full opacity-70 hover:opacity-100"
-				>
-					<Minus className="h-3 w-3" />
-				</button>
+				<ToolTip content="Remove item">
+					<button
+						type="button"
+						aria-label="Remove item"
+						onClick={() => onRemove(index)}
+						className="h-4 w-4 inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full opacity-70 hover:opacity-100"
+					>
+						<Minus className="h-3 w-3" />
+					</button>
+				</ToolTip>
 			</Badge>
 		)
 	}

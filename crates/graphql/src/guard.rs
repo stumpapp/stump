@@ -108,7 +108,25 @@ impl Guard for OptionalFeatureGuard {
 	}
 }
 
-pub struct BookClubRoleGuard {
+/// Guard that passes if the current user is a server owner.
+/// This is a transitional guard that exists alongside `is_server_owner` and should
+/// be removed once `ManageServer` / explicit admin permissions fully replace the
+/// server-owner concept.
+// TODO(permissions): remove once is_server_owner is eliminated
+pub struct ServerOwnerGuard;
+
+impl Guard for ServerOwnerGuard {
+	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+
+		if user.is_server_owner {
+			Ok(())
+		} else {
+			Err(error_message::FORBIDDEN_ACTION.into())
+		}
+	}
+}
+
 	club_id: String,
 	role: BookClubMemberRole,
 }

@@ -1,11 +1,12 @@
 import { formatBytes } from '@stump/client'
 import { Badge, Link, Text } from '@stump/components'
-import { FragmentType, Media, MediaModelOrdering } from '@stump/graphql'
+import { FragmentType, Media, MediaMetadataModelOrdering, MediaModelOrdering } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
+import { CellContext, ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat } from 'date-fns'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
+import { isEbookExtension } from '@/utils/readingProgress'
 
 import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'
@@ -39,26 +40,29 @@ function MetadataBadgeListCell({ values }: { values?: string[] | null }) {
 }
 
 const coverColumn = columnHelper.display({
-	cell: ({ row: { original: book } }) => <CoverImageCell id={book.id} title={book.resolvedName} />,
+	cell: ({ row: { original: book } }) => (
+		<CoverImageCell url={book.thumbnail.url} title={book.resolvedName} />
+	),
 	enableGlobalFilter: true,
 	header: () => null,
 	id: 'cover',
 	size: 40,
 })
 
-const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
-	cell: ({
-		getValue,
-		row: {
-			original: { id, libraryConfig, readProgress },
-		},
-	}) => (
+function NameColumnCell({
+	getValue,
+	row: {
+		original: { id, extension, libraryConfig, readProgress },
+	},
+}: CellContext<Media, string>) {
+	const paths = usePaths()
+	return (
 		<Link
 			to={
 				libraryConfig?.skipBookOverview
 					? paths.bookReader(id, {
-							epubcfi: readProgress?.epubcfi,
-							page: readProgress?.page ?? undefined,
+							isEpub: isEbookExtension(extension),
+							page: isEbookExtension(extension) ? undefined : (readProgress?.page ?? undefined),
 						})
 					: paths.bookOverview(id)
 			}
@@ -66,7 +70,11 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 		>
 			{getValue()}
 		</Link>
-	),
+	)
+}
+
+const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
+	cell: (ctx) => <NameColumnCell {...ctx} />,
 	enableGlobalFilter: true,
 	enableSorting: true,
 	header: () => (
@@ -151,14 +159,14 @@ const publishedColumn = columnHelper.accessor(
 			</Text>
 		),
 		enableGlobalFilter: true,
-		// TODO(relation-ordering): Support order by relation
-		enableSorting: false,
+		// TODO(sorting): Consider better null/empty handling (e.g., placing nulls last or excluding them when sorting)
+		enableSorting: true,
 		header: () => (
 			<Text size="sm" variant="secondary">
 				Published
 			</Text>
 		),
-		id: 'published',
+		id: MediaMetadataModelOrdering.Year,
 	},
 )
 

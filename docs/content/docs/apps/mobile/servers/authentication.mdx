@@ -2,11 +2,12 @@
 title: Authentication
 ---
 
-The app supports 3 types of authentication:
+The app supports 4 types of authentication:
 
 1. Login-based authentication (e.g., username/password or OIDC)
 2. Basic authentication (e.g., username/password)
 3. Token-based authentication (e.g., API key)
+4. Authless (i.e., no authentication)
 
 ## Login-based Authentication
 
@@ -33,10 +34,10 @@ When you choose a login-based authentication type for a Stump server that has OI
 </Callout>
 
 <Callout title="Performance Note" type="warning">
-	Basic Auth for OPDS requires the server to verify your password on every
-	request. This involves computationally expensive password hashing, which impacts image loading. If
-	you are a heavy OPDS user, consider using [Token-based
-	Authentication](#token-based-authentication) with a scoped API key for much faster performance
+	Basic Auth for OPDS requires the server to verify your password on every request. This involves
+	computationally expensive password hashing, which impacts image loading. If you are a heavy OPDS
+	user, consider using [Token-based Authentication](#token-based-authentication) with a scoped API
+	key for much faster performance
 </Callout>
 
 ## Token-based Authentication
@@ -52,9 +53,13 @@ The following servers, besides Stump, have viable, long-lived, token-based authe
 
 Note that token viability **does not** equate to support for the app. Only OPDS v2-compatible servers are supported by the app.
 
-<Callout type="info">
-	If there is a server that should be listed here, please let me know!
-</Callout>
+<Callout type="info">If there is a server that should be listed here, please let me know!</Callout>
+
+## Authless
+
+You can configure a server to be authless, which would effectively make Stump assume that the URL as-is will be authenticated. The name might feel a little misleading for scenarios where your server _is_ behind auth, but the URL just contains, e.g., an API key.
+
+For servers which support URL-based credentials, like embedding an API key directly in the URL, this is the method you should choose.
 
 ## Security Considerations
 

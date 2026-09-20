@@ -34,6 +34,15 @@ impl HostDetails {
 	pub fn url(&self) -> String {
 		format!("{}://{}", self.scheme, self.host)
 	}
+
+	/// Join an origin with an application path without duplicate boundary slashes.
+	pub fn url_for_path(&self, path: &str) -> String {
+		format!(
+			"{}/{}",
+			self.url().trim_end_matches('/'),
+			path.trim_start_matches('/')
+		)
+	}
 }
 
 impl From<HostDetails> for OPDSLinkFinalizer {

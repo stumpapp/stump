@@ -1,5 +1,9 @@
-import { Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, AlertTitle, NewCard } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { Info } from 'lucide-react'
+import { usePreviousDifferent } from 'rooks'
+
+import { useTauriStore } from '@/stores'
 
 import BundledServer from './BundledServer'
 import DiscordPresenceSwitch from './DiscordPresenceSwitch'
@@ -7,17 +11,26 @@ import DiscordPresenceSwitch from './DiscordPresenceSwitch'
 export default function OptionalFeaturesSection() {
 	const { t } = useLocaleContext()
 
-	return (
-		<div className="gap-y-6 flex flex-col">
-			<div>
-				<Heading size="sm">{t(getKey('label'))}</Heading>
-				<Text variant="muted" size="sm">
-					{t(getKey('description'))}
-				</Text>
-			</div>
+	const { runBundledServer } = useTauriStore()
 
-			<BundledServer />
-			<DiscordPresenceSwitch />
+	// this is far from perfect because navigating away resets the state lol but
+	// it's fine for now. maybe TODO add a btn to restart app
+	const didChangeRestartSettings = usePreviousDifferent(runBundledServer)
+
+	return (
+		<div className="gap-4 flex flex-col">
+			<NewCard label={t(getKey('label'))}>
+				<BundledServer />
+				<DiscordPresenceSwitch />
+			</NewCard>
+
+			{didChangeRestartSettings && (
+				<Alert variant="info">
+					<Info />
+					<AlertTitle>{t(getKey('restartRequired.title'))}</AlertTitle>
+					<AlertDescription>{t(getKey('restartRequired.description'))}</AlertDescription>
+				</Alert>
+			)}
 		</div>
 	)
 }

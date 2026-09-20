@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
+import { Timer } from '~/lib/hooks'
 import { ReadiumLocator, ReadiumViewRef } from '~/modules/readium'
-import { Timer } from '~/stores/reader'
 
 export type EpubReaderContextValue = {
 	readerRef: ReadiumViewRef | null

@@ -27,6 +27,26 @@ yarn web build && cargo build --package stump_server --release
 
 This will bundle the web application and build the Stump server. The server binary is located at `target/release/stump_server`, and the web bundle at `apps/web/dist`. You can place those two items anywhere you'd like, just be sure they are either next to each other or you have set the appropriate [environment variable](/docs/guides/configuration/server-config#stump_client_dir).
 
+## Enable PDF support
+
+PDF rendering relies on [PDFium](https://pdfium.googlesource.com/pdfium/). Unlike the Docker image, a source build does **not** include the PDFium binary, so you must download it yourself and tell Stump where it is. Without this, opening a PDF fails with a `PdfConfigurationError`.
+
+1. Download the PDFium binary for your platform from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries/releases). Each release archive contains the shared library under `lib/`:
+
+   - macOS: `libpdfium.dylib`
+   - Linux: `libpdfium.so`
+   - Windows: `pdfium.dll`
+
+2. Point Stump at the binary via the `PDFIUM_PATH` environment variable (or the `pdfium_path` key in your `Stump.toml`):
+
+   ```bash copy
+   export PDFIUM_PATH="/absolute/path/to/libpdfium.dylib"
+   ```
+
+<Callout type="info">
+  `PDFIUM_PATH` must be the full path to the library file itself, not the directory containing it. See the [server configuration reference](/docs/guides/configuration/server-config#pdfium_path) for more details.
+</Callout>
+
 ## Community packages
 
 <Callout type="warn">

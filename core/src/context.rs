@@ -9,8 +9,8 @@ use crate::{
 	config::StumpConfig,
 	database,
 	event::CoreEvent,
-	filesystem::scanner::LibraryWatcher,
-	job::{state::ApalisWorkerState, stump_job::StumpJob},
+	job::{context::ApalisWorkerState, StumpJob},
+	scan::watcher::LibraryWatcher,
 	CoreError, CoreResult,
 };
 

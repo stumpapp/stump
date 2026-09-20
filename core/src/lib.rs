@@ -12,10 +12,15 @@ mod context;
 pub mod database;
 pub mod error;
 mod event;
-pub mod filesystem;
+pub mod fs_utils;
+pub mod image;
 pub mod job;
 pub mod kobo;
+pub mod media;
+pub mod metadata;
 pub mod opds;
+pub mod readium;
+pub mod scan;
 pub mod utils;
 
 use config::logging::STUMP_SHADOW_TEXT;
@@ -94,19 +99,12 @@ impl StumpCore {
 	///
 	/// Returns the configuration variables in a `StumpConfig` struct.
 	pub fn init_config(config_dir: String) -> CoreResult<StumpConfig> {
-		let mut config = StumpConfig::new(config_dir)
-			// Load config file (if any)
-			.with_config_file()?
-			// Overlay environment variables
-			.with_environment()?;
+		let config = StumpConfig::load(config_dir)?;
 
-		// TODO: I couldn't get this fully working inside the macro but would like to revisit
-		if let Some(env_oidc) = config::OidcConfig::from_env() {
-			config.oidc = Some(env_oidc);
+		if let Err(error) = config.write_config() {
+			eprintln!("Failed to write Stump.toml: {error}");
+			// ^ config init before tracing init
 		}
-
-		// Write ensure that config directory exists and write Stump.toml
-		config.write_config_dir()?;
 
 		Ok(config)
 	}
@@ -293,10 +291,10 @@ impl StumpCore {
 		}
 	}
 
-	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
+	pub async fn init_scheduler(&self) -> Result<JobScheduler, CoreError> {
 		let ctx = self.ctx.arced();
 		let scheduler = JobScheduler::init(ctx).await?;
-		Ok(Arc::new(scheduler))
+		Ok(scheduler)
 	}
 
 	pub async fn init_library_watcher(&self) -> CoreResult<()> {

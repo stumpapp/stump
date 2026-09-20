@@ -30,6 +30,7 @@ const options: Record<FilterableEntity, OrderingField[]> = {
 		MediaModelOrdering.ModifiedAt,
 		MediaMetadataModelOrdering.Number,
 		MediaMetadataModelOrdering.Volume,
+		MediaMetadataModelOrdering.Year,
 	],
 	series: [
 		SeriesModelOrdering.Name,

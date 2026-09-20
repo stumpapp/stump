@@ -3,7 +3,6 @@ title: OPDS
 description: Compatibility information for OPDS
 ---
 
-
 Open Publication Distribution System ([OPDS](https://opds.io/)) is a specification for generating and serving catalogs of digital content. It is used by many applications, such as [Panels](https://panels.app/) and [Chunky Reader](https://apps.apple.com/us/app/chunky-comic-reader/id663567628).
 
 So long as an OPDS client _properly_ implements the OPDS specification, you should be able to use it with Stump. Each OPDS client might have a different way of collecting this information during their onboarding steps. If you have any trouble using your preferred client, please open an issue on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) or feel free to pop into the [Discord](https://discord.gg/63Ybb7J3as) for help. This page can be updated with your findings to help others in the future.
@@ -18,6 +17,11 @@ The general structure of the URL to connect to your Stump server is:
 
 `http(s)://your-server(:10801)(/baseUrl)/opds/v1.2/catalog`
 
+Where `your-server` is the domain or IP address of your Stump server, `:10801` is the port (if you are using the default port), and `/baseUrl` if you've put Stump behind a some sort of proxy that includes a path to access it. A few examples just to hopefully help clarify:
+
+- `http://192.168.1.1:10801/opds/v1.2/catalog`
+- `https://stump.example.com/opds/v1.2/catalog`
+
 #### Tested Clients
 
 > **Note:** The ✨ emoji indicates a client which the developer of Stump personally uses
@@ -26,10 +30,10 @@ The following clients have been tested with Stump:
 
 | OS            |                                      Application                                       | Page Streaming |                                                                     Issues/Notes |
 | ------------- | :------------------------------------------------------------------------------------: | -------------: | -------------------------------------------------------------------------------: |
-| iOS & Android |                              [Stump](/docs/apps/mobile)                               |             ✅ |                                                                               ✨ |
+| iOS & Android |                               [Stump](/docs/apps/mobile)                               |             ✅ |                                                                               ✨ |
 | iOS           |                             [Panels](https://panels.app/)                              |             ✅ |                                                                               ✨ |
 | iOS           |     [Chunky Reader](https://apps.apple.com/us/app/chunky-comic-reader/id663567628)     |             ✅ |                                                                                  |
-| iOS           |     [justRead](https://apps.apple.com/us/app/epub-reader-justread-app/id6757948605)     |             ❌ |                                    General EPUB/PDF/audiobook reader, not comic-focused; no page-streaming support |
+| iOS           |    [justRead](https://apps.apple.com/us/app/epub-reader-justread-app/id6757948605)     |             ❌ |  General EPUB/PDF/audiobook reader, not comic-focused; no page-streaming support |
 | Android       | [Moon+ Reader](https://play.google.com/store/apps/details?id=com.flyersoft.moonreader) |             ❌ |                                                       Users report OK experience |
 | Android       |                         [KyBook 3](http://kybook-reader.com/)                          |             ❌ |                                                          No testing at this time |
 | Android       |    [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)     |             ❌ | Supports covers, categories, and downloads, but shows file names not book titles |
@@ -58,6 +62,11 @@ The general structure of the URL to connect to your Stump server is:
 
 `http(s)://your-server(:10801)(/baseUrl)/opds/v2.0/catalog`
 
+Where `your-server` is the domain or IP address of your Stump server, `:10801` is the port (if you are using the default port), and `/baseUrl` if you've put Stump behind a some sort of proxy that includes a path to access it. A few examples just to hopefully help clarify:
+
+- `http://192.168.1.1:10801/opds/v2.0/catalog`
+- `https://stump.example.com/opds/v2.0/catalog`
+
 <Callout type="info">
 	Stump hasn't implemented `facets` support yet, but it is planned for a future release
 </Callout>
@@ -68,7 +77,7 @@ The following clients have been tested with Stump:
 
 | OS            |                                      Application                                      | Page Streaming |                                                                                                                         Issues/Notes |
 | ------------- | :-----------------------------------------------------------------------------------: | -------------: | -----------------------------------------------------------------------------------------------------------------------------------: |
-| iOS & Android |                              [Stump](/docs/apps/mobile)                              |             ✅ |                                                                                                                                      |
+| iOS & Android |                              [Stump](/docs/apps/mobile)                               |             ✅ |                                                                                                                                      |
 | iOS           |   [Cantook by Aldiko](https://apps.apple.com/us/app/cantook-by-aldiko/id1476410111)   |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
 | Android       | [Cantook by Aldiko](https://play.google.com/store/apps/details?id=com.aldiko.android) |             ❓ | Supports catalog traversal and media downloads. Issues with rendering media covers, however this appears to be an issue on their end |
 | Android       |    [Librera](https://play.google.com/store/apps/details?id=com.foobnix.pdf.reader)    |             ❓ |                                                                                       Does not work. Likely lacking OPDS 2.0 support |

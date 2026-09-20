@@ -117,19 +117,51 @@ export function useGraphQL<TResult, TVariables>(
 	return { error, ...rest } as UseQueryResult<TResult>
 }
 
-type UseGraphQLMutationOptions<TResult, TVariables> = Omit<
+// kinda hate this name, but can't think of anything else and think 5 min is enough time to spend on it lol
+/**
+ * same as {@link useGraphQL} but without a parent stump client context, so caller will
+ * need to properly handle errors themselves and provide a valid sdk instance
+ */
+export function useDetachedGraphQL<TResult, TVariables>(
+	sdk: Api,
+	document: TypedDocumentString<TResult, TVariables>,
+	queryKey: QueryKey,
+	variables?: TVariables extends Record<string, never> ? never : TVariables,
+	options?: Omit<UseQueryOptions<TResult, Error, TResult, QueryKey>, 'queryKey' | 'queryFn'>,
+): UseQueryResult<TResult> {
+	const { error, ...rest } = useQuery({
+		queryKey,
+		queryFn: async () => {
+			const response = await sdk.execute(document, variables)
+			return response
+		},
+		...options,
+	})
+
+	useEffect(() => {
+		if (!error) return
+		handleError({
+			sdk,
+			error,
+		})
+	}, [error, sdk])
+
+	return { error, ...rest } as UseQueryResult<TResult>
+}
+
+type UseGraphQLMutationOptions<TResult, TVariables, TContext = unknown> = Omit<
 	UseMutationOptions<
 		TResult,
 		unknown,
 		TVariables extends Record<string, never> ? never : TVariables,
-		unknown
+		TContext
 	>,
 	'mutationFn'
 >
 
-export function useGraphQLMutation<TResult, TVariables>(
+export function useGraphQLMutation<TResult, TVariables, TContext = unknown>(
 	document: TypedDocumentString<TResult, TVariables>,
-	options: UseGraphQLMutationOptions<TResult, TVariables> = {},
+	options: UseGraphQLMutationOptions<TResult, TVariables, TContext> = {},
 ) {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -142,12 +174,42 @@ export function useGraphQLMutation<TResult, TVariables>(
 	const { error, ...rest } = useMutation({
 		...options,
 		mutationFn,
-		onError: (error, variables, context) => {
+		onError: (error, variables, onMutateResult, context) => {
 			handleError({
 				sdk,
 				error,
 				onUnauthenticatedResponse,
 				onConnectionWithServerChanged,
+			})
+			options.onError?.(error, variables, onMutateResult, context)
+		},
+	})
+
+	return { error, ...rest } as UseMutationResult<
+		TResult,
+		unknown,
+		TVariables extends Record<string, never> ? never : TVariables,
+		TContext
+	>
+}
+
+export function useDetachedGraphQLMutation<TResult, TVariables>(
+	sdk: Api,
+	document: TypedDocumentString<TResult, TVariables>,
+	options: UseGraphQLMutationOptions<TResult, TVariables> = {},
+) {
+	const mutationFn = useCallback(
+		async (variables?: TVariables extends Record<string, never> ? never : TVariables) =>
+			sdk.execute(document, variables),
+		[sdk, document],
+	)
+	const { error, ...rest } = useMutation({
+		...options,
+		mutationFn,
+		onError: (error, variables, context) => {
+			handleError({
+				sdk,
+				error,
 			})
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			options?.onError?.(error, variables, noop, context as any)

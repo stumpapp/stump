@@ -28,7 +28,7 @@ const ReadingNowWidget = (
 	// ident not found
 	const bookUrl = (book: WidgetBook) => {
 		if (book.isReadingOffline) return `stump://offline/${book.id}`
-		return `stump://server/${book.serverId}/books/${book.id}`
+		return `stump://stump/${book.serverId}/books/${book.id}`
 	}
 
 	const owlPath = (name: string) =>

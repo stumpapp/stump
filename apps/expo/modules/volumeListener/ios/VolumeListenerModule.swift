@@ -84,8 +84,8 @@ public class VolumeListenerModule: Module {
             options: [.old, .new]
         ) { [weak self] _, change in
             guard let self,
-                let oldValue = change.oldValue,
-                let newValue = change.newValue
+                  let oldValue = change.oldValue,
+                  let newValue = change.newValue
             else { return }
 
             guard !self.isResetting else {

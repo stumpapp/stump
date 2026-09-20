@@ -11,7 +11,7 @@ import * as os from '@tauri-apps/plugin-os'
 import { StoredTokens } from '../stores/savedServer'
 
 type Return = TauriRPC & {
-	getNativePlatform: () => Promise<Platform>
+	getNativePlatform: () => Platform
 }
 
 /**
@@ -22,8 +22,8 @@ export function useTauriRPC(): Return {
 	/**
 	 * A helper function to get the native platform of the user's system
 	 */
-	const getNativePlatform = async () => {
-		const platform = await os.platform()
+	const getNativePlatform = () => {
+		const platform = os.platform()
 		// TODO(tauri-v2): Just use the platform string directly, they're more readable/similar now in v2
 		switch (platform) {
 			case 'macos':

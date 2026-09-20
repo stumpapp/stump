@@ -11,6 +11,13 @@ export const isDoublePageBehavior = (value: string): value is DoublePageBehavior
 	['auto', 'always', 'off'].includes(value)
 
 /**
+ * The number of columns to render for a paginated EPUB. `'auto'` lets the reader pick
+ * 1 or 2 columns based on the available stage width; `1`/`2` pin an explicit column count.
+ * Has no effect in continuous scroll mode.
+ */
+export type EpubColumnCount = 'auto' | 1 | 2
+
+/**
  * The preferences for a book, which represents an override of a user's default preferences for a
  * specific book
  */
@@ -69,6 +76,16 @@ export type BookPreferences = {
 	 * Whether the Ctrl key (or also Cmd key on Mac) is required to use panning and zooming.
 	 */
 	panzoomWithoutCtrl?: boolean
+	/**
+	 * The number of columns to render for a paginated EPUB. This will have no effect if the
+	 * book is not an EPUB, or if the reading mode is continuous scroll.
+	 */
+	columnCount?: EpubColumnCount
+	/**
+	 * The margin (in rem, roughly) applied around the page content for an EPUB. This will have
+	 * no effect if the book is not an EPUB.
+	 */
+	pageMargins?: number
 }
 
 /**
@@ -145,6 +162,8 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	panWithoutCtrl: false,
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,
+	columnCount: 'auto',
+	pageMargins: 1.0,
 } as const
 
 export const createReaderStore = (storage?: StateStorage) =>
@@ -185,7 +204,7 @@ export const createReaderStore = (storage?: StateStorage) =>
 				{
 					name: 'stump-new-reader-store',
 					storage: storage ? createJSONStorage(() => storage) : undefined,
-					version: 4,
+					version: 5,
 				},
 			),
 		),

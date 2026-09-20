@@ -193,12 +193,12 @@ class EPUBView(
                 fontFamily =
                     pendingProps.fontFamily
                         ?: oldProps?.fontFamily ?: FontFamily("Literata"),
-                lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
+                lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.5,
                 fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
                 fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
                 readingProgression =
                     pendingProps.readingProgression ?: oldProps?.readingProgression
-                    ?: ReadingProgression.LTR,
+                        ?: ReadingProgression.LTR,
                 publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
                 imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
                 pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
@@ -434,15 +434,15 @@ class EPUBView(
                     mapOf(
                         "success" to true,
                         "bookMetadata" to
-                                mapOf(
-                                    "title" to publication.metadata.title,
-                                    "author" to publication.metadata.authors.joinToString(", ") { it.name },
-                                    "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
-                                    "identifier" to (publication.metadata.identifier ?: ""),
-                                    "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
-                                    "totalPages" to positionCount,
-                                    "chapterCount" to publication.readingOrder.size,
-                                ),
+                            mapOf(
+                                "title" to publication.metadata.title,
+                                "author" to publication.metadata.authors.joinToString(", ") { it.name },
+                                "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
+                                "identifier" to (publication.metadata.identifier ?: ""),
+                                "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
+                                "totalPages" to positionCount,
+                                "chapterCount" to publication.readingOrder.size,
+                            ),
                         "tableOfContents" to tableOfContents,
                     ),
                 )
@@ -729,13 +729,13 @@ class EPUBView(
                             // and a bunch of flags in https://developer.android.com/reference/android/view/View
                             @Suppress("DEPRECATION")
                             menuLayout.rootView.systemUiVisibility = (
-                                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                            or View.SYSTEM_UI_FLAG_FULLSCREEN
-                                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                                    )
+                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            )
                         }
                     }
                 },

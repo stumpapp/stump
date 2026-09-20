@@ -91,6 +91,23 @@ impl Series {
 		Ok(Library::from(model))
 	}
 
+	async fn oneshot_book(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
+		if !self.model.is_oneshot {
+			return Ok(None);
+		}
+
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find()
+			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
+			.filter(media::Column::IsOneshot.eq(true))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?;
+
+		Ok(model.map(Media::from))
+	}
+
 	// TODO(perf): We probably could put this behind a dataloader if used frequently
 	/// Get media in this series
 	async fn media(
@@ -314,6 +331,7 @@ impl Series {
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
+		let last_modified = self.model.updated_at;
 
 		let dimensions = self
 			.model
@@ -323,11 +341,14 @@ impl Series {
 			.map(|dim| (dim.width, dim.height));
 
 		Ok(ImageRef {
-			url: service
-				.format_url(format!("/api/v2/series/{}/thumbnail", self.model.id)),
+			url: service.cache_friendly_url(
+				format!("/api/v2/series/{}/thumbnail", self.model.id),
+				&last_modified,
+			),
 			height: dimensions.as_ref().map(|dim| dim.1),
 			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.thumbnail_meta.clone(),
+			last_modified,
 		})
 	}
 

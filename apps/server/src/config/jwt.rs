@@ -37,8 +37,10 @@ async fn get_access_token_secret(conn: &DatabaseConnection) -> APIResult<String>
 		));
 	};
 
-	let _ = ACCESS_TOKEN_SECRET.set(secret.clone());
-	Ok(secret)
+	// Always return the value stored in the OnceLock. Concurrent callers may each
+	// load a secret from their own DB connection in tests; only the first
+	// `get_or_init` wins, and encode/decode must share that same cached secret.
+	Ok(ACCESS_TOKEN_SECRET.get_or_init(|| secret).clone())
 }
 
 async fn get_refresh_token_secret(conn: &DatabaseConnection) -> APIResult<String> {
@@ -58,8 +60,7 @@ async fn get_refresh_token_secret(conn: &DatabaseConnection) -> APIResult<String
 		));
 	};
 
-	let _ = REFRESH_TOKEN_SECRET.set(refresh_secret.clone());
-	Ok(refresh_secret)
+	Ok(REFRESH_TOKEN_SECRET.get_or_init(|| refresh_secret).clone())
 }
 
 #[derive(Debug, Serialize)]

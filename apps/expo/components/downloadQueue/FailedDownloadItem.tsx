@@ -16,7 +16,7 @@ export default function FailedDownloadItem({ item, onRetry, onDismiss }: Props) 
 	return (
 		<Card.Row>
 			<Icon as={AlertCircle} size={20} className="text-fill-danger" />
-			<View className="flex-1 gap-0.5">
+			<View className="gap-0.5 flex-1">
 				<Text className="font-medium" numberOfLines={1}>
 					{downloadQueueMetadata.safeParse(item.metadata).data?.bookName || item.filename}
 				</Text>
@@ -25,16 +25,16 @@ export default function FailedDownloadItem({ item, onRetry, onDismiss }: Props) 
 				</Text>
 			</View>
 
-			<View className="flex-row gap-1">
+			<View className="gap-1 flex-row">
 				<Pressable
 					onPress={() => onRetry(item.id)}
-					className="rounded-full bg-white/75 p-2 active:opacity-70 dark:bg-black/40"
+					className="bg-white/75 p-2 dark:bg-black/40 rounded-full active:opacity-70"
 				>
 					<Icon as={RefreshCw} size={16} className="text-foreground-muted" />
 				</Pressable>
 				<Pressable
 					onPress={() => onDismiss(item.id)}
-					className="rounded-full bg-white/75 p-2 active:opacity-70 dark:bg-black/40"
+					className="bg-white/75 p-2 dark:bg-black/40 rounded-full active:opacity-70"
 				>
 					<Icon as={X} size={16} className="text-foreground-muted" />
 				</Pressable>

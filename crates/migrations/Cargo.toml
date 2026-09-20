@@ -6,9 +6,18 @@ edition = "2021"
 name = "migrate"
 path = "bin/migrate.rs"
 
+[features]
+# will run tests that are really just quick smoke tests to ensure
+# the migrations work for postgres
+postgres-tests = []
+
 [dependencies]
 sea-orm = { workspace = true }
 sea-orm-migration = { workspace = true }
 tokio = { workspace = true }
 
 models = { path = "../models" }
+
+[dev-dependencies]
+testcontainers = { version = "0.27.0" }
+testcontainers-modules = { version = "0.15.0", features = ["postgres"] }

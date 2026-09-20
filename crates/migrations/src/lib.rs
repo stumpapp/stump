@@ -34,6 +34,9 @@ mod m20260804_000000_smart_list_role_to_integer;
 mod m20260811_182550_library_access;
 mod m20260813_151835_library_oidc_groups;
 mod m20260813_220807_user_oidc_groups;
+mod m20260815_205755_avatar_image_metadata;
+mod m20260816_000000_drop_legacy_epubcfi;
+mod m20260830_015110_oneshots;
 
 pub struct Migrator;
 
@@ -74,6 +77,9 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260811_182550_library_access::Migration),
 			Box::new(m20260813_151835_library_oidc_groups::Migration),
 			Box::new(m20260813_220807_user_oidc_groups::Migration),
+			Box::new(m20260815_205755_avatar_image_metadata::Migration),
+			Box::new(m20260816_000000_drop_legacy_epubcfi::Migration),
+			Box::new(m20260830_015110_oneshots::Migration),
 		]
 	}
 }

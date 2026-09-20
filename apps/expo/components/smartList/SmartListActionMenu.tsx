@@ -111,7 +111,7 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
-						className="squircle ml-2 mr-2 h-12 w-12 rounded-full border border-edge"
+						className="squircle ml-2 mr-2 h-12 w-12 border-edge rounded-full border"
 						variant="ghost"
 						size="icon"
 					>
@@ -134,7 +134,7 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 				<DropdownMenuContent
 					insets={contentInsets}
 					sideOffset={2}
-					className="w-2/3 tablet:w-64"
+					className="tablet:w-64 w-2/3"
 					align="end"
 				>
 					<DropdownMenuCheckboxItem
@@ -144,7 +144,7 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 						closeOnPress={false}
 					>
 						<Text className="text-lg">Grid</Text>
-						<Icon as={Grid3x2} size={20} className="ml-auto text-foreground-muted" />
+						<Icon as={Grid3x2} size={20} className="text-foreground-muted ml-auto" />
 					</DropdownMenuCheckboxItem>
 
 					<DropdownMenuCheckboxItem
@@ -154,7 +154,7 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 						closeOnPress={false}
 					>
 						<Text className="text-lg">List</Text>
-						<Icon as={List} size={20} className="ml-auto text-foreground-muted" />
+						<Icon as={List} size={20} className="text-foreground-muted ml-auto" />
 					</DropdownMenuCheckboxItem>
 
 					{onCollapseAll && onExpandAll && (

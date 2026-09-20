@@ -30,12 +30,6 @@ pub struct Model {
 	/// the "logical" date of this session, based on user prefs and start time
 	pub session_date: Date,
 
-	#[graphql(
-		deprecation = "future releases of Stump will remove support for this field"
-	)]
-	#[sea_orm(column_type = "Text", nullable)]
-	pub epubcfi: Option<String>,
-
 	#[sea_orm(column_type = "Json", nullable)]
 	pub start_locator: Option<ReadiumLocator>,
 	#[sea_orm(column_type = "Json", nullable)]

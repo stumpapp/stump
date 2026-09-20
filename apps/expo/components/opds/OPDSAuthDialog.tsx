@@ -13,12 +13,12 @@ import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
+import { hasLinkRel } from '~/lib/opds/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
-import { useActiveServer } from '../activeServer'
 import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Input, Text } from '../ui'
 import { HeaderButton } from '../ui/header-button/header-button'
-import { hasLinkRel } from './utils'
 
 type OPDSAuthDialogProps = {
 	isOpen: boolean
@@ -77,9 +77,10 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 			})
 			api.basicAuth = { username, password }
 
-			const catalogURL = activeServer.stumpOPDS
-				? urlJoin(activeServer.url, opdsURL('/catalog'))
-				: activeServer.url
+			const catalogURL =
+				activeServer.kind === 'stump'
+					? urlJoin(activeServer.url, opdsURL('/catalog'))
+					: activeServer.url
 
 			await api.axios.get(catalogURL)
 

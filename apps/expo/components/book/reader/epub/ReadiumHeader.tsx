@@ -36,12 +36,12 @@ export default function ReadiumHeader() {
 	const showControls = useReaderStore((state) => state.showControls)
 
 	return (
-		<View className="inset-x-safe h-12 px-8 mb-2 z-20 items-center justify-center">
+		<View className="mx-safe-or-6 h-12 mb-2 z-20 items-center justify-center">
 			{showControls && (
 				<Animated.View
 					entering={ENTERING_ANIMATION}
 					exiting={EXITING_ANIMATION}
-					className="left-6 absolute z-30"
+					className="left-0 absolute z-30"
 					style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
 				>
 					<GlassView

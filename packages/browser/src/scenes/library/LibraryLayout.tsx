@@ -49,6 +49,9 @@ const query = graphql(`
 				hideSeriesView
 			}
 			...LibrarySettingsConfig
+			config {
+				oneshotsDirectory
+			}
 		}
 	}
 `)

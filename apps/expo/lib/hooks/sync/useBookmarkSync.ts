@@ -7,10 +7,10 @@ import { toast } from 'sonner-native'
 
 import { executePullBookmarksSync } from '~/backgroundTasks/pullServerBookmarks'
 import { executePushBookmarksSync } from '~/backgroundTasks/pushLocalBookmarks'
-import { useActiveServer } from '~/components/activeServer'
 import { bookmarks, db, downloadedFiles, syncStatus } from '~/db'
 import { isLocalLibrary } from '~/lib/localLibrary'
 import { ReadiumLocator } from '~/modules/readium'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { PushSyncParams, SyncParams } from './types'
 import { useServerInstances } from './utils'
@@ -135,7 +135,6 @@ export function useSyncOnlineToOfflineBookmarks({ bookId, serverId }: SyncOnline
 					serverBookmarkId,
 					href: locator.href,
 					chapterTitle: locator.chapterTitle,
-					epubcfi: locator.locations?.partialCfi,
 					locations: locator.locations,
 					previewContent,
 					syncStatus: syncStatus.enum.SYNCED,

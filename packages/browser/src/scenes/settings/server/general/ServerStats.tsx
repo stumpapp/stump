@@ -1,8 +1,10 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { formatBytesSeparate } from '@stump/client'
-import { Statistic } from '@stump/components'
+import { STAT_COLORS, StatCard, StatCardProps } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { useMemo } from 'react'
+import { Book, HardDrive, Layers, Library } from 'lucide-react'
+
+import { useTheme } from '@/hooks/useTheme'
 
 const query = graphql(`
 	query ServerStats {
@@ -15,42 +17,51 @@ const query = graphql(`
 
 export default function ServerStats() {
 	const { data } = useSuspenseGraphQL(query, ['serverStats'])
+	const { isDarkVariant } = useTheme()
 
-	const stats = useMemo(
-		() => ({
-			seriesCount: data.numberOfSeries,
-			bookCount: data.mediaCount,
-			libraryCount: data.numberOfLibraries,
-			diskUsage: formatBytesSeparate(data.mediaDiskUsage),
-		}),
-		[data],
-	)
+	const diskUsage = formatBytesSeparate(data.mediaDiskUsage)
+
+	const stats: StatCardProps[] = [
+		{
+			label: 'Libraries',
+			value: data.numberOfLibraries,
+			icon: Library,
+			colors: STAT_COLORS.system,
+			countUp: true,
+		},
+		{
+			label: 'Series',
+			value: data.numberOfSeries,
+			icon: Layers,
+			colors: STAT_COLORS.series,
+			countUp: true,
+		},
+		{
+			label: 'Books',
+			value: data.mediaCount,
+			icon: Book,
+			colors: STAT_COLORS.books,
+			countUp: true,
+		},
+		...(diskUsage
+			? [
+					{
+						label: 'Disk usage',
+						value: diskUsage.value,
+						suffix: diskUsage.unit,
+						icon: HardDrive,
+						colors: STAT_COLORS.size,
+						countUp: true,
+					},
+				]
+			: []),
+	]
 
 	return (
-		<div className="max-w-xl gap-4 flex items-center justify-around divide-x divide-border">
-			<Statistic className="pr-10">
-				<Statistic.Label>Libraries</Statistic.Label>
-				<Statistic.CountUpNumber value={Number(stats.libraryCount)} />
-			</Statistic>
-
-			<Statistic className="px-10">
-				<Statistic.Label>Series</Statistic.Label>
-				<Statistic.CountUpNumber value={Number(stats.seriesCount)} />
-			</Statistic>
-
-			<Statistic className="px-10">
-				<Statistic.Label>Books</Statistic.Label>
-				<Statistic.CountUpNumber value={Number(stats.bookCount)} />
-			</Statistic>
-
-			<Statistic className="pl-10">
-				<Statistic.Label>Disk Usage</Statistic.Label>
-				<Statistic.CountUpNumber
-					unit={stats.diskUsage?.unit || 'B'}
-					value={stats.diskUsage?.value || 0}
-					decimal={true}
-				/>
-			</Statistic>
+		<div className="gap-2 sm:grid-cols-4 grid grid-cols-2">
+			{stats.map((stat, index) => (
+				<StatCard key={index} {...stat} isDark={isDarkVariant} />
+			))}
 		</div>
 	)
 }

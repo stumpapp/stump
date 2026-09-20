@@ -45,26 +45,6 @@ impl EpubMutation {
 		Ok(Bookmark { model: bookmark })
 	}
 
-	// TODO: This will be removed once the web client migrates to Readium
-	/// Delete a bookmark by epubcfi
-	async fn delete_bookmark_by_epubcfi(
-		&self,
-		ctx: &Context<'_>,
-		epubcfi: String,
-	) -> Result<Bookmark> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let bookmark = bookmark::Entity::find_for_user(user)
-			.filter(bookmark::Column::Epubcfi.eq(epubcfi))
-			.one(conn)
-			.await?
-			.ok_or("Bookmark not found")?;
-
-		let _ = bookmark.clone().delete(conn).await?;
-		Ok(Bookmark { model: bookmark })
-	}
-
 	/// Create an annotation (highlight/note)
 	async fn create_annotation(
 		&self,

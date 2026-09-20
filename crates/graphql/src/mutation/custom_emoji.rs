@@ -67,7 +67,7 @@ impl CustomEmojiMutation {
 
 		let config = core.config.as_ref();
 		let emoji_path = config
-			.get_emojis_dir()
+			.emojis_directory()
 			.join(format!("{}.{}", created.id, created.file_extension));
 
 		tokio::fs::write(&emoji_path, &image_bytes)
@@ -93,7 +93,7 @@ impl CustomEmojiMutation {
 
 		let config = core.config.as_ref();
 		let emoji_path = config
-			.get_emojis_dir()
+			.emojis_directory()
 			.join(format!("{}.{}", emoji.id, emoji.file_extension));
 
 		if tokio::fs::metadata(&emoji_path).await.is_ok() {

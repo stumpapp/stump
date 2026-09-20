@@ -12,7 +12,7 @@ import {
 import { SceneContainer } from '@/components/container'
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import CreateBookClubForm from './CreateBookClubForm'
 
@@ -26,6 +26,7 @@ const mutation = graphql(`
 `)
 
 export default function CreateBookClubScene() {
+	const paths = usePaths()
 	const [formStep, setFormStep] = useState(1)
 
 	const navigate = useNavigate()

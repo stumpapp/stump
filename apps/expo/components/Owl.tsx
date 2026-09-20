@@ -81,8 +81,9 @@ const defaultSize = (width: number, height: number) => {
 
 // TODO: Commission more owls:
 // - Onboarding states
+// - "happy" owl for things like "all good here" or "all synced" etc
 
-type OwlType =
+export type OwlType =
 	| 'search'
 	| 'construction'
 	| 'developing'

@@ -11,6 +11,7 @@ use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
 		enums::UserPermission,
+		image::{ImageMetadata, ImageRef},
 		permission_set::{permissions_satisfy, PermissionSet},
 	},
 };
@@ -32,6 +33,9 @@ pub struct Model {
 	pub is_server_owner: bool,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub avatar_path: Option<String>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub avatar_meta: Option<ImageMetadata>,
+	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -59,7 +63,7 @@ pub struct Model {
 pub struct AuthUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
-	pub avatar_url: Option<String>,
+	pub avatar: ImageRef,
 	pub username: String,
 	pub is_server_owner: bool,
 	pub is_locked: bool,
@@ -90,6 +94,9 @@ impl FromQueryResult for AuthUser {
 		let permissions_str: String = res.try_get("", "permissions")?;
 		let permissions = PermissionSet::from(permissions_str).resolve_into_vec();
 		let avatar_path: Option<String> = res.try_get("", "avatar_path")?;
+		let avatar_meta: Option<ImageMetadata> = res.try_get("", "avatar_meta")?;
+		let avatar_updated_at: Option<DateTimeWithTimeZone> =
+			res.try_get("", "avatar_updated_at")?;
 		let age_restriction = match age_restriction::Model::from_query_result(res, "") {
 			Ok(age_restriction) => Some(age_restriction),
 			Err(sea_orm::DbErr::RecordNotFound(_)) => None,
@@ -101,21 +108,31 @@ impl FromQueryResult for AuthUser {
 				None
 			})
 			.map(|p| user_preferences::Model {
-				home_arrangement: p
-					.home_arrangement
-					.or_else(user_preferences::Model::default_home_arrangement),
+				home_arrangement: Some(p.resolved_home_arrangement()),
 				navigation_arrangement: p
 					.navigation_arrangement
 					.or_else(user_preferences::Model::default_navigation_arrangement),
 				..p
 			});
 
+		let avatar = ImageRef {
+			// Note: This will never get populated at the db-level, the API will
+			// inject based on the service details
+			url: String::default(),
+			metadata: avatar_meta,
+			last_modified: avatar_updated_at,
+			..Default::default()
+		};
+
 		Ok(AuthUser {
 			id,
 			avatar_path,
 			// Note: This will never get populated at the db-level, the API will
 			// inject based on the service details
-			avatar_url: None,
+			// avatar_url: None,
+			// avatar_meta,
+			// avatar_updated_at,
+			avatar,
 			username,
 			is_server_owner,
 			is_locked,
@@ -130,6 +147,8 @@ impl FromQueryResult for AuthUser {
 pub struct LoginUser {
 	pub id: String,
 	pub avatar_path: Option<String>,
+	pub avatar_meta: Option<ImageMetadata>,
+	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	pub username: String,
 	pub hashed_password: String,
 	pub is_server_owner: bool,
@@ -186,6 +205,8 @@ impl FromQueryResult for LoginUser {
 		Ok(LoginUser {
 			id: user.id,
 			avatar_path: user.avatar_path,
+			avatar_meta: user.avatar_meta,
+			avatar_updated_at: user.avatar_updated_at,
 			username: user.username,
 			hashed_password: user.hashed_password,
 			is_server_owner: user.is_server_owner,
@@ -206,9 +227,18 @@ impl From<LoginUser> for AuthUser {
 		AuthUser {
 			id: user.id,
 			avatar_path: user.avatar_path,
-			// Note: This will never get populated at the db-level, the API will
-			// inject based on the service details
-			avatar_url: None,
+			// even if a user has no avatar, we still provide an empty ImageRef so that clients can still understand
+			// where to fetch the avatar from. they will need to properly handle the not-found case and
+			// what not but that feels acceptable for now. the alternative down the road could be to option `url`
+			// but i hate that for things like media and other consumers of ImageRef
+			avatar: ImageRef {
+				// Note: This will never get populated at the db-level, the API will
+				// inject based on the service details
+				url: String::default(),
+				metadata: user.avatar_meta,
+				last_modified: user.avatar_updated_at,
+				..Default::default()
+			},
 			username: user.username,
 			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,

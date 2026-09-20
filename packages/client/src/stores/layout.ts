@@ -1,14 +1,32 @@
-import { InterfaceLayout } from '@stump/graphql'
-import { ColumnOrder, ColumnSort } from '@stump/sdk'
+import {
+	InterfaceLayout,
+	LibraryModelOrdering,
+	MediaMetadataModelOrdering,
+	MediaModelOrdering,
+	OrderDirection,
+	SeriesModelOrdering,
+} from '@stump/graphql'
+import { ColumnSort } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
+
+export type LayoutOrderingField =
+	| MediaModelOrdering
+	| MediaMetadataModelOrdering
+	| SeriesModelOrdering
+	| LibraryModelOrdering
+
+export type LayoutOrdering = {
+	direction?: OrderDirection
+	orderBy?: LayoutOrderingField
+}
 
 export type LayoutStore = {
 	layout: InterfaceLayout
 	setLayout: (layout: InterfaceLayout) => void
 
-	sort?: ColumnOrder[]
-	setSort: (sort: ColumnOrder[]) => void
+	ordering?: LayoutOrdering
+	setOrdering: (ordering: LayoutOrdering) => void
 
 	columns?: ColumnSort[]
 	setColumns: (columns: ColumnSort[]) => void
@@ -28,7 +46,7 @@ export const createLayoutStore = ({ key, storage }: LayoutStoreParams) =>
 						layout: InterfaceLayout.Grid,
 						setColumns: (columns) => set({ columns }),
 						setLayout: (layout) => set({ layout }),
-						setSort: (sort) => set({ sort }),
+						setOrdering: (ordering) => set({ ordering }),
 					}) as LayoutStore,
 				{
 					name: `stump-${key}-layout-store`,

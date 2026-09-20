@@ -3,9 +3,9 @@ import { FragmentType, graphql, SmartListFilterGroupInput, useFragment } from '@
 import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { DEFAULT_META_CACHE_TIME, usePrefetchSmartList, useSmartListMeta } from './graphql'
 
@@ -27,6 +27,7 @@ type Props = {
 }
 
 export default function SmartListCard({ data }: Props) {
+	const paths = usePaths()
 	const { id, name, filters, description } = useFragment(fragment, data)
 	const { prefetch } = usePrefetchSmartList()
 	const { t } = useLocaleContext()

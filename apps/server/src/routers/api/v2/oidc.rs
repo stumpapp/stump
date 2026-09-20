@@ -6,6 +6,7 @@ use axum::{
 	routing::get,
 	Extension, Json, Router,
 };
+use chrono::Utc;
 use models::{
 	domain::oidc_sync::oidc_claims_to_permission_set,
 	entity::{server_config, user, user_preferences},
@@ -13,10 +14,12 @@ use models::{
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
-	ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, IntoActiveModel,
-	PaginatorTrait, QueryFilter, Set, TransactionTrait,
+	entity::prelude::DateTimeWithTimeZone, ActiveModelTrait, ColumnTrait,
+	ConnectionTrait, EntityTrait, IntoActiveModel, PaginatorTrait, QueryFilter, Set,
+	TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
+use stump_core::image::thumbnail::generate_image_metadata_from_bytes;
 use tower_sessions::Session;
 
 use openidconnect::PkceCodeChallenge;
@@ -61,7 +64,7 @@ async fn get_oidc_config(
 	let (enabled, allow_registration, disable_local_auth) =
 		if let Some(oidc) = &config.oidc {
 			(
-				oidc.is_configured(),
+				oidc.is_valid(),
 				oidc.allow_registration,
 				oidc.disable_local_auth,
 			)
@@ -109,7 +112,7 @@ async fn authorize(
 	let oidc_config = config
 		.oidc
 		.as_ref()
-		.filter(|c| c.is_configured())
+		.filter(|c| c.is_valid())
 		.ok_or_else(|| APIError::BadRequest("OIDC is not configured".to_string()))?;
 
 	if !oidc_config.enabled {
@@ -138,7 +141,7 @@ async fn authorize(
 	let pkce_challenge_code = pkce_challenge.as_str().to_owned();
 	let redirect_to = get_oidc_authorize_url(
 		&client,
-		&oidc_config.get_scopes(),
+		&oidc_config.scopes,
 		&state_value,
 		Some(pkce_challenge),
 	);
@@ -197,7 +200,7 @@ async fn callback(
 	let oidc_config = config
 		.oidc
 		.as_ref()
-		.filter(|c| c.is_configured())
+		.filter(|c| c.is_valid())
 		.ok_or_else(|| APIError::BadRequest("OIDC is not configured".to_string()))?;
 
 	if !oidc_config.enabled {
@@ -213,7 +216,7 @@ async fn callback(
 		oidc_provider.create_client(&base_url)?,
 	);
 
-	let extra_audiences = oidc_config.get_extra_audiences();
+	let extra_audiences = oidc_config.extra_audiences.clone();
 	let pkce_verifier = (!oidc_state.pkce_verifier.is_empty())
 		.then(|| openidconnect::PkceCodeVerifier::new(oidc_state.pkce_verifier));
 
@@ -314,8 +317,17 @@ async fn callback(
 				Ok((bytes, ext)) => {
 					let dest_path = ctx
 						.config
-						.get_avatars_dir()
+						.avatars_directory()
 						.join(format!("{}.{}", user.id, ext));
+
+					let avatar_meta =
+						match generate_image_metadata_from_bytes(bytes.clone()).await {
+							Ok(meta) => Some(meta),
+							Err(e) => {
+								tracing::error!(error = ?e, "Failed to generate image metadata");
+								None
+							},
+						};
 
 					match tokio::fs::write(&dest_path, &bytes).await {
 						Ok(_) => {
@@ -326,6 +338,16 @@ async fn callback(
 									sea_orm::sea_query::Expr::value(Some(
 										avatar_path_str,
 									)),
+								)
+								.col_expr(
+									user::Column::AvatarMeta,
+									sea_orm::sea_query::Expr::value(avatar_meta),
+								)
+								.col_expr(
+									user::Column::AvatarUpdatedAt,
+									sea_orm::sea_query::Expr::value::<
+										Option<DateTimeWithTimeZone>,
+									>(Some(Utc::now().into())),
 								)
 								.filter(user::Column::Id.eq(user.id.clone()))
 								.exec(&txn)

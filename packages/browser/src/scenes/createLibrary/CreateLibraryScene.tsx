@@ -15,7 +15,7 @@ import {
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
 
@@ -40,6 +40,7 @@ const mutation = graphql(`
 `)
 
 export default function CreateLibraryScene() {
+	const paths = usePaths()
 	const navigate = useNavigate()
 	const { sdk } = useSDK()
 	const client = useQueryClient()

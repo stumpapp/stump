@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
+import { isEbookExtension, isEbookReadProgress } from '@/utils/readingProgress'
 
 import DeleteHistoryConfirmation from './DeleteHistoryConfirmation'
 import EmailBookDialog from './EmailBookDialog'
@@ -110,10 +111,14 @@ export default function BookActionMenu({ book }: Props) {
 
 	const continueReadingLink = useMemo(() => {
 		if (!book.readProgress) return undefined
-		const { page, epubcfi } = book.readProgress
-		if (epubcfi) {
-			return paths.bookReader(book.id, { epubcfi, isEpub: true })
-		} else if (!!page && page > 0) {
+		const { page } = book.readProgress
+		if (
+			isEbookExtension(book.extension) ||
+			isEbookReadProgress(book.readProgress, book.extension)
+		) {
+			return paths.bookReader(book.id, { isEpub: true })
+		}
+		if (page && page > 0) {
 			return paths.bookReader(book.id, { page })
 		}
 		return undefined
@@ -283,7 +288,7 @@ export default function BookActionMenu({ book }: Props) {
 					align="end"
 					contentWrapperClassName="w-48"
 					trigger={
-						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0">
+						<Button variant="outline" size="icon" className="shrink-0">
 							<EllipsisVertical className="h-4 w-4" />
 						</Button>
 					}

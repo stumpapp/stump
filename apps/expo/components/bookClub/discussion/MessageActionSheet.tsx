@@ -184,7 +184,7 @@ function ActionRow({ icon, label, description, onPress, disabled, destructive }:
 		<Pressable onPress={onPress} disabled={disabled}>
 			<View
 				className={cn(
-					'ios:rounded-[2rem] gap-4 rounded-3xl p-4 flex-row items-center',
+					'ios:rounded-[2rem] gap-4 p-4 flex-row items-center rounded-3xl',
 					destructive ? 'dark:bg-red-500/15 bg-red-500/10' : 'bg-black/5 dark:bg-white/10',
 					disabled ? 'opacity-40' : 'active:opacity-80',
 				)}

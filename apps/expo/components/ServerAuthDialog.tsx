@@ -125,6 +125,8 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							className="self-center"
 							source={{ uri: urlJoin(activeServer.url, '/favicon.ico') }}
 							style={{ width: 100, height: 100 }}
+							// see https://github.com/stumpapp/stump/issues/1429
+							allowHardware={false}
 						/>
 					</View>
 

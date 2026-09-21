@@ -494,6 +494,10 @@
 						"description": "递归任意层级的每个文件夹视为一个系列"
 					}
 				}
+			},
+			"oneshotsDirectory": {
+				"label": "单篇目录",
+				"description": "存放单篇作品的目录名，相对于书库路径。若留空，则不会处理单篇作品"
 			}
 		},
 		"scan": {
@@ -848,6 +852,11 @@
 				"heading": "没有可显示的内容",
 				"message": "你最近添加的任何书籍都会显示在这里"
 			}
+		},
+		"allSectionsHidden": {
+			"label": "暂无内容",
+			"description": "你把所有内容都隐藏了，但愿你喜欢这片空白",
+			"customizeHome": "自定义首页"
 		}
 	},
 	"metadataEditor": {
@@ -899,6 +908,10 @@
 		},
 		"addFields": {
 			"description": "在自己的行上添加每个添加"
+		},
+		"actions": {
+			"removeItem": "移除条目",
+			"resetField": "重置字段"
 		}
 	},
 	"metadataMatching": {
@@ -1483,6 +1496,12 @@
 						"Stump 的翻译",
 						"如果你可以！"
 					]
+				},
+				"language": {
+					"label": "语言",
+					"contributeIfAble": "如果可以，请考虑参与 Stump 的翻译贡献！",
+					"contribute": "参与贡献",
+					"noThanks": "不了，谢谢"
 				}
 			}
 		},
@@ -1694,6 +1713,13 @@
 				"readingSessionGracePeriod": {
 					"label": "阅读会话宽限期",
 					"description": "如果在此时间范围内（秒）未检测到活动，下次更新将开始新的会话"
+				},
+				"homeArrangement": {
+					"title": "首页",
+					"description": "调整首页版块",
+					"label": "首页版块",
+					"hint": "拖动排列版块，或完全隐藏",
+					"reorder": "排序 {{section}}"
 				}
 			}
 		},
@@ -3687,6 +3713,34 @@
 					"horizontalScroll": "水平滚动",
 					"paged": "分页"
 				}
+			}
+		}
+	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "年龄分级",
+			"anyAge": {
+				"label": "全年龄",
+				"description": "不应用年龄分级筛选"
+			},
+			"custom": {
+				"label": "N岁及以下",
+				"description": {
+					"media": "仅显示年龄分级不高于 N 的内容，其中 N 为你下方输入的数字",
+					"series": "仅显示年龄分级不高于 N 的系列，其中 N 为你下方输入的数字"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "拓展名",
+			"any": "任何"
+		},
+		"readStatusSelect": {
+			"label": "阅读状态",
+			"options": {
+				"completed": "读完",
+				"reading": "正在阅读",
+				"unread": "未读"
 			}
 		}
 	}

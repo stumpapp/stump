@@ -8,10 +8,10 @@ use crate::{
 };
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::{
-	entity::{media, series, smart_list, smart_list_view},
-	shared::image::ImageRef,
+	entity::{media, series, smart_list, smart_list_access_rule, smart_list_view},
+	shared::{enums::AccessRole, image::ImageRef},
 };
-use sea_orm::{QuerySelect, TransactionTrait};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect, TransactionTrait};
 use std::collections::HashSet;
 
 #[derive(Debug, SimpleObject)]
@@ -178,5 +178,33 @@ impl SmartList {
 			matched_series: matched_series.len() as i64,
 			matched_libraries: matched_libraries.len() as i64,
 		})
+	}
+
+	/// Get the role of the viewer for this smart list
+	async fn viewer_role(&self, ctx: &Context<'_>) -> Result<AccessRole> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+
+		if self.model.creator_id == user.id {
+			return Ok(AccessRole::CoCreator);
+		}
+
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let access_rule = smart_list_access_rule::Entity::find()
+			.filter(
+				smart_list_access_rule::Column::UserId
+					.eq(user.id.clone())
+					.and(
+						smart_list_access_rule::Column::SmartListId
+							.eq(self.model.id.clone()),
+					),
+			)
+			.one(conn)
+			.await?;
+
+		Ok(access_rule
+			.map(|r| r.role)
+			// access is already enforced by the resolvers which return smart list objects,
+			// so defaulting to a reader role is largely safe here
+			.unwrap_or(AccessRole::Reader))
 	}
 }

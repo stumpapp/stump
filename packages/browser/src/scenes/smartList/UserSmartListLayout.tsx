@@ -7,7 +7,6 @@ import { useMediaMatch } from 'rooks'
 
 import { SceneContainer } from '@/components/container'
 import { GenericSettingsHeader } from '@/components/settings'
-import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
 
 import { SmartListContext } from './context'
@@ -53,18 +52,7 @@ export default function UserSmartListLayout() {
 		list,
 	})
 
-	const { user } = useAppContext()
-
-	/**
-	 * Whether or not the current user is the creator of the smart list
-	 */
-	const isCreator = useMemo(
-		() => !!list?.creatorId && list?.creatorId === user.id,
-		[user.id, list?.creatorId],
-	)
-
-	// TODO(permissions): pull role from api instead of this derivation
-	const viewerRole = isCreator ? AccessRole.CoCreator : AccessRole.Reader
+	const viewerRole = list?.viewerRole
 
 	// Create scoped store with default grouping from the list
 	// eslint-disable-next-line react-hooks/refs
@@ -78,7 +66,8 @@ export default function UserSmartListLayout() {
 		isSettings ? (
 			<GenericSettingsHeader
 				localeBase="smartListSettingsScene"
-				routeGroups={createRouteGroups(list?.id ?? '', viewerRole)}
+				// we don't render header if viewerRole is falsy so this is fine
+				routeGroups={createRouteGroups(list?.id ?? '', viewerRole ?? AccessRole.Reader)}
 			/>
 		) : (
 			<UserSmartListHeader />
@@ -88,8 +77,7 @@ export default function UserSmartListLayout() {
 		return null
 	}
 
-	// TODO: redirect for these?
-	if (!list || !meta) {
+	if (!list || !meta || !viewerRole) {
 		throw new Error(t(withLocaleKey('smartListNotFound')))
 	}
 

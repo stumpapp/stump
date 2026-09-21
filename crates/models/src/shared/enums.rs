@@ -3,8 +3,6 @@ use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
-// TODO: Consider not using screaming case?
-
 /// The role of an author in relation to a work or series
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Enum)]
 pub enum AuthorRole {

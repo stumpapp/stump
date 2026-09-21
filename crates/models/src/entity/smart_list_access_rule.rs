@@ -1,38 +1,7 @@
-use async_graphql::{Enum, SimpleObject};
+use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
-use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString};
 
-/// 1: reader (read), 2: collaborator (read, edit), 3: co-creator (read, edit, delete)
-#[derive(
-	Eq,
-	Copy,
-	Hash,
-	Debug,
-	Clone,
-	Default,
-	EnumIter,
-	PartialEq,
-	Serialize,
-	Deserialize,
-	DeriveActiveEnum,
-	EnumString,
-	Display,
-	Enum,
-)]
-#[sea_orm(
-	rs_type = "String",
-	rename_all = "SCREAMING_SNAKE_CASE",
-	db_type = "Integer"
-)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
-pub enum SmartListAccessRole {
-	#[default]
-	Reader = 1,
-	Collaborator = 2,
-	CoCreator = 3,
-}
+use crate::shared::enums::AccessRole;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "SmartListAccessRuleModel")]
@@ -40,7 +9,7 @@ pub enum SmartListAccessRole {
 pub struct Model {
 	#[sea_orm(primary_key)]
 	pub id: i32,
-	pub role: SmartListAccessRole,
+	pub role: AccessRole,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]

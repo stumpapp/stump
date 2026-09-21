@@ -29,8 +29,6 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	#[graphql(skip)]
 	pub hashed_password: String,
-	// TODO(permissions): consider removing
-	pub is_server_owner: bool,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub avatar_path: Option<String>,
 	#[sea_orm(column_type = "Json", nullable)]
@@ -65,7 +63,6 @@ pub struct AuthUser {
 	pub avatar_path: Option<String>,
 	pub avatar: ImageRef,
 	pub username: String,
-	pub is_server_owner: bool,
 	pub is_locked: bool,
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<super::age_restriction::Model>,
@@ -89,7 +86,6 @@ impl FromQueryResult for AuthUser {
 	) -> Result<Self, sea_orm::DbErr> {
 		let id = res.try_get("", "id")?;
 		let username = res.try_get("", "username")?;
-		let is_server_owner = res.try_get("", "is_server_owner")?;
 		let is_locked = res.try_get("", "is_locked")?;
 		let permissions_str: String = res.try_get("", "permissions")?;
 		let permissions = PermissionSet::from(permissions_str).resolve_into_vec();
@@ -134,7 +130,6 @@ impl FromQueryResult for AuthUser {
 			// avatar_updated_at,
 			avatar,
 			username,
-			is_server_owner,
 			is_locked,
 			permissions,
 			age_restriction,
@@ -151,7 +146,6 @@ pub struct LoginUser {
 	pub avatar_updated_at: Option<DateTimeWithTimeZone>,
 	pub username: String,
 	pub hashed_password: String,
-	pub is_server_owner: bool,
 	pub is_locked: bool,
 	pub max_sessions_allowed: Option<i32>,
 	pub permissions: Vec<UserPermission>,
@@ -209,7 +203,6 @@ impl FromQueryResult for LoginUser {
 			avatar_updated_at: user.avatar_updated_at,
 			username: user.username,
 			hashed_password: user.hashed_password,
-			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,
 			max_sessions_allowed: user.max_sessions_allowed,
 			permissions: PermissionSet::from(user.permissions.unwrap_or_default())
@@ -240,7 +233,6 @@ impl From<LoginUser> for AuthUser {
 				..Default::default()
 			},
 			username: user.username,
-			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,
 			permissions: user.permissions,
 			age_restriction: user.age_restriction,
@@ -258,7 +250,6 @@ mod tests {
 	#[test]
 	fn test_has_permission_resolves_associated_permissions() {
 		let user = AuthUser {
-			is_server_owner: false,
 			permissions: vec![UserPermission::ManageUsers],
 			..get_default_user()
 		};
@@ -276,7 +267,6 @@ mod tests {
 	fn test_has_permission_resolves_transitively() {
 		// ManageServer -> EmailerManage -> EmailerRead -> EmailSend
 		let user = AuthUser {
-			is_server_owner: false,
 			permissions: PermissionSet::new(vec![UserPermission::ManageServer])
 				.resolve_into_vec(),
 			..get_default_user()

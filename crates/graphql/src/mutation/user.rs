@@ -216,7 +216,6 @@ impl UserMutation {
 
 		let user = user::ActiveModel {
 			id: NotSet,
-			is_server_owner: Set(false),
 			created_at: Set(chrono::Utc::now().into()),
 			username: Set(input.username),
 			hashed_password: Set(hashed_password),
@@ -348,23 +347,10 @@ impl UserMutation {
 		let conn = core_ctx.conn.as_ref();
 
 		let is_self = user.id == id.to_string();
-		let can_manage_users =
-			user.is_server_owner || user.has_permission(UserPermission::ManageUsers);
+		let can_manage_users = user.has_permission(UserPermission::ManageUsers);
 
 		if !is_self && !can_manage_users {
 			return Err(FORBIDDEN_ACTION.into());
-		}
-
-		// TODO(permissions): server owner goes away
-		// nobody can update the server owner
-		if !is_self && !user.is_server_owner {
-			let target = user::Entity::find_by_id(id.to_string())
-				.one(conn)
-				.await?
-				.ok_or("User not found")?;
-			if target.is_server_owner {
-				return Err(FORBIDDEN_ACTION.into());
-			}
 		}
 
 		let updated_user =
@@ -658,12 +644,9 @@ async fn update_user(
 
 	let txn = conn.begin().await?;
 
-	// TODO(permissions): server owner goes away
-	// only a server owner or a user with ManageUsers may set another user's
-	// permissions, age restriction, and session cap.
-	let can_manage_privileged_fields = (by_user.is_server_owner
-		|| by_user.has_permission(UserPermission::ManageUsers))
-		&& !is_self_update;
+	// only a user with ManageUsers may set another user's permissions, age restriction, and session cap.
+	let can_manage_privileged_fields =
+		by_user.has_permission(UserPermission::ManageUsers) && !is_self_update;
 	if can_manage_privileged_fields {
 		update_user.max_sessions_allowed = Set(input.max_sessions_allowed);
 		update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;

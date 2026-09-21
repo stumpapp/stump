@@ -1,4 +1,5 @@
 import { Alert, AlertDescription, AlertTitle, Badge, NewCard, Sheet, Text } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { intlFormat, isValid, parseISO } from 'date-fns'
 import { ShieldAlert } from 'lucide-react'
@@ -15,7 +16,7 @@ type Props = {
 
 export default function APIKeyInspector({ apiKey, onClose }: Props) {
 	const { t } = useLocaleContext()
-	const { user } = useAppContext()
+	const { user, checkPermission } = useAppContext()
 
 	const displayedData = useCurrentOrPrevious(apiKey)
 
@@ -35,8 +36,12 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 	const expirationFormatted = formatDate(displayedData?.expiresAt)
 	const lastUsedAtFormatted = formatDate(displayedData?.lastUsedAt)
 	const createdAtFormatted = formatDate(displayedData?.createdAt)
+	// TODO(permissions): might need to change the language here to reflect keys with
+	// "dangerous" permissions instead of "all" permissions, since server-owner keys effectively
+	// died with the flag dying
 	const isAllPermissions =
-		user.isServerOwner && displayedData?.permissions.__typename === 'InheritPermissionStruct'
+		checkPermission(UserPermission.ManageServer) &&
+		displayedData?.permissions.__typename === 'InheritPermissionStruct'
 
 	const renderPermissions = () => {
 		if (isAllPermissions) return null

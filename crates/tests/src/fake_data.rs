@@ -93,7 +93,6 @@ impl User {
 			hashed_password: sea_orm::Set(
 				self.hashed_password.clone().unwrap_or("".to_string()),
 			),
-			is_server_owner: sea_orm::Set(true),
 			permissions: sea_orm::Set(
 				PermissionSet::new(self.permissions.clone().unwrap_or_default())
 					.resolve_into_string(),

@@ -63,16 +63,8 @@ export default function UserSmartListLayout() {
 		[user.id, list?.creatorId],
 	)
 
-	/**
-	 * The access role of the current user for this smart list. This is used to determine
-	 * what actions the user can take on the list
-	 *
-	 * TODO: Support actual roles from the backend, i.e. Writer, CoCreator, Creator, Reader
-	 */
-	const viewerRole = useMemo<AccessRole>(
-		() => (isCreator || user.isServerOwner ? AccessRole.CoCreator : AccessRole.Reader),
-		[isCreator, user.isServerOwner],
-	)
+	// TODO(permissions): pull role from api instead of this derivation
+	const viewerRole = isCreator ? AccessRole.CoCreator : AccessRole.Reader
 
 	// Create scoped store with default grouping from the list
 	// eslint-disable-next-line react-hooks/refs

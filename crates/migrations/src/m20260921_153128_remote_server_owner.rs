@@ -1,12 +1,7 @@
 use sea_orm_migration::prelude::*;
 
+#[derive(DeriveMigrationName)]
 pub struct Migration;
-
-impl MigrationName for Migration {
-	fn name(&self) -> &str {
-		"m20260920_000000_drop_server_owner"
-	}
-}
 
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
@@ -19,8 +14,13 @@ impl MigrationTrait for Migration {
 					.to_owned(),
 			)
 			.await
+		// TODO(permissions): we need to give the server owner manage server permissions
+		// as part of backfill
 	}
 
+	// Note: the down is non-recoverable wrt the server owner permission assignment, since
+	// we aren't tracking who was the server owner at time of up. It's fine, the CLI can
+	// be used to assign perms if needed
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		manager
 			.alter_table(

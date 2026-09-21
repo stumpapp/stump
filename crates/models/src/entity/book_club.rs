@@ -215,8 +215,7 @@ mod tests {
 
 	#[test]
 	fn test_all_for_user() {
-		let mut user = get_default_user();
-		user.is_server_owner = false;
+		let user = get_default_user();
 
 		let select = Entity::find_all_for_user(true, &user);
 		let stmt_str = select_no_cols_to_string(select);
@@ -225,8 +224,7 @@ mod tests {
 
 	#[test]
 	fn test_all_for_user_member() {
-		let mut user = get_default_user();
-		user.is_server_owner = false;
+		let user = get_default_user();
 
 		let select = Entity::find_all_for_user(false, &user);
 		let stmt_str = select_no_cols_to_string(select);
@@ -235,8 +233,7 @@ mod tests {
 
 	#[test]
 	fn test_for_id_and_user() {
-		let mut user = get_default_user();
-		user.is_server_owner = false;
+		let user = get_default_user();
 
 		let select = Entity::find_by_id_and_user("314", &user);
 		let stmt_str = select_no_cols_to_string(select);
@@ -245,8 +242,7 @@ mod tests {
 
 	#[test]
 	fn find_for_member_enforce_role() {
-		let mut user = get_default_user();
-		user.is_server_owner = false;
+		let user = get_default_user();
 
 		let select =
 			Entity::find_for_member_enforce_role(&user, BookClubMemberRole::Moderator);

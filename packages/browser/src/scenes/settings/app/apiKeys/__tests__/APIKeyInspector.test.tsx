@@ -15,12 +15,12 @@ vi.mock('@/context', () => ({
 const useAppContextRet = {
 	user: {
 		id: 'user-id',
-		isServerOwner: false,
 		permissions: {
 			__typename: 'UserPermissionStruct',
 			value: [UserPermission.AccessApiKeys],
 		},
 	} as unknown as AuthUser,
+	checkPermission: () => false,
 } as any
 
 vi.mock('@stump/i18n', () => ({
@@ -104,7 +104,7 @@ describe('APIKeyInspector', () => {
 	it('should render an unrestricted key properly', () => {
 		vi.mocked(useAppContext).mockReturnValue({
 			...useAppContextRet,
-			user: { ...useAppContextRet.user, isServerOwner: true },
+			checkPermission: (p: UserPermission) => p === UserPermission.ManageServer,
 		})
 		render(
 			<Subject apiKey={createKey({ permissions: { __typename: 'InheritPermissionStruct' } })} />,

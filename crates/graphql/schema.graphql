@@ -3689,7 +3689,6 @@ input UploadSeriesInput {
 type User {
 	id: String!
 	username: String!
-	isServerOwner: Boolean!
 	avatarPath: String
 	avatarMeta: ImageMetadata
 	avatarUpdatedAt: DateTime

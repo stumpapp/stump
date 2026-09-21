@@ -37,6 +37,7 @@ mod m20260813_220807_user_oidc_groups;
 mod m20260815_205755_avatar_image_metadata;
 mod m20260816_000000_drop_legacy_epubcfi;
 mod m20260830_015110_oneshots;
+mod m20260921_153128_remote_server_owner;
 
 pub struct Migrator;
 
@@ -80,6 +81,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260815_205755_avatar_image_metadata::Migration),
 			Box::new(m20260816_000000_drop_legacy_epubcfi::Migration),
 			Box::new(m20260830_015110_oneshots::Migration),
+			Box::new(m20260921_153128_remote_server_owner::Migration),
 		]
 	}
 }

@@ -940,6 +940,10 @@
 		},
 		"addFields": {
 			"description": "Add each addition on its own line"
+		},
+		"actions": {
+			"removeItem": "Remove item",
+			"resetField": "Reset field"
 		}
 	},
 	"metadataMatching": {

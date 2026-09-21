@@ -1,3 +1,15 @@
+<a name="0.1.10"></a>
+## 0.1.10 (2026-09-21)
+
+### Fixed
+
+- 🐛 Fix metadata editor delete squeezed against next tag ([#1431](https://github.com/stumpapp/stump/issues/1431)) [[766c734](https://github.com/stumpapp/stump/commit/766c7347dbc0a2fc8c93d04a8f922db3b5a41ba8)]
+
+### Security
+
+- 🔒 Prevent custom api keys from inheriting server owner flag [[44e1de1](https://github.com/stumpapp/stump/commit/44e1de12dd058bc27d40323cf495fe751088b364)]
+
+
 <a name="0.1.9"></a>
 ## 0.1.9 (2026-09-19)
 

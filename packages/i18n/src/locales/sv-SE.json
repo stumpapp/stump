@@ -2301,7 +2301,9 @@
 					"label": "Leverantör",
 					"allOption": "Alla aktiva leverantörer"
 				}
-			}
+			},
+			"heading": "Sök metadata",
+			"openButton": "Sök metadata"
 		}
 	}
 }

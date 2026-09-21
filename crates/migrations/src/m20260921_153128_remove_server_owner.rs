@@ -6,6 +6,20 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		let permissions = vec!["MANAGE_SERVER"].join(",");
+		let update_statement = Query::update()
+			.table(Users::Table)
+			.value(Users::Permissions, Expr::value(Some(permissions)))
+			.and_where(Expr::col(Users::IsServerOwner).eq(true))
+			// ^ to date, server owners had "no" permissions and the flag simply
+			// gave them implicit access to everything. now, we are giving them one
+			// explicit permission which should be sufficient
+			.to_owned();
+		manager
+			.get_connection()
+			.execute(manager.get_database_backend().build(&update_statement))
+			.await?;
+
 		manager
 			.alter_table(
 				Table::alter()
@@ -14,8 +28,6 @@ impl MigrationTrait for Migration {
 					.to_owned(),
 			)
 			.await
-		// TODO(permissions): we need to give the server owner manage server permissions
-		// as part of backfill
 	}
 
 	// Note: the down is non-recoverable wrt the server owner permission assignment, since
@@ -42,4 +54,5 @@ impl MigrationTrait for Migration {
 enum Users {
 	Table,
 	IsServerOwner,
+	Permissions,
 }

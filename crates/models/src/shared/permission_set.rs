@@ -174,6 +174,9 @@ impl AssociatedPermission for UserPermission {
 				// included so that admins retain parity with the legacy is_server_owner
 				// short-circuit. Likely candidates for removal once admins are issued
 				// a separate "default user perms" bundle alongside ManageServer.
+				// ^ the awkward part will be future features too, or if we did omit these from
+				// manage server how would the "owner" user get them? do we let them grant themselves?
+				// this needs a little more thought maybe
 				UserPermission::AccessKoreaderSync,
 				UserPermission::AccessKoboSync,
 				UserPermission::AccessSmartList,

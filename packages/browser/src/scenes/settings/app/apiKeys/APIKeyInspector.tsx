@@ -1,5 +1,4 @@
 import { Alert, AlertDescription, AlertTitle, Badge, NewCard, Sheet, Text } from '@stump/components'
-import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { intlFormat, isValid, parseISO } from 'date-fns'
 import { ShieldAlert } from 'lucide-react'
@@ -16,7 +15,7 @@ type Props = {
 
 export default function APIKeyInspector({ apiKey, onClose }: Props) {
 	const { t } = useLocaleContext()
-	const { user, checkPermission } = useAppContext()
+	const { user } = useAppContext()
 
 	const displayedData = useCurrentOrPrevious(apiKey)
 
@@ -36,16 +35,10 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 	const expirationFormatted = formatDate(displayedData?.expiresAt)
 	const lastUsedAtFormatted = formatDate(displayedData?.lastUsedAt)
 	const createdAtFormatted = formatDate(displayedData?.createdAt)
-	// TODO(permissions): might need to change the language here to reflect keys with
-	// "dangerous" permissions instead of "all" permissions, since server-owner keys effectively
-	// died with the flag dying
-	const isAllPermissions =
-		checkPermission(UserPermission.ManageServer) &&
+	const isPotentiallyDangerousKey =
 		displayedData?.permissions.__typename === 'InheritPermissionStruct'
 
 	const renderPermissions = () => {
-		if (isAllPermissions) return null
-
 		const permissions =
 			displayedData?.permissions.__typename === 'InheritPermissionStruct'
 				? user.permissions || []
@@ -75,7 +68,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 			description="A detailed view of this key"
 		>
 			<div className="px-4 gap-4 flex flex-col">
-				{isAllPermissions && (
+				{isPotentiallyDangerousKey && (
 					<Alert variant="warning" data-testid="unrestricted-meta">
 						<ShieldAlert className="size-4" />
 						<AlertTitle>{t(getKey('unrestrictedKey.heading'))}</AlertTitle>

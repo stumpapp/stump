@@ -292,8 +292,6 @@ const columns = [
 	}),
 ]
 
-// TODO(permissions): i added the missing permissions to satisfy the record type and avoid ts errors, but we will need localization
-// and another pass at the permission groups/inheritance before merge
 export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.AccessBookClub]: [],
 	[UserPermission.CreateBookClub]: [UserPermission.AccessBookClub],

@@ -20,7 +20,6 @@ const useAppContextRet = {
 			value: [UserPermission.AccessApiKeys],
 		},
 	} as unknown as AuthUser,
-	checkPermission: () => false,
 } as any
 
 vi.mock('@stump/i18n', () => ({
@@ -96,16 +95,13 @@ describe('APIKeyInspector', () => {
 			/>,
 		)
 
+		expect(screen.getByTestId('unrestricted-meta')).toBeInTheDocument()
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
 		expect(screen.getByText('Permissions')).toBeInTheDocument()
 		expect(screen.getAllByTestId('permission-badge')).toHaveLength(2)
 	})
 
-	it('should render an unrestricted key properly', () => {
-		vi.mocked(useAppContext).mockReturnValue({
-			...useAppContextRet,
-			checkPermission: (p: UserPermission) => p === UserPermission.ManageServer,
-		})
+	it('should render an unrestricted key warning for any inherit key', () => {
 		render(
 			<Subject apiKey={createKey({ permissions: { __typename: 'InheritPermissionStruct' } })} />,
 		)

@@ -856,6 +856,11 @@
 				"heading": "Nichts zu zeigen",
 				"message": "Alle zuletzt hinzugefügten Bücher werden hier angezeigt"
 			}
+		},
+		"allSectionsHidden": {
+			"label": "Es gibt nichts zu zeigen",
+			"description": "Du hast aller versteckt, ich hoffe, du magst leere Flächen",
+			"customizeHome": "Passe deine Startseite an"
 		}
 	},
 	"metadataEditor": {
@@ -907,6 +912,10 @@
 		},
 		"addFields": {
 			"description": "Füge jede Ergänzung in eine eigene Zeile hinzu"
+		},
+		"actions": {
+			"removeItem": "Element entfernen",
+			"resetField": "Feld zurücksetzen"
 		}
 	},
 	"metadataMatching": {
@@ -1708,6 +1717,17 @@
 				"readingSessionGracePeriod": {
 					"label": "Lesesitzungsschonfrist",
 					"description": "Falls keine Aktivität in diesem Zeitrahmen, in Sekunden, erkannt wird, wird bei der nächsten Aktualisierung eine neue Sitzung gestartet"
+				},
+				"homeArrangement": {
+					"title": "Startseite",
+					"description": "Passe die einzelnen Bereiche auf deiner Startseite an",
+					"label": "Startbereiche",
+					"reorder": "{{section}} neu anordnen",
+					"reset": "Zurücksetzen",
+					"saveFailed": "Fehler beim speicher deiner Änderungen",
+					"unsupported": "Ungültige Konfiguration",
+					"unsupportedDescription": "Bitte setze es auf den Standard zurück und versuche es erneut",
+					"hint": "Ziehe und ordne Bereiche um oder verstecke sie komplett"
 				}
 			}
 		},
@@ -1835,7 +1855,7 @@
 			"description": "Einstellungen für die Stump Desktopanwendung",
 			"sections": {
 				"configuredServers": {
-					"label": "Konfigurierte Server",
+					"label": "Server",
 					"description": "Liste der Stump Server, mit denen sich verbunden werden kann",
 					"getStarted": "Server hinzufügen, um loszulegen",
 					"unreachableServer": {
@@ -1928,12 +1948,16 @@
 					"description": "Verwalte optionale Funktionen einzigartig zu der Desktopanwendung",
 					"bundledServer": {
 						"label": "Gebündelte Server",
-						"description": "Führe den gebündelten Server im Hintergrund aus, während die Desktopanwendung läuft (Neustart erforderlich)"
+						"description": "Führe den gebündelten Server im Hintergrund aus, während die Desktopanwendung läuft"
 					},
 					"discordPresence": {
 						"label": "Discord Rich-Präsenz",
 						"description": "Zeige deine Stump Aktivität in Discord mit Discord Rich Presence",
 						"reconnect": "Wieder mit Discord verbinden"
+					},
+					"restartRequired": {
+						"title": "Neustart erforderlich",
+						"description": "Es gab Änderungen, welche einen Neustart der App benötigen, um in Kraft zu treten"
 					}
 				}
 			}

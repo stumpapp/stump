@@ -87,9 +87,9 @@ function Message({
 
 	if (isDeleted) {
 		return (
-			<View className="flex-row gap-3 px-4 py-2 opacity-50">
+			<View className="gap-3 px-4 py-2 flex-row opacity-50">
 				<View className="h-8 w-8" />
-				<Text className="flex-1 italic text-foreground-muted" size="sm">
+				<Text className="text-foreground-muted flex-1 italic" size="sm">
 					This message was deleted
 				</Text>
 			</View>
@@ -106,7 +106,7 @@ function Message({
 			{showReplyPreview && <MessageReplyPreview replyTo={message.replyTo} />}
 
 			<View
-				className={cn('flex-row gap-3 px-4 py-2', {
+				className={cn('gap-3 px-4 py-2 flex-row', {
 					'py-0 pb-2': showReplyPreview,
 				})}
 			>
@@ -125,8 +125,8 @@ function Message({
 					</AvatarFallback>
 				</Avatar>
 
-				<View className="flex-1 gap-0.5">
-					<View className="flex-row items-baseline gap-2">
+				<View className="gap-0.5 flex-1">
+					<View className="gap-2 flex-row items-baseline">
 						<Text className="font-semibold">{displayName}</Text>
 						<Text size="xs" className="text-foreground-muted">
 							{formatTimestamp(message.timestamp)}
@@ -141,7 +141,7 @@ function Message({
 
 					<Text>{message.content}</Text>
 
-					<View className="mt-1 flex-row flex-wrap items-center gap-1.5">
+					<View className="mt-1 gap-1.5 flex-row flex-wrap items-center">
 						{reactions.map((reaction) => {
 							const key = reaction.emoji ?? `custom:${reaction.customEmojiId}`
 
@@ -166,7 +166,7 @@ function Message({
 								<Pressable
 									key={key}
 									className={cn(
-										'squircle flex-row items-center gap-1.5 rounded-full border px-2 py-1.5',
+										'squircle gap-1.5 px-2 py-1.5 flex-row items-center rounded-full border',
 										!reaction.reactedByMe && 'border-edge bg-background-surface',
 									)}
 									onPress={onPress}
@@ -208,7 +208,7 @@ function Message({
 
 						{threadChildrenCount > 0 && !isThreadHeader && (
 							<Pressable
-								className="flex-row items-center gap-1"
+								className="gap-1 flex-row items-center"
 								onPress={() => onThreadPress?.(message)}
 							>
 								<Icon as={MessageSquare} className="h-3.5 w-3.5 text-foreground-muted opacity-90" />

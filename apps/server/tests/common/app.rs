@@ -144,4 +144,40 @@ impl TestApp {
 
 		response
 	}
+
+	pub async fn login_as(&self, username: &str, password: &str) -> String {
+		let response = self
+			.server
+			.post("/api/v2/auth/login?generate_token=true")
+			.json(&serde_json::json!({ "username": username, "password": password }))
+			.await;
+		response.assert_status_ok();
+		let body: serde_json::Value = response.json();
+		body["accessToken"]
+			.as_str()
+			.expect("accessToken missing from login response")
+			.to_string()
+	}
+
+	/// execute a gql query with a different token than the one managed by the app,
+	/// e.g. for testing diff personas
+	pub async fn execute_gql_with_token(
+		&self,
+		query: &str,
+		variables: Option<serde_json::Value>,
+		token: &str,
+	) -> serde_json::Value {
+		let mut body = serde_json::json!({ "query": query });
+		if let Some(vars) = variables {
+			body["variables"] = vars;
+		}
+		let response = self
+			.server
+			.post("/api/graphql")
+			.add_header("Authorization", format!("Bearer {}", token))
+			.json(&body)
+			.await;
+		response.assert_status_ok();
+		response.json()
+	}
 }

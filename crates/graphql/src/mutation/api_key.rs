@@ -82,11 +82,21 @@ fn check_permissions(
 	req_ctx: &AuthContext,
 	permissions: &APIKeyPermissions,
 ) -> Result<()> {
-	if let APIKeyPermissions::Custom(permissions) = permissions {
-		req_ctx.enforce_permissions(permissions).map_err(|e| {
-			tracing::trace!(?e, "User does not have requested permissions");
-			"You lack the required permissions".to_string()
-		})?;
+	match permissions {
+		APIKeyPermissions::Inherit(_) => {
+			if req_ctx.api_key().is_some() {
+				return Err(
+					"You cannot use an API key to create another API key with inherited permissions"
+						.into(),
+				);
+			}
+		},
+		APIKeyPermissions::Custom(permissions) => {
+			req_ctx.enforce_permissions(permissions).map_err(|e| {
+				tracing::trace!(?e, "User does not have requested permissions");
+				"You lack the required permissions".to_string()
+			})?;
+		},
 	}
 
 	Ok(())

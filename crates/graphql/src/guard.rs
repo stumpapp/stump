@@ -108,25 +108,7 @@ impl Guard for OptionalFeatureGuard {
 	}
 }
 
-/// Guard that passes if the current user is a server owner.
-/// This is a transitional guard that exists alongside `is_server_owner` and should
-/// be removed once `ManageServer` / explicit admin permissions fully replace the
-/// server-owner concept.
-// TODO(permissions): remove once is_server_owner is eliminated
-pub struct ServerOwnerGuard;
-
-impl Guard for ServerOwnerGuard {
-	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-
-		if user.is_server_owner {
-			Ok(())
-		} else {
-			Err(error_message::FORBIDDEN_ACTION.into())
-		}
-	}
-}
-
+pub struct BookClubRoleGuard {
 	club_id: String,
 	role: BookClubMemberRole,
 }
@@ -182,7 +164,6 @@ mod tests {
 		// User holds ManageUsers but not CreateUser explicitly. ManageUsers
 		// associates to CreateUser, so the guard for CreateUser should pass.
 		let user = AuthUser {
-			is_server_owner: false,
 			permissions: vec![UserPermission::ManageUsers],
 			..get_default_user()
 		};
@@ -194,7 +175,6 @@ mod tests {
 	#[test]
 	fn test_permission_guard_denies_locked_user() {
 		let user = AuthUser {
-			is_server_owner: false,
 			is_locked: true,
 			permissions: vec![UserPermission::CreateUser],
 			..get_default_user()
@@ -207,7 +187,6 @@ mod tests {
 	#[test]
 	fn test_permission_guard_denies_user_without_permission() {
 		let user = AuthUser {
-			is_server_owner: false,
 			permissions: vec![UserPermission::ReadUsers],
 			..get_default_user()
 		};

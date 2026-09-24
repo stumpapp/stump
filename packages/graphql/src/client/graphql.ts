@@ -4404,6 +4404,8 @@ export type SmartList = {
   meta: SmartListMeta;
   name: Scalars['String']['output'];
   thumbnail: ImageRef;
+  /** Get the role of the viewer for this smart list */
+  viewerRole: AccessRole;
   views: Array<SmartListView>;
   visibility: EntityVisibility;
 };
@@ -4819,7 +4821,6 @@ export type User = {
   finishedReadingSessionsCount: Scalars['Int']['output'];
   id: Scalars['String']['output'];
   isLocked: Scalars['Boolean']['output'];
-  isServerOwner: Scalars['Boolean']['output'];
   lastLogin?: Maybe<Scalars['DateTime']['output']>;
   loginSessionsCount: Scalars['Int']['output'];
   maxSessionsAllowed?: Maybe<Scalars['Int']['output']>;
@@ -4909,17 +4910,19 @@ export enum UserPermission {
   FileExplorer = 'FILE_EXPLORER',
   /** Grant access to lock another user, preventing them from logging in until an admin unlocks them */
   LockUser = 'LOCK_USER',
+  /** Grant access to manage background jobs (cancel, delete history/logs) */
+  ManageBackgroundJobs = 'MANAGE_BACKGROUND_JOBS',
   /**
    * Grant admin-level powers across all book clubs (everything ModerateBookClubs
    * grants, plus suggestion administration)
    */
   ManageBookClubs = 'MANAGE_BOOK_CLUBS',
-  /** Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them */
-  ManageJobs = 'MANAGE_JOBS',
   /** Grant access to manage the library (scan,edit,manage relations) */
   ManageLibrary = 'MANAGE_LIBRARY',
   /** Grant access to manage a notifier */
   ManageNotifier = 'MANAGE_NOTIFIER',
+  /** Grant access to manage scheduled background job configuration (create, update, delete) */
+  ManageScheduledBackgroundJobs = 'MANAGE_SCHEDULED_BACKGROUND_JOBS',
   /** Grant access to manage the server. This is effectively full access and encompasses all other permissions */
   ManageServer = 'MANAGE_SERVER',
   /** Grant access to manage users (create,edit,delete) */
@@ -4939,12 +4942,16 @@ export enum UserPermission {
    * lock/pin/create/archive discussions, see private clubs they're not a member of)
    */
   ModerateBookClubs = 'MODERATE_BOOK_CLUBS',
-  /** Grant access to read jobs */
-  ReadJobs = 'READ_JOBS',
+  /** Grant access to read background job history and status */
+  ReadBackgroundJobs = 'READ_BACKGROUND_JOBS',
+  /** Grant access to read/subscribe to server-side events (job progress, media updates, etc.) */
+  ReadEvents = 'READ_EVENTS',
   /** Grant access to read notifiers */
   ReadNotifier = 'READ_NOTIFIER',
   /** Grant access to read application-level logs, e.g. job logs */
   ReadPersistedLogs = 'READ_PERSISTED_LOGS',
+  /** Grant access to read scheduled background job configuration */
+  ReadScheduledBackgroundJobs = 'READ_SCHEDULED_BACKGROUND_JOBS',
   /** Grant access to read system logs */
   ReadSystemLogs = 'READ_SYSTEM_LOGS',
   /**
@@ -6388,7 +6395,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, oidcGroups?: Array<string> | null, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, oneshotsDirectory?: string | null } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -7097,7 +7104,7 @@ export type UpdateUserSceneQueryVariables = Exact<{
 }>;
 
 
-export type UpdateUserSceneQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string }, userById?: { __typename?: 'User', id: string, avatarUrl?: string | null, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, isServerOwner: boolean, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null }, users?: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
+export type UpdateUserSceneQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string }, userById?: { __typename?: 'User', id: string, avatarUrl?: string | null, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null }, users?: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
 
 export type ClearLoginActivityConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -7137,7 +7144,7 @@ export type UserTableQueryVariables = Exact<{
 }>;
 
 
-export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type SmartListCardFragment = { __typename?: 'SmartList', id: string, description?: string | null, filters: string, joiner: SmartListJoiner, name: string } & { ' $fragmentName'?: 'SmartListCardFragment' };
 
@@ -7156,7 +7163,7 @@ export type SmartListByIdQueryVariables = Exact<{
 }>;
 
 
-export type SmartListByIdQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility, views: Array<{ __typename?: 'SmartListView', id: number, listId: string, name: string, search?: string | null, bookColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, bookSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }>, groupColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, groupSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }> }> } | null };
+export type SmartListByIdQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility, viewerRole: AccessRole, views: Array<{ __typename?: 'SmartListView', id: number, listId: string, name: string, search?: string | null, bookColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, bookSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }>, groupColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, groupSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }> }> } | null };
 
 export type SmartListMetaQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13767,7 +13774,6 @@ export const UpdateUserSceneDocument = new TypedDocumentString(`
     }
     permissions
     maxSessionsAllowed
-    isServerOwner
   }
   users(pagination: {none: {unpaginated: true}}) @skip(if: $skip) {
     nodes {
@@ -13824,7 +13830,6 @@ export const UserTableDocument = new TypedDocumentString(`
       id
       avatarUrl
       username
-      isServerOwner
       isLocked
       createdAt
       lastLogin
@@ -13875,6 +13880,7 @@ export const SmartListByIdDocument = new TypedDocumentString(`
     joiner
     name
     visibility
+    viewerRole
     views {
       id
       listId

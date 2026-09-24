@@ -1786,8 +1786,8 @@
 					"heading": "API key",
 					"description": "A detailed view of this key",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "Dangerous key",
+						"description": "This key inherits your permissions and will have the same access you do. Be careful who you share it with"
 					}
 				},
 				"createKey": {
@@ -2955,9 +2955,9 @@
 			"label": "Manage users",
 			"description": "Allows the user to create, edit, and delete user accounts"
 		},
-		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
+		"READ_BACKGROUND_JOBS": {
+			"label": "Read background jobs",
+			"description": "Allows the user to view background job history and status"
 		},
 		"READ_NOTIFIER": {
 			"label": "Read notifiers",
@@ -2983,9 +2983,21 @@
 			"label": "Upload files",
 			"description": "Allows the user to upload files to the server"
 		},
-		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+		"MANAGE_BACKGROUND_JOBS": {
+			"label": "Manage background jobs",
+			"description": "Allows the user to cancel, delete, and manage background jobs"
+		},
+		"READ_SCHEDULED_BACKGROUND_JOBS": {
+			"label": "Read scheduled background jobs",
+			"description": "Allows the user to view scheduled background job configuration"
+		},
+		"MANAGE_SCHEDULED_BACKGROUND_JOBS": {
+			"label": "Manage scheduled background jobs",
+			"description": "Allows the user to create, update, and delete scheduled background job configuration"
+		},
+		"READ_EVENTS": {
+			"label": "Read events",
+			"description": "Allows the user to subscribe to server-side events such as job progress and media updates"
 		},
 		"EDIT_METADATA": {
 			"label": "Edit metadata",
@@ -3014,6 +3026,42 @@
 		"METADATA_FETCH_RECORD_MANAGE": {
 			"label": "Manage metadata matches",
 			"description": "Allows the user to search external providers for a book and accept or reject candidate matches"
+		},
+		"ACCESS_GRAPH_QL_PLAYGROUND": {
+			"label": "GraphQL playground",
+			"description": "Allows the user to access the GraphQL playground interface"
+		},
+		"MODERATE_BOOK_CLUBS": {
+			"label": "Moderate book clubs",
+			"description": "Allows the user to moderate any book club activity"
+		},
+		"MANAGE_BOOK_CLUBS": {
+			"label": "Manage book clubs",
+			"description": "Allows the user to manage all book clubs"
+		},
+		"CREATE_USER": {
+			"label": "Create users",
+			"description": "Allows the user to create new user accounts"
+		},
+		"UPDATE_USER": {
+			"label": "Update users",
+			"description": "Allows the user to update existing user accounts"
+		},
+		"DELETE_USER": {
+			"label": "Delete users",
+			"description": "Allows the user to delete user accounts"
+		},
+		"LOCK_USER": {
+			"label": "Lock users",
+			"description": "Allows the user to lock and unlock user accounts"
+		},
+		"MANAGE_USER_SESSIONS": {
+			"label": "Manage user sessions",
+			"description": "Allows the user to view and invalidate user sessions"
+		},
+		"VIEW_ALL_SMART_LISTS": {
+			"label": "View all smart lists",
+			"description": "Allows the user to view smart lists created by other users"
 		}
 	},
 	"mobileApp": {

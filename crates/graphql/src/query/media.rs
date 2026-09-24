@@ -18,7 +18,7 @@ use sea_orm::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
-	guard::{PermissionGuard, ServerOwnerGuard},
+	guard::PermissionGuard,
 	object::{
 		media::Media,
 		reading_session::{ReadingSession, ReadingSessionConflictResolutionView},

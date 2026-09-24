@@ -9,9 +9,9 @@ use strum::{Display, EnumString};
 
 use super::smart_list_access_rule;
 use crate::{
-	entity::{smart_list_access_rule::SmartListAccessRole, user::AuthUser},
+	entity::user::AuthUser,
 	shared::{
-		enums::EntityVisibility,
+		enums::{AccessRole, EntityVisibility},
 		ordering::{OrderBy, OrderDirection},
 	},
 };
@@ -146,10 +146,7 @@ fn get_access_condition_base_subquery(
 		.filter(smart_list_access_rule::Column::UserId.eq(user.id.clone()))
 }
 
-fn get_access_condition_base_rule(
-	user: &AuthUser,
-	role: SmartListAccessRole,
-) -> Condition {
+fn get_access_condition_base_rule(user: &AuthUser, role: AccessRole) -> Condition {
 	// A common condition that asserts there is an entry for the user that has a role
 	// greater than or equal to the minimum role:
 	// 1 for reader, 2 for collaborator, 3 for co-creator
@@ -203,7 +200,7 @@ pub fn get_access_condition_for_user(
 	query_mine: bool,
 ) -> Option<Condition> {
 	if !query_all && !query_mine {
-		let base_rule = get_access_condition_base_rule(user, SmartListAccessRole::Reader);
+		let base_rule = get_access_condition_base_rule(user, AccessRole::Reader);
 		Some(get_access_rule(user, base_rule))
 	} else if query_mine {
 		Some(Condition::all().add(Column::CreatorId.eq(user.id.clone())))
@@ -259,8 +256,7 @@ mod tests {
 	fn test_access_rules_base_rule() {
 		let user = get_default_user();
 
-		let condition =
-			get_access_condition_base_rule(&user, SmartListAccessRole::Reader);
+		let condition = get_access_condition_base_rule(&user, AccessRole::Reader);
 
 		let sql = condition_to_string(&condition);
 		assert_eq!(

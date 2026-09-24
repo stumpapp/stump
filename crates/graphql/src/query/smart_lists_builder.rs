@@ -310,7 +310,17 @@ mod tests {
 			],
 		}];
 
-		let series = fake_data::Series::default().insert(&db).await;
+		let library = fake_data::Library::default()
+			.insert_with_user(&db, &auth_user.id)
+			// ^ give the user access to lib
+			.await;
+
+		let series = fake_data::Series {
+			library_id: Some(library.id.clone()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
 
 		let stinky_book = fake_data::Media {
 			name: Some("stinky book".to_string()),

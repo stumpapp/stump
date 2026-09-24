@@ -15,7 +15,7 @@ pub struct JobQuery;
 
 #[Object]
 impl JobQuery {
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadJobs)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadBackgroundJobs)")]
 	async fn jobs(
 		&self,
 		ctx: &Context<'_>,
@@ -87,15 +87,16 @@ impl JobQuery {
 		}
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadJobs)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadBackgroundJobs)")]
 	async fn job_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Job>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let job = job::Entity::find_by_id(id.to_string()).one(conn).await?;
 		Ok(job.map(Job::from))
 	}
 
-	// TODO(permissions): Determine if folks generally agree with this access
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadJobs)")]
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ReadScheduledBackgroundJobs)"
+	)]
 	async fn scheduled_jobs(&self, ctx: &Context<'_>) -> Result<Vec<ScheduledJob>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

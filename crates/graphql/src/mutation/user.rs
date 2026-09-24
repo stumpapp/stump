@@ -25,7 +25,7 @@ use models::{
 };
 use sea_orm::{
 	prelude::*, ActiveValue::NotSet, ColumnTrait, DatabaseTransaction, IntoActiveModel,
-	Set, TransactionTrait, TryIntoModel,
+	QuerySelect, Set, TransactionTrait, TryIntoModel,
 };
 use std::{io::Read, path::Path};
 use stump_core::{
@@ -206,17 +206,17 @@ impl UserMutation {
 		ctx: &Context<'_>,
 		input: CreateUserInput,
 	) -> Result<User> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let hashed_password =
 			bcrypt::hash(input.password, core_ctx.config.password_hash_cost)?;
 
 		let conn = core_ctx.conn.as_ref();
 
-		let permissions = PermissionSet::new(input.permissions);
+		let permissions = grantable_permission_set(user, &input.permissions);
 
 		let user = user::ActiveModel {
 			id: NotSet,
-			is_server_owner: Set(false),
 			created_at: Set(chrono::Utc::now().into()),
 			username: Set(input.username),
 			hashed_password: Set(hashed_password),
@@ -348,23 +348,10 @@ impl UserMutation {
 		let conn = core_ctx.conn.as_ref();
 
 		let is_self = user.id == id.to_string();
-		let can_manage_users =
-			user.is_server_owner || user.has_permission(UserPermission::ManageUsers);
+		let can_manage_users = user.has_permission(UserPermission::ManageUsers);
 
 		if !is_self && !can_manage_users {
 			return Err(FORBIDDEN_ACTION.into());
-		}
-
-		// TODO(permissions): server owner goes away
-		// nobody can update the server owner
-		if !is_self && !user.is_server_owner {
-			let target = user::Entity::find_by_id(id.to_string())
-				.one(conn)
-				.await?
-				.ok_or("User not found")?;
-			if target.is_server_owner {
-				return Err(FORBIDDEN_ACTION.into());
-			}
 		}
 
 		let updated_user =
@@ -613,6 +600,73 @@ async fn update_user_preferences_by_id(
 	Ok(UserPreferences::from(updated_user_prefs))
 }
 
+/// Returns a [`PermissionSet`] containing only the permissions which the acting user
+/// effectively has which may be granted to another user.
+///
+/// This should only be used for creating a new user, for updating an existing user see [`merge_permissions`]
+fn grantable_permission_set(
+	by_user: &AuthUser,
+	requested: &[UserPermission],
+) -> PermissionSet {
+	let (allowed, denied): (Vec<_>, Vec<_>) = requested
+		.iter()
+		.cloned()
+		.partition(|p| by_user.has_permission(*p));
+
+	if !denied.is_empty() {
+		tracing::warn!(
+			by_user_id = &by_user.username,
+			?denied,
+			"Ignoring requested permissions the acting user does not hold"
+		);
+	}
+
+	PermissionSet::new(allowed)
+}
+
+/// Returns a new [`PermissionSet`] representing the target's final effective permissions,
+/// considering both the actor's requested changes and the target's existing permissions.
+///
+/// The goal of this is to avoid a scenario where a user with permission to update users doesn't
+/// inadvertently (or intentionally) remove permissions which they themselves lack. For example:
+/// - A user with [`UserPermission::ManageUsers`] attempts to update user B, who has [`UserPermission::ManageServer`]
+/// - The actor does not have [`UserPermission::ManageServer`], so they should not be able remove it from user B
+/// - This function ensures that user B's [`UserPermission::ManageServer`] permission is preserved, even if missing from the
+///   requested set of permissions to apply.
+fn merge_permissions(
+	actor: &AuthUser,
+	current_permissions: &[UserPermission],
+	requested: &[UserPermission],
+) -> PermissionSet {
+	let permissions_actor_cannot_remove: Vec<UserPermission> = current_permissions
+		.iter()
+		.filter(|p| !actor.permissions.contains(p))
+		// actor doesn't have = cannot remove from another user
+		.cloned()
+		.collect();
+
+	let (mut granted, denied): (Vec<_>, Vec<_>) = requested
+		.iter()
+		.cloned()
+		.partition(|p| actor.permissions.contains(p));
+
+	if !denied.is_empty() {
+		tracing::warn!(
+			actor = &actor.username,
+			?denied,
+			"Ignoring requested permissions outside the acting user's effective set"
+		);
+	}
+
+	for permission in permissions_actor_cannot_remove {
+		if !granted.contains(&permission) {
+			granted.push(permission);
+		}
+	}
+
+	PermissionSet::new(granted)
+}
+
 async fn update_user(
 	by_user: &AuthUser,
 	for_user_id: String,
@@ -658,17 +712,26 @@ async fn update_user(
 
 	let txn = conn.begin().await?;
 
-	// TODO(permissions): server owner goes away
-	// only a server owner or a user with ManageUsers may set another user's
-	// permissions, age restriction, and session cap.
-	let can_manage_privileged_fields = (by_user.is_server_owner
-		|| by_user.has_permission(UserPermission::ManageUsers))
-		&& !is_self_update;
+	// only a user with ManageUsers may set another user's permissions, age restriction, and session cap.
+	let can_manage_privileged_fields =
+		by_user.has_permission(UserPermission::ManageUsers) && !is_self_update;
 	if can_manage_privileged_fields {
 		update_user.max_sessions_allowed = Set(input.max_sessions_allowed);
 		update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;
-		let permissions = PermissionSet::new(input.permissions.clone());
-		update_user.permissions = Set(permissions.resolve_into_string());
+
+		let current_permissions = user::Entity::find_by_id(for_user_id.clone())
+			.select_only()
+			.column(user::Column::Permissions)
+			.into_tuple::<Option<String>>()
+			.one(&txn)
+			.await?
+			.map(|permissions| {
+				PermissionSet::from(permissions.unwrap_or_default()).resolve_into_vec()
+			})
+			.unwrap_or_default();
+		let updated_permission_set =
+			merge_permissions(by_user, &current_permissions, &input.permissions);
+		update_user.permissions = Set(updated_permission_set.resolve_into_string());
 	}
 
 	let updated_user_entity = update_user.update(&txn).await?;
@@ -733,6 +796,135 @@ async fn update_user_age_restriction(
 mod tests {
 	use super::*;
 	use sea_orm::{DatabaseBackend::Sqlite, MockDatabase};
+
+	#[test]
+	fn test_grantable_permission_set_allows_permissions_actor_has() {
+		let by_user = AuthUser {
+			id: "42".to_string(),
+			permissions: PermissionSet::new(vec![
+				UserPermission::ManageUsers,
+				UserPermission::CreateUser, // technically implicit from manage
+			])
+			.resolve_into_vec(),
+			..Default::default()
+		};
+
+		let granted = grantable_permission_set(
+			&by_user,
+			&[
+				UserPermission::CreateUser, // technically implicit from manage
+				UserPermission::ManageUsers,
+				UserPermission::ReadUsers, // implicit from manage
+			],
+		)
+		.resolve_into_vec();
+
+		assert!(granted.contains(&UserPermission::CreateUser));
+		assert!(granted.contains(&UserPermission::ManageUsers));
+	}
+
+	#[test]
+	fn test_grantable_permission_set_denies_permissions_actor_does_not_have() {
+		let by_user = AuthUser {
+			id: "42".to_string(),
+			permissions: PermissionSet::new(vec![UserPermission::ManageUsers])
+				.resolve_into_vec(),
+			..Default::default()
+		};
+
+		let granted = grantable_permission_set(
+			&by_user,
+			&[
+				UserPermission::CreateUser,
+				UserPermission::DownloadFile, // not held by actor
+				UserPermission::ManageServer, // def not held by actor
+			],
+		)
+		.resolve_into_vec();
+
+		assert!(granted.contains(&UserPermission::CreateUser));
+
+		assert!(!granted.contains(&UserPermission::DownloadFile));
+		assert!(!granted.contains(&UserPermission::ManageServer));
+	}
+
+	#[test]
+	fn test_merge_permissions_preserves_permissions_actor_themselves_does_not_have() {
+		let actor = AuthUser {
+			id: "oromei".to_string(),
+			permissions: PermissionSet::new(vec![UserPermission::ManageUsers])
+				.resolve_into_vec(),
+			..Default::default()
+		};
+		let existing_permissions =
+			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_vec();
+		let requested = vec![UserPermission::CreateUser];
+		// ^ oromei does not have ManageServer, thus should not be able to remove it
+		// from this update
+
+		let result = merge_permissions(&actor, &existing_permissions, &requested)
+			.resolve_into_vec();
+
+		assert!(result.contains(&UserPermission::ManageServer)); // preserved because actor does not have it
+		assert!(result.contains(&UserPermission::CreateUser)); // explicitly requested, and actor already had it anyways
+	}
+
+	#[test]
+	fn test_merge_permissions_revokes_permissions_actor_has_but_not_requested() {
+		let actor = AuthUser {
+			id: "oromei".to_string(),
+			permissions: PermissionSet::new(vec![UserPermission::ManageUsers])
+				.resolve_into_vec(),
+			..Default::default()
+		};
+		let existing_permissions =
+			PermissionSet::new(vec![UserPermission::CreateUser]).resolve_into_vec();
+		let requested = vec![];
+		// a bit silly and contrived but this is a valid case
+
+		let result = merge_permissions(&actor, &existing_permissions, &requested)
+			.resolve_into_vec();
+
+		assert!(!result.contains(&UserPermission::CreateUser));
+	}
+
+	// another kinda silly and contrived one, or idk maybe i am biased towards my own
+	// usage here where all my users are trusted folks, but basically this is a scenario
+	// that would be impossible to resolve in the world without a server owner to
+	// "break the tie"
+	/// if a user with max permission (ManageServer) attempts to update another user with
+	/// ManageServer, it works
+	#[test]
+	fn test_merge_permissions_revokes_those_with_equivalent_permission_power() {
+		let actor = AuthUser {
+			id: "gandalf".to_string(),
+			permissions: PermissionSet::new(vec![UserPermission::ManageServer])
+				.resolve_into_vec(),
+			..Default::default()
+		};
+		let existing_permissions =
+			PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_vec();
+		let requested = vec![]; // goodbye super powers :'(
+
+		let result = merge_permissions(&actor, &existing_permissions, &requested)
+			.resolve_into_vec();
+
+		assert!(!result.contains(&UserPermission::ManageServer)); // it was revoked
+	}
+
+	#[test]
+	fn test_merge_permissions_on_empty_set_is_just_basic_assignment() {
+		let actor = AuthUser {
+			id: "oromei".to_string(),
+			permissions: PermissionSet::new(vec![UserPermission::ManageUsers])
+				.resolve_into_vec(),
+			..Default::default()
+		};
+		let requested = vec![UserPermission::CreateUser];
+
+		let result = merge_permissions(&actor, &[], &requested).resolve_into_vec();
+		assert!(result.contains(&UserPermission::CreateUser));
+	}
 
 	#[tokio::test]
 	async fn test_update_age_restriction() {

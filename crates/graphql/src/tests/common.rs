@@ -22,7 +22,6 @@ pub fn get_default_user() -> AuthUser {
 		username: "test".to_string(),
 		avatar_path: None,
 		avatar: ImageRef::default(),
-		is_server_owner: true,
 		is_locked: false,
 		permissions: vec![],
 		age_restriction: None,

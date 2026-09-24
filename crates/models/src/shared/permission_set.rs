@@ -127,8 +127,18 @@ impl AssociatedPermission for UserPermission {
 			UserPermission::ManageUsers => {
 				vec![UserPermission::DeleteUser, UserPermission::CreateUser]
 			},
+			UserPermission::ReadBackgroundJobs => {
+				vec![UserPermission::ReadEvents]
+				// ^ it would feel a little weird to be able to see jobs but not their events
+			},
+			UserPermission::ManageBackgroundJobs => {
+				vec![UserPermission::ReadBackgroundJobs]
+			},
+			UserPermission::ManageScheduledBackgroundJobs => {
+				vec![UserPermission::ReadScheduledBackgroundJobs]
+			},
 			UserPermission::ReadPersistedLogs => {
-				vec![UserPermission::ReadJobs]
+				vec![UserPermission::ReadBackgroundJobs]
 			},
 			UserPermission::WriteBackMetadata => vec![UserPermission::EditMetadata],
 			UserPermission::EditThumbnails => vec![],
@@ -165,7 +175,8 @@ impl AssociatedPermission for UserPermission {
 				UserPermission::DownloadFile,
 				UserPermission::DeleteLibrary,
 				UserPermission::ManageUserSessions,
-				UserPermission::ManageJobs,
+				UserPermission::ManageBackgroundJobs,
+				UserPermission::ManageScheduledBackgroundJobs,
 				UserPermission::MetadataFetchRecordManage,
 				UserPermission::MetadataProviderManage,
 				UserPermission::ReadSystemLogs,
@@ -174,6 +185,9 @@ impl AssociatedPermission for UserPermission {
 				// included so that admins retain parity with the legacy is_server_owner
 				// short-circuit. Likely candidates for removal once admins are issued
 				// a separate "default user perms" bundle alongside ManageServer.
+				// ^ the awkward part will be future features too, or if we did omit these from
+				// manage server how would the "owner" user get them? do we let them grant themselves?
+				// this needs a little more thought maybe
 				UserPermission::AccessKoreaderSync,
 				UserPermission::AccessKoboSync,
 				UserPermission::AccessSmartList,

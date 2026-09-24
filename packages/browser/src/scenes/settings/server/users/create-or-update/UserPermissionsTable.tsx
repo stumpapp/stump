@@ -262,8 +262,11 @@ const groups = [
 	{
 		groupKey: 'serverManagement',
 		permissions: [
-			UserPermission.ReadJobs,
-			UserPermission.ManageJobs,
+			UserPermission.ReadBackgroundJobs,
+			UserPermission.ManageBackgroundJobs,
+			UserPermission.ReadScheduledBackgroundJobs,
+			UserPermission.ManageScheduledBackgroundJobs,
+			UserPermission.ReadEvents,
 			UserPermission.ReadPersistedLogs,
 			UserPermission.ReadSystemLogs,
 			UserPermission.ManageServer,
@@ -292,8 +295,6 @@ const columns = [
 	}),
 ]
 
-// TODO(permissions): i added the missing permissions to satisfy the record type and avoid ts errors, but we will need localization
-// and another pass at the permission groups/inheritance before merge
 export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.AccessBookClub]: [],
 	[UserPermission.CreateBookClub]: [UserPermission.AccessBookClub],
@@ -342,13 +343,17 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 		UserPermission.LockUser,
 		UserPermission.ManageUserSessions,
 	],
-	[UserPermission.ReadJobs]: [],
-	[UserPermission.ManageJobs]: [UserPermission.ReadJobs],
+	[UserPermission.ReadEvents]: [],
+	[UserPermission.ReadBackgroundJobs]: [UserPermission.ReadEvents],
+	[UserPermission.ManageBackgroundJobs]: [UserPermission.ReadBackgroundJobs],
+	[UserPermission.ReadScheduledBackgroundJobs]: [],
+	[UserPermission.ManageScheduledBackgroundJobs]: [UserPermission.ReadScheduledBackgroundJobs],
 	[UserPermission.ReadPersistedLogs]: [],
 	[UserPermission.ReadSystemLogs]: [],
 	[UserPermission.ManageServer]: [
 		UserPermission.ManageUsers,
-		UserPermission.ManageJobs,
+		UserPermission.ManageBackgroundJobs,
+		UserPermission.ManageScheduledBackgroundJobs,
 		UserPermission.ReadPersistedLogs,
 		UserPermission.ReadSystemLogs,
 	],

@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
-import { Alert, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { COLORS, IS_IOS_26_PLUS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useActiveServerSafe } from '~/providers/ActiveServerProvider'
@@ -30,7 +31,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	const router = useRouter()
 
 	const confirmResetTimer = () => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('readerSettings.readingTimer.resetTimer'),
 			t('readerSettings.readingTimer.confirmation.message', {
 				bookName: book.name,

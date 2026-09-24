@@ -6,7 +6,7 @@ import omit from 'lodash/omit'
 import { Check, X } from 'lucide-react-native'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
-import { Alert, FocusEvent, Platform, Pressable, View } from 'react-native'
+import { FocusEvent, Platform, Pressable, View } from 'react-native'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -23,6 +23,7 @@ import { DottedLine } from '../book/overview/DottedLine'
 import { Button, Heading, Input, Label, Loader, Switch, Text } from '../ui'
 import { HeaderButton } from '../ui/header-button/header-button'
 import { SegmentedPicker } from '../ui/segmented-picker/segmented-picker'
+import { SystemAlert } from '../ui/system-alert'
 
 type Props = {
 	editingServer?: SavedServerWithConfig | null
@@ -105,7 +106,7 @@ export default function AddOrEditServerForm({
 			setIsAddingHeader(false)
 		} else {
 			console.error(result.error.errors)
-			Alert.alert(
+			SystemAlert.alert(
 				t('common.error'),
 				result.error.errors[0]?.message || t(getKey('customHeaders.invalidHeader')),
 			)

@@ -6,10 +6,9 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-		let permissions = vec!["MANAGE_SERVER"].join(",");
 		let update_statement = Query::update()
 			.table(Users::Table)
-			.value(Users::Permissions, Expr::value(Some(permissions)))
+			.value(Users::Permissions, Expr::value(Some("MANAGE_SERVER")))
 			.and_where(Expr::col(Users::IsServerOwner).eq(true))
 			// ^ to date, server owners had "no" permissions and the flag simply
 			// gave them implicit access to everything. now, we are giving them one

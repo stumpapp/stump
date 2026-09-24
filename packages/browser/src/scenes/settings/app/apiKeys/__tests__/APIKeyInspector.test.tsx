@@ -15,10 +15,7 @@ vi.mock('@/context', () => ({
 const useAppContextRet = {
 	user: {
 		id: 'user-id',
-		permissions: {
-			__typename: 'UserPermissionStruct',
-			value: [UserPermission.AccessApiKeys],
-		},
+		permissions: [UserPermission.AccessApiKeys],
 	} as unknown as AuthUser,
 } as any
 

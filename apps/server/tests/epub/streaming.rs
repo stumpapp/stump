@@ -20,12 +20,14 @@ pub(crate) async fn setup_epub_book() -> (TestApp, String) {
 	let app = TestApp::new_with_default_user().await;
 	let db = app.conn();
 
+	let user_id = app.get_viewer_id().await;
+
 	let library = fake_data::Library {
 		id: Some("epub_lib".to_string()),
 		name: Some("Epub Library".to_string()),
 		..Default::default()
 	}
-	.insert(db)
+	.insert_with_user(db, &user_id)
 	.await;
 
 	let (_, books) = setup_single_series_with_n_books(

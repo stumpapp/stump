@@ -4915,8 +4915,8 @@ export enum UserPermission {
    * grants, plus suggestion administration)
    */
   ManageBookClubs = 'MANAGE_BOOK_CLUBS',
-  /** Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them */
-  ManageJobs = 'MANAGE_JOBS',
+  /** Grant access to manage background jobs (cancel, delete history/logs) */
+  ManageBackgroundJobs = 'MANAGE_BACKGROUND_JOBS',
   /** Grant access to manage the library (scan,edit,manage relations) */
   ManageLibrary = 'MANAGE_LIBRARY',
   /** Grant access to manage a notifier */
@@ -4940,14 +4940,20 @@ export enum UserPermission {
    * lock/pin/create/archive discussions, see private clubs they're not a member of)
    */
   ModerateBookClubs = 'MODERATE_BOOK_CLUBS',
-  /** Grant access to read jobs */
-  ReadJobs = 'READ_JOBS',
+  /** Grant access to read background job history and status */
+  ReadBackgroundJobs = 'READ_BACKGROUND_JOBS',
+  /** Grant access to read/subscribe to server-side events (job progress, media updates, etc.) */
+  ReadEvents = 'READ_EVENTS',
   /** Grant access to read notifiers */
   ReadNotifier = 'READ_NOTIFIER',
   /** Grant access to read application-level logs, e.g. job logs */
   ReadPersistedLogs = 'READ_PERSISTED_LOGS',
   /** Grant access to read system logs */
   ReadSystemLogs = 'READ_SYSTEM_LOGS',
+  /** Grant access to read scheduled background job configuration */
+  ReadScheduledBackgroundJobs = 'READ_SCHEDULED_BACKGROUND_JOBS',
+  /** Grant access to manage scheduled background job configuration (create, update, delete) */
+  ManageScheduledBackgroundJobs = 'MANAGE_SCHEDULED_BACKGROUND_JOBS',
   /**
    * Grant access to read users.
    *

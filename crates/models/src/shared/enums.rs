@@ -689,12 +689,6 @@ pub enum SupportedFont {
 	// Custom(String),
 }
 
-// TODO(permissions): Consider adding the following:
-// - Access to library logs
-// - Access to system logs
-// - Access to jobs and job management
-// TODO(permissions): address the various implicit permissions throughout and add explicit
-
 /// The permissions a user may be granted
 #[derive(
 	Eq,
@@ -800,10 +794,16 @@ pub enum UserPermission {
 	ManageNotifier,
 	/// Grant access to delete a notifier
 	DeleteNotifier,
-	/// Grant access to read jobs
-	ReadJobs,
-	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
-	ManageJobs,
+	/// Grant access to read/subscribe to server-side events (job progress, media updates, etc.)
+	ReadEvents,
+	/// Grant access to read background job history and status
+	ReadBackgroundJobs,
+	/// Grant access to manage background jobs (cancel, delete history/logs)
+	ManageBackgroundJobs,
+	/// Grant access to read scheduled background job configuration
+	ReadScheduledBackgroundJobs,
+	/// Grant access to manage scheduled background job configuration (create, update, delete)
+	ManageScheduledBackgroundJobs,
 	/// Grant access to read metadata fetch statuses
 	MetadataFetchRecordRead,
 	/// Grant access to manage metadata fetch statuses (accept matches, etc)

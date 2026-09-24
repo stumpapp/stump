@@ -2955,9 +2955,9 @@
 			"label": "Manage users",
 			"description": "Allows the user to create, edit, and delete user accounts"
 		},
-		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
+		"READ_BACKGROUND_JOBS": {
+			"label": "Read background jobs",
+			"description": "Allows the user to view background job history and status"
 		},
 		"READ_NOTIFIER": {
 			"label": "Read notifiers",
@@ -2983,9 +2983,21 @@
 			"label": "Upload files",
 			"description": "Allows the user to upload files to the server"
 		},
-		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+		"MANAGE_BACKGROUND_JOBS": {
+			"label": "Manage background jobs",
+			"description": "Allows the user to cancel, delete, and manage background jobs"
+		},
+		"READ_SCHEDULED_BACKGROUND_JOBS": {
+			"label": "Read scheduled background jobs",
+			"description": "Allows the user to view scheduled background job configuration"
+		},
+		"MANAGE_SCHEDULED_BACKGROUND_JOBS": {
+			"label": "Manage scheduled background jobs",
+			"description": "Allows the user to create, update, and delete scheduled background job configuration"
+		},
+		"READ_EVENTS": {
+			"label": "Read events",
+			"description": "Allows the user to subscribe to server-side events such as job progress and media updates"
 		},
 		"EDIT_METADATA": {
 			"label": "Edit metadata",

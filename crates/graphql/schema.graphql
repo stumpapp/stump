@@ -3690,10 +3690,16 @@ enum UserPermission {
 	MANAGE_NOTIFIER
 	"Grant access to delete a notifier"
 	DELETE_NOTIFIER
-	"Grant access to read jobs"
-	READ_JOBS
-	"Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them"
-	MANAGE_JOBS
+	"Grant access to read/subscribe to server-side events (job progress, media updates, etc.)"
+	READ_EVENTS
+	"Grant access to read background job history and status"
+	READ_BACKGROUND_JOBS
+	"Grant access to manage background jobs (cancel, delete history/logs)"
+	MANAGE_BACKGROUND_JOBS
+	"Grant access to read scheduled background job configuration"
+	READ_SCHEDULED_BACKGROUND_JOBS
+	"Grant access to manage scheduled background job configuration (create, update, delete)"
+	MANAGE_SCHEDULED_BACKGROUND_JOBS
 	"Grant access to read metadata fetch statuses"
 	METADATA_FETCH_RECORD_READ
 	"Grant access to manage metadata fetch statuses (accept matches, etc)"

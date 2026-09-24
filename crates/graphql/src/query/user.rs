@@ -153,7 +153,6 @@ impl UserQuery {
 		Ok(User::from(first))
 	}
 
-	// TODO(permissions): another implicit one
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageUsers)")]
 	async fn login_activity(&self, ctx: &Context<'_>) -> Result<Vec<UserLoginActivity>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -169,7 +168,6 @@ impl UserQuery {
 			.collect())
 	}
 
-	// TODO(permissions): another implicit one
 	#[graphql(
 		guard = "SelfGuard::new(&id).or(PermissionGuard::one(UserPermission::ManageUsers))"
 	)]

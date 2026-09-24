@@ -34,7 +34,6 @@ impl From<smart_list::Model> for SmartList {
 	}
 }
 
-// TODO(permissions): add resolver for viewer_role
 #[ComplexObject]
 impl SmartList {
 	async fn filters(&self) -> Result<String> {

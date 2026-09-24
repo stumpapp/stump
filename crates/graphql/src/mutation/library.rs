@@ -187,7 +187,7 @@ impl LibraryMutation {
 
 	/// Clear the scan history for a specific library
 	#[graphql(
-		guard = "PermissionGuard::new(&[UserPermission::ReadJobs, UserPermission::ManageLibrary])"
+		guard = "PermissionGuard::new(&[UserPermission::ReadBackgroundJobs, UserPermission::ManageLibrary])"
 	)]
 	async fn clear_scan_history(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
@@ -827,8 +827,6 @@ impl LibraryMutation {
 
 		Ok(library.into())
 	}
-
-	// TODO(permissions): should probably have non-full update mutations for this too eventually
 
 	/// Grant users access to a library. This operates as a full replacement of the
 	/// granted users list, so any users not included in the provided list will have

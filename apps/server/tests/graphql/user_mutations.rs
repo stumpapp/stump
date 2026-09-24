@@ -374,6 +374,96 @@ async fn test_manage_users_cannot_grant_manage_server() {
 	);
 }
 
+/// a user cannot strip a permission they don't have from another user
+#[tokio::test]
+async fn test_user_cannot_strip_permissions_they_dont_have() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "user-who-cannot-remove".to_string(),
+		permissions: vec![UserPermission::ManageUsers],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let target = CreateTestUser {
+		username: "user-to-be-stripped".to_string(),
+		permissions: vec![UserPermission::ManageServer],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			UPDATE_USER,
+			Some(json!({
+				"id": target.id,
+				"input": {
+					"username": &target.username,
+					"permissions": [], // i.e., empty to attempt strip
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&manager.token,
+		)
+		.await;
+
+	assert_no_errors(&response);
+	let perms = permissions_from(&response, "updateUser");
+	assert!(
+		perms.iter().any(|p| p == "MANAGE_SERVER"),
+		"should not have worked, got: {perms:?}"
+	);
+}
+
+/// a user can strip permissions if they themselves have them
+#[tokio::test]
+async fn test_user_can_strip_permissions_they_have() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "user-who-can-remove".to_string(),
+		permissions: vec![UserPermission::ManageUsers, UserPermission::DownloadFile],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let target = CreateTestUser {
+		username: "user-to-be-stripped".to_string(),
+		permissions: vec![UserPermission::DownloadFile],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			UPDATE_USER,
+			Some(json!({
+				"id": target.id,
+				"input": {
+					"username": &target.username,
+					"permissions": [],
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&manager.token,
+		)
+		.await;
+
+	assert_no_errors(&response);
+	let perms = permissions_from(&response, "updateUser");
+	assert!(
+		!perms.iter().any(|p| p == "DOWNLOAD_FILE"),
+		"should have been stripped, got: {perms:?}"
+	);
+}
+
 /// a user with ManageUsers permission cannot update their own permissions via `updateUser`
 #[tokio::test]
 async fn test_manage_users_cannot_update_own_permissions_via_self_update() {

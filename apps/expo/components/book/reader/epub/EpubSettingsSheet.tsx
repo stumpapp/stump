@@ -49,7 +49,7 @@ export default function EpubSettingsSheet(props: TrueSheetProps) {
 			>
 				<PortalHostProvider name={Platform.OS === 'android' ? SHEET_PORTAL_HOST : undefined}>
 					<ScrollView className="p-6 flex-1" nestedScrollEnabled>
-						<ThemeSheetContent setTouchingSlider={setTouchingSlider} />
+						<ThemeSheetContent isSheetOpen={isOpen} setTouchingSlider={setTouchingSlider} />
 					</ScrollView>
 				</PortalHostProvider>
 			</TrueSheet>

@@ -3,7 +3,9 @@
 package expo.modules.readium
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Outline
@@ -11,6 +13,7 @@ import android.graphics.PointF
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.View
@@ -825,17 +828,21 @@ class EPUBView(
 
     @ExperimentalReadiumApi
     override fun onExternalLinkActivated(url: AbsoluteUrl) {
-//        TODO: Figure this out
-//        if (!url. isHttp) return
-//        val context = requireActivity()
-//        val uri = url.toUri()
-//        try {
-//            CustomTabsIntent.Builder()
-//                .build()
-//                .launchUrl(context, uri)
-//        } catch (e: ActivityNotFoundException) {
-//            context.startActivity(Intent(Intent. ACTION_VIEW, uri))
-//        }
+        if (!url.isHttp) return
+        val uri = Uri.parse(url.toString())
+        val activity = appContext.currentActivity ?: return
+        try {
+            androidx.browser.customtabs.CustomTabsIntent
+                .Builder()
+                .build()
+                .launchUrl(activity, uri)
+        } catch (e: ActivityNotFoundException) {
+            try {
+                activity.startActivity(Intent(Intent.ACTION_VIEW, uri))
+            } catch (e2: ActivityNotFoundException) {
+                Log.w("EPUBView", "Failed to open URL: $uri")
+            }
+        }
     }
 
     private fun convertLinksToToc(links: List<Link>): List<Map<String, Any>> =

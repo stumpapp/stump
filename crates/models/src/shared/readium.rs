@@ -119,6 +119,7 @@ pub struct RWPMPositions {
 #[derive(
 	Clone,
 	Debug,
+	Default,
 	SimpleObject,
 	InputObject,
 	Deserialize,

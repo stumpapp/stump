@@ -41,7 +41,7 @@ use stump_core::{
 			OPDSNavigationLink, OPDSNavigationLinkBuilder,
 		},
 		metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
-		progression::{OPDSProgression, OPDSProgressionInput},
+		progression::OPDSProgression,
 		publication::OPDSPublication,
 	},
 	utils::chain_optional_iter,
@@ -1269,20 +1269,18 @@ async fn get_book_page(
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
-// // .route("/chapter/{chapter}", get(get_epub_chapter))
-// // .route("/{root}/{resource}", get(get_epub_meta)),
-// // async fn get_book_resource() {}
+// TODO: i might need to do some kind of custom error for progresion:
+// - https://drafts.opds.io/opds-progression-1.0.html#payload
+// - https://drafts.opds.io/opds-progression-1.0.html#failure-codes
+// - https://datatracker.ietf.org/doc/html/rfc7807
 
 /// A route handler which returns the progression of a book for a user.
 #[tracing::instrument(skip(ctx))]
 async fn get_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	HostExtractor(host): HostExtractor,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSProgression>> {
-	let link_finalizer = OPDSLinkFinalizer::from(host);
-
 	let user = req.user();
 	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
@@ -1302,7 +1300,7 @@ async fn get_book_progression(
 		return Ok(Json(OPDSProgression::default()));
 	};
 
-	Ok(Json(OPDSProgression::new(reading_session, link_finalizer)?))
+	Ok(Json(OPDSProgression::new(reading_session)?))
 }
 
 /// A route handler which updates the progression of a book for a user
@@ -1313,7 +1311,7 @@ async fn update_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
-	Json(input): Json<OPDSProgressionInput>,
+	Json(input): Json<OPDSProgression>,
 ) -> APIResult<axum::http::StatusCode> {
 	let user = req.user();
 	let conn = ctx.conn.as_ref();
@@ -1329,8 +1327,12 @@ async fn update_book_progression(
 			.one(conn)
 			.await?;
 
+	let input_modified = input
+		.modified_at()
+		.map_err(|e| APIError::BadRequest(format!("Invalid modified timestamp: {e}")))?;
+
 	match existing_session {
-		Some(ref session) if session.updated_at.is_some_and(|ts| ts > input.modified) => {
+		Some(ref session) if session.updated_at.is_some_and(|ts| ts > input_modified) => {
 			return Err(APIError::Conflict(
 				"Progression timestamp is older than existing session".to_string(),
 			));

@@ -168,16 +168,16 @@ export class OPDSV2API extends APIBase {
 	}
 
 	/**
-	 * Update the reading progression for a book, assuming the server supports it
+	 * Update the reading progression for a book, assuming the server supports OPDS Progression 1.0
 	 *
-	 * @param url The progression URL (from the publication's links with rel="http://www.cantook.com/api/progression")
+	 * @param url The progression URL (from the publication's links with rel="http://opds-spec.org/progression")
 	 * @param data The progression data
 	 */
 	async updateProgression(url: string, data: OPDSProgressionInput): Promise<void> {
 		await this.axios.put(resolveUrl(url, this.api.rootURL), data, {
 			baseURL: undefined,
 			headers: {
-				'Content-Type': 'application/vnd.readium.progression+json',
+				'Content-Type': 'application/opds-progression+json',
 			},
 		})
 	}

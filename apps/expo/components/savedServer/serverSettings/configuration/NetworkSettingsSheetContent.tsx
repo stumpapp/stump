@@ -1,11 +1,12 @@
 import { ArrowUpDown, CircleAlert, RadioTower, Route, Router } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { Alert, View } from 'react-native'
+import { View } from 'react-native'
 import { toast } from 'sonner-native'
 import { z } from 'zod'
 
 import { AppSettingsRow } from '~/components/appSettings'
 import { Button, Card, Switch, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { formatServerUrl } from '~/lib/utils'
@@ -142,7 +143,7 @@ export function NetworkSettingsSheetContent() {
 						variant="destructive"
 						roundness="full"
 						onPress={() => {
-							Alert.prompt(
+							SystemAlert.prompt(
 								t(getKey('swapUrls.label')),
 								t(getKey('swapUrls.confirmationText')),
 								[
@@ -233,7 +234,7 @@ export function NetworkSettingsSheetContent() {
 									variant="destructive"
 									roundness="full"
 									onPress={() => {
-										Alert.prompt(
+										SystemAlert.prompt(
 											t(getKey('wifiNetwork.removeWifi.label')),
 											t(getKey('wifiNetwork.removeWifi.confirmationText'), {
 												ssid: activeServer.localProfile?.ssid,

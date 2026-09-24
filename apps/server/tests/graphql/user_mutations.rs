@@ -3,6 +3,8 @@ use graphql::input::user::AgeRestrictionInput;
 use models::shared::enums::UserPermission;
 use serde_json::json;
 
+// TODO: split this into multiple files? if gets closer to 1k, i guess. for now is fine
+
 const UPDATE_VIEWER: &str = r#"
 mutation UpdateViewer($input: UpdateUserInput!) {
     updateViewer(input: $input) {
@@ -23,6 +25,16 @@ mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
         maxSessionsAllowed
         permissions
         ageRestriction { age restrictOnUnset }
+    }
+}
+"#;
+
+const CREATE_USER: &str = r#"
+mutation CreateUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+        id
+        username
+        permissions
     }
 }
 "#;
@@ -184,9 +196,9 @@ async fn test_regular_user_cannot_change_own_max_sessions_allowed() {
 	);
 }
 
-/// a user with ManageUsers can set another user's permissions
+/// a user with ManageUsers can grant permissions they effectively have via association
 #[tokio::test]
-async fn test_manage_users_can_set_permissions_on_another_user() {
+async fn test_manage_users_can_set_inherited_permissions_on_another_user() {
 	let app = TestApp::new_with_default_user().await;
 
 	let manager = CreateTestUser {
@@ -211,7 +223,7 @@ async fn test_manage_users_can_set_permissions_on_another_user() {
 				"id": target.id,
 				"input": {
 					"username": target.username,
-					"permissions": ["DOWNLOAD_FILE"],
+					"permissions": ["CREATE_USER"], // via ManageUsers
 					"maxSessionsAllowed": null,
 					"ageRestriction": null
 				}
@@ -223,8 +235,54 @@ async fn test_manage_users_can_set_permissions_on_another_user() {
 	assert_no_errors(&response);
 	let perms = permissions_from(&response, "updateUser");
 	assert!(
-		perms.iter().any(|p| p == "DOWNLOAD_FILE"),
-		"DOWNLOAD_FILE should be present after manager update, got: {perms:?}"
+		perms.iter().any(|p| p == "CREATE_USER"),
+		"CREATE_USER should be present after manager update, got: {perms:?}"
+	);
+}
+
+/// a user with ManageUsers cannot grant permissions they do not effectively have when creating a user
+#[tokio::test]
+async fn test_manage_users_create_user_filters_ungrantable_permissions() {
+	let app = TestApp::new_with_default_user().await;
+
+	let manager = CreateTestUser {
+		username: "manager-creates-user".to_string(),
+		permissions: vec![UserPermission::ManageUsers],
+		..Default::default()
+	}
+	.insert(&app)
+	.await;
+
+	let response = app
+		.execute_gql_with_token(
+			CREATE_USER,
+			Some(json!({
+				"input": {
+					"username": "created-by-manager",
+					"password": "password",
+					"permissions": ["CREATE_USER", "DOWNLOAD_FILE", "MANAGE_SERVER"],
+					"maxSessionsAllowed": null,
+					"ageRestriction": null
+				}
+			})),
+			&manager.token,
+		)
+		.await;
+	// ^ do not have DownloadFile nor ManageServer
+
+	assert_no_errors(&response);
+	let perms = permissions_from(&response, "createUser");
+	assert!(
+		perms.iter().any(|p| p == "CREATE_USER"),
+		"CREATE_USER should be present after manager create, got: {perms:?}"
+	);
+	assert!(
+		!perms.iter().any(|p| p == "DOWNLOAD_FILE"),
+		"DOWNLOAD_FILE should have been filtered out, got: {perms:?}"
+	);
+	assert!(
+		!perms.iter().any(|p| p == "MANAGE_SERVER"),
+		"MANAGE_SERVER should have been filtered out, got: {perms:?}"
 	);
 }
 

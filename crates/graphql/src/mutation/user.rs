@@ -206,13 +206,14 @@ impl UserMutation {
 		ctx: &Context<'_>,
 		input: CreateUserInput,
 	) -> Result<User> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let hashed_password =
 			bcrypt::hash(input.password, core_ctx.config.password_hash_cost)?;
 
 		let conn = core_ctx.conn.as_ref();
 
-		let permissions = PermissionSet::new(input.permissions);
+		let permissions = grantable_permission_set(user, &input.permissions);
 
 		let user = user::ActiveModel {
 			id: NotSet,
@@ -599,6 +600,49 @@ async fn update_user_preferences_by_id(
 	Ok(UserPreferences::from(updated_user_prefs))
 }
 
+// FIXME: there is a catch here that i think is worth considering further and correcting
+// before actually releasing to nightly: this doesn't check whether the action is
+// effectively _removing_ an existing permission from a user. example:
+// - oromei has ManageUsers, not ManageServer
+// - shadowfax has ManageServer
+// - oromei issues an update to shadowfax, including the ManageServer permission
+// - update_user calls this fn, which will fail on oromei.has_permission(ManageServer)
+//   and not include it in the allowed set
+// - the ManageServer permission is not included in ret, but flows through to update,
+//   thus removing it
+// it's tricky because we don't have e.g. patch_user, it is a full update, which semantically
+// shouldn't necessarily try to operate on just the permissions more like a patch would
+// ahhhhhhhhhhh permissions are hard!
+
+/// returns a permission set containing the permissions which the acting user
+/// holds which may be granted to another user. assumes the caller already
+/// checked that the acting user has permission to manage users.
+fn grantable_permission_set(
+	by_user: &AuthUser,
+	requested: &[UserPermission],
+) -> PermissionSet {
+	let mut allowed = Vec::new();
+	let mut denied = Vec::new();
+
+	for permission in requested.iter().cloned() {
+		if by_user.has_permission(permission.clone()) {
+			allowed.push(permission);
+		} else {
+			denied.push(permission);
+		}
+	}
+
+	if !denied.is_empty() {
+		tracing::warn!(
+			by_user_id = by_user.id,
+			?denied,
+			"Ignoring requested permissions the acting user does not hold"
+		);
+	}
+
+	PermissionSet::new(allowed)
+}
+
 async fn update_user(
 	by_user: &AuthUser,
 	for_user_id: String,
@@ -650,7 +694,7 @@ async fn update_user(
 	if can_manage_privileged_fields {
 		update_user.max_sessions_allowed = Set(input.max_sessions_allowed);
 		update_user_age_restriction(&for_user_id, &input.age_restriction, &txn).await?;
-		let permissions = PermissionSet::new(input.permissions.clone());
+		let permissions = grantable_permission_set(by_user, &input.permissions);
 		update_user.permissions = Set(permissions.resolve_into_string());
 	}
 
@@ -716,6 +760,57 @@ async fn update_user_age_restriction(
 mod tests {
 	use super::*;
 	use sea_orm::{DatabaseBackend::Sqlite, MockDatabase};
+
+	#[test]
+	fn test_grantable_permission_set_allows_permissions_actor_has() {
+		let by_user = AuthUser {
+			id: "42".to_string(),
+			permissions: PermissionSet::new(vec![
+				UserPermission::ManageUsers,
+				UserPermission::CreateUser, // technically implicit from manage
+			])
+			.resolve_into_vec(),
+			..Default::default()
+		};
+
+		let granted = grantable_permission_set(
+			&by_user,
+			&[
+				UserPermission::CreateUser, // technically implicit from manage
+				UserPermission::ManageUsers,
+				UserPermission::ReadUsers, // implicit from manage
+			],
+		)
+		.resolve_into_vec();
+
+		assert!(granted.contains(&UserPermission::CreateUser));
+		assert!(granted.contains(&UserPermission::ManageUsers));
+	}
+
+	#[test]
+	fn test_grantable_permission_set_denies_permissions_actor_does_not_have() {
+		let by_user = AuthUser {
+			id: "42".to_string(),
+			permissions: PermissionSet::new(vec![UserPermission::ManageUsers])
+				.resolve_into_vec(),
+			..Default::default()
+		};
+
+		let granted = grantable_permission_set(
+			&by_user,
+			&[
+				UserPermission::CreateUser,
+				UserPermission::DownloadFile, // not held by actor
+				UserPermission::ManageServer, // def not held by actor
+			],
+		)
+		.resolve_into_vec();
+
+		assert!(granted.contains(&UserPermission::CreateUser));
+
+		assert!(!granted.contains(&UserPermission::DownloadFile));
+		assert!(!granted.contains(&UserPermission::ManageServer));
+	}
 
 	#[tokio::test]
 	async fn test_update_age_restriction() {

@@ -102,7 +102,7 @@ export function SystemAlertHost() {
 
 	const { confirm, dismiss } = pendingAlert ? parseButtons(pendingAlert.buttons) : {}
 
-	if (!pendingAlert || !confirm) return <AndroidHost matchContents>{null}</AndroidHost>
+	if (!pendingAlert) return <AndroidHost matchContents>{null}</AndroidHost>
 
 	const canDismiss = pendingAlert.options?.cancelable ?? true
 
@@ -111,9 +111,9 @@ export function SystemAlertHost() {
 		pendingAlert.options?.onDismiss?.()
 	}
 
-	const onPressButton = (button: AlertButton) => {
+	const onPressButton = (button?: AlertButton) => {
 		setPendingAlert(null)
-		button.onPress?.()
+		button?.onPress?.()
 	}
 
 	return (
@@ -144,21 +144,23 @@ export function SystemAlertHost() {
 					</AlertDialog.Text>
 				)}
 
-				<AlertDialog.ConfirmButton>
-					<TextButton
-						onClick={() => onPressButton(confirm)}
-						colors={{
-							// white/5 or black/5
-							containerColor: isDarkColorScheme ? '#ffffff0d' : '0000000d',
-							contentColor:
-								confirm.style === 'destructive'
-									? colors.fill.danger.DEFAULT
-									: colors.foreground.DEFAULT,
-						}}
-					>
-						<AndroidText>{confirm.text ?? t('common.ok')}</AndroidText>
-					</TextButton>
-				</AlertDialog.ConfirmButton>
+				{confirm && (
+					<AlertDialog.ConfirmButton>
+						<TextButton
+							onClick={() => onPressButton(confirm)}
+							colors={{
+								// white/5 or black/5
+								containerColor: isDarkColorScheme ? '#ffffff0d' : '0000000d',
+								contentColor:
+									confirm.style === 'destructive'
+										? colors.fill.danger.DEFAULT
+										: colors.foreground.DEFAULT,
+							}}
+						>
+							<AndroidText>{confirm.text ?? t('common.ok')}</AndroidText>
+						</TextButton>
+					</AlertDialog.ConfirmButton>
+				)}
 
 				{dismiss && (
 					<AlertDialog.DismissButton>

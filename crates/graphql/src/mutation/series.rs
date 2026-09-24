@@ -242,6 +242,9 @@ impl SeriesMutation {
 			.map_err(Into::into)
 	}
 
+	// TODO: consider renaming to pause? i think at least on ui that language
+	// is a bit more aligned with resume mutation
+
 	/// Set the intent to stop the current readthrough, effectively a pause. on deck will stop
 	/// showing books in the current readthrough and instead only show unread books
 	async fn stop_series_reread(

@@ -42,5 +42,5 @@ export function useFavoriteBook({ id, onSuccess, ...params }: Params) {
 		[id, isFavorite, mutate],
 	)
 
-	return { isFavorite, favoriteBook }
+	return [isFavorite, favoriteBook] as const
 }

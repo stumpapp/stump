@@ -5595,7 +5595,7 @@ export type BooksAfterCursorQuery = { __typename?: 'Query', mediaById?: { __type
 
 export type HorizontalBookListItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'HorizontalBookListItemFragment' };
 
-export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: (
+export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, isFavorite: boolean, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: (
     { __typename?: 'Series', resolvedName: string, mediaCount: number, metadata?: { __typename?: 'SeriesMetadata', totalIssues?: number | null } | null }
     & { ' $fragmentRefs'?: { 'SeriesReadingStateFragment': SeriesReadingStateFragment } }
   ) } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
@@ -5606,34 +5606,6 @@ export type SeriesBooksListHeaderScanSeriesMutationVariables = Exact<{
 
 
 export type SeriesBooksListHeaderScanSeriesMutation = { __typename?: 'Mutation', scanSeries: boolean };
-
-export type SeriesBooksListHeaderDropSeriesMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesBooksListHeaderDropSeriesMutation = { __typename?: 'Mutation', dropSeries: { __typename?: 'UserSeriesState', droppedAt?: any | null } };
-
-export type SeriesBooksListHeaderUndropSeriesMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesBooksListHeaderUndropSeriesMutation = { __typename?: 'Mutation', undropSeries: { __typename?: 'UserSeriesState', droppedAt?: any | null } };
-
-export type SeriesBooksListHeaderStopRereadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesBooksListHeaderStopRereadMutation = { __typename?: 'Mutation', stopSeriesReread: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null } };
-
-export type SeriesBooksListHeaderResumeRereadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesBooksListHeaderResumeRereadMutation = { __typename?: 'Mutation', resumeSeriesReread: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null } };
 
 export type BookMenuFragment = { __typename?: 'Media', id: string, resolvedName: string, isFavorite: boolean, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string }, readProgress?: { __typename: 'ResumeReadingCursor' } | null, readHistory: Array<{ __typename: 'ReadthroughRecord' }> } & { ' $fragmentName'?: 'BookMenuFragment' };
 
@@ -5793,7 +5765,7 @@ export type UseFavoriteBookMutationVariables = Exact<{
 
 export type UseFavoriteBookMutation = { __typename?: 'Mutation', favoriteMedia: { __typename?: 'Media', id: string, isFavorite: boolean } };
 
-export type SeriesReadingStateFragment = { __typename?: 'Series', id: string, lastReadAt?: any | null, currentReadthrough?: number | null, userSeriesState?: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null, droppedAt?: any | null } | null, stats: { __typename?: 'SeriesStats', completedBooks: number } } & { ' $fragmentName'?: 'SeriesReadingStateFragment' };
+export type SeriesReadingStateFragment = { __typename?: 'Series', id: string, lastReadAt?: any | null, currentReadthrough?: number | null, resolvedName: string, userSeriesState?: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null, droppedAt?: any | null } | null, stats: { __typename?: 'SeriesStats', completedBooks: number } } & { ' $fragmentName'?: 'SeriesReadingStateFragment' };
 
 export type SeriesActionDropSeriesMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7466,6 +7438,7 @@ export const SeriesReadingStateFragmentDoc = new TypedDocumentString(`
   stats {
     completedBooks
   }
+  resolvedName
 }
     `, {"fragmentName":"SeriesReadingState"}) as unknown as TypedDocumentString<SeriesReadingStateFragment, unknown>;
 export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
@@ -7497,6 +7470,7 @@ export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
     }
     ...SeriesReadingState
   }
+  isFavorite
 }
     fragment SeriesReadingState on Series {
   id
@@ -7509,6 +7483,7 @@ export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
   stats {
     completedBooks
   }
+  resolvedName
 }`, {"fragmentName":"OnDeckBookItem"}) as unknown as TypedDocumentString<OnDeckBookItemFragment, unknown>;
 export const BookMenuFragmentDoc = new TypedDocumentString(`
     fragment BookMenu on Media {
@@ -9493,6 +9468,7 @@ export const SeriesBooksSceneSeriesNameDocument = new TypedDocumentString(`
   stats {
     completedBooks
   }
+  resolvedName
 }`) as unknown as TypedDocumentString<SeriesBooksSceneSeriesNameQuery, SeriesBooksSceneSeriesNameQueryVariables>;
 export const SeriesBooksScreenDocument = new TypedDocumentString(`
     query SeriesBooksScreen($filter: MediaFilterInput!, $pagination: Pagination, $orderBy: [MediaOrderBy!]) {
@@ -9972,6 +9948,7 @@ export const OnDeckBooksDocument = new TypedDocumentString(`
     }
     ...SeriesReadingState
   }
+  isFavorite
 }
 fragment SeriesReadingState on Series {
   id
@@ -9984,6 +9961,7 @@ fragment SeriesReadingState on Series {
   stats {
     completedBooks
   }
+  resolvedName
 }`) as unknown as TypedDocumentString<OnDeckBooksQuery, OnDeckBooksQueryVariables>;
 export const RecentlyAddedBooksDocument = new TypedDocumentString(`
     query RecentlyAddedBooks($pagination: Pagination) {
@@ -10111,34 +10089,6 @@ export const SeriesBooksListHeaderScanSeriesDocument = new TypedDocumentString(`
   scanSeries(id: $id)
 }
     `) as unknown as TypedDocumentString<SeriesBooksListHeaderScanSeriesMutation, SeriesBooksListHeaderScanSeriesMutationVariables>;
-export const SeriesBooksListHeaderDropSeriesDocument = new TypedDocumentString(`
-    mutation SeriesBooksListHeaderDropSeries($id: ID!) {
-  dropSeries(id: $id) {
-    droppedAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesBooksListHeaderDropSeriesMutation, SeriesBooksListHeaderDropSeriesMutationVariables>;
-export const SeriesBooksListHeaderUndropSeriesDocument = new TypedDocumentString(`
-    mutation SeriesBooksListHeaderUndropSeries($id: ID!) {
-  undropSeries(id: $id) {
-    droppedAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesBooksListHeaderUndropSeriesMutation, SeriesBooksListHeaderUndropSeriesMutationVariables>;
-export const SeriesBooksListHeaderStopRereadDocument = new TypedDocumentString(`
-    mutation SeriesBooksListHeaderStopReread($id: ID!) {
-  stopSeriesReread(id: $id) {
-    stoppedReadthroughAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesBooksListHeaderStopRereadMutation, SeriesBooksListHeaderStopRereadMutationVariables>;
-export const SeriesBooksListHeaderResumeRereadDocument = new TypedDocumentString(`
-    mutation SeriesBooksListHeaderResumeReread($id: ID!) {
-  resumeSeriesReread(id: $id) {
-    stoppedReadthroughAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesBooksListHeaderResumeRereadMutation, SeriesBooksListHeaderResumeRereadMutationVariables>;
 export const BookMenuCompleteDocument = new TypedDocumentString(`
     mutation BookMenuComplete($id: ID!) {
   finishMediaProgress(id: $id)

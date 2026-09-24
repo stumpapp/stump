@@ -6,7 +6,13 @@ export type ContextMenuItem = {
 	subtext?: string
 	icon: {
 		ios: Pick<ButtonProps, 'systemImage'>['systemImage']
-		android: LucideIcon
+		android:
+			| LucideIcon
+			| {
+					icon: LucideIcon
+					fill?: string
+					stroke?: string
+			  }
 	}
 	onPress: () => void
 	role?: 'default' | 'destructive'

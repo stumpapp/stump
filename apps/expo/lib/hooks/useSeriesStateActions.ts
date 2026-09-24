@@ -2,9 +2,11 @@ import { useGraphQLMutation } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { isAfter } from 'date-fns'
 import { BookX } from 'lucide-react-native'
-import { Alert } from 'react-native'
 
 import { ActionDef } from '~/components/filter/types'
+import { SystemAlert } from '~/components/ui/system-alert'
+
+import { useTranslate } from './useTranslate'
 
 const SeriesReadingState = graphql(`
 	fragment SeriesReadingState on Series {
@@ -18,6 +20,7 @@ const SeriesReadingState = graphql(`
 		stats {
 			completedBooks
 		}
+		resolvedName
 	}
 `)
 export type SeriesReadingStateFragmentType = FragmentType<typeof SeriesReadingState>
@@ -104,6 +107,7 @@ export function useSeriesStateActions({ fragment, ...options }: Params): Return 
 }
 
 export function useSeriesStateMenu({ fragment, ...options }: Params) {
+	const { t } = useTranslate()
 	const {
 		dropSeries,
 		canDrop,
@@ -114,24 +118,50 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 		resumeReread,
 		canResumeReread,
 	} = useSeriesStateActions({ fragment, ...options })
+	const { resolvedName: seriesName } = useFragment(SeriesReadingState, fragment)
+
+	// i decided to add confirms for them all since it kinda acts like a form
+	// of documentation for what they do. maybe i'll change this if folks
+	// using it find it annoying, but feels safer for now. i know not
+	// everyone reads the docs so lol
 
 	const dropWithConfirm = () =>
-		Alert.alert(
-			'Drop Series',
-			'TODO: something something drop something something description something something',
+		SystemAlert.alert(
+			t('seriesActions.dropSeries.label'),
+			t('seriesActions.dropSeries.description', { seriesName }),
 			[
 				{ text: 'Cancel', style: 'cancel' },
-				{ text: 'Drop', style: 'destructive', onPress: dropSeries },
+				{ text: t('seriesActions.dropSeries.drop'), style: 'destructive', onPress: dropSeries },
 			],
 		)
 
 	const undropWithConfirm = () =>
-		Alert.alert(
-			'Un-drop Series',
-			'Are you sure you want to un-drop this series? This will make it show up in your on-deck suggestions again.',
+		SystemAlert.alert(
+			t('seriesActions.undropSeries.label'),
+			t('seriesActions.undropSeries.description', { seriesName }),
 			[
 				{ text: 'Cancel', style: 'cancel' },
-				{ text: 'Un-drop', onPress: undropSeries },
+				{ text: t('seriesActions.undropSeries.undrop'), onPress: undropSeries },
+			],
+		)
+
+	const stopRereadWithConfirm = () =>
+		SystemAlert.alert(
+			t('seriesActions.stopReread.label'),
+			t('seriesActions.stopReread.description', { seriesName }),
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{ text: t('seriesActions.stopReread.stop'), onPress: stopReread },
+			],
+		)
+
+	const resumeRereadWithConfirm = () =>
+		SystemAlert.alert(
+			t('seriesActions.resumeReread.label'),
+			t('seriesActions.resumeReread.description', { seriesName }),
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{ text: t('seriesActions.resumeReread.resume'), onPress: resumeReread },
 			],
 		)
 
@@ -140,7 +170,7 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 			? [
 					{
 						key: 'undrop',
-						label: 'Un-drop Series',
+						label: t('seriesActions.undropSeries.label'),
 						icon: { ios: 'arrow.uturn.up.circle', android: BookX },
 						onPress: undropWithConfirm,
 					} satisfies ActionDef,
@@ -150,9 +180,9 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 			? [
 					{
 						key: 'stop-reread',
-						label: 'Stop Re-read',
+						label: t('seriesActions.stopReread.label'),
 						icon: { ios: 'pause.circle', android: BookX },
-						onPress: stopReread,
+						onPress: stopRereadWithConfirm,
 					} satisfies ActionDef,
 				]
 			: []),
@@ -160,9 +190,9 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 			? [
 					{
 						key: 'resume-reread',
-						label: 'Resume Re-read',
+						label: t('seriesActions.resumeReread.label'),
 						icon: { ios: 'play.circle', android: BookX },
-						onPress: resumeReread,
+						onPress: resumeRereadWithConfirm,
 					} satisfies ActionDef,
 				]
 			: []),
@@ -170,7 +200,7 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 			? [
 					{
 						key: 'drop',
-						label: 'Drop Series',
+						label: t('seriesActions.dropSeries.label'),
 						icon: { ios: 'xmark.circle', android: BookX },
 						onPress: dropWithConfirm,
 						destructive: true,

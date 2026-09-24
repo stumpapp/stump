@@ -2,19 +2,22 @@ import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
+import { Heart } from 'lucide-react-native'
 import { memo } from 'react'
 import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
 import { formatSeriesPosition } from '~/lib/bookUtils'
-import { COLORS } from '~/lib/constants'
+import { COLORS, useColors } from '~/lib/constants'
 import { useListItemSize, useTranslate } from '~/lib/hooks'
+import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { useSeriesStateMenu } from '~/lib/hooks/useSeriesStateActions'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
+import { ContextMenuItem } from '../ui/context-menu/types'
 
 const fragment = graphql(`
 	fragment OnDeckBookItem on Media {
@@ -45,6 +48,7 @@ const fragment = graphql(`
 			}
 			...SeriesReadingState
 		}
+		isFavorite
 	}
 `)
 
@@ -65,6 +69,7 @@ function OnDeckBookItem({ book }: Props) {
 	const { t } = useTranslate()
 	const { height, width } = useListItemSize()
 
+	const colors = useColors()
 	const router = useRouter()
 	const client = useQueryClient()
 
@@ -94,19 +99,45 @@ function OnDeckBookItem({ book }: Props) {
 		},
 	)
 
+	// TODO: might be good to add a BookContextMenu that defines its own fragment
+	// and handles all the actions which id otherwise duplicate a few times
+
 	const seriesStateActions = useSeriesStateMenu({
 		fragment: data.series,
 		onSuccess: () => client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
 	})
+
+	const [isFavorite, favoriteBook] = useFavoriteBook({ id: data.id, isFavorite: data.isFavorite })
+
+	const bookActions: ContextMenuItem[] = [
+		{
+			icon: {
+				ios: isFavorite ? 'heart.fill' : 'heart',
+				android: {
+					icon: Heart,
+					fill: isFavorite ? colors.fill.danger.DEFAULT : undefined,
+					stroke: colors.fill.danger.DEFAULT,
+				},
+			},
+			label: isFavorite ? t('bookActions.unfavoriteBook') : t('bookActions.favoriteBook'),
+			onPress: favoriteBook,
+		},
+	]
 
 	return (
 		<ContextMenu
 			onPress={() => router.navigate(`/stump/${serverID}/books/${data.id}`)}
 			groups={[
 				{
-					// @ts-expect-error: it is fine, just use sf for ios
-					items: seriesStateActions,
+					items: bookActions,
 				},
+				...(seriesStateActions.length > 0
+					? [
+							{
+								items: seriesStateActions as ContextMenuItem[],
+							},
+						]
+					: []),
 			]}
 		>
 			{({ pressed }) => (

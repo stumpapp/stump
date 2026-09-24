@@ -1,10 +1,10 @@
 import * as Application from 'expo-application'
 import { useEffect, useState } from 'react'
-import { Platform, View } from 'react-native'
+import { Platform } from 'react-native'
 
 import { useTranslate } from '~/lib/hooks'
 
-import { Text } from '../ui'
+import { Card } from '../ui'
 
 export default function SupportInformation() {
 	const { t } = useTranslate()
@@ -26,18 +26,22 @@ export default function SupportInformation() {
 	}, [supportID])
 
 	return (
-		<View>
-			<Text className="mb-3 text-foreground-muted">
-				{t('settings.supportInfo.buildInformation')}
-			</Text>
-			<Text className="text-foreground-muted">
-				{t('settings.supportInfo.version', {
-					version: Application.nativeApplicationVersion || '??',
-				})}
-			</Text>
-			<Text className="text-foreground-muted">
-				{t('settings.supportInfo.suuportIdentifier', { supportID: supportID || '??' })}
-			</Text>
-		</View>
+		<Card
+			label={t('settings.supportInfo.label')}
+			description={t('settings.supportInfo.description')}
+		>
+			<Card.Row
+				label={t('settings.supportInfo.version')}
+				value={
+					Application.nativeApplicationVersion ? `v${Application.nativeApplicationVersion}` : '??'
+				}
+			/>
+
+			<Card.Row
+				label={t('settings.supportInfo.supportIdentifier')}
+				value={supportID || '??'}
+				selectableValue
+			/>
+		</Card>
 	)
 }

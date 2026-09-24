@@ -31,26 +31,40 @@ export function ContextMenu({ groups, disabled, children, onPress }: ContextMenu
 			>
 				{groups.map((group, groupIndex) => (
 					<JSBase.ContextMenuGroup key={groupIndex}>
-						{group.items.map((item, itemIndex) => (
-							<JSBase.ContextMenuItem
-								key={`group-${groupIndex}-item-${itemIndex}-${item.label}`}
-								onPress={item.onPress}
-								disabled={disabled || item.disabled}
-								variant={item.role}
-							>
-								{item.icon && (
-									<Icon
-										as={item.icon.android}
-										className={cn('size-6 text-foreground-muted', {
-											'text-fill-danger': item.role === 'destructive',
-										})}
-									/>
-								)}
-								<Text>{item.label}</Text>
-								{/* TODO: Make subtext not look garbo */}
-								{/* {item.subtext && <Text className="text-foreground-muted">{item.subtext}</Text>} */}
-							</JSBase.ContextMenuItem>
-						))}
+						{group.items.map((item, itemIndex) => {
+							const icon = 'icon' in item.icon.android ? item.icon.android.icon : item.icon.android
+							const fillColor =
+								'icon' in item.icon.android && item.icon.android.fill
+									? item.icon.android.fill
+									: undefined
+							const strokeColor =
+								'icon' in item.icon.android && item.icon.android.stroke
+									? item.icon.android.stroke
+									: undefined
+
+							return (
+								<JSBase.ContextMenuItem
+									key={`group-${groupIndex}-item-${itemIndex}-${item.label}`}
+									onPress={item.onPress}
+									disabled={disabled || item.disabled}
+									variant={item.role}
+								>
+									{icon && (
+										<Icon
+											as={icon}
+											className={cn('size-6 text-foreground-muted', {
+												'text-fill-danger': item.role === 'destructive',
+											})}
+											{...(fillColor ? { fill: fillColor } : {})}
+											{...(strokeColor ? { stroke: strokeColor } : {})}
+										/>
+									)}
+									<Text>{item.label}</Text>
+									{/* TODO: Make subtext not look garbo */}
+									{/* {item.subtext && <Text className="text-foreground-muted">{item.subtext}</Text>} */}
+								</JSBase.ContextMenuItem>
+							)
+						})}
 					</JSBase.ContextMenuGroup>
 				))}
 			</JSBase.ContextMenuContent>

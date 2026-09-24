@@ -3118,7 +3118,9 @@
 			},
 			"goToLibrary": "Go to Library",
 			"goToSeries": "Go to Series",
-			"seeDetails": "See Details"
+			"seeDetails": "See Details",
+			"favoriteBook": "Favorite Book",
+			"unfavoriteBook": "Unfavorite Book"
 		},
 		"bookMetadata": {
 			"ageRating": "Age Rating",
@@ -3358,6 +3360,28 @@
 			"description": "Find specific content on this server",
 			"placeholder": "Search"
 		},
+		"seriesActions": {
+			"dropSeries": {
+				"label": "Drop Series",
+				"description": "Books in '{{seriesName}}' will be excluded from your on-deck suggestions, except for books added after the drop",
+				"drop": "Drop"
+			},
+			"undropSeries": {
+				"label": "Undrop Series",
+				"description": "This will make books in '{{seriesName}}' show up in your on-deck suggestions again",
+				"undrop": "Undrop"
+			},
+			"pauseRereadingSeries": {
+				"label": "Pause Reread",
+				"description": "This will pause your current reread of '{{seriesName}}', on-deck suggestions for this series will only include unread books",
+				"stop": "Pause"
+			},
+			"resumeRereadingSeries": {
+				"label": "Resume Reread",
+				"description": "This will resume your current reread of '{{seriesName}}', on-deck suggestions will include rereads again",
+				"resume": "Resume"
+			}
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferences",
@@ -3520,9 +3544,10 @@
 				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
+				"label": "Support Information",
+				"description": "This information can be used to help troubleshoot issues with the app",
+				"version": "App Version",
+				"supportIdentifier": "Support Identifier"
 			}
 		},
 		"stumpServer": {

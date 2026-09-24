@@ -99,7 +99,7 @@ export default function BookMenu({ data }: Props) {
 		[client, book.id],
 	)
 
-	const { isFavorite, favoriteBook } = useFavoriteBook({
+	const [isFavorite, favoriteBook] = useFavoriteBook({
 		id: book.id,
 		onSuccess: onFavoriteChanged,
 		isFavorite: book.isFavorite,

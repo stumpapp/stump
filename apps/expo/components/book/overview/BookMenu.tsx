@@ -12,9 +12,10 @@ import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Stack, useNavigation, useRouter } from 'expo-router'
 import { useCallback, useLayoutEffect } from 'react'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { toast } from 'sonner-native'
 
+import { SystemAlert } from '~/components/ui/system-alert'
 import { db, downloadedFiles } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
@@ -142,7 +143,7 @@ export default function BookMenu({ data }: Props) {
 	})
 
 	const confirmMarkAsRead = () => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.markAsRead.label'),
 			t('bookActions.markAsRead.confirmation', {
 				bookTitle: book.resolvedName,
@@ -158,7 +159,7 @@ export default function BookMenu({ data }: Props) {
 	}
 
 	const confirmClearProgress = () => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.clearProgress.label'),
 			t('bookActions.clearProgress.confirmation', {
 				bookTitle: book.resolvedName,
@@ -175,7 +176,7 @@ export default function BookMenu({ data }: Props) {
 	}
 
 	const confirmDeleteReadHistory = () => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.deleteReadHistory.label'),
 			t('bookActions.deleteReadHistory.confirmation', {
 				bookTitle: book.resolvedName,
@@ -192,7 +193,7 @@ export default function BookMenu({ data }: Props) {
 	}
 
 	const confirmDeleteDownload = () => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.deleteDownload.label'),
 			t('bookActions.deleteDownload.confirmation', {
 				bookTitle: book.resolvedName,

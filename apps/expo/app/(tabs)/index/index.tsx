@@ -2,7 +2,7 @@ import { FlashList } from '@shopify/flash-list'
 import { useRouter } from 'expo-router'
 import { ExternalLink } from 'lucide-react-native'
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, ScrollView, useWindowDimensions, View } from 'react-native'
+import { Linking, ScrollView, useWindowDimensions, View } from 'react-native'
 
 import EmptyState from '~/components/EmptyState'
 import { useGridItemSize } from '~/components/listLayout/grid/useGridItemSize'
@@ -10,6 +10,7 @@ import { useOwlHeaderOffset } from '~/components/Owl'
 import { UpdateServerSheet } from '~/components/savedServer/createOrUpdate/UpdateServerSheet'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { Button, Icon, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { useTranslate } from '~/lib/hooks'
 import { useSavedServers } from '~/stores'
 import { SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
@@ -65,7 +66,7 @@ export default function Screen() {
 
 	const handleDeleteServer = useCallback(
 		(server: SavedServer) => {
-			Alert.alert(
+			SystemAlert.alert(
 				t('savedServerActions.deleteServer.title'),
 				t('savedServerActions.deleteServer.confirmation', {
 					serverName: `'${server.name}'`,

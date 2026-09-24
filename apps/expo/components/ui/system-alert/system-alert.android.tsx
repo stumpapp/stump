@@ -22,27 +22,6 @@ type PendingAlert = {
 // the host when it mounts
 let showAndroidAlert: ((alert: PendingAlert) => void) | null = null
 
-// i kinda hate this but the Alert api doesn't make it much easier
-function parseButtons(buttons: AlertButton[]) {
-	if (buttons.length <= 1) {
-		return {
-			confirm: buttons[0],
-			dismiss: undefined as AlertButton | undefined,
-			// ^ did not bother with finding bc then there'd be a dupe
-		}
-	}
-
-	const cancel = buttons.find((button) => button.style === 'cancel')
-	if (cancel) {
-		return { confirm: buttons.find((button) => button.style !== 'cancel'), dismiss: cancel }
-	}
-
-	return {
-		confirm: buttons[buttons.length - 1],
-		dismiss: buttons[0],
-	}
-}
-
 function presentAlert(alert: PendingAlert) {
 	if (!showAndroidAlert) {
 		console.warn(
@@ -86,8 +65,6 @@ export const SystemAlert: AlertStatic = {
  */
 export function SystemAlertHost() {
 	const colors = useColors()
-	const { isDarkColorScheme } = useColorScheme()
-	const { t } = useTranslate()
 
 	const [pendingAlert, setPendingAlert] = useState<PendingAlert | null>(null)
 
@@ -99,8 +76,6 @@ export function SystemAlertHost() {
 			}
 		}
 	}, [])
-
-	const { confirm, dismiss } = pendingAlert ? parseButtons(pendingAlert.buttons) : {}
 
 	if (!pendingAlert) return <AndroidHost matchContents>{null}</AndroidHost>
 
@@ -144,39 +119,42 @@ export function SystemAlertHost() {
 					</AlertDialog.Text>
 				)}
 
-				{confirm && (
-					<AlertDialog.ConfirmButton>
-						<TextButton
-							onClick={() => onPressButton(confirm)}
-							colors={{
-								// white/5 or black/5
-								containerColor: isDarkColorScheme ? '#ffffff0d' : '0000000d',
-								contentColor:
-									confirm.style === 'destructive'
-										? colors.fill.danger.DEFAULT
-										: colors.foreground.DEFAULT,
-							}}
-						>
-							<AndroidText>{confirm.text ?? t('common.ok')}</AndroidText>
-						</TextButton>
-					</AlertDialog.ConfirmButton>
-				)}
-
-				{dismiss && (
-					<AlertDialog.DismissButton>
-						<TextButton
-							onClick={() => onPressButton(dismiss)}
-							colors={{
-								// white/5 or black/5
-								containerColor: isDarkColorScheme ? '#ffffff0d' : '0000000d',
-								contentColor: colors.foreground.DEFAULT,
-							}}
-						>
-							<AndroidText>{dismiss.text ?? t('common.cancel')}</AndroidText>
-						</TextButton>
-					</AlertDialog.DismissButton>
-				)}
+				{pendingAlert.buttons.map((button, index) => (
+					<SystemAlertButton key={index} button={button!} onPress={() => onPressButton(button)} />
+				))}
 			</AlertDialog>
 		</AndroidHost>
+	)
+}
+
+type SystemAlertButtonProps = {
+	button: AlertButton
+	onPress: () => void
+}
+
+function SystemAlertButton({ button, onPress }: SystemAlertButtonProps) {
+	const { t } = useTranslate()
+	const { isDarkColorScheme } = useColorScheme()
+
+	const colors = useColors()
+	const ButtonContainer =
+		button.style === 'cancel' ? AlertDialog.DismissButton : AlertDialog.ConfirmButton
+
+	// alert dialog will position the buttons based on the style, apparently. or rather which
+	// container is used (which here is controlled by the style)
+	return (
+		<ButtonContainer>
+			<TextButton
+				onClick={onPress}
+				colors={{
+					// white/5 or black/5
+					containerColor: isDarkColorScheme ? '#ffffff0d' : '0000000d',
+					contentColor:
+						button.style === 'destructive' ? colors.fill.danger.DEFAULT : colors.foreground.DEFAULT,
+				}}
+			>
+				<AndroidText>{button.text ?? t('common.ok')}</AndroidText>
+			</TextButton>
+		</ButtonContainer>
 	)
 }

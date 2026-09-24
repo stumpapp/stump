@@ -4910,17 +4910,19 @@ export enum UserPermission {
   FileExplorer = 'FILE_EXPLORER',
   /** Grant access to lock another user, preventing them from logging in until an admin unlocks them */
   LockUser = 'LOCK_USER',
+  /** Grant access to manage background jobs (cancel, delete history/logs) */
+  ManageBackgroundJobs = 'MANAGE_BACKGROUND_JOBS',
   /**
    * Grant admin-level powers across all book clubs (everything ModerateBookClubs
    * grants, plus suggestion administration)
    */
   ManageBookClubs = 'MANAGE_BOOK_CLUBS',
-  /** Grant access to manage background jobs (cancel, delete history/logs) */
-  ManageBackgroundJobs = 'MANAGE_BACKGROUND_JOBS',
   /** Grant access to manage the library (scan,edit,manage relations) */
   ManageLibrary = 'MANAGE_LIBRARY',
   /** Grant access to manage a notifier */
   ManageNotifier = 'MANAGE_NOTIFIER',
+  /** Grant access to manage scheduled background job configuration (create, update, delete) */
+  ManageScheduledBackgroundJobs = 'MANAGE_SCHEDULED_BACKGROUND_JOBS',
   /** Grant access to manage the server. This is effectively full access and encompasses all other permissions */
   ManageServer = 'MANAGE_SERVER',
   /** Grant access to manage users (create,edit,delete) */
@@ -4948,12 +4950,10 @@ export enum UserPermission {
   ReadNotifier = 'READ_NOTIFIER',
   /** Grant access to read application-level logs, e.g. job logs */
   ReadPersistedLogs = 'READ_PERSISTED_LOGS',
-  /** Grant access to read system logs */
-  ReadSystemLogs = 'READ_SYSTEM_LOGS',
   /** Grant access to read scheduled background job configuration */
   ReadScheduledBackgroundJobs = 'READ_SCHEDULED_BACKGROUND_JOBS',
-  /** Grant access to manage scheduled background job configuration (create, update, delete) */
-  ManageScheduledBackgroundJobs = 'MANAGE_SCHEDULED_BACKGROUND_JOBS',
+  /** Grant access to read system logs */
+  ReadSystemLogs = 'READ_SYSTEM_LOGS',
   /**
    * Grant access to read users.
    *

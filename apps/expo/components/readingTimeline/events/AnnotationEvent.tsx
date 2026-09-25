@@ -34,6 +34,8 @@ export function AnnotationEvent({ event }: Props) {
 				<View className="inset-0 dark:border-white/10 border-white/30 squircle absolute rounded-xl border-[0.75px]" />
 			</View>
 
+			<Text>TODO: figure out</Text>
+
 			<View className="flex-1" />
 
 			<Pressable>

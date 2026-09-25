@@ -1,15 +1,18 @@
+import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
-import { intlFormat } from 'date-fns'
+import { intlFormat, parse } from 'date-fns'
 import groupBy from 'lodash/groupBy'
-import { ChevronRight, Notebook } from 'lucide-react-native'
+import { ChevronRight, Layers, Notebook, Percent, StickyNote } from 'lucide-react-native'
 import { ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { match } from 'ts-pattern'
 
+import { STAT_COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 import { ScreenBackgroundGradient } from '../BackgroundGradient'
+import { MiniStatCard } from '../stats'
 import { Card, Icon, Text } from '../ui'
 import { AnnotationEvent, BookmarkEvent } from './events'
 import { fakeData } from './fakeData'
@@ -43,6 +46,8 @@ type Props = {
 //      things like that, a chunky row prolly doesn't look great
 // - padding/gap all over the place, trying not to pad outermost edges in case there is something i need edge-to-edge but
 //   need to uniform once landing on sm
+// - some synthetic event for book complete? it would mean a double of "start of readthrough X" so would need to consider, maybe
+//   either or? maybe ollie little pose for complete? i mean, no reason not to have poses for either ig
 export function BookReadingTimeline({ fragmentRef }: Props) {
 	const data = useFragment(fragment, fragmentRef)
 
@@ -54,29 +59,112 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 			.with({ __typename: 'Bookmark' }, (e) => <BookmarkEvent event={e} />)
 			.otherwise(() => null)
 
+	// 	const renderSession = ({
+	// 		session,
+	// 		events,
+	// 	}: (typeof fakeData.readthroughs)[number]['sessions'][number]) => {
+	// 		return (
+	// 			<View key={session.id} className="p-4 gap-4">
+	// 				{/*TODO: date above makes sense in top-down?*/}
+	// 				<View className="flex-row items-center justify-between">
+	// 					<Text className="text-foreground-muted font-medium">
+	// 						Read for {formatHumanDuration(session.elapsedSeconds)}
+	// 					</Text>
+	//
+	// 					<Text className="text-foreground-muted">
+	// 						{/*{formatDistanceToNow(session.createdAt, { addSuffix: true })}*/}
+	// 						{intlFormat(session.sessionDate, {
+	// 							year: 'numeric',
+	// 							month: 'long',
+	// 							day: 'numeric',
+	// 						})}
+	// 					</Text>
+	// 				</View>
+	//
+	// 				<View className="gap-8">{events.map(renderEvent)}</View>
+	// 			</View>
+	// 		)
+	// 	}
+
 	const renderSession = ({
 		session,
 		events,
 	}: (typeof fakeData.readthroughs)[number]['sessions'][number]) => {
+		const startDate = new Date(session.createdAt)
+		const endDate = new Date(session.updatedAt)
+
+		const timeRange = `${intlFormat(startDate, {
+			hour: 'numeric',
+			minute: 'numeric',
+		})} - ${intlFormat(endDate, {
+			hour: 'numeric',
+			minute: 'numeric',
+		})}`
+
+		const pagesRead = session.endPage - session.startPage
+		const chaptersRead = 3
+		const endPercentage = parseGraphQLPercentageDecimal(session.endPercentage) ?? '??'
+
 		return (
-			<View key={session.id} className="p-4 gap-4">
-				{/*TODO: date above makes sense in top-down?*/}
-				<View className="flex-row items-center justify-between">
-					<Text className="text-foreground-muted font-medium">
-						Read for {formatHumanDuration(session.elapsedSeconds)}
-					</Text>
+			<View key={session.id} className="gap-4 py-4">
+				<View className="px-3 flex-row items-center justify-between">
+					<Text className="text-foreground-muted font-medium">{timeRange}</Text>
 
 					<Text className="text-foreground-muted">
-						{/*{formatDistanceToNow(session.createdAt, { addSuffix: true })}*/}
-						{intlFormat(session.sessionDate, {
-							year: 'numeric',
-							month: 'long',
-							day: 'numeric',
-						})}
+						{formatHumanDuration(session.elapsedSeconds)}
 					</Text>
 				</View>
 
-				<View className="gap-8">{events.map(renderEvent)}</View>
+				{/*<View className="gap-6">{events.map(renderEvent)}</View>*/}
+
+				<Card>
+					{events.map((e) => (
+						<Card.Row key={e.id}>{renderEvent(e)}</Card.Row>
+					))}
+
+					<Card.Footer renderDivider={false}>
+						<MiniStatCard value={chaptersRead} colors={STAT_COLORS.size} icon={Layers} />
+						<MiniStatCard value={pagesRead} colors={STAT_COLORS.size} icon={StickyNote} />
+						<MiniStatCard value={endPercentage} colors={STAT_COLORS.size} icon={Percent} />
+					</Card.Footer>
+				</Card>
+			</View>
+		)
+	}
+
+	// awful name lol
+	const renderSessionGroupSeparate = (
+		date: string,
+		sessions: (typeof fakeData.readthroughs)[number]['sessions'][number][],
+	) => {
+		const parsed = parse(date, 'yyyy-MM-dd', new Date())
+		const currentYear = new Date().getFullYear()
+		const isSameYear = parsed.getFullYear() === currentYear
+
+		const showJournals = date === '2026-09-11'
+
+		// TODO: can prolly do sm like if the same week (sunday as anchor??) then just show day of week?
+		return (
+			<View className="gap-2">
+				<Text className="text-2xl font-semibold tracking-wide">
+					{intlFormat(parsed, {
+						year: isSameYear ? undefined : 'numeric',
+						// month: 'long',
+						month: 'short',
+						day: 'numeric',
+					})}
+				</Text>
+
+				{sessions.map(renderSession)}
+
+				{/*just fucking around*/}
+				{showJournals && (
+					<Card>
+						<Card.Row icon={Notebook} label="Journal Entries">
+							<Icon as={ChevronRight} size={18} />
+						</Card.Row>
+					</Card>
+				)}
 			</View>
 		)
 	}
@@ -87,10 +175,11 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 		events: (typeof fakeData.readthroughs)[number]['sessions'][number]['events'][number][],
 	) => {
 		// TODO: if going card route, move row into event renderer so evnt decides which kind
+		const parsed = parse(date, 'yyyy-MM-dd', new Date())
 		return (
 			<>
 				<Card
-					label={intlFormat(date, {
+					label={intlFormat(parsed, {
 						year: 'numeric',
 						month: 'long',
 						day: 'numeric',
@@ -116,6 +205,11 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 	const renderReadthrough = (readthrough: (typeof fakeData.readthroughs)[number]) => {
 		const groupedSessions = groupBy(readthrough.sessions, ({ session }) => session.sessionDate)
 
+		const mergedSessionsNoCard = Object.entries(groupedSessions).map(([date, sessions]) => ({
+			date,
+			sessions,
+		}))
+
 		const mergedSessions = Object.entries(groupedSessions).map(([date, sessions]) => ({
 			date,
 			sessions: sessions.map(({ session }) => session),
@@ -128,13 +222,21 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 				{/*{readthrough.sessions.map(renderSession)}*/}
 
 				{/*uncomment for cards + grouped by session date*/}
-				<View className="px-4 gap-8">
+				{/*<View className="px-4 gap-8">
 					{mergedSessions.map(({ date, sessions, events }) =>
 						renderSessionGroup(date, sessions, events),
 					)}
+				</View>*/}
+
+				{/*uncomment grouped by session date separated session cards tho*/}
+				<View className="px-4 gap-10">
+					{mergedSessionsNoCard.map(({ date, sessions }) =>
+						renderSessionGroupSeparate(date, sessions),
+					)}
 				</View>
+
 				<View
-					className={cn('px-4 py-12 gap-1', {
+					className={cn('px-4 py-10 gap-1', {
 						'pb-0': readthrough.readthroughNumber === 1,
 					})}
 				>

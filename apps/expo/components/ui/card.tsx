@@ -107,6 +107,7 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.Footer = FooterRow
 Card.InputRow = InputRow
 Card.LongRow = LongRow
 Card.RowDivider = Divider
@@ -158,6 +159,14 @@ function Row({ value, children, ...props }: RowProps) {
 			{value != undefined && (
 				<Text className="text-lg text-foreground-muted flex-1 text-right">{value}</Text>
 			)}
+			{children}
+		</BaseRowComponent>
+	)
+}
+
+function FooterRow({ children, className, ...props }: Omit<RowProps, 'value'>) {
+	return (
+		<BaseRowComponent className={cn('bg-black/5 dark:bg-white/10', className)} {...props}>
 			{children}
 		</BaseRowComponent>
 	)

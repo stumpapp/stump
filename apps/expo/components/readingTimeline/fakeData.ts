@@ -39,7 +39,15 @@ export const fakeData = {
 						endPercentage: '0.094',
 						elapsedSeconds: 5400,
 						deviceIds: [],
-						startLocator: null,
+						startLocator: {
+							__typename: 'ReadiumLocator' as const,
+							chapterTitle: 'A Long-Expected Party',
+							href: 'chapter-001.xhtml',
+							title: null,
+							type: 'application/xhtml+xml',
+							locations: null,
+							text: null,
+						},
 						endLocator: {
 							__typename: 'ReadiumLocator' as const,
 							chapterTitle: 'A Conspiracy Unmasked',

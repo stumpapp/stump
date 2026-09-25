@@ -1,10 +1,11 @@
 import { Plus } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
-import { Alert, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Icon } from '~/components/ui/icon'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -78,11 +79,11 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 
 	const handleDelete = useCallback(() => {
 		if (themeNames.length <= 1) {
-			Alert.alert('Error', 'You must have at least one theme')
+			SystemAlert.alert('Error', 'You must have at least one theme')
 			return
 		}
 
-		Alert.alert('Delete Theme', `Are you sure you want to delete '${name}'?`, [
+		SystemAlert.alert('Delete Theme', `Are you sure you want to delete '${name}'?`, [
 			{ text: 'Cancel', style: 'cancel' },
 			{
 				text: 'Delete',
@@ -110,7 +111,7 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 					<ThemePreview
 						name={name}
 						theme={config}
-						className={cn(isActive && 'border-2 border-edge-brand dark:border-edge-brand')}
+						className={cn(isActive && 'border-edge-brand dark:border-edge-brand border-2')}
 					/>
 				</Pressable>
 			</ContextMenu.Trigger>
@@ -142,7 +143,7 @@ const NewThemeButton = () => {
 	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
 	return (
 		<Pressable onPress={() => openCustomizeTheme({ mode: 'create' })}>
-			<View className="squircle w-24 rounded-3xl border-black/60 dark:border-white/60 aspect-[6/5] items-center justify-center border-2 border-dashed">
+			<View className="squircle w-24 border-black/60 dark:border-white/60 aspect-[6/5] items-center justify-center rounded-3xl border-2 border-dashed">
 				<Icon as={Plus} size={24} className="text-black/60 dark:text-white/60" />
 			</View>
 		</Pressable>

@@ -11,9 +11,6 @@ on:
 jobs:
   yarn-audit:
     runs-on: ubuntu-latest
-    # write for creating issue
-    permissions:
-      issues: write
 
     steps:
       - name: Checkout code
@@ -27,25 +24,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run yarn audit and create issue if needed
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # prevent non-zero exit from killing the job
-          set +e
-          AUDIT_OUTPUT=$(yarn audit --groups dependencies 2>&1)
-          AUDIT_EXIT_CODE=$?
-          set -e
-
-          # yarn audit exits 0 when no vulnerabilities are found
-          if [ "$AUDIT_EXIT_CODE" -ne 0 ]; then
-            if [ "${{ github.event_name }}" = "push" ]; then
-              echo "$AUDIT_OUTPUT"
-            else
-              printf '```\n%s\n```\n' "$AUDIT_OUTPUT" > issue-body.txt
-              gh issue create \
-                --title "[CVE] Vulnerable dependencies detected — $(date -u +%Y-%m-%d)" \
-                --body-file issue-body.txt \
-                --label "security"
-            fi
-          fi
+      - name: Run yarn audit
+        # 1138808 -> image-size: there is no patch available, and this dep is pulled in by
+        #            metro bundler (which is build-time only and ends up in the app bundle)
+        # 1138809 -> image-size: same as above
+        run: ./scripts/github/yarn-audit-with-allowlist.sh 1138808 1138809

@@ -1,9 +1,9 @@
 {
-  "platforms": ["apple", "android", "web"],
-  "apple": {
-    "modules": ["StumpStreamerModule"]
-  },
-  "android": {
-    "modules": ["expo.modules.streamer.StumpStreamerModule"]
-  }
+	"platforms": ["apple", "android", "web"],
+	"apple": {
+		"modules": ["StumpStreamerModule"]
+	},
+	"android": {
+		"modules": ["expo.modules.streamer.StumpStreamerModule"]
+	}
 }

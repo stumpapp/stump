@@ -1,47 +1,74 @@
-use graphql::input::user::CreateUserInput;
+use async_graphql::InputType;
+use graphql::input::user::AgeRestrictionInput;
+use models::shared::enums::UserPermission;
+use serde_json::{json, Value};
 
-// TODO(tests): ive left my chicken scratch here to remind myself of some ideas. if i am reading
-// this after idk maybe 5 months just do it plz! <3
+use super::TestApp;
 
-#[derive(Debug, Clone)]
-pub struct TestAccount {
-	username: &'static str,
-	password: &'static str,
-	// role: TestAccountRole,
-	// age_restriction: Option<i32>,
-	// ^ etc etc etc in the future
+pub struct TestUser {
+	pub id: String,
+	pub username: String,
+	pub token: String,
 }
 
-// pub enum TestAccountRole {
-// 	ServerAdmin,
-// 	// Custom(vec<permissions>)
-// 	// Child, etc
-// }
+pub struct CreateTestUser {
+	pub username: String,
+	pub password: String,
+	pub permissions: Vec<UserPermission>,
+	pub age_restriction: Option<AgeRestrictionInput>,
+}
 
-// impl TestAccount {
-// 	pub async fn register(&self, app: &TestApp) {
-// 		// app.server
-// 		// 	.grapqhl(CreateUserInput)
-// 	}
-// }
-
-impl From<TestAccount> for CreateUserInput {
-	fn from(account: TestAccount) -> Self {
-		CreateUserInput {
-			username: account.username.to_string(),
-			password: account.password.to_string(),
-			age_restriction: None,
-			// permissions: match account.role {
-			// 	TestAccountRole::ServerAdmin =>
-			// },
+impl Default for CreateTestUser {
+	fn default() -> Self {
+		Self {
+			username: "testuser".to_string(),
+			password: "password".to_string(),
 			permissions: vec![],
-			max_sessions_allowed: None,
+			age_restriction: None,
 		}
 	}
 }
 
-// pub const TEST_ACCOUNTS: [TestAccount; 1] = [TestAccount {
-// 	username: "initial-server-admin",
-// 	password: "password",
-// 	// role: TestAccountRole::ServerAdmin,
-// }];
+impl CreateTestUser {
+	/// create the user via the server-owner token stored in `app`, log them
+	/// in, and return a [`TestUser`]
+	pub async fn insert(&self, app: &TestApp) -> TestUser {
+		let perm_values: Vec<Value> = self.permissions.iter().map(|p| json!(p)).collect();
+
+		let mut input = json!({
+			"username": self.username,
+			"password": self.password,
+			"permissions": perm_values,
+		});
+		if let Some(ar) = &self.age_restriction {
+			input["ageRestriction"] =
+				ar.to_value().into_json().expect("should convert into json")
+		}
+
+		let response = app
+			.execute_gql(
+				r#"mutation CreateTestUser($input: CreateUserInput!) {
+                    createUser(input: $input) { id }
+                }"#,
+				Some(json!({ "input": input })),
+			)
+			.await;
+		assert!(
+			response.get("errors").is_none(),
+			"createUser failed: {response:#}"
+		);
+
+		let id = response["data"]["createUser"]["id"]
+			.as_str()
+			.expect("createUser returned no id")
+			.to_string();
+
+		let token = app.login_as(&self.username, &self.password).await;
+
+		TestUser {
+			id,
+			username: self.username.clone(),
+			token,
+		}
+	}
+}

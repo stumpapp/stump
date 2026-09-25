@@ -4,7 +4,7 @@ import { SymbolView } from 'expo-symbols'
 import medium from 'expo-symbols/androidWeights/medium'
 import { CheckCircle2, Trash } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo } from 'react'
-import { Alert, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
 
@@ -16,6 +16,7 @@ import { useSelectionStore } from '~/stores/selection'
 import { ThumbnailImage } from '../image'
 import { Heading, Progress, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
+import { SystemAlert } from '../ui/system-alert'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
 import { useDownloadRowItemSize } from './useDownloadRowItemSize'
@@ -130,7 +131,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	}, [selectionStore, downloadedFile.id, onSelectItem])
 
 	const handleDelete = useCallback(() => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.deleteBook.label'),
 			t('bookActions.deleteBook.confirmation', {
 				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),

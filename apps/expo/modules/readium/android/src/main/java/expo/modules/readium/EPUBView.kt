@@ -3,7 +3,9 @@
 package expo.modules.readium
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Outline
@@ -11,6 +13,7 @@ import android.graphics.PointF
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.View
@@ -193,12 +196,12 @@ class EPUBView(
                 fontFamily =
                     pendingProps.fontFamily
                         ?: oldProps?.fontFamily ?: FontFamily("Literata"),
-                lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
+                lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.5,
                 fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
                 fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
                 readingProgression =
                     pendingProps.readingProgression ?: oldProps?.readingProgression
-                    ?: ReadingProgression.LTR,
+                        ?: ReadingProgression.LTR,
                 publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
                 imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
                 pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
@@ -434,15 +437,15 @@ class EPUBView(
                     mapOf(
                         "success" to true,
                         "bookMetadata" to
-                                mapOf(
-                                    "title" to publication.metadata.title,
-                                    "author" to publication.metadata.authors.joinToString(", ") { it.name },
-                                    "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
-                                    "identifier" to (publication.metadata.identifier ?: ""),
-                                    "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
-                                    "totalPages" to positionCount,
-                                    "chapterCount" to publication.readingOrder.size,
-                                ),
+                            mapOf(
+                                "title" to publication.metadata.title,
+                                "author" to publication.metadata.authors.joinToString(", ") { it.name },
+                                "publisher" to publication.metadata.publishers.joinToString(", ") { it.name },
+                                "identifier" to (publication.metadata.identifier ?: ""),
+                                "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
+                                "totalPages" to positionCount,
+                                "chapterCount" to publication.readingOrder.size,
+                            ),
                         "tableOfContents" to tableOfContents,
                     ),
                 )
@@ -729,13 +732,13 @@ class EPUBView(
                             // and a bunch of flags in https://developer.android.com/reference/android/view/View
                             @Suppress("DEPRECATION")
                             menuLayout.rootView.systemUiVisibility = (
-                                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                            or View.SYSTEM_UI_FLAG_FULLSCREEN
-                                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                                    )
+                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            )
                         }
                     }
                 },
@@ -825,17 +828,21 @@ class EPUBView(
 
     @ExperimentalReadiumApi
     override fun onExternalLinkActivated(url: AbsoluteUrl) {
-//        TODO: Figure this out
-//        if (!url. isHttp) return
-//        val context = requireActivity()
-//        val uri = url.toUri()
-//        try {
-//            CustomTabsIntent.Builder()
-//                .build()
-//                .launchUrl(context, uri)
-//        } catch (e: ActivityNotFoundException) {
-//            context.startActivity(Intent(Intent. ACTION_VIEW, uri))
-//        }
+        if (!url.isHttp) return
+        val uri = Uri.parse(url.toString())
+        val activity = appContext.currentActivity ?: return
+        try {
+            androidx.browser.customtabs.CustomTabsIntent
+                .Builder()
+                .build()
+                .launchUrl(activity, uri)
+        } catch (e: ActivityNotFoundException) {
+            try {
+                activity.startActivity(Intent(Intent.ACTION_VIEW, uri))
+            } catch (e2: ActivityNotFoundException) {
+                Log.w("EPUBView", "Failed to open URL: $uri")
+            }
+        }
     }
 
     private fun convertLinksToToc(links: List<Link>): List<Map<String, Any>> =

@@ -53,6 +53,7 @@ dependencies {
   implementation "org.readium.kotlin-toolkit:readium-adapter-pdfium-navigator:$readium_version"
   implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
   implementation 'androidx.fragment:fragment-ktx:1.8.5'
+  implementation 'androidx.browser:browser:1.10.0'
   implementation 'androidx.compose.ui:ui-android:1.7.6'
   implementation 'org.jsoup:jsoup:1.18.3'
   implementation 'com.mcxiaoke.koi:async:0.5.5'

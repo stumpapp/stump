@@ -5,12 +5,13 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Redirect, useLocalSearchParams } from 'expo-router'
 import { HardDriveDownload } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
-import { Alert, View } from 'react-native'
+import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { db, downloadedFiles } from '~/db'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
 import { useDownload, useTranslate } from '~/lib/hooks'
@@ -59,7 +60,7 @@ export default function Screen() {
 			await deleteServerDownloads(serverID)
 			refetch()
 		} catch {
-			Alert.alert(
+			SystemAlert.alert(
 				t(getKey('deleteDownloads.deleteFailed.title')),
 				t(getKey('deleteDownloads.deleteFailed.description'), {
 					serverName: server?.name ? `'${server.name}'` : t('common.thisServer'),
@@ -73,7 +74,7 @@ export default function Screen() {
 	})
 
 	const handleDelete = () => {
-		Alert.alert(
+		SystemAlert.alert(
 			t(getKey('deleteDownloads.label')),
 			t(getKey('deleteDownloads.confirmation'), {
 				serverName: server?.name ? `'${server.name}'` : t('common.thisServer'),

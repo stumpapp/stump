@@ -18,13 +18,13 @@ export default function PotentiallyOutdatedServer({ error, onRetry }: Props) {
 	return (
 		<SafeAreaView className="flex-1 bg-background">
 			<View
-				className="h-full flex-1 items-center justify-center gap-8 p-4"
+				className="gap-8 p-4 h-full flex-1 items-center justify-center"
 				style={emptyContainerStyle}
 			>
 				<Owl owl="network-error" />
 
 				<View className="gap-2 px-4 tablet:max-w-lg">
-					<Heading size="xl" className="text-center font-semibold leading-tight">
+					<Heading size="xl" className="font-semibold leading-tight text-center">
 						Outdated Server
 					</Heading>
 
@@ -36,7 +36,7 @@ export default function PotentiallyOutdatedServer({ error, onRetry }: Props) {
 
 				<View className="flex-1" />
 
-				<View className="w-full gap-3">
+				<View className="gap-3 w-full">
 					<Button variant="brand" size="lg" roundness="full" onPress={() => router.dismissAll()}>
 						<Text>Return Home</Text>
 					</Button>

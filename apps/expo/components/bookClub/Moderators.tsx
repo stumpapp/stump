@@ -40,7 +40,7 @@ export function Moderators({ moderators }: Props) {
 	if (!moderator) return null
 
 	return (
-		<View className="flex-row items-center gap-2">
+		<View className="gap-2 flex-row items-center">
 			<Avatar
 				alt={moderator.displayName || 'Moderator'}
 				className={cn('h-8 w-8 border border-background', {
@@ -49,7 +49,7 @@ export function Moderators({ moderators }: Props) {
 			>
 				{moderator.avatarUrl && <AvatarImage source={{ uri: moderator.avatarUrl, headers }} />}
 				<AvatarFallback className="bg-black/5 dark:bg-white/10">
-					<Text className="text-[10px] font-medium text-foreground-muted">
+					<Text className="font-medium text-foreground-muted text-[10px]">
 						{getFallback(moderator.displayName)}
 					</Text>
 				</AvatarFallback>

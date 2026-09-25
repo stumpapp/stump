@@ -12,7 +12,7 @@ export type InputProps = {
 const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
 	({ label, errorMessage, ...props }, ref) => {
 		return (
-			<View className="w-full gap-1.5">
+			<View className="gap-1.5 w-full">
 				{label && <Text className="text-base font-medium text-foreground-muted">{label}</Text>}
 				<RawInput {...props} isInvalid={!!errorMessage} ref={ref} />
 				{errorMessage && <Text className="text-sm text-fill-danger">{errorMessage}</Text>}

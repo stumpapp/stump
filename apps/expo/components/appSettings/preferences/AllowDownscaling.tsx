@@ -21,7 +21,7 @@ export default function AllowDownscaling() {
 			title="Allow Downscaling"
 			onPress={() => patch({ allowDownscaling: !allowDownscaling })}
 		>
-			<View className="flex flex-row items-center gap-2">
+			<View className="gap-2 flex flex-row items-center">
 				<Switch
 					checked={allowDownscaling}
 					onCheckedChange={(checked) => patch({ allowDownscaling: checked })}

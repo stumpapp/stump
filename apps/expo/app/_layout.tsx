@@ -24,6 +24,7 @@ import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
 import { FloatingQueueButton } from '~/components/downloadQueue'
 import { PerformanceMonitor } from '~/components/PerformanceMonitor'
+import { SystemAlertHost } from '~/components/ui/system-alert'
 import { db } from '~/db'
 import migrations from '~/drizzle/migrations'
 import { reactNavigationIntegration } from '~/index'
@@ -274,6 +275,7 @@ export default function RootLayout() {
 									</Stack>
 									<FloatingQueueButton />
 									<PortalHost />
+									<SystemAlertHost />
 								</KeyboardProvider>
 
 								<Toaster

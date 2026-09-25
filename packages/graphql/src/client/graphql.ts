@@ -5111,6 +5111,16 @@ export type DeleteAnnotationMobileMutationVariables = Exact<{
 
 export type DeleteAnnotationMobileMutation = { __typename?: 'Mutation', deleteAnnotation: { __typename?: 'MediaAnnotation', id: string } };
 
+export type BookReadingTimelineScreenQueryVariables = Exact<{
+  bookId: Scalars['ID']['input'];
+}>;
+
+
+export type BookReadingTimelineScreenQuery = { __typename?: 'Query', mediaById?: (
+    { __typename?: 'Media', id: string }
+    & { ' $fragmentRefs'?: { 'BookReadingTimelineFragment': BookReadingTimelineFragment } }
+  ) | null };
+
 export type BooksScreenQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
   filters?: InputMaybe<MediaFilterInput>;
@@ -5641,6 +5651,8 @@ export type AcceptLocalProgressMutationVariables = Exact<{
 
 
 export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
+
+export type BookReadingTimelineFragment = { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null } | null } } & { ' $fragmentName'?: 'BookReadingTimelineFragment' };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -7525,6 +7537,16 @@ export const LibrarySearchItemFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
+export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
+    fragment BookReadingTimeline on Media {
+  id
+  thumbnail {
+    metadata {
+      averageColor
+    }
+  }
+}
+    `, {"fragmentName":"BookReadingTimeline"}) as unknown as TypedDocumentString<BookReadingTimelineFragment, unknown>;
 export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
@@ -8707,6 +8729,21 @@ export const DeleteAnnotationMobileDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteAnnotationMobileMutation, DeleteAnnotationMobileMutationVariables>;
+export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
+    query BookReadingTimelineScreen($bookId: ID!) {
+  mediaById(id: $bookId) {
+    id
+    ...BookReadingTimeline
+  }
+}
+    fragment BookReadingTimeline on Media {
+  id
+  thumbnail {
+    metadata {
+      averageColor
+    }
+  }
+}`) as unknown as TypedDocumentString<BookReadingTimelineScreenQuery, BookReadingTimelineScreenQueryVariables>;
 export const BooksScreenDocument = new TypedDocumentString(`
     query BooksScreen($pagination: Pagination, $filters: MediaFilterInput, $orderBy: [MediaOrderBy!]) {
   media(pagination: $pagination, filter: $filters, orderBy: $orderBy) {

@@ -171,3 +171,43 @@ function AnimatedHeaderBackground({ color }: { color: SharedValue<string> }) {
 	const animatedStyle = useAnimatedStyle(() => ({ backgroundColor: color.value }))
 	return <Animated.View style={[{ flex: 1 }, animatedStyle]} />
 }
+
+// TODO: don't love name necessarily, other one was very geared towards flashlist
+// and needed this for now but should consider proper place etc etc
+
+type ScreenBackgroundGradientProps = {
+	item: MinimalItem
+}
+
+export function ScreenBackgroundGradient({ item }: ScreenBackgroundGradientProps) {
+	const { height, width } = useDisplay()
+	const naviation = useNavigation()
+
+	// useEffect(() => {
+	// 	if (Platform.OS === 'android' && androidHeaderColor) {
+	// 		naviation.setOptions({
+	// 			headerBackground: () => <AnimatedHeaderBackground color={androidHeaderColor} />,
+	// 		})
+	// 	}
+	// }, [androidHeaderColor, naviation, tintListBackground])
+
+	const averageColor = getTintColor(item)
+
+	// not quite right just looking at apple journal and throwing something
+	// vaguely similar-ish
+	const colorSteps = [
+		averageColor + '99', // 60% opacity
+		averageColor + 'cc', // 80% opacity
+		averageColor,
+	]
+
+	const endPoint = vec(0, height)
+
+	return (
+		<Canvas style={{ position: 'absolute', inset: 0 }}>
+			<Rect x={0} y={0} width={width} height={height}>
+				<LinearGradient start={vec(0, 0)} end={endPoint} colors={colorSteps} />
+			</Rect>
+		</Canvas>
+	)
+}

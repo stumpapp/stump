@@ -280,6 +280,15 @@ export default function BookMenu({ data }: Props) {
 							{t('bookActions.goToSeries')}
 						</Stack.Toolbar.MenuAction>
 
+						<Stack.Toolbar.Menu inline>
+							<Stack.Toolbar.MenuAction
+								icon="clock"
+								onPress={() => router.push(`/stump/${serverID}/books/${book.id}/reading-timeline`)}
+							>
+								Reading Timeline
+							</Stack.Toolbar.MenuAction>
+						</Stack.Toolbar.Menu>
+
 						{isDownloaded && (
 							<Stack.Toolbar.Menu inline>
 								<Stack.Toolbar.MenuAction

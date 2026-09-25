@@ -26,6 +26,17 @@ export default function Screen() {
 					headerLeft: () => <BackLink />,
 				}}
 			/>
+
+			<Stack.Screen
+				name="reading-timeline"
+				options={{
+					headerTitle: 'Reading Timeline',
+					headerShown: Platform.OS === 'ios',
+					headerTransparent: true,
+					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
+					// headerLeft: () => <BackLink />,
+				}}
+			/>
 		</Stack>
 	)
 }

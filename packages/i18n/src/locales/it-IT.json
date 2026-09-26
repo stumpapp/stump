@@ -1,6 +1,6 @@
 {
 	"underConstruction": {
-		"heading": "Che imbarazzo…",
+		"heading": "Questo è imbarazzante",
 		"message": "Ti sei imbattuto in una pagina ancora in fase di sviluppo. Mi piacerebbe mostrartela, ma non è ancora del tutto pronta.",
 		"homeLink": "Torna alla home",
 		"githubLink": "Mostra la issue su GitHub"
@@ -15,7 +15,8 @@
 				"usernameAlreadyExists": "Il nome utente esiste già"
 			},
 			"labels": {
-				"username": "Nome utente"
+				"username": "Nome utente",
+				"password": "Password"
 			},
 			"buttons": {
 				"createAccount": "Crea account",
@@ -69,7 +70,11 @@
 					"placeholder": "es. 129260"
 				},
 				"provider": {
-					"allOption": "Tutti i provider abilitati"
+					"allOption": "Tutti i provider abilitati",
+					"label": "Provider"
+				},
+				"isbn": {
+					"label": "ISBN"
 				}
 			}
 		}
@@ -80,7 +85,8 @@
 			"labels": {
 				"fileSize": "Dimensioni del file",
 				"fileType": "Tipo di file",
-				"fileLocation": "Posizione del file"
+				"fileLocation": "Posizione del file",
+				"fileChecksum": "Checksum"
 			}
 		},
 		"emailBook": {
@@ -147,7 +153,8 @@
 			"membershipOptions": {
 				"displayName": {
 					"label": "Nome visualizzato",
-					"description": "Un nome opzionale per la tua iscrizione nel club del libro. Se impostato, ha la precedenza sul tuo nome utente"
+					"description": "Un nome opzionale per la tua iscrizione nel club del libro. Se impostato, ha la precedenza sul tuo nome utente",
+					"placeholder": "oromei"
 				},
 				"hideProgress": {
 					"label": "Nascondi progresso",
@@ -192,9 +199,11 @@
 				"labels": {
 					"name": "Nome",
 					"description": "Descrizione"
-				}
+				},
+				"no": "No"
 			},
-			"submit": "Crea club del libro"
+			"submit": "Crea club del libro",
+			"stepLabel": "Passo"
 		}
 	},
 	"bookClubSettingsScene": {
@@ -268,7 +277,8 @@
 			},
 			"path": {
 				"label": "Percorso",
-				"description": "Il percorso della libreria così come presente sul tuo server"
+				"description": "Il percorso della libreria così come presente sul tuo server",
+				"placeholder": "/percorso/della/libreria"
 			},
 			"description": {
 				"label": "Descrizione",
@@ -288,7 +298,9 @@
 					"LIGHT_NOVEL": "Light novel",
 					"WEB_NOVEL": "Web novel",
 					"WEBTOON": "Webtoon",
-					"MIXED": "Misto"
+					"MIXED": "Misto",
+					"MANGA": "Manga",
+					"MANHWA": "Manwha"
 				}
 			},
 			"defaultLibraryView": {
@@ -483,6 +495,11 @@
 						"description": "Ogni cartella a qualsiasi livello, in modo ricorsivo, è una singola serie"
 					}
 				}
+			},
+			"oneshotsDirectory": {
+				"label": "Cartella Oneshots",
+				"description": "Il nome della cartella dove sono salvati gli oneshots, relativa al percorso della libreria. Se lasciata vuota, gli oneshots non verranno processati",
+				"placeholder": "_oneshots"
 			}
 		},
 		"scan": {
@@ -547,12 +564,15 @@
 					"generateKoreaderHashes": "Genera hash KoReader",
 					"scaleEvenlyByFactor": "Ridimensiona proporzionalmente",
 					"exact": "Dimensione esatta",
-					"scaleDimension": "Dimensioni esplicite"
-				}
+					"scaleDimension": "Dimensioni esplicite",
+					"oneshotsDirectory": "Cartella Oneshots"
+				},
+				"no": "No"
 			},
 			"buttons": {
 				"confirm": "Crea libreria"
-			}
+			},
+			"stepLabel": "Passo"
 		}
 	},
 	"fileExplorer": {
@@ -582,7 +602,8 @@
 		"tabs": {
 			"books": "Libri",
 			"series": "Serie",
-			"files": "File"
+			"files": "File",
+			"oneshots": "Oneshots"
 		}
 	},
 	"librarySettingsScene": {
@@ -769,7 +790,8 @@
 					"missingEntitiesTable": {
 						"columns": {
 							"path": "Percorso",
-							"type": "Tipo"
+							"type": "Tipo",
+							"id": "ID"
 						},
 						"types": {
 							"BOOK": "Libro",
@@ -795,8 +817,16 @@
 		"buttons": {
 			"report": "Segnala problema",
 			"copy": "Copia dettagli errore",
-			"goHome": "Torna alla home"
-		}
+			"goHome": "Torna alla home",
+			"goHomeTitle": "Torna alla pagina iniziale",
+			"reportTitle": "Segnala questo errore come un potenziale bug su GitHub",
+			"copyTitle": "Copia i dettagli dell'errore negli appunti"
+		},
+		"heading": "lol, ops",
+		"criticalHeading": "È avvenuto un errore critico",
+		"emptyMessage": "Il messaggio di errore era vuoto.",
+		"copiedDetails": "Dettagli dell'errore copiati negli appunti",
+		"imageAlt": "Illustrazione di costruzione"
 	},
 	"homeScene": {
 		"onDeck": {
@@ -826,6 +856,11 @@
 				"heading": "Niente da mostrare",
 				"message": "I libri aggiunti di recente appariranno qui"
 			}
+		},
+		"allSectionsHidden": {
+			"label": "Non c'è nulla da mostrare",
+			"description": "Hai nascosto tutto, spero ti piaccia lo spazio vuoto",
+			"customizeHome": "Personalizza la tua pagina principale"
 		}
 	},
 	"metadataEditor": {
@@ -870,10 +905,17 @@
 			"totalIssues": "Problemi totali",
 			"publicationRun": "Periodo di pubblicazione",
 			"comicImage": "Immagine del fumetto",
-			"descriptionFormatted": "Descrizione (formattata)"
+			"descriptionFormatted": "Descrizione (formattata)",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"volume": "Volume"
 		},
 		"addFields": {
 			"description": "Aggiungi ogni aggiunta sulla propria riga"
+		},
+		"actions": {
+			"removeItem": "Rimuovi elemento",
+			"resetField": "Resetta campo"
 		}
 	},
 	"metadataMatching": {
@@ -898,7 +940,8 @@
 					"resolved": "Risolto"
 				},
 				"toolbar": {
-					"candidatePosition": "Candidato {{position}} di {{total}}"
+					"candidatePosition": "Candidato {{position}} di {{total}}",
+					"provider": "Provider"
 				}
 			},
 			"footer": {
@@ -1002,21 +1045,26 @@
 				"uiPerformance": "Questa funzionalità non dispone di ottimizzazioni delle prestazioni a livello d'interfaccia utente e potrebbe risultare lenta con filtri che generano un gran numero di risultati. Questo aspetto verrà migliorato in futuro",
 				"rootJoiner": {
 					"and": {
-						"description": "Tutti i gruppi di filtri devono essere soddisfatti affinché un libro venga incluso"
+						"description": "Tutti i gruppi di filtri devono essere soddisfatti affinché un libro venga incluso",
+						"label": "E"
 					},
 					"or": {
-						"description": "Almeno un gruppo di filtri deve essere soddisfatto affinché un libro venga incluso"
+						"description": "Almeno un gruppo di filtri deve essere soddisfatto affinché un libro venga incluso",
+						"label": "O"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"description": "Tutto deve essere vero"
+						"description": "Tutto deve essere vero",
+						"label": "E"
 					},
 					"or": {
-						"description": "Almeno uno deve essere vero"
+						"description": "Almeno uno deve essere vero",
+						"label": "O"
 					},
 					"not": {
-						"description": "Nessuno può essere vero"
+						"description": "Nessuno può essere vero",
+						"label": "NON"
 					}
 				},
 				"grouping": {
@@ -1106,7 +1154,8 @@
 									"status": "Stato",
 									"metaType": "Tipo",
 									"ageRating": "Classificazione per età",
-									"year": "Anno d'inizio"
+									"year": "Anno d'inizio",
+									"volume": "Volume"
 								}
 							},
 							"library": {
@@ -1177,11 +1226,13 @@
 					"description": "Descrizione",
 					"visibility": "Visibilità",
 					"grouping": "Raggruppa per"
-				}
+				},
+				"no": "No"
 			},
 			"buttons": {
 				"confirm": "Crea lista"
-			}
+			},
+			"stepLabel": "Passo"
 		}
 	},
 	"createOrUpdateApiKey": {
@@ -1375,14 +1426,18 @@
 			"general": "Generale",
 			"logs": "Log",
 			"jobs": "Attività e configurazione",
-			"users": "Gestione utenti"
+			"users": "Gestione utenti",
+			"server": "Server",
+			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"personal": {
 				"appearance": "Preferenze",
 				"api keys": "Chiavi API",
 				"reader": "Lettore",
-				"label": "Personale"
+				"label": "Personale",
+				"account": "Account",
+				"desktop": "Desktop"
 			},
 			"management": {
 				"logs": "Log",
@@ -1393,7 +1448,8 @@
 				"metadata": "Metadati",
 				"notifications": "Notifiche",
 				"tags": "Tag",
-				"label": "Gestione"
+				"label": "Gestione",
+				"general": "Server"
 			}
 		},
 		"app/account": {
@@ -1413,7 +1469,8 @@
 							"title": "Non hai l'autorizzazione per modificare queste impostazioni",
 							"description": "Contatta l'amministratore se desideri apportare modifiche a queste impostazioni"
 						},
-						"insufficientPermission": "Non sei autorizzato a cambiarlo"
+						"insufficientPermission": "Non sei autorizzato a cambiarlo",
+						"password": "Password"
 					},
 					"errors": {
 						"updateFailed": "Si è verificato un errore nel server durante l'aggiornamento del tuo profilo. Riprova."
@@ -1426,7 +1483,8 @@
 						"removeImage": "Rimuovi immagine",
 						"removeSelection": "Rimuovi immagine caricata",
 						"uploadFailed": "Impossibile caricare l'avatar",
-						"removeFailed": "Impossibile rimuovere l'avatar"
+						"removeFailed": "Impossibile rimuovere l'avatar",
+						"label": "Avatar"
 					},
 					"buttons": {
 						"confirm": "Salva modifiche"
@@ -1442,6 +1500,12 @@
 						"traduzioni di Stump",
 						", se ti è possibile!"
 					]
+				},
+				"language": {
+					"label": "Lingua",
+					"contributeIfAble": "Se puoi, valuta la possibilità di contribuire alle traduzioni di Stump!",
+					"contribute": "Contribuisci",
+					"noThanks": "No grazie"
 				}
 			}
 		},
@@ -1477,7 +1541,8 @@
 						"autumn": "Autunno",
 						"cosmic": "Cosmico",
 						"pumpkin": "Zucca",
-						"midnight": "Mezzanotte"
+						"midnight": "Mezzanotte",
+						"matrix": "Matrix"
 					}
 				},
 				"gradientToggle": {
@@ -1513,7 +1578,8 @@
 					"options": {
 						"grayscale": "Scala di grigi",
 						"averageColor": "Colore medio",
-						"colorful": "Colorato"
+						"colorful": "Colorato",
+						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailRoundness": {
@@ -1565,7 +1631,8 @@
 						"EXPLORE": "Esplora",
 						"LIBRARIES": "Librerie",
 						"BOOK_CLUBS": "Club del libro",
-						"SMART_LISTS": "Liste smart"
+						"SMART_LISTS": "Liste smart",
+						"HOME": "Home"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1650,6 +1717,17 @@
 				"readingSessionGracePeriod": {
 					"label": "Periodo di tolleranza della sessione di lettura",
 					"description": "Se non viene rilevata alcuna attività entro questo intervallo di tempo, espresso in secondi, l'aggiornamento successivo avvierà una nuova sessione"
+				},
+				"homeArrangement": {
+					"title": "Pagina iniziale",
+					"description": "Modifica le sezioni della tua pagina iniziale",
+					"label": "Sezioni Home",
+					"hint": "Trascina e riorganizza le sezioni o nascondile completamente",
+					"reorder": "Riordina {{section}}",
+					"reset": "Resetta",
+					"saveFailed": "Impossibile salvare le modifiche",
+					"unsupported": "Configurazione non valida",
+					"unsupportedDescription": "Ripristina le impostazioni predefinite e riprova"
 				}
 			}
 		},
@@ -1720,7 +1798,9 @@
 							"label": "Direzione di lettura",
 							"description": "La direzione in cui il lettore procederà attraverso le pagine"
 						}
-					}
+					},
+					"label": "Universale",
+					"description": "Impostazioni che si applicano a tutti i tipi di libri"
 				},
 				"imageBasedBooks": {
 					"label": "Libri basati su immagini",
@@ -1762,6 +1842,10 @@
 							"button": "Cancella preferenze"
 						}
 					}
+				},
+				"formats": {
+					"label": "Formati",
+					"description": "Configura le impostazioni predefinite del lettore in modo indipendente"
 				}
 			}
 		},
@@ -1793,7 +1877,9 @@
 								"placeholder": "Il mio server"
 							},
 							"uri": {
-								"description": "L'URL del server Stump"
+								"description": "L'URL del server Stump",
+								"label": "URI",
+								"placeholder": "https://stump.esempio.it"
 							}
 						}
 					},
@@ -1824,7 +1910,9 @@
 						"confirmation": {
 							"title": "Passa a questo server",
 							"description": "Verrai disconnesso dal server attuale",
-							"confirm": "Passa al server"
+							"confirm": "Passa al server",
+							"server": "Server",
+							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
@@ -1860,12 +1948,16 @@
 					"description": "Gestisci le funzionalità opzionali esclusive dell'applicazione desktop",
 					"bundledServer": {
 						"label": "Server integrato",
-						"description": "Esegui il server integrato in background quando l'applicazione desktop è in funzione (richiede il riavvio)"
+						"description": "Esegui il server integrato in background quando l'applicazione desktop è in funzione"
 					},
 					"discordPresence": {
 						"label": "Stato attività di Discord",
 						"description": "Mostra la tua attività su Stump all'interno di Discord utilizzando la Rich Presence di Discord",
 						"reconnect": "Riconnetti a Discord"
+					},
+					"restartRequired": {
+						"title": "Riavvio richiesto",
+						"description": "Sono state apportate modifiche che richiedono un riavvio dell'app per avere effetto"
 					}
 				}
 			}
@@ -1881,27 +1973,28 @@
 				"serverInfo": {
 					"title": "Informazioni sul server",
 					"description": "Dettagli di base sulla tua istanza del server Stump",
-					"build": {
-						"description": "Dettagli relativi alla versione e alla build",
-						"version": {
-							"semver": "Versione",
-							"commitHash": "Commit esatto",
-							"date": "Data della build"
-						}
-					},
+					"build": "Build",
 					"nonStableChannel": {
 						"title": "Stai eseguendo una build non stabile di Stump",
 						"description": [
 							"Sembra che tu stia eseguendo la versione",
 							"del canale di build"
 						]
+					},
+					"version": "Versione",
+					"exactCommit": "Commit esatto",
+					"debugInfo": {
+						"label": "Informazioni di debug",
+						"description": "Copia e incolla quando segnali problemi su GitHub",
+						"copyDebugInfoFailed": "Impossibile copiare le informazioni di debug"
 					}
 				},
 				"helpfulLinks": {
 					"title": "Link utili",
 					"description": "Collegamenti a risorse che possono essere utili per gestire l'istanza del tuo server Stump",
 					"links": {
-						"documentation": "Documentazione"
+						"documentation": "Documentazione",
+						"changelog": "Changelog"
 					}
 				},
 				"serverPublicUrl": {
@@ -1909,7 +2002,7 @@
 					"description": "L'URL da cui il server è accessibile dall'esterno della rete, se applicabile. Questo abiliterà i link di invito e altre funzionalità"
 				},
 				"customEmojis": {
-					"title": "Emoji personalizzate",
+					"title": "Emojis",
 					"description": "Carica e gestisci le emoji personalizzate per il tuo server",
 					"dropzone": "Trascina un'immagine o fai clic per selezionare",
 					"input": {
@@ -1928,6 +2021,19 @@
 					"renameError": "Impossibile rinominare l'emoji",
 					"deleteSuccess": "Emoji eliminata",
 					"deleteError": "Impossibile eliminare l'emoji"
+				},
+				"changelog": {
+					"label": "Changelog",
+					"description": "Guarda cosa è cambiato nelle ultime versioni di Stump"
+				},
+				"serverConfig": {
+					"label": "Configurazione server",
+					"description": "Un sottoinsieme di opzioni di configurazione per la gestione disponibili qui",
+					"publicUrl": {
+						"label": "URL Pubblica",
+						"description": "L'URL a cui il tuo server è accessibile dall'esterno della tua rete",
+						"updateFailed": "Impossibile aggiornare l'URL"
+					}
 				}
 			}
 		},
@@ -3462,6 +3568,34 @@
 		"widgets": {
 			"readingNow": {
 				"nothingInProgress": "Nulla in corso"
+			}
+		}
+	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "Classificazione per Età",
+			"anyAge": {
+				"label": "Qualsiasi età",
+				"description": "Nessuna filtro per età sarà applicato"
+			},
+			"custom": {
+				"label": "Età N e inferiore",
+				"description": {
+					"media": "Solo media con una classificazione per età N o inferiore verranno mostrati, dove N è il numero che hai inserito sotto",
+					"series": "Solo serie con una classificazione per età N o inferiore verranno mostrati, dove N è il numero che hai inserito sotto"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "Estensione",
+			"any": "Qualsiasi"
+		},
+		"readStatusSelect": {
+			"label": "Stato Lettura",
+			"options": {
+				"completed": "Completato",
+				"reading": "Leggendo",
+				"unread": "Non Letto"
 			}
 		}
 	}

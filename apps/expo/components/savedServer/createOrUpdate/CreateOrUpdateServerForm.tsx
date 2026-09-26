@@ -110,10 +110,13 @@ export function CreateOrUpdateServerForm() {
 								variant={didConnect ? 'success' : 'outline'}
 								onPress={checkConnection}
 								disabled={!url || isCheckingConnection}
+								key={didConnect ? 'connectedTestButton' : 'testConnectionTestButton'}
+								// ^ without this the text color gets fucked up, i assume
+								// sm about the text class provider
 							>
 								{isCheckingConnection && (
 									<View className="h-6 w-6 items-center justify-center">
-										<Loader />
+										<Loader android={{ size: 20, strokeWidth: 2 }} />
 									</View>
 								)}
 								{!isCheckingConnection && didConnect && (

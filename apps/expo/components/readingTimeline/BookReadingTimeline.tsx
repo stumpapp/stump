@@ -2,14 +2,25 @@ import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat, parse } from 'date-fns'
+import { useRouter } from 'expo-router'
 import groupBy from 'lodash/groupBy'
-import { ChevronRight, Layers, Notebook, Percent, StickyNote } from 'lucide-react-native'
-import { ScrollView, View } from 'react-native'
+import {
+	Bookmark,
+	ChevronRight,
+	Highlighter,
+	Layers,
+	Notebook,
+	PencilLine,
+	Percent,
+	StickyNote,
+} from 'lucide-react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { match } from 'ts-pattern'
 
 import { STAT_COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 import { ScreenBackgroundGradient } from '../BackgroundGradient'
 import { MiniStatCard } from '../stats'
@@ -51,6 +62,11 @@ type Props = {
 //   either or? maybe ollie little pose for complete? i mean, no reason not to have poses for either ig
 export function BookReadingTimeline({ fragmentRef }: Props) {
 	const data = useFragment(fragment, fragmentRef)
+	const router = useRouter()
+
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
 
 	const renderEvent = (
 		event: (typeof fakeData.readthroughs)[number]['sessions'][number]['events'][number],
@@ -109,6 +125,21 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 
 		const endChapterName = session.endLocator?.chapterTitle
 
+		const bookmarksCount = events.filter((e) => e.__typename === 'Bookmark').length
+		const highlightsCount = events.filter(
+			(e) => e.__typename === 'MediaAnnotation' && e.annotationText == null,
+		).length
+		const annotationsCount = events.filter(
+			(e) => e.__typename === 'MediaAnnotation' && e.annotationText != null,
+		).length
+
+		const truncatedAnnotations = events
+			.filter((e) => e.__typename === 'MediaAnnotation' && e.annotationText != null)
+			.slice(0, 3)
+			.map((e) => e.annotationText)
+			.join('\n')
+		// ^ obv not quite right but fine for now, TODO: make the fake data notes actually something useful for mocks
+
 		return (
 			<View key={session.id} className="gap-4 py-4">
 				<View className="px-3 flex-row items-center justify-between">
@@ -121,13 +152,24 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 
 				{/*<View className="gap-6">{events.map(renderEvent)}</View>*/}
 
-				<Card>
-					{events.map((e) => (
+				<Pressable
+					onPress={() =>
+						router.push(`/stump/${serverId}/books/${data.id}/reading-timeline/${session.id}`)
+					}
+				>
+					<Card>
+						{/*{events.map((e) => (
 						<Card.Row key={e.id}>{renderEvent(e)}</Card.Row>
-					))}
+					))}*/}
 
-					<Card.Footer renderDivider={false}>
-						{/*<MiniStatCard value={chaptersRead} colors={STAT_COLORS.size} icon={Layers} />
+						<Card.Row>
+							<MiniStatCard value={bookmarksCount} colors={STAT_COLORS.size} icon={Bookmark} />
+							<MiniStatCard value={highlightsCount} colors={STAT_COLORS.size} icon={Highlighter} />
+							<MiniStatCard value={annotationsCount} colors={STAT_COLORS.size} icon={PencilLine} />
+						</Card.Row>
+
+						<Card.Footer renderDivider={false}>
+							{/*<MiniStatCard value={chaptersRead} colors={STAT_COLORS.size} icon={Layers} />
 						<MiniStatCard value={pagesRead} colors={STAT_COLORS.size} icon={StickyNote} />
 						<MiniStatCard
 							value={`${startPercentage}% - ${endPercentage}%`}
@@ -135,7 +177,7 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 							icon={Percent}
 						/>*/}
 
-						{/*<View className="gap-1.5 w-full">
+							{/*<View className="gap-1.5 w-full">
 							<View className="flex-row justify-between">
 								<Text className="text-foreground-muted">
 									{session.startPage} - {session.endPage}
@@ -156,11 +198,20 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 							/>
 						</View>*/}
 
-						<View className="px-2 w-full">
-							<SessionProgressBar session={session} events={events} />
-						</View>
-					</Card.Footer>
-				</Card>
+							<View className="px-2 w-full">
+								<SessionProgressBar session={session} events={events} />
+							</View>
+						</Card.Footer>
+
+						<Card.Row
+							renderDivider={false}
+							value={
+								truncatedAnnotations ||
+								'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua est laborum'
+							}
+						/>
+					</Card>
+				</Pressable>
 			</View>
 		)
 	}

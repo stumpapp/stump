@@ -1,29 +1,34 @@
 import { Stack } from 'expo-router'
-import { Platform } from 'react-native'
 
 import BackLink from '~/components/BackLink'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
-import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
-	const disableDismissGesture = usePreferencesStore((store) => store.disableDismissGesture)
-
 	return (
 		<Stack
 			screenOptions={{
 				headerShown: false,
-				presentation:
-					disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
 			}}
 		>
 			<Stack.Screen
 				name="index"
 				options={{
-					headerTitle: '',
-					headerShown: Platform.OS === 'ios',
+					headerTitle: 'Reading Timeline',
+					headerShown: true,
 					headerTransparent: true,
 					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					headerLeft: () => <BackLink />,
+				}}
+			/>
+
+			<Stack.Screen
+				name="[sessionId]"
+				options={{
+					headerTitle: '',
+					headerShown: true,
+					headerTransparent: true,
+					headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
+					// headerLeft: () => <BackLink />,
 				}}
 			/>
 		</Stack>

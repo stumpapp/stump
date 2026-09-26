@@ -13,9 +13,10 @@ import { cn } from '~/lib/utils'
 
 import { ScreenBackgroundGradient } from '../BackgroundGradient'
 import { MiniStatCard } from '../stats'
-import { Card, Icon, Text } from '../ui'
+import { Card, Icon, Progress, Text } from '../ui'
 import { AnnotationEvent, BookmarkEvent } from './events'
 import { fakeData } from './fakeData'
+import { SessionProgressBar } from './SessionProgressBar'
 
 const fragment = graphql(`
 	fragment BookReadingTimeline on Media {
@@ -103,7 +104,10 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 
 		const pagesRead = session.endPage - session.startPage
 		const chaptersRead = 3
+		const startPercentage = parseGraphQLPercentageDecimal(session.startPercentage) ?? '??'
 		const endPercentage = parseGraphQLPercentageDecimal(session.endPercentage) ?? '??'
+
+		const endChapterName = session.endLocator?.chapterTitle
 
 		return (
 			<View key={session.id} className="gap-4 py-4">
@@ -123,9 +127,38 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 					))}
 
 					<Card.Footer renderDivider={false}>
-						<MiniStatCard value={chaptersRead} colors={STAT_COLORS.size} icon={Layers} />
+						{/*<MiniStatCard value={chaptersRead} colors={STAT_COLORS.size} icon={Layers} />
 						<MiniStatCard value={pagesRead} colors={STAT_COLORS.size} icon={StickyNote} />
-						<MiniStatCard value={endPercentage} colors={STAT_COLORS.size} icon={Percent} />
+						<MiniStatCard
+							value={`${startPercentage}% - ${endPercentage}%`}
+							colors={STAT_COLORS.size}
+							icon={Percent}
+						/>*/}
+
+						{/*<View className="gap-1.5 w-full">
+							<View className="flex-row justify-between">
+								<Text className="text-foreground-muted">
+									{session.startPage} - {session.endPage}
+								</Text>
+
+								<Text className="text-foreground-muted">{endChapterName}</Text>
+							</View>
+							<Progress
+								value={parseGraphQLPercentageDecimal(session.endPercentage) ?? 0}
+								className="h-1"
+								indicatorClassName="bg-white/80"
+								trackClassName="bg-black/30"
+								// blurProps={{
+								// 	intensity: 4,
+								// 	blurTarget: blurTargetRef,
+								// 	blurMethod: 'dimezisBlurView',
+								//       }}
+							/>
+						</View>*/}
+
+						<View className="px-2 w-full">
+							<SessionProgressBar session={session} events={events} />
+						</View>
 					</Card.Footer>
 				</Card>
 			</View>

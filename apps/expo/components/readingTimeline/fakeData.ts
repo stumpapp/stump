@@ -1,3 +1,4 @@
+import { ReadiumLocator } from '@stump/graphql'
 import { format, formatISO, sub } from 'date-fns'
 
 const now = new Date()
@@ -47,7 +48,7 @@ export const fakeData = {
 							type: 'application/xhtml+xml',
 							locations: null,
 							text: null,
-						},
+						} as ReadiumLocator,
 						endLocator: {
 							__typename: 'ReadiumLocator' as const,
 							chapterTitle: 'A Conspiracy Unmasked',
@@ -78,7 +79,7 @@ export const fakeData = {
 								type: 'application/xhtml+xml',
 								locations: null,
 								text: null,
-							},
+							} as ReadiumLocator,
 							createdAt: formatISO(sub(rt2s1Start, { minutes: -88 })),
 						},
 						{

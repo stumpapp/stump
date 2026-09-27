@@ -70,7 +70,7 @@ export function SessionProgressBar({ session, events }: Props) {
 
 	return (
 		<View className={cn('gap-1.5')}>
-			{trackWidth > 0 && (
+			{/*{trackWidth > 0 && (
 				<View style={{ position: 'relative', height: 16 }}>
 					<Text
 						size="xs"
@@ -91,7 +91,7 @@ export function SessionProgressBar({ session, events }: Props) {
 						{`p. ${session.endPage}`}
 					</Text>
 				</View>
-			)}
+			)}*/}
 
 			<View
 				className="h-2.5 bg-black/30 w-full overflow-hidden rounded-full"
@@ -104,7 +104,7 @@ export function SessionProgressBar({ session, events }: Props) {
 				{/*TODO: chapter dots?*/}
 			</View>
 
-			{trackWidth > 0 && (
+			{/*{trackWidth > 0 && (
 				<View style={{ position: 'relative', height: 16 }}>
 					<Text
 						size="xs"
@@ -125,7 +125,7 @@ export function SessionProgressBar({ session, events }: Props) {
 						{`${endPercentage.toFixed(1)}%`}
 					</Text>
 				</View>
-			)}
+			)}*/}
 		</View>
 	)
 }

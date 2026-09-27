@@ -87,7 +87,8 @@ export const fakeData = {
 							id: 'annotation-005',
 							mediaId: 'mediaId',
 							userId: 'oromeiId',
-							annotationText: 'really thoughtful and honest note here from me',
+							annotationText:
+								'I wish I could remember what happened here, but I have not read LOTR since late high school. I do recall enjoying it, albeit some bits were a bit of a slog. These days, I prefer lower-stakes fantasy and thoughtful novels.',
 							locator: {
 								__typename: 'ReadiumLocator' as const,
 								chapterTitle: 'A Long-Expected Party',
@@ -188,7 +189,8 @@ export const fakeData = {
 							id: 'annotation-004',
 							mediaId: 'mediaId',
 							userId: 'oromeiId',
-							annotationText: 'really thoughtful and honest note here from me',
+							annotationText:
+								'I wish I could remember what happened here, but I have not read LOTR since late high school. I do recall enjoying it, albeit some bits were a bit of a slog. These days, I prefer lower-stakes fantasy and thoughtful novels.',
 							locator: {
 								__typename: 'ReadiumLocator' as const,
 								chapterTitle: 'The Council of Elrond',
@@ -285,7 +287,8 @@ export const fakeData = {
 							id: 'annotation-002',
 							mediaId: 'mediaId',
 							userId: 'oromeiId',
-							annotationText: 'really thoughtful and honest note here from me',
+							annotationText:
+								'I wish I could remember what happened here, but I have not read LOTR since late high school. I do recall enjoying it, albeit some bits were a bit of a slog. These days, I prefer lower-stakes fantasy and thoughtful novels.',
 							locator: {
 								__typename: 'ReadiumLocator' as const,
 								chapterTitle: 'The Shadow of the Past',

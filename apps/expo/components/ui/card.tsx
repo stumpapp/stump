@@ -107,6 +107,7 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.BaseRowComponent = BaseRowComponent
 Card.Footer = FooterRow
 Card.InputRow = InputRow
 Card.LongRow = LongRow

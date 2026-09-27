@@ -3,6 +3,9 @@ import { Stack } from 'expo-router'
 import BackLink from '~/components/BackLink'
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 
+// TODO: prob query for thumb color here and use provider? so each screen more immediately
+// has the value needed for bg? we'll see if issue
+
 export default function Screen() {
 	return (
 		<Stack

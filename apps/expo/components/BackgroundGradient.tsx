@@ -192,6 +192,7 @@ export function ScreenBackgroundGradient({ item }: ScreenBackgroundGradientProps
 	// }, [androidHeaderColor, naviation, tintListBackground])
 
 	const averageColor = getTintColor(item)
+	console.log('averageColor', averageColor)
 
 	// not quite right just looking at apple journal and throwing something
 	// vaguely similar-ish

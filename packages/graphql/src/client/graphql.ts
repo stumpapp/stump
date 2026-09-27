@@ -5652,7 +5652,7 @@ export type AcceptLocalProgressMutationVariables = Exact<{
 
 export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
 
-export type BookReadingTimelineFragment = { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null } | null } } & { ' $fragmentName'?: 'BookReadingTimelineFragment' };
+export type BookReadingTimelineFragment = { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null } | null } } & { ' $fragmentName'?: 'BookReadingTimelineFragment' };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -7541,6 +7541,7 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     fragment BookReadingTimeline on Media {
   id
   thumbnail {
+    url
     metadata {
       averageColor
     }
@@ -8739,6 +8740,7 @@ export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
     fragment BookReadingTimeline on Media {
   id
   thumbnail {
+    url
     metadata {
       averageColor
     }

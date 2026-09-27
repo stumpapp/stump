@@ -1,3 +1,4 @@
+use async_graphql::{SimpleObject, Union};
 use chrono::{DateTime, FixedOffset};
 use models::shared::enums::ReadingStatus;
 
@@ -15,6 +16,7 @@ use crate::object::{
 //
 // this to say very much a wip draft all of this
 
+#[derive(Clone, Union)]
 pub enum SessionEvent {
 	Bookmark(Bookmark),
 	Annotation(MediaAnnotation),
@@ -26,12 +28,14 @@ pub enum SessionEvent {
 	// feels like an annoying amount of work for potentially not much convenience
 }
 
+#[derive(Clone, SimpleObject)]
 pub struct SessionWithEvents {
 	pub session: ReadingSession,
 	pub events: Vec<SessionEvent>,
 }
 
 /// the timeline of events for a specific readthrough of a book
+#[derive(Clone, SimpleObject)]
 pub struct ReadthroughTimeline {
 	pub readthrough_number: i32,
 	pub started_at: DateTime<FixedOffset>,
@@ -41,6 +45,7 @@ pub struct ReadthroughTimeline {
 	pub sessions: Vec<SessionWithEvents>,
 }
 
+#[derive(Clone, SimpleObject)]
 pub struct BookReadingTimeline {
 	pub readthroughs: Vec<ReadthroughTimeline>,
 	pub total_elapsed_seconds: i64,

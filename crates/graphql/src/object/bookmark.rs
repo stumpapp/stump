@@ -2,7 +2,7 @@ use async_graphql::SimpleObject;
 
 use models::entity::bookmark;
 
-#[derive(Debug, SimpleObject)]
+#[derive(Clone, Debug, SimpleObject)]
 pub struct Bookmark {
 	#[graphql(flatten)]
 	pub model: bookmark::Model,

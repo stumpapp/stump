@@ -20,6 +20,7 @@ pub struct Model {
 	pub media_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
+	// TODO: for consistency across all other models, should swap to DateTimeWithTimeZone
 	pub created_at: DateTimeUtc,
 }
 

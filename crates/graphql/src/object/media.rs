@@ -19,9 +19,10 @@ use crate::{
 			ReadingSessionLoader, ReadthroughRecordLoaderKey,
 			ResumeReadingCursorLoaderKey,
 		},
+		reading_timeline::{BookReadingTimelineLoaderKey, ReadingTimelineLoader},
 		series::SeriesLoader,
 	},
-	object::epub::Epub,
+	object::{epub::Epub, reading_timeline::BookReadingTimeline},
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
 	utils::db_statement,
 };
@@ -259,6 +260,23 @@ impl Media {
 			.unwrap_or_default();
 
 		Ok(history)
+	}
+
+	/// The reading timeline for the book for the current user. Will be `None` if the user has not
+	/// read the book
+	async fn reading_timeline(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<BookReadingTimeline>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<ReadingTimelineLoader>>()?;
+
+		Ok(loader
+			.load_one(BookReadingTimelineLoaderKey {
+				user_id: user.id.clone(),
+				media_id: self.model.id.clone(),
+			})
+			.await?)
 	}
 
 	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i64>> {

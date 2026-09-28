@@ -1,10 +1,11 @@
 import { useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useLocalSearchParams } from 'expo-router'
-import { ScrollView } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ScreenBackgroundGradient } from '~/components/BackgroundGradient'
+import { ReadingSessionDetailHeader } from '~/components/readingTimeline/sessionDetail'
 import { Text } from '~/components/ui'
 
 // TODO: prolly compose in fragments? awk bc book timeline uses
@@ -49,6 +50,7 @@ const query = graphql(`
 					}
 				}
 			}
+			...ReadingSessionDetailHeader
 		}
 	}
 `)
@@ -68,13 +70,15 @@ export default function Screen() {
 				// refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<Text>TODO: session overview header</Text>
-				<Text>standard kinda activity timeline feed view for events</Text>
-				<Text>associated journal entry for session (if any)</Text>
+				<View className="px-4 gap-6">
+					<ReadingSessionDetailHeader fragmentRef={session} />
+					<Text>standard kinda activity timeline feed view for events</Text>
+					<Text>associated journal entry for session (if any)</Text>
 
-				<Text>
-					TODO: future where you met goals? and which were met? totally very hand wavy here
-				</Text>
+					<Text>
+						TODO: future where you met goals? and which were met? totally very hand wavy here
+					</Text>
+				</View>
 			</ScrollView>
 		</SafeAreaView>
 	)

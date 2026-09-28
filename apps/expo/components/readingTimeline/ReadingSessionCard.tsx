@@ -91,6 +91,8 @@ type Props = {
 	}
 }
 
+// TODO: rename to ReadingSessionWithEventsCard or sm
+
 // a few thoughts:
 // - for a book's own reading timeline, perhaps we do not need to show the thumbnail nor title etc at all
 //   however with that removed there is not much more to show

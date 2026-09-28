@@ -1,5 +1,5 @@
 use async_graphql::{SimpleObject, Union};
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, Utc};
 use models::shared::enums::ReadingStatus;
 
 use crate::object::{
@@ -26,6 +26,15 @@ pub enum SessionEvent {
 	// e.g. lke "readthrough started" but we'd have to compute that
 	// from _first_/_last_ sessions relative to readthrough and that
 	// feels like an annoying amount of work for potentially not much convenience
+}
+
+impl SessionEvent {
+	pub fn created_at(&self) -> DateTime<Utc> {
+		match self {
+			SessionEvent::Bookmark(b) => b.model.created_at,
+			SessionEvent::Annotation(a) => a.model.created_at,
+		}
+	}
 }
 
 #[derive(Clone, SimpleObject)]

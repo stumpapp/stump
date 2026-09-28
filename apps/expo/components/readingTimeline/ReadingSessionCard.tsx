@@ -3,19 +3,15 @@ import { FragmentType, graphql, ReadingSessionCardFragment, useFragment } from '
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { useRouter } from 'expo-router'
-import { Bookmark as BookmarkIcon, Highlighter, PencilLine } from 'lucide-react-native'
-import { useState } from 'react'
-import { Easing, Pressable, View } from 'react-native'
-import { easeGradient } from 'react-native-easing-gradient'
+import { Bookmark as BookmarkIcon, Highlighter, LucideIcon, PencilLine } from 'lucide-react-native'
+import { Pressable, View } from 'react-native'
 
-import { STAT_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage, ThumbnailPlaceholderData } from '../image'
-import { MiniStatCard } from '../stats'
-import { Card, Progress, Text } from '../ui'
+import { Card, Icon, Progress, Text } from '../ui'
 import { SessionProgressBar } from './SessionProgressBar'
 
 const fragment = graphql(`
@@ -162,55 +158,83 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 			>
 				<Card>
 					<Card.Row>
-						<View className="gap-4 flex-row">
-							<ThumbnailImage
-								source={{
-									uri: thumbnailUrl,
-								}}
-								size={{ height: 80 / thumbnailRatio, width: 80 }}
-								placeholderData={thumbnailData}
-								borderAndShadowStyle={{ shadowRadius: 5 }}
-							/>
-
-							<View className="gap-3 flex-1">
-								<Text className="text-lg font-semibold shrink" numberOfLines={2}>
-									{bookName}
-								</Text>
-
-								<View className="flex-row">
-									<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
-										<Text size="sm">{`${t('common.page')} ${endPage}`}</Text>
-										<Text
-											size="xs"
-											className="pb-0.5 text-foreground-muted"
-										>{` / ${pageCount}`}</Text>
-									</View>
-								</View>
-
-								<View className="flex-1" />
-
-								{/*TODO: normal progress bar? or keep window? kinda looks more awk without
-								the annotations to explain the window. ill leave it for a second opinion for now*/}
-								{/*<View className="w-full">
-									<SessionProgressBar session={session} events={events} />
-								</View>*/}
-
-								<Progress
-									className="h-3"
-									value={parseGraphQLPercentageDecimal(session.endPercentage) ?? 0}
-									trackClassName="bg-black/10"
-									indicatorClassName="bg-white/70"
+						<View className="gap-2 flex-1">
+							<View className="gap-4 flex-row">
+								<ThumbnailImage
+									source={{
+										uri: thumbnailUrl,
+									}}
+									size={{ height: 80 / thumbnailRatio, width: 80 }}
+									placeholderData={thumbnailData}
+									borderAndShadowStyle={{ shadowRadius: 5 }}
 								/>
+
+								<View className="gap-3 flex-1">
+									<Text className="text-lg font-semibold shrink" numberOfLines={2}>
+										{bookName}
+									</Text>
+
+									<View className="gap-1.5 flex-row">
+										<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
+											<Text size="sm">{`${t('common.page')} ${endPage}`}</Text>
+											<Text
+												size="xs"
+												className="pb-0.5 text-foreground-muted"
+											>{` / ${pageCount}`}</Text>
+										</View>
+
+										{/* <View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
+											<Text size="sm">{`p. ${session.startPage}-${session.endPage}`}</Text>
+										</View> */}
+
+										{/* <View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
+											<Text size="sm">{formatNarrowDuration(session.elapsedSeconds)}</Text>
+										</View> */}
+									</View>
+
+									<View className="flex-1" />
+
+									{/*TODO: normal progress bar? or keep window? kinda looks more awk without
+									the annotations to explain the window. ill leave it for a second opinion for now*/}
+									{/*<View className="w-full">
+										<SessionProgressBar session={session} events={events} />
+									</View>*/}
+
+									<Progress
+										className="h-3"
+										value={parseGraphQLPercentageDecimal(session.endPercentage) ?? 0}
+										trackClassName="bg-black/10"
+										indicatorClassName="bg-white/70"
+									/>
+								</View>
 							</View>
+
+							<Text numberOfLines={4} className="text-lg text-foreground-muted">
+								{truncatedAnnotations}
+							</Text>
 						</View>
 					</Card.Row>
 
-					{truncatedAnnotations && <AnnotationsRow preview={truncatedAnnotations} />}
-
 					<Card.Row>
-						<MiniStatCard value={bookmarksCount} colors={STAT_COLORS.size} icon={BookmarkIcon} />
-						<MiniStatCard value={highlightsCount} colors={STAT_COLORS.size} icon={Highlighter} />
-						<MiniStatCard value={annotationsCount} colors={STAT_COLORS.size} icon={PencilLine} />
+						<View className="gap-2.5 -my-2.5 flex-row">
+							{/* <Text className="font-medium text-white/70">
+								{intlFormat(startDate, {
+									year: 'numeric',
+									month: 'short',
+									day: 'numeric',
+									hour: 'numeric',
+									minute: 'numeric',
+									weekday: 'short',
+								})}
+							</Text> */}
+
+							<View className="flex-1" />
+
+							<MarkingsStat icon={BookmarkIcon} value={bookmarksCount} />
+							<MarkingsStat icon={Highlighter} value={highlightsCount} />
+							<MarkingsStat icon={PencilLine} value={annotationsCount} />
+						</View>
+
 						{/*<View className="flex-1" />*/}
 						{/*^ pushes things left evenly more close to mock drawing, could also just not use stat cards*/}
 					</Card.Row>
@@ -220,53 +244,16 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 	)
 }
 
-// this is basically a LongRow but without the tappable expanding, we'll see if it lives long
-// here or if longrow should be more dynamic. for one use-case, i think it's fine here, only
-// care about extending if actual multiple uses benefit
-function AnnotationsRow({ preview }: { preview: string }) {
-	// const colors = useColors()
-	// const { isDarkColorScheme } = useColorScheme()
-	// const accentColor = usePalette('accent')
+type MarkingsStatProps = {
+	icon: LucideIcon
+	value: number
+}
 
-	const gradient = easeGradient({
-		colorStops: {
-			// 0.4: { color: isDarkColorScheme ? '#1A1A1A00' : '#F2F2F100' },
-			// 1: { color: isDarkColorScheme ? '#1A1A1A' : '#F2F2F1' },
-
-			0.4: { color: '#2e340900' },
-			1: { color: '#2e3409cc' },
-			// TODO: picked from specific book but need to put color somewhere to pull throughout
-		},
-		easing: Easing.bezier(0.45, 0, 0.55, 1),
-	})
-
-	const [isOverLineLimit, setIsOverLineLimit] = useState(false)
-
+function MarkingsStat({ icon, value }: MarkingsStatProps) {
 	return (
-		<Card.BaseRowComponent
-			// onPress={() => setExpanded(!expanded)}
-			className="gap-1 flex-wrap"
-		>
-			<View className="shrink items-end justify-center">
-				<Text
-					numberOfLines={4}
-					className="text-lg text-foreground-muted"
-					onTextLayout={(e) => setIsOverLineLimit(e.nativeEvent.lines.length >= 4)}
-				>
-					{preview}
-				</Text>
-
-				{/*FIXME: cannot fix the harshness box rn*/}
-				{/*{isOverLineLimit && (
-					<LinearGradient
-						colors={gradient.colors}
-						locations={gradient.locations}
-						useAngle
-						angle={172}
-						style={{ position: 'absolute', inset: 0 }}
-					/>
-				)}*/}
-			</View>
-		</Card.BaseRowComponent>
+		<View className="gap-0.5 flex-row items-center">
+			<Icon as={icon} size={12} strokeWidth={1.5} absoluteStrokeWidth className="text-white/70" />
+			<Text className="font-medium text-white/70">{value}</Text>
+		</View>
 	)
 }

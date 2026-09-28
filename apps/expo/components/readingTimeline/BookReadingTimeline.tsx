@@ -116,14 +116,6 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 						'pb-0': readthrough.readthroughNumber === 1,
 					})}
 				>
-					<View className="gap-4 w-full flex-row items-center">
-						<View className="bg-black/10 dark:bg-white/10 h-px flex-1" />
-						<Text className="text-foreground-muted font-medium shrink-0">
-							Start of Readthrough {readthrough.readthroughNumber}
-						</Text>
-						<View className="bg-black/5 h-px flex-1" />
-					</View>
-
 					{/*TODO: should probably localize? idk date range conventions*/}
 					<Text className="text-foreground-muted text-sm text-center">
 						{intlFormat(readthrough.startedAt, {
@@ -142,6 +134,14 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 								: 'Present'
 						}`}
 					</Text>
+
+					<View className="gap-4 w-full flex-row items-center">
+						<View className="bg-black/10 dark:bg-white/10 h-px flex-1" />
+						<Text className="text-foreground-muted font-medium shrink-0">
+							Start of Readthrough {readthrough.readthroughNumber}
+						</Text>
+						<View className="bg-black/10 dark:bg-white/10 h-px flex-1" />
+					</View>
 				</View>
 			</>
 		)

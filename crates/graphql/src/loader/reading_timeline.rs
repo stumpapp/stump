@@ -4,11 +4,7 @@ use std::{
 };
 
 use async_graphql::dataloader::Loader;
-use chrono::Utc;
-use models::{
-	domain::reading_progress::calculate_logical_date,
-	entity::{bookmark, media_annotation, reading_session, user_preferences},
-};
+use models::entity::{bookmark, media_annotation, reading_session};
 use sea_orm::{prelude::*, DatabaseConnection, QueryOrder};
 
 use crate::object::{
@@ -63,49 +59,77 @@ impl Loader<BookReadingTimelineLoaderKey> for ReadingTimelineLoader {
 			// ^ the ui will present most recent activity at the top
 			.all(self.conn.as_ref())
 			.await?;
+		let session_ids = sessions.iter().map(|s| s.id).collect::<Vec<_>>();
 
-		let bookmarks = bookmark::Entity::find()
-			.filter(
-				bookmark::Column::UserId
-					.is_in(user_ids.clone())
-					.and(bookmark::Column::MediaId.is_in(media_ids.clone())),
-			)
+		// TODO: need to figure out, part of how i approach this depends on whether
+		// there can actually truly exist annotations/bookmarks etc without a session.
+		// if they can, then the simplified filters ive done here are not sufficient since
+		// it would exlucde those events.
+
+		let mut session_id_to_bookmarks = bookmark::Entity::find()
+			.filter(bookmark::Column::SessionId.is_in(session_ids.clone()))
+			// ^ we don't need to filter by user/media since the sessions themselves
+			// have already been filtered as such
 			.order_by_desc(bookmark::Column::CreatedAt)
 			.all(self.conn.as_ref())
-			.await?;
+			.await?
+			.into_iter()
+			.fold(HashMap::new(), |mut acc, bookmark| {
+				if let Some(session_id) = bookmark.session_id {
+					acc.entry(session_id)
+						.or_insert_with(Vec::new)
+						.push(bookmark);
+				}
+				acc
+			});
 
-		let annotations = models::entity::media_annotation::Entity::find()
-			.filter(
-				models::entity::media_annotation::Column::UserId
-					.is_in(user_ids.clone())
-					.and(
-						models::entity::media_annotation::Column::MediaId
-							.is_in(media_ids.clone()),
-					),
-			)
+		let mut session_id_to_annotations = media_annotation::Entity::find()
+			.filter(media_annotation::Column::SessionId.is_in(session_ids.clone()))
 			.order_by_desc(models::entity::media_annotation::Column::CreatedAt)
 			.all(self.conn.as_ref())
-			.await?;
-
-		let users_preferences = user_preferences::Entity::find()
-			.filter(user_preferences::Column::UserId.is_in(user_ids.clone()))
-			.all(self.conn.as_ref())
-			.await?;
-
-		let user_to_day_reset_preference = users_preferences
+			.await?
 			.into_iter()
-			.map(|pref| {
-				(
-					pref.user_id.clone().unwrap_or_default(), // well that is annoying
-					pref.day_reset_hour_offset,
-				)
-			})
-			.collect::<HashMap<_, _>>();
+			.fold(HashMap::new(), |mut acc, annotation| {
+				if let Some(session_id) = annotation.session_id {
+					acc.entry(session_id)
+						.or_insert_with(Vec::new)
+						.push(annotation);
+				}
+				acc
+			});
 
 		let unique_set = sessions
 			.iter()
 			.map(|session| (session.user_id.clone(), session.media_id.clone()))
 			.collect::<HashSet<_>>();
+
+		let sessions_with_events = sessions
+			.into_iter()
+			.map(|session| SessionWithEvents {
+				session: ReadingSession::from(session.clone()),
+				events: {
+					let mut events = Vec::new();
+					if let Some(bookmarks) = session_id_to_bookmarks.remove(&session.id) {
+						events.extend(
+							bookmarks
+								.into_iter()
+								.map(|b| SessionEvent::Bookmark(Bookmark::from(b))),
+						);
+					}
+					if let Some(annotations) =
+						session_id_to_annotations.remove(&session.id)
+					{
+						events.extend(
+							annotations.into_iter().map(|a| {
+								SessionEvent::Annotation(MediaAnnotation::from(a))
+							}),
+						);
+					}
+					events.sort_by(|a, b| b.created_at().cmp(&a.created_at())); // desc
+					events
+				},
+			})
+			.collect::<Vec<_>>();
 
 		let mut result = HashMap::new();
 
@@ -117,34 +141,17 @@ impl Loader<BookReadingTimelineLoaderKey> for ReadingTimelineLoader {
 				// excluding it from the result set
 			};
 
-			let day_reset_hour_offset = user_to_day_reset_preference
-				.get(&pair.0)
+			let pair_sessions_with_events = sessions_with_events
+				.iter()
+				.filter(|swe| {
+					swe.session.model.user_id == pair.0
+						&& swe.session.model.media_id == pair.1
+				})
 				.cloned()
-				.unwrap_or(0);
-
-			let pair_sessions = sessions
-				.iter()
-				.filter(|s| s.user_id == pair.0 && s.media_id == pair.1)
 				.collect::<Vec<_>>();
 
-			let pair_bookmarks = bookmarks
-				.iter()
-				.filter(|b| b.user_id == pair.0 && b.media_id == pair.1)
-				.collect::<Vec<_>>();
-
-			let pair_annotations = annotations
-				.iter()
-				.filter(|a| a.user_id == pair.0 && a.media_id == pair.1)
-				.collect::<Vec<_>>();
-
-			let sessions_with_events = assign_events_to_sessions(
-				pair_sessions.into_iter().cloned().collect(),
-				pair_bookmarks.into_iter().cloned().collect(),
-				pair_annotations.into_iter().cloned().collect(),
-				day_reset_hour_offset,
-			);
-
-			let book_timeline = organize_sessions_into_timeline(sessions_with_events);
+			let book_timeline =
+				organize_sessions_into_timeline(pair_sessions_with_events);
 
 			result.insert(
 				BookReadingTimelineLoaderKey {
@@ -159,79 +166,76 @@ impl Loader<BookReadingTimelineLoaderKey> for ReadingTimelineLoader {
 	}
 }
 
-// this is all quite annoying honestly, makes me think shoving a fk to the session on the events would be a lot
-// easier...
-// thhis wouldn't help much with readthroughs ig, but associating event with sessions
-// would entirely fold into a join. would not be great for pre-this-change data which
-// is annoying, but maybe this can be a fallback or one-off migration? selfishly i want
-// my data but it isn't the end of the world
+// TODO: remove, but keeping because i think this serves as a good one-off migration to assign
+// session ids to existing bookmarks/annotations
+// fn assign_events_to_sessions(
+// 	sessions: Vec<reading_session::Model>,
+// 	bookmarks: Vec<bookmark::Model>,
+// 	annotations: Vec<media_annotation::Model>,
+// 	day_reset_hour_offset: i32,
+// ) -> Vec<SessionWithEvents> {
+// 	// each iter of events will require a lookup to push into the session, so
+// 	// i have a basic map to avoid exploding the complexity
+// 	let session_date_to_index = sessions
+// 		.iter()
+// 		.enumerate()
+// 		.map(|(i, session)| (session.session_date, i))
+// 		.collect::<HashMap<_, _>>();
+//
+// 	let mut session_with_events = sessions
+// 		.into_iter()
+// 		.map(|session| SessionWithEvents {
+// 			session: ReadingSession::from(session),
+// 			events: vec![],
+// 		})
+// 		.collect::<Vec<_>>();
+//
+// 	for bookmark in bookmarks {
+// 		let date = calculate_logical_date(
+// 			// TODO: make bookmark stamps DateTimeWithTimeZone and avoid this conversion
+// 			// should be a simple swap but will inflate the diff so leaving for now
+// 			bookmark.created_at.with_timezone(&Utc),
+// 			day_reset_hour_offset,
+// 		);
+// 		match session_date_to_index.get(&date) {
+// 			Some(&idx) => session_with_events[idx]
+// 				.events
+// 				.push(SessionEvent::Bookmark(Bookmark::from(bookmark))),
+// 			None => todo!("wtf do i do here?"),
+// 			// ^ this feels like a bit of a weird edge case, unless someone programmatically
+// 			// created a bookmark it should always be associated with a session. I may just
+// 			// skip it and log it, hoping if it happens someone reports it and i can take it
+// 			// from there. or i just add fks and rm this entire function basically
+// 		}
+// 	}
+//
+// 	for annotation in annotations {
+// 		let date = calculate_logical_date(
+// 			annotation.created_at.with_timezone(&Utc),
+// 			day_reset_hour_offset,
+// 		);
+// 		match session_date_to_index.get(&date) {
+// 			Some(&idx) => session_with_events[idx]
+// 				.events
+// 				.push(SessionEvent::Annotation(MediaAnnotation::from(annotation))),
+// 			None => todo!("wtf do i do here?"),
+// 			// TODO: same as above
+// 		}
+// 	}
+//
+// 	for session in &mut session_with_events {
+// 		session
+// 			.events
+// 			.sort_by(|a, b| b.created_at().cmp(&a.created_at())); // desc
+// 	}
+//
+// 	unimplemented!()
+// }
 
-/// Assigns the various events (bookmarks, annotations) to the appropriate session based on
-/// timestamps. Assumes all data provided is scoped to a specific user
-fn assign_events_to_sessions(
-	sessions: Vec<reading_session::Model>,
-	bookmarks: Vec<bookmark::Model>,
-	annotations: Vec<media_annotation::Model>,
-	day_reset_hour_offset: i32,
-) -> Vec<SessionWithEvents> {
-	// each iter of events will require a lookup to push into the session, so
-	// i have a basic map to avoid exploding the complexity
-	let session_date_to_index = sessions
-		.iter()
-		.enumerate()
-		.map(|(i, session)| (session.session_date, i))
-		.collect::<HashMap<_, _>>();
-
-	let mut session_with_events = sessions
-		.into_iter()
-		.map(|session| SessionWithEvents {
-			session: ReadingSession::from(session),
-			events: vec![],
-		})
-		.collect::<Vec<_>>();
-
-	for bookmark in bookmarks {
-		let date = calculate_logical_date(
-			// TODO: make bookmark stamps DateTimeWithTimeZone and avoid this conversion
-			// should be a simple swap but will inflate the diff so leaving for now
-			bookmark.created_at.with_timezone(&Utc),
-			day_reset_hour_offset,
-		);
-		match session_date_to_index.get(&date) {
-			Some(&idx) => session_with_events[idx]
-				.events
-				.push(SessionEvent::Bookmark(Bookmark::from(bookmark))),
-			None => todo!("wtf do i do here?"),
-			// ^ this feels like a bit of a weird edge case, unless someone programmatically
-			// created a bookmark it should always be associated with a session. I may just
-			// skip it and log it, hoping if it happens someone reports it and i can take it
-			// from there. or i just add fks and rm this entire function basically
-		}
-	}
-
-	for annotation in annotations {
-		let date = calculate_logical_date(
-			annotation.created_at.with_timezone(&Utc),
-			day_reset_hour_offset,
-		);
-		match session_date_to_index.get(&date) {
-			Some(&idx) => session_with_events[idx]
-				.events
-				.push(SessionEvent::Annotation(MediaAnnotation::from(annotation))),
-			None => todo!("wtf do i do here?"),
-			// TODO: same as above
-		}
-	}
-
-	for session in &mut session_with_events {
-		session
-			.events
-			.sort_by(|a, b| b.created_at().cmp(&a.created_at())); // desc
-	}
-
-	unimplemented!()
-}
-
+/// A helper to organize sessions into a timeline grouped by the readthrough they belong to.
+/// This is a little bit of a pain because readthroughs are somewhat ephemeral and not explicitly
+/// grouping anything, so we sort of do some in-memory agg since thinking about doing this at
+/// the db level gives me a headache
 fn organize_sessions_into_timeline(
 	sessions_with_events: Vec<SessionWithEvents>,
 ) -> BookReadingTimeline {
@@ -282,6 +286,8 @@ fn organize_sessions_into_timeline(
 				.map(|s| (s.session.model.status.clone(), s.session.model.updated_at))
 				.last()
 				.unwrap_or((readthrough.status.clone(), None));
+			// ^ the thought here that we only can assign a finished_at to a readthrough if there
+			// is a finalizing session (i.e., finished or abandoned)
 
 			let total_elapsed_seconds = readthrough
 				.sessions

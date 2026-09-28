@@ -2588,6 +2588,7 @@ type Query {
 	"Returns a list of all tags."
 	tags: [Tag!]!
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
+	readingSessionById(id: Int!): ReadingSession
 	me: User!
 	userCount: Int!
 	topReaders(take: Int): [User!]!
@@ -2711,6 +2712,7 @@ type ReadingSession {
 	updatedAt: DateTime
 	deviceIds: [String!]!
 	media: Media
+	events: [SessionEvent!]!
 }
 
 """

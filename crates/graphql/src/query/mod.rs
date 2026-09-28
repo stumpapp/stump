@@ -19,6 +19,7 @@ mod media_metadata_overview;
 mod metadata_provider;
 mod notifier;
 pub(crate) mod reading_list;
+mod reading_session;
 mod series;
 mod server_config;
 mod smart_list_view;
@@ -54,7 +55,7 @@ use smart_lists::SmartListsQuery;
 use tag::TagQuery;
 use user::UserQuery;
 
-use crate::query::job::JobQuery;
+use crate::query::{job::JobQuery, reading_session::ReadingSessionQuery};
 
 // Note: I had to split the Query/Mutation root types into chunks to avoid a compiler
 // overflow. It seems like a flat MergedObject creates a really large async block
@@ -78,6 +79,7 @@ struct ContentQueries(
 	EpubQuery,
 	TagQuery,
 	MediaMetadataOverviewQuery,
+	ReadingSessionQuery,
 );
 
 #[derive(async_graphql::MergedObject, Default)]

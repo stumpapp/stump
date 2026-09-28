@@ -3521,6 +3521,7 @@ export type Query = {
    * A paginated list of reading lists.
    */
   readingLists: PaginatedReadingListResponse;
+  readingSessionById?: Maybe<ReadingSession>;
   readingSessionConflictView: ReadingSessionConflictResolutionView;
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
@@ -3761,6 +3762,11 @@ export type QueryReadingListsArgs = {
 };
 
 
+export type QueryReadingSessionByIdArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type QueryReadingSessionConflictViewArgs = {
   branchedSessionId?: InputMaybe<Scalars['Int']['input']>;
   mediaId: Scalars['ID']['input'];
@@ -3872,6 +3878,7 @@ export type ReadingSession = {
   endLocator?: Maybe<ReadiumLocator>;
   endPage?: Maybe<Scalars['Int']['output']>;
   endPercentage?: Maybe<Scalars['Decimal']['output']>;
+  events: Array<SessionEvent>;
   id: Scalars['Int']['output'];
   koreaderProgress?: Maybe<Scalars['String']['output']>;
   media?: Maybe<Media>;
@@ -5156,6 +5163,13 @@ export type DeleteAnnotationMobileMutationVariables = Exact<{
 
 
 export type DeleteAnnotationMobileMutation = { __typename?: 'Mutation', deleteAnnotation: { __typename?: 'MediaAnnotation', id: string } };
+
+export type BookReadingTimelineSessionIdScreenQueryVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+}>;
+
+
+export type BookReadingTimelineSessionIdScreenQuery = { __typename?: 'Query', readingSessionById?: { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }>, media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } | null };
 
 export type BookReadingTimelineScreenQueryVariables = Exact<{
   bookId: Scalars['ID']['input'];
@@ -8881,6 +8895,49 @@ export const DeleteAnnotationMobileDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteAnnotationMobileMutation, DeleteAnnotationMobileMutationVariables>;
+export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentString(`
+    query BookReadingTimelineSessionIdScreen($sessionId: Int!) {
+  readingSessionById(id: $sessionId) {
+    id
+    createdAt
+    updatedAt
+    startPage
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+    endPercentage
+    elapsedSeconds
+    events {
+      __typename
+      ... on Bookmark {
+        id
+      }
+      ... on MediaAnnotation {
+        id
+        annotationText
+      }
+    }
+    media {
+      resolvedName
+      pages
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookReadingTimelineSessionIdScreenQuery, BookReadingTimelineSessionIdScreenQueryVariables>;
 export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
     query BookReadingTimelineScreen($bookId: ID!) {
   mediaById(id: $bookId) {

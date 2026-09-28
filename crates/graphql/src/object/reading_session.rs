@@ -1,12 +1,19 @@
 use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
-use models::entity::{reading_session, reading_session::DeviceIds};
+use models::entity::{
+	bookmark, media_annotation,
+	reading_session::{self, DeviceIds},
+};
+use sea_orm::{prelude::*, QueryOrder};
 
 use crate::{
-	data::AuthContext,
+	data::{AuthContext, CoreContext},
 	loader::media::{MediaByIdLoaderKey, MediaLoader},
-	object::media::Media,
+	object::{
+		bookmark::Bookmark, media::Media, media_annotation::MediaAnnotation,
+		reading_timeline::SessionEvent,
+	},
 };
 
 #[derive(Debug, Clone, SimpleObject)]
@@ -42,6 +49,41 @@ impl ReadingSession {
 			.await?;
 
 		Ok(media)
+	}
+
+	async fn events(&self, ctx: &Context<'_>) -> Result<Vec<SessionEvent>> {
+		// TODO(reading-timeline): access control
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let bookmarks = bookmark::Entity::find()
+			.filter(bookmark::Column::SessionId.eq(self.model.id))
+			.order_by_desc(bookmark::Column::CreatedAt)
+			.all(conn)
+			.await?;
+		let annotations = media_annotation::Entity::find()
+			.filter(media_annotation::Column::SessionId.eq(self.model.id))
+			.order_by_desc(media_annotation::Column::CreatedAt)
+			.all(conn)
+			.await?;
+
+		let events = {
+			let mut events = Vec::with_capacity(bookmarks.len() + annotations.len());
+			events.extend(
+				bookmarks
+					.into_iter()
+					.map(|b| SessionEvent::Bookmark(Bookmark::from(b))),
+			);
+			events.extend(
+				annotations
+					.into_iter()
+					.map(|a| SessionEvent::Annotation(MediaAnnotation::from(a))),
+			);
+			events.sort_by(|a, b| b.created_at().cmp(&a.created_at())); // desc
+			events
+		};
+
+		Ok(events)
 	}
 }
 

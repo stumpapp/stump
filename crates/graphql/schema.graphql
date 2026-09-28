@@ -332,6 +332,11 @@ enum BookClubSuggestionStatus {
 	REJECTED
 }
 
+type BookReadingTimeline {
+	readthroughs: [ReadthroughTimeline!]!
+	totalElapsedSeconds: Int!
+}
+
 type Bookmark {
 	id: String!
 	previewContent: String
@@ -340,6 +345,11 @@ type Bookmark {
 	mediaId: String!
 	userId: String!
 	createdAt: DateTime!
+	"""
+	The ID of the session which this bookmark was created in. Realistically, when using a Stump
+	reader this should always be set
+	"""
+	sessionId: Int
 }
 
 input BookmarkInput {
@@ -1361,6 +1371,11 @@ type Media {
 	resolvedName: String!
 	readProgress: ResumeReadingCursor
 	readHistory: [ReadthroughRecord!]!
+	"""
+	The reading timeline for the book for the current user. Will be `None` if the user has not
+	read the book
+	"""
+	readingTimeline: BookReadingTimeline
 	seriesPosition: Int
 	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -1385,6 +1400,11 @@ type MediaAnnotation {
 	userId: String!
 	createdAt: DateTime!
 	updatedAt: DateTime!
+	"""
+	The ID of the session which this annotation was created in. Realistically, when using a Stump
+	reader this should always be set
+	"""
+	sessionId: Int
 }
 
 "A media annotation represents a highlight and/or note"
@@ -1396,6 +1416,11 @@ type MediaAnnotationModel {
 	userId: String!
 	createdAt: DateTime!
 	updatedAt: DateTime!
+	"""
+	The ID of the session which this annotation was created in. Realistically, when using a Stump
+	reader this should always be set
+	"""
+	sessionId: Int
 }
 
 input MediaFilterInput {
@@ -2685,6 +2710,7 @@ type ReadingSession {
 	createdAt: DateTime!
 	updatedAt: DateTime
 	deviceIds: [String!]!
+	media: Media
 }
 
 """
@@ -2780,6 +2806,16 @@ type ReadthroughRecord {
 	completedAt: DateTime!
 	elapsedSeconds: Int!
 	dnf: Boolean!
+}
+
+"the timeline of events for a specific readthrough of a book"
+type ReadthroughTimeline {
+	readthroughNumber: Int!
+	startedAt: DateTime!
+	finishedAt: DateTime
+	status: ReadingStatus!
+	totalElapsedSeconds: Int!
+	sessions: [SessionWithEvents!]!
 }
 
 type RecentlyAdded {
@@ -3156,6 +3192,13 @@ type ServerConfigModel {
 	id: Int!
 	publicUrl: String
 	initialWalSetupComplete: Boolean!
+}
+
+union SessionEvent = Bookmark | MediaAnnotation
+
+type SessionWithEvents {
+	session: ReadingSession!
+	events: [SessionEvent!]!
 }
 
 """

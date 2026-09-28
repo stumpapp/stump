@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+
+use chrono::{DateTime, Duration, NaiveDate, Utc};
+use sea_orm::{FromQueryResult, Statement};
 use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
@@ -6,23 +10,60 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		let conn = manager.get_connection();
+		let db_backend = manager.get_database_backend();
+
+		// Sqlite does not support modification of foreign key constraints to existing tables
+		// >:( so we just rebuild the tables with the new fks
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"alter table "bookmarks" rename to "bookmarks_legacy""#.to_owned(),
+		))
+		.await?;
+
 		manager
-			.alter_table(
-				Table::alter()
+			.create_table(
+				Table::create()
 					.table(Bookmarks::Table)
-					.add_column(
-						ColumnDef::new(Bookmarks::SessionId)
-							.integer()
-							.null()
-							.default(Value::Int(None)),
+					.col(
+						ColumnDef::new(Bookmarks::Id)
+							.text()
+							.not_null()
+							.primary_key(),
 					)
-					.add_foreign_key(
-						TableForeignKey::new()
+					.col(ColumnDef::new(Bookmarks::PreviewContent).text().null())
+					.col(ColumnDef::new(Bookmarks::Locator).json().null())
+					.col(ColumnDef::new(Bookmarks::Page).integer().null())
+					.col(ColumnDef::new(Bookmarks::MediaId).text().not_null())
+					.col(ColumnDef::new(Bookmarks::UserId).text().not_null())
+					.col(
+						ColumnDef::new(Bookmarks::CreatedAt)
+							.timestamp_with_time_zone()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(ColumnDef::new(Bookmarks::SessionId).integer().null())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-bookmarks-media")
+							.from(Bookmarks::Table, Bookmarks::MediaId)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-bookmarks-user")
+							.from(Bookmarks::Table, Bookmarks::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
 							.name("fk-bookmarks-session")
-							.from_tbl(Bookmarks::Table)
-							.from_col(Bookmarks::SessionId)
-							.to_tbl(ReadingSessions::Table)
-							.to_col(ReadingSessions::Id)
+							.from(Bookmarks::Table, Bookmarks::SessionId)
+							.to(ReadingSessions::Table, ReadingSessions::Id)
 							.on_delete(ForeignKeyAction::SetNull),
 						// ^ no delete bookmarks when a session is deleted
 					)
@@ -30,23 +71,91 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"insert into "bookmarks"("id", "preview_content", "locator", "page", "media_id", "user_id", "created_at")
+			select
+			    "id",
+                "preview_content",
+                "locator",
+                "page",
+                "media_id",
+                "user_id",
+                "created_at"
+			from "bookmarks_legacy""#
+				.to_owned(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"drop table "bookmarks_legacy""#.to_owned(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"alter table "media_annotations" rename to "media_annotations_legacy""#
+				.to_owned(),
+		))
+		.await?;
+
 		manager
-			.alter_table(
-				Table::alter()
+			.create_table(
+				Table::create()
 					.table(MediaAnnotations::Table)
-					.add_column(
-						ColumnDef::new(MediaAnnotations::SessionId)
-							.integer()
-							.null()
-							.default(Value::Int(None)),
+					.col(
+						ColumnDef::new(MediaAnnotations::Id)
+							.string()
+							.not_null()
+							.primary_key(),
 					)
-					.add_foreign_key(
-						TableForeignKey::new()
+					.col(ColumnDef::new(MediaAnnotations::Locator).json().not_null())
+					.col(
+						ColumnDef::new(MediaAnnotations::AnnotationText)
+							.string()
+							.null(),
+					)
+					.col(
+						ColumnDef::new(MediaAnnotations::MediaId)
+							.string()
+							.not_null(),
+					)
+					.col(ColumnDef::new(MediaAnnotations::UserId).string().not_null())
+					.col(
+						ColumnDef::new(MediaAnnotations::CreatedAt)
+							.timestamp_with_time_zone()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(
+						ColumnDef::new(MediaAnnotations::UpdatedAt)
+							.timestamp_with_time_zone()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(ColumnDef::new(MediaAnnotations::SessionId).integer().null())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk_media_annotations_media_id")
+							.from(MediaAnnotations::Table, MediaAnnotations::MediaId)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk_media_annotations_user_id")
+							.from(MediaAnnotations::Table, MediaAnnotations::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
 							.name("fk-media_annotations-session")
-							.from_tbl(MediaAnnotations::Table)
-							.from_col(MediaAnnotations::SessionId)
-							.to_tbl(ReadingSessions::Table)
-							.to_col(ReadingSessions::Id)
+							.from(MediaAnnotations::Table, MediaAnnotations::SessionId)
+							.to(ReadingSessions::Table, ReadingSessions::Id)
 							.on_delete(ForeignKeyAction::SetNull),
 						// ^ no delete annotations when a session is deleted
 					)
@@ -54,26 +163,226 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		Ok(())
-	}
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"insert into "media_annotations"("id", "locator", "annotation_text", "media_id", "user_id", "created_at", "updated_at")
+			select
+			    "id",
+                "locator",
+                "annotation_text",
+                "media_id",
+                "user_id",
+                "created_at",
+                "updated_at"
+			from "media_annotations_legacy""#
+				.to_owned(),
+		))
+		.await?;
 
-	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"drop table "media_annotations_legacy""#.to_owned(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"drop index if exists "idx_media_annotations_user_media""#.to_owned(),
+		))
+		.await?;
+
 		manager
-			.alter_table(
-				Table::alter()
-					.table(Bookmarks::Table)
-					.drop_foreign_key("fk-bookmarks-session")
-					.drop_column(Bookmarks::SessionId)
+			.create_index(
+				Index::create()
+					.name("idx_media_annotations_user_media")
+					.table(MediaAnnotations::Table)
+					.col(MediaAnnotations::UserId)
+					.col(MediaAnnotations::MediaId)
 					.to_owned(),
 			)
 			.await?;
 
+		match backfill(conn).await {
+			Ok(_) => (),
+			Err(error) => {
+				tracing::warn!(
+					?error,
+					"Failed to backfill session_id for bookmarks and annotations"
+				);
+				// ^ best effort, no guarantee for data integrity
+			},
+		}
+
+		Ok(())
+	}
+
+	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		let conn = manager.get_connection();
+		let db_backend = manager.get_database_backend();
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"alter table "bookmarks" rename to "bookmarks_legacy""#.to_owned(),
+		))
+		.await?;
+
 		manager
-			.alter_table(
-				Table::alter()
+			.create_table(
+				Table::create()
+					.table(Bookmarks::Table)
+					.col(
+						ColumnDef::new(Bookmarks::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(Bookmarks::PreviewContent).text().null())
+					.col(ColumnDef::new(Bookmarks::Locator).json().null())
+					.col(ColumnDef::new(Bookmarks::Page).integer().null())
+					.col(ColumnDef::new(Bookmarks::MediaId).text().not_null())
+					.col(ColumnDef::new(Bookmarks::UserId).text().not_null())
+					.col(
+						ColumnDef::new(Bookmarks::CreatedAt)
+							.timestamp_with_time_zone()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-bookmarks-media")
+							.from(Bookmarks::Table, Bookmarks::MediaId)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-bookmarks-user")
+							.from(Bookmarks::Table, Bookmarks::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"insert INTO "bookmarks"("id", "preview_content", "locator", "page", "media_id", "user_id", "created_at")SELECT "id",
+                "preview_content",
+                "locator",
+                "page",
+                "media_id",
+                "user_id",
+                "created_at"
+			from "bookmarks_legacy""#
+				.to_owned(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"drop table "bookmarks_legacy""#.to_owned(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"alter table "media_annotations" rename to "media_annotations_legacy""#
+				.to_owned(),
+		))
+		.await?;
+
+		manager
+			.create_table(
+				Table::create()
 					.table(MediaAnnotations::Table)
-					.drop_foreign_key("fk-media_annotations-session")
-					.drop_column(MediaAnnotations::SessionId)
+					.col(
+						ColumnDef::new(MediaAnnotations::Id)
+							.string()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(MediaAnnotations::Locator).json().not_null())
+					.col(
+						ColumnDef::new(MediaAnnotations::AnnotationText)
+							.string()
+							.null(),
+					)
+					.col(
+						ColumnDef::new(MediaAnnotations::MediaId)
+							.string()
+							.not_null(),
+					)
+					.col(ColumnDef::new(MediaAnnotations::UserId).string().not_null())
+					.col(
+						ColumnDef::new(MediaAnnotations::CreatedAt)
+							.timestamp_with_time_zone()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(
+						ColumnDef::new(MediaAnnotations::UpdatedAt)
+							.timestamp_with_time_zone()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk_media_annotations_media_id")
+							.from(MediaAnnotations::Table, MediaAnnotations::MediaId)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk_media_annotations_user_id")
+							.from(MediaAnnotations::Table, MediaAnnotations::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"insert into "media_annotations"("id", "locator", "annotation_text", "media_id", "user_id", "created_at", "updated_at")
+			select
+    			"id",
+                "locator",
+                "annotation_text",
+                "media_id",
+                "user_id",
+                "created_at",
+                "updated_at"
+			from "media_annotations_legacy""#
+				.to_owned(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"drop table "media_annotations_legacy""#.to_owned(),
+		))
+		.await?;
+
+		conn.execute(Statement::from_string(
+			db_backend,
+			r#"drop index if exists "idx_media_annotations_user_media""#.to_owned(),
+		))
+		.await?;
+
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_media_annotations_user_media")
+					.table(MediaAnnotations::Table)
+					.col(MediaAnnotations::UserId)
+					.col(MediaAnnotations::MediaId)
 					.to_owned(),
 			)
 			.await?;
@@ -85,12 +394,26 @@ impl MigrationTrait for Migration {
 #[derive(DeriveIden)]
 enum Bookmarks {
 	Table,
+	Id,
+	PreviewContent,
+	Locator,
+	Page,
+	MediaId,
+	UserId,
+	CreatedAt,
 	SessionId,
 }
 
 #[derive(DeriveIden)]
 enum MediaAnnotations {
 	Table,
+	Id,
+	Locator,
+	AnnotationText,
+	MediaId,
+	UserId,
+	CreatedAt,
+	UpdatedAt,
 	SessionId,
 }
 
@@ -100,11 +423,199 @@ enum ReadingSessions {
 	Id,
 }
 
-async fn backfill() -> Result<(), DbErr> {
-	// for (user_id, media_id) for all bookmarks/annotations:
-	//    get day_reset pref ?? 0
-	//    map session_date to session_id for all pairs
-	//    for each bookmark/annotation:
-	//        if logical date in map, update session_id to session_id
-	todo!()
+#[derive(DeriveIden)]
+enum Media {
+	Table,
+	Id,
 }
+
+#[derive(DeriveIden)]
+enum Users {
+	Table,
+	Id,
+}
+
+#[derive(Debug, Clone, FromQueryResult)]
+struct SessionRecord {
+	id: i32,
+	updated_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Clone, FromQueryResult)]
+struct UserPreferencesRecord {
+	user_id: String,
+	day_reset_hour_offset: Option<i32>,
+}
+
+#[derive(Debug, Clone, FromQueryResult)]
+struct BookmarkRecord {
+	id: String,
+	user_id: String,
+	media_id: String,
+	created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, FromQueryResult)]
+struct AnnotationRecord {
+	id: String,
+	user_id: String,
+	media_id: String,
+	created_at: DateTime<Utc>,
+}
+
+async fn backfill(conn: &impl ConnectionTrait) -> Result<(), DbErr> {
+	let backend = conn.get_database_backend();
+
+	let user_preferences_records =
+		UserPreferencesRecord::find_by_statement(Statement::from_string(
+			backend,
+			"select user_id, day_reset_hour_offset from user_preferences",
+		))
+		.all(conn)
+		.await?;
+
+	let offset_by_user_id = user_preferences_records
+		.into_iter()
+		.map(|r| (r.user_id, r.day_reset_hour_offset.unwrap_or(0)))
+		.collect::<HashMap<_, _>>();
+
+	let bookmark_records = BookmarkRecord::find_by_statement(Statement::from_string(
+		backend,
+		"select id, user_id, media_id, created_at from bookmarks",
+	))
+	.all(conn)
+	.await?;
+
+	let annotation_records = AnnotationRecord::find_by_statement(Statement::from_string(
+		backend,
+		"select id, user_id, media_id, created_at from media_annotations",
+	))
+	.all(conn)
+	.await?;
+
+	for bookmark in bookmark_records {
+		let offset = offset_by_user_id
+			.get(&bookmark.user_id)
+			.copied()
+			.unwrap_or(0);
+		let logical_date = calculate_logical_date(bookmark.created_at, offset);
+
+		let candidate_sessions =
+			SessionRecord::find_by_statement(Statement::from_sql_and_values(
+				backend,
+				"select id, updated_at from reading_sessions \
+	             where user_id = ? and media_id = ? and session_date = ?",
+				vec![
+					bookmark.user_id.clone().into(),
+					bookmark.media_id.clone().into(),
+					logical_date.to_string().into(),
+				],
+			))
+			.all(conn)
+			.await?;
+
+		if candidate_sessions.is_empty() {
+			tracing::warn!(?bookmark, "No candidate session for bookmark");
+			continue;
+		}
+
+		let closest_match =
+			determine_approximate_session_id(bookmark.created_at, &candidate_sessions);
+
+		if let Some(session_id) = closest_match {
+			conn.execute(Statement::from_sql_and_values(
+				backend,
+				"update bookmarks set session_id = ? where id = ?",
+				vec![session_id.into(), bookmark.id.clone().into()],
+			))
+			.await?;
+		} else {
+			tracing::warn!(
+				?bookmark,
+				"Failed to determine closest session for bookmark"
+			);
+		}
+	}
+
+	for annotation in annotation_records {
+		let offset = offset_by_user_id
+			.get(&annotation.user_id)
+			.copied()
+			.unwrap_or(0);
+		let logical_date = calculate_logical_date(annotation.created_at, offset);
+
+		let candidate_sessions =
+			SessionRecord::find_by_statement(Statement::from_sql_and_values(
+				backend,
+				"select id, updated_at from reading_sessions \
+	             where user_id = ? and media_id = ? and session_date = ?",
+				vec![
+					annotation.user_id.clone().into(),
+					annotation.media_id.clone().into(),
+					logical_date.to_string().into(),
+				],
+			))
+			.all(conn)
+			.await?;
+
+		if candidate_sessions.is_empty() {
+			tracing::warn!(?annotation, "No candidate session for annotation");
+			continue;
+		}
+
+		let closest_match =
+			determine_approximate_session_id(annotation.created_at, &candidate_sessions);
+
+		if let Some(session_id) = closest_match {
+			conn.execute(Statement::from_sql_and_values(
+				backend,
+				"update media_annotations set session_id = ? where id = ?",
+				vec![session_id.into(), annotation.id.clone().into()],
+			))
+			.await?;
+		} else {
+			tracing::warn!(
+				?annotation,
+				"Failed to determine closest session for annotation"
+			);
+		}
+	}
+
+	Ok(())
+}
+
+fn calculate_logical_date(now: DateTime<Utc>, offset_hours: i32) -> NaiveDate {
+	(now - Duration::hours(offset_hours as i64)).date_naive()
+}
+
+/// Aims to pick the most likely session for a given event based on the time it was
+/// created (closest but not after session.updated_at)
+fn determine_approximate_session_id(
+	event_created_at: DateTime<Utc>,
+	candidate_sessions: &[SessionRecord],
+) -> Option<i32> {
+	let best = candidate_sessions
+		.iter()
+		.filter_map(|s| {
+			let updated_at = s.updated_at?;
+			let diff = (updated_at - event_created_at).num_seconds();
+			if diff >= 0 {
+				Some((diff, s))
+			} else {
+				None
+			}
+		})
+		.min_by_key(|(diff, _)| *diff)
+		.map(|(_, s)| s);
+
+	if let Some(session) = best {
+		return Some(session.id);
+	}
+
+	// TODO: this is basically a catch all so decide if that is ideal
+	candidate_sessions.iter().map(|s| s.id).max()
+}
+
+// TODO: should DEFINITELY add tests, way too much hand sql. tricky part is to keep it self-contained since importing something
+// risks having to change this migration if any breaking chagnes
+// also that is such a chore lol

@@ -3209,7 +3209,11 @@
 			"accessOpdsV1": "Access OPDS v1.2"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Unknown error",
+			"bookNotFound": {
+				"title": "Book not found",
+				"description": "The book you are looking for could not be found. It may have been deleted or moved"
+			}
 		},
 		"epubMenu": {
 			"tableOfContents": "Table of Contents",

@@ -1,5 +1,13 @@
-use async_graphql::{ComplexObject, SimpleObject};
+use async_graphql::{
+	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+};
 use models::entity::{reading_session, reading_session::DeviceIds};
+
+use crate::{
+	data::AuthContext,
+	loader::media::{MediaByIdLoaderKey, MediaLoader},
+	object::media::Media,
+};
 
 #[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex, name = "ReadingSession")]
@@ -19,6 +27,22 @@ impl ReadingSession {
 	}
 
 	// TODO: async fn devices(&self, ctx: &Context<'_>) -> Result<Vec<RegisteredReadingDevice>>
+
+	async fn media(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<MediaLoader>>()?;
+
+		// TODO(reading-timeline): user id needs to be considered, realistically the only scenario this
+		// protects against is user read while having permission to a book that is now
+		// revoked. still valid to protect against, but will come last before merge
+		let media = loader
+			.load_one(MediaByIdLoaderKey {
+				id: self.model.media_id.clone(),
+			})
+			.await?;
+
+		Ok(media)
+	}
 }
 
 impl From<reading_session::Model> for ReadingSession {

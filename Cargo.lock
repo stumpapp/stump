@@ -5291,12 +5291,14 @@ dependencies = [
 name = "migrations"
 version = "0.0.0"
 dependencies = [
+ "chrono",
  "models",
  "sea-orm",
  "sea-orm-migration",
  "testcontainers",
  "testcontainers-modules",
  "tokio",
+ "tracing",
 ]
 
 [[package]]

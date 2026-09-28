@@ -3,6 +3,7 @@ import { graphql } from '@stump/graphql'
 import { useLocalSearchParams } from 'expo-router'
 
 import { BookReadingTimeline } from '~/components/readingTimeline'
+import { useTranslate } from '~/lib/hooks'
 
 const query = graphql(`
 	query BookReadingTimelineScreen($bookId: ID!) {
@@ -14,11 +15,13 @@ const query = graphql(`
 `)
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { bookId } = useLocalSearchParams<{ bookId: string }>()
 	const {
 		data: { mediaById },
 	} = useSuspenseGraphQL(query, ['mediaById', bookId, 'readingTimeline'], { bookId })
-	if (!mediaById) throw new Error('oopsies make error message or do sm else, v unlikely tho')
+	// TODO: some custom error that allows me to throw with custom title/message
+	if (!mediaById) throw new Error(t('errors.bookNotFound.label'))
 
 	return <BookReadingTimeline fragmentRef={mediaById} />
 }

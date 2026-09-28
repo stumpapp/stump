@@ -1,4 +1,4 @@
-import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { BookReadingTimelineFragment, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { intlFormat, parse } from 'date-fns'
 import groupBy from 'lodash/groupBy'
 import { ScrollView, View } from 'react-native'
@@ -8,20 +8,47 @@ import { cn } from '~/lib/utils'
 
 import { ScreenBackgroundGradient } from '../BackgroundGradient'
 import { Text } from '../ui'
-import { fakeData } from './fakeData'
 import { ReadingSessionCard } from './ReadingSessionCard'
 
 const fragment = graphql(`
 	fragment BookReadingTimeline on Media {
 		id
+		readingTimeline {
+			readthroughs {
+				readthroughNumber
+				startedAt
+				finishedAt
+				sessions {
+					session {
+						id
+						sessionDate
+					}
+					...ReadingSessionCard
+				}
+			}
+			totalElapsedSeconds
+		}
+		resolvedName
+		pages
 		thumbnail {
 			url
 			metadata {
 				averageColor
+				colors {
+					color
+					percentage
+				}
+				thumbhash
 			}
 		}
 	}
 `)
+
+type Readthrough = NonNullable<
+	BookReadingTimelineFragment['readingTimeline']
+>['readthroughs'][number]
+
+type SessionWithEvents = Readthrough['sessions'][number]
 
 type Props = {
 	fragmentRef: FragmentType<typeof fragment>
@@ -46,10 +73,7 @@ type Props = {
 export function BookReadingTimeline({ fragmentRef }: Props) {
 	const data = useFragment(fragment, fragmentRef)
 
-	const renderSessionDate = (
-		date: string,
-		sessions: (typeof fakeData.readthroughs)[number]['sessions'][number][],
-	) => {
+	const renderSessionDate = (date: string, sessions: SessionWithEvents[]) => {
 		const parsed = parse(date, 'yyyy-MM-dd', new Date())
 		const currentYear = new Date().getFullYear()
 		const isSameYear = parsed.getFullYear() === currentYear
@@ -67,18 +91,13 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 				</Text>
 
 				{sessions.map((session) => (
-					<ReadingSessionCard
-						key={session.session.id}
-						bookId={data.id}
-						{...session}
-						thumbnail={data.thumbnail}
-					/>
+					<ReadingSessionCard key={session.session.id} fragmentRef={session} media={data} />
 				))}
 			</View>
 		)
 	}
 
-	const renderReadthrough = (readthrough: (typeof fakeData.readthroughs)[number]) => {
+	const renderReadthrough = (readthrough: Readthrough) => {
 		const groupedSessions = groupBy(readthrough.sessions, ({ session }) => session.sessionDate)
 
 		const mergedSessionsNoCard = Object.entries(groupedSessions).map(([date, sessions]) => ({
@@ -128,6 +147,7 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 		)
 	}
 
+	// TODO: handle no timeline
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScreenBackgroundGradient item={data} />
@@ -136,7 +156,7 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 				// refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				{fakeData.readthroughs.map(renderReadthrough)}
+				{data.readingTimeline?.readthroughs.map(renderReadthrough)}
 			</ScrollView>
 		</SafeAreaView>
 	)

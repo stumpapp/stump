@@ -1,7 +1,9 @@
+import { parseGraphQLPercentageDecimal } from '@stump/client'
+import { FragmentType, graphql, ReadingSessionCardFragment, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { useRouter } from 'expo-router'
-import { Bookmark, Highlighter, PencilLine } from 'lucide-react-native'
+import { Bookmark as BookmarkIcon, Highlighter, PencilLine } from 'lucide-react-native'
 import { useState } from 'react'
 import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
@@ -11,35 +13,112 @@ import { useTranslate } from '~/lib/hooks'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { usePreferencesStore } from '~/stores'
 
-import { ThumbnailImage } from '../image'
+import { ThumbnailImage, ThumbnailPlaceholderData } from '../image'
 import { MiniStatCard } from '../stats'
-import { Card, Text } from '../ui'
-import { fakeData } from './fakeData'
+import { Card, Progress, Text } from '../ui'
 import { SessionProgressBar } from './SessionProgressBar'
 
-// TODO: would be driven by fragments ig
-type Props = {
-	bookId: string
-	thumbnail: {
-		url: string
+const fragment = graphql(`
+	fragment ReadingSessionCard on SessionWithEvents {
+		session {
+			id
+			createdAt
+			updatedAt
+			startPage
+			endPage
+			endLocator {
+				locations {
+					position
+				}
+			}
+			endPercentage
+			elapsedSeconds
+			mediaId
+		}
+		events {
+			__typename
+			... on Bookmark {
+				id
+			}
+			... on MediaAnnotation {
+				id
+				annotationText
+			}
+		}
 	}
-	session: (typeof fakeData.readthroughs)[number]['sessions'][number]['session']
-	events: (typeof fakeData.readthroughs)[number]['sessions'][number]['events']
+`)
+
+const mediaFragment = graphql(`
+	fragment ReadingSessionCardMedia on SessionWithEvents {
+		session {
+			media {
+				resolvedName
+				pages
+				thumbnail {
+					url
+					metadata {
+						averageColor
+						colors {
+							color
+							percentage
+						}
+						thumbhash
+					}
+				}
+			}
+		}
+	}
+`)
+
+type BaseFragmentRef = FragmentType<typeof fragment>
+type MediaFragmentRef = FragmentType<typeof mediaFragment>
+
+type Annotation = Extract<
+	ReadingSessionCardFragment['events'][number],
+	{ __typename: 'MediaAnnotation' }
+>
+type Bookmark = Extract<ReadingSessionCardFragment['events'][number], { __typename: 'Bookmark' }>
+
+// the idea here is that a book's timeline will have its own info and not need to fetch
+// via the media resolver on session, but in a timeline not tied to a specific book
+// it would have to fetch the info as part of that node
+type Props = {
+	fragmentRef: BaseFragmentRef
+	mediaFragmentRef?: MediaFragmentRef
+	media?: {
+		resolvedName: string
+		pages: number
+		thumbnail: {
+			url: string
+			metadata?: ThumbnailPlaceholderData | null
+		}
+	}
 }
 
 // a few thoughts:
 // - for a book's own reading timeline, perhaps we do not need to show the thumbnail nor title etc at all
 //   however with that removed there is not much more to show
-export function ReadingSessionCard({ bookId, thumbnail, session, events }: Props) {
+export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Props) {
 	const router = useRouter()
 	const { t } = useTranslate()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
+	const { session, events } = useFragment(fragment, fragmentRef)
+
+	const gqlMedia = useFragment(mediaFragment, mediaFragmentRef)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const thumbnailUrl = media?.thumbnail?.url || gqlMedia?.session?.media?.thumbnail?.url || ''
+	const thumbnailData =
+		media?.thumbnail?.metadata || gqlMedia?.session?.media?.thumbnail?.metadata || null
+
+	const bookId = session.mediaId
+	const pageCount = media?.pages || gqlMedia?.session?.media?.pages || '??'
+	const bookName = media?.resolvedName || gqlMedia?.session?.media?.resolvedName || '??'
 
 	const startDate = new Date(session.createdAt)
 	const endDate = new Date(session.updatedAt)
+	const endPage = session.endPage ?? session.endLocator?.locations?.position ?? '??'
 
 	const timeRange = `${intlFormat(startDate, {
 		hour: 'numeric',
@@ -59,7 +138,7 @@ export function ReadingSessionCard({ bookId, thumbnail, session, events }: Props
 
 	// TODO: prefer journal entry as preview, fallback to annotation texts
 	const truncatedAnnotations = events
-		.filter((e) => e.__typename === 'MediaAnnotation' && e.annotationText != null)
+		.filter((e): e is Annotation => e.__typename === 'MediaAnnotation' && e.annotationText != null)
 		.slice(0, 3)
 		.map((e) => e.annotationText)
 		.join('\n')
@@ -71,7 +150,9 @@ export function ReadingSessionCard({ bookId, thumbnail, session, events }: Props
 			<View className="px-3 flex-row items-center justify-between">
 				<Text className="text-foreground-muted font-medium">{timeRange}</Text>
 
-				<Text className="text-foreground-muted">{formatHumanDuration(session.elapsedSeconds)}</Text>
+				<Text className="text-foreground-muted">
+					{session?.elapsedSeconds != null ? formatHumanDuration(session.elapsedSeconds) : '??'}
+				</Text>
 			</View>
 
 			<Pressable
@@ -84,22 +165,25 @@ export function ReadingSessionCard({ bookId, thumbnail, session, events }: Props
 						<View className="gap-4 flex-row">
 							<ThumbnailImage
 								source={{
-									uri: thumbnail.url,
+									uri: thumbnailUrl,
 								}}
 								size={{ height: 80 / thumbnailRatio, width: 80 }}
-								// placeholderData={thumbnailData}
+								placeholderData={thumbnailData}
 								borderAndShadowStyle={{ shadowRadius: 5 }}
 							/>
 
 							<View className="gap-3 flex-1">
 								<Text className="text-lg font-semibold shrink" numberOfLines={2}>
-									The Lord of the Rings: The Fellowship of the Ring
+									{bookName}
 								</Text>
 
 								<View className="flex-row">
 									<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
-										<Text size="sm">{`${t('common.page')} ${session.endPage}`}</Text>
-										<Text size="xs" className="pb-0.5 text-foreground-muted">{` / ${100}`}</Text>
+										<Text size="sm">{`${t('common.page')} ${endPage}`}</Text>
+										<Text
+											size="xs"
+											className="pb-0.5 text-foreground-muted"
+										>{` / ${pageCount}`}</Text>
 									</View>
 								</View>
 
@@ -107,18 +191,24 @@ export function ReadingSessionCard({ bookId, thumbnail, session, events }: Props
 
 								{/*TODO: normal progress bar? or keep window? kinda looks more awk without
 								the annotations to explain the window. ill leave it for a second opinion for now*/}
-								<View className="w-full">
+								{/*<View className="w-full">
 									<SessionProgressBar session={session} events={events} />
-								</View>
+								</View>*/}
+
+								<Progress
+									className="h-3"
+									value={parseGraphQLPercentageDecimal(session.endPercentage) ?? 0}
+									trackClassName="bg-black/10"
+									indicatorClassName="bg-white/70"
+								/>
 							</View>
 						</View>
 					</Card.Row>
 
-					{/*<Card.Row value={truncatedAnnotations} />*/}
-					<AnnotationsRow preview={truncatedAnnotations} />
+					{truncatedAnnotations && <AnnotationsRow preview={truncatedAnnotations} />}
 
 					<Card.Row>
-						<MiniStatCard value={bookmarksCount} colors={STAT_COLORS.size} icon={Bookmark} />
+						<MiniStatCard value={bookmarksCount} colors={STAT_COLORS.size} icon={BookmarkIcon} />
 						<MiniStatCard value={highlightsCount} colors={STAT_COLORS.size} icon={Highlighter} />
 						<MiniStatCard value={annotationsCount} colors={STAT_COLORS.size} icon={PencilLine} />
 						{/*<View className="flex-1" />*/}

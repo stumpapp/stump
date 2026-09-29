@@ -3871,6 +3871,14 @@ export enum ReadingMode {
 
 export type ReadingSession = {
   __typename?: 'ReadingSession';
+  /**
+   * Returns the list of chapter titles read during this session, including the start
+   * and end chapters.
+   *
+   * ## Important: This has some io cost and so should not necessarily be used in a list
+   * of sessions but more a detail view into a single session, etc.
+   */
+  chaptersRead: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   deviceIds: Array<Scalars['String']['output']>;
   /** accumulated reading time for this session, updated via deltas (not overwritten) */
@@ -5724,7 +5732,7 @@ export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', ses
 
 export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
 
-export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
+export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
 
 export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, createdAt: any, locator: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null, text?: { __typename?: 'ReadiumText', highlight?: string | null } | null } } & { ' $fragmentName'?: 'AnnotationEventFragment' };
 
@@ -7749,6 +7757,7 @@ export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
   createdAt
   updatedAt
   elapsedSeconds
+  chaptersRead
   media {
     thumbnail {
       url
@@ -9074,6 +9083,7 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
   createdAt
   updatedAt
   elapsedSeconds
+  chaptersRead
   media {
     thumbnail {
       url

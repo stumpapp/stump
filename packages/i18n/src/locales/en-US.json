@@ -3619,6 +3619,17 @@
 			},
 			"allSettings": "All Settings"
 		},
+		"readingSessions": {
+			"chaptersRead_one": "{{count}} chapter read",
+	    "chaptersRead_other": "{{count}} chapters read",
+	    "pagesRead_one": "{{count}} page read",
+	    "pagesRead_other": "{{count}} pages read",
+			"sessionSentence": {
+				"pageRange": "You spent {{timeRange}} reading from {{startPageFragment}} to {{endPageFragment}}",
+				"singlePage": "You spent {{timeRange}} reading {{startPageFragment}}",
+				"pageFragment": "page {{page}}"
+			}
+		},
 		"tableOfContents": {
 			"goToPageX": "Go to page {{pageNumber}}",
 			"goToPagePlaceholder": "Go to page...",

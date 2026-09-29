@@ -2713,6 +2713,14 @@ type ReadingSession {
 	deviceIds: [String!]!
 	media: Media
 	events: [SessionEvent!]!
+	"""
+	Returns the list of chapter titles read during this session, including the start
+	and end chapters.
+	
+	## Important: This has some io cost and so should not necessarily be used in a list
+	of sessions but more a detail view into a single session, etc.
+	"""
+	chaptersRead: [String!]!
 }
 
 """

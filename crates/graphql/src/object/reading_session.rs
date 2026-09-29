@@ -1,11 +1,18 @@
 use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
-use models::entity::{
-	bookmark, media_annotation,
-	reading_session::{self, DeviceIds},
+use models::{
+	domain::readium::chapters_between_locators,
+	entity::{
+		bookmark,
+		media::{self, MediaIdentSelect},
+		media_annotation,
+		reading_session::{self, DeviceIds},
+	},
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use stump_core::readium::ReadiumManifestGenerator;
+use tokio::task::spawn_blocking;
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -23,6 +30,12 @@ pub struct ReadingSession {
 	pub model: reading_session::Model,
 }
 
+// TODO(reading-timeline): wrt access control, i'm thinking that it might just
+// need to be locked down by the higher nodes (i.e., assume access check done when
+// session node passed down to here). otherwise each selection will just duplicate
+// a bunch of ac logic, which is inefficient as hell but really also importantly
+// a terrible mess to maintain
+//
 #[ComplexObject]
 impl ReadingSession {
 	async fn device_ids(&self) -> Vec<String> {
@@ -84,6 +97,47 @@ impl ReadingSession {
 		};
 
 		Ok(events)
+	}
+
+	/// Returns the list of chapter titles read during this session, including the start
+	/// and end chapters.
+	///
+	/// ## Important: This has some io cost and so should not necessarily be used in a list
+	/// of sessions but more a detail view into a single session, etc.
+	// ^ TODO: at least not until potentially storing the positions in the db
+	async fn chapters_read(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		// TODO(reading-timeline): access control
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let selection = media::Entity::find_by_id(self.model.media_id.clone())
+			.select_only()
+			.columns(MediaIdentSelect::columns())
+			.filter(media::Column::Extension.like("epub"))
+			.into_model::<MediaIdentSelect>()
+			.one(conn)
+			.await?;
+		let Some(book) = selection else {
+			tracing::debug!(
+				?self.model.media_id,
+				"book is not an epub so skipping chapters_read computation"
+			);
+			return Ok(vec![]);
+		};
+
+		let generator =
+			ReadiumManifestGenerator::new(book.path, "internal://".to_string());
+		// TODO(optimize): should generate positions once at ingestion and store in db
+		let positions = spawn_blocking(move || generator.generate_positions()).await??;
+
+		match (&self.model.start_locator, &self.model.end_locator) {
+			(Some(start), Some(end)) => Ok(chapters_between_locators(
+				start,
+				end,
+				positions.positions.as_slice(),
+			)),
+			_ => Ok(vec![]),
+		}
 	}
 }
 

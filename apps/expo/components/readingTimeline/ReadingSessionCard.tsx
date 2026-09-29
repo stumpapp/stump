@@ -253,8 +253,14 @@ type MarkingsStatProps = {
 function MarkingsStat({ icon, value }: MarkingsStatProps) {
 	return (
 		<View className="gap-0.5 flex-row items-center">
-			<Icon as={icon} size={12} strokeWidth={1.5} absoluteStrokeWidth className="text-white/70" />
-			<Text className="font-medium text-white/70">{value}</Text>
+			<Icon
+				as={icon}
+				size={12}
+				strokeWidth={1.5}
+				absoluteStrokeWidth
+				className="text-foreground-muted dark:text-white/70"
+			/>
+			<Text className="font-medium text-foreground-muted dark:text-white/70">{value}</Text>
 		</View>
 	)
 }

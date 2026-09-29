@@ -186,7 +186,7 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 										</View>
 
 										{/* <View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
-											<Text size="sm">{`p. ${session.startPage}-${session.endPage}`}</Text>
+											<Text size="sm">{`pp. ${session.startPage}-${session.endPage}`}</Text>
 										</View> */}
 
 										{/* <View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 flex-row items-end rounded-full">
@@ -203,7 +203,7 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 									</View>*/}
 
 									<Progress
-										className="h-3"
+										className="h-3 mb-1"
 										value={parseGraphQLPercentageDecimal(session.endPercentage) ?? 0}
 										trackClassName="bg-black/10"
 										indicatorClassName="bg-white/70"
@@ -211,34 +211,33 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 								</View>
 							</View>
 
-							<Text numberOfLines={4} className="text-lg text-foreground-muted">
-								{truncatedAnnotations}
-							</Text>
+							{truncatedAnnotations && (
+								<Text numberOfLines={4} className="text-lg text-foreground-muted">
+									{truncatedAnnotations}
+								</Text>
+							)}
+
+							<View className="-mb-1 w-full flex-row items-center">
+								{/* <Text className="font-medium text-white/70">
+									{intlFormat(startDate, {
+										year: 'numeric',
+										month: 'short',
+										day: 'numeric',
+										hour: 'numeric',
+										minute: 'numeric',
+										weekday: 'short',
+									})}
+								</Text> */}
+
+								<View className="flex-1" />
+
+								<View className="squircle px-2.5 py-0.5 bg-black/5 dark:bg-white/10 gap-2.5 flex-row rounded-full">
+									<MarkingsStat icon={BookmarkIcon} value={bookmarksCount} />
+									<MarkingsStat icon={Highlighter} value={highlightsCount} />
+									<MarkingsStat icon={PencilLine} value={annotationsCount} />
+								</View>
+							</View>
 						</View>
-					</Card.Row>
-
-					<Card.Row>
-						<View className="gap-2.5 -my-2.5 flex-row">
-							{/* <Text className="font-medium text-white/70">
-								{intlFormat(startDate, {
-									year: 'numeric',
-									month: 'short',
-									day: 'numeric',
-									hour: 'numeric',
-									minute: 'numeric',
-									weekday: 'short',
-								})}
-							</Text> */}
-
-							<View className="flex-1" />
-
-							<MarkingsStat icon={BookmarkIcon} value={bookmarksCount} />
-							<MarkingsStat icon={Highlighter} value={highlightsCount} />
-							<MarkingsStat icon={PencilLine} value={annotationsCount} />
-						</View>
-
-						{/*<View className="flex-1" />*/}
-						{/*^ pushes things left evenly more close to mock drawing, could also just not use stat cards*/}
 					</Card.Row>
 				</Card>
 			</Pressable>

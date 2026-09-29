@@ -7,8 +7,10 @@ type Props = {
 	className?: string
 }
 
-/// A component that will take a partially-translated string and replace each templated
-// placeholder (e.g., REPLACE_ME) with the corresponding correct translated value
+/**
+ * A component that will take a partially-translated string and replace each templated
+ * placeholder (e.g., REPLACE_ME) with the corresponding correct translated value
+ */
 export function TemplatedTranslationText({ fakeTranslation, values, className }: Props) {
 	const replacements = Object.entries(values)
 		.map(([key, node]) => ({ key, index: fakeTranslation.indexOf(key), node }))

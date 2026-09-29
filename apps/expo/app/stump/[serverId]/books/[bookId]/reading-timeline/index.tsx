@@ -14,6 +14,9 @@ const query = graphql(`
 	}
 `)
 
+// TODO: support order/group by for timeline:
+// - order asc/desc
+// - group by day/month
 export default function Screen() {
 	const { t } = useTranslate()
 	const { bookId } = useLocalSearchParams<{ bookId: string }>()

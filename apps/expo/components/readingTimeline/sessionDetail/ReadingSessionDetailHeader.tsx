@@ -59,6 +59,18 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const durationText = formatHumanDuration(data.elapsedSeconds ?? 0)
+	// TODO: this is really awkward in that you could:
+	// - start session, read for 30 seconds, exit reader
+	// - come back minutes before the session lapses, add an annotation
+	// - exit reader, let session lapse
+	// and this would read e.g. "1 minute 4 seconds" while the timeline shows e.g.:
+	// - 2:19 PM - opened book at page foo
+	// - 2:32 PM - added annotation at page biz
+	// - 2:32 PM - closed book at page biz
+	// it's kinda just a limitation of active reading time vs how granular session events are. by design
+	// they are extendable with the grace period / offset preferences, but this def hsows a bit
+	// of an awkward point. it's probably fine, i'm likely overthinking it. it is a weird disconnect
+	// on the ui tho
 
 	const timeRange = `${intlFormat(data.createdAt, {
 		hour: 'numeric',

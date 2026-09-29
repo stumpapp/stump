@@ -10,7 +10,6 @@ import {
 	ReadingSessionDetailHeader,
 } from '~/components/readingTimeline/sessionDetail'
 import RefreshControl from '~/components/RefreshControl'
-import { Text } from '~/components/ui'
 
 // TODO: prolly compose in fragments? awk bc book timeline uses
 // technically a diff object type
@@ -50,6 +49,10 @@ const query = graphql(`
 	}
 `)
 
+// TODO(reading-journal): render the corresponding entry for session, will need to sort out
+// interaction design (e.g., is editing it tied to the route header? on press? is it inline here? sheet? etc)
+// TODO(goals): a future where stump has reading goals and we can show which were met here. i am not inclined
+// to show goals not met, don't want it to be seen as demotivating
 export default function Screen() {
 	const { sessionId } = useLocalSearchParams<{ sessionId: string }>()
 	const {
@@ -72,12 +75,6 @@ export default function Screen() {
 					<ReadingSessionDetailHeader fragmentRef={session} />
 
 					<EventTimeline fragmentRef={session} />
-
-					<Text>associated journal entry for session (if any)</Text>
-
-					<Text>
-						TODO: future where you met goals? and which were met? totally very hand wavy here
-					</Text>
 				</View>
 			</ScrollView>
 		</SafeAreaView>

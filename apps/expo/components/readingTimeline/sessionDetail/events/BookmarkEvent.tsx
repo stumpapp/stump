@@ -23,9 +23,15 @@ const fragment = graphql(`
 
 type Props = {
 	fragmentRef: FragmentType<typeof fragment>
+	showTopConnector?: boolean
+	showBottomConnector?: boolean
 }
 
-export function BookmarkEvent({ fragmentRef }: Props) {
+export function BookmarkEvent({
+	fragmentRef,
+	showTopConnector = true,
+	showBottomConnector = true,
+}: Props) {
 	const { t } = useTranslate()
 	const data = useFragment(fragment, fragmentRef)
 
@@ -38,11 +44,13 @@ export function BookmarkEvent({ fragmentRef }: Props) {
 
 	return (
 		<EventTimelineRow
-			icon={{ as: Bookmark }}
+			icon={{ as: Bookmark, size: 'sm' }}
 			timestamp={parseGraphQLDateTime(data.createdAt) ?? new Date()}
+			showTopConnector={showTopConnector}
+			showBottomConnector={showBottomConnector}
 		>
 			<TemplatedTranslationText
-				className="text-foreground-muted text-center"
+				className="text-foreground-muted"
 				fakeTranslation={fakeTranslation}
 				values={{
 					PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: bookmarkedPage }),

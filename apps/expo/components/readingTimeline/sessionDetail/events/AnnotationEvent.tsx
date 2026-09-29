@@ -26,9 +26,15 @@ const fragment = graphql(`
 
 type Props = {
 	fragmentRef: FragmentType<typeof fragment>
+	showTopConnector?: boolean
+	showBottomConnector?: boolean
 }
 
-export function AnnotationEvent({ fragmentRef }: Props) {
+export function AnnotationEvent({
+	fragmentRef,
+	showTopConnector = true,
+	showBottomConnector = true,
+}: Props) {
 	const data = useFragment(fragment, fragmentRef)
 
 	// TODO: can open annotation sheet for highlights? in case you want to _add_ a note?
@@ -36,9 +42,11 @@ export function AnnotationEvent({ fragmentRef }: Props) {
 		<Pressable>
 			{({ pressed }) => (
 				<EventTimelineRow
-					icon={{ as: data.annotationText ? PencilLine : Highlighter }}
+					icon={{ as: data.annotationText ? PencilLine : Highlighter, size: 'sm' }}
 					timestamp={parseGraphQLDateTime(data.createdAt) ?? new Date()}
 					style={pressed ? { opacity: 0.8 } : undefined}
+					showTopConnector={showTopConnector}
+					showBottomConnector={showBottomConnector}
 				>
 					<View className="gap-2 flex flex-1 flex-row items-center">
 						<View className="gap-1.5 flex-1">

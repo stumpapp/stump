@@ -1,9 +1,10 @@
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { Book, BookOpen } from 'lucide-react-native'
+import React from 'react'
 import { View } from 'react-native'
 
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
-import { Card } from '~/components/ui'
+import { Card, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 
 import { AnnotationEvent } from './AnnotationEvent'
@@ -68,7 +69,11 @@ export function EventTimeline({ fragmentRef }: Props) {
 	})
 
 	return (
-		<Card>
+		<Card
+			// TODO: support this? api does, not much work to do it just need a callback, the current order, and
+			// swapping the start/end events depending on order
+			actions={<Text className="text-foreground-muted">Newest first</Text>}
+		>
 			<Card.Row>
 				<View className="w-full">
 					<EventTimelineRow
@@ -77,6 +82,7 @@ export function EventTimeline({ fragmentRef }: Props) {
 							shape: 'rounded',
 						}}
 						timestamp={data.createdAt}
+						showTopConnector={false}
 					>
 						<TemplatedTranslationText
 							className="text-foreground-muted"
@@ -87,24 +93,17 @@ export function EventTimeline({ fragmentRef }: Props) {
 						/>
 					</EventTimelineRow>
 
-					<View className="bg-black/10 dark:bg-white/10 ml-[6.25rem] min-h-[1.5rem] w-px" />
-					{data.events.map((event) => {
-						return (
-							<View key={JSON.stringify(event)}>
-								{renderEvent(event)}
-								{/*TODO: do proper math, not just eyeball*/}
-								{/*TODO: wrong height, prolly not in right place to get it to stretch*/}
-								<View className="bg-black/10 dark:bg-white/10 ml-[6.25rem] min-h-[1.5rem] w-px" />
-							</View>
-						)
-					})}
+					{data.events.map((event) => (
+						<React.Fragment key={JSON.stringify(event)}>{renderEvent(event)}</React.Fragment>
+					))}
 
 					<EventTimelineRow
 						icon={{
 							as: Book,
 							shape: 'rounded',
 						}}
-						timestamp={data.createdAt}
+						timestamp={data.updatedAt}
+						showBottomConnector={false}
 					>
 						<TemplatedTranslationText
 							className="text-foreground-muted"

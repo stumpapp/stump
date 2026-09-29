@@ -5,7 +5,10 @@ import { ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ScreenBackgroundGradient } from '~/components/BackgroundGradient'
-import { ReadingSessionDetailHeader } from '~/components/readingTimeline/sessionDetail'
+import {
+	EventTimeline,
+	ReadingSessionDetailHeader,
+} from '~/components/readingTimeline/sessionDetail'
 import { Text } from '~/components/ui'
 
 // TODO: prolly compose in fragments? awk bc book timeline uses
@@ -25,16 +28,7 @@ const query = graphql(`
 			}
 			endPercentage
 			elapsedSeconds
-			events {
-				__typename
-				... on Bookmark {
-					id
-				}
-				... on MediaAnnotation {
-					id
-					annotationText
-				}
-			}
+			...EventTimeline
 			media {
 				resolvedName
 				pages
@@ -72,7 +66,9 @@ export default function Screen() {
 			>
 				<View className="px-4 gap-6">
 					<ReadingSessionDetailHeader fragmentRef={session} />
-					<Text>standard kinda activity timeline feed view for events</Text>
+
+					<EventTimeline fragmentRef={session} />
+
 					<Text>associated journal entry for session (if any)</Text>
 
 					<Text>

@@ -14,16 +14,18 @@ type Props = {
 	}
 	timestamp: Date
 	children: React.ReactNode
+	style?: React.ComponentProps<typeof View>['style']
 }
 
 export function EventTimelineRow({
 	icon: { as: icon, shape = 'circle' },
 	timestamp,
 	children,
+	style,
 }: Props) {
 	// TODO: diff sizes for circle v round, will mess with separator
 	return (
-		<View className="gap-2.5 flex flex-row items-center">
+		<View className="gap-2.5 flex w-full flex-row items-center" style={style}>
 			<Text>
 				{intlFormat(timestamp, {
 					hour: 'numeric',

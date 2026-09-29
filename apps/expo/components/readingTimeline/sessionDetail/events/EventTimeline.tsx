@@ -60,7 +60,7 @@ export function EventTimeline({ fragmentRef }: Props) {
 	return (
 		<Card>
 			<Card.Row>
-				<View>
+				<View className="w-full">
 					<EventTimelineRow
 						icon={{
 							as: Book,

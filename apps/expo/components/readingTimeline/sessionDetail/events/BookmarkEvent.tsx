@@ -2,7 +2,8 @@ import { parseGraphQLDateTime } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { Bookmark } from 'lucide-react-native'
 
-import { Text } from '~/components/ui'
+import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
+import { useTranslate } from '~/lib/hooks'
 
 import { EventTimelineRow } from './EventTimelineRow'
 
@@ -25,19 +26,28 @@ type Props = {
 }
 
 export function BookmarkEvent({ fragmentRef }: Props) {
+	const { t } = useTranslate()
 	const data = useFragment(fragment, fragmentRef)
 
 	const bookmarkedPage =
 		data.page && data.page > 0 ? data.page : (data.bookmarkLocator?.locations?.position ?? '??')
+
+	const fakeTranslation = t('readingSessions.bookmarkSentence', {
+		pageFragment: 'PAGE_FRAGMENT',
+	})
 
 	return (
 		<EventTimelineRow
 			icon={{ as: Bookmark }}
 			timestamp={parseGraphQLDateTime(data.createdAt) ?? new Date()}
 		>
-			<Text className="text-foreground-muted">
-				Bookmarked page <Text>{bookmarkedPage}</Text>
-			</Text>
+			<TemplatedTranslationText
+				className="text-foreground-muted text-center"
+				fakeTranslation={fakeTranslation}
+				values={{
+					PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: bookmarkedPage }),
+				}}
+			/>
 		</EventTimelineRow>
 	)
 }

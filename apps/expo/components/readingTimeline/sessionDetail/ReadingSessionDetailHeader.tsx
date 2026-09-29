@@ -2,9 +2,10 @@ import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { View } from 'react-native'
 
+import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
 import { Card, Progress, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
@@ -70,87 +71,18 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 	const startPage = data.startPage ?? data.startLocator?.locations?.position ?? '??'
 	const endPage = data.endPage ?? data.endLocator?.locations?.position ?? '??'
 
-	const startPageFragment = t('readingSessions.sessionSentence.pageFragment', { page: startPage })
-	const endPageFragment = t('readingSessions.sessionSentence.pageFragment', { page: endPage })
+	const startPageFragment = t('readingSessions.pageFragment', { page: startPage })
+	const endPageFragment = t('readingSessions.pageFragment', { page: endPage })
 
-	const renderSentence = useCallback(() => {
-		const [localeKey, translationArguments] =
-			endPage !== startPage
-				? [
-						'readingSessions.sessionSentence.pageRange',
-						{
-							timeRange,
-							startPageFragment,
-							endPageFragment,
-						},
-					]
-				: [
-						'readingSessions.sessionSentence.singlePage',
-						{
-							timeRange,
-							startPageFragment,
-						},
-					]
-
-		const realTranslation = t(localeKey, translationArguments)
-		const fakeTranslation = t(localeKey, {
-			timeRange: 'TIME_RANGE',
-			startPageFragment: 'START_PAGE',
-			endPageFragment: 'END_PAGE',
-		})
-
-		const startIndex = fakeTranslation.indexOf('START_PAGE')
-		const endIndex = fakeTranslation.indexOf('END_PAGE')
-		const timeRangeIndex = fakeTranslation.indexOf('TIME_RANGE')
-
-		const replacements = [
-			{
-				key: 'TIME_RANGE',
-				index: timeRangeIndex,
-				node: (
-					<Text key="time-range" className="font-medium text-foreground">
-						{timeRange}
-					</Text>
-				),
-			},
-			{
-				key: 'START_PAGE',
-				index: startIndex,
-				node: (
-					<Text key="start-page" className="font-medium text-foreground">
-						{startPageFragment}
-					</Text>
-				),
-			},
-			{
-				key: 'END_PAGE',
-				index: endIndex,
-				node: (
-					<Text key="end-page" className="font-medium text-foreground">
-						{endPageFragment}
-					</Text>
-				),
-			},
-		]
-			.filter((s) => s.index !== -1)
-			.sort((a, b) => a.index - b.index)
-
-		const parts: React.ReactNode[] = []
-		if (replacements.length === 0) {
-			// this really shouldn't happen??
-			parts.push(realTranslation)
-		} else {
-			let cursor = 0
-			for (const replacement of replacements) {
-				parts.push(fakeTranslation.slice(cursor, replacement.index)) // text before first fragment
-				parts.push(replacement.node)
-				cursor = replacement.index + replacement.key.length
-			}
-			parts.push(fakeTranslation.slice(cursor)) // text after last fragment
-		}
-
-		return parts
-	}, [t, timeRange, startPageFragment, endPageFragment, startPage, endPage])
+	const localeKey =
+		endPage !== startPage
+			? 'readingSessions.sessionSentence.pageRange'
+			: 'readingSessions.sessionSentence.singlePage'
+	const fakeTranslation = t(localeKey, {
+		timeRange: 'TIME_RANGE',
+		startPageFragment: 'START_PAGE',
+		endPageFragment: 'END_PAGE',
+	})
 
 	const pagesRead = useMemo(() => {
 		if (typeof startPage === 'string' && typeof endPage === 'string') return '??'
@@ -193,16 +125,24 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 					separately, page range will be tricky because _technically_ can go backwards,
 					and seeing "read pages 10-5" is not my fav. "from 10 to 5" makes it feel better
 					*/}
-					<Text className="text-foreground-muted text-sm text-center">{renderSentence()}</Text>
+					<TemplatedTranslationText
+						className="text-foreground-muted text-center"
+						fakeTranslation={fakeTranslation}
+						values={{
+							TIME_RANGE: timeRange,
+							START_PAGE: startPageFragment,
+							END_PAGE: endPageFragment,
+						}}
+					/>
 				</View>
 
 				<View className="bg-black/10 dark:bg-white/10 h-full w-px shrink-0" />
 
-				<View className="gap-4 flex flex-1 items-start">
-					<Text className="text-lg">{t('readingSessions.pagesRead', { count: pagesRead })}</Text>
-					<Text className="text-lg">{durationText}</Text>
+				<View className="gap-4 px-2 flex flex-1 items-start">
+					<Text size="lg">{t('readingSessions.pagesRead', { count: pagesRead })}</Text>
+					<Text size="lg">{durationText}</Text>
 					{data.chaptersRead.length > 0 && (
-						<Text className="text-lg">
+						<Text size="lg">
 							{t('readingSessions.chaptersRead', { count: data.chaptersRead.length })}
 						</Text>
 					)}

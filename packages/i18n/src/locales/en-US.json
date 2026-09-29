@@ -3624,11 +3624,14 @@
 	    "chaptersRead_other": "{{count}} chapters read",
 	    "pagesRead_one": "{{count}} page read",
 	    "pagesRead_other": "{{count}} pages read",
+			"pageFragment": "page {{page}}",
 			"sessionSentence": {
 				"pageRange": "You spent {{timeRange}} reading from {{startPageFragment}} to {{endPageFragment}}",
-				"singlePage": "You spent {{timeRange}} reading {{startPageFragment}}",
-				"pageFragment": "page {{page}}"
-			}
+				"singlePage": "You spent {{timeRange}} reading {{startPageFragment}}"
+			},
+			"bookmarkSentence": "You bookmarked {{pageFragment}}",
+			"openedBookSentence": "Opened book at {{pageFragment}}",
+			"closedBookSentence": "Closed book at {{pageFragment}}"
 		},
 		"tableOfContents": {
 			"goToPageX": "Go to page {{pageNumber}}",

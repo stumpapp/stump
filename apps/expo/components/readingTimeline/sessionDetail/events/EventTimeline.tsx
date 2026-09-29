@@ -2,7 +2,9 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { Book, BookOpen } from 'lucide-react-native'
 import { View } from 'react-native'
 
-import { Card, Text } from '~/components/ui'
+import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
+import { Card } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 import { AnnotationEvent } from './AnnotationEvent'
 import { BookmarkEvent } from './BookmarkEvent'
@@ -41,6 +43,7 @@ type Props = {
 }
 
 export function EventTimeline({ fragmentRef }: Props) {
+	const { t } = useTranslate()
 	const data = useFragment(fragment, fragmentRef)
 
 	const renderEvent = (event: (typeof data.events)[number]) => {
@@ -57,6 +60,13 @@ export function EventTimeline({ fragmentRef }: Props) {
 	const endPage = data.endPage ?? data.endLocator?.locations?.position ?? '??'
 	const startPage = data.startPage ?? data.startLocator?.locations?.position ?? '??'
 
+	const fakeOpenTranslation = t('readingSessions.openedBookSentence', {
+		pageFragment: 'PAGE_FRAGMENT',
+	})
+	const fakeCloseTranslation = t('readingSessions.closedBookSentence', {
+		pageFragment: 'PAGE_FRAGMENT',
+	})
+
 	return (
 		<Card>
 			<Card.Row>
@@ -68,7 +78,13 @@ export function EventTimeline({ fragmentRef }: Props) {
 						}}
 						timestamp={data.createdAt}
 					>
-						<Text>Opened book at page {startPage}</Text>
+						<TemplatedTranslationText
+							className="text-foreground-muted"
+							fakeTranslation={fakeOpenTranslation}
+							values={{
+								PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: startPage }),
+							}}
+						/>
 					</EventTimelineRow>
 
 					<View className="bg-black/10 dark:bg-white/10 ml-[6.25rem] min-h-[1.5rem] w-px" />
@@ -90,7 +106,13 @@ export function EventTimeline({ fragmentRef }: Props) {
 						}}
 						timestamp={data.createdAt}
 					>
-						<Text>Closed book at page {endPage}</Text>
+						<TemplatedTranslationText
+							className="text-foreground-muted"
+							fakeTranslation={fakeCloseTranslation}
+							values={{
+								PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: endPage }),
+							}}
+						/>
 					</EventTimelineRow>
 				</View>
 

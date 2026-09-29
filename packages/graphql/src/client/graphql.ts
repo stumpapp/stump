@@ -3909,6 +3909,11 @@ export type ReadingSession = {
   userId: Scalars['String']['output'];
 };
 
+
+export type ReadingSessionEventsArgs = {
+  order?: OrderDirection;
+};
+
 /**
  * a view through which a client can resolve conflicts relative to a local ancestor session
  * and any number of remote sessions which were created afterwards

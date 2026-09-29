@@ -63,12 +63,12 @@ export function EventTimeline({ fragmentRef }: Props) {
 				<View className="w-full">
 					<EventTimelineRow
 						icon={{
-							as: Book,
+							as: BookOpen,
 							shape: 'rounded',
 						}}
 						timestamp={data.createdAt}
 					>
-						<Text>Closed book at page {endPage}</Text>
+						<Text>Opened book at page {startPage}</Text>
 					</EventTimelineRow>
 
 					<View className="bg-black/10 dark:bg-white/10 ml-[6.25rem] min-h-[1.5rem] w-px" />
@@ -85,12 +85,12 @@ export function EventTimeline({ fragmentRef }: Props) {
 
 					<EventTimelineRow
 						icon={{
-							as: BookOpen,
+							as: Book,
 							shape: 'rounded',
 						}}
 						timestamp={data.createdAt}
 					>
-						<Text>Opened book at page {startPage}</Text>
+						<Text>Closed book at page {endPage}</Text>
 					</EventTimelineRow>
 				</View>
 

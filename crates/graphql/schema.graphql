@@ -2712,7 +2712,7 @@ type ReadingSession {
 	updatedAt: DateTime
 	deviceIds: [String!]!
 	media: Media
-	events: [SessionEvent!]!
+	events(order: OrderDirection! = ASC): [SessionEvent!]!
 	"""
 	Returns the list of chapter titles read during this session, including the start
 	and end chapters.

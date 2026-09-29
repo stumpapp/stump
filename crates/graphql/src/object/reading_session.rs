@@ -9,6 +9,7 @@ use models::{
 		media_annotation,
 		reading_session::{self, DeviceIds},
 	},
+	shared::ordering::OrderDirection,
 };
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use stump_core::readium::ReadiumManifestGenerator;
@@ -64,19 +65,23 @@ impl ReadingSession {
 		Ok(media)
 	}
 
-	async fn events(&self, ctx: &Context<'_>) -> Result<Vec<SessionEvent>> {
+	async fn events(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default_with = "OrderDirection::Asc")] order: OrderDirection,
+	) -> Result<Vec<SessionEvent>> {
 		// TODO(reading-timeline): access control
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let bookmarks = bookmark::Entity::find()
 			.filter(bookmark::Column::SessionId.eq(self.model.id))
-			.order_by_desc(bookmark::Column::CreatedAt)
+			.order_by(bookmark::Column::CreatedAt, order.into())
 			.all(conn)
 			.await?;
 		let annotations = media_annotation::Entity::find()
 			.filter(media_annotation::Column::SessionId.eq(self.model.id))
-			.order_by_desc(media_annotation::Column::CreatedAt)
+			.order_by(media_annotation::Column::CreatedAt, order.into())
 			.all(conn)
 			.await?;
 
@@ -92,7 +97,10 @@ impl ReadingSession {
 					.into_iter()
 					.map(|a| SessionEvent::Annotation(MediaAnnotation::from(a))),
 			);
-			events.sort_by(|a, b| b.created_at().cmp(&a.created_at())); // desc
+			events.sort_by(|a, b| match order {
+				OrderDirection::Asc => a.created_at().cmp(&b.created_at()),
+				OrderDirection::Desc => b.created_at().cmp(&a.created_at()),
+			});
 			events
 		};
 

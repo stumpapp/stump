@@ -72,7 +72,7 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 					label: t('common.infoSheetStats.completedBooks'),
 					icon: BookCheck,
 					value: stats.completedBooks,
-					suffix: `/ ${stats.bookCount}`,
+					suffix: ` / ${stats.bookCount}`,
 					colors: STAT_COLORS.completed,
 				},
 				...(formattedTime
@@ -80,8 +80,8 @@ export function SeriesOverviewSheet({ isOpen, onClose }: Props) {
 							{
 								label: t('common.infoSheetStats.readingTime'),
 								icon: Clock,
-								value: formattedTime.value,
-								suffix: formattedTime.unit,
+								value: formattedTime[0]?.value ?? '??',
+								suffix: formattedTime[0]?.unit ?? undefined,
 								colors: STAT_COLORS.readingTime,
 							},
 						]

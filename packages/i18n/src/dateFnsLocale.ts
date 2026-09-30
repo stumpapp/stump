@@ -197,7 +197,7 @@ type DurationPart = {
 /**
  * Format a duration in human-readable form, separating the unit and value.
  *
- * Only returns one significant unit (hours, minutes or seconds).
+ * `'1 hour 2 minutes'` -> `[{value: 1, unit: ' hour '}, {value: 2, ' minutes'}]`
  */
 export function formatHumanDurationSeparate(
 	seconds: number,
@@ -225,6 +225,7 @@ export function formatHumanDurationSeparate(
 		})
 		.filter((x): x is DurationPart => x !== null)
 }
+
 /**
  * Format a duration in 'narrow' form
  */

@@ -1,12 +1,13 @@
-import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { FragmentType, graphql, OrderDirection, useFragment } from '@stump/graphql'
 import { Book, BookOpen } from 'lucide-react-native'
 import React from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
 import { Card, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 
+import { useEventOrderStore } from '../store'
 import { AnnotationEvent } from './AnnotationEvent'
 import { BookmarkEvent } from './BookmarkEvent'
 import { EventTimelineRow } from './EventTimelineRow'
@@ -20,7 +21,7 @@ const fragment = graphql(`
 				position
 			}
 		}
-		events {
+		events(order: $eventOrder) {
 			__typename
 			... on Bookmark {
 				...BookmarkEvent
@@ -68,54 +69,71 @@ export function EventTimeline({ fragmentRef }: Props) {
 		pageFragment: 'PAGE_FRAGMENT',
 	})
 
+	const order = useEventOrderStore((state) => state.order)
+	const setOrder = useEventOrderStore((state) => state.setOrder)
+
+	const OpenEvent = (
+		<EventTimelineRow
+			icon={{
+				as: BookOpen,
+				shape: 'rounded',
+			}}
+			timestamp={data.createdAt}
+		>
+			<TemplatedTranslationText
+				className="text-foreground-muted"
+				fakeTranslation={fakeOpenTranslation}
+				values={{
+					PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: startPage }),
+				}}
+			/>
+		</EventTimelineRow>
+	)
+
+	const CloseEvent = (
+		<EventTimelineRow
+			icon={{
+				as: Book,
+				shape: 'rounded',
+			}}
+			timestamp={data.updatedAt}
+		>
+			<TemplatedTranslationText
+				className="text-foreground-muted"
+				fakeTranslation={fakeCloseTranslation}
+				values={{
+					PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: endPage }),
+				}}
+			/>
+		</EventTimelineRow>
+	)
+
 	return (
 		<Card
-			// TODO: support this? api does, not much work to do it just need a callback, the current order, and
-			// swapping the start/end events depending on order
-			actions={<Text className="text-foreground-muted">Newest first</Text>}
+			actions={
+				<Pressable
+					onPress={() =>
+						setOrder(order === OrderDirection.Asc ? OrderDirection.Desc : OrderDirection.Asc)
+					}
+				>
+					{({ pressed }) => (
+						<Text className="text-foreground-muted" style={pressed ? { opacity: 0.8 } : undefined}>
+							{t(`sorting.sortDirectionDate.${order}`)}
+						</Text>
+					)}
+				</Pressable>
+			}
 		>
 			<Card.Row>
 				<View className="w-full">
-					<EventTimelineRow
-						icon={{
-							as: BookOpen,
-							shape: 'rounded',
-						}}
-						timestamp={data.createdAt}
-						showTopConnector={false}
-					>
-						<TemplatedTranslationText
-							className="text-foreground-muted"
-							fakeTranslation={fakeOpenTranslation}
-							values={{
-								PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: startPage }),
-							}}
-						/>
-					</EventTimelineRow>
+					{order === OrderDirection.Asc ? OpenEvent : CloseEvent}
 
 					{data.events.map((event) => (
 						<React.Fragment key={JSON.stringify(event)}>{renderEvent(event)}</React.Fragment>
 					))}
 
-					<EventTimelineRow
-						icon={{
-							as: Book,
-							shape: 'rounded',
-						}}
-						timestamp={data.updatedAt}
-						showBottomConnector={false}
-					>
-						<TemplatedTranslationText
-							className="text-foreground-muted"
-							fakeTranslation={fakeCloseTranslation}
-							values={{
-								PAGE_FRAGMENT: t('readingSessions.pageFragment', { page: endPage }),
-							}}
-						/>
-					</EventTimelineRow>
+					{order === OrderDirection.Asc ? CloseEvent : OpenEvent}
 				</View>
-
-				{/*TODO: start event*/}
 			</Card.Row>
 		</Card>
 	)

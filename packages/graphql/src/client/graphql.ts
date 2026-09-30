@@ -5179,6 +5179,7 @@ export type DeleteAnnotationMobileMutation = { __typename?: 'Mutation', deleteAn
 
 export type BookReadingTimelineSessionIdScreenQueryVariables = Exact<{
   sessionId: Scalars['Int']['input'];
+  eventOrder?: InputMaybe<OrderDirection>;
 }>;
 
 
@@ -7814,7 +7815,7 @@ export const EventTimelineFragmentDoc = new TypedDocumentString(`
       position
     }
   }
-  events {
+  events(order: $eventOrder) {
     __typename
     ... on Bookmark {
       ...BookmarkEvent
@@ -9037,7 +9038,7 @@ export const DeleteAnnotationMobileDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<DeleteAnnotationMobileMutation, DeleteAnnotationMobileMutationVariables>;
 export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentString(`
-    query BookReadingTimelineSessionIdScreen($sessionId: Int!) {
+    query BookReadingTimelineSessionIdScreen($sessionId: Int!, $eventOrder: OrderDirection) {
   readingSessionById(id: $sessionId) {
     id
     createdAt
@@ -9134,7 +9135,7 @@ fragment EventTimeline on ReadingSession {
       position
     }
   }
-  events {
+  events(order: $eventOrder) {
     __typename
     ... on Bookmark {
       ...BookmarkEvent

@@ -522,6 +522,11 @@ type CursorPaginatedBookClubDiscussionMessageResponse {
 	cursorInfo: CursorPaginationInfo!
 }
 
+type CursorPaginatedGlobalReadingTimelineNodeResponse {
+	nodes: [GlobalReadingTimelineNode!]!
+	cursorInfo: CursorPaginationInfo!
+}
+
 "A simple cursor-based pagination input object"
 input CursorPagination {
 	after: String
@@ -879,6 +884,11 @@ input FitWithinResizeInput {
 	width: Int!
 	"The maximum height (in pixels) of the resulting image"
 	height: Int!
+}
+
+type GlobalReadingTimelineNode {
+	mediaId: String!
+	session: SessionWithEvents!
 }
 
 "The sections displayed on a user's home page."
@@ -2603,7 +2613,14 @@ type Query {
 	"Returns a list of all tags."
 	tags: [Tag!]!
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
+	"""
+	Finds a reading session by its ID, if it exists. Access control is enforced such that:
+	- The session owner (i.e., the reader) can always access their own session
+	- Other users can access the session if there are any progress-sharing rules in play
+	(e.g., the session owner and the viewer share a book club membership with it enabled)
+	"""
 	readingSessionById(id: Int!): ReadingSession
+	myReadingTimeline(pagination: CursorPagination! = {after: null, limit: 20}, order: OrderDirection! = DESC): CursorPaginatedGlobalReadingTimelineNodeResponse!
 	me: User!
 	userCount: Int!
 	topReaders(take: Int): [User!]!

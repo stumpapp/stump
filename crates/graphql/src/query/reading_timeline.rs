@@ -1,11 +1,13 @@
 use async_graphql::{Context, Object, Result};
-use models::{entity::reading_session, shared::ordering::OrderDirection};
+use models::{
+	entity::reading_session, services::reading_timeline::sessions_with_events,
+	shared::ordering::OrderDirection,
+};
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	loader::reading_timeline::sessions_with_events,
-	object::reading_timeline::GlobalReadingTimelineNode,
+	object::reading_timeline::{GlobalReadingTimelineNode, SessionWithEvents},
 	pagination::{CursorPaginatedResponse, CursorPagination, CursorPaginationInfo},
 };
 
@@ -14,6 +16,8 @@ pub struct ReadingTimelineQuery;
 
 #[Object]
 impl ReadingTimelineQuery {
+	/// A paginated list of reading sessions and events for the authenticated user,
+	/// for all reading activity across all books
 	async fn my_reading_timeline(
 		&self,
 		ctx: &Context<'_>,
@@ -37,12 +41,10 @@ impl ReadingTimelineQuery {
 			query = query.filter(reading_session::Column::Id.lt(after));
 		}
 
-		let mut sessions = query.limit(limit + 1).all(conn).await?;
-		sessions.truncate(limit as usize);
-		let next_cursor = if sessions.len() as u64 > limit {
-			sessions.last().map(|s| s.id.to_string())
-		} else {
-			None
+		let sessions = query.limit(limit).all(conn).await?;
+		let next_cursor = match sessions.last().map(|s| s.id.to_string()) {
+			Some(id) if sessions.len() == pagination.limit as usize => Some(id),
+			_ => None,
 		};
 
 		if sessions.is_empty() {
@@ -56,8 +58,11 @@ impl ReadingTimelineQuery {
 			});
 		}
 
-		let sessions_with_events =
-			sessions_with_events(sessions, order.into(), conn).await?;
+		let sessions_with_events = sessions_with_events(sessions, order.into(), conn)
+			.await?
+			.into_iter()
+			.map(|s| SessionWithEvents::from_service(s, order))
+			.collect::<Vec<_>>();
 
 		let current_cursor = pagination.after.clone().or_else(|| {
 			sessions_with_events

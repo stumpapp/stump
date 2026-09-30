@@ -1,6 +1,11 @@
-use async_graphql::{ComplexObject, SimpleObject, Union};
+use std::collections::HashMap;
+
+use async_graphql::{SimpleObject, Union};
 use chrono::{DateTime, FixedOffset, Utc};
-use models::shared::enums::ReadingStatus;
+use models::{
+	services::reading_timeline::ServiceSessionWithEvents,
+	shared::{enums::ReadingStatus, ordering::OrderDirection},
+};
 
 use crate::object::{
 	bookmark::Bookmark, media_annotation::MediaAnnotation,
@@ -43,6 +48,34 @@ pub struct SessionWithEvents {
 	pub events: Vec<SessionEvent>,
 }
 
+impl SessionWithEvents {
+	pub fn from_service(
+		(session, bookmarks, annotations): ServiceSessionWithEvents,
+		order: OrderDirection,
+	) -> Self {
+		Self {
+			session: ReadingSession { model: session },
+			events: {
+				let mut events =
+					bookmarks
+						.into_iter()
+						.map(|b| SessionEvent::Bookmark(Bookmark { model: b }))
+						.chain(annotations.into_iter().map(|a| {
+							SessionEvent::Annotation(MediaAnnotation { model: a })
+						}))
+						.collect::<Vec<_>>();
+
+				events.sort_by(|a, b| match order {
+					OrderDirection::Asc => a.created_at().cmp(&b.created_at()),
+					_ => b.created_at().cmp(&a.created_at()),
+				});
+
+				events
+			},
+		}
+	}
+}
+
 /// the timeline of events for a specific readthrough of a book
 #[derive(Clone, SimpleObject)]
 pub struct ReadthroughTimeline {
@@ -58,6 +91,89 @@ pub struct ReadthroughTimeline {
 pub struct BookReadingTimeline {
 	pub readthroughs: Vec<ReadthroughTimeline>,
 	pub total_elapsed_seconds: i64,
+}
+
+impl BookReadingTimeline {
+	pub fn new(
+		sessions_with_events: Vec<SessionWithEvents>,
+		order: OrderDirection,
+	) -> BookReadingTimeline {
+		let mut readthroughs_map: HashMap<i32, ReadthroughTimeline> = HashMap::new();
+
+		for swe in sessions_with_events {
+			let readthrough_number = swe.session.model.readthrough_number;
+
+			let entry = readthroughs_map.entry(readthrough_number).or_insert(
+				ReadthroughTimeline {
+					readthrough_number,
+					started_at: swe.session.model.created_at,
+					finished_at: None,
+					status: swe.session.model.status.clone(),
+					total_elapsed_seconds: 0,
+					sessions: vec![],
+				},
+			);
+			// ^ some of the more aggregate values will have to be computed in a separate
+			// iteration
+
+			entry.total_elapsed_seconds += swe.session.model.elapsed_seconds.unwrap_or(0);
+			entry.sessions.push(swe);
+		}
+
+		let mut readthroughs = readthroughs_map
+			.into_iter()
+			.map(|(_, rt)| rt)
+			.collect::<Vec<_>>();
+		// TODO: double check unstable is ideal here
+		readthroughs.sort_unstable_by(|a, b| match order {
+			OrderDirection::Asc => a.started_at.cmp(&b.started_at),
+			_ => b.started_at.cmp(&a.started_at),
+		});
+
+		let readthroughs = readthroughs
+			.into_iter()
+			.map(|readthrough| {
+				let started_at = readthrough
+					.sessions
+					.iter()
+					.map(|s| s.session.model.created_at)
+					.min();
+
+				let (status, finished_at) = readthrough
+					.sessions
+					.iter()
+					.filter(|s| s.session.model.is_finalized())
+					.map(|s| (s.session.model.status.clone(), s.session.model.updated_at))
+					.last()
+					.unwrap_or((readthrough.status.clone(), None));
+				// ^ the thought here that we only can assign a finished_at to a readthrough if there
+				// is a finalizing session (i.e., finished or abandoned)
+
+				let total_elapsed_seconds = readthrough
+					.sessions
+					.iter()
+					.map(|s| s.session.model.elapsed_seconds.unwrap_or(0))
+					.sum();
+
+				ReadthroughTimeline {
+					readthrough_number: readthrough.readthrough_number,
+					started_at: started_at.unwrap_or(readthrough.started_at),
+					finished_at,
+					status,
+					total_elapsed_seconds,
+					sessions: readthrough.sessions,
+				}
+			})
+			.collect::<Vec<_>>();
+
+		let total_elapsed_seconds =
+			readthroughs.iter().map(|rt| rt.total_elapsed_seconds).sum();
+
+		BookReadingTimeline {
+			readthroughs,
+			total_elapsed_seconds,
+		}
+	}
 }
 
 #[derive(Clone, SimpleObject)]

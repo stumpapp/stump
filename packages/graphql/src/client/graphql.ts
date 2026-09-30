@@ -584,6 +584,12 @@ export type CursorPaginatedBookClubDiscussionMessageResponse = {
   nodes: Array<BookClubDiscussionMessage>;
 };
 
+export type CursorPaginatedGlobalReadingTimelineNodeResponse = {
+  __typename?: 'CursorPaginatedGlobalReadingTimelineNodeResponse';
+  cursorInfo: CursorPaginationInfo;
+  nodes: Array<GlobalReadingTimelineNode>;
+};
+
 /** A simple cursor-based pagination input object */
 export type CursorPagination = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -945,6 +951,12 @@ export type FitWithinResizeInput = {
   height: Scalars['Int']['input'];
   /** The maximum width (in pixels) of the resulting image */
   width: Scalars['Int']['input'];
+};
+
+export type GlobalReadingTimelineNode = {
+  __typename?: 'GlobalReadingTimelineNode';
+  mediaId: Scalars['String']['output'];
+  session: SessionWithEvents;
 };
 
 /** The sections displayed on a user's home page. */
@@ -3526,6 +3538,7 @@ export type Query = {
   metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   /** Get all pending invitations for the current user */
   myBookClubInvitations: Array<BookClubInvitation>;
+  myReadingTimeline: CursorPaginatedGlobalReadingTimelineNodeResponse;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
   onDeck: PaginatedMediaResponse;
@@ -3547,6 +3560,12 @@ export type Query = {
    * A paginated list of reading lists.
    */
   readingLists: PaginatedReadingListResponse;
+  /**
+   * Finds a reading session by its ID, if it exists. Access control is enforced such that:
+   * - The session owner (i.e., the reader) can always access their own session
+   * - Other users can access the session if there are any progress-sharing rules in play
+   * (e.g., the session owner and the viewer share a book club membership with it enabled)
+   */
   readingSessionById?: Maybe<ReadingSession>;
   readingSessionConflictView: ReadingSessionConflictResolutionView;
   recentlyAddedMedia: PaginatedMediaResponse;
@@ -3765,6 +3784,12 @@ export type QueryMetadataFetchRecordArgs = {
 
 export type QueryMetadataProviderConfigByIdArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type QueryMyReadingTimelineArgs = {
+  order?: OrderDirection;
+  pagination?: CursorPagination;
 };
 
 

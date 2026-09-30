@@ -3,11 +3,11 @@ import { graphql, SeriesBooksSceneSeriesNameQuery, UserPermission } from '@stump
 import { useQueryClient } from '@tanstack/react-query'
 import { DownloadCloud, Info, ScanLine } from 'lucide-react-native'
 import { useMemo } from 'react'
-import { Alert } from 'react-native'
 
 import { useEntityListHeader } from '~/components/filter/EntityListHeader'
 import { ActionDef } from '~/components/filter/types'
 import { MiniEntityStatCards } from '~/components/stats'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { useStumpServer } from '~/providers/StumpServerProvider'
 
 import { useBooksFilterMenu } from './BooksFilterMenu'
@@ -73,9 +73,9 @@ export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalAc
 				label: 'Download Series',
 				icon: { ios: 'arrow.down.circle', android: DownloadCloud },
 				onPress: () => {
-					Alert.alert(
+					SystemAlert.alert(
 						'Download Series',
-						'Are you sure you want to enqueue the download for this entire series?',
+						'Are you sure you want to download the entire series?',
 						[
 							{ text: 'Cancel', style: 'cancel' },
 							{ text: 'Download', onPress: additionalActions.onDownloadSeries },

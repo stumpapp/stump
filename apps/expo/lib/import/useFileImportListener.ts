@@ -2,9 +2,9 @@ import * as Sentry from '@sentry/react-native'
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
 import { useCallback, useEffect, useRef } from 'react'
-import { Alert } from 'react-native'
 
 import { useDownloadsState } from '~/components/localLibrary/store'
+import { SystemAlert } from '~/components/ui/system-alert'
 
 import { importLocalFile } from './importFile'
 
@@ -27,17 +27,18 @@ export function useFileImportListener() {
 				if (result.success) {
 					increment()
 
-					Alert.alert('File Imported', `"${result.filename}" has been added to your library.`, [
-						{ text: 'View Library', onPress: () => router.push('/library') },
-						{ text: 'OK' },
-					])
+					SystemAlert.alert(
+						'File Imported',
+						`"${result.filename}" has been added to your library.`,
+						[{ text: 'View Library', onPress: () => router.push('/library') }, { text: 'OK' }],
+					)
 				} else {
 					Sentry.captureMessage('File import failed', { extra: { url, error: result.error } })
-					Alert.alert('Import Failed', result.error)
+					SystemAlert.alert('Import Failed', result.error)
 				}
 			} catch (error) {
 				Sentry.captureException(error, { extra: { url } })
-				Alert.alert(
+				SystemAlert.alert(
 					'Import Error',
 					error instanceof Error ? error.message : 'Failed to import file',
 				)

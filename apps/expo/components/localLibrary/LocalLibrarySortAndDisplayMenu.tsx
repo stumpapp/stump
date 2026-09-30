@@ -15,7 +15,7 @@ import {
 	Trash,
 } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
-import { Alert, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
@@ -42,6 +42,7 @@ import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
 import { DOWNLOAD_PROBLEMS_SHEET_NAME } from '../downloadQueue'
+import { SystemAlert } from '../ui/system-alert'
 import { DownloadSortOption, useDownloadsState } from './store'
 import { SYNC_CONFLICTS_SHEET_NAME } from './syncConflicts'
 
@@ -103,7 +104,7 @@ export function useLocalLibrarySortAndDisplayMenu() {
 	}
 
 	const confirmDeleteAllDownloads = () => {
-		Alert.alert(
+		SystemAlert.alert(
 			t(getActionsKey('deleteAllDownloads.confirmation')),
 			t(getActionsKey('deleteAllDownloads.disclaimer')),
 			[

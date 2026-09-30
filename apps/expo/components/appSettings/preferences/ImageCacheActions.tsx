@@ -1,8 +1,9 @@
 import { Image } from 'lucide-react-native'
-import { Alert, View } from 'react-native'
+import { View } from 'react-native'
 import TurboImage from 'react-native-turbo-image'
 
 import { Button, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 
@@ -12,7 +13,11 @@ export default function ImageCacheActions() {
 	const { t } = useTranslate()
 
 	const onClearCache = async (message: string) => {
-		Alert.alert(message)
+		SystemAlert.alert(message, undefined, [
+			{
+				text: t('common.ok'),
+			},
+		])
 	}
 
 	return (

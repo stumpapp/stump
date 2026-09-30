@@ -1,9 +1,10 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import { Alert, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Input, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -117,7 +118,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 		const trimmedName = name.trim()
 
 		if (!trimmedName) {
-			Alert.alert('Error', 'Please enter a theme name')
+			SystemAlert.alert('Error', 'Please enter a theme name')
 			return
 		}
 
@@ -126,7 +127,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 			!customTheme.colors?.foreground ||
 			!customTheme.colors?.highlight
 		) {
-			Alert.alert('Error', 'Theme colors are required')
+			SystemAlert.alert('Error', 'Theme colors are required')
 			return
 		}
 
@@ -134,7 +135,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 
 		if (isCreateMode) {
 			if (themes[trimmedName]) {
-				Alert.alert('Error', 'A theme with this name already exists')
+				SystemAlert.alert('Error', 'A theme with this name already exists')
 				return
 			}
 			addTheme(trimmedName, customTheme)

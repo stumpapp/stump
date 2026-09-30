@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
-import { Alert, View } from 'react-native'
+import { View } from 'react-native'
 
 import { Button, Card, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
@@ -36,7 +37,7 @@ export function CustomHeaders() {
 			setIsAddingHeader(false)
 		} else {
 			console.error(result.error.errors)
-			Alert.alert(
+			SystemAlert.alert(
 				t('common.error'),
 				result.error.errors[0]?.message || t(getKey('customHeaders.invalidHeader')),
 			)

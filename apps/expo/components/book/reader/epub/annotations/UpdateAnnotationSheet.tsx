@@ -1,9 +1,10 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { Alert, View } from 'react-native'
+import { View } from 'react-native'
 
 import SheetWithHeader from '~/components/SheetWithHeader'
 import { Button, Text } from '~/components/ui'
+import { SystemAlert } from '~/components/ui/system-alert'
 import { useColors } from '~/lib/constants'
 import { Decoration } from '~/modules/readium'
 
@@ -51,7 +52,7 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 		const handleDelete = useCallback(() => {
 			if (!decoration) return
 
-			Alert.alert('Delete Highlight', 'Are you sure you want to delete this annotation?', [
+			SystemAlert.alert('Delete Highlight', 'Are you sure you want to delete this annotation?', [
 				{ text: 'Cancel', style: 'cancel' },
 				{
 					text: 'Delete',

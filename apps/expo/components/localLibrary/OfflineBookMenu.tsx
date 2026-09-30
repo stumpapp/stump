@@ -1,10 +1,11 @@
 import { Stack, useNavigation, useRouter } from 'expo-router'
 import { useCallback, useLayoutEffect, useMemo } from 'react'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
 
 import { epubProgress } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 
+import { SystemAlert } from '../ui/system-alert'
 import AndroidOfflineBookMenu from './AndroidOfflineBookMenu'
 import { DownloadedFile } from './types'
 
@@ -48,7 +49,7 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 	}, [readProgress, currentPage, totalPages])
 
 	const handleMarkAsComplete = useCallback(() => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.markAsRead.label'),
 			t('bookActions.markAsRead.confirmation', {
 				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
@@ -64,7 +65,7 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 	}, [markAsComplete, downloadedFile.id, downloadedFile.pages, downloadedFile.bookName, t])
 
 	const handleClearProgress = useCallback(() => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.clearProgress.label'),
 			t('bookActions.clearProgress.confirmation', {
 				bookTitle: downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
@@ -81,7 +82,7 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 	}, [clearProgress, downloadedFile.id, downloadedFile.bookName, t])
 
 	const handleDelete = useCallback(() => {
-		Alert.alert(
+		SystemAlert.alert(
 			t('bookActions.deleteBook.label'),
 			t('bookActions.deleteBook.confirmation').replace(
 				'{{bookTitle}}',

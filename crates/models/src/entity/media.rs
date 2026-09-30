@@ -281,7 +281,8 @@ pub struct MediaIdentWithSeriesId {
 pub struct MediaThumbSelect {
 	pub id: String,
 	pub path: String,
-	pub series_id: String,
+	pub library_id: String,
+	pub series_id: Option<String>,
 	pub thumbnail_path: Option<String>,
 	pub thumbnail_meta: Option<ImageMetadata>,
 }
@@ -291,6 +292,7 @@ impl MediaThumbSelect {
 		vec![
 			Column::Id,
 			Column::Path,
+			Column::LibraryId,
 			Column::SeriesId,
 			Column::ThumbnailPath,
 			Column::ThumbnailMeta,
@@ -303,7 +305,8 @@ impl From<Model> for MediaThumbSelect {
 		Self {
 			id: model.id,
 			path: model.path,
-			series_id: model.series_id.unwrap_or_default(),
+			library_id: model.library_id,
+			series_id: model.series_id,
 			thumbnail_path: model.thumbnail_path,
 			thumbnail_meta: model.thumbnail_meta,
 		}

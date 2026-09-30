@@ -1,14 +1,10 @@
 use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	entity::{favorite_media, library, library_config, media, series},
+	entity::{favorite_media, library, library_config, media},
 	shared::enums::UserPermission,
 };
-use sea_orm::{
-	prelude::*,
-	sea_query::{OnConflict, Query},
-	IntoActiveModel, QuerySelect, Set,
-};
+use sea_orm::{prelude::*, sea_query::OnConflict, IntoActiveModel, QuerySelect, Set};
 use stump_core::{
 	image::{bump_media_thumbnail_fallbacks, generate_thumbnail_from_book},
 	job::StumpJob,
@@ -172,22 +168,8 @@ impl MediaMutation {
 			.await?
 			.ok_or("Book not found")?;
 
-		let series_id = book
-			.media
-			.series_id
-			.clone()
-			.ok_or("Series ID not set on book")?;
-
 		let (_library, config) = library::Entity::find_for_user(user)
-			.filter(
-				library::Column::Id.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(series_id))
-						.to_owned(),
-				),
-			)
+			.filter(library::Column::Id.eq(&book.media.library_id))
 			.find_also_related(library_config::Entity)
 			.one(core.conn.as_ref())
 			.await?
@@ -228,6 +210,7 @@ impl MediaMutation {
 
 		bump_media_thumbnail_fallbacks(
 			core.conn.as_ref(),
+			&book.media.library_id,
 			book.media.series_id.as_deref(),
 		)
 		.await?;

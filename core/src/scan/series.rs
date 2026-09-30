@@ -219,12 +219,16 @@ impl JobLifecycle for SeriesScanJob {
 		let did_create = output.created_media > 0;
 		let did_update = output.updated_media > 0;
 
-		let image_options = self
-			.config
-			.as_ref()
-			.and_then(|o| o.thumbnail_config.clone());
+		let config = self.config.as_ref().ok_or_else(|| {
+			JobError::InitFailed("Library config missing from series scan".into())
+		})?;
+		let image_options = config.thumbnail_config.clone();
 		if image_options.is_none() && (did_create || did_update) {
-			bump_media_thumbnail_fallbacks(ctx.conn(), Some(&self.id)).await?;
+			let library_id = config.library_id.as_deref().ok_or_else(|| {
+				JobError::InitFailed("Library owner missing from series scan".into())
+			})?;
+			bump_media_thumbnail_fallbacks(ctx.conn(), library_id, Some(&self.id))
+				.await?;
 		}
 
 		ctx.emit_event(CoreEvent::JobOutput(event::JobOutput {
@@ -263,7 +267,7 @@ impl JobLifecycle for SeriesScanJob {
 			if let Err(e) = ctx
 				.enqueue(StumpJob::placeholder_generation(
 					PlaceholderGenerationJobConfig::new(
-						PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
+						PlaceholderGenerationJobScope::BooksInSeries(self.id.clone()),
 						false,
 					),
 				))

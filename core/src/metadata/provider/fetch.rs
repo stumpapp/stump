@@ -29,33 +29,33 @@ async fn library_type_for_series(
 		.await?
 		.ok_or_else(|| CoreError::NotFound(format!("Series {series_id}")))?;
 
+	library_type_for_library(conn, &library_id).await
+}
+
+async fn library_type_for_library(
+	conn: &DatabaseConnection,
+	library_id: &str,
+) -> Result<LibraryType, CoreError> {
 	let config = library_config::Entity::find()
 		.filter(library_config::Column::LibraryId.eq(library_id))
 		.one(conn)
-		.await
-		.map_err(|e| CoreError::InternalError(e.to_string()))?
+		.await?
 		.ok_or_else(|| CoreError::NotFound("Library missing config!".into()))?;
-
 	Ok(config.library_type)
 }
 
-// TODO: This is terrible, I should just bite the bullet and put a direct fk on media
 async fn library_type_for_media(
 	conn: &DatabaseConnection,
 	media_id: &str,
 ) -> Result<LibraryType, CoreError> {
-	let tuple = media::Entity::find()
-		.filter(media::Column::Id.eq(media_id))
-		.find_also_related(series::Entity)
+	let library_id = media::Entity::find_by_id(media_id)
+		.select_only()
+		.column(media::Column::LibraryId)
+		.into_tuple::<String>()
 		.one(conn)
 		.await?
 		.ok_or_else(|| CoreError::NotFound(format!("Media {media_id}")))?;
-
-	let (_, Some(series)) = tuple else {
-		return Err(CoreError::NotFound(format!("Series for media {media_id}")));
-	};
-
-	library_type_for_series(conn, &series.id).await
+	library_type_for_library(conn, &library_id).await
 }
 
 /// Filters provider configs down to those that support the given library type, and,

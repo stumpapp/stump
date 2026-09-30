@@ -114,17 +114,8 @@ impl LibraryMutation {
 		let txn = core.conn.as_ref().begin().await?;
 
 		let deleted_media_ids = media::Entity::delete_many()
-			.filter(
-				media::Column::Status.ne(FileStatus::Ready.to_string()).and(
-					media::Column::SeriesId.in_subquery(
-						Query::select()
-							.column(series::Column::Id)
-							.from(series::Entity)
-							.and_where(series::Column::LibraryId.eq(id.to_string()))
-							.to_owned(),
-					),
-				),
-			)
+			.filter(media::Column::Status.ne(FileStatus::Ready.to_string()))
+			.filter(media::Column::LibraryId.eq(id.to_string()))
 			.exec_with_returning(&txn)
 			.await?
 			.into_iter()
@@ -137,13 +128,13 @@ impl LibraryMutation {
 			.filter(
 				Condition::any()
 					.add(series::Column::Status.ne(FileStatus::Ready.to_string()))
-					// TODO: Double check that this query is correct
 					.add(
 						series::Column::Id.not_in_subquery(
 							Query::select()
 								.column(media::Column::SeriesId)
 								.distinct()
 								.from(media::Entity)
+								.and_where(media::Column::SeriesId.is_not_null())
 								.to_owned(),
 						),
 					),
@@ -155,8 +146,8 @@ impl LibraryMutation {
 			.collect::<Vec<_>>();
 		tracing::trace!(?deleted_series_ids, "Deleted series ids");
 
-		let is_library_empty = series::Entity::find()
-			.filter(series::Column::LibraryId.eq(id.to_string()))
+		let is_library_empty = media::Entity::find()
+			.filter(media::Column::LibraryId.eq(id.to_string()))
 			.count(&txn)
 			.await? == 0;
 
@@ -346,7 +337,7 @@ impl LibraryMutation {
 						Query::select()
 							.column(media::Column::Id)
 							.from(media::Entity)
-							.and_where(media::Column::SeriesId.is_in(series_ids))
+							.and_where(media::Column::LibraryId.eq(library.id.clone()))
 							.to_owned(),
 					),
 				)
@@ -1040,15 +1031,7 @@ impl LibraryMutation {
 			.await?;
 
 		let books = media::Entity::find()
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(library_id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(library_id.clone()))
 			.select_only()
 			.columns(media::MediaIdentSelect::columns())
 			.into_model::<media::MediaIdentSelect>()
@@ -1096,15 +1079,7 @@ impl LibraryMutation {
 			.await?;
 
 		media::Entity::update_many()
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(library_id))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(library_id))
 			.col_expr(media::Column::ThumbnailPath, Expr::value(None::<String>))
 			.col_expr(
 				media::Column::ThumbnailMeta,
@@ -1238,15 +1213,7 @@ impl LibraryMutation {
 		let library_id_str = library.id.clone();
 
 		let media_ids: Vec<String> = media::Entity::find()
-			.filter(
-				media::Column::SeriesId.in_subquery(
-					Query::select()
-						.column(series::Column::Id)
-						.from(series::Entity)
-						.and_where(series::Column::LibraryId.eq(&library_id_str))
-						.to_owned(),
-				),
-			)
+			.filter(media::Column::LibraryId.eq(&library_id_str))
 			.select_only()
 			.column(media::Column::Id)
 			.into_tuple()

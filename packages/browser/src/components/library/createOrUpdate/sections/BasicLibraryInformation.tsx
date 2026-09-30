@@ -1,5 +1,5 @@
 import { Input, InputGroup, Label, Text, TextArea } from '@stump/components'
-import { UserPermission } from '@stump/graphql'
+import { OrganizationMode, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import { Suspense } from 'react'
@@ -25,6 +25,8 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 	const { checkPermission } = useAppContext()
 
 	const isCreatingLibrary = !ctx?.library
+	const isMetadata =
+		useWatch({ control: form.control, name: 'organizationMode' }) === OrganizationMode.Metadata
 	const tags = useWatch({ control: form.control, name: 'tags' })
 
 	const { t } = useLocaleContext()
@@ -93,7 +95,12 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					id="oneshotsDirectory"
 					placeholder={t(getKey('oneshotsDirectory.placeholder'))}
 					errorMessage={errors.oneshotsDirectory?.message}
-					description={t(getKey('oneshotsDirectory.description'))}
+					disabled={isMetadata}
+					description={
+						isMetadata
+							? t(getKey('organizationMode.noOneshots'))
+							: t(getKey('oneshotsDirectory.description'))
+					}
 					{...form.register('oneshotsDirectory')}
 				/>
 			</div>

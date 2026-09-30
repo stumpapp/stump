@@ -14,6 +14,7 @@ import SeriesHeader from './SeriesHeader'
 const query = graphql(`
 	query SeriesLayout($id: ID!) {
 		seriesById(id: $id) {
+			kind
 			id
 			path
 			library {

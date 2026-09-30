@@ -215,6 +215,10 @@ impl LibraryMutation {
 	) -> Result<Library> {
 		let core = ctx.data::<CoreContext>()?;
 
+		if let Some(config) = &input.config {
+			config.validate_organization(None)?;
+		}
+
 		enforce_valid_library_path(core.conn.as_ref(), &input.path, None).await?;
 
 		let scan_after_creation = input.scan_after_persist;
@@ -373,6 +377,11 @@ impl LibraryMutation {
 			return Err("Library is missing associated config!".into());
 		};
 
+		if let Some(config) = &input.config {
+			config.validate_organization(Some(existing_config.organization_mode))?;
+		}
+		let has_config = input.config.is_some();
+
 		enforce_valid_library_path(
 			core.conn.as_ref(),
 			&input.path,
@@ -413,6 +422,11 @@ impl LibraryMutation {
 		let txn = core.conn.as_ref().begin().await?;
 
 		let (library, config) = input.into_active_model();
+		let config = if has_config {
+			config
+		} else {
+			existing_config.clone().into()
+		};
 
 		let _updated_config = library_config::ActiveModel {
 			id: Set(existing_config.id),

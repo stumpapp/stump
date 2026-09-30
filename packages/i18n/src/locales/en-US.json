@@ -500,6 +500,21 @@
 						"description": "Each folder at any level recursively is a single series"
 					}
 				}
+			},
+			"organizationMode": {
+				"label": "Organization",
+				"description": "Choose how Stump groups books into series.",
+				"filesystem": {
+					"label": "Filesystem",
+					"description": "Group books using their folders and a library pattern."
+				},
+				"metadata": {
+					"label": "Metadata",
+					"description": "Scan every folder. Group books by their series metadata; books without a series stay standalone."
+				},
+				"immutable": "Organization cannot be changed after creation. Create a new library to use a different mode.",
+				"processingRequired": "Required for metadata organization. Unchanged files are re-read only when you regenerate metadata.",
+				"noOneshots": "Metadata libraries keep books without series metadata standalone."
 			}
 		},
 		"scan": {

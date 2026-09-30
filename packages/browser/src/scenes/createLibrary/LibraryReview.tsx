@@ -1,5 +1,5 @@
 import { Heading, Label, Text } from '@stump/components'
-import { LibraryPattern } from '@stump/graphql'
+import { LibraryPattern, OrganizationMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { PropsWithChildren } from 'react'
@@ -147,13 +147,23 @@ export default function LibraryReview() {
 				description={t(getStepKey(2, 'description'))}
 			>
 				<div>
-					<Label>{t(getLabelKey('pattern'))}</Label>
+					<Label>{t('createOrUpdateLibraryForm.fields.organizationMode.label')}</Label>
 					<Text variant="muted" size="sm">
-						{state.libraryPattern === LibraryPattern.CollectionBased
-							? t(getPatternKey('collectionPriority.label'))
-							: t(getPatternKey('seriesPriority.label'))}
+						{t(
+							`createOrUpdateLibraryForm.fields.organizationMode.${state.organizationMode === OrganizationMode.Metadata ? 'metadata' : 'filesystem'}.label`,
+						)}
 					</Text>
 				</div>
+				{state.organizationMode !== OrganizationMode.Metadata && (
+					<div>
+						<Label>{t(getLabelKey('pattern'))}</Label>
+						<Text variant="muted" size="sm">
+							{state.libraryPattern === LibraryPattern.CollectionBased
+								? t(getPatternKey('collectionPriority.label'))
+								: t(getPatternKey('seriesPriority.label'))}
+						</Text>
+					</div>
+				)}
 
 				<div>
 					<Label>{t(getLabelKey('ignoreRules'))}</Label>

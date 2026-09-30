@@ -4,6 +4,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
+import { invalidateThumbnailQueries } from '@/utils/query'
+
 import {
 	getMediaFieldComparisons,
 	getSeriesFieldComparisons,
@@ -147,6 +149,7 @@ export function useMatchActions() {
 	const queryClient = useQueryClient()
 
 	const invalidateQueries = () => {
+		invalidateThumbnailQueries(queryClient)
 		queryClient.invalidateQueries({
 			predicate: ({ queryKey }) =>
 				queryKey.some((key) => typeof key === 'string' && key === 'pendingMetadataMatches') ||

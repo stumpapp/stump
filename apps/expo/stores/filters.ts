@@ -39,10 +39,12 @@ export function createFilterStore<F, O>(defaultFilter: F, defaultSort: O) {
 	}))
 }
 
-export const createBookFilterStore = (initialFilter: Partial<MediaFilterInput> = {}) =>
-	createFilterStore<MediaFilterInput, MediaOrderBy>(initialFilter, {
+export const createBookFilterStore = (
+	initialFilter: Partial<MediaFilterInput> = {},
+	initialSort: MediaOrderBy = {
 		media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc },
-	})
+	},
+) => createFilterStore<MediaFilterInput, MediaOrderBy>(initialFilter, initialSort)
 
 export const useInitialBookFilters = () => {
 	const initialFilters = useLocalSearchParams<{ initialFilters?: string }>()

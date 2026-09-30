@@ -78,7 +78,7 @@ export default function LibrarySideBarSection({
 			return (
 				<SideBarButtonLink
 					key={library.id}
-					to={paths.librarySeries(library.id)}
+					to={paths.library(library.id)}
 					isActive={currentLibraryId === library.id}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}

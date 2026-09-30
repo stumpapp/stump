@@ -1,5 +1,5 @@
 import { Text } from '@stump/components'
-import { LibraryPattern, useFragment } from '@stump/graphql'
+import { LibraryPattern, OrganizationMode, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useLibraryContext } from '@/scenes/library/context'
@@ -11,7 +11,7 @@ export default function PatternDisplay() {
 
 	const { library } = useLibraryContext()
 	const {
-		config: { libraryPattern },
+		config: { libraryPattern, organizationMode },
 	} = useFragment(LibrarySettingsConfig, library)
 
 	const localeKey =
@@ -23,11 +23,17 @@ export default function PatternDisplay() {
 			data-testid="unrestricted-meta"
 		>
 			<div className="px-2.5 py-0.5 flex items-center text-warning">
-				<span className="font-medium">{t(getOptionKey(`${localeKey}.label`))}</span>
+				<span className="font-medium">
+					{organizationMode === OrganizationMode.Metadata
+						? t('createOrUpdateLibraryForm.fields.organizationMode.metadata.label')
+						: t(getOptionKey(`${localeKey}.label`))}
+				</span>
 			</div>
 			<div className="p-2.5 rounded-lg bg-warning/15">
 				<Text size="sm" className="text-warning">
-					{t(getOptionKey(`${localeKey}.description`))}
+					{organizationMode === OrganizationMode.Metadata
+						? t('createOrUpdateLibraryForm.fields.organizationMode.metadata.description')
+						: t(getOptionKey(`${localeKey}.description`))}
 				</Text>
 			</div>
 		</div>

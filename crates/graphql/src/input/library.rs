@@ -3,8 +3,8 @@ use models::{
 	entity::{library, library_config},
 	shared::{
 		enums::{
-			LibraryPattern, LibraryType, LibraryViewMode, ReadingDirection,
-			ReadingImageScaleFit, ReadingMode,
+			LibraryPattern, LibraryType, LibraryViewMode, OrganizationMode,
+			ReadingDirection, ReadingImageScaleFit, ReadingMode,
 		},
 		ignore_rules::IgnoreRules,
 		image_processor_options::ImageProcessorOptions,
@@ -58,6 +58,7 @@ impl CreateOrUpdateLibraryInput {
 
 #[derive(Debug, Default, InputObject)]
 pub struct LibraryConfigInput {
+	pub organization_mode: Option<OrganizationMode>,
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
 	pub generate_file_hashes: bool,
@@ -79,8 +80,25 @@ pub struct LibraryConfigInput {
 }
 
 impl LibraryConfigInput {
+	pub fn validate_organization(
+		&self,
+		existing: Option<OrganizationMode>,
+	) -> Result<()> {
+		if existing.is_some_and(|mode| {
+			self.organization_mode
+				.is_some_and(|requested| requested != mode)
+		}) {
+			return Err("Library organization cannot be changed after creation".into());
+		}
+		validate_organization(
+			self.organization_mode.or(existing).unwrap_or_default(),
+			self.process_metadata,
+			self.oneshots_directory.as_deref(),
+		)
+	}
 	pub fn into_active_model(self) -> library_config::ActiveModel {
 		let LibraryConfigInput {
+			organization_mode,
 			convert_rar_to_zip,
 			hard_delete_conversions,
 			generate_file_hashes,
@@ -107,6 +125,7 @@ impl LibraryConfigInput {
 			.unwrap_or_default();
 
 		library_config::ActiveModel {
+			organization_mode: organization_mode.map(Set).unwrap_or_default(),
 			convert_rar_to_zip: Set(convert_rar_to_zip),
 			hard_delete_conversions: Set(hard_delete_conversions),
 			generate_file_hashes: Set(generate_file_hashes),
@@ -234,6 +253,16 @@ impl PatchLibraryConfigInput {
 		self,
 		model: library_config::Model,
 	) -> Result<library_config::ActiveModel> {
+		let oneshots = match &self.oneshots_directory {
+			MaybeUndefined::Value(value) => Some(value.as_str()),
+			MaybeUndefined::Null => None,
+			MaybeUndefined::Undefined => model.oneshots_directory.as_deref(),
+		};
+		validate_organization(
+			model.organization_mode,
+			self.process_metadata.unwrap_or(model.process_metadata),
+			oneshots,
+		)?;
 		let PatchLibraryConfigInput {
 			convert_rar_to_zip,
 			hard_delete_conversions,
@@ -328,4 +357,20 @@ impl PatchLibraryConfigInput {
 			},
 		})
 	}
+}
+
+fn validate_organization(
+	mode: OrganizationMode,
+	process_metadata: bool,
+	oneshots_directory: Option<&str>,
+) -> Result<()> {
+	if mode == OrganizationMode::Metadata {
+		if !process_metadata {
+			return Err("Metadata libraries require metadata processing".into());
+		}
+		if oneshots_directory.is_some() {
+			return Err("Metadata libraries do not use a oneshots directory".into());
+		}
+	}
+	Ok(())
 }

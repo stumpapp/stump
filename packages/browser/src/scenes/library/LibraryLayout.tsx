@@ -44,6 +44,7 @@ const query = graphql(`
 				}
 			}
 			config {
+				organizationMode
 				defaultLibraryViewMode
 				hideSeriesView
 			}

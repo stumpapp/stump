@@ -6,7 +6,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import getProperty from 'lodash/get'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { match, P } from 'ts-pattern'
@@ -71,9 +71,7 @@ const fragment = graphql(`
 const mutation = graphql(`
 	mutation UpdateSeriesMetadata($id: ID!, $input: SeriesMetadataInput!) {
 		updateSeriesMetadata(id: $id, input: $input) {
-			metadata {
-				...SeriesMetadataEditor
-			}
+			id
 		}
 	}
 `)
@@ -94,9 +92,7 @@ type Props = {
 // TODO(ux): Improve error states within form
 
 export default function SeriesMetadataEditor({ seriesId, data }: Props) {
-	const [_data, setData] = useState(() => data)
-
-	const metadata = useFragment(fragment, _data)
+	const metadata = useFragment(fragment, data)
 	const paths = usePaths()
 
 	const [showMissing, setShowMissing] = useState(false)
@@ -229,6 +225,11 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 		resolver: zodResolver(schema),
 	})
 
+	useEffect(() => {
+		form.reset(getEditorDefaultValues(metadata))
+		setLockedFields(new Set(metadata?.lockedFields ?? []))
+	}, [form, metadata])
+
 	const client = useQueryClient()
 	const { sdk } = useSDK()
 
@@ -239,10 +240,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 	}, [client, sdk, seriesId])
 
 	const { mutate: updateMetadata } = useGraphQLMutation(mutation, {
-		onSuccess: ({ updateSeriesMetadata: { metadata } }) => {
-			if (metadata) {
-				setData(metadata)
-			}
+		onSuccess: () => {
 			setState(MetadataEditorState.Display)
 			onRefetchParents()
 		},

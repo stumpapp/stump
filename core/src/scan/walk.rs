@@ -72,6 +72,7 @@ pub struct WalkerCtx {
 	pub dir_mtimes: HashMap<String, u64>,
 	/// The series ID for this walk, if scoped to a specific series
 	pub series_id: Option<String>,
+	pub library_id: Option<String>,
 	/// the directory for the library which oneshots are stored in, if any. this is
 	/// **relative** to the library path and, if set, not a fully qualified path
 	pub oneshots_directory: Option<String>,
@@ -319,6 +320,8 @@ pub async fn walk_library(
 /// The output of walking a series
 #[derive(Default)]
 pub struct WalkedSeries {
+	pub seen_directories: u64,
+	pub ignored_directories: u64,
 	/// The total number of files seen during the walk
 	pub seen_files: u64,
 	/// The number of files that were either ignored via ignore rules or common ignore patterns
@@ -365,6 +368,7 @@ pub async fn walk_series(
 		options,
 		dir_mtimes,
 		series_id,
+		library_id,
 		..
 	}: WalkerCtx,
 ) -> CoreResult<WalkedSeries> {
@@ -380,92 +384,116 @@ pub async fn walk_series(
 
 	let path_buf = path.to_path_buf();
 	let walk_start = std::time::Instant::now();
-	let (valid_entries, ignored_entries, observed_dir_mtimes): (
-		Vec<DirEntry>,
-		Vec<DirEntry>,
-		HashMap<String, u64>,
-	) = tokio::task::spawn_blocking(move || {
-		let mut walkdir = WalkDir::new(&path_buf);
-		if let Some(num) = max_depth {
-			walkdir = walkdir.max_depth(num);
-		}
-
-		let root_str = path_buf.to_string_lossy().into_owned();
-
-		let mut it = walkdir.into_iter();
-
-		let mut valid = Vec::new();
-		let mut ignored = Vec::new();
-		let mut observed = HashMap::new();
-
-		loop {
-			match it.next() {
-				None => break,
-				Some(Err(error)) => {
-					tracing::warn!(
-						error = ?error,
-						path = ?error.path(),
-						"Error encountered during walk, skipping entry"
-					);
-					continue;
-				},
-				Some(Ok(entry)) => {
-					let entry_path = entry.path();
-
-					if entry_path.is_dir() {
-						let path_str = entry_path.to_string_lossy().into_owned();
-						let current_mtime = entry_path
-							.metadata()
-							.and_then(|m| m.modified())
-							.map(|t| {
-								t.duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
-							})
-							.unwrap_or(0);
-						let did_change = dir_mtimes
-							.get(&path_str)
-							.is_none_or(|&prev_mtime| prev_mtime != current_mtime);
-
-						// no point observing mtimes if unchanged, as the write path will be useless since the
-						// value is already same as before
-						if did_change {
-							tracing::trace!(
-								mtime = current_mtime,
-								path = path_str,
-								"Observed changed dir"
-							);
-							observed.insert(path_str.clone(), current_mtime);
-						}
-
-						// we never skip the series root, itself. the mtime might not accurately
-						// reflect changes deeper in the tree, and so skipping would cause us
-						// to miss any changes at those levels
-						let is_root = path_str == root_str;
-						if !is_root && !did_change {
-							tracing::trace!(
-								mtime = current_mtime,
-								path = path_str,
-								"Skipping unchanged dir"
-							);
-							it.skip_current_dir();
-						}
-						continue;
-					}
-
-					if ignore_rules.is_match(entry_path)
-						|| entry_path.is_default_ignored()
-					{
-						ignored.push(entry);
-					} else {
-						valid.push(entry);
-					}
-				},
+	let (
+		valid_entries,
+		ignored_entries,
+		observed_dir_mtimes,
+		seen_directories,
+		ignored_directories,
+	): (Vec<DirEntry>, Vec<DirEntry>, HashMap<String, u64>, u64, u64) =
+		tokio::task::spawn_blocking(move || {
+			let mut walkdir = WalkDir::new(&path_buf);
+			if let Some(num) = max_depth {
+				walkdir = walkdir.max_depth(num);
 			}
-		}
 
-		(valid, ignored, observed)
-	})
-	.await
-	.map_err(|e| CoreError::InternalError(format!("Series walk task panicked: {e}")))?;
+			let root_str = path_buf.to_string_lossy().into_owned();
+
+			let mut it = walkdir.into_iter();
+
+			let mut valid = Vec::new();
+			let mut ignored = Vec::new();
+			let mut observed = HashMap::new();
+			let mut seen_directories = 0;
+			let mut ignored_directories = 0;
+
+			loop {
+				match it.next() {
+					None => break,
+					Some(Err(error)) => {
+						tracing::warn!(
+							error = ?error,
+							path = ?error.path(),
+							"Error encountered during walk, skipping entry"
+						);
+						continue;
+					},
+					Some(Ok(entry)) => {
+						let entry_path = entry.path();
+
+						if entry_path.is_dir() {
+							let path_str = entry_path.to_string_lossy().into_owned();
+							seen_directories += 1;
+							if path_str != root_str
+								&& (ignore_rules.is_match(entry_path)
+									|| entry_path.is_hidden_file())
+							{
+								ignored_directories += 1;
+								it.skip_current_dir();
+								continue;
+							}
+							let current_mtime = entry_path
+								.metadata()
+								.and_then(|m| m.modified())
+								.map(|t| {
+									t.duration_since(UNIX_EPOCH)
+										.unwrap_or_default()
+										.as_secs()
+								})
+								.unwrap_or(0);
+							let did_change = dir_mtimes
+								.get(&path_str)
+								.is_none_or(|&prev_mtime| prev_mtime != current_mtime);
+
+							// no point observing mtimes if unchanged, as the write path will be useless since the
+							// value is already same as before
+							if did_change {
+								tracing::trace!(
+									mtime = current_mtime,
+									path = path_str,
+									"Observed changed dir"
+								);
+								observed.insert(path_str.clone(), current_mtime);
+							}
+
+							// we never skip the series root, itself. the mtime might not accurately
+							// reflect changes deeper in the tree, and so skipping would cause us
+							// to miss any changes at those levels
+							let is_root = path_str == root_str;
+							if !is_root && !did_change {
+								tracing::trace!(
+									mtime = current_mtime,
+									path = path_str,
+									"Skipping unchanged dir"
+								);
+								it.skip_current_dir();
+							}
+							continue;
+						}
+
+						if ignore_rules.is_match(entry_path)
+							|| entry_path.is_default_ignored()
+						{
+							ignored.push(entry);
+						} else {
+							valid.push(entry);
+						}
+					},
+				}
+			}
+
+			(
+				valid,
+				ignored,
+				observed,
+				seen_directories,
+				ignored_directories,
+			)
+		})
+		.await
+		.map_err(|e| {
+			CoreError::InternalError(format!("Series walk task panicked: {e}"))
+		})?;
 
 	let valid_entries_len = valid_entries.len() as u64;
 	let ignored_files = ignored_entries.len() as u64;
@@ -479,8 +507,11 @@ pub async fn walk_series(
 
 	tracing::trace!("Fetching existing media...");
 	let fetch_start = std::time::Instant::now();
-	let existing_media = match series_id.as_deref() {
-		Some(id) => {
+	let scope = series_id
+		.map(|id| media::Column::SeriesId.eq(id))
+		.or_else(|| library_id.map(|id| media::Column::LibraryId.eq(id)));
+	let existing_media = match scope {
+		Some(scope) => {
 			media::Entity::find()
 				.columns(vec![
 					media::Column::Id,
@@ -488,7 +519,7 @@ pub async fn walk_series(
 					media::Column::ModifiedAt,
 					media::Column::Status,
 				])
-				.filter(media::Column::SeriesId.eq(id))
+				.filter(scope)
 				.all(db.as_ref())
 				.await?
 		},
@@ -591,7 +622,7 @@ pub async fn walk_series(
 	let to_visit = book_visit_operations.len();
 	tracing::trace!(to_visit, "Found media to visit");
 
-	let skipped_files = seen_files - (to_create + to_visit) as u64;
+	let skipped_files = valid_entries_len - (to_create + to_visit) as u64;
 	tracing::trace!(
 		skipped_files,
 		"Skipped files: {seen_files} - ({to_create} + {to_visit})"
@@ -609,6 +640,8 @@ pub async fn walk_series(
 	);
 
 	Ok(WalkedSeries {
+		seen_directories,
+		ignored_directories,
 		seen_files,
 		ignored_files,
 		skipped_files,

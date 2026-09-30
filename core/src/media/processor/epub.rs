@@ -1,4 +1,5 @@
 use merge::Merge;
+use models::shared::enums::OrganizationMode;
 use quick_xml::{escape::unescape, events::Event, Reader};
 use std::{
 	collections::HashMap,
@@ -81,6 +82,7 @@ impl MediaProcessor for EpubProcessor {
 	fn process_metadata(
 		&self,
 		path: &Path,
+		organization_mode: OrganizationMode,
 	) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
 		let mut epub_file = EpubDoc::new(path)?;
 		let metadata_map = metadata_to_map(epub_file.metadata.clone());
@@ -89,9 +91,10 @@ impl MediaProcessor for EpubProcessor {
 		tracing::trace!(before = ?embedded_metadata, "Processing embedded metadata");
 
 		let root_file_path = epub_file.root_file.clone();
-		if let Some(Ok(parsed_embedded_metadata)) = epub_file
+		if let Some(parsed_embedded_metadata) = epub_file
 			.get_resource_str_by_path(&root_file_path)
 			.map(|xml| parse_opf_xml(&xml))
+			.transpose()?
 		{
 			let additional_metadata =
 				ProcessedMediaMetadata::from(parsed_embedded_metadata);
@@ -104,7 +107,14 @@ impl MediaProcessor for EpubProcessor {
 		let file_path = path.with_extension("opf");
 		if file_path.exists() {
 			let opf_string = std::fs::read_to_string(file_path)?;
-			let opf_metadata = parse_opf_xml(&opf_string)?;
+			let opf_metadata = match parse_opf_xml(&opf_string) {
+				Ok(metadata) => metadata,
+				Err(error) if organization_mode == OrganizationMode::Filesystem => {
+					tracing::warn!(?error, "Ignoring invalid optional OPF sidecar");
+					return Ok(Some(embedded_metadata));
+				},
+				Err(error) => return Err(error),
+			};
 
 			// Prioritize the OPF metadata over the embedded metadata
 			let opf_metadata = ProcessedMediaMetadata::from(opf_metadata);
@@ -125,20 +135,14 @@ impl MediaProcessor for EpubProcessor {
 	) -> Result<ProcessedMediaFile, MediaProcessorError> {
 		tracing::trace!(?path, "Processing epub");
 
-		let metadata = self.process_metadata(path);
+		let metadata = if options.process_metadata {
+			self.process_metadata(path, options.organization_mode)?
+		} else {
+			None
+		};
 
 		let mut epub_file = EpubDoc::new(path)?;
 		let pages = compute_synthetic_page_count(&mut epub_file)?;
-
-		// Get metadata from epub file if process_metadata failed
-		let metadata = match metadata {
-			Ok(Some(m)) => m,
-			result => {
-				tracing::trace!(?result, "Falling back to epub-rs metadata");
-				let metadata_map = metadata_to_map(epub_file.metadata);
-				ProcessedMediaMetadata::from(metadata_map)
-			},
-		};
 
 		let hashes = self.generate_hashes(path, options)?;
 
@@ -146,7 +150,7 @@ impl MediaProcessor for EpubProcessor {
 			path: path.to_path_buf(),
 			hash: hashes.stump,
 			koreader_hash: hashes.koreader,
-			metadata: Some(metadata),
+			metadata,
 			pages,
 		})
 	}
@@ -593,6 +597,8 @@ fn parse_opf_xml(
 	let mut current_tag = String::new();
 	let mut buf = Vec::new();
 	let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
+	let mut depth = 0usize;
+	let mut has_root = false;
 
 	// tags which _might_ contain html, will be handled differently if encountered
 	const HTML_CONTENT_TAGS: [&str; 3] = ["description", "summary", "synopsis"];
@@ -602,6 +608,8 @@ fn parse_opf_xml(
 
 		match reader.read_event_into(&mut buf) {
 			Ok(Event::Start(ref e)) => {
+				has_root = true;
+				depth += 1;
 				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
 				let base_tag = tag_name
 					.strip_prefix("dc:")
@@ -613,7 +621,10 @@ fn parse_opf_xml(
 				} else {
 					current_tag = base_tag.clone();
 
-					for attr in e.attributes().flatten() {
+					for attr in e.attributes() {
+						let attr = attr.map_err(|error| {
+							MediaProcessorError::Metadata(error.to_string())
+						})?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
 								let scheme =
@@ -639,13 +650,17 @@ fn parse_opf_xml(
 				}
 			},
 			Ok(Event::Empty(ref e)) => {
+				has_root = true;
 				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
 
 				if tag_name == "meta" {
 					let mut meta_name = String::new();
 					let mut meta_content = String::new();
 
-					for attr in e.attributes().flatten() {
+					for attr in e.attributes() {
+						let attr = attr.map_err(|error| {
+							MediaProcessorError::Metadata(error.to_string())
+						})?;
 						match attr.key.as_ref() {
 							b"name" => {
 								let name = String::from_utf8_lossy(&attr.value);
@@ -681,7 +696,10 @@ fn parse_opf_xml(
 					let mut tag_key = base_tag.clone();
 					let mut tag_content = String::new();
 
-					for attr in e.attributes().flatten() {
+					for attr in e.attributes() {
+						let attr = attr.map_err(|error| {
+							MediaProcessorError::Metadata(error.to_string())
+						})?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
 								let scheme =
@@ -752,12 +770,17 @@ fn parse_opf_xml(
 				}
 			},
 			Ok(Event::End(_)) => {
+				depth = depth.saturating_sub(1);
 				current_tag.clear();
 			},
-			Ok(Event::Eof) => break,
+			Ok(Event::Eof) if depth == 0 && has_root => break,
+			Ok(Event::Eof) => {
+				return Err(MediaProcessorError::Metadata(
+					"Unexpected end of OPF XML".into(),
+				))
+			},
 			Err(e) => {
-				tracing::warn!("Error parsing OPF XML: {}", e);
-				break;
+				return Err(MediaProcessorError::Metadata(e.to_string()));
 			},
 			_ => {},
 		}
@@ -766,6 +789,7 @@ fn parse_opf_xml(
 			let end = quick_xml::events::BytesEnd::new(&full_tag);
 			match reader.read_text(end.name()) {
 				Ok(raw_text) => {
+					depth = depth.saturating_sub(1);
 					let text = unescape(&raw_text)
 						.map(|c| c.into_owned())
 						.unwrap_or_else(|_| raw_text.into_owned());
@@ -776,7 +800,7 @@ fn parse_opf_xml(
 					}
 				},
 				Err(e) => {
-					tracing::warn!("Error reading {} content: {}", base_tag, e);
+					return Err(MediaProcessorError::Metadata(e.to_string()));
 				},
 			}
 		}
@@ -1090,7 +1114,8 @@ mod tests {
 		let path = Path::new(&path_str);
 		let processor = EpubProcessor;
 
-		let processed_metadata = processor.process_metadata(path);
+		let processed_metadata =
+			processor.process_metadata(path, OrganizationMode::Filesystem);
 		match processed_metadata {
 			Ok(Some(metadata)) => {
 				assert_eq!(

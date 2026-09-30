@@ -1,23 +1,29 @@
+use crate::{
+	media::processor::error::MediaProcessorError, metadata::ProcessedMediaMetadata,
+};
 use quick_xml::de::from_str as xml_from_str;
-use tracing::error;
 
-use crate::metadata::ProcessedMediaMetadata;
+pub(crate) fn metadata_from_buf(
+	contents: &str,
+) -> Result<ProcessedMediaMetadata, MediaProcessorError> {
+	xml_from_str(contents.trim())
+		.map_err(|error| MediaProcessorError::Metadata(error.to_string()))
+}
 
-pub(crate) fn metadata_from_buf(contents: &str) -> Option<ProcessedMediaMetadata> {
-	let adjusted = contents.trim();
-	// let adjusted = adjusted.trim_start_matches("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-
-	if adjusted.is_empty() {
-		return None;
-	}
-
-	match xml_from_str(adjusted) {
-		Ok(meta) => Some(meta),
-		Err(err) => {
-			println!("Failed to parse metadata from buf: {err}");
-			error!(error = ?err, content = adjusted, "Failed to parse metadata from buf");
-			None
+pub(crate) fn comic_info_metadata(
+	contents: &str,
+	organization_mode: models::shared::enums::OrganizationMode,
+) -> Result<Option<ProcessedMediaMetadata>, MediaProcessorError> {
+	match metadata_from_buf(contents) {
+		Ok(metadata) => Ok(Some(metadata)),
+		Err(error)
+			if organization_mode
+				== models::shared::enums::OrganizationMode::Filesystem =>
+		{
+			tracing::warn!(?error, "Ignoring invalid optional ComicInfo.xml");
+			Ok(None)
 		},
+		Err(error) => Err(error),
 	}
 }
 
@@ -125,12 +131,12 @@ mod tests {
 		// An empty string
 		let contents = "";
 		let metadata = metadata_from_buf(contents);
-		assert!(metadata.is_none());
+		assert!(metadata.is_err());
 
 		// Something JSON-ish instead of xml
 		let contents = "metadata: { contents: oops }";
 		let metadata = metadata_from_buf(contents);
-		assert!(metadata.is_none());
+		assert!(metadata.is_err());
 	}
 
 	// Asserts a fix for an issue reported wrt empty tags in ComicInfo.xml, e.g. <Number></Number> or <Number/>
@@ -145,7 +151,7 @@ mod tests {
   <Summary>A test summary</Summary>
 </ComicInfo>"#;
 		let metadata = metadata_from_buf(contents);
-		assert!(metadata.is_some(), "Should parse XML with empty tags");
+		assert!(metadata.is_ok(), "Should parse XML with empty tags");
 		let metadata = metadata.unwrap();
 		assert_eq!(metadata.title, Some("Test Comic".to_string()));
 		assert_eq!(metadata.series, Some("Test Series".to_string()));
@@ -165,10 +171,7 @@ mod tests {
   <Summary>A test summary</Summary>
 </ComicInfo>"#;
 		let metadata = metadata_from_buf(contents);
-		assert!(
-			metadata.is_some(),
-			"Should parse XML with self-closing tags"
-		);
+		assert!(metadata.is_ok(), "Should parse XML with self-closing tags");
 		let metadata = metadata.unwrap();
 		assert_eq!(metadata.title, Some("Test Comic".to_string()));
 		assert_eq!(metadata.series, Some("Test Series".to_string()));

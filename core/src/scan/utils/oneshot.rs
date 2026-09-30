@@ -72,9 +72,15 @@ async fn build_oneshot<P: AsRef<Path>>(
 		..Default::default()
 	};
 
-	let media = prepare_draft(path, &id.to_string(), library_config, core_config, None)
-		.await?
-		.oneshot();
+	let media = prepare_draft(
+		path,
+		Some(&id.to_string()),
+		library_config,
+		core_config,
+		None,
+	)
+	.await?
+	.oneshot();
 
 	let metadata = match media.metadata.as_ref().map(|m| m.title.clone()) {
 		// ^ note: as_ref() impl for ActiveValue allegedly can panic if the value is not set,

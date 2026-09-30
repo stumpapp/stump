@@ -593,8 +593,14 @@ fn parse_opf_xml(
 	opf_content: &str,
 ) -> Result<HashMap<String, Vec<String>>, MediaProcessorError> {
 	let mut reader = Reader::from_str(opf_content);
-	reader.config_mut().trim_text(true);
+	reader.config_mut().trim_text(false);
 	let mut current_tag = String::new();
+	let mut current_content = String::new();
+	let mut current_id = String::new();
+	let mut current_refines = String::new();
+	let mut collection_ids = Vec::new();
+	let mut collection_type_refs = Vec::new();
+	let mut collection_position_refs = Vec::new();
 	let mut buf = Vec::new();
 	let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
 	let mut depth = 0usize;
@@ -610,6 +616,9 @@ fn parse_opf_xml(
 			Ok(Event::Start(ref e)) => {
 				has_root = true;
 				depth += 1;
+				current_content.clear();
+				current_id.clear();
+				current_refines.clear();
 				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
 				let base_tag = tag_name
 					.strip_prefix("dc:")
@@ -617,6 +626,15 @@ fn parse_opf_xml(
 					.to_string();
 
 				if HTML_CONTENT_TAGS.contains(&base_tag.as_str()) {
+					for attr in e.attributes() {
+						attr.map_err(|error| {
+							MediaProcessorError::Metadata(error.to_string())
+						})?
+						.decode_and_unescape_value(reader.decoder())
+						.map_err(|error| {
+							MediaProcessorError::Metadata(error.to_string())
+						})?;
+					}
 					html_tag_to_read = Some((tag_name, base_tag));
 				} else {
 					current_tag = base_tag.clone();
@@ -625,24 +643,31 @@ fn parse_opf_xml(
 						let attr = attr.map_err(|error| {
 							MediaProcessorError::Metadata(error.to_string())
 						})?;
+						let value =
+							attr.decode_and_unescape_value(reader.decoder()).map_err(
+								|error| MediaProcessorError::Metadata(error.to_string()),
+							)?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
-								let scheme =
-									String::from_utf8_lossy(&attr.value).to_lowercase();
+								let scheme = value.to_lowercase();
 								current_tag = format!("identifier_{}", scheme);
 							},
 							b"name" if tag_name == "meta" => {
-								let name = String::from_utf8_lossy(&attr.value);
+								let name = value;
 								current_tag =
 									name.trim_start_matches("calibre:").to_string();
 							},
-							b"property" if tag_name == "meta" => {
-								let property = String::from_utf8_lossy(&attr.value);
-								current_tag = property.to_string();
+							b"property"
+								if matches!(tag_name.as_str(), "meta" | "opf:meta") =>
+							{
+								current_tag = value.into_owned();
 							},
-							b"property" if tag_name == "opf:meta" => {
-								let property = String::from_utf8_lossy(&attr.value);
-								current_tag = property.to_string();
+							b"id" => current_id = value.to_string(),
+							b"refines" => {
+								current_refines = value
+									.strip_prefix('#')
+									.unwrap_or_default()
+									.to_string()
 							},
 							_ => {},
 						}
@@ -661,20 +686,22 @@ fn parse_opf_xml(
 						let attr = attr.map_err(|error| {
 							MediaProcessorError::Metadata(error.to_string())
 						})?;
+						let value =
+							attr.decode_and_unescape_value(reader.decoder()).map_err(
+								|error| MediaProcessorError::Metadata(error.to_string()),
+							)?;
 						match attr.key.as_ref() {
 							b"name" => {
-								let name = String::from_utf8_lossy(&attr.value);
+								let name = value;
 								meta_name =
 									name.trim_start_matches("calibre:").to_string();
 							},
 							b"property" => {
-								let property = String::from_utf8_lossy(&attr.value);
+								let property = value;
 								meta_name = property.to_string();
 							},
 							b"content" => {
-								meta_content = String::from_utf8_lossy(&attr.value)
-									.trim()
-									.to_string();
+								meta_content = value.trim().to_string();
 							},
 							_ => {},
 						}
@@ -700,16 +727,17 @@ fn parse_opf_xml(
 						let attr = attr.map_err(|error| {
 							MediaProcessorError::Metadata(error.to_string())
 						})?;
+						let value =
+							attr.decode_and_unescape_value(reader.decoder()).map_err(
+								|error| MediaProcessorError::Metadata(error.to_string()),
+							)?;
 						match attr.key.as_ref() {
 							b"opf:scheme" if base_tag == "identifier" => {
-								let scheme =
-									String::from_utf8_lossy(&attr.value).to_lowercase();
+								let scheme = value.to_lowercase();
 								tag_key = format!("identifier_{}", scheme);
 							},
 							b"content" => {
-								tag_content = String::from_utf8_lossy(&attr.value)
-									.trim()
-									.to_string();
+								tag_content = value.trim().to_string();
 							},
 							_ => {},
 						}
@@ -721,24 +749,48 @@ fn parse_opf_xml(
 				}
 			},
 			Ok(Event::Text(e)) => {
+				let raw = e
+					.decode()
+					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+				current_content.push_str(&raw);
+			},
+			Ok(Event::CData(e)) => {
+				let raw = e
+					.decode()
+					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+				current_content.push_str(&raw);
+			},
+			Ok(Event::GeneralRef(e)) => {
+				let reference = e
+					.decode()
+					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+				let raw = format!("&{reference};");
+				let value = unescape(&raw)
+					.map_err(|error| MediaProcessorError::Metadata(error.to_string()))?;
+				current_content.push_str(&value);
+			},
+			Ok(Event::End(_)) => {
+				depth = depth.saturating_sub(1);
 				if !current_tag.is_empty() {
-					let text = String::from_utf8_lossy(&e).to_string();
-					let content = text.trim().to_string();
+					let content = current_content.trim().to_string();
 					if !content.is_empty() {
 						match current_tag.as_str() {
 							"belongs-to-collection" => {
+								collection_ids.push(current_id.clone());
 								opf_metadata
 									.entry("collection_name".to_string())
 									.or_default()
 									.push(content.clone());
 							},
 							"collection-type" => {
+								collection_type_refs.push(current_refines.clone());
 								opf_metadata
 									.entry("collection_type".to_string())
 									.or_default()
 									.push(content.clone());
 							},
 							"group-position" => {
+								collection_position_refs.push(current_refines.clone());
 								opf_metadata
 									.entry("collection_position".to_string())
 									.or_default()
@@ -768,10 +820,8 @@ fn parse_opf_xml(
 						}
 					}
 				}
-			},
-			Ok(Event::End(_)) => {
-				depth = depth.saturating_sub(1);
 				current_tag.clear();
+				current_content.clear();
 			},
 			Ok(Event::Eof) if depth == 0 && has_root => break,
 			Ok(Event::Eof) => {
@@ -806,6 +856,31 @@ fn parse_opf_xml(
 		}
 
 		buf.clear();
+	}
+
+	if !opf_metadata.contains_key("series") {
+		if let Some(names) = opf_metadata.get("collection_name") {
+			let types = opf_metadata.get("collection_type");
+			let positions = opf_metadata.get("collection_position");
+			let unambiguous = names.len() == 1
+				&& collection_ids.len() == 1
+				&& !collection_ids[0].is_empty()
+				&& types.is_some_and(|types| types == &["series".to_string()])
+				&& collection_type_refs == collection_ids
+				&& positions.is_none_or(|positions| {
+					positions.len() == 1 && collection_position_refs == collection_ids
+				});
+			if unambiguous {
+				let name = names.clone();
+				let position = positions.cloned();
+				opf_metadata.insert("series".into(), name);
+				if let Some(position) = position {
+					opf_metadata.insert("series_index".into(), position);
+				}
+			} else {
+				tracing::warn!(?names, ?types, "EPUB collections do not identify one unambiguous series; leaving the book standalone");
+			}
+		}
 	}
 
 	tracing::trace!(?opf_metadata, "Extracted OPF metadata");

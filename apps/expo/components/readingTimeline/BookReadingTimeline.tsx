@@ -1,12 +1,14 @@
+import { useRefetch } from '@stump/client'
 import { BookReadingTimelineFragment, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { intlFormat, parse } from 'date-fns'
 import groupBy from 'lodash/groupBy'
+import { Fragment } from 'react'
 import { ScrollView, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import { ScreenBackgroundGradient } from '../BackgroundGradient'
+import RefreshControl from '../RefreshControl'
 import { Text } from '../ui'
 import { ReadingSessionCard } from './ReadingSessionCard'
 
@@ -52,6 +54,7 @@ type SessionWithEvents = Readthrough['sessions'][number]
 
 type Props = {
 	fragmentRef: FragmentType<typeof fragment>
+	refetch: () => Promise<unknown>
 }
 
 // TODO: resolve these thoughts too:
@@ -70,8 +73,11 @@ type Props = {
 //   need to uniform once landing on sm
 // - some synthetic event for book complete? it would mean a double of "start of readthrough X" so would need to consider, maybe
 //   either or? maybe ollie little pose for complete? i mean, no reason not to have poses for either ig
-export function BookReadingTimeline({ fragmentRef }: Props) {
+export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
+	const { t } = useTranslate()
+
 	const data = useFragment(fragment, fragmentRef)
+	const [isRefreshing, onRefresh] = useRefetch(refetch)
 
 	const renderSessionDate = (date: string, sessions: SessionWithEvents[]) => {
 		const parsed = parse(date, 'yyyy-MM-dd', new Date())
@@ -80,7 +86,10 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 
 		// TODO: can prolly do sm like if the same week (sunday as anchor??) then just show day of week?
 		return (
-			<View className="gap-2">
+			<View
+				className="gap-2"
+				key={`session-date-${date}-sessions-${sessions.map((s) => s.session.id).join('-')}`}
+			>
 				<Text className="text-2xl font-semibold tracking-wide">
 					{intlFormat(parsed, {
 						year: isSameYear ? undefined : 'numeric',
@@ -105,8 +114,25 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 			sessions,
 		}))
 
+		// deferring to localization so if there is a language which orders
+		// the dates differently then it would be handled properly
+		const dateRange = t('readingTimeline.readthroughDateRange', {
+			startDate: intlFormat(readthrough.startedAt, {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+			}),
+			endDate: readthrough.finishedAt
+				? intlFormat(readthrough.finishedAt, {
+						year: 'numeric',
+						month: 'long',
+						day: 'numeric',
+					})
+				: t('common.presentTime'),
+		})
+
 		return (
-			<>
+			<Fragment key={`readthrough-${readthrough.readthroughNumber}`}>
 				<View className="px-4 gap-10">
 					{mergedSessionsNoCard.map(({ date, sessions }) => renderSessionDate(date, sessions))}
 				</View>
@@ -117,47 +143,29 @@ export function BookReadingTimeline({ fragmentRef }: Props) {
 					})}
 				>
 					{/*TODO: should probably localize? idk date range conventions*/}
-					<Text className="text-foreground-muted text-sm text-center">
-						{intlFormat(readthrough.startedAt, {
-							year: 'numeric',
-							month: 'long',
-							day: 'numeric',
-						})}
-
-						{` - ${
-							readthrough.finishedAt
-								? intlFormat(readthrough.finishedAt, {
-										year: 'numeric',
-										month: 'long',
-										day: 'numeric',
-									})
-								: 'Present'
-						}`}
-					</Text>
+					<Text className="text-foreground-muted text-sm text-center">{dateRange}</Text>
 
 					<View className="gap-4 w-full flex-row items-center">
 						<View className="bg-black/10 dark:bg-white/10 h-px flex-1" />
 						<Text className="text-foreground-muted font-medium shrink-0">
-							Start of Readthrough {readthrough.readthroughNumber}
+							{t('readingTimeline.startOfReadthrough', {
+								readthroughNumber: readthrough.readthroughNumber,
+							})}
 						</Text>
 						<View className="bg-black/10 dark:bg-white/10 h-px flex-1" />
 					</View>
 				</View>
-			</>
+			</Fragment>
 		)
 	}
 
 	// TODO: handle no timeline
 	return (
-		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-			<ScreenBackgroundGradient item={data} />
-
-			<ScrollView
-				// refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-				contentInsetAdjustmentBehavior="automatic"
-			>
-				{data.readingTimeline?.readthroughs.map(renderReadthrough)}
-			</ScrollView>
-		</SafeAreaView>
+		<ScrollView
+			refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+			contentInsetAdjustmentBehavior="automatic"
+		>
+			{data.readingTimeline?.readthroughs.map(renderReadthrough)}
+		</ScrollView>
 	)
 }

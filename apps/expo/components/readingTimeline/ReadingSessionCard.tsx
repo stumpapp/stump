@@ -91,6 +91,14 @@ type Props = {
 	}
 }
 
+// TODO: create container that handles:
+// - context menu with deletion
+// - deletion should confirm, with special confirm for terminal sessions (i.e., ones
+//   that are complete) since it would directly affect readthrough calculations
+// - ability to edit session start/end times
+// - ability to edit reading time
+// ^ some of these open up the possibility of manual tracking, or manual adjustments, which
+// i personally need for my own reading (sometimes i move to kobo, mostly on phone tho)
 // TODO: rename to ReadingSessionWithEventsCard or sm
 
 // a few thoughts:

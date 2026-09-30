@@ -22,9 +22,10 @@ export default function Screen() {
 	const { bookId } = useLocalSearchParams<{ bookId: string }>()
 	const {
 		data: { mediaById },
+		refetch,
 	} = useSuspenseGraphQL(query, ['mediaById', bookId, 'readingTimeline'], { bookId })
 	// TODO: some custom error that allows me to throw with custom title/message
 	if (!mediaById) throw new Error(t('errors.bookNotFound.label'))
 
-	return <BookReadingTimeline fragmentRef={mediaById} />
+	return <BookReadingTimeline fragmentRef={mediaById} refetch={refetch} />
 }

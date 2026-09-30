@@ -3206,7 +3206,8 @@
 			"version": "Version",
 			"view": "View",
 			"accessOpdsV2": "Access OPDS v2.0",
-			"accessOpdsV1": "Access OPDS v1.2"
+			"accessOpdsV1": "Access OPDS v1.2",
+			"presentTime": "Present"
 		},
 		"errors": {
 			"unknown": "Unknown error",
@@ -3632,6 +3633,10 @@
 			"bookmarkSentence": "You bookmarked {{pageFragment}}",
 			"openedBookSentence": "Opened book at {{pageFragment}}",
 			"closedBookSentence": "Closed book at {{pageFragment}}"
+		},
+		"readingTimeline": {
+			"startOfReadthrough": "Start of Readthrough {{readthroughNumber}}",
+			"readthroughDateRange": "{{startDate}} - {{endDate}}"
 		},
 		"tableOfContents": {
 			"goToPageX": "Go to page {{pageNumber}}",

@@ -5110,6 +5110,13 @@ export type SearchLibraryQuery = { __typename?: 'Query', libraries: { __typename
       & { ' $fragmentRefs'?: { 'LibrarySearchItemFragment': LibrarySearchItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', nextCursor?: string | null } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type BookByIdStackLayoutQueryVariables = Exact<{
+  bookId: Scalars['ID']['input'];
+}>;
+
+
+export type BookByIdStackLayoutQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
+
 export type BookByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -8709,6 +8716,23 @@ export const SearchLibraryDocument = new TypedDocumentString(`
     width
   }
 }`) as unknown as TypedDocumentString<SearchLibraryQuery, SearchLibraryQueryVariables>;
+export const BookByIdStackLayoutDocument = new TypedDocumentString(`
+    query BookByIdStackLayout($bookId: ID!) {
+  mediaById(id: $bookId) {
+    id
+    thumbnail {
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookByIdStackLayoutQuery, BookByIdStackLayoutQueryVariables>;
 export const BookByIdDocument = new TypedDocumentString(`
     query BookById($id: ID!) {
   mediaById(id: $id) {

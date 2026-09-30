@@ -150,11 +150,19 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 
 				<View className="bg-black/10 dark:bg-white/10 h-full w-px shrink-0" />
 
+				{/*TODO: figure this section out, it is the most awkward section bc so empty i think
+				i considered icons, but that would be a bit similar to the timeline. i think that's fine
+				but won't focus on it for now
+				*/}
 				<View className="gap-4 px-2 flex flex-1 items-start">
-					<Text size="lg">{t('readingSessions.pagesRead', { count: pagesRead })}</Text>
-					<Text size="lg">{durationText}</Text>
+					<Text size="lg" className="p-3">
+						{t('readingSessions.pagesRead', { count: pagesRead })}
+					</Text>
+					<Text size="lg" className="p-3">
+						{durationText}
+					</Text>
 					{data.chaptersRead.length > 0 && (
-						<Text size="lg">
+						<Text size="lg" className="p-3">
 							{t('readingSessions.chaptersRead', { count: data.chaptersRead.length })}
 						</Text>
 					)}

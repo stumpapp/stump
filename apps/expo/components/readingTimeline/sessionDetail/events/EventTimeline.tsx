@@ -1,10 +1,10 @@
 import { FragmentType, graphql, OrderDirection, useFragment } from '@stump/graphql'
-import { Book, BookOpen } from 'lucide-react-native'
+import { ArrowDownRight, ArrowUpRight, Book, BookOpen } from 'lucide-react-native'
 import React from 'react'
 import { Pressable, View } from 'react-native'
 
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
-import { Card, Text } from '~/components/ui'
+import { Card, Icon, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 
 import { useEventOrderStore } from '../store'
@@ -117,9 +117,19 @@ export function EventTimeline({ fragmentRef }: Props) {
 					}
 				>
 					{({ pressed }) => (
-						<Text className="text-foreground-muted" style={pressed ? { opacity: 0.8 } : undefined}>
-							{t(`sorting.sortDirectionDate.${order}`)}
-						</Text>
+						<View
+							className="gap-1.5 flex flex-row items-center"
+							style={pressed ? { opacity: 0.8 } : undefined}
+						>
+							<Text className="text-foreground-muted">
+								{t(`sorting.sortDirectionDate.${order}`)}
+							</Text>
+
+							<Icon
+								as={order === OrderDirection.Asc ? ArrowUpRight : ArrowDownRight}
+								className="text-foreground-muted h-4 w-4"
+							/>
+						</View>
 					)}
 				</Pressable>
 			}

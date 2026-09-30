@@ -48,6 +48,7 @@ export type AddDownloadedFileParams = {
 	bookName?: string | null
 	metadata?: Partial<MediaMetadata> | null
 	seriesId?: string | null
+	libraryId?: string | null
 	toc?: string[] | null
 	// TODO: This technically would be different if the user uploaded a custom thumbnail for the book,
 	// since the mobile app generates its own thumbnail. I think this is acceptable for now, but something
@@ -103,10 +104,9 @@ export class DownloadRepository {
 			console.error('Error generating thumbnail for downloaded file:', error)
 		}
 
-		const downloadedFile = await db.transaction(async (tx) => {
+		const downloadedFile = db.transaction((tx) => {
 			if (relations?.seriesRef) {
-				await tx
-					.insert(seriesRefs)
+				tx.insert(seriesRefs)
 					.values({
 						id: relations.seriesRef.id,
 						serverId: file.serverId,
@@ -120,11 +120,11 @@ export class DownloadRepository {
 							libraryId: relations.seriesRef.libraryId,
 						},
 					})
+					.run()
 			}
 
 			if (relations?.libraryRef) {
-				await tx
-					.insert(libraryRefs)
+				tx.insert(libraryRefs)
 					.values({
 						id: relations.libraryRef.id,
 						serverId: file.serverId,
@@ -136,7 +136,47 @@ export class DownloadRepository {
 							name: relations.libraryRef.name,
 						},
 					})
+					.run()
 			}
+
+			const newFile: NewDownloadedFile = {
+				id: file.id,
+				filename: file.filename,
+				uri: toRelativePath(file.uri),
+				serverId: file.serverId,
+				size: file.size,
+				bookName: file.bookName ?? file.metadata?.title,
+				bookDescription: file.metadata?.summary,
+				bookMetadata: file.metadata,
+				libraryId:
+					file.libraryId ?? relations?.libraryRef?.id ?? relations?.seriesRef?.libraryId ?? null,
+				seriesId: file.seriesId,
+				pages,
+				toc: file.toc,
+				thumbnailMeta: file.imageMetadata,
+				thumbnailPath: thumbnailPath ? toRelativePath(thumbnailPath) : null,
+			}
+
+			const result = tx
+				.insert(downloadedFiles)
+				.values(newFile)
+				.onConflictDoUpdate({
+					target: downloadedFiles.id,
+					set: {
+						filename: newFile.filename,
+						uri: newFile.uri,
+						size: newFile.size,
+						bookName: newFile.bookName,
+						bookDescription: newFile.bookDescription,
+						bookMetadata: newFile.bookMetadata,
+						libraryId: newFile.libraryId,
+						seriesId: newFile.seriesId,
+						pages: newFile.pages,
+						toc: newFile.toc,
+					},
+				})
+				.returning()
+				.get()
 
 			if (relations?.existingProgression) {
 				const values = {
@@ -152,8 +192,7 @@ export class DownloadRepository {
 					syncStatus: syncStatus.enum.SYNCED,
 				} satisfies typeof readProgress.$inferInsert
 
-				await tx
-					.insert(readProgress)
+				tx.insert(readProgress)
 					.values(values)
 					.onConflictDoUpdate({
 						target: readProgress.bookId,
@@ -162,43 +201,10 @@ export class DownloadRepository {
 							lastModified: new Date(relations.existingProgression.updatedAt ?? new Date()),
 						},
 					})
+					.run()
 			}
 
-			const newFile: NewDownloadedFile = {
-				id: file.id,
-				filename: file.filename,
-				uri: toRelativePath(file.uri),
-				serverId: file.serverId,
-				size: file.size,
-				bookName: file.bookName ?? file.metadata?.title,
-				bookDescription: file.metadata?.summary,
-				bookMetadata: file.metadata,
-				seriesId: file.seriesId,
-				pages,
-				toc: file.toc,
-				thumbnailMeta: file.imageMetadata,
-				thumbnailPath: thumbnailPath ? toRelativePath(thumbnailPath) : null,
-			}
-
-			const result = await tx
-				.insert(downloadedFiles)
-				.values(newFile)
-				.onConflictDoUpdate({
-					target: downloadedFiles.id,
-					set: {
-						filename: newFile.filename,
-						uri: newFile.uri,
-						size: newFile.size,
-						bookName: newFile.bookName,
-						bookDescription: newFile.bookDescription,
-						bookMetadata: newFile.bookMetadata,
-						seriesId: newFile.seriesId,
-						pages: newFile.pages,
-						toc: newFile.toc,
-					},
-				})
-				.returning()
-			return result[0]
+			return result
 		})
 
 		if (!downloadedFile) {

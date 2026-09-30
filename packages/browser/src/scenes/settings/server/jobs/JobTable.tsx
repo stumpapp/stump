@@ -78,7 +78,7 @@ export default function JobTable() {
 	const { checkPermission } = useAppContext()
 	const { t } = useLocaleContext()
 
-	const canManageJobs = checkPermission(UserPermission.ManageJobs)
+	const canManageJobs = checkPermission(UserPermission.ManageBackgroundJobs)
 
 	const client = useQueryClient()
 	const { sdk } = useSDK()

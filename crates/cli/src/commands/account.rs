@@ -659,7 +659,6 @@ mod tests {
 			user::ActiveModel {
 				username: sea_orm::Set("oromei".to_string()),
 				hashed_password: sea_orm::Set("hashed_password".to_string()),
-				is_server_owner: sea_orm::Set(true),
 				is_locked: sea_orm::Set(false),
 				..Default::default()
 			}
@@ -961,7 +960,6 @@ mod tests {
 					username: Set("oidc_user".to_string()),
 					oidc_email: Set(Some("user@proton.me".to_string())),
 					oidc_issuer_id: Set(Some("https://example.com/oidc".to_string())),
-					is_server_owner: Set(false),
 					..ExampleUser::active_model()
 				}),
 			)

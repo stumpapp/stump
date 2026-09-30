@@ -36,7 +36,7 @@ type Props = {
 export default function UserActionMenu({ user, onSelectForInspect, onSelectForDeletion }: Props) {
 	const paths = usePaths()
 	const { sdk } = useSDK()
-	const { isServerOwner, user: byUser, checkPermission } = useAppContext()
+	const { user: byUser, checkPermission } = useAppContext()
 
 	const client = useQueryClient()
 	const canManageUsers = checkPermission(UserPermission.ManageUsers)
@@ -111,7 +111,7 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 									onClick: () => onSelectForDeletion(user),
 								} as const,
 								{
-									disabled: isSelf || user.isServerOwner,
+									disabled: isSelf,
 									label: `${user.isLocked ? 'Unlock' : 'Lock'} account`,
 									leftIcon: user.isLocked ? (
 										<Unlock className="mr-2 h-4 w-4" />
@@ -139,7 +139,7 @@ export default function UserActionMenu({ user, onSelectForInspect, onSelectForDe
 		],
 	)
 
-	if (!isServerOwner) {
+	if (!canManageUsers) {
 		return null
 	}
 

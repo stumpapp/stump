@@ -34,7 +34,7 @@ pub struct OidcConfig {
 	)]
 	pub scopes: Vec<String>,
 	/// The claim name containing the user's group memberships
-	#[setting(default = "groups".to_string())]
+	#[setting(default = "groups")]
 	#[graphql(skip)]
 	pub groups_claim: String,
 	/// Maps provider group names to Stump permissions. If empty, permissions are
@@ -70,17 +70,15 @@ impl OidcConfig {
 			&& !self.client_secret.is_empty();
 		if !is_configured_properly && self.enabled {
 			tracing::warn!(
-				client_id = ?self.client_id,
-				issuer_url = ?self.issuer_url,
-				client_secret_set = !self.client_secret.is_empty(),
-				"OIDC is enabled but not properly configured (client_id, issuer_url, and client_secret are required)"
+			client_id = ?self.client_id,
+			issuer_url = ?self.issuer_url,
+			client_secret_set = !self.client_secret.is_empty(),
+			"OIDC is enabled but not properly configured (client_id, issuer_url, and client_secret are required)"
 			);
-		}
 		}
 		is_configured_properly
 	}
 }
-
 
 impl std::fmt::Debug for OidcConfig {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

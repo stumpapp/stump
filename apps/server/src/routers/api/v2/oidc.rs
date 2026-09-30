@@ -294,8 +294,6 @@ async fn callback(
 			hashed_password: Set(String::new()), // OIDC users don't have a password
 			oidc_issuer_id: Set(Some(claims.subject.clone())),
 			oidc_email: Set(Some(claims.email.clone())),
-			// TODO(permissions): rm is_server_owner
-			is_server_owner: Set(is_first_user),
 			permissions: Set(bootstrap_permissions),
 			..Default::default()
 		};

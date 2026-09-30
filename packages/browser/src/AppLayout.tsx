@@ -208,12 +208,13 @@ export function AppLayout() {
 		return null
 	}
 
+	// TODO: the naming here is quite shit, it was years ago and `AppContext` that holds
+	// almost exclusively user data is an awful name. rname it
 	return (
 		<AppContext.Provider
 			value={{
 				checkPermission: checkUserPermission,
 				enforcePermission,
-				isServerOwner: storeUser.isServerOwner,
 				user: storeUser,
 				logout,
 			}}

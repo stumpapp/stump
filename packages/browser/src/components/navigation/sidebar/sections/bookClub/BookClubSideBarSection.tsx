@@ -38,7 +38,7 @@ export default function BookClubSideBarSection({
 	isMobile,
 }: Props) {
 	const location = useLocation()
-	const { user, isServerOwner, checkPermission } = useAppContext()
+	const { user, checkPermission } = useAppContext()
 
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
@@ -56,8 +56,9 @@ export default function BookClubSideBarSection({
 		return bookClubs.map((bookClub) => {
 			const userId = user.id
 			const member = bookClub.members?.find((member) => member.userId === userId)
+			const canManageBookClubs = checkPermission(UserPermission.ManageBookClubs)
 			const canChange =
-				(isServerOwner || member?.role === 'CREATOR' || member?.role === 'ADMIN') && !isMobile
+				(canManageBookClubs || member?.role === 'CREATOR' || member?.role === 'ADMIN') && !isMobile
 
 			const leftContent = (
 				<BookClubEmoji

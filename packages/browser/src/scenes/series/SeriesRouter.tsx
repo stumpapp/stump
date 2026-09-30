@@ -2,7 +2,7 @@ import { UserPermission } from '@stump/graphql'
 import { lazy, useMemo } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
-import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'
+import UserPermissionRouteGuard from '@/components/UserPermissionRouteGuard.tsx'
 import { useAppContext } from '@/context'
 
 import SeriesLayout from './SeriesLayout.tsx'
@@ -27,7 +27,7 @@ export default function SeriesRouter() {
 				<Route path="" element={<Navigate to="books" replace />} />
 				<Route path="books" element={<SeriesBooksScene />} />
 				{canAccessExplorer && <Route path="files" element={<SeriesExplorerScene />} />}
-				<Route element={<ServerOwnerRouteWrapper />}>
+				<Route element={<UserPermissionRouteGuard permissions={[UserPermission.ManageLibrary]} />}>
 					<Route path="settings" element={<SeriesSettingsScene />} />
 				</Route>
 			</Route>

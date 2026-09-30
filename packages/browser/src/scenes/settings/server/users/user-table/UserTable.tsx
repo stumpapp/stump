@@ -28,7 +28,6 @@ const query = graphql(`
 				id
 				avatarUrl
 				username
-				isServerOwner
 				isLocked
 				createdAt
 				lastLogin
@@ -153,15 +152,6 @@ const baseColumns = [
 	columnHelper.accessor('username', {
 		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
 		header: 'User',
-	}),
-	columnHelper.display({
-		cell: ({
-			row: {
-				original: { isServerOwner },
-			},
-		}) => <Text size="sm">{isServerOwner ? 'Server Owner' : 'Member'}</Text>,
-		header: 'Role',
-		id: 'isServerOwner',
 	}),
 	columnHelper.accessor('createdAt', {
 		cell: ({

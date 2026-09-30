@@ -10,7 +10,7 @@ import { AuthUser } from './graphql'
 
 export const isUser = (data: unknown): data is AuthUser => {
 	const casted = data as AuthUser
-	return casted?.id !== undefined && casted?.isServerOwner !== undefined
+	return casted?.id != undefined && casted?.username != undefined
 }
 
 const fontSchema = z.nativeEnum(SupportedFont)

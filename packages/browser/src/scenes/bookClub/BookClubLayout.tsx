@@ -1,6 +1,6 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn } from '@stump/components'
-import { BookClubLayoutQuery, graphql } from '@stump/graphql'
+import { BookClubLayoutQuery, graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router'
@@ -9,8 +9,8 @@ import { useMediaMatch } from 'rooks'
 import { BookClubContext } from '@/components/bookClub'
 import { SceneContainer } from '@/components/container'
 import { GenericSettingsHeader } from '@/components/settings'
+import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
-import { useUserStore } from '@/stores'
 import { noop } from '@/utils/misc'
 
 import BookClubHeader from './BookClubHeader'
@@ -100,7 +100,7 @@ export default function BookClubLayout() {
 
 	const navigate = useNavigate()
 	const location = useLocation()
-	const user = useUserStore((store) => store.user)
+	const { checkPermission } = useAppContext()
 	const {
 		preferences: {
 			enableDoubleSidebar,
@@ -117,9 +117,10 @@ export default function BookClubLayout() {
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	const viewerMember = useMemo(() => bookClub?.membership, [bookClub])
+	const canManageBookClubs = checkPermission(UserPermission.ManageBookClubs)
 	const viewerCanManage =
-		user?.isServerOwner || viewerMember?.isCreator || viewerMember?.role === 'ADMIN'
-	const viewerIsMember = !!viewerMember || !!user?.isServerOwner
+		canManageBookClubs || viewerMember?.isCreator || viewerMember?.role === 'ADMIN'
+	const viewerIsMember = !!viewerMember || canManageBookClubs
 
 	const renderHeader = () =>
 		isSettings ? (

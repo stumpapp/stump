@@ -21,7 +21,6 @@ vi.mock('../create-or-update/UpdateUserScene.tsx', () => ({
 
 const buildContext = (permissions: UserPermission[]): IAppContext => ({
 	checkPermission: (p: UserPermission) => permissions.includes(p),
-	isServerOwner: false,
 	user: {} as any,
 	logout: vi.fn(),
 	enforcePermission: vi.fn(),

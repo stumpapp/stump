@@ -15,7 +15,7 @@ pub struct JobMutation;
 
 #[Object]
 impl JobMutation {
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageJobs)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageBackgroundJobs)")]
 	async fn cancel_job(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
 		let core = ctx.data::<CoreContext>()?;
 		let job_id = id.to_string();
@@ -26,7 +26,7 @@ impl JobMutation {
 		Ok(cancelled)
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageJobs)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageBackgroundJobs)")]
 	async fn delete_job(
 		&self,
 		ctx: &Context<'_>,
@@ -71,7 +71,7 @@ impl JobMutation {
 		Ok(true)
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageJobs)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageBackgroundJobs)")]
 	async fn delete_job_history(&self, ctx: &Context<'_>) -> Result<DeleteJobHistory> {
 		let core = ctx.data::<CoreContext>()?;
 
@@ -92,7 +92,7 @@ impl JobMutation {
 		Ok(DeleteJobHistory { affected_rows })
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageJobs)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageBackgroundJobs)")]
 	async fn delete_job_logs(
 		&self,
 		ctx: &Context<'_>,

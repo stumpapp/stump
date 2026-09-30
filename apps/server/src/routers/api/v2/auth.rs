@@ -402,8 +402,6 @@ pub async fn register(
 		.await?
 		> 0;
 
-	let mut is_server_owner = false;
-
 	let session_user = fetch_session_user(&session, ctx.conn.as_ref()).await?;
 
 	if let Some(user) = session_user {
@@ -412,18 +410,14 @@ pub async fn register(
 				"You do not have permission to access this resource.",
 			)));
 		}
-	} else if session_user.is_none() && has_users {
+	} else if has_users {
 		// if users exist, a valid session is required to register a new user
 		return Err(APIError::Unauthorized);
-	} else if !has_users {
-		// TODO(permissions): rm this?
-		// if no users present, the user is automatically a server owner
-		is_server_owner = true;
 	}
 
 	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
-	let bootstrap_permissions = if is_server_owner {
+	let bootstrap_permissions = if !has_users {
 		PermissionSet::new(vec![UserPermission::ManageServer]).resolve_into_string()
 	} else {
 		None
@@ -434,7 +428,6 @@ pub async fn register(
 	let active_model = user::ActiveModel {
 		username: Set(input.username.clone()),
 		hashed_password: Set(hashed_password),
-		is_server_owner: Set(is_server_owner),
 		permissions: Set(bootstrap_permissions),
 		..Default::default()
 	};

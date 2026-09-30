@@ -16,7 +16,7 @@ export default function JobSettingsScene() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 
-	const canManageJobs = checkPermission(UserPermission.ManageJobs)
+	const canManageJobs = checkPermission(UserPermission.ManageBackgroundJobs)
 
 	return (
 		<SceneContainer>
@@ -24,8 +24,8 @@ export default function JobSettingsScene() {
 				<title>Stump | {t('settingsScene.server/jobs.helmet')}</title>
 			</Helmet>
 
-			{/* 
-					TODO(aaron): on mobile only, add a section for managing the running job. Doing it all 
+			{/*
+					TODO(aaron): on mobile only, add a section for managing the running job. Doing it all
 					through the table on mobile would prolly suck
 				*/}
 

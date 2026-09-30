@@ -162,8 +162,7 @@ mod tests {
 
 	#[test]
 	fn test_find_members_accessible_to_user() {
-		let mut user = get_default_user();
-		user.is_server_owner = false;
+		let user = get_default_user();
 
 		let select = Entity::find_members_accessible_to_user(&user);
 		assert_eq!(

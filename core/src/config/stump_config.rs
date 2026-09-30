@@ -30,26 +30,6 @@ const DEFAULT_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 // like that bc idk what to do about the password, and having all of the config except password in toml
 // felt funny? idk ill wait until someone complains maybe >:)
 
-pub mod defaults {
-	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
-	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
-	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600; // 1 hour
-	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 7; // 7 days
-	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
-	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
-	pub const DEFAULT_MAX_FILE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
-	pub const DEFAULT_PDF_RENDER_DPI: u32 = 150; // Good balance of quality and performance
-	pub const DEFAULT_PDF_MAX_DIMENSION: u32 = 1200; // Optimized for faster rendering while maintaining quality
-	pub const DEFAULT_PDF_RENDER_FORMAT: &str = "webp"; // Default to WebP for better compression
-	pub const DEFAULT_PDF_CACHE_PAGES: bool = true; // Enable page caching by default
-	pub const DEFAULT_PDF_PRERENDER_RANGE: u32 = 5; // Pre-render 5 pages before/after current
-	pub const DEFAULT_PDF_HIGH_QUALITY: bool = true; // Enable high-quality rendering by default
-	pub const DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS: i64 = 60 * 60 * 24; // 1 day
-	pub const DEFAULT_PARALLELISM_MULTIPLIER: usize = 2;
-}
-use defaults::*;
-
 #[derive(Config, Serialize, Debug, Clone, PartialEq, SimpleObject)]
 #[config(env_prefix = "STUMP_")]
 pub struct StumpConfig {

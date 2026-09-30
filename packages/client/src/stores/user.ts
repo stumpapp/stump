@@ -23,7 +23,7 @@ export const createUserStore = (storage?: StateStorage) =>
 					checkUserPermission(permission: UserPermission) {
 						const user = get().user
 						if (!user) return false
-						return user.isServerOwner || user.permissions.includes(permission)
+						return user.permissions.includes(permission)
 					},
 					reset() {
 						set(() => ({}))

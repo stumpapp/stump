@@ -1,4 +1,4 @@
-use async_graphql::{SimpleObject, Union};
+use async_graphql::{ComplexObject, SimpleObject, Union};
 use chrono::{DateTime, FixedOffset, Utc};
 use models::shared::enums::ReadingStatus;
 
@@ -60,15 +60,17 @@ pub struct BookReadingTimeline {
 	pub total_elapsed_seconds: i64,
 }
 
-// i hate the global naming here but can't think of better yet
+#[derive(Clone, SimpleObject)]
 pub struct GlobalReadingTimelineNode {
 	pub media_id: String,
 	pub session: SessionWithEvents,
 }
-// ^ TODO: media() resolever behind loader
 
-pub struct GlobalReadingTimeline {}
-// ^ hmmm idrk about this one, i may be spending too much time thinking about multiple stones
-// when i just need book-level first. it kinda depends on the ui, like how do i group things for the
-// global timeline? if it can be flat, then this doesn't even really need to exist and i can just
-// return vec of the node. can add user_id for future of members' timelines, too, i think
+impl From<SessionWithEvents> for GlobalReadingTimelineNode {
+	fn from(session_with_events: SessionWithEvents) -> Self {
+		Self {
+			media_id: session_with_events.session.model.media_id.clone(),
+			session: session_with_events,
+		}
+	}
+}

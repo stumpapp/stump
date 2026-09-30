@@ -20,6 +20,7 @@ mod metadata_provider;
 mod notifier;
 pub(crate) mod reading_list;
 mod reading_session;
+mod reading_timeline;
 mod series;
 mod server_config;
 mod smart_list_view;

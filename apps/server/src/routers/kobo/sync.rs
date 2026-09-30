@@ -290,10 +290,10 @@ impl<'a> SyncPage<'a> {
 #[cfg(test)]
 mod tests {
 	use chrono::Days;
-	use models::entity::{kobo_sync_session, user};
+	use models::entity::{kobo_sync_session, media, user};
 	use sea_orm::prelude::DateTimeWithTimeZone;
 	use sea_orm::query::*;
-	use sea_orm::EntityTrait;
+	use sea_orm::{ActiveModelTrait, EntityTrait};
 	use tests::db::test_database;
 	use tests::fake_data;
 
@@ -310,7 +310,7 @@ mod tests {
 		let user = fake_data::User::new("ishmael").insert(&db).await;
 		let series = fake_data::Series::default().insert(&db).await;
 
-		fake_data::Media {
+		let book = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
 			name: Some("Don Quixote".to_string()),
@@ -319,6 +319,9 @@ mod tests {
 		}
 		.insert(&db)
 		.await;
+		let mut book: media::ActiveModel = book.into();
+		book.series_id = sea_orm::Set(None);
+		book.update(&db).await.unwrap();
 
 		fake_data::Media {
 			series_id: series.id.clone(),
@@ -364,6 +367,20 @@ mod tests {
 			],
 			sync_page.media_ids,
 		);
+		let items = sync_page.sync_items("http://localhost/kobo").await.unwrap();
+		assert_eq!(items.len(), 3);
+		let standalone = items
+			.into_iter()
+			.find_map(|item| match item {
+				SyncItem::NewEntitlement(book)
+					if book.book_metadata.entitlement_id == "don-quixote" =>
+				{
+					Some(book)
+				},
+				_ => None,
+			})
+			.expect("Standalone book entitlement");
+		assert!(standalone.book_metadata.series.is_none());
 	}
 
 	#[tokio::test]

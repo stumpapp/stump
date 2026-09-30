@@ -760,14 +760,14 @@ async fn browse_library_by_id(
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
 	let library_books = OPDSPublicationEntity::find_for_user(&user)
-		.filter(series::Column::LibraryId.eq(id.clone()))
+		.filter(media::Column::LibraryId.eq(id.clone()))
 		.limit(DEFAULT_LIMIT)
 		.order_by_asc(media::Column::Name)
 		.into_model::<OPDSPublicationEntity>()
 		.all(ctx.conn.as_ref())
 		.await?;
 	let library_books_count = OPDSPublicationEntity::find_for_user(&user)
-		.filter(series::Column::LibraryId.eq(id.clone()))
+		.filter(media::Column::LibraryId.eq(id.clone()))
 		.count(ctx.conn.as_ref())
 		.await?;
 
@@ -801,7 +801,7 @@ async fn browse_library_by_id(
 		.build()?;
 
 	let latest_library_books = OPDSPublicationEntity::find_for_user(&user)
-		.filter(series::Column::LibraryId.eq(id.clone()))
+		.filter(media::Column::LibraryId.eq(id.clone()))
 		.limit(DEFAULT_LIMIT)
 		.order_by_desc(media::Column::CreatedAt)
 		.into_model::<OPDSPublicationEntity>()
@@ -1036,7 +1036,7 @@ async fn browse_library_books(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
 		&user,
-		Some(Condition::all().add(series::Column::LibraryId.eq(id.clone()))),
+		Some(Condition::all().add(media::Column::LibraryId.eq(id.clone()))),
 		(media::Column::Name, Order::Asc),
 		pagination.0,
 		"Library Books - All",
@@ -1060,7 +1060,7 @@ async fn latest_library_books(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
 		&user,
-		Some(Condition::all().add(series::Column::LibraryId.eq(id.clone()))),
+		Some(Condition::all().add(media::Column::LibraryId.eq(id.clone()))),
 		(media::Column::CreatedAt, Order::Desc),
 		pagination.0,
 		"Library Books - Latest",

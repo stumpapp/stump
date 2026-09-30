@@ -104,17 +104,18 @@ impl Media {
 	}
 
 	/// The series the media belongs to
-	async fn series(&self, ctx: &Context<'_>) -> Result<Series> {
+	async fn series(&self, ctx: &Context<'_>) -> Result<Option<Series>> {
+		let Some(series_id) = self.model.series_id.clone() else {
+			return Ok(None);
+		};
 		let loader = ctx.data::<DataLoader<SeriesLoader>>()?;
-
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
 		let series = loader
 			.load_one(series_id)
 			.await?
 			.ok_or("Series not found")?;
 
-		Ok(series)
+		Ok(Some(series))
 	}
 
 	async fn library_id(&self) -> &str {
@@ -273,6 +274,9 @@ impl Media {
 	}
 
 	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i64>> {
+		let Some(series_id) = self.model.series_id.clone() else {
+			return Ok(None);
+		};
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		if let Some(position) = self.metadata.as_ref().and_then(|m| m.model.number) {
@@ -285,8 +289,6 @@ impl Media {
 		struct PositionResult {
 			position: i64,
 		}
-
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
 		let position = PositionResult::find_by_statement(db_statement(
 			conn,
@@ -331,24 +333,36 @@ impl Media {
 				)
 			},
 		};
+		let Some(series_id) = &self.model.series_id else {
+			return Ok(PaginatedResponse {
+				nodes: vec![],
+				page_info: CursorPaginationInfo {
+					current_cursor: None,
+					next_cursor: None,
+					limit: pagination.limit,
+				}
+				.into(),
+			});
+		};
 
 		let mut cursor = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::SeriesId.eq(self.model.series_id.clone()))
+			.filter(media::Column::SeriesId.eq(series_id))
 			.cursor_by(media::Column::Name);
 
 		let after = match pagination.after.clone() {
 			Some(after) if after != self.model.id => {
-				let media =
-					media::Entity::find_for_user(user)
-						.select_only()
-						.column(media::Column::Name)
-						.filter(media::Column::Id.eq(after).and(
-							media::Column::SeriesId.eq(self.model.series_id.clone()),
-						))
-						.into_model::<media::MediaNameCmpSelect>()
-						.one(conn)
-						.await?
-						.ok_or("Cursor not found")?;
+				let media = media::Entity::find_for_user(user)
+					.select_only()
+					.column(media::Column::Name)
+					.filter(
+						media::Column::Id
+							.eq(after)
+							.and(media::Column::SeriesId.eq(series_id)),
+					)
+					.into_model::<media::MediaNameCmpSelect>()
+					.one(conn)
+					.await?
+					.ok_or("Cursor not found")?;
 				media.name
 			},
 			_ => self.model.name.clone(),

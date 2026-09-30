@@ -8,6 +8,7 @@ const query = graphql(`
 			id
 			...BookCard
 			...BookFileInformation
+			...BookLibrarySeriesLinks
 			resolvedName
 			extension
 			seriesId

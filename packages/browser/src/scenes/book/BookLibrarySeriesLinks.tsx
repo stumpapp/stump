@@ -1,52 +1,50 @@
-import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Link, Text } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
 import { usePaths } from '../../paths'
 
-const seriesQuery = graphql(`
-	query BookLibrarySeriesLinks($id: ID!) {
-		seriesById(id: $id) {
+const fragment = graphql(`
+	fragment BookLibrarySeriesLinks on Media {
+		library {
+			id
+			name
+		}
+		series {
 			id
 			resolvedName
-			library {
-				id
-				name
-			}
 		}
 	}
 `)
 
 type Props = {
-	seriesId?: string
+	fragment: FragmentType<typeof fragment>
 }
 
-export default function BookLibrarySeriesLinks({ seriesId }: Props) {
+export default function BookLibrarySeriesLinks({ fragment: fragmentRef }: Props) {
 	const paths = usePaths()
-	const { sdk } = useSDK()
-	const {
-		data: { seriesById: series },
-	} = useSuspenseGraphQL(seriesQuery, sdk.cacheKey('seriesLinks', [seriesId]), {
-		id: seriesId || '',
-	})
-
-	const library = series?.library
+	const { library, series } = useFragment(fragment, fragmentRef)
 
 	return (
 		<div className="gap-1.5 flex items-center">
-			{library && (
-				<Link to={paths.librarySeries(library.id)} underline={false}>
-					<Badge size="sm" rounded="full" className="cursor-pointer">
-						{library.name}
-					</Badge>
-				</Link>
-			)}
+			<Link
+				to={series ? paths.librarySeries(library.id) : paths.libraryBooks(library.id)}
+				underline={false}
+				className="rounded-full focus-visible:ring-2 focus-visible:ring-ring"
+			>
+				<Badge size="sm" rounded="full" className="cursor-pointer">
+					{library.name}
+				</Badge>
+			</Link>
 			{series && (
 				<>
 					<Text size="sm" variant="muted">
 						/
 					</Text>
-					<Link to={paths.seriesOverview(series.id)} underline={false}>
+					<Link
+						to={paths.seriesOverview(series.id)}
+						underline={false}
+						className="rounded-full focus-visible:ring-2 focus-visible:ring-ring"
+					>
 						<Badge variant="primary" size="sm" rounded="full" className="cursor-pointer">
 							{series.resolvedName}
 						</Badge>

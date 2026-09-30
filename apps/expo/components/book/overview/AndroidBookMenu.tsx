@@ -131,7 +131,7 @@ export default function AndroidBookMenu({
 						onPress={() =>
 							router.push({
 								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/stump/${book.id}/libraries/${book.library.id}`,
+								pathname: `/stump/${serverId}/libraries/${book.library.id}`,
 							})
 						}
 					>
@@ -142,22 +142,26 @@ export default function AndroidBookMenu({
 						<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
 					</DropdownMenuItem>
 
-					<DropdownMenuSeparator />
+					{book.series && (
+						<>
+							<DropdownMenuSeparator />
 
-					<DropdownMenuItem
-						onPress={() =>
-							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/stump/${book.id}/series/${book.series.id}`,
-							})
-						}
-					>
-						<View>
-							<Text className="text-lg">Go to Series</Text>
-							<Text className="text-sm text-foreground-muted">{book.series.resolvedName}</Text>
-						</View>
-						<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
-					</DropdownMenuItem>
+							<DropdownMenuItem
+								onPress={() =>
+									router.push({
+										// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
+										pathname: `/stump/${serverId}/series/${book.series?.id}`,
+									})
+								}
+							>
+								<View>
+									<Text className="text-lg">Go to Series</Text>
+									<Text className="text-sm text-foreground-muted">{book.series.resolvedName}</Text>
+								</View>
+								<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
+							</DropdownMenuItem>
+						</>
+					)}
 				</DropdownMenuGroup>
 
 				{!isUntouched && (

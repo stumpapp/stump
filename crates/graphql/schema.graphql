@@ -508,13 +508,13 @@ type CreatedManySeries {
 
 type CreatedMedia {
 	id: String!
-	seriesId: String!
+	seriesId: String
 	libraryId: String!
 }
 
 type CreatedOrUpdatedManyMedia {
 	count: Int!
-	seriesId: String!
+	seriesId: String
 	libraryId: String!
 }
 
@@ -1369,7 +1369,7 @@ type Media {
 	"The tags associated with the media"
 	tags: [Tag!]!
 	"The series the media belongs to"
-	series: Series!
+	series: Series
 	libraryId: String!
 	library: Library!
 	libraryConfig: LibraryConfig!

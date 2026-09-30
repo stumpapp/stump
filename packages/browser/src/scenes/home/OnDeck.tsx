@@ -176,7 +176,7 @@ const OnDeckBookCard = memo(function OnDeckBookCard({ fragment, cardWidth }: OnD
 		direction: 'to bottom',
 	}
 
-	const seriesPosition = Number(data.metadata?.number) || data.seriesPosition
+	const seriesPosition = data.series ? Number(data.metadata?.number) || data.seriesPosition : null
 	// If seriesPosition is fractional, we show "Book X in series"
 	// If it's an integer, we show "Book X of Y"
 	// If the integer is more than the total count, we fallback to "Book X in series"

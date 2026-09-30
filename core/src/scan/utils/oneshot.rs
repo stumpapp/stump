@@ -260,7 +260,7 @@ async fn insert_oneshots(
 		for (media_id, series_id) in event_pairs {
 			worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
 				id: media_id,
-				series_id,
+				series_id: Some(series_id),
 				library_id: library_id.to_string(),
 			}));
 		}

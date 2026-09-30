@@ -957,7 +957,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));
@@ -985,7 +985,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));
@@ -1025,7 +1025,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						CreatedOrUpdatedManyMedia {
 							count: created_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));
@@ -1064,7 +1064,7 @@ impl JobLifecycle for LibraryScanJob {
 					ctx.emit_event(CoreEvent::CreatedOrUpdatedManyMedia(
 						event::CreatedOrUpdatedManyMedia {
 							count: updated_media,
-							series_id,
+							series_id: Some(series_id),
 							library_id: self.id.clone(),
 						},
 					));

@@ -116,8 +116,12 @@ export default function BookMenu({ data }: Props) {
 			// TODO: would be better to have a little bit smarter cache invalidation here,
 			// im casting a wide net because i don't want to have to figure out where i am
 			// in the router (e.g., did i come from books? a series? etc)
-			client.invalidateQueries({ queryKey: ['seriesById', book.series.id], exact: false }), // stats
-			client.invalidateQueries({ queryKey: ['seriesBooks', book.series.id], exact: false }),
+			...(book.series
+				? [
+						client.invalidateQueries({ queryKey: ['seriesById', book.series.id], exact: false }), // stats
+						client.invalidateQueries({ queryKey: ['seriesBooks', book.series.id], exact: false }),
+					]
+				: []),
 			client.invalidateQueries({ queryKey: ['booksStats', serverID], exact: false }), // stats
 			client.invalidateQueries({ queryKey: ['books', serverID], exact: false }), // server books
 		])
@@ -266,19 +270,21 @@ export default function BookMenu({ data }: Props) {
 
 						<Stack.Toolbar.MenuAction
 							icon="arrow.up.right"
-							onPress={() => router.push(`/stump/${book.id}/libraries/${book.library.id}`)}
+							onPress={() => router.push(`/stump/${serverID}/libraries/${book.library.id}`)}
 							subtitle={book.library.name}
 						>
 							{t('bookActions.goToLibrary')}
 						</Stack.Toolbar.MenuAction>
 
-						<Stack.Toolbar.MenuAction
-							icon="arrow.up.right"
-							onPress={() => router.push(`/stump/${book.id}/series/${book.series.id}`)}
-							subtitle={book.series.resolvedName}
-						>
-							{t('bookActions.goToSeries')}
-						</Stack.Toolbar.MenuAction>
+						{book.series && (
+							<Stack.Toolbar.MenuAction
+								icon="arrow.up.right"
+								onPress={() => router.push(`/stump/${serverID}/series/${book.series?.id}`)}
+								subtitle={book.series.resolvedName}
+							>
+								{t('bookActions.goToSeries')}
+							</Stack.Toolbar.MenuAction>
+						)}
 
 						{!isUntouched && (
 							<Stack.Toolbar.Menu inline>

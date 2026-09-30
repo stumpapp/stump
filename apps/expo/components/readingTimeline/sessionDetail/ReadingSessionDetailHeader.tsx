@@ -1,8 +1,8 @@
 import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { View } from 'react-native'
 
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
@@ -58,7 +58,9 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 	const data = useFragment(fragment, fragmentRef)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const durationText = formatHumanDuration(data.elapsedSeconds ?? 0)
+	const durationText = formatHumanDurationSeparate(data.elapsedSeconds ?? 0, {
+		significantUnits: 2,
+	})
 	// TODO: this is really awkward in that you could:
 	// - start session, read for 30 seconds, exit reader
 	// - come back minutes before the session lapses, add an annotation
@@ -105,31 +107,43 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 		return '??'
 	}, [startPage, endPage])
 
+	const chaptersRead = data.chaptersRead.length - 1
+
+	const [thumbnailHeight, setThumbnailHeight] = useState(0)
+
 	if (!data.media) return null
 
 	return (
 		<Card>
-			<Card.Row className="gap-2.5 flex-row">
-				<View className="gap-3 flex-1">
-					<ThumbnailImage
-						source={{
-							uri: data.media.thumbnail?.url,
-						}}
-						size={{ height: 115 / thumbnailRatio, width: 115 }}
-						placeholderData={data.media.thumbnail.metadata}
-						borderAndShadowStyle={{ shadowRadius: 5 }}
-					/>
-
-					<View className="w-full items-center justify-center">
-						<Progress
-							className="h-2.5"
-							value={parseGraphQLPercentageDecimal(data.endPercentage) ?? 0}
-							trackClassName="bg-black/10"
-							indicatorClassName="bg-white/70"
+			<Card.Row className="gap-4 flex-col">
+				<View className="gap-2.5 flex-row items-start">
+					<View className="flex-1">
+						<ThumbnailImage
+							source={{
+								uri: data.media.thumbnail?.url,
+							}}
+							size={{ height: thumbnailHeight, width: thumbnailHeight * thumbnailRatio }}
+							placeholderData={data.media.thumbnail.metadata}
+							borderAndShadowStyle={{ shadowRadius: 5 }}
 						/>
 					</View>
 
-					{/*TODO: i think the phrasing here is not quite right, but maybe just me. im
+					<View
+						className="gap-3 flex-1 items-start justify-between"
+						onLayout={(e) => setThumbnailHeight(e.nativeEvent.layout.height)}
+					>
+						<View className="squircle py-2 px-4 gap-2 bg-black/5 dark:bg-white/10 w-full flex-col items-start rounded-[1.25rem]">
+							<StatText value={pagesRead} suffix={' pages read'} />
+							{/* TODO: might be too wide for larger numbers */}
+							<Text>
+								{durationText.map((d, i) => (
+									<StatText key={i} value={d.value} suffix={d.unit} />
+								))}
+							</Text>
+							<StatText value={chaptersRead} suffix={' chapters finished'} />
+						</View>
+
+						{/*TODO: i think the phrasing here is not quite right, but maybe just me. im
 					wondering if something more along the lines of this might work:
 					- You read pages 1-10 between 12:00 PM and 12:30 PM
 					- You read page 23 between 1:00 PM and 1:15 PM
@@ -137,29 +151,36 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 					separately, page range will be tricky because _technically_ can go backwards,
 					and seeing "read pages 10-5" is not my fav. "from 10 to 5" makes it feel better
 					*/}
-					<TemplatedTranslationText
-						className="text-foreground-muted text-center"
-						fakeTranslation={fakeTranslation}
-						values={{
-							TIME_RANGE: timeRange,
-							START_PAGE: startPageFragment,
-							END_PAGE: endPageFragment,
-						}}
-					/>
+						<TemplatedTranslationText
+							className="text-foreground-muted px-1"
+							fakeTranslation={fakeTranslation}
+							values={{
+								TIME_RANGE: timeRange,
+								START_PAGE: startPageFragment,
+								END_PAGE: endPageFragment,
+							}}
+						/>
+					</View>
 				</View>
 
-				<View className="bg-black/10 dark:bg-white/10 h-full w-px shrink-0" />
-
-				<View className="gap-4 px-2 flex flex-1 items-start">
-					<Text size="lg">{t('readingSessions.pagesRead', { count: pagesRead })}</Text>
-					<Text size="lg">{durationText}</Text>
-					{data.chaptersRead.length > 0 && (
-						<Text size="lg">
-							{t('readingSessions.chaptersRead', { count: data.chaptersRead.length })}
-						</Text>
-					)}
-				</View>
+				<Progress
+					className="h-2.5"
+					value={parseGraphQLPercentageDecimal(data.endPercentage) ?? 0}
+					trackClassName="bg-black/10"
+					indicatorClassName="bg-white/70"
+				/>
 			</Card.Row>
 		</Card>
+	)
+}
+
+function StatText({ value, suffix }: { value: number | string; suffix: string }) {
+	return (
+		<Text size="xl" className="font-extrabold text-center">
+			{value}
+			<Text size="sm" className="font-bold text-foreground-muted text-center">
+				{suffix}
+			</Text>
+		</Text>
 	)
 }

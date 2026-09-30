@@ -12,7 +12,6 @@ import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage, ThumbnailPlaceholderData } from '../image'
 import { Card, Icon, Progress, Text } from '../ui'
-import { SessionProgressBar } from './SessionProgressBar'
 
 const fragment = graphql(`
 	fragment ReadingSessionCard on SessionWithEvents {
@@ -150,7 +149,6 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 		.join('\n')
 	// ^ obv not quite right but fine for now, TODO: make the fake data notes actually something useful for mocks
 
-	// TODO: rm mock/fake data throughout ehre and there
 	return (
 		<View key={session.id} className="gap-4 py-4">
 			<View className="px-3 flex-row items-center justify-between">

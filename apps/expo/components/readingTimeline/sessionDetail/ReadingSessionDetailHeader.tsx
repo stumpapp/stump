@@ -11,6 +11,7 @@ import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../../image'
+import { SessionProgressBar } from '../SessionProgressBar'
 
 const fragment = graphql(`
 	fragment ReadingSessionDetailHeader on ReadingSession {
@@ -27,6 +28,7 @@ const fragment = graphql(`
 				position
 			}
 		}
+		startPercentage
 		endPercentage
 		createdAt
 		updatedAt
@@ -121,11 +123,16 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 					/>
 
 					<View className="w-full items-center justify-center">
-						<Progress
+						{/*<Progress
 							className="h-2.5"
 							value={parseGraphQLPercentageDecimal(data.endPercentage) ?? 0}
 							trackClassName="bg-black/10"
 							indicatorClassName="bg-white/70"
+						/>*/}
+
+						<SessionProgressBar
+							startPercentage={parseGraphQLPercentageDecimal(data.startPercentage) ?? 0}
+							endPercentage={parseGraphQLPercentageDecimal(data.endPercentage) ?? 0}
 						/>
 					</View>
 

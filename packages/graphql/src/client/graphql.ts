@@ -2108,6 +2108,11 @@ export type Mutation = {
    * A result containing the deleted reading list, or an error if deletion failed.
    */
   deleteReadingList: ReadingList;
+  /**
+   * Deletes a reading session for the authenticated user. Only the user who owns the session
+   * may delete it
+   */
+  deleteReadingSession: Scalars['Boolean']['output'];
   deleteScheduledJob: Scalars['Boolean']['output'];
   deleteSmartList: SmartList;
   deleteSmartListView: SmartListView;
@@ -2156,6 +2161,11 @@ export type Mutation = {
   patchEmailDevice: RegisteredEmailDevice;
   patchLibrary: Library;
   patchLibraryConfig: LibraryConfig;
+  /**
+   * Updates a reading session for the authenticated user, exposing a small
+   * set of fields which are editable
+   */
+  patchReadingSession: ReadingSession;
   /** Pin or unpin a message (Moderator+) */
   pinMessage: Scalars['Boolean']['output'];
   processLibraryThumbnails: Scalars['Boolean']['output'];
@@ -2609,6 +2619,11 @@ export type MutationDeleteReadingListArgs = {
 };
 
 
+export type MutationDeleteReadingSessionArgs = {
+  sessionId: Scalars['Int']['input'];
+};
+
+
 export type MutationDeleteScheduledJobArgs = {
   id: Scalars['Int']['input'];
 };
@@ -2724,6 +2739,12 @@ export type MutationPatchLibraryArgs = {
 export type MutationPatchLibraryConfigArgs = {
   id: Scalars['ID']['input'];
   input: PatchLibraryConfigInput;
+};
+
+
+export type MutationPatchReadingSessionArgs = {
+  input: PatchReadingSession;
+  sessionId: Scalars['Int']['input'];
 };
 
 
@@ -3396,6 +3417,11 @@ export type PatchMetadataProviderConfigInput = {
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type PatchReadingSession = {
+  elapsedSeconds?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<ReadingStatus>;
+};
+
 export type PlaceholderGenerationOutput = {
   __typename?: 'PlaceholderGenerationOutput';
   /** The number of placeholder metadata entries that were generated */
@@ -3889,6 +3915,12 @@ export type ReadingSession = {
   events: Array<SessionEvent>;
   id: Scalars['Int']['output'];
   koreaderProgress?: Maybe<Scalars['String']['output']>;
+  /**
+   * The media which this session belongs to. Please note that if somehow the user loses access to the
+   * media record, e.g. via access control, then this will resolve to `None` to avoid leaking
+   * information which the user no longer has access to. It is a bit awkward, since the session itself
+   * means they have at least at some point read some portion
+   */
   media?: Maybe<Media>;
   mediaId: Scalars['String']['output'];
   notes?: Maybe<Scalars['String']['output']>;

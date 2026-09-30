@@ -18,6 +18,7 @@ mod metadata_provider;
 mod notifier;
 mod reading_list;
 pub mod reading_progress;
+mod reading_session;
 mod scheduled_job_config;
 mod series;
 mod series_metadata;
@@ -48,6 +49,7 @@ use metadata_provider::MetadataProviderMutation;
 use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
 use reading_progress::ReadProgressMutation;
+use reading_session::ReadingSessionMutation;
 use scheduled_job_config::ScheduledJobConfigMutation;
 use series::SeriesMutation;
 use series_metadata::SeriesMetadataMutation;
@@ -110,4 +112,5 @@ pub struct Mutation(
 	SystemMutations,
 	ListMutations,
 	ReadProgressMutation,
+	ReadingSessionMutation,
 );

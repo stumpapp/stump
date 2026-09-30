@@ -17,7 +17,7 @@ use tokio::task::spawn_blocking;
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	loader::media::{MediaByIdLoaderKey, MediaLoader},
+	loader::media::{MediaByIdForUserLoaderKey, MediaLoader},
 	object::{
 		bookmark::Bookmark, media::Media, media_annotation::MediaAnnotation,
 		reading_timeline::SessionEvent,
@@ -36,7 +36,10 @@ pub struct ReadingSession {
 // session node passed down to here). otherwise each selection will just duplicate
 // a bunch of ac logic, which is inefficient as hell but really also importantly
 // a terrible mess to maintain
-//
+
+/// A single, contiguous reading session for a given user and book. Access to this node
+/// MUST be restricted by the resolvers which would return it, and resolvers within
+/// this node assume as such
 #[ComplexObject]
 impl ReadingSession {
 	async fn device_ids(&self) -> Vec<String> {
@@ -49,16 +52,18 @@ impl ReadingSession {
 
 	// TODO: async fn devices(&self, ctx: &Context<'_>) -> Result<Vec<RegisteredReadingDevice>>
 
+	/// The media which this session belongs to. Please note that if somehow the user loses access to the
+	/// media record, e.g. via access control, then this will resolve to `None` to avoid leaking
+	/// information which the user no longer has access to. It is a bit awkward, since the session itself
+	/// means they have at least at some point read some portion
 	async fn media(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<MediaLoader>>()?;
 
-		// TODO(reading-timeline): user id needs to be considered, realistically the only scenario this
-		// protects against is user read while having permission to a book that is now
-		// revoked. still valid to protect against, but will come last before merge
 		let media = loader
-			.load_one(MediaByIdLoaderKey {
+			.load_one(MediaByIdForUserLoaderKey {
 				id: self.model.media_id.clone(),
+				user_id: user.id.clone(),
 			})
 			.await?;
 
@@ -70,8 +75,6 @@ impl ReadingSession {
 		ctx: &Context<'_>,
 		#[graphql(default_with = "OrderDirection::Asc")] order: OrderDirection,
 	) -> Result<Vec<SessionEvent>> {
-		// TODO(reading-timeline): access control
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let bookmarks = bookmark::Entity::find()
@@ -114,8 +117,6 @@ impl ReadingSession {
 	/// of sessions but more a detail view into a single session, etc.
 	// ^ TODO: at least not until potentially storing the positions in the db
 	async fn chapters_read(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
-		// TODO(reading-timeline): access control
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let selection = media::Entity::find_by_id(self.model.media_id.clone())

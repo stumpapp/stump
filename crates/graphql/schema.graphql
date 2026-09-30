@@ -2201,6 +2201,16 @@ type Mutation {
 	readthroughs
 	"""
 	clearSeriesReadingHistory(id: ID!): Int!
+	"""
+	Deletes a reading session for the authenticated user. Only the user who owns the session
+	may delete it
+	"""
+	deleteReadingSession(sessionId: Int!): Boolean!
+	"""
+	Updates a reading session for the authenticated user, exposing a small
+	set of fields which are editable
+	"""
+	patchReadingSession(sessionId: Int!, input: PatchReadingSession!): ReadingSession!
 }
 
 """
@@ -2488,6 +2498,11 @@ input PatchMetadataProviderConfigInput {
 	apiTokenExpiresAt: DateTime
 }
 
+input PatchReadingSession {
+	elapsedSeconds: String
+	status: ReadingStatus
+}
+
 type PlaceholderGenerationOutput {
 	"The total number of entities that were visited"
 	visitedEntities: Int!
@@ -2711,6 +2726,12 @@ type ReadingSession {
 	createdAt: DateTime!
 	updatedAt: DateTime
 	deviceIds: [String!]!
+	"""
+	The media which this session belongs to. Please note that if somehow the user loses access to the
+	media record, e.g. via access control, then this will resolve to `None` to avoid leaking
+	information which the user no longer has access to. It is a bit awkward, since the session itself
+	means they have at least at some point read some portion
+	"""
 	media: Media
 	events(order: OrderDirection! = ASC): [SessionEvent!]!
 	"""

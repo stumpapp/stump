@@ -365,6 +365,7 @@ mod tests {
 				hash: Some("hash".to_string()),
 				koreader_hash: None,
 				series_id: Some("1".to_string()),
+				library_id: "library-1".to_string(),
 				pages: 3,
 				modified_at: None,
 				size: 2000,

@@ -12,7 +12,7 @@ use crate::{
 	config::StumpConfig,
 	fs_utils::{FileParts, PathUtils},
 	media::processor::{process_file, MediaProcessorOptions},
-	CoreResult,
+	CoreError, CoreResult,
 };
 
 #[derive(Debug, Clone)]
@@ -45,6 +45,9 @@ pub async fn prepare_draft(
 	config: &StumpConfig,
 	existing: Option<&media::ModelWithMetadata>,
 ) -> CoreResult<MediaDraft> {
+	let library_id = library_config.library_id.clone().ok_or_else(|| {
+		CoreError::InternalError("Library configuration is missing its library ID".into())
+	})?;
 	let options = MediaProcessorOptions::new(&library_config, config);
 
 	let processed = process_file(path, options, config).await?;
@@ -108,6 +111,7 @@ pub async fn prepare_draft(
 		koreader_hash: Set(processed.koreader_hash),
 		path: Set(path_str),
 		series_id: Set(Some(series_id.to_string())),
+		library_id: Set(library_id),
 		modified_at: Set(last_modified_at),
 		status: Set(FileStatus::Ready),
 		created_at: Set(chrono::Utc::now().into()),

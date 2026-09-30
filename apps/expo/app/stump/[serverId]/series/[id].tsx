@@ -28,6 +28,7 @@ import { useBooksLayout } from '~/stores/layout'
 const query = graphql(`
 	query SeriesBooksSceneSeriesName($id: ID!) {
 		seriesById(id: $id) {
+			kind
 			resolvedName
 			stats {
 				bookCount
@@ -182,6 +183,7 @@ export default function Screen() {
 					viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
 					ListHeaderComponent={
 						<SeriesBooksListHeader
+							seriesKind={series.kind}
 							seriesId={id}
 							layoutKey={layoutKey}
 							stats={series.stats}

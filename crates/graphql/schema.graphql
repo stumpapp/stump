@@ -1876,7 +1876,8 @@ input MetadataRetryConfigInput {
 
 type MissingEntity {
 	id: String!
-	path: String!
+	name: String!
+	path: String
 	type: MissingEntityType!
 }
 
@@ -3035,7 +3036,8 @@ type Series {
 	id: String!
 	name: String!
 	description: String
-	path: String!
+	path: String
+	kind: SeriesKind!
 	status: FileStatus!
 	isOneshot: Boolean!
 	thumbnailMeta: ImageMetadata
@@ -3080,6 +3082,11 @@ input SeriesFilterInput {
 	_and: [SeriesFilterInput!] = null
 	_not: [SeriesFilterInput!] = null
 	_or: [SeriesFilterInput!] = null
+}
+
+enum SeriesKind {
+	FILESYSTEM
+	VIRTUAL
 }
 
 type SeriesMetadata {
@@ -3206,6 +3213,7 @@ enum SeriesModelOrdering {
 	NAME
 	DESCRIPTION
 	PATH
+	KIND
 	STATUS
 	IS_ONESHOT
 	THUMBNAIL_META

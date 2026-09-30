@@ -36,6 +36,7 @@ mod m20260816_000000_drop_legacy_epubcfi;
 mod m20260830_015110_oneshots;
 mod m20260928_173434_bookmark_and_annotation_fks_to_session;
 mod m20260930_000000_media_library;
+mod m20260930_000001_virtual_series;
 
 pub struct Migrator;
 
@@ -78,6 +79,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260830_015110_oneshots::Migration),
 			Box::new(m20260928_173434_bookmark_and_annotation_fks_to_session::Migration),
 			Box::new(m20260930_000000_media_library::Migration),
+			Box::new(m20260930_000001_virtual_series::Migration),
 		]
 	}
 }

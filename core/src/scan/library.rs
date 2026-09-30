@@ -224,7 +224,7 @@ impl JobLifecycle for LibraryScanJob {
 			.await
 			.unwrap_or_default()
 			.into_iter()
-			.map(|s| (s.path, s.id))
+			.filter_map(|s| s.path.map(|path| (path, s.id)))
 			.collect::<HashMap<String, String>>();
 		tracing::debug!(count = loaded_series_ids.len(), "preloaded series ids");
 		if let Ok(mut map) = self.series_id_by_path.lock() {
@@ -631,7 +631,9 @@ impl JobLifecycle for LibraryScanJob {
 								output.created_series += created_series.len() as u64;
 								if let Ok(mut map) = self.series_id_by_path.lock() {
 									for s in &created_series {
-										map.insert(s.path.clone(), s.id.clone());
+										if let Some(path) = &s.path {
+											map.insert(path.clone(), s.id.clone());
+										}
 									}
 								}
 								ctx.emit_event(CoreEvent::CreatedManySeries(

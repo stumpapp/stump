@@ -60,6 +60,7 @@ export default function CleanLibrary() {
 			toast.promise(cleanLibrary({ id }), {
 				loading: t(getKey('confirmation.loading')),
 				success: ({ cleanLibrary: result }) => {
+					void client.invalidateQueries({ queryKey: ['missingEntities', id] })
 					if (result.isEmpty) {
 						return t(getKey('emptyText'))
 					} else if (result.deletedMediaCount === 0 && result.deletedSeriesCount === 0) {

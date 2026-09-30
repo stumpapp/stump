@@ -331,26 +331,11 @@ impl LibraryMutation {
 			impact,
 			MetadataResetImpact::Books | MetadataResetImpact::Everything
 		) {
-			let media_metadata_models = media_metadata::Entity::find()
-				.filter(
-					media_metadata::Column::MediaId.in_subquery(
-						Query::select()
-							.column(media::Column::Id)
-							.from(media::Entity)
-							.and_where(media::Column::LibraryId.eq(library.id.clone()))
-							.to_owned(),
-					),
-				)
-				.all(&tx)
-				.await?;
-			tracing::trace!(
-				count = media_metadata_models.len(),
-				"Found media metadata to delete"
-			);
-
-			for media_metadata in media_metadata_models {
-				media_metadata.delete(&tx).await?;
-			}
+			stump_core::metadata::membership::reset_media_metadata(
+				&tx,
+				media::Column::LibraryId.eq(&library.id),
+			)
+			.await?;
 		}
 
 		tx.commit().await?;

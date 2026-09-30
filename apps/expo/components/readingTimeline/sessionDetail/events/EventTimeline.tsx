@@ -1,11 +1,22 @@
-import { FragmentType, graphql, OrderDirection, useFragment } from '@stump/graphql'
+import {
+	AnnotationEventFragment,
+	FragmentType,
+	graphql,
+	OrderDirection,
+	useFragment,
+} from '@stump/graphql'
 import { ArrowDownRight, ArrowUpRight, Book, BookOpen } from 'lucide-react-native'
-import React from 'react'
+import React, { useRef } from 'react'
 import { Pressable, View } from 'react-native'
 
+import {
+	UpdateAnnotationSheet,
+	UpdateAnnotationSheetRef,
+} from '~/components/book/reader/epub/annotations'
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
 import { Card, Icon, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
+import { intoReadiumLocator } from '~/modules/readium'
 
 import { useEventOrderStore } from '../store'
 import { AnnotationEvent } from './AnnotationEvent'
@@ -14,6 +25,7 @@ import { EventTimelineRow } from './EventTimelineRow'
 
 const fragment = graphql(`
 	fragment EventTimeline on ReadingSession {
+		mediaId
 		createdAt
 		startPage
 		startLocator {
@@ -48,12 +60,27 @@ export function EventTimeline({ fragmentRef }: Props) {
 	const { t } = useTranslate()
 	const data = useFragment(fragment, fragmentRef)
 
+	const updateAnnotationSheetRef = useRef<UpdateAnnotationSheetRef>(null)
+
+	const onAnnotationPress = (annotation: AnnotationEventFragment) => {
+		updateAnnotationSheetRef.current?.open({
+			id: annotation.id,
+			bookId: data.mediaId,
+			locator: intoReadiumLocator(annotation.locator),
+			// TODO(highlights): support per-highlight color
+			color: '#FFEB3B',
+			createdAt: new Date(annotation.createdAt),
+			updatedAt: new Date(annotation.createdAt),
+			annotationText: annotation.annotationText ?? undefined,
+		})
+	}
+
 	const renderEvent = (event: (typeof data.events)[number]) => {
 		switch (event.__typename) {
 			case 'Bookmark':
 				return <BookmarkEvent fragmentRef={event} />
 			case 'MediaAnnotation':
-				return <AnnotationEvent fragmentRef={event} />
+				return <AnnotationEvent fragmentRef={event} onPress={onAnnotationPress} />
 			default:
 				return null
 		}
@@ -109,42 +136,53 @@ export function EventTimeline({ fragmentRef }: Props) {
 	)
 
 	return (
-		<Card
-			actions={
-				<Pressable
-					onPress={() =>
-						setOrder(order === OrderDirection.Asc ? OrderDirection.Desc : OrderDirection.Asc)
-					}
-				>
-					{({ pressed }) => (
-						<View
-							className="gap-1.5 flex flex-row items-center"
-							style={pressed ? { opacity: 0.8 } : undefined}
-						>
-							<Text className="text-foreground-muted">
-								{t(`sorting.sortDirectionDate.${order}`)}
-							</Text>
+		<>
+			<Card
+				actions={
+					<Pressable
+						onPress={() =>
+							setOrder(order === OrderDirection.Asc ? OrderDirection.Desc : OrderDirection.Asc)
+						}
+					>
+						{({ pressed }) => (
+							<View
+								className="gap-1.5 flex flex-row items-center"
+								style={pressed ? { opacity: 0.8 } : undefined}
+							>
+								<Text className="text-foreground-muted">
+									{t(`sorting.sortDirectionDate.${order}`)}
+								</Text>
 
-							<Icon
-								as={order === OrderDirection.Asc ? ArrowUpRight : ArrowDownRight}
-								className="text-foreground-muted h-4 w-4"
-							/>
-						</View>
-					)}
-				</Pressable>
-			}
-		>
-			<Card.Row>
-				<View className="w-full">
-					{order === OrderDirection.Asc ? OpenEvent : CloseEvent}
+								<Icon
+									as={order === OrderDirection.Asc ? ArrowUpRight : ArrowDownRight}
+									className="text-foreground-muted h-4 w-4"
+								/>
+							</View>
+						)}
+					</Pressable>
+				}
+			>
+				<Card.Row>
+					<View className="w-full">
+						{order === OrderDirection.Asc ? OpenEvent : CloseEvent}
 
-					{data.events.map((event) => (
-						<React.Fragment key={JSON.stringify(event)}>{renderEvent(event)}</React.Fragment>
-					))}
+						{data.events.map((event) => (
+							<React.Fragment key={JSON.stringify(event)}>{renderEvent(event)}</React.Fragment>
+						))}
 
-					{order === OrderDirection.Asc ? CloseEvent : OpenEvent}
-				</View>
-			</Card.Row>
-		</Card>
+						{order === OrderDirection.Asc ? CloseEvent : OpenEvent}
+					</View>
+				</Card.Row>
+			</Card>
+
+			<UpdateAnnotationSheet
+				// TODO: obv the callbacks, but separately consider knobs to style the sheet,
+				// the blast of white was not welcome when i opened for the first time compared
+				// to the nice background lol but also a lower priority honestly
+				ref={updateAnnotationSheetRef}
+				onAnnotationChange={() => {}}
+				onDelete={() => {}}
+			/>
+		</>
 	)
 }

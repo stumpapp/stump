@@ -1,5 +1,5 @@
 import { parseGraphQLDateTime } from '@stump/client'
-import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { AnnotationEventFragment, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { ChevronRight, Highlighter, PencilLine } from 'lucide-react-native'
 import { Pressable, View } from 'react-native'
 
@@ -13,11 +13,18 @@ const fragment = graphql(`
 		# page
 		annotationText
 		locator {
+			href
+			type
+			chapterTitle
 			locations {
 				position
+				progression
+				totalProgression
 			}
 			text {
 				highlight
+				after
+				before
 			}
 		}
 		createdAt
@@ -28,18 +35,20 @@ type Props = {
 	fragmentRef: FragmentType<typeof fragment>
 	showTopConnector?: boolean
 	showBottomConnector?: boolean
+	onPress: (data: AnnotationEventFragment) => void
 }
 
 export function AnnotationEvent({
 	fragmentRef,
 	showTopConnector = true,
 	showBottomConnector = true,
+	onPress,
 }: Props) {
 	const data = useFragment(fragment, fragmentRef)
 
 	// TODO: can open annotation sheet for highlights? in case you want to _add_ a note?
 	return (
-		<Pressable>
+		<Pressable onPress={() => onPress(data)}>
 			{({ pressed }) => (
 				<EventTimelineRow
 					icon={{ as: data.annotationText ? PencilLine : Highlighter, size: 'sm' }}

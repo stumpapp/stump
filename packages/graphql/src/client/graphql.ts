@@ -5804,11 +5804,11 @@ export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents'
 
 export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
 
-export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, createdAt: any, locator: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null, text?: { __typename?: 'ReadiumText', highlight?: string | null } | null } } & { ' $fragmentName'?: 'AnnotationEventFragment' };
+export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, createdAt: any, locator: { __typename?: 'ReadiumLocator', href: string, type: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', position?: number | null, progression?: any | null, totalProgression?: any | null } | null, text?: { __typename?: 'ReadiumText', highlight?: string | null, after?: string | null, before?: string | null } | null } } & { ' $fragmentName'?: 'AnnotationEventFragment' };
 
 export type BookmarkEventFragment = { __typename?: 'Bookmark', id: string, page?: number | null, createdAt: any, bookmarkLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'BookmarkEventFragment' };
 
-export type EventTimelineFragment = { __typename?: 'ReadingSession', createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
+export type EventTimelineFragment = { __typename?: 'ReadingSession', mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
     { __typename: 'Bookmark' }
     & { ' $fragmentRefs'?: { 'BookmarkEventFragment': BookmarkEventFragment } }
   ) | (
@@ -7861,11 +7861,18 @@ export const AnnotationEventFragmentDoc = new TypedDocumentString(`
   id
   annotationText
   locator {
+    href
+    type
+    chapterTitle
     locations {
       position
+      progression
+      totalProgression
     }
     text {
       highlight
+      after
+      before
     }
   }
   createdAt
@@ -7873,6 +7880,7 @@ export const AnnotationEventFragmentDoc = new TypedDocumentString(`
     `, {"fragmentName":"AnnotationEvent"}) as unknown as TypedDocumentString<AnnotationEventFragment, unknown>;
 export const EventTimelineFragmentDoc = new TypedDocumentString(`
     fragment EventTimeline on ReadingSession {
+  mediaId
   createdAt
   startPage
   startLocator {
@@ -7901,11 +7909,18 @@ export const EventTimelineFragmentDoc = new TypedDocumentString(`
   id
   annotationText
   locator {
+    href
+    type
+    chapterTitle
     locations {
       position
+      progression
+      totalProgression
     }
     text {
       highlight
+      after
+      before
     }
   }
   createdAt
@@ -9191,11 +9206,18 @@ fragment AnnotationEvent on MediaAnnotation {
   id
   annotationText
   locator {
+    href
+    type
+    chapterTitle
     locations {
       position
+      progression
+      totalProgression
     }
     text {
       highlight
+      after
+      before
     }
   }
   createdAt
@@ -9211,6 +9233,7 @@ fragment BookmarkEvent on Bookmark {
   createdAt
 }
 fragment EventTimeline on ReadingSession {
+  mediaId
   createdAt
   startPage
   startLocator {

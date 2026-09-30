@@ -1449,6 +1449,8 @@ input MediaFilterInput {
 	createdAt: NumericFilterDateTime = null
 	updatedAt: NumericFilterDateTime = null
 	seriesId: FieldFilterString = null
+	libraryId: FieldFilterString = null
+	libraryType: ComputedFilterLibraryType = null
 	status: FieldFilterFileStatus = null
 	path: FieldFilterString = null
 	pages: NumericFilterI32 = null
@@ -2588,7 +2590,7 @@ type Query {
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!
 	mediaDiskUsage: Int!
-	media(filter: MediaFilterInput! = {id: null, name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, tags: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput! = {id: null, name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, libraryId: null, libraryType: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, tags: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	"Returns the available alphabet for all media in the server"
@@ -3315,7 +3317,7 @@ type SmartListGrouped {
 }
 
 type SmartListGroupedItem {
-	entity: SmartListItemEntity!
+	entity: SmartListItemEntity
 	books: [Media!]!
 }
 

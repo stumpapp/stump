@@ -1,6 +1,6 @@
 use async_graphql::dataloader::Loader;
-use models::entity::{library_config, series};
-use sea_orm::{prelude::*, DatabaseConnection, QuerySelect};
+use models::entity::library_config;
+use sea_orm::{prelude::*, DatabaseConnection};
 use std::{collections::HashMap, sync::Arc};
 
 pub struct LibraryConfigLoader {
@@ -15,7 +15,7 @@ impl LibraryConfigLoader {
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct LibraryConfigLoaderKey {
-	pub series_id: String,
+	pub library_id: String,
 }
 
 impl Loader<LibraryConfigLoaderKey> for LibraryConfigLoader {
@@ -26,23 +26,9 @@ impl Loader<LibraryConfigLoaderKey> for LibraryConfigLoader {
 		&self,
 		keys: &[LibraryConfigLoaderKey],
 	) -> Result<HashMap<LibraryConfigLoaderKey, Self::Value>, Self::Error> {
-		let series_ids = keys
+		let library_ids = keys
 			.iter()
-			.map(|key| key.series_id.clone())
-			.collect::<Vec<_>>();
-
-		let series_to_library = series::Entity::find()
-			.select_only()
-			.column(series::Column::Id)
-			.column(series::Column::LibraryId)
-			.filter(series::Column::Id.is_in(series_ids))
-			.into_tuple::<(String, String)>()
-			.all(self.conn.as_ref())
-			.await?;
-
-		let library_ids = series_to_library
-			.iter()
-			.map(|(_, library_id)| library_id.clone())
+			.map(|key| key.library_id.clone())
 			.collect::<Vec<_>>();
 
 		let configs = library_config::Entity::find()
@@ -63,14 +49,7 @@ impl Loader<LibraryConfigLoaderKey> for LibraryConfigLoader {
 		let mut result = HashMap::new();
 
 		for key in keys {
-			let Some((_, library_id)) = series_to_library
-				.iter()
-				.find(|(series_id, _)| series_id == &key.series_id)
-			else {
-				continue;
-			};
-
-			if let Some(config) = config_by_library.get(library_id) {
+			if let Some(config) = config_by_library.get(&key.library_id) {
 				result.insert(key.clone(), config.clone());
 			}
 		}

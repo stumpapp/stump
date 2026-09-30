@@ -1570,6 +1570,8 @@ export type MediaFilterInput = {
   createdAt?: InputMaybe<NumericFilterDateTime>;
   extension?: InputMaybe<FieldFilterString>;
   id?: InputMaybe<FieldFilterString>;
+  libraryId?: InputMaybe<FieldFilterString>;
+  libraryType?: InputMaybe<ComputedFilterLibraryType>;
   metadata?: InputMaybe<MediaMetadataFilterInput>;
   name?: InputMaybe<FieldFilterString>;
   pages?: InputMaybe<NumericFilterI32>;
@@ -4578,7 +4580,7 @@ export type SmartListGrouped = {
 export type SmartListGroupedItem = {
   __typename?: 'SmartListGroupedItem';
   books: Array<Media>;
-  entity: SmartListItemEntity;
+  entity?: Maybe<SmartListItemEntity>;
 };
 
 /** The different grouping options for smart lists */
@@ -5543,7 +5545,7 @@ export type SmartListScreenQueryVariables = Exact<{
 }>;
 
 
-export type SmartListScreenQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, name: string, description?: string | null, items: { __typename: 'SmartListGrouped', items: Array<{ __typename?: 'SmartListGroupedItem', entity: { __typename: 'Library', id: string, name: string } | { __typename: 'Series', id: string, resolvedName: string }, books: Array<(
+export type SmartListScreenQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, name: string, description?: string | null, items: { __typename: 'SmartListGrouped', items: Array<{ __typename?: 'SmartListGroupedItem', entity?: { __typename: 'Library', id: string, name: string } | { __typename: 'Series', id: string, resolvedName: string } | null, books: Array<(
           { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }
           & { ' $fragmentRefs'?: { 'SmartListBookItemFragment': SmartListBookItemFragment } }
         )> }> } | { __typename: 'SmartListUngrouped', books: Array<(
@@ -7353,7 +7355,7 @@ export type SmartListItemsQueryVariables = Exact<{
 }>;
 
 
-export type SmartListItemsQuery = { __typename?: 'Query', smartListItems: { __typename: 'SmartListGrouped', items: Array<{ __typename?: 'SmartListGroupedItem', entity: { __typename: 'Library', id: string, name: string } | { __typename: 'Series', id: string, name: string }, books: Array<(
+export type SmartListItemsQuery = { __typename?: 'Query', smartListItems: { __typename: 'SmartListGrouped', items: Array<{ __typename?: 'SmartListGroupedItem', entity?: { __typename: 'Library', id: string, name: string } | { __typename: 'Series', id: string, name: string } | null, books: Array<(
         { __typename?: 'Media' }
         & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
       )> }> } | { __typename: 'SmartListUngrouped', books: Array<(

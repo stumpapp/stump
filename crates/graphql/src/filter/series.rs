@@ -1,20 +1,21 @@
 use async_graphql::InputObject;
 use models::{
-	entity::{library, library_config, media, reading_session, series},
+	entity::{media, reading_session, series},
 	shared::enums::{LibraryType, ReadingStatus},
 };
 use sea_orm::{
 	prelude::*,
-	sea_query::{Expr, JoinType, Query, SelectStatement},
+	sea_query::{Expr, Query, SelectStatement},
 	Condition,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use super::{
-	apply_string_filter, library::LibraryFilterInput,
-	series_metadata::SeriesMetadataFilterInput, ConceptualFilter, IntoFilter,
-	StringLikeFilter,
+	apply_string_filter,
+	library::{apply_library_type_filter, LibraryFilterInput},
+	series_metadata::SeriesMetadataFilterInput,
+	ConceptualFilter, IntoFilter, StringLikeFilter,
 };
 
 // TODO: Support filter by tags (requires join logic)
@@ -148,51 +149,6 @@ fn apply_series_reading_status_filter(
 	}
 }
 
-// select * from library where id in (select library_id from library_config where library_type = ?)
-fn library_type_id_subquery(library_type: LibraryType) -> SelectStatement {
-	Query::select()
-		.column((library::Entity, library::Column::Id))
-		.from(library::Entity)
-		.join(
-			JoinType::InnerJoin,
-			library_config::Entity,
-			Expr::col((library_config::Entity, library_config::Column::Id))
-				.equals((library::Entity, library::Column::ConfigId)),
-		)
-		.and_where(
-			Expr::col((library_config::Entity, library_config::Column::LibraryType))
-				.eq(library_type),
-		)
-		.to_owned()
-}
-
-fn apply_library_type_filter(filter: ConceptualFilter<LibraryType>) -> Condition {
-	match filter {
-		ConceptualFilter::Is(value) => Condition::all()
-			.add(series::Column::LibraryId.in_subquery(library_type_id_subquery(value))),
-		ConceptualFilter::IsNot(value) => Condition::all().add(
-			series::Column::LibraryId
-				.in_subquery(library_type_id_subquery(value))
-				.not(),
-		),
-		ConceptualFilter::IsAnyOf(values) => {
-			values.into_iter().fold(Condition::any(), |cond, v| {
-				cond.add(
-					series::Column::LibraryId.in_subquery(library_type_id_subquery(v)),
-				)
-			})
-		},
-		ConceptualFilter::IsNoneOf(values) => values
-			.into_iter()
-			.fold(Condition::any(), |cond, v| {
-				cond.add(
-					series::Column::LibraryId.in_subquery(library_type_id_subquery(v)),
-				)
-			})
-			.not(),
-	}
-}
-
 impl SeriesFilterInput {
 	/// The same as `into_filter` but intaking a user_id to resolve user-scoped filters (e.g. `reading_status`)
 	pub fn into_filter_with_user(mut self, user_id: &str) -> sea_orm::Condition {
@@ -273,7 +229,9 @@ impl SeriesFilterInput {
 					.map(|f| apply_string_filter(series::Column::LibraryId, f)),
 			)
 			.add_option(self.is_oneshot.map(|f| series::Column::IsOneshot.eq(f)))
-			.add_option(self.library_type.map(apply_library_type_filter))
+			.add_option(self.library_type.map(|filter| {
+				apply_library_type_filter(series::Column::LibraryId, filter)
+			}))
 			.add_option(self.metadata.map(|f| f.into_filter()))
 			.add_option(self.library.map(|f| f.into_filter()))
 	}

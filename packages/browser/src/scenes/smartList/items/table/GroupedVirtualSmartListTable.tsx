@@ -1,5 +1,6 @@
 import { cn } from '@stump/components'
 import { Media, SmartListGroupedItem } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import {
 	ExpandedState,
 	flexRender,
@@ -18,7 +19,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { SortIcon } from '@/components/table'
 
 import { useScrollElement } from '../../../../hooks/useScrollElement'
-import { useSafeWorkingView } from '../../context'
+import { useSafeWorkingView, useSmartListContext } from '../../context'
 import { buildColumns as buildGroupColumns } from './groupColumns'
 import { bookFuzzySearch, buildColumns as buildBookColumns } from './mediaColumns'
 import { SmartListTableItem } from './SmartListTableItem'
@@ -38,6 +39,8 @@ const GROUP_ROW_HEIGHT = 40
 const BOOK_HEADER_HEIGHT = 40
 
 export default function GroupedVirtualSmartListTable({ items }: Props) {
+	const { t } = useLocaleContext()
+	const { list } = useSmartListContext()
 	const containerRef = useRef<HTMLDivElement>(null)
 	const listRef = useRef<HTMLDivElement>(null)
 	const scrollElement = useScrollElement(containerRef)
@@ -46,10 +49,11 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 	const search = workingView.search
 	const [expanded, setExpanded] = useState<ExpandedState>({})
 
-	const isGroupedBySeries = items[0]?.entity?.__typename === 'Series'
+	const isGroupedBySeries = list.defaultGrouping === 'BY_SERIES'
+	const standaloneLabel = t('userSmartListScene.itemsScene.standaloneBooks')
 	const groupColumns = useMemo(
-		() => buildGroupColumns(isGroupedBySeries, workingView.groupColumns),
-		[isGroupedBySeries, workingView.groupColumns],
+		() => buildGroupColumns(isGroupedBySeries, workingView.groupColumns, standaloneLabel),
+		[isGroupedBySeries, workingView.groupColumns, standaloneLabel],
 	)
 
 	const groupSorting = useMemo(() => workingView?.groupSorting ?? [], [workingView])
@@ -76,30 +80,11 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 		getExpandedRowModel: getExpandedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getRowCanExpand: () => true,
-		getRowId: (row) => {
-			const entity = row.entity as { id?: string; name: string }
-			return entity.id || entity.name
-		},
+		getRowId: (row) => row.entity?.id ?? 'standalone',
 		getSortedRowModel: getSortedRowModel(),
-		globalFilterFn: (
-			{
-				original: {
-					books,
-					entity: { name },
-				},
-			},
-			_columnId,
-			searchValue,
-		) => {
-			const matchedBooks = books.filter((book) => bookFuzzySearch(book, searchValue))
-			if (matchedBooks.length) {
-				return true
-			} else if (name.toLowerCase().includes(searchValue.toLowerCase())) {
-				return true
-			} else {
-				return false
-			}
-		},
+		globalFilterFn: ({ original: { books, entity } }, _columnId, searchValue) =>
+			books.some((book) => bookFuzzySearch(book, searchValue)) ||
+			(entity?.name ?? standaloneLabel).toLowerCase().includes(searchValue.toLowerCase()),
 		onExpandedChange: setExpanded,
 		onSortingChange: setGroupSorting,
 		state: { expanded, globalFilter: search, sorting: groupSorting },

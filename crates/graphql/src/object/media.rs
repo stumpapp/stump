@@ -3,17 +3,18 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, media_analysis, reading_session, series, tag},
+	entity::{library, media, media_analysis, reading_session, tag},
 	services::reading_timeline::sessions_with_events,
 	shared::{analysis::MediaAnalysisData, image::ImageRef, ordering::OrderDirection},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{prelude::*, sea_query::Query, FromQueryResult, QueryOrder, QuerySelect};
+use sea_orm::{prelude::*, FromQueryResult, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
 	loader::{
 		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
+		library::LibraryLoader,
 		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
@@ -116,57 +117,24 @@ impl Media {
 		Ok(series)
 	}
 
-	async fn library_id(&self, ctx: &Context<'_>) -> Result<String> {
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
-		let id: String = library::Entity::find()
-			.select_only()
-			.column(library::Column::Id)
-			.filter(
-				library::Column::Id.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(series_id))
-						.to_owned(),
-				),
-			)
-			.into_tuple()
-			.one(conn)
-			.await?
-			.ok_or("Library not found")?;
-
-		Ok(id)
+	async fn library_id(&self) -> &str {
+		&self.model.library_id
 	}
 
 	async fn library(&self, ctx: &Context<'_>) -> Result<Library> {
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
-		let model = library::Entity::find()
-			.filter(
-				library::Column::Id.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(series_id))
-						.to_owned(),
-				),
-			)
-			.one(conn)
+		ctx.data::<DataLoader<LibraryLoader>>()?
+			.load_one(self.model.library_id.clone())
 			.await?
-			.ok_or("Library not found")?;
-
-		Ok(Library::from(model))
+			.ok_or_else(|| "Library not found".into())
 	}
 
 	async fn library_config(&self, ctx: &Context<'_>) -> Result<LibraryConfig> {
 		let loader = ctx.data::<DataLoader<LibraryConfigLoader>>()?;
-		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
 
 		loader
-			.load_one(LibraryConfigLoaderKey { series_id })
+			.load_one(LibraryConfigLoaderKey {
+				library_id: self.model.library_id.clone(),
+			})
 			.await?
 			.map(LibraryConfig::from)
 			.ok_or_else(|| "Library config not found".into())
@@ -420,15 +388,7 @@ impl Media {
 		let (library_path,) = library::Entity::find()
 			.select_only()
 			.column(library::Column::Path)
-			.filter(
-				library::Column::Id.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(self.model.series_id.clone()))
-						.to_owned(),
-				),
-			)
+			.filter(library::Column::Id.eq(&self.model.library_id))
 			.into_tuple::<(String,)>()
 			.one(conn)
 			.await?

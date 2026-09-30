@@ -3312,6 +3312,7 @@
 			"backLink": "Lists"
 		},
 		"itemsScene": {
+			"standaloneBooks": "Standalone books",
 			"smartListNotFound": "Smart list not found",
 			"actionHeader": {
 				"viewSelector": {

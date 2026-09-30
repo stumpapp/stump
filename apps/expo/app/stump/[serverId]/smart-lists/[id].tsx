@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql, SmartListBookItemFragment, SmartListScreenQuery } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import debounce from 'lodash/debounce'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -86,6 +87,8 @@ type Book = Extract<
 type ListData = (string | Book)[] // https://shopify.github.io/flash-list/docs/guides/section-list/
 
 export default function Screen() {
+	const { t } = useLocaleContext()
+	const standaloneLabel = t('userSmartListScene.itemsScene.standaloneBooks')
 	const { id } = useLocalSearchParams<{ id: string }>()
 	const {
 		activeServer: { id: serverID },
@@ -147,7 +150,7 @@ export default function Screen() {
 					const entityName = match(groupItem.entity)
 						.with({ __typename: 'Series' }, (series) => series.resolvedName)
 						.with({ __typename: 'Library' }, (library) => library.name)
-						.otherwise(() => '')
+						.otherwise(() => standaloneLabel)
 					if (entityName) {
 						groupNames.push(entityName)
 					}
@@ -155,7 +158,7 @@ export default function Screen() {
 			})
 			.otherwise(() => {})
 		collapseAll(id, groupNames)
-	}, [collapseAll, id, smartList])
+	}, [collapseAll, id, smartList, standaloneLabel])
 
 	const toggleGroup = useSmartListGroupStore((state) => state.toggleGroup)
 	const onToggleGroup = useCallback(
@@ -189,7 +192,7 @@ export default function Screen() {
 					const entityName = match(groupItem.entity)
 						.with({ __typename: 'Series' }, (series) => series.resolvedName)
 						.with({ __typename: 'Library' }, (library) => library.name)
-						.otherwise(() => '')
+						.otherwise(() => standaloneLabel)
 
 					const isEntityGroupMatch =
 						!fuzzyText || entityName.toLowerCase().includes(fuzzyText.trim().toLowerCase())
@@ -223,7 +226,7 @@ export default function Screen() {
 				return listData
 			})
 			.exhaustive() // I want to throw here so I know if something if wrong
-	}, [smartList, collapsedItems, fuzzyText])
+	}, [smartList, collapsedItems, fuzzyText, standaloneLabel])
 
 	const stickyHeaderIndices = useMemo(() => {
 		const indices: number[] = []

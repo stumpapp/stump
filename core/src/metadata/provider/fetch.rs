@@ -17,22 +17,7 @@ use sea_orm::{
 use super::{apply, ProviderClientCache};
 use crate::CoreError;
 
-async fn library_type_for_series(
-	conn: &DatabaseConnection,
-	series_id: &str,
-) -> Result<LibraryType, CoreError> {
-	let library_id = series::Entity::find_by_id(series_id)
-		.select_only()
-		.column(series::Column::LibraryId)
-		.into_tuple::<String>()
-		.one(conn)
-		.await?
-		.ok_or_else(|| CoreError::NotFound(format!("Series {series_id}")))?;
-
-	library_type_for_library(conn, &library_id).await
-}
-
-async fn library_type_for_library(
+pub(super) async fn library_type_for_library(
 	conn: &DatabaseConnection,
 	library_id: &str,
 ) -> Result<LibraryType, CoreError> {
@@ -111,7 +96,10 @@ pub async fn fetch_series_metadata(
 	models: series::ModelWithMetadata,
 	provider_cache: &ProviderClientCache,
 ) -> Result<Vec<MatchCandidate>, CoreError> {
-	let library_type = library_type_for_series(conn, &models.series.id).await?;
+	let library_id = models.series.library_id.as_deref().ok_or_else(|| {
+		CoreError::NotFound(format!("Library for series {}", models.series.id))
+	})?;
+	let library_type = library_type_for_library(conn, library_id).await?;
 
 	let search_name = models
 		.metadata

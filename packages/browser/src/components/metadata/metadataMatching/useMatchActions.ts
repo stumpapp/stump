@@ -116,7 +116,6 @@ export function useToggleLockedField() {
 }
 
 export function useMatchActions() {
-	const { sdk } = useSDK()
 	const {
 		records,
 		currentRecordIndex,
@@ -150,14 +149,7 @@ export function useMatchActions() {
 
 	const invalidateQueries = () => {
 		invalidateThumbnailQueries(queryClient)
-		queryClient.invalidateQueries({
-			predicate: ({ queryKey }) =>
-				queryKey.some((key) => typeof key === 'string' && key === 'pendingMetadataMatches') ||
-				queryKey.includes(sdk.cacheKeys.mediaById) ||
-				queryKey.includes(sdk.cacheKeys.bookOverview) ||
-				queryKey.includes(sdk.cacheKeys.bookOverviewHeader) ||
-				queryKey.includes(sdk.cacheKeys.seriesById),
-		})
+		queryClient.invalidateQueries({ queryKey: ['pendingMetadataMatches'] })
 	}
 
 	const advance = () => {

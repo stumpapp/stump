@@ -115,6 +115,7 @@ async fn library_series_group_links_to_paginated_scoped_series_feed() {
 	assert!(link(&first, "next")
 		.unwrap()
 		.ends_with("page=2&page_size=10"));
+	assert!(link(&first, "previous").is_none());
 
 	let second = app
 		.get("/opds/v2.0/libraries/library/series?page=2&page_size=10")
@@ -122,6 +123,9 @@ async fn library_series_group_links_to_paginated_scoped_series_feed() {
 	second.assert_status_ok();
 	let second: Value = second.json();
 	assert_eq!(second["navigation"].as_array().unwrap().len(), 1);
+	assert!(link(&second, "previous")
+		.unwrap()
+		.ends_with("page=1&page_size=10"));
 	assert!(link(&second, "next").is_none());
 }
 
@@ -150,6 +154,42 @@ async fn library_series_feed_rejects_a_library_hidden_from_the_user() {
 		.add_header("Authorization", format!("Bearer {}", other.token))
 		.await;
 	assert_eq!(response.status_code(), 404);
+}
+
+#[tokio::test]
+async fn book_feed_preserves_pagination_links_until_the_last_page() {
+	let app = TestApp::new_with_default_user().await;
+	setup_single_series_with_n_books(
+		&app,
+		fake_data::Series {
+			id: Some("paginated-series".to_string()),
+			..Default::default()
+		},
+		3,
+	)
+	.await;
+
+	let first = app
+		.get("/opds/v2.0/series/paginated-series?page=1&page_size=2")
+		.await;
+	first.assert_status_ok();
+	let first: Value = first.json();
+	assert_eq!(first["publications"].as_array().unwrap().len(), 2);
+	assert!(link(&first, "previous").is_none());
+	assert!(link(&first, "next")
+		.unwrap()
+		.ends_with("/opds/v2.0/series/paginated-series?page=2&page_size=2"));
+
+	let second = app
+		.get("/opds/v2.0/series/paginated-series?page=2&page_size=2")
+		.await;
+	second.assert_status_ok();
+	let second: Value = second.json();
+	assert_eq!(second["publications"].as_array().unwrap().len(), 1);
+	assert!(link(&second, "previous")
+		.unwrap()
+		.ends_with("/opds/v2.0/series/paginated-series?page=1&page_size=2"));
+	assert!(link(&second, "next").is_none());
 }
 
 #[tokio::test]

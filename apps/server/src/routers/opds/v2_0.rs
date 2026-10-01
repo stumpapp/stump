@@ -673,6 +673,34 @@ async fn browse_libraries(
 		)
 		.build()?;
 
+	let previous_link = match pagination.previous_page() {
+		Some(page) => Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href("/opds/v2.0/libraries", &pagination, page))
+					.rel(OPDSLinkRel::Previous.item())
+					.build()?,
+			)),
+		),
+		None => None,
+	};
+	let next_link = if (pagination.offset() + take) < library_count {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						"/opds/v2.0/libraries",
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
+
 	Ok(Json(
 		OPDSFeedBuilder::default()
 			.metadata(
@@ -699,34 +727,7 @@ async fn browse_libraries(
 							.rel(OPDSLinkRel::SelfLink.item())
 							.build()?,
 					)],
-					[
-						pagination.previous_page().map(|page| {
-							link_finalizer.finalize(OPDSLink::Link(
-								OPDSBaseLinkBuilder::default()
-									.href(pagination_href(
-										"/opds/v2.0/libraries",
-										&pagination,
-										page,
-									))
-									.rel(OPDSLinkRel::Previous.item())
-									.build()
-									.expect("valid OPDS previous link"),
-							))
-						}),
-						((pagination.offset() + take) < library_count).then(|| {
-							link_finalizer.finalize(OPDSLink::Link(
-								OPDSBaseLinkBuilder::default()
-									.href(pagination_href(
-										"/opds/v2.0/libraries",
-										&pagination,
-										pagination.next_page(),
-									))
-									.rel(OPDSLinkRel::Next.item())
-									.build()
-									.expect("valid OPDS next link"),
-							))
-						}),
-					],
+					[previous_link, next_link],
 				)),
 			)
 			.navigation(
@@ -965,19 +966,22 @@ where
 		None => None,
 	};
 
-	let next_link = has_more.then(|| {
-		link_finalizer.finalize(OPDSLink::Link(
-			OPDSBaseLinkBuilder::default()
-				.href(pagination_href(
-					base_url,
-					&pagination,
-					pagination.next_page(),
-				))
-				.rel(OPDSLinkRel::Next.item())
-				.build()
-				.expect("static OPDS link is valid"),
-		))
-	});
+	let next_link = if has_more {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						base_url,
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
 	let links = link_finalizer.finalize_all(chain_optional_iter(
 		[
 			OPDSLink::Link(
@@ -1094,28 +1098,33 @@ async fn browse_library_series(
 		.await?;
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 	let base_url = format!("/opds/v2.0/libraries/{id}/series");
-	let previous_link = pagination.previous_page().map(|page| {
-		link_finalizer.finalize(OPDSLink::Link(
-			OPDSBaseLinkBuilder::default()
-				.href(pagination_href(&base_url, &pagination, page))
-				.rel(OPDSLinkRel::Previous.item())
-				.build()
-				.expect("valid OPDS previous link"),
-		))
-	});
-	let next_link = ((pagination.offset() + take) < series_count).then(|| {
-		link_finalizer.finalize(OPDSLink::Link(
-			OPDSBaseLinkBuilder::default()
-				.href(pagination_href(
-					&base_url,
-					&pagination,
-					pagination.next_page(),
-				))
-				.rel(OPDSLinkRel::Next.item())
-				.build()
-				.expect("valid OPDS next link"),
-		))
-	});
+	let previous_link = match pagination.previous_page() {
+		Some(page) => Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(&base_url, &pagination, page))
+					.rel(OPDSLinkRel::Previous.item())
+					.build()?,
+			)),
+		),
+		None => None,
+	};
+	let next_link = if (pagination.offset() + take) < series_count {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						&base_url,
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
 
 	Ok(Json(
 		OPDSFeedBuilder::default()

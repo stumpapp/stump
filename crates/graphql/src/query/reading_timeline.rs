@@ -38,7 +38,11 @@ impl ReadingTimelineQuery {
 			.order_by(reading_session::Column::Id, order.into());
 		// ^ ids serial so should be fine to sort by it instead of date
 		if let Some(after) = cursor {
-			query = query.filter(reading_session::Column::Id.lt(after));
+			if order == OrderDirection::Asc {
+				query = query.filter(reading_session::Column::Id.gt(after));
+			} else {
+				query = query.filter(reading_session::Column::Id.gt(after));
+			}
 		}
 
 		let sessions = query.limit(limit).all(conn).await?;

@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 import { View } from 'react-native'
 
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
-import { Card, Progress, Text } from '~/components/ui'
+import { Card, Text } from '~/components/ui'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -109,7 +109,7 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 		return '??'
 	}, [startPage, endPage])
 
-	const chaptersRead = data.chaptersRead.length - 1
+	const chaptersRead = Math.max(0, data.chaptersRead.length - 1)
 
 	const [thumbnailHeight, setThumbnailHeight] = useState(0)
 
@@ -147,14 +147,6 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 							<StatText value={chaptersRead} suffix={' chapters finished'} />
 						</View>
 
-						{/*TODO: i think the phrasing here is not quite right, but maybe just me. im
-					wondering if something more along the lines of this might work:
-					- You read pages 1-10 between 12:00 PM and 12:30 PM
-					- You read page 23 between 1:00 PM and 1:15 PM
-					maybe it's just the word `spent` when used with time range that feels a little off.
-					separately, page range will be tricky because _technically_ can go backwards,
-					and seeing "read pages 10-5" is not my fav. "from 10 to 5" makes it feel better
-					*/}
 						<TemplatedTranslationText
 							className="text-foreground-muted px-1"
 							fakeTranslation={fakeTranslation}
@@ -166,13 +158,6 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 						/>
 					</View>
 				</View>
-
-				{/*<Progress
-					className="h-2.5"
-					value={parseGraphQLPercentageDecimal(data.endPercentage) ?? 0}
-					trackClassName="bg-black/10"
-					indicatorClassName="bg-white/70"
-        />*/}
 
 				<SessionProgressBar
 					startPercentage={parseGraphQLPercentageDecimal(data.startPercentage) ?? 0}

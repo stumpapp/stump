@@ -5798,6 +5798,17 @@ export type BookReadingTimelineFragment = { __typename?: 'Media', id: string, re
         & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment } }
       )> }> } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'BookReadingTimelineFragment' };
 
+export type MyReadingTimelineScreenQueryVariables = Exact<{
+  pagination?: InputMaybe<CursorPagination>;
+  order?: InputMaybe<OrderDirection>;
+}>;
+
+
+export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTimeline: { __typename?: 'CursorPaginatedGlobalReadingTimelineNodeResponse', nodes: Array<{ __typename?: 'GlobalReadingTimelineNode', mediaId: string, session: (
+        { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', sessionDate: any } }
+        & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
+      ) }> } };
+
 export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> } & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
 
 export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
@@ -10756,6 +10767,67 @@ export const AcceptLocalProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AcceptLocalProgressMutation, AcceptLocalProgressMutationVariables>;
+export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
+    query MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {
+  myReadingTimeline(pagination: $pagination, order: $order) {
+    nodes {
+      mediaId
+      session {
+        session {
+          sessionDate
+        }
+        ...ReadingSessionCard
+        ...ReadingSessionCardMedia
+      }
+    }
+  }
+}
+    fragment ReadingSessionCard on SessionWithEvents {
+  session {
+    id
+    createdAt
+    updatedAt
+    startPage
+    endPage
+    endLocator {
+      locations {
+        position
+      }
+    }
+    endPercentage
+    elapsedSeconds
+    mediaId
+  }
+  events {
+    __typename
+    ... on Bookmark {
+      id
+    }
+    ... on MediaAnnotation {
+      id
+      annotationText
+    }
+  }
+}
+fragment ReadingSessionCardMedia on SessionWithEvents {
+  session {
+    media {
+      resolvedName
+      pages
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+    }
+  }
+}`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

@@ -72,7 +72,7 @@ type Annotation = Extract<
 	ReadingSessionCardFragment['events'][number],
 	{ __typename: 'MediaAnnotation' }
 >
-type Bookmark = Extract<ReadingSessionCardFragment['events'][number], { __typename: 'Bookmark' }>
+// type Bookmark = Extract<ReadingSessionCardFragment['events'][number], { __typename: 'Bookmark' }>
 
 // the idea here is that a book's timeline will have its own info and not need to fetch
 // via the media resolver on session, but in a timeline not tied to a specific book
@@ -88,6 +88,8 @@ type Props = {
 			metadata?: ThumbnailPlaceholderData | null
 		}
 	}
+	// refers to the list which renders this card
+	groupedBy?: 'day' | 'month'
 }
 
 // TODO: create container that handles:
@@ -103,7 +105,12 @@ type Props = {
 // a few thoughts:
 // - for a book's own reading timeline, perhaps we do not need to show the thumbnail nor title etc at all
 //   however with that removed there is not much more to show
-export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Props) {
+export function ReadingSessionCard({
+	fragmentRef,
+	mediaFragmentRef,
+	media,
+	groupedBy = 'day',
+}: Props) {
 	const router = useRouter()
 	const { t } = useTranslate()
 	const {
@@ -128,6 +135,14 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 	const timeRange = `${intlFormat(startDate, {
 		hour: 'numeric',
 		minute: 'numeric',
+		// TODO(reading-timeline): i considered this too, and think the footer date is probably better
+		// but leaving in case revisit (the date was nice up top, but muted so almost less prominent)
+		// ...(groupedBy === 'month'
+		// 	? {
+		// 			month: 'short',
+		// 			day: 'numeric',
+		// 		}
+		// 	: {}),
 	})} - ${intlFormat(endDate, {
 		hour: 'numeric',
 		minute: 'numeric',
@@ -202,8 +217,7 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 
 									<View className="flex-1" />
 
-									{/*TODO: normal progress bar? or keep window? kinda looks more awk without
-									the annotations to explain the window. ill leave it for a second opinion for now*/}
+									{/*TODO(reading-timeline): normal progress vs windowed one, revisit when deciding text above*/}
 									{/*<View className="w-full">
 										<SessionProgressBar session={session} events={events} />
 									</View>*/}
@@ -224,16 +238,18 @@ export function ReadingSessionCard({ fragmentRef, mediaFragmentRef, media }: Pro
 							)}
 
 							<View className="-mb-1 w-full flex-row items-center">
-								{/* <Text className="font-medium text-white/70">
-									{intlFormat(startDate, {
-										year: 'numeric',
-										month: 'short',
-										day: 'numeric',
-										hour: 'numeric',
-										minute: 'numeric',
-										weekday: 'short',
-									})}
-								</Text> */}
+								{groupedBy === 'month' && (
+									<Text className="font-medium text-white/70">
+										{intlFormat(startDate, {
+											year: 'numeric',
+											month: 'short',
+											day: 'numeric',
+											hour: 'numeric',
+											minute: 'numeric',
+											weekday: 'short',
+										})}
+									</Text>
+								)}
 
 								<View className="flex-1" />
 

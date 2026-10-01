@@ -176,6 +176,7 @@ function AnimatedHeaderBackground({ color }: { color: SharedValue<string> }) {
 // and needed this for now but should consider proper place etc etc
 
 type ScreenBackgroundGradientProps = {
+	// TODO: change to just take image metadata instead
 	item: MinimalItem
 }
 
@@ -192,7 +193,6 @@ export function ScreenBackgroundGradient({ item }: ScreenBackgroundGradientProps
 	// }, [androidHeaderColor, naviation, tintListBackground])
 
 	const averageColor = getTintColor(item)
-	console.log('averageColor', averageColor)
 
 	// not quite right just looking at apple journal and throwing something
 	// vaguely similar-ish

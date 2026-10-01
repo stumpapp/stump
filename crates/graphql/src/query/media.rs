@@ -480,6 +480,14 @@ impl MediaQuery {
 				AND backlogged_at IS NOT NULL
 			),
 
+			-- series the user dnf'ed
+		    user_dnf_series AS (
+                SELECT series_id
+                FROM user_series_state
+                WHERE user_id = ?
+                AND dnf_at IS NOT NULL
+            ),
+
 			-- series with an in-progress session
 			user_active_series AS (
 				SELECT DISTINCT m.series_id
@@ -605,6 +613,7 @@ impl MediaQuery {
 				WHERE
 					m.series_id IN (SELECT series_id FROM user_read_series)
 					AND m.series_id NOT IN (SELECT series_id FROM user_backlogged_series)
+					AND m.series_id NOT IN (SELECT series_id FROM user_dnf_series)
 					AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
 					AND (str.target_rank IS NULL OR br.rank > str.target_rank)
 					AND m.deleted_at IS NULL

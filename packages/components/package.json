@@ -78,7 +78,7 @@
 		"@storybook/react-webpack5": "^7.6.17",
 		"@storybook/testing-library": "^0.2.2",
 		"@storybook/theming": "^7.6.17",
-		"@tailwindcss/postcss": "^4.2.2",
+		"@tailwindcss/postcss": "^4.3.3",
 		"@tailwindcss/typography": "^0.5.20",
 		"tailwindcss": "^4.2.2",
 		"@types/react": "^19.0.0",

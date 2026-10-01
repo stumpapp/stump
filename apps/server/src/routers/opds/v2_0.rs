@@ -1305,14 +1305,14 @@ async fn get_book_progression(
 
 /// A route handler which updates the progression of a book for a user
 ///
-/// Returns 204 on success, 409 Conflict if the timestamp is older.
+/// Returns 201 on success, 409 Conflict if the timestamp is older.
 #[tracing::instrument(skip(ctx))]
 async fn update_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 	Json(input): Json<OPDSProgression>,
-) -> APIResult<axum::http::StatusCode> {
+) -> APIResult<(axum::http::StatusCode, Json<OPDSProgression>)> {
 	let user = req.user();
 	let conn = ctx.conn.as_ref();
 
@@ -1326,6 +1326,7 @@ async fn update_book_progression(
 		reading_session::Entity::find_latest_for_user_and_media(&user, &id)
 			.one(conn)
 			.await?;
+	let will_create = existing_session.is_none();
 
 	let input_modified = input
 		.modified_at()
@@ -1394,10 +1395,31 @@ async fn update_book_progression(
 	};
 
 	let txn = conn.begin().await?;
-	upsert_reading_session(&txn, &user, &id, progression).await?;
+	let session = upsert_reading_session(&txn, &user, &id, progression).await?;
 	txn.commit().await?;
 
-	Ok(axum::http::StatusCode::NO_CONTENT)
+	let Some(active_reading_session) = OPDSProgressionEntity::find()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.into_model::<OPDSProgressionEntity>()
+		.one(ctx.conn.as_ref())
+		.await?
+	else {
+		return Err(APIError::InternalServerError(
+			"Failed to retrieve updated reading session".to_string(),
+		));
+	};
+
+	// i doubt it matters but no harm in being a little more precise
+	let status_code = if will_create {
+		axum::http::StatusCode::CREATED
+	} else {
+		axum::http::StatusCode::OK
+	};
+
+	Ok((
+		status_code,
+		Json(OPDSProgression::new(active_reading_session)?),
+	))
 }
 
 /// A route handler which downloads a book for a user.

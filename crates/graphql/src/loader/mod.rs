@@ -9,3 +9,6 @@ pub mod reading_session;
 pub mod series;
 pub mod series_count;
 pub mod series_finished_count;
+pub mod series_reading_data;
+pub mod series_stats;
+pub mod user_series_state;

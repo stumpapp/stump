@@ -9,7 +9,6 @@ use models::{
 		library, media, media_metadata, reading_session, series, series_tag, tag,
 		user_series_state,
 	},
-	services::series_state,
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::ReadingStatus,
@@ -28,6 +27,9 @@ use crate::{
 		favorite::{FavoriteSeriesLoaderKey, FavoritesLoader},
 		series_count::SeriesCountLoader,
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
+		series_reading_data::{SeriesReadingDataLoader, SeriesReadingDataLoaderKey},
+		series_stats::{SeriesStatsLoader, SeriesStatsLoaderKey},
+		user_series_state::{UserSeriesStateLoader, UserSeriesStateLoaderKey},
 	},
 	object::{series_metadata::SeriesMetadata, stats::SeriesStats},
 	utils::db_statement,
@@ -360,18 +362,31 @@ impl Series {
 	async fn stats(
 		&self,
 		ctx: &Context<'_>,
+		// TODO(permissions): prob put behind a permission for "all user agg stats" or something
+		// it is pretty non-exposing info so fine for now but should get done eventually
 		all_users: Option<bool>,
 	) -> Result<SeriesStats> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let stats = SeriesStats::fetch(
-			conn,
-			self.model.id.clone(),
-			user.id.clone(),
-			all_users.unwrap_or(false),
-		)
-		.await?;
+		if all_users.unwrap_or(false) {
+			let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+			return SeriesStats::fetch(
+				conn,
+				self.model.id.clone(),
+				user.id.clone(),
+				true,
+			)
+			.await;
+		}
+
+		let loader = ctx.data::<DataLoader<SeriesStatsLoader>>()?;
+		let stats = loader
+			.load_one(SeriesStatsLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
+			.await?
+			.unwrap_or_default();
 
 		Ok(stats)
 	}
@@ -426,26 +441,16 @@ impl Series {
 	/// null if not started yet
 	async fn current_readthrough(&self, ctx: &Context<'_>) -> Result<Option<i32>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let loader = ctx.data::<DataLoader<SeriesReadingDataLoader>>()?;
 
-		let max: Option<i32> = reading_session::Entity::find()
-			.select_only()
-			.column(reading_session::Column::ReadthroughNumber)
-			.join(
-				JoinType::InnerJoin,
-				reading_session::Entity::belongs_to(media::Entity)
-					.from(reading_session::Column::MediaId)
-					.to(media::Column::Id)
-					.into(),
-			)
-			.filter(reading_session::Column::UserId.eq(&user.id))
-			.filter(media::Column::SeriesId.eq(&self.model.id))
-			.order_by_desc(reading_session::Column::ReadthroughNumber)
-			.into_tuple()
-			.one(conn)
+		let data = loader
+			.load_one(SeriesReadingDataLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
 			.await?;
 
-		Ok(max)
+		Ok(data.and_then(|d| d.current_readthrough))
 	}
 
 	/// The most recent datetime that any book in the series was read
@@ -454,26 +459,16 @@ impl Series {
 		ctx: &Context<'_>,
 	) -> Result<Option<DateTimeWithTimeZone>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let loader = ctx.data::<DataLoader<SeriesReadingDataLoader>>()?;
 
-		let last_read_at: Option<DateTimeWithTimeZone> = reading_session::Entity::find()
-			.select_only()
-			.column(reading_session::Column::UpdatedAt)
-			.join(
-				JoinType::InnerJoin,
-				reading_session::Entity::belongs_to(media::Entity)
-					.from(reading_session::Column::MediaId)
-					.to(media::Column::Id)
-					.into(),
-			)
-			.filter(reading_session::Column::UserId.eq(&user.id))
-			.filter(media::Column::SeriesId.eq(&self.model.id))
-			.order_by_desc(reading_session::Column::UpdatedAt)
-			.into_tuple()
-			.one(conn)
+		let data = loader
+			.load_one(SeriesReadingDataLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
 			.await?;
 
-		Ok(last_read_at)
+		Ok(data.and_then(|d| d.last_read_at))
 	}
 
 	/// Get the on-deck/re-read state for this series for the current user, if it exists
@@ -482,9 +477,14 @@ impl Series {
 		ctx: &Context<'_>,
 	) -> Result<Option<user_series_state::Model>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let loader = ctx.data::<DataLoader<UserSeriesStateLoader>>()?;
 
-		let state = series_state::get(conn, &user.id, &self.model.id).await?;
+		let state = loader
+			.load_one(UserSeriesStateLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
+			.await?;
 
 		Ok(state)
 	}

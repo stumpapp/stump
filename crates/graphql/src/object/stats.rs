@@ -9,7 +9,7 @@ use crate::utils::db_statement;
 
 // Note: SQLx does not support u64 :'(
 // See https://github.com/launchbadge/sqlx/issues/499
-#[derive(Debug, FromQueryResult, SimpleObject)]
+#[derive(Debug, Default, Clone, FromQueryResult, SimpleObject)]
 pub struct BookAggregateStats {
 	book_count: i64,
 	total_bytes: i64,
@@ -135,7 +135,7 @@ impl LibraryStats {
 	}
 }
 
-#[derive(Debug, FromQueryResult, SimpleObject)]
+#[derive(Debug, Default, Clone, FromQueryResult, SimpleObject)]
 pub struct SeriesStats {
 	#[graphql(flatten)]
 	#[sea_orm(nested)]

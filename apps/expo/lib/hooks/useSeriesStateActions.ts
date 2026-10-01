@@ -1,6 +1,4 @@
-import { useGraphQLMutation } from '@stump/client'
-import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import { isAfter } from 'date-fns'
+import { useSeriesStateMutation } from '@stump/client'
 import { BookX } from 'lucide-react-native'
 
 import { ActionDef } from '~/components/filter/types'
@@ -8,99 +6,7 @@ import { SystemAlert } from '~/components/ui/system-alert'
 
 import { useTranslate } from './useTranslate'
 
-const SeriesReadingState = graphql(`
-	fragment SeriesReadingState on Series {
-		id
-		userSeriesState {
-			rereadStoppedAt
-			backloggedAt
-			dnfAt
-		}
-		lastReadAt
-		currentReadthrough
-		resolvedName
-	}
-`)
-export type SeriesReadingStateFragmentType = FragmentType<typeof SeriesReadingState>
-
-const backlogMutation = graphql(`
-	mutation SeriesActionBacklogSeries($id: ID!) {
-		backlogSeries(id: $id) {
-			backloggedAt
-		}
-	}
-`)
-
-const unbacklogMutation = graphql(`
-	mutation SeriesActionUnbacklogSeries($id: ID!) {
-		unbacklogSeries(id: $id) {
-			backloggedAt
-		}
-	}
-`)
-
-const stopRereadMutation = graphql(`
-	mutation SeriesActionStopReread($id: ID!) {
-		stopSeriesReread(id: $id) {
-			rereadStoppedAt
-		}
-	}
-`)
-
-const resumeRereadMutation = graphql(`
-	mutation SeriesActionResumeReread($id: ID!) {
-		resumeSeriesReread(id: $id) {
-			rereadStoppedAt
-		}
-	}
-`)
-
-type Params = {
-	fragment: FragmentType<typeof SeriesReadingState>
-	onSuccess?: () => void
-}
-
-type Return = {
-	backlogSeries: () => void
-	canBacklog: boolean
-	unbacklogSeries: () => void
-	canUnbacklog: boolean
-	stopReread: () => void
-	canStopReread: boolean
-	resumeReread: () => void
-	canResumeReread: boolean
-}
-
-export function useSeriesStateActions({ fragment, ...options }: Params): Return {
-	const {
-		id: seriesId,
-		userSeriesState: seriesState,
-		lastReadAt,
-		currentReadthrough,
-	} = useFragment(SeriesReadingState, fragment)
-
-	const { mutate: backlogSeries } = useGraphQLMutation(backlogMutation, options)
-	const { mutate: unbacklogSeries } = useGraphQLMutation(unbacklogMutation, options)
-	const { mutate: stopReread } = useGraphQLMutation(stopRereadMutation, options)
-	const { mutate: resumeReread } = useGraphQLMutation(resumeRereadMutation, options)
-
-	const isBacklogged = !!seriesState?.backloggedAt
-	const isRereading = (currentReadthrough ?? 0) > 1
-
-	const stoppedAt = seriesState?.rereadStoppedAt
-	const isReadthroughStopped = lastReadAt && stoppedAt ? isAfter(lastReadAt, stoppedAt) : false
-
-	return {
-		backlogSeries: () => backlogSeries({ id: seriesId }),
-		canBacklog: !isBacklogged,
-		unbacklogSeries: () => unbacklogSeries({ id: seriesId }),
-		canUnbacklog: isBacklogged,
-		stopReread: () => stopReread({ id: seriesId }),
-		canStopReread: !isBacklogged && isRereading && !isReadthroughStopped,
-		resumeReread: () => resumeReread({ id: seriesId }),
-		canResumeReread: !isBacklogged && isReadthroughStopped,
-	}
-}
+type Params = Parameters<typeof useSeriesStateMutation>[0]
 
 export function useSeriesStateMenu({ fragment, ...options }: Params) {
 	const { t } = useTranslate()
@@ -113,8 +19,8 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 		canStopReread,
 		resumeReread,
 		canResumeReread,
-	} = useSeriesStateActions({ fragment, ...options })
-	const { resolvedName: seriesName } = useFragment(SeriesReadingState, fragment)
+		data: { resolvedName: seriesName },
+	} = useSeriesStateMutation({ fragment, ...options })
 
 	// i decided to add confirms for them all since it kinda acts like a form
 	// of documentation for what they do. maybe i'll change this if folks

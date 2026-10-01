@@ -1029,7 +1029,23 @@
 		"actions": {
 			"markAsRead": "Mark series as read",
 			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
+			"goToLibrary": "Go to library",
+			"backlogSeries": {
+				"label": "Move to backlog",
+				"description": "Books in '{{seriesName}}' will be excluded from your on-deck suggestions until removed from the backlog"
+			},
+			"unbacklogSeries": {
+				"label": "Remove from backlog",
+				"description": "This will make books in '{{seriesName}}' show up in your on-deck suggestions again as they normally would"
+			},
+			"stopReread": {
+				"label": "Stop reread",
+				"description": "This will stop your current reread of '{{seriesName}}'. The on-deck suggestions for this series will only include its unread books"
+			},
+			"resumeReread": {
+				"label": "Resume reread",
+				"description": "This will resume the latest, incomplete reread of '{{seriesName}}'. The on-deck suggestions will include rereads again"
+			}
 		},
 		"errors": {
 			"failedToUpdateCompletion": "Failed to update book completion status"

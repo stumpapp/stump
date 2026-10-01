@@ -5796,36 +5796,6 @@ export type UseFavoriteBookMutationVariables = Exact<{
 
 export type UseFavoriteBookMutation = { __typename?: 'Mutation', favoriteMedia: { __typename?: 'Media', id: string, isFavorite: boolean } };
 
-export type SeriesReadingStateFragment = { __typename?: 'Series', id: string, lastReadAt?: any | null, currentReadthrough?: number | null, resolvedName: string, userSeriesState?: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null, backloggedAt?: any | null, dnfAt?: any | null } | null } & { ' $fragmentName'?: 'SeriesReadingStateFragment' };
-
-export type SeriesActionBacklogSeriesMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesActionBacklogSeriesMutation = { __typename?: 'Mutation', backlogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
-
-export type SeriesActionUnbacklogSeriesMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesActionUnbacklogSeriesMutation = { __typename?: 'Mutation', unbacklogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
-
-export type SeriesActionStopRereadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesActionStopRereadMutation = { __typename?: 'Mutation', stopSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
-
-export type SeriesActionResumeRereadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type SeriesActionResumeRereadMutation = { __typename?: 'Mutation', resumeSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
-
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6685,7 +6655,10 @@ export type SeriesLayoutQueryVariables = Exact<{
 }>;
 
 
-export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: (
+    { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }
+    & { ' $fragmentRefs'?: { 'SeriesReadingStateFragment': SeriesReadingStateFragment } }
+  ) | null };
 
 export type SeriesLibrayLinkQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7321,6 +7294,36 @@ export type DeleteSmartListMutationVariables = Exact<{
 
 
 export type DeleteSmartListMutation = { __typename?: 'Mutation', deleteSmartList: { __typename: 'SmartList' } };
+
+export type SeriesReadingStateFragment = { __typename?: 'Series', id: string, lastReadAt?: any | null, currentReadthrough?: number | null, resolvedName: string, userSeriesState?: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null, backloggedAt?: any | null, dnfAt?: any | null } | null } & { ' $fragmentName'?: 'SeriesReadingStateFragment' };
+
+export type SeriesActionBacklogSeriesMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionBacklogSeriesMutation = { __typename?: 'Mutation', backlogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
+
+export type SeriesActionUnbacklogSeriesMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionUnbacklogSeriesMutation = { __typename?: 'Mutation', unbacklogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
+
+export type SeriesActionStopRereadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionStopRereadMutation = { __typename?: 'Mutation', stopSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
+
+export type SeriesActionResumeRereadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionResumeRereadMutation = { __typename?: 'Mutation', resumeSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
 
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
@@ -10509,34 +10512,6 @@ export const UseFavoriteBookDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UseFavoriteBookMutation, UseFavoriteBookMutationVariables>;
-export const SeriesActionBacklogSeriesDocument = new TypedDocumentString(`
-    mutation SeriesActionBacklogSeries($id: ID!) {
-  backlogSeries(id: $id) {
-    backloggedAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesActionBacklogSeriesMutation, SeriesActionBacklogSeriesMutationVariables>;
-export const SeriesActionUnbacklogSeriesDocument = new TypedDocumentString(`
-    mutation SeriesActionUnbacklogSeries($id: ID!) {
-  unbacklogSeries(id: $id) {
-    backloggedAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesActionUnbacklogSeriesMutation, SeriesActionUnbacklogSeriesMutationVariables>;
-export const SeriesActionStopRereadDocument = new TypedDocumentString(`
-    mutation SeriesActionStopReread($id: ID!) {
-  stopSeriesReread(id: $id) {
-    rereadStoppedAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesActionStopRereadMutation, SeriesActionStopRereadMutationVariables>;
-export const SeriesActionResumeRereadDocument = new TypedDocumentString(`
-    mutation SeriesActionResumeReread($id: ID!) {
-  resumeSeriesReread(id: $id) {
-    rereadStoppedAt
-  }
-}
-    `) as unknown as TypedDocumentString<SeriesActionResumeRereadMutation, SeriesActionResumeRereadMutationVariables>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {
@@ -13080,9 +13055,20 @@ export const SeriesLayoutDocument = new TypedDocumentString(`
     }
     createdAt
     updatedAt
+    ...SeriesReadingState
   }
 }
-    `) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
+    fragment SeriesReadingState on Series {
+  id
+  userSeriesState {
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
+  }
+  lastReadAt
+  currentReadthrough
+  resolvedName
+}`) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
 export const SeriesLibrayLinkDocument = new TypedDocumentString(`
     query SeriesLibrayLink($id: ID!) {
   libraryById(id: $id) {
@@ -14288,6 +14274,34 @@ export const DeleteSmartListDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteSmartListMutation, DeleteSmartListMutationVariables>;
+export const SeriesActionBacklogSeriesDocument = new TypedDocumentString(`
+    mutation SeriesActionBacklogSeries($id: ID!) {
+  backlogSeries(id: $id) {
+    backloggedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionBacklogSeriesMutation, SeriesActionBacklogSeriesMutationVariables>;
+export const SeriesActionUnbacklogSeriesDocument = new TypedDocumentString(`
+    mutation SeriesActionUnbacklogSeries($id: ID!) {
+  unbacklogSeries(id: $id) {
+    backloggedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionUnbacklogSeriesMutation, SeriesActionUnbacklogSeriesMutationVariables>;
+export const SeriesActionStopRereadDocument = new TypedDocumentString(`
+    mutation SeriesActionStopReread($id: ID!) {
+  stopSeriesReread(id: $id) {
+    rereadStoppedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionStopRereadMutation, SeriesActionStopRereadMutationVariables>;
+export const SeriesActionResumeRereadDocument = new TypedDocumentString(`
+    mutation SeriesActionResumeReread($id: ID!) {
+  resumeSeriesReread(id: $id) {
+    rereadStoppedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionResumeRereadMutation, SeriesActionResumeRereadMutationVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

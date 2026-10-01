@@ -70,12 +70,15 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/libraries",
 					Router::new().route("/", get(browse_libraries)).nest(
 						"/{id}",
-						Router::new().route("/", get(browse_library_by_id)).nest(
-							"/books",
-							Router::new()
-								.route("/", get(browse_library_books))
-								.route("/latest", get(latest_library_books)),
-						),
+						Router::new()
+							.route("/", get(browse_library_by_id))
+							.nest(
+								"/books",
+								Router::new()
+									.route("/", get(browse_library_books))
+									.route("/latest", get(latest_library_books)),
+							)
+							.route("/series", get(browse_library_series)),
 					),
 				)
 				.nest(
@@ -260,6 +263,20 @@ struct OPDSBrowseParams {
 	pagination: OffsetPagination,
 	#[serde(flatten)]
 	filter: OPDSBrowseFilter,
+}
+
+fn pagination_href(base_url: &str, pagination: &OffsetPagination, page: u64) -> String {
+	let separator = if base_url.contains('?') { "&" } else { "?" };
+	let mut href = format!("{base_url}{separator}page={page}");
+
+	if pagination.page_size != Some(20) {
+		href.push_str(&format!("&page_size={}", pagination.limit()));
+	}
+	if pagination.zero_based == Some(true) {
+		href.push_str("&zero_based=true");
+	}
+
+	href
 }
 
 #[tracing::instrument]
@@ -656,6 +673,34 @@ async fn browse_libraries(
 		)
 		.build()?;
 
+	let previous_link = match pagination.previous_page() {
+		Some(page) => Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href("/opds/v2.0/libraries", &pagination, page))
+					.rel(OPDSLinkRel::Previous.item())
+					.build()?,
+			)),
+		),
+		None => None,
+	};
+	let next_link = if (pagination.offset() + take) < library_count {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						"/opds/v2.0/libraries",
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
+
 	Ok(Json(
 		OPDSFeedBuilder::default()
 			.metadata(
@@ -665,17 +710,26 @@ async fn browse_libraries(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(library_count)
 							.items_per_page(take)
-							.current_page(1)
+							.current_page(pagination.page)
 							.build()?,
 					))
 					.build()?,
 			)
-			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-				OPDSBaseLinkBuilder::default()
-					.href("/opds/v2.0/libraries/browse".to_string())
-					.rel(OPDSLinkRel::SelfLink.item())
-					.build()?,
-			)]))
+			.links(
+				link_finalizer.finalize_all(chain_optional_iter(
+					[OPDSLink::Link(
+						OPDSBaseLinkBuilder::default()
+							.href(pagination_href(
+								"/opds/v2.0/libraries",
+								&pagination,
+								pagination.page,
+							))
+							.rel(OPDSLinkRel::SelfLink.item())
+							.build()?,
+					)],
+					[previous_link, next_link],
+				)),
+			)
 			.navigation(
 				libraries
 					.into_iter()
@@ -806,12 +860,12 @@ async fn browse_library_by_id(
 				))
 				.build()?,
 		)
-		// .links(vec![OPDSLink::Link(
-		// 	OPDSBaseLinkBuilder::default()
-		// 		.href(format!("/opds/v2.0/libraries/{id}/series"))
-		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(OPDS-V2): Not self
-		// 		.build()?,
-		// )])
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+			OPDSBaseLinkBuilder::default()
+				.href(format!("/opds/v2.0/libraries/{id}/series"))
+				.rel(OPDSLinkRel::SelfLink.item())
+				.build()?,
+		)]))
 		.navigation(
 			library_series
 				.into_iter()
@@ -830,6 +884,19 @@ async fn browse_library_by_id(
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			)]))
+			.navigation(vec![OPDSNavigationLinkBuilder::default()
+				.title("All Series".to_string())
+				.base_link(
+					OPDSBaseLinkBuilder::default()
+						.href(
+							link_finalizer
+								.format_link(format!("/opds/v2.0/libraries/{id}/series")),
+						)
+						.rel(OPDSLinkRel::Subsection.item())
+						._type(OPDSLinkType::OpdsJson)
+						.build()?,
+				)
+				.build()?])
 			.groups(vec![books_group, latest_books_group, series_group])
 			.build()?,
 	))
@@ -886,13 +953,12 @@ where
 		OPDSPublication::vec_from_books(ctx.conn.as_ref(), link_finalizer.clone(), books)
 			.await?;
 
-	let next_page = pagination.next_page();
-	let page_separator = if base_url.contains('?') { "&" } else { "?" };
+	let has_more = (pagination.offset() + take) < books_count;
 	let previous_link = match pagination.previous_page() {
 		Some(page) => Some(
 			link_finalizer.finalize(OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}{page_separator}page={page}"))
+					.href(pagination_href(base_url, &pagination, page))
 					.rel(OPDSLinkRel::Previous.item())
 					.build()?,
 			)),
@@ -900,28 +966,38 @@ where
 		None => None,
 	};
 
+	let next_link = if has_more {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						base_url,
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
 	let links = link_finalizer.finalize_all(chain_optional_iter(
 		[
 			OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(base_url.to_string())
+					.href(pagination_href(base_url, &pagination, pagination.page))
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			),
 			OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href("/opds/v2.0/books/catalog".to_string())
+					.href("/opds/v2.0/catalog".to_string())
 					.rel(OPDSLinkRel::Start.item())
 					.build()?,
 			),
-			OPDSLink::Link(
-				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}{page_separator}page={next_page}"))
-					.rel(OPDSLinkRel::Next.item())
-					.build()?,
-			),
 		],
-		[previous_link],
+		[previous_link, next_link],
 	));
 
 	Ok(Json(
@@ -995,6 +1071,110 @@ async fn latest_library_books(
 }
 
 #[tracing::instrument(skip(ctx))]
+async fn browse_library_series(
+	State(ctx): State<AppState>,
+	HostExtractor(host): HostExtractor,
+	Path(id): Path<String>,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<AuthContext>,
+) -> APIResult<Json<OPDSFeed>> {
+	let user = req.user();
+	let library = library::Entity::find_for_user(&user)
+		.filter(library::Column::Id.eq(id.clone()))
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+	let take = pagination.limit();
+	let series = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.limit(take)
+		.offset(pagination.offset())
+		.order_by_asc(series::Column::Name)
+		.all(ctx.conn.as_ref())
+		.await?;
+	let series_count = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.count(ctx.conn.as_ref())
+		.await?;
+	let link_finalizer = OPDSLinkFinalizer::from(host);
+	let base_url = format!("/opds/v2.0/libraries/{id}/series");
+	let previous_link = match pagination.previous_page() {
+		Some(page) => Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(&base_url, &pagination, page))
+					.rel(OPDSLinkRel::Previous.item())
+					.build()?,
+			)),
+		),
+		None => None,
+	};
+	let next_link = if (pagination.offset() + take) < series_count {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						&base_url,
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
+
+	Ok(Json(
+		OPDSFeedBuilder::default()
+			.metadata(
+				OPDSMetadataBuilder::default()
+					.title(format!("{} Series", library.name))
+					.pagination(Some(
+						OPDSPaginationMetadataBuilder::default()
+							.number_of_items(series_count)
+							.items_per_page(take)
+							.current_page(pagination.page)
+							.build()?,
+					))
+					.build()?,
+			)
+			.links(
+				link_finalizer.finalize_all(chain_optional_iter(
+					[
+						OPDSLink::Link(
+							OPDSBaseLinkBuilder::default()
+								.href(pagination_href(
+									&base_url,
+									&pagination,
+									pagination.page,
+								))
+								.rel(OPDSLinkRel::SelfLink.item())
+								.build()?,
+						),
+						OPDSLink::Link(
+							OPDSBaseLinkBuilder::default()
+								.href("/opds/v2.0/catalog".to_string())
+								.rel(OPDSLinkRel::Start.item())
+								.build()?,
+						),
+					],
+					[previous_link, next_link],
+				)),
+			)
+			.navigation(
+				series
+					.into_iter()
+					.map(OPDSNavigationLink::from)
+					.map(|link| link.finalize(&link_finalizer))
+					.collect::<Vec<_>>(),
+			)
+			.build()?,
+	))
+}
+
+#[tracing::instrument(skip(ctx))]
 async fn browse_series(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
@@ -1017,12 +1197,11 @@ async fn browse_series(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let base_url = "/opds/v2.0/series";
-	let next_page = pagination.next_page();
 	let previous_link = match pagination.previous_page() {
 		Some(page) => Some(
 			link_finalizer.finalize(OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}?page={page}"))
+					.href(pagination_href(base_url, &pagination, page))
 					.rel(OPDSLinkRel::Previous.item())
 					.build()?,
 			)),
@@ -1033,7 +1212,11 @@ async fn browse_series(
 	let next_link = (has_more).then_some(
 		link_finalizer.finalize(OPDSLink::Link(
 			OPDSBaseLinkBuilder::default()
-				.href(format!("{base_url}?page={next_page}"))
+				.href(pagination_href(
+					base_url,
+					&pagination,
+					pagination.next_page(),
+				))
 				.rel(OPDSLinkRel::Next.item())
 				.build()?,
 		)),
@@ -1043,7 +1226,7 @@ async fn browse_series(
 		[
 			OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(base_url.to_string())
+					.href(pagination_href(base_url, &pagination, pagination.page))
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			),

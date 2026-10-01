@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use sea_orm::{
 	prelude::*, sea_query::Func, ActiveValue::Set, ColumnTrait, EntityTrait,
 	IntoActiveModel, JoinType, QueryFilter, QuerySelect,
@@ -50,7 +50,7 @@ pub async fn backlog_series(
 ) -> Result<user_series_state::Model, DbErr> {
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.backlogged_at = Set(Some(Utc::now().into()));
+	active.backlogged_at = Set(Some(Utc::now()));
 	active.update(db).await
 }
 
@@ -101,8 +101,8 @@ pub async fn stop_series_reread(
 		.await?;
 
 	let stop_at = stop_at
-		.map(|dt| DateTime::<Utc>::from(dt.with_timezone(&Utc)))
-		.unwrap_or_else(|| Utc::now().into());
+		.map(|dt| dt.with_timezone(&Utc))
+		.unwrap_or_else(Utc::now);
 
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
@@ -133,7 +133,7 @@ pub async fn dnf_series(
 ) -> Result<user_series_state::Model, DbErr> {
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.dnf_at = Set(Some(Utc::now().into()));
+	active.dnf_at = Set(Some(Utc::now()));
 	active.update(db).await
 }
 

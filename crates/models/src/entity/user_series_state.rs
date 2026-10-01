@@ -73,7 +73,7 @@ impl ActiveModelBehavior for ActiveModel {
 	where
 		C: ConnectionTrait,
 	{
-		let now = DateTime::from(Utc::now());
+		let now = Utc::now();
 
 		if insert {
 			self.created_at = ActiveValue::Set(now);

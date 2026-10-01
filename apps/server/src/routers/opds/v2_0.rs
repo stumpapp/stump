@@ -1269,11 +1269,6 @@ async fn get_book_page(
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
-// TODO: i might need to do some kind of custom error for progresion:
-// - https://drafts.opds.io/opds-progression-1.0.html#payload
-// - https://drafts.opds.io/opds-progression-1.0.html#failure-codes
-// - https://datatracker.ietf.org/doc/html/rfc7807
-
 /// A route handler which returns the progression of a book for a user.
 #[tracing::instrument(skip(ctx))]
 async fn get_book_progression(

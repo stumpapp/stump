@@ -1,5 +1,5 @@
 use async_graphql::SimpleObject;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use sea_orm::{prelude::*, ActiveValue, DeriveEntityModel};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
@@ -16,17 +16,22 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub series_id: String,
 
-	/// the date at which the last readthrough was dropped, so that we can
+	/// the date at which the last reread was stopped, so that we can
 	/// revert back to "first book beyond highest position ever read" logic for
 	/// the recommendations query instead of "next book in current re-read"
-	pub stopped_readthrough_at: Option<DateTimeWithTimeZone>,
+	pub reread_stopped_at: Option<DateTime<Utc>>,
 
-	/// when set, the books in the series will be excluded from on-deck recommentations
-	///  if the timestamp is after the ingestion time into stump
-	pub dropped_at: Option<DateTimeWithTimeZone>,
+	/// the date at which the series reading was "backlogged" for the user, which
+	/// would exclude books from this series showing up in on-deck recommentations
+	pub backlogged_at: Option<DateTime<Utc>>,
 
-	pub created_at: DateTimeWithTimeZone,
-	pub updated_at: Option<DateTimeWithTimeZone>,
+	/// the date at which the series was dnf'ed, which functionally is the same
+	/// as "backlogged" but with the added semantics of "I will never read this again"
+	/// and all that
+	pub dnf_at: Option<DateTime<Utc>>,
+
+	pub created_at: DateTime<Utc>,
+	pub updated_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -68,7 +73,7 @@ impl ActiveModelBehavior for ActiveModel {
 	where
 		C: ConnectionTrait,
 	{
-		let now = DateTimeWithTimeZone::from(Utc::now());
+		let now = DateTime::from(Utc::now());
 
 		if insert {
 			self.created_at = ActiveValue::Set(now);

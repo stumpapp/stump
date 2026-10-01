@@ -472,12 +472,12 @@ impl MediaQuery {
 				AND m.series_id IS NOT NULL
 			),
 
-			-- series the user has dropped
-			user_dropped_series AS (
+			-- series the user has paused
+			user_backlogged_series AS (
 				SELECT series_id
 				FROM user_series_state
 				WHERE user_id = ?
-				AND dropped_at IS NOT NULL
+				AND backlogged_at IS NOT NULL
 			),
 
 			-- series with an in-progress session
@@ -562,20 +562,20 @@ impl MediaQuery {
 			-- - otherwise the latest-read rank
 
 			-- to determine the target rank:
-			--  - paused re-read: stopped_readthrough_at != null and no book has been
+			--  - paused re-read: reread_stopped_at != null and no book has been
 			--                    finished since the stop (last_read_date <= stopped) ->
 			--                    uses max_rank so on-deck shows only new stuff
 			--  - auto-resume:    a book is finished after the stop (last_read_date > stopped)
 			--                    -> uses latest_rank so on deck shows next book
-			--  - resumed:        stopped_readthrough_at = null -> uses latest_rank so on deck
+			--  - resumed:        reread_stopped_at = null -> uses latest_rank so on deck
 			--                    shows next book
 			--  - normal read:    same as resumed, basically
 			series_target_rank AS (
 				SELECT
 					sr.series_id,
 					CASE
-						WHEN uss.stopped_readthrough_at IS NOT NULL
-						    AND slr.last_read_date <= uss.stopped_readthrough_at
+						WHEN uss.reread_stopped_at IS NOT NULL
+		    AND slr.last_read_date <= uss.reread_stopped_at
 						THEN sr.max_rank
 						ELSE sr.latest_rank
 					END AS target_rank
@@ -604,7 +604,7 @@ impl MediaQuery {
 					series_target_rank str ON str.series_id = m.series_id
 				WHERE
 					m.series_id IN (SELECT series_id FROM user_read_series)
-					AND m.series_id NOT IN (SELECT series_id FROM user_dropped_series)
+					AND m.series_id NOT IN (SELECT series_id FROM user_backlogged_series)
 					AND m.series_id NOT IN (SELECT series_id FROM user_active_series)
 					AND (str.target_rank IS NULL OR br.rank > str.target_rank)
 					AND m.deleted_at IS NULL

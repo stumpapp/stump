@@ -1981,6 +1981,12 @@ export type Mutation = {
   analyzeSeries: Scalars['Boolean']['output'];
   /** Archive or unarchive a discussion (Moderator+) */
   archiveDiscussion: Scalars['Boolean']['output'];
+  /**
+   * Backlogs the series, which will exlude any books in the series from being returned
+   * in on-deck recommendations. This is functionally equivalent to dnf'ing a series, but
+   * with the intent of maybe removing it from the backlog in the future
+   */
+  backlogSeries: UserSeriesState;
   cancelJob: Scalars['Boolean']['output'];
   /**
    * Delete media and series from a library that match one of the following conditions:
@@ -2068,7 +2074,7 @@ export type Mutation = {
   deleteLoginActivity: Scalars['Int']['output'];
   deleteLogs: LogDeleteOutput;
   deleteMedia: Media;
-  /** trashes all completed readthroughs for the media */
+  /** trashes all completed/abandoned readthroughs for the media */
   deleteMediaReadingHistory: Scalars['Int']['output'];
   /** Delete (soft delete) your own message */
   deleteMessage: BookClubDiscussionMessage;
@@ -2099,10 +2105,11 @@ export type Mutation = {
   deleteUserAvatar: User;
   deleteUserSessions: Scalars['Int']['output'];
   /**
-   * Exclude the series from on deck recommendations, except for books added to the series after
-   * dropping
+   * Mark a series as "did not finish" (DNF), which will exclude it from on-deck recommendations entirely.
+   * This is functionally the same as "backlogged" but with the added semantics
+   * of "I will never read this again"
    */
-  dropSeries: UserSeriesState;
+  dnfSeries: UserSeriesState;
   /** Edit your own message */
   editMessage: BookClubDiscussionMessage;
   favoriteMedia: Media;
@@ -2209,8 +2216,16 @@ export type Mutation = {
   toggleReaction: Scalars['Boolean']['output'];
   /** Toggle like on a suggestion */
   toggleSuggestionLike: Scalars['Boolean']['output'];
-  /** Un-drop a series, which will cause it to be included in on deck recommendations per normal logic */
-  undropSeries: UserSeriesState;
+  /**
+   * Removes the series from the backlog, which will restore it to on-deck recommendations
+   * to normal logic
+   */
+  unbacklogSeries: UserSeriesState;
+  /**
+   * Remove the "did not finish" (DNF) status from a series, which will restore it to on-deck
+   * recommendations per normal logic
+   */
+  undnfSeries: UserSeriesState;
   /** Update an annotation's note text */
   updateAnnotation: MediaAnnotation;
   updateApiKey: Apikey;
@@ -2373,6 +2388,11 @@ export type MutationAnalyzeSeriesArgs = {
 export type MutationArchiveDiscussionArgs = {
   archived: Scalars['Boolean']['input'];
   discussionId: Scalars['ID']['input'];
+};
+
+
+export type MutationBacklogSeriesArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2637,7 +2657,7 @@ export type MutationDeleteUserSessionsArgs = {
 };
 
 
-export type MutationDropSeriesArgs = {
+export type MutationDnfSeriesArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2885,7 +2905,12 @@ export type MutationToggleSuggestionLikeArgs = {
 };
 
 
-export type MutationUndropSeriesArgs = {
+export type MutationUnbacklogSeriesArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationUndnfSeriesArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5036,19 +5061,25 @@ export type UserPreferences = {
 
 export type UserSeriesState = {
   __typename?: 'UserSeriesState';
+  /**
+   * the date at which the series reading was "backlogged" for the user, which
+   * would exclude books from this series showing up in on-deck recommentations
+   */
+  backloggedAt?: Maybe<Scalars['DateTime']['output']>;
   createdAt: Scalars['DateTime']['output'];
   /**
-   * when set, the books in the series will be excluded from on-deck recommentations
-   * if the timestamp is after the ingestion time into stump
+   * the date at which the series was dnf'ed, which functionally is the same
+   * as "backlogged" but with the added semantics of "I will never read this again"
+   * and all that
    */
-  droppedAt?: Maybe<Scalars['DateTime']['output']>;
-  seriesId: Scalars['String']['output'];
+  dnfAt?: Maybe<Scalars['DateTime']['output']>;
   /**
-   * the date at which the last readthrough was dropped, so that we can
+   * the date at which the last reread was stopped, so that we can
    * revert back to "first book beyond highest position ever read" logic for
    * the recommendations query instead of "next book in current re-read"
    */
-  stoppedReadthroughAt?: Maybe<Scalars['DateTime']['output']>;
+  rereadStoppedAt?: Maybe<Scalars['DateTime']['output']>;
+  seriesId: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -5765,35 +5796,35 @@ export type UseFavoriteBookMutationVariables = Exact<{
 
 export type UseFavoriteBookMutation = { __typename?: 'Mutation', favoriteMedia: { __typename?: 'Media', id: string, isFavorite: boolean } };
 
-export type SeriesReadingStateFragment = { __typename?: 'Series', id: string, lastReadAt?: any | null, currentReadthrough?: number | null, resolvedName: string, userSeriesState?: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null, droppedAt?: any | null } | null, stats: { __typename?: 'SeriesStats', completedBooks: number } } & { ' $fragmentName'?: 'SeriesReadingStateFragment' };
+export type SeriesReadingStateFragment = { __typename?: 'Series', id: string, lastReadAt?: any | null, currentReadthrough?: number | null, resolvedName: string, userSeriesState?: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null, backloggedAt?: any | null, dnfAt?: any | null } | null } & { ' $fragmentName'?: 'SeriesReadingStateFragment' };
 
-export type SeriesActionDropSeriesMutationVariables = Exact<{
+export type SeriesActionBacklogSeriesMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SeriesActionDropSeriesMutation = { __typename?: 'Mutation', dropSeries: { __typename?: 'UserSeriesState', droppedAt?: any | null } };
+export type SeriesActionBacklogSeriesMutation = { __typename?: 'Mutation', backlogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
 
-export type SeriesActionUndropSeriesMutationVariables = Exact<{
+export type SeriesActionUnbacklogSeriesMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SeriesActionUndropSeriesMutation = { __typename?: 'Mutation', undropSeries: { __typename?: 'UserSeriesState', droppedAt?: any | null } };
+export type SeriesActionUnbacklogSeriesMutation = { __typename?: 'Mutation', unbacklogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
 
 export type SeriesActionStopRereadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SeriesActionStopRereadMutation = { __typename?: 'Mutation', stopSeriesReread: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null } };
+export type SeriesActionStopRereadMutation = { __typename?: 'Mutation', stopSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
 
 export type SeriesActionResumeRereadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SeriesActionResumeRereadMutation = { __typename?: 'Mutation', resumeSeriesReread: { __typename?: 'UserSeriesState', stoppedReadthroughAt?: any | null } };
+export type SeriesActionResumeRereadMutation = { __typename?: 'Mutation', resumeSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
 
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7430,14 +7461,12 @@ export const SeriesReadingStateFragmentDoc = new TypedDocumentString(`
     fragment SeriesReadingState on Series {
   id
   userSeriesState {
-    stoppedReadthroughAt
-    droppedAt
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
   }
   lastReadAt
   currentReadthrough
-  stats {
-    completedBooks
-  }
   resolvedName
 }
     `, {"fragmentName":"SeriesReadingState"}) as unknown as TypedDocumentString<SeriesReadingStateFragment, unknown>;
@@ -7475,14 +7504,12 @@ export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
     fragment SeriesReadingState on Series {
   id
   userSeriesState {
-    stoppedReadthroughAt
-    droppedAt
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
   }
   lastReadAt
   currentReadthrough
-  stats {
-    completedBooks
-  }
   resolvedName
 }`, {"fragmentName":"OnDeckBookItem"}) as unknown as TypedDocumentString<OnDeckBookItemFragment, unknown>;
 export const BookMenuFragmentDoc = new TypedDocumentString(`
@@ -9460,14 +9487,12 @@ export const SeriesBooksSceneSeriesNameDocument = new TypedDocumentString(`
     fragment SeriesReadingState on Series {
   id
   userSeriesState {
-    stoppedReadthroughAt
-    droppedAt
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
   }
   lastReadAt
   currentReadthrough
-  stats {
-    completedBooks
-  }
   resolvedName
 }`) as unknown as TypedDocumentString<SeriesBooksSceneSeriesNameQuery, SeriesBooksSceneSeriesNameQueryVariables>;
 export const SeriesBooksScreenDocument = new TypedDocumentString(`
@@ -9953,14 +9978,12 @@ export const OnDeckBooksDocument = new TypedDocumentString(`
 fragment SeriesReadingState on Series {
   id
   userSeriesState {
-    stoppedReadthroughAt
-    droppedAt
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
   }
   lastReadAt
   currentReadthrough
-  stats {
-    completedBooks
-  }
   resolvedName
 }`) as unknown as TypedDocumentString<OnDeckBooksQuery, OnDeckBooksQueryVariables>;
 export const RecentlyAddedBooksDocument = new TypedDocumentString(`
@@ -10486,31 +10509,31 @@ export const UseFavoriteBookDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UseFavoriteBookMutation, UseFavoriteBookMutationVariables>;
-export const SeriesActionDropSeriesDocument = new TypedDocumentString(`
-    mutation SeriesActionDropSeries($id: ID!) {
-  dropSeries(id: $id) {
-    droppedAt
+export const SeriesActionBacklogSeriesDocument = new TypedDocumentString(`
+    mutation SeriesActionBacklogSeries($id: ID!) {
+  backlogSeries(id: $id) {
+    backloggedAt
   }
 }
-    `) as unknown as TypedDocumentString<SeriesActionDropSeriesMutation, SeriesActionDropSeriesMutationVariables>;
-export const SeriesActionUndropSeriesDocument = new TypedDocumentString(`
-    mutation SeriesActionUndropSeries($id: ID!) {
-  undropSeries(id: $id) {
-    droppedAt
+    `) as unknown as TypedDocumentString<SeriesActionBacklogSeriesMutation, SeriesActionBacklogSeriesMutationVariables>;
+export const SeriesActionUnbacklogSeriesDocument = new TypedDocumentString(`
+    mutation SeriesActionUnbacklogSeries($id: ID!) {
+  unbacklogSeries(id: $id) {
+    backloggedAt
   }
 }
-    `) as unknown as TypedDocumentString<SeriesActionUndropSeriesMutation, SeriesActionUndropSeriesMutationVariables>;
+    `) as unknown as TypedDocumentString<SeriesActionUnbacklogSeriesMutation, SeriesActionUnbacklogSeriesMutationVariables>;
 export const SeriesActionStopRereadDocument = new TypedDocumentString(`
     mutation SeriesActionStopReread($id: ID!) {
   stopSeriesReread(id: $id) {
-    stoppedReadthroughAt
+    rereadStoppedAt
   }
 }
     `) as unknown as TypedDocumentString<SeriesActionStopRereadMutation, SeriesActionStopRereadMutationVariables>;
 export const SeriesActionResumeRereadDocument = new TypedDocumentString(`
     mutation SeriesActionResumeReread($id: ID!) {
   resumeSeriesReread(id: $id) {
-    stoppedReadthroughAt
+    rereadStoppedAt
   }
 }
     `) as unknown as TypedDocumentString<SeriesActionResumeRereadMutation, SeriesActionResumeRereadMutationVariables>;

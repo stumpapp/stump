@@ -2000,12 +2000,27 @@ type Mutation {
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
 	scanSeries(id: ID!): Boolean!
 	"""
-	Exclude the series from on deck recommendations, except for books added to the series after
-	dropping
+	Mark a series as "did not finish" (DNF), which will exclude it from on-deck recommendations entirely.
+	This is functionally the same as "backlogged" but with the added semantics
+	of "I will never read this again"
 	"""
-	dropSeries(id: ID!): UserSeriesState!
-	"Un-drop a series, which will cause it to be included in on deck recommendations per normal logic"
-	undropSeries(id: ID!): UserSeriesState!
+	dnfSeries(id: ID!): UserSeriesState!
+	"""
+	Remove the "did not finish" (DNF) status from a series, which will restore it to on-deck
+	recommendations per normal logic
+	"""
+	undnfSeries(id: ID!): UserSeriesState!
+	"""
+	Backlogs the series, which will exlude any books in the series from being returned
+	in on-deck recommendations. This is functionally equivalent to dnf'ing a series, but
+	with the intent of maybe removing it from the backlog in the future
+	"""
+	backlogSeries(id: ID!): UserSeriesState!
+	"""
+	Removes the series from the backlog, which will restore it to on-deck recommendations
+	to normal logic
+	"""
+	unbacklogSeries(id: ID!): UserSeriesState!
 	"""
 	Set the intent to stop the current readthrough, effectively a pause. on deck will stop
 	showing books in the current readthrough and instead only show unread books
@@ -2184,7 +2199,7 @@ type Mutation {
 	- if `dnf` is true, it will mark the readthrough as such
 	"""
 	finishMediaProgress(id: ID!, dnf: Boolean = null): Boolean!
-	"trashes all completed readthroughs for the media"
+	"trashes all completed/abandoned readthroughs for the media"
 	deleteMediaReadingHistory(id: ID!): Int!
 	"marks all books in the series as finished"
 	finishSeriesProgress(id: ID!): Int!
@@ -3772,16 +3787,22 @@ type UserPreferences {
 type UserSeriesState {
 	seriesId: String!
 	"""
-	the date at which the last readthrough was dropped, so that we can
+	the date at which the last reread was stopped, so that we can
 	revert back to "first book beyond highest position ever read" logic for
 	the recommendations query instead of "next book in current re-read"
 	"""
-	stoppedReadthroughAt: DateTime
+	rereadStoppedAt: DateTime
 	"""
-	when set, the books in the series will be excluded from on-deck recommentations
-	if the timestamp is after the ingestion time into stump
+	the date at which the series reading was "backlogged" for the user, which
+	would exclude books from this series showing up in on-deck recommentations
 	"""
-	droppedAt: DateTime
+	backloggedAt: DateTime
+	"""
+	the date at which the series was dnf'ed, which functionally is the same
+	as "backlogged" but with the added semantics of "I will never read this again"
+	and all that
+	"""
+	dnfAt: DateTime
 	createdAt: DateTime!
 	updatedAt: DateTime
 }

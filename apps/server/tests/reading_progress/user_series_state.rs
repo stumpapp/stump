@@ -13,23 +13,23 @@ use tests::fake_data;
 // NOTE: there is a lot of overlap btw here and super::on_deck::dropped_exclusions, but the focus here is on userSeriesState and not
 // the on deck implications of the same mutations
 
-async fn drop_series(app: &TestApp, series_id: &str) {
+async fn backlog_series(app: &TestApp, series_id: &str) {
 	let result = app
 		.execute_gql(
-			r#"mutation Drop($id: ID!) { dropSeries(id: $id) { droppedAt } }"#,
+			r#"mutation Backlog($id: ID!) { backlogSeries(id: $id) { backloggedAt } }"#,
 			Some(serde_json::json!({ "id": series_id })),
 		)
 		.await;
 	assert!(
 		result.get("data").is_some_and(|d| !d.is_null()),
-		"dropSeries mutation failed: {result:#}"
+		"backlogSeries mutation failed: {result:#}"
 	);
 }
 
 async fn stop_series_reread(app: &TestApp, series_id: &str) {
 	let result = app
 		.execute_gql(
-			r#"mutation Stop($id: ID!) { stopSeriesReread(id: $id) { stoppedReadthroughAt } }"#,
+			r#"mutation Stop($id: ID!) { stopSeriesReread(id: $id) { rereadStoppedAt } }"#,
 			Some(serde_json::json!({ "id": series_id })),
 		)
 		.await;
@@ -48,8 +48,8 @@ async fn series_reading_state(app: &TestApp, series_id: &str) -> serde_json::Val
                     lastReadAt
                     currentReadthrough
                     userSeriesState {
-                        droppedAt
-                        stoppedReadthroughAt
+                        backloggedAt
+                        rereadStoppedAt
                     }
                 }
             }
@@ -153,19 +153,19 @@ async fn test_current_readthrough_is_max_across_series() {
 	assert_eq!(state["currentReadthrough"], 2);
 }
 
-/// dropSeries should set droppedAt on userSeriesState, a bit of a sanity check really
+/// backlogSeries should set backloggedAt on userSeriesState, a bit of a sanity check really
 #[tokio::test]
 async fn test_drop_series_sets_state() {
 	let (app, series_id) = setup().await;
 
-	drop_series(&app, &series_id).await;
+	backlog_series(&app, &series_id).await;
 
 	let state = series_reading_state(&app, &series_id).await;
-	assert!(!state["userSeriesState"]["droppedAt"].is_null());
-	assert!(state["userSeriesState"]["stoppedReadthroughAt"].is_null());
+	assert!(!state["userSeriesState"]["backloggedAt"].is_null());
+	assert!(state["userSeriesState"]["rereadStoppedAt"].is_null());
 }
 
-/// stopSeriesReread should set stoppedReadthroughAt on userSeriesState, a bit of a sanity check really
+/// stopSeriesReread should set rereadStoppedAt on userSeriesState, a bit of a sanity check really
 #[tokio::test]
 async fn test_stop_reread_sets_state() {
 	let (app, series_id) = setup().await;
@@ -175,6 +175,6 @@ async fn test_stop_reread_sets_state() {
 	stop_series_reread(&app, &series_id).await;
 
 	let state = series_reading_state(&app, &series_id).await;
-	assert!(!state["userSeriesState"]["stoppedReadthroughAt"].is_null());
-	assert!(state["userSeriesState"]["droppedAt"].is_null());
+	assert!(!state["userSeriesState"]["rereadStoppedAt"].is_null());
+	assert!(state["userSeriesState"]["backloggedAt"].is_null());
 }

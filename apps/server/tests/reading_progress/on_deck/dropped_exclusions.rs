@@ -70,19 +70,19 @@ async fn execute_series_mutation(app: &TestApp, mutation: &str, series_id: &str)
 	);
 }
 
-async fn drop_series(app: &TestApp, series_id: &str) {
+async fn backlog_series(app: &TestApp, series_id: &str) {
 	execute_series_mutation(
 		app,
-		r#"mutation Drop($id: ID!) { dropSeries(id: $id) { droppedAt } }"#,
+		r#"mutation BacklogSeries($id: ID!) { backlogSeries(id: $id) { backloggedAt } }"#,
 		series_id,
 	)
 	.await;
 }
 
-async fn undrop_series(app: &TestApp, series_id: &str) {
+async fn unbacklog_series(app: &TestApp, series_id: &str) {
 	execute_series_mutation(
 		app,
-		r#"mutation Undrop($id: ID!) { undropSeries(id: $id) { droppedAt } }"#,
+		r#"mutation UnbacklogSeries($id: ID!) { unbacklogSeries(id: $id) { backloggedAt } }"#,
 		series_id,
 	)
 	.await;
@@ -91,7 +91,7 @@ async fn undrop_series(app: &TestApp, series_id: &str) {
 async fn stop_reread(app: &TestApp, series_id: &str) {
 	execute_series_mutation(
 		app,
-		r#"mutation Stop($id: ID!) { stopSeriesReread(id: $id) { stoppedReadthroughAt } }"#,
+		r#"mutation Stop($id: ID!) { stopSeriesReread(id: $id) { rereadStoppedAt } }"#,
 		series_id,
 	)
 	.await;
@@ -100,7 +100,7 @@ async fn stop_reread(app: &TestApp, series_id: &str) {
 async fn resume_reread(app: &TestApp, series_id: &str) {
 	execute_series_mutation(
 		app,
-		r#"mutation Resume($id: ID!) { resumeSeriesReread(id: $id) { stoppedReadthroughAt } }"#,
+		r#"mutation ResumeReread($id: ID!) { resumeSeriesReread(id: $id) { rereadStoppedAt } }"#,
 		series_id,
 	)
 	.await;
@@ -301,32 +301,32 @@ async fn test_skipping_on_first_readthrough() {
 	assert_eq!(ids, vec!["black_science_7".to_string()]);
 }
 
-/// dropping a series should not appear on deck
+/// backlogging a series should not appear on deck
 #[tokio::test]
-async fn test_dropped_series_excluded() {
+async fn test_backlogged_series_excluded() {
 	let (app, series_id) = setup(3).await;
 
 	create_nth_readthrough(&app, "black_science_1", 1).await;
 
 	assert!(!fetch_on_deck_ids(&app).await.is_empty()); // sanity check
 
-	drop_series(&app, &series_id).await;
+	backlog_series(&app, &series_id).await;
 
 	let ids = fetch_on_deck_ids(&app).await;
 	assert!(ids.is_empty(), "dropped series still on deck: {ids:?}");
 }
 
-/// un-dropping a series should restore it to on deck
+/// unbacklogging a series should restore it to on deck
 #[tokio::test]
-async fn test_undrop_series_reappears() {
+async fn test_unbacklogged_series_reappears() {
 	let (app, series_id) = setup(3).await;
 
 	create_nth_readthrough(&app, "black_science_1", 1).await;
-	drop_series(&app, &series_id).await;
+	backlog_series(&app, &series_id).await;
 
 	assert!(fetch_on_deck_ids(&app).await.is_empty());
 
-	undrop_series(&app, &series_id).await;
+	unbacklog_series(&app, &series_id).await;
 
 	let ids = fetch_on_deck_ids(&app).await;
 	assert_eq!(ids.len(), 1);

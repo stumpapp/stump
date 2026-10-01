@@ -12,31 +12,29 @@ const SeriesReadingState = graphql(`
 	fragment SeriesReadingState on Series {
 		id
 		userSeriesState {
-			stoppedReadthroughAt
-			droppedAt
+			rereadStoppedAt
+			backloggedAt
+			dnfAt
 		}
 		lastReadAt
 		currentReadthrough
-		stats {
-			completedBooks
-		}
 		resolvedName
 	}
 `)
 export type SeriesReadingStateFragmentType = FragmentType<typeof SeriesReadingState>
 
-const dropMutation = graphql(`
-	mutation SeriesActionDropSeries($id: ID!) {
-		dropSeries(id: $id) {
-			droppedAt
+const backlogMutation = graphql(`
+	mutation SeriesActionBacklogSeries($id: ID!) {
+		backlogSeries(id: $id) {
+			backloggedAt
 		}
 	}
 `)
 
-const undropMutation = graphql(`
-	mutation SeriesActionUndropSeries($id: ID!) {
-		undropSeries(id: $id) {
-			droppedAt
+const unbacklogMutation = graphql(`
+	mutation SeriesActionUnbacklogSeries($id: ID!) {
+		unbacklogSeries(id: $id) {
+			backloggedAt
 		}
 	}
 `)
@@ -44,7 +42,7 @@ const undropMutation = graphql(`
 const stopRereadMutation = graphql(`
 	mutation SeriesActionStopReread($id: ID!) {
 		stopSeriesReread(id: $id) {
-			stoppedReadthroughAt
+			rereadStoppedAt
 		}
 	}
 `)
@@ -52,7 +50,7 @@ const stopRereadMutation = graphql(`
 const resumeRereadMutation = graphql(`
 	mutation SeriesActionResumeReread($id: ID!) {
 		resumeSeriesReread(id: $id) {
-			stoppedReadthroughAt
+			rereadStoppedAt
 		}
 	}
 `)
@@ -63,10 +61,10 @@ type Params = {
 }
 
 type Return = {
-	dropSeries: () => void
-	canDrop: boolean
-	undropSeries: () => void
-	canUndrop: boolean
+	backlogSeries: () => void
+	canBacklog: boolean
+	unbacklogSeries: () => void
+	canUnbacklog: boolean
 	stopReread: () => void
 	canStopReread: boolean
 	resumeReread: () => void
@@ -79,40 +77,38 @@ export function useSeriesStateActions({ fragment, ...options }: Params): Return 
 		userSeriesState: seriesState,
 		lastReadAt,
 		currentReadthrough,
-		stats: { completedBooks },
 	} = useFragment(SeriesReadingState, fragment)
 
-	const { mutate: dropSeries } = useGraphQLMutation(dropMutation, options)
-	const { mutate: undropSeries } = useGraphQLMutation(undropMutation, options)
+	const { mutate: backlogSeries } = useGraphQLMutation(backlogMutation, options)
+	const { mutate: unbacklogSeries } = useGraphQLMutation(unbacklogMutation, options)
 	const { mutate: stopReread } = useGraphQLMutation(stopRereadMutation, options)
 	const { mutate: resumeReread } = useGraphQLMutation(resumeRereadMutation, options)
 
-	const isDropped = !!seriesState?.droppedAt
-	const hasProgress = completedBooks > 0
+	const isBacklogged = !!seriesState?.backloggedAt
 	const isRereading = (currentReadthrough ?? 0) > 1
 
-	const stoppedAt = seriesState?.stoppedReadthroughAt
+	const stoppedAt = seriesState?.rereadStoppedAt
 	const isReadthroughStopped = lastReadAt && stoppedAt ? isAfter(lastReadAt, stoppedAt) : false
 
 	return {
-		dropSeries: () => dropSeries({ id: seriesId }),
-		canDrop: !isDropped && hasProgress,
-		undropSeries: () => undropSeries({ id: seriesId }),
-		canUndrop: isDropped,
+		backlogSeries: () => backlogSeries({ id: seriesId }),
+		canBacklog: !isBacklogged,
+		unbacklogSeries: () => unbacklogSeries({ id: seriesId }),
+		canUnbacklog: isBacklogged,
 		stopReread: () => stopReread({ id: seriesId }),
-		canStopReread: !isDropped && isRereading && !isReadthroughStopped,
+		canStopReread: !isBacklogged && isRereading && !isReadthroughStopped,
 		resumeReread: () => resumeReread({ id: seriesId }),
-		canResumeReread: !isDropped && isReadthroughStopped,
+		canResumeReread: !isBacklogged && isReadthroughStopped,
 	}
 }
 
 export function useSeriesStateMenu({ fragment, ...options }: Params) {
 	const { t } = useTranslate()
 	const {
-		dropSeries,
-		canDrop,
-		undropSeries,
-		canUndrop,
+		backlogSeries,
+		canBacklog,
+		unbacklogSeries,
+		canUnbacklog,
 		stopReread,
 		canStopReread,
 		resumeReread,
@@ -125,23 +121,23 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 	// using it find it annoying, but feels safer for now. i know not
 	// everyone reads the docs so lol
 
-	const dropWithConfirm = () =>
+	const backlogWithConfirmation = () =>
 		SystemAlert.alert(
-			t('seriesActions.dropSeries.label'),
-			t('seriesActions.dropSeries.description', { seriesName }),
+			t('seriesActions.backlogSeries.label'),
+			t('seriesActions.backlogSeries.description', { seriesName }),
 			[
 				{ text: 'Cancel', style: 'cancel' },
-				{ text: t('seriesActions.dropSeries.drop'), style: 'destructive', onPress: dropSeries },
+				{ text: t('seriesActions.backlog'), style: 'destructive', onPress: backlogSeries },
 			],
 		)
 
-	const undropWithConfirm = () =>
+	const unbacklogWithConfirmation = () =>
 		SystemAlert.alert(
-			t('seriesActions.undropSeries.label'),
-			t('seriesActions.undropSeries.description', { seriesName }),
+			t('seriesActions.unbacklogSeries.label'),
+			t('seriesActions.unbacklogSeries.description', { seriesName }),
 			[
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: t('seriesActions.undropSeries.undrop'), onPress: undropSeries },
+				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: t('seriesActions.unbacklog'), onPress: unbacklogSeries },
 			],
 		)
 
@@ -150,8 +146,8 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 			t('seriesActions.stopReread.label'),
 			t('seriesActions.stopReread.description', { seriesName }),
 			[
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: t('seriesActions.stopReread.stop'), onPress: stopReread },
+				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: t('seriesActions.stop'), onPress: stopReread },
 			],
 		)
 
@@ -160,19 +156,19 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 			t('seriesActions.resumeReread.label'),
 			t('seriesActions.resumeReread.description', { seriesName }),
 			[
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: t('seriesActions.resumeReread.resume'), onPress: resumeReread },
+				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: t('seriesActions.resume'), onPress: resumeReread },
 			],
 		)
 
 	const items: ActionDef[] = [
-		...(canUndrop
+		...(canUnbacklog
 			? [
 					{
-						key: 'undrop',
-						label: t('seriesActions.undropSeries.label'),
+						key: 'unbacklog',
+						label: t('seriesActions.unbacklogSeries.label'),
 						icon: { ios: 'arrow.uturn.up.circle', android: BookX },
-						onPress: undropWithConfirm,
+						onPress: unbacklogWithConfirmation,
 					} satisfies ActionDef,
 				]
 			: []),
@@ -180,7 +176,7 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 			? [
 					{
 						key: 'stop-reread',
-						label: t('seriesActions.stopReread.label'),
+						label: t('seriesActions.pauseReread.label'),
 						icon: { ios: 'pause.circle', android: BookX },
 						onPress: stopRereadWithConfirm,
 					} satisfies ActionDef,
@@ -196,13 +192,13 @@ export function useSeriesStateMenu({ fragment, ...options }: Params) {
 					} satisfies ActionDef,
 				]
 			: []),
-		...(canDrop
+		...(canBacklog
 			? [
 					{
-						key: 'drop',
-						label: t('seriesActions.dropSeries.label'),
+						key: 'pause',
+						label: t('seriesActions.backlogSeries.label'),
 						icon: { ios: 'xmark.circle', android: BookX },
-						onPress: dropWithConfirm,
+						onPress: backlogWithConfirmation,
 						destructive: true,
 					} satisfies ActionDef,
 				]

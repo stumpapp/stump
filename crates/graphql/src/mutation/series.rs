@@ -213,9 +213,10 @@ impl SeriesMutation {
 		Ok(true)
 	}
 
-	/// Exclude the series from on deck recommendations, except for books added to the series after
-	/// dropping
-	async fn drop_series(
+	/// Mark a series as "did not finish" (DNF), which will exclude it from on-deck recommendations entirely.
+	/// This is functionally the same as "backlogged" but with the added semantics
+	/// of "I will never read this again"
+	async fn dnf_series(
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
@@ -223,13 +224,12 @@ impl SeriesMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		series_state::drop_series(conn, &user.id, id.as_ref())
-			.await
-			.map_err(Into::into)
+		Ok(series_state::dnf_series(conn, &user.id, id.as_ref()).await?)
 	}
 
-	/// Un-drop a series, which will cause it to be included in on deck recommendations per normal logic
-	async fn undrop_series(
+	/// Remove the "did not finish" (DNF) status from a series, which will restore it to on-deck
+	/// recommendations per normal logic
+	async fn undnf_series(
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
@@ -237,13 +237,35 @@ impl SeriesMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		series_state::undrop_series(conn, &user.id, id.as_ref())
-			.await
-			.map_err(Into::into)
+		Ok(series_state::undnf_series(conn, &user.id, id.as_ref()).await?)
 	}
 
-	// TODO: consider renaming to pause? i think at least on ui that language
-	// is a bit more aligned with resume mutation
+	/// Backlogs the series, which will exlude any books in the series from being returned
+	/// in on-deck recommendations. This is functionally equivalent to dnf'ing a series, but
+	/// with the intent of maybe removing it from the backlog in the future
+	async fn backlog_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::backlog_series(conn, &user.id, id.as_ref()).await?)
+	}
+
+	/// Removes the series from the backlog, which will restore it to on-deck recommendations
+	/// to normal logic
+	async fn unbacklog_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::unbacklog_series(conn, &user.id, id.as_ref()).await?)
+	}
 
 	/// Set the intent to stop the current readthrough, effectively a pause. on deck will stop
 	/// showing books in the current readthrough and instead only show unread books
@@ -255,9 +277,7 @@ impl SeriesMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		series_state::stop_series_reread(conn, &user.id, id.as_ref())
-			.await
-			.map_err(Into::into)
+		Ok(series_state::stop_series_reread(conn, &user.id, id.as_ref()).await?)
 	}
 
 	/// Restore the intent to read through the series, effectively a resume of the highest
@@ -270,8 +290,6 @@ impl SeriesMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		series_state::resume_series_reread(conn, &user.id, id.as_ref())
-			.await
-			.map_err(Into::into)
+		Ok(series_state::resume_series_reread(conn, &user.id, id.as_ref()).await?)
 	}
 }

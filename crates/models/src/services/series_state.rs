@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use sea_orm::{
 	prelude::*, sea_query::Func, ActiveValue::Set, ColumnTrait, EntityTrait,
 	IntoActiveModel, JoinType, QueryFilter, QuerySelect,
@@ -41,27 +41,29 @@ async fn get_or_create(
 	.await
 }
 
-/// marks a series as dropped
-pub async fn drop_series(
+/// puts a series into a "backlogged" state, which will filter out any of its books
+/// from on-deck recommendations until removed from the backlog
+pub async fn backlog_series(
 	db: &impl ConnectionTrait,
 	user_id: &str,
 	series_id: &str,
 ) -> Result<user_series_state::Model, DbErr> {
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.dropped_at = Set(Some(DateTimeWithTimeZone::from(Utc::now())));
+	active.backlogged_at = Set(Some(Utc::now().into()));
 	active.update(db).await
 }
 
-/// unmarks a series as dropped
-pub async fn undrop_series(
+/// removes a series from the "backlogged" state, making its books eligible for
+/// on-deck recommendations per normal logic
+pub async fn unbacklog_series(
 	db: &impl ConnectionTrait,
 	user_id: &str,
 	series_id: &str,
 ) -> Result<user_series_state::Model, DbErr> {
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.dropped_at = Set(None);
+	active.backlogged_at = Set(None);
 	active.update(db).await
 }
 
@@ -69,7 +71,7 @@ pub async fn undrop_series(
 /// readthrough and instead only show unread books beyond the highest position ever reached.
 ///
 /// the stop timestamp is set to the actual last-read date so any book finished after this
-/// point will advance last_read_date past the stop timestamp and autoresumt
+/// point will advance last_read_date past the stop timestamp and autoresume
 pub async fn stop_series_reread(
 	db: &impl ConnectionTrait,
 	user_id: &str,
@@ -98,11 +100,13 @@ pub async fn stop_series_reread(
 		.one(db)
 		.await?;
 
-	let stop_at = stop_at.unwrap_or_else(|| DateTimeWithTimeZone::from(Utc::now()));
+	let stop_at = stop_at
+		.map(|dt| DateTime::<Utc>::from(dt.with_timezone(&Utc)))
+		.unwrap_or_else(|| Utc::now().into());
 
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.stopped_readthrough_at = Set(Some(stop_at));
+	active.reread_stopped_at = Set(Some(stop_at));
 	active.update(db).await
 }
 
@@ -115,7 +119,33 @@ pub async fn resume_series_reread(
 ) -> Result<user_series_state::Model, DbErr> {
 	let existing = get_or_create(db, user_id, series_id).await?;
 	let mut active = existing.into_active_model();
-	active.stopped_readthrough_at = Set(None);
+	active.reread_stopped_at = Set(None);
+	active.update(db).await
+}
+
+/// marks a series as dnf'ed, which will exclude it from on-deck recommendations entirely.
+/// this is functionally the same as "backlogged" but with the added semantics
+/// of "I will never read this again"
+pub async fn dnf_series(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	series_id: &str,
+) -> Result<user_series_state::Model, DbErr> {
+	let existing = get_or_create(db, user_id, series_id).await?;
+	let mut active = existing.into_active_model();
+	active.dnf_at = Set(Some(Utc::now().into()));
+	active.update(db).await
+}
+
+/// clears the dnf stamp so on deck resumes per normal logic
+pub async fn undnf_series(
+	db: &impl ConnectionTrait,
+	user_id: &str,
+	series_id: &str,
+) -> Result<user_series_state::Model, DbErr> {
+	let existing = get_or_create(db, user_id, series_id).await?;
+	let mut active = existing.into_active_model();
+	active.dnf_at = Set(None);
 	active.update(db).await
 }
 

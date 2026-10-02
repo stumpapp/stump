@@ -64,7 +64,7 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 export default function RootLayout() {
 	const navigationRef = useNavigationContainerRef()
 
-	const { colorScheme, isDarkColorScheme } = useColorScheme()
+	const { colorScheme, isDarkColorScheme, setColorScheme } = useColorScheme()
 
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
 
@@ -108,7 +108,9 @@ export default function RootLayout() {
 		if (hasMounted.current) {
 			return
 		}
-		const preferredLocale = usePreferencesStore.getState().locale
+		const preferences = usePreferencesStore.getState()
+		setColorScheme(preferences.themePreference)
+		const preferredLocale = preferences.locale
 		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
 		initDateFnsLocale(preferredLocale ?? deviceLocale)
 		setLocaleDetector(() => preferredLocale ?? deviceLocale)
@@ -119,7 +121,7 @@ export default function RootLayout() {
 		SplashScreen.hideAsync().then(() => {
 			setIsAnimationReady(true)
 		})
-	}, [])
+	}, [colorScheme, setColorScheme])
 
 	React.useEffect(() => {
 		if (navigationRef) {

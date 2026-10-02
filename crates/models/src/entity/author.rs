@@ -21,7 +21,24 @@ pub struct Model {
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+	#[sea_orm(has_many = "super::media_author::Entity")]
+	MediaAuthor,
+	#[sea_orm(has_many = "super::series_author::Entity")]
+	SeriesAuthor,
+}
+
+impl Related<super::media_author::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::MediaAuthor.def()
+	}
+}
+
+impl Related<super::series_author::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::SeriesAuthor.def()
+	}
+}
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {

@@ -3,10 +3,24 @@ use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
-// TODO: Consider not using screaming case?
-
 /// The role of an author in relation to a work or series
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Enum)]
+#[derive(
+	Debug,
+	Clone,
+	Copy,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	Enum,
+	EnumIter,
+	DeriveActiveEnum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
 pub enum AuthorRole {
 	Primary,
 	CoAuthor,

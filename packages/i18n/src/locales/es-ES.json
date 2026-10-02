@@ -495,6 +495,10 @@
 						"description": "Cada carpeta en cualquier nivel recursivamente es una sola serie"
 					}
 				}
+			},
+			"oneshotsDirectory": {
+				"label": "Directorio de One-shots",
+				"placeholder": "_oneshots"
 			}
 		},
 		"scan": {
@@ -561,7 +565,8 @@
 					"generateKoreaderHashes": "Generar hashes para KoReader",
 					"scaleEvenlyByFactor": "Escalar uniformemente",
 					"exact": "Tamaño exacto",
-					"scaleDimension": "Tamaño explícito"
+					"scaleDimension": "Tamaño explícito",
+					"oneshotsDirectory": "Directorio de one-shots"
 				}
 			},
 			"buttons": {
@@ -596,7 +601,8 @@
 		"tabs": {
 			"books": "Libros",
 			"files": "Archivos",
-			"series": "Series"
+			"series": "Series",
+			"oneshots": "One-shots"
 		}
 	},
 	"librarySettingsScene": {
@@ -848,6 +854,11 @@
 				"heading": "Nada para mostrar",
 				"message": "Cualquier libro reciente que añadas aparecerá aquí"
 			}
+		},
+		"allSectionsHidden": {
+			"label": "No hay nada para mostrar",
+			"description": "Ocultaste todo, Espero que te guste el espacio vacío",
+			"customizeHome": "Personaliza tu página principal"
 		}
 	},
 	"metadataMatching": {
@@ -1309,7 +1320,10 @@
 					]
 				},
 				"language": {
-					"label": "Idioma"
+					"label": "Idioma",
+					"contributeIfAble": "¡Por favor considera contribuir a la traducción de Stump si puedes hacerlo!",
+					"contribute": "Contribuir",
+					"noThanks": "No gracias"
 				}
 			}
 		},
@@ -1521,6 +1535,17 @@
 				"enableJobOverlayToggle": {
 					"label": "Superposición de tareas",
 					"description": "Mostrar una superposición flotante cuando una tarea se está ejecutando"
+				},
+				"homeArrangement": {
+					"title": "Página de inicio",
+					"description": "Ajusta las secciones de tu página de inicio",
+					"label": "Secciones del Inicio",
+					"hint": "Arrastra y ordena secciones u ocultalas por completo",
+					"reorder": "Reordenar {{section}}",
+					"reset": "Reiniciar",
+					"saveFailed": "Falló al guardar tus cambios",
+					"unsupported": "Configuración inválida",
+					"unsupportedDescription": "Por favor reinicia a los valores por defecto e intenta nuevamente"
 				}
 			}
 		},
@@ -1581,7 +1606,8 @@
 					}
 				},
 				"formats": {
-					"label": "Formatos"
+					"label": "Formatos",
+					"description": "Configura los ajustes por defecto del lector independientemente"
 				}
 			}
 		},
@@ -1690,6 +1716,10 @@
 						"label": "Precencia en Discord",
 						"description": "Muestra tu actividad en Stump en Discord usando la Rich Presence de Discord",
 						"reconnect": "Reconectar a Discord"
+					},
+					"restartRequired": {
+						"title": "Requiere reiniciar",
+						"description": "Se realizaron cambios que requieren reiniciar la app para tener efecto"
 					}
 				}
 			}
@@ -1716,8 +1746,10 @@
 					"exactCommit": "Commit exacto",
 					"debugInfo": {
 						"label": "Información de depuración",
-						"copyDebugInfoFailed": "Falló en copiar la información de deupración"
-					}
+						"copyDebugInfoFailed": "Falló en copiar la información de deupración",
+						"description": "Copiar y pegar al reportar problemas en GitHub"
+					},
+					"version": "Versión"
 				},
 				"serverPublicUrl": {
 					"label": "URL pública",
@@ -1753,14 +1785,17 @@
 					"deleteError": "Falló al eliminar emoji"
 				},
 				"changelog": {
-					"label": "Registro de cambios"
+					"label": "Registro de cambios",
+					"description": "Ve que ha cambiado en la última versión de Stump"
 				},
 				"serverConfig": {
 					"description": "Un subgrupo de opciones de configuración disponible para gestionar aquí",
 					"publicUrl": {
 						"description": "La URL en la cual tu servidor es accesible desde fuera de tu red",
-						"updateFailed": "Falló en actualizar la URL"
-					}
+						"updateFailed": "Falló en actualizar la URL",
+						"label": "URL pública"
+					},
+					"label": "Configuración del servidor"
 				}
 			}
 		},
@@ -1893,7 +1928,8 @@
 					},
 					"inspector": {
 						"title": "Detalles del trabajo",
-						"description": "El resultado bruto de este trabajo y cualquier registro asociado"
+						"description": "El resultado bruto de este trabajo y cualquier registro asociado",
+						"associatedLogs": "Registros asociados"
 					},
 					"deleteJobHistory": {
 						"title": "Eliminar historial de trabajos",
@@ -1979,59 +2015,118 @@
 							"description": "Permitir al usuario descargar ficheros del servidor"
 						},
 						"upload": {
-							"label": "Subir ficheros"
-						}
+							"label": "Subir ficheros",
+							"description": "Permite al usuario cargar archivos al servidor"
+						},
+						"label": "Gestión de archivos"
 					},
 					"library": {
 						"scan": {
-							"label": "Escanear bibliotecas"
+							"label": "Escanear bibliotecas",
+							"description": "Permite al usuario iniciar escaneos para librerías existentes"
 						},
 						"edit": {
-							"label": "Editar bibliotecas"
+							"label": "Editar bibliotecas",
+							"description": "Permite al usuario editar detalles básicos de librerías existentes"
 						},
 						"delete": {
-							"label": "Eliminar librerías"
+							"label": "Eliminar librerías",
+							"description": "Permite al usuario eliminar librerías existentes. Incluye permisos para editar, gestionar y escanear"
+						},
+						"label": "Gestión de librería",
+						"create": {
+							"label": "Crear librerías",
+							"description": "Permite al usuario crear nuevas librerías. Incluye permisos para editar y escanear"
+						},
+						"manage": {
+							"label": "Gestionar librerías",
+							"description": "Permite al usuario gestionar ajustes avanzados de librerías existentes. Incluye permisos para editar y escanear"
 						}
 					},
 					"user": {
 						"manage": {
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update",
+							"label": "Gestionar usuarios"
+						},
+						"label": "Gestión de usuarios",
+						"read": {
+							"label": "Ver usuarios",
+							"description": "Permite al usuario consultar sobre los otros usuarios del servidor. Esto es requerido para algunas otras funciones, ej. excluir usuarios del acceso a una librería"
 						}
 					},
 					"smartlist": {
 						"label": "Listas inteligentes",
 						"read": {
-							"description": "Allows the user to access smart lists features"
+							"description": "Allows the user to access smart lists features",
+							"label": "Acceder a la función de listas inteligentes"
 						}
 					},
 					"server": {
 						"manage": {
-							"label": "Gestionar servidor"
-						}
+							"label": "Gestionar servidor",
+							"description": "Permite al usuario gestionar el servidor. Incluye *varios* otros permisos"
+						},
+						"label": "Gestión del servidor"
 					},
 					"emailer": {
 						"create": {
-							"label": "Crear servidores de correo"
+							"label": "Crear servidores de correo",
+							"description": "Permite al usuario crear nuevos servidores de correo"
 						},
 						"manage": {
-							"description": "Permite al usuario gestionar los servidores de correo existentes"
+							"description": "Permite al usuario gestionar los servidores de correo existentes",
+							"label": "Gestionar servidores de correo"
+						},
+						"label": "Servidores de correo",
+						"read": {
+							"label": "Acceder a los servidores de correo",
+							"description": "Permite al usuario ver los servidores de correo configurados"
 						}
 					},
 					"email": {
-						"label": "Enviar correos"
+						"label": "Enviar correos",
+						"send": {
+							"label": "Enviar correos",
+							"description": "Permite al usuario enviar correos desde el servidor hacia cualquier alias configurado"
+						},
+						"arbitrary_send": {
+							"label": "Enviar correos arbitrarios",
+							"description": "Permite al usuario enviar correos desde el servidor hacia cualquier dirección de correo"
+						}
 					},
 					"feature": {
 						"label": "Características 'Optar por'",
 						"api_keys": {
-							"label": "Llaves API"
+							"label": "Llaves API",
+							"description": "Permite al usuario gestionar sus propias llaves API"
+						},
+						"koreader_sync": {
+							"label": "Sincronización con KoReader",
+							"description": "Permite al usuario acceder a la función de sincronización con KoReader"
 						}
 					}
-				}
+				},
+				"validation": {
+					"ageRestrictionTooLow": "Restricción por edad no puede ser menor a 0",
+					"missingUsername": "Un nombre de usuario es requerido",
+					"missingPassword": "Una contraseña es requerida",
+					"usernameAlreadyExists": "El nombre de usuario ya existe"
+				},
+				"createSubmitButton": "Crear usuario",
+				"updateSubmitButton": "Actualizar usuario"
 			},
 			"userStats": {
 				"users": "Usuarios",
 				"booksCompleted": "Libros completados",
-				"topReader": "Mayor lector"
+				"topReader": "Mayor lector",
+				"booksInProgress": "Libros en progreso"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "Eliminar actividad",
+					"description": "Todos los registros de actividad de inicio de sesión se eliminarán permanentemente de la base de datos",
+					"confirm": "Eliminar"
+				}
 			}
 		},
 		"server/email": {
@@ -2043,23 +2138,52 @@
 						"sendHistory": {
 							"table": {
 								"columns": {
-									"createdAt": "Enviado el"
+									"createdAt": "Enviado el",
+									"to": "Hacia",
+									"subject": "Asunto",
+									"status": "Estado"
 								}
-							}
-						}
+							},
+							"heading": "Enviar historial",
+							"description": "Un registros de los correos enviados desde este servidor",
+							"emptyHeading": "No hay historial",
+							"emptySubtitle": "El historial de este servidor de correos está vaciío. No se ha usado aún o su historial ha sido limpiado"
+						},
+						"emptyHeading": "No hay servidores SMTP configurados",
+						"primaryEmailer": "Servidor de correos primario"
 					},
 					"title": "Servidores SMTP"
 				},
 				"devices": {
 					"addOrUpdateDevice": {
 						"name": {
-							"description": "Un nombre amigable único para identificar el alias de este dispositivo"
+							"description": "Un nombre amigable único para identificar el alias de este dispositivo",
+							"label": "Nombre"
+						},
+						"title": {
+							"create": "Crear alias de dispositivo",
+							"update": "Actualizar alias de dispositivo"
+						},
+						"email": {
+							"label": "Correo",
+							"description": "La dirección de correo a la cual este alias será asociada"
+						},
+						"forbidden": {
+							"label": "Prohibido",
+							"description": "Cuando habilitado, ningún usuario podrá enviar correos a la dirección asociada a este alias"
+						},
+						"submit": {
+							"create": "Crear alias del dispositivo",
+							"update": "Actualizar alias del dispositivo"
 						}
 					},
 					"table": {
 						"emptyHeading": "No hay dispositivos registrados",
 						"emptySubtitle": "Crear un nuevo alias de dispositivo para uso futuro"
-					}
+					},
+					"title": "Dispositivos de correo",
+					"description": "Los alias de dispositivo que has configurado para recibir correos de tu instancia del servidor de Stump",
+					"addDevice": "Añadir alias de dispositivo"
 				}
 			},
 			"createOrUpdateForm": {
@@ -2068,7 +2192,8 @@
 					"description": "El puerto del servidor SMTP"
 				},
 				"tlsEnabled": {
-					"description": "Si habilitado, la conección con el servidor SMTP será encriptada"
+					"description": "Si habilitado, la conección con el servidor SMTP será encriptada",
+					"label": "TLS habilitado"
 				},
 				"senderSettings": {
 					"heading": "Ajustes de envío"
@@ -2092,6 +2217,25 @@
 				"maxAttachmentSize": {
 					"label": "Tamaño máximo de adjuntos",
 					"description": "El tamaño máximo, en bytes, que los adjuntos pueden tener"
+				},
+				"name": {
+					"label": "Nombre",
+					"description": "Un nombre amigable para identificar de forma única a este servidor de correos"
+				},
+				"smtpSettings": {
+					"heading": "Ajustes de SMTP",
+					"description": "Los ajustes de SMTP para este servidor de correo"
+				},
+				"smtpProvider": {
+					"label": "Plantilla de proveedor de SMTP",
+					"description": "El proveedor del servidor SMTP. Esto se usa para prellenar algunos de los ajustes comunes, pero no engloba todos los proveedores"
+				},
+				"smtpHost": {
+					"label": "Servidor SMTP",
+					"description": "El nombre del servidor de SMTP"
+				},
+				"username": {
+					"label": "Nombre de usuario"
 				}
 			},
 			"updateEmailer": {
@@ -2101,7 +2245,8 @@
 				"title": "Crear gestor de correos"
 			},
 			"helmet": "Ajustes de correo",
-			"description": "Ajustes relacionados a configurar un servidor SMTP para tu instancia del servidor de Stump"
+			"description": "Ajustes relacionados a configurar un servidor SMTP para tu instancia del servidor de Stump",
+			"title": "Correo"
 		},
 		"server/metadataIntegrations": {
 			"helmet": "Integraciones de metadatos",
@@ -3097,10 +3242,15 @@
 			"totalIssues": "Números totales",
 			"comicImage": "Imágen del cómic",
 			"descriptionFormatted": "Descripción (con formato)",
-			"titleSort": "Ordenar por título"
+			"titleSort": "Ordenar por título",
+			"publicationRun": "Número de publicación"
 		},
 		"addFields": {
 			"description": "Añadir cada adición en su propia línea"
+		},
+		"actions": {
+			"removeItem": "Quitar elemento",
+			"resetField": "Reiniciar campo"
 		}
 	},
 	"createSmartListScene": {
@@ -3289,6 +3439,34 @@
 		"errors": {
 			"uploadFailed": "Falló en cargar imagen",
 			"updateFailed": "Falló en actualizar miniatura"
+		}
+	},
+	"mediaFilterForm": {
+		"ageRatingFilter": {
+			"label": "Clasificación por edad",
+			"anyAge": {
+				"label": "Cualquier edad",
+				"description": "No se aplicarán filtros por clasificación por edad"
+			},
+			"custom": {
+				"label": "Para N años o menos",
+				"description": {
+					"media": "Solo se mostrarán medios con una clasificación por edad de N o menor, donde N es el número que ingresaste abajo",
+					"series": "Solo se mostrarán series con una clasificación por edad de N o menor, donde N es el número que ingresaste abajo"
+				}
+			}
+		},
+		"extensionSelect": {
+			"label": "Formato",
+			"any": "Cualquiera"
+		},
+		"readStatusSelect": {
+			"label": "Estado de lectura",
+			"options": {
+				"completed": "Completado",
+				"reading": "Leyendo",
+				"unread": "No leído"
+			}
 		}
 	}
 }

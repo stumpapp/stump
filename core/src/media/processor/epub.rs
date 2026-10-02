@@ -812,6 +812,14 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 		}
 	}
 
+	// EPUB resources are stored in the zip archive with `/` separators. On Windows,
+	// `PathBuf::join` produces `\` separators, which breaks exact-name lookup in the
+	// archive (epub-rs's `convert_path_seps` performs the same normalization). Convert
+	// Windows separators to `/` so resource paths match archive entry names.
+	if cfg!(windows) {
+		normalized = PathBuf::from(normalized.to_string_lossy().replace('\\', "/"));
+	}
+
 	normalized
 }
 
@@ -1067,6 +1075,22 @@ mod tests {
 		let path = PathBuf::from("chapters/chapter1/../../Styles/style.css");
 		let result = normalize_resource_path(path, "OEBPS");
 		assert_eq!(result, PathBuf::from("OEBPS/Styles/style.css"));
+
+		// Windows-style separators (as produced by `PathBuf::join` on Windows) must be
+		// normalized to POSIX separators, since zip archive entry names always use `/`.
+		let path = PathBuf::from(r"OEBPS\Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
+
+		let path = PathBuf::from(r"Text\Bookname.xhtml");
+		let result = normalize_resource_path(path, "OEBPS");
+		assert_eq!(
+			result.to_string_lossy().replace('\\', "/"),
+			"OEBPS/Text/Bookname.xhtml"
+		);
 	}
 
 	#[test]

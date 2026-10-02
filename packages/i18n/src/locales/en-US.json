@@ -3365,7 +3365,8 @@
 					"label": "Theme",
 					"options": {
 						"light": "Light",
-						"dark": "Dark"
+						"dark": "Dark",
+						"system": "System"
 					}
 				},
 				"appPrimaryColor": {

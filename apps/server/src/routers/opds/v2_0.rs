@@ -41,7 +41,7 @@ use stump_core::{
 			OPDSNavigationLink, OPDSNavigationLinkBuilder,
 		},
 		metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
-		progression::{OPDSProgression, OPDSProgressionInput},
+		progression::OPDSProgression,
 		publication::OPDSPublication,
 	},
 	utils::chain_optional_iter,
@@ -1452,20 +1452,13 @@ async fn get_book_page(
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
-// // .route("/chapter/{chapter}", get(get_epub_chapter))
-// // .route("/{root}/{resource}", get(get_epub_meta)),
-// // async fn get_book_resource() {}
-
 /// A route handler which returns the progression of a book for a user.
 #[tracing::instrument(skip(ctx))]
 async fn get_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	HostExtractor(host): HostExtractor,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSProgression>> {
-	let link_finalizer = OPDSLinkFinalizer::from(host);
-
 	let user = req.user();
 	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
@@ -1485,19 +1478,19 @@ async fn get_book_progression(
 		return Ok(Json(OPDSProgression::default()));
 	};
 
-	Ok(Json(OPDSProgression::new(reading_session, link_finalizer)?))
+	Ok(Json(OPDSProgression::new(reading_session)?))
 }
 
 /// A route handler which updates the progression of a book for a user
 ///
-/// Returns 204 on success, 409 Conflict if the timestamp is older.
+/// Returns 201 on success, 409 Conflict if the timestamp is older.
 #[tracing::instrument(skip(ctx))]
 async fn update_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
-	Json(input): Json<OPDSProgressionInput>,
-) -> APIResult<axum::http::StatusCode> {
+	Json(input): Json<OPDSProgression>,
+) -> APIResult<(axum::http::StatusCode, Json<OPDSProgression>)> {
 	let user = req.user();
 	let conn = ctx.conn.as_ref();
 
@@ -1511,9 +1504,14 @@ async fn update_book_progression(
 		reading_session::Entity::find_latest_for_user_and_media(&user, &id)
 			.one(conn)
 			.await?;
+	let will_create = existing_session.is_none();
+
+	let input_modified = input
+		.modified_at()
+		.map_err(|e| APIError::BadRequest(format!("Invalid modified timestamp: {e}")))?;
 
 	match existing_session {
-		Some(ref session) if session.updated_at.is_some_and(|ts| ts > input.modified) => {
+		Some(ref session) if session.updated_at.is_some_and(|ts| ts > input_modified) => {
 			return Err(APIError::Conflict(
 				"Progression timestamp is older than existing session".to_string(),
 			));
@@ -1575,10 +1573,31 @@ async fn update_book_progression(
 	};
 
 	let txn = conn.begin().await?;
-	upsert_reading_session(&txn, &user, &id, progression).await?;
+	let session = upsert_reading_session(&txn, &user, &id, progression).await?;
 	txn.commit().await?;
 
-	Ok(axum::http::StatusCode::NO_CONTENT)
+	let Some(active_reading_session) = OPDSProgressionEntity::find()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.into_model::<OPDSProgressionEntity>()
+		.one(ctx.conn.as_ref())
+		.await?
+	else {
+		return Err(APIError::InternalServerError(
+			"Failed to retrieve updated reading session".to_string(),
+		));
+	};
+
+	// i doubt it matters but no harm in being a little more precise
+	let status_code = if will_create {
+		axum::http::StatusCode::CREATED
+	} else {
+		axum::http::StatusCode::OK
+	};
+
+	Ok((
+		status_code,
+		Json(OPDSProgression::new(active_reading_session)?),
+	))
 }
 
 /// A route handler which downloads a book for a user.

@@ -41,7 +41,7 @@ use stump_core::{
 			OPDSNavigationLink, OPDSNavigationLinkBuilder,
 		},
 		metadata::{OPDSMetadata, OPDSMetadataBuilder, OPDSPaginationMetadataBuilder},
-		progression::{OPDSProgression, OPDSProgressionInput},
+		progression::OPDSProgression,
 		publication::OPDSPublication,
 	},
 	utils::chain_optional_iter,
@@ -70,12 +70,15 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/libraries",
 					Router::new().route("/", get(browse_libraries)).nest(
 						"/{id}",
-						Router::new().route("/", get(browse_library_by_id)).nest(
-							"/books",
-							Router::new()
-								.route("/", get(browse_library_books))
-								.route("/latest", get(latest_library_books)),
-						),
+						Router::new()
+							.route("/", get(browse_library_by_id))
+							.nest(
+								"/books",
+								Router::new()
+									.route("/", get(browse_library_books))
+									.route("/latest", get(latest_library_books)),
+							)
+							.route("/series", get(browse_library_series)),
 					),
 				)
 				.nest(
@@ -260,6 +263,20 @@ struct OPDSBrowseParams {
 	pagination: OffsetPagination,
 	#[serde(flatten)]
 	filter: OPDSBrowseFilter,
+}
+
+fn pagination_href(base_url: &str, pagination: &OffsetPagination, page: u64) -> String {
+	let separator = if base_url.contains('?') { "&" } else { "?" };
+	let mut href = format!("{base_url}{separator}page={page}");
+
+	if pagination.page_size != Some(20) {
+		href.push_str(&format!("&page_size={}", pagination.limit()));
+	}
+	if pagination.zero_based == Some(true) {
+		href.push_str("&zero_based=true");
+	}
+
+	href
 }
 
 #[tracing::instrument]
@@ -656,6 +673,34 @@ async fn browse_libraries(
 		)
 		.build()?;
 
+	let previous_link = match pagination.previous_page() {
+		Some(page) => Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href("/opds/v2.0/libraries", &pagination, page))
+					.rel(OPDSLinkRel::Previous.item())
+					.build()?,
+			)),
+		),
+		None => None,
+	};
+	let next_link = if (pagination.offset() + take) < library_count {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						"/opds/v2.0/libraries",
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
+
 	Ok(Json(
 		OPDSFeedBuilder::default()
 			.metadata(
@@ -665,17 +710,26 @@ async fn browse_libraries(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(library_count)
 							.items_per_page(take)
-							.current_page(1)
+							.current_page(pagination.page)
 							.build()?,
 					))
 					.build()?,
 			)
-			.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
-				OPDSBaseLinkBuilder::default()
-					.href("/opds/v2.0/libraries/browse".to_string())
-					.rel(OPDSLinkRel::SelfLink.item())
-					.build()?,
-			)]))
+			.links(
+				link_finalizer.finalize_all(chain_optional_iter(
+					[OPDSLink::Link(
+						OPDSBaseLinkBuilder::default()
+							.href(pagination_href(
+								"/opds/v2.0/libraries",
+								&pagination,
+								pagination.page,
+							))
+							.rel(OPDSLinkRel::SelfLink.item())
+							.build()?,
+					)],
+					[previous_link, next_link],
+				)),
+			)
 			.navigation(
 				libraries
 					.into_iter()
@@ -806,12 +860,12 @@ async fn browse_library_by_id(
 				))
 				.build()?,
 		)
-		// .links(vec![OPDSLink::Link(
-		// 	OPDSBaseLinkBuilder::default()
-		// 		.href(format!("/opds/v2.0/libraries/{id}/series"))
-		// 		.rel(OPDSLinkRel::SelfLink.item()) // TODO(OPDS-V2): Not self
-		// 		.build()?,
-		// )])
+		.links(link_finalizer.finalize_all(vec![OPDSLink::Link(
+			OPDSBaseLinkBuilder::default()
+				.href(format!("/opds/v2.0/libraries/{id}/series"))
+				.rel(OPDSLinkRel::SelfLink.item())
+				.build()?,
+		)]))
 		.navigation(
 			library_series
 				.into_iter()
@@ -830,6 +884,19 @@ async fn browse_library_by_id(
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			)]))
+			.navigation(vec![OPDSNavigationLinkBuilder::default()
+				.title("All Series".to_string())
+				.base_link(
+					OPDSBaseLinkBuilder::default()
+						.href(
+							link_finalizer
+								.format_link(format!("/opds/v2.0/libraries/{id}/series")),
+						)
+						.rel(OPDSLinkRel::Subsection.item())
+						._type(OPDSLinkType::OpdsJson)
+						.build()?,
+				)
+				.build()?])
 			.groups(vec![books_group, latest_books_group, series_group])
 			.build()?,
 	))
@@ -886,13 +953,12 @@ where
 		OPDSPublication::vec_from_books(ctx.conn.as_ref(), link_finalizer.clone(), books)
 			.await?;
 
-	let next_page = pagination.next_page();
-	let page_separator = if base_url.contains('?') { "&" } else { "?" };
+	let has_more = (pagination.offset() + take) < books_count;
 	let previous_link = match pagination.previous_page() {
 		Some(page) => Some(
 			link_finalizer.finalize(OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}{page_separator}page={page}"))
+					.href(pagination_href(base_url, &pagination, page))
 					.rel(OPDSLinkRel::Previous.item())
 					.build()?,
 			)),
@@ -900,28 +966,38 @@ where
 		None => None,
 	};
 
+	let next_link = if has_more {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						base_url,
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
 	let links = link_finalizer.finalize_all(chain_optional_iter(
 		[
 			OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(base_url.to_string())
+					.href(pagination_href(base_url, &pagination, pagination.page))
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			),
 			OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href("/opds/v2.0/books/catalog".to_string())
+					.href("/opds/v2.0/catalog".to_string())
 					.rel(OPDSLinkRel::Start.item())
 					.build()?,
 			),
-			OPDSLink::Link(
-				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}{page_separator}page={next_page}"))
-					.rel(OPDSLinkRel::Next.item())
-					.build()?,
-			),
 		],
-		[previous_link],
+		[previous_link, next_link],
 	));
 
 	Ok(Json(
@@ -995,6 +1071,110 @@ async fn latest_library_books(
 }
 
 #[tracing::instrument(skip(ctx))]
+async fn browse_library_series(
+	State(ctx): State<AppState>,
+	HostExtractor(host): HostExtractor,
+	Path(id): Path<String>,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<AuthContext>,
+) -> APIResult<Json<OPDSFeed>> {
+	let user = req.user();
+	let library = library::Entity::find_for_user(&user)
+		.filter(library::Column::Id.eq(id.clone()))
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+	let take = pagination.limit();
+	let series = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.limit(take)
+		.offset(pagination.offset())
+		.order_by_asc(series::Column::Name)
+		.all(ctx.conn.as_ref())
+		.await?;
+	let series_count = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(id.clone()))
+		.count(ctx.conn.as_ref())
+		.await?;
+	let link_finalizer = OPDSLinkFinalizer::from(host);
+	let base_url = format!("/opds/v2.0/libraries/{id}/series");
+	let previous_link = match pagination.previous_page() {
+		Some(page) => Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(&base_url, &pagination, page))
+					.rel(OPDSLinkRel::Previous.item())
+					.build()?,
+			)),
+		),
+		None => None,
+	};
+	let next_link = if (pagination.offset() + take) < series_count {
+		Some(
+			link_finalizer.finalize(OPDSLink::Link(
+				OPDSBaseLinkBuilder::default()
+					.href(pagination_href(
+						&base_url,
+						&pagination,
+						pagination.next_page(),
+					))
+					.rel(OPDSLinkRel::Next.item())
+					.build()?,
+			)),
+		)
+	} else {
+		None
+	};
+
+	Ok(Json(
+		OPDSFeedBuilder::default()
+			.metadata(
+				OPDSMetadataBuilder::default()
+					.title(format!("{} Series", library.name))
+					.pagination(Some(
+						OPDSPaginationMetadataBuilder::default()
+							.number_of_items(series_count)
+							.items_per_page(take)
+							.current_page(pagination.page)
+							.build()?,
+					))
+					.build()?,
+			)
+			.links(
+				link_finalizer.finalize_all(chain_optional_iter(
+					[
+						OPDSLink::Link(
+							OPDSBaseLinkBuilder::default()
+								.href(pagination_href(
+									&base_url,
+									&pagination,
+									pagination.page,
+								))
+								.rel(OPDSLinkRel::SelfLink.item())
+								.build()?,
+						),
+						OPDSLink::Link(
+							OPDSBaseLinkBuilder::default()
+								.href("/opds/v2.0/catalog".to_string())
+								.rel(OPDSLinkRel::Start.item())
+								.build()?,
+						),
+					],
+					[previous_link, next_link],
+				)),
+			)
+			.navigation(
+				series
+					.into_iter()
+					.map(OPDSNavigationLink::from)
+					.map(|link| link.finalize(&link_finalizer))
+					.collect::<Vec<_>>(),
+			)
+			.build()?,
+	))
+}
+
+#[tracing::instrument(skip(ctx))]
 async fn browse_series(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
@@ -1017,12 +1197,11 @@ async fn browse_series(
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
 	let base_url = "/opds/v2.0/series";
-	let next_page = pagination.next_page();
 	let previous_link = match pagination.previous_page() {
 		Some(page) => Some(
 			link_finalizer.finalize(OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}?page={page}"))
+					.href(pagination_href(base_url, &pagination, page))
 					.rel(OPDSLinkRel::Previous.item())
 					.build()?,
 			)),
@@ -1033,7 +1212,11 @@ async fn browse_series(
 	let next_link = (has_more).then_some(
 		link_finalizer.finalize(OPDSLink::Link(
 			OPDSBaseLinkBuilder::default()
-				.href(format!("{base_url}?page={next_page}"))
+				.href(pagination_href(
+					base_url,
+					&pagination,
+					pagination.next_page(),
+				))
 				.rel(OPDSLinkRel::Next.item())
 				.build()?,
 		)),
@@ -1043,7 +1226,7 @@ async fn browse_series(
 		[
 			OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(base_url.to_string())
+					.href(pagination_href(base_url, &pagination, pagination.page))
 					.rel(OPDSLinkRel::SelfLink.item())
 					.build()?,
 			),
@@ -1269,20 +1452,13 @@ async fn get_book_page(
 	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
-// // .route("/chapter/{chapter}", get(get_epub_chapter))
-// // .route("/{root}/{resource}", get(get_epub_meta)),
-// // async fn get_book_resource() {}
-
 /// A route handler which returns the progression of a book for a user.
 #[tracing::instrument(skip(ctx))]
 async fn get_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	HostExtractor(host): HostExtractor,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSProgression>> {
-	let link_finalizer = OPDSLinkFinalizer::from(host);
-
 	let user = req.user();
 	let newer_exists = reading_session::Entity::newer_session_exists_subquery();
 
@@ -1302,19 +1478,19 @@ async fn get_book_progression(
 		return Ok(Json(OPDSProgression::default()));
 	};
 
-	Ok(Json(OPDSProgression::new(reading_session, link_finalizer)?))
+	Ok(Json(OPDSProgression::new(reading_session)?))
 }
 
 /// A route handler which updates the progression of a book for a user
 ///
-/// Returns 204 on success, 409 Conflict if the timestamp is older.
+/// Returns 201 on success, 409 Conflict if the timestamp is older.
 #[tracing::instrument(skip(ctx))]
 async fn update_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
-	Json(input): Json<OPDSProgressionInput>,
-) -> APIResult<axum::http::StatusCode> {
+	Json(input): Json<OPDSProgression>,
+) -> APIResult<(axum::http::StatusCode, Json<OPDSProgression>)> {
 	let user = req.user();
 	let conn = ctx.conn.as_ref();
 
@@ -1328,9 +1504,14 @@ async fn update_book_progression(
 		reading_session::Entity::find_latest_for_user_and_media(&user, &id)
 			.one(conn)
 			.await?;
+	let will_create = existing_session.is_none();
+
+	let input_modified = input
+		.modified_at()
+		.map_err(|e| APIError::BadRequest(format!("Invalid modified timestamp: {e}")))?;
 
 	match existing_session {
-		Some(ref session) if session.updated_at.is_some_and(|ts| ts > input.modified) => {
+		Some(ref session) if session.updated_at.is_some_and(|ts| ts > input_modified) => {
 			return Err(APIError::Conflict(
 				"Progression timestamp is older than existing session".to_string(),
 			));
@@ -1392,10 +1573,31 @@ async fn update_book_progression(
 	};
 
 	let txn = conn.begin().await?;
-	upsert_reading_session(&txn, &user, &id, progression).await?;
+	let session = upsert_reading_session(&txn, &user, &id, progression).await?;
 	txn.commit().await?;
 
-	Ok(axum::http::StatusCode::NO_CONTENT)
+	let Some(active_reading_session) = OPDSProgressionEntity::find()
+		.filter(reading_session::Column::Id.eq(session.id))
+		.into_model::<OPDSProgressionEntity>()
+		.one(ctx.conn.as_ref())
+		.await?
+	else {
+		return Err(APIError::InternalServerError(
+			"Failed to retrieve updated reading session".to_string(),
+		));
+	};
+
+	// i doubt it matters but no harm in being a little more precise
+	let status_code = if will_create {
+		axum::http::StatusCode::CREATED
+	} else {
+		axum::http::StatusCode::OK
+	};
+
+	Ok((
+		status_code,
+		Json(OPDSProgression::new(active_reading_session)?),
+	))
 }
 
 /// A route handler which downloads a book for a user.

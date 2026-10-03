@@ -438,6 +438,17 @@
 					"title": "썸네일",
 					"description": "썸네일 이미지 표시 옵션"
 				},
+				"homeArrangement": {
+					"title": "홈 화면",
+					"description": "홈 화면의 섹션을 조정합니다",
+					"label": "홈 화면 섹션",
+					"hint": "섹션을 드래그하여 순서를 바꾸거나 숨길 수 있습니다",
+					"reorder": "{{section}} 순서 변경",
+					"reset": "초기화",
+					"saveFailed": "변경 사항을 저장하지 못했습니다",
+					"unsupported": "잘못된 설정",
+					"unsupportedDescription": "기본값으로 초기화한 뒤 다시 시도하세요"
+				},
 				"themeSelect": {
 					"label": "테마",
 					"description": [
@@ -734,6 +745,10 @@
 						"label": "Discord 활동 상태",
 						"description": "Discord Rich Presence를 통해 Stump 활동을 Discord에 표시합니다",
 						"reconnect": "Discord에 다시 연결"
+					},
+					"restartRequired": {
+						"title": "재시작 필요",
+						"description": "변경 사항을 적용하려면 앱을 재시작해야 합니다"
 					}
 				}
 			},
@@ -1685,6 +1700,8 @@
 		"back": "뒤로",
 		"continue": "계속",
 		"book": "책",
+		"book_one": "책",
+		"book_other": "책",
 		"series": "시리즈",
 		"fileUpload": {
 			"someRejected": "일부 파일을 업로드할 수 없습니다. 파일 형식을 확인하고 다시 시도하세요",
@@ -1695,6 +1712,7 @@
 		"none": "없음",
 		"copy": "복사",
 		"open": "열기",
+		"xBooks_one": "도서 {{count}}권",
 		"xBooks_other": "도서 {{count}}권",
 		"seeMore": "더 보기",
 		"view": "보기"
@@ -1857,6 +1875,8 @@
 		},
 		"common": {
 			"book": "책",
+			"book_one": "책",
+			"book_other": "책",
 			"cancel": "취소",
 			"chapter": "장",
 			"clear": "지우기",
@@ -1883,6 +1903,7 @@
 			"name": "이름",
 			"none": "없음",
 			"notAvailable": "사용 불가",
+			"ok": "확인",
 			"options": "옵션",
 			"page": "페이지",
 			"pages": "페이지",
@@ -1915,6 +1936,7 @@
 			"exit": "나가기",
 			"notConfigured": "설정되지 않음",
 			"test": "테스트",
+			"xBooks_one": "도서 {{count}}권",
 			"xBooks_other": "도서 {{count}}권",
 			"view": "보기"
 		},
@@ -2997,6 +3019,11 @@
 				"heading": "표시할 항목이 없습니다",
 				"message": "최근 추가한 책이 여기에 표시됩니다"
 			}
+		},
+		"allSectionsHidden": {
+			"label": "표시할 항목이 없습니다",
+			"description": "모든 항목을 숨겼네요. 빈 화면도 마음에 드시길 바라요",
+			"customizeHome": "홈 화면 설정"
 		}
 	},
 	"metadataEditor": {
@@ -3048,6 +3075,10 @@
 		},
 		"addFields": {
 			"description": "추가할 항목을 한 줄에 하나씩 입력하세요"
+		},
+		"actions": {
+			"removeItem": "항목 제거",
+			"resetField": "필드 초기화"
 		}
 	},
 	"metadataMatching": {
@@ -3195,7 +3226,8 @@
 						"description": "하나 이상의 조건을 충족해야 합니다"
 					},
 					"not": {
-						"label": "NOT"
+						"label": "NOT",
+						"description": "어떤 조건도 충족하면 안 됩니다"
 					}
 				},
 				"grouping": {
@@ -3762,6 +3794,7 @@
 		"controls": {
 			"columns": "단 수",
 			"auto": "자동",
+			"columnCount_one": "{{count}}단",
 			"columnCount_other": "{{count}}단",
 			"pageMargins": "페이지 여백",
 			"readingDirection": "읽기 방향",
@@ -3863,9 +3896,10 @@
 				"description": "연령 등급으로 필터링하지 않습니다"
 			},
 			"custom": {
-				"label": "N세 이상",
+				"label": "N세 이하",
 				"description": {
-					"media": "아래에 입력한 나이 이하의 연령 등급이 지정된 도서만 표시합니다"
+					"media": "아래에 입력한 나이 이하의 연령 등급이 지정된 도서만 표시합니다",
+					"series": "아래에 입력한 나이 이하의 연령 등급이 지정된 시리즈만 표시합니다"
 				}
 			}
 		},

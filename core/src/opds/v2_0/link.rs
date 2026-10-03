@@ -35,7 +35,7 @@ pub enum OPDSLinkRel {
 	Logo,
 	#[serde(rename = "http://opds-spec.org/acquisition")]
 	Acquisition,
-	#[serde(rename = "http://www.cantook.com/api/progression")]
+	#[serde(rename = "http://opds-spec.org/progression")]
 	Progression,
 }
 
@@ -94,7 +94,7 @@ pub enum OPDSLinkType {
 	Pdf,
 	#[serde(rename = "application/epub+zip")]
 	Epub,
-	#[serde(rename = "application/vnd.readium.progression+json")]
+	#[serde(rename = "application/opds-progression+json")]
 	Progression,
 	#[serde(rename = "application/xhtml+xml")]
 	Xhtml,

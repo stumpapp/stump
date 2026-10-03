@@ -14,7 +14,7 @@ import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { db, readProgress } from '~/db'
 import { useReadingTimer } from '~/lib/hooks'
-import { hashFromURL, useResolveURL } from '~/lib/opds/utils'
+import { getProgressionPage, hashFromURL, useResolveURL } from '~/lib/opds/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
@@ -91,8 +91,11 @@ export default function Screen() {
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
 	const currentPage = useMemo(() => {
-		const extractedPosition = progression?.locator.locations?.position
+		const extractedPosition = getProgressionPage(progression)
 		if (!extractedPosition) {
+			console.warn('Failed to extract progression page, defaulting to 1', {
+				progression,
+			})
 			return 1
 		}
 		return extractedPosition
@@ -138,22 +141,19 @@ export default function Screen() {
 		},
 	})
 
+	type UpdateProgresionParams = {
+		url: string
+		input: OPDSProgressionInput
+		page: number
+		bookId: string
+		serverId: string
+	}
 	const { mutate: updateProgression } = useMutation({
 		retry: (attempts) => attempts < 3,
 		onError: (error) => {
 			console.error('Failed to update OPDS progression:', error)
 		},
-		mutationFn: async ({
-			url,
-			input,
-			bookId,
-			serverId,
-		}: {
-			url: string
-			input: OPDSProgressionInput
-			bookId: string
-			serverId: string
-		}) => {
+		mutationFn: async ({ url, input, page, bookId, serverId }: UpdateProgresionParams) => {
 			sdk.opds.updateProgression(url, input)
 
 			const totalSeconds = timer.getTotalSeconds()
@@ -163,14 +163,14 @@ export default function Screen() {
 					bookId: bookId,
 					serverId: serverId,
 					elapsedSeconds: totalSeconds,
-					page: input.locator.locations?.position,
+					page,
 					lastModified: new Date(),
 				})
 				.onConflictDoUpdate({
 					target: readProgress.bookId,
 					set: {
 						elapsedSeconds: totalSeconds,
-						page: input.locator.locations?.position,
+						page,
 						lastModified: new Date(),
 					},
 				})
@@ -185,12 +185,11 @@ export default function Screen() {
 
 			timer.popDeltaSeconds()
 
-			const progression = readingOrder?.length
+			const progressionValue = readingOrder?.length
 				? Math.round((page / readingOrder.length) * 100) / 100
 				: undefined
 
 			lastPageRef.current = page
-			const currentLink = readingOrder?.[page - 1]
 			const input: OPDSProgressionInput = {
 				modified: new Date().toISOString(),
 				device: {
@@ -198,19 +197,12 @@ export default function Screen() {
 					// TODO(opds): Allow user to set device name in settings?
 					name: `Stump App - ${Platform.OS === 'ios' ? 'iOS' : 'Android'}`,
 				},
-				locator: {
-					href: currentLink?.href || `#page-${page}`,
-					type: currentLink?.type || 'image/jpeg',
-					locations: {
-						position: page,
-						// Note: progression and totalProgression are the same for image-based readers
-						progression,
-						totalProgression: progression,
-					},
-				},
+				progression: progressionValue ?? 0,
+				references: [`#page=${page}`],
+				title: `Page ${page}`,
 			}
 
-			updateProgression({ url: progressionURL, input, bookId: id, serverId })
+			updateProgression({ url: progressionURL, input, page, bookId: id, serverId })
 		},
 		[progressionURL, deviceId, readingOrder, updateProgression, timer, id, serverId],
 	)

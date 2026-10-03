@@ -20,7 +20,6 @@ pub struct Model {
 	pub media_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
-	// TODO: for consistency across all other models, should swap to DateTimeWithTimeZone
 	pub created_at: DateTimeUtc,
 	/// The ID of the session which this bookmark was created in. Realistically, when using a Stump
 	/// reader this should always be set

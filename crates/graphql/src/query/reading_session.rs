@@ -34,6 +34,10 @@ impl ReadingSessionQuery {
 			return Ok(Some(ReadingSession::from(session)));
 		}
 
+		// TODO(tests): add a test to assert this once book clubs are _actually_ implemented
+		// realistically there is no risk atm (the feature is not implemented nor exposed fully)
+		// so deferring to another time
+
 		// the viewer AND the session owner must both be members of the same club, and
 		// the session owner must opt-in to sharing their progress
 		let has_shared_membership_with_access = book_club_member::Entity::find()

@@ -1,0 +1,2 @@
+- [ ] swap all DateTimeWithTimezone stamps to just be utc, the rationale is that they are server-derived and without tz info it will just be an offset of 0 _anyways_. there are few instances where tz should flow through (e.g., inputs from client)
+- [ ] add a timezone field to relevant models (e.g., reading_session) so that it can be more accurately displayed per the tz which the user was in at the time of event. honestly for self-hosted software i imagine this is largely a non-issue, but eventually would be good to get done

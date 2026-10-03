@@ -12,25 +12,14 @@ use crate::object::{
 	reading_session::ReadingSession,
 };
 
-// this is really tricky to get started because there are two flavors of timelines:
-// 1. see progression events for a specific book (unpaginated by me, e.g. books/bookId/reading-timeline)
-// 2. see progression events between time window for all books (paginated, by me, e.g. /reading-timeline)
-// and then separately i imagine a world where eventually i want to reuse this for book club features,
-// e.g. "show me all of the members' progression who have opted-in to sharing the currently-reading book"
-// which also means i think i'll need to rely on reusable fns in models
-//
-// this to say very much a wip draft all of this
-
 #[derive(Clone, Union)]
 pub enum SessionEvent {
 	Bookmark(Bookmark),
 	Annotation(MediaAnnotation),
-	// reviews, etc
-	// TODO: could also have synthetic events if the explicit
-	// grouping i drafted in BookReadingTimeline turns out stinky,
-	// e.g. lke "readthrough started" but we'd have to compute that
-	// from _first_/_last_ sessions relative to readthrough and that
-	// feels like an annoying amount of work for potentially not much convenience
+	// TODO(reading-timeline):
+	// - reviews
+	// - journal entries
+	// - synthetic events? may not be feasible for the paginated variant of timeline
 }
 
 impl SessionEvent {
@@ -49,6 +38,8 @@ pub struct SessionWithEvents {
 }
 
 impl SessionWithEvents {
+	/// Construct a gql `SessionWithEvents` from the service repr `ServiceSessionWithEvents`, and
+	/// sort the events by the given order direction
 	pub fn from_service(
 		(session, bookmarks, annotations): ServiceSessionWithEvents,
 		order: OrderDirection,
@@ -76,7 +67,7 @@ impl SessionWithEvents {
 	}
 }
 
-/// the timeline of events for a specific readthrough of a book
+/// The timeline of events for a specific readthrough of a book
 #[derive(Clone, SimpleObject)]
 pub struct ReadthroughTimeline {
 	pub readthrough_number: i32,
@@ -87,6 +78,7 @@ pub struct ReadthroughTimeline {
 	pub sessions: Vec<SessionWithEvents>,
 }
 
+/// The full timeline of events for a book, including all readthroughs and their sessions
 #[derive(Clone, SimpleObject)]
 pub struct BookReadingTimeline {
 	pub readthroughs: Vec<ReadthroughTimeline>,
@@ -114,7 +106,7 @@ impl BookReadingTimeline {
 				},
 			);
 			// ^ some of the more aggregate values will have to be computed in a separate
-			// iteration
+			// iteration (below)
 
 			entry.total_elapsed_seconds += swe.session.model.elapsed_seconds.unwrap_or(0);
 			entry.sessions.push(swe);
@@ -176,6 +168,8 @@ impl BookReadingTimeline {
 	}
 }
 
+/// A node in the global reading timeline, which is more of a flat list of sessions with their
+/// corresponding events instead of being grouped by readthroughs
 #[derive(Clone, SimpleObject)]
 pub struct GlobalReadingTimelineNode {
 	pub media_id: String,

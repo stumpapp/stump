@@ -10,6 +10,9 @@ pub type ServiceSessionWithEvents = (
 	Vec<media_annotation::Model>,
 );
 
+/// Given a list of reading sessions, fetch all events corresponding to each
+/// session (e.g., bookmarks, annotations, etc) and return a list of tuples to
+/// group events with their corresponding session
 pub async fn sessions_with_events(
 	sessions: Vec<reading_session::Model>,
 	order: Order,

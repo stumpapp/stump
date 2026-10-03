@@ -31,12 +31,6 @@ pub struct ReadingSession {
 	pub model: reading_session::Model,
 }
 
-// TODO(reading-timeline): wrt access control, i'm thinking that it might just
-// need to be locked down by the higher nodes (i.e., assume access check done when
-// session node passed down to here). otherwise each selection will just duplicate
-// a bunch of ac logic, which is inefficient as hell but really also importantly
-// a terrible mess to maintain
-
 /// A single, contiguous reading session for a given user and book. Access to this node
 /// MUST be restricted by the resolvers which would return it, and resolvers within
 /// this node assume as such

@@ -41,9 +41,7 @@ export function SessionProgressBar({ startPercentage, endPercentage }: Props) {
 		left: 0,
 		width: segmentLeft.value,
 	}))
-	//
-	// 	trackClassName="bg-black/10 dark:bg-white/10"
-	// 	indicatorClassName="bg-white/70 dark:bg-white/60"
+
 	return (
 		<View
 			className="h-2.5 bg-black/30 dark:bg-white/10 w-full overflow-hidden rounded-full"

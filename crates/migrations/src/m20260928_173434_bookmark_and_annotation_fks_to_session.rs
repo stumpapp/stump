@@ -269,7 +269,7 @@ impl MigrationTrait for Migration {
 
 		conn.execute(Statement::from_string(
 			db_backend,
-			r#"insert INTO "bookmarks"("id", "preview_content", "locator", "page", "media_id", "user_id", "created_at")SELECT "id",
+			r#"insert into "bookmarks"("id", "preview_content", "locator", "page", "media_id", "user_id", "created_at")SELECT "id",
                 "preview_content",
                 "locator",
                 "page",
@@ -612,10 +612,303 @@ fn determine_approximate_session_id(
 		return Some(session.id);
 	}
 
-	// TODO: this is basically a catch all so decide if that is ideal
 	candidate_sessions.iter().map(|s| s.id).max()
 }
 
-// TODO: should DEFINITELY add tests, way too much hand sql. tricky part is to keep it self-contained since importing something
-// risks having to change this migration if any breaking chagnes
-// also that is such a chore lol
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use chrono::TimeZone;
+	use sea_orm::{Database, DatabaseConnection, Statement};
+
+	// i hate manually creating these but migrations tests are meant to be isolated so
+	// cannot e.g. pull in from fake_data etc
+	async fn setup_db() -> DatabaseConnection {
+		let db = Database::connect("sqlite::memory:")
+			.await
+			.expect("should connect to in-memory sqlite");
+		let backend = db.get_database_backend();
+
+		// not fully accurate, like user_id fields not fks nor is there a
+		// users table, but i think sufficient. better than nothing!
+		let stmts = [
+			r#"CREATE TABLE user_preferences (
+				user_id TEXT NOT NULL PRIMARY KEY,
+				day_reset_hour_offset INTEGER
+			)"#,
+			r#"CREATE TABLE reading_sessions (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				user_id TEXT NOT NULL,
+				media_id TEXT NOT NULL,
+				session_date TEXT NOT NULL,
+				updated_at DATETIME
+			)"#,
+			r#"CREATE TABLE bookmarks (
+				id TEXT NOT NULL PRIMARY KEY,
+				user_id TEXT NOT NULL,
+				media_id TEXT NOT NULL,
+				created_at DATETIME NOT NULL,
+				session_id INTEGER
+			)"#,
+			r#"CREATE TABLE media_annotations (
+				id TEXT NOT NULL PRIMARY KEY,
+				user_id TEXT NOT NULL,
+				media_id TEXT NOT NULL,
+				created_at DATETIME NOT NULL,
+				updated_at DATETIME NOT NULL,
+				session_id INTEGER
+			)"#,
+		];
+
+		for stmt in &stmts {
+			db.execute(Statement::from_string(backend, ToString::to_string(stmt)))
+				.await
+				.expect("should create table");
+		}
+
+		db
+	}
+
+	#[derive(Debug, FromQueryResult)]
+	struct SessionIdRow {
+		session_id: Option<i32>,
+	}
+
+	async fn get_bookmark_session_id(
+		db: &DatabaseConnection,
+		bookmark_id: &str,
+	) -> Option<i32> {
+		SessionIdRow::find_by_statement(Statement::from_sql_and_values(
+			db.get_database_backend(),
+			"select session_id from bookmarks where id = ?",
+			vec![bookmark_id.into()],
+		))
+		.one(db)
+		.await
+		.expect("query should succeed")
+		.expect("bookmark should exist")
+		.session_id
+	}
+
+	async fn get_annotation_session_id(
+		db: &DatabaseConnection,
+		annotation_id: &str,
+	) -> Option<i32> {
+		SessionIdRow::find_by_statement(Statement::from_sql_and_values(
+			db.get_database_backend(),
+			"select session_id from media_annotations where id = ?",
+			vec![annotation_id.into()],
+		))
+		.one(db)
+		.await
+		.expect("query should succeed")
+		.expect("annotation should exist")
+		.session_id
+	}
+
+	#[test]
+	fn test_picks_closest_session_after_event() {
+		let event_at = Utc.with_ymd_and_hms(2026, 10, 3, 10, 0, 0).unwrap();
+		let sessions = vec![
+			SessionRecord {
+				id: 1,
+				updated_at: Some(Utc.with_ymd_and_hms(2026, 10, 3, 10, 30, 0).unwrap()),
+			},
+			SessionRecord {
+				id: 2,
+				updated_at: Some(Utc.with_ymd_and_hms(2026, 10, 3, 12, 0, 0).unwrap()),
+			},
+		];
+		assert_eq!(
+			determine_approximate_session_id(event_at, &sessions),
+			Some(1)
+		);
+	}
+
+	#[test]
+	fn test_falls_back_to_max_id_when_all_sessions_precede_event() {
+		let event_at = Utc.with_ymd_and_hms(2026, 10, 3, 14, 0, 0).unwrap();
+		let sessions = vec![
+			SessionRecord {
+				id: 1,
+				updated_at: Some(Utc.with_ymd_and_hms(2026, 10, 3, 10, 0, 0).unwrap()),
+			},
+			SessionRecord {
+				id: 3,
+				updated_at: Some(Utc.with_ymd_and_hms(2026, 10, 3, 11, 0, 0).unwrap()),
+			},
+			SessionRecord {
+				id: 2,
+				updated_at: Some(Utc.with_ymd_and_hms(2026, 10, 3, 12, 0, 0).unwrap()),
+			},
+		];
+		assert_eq!(
+			determine_approximate_session_id(event_at, &sessions),
+			Some(3)
+		);
+	}
+
+	#[test]
+	fn test_falls_back_to_max_id_when_updated_at_is_null() {
+		let event_at = Utc.with_ymd_and_hms(2026, 10, 3, 10, 0, 0).unwrap();
+		let sessions = vec![
+			SessionRecord {
+				id: 2,
+				updated_at: None,
+			},
+			SessionRecord {
+				id: 5,
+				updated_at: None,
+			},
+			SessionRecord {
+				id: 3,
+				updated_at: None,
+			},
+		];
+		assert_eq!(
+			determine_approximate_session_id(event_at, &sessions),
+			Some(5)
+		);
+	}
+
+	#[tokio::test]
+	async fn test_backfill_assigns_session_to_bookmark() {
+		let db = setup_db().await;
+		let backend = db.get_database_backend();
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
+			vec!["user-1".into(), "media-1".into(), "2026-10-03".into(), "2026-10-03 12:00:00".into()],
+		))
+		.await
+		.expect("should insert reading session");
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
+			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 11:30:00".into()],
+		))
+		.await
+		.expect("should insert reading session");
+
+		backfill(&db).await.expect("backfill should succeed");
+
+		assert!(get_bookmark_session_id(&db, "bm-1").await.is_some());
+	}
+
+	#[tokio::test]
+	async fn test_backfill_assigns_session_to_annotation() {
+		let db = setup_db().await;
+		let backend = db.get_database_backend();
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
+			vec!["user-1".into(), "media-1".into(), "2026-10-03".into(), "2026-10-03 15:00:00".into()],
+		))
+		.await
+		.expect("should insert reading session");
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into media_annotations (id, user_id, media_id, created_at, updated_at) values (?, ?, ?, ?, ?)",
+			vec!["ann-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 14:00:00".into(), "2026-10-03 14:00:00".into()],
+		))
+		.await
+		.expect("should insert annotation");
+
+		backfill(&db).await.expect("backfill should succeed");
+
+		assert!(get_annotation_session_id(&db, "ann-1").await.is_some());
+	}
+
+	/// when multiple sessions are on the same day it should link whichever is closest but not before
+	/// the bookmark's created_at stamp
+	#[tokio::test]
+	async fn test_backfill_picks_closest_session_for_bookmark() {
+		let db = setup_db().await;
+		let backend = db.get_database_backend();
+
+		for updated_at in [
+			"2026-10-03 10:30:00", // ends at 10:30
+			"2026-10-03 14:00:00", // ends at 2:30
+		] {
+			db.execute(Statement::from_sql_and_values(
+				backend,
+				"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
+				vec!["user-1".into(), "media-1".into(), "2026-10-03".into(), updated_at.into()],
+			))
+			.await
+			.expect("should insert reading session");
+		}
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
+			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 10:00:00".into()],
+		))
+		.await
+		.expect("should insert bookmark");
+		// ^ bookmarked at 10 so should match with 10:30
+
+		backfill(&db).await.expect("backfill should succeed");
+
+		assert_eq!(get_bookmark_session_id(&db, "bm-1").await, Some(1));
+	}
+
+	#[tokio::test]
+	async fn test_backfill_leaves_session_null_when_no_session_exists() {
+		let db = setup_db().await;
+		let backend = db.get_database_backend();
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
+			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 10:00:00".into()],
+		))
+		.await
+		.expect("should insert bookmark");
+
+		backfill(&db).await.expect("backfill should succeed");
+
+		assert_eq!(get_bookmark_session_id(&db, "bm-1").await, None);
+	}
+
+	/// non-zero offset will shift when the logical date starts/ends and so the linkage needs to
+	/// account for and respect that
+	#[tokio::test]
+	async fn test_backfill_respects_day_reset_hour_offset() {
+		let db = setup_db().await;
+		let backend = db.get_database_backend();
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into user_preferences (user_id, day_reset_hour_offset) values (?, ?)",
+			vec!["user-1".into(), 4.into()], // offset=4 -> logical day starts at 4am
+		))
+		.await
+		.expect("should insert user preferences");
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into reading_sessions (user_id, media_id, session_date, updated_at) values (?, ?, ?, ?)",
+			vec!["user-1".into(), "media-1".into(), "2026-10-02".into(), "2026-10-03 03:00:00".into()],
+		))
+		.await
+		.expect("should insert reading session");
+		// ^ session is on 2nd and ends at 3am, thus is still part of 2nd logical day
+
+		db.execute(Statement::from_sql_and_values(
+			backend,
+			"insert into bookmarks (id, user_id, media_id, created_at) values (?, ?, ?, ?)",
+			vec!["bm-1".into(), "user-1".into(), "media-1".into(), "2026-10-03 01:00:00".into()],
+		))
+		.await
+		.expect("should insert bookmark");
+
+		backfill(&db).await.expect("backfill should succeed");
+
+		assert!(get_bookmark_session_id(&db, "bm-1").await.is_some());
+	}
+}

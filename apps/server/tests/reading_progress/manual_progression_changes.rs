@@ -533,6 +533,61 @@ async fn test_clear_media_reading_history_retains_current() {
 	assert!(in_progress_sessions_exist);
 }
 
+/// if the latest session is completed, history clear should still trash old readthroughs
+/// and all sessions in it (which is how this is diff than test_clear_media_reading_history)
+#[tokio::test]
+async fn test_clear_media_reading_history_trashes_latest_completed_session() {
+	let app = setup().await;
+	let conn = app.conn();
+
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 10,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	let first_session = active_session_for_book(&app, "black_science_1").await;
+	fudge_session_time(&first_session, conn).await;
+	// ^ this is the specific diff from test_clear_media_reading_history that
+	// the test is trying to cover
+
+	update_progress(
+		&app,
+		"black_science_1",
+		MediaProgressInput::Paged(PagedProgressInput {
+			page: 20,
+			elapsed_seconds_delta: Some(300),
+			..Default::default()
+		}),
+	)
+	.await;
+	finish_book_progress(&app, "black_science_1", false).await;
+
+	let finished_session = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.filter(reading_session::Column::Status.eq(ReadingStatus::Finished))
+		.order_by_desc(reading_session::Column::UpdatedAt)
+		.one(conn)
+		.await
+		.expect("db error")
+		.expect("finished session should exist");
+	fudge_session_time(&finished_session, conn).await;
+
+	delete_reading_history(&app, "black_science_1").await;
+
+	let session_exists = reading_session::Entity::find()
+		.filter(reading_session::Column::MediaId.eq("black_science_1"))
+		.one(conn)
+		.await
+		.expect("db error")
+		.is_some();
+	assert!(!session_exists);
+}
+
 async fn accept_local_progress(
 	app: &TestApp,
 	book_id: &str,

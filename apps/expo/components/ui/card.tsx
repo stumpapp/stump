@@ -43,7 +43,10 @@ type RowProps = Omit<ViewProps, 'children'> & {
 	iconBackgroundColor?: string
 	disabled?: boolean
 	renderDivider?: boolean
-} & ({ value?: string | number; children?: never } | { children?: ReactNode; value?: never })
+} & (
+		| { value?: string | number; selectableValue?: boolean; children?: never }
+		| { children?: ReactNode; value?: never; selectableValue?: never }
+	)
 
 type StatGroupProps = ViewProps
 
@@ -152,18 +155,24 @@ function Stat({ label, value, suffix }: StatProps) {
 	)
 }
 
-function Row({ value, children, ...props }: RowProps) {
+function Row({ value, children, selectableValue, ...props }: RowProps) {
 	return (
 		<BaseRowComponent {...props}>
 			{value != undefined && (
-				<Text className="text-lg text-foreground-muted flex-1 text-right">{value}</Text>
+				<Text
+					className={cn('text-lg text-foreground-muted flex-1 text-right', {
+						'select-text': selectableValue,
+					})}
+				>
+					{value}
+				</Text>
 			)}
 			{children}
 		</BaseRowComponent>
 	)
 }
 
-function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
+function LongRow({ value, className, selectableValue, ...props }: Omit<RowProps, 'children'>) {
 	const colors = useColors()
 	const { isDarkColorScheme } = useColorScheme()
 	const accentColor = usePalette('accent')
@@ -189,7 +198,9 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 				<View className="shrink items-end justify-center">
 					<Text
 						numberOfLines={expanded ? undefined : 4}
-						className="text-lg text-foreground-muted"
+						className={cn('text-lg text-foreground-muted', {
+							'select-text': selectableValue,
+						})}
 						onTextLayout={(e) => {
 							const isOverLimit = e.nativeEvent.lines.length >= 4
 							if (isExpandable === isOverLimit) return

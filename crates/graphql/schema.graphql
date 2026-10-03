@@ -1999,6 +1999,38 @@ type Mutation {
 	"""
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
 	scanSeries(id: ID!): Boolean!
+	"""
+	Mark a series as "did not finish" (DNF), which will exclude it from on-deck recommendations entirely.
+	This is functionally the same as "backlogged" but with the added semantics
+	of "I will never read this again"
+	"""
+	dnfSeries(id: ID!): UserSeriesState!
+	"""
+	Remove the "did not finish" (DNF) status from a series, which will restore it to on-deck
+	recommendations per normal logic
+	"""
+	undnfSeries(id: ID!): UserSeriesState!
+	"""
+	Backlogs the series, which will exlude any books in the series from being returned
+	in on-deck recommendations. This is functionally equivalent to dnf'ing a series, but
+	with the intent of maybe removing it from the backlog in the future
+	"""
+	backlogSeries(id: ID!): UserSeriesState!
+	"""
+	Removes the series from the backlog, which will restore it to on-deck recommendations
+	to normal logic
+	"""
+	unbacklogSeries(id: ID!): UserSeriesState!
+	"""
+	Set the intent to stop the current readthrough, effectively a pause. on deck will stop
+	showing books in the current readthrough and instead only show unread books
+	"""
+	stopSeriesReread(id: ID!): UserSeriesState!
+	"""
+	Restore the intent to read through the series, effectively a resume of the highest
+	readthrough
+	"""
+	resumeSeriesReread(id: ID!): UserSeriesState!
 	"Create a bookmark for a user"
 	createBookmark(input: BookmarkInput!): Bookmark!
 	"Delete a bookmark by ID, only if the user created it"
@@ -2167,7 +2199,7 @@ type Mutation {
 	- if `dnf` is true, it will mark the readthrough as such
 	"""
 	finishMediaProgress(id: ID!, dnf: Boolean = null): Boolean!
-	"trashes all completed readthroughs for the media"
+	"trashes all completed/abandoned readthroughs for the media"
 	deleteMediaReadingHistory(id: ID!): Int!
 	"marks all books in the series as finished"
 	finishSeriesProgress(id: ID!): Int!
@@ -2967,7 +2999,25 @@ type Series {
 	qualified URL to the image.
 	"""
 	thumbnail: ImageRef!
+	"Get the stats for this series, scoped to current user by default"
 	stats(allUsers: Boolean): SeriesStats!
+	"""
+	The reading status of this series for the current user:
+	- `READING` if any book has an active (latest) session
+	- `FINISHED` if all books have a finished session and **none** are active,
+	including re-reads
+	- `NOT_STARTED` if no sessions exist at all
+	"""
+	readingStatus: ReadingStatus!
+	"""
+	The highest readthrough number seen across all sessions for this user+series, or
+	null if not started yet
+	"""
+	currentReadthrough: Int
+	"The most recent datetime that any book in the series was read"
+	lastReadAt: DateTime
+	"Get the on-deck/re-read state for this series for the current user, if it exists"
+	userSeriesState: UserSeriesState
 }
 
 input SeriesFilterInput {
@@ -3732,6 +3782,29 @@ type UserPreferences {
 	userId: String
 	homeArrangement: Arrangement!
 	navigationArrangement: Arrangement!
+}
+
+type UserSeriesState {
+	seriesId: String!
+	"""
+	the date at which the last reread was stopped, so that we can
+	revert back to "first book beyond highest position ever read" logic for
+	the recommendations query instead of "next book in current re-read"
+	"""
+	rereadStoppedAt: DateTime
+	"""
+	the date at which the series reading was "backlogged" for the user, which
+	would exclude books from this series showing up in on-deck recommentations
+	"""
+	backloggedAt: DateTime
+	"""
+	the date at which the series was dnf'ed, which functionally is the same
+	as "backlogged" but with the added semantics of "I will never read this again"
+	and all that
+	"""
+	dnfAt: DateTime
+	createdAt: DateTime!
+	updatedAt: DateTime
 }
 
 input ValidateMetadataProviderConfigInput {

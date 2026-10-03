@@ -27,6 +27,7 @@ mod m20260523_220757_rename_registered_reading_devices;
 mod m20260525_165704_roundness_preference;
 mod m20260601_000000_add_scanned_directory;
 mod m20260603_164540_thumbnail_roundness_preference;
+mod m20260612_184203_user_series_state;
 mod m20260613_000000_add_series_path_index;
 mod m20260617_200820_rm_thumbnails_in_headers_pref;
 mod m20260702_000000_metadata_fetch_partial_results;
@@ -67,6 +68,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260525_165704_roundness_preference::Migration),
 			Box::new(m20260601_000000_add_scanned_directory::Migration),
 			Box::new(m20260603_164540_thumbnail_roundness_preference::Migration),
+			Box::new(m20260612_184203_user_series_state::Migration),
 			Box::new(m20260613_000000_add_series_path_index::Migration),
 			Box::new(m20260617_200820_rm_thumbnails_in_headers_pref::Migration),
 			Box::new(m20260702_000000_metadata_fetch_partial_results::Migration),

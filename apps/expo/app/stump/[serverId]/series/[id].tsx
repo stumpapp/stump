@@ -36,6 +36,8 @@ const query = graphql(`
 				totalReadingTimeSeconds
 			}
 			libraryId
+			readingStatus
+			...SeriesReadingState
 		}
 	}
 `)
@@ -158,6 +160,7 @@ export default function Screen() {
 		layout,
 		flashListRef: listRef,
 	})
+
 	useEffect(() => {
 		listRef.current?.recomputeViewableItems()
 	}, [filters, layout, sort])
@@ -186,6 +189,7 @@ export default function Screen() {
 							layoutKey={layoutKey}
 							stats={series.stats}
 							additionalActions={actions}
+							fragment={series}
 						/>
 					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}

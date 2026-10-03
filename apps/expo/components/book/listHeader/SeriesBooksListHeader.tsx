@@ -2,12 +2,16 @@ import { useGraphQLMutation } from '@stump/client'
 import { graphql, SeriesBooksSceneSeriesNameQuery, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { DownloadCloud, Info, ScanLine } from 'lucide-react-native'
-import { useMemo } from 'react'
 
 import { useEntityListHeader } from '~/components/filter/EntityListHeader'
 import { ActionDef } from '~/components/filter/types'
 import { MiniEntityStatCards } from '~/components/stats'
 import { SystemAlert } from '~/components/ui/system-alert'
+import { useTranslate } from '~/lib/hooks'
+import {
+	type SeriesReadingStateFragmentType,
+	useSeriesStateMenu,
+} from '~/lib/hooks/useSeriesStateActions'
 import { useStumpServer } from '~/providers/StumpServerProvider'
 
 import { useBooksFilterMenu } from './BooksFilterMenu'
@@ -28,65 +32,74 @@ type Props = {
 	seriesId: string
 	layoutKey: string
 	stats: NonNullable<SeriesBooksSceneSeriesNameQuery['seriesById']>['stats']
+	fragment: SeriesReadingStateFragmentType
 	additionalActions: SeriesActionsProps
 }
 
-export function SeriesBooksListHeader({ seriesId, layoutKey, stats, additionalActions }: Props) {
+export function SeriesBooksListHeader({
+	seriesId,
+	layoutKey,
+	stats,
+	fragment,
+	additionalActions,
+}: Props) {
 	const client = useQueryClient()
+	const onSuccess = () =>
+		client.invalidateQueries({ queryKey: ['seriesById', seriesId], exact: false })
+
+	const serieStateActions = useSeriesStateMenu({ fragment, onSuccess })
+
 	const { mutate: scanSeries } = useGraphQLMutation(scanMutation, {
-		onSuccess: () => {
-			setTimeout(
-				() =>
-					client.refetchQueries({
-						queryKey: ['seriesById', seriesId],
-						exact: false,
-					}),
-				2000,
-			)
-		},
+		onSuccess: () => setTimeout(onSuccess, 2000), // a bit of a naive approach but prolly fine
 	})
 
 	const { checkPermission } = useStumpServer()
+	const { t } = useTranslate()
 
-	const actions = useMemo(() => {
-		const result: ActionDef[] = [
-			{
-				key: 'overview',
-				label: 'Overview',
-				icon: { ios: 'info.circle', android: Info },
-				onPress: additionalActions.onShowOverview,
-			},
-		]
+	// TODO(localization): add keys after the existing effort to avoid conflicts
+	// TODO(on-deck): ughhh it was such a good idea at the time to push all destructive actions
+	// to the end in useSortAndDisplayMenu but now things aren't grouped how i want them.
+	// its fine for now, but annoying >:(
+	// TODO(on-deck): pick icons, did not have much time to be thoughtful abt it
 
-		if (checkPermission(UserPermission.ScanLibrary)) {
-			result.push({
-				key: 'scan',
-				label: 'Scan Series',
-				icon: { ios: 'document.viewfinder', android: ScanLine },
-				onPress: () => scanSeries({ id: seriesId }),
-			})
-		}
-
-		if (checkPermission(UserPermission.DownloadFile)) {
-			result.push({
-				key: 'download',
-				label: 'Download Series',
-				icon: { ios: 'arrow.down.circle', android: DownloadCloud },
-				onPress: () => {
-					SystemAlert.alert(
-						'Download Series',
-						'Are you sure you want to download the entire series?',
-						[
-							{ text: 'Cancel', style: 'cancel' },
-							{ text: 'Download', onPress: additionalActions.onDownloadSeries },
-						],
-					)
-				},
-			})
-		}
-
-		return result
-	}, [additionalActions, checkPermission, scanSeries, seriesId])
+	const actions: ActionDef[] = [
+		{
+			key: 'overview',
+			label: 'Overview',
+			icon: { ios: 'info.circle', android: Info },
+			onPress: additionalActions.onShowOverview,
+		},
+		...serieStateActions,
+		...(checkPermission(UserPermission.ScanLibrary)
+			? [
+					{
+						key: 'scan',
+						label: 'Scan Series',
+						icon: { ios: 'document.viewfinder', android: ScanLine },
+						onPress: () => scanSeries({ id: seriesId }),
+					} satisfies ActionDef,
+				]
+			: []),
+		...(checkPermission(UserPermission.DownloadFile)
+			? [
+					{
+						key: 'download',
+						label: 'Download Series',
+						icon: { ios: 'arrow.down.circle', android: DownloadCloud },
+						onPress: () => {
+							SystemAlert.alert(
+								'Download Series',
+								'Are you sure you want to enqueue the download for this entire series?',
+								[
+									{ text: t('common.cancel'), style: 'cancel' },
+									{ text: t('common.download'), onPress: additionalActions.onDownloadSeries },
+								],
+							)
+						},
+					} satisfies ActionDef,
+				]
+			: []),
+	]
 
 	const sortMenu = useSeriesBooksSortAndDisplayMenu({
 		layoutKey,

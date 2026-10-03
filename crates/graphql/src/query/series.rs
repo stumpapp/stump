@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::series,
+	entity::{series, user_series_state},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		ordering::OrderBy,
@@ -166,6 +166,7 @@ impl SeriesQuery {
 		Ok(count)
 	}
 
+	/// Returns series in the order they were added to the server, most recent first
 	async fn recently_added_series(
 		&self,
 		ctx: &Context<'_>,
@@ -242,6 +243,157 @@ impl SeriesQuery {
 
 				Ok(PaginatedResponse {
 					nodes: models.into_iter().map(Series::from).collect(),
+					page_info: OffsetPaginationInfo::unpaged(count).into(),
+				})
+			},
+		}
+	}
+
+	/// Returns series which have been backlogged by the authenticated user
+	async fn backlogged_series(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default, validator(custom = "PaginationValidator"))]
+		pagination: Pagination,
+	) -> Result<PaginatedResponse<Series>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let series_state_query = user_series_state::Entity::find().filter(
+			user_series_state::Column::UserId
+				.eq(user.id.clone())
+				.and(user_series_state::Column::BackloggedAt.is_not_null()),
+		);
+
+		match pagination.resolve() {
+			Pagination::Cursor(info) => {
+				let mut cursor =
+					series_state_query.cursor_by(user_series_state::Column::BackloggedAt);
+				if let Some(ref id) = info.after {
+					let record = user_series_state::Entity::find()
+						.filter(
+							user_series_state::Column::UserId
+								.eq(user.id.clone())
+								.and(user_series_state::Column::SeriesId.eq(id.clone())),
+						)
+						.one(conn)
+						.await?
+						.ok_or("Cursor not found")?;
+					cursor.after(record.backlogged_at);
+				}
+				cursor.first(info.limit).desc();
+
+				let series_ids = cursor
+					.into_model::<user_series_state::Model>()
+					.all(conn)
+					.await?
+					.into_iter()
+					.map(|s| s.series_id)
+					.collect::<Vec<String>>();
+
+				let mut series_id_to_model =
+					series::ModelWithMetadata::find_for_user(user)
+						.filter(series::Column::Id.is_in(series_ids.clone()))
+						.order_by_desc(series::Column::CreatedAt)
+						.into_model::<series::ModelWithMetadata>()
+						.all(conn)
+						.await?
+						.into_iter()
+						.map(|m| (m.series.id.clone(), m))
+						.collect::<HashMap<String, series::ModelWithMetadata>>();
+
+				// a bit scuffed but don't want to deal with figuring out this complex db query rn
+				let sorted_series = series_ids
+					.into_iter()
+					.filter_map(|id| series_id_to_model.remove(&id))
+					.collect::<Vec<series::ModelWithMetadata>>();
+
+				let current_cursor = info
+					.after
+					.or_else(|| sorted_series.first().map(|m| m.series.id.clone()));
+				let next_cursor = match sorted_series
+					.last()
+					.map(|result| result.series.id.clone())
+				{
+					Some(id) if sorted_series.len() == info.limit as usize => Some(id),
+					_ => None,
+				};
+
+				Ok(PaginatedResponse {
+					nodes: sorted_series.into_iter().map(Series::from).collect(),
+					page_info: CursorPaginationInfo {
+						current_cursor,
+						next_cursor,
+						limit: info.limit,
+					}
+					.into(),
+				})
+			},
+			Pagination::Offset(info) => {
+				let count = series_state_query.clone().count(conn).await?;
+
+				let series_ids = series_state_query
+					.offset(info.offset())
+					.limit(info.limit())
+					.order_by_desc(user_series_state::Column::BackloggedAt)
+					.into_model::<user_series_state::Model>()
+					.all(conn)
+					.await?
+					.into_iter()
+					.map(|s| s.series_id)
+					.collect::<Vec<String>>();
+
+				let mut series_id_to_model =
+					series::ModelWithMetadata::find_for_user(user)
+						.filter(series::Column::Id.is_in(series_ids.clone()))
+						.order_by_desc(series::Column::CreatedAt)
+						.into_model::<series::ModelWithMetadata>()
+						.all(conn)
+						.await?
+						.into_iter()
+						.map(|m| (m.series.id.clone(), m))
+						.collect::<HashMap<String, series::ModelWithMetadata>>();
+
+				let sorted_series = series_ids
+					.into_iter()
+					.filter_map(|id| series_id_to_model.remove(&id))
+					.collect::<Vec<series::ModelWithMetadata>>();
+
+				Ok(PaginatedResponse {
+					nodes: sorted_series.into_iter().map(Series::from).collect(),
+					page_info: OffsetPaginationInfo::new(info, count).into(),
+				})
+			},
+			Pagination::None(_) => {
+				let series_ids = series_state_query
+					.order_by_desc(user_series_state::Column::BackloggedAt)
+					.into_model::<user_series_state::Model>()
+					.all(conn)
+					.await?
+					.into_iter()
+					.map(|s| s.series_id)
+					.collect::<Vec<String>>();
+
+				let mut series_id_to_model =
+					series::ModelWithMetadata::find_for_user(user)
+						.filter(series::Column::Id.is_in(series_ids.clone()))
+						.order_by_desc(series::Column::CreatedAt)
+						.into_model::<series::ModelWithMetadata>()
+						.all(conn)
+						.await?
+						.into_iter()
+						.map(|m| (m.series.id.clone(), m))
+						.collect::<HashMap<String, series::ModelWithMetadata>>();
+
+				let sorted_series = series_ids
+					.into_iter()
+					.filter_map(|id| series_id_to_model.remove(&id))
+					.collect::<Vec<series::ModelWithMetadata>>();
+
+				let count = sorted_series.len().try_into()?;
+
+				Ok(PaginatedResponse {
+					nodes: sorted_series.into_iter().map(Series::from).collect(),
 					page_info: OffsetPaginationInfo::unpaged(count).into(),
 				})
 			},

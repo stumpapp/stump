@@ -1,7 +1,10 @@
 use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	entity::{favorite_series, library, library_config, media, series},
+	entity::{
+		favorite_series, library, library_config, media, series, user_series_state,
+	},
+	services::series_state,
 	shared::enums::UserPermission,
 };
 use sea_orm::{
@@ -208,5 +211,85 @@ impl SeriesMutation {
 			.await?;
 
 		Ok(true)
+	}
+
+	/// Mark a series as "did not finish" (DNF), which will exclude it from on-deck recommendations entirely.
+	/// This is functionally the same as "backlogged" but with the added semantics
+	/// of "I will never read this again"
+	async fn dnf_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::dnf_series(conn, &user.id, id.as_ref()).await?)
+	}
+
+	/// Remove the "did not finish" (DNF) status from a series, which will restore it to on-deck
+	/// recommendations per normal logic
+	async fn undnf_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::undnf_series(conn, &user.id, id.as_ref()).await?)
+	}
+
+	/// Backlogs the series, which will exlude any books in the series from being returned
+	/// in on-deck recommendations. This is functionally equivalent to dnf'ing a series, but
+	/// with the intent of maybe removing it from the backlog in the future
+	async fn backlog_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::backlog_series(conn, &user.id, id.as_ref()).await?)
+	}
+
+	/// Removes the series from the backlog, which will restore it to on-deck recommendations
+	/// to normal logic
+	async fn unbacklog_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::unbacklog_series(conn, &user.id, id.as_ref()).await?)
+	}
+
+	/// Set the intent to stop the current readthrough, effectively a pause. on deck will stop
+	/// showing books in the current readthrough and instead only show unread books
+	async fn stop_series_reread(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::stop_series_reread(conn, &user.id, id.as_ref()).await?)
+	}
+
+	/// Restore the intent to read through the series, effectively a resume of the highest
+	/// readthrough
+	async fn resume_series_reread(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<user_series_state::Model> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(series_state::resume_series_reread(conn, &user.id, id.as_ref()).await?)
 	}
 }

@@ -1029,7 +1029,23 @@
 		"actions": {
 			"markAsRead": "Mark series as read",
 			"markAsUnread": "Mark series as unread",
-			"goToLibrary": "Go to library"
+			"goToLibrary": "Go to library",
+			"backlogSeries": {
+				"label": "Move to backlog",
+				"description": "Books in '{{seriesName}}' will be excluded from your on-deck suggestions until removed from the backlog"
+			},
+			"unbacklogSeries": {
+				"label": "Remove from backlog",
+				"description": "This will make books in '{{seriesName}}' show up in your on-deck suggestions again as they normally would"
+			},
+			"stopReread": {
+				"label": "Stop reread",
+				"description": "This will stop your current reread of '{{seriesName}}'. The on-deck suggestions for this series will only include its unread books"
+			},
+			"resumeReread": {
+				"label": "Resume reread",
+				"description": "This will resume the latest, incomplete reread of '{{seriesName}}'. The on-deck suggestions will include rereads again"
+			}
 		},
 		"errors": {
 			"failedToUpdateCompletion": "Failed to update book completion status"
@@ -3118,7 +3134,9 @@
 			},
 			"goToLibrary": "Go to Library",
 			"goToSeries": "Go to Series",
-			"seeDetails": "See Details"
+			"seeDetails": "See Details",
+			"favoriteBook": "Favorite Book",
+			"unfavoriteBook": "Unfavorite Book"
 		},
 		"bookMetadata": {
 			"ageRating": "Age Rating",
@@ -3358,6 +3376,29 @@
 			"description": "Find specific content on this server",
 			"placeholder": "Search"
 		},
+		"seriesActions": {
+			"pause": "Pause",
+			"resume": "Resume",
+			"stop": "Stop",
+			"backlog": "Backlog",
+			"unbacklog": "Unbacklog",
+			"backlogSeries": {
+				"label": "Backlog Series",
+				"description": "Books in '{{seriesName}}' will be excluded from your on-deck suggestions until removed from the backlog"
+			},
+			"unbacklogSeries": {
+				"label": "Remove From Backlog",
+				"description": "This will make books in '{{seriesName}}' show up in your on-deck suggestions again as they normally would"
+			},
+			"stopReread": {
+				"label": "Stop Reread",
+				"description": "This will stop your current reread of '{{seriesName}}'. The on-deck suggestions for this series will only include its unread books"
+			},
+			"resumeReread": {
+				"label": "Resume Reread",
+				"description": "This will resume the latest, incomplete reread of '{{seriesName}}'. The on-deck suggestions will include rereads again"
+			}
+		},
 		"settings": {
 			"preferences": {
 				"label": "Preferences",
@@ -3520,9 +3561,10 @@
 				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
+				"label": "Support Information",
+				"description": "This information can be used to help troubleshoot issues with the app",
+				"version": "App Version",
+				"supportIdentifier": "Support Identifier"
 			}
 		},
 		"stumpServer": {

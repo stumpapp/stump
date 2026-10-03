@@ -6,18 +6,28 @@ export type ContextMenuItem = {
 	subtext?: string
 	icon: {
 		ios: Pick<ButtonProps, 'systemImage'>['systemImage']
-		android: LucideIcon
+		android:
+			| LucideIcon
+			| {
+					icon: LucideIcon
+					fill?: string
+					stroke?: string
+			  }
 	}
 	onPress: () => void
 	role?: 'default' | 'destructive'
 	disabled?: boolean
 }
 
+export type ContextMenuGroup = {
+	items: ContextMenuItem[]
+}
+
+export type ContextMenuChildrenCallback = (state: { pressed: boolean }) => React.ReactNode
+
 export type ContextMenuProps = {
-	children: React.ReactNode
-	groups: {
-		items: ContextMenuItem[]
-	}[]
+	children: React.ReactNode | ContextMenuChildrenCallback
+	groups: ContextMenuGroup[]
 	disabled?: boolean
 	onPress?: () => void
 }

@@ -1981,6 +1981,12 @@ export type Mutation = {
   analyzeSeries: Scalars['Boolean']['output'];
   /** Archive or unarchive a discussion (Moderator+) */
   archiveDiscussion: Scalars['Boolean']['output'];
+  /**
+   * Backlogs the series, which will exlude any books in the series from being returned
+   * in on-deck recommendations. This is functionally equivalent to dnf'ing a series, but
+   * with the intent of maybe removing it from the backlog in the future
+   */
+  backlogSeries: UserSeriesState;
   cancelJob: Scalars['Boolean']['output'];
   /**
    * Delete media and series from a library that match one of the following conditions:
@@ -2068,7 +2074,7 @@ export type Mutation = {
   deleteLoginActivity: Scalars['Int']['output'];
   deleteLogs: LogDeleteOutput;
   deleteMedia: Media;
-  /** trashes all completed readthroughs for the media */
+  /** trashes all completed/abandoned readthroughs for the media */
   deleteMediaReadingHistory: Scalars['Int']['output'];
   /** Delete (soft delete) your own message */
   deleteMessage: BookClubDiscussionMessage;
@@ -2098,6 +2104,12 @@ export type Mutation = {
    */
   deleteUserAvatar: User;
   deleteUserSessions: Scalars['Int']['output'];
+  /**
+   * Mark a series as "did not finish" (DNF), which will exclude it from on-deck recommendations entirely.
+   * This is functionally the same as "backlogged" but with the added semantics
+   * of "I will never read this again"
+   */
+  dnfSeries: UserSeriesState;
   /** Edit your own message */
   editMessage: BookClubDiscussionMessage;
   favoriteMedia: Media;
@@ -2156,6 +2168,11 @@ export type Mutation = {
   resetSeriesMetadata: Series;
   respondToBookClubInvitation: BookClubInvitation;
   /**
+   * Restore the intent to read through the series, effectively a resume of the highest
+   * readthrough
+   */
+  resumeSeriesReread: UserSeriesState;
+  /**
    * Enqueue a scan job for a library. This will index the filesystem from the library's root path
    * and update the database accordingly.
    */
@@ -2182,6 +2199,11 @@ export type Mutation = {
    * and unlinks removed ones. Returns the updated series.
    */
   setSeriesTags: Series;
+  /**
+   * Set the intent to stop the current readthrough, effectively a pause. on deck will stop
+   * showing books in the current readthrough and instead only show unread books
+   */
+  stopSeriesReread: UserSeriesState;
   /** Suggest a book for the book club */
   suggestBook: BookClubBookSuggestion;
   /** Send a test email to verify the SMTP configuration is working */
@@ -2194,6 +2216,16 @@ export type Mutation = {
   toggleReaction: Scalars['Boolean']['output'];
   /** Toggle like on a suggestion */
   toggleSuggestionLike: Scalars['Boolean']['output'];
+  /**
+   * Removes the series from the backlog, which will restore it to on-deck recommendations
+   * to normal logic
+   */
+  unbacklogSeries: UserSeriesState;
+  /**
+   * Remove the "did not finish" (DNF) status from a series, which will restore it to on-deck
+   * recommendations per normal logic
+   */
+  undnfSeries: UserSeriesState;
   /** Update an annotation's note text */
   updateAnnotation: MediaAnnotation;
   updateApiKey: Apikey;
@@ -2356,6 +2388,11 @@ export type MutationAnalyzeSeriesArgs = {
 export type MutationArchiveDiscussionArgs = {
   archived: Scalars['Boolean']['input'];
   discussionId: Scalars['ID']['input'];
+};
+
+
+export type MutationBacklogSeriesArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2620,6 +2657,11 @@ export type MutationDeleteUserSessionsArgs = {
 };
 
 
+export type MutationDnfSeriesArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationEditMessageArgs = {
   input: EditMessageInput;
   messageId: Scalars['ID']['input'];
@@ -2771,6 +2813,11 @@ export type MutationRespondToBookClubInvitationArgs = {
 };
 
 
+export type MutationResumeSeriesRereadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationScanLibraryArgs = {
   id: Scalars['ID']['input'];
   options?: InputMaybe<Scalars['JSON']['input']>;
@@ -2829,6 +2876,11 @@ export type MutationSetSeriesTagsArgs = {
 };
 
 
+export type MutationStopSeriesRereadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationSuggestBookArgs = {
   bookClubId: Scalars['ID']['input'];
   input: SuggestBookInput;
@@ -2850,6 +2902,16 @@ export type MutationToggleReactionArgs = {
 
 export type MutationToggleSuggestionLikeArgs = {
   suggestionId: Scalars['ID']['input'];
+};
+
+
+export type MutationUnbacklogSeriesArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationUndnfSeriesArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4127,12 +4189,19 @@ export type SendToEmail = {
 export type Series = {
   __typename?: 'Series';
   createdAt: Scalars['DateTime']['output'];
+  /**
+   * The highest readthrough number seen across all sessions for this user+series, or
+   * null if not started yet
+   */
+  currentReadthrough?: Maybe<Scalars['Int']['output']>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isComplete: Scalars['Boolean']['output'];
   isFavorite: Scalars['Boolean']['output'];
   isOneshot: Scalars['Boolean']['output'];
+  /** The most recent datetime that any book in the series was read */
+  lastReadAt?: Maybe<Scalars['DateTime']['output']>;
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
   /** Get media in this series */
@@ -4145,8 +4214,17 @@ export type Series = {
   path: Scalars['String']['output'];
   percentageCompleted: Scalars['Float']['output'];
   readCount: Scalars['Int']['output'];
+  /**
+   * The reading status of this series for the current user:
+   * - `READING` if any book has an active (latest) session
+   * - `FINISHED` if all books have a finished session and **none** are active,
+   * including re-reads
+   * - `NOT_STARTED` if no sessions exist at all
+   */
+  readingStatus: ReadingStatus;
   resolvedDescription?: Maybe<Scalars['String']['output']>;
   resolvedName: Scalars['String']['output'];
+  /** Get the stats for this series, scoped to current user by default */
   stats: SeriesStats;
   status: FileStatus;
   tags: Array<Tag>;
@@ -4160,6 +4238,8 @@ export type Series = {
   unreadCount: Scalars['Int']['output'];
   upNext: Array<Media>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Get the on-deck/re-read state for this series for the current user, if it exists */
+  userSeriesState?: Maybe<UserSeriesState>;
 };
 
 
@@ -4979,6 +5059,30 @@ export type UserPreferences = {
   userId?: Maybe<Scalars['String']['output']>;
 };
 
+export type UserSeriesState = {
+  __typename?: 'UserSeriesState';
+  /**
+   * the date at which the series reading was "backlogged" for the user, which
+   * would exclude books from this series showing up in on-deck recommentations
+   */
+  backloggedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  /**
+   * the date at which the series was dnf'ed, which functionally is the same
+   * as "backlogged" but with the added semantics of "I will never read this again"
+   * and all that
+   */
+  dnfAt?: Maybe<Scalars['DateTime']['output']>;
+  /**
+   * the date at which the last reread was stopped, so that we can
+   * revert back to "first book beyond highest position ever read" logic for
+   * the recommendations query instead of "next book in current re-read"
+   */
+  rereadStoppedAt?: Maybe<Scalars['DateTime']['output']>;
+  seriesId: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type ValidateMetadataProviderConfigInput = {
   /** The API token for authenticating with the provider */
   apiToken: Scalars['String']['input'];
@@ -5339,7 +5443,10 @@ export type SeriesBooksSceneSeriesNameQueryVariables = Exact<{
 }>;
 
 
-export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string, libraryId?: string | null, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number } } | null };
+export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: (
+    { __typename?: 'Series', resolvedName: string, libraryId?: string | null, readingStatus: ReadingStatus, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number } }
+    & { ' $fragmentRefs'?: { 'SeriesReadingStateFragment': SeriesReadingStateFragment } }
+  ) | null };
 
 export type SeriesBooksScreenQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -5519,7 +5626,10 @@ export type BooksAfterCursorQuery = { __typename?: 'Query', mediaById?: { __type
 
 export type HorizontalBookListItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'HorizontalBookListItemFragment' };
 
-export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: { __typename?: 'Series', resolvedName: string, mediaCount: number, metadata?: { __typename?: 'SeriesMetadata', totalIssues?: number | null } | null } } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
+export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, isFavorite: boolean, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: (
+    { __typename?: 'Series', resolvedName: string, mediaCount: number, metadata?: { __typename?: 'SeriesMetadata', totalIssues?: number | null } | null }
+    & { ' $fragmentRefs'?: { 'SeriesReadingStateFragment': SeriesReadingStateFragment } }
+  ) } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
 
 export type SeriesBooksListHeaderScanSeriesMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6545,7 +6655,10 @@ export type SeriesLayoutQueryVariables = Exact<{
 }>;
 
 
-export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null };
+export type SeriesLayoutQuery = { __typename?: 'Query', seriesById?: (
+    { __typename?: 'Series', id: string, path: string, resolvedName: string, resolvedDescription?: string | null, createdAt: any, updatedAt?: any | null, library: { __typename?: 'Library', id: string, name: string }, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }
+    & { ' $fragmentRefs'?: { 'SeriesReadingStateFragment': SeriesReadingStateFragment } }
+  ) | null };
 
 export type SeriesLibrayLinkQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7182,6 +7295,36 @@ export type DeleteSmartListMutationVariables = Exact<{
 
 export type DeleteSmartListMutation = { __typename?: 'Mutation', deleteSmartList: { __typename: 'SmartList' } };
 
+export type SeriesReadingStateFragment = { __typename?: 'Series', id: string, lastReadAt?: any | null, currentReadthrough?: number | null, resolvedName: string, userSeriesState?: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null, backloggedAt?: any | null, dnfAt?: any | null } | null } & { ' $fragmentName'?: 'SeriesReadingStateFragment' };
+
+export type SeriesActionBacklogSeriesMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionBacklogSeriesMutation = { __typename?: 'Mutation', backlogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
+
+export type SeriesActionUnbacklogSeriesMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionUnbacklogSeriesMutation = { __typename?: 'Mutation', unbacklogSeries: { __typename?: 'UserSeriesState', backloggedAt?: any | null } };
+
+export type SeriesActionStopRereadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionStopRereadMutation = { __typename?: 'Mutation', stopSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
+
+export type SeriesActionResumeRereadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionResumeRereadMutation = { __typename?: 'Mutation', resumeSeriesReread: { __typename?: 'UserSeriesState', rereadStoppedAt?: any | null } };
+
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
   pagination: Pagination;
@@ -7317,6 +7460,19 @@ export const HorizontalBookListItemFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"HorizontalBookListItem"}) as unknown as TypedDocumentString<HorizontalBookListItemFragment, unknown>;
+export const SeriesReadingStateFragmentDoc = new TypedDocumentString(`
+    fragment SeriesReadingState on Series {
+  id
+  userSeriesState {
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
+  }
+  lastReadAt
+  currentReadthrough
+  resolvedName
+}
+    `, {"fragmentName":"SeriesReadingState"}) as unknown as TypedDocumentString<SeriesReadingStateFragment, unknown>;
 export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
     fragment OnDeckBookItem on Media {
   id
@@ -7344,9 +7500,21 @@ export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
     metadata {
       totalIssues
     }
+    ...SeriesReadingState
   }
+  isFavorite
 }
-    `, {"fragmentName":"OnDeckBookItem"}) as unknown as TypedDocumentString<OnDeckBookItemFragment, unknown>;
+    fragment SeriesReadingState on Series {
+  id
+  userSeriesState {
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
+  }
+  lastReadAt
+  currentReadthrough
+  resolvedName
+}`, {"fragmentName":"OnDeckBookItem"}) as unknown as TypedDocumentString<OnDeckBookItemFragment, unknown>;
 export const BookMenuFragmentDoc = new TypedDocumentString(`
     fragment BookMenu on Media {
   id
@@ -9315,9 +9483,21 @@ export const SeriesBooksSceneSeriesNameDocument = new TypedDocumentString(`
       totalReadingTimeSeconds
     }
     libraryId
+    readingStatus
+    ...SeriesReadingState
   }
 }
-    `) as unknown as TypedDocumentString<SeriesBooksSceneSeriesNameQuery, SeriesBooksSceneSeriesNameQueryVariables>;
+    fragment SeriesReadingState on Series {
+  id
+  userSeriesState {
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
+  }
+  lastReadAt
+  currentReadthrough
+  resolvedName
+}`) as unknown as TypedDocumentString<SeriesBooksSceneSeriesNameQuery, SeriesBooksSceneSeriesNameQueryVariables>;
 export const SeriesBooksScreenDocument = new TypedDocumentString(`
     query SeriesBooksScreen($filter: MediaFilterInput!, $pagination: Pagination, $orderBy: [MediaOrderBy!]) {
   media(filter: $filter, pagination: $pagination, orderBy: $orderBy) {
@@ -9794,7 +9974,20 @@ export const OnDeckBooksDocument = new TypedDocumentString(`
     metadata {
       totalIssues
     }
+    ...SeriesReadingState
   }
+  isFavorite
+}
+fragment SeriesReadingState on Series {
+  id
+  userSeriesState {
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
+  }
+  lastReadAt
+  currentReadthrough
+  resolvedName
 }`) as unknown as TypedDocumentString<OnDeckBooksQuery, OnDeckBooksQueryVariables>;
 export const RecentlyAddedBooksDocument = new TypedDocumentString(`
     query RecentlyAddedBooks($pagination: Pagination) {
@@ -12862,9 +13055,20 @@ export const SeriesLayoutDocument = new TypedDocumentString(`
     }
     createdAt
     updatedAt
+    ...SeriesReadingState
   }
 }
-    `) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
+    fragment SeriesReadingState on Series {
+  id
+  userSeriesState {
+    rereadStoppedAt
+    backloggedAt
+    dnfAt
+  }
+  lastReadAt
+  currentReadthrough
+  resolvedName
+}`) as unknown as TypedDocumentString<SeriesLayoutQuery, SeriesLayoutQueryVariables>;
 export const SeriesLibrayLinkDocument = new TypedDocumentString(`
     query SeriesLibrayLink($id: ID!) {
   libraryById(id: $id) {
@@ -14070,6 +14274,34 @@ export const DeleteSmartListDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteSmartListMutation, DeleteSmartListMutationVariables>;
+export const SeriesActionBacklogSeriesDocument = new TypedDocumentString(`
+    mutation SeriesActionBacklogSeries($id: ID!) {
+  backlogSeries(id: $id) {
+    backloggedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionBacklogSeriesMutation, SeriesActionBacklogSeriesMutationVariables>;
+export const SeriesActionUnbacklogSeriesDocument = new TypedDocumentString(`
+    mutation SeriesActionUnbacklogSeries($id: ID!) {
+  unbacklogSeries(id: $id) {
+    backloggedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionUnbacklogSeriesMutation, SeriesActionUnbacklogSeriesMutationVariables>;
+export const SeriesActionStopRereadDocument = new TypedDocumentString(`
+    mutation SeriesActionStopReread($id: ID!) {
+  stopSeriesReread(id: $id) {
+    rereadStoppedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionStopRereadMutation, SeriesActionStopRereadMutationVariables>;
+export const SeriesActionResumeRereadDocument = new TypedDocumentString(`
+    mutation SeriesActionResumeReread($id: ID!) {
+  resumeSeriesReread(id: $id) {
+    rereadStoppedAt
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesActionResumeRereadMutation, SeriesActionResumeRereadMutationVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

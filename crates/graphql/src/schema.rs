@@ -12,6 +12,9 @@ use crate::{
 		series::SeriesLoader,
 		series_count::SeriesCountLoader,
 		series_finished_count::SeriesFinishedCountLoader,
+		series_reading_data::SeriesReadingDataLoader,
+		series_stats::SeriesStatsLoader,
+		user_series_state::UserSeriesStateLoader,
 	},
 	mutation::Mutation,
 	query::Query,
@@ -94,6 +97,18 @@ pub fn add_data_loaders<
 		))
 		.data(DataLoader::new(
 			MediaAnalysisLoader::new(conn.clone()),
+			tokio::spawn,
+		))
+		.data(DataLoader::new(
+			UserSeriesStateLoader::new(conn.clone()),
+			tokio::spawn,
+		))
+		.data(DataLoader::new(
+			SeriesReadingDataLoader::new(conn.clone()),
+			tokio::spawn,
+		))
+		.data(DataLoader::new(
+			SeriesStatsLoader::new(conn.clone()),
 			tokio::spawn,
 		))
 }

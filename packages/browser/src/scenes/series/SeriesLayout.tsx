@@ -46,6 +46,7 @@ const query = graphql(`
 			}
 			createdAt
 			updatedAt
+			...SeriesReadingState
 		}
 	}
 `)
@@ -73,7 +74,7 @@ export default function SeriesLayout() {
 	const { id } = useParams()
 	const {
 		data: { seriesById: series },
-	} = useSuspenseGraphQL(query, ['seriesById'], { id: id || '' })
+	} = useSuspenseGraphQL(query, ['seriesById', id], { id: id || '' })
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()

@@ -5,7 +5,10 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, media_metadata, reading_session, series, series_tag, tag},
+	entity::{
+		library, media, media_metadata, reading_session, series, series_tag, tag,
+		user_series_state,
+	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::ReadingStatus,
@@ -24,6 +27,9 @@ use crate::{
 		favorite::{FavoriteSeriesLoaderKey, FavoritesLoader},
 		series_count::SeriesCountLoader,
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
+		series_reading_data::{SeriesReadingDataLoader, SeriesReadingDataLoaderKey},
+		series_stats::{SeriesStatsLoader, SeriesStatsLoaderKey},
+		user_series_state::{UserSeriesStateLoader, UserSeriesStateLoaderKey},
 	},
 	object::{series_metadata::SeriesMetadata, stats::SeriesStats},
 	utils::db_statement,
@@ -352,23 +358,135 @@ impl Series {
 		})
 	}
 
+	/// Get the stats for this series, scoped to current user by default
 	async fn stats(
 		&self,
 		ctx: &Context<'_>,
+		// TODO(permissions): prob put behind a permission for "all user agg stats" or something
+		// it is pretty non-exposing info so fine for now but should get done eventually
 		all_users: Option<bool>,
 	) -> Result<SeriesStats> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let stats = SeriesStats::fetch(
-			conn,
-			self.model.id.clone(),
-			user.id.clone(),
-			all_users.unwrap_or(false),
-		)
-		.await?;
+		if all_users.unwrap_or(false) {
+			let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+			return SeriesStats::fetch(
+				conn,
+				self.model.id.clone(),
+				user.id.clone(),
+				true,
+			)
+			.await;
+		}
+
+		let loader = ctx.data::<DataLoader<SeriesStatsLoader>>()?;
+		let stats = loader
+			.load_one(SeriesStatsLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
+			.await?
+			.unwrap_or_default();
 
 		Ok(stats)
+	}
+
+	// FIXME(on-deck): not quite right with the user_series_state, e.g. is a paused re-read considered "reading"?
+	// accepting for now bc i want to mock up the ui and will revist
+
+	/// The reading status of this series for the current user:
+	/// - `READING` if any book has an active (latest) session
+	/// - `FINISHED` if all books have a finished session and **none** are active,
+	///    including re-reads
+	/// - `NOT_STARTED` if no sessions exist at all
+	async fn reading_status(&self, ctx: &Context<'_>) -> Result<ReadingStatus> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let newer_exists = reading_session::Entity::newer_session_exists_subquery();
+
+		let active_count: u64 = reading_session::Entity::find()
+			.join(
+				JoinType::InnerJoin,
+				reading_session::Entity::belongs_to(media::Entity)
+					.from(reading_session::Column::MediaId)
+					.to(media::Column::Id)
+					.into(),
+			)
+			.filter(
+				reading_session::Column::UserId
+					.eq(&user.id)
+					.and(reading_session::Column::Status.eq(ReadingStatus::Reading)),
+			)
+			.filter(media::Column::SeriesId.eq(&self.model.id))
+			.filter(Expr::expr(Expr::exists(newer_exists)).not())
+			.count(conn)
+			.await?;
+
+		if active_count > 0 {
+			return Ok(ReadingStatus::Reading);
+		}
+
+		let (book_count, finished_count) =
+			get_series_progress(ctx, self.model.id.clone()).await?;
+
+		if finished_count >= book_count && book_count > 0 {
+			return Ok(ReadingStatus::Finished);
+		}
+
+		Ok(ReadingStatus::NotStarted)
+	}
+
+	/// The highest readthrough number seen across all sessions for this user+series, or
+	/// null if not started yet
+	async fn current_readthrough(&self, ctx: &Context<'_>) -> Result<Option<i32>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<SeriesReadingDataLoader>>()?;
+
+		let data = loader
+			.load_one(SeriesReadingDataLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
+			.await?;
+
+		Ok(data.and_then(|d| d.current_readthrough))
+	}
+
+	/// The most recent datetime that any book in the series was read
+	async fn last_read_at(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<DateTimeWithTimeZone>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<SeriesReadingDataLoader>>()?;
+
+		let data = loader
+			.load_one(SeriesReadingDataLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
+			.await?;
+
+		Ok(data.and_then(|d| d.last_read_at))
+	}
+
+	/// Get the on-deck/re-read state for this series for the current user, if it exists
+	async fn user_series_state(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<user_series_state::Model>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let loader = ctx.data::<DataLoader<UserSeriesStateLoader>>()?;
+
+		let state = loader
+			.load_one(UserSeriesStateLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
+			.await?;
+
+		Ok(state)
 	}
 }
 

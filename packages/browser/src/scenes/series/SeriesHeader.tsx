@@ -1,10 +1,20 @@
-import { useGraphQLMutation, usePrefetchFiles } from '@stump/client'
+import { useGraphQLMutation, usePrefetchFiles, useSeriesStateMutation } from '@stump/client'
 import { formatBytesSeparate } from '@stump/client'
+import { ConfirmationModal } from '@stump/components'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { extractErrorMessage, graphql, UserPermission } from '@stump/graphql'
 import { formatHumanDurationSeparate, useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowUpRight, BookCheck, BookOpen, BookOpenCheck, Clock, HardDrive } from 'lucide-react'
+import {
+	ArrowUpRight,
+	BookCheck,
+	BookOpen,
+	BookOpenCheck,
+	Clock,
+	HardDrive,
+	ListStart,
+	ListX,
+} from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -25,17 +35,31 @@ const completeSeriesMutation = graphql(`
 `)
 
 export default function SeriesHeader() {
+	const client = useQueryClient()
 	const { checkPermission } = useAppContext()
-	const {
-		series: {
-			id,
-			resolvedName,
-			path,
-			stats,
-			library: { id: libraryId },
-		},
-	} = useSeriesContext()
+	const { series } = useSeriesContext()
 	const { t } = useLocaleContext()
+	const {
+		backlogSeries,
+		canBacklog,
+		unbacklogSeries,
+		canUnbacklog,
+		stopReread,
+		canStopReread,
+		resumeReread,
+		canResumeReread,
+	} = useSeriesStateMutation({
+		fragment: series,
+		onSuccess: () =>
+			client.invalidateQueries({ queryKey: ['seriesById', series.id], exact: false }),
+	})
+	const {
+		id,
+		resolvedName,
+		path,
+		stats,
+		library: { id: libraryId },
+	} = series
 
 	const location = useLocation()
 	const navigate = useNavigate()
@@ -47,8 +71,10 @@ export default function SeriesHeader() {
 
 	const [showCompleteSeriesConfirmation, setShowCompleteSeriesConfirmation] = useState(false)
 	const [isOverviewSheetOpen, setIsOverviewSheetOpen] = useState(false)
-
-	const client = useQueryClient()
+	const [showBacklogConfirmation, setShowBacklogConfirmation] = useState(false)
+	const [showUnbacklogConfirmation, setShowUnbacklogConfirmation] = useState(false)
+	const [showStopRereadConfirmation, setShowStopRereadConfirmation] = useState(false)
+	const [showResumeRereadConfirmation, setShowResumeRereadConfirmation] = useState(false)
 
 	const onSuccess = () => {
 		client.invalidateQueries({ queryKey: ['seriesBooks', id], exact: false })
@@ -63,6 +89,45 @@ export default function SeriesHeader() {
 			})
 		},
 	})
+
+	const seriesStateActions = [
+		...(canBacklog
+			? [
+					{
+						label: t('seriesHeader.actions.backlogSeries.label'),
+						leftIcon: <ListX className="mr-2 h-4 w-4" />,
+						onClick: () => setShowBacklogConfirmation(true),
+					},
+				]
+			: []),
+		...(canUnbacklog
+			? [
+					{
+						label: t('seriesHeader.actions.unbacklogSeries.label'),
+						leftIcon: <ListStart className="mr-2 h-4 w-4" />,
+						onClick: () => setShowUnbacklogConfirmation(true),
+					},
+				]
+			: []),
+		...(canStopReread
+			? [
+					{
+						label: t('seriesHeader.actions.stopReread.label'),
+						leftIcon: <ListX className="mr-2 h-4 w-4" />,
+						onClick: () => setShowStopRereadConfirmation(true),
+					},
+				]
+			: []),
+		...(canResumeReread
+			? [
+					{
+						label: t('seriesHeader.actions.resumeReread.label'),
+						leftIcon: <ListStart className="mr-2 h-4 w-4" />,
+						onClick: () => setShowResumeRereadConfirmation(true),
+					},
+				]
+			: []),
+	]
 
 	const actions = [
 		{
@@ -87,6 +152,7 @@ export default function SeriesHeader() {
 				},
 			],
 		},
+		...(seriesStateActions.length > 0 ? [{ items: seriesStateActions }] : []),
 	] satisfies DropdownItemGroup[]
 
 	const prefetchSeriesBooks = usePrefetchSeriesBooks()
@@ -161,6 +227,58 @@ export default function SeriesHeader() {
 				onConfirm={() => {
 					completeSeries({ id: id })
 					setShowCompleteSeriesConfirmation(false)
+				}}
+			/>
+
+			<ConfirmationModal
+				title={t('seriesHeader.actions.backlogSeries.label')}
+				description={t('seriesHeader.actions.backlogSeries.description', {
+					seriesName: resolvedName,
+				})}
+				isOpen={showBacklogConfirmation}
+				onClose={() => setShowBacklogConfirmation(false)}
+				onConfirm={() => {
+					backlogSeries()
+					setShowBacklogConfirmation(false)
+				}}
+			/>
+
+			<ConfirmationModal
+				title={t('seriesHeader.actions.unbacklogSeries.label')}
+				description={t('seriesHeader.actions.unbacklogSeries.description', {
+					seriesName: resolvedName,
+				})}
+				isOpen={showUnbacklogConfirmation}
+				onClose={() => setShowUnbacklogConfirmation(false)}
+				onConfirm={() => {
+					unbacklogSeries()
+					setShowUnbacklogConfirmation(false)
+				}}
+			/>
+
+			<ConfirmationModal
+				title={t('seriesHeader.actions.stopReread.label')}
+				description={t('seriesHeader.actions.stopReread.description', {
+					seriesName: resolvedName,
+				})}
+				isOpen={showStopRereadConfirmation}
+				onClose={() => setShowStopRereadConfirmation(false)}
+				onConfirm={() => {
+					stopReread()
+					setShowStopRereadConfirmation(false)
+				}}
+			/>
+
+			<ConfirmationModal
+				title={t('seriesHeader.actions.resumeReread.label')}
+				description={t('seriesHeader.actions.resumeReread.description', {
+					seriesName: resolvedName,
+				})}
+				isOpen={showResumeRereadConfirmation}
+				onClose={() => setShowResumeRereadConfirmation(false)}
+				onConfirm={() => {
+					resumeReread()
+					setShowResumeRereadConfirmation(false)
 				}}
 			/>
 

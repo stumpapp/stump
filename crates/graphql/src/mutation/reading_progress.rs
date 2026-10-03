@@ -338,7 +338,7 @@ impl ReadProgressMutation {
 		Ok(true)
 	}
 
-	/// trashes all completed readthroughs for the media
+	/// trashes all completed/abandoned readthroughs for the media
 	#[tracing::instrument(skip(self, ctx), fields(media_id = ?id))]
 	async fn delete_media_reading_history(
 		&self,
@@ -349,21 +349,15 @@ impl ReadProgressMutation {
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
-		let current_readthrough = reading_session::Entity::find()
+		let latest_session = reading_session::Entity::find()
 			.filter(
 				reading_session::Column::UserId
 					.eq(user.id.clone())
 					.and(reading_session::Column::MediaId.eq(id.to_string())),
 			)
-			.filter(
-				reading_session::Column::Status
-					.ne(ReadingStatus::Finished)
-					.and(reading_session::Column::Status.ne(ReadingStatus::Abandoned)),
-			)
 			.order_by_desc(reading_session::Column::CreatedAt)
 			.one(conn)
-			.await?
-			.map(|s| s.readthrough_number);
+			.await?;
 
 		let affected_rows = reading_session::Entity::delete_many()
 			.filter(
@@ -371,9 +365,15 @@ impl ReadProgressMutation {
 					.eq(user.id.clone())
 					.and(reading_session::Column::MediaId.eq(id.to_string())),
 			)
-			.apply_if(current_readthrough, |q, readthrough| {
-				q.filter(reading_session::Column::ReadthroughNumber.ne(readthrough))
-			})
+			.apply_if(
+				latest_session.filter(|s| !s.is_finalized()),
+				|q, session| {
+					q.filter(
+						reading_session::Column::ReadthroughNumber
+							.ne(session.readthrough_number),
+					)
+				},
+			)
 			.exec(conn)
 			.await?
 			.rows_affected;
@@ -387,7 +387,7 @@ impl ReadProgressMutation {
 	}
 
 	// TODO(pedantic): this name kinda worked for finish_media_progress (kinda) but
-	// is even more awk for series... maybe rename
+	// is even more awk for series... maybe rename to finish_all_books_in_series?
 
 	/// marks all books in the series as finished
 	async fn finish_series_progress(&self, ctx: &Context<'_>, id: ID) -> Result<i64> {

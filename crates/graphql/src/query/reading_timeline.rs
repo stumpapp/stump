@@ -41,7 +41,7 @@ impl ReadingTimelineQuery {
 			if order == OrderDirection::Asc {
 				query = query.filter(reading_session::Column::Id.gt(after));
 			} else {
-				query = query.filter(reading_session::Column::Id.gt(after));
+				query = query.filter(reading_session::Column::Id.lt(after));
 			}
 		}
 

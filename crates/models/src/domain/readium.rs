@@ -24,11 +24,9 @@ pub fn chapters_between_locators(
 		.iter()
 		.enumerate()
 		.filter_map(|(index, pos)| {
-			if let Some(chapter_title) = &pos.title {
-				Some((chapter_title.clone(), index))
-			} else {
-				None
-			}
+			pos.title
+				.as_ref()
+				.map(|chapter_title| (chapter_title.clone(), index))
 		})
 		.collect::<HashMap<_, _>>();
 

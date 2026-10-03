@@ -100,7 +100,7 @@ impl BookReadingTimeline {
 					readthrough_number,
 					started_at: swe.session.model.created_at,
 					finished_at: None,
-					status: swe.session.model.status.clone(),
+					status: swe.session.model.status,
 					total_elapsed_seconds: 0,
 					sessions: vec![],
 				},
@@ -112,10 +112,7 @@ impl BookReadingTimeline {
 			entry.sessions.push(swe);
 		}
 
-		let mut readthroughs = readthroughs_map
-			.into_iter()
-			.map(|(_, rt)| rt)
-			.collect::<Vec<_>>();
+		let mut readthroughs = readthroughs_map.into_values().collect::<Vec<_>>();
 		// TODO: double check unstable is ideal here
 		readthroughs.sort_unstable_by(|a, b| match order {
 			OrderDirection::Asc => a.started_at.cmp(&b.started_at),
@@ -135,9 +132,9 @@ impl BookReadingTimeline {
 					.sessions
 					.iter()
 					.filter(|s| s.session.model.is_finalized())
-					.map(|s| (s.session.model.status.clone(), s.session.model.updated_at))
-					.last()
-					.unwrap_or((readthrough.status.clone(), None));
+					.map(|s| (s.session.model.status, s.session.model.updated_at))
+					.next_back()
+					.unwrap_or((readthrough.status, None));
 				// ^ the thought here that we only can assign a finished_at to a readthrough if there
 				// is a finalizing session (i.e., finished or abandoned)
 

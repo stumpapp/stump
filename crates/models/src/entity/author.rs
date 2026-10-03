@@ -47,6 +47,9 @@ impl ActiveModelBehavior for ActiveModel {
 		C: ConnectionTrait,
 	{
 		if insert {
+			if self.id.is_not_set() {
+				self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+			}
 			self.created_at = ActiveValue::Set(chrono::Utc::now());
 		}
 		self.updated_at = ActiveValue::Set(chrono::Utc::now());

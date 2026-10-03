@@ -5387,6 +5387,7 @@ dependencies = [
  "thiserror 2.0.20",
  "tokio-test",
  "tracing",
+ "unicode-normalization",
  "uuid 1.18.1",
 ]
 
@@ -9782,7 +9783,7 @@ dependencies = [
  "serde_with",
  "swift-rs",
  "thiserror 2.0.20",
- "toml 0.9.7",
+ "toml 1.1.6+spec-1.1.0",
  "url",
  "urlpattern",
  "uuid 1.18.1",
@@ -10696,9 +10697,9 @@ checksum = "84a22b9f218b40614adcb3f4ff08b703773ad44fa9423e4e0d346d5db86e4ebc"
 
 [[package]]
 name = "unicode-normalization"
-version = "0.1.22"
+version = "0.1.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c5713f0fc4b5db668a2ac63cdb7bb4469d8c9fed047b1d0292cc7b0ce2ba921"
+checksum = "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
 dependencies = [
  "tinyvec",
 ]

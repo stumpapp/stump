@@ -3,11 +3,12 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, media_analysis, series, tag},
-	shared::{analysis::MediaAnalysisData, image::ImageRef},
+	entity::{library, media, media_analysis, reading_session, series, tag},
+	services::reading_timeline::sessions_with_events,
+	shared::{analysis::MediaAnalysisData, image::ImageRef, ordering::OrderDirection},
 };
 use num_traits::cast::ToPrimitive;
-use sea_orm::{prelude::*, sea_query::Query, FromQueryResult, QuerySelect};
+use sea_orm::{prelude::*, sea_query::Query, FromQueryResult, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -21,7 +22,10 @@ use crate::{
 		},
 		series::SeriesLoader,
 	},
-	object::epub::Epub,
+	object::{
+		epub::Epub,
+		reading_timeline::{BookReadingTimeline, SessionWithEvents},
+	},
 	pagination::{CursorPagination, CursorPaginationInfo, PaginatedResponse, Pagination},
 	utils::db_statement,
 };
@@ -259,6 +263,45 @@ impl Media {
 			.unwrap_or_default();
 
 		Ok(history)
+	}
+
+	/// The reading timeline for the book for the current user. Will be `None` if the user has not
+	/// read the book.
+	///
+	/// Note: This is not paginated and loads the entire timeline at once for the user, so it will be expensive
+	/// if selected in a query for N number of books
+	async fn reading_timeline(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default_with = "OrderDirection::Desc")] order: OrderDirection,
+	) -> Result<Option<BookReadingTimeline>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let sessions = reading_session::Entity::find()
+			.filter(
+				reading_session::Column::UserId
+					.eq(user.id.clone())
+					.and(reading_session::Column::MediaId.eq(self.model.id.clone())),
+			)
+			.order_by(reading_session::Column::ReadthroughNumber, order.into())
+			.order_by(reading_session::Column::CreatedAt, order.into())
+			.all(conn)
+			.await?;
+
+		// no point wasting compute/db trips
+		if sessions.is_empty() {
+			return Ok(None);
+		}
+
+		let sessions_with_events = sessions_with_events(sessions, order.into(), conn)
+			.await?
+			.into_iter()
+			.map(|s| SessionWithEvents::from_service(s, order))
+			.collect::<Vec<_>>();
+		let book_timeline = BookReadingTimeline::new(sessions_with_events, order);
+
+		Ok(Some(book_timeline))
 	}
 
 	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i64>> {

@@ -21,6 +21,9 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 	pub created_at: DateTimeUtc,
+	/// The ID of the session which this bookmark was created in. Realistically, when using a Stump
+	/// reader this should always be set
+	pub session_id: Option<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -41,6 +44,14 @@ pub enum Relation {
 		on_delete = "Cascade"
 	)]
 	User,
+	#[sea_orm(
+		belongs_to = "super::reading_session::Entity",
+		from = "Column::SessionId",
+		to = "super::reading_session::Column::Id",
+		on_update = "Cascade",
+		on_delete = "SetNull"
+	)]
+	ReadingSession,
 }
 
 impl Related<super::media::Entity> for Entity {
@@ -52,6 +63,12 @@ impl Related<super::media::Entity> for Entity {
 impl Related<super::user::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::User.def()
+	}
+}
+
+impl Related<super::reading_session::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::ReadingSession.def()
 	}
 }
 

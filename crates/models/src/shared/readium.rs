@@ -188,3 +188,9 @@ pub struct ReadiumLocator {
 	#[serde(default = "default_type")]
 	pub r#type: String,
 }
+
+impl ReadiumLocator {
+	pub fn page(&self) -> Option<i32> {
+		self.locations.as_ref().and_then(|loc| loc.position)
+	}
+}

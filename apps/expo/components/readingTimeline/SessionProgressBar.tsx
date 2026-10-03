@@ -41,17 +41,19 @@ export function SessionProgressBar({ startPercentage, endPercentage }: Props) {
 		left: 0,
 		width: segmentLeft.value,
 	}))
-
+	//
+	// 	trackClassName="bg-black/10 dark:bg-white/10"
+	// 	indicatorClassName="bg-white/70 dark:bg-white/60"
 	return (
 		<View
-			className="h-2.5 bg-black/30 w-full overflow-hidden rounded-full"
+			className="h-2.5 bg-black/30 dark:bg-white/10 w-full overflow-hidden rounded-full"
 			style={{ position: 'relative' }}
 			onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
 		>
 			{/*TODO: a crosshatch or something would look neat to better distinguish*/}
 			<Animated.View
 				style={previouslyReadSegment}
-				className={cn('bg-black/10 absolute h-full overflow-hidden')}
+				className={cn('bg-black/10 dark:bg-white/10 absolute h-full overflow-hidden')}
 			/>
 			<Animated.View style={segmentStyle} className={cn('bg-white/70 absolute h-full')} />
 		</View>

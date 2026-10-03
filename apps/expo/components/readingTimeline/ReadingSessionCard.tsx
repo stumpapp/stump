@@ -72,7 +72,6 @@ type Annotation = Extract<
 	ReadingSessionCardFragment['events'][number],
 	{ __typename: 'MediaAnnotation' }
 >
-// type Bookmark = Extract<ReadingSessionCardFragment['events'][number], { __typename: 'Bookmark' }>
 
 // the idea here is that a book's timeline will have its own info and not need to fetch
 // via the media resolver on session, but in a timeline not tied to a specific book
@@ -221,8 +220,8 @@ export function ReadingSessionCard({
 									<Progress
 										className="h-3 mb-1"
 										value={parseGraphQLPercentageDecimal(session.endPercentage) ?? 0}
-										trackClassName="bg-black/10"
-										indicatorClassName="bg-white/70"
+										trackClassName="bg-black/10 dark:bg-white/10"
+										indicatorClassName="bg-white/70 dark:bg-white/60"
 									/>
 								</View>
 							</View>
@@ -235,7 +234,7 @@ export function ReadingSessionCard({
 
 							<View className="-mb-1 w-full flex-row items-center">
 								{groupedBy === 'month' && (
-									<Text className="font-medium text-white/70">
+									<Text className="font-medium text-foreground-muted dark:text-white/70">
 										{intlFormat(startDate, {
 											year: 'numeric',
 											month: 'short',

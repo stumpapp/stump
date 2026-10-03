@@ -386,6 +386,7 @@ export enum BookClubSuggestionStatus {
   Rejected = 'REJECTED'
 }
 
+/** The full timeline of events for a book, including all readthroughs and their sessions */
 export type BookReadingTimeline = {
   __typename?: 'BookReadingTimeline';
   readthroughs: Array<ReadthroughTimeline>;
@@ -953,6 +954,10 @@ export type FitWithinResizeInput = {
   width: Scalars['Int']['input'];
 };
 
+/**
+ * A node in the global reading timeline, which is more of a flat list of sessions with their
+ * corresponding events instead of being grouped by readthroughs
+ */
 export type GlobalReadingTimelineNode = {
   __typename?: 'GlobalReadingTimelineNode';
   mediaId: Scalars['String']['output'];
@@ -1462,7 +1467,10 @@ export type Media = {
   readProgress?: Maybe<ResumeReadingCursor>;
   /**
    * The reading timeline for the book for the current user. Will be `None` if the user has not
-   * read the book
+   * read the book.
+   *
+   * Note: This is not paginated and loads the entire timeline at once for the user, so it will be expensive
+   * if selected in a query for N number of books
    */
   readingTimeline?: Maybe<BookReadingTimeline>;
   /**
@@ -1509,6 +1517,11 @@ export type Media = {
 
 export type MediaNextInSeriesArgs = {
   pagination?: Pagination;
+};
+
+
+export type MediaReadingTimelineArgs = {
+  order?: OrderDirection;
 };
 
 export type MediaAnalysisData = {
@@ -3538,6 +3551,10 @@ export type Query = {
   metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   /** Get all pending invitations for the current user */
   myBookClubInvitations: Array<BookClubInvitation>;
+  /**
+   * A paginated list of reading sessions and events for the authenticated user,
+   * for all reading activity across all books
+   */
   myReadingTimeline: CursorPaginatedGlobalReadingTimelineNodeResponse;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
@@ -4071,7 +4088,7 @@ export type ReadthroughRecord = {
   startedAt: Scalars['DateTime']['output'];
 };
 
-/** the timeline of events for a specific readthrough of a book */
+/** The timeline of events for a specific readthrough of a book */
 export type ReadthroughTimeline = {
   __typename?: 'ReadthroughTimeline';
   finishedAt?: Maybe<Scalars['DateTime']['output']>;

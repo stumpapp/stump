@@ -332,6 +332,7 @@ enum BookClubSuggestionStatus {
 	REJECTED
 }
 
+"The full timeline of events for a book, including all readthroughs and their sessions"
 type BookReadingTimeline {
 	readthroughs: [ReadthroughTimeline!]!
 	totalElapsedSeconds: Int!
@@ -886,6 +887,10 @@ input FitWithinResizeInput {
 	height: Int!
 }
 
+"""
+A node in the global reading timeline, which is more of a flat list of sessions with their
+corresponding events instead of being grouped by readthroughs
+"""
 type GlobalReadingTimelineNode {
 	mediaId: String!
 	session: SessionWithEvents!
@@ -1383,9 +1388,12 @@ type Media {
 	readHistory: [ReadthroughRecord!]!
 	"""
 	The reading timeline for the book for the current user. Will be `None` if the user has not
-	read the book
+	read the book.
+	
+	Note: This is not paginated and loads the entire timeline at once for the user, so it will be expensive
+	if selected in a query for N number of books
 	"""
-	readingTimeline: BookReadingTimeline
+	readingTimeline(order: OrderDirection! = DESC): BookReadingTimeline
 	seriesPosition: Int
 	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -2620,6 +2628,10 @@ type Query {
 	(e.g., the session owner and the viewer share a book club membership with it enabled)
 	"""
 	readingSessionById(id: Int!): ReadingSession
+	"""
+	A paginated list of reading sessions and events for the authenticated user,
+	for all reading activity across all books
+	"""
 	myReadingTimeline(pagination: CursorPagination! = {after: null, limit: 20}, order: OrderDirection! = DESC): CursorPaginatedGlobalReadingTimelineNodeResponse!
 	me: User!
 	userCount: Int!
@@ -2856,7 +2868,7 @@ type ReadthroughRecord {
 	dnf: Boolean!
 }
 
-"the timeline of events for a specific readthrough of a book"
+"The timeline of events for a specific readthrough of a book"
 type ReadthroughTimeline {
 	readthroughNumber: Int!
 	startedAt: DateTime!

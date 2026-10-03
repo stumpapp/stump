@@ -9,8 +9,8 @@ import {
 	EventTimeline,
 	ReadingSessionDetailHeader,
 } from '~/components/readingTimeline/sessionDetail'
-import { useEventOrderStore } from '~/components/readingTimeline/sessionDetail/store'
 import RefreshControl from '~/components/RefreshControl'
+import { useSessionDetailOrderStore } from '~/stores/readingTimeline'
 
 const query = graphql(`
 	query BookReadingTimelineSessionIdScreen($sessionId: Int!, $eventOrder: OrderDirection) {
@@ -54,7 +54,7 @@ const query = graphql(`
 // to show goals not met, don't want it to be seen as demotivating
 export default function Screen() {
 	const { sessionId } = useLocalSearchParams<{ sessionId: string }>()
-	const eventOrder = useEventOrderStore((state) => state.order)
+	const eventOrder = useSessionDetailOrderStore((state) => state.order)
 	const { data, isLoading, refetch } = useGraphQL(
 		query,
 		['sessionById', sessionId, eventOrder],
@@ -66,8 +66,7 @@ export default function Screen() {
 	)
 	const session = data?.readingSessionById
 
-	if (!session && !isLoading)
-		throw new Error('oopsies make error message or do sm else, v unlikely tho')
+	if (!session && !isLoading) throw new Error('Session not found')
 
 	const [isRefetching, onRefresh] = useRefetch(refetch)
 

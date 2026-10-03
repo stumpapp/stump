@@ -6,12 +6,12 @@ import { Stack } from 'expo-router'
 import { View } from 'react-native'
 
 import { useTranslate } from '~/lib/hooks'
+import { useReadingTimelineDisplayStore } from '~/stores/readingTimeline'
 
 import { OwlEmptyState } from '../OwlEmptyState'
 import RefreshControl from '../RefreshControl'
 import { Text } from '../ui'
 import { ReadingSessionCard } from './ReadingSessionCard'
-import { useReadingTimelineDisplayStore } from './sessionDetail/store'
 
 const query = graphql(`
 	query MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {
@@ -138,10 +138,12 @@ function StackHeader() {
 		<Stack.Toolbar placement="right">
 			<Stack.Toolbar.Menu icon="ellipsis">
 				<Stack.Toolbar.Menu title="Timeline">
-					<Stack.Toolbar.MenuAction onPress={() => {}} isOn>
+					<Stack.Toolbar.MenuAction onPress={() => {}} isOn disabled>
 						Sessions
 					</Stack.Toolbar.MenuAction>
-					<Stack.Toolbar.MenuAction onPress={() => {}}>Events</Stack.Toolbar.MenuAction>
+					<Stack.Toolbar.MenuAction onPress={() => {}} disabled>
+						Events
+					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
 
 				<Stack.Toolbar.Menu title="Group By">

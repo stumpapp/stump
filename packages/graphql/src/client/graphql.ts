@@ -5819,13 +5819,27 @@ export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: stri
 
 export type BookmarkEventFragment = { __typename?: 'Bookmark', id: string, page?: number | null, createdAt: any, bookmarkLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'BookmarkEventFragment' };
 
-export type EventTimelineFragment = { __typename?: 'ReadingSession', mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
+export type EventTimelineFragment = { __typename?: 'ReadingSession', id: number, mediaId: string, createdAt: any, startPage?: number | null, updatedAt?: any | null, endPage?: number | null, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, events: Array<(
     { __typename: 'Bookmark' }
     & { ' $fragmentRefs'?: { 'BookmarkEventFragment': BookmarkEventFragment } }
   ) | (
     { __typename: 'MediaAnnotation' }
     & { ' $fragmentRefs'?: { 'AnnotationEventFragment': AnnotationEventFragment } }
   )>, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } & { ' $fragmentName'?: 'EventTimelineFragment' };
+
+export type UpdateAnnotationMobileEventTimelineMutationVariables = Exact<{
+  input: UpdateAnnotationInput;
+}>;
+
+
+export type UpdateAnnotationMobileEventTimelineMutation = { __typename?: 'Mutation', updateAnnotation: { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, updatedAt: any } };
+
+export type DeleteAnnotationMobileEventTimelineMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type DeleteAnnotationMobileEventTimelineMutation = { __typename?: 'Mutation', deleteAnnotation: { __typename?: 'MediaAnnotation', id: string } };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -7891,6 +7905,7 @@ export const AnnotationEventFragmentDoc = new TypedDocumentString(`
     `, {"fragmentName":"AnnotationEvent"}) as unknown as TypedDocumentString<AnnotationEventFragment, unknown>;
 export const EventTimelineFragmentDoc = new TypedDocumentString(`
     fragment EventTimeline on ReadingSession {
+  id
   mediaId
   createdAt
   startPage
@@ -9244,6 +9259,7 @@ fragment BookmarkEvent on Bookmark {
   createdAt
 }
 fragment EventTimeline on ReadingSession {
+  id
   mediaId
   createdAt
   startPage
@@ -10828,6 +10844,22 @@ fragment ReadingSessionCardMedia on SessionWithEvents {
     }
   }
 }`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
+export const UpdateAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
+    mutation UpdateAnnotationMobileEventTimeline($input: UpdateAnnotationInput!) {
+  updateAnnotation(input: $input) {
+    id
+    annotationText
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateAnnotationMobileEventTimelineMutation, UpdateAnnotationMobileEventTimelineMutationVariables>;
+export const DeleteAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
+    mutation DeleteAnnotationMobileEventTimeline($id: String!) {
+  deleteAnnotation(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteAnnotationMobileEventTimelineMutation, DeleteAnnotationMobileEventTimelineMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

@@ -46,7 +46,6 @@ export function AnnotationEvent({
 }: Props) {
 	const data = useFragment(fragment, fragmentRef)
 
-	// TODO: can open annotation sheet for highlights? in case you want to _add_ a note?
 	return (
 		<Pressable onPress={() => onPress(data)}>
 			{({ pressed }) => (

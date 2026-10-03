@@ -134,8 +134,13 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 						className="gap-3 flex-1 items-start justify-between"
 						onLayout={(e) => setThumbnailHeight(e.nativeEvent.layout.height)}
 					>
-						{/*TODO: jo i kept your changes but this is a note for me to come back and re-localize
-              things in the style you added here*/}
+						{/*TODO(reading-timeline): localizing this will be a bit tricky:
+						- curretnly opinionated on order (value then suffix)
+						- some langs are not in that order
+						i think maybe the TemplatedTranslationText can serve as an example here where
+            we extract the value from the translated sentence and render it in the correct order
+            for now just leaving as todo
+						*/}
 						<View className="squircle py-2 px-4 gap-2 bg-black/5 dark:bg-white/10 w-full flex-col items-start rounded-[1.25rem]">
 							<StatText value={pagesRead} suffix={' pages read'} />
 							{/* TODO: might be too wide for larger numbers */}

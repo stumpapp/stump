@@ -79,7 +79,7 @@ export default function TabLayout() {
 				/>
 			</NativeTabs.Trigger>
 			<NativeTabs.Trigger name="reading-timeline">
-				<NativeTabs.Trigger.Label>Activity</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Label>{t('tabs.activity')}</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon
 					sf={{
 						default: 'book.pages',

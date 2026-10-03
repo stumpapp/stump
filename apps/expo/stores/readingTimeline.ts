@@ -2,24 +2,22 @@ import { OrderDirection } from '@stump/graphql'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { ZustandMMKVStorage } from '~/stores/store'
-
-// TODO: move out from detail
+import { ZustandMMKVStorage } from './store'
 
 /** a simple store for setting the order of events within a session detail */
-type EventOrderStore = {
+type SessionDetailOrderStore = {
 	order: OrderDirection
 	setOrder: (order: OrderDirection) => void
 }
 
-export const useEventOrderStore = create(
-	persist<EventOrderStore>(
+export const useSessionDetailOrderStore = create(
+	persist<SessionDetailOrderStore>(
 		(set) => ({
 			order: OrderDirection.Desc,
 			setOrder: (order) => set({ order }),
 		}),
 		{
-			name: 'event-order',
+			name: 'session-detail-event-order',
 			storage: createJSONStorage(() => ZustandMMKVStorage),
 		},
 	),

@@ -3,24 +3,20 @@ import { View } from 'react-native'
 
 import { ScreenBackgroundGradient } from '~/components/BackgroundGradient'
 import { IS_IOS_26_PLUS, usePalette } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const accentColor = usePalette('accent')
 	const listColors = usePreferencesStore((store) => store.tintListBackground)
 
-	// TODO(reading-timeline): technically the book timeline doesn't consider tintListBackground, but it
-	// probably should so did it here
 	return (
 		<View style={{ flex: 1 }}>
 			{listColors && (
 				<ScreenBackgroundGradient
-					item={{
-						thumbnail: {
-							metadata: {
-								averageColor: accentColor,
-							},
-						},
+					imageMetadata={{
+						averageColor: accentColor,
 					}}
 				/>
 			)}
@@ -36,7 +32,7 @@ export default function Screen() {
 				<Stack.Screen
 					name="index"
 					options={{
-						headerTitle: 'Reading Timeline',
+						headerTitle: t('readingTimeline.title'),
 						headerShown: true,
 						headerTransparent: true,
 						headerLargeTitleEnabled: true,
@@ -45,15 +41,8 @@ export default function Screen() {
 					}}
 				/>
 
-				{/*<Stack.Screen
-					name="[sessionId]"
-					options={{
-						headerTitle: '',
-						headerShown: true,
-						headerTransparent: true,
-						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
-					}}
-				/>*/}
+				{/*TODO(reading-timeline): determine if need separate sessionId route
+				in this stack or if acceptable to remain in bookId stack*/}
 			</Stack>
 		</View>
 	)

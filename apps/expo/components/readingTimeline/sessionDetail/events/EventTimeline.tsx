@@ -1,3 +1,4 @@
+import { useGraphQLMutation } from '@stump/client'
 import {
 	AnnotationEventFragment,
 	FragmentType,
@@ -5,6 +6,7 @@ import {
 	OrderDirection,
 	useFragment,
 } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowDownRight, ArrowUpRight, Book, BookOpen } from 'lucide-react-native'
 import React, { useRef } from 'react'
 import { Pressable, View } from 'react-native'
@@ -15,16 +17,18 @@ import {
 } from '~/components/book/reader/epub/annotations'
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
 import { Card, Icon, Text } from '~/components/ui'
-import { useTranslate } from '~/lib/hooks'
+import { useSyncOnlineToOfflineAnnotations, useTranslate } from '~/lib/hooks'
 import { intoReadiumLocator } from '~/modules/readium'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useSessionDetailOrderStore } from '~/stores/readingTimeline'
 
-import { useEventOrderStore } from '../store'
 import { AnnotationEvent } from './AnnotationEvent'
 import { BookmarkEvent } from './BookmarkEvent'
 import { EventTimelineRow } from './EventTimelineRow'
 
 const fragment = graphql(`
 	fragment EventTimeline on ReadingSession {
+		id
 		mediaId
 		createdAt
 		startPage
@@ -52,13 +56,71 @@ const fragment = graphql(`
 	}
 `)
 
+const updateAnnotationMutation = graphql(`
+	mutation UpdateAnnotationMobileEventTimeline($input: UpdateAnnotationInput!) {
+		updateAnnotation(input: $input) {
+			id
+			annotationText
+			updatedAt
+		}
+	}
+`)
+
+const deleteAnnotationMutation = graphql(`
+	mutation DeleteAnnotationMobileEventTimeline($id: String!) {
+		deleteAnnotation(id: $id) {
+			id
+		}
+	}
+`)
+
 type Props = {
 	fragmentRef: FragmentType<typeof fragment>
 }
 
 export function EventTimeline({ fragmentRef }: Props) {
 	const { t } = useTranslate()
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
 	const data = useFragment(fragment, fragmentRef)
+	const queryClient = useQueryClient()
+
+	const { syncUpdate, syncDelete } = useSyncOnlineToOfflineAnnotations({
+		bookId: data.mediaId,
+		serverId,
+	})
+
+	const sessionId = data.id
+
+	const invalidateAfterSuccess = () =>
+		Promise.all([
+			queryClient.invalidateQueries({ queryKey: ['sessionById', sessionId], exact: false }),
+			queryClient.invalidateQueries({
+				queryKey: ['mediaById', data.mediaId, 'readingTimeline'],
+				exact: false,
+			}),
+		])
+
+	const { mutateAsync: updateAnnotation } = useGraphQLMutation(updateAnnotationMutation, {
+		onError: (error) => {
+			console.error('Failed to update annotation:', error)
+		},
+		onSuccess: ({ updateAnnotation: updatedAnnotation }) => {
+			invalidateAfterSuccess()
+			syncUpdate(updatedAnnotation.id, updatedAnnotation.annotationText ?? null)
+		},
+	})
+
+	const { mutateAsync: deleteAnnotation } = useGraphQLMutation(deleteAnnotationMutation, {
+		onError: (error) => {
+			console.error('Failed to delete annotation:', error)
+		},
+		onSuccess: ({ deleteAnnotation: deletedAnnotation }) => {
+			invalidateAfterSuccess()
+			syncDelete(deletedAnnotation.id)
+		},
+	})
 
 	const updateAnnotationSheetRef = useRef<UpdateAnnotationSheetRef>(null)
 
@@ -96,8 +158,8 @@ export function EventTimeline({ fragmentRef }: Props) {
 		pageFragment: 'PAGE_FRAGMENT',
 	})
 
-	const order = useEventOrderStore((state) => state.order)
-	const setOrder = useEventOrderStore((state) => state.setOrder)
+	const order = useSessionDetailOrderStore((state) => state.order)
+	const setOrder = useSessionDetailOrderStore((state) => state.setOrder)
 
 	const OpenEvent = (
 		<EventTimelineRow
@@ -176,12 +238,19 @@ export function EventTimeline({ fragmentRef }: Props) {
 			</Card>
 
 			<UpdateAnnotationSheet
-				// TODO: obv the callbacks, but separately consider knobs to style the sheet,
-				// the blast of white was not welcome when i opened for the first time compared
-				// to the nice background lol but also a lower priority honestly
+				// TODO: consider knobs to style the sheet, the blast of white
+				// was not welcome when i opened for the first time compared
+				// to the nice background
 				ref={updateAnnotationSheetRef}
-				onAnnotationChange={() => {}}
-				onDelete={() => {}}
+				onAnnotationChange={(id, annotationText) =>
+					updateAnnotation({
+						input: {
+							id,
+							annotationText,
+						},
+					})
+				}
+				onDelete={(id) => deleteAnnotation({ id })}
 			/>
 		</>
 	)

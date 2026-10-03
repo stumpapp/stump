@@ -3254,7 +3254,8 @@
 			"home": "Home",
 			"browse": "Browse",
 			"clubs": "Clubs",
-			"search": "Search"
+			"search": "Search",
+			"activity": "Activity"
 		},
 		"localLibrary": {
 			"title": "Local Library",
@@ -3635,6 +3636,7 @@
 			"closedBookSentence": "Closed book at {{pageFragment}}"
 		},
 		"readingTimeline": {
+			"title": "Reading Timeline",
 			"startOfReadthrough": "Start of Readthrough {{readthroughNumber}}",
 			"readthroughDateRange": "{{startDate}} - {{endDate}}"
 		},

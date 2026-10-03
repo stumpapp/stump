@@ -14,7 +14,7 @@ const query = graphql(`
 	}
 `)
 
-// TODO: support order/group by for timeline:
+// TODO(reading-timeline): support order/group by:
 // - order asc/desc
 // - group by day/month
 export default function Screen() {
@@ -24,7 +24,7 @@ export default function Screen() {
 		data: { mediaById },
 		refetch,
 	} = useSuspenseGraphQL(query, ['mediaById', bookId, 'readingTimeline'], { bookId })
-	// TODO: some custom error that allows me to throw with custom title/message
+	// TODO(errors): some custom error that allows me to throw with custom title/message
 	if (!mediaById) throw new Error(t('errors.bookNotFound.label'))
 
 	return <BookReadingTimeline fragmentRef={mediaById} refetch={refetch} />

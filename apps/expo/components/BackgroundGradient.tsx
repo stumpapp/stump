@@ -17,6 +17,7 @@ import Animated, {
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { ImageMetadata } from '~/providers/DerivedColorPalette'
 import { usePreferencesStore } from '~/stores'
 
 import { useResolvedHeaderHeight } from './header/useAnimatedHeader'
@@ -172,18 +173,14 @@ function AnimatedHeaderBackground({ color }: { color: SharedValue<string> }) {
 	return <Animated.View style={[{ flex: 1 }, animatedStyle]} />
 }
 
-// TODO: don't love name necessarily, other one was very geared towards flashlist
-// and needed this for now but should consider proper place etc etc
-
 type ScreenBackgroundGradientProps = {
-	// TODO: change to just take image metadata instead
-	item: MinimalItem
+	imageMetadata?: ImageMetadata | null
 }
+// TODO: knobs to control gradient
 
-export function ScreenBackgroundGradient({ item }: ScreenBackgroundGradientProps) {
+export function ScreenBackgroundGradient({ imageMetadata }: ScreenBackgroundGradientProps) {
 	const { height, width } = useDisplay()
-	const naviation = useNavigation()
-
+	// const naviation = useNavigation()
 	// useEffect(() => {
 	// 	if (Platform.OS === 'android' && androidHeaderColor) {
 	// 		naviation.setOptions({
@@ -192,7 +189,7 @@ export function ScreenBackgroundGradient({ item }: ScreenBackgroundGradientProps
 	// 	}
 	// }, [androidHeaderColor, naviation, tintListBackground])
 
-	const averageColor = getTintColor(item)
+	const averageColor = getTintColor({ thumbnail: { metadata: imageMetadata } })
 
 	// not quite right just looking at apple journal and throwing something
 	// vaguely similar-ish

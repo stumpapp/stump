@@ -57,22 +57,6 @@ type Props = {
 	refetch: () => Promise<unknown>
 }
 
-// TODO: resolve these thoughts too:
-// - original request was grouped per logical date, and did a ton of backend work to sort that
-//   so perhaps do that manually? don't know if i want to group via backend by session date,
-//   so many unknowns this is why i just said fuck it and created a fake data set to sort
-//   ui first as a sort of tdd lol uidd? regardless, as i have it a date with
-//   multiple sessions would have multiple of those dates (i.e. it isn't grouped)
-// - don't do all these inline render fns, just easier for now
-// - create sm like ScreenColorsProvider to handle inline color themes for the gradient, e.g. for buttons, text, etc
-//   can also just do mostly black/white alpha palette + a few accents based on provider or whatever idk
-// - cards? not to cards? cards per logical date? none? decisions
-//    - i like the visual grouping of dates but i anticipate awkwardness as soon as i add previews or chapter names or
-//      things like that, a chunky row prolly doesn't look great
-// - padding/gap all over the place, trying not to pad outermost edges in case there is something i need edge-to-edge but
-//   need to uniform once landing on sm
-// - some synthetic event for book complete? it would mean a double of "start of readthrough X" so would need to consider, maybe
-//   either or? maybe ollie little pose for complete? i mean, no reason not to have poses for either ig
 export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
 	const { t } = useTranslate()
 
@@ -114,8 +98,6 @@ export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
 			sessions,
 		}))
 
-		// deferring to localization so if there is a language which orders
-		// the dates differently then it would be handled properly
 		const dateRange = t('readingTimeline.readthroughDateRange', {
 			startDate: intlFormat(readthrough.startedAt, {
 				year: 'numeric',
@@ -142,7 +124,6 @@ export function BookReadingTimeline({ fragmentRef, refetch }: Props) {
 						'pb-0': readthrough.readthroughNumber === 1,
 					})}
 				>
-					{/*TODO: should probably localize? idk date range conventions*/}
 					<Text className="text-foreground-muted text-sm text-center">{dateRange}</Text>
 
 					<View className="gap-4 w-full flex-row items-center">

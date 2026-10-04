@@ -180,15 +180,8 @@ type ScreenBackgroundGradientProps = {
 
 export function ScreenBackgroundGradient({ imageMetadata }: ScreenBackgroundGradientProps) {
 	const { height, width } = useDisplay()
-	// const naviation = useNavigation()
-	// useEffect(() => {
-	// 	if (Platform.OS === 'android' && androidHeaderColor) {
-	// 		naviation.setOptions({
-	// 			headerBackground: () => <AnimatedHeaderBackground color={androidHeaderColor} />,
-	// 		})
-	// 	}
-	// }, [androidHeaderColor, naviation, tintListBackground])
 
+	const naviation = useNavigation()
 	const averageColor = getTintColor({ thumbnail: { metadata: imageMetadata } })
 
 	// not quite right just looking at apple journal and throwing something
@@ -200,6 +193,17 @@ export function ScreenBackgroundGradient({ imageMetadata }: ScreenBackgroundGrad
 	]
 
 	const endPoint = vec(0, height)
+
+	const androidColor = useSharedValue(averageColor)
+
+	const applyAndroidHeader = !!imageMetadata
+	useEffect(() => {
+		if (Platform.OS === 'android' && applyAndroidHeader) {
+			naviation.setOptions({
+				headerBackground: () => <AnimatedHeaderBackground color={androidColor} />,
+			})
+		}
+	}, [androidColor, naviation, applyAndroidHeader])
 
 	return (
 		<Canvas style={{ position: 'absolute', inset: 0 }}>

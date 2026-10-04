@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 
 import { ScreenBackgroundGradient } from '~/components/BackgroundGradient'
 import BackLink from '~/components/BackLink'
@@ -31,7 +31,8 @@ export default function Screen() {
 					options={{
 						headerTitle: t('readingTimeline.title'),
 						headerShown: true,
-						headerTransparent: true,
+						headerTransparent: Platform.OS === 'ios',
+						headerBackground: Platform.OS === 'android' ? () => <View /> : undefined,
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 						headerLeft: () => <BackLink />,
 					}}
@@ -42,7 +43,8 @@ export default function Screen() {
 					options={{
 						headerTitle: '',
 						headerShown: true,
-						headerTransparent: true,
+						headerTransparent: Platform.OS === 'ios',
+						headerBackground: Platform.OS === 'android' ? () => <View /> : undefined,
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
 					}}
 				/>

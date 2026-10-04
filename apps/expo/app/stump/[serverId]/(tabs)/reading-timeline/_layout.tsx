@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 
 import { ScreenBackgroundGradient } from '~/components/BackgroundGradient'
 import { IS_IOS_26_PLUS, usePalette } from '~/lib/constants'
@@ -33,8 +33,12 @@ export default function Screen() {
 					name="index"
 					options={{
 						headerTitle: t('readingTimeline.title'),
+						// for whatever reason, the navigation.setOptions({...}) call won't work unless we set the headerBackground here
+						// i assume it is some lifecycle issue either with some nuance of stump or in react-navigation itself, but this
+						// is a fine enough workaround for now
+						headerBackground: Platform.OS === 'android' ? () => <View /> : undefined,
 						headerShown: true,
-						headerTransparent: true,
+						headerTransparent: Platform.OS === 'ios',
 						headerLargeTitleEnabled: true,
 						headerLargeTitleStyle: { fontSize: 30 },
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',

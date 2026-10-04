@@ -85,7 +85,10 @@ export default function TabLayout() {
 						default: 'book.pages',
 						selected: 'book.pages.fill',
 					}}
-					md="groups"
+					// TODO(android): don't love this one, a few other options:
+					// - history
+					// - timeline (meh)
+					md="view_timeline"
 				/>
 			</NativeTabs.Trigger>
 			{showClubs && (

@@ -107,15 +107,15 @@ export default function LibraryHeader() {
 					key: 'completedBooks',
 					icon: BookCheck,
 					value: stats.completedBooks,
-					suffix: `/ ${stats.bookCount}`,
+					suffix: ` / ${stats.bookCount}`,
 				},
 				...(formattedTime
 					? [
 							{
 								key: 'totalReadingTimeSeconds',
 								icon: Clock,
-								value: formattedTime.value,
-								suffix: formattedTime.unit,
+								value: formattedTime[0]?.value ?? '??',
+								suffix: formattedTime[0]?.unit ?? undefined,
 							},
 						]
 					: []),

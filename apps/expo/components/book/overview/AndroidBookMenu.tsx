@@ -4,6 +4,7 @@ import {
 	ArrowUpRight,
 	BookCheck,
 	CircleMinus,
+	Clock,
 	CopyMinus,
 	Ellipsis,
 	Heart,
@@ -24,7 +25,9 @@ import {
 	Icon,
 	Text,
 } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { useActiveServer } from '~/providers/ActiveServerProvider'
 
 type Props = {
 	book: BookMenuFragment
@@ -47,6 +50,11 @@ export default function AndroidBookMenu({
 	deleteCurrentSession,
 	deleteReadHistory,
 }: Props) {
+	const { t } = useTranslate()
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
+
 	const router = useRouter()
 	const insets = useSafeAreaInsets()
 	const contentInsets = {
@@ -151,6 +159,19 @@ export default function AndroidBookMenu({
 						<Icon as={ArrowUpRight} size={20} className={cn('text-foreground-muted ml-auto')} />
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
+
+				{!isUntouched && (
+					<>
+						<DropdownMenuSeparator variant="group" />
+
+						<DropdownMenuItem
+							onPress={() => router.push(`/stump/${serverId}/books/${book.id}/reading-timeline`)}
+						>
+							<Text className="text-lg">{t('readingTimeline.title')}</Text>
+							<Icon as={Clock} size={20} className={cn('text-foreground-muted ml-auto')} />
+						</DropdownMenuItem>
+					</>
+				)}
 
 				{isDownloaded && (
 					<>

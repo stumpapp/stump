@@ -332,6 +332,12 @@ enum BookClubSuggestionStatus {
 	REJECTED
 }
 
+"The full timeline of events for a book, including all readthroughs and their sessions"
+type BookReadingTimeline {
+	readthroughs: [ReadthroughTimeline!]!
+	totalElapsedSeconds: Int!
+}
+
 type Bookmark {
 	id: String!
 	previewContent: String
@@ -340,6 +346,11 @@ type Bookmark {
 	mediaId: String!
 	userId: String!
 	createdAt: DateTime!
+	"""
+	The ID of the session which this bookmark was created in. Realistically, when using a Stump
+	reader this should always be set
+	"""
+	sessionId: Int
 }
 
 input BookmarkInput {
@@ -509,6 +520,11 @@ type CreatedOrUpdatedManyMedia {
 
 type CursorPaginatedBookClubDiscussionMessageResponse {
 	nodes: [BookClubDiscussionMessage!]!
+	cursorInfo: CursorPaginationInfo!
+}
+
+type CursorPaginatedGlobalReadingTimelineNodeResponse {
+	nodes: [GlobalReadingTimelineNode!]!
 	cursorInfo: CursorPaginationInfo!
 }
 
@@ -869,6 +885,15 @@ input FitWithinResizeInput {
 	width: Int!
 	"The maximum height (in pixels) of the resulting image"
 	height: Int!
+}
+
+"""
+A node in the global reading timeline, which is more of a flat list of sessions with their
+corresponding events instead of being grouped by readthroughs
+"""
+type GlobalReadingTimelineNode {
+	mediaId: String!
+	session: SessionWithEvents!
 }
 
 "The sections displayed on a user's home page."
@@ -1361,6 +1386,14 @@ type Media {
 	resolvedName: String!
 	readProgress: ResumeReadingCursor
 	readHistory: [ReadthroughRecord!]!
+	"""
+	The reading timeline for the book for the current user. Will be `None` if the user has not
+	read the book.
+	
+	Note: This is not paginated and loads the entire timeline at once for the user, so it will be expensive
+	if selected in a query for N number of books
+	"""
+	readingTimeline(order: OrderDirection! = DESC): BookReadingTimeline
 	seriesPosition: Int
 	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
@@ -1385,6 +1418,11 @@ type MediaAnnotation {
 	userId: String!
 	createdAt: DateTime!
 	updatedAt: DateTime!
+	"""
+	The ID of the session which this annotation was created in. Realistically, when using a Stump
+	reader this should always be set
+	"""
+	sessionId: Int
 }
 
 "A media annotation represents a highlight and/or note"
@@ -1396,6 +1434,11 @@ type MediaAnnotationModel {
 	userId: String!
 	createdAt: DateTime!
 	updatedAt: DateTime!
+	"""
+	The ID of the session which this annotation was created in. Realistically, when using a Stump
+	reader this should always be set
+	"""
+	sessionId: Int
 }
 
 input MediaFilterInput {
@@ -2176,6 +2219,16 @@ type Mutation {
 	readthroughs
 	"""
 	clearSeriesReadingHistory(id: ID!): Int!
+	"""
+	Deletes a reading session for the authenticated user. Only the user who owns the session
+	may delete it
+	"""
+	deleteReadingSession(sessionId: Int!): Boolean!
+	"""
+	Updates a reading session for the authenticated user, exposing a small
+	set of fields which are editable
+	"""
+	patchReadingSession(sessionId: Int!, input: PatchReadingSession!): ReadingSession!
 }
 
 """
@@ -2463,6 +2516,11 @@ input PatchMetadataProviderConfigInput {
 	apiTokenExpiresAt: DateTime
 }
 
+input PatchReadingSession {
+	elapsedSeconds: String
+	status: ReadingStatus
+}
+
 type PlaceholderGenerationOutput {
 	"The total number of entities that were visited"
 	visitedEntities: Int!
@@ -2563,6 +2621,18 @@ type Query {
 	"Returns a list of all tags."
 	tags: [Tag!]!
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
+	"""
+	Finds a reading session by its ID, if it exists. Access control is enforced such that:
+	- The session owner (i.e., the reader) can always access their own session
+	- Other users can access the session if there are any progress-sharing rules in play
+	(e.g., the session owner and the viewer share a book club membership with it enabled)
+	"""
+	readingSessionById(id: Int!): ReadingSession
+	"""
+	A paginated list of reading sessions and events for the authenticated user,
+	for all reading activity across all books
+	"""
+	myReadingTimeline(pagination: CursorPagination! = {after: null, limit: 20}, order: OrderDirection! = DESC): CursorPaginatedGlobalReadingTimelineNodeResponse!
 	me: User!
 	userCount: Int!
 	topReaders(take: Int): [User!]!
@@ -2685,6 +2755,22 @@ type ReadingSession {
 	createdAt: DateTime!
 	updatedAt: DateTime
 	deviceIds: [String!]!
+	"""
+	The media which this session belongs to. Please note that if somehow the user loses access to the
+	media record, e.g. via access control, then this will resolve to `None` to avoid leaking
+	information which the user no longer has access to. It is a bit awkward, since the session itself
+	means they have at least at some point read some portion
+	"""
+	media: Media
+	events(order: OrderDirection! = ASC): [SessionEvent!]!
+	"""
+	Returns the list of chapter titles read during this session, including the start
+	and end chapters.
+	
+	## Important: This has some io cost and so should not necessarily be used in a list
+	of sessions but more a detail view into a single session, etc.
+	"""
+	chaptersRead: [String!]!
 }
 
 """
@@ -2780,6 +2866,16 @@ type ReadthroughRecord {
 	completedAt: DateTime!
 	elapsedSeconds: Int!
 	dnf: Boolean!
+}
+
+"The timeline of events for a specific readthrough of a book"
+type ReadthroughTimeline {
+	readthroughNumber: Int!
+	startedAt: DateTime!
+	finishedAt: DateTime
+	status: ReadingStatus!
+	totalElapsedSeconds: Int!
+	sessions: [SessionWithEvents!]!
 }
 
 type RecentlyAdded {
@@ -3156,6 +3252,13 @@ type ServerConfigModel {
 	id: Int!
 	publicUrl: String
 	initialWalSetupComplete: Boolean!
+}
+
+union SessionEvent = Bookmark | MediaAnnotation
+
+type SessionWithEvents {
+	session: ReadingSession!
+	events: [SessionEvent!]!
 }
 
 """

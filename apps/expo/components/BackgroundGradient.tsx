@@ -17,6 +17,7 @@ import Animated, {
 import { IS_IOS_26_PLUS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { ImageMetadata } from '~/providers/DerivedColorPalette'
 import { usePreferencesStore } from '~/stores'
 
 import { useResolvedHeaderHeight } from './header/useAnimatedHeader'
@@ -170,4 +171,45 @@ function getTintColor(item?: MinimalItem): string {
 function AnimatedHeaderBackground({ color }: { color: SharedValue<string> }) {
 	const animatedStyle = useAnimatedStyle(() => ({ backgroundColor: color.value }))
 	return <Animated.View style={[{ flex: 1 }, animatedStyle]} />
+}
+
+type ScreenBackgroundGradientProps = {
+	imageMetadata?: ImageMetadata | null
+}
+// TODO: knobs to control gradient
+
+export function ScreenBackgroundGradient({ imageMetadata }: ScreenBackgroundGradientProps) {
+	const { height, width } = useDisplay()
+
+	const naviation = useNavigation()
+	const averageColor = getTintColor({ thumbnail: { metadata: imageMetadata } })
+
+	// not quite right just looking at apple journal and throwing something
+	// vaguely similar-ish
+	const colorSteps = [
+		averageColor + '99', // 60% opacity
+		averageColor + 'cc', // 80% opacity
+		averageColor,
+	]
+
+	const endPoint = vec(0, height)
+
+	const androidColor = useSharedValue(averageColor)
+
+	const applyAndroidHeader = !!imageMetadata
+	useEffect(() => {
+		if (Platform.OS === 'android' && applyAndroidHeader) {
+			naviation.setOptions({
+				headerBackground: () => <AnimatedHeaderBackground color={androidColor} />,
+			})
+		}
+	}, [androidColor, naviation, applyAndroidHeader])
+
+	return (
+		<Canvas style={{ position: 'absolute', inset: 0 }}>
+			<Rect x={0} y={0} width={width} height={height}>
+				<LinearGradient start={vec(0, 0)} end={endPoint} colors={colorSteps} />
+			</Rect>
+		</Canvas>
+	)
 }

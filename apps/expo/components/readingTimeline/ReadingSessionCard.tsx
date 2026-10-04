@@ -220,8 +220,8 @@ export function ReadingSessionCard({
 									<Progress
 										className="h-3 mb-1"
 										value={parseGraphQLPercentageDecimal(session.endPercentage) ?? 0}
-										trackClassName="bg-black/10 dark:bg-white/10"
-										indicatorClassName="bg-white/70 dark:bg-white/60"
+										trackClassName="bg-black/20 dark:bg-white/10"
+										indicatorClassName="bg-black/10 dark:bg-white/60"
 									/>
 								</View>
 							</View>

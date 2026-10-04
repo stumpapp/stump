@@ -37,6 +37,9 @@ impl ReadingTimelineQuery {
 			.filter(reading_session::Column::UserId.eq(&user.id))
 			.order_by(reading_session::Column::Id, order.into());
 		// ^ ids serial so should be fine to sort by it instead of date
+		// note though if you are a long-time stumper like me and have gone through the
+		// pre-0.1.0 migration then it might be a little funky. but largely the above is
+		// true otherwise for folks coming after 0.1.0
 		if let Some(after) = cursor {
 			if order == OrderDirection::Asc {
 				query = query.filter(reading_session::Column::Id.gt(after));

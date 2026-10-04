@@ -1,4 +1,5 @@
 use crate::{
+	domain::author::{normalize_author_name, parse_writers},
 	entity::{author, media, media_author, series_author},
 	shared::enums::AuthorRole,
 };
@@ -16,8 +17,10 @@ pub async fn upsert_author(
 	db: &impl ConnectionTrait,
 	name: &str,
 ) -> Result<author::Model, DbErr> {
+	let normalized = normalize_author_name(name);
+
 	let existing = author::Entity::find()
-		.filter(author::Column::Name.eq(name))
+		.filter(author::Column::NormalizedName.eq(normalized))
 		.one(db)
 		.await?;
 
@@ -38,19 +41,22 @@ pub async fn upsert_author(
 
 /// A struct to help with linking authors to media entries
 #[derive(Debug, Clone)]
-pub struct AuthorLink {
+pub struct AuthorJoint {
 	pub name: String,
 	pub role: AuthorRole,
 }
+// TODO(authors): i kinda hate this name, started with AuthorLink and while i like that
+// more it almost felt misleading like it was a link. im overthinking it i know i know
+// but i hate the name :'(
 
 // TODO: duplicate AuthorRole::Primary??
 #[tracing::instrument(skip(db, links), fields(media_id = media_id))]
 pub async fn link_media_authors(
 	db: &impl ConnectionTrait,
 	media_id: &str,
-	links: Vec<AuthorLink>,
+	links: Vec<AuthorJoint>,
 ) -> Result<(), DbErr> {
-	for AuthorLink { name, role } in links {
+	for AuthorJoint { name, role } in links {
 		let author = upsert_author(db, &name).await?;
 
 		let active_model = media_author::ActiveModel {

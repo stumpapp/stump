@@ -70,7 +70,26 @@ export default function TabLayout() {
 			</NativeTabs.Trigger>
 			<NativeTabs.Trigger name="browse">
 				<NativeTabs.Trigger.Label>{t('tabs.browse')}</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="books.vertical.fill" md="explore" />
+				<NativeTabs.Trigger.Icon
+					sf={{
+						default: 'books.vertical',
+						selected: 'books.vertical.fill',
+					}}
+					md="explore"
+				/>
+			</NativeTabs.Trigger>
+			<NativeTabs.Trigger name="reading-timeline">
+				<NativeTabs.Trigger.Label>{t('tabs.activity')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon
+					sf={{
+						default: 'book.pages',
+						selected: 'book.pages.fill',
+					}}
+					// TODO(android): don't love this one, a few other options:
+					// - history
+					// - timeline (meh)
+					md="view_timeline"
+				/>
 			</NativeTabs.Trigger>
 			{showClubs && (
 				<NativeTabs.Trigger name="clubs">

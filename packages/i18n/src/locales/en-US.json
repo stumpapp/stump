@@ -3206,10 +3206,15 @@
 			"version": "Version",
 			"view": "View",
 			"accessOpdsV2": "Access OPDS v2.0",
-			"accessOpdsV1": "Access OPDS v1.2"
+			"accessOpdsV1": "Access OPDS v1.2",
+			"presentTime": "Present"
 		},
 		"errors": {
-			"unknown": "Unknown error"
+			"unknown": "Unknown error",
+			"bookNotFound": {
+				"title": "Book not found",
+				"description": "The book you are looking for could not be found. It may have been deleted or moved"
+			}
 		},
 		"epubMenu": {
 			"tableOfContents": "Table of Contents",
@@ -3249,7 +3254,8 @@
 			"home": "Home",
 			"browse": "Browse",
 			"clubs": "Clubs",
-			"search": "Search"
+			"search": "Search",
+			"activity": "Activity"
 		},
 		"localLibrary": {
 			"title": "Local Library",
@@ -3615,6 +3621,25 @@
 				}
 			},
 			"allSettings": "All Settings"
+		},
+		"readingSessions": {
+			"chaptersRead_one": "{{count}} chapter read",
+	    "chaptersRead_other": "{{count}} chapters read",
+	    "pagesRead_one": "{{count}} page read",
+	    "pagesRead_other": "{{count}} pages read",
+			"pageFragment": "page {{page}}",
+			"sessionSentence": {
+				"pageRange": "You spent {{timeRange}} reading from {{startPageFragment}} to {{endPageFragment}}",
+				"singlePage": "You spent {{timeRange}} reading {{startPageFragment}}"
+			},
+			"bookmarkSentence": "You bookmarked {{pageFragment}}",
+			"openedBookSentence": "Opened book at {{pageFragment}}",
+			"closedBookSentence": "Closed book at {{pageFragment}}"
+		},
+		"readingTimeline": {
+			"title": "Reading Timeline",
+			"startOfReadthrough": "Start of Readthrough {{readthroughNumber}}",
+			"readthroughDateRange": "{{startDate}} - {{endDate}}"
 		},
 		"tableOfContents": {
 			"goToPageX": "Go to page {{pageNumber}}",

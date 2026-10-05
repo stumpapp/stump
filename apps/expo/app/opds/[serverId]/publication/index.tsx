@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { useSDK } from '@stump/client'
+import { useRefetch, useSDK } from '@stump/client'
 import { OPDSLink, resolveUrl } from '@stump/sdk'
 import { useNavigation, useRouter } from 'expo-router'
 import { Loader2 } from 'lucide-react-native'
@@ -25,6 +25,7 @@ import { CreditsSection, RelatedPublicationItem, useRelatedPublications } from '
 import FeedSelfURL from '~/components/opds/FeedSelfURL'
 import { usePublicationMenu } from '~/components/opds/PublicationMenu'
 import MetadataBadgeSection from '~/components/overview/MetadataBadgeSection'
+import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Icon, Text } from '~/components/ui'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { usePalette } from '~/lib/constants'
@@ -43,6 +44,7 @@ import {
 	getLanguages,
 	getLinkableMetadataArrayField,
 	getNumberField,
+	getProgressionPage,
 	getPublicationThumbnailURL,
 	getStringField,
 } from '~/lib/opds/utils'
@@ -58,11 +60,13 @@ export default function Screen() {
 	const {
 		activeServer: { id: serverId, kind },
 	} = useActiveServer()
-	const { publication, url, progression } = usePublicationContext()
+	const { publication, url, progression, refetchProgression } = usePublicationContext()
 	const { metadata, images, readingOrder, links, resources } = publication
 	const { title, identifier, belongsTo } = metadata || {}
 
 	const isStumpOPDS = kind === 'stump'
+
+	const [isRefetching, refetch] = useRefetch(refetchProgression)
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
@@ -201,9 +205,7 @@ export default function Screen() {
 	const accentColor = usePalette('accent')
 
 	const existsSomeProgression =
-		!!progression?.locator.locations?.position ||
-		!!progression?.locator.locations?.totalProgression ||
-		!!progression?.modified
+		!!getProgressionPage(progression) || progression?.progression != null || !!progression?.modified
 
 	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 	const [mainSectionHeight, setMainSectionHeight] = useState<number>()
@@ -233,6 +235,7 @@ export default function Screen() {
 				style={{
 					marginBottom: Platform.OS === 'android' ? insets.bottom : undefined,
 				}}
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 			>
 				{/*lol this is absurd!*/}
 				<View style={{ height: Platform.OS === 'android' ? headerHeight : 0 }} />
@@ -292,9 +295,9 @@ export default function Screen() {
 						showChapterTitle={false}
 						progressData={{
 							chapterTitle: null,
-							page: progression?.locator.locations?.position,
+							page: getProgressionPage(progression),
 							totalPages: numberOfPages,
-							percentage: Math.round((progression?.locator.locations?.totalProgression ?? 0) * 100),
+							percentage: Math.round((progression?.progression ?? 0) * 100),
 							// TODO: pull from local db
 							readingTimeSeconds: null,
 							lastRead: progression?.modified,

@@ -18,6 +18,10 @@ pub struct Model {
 	pub display_name: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub bio: Option<String>,
+	// TODO: make opt-in, i.e. "share reading progress"
+	// for simplicity i think it would be all or nothing, i don't want to maintain
+	// something like "only share the percentage and the day" or whatever. if you share,
+	// then members can see the reading sessions and stuff. if not, cool
 	pub hide_progress: bool,
 	pub role: BookClubMemberRole,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]

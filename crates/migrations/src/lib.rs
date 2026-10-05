@@ -34,6 +34,7 @@ mod m20260804_000000_smart_list_role_to_integer;
 mod m20260815_205755_avatar_image_metadata;
 mod m20260816_000000_drop_legacy_epubcfi;
 mod m20260830_015110_oneshots;
+mod m20260928_173434_bookmark_and_annotation_fks_to_session;
 
 pub struct Migrator;
 
@@ -74,6 +75,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260815_205755_avatar_image_metadata::Migration),
 			Box::new(m20260816_000000_drop_legacy_epubcfi::Migration),
 			Box::new(m20260830_015110_oneshots::Migration),
+			Box::new(m20260928_173434_bookmark_and_annotation_fks_to_session::Migration),
 		]
 	}
 }

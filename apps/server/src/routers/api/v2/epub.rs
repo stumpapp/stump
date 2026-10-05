@@ -22,6 +22,7 @@ use stump_core::{
 		ReadiumManifestGenerator,
 	},
 };
+use tokio::task::spawn_blocking;
 use tokio_util::sync::CancellationToken;
 
 use crate::{
@@ -132,7 +133,11 @@ async fn get_epub_positions(
 
 	let base_url = epub_service_base_url(&host_details, &id);
 	let generator = ReadiumManifestGenerator::new(&ebook.path, base_url);
-	let positions = generator.generate_positions()?;
+	// TODO: consider making generator be async, not the place in this feature branch
+	// to eval really
+	let positions = spawn_blocking(move || generator.generate_positions())
+		.await
+		.map_err(|e| APIError::InternalServerError(e.to_string()))??;
 
 	Ok(WebPubPositionsResponse(positions))
 }
@@ -181,11 +186,10 @@ async fn get_epub_search(
 	// Dropping the request future cancels the token so the blocking scan can stop.
 	let _guard = cancel.drop_guard();
 
-	let response = tokio::task::spawn_blocking(move || {
-		search_epub(&path, &base_url, options, &cancel_for_task)
-	})
-	.await
-	.map_err(|e| APIError::InternalServerError(e.to_string()))??;
+	let response =
+		spawn_blocking(move || search_epub(&path, &base_url, options, &cancel_for_task))
+			.await
+			.map_err(|e| APIError::InternalServerError(e.to_string()))??;
 
 	Ok(Json(response))
 }

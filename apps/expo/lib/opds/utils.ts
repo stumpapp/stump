@@ -1,5 +1,12 @@
 import { useSDK } from '@stump/client'
-import { OPDSEntryBelongsTo, OPDSLink, OPDSMetadata, OPDSPublication, resolveUrl } from '@stump/sdk'
+import {
+	OPDSEntryBelongsTo,
+	OPDSLink,
+	OPDSMetadata,
+	OPDSProgression,
+	OPDSPublication,
+	resolveUrl,
+} from '@stump/sdk'
 import { isValid, parseISO } from 'date-fns'
 import get from 'lodash/get'
 import { useCallback } from 'react'
@@ -9,8 +16,8 @@ import { z } from 'zod'
 
 // TODO: split up a bit, e.g. progression and metadata can easily be separate modules
 
-const CANTOOK_PROGRESSION_REL = 'http://www.cantook.com/api/progression'
-const READIUM_PROGRESSION_TYPE = 'application/vnd.readium.progression+json'
+const OPDS_PROGRESSION_REL = 'http://opds-spec.org/progression'
+const OPDS_PROGRESSION_TYPE = 'application/opds-progression+json'
 
 const flexibleStringValue = z.string()
 
@@ -298,11 +305,26 @@ export const getPublicationId = (
 
 export const getProgressionURL = (links: OPDSPublication['links'], baseUrl?: string) => {
 	const progressionLink = links?.find(
-		(link) => hasLinkRel(link, CANTOOK_PROGRESSION_REL) || link.type === READIUM_PROGRESSION_TYPE,
+		(link) => hasLinkRel(link, OPDS_PROGRESSION_REL) || link.type === OPDS_PROGRESSION_TYPE,
 	)
 	if (progressionLink?.href) {
 		return resolveUrl(progressionLink.href, baseUrl)
 	}
+}
+
+/**
+ * Extract the page number from the first reference that starts with `#page=`
+ */
+export const getProgressionPage = (
+	progression: OPDSProgression | null | undefined,
+): number | null => {
+	if (!progression) return null
+	const pageRef = progression.references?.find((r) => r.startsWith('#page='))
+	if (pageRef) {
+		const pageValue = parseInt(pageRef.slice('#page='.length), 10)
+		return isNaN(pageValue) ? null : pageValue
+	}
+	return null
 }
 
 export const getPublicationThumbnailURL = (

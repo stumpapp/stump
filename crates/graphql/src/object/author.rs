@@ -4,10 +4,10 @@ use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
 use models::{
-	entity::{author, media, media_author},
+	entity::{author, media, media_author, series, series_author},
 	shared::enums::AuthorRole,
 };
-use sea_orm::prelude::*;
+use sea_orm::{prelude::*, QueryTrait};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -15,7 +15,7 @@ use crate::{
 		AuthorMediaLoader, AuthorMediaLoaderKey, MetadataSeriesMediaLoader,
 		MetadataSeriesMediaLoaderKey,
 	},
-	object::media::Media,
+	object::{media::Media, series::Series},
 };
 
 // This is basically the same as it has been for ages but it should go with another note
@@ -67,7 +67,9 @@ impl Author {
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
 pub struct AuthorSeries {
-	pub title: String,
+	#[graphql(flatten)]
+	pub series: Series,
+	pub role: Option<AuthorRole>,
 	// Note: This is kinda a hack, I basically use this as a means of scoping down
 	// when set. The idea is when querying through a library node, it will be set
 	// to that library's ID. When querying authors at query root, it won't.
@@ -210,6 +212,8 @@ impl AuthorSeries {
 
 #[ComplexObject]
 impl Author {
+	// TODO: I think maybe there should be an AuthorBook object to wrap media + add the
+	// type of book? it kinda depends on how i make the ui to an extent
 	/// Books authored by this author (primary role)
 	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
@@ -218,6 +222,12 @@ impl Author {
 		let books_authored = media::ModelWithMetadata::find_for_user(user)
 			.inner_join(media_author::Entity)
 			.filter(media_author::Column::Role.eq(AuthorRole::Primary))
+			// AHHHHHHHH
+			// TODO(chore): add fk to media
+			// .apply_if(self.library_id.is_some(), |query| {
+			// 	query
+			// 		.filter(media::Column::LibraryId.eq(self.library_id.clone().unwrap()))
+			// })
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?
@@ -230,7 +240,7 @@ impl Author {
 
 	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<AuthorSeries>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
+		// let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
 
 		// 		let key = AuthorMediaLoaderKey {
 		// 			author_name: self.name.clone(),
@@ -260,7 +270,28 @@ impl Author {
 		//
 		// 		Ok(series)
 
-		unimplemented!()
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let author_series = series::ModelWithMetadata::find_for_user(user)
+			.select_also(series_author::Entity)
+			.filter(series_author::Column::AuthorId.eq(self.model.id.clone()))
+			.apply_if(self.library_id.as_deref(), |query, library_id| {
+				query.filter(series::Column::LibraryId.eq(library_id))
+			})
+			.into_model::<series::ModelWithMetadata, series_author::Model>()
+			.all(conn)
+			.await?
+			.into_iter()
+			.filter_map(|(series_model, series_author_model)| {
+				series_author_model.map(|series_author_model| AuthorSeries {
+					series: Series::from(series_model),
+					role: Some(series_author_model.role),
+					library_id: self.library_id.clone(),
+				})
+			})
+			.collect();
+
+		Ok(author_series)
 	}
 
 	/// Books where this author is the sole credited writer (no co-authors)

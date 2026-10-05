@@ -214,6 +214,8 @@ fn apply_age_restriction_filter(
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+	#[sea_orm(has_many = "super::series_author::Entity")]
+	Authors,
 	#[sea_orm(
 		belongs_to = "super::library::Entity",
 		from = "Column::LibraryId",
@@ -230,6 +232,12 @@ pub enum Relation {
 	Tags,
 	#[sea_orm(has_one = "super::metadata_fetch_record::Entity")]
 	MetadataFetchRecord,
+}
+
+impl Related<super::series_author::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Authors.def()
+	}
 }
 
 impl Related<super::library::Entity> for Entity {

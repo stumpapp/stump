@@ -323,6 +323,8 @@ pub struct ReadingSessionUpdatedAtCmpSelect {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+	#[sea_orm(has_many = "super::media_author::Entity")]
+	Authors,
 	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]
 	BookClubBookSuggestion,
 	#[sea_orm(has_many = "super::book_club_book::Entity")]
@@ -355,6 +357,12 @@ pub enum Relation {
 	Analysis,
 	#[sea_orm(has_one = "super::metadata_fetch_record::Entity")]
 	MetadataFetchRecord,
+}
+
+impl Related<super::media_author::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Authors.def()
+	}
 }
 
 impl Related<super::book_club_book_suggestion::Entity> for Entity {

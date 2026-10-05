@@ -3,7 +3,10 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, media, media_analysis, reading_session, series, tag},
+	entity::{
+		author, library, media, media_analysis, media_author, reading_session, series,
+		tag,
+	},
 	services::reading_timeline::sessions_with_events,
 	shared::{analysis::MediaAnalysisData, image::ImageRef, ordering::OrderDirection},
 };
@@ -23,6 +26,7 @@ use crate::{
 		series::SeriesLoader,
 	},
 	object::{
+		author::Author,
 		epub::Epub,
 		reading_timeline::{BookReadingTimeline, SessionWithEvents},
 	},
@@ -64,6 +68,30 @@ impl Media {
 
 #[ComplexObject]
 impl Media {
+	/// The authors of the media, if any
+	async fn authors(&self, ctx: &Context<'_>) -> Result<Vec<Author>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		// TODO(authors): loader
+		// let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
+
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let authors = media_author::Entity::find()
+			.select_also(author::Entity)
+			.filter(media_author::Column::MediaId.eq(self.model.id.clone()))
+			.order_by_asc(author::Column::Name)
+			.all(conn)
+			.await?
+			.into_iter()
+			.filter_map(|(media_author, author)| {
+				author.map(|author| (author, media_author.role))
+			})
+			.map(|(author, role)| Author::new(author, Some(role)))
+			.collect();
+
+		Ok(authors)
+	}
+
 	/// If the media is an epub, this will return the parsed epub data from the file
 	async fn ebook(&self) -> Result<Option<Epub>> {
 		if self.model.extension.to_lowercase() != "epub" {

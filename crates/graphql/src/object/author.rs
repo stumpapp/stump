@@ -3,10 +3,14 @@ use std::collections::{BTreeSet, HashMap};
 use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
-use models::shared::enums::AuthorRole;
+use models::{
+	entity::{author, media, media_author},
+	shared::enums::AuthorRole,
+};
+use sea_orm::prelude::*;
 
 use crate::{
-	data::AuthContext,
+	data::{AuthContext, CoreContext},
 	loader::author::{
 		AuthorMediaLoader, AuthorMediaLoaderKey, MetadataSeriesMediaLoader,
 		MetadataSeriesMediaLoaderKey,
@@ -37,7 +41,8 @@ fn determine_role(writers: &str, author_name: &str) -> AuthorRole {
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
 pub struct Author {
-	pub name: String,
+	#[graphql(flatten)]
+	pub model: author::Model,
 	/// The role of this author relative to the context they are queried in (e.g., a series).
 	/// This field will be None when queried outside of a context in which an author has a role,
 	/// like at a library-level query
@@ -47,6 +52,16 @@ pub struct Author {
 	// to that library's ID. When querying authors at query root, it won't.
 	#[graphql(skip)]
 	pub library_id: Option<String>,
+}
+
+impl Author {
+	pub fn new(model: author::Model, role: Option<AuthorRole>) -> Self {
+		Self {
+			model,
+			role,
+			library_id: None,
+		}
+	}
 }
 
 #[derive(Debug, SimpleObject)]
@@ -79,48 +94,52 @@ pub struct SharedWork {
 impl SharedWork {
 	/// All authors who contributed to this work, with their roles
 	async fn authors(&self) -> Vec<Author> {
-		let Some(ref metadata) = self.media.metadata else {
-			return Vec::new();
-		};
-		let Some(ref writers) = metadata.model.writers else {
-			return Vec::new();
-		};
+		// 		let Some(ref metadata) = self.media.metadata else {
+		// 			return Vec::new();
+		// 		};
+		// 		let Some(ref writers) = metadata.model.writers else {
+		// 			return Vec::new();
+		// 		};
+		//
+		// 		parse_writers(writers)
+		// 			.into_iter()
+		// 			.map(|name| {
+		// 				let role = determine_role(writers, &name);
+		// 				Author {
+		// 					name,
+		// 					role: Some(role),
+		// 					library_id: self.library_id.clone(),
+		// 				}
+		// 			})
+		// 			.collect()
 
-		parse_writers(writers)
-			.into_iter()
-			.map(|name| {
-				let role = determine_role(writers, &name);
-				Author {
-					name,
-					role: Some(role),
-					library_id: self.library_id.clone(),
-				}
-			})
-			.collect()
+		unimplemented!()
 	}
 
 	/// Authors who contributed to this work, excluding the viewing author
 	async fn co_authors(&self) -> Vec<Author> {
-		let Some(ref metadata) = self.media.metadata else {
-			return Vec::new();
-		};
-		let Some(ref writers) = metadata.model.writers else {
-			return Vec::new();
-		};
+		// 		let Some(ref metadata) = self.media.metadata else {
+		// 			return Vec::new();
+		// 		};
+		// 		let Some(ref writers) = metadata.model.writers else {
+		// 			return Vec::new();
+		// 		};
+		//
+		// 		let viewing_lower = self.viewing_author.to_lowercase();
+		// 		parse_writers(writers)
+		// 			.into_iter()
+		// 			.filter(|name| name.to_lowercase() != viewing_lower)
+		// 			.map(|name| {
+		// 				let role = determine_role(writers, &name);
+		// 				Author {
+		// 					name,
+		// 					role: Some(role),
+		// 					library_id: self.library_id.clone(),
+		// 				}
+		// 			})
+		// 			.collect()
 
-		let viewing_lower = self.viewing_author.to_lowercase();
-		parse_writers(writers)
-			.into_iter()
-			.filter(|name| name.to_lowercase() != viewing_lower)
-			.map(|name| {
-				let role = determine_role(writers, &name);
-				Author {
-					name,
-					role: Some(role),
-					library_id: self.library_id.clone(),
-				}
-			})
-			.collect()
+		unimplemented!()
 	}
 }
 
@@ -191,113 +210,123 @@ impl AuthorSeries {
 
 #[ComplexObject]
 impl Author {
+	/// Books authored by this author (primary role)
 	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let key = AuthorMediaLoaderKey {
-			author_name: self.name.clone(),
-			library_id: self.library_id.clone(),
-			user_id: user.id.clone(),
-		};
+		let books_authored = media::ModelWithMetadata::find_for_user(user)
+			.inner_join(media_author::Entity)
+			.filter(media_author::Column::Role.eq(AuthorRole::Primary))
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?
+			.into_iter()
+			.map(Media::from)
+			.collect();
 
-		let media = loader.load_one(key).await?.unwrap_or_default();
-		Ok(media)
+		Ok(books_authored)
 	}
 
 	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<AuthorSeries>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
 
-		let key = AuthorMediaLoaderKey {
-			author_name: self.name.clone(),
-			library_id: self.library_id.clone(),
-			user_id: user.id.clone(),
-		};
+		// 		let key = AuthorMediaLoaderKey {
+		// 			author_name: self.name.clone(),
+		// 			library_id: self.library_id.clone(),
+		// 			user_id: user.id.clone(),
+		// 		};
+		//
+		// 		let media = loader.load_one(key).await?.unwrap_or_default();
+		//
+		// 		let mut series_titles: BTreeSet<String> = BTreeSet::new();
+		//
+		// 		for m in &media {
+		// 			if let Some(ref metadata) = m.metadata {
+		// 				if let Some(ref series_name) = metadata.model.series {
+		// 					series_titles.insert(series_name.clone());
+		// 				}
+		// 			}
+		// 		}
+		//
+		// 		let series = series_titles
+		// 			.into_iter()
+		// 			.map(|title| AuthorSeries {
+		// 				title,
+		// 				library_id: self.library_id.clone(),
+		// 			})
+		// 			.collect();
+		//
+		// 		Ok(series)
 
-		let media = loader.load_one(key).await?.unwrap_or_default();
-
-		let mut series_titles: BTreeSet<String> = BTreeSet::new();
-
-		for m in &media {
-			if let Some(ref metadata) = m.metadata {
-				if let Some(ref series_name) = metadata.model.series {
-					series_titles.insert(series_name.clone());
-				}
-			}
-		}
-
-		let series = series_titles
-			.into_iter()
-			.map(|title| AuthorSeries {
-				title,
-				library_id: self.library_id.clone(),
-			})
-			.collect();
-
-		Ok(series)
+		unimplemented!()
 	}
 
 	/// Books where this author is the sole credited writer (no co-authors)
 	async fn standalones(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
+		// 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		// 		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
+		//
+		// 		let key = AuthorMediaLoaderKey {
+		// 			author_name: self.name.clone(),
+		// 			library_id: self.library_id.clone(),
+		// 			user_id: user.id.clone(),
+		// 		};
+		//
+		// 		let media = loader.load_one(key).await?.unwrap_or_default();
+		//
+		// 		let standalones = media
+		// 			.into_iter()
+		// 			.filter(|m| {
+		// 				m.metadata
+		// 					.as_ref()
+		// 					.and_then(|md| md.model.writers.as_ref())
+		// 					.map(|w| {
+		// 						let authors = parse_writers(w);
+		// 						authors.len() == 1
+		// 							&& authors[0].to_lowercase() == self.name.to_lowercase()
+		// 					})
+		// 					.unwrap_or(false)
+		// 			})
+		// 			.collect();
+		//
+		// 		Ok(standalones)
 
-		let key = AuthorMediaLoaderKey {
-			author_name: self.name.clone(),
-			library_id: self.library_id.clone(),
-			user_id: user.id.clone(),
-		};
-
-		let media = loader.load_one(key).await?.unwrap_or_default();
-
-		let standalones = media
-			.into_iter()
-			.filter(|m| {
-				m.metadata
-					.as_ref()
-					.and_then(|md| md.model.writers.as_ref())
-					.map(|w| {
-						let authors = parse_writers(w);
-						authors.len() == 1
-							&& authors[0].to_lowercase() == self.name.to_lowercase()
-					})
-					.unwrap_or(false)
-			})
-			.collect();
-
-		Ok(standalones)
+		unimplemented!()
 	}
 
 	/// Books where this author shares credit with other writers (co-authored works)
 	async fn shared_works(&self, ctx: &Context<'_>) -> Result<Vec<SharedWork>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
+		// 		let loader = ctx.data::<DataLoader<AuthorMediaLoader>>()?;
+		//
+		// 		let key = AuthorMediaLoaderKey {
+		// 			author_name: self.name.clone(),
+		// 			library_id: self.library_id.clone(),
+		// 			user_id: user.id.clone(),
+		// 		};
+		//
+		// 		let media = loader.load_one(key).await?.unwrap_or_default();
+		//
+		// 		let shared = media
+		// 			.into_iter()
+		// 			.filter(|m| {
+		// 				m.metadata
+		// 					.as_ref()
+		// 					.and_then(|md| md.model.writers.as_ref())
+		// 					.map(|w| parse_writers(w).len() > 1)
+		// 					.unwrap_or(false)
+		// 			})
+		// 			.map(|media| SharedWork {
+		// 				media,
+		// 				viewing_author: self.name.clone(),
+		// 				library_id: self.library_id.clone(),
+		// 			})
+		// 			.collect();
+		//
+		// 		Ok(shared)
 
-		let key = AuthorMediaLoaderKey {
-			author_name: self.name.clone(),
-			library_id: self.library_id.clone(),
-			user_id: user.id.clone(),
-		};
-
-		let media = loader.load_one(key).await?.unwrap_or_default();
-
-		let shared = media
-			.into_iter()
-			.filter(|m| {
-				m.metadata
-					.as_ref()
-					.and_then(|md| md.model.writers.as_ref())
-					.map(|w| parse_writers(w).len() > 1)
-					.unwrap_or(false)
-			})
-			.map(|media| SharedWork {
-				media,
-				viewing_author: self.name.clone(),
-				library_id: self.library_id.clone(),
-			})
-			.collect();
-
-		Ok(shared)
+		unimplemented!()
 	}
 }

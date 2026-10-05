@@ -2070,7 +2070,8 @@
 					"label": "테마",
 					"options": {
 						"light": "라이트",
-						"dark": "다크"
+						"dark": "다크",
+						"system": "시스템"
 					}
 				},
 				"appPrimaryColor": {

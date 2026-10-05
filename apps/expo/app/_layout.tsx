@@ -64,7 +64,7 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 export default function RootLayout() {
 	const navigationRef = useNavigationContainerRef()
 
-	const { colorScheme, isDarkColorScheme } = useColorScheme()
+	const { colorScheme, isDarkColorScheme, setColorScheme } = useColorScheme()
 
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
 
@@ -76,6 +76,7 @@ export default function RootLayout() {
 	const animation = React.useRef<LottieView>(null)
 	const { hideStatusBar, hideNavigationBar } = useHideSystemBars()
 	const hasMounted = React.useRef(false)
+	const hasRestoredTheme = React.useRef(false)
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -103,6 +104,20 @@ export default function RootLayout() {
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
 	const { isDarkEpubTheme } = useEpubTheme()
+	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
+
+	useIsomorphicLayoutEffect(() => {
+		if (hasRestoredTheme.current) {
+			return
+		}
+		setColorScheme(usePreferencesStore.getState().themePreference)
+		hasRestoredTheme.current = true
+		setIsColorSchemeLoaded(true)
+	}, [setColorScheme])
+
+	React.useEffect(() => {
+		setAndroidNavigationBar(isDarkBackground ? 'dark' : 'light')
+	}, [isDarkBackground])
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -112,8 +127,6 @@ export default function RootLayout() {
 		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
 		initDateFnsLocale(preferredLocale ?? deviceLocale)
 		setLocaleDetector(() => preferredLocale ?? deviceLocale)
-		setAndroidNavigationBar(colorScheme)
-		setIsColorSchemeLoaded(true)
 		hasMounted.current = true
 
 		SplashScreen.hideAsync().then(() => {
@@ -166,8 +179,6 @@ export default function RootLayout() {
 	}, [success])
 
 	useEnsureWidgetAssetsWritten()
-
-	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
 
 	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return <View className="flex-1 bg-background" />

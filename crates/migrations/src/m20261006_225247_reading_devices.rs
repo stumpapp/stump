@@ -21,18 +21,8 @@ impl MigrationTrait for Migration {
 					// reading devices will have a composite pk of (id, user_id) so that
 					// a device name can be shared across users (e.g., maybe me and my partner
 					// both read from the same ipad but have separate server entries, etc)
-					.col(
-						ColumnDef::new(ReadingDevices::Id)
-							.text()
-							.not_null()
-							.primary_key(),
-					)
-					.col(
-						ColumnDef::new(ReadingDevices::UserId)
-							.text()
-							.not_null()
-							.primary_key(),
-					)
+					.col(ColumnDef::new(ReadingDevices::Id).text().not_null())
+					.col(ColumnDef::new(ReadingDevices::UserId).text().not_null())
 					.col(ColumnDef::new(ReadingDevices::Name).text().not_null())
 					.col(
 						ColumnDef::new(ReadingDevices::CreatedAt)
@@ -45,6 +35,13 @@ impl MigrationTrait for Migration {
 							.timestamp_with_time_zone()
 							.default(Expr::current_timestamp())
 							.not_null(),
+					)
+					// note for future self: composite pk must be declared as such,
+					// sqlite will reject individual primary_key() calls on the cols
+					.primary_key(
+						Index::create()
+							.col(ReadingDevices::Id)
+							.col(ReadingDevices::UserId),
 					)
 					.foreign_key(
 						ForeignKey::create()

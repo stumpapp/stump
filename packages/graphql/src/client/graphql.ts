@@ -3443,7 +3443,7 @@ export type PatchMetadataProviderConfigInput = {
 };
 
 export type PatchReadingSession = {
-  elapsedSeconds?: InputMaybe<Scalars['String']['input']>;
+  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<ReadingStatus>;
 };
 
@@ -5266,7 +5266,7 @@ export type BookReadingTimelineSessionIdScreenQueryVariables = Exact<{
 
 export type BookReadingTimelineSessionIdScreenQuery = { __typename?: 'Query', readingSessionById?: (
     { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null }
-    & { ' $fragmentRefs'?: { 'EventTimelineFragment': EventTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment } }
+    & { ' $fragmentRefs'?: { 'ReadingSessionMenuFragment': ReadingSessionMenuFragment;'EventTimelineFragment': EventTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment } }
   ) | null };
 
 export type BookReadingTimelineScreenQueryVariables = Exact<{
@@ -5826,11 +5826,21 @@ export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTime
         & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
       ) }> } };
 
-export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> } & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
+export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> } & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
 
 export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
 
+export type PatchReadingSessionEditSheetMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+  input: PatchReadingSession;
+}>;
+
+
+export type PatchReadingSessionEditSheetMutation = { __typename?: 'Mutation', patchReadingSession: { __typename?: 'ReadingSession', id: number, elapsedSeconds?: number | null } };
+
 export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
+
+export type ReadingSessionMenuFragment = { __typename?: 'ReadingSession', id: number, status: ReadingStatus, mediaId: string, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null } & { ' $fragmentName'?: 'ReadingSessionMenuFragment' };
 
 export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, createdAt: any, locator: { __typename?: 'ReadiumLocator', href: string, type: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', position?: number | null, progression?: any | null, totalProgression?: any | null } | null, text?: { __typename?: 'ReadiumText', highlight?: string | null, after?: string | null, before?: string | null } | null } } & { ' $fragmentName'?: 'AnnotationEventFragment' };
 
@@ -5857,6 +5867,13 @@ export type DeleteAnnotationMobileEventTimelineMutationVariables = Exact<{
 
 
 export type DeleteAnnotationMobileEventTimelineMutation = { __typename?: 'Mutation', deleteAnnotation: { __typename?: 'MediaAnnotation', id: string } };
+
+export type DeleteReadingSessionMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteReadingSessionMutation = { __typename?: 'Mutation', deleteReadingSession: boolean };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -7745,6 +7762,7 @@ export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -7805,6 +7823,7 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -7886,6 +7905,16 @@ export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"ReadingSessionDetailHeader"}) as unknown as TypedDocumentString<ReadingSessionDetailHeaderFragment, unknown>;
+export const ReadingSessionMenuFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionMenu on ReadingSession {
+  id
+  status
+  mediaId
+  createdAt
+  updatedAt
+  elapsedSeconds
+}
+    `, {"fragmentName":"ReadingSessionMenu"}) as unknown as TypedDocumentString<ReadingSessionMenuFragment, unknown>;
 export const BookmarkEventFragmentDoc = new TypedDocumentString(`
     fragment BookmarkEvent on Bookmark {
   id
@@ -9181,6 +9210,7 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
     query BookReadingTimelineSessionIdScreen($sessionId: Int!, $eventOrder: OrderDirection) {
   readingSessionById(id: $sessionId) {
     id
+    ...ReadingSessionMenu
     createdAt
     updatedAt
     startPage
@@ -9244,6 +9274,14 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
       }
     }
   }
+}
+fragment ReadingSessionMenu on ReadingSession {
+  id
+  status
+  mediaId
+  createdAt
+  updatedAt
+  elapsedSeconds
 }
 fragment AnnotationEvent on MediaAnnotation {
   id
@@ -9343,6 +9381,7 @@ export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
 fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -10818,6 +10857,7 @@ export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
+    status
     createdAt
     updatedAt
     startPage
@@ -10861,6 +10901,14 @@ fragment ReadingSessionCardMedia on SessionWithEvents {
     }
   }
 }`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
+export const PatchReadingSessionEditSheetDocument = new TypedDocumentString(`
+    mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
+  patchReadingSession(sessionId: $sessionId, input: $input) {
+    id
+    elapsedSeconds
+  }
+}
+    `) as unknown as TypedDocumentString<PatchReadingSessionEditSheetMutation, PatchReadingSessionEditSheetMutationVariables>;
 export const UpdateAnnotationMobileEventTimelineDocument = new TypedDocumentString(`
     mutation UpdateAnnotationMobileEventTimeline($input: UpdateAnnotationInput!) {
   updateAnnotation(input: $input) {
@@ -10877,6 +10925,11 @@ export const DeleteAnnotationMobileEventTimelineDocument = new TypedDocumentStri
   }
 }
     `) as unknown as TypedDocumentString<DeleteAnnotationMobileEventTimelineMutation, DeleteAnnotationMobileEventTimelineMutationVariables>;
+export const DeleteReadingSessionDocument = new TypedDocumentString(`
+    mutation DeleteReadingSession($sessionId: Int!) {
+  deleteReadingSession(sessionId: $sessionId)
+}
+    `) as unknown as TypedDocumentString<DeleteReadingSessionMutation, DeleteReadingSessionMutationVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(

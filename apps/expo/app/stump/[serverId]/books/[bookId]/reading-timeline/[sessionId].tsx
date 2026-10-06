@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import {
 	EventTimeline,
 	ReadingSessionDetailHeader,
+	useReadingSessionMenu,
 } from '~/components/readingTimeline/sessionDetail'
 import RefreshControl from '~/components/RefreshControl'
 import { useSessionDetailOrderStore } from '~/stores/readingTimeline'
@@ -16,6 +17,7 @@ const query = graphql(`
 	query BookReadingTimelineSessionIdScreen($sessionId: Int!, $eventOrder: OrderDirection) {
 		readingSessionById(id: $sessionId) {
 			id
+			...ReadingSessionMenu
 			createdAt
 			updatedAt
 			startPage
@@ -65,6 +67,7 @@ export default function Screen() {
 		{ placeholderData: keepPreviousData },
 	)
 	const session = data?.readingSessionById
+	const sessionMenu = useReadingSessionMenu(session)
 
 	if (!session && !isLoading) throw new Error('Session not found')
 
@@ -74,6 +77,7 @@ export default function Screen() {
 
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+			{sessionMenu}
 			<ScrollView
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="automatic"

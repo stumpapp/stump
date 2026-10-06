@@ -2517,7 +2517,7 @@ input PatchMetadataProviderConfigInput {
 }
 
 input PatchReadingSession {
-	elapsedSeconds: String
+	elapsedSeconds: Int
 	status: ReadingStatus
 }
 

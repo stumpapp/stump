@@ -1,10 +1,19 @@
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, ReadingSessionCardFragment, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { useRouter } from 'expo-router'
-import { Bookmark as BookmarkIcon, Highlighter, LucideIcon, PencilLine } from 'lucide-react-native'
-import { Pressable, View } from 'react-native'
+import {
+	Bookmark as BookmarkIcon,
+	CalendarClock,
+	Highlighter,
+	LucideIcon,
+	PencilLine,
+	Trash,
+} from 'lucide-react-native'
+import { useRef } from 'react'
+import { View } from 'react-native'
 
 import { useTranslate } from '~/lib/hooks'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
@@ -12,11 +21,15 @@ import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage, ThumbnailPlaceholderData } from '../image'
 import { Card, Icon, Progress, Text } from '../ui'
+import { ContextMenu } from '../ui/context-menu/context-menu'
+import { ReadingSessionEditSheet } from './ReadingSessionEditSheet'
+import { useReadingSessionMutations } from './useReadingSessionMutations'
 
 const fragment = graphql(`
 	fragment ReadingSessionCard on SessionWithEvents {
 		session {
 			id
+			status
 			createdAt
 			updatedAt
 			startPage
@@ -91,13 +104,6 @@ type Props = {
 	groupedBy?: 'day' | 'month'
 }
 
-// TODO: create container that handles:
-// - context menu with deletion
-// - deletion should confirm, with special confirm for terminal sessions (i.e., ones
-//   that are complete) since it would directly affect readthrough calculations
-// - ability to edit session start/end times
-// - ability to edit reading time
-// ^ some of these open up the possibility of manual tracking, or manual adjustments, which
 // i personally need for my own reading (sometimes i move to kobo, mostly on phone tho)
 
 export function ReadingSessionCard({
@@ -112,7 +118,9 @@ export function ReadingSessionCard({
 		activeServer: { id: serverId },
 	} = useActiveServer()
 	const { session, events } = useFragment(fragment, fragmentRef)
+	const { confirmDeleteSession } = useReadingSessionMutations()
 
+	const editSheetRef = useRef<TrueSheet>(null)
 	const gqlMedia = useFragment(mediaFragment, mediaFragmentRef)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const thumbnailUrl = media?.thumbnail?.url || gqlMedia?.session?.media?.thumbnail?.url || ''
@@ -169,10 +177,37 @@ export function ReadingSessionCard({
 				</Text>
 			</View>
 
-			<Pressable
+			<ContextMenu
 				onPress={() =>
 					router.push(`/stump/${serverId}/books/${bookId}/reading-timeline/${session.id}`)
 				}
+				groups={[
+					{
+						items: [
+							{
+								label: 'Date and Time',
+								icon: {
+									ios: 'calendar',
+									android: CalendarClock,
+								},
+								onPress: () => editSheetRef.current?.present(),
+							},
+						],
+					},
+					{
+						items: [
+							{
+								label: 'Delete Session',
+								icon: {
+									ios: 'trash',
+									android: Trash,
+								},
+								onPress: () => confirmDeleteSession(session),
+								role: 'destructive',
+							},
+						],
+					},
+				]}
 			>
 				<Card>
 					<Card.Row>
@@ -257,7 +292,9 @@ export function ReadingSessionCard({
 						</View>
 					</Card.Row>
 				</Card>
-			</Pressable>
+			</ContextMenu>
+
+			<ReadingSessionEditSheet ref={editSheetRef} session={session} />
 		</View>
 	)
 }

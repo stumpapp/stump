@@ -63,7 +63,7 @@ export function ReadingSessionEditSheet({ ref, session }: Props) {
 			headerRightButton={{ type: 'check', onPress: onSubmit, disabled: isPatchingSession }}
 		>
 			<View className="gap-4">
-				<Card label="Session Start and End">
+				<Card label="Session Times">
 					<Card.Row label="Start">
 						<InlineDatePicker
 							value={start}

@@ -2,7 +2,7 @@ import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { formatHumanDurationSeparate } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { View } from 'react-native'
 
 import { TemplatedTranslationText } from '~/components/TemplatedTranslationText'
@@ -111,8 +111,6 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 
 	const chaptersRead = Math.max(0, data.chaptersRead.length - 1)
 
-	const [thumbnailHeight, setThumbnailHeight] = useState(0)
-
 	if (!data.media) return null
 
 	return (
@@ -124,16 +122,13 @@ export function ReadingSessionDetailHeader({ fragmentRef }: Props) {
 							source={{
 								uri: data.media.thumbnail?.url,
 							}}
-							size={{ height: thumbnailHeight, width: thumbnailHeight * thumbnailRatio }}
+							size={{ height: 175, width: 175 * thumbnailRatio }}
 							placeholderData={data.media.thumbnail.metadata}
 							borderAndShadowStyle={{ shadowRadius: 5 }}
 						/>
 					</View>
 
-					<View
-						className="gap-3 flex-1 items-start justify-between"
-						onLayout={(e) => setThumbnailHeight(e.nativeEvent.layout.height)}
-					>
+					<View className="gap-3 flex-1 items-start justify-between">
 						{/*TODO(reading-timeline): localizing this will be a bit tricky:
 						- curretnly opinionated on order (value then suffix)
 						- some langs are not in that order

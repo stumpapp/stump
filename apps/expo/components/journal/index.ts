@@ -1,1 +1,2 @@
-export { JournalEditor, type JournalEditorProps } from './JournalEditor'
+export { JournalEditor } from './JournalEditor'
+export type { JournalEditorProps } from './types'

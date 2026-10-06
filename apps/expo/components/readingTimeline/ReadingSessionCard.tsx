@@ -162,7 +162,8 @@ export function ReadingSessionCard({
 		(e) => e.__typename === 'MediaAnnotation' && e.annotationText != null,
 	).length
 
-	const truncatedJournalEntry = session.journalEntry?.content?.slice(0, 200) ?? null
+	// TODO: ellipsis with truncation?
+	const truncatedJournalEntry = session.journalEntry?.content?.slice(0, 200) || null
 	// TODO: not quite right, entry will not be plain text
 	const previewText =
 		truncatedJournalEntry ||

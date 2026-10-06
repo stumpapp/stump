@@ -1066,6 +1066,16 @@ type JobUpdate {
 	totalSubtasks: Int
 }
 
+type JournalEntryModel {
+	id: Int!
+	content: String!
+	userId: String!
+	mediaId: String!
+	sessionId: Int
+	createdAt: DateTime!
+	updatedAt: DateTime!
+}
+
 type Library {
 	id: String!
 	name: String!
@@ -2229,6 +2239,10 @@ type Mutation {
 	set of fields which are editable
 	"""
 	patchReadingSession(sessionId: Int!, input: PatchReadingSession!): ReadingSession!
+	"Upserts a reading journal entry for the authenticated user and the given reading session"
+	upsertReadingSessionJournalEntry(sessionId: Int!, content: String!): JournalEntryModel!
+	"Deletes a reading journal entry for the authenticated user"
+	deleteJournalEntry(entryId: Int!): Boolean!
 }
 
 """

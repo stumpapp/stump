@@ -1139,6 +1139,17 @@ export type JobUpdate = {
   totalSubtasks?: Maybe<Scalars['Int']['output']>;
 };
 
+export type JournalEntryModel = {
+  __typename?: 'JournalEntryModel';
+  content: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  mediaId: Scalars['String']['output'];
+  sessionId?: Maybe<Scalars['Int']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
+};
+
 export type Library = {
   __typename?: 'Library';
   authors: Array<Author>;
@@ -2108,6 +2119,8 @@ export type Mutation = {
   deleteJob: Scalars['Boolean']['output'];
   deleteJobHistory: DeleteJobHistory;
   deleteJobLogs: DeleteJobAssociatedLogs;
+  /** Deletes a reading journal entry for the authenticated user */
+  deleteJournalEntry: Scalars['Boolean']['output'];
   /**
    * Delete a library, including all associated media and series via cascading deletes. This
    * operation cannot be undone.
@@ -2349,6 +2362,8 @@ export type Mutation = {
    * called by a server owner
    */
   uploadUserAvatar: User;
+  /** Upserts a reading journal entry for the authenticated user and the given reading session */
+  upsertReadingSessionJournalEntry: JournalEntryModel;
   /** Validate the provided API token by making a test request using a client instance */
   validateProviderConfig: ProviderCredentialVerification;
   /**
@@ -2591,6 +2606,11 @@ export type MutationDeleteJobArgs = {
 
 export type MutationDeleteJobLogsArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteJournalEntryArgs = {
+  entryId: Scalars['Int']['input'];
 };
 
 
@@ -3147,6 +3167,12 @@ export type MutationUploadSeriesThumbnailBase64Args = {
 export type MutationUploadUserAvatarArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   upload: Scalars['Upload']['input'];
+};
+
+
+export type MutationUpsertReadingSessionJournalEntryArgs = {
+  content: Scalars['String']['input'];
+  sessionId: Scalars['Int']['input'];
 };
 
 

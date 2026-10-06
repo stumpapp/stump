@@ -4,6 +4,12 @@ use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue
 
 use super::user::AuthUser;
 
+// note for posterity: i decided to move entries to their own table, instead of directly
+// embedding them in the session table. in case there is at all a future where i decide
+// to allow multiple entries per session, this lends itself to that way more easily.
+// more immediately, though, this gives us stamps for entries which in and of itself is
+// worth for me
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "journal_entries")]
 #[graphql(name = "JournalEntryModel")]

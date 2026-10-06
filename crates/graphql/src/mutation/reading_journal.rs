@@ -33,6 +33,7 @@ impl ReadingJournalMutation {
 			session_id: Set(Some(session.id)),
 			content: Set(content),
 			media_id: Set(session.media_id.clone()),
+			user_id: Set(user.id.clone()),
 			..Default::default()
 		};
 

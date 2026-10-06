@@ -42,6 +42,9 @@ const fragment = graphql(`
 			endPercentage
 			elapsedSeconds
 			mediaId
+			journalEntry {
+				content
+			}
 		}
 		events {
 			__typename
@@ -159,13 +162,17 @@ export function ReadingSessionCard({
 		(e) => e.__typename === 'MediaAnnotation' && e.annotationText != null,
 	).length
 
-	// TODO: prefer journal entry as preview, fallback to annotation texts
-	const truncatedAnnotations = events
-		.filter((e): e is Annotation => e.__typename === 'MediaAnnotation' && e.annotationText != null)
-		.slice(0, 3)
-		.map((e) => e.annotationText)
-		.join('\n')
-	// ^ obv not quite right but fine for now, TODO: make the fake data notes actually something useful for mocks
+	const truncatedJournalEntry = session.journalEntry?.content?.slice(0, 200) ?? null
+	// TODO: not quite right, entry will not be plain text
+	const previewText =
+		truncatedJournalEntry ||
+		events
+			.filter(
+				(e): e is Annotation => e.__typename === 'MediaAnnotation' && e.annotationText != null,
+			)
+			.slice(0, 3)
+			.map((e) => e.annotationText)
+			.join('\n')
 
 	return (
 		<View key={session.id} className="gap-4 py-4">
@@ -261,9 +268,9 @@ export function ReadingSessionCard({
 								</View>
 							</View>
 
-							{truncatedAnnotations && (
+							{previewText && (
 								<Text numberOfLines={4} className="text-lg text-foreground-muted">
-									{truncatedAnnotations}
+									{previewText}
 								</Text>
 							)}
 

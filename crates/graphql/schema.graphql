@@ -2785,6 +2785,7 @@ type ReadingSession {
 	of sessions but more a detail view into a single session, etc.
 	"""
 	chaptersRead: [String!]!
+	journalEntry: JournalEntryModel
 }
 
 """

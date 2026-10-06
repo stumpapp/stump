@@ -4,7 +4,7 @@ use async_graphql::{
 use models::{
 	domain::readium::chapters_between_locators,
 	entity::{
-		bookmark,
+		bookmark, journal_entry,
 		media::{self, MediaIdentSelect},
 		media_annotation,
 		reading_session::{self, DeviceIds},
@@ -141,6 +141,21 @@ impl ReadingSession {
 			)),
 			_ => Ok(vec![]),
 		}
+	}
+
+	async fn journal_entry(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<journal_entry::Model>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let entry = journal_entry::Entity::find_for_user(user)
+			.filter(journal_entry::Column::SessionId.eq(self.model.id))
+			.one(conn)
+			.await?;
+
+		Ok(entry)
 	}
 }
 

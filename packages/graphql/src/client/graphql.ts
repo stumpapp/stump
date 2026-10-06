@@ -3982,6 +3982,7 @@ export type ReadingSession = {
   endPercentage?: Maybe<Scalars['Decimal']['output']>;
   events: Array<SessionEvent>;
   id: Scalars['Int']['output'];
+  journalEntry?: Maybe<JournalEntryModel>;
   koreaderProgress?: Maybe<Scalars['String']['output']>;
   /**
    * The media which this session belongs to. Please note that if somehow the user loses access to the
@@ -5292,7 +5293,7 @@ export type BookReadingTimelineSessionIdScreenQueryVariables = Exact<{
 
 export type BookReadingTimelineSessionIdScreenQuery = { __typename?: 'Query', readingSessionById?: (
     { __typename?: 'ReadingSession', id: number, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null }
-    & { ' $fragmentRefs'?: { 'ReadingSessionMenuFragment': ReadingSessionMenuFragment;'EventTimelineFragment': EventTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment } }
+    & { ' $fragmentRefs'?: { 'ReadingSessionMenuFragment': ReadingSessionMenuFragment;'EventTimelineFragment': EventTimelineFragment;'ReadingSessionDetailHeaderFragment': ReadingSessionDetailHeaderFragment;'SessionJournalFragment': SessionJournalFragment } }
   ) | null };
 
 export type BookReadingTimelineScreenQueryVariables = Exact<{
@@ -5867,6 +5868,8 @@ export type PatchReadingSessionEditSheetMutation = { __typename?: 'Mutation', pa
 export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
 
 export type ReadingSessionMenuFragment = { __typename?: 'ReadingSession', id: number, status: ReadingStatus, mediaId: string, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null } & { ' $fragmentName'?: 'ReadingSessionMenuFragment' };
+
+export type SessionJournalFragment = { __typename?: 'ReadingSession', id: number, journalEntry?: { __typename?: 'JournalEntryModel', id: number, content: string, updatedAt: any } | null } & { ' $fragmentName'?: 'SessionJournalFragment' };
 
 export type AnnotationEventFragment = { __typename?: 'MediaAnnotation', id: string, annotationText?: string | null, createdAt: any, locator: { __typename?: 'ReadiumLocator', href: string, type: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', position?: number | null, progression?: any | null, totalProgression?: any | null } | null, text?: { __typename?: 'ReadiumText', highlight?: string | null, after?: string | null, before?: string | null } | null } } & { ' $fragmentName'?: 'AnnotationEventFragment' };
 
@@ -7941,6 +7944,16 @@ export const ReadingSessionMenuFragmentDoc = new TypedDocumentString(`
   elapsedSeconds
 }
     `, {"fragmentName":"ReadingSessionMenu"}) as unknown as TypedDocumentString<ReadingSessionMenuFragment, unknown>;
+export const SessionJournalFragmentDoc = new TypedDocumentString(`
+    fragment SessionJournal on ReadingSession {
+  id
+  journalEntry {
+    id
+    content
+    updatedAt
+  }
+}
+    `, {"fragmentName":"SessionJournal"}) as unknown as TypedDocumentString<SessionJournalFragment, unknown>;
 export const BookmarkEventFragmentDoc = new TypedDocumentString(`
     fragment BookmarkEvent on Bookmark {
   id
@@ -9265,6 +9278,7 @@ export const BookReadingTimelineSessionIdScreenDocument = new TypedDocumentStrin
       }
     }
     ...ReadingSessionDetailHeader
+    ...SessionJournal
   }
 }
     fragment ReadingSessionDetailHeader on ReadingSession {
@@ -9308,6 +9322,14 @@ fragment ReadingSessionMenu on ReadingSession {
   createdAt
   updatedAt
   elapsedSeconds
+}
+fragment SessionJournal on ReadingSession {
+  id
+  journalEntry {
+    id
+    content
+    updatedAt
+  }
 }
 fragment AnnotationEvent on MediaAnnotation {
   id

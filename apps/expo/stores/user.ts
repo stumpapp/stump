@@ -50,6 +50,7 @@ type MobilePreferencesStore = {
 	tintListBackground: boolean
 	textCase: TextCase
 	maxPageViewingSeconds: number
+	deviceName?: string | null
 	/**
 	 * Patch the store with new values.
 	 */

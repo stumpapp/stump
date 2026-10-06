@@ -16,6 +16,7 @@ mod media;
 mod media_metadata;
 mod metadata_provider;
 mod notifier;
+mod reading_device;
 mod reading_journal;
 mod reading_list;
 pub mod reading_progress;
@@ -48,6 +49,7 @@ use media::MediaMutation;
 use media_metadata::MediaMetadataMutation;
 use metadata_provider::MetadataProviderMutation;
 use notifier::NotifierMutation;
+use reading_device::ReadingDeviceMutation;
 use reading_journal::ReadingJournalMutation;
 use reading_list::ReadingListMutation;
 use reading_progress::ReadProgressMutation;
@@ -116,4 +118,5 @@ pub struct Mutation(
 	ReadProgressMutation,
 	ReadingSessionMutation,
 	ReadingJournalMutation,
+	ReadingDeviceMutation,
 );

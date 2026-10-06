@@ -2138,6 +2138,8 @@ export type Mutation = {
   deleteMessage: BookClubDiscussionMessage;
   deleteMetadataProvider: MetadataProviderConfigModel;
   deleteNotifier: Notifier;
+  /** Deletes a reading device owned by the authenticated user */
+  deleteReadingDevice: Scalars['Boolean']['output'];
   /**
    * Deletes a reading list by ID.
    *
@@ -2362,6 +2364,8 @@ export type Mutation = {
    * called by a server owner
    */
   uploadUserAvatar: User;
+  /** Upserts a reading device for the authenticated user */
+  upsertReadingDevice: ReadingDeviceModel;
   /** Upserts a reading journal entry for the authenticated user and the given reading session */
   upsertReadingSessionJournalEntry: JournalEntryModel;
   /** Validate the provided API token by making a test request using a client instance */
@@ -2656,6 +2660,11 @@ export type MutationDeleteMetadataProviderArgs = {
 
 export type MutationDeleteNotifierArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteReadingDeviceArgs = {
+  deviceId: Scalars['Int']['input'];
 };
 
 
@@ -3167,6 +3176,12 @@ export type MutationUploadSeriesThumbnailBase64Args = {
 export type MutationUploadUserAvatarArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   upload: Scalars['Upload']['input'];
+};
+
+
+export type MutationUpsertReadingDeviceArgs = {
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
 };
 
 
@@ -3922,6 +3937,17 @@ export type QueryUserByIdArgs = {
 
 export type QueryUsersArgs = {
   pagination?: Pagination;
+};
+
+export type ReadingDeviceModel = {
+  __typename?: 'ReadingDeviceModel';
+  createdAt: Scalars['DateTime']['output'];
+  email?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  kind?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
 };
 
 /** The different reading directions supported by any Stump reader */
@@ -5955,6 +5981,14 @@ export type UseFavoriteBookMutationVariables = Exact<{
 
 
 export type UseFavoriteBookMutation = { __typename?: 'Mutation', favoriteMedia: { __typename?: 'Media', id: string, isFavorite: boolean } };
+
+export type UseSyncDeviceNameMutationVariables = Exact<{
+  deviceId: Scalars['String']['input'];
+  deviceName: Scalars['String']['input'];
+}>;
+
+
+export type UseSyncDeviceNameMutation = { __typename?: 'Mutation', upsertReadingDevice: { __typename?: 'ReadingDeviceModel', id: string, name: string } };
 
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -11185,6 +11219,14 @@ export const UseFavoriteBookDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UseFavoriteBookMutation, UseFavoriteBookMutationVariables>;
+export const UseSyncDeviceNameDocument = new TypedDocumentString(`
+    mutation UseSyncDeviceName($deviceId: String!, $deviceName: String!) {
+  upsertReadingDevice(id: $deviceId, name: $deviceName) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<UseSyncDeviceNameMutation, UseSyncDeviceNameMutationVariables>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {

@@ -1,7 +1,7 @@
 import { Platform, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
-import { ContactInformation, SupportInformation } from '~/components/appSettings'
+import { ContactInformation, DeviceSection, SupportInformation } from '~/components/appSettings'
 import { AppDataUsageLink } from '~/components/appSettings/management'
 import {
 	AppLanguage,
@@ -66,6 +66,8 @@ export default function Screen() {
 					<ImageReaderSettings />
 					<EpubSettings />
 				</Card>
+
+				<DeviceSection />
 
 				<Card
 					label={t(getSectionLabelKey('stump'))}

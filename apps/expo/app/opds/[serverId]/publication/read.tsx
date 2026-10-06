@@ -3,7 +3,6 @@ import { OPDSProgressionInput } from '@stump/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import * as Application from 'expo-application'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useFocusEffect } from 'expo-router'
@@ -16,6 +15,7 @@ import { db, readProgress } from '~/db'
 import { useReadingTimer } from '~/lib/hooks'
 import { getProgressionPage, hashFromURL, useResolveURL } from '~/lib/opds/utils'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
+import { useDeviceId } from '~/providers/DeviceIdProvider'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
@@ -42,6 +42,7 @@ export default function Screen() {
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
+	const deviceId = useDeviceId()
 
 	const [id] = useState(() => identifier || hashFromURL(url))
 
@@ -100,19 +101,6 @@ export default function Screen() {
 		}
 		return extractedPosition
 	}, [progression])
-
-	// TODO: Consider a store for device info? If more areas need it I guess
-	const [deviceId, setDeviceId] = useState<string | null>(null)
-	useEffect(() => {
-		async function getDeviceId() {
-			if (Platform.OS === 'ios') {
-				setDeviceId(await Application.getIosIdForVendorAsync())
-			} else {
-				setDeviceId(Application.getAndroidId())
-			}
-		}
-		getDeviceId()
-	}, [])
 
 	const queryClient = useQueryClient()
 	const lastPageRef = useRef<number | null>(null)

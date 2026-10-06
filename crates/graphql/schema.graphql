@@ -2243,6 +2243,10 @@ type Mutation {
 	upsertReadingSessionJournalEntry(sessionId: Int!, content: String!): JournalEntryModel!
 	"Deletes a reading journal entry for the authenticated user"
 	deleteJournalEntry(entryId: Int!): Boolean!
+	"Upserts a reading device for the authenticated user"
+	upsertReadingDevice(id: String!, name: String!): ReadingDeviceModel!
+	"Deletes a reading device owned by the authenticated user"
+	deleteReadingDevice(deviceId: Int!): Boolean!
 }
 
 """
@@ -2702,6 +2706,16 @@ type Query {
 	readingListById(id: ID!): ReadingList!
 	"List the custom emojis available on this server"
 	customEmojis: [CustomEmoji!]!
+}
+
+type ReadingDeviceModel {
+	id: String!
+	name: String!
+	kind: String
+	email: String
+	userId: String!
+	createdAt: DateTime!
+	updatedAt: DateTime!
 }
 
 "The different reading directions supported by any Stump reader"

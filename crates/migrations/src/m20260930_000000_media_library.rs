@@ -10,19 +10,22 @@ impl MigrationTrait for Migration {
 		let conn = manager.get_connection();
 		let backend = conn.get_database_backend();
 		let txn = conn.begin().await?;
-		if let Some(orphan) = txn
-			.query_one(Statement::from_string(
+		let orphans = txn
+			.query_all(Statement::from_string(
 				backend,
 				"SELECT media.id FROM media
 				 LEFT JOIN series ON series.id = media.series_id
 				 LEFT JOIN libraries ON libraries.id = series.library_id
-				 WHERE libraries.id IS NULL LIMIT 1",
+				 WHERE libraries.id IS NULL ORDER BY media.id",
 			))
 			.await?
-		{
+			.iter()
+			.map(|orphan| orphan.try_get::<String>("", "id"))
+			.collect::<Result<Vec<_>, _>>()?;
+		if !orphans.is_empty() {
 			return Err(DbErr::Custom(format!(
-				"Cannot backfill library ownership for book {}: repair its series/library relation before retrying migration",
-				orphan.try_get::<String>("", "id")?,
+				"Cannot backfill library ownership for books {}: repair their series/library relations before retrying migration",
+				orphans.join(", "),
 			)));
 		}
 
@@ -55,14 +58,15 @@ impl MigrationTrait for Migration {
 				}
 			},
 			DbBackend::Sqlite => {
-				for (name, event) in [
-					("insert", "INSERT"),
-					("update", "UPDATE OF library_id, series_id"),
+				for (name, event, cascade_guard) in [
+					("insert", "INSERT", ""),
+					("update", "UPDATE OF library_id, series_id",
+					 "AND EXISTS (SELECT 1 FROM libraries WHERE id = OLD.library_id)"),
 				] {
 					txn.execute(Statement::from_string(backend, format!(
 						"CREATE TRIGGER media_library_{name} BEFORE {event} ON media
 						 WHEN NEW.library_id IS NULL OR
-						 (NEW.series_id IS NOT NULL AND NOT EXISTS
+						 (NEW.series_id IS NOT NULL {cascade_guard} AND NOT EXISTS
 						  (SELECT 1 FROM series WHERE id = NEW.series_id AND library_id = NEW.library_id))
 						 BEGIN SELECT RAISE(ABORT, 'Book must belong to a library and its series must belong to that library'); END",
 					))).await?;
@@ -70,7 +74,8 @@ impl MigrationTrait for Migration {
 				txn.execute(Statement::from_string(
 					backend,
 					"CREATE TRIGGER series_media_library_update BEFORE UPDATE OF library_id ON series
-					 WHEN EXISTS (SELECT 1 FROM media WHERE series_id = OLD.id
+					 WHEN EXISTS (SELECT 1 FROM libraries WHERE id = OLD.library_id)
+					 AND EXISTS (SELECT 1 FROM media WHERE series_id = OLD.id
 					 AND (NEW.library_id IS NULL OR library_id != NEW.library_id))
 					 BEGIN SELECT RAISE(ABORT, 'Series and its books must belong to the same library'); END",
 				)).await?;

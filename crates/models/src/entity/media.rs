@@ -61,6 +61,10 @@ pub struct Model {
 	/// expected that all media will belong to a series
 	#[sea_orm(column_type = "Text", nullable)]
 	pub series_id: Option<String>,
+	#[sea_orm(column_type = "Text")]
+	#[graphql(skip)]
+	#[ordering(skip)]
+	pub library_id: String,
 	/// The timestamp of the last time the media was updated. This will be set during creation, as well
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub updated_at: Option<DateTimeWithTimeZone>,
@@ -323,6 +327,14 @@ pub struct ReadingSessionUpdatedAtCmpSelect {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+	#[sea_orm(
+		belongs_to = "super::library::Entity",
+		from = "Column::LibraryId",
+		to = "super::library::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	Library,
 	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]
 	BookClubBookSuggestion,
 	#[sea_orm(has_many = "super::book_club_book::Entity")]
@@ -360,6 +372,12 @@ pub enum Relation {
 impl Related<super::book_club_book_suggestion::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::BookClubBookSuggestion.def()
+	}
+}
+
+impl Related<super::library::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Library.def()
 	}
 }
 

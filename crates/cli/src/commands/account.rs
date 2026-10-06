@@ -758,6 +758,7 @@ mod tests {
 				name: Set(format!("Test Media {}", i + 1)),
 				path: Set(format!("/test/series/media{}", i + 1)),
 				series_id: Set(Some(series.id.clone())),
+				library_id: Set(library.id.clone()),
 				extension: Set("cbz".to_string()),
 				pages: Set(100 + i),
 				status: Set(FileStatus::Ready),

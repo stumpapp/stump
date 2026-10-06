@@ -14,6 +14,9 @@ const mutation = graphql(`
 	}
 `)
 
+// This hook will attempt to upsert the device name on the server on mount / whenever
+// name changes. It isn't worth the hassle to try to handle "name hasn't changed across
+// sessions so don't try upsert" so it's fine
 export function useSyncDeviceName() {
 	const deviceName = usePreferencesStore((state) => state.deviceName)
 	const deviceId = useDeviceId()

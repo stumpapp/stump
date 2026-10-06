@@ -9,14 +9,12 @@ use crate::entity::user::AuthUser;
 #[sea_orm(table_name = "reading_devices")]
 #[graphql(name = "ReadingDeviceModel")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
+	#[sea_orm(primary_key, auto_increment = false)]
 	pub id: String,
-	#[sea_orm(column_type = "Text", unique)]
-	pub name: String,
-	pub kind: Option<String>,
-	pub email: Option<String>,
-
+	#[sea_orm(primary_key, auto_increment = false)]
 	pub user_id: String,
+	pub name: String,
+
 	pub created_at: DateTimeUtc,
 	pub updated_at: DateTimeUtc,
 }

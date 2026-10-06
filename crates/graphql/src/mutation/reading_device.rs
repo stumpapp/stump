@@ -30,14 +30,18 @@ impl ReadingDeviceMutation {
 
 		let upserted_entry = reading_device::Entity::insert(entry)
 			.on_conflict(
-				OnConflict::columns([reading_device::Column::Id])
-					// TODO: not quite right, if a device is shared might need a
-					// dual key on (id, user_id)
-					.update_columns([
-						reading_device::Column::Name,
-						reading_device::Column::UpdatedAt,
-					])
-					.to_owned(),
+				// a device can be shared, so we really only want to update if the name changes
+				// on a record already existing for the user. if this conflict doesn't hit then
+				// its just a shared device
+				OnConflict::columns([
+					reading_device::Column::Id,
+					reading_device::Column::UserId,
+				])
+				.update_columns([
+					reading_device::Column::Name,
+					reading_device::Column::UpdatedAt,
+				])
+				.to_owned(),
 			)
 			.exec_with_returning(conn)
 			.await?;

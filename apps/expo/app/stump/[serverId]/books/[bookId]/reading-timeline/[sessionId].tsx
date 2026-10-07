@@ -4,8 +4,7 @@ import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useNavigation } from 'expo-router/react-navigation'
 import { useLayoutEffect } from 'react'
-import { View } from 'react-native'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
+import { ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { SessionEventsTimeline } from '~/components/readingTimeline/events'
@@ -88,21 +87,21 @@ export default function Screen() {
 
 	if (!session) return null
 
-	// FIXME: i think the KeyboardAwareScrollView is messing with the menu in the stack header,
-	// opening menu shifts me down to the bottom of the page
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			{sessionMenu}
-			<KeyboardAwareScrollView
+			<ScrollView
+				className="flex-1"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="always"
+				automaticallyAdjustKeyboardInsets
 			>
 				<View className="px-4 gap-6">
 					<ReadingSessionDetailHeader fragmentRef={session} />
 					<SessionEventsTimeline fragmentRef={session} />
 					<SessionJournal fragmentRef={session} />
 				</View>
-			</KeyboardAwareScrollView>
+			</ScrollView>
 		</SafeAreaView>
 	)
 }

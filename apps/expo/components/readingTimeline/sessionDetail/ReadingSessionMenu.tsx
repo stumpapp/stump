@@ -163,10 +163,12 @@ function AndroidReadingSessionMenu({
 				className="tablet:w-64 w-3/5"
 				align="end"
 			>
-				<DropdownMenuItem onPress={() => router.push(`/stump/${serverId}/books/${bookId}`)}>
-					<Text className="text-lg">Go to Book</Text>
-					<Icon as={ArrowUpRight} size={20} className="text-foreground-muted ml-auto" />
-				</DropdownMenuItem>
+				{showBookLink && (
+					<DropdownMenuItem onPress={() => router.push(`/stump/${serverId}/books/${bookId}`)}>
+						<Text className="text-lg">Go to Book</Text>
+						<Icon as={ArrowUpRight} size={20} className="text-foreground-muted ml-auto" />
+					</DropdownMenuItem>
+				)}
 
 				<DropdownMenuSeparator variant="group" />
 

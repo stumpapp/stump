@@ -3,7 +3,7 @@ import { parseGraphQLPercentageDecimal } from '@stump/client'
 import { FragmentType, graphql, ReadingSessionCardFragment, useFragment } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
-import { useRouter } from 'expo-router'
+import { usePathname, useRouter } from 'expo-router'
 import {
 	Bookmark as BookmarkIcon,
 	CalendarClock,
@@ -123,6 +123,10 @@ export function ReadingSessionCard({
 	const { session, events } = useFragment(fragment, fragmentRef)
 	const { confirmDeleteSession } = useReadingSessionMutations()
 
+	const pathname = usePathname()
+	const pushReferrer = pathname.includes('/books/') ? undefined : 'my-timeline'
+	// ^ informs the detail screen whether to show a link to book in menu
+
 	const editSheetRef = useRef<TrueSheet>(null)
 	const gqlMedia = useFragment(mediaFragment, mediaFragmentRef)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
@@ -187,7 +191,9 @@ export function ReadingSessionCard({
 
 			<ContextMenu
 				onPress={() =>
-					router.push(`/stump/${serverId}/books/${bookId}/reading-timeline/${session.id}`)
+					router.push(
+						`/stump/${serverId}/books/${bookId}/reading-timeline/${session.id}${pushReferrer ? `?from=${pushReferrer}` : ''}`,
+					)
 				}
 				groups={[
 					{

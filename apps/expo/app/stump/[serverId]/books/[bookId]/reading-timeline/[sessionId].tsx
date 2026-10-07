@@ -56,7 +56,7 @@ const query = graphql(`
 // TODO(goals): a future where stump has reading goals and we can show which were met here. i am not inclined
 // to show goals not met, don't want it to be seen as demotivating
 export default function Screen() {
-	const { sessionId } = useLocalSearchParams<{ sessionId: string }>()
+	const { sessionId, from } = useLocalSearchParams<{ sessionId: string; from?: string }>()
 	const eventOrder = useSessionDetailOrderStore((state) => state.order)
 	const { data, isLoading, refetch, error } = useGraphQL(
 		query,
@@ -68,7 +68,7 @@ export default function Screen() {
 		{ placeholderData: keepPreviousData },
 	)
 	const session = data?.readingSessionById
-	const sessionMenu = useReadingSessionMenu(session)
+	const sessionMenu = useReadingSessionMenu({ session, showBookLink: !!from })
 
 	if (error) throw new Error(`Error fetching session: ${error.message}`)
 	if (!session && !isLoading) throw new Error('Session not found')

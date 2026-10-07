@@ -22,9 +22,9 @@ import { intoReadiumLocator } from '~/modules/readium'
 import { useActiveServer } from '~/providers/ActiveServerProvider'
 import { useSessionDetailOrderStore } from '~/stores/readingTimeline'
 
-import { AnnotationEvent } from './AnnotationEvent'
-import { BookmarkEvent } from './BookmarkEvent'
-import { EventTimelineRow } from './EventTimelineRow'
+import { AnnotationEvent } from '../events/AnnotationEvent'
+import { BookmarkEvent } from '../events/BookmarkEvent'
+import { EventTimelineRow } from '../events/EventTimelineRow'
 
 const fragment = graphql(`
 	fragment EventTimeline on ReadingSession {
@@ -77,6 +77,9 @@ const deleteAnnotationMutation = graphql(`
 type Props = {
 	fragmentRef: FragmentType<typeof fragment>
 }
+
+// TODO: this can actually prob live with events still? not sure, we'll
+// see how i progress forward after acutally impl and not just preemptive reorg
 
 export function EventTimeline({ fragmentRef }: Props) {
 	const { t } = useTranslate()

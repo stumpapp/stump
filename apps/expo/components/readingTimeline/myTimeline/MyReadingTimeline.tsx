@@ -6,11 +6,11 @@ import { View } from 'react-native'
 
 import { useReadingTimelineDisplayStore } from '~/stores/readingTimeline'
 
-import { OwlEmptyState } from '../OwlEmptyState'
-import RefreshControl from '../RefreshControl'
-import { Text } from '../ui'
+import { OwlEmptyState } from '../../OwlEmptyState'
+import RefreshControl from '../../RefreshControl'
+import { Text } from '../../ui'
+import { ReadingSessionCard } from '../ReadingSessionCard'
 import { MyReadingTimelineMenu } from './MyReadingTimelineMenu'
-import { ReadingSessionCard } from './ReadingSessionCard'
 
 const query = graphql(`
 	query MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {

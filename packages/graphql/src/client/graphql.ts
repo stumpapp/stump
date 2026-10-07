@@ -5862,6 +5862,18 @@ export type AcceptLocalProgressMutationVariables = Exact<{
 
 export type AcceptLocalProgressMutation = { __typename?: 'Mutation', acceptLocalProgress: { __typename?: 'ReadingSession', id: number, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, endLocator?: { __typename?: 'ReadiumLocator', href: string, chapterTitle: string, locations?: { __typename?: 'ReadiumLocation', progression?: any | null, totalProgression?: any | null } | null } | null } };
 
+export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, journalEntry?: { __typename?: 'JournalEntryModel', content: string } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> } & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
+
+export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
+
+export type PatchReadingSessionEditSheetMutationVariables = Exact<{
+  sessionId: Scalars['Int']['input'];
+  input: PatchReadingSession;
+}>;
+
+
+export type PatchReadingSessionEditSheetMutation = { __typename?: 'Mutation', patchReadingSession: { __typename?: 'ReadingSession', id: number, elapsedSeconds?: number | null } };
+
 export type BookReadingTimelineFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, readingTimeline?: { __typename?: 'BookReadingTimeline', totalElapsedSeconds: number, readthroughs: Array<{ __typename?: 'ReadthroughTimeline', readthroughNumber: number, startedAt: any, finishedAt?: any | null, sessions: Array<(
         { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, sessionDate: any } }
         & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment } }
@@ -5877,18 +5889,6 @@ export type MyReadingTimelineScreenQuery = { __typename?: 'Query', myReadingTime
         { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', sessionDate: any } }
         & { ' $fragmentRefs'?: { 'ReadingSessionCardFragment': ReadingSessionCardFragment;'ReadingSessionCardMediaFragment': ReadingSessionCardMediaFragment } }
       ) }> } };
-
-export type ReadingSessionCardFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', id: number, status: ReadingStatus, createdAt: any, updatedAt?: any | null, startPage?: number | null, endPage?: number | null, endPercentage?: any | null, elapsedSeconds?: number | null, mediaId: string, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, journalEntry?: { __typename?: 'JournalEntryModel', content: string } | null }, events: Array<{ __typename: 'Bookmark', id: string } | { __typename: 'MediaAnnotation', id: string, annotationText?: string | null }> } & { ' $fragmentName'?: 'ReadingSessionCardFragment' };
-
-export type ReadingSessionCardMediaFragment = { __typename?: 'SessionWithEvents', session: { __typename?: 'ReadingSession', media?: { __typename?: 'Media', resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } } & { ' $fragmentName'?: 'ReadingSessionCardMediaFragment' };
-
-export type PatchReadingSessionEditSheetMutationVariables = Exact<{
-  sessionId: Scalars['Int']['input'];
-  input: PatchReadingSession;
-}>;
-
-
-export type PatchReadingSessionEditSheetMutation = { __typename?: 'Mutation', patchReadingSession: { __typename?: 'ReadingSession', id: number, elapsedSeconds?: number | null } };
 
 export type ReadingSessionDetailHeaderFragment = { __typename?: 'ReadingSession', id: number, startPage?: number | null, endPage?: number | null, startPercentage?: any | null, endPercentage?: any | null, createdAt: any, updatedAt?: any | null, elapsedSeconds?: number | null, chaptersRead: Array<string>, startLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, endLocator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null, media?: { __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'ReadingSessionDetailHeaderFragment' };
 
@@ -7828,6 +7828,27 @@ export const LibrarySearchItemFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
+export const ReadingSessionCardMediaFragmentDoc = new TypedDocumentString(`
+    fragment ReadingSessionCardMedia on SessionWithEvents {
+  session {
+    media {
+      resolvedName
+      pages
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+    }
+  }
+}
+    `, {"fragmentName":"ReadingSessionCardMedia"}) as unknown as TypedDocumentString<ReadingSessionCardMediaFragment, unknown>;
 export const ReadingSessionCardFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionCard on SessionWithEvents {
   session {
@@ -7924,27 +7945,6 @@ export const BookReadingTimelineFragmentDoc = new TypedDocumentString(`
     }
   }
 }`, {"fragmentName":"BookReadingTimeline"}) as unknown as TypedDocumentString<BookReadingTimelineFragment, unknown>;
-export const ReadingSessionCardMediaFragmentDoc = new TypedDocumentString(`
-    fragment ReadingSessionCardMedia on SessionWithEvents {
-  session {
-    media {
-      resolvedName
-      pages
-      thumbnail {
-        url
-        metadata {
-          averageColor
-          colors {
-            color
-            percentage
-          }
-          thumbhash
-        }
-      }
-    }
-  }
-}
-    `, {"fragmentName":"ReadingSessionCardMedia"}) as unknown as TypedDocumentString<ReadingSessionCardMediaFragment, unknown>;
 export const ReadingSessionDetailHeaderFragmentDoc = new TypedDocumentString(`
     fragment ReadingSessionDetailHeader on ReadingSession {
   id
@@ -9442,38 +9442,7 @@ export const BookReadingTimelineScreenDocument = new TypedDocumentString(`
     ...BookReadingTimeline
   }
 }
-    fragment BookReadingTimeline on Media {
-  id
-  readingTimeline {
-    readthroughs {
-      readthroughNumber
-      startedAt
-      finishedAt
-      sessions {
-        session {
-          id
-          sessionDate
-        }
-        ...ReadingSessionCard
-      }
-    }
-    totalElapsedSeconds
-  }
-  resolvedName
-  pages
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-  }
-}
-fragment ReadingSessionCard on SessionWithEvents {
+    fragment ReadingSessionCard on SessionWithEvents {
   session {
     id
     status
@@ -9501,6 +9470,37 @@ fragment ReadingSessionCard on SessionWithEvents {
     ... on MediaAnnotation {
       id
       annotationText
+    }
+  }
+}
+fragment BookReadingTimeline on Media {
+  id
+  readingTimeline {
+    readthroughs {
+      readthroughNumber
+      startedAt
+      finishedAt
+      sessions {
+        session {
+          id
+          sessionDate
+        }
+        ...ReadingSessionCard
+      }
+    }
+    totalElapsedSeconds
+  }
+  resolvedName
+  pages
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
     }
   }
 }`) as unknown as TypedDocumentString<BookReadingTimelineScreenQuery, BookReadingTimelineScreenQueryVariables>;
@@ -10937,6 +10937,14 @@ export const AcceptLocalProgressDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AcceptLocalProgressMutation, AcceptLocalProgressMutationVariables>;
+export const PatchReadingSessionEditSheetDocument = new TypedDocumentString(`
+    mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
+  patchReadingSession(sessionId: $sessionId, input: $input) {
+    id
+    elapsedSeconds
+  }
+}
+    `) as unknown as TypedDocumentString<PatchReadingSessionEditSheetMutation, PatchReadingSessionEditSheetMutationVariables>;
 export const MyReadingTimelineScreenDocument = new TypedDocumentString(`
     query MyReadingTimelineScreen($pagination: CursorPagination, $order: OrderDirection) {
   myReadingTimeline(pagination: $pagination, order: $order) {
@@ -11002,14 +11010,6 @@ fragment ReadingSessionCardMedia on SessionWithEvents {
     }
   }
 }`) as unknown as TypedDocumentString<MyReadingTimelineScreenQuery, MyReadingTimelineScreenQueryVariables>;
-export const PatchReadingSessionEditSheetDocument = new TypedDocumentString(`
-    mutation PatchReadingSessionEditSheet($sessionId: Int!, $input: PatchReadingSession!) {
-  patchReadingSession(sessionId: $sessionId, input: $input) {
-    id
-    elapsedSeconds
-  }
-}
-    `) as unknown as TypedDocumentString<PatchReadingSessionEditSheetMutation, PatchReadingSessionEditSheetMutationVariables>;
 export const UpsertReadingSessionJournalEntryDocument = new TypedDocumentString(`
     mutation UpsertReadingSessionJournalEntry($sessionId: Int!, $content: String!) {
   upsertReadingSessionJournalEntry(sessionId: $sessionId, content: $content) {

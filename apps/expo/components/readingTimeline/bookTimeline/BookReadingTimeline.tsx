@@ -8,9 +8,9 @@ import { ScrollView, View } from 'react-native'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import RefreshControl from '../RefreshControl'
-import { Text } from '../ui'
-import { ReadingSessionCard } from './ReadingSessionCard'
+import RefreshControl from '../../RefreshControl'
+import { Text } from '../../ui'
+import { ReadingSessionCard } from '../ReadingSessionCard'
 
 const fragment = graphql(`
 	fragment BookReadingTimeline on Media {

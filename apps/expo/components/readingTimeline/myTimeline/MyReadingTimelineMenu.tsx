@@ -44,6 +44,7 @@ function IosTimelineMenu() {
 	const { t } = useTranslate()
 
 	const order = useReadingTimelineDisplayStore((state) => state.order)
+	const feedType = useReadingTimelineDisplayStore((state) => state.feedType)
 	const groupBy = useReadingTimelineDisplayStore((state) => state.groupBy)
 	const patchDisplay = useReadingTimelineDisplayStore((state) => state.patchStore)
 
@@ -51,10 +52,16 @@ function IosTimelineMenu() {
 		<Stack.Toolbar placement="right">
 			<Stack.Toolbar.Menu icon="ellipsis" cornerRadius={16}>
 				<Stack.Toolbar.Menu title="Timeline" cornerRadius={16}>
-					<Stack.Toolbar.MenuAction onPress={() => {}} isOn disabled>
+					<Stack.Toolbar.MenuAction
+						onPress={() => patchDisplay({ feedType: 'sessions' })}
+						isOn={feedType === 'sessions'}
+					>
 						Sessions
 					</Stack.Toolbar.MenuAction>
-					<Stack.Toolbar.MenuAction onPress={() => {}} disabled>
+					<Stack.Toolbar.MenuAction
+						onPress={() => patchDisplay({ feedType: 'events' })}
+						isOn={feedType === 'events'}
+					>
 						Events
 					</Stack.Toolbar.MenuAction>
 				</Stack.Toolbar.Menu>
@@ -102,6 +109,7 @@ function AndroidTimelineMenu() {
 	const insets = useSafeAreaInsets()
 
 	const order = useReadingTimelineDisplayStore((state) => state.order)
+	const feedType = useReadingTimelineDisplayStore((state) => state.feedType)
 	const groupBy = useReadingTimelineDisplayStore((state) => state.groupBy)
 	const patchDisplay = useReadingTimelineDisplayStore((state) => state.patchStore)
 
@@ -139,10 +147,16 @@ function AndroidTimelineMenu() {
 			>
 				<DropdownMenuGroup>
 					<DropdownMenuLabel className="text-foreground-muted">Timeline</DropdownMenuLabel>
-					<DropdownMenuCheckboxItem checked onCheckedChange={() => {}} disabled>
+					<DropdownMenuCheckboxItem
+						checked={feedType === 'sessions'}
+						onCheckedChange={() => patchDisplay({ feedType: 'sessions' })}
+					>
 						<Text className="text-lg">Sessions</Text>
 					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem checked={false} onCheckedChange={() => {}} disabled>
+					<DropdownMenuCheckboxItem
+						checked={feedType === 'events'}
+						onCheckedChange={() => patchDisplay({ feedType: 'events' })}
+					>
 						<Text className="text-lg">Events</Text>
 					</DropdownMenuCheckboxItem>
 				</DropdownMenuGroup>

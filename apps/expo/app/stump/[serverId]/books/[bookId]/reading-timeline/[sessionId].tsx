@@ -4,7 +4,8 @@ import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useNavigation } from 'expo-router/react-navigation'
 import { useLayoutEffect } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Platform, ScrollView, View } from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { SessionEventsTimeline } from '~/components/readingTimeline/events'
@@ -15,6 +16,12 @@ import {
 } from '~/components/readingTimeline/sessionDetail'
 import RefreshControl from '~/components/RefreshControl'
 import { useSessionDetailOrderStore } from '~/stores/readingTimeline'
+
+const ScrollComponent = Platform.OS === 'ios' ? ScrollView : KeyboardAwareScrollView
+// ^ for whatever reason, KeyboardAwareScrollView on iOS has a bad interaction with the
+// stack toolbar menu and when opening it will scroll down to the input. funny enough,
+// not using it on iOS seemed fine (it still avoids keyboard) but on android it was not.
+// android doesn't use the stack menu so we can use it there
 
 const query = graphql(`
 	query BookReadingTimelineSessionIdScreen($sessionId: Int!, $eventOrder: OrderDirection) {
@@ -90,7 +97,7 @@ export default function Screen() {
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			{sessionMenu}
-			<ScrollView
+			<ScrollComponent
 				className="flex-1"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="always"
@@ -101,7 +108,7 @@ export default function Screen() {
 					<SessionEventsTimeline fragmentRef={session} />
 					<SessionJournal fragmentRef={session} />
 				</View>
-			</ScrollView>
+			</ScrollComponent>
 		</SafeAreaView>
 	)
 }

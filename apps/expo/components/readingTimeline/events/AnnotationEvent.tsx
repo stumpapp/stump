@@ -36,6 +36,7 @@ type Props = {
 	showTopConnector?: boolean
 	showBottomConnector?: boolean
 	onPress: (data: AnnotationEventFragment) => void
+	feedType?: 'sessions' | 'events'
 }
 
 export function AnnotationEvent({
@@ -43,6 +44,7 @@ export function AnnotationEvent({
 	showTopConnector = true,
 	showBottomConnector = true,
 	onPress,
+	feedType = 'sessions',
 }: Props) {
 	const data = useFragment(fragment, fragmentRef)
 
@@ -55,6 +57,7 @@ export function AnnotationEvent({
 					style={pressed ? { opacity: 0.8 } : undefined}
 					showTopConnector={showTopConnector}
 					showBottomConnector={showBottomConnector}
+					feedType={feedType}
 				>
 					<View className="gap-2 flex flex-1 flex-row items-center">
 						<View className="gap-1.5 flex-1">

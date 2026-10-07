@@ -2,12 +2,14 @@ import { useGraphQL, useRefetch } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { keepPreviousData } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
+import { useNavigation } from 'expo-router/react-navigation'
+import { useLayoutEffect } from 'react'
 import { View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { SessionEventsTimeline } from '~/components/readingTimeline/events'
 import {
-	EventTimeline,
 	ReadingSessionDetailHeader,
 	SessionJournal,
 	useReadingSessionMenu,
@@ -31,7 +33,7 @@ const query = graphql(`
 			}
 			endPercentage
 			elapsedSeconds
-			...EventTimeline
+			...SessionEventsTimeline
 			media {
 				resolvedName
 				pages
@@ -75,20 +77,29 @@ export default function Screen() {
 
 	const [isRefetching, onRefresh] = useRefetch(refetch)
 
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		if (session?.media?.resolvedName) {
+			navigation.setOptions({
+				headerTitle: session.media.resolvedName,
+			})
+		}
+	}, [session?.media?.resolvedName, navigation])
+
 	if (!session) return null
 
-	// FIXME: the keyboard aware not quite right, it works up to a point then stops
-	// could just be the sim too
+	// FIXME: i think the KeyboardAwareScrollView is messing with the menu in the stack header,
+	// opening menu shifts me down to the bottom of the page
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			{sessionMenu}
 			<KeyboardAwareScrollView
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
-				contentInsetAdjustmentBehavior="automatic"
+				contentInsetAdjustmentBehavior="always"
 			>
 				<View className="px-4 gap-6">
 					<ReadingSessionDetailHeader fragmentRef={session} />
-					<EventTimeline fragmentRef={session} />
+					<SessionEventsTimeline fragmentRef={session} />
 					<SessionJournal fragmentRef={session} />
 				</View>
 			</KeyboardAwareScrollView>

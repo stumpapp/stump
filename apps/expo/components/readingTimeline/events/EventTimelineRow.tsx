@@ -17,6 +17,7 @@ type Props = ViewProps & {
 	children: React.ReactNode
 	showTopConnector?: boolean
 	showBottomConnector?: boolean
+	feedType: 'sessions' | 'events'
 }
 
 // TODO: struggling to figure out the ideal way to do the node attach lines, the current problem i see
@@ -29,17 +30,21 @@ export function EventTimelineRow({
 	children,
 	showTopConnector = false,
 	showBottomConnector = false,
+	feedType,
 	...props
 }: Props) {
 	const isSmall = iconSize === 'sm'
+
 	return (
 		<View className="gap-2.5 flex flex-row items-center" {...props}>
-			<Text className="py-4">
-				{intlFormat(timestamp, {
-					hour: 'numeric',
-					minute: 'numeric',
-				})}
-			</Text>
+			{feedType === 'sessions' && (
+				<Text className="py-4">
+					{intlFormat(timestamp, {
+						hour: 'numeric',
+						minute: 'numeric',
+					})}
+				</Text>
+			)}
 
 			{/*the w-12 is fixed so i could center the node attach line*/}
 			<View className="w-12 flex flex-col items-center self-stretch">

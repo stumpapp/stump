@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router'
+import { Stack, useLocalSearchParams } from 'expo-router'
 import { Platform, View } from 'react-native'
 
 import { ScreenBackgroundGradient } from '~/components/BackgroundGradient'
@@ -9,6 +9,7 @@ import { useDerivedColorPalette } from '~/providers/DerivedColorPalette'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
+	const { from } = useLocalSearchParams<{ sessionId: string; from?: string }>()
 	const { t } = useTranslate()
 	const { imageMetadata } = useDerivedColorPalette()
 
@@ -46,6 +47,9 @@ export default function Screen() {
 						headerTransparent: Platform.OS === 'ios',
 						headerBackground: Platform.OS === 'android' ? () => <View /> : undefined,
 						headerBlurEffect: IS_IOS_26_PLUS ? undefined : 'regular',
+						// when jumped to here from root timeline the stack doesn't inject a back so
+						// we add it manually
+						headerLeft: from != null ? () => <BackLink /> : undefined,
 					}}
 				/>
 			</Stack>

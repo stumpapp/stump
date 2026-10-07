@@ -108,10 +108,6 @@ export function MyReadingTimeline() {
 		<FlashList
 			refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 			data={listItems}
-			// TODO: rn the card links to books/[bookId]/reading-timeline/[sessionId]
-			// this might be acceptable and honestly reduce the amount of work, but atm
-			// the background gradient is a bit awkward when it changes and the back nav
-			// doesn't work when jumping stacks
 			renderItem={renderItem}
 			contentContainerStyle={{ paddingHorizontal: 16 }}
 			contentInsetAdjustmentBehavior="automatic"

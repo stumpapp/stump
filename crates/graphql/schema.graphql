@@ -2710,10 +2710,8 @@ type Query {
 
 type ReadingDeviceModel {
 	id: String!
-	name: String!
-	kind: String
-	email: String
 	userId: String!
+	name: String!
 	createdAt: DateTime!
 	updatedAt: DateTime!
 }
@@ -2783,6 +2781,7 @@ type ReadingSession {
 	createdAt: DateTime!
 	updatedAt: DateTime
 	deviceIds: [String!]!
+	devices: [ReadingDeviceModel!]!
 	"""
 	The media which this session belongs to. Please note that if somehow the user loses access to the
 	media record, e.g. via access control, then this will resolve to `None` to avoid leaking

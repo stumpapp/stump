@@ -6,7 +6,7 @@ use models::{
 	entity::{
 		bookmark, journal_entry,
 		media::{self, MediaIdentSelect},
-		media_annotation,
+		media_annotation, reading_device,
 		reading_session::{self, DeviceIds},
 	},
 	shared::ordering::OrderDirection,
@@ -44,7 +44,33 @@ impl ReadingSession {
 			.unwrap_or_default()
 	}
 
-	// TODO: async fn devices(&self, ctx: &Context<'_>) -> Result<Vec<RegisteredReadingDevice>>
+	// TODO: one day a device can have its own obj with resolvers for various stats
+	// but i don't personally have much need for that so will see if it is ever asked
+
+	/// The devices which were used during this reading session
+	async fn devices(&self, ctx: &Context<'_>) -> Result<Vec<reading_device::Model>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		if self.model.device_ids.is_none() {
+			return Ok(vec![]);
+		}
+
+		let devices = reading_device::Entity::find_for_user(user)
+			.filter(
+				reading_device::Column::Id.is_in(
+					self.model
+						.device_ids
+						.as_ref()
+						.map(|DeviceIds(ids)| ids.clone())
+						.unwrap_or_default(),
+				),
+			)
+			.all(conn)
+			.await?;
+
+		Ok(devices)
+	}
 
 	/// The media which this session belongs to. Please note that if somehow the user loses access to the
 	/// media record, e.g. via access control, then this will resolve to `None` to avoid leaking

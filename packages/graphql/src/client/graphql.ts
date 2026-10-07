@@ -3942,9 +3942,7 @@ export type QueryUsersArgs = {
 export type ReadingDeviceModel = {
   __typename?: 'ReadingDeviceModel';
   createdAt: Scalars['DateTime']['output'];
-  email?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
-  kind?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
   userId: Scalars['String']['output'];
@@ -4001,6 +3999,7 @@ export type ReadingSession = {
   chaptersRead: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   deviceIds: Array<Scalars['String']['output']>;
+  devices: Array<ReadingDeviceModel>;
   /** accumulated reading time for this session, updated via deltas (not overwritten) */
   elapsedSeconds?: Maybe<Scalars['Int']['output']>;
   endLocator?: Maybe<ReadiumLocator>;

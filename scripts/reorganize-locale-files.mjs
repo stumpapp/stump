@@ -1,3 +1,4 @@
+import { execaSync } from 'execa'
 import { readFileSync, writeFileSync } from 'fs'
 import get from 'lodash/get.js'
 import has from 'lodash/has.js'
@@ -20,6 +21,7 @@ const SMALL_WORDS = new Set([
 	'and',
 	'as',
 	'at',
+	'be',
 	'but',
 	'by',
 	'en',
@@ -59,14 +61,19 @@ const SMALL_WORDS = new Set([
 	'without',
 	'yet',
 ])
-// TODO: ^ this is tricky because its just english, i may just have to rely on folks
-// helping to retranslate to get non-en to case properly
+
+function titleCasePreservingPlaceholders(value, options) {
+	const placeholders = value.match(/{{.*?}}/g) ?? []
+	let index = 0
+	return titleCase(value, options).replace(/{{.*?}}/g, () => placeholders[index++])
+}
 
 /**
  *
  * @param {string} localeFilePath
  */
 function reorganizeLocaleFile(localeFilePath) {
+	const locale = localeFilePath.split('/').pop().replace('.json', '')
 	const localeData = JSON.parse(readFileSync(localeFilePath, 'utf8'))
 
 	const newLocaleData = {
@@ -96,19 +103,26 @@ function reorganizeLocaleFile(localeFilePath) {
 		set(newLocaleData, ['shared', 'common'], mergedCommon)
 		remove(newLocaleData, ['mobileApp', 'common'])
 	}
-	const dummyPath = resolve(LOCALES_DIR, 'dummy.json')
-	writeFileSync(dummyPath, JSON.stringify(newLocaleData, null, 2), 'utf8')
+	writeFileSync(localeFilePath, JSON.stringify(newLocaleData, null, 2), 'utf8')
+
+	if (localeFilePath.endsWith('en-US.json')) {
+		generateTitleCaseExclusionsList()
+	}
+
+	if (locale.startsWith('en-')) {
+		migrateAllToTitleCase(newLocaleData, locale)
+	}
 }
 
 // keys in migrated files which should be left alone
-let titleCaseExclusionsList = []
-// TODO: maybe do a brief manual pass too?
+let titleCaseExclusionsList = [
+	'mobileApp.readingSessions', // meant to be sentences
+]
+// TODO:more!
 
 function generateTitleCaseExclusionsList() {
 	const enUSPath = resolve(LOCALES_DIR, 'en-US.json')
 	const localeData = JSON.parse(readFileSync(enUSPath, 'utf8'))
-
-	// collect all keys recursively which have >3 words
 
 	function collectKeys(obj, prefix = '') {
 		for (const key in obj) {
@@ -117,7 +131,7 @@ function generateTitleCaseExclusionsList() {
 
 			if (typeof value === 'string') {
 				const wordCount = value.trim().split(/\s+/).length
-				if (wordCount > 3) {
+				if (wordCount > 4) {
 					titleCaseExclusionsList.push(fullKey)
 				}
 			} else if (typeof value === 'object' && value != null) {
@@ -128,7 +142,7 @@ function generateTitleCaseExclusionsList() {
 
 	collectKeys(localeData)
 
-	console.log('Title case exclusions list generated:', titleCaseExclusionsList)
+	// console.log('Title case exclusions list generated:', titleCaseExclusionsList)
 }
 
 /**
@@ -143,8 +157,12 @@ function migrateAllToTitleCase(localeData, locale) {
 			const fullKey = prefix ? `${prefix}.${key}` : key
 
 			if (typeof value === 'string') {
-				if (!titleCaseExclusionsList.includes(fullKey)) {
-					obj[key] = titleCase(value, {
+				const isExcludedKey = titleCaseExclusionsList.includes(fullKey)
+				const isExcludedKeyViaParent = titleCaseExclusionsList.some((excludedKey) =>
+					fullKey.startsWith(`${excludedKey}.`),
+				)
+				if (!isExcludedKey && !isExcludedKeyViaParent) {
+					obj[key] = titleCasePreservingPlaceholders(value, {
 						locale,
 						// yoink! https://github.com/ianstormtaylor/title-case-minors/blob/master/index.js
 						smallWords: SMALL_WORDS,
@@ -158,25 +176,56 @@ function migrateAllToTitleCase(localeData, locale) {
 
 	walkAndMigrate(localeData)
 
-	const outputPath = resolve(LOCALES_DIR, `${locale}-test.json`)
+	const outputPath = resolve(LOCALES_DIR, `${locale}.json`)
 	writeFileSync(outputPath, JSON.stringify(localeData, null, 2), 'utf8')
 }
 
-function run() {
-	// for each locale file:
-	// 1. every key not in mobileApp moves into webApp
-	// 2. webApp.common moves into shared.common
-	// 3. mobileApp.common moves into shared.common, overwriting shared keys
-	//
-	// just trying with en-us for now until i get it right:
-	// const enUSPath = resolve(LOCALES_DIR, 'en-US.json')
-	// reorganizeLocaleFile(enUSPath)
+// function findPlaceholderValues() {
+// 	const enUSPath = resolve(LOCALES_DIR, 'en-US.json')
+// 	const localeData = JSON.parse(readFileSync(enUSPath, 'utf8'))
+//
+// 	const placeholderValues = []
+//
+// 	function walkAndFindPlaceholders(obj, prefix = '') {
+// 		for (const key in obj) {
+// 			const value = obj[key]
+// 			const fullKey = prefix ? `${prefix}.${key}` : key
+//
+// 			if (typeof value === 'string') {
+// 				// for EVERY instance of {{name}} in the string, add it to the list
+// 				const regex = /{{(.*?)}}/g
+// 				let match
+// 				while ((match = regex.exec(value)) !== null) {
+// 					placeholderValues.push(`{{${match[1]}}}`)
+// 				}
+// 			} else if (typeof value === 'object' && value != null) {
+// 				walkAndFindPlaceholders(value, fullKey)
+// 			}
+// 		}
+// 	}
+//
+// 	walkAndFindPlaceholders(localeData)
+//
+// 	const uniquePlaceholders = [...new Set(placeholderValues)]
+// 	console.log('Unique placeholder values found:', uniquePlaceholders)
+// }
 
-	generateTitleCaseExclusionsList()
-	migrateAllToTitleCase(
-		JSON.parse(readFileSync(resolve(LOCALES_DIR, 'en-US.json'), 'utf8')),
-		'en-US',
-	)
+function run() {
+	// findPlaceholderValues()
+
+	const { stdout } = execaSync('ls', [LOCALES_DIR], { encoding: 'utf8' })
+
+	const localeFiles = stdout
+		.split('\n')
+		.filter((file) => file.endsWith('.json'))
+		.map((file) => resolve(LOCALES_DIR, file))
+
+	const enUSPath = resolve(LOCALES_DIR, 'en-US.json')
+	reorganizeLocaleFile(enUSPath)
+
+	// for (const localeFilePath of localeFiles) {
+	// 	reorganizeLocaleFile(localeFilePath)
+	// }
 }
 
 run()

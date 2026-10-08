@@ -1,0 +1,6 @@
+- [x] most of browser package uses useTranslate now, so that's good
+- [ ] find/replace instances of t('common.someKey') and replace with dedicated shared fn
+  - [ ] find a better fckn name than tShared :sob:
+- [ ] find "sentences" with some script (>3 words??) to form exclusion list for Title Case conversion
+  - [ ] there is already a small exclusion list for things like OPDS and stuff
+  - [ ] try to see if for each locale we can to Title Case per locale rules, but if not then maybe just keep the Title Case conversion to english

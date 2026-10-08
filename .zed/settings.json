@@ -1,0 +1,7 @@
+{
+	// "auto_install_extensions": {},
+	// ^ would love to have this -> https://github.com/zed-industries/zed/discussions/64950
+	"file_types": {
+		"Markdown": ["todo"],
+	},
+}

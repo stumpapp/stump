@@ -10,7 +10,6 @@ import {
 	Input,
 	PasswordInput,
 } from '@stump/components'
-import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { motion, Variants } from 'framer-motion'
 import { ArrowRight, Cake, ShieldAlert } from 'lucide-react'
@@ -20,6 +19,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { useTranslate } from '@/hooks/useTranslate'
 import { useAppStore, useUserStore } from '@/stores'
 
 // TODO: redirect away if the user is already logged in
@@ -35,7 +35,7 @@ export default function LoginOrClaimScene() {
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
 
 	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
+	const { t, tShared } = useTranslate()
 	const {
 		isClaimed,
 		isCheckingClaimed,
@@ -225,7 +225,7 @@ export default function LoginOrClaimScene() {
 								onClick={() => setShowServers(true)}
 							>
 								<span className="text-sm font-semibold text-muted-foreground transition-colors duration-100 group-hover:text-foreground">
-									{t('common.goToServers')}
+									{tShared('common.goToServers')}
 								</span>
 
 								<ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />

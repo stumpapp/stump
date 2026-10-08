@@ -22,6 +22,11 @@ type Return = {
 	 */
 	t: (key: string, options?: Record<string, unknown>) => string
 	/**
+	 * the shorthand translation function for keys in the shared namespace
+	 */
+	tShared: (key: string, options?: Record<string, unknown>) => string
+	// ^ TODO: hate this name
+	/**
 	 * the translation function which allows for specifying a namespace
 	 */
 	translate: (namespace: string, key: string, options?: Record<string, unknown>) => string
@@ -72,5 +77,6 @@ export function useCreateTranslate({
 		namespace,
 		translate: (ns, key, options) => translate(key, options, ns),
 		// ^ i break the rule here but that's fine lol only place it should be done as such
+		tShared: (key, options) => translate(key, options, 'shared'),
 	}
 }
